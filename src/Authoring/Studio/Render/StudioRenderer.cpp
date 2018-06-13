@@ -398,14 +398,23 @@ struct SRendererImpl : public IStudioRenderer,
         if (!m_Closed && IsInitialized()) {
             m_RenderContext->BeginRender();
             if (m_Translation)
-                m_Translation->PreRender();
+                m_Translation->PreRender(false);
             NVRenderContext &theContext = m_RenderContext->GetRenderContext();
             theContext.SetDepthWriteEnabled(true);
             theContext.Clear(qt3ds::render::NVRenderClearFlags(
                 qt3ds::render::NVRenderClearValues::Color | qt3ds::render::NVRenderClearValues::Depth));
             if (m_Translation) {
-                m_Translation->Render(m_PickResult.GetWidgetId(), m_GuidesEnabled);
+                m_Translation->Render(m_PickResult.GetWidgetId(), m_GuidesEnabled, false);
+
+                // draw scene preview view screen display area layer
+                if (CStudioPreferences::showEditModePreview()
+                        && m_Translation->m_EditCameraEnabled
+                        && !m_Translation->GetPreviewViewportDimensions().isZero()) {
+                    m_Translation->PreRender(true);
+                    m_Translation->Render(0, false, true);
+                }
             }
+
             m_RenderContext->EndRender();
         }
     }

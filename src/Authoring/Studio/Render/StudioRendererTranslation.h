@@ -402,6 +402,8 @@ namespace studio {
         QT3DSVec4 m_guideFillColor;
         QT3DSVec4 m_selectedGuideFillColor;
 
+        const float m_previewViewportSize = 600.0f;
+
         STranslation(IStudioRenderer &inRenderer, IQt3DSRenderContext &inContext);
         void MarkBeginComponentSeconds(qt3dsdm::Qt3DSDMSlideHandle) { ++m_ComponentSecondsDepth; }
 
@@ -484,6 +486,8 @@ namespace studio {
         void SetViewport(QT3DSF32 inWidth, QT3DSF32 inHeight) { m_Viewport = QT3DSVec2(inWidth, inHeight); }
 
         QT3DSVec2 GetViewportDimensions() { return m_Viewport; }
+        QT3DSVec2 GetPreviewViewportDimensions();
+        qt3ds::render::NVRenderRect GetPreviewViewport();
 
         void ClearDirtySet()
         {
@@ -496,16 +500,17 @@ namespace studio {
             m_DirtySet.clear();
         }
         // We build the render graph every time we render.  This may seem wasteful
-        void BuildRenderGraph(qt3dsdm::Qt3DSDMInstanceHandle inParent,
-                              Qt3DSDMInstanceHandle inAliasHandle = qt3dsdm::Qt3DSDMInstanceHandle());
-        void
-        BuildRenderGraph(SGraphObjectTranslator &inParent,
-                         qt3dsdm::Qt3DSDMInstanceHandle inAliasHandle = qt3dsdm::Qt3DSDMInstanceHandle());
+        void BuildRenderGraph(qt3dsdm::Qt3DSDMInstanceHandle inParent, bool scenePreviewPass,
+                              Qt3DSDMInstanceHandle inAliasHandle
+                                = qt3dsdm::Qt3DSDMInstanceHandle());
+        void BuildRenderGraph(SGraphObjectTranslator &inParent, bool scenePreviewPass,
+                              qt3dsdm::Qt3DSDMInstanceHandle inAliasHandle
+                                = qt3dsdm::Qt3DSDMInstanceHandle());
         void
         DeactivateScan(SGraphObjectTranslator &inParent,
                        qt3dsdm::Qt3DSDMInstanceHandle inAliasHandle = qt3dsdm::Qt3DSDMInstanceHandle());
-        void PreRender();
-        void Render(int inWidgetId, bool inDrawGuides);
+        void PreRender(bool scenePreviewPass);
+        void Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPass);
         void EndRender();
         void DoPrepareForDrag(SNode *inSelectedNode);
         void ResetWidgets();

@@ -710,8 +710,7 @@ struct SRenderContext : public IQt3DSRenderContext
                     m_RotationTexture = NULL;
                     m_RotationDepthBuffer = NULL;
                 }
-                bool clear = m_SceneColor.getValue().w == 0.0f ? false : true;
-                if (m_SceneColor.hasValue() && clear) {
+                if (m_SceneColor.hasValue() && m_SceneColor.getValue().w != 0.0f) {
                     m_RenderContext->SetClearColor(m_SceneColor);
                     m_RenderContext->Clear(qt3ds::render::NVRenderClearValues::Color);
                 }

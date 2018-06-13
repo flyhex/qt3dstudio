@@ -1909,12 +1909,12 @@ STranslation::STranslation(IStudioRenderer &inRenderer, IQt3DSRenderContext &inC
                                          1.f);
 }
 
-void STranslation::BuildRenderGraph(SGraphObjectTranslator &inParent,
+void STranslation::BuildRenderGraph(SGraphObjectTranslator &inParent, bool scenePreviewPass,
                                     Qt3DSDMInstanceHandle inAliasHandle)
 {
     SGraphObjectTranslator &theParentTranslator(inParent);
     theParentTranslator.ClearChildren();
-    if (m_EditCameraEnabled) {
+    if (m_EditCameraEnabled && !scenePreviewPass) {
         const auto objectType = theParentTranslator.GetGraphObject().m_Type;
         if (objectType == GraphObjectTypes::Layer) {
             theParentTranslator.AppendChild(m_EditCamera);
@@ -1946,7 +1946,7 @@ void STranslation::BuildRenderGraph(SGraphObjectTranslator &inParent,
         // We we have edit cameras active, we only render the active layer and we remove any cameras
         // in the active layer.  Furthermore if our edit light is active, then we also remove any
         // active lights in the layer.
-        if (m_EditCameraEnabled) {
+        if (m_EditCameraEnabled && !scenePreviewPass) {
             if (theTranslator->GetGraphObject().m_Type == GraphObjectTypes::Layer) {
                 if (theChild == m_Doc.GetActiveLayer()) {
                     if (m_EditCameraLayerTranslator != nullptr
@@ -1961,11 +1961,11 @@ void STranslation::BuildRenderGraph(SGraphObjectTranslator &inParent,
                     }
                     theTranslator = m_EditCameraLayerTranslator;
                     theParentTranslator.AppendChild(theTranslator->GetGraphObject());
-                    BuildRenderGraph(*m_EditCameraLayerTranslator);
+                    BuildRenderGraph(*m_EditCameraLayerTranslator, scenePreviewPass);
                 }
             } else {
                 theParentTranslator.AppendChild(theTranslator->GetGraphObject());
-                BuildRenderGraph(theChild, inAliasHandle);
+                BuildRenderGraph(theChild, scenePreviewPass, inAliasHandle);
 
                 if (theTranslator->GetGraphObject().m_Type == GraphObjectTypes::Effect)
                     theTranslator->SetActive(false);
@@ -1981,7 +1981,7 @@ void STranslation::BuildRenderGraph(SGraphObjectTranslator &inParent,
         {
             theParentTranslator.AppendChild(theTranslator->GetGraphObject());
             if (m_Reader.IsCurrentlyActive(theChild)) {
-                BuildRenderGraph(theChild, inAliasHandle);
+                BuildRenderGraph(theChild, scenePreviewPass, inAliasHandle);
                 theTranslator->SetActive(true);
             } else {
                 theTranslator->SetActive(false);
@@ -2016,7 +2016,7 @@ void STranslation::DeactivateScan(SGraphObjectTranslator &inParent,
 }
 
 // We build the render graph every time we render.  This may seem wasteful
-void STranslation::BuildRenderGraph(qt3dsdm::Qt3DSDMInstanceHandle inParent,
+void STranslation::BuildRenderGraph(qt3dsdm::Qt3DSDMInstanceHandle inParent, bool scenePreviewPass,
                                     Qt3DSDMInstanceHandle inAliasHandle)
 {
     SGraphObjectTranslator *theParentTranslator = GetOrCreateTranslator(inParent, inAliasHandle);
@@ -2026,7 +2026,7 @@ void STranslation::BuildRenderGraph(qt3dsdm::Qt3DSDMInstanceHandle inParent,
         theParentTranslator->SetActive(false);
         return;
     }
-    BuildRenderGraph(*theParentTranslator, inAliasHandle);
+    BuildRenderGraph(*theParentTranslator, scenePreviewPass, inAliasHandle);
 }
 
 void STranslation::ReleaseTranslation(Q3DStudio::TIdentifier inInstance)
@@ -2052,7 +2052,27 @@ void STranslation::MarkDirty(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     RequestRender();
 }
 
-void STranslation::PreRender()
+QT3DSVec2 STranslation::GetPreviewViewportDimensions()
+{
+    CStudioProjectSettings *theSettings = m_Doc.GetCore()->GetStudioProjectSettings();
+    CPt thePresSize = theSettings->GetPresentationSize();
+    QT3DSVec2 vp(GetViewportDimensions());
+    if (vp.x < m_previewViewportSize || vp.y < m_previewViewportSize)
+        return QT3DSVec2(0.0f);
+    QT3DSVec2 ret(thePresSize.x, thePresSize.y);
+    const float aspect = ret.x / ret.y;
+    if (aspect > 1.0) {
+        ret.x = m_previewViewportSize;
+        ret.y = m_previewViewportSize / aspect;
+    } else {
+        ret.x = m_previewViewportSize * aspect;
+        ret.y = m_previewViewportSize;
+    }
+
+    return ret;
+}
+
+void STranslation::PreRender(bool scenePreviewPass)
 {
     // Run through the entire asset graph and mark active or inactive if we have an
     // associated render representation.
@@ -2060,14 +2080,19 @@ void STranslation::PreRender()
     // but for now it is more stable to run through the graph.
     // There is always one root, the scene.
     TIdentifier theRoot = m_AssetGraph.GetRoot(0);
-    m_editModeCamerasAndLights.clear();
+    if (!scenePreviewPass)
+        m_editModeCamerasAndLights.clear();
     ClearDirtySet();
-    BuildRenderGraph(theRoot);
-    m_Context.SetScaleMode(qt3ds::render::ScaleModes::ExactSize);
+    BuildRenderGraph(theRoot, scenePreviewPass);
+    if (scenePreviewPass)
+        m_Context.SetScaleMode(qt3ds::render::ScaleModes::FitSelected);
+    else
+        m_Context.SetScaleMode(qt3ds::render::ScaleModes::ExactSize);
+
     m_Context.SetMatteColor(QT3DSVec4(.13f, .13f, .13f, 1.0f));
     QT3DSVec2 theViewportDims(GetViewportDimensions());
     // Ensure the camera points where it should
-    if (m_EditCameraEnabled) {
+    if (m_EditCameraEnabled && !scenePreviewPass) {
         m_EditCameraInfo.ApplyToCamera(m_EditCamera, GetViewportDimensions());
         m_EditLight.MarkDirty(qt3ds::render::NodeTransformDirtyFlag::TransformIsDirty);
     }
@@ -2078,9 +2103,16 @@ void STranslation::PreRender()
         // The presentation sizes are used for when we have to render a layer offscreen.  If their
         // width and height
         // isn't set, then they use the presentation dimensions.
-        m_Presentation.m_PresentationDimensions =
-            QT3DSVec2((QT3DSF32)thePresSize.x, (QT3DSF32)thePresSize.y);
+        if (scenePreviewPass) {
+            m_Presentation.m_PresentationDimensions =
+                QT3DSVec2((QT3DSF32)theViewportDims.x, (QT3DSF32)theViewportDims.y);
+        } else {
+            m_Presentation.m_PresentationDimensions =
+                QT3DSVec2((QT3DSF32)thePresSize.x, (QT3DSF32)thePresSize.y);
+        }
         QT3DSVec2 theViewportDims(GetViewportDimensions());
+        if (scenePreviewPass)
+            theViewportDims = GetPreviewViewportDimensions();
         m_Context.SetWindowDimensions(
             QSize((QT3DSU32)theViewportDims.x, (QT3DSU32)theViewportDims.y));
         m_Context.SetPresentationDimensions(
@@ -2090,7 +2122,7 @@ void STranslation::PreRender()
         // set if we draw geometry in wireframe mode
         m_Context.SetWireframeMode(CStudioPreferences::IsWireframeModeOn());
 
-        if (m_EditCameraEnabled) {
+        if (m_EditCameraEnabled && !scenePreviewPass) {
             m_Presentation.m_PresentationDimensions = theViewportDims;
             m_Context.SetPresentationDimensions(
                 QSize((QT3DSU32)theViewportDims.x, (QT3DSU32)theViewportDims.y));
@@ -2104,10 +2136,17 @@ void STranslation::PreRender()
             SGraphObjectTranslator *theSceneTranslator = GetOrCreateTranslator(theRoot);
             if (theSceneTranslator) {
                 SScene &theScene = static_cast<SScene &>(theSceneTranslator->GetGraphObject());
-                if (theScene.m_UseClearColor)
-                    m_Context.SetSceneColor(QT3DSVec4(theScene.m_ClearColor, 1.0f));
-                else
-                    m_Context.SetSceneColor(QT3DSVec4(QT3DSVec3(0.0f), 1.0f));
+                if (scenePreviewPass) {
+                    if (theScene.m_UseClearColor)
+                        m_Context.SetMatteColor(QT3DSVec4(theScene.m_ClearColor, 1.0f));
+                    else
+                        m_Context.SetMatteColor(QT3DSVec4(0.0f, 0.0f, 0.0f, 1.0f));
+                } else {
+                    if (theScene.m_UseClearColor)
+                        m_Context.SetSceneColor(QT3DSVec4(theScene.m_ClearColor, 1.0f));
+                    else
+                        m_Context.SetSceneColor(QT3DSVec4(QT3DSVec3(0.0f), 1.0f));
+                }
             }
         }
     }
@@ -2309,7 +2348,13 @@ struct SVerticalGuideFactory : public IGuideElementFactory
     }
 };
 
-void STranslation::Render(int inWidgetId, bool inDrawGuides)
+qt3ds::render::NVRenderRect STranslation::GetPreviewViewport()
+{
+    QT3DSVec2 vp = GetPreviewViewportDimensions();
+    return qt3ds::render::NVRenderRect(0, 0, vp.x, vp.y);
+}
+
+void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPass)
 {
     // For now, we just render.
     // Next step will be to get the bounding boxes and such setup.
@@ -2318,150 +2363,171 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
         // Note that begin frame is called before we allocate the bounding box and axis widgets so
         // that we can take advantage of the renderer's per-frame-allocator.
         m_Context.BeginFrame();
-        // Render the bounding boxes and extra widgets.
-        // This is called *before* the render because these sort of appendages need to be added
-        // to the layer renderables.
+
         qt3dsdm::TInstanceHandleList theHandles = m_Doc.GetSelectedValue().GetSelectedInstances();
 
-        // Don't show the bounding box or pivot for the component we are *in* the component
-        SGraphObjectTranslator *theTranslator = nullptr;
-        long theToolMode = g_StudioApp.GetToolMode();
-        int theCameraToolMode = m_EditCameraEnabled ? (theToolMode & STUDIO_CAMERATOOL_MASK) : 0;
-        bool shouldDisplayWidget = false;
-        if (theCameraToolMode == 0) {
-            switch (theToolMode) {
-            default:
-                break;
-            case STUDIO_TOOLMODE_MOVE:
-            case STUDIO_TOOLMODE_ROTATE:
-            case STUDIO_TOOLMODE_SCALE:
-                shouldDisplayWidget = true;
-                break;
-            };
-        }
+        if (scenePreviewPass == false) {
+            // Render the bounding boxes and extra widgets.
+            // This is called *before* the render because these sort of appendages need to be added
+            // to the layer renderables.
 
-        bool selectedPath = false;
+            // Don't show the bounding box or pivot for the component we are *in* the component
+            SGraphObjectTranslator *theTranslator = nullptr;
+            long theToolMode = g_StudioApp.GetToolMode();
+            int theCameraToolMode = m_EditCameraEnabled
+                                    ? (theToolMode & STUDIO_CAMERATOOL_MASK) : 0;
+            bool shouldDisplayWidget = false;
+            if (theCameraToolMode == 0) {
+                switch (theToolMode) {
+                default:
+                    break;
+                case STUDIO_TOOLMODE_MOVE:
+                case STUDIO_TOOLMODE_ROTATE:
+                case STUDIO_TOOLMODE_SCALE:
+                    shouldDisplayWidget = true;
+                    break;
+                };
+            }
 
-        for (size_t selectedIdx = 0, selectedEnd = theHandles.size(); selectedIdx < selectedEnd;
-             ++selectedIdx) {
-            qt3dsdm::Qt3DSDMInstanceHandle theInstance = theHandles[selectedIdx];
-            if (theInstance
-                != m_Doc.GetDocumentReader().GetComponentForSlide(m_Doc.GetActiveSlide())) {
-                if (m_Doc.GetDocumentReader().GetObjectTypeName(theInstance)
-                    == L"PathAnchorPoint") {
-                    theInstance = m_AssetGraph.GetParent(m_AssetGraph.GetParent(theInstance));
-                    shouldDisplayWidget = false;
-                }
-                theTranslator = GetOrCreateTranslator(theInstance);
-                // Get the tool mode right now.
-                if (theTranslator) {
-                    GraphObjectTypes::Enum theType(theTranslator->GetGraphObject().m_Type);
-                    if (CStudioPreferences::IsBoundingBoxesOn()) {
-                        switch (theType) {
-                        case GraphObjectTypes::Node:
-                            DrawGroupBoundingBoxes(*theTranslator);
-                            break;
-                        case GraphObjectTypes::Text:
-                        case GraphObjectTypes::Model:
-                        case GraphObjectTypes::Layer:
-                        case GraphObjectTypes::Light:
-                        case GraphObjectTypes::Path:
-                            DrawNonGroupBoundingBoxes(*theTranslator);
-                            break;
-                        }
+            bool selectedPath = false;
+
+            for (size_t selectedIdx = 0, selectedEnd = theHandles.size(); selectedIdx < selectedEnd;
+                 ++selectedIdx) {
+                qt3dsdm::Qt3DSDMInstanceHandle theInstance = theHandles[selectedIdx];
+                if (theInstance
+                    != m_Doc.GetDocumentReader().GetComponentForSlide(m_Doc.GetActiveSlide())) {
+                    if (m_Doc.GetDocumentReader().GetObjectTypeName(theInstance)
+                        == L"PathAnchorPoint") {
+                        theInstance = m_AssetGraph.GetParent(m_AssetGraph.GetParent(theInstance));
+                        shouldDisplayWidget = false;
                     }
-                    // Don't draw the axis if there is a widget.
-                    if (CStudioPreferences::ShouldDisplayPivotPoint()
-                        && shouldDisplayWidget == false) {
-                        switch (theTranslator->GetGraphObject().m_Type) {
-                        case GraphObjectTypes::Node:
-                        case GraphObjectTypes::Text:
-                        case GraphObjectTypes::Model:
-                            DrawAxis(*theTranslator);
-                            break;
+                    theTranslator = GetOrCreateTranslator(theInstance);
+                    // Get the tool mode right now.
+                    if (theTranslator) {
+                        GraphObjectTypes::Enum theType(theTranslator->GetGraphObject().m_Type);
+                        if (CStudioPreferences::IsBoundingBoxesOn()) {
+                            switch (theType) {
+                            case GraphObjectTypes::Node:
+                                DrawGroupBoundingBoxes(*theTranslator);
+                                break;
+                            case GraphObjectTypes::Text:
+                            case GraphObjectTypes::Model:
+                            case GraphObjectTypes::Layer:
+                            case GraphObjectTypes::Light:
+                            case GraphObjectTypes::Path:
+                                DrawNonGroupBoundingBoxes(*theTranslator);
+                                break;
+                            }
                         }
-                    }
-                    if (theType == GraphObjectTypes::Path && selectedPath == false) {
-                        selectedPath = true;
-                        if (!m_PathWidget)
-                            m_PathWidget = qt3ds::widgets::IPathWidget::CreatePathWidget(
-                                m_Context.GetAllocator(), m_Context);
-                        m_PathWidget->SetNode(
-                            static_cast<SNode &>(theTranslator->GetGraphObject()));
-                        m_Context.GetRenderer().AddRenderWidget(*m_PathWidget);
+                        // Don't draw the axis if there is a widget.
+                        if (CStudioPreferences::ShouldDisplayPivotPoint()
+                            && shouldDisplayWidget == false) {
+                            switch (theTranslator->GetGraphObject().m_Type) {
+                            case GraphObjectTypes::Node:
+                            case GraphObjectTypes::Text:
+                            case GraphObjectTypes::Model:
+                                DrawAxis(*theTranslator);
+                                break;
+                            }
+                        }
+                        if (theType == GraphObjectTypes::Path && selectedPath == false) {
+                            selectedPath = true;
+                            if (!m_PathWidget) {
+                                m_PathWidget = qt3ds::widgets::IPathWidget::CreatePathWidget(
+                                    m_Context.GetAllocator(), m_Context);
+                            }
+                            m_PathWidget->SetNode(
+                                static_cast<SNode &>(theTranslator->GetGraphObject()));
+                            m_Context.GetRenderer().AddRenderWidget(*m_PathWidget);
+                        }
                     }
                 }
             }
-        }
 
-        if (theHandles.size() > 1)
-            theTranslator = nullptr;
+            if (theHandles.size() > 1)
+                theTranslator = nullptr;
 
-        qt3ds::widgets::IStudioWidget *theNextWidget(nullptr);
-        if (theTranslator && GraphObjectTypes::IsNodeType(theTranslator->GetGraphObject().m_Type)
-            && theTranslator->GetGraphObject().m_Type != GraphObjectTypes::Layer) {
+            qt3ds::widgets::IStudioWidget *theNextWidget(nullptr);
+            if (theTranslator
+                    && GraphObjectTypes::IsNodeType(theTranslator->GetGraphObject().m_Type)
+                    && theTranslator->GetGraphObject().m_Type != GraphObjectTypes::Layer) {
 
-            qt3ds::render::SNode &theNode(
-                static_cast<qt3ds::render::SNode &>(theTranslator->GetGraphObject()));
-            SCamera *theRenderCamera = m_Context.GetRenderer().GetCameraForNode(theNode);
-            bool isActiveCamera = theRenderCamera == (static_cast<SCamera *>(&theNode));
-            if (shouldDisplayWidget && isActiveCamera == false
-                    && theTranslator->GetGraphObject().m_Type != GraphObjectTypes::Camera) {
-                switch (theToolMode) {
+                qt3ds::render::SNode &theNode(
+                    static_cast<qt3ds::render::SNode &>(theTranslator->GetGraphObject()));
+                SCamera *theRenderCamera = m_Context.GetRenderer().GetCameraForNode(theNode);
+                bool isActiveCamera = theRenderCamera == (static_cast<SCamera *>(&theNode));
+                if (shouldDisplayWidget && isActiveCamera == false
+                        && theTranslator->GetGraphObject().m_Type != GraphObjectTypes::Camera) {
+                    switch (theToolMode) {
+                    default:
+                        QT3DS_ASSERT(false);
+                        break;
+                    case STUDIO_TOOLMODE_MOVE:
+                        // Render translation widget
+                        if (!m_TranslationWidget) {
+                            m_TranslationWidget
+                                    = qt3ds::widgets::IStudioWidget::CreateTranslationWidget(
+                                            m_Context.GetAllocator());
+                        }
+                        theNextWidget = m_TranslationWidget.mPtr;
+                        break;
+                    case STUDIO_TOOLMODE_ROTATE:
+                        if (!m_RotationWidget) {
+                            m_RotationWidget = qt3ds::widgets::IStudioWidget::CreateRotationWidget(
+                                m_Context.GetAllocator());
+                        }
+                        theNextWidget = m_RotationWidget.mPtr;
+                        break;
+
+                    case STUDIO_TOOLMODE_SCALE:
+                        if (!m_ScaleWidget) {
+                            m_ScaleWidget = qt3ds::widgets::IStudioWidget::CreateScaleWidget(
+                                m_Context.GetAllocator());
+                        }
+                        theNextWidget = m_ScaleWidget.mPtr;
+                        break;
+                    }
+                    if (theNextWidget) {
+                        SNode &node = static_cast<SNode &>(theTranslator->GetGraphObject());
+                        theNextWidget->SetNode(node);
+                        m_Context.GetRenderer().AddRenderWidget(*theNextWidget);
+                    }
+                }
+            }
+            if (m_LastRenderedWidget.mPtr && m_LastRenderedWidget.mPtr != theNextWidget)
+                ResetWidgets();
+
+            m_LastRenderedWidget = theNextWidget;
+            if (m_LastRenderedWidget) {
+                m_LastRenderedWidget->SetSubComponentId(inWidgetId);
+                switch (g_StudioApp.GetManipulationMode()) {
+                case StudioManipulationModes::Local:
+                    m_LastRenderedWidget->SetRenderWidgetMode(
+                                qt3ds::render::RenderWidgetModes::Local);
+                    break;
+                case StudioManipulationModes::Global:
+                    m_LastRenderedWidget->SetRenderWidgetMode(
+                                qt3ds::render::RenderWidgetModes::Global);
+                    break;
                 default:
                     QT3DS_ASSERT(false);
                     break;
-                case STUDIO_TOOLMODE_MOVE:
-                    // Render translation widget
-                    if (!m_TranslationWidget)
-                        m_TranslationWidget = qt3ds::widgets::IStudioWidget::CreateTranslationWidget(
-                            m_Context.GetAllocator());
-                    theNextWidget = m_TranslationWidget.mPtr;
-                    break;
-                case STUDIO_TOOLMODE_ROTATE:
-                    if (!m_RotationWidget)
-                        m_RotationWidget = qt3ds::widgets::IStudioWidget::CreateRotationWidget(
-                            m_Context.GetAllocator());
-                    theNextWidget = m_RotationWidget.mPtr;
-                    break;
-
-                case STUDIO_TOOLMODE_SCALE:
-                    if (!m_ScaleWidget)
-                        m_ScaleWidget = qt3ds::widgets::IStudioWidget::CreateScaleWidget(
-                            m_Context.GetAllocator());
-                    theNextWidget = m_ScaleWidget.mPtr;
-                    break;
-                }
-                if (theNextWidget) {
-                    theNextWidget->SetNode(static_cast<SNode &>(theTranslator->GetGraphObject()));
-                    m_Context.GetRenderer().AddRenderWidget(*theNextWidget);
                 }
             }
         }
-        if (m_LastRenderedWidget.mPtr && m_LastRenderedWidget.mPtr != theNextWidget)
-            ResetWidgets();
+        m_Scene->PrepareForRender(scenePreviewPass
+                                  ? GetPreviewViewportDimensions()
+                                  : GetViewportDimensions(), m_Context);
 
-        m_LastRenderedWidget = theNextWidget;
-        if (m_LastRenderedWidget) {
-            m_LastRenderedWidget->SetSubComponentId(inWidgetId);
-            switch (g_StudioApp.GetManipulationMode()) {
-            case StudioManipulationModes::Local:
-                m_LastRenderedWidget->SetRenderWidgetMode(qt3ds::render::RenderWidgetModes::Local);
-                break;
-            case StudioManipulationModes::Global:
-                m_LastRenderedWidget->SetRenderWidgetMode(qt3ds::render::RenderWidgetModes::Global);
-                break;
-            default:
-                QT3DS_ASSERT(false);
-                break;
-            }
+
+        Option<NVRenderRect> viewport = m_Context.GetViewport();
+        if (scenePreviewPass) {
+            m_Context.SetViewport(GetPreviewViewport());
+            m_Context.SetSceneColor(Option<QT3DSVec4>());
         }
-
-        m_Scene->PrepareForRender(GetViewportDimensions(), m_Context);
-
         m_Context.RunRenderTasks();
 
-        if (m_EditCameraEnabled) {
+        if (!scenePreviewPass && m_EditCameraEnabled) {
             if (m_GradientWidget == nullptr)
                 m_GradientWidget = qt3ds::widgets::SGradientWidget
                                     ::CreateGradientWidget(m_Context.GetAllocator());
@@ -2478,8 +2544,11 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
             }
         }
 
-        m_Scene->Render(GetViewportDimensions(), m_Context, SScene::DoNotClear);
-        if (m_editModeCamerasAndLights.size() > 0) {
+        m_Scene->Render(scenePreviewPass
+                        ? GetPreviewViewportDimensions()
+                        : GetViewportDimensions(), m_Context, SScene::DoNotClear);
+
+        if (!scenePreviewPass && m_editModeCamerasAndLights.size() > 0) {
             if (!m_VisualAidWidget) {
                 m_VisualAidWidget = qt3ds::widgets::SVisualAidWidget
                     ::CreateVisualAidWidget(m_Context.GetAllocator());
@@ -2583,6 +2652,14 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides)
         }
 
         m_Context.EndFrame();
+        m_Context.SetViewport(viewport);
+        QT3DSVec2 theViewportDims(GetViewportDimensions());
+        m_Context.SetWindowDimensions(QSize((QT3DSU32)theViewportDims.x,
+                                            (QT3DSU32)theViewportDims.y));
+        CStudioProjectSettings *theSettings = m_Doc.GetCore()->GetStudioProjectSettings();
+        CPt thePresSize = theSettings->GetPresentationSize();
+        m_Presentation.m_PresentationDimensions =
+            QT3DSVec2((QT3DSF32)thePresSize.x, (QT3DSF32)thePresSize.y);
 
         if (m_ZoomRender.hasValue()) {
             RenderZoomRender(*m_ZoomRender);
@@ -2800,6 +2877,11 @@ Option<QT3DSU32> STranslation::PickWidget(CPt inMouseCoords, TranslationSelectMo
 SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::Enum inSelectMode)
 {
     bool requestRender = false;
+    if (m_EditCameraEnabled && CStudioPreferences::showEditModePreview()) {
+        // Must re-render to reset the preview viewport
+        PreRender(false);
+        Render(0, false, false);
+    }
 
     if (m_Doc.GetDocumentReader().AreGuidesEditable()) {
         qt3dsdm::TGuideHandleList theGuides = m_Doc.GetDocumentReader().GetGuides();

@@ -100,6 +100,9 @@ public:
     static long GetDefaultObjectLifetime();
     static void SetDefaultObjectLifetime(long inLifetime);
 
+    static bool showEditModePreview();
+    static void setShowEditModePreview(bool show);
+
     static bool GetTimebarDisplayTime();
     static void SetTimebarDisplayTime(bool inDisplayTime);
 

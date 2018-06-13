@@ -45,7 +45,7 @@ Project palette using Import functionality.</string>
      <x>0</x>
      <y>0</y>
      <width>1400</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -126,6 +126,7 @@ Project palette using Import functionality.</string>
     <addaction name="actionRulers_Guides"/>
     <addaction name="actionLock_Guides"/>
     <addaction name="actionClear_Guides"/>
+    <addaction name="actionCamera_Preview"/>
    </widget>
    <widget class="QMenu" name="menu_Timeline">
     <property name="title">
@@ -998,6 +999,17 @@ Project palette using Import functionality.</string>
   <action name="action_New_Project">
    <property name="text">
     <string>Project...</string>
+   </property>
+  </action>
+  <action name="actionCamera_Preview">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Camera Preview</string>
+   </property>
+   <property name="toolTip">
+    <string>Show Scene Camera Preview in Edit Mode</string>
    </property>
   </action>
  </widget>

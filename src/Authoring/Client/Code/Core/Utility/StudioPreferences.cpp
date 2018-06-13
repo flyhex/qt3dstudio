@@ -1010,3 +1010,13 @@ Q3DStudio::CString CStudioPreferences::GetVersionString()
 
     return theVersionNumber;
 }
+
+bool CStudioPreferences::showEditModePreview()
+{
+    return CPreferences::GetUserPreferences().GetValue("showEditModePreview", true);
+}
+
+void CStudioPreferences::setShowEditModePreview(bool show)
+{
+    CPreferences::GetUserPreferences().SetValue("showEditModePreview", show);
+}
