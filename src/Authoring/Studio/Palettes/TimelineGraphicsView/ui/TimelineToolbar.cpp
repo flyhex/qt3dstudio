@@ -72,7 +72,7 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     QAction *actionNewLayer = new QAction(iconLayer, newLayerString, this);
     QAction *actionFirst = new QAction(iconFirst, tr("Go to Timeline Start"), this);
     QAction *actionLast = new QAction(iconLast, tr("Go to Timeline End"), this);
-    m_actionDataInput = new QAction(m_iconDiActive, "");
+    m_actionDataInput = new QAction(m_iconDiInactive, "");
     m_actionDeleteRow = new QAction(iconDelete, tr("Delete Selected Object (Del)"), this);
     m_actionPlayStop = new QAction(this);
     m_timeLabel = new TimelineToolbarLabel(this);
@@ -172,8 +172,6 @@ void TimelineToolbar::onSelectionChange(Q3DStudio::SSelectedValue inNewSelectabl
     }
 
     m_actionDeleteRow->setEnabled(canDelete);
-
-    updateDataInputStatus(false);
 }
 
 // add a spacer widget
@@ -237,42 +235,38 @@ void TimelineToolbar::onDiButtonClicked()
     showDataInputChooser(mapToGlobal(pos()));
 }
 
-// Update datainput button state according to this timecontext
-// control state. If triggered via datamodel change i.e. dispatch message,
-// force update from actual property values
-void TimelineToolbar::updateDataInputStatus(bool isViaDispatch)
+// Update datainput button state according to this timecontext control state.
+void TimelineToolbar::updateDataInputStatus()
 {
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     qt3dsdm::Qt3DSDMPropertyHandle ctrldProp;
     qt3dsdm::Qt3DSDMInstanceHandle timeCtxRoot = doc->GetActiveRootInstance();
     CClientDataModelBridge *theClientBridge = doc->GetStudioSystem()->GetClientDataModelBridge();
-    // Only check for updates if we have entered new time context or receive dispatch (undo/redo).
-    // Actual control changes in this time context are handled in onDataInputChange
-    if (m_currTimeCtxRoot != timeCtxRoot || isViaDispatch) {
-        if (theClientBridge->GetObjectType(timeCtxRoot) == EStudioObjectType::OBJTYPE_SCENE) {
-            ctrldProp = theClientBridge->GetObjectDefinitions().m_Scene.m_ControlledProperty;
-        } else if (theClientBridge->GetObjectType(timeCtxRoot) ==
-                   EStudioObjectType::OBJTYPE_COMPONENT) {
-            ctrldProp = theClientBridge->GetObjectDefinitions().m_Component.m_ControlledProperty;
-        } else {
-            Q_ASSERT(false);
-        }
+    if (theClientBridge->GetObjectType(timeCtxRoot) == EStudioObjectType::OBJTYPE_SCENE) {
+        ctrldProp = theClientBridge->GetObjectDefinitions().m_Scene.m_ControlledProperty;
+    } else if (theClientBridge->GetObjectType(timeCtxRoot) ==
+               EStudioObjectType::OBJTYPE_COMPONENT) {
+        ctrldProp = theClientBridge->GetObjectDefinitions().m_Component.m_ControlledProperty;
+    } else {
+        Q_ASSERT(false);
+    }
 
-        qt3dsdm::SValue controlledPropertyVal;
-        doc->GetStudioSystem()->GetPropertySystem()->GetInstancePropertyValue(
-                    timeCtxRoot, ctrldProp, controlledPropertyVal);
-        auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal);
+    qt3dsdm::SValue controlledPropertyVal;
+    doc->GetStudioSystem()->GetPropertySystem()->GetInstancePropertyValue(
+                timeCtxRoot, ctrldProp, controlledPropertyVal);
+    auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal);
 
-        int slideStrPos = existingCtrl.indexOf("@timeline");
-        if (slideStrPos != -1) {
-            int ctrStrPos = existingCtrl.lastIndexOf("$", slideStrPos - 2);
-            m_currController = existingCtrl.mid(ctrStrPos + 1, slideStrPos - ctrStrPos - 2);
-        } else {
-            m_currController.clear();
-        }
+    QString newController;
+    int timelineStrPos = existingCtrl.indexOf("@timeline");
+    if (timelineStrPos != -1) {
+        int ctrStrPos = existingCtrl.lastIndexOf("$", timelineStrPos - 2);
+        newController = existingCtrl.mid(ctrStrPos + 1, timelineStrPos - ctrStrPos - 2);
+    }
+    if (newController != m_currController) {
+        m_currController = newController;
         // Toggle if we changed to a controlled time context, or if icon current state
         // differs from the control state of current time context
-        if (m_currController.size()) {
+        if (!m_currController.isEmpty()) {
             m_actionDataInput->setToolTip(
                 tr("Timeline Controller:\n%1").arg(m_currController));
             m_actionDataInput->setIcon(m_iconDiActive);
@@ -283,8 +277,6 @@ void TimelineToolbar::updateDataInputStatus(bool isViaDispatch)
             m_actionDataInput->setToolTip(tr("No control"));
             updateTimelineTitleColor(false);
         }
-
-        m_currTimeCtxRoot = timeCtxRoot;
         m_diLabel->setText(m_currController);
     }
 }
@@ -322,13 +314,13 @@ void TimelineToolbar::onDataInputChange(int handle, int instance, const QString 
         fullTimeControlStr = "$" + dataInputName + " @timeline";
         m_actionDataInput->setIcon(m_iconDiActive);
         m_currController = dataInputName;
-        updateTimelineTitleColor(false);
+        updateTimelineTitleColor(true);
     } else {
         m_actionDataInput->setToolTip(tr("No control"));
         // TODO actually delete the entire property instead of setting it as empty string
         m_actionDataInput->setIcon(m_iconDiInactive);
         m_currController.clear();
-        updateTimelineTitleColor(true);
+        updateTimelineTitleColor(false);
     }
 
     // To indicate that this presentation timeline is controlled by data input,
@@ -369,7 +361,6 @@ void TimelineToolbar::onDataInputChange(int handle, int instance, const QString 
     if (existingCtrl.startsWith(" "))
         existingCtrl.remove(0, 1);
 
-    m_currTimeCtxRoot = timeCtxRoot;
     m_diLabel->setText(m_currController);
     qt3dsdm::SValue fullCtrlPropVal
         = std::make_shared<qt3dsdm::CDataStr>(
@@ -384,18 +375,19 @@ void TimelineToolbar::OnBeginDataModelNotifications()
 
 void TimelineToolbar::OnEndDataModelNotifications()
 {
-    updateDataInputStatus(true);
+    updateDataInputStatus();
 }
 
 void TimelineToolbar::OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
-    updateDataInputStatus(true);
+    Q_UNUSED(inInstance)
 }
 
-void TimelineToolbar::OnImmediateRefreshInstanceMultiple(
-    qt3dsdm::Qt3DSDMInstanceHandle *inInstance, long inInstanceCount)
+void TimelineToolbar::OnImmediateRefreshInstanceMultiple(qt3dsdm::Qt3DSDMInstanceHandle *inInstance,
+                                                         long inInstanceCount)
 {
-    updateDataInputStatus(true);
+    Q_UNUSED(inInstance)
+    Q_UNUSED(inInstanceCount)
 }
 
 // Notify the user about control state change also with timeline dock
@@ -411,6 +403,6 @@ void TimelineToolbar::updateTimelineTitleColor(bool controlled)
                 + QString(CStudioPreferences::textColor().name()) + "; }";
     }
 
-    QWidget *timelineDock = parentWidget()->parentWidget()->parentWidget()->parentWidget();
+    QWidget *timelineDock = parentWidget()->parentWidget()->parentWidget();
     timelineDock->setStyleSheet(styleString);
 }

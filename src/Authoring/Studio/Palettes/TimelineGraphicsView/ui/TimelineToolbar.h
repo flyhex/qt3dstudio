@@ -84,7 +84,7 @@ private:
     void onSelectionChange(Q3DStudio::SSelectedValue inNewSelectable);
     void onDataInputChange(int handle, int instance, const QString &dataInputName);
     void showDataInputChooser(const QPoint &point);
-    void updateDataInputStatus(bool isViaDispatch);
+    void updateDataInputStatus();
     void updateTimelineTitleColor(bool controlled);
 
     TimelineToolbarLabel *m_timeLabel;
@@ -101,7 +101,6 @@ private:
     QIcon m_iconDiActive;
     QIcon m_iconDiInactive;
 
-    qt3dsdm::Qt3DSDMInstanceHandle m_currTimeCtxRoot = 0;
     QString m_currController;
 
     DataInputSelectView *m_dataInputSelector;

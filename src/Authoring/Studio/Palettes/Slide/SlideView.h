@@ -105,7 +105,7 @@ protected:
     virtual void OnSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inOldIndex,
                                    int inNewIndex);
 
-    void updateDataInputStatus(bool isViaDispatch);
+    void updateDataInputStatus();
     void UpdateSlideViewTitleColor();
 
 private:
@@ -134,7 +134,7 @@ private:
 
     qt3dsdm::Qt3DSDMInstanceHandle m_ActiveRoot; ///< the object containing the slides to be inspected.
     qt3dsdm::Qt3DSDMSlideHandle m_ActiveSlideHandle; ///< the active slide handle
-    bool m_controlled; // Are slides in this slide set controlled by datainput?
+    bool m_controlled = false; // Are slides in this slide set controlled by datainput?
     QString m_currentController;
     QString m_toolTip;
 };

@@ -206,7 +206,6 @@ void SlideView::OnNewPresentation()
     // slide datainput control
     CDispatch *theDispatch = g_StudioApp.GetCore()->GetDispatch();
     theDispatch->AddDataModelListener(this);
-    updateDataInputStatus(false);
 }
 
 void SlideView::OnClosingPresentation()
@@ -338,7 +337,7 @@ void SlideView::onDataInputChange(int handle, int instance, const QString &dataI
 
 // Set the state of slide control based on scene or component
 // controlledproperty
-void SlideView::updateDataInputStatus(bool isViaDispatch)
+void SlideView::updateDataInputStatus()
 {
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     CClientDataModelBridge *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
@@ -357,23 +356,28 @@ void SlideView::updateDataInputStatus(bool isViaDispatch)
     qt3dsdm::SValue controlledPropertyVal;
     doc->GetStudioSystem()->GetPropertySystem()->GetInstancePropertyValue(
                 slideRoot, ctrldProp, controlledPropertyVal);
-
     auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal);
-    if (existingCtrl.contains("@slide")) {
-        int slideStrPos = existingCtrl.indexOf("@slide");
-        int ctrStrPos = existingCtrl.lastIndexOf("$", slideStrPos - 2);
-        m_currentController = existingCtrl.mid(ctrStrPos + 1, slideStrPos - ctrStrPos - 2);
-        m_toolTip = tr("Slide Controller:\n") + m_currentController;
-        m_controlled = true;
-    } else {
-        m_currentController.clear();
-        m_toolTip = tr("No controller");
-        m_controlled = false;
-    }
 
-    // update UI
-    UpdateSlideViewTitleColor();
-    Q_EMIT controlledChanged();
+    QString newController;
+    int slideStrPos = existingCtrl.indexOf("@slide");
+    if (slideStrPos != -1) {
+        int ctrStrPos = existingCtrl.lastIndexOf("$", slideStrPos - 2);
+        newController = existingCtrl.mid(ctrStrPos + 1, slideStrPos - ctrStrPos - 2);
+    }
+    if (newController != m_currentController) {
+        m_currentController = newController;
+        if (!m_currentController.isEmpty()) {
+            m_toolTip = tr("Slide Controller:\n") + m_currentController;
+            m_controlled = true;
+        } else {
+            m_currentController.clear();
+            m_toolTip = tr("No controller");
+            m_controlled = false;
+        }
+        // update UI
+        UpdateSlideViewTitleColor();
+        Q_EMIT controlledChanged();
+    }
 }
 void SlideView::initialize()
 {
@@ -463,7 +467,6 @@ void SlideView::rebuildSlideList(const qt3dsdm::Qt3DSDMSlideHandle &inActiveSlid
             row++;
         }
     }
-    updateDataInputStatus(true);
 }
 
 CDoc *SlideView::GetDoc()
@@ -497,18 +500,19 @@ void SlideView::OnBeginDataModelNotifications()
 
 void SlideView::OnEndDataModelNotifications()
 {
-    updateDataInputStatus(true);
+    updateDataInputStatus();
 }
 
 void SlideView::OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
-    updateDataInputStatus(true);
+    Q_UNUSED(inInstance)
 }
 
 void SlideView::OnImmediateRefreshInstanceMultiple(
     qt3dsdm::Qt3DSDMInstanceHandle *inInstance, long inInstanceCount)
 {
-    updateDataInputStatus(true);
+    Q_UNUSED(inInstance)
+    Q_UNUSED(inInstanceCount)
 }
 
 // Notify the user about control state change also with slide view
