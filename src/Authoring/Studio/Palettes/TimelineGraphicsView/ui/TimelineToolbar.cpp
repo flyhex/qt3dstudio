@@ -130,7 +130,9 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     addAction(m_actionZoomOut);
     addWidget(m_scaleSlider);
     addAction(m_actionZoomIn);
-    addAction(actionGoToTime);
+
+    // child-action, not visible in UI
+    m_timeLabel->addAction(actionGoToTime);
 
     // add keyboard shortcuts
     m_actionZoomOut->setShortcut(Qt::Key_Minus);
