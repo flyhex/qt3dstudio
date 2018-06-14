@@ -51,8 +51,9 @@
 RowTimeline::RowTimeline()
     : InteractiveTimelineItem()
 {
-    setMinimumWidth(9999);
-    setMaximumWidth(9999);
+    // 999999: theoretically big enough row width (~ 4.6 hrs of presentation length)
+    setMinimumWidth(999999);
+    setMaximumWidth(999999);
 }
 
 RowTimeline::~RowTimeline()
@@ -462,7 +463,7 @@ void RowTimeline::moveDurationBy(double dx)
     m_startX += dx;
     m_endX += dx;
 
-    if (m_rowTree->parentRow() == nullptr || m_rowTree->rowType() == OBJTYPE_LAYER
+    if (!m_rowTree->parentRow() || m_rowTree->rowType() == OBJTYPE_LAYER
             || m_rowTree->hasComponentAncestor()) {
         m_minStartX = m_startX;
         m_maxEndX = m_endX;
@@ -495,10 +496,11 @@ void RowTimeline::moveDurationTo(double newX)
 
     double dx = newX - m_startX;
     double durationX = m_endX - m_startX;
+
     m_startX = newX;
     m_endX = m_startX + durationX;
 
-    if (m_rowTree->parentRow() == nullptr || m_rowTree->rowType() == OBJTYPE_LAYER
+    if (!m_rowTree->parentRow() || m_rowTree->rowType() == OBJTYPE_LAYER
             || m_rowTree->hasComponentAncestor()) {
         m_minStartX = m_startX;
         m_maxEndX = m_endX;
@@ -534,14 +536,19 @@ double RowTimeline::getDurationMoveOffsetX() const
     return m_startDurationMoveOffsetX;
 }
 
-// convert time values to x
+double RowTimeline::getDuration() const
+{
+    return m_endTime - m_startTime;
+}
+
+// convert time (seconds) values to x
 double RowTimeline::timeToX(double time) const
 {
     return TimelineConstants::RULER_EDGE_OFFSET + time * TimelineConstants::RULER_SEC_W
            * rowTree()->m_scene->ruler()->timelineScale();
 }
 
-// convert x values to time
+// convert x values to time (seconds)
 double RowTimeline::xToTime(double xPos) const
 {
     return (xPos - TimelineConstants::RULER_EDGE_OFFSET)
@@ -578,7 +585,7 @@ void RowTimeline::setStartX(double startX)
     m_startX = startX;
     m_startTime = xToTime(startX);
 
-    if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE
+    if (!m_rowTree->parentRow() || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE
             || m_rowTree->hasComponentAncestor()) {
         m_minStartX = 0;
     }
@@ -598,7 +605,7 @@ void RowTimeline::setEndX(double endX)
     m_endX = endX;
     m_endTime = xToTime(endX);
 
-    if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE
+    if (!m_rowTree->parentRow() || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE
         || m_rowTree->hasComponentAncestor()) {
         m_maxEndX = 999999;
     }
@@ -701,7 +708,7 @@ void RowTimeline::setStartTime(double startTime)
     m_startTime = startTime;
     m_startX = timeToX(startTime);
 
-    if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE
+    if (!m_rowTree->parentRow() || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE
             || m_rowTree->hasComponentAncestor()) {
         m_minStartX = 0;
     }
@@ -717,7 +724,7 @@ void RowTimeline::setEndTime(double endTime)
     m_endTime = endTime;
     m_endX = timeToX(endTime);
 
-    if (m_rowTree->parentRow() == nullptr || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE
+    if (!m_rowTree->parentRow() || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE
             || m_rowTree->hasComponentAncestor()) {
         m_maxEndX = 999999;
     }
@@ -776,43 +783,48 @@ QList<Keyframe *> RowTimeline::keyframes() const
     return m_keyframes;
 }
 
+QString RowTimeline::formatTime(double seconds) const
+{
+    long hrs = seconds / 3600;
+    long mins = (seconds - hrs * 3600) / 60;
+    long secs = seconds  - hrs * 3600 - mins * 60;
+    long millis = qRound((seconds - (int)seconds) * 1000);
+
+    if (hrs > 0)
+        return QString::asprintf("%02d:%02d:%02d.%03d", hrs, mins, secs, millis);
+
+    return QString::asprintf("%02d:%02d.%03d", mins, secs, millis);
+}
+
 void RowTimeline::showToolTip(const QPointF &pos)
 {
     QLabel *tooltip = m_rowTree->m_scene->timebarTooltip();
 
-    // .0000001 is added to ensure displayed times are rounded the right way
-    const double roundingFix = .0000001;
-    double start = m_startTime + roundingFix;
-    double end = m_endTime + roundingFix;
-    double duration = m_endTime - m_startTime + roundingFix;
-    QTime startTime(0, 0, int(start), int((start - int(start)) * 1000.0));
-    QTime endTime(0, 0, int(end), int((end - int(end)) * 1000.0));
-    QTime durationTime(0, 0, int(duration), qRound((duration - int(duration)) * 1000.0));
-
-    static const QString format = QStringLiteral("mm:ss:zzz");
-    static const QString toolTipTemplate = QStringLiteral("%1 - %2 (%3)");
-    const QString text = toolTipTemplate.arg(startTime.toString(format))
-            .arg(endTime.toString(format)).arg(durationTime.toString(format));
-
-    tooltip->setText(text);
+    tooltip->setText(formatTime(m_startTime) + " - " + formatTime(m_endTime)
+                     + " (" + formatTime(m_endTime - m_startTime) + ")");
 
     QPoint newPos = pos.toPoint() + QPoint(-tooltip->width() / 2,
                      -tooltip->height() - TimelineConstants::TIMEBAR_TOOLTIP_OFFSET_V);
+
+    // Confine the tooltip to the current screen area to avoid artifacts from different pixel ratios
+    static const int MARGIN = 5;
+    const QRect screenGeometry = QApplication::desktop()->screenGeometry(
+                m_rowTree->m_scene->widgetTimeline());
+    int xMin = screenGeometry.x() + MARGIN;
+    int xMax = screenGeometry.x() + screenGeometry.width() - tooltip->width() - MARGIN;
+    if (newPos.x() < xMin)
+        newPos.setX(xMin);
+    else if (newPos.x() > xMax)
+        newPos.setX(xMax);
+
     tooltip->move(newPos);
-    if (!QApplication::desktop()->screenGeometry(
-                m_rowTree->m_scene->widgetTimeline()).contains(tooltip->geometry())) {
-        // Hide tooltip if position is even partially on different screen than
-        // the timeline widget to avoid artifacts from different pixel ratios
-        tooltip->hide();
-    } else {
-        tooltip->raise();
-        tooltip->show();
-    }
+    tooltip->raise();
+    tooltip->show();
 }
 
 RowTimeline *RowTimeline::parentRow() const
 {
-    if (m_rowTree->m_parentRow == nullptr)
+    if (!m_rowTree->m_parentRow)
         return nullptr;
 
     return m_rowTree->m_parentRow->rowTimeline();

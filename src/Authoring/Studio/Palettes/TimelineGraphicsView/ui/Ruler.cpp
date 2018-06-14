@@ -121,13 +121,13 @@ void Ruler::setTimelineScale(double scl)
     update();
 }
 
-// convert distance values to time
+// convert distance values to time (seconds)
 double Ruler::distanceToTime(double distance) const
 {
     return distance / (TimelineConstants::RULER_SEC_W * m_timeScale);
 }
 
-// convert time values to distance
+// convert time (seconds) values to distance
 double Ruler::timeToDistance(double time) const
 {
     return time * TimelineConstants::RULER_SEC_W * m_timeScale;

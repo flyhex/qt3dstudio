@@ -1679,9 +1679,14 @@ QString CStudioApp::OnFileNew(bool createFolder)
     return QString();
 }
 
-bool CStudioApp::IsAuthorZoom()
+bool CStudioApp::IsAuthorZoom() const
 {
     return m_authorZoom;
+}
+
+bool CStudioApp::isOnProgress() const
+{
+    return m_isOnProgress;
 }
 
 void CStudioApp::SetAuthorZoom(bool inZoom)
@@ -1708,12 +1713,16 @@ void CStudioApp::OnDisplayAppStatus(Q3DStudio::CString &inStatusMsg)
 void CStudioApp::OnProgressBegin(const Q3DStudio::CString &inActionText,
                                  const Q3DStudio::CString &inAdditionalText)
 {
+    m_isOnProgress = true;
     m_dialogs->DisplayProgressScreen(inActionText, inAdditionalText);
 }
 
 void CStudioApp::OnProgressEnd()
 {
     m_dialogs->DestroyProgressScreen();
+    QTimer::singleShot(0, [this]() {
+        m_isOnProgress = false;
+    });
 }
 
 void CStudioApp::OnAssetDeleteFail()

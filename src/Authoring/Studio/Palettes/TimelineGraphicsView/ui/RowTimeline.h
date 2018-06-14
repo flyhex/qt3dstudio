@@ -71,6 +71,7 @@ public:
     double getEndTime() const;
     double getDurationMoveTime() const; // the time a row duration has moved (to commit to binding)
     double getDurationMoveOffsetX() const;
+    double getDuration() const;
     QColor barColor() const;
     int type() const;
     RowTimeline *parentRow() const;
@@ -90,6 +91,7 @@ private:
     void updateChildrenMaxEndXRecursive(RowTree *rowTree);
     void drawColorPropertyGradient(QPainter *painter, int width);
     bool isColorProperty() const;
+    QString formatTime(double seconds) const;
     double timeToX(double time) const;
     double xToTime(double xPos) const;
     void collectChildKeyframeTimes(QVector<double> &childKeyframeTimes);

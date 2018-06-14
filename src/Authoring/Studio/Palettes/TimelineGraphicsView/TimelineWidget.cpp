@@ -402,6 +402,20 @@ void TimelineWidget::OnTimeChanged(long inTime)
     m_graphicsScene->playHead()->setTime(inTime * .001);
     m_toolbar->setTime(inTime);
 
+    double left = m_viewTimelineHeader->horizontalScrollBar()->value()
+            + TimelineConstants::PLAYHEAD_W * .5;
+    double right = m_viewTimelineHeader->horizontalScrollBar()->value()
+            + m_viewTimelineHeader->width() - TimelineConstants::RULER_EDGE_OFFSET;
+    double playHeadX = m_graphicsScene->playHead()->x();
+
+    if (playHeadX < left || playHeadX > right) {
+        m_viewTimelineContent->ensureVisible(m_graphicsScene->playHead()->x()
+                                             - TimelineConstants::PLAYHEAD_W * .5,
+                                             m_viewTimelineContent->verticalScrollBar()->value()
+                                             + TimelineConstants::ROW_H,
+                                             TimelineConstants::PLAYHEAD_W, 0, 0, 0);
+    }
+
     if (inTime <= 0 && g_StudioApp.IsPlaying() && getPlaybackMode() == "Ping"
             && !g_StudioApp.isPlaybackPreviewOn()) {
         g_StudioApp.PlaybackStopNoRestore();

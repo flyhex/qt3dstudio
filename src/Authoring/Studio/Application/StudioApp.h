@@ -136,6 +136,7 @@ private:
     // are we are launching welcome screen again due to user canceling file dialog?
     bool m_goStraightToWelcomeFileDialog;
     bool m_playbackPreviewOn = false;
+    bool m_isOnProgress = false;
     int m_tutorialPage;
     QTimer *m_autosaveTimer;
 #if (defined Q_OS_MACOS)
@@ -199,7 +200,8 @@ public:
     void OnLoadDocumentCatcher(const Qt3DSFile &inLocation);
     void OnFileOpen();
     QString OnFileNew(bool createFolder = true);
-    bool IsAuthorZoom();
+    bool IsAuthorZoom() const;
+    bool isOnProgress() const;
     void SetAuthorZoom(bool inZoom);
     void SetAutosaveEnabled(bool enabled);
     void SetAutosaveInterval(int interval);

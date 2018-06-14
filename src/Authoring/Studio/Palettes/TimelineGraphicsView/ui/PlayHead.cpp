@@ -48,9 +48,10 @@ void PlayHead::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
 
     static const QPixmap pixHead = QPixmap(":/images/PlaybackHead.png");
 
+    static const int PLAY_HEAD_H = 999999; // theoretically big enough height
     painter->drawPixmap(-TimelineConstants::PLAYHEAD_W * .5, 0, pixHead);
     painter->setPen(QColor(TimelineConstants::PLAYHEAD_LINE_COLOR));
-    painter->drawLine(0, 0, 0, 3000);
+    painter->drawLine(0, 0, 0, PLAY_HEAD_H);
 }
 
 void PlayHead::setHeight(int height)

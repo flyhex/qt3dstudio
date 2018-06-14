@@ -143,10 +143,12 @@ private:
     TreeControlType m_clickedTreeControlType = TreeControlType::None;
     double m_pressPosInKeyframe;
     double m_treeWidth = TimelineConstants::TREE_DEFAULT_W;
+    double m_lastPlayHeadX = 0;
     TExpandMap m_expandMap;
     RowTree *m_releaseSelectRow = nullptr;
     bool m_autoScrollDownOn = false;
     bool m_autoScrollUpOn = false;
+    QTimer m_autoScrollTimelineTimer;
     QTimer m_autoScrollTimer;
     QTimer m_autoScrollTriggerTimer; // triggers m_autoScrollTimer
     QLabel *m_timebarToolTip = nullptr;
