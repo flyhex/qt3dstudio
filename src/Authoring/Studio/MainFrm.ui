@@ -127,6 +127,7 @@ Project palette using Import functionality.</string>
     <addaction name="actionLock_Guides"/>
     <addaction name="actionClear_Guides"/>
     <addaction name="actionCamera_Preview"/>
+    <addaction name="actionEdit_Lighting"/>
    </widget>
    <widget class="QMenu" name="menu_Timeline">
     <property name="title">
@@ -1006,10 +1007,21 @@ Project palette using Import functionality.</string>
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Camera Preview</string>
+    <string>Scene Preview</string>
    </property>
    <property name="toolTip">
     <string>Show Scene Camera Preview in Edit Mode</string>
+   </property>
+  </action>
+  <action name="actionEdit_Lighting">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Disable Scene Lighting</string>
+   </property>
+   <property name="toolTip">
+    <string>Disable Lighting from Scene Lights in Edit Views</string>
    </property>
   </action>
  </widget>

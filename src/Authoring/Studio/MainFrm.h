@@ -209,6 +209,8 @@ public:
     void OnUpdateEditCameraZoom();
     void OnEditViewFillMode();
     void OnUpdateEditViewFillMode();
+    void OnEditViewLightingEnabled();
+    void OnUpdateEditViewLightingEnabled();
 
     void OnViewGuidesRulers();
     void OnUpdateViewGuidesRulers();

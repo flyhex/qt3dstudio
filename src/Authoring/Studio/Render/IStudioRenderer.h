@@ -58,8 +58,8 @@ public:
     virtual void SetViewRect(const QRect &inRect) = 0;
 
     virtual void GetEditCameraList(QStringList &outCameras) = 0;
-    virtual void SetEnableEditLight(bool inEnableLight) = 0;
-    virtual bool IsEditLightEnabled() const = 0;
+    virtual void SetPolygonFillModeEnabled(bool inEnableFillMode) = 0;
+    virtual bool IsPolygonFillModeEnabled() const = 0;
     virtual bool DoesEditCameraSupportRotation(QT3DSI32 inIndex) = 0;
     virtual bool AreGuidesEnabled() const = 0;
     virtual void SetGuidesEnabled(bool val) = 0;

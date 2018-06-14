@@ -177,6 +177,8 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionWireframe, &QAction::triggered, this, &CMainFrame::OnViewWireframe);
     connect(m_ui->actionTooltips, &QAction::triggered, this, &CMainFrame::OnViewTooltips);
     connect(m_ui->actionCamera_Preview, &QAction::triggered, this, &CMainFrame::OnShowEditPreview);
+    connect(m_ui->actionEdit_Lighting, &QAction::triggered, this,
+            &CMainFrame::OnEditViewLightingEnabled);
 //    connect(m_ui->actionFind, &QAction::triggered, this, &CMainFrame::onViewFind); // TODO: Implement
 
     // Timeline Menu
@@ -296,6 +298,7 @@ CMainFrame::CMainFrame()
         OnUpdateClearGuides();
         OnUpdateLockGuides();
         OnUpdateCameraPreview();
+        OnUpdateEditViewLightingEnabled();
     });
 
     m_playbackTimer->setInterval(PLAYBACK_TIMER_TIMEOUT);
@@ -1436,7 +1439,7 @@ void CMainFrame::HandleEditViewFillModeKey()
 {
     if (m_sceneView.data() == GetActiveView() && !m_sceneView->isDeploymentView()) {
         OnEditViewFillMode();
-        bool theEditViewFillMode = g_StudioApp.getRenderer().IsEditLightEnabled();
+        bool theEditViewFillMode = g_StudioApp.getRenderer().IsPolygonFillModeEnabled();
         m_ui->actionShading_Mode->setChecked(theEditViewFillMode);
     }
 }
@@ -1449,8 +1452,8 @@ void CMainFrame::HandleEditViewFillModeKey()
 //==============================================================================
 void CMainFrame::OnEditViewFillMode()
 {
-    bool theEditViewFillMode = !g_StudioApp.getRenderer().IsEditLightEnabled();
-    g_StudioApp.getRenderer().SetEnableEditLight(theEditViewFillMode);
+    bool theEditViewFillMode = !g_StudioApp.getRenderer().IsPolygonFillModeEnabled();
+    g_StudioApp.getRenderer().SetPolygonFillModeEnabled(theEditViewFillMode);
 }
 
 //==============================================================================
@@ -1467,7 +1470,7 @@ void CMainFrame::OnUpdateEditViewFillMode()
 {
     if (m_sceneView.data() == GetActiveView() && !m_sceneView->isDeploymentView()) {
         m_ui->actionShading_Mode->setEnabled(true);
-        m_ui->actionShading_Mode->setChecked(g_StudioApp.getRenderer().IsEditLightEnabled());
+        m_ui->actionShading_Mode->setChecked(g_StudioApp.getRenderer().IsPolygonFillModeEnabled());
     } else {
         m_ui->actionShading_Mode->setEnabled(false);
         m_ui->actionShading_Mode->setChecked(false);
@@ -1516,6 +1519,12 @@ void CMainFrame::OnUpdateLockGuides()
 void CMainFrame::OnUpdateCameraPreview()
 {
     m_ui->actionCamera_Preview->setChecked(CStudioPreferences::showEditModePreview());
+    g_StudioApp.getRenderer().RequestRender();
+}
+
+void CMainFrame::OnUpdateEditViewLightingEnabled()
+{
+    m_ui->actionEdit_Lighting->setChecked(CStudioPreferences::editModeLightingEnabled());
     g_StudioApp.getRenderer().RequestRender();
 }
 
@@ -1878,6 +1887,12 @@ void CMainFrame::OnShowEditPreview()
 {
     bool show = CStudioPreferences::showEditModePreview();
     CStudioPreferences::setShowEditModePreview(!show);
+}
+
+void CMainFrame::OnEditViewLightingEnabled()
+{
+    bool enabled = CStudioPreferences::editModeLightingEnabled();
+    CStudioPreferences::setEditModeLightingEnabled(!enabled);
 }
 
 void CMainFrame::OnConnectionChanged(bool connected)

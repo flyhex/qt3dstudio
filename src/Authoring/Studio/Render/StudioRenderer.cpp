@@ -424,11 +424,9 @@ struct SRendererImpl : public IStudioRenderer,
         for (QT3DSU32 idx = 0; idx < g_NumEditCameras; ++idx)
             outCameras.push_back(g_EditCameraDefinitions[idx].m_Name);
     }
-    void SetEnableEditLight(bool inEnableLight) override
+    void SetPolygonFillModeEnabled(bool inEnableLight) override
     {
         CStudioPreferences::SetEditViewFillMode(inEnableLight);
-        if (m_Translation)
-            m_Translation->m_EditLightEnabled = inEnableLight;
         RequestRender();
     }
 
@@ -473,7 +471,7 @@ struct SRendererImpl : public IStudioRenderer,
         return -1;
     }
 
-    bool IsEditLightEnabled() const override
+    bool IsPolygonFillModeEnabled() const override
     {
         return GetEditCamera() >= 0 && CStudioPreferences::GetEditViewFillMode();
     }
@@ -645,7 +643,6 @@ struct SRendererImpl : public IStudioRenderer,
             if (m_Context.mPtr) {
                 m_Translation = std::make_shared<STranslation>(std::ref(*this),
                                                                  std::ref(*m_Context.mPtr));
-                m_Translation->m_EditLightEnabled = CStudioPreferences::GetEditViewFillMode();
                 ApplyEditCameraIndex();
                 SetTranslationViewport();
             }

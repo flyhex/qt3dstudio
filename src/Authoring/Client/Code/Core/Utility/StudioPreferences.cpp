@@ -1020,3 +1020,13 @@ void CStudioPreferences::setShowEditModePreview(bool show)
 {
     CPreferences::GetUserPreferences().SetValue("showEditModePreview", show);
 }
+
+bool CStudioPreferences::editModeLightingEnabled()
+{
+    return CPreferences::GetUserPreferences().GetValue("editModeLightingEnabled", true);
+}
+
+void CStudioPreferences::setEditModeLightingEnabled(bool enabled)
+{
+    CPreferences::GetUserPreferences().SetValue("editModeLightingEnabled", enabled);
+}

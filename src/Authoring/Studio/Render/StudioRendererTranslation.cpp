@@ -2083,6 +2083,7 @@ void STranslation::PreRender(bool scenePreviewPass)
     if (!scenePreviewPass)
         m_editModeCamerasAndLights.clear();
     ClearDirtySet();
+    m_EditLightEnabled = CStudioPreferences::editModeLightingEnabled();
     BuildRenderGraph(theRoot, scenePreviewPass);
     if (scenePreviewPass)
         m_Context.SetScaleMode(qt3ds::render::ScaleModes::FitSelected);

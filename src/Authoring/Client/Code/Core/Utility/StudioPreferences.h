@@ -103,6 +103,9 @@ public:
     static bool showEditModePreview();
     static void setShowEditModePreview(bool show);
 
+    static bool editModeLightingEnabled();
+    static void setEditModeLightingEnabled(bool enabled);
+
     static bool GetTimebarDisplayTime();
     static void SetTimebarDisplayTime(bool inDisplayTime);
 
