@@ -754,12 +754,8 @@ Rectangle {
             sliderMin: values[0]
             sliderMax: values[1]
 
-            onEditingFinished: {
-                _inspectorModel.setPropertyValue(instance, handle, value, true)
-            }
-            onSliderMoved: {
-                _inspectorModel.setPropertyValue(instance, handle, value, false)
-            }
+            onCommitValue: _inspectorModel.setPropertyValue(instance, handle, desiredValue, true)
+            onPreviewValue: _inspectorModel.setPropertyValue(instance, handle, desiredValue, false)
         }
     }
 
@@ -944,7 +940,7 @@ Rectangle {
 
         HandlerPropertyBaseSlider {
             intSlider: true;
-            property int intValue: Math.round(value)
+            property int intValue: Math.round(desiredValue)
             property int instance: parent.modelData.instance
             property int handle: parent.modelData.handle
             property variant values: parent.modelData.values
@@ -952,12 +948,8 @@ Rectangle {
             sliderMin: values[0]
             sliderMax: values[1]
 
-            onEditingFinished: {
-                _inspectorModel.setPropertyValue(instance, handle, intValue, true)
-            }
-            onSliderMoved: {
-                _inspectorModel.setPropertyValue(instance, handle, intValue, false)
-            }
+            onCommitValue: _inspectorModel.setPropertyValue(instance, handle, intValue, true)
+            onPreviewValue: _inspectorModel.setPropertyValue(instance, handle, intValue, false)
         }
     }
 

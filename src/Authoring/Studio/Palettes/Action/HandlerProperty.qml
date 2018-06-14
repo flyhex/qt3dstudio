@@ -132,7 +132,8 @@ ColumnLayout {
 
             label: parent ? parent.label : ""
 
-            onValueChanged: _parentView.setArgumentValue(propertyModel.valueHandle, value)
+            // We don't need to care about preview for action sliders
+            onCommitValue: _parentView.setArgumentValue(propertyModel.valueHandle, desiredValue)
         }
     }
 

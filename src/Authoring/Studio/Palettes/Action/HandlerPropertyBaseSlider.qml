@@ -39,18 +39,31 @@ import "../controls"
 Row {
     id: root
 
-    property alias value: slider.value
+    property real value: 0 // This is the value coming from backend
+    property alias desiredValue: slider.value // This is value adjusted by user
     property alias sliderMin: slider.from
     property alias sliderMax: slider.to
     property bool intSlider: false
     property int decimalSlider: 3
     property Item tabItem1: textField
 
-    signal editingFinished
-    signal sliderMoved
+    signal previewValue // Indicates desiredValue contains a preview value
+    signal commitValue  // Indicates desiredValue contains a final value to be committed
 
     spacing: 5
     width: _valueWidth
+
+    function doCommitValue() {
+        if (rateLimiter.running)
+            rateLimiter.stop();
+        textField.setTextFieldValue();
+        root.commitValue();
+    }
+
+    onValueChanged: {
+        slider.value = value;
+        textField.setTextFieldValue();
+    }
 
     Keys.onPressed: {
         if (event.key === Qt.Key_Up || event.key === Qt.Key_Down) {
@@ -114,13 +127,11 @@ Row {
             textField.setTextFieldValue()
         }
 
+        // onPressedChanged is triggered both mouse clicks and arrow keys, so adjusting with arrow
+        // keys will create undo point for each tick slider moves (even when holding the key down)
         onPressedChanged: {
-            if (!pressed) {
-                if (rateLimiter.running)
-                    rateLimiter.stop();
-                textField.setTextFieldValue()
-                root.editingFinished();
-            }
+            if (!pressed)
+                root.doCommitValue();
         }
 
         MouseArea {
@@ -148,7 +159,7 @@ Row {
         id: rateLimiter
         interval: 10
         onTriggered: {
-            root.sliderMoved();
+            root.previewValue();
         }
     }
 
@@ -195,7 +206,8 @@ Row {
             else if (text < sliderMin)
                 text = sliderMin
             slider.value = text
-            root.editingFinished()
+            root.doCommitValue();
+
         }
 
         function setTextFieldValue() {

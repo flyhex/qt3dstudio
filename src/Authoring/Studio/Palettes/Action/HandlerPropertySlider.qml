@@ -40,6 +40,7 @@ GridLayout {
     id: root
 
     property alias value: propertySlider.value
+    property alias desiredValue: propertySlider.desiredValue
     property alias sliderMin: propertySlider.sliderMin
     property alias sliderMax: propertySlider.sliderMax
     property alias label: labelItem.text
@@ -47,7 +48,8 @@ GridLayout {
     property int decimalSlider: propertySlider.decimalSlider
     property alias tabItem1: propertySlider.tabItem1
 
-    signal editingFinished
+    signal previewValue
+    signal commitValue
 
     columns: 3
 
@@ -59,6 +61,7 @@ GridLayout {
     HandlerPropertyBaseSlider {
         id: propertySlider
         // proxy the signal upwards
-        onEditingFinished: root.editingFinished()
+        onCommitValue: root.commitValue()
+        onPreviewValue: root.previewValue()
     }
 }
