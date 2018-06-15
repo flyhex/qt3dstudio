@@ -105,23 +105,14 @@
         <file>images/Keyframe-Master-Disabled.png</file>
         <file>images/Keyframe-MasterDynamic-Normal.png</file>
         <file>images/Keyframe-MasterDynamic-Selected.png</file>
-        <file>images/Keyframe-MasterLeft-disabled.png</file>
-        <file>images/Keyframe-MasterLeftDynamic-Normal.png</file>
-        <file>images/Keyframe-MasterLeftDynamic-Selected.png</file>
-        <file>images/Keyframe-MasterLeft-Normal.png</file>
-        <file>images/Keyframe-MasterLeft-Selected.png</file>
         <file>images/Keyframe-Master-Normal.png</file>
-        <file>images/Keyframe-MasterRight-disabled.png</file>
-        <file>images/Keyframe-MasterRightDynamic-Normal.png</file>
-        <file>images/Keyframe-MasterRightDynamic-Selected.png</file>
-        <file>images/Keyframe-MasterRight-Normal.png</file>
-        <file>images/Keyframe-MasterRight-Selected.png</file>
         <file>images/Keyframe-Master-Selected.png</file>
         <file>images/Keyframe-Property-Disabled.png</file>
         <file>images/Keyframe-PropertyDynamic-Normal.png</file>
         <file>images/Keyframe-PropertyDynamic-Selected.png</file>
         <file>images/Keyframe-Property-Normal.png</file>
         <file>images/Keyframe-Property-Selected.png</file>
+        <file>images/keyframe-hidden-normal.png</file>
         <file>images/Objects-Property-Disabled.png</file>
         <file>images/Objects-Property-Disabled@2x.png</file>
         <file>images/Action-ChildMasterAction.png</file>

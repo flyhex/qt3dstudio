@@ -73,6 +73,8 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     if (!y()) // prevents flickering when the row is just inserted to the layout
         return;
 
+    const int currentHeight = size().height() - 1;
+
     if (isColorProperty() && !m_keyframes.empty()) {
         drawColorPropertyGradient(painter, widget->width());
     } else {
@@ -86,7 +88,7 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
             bgColor = TimelineConstants::ROW_COLOR_OVER;
         else
             bgColor = TimelineConstants::ROW_COLOR_NORMAL;
-        painter->fillRect(0, 0, size().width(), size().height() - 1, bgColor);
+        painter->fillRect(0, 0, size().width(), currentHeight, bgColor);
     }
 
     // Duration
@@ -98,25 +100,25 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
             painter->setBrush(QBrush(QColor(TimelineConstants::ROW_COLOR_DURATION_OFF1),
                                      Qt::BDiagPattern));
             painter->setPen(Qt::NoPen);
-            painter->fillRect(QRect(m_startX, 0, m_endX - m_startX, size().height() - 1),
+            painter->fillRect(QRect(m_startX, 0, m_endX - m_startX, currentHeight),
                               QColor(TimelineConstants::ROW_COLOR_DURATION_OFF2));
-            painter->drawRect(QRect(m_startX, 0, m_endX - m_startX, size().height() - 1));
+            painter->drawRect(QRect(m_startX, 0, m_endX - m_startX, currentHeight));
 
             painter->setPen(QPen(QColor(TimelineConstants::ROW_COLOR_DURATION_EDGE), 3));
-            painter->drawLine(m_startX, 0, m_startX, size().height() - 1);
-            painter->drawLine(m_endX, 0, m_endX, size().height() - 1);
+            painter->drawLine(m_startX, 0, m_startX, currentHeight);
+            painter->drawLine(m_endX, 0, m_endX, currentHeight);
         } else {
             // draw main duration part
             double x = qMax(m_startX, m_minStartX);
             double w = qMin(m_endX, m_maxEndX) - x;
 
             painter->setPen(Qt::NoPen);
-            painter->fillRect(QRect(x, 0, w, size().height() - 1), m_barColor);
+            painter->fillRect(QRect(x, 0, w, currentHeight), m_barColor);
 
             if ( m_state == Selected) {
                 // draw selection overlay on bar
                 int marginY = 3;
-                painter->fillRect(QRect(x, marginY, w, size().height() - marginY * 2 - 1),
+                painter->fillRect(QRect(x, marginY, w, currentHeight - marginY * 2),
                                   QColor(TimelineConstants::ROW_COLOR_DURATION_SELECTED));
             }
 
@@ -125,26 +127,26 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                                      Qt::BDiagPattern));
             if (m_startX < m_minStartX) {
                 painter->setPen(Qt::NoPen);
-                painter->fillRect(QRect(m_startX, 0, m_minStartX - m_startX, size().height() - 1),
+                painter->fillRect(QRect(m_startX, 0, m_minStartX - m_startX, currentHeight),
                                   QColor(TimelineConstants::ROW_COLOR_DURATION_OFF2));
-                painter->drawRect(QRect(m_startX, 0, m_minStartX - m_startX, size().height() - 1));
+                painter->drawRect(QRect(m_startX, 0, m_minStartX - m_startX, currentHeight));
                 painter->setPen(QColor(TimelineConstants::ROW_COLOR_DURATION_EDGE));
-                painter->drawLine(m_minStartX, 0, m_minStartX, size().height() - 1);
+                painter->drawLine(m_minStartX, 0, m_minStartX, currentHeight);
             }
 
             // draw hashed part after
             if (m_endX > m_maxEndX) {
                 painter->setPen(Qt::NoPen);
-                painter->fillRect(QRect(m_maxEndX, 0, m_endX - m_maxEndX, size().height() - 1),
+                painter->fillRect(QRect(m_maxEndX, 0, m_endX - m_maxEndX, currentHeight),
                                   QColor(TimelineConstants::ROW_COLOR_DURATION_OFF2));
-                painter->drawRect(QRect(m_maxEndX, 0, m_endX - m_maxEndX, size().height() - 1));
+                painter->drawRect(QRect(m_maxEndX, 0, m_endX - m_maxEndX, currentHeight));
                 painter->setPen(QColor(TimelineConstants::ROW_COLOR_DURATION_EDGE));
-                painter->drawLine(m_maxEndX, 0, m_maxEndX, size().height() - 1);
+                painter->drawLine(m_maxEndX, 0, m_maxEndX, currentHeight);
             }
 
             painter->setPen(QPen(QColor(TimelineConstants::ROW_COLOR_DURATION_EDGE), 2));
-            painter->drawLine(m_startX, 0, m_startX, size().height() - 1);
-            painter->drawLine(m_endX, 0, m_endX, size().height() - 1);
+            painter->drawLine(m_startX, 0, m_startX, currentHeight);
+            painter->drawLine(m_endX, 0, m_endX, currentHeight);
         }
 
         painter->restore();
@@ -153,13 +155,30 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     if (m_propertyGraph) {
         // Property graph
         QRectF graphRect(TimelineConstants::RULER_EDGE_OFFSET, 0,
-                         widget->width(), size().height());
+                         widget->width(), currentHeight);
         m_propertyGraph->paintGraphs(painter, graphRect);
     }
 
     // Keyframes
-    const int keyFrameH = 16;
-    const int keyFrameY = (TimelineConstants::ROW_H / 2) - (keyFrameH / 2);
+    const qreal keyFrameH = 16.0;
+    const qreal keyFrameHalfH = keyFrameH / 2.0;
+    const qreal keyFrameY = (qMin(currentHeight, TimelineConstants::ROW_H) / 2.0) - keyFrameHalfH;
+    const qreal hiddenKeyFrameY = keyFrameY + (keyFrameH * 2.0 / 3.0) + 2.0;
+
+    // Hidden descendant keyframe indicators
+    if (!m_rowTree->expanded()) {
+        static const QPixmap pixKeyframeHidden = QPixmap(":/images/keyframe-hidden-normal.png");
+        QVector<double> childKeyframeTimes;
+        collectChildKeyframeTimes(childKeyframeTimes);
+
+        const qreal oldOpacity = painter->opacity();
+        painter->setOpacity(0.75);
+        for (const auto time : qAsConst(childKeyframeTimes)) {
+            const qreal xCoord = timeToX(time) - 2.5;
+            painter->drawPixmap(QPointF(xCoord, hiddenKeyFrameY), pixKeyframeHidden);
+        }
+        painter->setOpacity(oldOpacity);
+    }
 
     if (m_rowTree->hasPropertyChildren()) { // master keyframes
         static const QPixmap pixKeyframeMasterNormal
@@ -184,7 +203,7 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                 else
                     pixmap = pixKeyframeMasterNormal;
             }
-            painter->drawPixmap(timeToX(keyframe->time) - 8.5, keyFrameY, pixmap);
+            painter->drawPixmap(QPointF(timeToX(keyframe->time) - 8.5, keyFrameY), pixmap);
         }
     } else if (m_rowTree->isProperty()) {
         static const QPixmap pixKeyframePropertyNormal
@@ -209,8 +228,8 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                 else
                     pixmap = pixKeyframePropertyNormal;
             }
-            painter->drawPixmap(timeToX(keyframe->time) - (keyframe->selected() ? 7.5 : 5.5),
-                                keyFrameY, pixmap);
+            painter->drawPixmap(QPointF(timeToX(keyframe->time) - (keyframe->selected() ? 7.5 : 5.5),
+                                keyFrameY), pixmap);
         }
     }
 }
@@ -346,7 +365,17 @@ void RowTimeline::updateKeyframesFromBinding(qt3dsdm::Qt3DSDMPropertyHandle prop
                 m_rowTree->m_scene->keyframeManager()->selectKeyframe(kfUI);
         }
 
-        propRow->rowTimeline()->update();
+        if (isVisible()) {
+            propRow->rowTimeline()->update();
+            update();
+        } else {
+            // Find the first visible parent and update that to show hidden keyframes
+            RowTree *updateRow = m_rowTree->parentRow();
+            while (updateRow && !updateRow->isVisible())
+                updateRow = updateRow->parentRow();
+            if (updateRow)
+                updateRow->rowTimeline()->update();
+        }
     }
 }
 
@@ -516,7 +545,18 @@ double RowTimeline::timeToX(double time) const
 double RowTimeline::xToTime(double xPos) const
 {
     return (xPos - TimelineConstants::RULER_EDGE_OFFSET)
-           / (TimelineConstants::RULER_SEC_W * rowTree()->m_scene->ruler()->timelineScale());
+            / (TimelineConstants::RULER_SEC_W * rowTree()->m_scene->ruler()->timelineScale());
+}
+
+void RowTimeline::collectChildKeyframeTimes(QVector<double> &childKeyframeTimes)
+{
+    const auto childRows = m_rowTree->childRows();
+    for (const auto row : childRows) {
+        row->rowTimeline()->collectChildKeyframeTimes(childKeyframeTimes);
+        const auto keyframes = row->rowTimeline()->keyframes();
+        for (const auto kf : keyframes)
+            childKeyframeTimes.append(kf->time);
+    }
 }
 
 // called after timeline scale is changed to update duration star/end positions

@@ -92,6 +92,7 @@ private:
     bool isColorProperty() const;
     double timeToX(double time) const;
     double xToTime(double xPos) const;
+    void collectChildKeyframeTimes(QVector<double> &childKeyframeTimes);
 
     RowTree *m_rowTree;
     RowTimelinePropertyGraph *m_propertyGraph = nullptr;
