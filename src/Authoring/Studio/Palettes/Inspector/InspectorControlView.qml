@@ -501,73 +501,15 @@ Rectangle {
     Component {
         id: multiLine
 
-        ScrollView {
-            id: scrollView
+        HandlerBaseMultilineText {
             property int instance: parent.modelData.instance
             property int handle: parent.modelData.handle
-            property variant value: parent.modelData.value
-            property Item tabItem1: textArea
-
             width: _valueWidth
             height: _controlBaseHeight * 3
-            clip: true
+            value: parent.modelData.value
 
-            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-            ScrollBar.vertical.policy: ScrollBar.AsNeeded
-
-            TextArea {
-                id: textArea
-
-                property bool ignoreHotkeys: true
-
-                text: scrollView.value
-                horizontalAlignment: TextInput.AlignLeft
-                verticalAlignment: TextInput.AlignTop
-                font.pixelSize: _fontSize
-                color: _textColor
-                wrapMode: TextEdit.WrapAnywhere
-                selectionColor: _selectionColor
-                selectedTextColor: _textColor
-
-                topPadding: 6
-                bottomPadding: 6
-                rightPadding: 6
-
-                background: Rectangle {
-                    height: textArea.height
-                    color: textArea.enabled ? _studioColor2 : "transparent"
-                    border.width: textArea.activeFocus ? 1 : 0
-                    border.color: textArea.activeFocus ? _selectionColor : _disabledColor
-                }
-
-                MouseArea {
-                    id: mouseAreaX
-                    anchors.fill: parent
-                    property int clickedPos
-                    preventStealing: true
-
-                    onPressed: {
-                        textArea.forceActiveFocus()
-                        clickedPos = textArea.positionAt(mouse.x, mouse.y)
-                        textArea.cursorPosition = clickedPos
-                    }
-                    onDoubleClicked: textArea.selectAll()
-                    onPositionChanged: {
-                        textArea.cursorPosition = textArea.positionAt(mouse.x, mouse.y)
-                        textArea.select(clickedPos, textArea.cursorPosition)
-                    }
-                }
-
-                onTextChanged: {
-                    _inspectorModel.setPropertyValue(scrollView.instance, scrollView.handle,
-                                                     text, false)
-                }
-
-                onEditingFinished: {
-                    _inspectorModel.setPropertyValue(scrollView.instance, scrollView.handle,
-                                                     text, true)
-                }
-            }
+            onTextChanged: _inspectorModel.setPropertyValue(instance, handle, value, false)
+            onEditingFinished: _inspectorModel.setPropertyValue(instance, handle, value, true)
         }
     }
 

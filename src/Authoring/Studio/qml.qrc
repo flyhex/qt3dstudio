@@ -39,5 +39,6 @@
         <file>Palettes/controls/StyledToolButton.qml</file>
         <file>Palettes/controls/StyledMenuSeparator.qml</file>
         <file>Palettes/controls/StyledToggleButton.qml</file>
+        <file>Palettes/Action/HandlerBaseMultilineText.qml</file>
     </qresource>
 </RCC>

@@ -34,67 +34,25 @@ RowLayout {
     id: root
 
     property alias label: labelField.text
-    property alias value: textArea.text
-    property Item tabItem1: textArea
+    property alias value: multiLine.value
 
     signal editingFinished()
+    signal textChanged()
 
     StyledLabel {
         id: labelField
         text: qsTr("Argument")
     }
 
-    ScrollView {
-        id: scrollView
+    HandlerBaseMultilineText {
+        id: multiLine
+
         Layout.preferredWidth: _valueWidth
         Layout.preferredHeight: _controlBaseHeight * 3
-        clip: true
 
-        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-        ScrollBar.vertical.policy: ScrollBar.AsNeeded
+        onTextChanged: root.textChanged()
+        onEditingFinished: root.editingFinished()
 
-        TextArea {
-            id: textArea
-            property bool ignoreHotkeys: true
-
-            horizontalAlignment: TextInput.AlignLeft
-            verticalAlignment: TextInput.AlignTop
-            font.pixelSize: _fontSize
-            color: _textColor
-            selectionColor: _selectionColor
-            selectedTextColor: _textColor
-
-            topPadding: 6
-            bottomPadding: 6
-            rightPadding: 6
-
-            wrapMode: TextEdit.WrapAnywhere
-            background: Rectangle {
-                height: textArea.height
-                color: textArea.enabled ? _studioColor2 : "transparent"
-                border.width: textArea.activeFocus ? 1 : 0
-                border.color: textArea.activeFocus ? _selectionColor : _disabledColor
-            }
-
-            MouseArea {
-                id: mouseArea
-                property int clickedPos
-
-                anchors.fill: parent
-                preventStealing: true
-                onPressed: {
-                    textArea.forceActiveFocus()
-                    clickedPos = textArea.positionAt(mouse.x, mouse.y)
-                    textArea.cursorPosition = clickedPos
-                }
-                onDoubleClicked: textArea.selectAll()
-                onPositionChanged: {
-                    textArea.cursorPosition = textArea.positionAt(mouse.x,
-                                                                  mouse.y)
-                    textArea.select(clickedPos, textArea.cursorPosition)
-                }
-            }
-            onEditingFinished: root.editingFinished()
-        }
     }
+
 }
