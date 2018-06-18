@@ -167,6 +167,7 @@ void ActionView::setItem(const qt3dsdm::Qt3DSDMInstanceHandle &handle)
     }
     emitActionChanged();
     Q_EMIT itemChanged();
+    Q_EMIT itemTextChanged();
 }
 
 QString ActionView::itemIcon() const
@@ -750,10 +751,12 @@ void ActionView::OnHandlerArgumentModified(qt3dsdm::Qt3DSDMHandlerArgHandle inHa
 void ActionView::OnInstancePropertyValueChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                                 qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
-    Q_UNUSED(inProperty)
-    Q_UNUSED(inInstance)
-    if (!m_itemHandle.Valid())
+    if (!m_itemHandle.Valid() || m_itemHandle != inInstance)
         return;
+
+    auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
+    if (inProperty == bridge->GetNameProperty())
+        Q_EMIT itemTextChanged();
 
     emitActionChanged();
 }

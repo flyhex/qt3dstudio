@@ -84,7 +84,7 @@ class ActionView : public QQuickWidget,
     Q_PROPERTY(QAbstractItemModel *actionsModel READ actionsModel NOTIFY itemChanged FINAL)
     Q_PROPERTY(QAbstractItemModel *propertyModel READ propertyModel NOTIFY propertyModelChanged FINAL)
     Q_PROPERTY(QString itemIcon READ itemIcon NOTIFY itemChanged FINAL)
-    Q_PROPERTY(QString itemText READ itemText NOTIFY itemChanged FINAL)
+    Q_PROPERTY(QString itemText READ itemText NOTIFY itemTextChanged FINAL)
     Q_PROPERTY(QColor itemColor READ itemColor NOTIFY itemChanged FINAL)
     Q_PROPERTY(bool hasItem MEMBER m_hasItem NOTIFY hasItemChanged FINAL)
     Q_PROPERTY(QString triggerObjectName READ triggerObjectName NOTIFY actionChanged FINAL)
@@ -154,6 +154,7 @@ protected:
 
 Q_SIGNALS:
     void itemChanged();
+    void itemTextChanged();
     void actionChanged();
     void propertyModelChanged();
     void propertyChanged();
