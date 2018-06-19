@@ -359,7 +359,7 @@ Rectangle {
                         defaultSlideIndex: parent && parent.argument.value ? _parentView.slideNameToIndex(parent.argument.value)
                                                                            : 0
 
-                        onIndexChanged: {
+                        onActivated: {
                             if (parent && parent.argument.handle && currentSlide)
                                 _parentView.setArgumentValue(parent.argument.handle, currentSlide)
                         }

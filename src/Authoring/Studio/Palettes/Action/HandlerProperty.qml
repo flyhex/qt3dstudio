@@ -77,12 +77,15 @@ ColumnLayout {
 
         HandlerPropertyCombo {
             readonly property var actionProperty: parent ? _parentView.property : null
+            property var propertyValue: propertyModel && propertyModel.value !== undefined
+                                        ? propertyModel.value : ""
 
             label: parent ? parent.label : ""
             comboModel: ["8", "9", "10", "11", "12", "14", "16", "18", "20", "22", "24", "26",
                 "28", "36", "48", "72", "96", "120"];
 
             onValueChanged: _parentView.setArgumentValue(propertyModel.valueHandle, value)
+            onPropertyValueChanged: currentIndex = find(propertyValue)
         }
     }
 
@@ -91,7 +94,6 @@ ColumnLayout {
 
         HandlerPropertyXYZ {
             readonly property var propValue: propertyModel && propertyModel.value
-                                             && propertyModel.value.x
                                              ? propertyModel.value : undefined
             label: parent ? parent.label : ""
             valueX: propValue !== undefined ? Number(propValue.x).toFixed(numberOfDecimal) : "0.000"
@@ -111,10 +113,6 @@ ColumnLayout {
             onEditingFinished: {
                 _parentView.setArgumentValue(propertyModel.valueHandle,
                                              Qt.vector3d(valueX, valueY, valueZ), true);
-            }
-            onPreviewValueChanged: {
-                _parentView.setArgumentValue(propertyModel.valueHandle,
-                                             Qt.vector3d(valueX, valueY, valueZ), false);
             }
         }
     }
@@ -142,12 +140,14 @@ ColumnLayout {
 
         HandlerPropertyCombo {
             readonly property var actionProperty: parent ? _parentView.property : null
+            property var propertyValue: propertyModel && propertyModel.value !== undefined
+                                        ? propertyModel.value : ""
 
             label: parent ? parent.label : ""
             comboModel: actionProperty ? actionProperty.possibleValues : null
 
             onValueChanged: _parentView.setArgumentValue(propertyModel.valueHandle, value)
-
+            onPropertyValueChanged: currentIndex = find(propertyValue)
         }
     }
 
@@ -171,9 +171,14 @@ ColumnLayout {
             readonly property var propValue: propertyModel ? propertyModel.value : undefined
 
             label: parent ? parent.label : ""
-            color: propValue ? Qt.rgba(propValue.x, propValue.y, propValue.z, 1) : "black"
+            color:  "black"
             onColorSelected: {
-                _parentView.setArgumentValue(propertyModel.valueHandle, selectedColor)
+                _parentView.setArgumentValue(propertyModel.valueHandle, selectedColor);
+            }
+            onPreviewColorSelected: color = selectedColor
+            onPropValueChanged: {
+                color = propValue ? Qt.rgba(propValue.x, propValue.y, propValue.z, 1)
+                                  : "black";
             }
         }
     }

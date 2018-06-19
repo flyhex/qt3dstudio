@@ -39,7 +39,12 @@ RowLayout {
     property alias label: labelField.text
     property alias comboModel : comboBox.model
     property alias comboTextRole: comboBox.textRole
+    property alias currentIndex: comboBox.currentIndex
     property string value
+
+    function find(text) {
+        return comboBox.find(text);
+    }
 
     StyledLabel {
         id: labelField
@@ -50,6 +55,6 @@ RowLayout {
         id: comboBox
 
         Layout.fillWidth: true
-        onCurrentIndexChanged: value = comboBox.textAt(currentIndex)
+        onActivated: value = comboBox.textAt(currentIndex)
     }
 }

@@ -39,7 +39,7 @@ RowLayout {
     property string currentSlide
     property int defaultSlideIndex: 0
 
-    signal indexChanged()
+    signal activated()
 
     onDefaultSlideIndexChanged: comboSlide.currentIndex = defaultSlideIndex
 
@@ -53,9 +53,9 @@ RowLayout {
         Layout.preferredWidth: _valueWidth
         model: slideModel
 
-        onCurrentIndexChanged: {
+        onActivated: {
             currentSlide = comboSlide.textAt(currentIndex);
-            indexChanged();
+            root.activated();
         }
     }
 }
