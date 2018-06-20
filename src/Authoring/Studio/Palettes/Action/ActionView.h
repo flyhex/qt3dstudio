@@ -94,6 +94,7 @@ class ActionView : public QQuickWidget,
     Q_PROPERTY(QVariantList handlerArguments READ handlerArguments NOTIFY actionChanged FINAL)
     Q_PROPERTY(PropertyInfo property READ property NOTIFY propertyChanged FINAL)
     Q_PROPERTY(QString firedEvent MEMBER m_firedEvent NOTIFY firedEventChanged FINAL)
+    Q_PROPERTY(bool propertyValueInvalid READ isPropertyValueInvalid NOTIFY propertyValueInvalidChanged FINAL)
 
 public:
     ActionView(const QSize &preferredSize, QWidget *parent = nullptr);
@@ -113,6 +114,7 @@ public:
     QString handlerName() const;
     QVariantList handlerArguments() const;
     PropertyInfo property() const;
+    bool isPropertyValueInvalid() const;
 
     Q_INVOKABLE void setCurrentActionIndex(int index);
     Q_INVOKABLE void setCurrentPropertyIndex(int handle, int index);
@@ -161,6 +163,7 @@ Q_SIGNALS:
     void firedEventChanged();
     void hasItemChanged();
     void actionFocused(bool);
+    void propertyValueInvalidChanged();
 
 private Q_SLOTS:
     void copyAction();
@@ -179,6 +182,8 @@ private:
     void resetFiredEvent();
     void updateFiredEventFromHandle(int handle);
     void updateActionStates();
+    void setPropertyValueInvalid(bool invalid);
+    void clearPropertyValueInvalid();
 
     static CDoc *GetDoc();
     static CClientDataModelBridge *GetBridge();
@@ -215,6 +220,7 @@ private:
     QAction *m_actionCopy;
     QAction *m_actionCut;
     QAction *m_actionPaste;
+    bool m_propertyValueInvalid = true;
 };
 
 #endif // ACTIONVIEW_H

@@ -53,7 +53,7 @@ ColumnLayout {
         StyledComboBox {
             id: propertyCombo
             textRole: "name"
-            onCurrentIndexChanged: root.propertySelected(currentIndex)
+            onActivated: root.propertySelected(currentIndex)
             onModelChanged: currentIndex = root.defaultPropertyIndex
         }
     }
@@ -65,7 +65,7 @@ ColumnLayout {
             readonly property var actionProperty: parent ? _parentView.property : null
 
             label: parent ? parent.label : ""
-            value: propertyModel && actionProperty
+            value: propertyModel && !_parentView.propertyValueInvalid && actionProperty
                    && actionProperty.type === DataModelDataType.String
                    && propertyModel.value !== undefined ? propertyModel.value : ""
             onEditingFinished: _parentView.setArgumentValue(propertyModel.valueHandle, value)
@@ -77,7 +77,8 @@ ColumnLayout {
 
         HandlerPropertyCombo {
             readonly property var actionProperty: parent ? _parentView.property : null
-            property var propertyValue: propertyModel && propertyModel.value !== undefined
+            property var propertyValue: propertyModel && !_parentView.propertyValueInvalid
+                                        && propertyModel.value !== undefined
                                         ? propertyModel.value : ""
 
             label: parent ? parent.label : ""
@@ -93,7 +94,8 @@ ColumnLayout {
         id: xyzPropertyComponent
 
         HandlerPropertyXYZ {
-            readonly property var propValue: propertyModel && propertyModel.value
+            readonly property var propValue: propertyModel && !_parentView.propertyValueInvalid
+                                             && propertyModel.value !== undefined
                                              ? propertyModel.value : undefined
             label: parent ? parent.label : ""
             valueX: propValue !== undefined ? Number(propValue.x).toFixed(numberOfDecimal) : "0.000"
@@ -126,8 +128,8 @@ ColumnLayout {
             sliderMin: actionProperty ? actionProperty.min : 0
             sliderMax: actionProperty ? actionProperty.max : 100
             intSlider: actionProperty ? actionProperty.type === DataModelDataType.Long : false
-            value: propertyModel ? propertyModel.value : 0
-
+            value: propertyModel && !_parentView.propertyValueInvalid
+                   && propertyModel.value !== undefined ? propertyModel.value : sliderMin
             label: parent ? parent.label : ""
 
             // We don't need to care about preview for action sliders
@@ -140,7 +142,8 @@ ColumnLayout {
 
         HandlerPropertyCombo {
             readonly property var actionProperty: parent ? _parentView.property : null
-            property var propertyValue: propertyModel && propertyModel.value !== undefined
+            property var propertyValue: propertyModel && !_parentView.propertyValueInvalid
+                                        && propertyModel.value !== undefined
                                         ? propertyModel.value : ""
 
             label: parent ? parent.label : ""
@@ -156,7 +159,8 @@ ColumnLayout {
 
         HandlerGenericCheckbox {
             label: parent ? parent.label : ""
-            checked: propertyModel ? propertyModel.value : false
+            checked: propertyModel && !_parentView.propertyValueInvalid
+                     && propertyModel.value !== undefined ? propertyModel.value : false
 
             onClicked: {
                 _parentView.setArgumentValue(propertyModel.valueHandle, !checked)
@@ -168,7 +172,8 @@ ColumnLayout {
         id: colorBox
 
         HandlerGenericColor {
-            readonly property var propValue: propertyModel ? propertyModel.value : undefined
+            readonly property var propValue: propertyModel && !_parentView.propertyValueInvalid
+                                             ? propertyModel.value : undefined
 
             label: parent ? parent.label : ""
             color:  "black"
@@ -188,7 +193,8 @@ ColumnLayout {
 
         HandlerGenericText {
             label: parent ? parent.label : ""
-            value: propertyModel ? propertyModel.value : ""
+            value: propertyModel && !_parentView.propertyValueInvalid
+                   && propertyModel.value !== undefined ? propertyModel.value : ""
             onEditingFinished: _parentView.setArgumentValue(propertyModel.valueHandle, value)
         }
     }
@@ -198,7 +204,8 @@ ColumnLayout {
 
         HandlerGenericText {
             label: parent ? parent.label : ""
-            value: propertyModel ? propertyModel.value : ""
+            value: propertyModel && !_parentView.propertyValueInvalid
+                   && propertyModel.value !== undefined ? propertyModel.value : ""
             validator: DoubleValidator {
                 decimals: 3
                 notation: DoubleValidator.StandardNotation

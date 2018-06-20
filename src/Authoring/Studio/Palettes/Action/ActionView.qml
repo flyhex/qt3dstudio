@@ -118,6 +118,12 @@ Rectangle {
                 height: count == 0 ? _controlBaseHeight : count * _controlBaseHeight
                 clip: true
 
+                Connections {
+                    target: _parentView
+                    // Clear the action selection on item selection change
+                    onItemChanged: actionsList.currentIndex = -1
+                }
+
                 MouseArea {
                     anchors.fill: parent
                     enabled: parent.count == 0

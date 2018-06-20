@@ -44,8 +44,8 @@ GridLayout {
     property alias sliderMin: propertySlider.sliderMin
     property alias sliderMax: propertySlider.sliderMax
     property alias label: labelItem.text
-    property bool intSlider: propertySlider.intSlider
-    property int decimalSlider: propertySlider.decimalSlider
+    property alias intSlider: propertySlider.intSlider
+    property alias decimalSlider: propertySlider.decimalSlider
     property alias tabItem1: propertySlider.tabItem1
 
     signal previewValue

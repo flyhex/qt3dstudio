@@ -76,17 +76,20 @@ ActionView::ActionView(const QSize &preferredSize, QWidget *parent)
 
         const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
         if (actionInfo.m_Handler == L"Set Property") {
+            setPropertyValueInvalid(true);
             m_currentPropertyNameHandle = actionInfo.m_HandlerArgs.at(0);
             m_currentPropertyValueHandle = actionInfo.m_HandlerArgs.at(1);
             m_propertyModel->setAction(m_actionsModel->actionAt(m_currentActionIndex));
             m_propertyModel->setNameHandle(m_currentPropertyNameHandle);
             m_propertyModel->setValueHandle(m_currentPropertyValueHandle);
-
+            m_currentPropertyIndex = m_propertyModel->defaultPropertyIndex();
+            Q_EMIT propertyChanged();
             Q_EMIT propertyModelChanged();
+            setPropertyValueInvalid(false);
         }
     });
 
-    m_actionChangedCompressionTimer.setInterval(100);
+    m_actionChangedCompressionTimer.setInterval(20);
     m_actionChangedCompressionTimer.setSingleShot(true);
     connect(&m_actionChangedCompressionTimer, &QTimer::timeout, this, [this] {
         updateHandlerArguments();
@@ -287,6 +290,11 @@ PropertyInfo ActionView::property() const
     return m_propertyModel->property(m_currentPropertyIndex);
 }
 
+bool ActionView::isPropertyValueInvalid() const
+{
+    return m_propertyValueInvalid;
+}
+
 void ActionView::setCurrentActionIndex(int index)
 {
     if (index == m_currentActionIndex)
@@ -300,6 +308,7 @@ void ActionView::setCurrentActionIndex(int index)
 
 void ActionView::setCurrentPropertyIndex(int handle, int index)
 {
+    setPropertyValueInvalid(true);
     // Make sure propertymodel name & value handles are always up-to-date,
     // even when index is same as before
     m_currentPropertyValueHandle = 0;
@@ -335,6 +344,9 @@ void ActionView::setCurrentPropertyIndex(int handle, int index)
     }
 
     Q_EMIT propertyChanged();
+    // Clear the value invalid flag asynchronously as the value doesn't actually change until
+    // backend tells us it does
+    QTimer::singleShot(0, this, &ActionView::clearPropertyValueInvalid);
 }
 
 void ActionView::addAction()
@@ -1041,4 +1053,21 @@ void ActionView::updateActionStates()
     m_actionDel->setEnabled(hasValidAction);
     // Allow paste action even if item is not valid (list of actions is empty)
     m_actionPaste->setEnabled(CStudioClipboard::CanPasteAction());
+}
+
+// m_propertyValueInvalid flag indicates that property value is changing and
+// may not be valid if queried at the moment. It is used to prevent QML errors
+// about invalid value types when changing property handlers.
+void ActionView::setPropertyValueInvalid(bool invalid)
+{
+    if (invalid != m_propertyValueInvalid) {
+        m_propertyValueInvalid = invalid;
+        Q_EMIT propertyValueInvalidChanged();
+    }
+}
+
+// This is used to set m_propertyValueInvalid to false asynchronously
+void ActionView::clearPropertyValueInvalid()
+{
+    setPropertyValueInvalid(false);
 }
