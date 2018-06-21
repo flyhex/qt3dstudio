@@ -785,15 +785,14 @@ QList<Keyframe *> RowTimeline::keyframes() const
 
 QString RowTimeline::formatTime(double seconds) const
 {
-    long hrs = seconds / 3600;
-    long mins = (seconds - hrs * 3600) / 60;
-    long secs = seconds  - hrs * 3600 - mins * 60;
+    static const QString timeTemplate = tr("%1:%2.%3");
+    static const QChar fillChar = tr("0").at(0);
+
+    long mins = seconds / 60;
+    long secs = seconds - mins * 60;
     long millis = qRound((seconds - (int)seconds) * 1000);
 
-    if (hrs > 0)
-        return QString::asprintf("%02d:%02d:%02d.%03d", hrs, mins, secs, millis);
-
-    return QString::asprintf("%02d:%02d.%03d", mins, secs, millis);
+    return timeTemplate.arg(mins).arg(secs, 2, 10, fillChar).arg(millis, 3, 10, fillChar);
 }
 
 void RowTimeline::showToolTip(const QPointF &pos)
@@ -802,6 +801,8 @@ void RowTimeline::showToolTip(const QPointF &pos)
 
     tooltip->setText(formatTime(m_startTime) + " - " + formatTime(m_endTime)
                      + " (" + formatTime(m_endTime - m_startTime) + ")");
+
+    tooltip->adjustSize();
 
     QPoint newPos = pos.toPoint() + QPoint(-tooltip->width() / 2,
                      -tooltip->height() - TimelineConstants::TIMEBAR_TOOLTIP_OFFSET_V);

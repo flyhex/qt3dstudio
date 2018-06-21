@@ -194,17 +194,27 @@ void Ruler::setViewportX(int viewportX)
 // Returns timestamp in mm:ss.ttt or ss.ttt format
 const QString Ruler::timestampString(int timeMs)
 {
+    static const QString zeroString = tr("0");
+    static const QChar fillChar = tr("0").at(0);
+    static const QString noMinutesTemplate = tr("%1.%2");
+    static const QString minutesTemplate = tr("%1:%2.%3");
+
     int ms = timeMs % 1000;
     int s = timeMs % 60000 / 1000;
     int m = timeMs % 3600000 / 60000;
-    QString msString = QString::number(ms).rightJustified(3, '0');
-    QString sString = QString::number(s).rightJustified(2, '0');
-    if (timeMs == 0)
-        return tr("0");
-    else if (m == 0)
-        return tr("%1.%2").arg(sString).arg(msString);
-    else
-        return tr("%1:%2.%3").arg(m).arg(sString).arg(msString);
+    const QString msString = QString::number(ms).rightJustified(3, fillChar);
+    const QString sString = QString::number(s);
+
+    if (timeMs == 0) {
+        return zeroString;
+    } else if (m == 0) {
+        if (s < 10)
+            return noMinutesTemplate.arg(sString).arg(msString);
+        else
+            return noMinutesTemplate.arg(sString.rightJustified(2, fillChar)).arg(msString);
+    } else {
+        return minutesTemplate.arg(m).arg(sString.rightJustified(2, fillChar)).arg(msString);
+    }
 }
 
 int Ruler::type() const
