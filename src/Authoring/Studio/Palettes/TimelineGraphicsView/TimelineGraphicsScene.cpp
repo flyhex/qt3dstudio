@@ -672,7 +672,8 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             updateSnapSteps();
             if (m_playHead->time() > ruler()->duration())
                 g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(ruler()->duration() * 1000);
-        } else if (m_releaseSelectRow || !itemAt(event->scenePos(), QTransform())) {
+        } else if (!m_rulerPressed && (m_releaseSelectRow || !itemAt(event->scenePos(),
+                                                                     QTransform()))) {
             m_rowManager->selectRow(nullptr);
             if (m_releaseSelectRow)
                 m_rowManager->selectRow(m_releaseSelectRow);
