@@ -202,16 +202,13 @@ ColumnLayout {
     Component {
         id: floatPropertyComponent
 
-        HandlerGenericText {
+        HandlerGenericFloat {
             label: parent ? parent.label : ""
             value: propertyModel && !_parentView.propertyValueInvalid
-                   && propertyModel.value !== undefined ? propertyModel.value : ""
-            validator: DoubleValidator {
-                decimals: 3
-                notation: DoubleValidator.StandardNotation
-            }
+                   && propertyModel.value !== undefined
+                   ? Number(propertyModel.value).toFixed(numberOfDecimal) : 0
 
-            onEditingFinished: _parentView.setArgumentValue(propertyModel.valueHandle, value)
+            onEditingFinished: _parentView.setArgumentValue(propertyModel.valueHandle, desiredValue)
         }
     }
 

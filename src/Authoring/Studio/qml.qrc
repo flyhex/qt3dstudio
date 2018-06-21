@@ -40,5 +40,6 @@
         <file>Palettes/controls/StyledMenuSeparator.qml</file>
         <file>Palettes/controls/StyledToggleButton.qml</file>
         <file>Palettes/Action/HandlerBaseMultilineText.qml</file>
+        <file>Palettes/Action/HandlerGenericFloat.qml</file>
     </qresource>
 </RCC>
