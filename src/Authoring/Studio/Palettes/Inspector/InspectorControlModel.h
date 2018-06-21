@@ -168,6 +168,8 @@ private:
 
     QPair<long, int> m_modifiedProperty;
 
+    qt3dsdm::SValue m_previouslyCommittedValue;
+
     void updatePropertyValue(InspectorControlBase *element) const;
     void rebuildTree();
     void refreshTree();

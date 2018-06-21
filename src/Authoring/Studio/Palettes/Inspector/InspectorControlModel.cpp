@@ -890,17 +890,25 @@ void InspectorControlModel::setRenderableValue(long instance, int handle, const 
                                                    Q3DStudio::CString::fromQString(v));
 }
 
-void InspectorControlModel::setPropertyValue(long instance, int handle, const QVariant &value, bool commit)
+void InspectorControlModel::setPropertyValue(long instance, int handle, const QVariant &value,
+                                             bool commit)
 {
     qt3dsdm::SValue oldValue = currentPropertyValue(instance, handle);
     qt3dsdm::SValue v = value;
 
+    const bool hasPreview = (m_modifiedProperty.first == instance
+            && m_modifiedProperty.second == handle);
+
     // If this set is a commit for property that was previously changed without
     // committing, we must let the set go through even if the value hasn't changed
     // to finish the transaction.
-    if (v == oldValue && !(commit && (m_modifiedProperty.first == instance
-                                      && m_modifiedProperty.second == handle))) {
+    if (v == oldValue && !(commit && hasPreview))
         return;
+
+    if (!commit && !hasPreview) {
+        m_previouslyCommittedValue = oldValue;
+        m_modifiedProperty.first = instance;
+        m_modifiedProperty.second = handle;
     }
 
     // If the user enters 0.0 to any (x, y, z) values of camera scale,
@@ -919,8 +927,7 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
         const QVector3D theFloat3 = qt3dsdm::get<QVector3D>(v);
         if (theFloat3.x() == 0.0f || theFloat3.y() == 0.0f || theFloat3.z() == 0.0f )
             v = oldValue;
-    }
-    if ((theType == EStudioObjectType::OBJTYPE_CUSTOMMATERIAL
+    } else if ((theType == EStudioObjectType::OBJTYPE_CUSTOMMATERIAL
          || theType == EStudioObjectType::OBJTYPE_EFFECT) &&
             studio->GetPropertySystem()->GetDataType(handle)
                 == qt3dsdm::DataModelDataType::String
@@ -932,11 +939,6 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
             QString s = QString("./%1").arg(url.path());
             v = QVariant::fromValue(s);
         }
-    }
-
-    if (!commit && m_modifiedProperty.first == 0) {
-        m_modifiedProperty.first = instance;
-        m_modifiedProperty.second = handle;
     }
 
     // some properties may initialize OpenGL resources (e.g. loading meshes will
@@ -954,7 +956,12 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
     if (commit) {
         m_modifiedProperty.first = 0;
         m_modifiedProperty.second = 0;
-        m_UpdatableEditor.CommitEditor();
+        if (m_previouslyCommittedValue == v)
+            m_UpdatableEditor.RollbackEditor();
+        else
+            m_UpdatableEditor.CommitEditor();
+
+        m_previouslyCommittedValue = {};
         refreshTree();
     }
 }
