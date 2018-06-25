@@ -817,8 +817,10 @@ void TimelineWidget::onAsyncUpdate()
                             if (filterProperty) {
                                 row->updateFromBinding();
                                 m_graphicsScene->rowManager()->updateFiltering(row);
-                                // Filtering changes to children affect arrow visibility in parents
-                                updateArrowParents.insert(row->parentRow());
+                                // Filtering changes to children affect arrow visibility in parents.
+                                if (row->parentRow())
+                                    updateArrowParents.insert(row->parentRow());
+
                                 update();
                             }
                             if (nameProperty)
