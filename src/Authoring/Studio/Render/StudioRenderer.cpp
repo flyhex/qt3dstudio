@@ -208,6 +208,9 @@ struct SRendererImpl : public IStudioRenderer,
 
     void ReleaseOffscreenRenderersForSubpresentations()
     {
+        if (!m_Context.mPtr)
+            return;
+
         IOffscreenRenderManager &offscreenMgr(m_Context->GetOffscreenRenderManager());
 
         QVector<SubPresentationRecord> toUnregister;
