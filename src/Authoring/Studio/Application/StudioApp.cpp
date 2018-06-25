@@ -1648,7 +1648,7 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
     m_authorZoom = false;
 
     m_core->GetDispatch()->FireAuthorZoomChanged();
-
+    verifyDatainputBindings();
     checkDeletedDatainputs();
 
     return theLoadResult;
@@ -2003,4 +2003,23 @@ void CStudioApp::checkDeletedDatainputs()
 
     if (!map->empty())
         m_core->GetDispatch()->FireOnUndefinedDatainputsFail(map);
+}
+
+void CStudioApp::verifyDatainputBindings()
+{
+    m_core->GetDoc()->getSceneEditor()->BeginAggregateOperation();
+    bool res = m_core->GetDoc()->VerifyControlledProperties(
+                m_core->GetDoc()->GetActiveRootInstance());
+    m_core->GetDoc()->getSceneEditor()->EndAggregateOperation();
+
+    if (!res) {
+        // we remove invalid control bindings directly without transaction, so
+        // we need to explicitly fire notification in order to update UI
+        m_core->GetDispatch()->FireEndDataModelNotifications();
+        m_core->GetDoc()->SetModifiedFlag(true);
+        m_dialogs->DisplayMessageBox(tr("Invalid datainput usage in UIP file"),
+                                     tr("Some objects had invalid datainput control bindings."
+                                        " Invalid entries have been removed."),
+                                     Qt3DSMessageBox::ICON_WARNING, false);
+    }
 }

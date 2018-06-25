@@ -82,6 +82,7 @@
 #include <QtWidgets/qaction.h>
 #include <QtWidgets/qwidget.h>
 #include <QtCore/qtimer.h>
+#include <QtGui/qvalidator.h>
 
 using std::ref;
 using std::shared_ptr;
@@ -269,7 +270,6 @@ bool ModifyControlStrForProperty(Q3DStudio::CString &controlledPropStr,
         cpStr.TrimLeft();
         cpStr.TrimRight();
     } else {
-        Q3DStudio::CString controlledElemStr;
         // Insert delimiter if we already have an existing string.
         if (cpStr.size())
             cpStr.append(" ");
@@ -2908,6 +2908,82 @@ void CDoc::UpdateDatainputMap(
     GetAssetChildren(this, inInstance, iter);
     for (; !iter.IsDone(); ++iter)
         UpdateDatainputMap(iter.GetCurrent(), outMap);
+}
+
+bool CDoc::VerifyControlledProperties(const qt3dsdm::Qt3DSDMInstanceHandle inInstance)
+{
+    auto propSystem = GetPropertySystem();
+    bool ret = true;
+
+    qt3dsdm::Qt3DSDMPropertyHandle ctrldPropHandle
+        = propSystem->GetAggregateInstancePropertyByName(inInstance, L"controlledproperty");
+    // Split controlledproperty string to parts and check each for validity.
+    if (ctrldPropHandle) {
+        qt3dsdm::SValue ctrldPropVal;
+        propSystem->GetInstancePropertyValue(inInstance, ctrldPropHandle, ctrldPropVal);
+        Q3DStudio::CString currCtrldPropsStr
+                = qt3dsdm::get<qt3dsdm::TDataStrPtr>(ctrldPropVal)->GetData();
+        QStringList splitStr = currCtrldPropsStr.toQString().split(' ');
+
+        Q3DStudio::CString validatedStr;
+
+        QRegExpValidator rxp(QRegExp("[A-Za-z0-9_$]+"));
+
+        for (int i = 0; i < splitStr.size() - 1; i += 2) {
+            // Not much to do to validate datainput name except to check that it has no illegal
+            // characters. We will check elsewhere that datainput names correspond to ones
+            // that are defined in the global UIA file.
+
+            int pos;
+            auto diValidationRes = rxp.validate(splitStr[i], pos);
+
+            bool targetValid = false;
+            // check that target property exists or the target is @slide or @timeline
+            qt3dsdm::Qt3DSDMPropertyHandle targetPropHandle
+                    = propSystem->GetAggregateInstancePropertyByName(
+                        inInstance, splitStr[i+1].toStdWString().c_str());
+            if (targetPropHandle
+                || splitStr[i+1] == QLatin1String("@timeline")
+                || splitStr[i+1] == QLatin1String("@slide")) {
+                targetValid = true;
+            }
+
+            // if either controller or property is invalid or an empty string,
+            // do not insert pair into validated string
+            if (diValidationRes != QValidator::Invalid && targetValid
+                && splitStr[i].size() && splitStr[i] != QLatin1String("$")) {
+                // only add spacer if not at the first entry
+                if (validatedStr.size())
+                    validatedStr.append(" ");
+                validatedStr.append(Q3DStudio::CString::fromQString(splitStr[i]) + " "
+                                    + Q3DStudio::CString::fromQString(splitStr[i+1]));
+            } else {
+                ret = false;
+            }
+        }
+
+        // If we had to remove invalid entries for this object, write out the
+        // changed controlproperties string
+        if (!ret) {
+            Q3DStudio::SValue controlledProperty
+                    = std::make_shared<qt3dsdm::CDataStr>(validatedStr);
+            // Set changed controlledproperty properties directly without creating
+            // transaction and undo points
+            SetInstancePropertyValue(inInstance,  L"controlledproperty", controlledProperty);
+        }
+    }
+
+    // Recurse through the tree.
+    // If one or more objects fails to validate, return false for the entire recursive
+    // call stack.
+    Q3DStudio::CGraphIterator iter;
+    GetAssetChildren(this, inInstance, iter);
+    for (; !iter.IsDone(); ++iter) {
+        auto res = VerifyControlledProperties(iter.GetCurrent());
+        ret = res && ret;
+    }
+
+    return ret;
 }
 
 QDebug operator<<(QDebug dbg, const SubPresentationRecord &r)

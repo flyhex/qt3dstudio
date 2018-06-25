@@ -205,6 +205,13 @@ public:
             QMultiMap<QString,
                       QPair<qt3dsdm::Qt3DSDMInstanceHandle,
                             qt3dsdm::Qt3DSDMPropertyHandle>> *outMap = nullptr);
+    // Sanity checks controlledproperty strings to see if controller names
+    // and target properties are valid. Removes invalid controller - property
+    // pairs from controlledproperty string. Transaction/undo points are not created
+    // for invalid pair deletions, so caller is responsible for dispatching datamodel
+    // notifications.
+    // Recurses through the entire tree and returns true only if all strings were valid.
+    bool VerifyControlledProperties(const qt3dsdm::Qt3DSDMInstanceHandle inInstance);
 
     bool IsModified();
     bool IsValid() const;

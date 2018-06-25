@@ -218,6 +218,7 @@ public:
     void showInvalidFilenameWarning();
     void checkDeletedDatainputs();
     void saveDataInputsToProjectFile();
+    void verifyDatainputBindings();
 
     // CCoreAsynchronousEventListener
     void OnAsynchronousCommand(CCmd *inCmd) override;
