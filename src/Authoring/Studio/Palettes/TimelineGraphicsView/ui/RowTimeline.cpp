@@ -121,11 +121,11 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
             if (m_controllerDataInput.size()) {
                 painter->fillRect(QRect(x, 0, w, currentHeight),
                                   QColor(TimelineConstants::ROW_COLOR_DATAINPUT_DURATION));
-            } else {
+            } else if (m_rowTree->indexInLayout() != 1) {
                 painter->fillRect(QRect(x, 0, w, currentHeight), m_barColor);
             }
 
-            if ( m_state == Selected) {
+            if (m_state == Selected) {
                 // draw selection overlay on bar
                 painter->fillRect(QRect(x, marginY, w, currentHeight - marginY * 2),
                                   QColor(TimelineConstants::ROW_COLOR_DURATION_SELECTED));
@@ -177,9 +177,11 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                 painter->drawLine(m_maxEndX, 0, m_maxEndX, currentHeight);
             }
 
-            painter->setPen(QPen(QColor(TimelineConstants::ROW_COLOR_DURATION_EDGE), 2));
-            painter->drawLine(m_startX, 0, m_startX, currentHeight);
-            painter->drawLine(m_endX, 0, m_endX, currentHeight);
+            if (m_rowTree->indexInLayout() != 1) {
+                painter->setPen(QPen(QColor(TimelineConstants::ROW_COLOR_DURATION_EDGE), 2));
+                painter->drawLine(m_startX, 0, m_startX, currentHeight);
+                painter->drawLine(m_endX, 0, m_endX, currentHeight);
+            }
         }
 
         painter->restore();
@@ -679,7 +681,11 @@ void RowTimeline::updateChildrenEndRecursive(RowTree *rowTree, double oldEndX)
 {
     // Update all bound childred
     // Rows are considered to be bound when their times match
-    if (!rowTree->empty()) {
+    // Do not inherit endtime when it is set for scene/component, as for this case
+    // start-end equals global animation min - max range and is set to illustrate the
+    // range in timeline view when datainput control is active
+    if (!rowTree->empty() && rowTree->rowType() != OBJTYPE_SCENE
+        && rowTree->rowType() != OBJTYPE_COMPONENT) {
         const auto childRows = rowTree->childRows();
         for (auto child : childRows) {
             RowTimeline *rowTimeline = child->rowTimeline();

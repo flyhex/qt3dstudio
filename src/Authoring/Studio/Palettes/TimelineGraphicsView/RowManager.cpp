@@ -269,13 +269,13 @@ void RowManager::updateRulerDuration(bool updateMaxDuration)
             RowTree *row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
             double dur_i = row_i->rowTimeline()->getEndTime();
 
-            if ((isComponent || row_i->rowType() == OBJTYPE_LAYER) && dur_i > duration)
+            if (((isComponent && i != 1) || row_i->rowType() == OBJTYPE_LAYER) && dur_i > duration)
                 duration = dur_i;
 
             if (dur_i > maxDuration)
                 maxDuration = dur_i;
         }
-        rootRow->rowTimeline()->setEndTime(maxDuration);
+        rootRow->rowTimeline()->setEndTime(duration);
     }
 
     m_scene->ruler()->setDuration(duration);

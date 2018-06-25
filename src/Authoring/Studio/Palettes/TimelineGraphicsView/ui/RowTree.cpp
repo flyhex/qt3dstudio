@@ -1030,6 +1030,7 @@ bool RowTree::locked() const
 bool RowTree::hasActionButtons() const
 {
     return (!m_isProperty
+            && m_indexInLayout != 1
             && m_rowType != OBJTYPE_SCENE
             && m_rowType != OBJTYPE_MATERIAL
             && m_rowType != OBJTYPE_IMAGE);
