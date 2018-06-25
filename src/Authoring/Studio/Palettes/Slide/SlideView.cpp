@@ -50,6 +50,7 @@
 #include <QtQml/qqmlcontext.h>
 #include <QtQml/qqmlengine.h>
 #include <QtWidgets/qdesktopwidget.h>
+#include <QtWidgets/qdockwidget.h>
 
 SlideView::SlideView(QWidget *parent) : QQuickWidget(parent)
   , m_MasterSlideModel(new SlideModel(1, this))
@@ -134,6 +135,13 @@ bool SlideView::toolTipsEnabled()
 QSize SlideView::sizeHint() const
 {
     return {150, 500};
+}
+
+QSize SlideView::minimumSizeHint() const
+{
+    // prevent datainput control indicator from overlapping
+    // with slide name too much when panel is minimised
+    return {80, 0};
 }
 
 void SlideView::deselectAll()
@@ -327,6 +335,12 @@ void SlideView::onDataInputChange(int handle, int instance, const QString &dataI
 
     UpdateSlideViewTitleColor();
     Q_EMIT controlledChanged();
+}
+
+void SlideView::onDockLocationChange(Qt::DockWidgetArea area)
+{
+    m_dockArea = area;
+    Q_EMIT dockAreaChanged();
 }
 
 // Set the state of slide control based on scene or component

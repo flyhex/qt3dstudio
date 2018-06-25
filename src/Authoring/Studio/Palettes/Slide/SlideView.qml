@@ -50,6 +50,11 @@ Rectangle {
         }
     }
 
+    Connections {
+        target: _parentView
+        onDockAreaChanged: diIndicator.reAnchor();
+    }
+
     color: _backgroundColor
 
     Column {
@@ -117,6 +122,8 @@ Rectangle {
                                          - separator.height - separator2.height
                                          - parent.spacing * 2 - 14 - slideControlButton.height
                                          - slideControlButton.spacing * 2
+            // DockWidgetArea is enum; value 0x2 denotes right edge
+            property int area: _parentView.dockArea
             height: listItemHeight > 0 ? listItemHeight : 0
 
             anchors.horizontalCenter: parent.horizontalCenter
@@ -125,6 +132,42 @@ Rectangle {
 
             model: _parentView.currentModel
             spacing: 10
+
+            Rectangle {
+                id: diIndicator
+                height: slideList.listItemHeight
+                width: dataInputImage2.height
+
+                function reAnchor() {
+                    // reset anchors before setting new value
+                    anchors.right = undefined
+                    anchors.left = undefined
+                    // default position for indicator is right edge
+                    // except when slide panel is attached to window right side
+                    if (parent.area === 2)
+                        anchors.left = parent.left
+                    else
+                        anchors.right = parent.right
+                }
+
+                color: _parentView.controlled ? _dataInputColor : "transparent"
+                Row {
+                    rotation: 90
+                    anchors.centerIn: parent
+                    Image {
+                        id: dataInputImage2
+                        fillMode: Image.Pad
+                        visible: _parentView.controlled
+                        source: _resDir + "Objects-DataInput-White.png"
+
+                    }
+                    StyledLabel {
+                        text: _parentView.currController
+                        anchors.margins: 16
+                        color: "#ffffff"
+                    }
+                }
+            }
 
             MouseArea {
                 // mouse handling for the area not covered by the delegates

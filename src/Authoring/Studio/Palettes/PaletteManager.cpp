@@ -52,8 +52,9 @@
 /**
  * Constructor
  */
-CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
-    : m_MainFrame(inMainFrame)
+CPaletteManager::CPaletteManager(CMainFrame *inMainFrame, QObject *parent)
+    : QObject(parent)
+    , m_MainFrame(inMainFrame)
 {
     // Position tabs to the right
     inMainFrame->setTabPosition(Qt::AllDockWidgetAreas, QTabWidget::East);
@@ -94,6 +95,8 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame)
     m_slideDock->setWidget(slideView);
     inMainFrame->addDockWidget(Qt::LeftDockWidgetArea, m_slideDock);
     m_ControlList.insert(std::make_pair(CONTROLTYPE_SLIDE, m_slideDock));
+    QObject::connect(m_slideDock, &QDockWidget::dockLocationChanged, slideView,
+                     &SlideView::onDockLocationChange);
 
     m_basicObjectsDock = new QDockWidget(QObject::tr("Basic Objects"), inMainFrame);
     m_basicObjectsDock->setObjectName("basic_objects");

@@ -37,6 +37,7 @@
 //	Includes
 //==============================================================================
 #include <QtWidgets/qdockwidget.h>
+#include <QtCore/qobject.h>
 
 //==============================================================================
 //  Forwards
@@ -54,8 +55,9 @@ QT_FORWARD_DECLARE_CLASS(QDockWidget)
 /**
  *	@class	CPaletteManager
  */
-class CPaletteManager
+class CPaletteManager : public QObject
 {
+    Q_OBJECT
 public:
     // Do NOT change the order/values of this enum, these
     // values are stored in the registry
@@ -93,7 +95,7 @@ protected:
     TimelineWidget *m_timelineWidget;
 
 public:
-    CPaletteManager(CMainFrame *inMainFrame);
+    CPaletteManager(CMainFrame *inMainFrame, QObject *parent = nullptr);
     virtual ~CPaletteManager();
 
     // Access

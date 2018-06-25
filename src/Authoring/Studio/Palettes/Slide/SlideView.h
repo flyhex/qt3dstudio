@@ -55,6 +55,7 @@ class SlideView : public QQuickWidget,
     Q_PROPERTY(bool controlled MEMBER m_controlled NOTIFY controlledChanged)
     Q_PROPERTY(QString currController MEMBER m_currentController NOTIFY controlledChanged)
     Q_PROPERTY(QString toolTip MEMBER m_toolTip NOTIFY controlledChanged)
+    Q_PROPERTY(Qt::DockWidgetArea dockArea MEMBER m_dockArea NOTIFY dockAreaChanged)
 public:
     SlideView(QWidget *parent = nullptr);
     ~SlideView();
@@ -63,7 +64,9 @@ public:
     void setShowMasterSlide(bool show);
     QAbstractItemModel *currentModel() { return m_CurrentModel; }
     QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
     void onDataInputChange(int handle, int instance, const QString &dataInputName);
+    void onDockLocationChange(Qt::DockWidgetArea area);
 
     Q_INVOKABLE void deselectAll();
     Q_INVOKABLE void addNewSlide(int row);
@@ -91,6 +94,7 @@ Q_SIGNALS:
     void currentModelChanged();
     void showMasterSlideChanged();
     void controlledChanged();
+    void dockAreaChanged();
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
@@ -135,6 +139,7 @@ private:
     bool m_controlled = false; // Are slides in this slide set controlled by datainput?
     QString m_currentController;
     QString m_toolTip;
+    Qt::DockWidgetArea m_dockArea;
 };
 
 #endif // SLIDEVIEW_H

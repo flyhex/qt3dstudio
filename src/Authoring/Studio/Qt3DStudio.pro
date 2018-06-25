@@ -129,6 +129,7 @@ HEADERS += \
     Controls/ClickableLabel.h \
     Controls/WidgetControl.h \
     DragAndDrop/DropProxy.h \
+    Palettes/PaletteManager.h \
     Palettes/Action/ActionContextMenu.h \
     Palettes/Action/ActionModel.h \
     Palettes/Action/ActionView.h \
