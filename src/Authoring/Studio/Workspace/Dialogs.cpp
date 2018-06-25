@@ -386,11 +386,18 @@ bool CDialogs::DisplayUndefinedDatainputDlg(
 
     QString theSmallText;
     for (auto it : keys)
-        theSmallText.append(it + "\n");
+        theSmallText.append(QStringLiteral("\n") + it);
+
+    theSmallText.append(QStringLiteral("\n"));
 
     QLabel *diList = new QLabel(theSmallText);
+
+    QLabel *noUndoText = new QLabel;
+    noUndoText->setText(QObject::tr("Clear cannot be undone.\n"));
     theText->setIndent(10);
     diList->setIndent(20);
+    noUndoText->setIndent(10);
+
 
     QIcon warn(QApplication::style()->standardIcon(QStyle::SP_MessageBoxWarning));
     QLabel *warnLab = new QLabel();
@@ -410,8 +417,9 @@ bool CDialogs::DisplayUndefinedDatainputDlg(
     QDialogButtonBox *buttonBox = new QDialogButtonBox(Qt::Horizontal);
     buttonBox->addButton(ok, QDialogButtonBox::AcceptRole);
     buttonBox->addButton(cancel, QDialogButtonBox::RejectRole);
-    layout->addWidget(buttonBox, 3, 1, 1, 3, Qt::AlignCenter);
-    layout->addWidget(diList, 2, 2);
+    layout->addWidget(buttonBox, 4, 1, 1, 3, Qt::AlignCenter);
+    layout->addWidget(diList, 2, 2, Qt::AlignVCenter);
+    layout->addWidget(noUndoText, 3, 2);
 
     msgBox.setLayout(layout);
 

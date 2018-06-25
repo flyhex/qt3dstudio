@@ -1830,9 +1830,13 @@ void CStudioApp::OnUndefinedDatainputsFail(
 {
     bool res = m_dialogs->DisplayUndefinedDatainputDlg(map);
 
-    // Delete invalid datainput bindings if user prompted so
-    if (res)
+    // Delete invalid datainput bindings if user prompted so.
+    if (res) {
         m_core->GetDoc()->RemoveDatainputBindings(map);
+        // clear commands as we do not want to create undo point
+        // for automatic datainput deletion
+        m_core->GetCmdStack()->Clear();
+    }
 }
 
 void CStudioApp::toggleEyeball()
