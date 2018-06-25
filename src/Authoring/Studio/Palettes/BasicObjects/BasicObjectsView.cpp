@@ -32,6 +32,7 @@
 #include "Literals.h"
 #include "StudioPreferences.h"
 #include "StudioUtils.h"
+#include "StudioApp.h"
 
 #include <QtCore/qcoreapplication.h>
 #include <QtCore/qtimer.h>
@@ -62,6 +63,12 @@ void BasicObjectsView::startDrag(QQuickItem *item, int row)
     drag.setPixmap(QPixmap(index.data(BasicObjectsModel::IconRole).toUrl().toLocalFile()));
     drag.exec(Qt::CopyAction);
     QTimer::singleShot(0, item, &QQuickItem::ungrabMouse);
+}
+
+void BasicObjectsView::mousePressEvent(QMouseEvent *event)
+{
+    g_StudioApp.setLastActiveView(this);
+    QQuickWidget::mousePressEvent(event);
 }
 
 void BasicObjectsView::initialize()

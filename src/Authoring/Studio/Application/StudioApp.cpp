@@ -39,6 +39,8 @@
 #include "qtsingleapplication.h"
 #include "qtlocalpeer.h"
 #include "TimelineWidget.h"
+#include "SlideView.h"
+#include "IKeyframesManager.h"
 
 #include <QtGui/qsurfaceformat.h>
 #include <QtCore/qfileinfo.h>
@@ -948,6 +950,52 @@ QString CStudioApp::GetCopyType()
     return theCopyType;
 }
 
+QString CStudioApp::getDuplicateType() const
+{
+    const bool slide = qobject_cast<SlideView *>(m_lastActiveView) != nullptr;
+    CDoc *doc = m_core->GetDoc();
+    if (slide) {
+        qt3dsdm::Qt3DSDMSlideHandle handle = doc->GetActiveSlide();
+        if (handle != doc->GetStudioSystem()->GetSlideSystem()->GetMasterSlide(handle))
+            return tr("Slide");
+    } else {
+        qt3dsdm::Qt3DSDMInstanceHandle selectedInstance = doc->GetSelectedInstance();
+        CClientDataModelBridge *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+        if (bridge->IsDuplicateable(selectedInstance))
+            return tr("Object");
+    }
+    return {};
+}
+
+QString CStudioApp::getDeleteType() const
+{
+    // Delete priority: keyframes, slides, objects
+    const bool slide = qobject_cast<SlideView *>(m_lastActiveView) != nullptr;
+    CDoc *doc = m_core->GetDoc();
+    if (doc->GetKeyframesManager()->HasSelectedKeyframes()) {
+        return tr("Keyframes");
+    } else if (slide) {
+        // Check if the slide is the last one or the master
+        qt3dsdm::Qt3DSDMSlideHandle slideHandle = doc->GetActiveSlide();
+        qt3dsdm::ISlideSystem *slideSys = doc->GetStudioSystem()->GetSlideSystem();
+        qt3dsdm::Qt3DSDMSlideHandle masterSlideHandle = slideSys->GetMasterSlide(slideHandle);
+        size_t slideCount = slideSys->GetSlideCount(masterSlideHandle);
+        if (slideHandle != masterSlideHandle && slideCount > 2)
+            return tr("Slide");
+    } else {
+        qt3dsdm::TInstanceHandleList selected = doc->GetSelectedValue().GetSelectedInstances();
+        CClientDataModelBridge *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+        int deletableCount = 0;
+        for (size_t idx = 0, end = selected.size(); idx < end; ++idx) {
+            if (bridge->CanDelete(selected[idx]))
+                deletableCount++;
+        }
+        if (deletableCount && deletableCount == selected.size())
+            return tr("Object");
+    }
+    return {};
+}
+
 //=============================================================================
 /**
  * Cuts the selected object or keys
@@ -1031,37 +1079,21 @@ void CStudioApp::DeleteSelectedKeys()
 /**
  * Deletes selected object or keyframes
  */
-void CStudioApp::DeleteSelectedObject(bool slide)
+void CStudioApp::DeleteSelectedObject()
 {
+    const bool slide = qobject_cast<SlideView *>(m_lastActiveView) != nullptr;
     m_core->GetDoc()->DeleteSelectedItems(slide);
 }
 
-//=============================================================================
 /**
  * Handles the duplicate object command
  */
-void CStudioApp::HandleDuplicateCommand(bool slide)
+void CStudioApp::HandleDuplicateCommand()
 {
+    const bool slide = qobject_cast<SlideView *>(m_lastActiveView) != nullptr;
     m_core->GetDoc()->HandleDuplicateCommand(slide);
 }
 
-//=============================================================================
-/**
- * return true if the selected object is duplicatable
- */
-bool CStudioApp::CanDuplicateObject()
-{
-    // Get the currently selected object
-    qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = m_core->GetDoc()->GetSelectedInstance();
-    if (!theSelectedInstance.Valid())
-        return false;
-
-    // Check if the object can be duplicated
-    return m_core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge()->IsDuplicateable(
-                theSelectedInstance);
-}
-
-//==============================================================================
 /**
  * Toggles the state of autoset keyframes.
  */

@@ -214,16 +214,10 @@ void SlideView::OnClosingPresentation()
     clearSlideList();
 }
 
-void SlideView::focusInEvent(QFocusEvent *event)
+void SlideView::mousePressEvent(QMouseEvent *event)
 {
-    Q_UNUSED(event)
-    Q_EMIT slideFocused(true);
-}
-
-void SlideView::focusOutEvent(QFocusEvent *event)
-{
-    Q_UNUSED(event)
-    Q_EMIT slideFocused(false);
+    g_StudioApp.setLastActiveView(this);
+    QQuickWidget::mousePressEvent(event);
 }
 
 void SlideView::OnActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inIndex,

@@ -132,6 +132,23 @@ CMainFrame::CMainFrame()
             this, &CMainFrame::OnEditApplicationPreferences);
     connect(m_ui->actionPresentation_Settings, &QAction::triggered,
             this, &CMainFrame::OnEditPresentationPreferences);
+    connect(m_ui->menu_Edit, &QMenu::aboutToShow, [this]() {
+        // Enable/disable delete and duplicate
+        QString type = g_StudioApp.getDuplicateType();
+        QString label = tr("Duplicate %1").arg(type);
+        m_ui->action_Duplicate_Object->setText(label);
+        m_ui->action_Duplicate_Object->setEnabled(!type.isEmpty());
+
+        type = g_StudioApp.getDeleteType();
+        label = tr("Delete %1").arg(type);
+        m_ui->actionDelete->setText(label);
+        m_ui->actionDelete->setEnabled(!type.isEmpty());
+    });
+    connect(m_ui->menu_Edit, &QMenu::aboutToHide, [this]() {
+        // Enable delete and duplicate so hotkeys will work
+        m_ui->action_Duplicate_Object->setEnabled(true);
+        m_ui->actionDelete->setEnabled(true);
+    });
 
     // View Menu
     connect(m_ui->actionReset_layout, &QAction::triggered, this, &CMainFrame::onViewResetLayout);
@@ -240,7 +257,6 @@ CMainFrame::CMainFrame()
         OnUpdateEditCut();
         OnUpdateToolAutosetkeys();
         OnUpdateEditPaste();
-        OnUpdateEditDuplicate();
         OnUpdateTimelineDeleteSelectedKeyframes();
         OnUpdateTimelineSetInterpolation();
         OnUpdateTimelineSetTimeBarColor();
@@ -497,7 +513,9 @@ void CMainFrame::OnEditCopy()
  */
 void CMainFrame::OnUpdateEditCopy()
 {
-    if (g_StudioApp.CanCopy() && !m_actionActive) {
+    // TODO: Actions cannot currently be copied/cut/pasted via main edit menu
+    // ActionView handles action copy/cut/paste internally
+    if (g_StudioApp.CanCopy()) {
         QString theDescription = tr("Copy %1\tCtrl+C").arg(g_StudioApp.GetCopyType());
 
         m_ui->action_Copy->setText(theDescription);
@@ -529,7 +547,7 @@ void CMainFrame::OnEditCut()
  */
 void CMainFrame::OnUpdateEditCut()
 {
-    if (g_StudioApp.CanCut() && !m_actionActive) {
+    if (g_StudioApp.CanCut()) {
         QString theDescription = tr("Cut %1\tCtrl+X").arg(g_StudioApp.GetCopyType());
 
         m_ui->action_Cut->setText(theDescription);
@@ -567,7 +585,7 @@ void CMainFrame::onEditPasteToMaster()
  */
 void CMainFrame::OnUpdateEditPaste()
 {
-    if (g_StudioApp.CanPaste() && !m_actionActive) {
+    if (g_StudioApp.CanPaste()) {
         QString theUndoDescription = tr("Paste %1\tCtrl+V").arg(g_StudioApp.GetPasteType());
 
         m_ui->action_Paste->setText(theUndoDescription);
@@ -683,28 +701,14 @@ void CMainFrame::OnUpdateTimelineSetInterpolation()
  */
 void CMainFrame::OnEditDuplicate()
 {
-    g_StudioApp.HandleDuplicateCommand(m_slideActive);
+    g_StudioApp.HandleDuplicateCommand();
 }
 
 void CMainFrame::onEditDelete()
 {
-    g_StudioApp.DeleteSelectedObject(m_slideActive);
+    g_StudioApp.DeleteSelectedObject();
 }
 
-//==============================================================================
-/**
- *	OnUpdateEditDuplicate: Handles the UPDATE COMMAND UI message for this menu item.
- *
- *	If the currently selected object is not null, and it is not in the library,
- *	then the user can duplicate the object and the menu item is enabled.  Otherwise,
- *	it is disabled.
- */
-void CMainFrame::OnUpdateEditDuplicate()
-{
-    m_ui->action_Duplicate_Object->setEnabled(m_slideActive || g_StudioApp.CanDuplicateObject());
-}
-
-//=============================================================================
 /**
  * Command handler for the File Open menu and toolbar options.
  * This will save the file, if the file has not been saved before this will
@@ -1966,24 +1970,10 @@ void CMainFrame::toggleSelectMode()
         m_sceneView->onToolItemSelection();
 }
 
-void CMainFrame::onActionActive(bool active)
-{
-    m_actionActive = active;
-    m_ui->actionDelete->setEnabled(!active);
-    m_ui->action_Copy->setEnabled(!active);
-    m_ui->action_Cut->setEnabled(!active);
-    m_ui->action_Paste->setEnabled(!active);
-}
-
 void CMainFrame::showScene()
 {
     if (!m_sceneView.data()->isVisible()) {
         setCentralWidget(m_sceneView.data());
         m_sceneView.data()->setVisible(true);
     }
-}
-
-void CMainFrame::onSlideActive(bool active)
-{
-    m_slideActive = active;
 }

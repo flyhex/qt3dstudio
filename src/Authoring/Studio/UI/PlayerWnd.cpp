@@ -106,6 +106,8 @@ void CPlayerWnd::mouseMoveEvent(QMouseEvent *event)
 
 void CPlayerWnd::mousePressEvent(QMouseEvent *event)
 {
+    g_StudioApp.setLastActiveView(this);
+
     long toolMode = g_StudioApp.GetToolMode();
     const Qt::MouseButton btn = event->button();
     bool toolChanged = false;

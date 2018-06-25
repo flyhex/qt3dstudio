@@ -145,6 +145,7 @@ private:
 
 public:
     CMainFrame* m_pMainWnd;
+    QWidget *m_lastActiveView = nullptr;
 
     CCore *GetCore();
     CViews *GetViews();
@@ -162,6 +163,8 @@ public:
     void OnCopy();
     bool CanCopy();
     QString GetCopyType();
+    QString getDuplicateType() const;
+    QString getDeleteType() const;
     void OnCut();
     bool CanCut();
     void OnPaste();
@@ -171,9 +174,8 @@ public:
     bool CanChangeTimebarColor();
     void HandleSetChangedKeys();
     void DeleteSelectedKeys();
-    void DeleteSelectedObject(bool slide = false);
-    void HandleDuplicateCommand(bool slide = false);
-    bool CanDuplicateObject();
+    void DeleteSelectedObject();
+    void HandleDuplicateCommand();
     void OnToggleAutosetKeyframes();
     void SetAutosetKeyframes(bool inFlag);
     void PlaybackPlay();
@@ -243,6 +245,9 @@ public:
 
     void SaveUIAFile(bool subpresentations = true);
     Q3DStudio::CFilePath getMostRecentDirectory() const;
+
+    void setLastActiveView(QWidget *widget) { m_lastActiveView = widget; }
+    QWidget *lastActiveView() const { return m_lastActiveView; }
 };
 
 extern CStudioApp g_StudioApp;

@@ -152,7 +152,8 @@ public:
 
 protected:
     void focusInEvent(QFocusEvent *event) override;
-    void focusOutEvent(QFocusEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    bool event(QEvent *event) override;
 
 Q_SIGNALS:
     void itemChanged();
@@ -162,7 +163,6 @@ Q_SIGNALS:
     void propertyChanged();
     void firedEventChanged();
     void hasItemChanged();
-    void actionFocused(bool);
     void propertyValueInvalidChanged();
 
 private Q_SLOTS:

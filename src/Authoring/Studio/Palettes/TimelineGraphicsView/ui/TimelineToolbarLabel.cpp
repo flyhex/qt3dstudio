@@ -28,6 +28,7 @@
 
 #include "TimelineToolbarLabel.h"
 #include "StudioPreferences.h"
+#include "StudioApp.h"
 
 TimelineToolbarLabel::TimelineToolbarLabel(QWidget *parent)
     : QLabel(parent)
@@ -52,6 +53,7 @@ void TimelineToolbarLabel::leaveEvent(QEvent *event)
 
 void TimelineToolbarLabel::mousePressEvent(QMouseEvent *event)
 {
+    g_StudioApp.setLastActiveView(parentWidget()->parentWidget());
     emit clicked(event);
 }
 

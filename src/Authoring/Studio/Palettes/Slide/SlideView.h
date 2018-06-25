@@ -91,11 +91,9 @@ Q_SIGNALS:
     void currentModelChanged();
     void showMasterSlideChanged();
     void controlledChanged();
-    void slideFocused(bool);
 
 protected:
-    void focusInEvent(QFocusEvent *event) override;
-    void focusOutEvent(QFocusEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
 
     // DataModel callbacks
     virtual void OnActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inIndex,

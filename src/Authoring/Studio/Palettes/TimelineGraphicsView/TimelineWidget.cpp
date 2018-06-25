@@ -1025,6 +1025,7 @@ void TimelineWidget::mousePressEvent(QMouseEvent *event)
 {
     if (childAt(event->pos()) == m_splitter)
         m_splitterPressed = true;
+    g_StudioApp.setLastActiveView(this);
 }
 
 void TimelineWidget::mouseMoveEvent(QMouseEvent *event)

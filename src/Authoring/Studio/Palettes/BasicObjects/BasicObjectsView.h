@@ -43,6 +43,10 @@ public:
     QSize sizeHint() const override;
 
     Q_INVOKABLE void startDrag(QQuickItem *item, int row);
+
+protected:
+    void mousePressEvent(QMouseEvent *event) override;
+
 private:
     void initialize();
 

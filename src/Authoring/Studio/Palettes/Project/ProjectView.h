@@ -90,6 +90,9 @@ public:
 Q_SIGNALS:
     void projectChanged();
 
+protected:
+    void mousePressEvent(QMouseEvent *event) override;
+
 private:
     void initialize();
     void rebuild();

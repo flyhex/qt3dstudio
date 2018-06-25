@@ -96,6 +96,7 @@ public Q_SLOTS:
 
 protected:
     QSize sizeHint() const override;
+    void mousePressEvent(QMouseEvent *event) override;
 
 private:
     void setInspectable(CInspectableBase *inInspectable);

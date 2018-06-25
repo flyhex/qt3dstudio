@@ -217,6 +217,12 @@ void ProjectView::OnImmediateRefreshInstanceMultiple(qt3dsdm::Qt3DSDMInstanceHan
     Q_UNUSED(inInstanceCount);
 }
 
+void ProjectView::mousePressEvent(QMouseEvent *event)
+{
+    g_StudioApp.setLastActiveView(this);
+    QQuickWidget::mousePressEvent(event);
+}
+
 void ProjectView::startDrag(QQuickItem *item, int row)
 {
     const auto index = m_ProjectModel->index(row);

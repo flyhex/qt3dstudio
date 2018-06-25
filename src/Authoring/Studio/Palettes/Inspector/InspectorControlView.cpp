@@ -177,6 +177,12 @@ QSize InspectorControlView::sizeHint() const
     return m_preferredSize;
 }
 
+void InspectorControlView::mousePressEvent(QMouseEvent *event)
+{
+    g_StudioApp.setLastActiveView(this);
+    QQuickWidget::mousePressEvent(event);
+}
+
 void InspectorControlView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());

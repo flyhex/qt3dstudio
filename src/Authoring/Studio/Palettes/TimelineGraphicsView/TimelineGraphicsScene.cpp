@@ -436,6 +436,8 @@ void TimelineGraphicsScene::resetMouseCursor()
 
 void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
+    g_StudioApp.setLastActiveView(m_widgetTimeline);
+
     // Ignore non-left presses if dragging
     if (event->button() != Qt::LeftButton && (m_dragging || m_startRowMoverOnNextDrag)) {
         event->accept();

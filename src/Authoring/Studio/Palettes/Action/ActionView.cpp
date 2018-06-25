@@ -112,26 +112,18 @@ ActionView::ActionView(const QSize &preferredSize, QWidget *parent)
     QQuickWidget::addAction(action);
 
     m_actionCopy = new QAction(tr("Copy Action\t%1C").arg(ctrlKey));
-    m_actionCopy->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_C));
-    m_actionCopy->setShortcutContext(Qt::WidgetShortcut);
     connect(m_actionCopy, &QAction::triggered, this, &ActionView::copyAction);
     QQuickWidget::addAction(m_actionCopy);
 
     m_actionPaste = new QAction(tr("Paste Action\t%1V").arg(ctrlKey));
-    m_actionPaste->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_V));
-    m_actionPaste->setShortcutContext(Qt::WidgetShortcut);
     connect(m_actionPaste, &QAction::triggered, this, &ActionView::pasteAction);
     QQuickWidget::addAction(m_actionPaste);
 
     m_actionCut = new QAction(tr("Cut Action\t%1X").arg(ctrlKey));
-    m_actionCut->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_X));
-    m_actionCut->setShortcutContext(Qt::WidgetShortcut);
     connect(m_actionCut, &QAction::triggered, this, &ActionView::cutAction);
     QQuickWidget::addAction(m_actionCut);
 
     m_actionDel = new QAction(tr("Delete Action\tDel"));
-    m_actionDel->setShortcut(QKeySequence(Qt::Key_Delete));
-    m_actionDel->setShortcutContext(Qt::WidgetShortcut);
     connect(m_actionDel, &QAction::triggered, [=](){ deleteAction(m_currentActionIndex); });
     QQuickWidget::addAction(m_actionDel);
 }
@@ -148,15 +140,48 @@ QSize ActionView::sizeHint() const
 
 void ActionView::focusInEvent(QFocusEvent *event)
 {
-    Q_UNUSED(event)
     updateActionStates();
-    Q_EMIT actionFocused(true);
+    QQuickWidget::focusInEvent(event);
 }
 
-void ActionView::focusOutEvent(QFocusEvent *event)
+void ActionView::mousePressEvent(QMouseEvent *event)
 {
-    Q_UNUSED(event)
-    Q_EMIT actionFocused(false);
+    g_StudioApp.setLastActiveView(this);
+    QQuickWidget::mousePressEvent(event);
+}
+
+bool ActionView::event(QEvent *event)
+{
+    if (event->type() == QEvent::ShortcutOverride) {
+        QKeyEvent *ke = static_cast<QKeyEvent *>(event);
+        if (m_currentActionIndex >= 0 && (ke->key() == Qt::Key_Delete
+                                          || (ke->modifiers() == Qt::ControlModifier
+                                              && (ke->key() == Qt::Key_C || ke->key() == Qt::Key_V
+                                                  || ke->key() == Qt::Key_X)))) {
+            auto focusItem = quickWindow()->activeFocusItem();
+            if (focusItem && (focusItem->objectName() == QStringLiteral("actionListDelegate")
+                              || focusItem->objectName() == QStringLiteral("focusEater"))) {
+                if (ke->key() == Qt::Key_Delete) {
+                    if (m_actionDel->isEnabled())
+                        deleteAction(m_currentActionIndex);
+                } else if (ke->modifiers() == Qt::ControlModifier) {
+                    if (ke->key() == Qt::Key_C) {
+                        if (m_actionCopy->isEnabled())
+                            copyAction();
+                    } else if (ke->key() == Qt::Key_V) {
+                        if (m_actionPaste->isEnabled())
+                            pasteAction();
+                    } else if (ke->key() == Qt::Key_X) {
+                        if (m_actionCut->isEnabled())
+                            cutAction();
+                    }
+                }
+                event->accept();
+                return true;
+            }
+        }
+    }
+    return QQuickWidget::event(event);
 }
 
 void ActionView::setItem(const qt3dsdm::Qt3DSDMInstanceHandle &handle)

@@ -39,6 +39,7 @@ Rectangle {
 
     Item {
         id: focusEater
+        objectName: "focusEater"
         // Used to eat keyboard focus when user clicks outside any property control
     }
 
@@ -143,6 +144,7 @@ Rectangle {
 
                 delegate: Rectangle {
                     id: delegateItem
+                    objectName: "actionListDelegate"
 
                     width: actionsList.width
                     height: _controlBaseHeight

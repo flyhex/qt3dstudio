@@ -126,7 +126,6 @@ public:
     void OnUpdateEditPaste();
     void OnEditDuplicate();
     void onEditDelete();
-    void OnUpdateEditDuplicate();
 
     void timerEvent(QTimerEvent *event) override;
     void showEvent(QShowEvent *event) override;
@@ -241,9 +240,7 @@ public:
     void initializeGeometryAndState();
 
     void toggleSelectMode();
-    void onActionActive(bool active);
     void showScene();
-    void onSlideActive(bool active);
 
 Q_SIGNALS:
     void playStateChanged(bool started);
@@ -263,8 +260,6 @@ protected:
     QScopedPointer<CStudioPreferencesPropSheet> m_propSheet;
 
     bool m_playbackFlag = false;
-    bool m_actionActive = false;
-    bool m_slideActive = false;
     bool m_resettingLayout = false;
 };
 
