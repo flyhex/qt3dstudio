@@ -93,7 +93,7 @@ protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
-
+    void wheelEvent(QGraphicsSceneWheelEvent *wheelEvent);
     void keyPressEvent(QKeyEvent *keyEvent) override;
     void keyReleaseEvent(QKeyEvent *keyEvent) override;
 
@@ -143,7 +143,8 @@ private:
     TreeControlType m_clickedTreeControlType = TreeControlType::None;
     double m_pressPosInKeyframe;
     double m_treeWidth = TimelineConstants::TREE_DEFAULT_W;
-    double m_lastPlayHeadX = 0;
+    double m_lastAutoScrollX = -1.0;
+    double m_lastAutoScrollY = -1.0;
     TExpandMap m_expandMap;
     RowTree *m_releaseSelectRow = nullptr;
     bool m_autoScrollDownOn = false;

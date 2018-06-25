@@ -29,17 +29,15 @@
 #ifndef SELECTIONRECT_H
 #define SELECTIONRECT_H
 
-class Ruler;
-
 #include <QtWidgets/qgraphicsitem.h>
 
 class SelectionRect : public QGraphicsRectItem
 {
 public:
-    explicit SelectionRect(Ruler *ruler);
+    explicit SelectionRect();
 
     void start(const QPointF &origin);
-    void updateSize(const QPointF &pos);
+    void updateSize(const QPointF &pos, const QRectF &visibleScene);
     void end();
     bool isActive();
 
@@ -47,7 +45,6 @@ public:
                QWidget *widget = nullptr) override;
 
 private:
-    Ruler *m_ruler = nullptr;
     bool m_active = false;
     QRectF m_rect;
 };

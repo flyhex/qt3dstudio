@@ -92,6 +92,9 @@ namespace TimelineConstants
     const int AUTO_EXPAND_TIME          = 500; // auto expand a hovered row (while DnD-ing)
     const double MAX_SLIDE_TIME         = 3599.0; // seconds
 
+    const int TIMELINE_SCROLL_MAX_DELTA = 25; // Maximum amount of pixels to scroll per frame
+    const int TIMELINE_SCROLL_DIVISOR = 6;    // Divisor for timeline autoscroll distance
+
     // TODO: move the colors and dimensions to StudioPreferences.
 }
 

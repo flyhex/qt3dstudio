@@ -99,6 +99,7 @@ public:
     CPt GetPreferredSize() override;
     void SetSize(long inX, long inY) override;
     bool isFullReconstructPending() const { return m_fullReconstruct; }
+    NavigationBar *navigationBar() const { return m_navigationBar; }
 
 protected:
     // DataModel callbacks

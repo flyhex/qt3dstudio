@@ -77,7 +77,7 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     , m_layoutTimeline(new QGraphicsLinearLayout(Qt::Vertical))
     , m_ruler(new Ruler)
     , m_playHead(new PlayHead(m_ruler))
-    , m_selectionRect(new SelectionRect(m_ruler))
+    , m_selectionRect(new SelectionRect())
     , m_rowMover(new RowMover(this))
     , m_widgetTimeline(timelineWidget)
     , m_widgetRoot(new QGraphicsWidget)
@@ -138,26 +138,68 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
 
     connect(&m_autoScrollTimelineTimer, &QTimer::timeout, [this]() {
         if (!qApp->focusWindow() && !g_StudioApp.isOnProgress()) {
-            m_autoScrollTimelineTimer.stop();
             resetMousePressParams();
             return;
         }
+        QGraphicsView *timelineContent = m_widgetTimeline->viewTimelineContent();
+        QPoint scrollBarOffsets(timelineContent->verticalScrollBar()->isVisible()
+                                ? timelineContent->verticalScrollBar()->width() : 0,
+                                timelineContent->horizontalScrollBar()->isVisible()
+                                ? timelineContent->horizontalScrollBar()->height() : 0);
+        const QRect contentRect = timelineContent->contentsRect();
+        const double right = timelineContent->width() - scrollBarOffsets.x();
+        QPoint p = m_widgetTimeline->mapFromGlobal(QCursor::pos())
+                - QPoint(m_widgetTimeline->viewTreeContent()->width()
+                         + TimelineConstants::SPLITTER_W, 0);
 
-        QPoint p = m_widgetTimeline->mapFromGlobal(QCursor::pos());
-        double left = m_widgetTimeline->viewTreeContent()->width()
-                + TimelineConstants::SPLITTER_W;
-        double right = left + m_widgetTimeline->viewTimelineContent()->width()
-                - TimelineConstants::RULER_EDGE_OFFSET;
-        if (m_lastPlayHeadX != p.x() || p.x() < left || p.x() > right) {
-            m_lastPlayHeadX = p.x();
+        // Limit the maximum scroll speed
+        if (p.x() < 0) {
+            p.setX(qMax(-TimelineConstants::TIMELINE_SCROLL_MAX_DELTA,
+                        p.x() / TimelineConstants::TIMELINE_SCROLL_DIVISOR));
+        } else if (p.x() > right) {
+            p.setX(qMin(right + TimelineConstants::TIMELINE_SCROLL_MAX_DELTA,
+                        right + 1 + ((p.x() - right)
+                                     / TimelineConstants::TIMELINE_SCROLL_DIVISOR)));
+        }
+
+        if (m_selectionRect->isActive()) {
+            p -= QPoint(0, m_widgetTimeline->navigationBar()->height()
+                        + TimelineConstants::ROW_H);
+            const double bottom = timelineContent->contentsRect().height() - scrollBarOffsets.y();
+            if (m_lastAutoScrollX != p.x() || p.x() <= 0 || p.x() >= right
+                    || m_lastAutoScrollY != p.y() || p.y() <= 0 || p.y() >= bottom) {
+                m_lastAutoScrollX = p.x();
+                m_lastAutoScrollY = p.y();
+
+                if (p.y() < 0) {
+                    p.setY(qMax(-TimelineConstants::TIMELINE_SCROLL_MAX_DELTA,
+                                p.y() / TimelineConstants::TIMELINE_SCROLL_DIVISOR));
+                } else if (p.y() > bottom) {
+                    p.setY(qMin(bottom + TimelineConstants::TIMELINE_SCROLL_MAX_DELTA,
+                                bottom + 1 + ((p.y() - bottom)
+                                              / TimelineConstants::TIMELINE_SCROLL_DIVISOR)));
+                }
+
+                // Resize keyframe selection rect
+                const QPointF scenePoint = timelineContent->mapToScene(p);
+                timelineContent->ensureVisible(scenePoint.x(), scenePoint.y(),
+                                               0, 0, 0, 0);
+                QRectF visibleScene(
+                            timelineContent->mapToScene(contentRect.topLeft()),
+                            timelineContent->mapToScene(contentRect.bottomRight()
+                                                        - scrollBarOffsets));
+                m_selectionRect->updateSize(scenePoint, visibleScene);
+                m_keyframeManager->selectKeyframesInRect(m_selectionRect->rect());
+            }
+        } else if (m_lastAutoScrollX != p.x() || p.x() <= 0 || p.x() >= right) {
+            m_lastAutoScrollX = p.x();
 
             bool shift = QGuiApplication::queryKeyboardModifiers() & Qt::ShiftModifier;
-            double scroll = m_widgetTimeline->viewTimelineContent()
-                    ->horizontalScrollBar()->value();
+            double scroll = timelineContent->horizontalScrollBar()->value();
             if (scroll != 0)
                 scroll -= TimelineConstants::TREE_BOUND_W;
 
-            double distance = p.x() - left + scroll;
+            double distance = p.x() + scroll;
             if (m_clickedTimelineControlType == TimelineControlType::Duration)
                 distance -= m_editedTimelineRow->getDurationMoveOffsetX();
 
@@ -178,9 +220,8 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
 
                 m_editedTimelineRow->setStartX(distance);
                 m_editedTimelineRow->showToolTip(QCursor::pos());
-                m_widgetTimeline->viewTimelineContent()->ensureVisible(
-                            TimelineConstants::TREE_BOUND_W + visiblePtX,
-                            m_editedTimelineRow->y(), 0, 0, 0, 0);
+                timelineContent->ensureVisible(TimelineConstants::TREE_BOUND_W + visiblePtX,
+                                               m_editedTimelineRow->y(), 0, 0, 0, 0);
             } else if (m_clickedTimelineControlType == TimelineControlType::EndHandle) {
                 double time = m_ruler->distanceToTime(distance
                                                       - TimelineConstants::RULER_EDGE_OFFSET);
@@ -195,10 +236,9 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
                 m_editedTimelineRow->setEndX(distance);
                 m_editedTimelineRow->showToolTip(QCursor::pos());
                 rowManager()->updateRulerDuration(p.x() > right);
-                m_widgetTimeline->viewTimelineContent()->ensureVisible(
-                            TimelineConstants::TREE_BOUND_W
-                            + m_editedTimelineRow->getEndX() + edgeMargin,
-                            m_editedTimelineRow->y(), 0, 0, 0, 0);
+                timelineContent->ensureVisible(TimelineConstants::TREE_BOUND_W
+                                               + m_editedTimelineRow->getEndX() + edgeMargin,
+                                               m_editedTimelineRow->y(), 0, 0, 0, 0);
             } else if (m_clickedTimelineControlType == TimelineControlType::Duration) {
                 double time = m_ruler->distanceToTime(
                             distance - TimelineConstants::RULER_EDGE_OFFSET)
@@ -215,7 +255,7 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
                 m_editedTimelineRow->moveDurationTo(distance);
                 m_editedTimelineRow->showToolTip(QCursor::pos());
                 rowManager()->updateRulerDuration(p.x() > right);
-                m_widgetTimeline->viewTimelineContent()->ensureVisible(
+                timelineContent->ensureVisible(
                             TimelineConstants::TREE_BOUND_W + visiblePtX, m_editedTimelineRow->y(),
                             0, 0, 0, 0);
             }
@@ -458,18 +498,19 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                         m_rowManager->selectRow(m_editedTimelineRow->rowTree(), ctrlKeyDown);
                         // click position in ruler space
                         m_editedTimelineRow->startDurationMove(m_pressPos.x() - m_ruler->x());
-                        m_autoScrollTimelineTimer.start();
                     } else if (m_clickedTimelineControlType == TimelineControlType::StartHandle
                                || m_clickedTimelineControlType == TimelineControlType::EndHandle) {
-                        m_autoScrollTimelineTimer.start();
                     }
+                    m_autoScrollTimelineTimer.start();
                 }
             }
         } else {
             m_keyframeManager->deselectAllKeyframes();
 
-            if (m_pressPos.x() > m_ruler->x() && m_pressPos.y() > TimelineConstants::ROW_H)
+            if (m_pressPos.x() > m_ruler->x() && m_pressPos.y() > TimelineConstants::ROW_H) {
                 m_selectionRect->start(m_pressPos);
+                m_autoScrollTimelineTimer.start();
+            }
         }
     }
 
@@ -488,11 +529,7 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
     bool shift = event->modifiers() & Qt::ShiftModifier;
     if (m_dragging) {
-        if (m_selectionRect->isActive()) {
-            // resizing keyframe selection rect
-            m_selectionRect->updateSize(event->scenePos());
-            m_keyframeManager->selectKeyframesInRect(m_selectionRect->rect());
-        } else if (m_startRowMoverOnNextDrag || m_rowMover->isActive()) {
+        if (m_startRowMoverOnNextDrag || m_rowMover->isActive()) {
             // moving rows vertically (reorder/reparent)
             if (m_startRowMoverOnNextDrag) {
                 m_startRowMoverOnNextDrag = false;
@@ -600,6 +637,8 @@ void TimelineGraphicsScene::resetMousePressParams()
     m_autoScrollTriggerTimer.stop();
     m_timebarToolTip->hide();
     m_pressPos = invalidPoint;
+    m_lastAutoScrollX = -1.0;
+    m_lastAutoScrollY = -1.0;
 }
 
 QLabel *TimelineGraphicsScene::timebarTooltip()
@@ -733,6 +772,14 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
     QGraphicsScene::mouseDoubleClickEvent(event);
 }
 
+void TimelineGraphicsScene::wheelEvent(QGraphicsSceneWheelEvent *wheelEvent)
+{
+    // Make sure drag states update on wheel scrolls done during drag
+    m_lastAutoScrollX = -1.0;
+    m_lastAutoScrollY = -1.0;
+    QGraphicsScene::wheelEvent(wheelEvent);
+}
+
 void TimelineGraphicsScene::keyPressEvent(QKeyEvent *keyEvent)
 {
     // Eat left/right arrow keys on tree side unless some item (e.g. label) has focus
@@ -744,6 +791,12 @@ void TimelineGraphicsScene::keyPressEvent(QKeyEvent *keyEvent)
         m_rowMover->end();
     } else if (keyEvent->key() == Qt::Key_Delete && !m_rowMover->isActive()) {
         g_StudioApp.DeleteSelectedObject(); // Despite the name, this deletes objects and keyframes
+    }
+    // Make sure drag states update on keyboard scrolls done during drag
+    if (keyEvent->key() == Qt::Key_Left || keyEvent->key() == Qt::Key_Right
+            || keyEvent->key() == Qt::Key_Up || keyEvent->key() == Qt::Key_Down) {
+        m_lastAutoScrollX = -1.0;
+        m_lastAutoScrollY = -1.0;
     }
 
     QGraphicsScene::keyPressEvent(keyEvent);

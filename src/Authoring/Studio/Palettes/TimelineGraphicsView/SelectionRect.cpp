@@ -32,7 +32,7 @@
 
 #include <QtGui/qpainter.h>
 
-SelectionRect::SelectionRect(Ruler *ruler) : m_ruler(ruler)
+SelectionRect::SelectionRect()
 {
     setZValue(100);
     setActive(false);
@@ -55,14 +55,17 @@ void SelectionRect::start(const QPointF &origin)
     m_active = true;
 }
 
-void SelectionRect::updateSize(const QPointF &pos)
+void SelectionRect::updateSize(const QPointF &pos, const QRectF &visibleScene)
 {
     QPointF newPos = pos;
-    if (newPos.x() < m_ruler->x())
-        newPos.setX(m_ruler->x());
-
-    if (newPos.y() < TimelineConstants::ROW_H)
-        newPos.setY(TimelineConstants::ROW_H);
+    if (newPos.x() < visibleScene.left())
+        newPos.setX(visibleScene.left());
+    else if (newPos.x() > visibleScene.right())
+        newPos.setX(visibleScene.right());
+    if (newPos.y() < visibleScene.top())
+        newPos.setY(visibleScene.top());
+    else if (newPos.y() > visibleScene.bottom())
+        newPos.setY(visibleScene.bottom());
 
     m_rect.setBottomRight(newPos);
     setRect(m_rect.normalized());
