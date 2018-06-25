@@ -206,6 +206,24 @@ struct SRendererImpl : public IStudioRenderer,
         RequestRender();
     }
 
+    void ReleaseOffscreenRenderersForSubpresentations()
+    {
+        IOffscreenRenderManager &offscreenMgr(m_Context->GetOffscreenRenderManager());
+
+        QVector<SubPresentationRecord> toUnregister;
+
+        const auto keys = m_subpresentations.keys();
+        for (QString key : keys)
+            toUnregister.append(m_subpresentations[key].subpresentation);
+
+        for (int i = 0; i < toUnregister.size(); ++i) {
+            QByteArray data = toUnregister[i].m_id.toLocal8Bit();
+            qt3ds::render::CRegisteredString rid
+                    = m_Context->GetStringTable().RegisterStr(data.data());
+            offscreenMgr.ReleaseOffscreenRenderer(qt3ds::render::SOffscreenRendererKey(rid));
+        }
+
+    }
     ITextRenderer *GetTextRenderer() override
     {
         if (m_Context.mPtr)
@@ -479,6 +497,7 @@ struct SRendererImpl : public IStudioRenderer,
     // This must be safe to call from multiple places
     void Close() override
     {
+        ReleaseOffscreenRenderersForSubpresentations();
         m_subpresentations.clear();
         m_proxy.reset();
         m_Closed = true;
@@ -610,6 +629,7 @@ struct SRendererImpl : public IStudioRenderer,
     {
         OnClosingPresentation();
         m_proxy.reset();
+        ReleaseOffscreenRenderersForSubpresentations();
         m_subpresentations.clear();
         m_HasPresentation = true;
         // Reset edit camera information.
