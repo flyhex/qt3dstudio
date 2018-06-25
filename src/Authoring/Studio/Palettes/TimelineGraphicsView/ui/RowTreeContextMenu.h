@@ -57,6 +57,7 @@ private Q_SLOTS:
     void copyObjectPath();
     void pasteObject();
     void cutObject();
+    void addLayer();
 
 private:
     void initialize();
@@ -70,6 +71,7 @@ private:
     bool canCopyObject();
     bool canPasteObject();
     bool canCutObject();
+    bool canAddLayer() const;
 
     RowTree *m_RowTree;
     ITimelineItemBinding *m_TimelineItemBinding;
@@ -77,6 +79,7 @@ private:
     QAction *m_duplicateAction = nullptr;
     QAction *m_deleteAction = nullptr;
     QAction *m_groupAction = nullptr;
+    QAction *m_addLayerAction = nullptr;
     QAction *m_inspectAction = nullptr;
     QAction *m_makeAction = nullptr;
     QAction *m_copyPathAction = nullptr;

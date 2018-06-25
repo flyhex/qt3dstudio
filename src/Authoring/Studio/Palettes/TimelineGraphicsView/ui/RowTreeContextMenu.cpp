@@ -70,6 +70,14 @@ void RowTreeContextMenu::initialize()
 
     addSeparator();
 
+    m_addLayerAction = new QAction(tr("Add Layer"), this);
+    m_addLayerAction->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_L));
+    m_addLayerAction->setShortcutVisibleInContextMenu(true);
+    connect(m_addLayerAction, &QAction::triggered, this, &RowTreeContextMenu::addLayer);
+    addAction(m_addLayerAction);
+
+    addSeparator();
+
     m_copyAction = new QAction(tr("Copy"), this);
     m_copyAction->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_C));
     m_copyAction->setShortcutVisibleInContextMenu(true);
@@ -130,6 +138,8 @@ void RowTreeContextMenu::showEvent(QShowEvent *event)
     m_pasteAction->setEnabled(canPasteObject());
 
     m_makeAction->setEnabled(canMakeComponent());
+
+    m_addLayerAction->setEnabled(canAddLayer());
 
     QMenu::showEvent(event);
 }
@@ -256,6 +266,17 @@ void RowTreeContextMenu::cutObject()
 {
     m_TimelineItemBinding->PerformTransaction(
                 ITimelineItemBinding::EUserTransaction_Cut);
+}
+
+bool RowTreeContextMenu::canAddLayer() const
+{
+    return m_TimelineItemBinding->IsValidTransaction(
+                ITimelineItemBinding::EUserTransaction_AddLayer);
+}
+void RowTreeContextMenu::addLayer()
+{
+    m_TimelineItemBinding->PerformTransaction(
+                ITimelineItemBinding::EUserTransaction_AddLayer);
 }
 
 bool RowTreeContextMenu::canPasteObject()

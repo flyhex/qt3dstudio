@@ -598,6 +598,9 @@ bool Qt3DSDMTimelineItemBinding::IsValidTransaction(EUserTransaction inTransacti
     case EUserTransaction_Ungroup:
         return g_StudioApp.canUngroupSelectedObjects();
 
+    case EUserTransaction_AddLayer:
+        return (GetObjectType() == OBJTYPE_SCENE);
+
     default: // not handled
         break;
     }
@@ -632,6 +635,17 @@ inline void DoGroupObjects(CDoc &inDoc, const qt3dsdm::TInstanceHandleList &inIn
 inline void DoUngroupObjects(CDoc &inDoc, const qt3dsdm::TInstanceHandleList &inInstances)
 {
     g_StudioApp.ungroupSelectedObjects();
+}
+
+inline void doAddLayer(CDoc &inDoc, const qt3dsdm::TInstanceHandleList &inInstances)
+{
+    qt3dsdm::Qt3DSDMSlideHandle slide = inDoc.GetActiveSlide();
+    qt3dsdm::Qt3DSDMInstanceHandle parent = inDoc.GetActiveLayer();
+
+    SCOPED_DOCUMENT_EDITOR(inDoc, QObject::tr("Add Layer"))
+        ->CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Layer, parent, slide,
+                                   DocumentEditorInsertType::PreviousSibling,
+                                   CPt(), PRIMITIVETYPE_UNKNOWN, -1);
 }
 
 void Qt3DSDMTimelineItemBinding::PerformTransaction(EUserTransaction inTransaction)
@@ -678,6 +692,10 @@ void Qt3DSDMTimelineItemBinding::PerformTransaction(EUserTransaction inTransacti
     case EUserTransaction_Ungroup: {
         theDispatch.FireOnAsynchronousCommand(
                     std::bind(DoUngroupObjects, std::ref(*theDoc), theInstances));
+    } break;
+    case EUserTransaction_AddLayer: {
+        theDispatch.FireOnAsynchronousCommand(
+                    std::bind(doAddLayer, std::ref(*theDoc), theInstances));
     } break;
     default: // not handled
         break;

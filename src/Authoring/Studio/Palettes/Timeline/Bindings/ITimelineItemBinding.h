@@ -73,6 +73,7 @@ public:
         EUserTransaction_EditComponent,
         EUserTransaction_Group,
         EUserTransaction_Ungroup,
+        EUserTransaction_AddLayer,
     };
 
 public:
