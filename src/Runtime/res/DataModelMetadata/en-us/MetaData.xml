@@ -14,7 +14,7 @@
         <Asset>
                 <Property name="starttime" formalName="Start Time" type="Long" hidden="True" />
                 <Property name="endtime" formalName="End Time" type="Long" default="10000" hidden="True" />
-                <Property name="eyeball" formalName="Visible" type="Boolean" default="True" hidden="True" />
+                <Property name="eyeball" formalName="Visible" type="Boolean" default="True" hidden="True" controllable="True" />
                 <Property name="shy" formalName="Shy" type="Boolean" hidden="True" />
                 <Property name="sourcepath" type="String" hidden="True" />
                 <Property name="importfile" type="String" hidden="True" />
@@ -77,6 +77,7 @@
         </Image>
         <Layer>
                 <Property name="name" formalName="Name" type="String" default="Layer" hidden="True" />
+                <Property name="eyeball" formalName="Visible" type="Boolean" default="True" hidden="False" controllable="True" />
                 <Property name="disabledepthtest" formalName="Disable Depth Test" description="Optimize render speed for layers with\nmostly transparent objects?" type="Boolean" animatable="False"/>
                 <Property name="disabledepthprepass" formalName="Disable Depth Prepass" description="Optimize render speed for layers\nwith low depth complexity" type="Boolean" animatable="False"/>
                 <Property name="progressiveaa" formalName="Progressive AA" description="Improves the visual quality when no\nitems are moving" list="None:2x:4x:8x" default="None" />
@@ -270,6 +271,7 @@
         </ReferencedMaterial>
         <Model>
                 <Property name="name" formalName="Name" type="String" default="Model" hidden="True" />
+                <Property name="eyeball" formalName="Visible" type="Boolean" default="True" hidden="False" controllable="True" />
                 <Property name="sourcepath" formalName="Mesh" description="Geometry to use for this model" type="Mesh" />
                 <Property name="poseroot" hidden="True" type="Long" default="-1" />
                 <Property name="tessellation" formalName="Tessellation Mode" description="Type of tessellation to subdivide\nthe geometry" list="None:Linear:Phong:NPatch" default="None" />
@@ -434,6 +436,7 @@
         </SlideOwner>
         <Text>
                 <Property name="name" formalName="Name" type="String" default="Text" hidden="True" />
+                <Property name="eyeball" formalName="Visible" type="Boolean" default="True" hidden="False" controllable="True" />
                 <Property name="textstring" formalName="Text String" description="Text String" type="MultiLineString" default="Text" controllable="True" />
                 <Property name="textcolor" formalName="Text Color" description="Text Color" type="Color" default="1 1 1" controllable="True" />
                 <Property name="font" formalName="Font" description="Font" type="Font" default="TitilliumWeb-Regular" />
@@ -446,10 +449,4 @@
                 <Property name="leading" formalName="Leading" description="Leading" />
                 <Property name="tracking" formalName="Tracking" description="Tracking" />
         </Text>
-        <DataInput>
-          <Property name="name" formalName="Name" type="String" default="DataInput" hidden="True" />
-          <Property name="timefrom" formalName="Time from" description="Datainput incoming value corresponding\nto playhead time zero" animatable="False" min="0" default="0"/>
-          <Property name="timeto" formalName="Time to" description="Datainput incoming value corresponding\nto playhead end" animatable="False" min="0" default="0" />
-          <Property name="controlledelemprop" formalName="Controlled Element-Properties" type="MultiLineString" description ="Element/properties connected to this\ndata input" animatable="False" />
-        </DataInput>
 </MetaData>

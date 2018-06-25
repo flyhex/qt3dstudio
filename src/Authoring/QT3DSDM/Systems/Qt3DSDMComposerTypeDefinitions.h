@@ -99,12 +99,13 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(shy, m_Shy, bool, false)                                              \
     HANDLE_COMPOSER_PROPERTY(locked, m_Locked, bool, false)                                        \
     HANDLE_COMPOSER_PROPERTY_NO_DEFAULT(timebarcolor, m_TimebarColor, SFloat3)                     \
-    HANDLE_COMPOSER_PROPERTY(timebartext, m_TimebarText, SStringRef, L"")
+    HANDLE_COMPOSER_PROPERTY(timebartext, m_TimebarText, SStringRef, L"")                          \
+    HANDLE_COMPOSER_PROPERTY(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_SCENE_PROPERTIES                                                          \
     HANDLE_COMPOSER_PROPERTY(bgcolorenable, m_BgColorEnable, bool, true)                           \
     HANDLE_COMPOSER_PROPERTY(backgroundcolor, m_BackgroundColor, SFloat3, SFloat3(0, 0, 0))        \
-    HANDLE_COMPOSER_PROPERTY(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
+    HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_COMPONENT_PROPERTIES                                                      \
     HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")

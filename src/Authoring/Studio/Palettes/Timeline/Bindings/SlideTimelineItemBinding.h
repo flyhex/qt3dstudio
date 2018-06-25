@@ -75,6 +75,7 @@ public:
     void SetLocked(bool) override {}
     bool IsVisible() const override { return true; }
     void SetVisible(bool) override {}
+    bool IsVisibilityControlled() const override { return false; }
 
     // Keyframes, not applicable to a Slide
     void InsertKeyframe() override {}

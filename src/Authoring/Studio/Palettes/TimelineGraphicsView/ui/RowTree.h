@@ -178,6 +178,7 @@ private:
     bool m_filtered = false;
     bool m_arrowVisible = false;
     bool m_dndHover = false;
+    bool m_visibilityCtrld = false;
     DnDState m_dndState = DnDState::None;
     ActionStates m_actionStates = ActionState::None;
     ExpandState m_expandState = ExpandState::HiddenCollapsed;

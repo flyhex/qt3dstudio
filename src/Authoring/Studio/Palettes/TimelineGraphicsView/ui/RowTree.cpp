@@ -220,10 +220,16 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     static const QPixmap pixEmpty = QPixmap(":/images/Toggle-Empty.png");
     static const QPixmap pixShy = QPixmap(":/images/Toggle-Shy.png");
     static const QPixmap pixHide = QPixmap(":/images/Toggle-HideShow.png");
+    static const QPixmap pixHideCtrld = QPixmap(":/images/Toggle-HideShowControlled.png");
     static const QPixmap pixLock = QPixmap(":/images/Toggle-Lock.png");
     if (hasActionButtons()) {
         painter->drawPixmap(m_rectShy    , m_shy     ? pixShy  : pixEmpty);
-        painter->drawPixmap(m_rectVisible, m_visible ? pixHide : pixEmpty);
+        // Eyeball visibility follows the visibility setting for the object even if it has
+        // datainput controller
+        if (m_visibilityCtrld)
+            painter->drawPixmap(m_rectVisible, m_visible ? pixHideCtrld : pixEmpty);
+        else
+            painter->drawPixmap(m_rectVisible, m_visible ? pixHide : pixEmpty);
         painter->drawPixmap(m_rectLocked , m_locked  ? pixLock : pixEmpty);
     }
 
@@ -709,6 +715,7 @@ void RowTree::updateFromBinding()
     m_shy = m_binding->GetTimelineItem()->IsShy();
     m_visible = m_binding->GetTimelineItem()->IsVisible();
     m_locked = m_binding->GetTimelineItem()->IsLocked();
+    m_visibilityCtrld = m_binding->GetTimelineItem()->IsVisibilityControlled();
 
     // Update label locking & color
     Qt3DSDMTimelineItemBinding *itemBinding =

@@ -289,6 +289,8 @@
         <file>images/qml_notUsed@2x.png</file>
         <file>images/qml_used.png</file>
         <file>images/qml_used@2x.png</file>
+        <file>images/Toggle-HideShowControlled.png</file>
+        <file>images/Toggle-HideShowControlled@2x.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="open_dialog.png">images/open_dialog.png</file>

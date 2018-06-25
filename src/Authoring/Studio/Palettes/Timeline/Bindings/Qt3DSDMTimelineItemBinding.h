@@ -108,6 +108,7 @@ public:
     bool IsVisible() const override;
     void SetVisible(bool) override;
     bool HasAction(bool inMaster) override;
+    bool IsVisibilityControlled() const override;
     bool ChildrenHasAction(bool inMaster) override;
     bool ComponentHasAction(bool inMaster) override;
     ITimelineTimebar *GetTimebar() override;

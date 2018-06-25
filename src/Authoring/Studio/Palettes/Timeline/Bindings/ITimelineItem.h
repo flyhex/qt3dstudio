@@ -59,6 +59,7 @@ public:
     virtual bool IsVisible() const = 0;
     virtual void SetVisible(bool) = 0;
     virtual bool IsImported() const { return false; }
+    virtual bool IsVisibilityControlled() const = 0;
 
     // Actions
     virtual bool HasAction(bool inMaster) = 0;

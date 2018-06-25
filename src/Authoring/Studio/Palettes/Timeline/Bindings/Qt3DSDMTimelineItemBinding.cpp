@@ -160,6 +160,25 @@ bool Qt3DSDMTimelineItemBinding::IsLocked() const
     return GetBoolean(m_StudioSystem->GetClientDataModelBridge()->GetSceneAsset().m_Locked);
 }
 
+bool Qt3DSDMTimelineItemBinding::IsVisibilityControlled() const
+{
+    if (!m_StudioSystem->IsInstance(m_DataHandle))
+        return false;
+
+    Qt3DSDMPropertyHandle theNamePropHandle =
+            m_StudioSystem->GetPropertySystem()->GetAggregateInstancePropertyByName(
+                m_DataHandle, L"controlledproperty");
+
+    if (!theNamePropHandle)
+        return false;
+    SValue theNameValue;
+    m_StudioSystem->GetPropertySystem()->GetInstancePropertyValue(m_DataHandle, theNamePropHandle,
+                                                                  theNameValue);
+    TDataStrPtr theName = qt3dsdm::get<TDataStrPtr>(theNameValue);
+
+    return (wcsstr(theName->GetData(), L"eyeball"));
+}
+
 void ToggleChildrenLock(Q3DStudio::ScopedDocumentEditor &scopedDocEditor,
                         Qt3DSDMTimelineItemBinding *inTimelineItemBinding,
                         SDataModelSceneAsset inSceneAsset, bool inLocked)

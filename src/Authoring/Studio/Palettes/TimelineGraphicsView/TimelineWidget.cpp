@@ -698,9 +698,13 @@ void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance
         return;
 
     const SDataModelSceneAsset &asset = m_bridge->GetSceneAsset();
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    auto ctrldPropHandle = doc->GetPropertySystem()->GetAggregateInstancePropertyByName(
+                inInstance, L"controlledproperty");
     if (inProperty == asset.m_Eyeball || inProperty == asset.m_Locked || inProperty == asset.m_Shy
             || inProperty == asset.m_StartTime || inProperty == asset.m_EndTime
-            || inProperty == m_bridge->GetNameProperty()) {
+            || inProperty == m_bridge->GetNameProperty()
+            || inProperty == ctrldPropHandle) {
         m_dirtyProperties.insert(inInstance, inProperty);
         if (!m_asyncUpdateTimer.isActive())
             m_asyncUpdateTimer.start();
@@ -709,8 +713,9 @@ void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance
 
 void TimelineWidget::onAsyncUpdate()
 {
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+
     if (m_fullReconstruct) {
-        CDoc *doc = g_StudioApp.GetCore()->GetDoc();
         m_translationManager->Clear();
         m_binding = static_cast<Qt3DSDMTimelineItemBinding *>(
                     m_translationManager->GetOrCreate(
@@ -762,7 +767,6 @@ void TimelineWidget::onAsyncUpdate()
             }
 
             // Make sure selections on UI matches bindings
-            CDoc *doc = g_StudioApp.GetCore()->GetDoc();
             onSelectionChange(doc->GetSelectedValue());
 
             // Expand the parents of the added rows, but only for topmost ancestors of the moved
@@ -790,9 +794,13 @@ void TimelineWidget::onAsyncUpdate()
                 bool timeProperty = false;
                 bool nameProperty = false;
                 const auto props = m_dirtyProperties.values(instance);
+                const auto ctrldPropHandle =
+                        doc->GetPropertySystem()->GetAggregateInstancePropertyByName(
+                            instance, L"controlledproperty");
                 for (auto prop : props) {
                     filterProperty = filterProperty || prop == asset.m_Eyeball
-                            || prop == asset.m_Locked || prop == asset.m_Shy;
+                            || prop == asset.m_Locked || prop == asset.m_Shy
+                            || prop == ctrldPropHandle;
                     timeProperty = timeProperty
                             || prop == asset.m_StartTime || prop == asset.m_EndTime;
                     nameProperty = nameProperty || prop == nameProp;
@@ -811,6 +819,7 @@ void TimelineWidget::onAsyncUpdate()
                                 m_graphicsScene->rowManager()->updateFiltering(row);
                                 // Filtering changes to children affect arrow visibility in parents
                                 updateArrowParents.insert(row->parentRow());
+                                update();
                             }
                             if (nameProperty)
                                 row->updateLabel();
