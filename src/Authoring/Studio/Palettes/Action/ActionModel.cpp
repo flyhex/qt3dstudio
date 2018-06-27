@@ -80,16 +80,24 @@ QVariant ActionModel::data(const QModelIndex &index, int role) const
         return {};
 
     const auto action = m_actions.at(index.row());
-    switch (role)
-    {
-    case DescriptionRole:
-        return actionString(action);
-    case VisibleRole:
-        return actionSystem()->GetActionEyeballValue(activeSlide(), action);
-    default:
-        return {};
-    }
+    auto system = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
+    if (action.Valid()) {
+        auto actionCore = system->GetActionCore();
 
+        // Ensure the handle is still valid on the back-end, as some undo scenarios may cause this
+        // function to be called for already deleted actions
+        if (actionCore->HandleValid(action)) {
+            switch (role)
+            {
+            case DescriptionRole:
+                return actionString(action);
+            case VisibleRole:
+                return system->GetActionSystem()->GetActionEyeballValue(activeSlide(), action);
+            default:
+                return {};
+            }
+        }
+    }
     return {};
 }
 
