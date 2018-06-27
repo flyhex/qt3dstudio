@@ -63,7 +63,7 @@ public:
     void updateKeyframes();
     void insertKeyframe(Keyframe *keyframe);
     void removeKeyframe(Keyframe *keyframe);
-    void updateKeyframesFromBinding(qt3dsdm::Qt3DSDMPropertyHandle propHandle);
+    void updateKeyframesFromBinding(const QList<int> &properties);
     void updateDurationFromBinding();
     TimelineControlType getClickedControl(const QPointF &scenePos) const;
     double getStartX() const;

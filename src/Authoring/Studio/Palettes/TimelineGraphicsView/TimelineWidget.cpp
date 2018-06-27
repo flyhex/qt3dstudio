@@ -626,8 +626,10 @@ void TimelineWidget::refreshKeyframe(qt3dsdm::Qt3DSDMAnimationHandle inAnimation
             binding->RefreshPropertyKeyframe(theAnimationInfo.m_Property, inKeyframe,
                                              inTransaction);
 
-            binding->getRowTree()->rowTimeline()->updateKeyframesFromBinding(
-                        theAnimationInfo.m_Property);
+            // update UI asynchronously to make sure binding is completely up to date.
+            m_keyframeChangesMap.insert(theAnimationInfo.m_Instance, theAnimationInfo.m_Property);
+            if (!m_asyncUpdateTimer.isActive())
+                m_asyncUpdateTimer.start();
         }
     }
 }
@@ -793,10 +795,21 @@ void TimelineWidget::onAsyncUpdate()
             }
             updateActionStates(rowSet);
         }
+        if (!m_keyframeChangesMap.isEmpty()) {
+            const auto objects = m_keyframeChangesMap.keys();
+            for (int object : objects) {
+                RowTree *row = m_handlesMap.value(object);
+                if (row) {
+                    const auto properties = m_keyframeChangesMap.values(object);
+                    row->rowTimeline()->updateKeyframesFromBinding(properties);
+                }
+            }
+        }
     }
     m_dirtyProperties.clear();
     m_moveMap.clear();
     m_actionChanges.clear();
+    m_keyframeChangesMap.clear();
 }
 
 void TimelineWidget::onActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction,

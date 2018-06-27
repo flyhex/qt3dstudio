@@ -161,8 +161,9 @@ private:
     bool m_splitterPressed = false;
     QSize m_preferredSize;
     QMultiHash<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle> m_dirtyProperties;
-    QHash<int, int> m_moveMap;
-    QSet<int> m_actionChanges;
+    QHash<int, int> m_moveMap; // key: child handle, value: parent handle
+    QSet<int> m_actionChanges; // key: object handle
+    QMultiHash<int, int> m_keyframeChangesMap; // key: object handle, value: property handle
     QTimer m_asyncUpdateTimer;
     bool m_fullReconstruct = false;
     bool m_blockMousePress = false;

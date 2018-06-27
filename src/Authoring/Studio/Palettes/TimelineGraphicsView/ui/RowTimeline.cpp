@@ -362,52 +362,45 @@ void RowTimeline::updateDurationFromBinding()
     setEndTime(timebar->GetEndTime() * .001);
 }
 
-void RowTimeline::updateKeyframesFromBinding(qt3dsdm::Qt3DSDMPropertyHandle propHandle)
+void RowTimeline::updateKeyframesFromBinding(const QList<int> &properties)
 {
     if (m_rowTree->isProperty()) // this method works for main rows only
         return;
 
-    // find the UI property row from handle
-    RowTree *propRow = nullptr;
     const auto childProps = m_rowTree->childProps();
     for (auto child : childProps) {
         qt3dsdm::Qt3DSDMPropertyHandle propertyHandle =
             static_cast<Qt3DSDMTimelineItemProperty *>(child->m_PropBinding)
             ->getPropertyHandle();
-        if (propertyHandle == propHandle) {
-            propRow = child;
-            break;
-        }
-    }
+        if (properties.contains(propertyHandle)) {
+            m_rowTree->m_scene->keyframeManager()->deleteKeyframes(child->rowTimeline(), false);
 
-    if (propRow) {
-        m_rowTree->m_scene->keyframeManager()->deleteKeyframes(propRow->rowTimeline(), false);
+            for (int i = 0; i < child->m_PropBinding->GetKeyframeCount(); i++) {
+                Qt3DSDMTimelineKeyframe *kf = static_cast<Qt3DSDMTimelineKeyframe *>
+                        (child->m_PropBinding->GetKeyframeByIndex(i));
 
-        for (int i = 0; i < propRow->m_PropBinding->GetKeyframeCount(); i++) {
-            Qt3DSDMTimelineKeyframe *kf = static_cast<Qt3DSDMTimelineKeyframe *>
-                    (propRow->m_PropBinding->GetKeyframeByIndex(i));
+                Keyframe *kfUI = new Keyframe(static_cast<double>(kf->GetTime() * .001),
+                                              child->rowTimeline());
+                kfUI->binding = kf;
+                kfUI->dynamic = kf->IsDynamic();
+                kf->setUI(kfUI);
+                child->rowTimeline()->insertKeyframe(kfUI);
+                child->parentRow()->rowTimeline()->insertKeyframe(kfUI);
+                if (kf->IsSelected())
+                    m_rowTree->m_scene->keyframeManager()->selectKeyframe(kfUI);
+            }
 
-            Keyframe *kfUI = new Keyframe(static_cast<double>(kf->GetTime() * .001),
-                                          propRow->rowTimeline());
-            kfUI->binding = kf;
-            kfUI->dynamic = kf->IsDynamic();
-            kf->setUI(kfUI);
-            propRow->rowTimeline()->insertKeyframe(kfUI);
-            propRow->parentRow()->rowTimeline()->insertKeyframe(kfUI);
-            if (kf->IsSelected())
-                m_rowTree->m_scene->keyframeManager()->selectKeyframe(kfUI);
-        }
-
-        if (isVisible()) {
-            propRow->rowTimeline()->update();
-            update();
-        } else {
-            // Find the first visible parent and update that to show hidden keyframes
-            RowTree *updateRow = m_rowTree->parentRow();
-            while (updateRow && !updateRow->isVisible())
-                updateRow = updateRow->parentRow();
-            if (updateRow)
-                updateRow->rowTimeline()->update();
+            if (isVisible()) {
+                child->rowTimeline()->update();
+                update();
+            } else {
+                // Find the first visible parent and update that to show hidden keyframes
+                RowTree *updateRow = m_rowTree->parentRow();
+                while (updateRow && !updateRow->isVisible())
+                    updateRow = updateRow->parentRow();
+                if (updateRow)
+                    updateRow->rowTimeline()->update();
+            }
         }
     }
 }
