@@ -286,6 +286,9 @@ public:
         RearrangeObjects(theInstances, inDest, inInsertType, checkUniqueName);
     }
 
+    virtual void ungroupObjects(const qt3dsdm::TInstanceHandleList &inInstances) = 0;
+    virtual void groupObjects(const qt3dsdm::TInstanceHandleList &inInstances) = 0;
+
     // Returns the new component.
     virtual TInstanceHandle MakeComponent(const qt3dsdm::TInstanceHandleList &inInstances) = 0;
 

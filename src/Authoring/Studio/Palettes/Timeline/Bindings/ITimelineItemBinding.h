@@ -71,6 +71,8 @@ public:
         EUserTransaction_Delete,
         EUserTransaction_MakeComponent,
         EUserTransaction_EditComponent,
+        EUserTransaction_Group,
+        EUserTransaction_Ungroup,
     };
 
 public:

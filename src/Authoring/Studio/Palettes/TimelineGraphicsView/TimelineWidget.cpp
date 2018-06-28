@@ -517,6 +517,9 @@ void TimelineWidget::onAssetDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         m_graphicsScene->rowManager()->deleteRow(row);
         m_handlesMap.remove(inInstance);
         m_graphicsScene->expandMap().remove(inInstance);
+        // Ensure row deletions are finalized
+        if (!m_asyncUpdateTimer.isActive())
+            m_asyncUpdateTimer.start();
     }
 }
 
@@ -574,8 +577,10 @@ void TimelineWidget::onAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle parentIns
 
         if (propBinding && !propAnimated) {
             m_graphicsScene->rowManager()->deleteRow(propBinding->getRowTree());
-
             binding->RemovePropertyRow(property);
+            // Ensure row deletions are finalized
+            if (!m_asyncUpdateTimer.isActive())
+                m_asyncUpdateTimer.start();
         }
     }
 }
@@ -732,6 +737,7 @@ void TimelineWidget::onAsyncUpdate()
                                 rowParent->addChildAt(row, indexIt.key());
                         }
                     }
+                    rowParent->updateExpandStatus(RowTree::ExpandState::Expanded, false);
                 }
             }
             // Make sure selections on UI matches bindings
@@ -810,6 +816,7 @@ void TimelineWidget::onAsyncUpdate()
     m_moveMap.clear();
     m_actionChanges.clear();
     m_keyframeChangesMap.clear();
+    m_graphicsScene->rowManager()->finalizeRowDeletions();
 }
 
 void TimelineWidget::onActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction,

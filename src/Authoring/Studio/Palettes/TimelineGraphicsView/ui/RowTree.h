@@ -85,7 +85,7 @@ public:
                QWidget *widget = nullptr) override;
     void setState(State state) override;
     void setTimelineRow(RowTimeline *rowTimeline);
-    void setParent(RowTree *parent);
+    void setParentRow(RowTree *parent);
     void addChild(RowTree *child);
     void addChildAt(RowTree *child, int index);
     void removeChild(RowTree *child);

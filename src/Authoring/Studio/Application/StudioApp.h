@@ -165,6 +165,10 @@ public:
     QString GetCopyType();
     QString getDuplicateType() const;
     QString getDeleteType() const;
+    bool canGroupSelectedObjects() const;
+    bool canUngroupSelectedObjects() const;
+    bool groupSelectedObjects() const;
+    bool ungroupSelectedObjects() const;
     void OnCut();
     bool CanCut();
     void OnPaste();

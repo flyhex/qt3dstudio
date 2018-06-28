@@ -50,6 +50,7 @@ private Q_SLOTS:
     void renameObject();
     void duplicateObject();
     void deleteObject();
+    void groupObjects();
     void inspectComponent();
     void makeComponent();
     void copyObject();
@@ -62,6 +63,8 @@ private:
     bool canRenameObject();
     bool canDuplicateObject();
     bool canDeleteObject();
+    bool canGroupObjects();
+    bool canUngroupObjects();
     bool canInspectComponent();
     bool canMakeComponent();
     bool canCopyObject();
@@ -70,14 +73,17 @@ private:
 
     RowTree *m_RowTree;
     ITimelineItemBinding *m_TimelineItemBinding;
-    QAction *m_renameAction;
-    QAction *m_duplicateAction;
-    QAction *m_deleteAction;
-    QAction *m_inspectAction;
-    QAction *m_makeAction;
-    QAction *m_copyPathAction;
-    QAction *m_cutAction;
-    QAction *m_copyAction;
-    QAction *m_pasteAction;
+    QAction *m_renameAction = nullptr;
+    QAction *m_duplicateAction = nullptr;
+    QAction *m_deleteAction = nullptr;
+    QAction *m_groupAction = nullptr;
+    QAction *m_inspectAction = nullptr;
+    QAction *m_makeAction = nullptr;
+    QAction *m_copyPathAction = nullptr;
+    QAction *m_cutAction = nullptr;
+    QAction *m_copyAction = nullptr;
+    QAction *m_pasteAction = nullptr;
+    bool m_canGroupObjects = false;
+    bool m_canUngroupObjects = false;
 };
 #endif // ROWTREECONTEXTMENU_H

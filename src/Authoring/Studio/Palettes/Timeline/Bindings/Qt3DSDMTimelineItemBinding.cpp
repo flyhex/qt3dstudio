@@ -576,6 +576,12 @@ bool Qt3DSDMTimelineItemBinding::IsValidTransaction(EUserTransaction inTransacti
     case EUserTransaction_EditComponent:
         return (GetObjectType() == OBJTYPE_COMPONENT);
 
+    case EUserTransaction_Group:
+        return g_StudioApp.canGroupSelectedObjects();
+
+    case EUserTransaction_Ungroup:
+        return g_StudioApp.canUngroupSelectedObjects();
+
     default: // not handled
         break;
     }
@@ -600,6 +606,16 @@ inline void DoDelete(CDoc &inDoc, const qt3dsdm::TInstanceHandleList &inInstance
 inline void DoMakeComponent(CDoc &inDoc, const qt3dsdm::TInstanceHandleList &inInstances)
 {
     SCOPED_DOCUMENT_EDITOR(inDoc, QObject::tr("Make Component"))->MakeComponent(inInstances);
+}
+
+inline void DoGroupObjects(CDoc &inDoc, const qt3dsdm::TInstanceHandleList &inInstances)
+{
+    g_StudioApp.groupSelectedObjects();
+}
+
+inline void DoUngroupObjects(CDoc &inDoc, const qt3dsdm::TInstanceHandleList &inInstances)
+{
+    g_StudioApp.ungroupSelectedObjects();
 }
 
 void Qt3DSDMTimelineItemBinding::PerformTransaction(EUserTransaction inTransaction)
@@ -638,7 +654,15 @@ void Qt3DSDMTimelineItemBinding::PerformTransaction(EUserTransaction inTransacti
     case EUserTransaction_MakeComponent: {
         theDispatch.FireOnAsynchronousCommand(
                     std::bind(DoMakeComponent, std::ref(*theDoc), theInstances));
-    }
+    } break;
+    case EUserTransaction_Group: {
+        theDispatch.FireOnAsynchronousCommand(
+                    std::bind(DoGroupObjects, std::ref(*theDoc), theInstances));
+    } break;
+    case EUserTransaction_Ungroup: {
+        theDispatch.FireOnAsynchronousCommand(
+                    std::bind(DoUngroupObjects, std::ref(*theDoc), theInstances));
+    } break;
     default: // not handled
         break;
     }

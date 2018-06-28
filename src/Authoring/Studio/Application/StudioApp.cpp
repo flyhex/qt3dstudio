@@ -996,6 +996,50 @@ QString CStudioApp::getDeleteType() const
     return {};
 }
 
+bool CStudioApp::canGroupSelectedObjects() const
+{
+    // Grouping is never just one row, we always deal with multiple selected items
+    qt3dsdm::TInstanceHandleList selected = m_core->GetDoc()
+            ->GetSelectedValue().GetSelectedInstances();
+    return (selected.size() > 1);
+}
+
+bool CStudioApp::canUngroupSelectedObjects() const
+{
+    qt3dsdm::TInstanceHandleList selected = m_core->GetDoc()
+            ->GetSelectedValue().GetSelectedInstances();
+    if (selected.size() == 1) {
+        qt3dsdm::Qt3DSDMInstanceHandle first = selected[0];
+        return (first.Valid() && m_core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge()
+                ->GetObjectType(first) == OBJTYPE_GROUP);
+    }
+    return false;
+}
+
+bool CStudioApp::groupSelectedObjects() const
+{
+    if (canGroupSelectedObjects()) {
+        qt3dsdm::TInstanceHandleList selected = m_core->GetDoc()
+                ->GetSelectedValue().GetSelectedInstances();
+        SCOPED_DOCUMENT_EDITOR(*m_core->GetDoc(),
+                               QObject::tr("Group objects"))->groupObjects(selected);
+        return true;
+    }
+    return false;
+}
+
+bool CStudioApp::ungroupSelectedObjects() const
+{
+    if (canUngroupSelectedObjects()) {
+        qt3dsdm::TInstanceHandleList selected = m_core->GetDoc()
+                ->GetSelectedValue().GetSelectedInstances();
+        SCOPED_DOCUMENT_EDITOR(*m_core->GetDoc(),
+                               QObject::tr("Ungroup objects"))->ungroupObjects(selected);
+        return true;
+    }
+    return false;
+}
+
 //=============================================================================
 /**
  * Cuts the selected object or keys

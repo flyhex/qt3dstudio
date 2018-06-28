@@ -126,6 +126,7 @@ public:
     void OnUpdateEditPaste();
     void OnEditDuplicate();
     void onEditDelete();
+    void onEditGroup();
 
     void timerEvent(QTimerEvent *event) override;
     void showEvent(QShowEvent *event) override;

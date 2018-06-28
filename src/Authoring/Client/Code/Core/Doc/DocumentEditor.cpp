@@ -2326,6 +2326,61 @@ public:
         }
     }
 
+    // Move all children out of a given parent instances and delete the instances.
+    // Typically the parent instances are groups as the function name implies.
+    void ungroupObjects(const TInstanceHandleList &inInstances) override
+    {
+        for (size_t idx = 0, end = inInstances.size(); idx < end; ++idx) {
+            TInstanceHandle selected = inInstances[idx];
+            if (selected.Valid()) {
+                TInstanceHandleList childHandles;
+                CGraphIterator children;
+                GetAssetChildrenInActiveSlide(selected, children);
+                for (; !children.IsDone(); ++children) {
+                    TInstanceHandle child = children.GetCurrent();
+                    childHandles.push_back(child);
+                }
+
+                // Rename the selected and to-be deleted instance so that it is less likely to cause
+                // name clash when its children are moved to the same level
+                CString name = GetName(selected);
+                name.append("@@to_be_deleted@@");
+                SetName(selected, name);
+
+                // Move group's children directly below the group item
+                RearrangeObjects(childHandles, selected, DocumentEditorInsertType::NextSibling,
+                                 true);
+
+                // Delete the group
+                DeleteInstance(selected);
+
+                // Select ungrouped instances
+                for (size_t i = 0, end = childHandles.size(); i < end; ++i) {
+                    if (i == 0 && idx == 0)
+                        m_Doc.SelectDataModelObject(childHandles[i]);
+                    else
+                        m_Doc.ToggleDataModelObjectToSelection(childHandles[i]);
+                }
+            }
+        }
+    }
+
+    // Creates a new group object and moves the specified objects as its children
+    void groupObjects(const TInstanceHandleList &inInstances) override
+    {
+        TInstanceHandleList sortedList(ToGraphOrdering(inInstances));
+
+        // Create a new group next to the topmost item in the graph
+        TInstanceHandle sibling = sortedList.front();
+        Qt3DSDMSlideHandle slide = GetActiveSlide(sibling);
+        TInstanceHandle group = CreateSceneGraphInstance(ComposerObjectTypes::Group, sibling, slide,
+                                                         DocumentEditorInsertType::PreviousSibling,
+                                                         CPt(), PRIMITIVETYPE_UNKNOWN, -1);
+
+        // Move items into the group
+        RearrangeObjects(sortedList, group, DocumentEditorInsertType::LastChild, true);
+    }
+
     Qt3DSDMInstanceHandle MakeComponent(const qt3dsdm::TInstanceHandleList &inInstances) override
     {
         if (inInstances.empty())

@@ -62,6 +62,12 @@ void RowTreeContextMenu::initialize()
     connect(m_deleteAction, &QAction::triggered, this, &RowTreeContextMenu::deleteObject);
     addAction(m_deleteAction);
 
+    m_groupAction = new QAction(tr("Group Objects"), this);
+    m_groupAction->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_G));
+    m_groupAction->setShortcutVisibleInContextMenu(true);
+    connect(m_groupAction, &QAction::triggered, this, &RowTreeContextMenu::groupObjects);
+    addAction(m_groupAction);
+
     addSeparator();
 
     m_copyAction = new QAction(tr("Copy"), this);
@@ -113,6 +119,11 @@ void RowTreeContextMenu::showEvent(QShowEvent *event)
     m_renameAction->setEnabled(canRenameObject());
     m_duplicateAction->setEnabled(canDuplicateObject());
     m_deleteAction->setEnabled(canDeleteObject());
+    m_canGroupObjects = canGroupObjects();
+    m_canUngroupObjects = canUngroupObjects();
+    m_groupAction->setEnabled(m_canUngroupObjects || m_canGroupObjects);
+    if (m_canUngroupObjects)
+        m_groupAction->setText(tr("Ungroup Objects"));
 
     m_cutAction->setEnabled(canCutObject());
     m_copyAction->setEnabled(canCopyObject());
@@ -152,10 +163,30 @@ bool RowTreeContextMenu::canDeleteObject()
                 ITimelineItemBinding::EUserTransaction_Delete);
 }
 
+bool RowTreeContextMenu::canGroupObjects()
+{
+    return m_TimelineItemBinding->IsValidTransaction(
+                ITimelineItemBinding::EUserTransaction_Group);
+}
+
+bool RowTreeContextMenu::canUngroupObjects()
+{
+    return m_TimelineItemBinding->IsValidTransaction(
+                ITimelineItemBinding::EUserTransaction_Ungroup);
+}
+
 void RowTreeContextMenu::deleteObject()
 {
     m_TimelineItemBinding->PerformTransaction(
                 ITimelineItemBinding::EUserTransaction_Delete);
+}
+
+void RowTreeContextMenu::groupObjects()
+{
+    if (m_canGroupObjects)
+        m_TimelineItemBinding->PerformTransaction(ITimelineItemBinding::EUserTransaction_Group);
+    else if (m_canUngroupObjects)
+        m_TimelineItemBinding->PerformTransaction(ITimelineItemBinding::EUserTransaction_Ungroup);
 }
 
 bool RowTreeContextMenu::canInspectComponent()

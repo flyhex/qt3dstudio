@@ -55,6 +55,11 @@ RowManager::RowManager(TimelineGraphicsScene *scene, QGraphicsLinearLayout *layo
 
 }
 
+RowManager::~RowManager()
+{
+    finalizeRowDeletions();
+}
+
 void RowManager::recreateRowsFromBinding(ITimelineItemBinding *rootBinding)
 {
     removeAllRows();
@@ -309,32 +314,51 @@ void RowManager::deleteRow(RowTree *row)
        if (row->parentRow())
            row->parentRow()->removeChild(row);
 
-       deleteRowRecursive(row);
+       deleteRowRecursive(row, true);
    }
 }
 
-void RowManager::deleteRowRecursive(RowTree *row)
+void RowManager::finalizeRowDeletions()
 {
-   if (!row->childProps().empty()) {
-       const auto childProps = row->childProps();
-       for (auto child : childProps)
-            deleteRowRecursive(child);
-   }
+    for (auto row : qAsConst(m_deletedRows)) {
+        // If the row has been reparented, no need to delete it
+        if (!row->parentRow())
+            deleteRowRecursive(row, false);
+    }
+    m_deletedRows.clear();
+}
 
-   if (!row->childRows().empty()) {
-       const auto childRows = row->childRows();
-       for (auto child : childRows)
-            deleteRowRecursive(child);
-   }
+void RowManager::deleteRowRecursive(RowTree *row, bool deferChildRows)
+{
+    if (!row->childProps().empty()) {
+        const auto childProps = row->childProps();
+        for (auto child : childProps)
+            deleteRowRecursive(child, false);
+    }
 
-   m_selectedRows.removeAll(row);
+    if (!row->childRows().empty()) {
+        const auto childRows = row->childRows();
+        for (auto child : childRows) {
+            if (deferChildRows) {
+                // Let's not delete child rows just yet, there may be a pending move for them.
+                // This happens when the same transaction contains parent deletion and child row
+                // move, such as ungrouping items.
+                child->setParentRow(nullptr);
+                m_deletedRows.append(child);
+            } else {
+                deleteRowRecursive(child, false);
+            }
+        }
+    }
 
-   m_scene->keyframeManager()->deleteKeyframes(row->rowTimeline(), false);
+    m_selectedRows.removeAll(row);
 
-   if (row->getBinding())
+    m_scene->keyframeManager()->deleteKeyframes(row->rowTimeline(), false);
+
+    if (row->getBinding())
         static_cast<Qt3DSDMTimelineItemBinding *>(row->getBinding())->setRowTree(nullptr);
 
-   delete row;
+    delete row;
 }
 
 RowTree *RowManager::selectedRow() const

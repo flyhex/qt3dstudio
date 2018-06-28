@@ -417,6 +417,11 @@ void RowTree::setTimelineRow(RowTimeline *rowTimeline)
     m_rowTimeline = rowTimeline;
 }
 
+void RowTree::setParentRow(RowTree *parent)
+{
+    m_parentRow = parent;
+}
+
 void RowTree::selectLabel()
 {
     m_labelItem.setEnabled(true);

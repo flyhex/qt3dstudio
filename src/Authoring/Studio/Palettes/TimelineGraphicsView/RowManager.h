@@ -46,10 +46,12 @@ class RowManager
 public:
     RowManager(TimelineGraphicsScene *scene, QGraphicsLinearLayout *layoutLabels,
                QGraphicsLinearLayout *layoutTimeline);
+    ~RowManager();
 
     void selectRow(RowTree *row, bool multiSelect = false);
     void setRowSelection(RowTree *row, bool selected);
     void deleteRow(RowTree *row);
+    void finalizeRowDeletions();
     void clearSelection();
     void updateFiltering(RowTree *rowTree = nullptr);
     void recreateRowsFromBinding(ITimelineItemBinding *rootBinding);
@@ -72,7 +74,7 @@ public:
 
 private:
     int getLastChildIndex(RowTree *row, int index = -1);
-    void deleteRowRecursive(RowTree *row);
+    void deleteRowRecursive(RowTree *row, bool deferChildRows);
     void updateRowFilterRecursive(RowTree *row);
     void createRowsFromBindingRecursive(ITimelineItemBinding *binding,
                                         RowTree *parentRow = nullptr);
@@ -82,6 +84,7 @@ private:
     TimelineGraphicsScene *m_scene;
     QGraphicsLinearLayout *m_layoutTree;
     QGraphicsLinearLayout *m_layoutTimeline;
+    QVector<RowTree *> m_deletedRows;
 };
 
 #endif // ROWMANAGER_H

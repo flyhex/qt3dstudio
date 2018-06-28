@@ -125,7 +125,7 @@ CMainFrame::CMainFrame()
             this, &CMainFrame::onEditPasteToMaster);
     connect(m_ui->action_Duplicate_Object, &QAction::triggered, this, &CMainFrame::OnEditDuplicate);
     connect(m_ui->actionDelete, &QAction::triggered, this, &CMainFrame::onEditDelete);
-//    connect(m_ui->actionGroup, &QAction::triggered, this, &CMainFrame::onEditGroup); // TODO: Implement
+    connect(m_ui->actionGroup, &QAction::triggered, this, &CMainFrame::onEditGroup);
 //    connect(m_ui->actionParent, &QAction::triggered, this, &CMainFrame::onEditParent); // TODO: Implement
 //    connect(m_ui->actionUnparent, &QAction::triggered, this, &CMainFrame::onEditUnparent); // TODO: Implement
     connect(m_ui->actionStudio_Preferences, &QAction::triggered,
@@ -133,7 +133,6 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionPresentation_Settings, &QAction::triggered,
             this, &CMainFrame::OnEditPresentationPreferences);
     connect(m_ui->menu_Edit, &QMenu::aboutToShow, [this]() {
-        // Enable/disable delete and duplicate
         QString type = g_StudioApp.getDuplicateType();
         QString label = tr("Duplicate %1").arg(type);
         m_ui->action_Duplicate_Object->setText(label);
@@ -143,11 +142,20 @@ CMainFrame::CMainFrame()
         label = tr("Delete %1").arg(type);
         m_ui->actionDelete->setText(label);
         m_ui->actionDelete->setEnabled(!type.isEmpty());
+
+        if (g_StudioApp.canUngroupSelectedObjects()) {
+            m_ui->actionGroup->setText(tr("Ungroup Objects"));
+            m_ui->actionGroup->setEnabled(true);
+        } else {
+            m_ui->actionGroup->setText(tr("Group Objects"));
+            m_ui->actionGroup->setEnabled(g_StudioApp.canGroupSelectedObjects());
+        }
     });
     connect(m_ui->menu_Edit, &QMenu::aboutToHide, [this]() {
-        // Enable delete and duplicate so hotkeys will work
+        // Enable potentially disabled items so hotkeys will work
         m_ui->action_Duplicate_Object->setEnabled(true);
         m_ui->actionDelete->setEnabled(true);
+        m_ui->actionGroup->setEnabled(true);
     });
 
     // View Menu
@@ -237,7 +245,6 @@ CMainFrame::CMainFrame()
 
     // Hide unimplemented menu items
     m_ui->actionRepeat->setVisible(false);
-    m_ui->actionGroup->setVisible(false);
     m_ui->actionParent->setVisible(false);
     m_ui->actionUnparent->setVisible(false);
     m_ui->actionFit_all->setVisible(false);
@@ -707,6 +714,12 @@ void CMainFrame::OnEditDuplicate()
 void CMainFrame::onEditDelete()
 {
     g_StudioApp.DeleteSelectedObject();
+}
+
+void CMainFrame::onEditGroup()
+{
+    if (!g_StudioApp.groupSelectedObjects())
+        g_StudioApp.ungroupSelectedObjects();
 }
 
 /**
