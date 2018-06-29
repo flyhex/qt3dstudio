@@ -13,7 +13,7 @@ DEFINES += _UNICODE UNICODE QT3DS_AUTHORING _AFXDLL \
 
 win: QMAKE_LFLAGS += /MANIFEST /ENTRY:"wWinMainCRTStartup"
 
-QT += core gui openglextensions
+QT += core gui xml openglextensions
 QT += qml quick widgets quickwidgets network
 
 INCLUDEPATH += \

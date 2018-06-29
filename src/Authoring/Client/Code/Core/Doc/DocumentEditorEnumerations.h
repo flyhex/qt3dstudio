@@ -49,6 +49,8 @@ struct DocumentEditorFileType
         Material,
         Path,
         Sound,
+        Presentation,
+        Project
     };
 };
 

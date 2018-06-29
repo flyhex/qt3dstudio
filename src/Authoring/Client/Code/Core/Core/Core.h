@@ -33,6 +33,8 @@
 #include "CmdStack.h"
 #include "DispatchListeners.h"
 #include "BuildConfigParser.h"
+#include "Qt3DSFileTools.h"
+#include "Doc.h"
 
 //==============================================================================
 // Forwards
@@ -41,29 +43,18 @@ class CDispatch;
 class CCmdStack;
 class CHotKeys;
 class CStudioProjectSettings;
-namespace Q3DStudio {
-class CFilePath;
-}
+struct SubPresentationRecord;
 
 QT_FORWARD_DECLARE_CLASS(QWidget)
 
 class CCore : public QObject, public CModificationListener, public CPresentationChangeListener
 {
     Q_OBJECT
-protected: // Members
-    CDoc *m_Doc;
-    CDispatch *m_Dispatch;
-    CCmdStack *m_CmdStack;
-    CHotKeys *m_HotKeys;
-    CStudioProjectSettings *m_StudioProjectSettings;
-    Q3DStudio::CBuildConfigurations m_BuildConfigurations;
-    bool m_JustSaved;
 
-public: // Construction
+public:
     CCore();
     ~CCore();
 
-public: // Methods
     void Initialize();
 
     CDoc *GetDoc() const;
@@ -76,7 +67,7 @@ public: // Methods
     bool LoadBuildConfigurations();
     void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
 
-    bool OnNewDocument(const Qt3DSFile &inDocument, bool inCreateDirectory);
+    bool OnNewDocument(const Qt3DSFile &inDocument, bool isNewProject);
     void OnSaveDocument(const Qt3DSFile &inDocument, bool inSaveCopy = false);
     void OnSaveDocumentCatcher(const Qt3DSFile &inDocument, bool inSaveCopy = false);
     void SetCommandStackModifier(ICmdStackModifier *inModifier);
@@ -103,7 +94,34 @@ public: // Methods
     void DumpCommandQueue();
     bool HasJustSaved() { return m_JustSaved; }
     void SetJustSaved(bool inJustSaved) { m_JustSaved = inJustSaved; }
+    void setProjectNameAndPath(const Q3DStudio::CString &projectName,
+                               const Q3DStudio::CFilePath &projectPath);
+    void ensureProjectFile(const QDir &uipDirectory);
+    void loadProjectFileSubpresentationsAndDatainputs(
+            QVector<SubPresentationRecord> &subpresentations,
+            QMap<QString, CDataInputDialogItem *> &datainputs);
+    void setCurrentPresentation(const QString &currentPresentationId);
+    Q3DStudio::CFilePath getProjectPath() const;
+    Q3DStudio::CString getProjectName() const;
+    QString getFirstPresentationPath(const QString &uiaPath) const;
 
 protected:
+    CDoc *m_Doc;
+    CDispatch *m_Dispatch;
+    CCmdStack *m_CmdStack;
+    CHotKeys *m_HotKeys;
+    CStudioProjectSettings *m_StudioProjectSettings;
+    Q3DStudio::CBuildConfigurations m_BuildConfigurations;
+    bool m_JustSaved;
+
     void InitAndValidateBuildConfiguration();
+
+private:
+    Q3DStudio::CFilePath m_projectPath; // project directory
+    Q3DStudio::CString m_projectName;
+    QString m_currentPresentationId;
+
+    void createProjectFile();
+    void addPresentationNodeToProjectFile(const Q3DStudio::CFilePath &uip);
+
 };

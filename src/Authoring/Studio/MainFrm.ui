@@ -58,7 +58,14 @@ Project palette using Import functionality.</string>
      </property>
      <addaction name="actionSomething"/>
     </widget>
-    <addaction name="action_New"/>
+    <widget class="QMenu" name="menu_New">
+     <property name="title">
+      <string>&amp;New</string>
+     </property>
+     <addaction name="action_New_Project"/>
+     <addaction name="action_New_Presentation"/>
+    </widget>
+    <addaction name="menu_New"/>
     <addaction name="action_Open"/>
     <addaction name="action_Save"/>
     <addaction name="actionSave_As"/>
@@ -163,7 +170,6 @@ Project palette using Import functionality.</string>
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="action_New"/>
    <addaction name="action_Open"/>
    <addaction name="action_Save"/>
    <addaction name="separator"/>
@@ -497,14 +503,6 @@ Project palette using Import functionality.</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+U</string>
-   </property>
-  </action>
-  <action name="action_New">
-   <property name="text">
-    <string>&amp;New...</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+N</string>
    </property>
   </action>
   <action name="action_Open">
@@ -988,6 +986,19 @@ Project palette using Import functionality.</string>
    </property>
    <property name="text">
     <string>Hide/unhide unselected</string>
+   </property>
+  </action>
+  <action name="action_New_Presentation">
+   <property name="text">
+    <string>&amp;Presentation...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="action_New_Project">
+   <property name="text">
+    <string>Project...</string>
    </property>
   </action>
  </widget>

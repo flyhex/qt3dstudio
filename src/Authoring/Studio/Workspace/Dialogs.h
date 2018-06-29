@@ -82,6 +82,7 @@ public:
     static QStringList materialExtensions();
     static QStringList modelExtensions();
     static QStringList behaviorExtensions();
+    static QStringList presentationExtensions();
 
     // This is not an appropriate place for these, but better
     // in an inappropriate place than duplicated
@@ -118,13 +119,15 @@ public:
     static bool IsPathFileExtension(const wchar_t *inExt);
     static bool IsPathBufferExtension(const wchar_t *inExt);
     static bool IsSoundFileExtension(const wchar_t *inExt);
+    static bool isPresentationFileExtension(const wchar_t *inExt);
+    static bool isProjectFileExtension(const wchar_t *inExt);
 
     Qt3DSFile GetExportChoice(const Q3DStudio::CString &inExtension,
                               const Q3DStudio::CString &inDefaultName);
 
     Qt3DSFile GetSaveAsChoice(const QString &inDialogTitle = "", bool createFolder = false);
     Qt3DSFile GetNewDocumentChoice(const Q3DStudio::CString &inInitialDirectory
-                                   = Q3DStudio::CString(), bool createFolder = true);
+                                   = Q3DStudio::CString(), bool isProject = true);
     Qt3DSFile GetFileOpenChoice(const Q3DStudio::CString &inInitialDirectory
                                 = Q3DStudio::CString());
 

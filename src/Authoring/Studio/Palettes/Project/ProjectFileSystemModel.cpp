@@ -186,6 +186,8 @@ Q3DStudio::DocumentEditorFileType::Enum ProjectFileSystemModel::assetTypeForRow(
         return Q3DStudio::DocumentEditorFileType::DAE;
     else if (path == QStringLiteral("scripts"))
         return Q3DStudio::DocumentEditorFileType::Behavior;
+    else if (path == QStringLiteral("presentations"))
+        return Q3DStudio::DocumentEditorFileType::Presentation;
 
     return Q3DStudio::DocumentEditorFileType::Unknown;
 }
@@ -663,6 +665,7 @@ void ProjectFileSystemModel::updateDefaultDirMap()
         m_defaultDirToAbsPathMap.insert(QStringLiteral("materials"), QString());
         m_defaultDirToAbsPathMap.insert(QStringLiteral("models"), QString());
         m_defaultDirToAbsPathMap.insert(QStringLiteral("scripts"), QString());
+        m_defaultDirToAbsPathMap.insert(QStringLiteral("presentations"), QString());
     }
 
     const QString rootPath = m_items[0].index.data(QFileSystemModel::FilePathRole).toString();

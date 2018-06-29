@@ -215,7 +215,7 @@ void CSubPresentationDlg::browseFile()
 
 void CSubPresentationDlg::createSubPresentation()
 {
-    m_subPresentation.m_argsOrSrc = g_StudioApp.OnFileNew(false);
+    m_subPresentation.m_argsOrSrc = g_StudioApp.OnFileNew();
     updateUI();
     // Select the newly created file
     m_ui->comboBoxFileList->setCurrentText(m_subPresentation.m_argsOrSrc);

@@ -203,12 +203,6 @@ public:
             QMultiMap<QString,
                       QPair<qt3dsdm::Qt3DSDMInstanceHandle,
                             qt3dsdm::Qt3DSDMPropertyHandle>> *outMap = nullptr);
-    void LoadUIASubpresentations(const QString &uiaFile,
-                                 QVector<SubPresentationRecord> &subpresentations);
-    void LoadUIADataInputs(const QString &uiaFile,
-                           QMap<QString, CDataInputDialogItem *> &datainputs);
-    void LoadUIAInitialPresentationFilename(const QString &uiaFile,
-                                            QString &initialPresentation);
 
     bool IsModified();
     bool IsValid() const;

@@ -68,6 +68,10 @@ SObjectFileType ImportUtils::GetObjectFileTypeForFile(const CFilePath &inFile,
         return SObjectFileType(OBJTYPE_PATH, DocumentEditorFileType::Path);
     else if (CDialogs::IsSoundFileExtension(theExtension))
         return SObjectFileType(OBJTYPE_SOUND, DocumentEditorFileType::Sound);
+    else if (CDialogs::isPresentationFileExtension(theExtension))
+        return SObjectFileType(OBJTYPE_PRESENTATION, DocumentEditorFileType::Presentation);
+    else if (CDialogs::isProjectFileExtension(theExtension))
+        return SObjectFileType(OBJTYPE_PROJECT, DocumentEditorFileType::Project);
 
     return SObjectFileType(OBJTYPE_UNKNOWN, DocumentEditorFileType::Unknown);
 }

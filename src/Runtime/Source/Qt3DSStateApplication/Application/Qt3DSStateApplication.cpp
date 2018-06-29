@@ -43,6 +43,8 @@ using namespace eastl;
 
 static const int DI_SEC_SZ = 5; // Datainput section length in UIP file
 
+// Mahmoud_TODO: this method is to be removed after updating the subpresentation workflow
+// according to the new design (QT3DS-1569).
 bool IApplication::EnsureApplicationFile(const char *inFullUIPPath,
                                          const QStringList &parameters,
                                          bool subpresentations)
@@ -56,6 +58,7 @@ bool IApplication::EnsureApplicationFile(const char *inFullUIPPath,
     filename = filestem;
     filename.append(1, '.');
     filename.append(extension);
+
     CFileTools::CreateDir(directory.c_str());
     eastl::vector<eastl::string> dirFiles;
     CFileTools::GetDirectoryEntries(directory, dirFiles);
@@ -160,78 +163,7 @@ bool IApplication::EnsureApplicationFile(const char *inFullUIPPath,
             }
         }
     }
-    // No uia, just create a new one named after the uip file
-    if (!uiaPath.size()) {
-        eastl::string uiaName = filestem + ".uia";
-        CFileTools::CombineBaseAndRelative(directory.c_str(), uiaName.c_str(), uiaPath);
-        eastl::string uiaFileData = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                    "<application xmlns=\"http://qt.io/qt3dstudio/uia\">\n"
-                                    "\t<assets initial=\"";
-        uiaFileData.append(filestem.c_str());
-        uiaFileData.append("\">\n"
-                           "\t\t<presentation id=\"");
-        uiaFileData.append(filestem.c_str());
-        uiaFileData.append("\"\tsrc=\"");
-        uiaFileData.append(filename);
-        uiaFileData.append("\"/>\n");
 
-        if (subpresentations) {
-            for (int i = 0; i < parameters.size() / 3; i++) {
-                uiaFileData.append("\t\t<");
-                uiaFileData.append(qPrintable(parameters[3 * i]));
-                uiaFileData.append("id=\"");
-                uiaFileData.append(qPrintable(parameters[3 * i + 1]));
-                if (parameters[3 * i] == QStringLiteral("presentation"))
-                    uiaFileData.append("\" src=\"");
-                else
-                    uiaFileData.append("\" args=\"");
-                uiaFileData.append(qPrintable(parameters[3 * i + 2]));
-                uiaFileData.append("\"/>\n");
-            }
-        } else {
-            for (int i = 0; i < parameters.size() / DI_SEC_SZ; i++) {
-                uiaFileData.append("\t\t<dataInput ");
-                uiaFileData.append("name=\"");
-                uiaFileData.append(qPrintable(parameters[DI_SEC_SZ * i]));
-                uiaFileData.append("\" type=\"");
-                uiaFileData.append(qPrintable(parameters[DI_SEC_SZ * i + 1]));
-                if (QStringLiteral("Ranged Number") == parameters[DI_SEC_SZ * i + 1]) {
-                    uiaFileData.append("\" min=\"");
-                    uiaFileData.append(qPrintable(parameters[DI_SEC_SZ * i + 2]));
-                    uiaFileData.append("\" max=\"");
-                    uiaFileData.append(qPrintable(parameters[DI_SEC_SZ * i + 3]));
-                } else if (QStringLiteral("Evaluator") == parameters[DI_SEC_SZ * i + 1]) {
-                    uiaFileData.append("\" evaluator=\"");
-                    uiaFileData.append(qPrintable(parameters[DI_SEC_SZ * i + 4]));
-                }
-                uiaFileData.append("\"/>\n");
-            }
-        }
-
-        uiaFileData.append("\t</assets>\n");
-
-        // Add initial state
-        uiaFileData.append("\n\t<statemachine ref=\"#logic\">\n");
-        uiaFileData.append("\t\t<visual-states>\n");
-        uiaFileData.append("\t\t\t<state ref=\"Initial\">\n");
-        uiaFileData.append("\t\t\t\t<enter>\n");
-        uiaFileData.append("\t\t\t\t\t<goto-slide element=\"main:Scene\" rel=\"next\"/>\n");
-        uiaFileData.append("\t\t\t\t</enter>\n");
-        uiaFileData.append("\t\t\t</state>\n");
-        uiaFileData.append("\t\t</visual-states>\n");
-        uiaFileData.append("\t</statemachine>\n");
-
-        uiaFileData.append("</application>\n");
-
-        CFileSeekableIOStream theStream(uiaPath.c_str(), FileWriteFlags());
-        if (!theStream.IsOpen()) {
-            QT3DS_ASSERT(false);
-            return false;
-        }
-        theStream.Write(
-                    toConstDataRef((const qt3ds::QT3DSU8 *)uiaFileData.c_str(),
-                                   (qt3ds::QT3DSU32)uiaFileData.length()));
-    }
     return true;
 }
 

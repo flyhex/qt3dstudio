@@ -205,7 +205,8 @@ public:
     bool OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupDialogOnError = true);
     void OnLoadDocumentCatcher(const Qt3DSFile &inLocation);
     void OnFileOpen();
-    QString OnFileNew(bool createFolder = true);
+    QString OnProjectNew();
+    QString OnFileNew();
     bool IsAuthorZoom() const;
     bool isOnProgress() const;
     void SetAuthorZoom(bool inZoom);
@@ -214,6 +215,7 @@ public:
     void toggleEyeball();
     void showInvalidFilenameWarning();
     void checkDeletedDatainputs();
+    void saveDataInputsToProjectFile();
 
     // CCoreAsynchronousEventListener
     void OnAsynchronousCommand(CCmd *inCmd) override;

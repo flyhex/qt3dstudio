@@ -160,7 +160,7 @@ void DataInputSelectView::setSelection(int index)
                         Q_EMIT dataInputChanged(m_handle, m_instance, m_mostRecentlyAdded);
                     }
                 }
-                g_StudioApp.SaveUIAFile(false);
+                g_StudioApp.saveDataInputsToProjectFile();
             }
         }
         QTimer::singleShot(0, this, &DataInputSelectView::close);

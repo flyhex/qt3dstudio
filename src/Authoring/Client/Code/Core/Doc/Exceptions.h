@@ -97,6 +97,17 @@ public:
     }
 };
 
+class ProjectFileNotFoundException : public CStudioException
+{
+public:
+    ProjectFileNotFoundException() {}
+    virtual ~ProjectFileNotFoundException() {}
+    const wchar_t *GetDescription() const override
+    {
+        return Q3DStudio::CString(_LSTR("Project file was not found"));
+    }
+};
+
 class CENotImplException : public CStudioException
 {
 public:

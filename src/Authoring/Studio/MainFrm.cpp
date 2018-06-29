@@ -98,7 +98,8 @@ CMainFrame::CMainFrame()
     g_StudioApp.setupTimer(WM_STUDIO_TIMER, this);
 
     // File Menu
-    connect(m_ui->action_New, &QAction::triggered, this, &CMainFrame::OnFileNew);
+    connect(m_ui->action_New_Project, &QAction::triggered, this, &CMainFrame::OnProjectNew);
+    connect(m_ui->action_New_Presentation, &QAction::triggered, this, &CMainFrame::OnFileNew);
     connect(m_ui->action_Open, &QAction::triggered, this, &CMainFrame::OnFileOpen);
     connect(m_ui->action_Save, &QAction::triggered, this, &CMainFrame::OnFileSave);
     connect(m_ui->actionSave_As, &QAction::triggered, this, &CMainFrame::OnFileSaveAs);
@@ -769,9 +770,14 @@ void CMainFrame::OnFileSaveCopy()
 
 //=============================================================================
 /**
- * Command handler for the New Document menu option.
- * This will create a new default document.
+ * Command handler for the New Project menu option.
+ * This will also create a new default presentation.
  */
+void CMainFrame::OnProjectNew()
+{
+    g_StudioApp.OnProjectNew();
+}
+
 void CMainFrame::OnFileNew()
 {
     g_StudioApp.OnFileNew();
@@ -871,7 +877,7 @@ void CMainFrame::OnFileDataInputs()
     dataInputDlg.exec();
 
     if (dataInputDlg.result() == QDialog::Accepted)
-        g_StudioApp.SaveUIAFile(false);
+        g_StudioApp.saveDataInputsToProjectFile();
 }
 
 //==============================================================================

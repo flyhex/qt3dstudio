@@ -107,6 +107,7 @@ public:
     void OnUpdateFileSave();
     void OnFileSaveAs();
     void OnFileSaveCopy();
+    void OnProjectNew();
     void OnFileNew();
     void OnFileRevert();
     void OnFileImportAssets();

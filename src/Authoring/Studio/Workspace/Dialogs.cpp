@@ -113,6 +113,18 @@ const char *behaviorExts[] = {
     CDialogs::GetQmlFileExtension(), nullptr,
 };
 
+const char *presentationExts[] = {
+    "uip", nullptr,
+};
+
+const wchar_t *widePresentationExts[] = {
+    L"uip", nullptr,
+};
+
+const wchar_t *wideProjectExts[] = {
+    L"uia", nullptr,
+};
+
 const char *fontExts[] = {
     "ttf", "otf", nullptr,
 };
@@ -184,6 +196,7 @@ CDialogs::CDialogs(bool inShowGUI /*= true*/)
     const auto materialExt = materialExtensions();
     const auto modelExt = modelExtensions();
     const auto behaviorExt = behaviorExtensions();
+    const auto presentationExt = presentationExtensions();
 
     for (const auto ext : effectExt)
         m_defaultDirForSuffixMap.insert(ext, QStringLiteral("effects"));
@@ -197,6 +210,8 @@ CDialogs::CDialogs(bool inShowGUI /*= true*/)
         m_defaultDirForSuffixMap.insert(ext, QStringLiteral("models"));
     for (const auto ext : behaviorExt)
         m_defaultDirForSuffixMap.insert(ext, QStringLiteral("scripts"));
+    for (const auto ext : presentationExt)
+        m_defaultDirForSuffixMap.insert(ext, QStringLiteral("presentations"));
 }
 
 //=============================================================================
@@ -806,6 +821,16 @@ bool CDialogs::IsSoundFileExtension(const wchar_t *inExt)
     return IsFileExtension(inExt, wideSoundExts);
 }
 
+bool CDialogs::isPresentationFileExtension(const wchar_t *inExt)
+{
+    return IsFileExtension(inExt, widePresentationExts);
+}
+
+bool CDialogs::isProjectFileExtension(const wchar_t *inExt)
+{
+    return IsFileExtension(inExt, wideProjectExts);
+}
+
 //==============================================================================
 /**
  *  CreateAllowedTypesString: Creates the string used to determine allowable types
@@ -909,34 +934,38 @@ CDialogs::ESavePromptResult CDialogs::PromptForSave()
  *	Prompt the user for a file to save to from the SaveAs menu option.
  *	@return	an invalid file if the user cancels the save dialog.
  */
-Qt3DSFile CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool createFolder)
+Qt3DSFile CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
 {
     Qt3DSFile theFile("");
     QString theFileExt;
-    QString theImportFilter;
 
     QString theFilename
             = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetAbsolutePath().toQString();
 
-    if (theFilename.isEmpty() || createFolder)
+    if (theFilename.isEmpty() || isProject)
         theFilename = QObject::tr("Untitled");
 
     theFileExt = QStringLiteral(".uip");
-    theImportFilter = QObject::tr("Studio UI Presentation");
-
-    theImportFilter += " (*" + theFileExt + ")|*" + theFileExt + "|";
 
     QFileDialog theFileDlg;
     theFileDlg.setOption(QFileDialog::DontConfirmOverwrite);
+
     const QFileInfo fi(m_LastSaveFile.toQString());
-    theFileDlg.setDirectory((fi.path() == QStringLiteral("."))
-                            ? QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
+    // TODO: introduce a workspace concept?
+    theFileDlg.setDirectory(fi.path() == QStringLiteral(".") || isProject
+                            ? QStandardPaths::writableLocation(
+                                  QStandardPaths::DocumentsLocation)
                             : fi.path());
     theFileDlg.setAcceptMode(QFileDialog::AcceptSave);
     theFileDlg.setDefaultSuffix(theFileExt);
     theFileDlg.setOption(QFileDialog::DontUseNativeDialog, true);
     if (!inDialogTitle.isEmpty())
         theFileDlg.setWindowTitle(inDialogTitle);
+
+    if (isProject) {
+        theFileDlg.setLabelText(QFileDialog::FileName, QObject::tr("Project Name"));
+        theFileDlg.setLabelText(QFileDialog::Accept, QObject::tr("Create"));
+    }
 
     bool theShowDialog = true;
 
@@ -953,7 +982,7 @@ Qt3DSFile CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool createFol
         m_LastSaveFile = theFile.GetAbsolutePath();
         // New directory is only created when creating a new project. When doing a "save as"
         // or "save copy", a new directory is not created.
-        if (createFolder) {
+        if (isProject) {
             Q3DStudio::CFilePath theFinalDir;
             Q3DStudio::CFilePath theFinalDoc;
             g_StudioApp.GetCore()->GetCreateDirectoryFileName(theFile, theFinalDir, theFinalDoc);
@@ -983,15 +1012,18 @@ Qt3DSFile CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool createFol
 
 //==============================================================================
 /**
- *	Prompt the user for a file to create.
- *	@return	an invalid file if the user cancels the save dialog.
+ * Prompt the user for a file to create.
+ * @param  isProject   true: new project, false: new presentation
+ * @return an invalid file if the user cancels the save dialog.
  */
 Qt3DSFile CDialogs::GetNewDocumentChoice(const Q3DStudio::CString &inInitialDirectory,
-                                         bool createFolder)
+                                         bool isProject)
 {
     if (inInitialDirectory.size())
         m_LastSaveFile = inInitialDirectory;
-    return GetSaveAsChoice(QObject::tr("Create New Document"), createFolder);
+    QString title = isProject ? QObject::tr("Create New Project")
+                              : QObject::tr("Create New Presentation");
+    return GetSaveAsChoice(title, isProject);
 }
 
 //==============================================================================
@@ -1312,6 +1344,18 @@ QStringList CDialogs::behaviorExtensions()
     static QStringList exts;
     if (exts.isEmpty()) {
         for (const char *ext : behaviorExts) {
+            if (ext)
+                exts << QString::fromLatin1(ext);
+        }
+    }
+    return exts;
+}
+
+QStringList CDialogs::presentationExtensions()
+{
+    static QStringList exts;
+    if (exts.isEmpty()) {
+        for (const char *ext : presentationExts) {
             if (ext)
                 exts << QString::fromLatin1(ext);
         }

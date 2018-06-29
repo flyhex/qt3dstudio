@@ -27,9 +27,6 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-// Includes
-//==============================================================================
 #include "Qt3DSFile.h"
 #include "Qt3DSFileTools.h"
 
@@ -43,12 +40,8 @@
 #include <QtGui/qdesktopservices.h>
 #include <QtCore/qurl.h>
 
-//==============================================================================
-// Static variables
-//==============================================================================
 TFilePathList Qt3DSFile::s_TempFilePathList;
 
-//=============================================================================
 /**
  * Create a new file from the path.
  * @param inIsPosix ignored.
@@ -66,7 +59,6 @@ Qt3DSFile::Qt3DSFile(const Q3DStudio::CString &inPathName, bool inIsPosix, bool 
     m_Path = Q3DStudio::CString::fromQString(QDir::toNativeSeparators(path));
 }
 
-//=============================================================================
 /**
  * Create a file by combining the two paths.
  */
@@ -77,7 +69,6 @@ Qt3DSFile::Qt3DSFile(const Q3DStudio::CString &inPathName, const Q3DStudio::CStr
     m_Path = theFile.GetPath();
 }
 
-//=============================================================================
 /**
  * Create a file by combining the base path with a relative path.
  */
@@ -95,7 +86,6 @@ Qt3DSFile::Qt3DSFile(const Qt3DSFile &inFile)
     m_Path = inFile.m_Path;
 }
 
-//=============================================================================
 /**
  * Get an iterator for all the sub-files of this directory.
  */
@@ -104,7 +94,6 @@ CFileIterator Qt3DSFile::GetSubItems() const
     return CFileIterator(this);
 }
 
-//=============================================================================
 /**
  * Destructor
  */
@@ -121,7 +110,6 @@ bool Qt3DSFile::operator==(const Qt3DSFile &inRHS) const
 #endif
 }
 
-//=============================================================================
 /**
  * Returns true if this is a file and can be read.
  */
@@ -130,7 +118,6 @@ bool Qt3DSFile::CanRead() const
     return IsFile();
 }
 
-//=============================================================================
 /**
  * Returns true if this is a file and can be written to.
  */
@@ -140,7 +127,6 @@ bool Qt3DSFile::CanWrite() const
     return info.isWritable();
 }
 
-//=============================================================================
 /**
  * Delete this file from the file system. This will also perform a recursive
  * delete on the sub folders and files if it is a folder
@@ -166,7 +152,6 @@ bool Qt3DSFile::DeleteFile() const
     return theFileDeleted == TRUE;
 }
 
-//=============================================================================
 /**
  * Check to see if this file or directory exists.
  */
@@ -176,7 +161,6 @@ bool Qt3DSFile::Exists() const
     return info.exists();
 }
 
-//=============================================================================
 /**
  * Get the fully qualified absolute path.
  * This should resolve all relative parts of the path.
@@ -189,7 +173,6 @@ Q3DStudio::CString Qt3DSFile::GetAbsolutePath() const
     return m_Path;
 }
 
-//=============================================================================
 /**
  * @see GetAbsolutePath.
  */
@@ -198,7 +181,6 @@ Q3DStudio::CString Qt3DSFile::GetAbsolutePosixPath() const
     return GetAbsolutePath();
 }
 
-//=============================================================================
 /**
  * Get the filename section of this file, ignoring all drives and directories.
  */
@@ -208,7 +190,15 @@ Q3DStudio::CString Qt3DSFile::GetName() const
     return Q3DStudio::CString::fromQString(info.fileName());
 }
 
-//=============================================================================
+/**
+ * Get the filename section of this file, without the extension
+ */
+Q3DStudio::CString Qt3DSFile::GetStem() const
+{
+    QFileInfo info(m_Path.toQString());
+    return Q3DStudio::CString::fromQString(info.baseName());
+}
+
 /**
  * Get the file extension, without the period.
  */
@@ -218,7 +208,6 @@ Q3DStudio::CString Qt3DSFile::GetExtension() const
     return Q3DStudio::CString::fromQString(info.suffix());
 }
 
-//=============================================================================
 /**
  * Get the underlying path for this file, this may include relativity.
  */
@@ -227,7 +216,6 @@ Q3DStudio::CString Qt3DSFile::GetPath() const
     return m_Path;
 }
 
-//=============================================================================
 /**
  * Returns true if this file exists and is not a directory.
  * The param inCheckForAlias is not used in Windows
@@ -239,7 +227,6 @@ bool Qt3DSFile::IsFile(bool inCheckForAlias /*true*/) const
     return info.isFile();
 }
 
-//=============================================================================
 /**
  * Check to see if this file or directory is hidden.
  */
@@ -249,7 +236,6 @@ bool Qt3DSFile::IsHidden() const
     return info.isHidden();
 }
 
-//=============================================================================
 /**
  * Get the size of this file in bytes.
  */
@@ -259,7 +245,6 @@ long Qt3DSFile::Length() const
     return info.size();
 }
 
-//=============================================================================
 /**
  * Rename (or move) this file to the other file.
  */
@@ -269,7 +254,6 @@ void Qt3DSFile::RenameTo(const Qt3DSFile &inDestination)
         throw CIOException();
 }
 
-//=============================================================================
 /**
  * Copy this file to the other file, leaving this file intact.
  */
@@ -282,7 +266,6 @@ void Qt3DSFile::CopyTo(const Qt3DSFile &inDestination)
         throw CIOException();
 }
 
-//=============================================================================
 /**
  * Make this file read only. or unmark the read only
  */
@@ -297,7 +280,6 @@ void Qt3DSFile::SetReadOnly(bool inReadOnlyFlag)
     QFile::setPermissions(qpath, perm);
 }
 
-//=============================================================================
 /**
  * Get the location of where this application resides.
  */
@@ -315,7 +297,6 @@ Qt3DSFile Qt3DSFile::GetApplicationDirectory()
 #endif
 }
 
-//=============================================================================
 /**
  * Create a temporary file from where the system holds it's temp files.
  * @param inExtension the file extension that should be used.
@@ -336,7 +317,6 @@ Qt3DSFile Qt3DSFile::GetTemporaryFile()
     return Qt3DSFile(Q3DStudio::CString::fromQString(tempFile.fileName()));
 }
 
-//=============================================================================
 /**
  * Get the URL representing this file.
  */
@@ -345,7 +325,6 @@ QUrl Qt3DSFile::GetURL() const
     return QUrl::fromLocalFile(m_Path.toQString());
 }
 
-//=============================================================================
 /**
  * Request the filesystem to open this file in whatever manner it chooses with
  * the associated application.
@@ -357,7 +336,6 @@ void Qt3DSFile::Execute() const
     QDesktopServices::openUrl(url);
 }
 
-//=============================================================================
 /**
  * Combine the file and relative path together into another file.
  */
@@ -368,7 +346,6 @@ Qt3DSFile Qt3DSFile::Combine(const Qt3DSFile &inBasePath, const Q3DStudio::CStri
     return Qt3DSFile(Q3DStudio::CString::fromQString(rel));
 }
 
-//=============================================================================
 /**
  * Get a file handle for this file that can be used for reading.
  * The handle must be closed with CloseHandle when finished.
@@ -379,7 +356,6 @@ HANDLE Qt3DSFile::OpenFileReadHandle() const
     return nullptr;
 }
 
-//=============================================================================
 /**
  * Get a file handle for this file that can be used for writing.
  * The handle must be closed with CloseHandle when finished.
@@ -390,7 +366,6 @@ HANDLE Qt3DSFile::OpenFileWriteHandle() const
     return nullptr;
 }
 
-//=============================================================================
 /**
  * Clear all temp files that have been created so far by calling the GetTemporaryFile methods.
  * This would only clear the temp files that were created during the current program session,
@@ -412,7 +387,6 @@ void Qt3DSFile::AddTempFile(const Q3DStudio::CString &inFile)
     s_TempFilePathList.insert(inFile);
 }
 
-//=============================================================================
 /**
  * Checks if a path is relative or not.
  * Filename-only strings have no path separators and are considered relative.

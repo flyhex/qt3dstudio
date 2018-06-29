@@ -4146,8 +4146,9 @@ public:
                     QVector<SubPresentationRecord> subpresentations;
                     QVector<QString> subIds;
 
-                    m_Doc.LoadUIASubpresentations(m_Doc.GetDocumentUIAFile(),
-                                                  subpresentations);
+                    // Mahmoud_TODO: update here or delete.
+//                    m_Doc.LoadUIASubpresentations(m_Doc.GetDocumentUIAFile(),
+//                                                  subpresentations);
 
                     for (SubPresentationRecord &r : subpresentations)
                         subIds.push_back(r.m_id);

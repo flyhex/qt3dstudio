@@ -62,6 +62,7 @@ ProjectView::ProjectView(const QSize &preferredSize, QWidget *parent) : QQuickWi
     m_defaultImageDir = theApplicationPath + QStringLiteral("/Content/Maps Library");
     m_defaultMaterialDir = theApplicationPath + QStringLiteral("/Content/Material Library");
     m_defaultModelDir = theApplicationPath + QStringLiteral("/Content/Models Library");
+    m_defaultPresentationDir = theApplicationPath + QStringLiteral("/Content/Presentations");
 
     m_BehaviorDir = m_defaultBehaviorDir;
     m_EffectDir = m_defaultEffectDir;
@@ -69,6 +70,7 @@ ProjectView::ProjectView(const QSize &preferredSize, QWidget *parent) : QQuickWi
     m_ImageDir = m_defaultImageDir;
     m_MaterialDir = m_defaultMaterialDir;
     m_ModelDir = m_defaultModelDir;
+    m_presentationDir = m_defaultPresentationDir;
 
     m_assetImportDir = theApplicationPath + QStringLiteral("/Content");
 
@@ -144,6 +146,14 @@ void ProjectView::modelAction(int row)
     m_ProjectModel->importUrls(urls, row);
 }
 
+void ProjectView::presentationAction(int row)
+{
+    m_presentationDir = m_defaultPresentationDir;
+    QList<QUrl> urls = g_StudioApp.GetDialogs()->SelectAssets(
+                m_presentationDir, Q3DStudio::DocumentEditorFileType::Presentation);
+    m_ProjectModel->importUrls(urls, row);
+}
+
 void ProjectView::behaviorAction(int row)
 {
     m_BehaviorDir = m_defaultBehaviorDir;
@@ -182,6 +192,9 @@ void ProjectView::assetImportInContext(int row)
         break;
     case Q3DStudio::DocumentEditorFileType::Behavior:
         assetDir = &m_BehaviorDir;
+        break;
+    case Q3DStudio::DocumentEditorFileType::Presentation:
+        assetDir = &m_presentationDir;
         break;
     default:
         break;
@@ -322,9 +335,5 @@ void ProjectView::refreshImport(int row) const
 
 void ProjectView::rebuild()
 {
-    const auto theDoc = g_StudioApp.GetCore()->GetDoc();
-    const Q3DStudio::CFilePath thePath(theDoc->GetDocumentPath().GetAbsolutePath());
-    const Q3DStudio::CFilePath theRootDirPath = thePath.GetDirectory();
-
-    m_ProjectModel->setRootPath(theRootDirPath.toQString());
+    m_ProjectModel->setRootPath(g_StudioApp.GetCore()->getProjectPath().toQString());
 }

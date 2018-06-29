@@ -49,6 +49,7 @@
 #include <QtWidgets/qaction.h>
 #include <QtCore/qstandardpaths.h>
 #include <QtCore/qcommandlineparser.h>
+#include <QtXml/qdom.h>
 
 const QString activePresentationQuery = QStringLiteral("activePresentation:");
 
@@ -463,26 +464,23 @@ bool CStudioApp::handleWelcomeRes(int res, bool recursive)
 
 QString CStudioApp::resolvePresentationFile(const QString &inFile)
 {
-    // If opening an .uia file, parse the main presentation file from it and load that instead
-    QString outFile = inFile;
     QFileInfo inFileInfo(inFile);
-    if (inFileInfo.suffix().compare(QStringLiteral("uia"), Qt::CaseInsensitive) == 0) {
-        QString initialPresentation;
-        QString uiaPath = inFileInfo.absoluteFilePath();
-        if (inFileInfo.exists())
-            m_core->GetDoc()->LoadUIAInitialPresentationFilename(uiaPath, initialPresentation);
+    // a uip file, just return it
+    if (inFileInfo.suffix().compare(QStringLiteral("uip"), Qt::CaseInsensitive) == 0)
+        return inFile;
 
-        if (!initialPresentation.isEmpty()) {
-            QFileInfo uipFile(initialPresentation);
-            if (uipFile.isAbsolute()) {
-                outFile = initialPresentation;
-            } else {
-                uiaPath = inFileInfo.path();
-                outFile = uiaPath + QStringLiteral("/") + initialPresentation;
-            }
-        }
+    // If opening a .uia file, look for the first uip file inside it
+    if (inFileInfo.suffix().compare(QStringLiteral("uia"), Qt::CaseInsensitive) == 0
+            && inFileInfo.exists()) {
+        QString uiaPath = inFileInfo.absoluteFilePath();
+        QString firstPresentation = m_core->getFirstPresentationPath(uiaPath);
+
+        if (!firstPresentation.isEmpty())
+            return inFileInfo.path() + QStringLiteral("/") + firstPresentation;
     }
-    return outFile;
+
+    // couldn't find a uip file
+    return {};
 }
 
 //=============================================================================
@@ -1570,10 +1568,15 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
         m_views->getMainFrame()->showScene();
 
     try {
+        Q3DStudio::CFilePath docFilePath(inDocument.GetAbsolutePath());
+        m_core->ensureProjectFile(docFilePath.dir()); // make sure a project (a .uia file) exists
         OnLoadDocumentCatcher(loadDocument);
         m_core->GetDispatch()->FireOnOpenDocument(loadDocument, true);
         // Loading was successful
         theLoadResult = true;
+    } catch (ProjectFileNotFoundException &) {
+        theErrorText = tr("Project file was not found");
+        // No project file (.uia) was found
     } catch (CUnsupportedFileFormatException &) {
         theErrorText = tr("The file could not be opened. It is either invalid or was made with an "
                           "old version of Studio.");
@@ -1628,16 +1631,10 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
         }
     } else {
         m_dialogs->ResetSettings(loadDocument.GetPath());
-
-        m_subpresentations.clear();
-        m_core->GetDoc()->LoadUIASubpresentations(m_core->GetDoc()->GetDocumentUIAFile(true),
-                                                  m_subpresentations);
-
+        m_core->setCurrentPresentation(loadDocument.GetStem().toQString());
+        m_core->loadProjectFileSubpresentationsAndDatainputs(m_subpresentations,
+                                                             m_dataInputDialogItems);
         g_StudioApp.getRenderer().RegisterSubpresentations(m_subpresentations);
-
-        m_dataInputDialogItems.clear();
-        m_core->GetDoc()->LoadUIADataInputs(m_core->GetDoc()->GetDocumentUIAFile(true),
-                                            m_dataInputDialogItems);
     }
 
     m_authorZoom = false;
@@ -1651,53 +1648,87 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
 
 //=============================================================================
 /**
- *
+ * This method saves the UIA file after subpresentations or data inputs are changed
+ * @param subpresentations, true: subpresentation update, false: datainput update
  */
 void CStudioApp::SaveUIAFile(bool subpresentations)
 {
+    // Mahmoud_TODO: this method is to be removed after updating the subpresentation workflow
+    // according to the new design (QT3DS-1569).
     QStringList list;
     if (subpresentations) {
-        for (SubPresentationRecord r : m_subpresentations) {
+        for (SubPresentationRecord r : qAsConst(m_subpresentations)) {
             list.append(r.m_type);
             list.append(r.m_id);
             list.append(r.m_argsOrSrc);
         }
-    } else {
-        for (CDataInputDialogItem *item : m_dataInputDialogItems) {
-            list.append(item->name);
-            if (item->type == EDataType::DataTypeRangedNumber)
-                list.append(QStringLiteral("Ranged Number"));
-            else if (item->type == EDataType::DataTypeString)
-                list.append(QStringLiteral("String"));
-            else if (item->type == EDataType::DataTypeFloat)
-                list.append(QStringLiteral("Float"));
-            else if (item->type == EDataType::DataTypeBoolean)
-                list.append(QStringLiteral("Boolean"));
-            else if (item->type == EDataType::DataTypeVector3)
-                list.append(QStringLiteral("Vector3"));
-            else if (item->type == EDataType::DataTypeVector2)
-                list.append(QStringLiteral("Vector2"));
-#ifdef DATAINPUT_EVALUATOR_ENABLED
-            else if (item->type == EDataType::DataTypeEvaluator)
-                list.append(QStringLiteral("Evaluator"));
-#endif
-            else if (item->type == EDataType::DataTypeVariant)
-                list.append(QStringLiteral("Variant"));
-
-            // Write min and max regardless of type, as we will get a mess if number of parameters
-            // varies between different types
-            list.append(QString::number(item->minValue));
-            list.append(QString::number(item->maxValue));
-            // Write evaluator expression
-            list.append(QString(item->valueString));
-        }
     }
+
     Q3DStudio::CFilePath doc(GetCore()->GetDoc()->GetDocumentPath().GetAbsolutePath());
     QByteArray docBA = doc.toQString().toLatin1();
     qt3ds::state::IApplication::EnsureApplicationFile(docBA.constData(), list, subpresentations);
 
     if (subpresentations)
         g_StudioApp.getRenderer().RegisterSubpresentations(m_subpresentations);
+}
+
+void CStudioApp::saveDataInputsToProjectFile()
+{
+    // open the uia file
+    QString path = m_core->getProjectPath().toQString() + QLatin1String("/")
+            + m_core->getProjectName().toQString() + QLatin1String(".uia");
+    QFile file(path);
+    file.open(QIODevice::ReadWrite);
+    QDomDocument doc;
+    doc.setContent(&file);
+
+    QDomElement assetsNode = doc.documentElement().firstChildElement(QStringLiteral("assets"));
+
+    if (!assetsNode.isNull()) {
+        // remove old dataInput nodes
+       for (int i = assetsNode.childNodes().count() - 1; i >= 0; --i) {
+            QDomNode node_i = assetsNode.childNodes().at(i);
+            if (node_i.nodeName() == QLatin1String("dataInput"))
+                assetsNode.removeChild(node_i);
+        }
+
+        // add the new dataInputs
+        for (CDataInputDialogItem *item : qAsConst(m_dataInputDialogItems)) {
+
+            QDomElement diNode = doc.createElement(QStringLiteral("dataInput"));
+            diNode.setAttribute(QStringLiteral("name"), item->name);
+
+            if (item->type == EDataType::DataTypeRangedNumber) {
+                diNode.setAttribute(QStringLiteral("type"), QStringLiteral("Ranged Number"));
+                diNode.setAttribute(QStringLiteral("min"), item->minValue);
+                diNode.setAttribute(QStringLiteral("max"), item->maxValue);
+            } else if (item->type == EDataType::DataTypeString) {
+                diNode.setAttribute(QStringLiteral("type"), QStringLiteral("String"));
+            } else if (item->type == EDataType::DataTypeFloat) {
+                diNode.setAttribute(QStringLiteral("type"), QStringLiteral("Float"));
+            } else if (item->type == EDataType::DataTypeBoolean) {
+                diNode.setAttribute(QStringLiteral("type"), QStringLiteral("Boolean"));
+            } else if (item->type == EDataType::DataTypeVector3) {
+                diNode.setAttribute(QStringLiteral("type"), QStringLiteral("Vector3"));
+            } else if (item->type == EDataType::DataTypeVector2) {
+                diNode.setAttribute(QStringLiteral("type"), QStringLiteral("Vector2"));
+            } else if (item->type == EDataType::DataTypeVariant) {
+                diNode.setAttribute(QStringLiteral("type"), QStringLiteral("Variant"));
+            }
+#ifdef DATAINPUT_EVALUATOR_ENABLED
+            else if (item->type == EDataType::DataTypeEvaluator) {
+                diNode.setAttribute(QStringLiteral("type"), QStringLiteral("Evaluator"));
+                diNode.setAttribute(QStringLiteral("evaluator"), item->valueString);
+            }
+#endif
+            assetsNode.appendChild(diNode);
+        }
+
+        // write the uia file
+        file.resize(0);
+        file.write(doc.toByteArray(4));
+        file.close();
+    }
 }
 
 CFilePath CStudioApp::getMostRecentDirectory() const
@@ -1741,12 +1772,34 @@ void CStudioApp::OnFileOpen()
     }
 }
 
-QString CStudioApp::OnFileNew(bool createFolder)
+/**
+ * Create a new project
+ * this creates the project file (.uia), asset folders, and a default .uip file
+ */
+QString CStudioApp::OnProjectNew()
 {
     if (PerformSavePrompt()) {
-        Qt3DSFile theFile = m_dialogs->GetNewDocumentChoice(Q3DStudio::CString(""), createFolder);
+        Qt3DSFile theFile = m_dialogs->GetNewDocumentChoice(Q3DStudio::CString(""), true);
         if (theFile.GetPath() != "") {
-            if (!m_core->OnNewDocument(theFile, createFolder))
+            if (!m_core->OnNewDocument(theFile, true))
+                showInvalidFilenameWarning();
+        } else {
+            return theFile.GetName().toQString();
+        }
+    }
+    return QString();
+}
+
+/**
+ * Create a new presentation
+ * this creates a .uip file
+ */
+QString CStudioApp::OnFileNew()
+{
+    if (PerformSavePrompt()) {
+        Qt3DSFile theFile = m_dialogs->GetNewDocumentChoice(Q3DStudio::CString(""), false);
+        if (theFile.GetPath() != "") {
+            if (!m_core->OnNewDocument(theFile, false))
                 showInvalidFilenameWarning();
         } else {
             return theFile.GetName().toQString();

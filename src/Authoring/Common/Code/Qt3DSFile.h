@@ -71,6 +71,7 @@ public:
     Q3DStudio::CString GetAbsolutePosixPath() const;
 
     Q3DStudio::CString GetName() const;
+    Q3DStudio::CString GetStem() const;
     Q3DStudio::CString GetExtension() const;
     Q3DStudio::CString GetPath() const;
 

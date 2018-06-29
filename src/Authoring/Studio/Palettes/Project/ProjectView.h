@@ -59,6 +59,7 @@ public:
     Q_INVOKABLE void imageAction(int row);
     Q_INVOKABLE void materialAction(int row);
     Q_INVOKABLE void modelAction(int row);
+    Q_INVOKABLE void presentationAction(int row);
     Q_INVOKABLE void behaviorAction(int row);
     Q_INVOKABLE void assetImportAction(int row);
     void assetImportInContext(int row);
@@ -105,12 +106,14 @@ private:
     QString m_defaultImageDir;
     QString m_defaultMaterialDir;
     QString m_defaultModelDir;
+    QString m_defaultPresentationDir;
     QString m_BehaviorDir;
     QString m_EffectDir;
     QString m_FontDir;
     QString m_ImageDir;
     QString m_MaterialDir;
     QString m_ModelDir;
+    QString m_presentationDir;
     QString m_assetImportDir;
     QSize m_preferredSize;
 };
