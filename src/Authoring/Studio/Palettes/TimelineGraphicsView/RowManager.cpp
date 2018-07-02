@@ -236,14 +236,9 @@ void RowManager::setRowSelection(RowTree *row, bool selected)
         // Expand parents if not expanded
         QPointer<RowTree> pRow = row->parentRow();
         if (!pRow.isNull()) {
-            QTimer::singleShot(0, [pRow]() {
-                if (!pRow.isNull()) {
-                    RowTree *parentRow = pRow.data();
-                    while (parentRow) {
-                        parentRow->updateExpandStatus(RowTree::ExpandState::Expanded, false);
-                        parentRow = parentRow->parentRow();
-                    }
-                }
+            QTimer::singleShot(0, [this, pRow]() {
+                if (!pRow.isNull())
+                    ensureRowExpandedAndVisible(pRow, false);
             });
         }
     } else {
@@ -352,6 +347,7 @@ void RowManager::deleteRowRecursive(RowTree *row, bool deferChildRows)
     }
 
     m_selectedRows.removeAll(row);
+    m_deletedRows.removeAll(row); // Row actually deleted, remove it from pending deletes
 
     m_scene->keyframeManager()->deleteKeyframes(row->rowTimeline(), false);
 
@@ -376,6 +372,18 @@ bool RowManager::isRowSelected(RowTree *row) const
 QVector<RowTree *> RowManager::selectedRows() const
 {
     return m_selectedRows;
+}
+
+void RowManager::ensureRowExpandedAndVisible(RowTree *row, bool forceChildUpdate) const
+{
+    RowTree *parentRow = row;
+    while (parentRow) {
+        parentRow->updateExpandStatus(parentRow->expandHidden()
+                                    ? RowTree::ExpandState::HiddenExpanded
+                                    : RowTree::ExpandState::Expanded, false,
+                                    forceChildUpdate);
+        parentRow = parentRow->parentRow();
+    }
 }
 
 int RowManager::getRowIndex(RowTree *row, int startAt)

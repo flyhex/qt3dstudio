@@ -86,6 +86,8 @@ void RowTree::initialize()
     setTimelineRow(m_rowTimeline);
     m_rowTimeline->setRowTree(this);
 
+    setMinimumWidth(TimelineConstants::TREE_BOUND_W);
+
     initializeAnimations();
 
     m_labelItem.setParentItem(this);
@@ -153,6 +155,10 @@ void RowTree::animateExpand(ExpandState state)
         endHeight = TimelineConstants::ROW_H;
         endOpacity = 1;
     }
+    // Changing end values while animation is running does not affect currently running animation,
+    // so let's make sure the animation is stopped first.
+    m_expandAnimation.stop();
+
     m_expandHeightAnimation->setEndValue(QSizeF(size().width(), endHeight));
     m_expandTimelineHeightAnimation->setEndValue(QSizeF(m_rowTimeline->size().width(),
                                                         endHeight));
@@ -770,9 +776,10 @@ TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
     return TreeControlType::None;
 }
 
-void RowTree::updateExpandStatus(ExpandState state, bool animate)
+void RowTree::updateExpandStatus(ExpandState state, bool animate, bool forceChildUpdate)
 {
-    if (m_expandState == state)
+    const bool changed = m_expandState != state;
+    if (!forceChildUpdate && !changed)
         return;
 
     m_expandState = state;
@@ -781,7 +788,7 @@ void RowTree::updateExpandStatus(ExpandState state, bool animate)
         return;
 
     // Store the expanded state of items so we can restore it on slide change
-    if (m_binding) {
+    if (changed && m_binding) {
         m_scene->expandMap().insert(
                     static_cast<Qt3DSDMTimelineItemBinding *>(m_binding)->GetInstance(),
                     m_expandState);
@@ -789,6 +796,11 @@ void RowTree::updateExpandStatus(ExpandState state, bool animate)
 
     if (animate)
         animateExpand(m_expandState);
+
+    // updateFilter updates the row visibility. It must be called before children are handled
+    // to ensure parent visibility is up to date.
+    if (changed)
+        updateFilter();
 
     if (!m_childRows.empty()) {
         for (auto child : qAsConst(m_childRows)) {
@@ -815,8 +827,6 @@ void RowTree::updateExpandStatus(ExpandState state, bool animate)
                 child->updateExpandStatus(ExpandState::HiddenExpanded);
         }
     }
-
-    updateFilter();
 }
 
 void RowTree::updateLockRecursive(bool state)

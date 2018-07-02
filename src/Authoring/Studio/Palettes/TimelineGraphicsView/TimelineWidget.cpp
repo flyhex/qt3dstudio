@@ -512,7 +512,6 @@ void TimelineWidget::onAssetDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         return;
 
     RowTree *row = m_handlesMap.value(inInstance);
-
     if (row) { // scene object exists
         m_graphicsScene->rowManager()->deleteRow(row);
         m_handlesMap.remove(inInstance);
@@ -719,6 +718,7 @@ void TimelineWidget::onAsyncUpdate()
                 flippedMap.insert(it.value(), it.key());
             }
             const auto parentHandles = flippedMap.keys();
+            QSet<RowTree *> expandRows;
             for (const auto parentHandle : parentHandles) {
                 QSet<int> movedInstances(flippedMap.values(parentHandle).toSet());
                 RowTree *rowParent = m_handlesMap.value(parentHandle);
@@ -736,13 +736,28 @@ void TimelineWidget::onAsyncUpdate()
                             if (row)
                                 rowParent->addChildAt(row, indexIt.key());
                         }
+                        expandRows.insert(rowParent);
                     }
-                    rowParent->updateExpandStatus(RowTree::ExpandState::Expanded, false);
                 }
             }
+
             // Make sure selections on UI matches bindings
             CDoc *doc = g_StudioApp.GetCore()->GetDoc();
             onSelectionChange(doc->GetSelectedValue());
+
+            // Expand the parents of the added rows, but only for topmost ancestors of the moved
+            // rows as expanding all moved rows indiscriminately would not work intuitively
+            // in case of e.g. mass delete undo.
+            // Rest of expandRows will be force-updated to their current state to ensure
+            // their children are in proper state. This is relevant in cases like grouping,
+            // where existing potentially visible rows are moved under newly created group,
+            // which is collapsed by default.
+            for (RowTree *row : qAsConst(expandRows)) {
+                if (!expandRows.contains(row->parentRow()))
+                    m_graphicsScene->rowManager()->ensureRowExpandedAndVisible(row, true);
+                else
+                    row->updateExpandStatus(row->expandState(), false, true);
+            }
         }
         // Update properties
         if (!m_dirtyProperties.isEmpty()) {

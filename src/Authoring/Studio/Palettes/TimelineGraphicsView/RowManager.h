@@ -71,6 +71,7 @@ public:
     RowTree *selectedRow() const;
     bool isRowSelected(RowTree *row) const;
     QVector<RowTree *> selectedRows() const;
+    void ensureRowExpandedAndVisible(RowTree *row, bool forceChildUpdate) const;
 
 private:
     int getLastChildIndex(RowTree *row, int index = -1);

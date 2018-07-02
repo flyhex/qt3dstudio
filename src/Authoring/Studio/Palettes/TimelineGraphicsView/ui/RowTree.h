@@ -104,6 +104,7 @@ public:
     bool locked() const;
     bool expanded() const;
     bool expandHidden() const;
+    ExpandState expandState() const { return m_expandState; }
     bool isDecendentOf(RowTree *row) const;
     bool isContainer() const;
     bool isProperty() const;
@@ -140,7 +141,7 @@ public:
     DnDState getDnDState() const;
 
     ITimelineItemBinding *getBinding() const;
-    void updateExpandStatus(ExpandState state, bool animate = true);
+    void updateExpandStatus(ExpandState state, bool animate = true, bool forceChildUpdate = false);
     void updateArrowVisibility();
     void updateFilter();
 
