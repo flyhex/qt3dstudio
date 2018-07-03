@@ -755,70 +755,72 @@ struct SRendererImpl : public IStudioRenderer,
 
             if (theCameraToolMode == 0) {
                 if (m_Doc.GetDocumentReader().IsInstance(m_Doc.GetSelectedInstance())) {
-                    bool rightClick = (inFlags & CHotKeys::MOUSE_RBUTTON) != 0;
-                    MovementTypes::Enum theMovement(MovementTypes::Unknown);
+                    if (m_Doc.getSelectedInstancesCount() == 1) {
+                        bool rightClick = (inFlags & CHotKeys::MOUSE_RBUTTON) != 0;
+                        MovementTypes::Enum theMovement(MovementTypes::Unknown);
 
-                    switch (inToolMode) {
-                    default:
-                        QT3DS_ASSERT(false);
-                        break;
-                    case STUDIO_TOOLMODE_MOVE:
-                        if (rightClick)
-                            theMovement = MovementTypes::TranslateAlongCameraDirection;
-                        else
-                            theMovement = MovementTypes::Translate;
-                        break;
-                    case STUDIO_TOOLMODE_SCALE:
-                        if (rightClick)
-                            theMovement = MovementTypes::ScaleZ;
-                        else
-                            theMovement = MovementTypes::Scale;
-                        break;
-                    case STUDIO_TOOLMODE_ROTATE:
-                        if (rightClick)
-                            theMovement = MovementTypes::RotationAboutCameraDirection;
-                        else
-                            theMovement = MovementTypes::Rotation;
-                        break;
-                    }
-
-                    if (theMovement != MovementTypes::Unknown) {
-                        bool theLockToAxis = (inFlags & CHotKeys::MODIFIER_SHIFT) != 0;
-
-                        if (m_LastDragToolMode != MovementTypes::Unknown
-                            && theMovement != m_LastDragToolMode) {
-                            m_UpdatableEditor.RollbackEditor();
-                            m_MouseDownPoint = inPoint;
+                        switch (inToolMode) {
+                        default:
+                            QT3DS_ASSERT(false);
+                            break;
+                        case STUDIO_TOOLMODE_MOVE:
+                            if (rightClick)
+                                theMovement = MovementTypes::TranslateAlongCameraDirection;
+                            else
+                                theMovement = MovementTypes::Translate;
+                            break;
+                        case STUDIO_TOOLMODE_SCALE:
+                            if (rightClick)
+                                theMovement = MovementTypes::ScaleZ;
+                            else
+                                theMovement = MovementTypes::Scale;
+                            break;
+                        case STUDIO_TOOLMODE_ROTATE:
+                            if (rightClick)
+                                theMovement = MovementTypes::RotationAboutCameraDirection;
+                            else
+                                theMovement = MovementTypes::Rotation;
+                            break;
                         }
 
-                        m_LastDragToolMode = theMovement;
+                        if (theMovement != MovementTypes::Unknown) {
+                            bool theLockToAxis = (inFlags & CHotKeys::MODIFIER_SHIFT) != 0;
 
-                        switch (theMovement) {
-                        case MovementTypes::TranslateAlongCameraDirection:
-                            m_Translation->TranslateSelectedInstanceAlongCameraDirection(
-                                m_MouseDownPoint, inPoint, m_UpdatableEditor);
-                            break;
-                        case MovementTypes::Translate:
-                            m_Translation->TranslateSelectedInstance(
-                                m_MouseDownPoint, inPoint, m_UpdatableEditor, theLockToAxis);
-                            break;
-                        case MovementTypes::ScaleZ:
-                            m_Translation->ScaleSelectedInstanceZ(m_MouseDownPoint, inPoint,
-                                                                  m_UpdatableEditor);
-                            break;
-                        case MovementTypes::Scale:
-                            m_Translation->ScaleSelectedInstance(m_MouseDownPoint, inPoint,
-                                                                 m_UpdatableEditor);
-                            break;
-                        case MovementTypes::Rotation:
-                            m_Translation->RotateSelectedInstance(m_MouseDownPoint,
-                                                                  m_PreviousMousePoint, inPoint,
-                                                                  m_UpdatableEditor, theLockToAxis);
-                            break;
-                        case MovementTypes::RotationAboutCameraDirection:
-                            m_Translation->RotateSelectedInstanceAboutCameraDirectionVector(
-                                m_PreviousMousePoint, inPoint, m_UpdatableEditor);
-                            break;
+                            if (m_LastDragToolMode != MovementTypes::Unknown
+                                && theMovement != m_LastDragToolMode) {
+                                m_UpdatableEditor.RollbackEditor();
+                                m_MouseDownPoint = inPoint;
+                            }
+
+                            m_LastDragToolMode = theMovement;
+
+                            switch (theMovement) {
+                            case MovementTypes::TranslateAlongCameraDirection:
+                                m_Translation->TranslateSelectedInstanceAlongCameraDirection(
+                                    m_MouseDownPoint, inPoint, m_UpdatableEditor);
+                                break;
+                            case MovementTypes::Translate:
+                                m_Translation->TranslateSelectedInstance(
+                                    m_MouseDownPoint, inPoint, m_UpdatableEditor, theLockToAxis);
+                                break;
+                            case MovementTypes::ScaleZ:
+                                m_Translation->ScaleSelectedInstanceZ(m_MouseDownPoint, inPoint,
+                                                                      m_UpdatableEditor);
+                                break;
+                            case MovementTypes::Scale:
+                                m_Translation->ScaleSelectedInstance(m_MouseDownPoint, inPoint,
+                                                                     m_UpdatableEditor);
+                                break;
+                            case MovementTypes::Rotation:
+                                m_Translation->RotateSelectedInstance(
+                                            m_MouseDownPoint, m_PreviousMousePoint, inPoint,
+                                            m_UpdatableEditor, theLockToAxis);
+                                break;
+                            case MovementTypes::RotationAboutCameraDirection:
+                                m_Translation->RotateSelectedInstanceAboutCameraDirectionVector(
+                                    m_PreviousMousePoint, inPoint, m_UpdatableEditor);
+                                break;
+                            }
                         }
                     }
                 }
