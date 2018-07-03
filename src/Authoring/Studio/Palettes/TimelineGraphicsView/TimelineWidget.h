@@ -146,6 +146,7 @@ private:
                          qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
                          ETimelineKeyframeTransaction inTransaction);
     void updateActionStates(const QSet<RowTree *> &rows);
+    void setTreeWidth(int width);
 
     TreeHeaderView *m_viewTreeHeader = nullptr;
     QGraphicsView *m_viewTreeContent = nullptr;

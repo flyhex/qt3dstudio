@@ -56,6 +56,7 @@
 #include "IDocumentEditor.h"
 #include "Control.h"
 #include "TimelineDropTarget.h"
+#include "StudioPreferences.h"
 
 #include <QtGui/qevent.h>
 #include <QtWidgets/qgraphicslinearlayout.h>
@@ -287,6 +288,8 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     m_asyncUpdateTimer.setInterval(0);
     m_asyncUpdateTimer.setSingleShot(true);
     connect(&m_asyncUpdateTimer, &QTimer::timeout, this, &TimelineWidget::onAsyncUpdate);
+
+    setTreeWidth(CStudioPreferences::GetTimelineSplitterLocation());
 }
 
 Q3DStudio::CString TimelineWidget::getPlaybackMode()
@@ -308,6 +311,7 @@ Q3DStudio::CString TimelineWidget::getPlaybackMode()
 
 TimelineWidget::~TimelineWidget()
 {
+    CStudioPreferences::SetTimelineSplitterLocation(m_graphicsScene->treeWidth());
     m_graphicsScene->keyframeManager()->deselectAllKeyframes();
     delete m_BreadCrumbProvider;
 }
@@ -670,6 +674,16 @@ void TimelineWidget::updateActionStates(const QSet<RowTree *> &rows)
         }
         row->setActionStates(states);
     }
+}
+
+void TimelineWidget::setTreeWidth(int width)
+{
+    int treeWidth = qBound(int(TimelineConstants::TREE_MIN_W), width,
+                           int(TimelineConstants::TREE_MAX_W));
+
+    m_viewTreeHeader->setFixedWidth(treeWidth);
+    m_viewTreeContent->setFixedWidth(treeWidth);
+    m_graphicsScene->updateTreeWidth(treeWidth);
 }
 
 void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
@@ -1065,14 +1079,8 @@ void TimelineWidget::mousePressEvent(QMouseEvent *event)
 
 void TimelineWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    if (m_splitterPressed) {
-        double treeWidth = event->pos().x() - m_splitter->size().width() * .5;
-        treeWidth = qBound(TimelineConstants::TREE_MIN_W, treeWidth, TimelineConstants::TREE_MAX_W);
-
-        m_viewTreeHeader->setFixedWidth(treeWidth);
-        m_viewTreeContent->setFixedWidth(treeWidth);
-        m_graphicsScene->updateTreeWidth(treeWidth);
-    }
+    if (m_splitterPressed)
+        setTreeWidth(event->pos().x() - m_splitter->size().width() * .5);
 }
 
 void TimelineWidget::mouseReleaseEvent(QMouseEvent *event)
