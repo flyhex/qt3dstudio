@@ -330,13 +330,11 @@ void CMainFrame::onPlaybackTimeout()
 void CMainFrame::showEvent(QShowEvent *event)
 {
     QMainWindow::showEvent(event);
-    handleGeometryAndState(false);
 }
 
 void CMainFrame::hideEvent(QHideEvent *event)
 {
     QMainWindow::hideEvent(event);
-    handleGeometryAndState(true);
 }
 
 /**
@@ -1949,8 +1947,13 @@ void CMainFrame::handleGeometryAndState(bool save)
         settings.setValue(geoKey, saveGeometry());
         settings.setValue(stateKey, saveState(STUDIO_VERSION_NUM));
     } else {
+        // Restoring geometry and state back to back results in errors in state restoration, so
+        // let's restore state asynchronously
         restoreGeometry(settings.value(geoKey).toByteArray());
-        restoreState(settings.value(stateKey).toByteArray(), STUDIO_VERSION_NUM);
+        QTimer::singleShot(0, this, [this, stateKey]() {
+            QSettings settings;
+            restoreState(settings.value(stateKey).toByteArray(), STUDIO_VERSION_NUM);
+        });
     }
 }
 
