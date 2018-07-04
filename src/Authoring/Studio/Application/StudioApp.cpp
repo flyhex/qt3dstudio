@@ -1799,8 +1799,14 @@ QString CStudioApp::OnFileNew()
     if (PerformSavePrompt()) {
         Qt3DSFile theFile = m_dialogs->GetNewDocumentChoice(Q3DStudio::CString(""), false);
         if (theFile.GetPath() != "") {
-            if (!m_core->OnNewDocument(theFile, false))
+            if (!m_core->OnNewDocument(theFile, false)) {
                 showInvalidFilenameWarning();
+            } else {
+                m_core->setCurrentPresentation(theFile.GetStem().toQString());
+                m_core->loadProjectFileSubpresentationsAndDatainputs(m_subpresentations,
+                                                                     m_dataInputDialogItems);
+                g_StudioApp.getRenderer().RegisterSubpresentations(m_subpresentations);
+            }
         } else {
             return theFile.GetName().toQString();
         }
