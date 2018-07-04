@@ -35,12 +35,12 @@ TreeHeaderView::TreeHeaderView(QWidget *parent)
 
 void  TreeHeaderView::scrollContentsBy(int dx, int dy)
 {
-    // Overridden to ignore scrolling
+    // Overridden to ignore scrolling after initial show related scrolling has been finished
     //
     // Longer explanation: When RowTreeLabelItem (QGraphicsTextItem) gets focus
     // for text editing, it forces views to scroll themselves so that editable
     // text item is always visible. But we don't want tree header view to move.
     // See QGraphicsTextItemPrivate::textControl() and _q_ensureVisible()
-    Q_UNUSED(dx);
-    Q_UNUSED(dy);
+    if (m_allowScrolling)
+        QGraphicsView::scrollContentsBy(dx, dy);
 }

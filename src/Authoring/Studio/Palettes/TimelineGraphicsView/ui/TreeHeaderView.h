@@ -37,9 +37,13 @@ class TreeHeaderView : public QGraphicsView
 public:
     TreeHeaderView(QWidget *parent = nullptr);
 
-protected:
-    void  scrollContentsBy(int dx, int dy) override;
+    void disableScrolling() { m_allowScrolling = false; }
 
+protected:
+    void scrollContentsBy(int dx, int dy) override;
+
+private:
+    bool m_allowScrolling = true;
 };
 
 #endif // TREEHEADERVIEW_H

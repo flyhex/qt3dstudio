@@ -93,6 +93,8 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     , m_graphicsScene(new TimelineGraphicsScene(this))
     , m_preferredSize(preferredSize)
 {
+    int treeWidth = CStudioPreferences::GetTimelineSplitterLocation();
+
     // Mahmoud_TODO: CTimelineTranslationManager should be eventually removed or cleaned. Already
     // most of its functionality is implemented in this class
     m_translationManager = new CTimelineTranslationManager();
@@ -108,13 +110,13 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     m_viewTreeHeader->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_viewTreeHeader->viewport()->installEventFilter(new Eventfilter(this));
     m_viewTreeHeader->viewport()->setFocusPolicy(Qt::NoFocus);
-    m_viewTreeHeader->setFixedWidth(TimelineConstants::TREE_DEFAULT_W);
+    m_viewTreeHeader->setFixedWidth(treeWidth);
 
     m_viewTreeContent->setScene(m_graphicsScene);
     m_viewTreeContent->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     m_viewTreeContent->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_viewTreeContent->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    m_viewTreeContent->setFixedWidth(TimelineConstants::TREE_DEFAULT_W);
+    m_viewTreeContent->setFixedWidth(treeWidth);
 
     m_viewTimelineHeader->setScene(m_graphicsScene);
     m_viewTimelineHeader->setFixedHeight(TimelineConstants::ROW_H);
@@ -131,6 +133,8 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     m_viewTimelineContent->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     m_viewTimelineContent->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     m_viewTimelineContent->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+
+    setTreeWidth(treeWidth);
 
     auto *layoutTree = new QVBoxLayout;
     layoutTree->setContentsMargins(QMargins(0, 0, 0, 0));
@@ -288,8 +292,6 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     m_asyncUpdateTimer.setInterval(0);
     m_asyncUpdateTimer.setSingleShot(true);
     connect(&m_asyncUpdateTimer, &QTimer::timeout, this, &TimelineWidget::onAsyncUpdate);
-
-    setTreeWidth(CStudioPreferences::GetTimelineSplitterLocation());
 }
 
 Q3DStudio::CString TimelineWidget::getPlaybackMode()
@@ -323,6 +325,9 @@ QSize TimelineWidget::sizeHint() const
 
 void TimelineWidget::OnNewPresentation()
 {
+    // Disable scrolling of treeview now that all show related initial singnaling is behind us
+    m_viewTreeHeader->disableScrolling();
+
     // Register callbacks
     auto studioSystem = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
     qt3dsdm::IStudioFullSystemSignalProvider *theSignalProvider
