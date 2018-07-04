@@ -208,6 +208,13 @@ void ProjectView::assetImportInContext(int row)
 void ProjectView::OnNewPresentation()
 {
     rebuild();
+
+    // expand presentation folder by default (if it exists)
+    QTimer::singleShot(0, [this]() {
+        QString path = g_StudioApp.GetCore()->getProjectPath().absoluteFilePath()
+                + QStringLiteral("/presentations");
+        m_ProjectModel->expand(m_ProjectModel->rowForPath(path));
+    });
 }
 
 void ProjectView::OnBeginDataModelNotifications()
@@ -224,7 +231,8 @@ void ProjectView::OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandl
     Q_UNUSED(inInstance);
 }
 
-void ProjectView::OnImmediateRefreshInstanceMultiple(qt3dsdm::Qt3DSDMInstanceHandle *inInstance, long inInstanceCount)
+void ProjectView::OnImmediateRefreshInstanceMultiple(qt3dsdm::Qt3DSDMInstanceHandle *inInstance,
+                                                     long inInstanceCount)
 {
     Q_UNUSED(inInstance);
     Q_UNUSED(inInstanceCount);
@@ -255,7 +263,7 @@ void ProjectView::showContainingFolder(int row) const
     QString param = QStringLiteral("explorer ");
     if (!QFileInfo(path).isDir())
         param += QLatin1String("/select,");
-    param += QDir::toNativeSeparators(path).replace(QStringLiteral(" "), QStringLiteral("\ "));
+    param += QDir::toNativeSeparators(path).replace(QLatin1String(" "), QLatin1String("\ "));
     QProcess::startDetached(param);
 #elif defined(Q_OS_MACOS)
     QProcess::startDetached("/usr/bin/osascript", {"-e",

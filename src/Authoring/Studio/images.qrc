@@ -279,6 +279,16 @@
         <file>images/Assets-Model@2x.png</file>
         <file>images/Objects-DataInput-White.png</file>
         <file>images/Objects-DataInput-White@2x.png</file>
+        <file>images/presentation_edit.png</file>
+        <file>images/presentation_edit@2x.png</file>
+        <file>images/presentation_notUsed.png</file>
+        <file>images/presentation_notUsed@2x.png</file>
+        <file>images/presentation_used.png</file>
+        <file>images/presentation_used@2x.png</file>
+        <file>images/qml_notUsed.png</file>
+        <file>images/qml_notUsed@2x.png</file>
+        <file>images/qml_used.png</file>
+        <file>images/qml_used@2x.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="open_dialog.png">images/open_dialog.png</file>

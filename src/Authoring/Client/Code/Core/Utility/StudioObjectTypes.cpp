@@ -95,89 +95,98 @@ bool CStudioObjectTypes::AcceptableParent(EStudioObjectType inChild, EStudioObje
 
 //=============================================================================
 /**
- * Lame switch to get the normal state object specific icon.
+ * Get the normal state object specific icon.
  * @return the icon to be used in the 'normal' state.
  */
 const QString &CStudioObjectTypes::GetNormalIconName(EStudioObjectType inType)
 {
     switch (inType) {
     case OBJTYPE_CAMERA: {
-        static QString theString = "Objects-Camera-Normal.png";
+        static QString theString = QStringLiteral("Objects-Camera-Normal.png");
         return theString;
     }
     case OBJTYPE_IMAGE: {
-        static QString theString = "Objects-Image-Normal.png";
+        static QString theString = QStringLiteral("Objects-Image-Normal.png");
         return theString;
     }
     case OBJTYPE_LIGHT: {
-        static QString theString = "Objects-Light-Normal.png";
+        static QString theString = QStringLiteral("Objects-Light-Normal.png");
         return theString;
     }
     case OBJTYPE_MODEL: {
-        static QString theString = "Objects-Model-Normal.png";
+        static QString theString = QStringLiteral("Objects-Model-Normal.png");
         return theString;
     }
     case OBJTYPE_GROUP: {
-        static QString theString = "Objects-Group-Normal.png";
+        static QString theString = QStringLiteral("Objects-Group-Normal.png");
         return theString;
     }
     case OBJTYPE_ALIAS: {
-        static QString theString = "Objects-Alias-Normal.png";
+        static QString theString = QStringLiteral("Objects-Alias-Normal.png");
         return theString;
     }
     case OBJTYPE_PATH: {
-        static QString theString = "Objects-Path-Normal.png";
+        static QString theString = QStringLiteral("Objects-Path-Normal.png");
         return theString;
     }
     case OBJTYPE_PATHANCHORPOINT: {
-        static QString theString = "Objects-Anchor-Normal.png";
+        static QString theString = QStringLiteral("Objects-Anchor-Normal.png");
         return theString;
     }
     case OBJTYPE_SUBPATH: {
-        static QString theString = "Objects-SubPath-Normal.png";
+        static QString theString = QStringLiteral("Objects-SubPath-Normal.png");
         return theString;
     }
     case OBJTYPE_COMPONENT: {
-        static QString theString = "Objects-Component-Normal.png";
+        static QString theString = QStringLiteral("Objects-Component-Normal.png");
         return theString;
     }
     case OBJTYPE_LAYER: {
-        static QString theString = "Objects-Layer-Normal.png";
+        static QString theString = QStringLiteral("Objects-Layer-Normal.png");
         return theString;
     }
     case OBJTYPE_TEXT: {
-        static QString theString = "Objects-Text-Normal.png";
+        static QString theString = QStringLiteral("Objects-Text-Normal.png");
         return theString;
     }
     case OBJTYPE_MATERIAL:
     case OBJTYPE_CUSTOMMATERIAL:
     case OBJTYPE_REFERENCEDMATERIAL: {
-        static QString theString = "Objects-Material-Normal.png";
+        static QString theString = QStringLiteral("Objects-Material-Normal.png");
         return theString;
     }
     case OBJTYPE_SCENE:
     case OBJTYPE_SLIDE: {
-        static QString theString = "Objects-Scene-Normal.png";
+        static QString theString = QStringLiteral("Objects-Scene-Normal.png");
         return theString;
     }
     case OBJTYPE_BEHAVIOR: {
-        static QString theString = "Objects-Behavior-Normal.png";
+        static QString theString = QStringLiteral("Objects-Behavior-Normal.png");
         return theString;
     }
     case OBJTYPE_EFFECT: {
-        static QString theString = "Objects-Effect-Normal.png";
+        static QString theString = QStringLiteral("Objects-Effect-Normal.png");
         return theString;
     }
     case OBJTYPE_SOUND: {
-        static QString theString = "Objects-Sound-Normal.png";
+        static QString theString = QStringLiteral("Objects-Sound-Normal.png");
         return theString;
     }
     case OBJTYPE_DATAINPUT: {
-        static QString theString = "Objects-DataInput-Normal.png";
+        static QString theString = QStringLiteral("Objects-DataInput-Normal.png");
+        return theString;
+    }
+    case OBJTYPE_PRESENTATION: {
+        static QString theString = QStringLiteral("presentation_used.png");
+        return theString;
+    }
+    case OBJTYPE_PROJECT: {
+        // Mahmoud_TODO: get a project icon from UX and replace this temp. one
+        static QString theString = QStringLiteral("qml_used.png");
         return theString;
     }
     default: {
-        static QString theString = "Objects-Model-Normal.png";
+        static QString theString = QStringLiteral("Objects-Model-Normal.png");
         return theString;
     }
     }
@@ -185,88 +194,97 @@ const QString &CStudioObjectTypes::GetNormalIconName(EStudioObjectType inType)
 
 //=============================================================================
 /**
- * Lame switch to get the disabled state object specific icon.
+ * Get the disabled state object specific icon.
  * @return the icon to be used in the disabled state.
  */
 const QString &CStudioObjectTypes::GetDisabledIconName(EStudioObjectType inType)
 {
     switch (inType) {
     case OBJTYPE_CAMERA: {
-        static QString theString = "Objects-Camera-Disabled.png";
+        static QString theString = QStringLiteral("Objects-Camera-Disabled.png");
         return theString;
     }
     case OBJTYPE_IMAGE: {
-        static QString theString = "Objects-Image-Disabled.png";
+        static QString theString = QStringLiteral("Objects-Image-Disabled.png");
         return theString;
     }
     case OBJTYPE_LIGHT: {
-        static QString theString = "Objects-Light-Disabled.png";
+        static QString theString = QStringLiteral("Objects-Light-Disabled.png");
         return theString;
     }
     case OBJTYPE_MODEL: {
-        static QString theString = "Objects-Model-Disabled.png";
+        static QString theString = QStringLiteral("Objects-Model-Disabled.png");
         return theString;
     }
     case OBJTYPE_GROUP: {
-        static QString theString = "Objects-Group-Disabled.png";
+        static QString theString = QStringLiteral("Objects-Group-Disabled.png");
         return theString;
     }
     case OBJTYPE_ALIAS: {
-        static QString theString = "Objects-Alias-Disabled.png";
+        static QString theString = QStringLiteral("Objects-Alias-Disabled.png");
         return theString;
     }
     case OBJTYPE_PATH: {
-        static QString theString = "Objects-Path-Normal.png";
+        static QString theString = QStringLiteral("Objects-Path-Normal.png");
         return theString;
     }
     case OBJTYPE_PATHANCHORPOINT: {
-        static QString theString = "Objects-Anchor-Normal.png";
+        static QString theString = QStringLiteral("Objects-Anchor-Normal.png");
         return theString;
     }
     case OBJTYPE_SUBPATH: {
-        static QString theString = "Objects-SubPath-Normal.png";
+        static QString theString = QStringLiteral("Objects-SubPath-Normal.png");
         return theString;
     }
     case OBJTYPE_COMPONENT: {
-        static QString theString = "Objects-Component-Disabled.png";
+        static QString theString = QStringLiteral("Objects-Component-Disabled.png");
         return theString;
     }
     case OBJTYPE_LAYER: {
-        static QString theString = "Objects-Layer-Disabled.png";
+        static QString theString = QStringLiteral("Objects-Layer-Disabled.png");
         return theString;
     }
     case OBJTYPE_TEXT: {
-        static QString theString = "Objects-Text-Disabled.png";
+        static QString theString = QStringLiteral("Objects-Text-Disabled.png");
         return theString;
     }
     case OBJTYPE_MATERIAL:
     case OBJTYPE_CUSTOMMATERIAL:
     case OBJTYPE_REFERENCEDMATERIAL: {
-        static QString theString = "Objects-Material-Disabled.png";
+        static QString theString = QStringLiteral("Objects-Material-Disabled.png");
         return theString;
     }
     case OBJTYPE_SCENE: {
-        static QString theString = "Objects-Scene-Disabled.png";
+        static QString theString = QStringLiteral("Objects-Scene-Disabled.png");
         return theString;
     }
     case OBJTYPE_BEHAVIOR: {
-        static QString theString = "Objects-Behavior-Disabled.png";
+        static QString theString = QStringLiteral("Objects-Behavior-Disabled.png");
         return theString;
     }
     case OBJTYPE_EFFECT: {
-        static QString theString = "Objects-Effect-Disabled.png";
+        static QString theString = QStringLiteral("Objects-Effect-Disabled.png");
         return theString;
     }
     case OBJTYPE_SOUND: {
-        static QString theString = "Objects-Sound-Disabled.png";
+        static QString theString = QStringLiteral("Objects-Sound-Disabled.png");
         return theString;
     }
     case OBJTYPE_DATAINPUT: {
-        static QString theString = "Objects-DataInput-Disabled.png";
+        static QString theString = QStringLiteral("Objects-DataInput-Disabled.png");
+        return theString;
+    }
+    case OBJTYPE_PRESENTATION: {
+        static QString theString = QStringLiteral("presentation_notUsed.png");
+        return theString;
+    }
+    case OBJTYPE_PROJECT: {
+        // Mahmoud_TODO: get a project icon from UX and replace this temp. one
+        static QString theString = QStringLiteral("qml_notUsed.png");
         return theString;
     }
     default: {
-        static QString theString = "Objects-Model-Disabled.png";
+        static QString theString = QStringLiteral("Objects-Model-Disabled.png");
         return theString;
     }
     }
@@ -274,84 +292,93 @@ const QString &CStudioObjectTypes::GetDisabledIconName(EStudioObjectType inType)
 
 //=============================================================================
 /**
- * Lame switch to get the highlight state object specific icon.
+ * Get the highlight state object specific icon.
  * @return the icon to be used in the highlighted state.
  */
 const QString &CStudioObjectTypes::GetHighlightIconName(EStudioObjectType inType)
 {
     switch (inType) {
     case OBJTYPE_CAMERA: {
-        static QString theString = "Objects-Camera-Normal.png";
+        static QString theString = QStringLiteral("Objects-Camera-Normal.png");
         return theString;
     }
     case OBJTYPE_IMAGE: {
-        static QString theString = "Objects-Image-Normal.png";
+        static QString theString = QStringLiteral("Objects-Image-Normal.png");
         return theString;
     }
     case OBJTYPE_LIGHT: {
-        static QString theString = "Objects-Light-Normal.png";
+        static QString theString = QStringLiteral("Objects-Light-Normal.png");
         return theString;
     }
     case OBJTYPE_MODEL: {
-        static QString theString = "Objects-Model-Normal.png";
+        static QString theString = QStringLiteral("Objects-Model-Normal.png");
         return theString;
     }
     case OBJTYPE_GROUP: {
-        static QString theString = "Objects-Group-Normal.png";
+        static QString theString = QStringLiteral("Objects-Group-Normal.png");
         return theString;
     }
     case OBJTYPE_PATH: {
-        static QString theString = "Objects-Path-Normal.png";
+        static QString theString = QStringLiteral("Objects-Path-Normal.png");
         return theString;
     }
     case OBJTYPE_PATHANCHORPOINT: {
-        static QString theString = "Objects-Anchor-Normal.png";
+        static QString theString = QStringLiteral("Objects-Anchor-Normal.png");
         return theString;
     }
     case OBJTYPE_SUBPATH: {
-        static QString theString = "Objects-SubPath-Normal.png";
+        static QString theString = QStringLiteral("Objects-SubPath-Normal.png");
         return theString;
     }
     case OBJTYPE_ALIAS: {
-        static QString theString = "Objects-Alias-Normal.png";
+        static QString theString = QStringLiteral("Objects-Alias-Normal.png");
         return theString;
     }
     case OBJTYPE_COMPONENT: {
-        static QString theString = "Objects-Component-Normal.png";
+        static QString theString = QStringLiteral("Objects-Component-Normal.png");
         return theString;
     }
     case OBJTYPE_LAYER: {
-        static QString theString = "Objects-Layer-Normal.png";
+        static QString theString = QStringLiteral("Objects-Layer-Normal.png");
         return theString;
     }
     case OBJTYPE_TEXT: {
-        static QString theString = "Objects-Text-Normal.png";
+        static QString theString = QStringLiteral("Objects-Text-Normal.png");
         return theString;
     }
     case OBJTYPE_MATERIAL:
     case OBJTYPE_CUSTOMMATERIAL:
     case OBJTYPE_REFERENCEDMATERIAL: {
-        static QString theString = "Objects-Material-Normal.png";
+        static QString theString = QStringLiteral("Objects-Material-Normal.png");
         return theString;
     }
     case OBJTYPE_SCENE: {
-        static QString theString = "Objects-Scene-Normal.png";
+        static QString theString = QStringLiteral("Objects-Scene-Normal.png");
         return theString;
     }
     case OBJTYPE_BEHAVIOR: {
-        static QString theString = "Objects-Behavior-Normal.png";
+        static QString theString = QStringLiteral("Objects-Behavior-Normal.png");
         return theString;
     }
     case OBJTYPE_EFFECT: {
-        static QString theString = "Objects-Effect-Normal.png";
+        static QString theString = QStringLiteral("Objects-Effect-Normal.png");
         return theString;
     }
     case OBJTYPE_SOUND: {
-        static QString theString = "Objects-Sound-Normal.png";
+        static QString theString = QStringLiteral("Objects-Sound-Normal.png");
+        return theString;
+    }
+    case OBJTYPE_PRESENTATION: {
+        static QString theString = QStringLiteral("presentation_used.png");
+        return theString;
+    }
+    case OBJTYPE_PROJECT: {
+        // Mahmoud_TODO: ask UX to provide a project icon and replace it
+        static QString theString = QStringLiteral("qml_used.png");
         return theString;
     }
     default: {
-        static QString theString = "Objects-Model-Normal.png";
+        static QString theString = QStringLiteral("Objects-Model-Normal.png");
         return theString;
     }
     }

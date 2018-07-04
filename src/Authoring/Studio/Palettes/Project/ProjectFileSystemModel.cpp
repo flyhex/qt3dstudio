@@ -138,26 +138,42 @@ void ProjectFileSystemModel::updateReferences(bool emitDataChanged)
     const auto fontFileList = bridge->GetFontFileList();
     const auto effectTextureList = bridge->GetDynamicObjectTextureList();
 
-    auto addFileReferences = [this, doc](const Q3DStudio::CString &str) {
+    QString rootPath = QDir::cleanPath(doc->GetDocumentDirectory().toQString());
+    auto addFileReferences = [this, doc, &rootPath](const Q3DStudio::CString &str) {
         auto path = doc->GetResolvedPathToDoc(str).toQString();
         path = QDir::cleanPath(path);
         m_references.append(path);
-        QString rootPath = QDir::cleanPath(doc->GetDocumentDirectory().toQString());
         QString parentPath = QFileInfo(path).path();
         do {
             if (!m_references.contains(parentPath))
                 m_references.append(parentPath);
+
             path = parentPath;
             parentPath = QFileInfo(path).path();
         } while (rootPath != path && parentPath != path);
      };
-
     std::for_each(sourcePathList.begin(), sourcePathList.end(), addFileReferences);
     std::for_each(fontFileList.begin(), fontFileList.end(), addFileReferences);
     std::for_each(effectTextureList.begin(), effectTextureList.end(), addFileReferences);
 
-    if (emitDataChanged)
-        Q_EMIT dataChanged(index(0, 0), index(rowCount() - 1, 0), {IsReferencedRole});
+    // add currently open presentation references
+    Q3DStudio::CString documentPath = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetPath();
+    documentPath.Replace("\\", "/");
+    QString path = documentPath.toQString();
+    QString parentPath = QFileInfo(path).path();
+    m_references.append(path);
+    do {
+        if (!m_references.contains(parentPath))
+            m_references.append(parentPath);
+
+        path = parentPath;
+        parentPath = QFileInfo(path).path();
+    } while (rootPath != path && parentPath != path);
+
+    if (emitDataChanged) {
+        Q_EMIT dataChanged(index(0, 0), index(rowCount() - 1, 0), {IsReferencedRole,
+                                                                   Qt::DecorationRole});
+    }
 }
 
 Q3DStudio::DocumentEditorFileType::Enum ProjectFileSystemModel::assetTypeForRow(int row)
@@ -171,22 +187,22 @@ Q3DStudio::DocumentEditorFileType::Enum ProjectFileSystemModel::assetTypeForRow(
     if (!fi.isDir())
         path = fi.absolutePath();
     path = path.mid(rootPath.length() + 1);
-    const int slash = path.indexOf(QStringLiteral("/"));
+    const int slash = path.indexOf(QLatin1String("/"));
     if (slash >= 0)
         path = path.left(slash);
-    if (path == QStringLiteral("effects"))
+    if (path == QLatin1String("effects"))
         return Q3DStudio::DocumentEditorFileType::Effect;
-    else if (path == QStringLiteral("fonts"))
+    else if (path == QLatin1String("fonts"))
         return Q3DStudio::DocumentEditorFileType::Font;
-    else if (path == QStringLiteral("maps"))
+    else if (path == QLatin1String("maps"))
         return Q3DStudio::DocumentEditorFileType::Image;
-    else if (path == QStringLiteral("materials"))
+    else if (path == QLatin1String("materials"))
         return Q3DStudio::DocumentEditorFileType::Material;
-    else if (path == QStringLiteral("models"))
+    else if (path == QLatin1String("models"))
         return Q3DStudio::DocumentEditorFileType::DAE;
-    else if (path == QStringLiteral("scripts"))
+    else if (path == QLatin1String("scripts"))
         return Q3DStudio::DocumentEditorFileType::Behavior;
-    else if (path == QStringLiteral("presentations"))
+    else if (path == QLatin1String("presentations"))
         return Q3DStudio::DocumentEditorFileType::Presentation;
 
     return Q3DStudio::DocumentEditorFileType::Unknown;
@@ -277,11 +293,10 @@ void ProjectFileSystemModel::showModelChildItems(const QModelIndex &parentIndex,
 
 void ProjectFileSystemModel::expand(int row)
 {
-    Q_ASSERT(row >= 0 && row < m_items.size());
+    if (row < 0 || row > m_items.size() - 1 || m_items[row].expanded)
+        return;
 
     auto &item = m_items[row];
-    Q_ASSERT(item.expanded == false);
-
     const auto &modelIndex = item.index;
 
     const int rowCount = m_model->rowCount(modelIndex);
@@ -509,15 +524,32 @@ QString ProjectFileSystemModel::getIconName(const QString &path) const
 {
     QString iconName;
 
+    bool referenced = m_references.contains(path);
+
     QFileInfo fileInfo(path);
     if (fileInfo.isFile()) {
         EStudioObjectType type = getIconType(path);
-        if (type != OBJTYPE_UNKNOWN)
-            iconName = CStudioObjectTypes::GetNormalIconName(type);
-        else
-            iconName = QStringLiteral("Objects-Layer-Normal.png");
+
+        if (type == OBJTYPE_PRESENTATION) {
+            Q3DStudio::CString documentPath
+                    = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetPath();
+            documentPath.Replace("\\", "/");
+            if (path == documentPath.toQString()) // current open presentation
+                iconName = QStringLiteral("presentation_edit.png");
+        }
+
+        if (iconName.isEmpty()) {
+            if (type != OBJTYPE_UNKNOWN) {
+                iconName = referenced ? CStudioObjectTypes::GetNormalIconName(type)
+                                      : CStudioObjectTypes::GetDisabledIconName(type);
+            } else {
+                iconName = referenced ? QStringLiteral("Objects-Layer-Normal.png")
+                                      : QStringLiteral("Objects-Layer-Disabled.png");
+            }
+        }
     } else {
-        iconName = QStringLiteral("Objects-Folder-Normal.png");
+        iconName = referenced ? QStringLiteral("Objects-Folder-Normal.png")
+                              : QStringLiteral("Objects-Folder-Disabled.png");
     }
 
     return iconName;

@@ -65,6 +65,7 @@ public:
 
     void updateReferences(bool emitDataChanged);
     Q3DStudio::DocumentEditorFileType::Enum assetTypeForRow(int row);
+    int rowForPath(const QString &path) const;
 
     Q_INVOKABLE void expand(int row);
     Q_INVOKABLE void collapse(int row);
@@ -87,7 +88,6 @@ private:
     bool isVisible(const QModelIndex& modelIndex) const;
     bool hasVisibleChildren(const QModelIndex &modelIndex) const;
     void importUrl(const QDir &targetDir, const QUrl &url) const;
-    int rowForPath(const QString &path) const;
 
     void modelRowsInserted(const QModelIndex &parent, int start, int end);
     void modelRowsRemoved(const QModelIndex &parent, int start, int end);

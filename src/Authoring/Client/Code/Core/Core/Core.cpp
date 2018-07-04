@@ -107,7 +107,6 @@ Q3DStudio::CBuildConfigurations &CCore::GetBuildConfigurations()
     return m_BuildConfigurations;
 }
 
-//=============================================================================
 /**
  *	Load all the build configurations
  */
@@ -139,7 +138,6 @@ bool CCore::LoadBuildConfigurations()
     return theSuccess;
 }
 
-//=============================================================================
 /**
  *	If the build configuration saved doesn't exist, use the first one
  *	also verify all the properties required existed, else use the first option available
@@ -174,7 +172,6 @@ void CCore::InitAndValidateBuildConfiguration()
     }
 }
 
-//=============================================================================
 /**
  * Call by the mainframe to register the keyboard settings.
  * @param inShortcutHandler the handler for the keyboard actions.
@@ -211,7 +208,6 @@ void CCore::GetCreateDirectoryFileName(const Qt3DSFile &inDocument,
     outFinalDoc = CFilePath::CombineBaseAndRelative(outFinalDir, theName);
 }
 
-//=============================================================================
 /**
  * Call to create a new document.
  * This will clear out the current doc (if there is one) then create a new one.
@@ -240,7 +236,7 @@ bool CCore::OnNewDocument(const Qt3DSFile &inDocument, bool isNewProject)
         setProjectNameAndPath(theDocument.GetFileStem(), theFinalDir);
 
         // create the default uip file in the presentations folder
-        theDocument.setFile(QDir(theDocument.absolutePath() + QLatin1String("/presentations")),
+        theDocument.setFile(QDir(theDocument.absolutePath() + QStringLiteral("/presentations")),
                             theDocument.GetFileName().toQString());
     }
 
@@ -296,8 +292,8 @@ void CCore::ensureProjectFile(const QDir &uipDirectory)
 void CCore::addPresentationNodeToProjectFile(const Q3DStudio::CFilePath &uip)
 {
     // open the uia file
-    QString path = m_projectPath.toQString() + QLatin1String("/") + m_projectName.toQString()
-            + QLatin1String(".uia");
+    QString path = m_projectPath.toQString() + QStringLiteral("/") + m_projectName.toQString()
+            + QStringLiteral(".uia");
     QFile file(path);
     file.open(QIODevice::ReadWrite);
     QDomDocument doc;
@@ -366,8 +362,8 @@ void CCore::createProjectFile()
                                     "</statemachine>"
                                   "</application>"));
 
-    QString path = m_projectPath.toQString() + QLatin1String("/") + m_projectName.toQString()
-            + QLatin1String(".uia");
+    QString path = m_projectPath.toQString() + QStringLiteral("/") + m_projectName.toQString()
+            + QStringLiteral(".uia");
     QFile file(path);
     file.open(QIODevice::WriteOnly);
     file.resize(0);
@@ -382,8 +378,8 @@ void CCore::loadProjectFileSubpresentationsAndDatainputs(
     subpresentations.clear();
     datainputs.clear();
 
-    QString path = m_projectPath.toQString() + QLatin1String("/") + m_projectName.toQString()
-            + QLatin1String(".uia");
+    QString path = m_projectPath.toQString() + QStringLiteral("/") + m_projectName.toQString()
+            + QStringLiteral(".uia");
     QFile file(path);
     file.open(QIODevice::ReadOnly);
     QDomDocument doc;
@@ -459,7 +455,6 @@ Q3DStudio::CString CCore::getProjectName() const
     return m_projectName;
 }
 
-//=============================================================================
 /**
  * Call to save the current document.
  * This will do all the prompting, directory stuff necessary and perform the
@@ -481,7 +476,6 @@ void CCore::OnSaveDocument(const Qt3DSFile &inDocument, bool inSaveCopy /*= fals
         m_Dispatch->FireOnSaveDocument(inDocument, false, inSaveCopy);
 }
 
-//=============================================================================
 /**
  * Called by OnSaveDocument, to allow the error reporting to be inserted.
  * Because of the nature of the error reporting, OnSaveDocument has to have
@@ -553,7 +547,7 @@ void CCore::SetCommandStackModifier(ICmdStackModifier *inModifier)
 {
     m_CmdStack->SetCommandStackModifier(inModifier);
 }
-//=============================================================================
+
 /**
  * This is used for do/undo/redo and handles the execution of the command.
  * The command must have been new'd up, this will take responsibility for
@@ -571,7 +565,6 @@ bool CCore::ExecuteCommand(CCmd *inCommand, bool inIsSynchronous)
         return m_CmdStack->ExecuteCommand(inCommand);
 }
 
-//=============================================================================
 /**
  * Commit the last command to be executed.
  * @see CCmdStack::CommitLastCommand.
@@ -581,7 +574,6 @@ void CCore::CommitCurrentCommand()
     m_CmdStack->CommitLastCommand();
 }
 
-//=============================================================================
 /**
  * Callback from the CommandStack to change whether or not this is modified.
  * This is used when the execution of commands changes the modified state of
@@ -593,7 +585,6 @@ void CCore::SetCommandModifiedFlag(bool inIsModified)
         m_Doc->SetModifiedFlag();
 }
 
-//=============================================================================
 /**
  * Callback from the CommandStack for the change flags after a command was
  * executed.
@@ -602,7 +593,6 @@ void CCore::CommandUpdate(unsigned long /*inFlags*/)
 {
 }
 
-//=============================================================================
 /**
  * Notification from the dispatch that a new presentation is being created.
  */
@@ -611,7 +601,6 @@ void CCore::OnNewPresentation()
     m_CmdStack->Clear();
 }
 
-//=============================================================================
 /**
  * Notification from the dispatch that the current presentation is closing.
  */
@@ -621,7 +610,6 @@ void CCore::OnClosingPresentation()
     m_CmdStack->Clear();
 }
 
-//==============================================================================
 /**
  *	Helper function to remove invalid characters not accepted by windows when
  *	exporting a component.
@@ -662,7 +650,6 @@ void CCore::DeselectAllKeyframes()
     m_Doc->DeselectAllKeyframes();
 }
 
-//==============================================================================
 /**
  * Called by hotkeys to set the start time of the currently selected object.
  */
@@ -671,7 +658,6 @@ void CCore::SetTimebarStart()
     m_Doc->TruncateTimebar(true, false);
 }
 
-//==============================================================================
 /**
  * Called by hotkeys to set the end time of the currently selected object.
  */
@@ -680,7 +666,6 @@ void CCore::SetTimebarEnd()
     m_Doc->TruncateTimebar(false, false);
 }
 
-//==============================================================================
 /**
  * Called by hotkeys to set the start time of the currently selected object.
  * Affects children objects
@@ -690,7 +675,6 @@ void CCore::SetTimebarStartAffectsChildren()
     m_Doc->TruncateTimebar(true, true);
 }
 
-//==============================================================================
 /**
  * Called by hotkeys to set the end time of the currently selected object.
  * Affects children objects
@@ -700,7 +684,6 @@ void CCore::SetTimebarEndAffectsChildren()
     m_Doc->TruncateTimebar(false, true);
 }
 
-//==============================================================================
 /**
  * Debugging utility to dump the command queue to a file.
  */

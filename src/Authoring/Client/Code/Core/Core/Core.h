@@ -28,16 +28,12 @@
 ****************************************************************************/
 #pragma once
 
-//==============================================================================
-// Includes
 #include "CmdStack.h"
 #include "DispatchListeners.h"
 #include "BuildConfigParser.h"
 #include "Qt3DSFileTools.h"
 #include "Doc.h"
 
-//==============================================================================
-// Forwards
 class CDoc;
 class CDispatch;
 class CCmdStack;

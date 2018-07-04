@@ -1675,8 +1675,8 @@ void CStudioApp::SaveUIAFile(bool subpresentations)
 void CStudioApp::saveDataInputsToProjectFile()
 {
     // open the uia file
-    QString path = m_core->getProjectPath().toQString() + QLatin1String("/")
-            + m_core->getProjectName().toQString() + QLatin1String(".uia");
+    QString path = m_core->getProjectPath().toQString() + QStringLiteral("/")
+            + m_core->getProjectName().toQString() + QStringLiteral(".uia");
     QFile file(path);
     file.open(QIODevice::ReadWrite);
     QDomDocument doc;
