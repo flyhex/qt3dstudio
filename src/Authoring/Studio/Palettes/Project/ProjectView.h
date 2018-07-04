@@ -75,6 +75,8 @@ public:
     Q_INVOKABLE bool isRefreshable(int row) const;
     Q_INVOKABLE void showContextMenu(int x, int y, int index);
     Q_INVOKABLE bool toolTipsEnabled();
+    bool isPresentation(int row) const;
+    void openPresentation(int row);
 
     // CPresentationChangeListener
     void OnNewPresentation() override;

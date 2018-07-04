@@ -254,6 +254,15 @@ void ProjectView::startDrag(QQuickItem *item, int row)
     QTimer::singleShot(0, item, &QQuickItem::ungrabMouse);
 }
 
+void ProjectView::openPresentation(int row)
+{
+    if (g_StudioApp.PerformSavePrompt()) {
+        const QString path = m_ProjectModel->filePath(row);
+        const Qt3DSFile file(Q3DStudio::CString::fromQString(path));
+        g_StudioApp.OnLoadDocument(file);
+    }
+}
+
 void ProjectView::showContainingFolder(int row) const
 {
     if (row == -1)
@@ -301,6 +310,11 @@ bool ProjectView::isGroup(int row) const
         return false;
     Q3DStudio::CFilePath path(Q3DStudio::CString::fromQString(m_ProjectModel->filePath(row)));
     return Q3DStudio::ImportUtils::GetObjectFileTypeForFile(path).m_ObjectType == OBJTYPE_GROUP;
+}
+
+bool ProjectView::isPresentation(int row) const
+{
+    return m_ProjectModel->filePath(row).endsWith(QLatin1String(".uip"));
 }
 
 bool ProjectView::isRefreshable(int row) const

@@ -34,6 +34,12 @@ ProjectContextMenu::ProjectContextMenu(ProjectView *parent, int index)
     , m_view(parent)
     , m_index(index)
 {
+    if (m_view->isPresentation(m_index)) {
+        QAction *action = new QAction(tr("Open Presentation"));
+        connect(action, &QAction::triggered, this, &ProjectContextMenu::handleOpenPresentation);
+        addAction(action);
+    }
+
     QAction *action = new QAction(tr("Show Containing Folder"));
     connect(action, &QAction::triggered, this, &ProjectContextMenu::handleShowContainingFolder);
     addAction(action);
@@ -64,6 +70,11 @@ ProjectContextMenu::ProjectContextMenu(ProjectView *parent, int index)
 
 ProjectContextMenu::~ProjectContextMenu()
 {
+}
+
+void ProjectContextMenu::handleOpenPresentation()
+{
+    m_view->openPresentation(m_index);
 }
 
 void ProjectContextMenu::handleShowContainingFolder()
