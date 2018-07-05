@@ -104,7 +104,8 @@ protected:
     bool runApplication();
     bool blankRunApplication();
     bool openAndRunApplication(const QString &inFilename);
-    bool createAndRunApplication(const QString &filename, const QString &folder = QString());
+    bool createAndRunApplication(const QString &filename, const QString &folder = QString(),
+                                 bool isNewProject = true);
     void initCore();
     bool showStartupDialog();
     bool handleWelcomeRes(int res, bool recursive);
@@ -213,6 +214,7 @@ public:
     void SetAutosaveEnabled(bool enabled);
     void SetAutosaveInterval(int interval);
     void toggleEyeball();
+    void showPresentationIdUniqueWarning();
     void showInvalidFilenameWarning();
     void checkDeletedDatainputs();
     void saveDataInputsToProjectFile();

@@ -33,13 +33,13 @@
 #include "BuildConfigParser.h"
 #include "Qt3DSFileTools.h"
 #include "Doc.h"
+#include "ProjectFile.h"
 
 class CDoc;
 class CDispatch;
 class CCmdStack;
 class CHotKeys;
 class CStudioProjectSettings;
-struct SubPresentationRecord;
 
 QT_FORWARD_DECLARE_CLASS(QWidget)
 
@@ -63,7 +63,7 @@ public:
     bool LoadBuildConfigurations();
     void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
 
-    bool OnNewDocument(const Qt3DSFile &inDocument, bool isNewProject);
+    bool OnNewDocument(const Qt3DSFile &inDocument, bool isNewProject, bool silent = false);
     void OnSaveDocument(const Qt3DSFile &inDocument, bool inSaveCopy = false);
     void OnSaveDocumentCatcher(const Qt3DSFile &inDocument, bool inSaveCopy = false);
     void SetCommandStackModifier(ICmdStackModifier *inModifier);
@@ -90,16 +90,7 @@ public:
     void DumpCommandQueue();
     bool HasJustSaved() { return m_JustSaved; }
     void SetJustSaved(bool inJustSaved) { m_JustSaved = inJustSaved; }
-    void setProjectNameAndPath(const Q3DStudio::CString &projectName,
-                               const Q3DStudio::CFilePath &projectPath);
-    void ensureProjectFile(const QDir &uipDirectory);
-    void loadProjectFileSubpresentationsAndDatainputs(
-            QVector<SubPresentationRecord> &subpresentations,
-            QMap<QString, CDataInputDialogItem *> &datainputs);
-    void setCurrentPresentation(const QString &currentPresentationId);
-    Q3DStudio::CFilePath getProjectPath() const;
-    Q3DStudio::CString getProjectName() const;
-    QString getFirstPresentationPath(const QString &uiaPath) const;
+    ProjectFile &getProjectFile();
 
 protected:
     CDoc *m_Doc;
@@ -113,11 +104,5 @@ protected:
     void InitAndValidateBuildConfiguration();
 
 private:
-    Q3DStudio::CFilePath m_projectPath; // project directory
-    Q3DStudio::CString m_projectName;
-    QString m_currentPresentationId;
-
-    void createProjectFile();
-    void addPresentationNodeToProjectFile(const Q3DStudio::CFilePath &uip);
-
+    ProjectFile m_projectFile;
 };

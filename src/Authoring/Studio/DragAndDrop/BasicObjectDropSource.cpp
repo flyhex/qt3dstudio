@@ -187,8 +187,9 @@ CCmd *CBasicObjectDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandl
         if (theComposerType == ComposerObjectTypes::Text) {
             // For Text, we need to check if user already has font file inside fonts folder
             CFilePath theFontFile;
-            CFilePath theFontDir = CFilePath::CombineBaseAndRelative(theDoc->GetDocumentDirectory(),
-                                                                     CFilePath(L"fonts"));
+            CFilePath theFontDir = CFilePath::CombineBaseAndRelative(
+                        g_StudioApp.GetCore()->getProjectFile().getProjectPath(),
+                        CFilePath(L"fonts"));
             if (!theFontDir.Exists()) {
                 // Create font dir if necessary
                 theFontDir.CreateDir(true);

@@ -191,11 +191,13 @@ public:
     {
         ScopedBoolean __ignoredDirs(m_IgnoreDirChange);
         IDirectoryWatchingSystem *theSystem(m_Doc.GetDirectoryWatchingSystem());
-        if (theSystem)
-            m_ProjectDirWatcher =
-                theSystem->AddDirectory(m_Doc.GetDocumentDirectory().toQString(),
+        if (theSystem) {
+            m_ProjectDirWatcher = theSystem->AddDirectory(m_Doc.GetCore()->getProjectFile()
+                                                          .getProjectPath().toQString(),
                                         std::bind(&CDocEditor::OnProjectDirChanged, this,
                                                   std::placeholders::_1));
+        }
+
         qmlRegisterType<Q3DSQmlBehavior>("QtStudio3D.Behavior", 1, 0, "Behavior");
         qmlRegisterType<Q3DSQmlBehavior, 1>("QtStudio3D.Behavior", 1, 1, "Behavior");
     }

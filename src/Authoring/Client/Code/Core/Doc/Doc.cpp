@@ -1586,6 +1586,16 @@ Qt3DSFile CDoc::GetDocumentPath() const
     return m_DocumentPath;
 }
 
+void CDoc::setPresentationId(const QString &id)
+{
+    m_presentationId = id;
+}
+
+QString CDoc::getPresentationId() const
+{
+    return m_presentationId;
+}
+
 Q3DStudio::CString CDoc::GetDocumentDirectory() const
 {
     Q3DStudio::CFilePath thePath(m_DocumentPath.GetAbsolutePath());
@@ -2828,6 +2838,7 @@ void CDoc::CheckActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     }
 }
 
+// Mahmoud_TODO: to be removed in next patches (after resolving its uses)
 QString CDoc::GetDocumentUIAFile(bool master)
 {
     Q3DStudio::CString docDir = GetDocumentDirectory();

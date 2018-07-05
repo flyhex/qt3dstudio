@@ -55,6 +55,7 @@
 #include <QtWidgets/qcolordialog.h>
 #include <QtWidgets/qfiledialog.h>
 #include <QtWidgets/qmessagebox.h>
+#include <QtWidgets/qcheckbox.h>
 #include <QtCore/qstandardpaths.h>
 #include <QtWidgets/qdesktopwidget.h>
 #include <QtWidgets/qpushbutton.h>
@@ -121,6 +122,10 @@ const wchar_t *widePresentationExts[] = {
     L"uip", nullptr,
 };
 
+const char *projectExts[] = {
+    "uia", nullptr,
+};
+
 const wchar_t *wideProjectExts[] = {
     L"uia", nullptr,
 };
@@ -160,6 +165,8 @@ const wchar_t *wideSoundExts[] = {
 // Note: Despite its name, Q3DStudio::DocumentEditorFileType::DAE type includes
 // all supported model types
 SAllowedTypesEntry g_AllowedImportTypes[] = {
+    { Q3DStudio::DocumentEditorFileType::Presentation, QObject::tr("Presentations"),
+      presentationExts },
     { Q3DStudio::DocumentEditorFileType::DAE, QObject::tr("Model Files"), modelExts },
     { Q3DStudio::DocumentEditorFileType::Image, QObject::tr("Image Files"), imgExts },
     { Q3DStudio::DocumentEditorFileType::Behavior, QObject::tr("Behavior Scripts"), behaviorExts },
@@ -646,6 +653,35 @@ int CDialogs::DisplayChoiceBox(const QString &inTitle, const QString &inText, in
     }
 }
 
+/**
+ * Display a box to choose whether to override or skip an existing asset during import
+ *
+ * @return  user choice (Yes, No, YesToAll, NoToAll)
+ */
+int CDialogs::displayOverrideAssetBox(const QString &assetPath)
+{
+    if (m_ShowGUI) {
+        QMessageBox box;
+        box.setWindowTitle(QObject::tr("Asset Exists"));
+        box.setText(QObject::tr("The following asset already exists, do you want to override it?"));
+        box.setInformativeText(assetPath);
+        box.setIcon(QMessageBox::Warning);
+        box.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        box.setButtonText(QMessageBox::Yes, QObject::tr("Override"));
+        box.setButtonText(QMessageBox::No, QObject::tr("Skip"));
+        box.setDefaultButton(QMessageBox::No);
+        box.setCheckBox(new QCheckBox(QObject::tr("Do this action for all and don't ask again."),
+                                      &box));
+        int choice = box.exec();
+        if (box.checkBox()->isChecked())
+            choice = choice == QMessageBox::Yes ? QMessageBox::YesToAll : QMessageBox::NoToAll;
+        return choice;
+    } else {
+        qCDebug(qt3ds::TRACE_INFO) << "Asset Override: " << assetPath;
+        return QMessageBox::No;
+    }
+}
+
 const char *CDialogs::GetDAEFileExtension()
 {
     return "dae";
@@ -731,6 +767,21 @@ bool CDialogs::IsMaterialFileExtension(const char *inExt)
 bool CDialogs::IsSoundFileExtension(const char *inExt)
 {
     return IsFileExtension(inExt, soundExts);
+}
+
+bool CDialogs::isMeshFileExtension(const char *inExt)
+{
+    return IsFileExtension(inExt, meshExts);
+}
+
+bool CDialogs::isPresentationFileExtension(const char *inExt)
+{
+    return IsFileExtension(inExt, presentationExts);
+}
+
+bool CDialogs::isProjectFileExtension(const char *inExt)
+{
+    return IsFileExtension(inExt, projectExts);
 }
 
 const wchar_t **CDialogs::GetWideImgFileExtensions()

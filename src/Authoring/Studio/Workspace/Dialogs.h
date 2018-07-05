@@ -102,6 +102,9 @@ public:
     static bool IsEffectFileExtension(const char *inExt);
     static bool IsMaterialFileExtension(const char *inExt);
     static bool IsSoundFileExtension(const char *inExt);
+    static bool isPresentationFileExtension(const char *inExt);
+    static bool isMeshFileExtension(const char *inExt);
+    static bool isProjectFileExtension(const char *inExt);
 
     static const wchar_t *GetWideDAEFileExtension();
     static const wchar_t *GetWideFbxFileExtension();
@@ -142,6 +145,7 @@ public:
                                                          Qt3DSMessageBox::EMessageBoxIcon inIcon,
                                                          bool inShowCancel,
                                                          QWidget *parent = nullptr);
+    int displayOverrideAssetBox(const QString &assetPath);
     int DisplayChoiceBox(const QString &inTitle, const QString &inText, int inIcon);
     void DisplayKnownErrorDialog(const QString &inErrorText);
 

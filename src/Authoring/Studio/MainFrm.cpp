@@ -52,7 +52,6 @@
 #include "Core.h"
 #include "ITickTock.h"
 #include "IStudioRenderer.h"
-#include "SubPresentationListDlg.h"
 #include "DataInputListDlg.h"
 #include "StudioTutorialWidget.h"
 #include "remotedeploymentsender.h"
@@ -106,8 +105,6 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionSave_a_Copy, &QAction::triggered, this, &CMainFrame::OnFileSaveCopy);
     connect(m_ui->action_Revert, &QAction::triggered, this, &CMainFrame::OnFileRevert);
     connect(m_ui->actionImportAssets, &QAction::triggered, this, &CMainFrame::OnFileImportAssets);
-    connect(m_ui->actionSubpresentations, &QAction::triggered, this,
-            &CMainFrame::OnFileSubPresentations);
     connect(m_ui->actionData_Inputs, &QAction::triggered, this, &CMainFrame::OnFileDataInputs);
     connect(m_ui->action_Connect_to_Device, &QAction::triggered, this,
             &CMainFrame::OnFileConnectToDevice);
@@ -849,22 +846,6 @@ void CMainFrame::OnEditApplicationPreferences()
 void CMainFrame::OnEditPresentationPreferences()
 {
     EditPreferences(PAGE_STUDIOPROJECTSETTINGS);
-}
-
-//==============================================================================
-/**
- *  Displays the sub-presentation dialog.
- */
-void CMainFrame::OnFileSubPresentations()
-{
-    QString dir = g_StudioApp.GetCore()->GetDoc()->GetDocumentDirectory().toQString();
-
-    CSubPresentationListDlg dlg(QDir::toNativeSeparators(dir), g_StudioApp.m_subpresentations);
-    dlg.exec();
-    if (dlg.result() == QDialog::Accepted) {
-        g_StudioApp.m_subpresentations = dlg.subpresentations();
-        g_StudioApp.SaveUIAFile();
-    }
 }
 
 //==============================================================================

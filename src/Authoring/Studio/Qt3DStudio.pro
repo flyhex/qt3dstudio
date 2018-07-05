@@ -122,8 +122,6 @@ HEADERS += \
     Application/DurationEditDlg.h \
     Application/StudioApp.h \
     Application/StudioTutorialWidget.h \
-    Application/SubPresentationDlg.h \
-    Application/SubPresentationListDlg.h \
     Application/TimeEditDlg.h \
     Application/TimeEnums.h \
     Controls/ClickableLabel.h \
@@ -207,7 +205,10 @@ HEADERS += \
     UI/StudioAppPrefsPage.h \
     UI/StudioPreferencesPropSheet.h \
     UI/StudioProjectSettingsPage.h \
-    ../Common/Code/Graph/GraphPosition.h
+    ../Common/Code/Graph/GraphPosition.h \
+    Palettes/Project/EditPresentationIdDlg.h \
+    Application/ProjectFile.h \
+    Application/PresentationFile.h
 
 FORMS += \
     MainFrm.ui \
@@ -217,8 +218,6 @@ FORMS += \
     Application/DurationEditDlg.ui \
     Application/StudioTutorialWidget.ui \
     Application/AboutDlg.ui \
-    Application/SubPresentationDlg.ui \
-    Application/SubPresentationListDlg.ui \
     Palettes/Progress/ProgressDlg.ui \
     UI/StudioAppPrefsPage.ui \
     UI/StudioPreferencesPropSheet.ui \
@@ -226,7 +225,8 @@ FORMS += \
     UI/InterpolationDlg.ui \
     UI/ResetKeyframeValuesDlg.ui \
     UI/GLVersionDlg.ui \
-    UI/StartupDlg.ui
+    UI/StartupDlg.ui \
+    Palettes/Project/EditPresentationIdDlg.ui
 
 SOURCES += \
     Application/AboutDlg.cpp \
@@ -238,8 +238,6 @@ SOURCES += \
     Application/MsgRouter.cpp \
     Application/StudioApp.cpp \
     Application/StudioTutorialWidget.cpp \
-    Application/SubPresentationDlg.cpp \
-    Application/SubPresentationListDlg.cpp \
     Application/TimeEditDlg.cpp \
     Controls/AppFonts.cpp \
     Controls/BufferedRenderer.cpp \
@@ -375,7 +373,10 @@ SOURCES += \
     Utils/SystemPreferences.cpp \
     Utils/TickTock.cpp \
     Workspace/Dialogs.cpp \
-    Workspace/Views.cpp
+    Workspace/Views.cpp \
+    Palettes/Project/EditPresentationIdDlg.cpp \
+    Application/ProjectFile.cpp \
+    Application/PresentationFile.cpp
 
 RESOURCES += \
     MainFrm.qrc \

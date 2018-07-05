@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -26,12 +26,10 @@
 **
 ****************************************************************************/
 
-#ifndef SUBPRESENTATIONLISTDLG_H
-#define SUBPRESENTATIONLISTDLG_H
+#ifndef EDITPRESENTATIONIDDLG_H
+#define EDITPRESENTATIONIDDLG_H
 
 #include <QtWidgets/qdialog.h>
-
-#include "Doc.h"
 
 #ifdef QT_NAMESPACE
 using namespace QT_NAMESPACE;
@@ -39,49 +37,27 @@ using namespace QT_NAMESPACE;
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
-    class SubPresentationListDlg;
+class EditPresentationIdDlg;
 }
 QT_END_NAMESPACE
 
-QT_FORWARD_DECLARE_CLASS(QStandardItemModel)
-QT_FORWARD_DECLARE_CLASS(QKeyEvent)
-
-class CSubPresentationListDlg : public QDialog
+class EditPresentationIdDlg : public QDialog
 {
     Q_OBJECT
+
 public:
-    CSubPresentationListDlg(const QString &directory,
-                            const QVector<SubPresentationRecord> &subpresentations,
-                            QWidget* parent = nullptr);
-    ~CSubPresentationListDlg();
-    QVector<SubPresentationRecord> subpresentations() const;
+    explicit EditPresentationIdDlg(const QString &src, QWidget *parent = 0);
+    ~EditPresentationIdDlg();
 
-protected:
-    void initDialog();
-    void updateButtons();
-    void updateContents();
-    QString getUniqueId(const QString &id, bool editing = false);
-    void keyPressEvent(QKeyEvent *event);
-
-private Q_SLOTS:
-    void on_buttonBox_accepted();
-    void on_buttonBox_rejected();
-    void onAddSubPresentation();
-    void onRemoveSubPresentation();
-    void onEditSubPresentation();
-    void onActivated(const QModelIndex &index);
-    void onSelectionChanged();
-    void onSortOrderChanged(int column, Qt::SortOrder order);
+public Q_SLOTS:
+    void accept() override;
 
 private:
-    Ui::SubPresentationListDlg *m_ui;
-    QString m_directory;
-    QVector<SubPresentationRecord> m_records;
-    int m_currentIndex;
-    QString m_currentName;
-    QStandardItemModel *m_tableContents;
-    int m_sortColumn;
-    Qt::SortOrder m_sortOrder;
+    Ui::EditPresentationIdDlg *m_ui;
+    QString m_src; // src attribute value for the current presentation in the project file
+    QString m_presentationId;
+
+    void onChangePresentationId();
 };
 
-#endif
+#endif // EDITPRESENTATIONIDDLG_H

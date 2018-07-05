@@ -109,6 +109,9 @@ int main(int argc, char *argv[])
     parser.addOption({"silent",
                       QObject::tr("Allows creating a project silently.\n"
                       "Only has effect with create.")});
+    parser.addOption({"add",
+                      QObject::tr("Add a presentation to an existing project.\n"
+                      "Omit to create a new project. Only has effect with create.")});
     parser.process(guiApp);
 
     const QStringList files = parser.positionalArguments();
@@ -312,7 +315,7 @@ bool CStudioApp::initInstance(const QCommandLineParser &parser)
 
     m_dialogs = new CDialogs(!m_isSilent);
 
-    m_views = new CViews(this);
+    m_views = new CViews();
 
     m_core = new CCore();
     getRenderer();
@@ -352,12 +355,15 @@ bool CStudioApp::run(const QCommandLineParser &parser)
     bool theRetVal = false;
     try {
         if (parser.isSet("create")) {
+            // true: add a presentation to a project, false: create a new project
+            bool isAdd = parser.isSet("add");
             // Create, requires file and folder
             if (parser.positionalArguments().count() > 1) {
                 theRetVal = createAndRunApplication(parser.positionalArguments().at(0),
-                                                    parser.positionalArguments().at(1));
+                                                    parser.positionalArguments().at(1), !isAdd);
             } else {
-                theRetVal = createAndRunApplication(parser.positionalArguments().at(0));
+                theRetVal = createAndRunApplication(parser.positionalArguments().at(0),
+                                                    QString(), !isAdd);
             }
         } else if (parser.positionalArguments().count() > 0) {
             // Start given file
@@ -473,7 +479,7 @@ QString CStudioApp::resolvePresentationFile(const QString &inFile)
     if (inFileInfo.suffix().compare(QStringLiteral("uia"), Qt::CaseInsensitive) == 0
             && inFileInfo.exists()) {
         QString uiaPath = inFileInfo.absoluteFilePath();
-        QString firstPresentation = m_core->getFirstPresentationPath(uiaPath);
+        QString firstPresentation = m_core->getProjectFile().getFirstPresentationPath(uiaPath);
 
         if (!firstPresentation.isEmpty())
             return inFileInfo.path() + QStringLiteral("/") + firstPresentation;
@@ -647,7 +653,8 @@ bool CStudioApp::openAndRunApplication(const QString &inFilename)
     return theSuccess;
 }
 
-bool CStudioApp::createAndRunApplication(const QString &filename, const QString &folder)
+bool CStudioApp::createAndRunApplication(const QString &filename, const QString &folder,
+                                         bool isNewProject)
 {
     bool theSuccess = false;
     initCore();
@@ -659,7 +666,7 @@ bool CStudioApp::createAndRunApplication(const QString &filename, const QString 
     Qt3DSFile theFile = Qt3DSFile(CString::fromQString(folder),
                                   CString::fromQString(actualFilename));
     if (theFile.GetPath() != "") {
-        theSuccess = m_core->OnNewDocument(theFile, true);
+        theSuccess = m_core->OnNewDocument(theFile, isNewProject, m_isSilent);
         if (!theSuccess)
             return false;
 
@@ -1569,7 +1576,8 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
 
     try {
         Q3DStudio::CFilePath docFilePath(inDocument.GetAbsolutePath());
-        m_core->ensureProjectFile(docFilePath.dir()); // make sure a project (a .uia file) exists
+        // make sure a project (a .uia file) exists
+        m_core->getProjectFile().ensureProjectFile(docFilePath.dir());
         OnLoadDocumentCatcher(loadDocument);
         m_core->GetDispatch()->FireOnOpenDocument(loadDocument, true);
         // Loading was successful
@@ -1631,9 +1639,9 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
         }
     } else {
         m_dialogs->ResetSettings(loadDocument.GetPath());
-        m_core->setCurrentPresentation(loadDocument.GetStem().toQString());
-        m_core->loadProjectFileSubpresentationsAndDatainputs(m_subpresentations,
-                                                             m_dataInputDialogItems);
+        m_core->getProjectFile().updateDocPresentationId();
+        m_core->getProjectFile().loadSubpresentationsAndDatainputs(m_subpresentations,
+                                                                   m_dataInputDialogItems);
         g_StudioApp.getRenderer().RegisterSubpresentations(m_subpresentations);
     }
 
@@ -1675,8 +1683,8 @@ void CStudioApp::SaveUIAFile(bool subpresentations)
 void CStudioApp::saveDataInputsToProjectFile()
 {
     // open the uia file
-    QString path = m_core->getProjectPath().toQString() + QStringLiteral("/")
-            + m_core->getProjectName().toQString() + QStringLiteral(".uia");
+    QString path = m_core->getProjectFile().getProjectPath().toQString() + QStringLiteral("/")
+            + m_core->getProjectFile().getProjectName().toQString() + QStringLiteral(".uia");
     QFile file(path);
     file.open(QIODevice::ReadWrite);
     QDomDocument doc;
@@ -1802,9 +1810,8 @@ QString CStudioApp::OnFileNew()
             if (!m_core->OnNewDocument(theFile, false)) {
                 showInvalidFilenameWarning();
             } else {
-                m_core->setCurrentPresentation(theFile.GetStem().toQString());
-                m_core->loadProjectFileSubpresentationsAndDatainputs(m_subpresentations,
-                                                                     m_dataInputDialogItems);
+                m_core->getProjectFile().loadSubpresentationsAndDatainputs(m_subpresentations,
+                                                                           m_dataInputDialogItems);
                 g_StudioApp.getRenderer().RegisterSubpresentations(m_subpresentations);
             }
         } else {
@@ -1971,6 +1978,13 @@ void CStudioApp::toggleEyeball()
             }
         }
     }
+}
+
+void CStudioApp::showPresentationIdUniqueWarning()
+{
+    m_dialogs->DisplayMessageBox(tr("Warning"),
+                                 tr("Presentation Id must be unique."),
+                                 Qt3DSMessageBox::ICON_WARNING, false);
 }
 
 void CStudioApp::showInvalidFilenameWarning()

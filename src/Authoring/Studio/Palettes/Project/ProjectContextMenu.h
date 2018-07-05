@@ -42,6 +42,7 @@ public:
 
 private Q_SLOTS:
     void handleOpenPresentation();
+    void handleEditPresentationId();
     void handleShowContainingFolder();
     void handleCopyPath();
     void handleCopyFullPath();

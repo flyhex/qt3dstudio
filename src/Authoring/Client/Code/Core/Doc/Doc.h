@@ -185,6 +185,8 @@ public:
     Q3DStudio::IDirectoryWatchingSystem *GetDirectoryWatchingSystem();
     bool SetDocumentPath(const Qt3DSFile &inFile);
     Qt3DSFile GetDocumentPath() const;
+    void setPresentationId(const QString &id);
+    QString getPresentationId() const;
     Q3DStudio::CString GetDocumentDirectory() const;
     Q3DStudio::CString GetRelativePathToDoc(const Q3DStudio::CFilePath &inPath);
     Q3DStudio::CString GetResolvedPathToDoc(const Q3DStudio::CFilePath &inPath);
@@ -498,6 +500,7 @@ protected:
 
 private:
     bool m_playbackPreviewOn = false;
+    QString m_presentationId;
 };
 
 #endif // INCLUDED_DOC_H

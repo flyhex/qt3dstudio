@@ -117,10 +117,12 @@ void CStudioPreferencesPropSheet::done(int code)
 
 void CStudioPreferencesPropSheet::accept()
 {
-    if (apply() && !m_returnCode)
-        QDialog::accept();
-    else
-        QDialog::done(m_returnCode);
+    if (apply()) {
+        if (!m_returnCode)
+            QDialog::accept();
+        else
+            QDialog::done(m_returnCode);
+    }
 }
 
 void CStudioPreferencesPropSheet::reject()

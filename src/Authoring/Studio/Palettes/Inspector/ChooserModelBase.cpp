@@ -589,7 +589,5 @@ void ChooserModelBase::modelLayoutChanged()
 
 void ChooserModelBase::rebuild()
 {
-    const auto doc = g_StudioApp.GetCore()->GetDoc();
-    const Q3DStudio::CFilePath path(doc->GetDocumentPath().GetAbsolutePath());
-    setRootPath(path.GetDirectory().toQString());
+    setRootPath(g_StudioApp.GetCore()->getProjectFile().getProjectPath().toQString());
 }

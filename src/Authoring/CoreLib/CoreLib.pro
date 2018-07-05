@@ -36,10 +36,12 @@ INCLUDEPATH += \
     ../QT3DSDM/Systems \
     ../QT3DSDM/Systems/Cores \
     ../QT3DSIMP/Qt3DSImportSGTranslation \
+    ../Studio \
     ../Studio/DragAndDrop \
     ../Studio/Render \
     ../Studio/Workspace \
     ../Studio/DragAndDrop \
+    ../Studio/Application \
     ../Studio/Utils \
     ../Build \
     ../Common/Code/Thread \

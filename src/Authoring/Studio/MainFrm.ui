@@ -73,7 +73,6 @@ Project palette using Import functionality.</string>
     <addaction name="action_Revert"/>
     <addaction name="separator"/>
     <addaction name="actionImportAssets"/>
-    <addaction name="actionSubpresentations"/>
     <addaction name="actionData_Inputs"/>
     <addaction name="action_Connect_to_Device"/>
     <addaction name="separator"/>

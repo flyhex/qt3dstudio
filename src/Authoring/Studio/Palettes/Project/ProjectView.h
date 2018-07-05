@@ -30,6 +30,7 @@
 
 #include "DispatchListeners.h"
 #include "Qt3DSFile.h"
+#include "EditPresentationIdDlg.h"
 
 #include <QQuickWidget>
 #include <QModelIndex>
@@ -76,7 +77,9 @@ public:
     Q_INVOKABLE void showContextMenu(int x, int y, int index);
     Q_INVOKABLE bool toolTipsEnabled();
     bool isPresentation(int row) const;
+    bool isCurrentPresentation(int row) const;
     void openPresentation(int row);
+    void editPresentationId(int row);
 
     // CPresentationChangeListener
     void OnNewPresentation() override;

@@ -34,7 +34,7 @@
 /**
  *	Constructor
  */
-CViews::CViews(CStudioApp * /*inStudioApp*/)
+CViews::CViews()
     : m_mainFrame(nullptr)
 {
 }

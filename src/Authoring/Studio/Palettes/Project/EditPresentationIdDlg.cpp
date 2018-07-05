@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -26,50 +26,42 @@
 **
 ****************************************************************************/
 
-#ifndef SUBPRESENTATIONDLG_H
-#define SUBPRESENTATIONDLG_H
+#include "EditPresentationIdDlg.h"
+#include "ui_EditPresentationIdDlg.h"
+#include "StudioApp.h"
+#include "Core.h"
 
-#include <QtWidgets/qdialog.h>
-
-#include "Doc.h"
-
-#ifdef QT_NAMESPACE
-using namespace QT_NAMESPACE;
-#endif
-
-QT_BEGIN_NAMESPACE
-namespace Ui {
-    class SubPresentationDlg;
-}
-QT_END_NAMESPACE
-
-class CSubPresentationDlg : public QDialog
+EditPresentationIdDlg::EditPresentationIdDlg(const QString &src, QWidget *parent)
+    : QDialog(parent)
+    , m_src(src)
+    , m_ui(new Ui::EditPresentationIdDlg)
 {
-    Q_OBJECT
-public:
-    CSubPresentationDlg(const QString &directory,
-                        const SubPresentationRecord &subpresentation,
-                        QWidget* parent = nullptr);
-    ~CSubPresentationDlg();
-    SubPresentationRecord subpresentation();
+    m_ui->setupUi(this);
 
-protected:
-    void initDialog();
-    void updateUI();
-    void browseFile();
-    void createSubPresentation();
+    m_presentationId = g_StudioApp.GetCore()->getProjectFile().getPresentationId(src);
 
-private Q_SLOTS:
-    void on_buttonBox_accepted();
-    void on_buttonBox_rejected();
-    void onTypeChanged(int index);
-    void onFileChanged(int index);
-    void onIdChanged(const QString &id);
+    m_ui->lineEditPresentationId->setText(m_presentationId);
 
-private:
-    Ui::SubPresentationDlg *m_ui;
-    SubPresentationRecord m_subPresentation;
-    QString m_directory;
-};
+    connect(m_ui->lineEditPresentationId, &QLineEdit::textEdited, this,
+            &EditPresentationIdDlg::onChangePresentationId);
+}
 
-#endif
+void EditPresentationIdDlg::onChangePresentationId()
+{
+    m_presentationId = m_ui->lineEditPresentationId->text();
+}
+
+void EditPresentationIdDlg::accept()
+{
+    if (!g_StudioApp.GetCore()->getProjectFile().isUniquePresentationId(m_presentationId, m_src)) {
+        g_StudioApp.showPresentationIdUniqueWarning();
+    } else {
+        g_StudioApp.GetCore()->getProjectFile().writePresentationId(m_presentationId, m_src);
+        QDialog::accept();
+    }
+}
+
+EditPresentationIdDlg::~EditPresentationIdDlg()
+{
+    delete m_ui;
+}

@@ -28,6 +28,7 @@
 #include "qtAuthoring-config.h"
 #include <QtCore/qset.h>
 
+#include "PresentationFile.h"
 #include "Qt3DSCommonPrecompile.h"
 #include "ProjectFileSystemModel.h"
 #include "StudioUtils.h"
@@ -40,6 +41,7 @@
 #include "Dialogs.h"
 #include "Qt3DSDMStudioSystem.h"
 #include "Qt3DSImportTranslation.h"
+#include "Qt3DSMessageBox.h"
 #include "IDocumentEditor.h"
 #include "IDragable.h"
 
@@ -431,8 +433,61 @@ void ProjectFileSystemModel::importUrl(const QDir &targetDir, const QUrl &url) c
         // Copy the file to target directory
         // FindAndCopyDestFile will make sure the file name is unique and make sure it is
         // not read only.
-        bool copyResult = SFileTools::FindAndCopyDestFile(targetDir, sourceFile);
+        QString destPath; // final file path (after copying and renaming)
+        bool copyResult = SFileTools::FindAndCopyDestFile(targetDir, sourceFile, destPath);
         Q_ASSERT(copyResult);
+
+        if (CDialogs::isPresentationFileExtension(extension.toLatin1().data())) {
+            // add presentation node to the project file
+            g_StudioApp.GetCore()->getProjectFile().addPresentationNode(destPath);
+
+            QDir srcDir = fileInfo.dir();
+
+            // import related assets
+            PresentationFile file(destPath);
+            QList<QString> importSourcePaths;
+            QString rootPath; // imported uip project root
+            file.getSourcePaths(srcDir, importSourcePaths, rootPath);
+            int overrideChoice = QMessageBox::NoButton; // user choice from the override box
+            for (auto &path : qAsConst(importSourcePaths)) {
+                QString srcAssetPath, targetAssetPath;
+                if (path.indexOf(QLatin1String("./")) == 0) { // root path (stars with ./)
+                    srcAssetPath = QDir(rootPath).absoluteFilePath(path);
+                    targetAssetPath = QDir(g_StudioApp.GetCore()->getProjectFile()
+                                           .getProjectPath().filePath()).absoluteFilePath(path);
+                } else { // relative path
+                    srcAssetPath = srcDir.absoluteFilePath(path);
+                    targetAssetPath = targetDir.absoluteFilePath(path);
+                }
+
+                QFileInfo fi(targetAssetPath);
+                if (!fi.dir().exists())
+                    fi.dir().mkpath(".");
+
+                if (fi.exists()) { // asset exists, show override / skip box
+                    if (overrideChoice == QMessageBox::YesToAll) {
+                        QFile::remove(targetAssetPath);
+                    } else if (overrideChoice == QMessageBox::NoToAll) {
+                        // QFile::copy() do not override files
+                    } else {
+                        // get path relative to project root (for neat displaying)
+                        QString pathFromRoot = QDir(g_StudioApp.GetCore()->getProjectFile()
+                                                    .getProjectPath().filePath())
+                                                    .relativeFilePath(targetAssetPath);
+
+                        overrideChoice = g_StudioApp.GetDialogs()
+                                ->displayOverrideAssetBox(pathFromRoot);
+
+                        if (overrideChoice == QMessageBox::Yes
+                            || overrideChoice == QMessageBox::YesToAll) {
+                            QFile::remove(targetAssetPath);
+                        }
+                    }
+                }
+
+                QFile::copy(srcAssetPath, targetAssetPath);
+            }
+        }
 
         // For effect and custom material files, automatically copy related resources
         if (CDialogs::IsEffectFileExtension(extension.toLatin1().data())
@@ -443,11 +498,12 @@ void ProjectFileSystemModel::importUrl(const QDir &targetDir, const QUrl &url) c
                         effectFileSourcePaths);
 
             const QDir fileDir = QFileInfo(sourceFile).dir();
-            const QDir documentDir(doc->GetDocumentDirectory().toQString());
+            const QDir projectDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath()
+                                  .toQString());
 
             for (const auto &effectFile : effectFileSourcePaths) {
                 const QString sourcePath = fileDir.filePath(effectFile.toQString());
-                const QString resultPath = documentDir.filePath(effectFile.toQString());
+                const QString resultPath = projectDir.filePath(effectFile.toQString());
 
                 const QFileInfo resultFileInfo(resultPath);
                 if (!resultFileInfo.exists()) {

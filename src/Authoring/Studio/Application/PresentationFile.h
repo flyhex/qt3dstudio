@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1999-2002 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -27,33 +26,25 @@
 **
 ****************************************************************************/
 
-#ifndef INCLUDED_VIEWS_H
-#define INCLUDED_VIEWS_H 1
+#ifndef PRESENTATIONFILE_H
+#define PRESENTATIONFILE_H
 
-#pragma once
+#include <QtCore/qfile.h>
+#include <QtXml/qdom.h>
 
-#include <QtWidgets/qwidget.h>
+QT_FORWARD_DECLARE_CLASS(QDir)
 
-class CMainFrame;
-class CStudioApp;
-class CHotKeys;
-
-class CViews
+class PresentationFile
 {
 public:
-    CViews();
-    virtual ~CViews();
+    PresentationFile(const QString &path);
+    ~PresentationFile();
 
-    void createViews(bool silent);
+    void getSourcePaths(const QDir &srcDir, QList<QString> &outPaths, QString &outRootPath) const;
 
-    void registerGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
-
-    CMainFrame *getMainFrame();
-
-    void recheckMainframeSizingMode();
-
-protected:
-    QScopedPointer<CMainFrame> m_mainFrame;
+private:
+    QFile m_file;
+    QDomDocument m_domDoc;
 };
 
-#endif // INCLUDED_VIEWS_H
+#endif // PRESENTATIONFILE_H

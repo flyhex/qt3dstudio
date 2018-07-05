@@ -146,7 +146,6 @@ public:
     void OnUpdateToolAutosetkeys();
     void OnEditApplicationPreferences();
     void OnEditPresentationPreferences();
-    void OnFileSubPresentations();
     void OnFileDataInputs();
     void OnPlaybackPlay();
     void OnUpdatePlaybackPlay();

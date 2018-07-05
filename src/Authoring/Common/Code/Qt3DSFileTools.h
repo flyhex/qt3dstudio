@@ -369,8 +369,9 @@ struct SFileTools
     // srcFile -> src file to copy
     static SFileErrorCodeFileNameAndNumBytes FindAndCopyDestFile(const CFilePath &inDestDir,
                                                                  const CFilePath &inSrcFile);
-    static bool FindAndCopyDestFile(const QDir &inDestDir,
-                                    const QString &inSrcFile);
+    static bool FindAndCopyDestFile(const QDir &inDestDir, const QString &inSrcFile);
+    static bool FindAndCopyDestFile(const QDir &inDestDir, const QString &inSrcFile,
+                                    QString &outDestFile);
 };
 
 }

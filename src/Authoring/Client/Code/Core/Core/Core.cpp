@@ -35,19 +35,15 @@
 #include "StudioProjectSettings.h"
 #include "FileOutputStream.h"
 #include "FormattedOutputStream.h"
-#include "Exceptions.h"
-#include "Qt3DSFileTools.h"
 #include "Cmd.h"
+#include "StudioConst.h"
 #include "StudioPreferences.h"
 #include "Qt3DSStateApplication.h"
-#include "Studio/Application/DataInputDlg.h"
-#include "foundation/FileTools.h"
+#include "StudioApp.h"
+#include "Views/Views.h"
+#include "MainFrm.h"
 #include <QtWidgets/qaction.h>
-#include <QtWidgets/qwidget.h>
-#include <QtCore/qdiriterator.h>
-#include <QtXml/qdom.h>
 
-// Construction
 CCore::CCore()
     : m_Doc(NULL)
     , m_Dispatch(new CDispatch())
@@ -208,11 +204,22 @@ void CCore::GetCreateDirectoryFileName(const Qt3DSFile &inDocument,
     outFinalDoc = CFilePath::CombineBaseAndRelative(outFinalDir, theName);
 }
 
+ProjectFile &CCore::getProjectFile()
+{
+    return m_projectFile;
+}
+
 /**
  * Call to create a new document.
  * This will clear out the current doc (if there is one) then create a new one.
+ *
+ * @param inDocument the document absolute path including the file name
+ * @param isNewProject create a new project or create presentation under an existing project
+ * @param silent don't show the presentation settings
+ *
+ * @return bool creation successful
  */
-bool CCore::OnNewDocument(const Qt3DSFile &inDocument, bool isNewProject)
+bool CCore::OnNewDocument(const Qt3DSFile &inDocument, bool isNewProject, bool silent)
 {
     CDispatchDataModelNotificationScope __dispatchScope(*m_Dispatch);
 
@@ -233,11 +240,14 @@ bool CCore::OnNewDocument(const Qt3DSFile &inDocument, bool isNewProject)
         CFilePath::CombineBaseAndRelative(theFinalDir, CFilePath(L"presentations")).CreateDir(true);
         CFilePath::CombineBaseAndRelative(theFinalDir, CFilePath(L"scripts")).CreateDir(true);
 
-        setProjectNameAndPath(theDocument.GetFileStem(), theFinalDir);
+        // create the project .uia file
+        m_projectFile.create(theDocument.GetFileStem(), theFinalDir);
 
-        // create the default uip file in the presentations folder
+        // set the default uip file path to the presentations folder
         theDocument.setFile(QDir(theDocument.absolutePath() + QStringLiteral("/presentations")),
                             theDocument.GetFileName().toQString());
+    } else {
+        m_projectFile.ensureProjectFile(theDocument.dir());
     }
 
     Qt3DSFile fileDocument(theDocument.toCString());
@@ -252,207 +262,15 @@ bool CCore::OnNewDocument(const Qt3DSFile &inDocument, bool isNewProject)
     // Serialize the new document.
     m_Doc->SaveDocument(fileDocument);
 
-    if (isNewProject)
-        createProjectFile(); // create the project .uia file
-    else
-        ensureProjectFile(theDocument.dir());
-
     // write a new presentation node to the uia file
-    addPresentationNodeToProjectFile(theDocument);
+    m_projectFile.addPresentationNode(theDocument);
+    m_projectFile.updateDocPresentationId();
+
+    // show the presentation settings panel
+    if (!silent)
+        g_StudioApp.GetViews()->getMainFrame()->EditPreferences(PAGE_STUDIOPROJECTSETTINGS);
 
     return true;
-}
-
-// Mahmoud_TODO: add all the following UIA related methods to a new class (ProjectFile.cpp)
-
-// find the 1st .uia file in the current or parent directories and assume this is the project file,
-// as projects should have only 1 .uia file
-void CCore::ensureProjectFile(const QDir &uipDirectory)
-{
-    QDir currentDir = uipDirectory;
-    bool uiaFound = false;
-    do {
-        QDirIterator di(currentDir.path(), QDir::NoDotAndDotDot | QDir::Files);
-        while (di.hasNext()) {
-            Q3DStudio::CFilePath file = di.next();
-
-            if (file.GetExtension() == "uia") {
-                // found the project file, update project name and directory
-                setProjectNameAndPath(file.GetFileStem(), file.GetDirectory());
-                uiaFound = true;
-                break;
-            }
-        }
-    } while (!uiaFound && currentDir.cdUp());
-
-    if (!uiaFound)
-        throw ProjectFileNotFoundException();
-}
-
-void CCore::addPresentationNodeToProjectFile(const Q3DStudio::CFilePath &uip)
-{
-    // open the uia file
-    QString path = m_projectPath.toQString() + QStringLiteral("/") + m_projectName.toQString()
-            + QStringLiteral(".uia");
-    QFile file(path);
-    file.open(QIODevice::ReadWrite);
-    QDomDocument doc;
-    doc.setContent(&file);
-
-    QDomElement rootElem = doc.documentElement();
-    QDomElement assetsElem = rootElem.firstChildElement(QStringLiteral("assets"));
-
-    // create the <assets> node if it doesn't exist
-    if (assetsElem.isNull()) {
-        assetsElem = doc.createElement(QStringLiteral("assets"));
-        assetsElem.setAttribute(QStringLiteral("initial"), uip.GetFileStem().toQString());
-        rootElem.insertBefore(assetsElem, {});
-    }
-
-    QString relativeUipPath = uip.absoluteFilePath()
-            .remove(0, m_projectPath.toQString().length() + 1);
-
-    // add the presentation tag
-    QDomElement uipElem = doc.createElement(QStringLiteral("presentation"));
-    uipElem.setAttribute(QStringLiteral("id"), uip.GetFileStem().toQString());
-    uipElem.setAttribute(QStringLiteral("src"), relativeUipPath);
-    assetsElem.appendChild(uipElem);
-
-    // write the uia file
-    file.resize(0);
-    file.write(doc.toByteArray(4));
-    file.close();
-}
-
-// get the path (relative) to the first presentation in a uia file
-QString CCore::getFirstPresentationPath(const QString &uiaPath) const
-{
-    QFile file(uiaPath);
-    file.open(QIODevice::ReadOnly);
-    QDomDocument doc;
-    doc.setContent(&file);
-    file.close();
-
-    QDomElement assetsElem = doc.documentElement().firstChildElement(QStringLiteral("assets"));
-    if (!assetsElem.isNull()) {
-        QDomElement firstPresentationElem =
-                assetsElem.firstChildElement(QStringLiteral("presentation"));
-
-        if (!firstPresentationElem.isNull())
-            return firstPresentationElem.attribute(QStringLiteral("src"));
-    }
-
-    return {};
-}
-
-// create the project .uia file
-void CCore::createProjectFile()
-{
-    QDomDocument doc;
-    doc.setContent(QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\"?>"
-                                  "<application xmlns=\"http://qt.io/qt3dstudio/uia\">"
-                                    "<statemachine ref=\"#logic\">"
-                                      "<visual-states>"
-                                        "<state ref=\"Initial\">"
-                                          "<enter>"
-                                            "<goto-slide element=\"main:Scene\" rel=\"next\"/>"
-                                          "</enter>"
-                                        "</state>"
-                                      "</visual-states>"
-                                    "</statemachine>"
-                                  "</application>"));
-
-    QString path = m_projectPath.toQString() + QStringLiteral("/") + m_projectName.toQString()
-            + QStringLiteral(".uia");
-    QFile file(path);
-    file.open(QIODevice::WriteOnly);
-    file.resize(0);
-    file.write(doc.toByteArray(4));
-    file.close();
-}
-
-void CCore::loadProjectFileSubpresentationsAndDatainputs(
-                                                QVector<SubPresentationRecord> &subpresentations,
-                                                QMap<QString, CDataInputDialogItem *> &datainputs)
-{
-    subpresentations.clear();
-    datainputs.clear();
-
-    QString path = m_projectPath.toQString() + QStringLiteral("/") + m_projectName.toQString()
-            + QStringLiteral(".uia");
-    QFile file(path);
-    file.open(QIODevice::ReadOnly);
-    QDomDocument doc;
-    doc.setContent(&file);
-    file.close();
-
-    QDomElement assetsElem = doc.documentElement().firstChildElement(QStringLiteral("assets"));
-    if (!assetsElem.isNull()) {
-        for (QDomElement p = assetsElem.firstChild().toElement(); !p.isNull();
-            p = p.nextSibling().toElement()) {
-            if ((p.nodeName() == QLatin1String("presentation")
-                 || p.nodeName() == QLatin1String("presentation-qml"))
-                    && p.attribute(QStringLiteral("id")) != m_currentPresentationId) {
-                QString argsOrSrc = p.attribute(QStringLiteral("src"));
-                if (argsOrSrc.isNull())
-                    argsOrSrc = p.attribute(QStringLiteral("args"));
-
-                subpresentations.push_back(
-                            SubPresentationRecord(p.nodeName(), p.attribute("id"), argsOrSrc));
-            } else if (p.nodeName() == QLatin1String("dataInput")) {
-                CDataInputDialogItem *item = new CDataInputDialogItem();
-                item->name = p.attribute(QStringLiteral("name"));
-                QString type = p.attribute(QStringLiteral("type"));
-                if (type == QLatin1String("Ranged Number")) {
-                    item->type = EDataType::DataTypeRangedNumber;
-                    item->minValue = p.attribute(QStringLiteral("min")).toFloat();
-                    item->maxValue = p.attribute(QStringLiteral("max")).toFloat();
-                } else if (type == QLatin1String("String")) {
-                    item->type = EDataType::DataTypeString;
-                } else if (type == QLatin1String("Float")) {
-                    item->type = EDataType::DataTypeFloat;
-                } else if (type == QLatin1String("Boolean")) {
-                    item->type = EDataType::DataTypeBoolean;
-                } else if (type == QLatin1String("Vector3")) {
-                    item->type = EDataType::DataTypeVector3;
-                } else if (type == QLatin1String("Vector2")) {
-                    item->type = EDataType::DataTypeVector2;
-                } else if (type == QLatin1String("Variant")) {
-                    item->type = EDataType::DataTypeVariant;
-                }
-#ifdef DATAINPUT_EVALUATOR_ENABLED
-                else if (type == QLatin1String("Evaluator")) {
-                    item->type = EDataType::DataTypeEvaluator;
-                    item->valueString = p.attribute(QStringLiteral("evaluator"));
-                }
-#endif
-                datainputs.insert(item->name, item);
-            }
-        }
-    }
-}
-
-// set the current open presentation in the project
-void CCore::setCurrentPresentation(const QString &presentationId)
-{
-    this->m_currentPresentationId = presentationId;
-}
-
-void CCore::setProjectNameAndPath(const Q3DStudio::CString &projectName,
-                                  const Q3DStudio::CFilePath &projectPath)
-{
-    m_projectName = projectName;
-    m_projectPath = projectPath;
-}
-
-Q3DStudio::CFilePath CCore::getProjectPath() const
-{
-    return m_projectPath;
-}
-
-Q3DStudio::CString CCore::getProjectName() const
-{
-    return m_projectName;
 }
 
 /**

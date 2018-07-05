@@ -36,18 +36,9 @@
 #include "Views.h"
 #include "MainFrm.h"
 #include "CommonConstants.h"
-
 #include "StudioPreferences.h"
 #include "Core.h"
 
-/////////////////////////////////////////////////////////////////////////////
-// CStudioProjectSettingsPage property page
-
-//==============================================================================
-/**
- *	Constructor: Initializes the object.
- */
-//==============================================================================
 CStudioProjectSettingsPage::CStudioProjectSettingsPage(QWidget *parent)
     : CStudioPreferencesPropPage(parent)
     , m_AspectRatio(0.0f)
@@ -60,36 +51,26 @@ CStudioProjectSettingsPage::CStudioProjectSettingsPage(QWidget *parent)
     m_BoldFont = m_Font;
     m_BoldFont.setBold(true);
 
-    OnInitDialog();
+    onInitDialog();
 }
 
-//==============================================================================
-/**
- *	Destructor: Releases the object.
- */
-//==============================================================================
+
 CStudioProjectSettingsPage::~CStudioProjectSettingsPage()
 {
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// CStudioProjectSettingsPage message handlers
-
-//==============================================================================
 /**
- *	OnInitDialog: Handle the WM_INITDIALOG message.
+ * OnInitDialog: Handle the WM_INITDIALOG message.
  *
- *	Initialize the dialog by setting the various control values.
+ * Initialize the dialog by setting the various control values.
  *
- *	@param	None
- *
- *	@return Returns TRUE always.
+ * @return Returns TRUE always.
  */
-//==============================================================================
-void CStudioProjectSettingsPage::OnInitDialog()
+void CStudioProjectSettingsPage::onInitDialog()
 {
     m_ui->setupUi(this);
 
+    m_ui->m_PresentationId->setToolTip(tr("Presentation Id"));
     m_ui->m_ClientSizeWidth->setToolTip(tr("Presentation Width"));
     m_ui->m_ClientSizeHeight->setToolTip(tr("Presentation Height"));
     m_ui->m_checkConstrainProportions->setToolTip(tr("Check to maintain the aspect ratio when "
@@ -113,27 +94,26 @@ void CStudioProjectSettingsPage::OnInitDialog()
     this->LoadSettings();
 
     auto valueChanged = static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged);
+    connect(m_ui->m_PresentationId, &QLineEdit::textEdited,
+            this, &CStudioProjectSettingsPage::onChangePresentationId);
     connect(m_ui->m_ClientSizeWidth, valueChanged,
-            this, &CStudioProjectSettingsPage::OnChangeEditPresWidth);
+            this, &CStudioProjectSettingsPage::onChangeEditPresWidth);
     connect(m_ui->m_ClientSizeHeight, valueChanged,
-            this, &CStudioProjectSettingsPage::OnChangeEditPresHeight);
+            this, &CStudioProjectSettingsPage::onChangeEditPresHeight);
     connect(m_ui->m_checkConstrainProportions, &QCheckBox::clicked,
-            this, &CStudioProjectSettingsPage::OnCheckMaintainRatio);
+            this, &CStudioProjectSettingsPage::onCheckMaintainRatio);
     connect(m_ui->m_Author, &QLineEdit::textEdited,
-            this, &CStudioProjectSettingsPage::OnChangeAuthor);
+            this, &CStudioProjectSettingsPage::onChangeAuthor);
     connect(m_ui->m_Company, &QLineEdit::textEdited,
-            this, &CStudioProjectSettingsPage::OnChangeCompany);
+            this, &CStudioProjectSettingsPage::onChangeCompany);
 }
 
-//==============================================================================
-/**
- *	LoadSettings: Load the settings from the project settings and set the control values.
- *
- *	@param	None
- */
-//==============================================================================
+// LoadSettings: Load the settings from the project settings and set the control values.
 void CStudioProjectSettingsPage::LoadSettings()
 {
+    // Presentation Id
+    m_ui->m_PresentationId->setText(g_StudioApp.GetCore()->GetDoc()->getPresentationId());
+
     // Get the Client size
     CStudioProjectSettings *theProjectSettings = g_StudioApp.GetCore()->GetStudioProjectSettings();
     CPt theClientSize = theProjectSettings->GetPresentationSize();
@@ -157,17 +137,14 @@ void CStudioProjectSettingsPage::LoadSettings()
     m_ui->m_Company->setText(theProjectSettings->GetCompany());
 }
 
-//==============================================================================
-/**
- *	SaveSettings: Save the settings from the controls to the project settings.
- *
- *	@param	None
- */
-//==============================================================================
+// SaveSettings: Save the settings from the controls to the project settings.
 void CStudioProjectSettingsPage::SaveSettings()
 {
     CPt theClientSize;
     CStudioProjectSettings *theProjectSettings = g_StudioApp.GetCore()->GetStudioProjectSettings();
+
+    // Presentation Id
+    g_StudioApp.GetCore()->getProjectFile().writePresentationId(m_ui->m_PresentationId->text());
 
     // Presentation width & height
     theClientSize.x = m_ui->m_ClientSizeWidth->value();
@@ -190,27 +167,22 @@ void CStudioProjectSettingsPage::SaveSettings()
     theProjectSettings->SetRotatePresentation(m_ui->m_checkPortraitFormat->isChecked());
 }
 
-//==============================================================================
-/**
- *	Generic function when settings are modified.
- *
- *	@param	None
- */
-//==============================================================================
-void CStudioProjectSettingsPage::OnSettingsModified()
+// Generic function when settings are modified.
+void CStudioProjectSettingsPage::onSettingsModified()
 {
     this->setModified(TRUE);
 }
 
-//==============================================================================
-/**
- *	OnApply: Handler for the Apply button
- *
- *	@param	None
- */
-//==============================================================================
+// OnApply: Handler for the Apply button
 bool CStudioProjectSettingsPage::onApply()
 {
+    // make sure the presentation Id is unique
+    if (!g_StudioApp.GetCore()->getProjectFile()
+            .isUniquePresentationId(m_ui->m_PresentationId->text())) {
+        g_StudioApp.showPresentationIdUniqueWarning();
+        return false;
+    }
+
     // Apply was clicked - save settings and disabled the Apply button
     this->SaveSettings();
 
@@ -219,14 +191,8 @@ bool CStudioProjectSettingsPage::onApply()
     return CStudioPreferencesPropPage::onApply();
 }
 
-//==============================================================================
-/**
- *	OnChangeEditPresWidth: EN_CHANGE handler for the IDC_EDIT_PRESWIDTH field
- *
- *	@param	None
- */
-//==============================================================================
-void CStudioProjectSettingsPage::OnChangeEditPresWidth()
+// OnChangeEditPresWidth: EN_CHANGE handler for the IDC_EDIT_PRESWIDTH field
+void CStudioProjectSettingsPage::onChangeEditPresWidth()
 {
     this->setModified(TRUE);
 
@@ -244,14 +210,8 @@ void CStudioProjectSettingsPage::OnChangeEditPresWidth()
     }
 }
 
-//==============================================================================
-/**
- *	OnChangeEditPresHeight: EN_CHANGE handler for the IDC_EDIT_PRESHEIGHT field
- *
- *	@param	None
- */
-//==============================================================================
-void CStudioProjectSettingsPage::OnChangeEditPresHeight()
+// OnChangeEditPresHeight: EN_CHANGE handler for the IDC_EDIT_PRESHEIGHT field
+void CStudioProjectSettingsPage::onChangeEditPresHeight()
 {
     this->setModified(TRUE);
 
@@ -269,14 +229,8 @@ void CStudioProjectSettingsPage::OnChangeEditPresHeight()
     }
 }
 
-//==============================================================================
-/**
- *	OnCheckMaintainRatio: The aspect ratio checkbox has changed.
- *
- *	@param	None
- */
-//==============================================================================
-void CStudioProjectSettingsPage::OnCheckMaintainRatio()
+// OnCheckMaintainRatio: The aspect ratio checkbox has changed.
+void CStudioProjectSettingsPage::onCheckMaintainRatio()
 {
     this->setModified(TRUE);
 
@@ -290,74 +244,43 @@ void CStudioProjectSettingsPage::OnCheckMaintainRatio()
     m_AspectRatio = (double)thePresWidth / (double)thePresHeight;
 }
 
-//==============================================================================
-/**
- *	OnChangeAuthor: EN_CHANGE handler for the IDC_AUTHOR field.
- *
- *	@param	None
- */
-//==============================================================================
-void CStudioProjectSettingsPage::OnChangeAuthor()
+void CStudioProjectSettingsPage::onChangePresentationId()
 {
     this->setModified(TRUE);
 }
 
-//==============================================================================
-/**
- *	OnChangeCompany: EN_CHANGE handler for the IDC_COMPANY field.
- *
- *	@param	None
- */
-//==============================================================================
-void CStudioProjectSettingsPage::OnChangeCompany()
+// OnChangeAuthor: EN_CHANGE handler for the IDC_AUTHOR field.
+void CStudioProjectSettingsPage::onChangeAuthor()
 {
     this->setModified(TRUE);
 }
 
-//==============================================================================
-/**
- *	OnChangeSet1: EN_CHANGE handler for the IDC_SET1 field.
- *
- *	@param	None
- */
-//==============================================================================
-void CStudioProjectSettingsPage::OnChangeSet1()
+// OnChangeCompany: EN_CHANGE handler for the IDC_COMPANY field.
+void CStudioProjectSettingsPage::onChangeCompany()
 {
     this->setModified(TRUE);
 }
 
-//==============================================================================
-/**
- *	OnChangeSet2: EN_CHANGE handler for the IDC_SET2 field.
- *
- *	@param	None
- */
-//==============================================================================
-void CStudioProjectSettingsPage::OnChangeSet2()
+// OnChangeSet1: EN_CHANGE handler for the IDC_SET1 field.
+void CStudioProjectSettingsPage::onChangeSet1()
 {
     this->setModified(TRUE);
 }
 
-//==============================================================================
-/**
- *	OnChangeSet3: EN_CHANGE handler for the IDC_SET3 field.
- *
- *	@param	None
- */
-//==============================================================================
-void CStudioProjectSettingsPage::OnChangeSet3()
+// OnChangeSet2: EN_CHANGE handler for the IDC_SET2 field.
+void CStudioProjectSettingsPage::onChangeSet2()
 {
     this->setModified(TRUE);
 }
 
-//==============================================================================
-/**
- *	OnChangeSet5: EN_CHANGE handler for the IDC_SET5 field.
- *
- *	@param	None
- */
-//==============================================================================
-void CStudioProjectSettingsPage::OnChangeSet5()
+// OnChangeSet3: EN_CHANGE handler for the IDC_SET3 field.
+void CStudioProjectSettingsPage::onChangeSet3()
+{
+    this->setModified(TRUE);
+}
+
+// OnChangeSet5: EN_CHANGE handler for the IDC_SET5 field.
+void CStudioProjectSettingsPage::onChangeSet5()
 {
     this->setModified(TRUE);
 }

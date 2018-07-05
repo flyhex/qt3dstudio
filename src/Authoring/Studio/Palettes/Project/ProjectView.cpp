@@ -40,6 +40,7 @@
 #include "Dialogs.h"
 #include "IDocumentEditor.h"
 #include "ProjectContextMenu.h"
+#include "EditPresentationIdDlg.h"
 
 #include <QtCore/qprocess.h>
 #include <QtCore/qtimer.h>
@@ -211,7 +212,7 @@ void ProjectView::OnNewPresentation()
 
     // expand presentation folder by default (if it exists)
     QTimer::singleShot(0, [this]() {
-        QString path = g_StudioApp.GetCore()->getProjectPath().absoluteFilePath()
+        QString path = g_StudioApp.GetCore()->getProjectFile().getProjectPath().absoluteFilePath()
                 + QStringLiteral("/presentations");
         m_ProjectModel->expand(m_ProjectModel->rowForPath(path));
     });
@@ -261,6 +262,23 @@ void ProjectView::openPresentation(int row)
         const Qt3DSFile file(Q3DStudio::CString::fromQString(path));
         g_StudioApp.OnLoadDocument(file);
     }
+}
+
+bool ProjectView::isCurrentPresentation(int row) const
+{
+    QString docPath = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetPath().toQString()
+            .replace(QLatin1String("\\"), QLatin1String("/"));
+
+    return m_ProjectModel->filePath(row) == docPath;
+}
+
+void ProjectView::editPresentationId(int row)
+{
+    QString relativeUipPath = m_ProjectModel->filePath(row).remove(0,
+                g_StudioApp.GetCore()->getProjectFile().getProjectPath().toQString().length() + 1);
+
+    EditPresentationIdDlg dlg(relativeUipPath, this);
+    dlg.exec();
 }
 
 void ProjectView::showContainingFolder(int row) const
@@ -357,5 +375,6 @@ void ProjectView::refreshImport(int row) const
 
 void ProjectView::rebuild()
 {
-    m_ProjectModel->setRootPath(g_StudioApp.GetCore()->getProjectPath().toQString());
+    m_ProjectModel->setRootPath(g_StudioApp.GetCore()->getProjectFile().getProjectPath()
+                                .toQString());
 }

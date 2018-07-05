@@ -81,19 +81,20 @@ protected:
 
 protected:
     // Generated message map functions
-    virtual void OnInitDialog();
-    void OnChangeEditPresWidth();
-    void OnChangeEditPresHeight();
-    void OnCheckMaintainRatio();
-    void OnChangeAuthor();
-    void OnChangeCompany();
-    void OnSettingsModified();
-    void OnSelChangePreviewApp();
-    void OnCustomPreviewMore();
-    void OnChangeSet1();
-    void OnChangeSet2();
-    void OnChangeSet3();
-    void OnChangeSet5();
+    virtual void onInitDialog();
+    void onChangePresentationId();
+    void onChangeEditPresWidth();
+    void onChangeEditPresHeight();
+    void onCheckMaintainRatio();
+    void onChangeAuthor();
+    void onChangeCompany();
+    void onSettingsModified();
+    void onSelChangePreviewApp();
+    void onCustomPreviewMore();
+    void onChangeSet1();
+    void onChangeSet2();
+    void onChangeSet3();
+    void onChangeSet5();
 
     QScopedPointer<QT_PREPEND_NAMESPACE(Ui::StudioProjectSettingsPage)> m_ui;
 };

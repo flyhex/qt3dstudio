@@ -685,13 +685,21 @@ SFileErrorCodeFileNameAndNumBytes SFileTools::FindAndCopyDestFile(const CFilePat
     }
 }
 
-bool SFileTools::FindAndCopyDestFile(const QDir &inDestDir,
-                                     const QString &inSrcFile)
+bool SFileTools::FindAndCopyDestFile(const QDir &inDestDir, const QString &inSrcFile)
 {
-    QString dest = FindUniqueDestFile(inDestDir, inSrcFile);
-    if (dest.isEmpty())
+    QString destFile = FindUniqueDestFile(inDestDir, inSrcFile);
+    if (destFile.isEmpty())
         return false;
-    return QFile::copy(inSrcFile, dest);
+    return QFile::copy(inSrcFile, destFile);
+}
+
+bool SFileTools::FindAndCopyDestFile(const QDir &inDestDir, const QString &inSrcFile,
+                                     QString &outDestFile)
+{
+    outDestFile = FindUniqueDestFile(inDestDir, inSrcFile);
+    if (outDestFile.isEmpty())
+        return false;
+    return QFile::copy(inSrcFile, outDestFile);
 }
 
 }

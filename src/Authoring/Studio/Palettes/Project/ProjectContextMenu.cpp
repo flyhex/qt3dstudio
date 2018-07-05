@@ -37,7 +37,14 @@ ProjectContextMenu::ProjectContextMenu(ProjectView *parent, int index)
     if (m_view->isPresentation(m_index)) {
         QAction *action = new QAction(tr("Open Presentation"));
         connect(action, &QAction::triggered, this, &ProjectContextMenu::handleOpenPresentation);
+        action->setEnabled(!m_view->isCurrentPresentation(m_index));
         addAction(action);
+
+        action = new QAction(tr("Edit Presentation Id"));
+        connect(action, &QAction::triggered, this, &ProjectContextMenu::handleEditPresentationId);
+        addAction(action);
+
+        addSeparator();
     }
 
     QAction *action = new QAction(tr("Show Containing Folder"));
@@ -75,6 +82,11 @@ ProjectContextMenu::~ProjectContextMenu()
 void ProjectContextMenu::handleOpenPresentation()
 {
     m_view->openPresentation(m_index);
+}
+
+void ProjectContextMenu::handleEditPresentationId()
+{
+    m_view->editPresentationId(m_index);
 }
 
 void ProjectContextMenu::handleShowContainingFolder()

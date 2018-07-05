@@ -588,15 +588,16 @@ struct SRendererImpl : public IStudioRenderer,
     {
         if (m_Context.mPtr && m_Context->GetTextRenderer()) {
             m_Context->GetTextRenderer()->ClearProjectFontDirectories();
-            Q3DStudio::CString theDocDir = m_Doc.GetDocumentDirectory();
-            if (theDocDir.Length()) {
+            Q3DStudio::CString projectPath = g_StudioApp.GetCore()->getProjectFile()
+                    .getProjectPath().toCString();
+            if (projectPath.Length()) {
                 // Add the installed font folders from the res dir.
                 Q3DStudio::CString thePath(Q3DStudio::CString::fromQString(
                                                resourcePath() + QStringLiteral("/Font")));
                 m_Context->GetTextRenderer()->AddSystemFontDirectory(
                     m_Context->GetStringTable().RegisterStr(thePath.c_str()));
                 m_Context->GetTextRenderer()->AddProjectFontDirectory(
-                    m_Context->GetStringTable().RegisterStr(theDocDir.c_str()));
+                    m_Context->GetStringTable().RegisterStr(projectPath.c_str()));
             }
         }
     }
