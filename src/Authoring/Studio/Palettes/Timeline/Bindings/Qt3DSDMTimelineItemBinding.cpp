@@ -70,7 +70,6 @@ Qt3DSDMTimelineItemBinding::Qt3DSDMTimelineItemBinding(CTimelineTranslationManag
 
 {
     m_StudioSystem = m_TransMgr->GetStudioSystem();
-    m_TransMgr->GetDoc()->GetCore()->GetDispatch()->AddDataModelListener(this);
 }
 
 Qt3DSDMTimelineItemBinding::Qt3DSDMTimelineItemBinding(CTimelineTranslationManager *inMgr)
@@ -80,14 +79,12 @@ Qt3DSDMTimelineItemBinding::Qt3DSDMTimelineItemBinding(CTimelineTranslationManag
     , m_TimelineTimebar(nullptr)
 {
     m_StudioSystem = m_TransMgr->GetStudioSystem();
-    m_TransMgr->GetDoc()->GetCore()->GetDispatch()->AddDataModelListener(this);
 }
 
 Qt3DSDMTimelineItemBinding::~Qt3DSDMTimelineItemBinding()
 {
     RemoveAllPropertyBindings();
     delete m_TimelineTimebar;
-    m_TransMgr->GetDoc()->GetCore()->GetDispatch()->RemoveDataModelListener(this);
 }
 
 // helpers
@@ -756,33 +753,6 @@ Qt3DSDMInstanceHandle Qt3DSDMTimelineItemBinding::GetInstanceHandle() const
 long Qt3DSDMTimelineItemBinding::GetFlavor() const
 {
     return QT3DS_FLAVOR_ASSET_TL;
-}
-
-void Qt3DSDMTimelineItemBinding::OnBeginDataModelNotifications()
-{
-}
-void Qt3DSDMTimelineItemBinding::OnEndDataModelNotifications()
-{
-    RefreshStateRow();
-}
-void Qt3DSDMTimelineItemBinding::OnImmediateRefreshInstanceSingle(
-        qt3dsdm::Qt3DSDMInstanceHandle inInstance)
-{
-    if (inInstance == m_DataHandle)
-        RefreshStateRow(true);
-}
-void Qt3DSDMTimelineItemBinding::OnImmediateRefreshInstanceMultiple(
-        qt3dsdm::Qt3DSDMInstanceHandle *inInstance, long inInstanceCount)
-{
-    for (long idx = 0; idx < inInstanceCount; ++idx)
-        if (inInstance[idx] == m_DataHandle) {
-            RefreshStateRow();
-            break;
-        }
-}
-
-void Qt3DSDMTimelineItemBinding::RefreshStateRow(bool inRefreshChildren)
-{
 }
 
 ITimelineTimebar *Qt3DSDMTimelineItemBinding::CreateTimelineTimebar()

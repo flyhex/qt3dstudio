@@ -65,8 +65,7 @@ class CStudioSystem;
  */
 class Qt3DSDMTimelineItemBinding : public ITimelineItemBinding,
         public ITimelineItem,
-        public IDragable,
-        public IDataModelListener
+        public IDragable
 
 {
 protected: // Typedef
@@ -153,13 +152,6 @@ public:
 
     // IDragable
     long GetFlavor() const override;
-
-    void OnBeginDataModelNotifications() override;
-    void OnEndDataModelNotifications() override;
-    void OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override;
-    void OnImmediateRefreshInstanceMultiple(qt3dsdm::Qt3DSDMInstanceHandle *inInstance,
-                                            long inInstanceCount) override;
-    void RefreshStateRow(bool inRefreshChildren = false);
 
     virtual void AddPropertyRow(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle,
                                 bool inAppend = false);
