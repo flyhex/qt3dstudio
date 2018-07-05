@@ -819,6 +819,7 @@ void TimelineWidget::onAsyncUpdate()
             }
             for (RowTree *row : qAsConst(updateArrowParents))
                 row->updateArrowVisibility();
+            m_graphicsScene->updateSnapSteps();
         }
         if (!m_actionChanges.isEmpty()) {
             QSet<RowTree *> rowSet;
@@ -844,6 +845,7 @@ void TimelineWidget::onAsyncUpdate()
                     row->rowTimeline()->updateKeyframesFromBinding(properties);
                 }
             }
+            m_graphicsScene->updateSnapSteps();
         }
     }
     m_dirtyProperties.clear();

@@ -714,19 +714,16 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         } else if (m_keyframePressed) {
             // update keyframe movement (time) to binding
             m_keyframeManager->commitMoveSelectedKeyframes();
-            updateSnapSteps();
         } else if (m_clickedTimelineControlType == TimelineControlType::StartHandle) {
             ITimelineTimebar *timebar = m_editedTimelineRow->rowTree()->getBinding()
                     ->GetTimelineItem()->GetTimebar();
             timebar->ChangeTime(m_editedTimelineRow->getStartTime() * 1000, true);
             timebar->CommitTimeChange();
-            updateSnapSteps();
         } else if (m_clickedTimelineControlType == TimelineControlType::EndHandle) {
             ITimelineTimebar *timebar = m_editedTimelineRow->rowTree()->getBinding()
                     ->GetTimelineItem()->GetTimebar();
             timebar->ChangeTime(m_editedTimelineRow->getEndTime() * 1000, false);
             timebar->CommitTimeChange();
-            updateSnapSteps();
             if (m_playHead->time() > ruler()->duration())
                 g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(ruler()->duration() * 1000);
         } else if (m_dragging && m_clickedTimelineControlType == TimelineControlType::Duration) {
@@ -734,7 +731,6 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
                     ->GetTimelineItem()->GetTimebar();
             timebar->OffsetTime(m_editedTimelineRow->getDurationMoveTime() * 1000);
             timebar->CommitTimeChange();
-            updateSnapSteps();
             if (m_playHead->time() > ruler()->duration())
                 g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(ruler()->duration() * 1000);
         } else if (!m_rulerPressed && (m_releaseSelectRow || !itemAt(event->scenePos(),
