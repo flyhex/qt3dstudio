@@ -526,6 +526,9 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                         m_editedTimelineRow->startDurationMove(m_pressPos.x() - m_ruler->x());
                     } else if (m_clickedTimelineControlType == TimelineControlType::StartHandle
                                || m_clickedTimelineControlType == TimelineControlType::EndHandle) {
+                        m_editedTimelineRow->updateBoundChildren(
+                                    m_clickedTimelineControlType
+                                    == TimelineControlType::StartHandle);
                     }
                     m_autoScrollTimelineTimer.start();
                 }

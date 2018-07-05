@@ -360,6 +360,7 @@ void RowTimeline::updateDurationFromBinding()
         return;
 
     ITimelineTimebar *timebar = m_rowTree->m_binding->GetTimelineItem()->GetTimebar();
+    clearBoundChildren();
     setStartTime(timebar->GetStartTime() * .001);
     setEndTime(timebar->GetEndTime() * .001);
 }
@@ -481,6 +482,37 @@ void RowTimeline::startDurationMove(double clickX)
     m_startDurationMoveOffsetX = clickX - m_startX;
 }
 
+void RowTimeline::updateBoundChildren(bool start)
+{
+    // Collect all bound children
+    // Children are considered bound if the start/end time matches the parent time
+    if (start)
+        m_boundChildrenStart.clear();
+    else
+        m_boundChildrenEnd.clear();
+    if (m_rowTree->hasDurationBar()) {
+        const auto childRows = m_rowTree->childRows();
+        for (auto child : childRows) {
+            if (child->hasDurationBar()) {
+                RowTimeline *rowTimeline = child->rowTimeline();
+                if (start && rowTimeline->m_startX == m_startX) {
+                    m_boundChildrenStart.append(rowTimeline);
+                    rowTimeline->updateBoundChildren(start);
+                } else if (!start && rowTimeline->m_endX == m_endX) {
+                    m_boundChildrenEnd.append(rowTimeline);
+                    rowTimeline->updateBoundChildren(start);
+                }
+            }
+        }
+    }
+}
+
+void RowTimeline::clearBoundChildren()
+{
+    m_boundChildrenStart.clear();
+    m_boundChildrenEnd.clear();
+}
+
 // move the duration area (start/end x)
 void RowTimeline::moveDurationBy(double dx)
 {
@@ -596,8 +628,9 @@ void RowTimeline::collectChildKeyframeTimes(QVector<double> &childKeyframeTimes)
 // called after timeline scale is changed to update duration star/end positions
 void RowTimeline::updatePosition()
 {
-    setStartX(timeToX(m_startTime));
-    setEndX(timeToX(m_endTime));
+    clearBoundChildren();
+    setStartTime(m_startTime);
+    setEndTime(m_endTime);
 }
 
 // Set the position of the start of the row duration
@@ -608,7 +641,6 @@ void RowTimeline::setStartX(double startX)
     else if (startX > m_endX)
         startX = m_endX;
 
-    double oldStartX = m_startX;
     m_startX = startX;
     m_startTime = xToTime(startX);
 
@@ -617,7 +649,7 @@ void RowTimeline::setStartX(double startX)
         m_minStartX = 0;
     }
 
-    updateChildrenStartRecursive(m_rowTree, oldStartX);
+    updateChildrenStartRecursive();
     updateChildrenMinStartXRecursive(m_rowTree);
     update();
 }
@@ -628,7 +660,6 @@ void RowTimeline::setEndX(double endX)
     if (endX < m_startX)
         endX = m_startX;
 
-    double oldEndX = m_endX;
     m_endX = endX;
     m_endTime = xToTime(endX);
 
@@ -637,7 +668,7 @@ void RowTimeline::setEndX(double endX)
         m_maxEndX = 999999;
     }
 
-    updateChildrenEndRecursive(m_rowTree, oldEndX);
+    updateChildrenEndRecursive();
     updateChildrenMaxEndXRecursive(m_rowTree);
     update();
 }
@@ -659,42 +690,26 @@ void RowTimeline::setControllerText(const QString &controller)
     update();
 }
 
-void RowTimeline::updateChildrenStartRecursive(RowTree *rowTree, double oldStartX)
+void RowTimeline::updateChildrenStartRecursive()
 {
-    // Update all bound childred
-    // Rows are considered to be bound when their times match
-    if (!rowTree->empty()) {
-        const auto childRows = rowTree->childRows();
-        for (auto child : childRows) {
-            RowTimeline *rowTimeline = child->rowTimeline();
-            if (rowTimeline->m_startX == oldStartX) {
-                rowTimeline->m_startX = m_startX;
-                rowTimeline->m_startTime = m_startTime;
-                rowTimeline->updateChildrenStartRecursive(child, oldStartX);
-                rowTimeline->update();
-            }
+    for (auto child : qAsConst(m_boundChildrenStart)) {
+        if (!child.isNull()) {
+            child->m_startX = m_startX;
+            child->m_startTime = m_startTime;
+            child->updateChildrenStartRecursive();
+            child->update();
         }
     }
 }
 
-void RowTimeline::updateChildrenEndRecursive(RowTree *rowTree, double oldEndX)
+void RowTimeline::updateChildrenEndRecursive()
 {
-    // Update all bound childred
-    // Rows are considered to be bound when their times match
-    // Do not inherit endtime when it is set for scene/component, as for this case
-    // start-end equals global animation min - max range and is set to illustrate the
-    // range in timeline view when datainput control is active
-    if (!rowTree->empty() && rowTree->rowType() != OBJTYPE_SCENE
-        && rowTree->rowType() != OBJTYPE_COMPONENT) {
-        const auto childRows = rowTree->childRows();
-        for (auto child : childRows) {
-            RowTimeline *rowTimeline = child->rowTimeline();
-            if (rowTimeline->m_endX == oldEndX) {
-                rowTimeline->m_endX = m_endX;
-                rowTimeline->m_endTime = m_endTime;
-                rowTimeline->updateChildrenEndRecursive(child, oldEndX);
-                rowTimeline->update();
-            }
+    for (auto child : qAsConst(m_boundChildrenEnd)) {
+        if (!child.isNull()) {
+            child->m_endX = m_endX;
+            child->m_endTime = m_endTime;
+            child->updateChildrenEndRecursive();
+            child->update();
         }
     }
 }
@@ -741,7 +756,6 @@ void RowTimeline::updateChildrenMaxEndXRecursive(RowTree *rowTree)
 
 void RowTimeline::setStartTime(double startTime)
 {
-    double oldStartX = m_startX;
     m_startTime = startTime;
     m_startX = timeToX(startTime);
 
@@ -750,14 +764,13 @@ void RowTimeline::setStartTime(double startTime)
         m_minStartX = 0;
     }
 
-    updateChildrenStartRecursive(m_rowTree, oldStartX);
+    updateChildrenStartRecursive();
     updateChildrenMinStartXRecursive(m_rowTree);
     update();
 }
 
 void RowTimeline::setEndTime(double endTime)
 {
-    double oldEndX = m_endX;
     m_endTime = endTime;
     m_endX = timeToX(endTime);
 
@@ -766,7 +779,7 @@ void RowTimeline::setEndTime(double endTime)
         m_maxEndX = 999999;
     }
 
-    updateChildrenEndRecursive(m_rowTree, oldEndX);
+    updateChildrenEndRecursive();
     updateChildrenMaxEndXRecursive(m_rowTree);
     update();
 }

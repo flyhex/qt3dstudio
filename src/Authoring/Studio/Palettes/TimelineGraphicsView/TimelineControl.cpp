@@ -47,6 +47,8 @@ void TimelineControl::setRowTimeline(RowTimeline *rowTimeline)
     m_timebar = m_rowTimeline->rowTree()->getBinding()->GetTimelineItem()->GetTimebar();
     m_startTime = m_rowTimeline->getStartTime();
     m_endTime = m_rowTimeline->getEndTime();
+    m_rowTimeline->updateBoundChildren(true);
+    m_rowTimeline->updateBoundChildren(false);
 }
 
 void TimelineControl::showDurationEditDialog()

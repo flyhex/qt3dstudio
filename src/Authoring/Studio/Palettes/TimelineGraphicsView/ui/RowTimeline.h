@@ -32,6 +32,7 @@
 #include "InteractiveTimelineItem.h"
 #include "RowTypes.h"
 #include "Bindings/Qt3DSDMTimelineItemProperty.h"
+#include <QtCore/qpointer.h>
 
 class RowTree;
 class RowTimelinePropertyGraph;
@@ -51,6 +52,8 @@ public:
     void setRowTree(RowTree *rowTree);
     void updatePosition();
     void startDurationMove(double clickX);
+    void updateBoundChildren(bool start);
+    void clearBoundChildren();
     void moveDurationBy(double dx);
     void moveDurationTo(double newX);
     void setStartTime(double startTime);
@@ -86,8 +89,8 @@ protected:
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
 
 private:
-    void updateChildrenStartRecursive(RowTree *rowTree, double oldStartX);
-    void updateChildrenEndRecursive(RowTree *rowTree, double oldEndX);
+    void updateChildrenStartRecursive();
+    void updateChildrenEndRecursive();
     void updateChildrenMinStartXRecursive(RowTree *rowTree);
     void updateChildrenMaxEndXRecursive(RowTree *rowTree);
     void drawColorPropertyGradient(QPainter *painter, int width);
@@ -111,6 +114,8 @@ private:
     QString m_controllerDataInput;
     QList<Keyframe *> m_keyframes;
     QColor m_barColor;
+    QVector<QPointer<RowTimeline>> m_boundChildrenStart;
+    QVector<QPointer<RowTimeline>> m_boundChildrenEnd;
 
     friend class RowTree;
 };
