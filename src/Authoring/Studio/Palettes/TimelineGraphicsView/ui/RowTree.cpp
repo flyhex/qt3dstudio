@@ -36,6 +36,7 @@
 #include "Bindings/Qt3DSDMTimelineItemBinding.h"
 #include "Qt3DSString.h"
 #include "TreeHeader.h"
+#include "StudioPreferences.h"
 
 #include <QtGui/qpainter.h>
 #include "QtGui/qtextcursor.h"
@@ -190,28 +191,28 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     // Background
     QColor bgColor;
     if (m_dndState == DnDState::Source)
-        bgColor = TimelineConstants::ROW_COLOR_DND_SRC;
+        bgColor = CStudioPreferences::timelineRowColorDndSource();
     else if (m_isProperty)
-        bgColor = TimelineConstants::ROW_COLOR_NORMAL_PROP;
+        bgColor = CStudioPreferences::timelineRowColorNormalProp();
     else if (m_dndHover)
-        bgColor = TimelineConstants::ROW_COLOR_DND_TGT;
+        bgColor = CStudioPreferences::timelineRowColorDndTarget();
     else if (m_state == Selected)
-        bgColor = TimelineConstants::ROW_COLOR_SELECTED;
+        bgColor = CStudioPreferences::timelineRowColorSelected();
     else if (m_state == Hovered && !m_locked)
-        bgColor = TimelineConstants::ROW_COLOR_OVER;
+        bgColor = CStudioPreferences::timelineRowColorOver();
     else
-        bgColor = TimelineConstants::ROW_COLOR_NORMAL;
+        bgColor = CStudioPreferences::timelineRowColorNormal();
 
     painter->fillRect(QRect(0, 0, size().width(), size().height() - 1), bgColor);
 
     // left divider
-    painter->setPen(TimelineConstants::WIDGET_BG_COLOR);
+    painter->setPen(CStudioPreferences::timelineWidgetBgColor());
     painter->drawLine(18, 0, 18, size().height() - 1);
 
     // Shy, eye, lock separator
     painter->fillRect(QRect(treeWidth() - TimelineConstants::TREE_ICONS_W,
                             0, 1, size().height()),
-                      TimelineConstants::WIDGET_BG_COLOR);
+                      CStudioPreferences::timelineWidgetBgColor());
 
     // Shy, eye, lock
     static const QPixmap pixEmpty = QPixmap(":/images/Toggle-Empty.png");
@@ -226,7 +227,7 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
 
     // Candidate parent of a dragged row
     if (m_dndState == DnDState::Parent) {
-        painter->setPen(QPen(QColor(TimelineConstants::ROW_MOVER_COLOR), 1));
+        painter->setPen(QPen(CStudioPreferences::timelineRowMoverColor(), 1));
         painter->drawRect(QRect(1, 1, treeWidth() - 2, size().height() - 3));
     }
 

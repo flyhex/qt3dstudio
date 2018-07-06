@@ -29,6 +29,7 @@
 #include "PlayHead.h"
 #include "Ruler.h"
 #include "TimelineConstants.h"
+#include "StudioPreferences.h"
 
 #include <QtGui/qpainter.h>
 #include <QtGui/qcursor.h>
@@ -50,7 +51,7 @@ void PlayHead::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
 
     static const int PLAY_HEAD_H = 999999; // theoretically big enough height
     painter->drawPixmap(-TimelineConstants::PLAYHEAD_W * .5, 0, pixHead);
-    painter->setPen(QColor(TimelineConstants::PLAYHEAD_LINE_COLOR));
+    painter->setPen(CStudioPreferences::timelinePlayheadLineColor());
     painter->drawLine(0, 0, 0, PLAY_HEAD_H);
 }
 

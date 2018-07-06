@@ -39,6 +39,7 @@
 #include "Bindings/ITimelineTimebar.h"
 #include "Bindings/Qt3DSDMTimelineItemProperty.h"
 #include "AppFonts.h"
+#include "StudioPreferences.h"
 
 #include <QtGui/qpainter.h>
 #include <QtGui/qbrush.h>
@@ -83,13 +84,13 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
         // Background
         QColor bgColor;
         if (m_rowTree->isProperty())
-            bgColor = TimelineConstants::ROW_COLOR_NORMAL_PROP;
+            bgColor = CStudioPreferences::timelineRowColorNormalProp();
         else if (m_state == Selected)
-            bgColor = TimelineConstants::ROW_COLOR_SELECTED;
+            bgColor = CStudioPreferences::timelineRowColorSelected();
         else if (m_state == Hovered && !m_rowTree->m_locked)
-            bgColor = TimelineConstants::ROW_COLOR_OVER;
+            bgColor = CStudioPreferences::timelineRowColorOver();
         else
-            bgColor = TimelineConstants::ROW_COLOR_NORMAL;
+            bgColor = CStudioPreferences::timelineRowColorNormal();
         painter->fillRect(0, 0, size().width(), currentHeight, bgColor);
     }
 
@@ -100,14 +101,14 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
 
         // fully outside ancestors' limits, draw fully hashed
         if (m_minStartX > m_endX || m_maxEndX < m_startX) {
-            painter->setBrush(QBrush(QColor(TimelineConstants::ROW_COLOR_DURATION_OFF1),
+            painter->setBrush(QBrush(CStudioPreferences::timelineRowColorDurationOff1(),
                                      Qt::BDiagPattern));
             painter->setPen(Qt::NoPen);
             painter->fillRect(QRect(m_startX, 0, m_endX - m_startX, currentHeight),
-                              QColor(TimelineConstants::ROW_COLOR_DURATION_OFF2));
+                              CStudioPreferences::timelineRowColorDurationOff2());
             painter->drawRect(QRect(m_startX, 0, m_endX - m_startX, currentHeight));
 
-            painter->setPen(QPen(QColor(TimelineConstants::ROW_COLOR_DURATION_EDGE), 3));
+            painter->setPen(QPen(CStudioPreferences::timelineRowColorDurationEdge(), 2));
             painter->drawLine(m_startX, 0, m_startX, currentHeight);
             painter->drawLine(m_endX, 0, m_endX, currentHeight);
         } else {
@@ -120,7 +121,7 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
 
             if (m_controllerDataInput.size()) {
                 painter->fillRect(QRect(x, 0, w, currentHeight),
-                                  QColor(TimelineConstants::ROW_COLOR_DATAINPUT_DURATION));
+                                  CStudioPreferences::dataInputColor());
             } else if (m_rowTree->indexInLayout() != 1) {
                 painter->fillRect(QRect(x, 0, w, currentHeight), m_barColor);
             }
@@ -128,7 +129,7 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
             if (m_state == Selected) {
                 // draw selection overlay on bar
                 painter->fillRect(QRect(x, marginY, w, currentHeight - marginY * 2),
-                                  QColor(TimelineConstants::ROW_COLOR_DURATION_SELECTED));
+                                  CStudioPreferences::timelineRowColorDurationSelected());
             }
 
             if (m_controllerDataInput.size()) {
@@ -141,7 +142,7 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                 // for text
                 painter->setClipRect(x, 0, w, currentHeight);
                 painter->setClipping(true);
-                painter->setPen(QPen(QColor(TimelineConstants::ROW_COLOR_DATAINPUT_TEXT), 2));
+                painter->setPen(QPen(CStudioPreferences::textColor(), 2));
                 painter->drawText(QRect(x + pixDataInput.width(), 0, w, currentHeight),
                                   m_controllerDataInput, QTextOption(Qt::AlignCenter));
                 // place the icon marginY amount away from the datainput name
@@ -156,14 +157,14 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
             }
 
             // draw hashed part before
-            painter->setBrush(QBrush(QColor(TimelineConstants::ROW_COLOR_DURATION_OFF1),
+            painter->setBrush(QBrush(CStudioPreferences::timelineRowColorDurationOff1(),
                                      Qt::BDiagPattern));
             if (m_startX < m_minStartX) {
                 painter->setPen(Qt::NoPen);
                 painter->fillRect(QRect(m_startX, 0, m_minStartX - m_startX, currentHeight),
-                                  QColor(TimelineConstants::ROW_COLOR_DURATION_OFF2));
+                                  CStudioPreferences::timelineRowColorDurationOff2());
                 painter->drawRect(QRect(m_startX, 0, m_minStartX - m_startX, currentHeight));
-                painter->setPen(QColor(TimelineConstants::ROW_COLOR_DURATION_EDGE));
+                painter->setPen(CStudioPreferences::timelineRowColorDurationEdge());
                 painter->drawLine(m_minStartX, 0, m_minStartX, currentHeight);
             }
 
@@ -171,14 +172,14 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
             if (m_endX > m_maxEndX) {
                 painter->setPen(Qt::NoPen);
                 painter->fillRect(QRect(m_maxEndX, 0, m_endX - m_maxEndX, currentHeight),
-                                  QColor(TimelineConstants::ROW_COLOR_DURATION_OFF2));
+                                  CStudioPreferences::timelineRowColorDurationOff2());
                 painter->drawRect(QRect(m_maxEndX, 0, m_endX - m_maxEndX, currentHeight));
-                painter->setPen(QColor(TimelineConstants::ROW_COLOR_DURATION_EDGE));
+                painter->setPen(CStudioPreferences::timelineRowColorDurationEdge());
                 painter->drawLine(m_maxEndX, 0, m_maxEndX, currentHeight);
             }
 
             if (m_rowTree->indexInLayout() != 1) {
-                painter->setPen(QPen(QColor(TimelineConstants::ROW_COLOR_DURATION_EDGE), 2));
+                painter->setPen(QPen(CStudioPreferences::timelineRowColorDurationEdge(), 2));
                 painter->drawLine(m_startX, 0, m_startX, currentHeight);
                 painter->drawLine(m_endX, 0, m_endX, currentHeight);
             }

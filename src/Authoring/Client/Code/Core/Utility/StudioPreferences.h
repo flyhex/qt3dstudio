@@ -163,6 +163,25 @@ public:
     static QColor masterColor();
     static QColor disabledColor();
     static QColor dataInputColor();
+
+    static QColor timelineRowColorNormal();
+    static QColor timelineRowColorNormalProp();
+    static QColor timelineRowColorOver();
+    static QColor timelineRowColorSelected();
+    static QColor timelineRowColorDurationOff1();
+    static QColor timelineRowColorDurationOff2();
+    static QColor timelineRowColorDurationEdge();
+    static QColor timelineRowColorDurationSelected();
+    static QColor timelineRowColorDndSource();
+    static QColor timelineRowColorDndTarget();
+    static QColor timelineRowMoverColor();
+    static QColor timelineRulerColor();
+    static QColor timelineRulerColorDisabled();
+    static QColor timelineWidgetBgColor();
+    static QColor timelinePlayheadLineColor();
+    static QColor timelineFilterButtonSelectedColor();
+    static QColor timelineFilterButtonHoveredColor();
+
     static int fontSize();
     static int controlBaseHeight();
     static int idWidth();

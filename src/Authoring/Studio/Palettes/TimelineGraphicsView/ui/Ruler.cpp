@@ -28,6 +28,7 @@
 
 #include "Ruler.h"
 #include "TimelineConstants.h"
+#include "StudioPreferences.h"
 
 #include <QtGui/qpainter.h>
 #include <QtWidgets/qwidget.h>
@@ -53,12 +54,12 @@ void Ruler::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
     double rowXMax = std::max(minRulerWidth, totalSegmentsWidth);
 
     painter->save();
-    painter->setPen(QColor(TimelineConstants::RULER_COLOR_DISABLED));
+    painter->setPen(CStudioPreferences::timelineRulerColorDisabled());
     painter->drawLine(TimelineConstants::RULER_EDGE_OFFSET,
                       TimelineConstants::RULER_BASE_Y,
                       rowXMax + TimelineConstants::RULER_EDGE_OFFSET,
                       TimelineConstants::RULER_BASE_Y);
-    painter->setPen(QColor(TimelineConstants::RULER_COLOR));
+    painter->setPen(CStudioPreferences::timelineRulerColor());
     painter->drawLine(TimelineConstants::RULER_EDGE_OFFSET,
                       TimelineConstants::RULER_BASE_Y,
                       activeSegmentsWidth,
@@ -84,7 +85,7 @@ void Ruler::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
                 TimelineConstants::RULER_DIV_H3;
 
         if (!useDisabledColor && rowX > activeSegmentsWidth) {
-            painter->setPen(QColor(TimelineConstants::RULER_COLOR_DISABLED));
+            painter->setPen(CStudioPreferences::timelineRulerColorDisabled());
             useDisabledColor = true;
         }
         painter->drawLine(QPointF(rowX, TimelineConstants::RULER_BASE_Y - h),

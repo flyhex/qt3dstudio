@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "TreeHeader.h"
+#include "StudioPreferences.h"
 
 #include <QtGui/qpainter.h>
 
@@ -53,8 +54,8 @@ void TreeHeader::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     static const QPixmap pixVisible = QPixmap(":/images/Toggle-HideShow.png");
     static const QPixmap pixLock    = QPixmap(":/images/Toggle-Lock.png");
 
-    QColor selectedColor = QColor(TimelineConstants::FILTER_BUTTON_SELECTED_COLOR);
-    QColor hoveredColor = QColor(TimelineConstants::FILTER_BUTTON_HOVERED_COLOR);
+    const QColor selectedColor = CStudioPreferences::timelineFilterButtonSelectedColor();
+    const QColor hoveredColor = CStudioPreferences::timelineFilterButtonHoveredColor();
 
     if (m_shy)
         painter->fillRect(m_rectShy, selectedColor);

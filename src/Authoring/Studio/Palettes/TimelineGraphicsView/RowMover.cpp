@@ -31,6 +31,7 @@
 #include "RowManager.h"
 #include "TimelineGraphicsScene.h"
 #include "TimelineConstants.h"
+#include "StudioPreferences.h"
 
 #include <QtGui/qpainter.h>
 #include <QtWidgets/qapplication.h>
@@ -66,8 +67,8 @@ void RowMover::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     static const QPolygon polygon({QPoint(0, 0), QPoint(0, 3), QPoint(7, 3), QPoint(7, 1),
                                    QPoint(TimelineConstants::TREE_BOUND_W, 1),
                                    QPoint(TimelineConstants::TREE_BOUND_W, 0)});
-    painter->setPen(QPen(QColor(TimelineConstants::ROW_MOVER_COLOR), 1));
-    painter->setBrush(QColor(TimelineConstants::ROW_MOVER_COLOR));
+    painter->setPen(QPen(CStudioPreferences::timelineRowMoverColor(), 1));
+    painter->setBrush(CStudioPreferences::timelineRowMoverColor());
     painter->drawConvexPolygon(polygon);
 }
 

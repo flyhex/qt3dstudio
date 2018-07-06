@@ -38,29 +38,48 @@
 #include <QtGui/qpalette.h>
 #include <QtQml/qqmlcontext.h>
 
-::CColor s_BaseColor;
-::CColor s_DarkBaseColor;
-::CColor s_NormalColor;
-::CColor s_MasterColor;
-::CColor s_MouseOverHighlightColor;
-::CColor s_ButtonDownColor;
-::CColor s_DisabledTextColor;
+static ::CColor s_BaseColor;
+static ::CColor s_DarkBaseColor;
+static ::CColor s_NormalColor;
+static ::CColor s_MasterColor;
+static ::CColor s_MouseOverHighlightColor;
+static ::CColor s_ButtonDownColor;
+static ::CColor s_DisabledTextColor;
 
-QColor s_studioColor1;
-QColor s_studioColor2;
-QColor s_studioColor3;
-QColor s_backgroundColor;
-QColor s_guideColor;
-QColor s_selectionColor;
-QColor s_textColor;
-QColor s_masterColor;
-QColor s_disabledColor;
-QColor s_dataInputColor;
-int s_fontSize;
-int s_controlBaseHeight;
-int s_idWidth;
-int s_valueWidth;
-QSize s_browserPopupSize;
+static QColor s_studioColor1;
+static QColor s_studioColor2;
+static QColor s_studioColor3;
+static QColor s_backgroundColor;
+static QColor s_guideColor;
+static QColor s_selectionColor;
+static QColor s_textColor;
+static QColor s_masterColor;
+static QColor s_disabledColor;
+static QColor s_dataInputColor;
+
+static QColor s_timelineRowColorNormal;
+static QColor s_timelineRowColorNormalProp;
+static QColor s_timelineRowColorOver;
+static QColor s_timelineRowColorSelected;
+static QColor s_timelineRowColorDurationOff1; // duration off ancestors' bounds color1
+static QColor s_timelineRowColorDurationOff2; // duration off ancestors' bounds color2
+static QColor s_timelineRowColorDurationEdge; // duration left and right edge lines
+static QColor s_timelineRowColorDurationSelected;
+static QColor s_timelineRowColorDndSource;
+static QColor s_timelineRowColorDndTarget;
+static QColor s_timelineRowMoverColor;
+static QColor s_timelineRulerColor;
+static QColor s_timelineRulerColorDisabled;
+static QColor s_timelineWidgetBgColor;
+static QColor s_timelinePlayheadLineColor;
+static QColor s_timelineFilterButtonSelectedColor;
+static QColor s_timelineFilterButtonHoveredColor;
+
+static int s_fontSize;
+static int s_controlBaseHeight;
+static int s_idWidth;
+static int s_valueWidth;
+static QSize s_browserPopupSize;
 
 #define STRINGIFY(x) STRINGIFY2(x)
 #define STRINGIFY2(x) #x
@@ -113,6 +132,25 @@ void CStudioPreferences::LoadPreferences()
     s_masterColor = QColor("#5caa15");
     s_disabledColor = QColor("#727476");
     s_dataInputColor = QColor("#ff5102");
+
+    s_timelineRowColorNormal = QColor("#404040");
+    s_timelineRowColorNormalProp = QColor("#373737");
+    s_timelineRowColorOver = QColor("#4d4d4d");
+    s_timelineRowColorSelected = QColor("#336699");
+    s_timelineRowColorDurationOff1 = QColor("#3388B3");
+    s_timelineRowColorDurationOff2 = QColor("#222222");
+    s_timelineRowColorDurationEdge = QColor("#000000");
+    s_timelineRowColorDurationSelected = QColor("#80000000");
+    s_timelineRowColorDndSource = QColor("#464600");
+    s_timelineRowColorDndTarget = QColor("#292929");
+    s_timelineRowMoverColor = QColor("#ffff00");
+    s_timelineRulerColor = QColor("#888888");
+    s_timelineRulerColorDisabled = QColor("#444444");
+    s_timelineWidgetBgColor = QColor("#222222");
+    s_timelinePlayheadLineColor = QColor("#b20808");
+    s_timelineFilterButtonSelectedColor = QColor("#000000");
+    s_timelineFilterButtonHoveredColor = QColor("#40000000");
+
     s_fontSize = 12;
     s_controlBaseHeight = 22;
     s_idWidth = 130;
@@ -845,6 +883,91 @@ QColor CStudioPreferences::disabledColor()
 QColor CStudioPreferences::dataInputColor()
 {
     return s_dataInputColor;
+}
+
+QColor CStudioPreferences::timelineRowColorNormal()
+{
+    return s_timelineRowColorNormal;
+}
+
+QColor CStudioPreferences::timelineRowColorNormalProp()
+{
+    return s_timelineRowColorNormalProp;
+}
+
+QColor CStudioPreferences::timelineRowColorOver()
+{
+    return s_timelineRowColorOver;
+}
+
+QColor CStudioPreferences::timelineRowColorSelected()
+{
+    return s_timelineRowColorSelected;
+}
+
+QColor CStudioPreferences::timelineRowColorDurationOff1()
+{
+    return s_timelineRowColorDurationOff1;
+}
+
+QColor CStudioPreferences::timelineRowColorDurationOff2()
+{
+    return s_timelineRowColorDurationOff2;
+}
+
+QColor CStudioPreferences::timelineRowColorDurationEdge()
+{
+    return s_timelineRowColorDurationEdge;
+}
+
+QColor CStudioPreferences::timelineRowColorDurationSelected()
+{
+    return s_timelineRowColorDurationSelected;
+}
+
+QColor CStudioPreferences::timelineRowColorDndSource()
+{
+    return s_timelineRowColorDndSource;
+}
+
+QColor CStudioPreferences::timelineRowColorDndTarget()
+{
+    return s_timelineRowColorDndTarget;
+}
+
+QColor CStudioPreferences::timelineRowMoverColor()
+{
+    return s_timelineRowMoverColor;
+}
+
+QColor CStudioPreferences::timelineRulerColor()
+{
+    return s_timelineRulerColor;
+}
+
+QColor CStudioPreferences::timelineRulerColorDisabled()
+{
+    return s_timelineRulerColorDisabled;
+}
+
+QColor CStudioPreferences::timelineWidgetBgColor()
+{
+    return s_timelineWidgetBgColor;
+}
+
+QColor CStudioPreferences::timelinePlayheadLineColor()
+{
+    return s_timelinePlayheadLineColor;
+}
+
+QColor CStudioPreferences::timelineFilterButtonSelectedColor()
+{
+    return s_timelineFilterButtonSelectedColor;
+}
+
+QColor CStudioPreferences::timelineFilterButtonHoveredColor()
+{
+    return s_timelineFilterButtonHoveredColor;
 }
 
 int CStudioPreferences::fontSize()
