@@ -1253,6 +1253,7 @@ SLoadedTexture *SLoadedTexture::LoadBMP(ISeekableIOStream &inStream, bool inFlip
                                         NVFoundationBase &inFnd,
                                         qt3ds::render::NVRenderContextType renderContextType)
 {
+    Q_UNUSED(renderContextType)
     FreeImageIO theIO(inFnd.getAllocator(), inFnd);
     SLoadedTexture *retval = DoLoadBMP(&theIO, &inStream, 0);
     if (retval)

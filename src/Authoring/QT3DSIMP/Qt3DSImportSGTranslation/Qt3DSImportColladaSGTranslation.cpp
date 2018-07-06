@@ -403,7 +403,8 @@ void ColladaDOMWalker::SetFColladaAuthoringTool(const char *inName)
     // Guess the authoring tool type & version
     // This looks very hackish because there is no standard and it is based on the test data that I
     // have
-    const std::string theAuthoringToolLowerCase = QByteArray::fromRawData(inName, strlen(inName)).toLower().toStdString();
+    const std::string theAuthoringToolLowerCase = QByteArray::fromRawData(
+                inName, int(strlen(inName))).toLower().toStdString();
 
     EAuthoringToolType theAuthoringToolType = EAuthoringToolType_Unknown;
     if (theAuthoringToolLowerCase.find("studiocore") != std::string::npos) {

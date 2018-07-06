@@ -102,9 +102,10 @@ void Q3DSQmlRender::Render(const SOffscreenRendererEnvironment &inEnvironment,
                            SScene::RenderClearCommand inColorBufferNeedsClear,
                            const SRenderInstanceId instanceId)
 {
-    Q_UNUSED(inEnvironment);
-    Q_UNUSED(inPresentationScaleFactor);
-    Q_UNUSED(inColorBufferNeedsClear);
+    Q_UNUSED(inEnvironment)
+    Q_UNUSED(inPresentationScaleFactor)
+    Q_UNUSED(inColorBufferNeedsClear)
+    Q_UNUSED(instanceId)
     if (m_qmlStreamRenderer) {
         inRenderContext.PushPropertySet();
 

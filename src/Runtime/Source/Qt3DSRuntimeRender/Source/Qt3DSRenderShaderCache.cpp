@@ -151,9 +151,9 @@ inline qt3ds::render::NVRenderContextType StringToContextType(const CRenderStrin
         return retval;
 
     do {
-        pos = inContextType.find('|', lastpos);
+        pos = int(inContextType.find('|', lastpos));
         if (pos == eastl::string::npos)
-            pos = inContextType.size();
+            pos = int(inContextType.size());
         {
 
             eastl::string::size_type sectionLen = NVMin(pos - lastpos, lastTempBufIdx);
@@ -437,7 +437,7 @@ struct ShaderCache : public IShaderCache
 
         str.insert(0, m_InsertStr);
         if (inFeatures.size()) {
-            eastl::string::size_type insertPos = m_InsertStr.size();
+            eastl::string::size_type insertPos = int(m_InsertStr.size());
             m_InsertStr.clear();
             for (QT3DSU32 idx = 0, end = inFeatures.size(); idx < end; ++idx) {
                 SShaderPreprocessorFeature feature(inFeatures[idx]);
@@ -507,12 +507,12 @@ struct ShaderCache : public IShaderCache
 
         theInserter.first->second =
             m_RenderContext
-                .CompileSource(inKey, m_VertexCode.c_str(), m_VertexCode.size(),
-                               m_FragmentCode.c_str(), m_FragmentCode.size(),
-                               m_TessCtrlCode.c_str(), m_TessCtrlCode.size(),
-                               m_TessEvalCode.c_str(), m_TessEvalCode.size(),
-                               m_GeometryCode.c_str(), m_GeometryCode.size(), separableProgram)
-                .mShader;
+                .CompileSource(inKey, m_VertexCode.c_str(), QT3DSU32(m_VertexCode.size()),
+                               m_FragmentCode.c_str(), QT3DSU32(m_FragmentCode.size()),
+                               m_TessCtrlCode.c_str(), QT3DSU32(m_TessCtrlCode.size()),
+                               m_TessEvalCode.c_str(), QT3DSU32(m_TessEvalCode.size()),
+                               m_GeometryCode.c_str(), QT3DSU32(m_GeometryCode.size()),
+                               separableProgram).mShader;
         if (theInserter.first->second) {
             if (m_ShaderCache) {
                 IDOMWriter::Scope __writeScope(*m_ShaderCache, "Program");

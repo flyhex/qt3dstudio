@@ -29,6 +29,10 @@
 #include "Qt3DSDMPrefix.h"
 #include "SimpleAnimationCore.h"
 
+#ifdef _WIN32
+#pragma warning(disable : 4503) // decorated name length exceeded
+#endif
+
 typedef long INT32;
 typedef float FLOAT;
 #define DATALOGGER_CUBICROOT 0

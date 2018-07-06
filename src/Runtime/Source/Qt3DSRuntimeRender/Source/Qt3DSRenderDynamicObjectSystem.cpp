@@ -1022,7 +1022,8 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
             }
             theInsert.first->second = (char8_t *)m_Allocator.allocate(
                 theReadBuffer.size() + 1, "SDynamicObjectSystem::DoLoadShader", __FILE__, __LINE__);
-            memCopy(theInsert.first->second, theReadBuffer.c_str(), theReadBuffer.size() + 1);
+            memCopy(theInsert.first->second, theReadBuffer.c_str(),
+                    QT3DSU32(theReadBuffer.size()) + 1);
         } else
             theReadBuffer.assign(theInsert.first->second);
         DoInsertShaderHeaderInformation(theReadBuffer, inPathToEffect);

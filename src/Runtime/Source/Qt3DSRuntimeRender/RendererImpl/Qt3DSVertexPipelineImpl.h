@@ -182,9 +182,9 @@ namespace render {
                 && ProgramGenerator().GetStage(ShaderGeneratorStages::TessEval)) {
                 const char8_t *theExtension("TE[");
                 // we always assume triangles
-                for (size_t i = 0; i < 3; i++) {
+                for (int i = 0; i < 3; i++) {
                     char buf[10];
-                    sprintf(buf, "%lu", i);
+                    sprintf(buf, "%d", i);
                     for (TStrTableStrMap::const_iterator iter = m_InterpolationParameters.begin(),
                                                          end = m_InterpolationParameters.end();
                          iter != end; ++iter) {

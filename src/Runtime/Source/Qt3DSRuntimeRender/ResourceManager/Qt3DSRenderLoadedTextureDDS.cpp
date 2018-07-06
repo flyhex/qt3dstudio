@@ -685,6 +685,7 @@ namespace render {
                                             NVFoundationBase &inFnd,
                                             qt3ds::render::NVRenderContextType renderContextType)
     {
+        Q_UNUSED(renderContextType)
         FreeImageIO theIO(inFnd.getAllocator(), inFnd);
         SLoadedTexture *retval = DoLoadDDS(&theIO, inStream, flipVertical);
 

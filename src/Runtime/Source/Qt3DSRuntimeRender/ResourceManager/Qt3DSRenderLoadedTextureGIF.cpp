@@ -837,6 +837,7 @@ SLoadedTexture *SLoadedTexture::LoadGIF(ISeekableIOStream &inStream, bool inFlip
                                         NVFoundationBase &inFnd,
                                         qt3ds::render::NVRenderContextType renderContextType)
 {
+    Q_UNUSED(renderContextType)
     FreeImageIO theIO(inFnd.getAllocator(), inFnd);
     void *gifData = Open(&theIO, &inStream);
     if (gifData) {

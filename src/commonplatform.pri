@@ -82,6 +82,9 @@ win32 {
     win32-msvc {
         QMAKE_CXXFLAGS += /MP /d2Zi+
         QMAKE_CFLAGS += /MP /d2Zi+
+        # Warning C4251 = needs to have dll-interface to be used by clients of class,
+        #                 it comes from a lot of Qt headers, so disabling it.
+        QMAKE_CXXFLAGS_WARN_ON += -wd4251 #needs to have dll-interface to be used by clients
     }
 
     CONFIG(debug, debug|release) {

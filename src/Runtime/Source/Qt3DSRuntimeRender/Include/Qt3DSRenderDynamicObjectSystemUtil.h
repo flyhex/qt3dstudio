@@ -51,6 +51,7 @@ namespace render {
                 , m_StringTable(inStrTable)
                 , m_ProjectDir(inProjectDir)
             {
+                Q_UNUSED(alloc)
             }
             void Remap(CRegisteredString &inStr) { inStr.Remap(m_StrData); }
         };
@@ -67,6 +68,7 @@ namespace render {
                 : m_Map(map)
                 , m_StringTable(inStrTable)
             {
+                Q_UNUSED(alloc)
                 m_ProjectDir.assign(inProjectDir);
             }
             void Remap(CRegisteredString &inStr) { inStr.Remap(m_Map); }

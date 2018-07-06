@@ -157,7 +157,7 @@ struct SLightConstantProperties
         : m_lightCount(lcount, shader.m_Shader)
     {
         m_constants.resize(count);
-        for (unsigned int i = 0; i < count; ++i) {
+        for (int i = 0; i < count; ++i) {
             QString lref;
             if (packed)
                 lref = lseed + QStringLiteral("_%1_");

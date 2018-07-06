@@ -542,7 +542,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
             else
                 lightName = "lights";
             char buf[16];
-            _snprintf(buf, 16, "[%lu]", shadeIdx);
+            _snprintf(buf, 16, "[%d]", int(shadeIdx));
             lightName.append(buf);
 
             NVScopedRefCounted<SShaderLightProperties> theNewEntry =
@@ -564,6 +564,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
                        SShaderGeneratorGeneratedShader::ShadowMapPropertyArray &shadowMaps,
                        SShaderGeneratorGeneratedShader::ShadowCubePropertyArray &shadowCubes)
     {
+        Q_UNUSED(inProgram)
         if (inShadow) {
             if (shadowMap == false && inShadow->m_DepthCube
                     && (numShadowCubes < QT3DS_MAX_NUM_SHADOWS)) {
@@ -1031,7 +1032,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
             eastl::string::size_type pos = 0;
             while ((pos = srcString.find("out vec4 fragColor", pos)) != eastl::string::npos) {
                 srcString.insert(pos, "//");
-                pos += strlen("//out vec4 fragColor");
+                pos += int(strlen("//out vec4 fragColor"));
             }
         }
 

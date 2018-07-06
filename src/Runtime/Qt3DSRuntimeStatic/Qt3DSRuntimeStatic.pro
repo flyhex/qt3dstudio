@@ -612,7 +612,6 @@ SOURCES += \
     ../../Authoring/QT3DSDM/Systems/Qt3DSDMMetaData.cpp \
     ../../Authoring/QT3DSDM/Systems/Qt3DSDMXML.cpp \
     ../../Authoring/QT3DSDM/Systems/Qt3DSDMStringTable.cpp \
-    ../../Authoring/QT3DSDM/Systems/Qt3DSDMHandles.cpp \
     ../../Authoring/QT3DSDM/Systems/Qt3DSDMComposerTypeDefinitions.cpp \
     ../../Authoring/QT3DSDM/Systems/Qt3DSDMValue.cpp \
     ../../Authoring/QT3DSDM/Systems/Cores/SimpleDataCore.cpp
@@ -633,9 +632,6 @@ HEADERS += \
 # Engine
 HEADERS += \
     ../Source/Engine/Include/EnginePrefix.h
-
-SOURCES += \
-    ../Source/Engine/Source/EnginePrefix.cpp
 
 # Event
 SOURCES += \
@@ -663,14 +659,10 @@ HEADERS += \
     ../Source/Runtime/Include/q3dsqmlbehavior.h
 
 SOURCES += \
-    ../Source/Runtime/Source/RuntimePrefix.cpp \
     ../Source/Runtime/Source/q3dsqmlscript.cpp \
     ../Source/Runtime/Source/q3dsqmlbehavior.cpp
 
 # System
-SOURCES += \
-    ../Source/System/Source/SystemPrefix.cpp
-
 HEADERS += \
     ../Source/System/Include/SystemPrefix.h
 

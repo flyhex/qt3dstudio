@@ -52,7 +52,7 @@ typedef Q3DStudio::Graph::SGraphNode<int, int> SGraphableImpl;
 typedef SGraphableImpl *TGraphableImplPtr;
 typedef SGraphableImpl::TNodeList TGraphableImplList;
 
-struct SGraphImpl;
+class SGraphImpl;
 typedef SGraphImpl *TGraphImplPtr;
 
 // Transaction events are implemented by this small set of satellite classes.

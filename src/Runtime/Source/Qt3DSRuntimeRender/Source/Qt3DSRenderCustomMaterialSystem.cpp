@@ -1993,6 +1993,8 @@ struct SMaterialSystem : public ICustomMaterialSystem
 
     void OnMaterialActivationChange(const SCustomMaterial &inMaterial, bool inActive) override
     {
+        Q_UNUSED(inMaterial)
+        Q_UNUSED(inActive)
     }
 
     void EndFrame() override

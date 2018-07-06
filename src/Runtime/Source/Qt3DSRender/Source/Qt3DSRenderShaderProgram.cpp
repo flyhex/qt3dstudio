@@ -349,6 +349,7 @@ namespace render {
                            QT3DSI32 location, QT3DSI32 count, NVRenderShaderDataTypes::Enum type,
                            NVRenderTexture2DHandle inValue, QVector<QT3DSU32> &oldValue)
         {
+            Q_UNUSED(type)
             if (inValue) {
                 bool update = false;
                 for (int i = 0; i < count; i++) {
@@ -419,6 +420,7 @@ namespace render {
                            QT3DSI32 location, QT3DSI32 count, NVRenderShaderDataTypes::Enum type,
                            NVRenderTextureCubeHandle inValue, QVector<QT3DSU32> &oldValue)
         {
+            Q_UNUSED(type)
             if (inValue) {
                 bool update = false;
                 for (int i = 0; i < count; i++) {
@@ -906,6 +908,7 @@ namespace render {
     void NVRenderShaderProgram::SetConstantValue(NVRenderShaderConstantBase *inConstant,
                                                  NVRenderTexture2D *inValue, const QT3DSI32 inCount)
     {
+        Q_UNUSED(inCount)
         SetConstantValueOfType(this, inConstant, inValue, 1);
     }
     void NVRenderShaderProgram::SetConstantValue(NVRenderShaderConstantBase *inConstant,
@@ -923,6 +926,7 @@ namespace render {
     void NVRenderShaderProgram::SetConstantValue(NVRenderShaderConstantBase *inConstant,
                                                  NVRenderTextureCube *inValue, const QT3DSI32 inCount)
     {
+        Q_UNUSED(inCount)
         SetConstantValueOfType(this, inConstant, inValue, 1);
     }
     void NVRenderShaderProgram::SetConstantValue(NVRenderShaderConstantBase *inConstant,

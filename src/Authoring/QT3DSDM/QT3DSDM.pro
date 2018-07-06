@@ -36,7 +36,6 @@ SOURCES += \
     Systems/StudioPropertySystem.cpp \
     Systems/Qt3DSDMComposerTypeDefinitions.cpp \
     Systems/Qt3DSDMGuides.cpp \
-    Systems/Qt3DSDMHandles.cpp \
     Systems/Qt3DSDMMetaData.cpp \
     Systems/Qt3DSDMSignalSystem.cpp \
     Systems/Qt3DSDMStringTable.cpp \

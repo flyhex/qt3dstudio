@@ -71,7 +71,7 @@ int ActionModel::rowCount(const QModelIndex &parent) const
     if (parent.isValid())
         return 0;
 
-    return m_actions.size();
+    return int(m_actions.size());
 }
 
 QVariant ActionModel::data(const QModelIndex &index, int role) const

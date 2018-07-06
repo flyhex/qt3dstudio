@@ -2847,7 +2847,7 @@ SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::En
     // This doesn't use the color picker or renderer pick
     float lastDist = 99999999999999.0f;
     int lastIndex = -1;
-    for (size_t i = 0; i < m_editModeCamerasAndLights.size(); ++i) {
+    for (int i = 0; i < int(m_editModeCamerasAndLights.size()); ++i) {
         const QT3DSVec2 mouseCoords((QT3DSF32)inMouseCoords.x, (QT3DSF32)inMouseCoords.y);
         float dist;
         SGraphObject &object = m_editModeCamerasAndLights[i]->GetGraphObject();

@@ -48,12 +48,14 @@ int InteractiveTimelineItem::type() const
 
 void InteractiveTimelineItem::hoverEnterEvent(QGraphicsSceneHoverEvent  *event)
 {
+    Q_UNUSED(event)
     if (m_state != Selected)
         setState(Hovered);
 }
 
 void InteractiveTimelineItem::hoverLeaveEvent(QGraphicsSceneHoverEvent  *event)
 {
+    Q_UNUSED(event)
     if (m_state != Selected)
         setState(Normal);
 }

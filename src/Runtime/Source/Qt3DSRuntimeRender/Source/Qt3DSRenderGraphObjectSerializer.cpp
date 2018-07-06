@@ -95,6 +95,7 @@ struct SSerializerWriteContext
         , m_FileSizeStats(inStats)
         , m_StringTable(inStringTable)
     {
+        Q_UNUSED(inAllocator)
         m_BasePath.assign(inProjectDirectory);
     }
 
@@ -168,6 +169,7 @@ struct SSerializerReadContext : public SDataReader
         , m_StrTableBlock(inStrTable)
         , m_ProjectDirectory(inProjectDirectory)
     {
+        Q_UNUSED(inAllocator)
     }
     void Remap(CRegisteredString &inStr) { inStr.Remap(m_StrTableBlock); }
     template <typename TObjType>

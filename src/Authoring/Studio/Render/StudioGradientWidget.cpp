@@ -157,10 +157,10 @@ void SGradientWidget::Render(IRenderWidgetContext &inWidgetContext, NVRenderCont
         m_shader = CreateGradientShader(inWidgetContext, inRenderContext);
 
         inRenderContext.SetActiveShader(m_shader);
-        m_shader->SetPropertyValue("color0", QT3DSVec3(0.6, 0.6, 0.6));
-        m_shader->SetPropertyValue("color1", QT3DSVec3(0.4, 0.4, 0.4));
-        m_shader->SetPropertyValue("color2", QT3DSVec3(0.1, 0.1, 0.1));
-        m_shader->SetPropertyValue("color3", QT3DSVec3(0.35, 0.35, 0.35));
+        m_shader->SetPropertyValue("color0", QT3DSVec3(0.6f, 0.6f, 0.6f));
+        m_shader->SetPropertyValue("color1", QT3DSVec3(0.4f, 0.4f, 0.4f));
+        m_shader->SetPropertyValue("color2", QT3DSVec3(0.1f, 0.1f, 0.1f));
+        m_shader->SetPropertyValue("color3", QT3DSVec3(0.35f, 0.35f, 0.35f));
     }
 
     inRenderContext.SetDepthWriteEnabled(false);
