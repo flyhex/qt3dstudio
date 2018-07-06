@@ -573,10 +573,8 @@ struct SSceneTranslator : public SGraphObjectTranslator
     }
     void AppendChild(SGraphObject &inChild) override
     {
-        if (inChild.m_Type != GraphObjectTypes::Layer) {
-            QT3DS_ASSERT(false);
+        if (inChild.m_Type != GraphObjectTypes::Layer)
             return;
-        }
         SScene &theItem = static_cast<SScene &>(GetGraphObject());
         SLayer &theLayer = static_cast<SLayer &>(inChild);
         theItem.AddChild(theLayer);

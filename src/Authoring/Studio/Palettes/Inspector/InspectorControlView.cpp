@@ -85,7 +85,7 @@ const wchar_t **AllSupportedExtensionsList()
     static const wchar_t *extensions[] = {
         L"png", L"jpg", L"jpeg", L"dds", L"hdr",
         L"mesh", L"import", L"path",
-        L"material",
+        L"material", L"matdata",
         nullptr
     };
     return extensions;
@@ -109,6 +109,18 @@ void InspectorControlView::filterMaterials(std::vector<Q3DStudio::CFilePath> &ma
     for (size_t i = 0; i < m_fileList.size(); ++i) {
         if (isInList(extensions, m_fileList[i].GetExtension()))
             materials.push_back(m_fileList[i]);
+    }
+}
+
+void InspectorControlView::filterMatDatas(std::vector<Q3DStudio::CFilePath> &matDatas)
+{
+    static const wchar_t *extensions[] = {
+        L"matdata",
+        nullptr
+    };
+    for (size_t i = 0; i < m_fileList.size(); ++i) {
+        if (isInList(extensions, m_fileList[i].GetExtension()))
+            matDatas.push_back(m_fileList[i]);
     }
 }
 
@@ -168,6 +180,10 @@ void InspectorControlView::onFilesChanged(
     std::vector<Q3DStudio::CFilePath> materials;
     filterMaterials(materials);
     m_inspectorControlModel->setMaterials(materials);
+
+    std::vector<Q3DStudio::CFilePath> matDatas;
+    filterMatDatas(matDatas);
+    m_inspectorControlModel->setMatDatas(matDatas);
 }
 
 InspectorControlView::~InspectorControlView()

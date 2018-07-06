@@ -45,6 +45,7 @@
 #include "IDocumentEditor.h"
 #include "IDragable.h"
 #include <QtQml/qqmlapplicationengine.h>
+#include "IObjectReferenceHelper.h"
 
 ProjectFileSystemModel::ProjectFileSystemModel(QObject *parent) : QAbstractListModel(parent)
     , m_model(new QFileSystemModel(this))
@@ -337,6 +338,48 @@ bool ProjectFileSystemModel::hasValidUrlsForDropping(const QList<QUrl> &urls) co
     }
 
     return false;
+}
+
+void ProjectFileSystemModel::showInfo(int row)
+{
+    if (row < 0 || row >= m_items.size())
+        row = 0;
+
+    const TreeItem &item = m_items.at(row);
+    QString path = item.index.data(QFileSystemModel::FilePathRole).toString();
+
+    QFileInfo fi(path);
+
+    if (fi.suffix() == QLatin1String("matdata")) {
+        auto material = Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(),
+                                                          QObject::tr("Get Material"))
+                ->getOrCreateMaterial(Q3DStudio::CString::fromQString(fi.baseName()));
+        if (material.Valid())
+            g_StudioApp.GetCore()->GetDoc()->SelectDataModelObject(material);
+    }
+}
+
+void ProjectFileSystemModel::duplicate(int row)
+{
+    if (row < 0 || row >= m_items.size())
+        row = 0;
+
+    const TreeItem &item = m_items.at(row);
+    QString path = item.index.data(QFileSystemModel::FilePathRole).toString();
+
+    QFileInfo srcFile(path);
+    const QString destPathStart = srcFile.dir().absolutePath() + QDir::separator()
+            + srcFile.baseName() + QStringLiteral(" Copy");
+    const QString destPathEnd = QStringLiteral(".") + srcFile.suffix();
+    QString destPath = destPathStart + destPathEnd;
+
+    int i = 0;
+    while (QFile::exists(destPath)) {
+        i++;
+        destPath = destPathStart + QString::number(i) + destPathEnd;
+    }
+
+    QFile::copy(path, destPath);
 }
 
 void ProjectFileSystemModel::importUrls(const QList<QUrl> &urls, int row, bool autoSort)

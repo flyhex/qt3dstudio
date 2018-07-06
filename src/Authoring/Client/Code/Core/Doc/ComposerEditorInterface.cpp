@@ -95,6 +95,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
     qt3ds::QT3DSI32 m_StartTime;
     Import *m_ImportObj;
     TImportInstanceMap m_ImportToInstanceMap;
+    TImportInstanceMap m_MaterialToInstanceMap;
 
     // When we are refreshing, the root assets is the group we are refreshing.
     SComposerImportInterface(
@@ -142,6 +143,14 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
         return 0;
     }
 
+    Qt3DSDMInstanceHandle findMaterial(TImportId inImportHdl)
+    {
+        TImportInstanceMap::const_iterator entry(m_MaterialToInstanceMap.find(inImportHdl));
+        if (entry != m_MaterialToInstanceMap.end())
+            return entry->second;
+        return 0;
+    }
+
     void AddInstanceMap(Qt3DSDMInstanceHandle instanceHandle, TImportId inImportId) override
     {
         if (inImportId == NULL || *inImportId == 0) {
@@ -155,6 +164,20 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
         (void)success;
         assert(success);
     }
+
+    void addMaterialMap(Qt3DSDMInstanceHandle instanceHandle, TImportId inImportId)
+    {
+        if (inImportId == nullptr || *inImportId == 0) {
+            assert(0);
+            return;
+        }
+        bool success =
+            m_MaterialToInstanceMap
+                .insert(eastl::make_pair(m_StringTable.RegisterStr(inImportId), instanceHandle))
+                .second;
+        assert(success);
+    }
+
     Qt3DSDMInstanceHandle GetRoot() override { return m_Root; }
 
     const Q3DStudio::CFilePath &GetDestImportFile() override { return m_DestImportFile; }
@@ -232,12 +255,38 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
             CreateInstance(type, theParent, inImportId);
     }
 
+    void createMaterial(TImportId inImportId, ComposerObjectTypes::Enum type,
+                        TImportId inParent) override
+    {
+        auto material = m_Editor.getOrCreateMaterial(inImportId);
+        m_Editor.SetSpecificInstancePropertyValue(0, material, L"importid",
+                                                  std::make_shared<CDataStr>(inImportId));
+        m_Editor.SetSpecificInstancePropertyValue(
+            m_Slide, material, L"importfile",
+            std::make_shared<CDataStr>(m_Relativeimportfile.toCString()));
+        addMaterialMap(material, inImportId);
+
+        const auto sourcePath = m_Editor.writeMaterialFile(material,
+                                                           QString::fromWCharArray(inImportId),
+                                                           true);
+
+        Qt3DSDMInstanceHandle parent(FindInstance(inParent));
+        auto instance = m_Editor.CreateSceneGraphInstance(ComposerObjectTypes::ReferencedMaterial,
+                                                          parent, m_Slide);
+        m_Editor.setMaterialReferenceByName(instance, inImportId);
+        m_Editor.SetName(instance, inImportId);
+        m_Editor.setMaterialSourcePath(instance, sourcePath);
+    }
+
     void UpdateInstanceProperties(TImportId inInstance, const PropertyValue *propertBuffer,
                                           QT3DSU32 propertyBufferSize) override
     {
         Qt3DSDMInstanceHandle hdl(FindInstance(inInstance));
-        if (hdl.Valid() == false)
-            return;
+        if (hdl.Valid() == false) {
+            hdl = findMaterial(inInstance);
+            if (hdl.Valid() == false)
+                return;
+        }
 
         if (m_Editor.IsInstance(hdl) == false)
             return;
@@ -440,6 +489,11 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
             insert_unique(theInserter.first->second,
                           make_pair(theIterator.GetCurrentSlide(), newInstance));
         }
+    }
+
+    void createMaterial(TImportId inImportId, ComposerObjectTypes::Enum type,
+                        TImportId inParent) override
+    {
     }
 
     // We guarantee that all instances will be created before their properties are updated thus you

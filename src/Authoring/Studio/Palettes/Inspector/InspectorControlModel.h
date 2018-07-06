@@ -120,7 +120,9 @@ public:
 
     void setInspectable(CInspectableBase *inInspectable);
     CInspectableBase *inspectable() const;
+    void updateMaterialValues();
     void setMaterials(std::vector<Q3DStudio::CFilePath> &materials);
+    void setMatDatas(std::vector<Q3DStudio::CFilePath> &matdatas);
     void refreshRenderables();
     void refresh();
 
@@ -164,7 +166,15 @@ private:
         QString m_relativePath;
     };
 
+    struct MaterialDataEntry
+    {
+        QString m_name;
+        QString m_relativePath;
+        QMap<QString, QString> m_values;
+    };
+
     std::vector<MaterialEntry> m_materials;
+    std::vector<MaterialDataEntry> m_matDatas;
 
     Q3DStudio::CUpdateableDocumentEditor m_UpdatableEditor;
 
@@ -178,6 +188,7 @@ private:
     void notifyInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle inProperty);
     void updateAnimateToggleState(InspectorControlBase *inItem);
     void updateControlledToggleState(InspectorControlBase *inItem) const;
+    void saveIfMaterial(qt3dsdm::Qt3DSDMInstanceHandle instance);
 
     std::shared_ptr<qt3dsdm::ISignalConnection> m_notifier;
     std::shared_ptr<qt3dsdm::ISignalConnection> m_slideNotifier;
@@ -193,7 +204,8 @@ private:
     QVector<GroupInspectorControl> computeTree(CInspectableBase *inspectBase);
     bool isTreeRebuildRequired(CInspectableBase *inspectBase) const;
 
-    GroupInspectorControl computeGroup(CInspectableBase* inspectBase, int theIndex);
+    GroupInspectorControl computeGroup(CInspectableBase* inspectBase,
+                                       int theIndex, bool referenced = false);
     bool isGroupRebuildRequired(CInspectableBase *inspectable, int theIndex) const;
 
 };

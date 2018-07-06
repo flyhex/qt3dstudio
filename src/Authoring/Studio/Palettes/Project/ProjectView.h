@@ -73,6 +73,9 @@ public:
     Q_INVOKABLE void copyPath(int row) const;
     Q_INVOKABLE void copyFullPath(int row) const;
     Q_INVOKABLE void refreshImport(int row) const;
+    Q_INVOKABLE void addMaterial(int row) const;
+    Q_INVOKABLE void editMaterial(int row) const;
+    Q_INVOKABLE void duplicate(int row) const;
 
     Q_INVOKABLE bool isGroup(int row) const;
     Q_INVOKABLE bool isRefreshable(int row) const;
@@ -81,6 +84,7 @@ public:
     bool isPresentation(int row) const;
     bool isQmlStream(int row) const;
     bool isCurrentPresentation(int row) const;
+    bool isMaterialData(int row) const;
     void openPresentation(int row);
     void editPresentationId(int row);
 

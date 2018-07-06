@@ -377,6 +377,11 @@ bool ProjectView::isQmlStream(int row) const
     return strcmp(rootClassName, "Q3DStudio::Q3DSQmlBehavior") != 0;
 }
 
+bool ProjectView::isMaterialData(int row) const
+{
+    return m_ProjectModel->filePath(row).endsWith(QLatin1String(".matdata"));
+}
+
 bool ProjectView::isRefreshable(int row) const
 {
     return m_ProjectModel->isRefreshable(row);
@@ -413,6 +418,39 @@ void ProjectView::refreshImport(int row) const
                         oldFile.canonicalFilePath(), newFile.canonicalFilePath());
         }
     }
+}
+
+void ProjectView::addMaterial(int row) const
+{
+    if (row == -1)
+        return;
+
+    QString path = m_ProjectModel->filePath(row);
+    QFileInfo info(path);
+    if (info.isFile())
+        path = info.dir().path();
+    path += QLatin1String("/Material");
+    QString extension = QLatin1String(".matdata");
+
+    QFile file(path + extension);
+    int i = 0;
+    while (file.exists()) {
+        i++;
+        file.setFileName(path + QString::number(i) + extension);
+    }
+
+    file.open(QIODevice::WriteOnly);
+    file.write("<MaterialData version=\"1.0\">\n</MaterialData>");
+}
+
+void ProjectView::editMaterial(int row) const
+{
+    m_ProjectModel->showInfo(row);
+}
+
+void ProjectView::duplicate(int row) const
+{
+    m_ProjectModel->duplicate(row);
 }
 
 void ProjectView::rebuild()

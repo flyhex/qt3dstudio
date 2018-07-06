@@ -110,6 +110,7 @@ private:
     void OnLoadedSubPresentation() override;
     void OnTimeChanged();
     void filterMaterials(std::vector<Q3DStudio::CFilePath> &materials);
+    void filterMatDatas(std::vector<Q3DStudio::CFilePath> &matDatas);
     void setPropertyValueFromFilename(long instance, int handle, const QString &name);
     bool canLinkProperty(int instance, int handle) const;
     void onInstancePropertyValueChanged(qt3dsdm::Qt3DSDMPropertyHandle propertyHandle);

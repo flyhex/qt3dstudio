@@ -1411,6 +1411,47 @@ CInspectableBase *CStudioApp::GetInspectableFromSelectable(Q3DStudio::SSelectedV
     return theInspectableBase;
 }
 
+CInspectableBase *CStudioApp::getInspectableFromInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
+{
+    CInspectableBase *theInspectableBase = nullptr;
+    CDoc *theDoc = m_core->GetDoc();
+
+    if (m_core->GetDoc()->GetDocumentReader().IsInstance(inInstance)) {
+        CClientDataModelBridge *theBridge =
+                theDoc->GetStudioSystem()->GetClientDataModelBridge();
+        qt3dsdm::Qt3DSDMSlideHandle theCurrentActiveSlide = theDoc->GetActiveSlide();
+
+        // Slide, scene or component
+        if (inInstance
+                == theBridge->GetOwningComponentInstance(theCurrentActiveSlide)) {
+            Qt3DSDMInstanceHandle theCurrentActiveSlideInstance =
+                    theDoc->GetStudioSystem()->GetSlideSystem()->GetSlideInstance(
+                        theCurrentActiveSlide);
+
+            if (theBridge->IsSceneInstance(inInstance)) {
+                theInspectableBase = new Qt3DSDMSceneInspectable(
+                            *this, m_core, inInstance,
+                            theCurrentActiveSlideInstance);
+            } else if (theBridge->IsComponentInstance(inInstance)) {
+                theInspectableBase = new Qt3DSDMInspectable(
+                            *this, m_core, inInstance,
+                            theCurrentActiveSlideInstance);
+            }
+        }
+        if (theInspectableBase == nullptr) {
+            if (theBridge->IsMaterialBaseInstance(inInstance)) {
+                theInspectableBase =
+                        new Qt3DSDMMaterialInspectable(*this, m_core, inInstance);
+            } else {
+                theInspectableBase =
+                        new Qt3DSDMInspectable(*this, m_core, inInstance);
+            }
+        }
+    }
+
+    return theInspectableBase;
+}
+
 void CStudioApp::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler,
                                                  QWidget *actionParent)
 {

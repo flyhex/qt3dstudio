@@ -461,6 +461,11 @@ void TimelineWidget::onActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, 
 
 void TimelineWidget::insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *binding)
 {
+    if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()
+            ->isMaterialContainer(binding->GetInstance())) {
+        return;
+    }
+
     insertToHandlesMap(binding);
     const QList<ITimelineItemBinding *> children = binding->GetChildren();
     for (auto child : children)
@@ -469,6 +474,16 @@ void TimelineWidget::insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *bin
 
 void TimelineWidget::insertToHandlesMap(Qt3DSDMTimelineItemBinding *binding)
 {
+    if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()
+            ->isMaterialContainer(binding->GetInstance())) {
+        return;
+    }
+
+    if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()
+            ->isInsideMaterialContainer(binding->GetInstance())) {
+        return;
+    }
+
     m_handlesMap.insert(binding->GetInstance(), binding->getRowTree());
 }
 
@@ -502,12 +517,24 @@ void TimelineWidget::onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         return;
 
     if (m_bridge->IsSceneGraphInstance(inInstance)) {
+        if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()
+                ->isMaterialContainer(inInstance)) {
+            return;
+        }
+
+        if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()
+                ->isInsideMaterialContainer(inInstance)) {
+            return;
+        }
+
         Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inInstance, m_binding);
 
         bool rowExists = binding && binding->getRowTree();
         if (binding && !rowExists) {
-            Qt3DSDMTimelineItemBinding *bindingParent = getBindingForHandle(m_bridge
-                                                        ->GetParentInstance(inInstance), m_binding);
+            auto parentInstance = m_bridge->GetParentInstance(inInstance);
+
+            Qt3DSDMTimelineItemBinding *bindingParent = getBindingForHandle(parentInstance,
+                                                                            m_binding);
             m_graphicsScene->rowManager()
                     ->createRowFromBinding(binding, bindingParent->getRowTree());
             insertToHandlesMap(binding);

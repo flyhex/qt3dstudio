@@ -73,6 +73,8 @@ public:
 
     Q_INVOKABLE void importUrls(const QList<QUrl> &urls, int row, bool autoSort = true);
     Q_INVOKABLE bool hasValidUrlsForDropping(const QList<QUrl> &urls) const;
+    Q_INVOKABLE void showInfo(int row);
+    Q_INVOKABLE void duplicate(int row);
 
 Q_SIGNALS:
     void modelChanged(QAbstractItemModel *model);

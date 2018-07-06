@@ -199,6 +199,7 @@ public:
     void ReduceUltraBigTime();
     void PlaybackToggle();
     CInspectableBase *GetInspectableFromSelectable(Q3DStudio::SSelectedValue inSelectable);
+    CInspectableBase *getInspectableFromInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
     bool OnSave(bool autosave = false);
     bool OnSaveAs();

@@ -94,6 +94,7 @@ public:
     static const char *GetImportFileExtension();
     static const char *GetMeshFileExtension();
     static const char *GetQmlFileExtension();
+    static const char *GetMaterialDataFileExtension();
     static const char **GetFontFileExtensions();
     static const char **GetEffectFileExtensions();
     static const char **GetMaterialFileExtensions();

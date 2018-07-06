@@ -579,7 +579,7 @@ void RowTree::addChildAt(RowTree *child, int index)
     if (!child->isProperty()) {
         child->m_indexInLayout += m_childProps.count();
 
-        if (!m_childRows.empty()) {
+        if (m_childRows.size() >= index) {
             for (int i = 0; i < index; ++i)
                 child->m_indexInLayout += m_childRows.at(i)->getCountDecendentsRecursive();
         }

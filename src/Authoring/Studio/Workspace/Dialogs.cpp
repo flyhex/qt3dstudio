@@ -737,6 +737,11 @@ const char *CDialogs::GetQmlFileExtension()
     return "qml";
 }
 
+const char *CDialogs::GetMaterialDataFileExtension()
+{
+    return "matdata";
+}
+
 const char **CDialogs::GetFontFileExtensions()
 {
     return fontExts;
@@ -751,7 +756,6 @@ const char **CDialogs::GetMaterialFileExtensions()
 {
     return materialExts;
 }
-
 const char **CDialogs::GetSoundFileExtensions()
 {
     return soundExts;
