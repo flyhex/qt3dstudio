@@ -39,6 +39,7 @@
 #include <QtWidgets/qgraphicsscene.h>
 #include <QtCore/qlist.h>
 #include <QtCore/qhash.h>
+#include <QtCore/qpointer.h>
 
 class Ruler;
 class PlayHead;
@@ -129,7 +130,7 @@ private:
     TimelineWidget *m_widgetTimeline;
     QGraphicsWidget *m_widgetRoot;
     RowMover *m_rowMover = nullptr;
-    RowTimeline *m_editedTimelineRow = nullptr;
+    QPointer<RowTimeline> m_editedTimelineRow = nullptr;
     SelectionRect *m_selectionRect;
     RowManager *m_rowManager = nullptr;
     KeyframeManager *m_keyframeManager = nullptr;
@@ -149,7 +150,7 @@ private:
     double m_lastAutoScrollX = -1.0;
     double m_lastAutoScrollY = -1.0;
     TExpandMap m_expandMap;
-    RowTree *m_releaseSelectRow = nullptr;
+    QPointer<RowTree> m_releaseSelectRow = nullptr;
     bool m_autoScrollDownOn = false;
     bool m_autoScrollUpOn = false;
     QTimer m_autoScrollTimelineTimer;
