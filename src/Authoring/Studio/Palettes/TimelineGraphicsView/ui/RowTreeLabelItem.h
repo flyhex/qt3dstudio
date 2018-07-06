@@ -50,6 +50,7 @@ public:
     RowTree *parentRow() const;
     void setParentRow(RowTree *row);
     int type() const;
+    bool isLocked() const { return m_locked; }
 
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;

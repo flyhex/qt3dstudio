@@ -790,7 +790,7 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
                 RowTreeLabelItem *treeLabelItem = static_cast<RowTreeLabelItem *>(item);
                 if (treeLabelItem->parentRow()->isProperty()) {
                     treeLabelItem->parentRow()->togglePropertyExpanded();
-                } else {
+                } else if (!treeLabelItem->isLocked()) {
                     // Tree labels text can be edited with double-click
                     treeLabelItem->setEnabled(true);
                     treeLabelItem->setFocus();
@@ -804,7 +804,8 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
                     timeEditDlg.setKeyframesManager(m_keyframeManager);
                     timeEditDlg.showDialog(clickedKeyframe->time * 1000, doc, ASSETKEYFRAME);
                 } else {
-                    handleSetTimeBarTime();
+                    if (!rowTimeline->rowTree()->locked())
+                        handleSetTimeBarTime();
                 }
             }
         }
@@ -853,7 +854,7 @@ void TimelineGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *eve
     RowTree *row = m_rowManager->getRowAtPos(QPointF(0, event->scenePos().y()));
 
     if (!row || m_widgetTimeline->isFullReconstructPending() || m_dragging
-            || m_startRowMoverOnNextDrag) {
+            || m_startRowMoverOnNextDrag || row->locked()) {
         return;
     }
 

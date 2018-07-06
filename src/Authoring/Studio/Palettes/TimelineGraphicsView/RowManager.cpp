@@ -142,10 +142,12 @@ void RowManager::createRowsFromBindingRecursive(ITimelineItemBinding *binding, R
 RowTree *RowManager::getOrCreatePropertyRow(RowTree *masterRow, const QString &propType, int index)
 {
     RowTree *propertyRow = masterRow->getPropertyRow(propType);
-    if (propertyRow)
-        return propertyRow;
+    if (!propertyRow)
+        propertyRow = createRow(OBJTYPE_UNKNOWN, masterRow, 0, propType, index);
 
-    return createRow(OBJTYPE_UNKNOWN, masterRow, 0, propType, index);
+    propertyRow->updateLock(masterRow->locked());
+
+    return propertyRow;
 }
 
 RowTree *RowManager::createRow(EStudioObjectType rowType, RowTree *parentRow, const QString &label,

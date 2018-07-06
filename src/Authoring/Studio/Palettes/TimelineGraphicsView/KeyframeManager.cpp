@@ -169,16 +169,17 @@ void KeyframeManager::selectKeyframesInRect(const QRectF &rect)
 
     RowTree *row = m_scene->rowManager()->getRowAtPos(QPointF(0, rect.top()));
     while (row && row->y() < rect.bottom()) {
-        const auto keyframes = row->rowTimeline()->getKeyframesInRange(rect);
-        for (auto keyframe : keyframes) {
-            if (!m_selectedKeyframes.contains(keyframe)) {
-                m_selectedKeyframes.append(keyframe);
+        if (!row->locked()) {
+            const auto keyframes = row->rowTimeline()->getKeyframesInRange(rect);
+            for (auto keyframe : keyframes) {
+                if (!m_selectedKeyframes.contains(keyframe)) {
+                    m_selectedKeyframes.append(keyframe);
 
-                if (!m_selectedKeyframesMasterRows.contains(keyframe->rowMaster))
-                    m_selectedKeyframesMasterRows.append(keyframe->rowMaster);
+                    if (!m_selectedKeyframesMasterRows.contains(keyframe->rowMaster))
+                        m_selectedKeyframesMasterRows.append(keyframe->rowMaster);
+                }
             }
         }
-
         row = m_scene->rowManager()->getRowAtPos(QPointF(0, row->y() + row->size().height()));
     }
 
@@ -223,6 +224,17 @@ void KeyframeManager::deselectAllKeyframes()
 
     m_selectedKeyframes.clear();
     m_selectedKeyframesMasterRows.clear();
+}
+
+void KeyframeManager::deselectRowKeyframes(RowTree *row)
+{
+    const QList<Keyframe *> keyframes = row->rowTimeline()->keyframes();
+    for (const auto keyframe : keyframes) {
+        if (row->isProperty())
+            deselectKeyframe(keyframe);
+        else
+            deselectConnectedKeyframes(keyframe);
+    }
 }
 
 bool KeyframeManager::deleteSelectedKeyframes()

@@ -37,6 +37,7 @@
 #include "Qt3DSString.h"
 #include "TreeHeader.h"
 #include "StudioPreferences.h"
+#include "KeyframeManager.h"
 
 #include <QtGui/qpainter.h>
 #include "QtGui/qtextcursor.h"
@@ -714,13 +715,12 @@ void RowTree::updateFromBinding()
     // update view (shy, visible, locked)
     m_shy = m_binding->GetTimelineItem()->IsShy();
     m_visible = m_binding->GetTimelineItem()->IsVisible();
-    m_locked = m_binding->GetTimelineItem()->IsLocked();
+    updateLock(m_binding->GetTimelineItem()->IsLocked());
     m_visibilityCtrld = m_binding->GetTimelineItem()->IsVisibilityControlled();
 
-    // Update label locking & color
+    // Update label color
     Qt3DSDMTimelineItemBinding *itemBinding =
             static_cast<Qt3DSDMTimelineItemBinding *>(m_binding);
-    m_labelItem.setLocked(m_locked);
     m_master = itemBinding->IsMaster();
     m_labelItem.setMaster(m_master);
 }
@@ -767,7 +767,7 @@ void RowTree::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
 {
     QPointF p = mapFromScene(scenePos.x(), scenePos.y());
-    if (m_arrowVisible && m_rectArrow.contains(p.x(), p.y()) && !m_locked) {
+    if (m_arrowVisible && m_rectArrow.contains(p.x(), p.y())) {
         updateExpandStatus(m_expandState == ExpandState::Expanded ? ExpandState::Collapsed
                                                                   : ExpandState::Expanded, false);
         update();
@@ -845,14 +845,24 @@ void RowTree::updateExpandStatus(ExpandState state, bool animate, bool forceChil
 
 void RowTree::updateLockRecursive(bool state)
 {
-    m_locked = state;
-    m_labelItem.setLocked(m_locked);
-    update();
-
+    updateLock(state);
     if (!m_childRows.empty()) {
         for (auto child : qAsConst(m_childRows))
             child->updateLockRecursive(m_locked);
     }
+}
+
+void RowTree::updateLock(bool state)
+{
+    m_locked = state;
+    m_labelItem.setLocked(m_locked);
+    update();
+    if (!m_childProps.empty()) {
+        for (auto child : qAsConst(m_childProps))
+            child->updateLock(m_locked);
+    }
+    if (m_locked)
+        m_scene->keyframeManager()->deselectRowKeyframes(this);
 }
 
 void RowTree::updateLabelPosition()

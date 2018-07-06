@@ -225,10 +225,13 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                 = QPixmap(":/images/Keyframe-MasterDynamic-Normal.png");
         static const QPixmap pixKeyframeMasterDynamicSelected
                 = QPixmap(":/images/Keyframe-MasterDynamic-Selected.png");
-
+        static const QPixmap pixKeyframeMasterDisabled
+                = QPixmap(":/images/Keyframe-Master-Disabled.png");
         for (auto keyframe : qAsConst(m_keyframes)) {
             QPixmap pixmap;
-            if (keyframe->selected()) {
+            if (m_rowTree->locked()) {
+                pixmap = pixKeyframeMasterDisabled;
+            } else if (keyframe->selected()) {
                 if (keyframe->dynamic)
                     pixmap = pixKeyframeMasterDynamicSelected;
                 else
@@ -250,10 +253,13 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                 = QPixmap(":/images/Keyframe-PropertyDynamic-Normal.png");
         static const QPixmap pixKeyframePropertyDynamicSelected
                 = QPixmap(":/images/Keyframe-PropertyDynamic-Selected.png");
-
+        static const QPixmap pixKeyframePropertyDisabled
+                = QPixmap(":/images/Keyframe-Property-Disabled.png");
         for (auto keyframe : qAsConst(m_keyframes)) {
             QPixmap pixmap;
-            if (keyframe->selected()) {
+            if (m_rowTree->locked()) {
+                pixmap = pixKeyframePropertyDisabled;
+            } else if (keyframe->selected()) {
                 if (keyframe->dynamic)
                     pixmap = pixKeyframePropertyDynamicSelected;
                 else
@@ -313,6 +319,9 @@ void RowTimeline::drawColorPropertyGradient(QPainter *painter, int width)
 
 Keyframe *RowTimeline::getClickedKeyframe(const QPointF &scenePos)
 {
+    if (rowTree()->locked())
+        return nullptr;
+
     QPointF p = mapFromScene(scenePos.x(), scenePos.y());
     double x;
 
@@ -455,23 +464,25 @@ TimelineControlType RowTimeline::getClickedControl(const QPointF &scenePos) cons
     if (!m_rowTree->hasDurationBar())
         return TimelineControlType::None;
 
-    QPointF p = mapFromScene(scenePos.x(), scenePos.y());
-    const int halfHandle = TimelineConstants::DURATION_HANDLE_W * .5;
-    // Never choose start handle if end time is zero, as you cannot adjust it in that case
-    bool startHandle = p.x() > m_startX - halfHandle && p.x() < m_startX + halfHandle
-            && !qFuzzyIsNull(m_endTime);
-    bool endHandle = p.x() > m_endX - halfHandle && p.x() < m_endX + halfHandle;
-    if (startHandle && endHandle) {
-        // If handles overlap, choose the handle based on the side of the click relative to start
-        startHandle = p.x() < m_startX;
-        endHandle = !startHandle;
+    if (!m_rowTree->locked()) {
+        QPointF p = mapFromScene(scenePos.x(), scenePos.y());
+        const int halfHandle = TimelineConstants::DURATION_HANDLE_W * .5;
+        // Never choose start handle if end time is zero, as you cannot adjust it in that case
+        bool startHandle = p.x() > m_startX - halfHandle && p.x() < m_startX + halfHandle
+                && !qFuzzyIsNull(m_endTime);
+        bool endHandle = p.x() > m_endX - halfHandle && p.x() < m_endX + halfHandle;
+        if (startHandle && endHandle) {
+            // If handles overlap, choose the handle based on the side of the click relative to start
+            startHandle = p.x() < m_startX;
+            endHandle = !startHandle;
+        }
+        if (startHandle)
+            return TimelineControlType::StartHandle;
+        else if (endHandle)
+            return TimelineControlType::EndHandle;
+        else if (p.x() > m_startX && p.x() < m_endX && !rowTree()->locked())
+            return TimelineControlType::Duration;
     }
-    if (startHandle)
-        return TimelineControlType::StartHandle;
-    else if (endHandle)
-        return TimelineControlType::EndHandle;
-    else if (p.x() > m_startX && p.x() < m_endX && !rowTree()->locked())
-        return TimelineControlType::Duration;
 
     return TimelineControlType::None;
 }
@@ -494,7 +505,7 @@ void RowTimeline::updateBoundChildren(bool start)
     if (m_rowTree->hasDurationBar()) {
         const auto childRows = m_rowTree->childRows();
         for (auto child : childRows) {
-            if (child->hasDurationBar()) {
+            if (child->hasDurationBar() && !child->locked()) {
                 RowTimeline *rowTimeline = child->rowTimeline();
                 if (start && rowTimeline->m_startX == m_startX) {
                     m_boundChildrenStart.append(rowTimeline);
@@ -544,8 +555,10 @@ void RowTimeline::moveDurationBy(double dx)
         updateChildrenMinStartXRecursive(m_rowTree);
         updateChildrenMaxEndXRecursive(m_rowTree);
 
-        for (RowTree *child : qAsConst(m_rowTree->m_childRows))
-            child->m_rowTimeline->moveDurationBy(dx);
+        for (RowTree *child : qAsConst(m_rowTree->m_childRows)) {
+            if (!child->locked())
+                child->m_rowTimeline->moveDurationBy(dx);
+        }
     }
 }
 
@@ -581,8 +594,10 @@ void RowTimeline::moveDurationTo(double newX)
         updateChildrenMinStartXRecursive(m_rowTree);
         updateChildrenMaxEndXRecursive(m_rowTree);
 
-        for (RowTree *child : qAsConst(m_rowTree->m_childRows))
-            child->m_rowTimeline->moveDurationBy(dx);
+        for (RowTree *child : qAsConst(m_rowTree->m_childRows)) {
+            if (!child->locked())
+                child->m_rowTimeline->moveDurationBy(dx);
+        }
     }
 }
 

@@ -1951,17 +1951,23 @@ public:
         GetAssetChildrenInActiveSlide(inInstance, theChildren);
         for (; !theChildren.IsDone(); ++theChildren) {
             TInstanceHandle theChild = theChildren.GetCurrent();
-            std::pair<long, long> theChildTimeRange = GetTimeRange(theChild);
-            if (inSetStart) {
-                // If we are resizing start time, if child's start time == parent's child time
-                // then we need to resize child as well
-                if (theChildTimeRange.first == theTimeRange.first)
-                    ResizeTimeRange(theChild, inTime, inSetStart);
-            } else {
-                // If we are resizing end time, if child's end time == parent's end time
-                // then we need to resize child as well
-                if (theChildTimeRange.second == theTimeRange.second)
-                    ResizeTimeRange(theChild, inTime, inSetStart);
+            // Do not adjust locked children
+            SValue locked;
+            m_PropertySystem.GetInstancePropertyValue(
+                        theChild, m_Bridge.GetSceneAsset().m_Locked, locked);
+            if (!qt3dsdm::get<bool>(locked)) {
+                std::pair<long, long> theChildTimeRange = GetTimeRange(theChild);
+                if (inSetStart) {
+                    // If we are resizing start time, if child's start time == parent's child time
+                    // then we need to resize child as well
+                    if (theChildTimeRange.first == theTimeRange.first)
+                        ResizeTimeRange(theChild, inTime, inSetStart);
+                } else {
+                    // If we are resizing end time, if child's end time == parent's end time
+                    // then we need to resize child as well
+                    if (theChildTimeRange.second == theTimeRange.second)
+                        ResizeTimeRange(theChild, inTime, inSetStart);
+                }
             }
         }
     }
@@ -1983,7 +1989,13 @@ public:
         CGraphIterator theChildren;
         GetAssetChildrenInActiveSlide(inInstance, theChildren);
         for (; !theChildren.IsDone(); ++theChildren) {
-            OffsetTimeRange(theChildren.GetCurrent(), inOffset);
+            TInstanceHandle theChild = theChildren.GetCurrent();
+            // Do not adjust locked children
+            SValue locked;
+            m_PropertySystem.GetInstancePropertyValue(
+                        theChild, m_Bridge.GetSceneAsset().m_Locked, locked);
+            if (!qt3dsdm::get<bool>(locked))
+                OffsetTimeRange(theChild, inOffset);
         }
     }
 
@@ -2007,8 +2019,15 @@ public:
 
         CGraphIterator theChildren;
         GetAssetChildrenInActiveSlide(inInstance, theChildren);
-        for (; !theChildren.IsDone(); ++theChildren)
-            TruncateTimeRange(theChildren.GetCurrent(), inSetStart, inTime);
+        for (; !theChildren.IsDone(); ++theChildren) {
+            TInstanceHandle theChild = theChildren.GetCurrent();
+            // Do not adjust locked children
+            SValue locked;
+            m_PropertySystem.GetInstancePropertyValue(
+                        theChild, m_Bridge.GetSceneAsset().m_Locked, locked);
+            if (!qt3dsdm::get<bool>(locked))
+                TruncateTimeRange(theChild, inSetStart, inTime);
+        }
     }
 
     void SetTimebarColor(TInstanceHandle inInstance, ::CColor inColor) override

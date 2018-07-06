@@ -145,6 +145,7 @@ public:
     void updateExpandStatus(ExpandState state, bool animate = true, bool forceChildUpdate = false);
     void updateArrowVisibility();
     void updateFilter();
+    void updateLock(bool state);
 
 protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;

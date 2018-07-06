@@ -59,6 +59,7 @@ public:
     void deselectKeyframe(Keyframe *keyframe);
     void deselectConnectedKeyframes(Keyframe *keyframe);
     void deselectAllKeyframes();
+    void deselectRowKeyframes(RowTree *row);
     void deleteKeyframes(RowTimeline *row, bool repaint = true);
     void copySelectedKeyframes();
     void pasteKeyframes();
