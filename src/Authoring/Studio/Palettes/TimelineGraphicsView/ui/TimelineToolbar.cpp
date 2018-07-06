@@ -69,7 +69,7 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     altKey = "⌥";
 #endif
     QString newLayerString = tr("Add New Layer (%1L)").arg(ctrlKey);
-    QAction *actionNewLayer = new QAction(iconLayer, newLayerString, this);
+    m_actionNewLayer = new QAction(iconLayer, newLayerString, this);
     QAction *actionFirst = new QAction(iconFirst, tr("Go to Timeline Start"), this);
     QAction *actionLast = new QAction(iconLast, tr("Go to Timeline End"), this);
     m_actionDataInput = new QAction(m_iconDiInactive, "");
@@ -103,7 +103,7 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     updatePlayButtonState(false);
 
     // connections
-    connect(actionNewLayer, &QAction::triggered, this, &TimelineToolbar::newLayerTriggered);
+    connect(m_actionNewLayer, &QAction::triggered, this, &TimelineToolbar::newLayerTriggered);
     connect(m_actionDeleteRow, &QAction::triggered, this, &TimelineToolbar::deleteLayerTriggered);
     connect(m_timeLabel, &TimelineToolbarLabel::clicked, this, &TimelineToolbar::gotoTimeTriggered);
     connect(actionFirst, &QAction::triggered, this, &TimelineToolbar::firstFrameTriggered);
@@ -116,7 +116,7 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     connect(actionGoToTime, &QAction::triggered, this, &TimelineToolbar::gotoTimeTriggered);
 
     // add actions
-    addAction(actionNewLayer);
+    addAction(m_actionNewLayer);
     addAction(m_actionDeleteRow);
     addAction(m_actionDataInput);
     addWidget(m_diLabel);
@@ -141,8 +141,8 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     m_actionZoomIn->setShortcutContext(Qt::ApplicationShortcut);
     actionGoToTime->setShortcut(QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::Key_T));
     actionGoToTime->setShortcutContext(Qt::ApplicationShortcut);
-    actionNewLayer->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_L));
-    actionNewLayer->setShortcutContext(Qt::ApplicationShortcut);
+    m_actionNewLayer->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_L));
+    m_actionNewLayer->setShortcutContext(Qt::ApplicationShortcut);
 
     m_connectSelectionChange = g_StudioApp.GetCore()->GetDispatch()->ConnectSelectionChange(
                 std::bind(&TimelineToolbar::onSelectionChange, this, std::placeholders::_1));
@@ -197,6 +197,11 @@ void TimelineToolbar::setTime(long totalMillis)
 QString TimelineToolbar::getCurrentController() const
 {
     return m_currController;
+}
+
+void TimelineToolbar::setNewLayerEnabled(bool enable)
+{
+    m_actionNewLayer->setEnabled(enable);
 }
 
 void TimelineToolbar::updatePlayButtonState(bool started)

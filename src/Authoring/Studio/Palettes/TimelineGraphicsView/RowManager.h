@@ -69,6 +69,7 @@ public:
                        int index = -1);
     RowTree *getRowAtPos(const QPointF &scenePos) const;
     RowTree *selectedRow() const;
+    bool isComponentRoot() const;
     bool isRowSelected(RowTree *row) const;
     QVector<RowTree *> selectedRows() const;
     void ensureRowExpandedAndVisible(RowTree *row, bool forceChildUpdate) const;

@@ -725,6 +725,7 @@ void TimelineWidget::onAsyncUpdate()
         m_graphicsScene->rowManager()->updateFiltering();
         m_graphicsScene->updateController();
         onSelectionChange(doc->GetSelectedValue());
+        m_toolbar->setNewLayerEnabled(!m_graphicsScene->rowManager()->isComponentRoot());
     } else {
         if (!m_moveMap.isEmpty()) {
             // Flip the hash around so that we collect moves by parent.

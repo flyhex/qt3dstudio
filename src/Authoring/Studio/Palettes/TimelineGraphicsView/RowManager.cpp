@@ -366,6 +366,15 @@ RowTree *RowManager::selectedRow() const
     return nullptr;
 }
 
+bool RowManager::isComponentRoot() const
+{
+    if (m_layoutTree->count() > 1) {
+        RowTree *root = static_cast<RowTree *>(m_layoutTree->itemAt(1)->graphicsItem());
+        return root->rowType() == OBJTYPE_COMPONENT;
+    }
+    return false;
+}
+
 bool RowManager::isRowSelected(RowTree *row) const
 {
     return m_selectedRows.contains(row);

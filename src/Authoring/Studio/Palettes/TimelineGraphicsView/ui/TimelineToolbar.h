@@ -63,6 +63,7 @@ public:
     virtual ~TimelineToolbar();
     void setTime(long totalMillis);
     QString getCurrentController() const;
+    void setNewLayerEnabled(bool enable);
 
     // IDataModelListener
     void OnBeginDataModelNotifications() override;
@@ -96,6 +97,7 @@ private:
     QAction *m_actionZoomIn;
     QAction *m_actionZoomOut;
     QAction *m_actionDataInput;
+    QAction *m_actionNewLayer;
     qt3dsdm::TSignalConnectionPtr m_connectSelectionChange;
     QSlider *m_scaleSlider;
     QIcon m_iconStop;
