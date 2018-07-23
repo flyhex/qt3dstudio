@@ -140,7 +140,7 @@ struct SRendererImpl : public IStudioRenderer,
         m_Dispatch.AddSceneDragListener(this);
         m_Dispatch.AddToolbarChangeListener(this);
     }
-    ~SRendererImpl()
+    ~SRendererImpl() override
     {
         Close();
         m_Dispatch.RemoveDataModelListener(this);
@@ -268,38 +268,38 @@ struct SRendererImpl : public IStudioRenderer,
     {
         if (m_Context.mPtr)
             return m_Context->GetTextRenderer();
-        return NULL;
+        return nullptr;
     }
     // The buffer manager may not be available
     IBufferManager *GetBufferManager() override
     {
         if (m_Context.mPtr)
             return &m_Context->GetBufferManager();
-        return NULL;
+        return nullptr;
     }
 
     IPathManager *GetPathManager() override
     {
         if (m_Context.mPtr)
             return &m_Context->GetPathManager();
-        return NULL;
+        return nullptr;
     }
 
     qt3ds::foundation::IStringTable *GetRenderStringTable() override
     {
         if (m_Context.mPtr)
             return &m_Context->GetStringTable();
-        return NULL;
+        return nullptr;
     }
 
-    bool IsInitialized() override { return m_Context.mPtr != NULL; }
+    bool IsInitialized() override { return m_Context.mPtr != nullptr; }
 
     void Initialize(QWidget *inWindow) override
     {
         if (m_Closed)
             return;
         QT3DS_ASSERT(!m_RenderContext);
-        QT3DS_ASSERT(m_Context.mPtr == NULL);
+        QT3DS_ASSERT(m_Context.mPtr == nullptr);
         try {
             m_RenderContext = std::make_shared<CWGLRenderContext>(inWindow);
 
@@ -444,7 +444,7 @@ struct SRendererImpl : public IStudioRenderer,
     void SetEditCamera(QT3DSI32 inIndex) override
     {
         QT3DSI32 oldIndex = m_EditCameraIndex;
-        m_EditCameraIndex = NVMin(inIndex, (QT3DSI32)g_NumEditCameras);
+        m_EditCameraIndex = qMin(inIndex, (QT3DSI32)g_NumEditCameras);
         // save the old edit camera information
         if (oldIndex != m_EditCameraIndex && m_Translation && m_Translation->m_EditCameraEnabled) {
             while (m_EditCameraInformation.size() <= (QT3DSU32)oldIndex)
@@ -703,7 +703,7 @@ struct SRendererImpl : public IStudioRenderer,
     //==========================================================================
     void OnSceneMouseDown(SceneDragSenderType::Enum inSenderType, QPoint inPoint, int) override
     {
-        if (m_Translation == NULL)
+        if (m_Translation == nullptr)
             return;
 
         inPoint.setX(inPoint.x() * m_pixelRatio);
@@ -776,7 +776,7 @@ struct SRendererImpl : public IStudioRenderer,
     void OnSceneMouseDrag(SceneDragSenderType::Enum, QPoint inPoint, int inToolMode,
                                   int inFlags) override
     {
-        if (m_Translation == NULL)
+        if (m_Translation == nullptr)
             return;
 
         inPoint.setX(inPoint.x() * m_pixelRatio);
@@ -908,7 +908,7 @@ struct SRendererImpl : public IStudioRenderer,
                 case STUDIO_TOOLMODE_CAMERA_ZOOM: {
                     QT3DSF32 theMultiplier = 1.0f + theSubsetYDistance / 40.0f;
                     m_Translation->m_EditCameraInfo.m_ViewRadius =
-                        NVMax(.0001f, m_Translation->m_EditCameraInfo.m_ViewRadius * theMultiplier);
+                        qMax(.0001f, m_Translation->m_EditCameraInfo.m_ViewRadius * theMultiplier);
                     RequestRender();
                 } break;
                 case STUDIO_TOOLMODE_CAMERA_ROTATE: {
@@ -1011,7 +1011,7 @@ struct SRendererImpl : public IStudioRenderer,
         if (inToolMode == STUDIO_TOOLMODE_CAMERA_ZOOM && m_Translation) {
             QT3DSF32 theMultiplier = 1.0f - inDelta / static_cast<QT3DSF32>(120 * g_WheelFactor);
             m_Translation->m_EditCameraInfo.m_ViewRadius =
-                NVMax(.0001f, m_Translation->m_EditCameraInfo.m_ViewRadius * theMultiplier);
+                qMax(.0001f, m_Translation->m_EditCameraInfo.m_ViewRadius * theMultiplier);
             RequestRender();
         }
     }

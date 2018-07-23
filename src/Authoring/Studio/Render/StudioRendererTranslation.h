@@ -207,7 +207,7 @@ namespace studio {
             // The view radius dictates the zoom.
             QT3DSF32 theZoom = 1.0f;
             if (inCamera.m_Flags.IsOrthographic()) {
-                QT3DSF32 theViewport = NVMin(inViewport.x, inViewport.y);
+                QT3DSF32 theViewport = qMin(inViewport.x, inViewport.y);
                 theZoom = (m_ViewRadius * 2.0f) / theViewport;
             } else {
                 // We know the hypotenuse is 600.
@@ -407,7 +407,7 @@ namespace studio {
 
         void MarkComponentSeconds(qt3dsdm::Qt3DSDMSlideHandle)
         {
-            m_ComponentSecondsDepth = NVMax(0, m_ComponentSecondsDepth - 1);
+            m_ComponentSecondsDepth = qMax(0, m_ComponentSecondsDepth - 1);
             if (m_ComponentSecondsDepth == 0)
                 RequestRender();
         }

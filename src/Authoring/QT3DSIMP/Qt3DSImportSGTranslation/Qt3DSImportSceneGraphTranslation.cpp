@@ -142,12 +142,12 @@ static inline qt3dsdm::SValue ToColor(const float p[], float inMult)
 template <typename TDataType>
 static inline TDataType GetMin(TDataType a, TDataType b)
 {
-    return NVMin(a, b);
+    return qMin(a, b);
 }
 template <typename TDataType>
 static inline TDataType GetMax(TDataType a, TDataType b)
 {
-    return NVMax(a, b);
+    return qMax(a, b);
 }
 static void RGBtoHSV(float r, float g, float b, float *h, float *s, float *v)
 {

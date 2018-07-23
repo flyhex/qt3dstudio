@@ -87,8 +87,6 @@ namespace studio {
     using qt3ds::QT3DSI32;
     using qt3ds::QT3DSVec2;
     using qt3ds::QT3DSVec4;
-    using qt3ds::NVMax;
-    using qt3ds::NVMin;
     using qt3ds::QT3DSU32;
     using qt3ds::foundation::Empty;
     using qt3ds::foundation::InvasiveSet;

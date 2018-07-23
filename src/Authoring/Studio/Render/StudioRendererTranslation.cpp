@@ -111,7 +111,7 @@ struct STranslatorDataModelParser
     {
         auto theValue = GetPropertyValue<qt3ds::QT3DSI32>(inProperty);
         if (theValue.hasValue()) {
-            outValue = NVMax(theValue.getValue(), 0);
+            outValue = qMax(theValue.getValue(), 0);
             return true;
         }
         return false;

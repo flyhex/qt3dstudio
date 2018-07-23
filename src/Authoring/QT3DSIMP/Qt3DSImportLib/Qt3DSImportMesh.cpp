@@ -697,7 +697,7 @@ QT3DSU32 Mesh::SaveMulti(NVAllocatorCallback &alloc, ISeekableIOStream &inStream
             if (inId != 0) {
                 QT3DS_ASSERT(inId != theHeader->m_Entries.index(headerBaseAddr, idx).m_MeshId);
             }
-            nextId = NVMax(nextId, theHeader->m_Entries.index(headerBaseAddr, idx).m_MeshId + 1);
+            nextId = qMax(nextId, theHeader->m_Entries.index(headerBaseAddr, idx).m_MeshId + 1);
         }
         newMeshStartPos =
             sizeof(MeshMultiHeader) + theHeader->m_Entries.size() * sizeof(MeshMultiEntry);
@@ -744,7 +744,7 @@ SMultiLoadResult Mesh::LoadMulti(NVAllocatorCallback &alloc, ISeekableIOStream &
         if (theEntry.m_MeshId == inId || (inId == 0 && theEntry.m_MeshId > theId)) {
             if (theEntry.m_MeshId == inId)
                 foundMesh = true;
-            theId = NVMax(theId, (QT3DSU32)theEntry.m_MeshId);
+            theId = qMax(theId, (QT3DSU32)theEntry.m_MeshId);
             fileOffset = theEntry.m_MeshOffset;
         }
     }
@@ -815,7 +815,7 @@ QT3DSU32 GetHighestId(NVAllocatorCallback &inAlloc, MeshMultiHeader *inHeader)
     QT3DSU8 *baseHeaderAddr = reinterpret_cast<QT3DSU8 *>(inHeader);
     QT3DSU32 highestId = 0;
     for (QT3DSU32 idx = 0, end = inHeader->m_Entries.size(); idx < end; ++idx)
-        highestId = NVMax(highestId, inHeader->m_Entries.index(baseHeaderAddr, idx).m_MeshId);
+        highestId = qMax(highestId, inHeader->m_Entries.index(baseHeaderAddr, idx).m_MeshId);
     inAlloc.deallocate(inHeader);
     return highestId;
 }

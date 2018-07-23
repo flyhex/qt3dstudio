@@ -1206,7 +1206,7 @@ public:
             SRenderMesh *theBuffer = m_Doc.GetBufferCache().GetOrCreateModelBuffer(
                 Q3DStudio::CFilePath(newValue->GetData()));
             if (theBuffer)
-                numSubsets = NVMax(numSubsets, (QT3DSU32)theBuffer->m_Subsets.size());
+                numSubsets = qMax(numSubsets, (QT3DSU32)theBuffer->m_Subsets.size());
         }
 
         TInstanceHandleList theMaterials;

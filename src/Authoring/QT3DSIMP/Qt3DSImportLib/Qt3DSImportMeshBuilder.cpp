@@ -149,7 +149,7 @@ public:
                 continue;
 
             QT3DSU32 alignment = NVRenderComponentTypes::getSizeofType(entry.m_ComponentType);
-            bufferAlignment = NVMax(bufferAlignment, alignment);
+            bufferAlignment = qMax(bufferAlignment, alignment);
             QT3DSU32 byteSize = alignment * entry.m_NumComponents;
 
             if (entry.m_Data.size() % alignment != 0) {
@@ -163,7 +163,7 @@ public:
             } else if (numItems != localNumItems) {
                 QT3DS_ASSERT(false);
                 retval = false;
-                numItems = NVMin(numItems, localNumItems);
+                numItems = qMin(numItems, localNumItems);
             }
             // Lots of platforms can't handle non-aligned data.
             // so ensure we are aligned.
@@ -213,7 +213,7 @@ public:
             QT3DSIMP_FOREACH(idx, entries.size())
             {
                 const NVRenderVertexBufferEntry &entry(entries[idx]);
-                stride = NVMax(stride, entry.m_FirstItemOffset
+                stride = qMax(stride, entry.m_FirstItemOffset
                                + (entry.m_NumComponents * NVRenderComponentTypes::getSizeofType(
                                       entry.m_ComponentType)));
             }

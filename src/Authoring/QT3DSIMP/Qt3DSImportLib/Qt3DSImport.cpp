@@ -407,7 +407,7 @@ public:
     QT3DSU32 GetInstances(NVDataRef<InstanceDesc> outDescs) const override
     {
         QT3DS_ASSERT(outDescs.size() >= GetNumInstances());
-        QT3DSU32 numItems = NVMin(outDescs.size(), GetNumInstances());
+        QT3DSU32 numItems = qMin(outDescs.size(), GetNumInstances());
         QT3DSU32 idx = 0;
 
         ImportHashSet<TIMPHandle> &validInstances(
@@ -441,7 +441,7 @@ public:
             QT3DS_ASSERT(false);
             return 0;
         }
-        QT3DSU32 numItems = NVMin((QT3DSU32)outBuffer.size(), (QT3DSU32)inst->m_PropertyValues.size());
+        QT3DSU32 numItems = qMin((QT3DSU32)outBuffer.size(), (QT3DSU32)inst->m_PropertyValues.size());
         QT3DSU32 idx = 0;
         for (ImportHashMap<ComposerPropertyNames::Enum, SInternValue>::iterator
                  iter = inst->m_PropertyValues.begin(),
@@ -724,7 +724,7 @@ public:
     QT3DSU32 GetNumImages() const override { return (QT3DSU32)m_Images.size(); }
     QT3DSU32 GetImages(NVDataRef<Pair<TCharPtr, TCharPtr>> imgPaths) const override
     {
-        QT3DSU32 numItems = NVMin((QT3DSU32)imgPaths.size(), (QT3DSU32)m_Images.size());
+        QT3DSU32 numItems = qMin((QT3DSU32)imgPaths.size(), (QT3DSU32)m_Images.size());
         QT3DS_ASSERT(numItems == m_Images.size());
         QT3DSU32 idx = 0;
         for (ImportHashMap<TCharPtr, TCharPtr>::const_iterator iter = m_Images.begin(),
@@ -832,7 +832,7 @@ public:
     QT3DSU32 GetNumMeshes() const override { return (QT3DSU32)m_Meshes.size(); }
     QT3DSU32 GetMeshes(NVDataRef<Pair<TCharPtr, TCharPtr>> bufferPaths) const override
     {
-        QT3DSU32 numItems = NVMin((QT3DSU32)m_Meshes.size(), bufferPaths.size());
+        QT3DSU32 numItems = qMin((QT3DSU32)m_Meshes.size(), bufferPaths.size());
         QT3DS_ASSERT(numItems == m_Meshes.size());
         QT3DSU32 idx = 0;
         for (ImportHashMap<TCharPtr, MeshEntry>::const_iterator iter = m_Meshes.begin(),
@@ -932,7 +932,7 @@ public:
     QT3DSU32 GetNumPathBuffers() const override { return (QT3DSU32)m_PathBuffers.size(); }
     QT3DSU32 GetPathBuffers(NVDataRef<Pair<TCharPtr, TCharPtr>> pathBufferPaths) const override
     {
-        QT3DSU32 numItems = NVMin((QT3DSU32)pathBufferPaths.size(), (QT3DSU32)m_PathBuffers.size());
+        QT3DSU32 numItems = qMin((QT3DSU32)pathBufferPaths.size(), (QT3DSU32)m_PathBuffers.size());
         QT3DS_ASSERT(numItems == m_PathBuffers.size());
         QT3DSU32 idx = 0;
         for (ImportHashMap<TCharPtr, TCharPtr>::const_iterator iter = m_PathBuffers.begin(),
@@ -1025,10 +1025,10 @@ public:
         return Empty();
     }
 
-    QT3DSU32 GetNumAnimations() const override { return (QT3DSU32)m_Animations.size(); }
+    QT3DSU32 GetNumAnimations() const override { return QT3DSU32(m_Animations.size()); }
     QT3DSU32 GetAnimations(NVDataRef<Animation> outBuffers) const override
     {
-        QT3DSU32 numItems = NVMin((QT3DSU32)m_Animations.size(), (QT3DSU32)outBuffers.size());
+        QT3DSU32 numItems = qMin(QT3DSU32(m_Animations.size()), outBuffers.size());
         QT3DS_ASSERT(numItems == m_Animations.size());
         QT3DSU32 idx = 0;
         for (ImportHashMap<AnimationId, Animation *>::const_iterator iter = m_Animations.begin(),
@@ -1126,7 +1126,7 @@ public:
              success = inReader.MoveToNextSibling(L"Project")) {
             QT3DSU32 tempId;
             if (inReader.Att("Revision", tempId))
-                retval = NVMax(retval, tempId);
+                retval = qMax(retval, tempId);
         }
         return retval;
     }

@@ -229,7 +229,7 @@ namespace widgets {
         {
             // 25 small triangles per 180 degrees
             QT3DSF32 arcLen = (QT3DSF32)(M_PI / 25.0f);
-            QT3DSU32 increments = NVMax((QT3DSU32)1, (QT3DSU32)((fabs(inArcLen) / arcLen) + .5f));
+            QT3DSU32 increments = qMax((QT3DSU32)1, (QT3DSU32)((fabs(inArcLen) / arcLen) + .5f));
             QT3DSF32 angleMultiplier = inAngle / (QT3DSF32)increments;
             for (QT3DSU32 idx = 0; idx < increments; ++idx) {
                 QT3DSF32 localAngle = angleMultiplier * idx;

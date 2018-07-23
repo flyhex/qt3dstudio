@@ -502,7 +502,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
         if (theParentList == m_IdToSlideInstances.end()
             || theChildList == m_IdToSlideInstances.end())
             return;
-        size_t numItems = NVMin(theParentList->second.size(), theChildList->second.size());
+        size_t numItems = qMin(theParentList->second.size(), theChildList->second.size());
         for (size_t idx = 0; idx < numItems; ++idx) {
             Qt3DSDMSlideHandle theParentSlide = theParentList->second[idx].first;
             Qt3DSDMInstanceHandle theParent(theParentList->second[idx].second);

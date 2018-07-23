@@ -1013,7 +1013,7 @@ struct DOMParser
             QT3DSU32 amountToRead(data.size());
             QT3DSU32 amountRead = 0;
             if (m_BytesRead < THeaderLen) {
-                QT3DSU32 headerLeft = NVMin(THeaderLen - m_BytesRead, amountToRead);
+                QT3DSU32 headerLeft = qMin(THeaderLen - m_BytesRead, amountToRead);
                 memCopy(writePtr, m_Header + m_BytesRead, headerLeft);
                 writePtr += headerLeft;
                 amountToRead -= headerLeft;
