@@ -192,6 +192,8 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     QColor bgColor;
     if (m_dndState == DnDState::Source)
         bgColor = CStudioPreferences::timelineRowColorDndSource();
+    else if (m_dndState == DnDState::SP_TARGET)
+        bgColor = CStudioPreferences::timelineRowColorDndTargetSP();
     else if (m_isProperty)
         bgColor = CStudioPreferences::timelineRowColorNormalProp();
     else if (m_dndHover)
@@ -225,8 +227,12 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
         painter->drawPixmap(m_rectLocked , m_locked  ? pixLock : pixEmpty);
     }
 
-    // Candidate parent of a dragged row
-    if (m_dndState == DnDState::Parent) {
+    static const QPixmap pixInsertLeft = QPixmap(":/images/Insert-Left.png");
+    static const QPixmap pixInsertRight = QPixmap(":/images/Insert-Right.png");
+    if (m_dndState == DnDState::SP_TARGET) { // Candidate target of a subpresentation drop
+        painter->drawPixmap(19, 2, pixInsertLeft);
+        painter->drawPixmap(treeWidth() - TimelineConstants::TREE_ICONS_W - 8, 2, pixInsertRight);
+    } else if (m_dndState == DnDState::Parent) { // Candidate parent of a dragged row
         painter->setPen(QPen(CStudioPreferences::timelineRowMoverColor(), 1));
         painter->drawRect(QRect(1, 1, treeWidth() - 2, size().height() - 3));
     }

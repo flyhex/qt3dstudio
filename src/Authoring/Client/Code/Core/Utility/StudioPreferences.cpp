@@ -67,6 +67,7 @@ static QColor s_timelineRowColorDurationEdge; // duration left and right edge li
 static QColor s_timelineRowColorDurationSelected;
 static QColor s_timelineRowColorDndSource;
 static QColor s_timelineRowColorDndTarget;
+static QColor s_timelineRowColorDndTargetSP;
 static QColor s_timelineRowMoverColor;
 static QColor s_timelineRulerColor;
 static QColor s_timelineRulerColorDisabled;
@@ -143,6 +144,7 @@ void CStudioPreferences::LoadPreferences()
     s_timelineRowColorDurationSelected = QColor("#80000000");
     s_timelineRowColorDndSource = QColor("#464600");
     s_timelineRowColorDndTarget = QColor("#292929");
+    s_timelineRowColorDndTargetSP = QColor("#222000");
     s_timelineRowMoverColor = QColor("#ffff00");
     s_timelineRulerColor = QColor("#888888");
     s_timelineRulerColorDisabled = QColor("#444444");
@@ -928,6 +930,12 @@ QColor CStudioPreferences::timelineRowColorDurationSelected()
 QColor CStudioPreferences::timelineRowColorDndSource()
 {
     return s_timelineRowColorDndSource;
+}
+
+// get subpresentation target color
+QColor CStudioPreferences::timelineRowColorDndTargetSP()
+{
+    return s_timelineRowColorDndTargetSP;
 }
 
 QColor CStudioPreferences::timelineRowColorDndTarget()

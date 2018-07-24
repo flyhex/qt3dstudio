@@ -156,6 +156,9 @@ public:
                                                      const CPt &inPosition,
                                                      EPrimitiveType inPrimitiveType,
                                                      long inStartTime) = 0;
+    virtual void setInstanceImagePropertyValueAsRenderable(TInstanceHandle instance,
+                                                           TPropertyHandle prop,
+                                                           const CString &pId) = 0;
 
     virtual void DeleteInstances(qt3dsdm::TInstanceHandleList inInstances) = 0;
     // Delete this data model instance.  Will recursively delete any attached children in the scene

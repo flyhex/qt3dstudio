@@ -174,6 +174,7 @@ public:
     static QColor timelineRowColorDurationSelected();
     static QColor timelineRowColorDndSource();
     static QColor timelineRowColorDndTarget();
+    static QColor timelineRowColorDndTargetSP();
     static QColor timelineRowMoverColor();
     static QColor timelineRulerColor();
     static QColor timelineRulerColorDisabled();

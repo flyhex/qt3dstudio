@@ -1573,6 +1573,28 @@ public:
         return TInstanceHandle();
     }
 
+    /**
+     * Sets a subpresentation for an instance's property that accepts a texture (image) as its value
+     * If there is no texture exists, a new one is created. Next, the texture subpresentation
+     *  property is set to the pId param
+     * @param instance  the instance
+     * @param prop  the image property
+     * @param pId   the presentation Id to set for the texture
+     */
+    void setInstanceImagePropertyValueAsRenderable(TInstanceHandle instance, TPropertyHandle prop,
+                                                   const CString &pId) override
+    {
+        Qt3DSDMPropertyHandle img = GetImageInstanceForProperty(instance, prop);
+
+        if (!img)
+            img = CreateImageInstanceForMaterialOrLayer(instance, prop);
+
+        Qt3DSDMPropertyHandle propHandleSP = m_PropertySystem
+                .GetAggregateInstancePropertyByName(img, L"subpresentation");
+
+        SetInstancePropertyValueAsRenderable(img, propHandleSP, pId);
+    }
+
     void SetMaterialType(TInstanceHandle instance,
                                  const Q3DStudio::CString &inRelativePathToMaterialFile) override
     {

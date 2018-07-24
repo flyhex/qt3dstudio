@@ -208,7 +208,8 @@ HEADERS += \
     ../Common/Code/Graph/GraphPosition.h \
     Palettes/Project/EditPresentationIdDlg.h \
     Application/ProjectFile.h \
-    Application/PresentationFile.h
+    Application/PresentationFile.h \
+    Palettes/Project/ChooseImagePropertyDlg.h
 
 FORMS += \
     MainFrm.ui \
@@ -226,7 +227,8 @@ FORMS += \
     UI/ResetKeyframeValuesDlg.ui \
     UI/GLVersionDlg.ui \
     UI/StartupDlg.ui \
-    Palettes/Project/EditPresentationIdDlg.ui
+    Palettes/Project/EditPresentationIdDlg.ui \
+    Palettes/Project/ChooseImagePropertyDlg.ui
 
 SOURCES += \
     Application/AboutDlg.cpp \
@@ -376,7 +378,8 @@ SOURCES += \
     Workspace/Views.cpp \
     Palettes/Project/EditPresentationIdDlg.cpp \
     Application/ProjectFile.cpp \
-    Application/PresentationFile.cpp
+    Application/PresentationFile.cpp \
+    Palettes/Project/ChooseImagePropertyDlg.cpp
 
 RESOURCES += \
     MainFrm.qrc \

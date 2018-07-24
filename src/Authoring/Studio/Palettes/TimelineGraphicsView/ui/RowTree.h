@@ -61,6 +61,7 @@ public:
         None,
         Source, // the row being dragged while DnD-ing
         Parent, // parent of the insertion point
+        SP_TARGET, // drop target for a subpresentation (layer, material or image rows)
         Any     // accept any state (default value in setDnDState() method)
     };
 

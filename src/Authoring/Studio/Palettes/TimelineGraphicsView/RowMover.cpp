@@ -141,6 +141,9 @@ void RowMover::end(bool force)
             row->setDnDState(RowTree::DnDState::None, RowTree::DnDState::Any, true);
         m_sourceRows.clear();
 
+        if (m_insertionTarget)
+            m_insertionTarget->setDnDState(RowTree::DnDState::None);
+
         setVisible(false);
         resetInsertionParent();
         updateTargetRowLater = {};
@@ -190,6 +193,27 @@ bool RowMover::isSourceRowsDescendant(RowTree *row) const
 // i.e. when dragging from project or basic objects palettes
 void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowType)
 {
+    // DnD a presentation from the project panel (to set it as a subpresentation)
+    if (rowType == OBJTYPE_PRESENTATION) {
+        if (m_insertionTarget)
+            m_insertionTarget->setDnDState(RowTree::DnDState::None, RowTree::DnDState::SP_TARGET);
+
+        RowTree *rowAtMouse = m_scene->rowManager()->getRowAtPos(scenePos);
+        if (rowAtMouse) {
+            // m_insertionTarget will go through CFileDropSource::ValidateTarget() which will
+            // filter out invalid drop rows
+            m_insertionTarget = rowAtMouse;
+            m_insertType = Q3DStudio::DocumentEditorInsertType::LastChild;
+
+            if (rowAtMouse->rowType() == OBJTYPE_LAYER || rowAtMouse->rowType() == OBJTYPE_MATERIAL
+                    || rowAtMouse->rowType() == OBJTYPE_IMAGE) {
+                m_insertionTarget->setDnDState(RowTree::DnDState::SP_TARGET);
+            }
+        }
+
+        return;
+    }
+
     EStudioObjectType theRowType = rowType;
     if (theRowType == OBJTYPE_UNKNOWN && m_sourceRows.size() == 1)
         theRowType = m_sourceRows[0]->rowType();

@@ -41,6 +41,7 @@
 #include "IDocumentEditor.h"
 #include "Qt3DSFileTools.h"
 #include "ImportUtils.h"
+#include "ChooseImagePropertyDlg.h"
 
 bool CFileDropSource::s_FileHasValidTarget = false;
 
@@ -53,6 +54,12 @@ bool CFileDropSource::ValidateTarget(CDropTarget *inTarget)
     using namespace Q3DStudio;
 
     EStudioObjectType targetType = (EStudioObjectType)inTarget->GetObjectType();
+
+    if (m_ObjectType == OBJTYPE_PRESENTATION) {
+        SetHasValidTarget(targetType & (OBJTYPE_LAYER | OBJTYPE_MATERIAL | OBJTYPE_IMAGE));
+        return m_HasValidTarget;
+    }
+
     bool theValidTarget = false;
 
     // the only thing we want to do from here is check the type.
@@ -180,13 +187,46 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
         case Q3DStudio::DocumentEditorFileType::Path:
             theCommandName = QObject::tr("File Drop Path File");
             break;
+        case Q3DStudio::DocumentEditorFileType::Presentation:
+            theCommandName = QObject::tr("File Drop Subpresentation File");
+            break;
         }
 
-        Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
-            ->ImportFile(theDocType, theFilePath, theTarget, inSlide,
-                         CDialogs::GetImportFileExtension(),
-                         Q3DStudio::ImportUtils::GetInsertTypeForDropType(inDestType), thePoint,
-                         theStartTime);
+        if (theDocType == Q3DStudio::DocumentEditorFileType::Presentation) { // set subpresentation
+            QString pathFromRoot = QDir(theDoc.GetCore()->getProjectFile()
+                                        .getProjectPath().filePath())
+                                        .relativeFilePath(theFilePath.toQString());
+            Q3DStudio::CString presentationId = Q3DStudio::CString::fromQString(theDoc.GetCore()
+                                                ->getProjectFile().getPresentationId(pathFromRoot));
+            EStudioObjectType rowType = theDoc.GetStudioSystem()->GetClientDataModelBridge()
+                   ->GetObjectType(inTarget);
+
+            if (rowType == OBJTYPE_LAYER) {
+                qt3dsdm::Qt3DSDMPropertyHandle propHandle = theDoc.GetPropertySystem()
+                        ->GetAggregateInstancePropertyByName(inTarget, L"sourcepath");
+                Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
+                       ->SetInstancePropertyValueAsRenderable(inTarget, propHandle, presentationId);
+            } else if (rowType == OBJTYPE_MATERIAL) {
+                ChooseImagePropertyDlg dlg(inTarget);
+                if (dlg.exec() == QDialog::Accepted) {
+                    qt3dsdm::Qt3DSDMPropertyHandle propHandle = dlg.getSelectedPropertyHandle();
+                    Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
+                        ->setInstanceImagePropertyValueAsRenderable(inTarget, propHandle,
+                                                                    presentationId);
+                }
+            } else if (rowType == OBJTYPE_IMAGE) {
+                qt3dsdm::Qt3DSDMPropertyHandle propHandle = theDoc.GetPropertySystem()
+                        ->GetAggregateInstancePropertyByName(inTarget, L"subpresentation");
+                Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
+                       ->SetInstancePropertyValueAsRenderable(inTarget, propHandle, presentationId);
+            }
+        } else {
+            Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
+                ->ImportFile(theDocType, theFilePath, theTarget, inSlide,
+                             CDialogs::GetImportFileExtension(),
+                             Q3DStudio::ImportUtils::GetInsertTypeForDropType(inDestType), thePoint,
+                             theStartTime);
+        }
     }
     return nullptr;
 }

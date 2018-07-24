@@ -627,7 +627,8 @@ void TimelineGraphicsScene::updateAutoScrolling(double scenePosY)
     }
 }
 
-void TimelineGraphicsScene::updateSnapSteps() {
+void TimelineGraphicsScene::updateSnapSteps()
+{
     m_snapSteps.clear();
     // i = 1 is always the scene row
     for (int i = 2; i < m_layoutTimeline->count(); i++) {
