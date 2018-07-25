@@ -449,6 +449,8 @@ void Q3DSQmlStreamRenderer::render()
         QOpenGLFunctions *func = context->functions();
         GLuint texture = m_frameBuffer->texture();
         func->glDisable(GL_DEPTH_TEST);
+        func->glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA,
+                                  GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
         if (!m_program)
             initializeFboCopy();

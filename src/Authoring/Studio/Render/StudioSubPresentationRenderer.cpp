@@ -125,6 +125,7 @@ public:
         m_surfaceViewer->initialize(m_surface.data(), m_context.data(), m_fbo->handle());
 #endif
         m_running = true;
+        m_semaphore.release();
 
         m_context->doneCurrent();
 
@@ -185,6 +186,7 @@ StudioSubpresentationRenderer::StudioSubpresentationRenderer(
     , m_program(nullptr)
     , m_vao(nullptr)
     , m_vertices(nullptr)
+    , m_callback(nullptr)
     , m_rendererType(inRenderContext.GetStringTable().RegisterStr("StudioPresentationRenderer"))
     , mRefCount(0)
 {
@@ -211,15 +213,14 @@ StudioSubpresentationRenderer::GetDesiredEnvironment(QT3DSVec2 inPresentationSca
 {
     // If we aren't using a clear color, then we are expected to blend with the background
     if (!m_thread->m_initialized) {
-        m_thread->initialize(m_presentation, m_path);
-        m_thread->start();
+        initialize();
     }
     bool hasTransparency = true;
     NVRenderTextureFormats::Enum format =
         hasTransparency ? NVRenderTextureFormats::RGBA8 : NVRenderTextureFormats::RGB8;
     return SOffscreenRendererEnvironment(
-                 (QT3DSU32)(m_thread->m_size.width() * inPresentationScaleFactor.x),
-                 (QT3DSU32)(m_thread->m_size.height() * inPresentationScaleFactor.y),
+                 QT3DSU32(m_thread->m_size.width() * inPresentationScaleFactor.x),
+                 QT3DSU32(m_thread->m_size.height() * inPresentationScaleFactor.y),
                  format, OffscreenRendererDepthValues::Depth24, false,
                  AAModeValues::NoAA);
 }
@@ -235,6 +236,15 @@ SOffscreenRenderFlags StudioSubpresentationRenderer::NeedsRender(
     return SOffscreenRenderFlags(true, true);
 }
 
+void StudioSubpresentationRenderer::initialize()
+{
+    m_thread->initialize(m_presentation, m_path);
+    m_thread->start();
+    m_thread->m_semaphore.acquire();
+    if (m_callback)
+        m_callback->onOffscreenRendererInitialized(m_id);
+}
+
 void StudioSubpresentationRenderer::Render(const SOffscreenRendererEnvironment &inEnvironment,
                     NVRenderContext &inRenderContext, QT3DSVec2 inPresentationScaleFactor,
                     SScene::RenderClearCommand inColorBufferNeedsClear,
@@ -246,8 +256,7 @@ void StudioSubpresentationRenderer::Render(const SOffscreenRendererEnvironment &
     Q_UNUSED(instanceId)
     inRenderContext.PushPropertySet();
     if (!m_thread->m_initialized) {
-        m_thread->initialize(m_presentation, m_path);
-        m_thread->start();
+        initialize();
     }
     QMutexLocker lock(&m_thread->m_mutex);
     if (m_thread->m_initialized && m_thread->m_updated) {
@@ -273,9 +282,9 @@ void StudioSubpresentationRenderer::Render(const SOffscreenRendererEnvironment &
 
             m_program->enableAttributeArray(0);
             m_program->enableAttributeArray(1);
-            func->glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0);
+            func->glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 6 * sizeof(float), nullptr);
             func->glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
-                                        (const void *)(4 * sizeof(GLfloat)));
+                                        reinterpret_cast<const void *>(4 * sizeof(GLfloat)));
             m_vertices->release();
         } else {
             m_vao->bind();
@@ -289,6 +298,9 @@ void StudioSubpresentationRenderer::Render(const SOffscreenRendererEnvironment &
 
         m_program->release();
         m_vao->release();
+
+        if (m_callback)
+            m_callback->onOffscreenRendererFrame(m_id);
     }
     inRenderContext.PopPropertySet(true);
 }

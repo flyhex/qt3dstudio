@@ -87,6 +87,10 @@ namespace render {
             Q_UNUSED(instanceId);
             return false;
         }
+        void addCallback(IOffscreenRendererCallback *cb) override
+        {
+
+        }
         // Used for RTTI purposes so we can safely static-cast an offscreen renderer to a
         // CPluginRenderer
         static const char *GetRendererName() { return "Plugin"; }

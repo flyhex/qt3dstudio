@@ -130,9 +130,20 @@ namespace render {
 
     class IOffscreenRenderer : public NVRefCounted
     {
+    public:
+        class IOffscreenRendererCallback
+        {
+        public:
+            virtual void onOffscreenRendererInitialized(const QString &id) = 0;
+            virtual void onOffscreenRendererFrame(const QString &id) = 0;
+        protected:
+            virtual ~IOffscreenRendererCallback() {}
+        };
+
     protected:
         virtual ~IOffscreenRenderer() {}
     public:
+        virtual void addCallback(IOffscreenRendererCallback *cb) = 0;
         // Arbitrary const char* returned to indicate the type of this renderer
         // Can be overloaded to form the basis of an RTTI type system.
         // Not currently used by the rendering system.

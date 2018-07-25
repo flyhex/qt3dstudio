@@ -81,6 +81,10 @@ public:
         Q_UNUSED(instanceId)
         return false;
     }
+    void addCallback(IOffscreenRendererCallback *cb) override
+    {
+        m_callback = cb;
+    }
     static const char *GetRendererName() { return "qml-render"; }
 private:
 
@@ -90,6 +94,7 @@ private:
     IQ3DSQmlStreamRenderer *m_qmlStreamRenderer;
     CRegisteredString m_offscreenRenderType;
     CRegisteredString m_assetString;
+    IOffscreenRendererCallback *m_callback;
     volatile QT3DSI32 mRefCount;
 };
 

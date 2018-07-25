@@ -88,7 +88,8 @@ struct SRendererImpl : public IStudioRenderer,
                        public IReloadListener,
                        public CPresentationChangeListener,
                        public CSceneDragListener,
-                       public CToolbarChangeListener
+                       public CToolbarChangeListener,
+                       public IOffscreenRenderer::IOffscreenRendererCallback
 {
     typedef eastl::vector<Option<SEditCameraPersistentInformation>> TEditCameraInfoList;
     std::shared_ptr<CWGLRenderContext> m_RenderContext;
@@ -115,6 +116,7 @@ struct SRendererImpl : public IStudioRenderer,
     float m_pixelRatio;
     QHash<QString, StudioSubPresentation> m_subpresentations;
     QScopedPointer<Q3DSQmlStreamProxy> m_proxy;
+    QMap<QString, int> m_initialFrameMap;
 
     SRendererImpl()
         : m_Dispatch(*g_StudioApp.GetCore()->GetDispatch())
@@ -201,6 +203,7 @@ struct SRendererImpl : public IStudioRenderer,
                 offscreenMgr.RegisterOffscreenRenderer(
                             qt3ds::render::SOffscreenRendererKey(rid), *theOffscreenRenderer);
                 m_subpresentations[toRegister[i].m_id].renderer = theOffscreenRenderer;
+                theOffscreenRenderer->addCallback(this);
             } else {
                 qt3ds::render::IOffscreenRenderer *theOffscreenRenderer =
                     QT3DS_NEW(m_Context->GetAllocator(),
@@ -210,8 +213,18 @@ struct SRendererImpl : public IStudioRenderer,
                 offscreenMgr.RegisterOffscreenRenderer(
                             qt3ds::render::SOffscreenRendererKey(rid), *theOffscreenRenderer);
                 m_subpresentations[toRegister[i].m_id].renderer = theOffscreenRenderer;
+                theOffscreenRenderer->addCallback(this);
             }
             m_subpresentations[toRegister[i].m_id].subpresentation = toRegister[i];
+        }
+        // Process qml proxy events so that we have initialized the qml producer,
+        // then get the desired environment to initialize the qml renderer.
+        QCoreApplication::processEvents();
+        for (int i = 0; i < toRegister.size(); ++i) {
+            QByteArray data = toRegister[i].m_id.toLocal8Bit();
+            if (toRegister[i].m_type == QLatin1String("presentation-qml"))
+                m_subpresentations[toRegister[i].m_id].renderer
+                        ->GetDesiredEnvironment(QT3DSVec2(1.0f, 1.0f));
         }
         RequestRender();
     }
@@ -235,7 +248,20 @@ struct SRendererImpl : public IStudioRenderer,
                     = m_Context->GetStringTable().RegisterStr(data.data());
             offscreenMgr.ReleaseOffscreenRenderer(qt3ds::render::SOffscreenRendererKey(rid));
         }
+    }
 
+    void onOffscreenRendererInitialized(const QString &id) override
+    {
+        // Request render after first frame rendered by the offscreen renderer
+        m_initialFrameMap[id] = 1;
+    }
+
+    void onOffscreenRendererFrame(const QString &id) override
+    {
+        if (m_initialFrameMap.contains(id)) {
+            RequestRender();
+            m_initialFrameMap.remove(id);
+        }
     }
 
     ITextRenderer *GetTextRenderer() override

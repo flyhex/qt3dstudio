@@ -296,6 +296,10 @@ struct InstanceImpl : public IRenderPluginInstance
 
     QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(m_Foundation.getAllocator())
 
+    void addCallback(IOffscreenRendererCallback *cb) override
+    {
+
+    }
     void CreateScriptProxy(script_State *state) override
     {
         if (m_Class.CreateInstanceScriptProxy)

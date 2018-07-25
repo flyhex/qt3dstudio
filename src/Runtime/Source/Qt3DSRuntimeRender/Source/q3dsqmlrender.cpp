@@ -39,6 +39,7 @@ Q3DSQmlRender::Q3DSQmlRender(IQt3DSRenderContext &inRenderContext, const char *a
     , m_qmlStreamRenderer(nullptr)
     , m_offscreenRenderType(inRenderContext.GetStringTable().RegisterStr(GetRendererName()))
     , m_assetString(inRenderContext.GetStringTable().RegisterStr(asset))
+    , m_callback(nullptr)
     , mRefCount(0)
 {
 
@@ -112,6 +113,9 @@ void Q3DSQmlRender::Render(const SOffscreenRendererEnvironment &inEnvironment,
         m_qmlStreamRenderer->render();
 
         inRenderContext.PopPropertySet(true);
+
+        if (m_callback)
+            m_callback->onOffscreenRendererFrame(QString(m_assetString.c_str()));
     }
 }
 
@@ -124,6 +128,8 @@ void Q3DSQmlRender::initializeRenderer()
                     QT_PREPEND_NAMESPACE(QOpenGLContext)::currentContext(),
                     QT_PREPEND_NAMESPACE(QOpenGLContext)::currentContext()->surface())) {
             m_qmlStreamRenderer = nullptr;
+        } else if (m_callback) {
+            m_callback->onOffscreenRendererInitialized(QString(m_assetString.c_str()));
         }
     }
 }

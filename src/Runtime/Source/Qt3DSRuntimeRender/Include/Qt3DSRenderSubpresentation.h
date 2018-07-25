@@ -91,6 +91,10 @@ namespace render {
         {
             return false;
         }
+        void addCallback(IOffscreenRendererCallback *cb) override
+        {
+
+        }
         // Used for RTTI purposes so we can safely static-cast an offscreen renderer to a
         // CSubPresentationRenderer
         static const char *GetRendererName() { return "SubPresentation"; }

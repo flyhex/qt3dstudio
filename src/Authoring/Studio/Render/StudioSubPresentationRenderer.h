@@ -98,8 +98,14 @@ public:
         return false;
     }
 
+    void addCallback(IOffscreenRendererCallback *cb) override
+    {
+        m_callback = cb;
+    }
+
 private:
     void initializeFboCopy();
+    void initialize();
 
     qt3ds::render::IQt3DSRenderContext &m_renderContext;
     QString m_id;
@@ -110,7 +116,7 @@ private:
     QOpenGLShaderProgram *m_program;
     QOpenGLVertexArrayObject *m_vao;
     QOpenGLBuffer *m_vertices;
-
+    IOffscreenRendererCallback *m_callback;
     qt3ds::render::CRegisteredString m_rendererType;
     volatile qt3ds::render::QT3DSI32 mRefCount;
 };
