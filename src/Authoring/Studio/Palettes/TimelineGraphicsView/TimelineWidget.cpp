@@ -1152,11 +1152,7 @@ void TimelineWidget::openBarColorDialog()
     connect(theColorDlg, &QColorDialog::currentColorChanged,
             this, &TimelineWidget::onTimeBarColorChanged);
     if (theColorDlg->exec() == QDialog::Accepted) {
-        CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
         QColor selectedColor = theColorDlg->selectedColor();
-        Q3DStudio::ScopedDocumentEditor editor(*theDoc,
-                                               L"Set Timebar Color",
-                                               __FILE__, __LINE__);
         setSelectedTimeBarsColor(selectedColor, false);
     } else {
         setSelectedTimeBarsColor(previousColor, true);

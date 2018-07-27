@@ -247,6 +247,10 @@ void ProjectView::mousePressEvent(QMouseEvent *event)
 
 void ProjectView::startDrag(QQuickItem *item, int row)
 {
+    // prevent DnD the currently open presentation
+    if (isCurrentPresentation(row))
+        return;
+
     const auto index = m_ProjectModel->index(row);
 
     QDrag drag(this);

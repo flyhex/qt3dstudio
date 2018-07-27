@@ -45,10 +45,6 @@
 
 bool CFileDropSource::s_FileHasValidTarget = false;
 
-//===============================================================================
-/**
- *
- */
 bool CFileDropSource::ValidateTarget(CDropTarget *inTarget)
 {
     using namespace Q3DStudio;
@@ -87,10 +83,6 @@ bool CFileDropSource::ValidateTarget(CDropTarget *inTarget)
     }
 }
 
-//===============================================================================
-/**
- *
- */
 CFileDropSource::CFileDropSource(long inFlavor, void *inData, unsigned long inSize)
     : CDropSource(inFlavor, inSize)
     , m_File("")
@@ -101,38 +93,22 @@ CFileDropSource::CFileDropSource(long inFlavor, void *inData, unsigned long inSi
         Q3DStudio::ImportUtils::GetObjectFileTypeForFile(m_File.GetAbsolutePath()).m_ObjectType;
 }
 
-//===============================================================================
-/**
- *
- */
 void CFileDropSource::SetHasValidTarget(bool inValid)
 {
     m_HasValidTarget = inValid;
     CFileDropSource::s_FileHasValidTarget = inValid;
 }
 
-//===============================================================================
-/**
- *
- */
 bool CFileDropSource::GetHasValidTarget()
 {
     return CFileDropSource::s_FileHasValidTarget;
 }
 
-//===============================================================================
-/**
- *
- */
 bool CFileDropSource::CanMove()
 {
     return false;
 }
 
-//===============================================================================
-/**
- *
- */
 bool CFileDropSource::CanCopy()
 {
     return true;
@@ -142,8 +118,6 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
                                             EDROPDESTINATION inDestType,
                                             qt3dsdm::Qt3DSDMSlideHandle inSlide)
 {
-    qt3dsdm::Qt3DSDMInstanceHandle theTarget = inTarget;
-
     CDoc &theDoc(*g_StudioApp.GetCore()->GetDoc());
     Q3DStudio::CFilePath theFilePath(m_File.GetAbsolutePath());
     CPt thePoint;
@@ -222,7 +196,7 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
             }
         } else {
             Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
-                ->ImportFile(theDocType, theFilePath, theTarget, inSlide,
+                ->ImportFile(theDocType, theFilePath, inTarget, inSlide,
                              CDialogs::GetImportFileExtension(),
                              Q3DStudio::ImportUtils::GetInsertTypeForDropType(inDestType), thePoint,
                              theStartTime);
