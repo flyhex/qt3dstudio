@@ -360,6 +360,7 @@ struct SOffscreenRenderManager : public IOffscreenRenderManager
             NVRenderRect(0, 0, theDesiredEnvironment.m_Width, theDesiredEnvironment.m_Height));
         theContext.SetScissorTestEnabled(false);
 
+        theContext.SetBlendingEnabled(false);
         theData.m_Renderer->Render(theDesiredEnvironment, theContext, thePresScaleFactor,
                                    SScene::AlwaysClear, this);
 

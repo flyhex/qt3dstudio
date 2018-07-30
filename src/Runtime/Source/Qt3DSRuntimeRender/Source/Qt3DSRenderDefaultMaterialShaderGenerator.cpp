@@ -1859,7 +1859,8 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
             SetImageShaderVariables(shader, *theImage, imageIdx);
 
         qt3ds::render::NVRenderBlendFunctionArgument blendFunc;
-        qt3ds::render::NVRenderBlendEquationArgument blendEqua;
+        qt3ds::render::NVRenderBlendEquationArgument blendEqua(NVRenderBlendEquation::Add,
+                                                               NVRenderBlendEquation::Add);
         // The blend function goes:
         // src op
         // dst op
@@ -1871,15 +1872,11 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
             blendFunc = qt3ds::render::NVRenderBlendFunctionArgument(
                 NVRenderSrcBlendFunc::SrcAlpha, NVRenderDstBlendFunc::One,
                 NVRenderSrcBlendFunc::One, NVRenderDstBlendFunc::One);
-            blendEqua = qt3ds::render::NVRenderBlendEquationArgument(NVRenderBlendEquation::Add,
-                                                                  NVRenderBlendEquation::Add);
             break;
         case DefaultMaterialBlendMode::Multiply:
             blendFunc = qt3ds::render::NVRenderBlendFunctionArgument(
                 NVRenderSrcBlendFunc::DstColor, NVRenderDstBlendFunc::Zero,
                 NVRenderSrcBlendFunc::One, NVRenderDstBlendFunc::One);
-            blendEqua = qt3ds::render::NVRenderBlendEquationArgument(NVRenderBlendEquation::Add,
-                                                                  NVRenderBlendEquation::Add);
             break;
         case DefaultMaterialBlendMode::Overlay:
             // SW fallback is not using blend equation

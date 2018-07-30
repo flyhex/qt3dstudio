@@ -583,8 +583,10 @@ namespace render {
 
         // All objects with offscreen renderers are pickable so we can pass the pick through to the
         // offscreen renderer and let it deal with the pick.
-        if (inImage.m_LastFrameOffscreenRenderer != NULL)
+        if (inImage.m_LastFrameOffscreenRenderer != NULL) {
             ioFlags.SetPickable(true);
+            ioFlags |= RenderPreparationResultFlagValues::HasTransparency;
+        }
 
         if (inImage.m_TextureData.m_Texture) {
             if (inImage.m_TextureData.m_TextureFlags.HasTransparency()
@@ -626,7 +628,9 @@ namespace render {
             else
                 ioNextImage->m_NextImage = theImage;
 
-            if (inImage.m_TextureData.m_TextureFlags.IsPreMultiplied())
+            // assume offscreen renderer produces non-premultiplied image
+            if (inImage.m_LastFrameOffscreenRenderer == nullptr
+                    && inImage.m_TextureData.m_TextureFlags.IsPreMultiplied())
                 theKeyProp.SetPremultiplied(inShaderKey, true);
 
             SShaderKeyTextureSwizzle &theSwizzleKeyProp =
