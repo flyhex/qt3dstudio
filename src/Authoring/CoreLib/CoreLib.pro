@@ -32,6 +32,7 @@ INCLUDEPATH += \
     ../Client/Code/Shared/Log \
     ../Client/Code/Core/Timer \
     ../Client/Code/Core/VirtualAssets \
+    ../Client/Code/Core/Runtime2Integration \
     ../QT3DSIMP/Qt3DSImportLib \
     ../QT3DSDM/Systems \
     ../QT3DSDM/Systems/Cores \
@@ -53,13 +54,8 @@ INCLUDEPATH += \
     ../Common/Code/EulerAngles \
     ../Common/Code/Serialize \
     ../../Runtime/Source/DataModel/Include \
-    ../../Runtime/Source/Qt3DSRender/Include \
-    ../../Runtime/Source/Qt3DSFoundation/Include \
-    ../../Runtime/Source/Qt3DSFoundation/Include/foundation \
-    ../../Runtime/Source/Qt3DSRuntimeRender/Include \
-    ../../Runtime/Source/Qt3DSRuntimeRender/GraphObjects \
-    ../../Runtime/Source/Qt3DSRuntimeRender/ResourceManager \
-    ../../Runtime/Source/Qt3DSStateApplication/Application \
+    ../../Runtime/Source/qt3d-runtime/src/runtime \
+    ../../Runtime/Source/qt3d-runtime/src/runtime/api \
     ../../3rdparty/EASTL/UnknownVersion/include \
     $$QMAKE_INCDIR_FBX \
     ../../3rdparty/ColladaDOM/1.4.0/dom/include \
@@ -104,7 +100,6 @@ SOURCES += \
     ../Client/Code/Core/Core/Dispatch.cpp \
     ../Client/Code/Core/Doc/ComposerEditorInterface.cpp \
     ../Client/Code/Core/Doc/Doc.cpp \
-    ../Client/Code/Core/Doc/DocumentBufferCache.cpp \
     ../Client/Code/Core/Doc/DocumentEditor.cpp \
     ../Client/Code/Core/Doc/GraphUtils.cpp \
     ../Client/Code/Core/Doc/IComposerSerializer.cpp \
@@ -126,10 +121,14 @@ SOURCES += \
     ../QT3DSIMP/Qt3DSImportSGTranslation/Qt3DSImportFbxSGTranslation.cpp \
     ../QT3DSIMP/Qt3DSImportSGTranslation/Qt3DSImportSceneGraphTranslation.cpp \
     ../Client/Code/Core/Utility/q3dsdirsystem.cpp \
-    ../Client/Code/Core/Utility/q3dsdirwatcher.cpp
+    ../Client/Code/Core/Utility/q3dsdirwatcher.cpp \
+    ../Client/Code/Core/Runtime2Integration/Q3DSDocumentBufferCache.cpp
 
 HEADERS += \
     ../Client/Code/Core/Utility/q3dsdirsystem.h \
     ../Client/Code/Core/Utility/q3dsdirwatcher.h \
     ../Client/Code/Core/Doc/Doc.h \
-    ../Client/Code/Core/Core/Core.h
+    ../Client/Code/Core/Core/Core.h \
+    ../Client/Code/Core/Runtime2Integration/Q3DSRenderMesh.h \
+    ../Client/Code/Core/Runtime2Integration/Q3DSImageTextureData.h \
+    ../Client/Code/Core/Runtime2Integration/q3dsruntime2api.h

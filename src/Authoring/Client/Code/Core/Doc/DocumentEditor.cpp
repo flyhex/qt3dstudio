@@ -82,6 +82,7 @@
 #include <unordered_set>
 #include "DataModelObjectReferenceHelper.h"
 
+#include "q3dsruntime2api_p.h"
 
 namespace {
 
