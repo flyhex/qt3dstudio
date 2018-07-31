@@ -29,7 +29,12 @@
 #include "RowTreeContextMenu.h"
 #include "RowTree.h"
 #include "StudioClipboard.h"
+#include "StudioApp.h"
+#include "Doc.h"
+#include "Core.h"
 #include "Bindings/ITimelineItemBinding.h"
+#include "Bindings/Qt3DSDMTimelineItemBinding.h"
+#include "ChooseImagePropertyDlg.h"
 
 RowTreeContextMenu::RowTreeContextMenu(RowTree *inRowTree, QWidget *parent)
     : QMenu(parent)
@@ -45,6 +50,18 @@ RowTreeContextMenu::~RowTreeContextMenu()
 
 void RowTreeContextMenu::initialize()
 {
+    // add sub-presentations submenu
+    if (m_RowTree->rowType() & (OBJTYPE_LAYER | OBJTYPE_MATERIAL | OBJTYPE_IMAGE)) {
+        m_subpMenu = addMenu(tr("Set sub-presentation"));
+        connect(m_subpMenu, &QMenu::triggered, this, &RowTreeContextMenu::addSubPresentation);
+
+        m_subpMenu->addAction(tr("[None]"));
+        for (auto sp : qAsConst(g_StudioApp.m_subpresentations))
+            m_subpMenu->addAction(sp.m_id);
+
+        addSeparator();
+    }
+
     m_renameAction = new QAction(tr("Rename Object"), this);
     connect(m_renameAction, &QAction::triggered, this, &RowTreeContextMenu::renameObject);
     addAction(m_renameAction);
@@ -124,6 +141,8 @@ void RowTreeContextMenu::initialize()
 
 void RowTreeContextMenu::showEvent(QShowEvent *event)
 {
+    if (m_subpMenu)
+        m_subpMenu->setEnabled(canAddSubPresentation());
     m_renameAction->setEnabled(canRenameObject());
     m_duplicateAction->setEnabled(canDuplicateObject());
     m_deleteAction->setEnabled(canDeleteObject());
@@ -144,10 +163,44 @@ void RowTreeContextMenu::showEvent(QShowEvent *event)
     QMenu::showEvent(event);
 }
 
-bool RowTreeContextMenu::canRenameObject()
+bool RowTreeContextMenu::canAddSubPresentation() const
+{
+    return !g_StudioApp.m_subpresentations.empty();
+}
+
+bool RowTreeContextMenu::canRenameObject() const
 {
     return m_TimelineItemBinding->IsValidTransaction(
                 ITimelineItemBinding::EUserTransaction_Rename);
+}
+
+void RowTreeContextMenu::addSubPresentation(QAction *action)
+{
+    CDoc &doc(*g_StudioApp.GetCore()->GetDoc());
+    qt3dsdm::Qt3DSDMInstanceHandle instance =
+            static_cast<Qt3DSDMTimelineItemBinding *>(m_TimelineItemBinding)->GetInstance();
+    Q3DStudio::CString presentationId;
+    if (action->text() != tr("[None]"))
+        presentationId = Q3DStudio::CString::fromQString(action->text());
+
+    if (m_RowTree->rowType() == OBJTYPE_LAYER) {
+        qt3dsdm::Qt3DSDMPropertyHandle propHandle = doc.GetPropertySystem()
+                ->GetAggregateInstancePropertyByName(instance, L"sourcepath");
+        Q3DStudio::SCOPED_DOCUMENT_EDITOR(doc, tr("Set layer sub-presentation"))
+                ->SetInstancePropertyValueAsRenderable(instance, propHandle, presentationId);
+    } else if (m_RowTree->rowType() == OBJTYPE_MATERIAL) {
+        ChooseImagePropertyDlg dlg(instance);
+        if (dlg.exec() == QDialog::Accepted) {
+            qt3dsdm::Qt3DSDMPropertyHandle propHandle = dlg.getSelectedPropertyHandle();
+            Q3DStudio::SCOPED_DOCUMENT_EDITOR(doc, tr("Set material sub-presentation"))
+                ->setInstanceImagePropertyValueAsRenderable(instance, propHandle, presentationId);
+        }
+    } else if (m_RowTree->rowType() == OBJTYPE_IMAGE) {
+        qt3dsdm::Qt3DSDMPropertyHandle propHandle = doc.GetPropertySystem()
+                ->GetAggregateInstancePropertyByName(instance, L"subpresentation");
+        Q3DStudio::SCOPED_DOCUMENT_EDITOR(doc, tr("Set image sub-presentation"))
+                ->SetInstancePropertyValueAsRenderable(instance, propHandle, presentationId);
+    }
 }
 
 void RowTreeContextMenu::renameObject()
@@ -155,7 +208,7 @@ void RowTreeContextMenu::renameObject()
     m_RowTree->selectLabel();
 }
 
-bool RowTreeContextMenu::canDuplicateObject()
+bool RowTreeContextMenu::canDuplicateObject() const
 {
     return m_TimelineItemBinding->IsValidTransaction(
                 ITimelineItemBinding::EUserTransaction_Duplicate);
@@ -167,19 +220,19 @@ void RowTreeContextMenu::duplicateObject()
                 ITimelineItemBinding::EUserTransaction_Duplicate);
 }
 
-bool RowTreeContextMenu::canDeleteObject()
+bool RowTreeContextMenu::canDeleteObject() const
 {
     return m_TimelineItemBinding->IsValidTransaction(
                 ITimelineItemBinding::EUserTransaction_Delete);
 }
 
-bool RowTreeContextMenu::canGroupObjects()
+bool RowTreeContextMenu::canGroupObjects() const
 {
     return m_TimelineItemBinding->IsValidTransaction(
                 ITimelineItemBinding::EUserTransaction_Group);
 }
 
-bool RowTreeContextMenu::canUngroupObjects()
+bool RowTreeContextMenu::canUngroupObjects() const
 {
     return m_TimelineItemBinding->IsValidTransaction(
                 ITimelineItemBinding::EUserTransaction_Ungroup);
@@ -199,7 +252,7 @@ void RowTreeContextMenu::groupObjects()
         m_TimelineItemBinding->PerformTransaction(ITimelineItemBinding::EUserTransaction_Ungroup);
 }
 
-bool RowTreeContextMenu::canInspectComponent()
+bool RowTreeContextMenu::canInspectComponent() const
 {
     return m_TimelineItemBinding->IsValidTransaction(
                 ITimelineItemBinding::EUserTransaction_EditComponent);
@@ -218,7 +271,7 @@ void RowTreeContextMenu::inspectComponent()
  * Checks to see if the object can be wrapped in a component.
  * @return true if the object is allowed to be wrapped in a component.
  */
-bool RowTreeContextMenu::canMakeComponent()
+bool RowTreeContextMenu::canMakeComponent() const
 {
     return m_TimelineItemBinding->IsValidTransaction(
                 ITimelineItemBinding::EUserTransaction_MakeComponent);
@@ -244,7 +297,7 @@ void RowTreeContextMenu::copyObjectPath()
                 m_TimelineItemBinding->GetObjectPath().toQString());
 }
 
-bool RowTreeContextMenu::canCopyObject()
+bool RowTreeContextMenu::canCopyObject() const
 {
     return m_TimelineItemBinding->IsValidTransaction(
                 ITimelineItemBinding::EUserTransaction_Copy);
@@ -256,7 +309,7 @@ void RowTreeContextMenu::copyObject()
                 ITimelineItemBinding::EUserTransaction_Copy);
 }
 
-bool RowTreeContextMenu::canCutObject()
+bool RowTreeContextMenu::canCutObject() const
 {
     return m_TimelineItemBinding->IsValidTransaction(
                 ITimelineItemBinding::EUserTransaction_Cut);
@@ -279,7 +332,7 @@ void RowTreeContextMenu::addLayer()
                 ITimelineItemBinding::EUserTransaction_AddLayer);
 }
 
-bool RowTreeContextMenu::canPasteObject()
+bool RowTreeContextMenu::canPasteObject() const
 {
     return m_TimelineItemBinding->IsValidTransaction(
                 ITimelineItemBinding::EUserTransaction_Paste);

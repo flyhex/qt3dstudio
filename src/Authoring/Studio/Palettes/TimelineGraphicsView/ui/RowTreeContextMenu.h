@@ -47,6 +47,7 @@ protected:
     void showEvent(QShowEvent *event) override;
 
 private Q_SLOTS:
+    void addSubPresentation(QAction *action);
     void renameObject();
     void duplicateObject();
     void deleteObject();
@@ -61,20 +62,23 @@ private Q_SLOTS:
 
 private:
     void initialize();
-    bool canRenameObject();
-    bool canDuplicateObject();
-    bool canDeleteObject();
-    bool canGroupObjects();
-    bool canUngroupObjects();
-    bool canInspectComponent();
-    bool canMakeComponent();
-    bool canCopyObject();
-    bool canPasteObject();
-    bool canCutObject();
+
+    bool canAddSubPresentation() const;
+    bool canRenameObject() const;
+    bool canDuplicateObject() const;
+    bool canDeleteObject() const;
+    bool canGroupObjects() const;
+    bool canUngroupObjects() const;
+    bool canInspectComponent() const;
+    bool canMakeComponent() const;
+    bool canCopyObject() const;
+    bool canPasteObject() const;
+    bool canCutObject() const;
     bool canAddLayer() const;
 
     RowTree *m_RowTree;
     ITimelineItemBinding *m_TimelineItemBinding;
+    QMenu *m_subpMenu = nullptr; // sub-presentation submenu
     QAction *m_renameAction = nullptr;
     QAction *m_duplicateAction = nullptr;
     QAction *m_deleteAction = nullptr;
