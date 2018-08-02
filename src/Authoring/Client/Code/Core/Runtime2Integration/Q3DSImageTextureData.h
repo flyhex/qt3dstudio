@@ -40,6 +40,8 @@
 // We mean it.
 //
 
+#include "q3dsimagemanager_p.h"
+
 /*
     This class replaces Qt3DSRenderImageTextureData
 
@@ -105,10 +107,15 @@
     };
 */
 
+namespace Q3DStudio {
+
 class Q3DSImageTextureData
 {
 public:
+    Qt3DRender::QAbstractTexture *m_texture;
 
 };
+
+} // namespace Q3DStudio
 
 #endif

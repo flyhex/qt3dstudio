@@ -13,7 +13,7 @@ DEFINES += _UNICODE UNICODE QT3DS_AUTHORING _AFXDLL \
 
 win: QMAKE_LFLAGS += /MANIFEST /ENTRY:"wWinMainCRTStartup"
 
-QT += core gui xml openglextensions
+QT += core gui xml openglextensions 3dstudioruntime2-private
 QT += qml quick widgets quickwidgets network
 
 # Configuration for RT1/RT2 preview. RT2 doesn't work yet so uset RT1.
@@ -75,7 +75,11 @@ INCLUDEPATH += \
     ../../Runtime/Source/Qt3DSEvent/InternalInclude \
     ../../3rdparty/EASTL/UnknownVersion/include \
     ../../3rdparty/color \
-    ../../QtExtras/qmlstreamer
+    ../../QtExtras/qmlstreamer \
+    ../Client/Code/Core/Runtime2Integration \
+    ../../Runtime/qt3d-runtime/src/runtime \
+    ../../Runtime/qt3d-runtime/src/runtime/api \
+    ../../Runtime/qt3d-runtime/src/runtime/behaviorapi
 
 linux {
     BEGIN_ARCHIVE = -Wl,--whole-archive

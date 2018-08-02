@@ -626,10 +626,12 @@ Mesh *CreateMeshFromPreviousMesh(TPreviousMeshType *temp, NVAllocatorCallback &a
     return retval;
 }
 
-Mesh *Mesh::Load(NVAllocatorCallback &alloc, IInStream &inStream)
+Mesh *Mesh::Load(NVAllocatorCallback &alloc, QIODevice &inStream)
 {
     MeshDataHeader header;
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     inStream.Read(header);
+#endif
     QT3DS_ASSERT(header.m_FileId == MeshDataHeader::GetFileId());
     if (header.m_FileId != MeshDataHeader::GetFileId())
         return NULL;
@@ -638,10 +640,12 @@ Mesh *Mesh::Load(NVAllocatorCallback &alloc, IInStream &inStream)
     if (header.m_SizeInBytes < sizeof(Mesh))
         return NULL;
     QT3DSU8 *newMem = (QT3DSU8 *)alloc.allocate(header.m_SizeInBytes, "Mesh", __FILE__, __LINE__);
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     QT3DSU32 amountRead = inStream.Read(NVDataRef<QT3DSU8>(newMem, header.m_SizeInBytes));
+
     if (amountRead != header.m_SizeInBytes)
         goto failure;
-
+#endif
     if (header.m_FileVersion == 1) {
         MeshV1 *temp = DoInitialize<MeshV1>(header.m_HeaderFlags,
                                             NVDataRef<QT3DSU8>(newMem, header.m_SizeInBytes));
@@ -678,7 +682,7 @@ Mesh *Mesh::Initialize(QT3DSU16 meshVersion, MeshBufHeaderFlags meshFlags, NVDat
 
 // Multimesh support where you have multiple meshes in a single file.
 // Save multi where you have overridden the allocator.
-QT3DSU32 Mesh::SaveMulti(NVAllocatorCallback &alloc, ISeekableIOStream &inStream, QT3DSU32 inId) const
+QT3DSU32 Mesh::SaveMulti(NVAllocatorCallback &alloc, QIODevice &inStream, QT3DSU32 inId) const
 {
     QT3DSU32 nextId = 1;
     MeshMultiHeader tempHeader;
@@ -686,6 +690,7 @@ QT3DSU32 Mesh::SaveMulti(NVAllocatorCallback &alloc, ISeekableIOStream &inStream
     MeshMultiHeader *theWriteHeader = NULL;
 
     QT3DSI64 newMeshStartPos = 0;
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     if (inStream.GetLength() != 0) {
         theHeader = LoadMultiHeader(alloc, inStream);
         if (theHeader == NULL) {
@@ -725,10 +730,12 @@ QT3DSU32 Mesh::SaveMulti(NVAllocatorCallback &alloc, ISeekableIOStream &inStream
         alloc.deallocate(theHeader);
     }
     return static_cast<QT3DSU32>(nextId);
+#endif
+    return 0;
 }
 
 // Load a single mesh directly from a multi file with the provided overridden items
-SMultiLoadResult Mesh::LoadMulti(NVAllocatorCallback &alloc, ISeekableIOStream &inStream,
+SMultiLoadResult Mesh::LoadMulti(NVAllocatorCallback &alloc, QIODevice &inStream,
                                  QT3DSU32 inId)
 {
     MeshMultiHeader *theHeader(LoadMultiHeader(alloc, inStream));
@@ -752,8 +759,9 @@ SMultiLoadResult Mesh::LoadMulti(NVAllocatorCallback &alloc, ISeekableIOStream &
     if (fileOffset == (QT3DSU64)-1) {
         goto endFunction;
     }
-
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     inStream.SetPosition(static_cast<QT3DSI64>(fileOffset), SeekPosition::Begin);
+#endif
     retval = Load(alloc, inStream);
 endFunction:
     if (theHeader != NULL)
@@ -762,19 +770,22 @@ endFunction:
 }
 
 // Returns true if this is a multimesh (several meshes in one file).
-bool Mesh::IsMulti(ISeekableIOStream &inStream)
+bool Mesh::IsMulti(QIODevice &inStream)
 {
     MeshMultiHeader theHeader;
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     inStream.SetPosition(-((QT3DSI64)(sizeof(MeshMultiHeader))), SeekPosition::End);
     QT3DSU32 numBytes = inStream.Read(theHeader);
     if (numBytes != sizeof(MeshMultiHeader))
         return false;
+#endif
     return theHeader.m_Version == MeshMultiHeader::GetMultiStaticFileId();
 }
 // Load a multi header from a stream.
-MeshMultiHeader *Mesh::LoadMultiHeader(NVAllocatorCallback &alloc, ISeekableIOStream &inStream)
+MeshMultiHeader *Mesh::LoadMultiHeader(NVAllocatorCallback &alloc, QIODevice &inStream)
 {
     MeshMultiHeader theHeader;
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     inStream.SetPosition(-((QT3DSI64)sizeof(MeshMultiHeader)), SeekPosition::End);
     QT3DSU32 numBytes = inStream.Read(theHeader);
     if (numBytes != sizeof(MeshMultiHeader)
@@ -782,6 +793,7 @@ MeshMultiHeader *Mesh::LoadMultiHeader(NVAllocatorCallback &alloc, ISeekableIOSt
         || theHeader.m_Version > MeshMultiHeader::GetMultiStaticVersion()) {
         return NULL;
     }
+#endif
     size_t allocSize =
         sizeof(MeshMultiHeader) + theHeader.m_Entries.m_Size * sizeof(MeshMultiEntry);
     MeshMultiHeader *retval =
@@ -794,6 +806,7 @@ MeshMultiHeader *Mesh::LoadMultiHeader(NVAllocatorCallback &alloc, ISeekableIOSt
     QT3DSU8 *entryData = baseAddr + sizeof(MeshMultiHeader);
     *retval = theHeader;
     retval->m_Entries.m_Offset = (QT3DSU32)(entryData - baseAddr);
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     inStream.SetPosition(-((QT3DSI64)allocSize), SeekPosition::End);
 
     numBytes =
@@ -803,6 +816,7 @@ MeshMultiHeader *Mesh::LoadMultiHeader(NVAllocatorCallback &alloc, ISeekableIOSt
         alloc.deallocate(retval);
         retval = NULL;
     }
+#endif
     return retval;
 }
 
@@ -820,7 +834,7 @@ QT3DSU32 GetHighestId(NVAllocatorCallback &inAlloc, MeshMultiHeader *inHeader)
     return highestId;
 }
 
-QT3DSU32 Mesh::GetHighestMultiVersion(NVAllocatorCallback &alloc, ISeekableIOStream &inStream)
+QT3DSU32 Mesh::GetHighestMultiVersion(NVAllocatorCallback &alloc, QIODevice &inStream)
 {
     return GetHighestId(alloc, LoadMultiHeader(alloc, inStream));
 }

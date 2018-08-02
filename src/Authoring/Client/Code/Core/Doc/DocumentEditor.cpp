@@ -60,6 +60,8 @@
 #include "Qt3DSDMWStrOpsImpl.h"
 #include "Qt3DSDMMetaData.h"
 
+#include "Q3DSInputStreamFactory.h"
+
 #include "foundation/Qt3DSMemoryBuffer.h"
 #include "IDirectoryWatchingSystem.h"
 #include "Qt3DSDMActionCore.h"
@@ -83,6 +85,8 @@
 #include "DataModelObjectReferenceHelper.h"
 
 #include "q3dsruntime2api_p.h"
+
+#include <QtCore/qbuffer.h>
 
 namespace {
 
@@ -115,7 +119,7 @@ struct ScopedBoolean
     ~ScopedBoolean() { m_Value = !m_Value; }
 };
 
-typedef qt3ds::foundation::NVScopedRefCounted<qt3ds::render::IInputStreamFactory> TStreamFactoryPtr;
+typedef QSharedPointer<Q3DStudio::IInputStreamFactory> TStreamFactoryPtr;
 
 struct SImportXmlErrorHandler : public CXmlErrorHandler
 {
@@ -184,7 +188,7 @@ public:
         , m_IgnoreDirChange(false)
         , m_StringTable(m_DataCore.GetStringTable())
         , m_Foundation(Q3DStudio::Foundation::SStudioFoundation::Create())
-        , m_InputStreamFactory(qt3ds::render::IInputStreamFactory::Create(*m_Foundation.m_Foundation))
+        , m_InputStreamFactory(Q3DStudio::IInputStreamFactory::Create())
     {
         ScopedBoolean __ignoredDirs(m_IgnoreDirChange);
         IDirectoryWatchingSystem *theSystem(m_Doc.GetDirectoryWatchingSystem());
@@ -195,8 +199,8 @@ public:
                                                   std::placeholders::_1));
         }
 
-        qmlRegisterType<Q3DSQmlBehavior>("QtStudio3D.Behavior", 1, 0, "Behavior");
-        qmlRegisterType<Q3DSQmlBehavior, 1>("QtStudio3D.Behavior", 1, 1, "Behavior");
+        qmlRegisterType<Q3DSBehaviorObject>("QtStudio3D.Behavior", 1, 0, "Behavior");
+        qmlRegisterType<Q3DSBehaviorObject, 1>("QtStudio3D.Behavior", 1, 1, "Behavior");
     }
     virtual ~CDocEditor()
     {
@@ -749,7 +753,8 @@ public:
 
             SFilePtrOutStream theFileStream(theFile);
 
-            CDOMSerializer::Write(*inWriter.GetTopElement(), theFileStream);
+            CDOMSerializer::Write(*inWriter.GetTopElement(),
+                                  *theFileStream.m_File->m_OpenFile.data());
         }
         return theFinalPath;
     }
@@ -796,17 +801,37 @@ public:
 
     qt3ds::NVFoundationBase &GetFoundation() override { return *m_Foundation.m_Foundation; }
 
+    QSharedPointer<QFile> openQFileStream(Q3DStudio::CString inFile, FileOpenFlags flags) const
+    {
+        QFile::OpenMode qflags = QFile::ReadOnly;
+        bool open = flags & FileOpenFlagValues::Open;
+        bool create = flags & FileOpenFlagValues::Create;
+        if (flags & FileOpenFlagValues::Truncate)
+            qflags |= QFile::Truncate;
+        if (flags & FileOpenFlagValues::Write)
+            qflags |= QFile::WriteOnly;
+
+        QSharedPointer<QFile> file(new QFile(inFile.toQString()));
+        if (create && !file->exists())
+            return {};
+        if (!file->open(qflags))
+            return {};
+        if (!(flags & FileOpenFlagValues::Truncate) && open)
+            file->seek(file->size());
+        return file;
+    }
+
     void ParseSourcePathsOutOfEffectFile(Q3DStudio::CString inFile,
                                                  std::vector<Q3DStudio::CString> &outFilePaths) override
     {
-        qt3ds::foundation::CFileSeekableIOStream theStream(inFile,
-                                                           qt3ds::foundation::FileReadFlags());
-        if (theStream.IsOpen()) {
+        QSharedPointer<QFile> theStream(
+                    openQFileStream(inFile, qt3ds::foundation::FileReadFlags()));
+        if (!theStream.isNull()) {
             std::shared_ptr<IDOMFactory> theFactory =
                 IDOMFactory::CreateDOMFactory(m_DataCore.GetStringTablePtr());
             SImportXmlErrorHandler theImportHandler(m_Doc.GetImportFailedHandler(), inFile);
             qt3dsdm::SDOMElement *theElem =
-                CDOMSerializer::Read(*theFactory, theStream, &theImportHandler);
+                CDOMSerializer::Read(*theFactory, *theStream, &theImportHandler);
 
             CFilePath theFilePath(inFile);
             CFilePath theFileDir(theFilePath.GetDirectory());
@@ -834,15 +859,15 @@ public:
     Q3DStudio::CString GetCustomMaterialName(const Q3DStudio::CString &inFullPathToFile) const override
     {
         Q3DStudio::CString retval;
-        qt3ds::foundation::CFileSeekableIOStream theStream(inFullPathToFile,
-                                                           qt3ds::foundation::FileReadFlags());
-        if (theStream.IsOpen()) {
+        QSharedPointer<QFile> theStream(
+                    openQFileStream(inFullPathToFile, qt3ds::foundation::FileReadFlags()));
+        if (theStream.isNull()) {
             std::shared_ptr<IDOMFactory> theFactory =
                 IDOMFactory::CreateDOMFactory(m_DataCore.GetStringTablePtr());
             SImportXmlErrorHandler theImportHandler(m_Doc.GetImportFailedHandler(),
                                                     inFullPathToFile);
             qt3dsdm::SDOMElement *theElem =
-                CDOMSerializer::Read(*theFactory, theStream, &theImportHandler);
+                CDOMSerializer::Read(*theFactory, *theStream, &theImportHandler);
             if (theElem) {
                 // OK, then this just may be a valid material file.  Get the file stem of the path.
                 Q3DStudio::CFilePath thePath(inFullPathToFile);
@@ -958,14 +983,19 @@ public:
 
         Q3DStudio::CString theName;
         if (inType == ComposerObjectTypes::Model) {
-            const wchar_t *theSourcePath = m_Doc.GetBufferCache().GetPrimitiveName(inPrimitiveType);
-            QT3DS_ASSERT(!IsTrivial(theSourcePath));
+            QString theSourcePath = m_Doc.GetBufferCache().GetPrimitiveName(inPrimitiveType);
+            QT3DS_ASSERT(!theSourcePath.isEmpty());
+
+            wchar_t *ws = new wchar_t [theSourcePath.length() + 1];
+            memset(ws, 0, sizeof(wchar_t) * (theSourcePath.length() + 1));
+            theSourcePath.toWCharArray(ws);
 
             // Trigger material generation.
             SetInstancePropertyValue(retval, m_Bridge.GetObjectDefinitions().m_Asset.m_SourcePath,
-                                     std::make_shared<CDataStr>(theSourcePath));
+                                     std::make_shared<CDataStr>(ws));
 
-            theName = Q3DStudio::CString(theSourcePath + 1);
+            theName = Q3DStudio::CString(ws + 1);
+            delete [] ws;
         } else {
             theName = GetName(retval);
         }
@@ -1197,13 +1227,13 @@ public:
                 theValues.push_back(*inValue);
         }
 
-        QT3DSU32 numSubsets = 0;
+        int numSubsets = 0;
         for (size_t propIdx = 0, propEnd = theValues.size(); propIdx < propEnd; ++propIdx) {
             TDataStrPtr newValue(get<TDataStrPtr>(theValues[propIdx].second));
-            SRenderMesh *theBuffer = m_Doc.GetBufferCache().GetOrCreateModelBuffer(
+            Q3DSRenderMesh *theBuffer = m_Doc.GetBufferCache().GetOrCreateModelBuffer(
                 Q3DStudio::CFilePath(newValue->GetData()));
             if (theBuffer)
-                numSubsets = qMax(numSubsets, (QT3DSU32)theBuffer->m_Subsets.size());
+                numSubsets = qMax(numSubsets, theBuffer->m_subsets.size());
         }
 
         TInstanceHandleList theMaterials;
@@ -1234,17 +1264,17 @@ public:
         // the subset name.
         for (size_t propIdx = 0, propEnd = theValues.size(); propIdx < propEnd; ++propIdx) {
             TDataStrPtr newValue(get<TDataStrPtr>(theValues[propIdx].second));
-            SRenderMesh *theBuffer = m_Doc.GetBufferCache().GetOrCreateModelBuffer(
+            Q3DSRenderMesh *theBuffer = m_Doc.GetBufferCache().GetOrCreateModelBuffer(
                 Q3DStudio::CFilePath(newValue->GetData()));
             if (theBuffer == NULL)
                 continue;
-            for (long subsetIdx = 0, subsetEnd = theBuffer->m_Subsets.size(); subsetIdx < subsetEnd;
+            for (long subsetIdx = 0, subsetEnd = theBuffer->m_subsets.size(); subsetIdx < subsetEnd;
                  ++subsetIdx) {
 #ifdef KDAB_TEMPORARILY_REMOVED
                 StaticAssert<sizeof(wchar_t) == sizeof(char16_t)>::valid_expression();
 #endif
                 const wstring &theSubsetName =
-                    Q3DStudio::CString(theBuffer->m_Subsets[subsetIdx].m_Name.c_str()).c_str();
+                    Q3DStudio::CString::fromQString(theBuffer->m_subsetNames[subsetIdx]).c_str();
                 if (theSubsetName.size()) {
                     Qt3DSDMInstanceHandle theMaterial(theMaterials[subsetIdx]);
                     SValue theValue;
@@ -2546,15 +2576,16 @@ public:
     Qt3DSDMActionHandle PasteAction(const CFilePath &inFilePath,
                                            Qt3DSDMInstanceHandle inNewRoot) override
     {
-        CFileSeekableIOStream theStream(inFilePath.toCString(), FileReadFlags());
-        if (theStream.IsOpen() == false) {
+        QSharedPointer<QFile> theStream(openQFileStream(inFilePath.toCString(),
+                                                        FileReadFlags()));
+        if (theStream.isNull() == false) {
             QT3DS_ASSERT(false);
             return 0;
         }
         std::shared_ptr<IDOMFactory> theFactory(
             IDOMFactory::CreateDOMFactory(m_DataCore.GetStringTablePtr()));
-        SDOMElement *theElem = CDOMSerializer::Read(*theFactory, theStream);
-        if (theElem == NULL) {
+        SDOMElement *theElem = CDOMSerializer::Read(*theFactory, *theStream);
+        if (theElem == nullptr) {
             QT3DS_ASSERT(false);
             return 0;
         }
@@ -2924,9 +2955,9 @@ public:
             return 0;
         }
         CFilePath relativePath = m_Doc.GetRelativePathToDoc(imageSrc);
-        SImageTextureData theImageBuffer =
+        Q3DSImageTextureData theImageBuffer =
             m_Doc.GetBufferCache().GetOrCreateImageBuffer(relativePath);
-        if (theImageBuffer.m_Texture == NULL) {
+        if (!theImageBuffer.m_texture) {
             if (theHandler)
                 theHandler->DisplayImportFailed(imageSrc.toQString(),
                                                 QObject::tr("Can't Load Image File"), false);
@@ -2951,11 +2982,10 @@ public:
         if (inStartTime != -1)
             SetStartTime(theModelInstance, inStartTime);
 
-        STextureDetails theDetails = theImageBuffer.m_Texture->GetTextureDetails();
-        float theHeight = theDetails.m_Height / 100.0f;
-        float theWidth = theDetails.m_Width / 100.0f;
+        float theHeight = theImageBuffer.m_texture->height() / 100.0f;
+        float theWidth = theImageBuffer.m_texture->width()/ 100.0f;
         qt3dsdm::SFloat3 theScale = qt3dsdm::SFloat3(2, 2, 1); // Default, per Danc.
-        if (theHeight != 0 && theWidth != 0)
+        if (!qIsNull(theHeight) && qIsNull(theWidth))
             theScale = qt3dsdm::SFloat3(theWidth, theHeight, 1);
         m_PropertySystem.SetInstancePropertyValue(theModelInstance, m_Bridge.GetNode().m_Scale,
                                                   theScale);
@@ -2983,20 +3013,20 @@ public:
         }
         Q3DStudio::CString theRelativePath(m_Doc.GetRelativePathToDoc(inFullPathToDocument));
         SModelBufferAndPath theModelBuffer =
-            m_Doc.GetBufferCache().GetOrCreateModelBuffer(theRelativePath);
-        if (theModelBuffer.m_ModelBuffer == NULL) {
+            m_Doc.GetBufferCache().GetOrCreateModelBuffer(QFileInfo(theRelativePath.toQString()));
+        if (!theModelBuffer.m_modelBuffer) {
             if (theHandler)
                 theHandler->DisplayImportFailed(imageSrc.toQString(),
                                                 QObject::tr("Could Not Load Model Buffer"), false);
             return 0;
         }
         // Ensure we include the model buffer version in the relative path
-        theRelativePath = m_Doc.GetRelativePathToDoc(theModelBuffer.m_FilePath);
+        QString relativePath = m_Doc.GetRelativePathToDoc(theModelBuffer.m_filePath);
 
         qt3dsdm::Qt3DSDMInstanceHandle theModelInstance =
             CreateSceneGraphInstance(ComposerObjectTypes::Model, inParent, inSlide);
 
-        SValue theValue(std::make_shared<qt3dsdm::CDataStr>(theRelativePath));
+        SValue theValue(std::make_shared<qt3dsdm::CDataStr>(CString::fromQString(relativePath)));
         m_PropertySystem.SetInstancePropertyValue(theModelInstance,
                                                   m_Bridge.GetSourcePathProperty(), theValue);
 
@@ -3184,7 +3214,7 @@ public:
         ParseInstanceDefinition(const CFilePath &inFullPathToDocument,
                                 std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
                                 std::shared_ptr<IImportFailedHandler> inHandler,
-                                qt3ds::render::IInputStreamFactory &inInputStreamFactory) = 0;
+                                Q3DStudio::IInputStreamFactory &inInputStreamFactory) = 0;
     };
 
     virtual TInstanceHandle LoadDynamicInstance(const Q3DStudio::CString &inFullPathToDocument,
@@ -3274,7 +3304,7 @@ public:
         ParseInstanceDefinition(const CFilePath &inFullPathToDocument,
                                 std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
                                 std::shared_ptr<IImportFailedHandler> inHandler,
-                                qt3ds::render::IInputStreamFactory &inInputStreamFactory) override
+                                Q3DStudio::IInputStreamFactory &inInputStreamFactory) override
         {
             return IDocumentEditor::ParseScriptFile(inFullPathToDocument, inStringTable, inHandler,
                                                     inInputStreamFactory);
@@ -3318,7 +3348,7 @@ public:
         ParseInstanceDefinition(const CFilePath &inFullPathToDocument,
                                 std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
                                 std::shared_ptr<IImportFailedHandler> inHandler,
-                                qt3ds::render::IInputStreamFactory &inInputStreamFactory) override
+                                Q3DStudio::IInputStreamFactory &inInputStreamFactory) override
         {
             return IDocumentEditor::ParsePluginFile(inFullPathToDocument, inStringTable, inHandler,
                                                     inInputStreamFactory);
@@ -3389,7 +3419,7 @@ public:
                                                     Qt3DSDMInstanceHandle inInstance,
                                                     const TCharStr &inName,
                                                     std::vector<SMetaDataLoadWarning> &outWarnings,
-                                                    qt3ds::foundation::IInStream &stream);
+                                                    QFile &stream);
 
     TInstanceHandle LoadDynamicObject(const Q3DStudio::CString &inFullPathToDocument,
                                       TInstanceHandle inParent, TSlideHandle inSlide,
@@ -3442,8 +3472,8 @@ public:
 
                 std::vector<SMetaDataLoadWarning> theWarnings;
                 QString shaderFile = theShaderFile.toQString();
-                NVScopedRefCounted<qt3ds::render::IRefCountedInputStream> theStream(
-                    m_InputStreamFactory->GetStreamForFile(shaderFile));
+                IRefCountedInputStream theStream(
+                    *m_InputStreamFactory->getStreamForFile(shaderFile));
                 (m_MetaData.*inLoader)(m_StringTable.GetNarrowStr(theRelativePath.toCString()),
                                        theParentInstance,
                                        theRelativePath.GetFileStem().c_str(),
@@ -3821,13 +3851,11 @@ public:
                     // Once import file revisioning has been removed (QT3DS-1815), this can be
                     // replaced with theMesh->Save(theFullPath.toCString().GetCharStar());
                     // It also requires ripping the revisions out from the *.import files
-                    Qt3DSFileToolsSeekableMeshBufIOStream output(
-                                SFile::Wrap(SFile::OpenForWrite(theFullPath, FileWriteFlags()),
-                                            theFullPath));
-                    if (!output.IsOpen())
+                    QSharedPointer<QFile> output(openQFileStream(theFullPath, FileWriteFlags()));
+                    if (!output.data())
                         QT3DS_ALWAYS_ASSERT_MESSAGE(theFullPath.toCString().GetCharStar());
                     MallocAllocator allocator;
-                    theMesh->SaveMulti(allocator, output);
+                    theMesh->SaveMulti(allocator, *output);
 
                     delete theMesh;
 
@@ -3899,6 +3927,7 @@ public:
                             GetTypedInstancePropertyValue<float>(theLastAnchor, angleProp) + 180.0f;
                         QT3DSF32 prevDistance = GetTypedInstancePropertyValue<float>(
                             theLastAnchor, outgoingdistanceProp);
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
                         QT3DSVec2 c1 = IPathManager::GetControlPointFromAngleDistance(
                             prevPos, prevAngle, prevDistance);
 
@@ -3908,6 +3937,7 @@ public:
                         QT3DSVec2 c2 = IPathManager::GetControlPointFromAngleDistance(position, angle,
                                                                                    distance);
                         theBuilder->CubicCurveTo(c1, c2, position);
+#endif
                     }
                     theLastAnchor = theAnchor;
                 }
@@ -4018,6 +4048,7 @@ public:
                 QT3DSVec2 c1 = ToFnd(NextDataItem(theLoadedBuffer->m_Data, dataIdx));
                 QT3DSVec2 c2 = ToFnd(NextDataItem(theLoadedBuffer->m_Data, dataIdx));
                 QT3DSVec2 p2 = ToFnd(NextDataItem(theLoadedBuffer->m_Data, dataIdx));
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
                 QT3DSVec2 outgoing =
                     IPathManager::GetAngleDistanceFromControlPoint(theCurrentPosition, c1);
                 outgoing.x += 180.0f;
@@ -4042,6 +4073,7 @@ public:
                 if (fabs(incoming.y) > .01f)
                     theSlideCore.ForceSetInstancePropertyValue(
                         theCurrentSlide, theCurrentAnchorPoint, angleProp, incoming.x);
+#endif
             } break;
             case qt3dsimp::PathCommand::Close:
                 theSlideCore.ForceSetInstancePropertyValue(theCurrentSlide, theCurrentSubPath,
@@ -4052,7 +4084,9 @@ public:
                 break;
             }
         }
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
         theLoadedBuffer->Free(m_Foundation.m_Foundation->getAllocator());
+#endif
     }
 
     void ReplaceTextFontNameWithTextFileStem(qt3ds::render::ITextRenderer &inRenderer) override
@@ -4067,7 +4101,7 @@ public:
                                                     theValue)) {
                 qt3dsdm::TDataStrPtr theDataStr(qt3dsdm::get<qt3dsdm::TDataStrPtr>(theValue));
                 if (theDataStr && theDataStr->GetLength()) {
-
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
                     Option<CRegisteredString> theNewValueOpt = inRenderer.GetFontNameForFont(
                         m_StringTable.GetNarrowStr(theDataStr->GetData()));
                     if (theNewValueOpt.hasValue()) {
@@ -4078,6 +4112,7 @@ public:
                                 theTextHandle, m_Bridge.GetText().m_Font,
                                 std::make_shared<CDataStr>(theWideValue));
                     }
+#endif
                 }
             }
             qt3dsdm::Qt3DSDMSlideHandle theAssociatedSlide = GetAssociatedSlide(theTextHandle);
@@ -4088,6 +4123,7 @@ public:
                 for (size_t theSlideIdx = 0, theSlideEnd = theChildSlides.size();
                      theSlideIdx < theSlideEnd; ++theSlideIdx) {
                     SValue theSlideValue;
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
                     if (m_SlideCore.GetSpecificInstancePropertyValue(
                             theChildSlides[theSlideIdx], theTextHandle, m_Bridge.GetText().m_Font,
                             theSlideValue)) {
@@ -4107,6 +4143,7 @@ public:
                             }
                         }
                     }
+#endif
                 }
             }
         }
@@ -4375,9 +4412,9 @@ public:
                        && theInstances.empty() == false) {
                 CString theNameStr = GetName(theInstances[0].second);
                 std::vector<SMetaDataLoadWarning> theWarnings;
-                NVScopedRefCounted<qt3ds::render::IRefCountedInputStream> theStream(
-                    m_InputStreamFactory->GetStreamForFile(theRecord.m_File.toQString()));
-                if (theStream) {
+                IRefCountedInputStream theStream(
+                    *m_InputStreamFactory->getStreamForFile(theRecord.m_File.toQString()));
+                if (theStream.data()) {
                     m_MetaData.LoadEffectInstance(m_StringTable.GetNarrowStr(theRelativePath.toCString()),
                                                   theInstances[0].second,
                                                   TCharStr(theNameStr),
@@ -4523,13 +4560,64 @@ Qt3DSDMInstanceHandle IDocumentEditor::CreateSceneGraphInstance(
     return retval;
 }
 
+struct SScriptParser
+{
+    static std::shared_ptr<IDOMReader>
+    ParseScriptFile(std::shared_ptr<IDOMFactory> factory,
+                    std::shared_ptr<qt3dsdm::IStringTable> stringTable,
+                    const QString &fullPath, CXmlErrorHandler &errorHandler,
+                    Q3DStudio::IInputStreamFactory &streamFactory)
+    {
+        QByteArray byteArray;
+        {
+            IRefCountedInputStream stream(
+                *streamFactory.getStreamForFile(fullPath));
+            if (!stream) {
+                QT3DS_ASSERT(0);
+                return std::shared_ptr<IDOMReader>();
+            }
+
+            byteArray = stream->readAll();
+        }
+
+        QString code = QString::fromUtf8(byteArray);
+
+        bool skipXml = false;
+        auto start = code.indexOf(QLatin1String("/*[["));
+        if (start == -1)
+            skipXml = true;
+
+        QString tagged(QStringLiteral("<Behavior>\n"));
+        if (!skipXml) {
+            start += 4;
+            auto end = code.indexOf(QLatin1String("]]*/"), start);
+            if (end == -1)
+                return std::shared_ptr<IDOMReader>();
+
+            QString xml = code.mid(start, end - start).trimmed();
+
+            tagged.append(xml);
+        }
+        tagged.append(QLatin1String("</Behavior>\n"));
+        tagged.replace(QLatin1String("\r\n"), QLatin1String("\n"));
+
+        QByteArray array = tagged.toLatin1();
+        QBuffer xmlStream(&array);
+
+        SDOMElement *element(CDOMSerializer::Read(*factory, xmlStream, &errorHandler));
+        if (!element)
+            return std::shared_ptr<IDOMReader>();
+
+        return IDOMReader::CreateDOMReader(*element, stringTable, factory);
+    }
+};
+
 std::shared_ptr<IDOMReader>
 IDocumentEditor::ParseScriptFile(const CFilePath &inFullPathToDocument,
                                  std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
                                  std::shared_ptr<IImportFailedHandler> inHandler,
-                                 qt3ds::render::IInputStreamFactory &inInputStreamFactory)
+                                 Q3DStudio::IInputStreamFactory &inInputStreamFactory)
 {
-    using namespace ScriptParser;
     std::shared_ptr<qt3dsdm::IStringTable> theStringTable(inStringTable);
     std::shared_ptr<IDOMFactory> theFactory(IDOMFactory::CreateDOMFactory(theStringTable));
     SImportXmlErrorHandler theXmlErrorHandler(inHandler,
@@ -4550,11 +4638,81 @@ IDocumentEditor::ParseScriptFile(const CFilePath &inFullPathToDocument,
     return theReaderPtr;
 }
 
+
+struct CRenderPluginParser
+{
+
+    static bool NavigateToMetadata(std::shared_ptr<qt3dsdm::IDOMReader> inReader)
+    {
+        return inReader->MoveToFirstChild("metadata");
+    }
+
+    static std::shared_ptr<qt3dsdm::IDOMReader>
+    ParseFile(std::shared_ptr<qt3dsdm::IDOMFactory> inFactory,
+              std::shared_ptr<qt3dsdm::IStringTable> inStringTable, const char8_t *inFileData,
+              qt3dsdm::CXmlErrorHandler &inErrorHandler,
+              IInputStreamFactory &inStreamFactory)
+    {
+        using namespace qt3ds;
+        using namespace qt3ds::foundation;
+
+        IRefCountedInputStream theStream(
+            *inStreamFactory.getStreamForFile(inFileData));
+        if (!theStream) {
+            QT3DS_ASSERT(0);
+            return std::shared_ptr<qt3dsdm::IDOMReader>();
+        }
+
+        qt3dsdm::SDOMElement *theElem(
+            qt3dsdm::CDOMSerializer::Read(*inFactory, *theStream, &inErrorHandler));
+
+        if (!theElem) {
+            return std::shared_ptr<qt3dsdm::IDOMReader>();
+        } else
+            return qt3dsdm::IDOMReader::CreateDOMReader(*theElem, inStringTable, inFactory);
+    }
+};
+
+struct CCustomMaterialParser
+{
+
+    static bool NavigateToMetadata(std::shared_ptr<qt3dsdm::IDOMReader> inReader)
+    {
+        return inReader->MoveToFirstChild("MetaData");
+    }
+
+    static std::shared_ptr<qt3dsdm::IDOMReader>
+    ParseFile(std::shared_ptr<qt3dsdm::IDOMFactory> inFactory,
+              std::shared_ptr<qt3dsdm::IStringTable> inStringTable, const char8_t *inFileData,
+              qt3dsdm::CXmlErrorHandler &inErrorHandler,
+              IInputStreamFactory &inStreamFactory)
+    {
+        using namespace qt3ds;
+        using namespace qt3ds::foundation;
+
+        IRefCountedInputStream theStream(
+            *inStreamFactory.getStreamForFile(inFileData));
+        if (!theStream.data()) {
+            QT3DS_ASSERT(0);
+            return std::shared_ptr<qt3dsdm::IDOMReader>();
+        }
+
+        qt3dsdm::SDOMElement *theElem(
+            qt3dsdm::CDOMSerializer::Read(*inFactory, *theStream, &inErrorHandler));
+
+        if (!theElem) {
+            return std::shared_ptr<qt3dsdm::IDOMReader>();
+        } else
+            return qt3dsdm::IDOMReader::CreateDOMReader(*theElem, inStringTable, inFactory);
+    }
+};
+
+
 std::shared_ptr<IDOMReader>
 IDocumentEditor::ParsePluginFile(const Q3DStudio::CFilePath &inFullPathToDocument,
                                  std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
                                  std::shared_ptr<IImportFailedHandler> inHandler,
-                                 qt3ds::render::IInputStreamFactory &inInputStreamFactory)
+                                 IInputStreamFactory &inInputStreamFactory)
 {
     std::shared_ptr<qt3dsdm::IStringTable> theStringTable(inStringTable);
     std::shared_ptr<IDOMFactory> theFactory(IDOMFactory::CreateDOMFactory(theStringTable));
@@ -4579,7 +4737,7 @@ std::shared_ptr<IDOMReader>
 IDocumentEditor::ParseCustomMaterialFile(const Q3DStudio::CFilePath &inFullPathToDocument,
                                          std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
                                          std::shared_ptr<IImportFailedHandler> inHandler,
-                                         qt3ds::render::IInputStreamFactory &inInputStreamFactory)
+                                         IInputStreamFactory &inInputStreamFactory)
 {
     std::shared_ptr<qt3dsdm::IStringTable> theStringTable(inStringTable);
     std::shared_ptr<IDOMFactory> theFactory(IDOMFactory::CreateDOMFactory(theStringTable));

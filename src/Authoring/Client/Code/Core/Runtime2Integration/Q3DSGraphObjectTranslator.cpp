@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1999-2002 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -26,45 +25,21 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef IDOC_SCENE_GRAPH_H
-#define IDOC_SCENE_GRAPH_H
 
-#include "Qt3DSDMHandles.h"
-#include "foundation/Qt3DSVec3.h"
-#include "Pt.h"
-namespace qt3ds {
-namespace foundation {
-    class IStringTable;
-}
-}
+#include "Q3DSGraphObjectTranslator.h"
 
-#pragma once
-namespace Q3DStudio {
-using qt3ds::QT3DSVec3;
-class Q3DSRenderBufferManager;
-class ITextRenderer
+namespace Q3DStudio
 {
-public:
-    void ReloadFonts();
-};
-class SGraphObject;
-class IPathManager;
 
-class IDocSceneGraph
+QMap<Q3DSGraphObjectTranslator *, Q3DSGraphObject *> Q3DSGraphObjectTranslator::s_translatorMap;
+
+Q3DSGraphObjectTranslator::Q3DSGraphObjectTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                                     Q3DSGraphObject &inObj)
+    : m_graphObject(&inObj)
+    , m_instanceHandle(inInstance)
+    , m_dirtyIndex(std::numeric_limits<unsigned int>::max())
 {
-protected:
-    virtual ~IDocSceneGraph() {}
-public:
-    friend class std::shared_ptr<IDocSceneGraph>;
-
-    virtual ITextRenderer *GetTextRenderer() = 0;
-    virtual QT3DSVec3 GetIntendedPosition(qt3dsdm::Qt3DSDMInstanceHandle inHandle, CPt inPoint) = 0;
-    virtual Q3DSRenderBufferManager *GetBufferManager() = 0;
-    virtual IPathManager *GetPathManager() = 0;
-    virtual qt3ds::foundation::IStringTable *GetRenderStringTable() = 0;
-    // Request that this object renders.  May be ignored if a transaction
-    // is ongoing so we don't get multiple rendering per transaction.
-    virtual void RequestRender() = 0;
-};
+    s_translatorMap.insert(this, m_graphObject);
 }
-#endif
+
+}

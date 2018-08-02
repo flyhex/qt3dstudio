@@ -157,9 +157,9 @@ void CStudioSystem::ResetDatabase()
                                        + QStringLiteral("/DataModelMetadata/en-us/MetaData.xml")));
     // Load the new meta data
     {
-        qt3ds::foundation::CFileSeekableIOStream theStream(theFullPath,
-                                                           qt3ds::foundation::FileReadFlags());
-        if (theStream.IsOpen() == false) {
+        QFile theStream(theFullPath.toQString());
+
+        if (theStream.open(QFile::ReadOnly) == false) {
             QT3DS_ASSERT(false);
             return;
         }

@@ -57,9 +57,9 @@ const QVector<ChooserModelBase::FixedItem> MeshChooserModel::getFixedItems() con
         CDoc *doc = g_StudioApp.GetCore()->GetDoc();
         for (int i = 0; i < primitives.size(); i++) {
             auto item = primitives.at(i);
-            const wchar_t *itemName = doc->GetBufferCache().GetPrimitiveName(item.primitiveType());
+            QString itemName = doc->GetBufferCache().GetPrimitiveName(item.primitiveType());
             if (itemName[0] == L'#')
-                items.append({ OBJTYPE_MODEL, item.icon(), QString::fromWCharArray(itemName + 1) });
+                items.append({ OBJTYPE_MODEL, item.icon(), itemName.mid(1) });
         }
     }
 

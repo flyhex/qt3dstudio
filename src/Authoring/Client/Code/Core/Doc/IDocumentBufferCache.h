@@ -34,8 +34,8 @@
 #define INCLUDED_IDOCUMENTBUFFERCACHE_H
 #include "Qt3DSFileTools.h"
 #include "StudioObjectTypes.h"
-#include "QS3DImageTextureData.h"
-#include "QS3DRenderMesh.h"
+#include "Q3DSImageTextureData.h"
+#include "Q3DSRenderMesh.h"
 
 #include <QtCore/qfileinfo.h>
 
@@ -45,12 +45,14 @@ namespace Q3DStudio {
 
 struct SModelBufferAndPath
 {
-    QS3DRenderMesh *m_modelBuffer;
+    Q3DSRenderMesh *m_modelBuffer;
     QFileInfo m_filePath;
+    QString m_identifier;
 
-    SModelBufferAndPath(QS3DRenderMesh *inBuffer, const QFileInfo &inPath)
+    SModelBufferAndPath(Q3DSRenderMesh *inBuffer, const QFileInfo &inPath, const QString &identifier)
         : m_modelBuffer(inBuffer)
         , m_filePath(inPath)
+        , m_identifier(identifier)
     {
     }
 
@@ -59,8 +61,8 @@ struct SModelBufferAndPath
     {
     }
 
-    operator QS3DRenderMesh *() { return m_modelBuffer; }
-    QS3DRenderMesh *operator->() { return m_modelBuffer; }
+    operator Q3DSRenderMesh *() { return m_modelBuffer; }
+    Q3DSRenderMesh *operator->() { return m_modelBuffer; }
 };
 
 class IDocumentBufferCache
@@ -69,8 +71,8 @@ protected:
     virtual ~IDocumentBufferCache() {}
 public:
     friend class std::shared_ptr<IDocumentBufferCache>;
-    virtual const wchar_t **GetPrimitiveNames() = 0;
-    virtual const wchar_t *GetPrimitiveName(EPrimitiveType inPrimitiveType) = 0;
+    virtual QStringList GetPrimitiveNames() = 0;
+    virtual QString GetPrimitiveName(EPrimitiveType inPrimitiveType) = 0;
     // Get or create the model buffer.  May return NULL if the sourcepath doesn't
     // map to a loadable model buffer.
     // Takes a *relative* path from the document
@@ -79,10 +81,10 @@ public:
     // Get or create the image buffer.  May return NULL if the sourcepath doesn't
     // map to a loadable image buffer.
     // Takes a *relative* path from the document
-    virtual QS3DImageTextureData GetOrCreateImageBuffer(const QFileInfo &inSourcePath) = 0;
+    virtual Q3DSImageTextureData GetOrCreateImageBuffer(const QFileInfo &inSourcePath) = 0;
 
     virtual void
-    GetImageBuffers(std::vector<std::pair<QString, QS3DImageTextureData>> &outBuffers) = 0;
+    GetImageBuffers(std::vector<std::pair<QString, Q3DSImageTextureData>> &outBuffers) = 0;
 
     // Takes a *relative* path from the document
     virtual void InvalidateBuffer(const QFileInfo &inSourcePath) = 0;

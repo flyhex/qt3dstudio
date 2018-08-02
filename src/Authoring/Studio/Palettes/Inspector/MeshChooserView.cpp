@@ -75,9 +75,8 @@ void MeshChooserView::setSelectedMeshName(const QString &name)
     hide();
     bool resourceName = false;
     QString meshName = QLatin1Char('#') + name;
-    const wchar_t **files = g_StudioApp.GetCore()->GetDoc()->GetBufferCache().GetPrimitiveNames();
-    for (const wchar_t **item = files; item && *item; ++item) {
-        QString primitive = QString::fromWCharArray(*item);
+    QStringList files = g_StudioApp.GetCore()->GetDoc()->GetBufferCache().GetPrimitiveNames();
+    for (auto &primitive : files) {
         if (primitive == meshName) {
             resourceName = true;
             break;

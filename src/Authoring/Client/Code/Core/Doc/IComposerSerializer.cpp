@@ -44,6 +44,8 @@
 #include "IDocumentEditor.h"
 #include "Q3DStudioNVFoundation.h"
 
+#include "Q3DSInputStreamFactory.h"
+
 #include "Qt3DSDMGuides.h"
 #include "foundation/Qt3DSLogging.h"
 #include <unordered_map>
@@ -111,7 +113,7 @@ struct WStrOps<GuideDirections::Enum>
 
 namespace {
 
-typedef qt3ds::foundation::NVScopedRefCounted<qt3ds::render::IInputStreamFactory> TStreamFactoryPtr;
+typedef QSharedPointer<Q3DStudio::IInputStreamFactory> TStreamFactoryPtr;
 
 using std::hash;
 
@@ -384,7 +386,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         , m_ImportFailedHandler(inFailedHandler)
         , m_PathManager(inPathManager)
         , m_Foundation(Q3DStudio::Foundation::SStudioFoundation::Create())
-        , m_InputStreamFactory(qt3ds::render::IInputStreamFactory::Create(*m_Foundation.m_Foundation))
+        , m_InputStreamFactory(Q3DStudio::IInputStreamFactory::Create())
         , m_PreserveFileIds(true)
     {
     }
@@ -2498,8 +2500,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                 if (theFullPath.Exists()) {
                                     std::vector<SMetaDataLoadWarning> warnings;
                                     // Now the magic section
-                                    NVScopedRefCounted<qt3ds::render::IRefCountedInputStream>
-                                            theStream = m_InputStreamFactory->GetStreamForFile(
+                                    Q3DStudio::IRefCountedInputStream
+                                            *theStream = m_InputStreamFactory->getStreamForFile(
                                                 theFullPath.toQString());
                                     if (theStream) {
                                         m_MetaData.LoadEffectInstance(
@@ -2507,7 +2509,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                                     theMaster,
                                                     theFullPath.GetFileStem().c_str(),
                                                     warnings,
-                                                    *theStream);
+                                                    *theStream->data());
                                     }
                                 } else {
                                     QT3DS_ASSERT(false);
@@ -2529,8 +2531,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                            L"material", CString::ENDOFSTRING, false)) {
                                 if (theFullPath.Exists()) {
                                     std::vector<SMetaDataLoadWarning> warnings;
-                                    NVScopedRefCounted<qt3ds::render::IRefCountedInputStream>
-                                            theStream = m_InputStreamFactory->GetStreamForFile(
+                                    IRefCountedInputStream
+                                            *theStream = m_InputStreamFactory->getStreamForFile(
                                                 theFullPath.toQString());
                                     if (theStream) {
                                         // Now the magic section
@@ -2539,7 +2541,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                                     theMaster,
                                                     theFullPath.GetFileStem().c_str(),
                                                     warnings,
-                                                    *theStream);
+                                                    *theStream->data());
                                     }
                                 } else {
                                     QT3DS_ASSERT(false);

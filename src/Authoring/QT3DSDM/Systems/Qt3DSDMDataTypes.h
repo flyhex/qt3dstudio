@@ -186,6 +186,11 @@ public:
         : m_Data(inOther.m_Data)
     {
     }
+    CDataStr(const QString &inStr)
+    {
+        m_Data.resize(inStr.length()+1);
+        inStr.toWCharArray(&m_Data[0]);
+    }
     virtual ~CDataStr() {}
 
     CDataStr &operator=(const CDataStr &inOther)

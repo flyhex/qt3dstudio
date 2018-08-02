@@ -50,6 +50,7 @@
 #include "Utility/CoreConst.h"
 
 #include <QtCore/quuid.h>
+#include <QtCore/qfileinfo.h>
 
 //==============================================================================
 //	Forwards
@@ -170,7 +171,7 @@ class CDoc : public QObject, public IDoc, public ICmdStackModifier
 public:
     friend struct SDocumentDataModelListener;
     CDoc(CCore *inCore);
-    virtual ~CDoc();
+    virtual ~CDoc() override;
 
     DEFINE_OBJECT_COUNTER(CDoc)
 
@@ -193,6 +194,8 @@ public:
     Q3DStudio::CString GetRelativePathToDoc(const Q3DStudio::CFilePath &inPath);
     Q3DStudio::CString GetResolvedPathToDoc(const Q3DStudio::CFilePath &inPath);
     QString getRelativePath() const;
+    QString GetResolvedPathToDoc(const QFileInfo &inPath);
+    QString GetRelativePathToDoc(const QFileInfo &inPath);
 
     Qt3DSFile CreateUntitledDocument() const;
 

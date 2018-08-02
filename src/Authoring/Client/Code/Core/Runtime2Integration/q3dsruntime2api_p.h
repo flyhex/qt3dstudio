@@ -41,5 +41,7 @@
 //
 
 #include "q3dsengine_p.h"
+#include "q3dsbehaviorobject_p.h"
+#include "q3dsuippresentation_p.h"
 
 #endif

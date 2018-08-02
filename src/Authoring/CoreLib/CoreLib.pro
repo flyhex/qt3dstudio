@@ -14,7 +14,7 @@ contains(QMAKE_TARGET.arch, x86_64) {
     DEFINES += _AMD64_
 }
 
-QT += widgets
+QT += widgets 3dstudioruntime2-private
 
 macos:DEFINES += WIDE_IS_DIFFERENT_TYPE_THAN_CHAR16_T QT3DS_LITTLE_ENDIAN
 
@@ -54,8 +54,9 @@ INCLUDEPATH += \
     ../Common/Code/EulerAngles \
     ../Common/Code/Serialize \
     ../../Runtime/Source/DataModel/Include \
-    ../../Runtime/Source/qt3d-runtime/src/runtime \
-    ../../Runtime/Source/qt3d-runtime/src/runtime/api \
+    ../../Runtime/qt3d-runtime/src/runtime \
+    ../../Runtime/qt3d-runtime/src/runtime/api \
+    ../../Runtime/qt3d-runtime/src/runtime/behaviorapi \
     ../../3rdparty/EASTL/UnknownVersion/include \
     $$QMAKE_INCDIR_FBX \
     ../../3rdparty/ColladaDOM/1.4.0/dom/include \
@@ -109,7 +110,6 @@ SOURCES += \
     ../Client/Code/Core/Doc/ClientDataModelBridge/ClientDataModelBridge.cpp \
     ../Client/Code/Core/Timer/Timer.cpp \
     ../Client/Code/Core/VirtualAssets/PlaybackClock.cpp \
-    ../Client/Code/Core/VirtualAssets/VClockPolicy.cpp \
     ../QT3DSIMP/Qt3DSImportLib/Qt3DSImport.cpp \
     ../QT3DSIMP/Qt3DSImportLib/Qt3DSImportComposerTypes.cpp \
     ../QT3DSIMP/Qt3DSImportLib/Qt3DSImportMesh.cpp \
@@ -122,7 +122,8 @@ SOURCES += \
     ../QT3DSIMP/Qt3DSImportSGTranslation/Qt3DSImportSceneGraphTranslation.cpp \
     ../Client/Code/Core/Utility/q3dsdirsystem.cpp \
     ../Client/Code/Core/Utility/q3dsdirwatcher.cpp \
-    ../Client/Code/Core/Runtime2Integration/Q3DSDocumentBufferCache.cpp
+    ../Client/Code/Core/Runtime2Integration/Q3DSDocumentBufferCache.cpp \
+    ../Client/Code/Core/Runtime2Integration/Q3DSGraphObjectTranslator.cpp
 
 HEADERS += \
     ../Client/Code/Core/Utility/q3dsdirsystem.h \
@@ -131,4 +132,9 @@ HEADERS += \
     ../Client/Code/Core/Core/Core.h \
     ../Client/Code/Core/Runtime2Integration/Q3DSRenderMesh.h \
     ../Client/Code/Core/Runtime2Integration/Q3DSImageTextureData.h \
-    ../Client/Code/Core/Runtime2Integration/q3dsruntime2api.h
+    ../Client/Code/Core/Runtime2Integration/q3dsruntime2api_p.h \
+    ../Client/Code/Core/Runtime2Integration/Q3DSInputStreamFactory.h \
+    ../Client/Code/Core/Runtime2Integration/Q3DSRenderBufferManager.h \
+    ../Client/Code/Core/Runtime2Integration/Q3DSRenderWidgets.h \
+    ../Client/Code/Core/Runtime2Integration/Q3DSGraphObjectTranslator.h \
+    ../Client/Code/Core/Runtime2Integration/Q3DSTranslation.h

@@ -29,7 +29,7 @@
 #ifndef QT3DS_STUDIO_RENDERER_WIDGET_H
 #define QT3DS_STUDIO_RENDERER_WIDGET_H
 #pragma once
-#include "Qt3DSRenderWidgets.h"
+#include "Q3DSRenderWidgets.h"
 #include "foundation/Qt3DSRefCounted.h"
 #include "StudioPickValues.h"
 

@@ -497,9 +497,9 @@ public:
 class CDOMSerializer
 {
 public:
-    static void WriteXMLHeader(IOutStream &inStream);
-    static void Write(SDOMElement &inElement, IOutStream &inStream, QT3DSU32 inTabs = 0);
-    static SDOMElement *Read(IDOMFactory &inFactory, qt3ds::foundation::IInStream &inStream,
+    static void WriteXMLHeader(QIODevice &inStream);
+    static void Write(SDOMElement &inElement, QIODevice &inStream, QT3DSU32 inTabs = 0);
+    static SDOMElement *Read(IDOMFactory &inFactory, QIODevice &inStream,
                              CXmlErrorHandler *inErrorHandler = NULL);
 };
 }

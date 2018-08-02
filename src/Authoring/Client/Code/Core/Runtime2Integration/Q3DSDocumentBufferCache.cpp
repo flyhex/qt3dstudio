@@ -27,47 +27,45 @@
 **
 ****************************************************************************/
 
-#include "Qt3DSCommonPrecompile.h"
 #include "IDocumentBufferCache.h"
+#include "Q3DSRenderBufferManager.h"
 #include "Doc.h"
-
-#include "foundation/StringTable.h"
-
 #include "Core.h"
 #include "Dispatch.h"
 #include "IDocSceneGraph.h"
+
 #include <unordered_map>
+
 
 using namespace Q3DStudio;
 
 namespace {
 
-using std::unordered_map;
-typedef unordered_map<const wchar_t *, SRenderMesh *> TStringBufferMap;
+typedef QHash<QString, Q3DSRenderMesh *> TStringBufferMap;
 
 struct SModelBufferOrImage
 {
     // A file can contain multiple model buffers and we want to be accurate about reflecting this.
     TStringBufferMap m_ModelBuffers;
-    Option<SImageTextureData> m_ImageBuffer;
+    QSharedPointer<Q3DSImageTextureData> m_ImageBuffer;
+    QHash<QString, QString> m_ModelBuffersidentifiers;
 
     SModelBufferOrImage() {}
-    SModelBufferOrImage(SImageTextureData &imageBuffer)
-        : m_ImageBuffer(imageBuffer)
+    SModelBufferOrImage(Q3DSImageTextureData &imageBuffer)
+        : m_ImageBuffer(&imageBuffer)
     {
     }
-    void AddModelBuffer(const wchar_t *inBufferPath, SRenderMesh *inBuffer)
+    void AddModelBuffer(const QString &inBufferPath, Q3DSRenderMesh *inBuffer,
+                        const QString &identifier)
     {
-        pair<TStringBufferMap::iterator, bool> theInsertResult(
-            m_ModelBuffers.insert(make_pair(inBufferPath, inBuffer)));
-        if (theInsertResult.second == false)
-            theInsertResult.first->second = inBuffer;
+        m_ModelBuffers.insert(inBufferPath, inBuffer);
+        m_ModelBuffersidentifiers.insert(inBufferPath, identifier);
     }
-    SModelBufferAndPath FindModelBuffer(const wchar_t *inFullPath)
+    SModelBufferAndPath FindModelBuffer(const QString &inFullPath)
     {
-        TStringBufferMap::iterator theBuffer = m_ModelBuffers.find(inFullPath);
-        if (theBuffer != m_ModelBuffers.end())
-            return SModelBufferAndPath(theBuffer->second, CFilePath(inFullPath));
+        if (m_ModelBuffers.contains(inFullPath))
+            return SModelBufferAndPath(m_ModelBuffers[inFullPath], QFileInfo(inFullPath),
+                                       m_ModelBuffersidentifiers[inFullPath]);
         return SModelBufferAndPath();
     }
     void Release() {}
@@ -80,22 +78,20 @@ struct SDocBufferCache : public IDocumentBufferCache
     // buffer manager because in some cases will be destroyed after the gl context
     // is shut down thus causing chaos when the vertex buffers are released.
 
-    typedef unordered_map<const wchar_t *, SModelBufferOrImage> TBufferHashMap;
+    typedef QHash<QString, SModelBufferOrImage> TBufferHashMap;
 
-    qt3dsdm::TStringTablePtr m_StringTablePtr;
     TBufferHashMap m_Buffers;
     bool m_HasPrimitiveBuffers;
 
     SDocBufferCache(CDoc &inDoc)
         : m_Doc(inDoc)
-        , m_StringTablePtr(qt3dsdm::IStringTable::CreateStringTable())
         , m_HasPrimitiveBuffers(false)
     {
     }
 
-    ~SDocBufferCache() { m_Buffers.clear(); }
+    ~SDocBufferCache() override { m_Buffers.clear(); }
 
-    IBufferManager *GetBufferManager()
+    Q3DSRenderBufferManager *GetBufferManager()
     {
         if (m_Doc.GetSceneGraph())
             return m_Doc.GetSceneGraph()->GetBufferManager();
@@ -110,62 +106,56 @@ struct SDocBufferCache : public IDocumentBufferCache
             GetBufferManager()->Clear();
     }
 
-    void InvalidateBuffer(const CFilePath &inPath) override
+    void InvalidateBuffer(const QFileInfo &inPath) override
     {
-        CFilePath theFullPath = m_Doc.GetResolvedPathToDoc(inPath);
-        if (GetBufferManager()) {
-            GetBufferManager()->InvalidateBuffer(
-                GetBufferManager()->GetStringTable().RegisterStr(theFullPath.toCString()));
-        }
+        QString theFullPath = m_Doc.GetResolvedPathToDoc(inPath);
+        if (GetBufferManager())
+            GetBufferManager()->InvalidateBuffer(theFullPath);
 
-        TBufferHashMap::iterator entry(
-            m_Buffers.find(m_StringTablePtr->RegisterStr(inPath.toCString())));
-        if (entry != m_Buffers.end()) {
-            const_cast<SModelBufferOrImage &>(entry->second).Release();
-            m_Buffers.erase(entry);
-            m_Doc.GetCore()->GetDispatch()->FireDocumentBufferCacheInvalidated(inPath.toCString());
+        const QString path = inPath.filePath();
+        if (m_Buffers.contains(path)) {
+            m_Buffers[path].Release();
+            m_Buffers.remove(path);
+            m_Doc.GetCore()->GetDispatch()
+                    ->FireDocumentBufferCacheInvalidated(CString::fromQString(path));
         }
     }
 
     // Names are declared in the same order as the primitives
     // offset by the empty primitive
-    const wchar_t **GetPrimitiveNames() override
+    QStringList GetPrimitiveNames() override
     {
-        static const wchar_t *retval[] = {
-            L"#Rectangle", L"#Sphere", L"#Cone", L"#Cylinder", L"#Cube", nullptr,
+        static const QStringList retval = {
+            QStringLiteral("#Rectangle"), QStringLiteral("#Sphere"),
+            QStringLiteral("#Cone"), QStringLiteral("#Cylinder"),
+            QStringLiteral("#Cube")
         };
         return retval;
     }
 
-    const wchar_t *GetPrimitiveName(EPrimitiveType inPrimitiveType) override
+    QString GetPrimitiveName(EPrimitiveType inPrimitiveType) override
     {
         if (inPrimitiveType != PRIMITIVETYPE_UNKNOWN) {
             int theType(inPrimitiveType - 1);
-            const wchar_t **theNames = GetPrimitiveNames();
-            for (const wchar_t **theIter = theNames; theIter && *theIter; ++theIter, --theType) {
-                if (theType == 0)
-                    return *theIter;
-            }
+            if (GetPrimitiveNames().size() < theType)
+                return GetPrimitiveNames()[theType];
         }
-        return L"";
+        return QStringLiteral("");
     }
 
-    void AddModelBuffer(const CFilePath &inFile, SRenderMesh *inBuffer)
+    void AddModelBuffer(const QFileInfo inFile, Q3DSRenderMesh *inBuffer, const QString &identifier)
     {
-        const wchar_t *thePath(m_StringTablePtr->RegisterStr(inFile.toCString()));
-        TBufferHashMap::iterator theBufPtr =
-            m_Buffers.insert(make_pair(thePath, SModelBufferOrImage())).first;
-        const wchar_t *theFileWithId(m_StringTablePtr->RegisterStr(thePath));
-        theBufPtr->second.AddModelBuffer(theFileWithId, inBuffer);
+        const QString path = inFile.filePath();
+        m_Buffers.insert(path, SModelBufferOrImage());
+        m_Buffers[path].AddModelBuffer(path, inBuffer, identifier);
     }
 
     void BuildPrimitive(EPrimitiveType inPrimitiveType)
     {
-        const wchar_t *thePrimitiveName(GetPrimitiveName(inPrimitiveType));
+        QString thePrimitiveName(GetPrimitiveName(inPrimitiveType));
         if (GetBufferManager()) {
-            SRenderMesh *theBuffer = GetBufferManager()->LoadMesh(
-                GetBufferManager()->GetStringTable().RegisterStr(thePrimitiveName));
-            AddModelBuffer(CFilePath(thePrimitiveName), theBuffer);
+            Q3DSRenderMesh *theBuffer = GetBufferManager()->LoadMesh(thePrimitiveName);
+            AddModelBuffer(CFilePath(thePrimitiveName), theBuffer, QString::number(0));
         }
     }
 
@@ -181,69 +171,62 @@ struct SDocBufferCache : public IDocumentBufferCache
         BuildPrimitive(PRIMITIVETYPE_SPHERE);
     }
 
-    SModelBufferAndPath GetOrCreateModelBuffer(const CFilePath &inPath) override
+    SModelBufferAndPath GetOrCreateModelBuffer(const QFileInfo &inPath) override
     {
         CheckAndCreatePrimitiveBuffers();
+        const QString path = inPath.filePath();
 
-        CString path = inPath.toCString();
-        const TBufferHashMap::iterator entry(
-            m_Buffers.find(m_StringTablePtr->RegisterStr(path)));
-        if (entry != m_Buffers.end()) {
-            SModelBufferAndPath retval =
-                entry->second.FindModelBuffer(m_StringTablePtr->RegisterStr(path));
-            if (retval.m_ModelBuffer)
+        if (m_Buffers.contains(path)) {
+            SModelBufferAndPath retval = m_Buffers[path].FindModelBuffer(path);
+            if (retval.m_modelBuffer)
                 return retval;
         }
 
         if (path.size() == 0 || path[0] == '#')
             return SModelBufferAndPath();
 
-        CFilePath theFullPath(m_Doc.GetResolvedPathToDoc(path));
+        QString theFullPath(m_Doc.GetResolvedPathToDoc(inPath));
         SModelBufferAndPath retval;
-        if (theFullPath.IsFile()) {
+        if (inPath.isFile()) {
             if (GetBufferManager()) {
-                SRenderMesh *theMesh = GetBufferManager()->LoadMesh(
-                    GetBufferManager()->GetStringTable().RegisterStr(theFullPath.toCString()));
+                Q3DSRenderMesh *theMesh = GetBufferManager()->LoadMesh(theFullPath);
                 if (theMesh) {
-                    theFullPath.SetIdentifier(QString::number(theMesh->m_MeshId));
-                    retval = SModelBufferAndPath(theMesh, theFullPath);
+                    retval = SModelBufferAndPath(theMesh, theFullPath,
+                                                 QString::number(theMesh->m_meshId));
                 }
             }
         }
-        if (retval.m_ModelBuffer)
-            AddModelBuffer(inPath, retval.m_ModelBuffer);
+        if (retval.m_modelBuffer)
+            AddModelBuffer(inPath, retval.m_modelBuffer, retval.m_identifier);
         return retval;
     }
 
-    SImageTextureData GetOrCreateImageBuffer(const CFilePath &inPath) override
+    Q3DSImageTextureData GetOrCreateImageBuffer(const QFileInfo &inPath) override
     {
-        const TBufferHashMap::iterator entry(
-                    m_Buffers.find(m_StringTablePtr->RegisterStr(inPath.toCString())));
-        if (entry != m_Buffers.end() && entry->second.m_ImageBuffer.hasValue())
-            return entry->second.m_ImageBuffer;
-        CFilePath thePath(m_Doc.GetResolvedPathToDoc(inPath));
-        SImageTextureData retval;
-        if (thePath.IsFile() && GetBufferManager()) {
-            retval = GetBufferManager()->LoadRenderImage(
-                GetBufferManager()->GetStringTable().RegisterStr(thePath.toCString()));
+        const QString path = inPath.filePath();
+        if (m_Buffers.contains(path)) {
+            if (!m_Buffers[path].m_ImageBuffer.isNull())
+                return *m_Buffers[path].m_ImageBuffer.data();
         }
-        if (retval.m_Texture) {
-            m_Buffers.insert(
-                make_pair(m_StringTablePtr->RegisterStr(
-                              inPath.toCString()), SModelBufferOrImage(retval)));
-        }
+        Q3DSImageTextureData retval;
+        QString rpath = m_Doc.GetResolvedPathToDoc(inPath);
+        if (inPath.isFile() && GetBufferManager())
+            retval = GetBufferManager()->LoadRenderImage(rpath);
+
+        if (retval.m_texture)
+            m_Buffers.insert(path, SModelBufferOrImage(retval));
+
         return retval;
     }
 
     virtual void
-    GetImageBuffers(std::vector<std::pair<
-                    Q3DStudio::CString, SImageTextureData>> &outBuffers) override
+    GetImageBuffers(std::vector<std::pair<QString, Q3DSImageTextureData>> &outBuffers) override
     {
         for (TBufferHashMap::iterator theIter = m_Buffers.begin(), theEnd = m_Buffers.end();
              theIter != theEnd; ++theIter) {
-            if (theIter->second.m_ImageBuffer.hasValue()) {
+            if (!theIter->m_ImageBuffer.isNull()) {
                 outBuffers.push_back(
-                    make_pair(Q3DStudio::CString(theIter->first), theIter->second.m_ImageBuffer));
+                    std::make_pair(theIter.key(), *theIter.value().m_ImageBuffer));
             }
         }
     }

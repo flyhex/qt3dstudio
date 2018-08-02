@@ -63,7 +63,6 @@ struct STranslationLog;
 
 namespace qt3ds {
 namespace render {
-    class IInputStreamFactory;
     class ITextRenderer;
 }
 }
@@ -72,6 +71,7 @@ namespace Q3DStudio {
 using std::wstring;
 class CGraph;
 class IInternalDocumentEditor;
+class IInputStreamFactory;
 
 class IImportFailedHandler
 {
@@ -421,19 +421,19 @@ public:
     ParseScriptFile(const Q3DStudio::CFilePath &inFullPathToDocument,
                     std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
                     std::shared_ptr<IImportFailedHandler> inHandler,
-                    qt3ds::render::IInputStreamFactory &inInputStreamFactory);
+                    Q3DStudio::IInputStreamFactory &inInputStreamFactory);
 
     static std::shared_ptr<IDOMReader>
     ParsePluginFile(const Q3DStudio::CFilePath &inFullPathToDocument,
                     std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
                     std::shared_ptr<IImportFailedHandler> inHandler,
-                    qt3ds::render::IInputStreamFactory &inInputStreamFactory);
+                    Q3DStudio::IInputStreamFactory &inInputStreamFactory);
 
     static std::shared_ptr<IDOMReader>
     ParseCustomMaterialFile(const Q3DStudio::CFilePath &inFullPathToDocument,
                             std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
                             std::shared_ptr<IImportFailedHandler> inHandler,
-                            qt3ds::render::IInputStreamFactory &inInputStreamFactory);
+                            Q3DStudio::IInputStreamFactory &inInputStreamFactory);
 
     static void DisplayImportErrors(const QString &inImportSource,
                                     qt3dsimp::ImportErrorCodes::Enum inImportError,

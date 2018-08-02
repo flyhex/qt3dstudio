@@ -1626,6 +1626,19 @@ Q3DStudio::CString CDoc::GetRelativePathToDoc(const Q3DStudio::CFilePath &inPath
     return thePath;
 }
 
+QString CDoc::GetRelativePathToDoc(const QFileInfo &inPath)
+{
+    QString documentDirectory = GetDocumentDirectory().toQString();
+    QDir basePathDir = inPath.canonicalFilePath();
+    if (basePathDir.exists() && basePathDir.exists(documentDirectory)) {
+        basePathDir = QDir(documentDirectory);
+        QString relPath = basePathDir.relativeFilePath(inPath.absoluteFilePath());
+        return relPath;
+    }
+    return inPath.filePath();
+}
+
+
 //=============================================================================
 /**
  * Given a path (may be relative or absolute), return the path with respect to doc.
@@ -1642,6 +1655,15 @@ Q3DStudio::CString CDoc::GetResolvedPathToDoc(const Q3DStudio::CFilePath &inPath
         return Q3DStudio::CFilePath::CombineBaseAndRelative(GetDocumentDirectory(), inPath);
     }
     return inPath.toCString();
+}
+
+QString CDoc::GetResolvedPathToDoc(const QFileInfo &inPath)
+{
+    if (inPath.isAbsolute() == false) {
+        ASSERT(m_DocumentPath.Exists()); // Sanity check that document path has been set properly.
+        return GetDocumentDirectory().toQString() + "/" + inPath.filePath();
+    }
+    return inPath.absolutePath();
 }
 
 //=============================================================================

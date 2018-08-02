@@ -184,10 +184,18 @@
     };
 */
 
-class Q3SDRenderMesh
+#include "q3dsmesh_p.h"
+
+namespace Q3DStudio {
+
+class Q3DSRenderMesh
 {
 public:
-
+    QVector<Q3DSMesh> m_subsets;
+    QStringList m_subsetNames;
+    unsigned int m_meshId;
 };
+
+} // namespace Q3DStudio
 
 #endif

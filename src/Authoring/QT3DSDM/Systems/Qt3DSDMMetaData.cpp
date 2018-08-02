@@ -2816,7 +2816,7 @@ public:
     void LoadEffectInstance(const char *inShaderFile, Qt3DSDMInstanceHandle inInstance,
                             const TCharStr &inObjectName,
                             std::vector<SMetaDataLoadWarning> &outWarnings,
-                            qt3ds::foundation::IInStream &inStream) override
+                            QFile &inStream) override
     {
         QString shaderFile(inShaderFile);
         if (shaderFile.endsWith(".effect")) {
@@ -3793,7 +3793,7 @@ public:
                                      Qt3DSDMInstanceHandle inInstance,
                                      const TCharStr &inObjectName,
                                      std::vector<SMetaDataLoadWarning> &outWarnings,
-                                     qt3ds::foundation::IInStream &inStream) override
+                                     QFile &inStream) override
     {
         std::shared_ptr<IDOMFactory> theFactory(
                     IDOMFactory::CreateDOMFactory(m_DataCore->GetStringTablePtr()));
@@ -3825,7 +3825,7 @@ public:
     void LoadMaterialInstance(const char *inShaderFile, Qt3DSDMInstanceHandle inInstance,
                               const TCharStr &inName,
                               std::vector<SMetaDataLoadWarning> &outWarnings,
-                              qt3ds::foundation::IInStream &inStream) override
+                              QFile &inStream) override
     {
         QString shaderFile(inShaderFile);
         if (shaderFile.endsWith(".material")) {
@@ -4072,7 +4072,7 @@ public:
                                          Qt3DSDMInstanceHandle inInstance,
                                          const TCharStr &inObjectName,
                                          std::vector<SMetaDataLoadWarning> &outWarnings,
-                                         qt3ds::foundation::IInStream &inStream) override
+                                         QFile &inStream) override
     {
         std::shared_ptr<IDOMFactory> theFactory(
                     IDOMFactory::CreateDOMFactory(m_DataCore->GetStringTablePtr()));

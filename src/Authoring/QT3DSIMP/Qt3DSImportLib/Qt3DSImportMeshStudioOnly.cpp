@@ -35,6 +35,8 @@
 using namespace qt3dsimp;
 using namespace Q3DStudio;
 
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
+
 Mesh *Mesh::Load(const char *inFilePath)
 {
     Q3DStudio::CFilePath thePath(inFilePath);
@@ -67,7 +69,7 @@ QT3DSU32 Mesh::SaveMulti(const char *inFilePath) const
     Q3DStudio::CFilePath thePath(inFilePath);
     FileOpenFlags theFlags = thePath.Exists() ? FileAppendFlags() : FileWriteFlags();
     CFileSeekableIOStream stream(thePath.toCString(), theFlags);
-    return SaveMulti(allocator, stream);
+    SaveMulti(allocator, stream);
 }
 
 // Load a single mesh using c file API and malloc/free.
@@ -112,3 +114,4 @@ bool Qt3DSFileToolsSeekableMeshBufIOStream::Write(NVConstDataRef<QT3DSU8> data)
 {
     return m_File->Write(data.begin(), data.size()) == data.size();
 }
+#endif

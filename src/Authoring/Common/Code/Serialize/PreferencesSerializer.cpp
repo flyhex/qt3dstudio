@@ -56,6 +56,7 @@ void CPreferencesSerializer::SetPreferencesFile(const Q3DStudio::CString &theFil
 
     SDOMElement *topElement = NULL;
     if (m_PreferencesFile.IsFile()) {
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
         qt3ds::foundation::CFileSeekableIOStream theInStream(
             m_PreferencesFile.filePath(), qt3ds::foundation::FileReadFlags());
         if (theInStream.IsOpen() == false) {
@@ -70,6 +71,7 @@ void CPreferencesSerializer::SetPreferencesFile(const Q3DStudio::CString &theFil
             m_FileSet = false;
             return;
         }
+#endif
     } else {
         topElement = m_PreferencesFactory->NextElement(L"Settings");
     }
@@ -243,12 +245,13 @@ void CPreferencesSerializer::Serialize()
         if (!dir.exists()) {
             dir.mkpath(preferencesDir);
         }
-
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
         // Serialize the preferences in to the XML file
         qt3ds::foundation::CFileSeekableIOStream stream(
             m_PreferencesFile.filePath(), qt3ds::foundation::FileWriteFlags());
         stream.SetPosition(0, qt3ds::foundation::SeekPosition::Begin);
         CDOMSerializer::WriteXMLHeader(stream);
         CDOMSerializer::Write(*m_PreferencesIO.first->GetTopElement(), stream);
+#endif
     }
 }

@@ -37,6 +37,9 @@
 #include "foundation/StrConvertUTF.h"
 #include "foundation/StringTable.h"
 #include "utf8.h"
+
+#include <QtCore/qbytearray.h>
+
 #ifdef QT3DS_VC
 #include <winsock2.h>
 #include <windows.h> //output debug string
@@ -87,12 +90,12 @@ struct SDOMElement
 
     SDOMElement(TXMLCharPtr nm)
         : m_Name(nm)
-        , m_FirstAttribute(NULL)
-        , m_LastAttribute(NULL)
-        , m_Parent(NULL)
-        , m_FirstChild(NULL)
-        , m_LastChild(NULL)
-        , m_NextSibling(NULL)
+        , m_FirstAttribute(nullptr)
+        , m_LastAttribute(nullptr)
+        , m_Parent(nullptr)
+        , m_FirstChild(nullptr)
+        , m_LastChild(nullptr)
+        , m_NextSibling(nullptr)
         , m_Value("")
     {
     }
@@ -793,34 +796,33 @@ struct SDOMWriter : public IDOMWriter, public SDOMReader
 
 struct SimpleXmlWriter
 {
-    IOutStream &m_Stream;
+    QIODevice &m_file;
     eastl::vector<eastl::pair<TXMLCharPtr, bool>> m_OpenElements;
     bool m_ElementOpen;
     wchar_t m_PrintBuf[256];
     QT3DSU32 m_Tabs;
     eastl::basic_string<char8_t> m_ConvertBuf;
     eastl::basic_string<TWCharEASTLConverter::TCharType> m_WideBuffer;
+    QTextStream m_stream;
 
-    SimpleXmlWriter(IOutStream &stream, QT3DSU32 inTabs = 0)
-        : m_Stream(stream)
+    SimpleXmlWriter(QIODevice &stream, QT3DSU32 inTabs = 0)
+        : m_file(stream)
         , m_ElementOpen(false)
         , m_Tabs(inTabs)
+        , m_stream(&m_file)
     {
     }
     void Write(TWideXMLCharPtr data)
     {
-        if (!IsTrivial(data)) {
-            ConvertUTF(reinterpret_cast<const TWCharEASTLConverter::TCharType *>(data), 0,
-                       m_ConvertBuf);
-            m_Stream.Write(m_ConvertBuf.begin(), m_ConvertBuf.size());
-        }
+        if (!IsTrivial(data))
+            m_stream << data;
     }
     void Write(const char8_t *data)
     {
-        if (!IsTrivial(data)) {
-            m_Stream.Write(data, (QT3DSU32)strlen(data));
-        }
+        if (!IsTrivial(data))
+            m_stream << data;
     }
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     void BeginWideWrite() { m_WideBuffer.clear(); }
     void WriteTemp(wchar_t data) { m_WideBuffer.append(1, data); }
     void WriteTemp(const wchar_t *data)
@@ -828,7 +830,8 @@ struct SimpleXmlWriter
         m_WideBuffer.append(reinterpret_cast<const TWCharEASTLConverter::TCharType *>(data));
     }
     void EndWideWrite() { Write(reinterpret_cast<const wchar_t *>(m_WideBuffer.c_str())); }
-    void Write(char8_t data) { m_Stream.Write(data); }
+#endif
+    void Write(char8_t data) { m_stream << data; }
     void Tabs()
     {
         QT3DSXML_FOREACH(idx, (m_OpenElements.size() + m_Tabs))
@@ -904,7 +907,7 @@ struct SimpleXmlWriter
                 Write("&amp;");
                 break;
             default:
-                m_Stream.Write(NVConstDataRef<QT3DSU8>((const QT3DSU8 *)last, (QT3DSU32)(start - last)));
+                m_stream << QString::fromLatin1(last, start - last);
                 break;
             }
             last = start;
@@ -942,7 +945,7 @@ struct SimpleXmlWriter
                     Write("&amp;");
                     break;
                 default:
-                    m_Stream.Write(NVConstDataRef<QT3DSU8>((const QT3DSU8 *)last, (QT3DSU32)(start - last)));
+                    m_stream << QString::fromLatin1(last, start - last);
                     break;
                 }
                 last = start;
@@ -1026,21 +1029,18 @@ struct DOMParser
         }
     };
 
-    static SDOMElement *ParseXMLFile(IDOMFactory &factory, IInStream &inStream,
-                                     CXmlErrorHandler *handler = NULL)
+    static SDOMElement *ParseXMLFile(IDOMFactory &factory, QIODevice &inStream,
+                                     CXmlErrorHandler *handler = nullptr)
     {
         QXmlStreamReader sreader;
 
         DOMParser domParser(factory);
-        QT3DSU8 dataBuf[2048];
-        QT3DSU32 amountRead = 0;
+        QByteArray dataRead;
         do {
-            amountRead = inStream.Read(toDataRef(dataBuf, 2048));
-            if (amountRead) {
-                QByteArray tmp = QByteArray::fromRawData((char*)dataBuf,amountRead);
-                sreader.addData(tmp);
-            }
-        } while (amountRead > 0);
+            dataRead = inStream.read(2048);
+            if (dataRead.size() > 0)
+                sreader.addData(dataRead);
+        } while (dataRead.size() > 0);
 
         while (!sreader.atEnd()) {
             QXmlStreamReader::TokenType token = sreader.readNext();
@@ -1242,7 +1242,7 @@ IDOMFactory::CreateDOMFactory(std::shared_ptr<qt3dsdm::IStringTable> inStrTable)
     return std::make_shared<SimpleDomFactory>(std::ref(inStrTable));
 }
 
-void CDOMSerializer::WriteXMLHeader(IOutStream &inStream)
+void CDOMSerializer::WriteXMLHeader(QIODevice &inStream)
 {
     SimpleXmlWriter writer(inStream);
     writer.Write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
@@ -1298,7 +1298,7 @@ void WriteElement(SDOMElement &inElement, SimpleXmlWriter &inWriter,
     }
 }
 
-void CDOMSerializer::Write(SDOMElement &inElement, IOutStream &inStream, QT3DSU32 inTabs)
+void CDOMSerializer::Write(SDOMElement &inElement, QIODevice &inStream, QT3DSU32 inTabs)
 {
     // TODO: QXmlStreamWriter here?
     std::vector<SDOMAttribute *> theAttributes;
@@ -1307,7 +1307,7 @@ void CDOMSerializer::Write(SDOMElement &inElement, IOutStream &inStream, QT3DSU3
     WriteElement(inElement, writer, theAttSorter);
 }
 
-SDOMElement *CDOMSerializer::Read(IDOMFactory &inFactory, IInStream &inStream,
+SDOMElement *CDOMSerializer::Read(IDOMFactory &inFactory, QIODevice &inStream,
                                   CXmlErrorHandler *inErrorHandler)
 {
     return DOMParser::ParseXMLFile(inFactory, inStream, inErrorHandler);

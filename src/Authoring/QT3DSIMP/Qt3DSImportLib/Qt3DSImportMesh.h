@@ -379,7 +379,7 @@ struct Mesh
     // alloc.deallocate( mesh );
     // All the memory is allocated once and then pointers are back
     // filled, so this will work.
-    static Mesh *Load(NVAllocatorCallback &alloc, IInStream &inStream);
+    static Mesh *Load(NVAllocatorCallback &alloc, QIODevice &inStream);
 
     // Load a mesh using fopen and fread
     // Mesh needs to be freed by the caller using free
@@ -392,7 +392,7 @@ struct Mesh
 
     // Multimesh support where you have multiple meshes in a single file.
     // Save multi where you have overridden the allocator.
-    QT3DSU32 SaveMulti(NVAllocatorCallback &alloc, ISeekableIOStream &inStream, QT3DSU32 inId = 0) const;
+    QT3DSU32 SaveMulti(NVAllocatorCallback &alloc, QIODevice &inStream, QT3DSU32 inId = 0) const;
     // You can save multiple meshes in a file.  Each mesh returns an incrementing
     // integer for the multi file.  The original meshes aren't changed, and the file
     // is appended to.
@@ -400,20 +400,20 @@ struct Mesh
 
     // Load a single mesh directly from a multi file with the provided overridden items
     // Loading a multimesh with id == 0 indicates to just load the mesh with the highest id.
-    static SMultiLoadResult LoadMulti(NVAllocatorCallback &alloc, ISeekableIOStream &inStream,
+    static SMultiLoadResult LoadMulti(NVAllocatorCallback &alloc, QIODevice &inStream,
                                       QT3DSU32 inId = 0);
     // Load a single mesh using c file API and malloc/free.
     static SMultiLoadResult LoadMulti(const char *inFilePath, QT3DSU32 inId);
     // Returns true if this is a multimesh (several meshes in one file).
-    static bool IsMulti(ISeekableIOStream &inStream);
+    static bool IsMulti(QIODevice &inStream);
     // Load a multi header from a stream.
     static MeshMultiHeader *LoadMultiHeader(NVAllocatorCallback &alloc,
-                                            ISeekableIOStream &inStream);
+                                            QIODevice &inStream);
     // Load a multi header from a file using malloc.  Header needs to be freed using free.
     static MeshMultiHeader *LoadMultiHeader(const char *inFilePath);
 
     // Get the highest mesh version from a stream.
-    static QT3DSU32 GetHighestMultiVersion(NVAllocatorCallback &alloc, ISeekableIOStream &inStream);
+    static QT3DSU32 GetHighestMultiVersion(NVAllocatorCallback &alloc, QIODevice &inStream);
     // Get the highest mesh version from a file.
     static QT3DSU32 GetHighestMultiVersion(const char *inFilePath);
 };

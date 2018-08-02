@@ -35,6 +35,7 @@
 #include "Qt3DSDMActionInfo.h"
 #include "Qt3DSDMStringTable.h"
 #include "Qt3DSDMValue.h"
+#include <QtCore/qfile.h>
 
 struct SShaderParameters;
 namespace qt3ds {
@@ -331,7 +332,7 @@ public:
     virtual void LoadEffectInstance(const char *inShaderFile, Qt3DSDMInstanceHandle inInstance,
                                     const TCharStr &inName,
                                     std::vector<SMetaDataLoadWarning> &outWarnings,
-                                    qt3ds::foundation::IInStream &inStream) = 0;
+                                    QFile &inStream) = 0;
 
     virtual bool IsEffectInstanceRegistered(const char *inName) = 0;
     virtual void LoadEffectXML(IDOMReader &inStream, Qt3DSDMInstanceHandle inInstance,
@@ -342,14 +343,14 @@ public:
                                              Qt3DSDMInstanceHandle inInstance,
                                              const TCharStr &inObjectName,
                                              std::vector<SMetaDataLoadWarning> &outWarnings,
-                                             qt3ds::foundation::IInStream &inStream) = 0;
+                                             QFile &inStream) = 0;
     virtual Option<SMetaDataEffect> GetEffectBySourcePath(const char *inName) = 0;
 
     virtual void LoadMaterialInstance(const char *inShaderFile,
                                       Qt3DSDMInstanceHandle inInstance,
                                       const TCharStr &inName,
                                       std::vector<SMetaDataLoadWarning> &outWarnings,
-                                      qt3ds::foundation::IInStream &inStream) = 0;
+                                      QFile &inStream) = 0;
     virtual bool IsMaterialClassRegistered(const char *inName) = 0;
     virtual void LoadMaterialClassXML(IDOMReader &inStream, Qt3DSDMInstanceHandle inInstance,
                                       const TCharStr &inObjectName,
@@ -359,7 +360,7 @@ public:
                                                  Qt3DSDMInstanceHandle inInstance,
                                                  const TCharStr &inObjectName,
                                                  std::vector<SMetaDataLoadWarning> &outWarnings,
-                                                 qt3ds::foundation::IInStream &inStream) = 0;
+                                                 QFile &inStream) = 0;
     virtual Option<SMetaDataCustomMaterial> GetMaterialBySourcePath(const char *inSourcePath) = 0;
 
     ////////////////////////////////////////////////////////////////////////////////////

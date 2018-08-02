@@ -863,11 +863,14 @@ public:
             Q3DStudio::SFileTools::FindUniqueDestFile(m_MeshDir, name, L"mesh");
         Qt3DSFileToolsSeekableMeshBufIOStream output(handf);
         MallocAllocator alloc;
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
         QT3DSU32 meshId = meshBuffer.SaveMulti(alloc, output);
         CFilePath _retval = CFilePath::GetRelativePathFromBase(m_DestDirectory, handf->m_Path);
         MeshEntry newEntry(m_StringTable.RegisterStr(name.c_str()), _retval, meshId, m_StringTable);
         m_Meshes.insert(eastl::make_pair(newEntry.m_SourceId, newEntry));
         return newEntry.m_ReferencePath;
+#endif
+        return L"";
     }
 
     CharPtrOrError AddOrReplaceMesh(const Mesh &meshBuffer, TCharPtr name, Option<TCharPtr> srcMesh)
@@ -891,6 +894,7 @@ public:
                 QT3DS_ASSERT(false);
                 return ImportErrorData(ImportErrorCodes::ResourceNotWriteable, srcMesh.getValue());
             }
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
             MallocAllocator allocator;
             QT3DSU32 meshId = meshBuffer.SaveMulti(allocator, output);
 
@@ -900,6 +904,8 @@ public:
                                m_StringTable);
             m_Meshes.insert(eastl::make_pair(newEntry.m_SourceId, newEntry));
             return newEntry.m_ReferencePath;
+#endif
+            return L"";
         }
         return AddMesh(meshBuffer, name);
     }
@@ -1389,16 +1395,16 @@ public:
 
         {
             if (exists) {
-                CFileSeekableIOStream stream(fullPath.toCString(), FileReadFlags());
+                QFile stream(fullPath.toQString());
 
                 // OK, ensure we can open this file in append mode.
                 // This is kind of tricky because we need to write the data to the file
                 // after we read it.
-                if (stream.IsOpen() == false) {
+                if (stream.open(QFile::ReadWrite | QFile::Append) == false) {
                     QT3DS_ASSERT(false);
                     return 0;
                 }
-                stream.SetPosition(0, SeekPosition::Begin);
+                stream.seek(0);
 
                 theTopElement = CDOMSerializer::Read(*factory, stream);
 
@@ -1456,8 +1462,9 @@ public:
             }
         }
         {
-            CFileSeekableIOStream stream(fullPath.toCString(), FileWriteFlags());
-            stream.SetPosition(0, SeekPosition::Begin);
+            QFile stream(fullPath.toQString());
+            stream.open(QFile::ReadWrite | QFile::Append);
+            stream.seek(0);
             CDOMSerializer::WriteXMLHeader(stream);
             CDOMSerializer::Write(*theTopElement, stream);
         }
@@ -1471,9 +1478,8 @@ public:
         std::shared_ptr<IDOMFactory> factory(IDOMFactory::CreateDOMFactory(m_StringTablePtr));
         SDOMElement *topElement = NULL;
         {
-            Qt3DSFileToolsSeekableMeshBufIOStream stream(
-                SFile::Wrap(SFile::OpenForRead(fname), fname));
-            if (stream.IsOpen() == false) {
+            QFile stream(fname.toQString());
+            if (stream.open(QFile::ReadOnly) == false) {
                 QT3DS_ASSERT(false);
                 return false;
             }
@@ -1919,8 +1925,8 @@ QT3DSU32 Import::GetHighestImportRevision(TCharPtr pathToFile)
 {
     using std::shared_ptr;
     CFilePath fullFilePath(CFilePath::GetAbsolutePath(pathToFile));
-    CFileSeekableIOStream stream(fullFilePath.toCString(), FileReadFlags());
-    if (stream.IsOpen() == false) {
+    QFile stream(fullFilePath.toQString());
+    if (stream.open(QFile::ReadOnly) == false) {
         QT3DS_ASSERT(false);
         return 0;
     }
