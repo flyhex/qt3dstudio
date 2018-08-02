@@ -682,7 +682,6 @@ bool CStudioApp::createAndRunApplication(const QString &filename, const QString 
  */
 bool CStudioApp::runApplication()
 {
-    m_pMainWnd->initializeGeometryAndState();
     return qApp->exec() == 0;
 }
 
@@ -702,6 +701,7 @@ void CStudioApp::initCore()
     if (m_views) {
         m_views->createViews(m_isSilent);
         m_pMainWnd = m_views->getMainFrame();
+        m_pMainWnd->initializeGeometryAndState();
     }
 
     RegisterGlobalKeyboardShortcuts(m_core->GetHotKeys(), m_pMainWnd);
