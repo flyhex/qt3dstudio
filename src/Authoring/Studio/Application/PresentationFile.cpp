@@ -33,6 +33,7 @@
 #include "qdebug.h"
 #include "QtCore/qfileinfo.h"
 #include <QtCore/qdiriterator.h>
+#include <qxmlstream.h>
 
 // this class opens and manipulates a presentation file (.uip). new uip manipulation should be
 // implemented here. Old uip functionality should be gradually moved here as well whenever feasible.
@@ -51,6 +52,29 @@ PresentationFile::~PresentationFile()
     m_file.resize(0);
     m_file.write(m_domDoc.toByteArray(4));
     m_file.close();
+}
+
+// static
+QSize PresentationFile::readSize(const QString &url)
+{
+    QFile file(url);
+    file.open(QFile::Text | QFile::ReadOnly);
+    if (!file.isOpen()) {
+        qWarning() << file.errorString();
+        return QSize();
+    }
+    QXmlStreamReader reader(&file);
+    reader.setNamespaceProcessing(false);
+
+    while (reader.readNextStartElement()) {
+        if (reader.name() == QLatin1String("ProjectSettings")) {
+            const auto attrs = reader.attributes();
+            return QSize(attrs.value(QLatin1String("presentationWidth")).toInt(),
+                         attrs.value(QLatin1String("presentationHeight")).toInt());
+        }
+    }
+
+    return QSize();
 }
 
 // get all available child assets source paths (materials, images, effects, etc)

@@ -81,6 +81,9 @@ bool CStudioObjectTypes::AcceptableParent(EStudioObjectType inChild, EStudioObje
     case OBJTYPE_EFFECT:
         theAcceptible = (inParent == OBJTYPE_LAYER) || (inParent == OBJTYPE_EFFECT);
         break;
+    case OBJTYPE_PRESENTATION:
+        theAcceptible = inParent & (OBJTYPE_LAYER | OBJTYPE_SCENE);
+        break;
     case OBJTYPE_CUSTOMMATERIAL:
         theAcceptible = false; // TODO add drag and drop support
         break;

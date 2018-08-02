@@ -42,6 +42,8 @@ public:
 
     void getSourcePaths(const QDir &srcDir, QList<QString> &outPaths, QString &outRootPath) const;
 
+    static QSize readSize(const QString &url);
+
 private:
     QFile m_file;
     QDomDocument m_domDoc;

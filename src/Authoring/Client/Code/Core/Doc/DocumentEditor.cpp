@@ -67,6 +67,7 @@
 #include "foundation/Qt3DSMemoryBuffer.h"
 #include "IDirectoryWatchingSystem.h"
 #include "Qt3DSDMActionCore.h"
+#include "PresentationFile.h"
 #include "ActionSystem.h"
 #include "StandardExtensions.h"
 #include "Qt3DSRenderMesh.h"
@@ -1593,6 +1594,48 @@ public:
                 .GetAggregateInstancePropertyByName(img, L"subpresentation");
 
         SetInstancePropertyValueAsRenderable(img, propHandleSP, pId);
+    }
+
+    /**
+     * Create a scene rect and set its material's texture from the provided subpresentation Id
+     *
+     * @param pId the presentation Id to set for the texture
+     * @param pPath the presentation file path
+     * @param slide the slide to add to
+     * @param pos add position in the scene
+     * @param startTime add at this start time
+     */
+    void addRectForSubpresentation(const CString &pId, const QString &pPath, TSlideHandle slide,
+                                   const CPt &pos = CPt(), long startTime = -1) override
+    {
+        qt3dsdm::Qt3DSDMPropertyHandle activeLayer = m_Doc.GetActiveLayer();
+        Qt3DSDMInstanceHandle rectInstance =
+                CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Model, activeLayer, slide,
+                                         Q3DStudio::DocumentEditorInsertType::LastChild, pos,
+                                         PRIMITIVETYPE_RECT, startTime);
+
+        // match rect size with the presentation
+        QSize size = PresentationFile::readSize(pPath);
+        if (!size.isNull()) {
+            qt3dsdm::Qt3DSDMPropertyHandle scaleHandle =
+                    m_PropertySystem.GetAggregateInstancePropertyByName(rectInstance, L"scale");
+
+            SetInstancePropertyValue(rectInstance, scaleHandle,
+                                     qt3dsdm::SFloat3(size.width() * .01f,
+                                                      size.height() * .01f, 1));
+            // TODO: relate presentation size and rect scale in a better way?
+        }
+
+        // Set the subpresentation for the rect's material's diffuseMap
+        for (long i = 0; i < m_AssetGraph.GetChildCount(rectInstance); ++i) {
+            Qt3DSDMInstanceHandle mat(m_AssetGraph.GetChild(rectInstance, i));
+            if (m_Bridge.IsMaterialBaseInstance(mat)) {
+                qt3dsdm::Qt3DSDMPropertyHandle prop = m_PropertySystem
+                        .GetAggregateInstancePropertyByName(mat, L"diffusemap");
+                setInstanceImagePropertyValueAsRenderable(mat, prop, pId);
+                break;
+            }
+        }
     }
 
     void SetMaterialType(TInstanceHandle instance,

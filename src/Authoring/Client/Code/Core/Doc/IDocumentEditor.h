@@ -159,6 +159,9 @@ public:
     virtual void setInstanceImagePropertyValueAsRenderable(TInstanceHandle instance,
                                                            TPropertyHandle prop,
                                                            const CString &pId) = 0;
+    virtual void addRectForSubpresentation(const CString &pId, const QString &pPath,
+                                           TSlideHandle slide, const CPt &pos = CPt(),
+                                           long startTime = -1) = 0;
 
     virtual void DeleteInstances(qt3dsdm::TInstanceHandleList inInstances) = 0;
     // Delete this data model instance.  Will recursively delete any attached children in the scene

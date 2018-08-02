@@ -31,10 +31,9 @@
 #include "SceneDropTarget.h"
 #include "DropTarget.h"
 #include "DropSource.h"
-
 #include "StudioApp.h"
 #include "Doc.h"
-
+#include "IDocumentEditor.h"
 #include "HotKeys.h"
 #include "IDropTargetHelper.h"
 #include "Core.h"
@@ -43,6 +42,8 @@
 #include "ClientDataModelBridge.h"
 #include "Qt3DSDMDataCore.h"
 #include "Qt3DSDMSlides.h"
+#include "PresentationFile.h"
+#include "QtWidgets/qmessagebox.h"
 
 // Sceneview stuff
 //===============================================================================
@@ -65,7 +66,6 @@ CSceneViewDropTarget::CSceneViewDropTarget()
 long CSceneViewDropTarget::GetObjectType()
 {
     qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
-
     if (theInstance.Valid()) {
         CClientDataModelBridge *theBridge =
             g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
@@ -94,8 +94,13 @@ bool CSceneViewDropTarget::Accept(CDropSource &inSource)
     // We have to set this so we can adjust the Target to accept this source.
     SetDropSourceObjectType(inSource.GetObjectType());
 
-    bool theAcceptable = false;
+    // always allow DnD presentations on the scene
+    if (m_DropSourceObjectType == OBJTYPE_PRESENTATION) {
+        inSource.SetHasValidTarget(true);
+        return true;
+    }
 
+    bool theAcceptable = false;
     // We don't want to generate an asset right now so let the DropSource ask us if it can drop.
     theAcceptable = inSource.ValidateTarget(this);
 
@@ -133,15 +138,34 @@ void CSceneViewDropTarget::SetDropSourceObjectType(long inObjType)
 bool CSceneViewDropTarget::Drop(CDropSource &inSource)
 {
     // The Parent is a tree control item, so iwe know it can be converted to an Asset.
-
     // We have to set this so we can adjust the Target to accept this source.
     SetDropSourceObjectType(inSource.GetObjectType());
 
-    qt3dsdm::Qt3DSDMInstanceHandle theTargetInstance = GetInstance();
-    if (theTargetInstance.Valid()) {
-        CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
-        qt3dsdm::ISlideSystem *theSlideSystem = theDoc->GetStudioSystem()->GetSlideSystem();
-        qt3dsdm::Qt3DSDMSlideHandle theSlide = theDoc->GetActiveSlide();
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    qt3dsdm::Qt3DSDMInstanceHandle instance = GetInstance();
+    if (m_DropSourceObjectType == OBJTYPE_PRESENTATION) {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(QObject::tr("Set Sub-presentation"));
+        msgBox.setText(QObject::tr("Set as sub-presentation to"));
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+        msgBox.setButtonText(QMessageBox::Yes, QObject::tr("Layer"));
+        msgBox.setButtonText(QMessageBox::No, QObject::tr("Texture"));
+
+        int choice = msgBox.exec();
+        if (choice == QMessageBox::Yes) { // layer
+            instance = doc->GetActiveLayer();
+            // The GenerateAssetCommand below will take care of setting the subpresentation
+        } else if (choice == QMessageBox::No) { // texture
+            instance = doc->GetActiveRootInstance();
+            // The GenerateAssetCommand below will take care of setting the subpresentation
+        } else {
+            return true; // cancel
+        }
+    }
+
+    if (instance.Valid()) {
+        qt3dsdm::ISlideSystem *theSlideSystem = doc->GetStudioSystem()->GetSlideSystem();
+        qt3dsdm::Qt3DSDMSlideHandle theSlide = doc->GetActiveSlide();
         if (!theSlideSystem->IsMasterSlide(theSlide)
             && (inSource.GetCurrentFlags() & CHotKeys::MODIFIER_ALT)) {
             if (CanAddToMaster()) {
@@ -151,10 +175,10 @@ bool CSceneViewDropTarget::Drop(CDropSource &inSource)
                     theSlide = theMasterSlideHandle;
             }
         }
-        CCmd *command =
-            inSource.GenerateAssetCommand(theTargetInstance, EDROPDESTINATION_ON, theSlide);
-        if (command != nullptr)
-            theDoc->GetCore()->ExecuteCommand(command);
+
+        CCmd *command = inSource.GenerateAssetCommand(instance, EDROPDESTINATION_ON, theSlide);
+        if (command)
+            doc->GetCore()->ExecuteCommand(command);
     }
 
     return true;

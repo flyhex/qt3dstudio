@@ -193,6 +193,10 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
                         ->GetAggregateInstancePropertyByName(inTarget, L"subpresentation");
                 Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
                        ->SetInstancePropertyValueAsRenderable(inTarget, propHandle, presentationId);
+            } else if (rowType == OBJTYPE_SCENE) { // dropping on the scene as a texture
+                    Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
+                        ->addRectForSubpresentation(presentationId, theFilePath.toQString(),
+                                                    inSlide, thePoint, theStartTime);
             }
         } else {
             Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
