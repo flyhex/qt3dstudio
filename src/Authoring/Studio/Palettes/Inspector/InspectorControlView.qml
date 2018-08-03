@@ -384,10 +384,10 @@ Rectangle {
                                                     return comboDropDown;
                                                 if (modelData.propertyType === AdditionalMetaDataType.Texture)
                                                     return textureChooser;
-                                                // TODO: Add AdditionalMetaDataType for String (QT3DS-1865)
-                                                // Until then, 'String' type is received as 'None'
-                                                if (modelData.propertyType === AdditionalMetaDataType.None)
+                                                if (modelData.propertyType === AdditionalMetaDataType.String)
                                                     return editLine;
+                                                if (modelData.propertyType === AdditionalMetaDataType.None)
+                                                    return null;
                                                 console.warn("KDAB_TODO: (String) implement handler for type \"string\" property:",
                                                              modelData.propertyType);
                                                 return null;

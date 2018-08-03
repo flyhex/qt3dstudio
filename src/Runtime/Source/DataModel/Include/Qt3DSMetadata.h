@@ -99,6 +99,7 @@ enum ERuntimeAdditionalMetaDataType {
     ERuntimeAdditionalMetaDataTypeRenderable,
     ERuntimeAdditionalMetaDataTypePathBuffer,
     ERuntimeAdditionalMetaDataTypeShadowMapResolution,
+    ERuntimeAdditionalMetaDataTypeString,
 };
 
 typedef eastl::basic_string<char8_t> TRuntimeMetaDataStrType;

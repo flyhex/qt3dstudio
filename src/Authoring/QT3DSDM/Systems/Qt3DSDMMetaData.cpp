@@ -96,6 +96,7 @@ namespace qt3dsdm {
 #define QT3DS_WCHAR_T_Renderable L"Renderable"
 #define QT3DS_WCHAR_T_PathBuffer L"PathBuffer"
 #define QT3DS_WCHAR_T_ShadowMapResolution L"ShadowMapResolution"
+#define QT3DS_WCHAR_T_String L"String"
 
 #define ITERATE_ADDITIONAL_META_DATA_TYPES                                                         \
     HANDLE_ADDITIONAL_META_DATA_TYPE(None)                                                         \
@@ -113,7 +114,8 @@ namespace qt3dsdm {
     HANDLE_ADDITIONAL_META_DATA_TYPE(Texture)                                                      \
     HANDLE_ADDITIONAL_META_DATA_TYPE(Renderable)                                                   \
     HANDLE_ADDITIONAL_META_DATA_TYPE(PathBuffer)                                                   \
-    HANDLE_ADDITIONAL_META_DATA_TYPE(ShadowMapResolution)
+    HANDLE_ADDITIONAL_META_DATA_TYPE(ShadowMapResolution)                                          \
+    HANDLE_ADDITIONAL_META_DATA_TYPE(String)
 template <>
 struct WStrOps<AdditionalMetaDataType::Value>
 {
@@ -203,7 +205,7 @@ bool WStrOps<HandlerArgumentType::Value>::StrTo(const wchar_t *buffer, HandlerAr
     HANDLE_QT3DSDM_COMPLETE_TYPE(Slide, None, DataModelDataType::String)                                                 \
     HANDLE_QT3DSDM_COMPLETE_TYPE(Font, Font, DataModelDataType::String)                                                  \
     HANDLE_QT3DSDM_COMPLETE_TYPE(FontSize, FontSize, DataModelDataType::Float)                                           \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(String, None, DataModelDataType::String)                                                \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(String, String, DataModelDataType::String)                                              \
     HANDLE_QT3DSDM_COMPLETE_TYPE(MultiLineString, MultiLine, DataModelDataType::String)                                  \
     HANDLE_QT3DSDM_COMPLETE_TYPE(ObjectRef, ObjectRef, DataModelDataType::ObjectRef)                                     \
     HANDLE_QT3DSDM_COMPLETE_TYPE(Image, Image, DataModelDataType::Long4)                                                 \

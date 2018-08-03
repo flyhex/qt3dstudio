@@ -56,7 +56,8 @@ struct AdditionalMetaDataType {
     Texture,
     Renderable,
     PathBuffer,
-    ShadowMapResolution
+    ShadowMapResolution,
+    String,
   };
 
 

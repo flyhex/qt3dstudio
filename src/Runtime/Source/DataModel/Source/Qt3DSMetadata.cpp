@@ -357,6 +357,8 @@ public:
             return ERuntimeAdditionalMetaDataTypePathBuffer;
         case AdditionalMetaDataType::ShadowMapResolution:
             return ERuntimeAdditionalMetaDataTypeShadowMapResolution;
+        case AdditionalMetaDataType::String:
+            return ERuntimeAdditionalMetaDataTypeString;
         default:
             QT3DS_ASSERT(false);
             return ERuntimeAdditionalMetaDataTypeNone;

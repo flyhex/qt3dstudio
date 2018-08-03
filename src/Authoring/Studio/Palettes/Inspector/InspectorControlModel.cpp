@@ -600,7 +600,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
     switch (element->m_dataType) {
     case qt3dsdm::DataModelDataType::String:
         element->m_value = qt3dsdm::get<QString>(value);
-        //intentional fall-through
+        // intentional fall-through for other String-derived datatypes
     case qt3dsdm::DataModelDataType::StringOrInt:
         if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::StringList) {
             QStringList stringlist = qt3dsdm::get<QStringList>(info->m_MetaDataData);
@@ -692,6 +692,9 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
             element->m_value = fileInfo.fileName();
         } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::PathBuffer) {
             element->m_value = qt3dsdm::get<QString>(value);
+        } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::String) {
+            // Basic string already handled, do not warn about that.
+            // If we hit any other datatypes then give a warning
         } else {
             qWarning() << "KDAB_TODO: InspectorControlModel::updatePropertyValue: need to implement:"
                        << element->m_dataType << " element->m_propertyType : "

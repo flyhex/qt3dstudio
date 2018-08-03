@@ -861,6 +861,9 @@ struct SComposerSerializerImpl : public IComposerSerializer
                 return SStringOrInt(std::make_shared<CDataStr>(inValue));
         }
 
+        if (inType == DataModelDataType::String)
+            return std::make_shared<CDataStr>(inValue);
+
         qt3ds::foundation::ConvertUTF(
                     reinterpret_cast<const qt3ds::foundation::TWCharEASTLConverter::TCharType *>(inValue), 0,
                     m_ConvertStr);
