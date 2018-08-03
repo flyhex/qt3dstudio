@@ -33,6 +33,8 @@
 #include "foundation/Qt3DSRefCounted.h"
 #include "StudioPickValues.h"
 
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
+
 namespace qt3ds {
 namespace widgets {
     using namespace qt3ds::render;
@@ -135,5 +137,7 @@ namespace widgets {
     };
 }
 }
+
+#endif
 
 #endif

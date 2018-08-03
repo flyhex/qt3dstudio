@@ -35,7 +35,6 @@
 #include "Qt3DSDMWStrOpsImpl.h"
 #include "Qt3DSDMComposerTypeDefinitions.h"
 #include "Qt3DSImportComposerTypes.h"
-#include "Qt3DSFileToolsSeekableMeshBufIOStream.h"
 #include "foundation/StrConvertUTF.h"
 
 using qt3dsdm::IStringTable;
@@ -861,9 +860,9 @@ public:
 
         Q3DStudio::TFilePtr handf =
             Q3DStudio::SFileTools::FindUniqueDestFile(m_MeshDir, name, L"mesh");
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
         Qt3DSFileToolsSeekableMeshBufIOStream output(handf);
         MallocAllocator alloc;
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
         QT3DSU32 meshId = meshBuffer.SaveMulti(alloc, output);
         CFilePath _retval = CFilePath::GetRelativePathFromBase(m_DestDirectory, handf->m_Path);
         MeshEntry newEntry(m_StringTable.RegisterStr(name.c_str()), _retval, meshId, m_StringTable);
@@ -886,7 +885,7 @@ public:
 
             CFilePath meshPath =
                     CFilePath::CombineBaseAndRelative(m_DestDirectory, CString(srcMesh.getValue()));
-
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
             meshPath = meshPath.filePath();
             Qt3DSFileToolsSeekableMeshBufIOStream output(
                         SFile::Wrap(SFile::OpenForWrite(meshPath, FileWriteFlags()), meshPath));
@@ -894,7 +893,7 @@ public:
                 QT3DS_ASSERT(false);
                 return ImportErrorData(ImportErrorCodes::ResourceNotWriteable, srcMesh.getValue());
             }
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
+
             MallocAllocator allocator;
             QT3DSU32 meshId = meshBuffer.SaveMulti(allocator, output);
 
@@ -965,7 +964,7 @@ public:
             m_PathBufferDir.CreateDir(true);
         if (!m_PathBufferDir.IsDirectory())
             return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_PathBufferDir.toCString());
-
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
         Q3DStudio::TFilePtr handf =
             Q3DStudio::SFileTools::FindUniqueDestFile(m_PathBufferDir, name, L"path");
         Qt3DSFileToolsSeekableMeshBufIOStream output(handf);
@@ -975,7 +974,8 @@ public:
         const wchar_t *return_Value = m_StringTable.RegisterStr(_retval.toCString());
         m_PathBuffers.insert(
             eastl::make_pair(m_StringTable.RegisterStr(name.c_str()), return_Value));
-        return return_Value;
+#endif
+        return L"";
     }
 
     CharPtrOrError AddOrReplacePathBuffer(const SPathBuffer &pathBuffer, TCharPtr name,
@@ -992,6 +992,7 @@ public:
                 m_DestDirectory, CString(srcPathBuffer.getValue()));
 
             pathBufferPath = pathBufferPath.filePath();
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
             Qt3DSFileToolsSeekableMeshBufIOStream output(SFile::Wrap(
                 SFile::OpenForWrite(pathBufferPath, FileOpenFlags(FileOpenFlagValues::Open
                                                                   | FileOpenFlagValues::Create)),
@@ -1010,6 +1011,7 @@ public:
             const wchar_t *relPath = m_StringTable.RegisterStr(relativePath.toCString());
             m_PathBuffers.insert(eastl::make_pair(m_StringTable.RegisterStr(name), relPath));
             return relPath;
+#endif
         }
         return AddPathBuffer(pathBuffer, name);
     }
@@ -1874,8 +1876,9 @@ public:
 
 }
 
-ImportPtrOrError Import::Create(TCharPtr _srcPath, TCharPtr _destDir)
+ImportPtrOrError Import::Create(const QString &_srcPath, const QString &_destDir)
 {
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     CFilePath srcPath(CFilePath::GetAbsolutePath(_srcPath));
     CFilePath destDir(CFilePath::GetAbsolutePath(_destDir));
 
@@ -1887,10 +1890,13 @@ ImportPtrOrError Import::Create(TCharPtr _srcPath, TCharPtr _destDir)
 
     TStringTablePtr strTable = qt3dsdm::IStringTable::CreateStringTable();
     return new ImportImpl(strTable, srcPath, destDir, L"maps", L"meshes");
+#endif
+    return ImportErrorData();
 }
 
-ImportPtrOrError Import::Load(TCharPtr pathToFile, QT3DSU32 inImportVersion)
+ImportPtrOrError Import::Load(const QString &pathToFile, QT3DSU32 inImportVersion)
 {
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     CFilePath fullFilePath(CFilePath::GetAbsolutePath(pathToFile));
     CFilePath destDir(fullFilePath.GetDirectory());
 
@@ -1906,6 +1912,8 @@ ImportPtrOrError Import::Load(TCharPtr pathToFile, QT3DSU32 inImportVersion)
         return ImportErrorData(ImportErrorCodes::SourceFileNotReadable, fullFilePath.toCString());
     }
     return impl;
+#endif
+    return ImportErrorData();
 }
 
 ImportPtrOrError Import::CreateForRefresh(Import &original, TCharPtr _srcPath)
@@ -1921,8 +1929,9 @@ ImportPtrOrError Import::CreateForRefresh(Import &original, TCharPtr _srcPath)
     return &refresh->GetImportInterface();
 }
 
-QT3DSU32 Import::GetHighestImportRevision(TCharPtr pathToFile)
+QT3DSU32 Import::GetHighestImportRevision(const QString &pathToFile)
 {
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     using std::shared_ptr;
     CFilePath fullFilePath(CFilePath::GetAbsolutePath(pathToFile));
     QFile stream(fullFilePath.toQString());
@@ -1944,4 +1953,6 @@ QT3DSU32 Import::GetHighestImportRevision(TCharPtr pathToFile)
     std::shared_ptr<IDOMReader> theReader =
         IDOMReader::CreateDOMReader(*theTopElement, theStringTable);
     return ImportImpl::FindHighestRevisionInDocument(*theReader);
+#endif
+    return 0;
 }

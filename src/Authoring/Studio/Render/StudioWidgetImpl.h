@@ -32,6 +32,7 @@
 
 #include "StudioWidget.h"
 #include "foundation/Qt3DSContainers.h"
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
 #include "render/Qt3DSRenderShaderProgram.h"
 
 #include "Qt3DSRenderNode.h"
@@ -342,5 +343,5 @@ namespace widgets {
     };
 }
 }
-
+#endif
 #endif

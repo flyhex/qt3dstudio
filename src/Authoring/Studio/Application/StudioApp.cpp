@@ -61,7 +61,9 @@ int main(int argc, char *argv[])
 #endif
 
     // init runtime static resources
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     Q_INIT_RESOURCE(res);
+#endif
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     SharedTools::QtSingleApplication guiApp(QStringLiteral("Qt3DStudio"), argc, argv);

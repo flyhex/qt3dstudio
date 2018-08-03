@@ -58,7 +58,7 @@ using std::shared_ptr;
 typedef std::vector<std::pair<qt3dsdm::Qt3DSDMSlideHandle, qt3dsdm::Qt3DSDMInstanceHandle>>
     TSlideInstanceList;
 typedef std::vector<std::pair<qt3dsdm::Qt3DSDMSlideHandle, Q3DStudio::CString>> TSlideStringList;
-typedef std::unordered_map<const wchar_t *, TSlideInstanceList> TCharPtrToSlideInstanceMap;
+typedef QHash<QString, TSlideInstanceList> TCharPtrToSlideInstanceMap;
 using qt3ds::foundation::Option;
 using qt3dsdm::Qt3DSDMInstanceHandle;
 using qt3dsdm::Qt3DSDMPropertyHandle;

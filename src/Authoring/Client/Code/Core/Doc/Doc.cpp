@@ -60,7 +60,6 @@
 #include "IDocumentBufferCache.h"
 #include "StudioCoreSystem.h"
 #include "Qt3DSDMXML.h"
-#include "IOStreams.h"
 #include "Qt3DSDMWStrOpsImpl.h"
 #include "IComposerSerializer.h"
 #include "Qt3DSFileTools.h"
@@ -75,6 +74,7 @@
 #include "foundation/Qt3DSLogging.h"
 #include "Studio/Application/StudioApp.h"
 #include "Dialogs.h"
+#include "Q3DSImageTextureData.h"
 
 #include <QtCore/qfileinfo.h>
 #include <QtWidgets/qaction.h>
@@ -1148,7 +1148,8 @@ void CDoc::GetProjectFonts(
         std::vector<std::pair<Q3DStudio::CString, Q3DStudio::CString>> &outFontNameFileList)
 {
     outFontNameFileList.clear();
-    qt3ds::render::ITextRenderer *theRenderer = m_SceneGraph->GetTextRenderer();
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
+    ITextRenderer *theRenderer = m_SceneGraph->GetTextRenderer();
     if (theRenderer) {
         qt3ds::render::NVConstDataRef<qt3ds::render::SRendererFontEntry> theProjectFonts =
                 theRenderer->GetProjectFontList();
@@ -1157,11 +1158,13 @@ void CDoc::GetProjectFonts(
                         std::make_pair(ConvertToWide(theProjectFonts[idx].m_FontName),
                                        ConvertToWide(theProjectFonts[idx].m_FontFile)));
     }
+#endif
 }
 
 void CDoc::GetProjectFonts(std::vector<Q3DStudio::CString> &outFonts)
 {
     outFonts.clear();
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     qt3ds::render::ITextRenderer *theRenderer = m_SceneGraph->GetTextRenderer();
     if (theRenderer) {
         qt3ds::render::NVConstDataRef<qt3ds::render::SRendererFontEntry> theProjectFonts =
@@ -1169,12 +1172,14 @@ void CDoc::GetProjectFonts(std::vector<Q3DStudio::CString> &outFonts)
         for (uint32_t idx = 0, end = theProjectFonts.size(); idx < end; ++idx)
             outFonts.push_back(ConvertToWide(theProjectFonts[idx].m_FontName));
     }
+#endif
 }
 
 Q3DStudio::CString CDoc::GetProjectFontName(const Q3DStudio::CFilePath &inFullPathToFontFile)
 {
-    qt3ds::render::ITextRenderer *theRenderer = m_SceneGraph->GetTextRenderer();
     Q3DStudio::CString theFont;
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
+    qt3ds::render::ITextRenderer *theRenderer = m_SceneGraph->GetTextRenderer();
     if (theRenderer) {
         qt3ds::render::NVConstDataRef<qt3ds::render::SRendererFontEntry> theProjectFonts =
                 theRenderer->GetProjectFontList();
@@ -1197,6 +1202,7 @@ Q3DStudio::CString CDoc::GetProjectFontName(const Q3DStudio::CFilePath &inFullPa
             }
         }
     }
+#endif
     return theFont;
 }
 
@@ -2324,6 +2330,7 @@ std::shared_ptr<Q3DStudio::IComposerSerializer> CDoc::CreateSerializer()
     CStudioFullSystem &theFullSystem(*m_StudioSystem->GetFullSystem());
     CStudioCoreSystem &theCoreSystem(*theFullSystem.GetCoreSystem());
     CClientDataModelBridge &theClientBridge(*GetStudioSystem()->GetClientDataModelBridge());
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     return IComposerSerializer::CreateGraphSlideSerializer(
                 *theCoreSystem.GetDataCore(), *theCoreSystem.GetNewMetaData(),
                 *theCoreSystem.GetSlideCore(), *theCoreSystem.GetAnimationCore(),
@@ -2331,6 +2338,8 @@ std::shared_ptr<Q3DStudio::IComposerSerializer> CDoc::CreateSerializer()
                 *theFullSystem.GetActionSystem(), *theCoreSystem.GetSlideGraphCore(),
                 theClientBridge.GetObjectDefinitions(), m_ImportFailedHandler,
                 *theCoreSystem.GetGuideSystem(), *GetSceneGraph()->GetPathManager());
+#endif
+    return std::shared_ptr<Q3DStudio::IComposerSerializer>();
 }
 
 std::shared_ptr<Q3DStudio::IComposerSerializer> CDoc::CreateTransactionlessSerializer()
@@ -2340,6 +2349,7 @@ std::shared_ptr<Q3DStudio::IComposerSerializer> CDoc::CreateTransactionlessSeria
     CStudioFullSystem &theFullSystem(*m_StudioSystem->GetFullSystem());
     CStudioCoreSystem &theCoreSystem(*theFullSystem.GetCoreSystem());
     CClientDataModelBridge &theClientBridge(*GetStudioSystem()->GetClientDataModelBridge());
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     return IComposerSerializer::CreateGraphSlideSerializer(
                 *theCoreSystem.GetTransactionlessDataCore(), *theCoreSystem.GetNewMetaData(),
                 *theCoreSystem.GetTransactionlessSlideCore(),
@@ -2348,6 +2358,8 @@ std::shared_ptr<Q3DStudio::IComposerSerializer> CDoc::CreateTransactionlessSeria
                 *theFullSystem.GetSlideSystem(), *theFullSystem.GetActionSystem(),
                 *theCoreSystem.GetTransactionlessSlideGraphCore(), theClientBridge.GetObjectDefinitions(),
                 m_ImportFailedHandler, *theCoreSystem.GetGuideSystem(), *GetSceneGraph()->GetPathManager());
+#endif
+    return std::shared_ptr<Q3DStudio::IComposerSerializer>();
 }
 
 std::shared_ptr<qt3dsdm::IDOMWriter> CDoc::CreateDOMWriter()
@@ -2402,7 +2414,7 @@ struct SBufferedOutputStreamOutStream : public qt3dsdm::IOutStream
 };
 
 inline std::shared_ptr<qt3dsdm::IDOMReader>
-DoCreateDOMReader(qt3ds::foundation::IInStream &inStream,
+DoCreateDOMReader(QIODevice &inStream,
                   std::shared_ptr<qt3dsdm::IStringTable> theStringTable,
                   qt3ds::QT3DSI32 &outVersion)
 {
@@ -2430,13 +2442,16 @@ std::shared_ptr<qt3dsdm::IDOMReader> CDoc::CreateDOMReader(const Q3DStudio::CStr
                                                            qt3ds::QT3DSI32 &outVersion)
 {
     using namespace qt3dsdm;
-
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     TStringTablePtr theStringTable(
                 m_StudioSystem->GetFullSystem()->GetCoreSystem()->GetDataCore()->GetStringTablePtr());
     CFileSeekableIOStream theStream(inFilePath.GetCharStar(), FileReadFlags());
     if (!theStream.IsOpen())
         return std::shared_ptr<qt3dsdm::IDOMReader>();
+
     return DoCreateDOMReader(theStream, theStringTable, outVersion);
+#endif
+    return std::shared_ptr<qt3dsdm::IDOMReader>();
 }
 
 std::shared_ptr<qt3dsdm::IDOMReader> CDoc::CreateDOMReader(CBufferedInputStream &inStream,
@@ -2446,14 +2461,17 @@ std::shared_ptr<qt3dsdm::IDOMReader> CDoc::CreateDOMReader(CBufferedInputStream 
     TStringTablePtr theStringTable(
                 m_StudioSystem->GetFullSystem()->GetCoreSystem()->GetDataCore()->GetStringTablePtr());
     SBufferedInputStreamInStream theStream(inStream);
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     return DoCreateDOMReader(theStream, theStringTable, outVersion);
+#endif
+    return std::shared_ptr<qt3dsdm::IDOMReader>();
 }
 using std::pair;
 using std::make_pair;
-using qt3ds::render::SImageTextureData;
+using Q3DStudio::Q3DSImageTextureData;
 
-static bool SourcePathImageBufferLessThan(const pair<Q3DStudio::CString, SImageTextureData> &lhs,
-                                          const pair<Q3DStudio::CString, SImageTextureData> &rhs)
+static bool SourcePathImageBufferLessThan(const pair<QString, Q3DSImageTextureData> &lhs,
+                                          const pair<QString, Q3DSImageTextureData> &rhs)
 {
     return lhs.first < rhs.first;
 }
@@ -2470,9 +2488,9 @@ struct SBufferFilter
 
     // We want to filter out items that aren't in the map, so we need to return true
     // if the item is not in the map.
-    bool operator()(const std::pair<Q3DStudio::CString, SImageTextureData> &inItem) const
+    bool operator()(const std::pair<QString, Q3DSImageTextureData> &inItem) const
     {
-        return m_Map.find(m_StringTable.GetWideStr(inItem.first.c_str())) == m_Map.end();
+        return m_Map.find(inItem.first) == m_Map.end();
     }
 };
 //==============================================================================
@@ -2507,7 +2525,7 @@ void CDoc::SavePresentationFile(CBufferedOutputStream *inOutputStream)
         for (TCharPtrToSlideInstanceMap::iterator theIter = sourcePathToInstanceMap.begin(),
              end = sourcePathToInstanceMap.end();
              theIter != end; ++theIter) {
-            const TSlideInstanceList &theList = theIter->second;
+            const TSlideInstanceList &theList = *theIter;
             if (theList.empty())
                 continue;
             bool isImage = false;
@@ -2521,10 +2539,10 @@ void CDoc::SavePresentationFile(CBufferedOutputStream *inOutputStream)
                                 theInstance, theBridge.GetObjectDefinitions().m_Image.m_Instance);
             }
             if (isImage)
-                m_DocumentBufferCache->GetOrCreateImageBuffer(CFilePath(theIter->first));
+                m_DocumentBufferCache->GetOrCreateImageBuffer(QFileInfo(theIter.key()));
         }
 
-        std::vector<pair<Q3DStudio::CString, SImageTextureData>> theImageBuffers;
+        std::vector<pair<QString, Q3DSImageTextureData>> theImageBuffers;
         m_DocumentBufferCache->GetImageBuffers(theImageBuffers);
 
         // Remove buffers that aren't in the map.
@@ -2538,23 +2556,26 @@ void CDoc::SavePresentationFile(CBufferedOutputStream *inOutputStream)
             std::sort(theImageBuffers.begin(), theImageBuffers.end(),
                       SourcePathImageBufferLessThan);
             IDOMWriter::Scope __BufferData(theWriter, L"BufferData");
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
             for (size_t idx = 0, end = theImageBuffers.size(); idx < end; ++idx) {
-                SImageTextureData theBuffer = theImageBuffers[idx].second;
-                if (theBuffer.m_TextureFlags.HasTransparency()) {
+                Q3DSImageTextureData theBuffer = theImageBuffers[idx].second;
+                if (theBuffer.m_hasTransparency) {
                     IDOMWriter::Scope __ImageScope(theWriter, L"ImageBuffer");
-                    theWriter.Att(L"sourcepath", theImageBuffers[idx].first.c_str());
+                    theWriter.Att(L"sourcepath", );
                     theWriter.Att("hasTransparency", true);
                 }
             }
+#endif
         }
     }
 
     std::shared_ptr<IComposerSerializer> theSerializer(CreateSerializer());
     theSerializer->SerializeScene(theWriter);
-
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     SBufferedOutputStreamOutStream theStream(*inOutputStream);
     CDOMSerializer::WriteXMLHeader(theStream);
     CDOMSerializer::Write(*theWriter.GetTopElement(), theStream);
+#endif
 }
 
 //=============================================================================

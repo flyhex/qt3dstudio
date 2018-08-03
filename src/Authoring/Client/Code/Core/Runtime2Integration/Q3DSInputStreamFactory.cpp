@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2006 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -26,24 +25,41 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef QT3DS_STUDIO_PATH_WIDGET_H
-#define QT3DS_STUDIO_PATH_WIDGET_H
-#pragma once
-#include "StudioWidget.h"
-#include "Qt3DSDMHandles.h"
-#include "StudioPickValues.h"
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-namespace qt3ds {
-namespace widgets {
 
-    class IPathWidget : public IStudioWidgetBase
+#include "Q3DSInputStreamFactory.h"
+#include <QtCore/qsharedpointer.h>
+
+namespace Q3DStudio {
+
+class Q3DSInputStreamFactory : public IInputStreamFactory
+{
+public:
+    Q3DSInputStreamFactory()
     {
-    public:
-        qt3ds::studio::SStudioPickValue PickIndexToPickValue(QT3DSU32 inPickIndex) override = 0;
-        static IPathWidget &CreatePathWidget(NVAllocatorCallback &inAlloc,
-                                             IQt3DSRenderContext &inRenderContext);
-    };
+    }
+
+    void addSearchDirectory(const char *inDirectory) override
+    {
+
+    }
+
+    IRefCountedInputStream getStreamForFile(const QString &inFilename, bool inQuiet) override
+    {
+        return IRefCountedInputStream::create();
+    }
+
+    bool getPathForFile(const char *inFilename, QString &outFile, bool inQuiet) override
+    {
+        return false;
+    }
+};
+
+QSharedPointer<Q3DStudio::IInputStreamFactory> &IInputStreamFactory::Create()
+{
+    static QSharedPointer<Q3DStudio::IInputStreamFactory> s_factory;
+    if (s_factory.isNull())
+        s_factory.reset(new Q3DSInputStreamFactory());
+    return s_factory;
 }
+
 }
-#endif
-#endif

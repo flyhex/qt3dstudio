@@ -17,7 +17,10 @@ mingw:win32 {
     DEFINES += WIN32
 }
 
-INCLUDEPATH += $$PWD/../shared/header
+INCLUDEPATH += \
+    $$PWD/../shared/header \
+    $$PWD/../shared/header/foundation
+
 
 linux|qnx {
 QMAKE_CXXFLAGS += -fpermissive

@@ -1,5 +1,6 @@
 INCLUDEPATH += \
-    $$PWD\source
+    $$PWD\source \
+    $$PWD\header
 
 SOURCES += \
     $$PWD\source\ConvertUTF.cpp \

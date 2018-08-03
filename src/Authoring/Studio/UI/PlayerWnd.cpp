@@ -50,6 +50,86 @@
 #include <QtGui/qevent.h>
 #include <QtGui/qwindow.h>
 #include <QtGui/qscreen.h>
+#include <QtGui/qopenglcontext.h>
+#include <QtGui/qsurfaceformat.h>
+#include <QtGui/qoffscreensurface.h>
+#include <QtWidgets/qopenglwidget.h>
+
+
+static bool compareContextVersion(QSurfaceFormat a, QSurfaceFormat b)
+{
+    if (a.renderableType() != b.renderableType())
+        return false;
+    if (a.majorVersion() != b.majorVersion())
+        return false;
+    if (a.minorVersion() > b.minorVersion())
+        return false;
+    return true;
+}
+
+static QSurfaceFormat selectSurfaceFormat(QOpenGLWidget* window)
+{
+    struct ContextVersion {
+        int major;
+        int minor;
+        qt3ds::render::NVRenderContextType contextType;
+    };
+
+    ContextVersion versions[] = {
+        {4, 5, qt3ds::render::NVRenderContextValues::GL4},
+        {4, 4, qt3ds::render::NVRenderContextValues::GL4},
+        {4, 3, qt3ds::render::NVRenderContextValues::GL4},
+        {4, 2, qt3ds::render::NVRenderContextValues::GL4},
+        {4, 1, qt3ds::render::NVRenderContextValues::GL4},
+        {3, 3, qt3ds::render::NVRenderContextValues::GL3},
+        {2, 1, qt3ds::render::NVRenderContextValues::GL2},
+        {2, 0, qt3ds::render::NVRenderContextValues::GLES2},
+        {0, 0, qt3ds::render::NVRenderContextValues::NullContext}
+    };
+
+    QSurfaceFormat result = window->format();
+    bool valid = false;
+
+    for (const auto &ver : versions) {
+        if (ver.contextType == qt3ds::render::NVRenderContextValues::NullContext)
+            break;
+
+        // make an offscreen surface + context to query version
+        QScopedPointer<QOffscreenSurface> offscreenSurface(new QOffscreenSurface);
+
+        QSurfaceFormat format = window->format();
+        if (ver.contextType == qt3ds::render::NVRenderContextValues::GLES2) {
+            format.setRenderableType(QSurfaceFormat::OpenGLES);
+        } else {
+            format.setRenderableType(QSurfaceFormat::OpenGL);
+            if (ver.major >= 2)
+                format.setProfile(QSurfaceFormat::CoreProfile);
+        }
+        format.setMajorVersion(ver.major);
+        format.setMinorVersion(ver.minor);
+        format.setDepthBufferSize(24);
+        format.setStencilBufferSize(8);
+
+        offscreenSurface->setFormat(format);
+        offscreenSurface->create();
+        Q_ASSERT(offscreenSurface->isValid());
+
+        QScopedPointer<QOpenGLContext> queryContext(new QOpenGLContext);
+        queryContext->setFormat(format);
+        if (queryContext->create() && compareContextVersion(format, queryContext->format())) {
+            valid = true;
+            result = format;
+            break;
+        }
+    } // of version test iteration
+
+    if (!valid)
+        qFatal("Unable to select suitable OpenGL context");
+
+    qDebug() << Q_FUNC_INFO << "selected surface format:" << result;
+    QSurfaceFormat::setDefaultFormat(result);
+    return result;
+}
 
 CPlayerWnd::CPlayerWnd(QWidget *parent)
     : QOpenGLWidget(parent)
@@ -63,7 +143,7 @@ CPlayerWnd::CPlayerWnd(QWidget *parent)
     AddMainFlavor(QT3DS_FLAVOR_ASSET_LIB);
     AddMainFlavor(QT3DS_FLAVOR_BASIC_OBJECTS);
 
-    setFormat(CWGLRenderContext::selectSurfaceFormat(this));
+    setFormat(selectSurfaceFormat(this));
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     m_previousToolMode = g_StudioApp.GetToolMode();

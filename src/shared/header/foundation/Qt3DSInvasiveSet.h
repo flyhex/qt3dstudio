@@ -34,6 +34,7 @@
 #include "Qt3DSAllocator.h"
 #include "Qt3DSAllocatorCallback.h"
 #include "Qt3DSContainers.h"
+#include <QtCore/qvector.h>
 
 namespace qt3ds {
 namespace foundation {
@@ -41,14 +42,13 @@ namespace foundation {
     template <typename TObjectType, typename TGetSetIndexOp, typename TSetSetIndexOp>
     class InvasiveSet
     {
-        nvvector<TObjectType *> mSet;
+        QVector<TObjectType *> m_set;
 
         InvasiveSet(const InvasiveSet &other);
         InvasiveSet &operator=(const InvasiveSet &other);
 
     public:
-        InvasiveSet(NVAllocatorCallback &callback, const char *allocName)
-            : mSet(callback, allocName)
+        InvasiveSet()
         {
         }
 
@@ -56,8 +56,8 @@ namespace foundation {
         {
             QT3DSU32 currentIdx = TGetSetIndexOp()(inObject);
             if (currentIdx == QT3DS_MAX_U32) {
-                TSetSetIndexOp()(inObject, mSet.size());
-                mSet.push_back(&inObject);
+                TSetSetIndexOp()(inObject, m_set.size());
+                m_set.push_back(&inObject);
                 return true;
             }
             return false;
@@ -67,13 +67,13 @@ namespace foundation {
         {
             QT3DSU32 currentIdx = TGetSetIndexOp()(inObject);
             if (currentIdx != QT3DS_MAX_U32) {
-                TObjectType *theEnd = mSet.back();
+                TObjectType *theEnd = m_set.back();
                 TObjectType *theObj = &inObject;
                 if (theEnd != theObj) {
                     TSetSetIndexOp()(*theEnd, currentIdx);
-                    mSet[currentIdx] = theEnd;
+                    m_set[currentIdx] = theEnd;
                 }
-                mSet.pop_back();
+                m_set.pop_back();
                 TSetSetIndexOp()(inObject, QT3DS_MAX_U32);
                 return true;
             }
@@ -84,20 +84,20 @@ namespace foundation {
 
         void clear()
         {
-            for (QT3DSU32 idx = 0; idx < mSet.size(); ++idx)
-                TSetSetIndexOp()(*(mSet[idx]), QT3DS_MAX_U32);
-            mSet.clear();
+            for (QT3DSU32 idx = 0; idx < m_set.size(); ++idx)
+                TSetSetIndexOp()(*(m_set[idx]), QT3DS_MAX_U32);
+            m_set.clear();
         }
 
-        TObjectType *operator[](QT3DSU32 idx) { return mSet[idx]; }
-        const TObjectType *operator[](QT3DSU32 idx) const { return mSet[idx]; }
-        QT3DSU32 size() const { return mSet.size(); }
-        TObjectType **begin() { return mSet.begin(); }
-        TObjectType **end() { return mSet.end(); }
-        const TObjectType **begin() const { return mSet.begin(); }
-        const TObjectType **end() const { return mSet.end(); }
-        const TObjectType *back() const { return mSet.back(); }
-        TObjectType *back() { return mSet.back(); }
+        TObjectType *operator[](QT3DSU32 idx) { return m_set[idx]; }
+        const TObjectType *operator[](QT3DSU32 idx) const { return m_set[idx]; }
+        QT3DSU32 size() const { return m_set.size(); }
+        TObjectType **begin() { return m_set.begin(); }
+        TObjectType **end() { return m_set.end(); }
+        const TObjectType **begin() const { return m_set.begin(); }
+        const TObjectType **end() const { return m_set.end(); }
+        const TObjectType *back() const { return m_set.back(); }
+        TObjectType *back() { return m_set.back(); }
     };
 }
 }

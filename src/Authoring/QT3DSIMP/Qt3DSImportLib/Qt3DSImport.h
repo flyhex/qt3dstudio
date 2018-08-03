@@ -394,13 +394,13 @@ public:
     // FilePath::GetDirName( srcDirectoryOrFile )
     // We then get its absolute path, get our absolute path, and attempt to create
     // a relative path from dest directory to src directory.
-    static ImportPtrOrError Create(TCharPtr srcFile, TCharPtr destDirectory);
+    static ImportPtrOrError Create(const QString &srcFile, const QString &destDirectory);
 
     // Load an import object from a file.  This can obviously fail
     // Also, an import file can contain multiple documents so you need to identify
     // which document you are talking about.
     // 0 means load the latest document.
-    static ImportPtrOrError Load(TCharPtr pathToFile, QT3DSU32 inDocumentId = 0);
+    static ImportPtrOrError Load(const QString &pathToFile, QT3DSU32 inDocumentId = 0);
 
     // Create an import object that will update heavy resources (like images and mesh objects)
     // and it CompileReport will return objects that indicate the differences between the new
@@ -413,7 +413,7 @@ public:
 
     // Return the highest import version in a given document.  Returns zero upon
     // failure, else an integer that is valid for load.
-    static QT3DSU32 GetHighestImportRevision(TCharPtr pathToFile);
+    static QT3DSU32 GetHighestImportRevision(const QString &pathToFile);
 };
 }
 

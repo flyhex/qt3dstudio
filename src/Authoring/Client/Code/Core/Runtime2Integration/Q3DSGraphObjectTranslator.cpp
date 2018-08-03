@@ -42,4 +42,8 @@ Q3DSGraphObjectTranslator::Q3DSGraphObjectTranslator(qt3dsdm::Qt3DSDMInstanceHan
     s_translatorMap.insert(this, m_graphObject);
 }
 
+void Q3DSGraphObjectTranslator::PushTranslation(Q3DSTranslation &)
+{
+}
+
 }

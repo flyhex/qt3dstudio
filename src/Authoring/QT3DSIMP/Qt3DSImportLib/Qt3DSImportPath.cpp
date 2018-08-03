@@ -29,7 +29,8 @@
 #include "Qt3DSImportLibPrecompile.h"
 #include "Qt3DSImportPath.h"
 #include "foundation/Qt3DSBroadcastingAllocator.h"
-#include "foundation/Qt3DSAtomic.h"
+
+#include <QtCore/qatomic.h>
 
 using namespace qt3dsimp;
 
@@ -86,22 +87,21 @@ struct SBuilder : public IPathBufferBuilder
     NVFoundationBase &m_Foundation;
     nvvector<PathCommand::Enum> m_Commands;
     nvvector<QT3DSF32> m_Data;
-    QT3DSI32 m_RefCount;
+    QAtomicInt m_refCount;
 
     SBuilder(NVFoundationBase &inFoundation)
         : m_Foundation(inFoundation)
         , m_Commands(inFoundation.getAllocator(), "m_Commands")
         , m_Data(inFoundation.getAllocator(), "m_Data")
-        , m_RefCount(0)
+        , m_refCount(0)
     {
     }
 
-    void addRef() override { atomicIncrement(&m_RefCount); }
+    void addRef() override { m_refCount++; }
 
     void release() override
     {
-        atomicDecrement(&m_RefCount);
-        if (m_RefCount <= 0) {
+        if ((m_refCount--) <= 0) {
             NVAllocatorCallback &theAlloc(m_Foundation.getAllocator());
             NVDelete(theAlloc, this);
         }

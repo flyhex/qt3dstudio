@@ -40,8 +40,15 @@
 // We mean it.
 //
 
+#include "Doc.h"
+
 #include "q3dsruntime2api_p.h"
 #include "Qt3DSDMMetaData.h"
+#include "IStudioRenderer.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "Qt3DSDMComposerTypeDefinitions.h"
+#include "Q3DSGraphObjectTranslator.h"
+#include "foundation/Qt3DSInvasiveSet.h"
 
 /* This class replace STranslation */
 
@@ -121,9 +128,120 @@ struct STranslation : public qt3ds::render::IQt3DSRenderNodeFilter
 
 namespace Q3DStudio
 {
-class STranslation
-{
 
+class Q3DSTranslation
+{
+public:
+    Q3DSTranslation(IStudioRenderer &inRenderer, Q3DSEngine *engine);
+private:
+
+    struct TranslatorGetDirty
+    {
+        quint32 operator()(const Q3DSGraphObjectTranslator &inTrans) const
+        {
+            return inTrans.dirtyIndex();
+        }
+    };
+    struct TranslatorSetDirty
+    {
+        void operator()(Q3DSGraphObjectTranslator &inTrans, quint32 idx) const
+        {
+            inTrans.setDirtyIndex(idx);
+        }
+    };
+
+    struct Q3DSPresentation
+    {
+        QString m_id;
+        QString m_srcPath;
+        QString m_author;
+        QString m_company;
+        quint32 m_width;
+        quint32 m_height;
+        Q3DSPresentation()
+            : m_width(800)
+            , m_height(480)
+        {
+        }
+    };
+
+    typedef std::shared_ptr<qt3dsdm::ISignalConnection> TSignalConnection;
+    typedef qt3ds::foundation::InvasiveSet<Q3DSGraphObjectTranslator, TranslatorGetDirty,
+                                           TranslatorSetDirty>
+        TTranslatorDirtySet;
+    typedef QPair<qt3dsdm::Qt3DSDMInstanceHandle, Q3DSGraphObjectTranslator *>
+        THandleTranslatorPair;
+    typedef QVector<THandleTranslatorPair> THandleTranslatorPairList;
+    /*
+        Now that we have aliases, one instance handle can map to several translators.
+        One translator, however, only maps to one instance handle.
+    */
+    typedef QHash<qt3dsdm::Qt3DSDMInstanceHandle, THandleTranslatorPairList>
+        TInstanceToTranslatorMap;
+    IStudioRenderer &m_studioRenderer;
+
+    CDoc &m_doc;
+    IDocumentReader &m_reader;
+    qt3dsdm::SComposerObjectDefinitions &m_objectDefinitions;
+    qt3dsdm::CStudioSystem &m_studioSystem;
+    qt3dsdm::CStudioFullSystem &m_fullSystem;
+    Q3DStudio::CGraph &m_assetGraph;
+    Q3DSEngine *m_engine;
+
+    // allocator for scene graph and translators
+    //qt3ds::foundation::SSAutoDeallocatorAllocator m_Allocator;
+    // All translator related containers must come after the allocator
+    TInstanceToTranslatorMap m_translatorMap;
+    TTranslatorDirtySet m_dirtySet;
+    Q3DSPresentation m_presentation;
+    Q3DSScene *m_scene;
+    Q3DStudio::CGraphIterator m_graphIterator;
+    QVector<TSignalConnection> m_signalConnections;
+    quint32 m_ComponentSecondsDepth;
+
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
+    SNode m_MouseDownNode;
+    SCamera m_MouseDownCamera;
+    Option<QT3DSMat44> m_MouseDownParentGlobalTransformInverse;
+    Option<QT3DSMat33> m_MouseDownParentRotationInverse;
+    Option<QT3DSMat33> m_MouseDownGlobalRotation;
+    QT3DSI32 m_KeyRepeat;
+    bool m_EditCameraEnabled;
+    bool m_EditLightEnabled;
+    SEditCameraPersistentInformation m_EditCameraInfo;
+    SCamera m_EditCamera;
+    SLight m_EditLight;
+    QT3DSVec2 m_Viewport;
+    SEditCameraLayerTranslator *m_EditCameraLayerTranslator;
+    Option<SZoomRender> m_ZoomRender;
+    NVScopedRefCounted<qt3ds::widgets::IStudioWidget> m_TranslationWidget;
+    NVScopedRefCounted<qt3ds::widgets::IStudioWidget> m_RotationWidget;
+    NVScopedRefCounted<qt3ds::widgets::IStudioWidget> m_ScaleWidget;
+    NVScopedRefCounted<qt3ds::widgets::IStudioWidget> m_LastRenderedWidget;
+    NVScopedRefCounted<qt3ds::widgets::SGradientWidget> m_GradientWidget;
+    NVScopedRefCounted<qt3ds::widgets::SVisualAidWidget> m_VisualAidWidget;
+
+    NVScopedRefCounted<qt3ds::widgets::IPathWidget> m_PathWidget;
+    NVScopedRefCounted<qt3ds::render::NVRenderTexture2D> m_PickBuffer;
+    Option<SPathAnchorDragInitialValue> m_LastPathDragValue;
+    nvvector<qt3ds::QT3DSU8> m_PixelBuffer;
+    nvvector<SGraphObjectTranslator *> m_editModeCamerasAndLights;
+    QT3DSF32 m_CumulativeRotation;
+    eastl::vector<qt3ds::render::SPGGraphObject *> m_GuideContainer;
+    qt3ds::foundation::SFastAllocator<> m_GuideAllocator;
+    // The rects are maintained from last render because the render context
+    // doesn't guarantee the rects it returns are valid outside of begin/end render calls.
+    SRulerRect m_OuterRect;
+    SRulerRect m_InnerRect; // presentation rect.
+
+    QT3DSVec4 m_rectColor;
+    QT3DSVec4 m_lineColor;
+    QT3DSVec4 m_guideColor;
+    QT3DSVec4 m_selectedGuideColor;
+    QT3DSVec4 m_guideFillColor;
+    QT3DSVec4 m_selectedGuideFillColor;
+#endif
 };
+
 }
 #endif

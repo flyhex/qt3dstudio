@@ -362,8 +362,8 @@ void ProjectView::refreshImport(int row) const
     if (row == -1)
         return;
     using namespace Q3DStudio;
-    const auto path = m_ProjectModel->filePath(row);
-    qt3dsimp::ImportPtrOrError importPtr = qt3dsimp::Import::Load(path.toStdWString().c_str());
+    const QString path = m_ProjectModel->filePath(row);
+    qt3dsimp::ImportPtrOrError importPtr = qt3dsimp::Import::Load(path);
     if (importPtr.m_Value) {
         const auto destDir = importPtr.m_Value->GetDestDir();
         const auto srcFile = importPtr.m_Value->GetSrcFile();

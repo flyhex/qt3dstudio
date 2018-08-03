@@ -2501,7 +2501,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                     std::vector<SMetaDataLoadWarning> warnings;
                                     // Now the magic section
                                     Q3DStudio::IRefCountedInputStream
-                                            *theStream = m_InputStreamFactory->getStreamForFile(
+                                            theStream = m_InputStreamFactory->getStreamForFile(
                                                 theFullPath.toQString());
                                     if (theStream) {
                                         m_MetaData.LoadEffectInstance(
@@ -2509,7 +2509,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                                     theMaster,
                                                     theFullPath.GetFileStem().c_str(),
                                                     warnings,
-                                                    *theStream->data());
+                                                    *theStream);
                                     }
                                 } else {
                                     QT3DS_ASSERT(false);
@@ -2532,7 +2532,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                 if (theFullPath.Exists()) {
                                     std::vector<SMetaDataLoadWarning> warnings;
                                     IRefCountedInputStream
-                                            *theStream = m_InputStreamFactory->getStreamForFile(
+                                            theStream = m_InputStreamFactory->getStreamForFile(
                                                 theFullPath.toQString());
                                     if (theStream) {
                                         // Now the magic section
@@ -2541,7 +2541,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                                     theMaster,
                                                     theFullPath.GetFileStem().c_str(),
                                                     warnings,
-                                                    *theStream->data());
+                                                    *theStream);
                                     }
                                 } else {
                                     QT3DS_ASSERT(false);

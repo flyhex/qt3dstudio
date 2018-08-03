@@ -75,7 +75,14 @@ public:
             return m_aliasInstanceHandle;
         return GetInstanceHandle();
     }
-
+    quint32 dirtyIndex() const
+    {
+        return m_dirtyIndex;
+    }
+    void setDirtyIndex(quint32 index)
+    {
+        m_dirtyIndex = index;
+    }
 private:
 
     // This will never be null.  The reason it is a pointer is because
@@ -84,7 +91,7 @@ private:
     qt3dsdm::Qt3DSDMInstanceHandle m_instanceHandle;
     qt3dsdm::Qt3DSDMInstanceHandle m_aliasInstanceHandle;
 
-    unsigned int m_dirtyIndex;
+    quint32 m_dirtyIndex;
     static QMap<Q3DSGraphObjectTranslator *, Q3DSGraphObject *> s_translatorMap;
 };
 

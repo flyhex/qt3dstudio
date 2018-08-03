@@ -13,7 +13,7 @@ DEFINES += _UNICODE UNICODE QT3DS_AUTHORING _AFXDLL \
 
 win: QMAKE_LFLAGS += /MANIFEST /ENTRY:"wWinMainCRTStartup"
 
-QT += core gui xml openglextensions 3dstudioruntime2-private
+QT += core gui xml openglextensions 3dstudioruntime2 3dstudioruntime2-private
 QT += qml quick widgets quickwidgets network
 
 # Configuration for RT1/RT2 preview. RT2 doesn't work yet so uset RT1.
@@ -79,7 +79,8 @@ INCLUDEPATH += \
     ../Client/Code/Core/Runtime2Integration \
     ../../Runtime/qt3d-runtime/src/runtime \
     ../../Runtime/qt3d-runtime/src/runtime/api \
-    ../../Runtime/qt3d-runtime/src/runtime/behaviorapi
+    ../../Runtime/qt3d-runtime/src/runtime/behaviorapi \
+    ../../shared/header
 
 linux {
     BEGIN_ARCHIVE = -Wl,--whole-archive
@@ -354,17 +355,6 @@ SOURCES += \
     Palettes/TimelineGraphicsView/ui/TreeHeaderView.cpp \
     PreviewHelper.cpp \
     remotedeploymentsender.cpp \
-    Render/PathWidget.cpp \
-    Render/StudioGradientWidget.cpp \
-    Render/StudioRenderer.cpp \
-    Render/StudioRendererTranslation.cpp \
-    Render/StudioRotationWidget.cpp \
-    Render/StudioScaleWidget.cpp \
-    Render/StudioTranslationWidget.cpp \
-    Render/StudioVisualAidWidget.cpp \
-    Render/StudioWidget.cpp \
-    Render/WGLRenderContext.cpp \
-    Render/StudioSubPresentationRenderer.cpp \
     UI/EditCameraBar.cpp \
     UI/EditorPane.cpp \
     UI/GLVersionDlg.cpp \

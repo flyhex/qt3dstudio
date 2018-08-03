@@ -528,6 +528,18 @@ struct SStringTableMutexScope
 
 #define STRING_TABLE_MULTITHREADED_METHOD QMutexLocker __locker(m_multithreadMutex)
 
+/*
+#define QT3DS_IMPLEMENT_REF_COUNT_RELEASE(alloc)                                                      \
+    QT3DSI32 value = atomicDecrement(&mRefCount);                                                     \
+    if (value <= 0)                                                                                \
+        NVDelete(alloc, this);
+
+
+#define QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE_OVERRIDE(alloc)                                               \
+    void addRef() override { atomicIncrement(&mRefCount); }                                                 \
+    void release() override { QT3DS_IMPLEMENT_REF_COUNT_RELEASE(alloc); }
+*/
+
 class StringTable : public IStringTable
 {
     typedef nvhash_map<SCharAndHash, QT3DSU32> TMapType;
@@ -535,7 +547,7 @@ class StringTable : public IStringTable
     SStringFileDataList m_FileData;
     NVAllocatorCallback &m_Allocator;
     TNarrowToWideMapType m_StrWideMap;
-    volatile QT3DSI32 mRefCount; // fnd's naming convention
+    QAtomicInt mRefCount; // fnd's naming convention
     eastl::basic_string<char8_t, ForwardingAllocator> m_ConvertBuffer;
     TWideStr m_WideConvertBuffer;
     QMutex m_multithreadMutexBacker;
@@ -556,7 +568,16 @@ public:
 
     virtual ~StringTable() {}
 
-    QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE_OVERRIDE(m_FileData.m_Allocator.m_Allocator)
+    void addRef() override
+    {
+        mRefCount++;
+    }
+
+    void release() override
+    {
+        if ((mRefCount--) <= 0)
+            NVDelete(m_FileData.m_Allocator.m_Allocator, this);
+    }
 
     void EnableMultithreadedAccess() override { m_multithreadMutex = &m_multithreadMutexBacker; }
 

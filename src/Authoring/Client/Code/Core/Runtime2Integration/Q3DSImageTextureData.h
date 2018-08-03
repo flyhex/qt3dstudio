@@ -113,7 +113,7 @@ class Q3DSImageTextureData
 {
 public:
     Qt3DRender::QAbstractTexture *m_texture;
-
+    bool m_hasTransparency;
 };
 
 } // namespace Q3DStudio

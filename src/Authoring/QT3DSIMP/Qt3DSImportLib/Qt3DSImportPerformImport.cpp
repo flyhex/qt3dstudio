@@ -193,16 +193,20 @@ SImportResult CPerformImport::RefreshToComposer(ITranslator &translator,
 SImportResult CPerformImport::RefreshToComposer(ITranslator &translator, IComposerEditor &composer,
                                                 const CFilePath &ioImportFile)
 {
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     ImportPtrOrError originalPtr = Import::Load(ioImportFile.toCString());
     if (originalPtr.m_Value == NULL)
         return originalPtr.m_ErrorData.m_Error;
 
     return RefreshToComposer(translator, composer, *originalPtr.m_Value, ioImportFile);
+#endif
+    return SImportResult(ImportErrorCodes::SourceFileNotReadable);
 }
 
 SImportResult CPerformImport::ImportToComposer(ITranslator &translator, IComposerEditor &composer,
                                                const Q3DStudio::CFilePath &inImportFile)
 {
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     ScopedReleaser<ITranslator> __translatorScope(translator);
     const CFilePath &importDestFile(inImportFile);
     if (importDestFile.IsFile() && importDestFile.GetFileFlags().CanWrite() == false)
@@ -218,6 +222,7 @@ SImportResult CPerformImport::ImportToComposer(ITranslator &translator, ICompose
         QT3DSU32 importId = importPtr.m_Value->Save(fname.c_str());
         return SImportResult(importDestFile, importId);
     }
+#endif
     return ImportErrorCodes::TranslationToImportFailed;
 }
 
@@ -225,6 +230,7 @@ SImportResult
 CPerformImport::ImportToComposerFromImportFile(IComposerEditor &composer,
                                                const Q3DStudio::CFilePath &inImportFile)
 {
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     const CFilePath &importDestFile(inImportFile);
     if (importDestFile.IsFile() == false)
         return ImportErrorCodes::SourceFileDoesNotExist;
@@ -239,11 +245,14 @@ CPerformImport::ImportToComposerFromImportFile(IComposerEditor &composer,
     ScopedReleaser<Import> __importScope(*importPtr.m_Value);
     DoImportToComposer(*importPtr.m_Value, composer);
     return SImportResult(inImportFile, fileId);
+#endif
+    return ImportErrorCodes::SourceFileNotReadable;
 }
 
 SImportResult CPerformImport::TranslateToImportFile(ITranslator &translator,
                                                     const Q3DStudio::CFilePath &inImportFile)
 {
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     ScopedReleaser<ITranslator> __translatorScope(translator);
     const CFilePath &importDestFile(inImportFile);
     if (importDestFile.IsFile() && importDestFile.GetFileFlags().CanWrite() == false)
@@ -259,5 +268,6 @@ SImportResult CPerformImport::TranslateToImportFile(ITranslator &translator,
         QT3DSU32 importId = importPtr.m_Value->Save(fname.c_str());
         return SImportResult(inImportFile, importId);
     }
+#endif
     return ImportErrorCodes::TranslationToImportFailed;
 }

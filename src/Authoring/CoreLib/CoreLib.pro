@@ -14,7 +14,7 @@ contains(QMAKE_TARGET.arch, x86_64) {
     DEFINES += _AMD64_
 }
 
-QT += widgets 3dstudioruntime2-private
+QT += widgets 3dstudioruntime2 3dstudioruntime2-private
 
 macos:DEFINES += WIDE_IS_DIFFERENT_TYPE_THAN_CHAR16_T QT3DS_LITTLE_ENDIAN
 
@@ -123,7 +123,10 @@ SOURCES += \
     ../Client/Code/Core/Utility/q3dsdirsystem.cpp \
     ../Client/Code/Core/Utility/q3dsdirwatcher.cpp \
     ../Client/Code/Core/Runtime2Integration/Q3DSDocumentBufferCache.cpp \
-    ../Client/Code/Core/Runtime2Integration/Q3DSGraphObjectTranslator.cpp
+    ../Client/Code/Core/Runtime2Integration/Q3DSGraphObjectTranslator.cpp \
+    ../Client/Code/Core/Runtime2Integration/Q3DSTranslation.cpp \
+    ../Client/Code/Core/Runtime2Integration/Q3DSInputStreamFactory.cpp \
+    ../Client/Code/Core/Runtime2Integration/Q3DStudioRenderer.cpp
 
 HEADERS += \
     ../Client/Code/Core/Utility/q3dsdirsystem.h \
@@ -137,4 +140,5 @@ HEADERS += \
     ../Client/Code/Core/Runtime2Integration/Q3DSRenderBufferManager.h \
     ../Client/Code/Core/Runtime2Integration/Q3DSRenderWidgets.h \
     ../Client/Code/Core/Runtime2Integration/Q3DSGraphObjectTranslator.h \
-    ../Client/Code/Core/Runtime2Integration/Q3DSTranslation.h
+    ../Client/Code/Core/Runtime2Integration/Q3DSTranslation.h \
+    ../Client/Code/Core/Runtime2Integration/Q3DStudioRenderer.h
