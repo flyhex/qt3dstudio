@@ -42,6 +42,8 @@ using qt3ds::QT3DSU8;
 
 namespace {
 const QChar identifierSep = '#';
+const QChar illegalChar = ':'; // Illegal character in a file name on Windows, so disallow it for all
+const QChar replaceChar = '_'; // Replace illegal chars with this
 Q3DStudio::CString veryLongPathPrefix = "\\\\?\\";
 
 /* From QDir::fromNativeSeparators */
@@ -204,7 +206,11 @@ bool CFilePath::ConvertToAbsolute()
 
 CString CFilePath::MakeSafeFileStem(const CString &name)
 {
-    return CString::fromQString(normalizeAndCleanPath(name.toQString()));
+    QString ret = normalizeAndCleanPath(name.toQString());
+
+    ret = ret.replace(illegalChar, replaceChar);
+
+    return CString::fromQString(ret);
 }
 
 bool CFilePath::CreateDir(bool recurse) const
