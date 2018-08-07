@@ -63,6 +63,7 @@ QSize PresentationFile::readSize(const QString &url)
         qWarning() << file.errorString();
         return QSize();
     }
+
     QXmlStreamReader reader(&file);
     reader.setNamespaceProcessing(false);
 
@@ -75,6 +76,43 @@ QSize PresentationFile::readSize(const QString &url)
     }
 
     return QSize();
+}
+
+// static
+void PresentationFile::updatePresentationId(const QString &url, const QString &oldId,
+                                            const QString &newId)
+{
+    QFile file(url);
+    if (!file.open(QFile::Text | QIODevice::ReadWrite)) {
+        qWarning() << file.errorString();
+        return;
+    }
+    QDomDocument domDoc;
+    domDoc.setContent(&file);
+
+    QDomElement rootElem = domDoc.documentElement();
+    QDomNodeList addNodes = rootElem.elementsByTagName(QStringLiteral("Add"));
+    bool updated = false;
+
+    if (!addNodes.isEmpty()) {
+        for (int i = 0; i < addNodes.length(); ++i) {
+            QDomElement elem = addNodes.at(i).toElement();
+            if (elem.attribute(QStringLiteral("sourcepath")) == oldId) {
+                elem.setAttribute(QStringLiteral("sourcepath"), newId);
+                updated = true;
+            } else if (elem.attribute(QStringLiteral("subpresentation")) == oldId) {
+                elem.setAttribute(QStringLiteral("subpresentation"), newId);
+                updated = true;
+            }
+        }
+    }
+
+    if (updated) {
+        file.resize(0);
+        file.write(domDoc.toByteArray(4));
+    }
+
+    file.close();
 }
 
 // get all available child assets source paths (materials, images, effects, etc)

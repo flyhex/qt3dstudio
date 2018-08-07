@@ -582,7 +582,7 @@ qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetSelectedInstance()
     return GetInstanceFromSelectable(m_SelectedObject);
 }
 
-CCore *CDoc::GetCore()
+CCore *CDoc::GetCore() const
 {
     return m_Core;
 }
@@ -1584,6 +1584,15 @@ std::shared_ptr<Q3DStudio::IMoveRenameHandler> CDoc::getMoveRenameHandler()
 Qt3DSFile CDoc::GetDocumentPath() const
 {
     return m_DocumentPath;
+}
+
+/**
+ * Gets the document path relative to the project root
+ */
+QString CDoc::getRelativePath() const
+{
+    int projPathLength = GetCore()->getProjectFile().getProjectPath().toQString().length();
+    return QDir::cleanPath(m_DocumentPath.GetPath().toQString().remove(0, projPathLength + 1));
 }
 
 void CDoc::setPresentationId(const QString &id)

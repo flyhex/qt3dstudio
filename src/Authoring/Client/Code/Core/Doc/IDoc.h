@@ -156,7 +156,7 @@ public:
     virtual std::shared_ptr<qt3dsdm::IDOMReader>
     CreateDOMReader(const Q3DStudio::CString &inFilePath, qt3ds::QT3DSI32 &outVersion) = 0;
 
-    virtual CCore *GetCore() = 0;
+    virtual CCore *GetCore() const = 0;
 };
 
 #define OPEN_TRANSACTION(name) OpenTransaction(name, __FILE__, __LINE__)

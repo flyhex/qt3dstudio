@@ -42,6 +42,8 @@ public:
 
     void getSourcePaths(const QDir &srcDir, QList<QString> &outPaths, QString &outRootPath) const;
 
+    static void updatePresentationId(const QString &url, const QString &oldId,
+                                     const QString &newId);
     static QSize readSize(const QString &url);
 
 private:

@@ -33,6 +33,7 @@
 #include "StudioApp.h"
 #include "Core.h"
 #include "Doc.h"
+#include "PresentationFile.h"
 #include <QtCore/qdiriterator.h>
 #include <QtXml/qdom.h>
 
@@ -154,7 +155,7 @@ void ProjectFile::writePresentationId(const QString &id, const QString &src)
 {
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
 
-    if (src.isEmpty())
+    if (src.isEmpty() || src == doc->getRelativePath())
         doc->setPresentationId(id);
 
     QString path = m_projectPath.toQString() + QStringLiteral("/") + m_projectName.toQString()
@@ -165,20 +166,16 @@ void ProjectFile::writePresentationId(const QString &id, const QString &src)
     domDoc.setContent(&file);
 
     QDomElement rootElem = domDoc.documentElement();
-    QDomElement assetsElem = rootElem.firstChildElement(QStringLiteral("assets"));
-
-    if (!assetsElem.isNull()) {
-        QString relativePath = !src.isEmpty() ? src
-                               : doc->GetDocumentPath().GetPath().toQString()
-                                 .remove(0, m_projectPath.toQString().length() + 1)
-                                 .replace(QStringLiteral("\\"), QStringLiteral("/"));
-
-        for (QDomElement p = assetsElem.firstChild().toElement(); !p.isNull();
-            p = p.nextSibling().toElement()) {
-            if ((p.nodeName() == QLatin1String("presentation")
-                 || p.nodeName() == QLatin1String("presentation-qml"))
-                    && p.attribute(QStringLiteral("src")) == relativePath) {
-                p.setAttribute(QStringLiteral("id"), !id.isEmpty() ? id : doc->getPresentationId());
+    QDomNodeList pNodes = rootElem.elementsByTagName(QStringLiteral("presentation"));
+    QString oldId;
+    if (!pNodes.isEmpty()) {
+        QString relativePath = !src.isEmpty() ? src : doc->getRelativePath();
+        for (int i = 0; i < pNodes.length(); ++i) {
+            QDomElement pElem = pNodes.at(i).toElement();
+            if (pElem.attribute(QStringLiteral("src")) == relativePath) {
+                oldId = pElem.attribute(QStringLiteral("id"));
+                pElem.setAttribute(QStringLiteral("id"), !id.isEmpty() ? id
+                                                                       : doc->getPresentationId());
                 break;
             }
         }
@@ -188,6 +185,16 @@ void ProjectFile::writePresentationId(const QString &id, const QString &src)
     file.resize(0);
     file.write(domDoc.toByteArray(4));
     file.close();
+
+    // update changed presentation Id in all .uip files if in-use
+    if (!oldId.isEmpty()) {
+        for (int i = 0; i < pNodes.length(); ++i) {
+            QDomElement pElem = pNodes.at(i).toElement();
+            QString path = m_projectPath.toQString() + QStringLiteral("/")
+                           + pElem.attribute(QStringLiteral("src"));
+            PresentationFile::updatePresentationId(path, oldId, id);
+        }
+    }
 }
 
 // set the doc PresentationId from the project file, this is called after a document is loaded
@@ -228,23 +235,21 @@ QString ProjectFile::getPresentationId(const QString &src) const
 {
     QString path = m_projectPath.toQString() + QStringLiteral("/") + m_projectName.toQString()
             + QStringLiteral(".uia");
+
     QFile file(path);
-    file.open(QIODevice::ReadOnly);
-    QDomDocument doc;
-    doc.setContent(&file);
-    file.close();
+    file.open(QFile::Text | QFile::ReadOnly);
+    if (!file.isOpen()) {
+        qWarning() << file.errorString();
+        return {};
+    }
+    QXmlStreamReader reader(&file);
+    reader.setNamespaceProcessing(false);
 
-    QDomElement rootElem = doc.documentElement();
-    QDomElement assetsElem = rootElem.firstChildElement(QStringLiteral("assets"));
-
-    if (!assetsElem.isNull()) {
-        for (QDomElement p = assetsElem.firstChild().toElement(); !p.isNull();
-            p = p.nextSibling().toElement()) {
-            if ((p.nodeName() == QLatin1String("presentation")
-                 || p.nodeName() == QLatin1String("presentation-qml"))
-                    && p.attribute(QStringLiteral("src")) == src) {
-                return p.attribute(QStringLiteral("id"));
-            }
+    while (!reader.atEnd()) {
+        if (reader.readNextStartElement() && reader.name() == QLatin1String("presentation")) {
+            const auto attrs = reader.attributes();
+            if (attrs.value(QLatin1String("src")) == src)
+                return attrs.value(QLatin1String("id")).toString();
         }
     }
 

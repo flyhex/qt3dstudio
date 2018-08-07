@@ -192,6 +192,7 @@ public:
     Q3DStudio::CString GetDocumentDirectory() const;
     Q3DStudio::CString GetRelativePathToDoc(const Q3DStudio::CFilePath &inPath);
     Q3DStudio::CString GetResolvedPathToDoc(const Q3DStudio::CFilePath &inPath);
+    QString getRelativePath() const;
 
     Qt3DSFile CreateUntitledDocument() const;
 
@@ -354,7 +355,7 @@ public:
     long GetLatestEndTime();
     bool isPlayHeadAtEnd();
 
-    CCore *GetCore() override;
+    CCore *GetCore() const override;
 
     void TruncateTimebar(bool inSetStart, bool inAffectsChildren);
 
