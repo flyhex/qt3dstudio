@@ -227,10 +227,10 @@ at the top of this column will toggle the visibility of element rows marked as \
 
 \section2 Add a Layer
 
-You can add a layer to your presentation by dragging it from the \e{basic objects palette} to
-either the \e{timeline palette} or the \e{scene view} as described in the
-\l{adding-assets} {adding assets} section. Dragging the layer object to the \e{scene view} will
-always put the layer behind all current layers.
+You can create a new layer by clicking the layer icon
+\inlineimage Studio-Timeline-NewLayer.png
+in the bottom part of the scene graph. Creating a new layer in your scene will add both a
+camera and a light to that new layer.
 
 \section2 Related Content
 

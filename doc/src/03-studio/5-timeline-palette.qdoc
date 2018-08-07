@@ -218,14 +218,26 @@ Layers also provide a target where
 There must be at least one layer on each slide in the presentation. Studio will not let
 you delete the last layer unless you first add a new layer on the slide to replace it.
 
-You can create a new layer by clicking the layer icon
-\inlineimage Studio-Timeline-NewLayer.png
-in the bottom part of the scene graph. Creating a new layer in your scene will add both a
-camera and a light to that new layer.
+To create a new layer, do one of the following:
+\list
+  \li Click the layer icon
+  \inlineimage Studio-Timeline-NewLayer.png
+  in the bottom part of the scene graph.
+  \li Right-click the scene element in the scene graph and select \uicontrol {Add Layer} from the
+  context menu.
+  \li Press \c{Ctrl + L}.
+\endlist
 
-To remove a layer, select it in the scene graph, then click the delete layer icon
-\inlineimage Studio-Timeline-DeleteLayer.png
-.
+Creating a new layer in your scene will add both a camera and a light to that new layer.
+
+To remove a layer, first select it in the scene graph, then do one of the following:
+\list
+  \li Click the delete icon
+  \inlineimage Studio-Timeline-DeleteLayer.png
+  in the bottom part of the scene graph.
+  \li Right-click it and select \uicontrol{Delete Object} from the context menu.
+  \li Press \c{Del}.
+\endlist
 
 \section2 Data Input
 
