@@ -35,6 +35,7 @@ ScrollView {
     signal editingFinished()
     signal textChanged()
     property alias value: textArea.text
+    property Item tabItem1: textArea
 
     clip: true
 

@@ -451,10 +451,11 @@ Rectangle {
 
         TextField {
             id: textArea
-
+            property bool ignoreHotkeys: true
             property int instance: parent.modelData.instance
             property int handle: parent.modelData.handle
             property variant value: parent.modelData.value
+            property Item tabItem1: this
             width: _valueWidth
             horizontalAlignment: TextInput.AlignLeft
             verticalAlignment: TextInput.AlignVCenter

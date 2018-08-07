@@ -35,6 +35,7 @@ RowLayout {
 
     property alias label: labelField.text
     property alias value: multiLine.value
+    property alias tabItem1: multiLine.tabItem1
 
     signal editingFinished()
     signal textChanged()
