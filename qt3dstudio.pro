@@ -116,9 +116,11 @@ load(qt_parts)
                     $$QMAKE_COPY $$shell_quote($$shell_path( \
                         $$OUT_PWD/src/Runtime/qt3d-runtime/bin/$$RUNTIME2_LIB)) \
                     $$shell_quote($$shell_path($$[QT_INSTALL_BINS]/$$RUNTIME2_LIB))
+                EXTRA_DEPLOY_OPTIONS = --qml --quick
             }
             deployTarget.commands += && \
-                $$DEPLOY_TOOL $$shell_quote(\$(DEPLOY_DIR)/q3dsviewer$${exesuffix})
+                $$DEPLOY_TOOL $$shell_quote(\$(DEPLOY_DIR)/q3dsviewer$${exesuffix}) \
+                $$EXTRA_DEPLOY_OPTIONS
         }
     } else {
         # Create a dummy target for other platforms
