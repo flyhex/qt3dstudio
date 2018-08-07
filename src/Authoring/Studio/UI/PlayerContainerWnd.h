@@ -36,7 +36,9 @@
 
 class CSceneView;
 class CStudioApp;
-class CPlayerWnd;
+namespace Q3DStudio {
+class Q3DSPlayerWnd;
+}
 class CWGLRenderContext;
 
 class CPlayerContainerWnd : public QScrollArea
@@ -50,9 +52,9 @@ public:
 
 public:
     CPlayerContainerWnd(CSceneView *inSceneView);
-    virtual ~CPlayerContainerWnd();
+    ~CPlayerContainerWnd() override;
 
-    void SetPlayerWnd(CPlayerWnd *inPlayerWnd);
+    void SetPlayerWnd(Q3DStudio::Q3DSPlayerWnd *inPlayerWnd);
     void SetPlayerWndPosition(long &outLeftPresentationEdge, long &outTopPresentionEdge);
     void SetScrollRanges();
     void RecenterClient();
@@ -83,7 +85,7 @@ private:
 
 protected:
     CSceneView *m_SceneView; ///< Pointer to the SceneView for rulers manipulation
-    CPlayerWnd *m_PlayerWnd; ///< Pointer to the window control that contains client
+    Q3DStudio::Q3DSPlayerWnd *m_PlayerWnd; ///< Pointer to the window control that contains client
     QRect m_ClientRect; ///< The rect where the client is drawn
     EViewMode m_ViewMode;
 };

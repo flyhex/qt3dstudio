@@ -83,6 +83,7 @@ static int s_controlBaseHeight;
 static int s_idWidth;
 static int s_valueWidth;
 static QSize s_browserPopupSize;
+static int s_guideSize;
 
 #define STRINGIFY(x) STRINGIFY2(x)
 #define STRINGIFY2(x) #x
@@ -162,6 +163,7 @@ void CStudioPreferences::LoadPreferences()
     s_idWidth = 130;
     s_valueWidth = 250;
     s_browserPopupSize = QSize(400, 400);
+    s_guideSize = 32;
 }
 
 //==============================================================================
@@ -1017,6 +1019,11 @@ int CStudioPreferences::valueWidth()
 QSize CStudioPreferences::browserPopupSize()
 {
     return s_browserPopupSize;
+}
+
+int CStudioPreferences::guideSize()
+{
+    return s_guideSize;
 }
 
 QString CStudioPreferences::GetVersionString()

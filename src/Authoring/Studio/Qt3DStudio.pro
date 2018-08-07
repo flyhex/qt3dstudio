@@ -29,7 +29,19 @@ if (qtHaveModule(3dstudioruntime2)) {
                    $$OUT_PWD/../../Runtime/qt3d-runtime/include/Qt3DStudioRuntime2/2.2.0/Qt3DStudioRuntime2 \
                    $$OUT_PWD/../../Runtime/qt3d-runtime/include/Qt3DStudioRuntime2/2.1.0  \
                    $$OUT_PWD/../../Runtime/qt3d-runtime/include/Qt3DStudioRuntime2/2.1.0/Qt3DStudioRuntime2
-    QT += 3drender 3dcore
+    QT += 3drender 3dcore 3drender-private
+
+    RUNTIME2_LIBDIR = $$OUT_PWD/../../Runtime/qt3d-runtime/lib
+    macos {
+        LIBS += \
+            -F"$$RUNTIME2_LIBDIR" \
+            -framework Qt3DStudioRuntime2
+    } else {
+        RUNTIME2_LIB = $$qt5LibraryTarget(Qt3DStudioRuntime2$$QT_LIBINFIX)
+        LIBS += \
+            -L"$$RUNTIME2_LIBDIR" \
+            -l$$RUNTIME2_LIB
+    }
 }
 
 # Configuration for RT1/RT2 preview.
@@ -238,7 +250,8 @@ HEADERS += \
     Render/Q3DSRenderWidgets.h \
     Render/Q3DSGraphObjectTranslator.h \
     Render/Q3DSTranslation.h \
-    Render/Q3DStudioRenderer.h
+    Render/Q3DStudioRenderer.h \
+    UI/Q3DSPlayerWnd.h
 
 FORMS += \
     MainFrm.ui \
@@ -402,7 +415,8 @@ SOURCES += \
     Application/StudioTutorialPageIndicator.cpp \
     Render/Q3DStudioRenderer.cpp \
     Render/Q3DSGraphObjectTranslator.cpp \
-    Render/Q3DSTranslation.cpp
+    Render/Q3DSTranslation.cpp \
+    UI/Q3DSPlayerWnd.cpp
 
 RESOURCES += \
     MainFrm.qrc \

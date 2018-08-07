@@ -43,14 +43,15 @@
 CSceneView::CSceneView(QWidget *parent)
     : QWidget(parent)
     , m_playerContainerWnd(new CPlayerContainerWnd(this))
-    , m_playerWnd(new CPlayerWnd(m_playerContainerWnd.data()))
+    , m_playerWnd(new Q3DStudio::Q3DSPlayerWnd(m_playerContainerWnd.data()))
 {
     m_previousSelectMode = g_StudioApp.GetSelectMode();
 
     connect(m_playerContainerWnd.data(), &CPlayerContainerWnd::toolChanged,
             this, [=](){ setViewCursor(); Q_EMIT toolChanged(); });
 
-    connect(m_playerWnd.data(), &CPlayerWnd::dropReceived, this, &CSceneView::onDropReceived);
+    connect(m_playerWnd.data(), &Q3DStudio::Q3DSPlayerWnd::dropReceived,
+            this, &CSceneView::onDropReceived);
 
     m_playerContainerWnd->SetPlayerWnd(m_playerWnd.data());
 
@@ -67,7 +68,7 @@ void CSceneView::onDropReceived()
     setFocus();
 }
 
-CPlayerWnd *CSceneView::getPlayerWnd() const
+Q3DStudio::Q3DSPlayerWnd *CSceneView::getPlayerWnd() const
 {
     return m_playerWnd.data();
 }

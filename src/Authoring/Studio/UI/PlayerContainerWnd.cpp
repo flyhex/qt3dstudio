@@ -42,6 +42,7 @@
 #include "Core.h"
 #include "MainFrm.h"
 #include "StudioUtils.h"
+#include "StudioPreferences.h"
 
 #include <QtWidgets/qscrollbar.h>
 #include <QtGui/qevent.h>
@@ -51,7 +52,7 @@
 CPlayerContainerWnd::CPlayerContainerWnd(CSceneView *inSceneView)
     : QScrollArea(inSceneView)
     , m_SceneView(inSceneView)
-    , m_PlayerWnd(NULL)
+    , m_PlayerWnd(nullptr)
     , m_ViewMode(VIEW_SCENE)
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -285,14 +286,14 @@ QSize CPlayerContainerWnd::GetEffectivePresentationSize() const
     // This is a very dirty hack because we are of course hardcoding the size of the guides.
     // If the size of the guides never changes, the bet paid off.
     if (g_StudioApp.getRenderer().AreGuidesEnabled())
-        theSize += QSize(32, 32);
+        theSize += QSize(CStudioPreferences::guideSize(), CStudioPreferences::guideSize());
 
     return theSize / fixedDevicePixelRatio();
 }
 
 //==============================================================================
 
-void CPlayerContainerWnd::SetPlayerWnd(CPlayerWnd *inPlayerWnd)
+void CPlayerContainerWnd::SetPlayerWnd(Q3DStudio::Q3DSPlayerWnd *inPlayerWnd)
 {
     m_PlayerWnd = inPlayerWnd;
     viewport()->setBackgroundRole(QPalette::Dark);

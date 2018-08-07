@@ -1919,7 +1919,7 @@ QWidget *CMainFrame::GetActiveView()
     return centralWidget();
 }
 
-CPlayerWnd *CMainFrame::GetPlayerWnd() const
+Q3DStudio::Q3DSPlayerWnd *CMainFrame::GetPlayerWnd() const
 {
     return m_sceneView->getPlayerWnd();
 }

@@ -41,12 +41,31 @@
 //
 
 #include "IStudioRenderer.h"
+#include "DispatchListeners.h"
+#include "Core.h"
+#include "Dispatch.h"
+
+#include <q3dsruntime2api_p.h>
+#include <QtWidgets/qopenglwidget.h>
+
+QT_BEGIN_NAMESPACE
+namespace Qt3DRender {
+class QRenderAspect;
+}
+QT_END_NAMESPACE
 
 namespace Q3DStudio {
 
-class Q3DStudioRenderer : public IStudioRenderer
+class Q3DStudioRenderer : public IStudioRenderer,
+                          public IDataModelListener,
+                          public IReloadListener,
+                          public CPresentationChangeListener,
+                          public CSceneDragListener,
+                          public CToolbarChangeListener
 {
 public:
+    Q3DStudioRenderer();
+    ~Q3DStudioRenderer() override;
     ITextRenderer *GetTextRenderer() override;
     QT3DSVec3 GetIntendedPosition(qt3dsdm::Qt3DSDMInstanceHandle inHandle, CPt inPoint) override;
     Q3DSRenderBufferManager *GetBufferManager() override;
@@ -54,7 +73,7 @@ public:
     qt3ds::foundation::IStringTable *GetRenderStringTable() override;
     void RequestRender() override;
     bool IsInitialized() override;
-    void Initialize(QWidget *inWindow)override;
+    void Initialize(QWidget *inWindow) override;
     void SetViewRect(const QRect &inRect) override;
     void GetEditCameraList(QStringList &outCameras) override;
     void SetPolygonFillModeEnabled(bool inEnableFillMode) override;
@@ -73,6 +92,51 @@ public:
     void ReleaseContext() override;
     void RegisterSubpresentations(
             const QVector<SubPresentationRecord> &subpresentations) override;
+protected:
+    void OnBeginDataModelNotifications() override;
+    void OnEndDataModelNotifications() override;
+    void OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override;
+    void OnImmediateRefreshInstanceMultiple(qt3dsdm::Qt3DSDMInstanceHandle *inInstance,
+                                                    long inInstanceCount) override;
+    void OnReloadEffectInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override;
+    void OnNewPresentation() override;
+    void OnClosingPresentation() override;
+    void OnSceneMouseDown(SceneDragSenderType::Enum inSenderType, QPoint inPoint, int) override;
+    void OnSceneMouseDrag(SceneDragSenderType::Enum, QPoint inPoint, int inToolMode,
+                          int inFlags) override;
+    void OnSceneMouseUp(SceneDragSenderType::Enum) override;
+    void OnSceneMouseDblClick(SceneDragSenderType::Enum inSenderType, QPoint inPoint) override;
+    void OnSceneMouseWheel(SceneDragSenderType::Enum inSenderType, short inDelta,
+                           int inToolMode) override;
+    void OnToolbarChange() override;
+    void OnSelectionChange();
+private:
+
+    void createEngine();
+    void sendResizeToQt3D(const QSize &size);
+    qreal fixedDevicePixelRatio() const;
+    void drawGuides();
+
+    void drawTickMarksOnHorizontalRects(QPainter &painter, qreal innerLeft,
+                                        qreal innerRight, qreal innerBottom, qreal innerTop,
+                                        qreal outerBottom, qreal outerTop);
+    void drawTickMarksOnVerticalRects(QPainter &painter, qreal innerLeft,
+                                      qreal innerRight, qreal innerBottom, qreal innerTop,
+                                      qreal outerLeft, qreal outerRight);
+
+    CDispatch &m_dispatch;
+    CDoc &m_doc;
+    qt3dsdm::TSignalConnectionPtr m_selectionSignal;
+    QScopedPointer<Q3DSEngine> m_engine;
+    QOpenGLWidget *m_widget = nullptr;
+    Qt3DRender::QRenderAspect *m_renderAspect = nullptr;
+    Q3DSViewportSettings m_viewportSettings;
+    QRect m_viewRect;
+    QRect m_innerRect;
+    QRect m_outerRect;
+    QColor m_rectColor;
+    QColor m_lineColor;
+    bool m_guidesEnabled = true;
 };
 
 }

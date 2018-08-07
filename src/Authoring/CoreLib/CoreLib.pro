@@ -31,7 +31,7 @@ if (qtHaveModule(3dstudioruntime2)) {
                    $$OUT_PWD/../../Runtime/qt3d-runtime/include/Qt3DStudioRuntime2/2.2.0/Qt3DStudioRuntime2 \
                    $$OUT_PWD/../../Runtime/qt3d-runtime/include/Qt3DStudioRuntime2/2.1.0  \
                    $$OUT_PWD/../../Runtime/qt3d-runtime/include/Qt3DStudioRuntime2/2.1.0/Qt3DStudioRuntime2
-    QT += 3drender 3dcore
+    QT += 3drender 3dcore 3drender-private
 }
 
 macos:DEFINES += WIDE_IS_DIFFERENT_TYPE_THAN_CHAR16_T QT3DS_LITTLE_ENDIAN

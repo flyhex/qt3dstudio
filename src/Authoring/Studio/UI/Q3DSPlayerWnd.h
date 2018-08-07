@@ -26,8 +26,8 @@
 **
 ****************************************************************************/
 
-#ifndef Q3DS_RUNTIME2_API_H
-#define Q3DS_RUNTIME2_API_H
+#ifndef Q3DS_PLAYER_WND
+#define Q3DS_PLAYER_WND
 
 //
 //  W A R N I N G
@@ -40,9 +40,58 @@
 // We mean it.
 //
 
-#include "q3dsengine_p.h"
-#include "q3dsbehaviorobject_p.h"
-#include "q3dsuippresentation_p.h"
-#include "q3dsviewportsettings_p.h"
+#include "DropContainer.h"
+#include "PlayerContainerWnd.h"
 
-#endif
+#include <QtWidgets/qopenglwidget.h>
+
+class CPlayerContainerWnd;
+class CStudioApp;
+class CMouseCursor;
+class CHotkeys;
+
+namespace Q3DStudio {
+
+class Q3DSPlayerWnd : public QOpenGLWidget, public CWinDropContainer
+{
+    Q_OBJECT
+public:
+    explicit Q3DSPlayerWnd(QWidget *parent = nullptr);
+    ~Q3DSPlayerWnd() override;
+
+    void setContainerWnd(CPlayerContainerWnd *inSceneView);
+
+    QSize sizeHint() const override;
+
+    bool OnDragWithin(CDropSource &inSource) override;
+    bool OnDragReceive(CDropSource &inSource) override;
+    void OnDragLeave() override {}
+    void OnReflectMouse(CPt &, Qt::KeyboardModifiers) override {}
+
+    qreal fixedDevicePixelRatio() const;
+    void setToolMode(long toolMode) { m_previousToolMode = toolMode; }
+
+protected:
+
+    CPlayerContainerWnd *m_containerWnd;
+    bool m_mouseDown;
+    bool m_resumePlayOnMouseRelease = false;
+    long m_previousToolMode;
+
+Q_SIGNALS:
+    void dropReceived();
+
+protected:
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void initializeGL() override;
+    void resizeGL(int w, int h) override;
+    void paintGL() override;
+};
+
+}
+
+#endif // Q3DS_PLAYER_WND

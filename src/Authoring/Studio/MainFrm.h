@@ -68,7 +68,9 @@ namespace Ui
 }
 QT_END_NAMESPACE
 
-class CPlayerWnd;
+namespace Q3DStudio {
+class Q3DSPlayerWnd;
+}
 
 class CMainFrame : public QMainWindow,
         public CPresentationChangeListener,
@@ -240,7 +242,7 @@ public:
     void HandleEditCameraZoomExtent();
 
     QWidget *GetActiveView();
-    CPlayerWnd *GetPlayerWnd() const;
+    Q3DStudio::Q3DSPlayerWnd *GetPlayerWnd() const;
 
     void initializeGeometryAndState();
 

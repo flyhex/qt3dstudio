@@ -276,12 +276,8 @@ void CStudioApp::performShutdown()
     }
 
     if (m_renderer) {
-        if (m_views->getMainFrame())
-            m_views->getMainFrame()->GetPlayerWnd()->makeCurrent();
         m_renderer->Close();
         m_renderer = std::shared_ptr<Q3DStudio::IStudioRenderer>();
-        if (m_views->getMainFrame())
-            m_views->getMainFrame()->GetPlayerWnd()->doneCurrent();
     }
 
     delete m_views;

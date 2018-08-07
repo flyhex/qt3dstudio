@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "PlayerWnd.h"
+#include "Q3DSPlayerWnd.h"
 #include "PlayerContainerWnd.h"
 #include "DispatchListeners.h"
 
@@ -47,7 +47,7 @@ class CSceneView : public QWidget,
     Q_OBJECT
 protected:
     QScopedPointer<CPlayerContainerWnd> m_playerContainerWnd; // first-level child
-    QScopedPointer<CPlayerWnd> m_playerWnd; // second-level child (grandchild)
+    QScopedPointer<Q3DStudio::Q3DSPlayerWnd> m_playerWnd; // second-level child (grandchild)
     QCursor m_arrowCursor; // A pointer to the current cursor (changes according to mode)
     QCursor m_cursorGroupMove; // The move group cursor
     QCursor m_cursorGroupRotate; // The rotate group cursor
@@ -88,7 +88,7 @@ public:
     void onToolGroupSelection();
     void onToolItemSelection();
 
-    CPlayerWnd *getPlayerWnd() const;
+    Q3DStudio::Q3DSPlayerWnd *getPlayerWnd() const;
 
 Q_SIGNALS:
     void toolChanged();
