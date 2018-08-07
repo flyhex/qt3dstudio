@@ -217,20 +217,25 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     }
 
     if (m_rowTree->hasPropertyChildren()) { // master keyframes
+        static const QPixmap pixKeyframeMasterDisabled
+                = QPixmap(":/images/Keyframe-Master-Disabled.png");
         static const QPixmap pixKeyframeMasterNormal
                 = QPixmap(":/images/Keyframe-Master-Normal.png");
         static const QPixmap pixKeyframeMasterSelected
                 = QPixmap(":/images/Keyframe-Master-Selected.png");
+        static const QPixmap pixKeyframeMasterDynamicDisabled
+                = QPixmap(":/images/Keyframe-MasterDynamic-Disabled.png");
         static const QPixmap pixKeyframeMasterDynamicNormal
                 = QPixmap(":/images/Keyframe-MasterDynamic-Normal.png");
         static const QPixmap pixKeyframeMasterDynamicSelected
                 = QPixmap(":/images/Keyframe-MasterDynamic-Selected.png");
-        static const QPixmap pixKeyframeMasterDisabled
-                = QPixmap(":/images/Keyframe-Master-Disabled.png");
         for (auto keyframe : qAsConst(m_keyframes)) {
             QPixmap pixmap;
             if (m_rowTree->locked()) {
-                pixmap = pixKeyframeMasterDisabled;
+                if (keyframe->dynamic)
+                    pixmap = pixKeyframeMasterDynamicDisabled;
+                else
+                    pixmap = pixKeyframeMasterDisabled;
             } else if (keyframe->selected()) {
                 if (keyframe->dynamic)
                     pixmap = pixKeyframeMasterDynamicSelected;
@@ -245,20 +250,25 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
             painter->drawPixmap(QPointF(timeToX(keyframe->time) - 8.5, keyFrameY), pixmap);
         }
     } else if (m_rowTree->isProperty()) {
+        static const QPixmap pixKeyframePropertyDisabled
+                = QPixmap(":/images/Keyframe-Property-Disabled.png");
         static const QPixmap pixKeyframePropertyNormal
                 = QPixmap(":/images/Keyframe-Property-Normal.png");
         static const QPixmap pixKeyframePropertySelected
                 = QPixmap(":/images/Keyframe-Property-Selected.png");
+        static const QPixmap pixKeyframePropertyDynamicDisabled
+                = QPixmap(":/images/Keyframe-PropertyDynamic-Disabled.png");
         static const QPixmap pixKeyframePropertyDynamicNormal
                 = QPixmap(":/images/Keyframe-PropertyDynamic-Normal.png");
         static const QPixmap pixKeyframePropertyDynamicSelected
                 = QPixmap(":/images/Keyframe-PropertyDynamic-Selected.png");
-        static const QPixmap pixKeyframePropertyDisabled
-                = QPixmap(":/images/Keyframe-Property-Disabled.png");
         for (auto keyframe : qAsConst(m_keyframes)) {
             QPixmap pixmap;
             if (m_rowTree->locked()) {
-                pixmap = pixKeyframePropertyDisabled;
+                if (keyframe->dynamic)
+                    pixmap = pixKeyframePropertyDynamicDisabled;
+                else
+                    pixmap = pixKeyframePropertyDisabled;
             } else if (keyframe->selected()) {
                 if (keyframe->dynamic)
                     pixmap = pixKeyframePropertyDynamicSelected;
