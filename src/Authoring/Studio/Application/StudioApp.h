@@ -253,7 +253,8 @@ public:
     QMap<QString, CDataInputDialogItem *> m_dataInputDialogItems;
 
     void SaveUIAFile(bool subpresentations = true);
-    Q3DStudio::CFilePath getMostRecentDirectory() const;
+    QString getMostRecentDirectory() const;
+    QString getMostRecentProjectParentDir() const;
 
     void setLastActiveView(QWidget *widget) { m_lastActiveView = widget; }
     QWidget *lastActiveView() const { return m_lastActiveView; }

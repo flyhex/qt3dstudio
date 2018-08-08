@@ -195,7 +195,7 @@ size_t g_NumAllowedFileReferencesTypes =
 CDialogs::CDialogs(bool inShowGUI /*= true*/)
     : m_ProgressPalette(nullptr)
     , m_ShowGUI(inShowGUI)
-    , m_LastSaveFile(Q3DStudio::CString("."))
+    , m_LastSaveFile(QStringLiteral("./"))
 {
     const auto effectExt = effectExtensions();
     const auto fontExt = fontExtensions();
@@ -1000,9 +1000,9 @@ CDialogs::ESavePromptResult CDialogs::PromptForSave()
  *	Prompt the user for a file to save to from the SaveAs menu option.
  *	@return	an invalid file if the user cancels the save dialog.
  */
-Qt3DSFile CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
+QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
 {
-    Qt3DSFile theFile("");
+    QFileInfo theFile;
     QString theFileExt;
 
     QString theFilename
@@ -1016,12 +1016,12 @@ Qt3DSFile CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject
     QFileDialog theFileDlg;
     theFileDlg.setOption(QFileDialog::DontConfirmOverwrite);
 
-    const QFileInfo fi(m_LastSaveFile.toQString());
+    const QFileInfo fi(m_LastSaveFile);
     // TODO: introduce a workspace concept?
-    theFileDlg.setDirectory(fi.path() == QStringLiteral(".") || isProject
-                            ? QStandardPaths::writableLocation(
-                                  QStandardPaths::DocumentsLocation)
-                            : fi.path());
+    theFileDlg.setDirectory(
+                fi.path() == QLatin1String(".")
+                ? QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
+                : fi.path());
     theFileDlg.setAcceptMode(QFileDialog::AcceptSave);
     theFileDlg.setDefaultSuffix(theFileExt);
     theFileDlg.setOption(QFileDialog::DontUseNativeDialog, true);
@@ -1043,9 +1043,9 @@ Qt3DSFile CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject
         if (!selectedName.endsWith(theFileExt))
             selectedName.append(theFileExt);
 
-        theFile = Qt3DSFile(Q3DStudio::CString::fromQString(selectedName));
+        theFile = QFileInfo(selectedName);
 
-        m_LastSaveFile = theFile.GetAbsolutePath();
+        m_LastSaveFile = theFile.absoluteFilePath();
         // New directory is only created when creating a new project. When doing a "save as"
         // or "save copy", a new directory is not created.
         if (isProject) {
@@ -1054,7 +1054,7 @@ Qt3DSFile CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject
             g_StudioApp.GetCore()->GetCreateDirectoryFileName(theFile, theFinalDir, theFinalDoc);
 
             // Update last save file to final doc
-            m_LastSaveFile = theFinalDoc;
+            m_LastSaveFile = theFinalDoc.absoluteFilePath();
             if (theFinalDoc.Exists()) {
                 const QString theTitle(QObject::tr("Confirm Save As"));
                 const QString filePath(theFinalDir.GetFileName().toQString() + QDir::separator()
@@ -1065,7 +1065,7 @@ Qt3DSFile CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject
                 auto result = QMessageBox::question(nullptr, theTitle, theString);
                 if (result != QMessageBox::Yes) {
                     // Reset the file and show the file dialog again
-                    theFile = Qt3DSFile("");
+                    theFile = QFileInfo();
                     theShowDialog = true;
                     continue;
                 }
@@ -1073,7 +1073,7 @@ Qt3DSFile CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject
         }
     }
 
-    return theFile;
+    return theFile.absoluteFilePath();
 }
 
 //==============================================================================
@@ -1082,11 +1082,10 @@ Qt3DSFile CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject
  * @param  isProject   true: new project, false: new presentation
  * @return an invalid file if the user cancels the save dialog.
  */
-Qt3DSFile CDialogs::GetNewDocumentChoice(const Q3DStudio::CString &inInitialDirectory,
-                                         bool isProject)
+QString CDialogs::GetNewDocumentChoice(const QString &inInitialDirectory, bool isProject)
 {
     if (inInitialDirectory.size())
-        m_LastSaveFile = inInitialDirectory;
+        m_LastSaveFile = inInitialDirectory + QStringLiteral("/");
     QString title = isProject ? QObject::tr("Create New Project")
                               : QObject::tr("Create New Presentation");
     return GetSaveAsChoice(title, isProject);
@@ -1097,29 +1096,25 @@ Qt3DSFile CDialogs::GetNewDocumentChoice(const Q3DStudio::CString &inInitialDire
  * Prompt the user for a file to open.
  * This will return an invalid file if the user cancels the save dialog.
  */
-Qt3DSFile CDialogs::GetFileOpenChoice(const Q3DStudio::CString &inInitialDirectory)
+QString CDialogs::GetFileOpenChoice(const QString &inInitialDirectory)
 {
-    Qt3DSFile theFile("");
+    QFileInfo theFile;
     QString theImportFilter = QObject::tr("Studio UI Presentation (*.uip *.uia)");
 
     QFileDialog theFileDlg(g_StudioApp.m_pMainWnd, QString(),
-                           (inInitialDirectory == Q3DStudio::CString("."))
+                           (inInitialDirectory == QLatin1String("."))
                            ? QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
-                           : inInitialDirectory.toQString(),
+                           : inInitialDirectory,
                            theImportFilter);
     theFileDlg.setAcceptMode(QFileDialog::AcceptOpen);
     theFileDlg.setOption(QFileDialog::DontUseNativeDialog, true);
 
     if (theFileDlg.exec() == QDialog::Accepted) {
-        QFileInfo fi(theFileDlg.selectedFiles().first());
-        Q3DStudio::CString thePath = Q3DStudio::CString::fromQString(fi.absolutePath());
-        Q3DStudio::CString theName = Q3DStudio::CString::fromQString(fi.fileName());
-        theFile = Qt3DSFile(thePath, theName);
-
-        m_LastSaveFile = theFile.GetAbsolutePath();
+        theFile.setFile(theFileDlg.selectedFiles().first());
+        m_LastSaveFile = theFile.absoluteFilePath();
     }
 
-    return theFile;
+    return theFile.absoluteFilePath();
 }
 
 //==============================================================================
@@ -1218,7 +1213,7 @@ void CDialogs::ResetSettings(const Q3DStudio::CString &inCurrentDocPath)
     // Initialize the default dir/paths to the current document path if specified, otherwise leave
     // everything as it is.
     if (!inCurrentDocPath.IsEmpty())
-        m_LastSaveFile = inCurrentDocPath;
+        m_LastSaveFile = inCurrentDocPath.toQString();
 }
 
 bool CDialogs::DisplayResetKeyframeValuesDlg()
