@@ -64,6 +64,7 @@ private:
     QMessageBox *m_connectionError;
     QDateTime m_lastUpdate;
     QString m_projectFile;
+    QStringList m_lastDeployed;
 };
 
 #endif // REMOTEDEPLOYMENTSENDER_H

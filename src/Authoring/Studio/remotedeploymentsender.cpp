@@ -197,9 +197,11 @@ void RemoteDeploymentSender::streamProject(const QString &projectFile)
         return;
     }
 
-    // If we have a new project file, then reset the time
-    if (projectFile != m_projectFile)
+    // If we have a new project file, then reset the time and clear the deployed file list
+    if (projectFile != m_projectFile) {
         m_lastUpdate = QDateTime();
+        m_lastDeployed.clear();
+    }
 
     const QDir projectDirectory(fileInfo.absolutePath());
 
@@ -216,12 +218,17 @@ void RemoteDeploymentSender::streamProject(const QString &projectFile)
 
         QFileInfo info(file);
         QDateTime lastModified = info.lastModified();
+
 #ifdef Q_OS_DARWIN
         // Resolution on macOS is not guaranteed below second granularity
         lastModified.addSecs(1);
 #endif
-        if (!m_lastUpdate.isNull() && lastModified < m_lastUpdate)
+        if (!m_lastUpdate.isNull() && lastModified < m_lastUpdate
+                && m_lastDeployed.contains(filePath)) {
             continue;
+        }
+
+        m_lastDeployed.append(filePath);
 
         if (!file.open(QIODevice::ReadOnly)) {
             qWarning() << "could not open file " << filePath;

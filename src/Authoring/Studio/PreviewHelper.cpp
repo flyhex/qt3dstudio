@@ -206,7 +206,7 @@ void CPreviewHelper::DoPreviewViaConfig(Q3DStudio::CBuildConfiguration * /*inSel
 
     if (inMode == EXECMODE_DEPLOY) {
         Q_ASSERT(project);
-        project->streamProject(inDocumentFile.GetCharStar());
+        project->streamProject(inDocumentFile.toQString());
     } else if (inMode == EXECMODE_PREVIEW
                && CStudioPreferences::GetPreviewProperty("PLATFORM") == "PC") {
         // Quick Preview on PC without going via NANT
