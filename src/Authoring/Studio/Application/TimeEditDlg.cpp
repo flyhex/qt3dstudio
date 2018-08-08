@@ -152,8 +152,12 @@ void CTimeEditDlg::onInitDialog()
 void CTimeEditDlg::accept()
 {
     // Only commit here, cos dup keyframes will be deleted.
-    if (m_ObjectAssociation == ASSETKEYFRAME && m_Doc && m_KeyframesManager)
-        m_KeyframesManager->CommitChangedKeyframes();
+    if (m_ObjectAssociation == ASSETKEYFRAME && m_Doc && m_KeyframesManager) {
+        if (m_OffsetFromInitialTime == 0)
+            m_KeyframesManager->RollbackChangedKeyframes();
+        else
+            m_KeyframesManager->CommitChangedKeyframes();
+    }
 
     QDialog::accept();
 }
