@@ -347,14 +347,8 @@ void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
         Q3DStudio::SCOPED_DOCUMENT_EDITOR(
             *m_TransMgr->GetDoc(), QObject::tr("Set Name"))->SetName(m_DataHandle, inName, true);
 
-        QString theTitle = QObject::tr("Warning");
-        QString theString = QObject::tr("Object %1 was renamed to %2 because "
-                                        "original name was duplicated "
-                                        "under its parent.")
-                                        .arg(inName.toQString())
-                                        .arg(theBridge->GetName(m_DataHandle).toQString());
-        g_StudioApp.GetDialogs()->DisplayMessageBox(theTitle, theString,
-                                                    Qt3DSMessageBox::ICON_WARNING, false);
+        g_StudioApp.GetDialogs()->DisplayObjectRenamed(
+                    inName.toQString(), theBridge->GetName(m_DataHandle).toQString());
         return;
     }
 

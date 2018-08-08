@@ -754,12 +754,8 @@ struct SIMoveRenameHandler : public Q3DStudio::IMoveRenameHandler
     void displayMessageBox(const Q3DStudio::CString &origName,
                            const Q3DStudio::CString &newName) override
     {
-        QString theTitle = QObject::tr("Warning");
-        QString theMessage = QObject::tr("Object %1 was renamed to %2 because "
-                                         "original name was duplicated "
-                                         "under its parent.")
-                                            .arg(origName.toQString()).arg(newName.toQString());
-        m_dialogs.DisplayMessageBox(theTitle, theMessage, Qt3DSMessageBox::ICON_WARNING, false);
+        g_StudioApp.GetDialogs()->DisplayObjectRenamed(
+                    origName.toQString(), newName.toQString());
     }
 };
 

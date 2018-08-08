@@ -586,6 +586,21 @@ void CDialogs::DisplaySaveReadOnlyFailed(const Qt3DSFile &inSavedLocation)
     }
 }
 
+void CDialogs::DisplayObjectRenamed(const QString &origName, const QString &newName, bool async)
+{
+    QString title = QObject::tr("Warning");
+    QString message = QObject::tr("Object %1 was renamed to %2 because "
+                                  "original name was duplicated "
+                                  "under its parent.").arg(origName).arg(newName);
+    if (async) {
+        QTimer::singleShot(0, [this, title, message]() {
+            DisplayMessageBox(title, message, Qt3DSMessageBox::ICON_WARNING, false);
+        });
+    } else {
+        DisplayMessageBox(title, message, Qt3DSMessageBox::ICON_WARNING, false);
+    }
+}
+
 //==============================================================================
 /**
  *	Displays a Qt3DSMessageBox using the specified parameters.  The message box

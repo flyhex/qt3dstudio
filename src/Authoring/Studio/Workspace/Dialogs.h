@@ -140,6 +140,7 @@ public:
                                           const QString &inErrorText);
     void DisplaySavingPresentationFailed();
     void DisplaySaveReadOnlyFailed(const Qt3DSFile &inSavedLocation);
+    void DisplayObjectRenamed(const QString &origName, const QString &newName, bool async = false);
     Qt3DSMessageBox::EMessageBoxReturn DisplayMessageBox(const QString &inTitle,
                                                          const QString &inText,
                                                          Qt3DSMessageBox::EMessageBoxIcon inIcon,

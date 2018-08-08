@@ -489,13 +489,18 @@ Rectangle {
                 }
             }
 
-            text: value
+            // Don't just bind text to value, since changing text explicitly in onEditingFinished
+            // would break binding
+            onValueChanged: text = value
 
-            onTextChanged:
-                _inspectorModel.setPropertyValue(instance, handle, text, false)
+            onTextChanged: _inspectorModel.setPropertyValue(instance, handle, text, false)
 
-            onEditingFinished:
-                _inspectorModel.setPropertyValue(instance, handle, text, true)
+            onEditingFinished: {
+                _inspectorModel.setPropertyValue(instance, handle, text, true);
+                // Ensure we update the text to current value also in cases where making name
+                // unique results in no change to model value
+                text = value;
+            }
         }
     }
 

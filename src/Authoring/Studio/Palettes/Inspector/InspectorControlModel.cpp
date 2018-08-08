@@ -60,6 +60,7 @@
 #include "IDocumentReader.h"
 #include "IStudioRenderer.h"
 #include "foundation/Qt3DSLogging.h"
+#include "Dialogs.h"
 
 static QStringList renderableItems()
 {
@@ -896,6 +897,39 @@ void InspectorControlModel::setRenderableValue(long instance, int handle, const 
 void InspectorControlModel::setPropertyValue(long instance, int handle, const QVariant &value,
                                              bool commit)
 {
+    const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
+    const auto bridge = studio->GetClientDataModelBridge();
+    // Name property needs special handling
+    if (handle == bridge->GetNameProperty()) {
+        // Ignore preview of name property change
+        if (!commit)
+            return;
+
+        m_modifiedProperty.first = 0;
+        m_modifiedProperty.second = 0;
+        m_previouslyCommittedValue = {};
+
+        Q3DStudio::CString currentName = bridge->GetName(instance);
+        Q3DStudio::CString newName = Q3DStudio::CString::fromQString(value.toString());
+        if (!newName.IsEmpty()) {
+            qt3dsdm::Qt3DSDMInstanceHandle parentInstance = bridge->GetParentInstance(instance);
+            if (!bridge->CheckNameUnique(parentInstance, instance, newName)) {
+                QString origNewName = newName.toQString();
+                newName = bridge->GetUniqueChildName(parentInstance, instance, newName);
+                // Display rename message box asynchronously so focus loss won't trigger setting
+                // the name again
+                g_StudioApp.GetDialogs()->DisplayObjectRenamed(origNewName, newName.toQString(),
+                                                               true);
+            }
+            if (newName != currentName) {
+                Q3DStudio::SCOPED_DOCUMENT_EDITOR(
+                            *g_StudioApp.GetCore()->GetDoc(),
+                            QObject::tr("Set Name"))->SetName(instance, newName, false);
+            }
+        }
+        return;
+    }
+
     qt3dsdm::SValue oldValue = currentPropertyValue(instance, handle);
     qt3dsdm::SValue v = value;
 
@@ -920,8 +954,7 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
     // is generally not useful anyway.) We could silently discard zero values also deeper in the
     // value setter code, but then the inspector panel value would not be updated as opposed
     // to both rejecting invalid and resetting the original value here.
-    const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
-    EStudioObjectType theType = studio->GetClientDataModelBridge()->GetObjectType(instance);
+    EStudioObjectType theType = bridge->GetObjectType(instance);
     qt3dsdm::AdditionalMetaDataType::Value additionalType
             = studio->GetPropertySystem()->GetAdditionalMetaDataType(instance, handle);
 
