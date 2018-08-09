@@ -40,8 +40,7 @@ presentation, and also allowing you to select and transform elements
 graphically.
 
 Surrounding the scene view is the \e matte. The matte may not be
-visible if your presentation is larger than the available space. (This
-would be a shame, since it is rather useful; see below.)
+visible if your presentation is larger than the available space.
 
 \section1 Scene View
 
@@ -111,15 +110,6 @@ the transform:
 
 \section1 Matte
 
-Sometimes you need to select an item via the
-\l{studio-timeline-palette.html}{Timeline palette} because other items
-are in front of it. However, when you attempt to transform it by
-dragging on it (instead of using the manipulators), you end up selecting
-a different item.
-
-Clicking and dragging in the matte area when an element is selected is
-the same as clicking and dragging on the element itself. Using the matte
-for your dragging ensures that you will not accidentally transform the
-wrong element.
+Clicking the matte will deselect all selected objects in the presentation.
 
 */
