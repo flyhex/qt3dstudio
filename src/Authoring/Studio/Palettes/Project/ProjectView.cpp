@@ -48,6 +48,7 @@
 #include <QtGui/qdesktopservices.h>
 #include <QtQml/qqmlcontext.h>
 #include <QtQml/qqmlengine.h>
+#include <QtQml/qqmlfile.h>
 #include <QtQuick/qquickitem.h>
 
 ProjectView::ProjectView(const QSize &preferredSize, QWidget *parent) : QQuickWidget(parent)
@@ -247,15 +248,16 @@ void ProjectView::mousePressEvent(QMouseEvent *event)
 
 void ProjectView::startDrag(QQuickItem *item, int row)
 {
-    // prevent DnD the currently open presentation
-    if (isCurrentPresentation(row))
-        return;
-
     const auto index = m_ProjectModel->index(row);
 
     QDrag drag(this);
     drag.setMimeData(m_ProjectModel->mimeData({index}));
-    drag.exec(Qt::CopyAction);
+    drag.setPixmap(QPixmap(QQmlFile::urlToLocalFileOrQrc(index.data(Qt::DecorationRole).toUrl())));
+    // prevent DnD the currently open presentation
+    if (isCurrentPresentation(row))
+        drag.exec(Qt::IgnoreAction);
+    else
+        drag.exec(Qt::CopyAction);
     QTimer::singleShot(0, item, &QQuickItem::ungrabMouse);
 }
 

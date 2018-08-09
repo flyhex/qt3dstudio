@@ -39,6 +39,7 @@
 #include <QtGui/qdrag.h>
 #include <QtQml/qqmlcontext.h>
 #include <QtQml/qqmlengine.h>
+#include <QtQml/qqmlfile.h>
 #include <QtQuick/qquickitem.h>
 
 BasicObjectsView::BasicObjectsView(QWidget *parent) : QQuickWidget(parent)
@@ -60,7 +61,8 @@ void BasicObjectsView::startDrag(QQuickItem *item, int row)
 
     QDrag drag(this);
     drag.setMimeData(m_ObjectsModel->mimeData({index}));
-    drag.setPixmap(QPixmap(index.data(BasicObjectsModel::IconRole).toUrl().toLocalFile()));
+    drag.setPixmap(QPixmap(QQmlFile::urlToLocalFileOrQrc(
+                               index.data(BasicObjectsModel::IconRole).toUrl())));
     drag.exec(Qt::CopyAction);
     QTimer::singleShot(0, item, &QQuickItem::ungrabMouse);
 }
