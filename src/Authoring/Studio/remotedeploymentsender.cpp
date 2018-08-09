@@ -28,6 +28,8 @@
 ****************************************************************************/
 
 #include "remotedeploymentsender.h"
+#include "StudioApp.h"
+#include "Core.h"
 
 #include <QtCore/qpair.h>
 #include <QtCore/qfile.h>
@@ -203,15 +205,15 @@ void RemoteDeploymentSender::streamProject(const QString &projectFile)
         m_lastDeployed.clear();
     }
 
-    const QDir projectDirectory(fileInfo.absolutePath());
+    QString projectPath = g_StudioApp.GetCore()->getProjectFile().getProjectPath().toQString();
+
+    const QDir projectDirectory(projectPath);
 
     // The file to be loaded
-    const QString relativePath
-            = projectDirectory.relativeFilePath(fileInfo.filePath());
+    const QString relativePath = projectDirectory.relativeFilePath(fileInfo.filePath());
 
     int fileCount = 0;
-    QDirIterator it(fileInfo.absolutePath(), QDir::Files,
-                    QDirIterator::Subdirectories);
+    QDirIterator it(projectPath, QDir::Files, QDirIterator::Subdirectories);
     while (it.hasNext()) {
         const QString filePath = it.next();
         QFile file(filePath);
