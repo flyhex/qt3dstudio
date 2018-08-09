@@ -440,53 +440,7 @@ void ProjectFileSystemModel::importUrl(const QDir &targetDir, const QUrl &url) c
         if (CDialogs::isPresentationFileExtension(extension.toLatin1().data())) {
             // add presentation node to the project file
             g_StudioApp.GetCore()->getProjectFile().addPresentationNode(destPath);
-
-            QDir srcDir = fileInfo.dir();
-
-            // import related assets
-            PresentationFile file(destPath);
-            QList<QString> importSourcePaths;
-            QString rootPath; // imported uip project root
-            file.getSourcePaths(srcDir, importSourcePaths, rootPath);
-            int overrideChoice = QMessageBox::NoButton; // user choice from the override box
-            for (auto &path : qAsConst(importSourcePaths)) {
-                QString srcAssetPath, targetAssetPath;
-                if (path.indexOf(QLatin1String("./")) == 0) { // root path (stars with ./)
-                    srcAssetPath = QDir(rootPath).absoluteFilePath(path);
-                    targetAssetPath = QDir(g_StudioApp.GetCore()->getProjectFile()
-                                           .getProjectPath().filePath()).absoluteFilePath(path);
-                } else { // relative path
-                    srcAssetPath = srcDir.absoluteFilePath(path);
-                    targetAssetPath = targetDir.absoluteFilePath(path);
-                }
-
-                QFileInfo fi(targetAssetPath);
-                if (!fi.dir().exists())
-                    fi.dir().mkpath(".");
-
-                if (fi.exists()) { // asset exists, show override / skip box
-                    if (overrideChoice == QMessageBox::YesToAll) {
-                        QFile::remove(targetAssetPath);
-                    } else if (overrideChoice == QMessageBox::NoToAll) {
-                        // QFile::copy() do not override files
-                    } else {
-                        // get path relative to project root (for neat displaying)
-                        QString pathFromRoot = QDir(g_StudioApp.GetCore()->getProjectFile()
-                                                    .getProjectPath().filePath())
-                                                    .relativeFilePath(targetAssetPath);
-
-                        overrideChoice = g_StudioApp.GetDialogs()
-                                ->displayOverrideAssetBox(pathFromRoot);
-
-                        if (overrideChoice == QMessageBox::Yes
-                            || overrideChoice == QMessageBox::YesToAll) {
-                            QFile::remove(targetAssetPath);
-                        }
-                    }
-                }
-
-                QFile::copy(srcAssetPath, targetAssetPath);
-            }
+            importPresentationAssets(fileInfo, QFileInfo(destPath));
         }
 
         // For effect and custom material files, automatically copy related resources
@@ -511,6 +465,67 @@ void ProjectFileSystemModel::importUrl(const QDir &targetDir, const QUrl &url) c
                     QFile::copy(sourcePath, resultPath);
                 }
             }
+        }
+    }
+}
+
+/**
+ * Import all assets used in a uip file, this includes materials and effects (and their assets),
+ * images, fonts, subpresentations (and their recursive assets), models and scripts. Assets are
+ * imported in the same relative structure in the imported-from folder in order not to break the
+ * assets paths.
+ *
+ * @param uipSrc source path where the uip is imported from
+ * @param uipTarget target path where the uip is imported to
+ * @param overrideChoice tracks user choice (yes to all / no to all) to maintain the value through
+ *                       recursive calls
+ */
+void ProjectFileSystemModel::importPresentationAssets(const QFileInfo &uipSrc,
+                                                      const QFileInfo &uipTarget,
+                                                      const int overrideChoice) const
+{
+    QList<QString> importSourcePaths;
+    QString projPathSrc; // project absolute path for the source uip
+    PresentationFile::getSourcePaths(uipSrc, uipTarget, importSourcePaths, projPathSrc);
+    int overrideCh = overrideChoice;
+    for (auto &path : qAsConst(importSourcePaths)) {
+        QString srcAssetPath, targetAssetPath;
+        if (path.startsWith(QLatin1String("./"))) { // path from project root
+            srcAssetPath = QDir(projPathSrc).absoluteFilePath(path);
+            targetAssetPath = QDir(g_StudioApp.GetCore()->getProjectFile()
+                                   .getProjectPath().filePath()).absoluteFilePath(path);
+        } else { // relative path
+            srcAssetPath = uipSrc.dir().absoluteFilePath(path);
+            targetAssetPath = uipTarget.dir().absoluteFilePath(path);
+        }
+
+        QFileInfo fi(targetAssetPath);
+        if (!fi.dir().exists())
+            fi.dir().mkpath(".");
+
+        if (fi.exists()) { // asset exists, show override / skip box
+            if (overrideCh == QMessageBox::YesToAll) {
+                QFile::remove(targetAssetPath);
+            } else if (overrideCh == QMessageBox::NoToAll) {
+                // QFile::copy() does not override files
+            } else {
+                // get path relative to project root (for neat displaying)
+                QString pathFromRoot = QDir(g_StudioApp.GetCore()->getProjectFile()
+                                            .getProjectPath().filePath())
+                                            .relativeFilePath(targetAssetPath);
+
+                overrideCh = g_StudioApp.GetDialogs()->displayOverrideAssetBox(pathFromRoot);
+                if (overrideCh & (QMessageBox::Yes | QMessageBox::YesToAll))
+                    QFile::remove(targetAssetPath);
+            }
+        }
+
+        QFile::copy(srcAssetPath, targetAssetPath);
+
+        // recursively load any uip asset's assets
+        if (path.endsWith(QLatin1String(".uip"))) {
+            importPresentationAssets(QFileInfo(srcAssetPath), QFileInfo(targetAssetPath),
+                                     overrideCh);
         }
     }
 }

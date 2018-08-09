@@ -51,16 +51,19 @@ public:
     void loadSubpresentationsAndDatainputs(
             QVector<SubPresentationRecord> &subpresentations,
             QMap<QString, CDataInputDialogItem *> &datainputs);
-    void writePresentationId(const QString &id, const QString &src = QString());
+    void writePresentationId(const QString &id, const QString &src = {});
     void updateDocPresentationId();
     bool isUniquePresentationId(const QString &id,
-                                const QString &src = QString()) const;
+                                const QString &src = {}) const;
     Q3DStudio::CFilePath getProjectPath() const;
     Q3DStudio::CString getProjectName() const;
     QString getFirstPresentationPath(const QString &uiaPath) const;
     QString getPresentationId(const QString &src) const;
-    void addPresentationNode(const Q3DStudio::CFilePath &uip);
+    void addPresentationNode(const QString &uip, const QString &pId = {});
 
+    static void getPresentations(const QString &inUiaPath,
+                                 QVector<SubPresentationRecord> &outSubpresentations,
+                                 const QString &excludePresentationSrc = {});
 private:
     QString ensureUniquePresentationId(const QString &id) const;
 

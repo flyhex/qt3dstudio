@@ -263,7 +263,7 @@ bool CCore::OnNewDocument(const Qt3DSFile &inDocument, bool isNewProject, bool s
     m_Doc->SaveDocument(fileDocument);
 
     // write a new presentation node to the uia file
-    m_projectFile.addPresentationNode(theDocument);
+    m_projectFile.addPresentationNode(theDocument.absoluteFilePath());
     m_projectFile.updateDocPresentationId();
 
     // show the presentation settings panel

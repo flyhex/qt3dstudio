@@ -34,6 +34,7 @@
 #include <QtWidgets/qfilesystemmodel.h>
 #include <QtCore/qabstractitemmodel.h>
 #include <QtCore/qlist.h>
+#include <QtWidgets/qmessagebox.h>
 #include <QtCore/qurl.h>
 
 QT_FORWARD_DECLARE_CLASS(QFileSystemModel)
@@ -88,6 +89,8 @@ private:
     bool isVisible(const QModelIndex& modelIndex) const;
     bool hasVisibleChildren(const QModelIndex &modelIndex) const;
     void importUrl(const QDir &targetDir, const QUrl &url) const;
+    void importPresentationAssets(const QFileInfo &uipSrc, const QFileInfo &uipTarget,
+                                  const int overrideChoice = QMessageBox::NoButton) const;
 
     void modelRowsInserted(const QModelIndex &parent, int start, int end);
     void modelRowsRemoved(const QModelIndex &parent, int start, int end);

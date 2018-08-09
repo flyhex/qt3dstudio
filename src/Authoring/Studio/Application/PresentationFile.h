@@ -33,22 +33,20 @@
 #include <QtXml/qdom.h>
 
 QT_FORWARD_DECLARE_CLASS(QDir)
+QT_FORWARD_DECLARE_CLASS(QFileInfo)
 
 class PresentationFile
 {
 public:
-    PresentationFile(const QString &path);
-    ~PresentationFile();
-
-    void getSourcePaths(const QDir &srcDir, QList<QString> &outPaths, QString &outRootPath) const;
-
+    static void getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &uipTarget,
+                               QList<QString> &outPaths, QString &outRootPath);
     static void updatePresentationId(const QString &url, const QString &oldId,
                                      const QString &newId);
     static QSize readSize(const QString &url);
+    static QString findProjectFile(const QString &url);
 
 private:
-    QFile m_file;
-    QDomDocument m_domDoc;
+    PresentationFile();
 };
 
 #endif // PRESENTATIONFILE_H

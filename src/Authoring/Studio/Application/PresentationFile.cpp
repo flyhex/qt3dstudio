@@ -27,32 +27,20 @@
 ****************************************************************************/
 
 #include "PresentationFile.h"
+#include "ProjectFile.h"
+#include "Dialogs.h"
+#include "StudioApp.h"
+#include "Core.h"
+#include "Doc.h"
+#include "qdebug.h"
 #include <QtCore/qfile.h>
 #include <QtXml/qdom.h>
-#include "Dialogs.h"
-#include "qdebug.h"
 #include "QtCore/qfileinfo.h"
 #include <QtCore/qdiriterator.h>
 #include <qxmlstream.h>
 
-// this class opens and manipulates a presentation file (.uip). new uip manipulation should be
-// implemented here. Old uip functionality should be gradually moved here as well whenever feasible.
-
-PresentationFile::PresentationFile(const QString &path)
-{
-    m_file.setFileName(path);
-    bool success = m_file.open(QIODevice::ReadWrite);
-    Q_ASSERT(success); // invalid path
-
-    m_domDoc.setContent(&m_file);
-}
-
-PresentationFile::~PresentationFile()
-{
-    m_file.resize(0);
-    m_file.write(m_domDoc.toByteArray(4));
-    m_file.close();
-}
+// This class provides utility static methods for working with presentation files (.uip). Old uip
+// functionality should be gradually moved here whenever feasible.
 
 // static
 QSize PresentationFile::readSize(const QString &url)
@@ -115,12 +103,65 @@ void PresentationFile::updatePresentationId(const QString &url, const QString &o
     file.close();
 }
 
-// get all available child assets source paths (materials, images, effects, etc)
-void PresentationFile::getSourcePaths(const QDir &srcDir, QList<QString> &outPaths,
-                                      QString &outRootPath) const
+/**
+ * Find the project file path matching the given presentation file path
+ *
+ * @param uipPath presentation file path
+ * @return project file absolute path
+ */
+// static
+QString PresentationFile::findProjectFile(const QString &uipPath)
 {
+    QFileInfo fi(uipPath);
+
+    // first check if there is a uia in the same folder as the uip with the same name
+    QString uiaPath = fi.dir().absoluteFilePath(fi.baseName() + QStringLiteral(".uia"));
+    if (QFile::exists(uiaPath))
+        return uiaPath;
+
+    // next search for a uia starting from uip folder and going up, the first found 1 is assumed
+    // to be the project file
+    QDir currDir = fi.dir();
+    const int MAX_SEARCH_DEPTH = 3; // scan up to 3 levels up (for performance reasons)
+    int searchDepth = 0;
+    do {
+        QDirIterator di(currDir.path(), QDir::NoDotAndDotDot | QDir::Files);
+        while (di.hasNext()) {
+            QFileInfo fi2 = di.next();
+            if (fi2.suffix() == QLatin1String("uia"))
+                return fi2.filePath();
+        }
+        ++searchDepth;
+    } while (searchDepth < MAX_SEARCH_DEPTH && currDir.cdUp());
+
+    return {};
+}
+
+// get all available child assets source paths (materials, images, effects, etc)
+// static
+void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &uipTarget,
+                                      QList<QString> &outPaths, QString &outProjPathSrc)
+{
+    QFile file(uipTarget.filePath());
+    file.open(QFile::Text | QFile::ReadOnly);
+    if (!file.isOpen()) {
+        qWarning() << file.errorString();
+        return;
+    }
+
+    QDomDocument domDoc;
+    domDoc.setContent(&file);
+
+    QVector<SubPresentationRecord> subpresentations;
+    QString uiaPath = findProjectFile(uipSrc.filePath());
+    if (!uiaPath.isEmpty()) {
+        outProjPathSrc = QFileInfo(uiaPath).path();
+        QString uipPathRelative = QFileInfo(uiaPath).dir().relativeFilePath(uipSrc.filePath());
+        ProjectFile::getPresentations(uiaPath, subpresentations, uipPathRelative);
+    }
+
     // search <Classes>
-    QDomElement classesElem = m_domDoc.documentElement().firstChild()
+    QDomElement classesElem = domDoc.documentElement().firstChild()
             .firstChildElement(QStringLiteral("Classes"));
     for (QDomElement p = classesElem.firstChild().toElement(); !p.isNull();
         p = p.nextSibling().toElement()) {
@@ -134,62 +175,40 @@ void PresentationFile::getSourcePaths(const QDir &srcDir, QList<QString> &outPat
             // if material or effect, find and add their dependents
             if (CDialogs::IsMaterialFileExtension(ext.data()) ||
                 CDialogs::IsEffectFileExtension(ext.data())) {
-                QFile f(srcDir.path() + QStringLiteral("/") + sourcepath);
-                if (f.open(QIODevice::ReadOnly)) {
-                    QDomDocument domDoc;
-                    domDoc.setContent(&f);
+                QFile f(uipSrc.path() + QStringLiteral("/") + sourcepath);
+                if (f.open(QFile::Text | QFile::ReadOnly)) {
+                    QDomDocument domDocMat;
+                    domDocMat.setContent(&f);
 
-                    QDomNodeList propElems = domDoc.documentElement()
+                    QDomNodeList propElems = domDocMat.documentElement()
                             .firstChildElement(QStringLiteral("MetaData"))
                             .childNodes();
 
-                    QFile file;
                     for (int i = 0; i < propElems.count(); ++i) {
                         QString path = propElems.at(i).toElement()
-                                .attribute(QStringLiteral("default"));
+                                       .attribute(QStringLiteral("default"));
                         if (!path.isEmpty()) {
-                            if (path.indexOf(QLatin1String("./")) == 0) {
-                                // find the imported uip file project root
-                                if (outRootPath.isEmpty()) {
-                                    QDir currDir = srcDir;
-                                    do {
-                                        QDirIterator di(currDir.path(), QDir::NoDotAndDotDot
-                                                                           | QDir::Files);
-                                        while (di.hasNext()) {
-                                            QFileInfo fi = di.next();
-                                            if (fi.suffix() == QLatin1String("uia")) {
-                                                outRootPath = fi.path();
-                                                break;
-                                            }
-                                        }
-                                    } while (outRootPath.isEmpty() && currDir.cdUp());
-                                }
+                            QString absAssetPath = path.startsWith(QLatin1String("./"))
+                                                   ? outProjPathSrc + QStringLiteral("/") + path
+                                                   : uipSrc.path() + QStringLiteral("/") + path;
 
-                                // outRootPath can only be empty if no project file was found
-                                // in which case all root paths (starting with ./) wont be imported
-                                file.setFileName(outRootPath + QStringLiteral("/") + path);
-                            } else {
-                                file.setFileName(srcDir.path() + QStringLiteral("/") + path);
-                            }
-
-                            if (file.exists() && !outPaths.contains(path))
+                            if (QFile::exists(absAssetPath) && !outPaths.contains(path))
                                 outPaths.push_back(path);
                         }
                     }
-
-                    f.close();
                 }
             }
         }
     }
 
     // search <Logic> -> <State> -> <Add>
-    QDomNodeList addElems = m_domDoc.documentElement().firstChild()
+    QDomNodeList addElems = domDoc.documentElement().firstChild()
             .firstChildElement(QStringLiteral("Logic"))
             .elementsByTagName(QStringLiteral("Add"));
 
     for (int i = 0; i < addElems.count(); ++i) {
-        QString sourcePath = addElems.at(i).toElement().attribute(QStringLiteral("sourcepath"));
+        QDomElement elem = addElems.at(i).toElement();
+        QString sourcePath = elem.attribute(QStringLiteral("sourcepath"));
         if (!sourcePath.isEmpty()) {
             QFileInfo fi(sourcePath);
             QByteArray ext = fi.suffix().toLatin1();
@@ -200,10 +219,57 @@ void PresentationFile::getSourcePaths(const QDir &srcDir, QList<QString> &outPat
                     outPaths.push_back(sourcePath);
                 continue;
             }
+
+            // add layer subpresentations paths
+            auto *sp = std::find_if(subpresentations.begin(), subpresentations.end(),
+                                   [&sourcePath](const SubPresentationRecord &spr) -> bool {
+                                       return spr.m_id == sourcePath;
+                                   });
+            if (sp != subpresentations.end()) { // has a subpresentation
+                QString spPath = sp->m_argsOrSrc;
+                // set as root path (if it is not root nor relative) to make sure importing works
+                // correctly.
+                if (!spPath.startsWith(QLatin1String("../"))
+                    && !spPath.startsWith(QLatin1String("./"))) {
+                    spPath.prepend(QLatin1String("./"));
+                }
+
+                if (!outPaths.contains(spPath)) {
+                    outPaths.push_back(spPath);
+                    g_StudioApp.GetCore()->getProjectFile().addPresentationNode(sp->m_argsOrSrc,
+                                                                                sp->m_id);
+                }
+                continue;
+            }
+        }
+
+        // add texture subpresentations paths
+        QString subpresentation = elem.attribute(QStringLiteral("subpresentation"));
+        if (!subpresentation.isEmpty()) {
+            auto *sp = std::find_if(subpresentations.begin(), subpresentations.end(),
+                                   [&subpresentation](const SubPresentationRecord &spr) -> bool {
+                                       return spr.m_id == subpresentation;
+                                   });
+            if (sp != subpresentations.end()) { // has a subpresentation
+                QString spPath = sp->m_argsOrSrc;
+                // set as root path (if it is not root nor relative) to make sure importing works
+                // correctly.
+                if (!spPath.startsWith(QLatin1String("../"))
+                    && !spPath.startsWith(QLatin1String("./"))) {
+                    spPath.prepend(QLatin1String("./"));
+                }
+
+                if (!outPaths.contains(spPath)) {
+                    outPaths.push_back(spPath);
+                    g_StudioApp.GetCore()->getProjectFile().addPresentationNode(sp->m_argsOrSrc,
+                                                                                sp->m_id);
+                }
+            }
+            continue;
         }
 
         // add fonts paths
-        QString font = addElems.at(i).toElement().attribute(QStringLiteral("font"));
+        QString font = elem.attribute(QStringLiteral("font"));
         if (!font.isEmpty()) {
             // the .uip file only shows the font name, we search for the font file in the current
             // directory plus the 'fonts' directory at the same level or 1 level up.
@@ -212,21 +278,21 @@ void PresentationFile::getSourcePaths(const QDir &srcDir, QList<QString> &outPat
 
             // this is the most probable place so lets search it first
             QString fontPath = QStringLiteral("../fonts/") + font + TTF_EXT;
-            if (QFile::exists(srcDir.path() + QStringLiteral("/") + fontPath)) {
+            if (QFile::exists(uipSrc.path() + QStringLiteral("/") + fontPath)) {
                 if (!outPaths.contains(fontPath))
                     outPaths.push_back(fontPath);
                 continue;
             }
 
             fontPath = font + TTF_EXT;
-            if (QFile::exists(srcDir.path() + QStringLiteral("/") + fontPath)) {
+            if (QFile::exists(uipSrc.path() + QStringLiteral("/") + fontPath)) {
                 if (!outPaths.contains(fontPath))
                     outPaths.push_back(fontPath);
                 continue;
             }
 
             fontPath = QStringLiteral("fonts/") + font + TTF_EXT;
-            if (QFile::exists(srcDir.path() + QStringLiteral("/") + fontPath)) {
+            if (QFile::exists(uipSrc.path() + QStringLiteral("/") + fontPath)) {
                 if (!outPaths.contains(fontPath))
                     outPaths.push_back(fontPath);
                 continue;

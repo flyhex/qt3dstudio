@@ -1591,8 +1591,8 @@ Qt3DSFile CDoc::GetDocumentPath() const
  */
 QString CDoc::getRelativePath() const
 {
-    int projPathLength = GetCore()->getProjectFile().getProjectPath().toQString().length();
-    return QDir::cleanPath(m_DocumentPath.GetPath().toQString().remove(0, projPathLength + 1));
+    return QDir(GetCore()->getProjectFile().getProjectPath().toQString())
+            .relativeFilePath(m_DocumentPath.GetPath().toQString());
 }
 
 void CDoc::setPresentationId(const QString &id)

@@ -70,8 +70,9 @@ void ProjectFile::ensureProjectFile(const QDir &uipDirectory)
  * Add a presentation node to the project file
  *
  * @param uip the absolute path of the presentation file, it will be saved as relative
+ * @param pId presentation Id
  */
-void ProjectFile::addPresentationNode(const Q3DStudio::CFilePath &uip)
+void ProjectFile::addPresentationNode(const QString &uipPath, const QString &pId)
 {
     // open the uia file
     QString path = m_projectPath.toQString() + QStringLiteral("/") + m_projectName.toQString()
@@ -87,12 +88,11 @@ void ProjectFile::addPresentationNode(const Q3DStudio::CFilePath &uip)
     // create the <assets> node if it doesn't exist
     if (assetsElem.isNull()) {
         assetsElem = doc.createElement(QStringLiteral("assets"));
-        assetsElem.setAttribute(QStringLiteral("initial"), uip.GetFileStem().toQString());
+        assetsElem.setAttribute(QStringLiteral("initial"), QFileInfo(uipPath).baseName());
         rootElem.insertBefore(assetsElem, {});
     }
 
-    QString relativeUipPath = uip.absoluteFilePath()
-            .remove(0, m_projectPath.toQString().length() + 1);
+    QString relativeUipPath = QDir(m_projectPath.toQString()).relativeFilePath(uipPath);
 
     // make sure the node doesn't already exist
     bool nodeExists = false;
@@ -107,11 +107,12 @@ void ProjectFile::addPresentationNode(const Q3DStudio::CFilePath &uip)
     }
 
     if (!nodeExists) {
-        QString defaultPresentationId = ensureUniquePresentationId(uip.GetFileStem().toQString());
+        QString presentationId = pId.isEmpty()
+                ? ensureUniquePresentationId(QFileInfo(uipPath).baseName()) : pId;
 
-        // add the presentation tag
+        // add the presentation node
         QDomElement uipElem = doc.createElement(QStringLiteral("presentation"));
-        uipElem.setAttribute(QStringLiteral("id"), defaultPresentationId);
+        uipElem.setAttribute(QStringLiteral("id"), presentationId);
         uipElem.setAttribute(QStringLiteral("src"), relativeUipPath);
         assetsElem.appendChild(uipElem);
 
@@ -212,9 +213,8 @@ void ProjectFile::updateDocPresentationId()
     QDomElement assetsElem = rootElem.firstChildElement(QStringLiteral("assets"));
 
     if (!assetsElem.isNull()) {
-        QString relativeDocPath = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetPath()
-                .toQString().remove(0, m_projectPath.toQString().length() + 1)
-                .replace(QStringLiteral("\\"), QStringLiteral("/"));
+        QString relativeDocPath = QDir(m_projectPath.toQString()).relativeFilePath(
+                    g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetPath().toQString());
 
         for (QDomElement p = assetsElem.firstChild().toElement(); !p.isNull();
             p = p.nextSibling().toElement()) {
@@ -433,4 +433,47 @@ Q3DStudio::CFilePath ProjectFile::getProjectPath() const
 Q3DStudio::CString ProjectFile::getProjectName() const
 {
     return m_projectName;
+}
+
+/**
+ * Get presentations out of a uia file
+ *
+ * @param inUiaPath uia file path
+ * @param outSubpresentations list of collected presentations
+ * @param excludePresentationSrc execluded presentation, (commonly the current presentation)
+ */
+// static
+void ProjectFile::getPresentations(const QString &inUiaPath,
+                                   QVector<SubPresentationRecord> &outSubpresentations,
+                                   const QString &excludePresentationSrc)
+{
+    QFile file(inUiaPath);
+    file.open(QFile::Text | QFile::ReadOnly);
+    if (!file.isOpen()) {
+        qWarning() << file.errorString();
+        return;
+    }
+
+    QXmlStreamReader reader(&file);
+    reader.setNamespaceProcessing(false);
+
+    while (!reader.atEnd()) {
+        if (reader.readNextStartElement()
+            && (reader.name() == QLatin1String("presentation")
+                || reader.name() == QLatin1String("presentation-qml"))) {
+            const auto attrs = reader.attributes();
+            QString argsOrSrc = attrs.value(QLatin1String("src")).toString();
+            if (excludePresentationSrc == argsOrSrc)
+                continue;
+            if (argsOrSrc.isNull())
+                argsOrSrc = attrs.value(QLatin1String("args")).toString();
+
+            outSubpresentations.push_back(
+                        SubPresentationRecord(reader.name().toString(),
+                                              attrs.value(QLatin1String("id")).toString(),
+                                              argsOrSrc));
+        } else if (reader.name() == QLatin1String("assets") && !reader.isStartElement()) {
+            break; // reached end of <assets>
+        }
+    }
 }
