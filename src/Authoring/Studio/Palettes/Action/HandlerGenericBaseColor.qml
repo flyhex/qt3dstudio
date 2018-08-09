@@ -30,14 +30,13 @@ import QtQuick 2.6
 import QtQuick.Controls 2.2
 import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.3
-import Qt.labs.platform 1.0
 
 RowLayout {
     id: root
 
     property alias color: rect.color
     property color selectedColor: "black"
-    property color previousColor: "black"
+    property color currentColor: _parentView.currentColor
 
     signal colorSelected()
     signal previewColorSelected()
@@ -59,10 +58,8 @@ RowLayout {
             anchors.fill: parent
             onClicked: {
                 selectedColor = rect.color;
-                previousColor = rect.color;
-                colorDialog.color = selectedColor;
-                colorDialog.currentColor = selectedColor;
-                colorDialog.open();
+                selectedColor = _parentView.showColorDialog(selectedColor);
+                root.colorSelected();
             }
         }
 
@@ -79,22 +76,8 @@ RowLayout {
         Layout.fillWidth: true
     }
 
-    ColorDialog {
-        id: colorDialog
-        options: ColorDialog.DontUseNativeDialog
-        modality: Qt.ApplicationModal
-
-        onCurrentColorChanged: {
-            selectedColor = currentColor;
-            root.previewColorSelected();
-        }
-        onAccepted: {
-            previousColor = selectedColor;
-            root.colorSelected();
-        }
-        onRejected: {
-            selectedColor = previousColor;
-            root.colorSelected();
-        }
+    onCurrentColorChanged: {
+        selectedColor = currentColor;
+        root.previewColorSelected();
     }
 }

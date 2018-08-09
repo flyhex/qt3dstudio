@@ -1428,3 +1428,15 @@ QStringList CDialogs::presentationExtensions()
     }
     return exts;
 }
+
+QColor CDialogs::displayColorDialog(const QColor &color) const
+{
+    QColorDialog theColorDlg;
+    theColorDlg.setCurrentColor(color);
+    theColorDlg.setOption(QColorDialog::DontUseNativeDialog, true);
+    connect(&theColorDlg, &QColorDialog::currentColorChanged, this, &CDialogs::onColorChanged);
+    if (theColorDlg.exec() == QDialog::Accepted)
+        return theColorDlg.selectedColor();
+    else
+        return color;
+}

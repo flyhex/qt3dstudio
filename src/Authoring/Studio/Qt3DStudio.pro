@@ -211,6 +211,7 @@ HEADERS += \
     UI/StudioAppPrefsPage.h \
     UI/StudioPreferencesPropSheet.h \
     UI/StudioProjectSettingsPage.h \
+    Workspace/Dialogs.h \
     ../Common/Code/Graph/GraphPosition.h \
     Palettes/Project/EditPresentationIdDlg.h \
     Application/ProjectFile.h \

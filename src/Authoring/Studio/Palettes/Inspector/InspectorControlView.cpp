@@ -528,6 +528,20 @@ QObject *InspectorControlView::showDataInputChooser(int handle, int instance, co
     return m_dataInputChooserView;
 }
 
+QColor InspectorControlView::showColorDialog(const QColor &color)
+{
+    m_currentColor = color;
+    CDialogs *dialogs = g_StudioApp.GetDialogs();
+    connect(dialogs, &CDialogs::onColorChanged, this, &InspectorControlView::changeColor);
+    return dialogs->displayColorDialog(color);
+}
+
+void InspectorControlView::changeColor(const QColor &color)
+{
+    m_currentColor = color;
+    Q_EMIT currentColorChanged();
+}
+
 bool InspectorControlView::toolTipsEnabled()
 {
     return CStudioPreferences::ShouldShowTooltips();

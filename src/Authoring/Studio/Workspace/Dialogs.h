@@ -56,8 +56,9 @@ class CControl;
 class CDialogControl;
 class CProgressView;
 
-class CDialogs
+class CDialogs : public QObject
 {
+    Q_OBJECT
 public:
     enum ESavePromptResult {
         CANCEL_OPERATION,
@@ -149,6 +150,7 @@ public:
     int displayOverrideAssetBox(const QString &assetPath);
     int DisplayChoiceBox(const QString &inTitle, const QString &inText, int inIcon);
     void DisplayKnownErrorDialog(const QString &inErrorText);
+    QColor displayColorDialog(const QColor &color) const;
 
     ESavePromptResult PromptForSave();
     bool PromptForKeyframeInterpolation(float &ioEaseIn, float &ioEaseOut);
@@ -176,6 +178,9 @@ public:
     static void DisplayGLVersionWarning(const Q3DStudio::CString &inGLVersion,
                                         const Q3DStudio::CString &inRecommendedVersion);
     static void showWidgetBrowser(QWidget *screenWidget, QWidget *browser, const QPoint &point);
+
+Q_SIGNALS:
+    void onColorChanged(const QColor &color);
 
 protected:
     QString CreateAllowedTypesString(Q3DStudio::DocumentEditorFileType::Enum fileTypeFilter,
