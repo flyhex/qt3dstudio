@@ -1,0 +1,79 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2018 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Depth of Field
+\page depth-of-field-effect.html
+\ingroup qt3dstudio-best-practices
+
+\section1 Using Depth of Field
+
+\image Effects-DOF.png
+
+The \"Depth Of Field HQ Blur\" effect increasingly blurs regions of the
+image based on their deviation from a specified distance from the
+camera. (Notice that the cube and same-distance floor are in focus while
+the closer cone and farther sphere are blurred.)
+
+For this effect to work well, you need to adjust the
+\c{Clipping Start} and \c{Clipping End} properties of the
+camera for the Layer to 'frame' the content. (You ideally want the
+largest possible value for \c{Start} and the smallest possible
+value for \c{End}.) After you do this you can use the properties of
+the effect in the Inspector palette to adjust the effect.
+
+\list
+\li
+  The \c{Focus Distance} property specifies the distance from the
+  camera where the content is in perfect focus.
+\li
+  The \c{Depth of Field} property specifies a the distance around
+  the \c{Focus Distance} where items are fully in focus. The focus
+  then fades away to fully blurred by the same distance on both the near
+  and far sides.
+\endlist
+For example, a \c{Focus Distance} of 100 and a
+\c{Depth of Field} of 20 means that everything that is between 90
+and 110 units away from the camera will be fully in focus, items at a
+distance of 70-90 and 110-130 units will experiencing variable blurring,
+and everything closer than 70 or farther than 130 will be fully blurred.
+
+To make it easier to set up this effect, turn on the
+\c{Debug Focus Rendering} checkbox for the effect:
+\image Effects-DOF-Debug.png
+
+When enabled the scene will switch to a mode showing the amount of blur
+to be applied. Anything completely fogged in white will be fully
+blurred, anything that is fully black will be fully in focus, and shades
+of grey represent varying amounts of blur in between. You will find it
+far easier to turn on this mode and just scrub the values in the
+Inspector palette until the content you want is bracketed, compared to
+performing distance calculations and entering numbers.
+
+*/

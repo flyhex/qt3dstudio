@@ -1,0 +1,58 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2018 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Tilt Shift
+\page tilt-shift-effect.html
+\ingroup qt3dstudio-best-practices
+
+\section1 Using Tilt Shift
+
+\image Effects-TiltShift.png
+
+The \"Tilt Shift\" effect simulates depth of field in a much simpler
+(and more performant) manner. Instead of blurring based on the depth
+buffer, it simply blurs everything except for horizontal stripe on the
+layer. The effect is controlled by the properties:
+
+\list
+\li
+  \c{Focus Position} - the vertical placement of the center of
+  effect (the 'focused region') on the screen, from top to bottom.
+\li
+  \c{Focus Width} - the vertical size of the in-focus region.
+\li
+  \c{Blur Amount} - how much the not-in-focus regions are blurred.
+\endlist
+As with the Depth of Field effect, this effect has a
+\c{Debug Rendering} option that you can enable to see where the
+blur will be applied to the Layer. (See above for further description.)
+\image Effects-TiltShift-Debug.png
+
+*/
