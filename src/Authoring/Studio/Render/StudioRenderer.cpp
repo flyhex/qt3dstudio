@@ -163,7 +163,7 @@ struct SRendererImpl : public IStudioRenderer,
         if (m_proxy.isNull())
             m_proxy.reset(new Q3DSQmlStreamProxy());
         IOffscreenRenderManager &offscreenMgr(m_Context->GetOffscreenRenderManager());
-        const QString projectPath = m_Doc.GetCore()->getProjectFile().getProjectPath().toQString();
+        const QString projectPath = m_Doc.GetCore()->getProjectFile().getProjectPath();
         // setPath expects full path, but strips the filename
         m_proxy->setPath(projectPath + "/dummy.uip");
         QVector<SubPresentationRecord> toUnregister;
@@ -653,16 +653,15 @@ struct SRendererImpl : public IStudioRenderer,
     {
         if (m_Context.mPtr && m_Context->GetTextRenderer()) {
             m_Context->GetTextRenderer()->ClearProjectFontDirectories();
-            Q3DStudio::CString projectPath = g_StudioApp.GetCore()->getProjectFile()
-                    .getProjectPath().toCString();
-            if (projectPath.Length()) {
+            QString projectPath = g_StudioApp.GetCore()->getProjectFile().getProjectPath();
+            if (!projectPath.isEmpty()) {
                 // Add the installed font folders from the res dir.
                 Q3DStudio::CString thePath(Q3DStudio::CString::fromQString(
                                                resourcePath() + QStringLiteral("/Font")));
                 m_Context->GetTextRenderer()->AddSystemFontDirectory(
                     m_Context->GetStringTable().RegisterStr(thePath.c_str()));
                 m_Context->GetTextRenderer()->AddProjectFontDirectory(
-                    m_Context->GetStringTable().RegisterStr(projectPath.c_str()));
+                    m_Context->GetStringTable().RegisterStr(projectPath.toLatin1().data()));
             }
         }
     }

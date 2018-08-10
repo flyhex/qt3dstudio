@@ -452,8 +452,7 @@ void ProjectFileSystemModel::importUrl(const QDir &targetDir, const QUrl &url) c
                         effectFileSourcePaths);
 
             const QDir fileDir = QFileInfo(sourceFile).dir();
-            const QDir projectDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath()
-                                  .toQString());
+            const QDir projectDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath());
 
             for (const auto &effectFile : effectFileSourcePaths) {
                 const QString sourcePath = fileDir.filePath(effectFile.toQString());
@@ -492,8 +491,8 @@ void ProjectFileSystemModel::importPresentationAssets(const QFileInfo &uipSrc,
         QString srcAssetPath, targetAssetPath;
         if (path.startsWith(QLatin1String("./"))) { // path from project root
             srcAssetPath = QDir(projPathSrc).absoluteFilePath(path);
-            targetAssetPath = QDir(g_StudioApp.GetCore()->getProjectFile()
-                                   .getProjectPath().filePath()).absoluteFilePath(path);
+            targetAssetPath = QDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath())
+                                .absoluteFilePath(path);
         } else { // relative path
             srcAssetPath = uipSrc.dir().absoluteFilePath(path);
             targetAssetPath = uipTarget.dir().absoluteFilePath(path);
@@ -511,7 +510,7 @@ void ProjectFileSystemModel::importPresentationAssets(const QFileInfo &uipSrc,
             } else {
                 // get path relative to project root (for neat displaying)
                 QString pathFromRoot = QDir(g_StudioApp.GetCore()->getProjectFile()
-                                            .getProjectPath().filePath())
+                                            .getProjectPath())
                                             .relativeFilePath(targetAssetPath);
 
                 overrideCh = g_StudioApp.GetDialogs()->displayOverrideAssetBox(pathFromRoot);

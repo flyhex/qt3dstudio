@@ -589,5 +589,5 @@ void ChooserModelBase::modelLayoutChanged()
 
 void ChooserModelBase::rebuild()
 {
-    setRootPath(g_StudioApp.GetCore()->getProjectFile().getProjectPath().toQString());
+    setRootPath(g_StudioApp.GetCore()->getProjectFile().getProjectPath());
 }

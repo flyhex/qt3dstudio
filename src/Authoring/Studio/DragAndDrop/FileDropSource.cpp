@@ -167,8 +167,7 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
         }
 
         if (theDocType == Q3DStudio::DocumentEditorFileType::Presentation) { // set subpresentation
-            QString pathFromRoot = QDir(theDoc.GetCore()->getProjectFile()
-                                        .getProjectPath().filePath())
+            QString pathFromRoot = QDir(theDoc.GetCore()->getProjectFile().getProjectPath())
                                         .relativeFilePath(theFilePath.toQString());
             Q3DStudio::CString presentationId = Q3DStudio::CString::fromQString(theDoc.GetCore()
                                                 ->getProjectFile().getPresentationId(pathFromRoot));

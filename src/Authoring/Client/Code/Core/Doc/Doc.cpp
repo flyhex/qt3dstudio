@@ -1591,7 +1591,7 @@ Qt3DSFile CDoc::GetDocumentPath() const
  */
 QString CDoc::getRelativePath() const
 {
-    return QDir(GetCore()->getProjectFile().getProjectPath().toQString())
+    return QDir(GetCore()->getProjectFile().getProjectPath())
             .relativeFilePath(m_DocumentPath.GetPath().toQString());
 }
 

@@ -213,8 +213,8 @@ void ProjectView::OnNewPresentation()
 
     // expand presentation folder by default (if it exists)
     QTimer::singleShot(0, [this]() {
-        QString path = g_StudioApp.GetCore()->getProjectFile().getProjectPath().absoluteFilePath()
-                + QStringLiteral("/presentations");
+        QString path = g_StudioApp.GetCore()->getProjectFile().getProjectPath()
+                       + QStringLiteral("/presentations");
         m_ProjectModel->expand(m_ProjectModel->rowForPath(path));
     });
 }
@@ -280,8 +280,8 @@ bool ProjectView::isCurrentPresentation(int row) const
 
 void ProjectView::editPresentationId(int row)
 {
-    QString relativeUipPath = m_ProjectModel->filePath(row).remove(0,
-                g_StudioApp.GetCore()->getProjectFile().getProjectPath().toQString().length() + 1);
+    QString relativeUipPath = QDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath())
+                              .relativeFilePath(m_ProjectModel->filePath(row));
 
     EditPresentationIdDlg dlg(relativeUipPath, this);
     dlg.exec();
@@ -381,6 +381,5 @@ void ProjectView::refreshImport(int row) const
 
 void ProjectView::rebuild()
 {
-    m_ProjectModel->setRootPath(g_StudioApp.GetCore()->getProjectFile().getProjectPath()
-                                .toQString());
+    m_ProjectModel->setRootPath(g_StudioApp.GetCore()->getProjectFile().getProjectPath());
 }

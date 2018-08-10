@@ -194,7 +194,7 @@ public:
         IDirectoryWatchingSystem *theSystem(m_Doc.GetDirectoryWatchingSystem());
         if (theSystem) {
             m_ProjectDirWatcher = theSystem->AddDirectory(m_Doc.GetCore()->getProjectFile()
-                                                          .getProjectPath().toQString(),
+                                                          .getProjectPath(),
                                         std::bind(&CDocEditor::OnProjectDirChanged, this,
                                                   std::placeholders::_1));
         }

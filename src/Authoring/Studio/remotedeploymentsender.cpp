@@ -205,7 +205,7 @@ void RemoteDeploymentSender::streamProject(const QString &projectFile)
         m_lastDeployed.clear();
     }
 
-    QString projectPath = g_StudioApp.GetCore()->getProjectFile().getProjectPath().toQString();
+    QString projectPath = g_StudioApp.GetCore()->getProjectFile().getProjectPath();
 
     const QDir projectDirectory(projectPath);
 

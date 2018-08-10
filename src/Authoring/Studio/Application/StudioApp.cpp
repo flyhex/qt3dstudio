@@ -1573,7 +1573,7 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
     try {
         Q3DStudio::CFilePath docFilePath(inDocument.GetAbsolutePath());
         // make sure a project (a .uia file) exists
-        m_core->getProjectFile().ensureProjectFile(docFilePath.dir());
+        m_core->getProjectFile().ensureProjectFile(docFilePath.toQString());
         OnLoadDocumentCatcher(loadDocument);
         m_core->GetDispatch()->FireOnOpenDocument(loadDocument, true);
         // Loading was successful
@@ -1679,9 +1679,7 @@ void CStudioApp::SaveUIAFile(bool subpresentations)
 void CStudioApp::saveDataInputsToProjectFile()
 {
     // open the uia file
-    QString path = m_core->getProjectFile().getProjectPath().toQString() + QStringLiteral("/")
-            + m_core->getProjectFile().getProjectName().toQString() + QStringLiteral(".uia");
-    QFile file(path);
+    QFile file(m_core->getProjectFile().getProjectFilePath());
     file.open(QIODevice::ReadWrite);
     QDomDocument doc;
     doc.setContent(&file);
