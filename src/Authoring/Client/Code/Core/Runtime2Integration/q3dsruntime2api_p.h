@@ -44,5 +44,6 @@
 #include "q3dsbehaviorobject_p.h"
 #include "q3dsuippresentation_p.h"
 #include "q3dsviewportsettings_p.h"
+#include "q3dsenummaps_p.h"
 
 #endif

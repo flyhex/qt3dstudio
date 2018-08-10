@@ -32,6 +32,7 @@
 #include "StudioApp.h"
 #include "StudioPreferences.h"
 #include "StudioProjectSettings.h"
+#include "Q3DSTranslation.h"
 
 #include <QtWidgets/qwidget.h>
 #include <QtWidgets/qopenglwidget.h>
@@ -39,6 +40,7 @@
 #include <QtGui/qpainter.h>
 #include <QtGui/qopenglpaintdevice.h>
 #include <QtGui/qopenglfunctions.h>
+#include <QtGui/qoffscreensurface.h>
 #include <QtCore/qscopedvaluerollback.h>
 
 #include <Qt3DRender/qrendersurfaceselector.h>
@@ -72,10 +74,16 @@ Q3DStudioRenderer::Q3DStudioRenderer()
 
 Q3DStudioRenderer::~Q3DStudioRenderer()
 {
+    OnClosingPresentation();
     m_dispatch.RemoveDataModelListener(this);
     m_dispatch.RemovePresentationChangeListener(this);
     m_dispatch.RemoveSceneDragListener(this);
     m_dispatch.RemoveToolbarChangeListener(this);
+}
+
+QSharedPointer<Q3DSEngine> &Q3DStudioRenderer::engine()
+{
+    return m_engine;
 }
 
 ITextRenderer *Q3DStudioRenderer::GetTextRenderer()
@@ -106,8 +114,10 @@ qt3ds::foundation::IStringTable *Q3DStudioRenderer::GetRenderStringTable()
 
 void Q3DStudioRenderer::RequestRender()
 {
-    if (m_widget)
+    if (m_widget && !m_renderRequested) {
         m_widget->update();
+        m_renderRequested = true;
+    }
 }
 
 bool Q3DStudioRenderer::IsInitialized()
@@ -123,6 +133,10 @@ void Q3DStudioRenderer::Initialize(QWidget *inWindow)
 void Q3DStudioRenderer::SetViewRect(const QRect &inRect)
 {
     m_viewRect = inRect;
+    QSize size(inRect.width(), inRect.height());
+    if (!m_engine.isNull())
+        m_engine->resize(size, fixedDevicePixelRatio(), true);
+    sendResizeToQt3D(size);
 }
 
 void Q3DStudioRenderer::SetPolygonFillModeEnabled(bool inEnableFillMode)
@@ -316,8 +330,26 @@ void Q3DStudioRenderer::drawGuides()
 
 void Q3DStudioRenderer::RenderNow()
 {
+    m_renderRequested = false;
     QOpenGLContextPrivate *ctxD = QOpenGLContextPrivate::get(m_widget->context());
     QScopedValueRollback<GLuint> defaultFboRedirectRollback(ctxD->defaultFboRedirect, 0);
+
+    if (m_engine.isNull()) {
+        createEngine();
+
+        auto renderAspectD = static_cast<Qt3DRender::QRenderAspectPrivate *>(
+                    Qt3DRender::QRenderAspectPrivate::get(m_renderAspect));
+        renderAspectD->renderInitialize(m_widget->context());
+    }
+
+    m_widget->makeCurrent();
+
+    if (!m_translation.isNull())
+        m_translation->render();
+
+    auto renderAspectD = static_cast<Qt3DRender::QRenderAspectPrivate *>(
+                Qt3DRender::QRenderAspectPrivate::get(m_renderAspect));
+    renderAspectD->renderSynchronous();
 
     drawGuides();
 }
@@ -365,12 +397,16 @@ void Q3DStudioRenderer::OnReloadEffectInstance(qt3dsdm::Qt3DSDMInstanceHandle in
 
 void Q3DStudioRenderer::OnNewPresentation()
 {
-
+    m_hasPresentation = true;
+    createTranslation();
 }
 
 void Q3DStudioRenderer::OnClosingPresentation()
 {
-
+    if (!m_engine.isNull())
+        m_engine->setPresentation(nullptr);
+    m_translation.reset();
+    m_hasPresentation = false;
 }
 
 void Q3DStudioRenderer::OnSceneMouseDown(SceneDragSenderType::Enum inSenderType,
@@ -424,6 +460,8 @@ qreal Q3DStudioRenderer::fixedDevicePixelRatio() const
 
 void Q3DStudioRenderer::sendResizeToQt3D(const QSize &size)
 {
+    if (!m_engine)
+        return;
     Qt3DCore::QEntity *rootEntity = m_engine->rootEntity();
     if (rootEntity) {
         Qt3DRender::QRenderSurfaceSelector *surfaceSelector
@@ -438,21 +476,46 @@ void Q3DStudioRenderer::sendResizeToQt3D(const QSize &size)
 
 void Q3DStudioRenderer::createEngine()
 {
+    QOpenGLContext *context = QOpenGLContext::currentContext();
+    QSurface *surface = context->surface();
+    QOffscreenSurface *offscreen = nullptr;
+    QWindow *window = nullptr;
+    QObject *surfaceObject = nullptr;
+    if (surface->surfaceClass() == QSurface::Offscreen) {
+        offscreen = static_cast<QOffscreenSurface*>(surface);
+        surfaceObject = offscreen;
+    } else {
+        window = static_cast<QWindow*>(surface);
+        surfaceObject = window;
+    }
+
     m_engine.reset(new Q3DSEngine);
 
     Q3DSEngine::Flags flags = Q3DSEngine::WithoutRenderAspect;
+#if (Q3DS_ENABLE_PROFILEUI == 1)
     flags |= Q3DSEngine::EnableProfiling;
+#endif
+
+    m_viewportSettings.setMatteEnabled(true);
+    m_viewportSettings.setShowRenderStats(true);
+    QColor matteColor;
+    matteColor.setRgbF(.13, .13, .13);
+    m_viewportSettings.setMatteColor(matteColor);
 
     m_engine->setFlags(flags);
-    m_engine->setAutoToggleProfileUi(false); // up to the app to control this via the API instead
+    m_engine->setAutoToggleProfileUi(false);
 
-    m_engine->setSurface(m_widget->window()->windowHandle());
+    m_engine->setSurface(surfaceObject);
     m_engine->setViewportSettings(&m_viewportSettings);
 
     m_renderAspect = new Qt3DRender::QRenderAspect(Qt3DRender::QRenderAspect::Synchronous);
     m_engine->createAspectEngine();
     m_engine->aspectEngine()->registerAspect(m_renderAspect);
+}
 
+void Q3DStudioRenderer::createTranslation()
+{
+    m_translation.reset(new Q3DSTranslation(*this));
 }
 
 std::shared_ptr<IStudioRenderer> IStudioRenderer::CreateStudioRenderer()

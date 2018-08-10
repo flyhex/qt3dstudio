@@ -253,7 +253,7 @@ CMainFrame::CMainFrame()
     m_ui->actionFind->setVisible(false);
 
     // TODO: better solution?
-    m_updateUITimer->start(500);
+    m_updateUITimer->start(60);
     connect(m_updateUITimer.data(), &QTimer::timeout, [&]() {
         if (QApplication::activeWindow() != this)
             return;

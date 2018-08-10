@@ -137,7 +137,7 @@ struct SDocBufferCache : public IDocumentBufferCache
     {
         if (inPrimitiveType != PRIMITIVETYPE_UNKNOWN) {
             int theType(inPrimitiveType - 1);
-            if (GetPrimitiveNames().size() < theType)
+            if (GetPrimitiveNames().size() > theType)
                 return GetPrimitiveNames()[theType];
         }
         return QStringLiteral("");

@@ -160,6 +160,7 @@ namespace foundation {
         Qt3DSBCharPtr c_str() const;
         const wchar_t *wc_str() const;
         bool IsValid() const { return !m_String.isNull(); }
+        QString qstring() const { return m_String; }
 #ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
         // If this string is in the map, changes it to the map value.
         void Remap(const SStrRemapMap &inMap);

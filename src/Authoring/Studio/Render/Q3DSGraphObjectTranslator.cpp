@@ -27,6 +27,11 @@
 ****************************************************************************/
 
 #include "Q3DSGraphObjectTranslator.h"
+#include "Q3DSTranslation.h"
+#include "Q3DSStringTable.h"
+
+#include "Qt3DSString.h"
+#include "IDocumentReader.h"
 
 namespace Q3DStudio
 {
@@ -42,8 +47,43 @@ Q3DSGraphObjectTranslator::Q3DSGraphObjectTranslator(qt3dsdm::Qt3DSDMInstanceHan
     s_translatorMap.insert(this, m_graphObject);
 }
 
-void Q3DSGraphObjectTranslator::PushTranslation(Q3DSTranslation &)
+void Q3DSGraphObjectTranslator::pushTranslation(Q3DSTranslation &translation)
 {
+    Q3DStudio::CString theId = translation.reader().GetFileId(instanceHandle());
+    if (theId.size() && theId.toQString() != graphObject().id()) {
+        qt3ds::foundation::CRegisteredString rid
+                = Q3DSStringTable::instance()->GetRenderStringTable()
+                    .RegisterStr(theId.toQString());
+        QByteArray data = rid.qstring().toLatin1();
+        translation.presentation()->registerObject(data, &graphObject());
+    }
+    setDirty(false);
+}
+
+bool Q3DSGraphObjectTranslator::updateProperty(Q3DSTranslation &context,
+                                               qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                               qt3dsdm::Qt3DSDMPropertyHandle property,
+                                               qt3dsdm::SValue &value,
+                                               const QString &name)
+{
+    Q_UNUSED(context)
+    Q_UNUSED(instance)
+    Q_UNUSED(property)
+    Q3DSPropertyChangeList changeList;
+    bool ret = false;
+    if (name == QLatin1String("name")) {
+        changeList.append(m_graphObject->setName(value.toQVariant().toString()));
+        ret = true;
+    } else if (name == QLatin1String("starttime")) {
+        changeList.append(m_graphObject->setStartTime(value.getData<qint32>()));
+        ret = true;
+    } else if (name == QLatin1String("endtime")) {
+        changeList.append(m_graphObject->setEndTime(value.getData<qint32>()));
+        ret = true;
+    }
+    if (ret)
+        m_graphObject->notifyPropertyChanges(changeList);
+    return ret;
 }
 
 }

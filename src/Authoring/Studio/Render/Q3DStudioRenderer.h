@@ -48,6 +48,8 @@
 #include <q3dsruntime2api_p.h>
 #include <QtWidgets/qopenglwidget.h>
 
+#define Q3DS_ENABLE_PROFILEUI 0
+
 QT_BEGIN_NAMESPACE
 namespace Qt3DRender {
 class QRenderAspect;
@@ -56,6 +58,7 @@ QT_END_NAMESPACE
 
 namespace Q3DStudio {
 
+class Q3DSTranslation;
 class Q3DStudioRenderer : public IStudioRenderer,
                           public IDataModelListener,
                           public IReloadListener,
@@ -92,6 +95,13 @@ public:
     void ReleaseContext() override;
     void RegisterSubpresentations(
             const QVector<SubPresentationRecord> &subpresentations) override;
+
+    QSharedPointer<Q3DSEngine> &engine();
+
+    QRect viewRect() const
+    {
+        return m_viewRect;
+    }
 protected:
     void OnBeginDataModelNotifications() override;
     void OnEndDataModelNotifications() override;
@@ -110,9 +120,11 @@ protected:
                            int inToolMode) override;
     void OnToolbarChange() override;
     void OnSelectionChange();
+
 private:
 
     void createEngine();
+    void createTranslation();
     void sendResizeToQt3D(const QSize &size);
     qreal fixedDevicePixelRatio() const;
     void drawGuides();
@@ -127,16 +139,19 @@ private:
     CDispatch &m_dispatch;
     CDoc &m_doc;
     qt3dsdm::TSignalConnectionPtr m_selectionSignal;
-    QScopedPointer<Q3DSEngine> m_engine;
+    QSharedPointer<Q3DSEngine> m_engine;
     QOpenGLWidget *m_widget = nullptr;
     Qt3DRender::QRenderAspect *m_renderAspect = nullptr;
     Q3DSViewportSettings m_viewportSettings;
+    QScopedPointer<Q3DSTranslation> m_translation;
     QRect m_viewRect;
     QRect m_innerRect;
     QRect m_outerRect;
     QColor m_rectColor;
     QColor m_lineColor;
     bool m_guidesEnabled = true;
+    bool m_hasPresentation = false;
+    bool m_renderRequested = false;
 };
 
 }

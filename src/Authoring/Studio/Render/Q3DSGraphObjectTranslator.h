@@ -56,24 +56,24 @@ public:
 
     virtual ~Q3DSGraphObjectTranslator() {}
 
-    virtual void PushTranslation(Q3DSTranslation &inTranslatorContext);
-    virtual void AfterRenderGraphIsBuilt(Q3DSTranslation &) {}
-    virtual void SetActive(bool inActive) = 0;
-    virtual void ClearChildren() = 0;
-    virtual void AppendChild(Q3DSGraphObject &inChild) = 0;
-    virtual void ResetEffect() {}
-    virtual Q3DSGraphObject &GetGraphObject() { return *m_graphObject; }
-    virtual Q3DSGraphObject &GetNonAliasedGraphObject() { return *m_graphObject; }
-    virtual qt3dsdm::Qt3DSDMInstanceHandle GetInstanceHandle() { return m_instanceHandle; }
-    virtual qt3dsdm::Qt3DSDMInstanceHandle GetSceneGraphInstanceHandle()
+    virtual void pushTranslation(Q3DSTranslation &inTranslatorContext);
+    virtual void afterRenderGraphIsBuilt(Q3DSTranslation &) {}
+    virtual void setActive(bool inActive) = 0;
+    virtual void clearChildren() = 0;
+    virtual void appendChild(Q3DSGraphObject &inChild) = 0;
+    virtual void resetEffect() {}
+    virtual Q3DSGraphObject &graphObject() { return *m_graphObject; }
+    virtual Q3DSGraphObject &nonAliasedGraphObject() { return *m_graphObject; }
+    virtual qt3dsdm::Qt3DSDMInstanceHandle instanceHandle() { return m_instanceHandle; }
+    virtual qt3dsdm::Qt3DSDMInstanceHandle sceneGraphInstanceHandle()
     {
         return m_instanceHandle;
     }
-    virtual qt3dsdm::Qt3DSDMInstanceHandle GetPossiblyAliasedInstanceHandle()
+    virtual qt3dsdm::Qt3DSDMInstanceHandle possiblyAliasedInstanceHandle()
     {
         if (m_aliasInstanceHandle.Valid())
             return m_aliasInstanceHandle;
-        return GetInstanceHandle();
+        return instanceHandle();
     }
     quint32 dirtyIndex() const
     {
@@ -83,6 +83,27 @@ public:
     {
         m_dirtyIndex = index;
     }
+    void setAliasInstanceHandle(qt3dsdm::Qt3DSDMInstanceHandle a)
+    {
+        m_aliasInstanceHandle = a;
+    }
+    qt3dsdm::Qt3DSDMInstanceHandle aliasInstanceHandle() const
+    {
+        return m_aliasInstanceHandle;
+    }
+    virtual bool updateProperty(Q3DSTranslation &inContext,
+                                qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                qt3dsdm::Qt3DSDMPropertyHandle property,
+                                qt3dsdm::SValue &value,
+                                const QString &name);
+    bool dirty() const
+    {
+        return m_dirty;
+    }
+    void setDirty(bool dirty)
+    {
+        m_dirty = dirty;
+    }
 private:
 
     // This will never be null.  The reason it is a pointer is because
@@ -91,6 +112,7 @@ private:
     qt3dsdm::Qt3DSDMInstanceHandle m_instanceHandle;
     qt3dsdm::Qt3DSDMInstanceHandle m_aliasInstanceHandle;
 
+    bool m_dirty;
     quint32 m_dirtyIndex;
     static QMap<Q3DSGraphObjectTranslator *, Q3DSGraphObject *> s_translatorMap;
 };

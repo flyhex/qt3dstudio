@@ -49,6 +49,7 @@
 #include "Qt3DSDMComposerTypeDefinitions.h"
 #include "Q3DSGraphObjectTranslator.h"
 #include "foundation/Qt3DSInvasiveSet.h"
+#include "foundation/Qt3DSOption.h"
 
 /* This class replace STranslation */
 
@@ -128,12 +129,31 @@ struct STranslation : public qt3ds::render::IQt3DSRenderNodeFilter
 
 namespace Q3DStudio
 {
-
+class Q3DStudioRenderer;
+class Q3DSGraphObjectTranslator;
 class Q3DSTranslation
 {
 public:
-    Q3DSTranslation(IStudioRenderer &inRenderer, Q3DSEngine *engine);
+    Q3DSTranslation(Q3DStudioRenderer &inRenderer);
+
+protected:
+    void markDirty(qt3dsdm::Qt3DSDMInstanceHandle instance);
+    void markPropertyDirty(qt3dsdm::Qt3DSDMInstanceHandle instance,
+                           qt3dsdm::Qt3DSDMPropertyHandle property);
+    void releaseTranslation(qt3dsdm::Qt3DSDMInstanceHandle instance);
+    void markGraphInstanceDirty(int instance, int parent);
+    void markBeginComponentSeconds(qt3dsdm::Qt3DSDMSlideHandle slide);
+    void markComponentSeconds(qt3dsdm::Qt3DSDMSlideHandle);
+
 private:
+
+    void setPresentationData();
+    Q3DSGraphObjectTranslator *createTranslator(qt3dsdm::Qt3DSDMInstanceHandle instance);
+    Q3DSGraphObjectTranslator *getOrCreateTranslator(qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                          qt3dsdm::Qt3DSDMInstanceHandle aliasInstance);
+    void clearDirtySet();
+    QByteArray getInstanceObjectId(qt3dsdm::Qt3DSDMInstanceHandle instance);
+
 
     struct TranslatorGetDirty
     {
@@ -150,15 +170,15 @@ private:
         }
     };
 
-    struct Q3DSPresentation
+    struct Q3DSPresentationData
     {
         QString m_id;
         QString m_srcPath;
         QString m_author;
         QString m_company;
-        quint32 m_width;
-        quint32 m_height;
-        Q3DSPresentation()
+        long m_width;
+        long m_height;
+        Q3DSPresentationData()
             : m_width(800)
             , m_height(480)
         {
@@ -169,16 +189,23 @@ private:
     typedef qt3ds::foundation::InvasiveSet<Q3DSGraphObjectTranslator, TranslatorGetDirty,
                                            TranslatorSetDirty>
         TTranslatorDirtySet;
+
     typedef QPair<qt3dsdm::Qt3DSDMInstanceHandle, Q3DSGraphObjectTranslator *>
         THandleTranslatorPair;
     typedef QVector<THandleTranslatorPair> THandleTranslatorPairList;
+    typedef QHash<qt3dsdm::Qt3DSDMInstanceHandle, THandleTranslatorPairList>
+        TInstanceToTranslatorMap;
     /*
         Now that we have aliases, one instance handle can map to several translators.
         One translator, however, only maps to one instance handle.
     */
-    typedef QHash<qt3dsdm::Qt3DSDMInstanceHandle, THandleTranslatorPairList>
-        TInstanceToTranslatorMap;
-    IStudioRenderer &m_studioRenderer;
+    typedef qt3ds::foundation::Option<Q3DSTranslation::THandleTranslatorPair>
+        ThandleTranslatorOption;
+
+    ThandleTranslatorOption findTranslator(THandleTranslatorPairList &list,
+                                           qt3dsdm::Qt3DSDMInstanceHandle instance);
+
+    Q3DStudioRenderer &m_studioRenderer;
 
     CDoc &m_doc;
     IDocumentReader &m_reader;
@@ -186,18 +213,20 @@ private:
     qt3dsdm::CStudioSystem &m_studioSystem;
     qt3dsdm::CStudioFullSystem &m_fullSystem;
     Q3DStudio::CGraph &m_assetGraph;
-    Q3DSEngine *m_engine;
+    QSharedPointer<Q3DSEngine> m_engine;
+    QSharedPointer<Q3DSUipPresentation> m_presentation;
 
     // allocator for scene graph and translators
     //qt3ds::foundation::SSAutoDeallocatorAllocator m_Allocator;
     // All translator related containers must come after the allocator
     TInstanceToTranslatorMap m_translatorMap;
     TTranslatorDirtySet m_dirtySet;
-    Q3DSPresentation m_presentation;
+    Q3DSPresentationData m_presentation_data;
     Q3DSScene *m_scene;
     Q3DStudio::CGraphIterator m_graphIterator;
     QVector<TSignalConnection> m_signalConnections;
-    quint32 m_ComponentSecondsDepth;
+    quint32 m_componentSecondsDepth;
+    QVector<Q3DSGraphObjectTranslator*> m_slideTranslators;
 
 #ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     SNode m_MouseDownNode;
@@ -241,6 +270,25 @@ private:
     QT3DSVec4 m_guideFillColor;
     QT3DSVec4 m_selectedGuideFillColor;
 #endif
+public:
+    qt3dsdm::SComposerObjectDefinitions &objectDefinitions() const
+    {
+        return m_objectDefinitions;
+    }
+    Q3DStudio::CGraph &assetGraph()
+    {
+        return m_assetGraph;
+    }
+    IDocumentReader &reader()
+    {
+        return m_reader;
+    }
+    Q3DSUipPresentation *presentation() const
+    {
+        return m_presentation.data();
+    }
+    void render();
+    Q3DSGraphObjectTranslator *getOrCreateTranslator(qt3dsdm::Qt3DSDMInstanceHandle instance);
 };
 
 }

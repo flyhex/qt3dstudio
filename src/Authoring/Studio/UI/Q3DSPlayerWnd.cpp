@@ -34,6 +34,7 @@
 #include "HotKeys.h"
 #include "Dispatch.h"
 #include "SceneDropTarget.h"
+#include "Q3DStudioRenderer.h"
 
 #include <QtGui/qoffscreensurface.h>
 #include <QtGui/qopenglcontext.h>
@@ -151,6 +152,10 @@ void Q3DSPlayerWnd::resizeEvent(QResizeEvent *event)
 
 void Q3DSPlayerWnd::mouseMoveEvent(QMouseEvent *event)
 {
+#if (Q3DS_ENABLE_PROFILEUI == 1)
+    Q3DStudioRenderer &sr(static_cast<Q3DStudioRenderer &>(g_StudioApp.getRenderer()));
+    sr.engine()->handleMouseMoveEvent(event);
+#endif
     if (m_mouseDown) {
         long theModifierKeys = 0;
         if (event->buttons() & Qt::LeftButton
@@ -176,6 +181,10 @@ void Q3DSPlayerWnd::mouseMoveEvent(QMouseEvent *event)
 
 void Q3DSPlayerWnd::mousePressEvent(QMouseEvent *event)
 {
+#if (Q3DS_ENABLE_PROFILEUI == 1)
+    Q3DStudioRenderer &sr(static_cast<Q3DStudioRenderer &>(g_StudioApp.getRenderer()));
+    sr.engine()->handleMouseMoveEvent(event);
+#endif
     g_StudioApp.setLastActiveView(this);
 
     long toolMode = g_StudioApp.GetToolMode();
@@ -231,6 +240,10 @@ void Q3DSPlayerWnd::mousePressEvent(QMouseEvent *event)
 
 void Q3DSPlayerWnd::mouseReleaseEvent(QMouseEvent *event)
 {
+#if (Q3DS_ENABLE_PROFILEUI == 1)
+    Q3DStudioRenderer &sr(static_cast<Q3DStudioRenderer &>(g_StudioApp.getRenderer()));
+    sr.engine()->handleMouseMoveEvent(event);
+#endif
     const Qt::MouseButton btn = event->button();
 
     if (!m_containerWnd->IsDeploymentView()) {
@@ -259,6 +272,10 @@ void Q3DSPlayerWnd::mouseReleaseEvent(QMouseEvent *event)
 
 void Q3DSPlayerWnd::mouseDoubleClickEvent(QMouseEvent *event)
 {
+#if (Q3DS_ENABLE_PROFILEUI == 1)
+    Q3DStudioRenderer &sr(static_cast<Q3DStudioRenderer &>(g_StudioApp.getRenderer()));
+    sr.engine()->handleMouseMoveEvent(event);
+#endif
     g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDblClick(
                 SceneDragSenderType::SceneWindow, event->pos());
 }
