@@ -2085,16 +2085,18 @@ void STranslation::PreRender(bool scenePreviewPass)
     ClearDirtySet();
     m_EditLightEnabled = CStudioPreferences::editModeLightingEnabled();
     BuildRenderGraph(theRoot, scenePreviewPass);
-    if (scenePreviewPass)
+    QT3DSVec2 theViewportDims(GetViewportDimensions());
+    if (scenePreviewPass) {
         m_Context.SetScaleMode(qt3ds::render::ScaleModes::FitSelected);
-    else
+        theViewportDims = GetPreviewViewportDimensions();
+    } else {
         m_Context.SetScaleMode(qt3ds::render::ScaleModes::ExactSize);
+    }
 
     m_Context.SetMatteColor(QT3DSVec4(.13f, .13f, .13f, 1.0f));
-    QT3DSVec2 theViewportDims(GetViewportDimensions());
     // Ensure the camera points where it should
     if (m_EditCameraEnabled && !scenePreviewPass) {
-        m_EditCameraInfo.ApplyToCamera(m_EditCamera, GetViewportDimensions());
+        m_EditCameraInfo.ApplyToCamera(m_EditCamera, theViewportDims);
         m_EditLight.MarkDirty(qt3ds::render::NodeTransformDirtyFlag::TransformIsDirty);
     }
 
@@ -2111,9 +2113,6 @@ void STranslation::PreRender(bool scenePreviewPass)
             m_Presentation.m_PresentationDimensions =
                 QT3DSVec2((QT3DSF32)thePresSize.x, (QT3DSF32)thePresSize.y);
         }
-        QT3DSVec2 theViewportDims(GetViewportDimensions());
-        if (scenePreviewPass)
-            theViewportDims = GetPreviewViewportDimensions();
         m_Context.SetWindowDimensions(
             QSize((QT3DSU32)theViewportDims.x, (QT3DSU32)theViewportDims.y));
         m_Context.SetPresentationDimensions(
@@ -2355,7 +2354,8 @@ qt3ds::render::NVRenderRect STranslation::GetPreviewViewport()
     return qt3ds::render::NVRenderRect(0, 0, vp.x, vp.y);
 }
 
-void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPass)
+void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPass,
+                          bool overlayPreview)
 {
     // For now, we just render.
     // Next step will be to get the bounding boxes and such setup.
@@ -2367,7 +2367,42 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
 
         qt3dsdm::TInstanceHandleList theHandles = m_Doc.GetSelectedValue().GetSelectedInstances();
 
-        if (scenePreviewPass == false) {
+        if (scenePreviewPass) {
+            qt3ds::render::NVRenderContext &renderContext(m_Context.GetRenderContext());
+            QT3DSVec2 previewDims(GetPreviewViewportDimensions());
+            if (m_previewFboDimensions != previewDims) {
+                m_previewFboDimensions = previewDims;
+                if (m_previewFbo)
+                    m_Context.GetResourceManager().Release(*m_previewFbo);
+                if (m_previewRenderBuffer)
+                    m_Context.GetResourceManager().Release(*m_previewRenderBuffer);
+                if (m_previewTexture)
+                    m_Context.GetResourceManager().Release(*m_previewTexture);
+                m_previewFbo = nullptr;
+                m_previewRenderBuffer = nullptr;
+                m_previewTexture = nullptr;
+            }
+            if (!m_previewFbo)
+                m_previewFbo = m_Context.GetResourceManager().AllocateFrameBuffer();
+            if (!m_previewTexture) {
+                m_previewTexture = renderContext.CreateTexture2D();
+                m_previewTexture->SetTextureData(qt3ds::foundation::NVDataRef<qt3ds::QT3DSU8>(),
+                                                 0, previewDims.x, previewDims.y,
+                                                 qt3ds::render::NVRenderTextureFormats::RGBA8);
+                m_previewFbo->Attach(
+                            qt3ds::render::NVRenderFrameBufferAttachments::Color0,
+                            qt3ds::render::NVRenderTextureOrRenderBuffer(*m_previewTexture));
+            }
+            if (!m_previewRenderBuffer) {
+                m_previewRenderBuffer = m_Context.GetResourceManager().AllocateRenderBuffer(
+                            previewDims.x, previewDims.y,
+                            qt3ds::render::NVRenderRenderBufferFormats::Depth24);
+                m_previewFbo->Attach(
+                            qt3ds::render::NVRenderFrameBufferAttachments::Depth,
+                            qt3ds::render::NVRenderTextureOrRenderBuffer(*m_previewRenderBuffer));
+            }
+            renderContext.SetRenderTarget(m_previewFbo);
+        } else {
             // Render the bounding boxes and extra widgets.
             // This is called *before* the render because these sort of appendages need to be added
             // to the layer renderables.
@@ -2516,16 +2551,16 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
                 }
             }
         }
+        Option<NVRenderRect> viewport = m_Context.GetRenderContext().GetViewport();
+        if (scenePreviewPass) {
+            m_Context.GetRenderContext().SetViewport(GetPreviewViewport());
+            m_Context.SetSceneColor(Option<QT3DSVec4>());
+        }
+
         m_Scene->PrepareForRender(scenePreviewPass
                                   ? GetPreviewViewportDimensions()
                                   : GetViewportDimensions(), m_Context);
 
-
-        Option<NVRenderRect> viewport = m_Context.GetViewport();
-        if (scenePreviewPass) {
-            m_Context.SetViewport(GetPreviewViewport());
-            m_Context.SetSceneColor(Option<QT3DSVec4>());
-        }
         m_Context.RunRenderTasks();
 
         if (!scenePreviewPass && m_EditCameraEnabled) {
@@ -2652,8 +2687,30 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
             m_GuideAllocator.reset();
         }
 
+        if (overlayPreview) {
+            // Draw the overlay framebuffer
+            qt3ds::render::NVRenderContext &renderContext(m_Context.GetRenderContext());
+            renderContext.SetViewport(GetPreviewViewport());
+            qt3ds::render::SCamera camera;
+            camera.MarkDirty(qt3ds::render::NodeTransformDirtyFlag::TransformIsDirty);
+            camera.m_Flags.SetOrthographic(true);
+            QT3DSVec2 previewDims(GetPreviewViewportDimensions());
+            camera.CalculateGlobalVariables(
+                        render::NVRenderRectF(0, 0, previewDims.x, previewDims.y), previewDims);
+            QT3DSMat44 theVP;
+            camera.CalculateViewProjectionMatrix(theVP);
+            renderContext.SetCullingEnabled(false);
+            renderContext.SetBlendingEnabled(false);
+            renderContext.SetDepthTestEnabled(false);
+            renderContext.SetDepthWriteEnabled(false);
+            m_Context.GetRenderer().RenderQuad(previewDims, theVP, *m_previewTexture);
+        }
+
+        if (scenePreviewPass)
+            m_Context.GetRenderContext().SetRenderTarget(nullptr);
+
         m_Context.EndFrame();
-        m_Context.SetViewport(viewport);
+        m_Context.GetRenderContext().SetViewport(viewport);
         QT3DSVec2 theViewportDims(GetViewportDimensions());
         m_Context.SetWindowDimensions(QSize((QT3DSU32)theViewportDims.x,
                                             (QT3DSU32)theViewportDims.y));
@@ -2878,11 +2935,6 @@ Option<QT3DSU32> STranslation::PickWidget(CPt inMouseCoords, TranslationSelectMo
 SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::Enum inSelectMode)
 {
     bool requestRender = false;
-    if (m_EditCameraEnabled && CStudioPreferences::showEditModePreview()) {
-        // Must re-render to reset the preview viewport
-        PreRender(false);
-        Render(0, false, false);
-    }
 
     if (m_Doc.GetDocumentReader().AreGuidesEditable()) {
         qt3dsdm::TGuideHandleList theGuides = m_Doc.GetDocumentReader().GetGuides();
