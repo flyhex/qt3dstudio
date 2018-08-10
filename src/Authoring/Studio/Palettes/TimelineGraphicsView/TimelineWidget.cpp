@@ -57,6 +57,7 @@
 #include "Control.h"
 #include "TimelineDropTarget.h"
 #include "StudioPreferences.h"
+#include "Dialogs.h"
 
 #include <QtGui/qevent.h>
 #include <QtWidgets/qgraphicslinearlayout.h>
@@ -65,7 +66,6 @@
 #include <QtWidgets/qscrollbar.h>
 #include <QtWidgets/qslider.h>
 #include <QtWidgets/qlabel.h>
-#include <QtWidgets/qcolordialog.h>
 
 class Eventfilter : public QObject
 {
@@ -1144,19 +1144,13 @@ void TimelineWidget::openBarColorDialog()
     if (rows.isEmpty())
         return;
 
-    // Note: Setup color dialog with bar color of last selected
-    // row as it can only default to one.
+    // Note: Setup color dialog with bar color of last selected row as it can only default to one.
     QColor previousColor = rows.first()->rowTimeline()->barColor();
-    QColorDialog *theColorDlg = new QColorDialog(previousColor, this);
-    theColorDlg->setOption(QColorDialog::DontUseNativeDialog, true);
-    connect(theColorDlg, &QColorDialog::currentColorChanged,
-            this, &TimelineWidget::onTimeBarColorChanged);
-    if (theColorDlg->exec() == QDialog::Accepted) {
-        QColor selectedColor = theColorDlg->selectedColor();
-        setSelectedTimeBarsColor(selectedColor, false);
-    } else {
-        setSelectedTimeBarsColor(previousColor, true);
-    }
+    CDialogs *dialogs = g_StudioApp.GetDialogs();
+    connect(dialogs, &CDialogs::onColorChanged, this, &TimelineWidget::onTimeBarColorChanged);
+    QColor selectedColor = dialogs->displayColorDialog(previousColor);
+    setSelectedTimeBarsColor(selectedColor, selectedColor == previousColor);
+    disconnect(dialogs, &CDialogs::onColorChanged, this, &TimelineWidget::onTimeBarColorChanged);
 }
 
 void TimelineWidget::onTimeBarColorChanged(const QColor &color)

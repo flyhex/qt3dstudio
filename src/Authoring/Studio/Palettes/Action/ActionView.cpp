@@ -1075,7 +1075,9 @@ QColor ActionView::showColorDialog(const QColor &color)
     m_currentColor = color;
     CDialogs *dialogs = g_StudioApp.GetDialogs();
     connect(dialogs, &CDialogs::onColorChanged, this, &ActionView::changeColor);
-    return dialogs->displayColorDialog(color);
+    QColor currentColor = dialogs->displayColorDialog(color);
+    disconnect(dialogs, &CDialogs::onColorChanged, this, &ActionView::changeColor);
+    return currentColor;
 }
 
 void ActionView::changeColor(const QColor &color)
