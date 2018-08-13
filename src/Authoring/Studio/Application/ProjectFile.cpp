@@ -448,3 +448,9 @@ void ProjectFile::getPresentations(const QString &inUiaPath,
         }
     }
 }
+
+QString ProjectFile::getResolvedPathTo(const QString &path) const
+{
+    auto projectPath = QDir(getProjectPath()).absoluteFilePath(path);
+    return QDir::cleanPath(projectPath);
+}

@@ -1090,9 +1090,10 @@ struct SDynamicObjectTranslator : public SGraphObjectTranslator
                             qt3ds::render::ConvertWideUTF(theData->GetData(), 0, theStr);
                             eastl::string theWorkspace;
                             theItem.SetPropertyValue(
-                                theDefinition, theStr.c_str(),
-                                inContext.m_Doc.GetDocumentDirectory().GetCharStar(), theWorkspace,
-                                inContext.m_Context.GetStringTable());
+                                        theDefinition, theStr.c_str(),
+                                        inContext.m_Doc.GetCore()->getProjectFile()
+                                        .getProjectPath().toLocal8Bit().constData(),
+                                        theWorkspace, inContext.m_Context.GetStringTable());
                         }
                     } break;
                     default:

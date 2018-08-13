@@ -59,6 +59,7 @@ public:
     QString getFirstPresentationPath(const QString &uiaPath) const;
     QString getPresentationId(const QString &src) const;
     void addPresentationNode(const QString &uip, const QString &pId = {});
+    QString getResolvedPathTo(const QString &path) const;
 
     static void getPresentations(const QString &inUiaPath,
                                  QVector<SubPresentationRecord> &outSubpresentations,

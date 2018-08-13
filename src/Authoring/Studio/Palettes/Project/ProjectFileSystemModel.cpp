@@ -140,8 +140,9 @@ void ProjectFileSystemModel::updateReferences(bool emitDataChanged)
     const auto fontFileList = bridge->GetFontFileList();
     const auto effectTextureList = bridge->GetDynamicObjectTextureList();
 
-    QString rootPath = QDir::cleanPath(doc->GetDocumentDirectory().toQString());
-    auto addFileReferences = [this, doc, &rootPath](const Q3DStudio::CString &str) {
+    // Handle source and font references
+    QString uipPath = QDir::cleanPath(doc->GetDocumentDirectory().toQString());
+    auto addFileReferencesUip = [this, doc, &uipPath](const Q3DStudio::CString &str) {
         auto path = doc->GetResolvedPathToDoc(str).toQString();
         path = QDir::cleanPath(path);
         m_references.append(path);
@@ -152,16 +153,29 @@ void ProjectFileSystemModel::updateReferences(bool emitDataChanged)
 
             path = parentPath;
             parentPath = QFileInfo(path).path();
-        } while (rootPath != path && parentPath != path);
-     };
-    std::for_each(sourcePathList.begin(), sourcePathList.end(), addFileReferences);
-    std::for_each(fontFileList.begin(), fontFileList.end(), addFileReferences);
-    std::for_each(effectTextureList.begin(), effectTextureList.end(), addFileReferences);
+        } while (uipPath != path && parentPath != path);
+    };
+    std::for_each(sourcePathList.begin(), sourcePathList.end(), addFileReferencesUip);
+    std::for_each(fontFileList.begin(), fontFileList.end(), addFileReferencesUip);
+
+    // Handle effect texture references
+    QString projectPath = QDir::cleanPath(doc->GetCore()->getProjectFile().getProjectPath());
+    auto addFileReferencesUia = [this, doc, &projectPath](const Q3DStudio::CString &str) {
+        auto path = doc->GetCore()->getProjectFile().getResolvedPathTo(str.toQString());
+        m_references.append(path);
+        QString parentPath = QFileInfo(path).path();
+        do {
+            if (!m_references.contains(parentPath))
+                m_references.append(parentPath);
+
+            path = parentPath;
+            parentPath = QFileInfo(path).path();
+        } while (projectPath != path && parentPath != path);
+    };
+    std::for_each(effectTextureList.begin(), effectTextureList.end(), addFileReferencesUia);
 
     // add currently open presentation references
-    Q3DStudio::CString documentPath = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetPath();
-    documentPath.Replace("\\", "/");
-    QString path = documentPath.toQString();
+    QString path = QDir::cleanPath(doc->GetDocumentPath().GetPath().toQString());
     QString parentPath = QFileInfo(path).path();
     m_references.append(path);
     do {
@@ -170,7 +184,7 @@ void ProjectFileSystemModel::updateReferences(bool emitDataChanged)
 
         path = parentPath;
         parentPath = QFileInfo(path).path();
-    } while (rootPath != path && parentPath != path);
+    } while (uipPath != path && parentPath != path);
 
     if (emitDataChanged) {
         Q_EMIT dataChanged(index(0, 0), index(rowCount() - 1, 0), {IsReferencedRole,
