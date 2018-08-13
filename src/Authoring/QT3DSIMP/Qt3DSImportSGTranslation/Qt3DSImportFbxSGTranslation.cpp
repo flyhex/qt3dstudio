@@ -1858,6 +1858,7 @@ void FbxDomWalker::ProcessTextureParameter(FbxTexture *inTexture,
                                            STextureParameters &outTextureParameters)
 {
     if (inTexture) {
+        outTextureParameters.m_Flag = true;
         outTextureParameters.m_offsetU.m_Value = (float)inTexture->GetTranslationU();
         outTextureParameters.m_offsetV.m_Value = (float)inTexture->GetTranslationV();
         if (inTexture->GetWrapModeU() == FbxTexture::eRepeat)
