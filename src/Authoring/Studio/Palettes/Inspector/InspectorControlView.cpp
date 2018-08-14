@@ -54,6 +54,7 @@
 #include "MainFrm.h"
 #include "DataInputDlg.h"
 #include "Dialogs.h"
+#include "ProjectFile.h"
 
 #include <QtCore/qtimer.h>
 #include <QtQml/qqmlcontext.h>
@@ -547,6 +548,18 @@ void InspectorControlView::changeColor(const QColor &color)
 bool InspectorControlView::toolTipsEnabled()
 {
     return CStudioPreferences::ShouldShowTooltips();
+}
+
+// Converts a path that is relative to the current presentation to be relative to
+// the current project root
+QString InspectorControlView::convertPathToProjectRoot(const QString &presentationPath)
+{
+    QDir projDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath());
+    QFileInfo presentationFile(g_StudioApp.GetCore()->GetDoc()->GetDocumentPath()
+                               .GetAbsolutePath().toQString());
+    QDir presentationDir(presentationFile.absolutePath());
+    QString absPath = presentationDir.absoluteFilePath(presentationPath);
+    return projDir.relativeFilePath(absPath);
 }
 
 void InspectorControlView::OnBeginDataModelNotifications()

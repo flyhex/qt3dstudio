@@ -553,7 +553,11 @@ Rectangle {
             property int instance: parent.modelData.instance
             property int handle: parent.modelData.handle
             property variant values: parent.modelData.values
-            value: parent.modelData.value === "" ? qsTr("[None]") : parent.modelData.value
+            value: {
+                parent.modelData.value === "" ? qsTr("[None]")
+                                              : _parentView.convertPathToProjectRoot(
+                                                    parent.modelData.value)
+            }
             onShowBrowser: {
                 activeBrowser = _parentView.showFilesChooser(handle, instance,
                                                              mapToGlobal(width, 0))
