@@ -494,10 +494,6 @@ protected:
     Q3DStudio::SSelectedValue m_SelectedValue;
     bool m_nudging;
 
-    void GetOrUpdateFileList(std::vector<Q3DStudio::CString> &ioMyList,
-                             std::vector<Q3DStudio::CString> &outResult,
-                             const wchar_t **inExtensionList) const;
-
 public:
     void OnNewPresentation();
     void OnPresentationDeactivated();

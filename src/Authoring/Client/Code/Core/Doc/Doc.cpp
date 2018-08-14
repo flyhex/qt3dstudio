@@ -524,22 +524,6 @@ bool CDoc::PreUndo()
     return false;
 }
 
-void CDoc::GetOrUpdateFileList(std::vector<Q3DStudio::CString> &ioMyList,
-                               std::vector<Q3DStudio::CString> &outResult,
-                               const wchar_t **inExtensionList) const
-{
-    if (ioMyList.empty()) {
-        Q3DStudio::CFilePath dirPath(GetDocumentPath().GetAbsolutePath());
-        dirPath = dirPath.GetDirectory();
-        std::vector<Q3DStudio::CFilePath> files;
-        dirPath.RecursivelyFindFilesOfType(inExtensionList, files, true);
-        for (size_t idx = 0, end = files.size(); idx < end; ++idx)
-            ioMyList.push_back(files[idx].toCString());
-    }
-    outResult = ioMyList;
-}
-
-//=============================================================================
 /**
  * Check to see if this document has been modified since the last save.
  */
