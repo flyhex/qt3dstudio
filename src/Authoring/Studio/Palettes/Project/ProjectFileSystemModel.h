@@ -64,7 +64,7 @@ public:
     QString filePath(int row) const;
     bool isRefreshable(int row) const;
 
-    void updateReferences(bool emitDataChanged);
+    void updateReferences();
     Q3DStudio::DocumentEditorFileType::Enum assetTypeForRow(int row);
     int rowForPath(const QString &path) const;
 
@@ -99,6 +99,7 @@ private:
     void importQmlAssets(const QObject *qmlNode, const QDir &srcDir, const QDir &targetDir);
 
     void updateDefaultDirMap();
+    void addPathsToReferences(const QString &projectPath, const QString &origPath);
 
     struct TreeItem {
         QPersistentModelIndex index;
@@ -111,7 +112,7 @@ private:
     QFileSystemModel *m_model = nullptr;
     QPersistentModelIndex m_rootIndex;
     QList<TreeItem> m_items;
-    QStringList m_references;
+    QSet<QString> m_references;
     QHash<QString, QString> m_defaultDirToAbsPathMap;
     int m_importQmlOverrideChoice = QMessageBox::NoButton;
 };

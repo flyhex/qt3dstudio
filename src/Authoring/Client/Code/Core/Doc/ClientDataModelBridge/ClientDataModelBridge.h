@@ -367,6 +367,7 @@ public:
     std::set<Q3DStudio::CString> GetSourcePathList() const;
     std::set<Q3DStudio::CString> GetFontFileList() const;
     std::set<Q3DStudio::CString> GetDynamicObjectTextureList() const;
+    std::set<QString> getRenderableList() const;
     bool IsLockedAtAll(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     bool IsDuplicateable(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     bool IsMultiSelectable(qt3dsdm::Qt3DSDMInstanceHandle inInstance);

@@ -227,7 +227,7 @@ void ProjectView::OnBeginDataModelNotifications()
 
 void ProjectView::OnEndDataModelNotifications()
 {
-    m_ProjectModel->updateReferences(true);
+    QTimer::singleShot(0, m_ProjectModel, &ProjectFileSystemModel::updateReferences);
 }
 
 void ProjectView::OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance)

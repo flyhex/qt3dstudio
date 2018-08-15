@@ -196,6 +196,7 @@ public:
     const wchar_t *GetData() const { return m_Data.size() <= 1 ? L"" : &(*m_Data.begin()); }
     size_t GetLength() const { return m_Data.size() > 1 ? m_Data.size() - 1 : 0; }
     bool operator==(const CDataStr &inOther) const { return m_Data == inOther.m_Data; }
+    QString toQString() const { return QString::fromWCharArray(GetData()); }
 };
 
 typedef std::shared_ptr<CDataStr> TDataStrPtr;

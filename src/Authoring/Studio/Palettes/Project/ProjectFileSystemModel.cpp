@@ -132,7 +132,7 @@ bool ProjectFileSystemModel::isRefreshable(int row) const
     return path.endsWith(QLatin1String(".import"));
 }
 
-void ProjectFileSystemModel::updateReferences(bool emitDataChanged)
+void ProjectFileSystemModel::updateReferences()
 {
     m_references.clear();
     const auto doc = g_StudioApp.GetCore()->GetDoc();
@@ -140,57 +140,45 @@ void ProjectFileSystemModel::updateReferences(bool emitDataChanged)
     const auto sourcePathList = bridge->GetSourcePathList();
     const auto fontFileList = bridge->GetFontFileList();
     const auto effectTextureList = bridge->GetDynamicObjectTextureList();
+    auto renderableList = bridge->getRenderableList();
+    auto subpresentationRecord = g_StudioApp.m_subpresentations;
 
-    // Handle source and font references
-    QString uipPath = QDir::cleanPath(doc->GetDocumentDirectory().toQString());
-    auto addFileReferencesUip = [this, doc, &uipPath](const Q3DStudio::CString &str) {
-        auto path = doc->GetResolvedPathToDoc(str).toQString();
-        path = QDir::cleanPath(path);
-        m_references.append(path);
-        QString parentPath = QFileInfo(path).path();
-        do {
-            if (!m_references.contains(parentPath))
-                m_references.append(parentPath);
+    const QDir projectDir(doc->GetCore()->getProjectFile().getProjectPath());
+    const QString projectPath = QDir::cleanPath(projectDir.absolutePath());
+    const QString projectPathSlash = projectPath + QStringLiteral("/");
 
-            path = parentPath;
-            parentPath = QFileInfo(path).path();
-        } while (uipPath != path && parentPath != path);
+    // Add current presentation to renderables list
+    renderableList.insert(doc->getPresentationId());
+    subpresentationRecord.push_back(
+                SubPresentationRecord(
+                    QString(), doc->getPresentationId(),
+                    projectDir.relativeFilePath(doc->GetDocumentPath().GetPath().toQString())));
+
+    auto addReferencesPresentation = [this, doc, &projectPath](const Q3DStudio::CString &str) {
+        addPathsToReferences(projectPath, doc->GetResolvedPathToDoc(str).toQString());
     };
-    std::for_each(sourcePathList.begin(), sourcePathList.end(), addFileReferencesUip);
-    std::for_each(fontFileList.begin(), fontFileList.end(), addFileReferencesUip);
-
-    // Handle effect texture references
-    QString projectPath = QDir::cleanPath(doc->GetCore()->getProjectFile().getProjectPath());
-    auto addFileReferencesUia = [this, doc, &projectPath](const Q3DStudio::CString &str) {
-        auto path = doc->GetCore()->getProjectFile().getResolvedPathTo(str.toQString());
-        m_references.append(path);
-        QString parentPath = QFileInfo(path).path();
-        do {
-            if (!m_references.contains(parentPath))
-                m_references.append(parentPath);
-
-            path = parentPath;
-            parentPath = QFileInfo(path).path();
-        } while (projectPath != path && parentPath != path);
+    auto addReferencesProject = [this, doc, &projectPath](const Q3DStudio::CString &str) {
+        addPathsToReferences(
+                    projectPath,
+                    doc->GetCore()->getProjectFile().getResolvedPathTo(str.toQString()));
     };
-    std::for_each(effectTextureList.begin(), effectTextureList.end(), addFileReferencesUia);
+    auto addReferencesRenderable = [this, &projectPath, &projectPathSlash, &subpresentationRecord]
+            (const QString &id) {
+        for (SubPresentationRecord r : qAsConst(subpresentationRecord)) {
+            if (r.m_id == id)
+                addPathsToReferences(projectPath, projectPathSlash + r.m_argsOrSrc);
+        }
+    };
 
-    // add currently open presentation references
-    QString path = QDir::cleanPath(doc->GetDocumentPath().GetPath().toQString());
-    QString parentPath = QFileInfo(path).path();
-    m_references.append(path);
-    do {
-        if (!m_references.contains(parentPath))
-            m_references.append(parentPath);
+    std::for_each(sourcePathList.begin(), sourcePathList.end(), addReferencesPresentation);
+    std::for_each(fontFileList.begin(), fontFileList.end(), addReferencesPresentation);
+    std::for_each(effectTextureList.begin(), effectTextureList.end(), addReferencesProject);
+    std::for_each(renderableList.begin(), renderableList.end(), addReferencesRenderable);
 
-        path = parentPath;
-        parentPath = QFileInfo(path).path();
-    } while (uipPath != path && parentPath != path);
+    m_references.insert(projectPath);
 
-    if (emitDataChanged) {
-        Q_EMIT dataChanged(index(0, 0), index(rowCount() - 1, 0), {IsReferencedRole,
-                                                                   Qt::DecorationRole});
-    }
+    Q_EMIT dataChanged(index(0, 0), index(rowCount() - 1, 0), {IsReferencedRole,
+                                                               Qt::DecorationRole});
 }
 
 Q3DStudio::DocumentEditorFileType::Enum ProjectFileSystemModel::assetTypeForRow(int row)
@@ -238,7 +226,6 @@ void ProjectFileSystemModel::setRootIndex(const QModelIndex &rootIndex)
         return;
 
     clearModelData();
-    updateReferences(false);
 
     m_rootIndex = rootIndex;
 
@@ -873,4 +860,17 @@ void ProjectFileSystemModel::updateDefaultDirMap()
                 m_defaultDirToAbsPathMap.insert(key, QString());
         }
     }
+}
+
+void ProjectFileSystemModel::addPathsToReferences(const QString &projectPath,
+                                                  const QString &origPath)
+{
+    m_references.insert(origPath);
+    QString path = origPath;
+    QString parentPath = QFileInfo(path).path();
+    do {
+        m_references.insert(path);
+        path = parentPath;
+        parentPath = QFileInfo(path).path();
+    } while (path != projectPath && parentPath != path);
 }
