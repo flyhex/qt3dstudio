@@ -45,6 +45,12 @@ ProjectContextMenu::ProjectContextMenu(ProjectView *parent, int index)
         addAction(action);
 
         addSeparator();
+    } else if (m_view->isQmlStream(m_index)) {
+        QAction *action = new QAction(tr("Edit Qml stream Id"));
+        connect(action, &QAction::triggered, this, &ProjectContextMenu::handleEditPresentationId);
+        addAction(action);
+
+        addSeparator();
     }
 
     QAction *action = new QAction(tr("Show Containing Folder"));

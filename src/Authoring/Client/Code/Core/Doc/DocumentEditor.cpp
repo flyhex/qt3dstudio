@@ -1614,18 +1614,6 @@ public:
                                          Q3DStudio::DocumentEditorInsertType::LastChild, pos,
                                          PRIMITIVETYPE_RECT, startTime);
 
-        // match rect size with the presentation
-        QSize size = PresentationFile::readSize(pPath);
-        if (!size.isNull()) {
-            qt3dsdm::Qt3DSDMPropertyHandle scaleHandle =
-                    m_PropertySystem.GetAggregateInstancePropertyByName(rectInstance, L"scale");
-
-            SetInstancePropertyValue(rectInstance, scaleHandle,
-                                     qt3dsdm::SFloat3(size.width() * .01f,
-                                                      size.height() * .01f, 1));
-            // TODO: relate presentation size and rect scale in a better way?
-        }
-
         // Set the subpresentation for the rect's material's diffuseMap
         for (long i = 0; i < m_AssetGraph.GetChildCount(rectInstance); ++i) {
             Qt3DSDMInstanceHandle mat(m_AssetGraph.GetChild(rectInstance, i));
