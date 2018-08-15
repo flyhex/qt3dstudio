@@ -238,6 +238,7 @@ bool CCore::OnNewDocument(const Qt3DSFile &inDocument, bool isNewProject, bool s
         CFilePath::CombineBaseAndRelative(theFinalDir, CFilePath(L"materials")).CreateDir(true);
         CFilePath::CombineBaseAndRelative(theFinalDir, CFilePath(L"models")).CreateDir(true);
         CFilePath::CombineBaseAndRelative(theFinalDir, CFilePath(L"presentations")).CreateDir(true);
+        CFilePath::CombineBaseAndRelative(theFinalDir, CFilePath(L"qml streams")).CreateDir(true);
         CFilePath::CombineBaseAndRelative(theFinalDir, CFilePath(L"scripts")).CreateDir(true);
 
         // create the project .uia file

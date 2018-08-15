@@ -65,6 +65,7 @@ ProjectView::ProjectView(const QSize &preferredSize, QWidget *parent) : QQuickWi
     m_defaultMaterialDir = theApplicationPath + QStringLiteral("/Content/Material Library");
     m_defaultModelDir = theApplicationPath + QStringLiteral("/Content/Models Library");
     m_defaultPresentationDir = theApplicationPath + QStringLiteral("/Content/Presentations");
+    m_defaultQmlStreamDir = theApplicationPath + QStringLiteral("/Content/Qml Streams");
 
     m_BehaviorDir = m_defaultBehaviorDir;
     m_EffectDir = m_defaultEffectDir;
@@ -73,6 +74,7 @@ ProjectView::ProjectView(const QSize &preferredSize, QWidget *parent) : QQuickWi
     m_MaterialDir = m_defaultMaterialDir;
     m_ModelDir = m_defaultModelDir;
     m_presentationDir = m_defaultPresentationDir;
+    m_qmlStreamDir = m_defaultQmlStreamDir;
 
     m_assetImportDir = theApplicationPath + QStringLiteral("/Content");
 

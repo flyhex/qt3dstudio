@@ -55,12 +55,12 @@ void ProjectFile::ensureProjectFile(const QString &uipPath)
 }
 
 /**
- * Add a presentation node to the project file
+ * Add a presentation or presentation-qml node to the project file
  *
- * @param uip the absolute path of the presentation file, it will be saved as relative
+ * @param pPath the absolute path to the presentation file, it will be saved as relative
  * @param pId presentation Id
  */
-void ProjectFile::addPresentationNode(const QString &uipPath, const QString &pId)
+void ProjectFile::addPresentationNode(const QString &pPath, const QString &pId)
 {
     // open the uia file
     QFile file(getProjectFilePath());
@@ -74,11 +74,11 @@ void ProjectFile::addPresentationNode(const QString &uipPath, const QString &pId
     // create the <assets> node if it doesn't exist
     if (assetsElem.isNull()) {
         assetsElem = doc.createElement(QStringLiteral("assets"));
-        assetsElem.setAttribute(QStringLiteral("initial"), QFileInfo(uipPath).completeBaseName());
+        assetsElem.setAttribute(QStringLiteral("initial"), QFileInfo(pPath).completeBaseName());
         rootElem.insertBefore(assetsElem, {});
     }
 
-    QString relativeUipPath = QDir(getProjectPath()).relativeFilePath(uipPath);
+    QString relativePresentationPath = QDir(getProjectPath()).relativeFilePath(pPath);
 
     // make sure the node doesn't already exist
     bool nodeExists = false;
@@ -86,7 +86,7 @@ void ProjectFile::addPresentationNode(const QString &uipPath, const QString &pId
         p = p.nextSibling().toElement()) {
         if ((p.nodeName() == QLatin1String("presentation")
              || p.nodeName() == QLatin1String("presentation-qml"))
-                && p.attribute(QStringLiteral("src")) == relativeUipPath) {
+                && p.attribute(QStringLiteral("src")) == relativePresentationPath) {
             nodeExists = true;
             break;
         }
@@ -94,13 +94,15 @@ void ProjectFile::addPresentationNode(const QString &uipPath, const QString &pId
 
     if (!nodeExists) {
         QString presentationId = pId.isEmpty()
-                ? ensureUniquePresentationId(QFileInfo(uipPath).completeBaseName()) : pId;
+                ? ensureUniquePresentationId(QFileInfo(pPath).completeBaseName()) : pId;
 
         // add the presentation node
-        QDomElement uipElem = doc.createElement(QStringLiteral("presentation"));
-        uipElem.setAttribute(QStringLiteral("id"), presentationId);
-        uipElem.setAttribute(QStringLiteral("src"), relativeUipPath);
-        assetsElem.appendChild(uipElem);
+        QDomElement pElem = pPath.endsWith(QLatin1String(".qml"))
+                              ? doc.createElement(QStringLiteral("presentation-qml"))
+                              : doc.createElement(QStringLiteral("presentation"));
+        pElem.setAttribute(QStringLiteral("id"), presentationId);
+        pElem.setAttribute(QStringLiteral("src"), relativePresentationPath);
+        assetsElem.appendChild(pElem);
 
         file.resize(0);
         file.write(doc.toByteArray(4));

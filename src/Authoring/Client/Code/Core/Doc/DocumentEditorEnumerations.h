@@ -50,6 +50,7 @@ struct DocumentEditorFileType
         Path,
         Sound,
         Presentation,
+        QmlStream,
         Project
     };
 };

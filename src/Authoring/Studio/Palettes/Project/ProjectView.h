@@ -112,6 +112,7 @@ private:
     QString m_defaultMaterialDir;
     QString m_defaultModelDir;
     QString m_defaultPresentationDir;
+    QString m_defaultQmlStreamDir;
     QString m_BehaviorDir;
     QString m_EffectDir;
     QString m_FontDir;
@@ -119,6 +120,7 @@ private:
     QString m_MaterialDir;
     QString m_ModelDir;
     QString m_presentationDir;
+    QString m_qmlStreamDir;
     QString m_assetImportDir;
     QSize m_preferredSize;
 };

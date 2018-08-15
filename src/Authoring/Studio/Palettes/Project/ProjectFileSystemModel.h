@@ -88,7 +88,7 @@ private:
     EStudioObjectType getIconType(const QString &path) const;
     bool isVisible(const QModelIndex& modelIndex) const;
     bool hasVisibleChildren(const QModelIndex &modelIndex) const;
-    void importUrl(const QDir &targetDir, const QUrl &url) const;
+    void importUrl(QDir &targetDir, const QUrl &url);
     void importPresentationAssets(const QFileInfo &uipSrc, const QFileInfo &uipTarget,
                                   const int overrideChoice = QMessageBox::NoButton) const;
 
@@ -96,6 +96,7 @@ private:
     void modelRowsRemoved(const QModelIndex &parent, int start, int end);
     void modelRowsMoved(const QModelIndex &parent, int start, int end);
     void modelLayoutChanged();
+    void importQmlAssets(const QObject *qmlNode, const QDir &srcDir, const QDir &targetDir);
 
     void updateDefaultDirMap();
 
@@ -112,6 +113,7 @@ private:
     QList<TreeItem> m_items;
     QStringList m_references;
     QHash<QString, QString> m_defaultDirToAbsPathMap;
+    int m_importQmlOverrideChoice = QMessageBox::NoButton;
 };
 
 #endif // TREEVIEWADAPTOR_H
