@@ -256,7 +256,11 @@ Rectangle {
                                                 _parentView.showDataInputChooser(
                                                             model.modelData.handle,
                                                             model.modelData.instance,
-                                                            mapToGlobal(mouse.x, mouse.y));
+                                                            mapToGlobal(
+                                                                ctrldPropButton.x
+                                                                + ctrldPropButton.width,
+                                                                ctrldPropButton.y
+                                                                + ctrldPropButton.height));
                                             } else {
                                                 groupDelegateItem.showContextMenu(
                                                             mapToItem(root, mouse.x, mouse.y));
@@ -270,7 +274,7 @@ Rectangle {
                                     }
 
                                     Image {
-                                        id: controlledPropertyButton
+                                        id: ctrldPropButton
 
                                         property bool controlled: model.modelData.controlled
 
@@ -288,8 +292,8 @@ Rectangle {
                                 }
 
                                 Item {
-                                    width: (controlledPropertyButton.visible
-                                            ? 4 : controlledPropertyButton.width + 4)
+                                    width: (ctrldPropButton.visible
+                                            ? 4 : ctrldPropButton.width + 4)
                                     height: loadedItem.height + 4 // Add little space between items
                                 }
 
@@ -319,12 +323,7 @@ Rectangle {
                                             acceptedButtons: Qt.RightButton | Qt.LeftButton
                                             hoverEnabled: true
                                             onClicked: {
-                                                if (mouse.button === Qt.LeftButton) {
-                                                    _parentView.showDataInputChooser(
-                                                                model.modelData.handle,
-                                                                model.modelData.instance,
-                                                                mapToGlobal(mouse.x, mouse.y));
-                                                } else {
+                                                if (mouse.button === Qt.RightButton) {
                                                     groupDelegateItem.showContextMenu(
                                                                 mapToItem(root, mouse.x, mouse.y));
                                                 }

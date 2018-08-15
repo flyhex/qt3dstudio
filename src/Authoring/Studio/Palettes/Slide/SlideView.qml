@@ -354,7 +354,7 @@ Rectangle {
                     hoverEnabled: true
                     acceptedButtons: Qt.LeftButton
                     onClicked:  {
-                        _parentView.showControllerDialog(mapToGlobal(mouse.x, mouse.y));
+                        _parentView.showControllerDialog(mapToGlobal(x + width, y + height));
                     }
                 }
                 Image {
