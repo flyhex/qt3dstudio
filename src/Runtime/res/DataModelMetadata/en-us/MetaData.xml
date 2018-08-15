@@ -13,9 +13,9 @@
         </Alias>
         <Asset>
                 <Property name="name" formalName="Name" type="String" description="Object name" hidden="False" />
+                <Property name="eyeball" formalName="Visible" description="Item visibility" type="Boolean" default="True" hidden="False" controllable="True" />
                 <Property name="starttime" formalName="Start Time" type="Long" hidden="True" />
                 <Property name="endtime" formalName="End Time" type="Long" default="10000" hidden="True" />
-                <Property name="eyeball" formalName="Visible" description="Set item visibility." type="Boolean" default="True" hidden="True" controllable="True" />
                 <Property name="shy" formalName="Shy" type="Boolean" hidden="True" />
                 <Property name="sourcepath" type="String" hidden="True" />
                 <Property name="importfile" type="String" hidden="True" />
@@ -32,10 +32,11 @@
                 </Handler>
         </Asset>
         <Behavior>
-                <Property name="name" formalName="Name" description="Object name" type="String" default="Behavior" hidden="False" />
+                <!--<Property name="name" formalName="Name" description="Object name" type="String" default="Behavior" hidden="False" />-->
         </Behavior>
         <Camera>
                 <Property name="name" formalName="Name" description="Object name" type="String" default="Camera" hidden="False" />
+                <Property name="eyeball" formalName="Visible" description="Item visibility" type="Boolean" default="True" hidden="False" controllable="True" />
                 <Property name="opacity" formalName="Opacity" min="0" max="100" default="100" hidden="True" />
                 <Property name="orthographic" formalName="Orthographic" description="Remove all perspective from the camera?" type="Boolean" animatable="False" />
                 <Property name="position" formalName="Position" description="Location in local space" type="Vector" default="0 0 -600" controllable="True" />
@@ -51,17 +52,19 @@
                 <Property name="scaleanchor" formalName="Scale Anchor" description="Corner of the content to pin as the\nlayer size changes" list="Center:N:NE:E:SE:S:SW:W:NW" default="Center"/>
         </Camera>
         <Component>
-                <Property name="name" formalName="Name" description="Object name" type="String" default="Component" hidden="False" />
+                <!--<Property name="name" formalName="Name" description="Object name" type="String" default="Component" hidden="False" />-->
         </Component>
         <Effect>
                 <Property name="name" formalName="Name" type="String" default="Effect" hidden="False" />
+                <Property name="eyeball" formalName="Visible" description="Item visibility" type="Boolean" default="True" hidden="False" controllable="True" />
         </Effect>
         <Group>
-                <Property name="name" formalName="Name" type="String" default="Group" hidden="False" />
                 <Property name="sourcepath" formalName="Import" description="Path to the source of this group" type="Import" />
         </Group>
         <Image>
                 <!--Images and materials don't have lifetimes, so we use a value that we know just won't cause any issues-->
+                <Property name="name" formalName="Name" type="String" default="Image" hidden="True" />
+                <Property name="eyeball" formalName="Visible" description="Item visibility" type="Boolean" default="True" hidden="True"/>
                 <Property name="endtime" formalName="End Time" type="Long" default="2147483647" hidden="True" />
                 <Property name="name" formalName="Name" type="String" default="Image" hidden="False" />
                 <Property name="scaleu" formalName="U Repeat" description="Number of times the image is tiled on\nthe U direction of the material" default="1" />
@@ -78,7 +81,7 @@
         </Image>
         <Layer>
                 <Property name="name" formalName="Name" description="Object name" type="String" default="Layer" hidden="False" />
-                <Property name="eyeball" formalName="Visible" description="Set item visibility." type="Boolean" default="True" hidden="False" controllable="True" />
+                <Property name="eyeball" formalName="Visible" description="Item visibility" type="Boolean" default="True" hidden="False" controllable="True" />
                 <Property name="disabledepthtest" formalName="Disable Depth Test" description="Optimize render speed for layers with\nmostly transparent objects?" type="Boolean" animatable="False"/>
                 <Property name="disabledepthprepass" formalName="Disable Depth Prepass" description="Optimize render speed for layers\nwith low depth complexity" type="Boolean" animatable="False"/>
                 <Property name="progressiveaa" formalName="Progressive AA" description="Improves the visual quality when no\nitems are moving" list="None:2x:4x:8x" default="None" />
@@ -192,6 +195,7 @@
         </Layer>
         <Light>
                 <Property name="name" formalName="Name" description="Object name" type="String" default="Light" hidden="False" />
+                <Property name="eyeball" formalName="Visible" description="Item visibility" type="Boolean" default="True" hidden="False" controllable="True" />
                 <Property name="opacity" formalName="Opacity" min="0" max="100" default="100" hidden="True" />
                 <Property name='scope' formalName="Scope" description="Portion of the scene graph lit by this\nlight; no value results in entire layer\nbeing affected." type='ObjectRef' />
                 <Property name="lighttype" formalName="Light Type" description="Type of illumination to use" list="Directional:Point:Area" default="Directional" />
@@ -267,12 +271,12 @@
                 <Property name="diffuselightwrap" formalName="Diffuse Light Wrap" description="Diffuse Light Wrap" type="float" min='0.0' max='1.0' category="Material" />
         </Material>
         <ReferencedMaterial>
-                <Property name="name" formalName="Name" description="Object name" type="String" default="Material" hidden="False" category="Material" />
+                <Property name="name" formalName="Name" description="Object name" type="String" default="Material" hidden="True" category="Material" />
                 <Property name="referencedmaterial" formalName="Referenced Material" description="Material to use all settings from" type="ObjectRef" category="Material" />
         </ReferencedMaterial>
         <Model>
-                <Property name="name" formalName="Name" description="Object name" type="String" default="Model" hidden="False" />
-                <Property name="eyeball" formalName="Visible" description="Set item visibility." type="Boolean" default="True" hidden="False" controllable="True" />
+                <!--<Property name="name" formalName="Name" description="Object name" type="String" default="Model" hidden="False" />
+                <Property name="eyeball" formalName="Visible" description="Item visibility" type="Boolean" default="True" hidden="False" controllable="True" />-->
                 <Property name="sourcepath" formalName="Mesh" description="Geometry to use for this model" type="Mesh" />
                 <Property name="poseroot" hidden="True" type="Long" default="-1" />
                 <Property name="tessellation" formalName="Tessellation Mode" description="Type of tessellation to subdivide\nthe geometry" list="None:Linear:Phong:NPatch" default="None" />
@@ -436,8 +440,6 @@
                 <Handler name="Preceding Slide" category="Slide" description="Activate the slide that was previously active." />
         </SlideOwner>
         <Text>
-                <Property name="name" formalName="Name" description="Object name" type="String" default="Text" hidden="False" />
-                <Property name="eyeball" formalName="Visible" description="Set item visibility." type="Boolean" default="True" hidden="False" controllable="True" />
                 <Property name="textstring" formalName="Text String" description="Text String" type="MultiLineString" default="Text" controllable="True" />
                 <Property name="textcolor" formalName="Text Color" description="Text Color" type="Color" default="1 1 1" controllable="True" />
                 <Property name="font" formalName="Font" description="Font" type="Font" default="TitilliumWeb-Regular" />
