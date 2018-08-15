@@ -399,11 +399,13 @@ bool CDialogs::DisplayUndefinedDatainputDlg(
     QLabel *theText = new QLabel;
     int keysSize = keys.size();
     if (keysSize > 1) {
-        theText->setText(QObject::tr("Could not find Data Inputs. %1 Data Inputs missing.")
-                    .arg(keysSize));
+        theText->setText(QObject::tr("Could not find Data Inputs. "
+                                     "%1 Data Inputs used as controllers are undefined.")
+                         .arg(keysSize));
     } else {
-        theText->setText(QObject::tr("Could not find Data Input. %1 Data Input missing.")
-                    .arg(keysSize));
+        theText->setText(QObject::tr("Could not find Data Input. "
+                                     "%1 Data Input used as controller is undefined.")
+                         .arg(keysSize));
     }
 
     QString theSmallText;
@@ -433,8 +435,8 @@ bool CDialogs::DisplayUndefinedDatainputDlg(
     layout->addWidget(warnLab, 1, 1);
     layout->addWidget(theText, 1, 2);
 
-    QPushButton *ok = new QPushButton(QObject::tr("Clear all bindings now"));
-    QPushButton *cancel = new QPushButton(QObject::tr("I'll replace bindings manually"));
+    QPushButton *ok = new QPushButton(QObject::tr("Clear invalid controllers now"));
+    QPushButton *cancel = new QPushButton(QObject::tr("I'll fix controllers manually"));
 
     QDialogButtonBox *buttonBox = new QDialogButtonBox(Qt::Horizontal);
     buttonBox->addButton(ok, QDialogButtonBox::AcceptRole);
