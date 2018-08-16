@@ -469,8 +469,7 @@ QString CDialogs::ConfirmRefreshModelFile(const QString &inFile)
 
 
     return QFileDialog::getOpenFileName(g_StudioApp.m_pMainWnd, QObject::tr("Open"),
-                                        inFile, theFileFilter, nullptr,
-                                        QFileDialog::DontUseNativeDialog);
+                                        inFile, theFileFilter, nullptr);
 }
 
 QList<QUrl> CDialogs::SelectAssets(QString &outPath,
@@ -479,7 +478,6 @@ QList<QUrl> CDialogs::SelectAssets(QString &outPath,
     QFileDialog fd(g_StudioApp.m_pMainWnd);
     fd.setDirectory(outPath);
     fd.setFileMode(QFileDialog::ExistingFiles);
-    fd.setOption(QFileDialog::DontUseNativeDialog, true);
     QString initialFilter;
     fd.setNameFilter(CreateAllowedTypesString(assetType, initialFilter, true, false));
     fd.selectNameFilter(initialFilter);
@@ -1026,7 +1024,6 @@ QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
                 : fi.path());
     theFileDlg.setAcceptMode(QFileDialog::AcceptSave);
     theFileDlg.setDefaultSuffix(theFileExt);
-    theFileDlg.setOption(QFileDialog::DontUseNativeDialog, true);
     if (!inDialogTitle.isEmpty())
         theFileDlg.setWindowTitle(inDialogTitle);
 
@@ -1109,7 +1106,6 @@ QString CDialogs::GetFileOpenChoice(const QString &inInitialDirectory)
                            : inInitialDirectory,
                            theImportFilter);
     theFileDlg.setAcceptMode(QFileDialog::AcceptOpen);
-    theFileDlg.setOption(QFileDialog::DontUseNativeDialog, true);
 
     if (theFileDlg.exec() == QDialog::Accepted) {
         theFile.setFile(theFileDlg.selectedFiles().first());
@@ -1432,7 +1428,9 @@ QColor CDialogs::displayColorDialog(const QColor &color) const
     theColorDlg.setCurrentColor(color);
     theColorDlg.setOption(QColorDialog::DontUseNativeDialog, true);
     connect(&theColorDlg, &QColorDialog::currentColorChanged, this, &CDialogs::onColorChanged);
-    if (theColorDlg.exec() == QDialog::Accepted)
+    int result = theColorDlg.exec();
+    disconnect(&theColorDlg, &QColorDialog::currentColorChanged, this, &CDialogs::onColorChanged);
+    if (result == QDialog::Accepted)
         return theColorDlg.selectedColor();
     else
         return color;
