@@ -175,8 +175,7 @@ const wchar_t *wideSoundExts[] = {
 SAllowedTypesEntry g_AllowedImportTypes[] = {
     { Q3DStudio::DocumentEditorFileType::Presentation, QObject::tr("Presentations"),
       presentationExts },
-    { Q3DStudio::DocumentEditorFileType::QmlStream, QObject::tr("Qml streams"),
-      qmlStreamExts },
+    { Q3DStudio::DocumentEditorFileType::QmlStream, QObject::tr("Qml streams"), qmlStreamExts },
     { Q3DStudio::DocumentEditorFileType::DAE, QObject::tr("Model Files"), modelExts },
     { Q3DStudio::DocumentEditorFileType::Image, QObject::tr("Image Files"), imgExts },
     { Q3DStudio::DocumentEditorFileType::Behavior, QObject::tr("Behavior Scripts"), behaviorExts },
