@@ -1337,7 +1337,6 @@ public:
                                           const SValue &value, bool inAutoDelete = true) override
     {
         IPropertySystem &thePropertySystem(m_PropertySystem);
-        SValue currentValue;
         AdditionalMetaDataType::Value theProperytMetaData =
             thePropertySystem.GetAdditionalMetaDataType(instance, propName);
         TSlideHandle theNewSlide(GetSlideForProperty(instance, propName));
@@ -1350,19 +1349,32 @@ public:
                 if (theImageInstance.Valid() == false)
                     theImageInstance = CreateImageInstanceForMaterialOrLayer(instance, propName);
 
-                if (theImageInstance)
+                if (theImageInstance) {
                     SetInstancePropertyValue(theImageInstance, m_Bridge.GetSourcePathProperty(),
                                              value, inAutoDelete);
+                    // Clear subpresentation value
+                    SetInstancePropertyValue(theImageInstance,
+                                             m_Bridge.GetSceneImage().m_SubPresentation,
+                                             std::make_shared<CDataStr>(Q3DStudio::CString()),
+                                             inAutoDelete);
+                }
+
             } else {
                 if (theImageInstance.Valid()) {
                     TSlideHandle theInstanceSlide = GetAssociatedSlide(instance);
                     if (m_SlideSystem.IsMasterSlide(theInstanceSlide)) {
-                        if (IsPropertyLinked(instance, propName) && inAutoDelete)
+                        if (IsPropertyLinked(instance, propName) && inAutoDelete) {
                             DeleteImageInstanceFromMaterialOrLayer(instance, propName);
-                        else
+                        } else {
                             SetInstancePropertyValue(theImageInstance,
                                                      m_Bridge.GetSourcePathProperty(), value,
                                                      inAutoDelete);
+                            // Clear subpresentation value
+                            SetInstancePropertyValue(theImageInstance,
+                                                     m_Bridge.GetSceneImage().m_SubPresentation,
+                                                     std::make_shared<CDataStr>(Q3DStudio::CString()),
+                                                     inAutoDelete);
+                        }
                     } else {
                         DeleteImageInstanceFromMaterialOrLayer(instance, propName);
                     }
@@ -1563,8 +1575,23 @@ public:
              ++childIdx)
             DeleteInstance(childrenToDelete[childIdx]);
 
+        // If this is an image instance, set the inSourcePath also as the value of corresponding
+        // image property in the parent
+        if (m_Bridge.IsImageInstance(instance)) {
+            Qt3DSDMInstanceHandle parent;
+            Qt3DSDMPropertyHandle imageProperty;
+            if (!m_Bridge.GetMaterialFromImageInstance(instance, parent, imageProperty))
+                m_Bridge.GetLayerFromImageProbeInstance(instance, parent, imageProperty);
+            if (parent.Valid()) {
+                SetInstancePropertyValue(parent, imageProperty,
+                                         std::make_shared<qt3dsdm::CDataStr>(inSourcePath.c_str()),
+                                         true);
+            }
+        }
+
         SetInstancePropertyValue(instance, propName,
                                  std::make_shared<qt3dsdm::CDataStr>(inSourcePath.c_str()), true);
+
         // If this is a render plugin
         if (thePath.Exists() && thePath.GetExtension().CompareNoCase("plugin")) {
             Qt3DSDMSlideHandle theSlide(GetAssociatedSlide(instance));

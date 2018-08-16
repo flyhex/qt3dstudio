@@ -538,7 +538,10 @@ Rectangle {
             property int instance: parent.modelData.instance
             property int handle: parent.modelData.handle
             property variant values: parent.modelData.values
-            value: parent.modelData.value
+            value: {
+                var renderableId = _inspectorModel.renderableId(parent.modelData.value);
+                renderableId === "" ? parent.modelData.value : renderableId;
+            }
             onShowBrowser: {
                 activeBrowser = _parentView.showImageChooser(handle, instance,
                                                              mapToGlobal(width, 0))
@@ -821,6 +824,10 @@ Rectangle {
             property var values: parent.modelData.values
             property var value: parent.modelData.value
             model: values
+
+            // Disable for non-layer
+            enabled: _inspectorModel.isLayer(instance)
+            showArrow: enabled
 
             implicitWidth: _valueWidth
             implicitHeight: _controlBaseHeight

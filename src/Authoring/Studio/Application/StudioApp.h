@@ -252,6 +252,9 @@ public:
     QVector<SubPresentationRecord> m_subpresentations;
     QMap<QString, CDataInputDialogItem *> m_dataInputDialogItems;
 
+    QString getRenderableId(const QString &filePath) const;
+    QString getRenderableAbsolutePath(const QString &renderableId) const;
+
     QString getMostRecentDirectory() const;
     QString getMostRecentProjectParentDir() const;
 

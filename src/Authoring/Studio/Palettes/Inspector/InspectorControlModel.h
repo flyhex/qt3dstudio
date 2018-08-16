@@ -139,6 +139,8 @@ public:
                                        const QStringList &list);
     Q_INVOKABLE void setPropertyAnimated(long instance, int handle, bool animated);
     Q_INVOKABLE void setPropertyControlled(long instance, int property);
+    Q_INVOKABLE bool isLayer(long instance) const;
+    Q_INVOKABLE QString renderableId(const QString &filePath) const;
 
 private:
     void onSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inOldIndex,

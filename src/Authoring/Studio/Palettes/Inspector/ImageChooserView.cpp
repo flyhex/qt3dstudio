@@ -108,7 +108,14 @@ void ImageChooserView::showEvent(QShowEvent *event)
     const auto imageInstance = doc->GetDocumentReader().GetInstanceForGuid(guid);
     if (imageInstance.Valid()) {
         const QString path = doc->GetDocumentReader().GetSourcePath(imageInstance).toQString();
-        m_model->setCurrentFile(path);
+
+        // If path is renderable id, we need to resolve the actual path
+        const QString renderablePath = g_StudioApp.getRenderableAbsolutePath(path);
+
+        if (renderablePath.isEmpty())
+            m_model->setCurrentFile(path);
+        else
+            m_model->setCurrentFile(renderablePath);
     } else {
         m_model->setCurrentFile(tr("[None]"));
     }

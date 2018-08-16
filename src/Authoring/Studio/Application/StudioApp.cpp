@@ -1928,6 +1928,46 @@ void CStudioApp::OnPresentationModifiedExternally()
     }
 }
 
+// Get the renderable id for a file path.
+// filePath can be absolute or relative to either presentation or project
+QString CStudioApp::getRenderableId(const QString &filePath) const
+{
+    QString renderablePath;
+    QDir projectDir(m_core->getProjectFile().getProjectPath());
+    const QString projectPath = QDir::cleanPath(projectDir.absolutePath());
+    int index = projectPath.length() + 1;
+    QFileInfo fi(filePath);
+    if (fi.isAbsolute()) {
+        renderablePath = filePath.mid(index);
+    } else {
+        QFileInfo presFile(m_core->GetDoc()->GetDocumentPath().GetAbsolutePath().toQString());
+        QDir presDir(presFile.absoluteDir());
+        QString checkFile = QDir::cleanPath(presDir.absoluteFilePath(filePath));
+        if (!QFileInfo(checkFile).exists()) {
+            checkFile = QDir::cleanPath(projectDir.absoluteFilePath(filePath));
+            if (!QFileInfo(checkFile).exists())
+                return {};
+        }
+        renderablePath = checkFile.mid(index);
+    }
+    for (SubPresentationRecord r : qAsConst(g_StudioApp.m_subpresentations)) {
+        if (r.m_argsOrSrc == renderablePath)
+            return r.m_id;
+    }
+    return {};
+}
+
+QString CStudioApp::getRenderableAbsolutePath(const QString &renderableId) const
+{
+    for (SubPresentationRecord r : qAsConst(g_StudioApp.m_subpresentations)) {
+        if (r.m_id == renderableId) {
+            QDir projectDir(m_core->getProjectFile().getProjectPath());
+            return QDir::cleanPath(projectDir.absoluteFilePath(r.m_argsOrSrc));
+        }
+    }
+    return {};
+}
+
 void CStudioApp::OnUndefinedDatainputsFail(
         const QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
                                        qt3dsdm::Qt3DSDMPropertyHandle>> *map)

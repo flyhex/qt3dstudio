@@ -136,8 +136,15 @@ QVariant ChooserModelBase::data(const QModelIndex &index, int role) const
             return path == m_currentFile;
         }
 
+        case QFileSystemModel::FileNameRole: {
+            QString displayName = specialDisplayName(item);
+            if (displayName.isEmpty())
+                displayName = m_model->data(item.index, QFileSystemModel::FileNameRole).toString();
+            return displayName;
+        }
+
         default:
-            return m_model->data(item.index, role);
+            return m_model->data(item.index, role).toString();
         }
     }
 }
@@ -178,8 +185,6 @@ void ChooserModelBase::setCurrentFile(const QString &path)
         int currentRow = fileRow(fullPath);
 
         m_currentFile = fullPath;
-
-        const int fixedItemCount = fixedItems.count();
 
         if (previousRow != -1)
             Q_EMIT dataChanged(index(previousRow), index(previousRow));
@@ -375,6 +380,12 @@ bool ChooserModelBase::isExpanded(const QModelIndex &modelIndex) const
 EStudioObjectType ChooserModelBase::getIconType(const QString &path) const
 {
     return Q3DStudio::ImportUtils::GetObjectFileTypeForFile(Q3DStudio::CFilePath(path)).m_IconType;
+}
+
+QString ChooserModelBase::specialDisplayName(const ChooserModelBase::TreeItem &item) const
+{
+    Q_UNUSED(item)
+    return {};
 }
 
 QString ChooserModelBase::getIconName(const QString &path) const

@@ -1063,6 +1063,17 @@ void InspectorControlModel::setPropertyControlled(long instance, int property)
     signalSender->SendControlledToggled(instance, property);
 }
 
+bool InspectorControlModel::isLayer(long instance) const
+{
+    return g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge()
+            ->GetObjectType(instance) == EStudioObjectType::OBJTYPE_LAYER;
+}
+
+QString InspectorControlModel::renderableId(const QString &filePath) const
+{
+    return g_StudioApp.getRenderableId(filePath);
+}
+
 void InspectorControlModel::setPropertyAnimated(long instance, int handle, bool animated)
 {
     CCmd* cmd = nullptr;

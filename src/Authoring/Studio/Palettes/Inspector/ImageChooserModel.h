@@ -42,6 +42,7 @@ public:
 private:
     bool isVisible(const QString &path) const override;
     const QVector<FixedItem> getFixedItems() const override;
+    QString specialDisplayName(const TreeItem &item) const override;
 };
 
 #endif // IMAGECHOOSERMODEL_H

@@ -121,6 +121,9 @@ void InspectorControlView::OnNewPresentation()
 
 void InspectorControlView::OnClosingPresentation()
 {
+    // Image chooser model needs to be rebuilt from scratch for each presentation, as different
+    // presentations count as subpresentations
+    delete m_imageChooserView;
     m_fileList.clear();
 }
 
@@ -367,7 +370,15 @@ QObject *InspectorControlView::showImageChooser(int handle, int instance, const 
         m_imageChooserView = new ImageChooserView(this);
         connect(m_imageChooserView, &ImageChooserView::imageSelected, this,
                 [this] (int handle, int instance, const QString &imageName){
-            setPropertyValueFromFilename(instance, handle, imageName);
+            QString renderableId = g_StudioApp.getRenderableId(imageName);
+            if (renderableId.isEmpty()) {
+                setPropertyValueFromFilename(instance, handle, imageName);
+            } else {
+                Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(),
+                                                  QObject::tr("Set Property"))
+                        ->setInstanceImagePropertyValueAsRenderable(
+                            instance, handle, Q3DStudio::CString::fromQString(renderableId));
+            }
             m_imageChooserView->hide();
         });
     }

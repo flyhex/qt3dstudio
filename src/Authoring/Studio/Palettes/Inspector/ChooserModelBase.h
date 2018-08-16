@@ -81,7 +81,16 @@ protected:
         QString name;
     };
 
+    struct TreeItem {
+        QPersistentModelIndex index;
+        int depth;
+        bool expanded;
+        TreeItem *parent;
+        int childCount;
+    };
+
     virtual const QVector<FixedItem> getFixedItems() const = 0;
+    virtual QString specialDisplayName(const TreeItem &item) const;
 
 private:
     void setRootPath(const QString &path);
@@ -102,14 +111,6 @@ private:
     void modelLayoutChanged();
 
     void rebuild();
-
-    struct TreeItem {
-        QPersistentModelIndex index;
-        int depth;
-        bool expanded;
-        TreeItem *parent;
-        int childCount;
-    };
 
     QFileSystemModel *m_model;
     QPersistentModelIndex m_rootIndex;
