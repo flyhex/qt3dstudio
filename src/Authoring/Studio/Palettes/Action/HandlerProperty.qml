@@ -178,6 +178,7 @@ ColumnLayout {
             label: parent ? parent.label : ""
             color:  "black"
             onColorSelected: {
+                color = selectedColor;
                 _parentView.setArgumentValue(propertyModel.valueHandle, selectedColor);
             }
             onPreviewColorSelected: color = selectedColor

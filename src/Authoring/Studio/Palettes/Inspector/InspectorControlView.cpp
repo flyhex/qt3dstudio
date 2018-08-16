@@ -533,16 +533,12 @@ QColor InspectorControlView::showColorDialog(const QColor &color)
 {
     m_currentColor = color;
     CDialogs *dialogs = g_StudioApp.GetDialogs();
-    connect(dialogs, &CDialogs::onColorChanged, this, &InspectorControlView::changeColor);
+    connect(dialogs, &CDialogs::onColorChanged,
+            this, &InspectorControlView::dialogCurrentColorChanged);
     QColor currentColor = dialogs->displayColorDialog(color);
-    disconnect(dialogs, &CDialogs::onColorChanged, this, &InspectorControlView::changeColor);
+    disconnect(dialogs, &CDialogs::onColorChanged,
+               this, &InspectorControlView::dialogCurrentColorChanged);
     return currentColor;
-}
-
-void InspectorControlView::changeColor(const QColor &color)
-{
-    m_currentColor = color;
-    Q_EMIT currentColorChanged();
 }
 
 bool InspectorControlView::toolTipsEnabled()

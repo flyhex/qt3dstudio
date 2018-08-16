@@ -1149,8 +1149,8 @@ void TimelineWidget::openBarColorDialog()
     CDialogs *dialogs = g_StudioApp.GetDialogs();
     connect(dialogs, &CDialogs::onColorChanged, this, &TimelineWidget::onTimeBarColorChanged);
     QColor selectedColor = dialogs->displayColorDialog(previousColor);
-    setSelectedTimeBarsColor(selectedColor, selectedColor == previousColor);
     disconnect(dialogs, &CDialogs::onColorChanged, this, &TimelineWidget::onTimeBarColorChanged);
+    setSelectedTimeBarsColor(selectedColor, selectedColor == previousColor);
 }
 
 void TimelineWidget::onTimeBarColorChanged(const QColor &color)
@@ -1162,18 +1162,16 @@ void TimelineWidget::onTimeBarColorChanged(const QColor &color)
 // When preview, only set the UI without property changes.
 void TimelineWidget::setSelectedTimeBarsColor(const QColor &color, bool preview)
 {
+    using namespace Q3DStudio; // Needed for SCOPED_DOCUMENT_EDITOR macro
     auto rows = selectedRows();
     for (RowTree *row : qAsConst(rows)) {
         row->rowTimeline()->setBarColor(color);
         if (!preview) {
-            // Get editable handle into document editor without undo transactions
-            CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
-            Q3DStudio::IDocumentEditor *editor =
-                    dynamic_cast<Q3DStudio::IDocumentEditor*>(&theDoc->GetDocumentReader());
-
             Qt3DSDMTimelineItemBinding *timelineItemBinding =
-                static_cast<Qt3DSDMTimelineItemBinding *>(row->getBinding());
-            editor->SetTimebarColor(timelineItemBinding->GetInstanceHandle(), color);
+                    static_cast<Qt3DSDMTimelineItemBinding *>(row->getBinding());
+            SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(),
+                                   QObject::tr("Set Timebar Color"))
+                ->SetTimebarColor(timelineItemBinding->GetInstanceHandle(), color);
         }
     }
 }

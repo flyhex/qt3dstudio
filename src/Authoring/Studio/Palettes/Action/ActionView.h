@@ -95,7 +95,6 @@ class ActionView : public QQuickWidget,
     Q_PROPERTY(PropertyInfo property READ property NOTIFY propertyChanged FINAL)
     Q_PROPERTY(QString firedEvent MEMBER m_firedEvent NOTIFY firedEventChanged FINAL)
     Q_PROPERTY(bool propertyValueInvalid READ isPropertyValueInvalid NOTIFY propertyValueInvalidChanged FINAL)
-    Q_PROPERTY(QColor currentColor READ currentColor NOTIFY currentColorChanged FINAL)
 
 public:
     ActionView(const QSize &preferredSize, QWidget *parent = nullptr);
@@ -116,7 +115,6 @@ public:
     QVariantList handlerArguments() const;
     PropertyInfo property() const;
     bool isPropertyValueInvalid() const;
-    QColor currentColor() const { return m_currentColor; }
 
     Q_INVOKABLE void setCurrentActionIndex(int index);
     Q_INVOKABLE void setCurrentPropertyIndex(int handle, int index);
@@ -167,13 +165,12 @@ Q_SIGNALS:
     void firedEventChanged();
     void hasItemChanged();
     void propertyValueInvalidChanged();
-    void currentColorChanged();
+    void dialogCurrentColorChanged(const QColor &newColor);
 
 private Q_SLOTS:
     void copyAction();
     void cutAction();
     void pasteAction();
-    void changeColor(const QColor &color);
 
 private:
     void setTriggerObject(const qt3dsdm::SObjectRefType &object);

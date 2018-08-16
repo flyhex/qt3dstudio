@@ -36,10 +36,20 @@ RowLayout {
 
     property alias color: rect.color
     property color selectedColor: "black"
-    property color currentColor: _parentView.currentColor
+    property bool listenToColorChanges: false
 
     signal colorSelected()
     signal previewColorSelected()
+
+    Connections {
+        target: _parentView
+        onDialogCurrentColorChanged: {
+            if (root.listenToColorChanges) {
+                root.selectedColor = newColor;
+                root.previewColorSelected();
+            }
+        }
+    }
 
     Rectangle {
         id: rect
@@ -57,8 +67,9 @@ RowLayout {
 
             anchors.fill: parent
             onClicked: {
-                selectedColor = rect.color;
-                selectedColor = _parentView.showColorDialog(selectedColor);
+                root.listenToColorChanges = true;
+                root.selectedColor = _parentView.showColorDialog(rect.color);
+                root.listenToColorChanges = false;
                 root.colorSelected();
             }
         }
@@ -74,10 +85,5 @@ RowLayout {
 
     Item {
         Layout.fillWidth: true
-    }
-
-    onCurrentColorChanged: {
-        selectedColor = currentColor;
-        root.previewColorSelected();
     }
 }

@@ -58,7 +58,6 @@ class InspectorControlView : public QQuickWidget,
     Q_OBJECT
     Q_PROPERTY(QString titleText READ titleText NOTIFY titleChanged FINAL)
     Q_PROPERTY(QString titleIcon READ titleIcon NOTIFY titleChanged FINAL)
-    Q_PROPERTY(QColor currentColor READ currentColor NOTIFY currentColorChanged FINAL)
 public:
     explicit InspectorControlView(const QSize &preferredSize, QWidget *parent = nullptr);
     ~InspectorControlView() override;
@@ -69,7 +68,6 @@ public:
     QString titleText() const;
     Q_INVOKABLE QColor titleColor(int instance = 0, int handle = 0) const;
     QString titleIcon() const;
-    QColor currentColor() const { return m_currentColor; }
 
     Q_INVOKABLE void showContextMenu(int x, int y, int handle, int instance);
     Q_INVOKABLE QObject *showImageChooser(int handle, int instance, const QPoint &point);
@@ -93,11 +91,10 @@ Q_SIGNALS:
     void titleChanged();
     void controlsChanged();
     void imageSelected(const QString &name);
-    void currentColorChanged();
+    void dialogCurrentColorChanged(const QColor &newColor);
 
 public Q_SLOTS:
     void toggleMasterLink();
-    void changeColor(const QColor &color);
 
 protected:
     QSize sizeHint() const override;
