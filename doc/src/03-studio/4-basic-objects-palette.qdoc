@@ -101,9 +101,17 @@ children they do have an effect on runtime speed. Though the
 performance impact is very slight, you should avoid using groups
 \e{solely} for conceptual organization.
 
-\note There is currently no way to group multiple existing items
-other than to create a new group and drag the items in one at a time, or cut and paste multiple
-items at once. Support for grouping multi-selected items will be added in future releases.
+To group existing objects, selected them in the scene graph or in the scene view
+(\c{Ctrl + left mouse click} to select multiple objects), then do one
+of the following:
+
+\list
+  \li Right-click any of the selected objects in the scene graph and select
+  \uicontrol{Group Objects} from the context menu.
+  \li Select \uicontrol{Edit > Group Objects} from the menu bar.
+  \li Press \c{Ctrl + G}.
+  This will create a group and move the selected objects into the group.
+\endlist
 
 \section1 Text
 
