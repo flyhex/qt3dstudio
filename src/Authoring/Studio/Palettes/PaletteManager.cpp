@@ -72,7 +72,7 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame, QObject *parent)
     inMainFrame->addDockWidget(Qt::RightDockWidgetArea, m_projectDock);
     m_ControlList.insert(std::make_pair(CONTROLTYPE_PROJECT, m_projectDock));
 
-    m_inspectorDock = new QDockWidget(QObject::tr("Inspector Control"), inMainFrame);
+    m_inspectorDock = new QDockWidget(QObject::tr("Inspector"), inMainFrame);
     m_inspectorDock->setObjectName("inspector_control");
     m_inspectorDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
                                      | Qt::BottomDockWidgetArea);
