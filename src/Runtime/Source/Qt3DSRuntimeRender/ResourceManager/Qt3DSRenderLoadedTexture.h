@@ -132,7 +132,6 @@ namespace render {
                 break;
 
             default:
-                QT3DS_ASSERT(false);
             // fallthrough intentional
             case 4:
                 format = qt3ds::render::NVRenderTextureFormats::RGBA8;
