@@ -193,8 +193,8 @@ bool RowMover::isSourceRowsDescendant(RowTree *row) const
 // i.e. when dragging from project or basic objects palettes
 void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowType)
 {
-    // DnD a presentation from the project panel (to set it as a subpresentation)
-    if (rowType == OBJTYPE_PRESENTATION) {
+    // DnD a presentation / Qml stream from the project panel (to set it as a subpresentation)
+    if (rowType == OBJTYPE_PRESENTATION || rowType == OBJTYPE_QML_STREAM) {
         if (m_insertionTarget)
             m_insertionTarget->setDnDState(RowTree::DnDState::None, RowTree::DnDState::SP_TARGET);
 
@@ -206,7 +206,7 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
             m_insertType = Q3DStudio::DocumentEditorInsertType::LastChild;
 
             if (rowAtMouse->rowType() == OBJTYPE_LAYER || rowAtMouse->rowType() == OBJTYPE_MATERIAL
-                    || rowAtMouse->rowType() == OBJTYPE_IMAGE) {
+                || rowAtMouse->rowType() == OBJTYPE_IMAGE) {
                 m_insertionTarget->setDnDState(RowTree::DnDState::SP_TARGET);
             }
         }

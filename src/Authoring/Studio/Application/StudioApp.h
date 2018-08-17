@@ -252,7 +252,6 @@ public:
     QVector<SubPresentationRecord> m_subpresentations;
     QMap<QString, CDataInputDialogItem *> m_dataInputDialogItems;
 
-    void SaveUIAFile(bool subpresentations = true);
     QString getMostRecentDirectory() const;
     QString getMostRecentProjectParentDir() const;
 

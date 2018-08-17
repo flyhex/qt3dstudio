@@ -230,26 +230,19 @@ void ProjectFile::updateDocPresentationId()
     }
 }
 
-// get a presentationId from the project file, that match a given src attribute
+// get a presentationId that match a given src attribute
 QString ProjectFile::getPresentationId(const QString &src) const
 {
-    QFile file(getProjectFilePath());
-    file.open(QFile::Text | QFile::ReadOnly);
-    if (!file.isOpen()) {
-        qWarning() << file.errorString();
-        return {};
-    }
-    QXmlStreamReader reader(&file);
-    reader.setNamespaceProcessing(false);
-
-    while (!reader.atEnd()) {
-        if (reader.readNextStartElement()
-            && (reader.name() == QLatin1String("presentation")
-                || reader.name() == QLatin1String("presentation-qml"))) {
-            const auto attrs = reader.attributes();
-            if (attrs.value(QLatin1String("src")) == src)
-                return attrs.value(QLatin1String("id")).toString();
-        }
+    if (src == g_StudioApp.GetCore()->GetDoc()->getRelativePath()) {
+        return g_StudioApp.GetCore()->GetDoc()->getPresentationId();
+    } else {
+        auto *sp = std::find_if(g_StudioApp.m_subpresentations.begin(),
+                                g_StudioApp.m_subpresentations.end(),
+                               [&src](const SubPresentationRecord &spr) -> bool {
+                                   return spr.m_argsOrSrc == src;
+                               });
+        if (sp != g_StudioApp.m_subpresentations.end())
+            return sp->m_id;
     }
 
     return {};

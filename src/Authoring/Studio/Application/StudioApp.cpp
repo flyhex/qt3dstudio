@@ -1653,32 +1653,6 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
     return theLoadResult;
 }
 
-//=============================================================================
-/**
- * This method saves the UIA file after subpresentations or data inputs are changed
- * @param subpresentations, true: subpresentation update, false: datainput update
- */
-void CStudioApp::SaveUIAFile(bool subpresentations)
-{
-    // Mahmoud_TODO: this method is to be removed after updating the subpresentation workflow
-    // according to the new design (QT3DS-1569).
-    QStringList list;
-    if (subpresentations) {
-        for (SubPresentationRecord r : qAsConst(m_subpresentations)) {
-            list.append(r.m_type);
-            list.append(r.m_id);
-            list.append(r.m_argsOrSrc);
-        }
-    }
-
-    Q3DStudio::CFilePath doc(GetCore()->GetDoc()->GetDocumentPath().GetAbsolutePath());
-    QByteArray docBA = doc.toQString().toLatin1();
-    qt3ds::state::IApplication::EnsureApplicationFile(docBA.constData(), list, subpresentations);
-
-    if (subpresentations)
-        g_StudioApp.getRenderer().RegisterSubpresentations(m_subpresentations);
-}
-
 void CStudioApp::saveDataInputsToProjectFile()
 {
     // open the uia file

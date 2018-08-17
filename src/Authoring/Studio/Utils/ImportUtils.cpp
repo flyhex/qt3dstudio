@@ -31,47 +31,54 @@
 #include "ImportUtils.h"
 #include "Dialogs.h"
 #include "Qt3DSFileTools.h"
+#include <QtQml/qqmlapplicationengine.h>
 
 namespace Q3DStudio {
 
 SObjectFileType ImportUtils::GetObjectFileTypeForFile(const CFilePath &inFile,
                                                       bool inCheckFileExists /*= true*/)
 {
-    if (inCheckFileExists && inFile.IsFile() == false)
+    if (inCheckFileExists && !inFile.isFile())
         return SObjectFileType(OBJTYPE_UNKNOWN, DocumentEditorFileType::Unknown);
 
     Q3DStudio::CString theExtension(inFile.GetExtension());
     theExtension.ToLower();
 
     if (theExtension.Compare(CDialogs::GetImportFileExtension(), Q3DStudio::CString::ENDOFSTRING,
-                             false))
+                             false)) {
         return SObjectFileType(OBJTYPE_GROUP, DocumentEditorFileType::Import);
-    else if (theExtension.Compare(CDialogs::GetMeshFileExtension(), Q3DStudio::CString::ENDOFSTRING,
-                                  false))
+    } else if (theExtension.Compare(CDialogs::GetMeshFileExtension(), Q3DStudio::CString::ENDOFSTRING,
+                                  false)) {
         return SObjectFileType(OBJTYPE_MODEL, DocumentEditorFileType::Mesh);
-    else if (CDialogs::IsImageFileExtension(theExtension))
+    } else if (CDialogs::IsImageFileExtension(theExtension)) {
         return SObjectFileType(
             OBJTYPE_MODEL, OBJTYPE_IMAGE,
             DocumentEditorFileType::Image); // Drag-drop image to scene will auto-map to Rectangle.
-    else if (theExtension.Compare(CDialogs::GetQmlFileExtension(),
-                                  Q3DStudio::CString::ENDOFSTRING, false))
-        return SObjectFileType(OBJTYPE_BEHAVIOR, DocumentEditorFileType::Behavior);
-    else if (CDialogs::IsFontFileExtension(theExtension))
+    } else if (theExtension.Compare(CDialogs::GetQmlFileExtension(),
+                                    Q3DStudio::CString::ENDOFSTRING, false)) {
+        QQmlApplicationEngine qmlEngine(inFile.absoluteFilePath());
+        const char *rootClassName = qmlEngine.rootObjects().at(0)
+                                    ->metaObject()->superClass()->className();
+        bool isQmlStream =  strcmp(rootClassName, "Q3DStudio::Q3DSQmlBehavior") != 0;
+        return isQmlStream ? SObjectFileType(OBJTYPE_QML_STREAM, DocumentEditorFileType::QmlStream)
+                           : SObjectFileType(OBJTYPE_BEHAVIOR, DocumentEditorFileType::Behavior);
+    } else if (CDialogs::IsFontFileExtension(theExtension)) {
         return SObjectFileType(OBJTYPE_TEXT, DocumentEditorFileType::Font);
-    else if (CDialogs::IsEffectFileExtension(theExtension))
+    } else if (CDialogs::IsEffectFileExtension(theExtension)) {
         return SObjectFileType(OBJTYPE_EFFECT, DocumentEditorFileType::Effect);
-    else if (CDialogs::IsMaterialFileExtension(theExtension))
+    } else if (CDialogs::IsMaterialFileExtension(theExtension)) {
         return SObjectFileType(OBJTYPE_CUSTOMMATERIAL, DocumentEditorFileType::Material);
-    else if (CDialogs::IsPathFileExtension(theExtension))
+    } else if (CDialogs::IsPathFileExtension(theExtension)) {
         return SObjectFileType(OBJTYPE_PATH, DocumentEditorFileType::Path);
-    else if (CDialogs::IsPathBufferExtension(theExtension))
+    } else if (CDialogs::IsPathBufferExtension(theExtension)) {
         return SObjectFileType(OBJTYPE_PATH, DocumentEditorFileType::Path);
-    else if (CDialogs::IsSoundFileExtension(theExtension))
+    } else if (CDialogs::IsSoundFileExtension(theExtension)) {
         return SObjectFileType(OBJTYPE_SOUND, DocumentEditorFileType::Sound);
-    else if (CDialogs::isPresentationFileExtension(theExtension))
+    } else if (CDialogs::isPresentationFileExtension(theExtension)) {
         return SObjectFileType(OBJTYPE_PRESENTATION, DocumentEditorFileType::Presentation);
-    else if (CDialogs::isProjectFileExtension(theExtension))
+    } else if (CDialogs::isProjectFileExtension(theExtension)) {
         return SObjectFileType(OBJTYPE_PROJECT, DocumentEditorFileType::Project);
+    }
 
     return SObjectFileType(OBJTYPE_UNKNOWN, DocumentEditorFileType::Unknown);
 }

@@ -38,19 +38,7 @@ EditPresentationIdDlg::EditPresentationIdDlg(const QString &src, QWidget *parent
 {
     m_ui->setupUi(this);
 
-    if (src == g_StudioApp.GetCore()->GetDoc()->getRelativePath()) {
-        m_presentationId = g_StudioApp.GetCore()->GetDoc()->getPresentationId();
-    } else {
-        auto *sp = std::find_if(g_StudioApp.m_subpresentations.begin(),
-                                g_StudioApp.m_subpresentations.end(),
-                               [&src](const SubPresentationRecord &spr) -> bool {
-                                   return spr.m_argsOrSrc == src;
-                               });
-
-        if (sp != g_StudioApp.m_subpresentations.end())
-            m_presentationId = sp->m_id;
-    }
-
+    m_presentationId = g_StudioApp.GetCore()->getProjectFile().getPresentationId(src);
     m_ui->lineEditPresentationId->setText(m_presentationId);
 }
 
