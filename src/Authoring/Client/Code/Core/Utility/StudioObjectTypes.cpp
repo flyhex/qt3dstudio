@@ -82,6 +82,7 @@ bool CStudioObjectTypes::AcceptableParent(EStudioObjectType inChild, EStudioObje
         theAcceptible = (inParent == OBJTYPE_LAYER) || (inParent == OBJTYPE_EFFECT);
         break;
     case OBJTYPE_PRESENTATION:
+    case OBJTYPE_QML_STREAM:
         theAcceptible = inParent & (OBJTYPE_LAYER | OBJTYPE_SCENE);
         break;
     case OBJTYPE_CUSTOMMATERIAL:
