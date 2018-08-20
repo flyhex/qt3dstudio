@@ -1004,15 +1004,17 @@ CDialogs::ESavePromptResult CDialogs::PromptForSave()
     return theResult;
 }
 
-//==============================================================================
 /**
- *	Prompt the user for a file to save to from the SaveAs menu option.
- *	@return	an invalid file if the user cancels the save dialog.
+ * Prompt the user for a file to save to.
+ * If browsing for location for presentation (isProject == false), then
+ * allow browsing only inside current project.
+ * Return an invalid file if the user cancels the save dialog.
  */
 QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
 {
     QFileInfo theFile;
     QString theFileExt;
+    QString projPath(QDir::cleanPath(g_StudioApp.GetCore()->getProjectFile().getProjectPath()));
 
     QString theFilename
             = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetAbsolutePath().toQString();
@@ -1039,6 +1041,17 @@ QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
     if (isProject) {
         theFileDlg.setLabelText(QFileDialog::FileName, QObject::tr("Project Name"));
         theFileDlg.setLabelText(QFileDialog::Accept, QObject::tr("Create"));
+    } else {
+        // Limit browsing to project directory
+        connect(&theFileDlg, &QFileDialog::directoryEntered,
+                [&theFileDlg, &projPath](const QString &dir) {
+            QFileInfo fi(QDir::cleanPath(dir));
+            const QString absPath = fi.absoluteFilePath();
+            if (!absPath.startsWith(projPath))
+                theFileDlg.setDirectory(projPath);
+        });
+        // Note that since we are using native file dialog, we cannot change the sidebar or
+        // "look in" combo contents of the file dialog, which may cause bit of confusion.
     }
 
     bool theShowDialog = true;
@@ -1050,6 +1063,15 @@ QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
         // Make sure file name has correct extension
         if (!selectedName.endsWith(theFileExt))
             selectedName.append(theFileExt);
+
+        if (!isProject) {
+            // If user somehow manages to select a file path outside project directory, save to
+            // default presentations directory
+            QFileInfo fi(QDir::cleanPath(selectedName));
+            const QString absPath = fi.absoluteFilePath();
+            if (!absPath.startsWith(projPath))
+                selectedName = projPath + QStringLiteral("/presentations/") + fi.fileName();
+        }
 
         theFile = QFileInfo(selectedName);
 
