@@ -188,6 +188,8 @@ public:
     static QColor timelinePlayheadLineColor();
     static QColor timelineFilterButtonSelectedColor();
     static QColor timelineFilterButtonHoveredColor();
+    static QColor timelineRowSubpColor();
+    static QColor timelineRowSubpDescendantColor();
 
     static int fontSize();
     static int controlBaseHeight();

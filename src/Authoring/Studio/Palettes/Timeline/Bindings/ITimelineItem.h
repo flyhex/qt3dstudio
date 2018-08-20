@@ -66,6 +66,9 @@ public:
     virtual bool ChildrenHasAction(bool inMaster) = 0;
     virtual bool ComponentHasAction(bool inMaster) = 0;
 
+    // subpresentations
+    virtual bool hasSubpresentation() const = 0;
+
     virtual ITimelineTimebar *GetTimebar() = 0;
 };
 

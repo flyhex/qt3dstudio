@@ -508,8 +508,9 @@ void TimelineWidget::onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         if (binding && !rowExists) {
             Qt3DSDMTimelineItemBinding *bindingParent = getBindingForHandle(m_bridge
                                                         ->GetParentInstance(inInstance), m_binding);
-            m_graphicsScene->rowManager()
-                    ->createRowFromBinding(binding, bindingParent->getRowTree());
+            RowTree *row = m_graphicsScene->rowManager()
+                           ->createRowFromBinding(binding, bindingParent->getRowTree());
+            row->updateSubpresentations();
             insertToHandlesMap(binding);
         }
     }
@@ -522,6 +523,7 @@ void TimelineWidget::onAssetDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 
     RowTree *row = m_handlesMap.value(inInstance);
     if (row) { // scene object exists
+        row->updateSubpresentations(-1);
         m_graphicsScene->rowManager()->deleteRow(row);
         m_handlesMap.remove(inInstance);
         m_graphicsScene->expandMap().remove(inInstance);
@@ -699,16 +701,24 @@ void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance
 
     const SDataModelSceneAsset &asset = m_bridge->GetSceneAsset();
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-    auto ctrldPropHandle = doc->GetPropertySystem()->GetAggregateInstancePropertyByName(
-                inInstance, L"controlledproperty");
+    EStudioObjectType instanceType = m_bridge->GetObjectType(inInstance);
+    auto ctrldPropHandle = doc->GetPropertySystem()
+                           ->GetAggregateInstancePropertyByName(inInstance, L"controlledproperty");
+
     if (inProperty == asset.m_Eyeball || inProperty == asset.m_Locked || inProperty == asset.m_Shy
-            || inProperty == asset.m_StartTime || inProperty == asset.m_EndTime
-            || inProperty == m_bridge->GetNameProperty()
-            || inProperty == ctrldPropHandle) {
+        || inProperty == asset.m_StartTime || inProperty == asset.m_EndTime
+        || inProperty == m_bridge->GetNameProperty() || inProperty == ctrldPropHandle) {
         m_dirtyProperties.insert(inInstance, inProperty);
         if (!m_asyncUpdateTimer.isActive())
             m_asyncUpdateTimer.start();
-    }
+    } else if ((instanceType == OBJTYPE_LAYER && inProperty == m_bridge->GetSourcePathProperty())
+               || (instanceType == OBJTYPE_IMAGE && inProperty == m_bridge->GetSceneImage()
+                                                                  .m_SubPresentation)) {
+       // subpresentation property change
+       m_subpresentationChanges.insert(inInstance);
+       if (!m_asyncUpdateTimer.isActive())
+           m_asyncUpdateTimer.start();
+   }
 }
 
 void TimelineWidget::onAsyncUpdate()
@@ -731,6 +741,11 @@ void TimelineWidget::onAsyncUpdate()
         m_graphicsScene->updateController();
         onSelectionChange(doc->GetSelectedValue());
         m_toolbar->setNewLayerEnabled(!m_graphicsScene->rowManager()->isComponentRoot());
+
+        // update suppresentation indicators
+        for (auto *row : m_handlesMap)
+            row->updateSubpresentations();
+
     } else {
         if (!m_moveMap.isEmpty()) {
             // Flip the hash around so that we collect moves by parent.
@@ -758,8 +773,14 @@ void TimelineWidget::onAsyncUpdate()
                         while (indexIt.hasNext()) {
                             indexIt.next();
                             RowTree *row = m_handlesMap.value(indexIt.value());
-                            if (row)
+                            if (row) {
+                                bool isReparent = rowParent != row->parentRow();
+                                if (isReparent)
+                                    row->updateSubpresentations(-1);
                                 rowParent->addChildAt(row, indexIt.key());
+                                if (isReparent)
+                                    row->updateSubpresentations(1);
+                            }
                         }
                         expandRows.insert(rowParent);
                     }
@@ -848,6 +869,15 @@ void TimelineWidget::onAsyncUpdate()
             }
             updateActionStates(rowSet);
         }
+
+        if (!m_subpresentationChanges.isEmpty()) {
+            for (int id : qAsConst(m_subpresentationChanges)) {
+                RowTree *row = m_handlesMap.value(id);
+                if (row)
+                    row->updateSubpresentations();
+            }
+        }
+
         if (!m_keyframeChangesMap.isEmpty()) {
             const auto objects = m_keyframeChangesMap.keys();
             for (int object : objects) {
@@ -863,6 +893,7 @@ void TimelineWidget::onAsyncUpdate()
     m_dirtyProperties.clear();
     m_moveMap.clear();
     m_actionChanges.clear();
+    m_subpresentationChanges.clear();
     m_keyframeChangesMap.clear();
     m_graphicsScene->rowManager()->finalizeRowDeletions();
 }

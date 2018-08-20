@@ -69,6 +69,8 @@ static QColor s_timelineRowColorDndSource;
 static QColor s_timelineRowColorDndTarget;
 static QColor s_timelineRowColorDndTargetSP;
 static QColor s_timelineRowMoverColor;
+static QColor s_timelineRowSubpColor;
+static QColor s_timelineRowSubpDescendantColor;
 static QColor s_timelineRulerColor;
 static QColor s_timelineRulerColorDisabled;
 static QColor s_timelineWidgetBgColor;
@@ -152,6 +154,8 @@ void CStudioPreferences::LoadPreferences()
     s_timelinePlayheadLineColor = QColor("#b20808");
     s_timelineFilterButtonSelectedColor = QColor("#000000");
     s_timelineFilterButtonHoveredColor = QColor("#40000000");
+    s_timelineRowSubpColor = QColor("#e2ceff");
+    s_timelineRowSubpDescendantColor = QColor("#a263ff");
 
     s_fontSize = 12;
     s_controlBaseHeight = 22;
@@ -976,6 +980,16 @@ QColor CStudioPreferences::timelineFilterButtonSelectedColor()
 QColor CStudioPreferences::timelineFilterButtonHoveredColor()
 {
     return s_timelineFilterButtonHoveredColor;
+}
+
+QColor CStudioPreferences::timelineRowSubpColor()
+{
+    return s_timelineRowSubpColor;
+}
+
+QColor CStudioPreferences::timelineRowSubpDescendantColor()
+{
+    return s_timelineRowSubpDescendantColor;
 }
 
 int CStudioPreferences::fontSize()
