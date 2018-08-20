@@ -85,6 +85,7 @@ ProjectView::ProjectView(const QSize &preferredSize, QWidget *parent) : QQuickWi
     auto dispatch = g_StudioApp.GetCore()->GetDispatch();
     dispatch->AddPresentationChangeListener(this);
     dispatch->AddDataModelListener(this);
+    dispatch->AddFileOpenListener(this);
 }
 
 ProjectView::~ProjectView()
@@ -220,6 +221,25 @@ void ProjectView::OnNewPresentation()
                        + QStringLiteral("/presentations");
         m_ProjectModel->expand(m_ProjectModel->rowForPath(path));
     });
+}
+
+void ProjectView::OnOpenDocument(const Qt3DSFile &inFilename, bool inSucceeded)
+{
+    Q_UNUSED(inFilename)
+    Q_UNUSED(inSucceeded)
+}
+
+void ProjectView::OnSaveDocument(const Qt3DSFile &inFilename, bool inSucceeded, bool inSaveCopy)
+{
+    Q_UNUSED(inFilename)
+    Q_UNUSED(inSucceeded)
+    Q_UNUSED(inSaveCopy)
+    QTimer::singleShot(0, m_ProjectModel, &ProjectFileSystemModel::updateReferences);
+}
+
+void ProjectView::OnDocumentPathChanged(const Qt3DSFile &inNewPath)
+{
+    Q_UNUSED(inNewPath)
 }
 
 void ProjectView::OnBeginDataModelNotifications()

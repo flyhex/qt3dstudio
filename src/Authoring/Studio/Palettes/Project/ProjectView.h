@@ -40,7 +40,9 @@ QT_FORWARD_DECLARE_CLASS(QQuickItem)
 
 class ProjectView : public QQuickWidget,
                     public CPresentationChangeListener,
-                    public IDataModelListener
+                    public IDataModelListener,
+                    public CFileOpenListener
+
 
 {
     Q_OBJECT
@@ -84,6 +86,10 @@ public:
 
     // CPresentationChangeListener
     void OnNewPresentation() override;
+    // CFileOpenListener
+    void OnOpenDocument(const Qt3DSFile &inFilename, bool inSucceeded) override;
+    void OnSaveDocument(const Qt3DSFile &inFilename, bool inSucceeded, bool inSaveCopy) override;
+    void OnDocumentPathChanged(const Qt3DSFile &inNewPath) override;
     // IDataModelListener
     void OnBeginDataModelNotifications() override;
     void OnEndDataModelNotifications() override;
