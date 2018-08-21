@@ -209,8 +209,12 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
                 || rowAtMouse->rowType() == OBJTYPE_IMAGE) {
                 m_insertionTarget->setDnDState(RowTree::DnDState::SP_TARGET);
             }
+            m_rowAutoExpand = rowAtMouse;
+            m_autoExpandTimer.start(TimelineConstants::AUTO_EXPAND_TIME);
+        } else {
+            m_rowAutoExpand = nullptr;
+            m_autoExpandTimer.stop();
         }
-
         return;
     }
 
