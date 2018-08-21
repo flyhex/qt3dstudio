@@ -86,7 +86,6 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     m_scaleSlider->setFixedWidth(100);
     m_scaleSlider->setMinimum(1);
     m_scaleSlider->setMaximum(22);
-    m_scaleSlider->setPageStep(.1);
     m_scaleSlider->setValue(2);
 
     m_timeLabel->setText(tr("0:00.000"));
