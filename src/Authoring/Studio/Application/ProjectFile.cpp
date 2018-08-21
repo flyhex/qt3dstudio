@@ -34,6 +34,7 @@
 #include "Core.h"
 #include "Doc.h"
 #include "PresentationFile.h"
+#include "IStudioRenderer.h"
 #include <QtCore/qdiriterator.h>
 #include <QtXml/qdom.h>
 
@@ -72,10 +73,12 @@ void ProjectFile::addPresentationNode(const QString &pPath, const QString &pId)
     QDomElement assetsElem = rootElem.firstChildElement(QStringLiteral("assets"));
 
     // create the <assets> node if it doesn't exist
+    bool initial = false;
     if (assetsElem.isNull()) {
         assetsElem = doc.createElement(QStringLiteral("assets"));
         assetsElem.setAttribute(QStringLiteral("initial"), QFileInfo(pPath).completeBaseName());
         rootElem.insertBefore(assetsElem, {});
+        initial = true;
     }
 
     QString relativePresentationPath = QDir(getProjectPath()).relativeFilePath(pPath);
@@ -108,10 +111,13 @@ void ProjectFile::addPresentationNode(const QString &pPath, const QString &pId)
         file.resize(0);
         file.write(doc.toByteArray(4));
 
-        // add to m_subpresentations
-        g_StudioApp.m_subpresentations.push_back(
-                    SubPresentationRecord(QStringLiteral("presentation-qml"), presentationId,
-                                          relativePresentationPath));
+        if (!initial) {
+            g_StudioApp.m_subpresentations.push_back(
+                        SubPresentationRecord(isQml ? QStringLiteral("presentation-qml")
+                                                    : QStringLiteral("presentation"),
+                                              presentationId, relativePresentationPath));
+            g_StudioApp.getRenderer().RegisterSubpresentations(g_StudioApp.m_subpresentations);
+        }
     }
 
     file.close();
