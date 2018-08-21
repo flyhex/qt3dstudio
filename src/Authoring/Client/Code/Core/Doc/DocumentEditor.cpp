@@ -1582,15 +1582,26 @@ public:
             Qt3DSDMPropertyHandle imageProperty;
             if (!m_Bridge.GetMaterialFromImageInstance(instance, parent, imageProperty))
                 m_Bridge.GetLayerFromImageProbeInstance(instance, parent, imageProperty);
+            bool parentEmptied = false;
             if (parent.Valid()) {
                 SetInstancePropertyValue(parent, imageProperty,
                                          std::make_shared<qt3dsdm::CDataStr>(inSourcePath.c_str()),
                                          true);
+                // Setting the parent image property to empty will delete the image child,
+                // so we should skip setting the property there
+                if (inSourcePath.IsEmpty())
+                    parentEmptied = true;
             }
+            if (!parentEmptied) {
+                SetInstancePropertyValue(instance, propName,
+                                         std::make_shared<qt3dsdm::CDataStr>(inSourcePath.c_str()),
+                                         true);
+            }
+        } else {
+            SetInstancePropertyValue(instance, propName,
+                                     std::make_shared<qt3dsdm::CDataStr>(inSourcePath.c_str()),
+                                     true);
         }
-
-        SetInstancePropertyValue(instance, propName,
-                                 std::make_shared<qt3dsdm::CDataStr>(inSourcePath.c_str()), true);
 
         // If this is a render plugin
         if (thePath.Exists() && thePath.GetExtension().CompareNoCase("plugin")) {
