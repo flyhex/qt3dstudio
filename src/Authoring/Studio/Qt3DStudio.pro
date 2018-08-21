@@ -413,6 +413,19 @@ macos:!isEmpty(QMAKE_LIBS_FBX) {
     QMAKE_BUNDLE_DATA += fbxsdk
 }
 
+macos: {
+    qtstudio3d.files = $$absolute_path($$LIBDIR)/QtStudio3D.framework
+    qtstudio3d.path = Contents/Frameworks
+
+    studioruntime.files = $$absolute_path($$LIBDIR)/libqt3dsruntime.1.dylib
+    studioruntime.path = Contents/Frameworks
+
+    qmlstreamer.files = $$absolute_path($$LIBDIR)/libqt3dsqmlstreamer.1.dylib
+    qmlstreamer.path = Contents/Frameworks
+
+    QMAKE_BUNDLE_DATA += qtstudio3d studioruntime qmlstreamer
+}
+
 macos {
     QMAKE_INFO_PLIST = Info.plist
 }
