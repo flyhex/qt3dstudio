@@ -581,11 +581,11 @@ void CDialogs::DisplaySavingPresentationFailed()
  *
  *	@return	void
  */
-void CDialogs::DisplaySaveReadOnlyFailed(const Qt3DSFile &inSavedLocation)
+void CDialogs::DisplaySaveReadOnlyFailed(const QString &inSavedLocation)
 {
     QString theMsg = QObject::tr("Studio cannot save the file '%1'. The file is marked Read-Only."
                                  "\nSave the file with another file name or to a different "
-                                 "location.").arg(inSavedLocation.GetName().toQString());
+                                 "location.").arg(inSavedLocation);
     QString theTitle = QObject::tr("Qt 3D Studio");
 
     if (m_ShowGUI) {

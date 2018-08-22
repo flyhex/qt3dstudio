@@ -510,7 +510,7 @@ struct SApp : public IApplication
         , m_ThreadRunnables(inFactory.GetFoundation().getAllocator(), "SApp::m_ThreadRunnables")
         , m_MainThreadRunnables(inFactory.GetFoundation().getAllocator(),
                                 "SApp::m_MainThreadRunnables")
-        , m_HideFPS(false)
+        , m_HideFPS(true)
         , m_DisableState(false)
         , m_ProfileLogging(false)
         , m_LastRenderWasDirty(true)

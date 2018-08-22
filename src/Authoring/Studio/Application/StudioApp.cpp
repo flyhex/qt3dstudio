@@ -478,14 +478,14 @@ QString CStudioApp::resolvePresentationFile(const QString &inFile)
     if (inFileInfo.suffix().compare(QStringLiteral("uip"), Qt::CaseInsensitive) == 0)
         return inFile;
 
-    // If opening a .uia file, look for the first uip file inside it
+    // If opening a .uia file, open the initial presentation
     if (inFileInfo.suffix().compare(QStringLiteral("uia"), Qt::CaseInsensitive) == 0
             && inFileInfo.exists()) {
         QString uiaPath = inFileInfo.absoluteFilePath();
-        QString firstPresentation = m_core->getProjectFile().getFirstPresentationPath(uiaPath);
+        QString initialPresentation = m_core->getProjectFile().getInitialPresentationSrc(uiaPath);
 
-        if (!firstPresentation.isEmpty())
-            return inFileInfo.path() + QStringLiteral("/") + firstPresentation;
+        if (!initialPresentation.isEmpty())
+            return inFileInfo.path() + QStringLiteral("/") + initialPresentation;
     }
 
     // couldn't find a uip file

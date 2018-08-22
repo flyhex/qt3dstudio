@@ -42,6 +42,7 @@
 #include <QtWidgets/qinputdialog.h>
 #include <QtWidgets/qmessagebox.h>
 #include <QtCore/qprocess.h>
+#include <ProjectFile.h>
 
 #include "remotedeploymentsender.h"
 
@@ -55,7 +56,7 @@ Q3DStudio::CString CPreviewHelper::GetLaunchFile(const Q3DStudio::CString &inUip
             .Compare(previewSuffix + uipSuffix);
 
     Q3DStudio::CFilePath theUipPath(inUipPath);
-
+    // Mahmoud_TODO: update to use PresentationFile::findProjectFile()
     Q3DStudio::CString theDir = theUipPath.GetDirectory();
     Q3DStudio::CString theStem = theUipPath.GetFileStem();
     if (isPreview)
@@ -133,18 +134,14 @@ void CPreviewHelper::PreviewViaConfig(Q3DStudio::CBuildConfiguration *inSelected
                                       EExecMode inMode, const QString &viewerExeName,
                                       RemoteDeploymentSender *project)
 {
-    bool theUsingTempFile;
-    Qt3DSFile theDocument = GetDocumentFile(theUsingTempFile);
     CCore *theCore = g_StudioApp.GetCore();
+    QString prvPath = theCore->getProjectFile().createPreview();
     try {
-        if (theUsingTempFile)
-            theCore->OnSaveDocument(theDocument, true);
-
-        DoPreviewViaConfig(inSelectedConfig, theDocument.GetAbsolutePath(),
+        DoPreviewViaConfig(inSelectedConfig, Q3DStudio::CString::fromQString(prvPath),
                            inMode, viewerExeName, project);
     } catch (...) {
         theCore->GetDispatch()->FireOnProgressEnd();
-        g_StudioApp.GetDialogs()->DisplaySaveReadOnlyFailed(theDocument);
+        g_StudioApp.GetDialogs()->DisplaySaveReadOnlyFailed(prvPath);
     }
 }
 
@@ -182,12 +179,18 @@ void CPreviewHelper::cleanupProcess(QProcess *p, QString *pDocStr)
     QString preview = previewSuffix.toQString();
     QString uia = preview + uiaSuffix.toQString();
     QString uip = preview + uipSuffix.toQString();
-    if (pDocStr->endsWith(uia) || pDocStr->endsWith(uip)) {
-        QFile(*pDocStr).remove();
-        if (pDocStr->endsWith(uia)) {
-            pDocStr->replace(uia, uip);
-            QFile(*pDocStr).remove();
+    if (pDocStr->endsWith(uia)) {
+        // remove presentation preview (initial)
+        QString initialPresentationSrc = ProjectFile::getInitialPresentationSrc(*pDocStr);
+        if (!initialPresentationSrc.isEmpty()) {
+            QString absUipPath = QDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath())
+                                                        .absoluteFilePath(initialPresentationSrc);
+            QFile(absUipPath).remove();
         }
+
+        QFile(*pDocStr).remove(); // remove uia preview
+    } else if (pDocStr->endsWith(uip)) {
+        QFile(*pDocStr).remove();
     }
     if (p->state() == QProcess::Running) {
         p->terminate();
