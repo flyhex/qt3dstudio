@@ -284,15 +284,15 @@ public:
     virtual void RearrangeObjects(const qt3dsdm::TInstanceHandleList &inInstances,
                                   TInstanceHandle inDest,
                                   DocumentEditorInsertType::Enum inInsertType,
-                                  bool checkUniqueName = true) = 0;
+                                  bool checkUniqueName = true, bool notifyRename = true) = 0;
 
     void RearrangeObject(TInstanceHandle inInstance, TInstanceHandle inDest,
                          DocumentEditorInsertType::Enum inInsertType,
-                         bool checkUniqueName = true)
+                         bool checkUniqueName = true, bool notifyRename = true)
     {
         qt3dsdm::TInstanceHandleList theInstances;
         theInstances.push_back(inInstance);
-        RearrangeObjects(theInstances, inDest, inInsertType, checkUniqueName);
+        RearrangeObjects(theInstances, inDest, inInsertType, checkUniqueName, notifyRename);
     }
 
     virtual void ungroupObjects(const qt3dsdm::TInstanceHandleList &inInstances) = 0;

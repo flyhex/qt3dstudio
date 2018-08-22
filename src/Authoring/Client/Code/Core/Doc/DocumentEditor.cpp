@@ -2281,7 +2281,7 @@ public:
     FinalizeAddOrDrop(qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3dsdm::Qt3DSDMInstanceHandle inParent,
                       DocumentEditorInsertType::Enum inInsertType, const CPt &inPosition,
                       bool inSetTimeRangeToParent, bool inSelectInstanceWhenFinished = true,
-                      bool checkUniqueName = true)
+                      bool checkUniqueName = true, bool notifyRename = true)
     {
         if (inPosition.x != 0 && inPosition.y != 0) {
             Q3DStudio::IDocSceneGraph *theGraph(m_Doc.GetSceneGraph());
@@ -2293,7 +2293,7 @@ public:
                 QT3DS_ASSERT(false);
             }
         }
-        RearrangeObject(inInstance, inParent, inInsertType, checkUniqueName);
+        RearrangeObject(inInstance, inParent, inInsertType, checkUniqueName, notifyRename);
         if (inSetTimeRangeToParent)
             SetTimeRangeToParent(inInstance);
         if (inSelectInstanceWhenFinished)
@@ -2349,7 +2349,8 @@ public:
                                                 TInstanceHandle inNewRoot,
                                                 bool inGenerateUniqueName,
                                                 DocumentEditorInsertType::Enum inInsertType,
-                                                const CPt &inPosition)
+                                                const CPt &inPosition,
+                                                bool notifyRename = true)
     {
         std::shared_ptr<IComposerSerializer> theSerializer = m_Doc.CreateSerializer();
         TInstanceHandleList retval = theSerializer->SerializeSceneGraphObject(
@@ -2359,7 +2360,8 @@ public:
             if (inInsertType == DocumentEditorInsertType::NextSibling)
                 theInstance = retval[end - idx - 1];
 
-            FinalizeAddOrDrop(theInstance, inNewRoot, inInsertType, inPosition, false);
+            FinalizeAddOrDrop(theInstance, inNewRoot, inInsertType, inPosition, false, true, true,
+                              notifyRename);
 
             SetName(theInstance, GetName(theInstance), inGenerateUniqueName);
         }
@@ -2466,7 +2468,7 @@ public:
     void RearrangeObjects(const qt3dsdm::TInstanceHandleList &inInstances,
                                   TInstanceHandle inDest,
                                   DocumentEditorInsertType::Enum inInsertType,
-                                  bool checkUniqueName) override
+                                  bool checkUniqueName, bool notifyRename = true) override
     {
         qt3dsdm::TInstanceHandleList sortableList(ToGraphOrdering(inInstances));
         TInstanceHandle theParent(inDest);
@@ -2475,7 +2477,7 @@ public:
             theParent = GetParent(inDest);
 
         if (m_Bridge.IsComponentInstance(theParent)
-                && moveIntoComponent(inInstances, theParent, checkUniqueName)) {
+                && moveIntoComponent(inInstances, theParent, checkUniqueName, notifyRename)) {
             return;
         }
 
@@ -2491,7 +2493,8 @@ public:
                 if (!m_Bridge.CheckNameUnique(theParent, theInstance, currName)) {
                     CString newName = m_Bridge.GetUniqueChildName(theParent, theInstance,
                                                                   currName);
-                    m_Doc.getMoveRenameHandler()->displayMessageBox(currName, newName);
+                    if (notifyRename)
+                        m_Doc.getMoveRenameHandler()->displayMessageBox(currName, newName);
                     SetName(theInstance, newName);
                 }
             }
@@ -2605,7 +2608,8 @@ public:
     // Returns true if move was done. Returns false if instances are already in target component,
     // which means a regular rearrange can be done.
     bool moveIntoComponent(const qt3dsdm::TInstanceHandleList &inInstances,
-                           const Qt3DSDMInstanceHandle targetComponent, bool checkUniqueName)
+                           const Qt3DSDMInstanceHandle targetComponent, bool checkUniqueName,
+                           bool notifyRename)
     {
         if (inInstances.empty())
             return false;
@@ -2652,7 +2656,8 @@ public:
                     if (!m_Bridge.CheckNameUnique(targetComponent, instance, currName)) {
                         CString newName = m_Bridge.GetUniqueChildName(
                                     targetComponent, instance, currName);
-                        m_Doc.getMoveRenameHandler()->displayMessageBox(currName, newName);
+                        if (notifyRename)
+                            m_Doc.getMoveRenameHandler()->displayMessageBox(currName, newName);
                         SetName(instance, newName);
                     }
                 }
@@ -2677,7 +2682,7 @@ public:
     {
         qt3dsdm::TInstanceHandleList theInstances(ToGraphOrdering(inInstances));
         std::shared_ptr<IDOMReader> theReader(CopySceneGraphObjectsToMemory(theInstances));
-        return DoPasteSceneGraphObject(theReader, inDest, true, inInsertType, CPt());
+        return DoPasteSceneGraphObject(theReader, inDest, true, inInsertType, CPt(), false);
     }
 
     Qt3DSDMActionHandle AddAction(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
