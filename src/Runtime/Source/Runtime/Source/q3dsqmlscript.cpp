@@ -212,15 +212,15 @@ void Q3DSQmlScript::setAttribute(const QString &handle, const QString &attribute
     float valueFloat;
 
     const char *valuePtr = nullptr;
-    switch (value.type()) {
-    case QVariant::Bool:
-    case QVariant::Int:
-    case QVariant::Double:
+    switch (static_cast<QMetaType::Type>(value.type())) {
+    case QMetaType::Bool:
+    case QMetaType::Int:
+    case QMetaType::Double:
     case QMetaType::Float:
         valueFloat = value.toFloat();
         valuePtr = (const char *)&valueFloat;
         break;
-    case QVariant::String:
+    case QMetaType::QString:
     default:
         valueStr = value.toString().toUtf8();
         valuePtr = valueStr.constData();
