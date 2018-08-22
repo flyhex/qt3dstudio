@@ -257,6 +257,11 @@ void CStudioApp::performShutdown()
     if (m_core) {
         m_core->GetDispatch()->RemoveAppStatusListener(this);
         m_core->GetDispatch()->RemoveCoreAsynchronousEventListener(this);
+
+        // close transactions before we call destructors
+        if (m_core->GetDoc()->IsTransactionOpened())
+            m_core->GetDoc()->CloseTransaction();
+
         qCInfo(qt3ds::TRACE_INFO) << "Studio exiting successfully";
     }
 
