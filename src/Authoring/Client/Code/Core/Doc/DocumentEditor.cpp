@@ -1064,7 +1064,8 @@ public:
                     m_DataCore.DeleteInstance(theInstance);
             }
         }
-        if (m_Bridge.IsMaterialBaseInstance(instance)) {
+        if (m_Bridge.IsMaterialBaseInstance(instance)
+            && !m_Bridge.IsCustomMaterialInstance(instance)) {
             // Find all material instances that may reference this instance.
             // Ensure they are marked as dirty at this point but do not change their reference
             // target
@@ -1113,7 +1114,6 @@ public:
                     }
                 }
             }
-
         } else if (m_Bridge.IsImageInstance(instance)) {
             // Unassign the image property from material
             Qt3DSDMInstanceHandle theParent;
@@ -1123,14 +1123,19 @@ public:
                 m_Bridge.GetLayerFromImageProbeInstance(instance, theParent, theProperty);
             if (theParent.Valid())
                 m_PropertySystem.SetInstancePropertyValue(theParent, theProperty, SLong4());
-        } else if (m_Bridge.IsBehaviorInstance(instance) || m_Bridge.IsEffectInstance(instance)) {
+        } else if (m_Bridge.IsBehaviorInstance(instance) || m_Bridge.IsEffectInstance(instance)
+                   || m_Bridge.IsCustomMaterialInstance(instance)) {
             // Check if this is the last instance that uses the same sourcepath property
             // If yes, delete the parent as well
             Qt3DSDMInstanceHandle theObjectDefInstance;
             if (m_Bridge.IsBehaviorInstance(instance))
                 theObjectDefInstance = m_Bridge.GetObjectDefinitions().m_Behavior.m_Instance;
-            else
+            else if (m_Bridge.IsEffectInstance(instance))
                 theObjectDefInstance = m_Bridge.GetObjectDefinitions().m_Effect.m_Instance;
+            else if (m_Bridge.IsCustomMaterialInstance(instance))
+                theObjectDefInstance = m_Bridge.GetObjectDefinitions().m_CustomMaterial.m_Instance;
+            else
+                QT3DS_ASSERT(false);
 
             // First, we need to get the parent instance that has the same sourcepath property
             CFilePath theSourcePath(GetSourcePath(instance));
