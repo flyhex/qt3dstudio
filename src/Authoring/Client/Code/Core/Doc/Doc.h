@@ -168,6 +168,11 @@ public:
     // i.e. only the exact equivalent mapping from datainput type to
     // property type is allowed (float to float, string to string etc.)
     QVector<QPair<qt3dsdm::DataModelDataType::Value, bool>> boundTypes;
+    // Bindings in other subpresentations, of QMap format
+    // QMultiMap<subpresentation_id, QPair<datatype, strict>>.
+    // Stored separately so we can conveniently update/clear binding info
+    // for current presentation and keep subpresentation binding info intact or vice versa.
+    QMultiMap<QString, QPair<qt3dsdm::DataModelDataType::Value, bool>> externalPresBoundTypes;
 };
 
 //==============================================================================

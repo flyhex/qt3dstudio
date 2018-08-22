@@ -38,6 +38,7 @@
 #include "QtCore/qfileinfo.h"
 #include <QtCore/qdiriterator.h>
 #include <qxmlstream.h>
+#include <QtCore/qlist.h>
 
 // This class provides utility static methods for working with presentation files (.uip). Old uip
 // functionality should be gradually moved here whenever feasible.
@@ -305,4 +306,73 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
             }
         }
     }
+}
+
+/**
+ * Find datainput use in subpresentation
+ *
+ * @param subpresentation subpresentation
+ * @param outmap returned list of datainput - property name pairs
+ */
+// static
+bool PresentationFile::getDataInputBindings(const SubPresentationRecord &subpresentation,
+                                            QMultiMap<QString, QPair<QString, QString>> &outmap)
+{
+    QList<QString> ctrldPropList;
+
+    QString spPath(g_StudioApp.getRenderableAbsolutePath(subpresentation.m_id));
+    QFile file(spPath);
+
+    file.open(QFile::Text | QFile::ReadOnly);
+    if (!file.isOpen()) {
+        qWarning() << file.errorString();
+        return false;
+    }
+
+    QDomDocument domDoc;
+    domDoc.setContent(&file);
+
+    // search <Graph>
+    QDomElement graphElem = domDoc.documentElement().firstChild()
+            .firstChildElement(QStringLiteral("Graph"));
+    for (QDomElement p = graphElem.firstChild().toElement(); !p.isNull();
+         p = p.nextSibling().toElement()) {
+        QString ctrldPropStr = p.attribute(QStringLiteral("controlledproperty"));
+        if (!ctrldPropStr.isEmpty())
+            ctrldPropList.append(ctrldPropStr);
+    }
+    // Search Logic - State - Add
+    QDomNodeList addElems = domDoc.documentElement().firstChild()
+            .firstChildElement(QStringLiteral("Logic"))
+            .elementsByTagName(QStringLiteral("Add"));
+
+    for (int i = 0; i < addElems.count(); ++i) {
+        QDomElement elem = addElems.at(i).toElement();
+        QString ctrldPropStr = elem.attribute(QStringLiteral("controlledproperty"));
+        if (!ctrldPropStr.isEmpty())
+            ctrldPropList.append(ctrldPropStr);
+    }
+
+    for (auto di : qAsConst(ctrldPropList)) {
+        QStringList split = di.split(QLatin1String(" "));
+        for (int i = 0; i < split.size(); i += 2) {
+            QString diName = split[i];
+            // Datainput names indicated with prefix "$", remove
+            // if found.
+            if (diName.startsWith(QLatin1String("$")))
+                diName = diName.mid(1, diName.size() - 1);
+            QString propName = split[i + 1];
+            // We should find the datainput from the global datainput list
+            // parsed out from UIA file, but check just in case and do not insert
+            // if not found.
+            if (g_StudioApp.m_dataInputDialogItems.contains(diName)) {
+                outmap.insert(subpresentation.m_id, QPair<QString, QString>(diName, propName));
+            } else {
+                qWarning() << "Subpresentation" << subpresentation.m_id
+                           << "is using datainput" << diName << "that is "
+                              "not found from the current UIA file";
+            }
+        }
+    }
+    return true;
 }

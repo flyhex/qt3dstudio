@@ -2883,8 +2883,6 @@ QString CDoc::GetDocumentUIAFile(bool master)
     return file.isEmpty() ? masterFile : file;
 }
 
-// TODO: use ProjectFile class framework to parse subpresentations and add datainput use
-// information from them to the map as well
 void CDoc::UpdateDatainputMap(
         const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
         QMultiMap<QString,
@@ -2911,11 +2909,9 @@ void CDoc::UpdateDatainputMap(
             // Update the controlled elements and property types for
             // verified, existing datainputs. Note that for @timeline and
             // @slide controllers the property type is not found as these
-            // are pseudo-properties, and return from GetDataType will be invalid.
-            // For slide control, type is strictly set to String. For timeline,
-            // the datainput is strictly Ranged Number which cannot be represented
-            // with object property datatypes, so will be handled separately
-            // when allowable datainput types are checked.
+            // are pseudo-properties, so we handle them here.
+            // For slide control, type is strictly set to String.
+            // For timeline the datainput is strictly Ranged Number only.
             if (g_StudioApp.m_dataInputDialogItems.contains(diName)) {
                 g_StudioApp.m_dataInputDialogItems[diName]->
                     controlledElems.append(inInstance);
@@ -2927,6 +2923,11 @@ void CDoc::UpdateDatainputMap(
                             ->boundTypes.append(QPair<qt3dsdm::DataModelDataType::Value, bool>
                                                 (qt3dsdm::DataModelDataType::Value::String, true));
 
+                } else if (propName == QLatin1String("@timeline")) {
+                    g_StudioApp.m_dataInputDialogItems[diName]
+                            ->boundTypes.append(
+                                QPair<qt3dsdm::DataModelDataType::Value, bool>
+                                (qt3dsdm::DataModelDataType::Value::RangedNumber, true));
                 }
             } else if (outMap != nullptr) {
                 // Do multi insert as single datainput name can

@@ -33,6 +33,8 @@
 #pragma once
 
 #include "StudioObjectTypes.h"
+#include "Qt3DSImportComposerTypes.h"
+#include "Qt3DSDMComposerTypeDefinitions.h"
 #include "DispatchListeners.h"
 #include "Qt3DSDMHandles.h"
 #include "Qt3DSFileTools.h"

@@ -2101,10 +2101,51 @@ void CStudioApp::checkDeletedDatainputs()
     QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle>> *map;
     map = new QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
                                        qt3dsdm::Qt3DSDMPropertyHandle>>;
-    m_core->GetDoc()->UpdateDatainputMap(m_core->GetDoc()->GetActiveRootInstance(), map);
+
+    auto doc = m_core->GetDoc();
+    // Update datainputs for the currently open presentation
+    doc->UpdateDatainputMap(m_core->GetDoc()->GetActiveRootInstance(), map);
 
     if (!map->empty())
         m_core->GetDispatch()->FireOnUndefinedDatainputsFail(map);
+
+    // Update allowed property types for datainput-controlled properties
+    // in subpresentations. It is ok to do this once
+    // at the project opening, as the assumption is that subpresentation files
+    // do not change while we are editing currently open presentation.
+
+    // Clear the old subpresentation binding info only.
+    for (auto it : qAsConst(m_dataInputDialogItems))
+        it->externalPresBoundTypes.clear();
+
+    const QMultiMap<QString, QPair<QString, QString>> spDatainputs
+            = GetCore()->getProjectFile().getDiBindingtypesFromSubpresentations();
+
+    // For datainput bindings in subpresentations we do not have specific
+    // instance and/or property handles. Get the datatype for property using
+    // the generic name string and leave instance/property handle empty.
+    for (auto sp : spDatainputs) {
+        const QString propName = sp.second;
+        CDataInputDialogItem *item = m_dataInputDialogItems.find(sp.first).value();
+        QPair<qt3dsdm::DataModelDataType::Value, bool> spEntry;
+        if (propName == QLatin1String("@timeline")) {
+            spEntry.first = qt3dsdm::DataModelDataType::Value::RangedNumber;
+            spEntry.second = true;
+        } else if (propName == QLatin1String("@slide")) {
+            spEntry.first = qt3dsdm::DataModelDataType::Value::String;
+            spEntry.second = true;
+        } else {
+            qt3dsimp::SImportComposerTypes theTypes;
+            qt3dsimp::SImportAsset &theAsset(theTypes.GetImportAssetForType(
+                                                 qt3dsdm::ComposerObjectTypes::Node));
+            qt3dsdm::DataModelDataType::Value theType(
+                        theAsset.GetPropertyDataType(propName.toStdWString().c_str()));
+            spEntry.first = theType;
+            spEntry.second = false;
+        }
+
+        item->externalPresBoundTypes.insert(sp.first, spEntry);
+    }
 }
 
 void CStudioApp::verifyDatainputBindings()

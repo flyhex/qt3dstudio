@@ -782,6 +782,7 @@ struct DataModelDataType {
       ObjectRef,
       StringOrInt,
       FloatList,
+      RangedNumber // datainput-specific type for editor only
   };
 
 

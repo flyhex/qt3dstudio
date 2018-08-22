@@ -29,11 +29,15 @@
 #ifndef PRESENTATIONFILE_H
 #define PRESENTATIONFILE_H
 
+#include "ProjectFile.h"
+
 #include <QtCore/qfile.h>
 #include <QtXml/qdom.h>
+#include <QtCore/qmap.h>
 
 QT_FORWARD_DECLARE_CLASS(QDir)
 QT_FORWARD_DECLARE_CLASS(QFileInfo)
+class CDataInputDialogItem;
 
 class PresentationFile
 {
@@ -44,6 +48,8 @@ public:
                                      const QString &newId);
     static QSize readSize(const QString &uipPath);
     static QString findProjectFile(const QString &uipPath);
+    static bool getDataInputBindings(const SubPresentationRecord &subpresentation,
+                                     QMultiMap<QString, QPair<QString, QString>> &outmap);
 
 private:
     PresentationFile();

@@ -530,3 +530,14 @@ QString ProjectFile::getResolvedPathTo(const QString &path) const
     auto projectPath = QDir(getProjectPath()).absoluteFilePath(path);
     return QDir::cleanPath(projectPath);
 }
+
+// Return multimap of type subpresentationid - QPair<datainput, propertyname>
+QMultiMap<QString, QPair<QString, QString>>
+ProjectFile::getDiBindingtypesFromSubpresentations() const
+{
+    QMultiMap<QString, QPair<QString, QString>> map;
+    for (auto sp : qAsConst(g_StudioApp.m_subpresentations))
+        PresentationFile::getDataInputBindings(sp, map);
+
+    return map;
+}

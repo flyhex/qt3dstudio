@@ -60,6 +60,7 @@ public:
     QString getPresentationId(const QString &src) const;
     QString getResolvedPathTo(const QString &path) const;
     QString createPreview();
+    QMultiMap<QString, QPair<QString, QString>> getDiBindingtypesFromSubpresentations() const;
 
     static QString getInitialPresentationSrc(const QString &uiaPath);
     static void getPresentations(const QString &inUiaPath,
