@@ -115,7 +115,7 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     m_viewTreeContent->setScene(m_graphicsScene);
     m_viewTreeContent->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     m_viewTreeContent->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    m_viewTreeContent->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_viewTreeContent->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     m_viewTreeContent->setFixedWidth(treeWidth);
 
     m_viewTimelineHeader->setScene(m_graphicsScene);

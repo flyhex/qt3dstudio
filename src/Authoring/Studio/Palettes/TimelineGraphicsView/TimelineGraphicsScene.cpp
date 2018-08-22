@@ -143,10 +143,7 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
             return;
         }
         QGraphicsView *timelineContent = m_widgetTimeline->viewTimelineContent();
-        QPoint scrollBarOffsets(timelineContent->verticalScrollBar()->isVisible()
-                                ? timelineContent->verticalScrollBar()->width() : 0,
-                                timelineContent->horizontalScrollBar()->isVisible()
-                                ? timelineContent->horizontalScrollBar()->height() : 0);
+        const QPoint scrollBarOffsets(getScrollbarOffsets());
         const QRect contentRect = timelineContent->contentsRect();
         const double right = timelineContent->width() - scrollBarOffsets.x();
         QPoint p = m_widgetTimeline->mapFromGlobal(QCursor::pos())
@@ -983,6 +980,15 @@ QGraphicsItem *TimelineGraphicsScene::getItemBelowType(TimelineItem::ItemType ty
             return hoverItems.at(1);
     }
     return item;
+}
+
+QPoint TimelineGraphicsScene::getScrollbarOffsets() const
+{
+    QGraphicsView *timelineContent = m_widgetTimeline->viewTimelineContent();
+    return QPoint(timelineContent->verticalScrollBar()->isVisible()
+            ? timelineContent->verticalScrollBar()->width() : 0,
+            timelineContent->horizontalScrollBar()->isVisible()
+            ? timelineContent->horizontalScrollBar()->height() : 0);
 }
 
 void TimelineGraphicsScene::handleInsertKeyframe()

@@ -90,6 +90,7 @@ public:
     void resetMousePressParams();
     QLabel *timebarTooltip();
     void updateAutoScrolling(double scenePosY);
+    QPoint getScrollbarOffsets() const;
 
 protected:
     bool event(QEvent *event) override;

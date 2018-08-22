@@ -45,7 +45,7 @@ void TreeHeader::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     Q_UNUSED(option)
     Q_UNUSED(widget)
 
-    double treeWidth = m_scene->treeWidth();
+    double treeWidth = m_scene->treeWidth() - m_scene->getScrollbarOffsets().x();
     m_rectShy    .setRect(treeWidth - 16 * 3.3, size().height() * .5 - 8, 16, 16);
     m_rectVisible.setRect(treeWidth - 16 * 2.2, size().height() * .5 - 8, 16, 16);
     m_rectLock   .setRect(treeWidth - 16 * 1.1, size().height() * .5 - 8, 16, 16);

@@ -56,7 +56,7 @@ namespace TimelineConstants
     const double TREE_DEFAULT_W = 250;
     const double TREE_BOUND_W   = 10000; // real width of the row (> max possible visible tree area)
     const double TREE_ICONS_W   = 53;
-    const int SPLITTER_W        = 8;
+    const int SPLITTER_W        = 4;
     const int PLAYHEAD_W        = 14;
     const int DURATION_HANDLE_W = 14;    // width of duration end handles in a timeline row
     const int NAVIGATION_BAR_H  = 30;    // height of navigation/breadcrumb bar
