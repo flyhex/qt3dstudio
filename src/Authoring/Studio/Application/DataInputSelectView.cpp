@@ -149,7 +149,7 @@ void DataInputSelectView::setSelection(int index)
             }
         } else {
             CDataInputListDlg dataInputDlg(&(g_StudioApp.m_dataInputDialogItems), true,
-                                           nullptr, m_defaultType);
+                                           nullptr, m_defaultType, m_acceptedTypes);
             dataInputDlg.exec();
 
             if (dataInputDlg.result() == QDialog::Accepted) {

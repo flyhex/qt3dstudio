@@ -387,7 +387,8 @@ QDialog#DataInputListDlg QPushButton#DataInputListButton:pressed {
 }
 
 QDialog#SubPresentationDlg QPushButton:!enabled,
-QDialog#DataInputDlg  QPushButton:!enabled {
+QDialog#DataInputDlg QPushButton:!enabled,
+QDialog#DataInputDlg QComboBox QAbstractItemView::item:disabled {
     background: transparent;
     color: #727476;
 }

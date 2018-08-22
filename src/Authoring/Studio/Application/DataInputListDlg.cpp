@@ -42,7 +42,8 @@
 const int columnCount = 3;
 
 CDataInputListDlg::CDataInputListDlg(QMap<QString, CDataInputDialogItem *> *datainputs,
-                                     bool goToAdd, QWidget *parent, EDataType defaultType)
+                                     bool goToAdd, QWidget *parent, EDataType defaultType,
+                                     const QVector<EDataType> &acceptedTypes)
     : QDialog(parent, Qt::MSWindowsFixedSizeDialogHint)
     , m_ui(new Ui::DataInputListDlg)
     , m_actualDataInputs(datainputs)
@@ -51,6 +52,7 @@ CDataInputListDlg::CDataInputListDlg(QMap<QString, CDataInputDialogItem *> *data
     , m_currentDataInputIndex(-1)
     , m_tableContents(new QStandardItemModel(0, columnCount, this))
     , m_sortColumn(-1)
+    , m_acceptedTypes(acceptedTypes)
 {
     m_ui->setupUi(this);
 
@@ -232,7 +234,7 @@ void CDataInputListDlg::onAddDataInput()
     // Create a new data input dialog item and give it to dialog
     CDataInputDialogItem *dataInput = new CDataInputDialogItem();
     dataInput->type = m_defaultType;
-    CDataInputDlg datainputdialog(&dataInput, m_tableContents, this);
+    CDataInputDlg datainputdialog(&dataInput, m_tableContents, this, m_acceptedTypes);
     datainputdialog.setWindowTitle("Add Data Input");
     if (datainputdialog.exec() == QDialog::Accepted) {
         m_dataInputs.insert(dataInput->name, dataInput);
@@ -287,7 +289,34 @@ void CDataInputListDlg::onEditDataInput()
 {
     if (m_currentDataInputIndex >= 0) {
         CDataInputDialogItem *di = m_dataInputs.value(m_currentDataInputName);
-        CDataInputDlg datainputdialog(&di, m_tableContents, this);
+
+        // Only show types that are ok for _all_ currently controlled properties.
+        // If datainput is not controlling any elements, all types are ok.
+        QVector<EDataType> allowedTypes;
+        if (di->controlledElems.size()) {
+            for (auto type : qAsConst(di->boundTypes)) {
+                // If we hit strict type requirement for a certain bound datatype, set allowed types
+                // to only this data type (and Variant) and exit after appending it to
+                // allowedTypes vector.
+                // We should never have strict requirement for two different datatypes, obviously.
+                if (type.second)
+                    allowedTypes.clear();
+
+                auto acceptedTypes = CDataInputDlg::getAcceptedTypes(type.first, type.second);
+
+                for (auto t : qAsConst(acceptedTypes)) {
+                    if (!allowedTypes.contains(t))
+                        allowedTypes.append(t);
+                }
+                // if we just hit a strict type requirement we are finished
+                if (type.second)
+                    break;
+            }
+        } else {
+            allowedTypes = allDataTypes;
+        }
+
+        CDataInputDlg datainputdialog(&di, m_tableContents, this, allowedTypes);
         datainputdialog.exec();
 
         // insert replaces the previous key - value pair
