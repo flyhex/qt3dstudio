@@ -2567,6 +2567,13 @@ public:
             return Qt3DSDMInstanceHandle();
 
         qt3dsdm::TInstanceHandleList theInstances = ToGraphOrdering(inInstances);
+
+        // Get the original start/end times
+        QList<std::pair<long, long>> theStartEndTimes;
+
+        for (auto instance : qAsConst(theInstances))
+            theStartEndTimes.append(GetTimeRange(instance));
+
         // Do this in reverse order.
         // first add new component.
         Qt3DSDMSlideHandle theSlide = GetAssociatedSlide(theInstances[0]);
@@ -2574,12 +2581,6 @@ public:
         TInstanceHandle component = CreateSceneGraphInstance(
             ComposerObjectTypes::Component, theInstances[0], theSlide,
             DocumentEditorInsertType::NextSibling, CPt(), PRIMITIVETYPE_UNKNOWN, 0);
-
-        // After consultation with Stephen Mendoza about this we decided *not* to move the start
-        // position to the component.
-        // as this breaks embedded animations unless you move the position animations to the
-        // component as well.
-        pair<long, long> theStartEndTimes = GetTimeRange(theInstances[0]);
 
         CString theName = GetName(theInstances[0]);
 
@@ -2591,11 +2592,20 @@ public:
         Qt3DSDMSlideHandle theComponentSlide(m_Bridge.GetComponentActiveSlide(component));
 
         // Paste into the master slide of the new component
-        theSerializer->SerializeSceneGraphObject(*theReader, m_Doc.GetDocumentDirectory(),
-                                                 component,
-                                                 m_SlideSystem.GetMasterSlide(theComponentSlide));
+        TInstanceHandleList insertedHandles = theSerializer->SerializeSceneGraphObject(
+                    *theReader,m_Doc.GetDocumentDirectory(), component,
+                    m_SlideSystem.GetMasterSlide(theComponentSlide));
 
-        SetTimeRange(component, theStartEndTimes.first, theStartEndTimes.second);
+        // Restore the original time range for all objects.
+        if (insertedHandles.size()) {
+            for (int i = 0; i < theStartEndTimes.size(); i++) {
+                if (theStartEndTimes.at(i) != std::make_pair(0L, 0L)) {
+                    SetTimeRange(insertedHandles.at(i), theStartEndTimes.at(i).first,
+                                 theStartEndTimes.at(i).second);
+                }
+            }
+        }
+
         SetName(component, theName);
 
         m_Doc.SelectDataModelObject(component);
