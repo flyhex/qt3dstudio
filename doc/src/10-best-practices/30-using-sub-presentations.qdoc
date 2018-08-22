@@ -34,8 +34,8 @@
 
 \section1 Introduction
 
-Sub-Presentations is a feature which allows a Studio presentation or a QML file to be
-embedded in a Studio presentation.
+Sub-Presentations is a feature which allows a Studio presentation (\c{.uia} file) or a
+QML file to be embedded in a Studio presentation.
 
 Sub-presentations execute independently, albeit inside the same Runtime
 process as the initial presentation. The rendered frame from each
@@ -43,80 +43,105 @@ sub-presentation is essentially used as a texture on a rectangle in the
 main presentation. This allows control over where and how each
 sub-presentation is composited into the final frame.
 
+There are two different ways to display a sub-presentation; on a separate layer
+or as a texture on a 3D object.
+
+\section1 Importing and Creating Sub-Presentations
+To use a sub-presentation, you will first need to add it to your project. This can be done either
+by creating a new one or importing an existing one. Sub-presentations of QML stream type cannot be
+created from the editor, only imported.
+
+\section2 Importing Sub-Presentations
+To import a sub-presentation, do one of the following:
+\list
+  \li
+    From the menu bar, select \uicontrol{File > Import Assets}. Then locate the \c{.uia} or
+    \c{.qml} file you wish to import and press \uicontrol{Save}.
+  \li Right-click anywhere in the project palette and select \uicontrol{Import Assets}
+    from the context menu. Then locate the \c{.uia} or \c{.qml} file you wish to import and press
+    \uicontrol{Save}.
+  \li
+    Click \inlineimage{import-assets-icon.png}
+    in the bottom part of the project palette.
+    Then locate the \c{.uia} or \c{.qml} file you wish to import and press \uicontrol{Save}.
+\endlist
+
+Sub-presentations will be imported to the folder that is selected in the project palette. If
+no folder is selected, sub-presentations will be imported to the \e{presentations} or
+\e{qml streams} folder depending on the type of the sub-presentation. All assets (such as images,
+3D models and effects) and folders of the imported sub-presentation will be imported.
+
+\image {subpresentation-project-structure.png}
+
+\section2 Creating Sub-Presentations
+
+From the editor, you can create a new Studio presentation to use as a sub-presentation.
+\list 1
+  \li From the menu bar, select \uicontrol{File > New > Presentation}.
+  \li Enter a name for the presentation and press \uicontrol{Save}.
+  \li The presentation settings dialogue for the new presentation will open. If desired, make
+  changes, then press \uicontrol{OK}.
+\endlist
+
+Once created, your new presentation will open in the editor. To return to edit your main
+presentation (or any other sub-presentation), right-click it in the project palette and select
+\uicontrol{Open Presentation}.
+
+\image{open-presentation.png}
+
 \section1 Using Sub-Presentations
 
-There are two different ways to display a sub-presentation; on a separate layer
-or on an image element on an existing layer.
-
-\target sub-presentation layer
-\section2 Sub-presentation on a Layer
+\section2 Adding a Sub-Presentation to a Layer
 
 One of the main benefits of adding a sub-presentation on a layer is that you can author different
 parts of a large presentation as separate smaller presentations. This can help control complexity
 in single \c{.uip} files, as well as allow different parts of a presentation to be authored
 separately and simultaneously.
 
-\list 1
-\li
-  From the file menu, select \uicontrol{Edit} > \uicontrol{Sub-presentations}.
-\li
-  Click the \uicontrol{+} icon.
-\li
-  Enter desired name for the sub-presentation in the \uicontrol{Name} field. In case you have
-  several sub-presentations in your project the names need to be unique.
-\li
-  Set \uicontrol{Type} to \c{Presentation} or \c{QML stream} depending on the content you want to
-  embed.
-\li
-  Click \uicontrol{Browse}, the combobox will display the following options:
-  \list a
-    \li
-    \e{Browse} - Browse to the folder of desired content and select the \c{.uip} or \c{.qml} file
-    to add as sub-presentation.
-  \endlist
-  The options below are only available for \c{Presentation} type.
-  \list b
-    \li
-    \e{Create} - Creates a new empty presentation, which is added as a sub-presentation to the
-    project. You may start editing it at once, or return to the main presentation by opening it
-    from the file menu.
-    \li
-    A list of all \c{.uip} files in your project folder. Select one to add it as a
-    sub-presentation.
-  \endlist
-  \image subpresentation-dialog.png
-\li
-  Select the layer you want to use for the sub-presentation in the \e{timeline palette}.
-  Then, in the inspector palette, select the desired sub-presentation in the
-  \uicontrol{Sub-Presentation} field. All sub-presentations added to the project will be listed
-  here.
-  \image layer-sub-presentation.png
+To add a sub-presentation to a layer, do one of the following:
+\list
+  \li
+    Drag the sub-presentation from the project palette to the scene view and select
+    \uicontrol{Layer} from the dialogue. The sub-presentation will be added to the active layer,
+    if no layer is active it will be added to the topmost layer.
+  \li
+    Drag the sub-presentation from the project palette to a specific layer in the scene graph.
+  \li
+    Right-click a layer in the scene graph and select \uicontrol{Set sub-presentation}
+    from the context menu. Then select desired sub-presentation.
+    \image subpresentation-scene-graph.png
+  \li
+    Select the layer in the scene graph. Then, in the inspector palette, set the desired
+    sub-presentation in the \uicontrol{Sub-presentation} property.
+    \image subpresentation-layer-inspector.png
+  \li
+    Additionally, it is possible to add a sub-presentation as an
+    \l {Using Image-based Lighting} {IBL light probe} for a layer. To do this, select the layer
+    in the scene graph and set the desired sub-presentation in the \uicontrol{Light Probe} or
+    \uicontrol{Secondary Light Probe} property.
 \endlist
 
-\section2 Sub-presentation on an Image Element
+\section2 Adding a Sub-Presentation as a texture
 
-One benefit of displaying a sub-presentation on an image element is that you can use Studio
+One benefit of displaying a sub-presentation as a texture is that you can use Studio
 presentations and QML files to map the materials of objects in your presentation. You can apply
-sub-presentations as any kind of map to object materials, i.e. diffuse maps, specular maps and
+sub-presentations to any map or image property of a material, i.e. diffuse maps, specular maps and
 displacement maps. This way you can for example create animated textures.
 
-\list 1
-\li
-  Follow step 1 to 5 in the \l {sub-presentation layer}{Sub-presentation on a layer}
-  section above.
-\li
-  Add a basic object to your layer.
-\li
-  Add any image as a map for the material of the object by first selecting the material
-  of the object in the \e{timeline palette} and then selecting desired map in the
-  \e{inspector palette}. This image will act only as a placeholder, it does not matter what
-  image you use.
-  \image add-diffuse-map.png
-\li
-  Select the \e{map} in the \e{timeline palette} and then select the desired
-  sub-presentation in the \uicontrol{Sub-Presentation} field. All sub-presentations added in
-  the \c{.uia} will be listed here.
-  \image add-diffuse-map-subpresentation.png
+To add a sub-presentation as a texture of a 3D object, do one of the following:
+\list
+  \li
+    Drag the sub-presentation from the project palette to the scene view and select
+    \uicontrol{Texture} from the dialogue. This will create a rectangle object in the scene and
+    add the sub-presentation as a diffuse map to its material.
+  \li In the scene graph, right-click the material of an object and select
+    \uicontrol{Set sub-presentation}. Then select desired sub-presentation and desired property.
+    \image subpresentation-material-scene-graph.png
+    \image subpresentation-set-as-property.png
+  \li
+    With the object selected, select the sub-presentation for the desired property in the
+    inspector palette.
+    \image subpresentation-diffuse-map.png
 \endlist
 
 \section1 Transparency
