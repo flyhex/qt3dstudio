@@ -1276,8 +1276,10 @@ void CDoc::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
         // TODO: implement a pre-change signal that can be used to extract
         // controlledproperty string before and after the change, so we know exactly
         // what happened to the element
-        for (auto &it : qAsConst(g_StudioApp.m_dataInputDialogItems))
+        for (auto &it : qAsConst(g_StudioApp.m_dataInputDialogItems)) {
             it->controlledElems.clear();
+            it->boundTypes.clear();
+        }
 
         UpdateDatainputMap(m_Core->GetDoc()->GetActiveRootInstance());
     }
@@ -2881,6 +2883,8 @@ QString CDoc::GetDocumentUIAFile(bool master)
     return file.isEmpty() ? masterFile : file;
 }
 
+// TODO: use ProjectFile class framework to parse subpresentations and add datainput use
+// information from them to the map as well
 void CDoc::UpdateDatainputMap(
         const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
         QMultiMap<QString,
@@ -2899,12 +2903,34 @@ void CDoc::UpdateDatainputMap(
         QStringList splitStr = currCtrldPropsStr.toQString().split(' ');
         for (int i = 0; i < splitStr.size() - 1; i += 2) {
             QString diName = splitStr[i].startsWith('$') ? splitStr[i].remove(0, 1) : splitStr[i];
+            QString propName = splitStr[i+1];
+
+            auto propHandle = propSystem->GetAggregateInstancePropertyByName(
+                        inInstance, propName.toStdWString().c_str());
+            auto propType = propSystem->GetDataType(propHandle);
+            // Update the controlled elements and property types for
+            // verified, existing datainputs. Note that for @timeline and
+            // @slide controllers the property type is not found as these
+            // are pseudo-properties, and return from GetDataType will be invalid.
+            // For slide control, type is strictly set to String. For timeline,
+            // the datainput is strictly Ranged Number which cannot be represented
+            // with object property datatypes, so will be handled separately
+            // when allowable datainput types are checked.
             if (g_StudioApp.m_dataInputDialogItems.contains(diName)) {
                 g_StudioApp.m_dataInputDialogItems[diName]->
                     controlledElems.append(inInstance);
+                if (propType) {
+                    g_StudioApp.m_dataInputDialogItems[diName]->boundTypes.append(
+                                QPair<qt3dsdm::DataModelDataType::Value, bool>(propType, false));
+                } else if (propName == QLatin1String("@slide")) {
+                    g_StudioApp.m_dataInputDialogItems[diName]
+                            ->boundTypes.append(QPair<qt3dsdm::DataModelDataType::Value, bool>
+                                                (qt3dsdm::DataModelDataType::Value::String, true));
+
+                }
             } else if (outMap != nullptr) {
                 // Do multi insert as single datainput name can
-                // be found in several elements
+                // be found in several elements.
                 qt3dsdm::Qt3DSDMPropertyHandle prop
                         = propSystem->GetAggregateInstancePropertyByName(
                             inInstance, splitStr[i+1].toStdWString().c_str());

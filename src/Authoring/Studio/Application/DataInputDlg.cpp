@@ -34,7 +34,7 @@
 #include <QtWidgets/qstyleditemdelegate.h>
 
 CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemModel *data,
-                             QWidget *parent)
+                             QWidget *parent, const QVector<EDataType> acceptedTypes)
     : QDialog(parent, Qt::MSWindowsFixedSizeDialogHint)
     , m_ui(new Ui::DataInputDlg)
     , m_data(data)
@@ -43,6 +43,7 @@ CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemMode
     , m_type(0)
     , m_min(0.0)
     , m_max(10.0)
+    , m_acceptedTypes(acceptedTypes)
 {
     m_ui->setupUi(this);
 
@@ -50,16 +51,31 @@ CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemMode
     QStyledItemDelegate *itemDelegate = new QStyledItemDelegate();
     m_ui->comboBoxTypeList->setItemDelegate(itemDelegate);
 
-    m_ui->comboBoxTypeList->addItem(tr("Boolean"));
+    m_ui->comboBoxTypeList->addItem(tr("Boolean"), QVariant(DataTypeBoolean));
 #ifdef DATAINPUT_EVALUATOR_ENABLED
-    m_ui->comboBoxTypeList->addItem(tr("Evaluator"));
+    m_ui->comboBoxTypeList->addItem(tr("Evaluator"), QVariant(DataTypeEvaluator));
 #endif
-    m_ui->comboBoxTypeList->addItem(tr("Float"));
-    m_ui->comboBoxTypeList->addItem(tr("Ranged Number"));
-    m_ui->comboBoxTypeList->addItem(tr("String"));
-    m_ui->comboBoxTypeList->addItem(tr("Variant"));
-    m_ui->comboBoxTypeList->addItem(tr("Vector2"));
-    m_ui->comboBoxTypeList->addItem(tr("Vector3"));
+    m_ui->comboBoxTypeList->addItem(tr("Float"), QVariant(DataTypeFloat));
+    m_ui->comboBoxTypeList->addItem(tr("Ranged Number"), QVariant(DataTypeRangedNumber));
+    m_ui->comboBoxTypeList->addItem(tr("String"), QVariant(DataTypeString));
+    m_ui->comboBoxTypeList->addItem(tr("Variant"), QVariant(DataTypeVariant));
+    m_ui->comboBoxTypeList->addItem(tr("Vector2"), QVariant(DataTypeVector2));
+    m_ui->comboBoxTypeList->addItem(tr("Vector3"), QVariant(DataTypeVector3));
+
+    QStandardItemModel *model
+            = qobject_cast<QStandardItemModel *>(m_ui->comboBoxTypeList->model());
+    const QBrush transparent(Qt::transparent);
+    for (int i = 0; i < m_ui->comboBoxTypeList->model()->rowCount(); ++i)
+    {
+        QStandardItem *item = model->item(i, 0);
+        // We need special handling for Ranged Number as it is
+        // not a studio property datatype, but relevant only for datainput.
+        if (!acceptedTypes.contains((EDataType)i)
+            && !(m_dataInput->type == DataTypeRangedNumber
+                 && item->data(Qt::UserRole) == DataTypeRangedNumber)) {
+            item->setEnabled(false);
+        }
+    }
 
     initDialog();
 
@@ -207,19 +223,29 @@ void CDataInputDlg::updateVisibility(int type)
     m_ui->lineEditEvaluation->setVisible(false);
     m_ui->labelEvaluation->setVisible(false);
 #endif
+    // Adjust text label positioning according to the
+    // visibility of info text warning about allowed datatypes.
+    if (m_dataInput->controlledElems.size()) {
+        m_ui->labelInfoText->setVisible(true);
+        m_ui->infoTxtSpacer->changeSize(20, 18);
+    } else {
+        m_ui->labelInfoText->setVisible(false);
+        m_ui->infoTxtSpacer->changeSize(20, 0);
+    }
 }
 
 const bool CDataInputDlg::isEquivalentDataType(int dlgType,
-                                               qt3dsdm::DataModelDataType::Value dmType)
+                                               qt3dsdm::DataModelDataType::Value dmType,
+                                               bool strict)
 {
     if ((dlgType == EDataType::DataTypeString
          && dmType == qt3dsdm::DataModelDataType::String)
         || (dlgType == EDataType::DataTypeRangedNumber
             && (dmType == qt3dsdm::DataModelDataType::Float
-                || dmType == qt3dsdm::DataModelDataType::String))
+                || dmType == qt3dsdm::DataModelDataType::String) && !strict)
         || (dlgType == EDataType::DataTypeFloat
             && (dmType == qt3dsdm::DataModelDataType::Float
-                || dmType == qt3dsdm::DataModelDataType::String))
+                || (dmType == qt3dsdm::DataModelDataType::String && !strict)))
         || (dlgType == EDataType::DataTypeBoolean
             && dmType == qt3dsdm::DataModelDataType::Bool)
         || (dlgType == EDataType::DataTypeVector3
@@ -240,25 +266,12 @@ const bool CDataInputDlg::isEquivalentDataType(int dlgType,
     return false;
 }
 
-QVector<EDataType> CDataInputDlg::getAcceptedTypes(qt3dsdm::DataModelDataType::Value dmType)
+QVector<EDataType> CDataInputDlg::getAcceptedTypes(qt3dsdm::DataModelDataType::Value dmType,
+                                                   bool strict)
 {
-    // The order also specifies the priority for default type in case of multiple accepted types
-    static const QVector<EDataType> allDataTypes = {
-        EDataType::DataTypeString,
-        EDataType::DataTypeFloat,
-        EDataType::DataTypeVector3,
-        EDataType::DataTypeVector2,
-        EDataType::DataTypeRangedNumber,
-        EDataType::DataTypeBoolean,
-#ifdef DATAINPUT_EVALUATOR_ENABLED
-        EDataType::DataTypeEvaluator,
-#endif
-        EDataType::DataTypeVariant
-    };
-
     QVector<EDataType> acceptedTypes;
     for (auto candidate : allDataTypes) {
-        if (isEquivalentDataType(candidate, dmType))
+        if (isEquivalentDataType(candidate, dmType, strict))
             acceptedTypes.append(candidate);
     }
     return acceptedTypes;

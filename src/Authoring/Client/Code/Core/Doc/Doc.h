@@ -161,6 +161,13 @@ public:
     QString name;
     int type;
     QVector<qt3dsdm::Qt3DSDMInstanceHandle> controlledElems;
+    // The type of property/properties that this datainput controls
+    // for the purposes of limiting allowed datainput type changes.
+    // Note that there can be more than one type being controlled
+    // f.ex with Variant type. Boolean signifies "strict" type requirement
+    // i.e. only the exact equivalent mapping from datainput type to
+    // property type is allowed (float to float, string to string etc.)
+    QVector<QPair<qt3dsdm::DataModelDataType::Value, bool>> boundTypes;
 };
 
 //==============================================================================
