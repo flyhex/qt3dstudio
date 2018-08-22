@@ -935,12 +935,14 @@ public:
 
     virtual Qt3DSDMInstanceHandle
     CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Enum inType, TInstanceHandle inParent,
-                             TSlideHandle inSlide, TInstanceHandle inTargetId = TInstanceHandle()) override
+                             TSlideHandle inSlide, TInstanceHandle inTargetId = TInstanceHandle(),
+                             bool setTimeRange = true) override
     {
         Qt3DSDMInstanceHandle retval = IDocumentEditor::CreateSceneGraphInstance(
             ComposerObjectTypes::Convert(inType), inParent, inSlide, m_DataCore, m_SlideSystem,
-            m_Bridge.GetObjectDefinitions(), m_AssetGraph, m_MetaData, inTargetId);
-        SetTimeRangeToParent(retval);
+            m_Bridge.GetObjectDefinitions(), m_AssetGraph, m_MetaData, inTargetId, setTimeRange);
+        if (setTimeRange)
+            SetTimeRangeToParent(retval);
         return retval;
     }
 
@@ -949,9 +951,11 @@ public:
                                                      DocumentEditorInsertType::Enum inInsertType,
                                                      const CPt &inPosition,
                                                      EPrimitiveType inPrimitiveType,
-                                                     long inStartTime) override
+                                                     long inStartTime,
+                                                     bool setTimeRange = true) override
     {
-        TInstanceHandle retval(CreateSceneGraphInstance(inType, inParent, inSlide));
+        TInstanceHandle retval(CreateSceneGraphInstance(inType, inParent, inSlide,
+                                                        TInstanceHandle(), setTimeRange));
 
         Q3DStudio::CString theName;
         if (inType == ComposerObjectTypes::Model) {
@@ -970,7 +974,8 @@ public:
             // release.
             //theName = GetName(retval);
         }
-        SetTimeRangeToParent(retval);
+        if (setTimeRange)
+            SetTimeRangeToParent(retval);
 
         if (inType == ComposerObjectTypes::Layer) {
             CreateSceneGraphInstance(ComposerObjectTypes::Camera, retval, inSlide);
@@ -983,9 +988,9 @@ public:
         if (m_DataCore.IsInstanceOrDerivedFrom(
                 retval, m_Bridge.GetObjectDefinitions().m_SlideOwner.m_Instance))
             m_Bridge.GetOrCreateGraphRoot(retval);
-
+        // if we did not set time range earlier, let's set it now to match parent
         TInstanceHandle handle = FinalizeAddOrDrop(retval, inParent, inInsertType,
-                                                   inPosition, false, true, false);
+                                                   inPosition, !setTimeRange, true, false);
         SetName(retval, theName, true);
         return handle;
     }
@@ -4572,7 +4577,7 @@ Qt3DSDMInstanceHandle IDocumentEditor::CreateSceneGraphInstance(
     const wchar_t *inType, TInstanceHandle inParent, TSlideHandle inSlide,
     qt3dsdm::IDataCore &inDataCore, qt3dsdm::ISlideSystem &inSlideSystem,
     qt3dsdm::SComposerObjectDefinitions &inObjectDefs, Q3DStudio::CGraph &inAssetGraph,
-    qt3dsdm::IMetaData &inMetaData, TInstanceHandle inTargetId)
+    qt3dsdm::IMetaData &inMetaData, TInstanceHandle inTargetId, bool setTimeRange)
 {
     return CreateSceneGraphInstance(inMetaData.GetCanonicalInstanceForType(inType), inParent,
                                     inSlide, inDataCore, inSlideSystem, inObjectDefs, inAssetGraph,

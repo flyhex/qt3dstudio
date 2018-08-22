@@ -126,7 +126,8 @@ public:
                              qt3dsdm::IDataCore &inDataCore, qt3dsdm::ISlideSystem &inSlideSystem,
                              qt3dsdm::SComposerObjectDefinitions &inObjectDefs,
                              Q3DStudio::CGraph &inAssetGraph, qt3dsdm::IMetaData &inMetaData,
-                             TInstanceHandle inTargetId = TInstanceHandle());
+                             TInstanceHandle inTargetId = TInstanceHandle(),
+                             bool setTimeRange = true);
 
     static TInstanceHandle CreateSceneGraphInstance(
         Qt3DSDMInstanceHandle inMaster, TInstanceHandle parent, TSlideHandle inSlide,
@@ -148,14 +149,16 @@ public:
     virtual TInstanceHandle
     CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Enum type, TInstanceHandle parent,
                              TSlideHandle inSlide,
-                             TInstanceHandle inTargetId = TInstanceHandle()) = 0;
+                             TInstanceHandle inTargetId = TInstanceHandle(),
+                             bool setTimeRange = true) = 0;
 
     virtual TInstanceHandle CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Enum type,
                                                      TInstanceHandle parent, TSlideHandle inSlide,
                                                      DocumentEditorInsertType::Enum inInsertType,
                                                      const CPt &inPosition,
                                                      EPrimitiveType inPrimitiveType,
-                                                     long inStartTime) = 0;
+                                                     long inStartTime,
+                                                     bool setTimeRange = true) = 0;
     virtual void setInstanceImagePropertyValueAsRenderable(TInstanceHandle instance,
                                                            TPropertyHandle prop,
                                                            const CString &pId) = 0;
