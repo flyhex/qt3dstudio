@@ -975,15 +975,11 @@ void RowTree::setActionStates(ActionStates states)
 
 bool RowTree::isContainer() const
 {
-    if (isComponent() && m_indexInLayout == 1) // root element inside a component
-        return true;
-
     return !m_isProperty
             && m_rowType != OBJTYPE_ALIAS
             && m_rowType != OBJTYPE_MATERIAL
             && m_rowType != OBJTYPE_IMAGE
             && m_rowType != OBJTYPE_TEXT
-            && m_rowType != OBJTYPE_COMPONENT
             && m_rowType != OBJTYPE_BEHAVIOR
             && m_rowType != OBJTYPE_EFFECT;
 }

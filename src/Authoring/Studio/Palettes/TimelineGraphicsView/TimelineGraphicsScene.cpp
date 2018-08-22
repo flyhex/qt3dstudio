@@ -406,6 +406,16 @@ void TimelineGraphicsScene::commitMoveRows()
     if (!m_rowMover->insertionParent()->expanded())
         m_rowMover->insertionParent()->updateExpandStatus(RowTree::ExpandState::Expanded, false);
 
+    // Remove sourcerows for items that will be deleted as result of RearrangeObjects,
+    // f.ex objects that will be moved to a component; otherwise we try to update
+    // timeline rows that no longer have valid scene objects linked to them.
+    // Note that we remove all sourcerows that are being dragged currently, because they
+    // all share the same drop target anyway.
+    if (m_rowMover->shouldDeleteAfterMove()) {
+        for (auto sourceRow : sourceRows)
+            m_rowMover->removeSourceRow(sourceRow);
+    }
+
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(),
                                       QObject::tr("Move Rows"))
             ->RearrangeObjects(sourceHandles, handleTarget, m_rowMover->insertionType());

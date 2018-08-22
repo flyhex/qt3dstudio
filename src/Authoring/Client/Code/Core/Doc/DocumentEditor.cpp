@@ -2479,6 +2479,11 @@ public:
             || inInsertType == DocumentEditorInsertType::NextSibling)
             theParent = GetParent(inDest);
 
+        if (IsComponent(theParent)) {
+            moveIntoComponent(inInstances, theParent);
+            return;
+        }
+
         for (size_t idx = 0, end = sortableList.size(); idx < end; ++idx) {
             qt3dsdm::Qt3DSDMInstanceHandle theInstance(sortableList[idx]);
             // If the insert type is next sibling, we have to reverse the list
@@ -2501,12 +2506,6 @@ public:
                 m_AssetGraph.MoveAfter(theInstance, inDest);
             else if (inInsertType == DocumentEditorInsertType::LastChild)
                 m_AssetGraph.MoveTo(theInstance, inDest, COpaquePosition::LAST);
-        }
-
-        for (size_t idx = 0, end = sortableList.size(); idx < end; ++idx) {
-            qt3dsdm::Qt3DSDMInstanceHandle theInstance(sortableList[idx]);
-            if (inInsertType == DocumentEditorInsertType::NextSibling)
-                theInstance = sortableList[end - idx - 1];
         }
     }
 
@@ -2604,6 +2603,43 @@ public:
 
         m_Doc.SelectDataModelObject(component);
         return component;
+    }
+
+    void moveIntoComponent(const qt3dsdm::TInstanceHandleList &inInstances,
+                           const Qt3DSDMInstanceHandle targetComponent)
+    {
+        if (inInstances.empty())
+            return;
+
+        qt3dsdm::TInstanceHandleList theInstances = ToGraphOrdering(inInstances);
+        QList<std::pair<long, long>> theStartEndTimes;
+
+        for (auto instance : qAsConst(theInstances))
+            theStartEndTimes.append(GetTimeRange(instance));
+
+        // Now cut the group from the scene.
+        std::shared_ptr<IDOMReader> theReader(CopySceneGraphObjectsToMemory(theInstances));
+
+        DeleteInstances(theInstances);
+
+        std::shared_ptr<IComposerSerializer> theSerializer = m_Doc.CreateSerializer();
+        Qt3DSDMSlideHandle theComponentSlide(m_Bridge.GetComponentActiveSlide(targetComponent));
+
+        // Paste into the master slide of the new component.
+        TInstanceHandleList insertedHandles =
+                theSerializer->SerializeSceneGraphObject(
+                    *theReader, m_Doc.GetDocumentDirectory(),
+                    targetComponent,
+                    m_SlideSystem.GetMasterSlide(theComponentSlide));
+
+        // Restore the original time range for all objects.
+        if (insertedHandles.size()) {
+            for (int i = 0; i < theStartEndTimes.size(); i++) {
+                if (theStartEndTimes.at(i) != std::make_pair(0L, 0L))
+                    SetTimeRange(insertedHandles.at(i), theStartEndTimes.at(i).first,
+                                 theStartEndTimes.at(i).second);
+            }
+        }
     }
 
     void DuplicateInstances(const qt3dsdm::TInstanceHandleList &inInstances) override
