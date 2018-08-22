@@ -45,7 +45,7 @@
 
 ImageChooserView::ImageChooserView(QWidget *parent)
     : QQuickWidget(parent)
-    , m_model(new ImageChooserModel(this))
+    , m_model(new ImageChooserModel(true, this))
 {
     setWindowTitle(tr("Images"));
     setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
