@@ -380,7 +380,7 @@ Rectangle {
                                                 if (modelData.propertyType === AdditionalMetaDataType.MultiLine)
                                                     return multiLine;
                                                 if (modelData.propertyType === AdditionalMetaDataType.Font)
-                                                    return comboDropDown;
+                                                    return fontDropDown;
                                                 if (modelData.propertyType === AdditionalMetaDataType.Texture)
                                                     return textureChooser;
                                                 if (modelData.propertyType === AdditionalMetaDataType.String)
@@ -737,6 +737,44 @@ Rectangle {
             }
             onValueChanged: {
                 currentIndex = find(value)
+            }
+        }
+    }
+
+    Component  {
+        id: fontDropDown
+
+        StyledComboBox {
+            property int instance: parent.modelData.instance
+            property int handle: parent.modelData.handle
+            property var values: parent.modelData.values
+            property var value: parent.modelData.value
+            property bool blockIndexChange: false
+
+            model: values
+
+            implicitWidth: _valueWidth
+            implicitHeight: _controlBaseHeight
+
+            Component.onCompleted: {
+                currentIndex = find(value)
+            }
+            onCurrentIndexChanged: {
+                var newValue = textAt(currentIndex)
+                if (!blockIndexChange && value !== newValue && currentIndex !== -1)
+                    _inspectorModel.setPropertyValue(instance, handle, newValue)
+            }
+            onValueChanged: {
+                var newNewIndex = find(value);
+                if (!blockIndexChange || newNewIndex > 0)
+                    currentIndex = newNewIndex;
+                blockIndexChange = false;
+            }
+            onValuesChanged : {
+                // Changing the values list will reset the currentIndex to zero, so block setting
+                // the actual font. We'll get the proper index right after.
+                if (currentIndex > 0)
+                    blockIndexChange = true;
             }
         }
     }
