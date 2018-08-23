@@ -1993,7 +1993,6 @@ public:
                                                 DocumentEditorInsertType::LastChild,
                                                 CPt(), PRIMITIVETYPE_UNKNOWN, -1);
             SetName(material, materialName);
-            SetTimeRange(material, 0, 0);
         }
         return material;
     }
@@ -2197,6 +2196,14 @@ public:
                 }
             }
         }
+    }
+
+    void copyMaterialProperties(Qt3DSDMInstanceHandle src, Qt3DSDMInstanceHandle dst) override
+    {
+        const auto slide = m_Doc.GetActiveSlide();
+        const auto name = GetName(dst);
+        CopyProperties(slide, src, slide, dst);
+        SetName(dst, name);
     }
 
     void CopyProperties(TSlideHandle inSourceSlide, TInstanceHandle inSourceInstance,

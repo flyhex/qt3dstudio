@@ -289,16 +289,31 @@ void InspectorControlModel::setMatDatas(std::vector<Q3DStudio::CFilePath> &matDa
     updateMaterialValues();
 }
 
+QString getStandardMaterialString()
+{
+    return QObject::tr("Standard Material");
+}
+
+QString getReferencedMaterialString()
+{
+    return QObject::tr("Referenced Material");
+}
+
+QString getDefaultMaterialString()
+{
+    return QObject::tr("Default");
+}
+
 QStringList InspectorControlModel::materialValues() const
 {
     QStringList values;
-    values.push_back(tr("Standard Material"));
-    values.push_back(tr("Referenced Material"));
+    values.push_back(getStandardMaterialString());
+    values.push_back(getReferencedMaterialString());
 
     for (size_t matIdx = 0, end = m_materials.size(); matIdx < end; ++matIdx)
         values.push_back(m_materials[matIdx].m_name);
 
-    values.push_back(tr("Default"));
+    values.push_back(getDefaultMaterialString());
 
     for (size_t matIdx = 0, end = m_matDatas.size(); matIdx < end; ++matIdx)
         values.push_back(m_matDatas[matIdx].m_name);
@@ -332,13 +347,13 @@ InspectorControlBase* InspectorControlModel::createMaterialItem(Qt3DSDMInspectab
 
     switch (theType) {
     case OBJTYPE_MATERIAL:
-        item->m_value = tr("Standard Material");
+        item->m_value = getStandardMaterialString();
         break;
 
     case OBJTYPE_REFERENCEDMATERIAL:
-        item->m_value = tr("Referenced Material");
+        item->m_value = getReferencedMaterialString();
         if (sourcePath == QLatin1String("Default"))
-            item->m_value = tr("Default");
+            item->m_value = getDefaultMaterialString();
         for (int matIdx = 0, end = int(m_matDatas.size()); matIdx < end; ++matIdx) {
             if (m_matDatas[matIdx].m_relativePath == sourcePath)
                 item->m_value = values[m_materials.size() + matIdx + 3];
@@ -1006,11 +1021,11 @@ void InspectorControlModel::setMaterialTypeValue(long instance, int handle, cons
     QMap<QString, QString> values;
 
     bool changeMaterialFile = false;
-    if (typeValue == tr("Standard Material")) {
+    if (typeValue == getStandardMaterialString()) {
         v = Q3DStudio::CString("Standard Material");
-    } else if (typeValue == tr("Referenced Material")) {
+    } else if (typeValue == getReferencedMaterialString()) {
         v = Q3DStudio::CString("Referenced Material");
-    } else if (typeValue == tr("Default")) {
+    } else if (typeValue == getDefaultMaterialString()) {
         v = Q3DStudio::CString("Referenced Material");
         name = QLatin1String("Default");
         srcPath = "Default";
@@ -1034,9 +1049,19 @@ void InspectorControlModel::setMaterialTypeValue(long instance, int handle, cons
         }
     }
 
+    const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
+    const Q3DStudio::CString oldType = sceneEditor->GetObjectTypeName(instance);
+
+    qt3dsdm::Qt3DSDMInstanceHandle refMaterial;
+    if (oldType == "ReferencedMaterial" && typeValue == getStandardMaterialString())
+        sceneEditor->getMaterialReference(instance, refMaterial);
+
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(),
                                       QObject::tr("Set Material Type"))
             ->SetMaterialType(instance, v);
+
+    if (refMaterial.Valid())
+        sceneEditor->copyMaterialProperties(refMaterial, instance);
 
     saveIfMaterial(instance);
 

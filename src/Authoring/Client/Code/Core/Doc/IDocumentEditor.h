@@ -196,6 +196,8 @@ public:
     virtual void setMaterialReference(Qt3DSDMInstanceHandle instance,
                                       Qt3DSDMInstanceHandle reference) = 0;
 
+    virtual void copyMaterialProperties(Qt3DSDMInstanceHandle src, Qt3DSDMInstanceHandle dst) = 0;
+
     // Set the instance's property value.  This will set it in this slide if specified, else it is
     // set
     // in the datacore.  Mainly for internal use.  Most clients should use the API's below (note
