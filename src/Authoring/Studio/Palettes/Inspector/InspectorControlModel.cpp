@@ -145,9 +145,8 @@ CInspectableBase *InspectorControlModel::inspectable() const
 qt3dsdm::Qt3DSDMInstanceHandle getReferenceMaterial(qt3dsdm::Qt3DSDMInstanceHandle instance)
 {
     qt3dsdm::Qt3DSDMInstanceHandle refMaterial;
-    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(),
-                                      QObject::tr("Get Property"))
-            ->getMaterialReference(instance, refMaterial);
+    const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
+    sceneEditor->getMaterialReference(instance, refMaterial);
     return refMaterial;
 }
 
@@ -218,8 +217,6 @@ QVariant InspectorControlModel::getPropertyValue(long instance, int handle)
 
 void InspectorControlModel::updateMaterialValues()
 {
-    const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
-
     // Find if there are any material items and update the values of those
     for (int row = 0; row < m_groupElements.count(); ++row) {
         const CInspectorGroup *inspectorGroup = m_inspectableBase->GetGroup(row);
@@ -623,24 +620,31 @@ auto InspectorControlModel::computeTree(CInspectableBase* inspectBase)
     QVector<GroupInspectorControl> result;
 
     if (inspectBase) {
+        bool isMaterialFromFile = false;
+        const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
+        if (const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(inspectBase)) {
+            isMaterialFromFile = sceneEditor->isInsideMaterialContainer(
+                        inspectable->GetGroupInstance(0));
+        }
+
         long theCount = inspectBase->GetGroupCount();
         for (long theIndex = 0; theIndex < theCount; ++theIndex) {
-            result.append(computeGroup(inspectBase, theIndex));
+            result.append(computeGroup(inspectBase, theIndex, isMaterialFromFile, false));
         }
-    }
 
-    //Show original material properties for referenced materials
-    auto refMaterial = getReferenceMaterial(inspectBase);
-    if (refMaterial.Valid()) {
-        auto refMaterialInspectable = getReferenceMaterialInspectable(refMaterial);
-        if (refMaterialInspectable) {
-            const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
-                    ->GetClientDataModelBridge();
+        //Show original material properties for referenced materials
+        auto refMaterial = getReferenceMaterial(inspectBase);
+        if (refMaterial.Valid()) {
+            auto refMaterialInspectable = getReferenceMaterialInspectable(refMaterial);
+            if (refMaterialInspectable) {
+                const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+                        ->GetClientDataModelBridge();
 
-            if (bridge->GetSourcePath(refMaterial) != "Default") {
-                long theCount = refMaterialInspectable->GetGroupCount();
-                for (long theIndex = theCount - 1; theIndex < theCount; ++theIndex)
-                    result.append(computeGroup(refMaterialInspectable, theIndex, true));
+                if (bridge->GetSourcePath(refMaterial) != "Default") {
+                    long theCount = refMaterialInspectable->GetGroupCount();
+                    for (long theIndex = theCount - 1; theIndex < theCount; ++theIndex)
+                        result.append(computeGroup(refMaterialInspectable, theIndex, true, true));
+                }
             }
         }
     }
@@ -649,21 +653,21 @@ auto InspectorControlModel::computeTree(CInspectableBase* inspectBase)
 }
 
 auto InspectorControlModel::computeGroup(CInspectableBase* inspectable,
-                                         int theIndex, bool referenced)
+                                         int theIndex, bool disableAnimation, bool isReference)
     -> GroupInspectorControl
 {
     CInspectorGroup* theInspectorGroup = inspectable->GetGroup(theIndex);
     GroupInspectorControl result;
     result.groupTitle = theInspectorGroup->GetName();
 
-    if (referenced)
+    if (isReference)
         result.groupTitle += QLatin1String(" (Reference)");
 
     if (const auto cdmInspectable = dynamic_cast<Qt3DSDMInspectable *>(inspectable)) {
         if (const auto group = dynamic_cast<Qt3DSDMInspectorGroup *>(theInspectorGroup)) {
             const auto materialGroup
                     = dynamic_cast<Qt3DSDMMaterialInspectorGroup *>(group);
-            if (!referenced && materialGroup && materialGroup->isMaterialGroup()) {
+            if (!isReference && materialGroup && materialGroup->isMaterialGroup()) {
                 InspectorControlBase *item = createMaterialItem(cdmInspectable, theIndex);
                 if (item)
                     result.controlElements.push_back(QVariant::fromValue(item));
@@ -673,7 +677,7 @@ auto InspectorControlModel::computeGroup(CInspectableBase* inspectable,
                 if (!item)
                     continue;
 
-                if (referenced)
+                if (disableAnimation)
                     item->m_animatable = false;
 
                 result.controlElements.push_back(QVariant::fromValue(item));

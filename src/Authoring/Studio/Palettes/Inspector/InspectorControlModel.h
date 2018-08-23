@@ -205,7 +205,8 @@ private:
     bool isTreeRebuildRequired(CInspectableBase *inspectBase) const;
 
     GroupInspectorControl computeGroup(CInspectableBase* inspectBase,
-                                       int theIndex, bool referenced = false);
+                                       int theIndex, bool disableAnimation = false,
+                                       bool isReference = false);
     bool isGroupRebuildRequired(CInspectableBase *inspectable, int theIndex) const;
 
 };
