@@ -182,7 +182,8 @@ void CPreviewHelper::cleanupProcess(QProcess *p, QString *pDocStr)
     if (pDocStr->endsWith(uia)) {
         // remove presentation preview (initial)
         QString initialPresentationSrc = ProjectFile::getInitialPresentationSrc(*pDocStr);
-        if (!initialPresentationSrc.isEmpty()) {
+        if (!initialPresentationSrc.isEmpty() && initialPresentationSrc
+                                                 .endsWith(QLatin1String("_@preview@.uip"))) {
             QString absUipPath = QDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath())
                                                         .absoluteFilePath(initialPresentationSrc);
             QFile(absUipPath).remove();

@@ -125,7 +125,8 @@ void ProjectFile::addPresentationNode(const QString &pPath, const QString &pId)
     file.close();
 }
 
-// get the src attribute (relative path) to the first presentation in a uia file
+// get the src attribute (relative path) to the first presentation in a uia file, if no initial
+// presentation exists, the first one is returned
 QString ProjectFile::getInitialPresentationSrc(const QString &uiaPath)
 {
     QFile file(uiaPath);
@@ -134,6 +135,7 @@ QString ProjectFile::getInitialPresentationSrc(const QString &uiaPath)
     domDoc.setContent(&file);
     file.close();
 
+    QString firstPresentationSrc;
     QDomElement assetsElem = domDoc.documentElement().firstChildElement(QStringLiteral("assets"));
     if (!assetsElem.isNull()) {
         QString initialId = assetsElem.attribute(QStringLiteral("initial"));
@@ -144,11 +146,14 @@ QString ProjectFile::getInitialPresentationSrc(const QString &uiaPath)
                 QDomElement pElem = pNodes.at(i).toElement();
                 if (pElem.attribute(QStringLiteral("id")) == docPresentationId)
                     return pElem.attribute(QStringLiteral("src"));
+
+                if (i == 0)
+                    firstPresentationSrc = pElem.attribute(QStringLiteral("src"));
             }
         }
     }
 
-    return {};
+    return firstPresentationSrc;
 }
 
 /**
