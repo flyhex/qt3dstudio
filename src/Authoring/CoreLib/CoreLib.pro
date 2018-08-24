@@ -14,7 +14,21 @@ contains(QMAKE_TARGET.arch, x86_64) {
     DEFINES += _AMD64_
 }
 
-QT += widgets 3dstudioruntime2 3dstudioruntime2-private
+QT += qml widgets
+
+if (qtHaveModule(3dstudioruntime2)) {
+    QT += 3dstudioruntime2 3dstudioruntime2-private
+} else {
+    # build can not find runtime2 module
+    # try building agaist runtime2 local build directory
+    if (!exists($$OUT_PWD/../../Runtime/qt3d-runtime/include/Qt3DStudioRuntime2)) {
+        error("Unable to find runtime2 module")
+    }
+    INCLUDEPATH += $$OUT_PWD/../../Runtime/qt3d-runtime/include \
+                   $$OUT_PWD/../../Runtime/qt3d-runtime/include/Qt3DStudioRuntime2/$$MODULE_VERSION  \
+                   $$OUT_PWD/../../Runtime/qt3d-runtime/include/Qt3DStudioRuntime2/$$MODULE_VERSION/Qt3DStudioRuntime2
+    QT += 3drender 3dcore
+}
 
 macos:DEFINES += WIDE_IS_DIFFERENT_TYPE_THAN_CHAR16_T QT3DS_LITTLE_ENDIAN
 

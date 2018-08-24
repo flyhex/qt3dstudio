@@ -4,21 +4,31 @@ include(../commoninclude.pri)
 include($$OUT_PWD/../qtAuthoring-config.pri)
 include(../../shared/qtsingleapplication/qtsingleapplication.pri)
 INCLUDEPATH += $$OUT_PWD/..
-
 CONFIG += nostrictstrings
-
 DEFINES += _UNICODE UNICODE QT3DS_AUTHORING _AFXDLL \
     PCRE_STATIC EASTL_MINMAX_ENABLED=0 \
     EASTL_NOMINMAX=0 DOM_DYNAMIC
 
 win: QMAKE_LFLAGS += /MANIFEST /ENTRY:"wWinMainCRTStartup"
 
-QT += core gui xml openglextensions 3dstudioruntime2 3dstudioruntime2-private
+QT += core gui xml openglextensions
 QT += qml quick widgets quickwidgets network
 
-# Configuration for RT1/RT2 preview. RT2 doesn't work yet so uset RT1.
-QT += studio3d-private
-#QT += 3dstudioruntime2-private
+if (qtHaveModule(3dstudioruntime2)) {
+    QT += 3dstudioruntime2 3dstudioruntime2-private
+} else {
+    # build can not find runtime2 module
+    # try building agaist runtime2 local build directory
+    if (!exists($$OUT_PWD/../../Runtime/qt3d-runtime/include/Qt3DStudioRuntime2)) {
+        error("Unable to find runtime2 module")
+    }
+    INCLUDEPATH += $$OUT_PWD/../../Runtime/qt3d-runtime/include \
+                   $$OUT_PWD/../../Runtime/qt3d-runtime/include/Qt3DStudioRuntime2/$$MODULE_VERSION  \
+                   $$OUT_PWD/../../Runtime/qt3d-runtime/include/Qt3DStudioRuntime2/$$MODULE_VERSION/Qt3DStudioRuntime2
+    QT += 3drender 3dcore
+}
+
+# Configuration for RT1/RT2 preview.
 #DEFINES += Q3DS_PREVIEW_SUBPRESENTATION_RT2
 
 INCLUDEPATH += \
