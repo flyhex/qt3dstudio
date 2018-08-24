@@ -4253,67 +4253,6 @@ public:
                 continue;
             }
 
-            if (theExtension.CompareNoCase(L"uia")) {
-                if (m_Doc.GetDocumentUIAFile() == theRecord.m_File.toQString()) {
-                    QVector<SubPresentationRecord> subpresentations;
-                    QVector<QString> subIds;
-
-                    // Mahmoud_TODO: update here or delete.
-//                    m_Doc.LoadUIASubpresentations(m_Doc.GetDocumentUIAFile(),
-//                                                  subpresentations);
-
-                    for (SubPresentationRecord &r : subpresentations)
-                        subIds.push_back(r.m_id);
-
-                    bool renderableReset = false;
-                    // find all renderables from layers and textures and check they are
-                    // still using correct values
-                    TInstanceHandleList renderableInstances;
-                    m_DataCore.GetInstancesDerivedFrom(renderableInstances,
-                                                       theDefinitions.m_Layer.m_Instance);
-                    m_DataCore.GetInstancesDerivedFrom(renderableInstances,
-                                                       theDefinitions.m_Image.m_Instance);
-                    for (int rid = 0; rid < renderableInstances.size(); ++rid) {
-                        TPropertyHandleList theProperties;
-                        Qt3DSDMInstanceHandle theInstance = renderableInstances[rid];
-                        m_PropertySystem.GetAggregateInstanceProperties(theInstance, theProperties);
-                        size_t thePropertyCount = theProperties.size();
-                        for (size_t thePropertyIndex = 0;
-                             thePropertyIndex < thePropertyCount; ++thePropertyIndex) {
-                            Qt3DSDMPropertyHandle theProperty = theProperties[thePropertyIndex];
-                            qt3dsdm::AdditionalMetaDataType::Value theAdditionalMetaDataType =
-                                m_PropertySystem.GetAdditionalMetaDataType(theInstance,
-                                                                           theProperty);
-                            if (theAdditionalMetaDataType
-                                    == AdditionalMetaDataType::Renderable) {
-                                std::vector<SValue> theValueList;
-                                m_Bridge.GetValueListFromAllSlides(theInstance, theProperty,
-                                                                   theValueList);
-                                for (SValue &val : theValueList) {
-                                    QString valString = val.toQVariant().toString();
-                                    if (valString.isEmpty() == false
-                                            && subIds.contains(valString) == false) {
-                                        SetInstancePropertyValueAsRenderable(theInstance,
-                                                                             theProperty,
-                                                                             Q3DStudio::CString());
-                                        m_StudioSystem.GetFullSystem()->GetSignalSender()
-                                                ->SendInstancePropertyValue(theInstance,
-                                                                            theProperty);
-                                        renderableReset = true;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (renderableReset) {
-                        // Notify user that the values were reset
-                        // somehow
-                    }
-                }
-            }
-
             QDir modifiedPath = QDir::cleanPath(QString::fromWCharArray(theString));
             TCharPtrToSlideInstanceMap::iterator theFind = m_SourcePathInstanceMap.end();
             for (TCharPtrToSlideInstanceMap::iterator it = m_SourcePathInstanceMap.begin();
