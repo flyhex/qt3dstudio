@@ -510,7 +510,7 @@ QObject *InspectorControlView::showObjectReference(int handle, int instance, con
     return m_objectReferenceView;
 }
 
-QObject *InspectorControlView::showDataInputChooser(int handle, int instance, const QPoint &point)
+void InspectorControlView::showDataInputChooser(int handle, int instance, const QPoint &point)
 {
     if (!m_dataInputChooserView) {
         const QVector<EDataType> acceptedTypes;
@@ -543,8 +543,6 @@ QObject *InspectorControlView::showDataInputChooser(int handle, int instance, co
                     m_inspectorControlModel->currentControllerValue(instance, handle),
                     handle, instance);
     CDialogs::showWidgetBrowser(this, m_dataInputChooserView, point);
-
-    return m_dataInputChooserView;
 }
 
 QColor InspectorControlView::showColorDialog(const QColor &color)
