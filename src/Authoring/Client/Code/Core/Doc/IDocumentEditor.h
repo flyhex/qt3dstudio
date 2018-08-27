@@ -185,9 +185,7 @@ public:
 
     virtual bool isInsideMaterialContainer(Qt3DSDMInstanceHandle instance) const = 0;
 
-    virtual Qt3DSDMInstanceHandle getActiveMaterialContainer() const = 0;
-
-    virtual QVector<Qt3DSDMInstanceHandle> getAllMaterialContainers() const = 0;
+    virtual Qt3DSDMInstanceHandle getMaterialContainer() const = 0;
 
     virtual Qt3DSDMInstanceHandle getOrCreateMaterial(const Q3DStudio::CString &materialName) = 0;
 

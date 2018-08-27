@@ -351,9 +351,13 @@ void ProjectFileSystemModel::showInfo(int row)
     QFileInfo fi(path);
 
     if (fi.suffix() == QLatin1String("matdata")) {
-        auto material = Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(),
-                                                          QObject::tr("Get Material"))
+        const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
+        const auto material = sceneEditor
                 ->getOrCreateMaterial(Q3DStudio::CString::fromQString(fi.baseName()));
+        QString name;
+        QMap<QString, QString> values;
+        sceneEditor->getMaterialInfo(fi.absoluteFilePath(), name, values);
+        sceneEditor->setMaterialValues(name, values);
         if (material.Valid())
             g_StudioApp.GetCore()->GetDoc()->SelectDataModelObject(material);
     }

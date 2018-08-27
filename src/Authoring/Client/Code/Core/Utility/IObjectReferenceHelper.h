@@ -77,7 +77,8 @@ public:
     virtual bool
     GetChildInstanceList(const qt3dsdm::Qt3DSDMInstanceHandle &inInstance,
                          qt3dsdm::TInstanceHandleList &outlist, qt3dsdm::Qt3DSDMSlideHandle inSlide,
-                         const qt3dsdm::Qt3DSDMInstanceHandle &inOwningInstance) const = 0;
+                         const qt3dsdm::Qt3DSDMInstanceHandle &inOwningInstance,
+                         bool ignoreMaterialProperties = false) const = 0;
     virtual Q3DStudio::CString
     LookupObjectFormalName(const qt3dsdm::Qt3DSDMInstanceHandle inInstance) const = 0;
 
@@ -88,7 +89,8 @@ public:
     virtual bool ResolvePath(const qt3dsdm::Qt3DSDMInstanceHandle &inInstance,
                              const Q3DStudio::CString &inPathValue,
                              CRelativePathTools::EPathType &outType,
-                             qt3dsdm::Qt3DSDMInstanceHandle &outResolvedInstance) = 0;
+                             qt3dsdm::Qt3DSDMInstanceHandle &outResolvedInstance,
+                             bool ignoreMaterialProperties = false) = 0;
     virtual qt3dsdm::Qt3DSDMInstanceHandle
     Resolve(const qt3dsdm::SValue &inObjectRefValue,
             const qt3dsdm::Qt3DSDMInstanceHandle &inBaseInstance) const = 0;
