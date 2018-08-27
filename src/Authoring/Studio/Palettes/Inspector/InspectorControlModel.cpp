@@ -621,11 +621,15 @@ auto InspectorControlModel::computeTree(CInspectableBase* inspectBase)
 
     if (inspectBase) {
         bool isMaterialFromFile = false;
+
         const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
-        if (const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(inspectBase)) {
-            isMaterialFromFile = sceneEditor->isInsideMaterialContainer(
-                        inspectable->GetGroupInstance(0));
-        }
+
+        qt3dsdm::Qt3DSDMInstanceHandle instance;
+        if (const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(inspectBase))
+            instance = inspectable->GetGroupInstance(0);
+
+        if (instance.Valid())
+            isMaterialFromFile = sceneEditor->isInsideMaterialContainer(instance);
 
         long theCount = inspectBase->GetGroupCount();
         for (long theIndex = 0; theIndex < theCount; ++theIndex) {
@@ -640,7 +644,12 @@ auto InspectorControlModel::computeTree(CInspectableBase* inspectBase)
                 const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
                         ->GetClientDataModelBridge();
 
-                if (bridge->GetSourcePath(refMaterial) != "Default") {
+                QString materialSrcPath;
+                if (instance.Valid())
+                    materialSrcPath = bridge->GetSourcePath(instance).toQString();
+
+                if (materialSrcPath != QLatin1String("Default")
+                        && bridge->GetSourcePath(refMaterial) != "Default") {
                     long theCount = refMaterialInspectable->GetGroupCount();
                     for (long theIndex = theCount - 1; theIndex < theCount; ++theIndex)
                         result.append(computeGroup(refMaterialInspectable, theIndex, true, true));
