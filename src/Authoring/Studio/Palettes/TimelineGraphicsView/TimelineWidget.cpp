@@ -701,24 +701,22 @@ void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance
 
     const SDataModelSceneAsset &asset = m_bridge->GetSceneAsset();
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-    EStudioObjectType instanceType = m_bridge->GetObjectType(inInstance);
     auto ctrldPropHandle = doc->GetPropertySystem()
-                           ->GetAggregateInstancePropertyByName(inInstance, L"controlledproperty");
+            ->GetAggregateInstancePropertyByName(inInstance, L"controlledproperty");
 
     if (inProperty == asset.m_Eyeball || inProperty == asset.m_Locked || inProperty == asset.m_Shy
-        || inProperty == asset.m_StartTime || inProperty == asset.m_EndTime
-        || inProperty == m_bridge->GetNameProperty() || inProperty == ctrldPropHandle) {
+            || inProperty == asset.m_StartTime || inProperty == asset.m_EndTime
+            || inProperty == m_bridge->GetNameProperty() || inProperty == ctrldPropHandle) {
         m_dirtyProperties.insert(inInstance, inProperty);
         if (!m_asyncUpdateTimer.isActive())
             m_asyncUpdateTimer.start();
-    } else if ((instanceType == OBJTYPE_LAYER && inProperty == m_bridge->GetSourcePathProperty())
-               || (instanceType == OBJTYPE_IMAGE && inProperty == m_bridge->GetSceneImage()
-                                                                  .m_SubPresentation)) {
-       // subpresentation property change
-       m_subpresentationChanges.insert(inInstance);
-       if (!m_asyncUpdateTimer.isActive())
-           m_asyncUpdateTimer.start();
-   }
+    } else if (inProperty == m_bridge->GetSceneImage().m_SubPresentation
+               || (inProperty == m_bridge->GetSourcePathProperty()
+                   && m_bridge->GetObjectType(inInstance) == OBJTYPE_LAYER)) {
+        m_subpresentationChanges.insert(inInstance);
+        if (!m_asyncUpdateTimer.isActive())
+            m_asyncUpdateTimer.start();
+    }
 }
 
 void TimelineWidget::onAsyncUpdate()
