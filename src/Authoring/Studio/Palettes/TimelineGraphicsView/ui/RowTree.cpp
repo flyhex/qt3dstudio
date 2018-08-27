@@ -885,6 +885,7 @@ void RowTree::updateSubpresentations(int updateParentsOnlyVal)
             RowTree *parentRow = m_parentRow;
             while (parentRow) {
                 parentRow->m_numDescendantSubpresentations += n * updateParentsOnlyVal;
+                parentRow->update();
                 parentRow = parentRow->m_parentRow;
             }
         }
@@ -898,10 +899,12 @@ void RowTree::updateSubpresentations(int updateParentsOnlyVal)
             RowTree *parentRow = m_parentRow;
             while (parentRow) {
                 parentRow->m_numDescendantSubpresentations += n;
+                parentRow->update();
                 parentRow = parentRow->m_parentRow;
             }
         }
     }
+    update();
 }
 
 void RowTree::updateLabelPosition()
