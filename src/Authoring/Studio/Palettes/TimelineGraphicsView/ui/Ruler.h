@@ -52,6 +52,7 @@ public:
     void setDuration(double duration);
     void setMaxDuration(double maxDuration);
     void setViewportX(int viewportX);
+    int viewportX() const;
     int type() const;
 
 protected:
@@ -61,6 +62,7 @@ protected:
 signals:
     void maxDurationChanged(double maxDuration);
     void durationChanged(double duration);
+    void viewportXChanged(int viewportX);
 
 private:
     const QString timestampString(int timeMs);

@@ -217,6 +217,12 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     connect(m_viewTreeContent->horizontalScrollBar(), &QAbstractSlider::valueChanged, this,
             [this](int value) {
         m_viewTreeHeader->horizontalScrollBar()->setValue(value);
+        // Keep m_viewTreeContent always positioned at 0
+        // This hack is required due to RowTimelineCommentItem (QGraphicsTextItem)
+        // ensuring that all views see the text item when it gets focus or content
+        // changes with setPlainText(). See QTBUG-71241 and QT3DS-1508.
+        if (value != 0)
+            m_viewTreeContent->horizontalScrollBar()->setValue(0);
     });
 
     connect(m_toolbar, &TimelineToolbar::newLayerTriggered, this, [this]() {

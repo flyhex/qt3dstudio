@@ -209,6 +209,7 @@ private:
 
     friend class RowTimeline;
     friend class RowTimelinePropertyGraph;
+    friend class RowTimelineContextMenu;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(RowTree::ActionStates)

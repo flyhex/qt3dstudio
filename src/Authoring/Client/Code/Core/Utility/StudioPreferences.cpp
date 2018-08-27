@@ -80,6 +80,7 @@ static QColor s_timelineWidgetBgColor;
 static QColor s_timelinePlayheadLineColor;
 static QColor s_timelineFilterButtonSelectedColor;
 static QColor s_timelineFilterButtonHoveredColor;
+static QColor s_timelineRowCommentBgColor;
 
 static int s_fontSize;
 static int s_controlBaseHeight;
@@ -171,6 +172,7 @@ void CStudioPreferences::loadPreferences(const QString &filePath)
     s_timelineFilterButtonHoveredColor = QColor("#40000000");
     s_timelineRowSubpColor = QColor("#e2ceff");
     s_timelineRowSubpDescendantColor = QColor("#a263ff");
+    s_timelineRowCommentBgColor = QColor("#d0000000");
 
     s_fontSize = 12;
     s_controlBaseHeight = 22;
@@ -1003,6 +1005,11 @@ QColor CStudioPreferences::timelineRowSubpColor()
 QColor CStudioPreferences::timelineRowSubpDescendantColor()
 {
     return s_timelineRowSubpDescendantColor;
+}
+
+QColor CStudioPreferences::timelineRowCommentBgColor()
+{
+    return s_timelineRowCommentBgColor;
 }
 
 int CStudioPreferences::fontSize()

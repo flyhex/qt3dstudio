@@ -738,6 +738,8 @@ void RowTree::updateFromBinding()
             static_cast<Qt3DSDMTimelineItemBinding *>(m_binding);
     m_master = itemBinding->IsMaster();
     m_labelItem.setMaster(m_master);
+    // Update timeline comments
+    m_rowTimeline->updateCommentItem();
 }
 
 void RowTree::updateLabel()

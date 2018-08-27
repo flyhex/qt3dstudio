@@ -33,6 +33,7 @@
 #include "RowTypes.h"
 #include "Bindings/Qt3DSDMTimelineItemProperty.h"
 #include <QtCore/qpointer.h>
+#include "RowTimelineCommentItem.h"
 
 class RowTree;
 class RowTimelinePropertyGraph;
@@ -89,10 +90,13 @@ protected:
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
 
 private:
+    void initialize();
     void updateChildrenStartRecursive();
     void updateChildrenEndRecursive();
     void updateChildrenMinStartXRecursive(RowTree *rowTree);
     void updateChildrenMaxEndXRecursive(RowTree *rowTree);
+    void updateCommentItem();
+    void updateCommentItemPos();
     void drawColorPropertyGradient(QPainter *painter, int width);
     bool isColorProperty() const;
     QString formatTime(double seconds) const;
@@ -102,6 +106,7 @@ private:
 
     RowTree *m_rowTree;
     RowTimelinePropertyGraph *m_propertyGraph = nullptr;
+    RowTimelineCommentItem *m_commentItem = nullptr;
     double m_startTime = 0;
     double m_startDurationMoveStartTime = 0;
     double m_startDurationMoveOffsetX = 0;

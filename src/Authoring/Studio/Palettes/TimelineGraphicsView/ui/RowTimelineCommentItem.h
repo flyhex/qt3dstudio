@@ -26,32 +26,45 @@
 **
 ****************************************************************************/
 
-#ifndef TIMELINEITEM_H
-#define TIMELINEITEM_H
+#ifndef ROWTIMELINECOMMENTITEM_H
+#define ROWTIMELINECOMMENTITEM_H
 
-#include <QtWidgets/qgraphicswidget.h>
+#include "StudioObjectTypes.h"
+#include <QtWidgets/qgraphicsitem.h>
+#include <QtCore/qstring.h>
+#include <QtWidgets/qgraphicssceneevent.h>
+#include <QtGui/qevent.h>
 
-class TimelineItem : public QGraphicsWidget
+class RowTree;
+
+class RowTimelineCommentItem : public QGraphicsTextItem
 {
     Q_OBJECT
-
 public:
-    explicit TimelineItem(TimelineItem *parent = nullptr);
+    explicit RowTimelineCommentItem(QGraphicsItem *parent = nullptr);
 
-    enum ItemType {
-        TypeTimelineItem = UserType + 1,
-        TypeInteractiveTimelineItem,
-        TypeTreeHeader,
-        TypeRowTree,
-        TypeRowTreeLabelItem,
-        TypeRowTimeline,
-        TypeRowTimelineCommentItem,
-        TypePlayHead,
-        TypeRuler,
-        TypeRowMover
-    };
+    QString label() const;
+    void setLabel(const QString &label);
+    RowTree *parentRow() const;
+    void setParentRow(RowTree *row);
+    int type() const override;
 
-   int type() const;
+protected:
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    void focusOutEvent(QFocusEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
+    QRectF boundingRect() const override;
+
+signals:
+    void labelChanged(const QString label);
+
+private:
+    void validateLabel();
+
+    RowTree *m_rowTree = nullptr;
+    QString m_label;
+    bool m_acceptOnFocusOut;
+
 };
 
-#endif // TIMELINEITEM_H
+#endif // ROWTIMELINECOMMENTITEM_H

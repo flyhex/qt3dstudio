@@ -189,8 +189,14 @@ void Ruler::setViewportX(int viewportX)
 {
     if (m_viewportX != viewportX) {
         m_viewportX = viewportX;
+        emit viewportXChanged(m_viewportX);
         update();
     }
+}
+
+int Ruler::viewportX() const
+{
+    return m_viewportX;
 }
 
 // Returns timestamp in mm:ss.ttt or ss.ttt format

@@ -221,7 +221,8 @@ HEADERS += \
     Palettes/Inspector/MaterialRefView.h \
     Palettes/scenecamera/scenecameraview.h \
     Palettes/scenecamera/scenecamerascrollarea.h \
-    Palettes/scenecamera/scenecameraglwidget.h
+    Palettes/scenecamera/scenecameraglwidget.h \
+    Palettes/TimelineGraphicsView/ui/RowTimelineCommentItem.h
 
 FORMS += \
     MainFrm.ui \
@@ -396,7 +397,8 @@ SOURCES += \
     Palettes/Inspector/MaterialRefView.cpp \
     Palettes/scenecamera/scenecameraview.cpp \
     Palettes/scenecamera/scenecamerascrollarea.cpp \
-    Palettes/scenecamera/scenecameraglwidget.cpp
+    Palettes/scenecamera/scenecameraglwidget.cpp \
+    Palettes/TimelineGraphicsView/ui/RowTimelineCommentItem.cpp
 
 RESOURCES += \
     MainFrm.qrc \
