@@ -51,6 +51,8 @@
 #include <QtCore/qstandardpaths.h>
 #include <QtCore/qcommandlineparser.h>
 #include <QtXml/qdom.h>
+#include <QtQml/qqmlapplicationengine.h>
+#include <QtQuick/qquickitem.h>
 
 const QString activePresentationQuery = QStringLiteral("activePresentation:");
 
@@ -1641,7 +1643,7 @@ bool CStudioApp::OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupD
         m_core->getProjectFile().updateDocPresentationId();
         m_core->getProjectFile().loadSubpresentationsAndDatainputs(m_subpresentations,
                                                                    m_dataInputDialogItems);
-        g_StudioApp.getRenderer().RegisterSubpresentations(m_subpresentations);
+        getRenderer().RegisterSubpresentations(m_subpresentations);
     }
 
     m_authorZoom = false;
@@ -1806,7 +1808,7 @@ QString CStudioApp::OnFileNew()
             } else {
                 m_core->getProjectFile().loadSubpresentationsAndDatainputs(m_subpresentations,
                                                                            m_dataInputDialogItems);
-                g_StudioApp.getRenderer().RegisterSubpresentations(m_subpresentations);
+                getRenderer().RegisterSubpresentations(m_subpresentations);
             }
         } else {
             return theFile.GetName().toQString();
@@ -1950,7 +1952,7 @@ QString CStudioApp::getRenderableId(const QString &filePath) const
         }
         renderablePath = checkFile.mid(index);
     }
-    for (SubPresentationRecord r : qAsConst(g_StudioApp.m_subpresentations)) {
+    for (SubPresentationRecord r : qAsConst(m_subpresentations)) {
         if (r.m_argsOrSrc == renderablePath)
             return r.m_id;
     }
@@ -1959,10 +1961,35 @@ QString CStudioApp::getRenderableId(const QString &filePath) const
 
 QString CStudioApp::getRenderableAbsolutePath(const QString &renderableId) const
 {
-    for (SubPresentationRecord r : qAsConst(g_StudioApp.m_subpresentations)) {
+    for (SubPresentationRecord r : qAsConst(m_subpresentations)) {
         if (r.m_id == renderableId) {
             QDir projectDir(m_core->getProjectFile().getProjectPath());
             return QDir::cleanPath(projectDir.absoluteFilePath(r.m_argsOrSrc));
+        }
+    }
+    return {};
+}
+
+// Returns renderable size in pixels.
+QSize CStudioApp::getRenderableSize(const QString &renderableId)
+{
+    for (int i = 0; i < m_subpresentations.size(); ++i) {
+        SubPresentationRecord &r = m_subpresentations[i];
+        if (r.m_id == renderableId) {
+            if (!r.m_size.isValid()) {
+                QDir projectDir(m_core->getProjectFile().getProjectPath());
+                QString path = QDir::cleanPath(projectDir.absoluteFilePath(r.m_argsOrSrc));
+                QString type = r.m_type;
+                if (type == QLatin1String("presentation")) {
+                    r.m_size = PresentationFile::readSize(path);
+                } else { // QML stream
+                    QQmlApplicationEngine qmlEngine(path);
+                    QQuickItem *item = qobject_cast<QQuickItem *>(qmlEngine.rootObjects().at(0));
+                    if (item)
+                        r.m_size = QSize(qRound(item->width()), qRound(item->height()));
+                }
+            }
+            return r.m_size;
         }
     }
     return {};

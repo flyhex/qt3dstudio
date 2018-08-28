@@ -50,6 +50,7 @@
 #include "Utility/CoreConst.h"
 
 #include <QtCore/quuid.h>
+#include <QtCore/qsize.h>
 
 //==============================================================================
 //	Forwards
@@ -125,6 +126,7 @@ struct SubPresentationRecord
     QString m_type;
     QString m_id;
     QString m_argsOrSrc;
+    QSize m_size;
 
     SubPresentationRecord() {}
     SubPresentationRecord(const QString &type, const QString &id, const QString &args)
@@ -138,6 +140,7 @@ struct SubPresentationRecord
         m_type = o.m_type;
         m_id = o.m_id;
         m_argsOrSrc = o.m_argsOrSrc;
+        m_size = o.m_size;
         return *this;
     }
 

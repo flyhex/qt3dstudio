@@ -254,6 +254,7 @@ public:
 
     QString getRenderableId(const QString &filePath) const;
     QString getRenderableAbsolutePath(const QString &renderableId) const;
+    QSize getRenderableSize(const QString &renderableId);
 
     QString getMostRecentDirectory() const;
     QString getMostRecentProjectParentDir() const;

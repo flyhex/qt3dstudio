@@ -87,6 +87,8 @@
 #include <unordered_set>
 #include "Runtime/Include/q3dsqmlbehavior.h"
 #include "Qt3DSFileToolsSeekableMeshBufIOStream.h"
+#include "StudioProjectSettings.h"
+#include "StudioApp.h"
 
 namespace {
 
@@ -1597,6 +1599,76 @@ public:
                                          std::make_shared<qt3dsdm::CDataStr>(inSourcePath.c_str()),
                                          true);
             }
+        } else if (m_Bridge.IsLayerInstance(instance)
+                   && m_Bridge.GetSourcePathProperty() == propName
+                   && !inSourcePath.IsEmpty()) {
+            // Resize the layer to be the size of the presentation
+
+            QSize presSize(g_StudioApp.getRenderableSize(inSourcePath.toQString()));
+            auto &layer = m_Bridge.GetLayer();
+
+            // Determine if width and height properties are visible
+            auto isPropertyVisible = [this, &instance](TPropertyHandle propHandle) {
+                IMetaData &metaData = *m_Doc.GetStudioSystem()->GetActionMetaData();
+                Qt3DSDMMetaDataPropertyHandle metaHandle
+                        = metaData.GetMetaDataProperty(instance, propHandle);
+                qt3ds::foundation::NVConstDataRef<SPropertyFilterInfo> filters(
+                            metaData.GetMetaDataPropertyFilters(metaHandle));
+                if (filters.size()) {
+                    qt3dsdm::IPropertySystem &propertySystem(
+                                *m_Doc.GetStudioSystem()->GetPropertySystem());
+                    for (QT3DSU32 propIdx = 0, propEnd = filters.size(); propIdx < propEnd;
+                         ++propIdx) {
+                        const SPropertyFilterInfo &filter(filters[propIdx]);
+                        SValue value;
+                        propertySystem.GetInstancePropertyValue(
+                                    instance, filter.m_FilterProperty, value);
+                        if (value == filter.m_Value)
+                            return true;
+                    }
+                }
+                return false;
+            };
+            bool widthVisible = isPropertyVisible(layer.m_Width);
+            bool heightVisible = isPropertyVisible(layer.m_Height);
+
+            // If width is visible, adjust that. Otherwise adjust right in relation to left.
+            SValue pixelValue = std::make_shared<CDataStr>(L"pixels");
+            SValue percentValue = std::make_shared<CDataStr>(L"percent");
+            if (widthVisible) {
+                SetInstancePropertyValue(instance, layer.m_WidthUnits, pixelValue, true);
+                SetInstancePropertyValue(instance, layer.m_Width, float(presSize.width()), true);
+            } else {
+                long curWidth = m_Doc.GetCore()->GetStudioProjectSettings()
+                        ->GetPresentationSize().x;
+                Option<SValue> leftVal = GetInstancePropertyValue(instance, layer.m_Left);
+                Option<SValue> leftUnitsVal = GetInstancePropertyValue(instance, layer.m_LeftUnits);
+                float left = qt3dsdm::get<float>(leftVal.getValue());
+                if (Equals(leftUnitsVal, percentValue))
+                    left = (curWidth * left) / 100;
+                float right = curWidth - (left + float(presSize.width()));
+                SetInstancePropertyValue(instance, layer.m_RightUnits, pixelValue, true);
+                SetInstancePropertyValue(instance, layer.m_Right, right, true);
+            }
+            // If height is visible, adjust that. Otherwise adjust bottom in relation to top.
+            if (heightVisible) {
+                SetInstancePropertyValue(instance, layer.m_HeightUnits, pixelValue, true);
+                SetInstancePropertyValue(instance, layer.m_Height, float(presSize.height()), true);
+            } else {
+                long curHeight = m_Doc.GetCore()->GetStudioProjectSettings()
+                        ->GetPresentationSize().y;
+                Option<SValue> topVal = GetInstancePropertyValue(instance, layer.m_Top);
+                Option<SValue> topUnitsVal = GetInstancePropertyValue(instance, layer.m_TopUnits);
+                float top = qt3dsdm::get<float>(topVal.getValue());
+                if (Equals(topUnitsVal, percentValue))
+                    top = (curHeight * top) / 100;
+                float bottom = curHeight - (top + float(presSize.height()));
+                SetInstancePropertyValue(instance, layer.m_BottomUnits, pixelValue, true);
+                SetInstancePropertyValue(instance, layer.m_Bottom, bottom, true);
+            }
+            SetInstancePropertyValue(instance, propName,
+                                     std::make_shared<qt3dsdm::CDataStr>(inSourcePath.c_str()),
+                                     true);
         } else {
             SetInstancePropertyValue(instance, propName,
                                      std::make_shared<qt3dsdm::CDataStr>(inSourcePath.c_str()),
