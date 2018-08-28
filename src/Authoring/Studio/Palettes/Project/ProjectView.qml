@@ -195,7 +195,10 @@ Rectangle {
                                         projectTree.model.collapse(index);
                                     else
                                         projectTree.model.expand(index);
+                                } else {
+                                    _parentView.openFile(index);
                                 }
+
                                 clickPending = false;
                             } else {
                                 clickPending = true;

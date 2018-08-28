@@ -78,6 +78,8 @@ public:
     Q_INVOKABLE bool isRefreshable(int row) const;
     Q_INVOKABLE void showContextMenu(int x, int y, int index);
     Q_INVOKABLE bool toolTipsEnabled();
+    Q_INVOKABLE void openFile(int row);
+
     bool isPresentation(int row) const;
     bool isQmlStream(int row) const;
     bool isCurrentPresentation(int row) const;
