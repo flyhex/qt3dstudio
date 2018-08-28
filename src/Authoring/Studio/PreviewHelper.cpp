@@ -150,27 +150,56 @@ QString CPreviewHelper::getViewerFilePath(const QString &exeName)
     using namespace Q3DStudio;
     CFilePath currentPath(Qt3DSFile::GetApplicationDirectory().GetAbsolutePath());
     CFilePath viewerDir(QApplication::applicationDirPath());
-    if (!viewerDir.IsDirectory())
-        viewerDir = currentPath.GetDirectory(); // Developing directory
 
     QString viewerFile;
 #ifdef Q_OS_WIN
+    if (!viewerDir.IsDirectory())
+        viewerDir = currentPath.GetDirectory(); // Developing directory
     viewerFile = QStringLiteral("%1.exe").arg(exeName);
-#else
-#ifdef Q_OS_MACOS
-    viewerFile = QStringLiteral("../../../%1.app/Contents/MacOS/%1").arg(exeName);
-#else
-    viewerFile = QStringLiteral("%1").arg(exeName);
-#endif
-#endif
+
     QString viewer = viewerDir.filePath() + QStringLiteral("/") + viewerFile;
     if (!QFileInfo(viewer).exists()
-            && exeName == QStringLiteral("q3dsviewer")) {
-        return viewerDir.filePath() + QStringLiteral("/../src/Runtime/qt3d-runtime/bin/")
+            && exeName == QLatin1String("q3dsviewer")) {
+        viewer = viewerDir.filePath() + QStringLiteral("/../src/Runtime/qt3d-runtime/bin/")
                 + viewerFile;
-    } else {
-        return viewer;
     }
+#else
+#ifdef Q_OS_MACOS
+    // Check if we're looking for Viewer 2.x that has a different development
+    // time path for the executable
+    QString viewerDevPath;
+    if (exeName == QLatin1String("q3dsviewer"))
+        viewerDevPath = QStringLiteral("../src/Runtime/qt3d-runtime/bin/");
+
+    // Name of the executable file on macOS
+    viewerFile = QStringLiteral("%1.app/Contents/MacOS/%1").arg(exeName);
+
+    // Executable directory is three steps above the directory of studio executable
+    QString executableDir = viewerDir.filePath() + QStringLiteral("/../../../");
+
+    // Formulate the expected path to the viewer in development environment
+    QString viewer = executableDir + viewerDevPath + viewerFile;
+
+    // If not in development environment, expect viewer to be in same directory
+    if (!QFileInfo(viewer).exists())
+        viewer = executableDir + viewerFile;
+
+#else
+    if (!viewerDir.IsDirectory())
+        viewerDir = currentPath.GetDirectory(); // Developing directory
+
+    viewerFile = exeName;
+
+    QString viewer = viewerDir.filePath() + QStringLiteral("/") + viewerFile;
+    if (!QFileInfo(viewer).exists()
+            && exeName == QLatin1String("q3dsviewer")) {
+        viewer = viewerDir.filePath() + QStringLiteral("/../src/Runtime/qt3d-runtime/bin/")
+                + viewerFile;
+    }
+#endif
+#endif
+
+    return viewer;
 }
 
 void CPreviewHelper::cleanupProcess(QProcess *p, QString *pDocStr)
