@@ -227,28 +227,6 @@ void CStudioPreferences::SetTimelineSnappingGridResolution(ESnapGridResolution i
     CPreferences::GetUserPreferences().SetLongValue("SnappingGridResolution", (long)inResolution);
 }
 
-//==============================================================================
-/**
- *	Get the background color of the editing view
- *	@return the color of the editing view
- */
-::CColor CStudioPreferences::GetEditViewBackgroundColor()
-{
-    return CPreferences::GetUserPreferences().GetColorValue("EditViewBGColor",
-                                                            EDITVIEW_DEFAULTBGCOLOR);
-}
-
-//==============================================================================
-/**
- *	Set the background color of the editing view
- *	@param inColor the color of the editing view
- */
-void CStudioPreferences::SetEditViewBackgroundColor(::CColor inColor)
-{
-    CPreferences::GetUserPreferences().SetColorValue("EditViewBGColor", inColor);
-}
-
-//==============================================================================
 /**
  *	Get the fill mode to render the geometries when in editing view
  *	@return true to render as solid, else as wireframe

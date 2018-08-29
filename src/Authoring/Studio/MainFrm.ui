@@ -824,13 +824,13 @@ Project palette using Import functionality.</string>
      <normaloff>:/images/playback_tools_low-02.png</normaloff>:/images/playback_tools_low-02.png</iconset>
    </property>
    <property name="text">
-    <string>Preview with Legacy Viewer</string>
+    <string>Preview with Legacy Qt 3D Viewer 1.1</string>
    </property>
    <property name="iconText">
-    <string>Preview with Legacy Viewer</string>
+    <string>Preview with Legacy Qt 3D Viewer 1.1</string>
    </property>
    <property name="toolTip">
-    <string>Preview with Legacy Viewer</string>
+    <string>Preview with Legacy Qt 3D Viewer 1.1</string>
    </property>
   </action>
   <action name="actionImportAssets">

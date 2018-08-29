@@ -58,9 +58,6 @@ public:
     static ESnapGridResolution GetTimelineSnappingGridResolution();
     static void SetTimelineSnappingGridResolution(ESnapGridResolution inResolution);
 
-    static ::CColor GetEditViewBackgroundColor();
-    static void SetEditViewBackgroundColor(::CColor inColor);
-
     static bool GetEditViewFillMode();
     static void SetEditViewFillMode(bool inRenderAsSolid);
 

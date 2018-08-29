@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>347</width>
-    <height>400</height>
+    <height>511</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -59,24 +59,10 @@
       <string>Editing View</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0" colspan="2">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Background Color</string>
-        </property>
-        <property name="buddy">
-         <cstring>m_EditViewBGColor</cstring>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="2" colspan="2">
-       <widget class="QPushButton" name="m_EditViewBGColor">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
+       <widget class="QComboBox" name="m_EditViewStartupView"/>
       </item>
-      <item row="1" column="0" colspan="2">
+      <item row="0" column="0" colspan="2">
        <widget class="QLabel" name="label_4">
         <property name="text">
          <string>Preferred Startup View</string>
@@ -85,9 +71,6 @@
          <cstring>m_EditViewStartupView</cstring>
         </property>
        </widget>
-      </item>
-      <item row="1" column="2" colspan="2">
-       <widget class="QComboBox" name="m_EditViewStartupView"/>
       </item>
      </layout>
     </widget>
