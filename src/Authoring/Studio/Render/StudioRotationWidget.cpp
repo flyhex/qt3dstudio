@@ -375,12 +375,12 @@ struct SRotationWidget : public SStudioWidgetImpl<StudioWidgetTypes::Rotation>
             char textBuffer[25] = { 0 };
             QT3DSF32 angleDeg(m_RotationWedge->m_Angle);
             TODEG(angleDeg);
-            sprintf(textBuffer, "%.1f", angleDeg);
+            sprintf(textBuffer, " %.1f ", angleDeg); // spaces added for margin
             STextRenderInfo theInfo;
             theInfo.m_Text = inRenderContext.GetStringTable().RegisterStr(textBuffer);
             theInfo.m_HorizontalAlignment = TextHorizontalAlignment::Center;
             theInfo.m_VerticalAlignment = TextVerticalAlignment::Bottom;
-            theInfo.m_FontSize = 12.0f * pixelRatio;
+            theInfo.m_FontSize = 24.0f * pixelRatio;
             theInfo.m_Font = inRenderContext.GetStringTable().RegisterStr("TitilliumWeb-Regular");
             QT3DSMat44 theTransMatrix(QT3DSMat44::createIdentity());
             theTransMatrix.column3.x = endLineEnd.x;
