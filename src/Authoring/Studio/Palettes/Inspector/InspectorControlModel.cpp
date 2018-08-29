@@ -340,7 +340,27 @@ InspectorControlBase* InspectorControlModel::createMaterialItem(Qt3DSDMInspectab
     const QStringList values = materialValues();
     item->m_values = values;
 
-    const QString sourcePath = theBridge->GetSourcePath(item->m_instance).toQString();
+    QString sourcePath = theBridge->GetSourcePath(item->m_instance).toQString();
+
+    if (!sourcePath.isEmpty() && sourcePath != QLatin1String("Default")) {
+        const auto doc = g_StudioApp.GetCore()->GetDoc();
+        const auto dirPath = doc->GetDocumentDirectory().toQString();
+        QFileInfo fileInfo(dirPath + QStringLiteral("/") + sourcePath);
+        if (!fileInfo.exists()) {
+            const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
+            const auto refMaterial = getReferenceMaterial(item->m_instance);
+            if (refMaterial.Valid()) {
+                const auto matName = sceneEditor->GetName(refMaterial);
+                QFileInfo newFileInfo(fileInfo.absoluteDir().path() + QStringLiteral("/")
+                                      + matName.toQString() + QStringLiteral(".matdata"));
+                const QDir docDir(dirPath);
+                const auto relPath = docDir.relativeFilePath(newFileInfo.absoluteFilePath());
+                sceneEditor->setMaterialSourcePath(item->m_instance,
+                                                   Q3DStudio::CString::fromQString(relPath));
+                sourcePath = theBridge->GetSourcePath(item->m_instance).toQString();
+            }
+        }
+    }
 
     switch (theType) {
     case OBJTYPE_MATERIAL:
@@ -997,18 +1017,24 @@ void InspectorControlModel::saveIfMaterial(qt3dsdm::Qt3DSDMInstanceHandle instan
 {
     const auto doc = g_StudioApp.GetCore()->GetDoc();
     const auto sceneEditor = doc->getSceneEditor();
-    if (!sceneEditor->isInsideMaterialContainer(instance))
+
+    auto material = instance;
+    const auto refMaterial = getReferenceMaterial(instance);
+    if (refMaterial.Valid())
+        material = refMaterial;
+
+    if (!sceneEditor->isInsideMaterialContainer(material))
         return;
 
     const auto studio = doc->GetStudioSystem();
     const auto bridge = studio->GetClientDataModelBridge();
-    EStudioObjectType type = bridge->GetObjectType(instance);
+    EStudioObjectType type = bridge->GetObjectType(material);
 
     if (type == EStudioObjectType::OBJTYPE_MATERIAL
         || type == EStudioObjectType::OBJTYPE_CUSTOMMATERIAL) {
         qt3dsdm::SValue value;
         studio->GetPropertySystem()->GetInstancePropertyValue(
-            instance, bridge->GetObjectDefinitions().m_Named.m_NameProp, value);
+            material, bridge->GetObjectDefinitions().m_Named.m_NameProp, value);
         qt3dsdm::TDataStrPtr namePtr(qt3dsdm::get<qt3dsdm::TDataStrPtr>(value));
         QString materialName = QString::fromWCharArray(namePtr->GetData(), namePtr->GetLength());
         QString sourcePath;
@@ -1020,7 +1046,7 @@ void InspectorControlModel::saveIfMaterial(qt3dsdm::Qt3DSDMInstanceHandle instan
         }
 
         if (!sourcePath.isEmpty())
-            sceneEditor->writeMaterialFile(instance, materialName, false, sourcePath);
+            sceneEditor->writeMaterialFile(material, materialName, false, sourcePath);
     }
 }
 
@@ -1076,8 +1102,6 @@ void InspectorControlModel::setMaterialTypeValue(long instance, int handle, cons
     if (refMaterial.Valid())
         sceneEditor->copyMaterialProperties(refMaterial, instance);
 
-    saveIfMaterial(instance);
-
     if (changeMaterialFile) {
         Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(),
                                           QObject::tr("Set Material Properties"))
@@ -1090,6 +1114,8 @@ void InspectorControlModel::setMaterialTypeValue(long instance, int handle, cons
 
         rebuildTree(); // Hack to mimic value changing behavior of the type selector
     }
+
+    saveIfMaterial(instance);
 }
 
 void InspectorControlModel::setRenderableValue(long instance, int handle, const QVariant &value)

@@ -864,7 +864,7 @@ public:
     }
 
     void getMaterialInfo(const QString &inFullPathToFile,
-                         QString &outName, QMap<QString, QString> &outValues)
+                         QString &outName, QMap<QString, QString> &outValues) override
     {
         qt3ds::foundation::CFileSeekableIOStream theStream(inFullPathToFile,
                                                            qt3ds::foundation::FileReadFlags());
@@ -888,8 +888,6 @@ public:
                     theReader->Value(value);
                     outValues[name] = value;
                 }
-                // Material name should be the filename regardless of the name value
-                outValues["name"] = outName;
             }
         }
     }
@@ -1827,6 +1825,10 @@ public:
         m_PropertySystem.GetAggregateInstanceProperties(instance, propList);
         for (auto &prop : propList) {
             const auto &name = m_PropertySystem.GetName(prop);
+
+            if (name == L"name")
+                continue;
+
             m_PropertySystem.GetInstancePropertyValue(instance, prop, value);
 
             if (m_AnimationSystem.IsPropertyAnimated(instance, prop))
@@ -1835,7 +1837,7 @@ public:
             if (!value.empty()) {
                 bool valid = true;
                 QString path;
-                if (value.getType() == DataModelDataType::Long4) {
+                if (name != L"id" && value.getType() == DataModelDataType::Long4) {
                     SLong4 guid = get<qt3dsdm::SLong4>(value);
                     if (guid.Valid()) {
                         auto ref = m_Bridge.GetInstanceByGUID(guid);
@@ -1870,6 +1872,13 @@ public:
                 }
             }
         }
+        file.write("\t<Property name=\"presentation\">");
+        file.write(m_Doc.GetDocumentPath().GetAbsolutePath()
+                   .toQString().toUtf8().constData());
+        file.write("</Property>\n");
+        file.write("\t<Property name=\"name\">");
+        file.write(QFileInfo(file).completeBaseName().toUtf8().constData());
+        file.write("</Property>\n");
         file.write("</MaterialData>");
     }
 
@@ -1933,7 +1942,7 @@ public:
         return instance;
     }
 
-    Qt3DSDMInstanceHandle getOrCreateMaterial(const Q3DStudio::CString &materialName) override
+    Qt3DSDMInstanceHandle getMaterial(const Q3DStudio::CString &materialName)
     {
         IObjectReferenceHelper *objRefHelper = m_Doc.GetDataModelObjectReferenceHelper();
         QString name = getMaterialContainerPath() + QStringLiteral(".") + materialName.toQString();
@@ -1942,6 +1951,12 @@ public:
         objRefHelper->ResolvePath(m_Doc.GetSceneInstance(),
                                   name.toUtf8().constData(),
                                   type, material, true);
+        return material;
+    }
+
+    Qt3DSDMInstanceHandle getOrCreateMaterial(const Q3DStudio::CString &materialName) override
+    {
+        auto material = getMaterial(materialName);
         if (!material.Valid()) {
             auto parent = getOrCreateMaterialContainer();
             material = CreateSceneGraphInstance(ComposerObjectTypes::Material, parent,
@@ -3141,7 +3156,7 @@ public:
         GetChildren(GetAssociatedSlide(parent), parent, children);
 
         for (auto &instance : children) {
-            auto name = GetName(instance);
+            const auto name = GetName(instance);
             writeMaterialFile(getOrCreateMaterial(name), name.toQString(), false);
         }
     }
@@ -4608,12 +4623,22 @@ public:
 
             if (theExtension.CompareNoCase(L"matdata")) {
                 if (theRecord.m_ModificationType == FileModificationType::Created) {
-                    getOrCreateMaterial(Q3DStudio::CString::fromQString(
-                                            theRecord.m_File.baseName()));
                     QString name;
                     QMap<QString, QString> values;
                     getMaterialInfo(theRecord.m_File.absoluteFilePath(), name, values);
+                    if (values.contains(QStringLiteral("presentation"))
+                            && values.contains(QStringLiteral("name"))) {
+                        if (values[QStringLiteral("presentation")]
+                                == m_Doc.GetDocumentPath().GetAbsolutePath().toQString()) {
+                            const auto instance = getMaterial(Q3DStudio::CString::fromQString(
+                                                                  values[QStringLiteral("name")]));
+                            if (instance.Valid())
+                                SetName(instance, Q3DStudio::CString::fromQString(name));
+                        }
+                    }
+                    auto material = getOrCreateMaterial(Q3DStudio::CString::fromQString(name));
                     setMaterialValues(name, values);
+                    writeMaterialFile(material, name, false, theRecord.m_File.toQString());
                 }
                 else if (theRecord.m_ModificationType == FileModificationType::Destroyed) {
                     IObjectReferenceHelper *objRefHelper
