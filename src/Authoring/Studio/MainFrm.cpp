@@ -910,7 +910,6 @@ void CMainFrame::EditPreferences(short inPageIndex)
         // Hide legacy viewer preview button
         m_ui->actionPreviewRuntime1->setVisible(false);
         CStudioPreferences::SetEditViewFillMode(true);
-        CStudioPreferences::SetEditViewBackgroundColor(CStudioPreferences::EDITVIEW_DEFAULTBGCOLOR);
         CStudioPreferences::SetPreferredStartupView(
                     CStudioPreferences::PREFERREDSTARTUP_DEFAULTINDEX);
         CStudioPreferences::SetAutoSaveDelay(CStudioPreferences::DEFAULT_AUTOSAVE_DELAY);

@@ -56,35 +56,18 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame, QObject *parent)
     : QObject(parent)
     , m_MainFrame(inMainFrame)
 {
+    const int defaultBottomDockHeight = int(inMainFrame->height() * 0.25);
+    const int defaultRightDockWidth = 435; // To fit all inspector controls
+    const int defaultProjectHeight = 285; // To fit all new project folders, expanded
+
     // Position tabs to the right
     inMainFrame->setTabPosition(Qt::AllDockWidgetAreas, QTabWidget::East);
+    inMainFrame->setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
     m_projectDock = new QDockWidget(QObject::tr("Project"), inMainFrame);
     m_projectDock->setObjectName("project");
     m_projectDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
                                    | Qt::BottomDockWidgetArea);
-    // Give the preferred size as percentages of the mainframe size
-    m_projectView = new ProjectView(QSize(inMainFrame->width() * 0.2,
-                                          inMainFrame->height() * 0.8),
-                                    m_projectDock);
-    m_projectView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-    m_projectDock->setWidget(m_projectView);
-    inMainFrame->addDockWidget(Qt::RightDockWidgetArea, m_projectDock);
-    m_ControlList.insert(std::make_pair(CONTROLTYPE_PROJECT, m_projectDock));
-
-    m_inspectorDock = new QDockWidget(QObject::tr("Inspector"), inMainFrame);
-    m_inspectorDock->setObjectName("inspector_control");
-    m_inspectorDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
-                                     | Qt::BottomDockWidgetArea);
-    // Give the preferred size as percentages of the mainframe size
-    auto inspectorView = new InspectorControlView(QSize(inMainFrame->width() * 0.2,
-                                                        inMainFrame->height() * 0.8),
-                                                  m_inspectorDock);
-    inspectorView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-    m_inspectorDock->setWidget(inspectorView);
-    inMainFrame->addDockWidget(Qt::RightDockWidgetArea, m_inspectorDock);
-    inMainFrame->tabifyDockWidget(m_projectDock, m_inspectorDock);
-    m_ControlList.insert(std::make_pair(CONTROLTYPE_INSPECTOR, m_inspectorDock));
 
     m_slideDock = new QDockWidget(QObject::tr("Slide"), inMainFrame);
     m_slideDock->setObjectName("slide");
@@ -115,9 +98,8 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame, QObject *parent)
     m_timelineDock->setAllowedAreas(Qt::BottomDockWidgetArea);
 
     // Give the preferred size as percentages of the mainframe size
-    // -25 is applied to width to compensate the action palette having no tabs by default
-    m_timelineWidget = new TimelineWidget(QSize(inMainFrame->width() * 0.8 - 25,
-                                                inMainFrame->height() * 0.2));
+    m_timelineWidget = new TimelineWidget(QSize(inMainFrame->width() - defaultRightDockWidth,
+                                                defaultBottomDockHeight));
     m_timelineWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     WidgetControl *timeLineWidgetControl = new WidgetControl(m_timelineWidget, m_timelineDock);
     timeLineWidgetControl->RegisterForDnd(timeLineWidgetControl);
@@ -133,19 +115,42 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame, QObject *parent)
     inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, m_timelineDock);
     m_ControlList.insert(std::make_pair(CONTROLTYPE_TIMELINE, m_timelineDock));
 
+    // Give the preferred size as percentages of the mainframe size
+    m_projectView = new ProjectView(QSize(defaultRightDockWidth, defaultProjectHeight),
+                                    m_projectDock);
+    m_projectView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    m_projectDock->setWidget(m_projectView);
+    inMainFrame->addDockWidget(Qt::RightDockWidgetArea, m_projectDock);
+    m_ControlList.insert(std::make_pair(CONTROLTYPE_PROJECT, m_projectDock));
+
     m_actionDock = new QDockWidget(QObject::tr("Action"), inMainFrame);
     m_actionDock->setObjectName("action");
     m_actionDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
                                   | Qt::BottomDockWidgetArea);
     // Give the preferred size as percentages of the mainframe size
-    // +25 is applied to width to compensate the action palette having no tabs by default
-    auto actionView = new ActionView(QSize(inMainFrame->width() * 0.2 + 25,
-                                           inMainFrame->height() * 0.2),
-                                     m_actionDock);
+    auto actionView = new ActionView(
+                QSize(defaultRightDockWidth, inMainFrame->height() - defaultProjectHeight),
+                m_actionDock);
     actionView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     m_actionDock->setWidget(actionView);
-    inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, m_actionDock);
+    inMainFrame->addDockWidget(Qt::RightDockWidgetArea, m_actionDock);
     m_ControlList.insert(std::make_pair(CONTROLTYPE_ACTION, m_actionDock));
+
+    m_inspectorDock = new QDockWidget(QObject::tr("Inspector"), inMainFrame);
+    m_inspectorDock->setObjectName("inspector_control");
+    m_inspectorDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
+                                     | Qt::BottomDockWidgetArea);
+    // Give the preferred size as percentages of the mainframe size
+    auto inspectorView = new InspectorControlView(
+                QSize(defaultRightDockWidth, inMainFrame->height() - defaultProjectHeight),
+                m_inspectorDock);
+    inspectorView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    m_inspectorDock->setWidget(inspectorView);
+    inMainFrame->addDockWidget(Qt::RightDockWidgetArea, m_inspectorDock);
+    inMainFrame->tabifyDockWidget(m_inspectorDock, m_actionDock);
+    m_ControlList.insert(std::make_pair(CONTROLTYPE_INSPECTOR, m_inspectorDock));
+
+    m_inspectorDock->raise();
 
     m_basicObjectsDock->setEnabled(false);
     m_projectDock->setEnabled(false);

@@ -47,6 +47,8 @@
 #include "Qt3DSImportTranslationCommon.h"
 #include "Qt3DSImportSceneGraphTranslation.h"
 #include "Qt3DSImportTranslation.h"
+#include "Dialogs.h"
+#include "StudioApp.h"
 
 #include <QtCore/qbytearray.h>
 #include <QtCore/qfileinfo.h>
@@ -909,7 +911,13 @@ void ColladaDOMWalker::ProcessTriangle(const domTrianglesRef inTrianglesRef,
     // Set the face indicies used by this particular material
     const xsNCName theMaterialName =
         inTrianglesRef->getMaterial(); // TODO: Handle the material settings for this face
-    ioFaceIndicies.second.push_back(std::make_pair(theMaterialName, theMaterialFaceIndicies));
+    if (theMaterialName != nullptr) {
+        ioFaceIndicies.second.push_back(std::make_pair(theMaterialName, theMaterialFaceIndicies));
+    } else {
+        g_StudioApp.GetDialogs()->DisplayKnownErrorDialog(
+                    QObject::tr("The mesh files could not be created.\n"
+                                "Materials are missing from the imported model."));
+    }
 }
 
 /**

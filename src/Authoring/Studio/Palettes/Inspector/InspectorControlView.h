@@ -75,7 +75,7 @@ public:
     Q_INVOKABLE QObject *showMeshChooser(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QObject *showObjectReference(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QObject *showTextureChooser(int handle, int instance, const QPoint &point);
-    Q_INVOKABLE QObject *showDataInputChooser(int handle, int instance, const QPoint &point);
+    Q_INVOKABLE void showDataInputChooser(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QColor showColorDialog(const QColor &color);
     Q_INVOKABLE bool toolTipsEnabled();
     Q_INVOKABLE QString convertPathToProjectRoot(const QString &presentationPath);

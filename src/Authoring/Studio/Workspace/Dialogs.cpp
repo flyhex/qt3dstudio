@@ -183,7 +183,7 @@ SAllowedTypesEntry g_AllowedImportTypes[] = {
     { Q3DStudio::DocumentEditorFileType::Font, QObject::tr("Font Files"), fontExts },
     { Q3DStudio::DocumentEditorFileType::Material, QObject::tr("Material Files"), materialExts },
 };
-size_t g_NumAllowedImportTypes = sizeof(g_AllowedImportTypes) / sizeof(*g_AllowedImportTypes);
+int g_NumAllowedImportTypes = sizeof(g_AllowedImportTypes) / sizeof(*g_AllowedImportTypes);
 
 // List of file types allowed for file references
 SAllowedTypesEntry g_AllowedFileReferencesTypes[] = {
@@ -193,7 +193,7 @@ SAllowedTypesEntry g_AllowedFileReferencesTypes[] = {
     { Q3DStudio::DocumentEditorFileType::Import, QObject::tr("Import Files"), importExts },
     { Q3DStudio::DocumentEditorFileType::Effect, QObject::tr("Effect Files"), effectExts },
 };
-size_t g_NumAllowedFileReferencesTypes =
+int g_NumAllowedFileReferencesTypes =
         sizeof(g_AllowedFileReferencesTypes) / sizeof(*g_AllowedFileReferencesTypes);
 }
 
@@ -476,7 +476,6 @@ QString CDialogs::ConfirmRefreshModelFile(const QString &inFile)
             CreateAllowedTypesString(Q3DStudio::DocumentEditorFileType::DAE, initialFilter,
                                      true, true);
 
-
     return QFileDialog::getOpenFileName(g_StudioApp.m_pMainWnd, QObject::tr("Open"),
                                         inFile, theFileFilter, nullptr);
 }
@@ -488,7 +487,9 @@ QList<QUrl> CDialogs::SelectAssets(QString &outPath,
     fd.setDirectory(outPath);
     fd.setFileMode(QFileDialog::ExistingFiles);
     QString initialFilter;
-    fd.setNameFilter(CreateAllowedTypesString(assetType, initialFilter, true, false));
+    fd.setNameFilter(CreateAllowedTypesString(
+                         assetType, initialFilter, true,
+                         assetType != Q3DStudio::DocumentEditorFileType::Unknown));
     fd.selectNameFilter(initialFilter);
     fd.setWindowTitle(QObject::tr("Import Assets"));
 
@@ -580,11 +581,11 @@ void CDialogs::DisplaySavingPresentationFailed()
  *
  *	@return	void
  */
-void CDialogs::DisplaySaveReadOnlyFailed(const Qt3DSFile &inSavedLocation)
+void CDialogs::DisplaySaveReadOnlyFailed(const QString &inSavedLocation)
 {
     QString theMsg = QObject::tr("Studio cannot save the file '%1'. The file is marked Read-Only."
                                  "\nSave the file with another file name or to a different "
-                                 "location.").arg(inSavedLocation.GetName().toQString());
+                                 "location.").arg(inSavedLocation);
     QString theTitle = QObject::tr("Qt 3D Studio");
 
     if (m_ShowGUI) {
@@ -922,8 +923,8 @@ QString CDialogs::CreateAllowedTypesString(Q3DStudio::DocumentEditorFileType::En
 {
     QString theReturnString;
     QString combinedFilter;
-    size_t theCount = forImport ? g_NumAllowedImportTypes : g_NumAllowedFileReferencesTypes;
-    for (size_t idx = 0; idx < theCount; ++idx) {
+    int theCount = forImport ? g_NumAllowedImportTypes : g_NumAllowedFileReferencesTypes;
+    for (int idx = 0; idx < theCount; ++idx) {
         const SAllowedTypesEntry &entry =
                 forImport ? g_AllowedImportTypes[idx] : g_AllowedFileReferencesTypes[idx];
         if (!exclusive || fileTypeFilter == entry.m_FileType) {
@@ -941,10 +942,13 @@ QString CDialogs::CreateAllowedTypesString(Q3DStudio::DocumentEditorFileType::En
         combinedFilter.chop(1); // Remove last separator
         theReturnString.prepend(QObject::tr("All Supported Asset types")
                                 + " (" + combinedFilter + ");;");
-        outInitialFilter = combinedFilter;
+        outInitialFilter = QObject::tr("All Supported Asset types")
+                + " (" + combinedFilter + ")";
     }
     theReturnString.chop(2);
-    outInitialFilter.chop(2);
+    if (exclusive)
+        outInitialFilter.chop(2);
+
     return theReturnString;
 }
 

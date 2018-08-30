@@ -32,70 +32,93 @@
 \page studio-project-palette.html
 \ingroup qt3dstudio-studio
 
-The Project palette displays the files and folders on disk for your project.
-However, only files usable by Studio are displayed in the palette.
+The project palette displays the files and folders on disk for your project.
+Only files usable by Studio are displayed in the palette.
 
-\section1 Adding Assets
+\section1 Importing Assets
 
-You can add new assets to your project by dragging the files from the file system to the
-\e{project palette}. This will create a copy of the file in the project folder structure.
-The original file will always remain untouched.
+You can import assets to your project in the following ways:
 
-\section2 Adding Assets from a Library
+\list
+  \li
+    \list 1
+      \li From the menu bar, select \uicontrol{File > Import Assets}.
+      \li Select desired files to import, then press \uicontrol{Open}.
+    \endlist
+  \li
+    \list 1
+      \li In the bottom of the project palette, click the \inlineimage import-assets-icon.png
+      .
+      \li Select desired files to import, then press \uicontrol{Open}.
+    \endlist
+  \li
+    \list 1
+      \li In the project palette, right-click and select \uicontrol{Import Assets} from the
+      context menu.
+      \li Select desired files to import, then press \uicontrol{Open}.
+      \note If a folder is selected in the project palette, only files of corresponding file types
+      will be visible in the file dialogue. If you for example have selected the \e{models} folder
+      before importing, only files of \e{.fbx} and \e{.dae} will be shown.
+    \endlist
+  \li
+     \list 1
+      \li From the file system, drag and drop desired files to the project palette. If the files
+      are not dropped in a specific folder they will be automatically imported to the
+      corresponding folder. For example, image files will be imported to the \e maps folder.
+      \image import-assetes-dnd.png
+    \endlist
+\endlist
+
+When importing files to your project, a \e copy of the file is imported. The original file will
+always remain untouched.
+
+\section2 Importing Assets from the Asset Library
+
+Qt 3D Studio ships with a variety of sample assets to help you
+experiment and to speed common development needs. To import these assets to your project, use the
+assets library icons in the bottom part of the project palette.
 
 \image sampleAssets.png
 
-Qt 3D Studio ships with a variety of sample assets to help you
-experiment and to speed common development needs. These files are hidden
-by the installer deep in the bowels of your computer. To make them easier
-to access, the bottom of the Project palette has five icons that provide
-direct access to a specific library.
-
-Clicking on one of these icons will open the corresponding folder in
-your file system. Once you have found the asset that you want, drag the
-asset from the file system onto the appropriate folder in the Project
-palette. As described above, this will \e{copy} the sample asset into
-your project. Once you have a copy you are free to edit it without fear
-of damaging the pristine original.
+Clicking on one of these icons will open the corresponding assets library folder. Select the
+desired files and press open to import them to your project, this will \e{copy} the sample asset
+into your project. Once you have a copy you are free to edit it without fear of damaging the
+pristine original.
 
 \section1 Managing Assets
 
 If you wish to rename or delete items from your project, simply do so
-via the file system. Double-clicking on the folder in the Project
-palette will open the folder in the file system.
-
-Alternatively, you may right-click on a project asset and choose
-\c{Show Containing Folder}. This will open the folder containing the item
-and also select it in the file system.
+via the file system. Right-click the folder (or an asset in the folder) in the project
+palette and select \uicontrol{Show Containing Folder} to open the folder in the file
+system.
 
 \section1 Using Assets
 
-To use an item from the Project palette in your presentation, drag the
+To use an item from the project palette in your presentation, drag the
 item into the \l{studio-scene-view-and-matte.html}{scene view}
-or \l{studio-timeline-palette.html}{Timeline palette}. A new element
+or \l{studio-timeline-palette.html}{timeline palette}. A new element
 will be created in your scene tied to that asset.
 
-For convenience, dragging an image from the Project palette into your
+For convenience, dragging an image from the project palette into your
 scene will automatically create a rectangular model scaled to the aspect
 ratio of your image, with the image used as the diffuse map on the
 material. Dragging out a font file will create a text element with the
 font set correctly.
 
-Changes to the asset on disk (for example, editing an image in Photoshop,
-changing a script in Architect) will automatically update inside Studio.
+Changes to the asset on disk (for example, editing an image in Photoshop),
+will automatically update inside Studio.
 
 The one caveat to the above are 3D model assets. When you import a 3D
 model (in Collada or FBX format) into your project, it is converted into
 a \c{.import} file that references one or more \c{.mesh}
 assets. Changes to the original 3D model file will \b{not}
 automatically update inside of Studio. To update a changed model,
-right-click on the \c{.import} file in the Project palette and
-choose \c{Refresh Import...}. In the subsequent file dialog,
-select the model file on disk that you wish to re-import. Studio will do
-its best to understand the differences between your original file and
-the new version, and apply them to your presentation. For more details,
-read the section
+right-click on the \c{.import} file in the project palette and
+choose \uicontrol{Refresh Import}. In the subsequent file dialog,
+select the model file on disk that you wish to re-import. Your model in Studio will
+be updated. For more details, read the section
 \l{best-practices-importing-3d-content.html}{Working with 3D Content}.
+
 \omit
 \section1 Locating Missing Assets
 

@@ -123,6 +123,7 @@ public:
     void updateMaterialValues();
     void setMaterials(std::vector<Q3DStudio::CFilePath> &materials);
     void setMatDatas(std::vector<Q3DStudio::CFilePath> &matdatas);
+    void updateFontValues(InspectorControlBase *element) const;
     void refreshRenderables();
     void refresh();
 

@@ -51,16 +51,17 @@ public:
             QMap<QString, CDataInputDialogItem *> &datainputs);
     void writePresentationId(const QString &id, const QString &src = {});
     void updateDocPresentationId();
+    void addPresentationNode(const QString &uip, const QString &pId = {});
     bool isUniquePresentationId(const QString &id,
                                 const QString &src = {}) const;
     QString getProjectPath() const;
     QString getProjectFilePath() const;
     QString getProjectName() const;
-    QString getFirstPresentationPath(const QString &uiaPath) const;
     QString getPresentationId(const QString &src) const;
-    void addPresentationNode(const QString &uip, const QString &pId = {});
     QString getResolvedPathTo(const QString &path) const;
+    QString createPreview();
 
+    static QString getInitialPresentationSrc(const QString &uiaPath);
     static void getPresentations(const QString &inUiaPath,
                                  QVector<SubPresentationRecord> &outSubpresentations,
                                  const QString &excludePresentationSrc = {});

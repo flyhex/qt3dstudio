@@ -29,8 +29,9 @@
 #include "ImageChooserModel.h"
 #include "StudioApp.h"
 
-ImageChooserModel::ImageChooserModel(QObject *parent)
+ImageChooserModel::ImageChooserModel(bool showRenderables, QObject *parent)
     : ChooserModelBase(parent)
+    , m_showRenderables(showRenderables)
 {
 }
 
@@ -40,7 +41,8 @@ ImageChooserModel::~ImageChooserModel()
 
 bool ImageChooserModel::isVisible(const QString &path) const
 {
-    return getIconType(path) == OBJTYPE_IMAGE || !g_StudioApp.getRenderableId(path).isEmpty();
+    return getIconType(path) == OBJTYPE_IMAGE
+            || (m_showRenderables && !g_StudioApp.getRenderableId(path).isEmpty());
 }
 
 const QVector<ChooserModelBase::FixedItem> ImageChooserModel::getFixedItems() const

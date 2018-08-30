@@ -398,6 +398,28 @@ bool ProjectView::toolTipsEnabled()
     return CStudioPreferences::ShouldShowTooltips();
 }
 
+void ProjectView::openFile(int row)
+{
+    if (row == -1)
+        return;
+
+    QFileInfo fi(m_ProjectModel->filePath(row));
+    if (fi.isDir() || isCurrentPresentation(row))
+        return;
+
+    QString filePath = QDir::cleanPath(fi.absoluteFilePath());
+    QTimer::singleShot(0, [filePath]() {
+        // .uip files should be opened in this studio instance
+        if (filePath.endsWith(QLatin1String(".uip"), Qt::CaseInsensitive)) {
+            if (g_StudioApp.PerformSavePrompt())
+                g_StudioApp.OnLoadDocument(filePath);
+        } else {
+            // TODO: materials to be opened in inspector, pending materials handling overhaul
+            QDesktopServices::openUrl(QUrl::fromLocalFile(filePath));
+        }
+    });
+}
+
 void ProjectView::refreshImport(int row) const
 {
     if (row == -1)

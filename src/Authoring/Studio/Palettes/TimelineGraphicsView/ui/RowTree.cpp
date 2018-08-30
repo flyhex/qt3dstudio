@@ -179,6 +179,7 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
         return;
 
     static const int ICON_SIZE = 16;
+    static const int LEFT_DIVIDER = 18;
     const int offset = 5 + m_depth * TimelineConstants::ROW_DEPTH_STEP;
     const int iconY = (TimelineConstants::ROW_H / 2) - (ICON_SIZE / 2);
 
@@ -210,7 +211,7 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
 
     // left divider
     painter->setPen(CStudioPreferences::timelineWidgetBgColor());
-    painter->drawLine(18, 0, 18, size().height() - 1);
+    painter->drawLine(LEFT_DIVIDER, 0, LEFT_DIVIDER, size().height() - 1);
 
     // Shy, eye, lock separator
     painter->fillRect(QRect(treeWidth() - TimelineConstants::TREE_ICONS_W,
@@ -253,6 +254,15 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     static const QPixmap pixCompAction = QPixmap(":/images/Action-ComponentAction.png");
 
     if (!isProperty()) {
+        // subpresentation indicators
+        if (m_hasSubpresentation) {
+            painter->fillRect(QRect(0, 0, LEFT_DIVIDER, size().height() - 1),
+                              CStudioPreferences::timelineRowSubpColor());
+        } else if (!expanded() && m_numDescendantSubpresentations > 0) {
+            painter->fillRect(QRect(0, 0, LEFT_DIVIDER, size().height() - 1),
+                              CStudioPreferences::timelineRowSubpDescendantColor());
+        }
+
         if (m_actionStates & ActionState::MasterAction) // has master action
             painter->drawPixmap(0, 0, pixMasterAction);
         else if (m_actionStates & ActionState::Action) // has action
@@ -865,6 +875,38 @@ void RowTree::updateLock(bool state)
         m_scene->keyframeManager()->deselectRowKeyframes(this);
 }
 
+void RowTree::updateSubpresentations(int updateParentsOnlyVal)
+{
+    if (updateParentsOnlyVal != 0) {
+        int n = m_numDescendantSubpresentations;
+        if (m_hasSubpresentation)
+            n++;
+        if (n > 0) {
+            RowTree *parentRow = m_parentRow;
+            while (parentRow) {
+                parentRow->m_numDescendantSubpresentations += n * updateParentsOnlyVal;
+                parentRow->update();
+                parentRow = parentRow->m_parentRow;
+            }
+        }
+    } else {
+        auto binding = static_cast<Qt3DSDMTimelineItemBinding *>(m_binding);
+        bool hasSubp = binding->hasSubpresentation();
+
+        if (m_hasSubpresentation != hasSubp) {
+            m_hasSubpresentation = hasSubp;
+            int n = hasSubp ? 1 : -1;
+            RowTree *parentRow = m_parentRow;
+            while (parentRow) {
+                parentRow->m_numDescendantSubpresentations += n;
+                parentRow->update();
+                parentRow = parentRow->m_parentRow;
+            }
+        }
+    }
+    update();
+}
+
 void RowTree::updateLabelPosition()
 {
     int offset = 5 + m_depth * TimelineConstants::ROW_DEPTH_STEP + 30;
@@ -933,15 +975,11 @@ void RowTree::setActionStates(ActionStates states)
 
 bool RowTree::isContainer() const
 {
-    if (isComponent() && m_indexInLayout == 1) // root element inside a component
-        return true;
-
     return !m_isProperty
             && m_rowType != OBJTYPE_ALIAS
             && m_rowType != OBJTYPE_MATERIAL
             && m_rowType != OBJTYPE_IMAGE
             && m_rowType != OBJTYPE_TEXT
-            && m_rowType != OBJTYPE_COMPONENT
             && m_rowType != OBJTYPE_BEHAVIOR
             && m_rowType != OBJTYPE_EFFECT;
 }

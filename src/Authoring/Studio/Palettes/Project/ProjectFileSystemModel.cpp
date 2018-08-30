@@ -763,21 +763,18 @@ bool ProjectFileSystemModel::hasVisibleChildren(const QModelIndex &modelIndex) c
 
 bool ProjectFileSystemModel::isVisible(const QModelIndex &modelIndex) const
 {
-    bool result = false;
+    QString path = modelIndex.data(QFileSystemModel::FilePathRole).toString();
 
-    if (modelIndex == m_rootIndex) {
-        result = true;
-    } else {
-        QString path = modelIndex.data(QFileSystemModel::FilePathRole).toString();
-        QFileInfo fileInfo(path);
-        if (fileInfo.isFile()) {
-            result = getIconType(path) != OBJTYPE_UNKNOWN;
-        } else {
-            result = true;
-        }
+    if (modelIndex == m_rootIndex || QFileInfo(path).isDir())
+        return true;
+
+    if (path.endsWith(QLatin1String("_autosave.uip"))
+        || path.endsWith(QLatin1String("_@preview@.uip"))
+        || path.endsWith(QLatin1String(".uia"))) {
+        return false;
     }
 
-    return result;
+    return getIconType(path) != OBJTYPE_UNKNOWN;
 }
 
 void ProjectFileSystemModel::modelRowsInserted(const QModelIndex &parent, int start, int end)

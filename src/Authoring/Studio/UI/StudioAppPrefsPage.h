@@ -56,12 +56,8 @@ public:
     explicit CStudioAppPrefsPage(QWidget *parent = nullptr);
     ~CStudioAppPrefsPage();
 
-    // Dialog Data
-    QColor m_bgColor;
-
 public:
     bool onApply() override;
-    void onBackgroundColorChanged(const QColor &color);
 
 protected:
     bool m_timebarShowTime; // TRUE if timebars are to display their time value
@@ -80,7 +76,6 @@ protected:
 #if 0 // Removed until we have some other Preview configurations that just Viewer
     void onChangePreviewConfiguration();
 #endif
-    void onBgColorButtonClicked();
 
     void enableAutosave(bool enabled);
     void setAutosaveInterval(int interval);
@@ -99,9 +94,6 @@ protected:
     void removePreviewPropertyControls();
 #endif
     QScopedPointer<QT_PREPEND_NAMESPACE(Ui::StudioAppPrefsPage)> m_ui;
-
-private:
-    void updateColorButton();
 };
 
 #endif

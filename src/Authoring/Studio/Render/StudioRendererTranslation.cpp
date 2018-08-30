@@ -2125,10 +2125,7 @@ void STranslation::PreRender(bool scenePreviewPass)
             m_Presentation.m_PresentationDimensions = theViewportDims;
             m_Context.SetPresentationDimensions(
                 QSize((QT3DSU32)theViewportDims.x, (QT3DSU32)theViewportDims.y));
-            ::CColor theEditCameraBackground = CStudioPreferences::GetEditViewBackgroundColor();
-            m_Context.SetSceneColor(QT3DSVec4(theEditCameraBackground.GetRed() / 255.0f,
-                                              theEditCameraBackground.GetGreen() / 255.0f,
-                                              theEditCameraBackground.GetBlue() / 255.0f, 1.0f));
+            m_Context.SetSceneColor(QT3DSVec4(0.0f, 0.0f, 0.0f, 1.0f));
         } else {
 
             TIdentifier theRoot = m_AssetGraph.GetRoot(0);
@@ -2567,16 +2564,11 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
                 m_GradientWidget = qt3ds::widgets::SGradientWidget
                                     ::CreateGradientWidget(m_Context.GetAllocator());
             // render gradient background
-            if (m_EditCameraEnabled) {
-                SNode *node = GetEditCameraLayer();
-                m_GradientWidget->SetNode(*node);
-                m_GradientWidget->Render(m_Context.GetRenderWidgetContext(),
-                                         m_Context.GetRenderContext(),
-                                         m_EditCameraInfo.IsOrthographic());
-            } else {
-                m_GradientWidget->Render(m_Context.GetRenderWidgetContext(),
-                                         m_Context.GetRenderContext(), true);
-            }
+            SNode *node = GetEditCameraLayer();
+            m_GradientWidget->SetNode(*node);
+            m_GradientWidget->Render(m_Context.GetRenderWidgetContext(),
+                                     m_Context.GetRenderContext(),
+                                     m_EditCameraInfo.IsOrthographic());
         }
 
         m_Scene->Render(scenePreviewPass

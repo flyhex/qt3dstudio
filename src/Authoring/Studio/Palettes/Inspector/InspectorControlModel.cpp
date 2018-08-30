@@ -301,6 +301,39 @@ QString getDefaultMaterialString()
     return QObject::tr("Default");
 }
 
+void InspectorControlModel::updateFontValues(InspectorControlBase *element) const
+{
+    // Find if there are any font items and update the values of those
+    QVector<InspectorControlBase *> fontElements;
+    if (element) {
+        fontElements.append(element);
+    } else {
+        for (int row = 0; row < m_groupElements.count(); ++row) {
+            auto group = m_groupElements[row];
+            for (int p = 0; p < group.controlElements.count(); ++p) {
+                QVariant &element = group.controlElements[p];
+                InspectorControlBase *property = element.value<InspectorControlBase *>();
+                if (property->m_propertyType == qt3dsdm::AdditionalMetaDataType::Font)
+                    fontElements.append(property);
+            }
+        }
+    }
+
+    if (fontElements.size()) {
+        std::vector<Q3DStudio::CString> fontNames;
+        g_StudioApp.GetCore()->GetDoc()->GetProjectFonts(fontNames);
+        QStringList possibleValues;
+        for (const auto &fontName : fontNames)
+            possibleValues.append(fontName.toQString());
+        for (auto fontElement : qAsConst(fontElements)) {
+            fontElement->m_values = possibleValues;
+            Q_EMIT fontElement->valuesChanged();
+            // Changing values resets the selected index, so pretend the value has also changed
+            Q_EMIT fontElement->valueChanged();
+        }
+    }
+}
+
 QStringList InspectorControlModel::materialValues() const
 {
     QStringList values;
@@ -759,6 +792,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
     const auto metaDataProvider = doc->GetStudioSystem()->GetActionMetaData();
     const auto info = metaDataProvider->GetMetaDataPropertyInfo(
                 metaDataProvider->GetMetaDataProperty(instance, element->m_property));
+    bool skipEmits = false;
     switch (element->m_dataType) {
     case qt3dsdm::DataModelDataType::String:
         element->m_value = qt3dsdm::get<QString>(value);
@@ -833,13 +867,8 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
         } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::MultiLine) {
             element->m_value = qt3dsdm::get<QString>(value);
         } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Font) {
-            std::vector<Q3DStudio::CString> fontNames;
-            g_StudioApp.GetCore()->GetDoc()->GetProjectFonts(fontNames);
-            QStringList possibleValues;
-            for (const auto &fontName: fontNames)
-                possibleValues.append(fontName.toQString());
-            element->m_values = possibleValues;
-            element->m_value = qt3dsdm::get<QString>(value);
+            updateFontValues(element);
+            skipEmits = true; // updateFontValues handles emits in correct order
         } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Mesh) {
             QString meshValue = qt3dsdm::get<QString>(value);
             Q3DStudio::CFilePath theSelectionItem(Q3DStudio::CString::fromQString(meshValue));
@@ -951,8 +980,11 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
                    << element->m_dataType;
         break;
     }
-    Q_EMIT element->valueChanged();
-    Q_EMIT element->valuesChanged();
+
+    if (!skipEmits) {
+        Q_EMIT element->valueChanged();
+        Q_EMIT element->valuesChanged();
+    }
 
     // Controlled state must be manually set after undo operations,
     // as only the "controlledproperty" is restored in undo,

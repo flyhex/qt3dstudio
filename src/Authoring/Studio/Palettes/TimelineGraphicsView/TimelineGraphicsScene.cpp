@@ -84,6 +84,7 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     , m_rowManager(new RowManager(this, m_layoutTree, m_layoutTimeline))
     , m_keyframeManager(new KeyframeManager(this))
     , m_pressPos(invalidPoint)
+    , m_pressScreenPos(invalidPoint)
     , m_timelineControl(new TimelineControl(this))
     , m_currentCursor(-1)
 {
@@ -405,6 +406,16 @@ void TimelineGraphicsScene::commitMoveRows()
     if (!m_rowMover->insertionParent()->expanded())
         m_rowMover->insertionParent()->updateExpandStatus(RowTree::ExpandState::Expanded, false);
 
+    // Remove sourcerows for items that will be deleted as result of RearrangeObjects,
+    // f.ex objects that will be moved to a component; otherwise we try to update
+    // timeline rows that no longer have valid scene objects linked to them.
+    // Note that we remove all sourcerows that are being dragged currently, because they
+    // all share the same drop target anyway.
+    if (m_rowMover->shouldDeleteAfterMove()) {
+        for (auto sourceRow : sourceRows)
+            m_rowMover->removeSourceRow(sourceRow);
+    }
+
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(),
                                       QObject::tr("Move Rows"))
             ->RearrangeObjects(sourceHandles, handleTarget, m_rowMover->insertionType());
@@ -450,6 +461,22 @@ void TimelineGraphicsScene::resetMouseCursor()
 void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     g_StudioApp.setLastActiveView(m_widgetTimeline);
+
+    if ((event->modifiers() & Qt::AltModifier) && !m_dragging) {
+        if (event->button() == Qt::RightButton && !m_timelinePanning) {
+            // Start zooming
+            m_timelineZooming = true;
+            m_pressScreenPos = event->screenPos();
+            event->accept();
+            return;
+        } else if (event->button() == Qt::MiddleButton && !m_timelineZooming) {
+            // Start panning
+            m_timelinePanning = true;
+            m_pressPos = event->scenePos();
+            event->accept();
+            return;
+        }
+    }
 
     // Ignore non-left presses if dragging
     if (event->button() != Qt::LeftButton && (m_dragging || m_startRowMoverOnNextDrag)) {
@@ -561,10 +588,30 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
+    if (m_timelineZooming) {
+        int deltaY = event->screenPos().y() - m_pressScreenPos.y();
+        int deltaX = event->screenPos().x() - m_pressScreenPos.x();
+        // Zooming in when moving down/right.
+        int delta = -deltaX - deltaY;
+        const int threshold = 20;
+        if (delta < -threshold) {
+            m_widgetTimeline->toolbar()->onZoomInButtonClicked();
+            m_pressScreenPos = event->screenPos();
+        } else if (delta > threshold) {
+            m_widgetTimeline->toolbar()->onZoomOutButtonClicked();
+            m_pressScreenPos = event->screenPos();
+        }
+    } else if (m_timelinePanning) {
+        int deltaX = event->scenePos().x() - m_pressPos.x();
+        QScrollBar *scrollbar = m_widgetTimeline->viewTimelineContent()->horizontalScrollBar();
+        scrollbar->setValue(scrollbar->value() - deltaX);
+    }
+
     if (m_editedTimelineRow.isNull())
         updateHoverStatus(event->scenePos());
 
-    if (!m_dragging && m_pressPos != invalidPoint
+    if (!m_dragging && !m_timelineZooming && !m_timelinePanning
+            && m_pressPos != invalidPoint
             && (event->scenePos() - m_pressPos).manhattanLength() > 10) {
         m_dragging = true;
     }
@@ -670,6 +717,8 @@ void TimelineGraphicsScene::resetMousePressParams()
     m_selectionRect->end();
     m_rowMover->end();
     m_dragging = false;
+    m_timelineZooming = false;
+    m_timelinePanning = false;
     m_startRowMoverOnNextDrag = false;
     m_rulerPressed = false;
     m_keyframePressed = false;
@@ -680,6 +729,7 @@ void TimelineGraphicsScene::resetMousePressParams()
     m_autoScrollTriggerTimer.stop();
     m_timebarToolTip->hide();
     m_pressPos = invalidPoint;
+    m_pressScreenPos = invalidPoint;
     m_lastAutoScrollX = -1.0;
     m_lastAutoScrollY = -1.0;
 }
@@ -768,9 +818,9 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             if (!m_releaseSelectRow.isNull())
                 m_rowManager->selectRow(m_releaseSelectRow);
         }
-
-        resetMousePressParams();
     }
+
+    resetMousePressParams();
 
     QGraphicsScene::mouseReleaseEvent(event);
 }
@@ -861,10 +911,11 @@ void TimelineGraphicsScene::keyReleaseEvent(QKeyEvent *keyEvent)
 
 void TimelineGraphicsScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
+    // No context menu if user is pressing ALT (so panning/zooming timeline)
+    bool alt = event->modifiers() & Qt::AltModifier;
     RowTree *row = m_rowManager->getRowAtPos(QPointF(0, event->scenePos().y()));
-
     if (!row || m_widgetTimeline->isFullReconstructPending() || m_dragging
-            || m_startRowMoverOnNextDrag || row->locked()) {
+            || m_startRowMoverOnNextDrag || row->locked() || alt) {
         return;
     }
 
