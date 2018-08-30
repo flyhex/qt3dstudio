@@ -78,13 +78,11 @@ load(qt_parts)
             QMAKE_EXTRA_TARGETS += mkStudioQmlDir
             mkStudioQmlDir.commands = \
                 $$sprintf($$QMAKE_MKDIR_CMD, $$shell_quote($$shell_path(\$(DEPLOY_DIR)/QtStudio3D)))
-
-            # Deploy viewer 1.0 qml dependencies when deploying studio
-            EXTRA_DEPLOY_OPTIONS = -qmldir=$$shell_quote($$PWD/src/Viewer/Qt3DViewer)
         }
 
         qtPrepareTool(DEPLOY_TOOL, $$deploytool)
 
+        EXTRA_DEPLOY_OPTIONS = -qmldir=$$shell_quote($$PWD/src/shared/dummyqml)
         deployTarget.commands = \
             $$DEPLOY_TOOL $$shell_quote(\$(DEPLOY_DIR)/Qt3DStudio$${exesuffix}) \
                 -qmldir=$$shell_quote($$PWD/src/Authoring/Studio/Palettes) $$EXTRA_DEPLOY_OPTIONS
@@ -93,7 +91,7 @@ load(qt_parts)
             # Viewer 1.0
             deployTarget.commands += && \
                 $$DEPLOY_TOOL $$shell_quote(\$(DEPLOY_DIR)/Qt3DViewer$${exesuffix}) \
-                -qmldir=$$shell_quote($$PWD/src/Viewer/Qt3DViewer)
+                $$EXTRA_DEPLOY_OPTIONS
         }
 
         greaterThan(QT_MAJOR_VERSION, 5)|greaterThan(QT_MINOR_VERSION, 10) {
@@ -116,8 +114,8 @@ load(qt_parts)
                     $$QMAKE_COPY $$shell_quote($$shell_path( \
                         $$OUT_PWD/src/Runtime/qt3d-runtime/bin/$$RUNTIME2_LIB)) \
                     $$shell_quote($$shell_path($$[QT_INSTALL_BINS]/$$RUNTIME2_LIB))
-                EXTRA_DEPLOY_OPTIONS = --qml --quick
             }
+
             deployTarget.commands += && \
                 $$DEPLOY_TOOL $$shell_quote(\$(DEPLOY_DIR)/q3dsviewer$${exesuffix}) \
                 $$EXTRA_DEPLOY_OPTIONS
