@@ -143,9 +143,6 @@ public:
     // children.
     virtual void GetAllAssociatedSlides(TInstanceHandle inInstance, TSlideList &outList) const = 0;
 
-    // Returns true if this object is the scene or a components
-    virtual bool IsComponent(TInstanceHandle inInstance) const = 0;
-
     // Get all the source paths for this instance.  If the slide is zero, this means the source
     // path is set in the data core.  Else this indicates exactly which slide the source path is
     // set under.
