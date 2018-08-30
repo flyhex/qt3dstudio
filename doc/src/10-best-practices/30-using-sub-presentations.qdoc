@@ -98,6 +98,9 @@ parts of a large presentation as separate smaller presentations. This can help c
 in single \c{.uip} files, as well as allow different parts of a presentation to be authored
 separately and simultaneously.
 
+When you add a sub-presentation to a layer in either way described below, the layer will scale
+to match the size of the sub-presentation.
+
 To add a sub-presentation to a layer, do one of the following:
 \list
   \li
