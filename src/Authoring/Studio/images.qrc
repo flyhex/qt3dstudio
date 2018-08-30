@@ -255,6 +255,12 @@
         <file>images/zoom_out@2x.png</file>
         <file>images/zoom_in.png</file>
         <file>images/zoom_in@2x.png</file>
+        <file>images/Tutorial/background.png</file>
+        <file>images/Tutorial/background@2x.png</file>
+        <file>images/Tutorial/dot_active.png</file>
+        <file>images/Tutorial/dot_active@2x.png</file>
+        <file>images/Tutorial/dot_inactive.png</file>
+        <file>images/Tutorial/dot_inactive@2x.png</file>
         <file>images/Tutorial/screens/1x/1.png</file>
         <file>images/Tutorial/screens/1x/2.png</file>
         <file>images/Tutorial/screens/1x/3.png</file>

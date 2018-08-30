@@ -122,7 +122,10 @@ void CPerformImport::DoImportToComposer(Import &import, IComposerEditor &compose
             TImportId parentId = L"";
             if (parent.hasValue())
                 parentId = parent->m_Id;
-            composer.CreateInstance(desc.m_Id, desc.m_Type, parentId);
+            if (desc.m_Type != ComposerObjectTypes::Material)
+                composer.CreateInstance(desc.m_Id, desc.m_Type, parentId);
+            else
+                composer.createMaterial(desc.m_Id, desc.m_Type, parentId);
         }
     }
 

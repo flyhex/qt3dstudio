@@ -69,6 +69,8 @@ static QColor s_timelineRowColorDndSource;
 static QColor s_timelineRowColorDndTarget;
 static QColor s_timelineRowColorDndTargetSP;
 static QColor s_timelineRowMoverColor;
+static QColor s_timelineRowSubpColor;
+static QColor s_timelineRowSubpDescendantColor;
 static QColor s_timelineRulerColor;
 static QColor s_timelineRulerColorDisabled;
 static QColor s_timelineWidgetBgColor;
@@ -152,6 +154,8 @@ void CStudioPreferences::LoadPreferences()
     s_timelinePlayheadLineColor = QColor("#b20808");
     s_timelineFilterButtonSelectedColor = QColor("#000000");
     s_timelineFilterButtonHoveredColor = QColor("#40000000");
+    s_timelineRowSubpColor = QColor("#e2ceff");
+    s_timelineRowSubpDescendantColor = QColor("#a263ff");
 
     s_fontSize = 12;
     s_controlBaseHeight = 22;
@@ -223,28 +227,6 @@ void CStudioPreferences::SetTimelineSnappingGridResolution(ESnapGridResolution i
     CPreferences::GetUserPreferences().SetLongValue("SnappingGridResolution", (long)inResolution);
 }
 
-//==============================================================================
-/**
- *	Get the background color of the editing view
- *	@return the color of the editing view
- */
-::CColor CStudioPreferences::GetEditViewBackgroundColor()
-{
-    return CPreferences::GetUserPreferences().GetColorValue("EditViewBGColor",
-                                                            EDITVIEW_DEFAULTBGCOLOR);
-}
-
-//==============================================================================
-/**
- *	Set the background color of the editing view
- *	@param inColor the color of the editing view
- */
-void CStudioPreferences::SetEditViewBackgroundColor(::CColor inColor)
-{
-    CPreferences::GetUserPreferences().SetColorValue("EditViewBGColor", inColor);
-}
-
-//==============================================================================
 /**
  *	Get the fill mode to render the geometries when in editing view
  *	@return true to render as solid, else as wireframe
@@ -976,6 +958,16 @@ QColor CStudioPreferences::timelineFilterButtonSelectedColor()
 QColor CStudioPreferences::timelineFilterButtonHoveredColor()
 {
     return s_timelineFilterButtonHoveredColor;
+}
+
+QColor CStudioPreferences::timelineRowSubpColor()
+{
+    return s_timelineRowSubpColor;
+}
+
+QColor CStudioPreferences::timelineRowSubpDescendantColor()
+{
+    return s_timelineRowSubpDescendantColor;
 }
 
 int CStudioPreferences::fontSize()

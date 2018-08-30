@@ -45,6 +45,7 @@
 #include "IDocumentEditor.h"
 #include "IDragable.h"
 #include <QtQml/qqmlapplicationengine.h>
+#include "IObjectReferenceHelper.h"
 
 ProjectFileSystemModel::ProjectFileSystemModel(QObject *parent) : QAbstractListModel(parent)
     , m_model(new QFileSystemModel(this))
@@ -337,6 +338,52 @@ bool ProjectFileSystemModel::hasValidUrlsForDropping(const QList<QUrl> &urls) co
     }
 
     return false;
+}
+
+void ProjectFileSystemModel::showInfo(int row)
+{
+    if (row < 0 || row >= m_items.size())
+        row = 0;
+
+    const TreeItem &item = m_items.at(row);
+    QString path = item.index.data(QFileSystemModel::FilePathRole).toString();
+
+    QFileInfo fi(path);
+
+    if (fi.suffix() == QLatin1String("matdata")) {
+        const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
+        const auto material = sceneEditor
+                ->getOrCreateMaterial(Q3DStudio::CString::fromQString(fi.baseName()));
+        QString name;
+        QMap<QString, QString> values;
+        sceneEditor->getMaterialInfo(fi.absoluteFilePath(), name, values);
+        sceneEditor->setMaterialValues(name, values);
+        if (material.Valid())
+            g_StudioApp.GetCore()->GetDoc()->SelectDataModelObject(material);
+    }
+}
+
+void ProjectFileSystemModel::duplicate(int row)
+{
+    if (row < 0 || row >= m_items.size())
+        row = 0;
+
+    const TreeItem &item = m_items.at(row);
+    QString path = item.index.data(QFileSystemModel::FilePathRole).toString();
+
+    QFileInfo srcFile(path);
+    const QString destPathStart = srcFile.dir().absolutePath() + QDir::separator()
+            + srcFile.baseName() + QStringLiteral(" Copy");
+    const QString destPathEnd = QStringLiteral(".") + srcFile.suffix();
+    QString destPath = destPathStart + destPathEnd;
+
+    int i = 0;
+    while (QFile::exists(destPath)) {
+        i++;
+        destPath = destPathStart + QString::number(i) + destPathEnd;
+    }
+
+    QFile::copy(path, destPath);
 }
 
 void ProjectFileSystemModel::importUrls(const QList<QUrl> &urls, int row, bool autoSort)
@@ -716,21 +763,18 @@ bool ProjectFileSystemModel::hasVisibleChildren(const QModelIndex &modelIndex) c
 
 bool ProjectFileSystemModel::isVisible(const QModelIndex &modelIndex) const
 {
-    bool result = false;
+    QString path = modelIndex.data(QFileSystemModel::FilePathRole).toString();
 
-    if (modelIndex == m_rootIndex) {
-        result = true;
-    } else {
-        QString path = modelIndex.data(QFileSystemModel::FilePathRole).toString();
-        QFileInfo fileInfo(path);
-        if (fileInfo.isFile()) {
-            result = getIconType(path) != OBJTYPE_UNKNOWN;
-        } else {
-            result = true;
-        }
+    if (modelIndex == m_rootIndex || QFileInfo(path).isDir())
+        return true;
+
+    if (path.endsWith(QLatin1String("_autosave.uip"))
+        || path.endsWith(QLatin1String("_@preview@.uip"))
+        || path.endsWith(QLatin1String(".uia"))) {
+        return false;
     }
 
-    return result;
+    return getIconType(path) != OBJTYPE_UNKNOWN;
 }
 
 void ProjectFileSystemModel::modelRowsInserted(const QModelIndex &parent, int start, int end)

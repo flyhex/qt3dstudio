@@ -72,7 +72,8 @@ public:
     FindAssetInstanceByObjectPath(CDoc *inDoc, const qt3dsdm::Qt3DSDMInstanceHandle &inRootInstance,
                                   const Q3DStudio::CString &inString, EPathType &outPathType,
                                   bool &outIsResolved,
-                                  const IObjectReferenceHelper *inHelper = NULL);
+                                  const IObjectReferenceHelper *inHelper = nullptr,
+                                  bool ignoreMaterialProperties = false);
     static qt3dsdm::SObjectRefType
     CreateAssetRefValue(const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                         const qt3dsdm::Qt3DSDMInstanceHandle inRootInstance, EPathType inPathType,
@@ -83,7 +84,8 @@ protected:
     DoFindAssetInstanceByObjectPath(CDoc *inDoc, const qt3dsdm::Qt3DSDMInstanceHandle &inRootInstance,
                                     const qt3dsdm::Qt3DSDMInstanceHandle inTimeParentInstance,
                                     qt3dsdm::Qt3DSDMSlideHandle inSlide, CStackTokenizer &ioTokenizer,
-                                    bool &outIsResolved, const IObjectReferenceHelper *inHelper);
+                                    bool &outIsResolved, const IObjectReferenceHelper *inHelper,
+                                    bool ignoreMaterialProperties = false);
     static Q3DStudio::CString LookupObjectName(const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                                CDoc *inDoc);
 };

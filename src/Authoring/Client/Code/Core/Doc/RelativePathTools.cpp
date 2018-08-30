@@ -161,7 +161,8 @@ CRelativePathTools::BuildRelativeReferenceString(const qt3dsdm::Qt3DSDMInstanceH
 qt3dsdm::Qt3DSDMInstanceHandle CRelativePathTools::FindAssetInstanceByObjectPath(
     CDoc *inDoc, const qt3dsdm::Qt3DSDMInstanceHandle &inRootInstance,
     const Q3DStudio::CString &inString, EPathType &outPathType, bool &outIsResolved,
-    const IObjectReferenceHelper *inHelper /*= NULL */)
+    const IObjectReferenceHelper *inHelper,
+    bool ignoreMaterialProperties)
 {
     CClientDataModelBridge *theBridge = inDoc->GetStudioSystem()->GetClientDataModelBridge();
 
@@ -209,10 +210,12 @@ qt3dsdm::Qt3DSDMInstanceHandle CRelativePathTools::FindAssetInstanceByObjectPath
                 theBridge->GetComponentActiveSlide(theTimeParent);
             return DoFindAssetInstanceByObjectPath(inDoc, theFoundInstance, theTimeParent,
                                                    theCurrentSlide, theTokenizer, outIsResolved,
-                                                   inHelper);
-        } else
+                                                   inHelper, ignoreMaterialProperties);
+        } else {
             return DoFindAssetInstanceByObjectPath(inDoc, theFoundInstance, theTimeParent, 0,
-                                                   theTokenizer, outIsResolved, inHelper);
+                                                   theTokenizer, outIsResolved, inHelper,
+                                                   ignoreMaterialProperties);
+        }
     } else {
         return inDoc->GetSceneInstance();
     }
@@ -256,7 +259,8 @@ CRelativePathTools::CreateAssetRefValue(const qt3dsdm::Qt3DSDMInstanceHandle inI
 qt3dsdm::Qt3DSDMInstanceHandle CRelativePathTools::DoFindAssetInstanceByObjectPath(
     CDoc *inDoc, const qt3dsdm::Qt3DSDMInstanceHandle &inRootInstance,
     const qt3dsdm::Qt3DSDMInstanceHandle inTimeParentInstance, qt3dsdm::Qt3DSDMSlideHandle inSlide,
-    CStackTokenizer &ioTokenizer, bool &outIsResolved, const IObjectReferenceHelper *inHelper)
+    CStackTokenizer &ioTokenizer, bool &outIsResolved, const IObjectReferenceHelper *inHelper,
+    bool ignoreMaterialProperties)
 {
     CClientDataModelBridge *theBridge = inDoc->GetStudioSystem()->GetClientDataModelBridge();
 
@@ -275,7 +279,7 @@ qt3dsdm::Qt3DSDMInstanceHandle CRelativePathTools::DoFindAssetInstanceByObjectPa
                     outIsResolved = true;
                     theFoundInstance = DoFindAssetInstanceByObjectPath(
                         inDoc, theParentInstance, inTimeParentInstance, inSlide, ioTokenizer,
-                        outIsResolved, inHelper);
+                        outIsResolved, inHelper, ignoreMaterialProperties);
                 }
             }
             // Find the asset by name
@@ -285,7 +289,8 @@ qt3dsdm::Qt3DSDMInstanceHandle CRelativePathTools::DoFindAssetInstanceByObjectPa
                 if (!outIsResolved && inHelper) {
                     qt3dsdm::TInstanceHandleList theChildList;
                     if (inHelper->GetChildInstanceList(inRootInstance, theChildList, inSlide,
-                                                       inTimeParentInstance)) {
+                                                       inTimeParentInstance,
+                                                       ignoreMaterialProperties)) {
                         for (size_t theIndex = 0; theIndex < theChildList.size(); ++theIndex) {
                             Q3DStudio::CString theCurrentAssetName(
                                 LookupObjectName(theChildList[theIndex], inDoc));
@@ -294,7 +299,7 @@ qt3dsdm::Qt3DSDMInstanceHandle CRelativePathTools::DoFindAssetInstanceByObjectPa
                                 outIsResolved = true;
                                 theFoundInstance = DoFindAssetInstanceByObjectPath(
                                     inDoc, theChildList[theIndex], inTimeParentInstance, inSlide,
-                                    ioTokenizer, outIsResolved, inHelper);
+                                    ioTokenizer, outIsResolved, inHelper, ignoreMaterialProperties);
                                 break;
                             }
                         }

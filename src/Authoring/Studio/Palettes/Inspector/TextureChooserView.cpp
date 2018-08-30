@@ -45,7 +45,7 @@
 
 TextureChooserView::TextureChooserView(QWidget *parent)
     : QQuickWidget(parent)
-    , m_model(new ImageChooserModel(this))
+    , m_model(new ImageChooserModel(false, this))
 {
     setWindowTitle(tr("Texture"));
     setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);

@@ -62,6 +62,9 @@ SObjectFileType ImportUtils::GetObjectFileTypeForFile(const CFilePath &inFile,
         bool isQmlStream =  strcmp(rootClassName, "Q3DStudio::Q3DSQmlBehavior") != 0;
         return isQmlStream ? SObjectFileType(OBJTYPE_QML_STREAM, DocumentEditorFileType::QmlStream)
                            : SObjectFileType(OBJTYPE_BEHAVIOR, DocumentEditorFileType::Behavior);
+    } else if (theExtension.Compare(CDialogs::GetMaterialDataFileExtension(),
+                                    Q3DStudio::CString::ENDOFSTRING, false)) {
+        return SObjectFileType(OBJTYPE_MATERIALDATA, DocumentEditorFileType::MaterialData);
     } else if (CDialogs::IsFontFileExtension(theExtension)) {
         return SObjectFileType(OBJTYPE_TEXT, DocumentEditorFileType::Font);
     } else if (CDialogs::IsEffectFileExtension(theExtension)) {

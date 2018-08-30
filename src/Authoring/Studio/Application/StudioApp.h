@@ -199,6 +199,7 @@ public:
     void ReduceUltraBigTime();
     void PlaybackToggle();
     CInspectableBase *GetInspectableFromSelectable(Q3DStudio::SSelectedValue inSelectable);
+    CInspectableBase *getInspectableFromInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
     bool OnSave(bool autosave = false);
     bool OnSaveAs();
@@ -254,6 +255,7 @@ public:
 
     QString getRenderableId(const QString &filePath) const;
     QString getRenderableAbsolutePath(const QString &renderableId) const;
+    QSize getRenderableSize(const QString &renderableId);
 
     QString getMostRecentDirectory() const;
     QString getMostRecentProjectParentDir() const;

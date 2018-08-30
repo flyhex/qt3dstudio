@@ -377,6 +377,11 @@ bool ProjectView::isQmlStream(int row) const
     return strcmp(rootClassName, "Q3DStudio::Q3DSQmlBehavior") != 0;
 }
 
+bool ProjectView::isMaterialData(int row) const
+{
+    return m_ProjectModel->filePath(row).endsWith(QLatin1String(".matdata"));
+}
+
 bool ProjectView::isRefreshable(int row) const
 {
     return m_ProjectModel->isRefreshable(row);
@@ -391,6 +396,28 @@ void ProjectView::showContextMenu(int x, int y, int index)
 bool ProjectView::toolTipsEnabled()
 {
     return CStudioPreferences::ShouldShowTooltips();
+}
+
+void ProjectView::openFile(int row)
+{
+    if (row == -1)
+        return;
+
+    QFileInfo fi(m_ProjectModel->filePath(row));
+    if (fi.isDir() || isCurrentPresentation(row))
+        return;
+
+    QString filePath = QDir::cleanPath(fi.absoluteFilePath());
+    QTimer::singleShot(0, [filePath]() {
+        // .uip files should be opened in this studio instance
+        if (filePath.endsWith(QLatin1String(".uip"), Qt::CaseInsensitive)) {
+            if (g_StudioApp.PerformSavePrompt())
+                g_StudioApp.OnLoadDocument(filePath);
+        } else {
+            // TODO: materials to be opened in inspector, pending materials handling overhaul
+            QDesktopServices::openUrl(QUrl::fromLocalFile(filePath));
+        }
+    });
 }
 
 void ProjectView::refreshImport(int row) const
@@ -413,6 +440,39 @@ void ProjectView::refreshImport(int row) const
                         oldFile.canonicalFilePath(), newFile.canonicalFilePath());
         }
     }
+}
+
+void ProjectView::addMaterial(int row) const
+{
+    if (row == -1)
+        return;
+
+    QString path = m_ProjectModel->filePath(row);
+    QFileInfo info(path);
+    if (info.isFile())
+        path = info.dir().path();
+    path += QLatin1String("/Material");
+    QString extension = QLatin1String(".matdata");
+
+    QFile file(path + extension);
+    int i = 0;
+    while (file.exists()) {
+        i++;
+        file.setFileName(path + QString::number(i) + extension);
+    }
+
+    file.open(QIODevice::WriteOnly);
+    file.write("<MaterialData version=\"1.0\">\n</MaterialData>");
+}
+
+void ProjectView::editMaterial(int row) const
+{
+    m_ProjectModel->showInfo(row);
+}
+
+void ProjectView::duplicate(int row) const
+{
+    m_ProjectModel->duplicate(row);
 }
 
 void ProjectView::rebuild()

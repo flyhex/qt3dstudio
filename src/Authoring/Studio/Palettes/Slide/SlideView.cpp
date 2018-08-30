@@ -56,6 +56,7 @@ SlideView::SlideView(QWidget *parent) : QQuickWidget(parent)
   , m_MasterSlideModel(new SlideModel(1, this))
   , m_SlidesModel(new SlideModel(0, this))
   , m_ActiveRoot(0)
+  , m_toolTip(tr("No Controller"))
 {
     g_StudioApp.GetCore()->GetDispatch()->AddPresentationChangeListener(this);
     setResizeMode(QQuickWidget::SizeRootObjectToView);
@@ -286,7 +287,7 @@ void SlideView::onDataInputChange(int handle, int instance, const QString &dataI
     } else {
         m_controlled = false;
         m_currentController.clear();
-        m_toolTip = tr("No controller");
+        m_toolTip = tr("No Controller");
     }
     qt3dsdm::Qt3DSDMPropertyHandle ctrldProp;
     if (bridge->GetObjectType(slideRoot) == EStudioObjectType::OBJTYPE_SCENE) {
@@ -379,7 +380,7 @@ void SlideView::updateDataInputStatus()
             m_controlled = true;
         } else {
             m_currentController.clear();
-            m_toolTip = tr("No controller");
+            m_toolTip = tr("No Controller");
             m_controlled = false;
         }
         // update UI

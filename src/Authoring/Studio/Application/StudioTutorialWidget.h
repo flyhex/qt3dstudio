@@ -32,6 +32,7 @@
 #include <QtCore/qlist.h>
 #include <QtCore/qstring.h>
 #include <QtCore/qsettings.h>
+#include <QtCore/qdatetime.h>
 #include <QtGui/qpixmap.h>
 #include <QtGui/qpalette.h>
 #include <QtWidgets/qdialog.h>
@@ -68,6 +69,7 @@ protected:
 public:
     void handleFwd();
     void handleBack();
+    void handleIndexChange(int index);
     void handleDoNotShowAgainChange(int state);
     void handleOpenSample();
     void handleCreateNew();
@@ -78,20 +80,25 @@ private:
 
     QList<QString> *m_welcomeImages;
     QList<QString>::iterator m_imgIter;
+    QList<QString>::iterator m_imgIterPrev;
 
     QPalette *m_palette;
+    QPixmap m_pageInPixmap;
+    QPixmap m_pageOutPixmap;
+    QPixmap m_backgroundPixmap;
 
     qreal m_displayScale;
+    qreal m_pageInOpacity = 0.0;
+    QTime m_opacityTime;
 
     bool m_showProjectButtons;
 
     void getImageList();
+    void updateButtons();
+    void animateInOut();
 
     QPixmap getScaledPic(const QList<QString>::iterator &iter);
-    QPixmap getPrevScaledPic();
-    QPixmap getNextScaledPic();
-    qreal getDisplayScalingForImage(const QList<QString>::iterator &iter);
-    QSize getPicSize(const QList<QString>::iterator &iter);
+    qreal getDisplayScalingForImage(const QPixmap &picOrig);
 };
 
 #endif // STUDIOTUTORIALWIDGET_H

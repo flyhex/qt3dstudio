@@ -111,6 +111,7 @@ public:
     bool IsVisibilityControlled() const override;
     bool ChildrenHasAction(bool inMaster) override;
     bool ComponentHasAction(bool inMaster) override;
+    bool hasSubpresentation() const override;
     ITimelineTimebar *GetTimebar() override;
 
     // INamable

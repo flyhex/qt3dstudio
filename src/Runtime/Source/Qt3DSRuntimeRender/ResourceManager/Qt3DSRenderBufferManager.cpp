@@ -325,7 +325,7 @@ struct SBufferManager : public IBufferManager
     }
 
     SImageTextureData LoadRenderImage(CRegisteredString inImagePath,
-                                              bool inForceScanForTransparency, bool inBsdfMipmaps) override
+                                      bool inForceScanForTransparency, bool inBsdfMipmaps) override
     {
         inImagePath = GetImagePath(inImagePath);
 
@@ -338,8 +338,22 @@ struct SBufferManager : public IBufferManager
             {
                 SStackPerfTimer __perfTimer(m_PerfTimer, "Image Decompression");
                 theLoadedImage = SLoadedTexture::Load(
-                    inImagePath.c_str(), m_Context->GetFoundation(), *m_InputStreamFactory,
+                            inImagePath.c_str(), m_Context->GetFoundation(), *m_InputStreamFactory,
                             true, m_Context->GetRenderContextType());
+                // Hackish solution to custom materials not finding their textures if they are used
+                // in sub-presentations. Note: Runtime 1 is going to be removed in Qt 3D Studio 2.x,
+                // so this should be ok.
+                if (!theLoadedImage) {
+                    QString searchPath = QStringLiteral(".");
+                    searchPath.append(inImagePath.c_str());
+                    int loops = 0;
+                    while (!theLoadedImage && ++loops <= 3) {
+                        theLoadedImage = SLoadedTexture::Load(
+                                    searchPath.toUtf8(), m_Context->GetFoundation(),
+                                    *m_InputStreamFactory, true, m_Context->GetRenderContextType());
+                        searchPath.prepend(QStringLiteral("../"));
+                    }
+                }
             }
 
             if (theLoadedImage) {
@@ -350,7 +364,7 @@ struct SBufferManager : public IBufferManager
                 // again
                 // which could slow down the system quite a bit.
                 pair<TImageMap::iterator, bool> theImage =
-                    m_ImageMap.insert(make_pair(inImagePath, SImageEntry()));
+                        m_ImageMap.insert(make_pair(inImagePath, SImageEntry()));
                 theImage.first->second.m_Loaded = true;
                 qCWarning(WARNING, "Failed to load image: %s", inImagePath.c_str());
                 theIter = theImage.first;

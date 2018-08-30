@@ -53,6 +53,18 @@ ProjectContextMenu::ProjectContextMenu(ProjectView *parent, int index)
         addSeparator();
     }
 
+    if (m_view->isMaterialData(m_index)) {
+        QAction *action = new QAction(tr("Edit Material"));
+        connect(action, &QAction::triggered, this, &ProjectContextMenu::handleEditMaterial);
+        addAction(action);
+
+        action = new QAction(tr("Duplicate"));
+        connect(action, &QAction::triggered, this, &ProjectContextMenu::handleDuplicate);
+        addAction(action);
+
+        addSeparator();
+    }
+
     QAction *action = new QAction(tr("Show Containing Folder"));
     connect(action, &QAction::triggered, this, &ProjectContextMenu::handleShowContainingFolder);
     addAction(action);
@@ -71,6 +83,12 @@ ProjectContextMenu::ProjectContextMenu(ProjectView *parent, int index)
 
     action = new QAction(tr("Import Assets..."));
     connect(action, &QAction::triggered, this, &ProjectContextMenu::handleImportAssets);
+    addAction(action);
+
+    addSeparator();
+
+    action = new QAction(tr("Add Material"));
+    connect(action, &QAction::triggered, this, &ProjectContextMenu::handleAddMaterial);
     addAction(action);
 
     if (m_view->isRefreshable(m_index)) {
@@ -118,4 +136,19 @@ void ProjectContextMenu::handleRefreshImport()
 void ProjectContextMenu::handleImportAssets()
 {
     m_view->assetImportInContext(m_index);
+}
+
+void ProjectContextMenu::handleAddMaterial()
+{
+    m_view->addMaterial(m_index);
+}
+
+void ProjectContextMenu::handleEditMaterial()
+{
+    m_view->editMaterial(m_index);
+}
+
+void ProjectContextMenu::handleDuplicate()
+{
+    m_view->duplicate(m_index);
 }

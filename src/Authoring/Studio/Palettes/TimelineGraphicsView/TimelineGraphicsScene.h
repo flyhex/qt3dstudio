@@ -135,6 +135,7 @@ private:
     RowManager *m_rowManager = nullptr;
     KeyframeManager *m_keyframeManager = nullptr;
     QPointF m_pressPos;
+    QPointF m_pressScreenPos;
     QList<double> m_snapSteps;
     CMouseCursor::Qt3DSMouseCursor m_currentCursor;
     TimelineControl *m_timelineControl = nullptr;
@@ -143,6 +144,8 @@ private:
     bool m_keyframePressed = false;
     bool m_dragging = false;
     bool m_startRowMoverOnNextDrag = false;
+    bool m_timelineZooming = false;
+    bool m_timelinePanning = false;
     TimelineControlType m_clickedTimelineControlType = TimelineControlType::None;
     TreeControlType m_clickedTreeControlType = TreeControlType::None;
     double m_pressPosInKeyframe;

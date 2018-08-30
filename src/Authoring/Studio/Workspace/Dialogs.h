@@ -94,6 +94,7 @@ public:
     static const char *GetImportFileExtension();
     static const char *GetMeshFileExtension();
     static const char *GetQmlFileExtension();
+    static const char *GetMaterialDataFileExtension();
     static const char **GetFontFileExtensions();
     static const char **GetEffectFileExtensions();
     static const char **GetMaterialFileExtensions();
@@ -138,7 +139,7 @@ public:
     void DisplayLoadingPresentationFailed(const Qt3DSFile &inPresentation,
                                           const QString &inErrorText);
     void DisplaySavingPresentationFailed();
-    void DisplaySaveReadOnlyFailed(const Qt3DSFile &inSavedLocation);
+    void DisplaySaveReadOnlyFailed(const QString &inSavedLocation);
     void DisplayObjectRenamed(const QString &origName, const QString &newName, bool async = false);
     Qt3DSMessageBox::EMessageBoxReturn DisplayMessageBox(const QString &inTitle,
                                                          const QString &inText,

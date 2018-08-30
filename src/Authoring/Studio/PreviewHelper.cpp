@@ -42,6 +42,7 @@
 #include <QtWidgets/qinputdialog.h>
 #include <QtWidgets/qmessagebox.h>
 #include <QtCore/qprocess.h>
+#include <ProjectFile.h>
 
 #include "remotedeploymentsender.h"
 
@@ -55,7 +56,7 @@ Q3DStudio::CString CPreviewHelper::GetLaunchFile(const Q3DStudio::CString &inUip
             .Compare(previewSuffix + uipSuffix);
 
     Q3DStudio::CFilePath theUipPath(inUipPath);
-
+    // Mahmoud_TODO: update to use PresentationFile::findProjectFile()
     Q3DStudio::CString theDir = theUipPath.GetDirectory();
     Q3DStudio::CString theStem = theUipPath.GetFileStem();
     if (isPreview)
@@ -133,18 +134,14 @@ void CPreviewHelper::PreviewViaConfig(Q3DStudio::CBuildConfiguration *inSelected
                                       EExecMode inMode, const QString &viewerExeName,
                                       RemoteDeploymentSender *project)
 {
-    bool theUsingTempFile;
-    Qt3DSFile theDocument = GetDocumentFile(theUsingTempFile);
     CCore *theCore = g_StudioApp.GetCore();
+    QString prvPath = theCore->getProjectFile().createPreview();
     try {
-        if (theUsingTempFile)
-            theCore->OnSaveDocument(theDocument, true);
-
-        DoPreviewViaConfig(inSelectedConfig, theDocument.GetAbsolutePath(),
+        DoPreviewViaConfig(inSelectedConfig, Q3DStudio::CString::fromQString(prvPath),
                            inMode, viewerExeName, project);
     } catch (...) {
         theCore->GetDispatch()->FireOnProgressEnd();
-        g_StudioApp.GetDialogs()->DisplaySaveReadOnlyFailed(theDocument);
+        g_StudioApp.GetDialogs()->DisplaySaveReadOnlyFailed(prvPath);
     }
 }
 
@@ -153,27 +150,56 @@ QString CPreviewHelper::getViewerFilePath(const QString &exeName)
     using namespace Q3DStudio;
     CFilePath currentPath(Qt3DSFile::GetApplicationDirectory().GetAbsolutePath());
     CFilePath viewerDir(QApplication::applicationDirPath());
-    if (!viewerDir.IsDirectory())
-        viewerDir = currentPath.GetDirectory(); // Developing directory
 
     QString viewerFile;
 #ifdef Q_OS_WIN
+    if (!viewerDir.IsDirectory())
+        viewerDir = currentPath.GetDirectory(); // Developing directory
     viewerFile = QStringLiteral("%1.exe").arg(exeName);
-#else
-#ifdef Q_OS_MACOS
-    viewerFile = QStringLiteral("../../../%1.app/Contents/MacOS/%1").arg(exeName);
-#else
-    viewerFile = QStringLiteral("%1").arg(exeName);
-#endif
-#endif
+
     QString viewer = viewerDir.filePath() + QStringLiteral("/") + viewerFile;
     if (!QFileInfo(viewer).exists()
-            && exeName == QStringLiteral("q3dsviewer")) {
-        return viewerDir.filePath() + QStringLiteral("/../src/Runtime/qt3d-runtime/bin/")
+            && exeName == QLatin1String("q3dsviewer")) {
+        viewer = viewerDir.filePath() + QStringLiteral("/../src/Runtime/qt3d-runtime/bin/")
                 + viewerFile;
-    } else {
-        return viewer;
     }
+#else
+#ifdef Q_OS_MACOS
+    // Check if we're looking for Viewer 2.x that has a different development
+    // time path for the executable
+    QString viewerDevPath;
+    if (exeName == QLatin1String("q3dsviewer"))
+        viewerDevPath = QStringLiteral("../src/Runtime/qt3d-runtime/bin/");
+
+    // Name of the executable file on macOS
+    viewerFile = QStringLiteral("%1.app/Contents/MacOS/%1").arg(exeName);
+
+    // Executable directory is three steps above the directory of studio executable
+    QString executableDir = viewerDir.filePath() + QStringLiteral("/../../../");
+
+    // Formulate the expected path to the viewer in development environment
+    QString viewer = executableDir + viewerDevPath + viewerFile;
+
+    // If not in development environment, expect viewer to be in same directory
+    if (!QFileInfo(viewer).exists())
+        viewer = executableDir + viewerFile;
+
+#else
+    if (!viewerDir.IsDirectory())
+        viewerDir = currentPath.GetDirectory(); // Developing directory
+
+    viewerFile = exeName;
+
+    QString viewer = viewerDir.filePath() + QStringLiteral("/") + viewerFile;
+    if (!QFileInfo(viewer).exists()
+            && exeName == QLatin1String("q3dsviewer")) {
+        viewer = viewerDir.filePath() + QStringLiteral("/../src/Runtime/qt3d-runtime/bin/")
+                + viewerFile;
+    }
+#endif
+#endif
+
+    return viewer;
 }
 
 void CPreviewHelper::cleanupProcess(QProcess *p, QString *pDocStr)
@@ -182,12 +208,19 @@ void CPreviewHelper::cleanupProcess(QProcess *p, QString *pDocStr)
     QString preview = previewSuffix.toQString();
     QString uia = preview + uiaSuffix.toQString();
     QString uip = preview + uipSuffix.toQString();
-    if (pDocStr->endsWith(uia) || pDocStr->endsWith(uip)) {
-        QFile(*pDocStr).remove();
-        if (pDocStr->endsWith(uia)) {
-            pDocStr->replace(uia, uip);
-            QFile(*pDocStr).remove();
+    if (pDocStr->endsWith(uia)) {
+        // remove presentation preview (initial)
+        QString initialPresentationSrc = ProjectFile::getInitialPresentationSrc(*pDocStr);
+        if (!initialPresentationSrc.isEmpty() && initialPresentationSrc
+                                                 .endsWith(QLatin1String("_@preview@.uip"))) {
+            QString absUipPath = QDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath())
+                                                        .absoluteFilePath(initialPresentationSrc);
+            QFile(absUipPath).remove();
         }
+
+        QFile(*pDocStr).remove(); // remove uia preview
+    } else if (pDocStr->endsWith(uip)) {
+        QFile(*pDocStr).remove();
     }
     if (p->state() == QProcess::Running) {
         p->terminate();

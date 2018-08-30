@@ -174,6 +174,28 @@ public:
         DeleteInstances(theInstances);
     }
 
+    virtual Q3DStudio::CString writeMaterialFile(Qt3DSDMInstanceHandle instance,
+                                         const QString &materialName,
+                                         bool createNewFile,
+                                         const QString &sourcePath = {}) = 0;
+
+    virtual void updateMaterialInstances(const QStringList &filenames) = 0;
+
+    virtual bool isMaterialContainer(Qt3DSDMInstanceHandle instance) const = 0;
+
+    virtual bool isInsideMaterialContainer(Qt3DSDMInstanceHandle instance) const = 0;
+
+    virtual Qt3DSDMInstanceHandle getMaterialContainer() const = 0;
+
+    virtual Qt3DSDMInstanceHandle getOrCreateMaterial(const Q3DStudio::CString &materialName) = 0;
+
+    virtual void getMaterialReference(Qt3DSDMInstanceHandle instance,
+                                      Qt3DSDMInstanceHandle &reference) const = 0;
+    virtual void setMaterialReference(Qt3DSDMInstanceHandle instance,
+                                      Qt3DSDMInstanceHandle reference) = 0;
+
+    virtual void copyMaterialProperties(Qt3DSDMInstanceHandle src, Qt3DSDMInstanceHandle dst) = 0;
+
     // Set the instance's property value.  This will set it in this slide if specified, else it is
     // set
     // in the datacore.  Mainly for internal use.  Most clients should use the API's below (note
@@ -214,6 +236,22 @@ public:
 
     virtual void SetMaterialType(TInstanceHandle instance,
                                  const Q3DStudio::CString &inRelativePathToMaterialFile) = 0;
+
+    virtual void setMaterialProperties(TInstanceHandle instance, const QString &materialName,
+                                       const Q3DStudio::CString &materialSourcePath,
+                                       const QMap<QString, QString> &values) = 0;
+
+    virtual void setMaterialReferenceByName(TInstanceHandle instance,
+                                            const Q3DStudio::CString &materialName) = 0;
+
+    virtual void setMaterialSourcePath(TInstanceHandle instance,
+                                       const Q3DStudio::CString &materialSourcePath) = 0;
+
+    virtual void setMaterialValues(const QString &materialName,
+                                   const QMap<QString, QString> &values) = 0;
+
+    virtual void setMaterialValues(TInstanceHandle instance,
+                                   const QMap<QString, QString> &values) = 0;
 
     // Set the slide name property value
     // Also update all actions that point to the old slide name to new name

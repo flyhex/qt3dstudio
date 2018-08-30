@@ -44,10 +44,9 @@ Rectangle {
         ListView {
             id: listView
 
-            anchors {
-                fill: parent
-                leftMargin: 8
-            }
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.margins: 4
 
             boundsBehavior: Flickable.StopAtBounds
             spacing: 4

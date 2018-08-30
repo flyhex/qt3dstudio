@@ -62,8 +62,8 @@ INCLUDEPATH += \
     ../../Runtime/Source/Qt3DSStateApplication/Application \
     ../../3rdparty/EASTL/UnknownVersion/include \
     $$QMAKE_INCDIR_FBX \
-    ../../3rdparty/ColladaDOM/1.4.0/dom/include \
-    ../../3rdparty/ColladaDOM/1.4.0/dom/include/1.4 \
+    ../../3rdparty/ColladaDOM/2.4.0/dom/include \
+    ../../3rdparty/ColladaDOM/2.4.0/dom/include/1.4 \
     ../../3rdparty/color \
     ..
 

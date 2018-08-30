@@ -95,7 +95,8 @@ void PresentationFile::updatePresentationId(const QString &uipPath, const QStrin
             if (elem.attribute(QStringLiteral("sourcepath")) == oldId) {
                 elem.setAttribute(QStringLiteral("sourcepath"), newId);
                 updated = true;
-            } else if (elem.attribute(QStringLiteral("subpresentation")) == oldId) {
+            }
+            if (elem.attribute(QStringLiteral("subpresentation")) == oldId) {
                 elem.setAttribute(QStringLiteral("subpresentation"), newId);
                 updated = true;
             }

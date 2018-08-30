@@ -132,6 +132,10 @@ RowTree *RowManager::createRowFromBinding(ITimelineItemBinding *binding, RowTree
 
 void RowManager::createRowsFromBindingRecursive(ITimelineItemBinding *binding, RowTree *parentRow)
 {
+    auto instance = static_cast<Qt3DSDMTimelineItemBinding *>(binding)->GetInstance();
+    if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()->isMaterialContainer(instance))
+        return;
+
     RowTree *newRow = createRowFromBinding(binding, parentRow);
     // create child rows recursively
     const QList<ITimelineItemBinding *> children = binding->GetChildren();
