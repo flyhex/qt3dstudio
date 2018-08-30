@@ -49,7 +49,6 @@ static const float fepsilon = 1e-6f;
 static const float pointLightOuterRadius = 40.0f;
 static const float directionalLightRadius = 40.0f;
 static const float directionalLightLength = 100.0f;
-static const float cameraMaxLength = 1000.0f;
 
 SVisualAidWidget::SVisualAidWidget(NVAllocatorCallback &inAlloc)
     : m_node(nullptr)
@@ -403,17 +402,12 @@ NVRenderShaderProgram *SVisualAidWidget::createRenderCameraShader(
     vertGenerator.AddUniform("invProjMatrix", "mat4");
     vertGenerator.AddUniform("mvpMatrix", "mat4");
     vertGenerator.AddUniform("orthographic", "int");
-    vertGenerator.AddUniform("cameraMaxLength", "float");
 
     vertGenerator.Append("void main() {");
     vertGenerator.Append("\tvec4 pos = vec4(0.0, 0.0, 0.0, 1.0);");
     vertGenerator.Append("\tif (attr_pos.w != 0.0) {");
     vertGenerator.Append("\t\tpos = invProjMatrix * attr_pos;");
     vertGenerator.Append("\t\tpos = pos / pos.w;");
-    vertGenerator.Append("\t\tif (orthographic == 0 && length(pos.xyz) > cameraMaxLength) " \
-                         "pos.xyz = cameraMaxLength * normalize(pos.xyz);");
-    vertGenerator.Append("\t\tif (orthographic == 1 && pos.z < -cameraMaxLength) " \
-                         "pos.z = -cameraMaxLength;");
     vertGenerator.Append("\t}");
     vertGenerator.Append("\tgl_Position = mvpMatrix * vec4(pos.xyz, 1.0);");
     vertGenerator.Append("}");
@@ -490,7 +484,6 @@ void SVisualAidWidget::renderCamera(SNode *node, IRenderWidgetContext &inWidgetC
 
     SWidgetRenderSetupResult theSetup(inWidgetContext, *node, RenderWidgetModes::Local);
 
-    m_renderCameraShader->SetPropertyValue("cameraMaxLength", cameraMaxLength);
     m_renderCameraShader->SetPropertyValue("orthographic",
                                            camera->m_Flags.IsOrthographic() ? 1 : 0);
     m_renderCameraShader->SetPropertyValue("invProjMatrix", ip);
