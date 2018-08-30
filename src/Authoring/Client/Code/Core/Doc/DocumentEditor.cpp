@@ -2161,9 +2161,10 @@ public:
 
     void copyMaterialProperties(Qt3DSDMInstanceHandle src, Qt3DSDMInstanceHandle dst) override
     {
-        const auto slide = m_Doc.GetActiveSlide();
+        const auto srcSlide = m_Bridge.GetOrCreateGraphRoot(src);
+        const auto dstSlide = m_Bridge.GetOrCreateGraphRoot(dst);
         const auto name = GetName(dst);
-        CopyProperties(slide, src, slide, dst);
+        CopyProperties(srcSlide, src, dstSlide, dst);
         SetName(dst, name);
     }
 
