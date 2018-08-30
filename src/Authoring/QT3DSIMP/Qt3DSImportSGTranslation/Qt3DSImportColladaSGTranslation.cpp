@@ -28,11 +28,7 @@
 ****************************************************************************/
 
 #include "Qt3DSCommonPrecompile.h"
-#include "dae.h"
-#include "dom/domCOLLADA.h"
-#include "dom/domConstants.h"
-#include "dom/domCommon_float_or_param_type.h"
-#include "dom/domCommon_transparent_type.h"
+#include "Qt3DSDAE.h"
 #include "Qt3DSMath.h"
 #include "Qt3DSImportColladaDOMUtils.h"
 #include "Qt3DSImportColladaTransformUtils.h"
@@ -41,9 +37,6 @@
 #include <memory>
 #include <map>
 #include <functional>
-#include "dom/domElements.h"
-#include "dom/domProfile_COMMON.h"
-#include "dom/domCommon_color_or_texture_type.h"
 #include "Qt3DSImportTranslationCommon.h"
 #include "Qt3DSImportSceneGraphTranslation.h"
 #include "Qt3DSImportTranslation.h"
