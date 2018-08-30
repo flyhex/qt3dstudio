@@ -2566,16 +2566,11 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
                 m_GradientWidget = qt3ds::widgets::SGradientWidget
                                     ::CreateGradientWidget(m_Context.GetAllocator());
             // render gradient background
-            if (m_EditCameraEnabled) {
-                SNode *node = GetEditCameraLayer();
-                m_GradientWidget->SetNode(*node);
-                m_GradientWidget->Render(m_Context.GetRenderWidgetContext(),
-                                         m_Context.GetRenderContext(),
-                                         m_EditCameraInfo.IsOrthographic());
-            } else {
-                m_GradientWidget->Render(m_Context.GetRenderWidgetContext(),
-                                         m_Context.GetRenderContext(), true);
-            }
+            SNode *node = GetEditCameraLayer();
+            m_GradientWidget->SetNode(*node);
+            m_GradientWidget->Render(m_Context.GetRenderWidgetContext(),
+                                     m_Context.GetRenderContext(),
+                                     m_EditCameraInfo.IsOrthographic());
         }
 
         m_Scene->Render(scenePreviewPass
