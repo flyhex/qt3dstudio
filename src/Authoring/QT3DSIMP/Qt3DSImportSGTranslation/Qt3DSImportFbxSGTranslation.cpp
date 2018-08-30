@@ -38,7 +38,7 @@
 #include <tuple>
 #include <memory>
 #include <map>
-#include <fbxsdk.h>
+#include "Qt3DSFBXSDK.h"
 #include "Qt3DSImportFbxDomUtils.h"
 #include "Qt3DSImportSceneGraphTranslation.h"
 #include "foundation/Qt3DSVec3.h"
