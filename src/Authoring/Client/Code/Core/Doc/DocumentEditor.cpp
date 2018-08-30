@@ -382,15 +382,6 @@ public:
         }
     }
 
-    bool IsComponent(TInstanceHandle inInstance) const override
-    {
-        if (IsInstance(inInstance))
-            return m_DataCore.IsInstanceOrDerivedFrom(
-                inInstance, m_Bridge.GetObjectDefinitions().m_SlideOwner.m_Instance);
-
-        return false;
-    }
-
     void GetAllPaths(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty,
                      TSlideStringList &outPaths) const
     {
@@ -2837,7 +2828,7 @@ public:
             || inInsertType == DocumentEditorInsertType::NextSibling)
             theParent = GetParent(inDest);
 
-        if (IsComponent(theParent)) {
+        if (m_Bridge.IsComponentInstance(theParent)) {
             moveIntoComponent(inInstances, theParent);
             return;
         }
