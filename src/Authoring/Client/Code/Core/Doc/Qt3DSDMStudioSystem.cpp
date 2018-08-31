@@ -201,7 +201,7 @@ ISlideCore *CStudioSystem::GetSlideCore()
     return m_StudioSystem->GetSlideCore().get();
 }
 
-IPropertySystem *CStudioSystem::GetPropertySystem()
+IPropertySystem *CStudioSystem::GetPropertySystem() const
 {
     return m_StudioSystem->GetPropertySystem().get();
 }

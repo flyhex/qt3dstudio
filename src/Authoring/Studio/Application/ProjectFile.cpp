@@ -31,6 +31,8 @@
 #include "Exceptions.h"
 #include "DataInputDlg.h"
 #include "StudioApp.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "ClientDataModelBridge.h"
 #include "Core.h"
 #include "Doc.h"
 #include "PresentationFile.h"
@@ -226,22 +228,48 @@ void ProjectFile::writePresentationId(const QString &id, const QString &src)
         }
     }
 
-    // overwrite the uia file
-    file.resize(0);
-    file.write(domDoc.toByteArray(4));
-    file.close();
+    if (!oldId.isEmpty()) { // a presentation id changed
+        // overwrite the uia file
+        file.resize(0);
+        file.write(domDoc.toByteArray(4));
 
-    // update in-memory values
-    auto *sp = std::find_if(g_StudioApp.m_subpresentations.begin(),
-                            g_StudioApp.m_subpresentations.end(),
-                           [&theSrc](const SubPresentationRecord &spr) -> bool {
-                               return spr.m_argsOrSrc == theSrc;
-                           });
-    if (sp != g_StudioApp.m_subpresentations.end())
-        sp->m_id = theId;
+        // update m_subpresentations
+        auto *sp = std::find_if(g_StudioApp.m_subpresentations.begin(),
+                                g_StudioApp.m_subpresentations.end(),
+                               [&theSrc](const SubPresentationRecord &spr) -> bool {
+                                   return spr.m_argsOrSrc == theSrc;
+                               });
+        if (sp != g_StudioApp.m_subpresentations.end())
+            sp->m_id = theId;
 
-    // update changed presentation Id in all .uip files if in-use
-    if (!oldId.isEmpty()) {
+        // update current doc instances (layers and images) that are using this presentation Id
+        auto *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+        qt3dsdm::IPropertySystem *propSystem = doc->GetStudioSystem()->GetPropertySystem();
+        std::function<void(qt3dsdm::Qt3DSDMInstanceHandle)>
+        parseChildren = [&](qt3dsdm::Qt3DSDMInstanceHandle instance) {
+            Q3DStudio::CGraphIterator iter;
+            GetAssetChildren(doc, instance, iter);
+
+            while (!iter.IsDone()) {
+                qt3dsdm::Qt3DSDMInstanceHandle child = iter.GetCurrent();
+                if (bridge->GetObjectType(child) & (OBJTYPE_LAYER | OBJTYPE_IMAGE)) {
+                    if (bridge->GetSourcePath(child).toQString() == oldId) {
+                        propSystem->SetInstancePropertyValue(child, bridge->GetSourcePathProperty(),
+                                                             qt3dsdm::SValue(QVariant(theId)));
+                    }
+                    if (bridge->getSubpresentation(child).toQString() == oldId) {
+                        propSystem->SetInstancePropertyValue(child,
+                                                             bridge->getSubpresentationProperty(),
+                                                             qt3dsdm::SValue(QVariant(theId)));
+                    }
+                }
+                parseChildren(child);
+                ++iter;
+            }
+        };
+        parseChildren(doc->GetSceneInstance());
+
+        // update changed presentation Id in all .uip files if in-use
         QDomNodeList pNodes = assetsElem.elementsByTagName(QStringLiteral("presentation"));
         for (int i = 0; i < pNodes.count(); ++i) {
             QDomElement pElem = pNodes.at(i).toElement();
