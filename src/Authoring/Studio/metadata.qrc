@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/DataModelMetadata/en-us/MetaData.xml</file>
+        <file>res/Font/TitilliumWeb-Regular.ttf</file>
+    </qresource>
+</RCC>
