@@ -38,7 +38,6 @@ SOURCES += \
     Systems/Qt3DSDMGuides.cpp \
     Systems/Qt3DSDMMetaData.cpp \
     Systems/Qt3DSDMSignalSystem.cpp \
-    Systems/Qt3DSDMStringTable.cpp \
     Systems/Qt3DSDMValue.cpp \
     Systems/Qt3DSDMXML.cpp \
     Systems/Cores/ActionCoreProducer.cpp \
@@ -50,7 +49,7 @@ SOURCES += \
     Systems/Cores/SimpleSlideCore.cpp \
     Systems/Cores/SimpleSlideGraphCore.cpp \
     Systems/Cores/SlideCoreProducer.cpp \
-    Systems/Cores/SlideGraphCoreProducer.cpp \
+    Systems/Cores/SlideGraphCoreProducer.cpp
 
 HEADERS += \
     Systems/Qt3DSDMDataTypes.h \

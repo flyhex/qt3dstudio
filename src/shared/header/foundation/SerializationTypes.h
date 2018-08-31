@@ -34,6 +34,7 @@
 #include "Qt3DSDataRef.h"
 #include "Qt3DSMemoryBuffer.h"
 #include "Qt3DSContainers.h"
+#include <QtCore/qmath.h>
 
 namespace qt3ds {
 namespace foundation {
@@ -93,7 +94,7 @@ namespace foundation {
             if (count) {
                 QT3DSU32 loadSize = count * sizeof(TDataType);
                 QT3DSU32 amountLeft = (QT3DSU32)(m_EndPtr - m_CurrentPtr);
-                QT3DSU32 amountLoaded = NVMin(loadSize, amountLeft);
+                QT3DSU32 amountLoaded = qMin(loadSize, amountLeft);
                 memCopy(dt, m_CurrentPtr, amountLoaded);
                 m_CurrentPtr += amountLoaded;
                 if (amountLoaded < loadSize) {

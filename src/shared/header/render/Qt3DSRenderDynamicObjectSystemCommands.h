@@ -269,7 +269,7 @@ namespace dynamic {
             }
             SAllocateBuffer(const SAllocateBuffer &inOther, IStringTable &inStrTable)
                 : SCommand(CommandTypes::AllocateBuffer)
-                , m_Name(inStrTable.RegisterStr(inOther.m_Name))
+                , m_Name(inOther.m_Name)
                 , m_Format(inOther.m_Format)
                 , m_FilterOp(inOther.m_FilterOp)
                 , m_TexCoordOp(inOther.m_TexCoordOp)
@@ -300,7 +300,7 @@ namespace dynamic {
             }
 
             SAllocateImage(const SAllocateImage &inOther, IStringTable &inStrTable)
-                : SAllocateBuffer(inStrTable.RegisterStr(inOther.m_Name), inOther.m_Format,
+                : SAllocateBuffer(inOther.m_Name, inOther.m_Format,
                                   inOther.m_FilterOp, inOther.m_TexCoordOp,
                                   inOther.m_SizeMultiplier, inOther.m_BufferFlags)
                 , m_Access(inOther.m_Access)
@@ -340,9 +340,9 @@ namespace dynamic {
 
             SAllocateDataBuffer(const SAllocateDataBuffer &inOther, IStringTable &inStrTable)
                 : SCommand(CommandTypes::AllocateDataBuffer)
-                , m_Name(inStrTable.RegisterStr(inOther.m_Name))
+                , m_Name(inOther.m_Name)
                 , m_DataBufferType(inOther.m_DataBufferType)
-                , m_WrapName(inStrTable.RegisterStr(inOther.m_WrapName))
+                , m_WrapName(inOther.m_WrapName)
                 , m_DataBufferWrapType(inOther.m_DataBufferWrapType)
                 , m_Size(inOther.m_Size)
                 , m_BufferFlags(inOther.m_BufferFlags)
@@ -378,7 +378,7 @@ namespace dynamic {
             }
             SBindBuffer(const SBindBuffer &inOther, IStringTable &inTable)
                 : SCommand(CommandTypes::BindBuffer)
-                , m_BufferName(inTable.RegisterStr(inOther.m_BufferName))
+                , m_BufferName(inOther.m_BufferName)
                 , m_NeedsClear(inOther.m_NeedsClear)
             {
             }
@@ -405,8 +405,8 @@ namespace dynamic {
             }
             SBindShader(const SBindShader &inOther, IStringTable &inTable)
                 : SCommand(CommandTypes::BindShader)
-                , m_ShaderPath(inTable.RegisterStr(inOther.m_ShaderPath))
-                , m_ShaderDefine(inTable.RegisterStr(inOther.m_ShaderDefine))
+                , m_ShaderPath(inOther.m_ShaderPath)
+                , m_ShaderDefine(inOther.m_ShaderDefine)
             {
             }
         };
@@ -440,7 +440,7 @@ namespace dynamic {
             }
             SApplyInstanceValue(const SApplyInstanceValue &inOther, IStringTable &inTable)
                 : SCommand(CommandTypes::ApplyInstanceValue)
-                , m_PropertyName(inTable.RegisterStr(inOther.m_PropertyName))
+                , m_PropertyName(inOther.m_PropertyName)
                 , m_ValueType(inOther.m_ValueType)
                 , m_ValueOffset(inOther.m_ValueOffset)
             {
@@ -467,7 +467,7 @@ namespace dynamic {
 
             SApplyValue(const SApplyValue &inOther, IStringTable &inTable)
                 : SCommand(CommandTypes::ApplyValue)
-                , m_PropertyName(inTable.RegisterStr(inOther.m_PropertyName))
+                , m_PropertyName(inOther.m_PropertyName)
                 , m_ValueType(inOther.m_ValueType)
                 , m_Value(inOther.m_Value)
             {
@@ -492,8 +492,8 @@ namespace dynamic {
             }
             SApplyBufferValue(const SApplyBufferValue &inOther, IStringTable &inTable)
                 : SCommand(CommandTypes::ApplyBufferValue)
-                , m_BufferName(inTable.RegisterStr(inOther.m_BufferName))
-                , m_ParamName(inTable.RegisterStr(inOther.m_ParamName))
+                , m_BufferName(inOther.m_BufferName)
+                , m_ParamName(inOther.m_ParamName)
             {
             }
         };
@@ -517,8 +517,8 @@ namespace dynamic {
             }
             SApplyImageValue(const SApplyImageValue &inOther, IStringTable &inTable)
                 : SCommand(CommandTypes::ApplyImageValue)
-                , m_ImageName(inTable.RegisterStr(inOther.m_ImageName))
-                , m_ParamName(inTable.RegisterStr(inOther.m_ParamName))
+                , m_ImageName(inOther.m_ImageName)
+                , m_ParamName(inOther.m_ParamName)
                 , m_BindAsTexture(inOther.m_BindAsTexture)
                 , m_NeedSync(inOther.m_NeedSync)
             {
@@ -540,7 +540,7 @@ namespace dynamic {
             }
             SApplyDataBufferValue(const SApplyDataBufferValue &inOther, IStringTable &inTable)
                 : SCommand(CommandTypes::ApplyDataBufferValue)
-                , m_ParamName(inTable.RegisterStr(inOther.m_ParamName))
+                , m_ParamName(inOther.m_ParamName)
                 , m_BindAs(inOther.m_BindAs)
             {
             }
@@ -558,7 +558,7 @@ namespace dynamic {
             }
             SApplyDepthValue(const SApplyDepthValue &inOther, IStringTable &inTable)
                 : SCommand(CommandTypes::ApplyDepthValue)
-                , m_ParamName(inTable.RegisterStr(inOther.m_ParamName))
+                , m_ParamName(inOther.m_ParamName)
             {
             }
         };
@@ -639,8 +639,8 @@ namespace dynamic {
 
             SApplyBlitFramebuffer(const SApplyBlitFramebuffer &inOther, IStringTable &inTable)
                 : SCommand(CommandTypes::ApplyBlitFramebuffer)
-                , m_SourceBufferName(inTable.RegisterStr(inOther.m_SourceBufferName))
-                , m_DestBufferName(inTable.RegisterStr(inOther.m_DestBufferName))
+                , m_SourceBufferName(inOther.m_SourceBufferName)
+                , m_DestBufferName(inOther.m_DestBufferName)
             {
             }
         };
@@ -710,7 +710,7 @@ namespace dynamic {
 
             SDepthStencil(const SDepthStencil &inOther, IStringTable &inTable)
                 : SCommand(CommandTypes::DepthStencil)
-                , m_BufferName(inTable.RegisterStr(inOther.m_BufferName))
+                , m_BufferName(inOther.m_BufferName)
                 , m_Flags(inOther.m_Flags)
                 , m_StencilFailOperation(inOther.m_StencilFailOperation)
                 , m_DepthPassOperation(inOther.m_DepthPassOperation)

@@ -24,6 +24,7 @@ INCLUDEPATH += \
     Code/Report \
     Code/Serialize \
     ../Client/Code/Shared \
+    ../Client/Code/Core/Runtime2Integration \
     ../Client/Code/Core/Utility \
     ../QT3DSDM \
     ../QT3DSDM/Systems \
@@ -77,6 +78,8 @@ SOURCES += \
     Code/Memory/MemoryObject.cpp \
     Code/Serialize/FormattedInputStream.cpp \
     Code/Serialize/FormattedOutputStream.cpp \
-    Code/Serialize/PreferencesSerializer.cpp
+    Code/Serialize/PreferencesSerializer.cpp \
+    ../Client/Code/Core/Runtime2Integration/Q3DSStringTable.cpp
 
-HEADERS = Code/Literals.h
+HEADERS = Code/Literals.h \
+    ../Client/Code/Core/Runtime2Integration/Q3DSStringTable.h

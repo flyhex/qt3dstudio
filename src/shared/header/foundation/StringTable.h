@@ -37,18 +37,24 @@
 #define WIDE_IS_DIFFERENT_TYPE_THAN_CHAR16_T
 #endif
 #endif
+
+#include <QtCore/qstring.h>
+#include "Qt3DSFoundation.h"
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
 #include "Qt3DSRefCounted.h"
 #include "Qt3DSAllocator.h"
 #include "EASTL/functional.h"
 #include "EABase/eabase.h" //char16_t definition
 #include "Qt3DSDataRef.h"
 #include "Qt3DSOption.h"
+#endif
 
 namespace qt3ds {
 namespace foundation {
     typedef char8_t Qt3DSBChar;
     typedef const char8_t *Qt3DSBCharPtr;
     class IStringTable;
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
 
     // Serialization types, NVRenderSerializationTypes.h
     struct SStrRemapMap;
@@ -97,25 +103,31 @@ namespace foundation {
             return m_StrTable;
         }
     };
-
+#endif
     // String that can only be constructed from strings in the string table.
     // These strings are valid utf-8 strings
     class CRegisteredString
     {
-        Qt3DSBCharPtr m_String;
+        QString m_String;
+        IStringTable *m_table;
 
     public:
         CRegisteredString()
             : m_String("")
         {
         }
+        CRegisteredString(const QString &str, IStringTable *t)
+            : m_String(str), m_table(t)
+        {
+        }
         CRegisteredString(const CRegisteredString &inOther)
-            : m_String(inOther.m_String)
+            : m_String(inOther.m_String), m_table(inOther.m_table)
         {
         }
         CRegisteredString &operator=(const CRegisteredString &inOther)
         {
             m_String = inOther.m_String;
+            m_table = inOther.m_table;
             return *this;
         }
 
@@ -125,6 +137,7 @@ namespace foundation {
         bool operator<(const char *inStr) const
         {
             // Ensure non-null strings to strcmp.
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
             const char *myStr = m_String ? m_String : "";
             inStr = inStr ? inStr : "";
             int answer;
@@ -137,12 +150,17 @@ namespace foundation {
             }
             answer = *inStr - *myStr;
             return answer < 0;
+#endif
+            return m_String < QString(inStr);
         }
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
         size_t hash() const { return eastl::hash<size_t>()(reinterpret_cast<size_t>(m_String)); }
-        operator Qt3DSBCharPtr() const { return c_str(); }
-        Qt3DSBCharPtr c_str() const { return m_String ? m_String : ""; }
-        bool IsValid() const { return m_String && *m_String; }
-
+#endif
+        operator Qt3DSBCharPtr() { return c_str(); }
+        Qt3DSBCharPtr c_str() const;
+        const wchar_t *wc_str() const;
+        bool IsValid() const { return !m_String.isNull(); }
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
         // If this string is in the map, changes it to the map value.
         void Remap(const SStrRemapMap &inMap);
 
@@ -169,8 +187,9 @@ namespace foundation {
             retval.m_String = str;
             return retval;
         }
+#endif
     };
-
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     class IStringTable;
 
     class CStringHandle
@@ -205,7 +224,7 @@ namespace foundation {
             return CStringHandle(strHandle);
         }
     };
-
+#endif
     // String table stores strings in utf-8 format and does valid utf-16,utf-32 -> utf-8
     // also converts utf8 -> either utf-32 or utf-16, depending on sizeof( wchar_t ) if
     // requested.
@@ -213,7 +232,7 @@ namespace foundation {
     // Also generates offsets that are consistent so clients can convert their strings
     // to offsets during save and convert from offset to string during load regardless
     // of if they load before or after this table.
-    class QT3DS_AUTOTEST_EXPORT IStringTable : public NVRefCounted
+    class QT3DS_AUTOTEST_EXPORT IStringTable
     {
     public:
         // default state is for multithreaded access to be disabled.
@@ -226,48 +245,28 @@ namespace foundation {
         virtual CRegisteredString RegisterStr(const char16_t *str) = 0;
         // utf-32->utf-8
         virtual CRegisteredString RegisterStr(const char32_t *str) = 0;
-
-        virtual CStringHandle GetHandle(Qt3DSBCharPtr str) = 0;
-        virtual CRegisteredString HandleToStr(QT3DSU32 strHandle) = 0;
+        virtual CRegisteredString RegisterStr(const QString &str) = 0;
 
         virtual CRegisteredString RegisterStr(const wchar_t *str) = 0;
 
         virtual const wchar_t *GetWideStr(Qt3DSBCharPtr src) = 0;
         virtual const wchar_t *GetWideStr(const wchar_t *str) = 0;
+        virtual const wchar_t *GetWideStr(const QString &str) = 0;
 
-        Qt3DSBCharPtr GetNarrowStr(const wchar_t *src) { return RegisterStr(src); }
-        Qt3DSBCharPtr GetNarrowStr(Qt3DSBCharPtr src) { return RegisterStr(src); }
-
-        // The string table maintains a map that will tell clients where their strings will be
-        // in terms of offsets into the data that the string table writes.
-        // This map will change each time a new string is added to the string table.
-        // Conversion from string -> data offset.
-        virtual const SStrRemapMap &GetRemapMap() = 0;
-
-        virtual NVAllocatorCallback &GetAllocator() = 0;
-
-        // Save to a block of memory.  It is up the callers to deallocate using allocator
-        // from GetAllocator().  Returns a remap map that takes existing strings and changes their
-        // address such that they are offsets into the block of memory where this object
-        // started saving.  Returns a map that converts registered strings into offsets of the
-        // written buffer.
-        virtual void Save(SWriteBuffer &ioBuffer) const = 0;
-
-        // Load all the strings from inMemory.  inMemory is not freed by this object
-        // Finally, you will need to take inMemory and call remap on all strings
-        // from offsets back into their correct address into inMemory.
-        virtual void Load(qt3ds::foundation::NVDataRef<QT3DSU8> inMemory) = 0;
-
-        static IStringTable &CreateStringTable(NVAllocatorCallback &alloc);
+        Qt3DSBCharPtr GetNarrowStr(const wchar_t *src) { return RegisterStr(src).c_str(); }
+        virtual Qt3DSBCharPtr GetNarrowStr(const QString &src) = 0;
+        Qt3DSBCharPtr GetNarrowStr(Qt3DSBCharPtr src) { return RegisterStr(src).c_str(); }
     };
-
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     inline const char8_t *CStringHandle::c_str(IStringTable &strTable) const
     {
         return strTable.HandleToStr(m_Data);
     }
+#endif
 }
 }
 
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
 // eastl extensions to allow easy hashtable creation using string table strings.
 namespace eastl {
 
@@ -287,5 +286,6 @@ struct equal_to<qt3ds::foundation::CRegisteredString>
     }
 };
 }
+#endif
 
 #endif
