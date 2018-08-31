@@ -45,14 +45,37 @@ ProjectFile::ProjectFile()
 
 // find the 1st .uia file in the current or parent directories and assume this is the project file,
 // as a project should have only 1 .uia file
-void ProjectFile::ensureProjectFile(const QString &uipPath)
+void ProjectFile::ensureProjectFile()
 {
-    QString uiaPath = PresentationFile::findProjectFile(uipPath);
+    if (!m_fileInfo.exists()) {
+        QFileInfo uipFile(g_StudioApp.GetCore()->GetDoc()
+                          ->GetDocumentPath().GetAbsolutePath().toQString());
+        QString uiaPath(PresentationFile::findProjectFile(uipFile.absoluteFilePath()));
 
-    if (!uiaPath.isEmpty()) // uia found
+        if (uiaPath.isEmpty()) {
+            // .uia not found, create new project .uia file. Creation sets info.
+            create(uipFile.completeBaseName(), uipFile.absolutePath());
+            addPresentationNode(uipFile.absoluteFilePath());
+            updateDocPresentationId();
+        } else {
+            // .uia found, set project file info
+            m_fileInfo.setFile(uiaPath);
+        }
+    }
+}
+
+void ProjectFile::initProjectFile(const QString &presPath)
+{
+    QFileInfo uipFile(presPath);
+    QString uiaPath(PresentationFile::findProjectFile(uipFile.absoluteFilePath()));
+
+    if (uiaPath.isEmpty()) {
+        // .uia not found, clear project file info
+        m_fileInfo = QFileInfo();
+    } else {
+        // .uia found, set project file info
         m_fileInfo.setFile(uiaPath);
-    else
-        throw ProjectFileNotFoundException();
+    }
 }
 
 /**
@@ -63,6 +86,8 @@ void ProjectFile::ensureProjectFile(const QString &uipPath)
  */
 void ProjectFile::addPresentationNode(const QString &pPath, const QString &pId)
 {
+    ensureProjectFile();
+
     // open the uia file
     QFile file(getProjectFilePath());
     file.open(QIODevice::ReadWrite);
@@ -126,7 +151,7 @@ void ProjectFile::addPresentationNode(const QString &pPath, const QString &pId)
 }
 
 // get the src attribute (relative path) to the first presentation in a uia file, if no initial
-// presentation exists, the first one is returned
+// presentation exists, the first one is returned.
 QString ProjectFile::getInitialPresentationSrc(const QString &uiaPath)
 {
     QFile file(uiaPath);
@@ -166,6 +191,8 @@ QString ProjectFile::getInitialPresentationSrc(const QString &uiaPath)
  */
 void ProjectFile::writePresentationId(const QString &id, const QString &src)
 {
+    ensureProjectFile();
+
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     QString theSrc = src.isEmpty() ? doc->getRelativePath() : src;
     QString theId = id.isEmpty() ? doc->getPresentationId() : id;
@@ -225,9 +252,13 @@ void ProjectFile::writePresentationId(const QString &id, const QString &src)
     }
 }
 
-// set the doc PresentationId from the project file, this is called after a document is loaded
+// Set the doc PresentationId from the project file, this is called after a document is loaded.
+// If there is no project file, does nothing.
 void ProjectFile::updateDocPresentationId()
 {
+    if (!m_fileInfo.exists())
+        return;
+
     QFile file(getProjectFilePath());
     file.open(QFile::Text | QFile::ReadOnly);
     if (!file.isOpen()) {
@@ -254,6 +285,9 @@ void ProjectFile::updateDocPresentationId()
 // get a presentationId that match a given src attribute
 QString ProjectFile::getPresentationId(const QString &src) const
 {
+    if (!m_fileInfo.exists())
+        return {};
+
     if (src == g_StudioApp.GetCore()->GetDoc()->getRelativePath()) {
         return g_StudioApp.GetCore()->GetDoc()->getPresentationId();
     } else {
@@ -270,8 +304,7 @@ QString ProjectFile::getPresentationId(const QString &src) const
 }
 
 // create the project .uia file
-void ProjectFile::create(const QString &projectName,
-                         const Q3DStudio::CFilePath &projectPath)
+void ProjectFile::create(const QString &projectName, const QString &projectPath)
 {
     QDomDocument doc;
     doc.setContent(QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\"?>"
@@ -287,8 +320,7 @@ void ProjectFile::create(const QString &projectName,
                                     "</statemachine>"
                                   "</application>"));
 
-    QString uiaPath = projectPath.toQString() + QStringLiteral("/") + projectName
-                      + QStringLiteral(".uia");
+    QString uiaPath = projectPath + QStringLiteral("/") + projectName + QStringLiteral(".uia");
 
     QFile file(uiaPath);
     file.open(QIODevice::WriteOnly);
@@ -303,11 +335,22 @@ void ProjectFile::create(const QString &projectName,
  * Clone the project file with a preview suffix and set the initial attribute to the currently
  * open document
  *
- * @return path to the preview project file
+ * @return path to the preview project file. Return path to .uip or preview .uip file if there
+ * is no project file.
  */
 QString ProjectFile::createPreview()
 {
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    QString uipPrvPath = doc->GetDocumentPath().GetAbsolutePath().toQString();
+    // create a preview uip if doc modified
+    if (doc->IsModified()) {
+        uipPrvPath.replace(QLatin1String(".uip"), QLatin1String("_@preview@.uip"));
+        g_StudioApp.GetCore()->OnSaveDocument(uipPrvPath, true);
+    }
+
+    if (!m_fileInfo.exists())
+        return uipPrvPath;
+
     QString prvPath = getProjectFilePath();
     prvPath.replace(QLatin1String(".uia"), QLatin1String("_@preview@.uia"));
 
@@ -325,12 +368,8 @@ QString ProjectFile::createPreview()
         assetsElem.setAttribute(QStringLiteral("initial"),
                                 doc->getPresentationId());
 
-         // create a preview uip if doc modified
         if (doc->IsModified()) {
-            QString uipPrvPath = doc->GetDocumentPath().GetAbsolutePath().toQString();
-            uipPrvPath.replace(QLatin1String(".uip"), QLatin1String("_@preview@.uip"));
-            g_StudioApp.GetCore()->OnSaveDocument(uipPrvPath, true);
-
+            // Set the preview uip path in the uia file
             QDomNodeList pNodes = assetsElem.elementsByTagName(QStringLiteral("presentation"));
             for (int i = 0; i < pNodes.count(); ++i) {
                 QDomElement pElem = pNodes.at(i).toElement();
@@ -357,6 +396,9 @@ void ProjectFile::loadSubpresentationsAndDatainputs(
                                                 QVector<SubPresentationRecord> &subpresentations,
                                                 QMap<QString, CDataInputDialogItem *> &datainputs)
 {
+    if (!m_fileInfo.exists())
+        return;
+
     subpresentations.clear();
     datainputs.clear();
 
@@ -421,6 +463,9 @@ void ProjectFile::loadSubpresentationsAndDatainputs(
  */
 bool ProjectFile::isUniquePresentationId(const QString &id, const QString &src) const
 {
+    if (!m_fileInfo.exists())
+        return true;
+
     QString theSrc = src.isEmpty() ? g_StudioApp.GetCore()->GetDoc()->getRelativePath() : src;
     bool isCurrDoc = theSrc == g_StudioApp.GetCore()->GetDoc()->getRelativePath();
 
@@ -437,7 +482,10 @@ bool ProjectFile::isUniquePresentationId(const QString &id, const QString &src) 
 
 QString ProjectFile::ensureUniquePresentationId(const QString &id) const
 {
-    QFile file(getProjectFilePath());
+    if (!m_fileInfo.exists())
+        return id;
+
+    QFile file(m_fileInfo.filePath());
     file.open(QIODevice::ReadOnly);
     QDomDocument doc;
     doc.setContent(&file);
@@ -465,21 +513,33 @@ QString ProjectFile::ensureUniquePresentationId(const QString &id) const
     return newId;
 }
 
-// Get the path to the project root
+// Get the path to the project root. If .uia doesn't exist, return path to current presentation.
 QString ProjectFile::getProjectPath() const
 {
-    return m_fileInfo.path();
+    if (m_fileInfo.exists()) {
+        return m_fileInfo.path();
+    } else {
+        return QFileInfo(g_StudioApp.GetCore()->GetDoc()
+                         ->GetDocumentPath().GetAbsolutePath().toQString()).absolutePath();
+    }
 }
 
-// Get the path to the project's .uia file
+// Get the path to the project's .uia file. If .uia doesn't exist, return empty string.
 QString ProjectFile::getProjectFilePath() const
 {
-    return m_fileInfo.filePath();
+    if (m_fileInfo.exists())
+        return m_fileInfo.filePath();
+    else
+        return {};
 }
 
+// Returns current project name or empty string if there is no .uia file
 QString ProjectFile::getProjectName() const
 {
-    return m_fileInfo.completeBaseName();
+    if (m_fileInfo.exists())
+        return m_fileInfo.completeBaseName();
+    else
+        return {};
 }
 
 /**

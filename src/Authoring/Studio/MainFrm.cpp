@@ -388,6 +388,8 @@ void CMainFrame::OnCreate()
     m_ui->action_Revert->setEnabled(false);
     m_ui->actionImportAssets->setEnabled(false);
     m_ui->actionRemote_Preview->setEnabled(false);
+    m_ui->action_New_Presentation->setEnabled(false);
+    m_ui->actionData_Inputs->setEnabled(false);
 
 #if 1 // TODO: Hidden until UX decision is made if these buttons are needed at all or not
     m_ui->actionPan_Tool->setVisible(false);
@@ -426,6 +428,8 @@ void CMainFrame::OnNewPresentation()
     m_ui->action_Connect_to_Device->setEnabled(true);
     m_ui->action_Revert->setEnabled(true);
     m_ui->actionImportAssets->setEnabled(true);
+    m_ui->action_New_Presentation->setEnabled(true);
+    m_ui->actionData_Inputs->setEnabled(true);
 
     // Clear data input list and sub-presentation list
     g_StudioApp.m_subpresentations.clear();
