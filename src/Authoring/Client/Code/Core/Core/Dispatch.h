@@ -135,7 +135,7 @@ public:
     void FireOnLoadedSubPresentation();
     void FireOnNewPresentation();
     void FireOnClosingPresentation();
-    void FireOnSavingPresentation(const Qt3DSFile *inNewPresentationFile = NULL);
+    void FireOnSavingPresentation(const QString *inNewPresentationFile = nullptr);
     void FireOnExportingAsset(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     void FireOnPresentationModifiedExternally();
 
@@ -151,9 +151,9 @@ public:
 
     void AddFileOpenListener(CFileOpenListener *inListener);
     void RemoveFileOpenListener(CFileOpenListener *inListener);
-    void FireOnOpenDocument(const Qt3DSFile &inFile, bool inSucceeded);
-    void FireOnSaveDocument(const Qt3DSFile &inFile, bool inSucceeded, bool inSaveCopy);
-    void FireOnDocumentPathChanged(const Qt3DSFile &inNewPath);
+    void FireOnOpenDocument(const QString &inFile, bool inSucceeded);
+    void FireOnSaveDocument(const QString &inFile, bool inSucceeded, bool inSaveCopy);
+    void FireOnDocumentPathChanged(const QString &inNewPath);
 
     // Toolbar changes
     void AddToolbarChangeListener(CToolbarChangeListener *inListener);
@@ -192,7 +192,7 @@ public:
     void RemoveFailListener(CFailListener *inListener);
     void FireOnAssetDeleteFail();
     void FireOnPasteFail();
-    void FireOnBuildConfigurationFileParseFail(const Q3DStudio::CString &inMessage);
+    void FireOnBuildConfigurationFileParseFail(const QString &inMessage);
     void FireOnSaveFail(bool inKnownError);
     void FireOnProjectVariableFail(const Q3DStudio::CString &inMessage);
     void FireOnErrorFail(const Q3DStudio::CString &inText);

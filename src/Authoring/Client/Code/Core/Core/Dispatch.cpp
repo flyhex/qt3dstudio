@@ -289,7 +289,7 @@ void CDispatch::FireOnClosingPresentation()
     m_PresentationChangeListeners.FireEvent(&CPresentationChangeListener::OnClosingPresentation);
 }
 
-void CDispatch::FireOnSavingPresentation(const Qt3DSFile *inNewPresentationFile)
+void CDispatch::FireOnSavingPresentation(const QString *inNewPresentationFile)
 {
     m_PresentationChangeListeners.FireEvent(&CPresentationChangeListener::OnSavingPresentation,
                                             inNewPresentationFile);
@@ -388,7 +388,7 @@ void CDispatch::RemoveFileOpenListener(CFileOpenListener *inListener)
 /**
  * Fire an event to all the file open listeners that a has been opened.
  */
-void CDispatch::FireOnOpenDocument(const Qt3DSFile &inFile, bool inSucceeded)
+void CDispatch::FireOnOpenDocument(const QString &inFile, bool inSucceeded)
 {
     m_FileOpenListeners.FireEvent(&CFileOpenListener::OnOpenDocument, inFile, inSucceeded);
 }
@@ -397,7 +397,7 @@ void CDispatch::FireOnOpenDocument(const Qt3DSFile &inFile, bool inSucceeded)
 /**
  * Fire an event to all the file open listeners that a has been saved.
  */
-void CDispatch::FireOnSaveDocument(const Qt3DSFile &inFile, bool inSucceeded, bool inSaveCopy)
+void CDispatch::FireOnSaveDocument(const QString &inFile, bool inSucceeded, bool inSaveCopy)
 {
     m_FileOpenListeners.FireEvent(&CFileOpenListener::OnSaveDocument, inFile, inSucceeded,
                                   inSaveCopy);
@@ -407,7 +407,7 @@ void CDispatch::FireOnSaveDocument(const Qt3DSFile &inFile, bool inSucceeded, bo
 /**
  * Fire an event to all the file open listeners that a has been saved.
  */
-void CDispatch::FireOnDocumentPathChanged(const Qt3DSFile &inNewPath)
+void CDispatch::FireOnDocumentPathChanged(const QString &inNewPath)
 {
     m_FileOpenListeners.FireEvent(&CFileOpenListener::OnDocumentPathChanged, inNewPath);
 }
@@ -610,7 +610,7 @@ void CDispatch::FireOnPasteFail()
     m_FailListeners.FireEvent(&CFailListener::OnPasteFail);
 }
 
-void CDispatch::FireOnBuildConfigurationFileParseFail(const Q3DStudio::CString &inMessage)
+void CDispatch::FireOnBuildConfigurationFileParseFail(const QString &inMessage)
 {
     m_FailListeners.FireEvent(&CFailListener::OnBuildconfigurationFileParseFail, inMessage);
 }

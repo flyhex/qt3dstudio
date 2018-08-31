@@ -152,12 +152,10 @@ void CStudioSystem::ResetDatabase()
     TNewMetaDataPtr theNewMetaData(theCore->GetNewMetaData());
     std::shared_ptr<IStringTable> theStringTable(theNewMetaData->GetStringTablePtr());
     std::shared_ptr<IDOMFactory> theFactory(IDOMFactory::CreateDOMFactory(theStringTable));
-    Q3DStudio::CString theFullPath(Q3DStudio::CString::fromQString(
-                                       resourcePath()
-                                       + QStringLiteral("/DataModelMetadata/en-us/MetaData.xml")));
+    QString theFullPath(resourcePath() + QStringLiteral("/DataModelMetadata/en-us/MetaData.xml"));
     // Load the new meta data
     {
-        QFile theStream(theFullPath.toQString());
+        QFile theStream(theFullPath);
 
         if (theStream.open(QFile::ReadOnly) == false) {
             QT3DS_ASSERT(false);

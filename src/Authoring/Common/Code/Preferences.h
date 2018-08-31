@@ -42,7 +42,7 @@ class CPreferencesSerializer;
 class CPreferences
 {
 public:
-    CPreferences(const Q3DStudio::CString &inTagPath)
+    CPreferences(const QString &inTagPath = QString())
         : m_TagPath(inTagPath)
     {
     }
@@ -52,28 +52,28 @@ public:
     CPreferences &operator=(const CPreferences &inRightHandSide);
 
     static CPreferences GetUserPreferences();
-    static CPreferences GetUserPreferences(const Q3DStudio::CString &inSubKeyPath);
+    static CPreferences GetUserPreferences(const QString &inSubKeyPath);
 
-    CPreferences GetPreferences(const Q3DStudio::CString &inPreferencesKey);
+    CPreferences GetPreferences(const QString &inPreferencesKey);
 
-    void SetStringValue(const Q3DStudio::CString &inKey, const Q3DStudio::CString &inValue);
-    Q3DStudio::CString GetStringValue(const Q3DStudio::CString &inKey,
-                                      const Q3DStudio::CString &inDefaultValue);
+    void SetStringValue(const QString &inKey, const QString &inValue);
+    QString GetStringValue(const QString &inKey,
+                           const QString &inDefaultValue = QString());
 
-    void SetLongValue(const Q3DStudio::CString &inKey, long inValue);
-    long GetLongValue(const Q3DStudio::CString &inKey, long inDefaultValue);
+    void SetLongValue(const QString &inKey, long inValue);
+    long GetLongValue(const QString &inKey, long inDefaultValue);
 
-    void SetValue(const Q3DStudio::CString &inKey, bool inValue);
-    bool GetValue(const Q3DStudio::CString &inKey, bool inDefaultValue);
+    void SetValue(const QString &inKey, bool inValue);
+    bool GetValue(const QString &inKey, bool inDefaultValue);
 
-    void SetValue(const Q3DStudio::CString &inKey, double inValue);
-    double GetValue(const Q3DStudio::CString &inKey, double inDefaultValue);
+    void SetValue(const QString &inKey, double inValue);
+    double GetValue(const QString &inKey, double inDefaultValue);
 
-    void SetColorValue(const Q3DStudio::CString &inKey, ::CColor inValue);
-    ::CColor GetColorValue(const Q3DStudio::CString &inKey, ::CColor inDefaultValue);
+    void SetColorValue(const QString &inKey, ::CColor inValue);
+    ::CColor GetColorValue(const QString &inKey, ::CColor inDefaultValue);
 
-    void SetBinaryValue(const Q3DStudio::CString &inKey, const void *inData, long inLength);
-    bool GetBinaryValue(const Q3DStudio::CString &inKey, void *outData, long inLength);
+    void SetBinaryValue(const QString &inKey, const void *inData, long inLength);
+    bool GetBinaryValue(const QString &inKey, void *outData, long inLength);
 
     void Clear();
 
@@ -81,14 +81,14 @@ public:
 
     void Commit();
 
-    void RemoveKey(const Q3DStudio::CString &inKeyName);
+    void RemoveKey(const QString &inKeyName);
 
-    bool Exists(const Q3DStudio::CString &inKeyName);
+    bool Exists(const QString &inKeyName);
 
-    static void SetPreferencesFile(const Q3DStudio::CString &inFileName);
+    static void SetPreferencesFile(const QString &inFileName);
 
 private:
-    Q3DStudio::CString m_TagPath;
+    QString m_TagPath;
     static CPreferencesSerializer s_PreferencesSerializer;
 };
 #endif // INCLUDED_PREFERENCES_H

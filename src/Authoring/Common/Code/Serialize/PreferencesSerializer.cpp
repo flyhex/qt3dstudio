@@ -28,13 +28,13 @@
 ****************************************************************************/
 #include "Qt3DSCommonPrecompile.h"
 #include "PreferencesSerializer.h"
+#include "Q3DSStringTable.h"
 
 #include <QtCore/qdir.h>
 
 CPreferencesSerializer::CPreferencesSerializer()
-    : m_FileSet(false)
-    , m_PreferencesStrTable(IStringTable::CreateStringTable())
-    , m_PreferencesFactory(IDOMFactory::CreateDOMFactory(m_PreferencesStrTable))
+    : m_fileSet(false)
+    , m_preferencesFactory(IDOMFactory::CreateDOMFactory(Q3DStudio::Q3DSStringTable::instance()))
 {
 }
 
@@ -43,71 +43,67 @@ CPreferencesSerializer::~CPreferencesSerializer()
     Serialize();
 }
 
-void CPreferencesSerializer::SetPreferencesFile(const Q3DStudio::CString &theFile)
+void CPreferencesSerializer::SetPreferencesFile(const QString &theFile)
 {
-    Q3DStudio::CFilePath fPath(theFile);
+    QFileInfo fPath(theFile);
 
-    if (m_PreferencesFile.filePath() == fPath.filePath())
+    if (m_preferencesFile.filePath() == fPath.filePath())
         return;
 
     Serialize();
 
-    m_PreferencesFile = fPath;
+    m_preferencesFile = fPath;
 
-    SDOMElement *topElement = NULL;
-    if (m_PreferencesFile.IsFile()) {
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-        qt3ds::foundation::CFileSeekableIOStream theInStream(
-            m_PreferencesFile.filePath(), qt3ds::foundation::FileReadFlags());
-        if (theInStream.IsOpen() == false) {
+    SDOMElement *topElement = nullptr;
+    if (m_preferencesFile.isFile()) {
+        QFile theInStream(fPath.filePath());
+        if (theInStream.open(QFile::ReadOnly | QFile::Text | QFile::ExistingOnly) == false) {
             QT3DS_ASSERT(false);
-            m_FileSet = false;
+            m_fileSet = false;
             return;
         }
 
-        topElement = CDOMSerializer::Read(*m_PreferencesFactory, theInStream);
-        if (topElement == NULL) {
+        topElement = CDOMSerializer::Read(*m_preferencesFactory, theInStream);
+        if (topElement == nullptr) {
             QT3DS_ASSERT(false);
-            m_FileSet = false;
+            m_fileSet = false;
             return;
         }
-#endif
     } else {
-        topElement = m_PreferencesFactory->NextElement(L"Settings");
+        topElement = m_preferencesFactory->NextElement(L"Settings");
     }
 
-    m_PreferencesIO =
-        IDOMWriter::CreateDOMWriter(m_PreferencesFactory, *topElement, m_PreferencesStrTable);
-    m_FileSet = true;
+    m_preferencesIO =
+        IDOMWriter::CreateDOMWriter(m_preferencesFactory, *topElement,
+                                    Q3DStudio::Q3DSStringTable::instance());
+    m_fileSet = true;
 }
 
-void CPreferencesSerializer::Begin(const Q3DStudio::CString &inTag)
+void CPreferencesSerializer::Begin(const QString &inTag)
 {
-    if (!m_FileSet) {
+    if (!m_fileSet)
         return;
-    }
-    if (!inTag.IsEmpty()) {
-        std::shared_ptr<IDOMReader> theReader(m_PreferencesIO.second);
-        CStringTokenizer theTokenizer(inTag, L"\\");
-        do {
-            Q3DStudio::CString theTag = theTokenizer.GetCurrentPartition();
-            if (!theReader->MoveToFirstChild(theTag.c_str())) {
-                std::shared_ptr<IDOMWriter> theWriter(m_PreferencesIO.first);
-                theWriter->Begin(theTag.c_str());
+
+    if (!inTag.isEmpty()) {
+        std::shared_ptr<IDOMReader> theReader(m_preferencesIO.second);
+        const QStringList tokens = inTag.split(QStringLiteral("\\"));
+        for (const QString &tag : tokens) {
+            Q3DStudio::WQString token = Q3DStudio::toWQString(tag);
+            if (!theReader->MoveToFirstChild(token.data())) {
+                std::shared_ptr<IDOMWriter> theWriter(m_preferencesIO.first);
+                theWriter->Begin(token.data());
             }
-            ++theTokenizer;
-        } while (theTokenizer.HasNextPartition());
+        }
     }
 }
 
-bool CPreferencesSerializer::GetSubElemValue(const Q3DStudio::CString &inSubElem,
-                                             Q3DStudio::CString &outValue)
+bool CPreferencesSerializer::GetSubElemValue(const QString &inSubElem,
+                                             QString &outValue)
 {
-    if (!m_FileSet) {
+    if (!m_fileSet)
         return false;
-    }
 
-    std::shared_ptr<IDOMReader> theReader(m_PreferencesIO.second);
+    std::shared_ptr<IDOMReader> theReader(m_preferencesIO.second);
     IDOMReader::Scope _readerScoped(*theReader);
     bool hasNext = true;
 
@@ -115,24 +111,23 @@ bool CPreferencesSerializer::GetSubElemValue(const Q3DStudio::CString &inSubElem
          hasNext = theReader->MoveToNextSibling()) {
         TWideXMLCharPtr strValue;
         theReader->Att(L"name", strValue);
-        if (inSubElem.CompareNoCase(strValue)) {
+        QString value = QString::fromWCharArray(strValue);
+        if (inSubElem.compare(value, Qt::CaseInsensitive) == 0) {
             theReader->Att(L"value", strValue);
-            outValue.assign(strValue);
+            outValue = QString::fromWCharArray(strValue);
             return true;
         }
     }
-
     return false;
 }
 
-void CPreferencesSerializer::SetSubElemValue(const Q3DStudio::CString &inSubElem,
-                                             const Q3DStudio::CString &inValue)
+void CPreferencesSerializer::SetSubElemValue(const QString &inSubElem,
+                                             const QString &inValue)
 {
-    if (!m_FileSet) {
+    if (!m_fileSet)
         return;
-    }
 
-    std::shared_ptr<IDOMReader> theReader(m_PreferencesIO.second);
+    std::shared_ptr<IDOMReader> theReader(m_preferencesIO.second);
     theReader->PushScope();
     bool hasNext = true, hasFind = false;
     TWideXMLCharPtr strValue;
@@ -140,59 +135,61 @@ void CPreferencesSerializer::SetSubElemValue(const Q3DStudio::CString &inSubElem
          hasNext = theReader->MoveToNextSibling()) {
 
         theReader->Att(L"name", strValue);
-        if (inSubElem.CompareNoCase(strValue)) {
+        QString value = QString::fromWCharArray(strValue);
+        if (inSubElem.compare(value, Qt::CaseInsensitive) == 0) {
             hasFind = true;
             break;
         }
     }
     if (hasFind) {
-        std::shared_ptr<IDOMWriter> theWriter(m_PreferencesIO.first);
-        theWriter->Att(L"value", inValue.c_str());
+        std::shared_ptr<IDOMWriter> theWriter(m_preferencesIO.first);
+        Q3DStudio::WQString iv = Q3DStudio::toWQString(inValue);
+        theWriter->Att(L"value", iv.constData());
         theReader->PopScope();
     } else {
         theReader->PopScope();
-        std::shared_ptr<IDOMWriter> theWriter(m_PreferencesIO.first);
+        std::shared_ptr<IDOMWriter> theWriter(m_preferencesIO.first);
         theWriter->Begin(L"Item");
-        theWriter->Att(L"Name", inSubElem.c_str());
-        theWriter->Att(L"value", inValue.c_str());
+        Q3DStudio::WQString is = Q3DStudio::toWQString(inSubElem);
+        Q3DStudio::WQString iv = Q3DStudio::toWQString(inValue);
+        theWriter->Att(L"Name", is.constData());
+        theWriter->Att(L"value", iv.constData());
     }
 }
 void CPreferencesSerializer::Revert()
 {
-    if (!m_FileSet) {
+    if (!m_fileSet)
         return;
-    }
 
-    std::shared_ptr<IDOMReader> theReader(m_PreferencesIO.second);
+    std::shared_ptr<IDOMReader> theReader(m_preferencesIO.second);
     theReader->SetScope(theReader->GetTopElement());
 }
 
-void CPreferencesSerializer::Remove(const Q3DStudio::CString &inTag)
+void CPreferencesSerializer::Remove(const QString &inTag)
 {
-    if (!m_FileSet) {
+    if (!m_fileSet)
         return;
-    }
-    if (!inTag.IsEmpty()) {
-        std::shared_ptr<IDOMReader> theReader(m_PreferencesIO.second);
-        CStringTokenizer theTokenizer(inTag, L"\\");
-        Q3DStudio::CString theTag;
+
+    if (!inTag.isEmpty()) {
+        std::shared_ptr<IDOMReader> theReader(m_preferencesIO.second);
+        const QStringList tags = inTag.split(QStringLiteral("\\"));
+
         bool bBreak = true;
-        do {
-            theTag = theTokenizer.GetCurrentPartition();
-            bBreak = theReader->MoveToFirstChild(theTag.c_str());
+        for (const QString &tag : tags) {
+            Q3DStudio::WQString wtag = Q3DStudio::toWQString(tag);
+            bBreak = theReader->MoveToFirstChild(wtag.constData());
             if (!bBreak)
                 break;
-            ++theTokenizer;
-        } while (theTokenizer.HasNextPartition());
+        };
         if (bBreak) {
-            std::shared_ptr<IDOMWriter> theWriter(m_PreferencesIO.first);
+            std::shared_ptr<IDOMWriter> theWriter(m_preferencesIO.first);
             theWriter->RemoveCurrent();
         }
     } else {
-        std::shared_ptr<IDOMReader> theReader(m_PreferencesIO.second);
+        std::shared_ptr<IDOMReader> theReader(m_preferencesIO.second);
         while (theReader->CountChildren() > 0) {
             theReader->MoveToFirstChild();
-            std::shared_ptr<IDOMWriter> theWriter(m_PreferencesIO.first);
+            std::shared_ptr<IDOMWriter> theWriter(m_preferencesIO.first);
             theWriter->RemoveCurrent();
         }
     }
@@ -200,58 +197,58 @@ void CPreferencesSerializer::Remove(const Q3DStudio::CString &inTag)
 
 long CPreferencesSerializer::CountSubElems() const
 {
-    if (!m_FileSet) {
+    if (!m_fileSet)
         return 0;
-    }
-    std::shared_ptr<IDOMReader> theReader(m_PreferencesIO.second);
+
+    std::shared_ptr<IDOMReader> theReader(m_preferencesIO.second);
     return static_cast<long>(theReader->CountChildren());
 }
 
-void CPreferencesSerializer::RemoveSubElem(const Q3DStudio::CString &inSubElem)
+void CPreferencesSerializer::RemoveSubElem(const QString &inSubElem)
 {
-    if (!m_FileSet) {
+    if (!m_fileSet)
         return;
-    }
-    std::shared_ptr<IDOMReader> theReader(m_PreferencesIO.second);
+
+    std::shared_ptr<IDOMReader> theReader(m_preferencesIO.second);
     IDOMReader::Scope _readerScoped(*theReader);
     bool hasNext = true;
     TWideXMLCharPtr strValue;
     for (hasNext = theReader->MoveToFirstChild(); hasNext;
          hasNext = theReader->MoveToNextSibling()) {
         theReader->Att(L"name", strValue);
-        if (inSubElem.CompareNoCase(strValue)) {
-            std::shared_ptr<IDOMWriter> theWriter(m_PreferencesIO.first);
+        if (inSubElem.compare(QString::fromWCharArray(strValue), Qt::CaseInsensitive) == 0) {
+            std::shared_ptr<IDOMWriter> theWriter(m_preferencesIO.first);
             theWriter->RemoveCurrent();
             break;
         }
     }
 }
 
-bool CPreferencesSerializer::ExistElem(const Q3DStudio::CString &inElemName)
+bool CPreferencesSerializer::ExistElem(const QString &inElemName)
 {
-    if (!m_FileSet) {
+    if (!m_fileSet)
         return false;
-    }
-    std::shared_ptr<IDOMReader> theReader(m_PreferencesIO.second);
+
+    std::shared_ptr<IDOMReader> theReader(m_preferencesIO.second);
     IDOMReader::Scope _readerScoped(*theReader);
-    return theReader->MoveToFirstChild(inElemName.c_str());
+    Q3DStudio::WQString name = Q3DStudio::toWQString(inElemName);
+    return theReader->MoveToFirstChild(name.data());
 }
 
 void CPreferencesSerializer::Serialize()
 {
-    if (m_FileSet) {
-        QString preferencesDir = m_PreferencesFile.dir().path();
+    if (m_fileSet) {
+        QString preferencesDir = m_preferencesFile.dir().path();
         QDir dir(preferencesDir);
-        if (!dir.exists()) {
+        if (!dir.exists())
             dir.mkpath(preferencesDir);
-        }
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
+
         // Serialize the preferences in to the XML file
-        qt3ds::foundation::CFileSeekableIOStream stream(
-            m_PreferencesFile.filePath(), qt3ds::foundation::FileWriteFlags());
-        stream.SetPosition(0, qt3ds::foundation::SeekPosition::Begin);
-        CDOMSerializer::WriteXMLHeader(stream);
-        CDOMSerializer::Write(*m_PreferencesIO.first->GetTopElement(), stream);
-#endif
+        QFile stream(m_preferencesFile.filePath());
+        if (stream.open(QFile::Text | QFile::Truncate | QFile::WriteOnly)) {
+            stream.seek(0);
+            CDOMSerializer::WriteXMLHeader(stream);
+            CDOMSerializer::Write(*m_preferencesIO.first->GetTopElement(), stream);
+        }
     }
 }

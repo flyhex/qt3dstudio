@@ -109,7 +109,7 @@ public:
     static bool GetTimebarDisplayTime();
     static void SetTimebarDisplayTime(bool inDisplayTime);
 
-    static Q3DStudio::CString GetVersionString();
+    static QString GetVersionString();
 
     static bool GetDontShowGLVersionDialog();
     static void SetDontShowGLVersionDialog(bool inValue);
@@ -125,11 +125,11 @@ public:
     static bool GetAdvancePropertyExpandedFlag();
     static void SetAdvancePropertyExpandedFlag(bool inAdvancePropertyFlag);
 
-    static Q3DStudio::CString GetPreviewConfig();
-    static void SetPreviewConfig(const Q3DStudio::CString &inValue);
-    static Q3DStudio::CString GetPreviewProperty(const Q3DStudio::CString &inName);
-    static void SetPreviewProperty(const Q3DStudio::CString &inName,
-                                   const Q3DStudio::CString &inValue);
+    static QString GetPreviewConfig();
+    static void SetPreviewConfig(const QString &inValue);
+    static QString GetPreviewProperty(const QString &inName);
+    static void SetPreviewProperty(const QString &inName,
+                                   const QString &inValue);
 
     static ::CColor GetNormalColor();
     static ::CColor GetMasterColor();

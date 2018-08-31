@@ -47,7 +47,7 @@
 /**
  *	Constructor: Initializes the object.
  */
-CStudioProjectSettings::CStudioProjectSettings(CCore *inCore /*=NULL*/)
+CStudioProjectSettings::CStudioProjectSettings(CCore *inCore)
     : m_Core(inCore)
 {
     this->Reset();

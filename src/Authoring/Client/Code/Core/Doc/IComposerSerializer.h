@@ -108,7 +108,7 @@ public:
         qt3dsdm::IActionSystem &inActionSystem, qt3dsdm::ISlideGraphCore &inSlideGraphCore,
         qt3dsdm::SComposerObjectDefinitions &inObjectDefinitions,
         std::shared_ptr<Q3DStudio::IImportFailedHandler> inFailedHandler,
-        qt3dsdm::IGuideSystem &inGuideSystem, qt3ds::render::IPathManager &inPathManager);
+        qt3dsdm::IGuideSystem &inGuideSystem);
 };
 }
 

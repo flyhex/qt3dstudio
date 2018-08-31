@@ -74,6 +74,7 @@
 #include "foundation/Qt3DSLogging.h"
 #include "Studio/Application/StudioApp.h"
 #include "Dialogs.h"
+#include "Q3DSStringTable.h"
 #include "Q3DSImageTextureData.h"
 
 #include <QtCore/qfileinfo.h>
@@ -1534,7 +1535,7 @@ bool CDoc::SetDocumentPath(const Qt3DSFile &inDocumentPath)
     if (Qt3DSFile::IsPathRelative(m_DocumentPath.GetPath()) || !m_DocumentPath.Exists())
         return false;
 
-    m_Core->GetDispatch()->FireOnDocumentPathChanged(m_DocumentPath);
+    m_Core->GetDispatch()->FireOnDocumentPathChanged(m_DocumentPath.GetAbsolutePath().toQString());
     return true;
 }
 
@@ -1720,11 +1721,14 @@ void CDoc::LoadDocument(const Qt3DSFile &inDocument)
 {
     ResetData();
 
-    CFileInputStream theFileStream(inDocument.GetAbsolutePosixPath());
-    CBufferedInputStream theBufferedStream(&theFileStream, inDocument.Length());
+    QFile file(inDocument.GetAbsolutePosixPath().toQString());
+    if (!file.open(QFile::ReadOnly | QFile::ExistingOnly)) {
+        QT3DS_ASSERT(0);
+        return;
+    }
     SetDocumentPath(inDocument); // SetDocumentPath before LoadPresentation because we need
     // DocumentPath to load relative resources such as images
-    LoadPresentationFile(&theBufferedStream);
+    LoadPresentationFile(&file);
 }
 
 //=============================================================================
@@ -1733,11 +1737,14 @@ void CDoc::LoadDocument(const Qt3DSFile &inDocument)
  */
 void CDoc::SaveDocument(const Qt3DSFile &inDocument)
 {
-    CFileOutputStream theFileStream(inDocument.GetAbsolutePosixPath());
+    QFile file(inDocument.GetAbsolutePosixPath().toQString());
+    if (!file.open(QFile::ReadWrite | QFile::Truncate)) {
+        QT3DS_ASSERT(0);
+        return;
+    }
     // Exceptions here get propagated to the crash dialog.
-    CBufferedOutputStream theBufferStream(&theFileStream);
-    SavePresentationFile(&theBufferStream);
-    theBufferStream.Close();
+    SavePresentationFile(&file);
+    file.close();
 }
 
 //=============================================================================
@@ -2179,7 +2186,7 @@ bool CDoc::VerifyCanRename(qt3dsdm::Qt3DSDMInstanceHandle inAsset)
 /**
  * Load a stream of a UIP file.
  */
-void CDoc::LoadPresentationFile(CBufferedInputStream *inInputStream)
+void CDoc::LoadPresentationFile(QIODevice *inInputStream)
 {
     Q3DStudio::CString theOrigFileName;
 
@@ -2220,7 +2227,7 @@ void CDoc::LoadPresentationFile(CBufferedInputStream *inInputStream)
  * Loads Studio object data from a presentation file archive.
  * @param inArchive CArchive from which to load the data objects.
  */
-int CDoc::LoadStudioData(CBufferedInputStream *inInputStream)
+int CDoc::LoadStudioData(QIODevice *inInputStream)
 {
     using namespace std;
     using namespace qt3dsdm;
@@ -2330,16 +2337,13 @@ std::shared_ptr<Q3DStudio::IComposerSerializer> CDoc::CreateSerializer()
     CStudioFullSystem &theFullSystem(*m_StudioSystem->GetFullSystem());
     CStudioCoreSystem &theCoreSystem(*theFullSystem.GetCoreSystem());
     CClientDataModelBridge &theClientBridge(*GetStudioSystem()->GetClientDataModelBridge());
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     return IComposerSerializer::CreateGraphSlideSerializer(
                 *theCoreSystem.GetDataCore(), *theCoreSystem.GetNewMetaData(),
                 *theCoreSystem.GetSlideCore(), *theCoreSystem.GetAnimationCore(),
                 *theCoreSystem.GetActionCore(), *m_AssetGraph, *theFullSystem.GetSlideSystem(),
                 *theFullSystem.GetActionSystem(), *theCoreSystem.GetSlideGraphCore(),
                 theClientBridge.GetObjectDefinitions(), m_ImportFailedHandler,
-                *theCoreSystem.GetGuideSystem(), *GetSceneGraph()->GetPathManager());
-#endif
-    return std::shared_ptr<Q3DStudio::IComposerSerializer>();
+                *theCoreSystem.GetGuideSystem());
 }
 
 std::shared_ptr<Q3DStudio::IComposerSerializer> CDoc::CreateTransactionlessSerializer()
@@ -2349,7 +2353,7 @@ std::shared_ptr<Q3DStudio::IComposerSerializer> CDoc::CreateTransactionlessSeria
     CStudioFullSystem &theFullSystem(*m_StudioSystem->GetFullSystem());
     CStudioCoreSystem &theCoreSystem(*theFullSystem.GetCoreSystem());
     CClientDataModelBridge &theClientBridge(*GetStudioSystem()->GetClientDataModelBridge());
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
+
     return IComposerSerializer::CreateGraphSlideSerializer(
                 *theCoreSystem.GetTransactionlessDataCore(), *theCoreSystem.GetNewMetaData(),
                 *theCoreSystem.GetTransactionlessSlideCore(),
@@ -2357,9 +2361,8 @@ std::shared_ptr<Q3DStudio::IComposerSerializer> CDoc::CreateTransactionlessSeria
                 *theCoreSystem.GetTransactionlessActionCore(), *m_AssetGraph,
                 *theFullSystem.GetSlideSystem(), *theFullSystem.GetActionSystem(),
                 *theCoreSystem.GetTransactionlessSlideGraphCore(), theClientBridge.GetObjectDefinitions(),
-                m_ImportFailedHandler, *theCoreSystem.GetGuideSystem(), *GetSceneGraph()->GetPathManager());
-#endif
-    return std::shared_ptr<Q3DStudio::IComposerSerializer>();
+                m_ImportFailedHandler, *theCoreSystem.GetGuideSystem());
+
 }
 
 std::shared_ptr<qt3dsdm::IDOMWriter> CDoc::CreateDOMWriter()
@@ -2454,17 +2457,13 @@ std::shared_ptr<qt3dsdm::IDOMReader> CDoc::CreateDOMReader(const Q3DStudio::CStr
     return std::shared_ptr<qt3dsdm::IDOMReader>();
 }
 
-std::shared_ptr<qt3dsdm::IDOMReader> CDoc::CreateDOMReader(CBufferedInputStream &inStream,
+std::shared_ptr<qt3dsdm::IDOMReader> CDoc::CreateDOMReader(QIODevice &inStream,
                                                            qt3ds::QT3DSI32 &outVersion)
 {
     using namespace qt3dsdm;
     TStringTablePtr theStringTable(
                 m_StudioSystem->GetFullSystem()->GetCoreSystem()->GetDataCore()->GetStringTablePtr());
-    SBufferedInputStreamInStream theStream(inStream);
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-    return DoCreateDOMReader(theStream, theStringTable, outVersion);
-#endif
-    return std::shared_ptr<qt3dsdm::IDOMReader>();
+    return DoCreateDOMReader(inStream, theStringTable, outVersion);
 }
 using std::pair;
 using std::make_pair;
@@ -2499,7 +2498,7 @@ struct SBufferFilter
  *	@param	inArchive	CArchive for saving data
  *	@return true if saved successfully
  */
-void CDoc::SavePresentationFile(CBufferedOutputStream *inOutputStream)
+void CDoc::SavePresentationFile(QIODevice *inOutputStream)
 {
     using namespace std;
     using namespace qt3dsdm;
@@ -2556,26 +2555,22 @@ void CDoc::SavePresentationFile(CBufferedOutputStream *inOutputStream)
             std::sort(theImageBuffers.begin(), theImageBuffers.end(),
                       SourcePathImageBufferLessThan);
             IDOMWriter::Scope __BufferData(theWriter, L"BufferData");
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
             for (size_t idx = 0, end = theImageBuffers.size(); idx < end; ++idx) {
                 Q3DSImageTextureData theBuffer = theImageBuffers[idx].second;
                 if (theBuffer.m_hasTransparency) {
                     IDOMWriter::Scope __ImageScope(theWriter, L"ImageBuffer");
-                    theWriter.Att(L"sourcepath", );
+                    Q3DStudio::WQString sp = Q3DStudio::toWQString(theImageBuffers[idx].first);
+                    theWriter.Att(L"sourcepath", sp.constData());
                     theWriter.Att("hasTransparency", true);
                 }
             }
-#endif
         }
     }
 
     std::shared_ptr<IComposerSerializer> theSerializer(CreateSerializer());
     theSerializer->SerializeScene(theWriter);
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-    SBufferedOutputStreamOutStream theStream(*inOutputStream);
-    CDOMSerializer::WriteXMLHeader(theStream);
-    CDOMSerializer::Write(*theWriter.GetTopElement(), theStream);
-#endif
+    CDOMSerializer::WriteXMLHeader(*inOutputStream);
+    CDOMSerializer::Write(*theWriter.GetTopElement(), *inOutputStream);
 }
 
 //=============================================================================

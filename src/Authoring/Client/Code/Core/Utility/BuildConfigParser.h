@@ -41,7 +41,7 @@
 #include <list>
 
 #include <QMetaType>
-#include "Qt3DSFile.h"
+#include <QtCore/qstring.h>
 #include <QtCore/qxmlstream.h>
 
 
@@ -57,39 +57,39 @@ public:
     struct SConfigPropertyValue
     {
     protected:
-        CString m_Name; ///< name of property value
-        CString m_Label; ///< display name of property value
+        QString m_Name; ///< name of property value
+        QString m_Label; ///< display name of property value
 
     public:
-        const CString &GetName() { return m_Name; }
-        void SetName(const CString &inName) { m_Name = inName; }
+        const QString &GetName() { return m_Name; }
+        void SetName(const QString &inName) { m_Name = inName; }
 
-        const CString &GetLabel() { return m_Label; }
-        void SetLabel(const CString &inLabel) { m_Label = inLabel; }
+        const QString &GetLabel() { return m_Label; }
+        void SetLabel(const QString &inLabel) { m_Label = inLabel; }
     };
 
     typedef std::vector<SConfigPropertyValue> TConfigPropertyValues; ///< List of property values
     struct SConfigProperty
     {
     protected:
-        CString m_Name; ///< name of property
-        CString m_Label; ///< display name of property
-        CString m_Help; ///< help string of property
+        QString m_Name; ///< name of property
+        QString m_Label; ///< display name of property
+        QString m_Help; ///< help string of property
         TConfigPropertyValues m_AcceptableValues; ///< List of acceptable values
 
     public:
-        const CString &GetName() { return m_Name; }
-        void SetName(const CString &inName) { m_Name = inName; }
+        const QString &GetName() { return m_Name; }
+        void SetName(const QString &inName) { m_Name = inName; }
 
-        const CString &GetLabel() { return m_Label; }
-        void SetLabel(const CString &inLabel) { m_Label = inLabel; }
+        const QString &GetLabel() { return m_Label; }
+        void SetLabel(const QString &inLabel) { m_Label = inLabel; }
 
-        const CString &GetHelp() { return m_Help; }
-        void SetHelp(const CString &inHelp) { m_Help = inHelp; }
+        const QString &GetHelp() { return m_Help; }
+        void SetHelp(const QString &inHelp) { m_Help = inHelp; }
 
         void AddValue(SConfigPropertyValue &inValue) { m_AcceptableValues.push_back(inValue); }
 
-        bool HasValue(const CString &inPropertyValue)
+        bool HasValue(const QString &inPropertyValue)
         {
             TConfigPropertyValues::iterator theIter;
             for (theIter = m_AcceptableValues.begin(); theIter != m_AcceptableValues.end();
@@ -108,29 +108,29 @@ public:
     typedef std::list<SConfigProperty> TConfigProperties; ///< List of properties
 
 protected:
-    CString m_Name; ///< Name of this configuration
-    CString m_Path; ///< Absolute path of this configuration
-    CString m_PreviewApp; ///< preview application syntax
-    CString m_DeployApp; ///< delploy application syntax
+    QString m_Name; ///< Name of this configuration
+    QString m_Path; ///< Absolute path of this configuration
+    QString m_PreviewApp; ///< preview application syntax
+    QString m_DeployApp; ///< delploy application syntax
     TConfigProperties m_ConfigProperties; ///< List of properties
 
 public:
-    CBuildConfiguration(const CString &inPath)
+    CBuildConfiguration(const QString &inPath)
         : m_Path(inPath)
     {
     }
 
-    const CString &GetPath() { return m_Path; }
-    void SetPath(const CString &inPath) { m_Path = inPath; }
+    const QString &GetPath() { return m_Path; }
+    void SetPath(const QString &inPath) { m_Path = inPath; }
 
-    const CString &GetName() { return m_Name; }
-    void SetName(const CString &inName) { m_Name = inName; }
+    const QString &GetName() { return m_Name; }
+    void SetName(const QString &inName) { m_Name = inName; }
 
-    const CString &GetPreviewApp() { return m_PreviewApp; }
-    void SetPreviewApp(const CString &inPreviewApp) { m_PreviewApp = inPreviewApp; }
+    const QString &GetPreviewApp() { return m_PreviewApp; }
+    void SetPreviewApp(const QString &inPreviewApp) { m_PreviewApp = inPreviewApp; }
 
-    const CString &GetDeployApp() { return m_DeployApp; }
-    void SetDeployApp(const CString &inDeployApp) { m_DeployApp = inDeployApp; }
+    const QString &GetDeployApp() { return m_DeployApp; }
+    void SetDeployApp(const QString &inDeployApp) { m_DeployApp = inDeployApp; }
 
     SConfigProperty &AddProperty(SConfigProperty &inProperty)
     {
@@ -138,7 +138,7 @@ public:
         return m_ConfigProperties.back();
     }
 
-    SConfigProperty *GetProperty(const CString &inPropertyName)
+    SConfigProperty *GetProperty(const QString &inPropertyName)
     {
         TConfigProperties::iterator theIter;
         for (theIter = m_ConfigProperties.begin(); theIter != m_ConfigProperties.end(); ++theIter) {
@@ -159,7 +159,7 @@ public:
 class CBuildConfigurations
 {
 public:
-    typedef std::map<CString, CBuildConfiguration *>
+    typedef std::map<QString, CBuildConfiguration *>
         TBuildConfigurations; ///< List of build configurations, sorted by name
 
 public:
@@ -168,13 +168,13 @@ public:
         m_BuildConfigurations.insert(std::make_pair(inConfig->GetName(), inConfig));
     }
 
-    CBuildConfiguration *GetConfiguration(const CString &inName)
+    CBuildConfiguration *GetConfiguration(const QString &inName)
     {
         TBuildConfigurations::iterator theFind = m_BuildConfigurations.find(inName);
         if (theFind != m_BuildConfigurations.end())
             return theFind->second;
         else
-            return NULL;
+            return nullptr;
     }
 
     TBuildConfigurations &GetConfigurations() { return m_BuildConfigurations; }
@@ -207,8 +207,8 @@ public:
     virtual ~CBuildConfigParser();
 
 public:
-    bool LoadConfigurations(Qt3DSFile &inDirectory);
-    CString GetErrorMessage() { return CString::fromQString(m_ErrorMessage); }
+    bool LoadConfigurations(const QString &inDirectory);
+    QString GetErrorMessage() { return m_ErrorMessage; }
 
 protected:
     void ParseProjectAttributes(const QXmlStreamAttributes &inAttributes);
@@ -227,8 +227,8 @@ protected:
     CBuildConfigurations &m_BuildConfigurations; ///< Working list of build configurations
     CBuildConfiguration *m_CurrentConfiguration; ///< Current parsing configuration
     CBuildConfiguration::SConfigProperty *m_CurrentProperty; ///< Current parsing property
-    CString m_CurrentFile; ///< Current Parse file
-    CString m_ElementData; ///< Element Data read in
+    QString m_CurrentFile; ///< Current Parse file
+    QString m_ElementData; ///< Element Data read in
     QString m_ErrorMessage; ///< Consolidated error messages
     bool m_TagStarted; ///< Hacked to signify tag started
 };

@@ -1051,7 +1051,8 @@ Qt3DSFile CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject
         if (isProject) {
             Q3DStudio::CFilePath theFinalDir;
             Q3DStudio::CFilePath theFinalDoc;
-            g_StudioApp.GetCore()->GetCreateDirectoryFileName(theFile, theFinalDir, theFinalDoc);
+            g_StudioApp.GetCore()->GetCreateDirectoryFileName(
+                        theFile.GetAbsolutePath().toQString(), theFinalDir, theFinalDoc);
 
             // Update last save file to final doc
             m_LastSaveFile = theFinalDoc;

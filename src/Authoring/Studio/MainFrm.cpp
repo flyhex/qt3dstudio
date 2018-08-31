@@ -361,7 +361,7 @@ void CMainFrame::OnCreate()
     if (theDialogs) {
         Q3DStudio::CString theMostRecentOpen;
         if (m_recentItems && m_recentItems->GetItemCount() > 0)
-            theMostRecentOpen = m_recentItems->GetItem(0).GetPath();
+            theMostRecentOpen = Q3DStudio::CString::fromQString(m_recentItems->GetItem(0));
         if (theMostRecentOpen.IsEmpty()) // default to exe
             theMostRecentOpen = Qt3DSFile::GetApplicationDirectory().GetPath();
 
@@ -1816,7 +1816,7 @@ void CMainFrame::RecheckSizingMode()
 /**
  * Callback when a Core is opened or fails to open.
  */
-void CMainFrame::OnOpenDocument(const Qt3DSFile &inFilename, bool inSucceeded)
+void CMainFrame::OnOpenDocument(const QString &inFilename, bool inSucceeded)
 {
     if (inSucceeded)
         m_recentItems->AddRecentItem(inFilename);
@@ -1828,7 +1828,7 @@ void CMainFrame::OnOpenDocument(const Qt3DSFile &inFilename, bool inSucceeded)
 /**
  * Callback when a Core is saved or fails to save.
  */
-void CMainFrame::OnSaveDocument(const Qt3DSFile &inFilename, bool inSucceeded, bool inSaveCopy)
+void CMainFrame::OnSaveDocument(const QString &inFilename, bool inSucceeded, bool inSaveCopy)
 {
     if (!inSaveCopy)
         OnOpenDocument(inFilename, inSucceeded);
@@ -1838,9 +1838,10 @@ void CMainFrame::OnSaveDocument(const Qt3DSFile &inFilename, bool inSucceeded, b
 /**
  * Callback for when a the doc gets a new path
  */
-void CMainFrame::OnDocumentPathChanged(const Qt3DSFile &inNewPath)
+void CMainFrame::OnDocumentPathChanged(const QString &inNewPath)
 {
-    QString theTitle = inNewPath.GetName().toQString();
+    QFileInfo info(inNewPath);
+    QString theTitle = info.filePath();
     if (theTitle.isEmpty())
         theTitle = QObject::tr("Untitled");
 
@@ -1849,7 +1850,7 @@ void CMainFrame::OnDocumentPathChanged(const Qt3DSFile &inNewPath)
     // TODO: Move this whole pile to the studio app
     setWindowTitle(theTitle);
 
-    if (inNewPath.Exists())
+    if (info.exists())
         m_recentItems->AddRecentItem(inNewPath);
 }
 

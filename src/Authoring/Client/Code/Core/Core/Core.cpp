@@ -46,7 +46,7 @@
 #include "MainFrm.h"
 
 CCore::CCore()
-    : m_Doc(NULL)
+    : m_Doc(nullptr)
     , m_Dispatch(new CDispatch())
     , m_CmdStack(new CCmdStack())
     , m_HotKeys(new CHotKeys())
@@ -125,7 +125,8 @@ bool CCore::LoadBuildConfigurations()
                     Q3DStudio::CString(L"Build Configurations")); // Installed directory
 
     Q3DStudio::CBuildConfigParser theParser(m_BuildConfigurations);
-    bool theSuccess = theParser.LoadConfigurations(theConfigurationDirectory);
+    bool theSuccess = theParser.LoadConfigurations(
+                theConfigurationDirectory.GetAbsolutePath().toQString());
     if (!theSuccess) {
         m_Dispatch->FireOnBuildConfigurationFileParseFail(theParser.GetErrorMessage());
     } else {
@@ -157,8 +158,8 @@ void CCore::InitAndValidateBuildConfiguration()
         Q3DStudio::CBuildConfiguration::TConfigProperties::iterator theConfigPropIter;
         for (theConfigPropIter = theConfigProperties.begin();
              theConfigPropIter != theConfigProperties.end(); ++theConfigPropIter) {
-            const Q3DStudio::CString &thePropName = theConfigPropIter->GetName();
-            Q3DStudio::CString theStoredValue = CStudioPreferences::GetPreviewProperty(thePropName);
+            const QString &thePropName = theConfigPropIter->GetName();
+            QString theStoredValue = CStudioPreferences::GetPreviewProperty(thePropName);
             if (!theConfigPropIter->HasValue(theStoredValue)) {
                 // add this property in
                 if (theConfigPropIter->GetAcceptableValues().size())
@@ -192,12 +193,12 @@ void CCore::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget
                         CCore::SetTimebarEnd);
 }
 
-void CCore::GetCreateDirectoryFileName(const Qt3DSFile &inDocument,
+void CCore::GetCreateDirectoryFileName(const QString &inDocument,
                                        Q3DStudio::CFilePath &outFinalDir,
                                        Q3DStudio::CFilePath &outFinalDoc)
 {
     using namespace Q3DStudio;
-    CFilePath theOriginal(inDocument.GetAbsolutePath());
+    CFilePath theOriginal(inDocument);
     CFilePath theName(theOriginal.GetFileName());
     CString theStem(theOriginal.GetFileStem());
     CFilePath theDir = theOriginal.GetDirectory();
@@ -220,13 +221,13 @@ ProjectFile &CCore::getProjectFile()
  *
  * @return bool creation successful
  */
-bool CCore::OnNewDocument(const Qt3DSFile &inDocument, bool isNewProject, bool silent)
+bool CCore::OnNewDocument(const QString &inDocument, bool isNewProject, bool silent)
 {
     CDispatchDataModelNotificationScope __dispatchScope(*m_Dispatch);
 
     m_Doc->CloseDocument();
 
-    Q3DStudio::CFilePath theDocument(inDocument.GetAbsolutePath());
+    Q3DStudio::CFilePath theDocument(inDocument);
 
     if (isNewProject) {
         // create asset folders
@@ -279,7 +280,7 @@ bool CCore::OnNewDocument(const Qt3DSFile &inDocument, bool isNewProject, bool s
  * This will do all the prompting, directory stuff necessary and perform the
  * saving of the document.
  */
-void CCore::OnSaveDocument(const Qt3DSFile &inDocument, bool inSaveCopy /*= false*/)
+void CCore::OnSaveDocument(const QString &inDocument, bool inSaveCopy /*= false*/)
 {
     m_JustSaved = true;
     GetDispatch()->FireOnSavingPresentation(&inDocument);
@@ -303,17 +304,18 @@ void CCore::OnSaveDocument(const Qt3DSFile &inDocument, bool inSaveCopy /*= fals
  * leave the document in a dirty state and not update it to point to the new
  * file path.
 */
-void CCore::OnSaveDocumentCatcher(const Qt3DSFile &inDocument, bool inSaveCopy /*= false*/)
+void CCore::OnSaveDocumentCatcher(const QString &inDocument, bool inSaveCopy /*= false*/)
 {
+    QFileInfo info(inDocument);
     m_Dispatch->FireOnProgressBegin(Q3DStudio::CString::fromQString(QObject::tr("Saving ")),
-                                    inDocument.GetName());
+                                    Q3DStudio::CString::fromQString(info.fileName()));
 
     bool theDisplaySaveFailDialog = false;
-    bool theFileExists = inDocument.Exists();
-    Qt3DSFile theTempFile(inDocument);
+    bool theFileExists = info.exists();
+    Qt3DSFile theTempFile(Q3DStudio::CString::fromQString(inDocument));
 
     // Test for readonly files
-    if (theFileExists && inDocument.CanWrite() == false)
+    if (theFileExists && info.isWritable() == false)
         theDisplaySaveFailDialog = true;
     else {
         try {
@@ -325,7 +327,7 @@ void CCore::OnSaveDocumentCatcher(const Qt3DSFile &inDocument, bool inSaveCopy /
                 if (theTempFile.GetAbsolutePosixPath().IsEmpty()) { // too bad, we'll have to use
                     // the original (which might be
                     // the only writeable file)
-                    theTempFile = inDocument;
+                    theTempFile = Qt3DSFile(Q3DStudio::CString::fromQString(inDocument));
                     theFileExists = false;
                 }
             }
@@ -334,14 +336,14 @@ void CCore::OnSaveDocumentCatcher(const Qt3DSFile &inDocument, bool inSaveCopy /
 
             // update the original file
             if (theFileExists)
-                theTempFile.CopyTo(inDocument);
+                theTempFile.CopyTo(Qt3DSFile(Q3DStudio::CString::fromQString(inDocument)));
 
             // If we are saving normally and not a copy, then we need to update the current document
             // to make sure it points to the saved file and make it not-dirty.  If we are saving a
             // copy
             // then we will leave the document with the original file path dirty state
             if (!inSaveCopy) {
-                m_Doc->SetDocumentPath(inDocument);
+                m_Doc->SetDocumentPath(Qt3DSFile(Q3DStudio::CString::fromQString(inDocument)));
                 m_Doc->SetModifiedFlag(false);
             }
         } catch (CStudioException &) // one of our exceptions, show the standard save error.

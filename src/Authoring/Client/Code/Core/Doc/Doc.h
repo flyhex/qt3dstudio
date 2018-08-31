@@ -348,7 +348,7 @@ public:
     // to the project element.
     virtual std::shared_ptr<qt3dsdm::IDOMReader>
     CreateDOMReader(const Q3DStudio::CString &inFilePath, qt3ds::QT3DSI32 &outVersion) override;
-    virtual std::shared_ptr<qt3dsdm::IDOMReader> CreateDOMReader(CBufferedInputStream &inStream,
+    virtual std::shared_ptr<qt3dsdm::IDOMReader> CreateDOMReader(QIODevice &inStream,
                                                                  qt3ds::QT3DSI32 &outVersion);
 
     void SelectDataModelObject(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle);
@@ -431,12 +431,12 @@ protected:
     Q3DStudio::SSelectedValue SetupInstanceSelection(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     // Set the selection, but don't send an event.
     bool SetSelection(Q3DStudio::SSelectedValue inNewSelection = Q3DStudio::SSelectedValue());
-    void LoadPresentationFile(CBufferedInputStream *inInputStream);
-    void SavePresentationFile(CBufferedOutputStream *inOutputStream);
+    void LoadPresentationFile(QIODevice *inInputStream);
+    void SavePresentationFile(QIODevice *inOutputStream);
 
     void CleanupData();
     void ResetData();
-    int LoadStudioData(CBufferedInputStream *inInputStream);
+    int LoadStudioData(QIODevice *inInputStream);
     void ResetDataCore();
     void SetupDataCoreSignals();
 

@@ -170,7 +170,7 @@ public:
     /**
      * The current presentation is being saved.
      */
-    virtual void OnSavingPresentation(const Qt3DSFile *inNewPresentationFile)
+    virtual void OnSavingPresentation(const QString *inNewPresentationFile)
     {
         Q_UNUSED(inNewPresentationFile);
     }
@@ -217,9 +217,9 @@ public:
 class CFileOpenListener
 {
 public:
-    virtual void OnOpenDocument(const Qt3DSFile &inFilename, bool inSucceeded) = 0;
-    virtual void OnSaveDocument(const Qt3DSFile &inFilename, bool inSucceeded, bool inSaveCopy) = 0;
-    virtual void OnDocumentPathChanged(const Qt3DSFile &inNewPath) = 0;
+    virtual void OnOpenDocument(const QString &inFilename, bool inSucceeded) = 0;
+    virtual void OnSaveDocument(const QString &inFilename, bool inSucceeded, bool inSaveCopy) = 0;
+    virtual void OnDocumentPathChanged(const QString &inNewPath) = 0;
 };
 
 class CSelectedNodePropChangeListener
@@ -277,7 +277,7 @@ public:
     virtual ~CFailListener() {}
     virtual void OnAssetDeleteFail() = 0;
     virtual void OnPasteFail() = 0;
-    virtual void OnBuildconfigurationFileParseFail(const Q3DStudio::CString &inMessage) = 0;
+    virtual void OnBuildconfigurationFileParseFail(const QString &inMessage) = 0;
     virtual void OnSaveFail(bool inKnownError) = 0;
     virtual void OnProjectVariableFail(const Q3DStudio::CString &inMessage) = 0;
     virtual void OnErrorFail(const Q3DStudio::CString &inText) = 0;

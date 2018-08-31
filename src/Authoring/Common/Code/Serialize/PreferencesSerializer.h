@@ -51,35 +51,34 @@ public: // construction
     ~CPreferencesSerializer();
 
 public: // methods
-    void SetPreferencesFile(const Q3DStudio::CString &theFile);
+    void SetPreferencesFile(const QString &theFile);
 
-    void Begin(const Q3DStudio::CString &inTag);
+    void Begin(const QString &inTag);
 
-    bool GetSubElemValue(const Q3DStudio::CString &inSubElem, Q3DStudio::CString &outValue);
+    bool GetSubElemValue(const QString &inSubElem, QString &outValue);
 
     void Revert();
 
-    void Remove(const Q3DStudio::CString &inTag);
+    void Remove(const QString &inTag);
 
-    void SetSubElemValue(const Q3DStudio::CString &inSubElem, const Q3DStudio::CString &inValue);
+    void SetSubElemValue(const QString &inSubElem, const QString &inValue);
 
     long CountSubElems() const;
 
-    void RemoveSubElem(const Q3DStudio::CString &inSubElem);
+    void RemoveSubElem(const QString &inSubElem);
 
-    bool ExistElem(const Q3DStudio::CString &inElemName);
+    bool ExistElem(const QString &inElemName);
 
-    bool IsFileSet() const { return m_FileSet; }
+    bool IsFileSet() const { return m_fileSet; }
 
 private:
     void Serialize();
 
 private:
-    bool m_FileSet;
-    Q3DStudio::CFilePath m_PreferencesFile;
-    TStringTablePtr m_PreferencesStrTable;
-    eastl::pair<std::shared_ptr<IDOMWriter>, std::shared_ptr<IDOMReader>> m_PreferencesIO;
-    std::shared_ptr<IDOMFactory> m_PreferencesFactory;
+    bool m_fileSet;
+    QFileInfo m_preferencesFile;
+    eastl::pair<std::shared_ptr<IDOMWriter>, std::shared_ptr<IDOMReader>> m_preferencesIO;
+    std::shared_ptr<IDOMFactory> m_preferencesFactory;
 };
 
 #endif // INCLUDED_PREFERENCES_SERIALIZER_H

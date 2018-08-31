@@ -29,6 +29,7 @@
 
 #include "Qt3DSCommonPrecompile.h"
 #include "BuildConfigParser.h"
+#include "Qt3DSFile.h"
 #include "Qt3DSFileTools.h"
 
 namespace Q3DStudio {
@@ -73,16 +74,17 @@ CBuildConfigParser::~CBuildConfigParser()
  *	@param inDirectory		the directory to look for all the configuration files
  *	@return true if all files parsed successfully, else false
  */
-bool CBuildConfigParser::LoadConfigurations(Qt3DSFile &inDirectory)
+bool CBuildConfigParser::LoadConfigurations(const QString &inDirectory)
 {
     m_ErrorMessage.clear();
 
-    CFileIterator theFileIter = inDirectory.GetSubItems();
+    Qt3DSFile directory(CString::fromQString(inDirectory));
+    CFileIterator theFileIter = directory.GetSubItems();
     while (!theFileIter.IsDone()) {
         Qt3DSFile theCurrentFile(theFileIter.GetCurrent());
-        m_CurrentFile = theCurrentFile.GetAbsolutePath();
+        m_CurrentFile = theCurrentFile.GetAbsolutePath().toQString();
 
-        if (theCurrentFile.GetExtension().CompareNoCase(L"build")) {
+        if (QFileInfo(m_CurrentFile).suffix() == QLatin1String("build")) {
             m_CurrentConfiguration = new CBuildConfiguration(m_CurrentFile);
             QFile file(theCurrentFile.GetAbsolutePath().toQString());
             file.open(QFile::ReadOnly);
@@ -171,7 +173,7 @@ void CBuildConfigParser::EndElement(const QString &inElementName)
 void CBuildConfigParser::HandleCharacterData(const QString &data, int /*inLen*/)
 {
     if (m_TagStarted)
-        m_ElementData += Q3DStudio::CString::fromQString(data);
+        m_ElementData += data;
 }
 
 //===============================================================================
@@ -217,17 +219,18 @@ void CBuildConfigParser::ParseValueAttributes(const QXmlStreamAttributes &inAttr
             theValue.SetLabel(attrib.value().toUtf8().constData());
     }
 
-    using namespace Q3DStudio;
-    Q3DStudio::CString thePropertyName = m_CurrentProperty->GetName();
-    if (thePropertyName == L"MODE") {
-        Q3DStudio::CString theValueName(theValue.GetName());
-        if (theValueName == L"Debug") {
+    QString thePropertyName = m_CurrentProperty->GetName();
+    if (thePropertyName == QLatin1String("MODE")) {
+        QString theValueName(theValue.GetName());
+        if (theValueName == QLatin1String("Debug")) {
             CFilePath theFilePath;
             theFilePath.GetModuleFilePath();
             CFilePath theDir = theFilePath.GetDirectory().GetFileStem();
             // If this isn't a developer build.
-            if (theDir.filePath() != "release" || theDir.filePath() != "debug")
+            if (theDir.filePath() != QLatin1String("release")
+                    || theDir.filePath() != QLatin1String("debug")) {
                 return;
+            }
         }
     }
 

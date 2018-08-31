@@ -50,7 +50,7 @@ class CStudioProjectSettings
 
     // Construction
 public:
-    CStudioProjectSettings(CCore *inCore = NULL);
+    CStudioProjectSettings(CCore *inCore = nullptr);
     ~CStudioProjectSettings();
 
     QString GetAuthor() { return m_Author; }

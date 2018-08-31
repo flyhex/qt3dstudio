@@ -265,8 +265,7 @@ void ProjectView::openPresentation(int row)
 {
     if (g_StudioApp.PerformSavePrompt()) {
         const QString path = m_ProjectModel->filePath(row);
-        const Qt3DSFile file(Q3DStudio::CString::fromQString(path));
-        g_StudioApp.OnLoadDocument(file);
+        g_StudioApp.OnLoadDocument(path);
     }
 }
 

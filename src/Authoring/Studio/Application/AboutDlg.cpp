@@ -111,7 +111,7 @@ void CAboutDlg::OnInitDialog()
 {
     // Set the Studio version
     m_ProductVersionStr = QStringLiteral("Qt 3D Studio v")
-            + CStudioPreferences::GetVersionString().toQString();
+            + CStudioPreferences::GetVersionString();
 
     // Set the copyright string
     m_CopyrightStr = QObject::tr("Copyright (C) %1 The Qt Company. All rights reserved.").arg(

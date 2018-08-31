@@ -39,10 +39,8 @@
 //	 Includes
 //==============================================================================
 
-#include "Qt3DSString.h"
-#include "Qt3DSFile.h"
-
 #include <QtWidgets/qdialog.h>
+#include <QtCore/qstring.h>
 
 #ifdef QT_NAMESPACE
 using namespace QT_NAMESPACE;
@@ -99,14 +97,14 @@ private:
     EStartupChoice m_Choice = EStartupChoice_Invalid;
 
     // Recent Docs
-    std::vector<Qt3DSFile> m_RecentDocs;
-    Qt3DSFile m_RecentDocSelected;
+    std::vector<QString> m_RecentDocs;
+    QString m_RecentDocSelected;
 
 public:
     void OnInitDialog();
-    void AddRecentItem(const Qt3DSFile &inRecentItem);
+    void AddRecentItem(const QString &inRecentItem);
     EStartupChoice GetChoice();
-    Qt3DSFile GetRecentDoc() const;
+    QString GetRecentDoc() const;
 
 private:
     QScopedPointer<Ui::StartupDlg> m_ui;

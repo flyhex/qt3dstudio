@@ -189,7 +189,7 @@ public:
     bool IsPlaying();
     void OnRevert();
     bool CanRevert();
-    void OnFileOpenRecent(const Qt3DSFile &inDocument);
+    void OnFileOpenRecent(const QString &inDocument);
     bool PerformSavePrompt();
     void PlaybackStop();
     bool isPlaybackPreviewOn() const;
@@ -203,7 +203,7 @@ public:
     bool OnSave(bool autosave = false);
     bool OnSaveAs();
     bool OnSaveCopy();
-    bool OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupDialogOnError = true);
+    bool OnLoadDocument(const QString &inDocument, bool inShowStartupDialogOnError = true);
     void OnLoadDocumentCatcher(const Qt3DSFile &inLocation);
     void OnFileOpen();
     QString OnProjectNew();
@@ -232,7 +232,7 @@ public:
     // CFailListener
     void OnAssetDeleteFail() override;
     void OnPasteFail() override;
-    void OnBuildconfigurationFileParseFail(const Q3DStudio::CString &inMessage) override;
+    void OnBuildconfigurationFileParseFail(const QString &inMessage) override;
     void OnSaveFail(bool inKnownError) override;
     void OnProjectVariableFail(const Q3DStudio::CString &inMessage) override;
     void OnErrorFail(const Q3DStudio::CString &inText) override;
@@ -257,6 +257,8 @@ public:
 
     void setLastActiveView(QWidget *widget) { m_lastActiveView = widget; }
     QWidget *lastActiveView() const { return m_lastActiveView; }
+
+    static QFileInfo applicationDirectory();
 };
 
 extern CStudioApp g_StudioApp;

@@ -138,7 +138,7 @@ void CPreviewHelper::PreviewViaConfig(Q3DStudio::CBuildConfiguration *inSelected
     CCore *theCore = g_StudioApp.GetCore();
     try {
         if (theUsingTempFile)
-            theCore->OnSaveDocument(theDocument, true);
+            theCore->OnSaveDocument(theDocument.GetAbsolutePath().toQString(), true);
 
         DoPreviewViaConfig(inSelectedConfig, theDocument.GetAbsolutePath(),
                            inMode, viewerExeName, project);
@@ -310,7 +310,7 @@ bool CPreviewHelper::ResolveVariable(Q3DStudio::CBuildConfiguration *inSelectedC
     // Handle special variable
     if (inVariable == "BUILDFILE") {
         if (inSelectedConfig) {
-            theReturnStr = inSelectedConfig->GetPath();
+            theReturnStr = Q3DStudio::CString::fromQString(inSelectedConfig->GetPath());
             theHasResolved = true;
         }
     } else if (inVariable == "UIPFILE") {
@@ -319,9 +319,9 @@ bool CPreviewHelper::ResolveVariable(Q3DStudio::CBuildConfiguration *inSelectedC
     }
 
     if (!theHasResolved) {
-        Q3DStudio::CString theValue = CStudioPreferences::GetPreviewProperty(inVariable);
+        QString theValue = CStudioPreferences::GetPreviewProperty(inVariable.toQString());
         if (theValue != "") {
-            theReturnStr = theValue;
+            theReturnStr = Q3DStudio::CString::fromQString(theValue);
             theHasResolved = true;
         }
     }

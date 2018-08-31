@@ -815,7 +815,7 @@ struct SimpleXmlWriter
     void Write(TWideXMLCharPtr data)
     {
         if (!IsTrivial(data))
-            m_stream << data;
+            m_stream << QString::fromWCharArray(data);
     }
     void Write(const char8_t *data)
     {
@@ -1035,12 +1035,8 @@ struct DOMParser
         QXmlStreamReader sreader;
 
         DOMParser domParser(factory);
-        QByteArray dataRead;
-        do {
-            dataRead = inStream.read(2048);
-            if (dataRead.size() > 0)
-                sreader.addData(dataRead);
-        } while (dataRead.size() > 0);
+        QByteArray dataRead = inStream.readAll();
+        sreader.addData(dataRead);
 
         while (!sreader.atEnd()) {
             QXmlStreamReader::TokenType token = sreader.readNext();

@@ -64,8 +64,6 @@ public:
     virtual qt3ds::foundation::IStringTable &GetRenderStringTable() = 0;
 
     static std::shared_ptr<IStringTable> CreateStringTable();
-    static std::shared_ptr<IStringTable>
-    CreateStringTable(qt3ds::foundation::IStringTable &inStrTable);
 };
 typedef std::shared_ptr<IStringTable> TStringTablePtr;
 };

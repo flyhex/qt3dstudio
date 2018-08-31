@@ -43,7 +43,7 @@
 #include "GUIDUtilities.h"
 #include "IDocumentEditor.h"
 #include "Q3DStudioNVFoundation.h"
-
+#include "IDocSceneGraph.h"
 #include "Q3DSInputStreamFactory.h"
 
 #include "Qt3DSDMGuides.h"
@@ -320,7 +320,6 @@ struct SComposerSerializerImpl : public IComposerSerializer
     SComposerObjectDefinitions &m_ObjectDefinitions;
     qt3dsdm::IStringTable &m_StringTable;
     std::shared_ptr<Q3DStudio::IImportFailedHandler> m_ImportFailedHandler;
-    qt3ds::render::IPathManager &m_PathManager;
 
     // The instances we have discovered when we are writing
     THandleToIdMap m_HandleToIdMap;
@@ -370,7 +369,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                             IActionSystem &inActionSystem, ISlideGraphCore &inSlideGraphCore,
                             SComposerObjectDefinitions &inObjectDefinitions,
                             std::shared_ptr<Q3DStudio::IImportFailedHandler> inFailedHandler,
-                            IGuideSystem &inGuideSystem, qt3ds::render::IPathManager &inPathManager)
+                            IGuideSystem &inGuideSystem)
         : m_DataCore(inDataCore)
         , m_MetaData(inMetaData)
         , m_SlideCore(inSlideCore)
@@ -384,7 +383,6 @@ struct SComposerSerializerImpl : public IComposerSerializer
         , m_ObjectDefinitions(inObjectDefinitions)
         , m_StringTable(inDataCore.GetStringTable())
         , m_ImportFailedHandler(inFailedHandler)
-        , m_PathManager(inPathManager)
         , m_Foundation(Q3DStudio::Foundation::SStudioFoundation::Create())
         , m_InputStreamFactory(Q3DStudio::IInputStreamFactory::Create())
         , m_PreserveFileIds(true)
@@ -2811,11 +2809,10 @@ std::shared_ptr<IComposerSerializer> IComposerSerializer::CreateGraphSlideSerial
         IAnimationCore &inAnimationCore, IActionCore &inActionCore, CGraph &inAssetGraph,
         ISlideSystem &inSlideSystem, IActionSystem &inActionSystem, ISlideGraphCore &inSlideGraphCore,
         SComposerObjectDefinitions &inObjectDefinitions,
-        std::shared_ptr<Q3DStudio::IImportFailedHandler> inFailedHandler, IGuideSystem &inGuideSystem,
-        qt3ds::render::IPathManager &inPathManager)
+        std::shared_ptr<Q3DStudio::IImportFailedHandler> inFailedHandler, IGuideSystem &inGuideSystem)
 {
     return std::shared_ptr<SComposerSerializerImpl>(new SComposerSerializerImpl(
                                                           inDataCore, inMetaData, inSlideCore, inAnimationCore, inActionCore, inAssetGraph,
                                                           inSlideSystem, inActionSystem, inSlideGraphCore, inObjectDefinitions, inFailedHandler,
-                                                          inGuideSystem, inPathManager));
+                                                          inGuideSystem));
 }
