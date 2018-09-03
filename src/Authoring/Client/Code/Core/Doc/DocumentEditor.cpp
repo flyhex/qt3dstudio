@@ -1900,9 +1900,6 @@ public:
         for (auto &prop : propList) {
             const auto &name = m_PropertySystem.GetName(prop);
 
-            if (name == L"name")
-                continue;
-
             m_PropertySystem.GetInstancePropertyValue(instance, prop, value);
 
             if (m_AnimationSystem.IsPropertyAnimated(instance, prop))
@@ -1950,8 +1947,13 @@ public:
         file.write(m_Doc.GetDocumentPath().GetAbsolutePath()
                    .toQString().toUtf8().constData());
         file.write("</Property>\n");
-        file.write("\t<Property name=\"name\">");
-        file.write(QFileInfo(file).completeBaseName().toUtf8().constData());
+
+        const QFileInfo fileInfo(file);
+        file.write("\t<Property name=\"path\">");
+        file.write(fileInfo.absoluteFilePath().toUtf8().constData());
+        file.write("</Property>\n");
+        file.write("\t<Property name=\"filename\">");
+        file.write(fileInfo.completeBaseName().toUtf8().constData());
         file.write("</Property>\n");
         file.write("</MaterialData>");
     }
@@ -2016,7 +2018,7 @@ public:
         return instance;
     }
 
-    Qt3DSDMInstanceHandle getMaterial(const Q3DStudio::CString &materialName)
+    Qt3DSDMInstanceHandle getMaterial(const Q3DStudio::CString &materialName) override
     {
         IObjectReferenceHelper *objRefHelper = m_Doc.GetDataModelObjectReferenceHelper();
         QString name = getMaterialContainerPath() + QStringLiteral(".") + materialName.toQString();
@@ -4731,39 +4733,6 @@ public:
             CFilePath theRelativePath(m_Doc.GetRelativePathToDoc(theRecord.m_File));
             const wchar_t *theString(
                 m_DataCore.GetStringTable().RegisterStr(theRelativePath.toCString()));
-
-            if (theExtension.CompareNoCase(L"matdata")) {
-                if (theRecord.m_ModificationType == FileModificationType::Created) {
-                    QString name;
-                    QMap<QString, QString> values;
-                    getMaterialInfo(theRecord.m_File.absoluteFilePath(), name, values);
-                    if (values.contains(QStringLiteral("presentation"))
-                            && values.contains(QStringLiteral("name"))) {
-                        if (values[QStringLiteral("presentation")]
-                                == m_Doc.GetDocumentPath().GetAbsolutePath().toQString()) {
-                            const auto instance = getMaterial(Q3DStudio::CString::fromQString(
-                                                                  values[QStringLiteral("name")]));
-                            if (instance.Valid())
-                                SetName(instance, Q3DStudio::CString::fromQString(name));
-                        }
-                    }
-                    auto material = getOrCreateMaterial(Q3DStudio::CString::fromQString(name));
-                    setMaterialValues(name, values);
-                    writeMaterialFile(material, name, false, theRecord.m_File.toQString());
-                }
-                else if (theRecord.m_ModificationType == FileModificationType::Destroyed) {
-                    IObjectReferenceHelper *objRefHelper
-                            = m_Doc.GetDataModelObjectReferenceHelper();
-                    CRelativePathTools::EPathType type;
-                    qt3dsdm::Qt3DSDMInstanceHandle material;
-                    objRefHelper->ResolvePath(m_Doc.GetSceneInstance(),
-                                              (getMaterialContainerPath() + QStringLiteral(".") +
-                                               theRecord.m_File.baseName()).toUtf8().constData(),
-                                              type, material, true);
-                    if (material.Valid())
-                        DeleteInstance(material);
-                }
-            }
 
             if ((theExtension.CompareNoCase(L"ttf")
                  || theExtension.CompareNoCase(L"otf")) // should use CDialogs::IsFontFileExtension

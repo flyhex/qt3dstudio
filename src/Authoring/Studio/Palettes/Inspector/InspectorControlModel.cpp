@@ -259,29 +259,52 @@ void InspectorControlModel::setMaterials(std::vector<Q3DStudio::CFilePath> &mate
 void InspectorControlModel::setMatDatas(std::vector<Q3DStudio::CFilePath> &matDatas)
 {
     m_matDatas.clear();
-    const Q3DStudio::CString base = g_StudioApp.GetCore()->GetDoc()->GetDocumentDirectory();
-    const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
+
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    const auto sceneEditor = doc->getSceneEditor();
+    if (!sceneEditor)
+        return;
 
     QStringList filenames;
     for (Q3DStudio::CFilePath path : matDatas) {
         const QString relativePath = path.toQString();
         const Q3DStudio::CFilePath absolutePath
-            = Q3DStudio::CFilePath::CombineBaseAndRelative(base, path);
+            = Q3DStudio::CFilePath::CombineBaseAndRelative(doc->GetDocumentDirectory(), path);
 
         QString name;
         QMap<QString, QString> values;
-        g_StudioApp.GetCore()->GetDoc()->GetDocumentReader().getMaterialInfo(
+        sceneEditor->getMaterialInfo(
                     absolutePath.toQString(), name, values);
 
         m_matDatas.push_back({name, relativePath, values});
         filenames.push_back(name);
 
-        if (sceneEditor)
-            sceneEditor->setMaterialValues(name, values);
+        bool needRewrite = false;
+        if (values.contains(QStringLiteral("presentation"))
+                && values.contains(QStringLiteral("path"))
+                && values.contains(QStringLiteral("filename"))) {
+            if (values[QStringLiteral("presentation")]
+                    == doc->GetDocumentPath().GetAbsolutePath().toQString()) {
+                if (!QFileInfo(values["path"]).exists()) {
+                    const auto instance = sceneEditor->getMaterial(
+                                Q3DStudio::CString::fromQString(
+                                    values[QStringLiteral("filename")]));
+                    if (instance.Valid()) {
+                        sceneEditor->SetName(instance, Q3DStudio::CString::fromQString(name));
+                        needRewrite = true;
+                    }
+                }
+            }
+        }
+
+        auto material = sceneEditor->getOrCreateMaterial(Q3DStudio::CString::fromQString(name));
+        sceneEditor->setMaterialValues(name, values);
+
+        if (needRewrite)
+            sceneEditor->writeMaterialFile(material, name, false, absolutePath.toQString());
     }
 
-    if (sceneEditor)
-        sceneEditor->updateMaterialInstances(filenames);
+    sceneEditor->updateMaterialInstances(filenames);
 
     updateMaterialValues();
 }

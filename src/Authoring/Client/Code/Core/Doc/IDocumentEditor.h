@@ -187,6 +187,7 @@ public:
 
     virtual Qt3DSDMInstanceHandle getMaterialContainer() const = 0;
 
+    virtual Qt3DSDMInstanceHandle getMaterial(const Q3DStudio::CString &materialName) = 0;
     virtual Qt3DSDMInstanceHandle getOrCreateMaterial(const Q3DStudio::CString &materialName) = 0;
 
     virtual void getMaterialReference(Qt3DSDMInstanceHandle instance,
