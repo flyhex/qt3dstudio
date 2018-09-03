@@ -408,13 +408,14 @@ void ProjectView::openFile(int row)
         return;
 
     QString filePath = QDir::cleanPath(fi.absoluteFilePath());
-    QTimer::singleShot(0, [filePath]() {
+    QTimer::singleShot(0, [filePath, row, this]() {
         // .uip files should be opened in this studio instance
         if (filePath.endsWith(QLatin1String(".uip"), Qt::CaseInsensitive)) {
             if (g_StudioApp.PerformSavePrompt())
                 g_StudioApp.OnLoadDocument(filePath);
+        } else if (filePath.endsWith(QLatin1String(".matdata"), Qt::CaseInsensitive)) {
+            editMaterial(row);
         } else {
-            // TODO: materials to be opened in inspector, pending materials handling overhaul
             QDesktopServices::openUrl(QUrl::fromLocalFile(filePath));
         }
     });
