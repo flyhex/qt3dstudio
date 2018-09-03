@@ -1925,15 +1925,15 @@ public:
                     MemoryBuffer<RawAllocator> tempBuffer;
                     WCharTWriter writer(tempBuffer);
                     WStrOps<SValue>().ToBuf(value, writer);
-                    tempBuffer.write((QT3DSU16)0);
+                    tempBuffer.write(0);
 
                     if (tempBuffer.size()) {
                         file.write("\t<Property name=\"");
                         file.write(QString::fromWCharArray(name.wide_str(),
                                                            name.length()).toUtf8().constData());
                         file.write("\">");
-                        file.write(QString::fromWCharArray((const wchar_t *)tempBuffer.begin(),
-                                                           tempBuffer.size()).toUtf8().constData());
+                        file.write(QString::fromWCharArray(
+                                       (const wchar_t *)tempBuffer.begin()).toUtf8().constData());
                         file.write("</Property>\n");
                     }
                 } else {
