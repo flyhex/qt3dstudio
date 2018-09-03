@@ -1194,9 +1194,34 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
                                                                true);
             }
             if (newName != currentName) {
-                Q3DStudio::SCOPED_DOCUMENT_EDITOR(
-                            *g_StudioApp.GetCore()->GetDoc(),
-                            QObject::tr("Set Name"))->SetName(instance, newName, false);
+                bool canRename = false;
+
+                const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
+                if (sceneEditor->isInsideMaterialContainer(instance)) {
+                    const auto doc = g_StudioApp.GetCore()->GetDoc();
+                    const auto dirPath = doc->GetDocumentDirectory().toQString();
+                    for (size_t matIdx = 0, end = m_matDatas.size(); matIdx < end; ++matIdx) {
+                        if (m_matDatas[matIdx].m_name == currentName.toQString()) {
+                            QFileInfo fileInfo(dirPath + QStringLiteral("/")
+                                               + m_matDatas[matIdx].m_relativePath);
+                            const QString oldFile = fileInfo.absoluteFilePath();
+                            const QString newFile = fileInfo.absolutePath()
+                                    + QStringLiteral("/")
+                                    + newName.toQString()
+                                    + QStringLiteral(".matdata");
+                            canRename = QFile::rename(oldFile, newFile);
+                            break;
+                        }
+                    }
+                } else {
+                    canRename = true;
+                }
+
+                if (canRename) {
+                    Q3DStudio::SCOPED_DOCUMENT_EDITOR(
+                                *g_StudioApp.GetCore()->GetDoc(),
+                                QObject::tr("Set Name"))->SetName(instance, newName, false);
+                }
             }
         }
         return;
