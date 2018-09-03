@@ -86,6 +86,7 @@ public:
     bool isPresentation(int row) const;
     bool isQmlStream(int row) const;
     bool isCurrentPresentation(int row) const;
+    bool isMaterialFolder(int row) const;
     bool isMaterialData(int row) const;
     void openPresentation(int row);
     void editPresentationId(int row);

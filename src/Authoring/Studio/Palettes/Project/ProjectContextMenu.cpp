@@ -85,11 +85,12 @@ ProjectContextMenu::ProjectContextMenu(ProjectView *parent, int index)
     connect(action, &QAction::triggered, this, &ProjectContextMenu::handleImportAssets);
     addAction(action);
 
-    addSeparator();
-
-    action = new QAction(tr("Add Material"));
-    connect(action, &QAction::triggered, this, &ProjectContextMenu::handleAddMaterial);
-    addAction(action);
+    if (m_view->isMaterialFolder(m_index)) {
+        addSeparator();
+        action = new QAction(tr("Add Material"));
+        connect(action, &QAction::triggered, this, &ProjectContextMenu::handleAddMaterial);
+        addAction(action);
+    }
 
     if (m_view->isRefreshable(m_index)) {
         addSeparator();

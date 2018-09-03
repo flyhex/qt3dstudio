@@ -377,6 +377,11 @@ bool ProjectView::isQmlStream(int row) const
     return strcmp(rootClassName, "Q3DStudio::Q3DSQmlBehavior") != 0;
 }
 
+bool ProjectView::isMaterialFolder(int row) const
+{
+    return m_ProjectModel->filePath(row).endsWith(QLatin1String("/materials"));
+}
+
 bool ProjectView::isMaterialData(int row) const
 {
     return m_ProjectModel->filePath(row).endsWith(QLatin1String(".matdata"));
