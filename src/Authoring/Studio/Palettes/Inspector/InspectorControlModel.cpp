@@ -226,7 +226,7 @@ void InspectorControlModel::updateMaterialValues()
             if (m_groupElements[row].controlElements.size()) {
                 auto item = m_groupElements[row].controlElements[0]
                         .value<InspectorControlBase *>();
-                item->m_values = materialValues();
+                item->m_values = materialValues(item->m_instance);
                 Q_EMIT item->valuesChanged();
                 // Changing values resets the selected index, so pretend the value has also changed
                 Q_EMIT item->valueChanged();
@@ -357,7 +357,7 @@ void InspectorControlModel::updateFontValues(InspectorControlBase *element) cons
     }
 }
 
-QStringList InspectorControlModel::materialValues() const
+QStringList InspectorControlModel::materialValues(qt3dsdm::Qt3DSDMInstanceHandle instance) const
 {
     QStringList values;
     values.push_back(getStandardMaterialString());
@@ -366,10 +366,14 @@ QStringList InspectorControlModel::materialValues() const
     for (size_t matIdx = 0, end = m_materials.size(); matIdx < end; ++matIdx)
         values.push_back(m_materials[matIdx].m_name);
 
-    values.push_back(getDefaultMaterialString());
+    const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
 
-    for (size_t matIdx = 0, end = m_matDatas.size(); matIdx < end; ++matIdx)
-        values.push_back(m_matDatas[matIdx].m_name);
+    if (!sceneEditor->isInsideMaterialContainer(instance)) {
+        values.push_back(getDefaultMaterialString());
+
+        for (size_t matIdx = 0, end = m_matDatas.size(); matIdx < end; ++matIdx)
+            values.push_back(m_matDatas[matIdx].m_name);
+    }
 
     return values;
 }
@@ -393,7 +397,7 @@ InspectorControlBase* InspectorControlModel::createMaterialItem(Qt3DSDMInspectab
 
     item->m_animatable = false;
 
-    const QStringList values = materialValues();
+    const QStringList values = materialValues(instance);
     item->m_values = values;
 
     QString sourcePath = theBridge->GetSourcePath(item->m_instance).toQString();
