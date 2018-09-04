@@ -28,9 +28,6 @@
 **
 ****************************************************************************/
 
-#pragma message(                                                                                   \
-    "AKBezierEval.h -- Changes to this file necessitate rebuilding the studio DataModel project and running the unit tests")
-
 namespace Q3DStudio {
 
 //==============================================================================
