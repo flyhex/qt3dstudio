@@ -818,7 +818,7 @@ public:
             if (inTextureParameters.m_offsetU.m_Flag) {
                 SetInstancePropertyValue(
                     theImageInstance, m_Image.m_PositionU,
-                    (theDefaultPivot - 1 + inTextureParameters.m_offsetU.m_Value * theCoverageU)
+                    ((theDefaultPivot - 1 + inTextureParameters.m_offsetU.m_Value) * theCoverageU)
                         / theScaleU);
             }
             // From AMXMayaExporter: do offset with pivotV and scaleV...
@@ -826,7 +826,7 @@ public:
             if (inTextureParameters.m_offsetV.m_Flag) {
                 SetInstancePropertyValue(
                     theImageInstance, m_Image.m_PositionV,
-                    (theDefaultPivot - 1 + inTextureParameters.m_offsetV.m_Value * theCoverageV)
+                    ((theDefaultPivot - 1 + inTextureParameters.m_offsetV.m_Value) * theCoverageV)
                         / theScaleV);
             }
 
