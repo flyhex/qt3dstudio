@@ -1691,10 +1691,7 @@ public:
         if (!img)
             img = CreateImageInstanceForMaterialOrLayer(instance, prop);
 
-        Qt3DSDMPropertyHandle propHandleSP = m_PropertySystem
-                .GetAggregateInstancePropertyByName(img, L"subpresentation");
-
-        SetInstancePropertyValueAsRenderable(img, propHandleSP, pId);
+        SetInstancePropertyValueAsRenderable(img, m_Bridge.getSubpresentationProperty(), pId);
     }
 
     /**
@@ -1728,7 +1725,7 @@ public:
     }
 
     void SetMaterialType(TInstanceHandle instance,
-                                 const Q3DStudio::CString &inRelativePathToMaterialFile) override
+                         const Q3DStudio::CString &inRelativePathToMaterialFile) override
     {
         const Q3DStudio::CString existing = m_Bridge.GetSourcePath(instance);
         if (existing == inRelativePathToMaterialFile)
@@ -1782,10 +1779,8 @@ public:
                                              DocumentEditorInsertType::LastChild, 0, instance);
         }
 
-        if (newMaterial.Valid()) {
-            if (nextChild.Valid())
-                m_AssetGraph.MoveBefore(newMaterial, nextChild);
-        }
+        if (newMaterial.Valid() && nextChild.Valid())
+            m_AssetGraph.MoveBefore(newMaterial, nextChild);
 
         // restore current lightmap settings for new material
         if (theLightmapIndirectValue.hasValue())
