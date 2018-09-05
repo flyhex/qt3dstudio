@@ -109,10 +109,10 @@ void CStartupDlg::OnInitDialog()
         recent->setProperty("recentIndex", theIndex);
 
         if (m_RecentDocs.size() > theIndex) {
-            // Set the name
-            recent->setText(m_RecentDocs[theIndex]);
-            // Set path and date to tooltip
             QFileInfo thePath(m_RecentDocs[theIndex]);
+            // Set the name
+            recent->setText(thePath.fileName());
+            // Set path and date to tooltip
             QString toolTip = thePath.absoluteDir().path();
             toolTip.append(QStringLiteral("\n"));
             toolTip.append(GetFileTimeReadable(m_RecentDocs[theIndex]));
