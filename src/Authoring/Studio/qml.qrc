@@ -41,5 +41,6 @@
         <file>Palettes/controls/StyledToggleButton.qml</file>
         <file>Palettes/Action/HandlerBaseMultilineText.qml</file>
         <file>Palettes/Action/HandlerGenericFloat.qml</file>
+        <file>Palettes/Inspector/MaterialDropDown.qml</file>
     </qresource>
 </RCC>

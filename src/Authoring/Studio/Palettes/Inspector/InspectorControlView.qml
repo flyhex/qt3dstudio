@@ -422,7 +422,11 @@ Rectangle {
                                                 return null;
                                             case DataModelDataType.StringRef:
                                                 if (modelData.propertyType === AdditionalMetaDataType.None)
-                                                    return materialDropDown;
+                                                    return materialTypeDropDown;
+                                                if (modelData.propertyType === AdditionalMetaDataType.Renderable)
+                                                    return shaderDropDown;
+                                                if (modelData.propertyType === AdditionalMetaDataType.ObjectRef)
+                                                    return matDataDropDown;
                                                 console.warn("KDAB_TODO: implement handler for type:\"StringRef\" text ",
                                                              model.modelData.title);
                                                 return null;
@@ -816,40 +820,26 @@ Rectangle {
     }
 
     Component  {
-        id: materialDropDown
+        id: materialTypeDropDown
 
-        StyledComboBox {
-            property int instance: parent.modelData.instance
-            property int handle: parent.modelData.handle
-            property var values: parent.modelData.values
-            property var value: parent.modelData.value
-            property bool blockIndexChange: false
+        MaterialDropDown {
+            callback: _inspectorModel.setMaterialTypeValue
+        }
+    }
 
-            model: values
+    Component  {
+        id: shaderDropDown
 
-            implicitWidth: _valueWidth
-            implicitHeight: _controlBaseHeight
+        MaterialDropDown {
+            callback: _inspectorModel.setShaderValue
+        }
+    }
 
-            Component.onCompleted: {
-                currentIndex = find(value)
-            }
-            onCurrentIndexChanged: {
-                var newValue = textAt(currentIndex)
-                if (!blockIndexChange && value !== newValue && currentIndex !== -1)
-                    _inspectorModel.setMaterialTypeValue(instance, handle, newValue)
-            }
-            onValueChanged: {
-                var newNewIndex = find(value);
-                if (!blockIndexChange || newNewIndex > 0)
-                    currentIndex = newNewIndex;
-                blockIndexChange = false;
-            }
-            onValuesChanged : {
-                // Changing the values list will reset the currentIndex to zero, so block setting
-                // the actual material. We'll get the proper index right after.
-                if (currentIndex > 0)
-                    blockIndexChange = true;
-            }
+    Component  {
+        id: matDataDropDown
+
+        MaterialDropDown {
+            callback: _inspectorModel.setMatDataValue
         }
     }
 
