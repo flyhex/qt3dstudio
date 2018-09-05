@@ -85,7 +85,6 @@ clang {
 # QT3DS-2247 -Wno-pointer-bool-conversion
 # QT3DS-2248 -Wno-self-assign
 # QT3DS-2249 -Wno-tautological-compare
-# QT3DS-2250 -Wno-uninitialized
 # QT3DS-2251 -Wno-tautological-constant-out-of-range-compare
 # QT3DS-2253 -Wno-infinite-recursion
     QMAKE_CXXFLAGS_WARN_ON = -Wall \
@@ -110,7 +109,6 @@ clang {
         -Wno-deprecated-declarations \
         -Wno-pointer-bool-conversion \
         -Wno-self-assign \
-        -Wno-uninitialized \
         -Wno-tautological-compare \
         -Wno-tautological-constant-out-of-range-compare \
         -Wno-infinite-recursion
@@ -136,7 +134,6 @@ clang {
         -Wno-deprecated-declarations \
         -Wno-pointer-bool-conversion \
         -Wno-self-assign \
-        -Wno-uninitialized \
         -Wno-tautological-compare \
         -Wno-tautological-constant-out-of-range-compare \
         -Wno-infinite-recursion

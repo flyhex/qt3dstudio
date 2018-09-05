@@ -1477,7 +1477,7 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
         if (theInsertResult.second) {
             NVRenderShaderProgram *theProgram = m_Context->GetShaderCache().GetProgram(
                 GetShaderCacheKey(inPath, theProgramMacro, theFlags), inFeatureSet);
-            SDynamicShaderProgramFlags theFlags(theFlags);
+            SDynamicShaderProgramFlags flags(theFlags);
             if (!theProgram) {
                 CRenderString theShaderBuffer;
                 const char8_t *geomSource = DoLoadShader(inPath, theShaderBuffer);
@@ -1506,11 +1506,11 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
                 programBuffer.append("\n#ifdef FRAGMENT_SHADER\n");
                 programBuffer.append(fragmentSource);
                 programBuffer.append("\n#endif");
-                theFlags.SetGeometryShaderEnabled(true);
+                flags.SetGeometryShaderEnabled(true);
                 theProgram = CompileShader(inPath, programBuffer.c_str(), geomSource,
-                                           theProgramMacro, inFeatureSet, theFlags);
+                                           theProgramMacro, inFeatureSet, flags);
             }
-            theInsertResult.first->second = TShaderAndFlags(theProgram, theFlags);
+            theInsertResult.first->second = TShaderAndFlags(theProgram, flags);
         }
         return theInsertResult.first->second;
     }
