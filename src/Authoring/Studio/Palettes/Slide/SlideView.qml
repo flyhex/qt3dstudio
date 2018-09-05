@@ -364,8 +364,8 @@ Rectangle {
                     property bool controlled: parent.controlled
                     source: {
                         _resDir + (controlled
-                                   ? "Objects-DataInput-Normal.png"
-                                   : "Objects-DataInput-Disabled.png")
+                                   ? "Objects-DataInput-Active.png"
+                                   : "Objects-DataInput-Inactive.png")
                     }
                 }
                 StyledTooltip {

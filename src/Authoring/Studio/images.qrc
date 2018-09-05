@@ -238,10 +238,12 @@
         <file>images/Objects-edit-disabled@2x.png</file>
         <file>images/Objects-edit-normal.png</file>
         <file>images/Objects-edit-normal@2x.png</file>
-        <file>images/Objects-DataInput-Normal.png</file>
-        <file>images/Objects-DataInput-Normal@2x.png</file>
-        <file>images/Objects-DataInput-Disabled.png</file>
-        <file>images/Objects-DataInput-Disabled@2x.png</file>
+        <file>images/Objects-DataInput-Active.png</file>
+        <file>images/Objects-DataInput-Active@2x.png</file>
+        <file>images/Objects-DataInput-Inactive.png</file>
+        <file>images/Objects-DataInput-Inactive@2x.png</file>
+        <file>images/Objects-DataInput-White.png</file>
+        <file>images/Objects-DataInput-White@2x.png</file>
         <file>images/Asset-import-Normal.png</file>
         <file>images/Asset-import-Normal@2x.png</file>
         <file>images/arrow_up.png</file>
@@ -285,8 +287,6 @@
         <file>images/remote-disabled@2x.png</file>
         <file>images/Assets-Model.png</file>
         <file>images/Assets-Model@2x.png</file>
-        <file>images/Objects-DataInput-White.png</file>
-        <file>images/Objects-DataInput-White@2x.png</file>
         <file>images/presentation_edit.png</file>
         <file>images/presentation_edit@2x.png</file>
         <file>images/presentation_notUsed.png</file>

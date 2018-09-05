@@ -56,8 +56,8 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     static const QIcon iconLast = QIcon(":/images/playback_tools_low-04.png");
     static const QIcon iconZoomIn = QIcon(":/images/zoom_in.png");
     static const QIcon iconZoomOut = QIcon(":/images/zoom_out.png");
-    m_iconDiActive = QIcon(":/images/Objects-DataInput-Normal.png");
-    m_iconDiInactive = QIcon(":/images/Objects-DataInput-Disabled.png");
+    m_iconDiActive = QIcon(":/images/Objects-DataInput-Active.png");
+    m_iconDiInactive = QIcon(":/images/Objects-DataInput-Inactive.png");
     m_iconStop = QIcon(":/images/playback_tools_low-01.png");
     m_iconPlay = QIcon(":/images/playback_tools_low-02.png");
 
