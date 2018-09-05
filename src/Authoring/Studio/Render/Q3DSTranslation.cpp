@@ -1780,7 +1780,7 @@ void Q3DSTranslation::clearDirtySet()
     m_dirtySet.clear();
 }
 
-void Q3DSTranslation::render()
+void Q3DSTranslation::prepareRender(const QRect &rect, const QSize &size)
 {
     if (!m_scene)
         return;
@@ -1789,6 +1789,11 @@ void Q3DSTranslation::render()
         m_engine->setPresentation(m_presentation.data());
         m_engine->setProfileUiVisible(true, true);
         m_studioRenderer.SetViewRect(m_studioRenderer.viewRect());
+    }
+    if (rect != m_rect || size != m_size) {
+        m_engine->sceneManager()->updateSizes(size, 1.0, rect, true);
+        m_rect = rect;
+        m_size = size;
     }
 }
 

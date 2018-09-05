@@ -129,6 +129,22 @@ struct STranslation : public qt3ds::render::IQt3DSRenderNodeFilter
 
 namespace Q3DStudio
 {
+
+enum class TranslationSelectMode
+{
+    Group = 0,
+    Single,
+    NestedComponentSingle,
+};
+
+enum class EditCameraTypes
+{
+    SceneCamera = 0,
+    Perspective,
+    Orthographic,
+    Directional,
+};
+
 class Q3DStudioRenderer;
 class Q3DSGraphObjectTranslator;
 class Q3DSTranslation
@@ -227,6 +243,8 @@ private:
     QVector<TSignalConnection> m_signalConnections;
     quint32 m_componentSecondsDepth;
     QVector<Q3DSGraphObjectTranslator*> m_slideTranslators;
+    QRect m_rect;
+    QSize m_size;
 
 #ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     SNode m_MouseDownNode;
@@ -287,7 +305,7 @@ public:
     {
         return m_presentation.data();
     }
-    void render();
+    void prepareRender(const QRect &rect, const QSize &size);
     Q3DSGraphObjectTranslator *getOrCreateTranslator(qt3dsdm::Qt3DSDMInstanceHandle instance);
 };
 

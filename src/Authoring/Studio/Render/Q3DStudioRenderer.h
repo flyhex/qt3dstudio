@@ -152,6 +152,7 @@ private:
     bool m_guidesEnabled = true;
     bool m_hasPresentation = false;
     bool m_renderRequested = false;
+    int m_editCameraIndex = -1;
 };
 
 }

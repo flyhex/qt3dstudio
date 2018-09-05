@@ -53,6 +53,27 @@
 
 namespace Q3DStudio {
 
+struct SEditCameraDefinition
+{
+    EditCameraTypes m_Type;
+    // Directional cameras have a direction they point
+    QT3DSVec3 m_Direction; // not normalized
+    QString m_Name;
+};
+
+static SEditCameraDefinition g_EditCameraDefinitions[] = {
+    { EditCameraTypes::Perspective, QT3DSVec3(1, -1, -1), QObject::tr("Perspective View") },
+    { EditCameraTypes::Orthographic, QT3DSVec3(1, -1, -1), QObject::tr("Orthographic View") },
+    { EditCameraTypes::Directional, QT3DSVec3(0, -1, 0), QObject::tr("Top View") },
+    { EditCameraTypes::Directional, QT3DSVec3(0, 1, 0), QObject::tr("Bottom View") },
+    { EditCameraTypes::Directional, QT3DSVec3(1, 0, 0), QObject::tr("Left View") },
+    { EditCameraTypes::Directional, QT3DSVec3(-1, 0, 0), QObject::tr("Right View") },
+    { EditCameraTypes::Directional, QT3DSVec3(0, 0, -1), QObject::tr("Front View") },
+    { EditCameraTypes::Directional, QT3DSVec3(0, 0, 1), QObject::tr("Back View") },
+};
+static QT3DSU32 g_NumEditCameras = sizeof(g_EditCameraDefinitions)
+                                        / sizeof(*g_EditCameraDefinitions);
+
 Q3DStudioRenderer::Q3DStudioRenderer()
     : m_dispatch(*g_StudioApp.GetCore()->GetDispatch())
     , m_doc(*g_StudioApp.GetCore()->GetDoc())
@@ -151,7 +172,9 @@ bool Q3DStudioRenderer::IsPolygonFillModeEnabled() const
 
 void Q3DStudioRenderer::GetEditCameraList(QStringList &outCameras)
 {
-
+    outCameras.clear();
+    for (QT3DSU32 idx = 0; idx < g_NumEditCameras; ++idx)
+        outCameras.push_back(g_EditCameraDefinitions[idx].m_Name);
 }
 
 bool Q3DStudioRenderer::DoesEditCameraSupportRotation(QT3DSI32 inIndex)
@@ -181,12 +204,15 @@ void Q3DStudioRenderer::SetGuidesEditable(bool val)
 
 void Q3DStudioRenderer::SetEditCamera(QT3DSI32 inIndex)
 {
-
+    m_editCameraIndex = qMin(inIndex, (QT3DSI32)g_NumEditCameras);
+    RequestRender();
 }
 
 QT3DSI32 Q3DStudioRenderer::GetEditCamera() const
 {
-    return 0;
+    if (m_editCameraIndex >= 0 && m_editCameraIndex < (QT3DSI32)g_NumEditCameras)
+        return m_editCameraIndex;
+    return -1;
 }
 
 void Q3DStudioRenderer::EditCameraZoomToFit()
@@ -292,10 +318,10 @@ void Q3DStudioRenderer::drawGuides()
 
     int offset = CStudioPreferences::guideSize() / 2;
 
-    int innerLeft = thePresentationViewport.left() + offset;
-    int innerRight = thePresentationViewport.right() - offset;
-    int innerBottom = thePresentationViewport.bottom() - offset;
-    int innerTop = thePresentationViewport.top() + offset;
+    int innerLeft = offset;
+    int innerRight = thePresentationViewport.width() - offset;
+    int innerBottom = thePresentationViewport.height() - offset;
+    int innerTop = offset;
 
     int outerLeft = innerLeft - offset;
     int outerRight = innerRight + offset;
@@ -340,16 +366,23 @@ void Q3DStudioRenderer::RenderNow()
         auto renderAspectD = static_cast<Qt3DRender::QRenderAspectPrivate *>(
                     Qt3DRender::QRenderAspectPrivate::get(m_renderAspect));
         renderAspectD->renderInitialize(m_widget->context());
+        m_widget->makeCurrent();
     }
 
-    m_widget->makeCurrent();
-
-    if (!m_translation.isNull())
-        m_translation->render();
+    if (!m_translation.isNull()) {
+        QSize size = QSize(m_viewRect.width(), m_viewRect.height());
+        QRect viewRect = QRect(0, 0, size.width(), size.height());
+        if (m_guidesEnabled) {
+            const int guideSize = CStudioPreferences::guideSize();
+            const int offset = guideSize / 2;
+            viewRect = QRect(offset, offset, size.width() - guideSize, size.height() - guideSize);
+        }
+        m_translation->prepareRender(viewRect, size);
+    }
 
     auto renderAspectD = static_cast<Qt3DRender::QRenderAspectPrivate *>(
                 Qt3DRender::QRenderAspectPrivate::get(m_renderAspect));
-    renderAspectD->renderSynchronous();
+    renderAspectD->renderSynchronous(true);
 
     drawGuides();
 }
@@ -497,7 +530,7 @@ void Q3DStudioRenderer::createEngine()
 #endif
 
     m_viewportSettings.setMatteEnabled(true);
-    m_viewportSettings.setShowRenderStats(true);
+    m_viewportSettings.setShowRenderStats(false);
     QColor matteColor;
     matteColor.setRgbF(.13, .13, .13);
     m_viewportSettings.setMatteColor(matteColor);
