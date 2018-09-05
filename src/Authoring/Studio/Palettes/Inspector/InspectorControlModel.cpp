@@ -436,8 +436,6 @@ void InspectorControlModel::updateControlledToggleState(InspectorControlBase* in
     // Restore original tool tip from metadata when turning control off
     if (!currPropValStr.size()) {
         inItem->m_controlled = false;
-        inItem->m_tooltip = Q3DStudio::CString(
-            inItem->m_metaProperty.m_Description.c_str()).toQString();
         inItem->m_controller = "";
     } else {
        Q3DStudio::CString propName
@@ -449,8 +447,6 @@ void InspectorControlModel::updateControlledToggleState(InspectorControlBase* in
        if ((propNamePos == currPropValStr.ENDOFSTRING)
            && (propNamePos != 0)) {
            inItem->m_controlled = false;
-           inItem->m_tooltip = Q3DStudio::CString(
-               inItem->m_metaProperty.m_Description.c_str()).toQString();
            inItem->m_controller = "";
        } else {
            inItem->m_controlled = true;
@@ -467,7 +463,6 @@ void InspectorControlModel::updateControlledToggleState(InspectorControlBase* in
            const QString ctrlName = currPropValStr.substr(
                posCtrlr, propNamePos - posCtrlr).toQString();
 
-           inItem->m_tooltip = tr("Controlling Data Input:\n%1").arg(ctrlName);
            inItem->m_controller = ctrlName;
        }
     }
