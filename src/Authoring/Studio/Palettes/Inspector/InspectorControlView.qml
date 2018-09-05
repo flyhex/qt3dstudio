@@ -191,8 +191,10 @@ Rectangle {
                                                 }
 
                                                 MouseArea {
+                                                    id: animateButtonMouseArea
                                                     anchors.fill: parent
                                                     acceptedButtons: Qt.RightButton | Qt.LeftButton
+                                                    hoverEnabled: true
                                                     onClicked:  {
                                                         if (mouse.button === Qt.LeftButton) {
                                                             _inspectorModel.setPropertyAnimated(
@@ -207,6 +209,11 @@ Rectangle {
                                                         }
                                                     }
                                                 }
+                                                StyledTooltip {
+                                                    text: qsTr("Enable animation")
+                                                    enabled: animateButtonMouseArea.containsMouse
+                                                }
+
                                             }
                                         }
                                         StyledLabel { // Property label
@@ -223,7 +230,7 @@ Rectangle {
                                             Layout.alignment: Qt.AlignTop
 
                                             MouseArea {
-                                                id: mouseArea
+                                                id: propertyLabelMouseArea
                                                 anchors.fill: parent
                                                 acceptedButtons: Qt.RightButton
                                                 hoverEnabled: true
@@ -235,7 +242,7 @@ Rectangle {
                                             StyledTooltip {
                                                 id: valueToolTip
                                                 text: modelData.toolTip
-                                                enabled: mouseArea.containsMouse
+                                                enabled: propertyLabelMouseArea.containsMouse
                                             }
                                         }
                                     }
@@ -249,7 +256,7 @@ Rectangle {
                                             visible: model.modelData.controllable
 
                                             MouseArea {
-                                                id: mousearea
+                                                id: dataInputButtonMouseArea
                                                 anchors.fill: parent
                                                 acceptedButtons: Qt.RightButton | Qt.LeftButton
                                                 hoverEnabled: true
@@ -279,6 +286,10 @@ Rectangle {
                                                                ? "Objects-DataInput-Normal.png"
                                                                : "Objects-DataInput-Disabled.png")
                                                 }
+                                            }
+                                            StyledTooltip {
+                                                text: qsTr("Select Data Input control")
+                                                enabled: dataInputButtonMouseArea.containsMouse
                                             }
                                         }
                                         StyledLabel {
@@ -435,7 +446,6 @@ Rectangle {
             }
 
             MouseArea {
-                id: mouseAreaX
                 anchors.fill: parent
                 property int clickedPos
                 preventStealing: true
