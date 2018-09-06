@@ -1880,6 +1880,10 @@ public:
             if (actualSourcePath.isEmpty())
                 actualSourcePath = getMaterialPath(materialName);
 
+            QFileInfo fileInfo(actualSourcePath);
+            if (!fileInfo.dir().exists())
+                fileInfo.dir().mkdir(QStringLiteral("."));
+
             QFile file(actualSourcePath);
             if ((createNewFile && !file.exists()) || (!createNewFile && file.exists()))
                 saveMaterial(instance, file);
