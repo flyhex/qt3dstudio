@@ -154,6 +154,7 @@ Rectangle {
                 Row {
                     rotation: 90
                     anchors.centerIn: parent
+                    spacing: 5
                     Image {
                         id: dataInputImage2
                         fillMode: Image.Pad
@@ -377,7 +378,6 @@ Rectangle {
             StyledLabel {
                 id: dataInputName
                 text: _parentView.currController
-                leftPadding: 10
                 color: _parentView.controlled ? _dataInputColor : "transparent"
             }
         }

@@ -118,6 +118,7 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     addAction(m_actionNewLayer);
     addAction(m_actionDeleteRow);
     addAction(m_actionDataInput);
+    addSpacing(2);
     addWidget(m_diLabel);
     addSpacing(20);
     addWidget(m_timeLabel);
