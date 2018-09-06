@@ -522,6 +522,8 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                     m_rowManager->selectRow(rowTree, ctrlKeyDown);
                     if (rowTree->draggable())
                         m_startRowMoverOnNextDrag = true;
+                } else if (m_clickedTreeControlType == TreeControlType::Arrow) {
+                    updateSnapSteps();
                 }
             } else if (item->type() == TimelineItem::TypeRowTimeline) {
                 m_editedTimelineRow = static_cast<RowTimeline *>(item);
@@ -819,6 +821,9 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
                 m_rowManager->selectRow(m_releaseSelectRow);
         }
     }
+
+    if (m_timelineZooming)
+        updateSnapSteps();
 
     resetMousePressParams();
 
