@@ -964,7 +964,11 @@ public:
 
             theName = Q3DStudio::CString(theSourcePath + 1);
         } else {
-            theName = GetName(retval);
+            theName = ComposerObjectTypes::Convert(inType);
+            // TODO: This should work (QT3DS-2278). The line above is a quick fix in case
+            // the actual reason for this to have stopped working is not found in time for 2.1
+            // release.
+            //theName = GetName(retval);
         }
         SetTimeRangeToParent(retval);
 
@@ -3465,9 +3469,9 @@ public:
     };
 
     TInstanceHandle CreateText(const Q3DStudio::CString &inFullPathToDocument,
-                                       TInstanceHandle inParent, TSlideHandle inSlide,
-                                       DocumentEditorInsertType::Enum inDropType,
-                                       const CPt &inPosition = CPt(), long inStartTime = -1) override
+                               TInstanceHandle inParent, TSlideHandle inSlide,
+                               DocumentEditorInsertType::Enum inDropType,
+                               const CPt &inPosition = CPt(), long inStartTime = -1) override
     {
         (void)inStartTime;
 
@@ -3504,7 +3508,10 @@ public:
         // Set the name afterwards, do not do uniqueness check here
         auto handle = FinalizeAddOrDrop(theTextInstance, inParent, inDropType, inPosition,
                                         inStartTime == -1, true, false);
-        SetName(handle, GetName(handle), true);
+        SetName(handle, ComposerObjectTypes::Convert(ComposerObjectTypes::Text), true);
+        // TODO: This should work (QT3DS-2278). The line above is a quick fix in case the actual
+        // reason for this to have stopped working is not found in time for 2.1 release.
+        //SetName(handle, GetName(handle), true);
 
         return handle;
     }
