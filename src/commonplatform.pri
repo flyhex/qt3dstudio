@@ -86,7 +86,6 @@ clang {
 # QT3DS-2248 -Wno-self-assign
 # QT3DS-2249 -Wno-tautological-compare
 # QT3DS-2251 -Wno-tautological-constant-out-of-range-compare
-# QT3DS-2253 -Wno-infinite-recursion
     QMAKE_CXXFLAGS_WARN_ON = -Wall \
         -Wno-unknown-pragmas \
         -Wno-unused-local-typedefs \
@@ -110,8 +109,7 @@ clang {
         -Wno-pointer-bool-conversion \
         -Wno-self-assign \
         -Wno-tautological-compare \
-        -Wno-tautological-constant-out-of-range-compare \
-        -Wno-infinite-recursion
+        -Wno-tautological-constant-out-of-range-compare
     QMAKE_CFLAGS_WARN_ON = -Wall \
         -Wno-unknown-pragmas \
         -Wno-unused-local-typedefs \
@@ -135,8 +133,7 @@ clang {
         -Wno-pointer-bool-conversion \
         -Wno-self-assign \
         -Wno-tautological-compare \
-        -Wno-tautological-constant-out-of-range-compare \
-        -Wno-infinite-recursion
+        -Wno-tautological-constant-out-of-range-compare
 
 # Suppress the huge pile of Qt related warnings on "direct access in function
 # from file to global weak symbol". These arise when not using devbuilds of Qt.
