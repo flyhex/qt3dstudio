@@ -1881,10 +1881,9 @@ public:
                 actualSourcePath = getMaterialPath(materialName);
 
             QFile file(actualSourcePath);
-            if ((createNewFile && !file.exists()) || (!createNewFile && file.exists())) {
+            if ((createNewFile && !file.exists()) || (!createNewFile && file.exists()))
                 saveMaterial(instance, file);
-                return m_Doc.GetRelativePathToDoc(actualSourcePath);
-            }
+            return m_Doc.GetRelativePathToDoc(actualSourcePath);
         }
 
         return "";

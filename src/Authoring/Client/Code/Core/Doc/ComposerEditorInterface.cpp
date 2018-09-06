@@ -255,26 +255,30 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
             CreateInstance(type, theParent, inImportId);
     }
 
-    void createMaterial(TImportId inImportId, ComposerObjectTypes::Enum type,
-                        TImportId inParent) override
+    void createMaterial(const InstanceDesc &desc, TImportId inParent) override
     {
-        auto material = m_Editor.getOrCreateMaterial(inImportId);
+        Q3DStudio::CString materialName = desc.m_Id;
+        Option<SValue> name = m_ImportObj->GetInstancePropertyValue(desc.m_Handle,
+                                                                    ComposerPropertyNames::name);
+        if (name.hasValue())
+            materialName = qt3dsdm::get<TDataStrPtr>(*name)->GetData();
+        const auto material = m_Editor.getOrCreateMaterial(materialName);
         m_Editor.SetSpecificInstancePropertyValue(0, material, L"importid",
-                                                  std::make_shared<CDataStr>(inImportId));
+                                                  std::make_shared<CDataStr>(desc.m_Id));
         m_Editor.SetSpecificInstancePropertyValue(
             m_Slide, material, L"importfile",
             std::make_shared<CDataStr>(m_Relativeimportfile.toCString()));
-        addMaterialMap(material, inImportId);
+        addMaterialMap(material, desc.m_Id);
 
         const auto sourcePath = m_Editor.writeMaterialFile(material,
-                                                           QString::fromWCharArray(inImportId),
+                                                           materialName.toQString(),
                                                            true);
 
         Qt3DSDMInstanceHandle parent(FindInstance(inParent));
         auto instance = m_Editor.CreateSceneGraphInstance(ComposerObjectTypes::ReferencedMaterial,
                                                           parent, m_Slide);
-        m_Editor.setMaterialReferenceByName(instance, inImportId);
-        m_Editor.SetName(instance, inImportId);
+        m_Editor.setMaterialReferenceByName(instance, materialName);
+        m_Editor.SetName(instance, materialName);
         m_Editor.setMaterialSourcePath(instance, sourcePath);
     }
 
@@ -491,8 +495,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
         }
     }
 
-    void createMaterial(TImportId inImportId, ComposerObjectTypes::Enum type,
-                        TImportId inParent) override
+    void createMaterial(const InstanceDesc &desc, TImportId inParent) override
     {
     }
 
