@@ -39,7 +39,7 @@ public:
     void start(const QPointF &origin);
     void updateSize(const QPointF &pos, const QRectF &visibleScene);
     void end();
-    bool isActive();
+    bool isActive() const;
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                QWidget *widget = nullptr) override;
