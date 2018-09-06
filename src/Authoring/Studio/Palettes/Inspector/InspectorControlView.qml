@@ -171,9 +171,11 @@ Rectangle {
                                     spacing: 0
                                     RowLayout { // Property row
                                         Layout.alignment: Qt.AlignLeft
-                                        Item { // Property animation control button
+                                        Rectangle { // Property animation control button
                                             width: 16
-                                            height: _controlBaseHeight
+                                            height: 16
+                                            color: animateButtonMouseArea.containsMouse
+                                                   ? _studioColor1 : _backgroundColor
 
                                             Image {
                                                 id: animatedPropertyButton
@@ -249,11 +251,12 @@ Rectangle {
 
                                     RowLayout { // Datainput button & label
                                         Layout.alignment: Qt.AlignLeft
-                                        Item { // Datainput control button
-                                            Layout.alignment: Qt.AlignTop
+                                        Rectangle { // Datainput control button
                                             width: 16
-                                            height: _controlBaseHeight
+                                            height: 16
                                             visible: model.modelData.controllable
+                                            color: dataInputButtonMouseArea.containsMouse
+                                                   ? _studioColor1 : _backgroundColor
 
                                             MouseArea {
                                                 id: dataInputButtonMouseArea

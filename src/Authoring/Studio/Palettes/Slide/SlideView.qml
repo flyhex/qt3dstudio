@@ -346,7 +346,7 @@ Rectangle {
                 property string currentController: _parentView.currController
                 property string toolTip: _parentView.toolTip
                 background: Rectangle {
-                    color: "transparent"
+                    color: controlButtonArea.containsMouse ? _studioColor1 : _backgroundColor
                 }
                 MouseArea {
                     id: controlButtonArea
