@@ -2021,7 +2021,8 @@ public:
     Qt3DSDMInstanceHandle getMaterial(const Q3DStudio::CString &materialName) override
     {
         IObjectReferenceHelper *objRefHelper = m_Doc.GetDataModelObjectReferenceHelper();
-        QString name = getMaterialContainerPath() + QStringLiteral(".") + materialName.toQString();
+        QString name = getMaterialContainerPath() + QStringLiteral(".")
+                + materialName.toQString().replace(QLatin1String("."), QLatin1String("\\."));
         Qt3DSDMInstanceHandle material;
         CRelativePathTools::EPathType type;
         objRefHelper->ResolvePath(m_Doc.GetSceneInstance(),

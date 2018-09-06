@@ -353,7 +353,7 @@ void ProjectFileSystemModel::showInfo(int row)
     if (fi.suffix() == QLatin1String("matdata")) {
         const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
         const auto material = sceneEditor
-                ->getOrCreateMaterial(Q3DStudio::CString::fromQString(fi.baseName()));
+                ->getOrCreateMaterial(Q3DStudio::CString::fromQString(fi.completeBaseName()));
         QString name;
         QMap<QString, QString> values;
         sceneEditor->getMaterialInfo(fi.absoluteFilePath(), name, values);
@@ -373,7 +373,7 @@ void ProjectFileSystemModel::duplicate(int row)
 
     QFileInfo srcFile(path);
     const QString destPathStart = srcFile.dir().absolutePath() + QDir::separator()
-            + srcFile.baseName() + QStringLiteral(" Copy");
+            + srcFile.completeBaseName() + QStringLiteral(" Copy");
     const QString destPathEnd = QStringLiteral(".") + srcFile.suffix();
     QString destPath = destPathStart + destPathEnd;
 
