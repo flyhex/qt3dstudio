@@ -833,8 +833,12 @@ public:
                         const QString &name) override
     {
         bool ret = false;
-        if (Q3DSNodeTranslator::updateProperty(inContext, instance, property, value, name))
-            return true;
+
+        // we'll handle this
+        if (name != QLatin1String("eyeball")) {
+            if (Q3DSNodeTranslator::updateProperty(inContext, instance, property, value, name))
+                return true;
+        }
 
         Q3DSPropertyChangeList changeList;
         Q3DSCameraNode &theItem = static_cast<Q3DSCameraNode &>(graphObject());
@@ -852,11 +856,45 @@ public:
         } else if (name == QLatin1String("scaleanchor")) {
             HANDLE_CHANGE(theItem.setScaleAnchor(
                               Q3DSValueParser::parseEnum<Q3DSCameraNode::ScaleAnchor>(value)))
+        } else if (name == QLatin1String("eyeball")) {
+            if (m_editCameraEnabled) {
+                m_activeState = value.getData<bool>();
+                return true;
+            } else {
+                return Q3DSNodeTranslator::updateProperty(inContext, instance,
+                                                          property, value, name);
+            }
         }
         if (ret)
             theItem.notifyPropertyChanges(changeList);
         return ret;
     }
+
+    void setActive(bool inActive) override
+    {
+        if (m_editCameraEnabled)
+            m_activeState = inActive;
+    }
+
+    void setEditCameraEnabled(bool enabled)
+    {
+        if (m_editCameraEnabled != enabled) {
+            Q3DSCameraNode &theItem = static_cast<Q3DSCameraNode &>(graphObject());
+            m_editCameraEnabled = enabled;
+            Q3DSPropertyChangeList list;
+            if (enabled) {
+                m_activeState = theItem.eyeballEnabled();
+                list.append(theItem.setEyeballEnabled(false));
+            } else {
+                list.append(theItem.setEyeballEnabled(m_activeState));
+            }
+            theItem.notifyPropertyChanges(list);
+        }
+    }
+
+private:
+    bool m_editCameraEnabled = false;
+    bool m_activeState = false;
 };
 
 class Q3DSLightTranslator : public Q3DSNodeTranslator
@@ -1706,8 +1744,10 @@ Q3DSGraphObjectTranslator *Q3DSTranslation::createTranslator(
         break;
     }
     case qt3dsdm::ComposerObjectTypes::Camera: {
-        translator = new Q3DSCameraTranslator(instance,
-                                              *m_presentation->newObject<Q3DSCameraNode>(id));
+        Q3DSCameraTranslator *t
+            = new Q3DSCameraTranslator(instance, *m_presentation->newObject<Q3DSCameraNode>(id));
+        m_cameraTranslators.push_back(t);
+        translator = t;
         break;
     }
     case qt3dsdm::ComposerObjectTypes::Light: {
@@ -1791,11 +1831,85 @@ void Q3DSTranslation::prepareRender(const QRect &rect, const QSize &size)
 #endif
         m_studioRenderer.SetViewRect(m_studioRenderer.viewRect());
     }
+    if (m_editCameraEnabled) {
+        const auto values = m_editCameras.values();
+        for (auto camera : values)
+            m_editCameraInfo.applyToCamera(*camera, QSizeF(m_size));
+    }
     if (rect != m_rect || size != m_size) {
         m_engine->sceneManager()->updateSizes(size, 1.0, rect, true);
         m_rect = rect;
         m_size = size;
     }
+}
+
+void Q3DSTranslation::enableEditCamera(const SEditCameraPersistentInformation &info)
+{
+    m_editCameraInfo = info;
+    // loop through layers and create edit camera for each
+    Q3DSGraphObject *object = m_scene->firstChild();
+    while (object) {
+        if (object->type() != Q3DSGraphObject::Layer) {
+            object = object->nextSibling();
+            continue;
+        }
+        Q3DSLayerNode *layer = static_cast<Q3DSLayerNode *>(object);
+        QByteArray editCameraId = QByteArrayLiteral("StudioEditCamera_");
+        editCameraId.append(layer->id());
+
+        Q3DSCameraNode *editCamera = nullptr;
+        if (!m_editCameras.contains(editCameraId)) {
+            editCamera = m_presentation->newObject<Q3DSCameraNode>(editCameraId);
+            layer->appendChildNode(editCamera);
+            m_presentation->masterSlide()->addObject(editCamera);
+            m_editCameras.insert(editCameraId, editCamera);
+        } else {
+            editCamera = m_editCameras[editCameraId];
+            if (layer != editCamera->parent()) {
+                editCamera->parent()->removeChildNode(editCamera);
+                layer->appendChildNode(editCamera);
+            }
+        }
+
+        m_editCameraInfo.applyToCamera(*editCamera, QSizeF(m_size));
+
+        Q3DSPropertyChangeList list;
+        list.append(editCamera->setEyeballEnabled(true));
+        list.append(editCamera->setName(info.m_name));
+        editCamera->notifyPropertyChanges(list);
+
+        object = object->nextSibling();
+    }
+    enableSceneCameras(false);
+    m_editCameraEnabled = true;
+}
+
+void Q3DSTranslation::disableEditCamera()
+{
+    const auto values = m_editCameras.values();
+    for (auto camera : values) {
+        Q3DSPropertyChangeList list;
+        list.append(camera->setEyeballEnabled(false));
+        camera->notifyPropertyChanges(list);
+    }
+    enableSceneCameras(true);
+    m_editCameraEnabled = false;
+}
+
+SEditCameraPersistentInformation Q3DSTranslation::editCameraInfo() const
+{
+    return m_editCameraInfo;
+}
+
+void Q3DSTranslation::enableSceneCameras(bool enable)
+{
+    for (auto translator : qAsConst(m_cameraTranslators))
+        translator->setEditCameraEnabled(!enable);
+}
+
+void Q3DSTranslation::wheelZoom(qreal factor)
+{
+    m_editCameraInfo.m_viewRadius = qMax(.0001, m_editCameraInfo.m_viewRadius * factor);
 }
 
 }

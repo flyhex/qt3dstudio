@@ -250,8 +250,9 @@ HEADERS += \
     Render/Q3DSGraphObjectTranslator.h \
     Render/Q3DSTranslation.h \
     Render/Q3DStudioRenderer.h \
-    UI/Q3DSPlayerWnd.h \
-    Palettes/Inspector/MaterialRefView.h
+    Palettes/Inspector/MaterialRefView.h \
+    Render/Q3DSEditCamera.h \
+    UI/Q3DSPlayerWnd.h
 
 FORMS += \
     MainFrm.ui \
@@ -415,8 +416,9 @@ SOURCES += \
     Render/Q3DStudioRenderer.cpp \
     Render/Q3DSGraphObjectTranslator.cpp \
     Render/Q3DSTranslation.cpp \
+    Palettes/Inspector/MaterialRefView.cpp \
     UI/Q3DSPlayerWnd.cpp \
-    Palettes/Inspector/MaterialRefView.cpp
+    Render/Q3DSEditCamera.cpp
 
 RESOURCES += \
     MainFrm.qrc \

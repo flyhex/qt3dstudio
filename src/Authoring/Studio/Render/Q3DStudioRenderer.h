@@ -44,6 +44,7 @@
 #include "DispatchListeners.h"
 #include "Core.h"
 #include "Dispatch.h"
+#include "Q3DSEditCamera.h"
 
 #include <q3dsruntime2api_p.h>
 #include <QtWidgets/qopenglwidget.h>
@@ -123,6 +124,10 @@ protected:
 
 private:
 
+    bool editCameraEnabled() const
+    {
+        return m_editCameraIndex > -1 ? true : false;
+    }
     void createEngine();
     void createTranslation();
     void sendResizeToQt3D(const QSize &size);
@@ -144,6 +149,7 @@ private:
     Qt3DRender::QRenderAspect *m_renderAspect = nullptr;
     Q3DSViewportSettings m_viewportSettings;
     QScopedPointer<Q3DSTranslation> m_translation;
+    QVector<SEditCameraPersistentInformation> m_editCameraInformation;
     QRect m_viewRect;
     QRect m_innerRect;
     QRect m_outerRect;

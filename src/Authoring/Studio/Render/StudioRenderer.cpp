@@ -1038,7 +1038,7 @@ struct SRendererImpl : public IStudioRenderer,
     void OnSceneMouseWheel(SceneDragSenderType::Enum inSenderType, short inDelta,
                                    int inToolMode) override
     {
-        ASSERT(inSenderType == SceneDragSenderType::Matte);
+        Q_ASSERT(inSenderType == SceneDragSenderType::Matte);
         if (inToolMode == STUDIO_TOOLMODE_CAMERA_ZOOM && m_Translation) {
             QT3DSF32 theMultiplier = 1.0f - inDelta / static_cast<QT3DSF32>(120 * g_WheelFactor);
             m_Translation->m_EditCameraInfo.m_ViewRadius =

@@ -50,6 +50,7 @@
 #include "Q3DSGraphObjectTranslator.h"
 #include "foundation/Qt3DSInvasiveSet.h"
 #include "foundation/Qt3DSOption.h"
+#include "Q3DSEditCamera.h"
 
 /* This class replace STranslation */
 
@@ -137,16 +138,9 @@ enum class TranslationSelectMode
     NestedComponentSingle,
 };
 
-enum class EditCameraTypes
-{
-    SceneCamera = 0,
-    Perspective,
-    Orthographic,
-    Directional,
-};
-
 class Q3DStudioRenderer;
 class Q3DSGraphObjectTranslator;
+class Q3DSCameraTranslator;
 class Q3DSTranslation
 {
 public:
@@ -242,9 +236,13 @@ private:
     Q3DStudio::CGraphIterator m_graphIterator;
     QVector<TSignalConnection> m_signalConnections;
     quint32 m_componentSecondsDepth;
-    QVector<Q3DSGraphObjectTranslator*> m_slideTranslators;
+    QVector<Q3DSGraphObjectTranslator *> m_slideTranslators;
+    QVector<Q3DSCameraTranslator *> m_cameraTranslators;
     QRect m_rect;
     QSize m_size;
+    QHash<QByteArray, Q3DSCameraNode *> m_editCameras;
+    SEditCameraPersistentInformation m_editCameraInfo;
+    bool m_editCameraEnabled = false;
 
 #ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     SNode m_MouseDownNode;
@@ -307,6 +305,11 @@ public:
     }
     void prepareRender(const QRect &rect, const QSize &size);
     Q3DSGraphObjectTranslator *getOrCreateTranslator(qt3dsdm::Qt3DSDMInstanceHandle instance);
+    void enableEditCamera(const SEditCameraPersistentInformation &info);
+    void disableEditCamera();
+    SEditCameraPersistentInformation editCameraInfo() const;
+    void enableSceneCameras(bool enable);
+    void wheelZoom(qreal factor);
 };
 
 }

@@ -53,26 +53,28 @@
 
 namespace Q3DStudio {
 
+const int g_wheelFactor = 10; // the wheel zoom factor
+
 struct SEditCameraDefinition
 {
-    EditCameraTypes m_Type;
+    EditCameraTypes m_type;
     // Directional cameras have a direction they point
-    QT3DSVec3 m_Direction; // not normalized
-    QString m_Name;
+    QVector3D m_direction; // not normalized
+    QString m_name;
 };
 
-static SEditCameraDefinition g_EditCameraDefinitions[] = {
-    { EditCameraTypes::Perspective, QT3DSVec3(1, -1, -1), QObject::tr("Perspective View") },
-    { EditCameraTypes::Orthographic, QT3DSVec3(1, -1, -1), QObject::tr("Orthographic View") },
-    { EditCameraTypes::Directional, QT3DSVec3(0, -1, 0), QObject::tr("Top View") },
-    { EditCameraTypes::Directional, QT3DSVec3(0, 1, 0), QObject::tr("Bottom View") },
-    { EditCameraTypes::Directional, QT3DSVec3(1, 0, 0), QObject::tr("Left View") },
-    { EditCameraTypes::Directional, QT3DSVec3(-1, 0, 0), QObject::tr("Right View") },
-    { EditCameraTypes::Directional, QT3DSVec3(0, 0, -1), QObject::tr("Front View") },
-    { EditCameraTypes::Directional, QT3DSVec3(0, 0, 1), QObject::tr("Back View") },
+static SEditCameraDefinition g_editCameraDefinitions[] = {
+    { EditCameraTypes::Perspective, QVector3D(1, -1, -1), QObject::tr("Perspective View") },
+    { EditCameraTypes::Orthographic, QVector3D(1, -1, -1), QObject::tr("Orthographic View") },
+    { EditCameraTypes::Directional, QVector3D(0, -1, 0), QObject::tr("Top View") },
+    { EditCameraTypes::Directional, QVector3D(0, 1, 0), QObject::tr("Bottom View") },
+    { EditCameraTypes::Directional, QVector3D(1, 0, 0), QObject::tr("Left View") },
+    { EditCameraTypes::Directional, QVector3D(-1, 0, 0), QObject::tr("Right View") },
+    { EditCameraTypes::Directional, QVector3D(0, 0, -1), QObject::tr("Front View") },
+    { EditCameraTypes::Directional, QVector3D(0, 0, 1), QObject::tr("Back View") },
 };
-static QT3DSU32 g_NumEditCameras = sizeof(g_EditCameraDefinitions)
-                                        / sizeof(*g_EditCameraDefinitions);
+static int g_numEditCameras = sizeof(g_editCameraDefinitions)
+                                        / sizeof(*g_editCameraDefinitions);
 
 Q3DStudioRenderer::Q3DStudioRenderer()
     : m_dispatch(*g_StudioApp.GetCore()->GetDispatch())
@@ -91,6 +93,7 @@ Q3DStudioRenderer::Q3DStudioRenderer()
     m_rectColor = QColor(int(color.GetRed()), int(color.GetGreen()), int(color.GetBlue()));
     color = CStudioPreferences::GetRulerTickColor(); // Tick marks
     m_lineColor = QColor(int(color.GetRed()), int(color.GetGreen()), int(color.GetBlue()));
+    m_editCameraInformation.resize(g_numEditCameras);
 }
 
 Q3DStudioRenderer::~Q3DStudioRenderer()
@@ -169,12 +172,14 @@ bool Q3DStudioRenderer::IsPolygonFillModeEnabled() const
 void Q3DStudioRenderer::GetEditCameraList(QStringList &outCameras)
 {
     outCameras.clear();
-    for (QT3DSU32 idx = 0; idx < g_NumEditCameras; ++idx)
-        outCameras.push_back(g_EditCameraDefinitions[idx].m_Name);
+    for (int idx = 0; idx < g_numEditCameras; ++idx)
+        outCameras.push_back(g_editCameraDefinitions[idx].m_name);
 }
 
 bool Q3DStudioRenderer::DoesEditCameraSupportRotation(QT3DSI32 inIndex)
 {
+    if (inIndex >= 0 && inIndex < g_numEditCameras)
+        return g_editCameraDefinitions[inIndex].m_type != EditCameraTypes::Directional;
     return false;
 }
 
@@ -200,13 +205,47 @@ void Q3DStudioRenderer::SetGuidesEditable(bool val)
 
 void Q3DStudioRenderer::SetEditCamera(QT3DSI32 inIndex)
 {
-    m_editCameraIndex = qMin(inIndex, (QT3DSI32)g_NumEditCameras);
-    RequestRender();
+    int index = qMin(inIndex, g_numEditCameras);
+    if (index != m_editCameraIndex) {
+        // save old edit camera info
+        if (editCameraEnabled())
+            m_editCameraInformation[m_editCameraIndex] = m_translation->editCameraInfo();
+        m_editCameraIndex = index;
+        if (index == -1) {
+            // use scene camera
+            m_translation->disableEditCamera();
+        } else {
+            // use edit camera
+            const SEditCameraDefinition &def(g_editCameraDefinitions[m_editCameraIndex]);
+
+            SEditCameraPersistentInformation &cameraInfo
+                    = m_editCameraInformation[m_editCameraIndex];
+
+            if (!cameraInfo.m_initialized) {
+                QVector3D normalizedDir = def.m_direction;
+                normalizedDir.normalize();
+                if (def.m_type == EditCameraTypes::Directional) {
+                    cameraInfo.m_direction = normalizedDir;
+                } else {
+                    cameraInfo.m_direction = normalizedDir;
+                    cameraInfo.m_xRotation = qRadiansToDegrees(-qAtan(normalizedDir.x()
+                                                                      / normalizedDir.z()));
+                    cameraInfo.m_yRotation = qRadiansToDegrees(qAsin(normalizedDir.y()));
+                }
+                cameraInfo.m_name = def.m_name;
+                cameraInfo.m_cameraType = def.m_type;
+                cameraInfo.m_initialized = true;
+            }
+
+            m_translation->enableEditCamera(cameraInfo);
+        }
+        RequestRender();
+    }
 }
 
 QT3DSI32 Q3DStudioRenderer::GetEditCamera() const
 {
-    if (m_editCameraIndex >= 0 && m_editCameraIndex < (QT3DSI32)g_NumEditCameras)
+    if (m_editCameraIndex >= 0 && m_editCameraIndex < g_numEditCameras)
         return m_editCameraIndex;
     return -1;
 }
@@ -489,7 +528,12 @@ void Q3DStudioRenderer::OnSceneMouseDblClick(SceneDragSenderType::Enum inSenderT
 void Q3DStudioRenderer::OnSceneMouseWheel(SceneDragSenderType::Enum inSenderType, short inDelta,
                                           int inToolMode)
 {
-
+    Q_ASSERT(inSenderType == SceneDragSenderType::Matte);
+    if (inToolMode == STUDIO_TOOLMODE_CAMERA_ZOOM && m_translation.data()) {
+        qreal theMultiplier = 1.0 - inDelta / static_cast<qreal>(120 * g_wheelFactor);
+        m_translation->wheelZoom(theMultiplier);
+        RequestRender();
+    }
 }
 
 void Q3DStudioRenderer::OnToolbarChange()
