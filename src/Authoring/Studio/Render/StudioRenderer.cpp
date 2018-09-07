@@ -163,7 +163,7 @@ struct SRendererImpl : public IStudioRenderer,
         if (m_proxy.isNull())
             m_proxy.reset(new Q3DSQmlStreamProxy());
         IOffscreenRenderManager &offscreenMgr(m_Context->GetOffscreenRenderManager());
-        const QString projectPath = m_Doc.GetCore()->getProjectFile().getProjectPath().toQString();
+        const QString projectPath = m_Doc.GetCore()->getProjectFile().getProjectPath();
         // setPath expects full path, but strips the filename
         m_proxy->setPath(projectPath + "/dummy.uip");
         QVector<SubPresentationRecord> toUnregister;
@@ -397,22 +397,25 @@ struct SRendererImpl : public IStudioRenderer,
         m_RenderRequested = false;
         if (!m_Closed && IsInitialized()) {
             m_RenderContext->BeginRender();
-            if (m_Translation)
-                m_Translation->PreRender(false);
+            bool preview = false;
+            if (m_Translation) {
+                preview = CStudioPreferences::showEditModePreview()
+                        && m_Translation->m_EditCameraEnabled
+                        && !m_Translation->GetPreviewViewportDimensions().isZero();
+                m_Translation->PreRender(preview);
+            }
             NVRenderContext &theContext = m_RenderContext->GetRenderContext();
             theContext.SetDepthWriteEnabled(true);
             theContext.Clear(qt3ds::render::NVRenderClearFlags(
-                qt3ds::render::NVRenderClearValues::Color | qt3ds::render::NVRenderClearValues::Depth));
+                                 qt3ds::render::NVRenderClearValues::Color
+                                 | qt3ds::render::NVRenderClearValues::Depth));
             if (m_Translation) {
-                m_Translation->Render(m_PickResult.GetWidgetId(), m_GuidesEnabled, false);
-
                 // draw scene preview view screen display area layer
-                if (CStudioPreferences::showEditModePreview()
-                        && m_Translation->m_EditCameraEnabled
-                        && !m_Translation->GetPreviewViewportDimensions().isZero()) {
-                    m_Translation->PreRender(true);
-                    m_Translation->Render(0, false, true);
+                if (preview) {
+                    m_Translation->Render(0, false, true, false);
+                    m_Translation->PreRender(false);
                 }
+                m_Translation->Render(m_PickResult.GetWidgetId(), m_GuidesEnabled, false, preview);
             }
 
             m_RenderContext->EndRender();
@@ -653,16 +656,15 @@ struct SRendererImpl : public IStudioRenderer,
     {
         if (m_Context.mPtr && m_Context->GetTextRenderer()) {
             m_Context->GetTextRenderer()->ClearProjectFontDirectories();
-            Q3DStudio::CString projectPath = g_StudioApp.GetCore()->getProjectFile()
-                    .getProjectPath().toCString();
-            if (projectPath.Length()) {
+            QString projectPath = g_StudioApp.GetCore()->getProjectFile().getProjectPath();
+            if (!projectPath.isEmpty()) {
                 // Add the installed font folders from the res dir.
                 Q3DStudio::CString thePath(Q3DStudio::CString::fromQString(
                                                resourcePath() + QStringLiteral("/Font")));
                 m_Context->GetTextRenderer()->AddSystemFontDirectory(
                     m_Context->GetStringTable().RegisterStr(thePath.c_str()));
                 m_Context->GetTextRenderer()->AddProjectFontDirectory(
-                    m_Context->GetStringTable().RegisterStr(projectPath.c_str()));
+                    m_Context->GetStringTable().RegisterStr(projectPath.toLatin1().data()));
             }
         }
     }

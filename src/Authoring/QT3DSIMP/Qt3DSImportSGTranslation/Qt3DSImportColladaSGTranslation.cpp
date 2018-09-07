@@ -28,11 +28,7 @@
 ****************************************************************************/
 
 #include "Qt3DSCommonPrecompile.h"
-#include "dae.h"
-#include "dom/domCOLLADA.h"
-#include "dom/domConstants.h"
-#include "dom/domCommon_float_or_param_type.h"
-#include "dom/domCommon_transparent_type.h"
+#include "Qt3DSDAE.h"
 #include "Qt3DSMath.h"
 #include "Qt3DSImportColladaDOMUtils.h"
 #include "Qt3DSImportColladaTransformUtils.h"
@@ -41,12 +37,11 @@
 #include <memory>
 #include <map>
 #include <functional>
-#include "dom/domElements.h"
-#include "dom/domProfile_COMMON.h"
-#include "dom/domCommon_color_or_texture_type.h"
 #include "Qt3DSImportTranslationCommon.h"
 #include "Qt3DSImportSceneGraphTranslation.h"
 #include "Qt3DSImportTranslation.h"
+#include "Dialogs.h"
+#include "StudioApp.h"
 
 #include <QtCore/qbytearray.h>
 #include <QtCore/qfileinfo.h>
@@ -909,7 +904,13 @@ void ColladaDOMWalker::ProcessTriangle(const domTrianglesRef inTrianglesRef,
     // Set the face indicies used by this particular material
     const xsNCName theMaterialName =
         inTrianglesRef->getMaterial(); // TODO: Handle the material settings for this face
-    ioFaceIndicies.second.push_back(std::make_pair(theMaterialName, theMaterialFaceIndicies));
+    if (theMaterialName != nullptr) {
+        ioFaceIndicies.second.push_back(std::make_pair(theMaterialName, theMaterialFaceIndicies));
+    } else {
+        g_StudioApp.GetDialogs()->DisplayKnownErrorDialog(
+                    QObject::tr("The mesh files could not be created.\n"
+                                "Materials are missing from the imported model."));
+    }
 }
 
 /**

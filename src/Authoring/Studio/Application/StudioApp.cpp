@@ -40,6 +40,7 @@
 #include "TimelineWidget.h"
 #include "SlideView.h"
 #include "IKeyframesManager.h"
+#include "PresentationFile.h"
 
 #include <QtGui/qsurfaceformat.h>
 #include <QtCore/qfileinfo.h>
@@ -49,6 +50,8 @@
 #include <QtCore/qstandardpaths.h>
 #include <QtCore/qcommandlineparser.h>
 #include <QtXml/qdom.h>
+#include <QtQml/qqmlapplicationengine.h>
+#include <QtQuick/qquickitem.h>
 
 const QString activePresentationQuery = QStringLiteral("activePresentation:");
 
@@ -406,7 +409,7 @@ bool CStudioApp::handleWelcomeRes(int res, bool recursive)
     bool theReturn = true;
     switch (res) {
     case StudioTutorialWidget::createNewResult: {
-        Qt3DSFile theFile = m_dialogs->GetNewDocumentChoice(Q3DStudio::CString("."));
+        Qt3DSFile theFile(m_dialogs->GetNewDocumentChoice(getMostRecentProjectParentDir()));
         if (theFile.GetPath() != "") {
             if (!m_core->OnNewDocument(theFile.GetAbsolutePath().toQString(), true)) {
                 // Invalid filename, show a message box and the startup dialog
@@ -453,8 +456,7 @@ bool CStudioApp::handleWelcomeRes(int res, bool recursive)
 #endif
             if (!filePath.exists())
                 filePath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-            Qt3DSFile path = m_dialogs->GetFileOpenChoice(
-                        Q3DStudio::CString::fromQString(filePath.absoluteFilePath()));
+            Qt3DSFile path = m_dialogs->GetFileOpenChoice(filePath.absoluteFilePath());
             theFile = QFileInfo(path.GetAbsolutePath().toQString());
         } else {
             theFile = filePath.absolutePath() + QStringLiteral("/SampleProject.uip");
@@ -491,14 +493,14 @@ QString CStudioApp::resolvePresentationFile(const QString &inFile)
     if (inFileInfo.suffix().compare(QStringLiteral("uip"), Qt::CaseInsensitive) == 0)
         return inFile;
 
-    // If opening a .uia file, look for the first uip file inside it
+    // If opening a .uia file, open the initial presentation
     if (inFileInfo.suffix().compare(QStringLiteral("uia"), Qt::CaseInsensitive) == 0
             && inFileInfo.exists()) {
         QString uiaPath = inFileInfo.absoluteFilePath();
-        QString firstPresentation = m_core->getProjectFile().getFirstPresentationPath(uiaPath);
+        QString initialPresentation = m_core->getProjectFile().getInitialPresentationSrc(uiaPath);
 
-        if (!firstPresentation.isEmpty())
-            return inFileInfo.path() + QStringLiteral("/") + firstPresentation;
+        if (!initialPresentation.isEmpty())
+            return inFileInfo.path() + QStringLiteral("/") + initialPresentation;
     }
 
     // couldn't find a uip file
@@ -564,7 +566,7 @@ bool CStudioApp::showStartupDialog()
             break;
 
         case CStartupDlg::EStartupChoice_NewDoc: {
-            Qt3DSFile theFile = m_dialogs->GetNewDocumentChoice(getMostRecentDirectory());
+            Qt3DSFile theFile = m_dialogs->GetNewDocumentChoice(getMostRecentProjectParentDir());
             if (theFile.GetPath() != "") {
                  if (!m_core->OnNewDocument(theFile.GetAbsolutePath().toQString(), true)) {
                      // Invalid filename, show a message box and the dialog again
@@ -1423,6 +1425,47 @@ CInspectableBase *CStudioApp::GetInspectableFromSelectable(Q3DStudio::SSelectedV
     return theInspectableBase;
 }
 
+CInspectableBase *CStudioApp::getInspectableFromInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
+{
+    CInspectableBase *theInspectableBase = nullptr;
+    CDoc *theDoc = m_core->GetDoc();
+
+    if (m_core->GetDoc()->GetDocumentReader().IsInstance(inInstance)) {
+        CClientDataModelBridge *theBridge =
+                theDoc->GetStudioSystem()->GetClientDataModelBridge();
+        qt3dsdm::Qt3DSDMSlideHandle theCurrentActiveSlide = theDoc->GetActiveSlide();
+
+        // Slide, scene or component
+        if (inInstance
+                == theBridge->GetOwningComponentInstance(theCurrentActiveSlide)) {
+            Qt3DSDMInstanceHandle theCurrentActiveSlideInstance =
+                    theDoc->GetStudioSystem()->GetSlideSystem()->GetSlideInstance(
+                        theCurrentActiveSlide);
+
+            if (theBridge->IsSceneInstance(inInstance)) {
+                theInspectableBase = new Qt3DSDMSceneInspectable(
+                            *this, m_core, inInstance,
+                            theCurrentActiveSlideInstance);
+            } else if (theBridge->IsComponentInstance(inInstance)) {
+                theInspectableBase = new Qt3DSDMInspectable(
+                            *this, m_core, inInstance,
+                            theCurrentActiveSlideInstance);
+            }
+        }
+        if (theInspectableBase == nullptr) {
+            if (theBridge->IsMaterialBaseInstance(inInstance)) {
+                theInspectableBase =
+                        new Qt3DSDMMaterialInspectable(*this, m_core, inInstance);
+            } else {
+                theInspectableBase =
+                        new Qt3DSDMInspectable(*this, m_core, inInstance);
+            }
+        }
+    }
+
+    return theInspectableBase;
+}
+
 void CStudioApp::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler,
                                                  QWidget *actionParent)
 {
@@ -1588,7 +1631,7 @@ bool CStudioApp::OnLoadDocument(const QString &inDocument, bool inShowStartupDia
     try {
         Q3DStudio::CFilePath docFilePath(inDocument);
         // make sure a project (a .uia file) exists
-        m_core->getProjectFile().ensureProjectFile(docFilePath.dir());
+        m_core->getProjectFile().ensureProjectFile(docFilePath.toQString());
         OnLoadDocumentCatcher(loadDocument);
         m_core->GetDispatch()->FireOnOpenDocument(loadDocument.GetAbsolutePath().toQString(), true);
         // Loading was successful
@@ -1654,7 +1697,7 @@ bool CStudioApp::OnLoadDocument(const QString &inDocument, bool inShowStartupDia
         m_core->getProjectFile().updateDocPresentationId();
         m_core->getProjectFile().loadSubpresentationsAndDatainputs(m_subpresentations,
                                                                    m_dataInputDialogItems);
-        g_StudioApp.getRenderer().RegisterSubpresentations(m_subpresentations);
+        getRenderer().RegisterSubpresentations(m_subpresentations);
     }
 
     m_authorZoom = false;
@@ -1666,37 +1709,10 @@ bool CStudioApp::OnLoadDocument(const QString &inDocument, bool inShowStartupDia
     return theLoadResult;
 }
 
-//=============================================================================
-/**
- * This method saves the UIA file after subpresentations or data inputs are changed
- * @param subpresentations, true: subpresentation update, false: datainput update
- */
-void CStudioApp::SaveUIAFile(bool subpresentations)
-{
-    // Mahmoud_TODO: this method is to be removed after updating the subpresentation workflow
-    // according to the new design (QT3DS-1569).
-    QStringList list;
-    if (subpresentations) {
-        for (SubPresentationRecord r : qAsConst(m_subpresentations)) {
-            list.append(r.m_type);
-            list.append(r.m_id);
-            list.append(r.m_argsOrSrc);
-        }
-    }
-
-    Q3DStudio::CFilePath doc(GetCore()->GetDoc()->GetDocumentPath().GetAbsolutePath());
-    QByteArray docBA = doc.toQString().toLatin1();
-
-    if (subpresentations)
-        g_StudioApp.getRenderer().RegisterSubpresentations(m_subpresentations);
-}
-
 void CStudioApp::saveDataInputsToProjectFile()
 {
     // open the uia file
-    QString path = m_core->getProjectFile().getProjectPath().toQString() + QStringLiteral("/")
-            + m_core->getProjectFile().getProjectName().toQString() + QStringLiteral(".uia");
-    QFile file(path);
+    QFile file(m_core->getProjectFile().getProjectFilePath());
     file.open(QIODevice::ReadWrite);
     QDomDocument doc;
     doc.setContent(&file);
@@ -1750,16 +1766,38 @@ void CStudioApp::saveDataInputsToProjectFile()
     }
 }
 
-CFilePath CStudioApp::getMostRecentDirectory() const
+QString CStudioApp::getMostRecentDirectory() const
 {
-    CFilePath mostRecentDirectory = Q3DStudio::CFilePath(".");
+    QFileInfo mostRecentDirectory = QFileInfo(QStringLiteral("."));
+    if (m_views) {
+        CRecentItems *recentItems = m_views->getMainFrame()->GetRecentItems();
+        if (recentItems->GetItemCount() > 0)
+            mostRecentDirectory = QFileInfo(recentItems->GetItem(0)).path();
+    }
+    return mostRecentDirectory.absoluteFilePath();
+}
+
+QString CStudioApp::getMostRecentProjectParentDir() const
+{
+    QString parentDirectory(QStringLiteral("."));
     if (m_views) {
         CRecentItems *recentItems = m_views->getMainFrame()->GetRecentItems();
         if (recentItems->GetItemCount() > 0) {
-            mostRecentDirectory = CFilePath(recentItems->GetItem(0));
+            QString mostRecentPresentation = recentItems->GetItem(0);
+            QFileInfo projectFile(PresentationFile::findProjectFile(mostRecentPresentation));
+            if (!projectFile.exists())
+                projectFile.setFile(mostRecentPresentation);
+            if (!projectFile.exists()) {
+                parentDirectory = QStandardPaths::writableLocation(
+                            QStandardPaths::DocumentsLocation);
+            } else {
+                QDir dir = projectFile.absoluteDir();
+                dir.cdUp();
+                parentDirectory = dir.absolutePath();
+            }
         }
     }
-    return mostRecentDirectory;
+    return parentDirectory;
 }
 
 //=============================================================================
@@ -1797,7 +1835,7 @@ void CStudioApp::OnFileOpen()
 QString CStudioApp::OnProjectNew()
 {
     if (PerformSavePrompt()) {
-        Qt3DSFile theFile = m_dialogs->GetNewDocumentChoice(Q3DStudio::CString(""), true);
+        Qt3DSFile theFile = m_dialogs->GetNewDocumentChoice(getMostRecentProjectParentDir(), true);
         if (theFile.GetPath() != "") {
             if (!m_core->OnNewDocument(theFile.GetAbsolutePath().toQString(), true))
                 showInvalidFilenameWarning();
@@ -1815,14 +1853,14 @@ QString CStudioApp::OnProjectNew()
 QString CStudioApp::OnFileNew()
 {
     if (PerformSavePrompt()) {
-        Qt3DSFile theFile = m_dialogs->GetNewDocumentChoice(Q3DStudio::CString(""), false);
+        Qt3DSFile theFile = m_dialogs->GetNewDocumentChoice(getMostRecentDirectory(), false);
         if (theFile.GetPath() != "") {
             if (!m_core->OnNewDocument(theFile.GetAbsolutePath().toQString(), false)) {
                 showInvalidFilenameWarning();
             } else {
                 m_core->getProjectFile().loadSubpresentationsAndDatainputs(m_subpresentations,
                                                                            m_dataInputDialogItems);
-                g_StudioApp.getRenderer().RegisterSubpresentations(m_subpresentations);
+                getRenderer().RegisterSubpresentations(m_subpresentations);
             }
         } else {
             return theFile.GetName().toQString();
@@ -1942,6 +1980,71 @@ void CStudioApp::OnPresentationModifiedExternally()
         Qt3DSFile theCurrentDoc = m_core->GetDoc()->GetDocumentPath();
         OnLoadDocument(theCurrentDoc.GetAbsolutePath().toQString());
     }
+}
+
+// Get the renderable id for a file path.
+// filePath can be absolute or relative to either presentation or project
+QString CStudioApp::getRenderableId(const QString &filePath) const
+{
+    QString renderablePath;
+    QDir projectDir(m_core->getProjectFile().getProjectPath());
+    const QString projectPath = QDir::cleanPath(projectDir.absolutePath());
+    int index = projectPath.length() + 1;
+    QFileInfo fi(filePath);
+    if (fi.isAbsolute()) {
+        renderablePath = filePath.mid(index);
+    } else {
+        QFileInfo presFile(m_core->GetDoc()->GetDocumentPath().GetAbsolutePath().toQString());
+        QDir presDir(presFile.absoluteDir());
+        QString checkFile = QDir::cleanPath(presDir.absoluteFilePath(filePath));
+        if (!QFileInfo(checkFile).exists()) {
+            checkFile = QDir::cleanPath(projectDir.absoluteFilePath(filePath));
+            if (!QFileInfo(checkFile).exists())
+                return {};
+        }
+        renderablePath = checkFile.mid(index);
+    }
+    for (SubPresentationRecord r : qAsConst(m_subpresentations)) {
+        if (r.m_argsOrSrc == renderablePath)
+            return r.m_id;
+    }
+    return {};
+}
+
+QString CStudioApp::getRenderableAbsolutePath(const QString &renderableId) const
+{
+    for (SubPresentationRecord r : qAsConst(m_subpresentations)) {
+        if (r.m_id == renderableId) {
+            QDir projectDir(m_core->getProjectFile().getProjectPath());
+            return QDir::cleanPath(projectDir.absoluteFilePath(r.m_argsOrSrc));
+        }
+    }
+    return {};
+}
+
+// Returns renderable size in pixels.
+QSize CStudioApp::getRenderableSize(const QString &renderableId)
+{
+    for (int i = 0; i < m_subpresentations.size(); ++i) {
+        SubPresentationRecord &r = m_subpresentations[i];
+        if (r.m_id == renderableId) {
+            if (!r.m_size.isValid()) {
+                QDir projectDir(m_core->getProjectFile().getProjectPath());
+                QString path = QDir::cleanPath(projectDir.absoluteFilePath(r.m_argsOrSrc));
+                QString type = r.m_type;
+                if (type == QLatin1String("presentation")) {
+                    r.m_size = PresentationFile::readSize(path);
+                } else { // QML stream
+                    QQmlApplicationEngine qmlEngine(path);
+                    QQuickItem *item = qobject_cast<QQuickItem *>(qmlEngine.rootObjects().at(0));
+                    if (item)
+                        r.m_size = QSize(qRound(item->width()), qRound(item->height()));
+                }
+            }
+            return r.m_size;
+        }
+    }
+    return {};
 }
 
 void CStudioApp::OnUndefinedDatainputsFail(

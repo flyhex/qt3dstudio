@@ -142,11 +142,14 @@ void DataInputSelectView::setSelection(int index)
         m_selection = index;
         QString sel = m_model->data(m_model->index(index), Qt::DisplayRole).toString();
         if (sel != getAddNewDataInputString()) {
-            Q_EMIT dataInputChanged(m_handle, m_instance, sel);
-            Q_EMIT selectedChanged();
+            // do not set the value if it has not changed
+            if (sel != m_currController && !(sel == getNoneString() && !m_currController.size())) {
+                Q_EMIT dataInputChanged(m_handle, m_instance, sel);
+                Q_EMIT selectedChanged();
+            }
         } else {
             CDataInputListDlg dataInputDlg(&(g_StudioApp.m_dataInputDialogItems), true,
-                                           nullptr, m_defaultType);
+                                           nullptr, m_defaultType, m_acceptedTypes);
             dataInputDlg.exec();
 
             if (dataInputDlg.result() == QDialog::Accepted) {

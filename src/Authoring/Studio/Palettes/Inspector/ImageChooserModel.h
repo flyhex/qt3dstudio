@@ -36,12 +36,15 @@ class ImageChooserModel : public ChooserModelBase
     Q_OBJECT
 
 public:
-    explicit ImageChooserModel(QObject *parent = nullptr);
+    explicit ImageChooserModel(bool showRenderables, QObject *parent = nullptr);
     virtual ~ImageChooserModel();
 
 private:
     bool isVisible(const QString &path) const override;
     const QVector<FixedItem> getFixedItems() const override;
+    QString specialDisplayName(const TreeItem &item) const override;
+
+    bool m_showRenderables = false;
 };
 
 #endif // IMAGECHOOSERMODEL_H

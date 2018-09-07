@@ -582,7 +582,7 @@ void GetKeyframesAsBezier(Qt3DSDMAnimationHandle inAnimation, const IAnimationCo
                 SafeIncrementIterator(thePreviousKeyframe, theEndKeyframe);
 
         TKeyframeHandleList::iterator theNextKeyframe =
-                SafeIncrementIterator(theNextKeyframe, theEndKeyframe);
+                SafeIncrementIterator(theCurrentKeyframe, theEndKeyframe);
 
         TBezierKeyframeList::iterator theResult(outKeyframes.begin());
 

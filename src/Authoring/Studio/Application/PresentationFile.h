@@ -42,8 +42,8 @@ public:
                                QList<QString> &outPaths, QString &outRootPath);
     static void updatePresentationId(const QString &url, const QString &oldId,
                                      const QString &newId);
-    static QSize readSize(const QString &url);
-    static QString findProjectFile(const QString &url);
+    static QSize readSize(const QString &uipPath);
+    static QString findProjectFile(const QString &uipPath);
 
 private:
     PresentationFile();

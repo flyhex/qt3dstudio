@@ -1322,6 +1322,23 @@ std::set<Q3DStudio::CString> CClientDataModelBridge::GetDynamicObjectTextureList
     return theSourcePathList;
 }
 
+std::set<QString> CClientDataModelBridge::getRenderableList() const
+{
+    std::vector<SValue> valueList
+            = GetValueList(m_Layer.m_Instance, m_SceneAsset.m_SourcePath, nullptr);
+    std::vector<SValue> imageList
+            = GetValueList(m_SceneImage.m_Instance, m_SceneImage.m_SubPresentation, nullptr);
+    valueList.insert(valueList.end(), imageList.begin(), imageList.end());
+
+    std::set<QString> idList;
+    for (auto it = valueList.begin(); it != valueList.end(); ++it) {
+        QString renderableId = qt3dsdm::get<TDataStrPtr>(*it)->toQString();
+        if (!renderableId.isEmpty())
+            idList.insert(renderableId);
+    }
+    return idList;
+}
+
 bool CClientDataModelBridge::IsLockedAtAll(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     qt3dsdm::SValue theValue;

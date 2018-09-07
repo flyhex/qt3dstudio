@@ -90,10 +90,9 @@ void CStudioAppPrefsPage::onInitDialog()
     // Add tool tips for controls
     m_ui->m_DefaultInterpolation->setToolTip(tr("Set default keyframe interpolation type"));
     m_ui->m_checkTimelineAbsoluteSnapping->setToolTip(tr("Enable timeline snapping grid"));
-    m_ui->m_checkLegacyViewer->setToolTip(tr("Enable legacy viewer preview"));
+    m_ui->m_checkLegacyViewer->setToolTip(tr("Enable preview with legacy Qt 3D Viewer 1.1"));
     m_ui->m_SnapRangeCombo->setToolTip(tr("Set resolution of timeline snapping grid"));
     m_ui->m_buttonRestoreDefaults->setToolTip(tr("Click to restore default Studio settings"));
-    m_ui->m_EditViewBGColor->setAutoFillBackground(true);
 
     // Set fonts for child windows.
     for (auto w : findChildren<QWidget *>())
@@ -122,8 +121,6 @@ void CStudioAppPrefsPage::onInitDialog()
             this, [=](){ setModified(true); enableOptions(); });
     connect(m_ui->m_checkLegacyViewer, &QCheckBox::clicked,
             this, [=](){ setModified(true); m_restartNeeded = true; });
-    connect(m_ui->m_EditViewBGColor, &QPushButton::clicked,
-            this, &CStudioAppPrefsPage::onBgColorButtonClicked);
     connect(m_ui->m_EditViewStartupView, activated, this, [=](){ setModified(true); });
     connect(m_ui->selectorWidth,
             static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
@@ -175,9 +172,9 @@ void CStudioAppPrefsPage::loadSettings()
     m_ui->selectorLength->setValue(CStudioPreferences::getSelectorLineLength());
 
     // The scale mode
-    m_ui->m_SnapRangeCombo->addItem(tr("Low Resolution"));
-    m_ui->m_SnapRangeCombo->addItem(tr("Medium Resolution"));
-    m_ui->m_SnapRangeCombo->addItem(tr("High Resolution"));
+    m_ui->m_SnapRangeCombo->addItem(tr("1 Second"));
+    m_ui->m_SnapRangeCombo->addItem(tr("0.5 Seconds"));
+    m_ui->m_SnapRangeCombo->addItem(tr("0.1 Seconds"));
     long theResolution = (long)CStudioPreferences::GetTimelineSnappingGridResolution();
     m_ui->m_SnapRangeCombo->setCurrentIndex(theResolution);
 
@@ -192,19 +189,8 @@ void CStudioAppPrefsPage::loadSettings()
 #if 0 // Removed until we have some other Preview configurations than just Viewer
     loadPreviewSelections();
 #endif
-
-    m_bgColor = CStudioPreferences::GetEditViewBackgroundColor();
-    updateColorButton();
 }
 
-void CStudioAppPrefsPage::updateColorButton()
-{
-    QString bgColorStyle = QStringLiteral("background-color: ") + m_bgColor.name();
-    m_ui->m_EditViewBGColor->setStyleSheet(bgColorStyle);
-    setModified(true);
-}
-
-//==============================================================================
 /**
  *	SaveSettings: Save the settings from the controls to the CDoc
  *
@@ -225,9 +211,6 @@ void CStudioAppPrefsPage::saveSettings()
 
     // Legacy viewer
     CStudioPreferences::SetLegacyViewerActive(m_ui->m_checkLegacyViewer->isChecked());
-
-    // Edit View Background Color
-    CStudioPreferences::SetEditViewBackgroundColor(m_bgColor);
 
     // Preferred Startup View
     long theSel = m_ui->m_EditViewStartupView->currentIndex();
@@ -395,30 +378,6 @@ void CStudioAppPrefsPage::onChangePreviewConfiguration()
     LoadBuildProperties();
 }
 #endif
-
-void CStudioAppPrefsPage::onBgColorButtonClicked()
-{
-    QColor previousColor = m_bgColor;
-    QColorDialog *theColorDlg = new QColorDialog(previousColor, this);
-    theColorDlg->setOption(QColorDialog::DontUseNativeDialog, true);
-    connect(theColorDlg, &QColorDialog::currentColorChanged,
-            this, &CStudioAppPrefsPage::onBackgroundColorChanged);
-    if (theColorDlg->exec() == QDialog::Accepted)
-        m_bgColor = theColorDlg->selectedColor();
-    else
-        m_bgColor = previousColor;
-    updateColorButton();
-    CStudioPreferences::SetEditViewBackgroundColor(m_bgColor);
-    g_StudioApp.getRenderer().RequestRender();
-}
-
-void CStudioAppPrefsPage::onBackgroundColorChanged(const QColor &color)
-{
-    m_bgColor = color;
-    updateColorButton();
-    CStudioPreferences::SetEditViewBackgroundColor(m_bgColor);
-    g_StudioApp.getRenderer().RequestRender();
-}
 
 void CStudioAppPrefsPage::enableAutosave(bool enabled)
 {

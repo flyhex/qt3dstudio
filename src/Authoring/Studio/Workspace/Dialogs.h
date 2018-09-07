@@ -94,6 +94,7 @@ public:
     static const char *GetImportFileExtension();
     static const char *GetMeshFileExtension();
     static const char *GetQmlFileExtension();
+    static const char *GetMaterialDataFileExtension();
     static const char **GetFontFileExtensions();
     static const char **GetEffectFileExtensions();
     static const char **GetMaterialFileExtensions();
@@ -129,18 +130,16 @@ public:
     Qt3DSFile GetExportChoice(const Q3DStudio::CString &inExtension,
                               const Q3DStudio::CString &inDefaultName);
 
-    Qt3DSFile GetSaveAsChoice(const QString &inDialogTitle = "", bool createFolder = false);
-    Qt3DSFile GetNewDocumentChoice(const Q3DStudio::CString &inInitialDirectory
-                                   = Q3DStudio::CString(), bool isProject = true);
-    Qt3DSFile GetFileOpenChoice(const Q3DStudio::CString &inInitialDirectory
-                                = Q3DStudio::CString());
+    QString GetSaveAsChoice(const QString &inDialogTitle = {}, bool isProject = false);
+    QString GetNewDocumentChoice(const QString &inInitialDirectory = {}, bool isProject = true);
+    QString GetFileOpenChoice(const QString &inInitialDirectory = {});
 
     void DisplayImportFailed(const QUrl &inURL, const QString &inDescription,
                              bool inWarningsOnly);
     void DisplayLoadingPresentationFailed(const Qt3DSFile &inPresentation,
                                           const QString &inErrorText);
     void DisplaySavingPresentationFailed();
-    void DisplaySaveReadOnlyFailed(const Qt3DSFile &inSavedLocation);
+    void DisplaySaveReadOnlyFailed(const QString &inSavedLocation);
     void DisplayObjectRenamed(const QString &origName, const QString &newName, bool async = false);
     Qt3DSMessageBox::EMessageBoxReturn DisplayMessageBox(const QString &inTitle,
                                                          const QString &inText,
@@ -192,7 +191,7 @@ protected:
     CProgressView *m_ProgressPalette;
     bool m_ShowGUI;
 
-    Q3DStudio::CString m_LastSaveFile; ///< Path to the file was previously saved
+    QString m_LastSaveFile; ///< Path to the file was previously saved
 
     QHash<QString, QString> m_defaultDirForSuffixMap;
 };

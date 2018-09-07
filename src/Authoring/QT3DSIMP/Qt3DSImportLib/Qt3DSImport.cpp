@@ -316,10 +316,16 @@ public:
             m_SrcDirectory = CFilePath(m_SrcFile).GetDirectory();
         }
         // On load, images and meshes directories will be trivial.
-        if (!IsTrivial(imagesDir))
-            m_ImageDir = CFilePath::CombineBaseAndRelative(destDirectory, CString(imagesDir));
-        if (!IsTrivial(meshesDir))
-            m_MeshDir = CFilePath::CombineBaseAndRelative(destDirectory, CString(meshesDir));
+        if (!IsTrivial(imagesDir)) {
+            m_ImageDir = imagesDir;
+            if (m_ImageDir.isRelative())
+                m_ImageDir = CFilePath::CombineBaseAndRelative(destDirectory, CString(imagesDir));
+        }
+        if (!IsTrivial(meshesDir)) {
+            m_MeshDir = meshesDir;
+            if (m_MeshDir.isRelative())
+                m_MeshDir = CFilePath::CombineBaseAndRelative(destDirectory, CString(meshesDir));
+        }
         m_PathBufferDir = CFilePath::CombineBaseAndRelative(destDirectory, CString(L"paths"));
     }
 

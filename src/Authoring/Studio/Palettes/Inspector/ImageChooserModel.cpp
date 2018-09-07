@@ -27,9 +27,11 @@
 ****************************************************************************/
 
 #include "ImageChooserModel.h"
+#include "StudioApp.h"
 
-ImageChooserModel::ImageChooserModel(QObject *parent)
+ImageChooserModel::ImageChooserModel(bool showRenderables, QObject *parent)
     : ChooserModelBase(parent)
+    , m_showRenderables(showRenderables)
 {
 }
 
@@ -39,11 +41,19 @@ ImageChooserModel::~ImageChooserModel()
 
 bool ImageChooserModel::isVisible(const QString &path) const
 {
-    return getIconType(path) == OBJTYPE_IMAGE;
+    return getIconType(path) == OBJTYPE_IMAGE
+            || (m_showRenderables && !g_StudioApp.getRenderableId(path).isEmpty());
 }
 
 const QVector<ChooserModelBase::FixedItem> ImageChooserModel::getFixedItems() const
 {
     static const QVector<FixedItem> items = { { OBJTYPE_IMAGE, "", tr("[None]") } };
     return items;
+}
+
+QString ImageChooserModel::specialDisplayName(const ChooserModelBase::TreeItem &item) const
+{
+    // Renderable items display the id instead of file name
+    const QString path = item.index.data(QFileSystemModel::FilePathRole).toString();
+    return g_StudioApp.getRenderableId(path);
 }

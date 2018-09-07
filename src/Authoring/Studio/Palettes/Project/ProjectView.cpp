@@ -50,6 +50,7 @@
 #include <QtQml/qqmlengine.h>
 #include <QtQml/qqmlfile.h>
 #include <QtQuick/qquickitem.h>
+#include <QtQml/qqmlapplicationengine.h>
 
 ProjectView::ProjectView(const QSize &preferredSize, QWidget *parent) : QQuickWidget(parent)
   , m_ProjectModel(new ProjectFileSystemModel(this))
@@ -65,6 +66,7 @@ ProjectView::ProjectView(const QSize &preferredSize, QWidget *parent) : QQuickWi
     m_defaultMaterialDir = theApplicationPath + QStringLiteral("/Content/Material Library");
     m_defaultModelDir = theApplicationPath + QStringLiteral("/Content/Models Library");
     m_defaultPresentationDir = theApplicationPath + QStringLiteral("/Content/Presentations");
+    m_defaultQmlStreamDir = theApplicationPath + QStringLiteral("/Content/Qml Streams");
 
     m_BehaviorDir = m_defaultBehaviorDir;
     m_EffectDir = m_defaultEffectDir;
@@ -73,6 +75,7 @@ ProjectView::ProjectView(const QSize &preferredSize, QWidget *parent) : QQuickWi
     m_MaterialDir = m_defaultMaterialDir;
     m_ModelDir = m_defaultModelDir;
     m_presentationDir = m_defaultPresentationDir;
+    m_qmlStreamDir = m_defaultQmlStreamDir;
 
     m_assetImportDir = theApplicationPath + QStringLiteral("/Content");
 
@@ -82,6 +85,7 @@ ProjectView::ProjectView(const QSize &preferredSize, QWidget *parent) : QQuickWi
     auto dispatch = g_StudioApp.GetCore()->GetDispatch();
     dispatch->AddPresentationChangeListener(this);
     dispatch->AddDataModelListener(this);
+    dispatch->AddFileOpenListener(this);
 }
 
 ProjectView::~ProjectView()
@@ -213,10 +217,29 @@ void ProjectView::OnNewPresentation()
 
     // expand presentation folder by default (if it exists)
     QTimer::singleShot(0, [this]() {
-        QString path = g_StudioApp.GetCore()->getProjectFile().getProjectPath().absoluteFilePath()
-                + QStringLiteral("/presentations");
+        QString path = g_StudioApp.GetCore()->getProjectFile().getProjectPath()
+                       + QStringLiteral("/presentations");
         m_ProjectModel->expand(m_ProjectModel->rowForPath(path));
     });
+}
+
+void ProjectView::OnOpenDocument(const QString &inFilename, bool inSucceeded)
+{
+    Q_UNUSED(inFilename)
+    Q_UNUSED(inSucceeded)
+}
+
+void ProjectView::OnSaveDocument(const QString &inFilename, bool inSucceeded, bool inSaveCopy)
+{
+    Q_UNUSED(inFilename)
+    Q_UNUSED(inSucceeded)
+    Q_UNUSED(inSaveCopy)
+    QTimer::singleShot(0, m_ProjectModel, &ProjectFileSystemModel::updateReferences);
+}
+
+void ProjectView::OnDocumentPathChanged(const QString &inNewPath)
+{
+    Q_UNUSED(inNewPath)
 }
 
 void ProjectView::OnBeginDataModelNotifications()
@@ -225,7 +248,7 @@ void ProjectView::OnBeginDataModelNotifications()
 
 void ProjectView::OnEndDataModelNotifications()
 {
-    m_ProjectModel->updateReferences(true);
+    QTimer::singleShot(0, m_ProjectModel, &ProjectFileSystemModel::updateReferences);
 }
 
 void ProjectView::OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
@@ -279,10 +302,10 @@ bool ProjectView::isCurrentPresentation(int row) const
 
 void ProjectView::editPresentationId(int row)
 {
-    QString relativeUipPath = m_ProjectModel->filePath(row).remove(0,
-                g_StudioApp.GetCore()->getProjectFile().getProjectPath().toQString().length() + 1);
+    QString relativePresPath = QDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath())
+                               .relativeFilePath(m_ProjectModel->filePath(row));
 
-    EditPresentationIdDlg dlg(relativeUipPath, this);
+    EditPresentationIdDlg dlg(relativePresPath, this);
     dlg.exec();
 }
 
@@ -340,6 +363,29 @@ bool ProjectView::isPresentation(int row) const
     return m_ProjectModel->filePath(row).endsWith(QLatin1String(".uip"));
 }
 
+bool ProjectView::isQmlStream(int row) const
+{
+    const QString filePath = m_ProjectModel->filePath(row);
+
+    if (!filePath.endsWith(QLatin1String(".qml")))
+        return false;
+
+    QQmlApplicationEngine qmlEngine(filePath);
+    const char *rootClassName = qmlEngine.rootObjects().at(0)
+                                ->metaObject()->superClass()->className();
+    return strcmp(rootClassName, "Q3DStudio::Q3DSQmlBehavior") != 0;
+}
+
+bool ProjectView::isMaterialFolder(int row) const
+{
+    return m_ProjectModel->filePath(row).endsWith(QLatin1String("/materials"));
+}
+
+bool ProjectView::isMaterialData(int row) const
+{
+    return m_ProjectModel->filePath(row).endsWith(QLatin1String(".matdata"));
+}
+
 bool ProjectView::isRefreshable(int row) const
 {
     return m_ProjectModel->isRefreshable(row);
@@ -354,6 +400,29 @@ void ProjectView::showContextMenu(int x, int y, int index)
 bool ProjectView::toolTipsEnabled()
 {
     return CStudioPreferences::ShouldShowTooltips();
+}
+
+void ProjectView::openFile(int row)
+{
+    if (row == -1)
+        return;
+
+    QFileInfo fi(m_ProjectModel->filePath(row));
+    if (fi.isDir() || isCurrentPresentation(row))
+        return;
+
+    QString filePath = QDir::cleanPath(fi.absoluteFilePath());
+    QTimer::singleShot(0, [filePath, row, this]() {
+        // .uip files should be opened in this studio instance
+        if (filePath.endsWith(QLatin1String(".uip"), Qt::CaseInsensitive)) {
+            if (g_StudioApp.PerformSavePrompt())
+                g_StudioApp.OnLoadDocument(filePath);
+        } else if (filePath.endsWith(QLatin1String(".matdata"), Qt::CaseInsensitive)) {
+            editMaterial(row);
+        } else {
+            QDesktopServices::openUrl(QUrl::fromLocalFile(filePath));
+        }
+    });
 }
 
 void ProjectView::refreshImport(int row) const
@@ -378,8 +447,40 @@ void ProjectView::refreshImport(int row) const
     }
 }
 
+void ProjectView::addMaterial(int row) const
+{
+    if (row == -1)
+        return;
+
+    QString path = m_ProjectModel->filePath(row);
+    QFileInfo info(path);
+    if (info.isFile())
+        path = info.dir().path();
+    path += QLatin1String("/Material");
+    QString extension = QLatin1String(".matdata");
+
+    QFile file(path + extension);
+    int i = 0;
+    while (file.exists()) {
+        i++;
+        file.setFileName(path + QString::number(i) + extension);
+    }
+
+    file.open(QIODevice::WriteOnly);
+    file.write("<MaterialData version=\"1.0\">\n</MaterialData>");
+}
+
+void ProjectView::editMaterial(int row) const
+{
+    m_ProjectModel->showInfo(row);
+}
+
+void ProjectView::duplicate(int row) const
+{
+    m_ProjectModel->duplicate(row);
+}
+
 void ProjectView::rebuild()
 {
-    m_ProjectModel->setRootPath(g_StudioApp.GetCore()->getProjectFile().getProjectPath()
-                                .toQString());
+    m_ProjectModel->setRootPath(g_StudioApp.GetCore()->getProjectFile().getProjectPath());
 }

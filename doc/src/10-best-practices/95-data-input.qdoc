@@ -117,8 +117,6 @@ To delete a data input, follow the steps below.
 
 \section1 Control the Timeline with Data Input
 
-\image timeline-datainput.png
-
 \note Only data input of \e {Ranged Number} type can be used to control the timeline.
 
 To add a data input to control the timeline animation, follow the instructions below.
@@ -132,19 +130,16 @@ To add a data input to control the timeline animation, follow the instructions b
   \li Press \uicontrol{OK}.
 \endlist
 
+\image timeline-datainput.png
+Once the data input has been added, it is clearly shown in the timeline palette which data input
+is controlling the timeline animation.
+
 The \e{minimum range} value of the data input will correspond to the start of the timeline while
 the \e{maximum range} value will correspond to the end of the timeline.
 
-When you have selected a data input for the timeline the data input will turn orange
-\inlineimage datainput-to-timeline-icon-active.png
-to indicate that the timeline is connected to a data input, and the name of the data input is
-shown next to the icon.
-
-To remove the data input, repeat the steps below but select \uicontrol{[No control]} in step 3.
+To remove the data input, repeat step 2 above. Then select \uicontrol{[No control]} in step 3.
 
 \section1 Control Slides with Data Input
-
-\image slide-palette-data-input-inactive.png
 
 \note Only data input of \e {String} type can be used to control slides.
 
@@ -157,12 +152,12 @@ To remove the data input, repeat the steps below but select \uicontrol{[No contr
   \li Press \uicontrol{OK}.
 \endlist
 
-When you have selected a data input for the slides data input icon in the inspector palette will
-turn orange \inlineimage datainput-to-timeline-icon-active.png
-to indicate that the slides are connected to a data input, and the name of the data input is
-shown next to the icon.
+\image slide-palette-data-input-active.png
 
-To remove the data input, repeat the steps below but select \uicontrol{[No control]} in step 3.
+Once the data input has been added, it is clearly shown in the slide palette which data input
+is controlling slide transitions.
+
+To remove the data input, repeat step 2 above. Then select \uicontrol{[No control]} in step 3.
 
 \section1 Control an Object Property with Data Input
 
@@ -209,10 +204,11 @@ The following data input types can be used to control object properties:
   \li Press \uicontrol{OK}.
 \endlist
 
-When you have selected a data input for the property the property name and the
-data input icon in the inspector palette will turn orange to indicate that the property
-is connected to a data input, and the name of the data input is shown next to the icon.
+\image datainput-property-active-icon.png
 
-To remove the data input, repeat the steps below but select \uicontrol{[No control]} in step 4.
+Once the data input has been added, it is shown in the inspector palette which data input
+is controlling which property.
+
+To remove the data input, repeat step 3 above. Then select \uicontrol{[No control]} in step 4.
 
 */

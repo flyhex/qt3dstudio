@@ -87,6 +87,16 @@ QVector<RowTree *> RowMover::sourceRows() const
     return m_sourceRows;
 }
 
+void RowMover::removeSourceRow(RowTree *row)
+{
+    m_sourceRows.remove(m_sourceRows.indexOf(row));
+}
+
+bool RowMover::shouldDeleteAfterMove() const
+{
+    return m_deleteAfterMove;
+}
+
 void RowMover::resetInsertionParent(RowTree *newParent)
 {
     if (m_insertionParent) {
@@ -109,6 +119,7 @@ bool RowMover::isActive()
 
 void RowMover::start(const QVector<RowTree *> &rows)
 {
+    m_deleteAfterMove = false;
     m_sourceRows.clear();
     if (!rows.isEmpty()) {
         // Remove rows that have an ancestor included in the selection or ones that are of
@@ -139,6 +150,7 @@ void RowMover::end(bool force)
         m_active = false;
         for (auto row : qAsConst(m_sourceRows))
             row->setDnDState(RowTree::DnDState::None, RowTree::DnDState::Any, true);
+
         m_sourceRows.clear();
 
         if (m_insertionTarget)
@@ -193,8 +205,8 @@ bool RowMover::isSourceRowsDescendant(RowTree *row) const
 // i.e. when dragging from project or basic objects palettes
 void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowType)
 {
-    // DnD a presentation from the project panel (to set it as a subpresentation)
-    if (rowType == OBJTYPE_PRESENTATION) {
+    // DnD a presentation / Qml stream from the project panel (to set it as a subpresentation)
+    if (rowType == OBJTYPE_PRESENTATION || rowType == OBJTYPE_QML_STREAM) {
         if (m_insertionTarget)
             m_insertionTarget->setDnDState(RowTree::DnDState::None, RowTree::DnDState::SP_TARGET);
 
@@ -206,11 +218,15 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
             m_insertType = Q3DStudio::DocumentEditorInsertType::LastChild;
 
             if (rowAtMouse->rowType() == OBJTYPE_LAYER || rowAtMouse->rowType() == OBJTYPE_MATERIAL
-                    || rowAtMouse->rowType() == OBJTYPE_IMAGE) {
+                || rowAtMouse->rowType() == OBJTYPE_IMAGE) {
                 m_insertionTarget->setDnDState(RowTree::DnDState::SP_TARGET);
             }
+            m_rowAutoExpand = rowAtMouse;
+            m_autoExpandTimer.start(TimelineConstants::AUTO_EXPAND_TIME);
+        } else {
+            m_rowAutoExpand = nullptr;
+            m_autoExpandTimer.stop();
         }
-
         return;
     }
 
@@ -276,8 +292,20 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
         }
         // calc insertion parent
         RowTree *insertParent = rowInsert1;
-        for (int i = rowInsert1->depth(); i >= depth; --i)
-            insertParent = insertParent->parentRow();
+        // If we are dragging objects to a component,
+        // let insertParent be the component itself, not
+        // the parent for the component and set the source rows
+        // to be deleted soon (their duplicates will be inserted
+        // in the component). Do this only if m_active is true
+        // i.e. user is dragging a row within timeline (not from object/project panel)
+        // AND drop depth is larger than for the component (user is dropping items _in_
+        // the component, not at the same depth as the component itself)
+        if (insertParent->isComponent() && depth > insertParent->depth() && m_active) {
+            m_deleteAfterMove = true;
+        } else {
+            for (int i = rowInsert1->depth(); i >= depth; --i)
+                insertParent = insertParent->parentRow();
+        }
 
         resetInsertionParent(insertParent);
 

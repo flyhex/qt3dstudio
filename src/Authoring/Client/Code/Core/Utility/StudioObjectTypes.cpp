@@ -82,6 +82,7 @@ bool CStudioObjectTypes::AcceptableParent(EStudioObjectType inChild, EStudioObje
         theAcceptible = (inParent == OBJTYPE_LAYER) || (inParent == OBJTYPE_EFFECT);
         break;
     case OBJTYPE_PRESENTATION:
+    case OBJTYPE_QML_STREAM:
         theAcceptible = inParent & (OBJTYPE_LAYER | OBJTYPE_SCENE);
         break;
     case OBJTYPE_CUSTOMMATERIAL:
@@ -183,6 +184,10 @@ const QString &CStudioObjectTypes::GetNormalIconName(EStudioObjectType inType)
         static QString theString = QStringLiteral("presentation_used.png");
         return theString;
     }
+    case OBJTYPE_QML_STREAM: {
+        static QString theString = QStringLiteral("qml_used.png");
+        return theString;
+    }
     case OBJTYPE_PROJECT: {
         // Mahmoud_TODO: get a project icon from UX and replace this temp. one
         static QString theString = QStringLiteral("qml_used.png");
@@ -279,6 +284,10 @@ const QString &CStudioObjectTypes::GetDisabledIconName(EStudioObjectType inType)
     }
     case OBJTYPE_PRESENTATION: {
         static QString theString = QStringLiteral("presentation_notUsed.png");
+        return theString;
+    }
+    case OBJTYPE_QML_STREAM: {
+        static QString theString = QStringLiteral("qml_notUsed.png");
         return theString;
     }
     case OBJTYPE_PROJECT: {

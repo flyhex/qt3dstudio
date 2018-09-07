@@ -72,7 +72,7 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     m_actionNewLayer = new QAction(iconLayer, newLayerString, this);
     QAction *actionFirst = new QAction(iconFirst, tr("Go to Timeline Start"), this);
     QAction *actionLast = new QAction(iconLast, tr("Go to Timeline End"), this);
-    m_actionDataInput = new QAction(m_iconDiInactive, "");
+    m_actionDataInput = new QAction(m_iconDiInactive, tr("No Controller"), this);
     m_actionDeleteRow = new QAction(iconDelete, tr("Delete Selected Object (Del)"), this);
     m_actionPlayStop = new QAction(this);
     m_timeLabel = new TimelineToolbarLabel(this);
@@ -86,7 +86,6 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     m_scaleSlider->setFixedWidth(100);
     m_scaleSlider->setMinimum(1);
     m_scaleSlider->setMaximum(22);
-    m_scaleSlider->setPageStep(.1);
     m_scaleSlider->setValue(2);
 
     m_timeLabel->setText(tr("0:00.000"));
@@ -286,7 +285,7 @@ void TimelineToolbar::updateDataInputStatus()
         } else {
             // TODO actually delete the entire property instead of setting it as empty string
             m_actionDataInput->setIcon(m_iconDiInactive);
-            m_actionDataInput->setToolTip(tr("No control"));
+            m_actionDataInput->setToolTip(tr("No Controller"));
             updateTimelineTitleColor(false);
         }
         m_diLabel->setText(m_currController);
@@ -329,7 +328,7 @@ void TimelineToolbar::onDataInputChange(int handle, int instance, const QString 
         m_currController = dataInputName;
         updateTimelineTitleColor(true);
     } else {
-        m_actionDataInput->setToolTip(tr("No control"));
+        m_actionDataInput->setToolTip(tr("No Controller"));
         // TODO actually delete the entire property instead of setting it as empty string
         m_actionDataInput->setIcon(m_iconDiInactive);
         m_currController.clear();

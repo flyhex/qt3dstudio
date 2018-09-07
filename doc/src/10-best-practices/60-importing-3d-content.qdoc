@@ -225,6 +225,10 @@ I/O. Be sure that Save Triangles as Triangles is checked on.
 
 \image 3D_Content/colladaModo04.png
 
+\section2 Exporting COLLADA from Blender
+
+Make sure triangulate is on. In addition, you'll need to make sure all of the meshes have materials.
+
 \section1 Description of supported features
 
 The following section describes the features supported by COLLADA import

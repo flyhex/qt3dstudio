@@ -461,6 +461,11 @@ void TimelineWidget::onActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, 
 
 void TimelineWidget::insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *binding)
 {
+    if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()
+            ->isMaterialContainer(binding->GetInstance())) {
+        return;
+    }
+
     insertToHandlesMap(binding);
     const QList<ITimelineItemBinding *> children = binding->GetChildren();
     for (auto child : children)
@@ -469,6 +474,16 @@ void TimelineWidget::insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *bin
 
 void TimelineWidget::insertToHandlesMap(Qt3DSDMTimelineItemBinding *binding)
 {
+    if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()
+            ->isMaterialContainer(binding->GetInstance())) {
+        return;
+    }
+
+    if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()
+            ->isInsideMaterialContainer(binding->GetInstance())) {
+        return;
+    }
+
     m_handlesMap.insert(binding->GetInstance(), binding->getRowTree());
 }
 
@@ -502,14 +517,26 @@ void TimelineWidget::onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         return;
 
     if (m_bridge->IsSceneGraphInstance(inInstance)) {
+        if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()
+                ->isMaterialContainer(inInstance)) {
+            return;
+        }
+
+        if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()
+                ->isInsideMaterialContainer(inInstance)) {
+            return;
+        }
+
         Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inInstance, m_binding);
 
         bool rowExists = binding && binding->getRowTree();
         if (binding && !rowExists) {
-            Qt3DSDMTimelineItemBinding *bindingParent = getBindingForHandle(m_bridge
-                                                        ->GetParentInstance(inInstance), m_binding);
-            m_graphicsScene->rowManager()
-                    ->createRowFromBinding(binding, bindingParent->getRowTree());
+            auto parentInstance = m_bridge->GetParentInstance(inInstance);
+            Qt3DSDMTimelineItemBinding *bindingParent = getBindingForHandle(parentInstance,
+                                                                            m_binding);
+            RowTree *row = m_graphicsScene->rowManager()
+                           ->createRowFromBinding(binding, bindingParent->getRowTree());
+            row->updateSubpresentations();
             insertToHandlesMap(binding);
         }
     }
@@ -522,6 +549,7 @@ void TimelineWidget::onAssetDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 
     RowTree *row = m_handlesMap.value(inInstance);
     if (row) { // scene object exists
+        row->updateSubpresentations(-1);
         m_graphicsScene->rowManager()->deleteRow(row);
         m_handlesMap.remove(inInstance);
         m_graphicsScene->expandMap().remove(inInstance);
@@ -699,13 +727,19 @@ void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance
 
     const SDataModelSceneAsset &asset = m_bridge->GetSceneAsset();
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-    auto ctrldPropHandle = doc->GetPropertySystem()->GetAggregateInstancePropertyByName(
-                inInstance, L"controlledproperty");
+    auto ctrldPropHandle = doc->GetPropertySystem()
+            ->GetAggregateInstancePropertyByName(inInstance, L"controlledproperty");
+
     if (inProperty == asset.m_Eyeball || inProperty == asset.m_Locked || inProperty == asset.m_Shy
             || inProperty == asset.m_StartTime || inProperty == asset.m_EndTime
-            || inProperty == m_bridge->GetNameProperty()
-            || inProperty == ctrldPropHandle) {
+            || inProperty == m_bridge->GetNameProperty() || inProperty == ctrldPropHandle) {
         m_dirtyProperties.insert(inInstance, inProperty);
+        if (!m_asyncUpdateTimer.isActive())
+            m_asyncUpdateTimer.start();
+    } else if (inProperty == m_bridge->GetSceneImage().m_SubPresentation
+               || (inProperty == m_bridge->GetSourcePathProperty()
+                   && m_bridge->GetObjectType(inInstance) == OBJTYPE_LAYER)) {
+        m_subpresentationChanges.insert(inInstance);
         if (!m_asyncUpdateTimer.isActive())
             m_asyncUpdateTimer.start();
     }
@@ -731,6 +765,11 @@ void TimelineWidget::onAsyncUpdate()
         m_graphicsScene->updateController();
         onSelectionChange(doc->GetSelectedValue());
         m_toolbar->setNewLayerEnabled(!m_graphicsScene->rowManager()->isComponentRoot());
+
+        // update suppresentation indicators
+        for (auto *row : m_handlesMap)
+            row->updateSubpresentations();
+
     } else {
         if (!m_moveMap.isEmpty()) {
             // Flip the hash around so that we collect moves by parent.
@@ -758,8 +797,14 @@ void TimelineWidget::onAsyncUpdate()
                         while (indexIt.hasNext()) {
                             indexIt.next();
                             RowTree *row = m_handlesMap.value(indexIt.value());
-                            if (row)
+                            if (row) {
+                                bool isReparent = rowParent != row->parentRow();
+                                if (isReparent)
+                                    row->updateSubpresentations(-1);
                                 rowParent->addChildAt(row, indexIt.key());
+                                if (isReparent)
+                                    row->updateSubpresentations(1);
+                            }
                         }
                         expandRows.insert(rowParent);
                     }
@@ -848,6 +893,15 @@ void TimelineWidget::onAsyncUpdate()
             }
             updateActionStates(rowSet);
         }
+
+        if (!m_subpresentationChanges.isEmpty()) {
+            for (int id : qAsConst(m_subpresentationChanges)) {
+                RowTree *row = m_handlesMap.value(id);
+                if (row)
+                    row->updateSubpresentations();
+            }
+        }
+
         if (!m_keyframeChangesMap.isEmpty()) {
             const auto objects = m_keyframeChangesMap.keys();
             for (int object : objects) {
@@ -863,6 +917,7 @@ void TimelineWidget::onAsyncUpdate()
     m_dirtyProperties.clear();
     m_moveMap.clear();
     m_actionChanges.clear();
+    m_subpresentationChanges.clear();
     m_keyframeChangesMap.clear();
     m_graphicsScene->rowManager()->finalizeRowDeletions();
 }
@@ -1149,8 +1204,8 @@ void TimelineWidget::openBarColorDialog()
     CDialogs *dialogs = g_StudioApp.GetDialogs();
     connect(dialogs, &CDialogs::onColorChanged, this, &TimelineWidget::onTimeBarColorChanged);
     QColor selectedColor = dialogs->displayColorDialog(previousColor);
-    setSelectedTimeBarsColor(selectedColor, selectedColor == previousColor);
     disconnect(dialogs, &CDialogs::onColorChanged, this, &TimelineWidget::onTimeBarColorChanged);
+    setSelectedTimeBarsColor(selectedColor, selectedColor == previousColor);
 }
 
 void TimelineWidget::onTimeBarColorChanged(const QColor &color)
@@ -1162,18 +1217,16 @@ void TimelineWidget::onTimeBarColorChanged(const QColor &color)
 // When preview, only set the UI without property changes.
 void TimelineWidget::setSelectedTimeBarsColor(const QColor &color, bool preview)
 {
+    using namespace Q3DStudio; // Needed for SCOPED_DOCUMENT_EDITOR macro
     auto rows = selectedRows();
     for (RowTree *row : qAsConst(rows)) {
         row->rowTimeline()->setBarColor(color);
         if (!preview) {
-            // Get editable handle into document editor without undo transactions
-            CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
-            Q3DStudio::IDocumentEditor *editor =
-                    dynamic_cast<Q3DStudio::IDocumentEditor*>(&theDoc->GetDocumentReader());
-
             Qt3DSDMTimelineItemBinding *timelineItemBinding =
-                static_cast<Qt3DSDMTimelineItemBinding *>(row->getBinding());
-            editor->SetTimebarColor(timelineItemBinding->GetInstanceHandle(), color);
+                    static_cast<Qt3DSDMTimelineItemBinding *>(row->getBinding());
+            SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(),
+                                   QObject::tr("Set Timebar Color"))
+                ->SetTimebarColor(timelineItemBinding->GetInstanceHandle(), color);
         }
     }
 }

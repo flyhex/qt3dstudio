@@ -37,6 +37,7 @@
 #include "Qt3DSString.h"
 #include "FileIterator.h"
 #include "PlatformTypes.h"
+#include <QtCore/QFileInfo>
 
 //=========================================================================================
 //	Typedefs
@@ -55,6 +56,9 @@ public:
     Qt3DSFile(const Qt3DSFile &inBasePath, const Q3DStudio::CString &inPathname,
              bool inIsPosix = false);
     Qt3DSFile(const Qt3DSFile &inFile);
+    Qt3DSFile(const QString &inFile);
+    Qt3DSFile(const char *inFile);
+    Qt3DSFile(const QFileInfo &inFile);
 
     CFileIterator GetSubItems() const;
 

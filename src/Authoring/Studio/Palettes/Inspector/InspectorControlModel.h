@@ -120,7 +120,10 @@ public:
 
     void setInspectable(CInspectableBase *inInspectable);
     CInspectableBase *inspectable() const;
+    void updateMaterialValues();
     void setMaterials(std::vector<Q3DStudio::CFilePath> &materials);
+    void setMatDatas(std::vector<Q3DStudio::CFilePath> &matdatas);
+    void updateFontValues(InspectorControlBase *element) const;
     void refreshRenderables();
     void refresh();
 
@@ -139,6 +142,8 @@ public:
                                        const QStringList &list);
     Q_INVOKABLE void setPropertyAnimated(long instance, int handle, bool animated);
     Q_INVOKABLE void setPropertyControlled(long instance, int property);
+    Q_INVOKABLE bool isLayer(long instance) const;
+    Q_INVOKABLE QString renderableId(const QString &filePath) const;
 
 private:
     void onSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inOldIndex,
@@ -162,7 +167,15 @@ private:
         QString m_relativePath;
     };
 
+    struct MaterialDataEntry
+    {
+        QString m_name;
+        QString m_relativePath;
+        QMap<QString, QString> m_values;
+    };
+
     std::vector<MaterialEntry> m_materials;
+    std::vector<MaterialDataEntry> m_matDatas;
 
     Q3DStudio::CUpdateableDocumentEditor m_UpdatableEditor;
 
@@ -176,11 +189,12 @@ private:
     void notifyInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle inProperty);
     void updateAnimateToggleState(InspectorControlBase *inItem);
     void updateControlledToggleState(InspectorControlBase *inItem) const;
+    void saveIfMaterial(qt3dsdm::Qt3DSDMInstanceHandle instance);
 
     std::shared_ptr<qt3dsdm::ISignalConnection> m_notifier;
     std::shared_ptr<qt3dsdm::ISignalConnection> m_slideNotifier;
 
-    QStringList materialValues() const;
+    QStringList materialValues(qt3dsdm::Qt3DSDMInstanceHandle instance) const;
     InspectorControlBase *createMaterialItem(Qt3DSDMInspectable *inspectable, int groupIndex);
     InspectorControlBase *createItem(Qt3DSDMInspectable *inspectable,
                                      Q3DStudio::Qt3DSDMInspectorRow *row, int groupIndex);
@@ -191,7 +205,9 @@ private:
     QVector<GroupInspectorControl> computeTree(CInspectableBase *inspectBase);
     bool isTreeRebuildRequired(CInspectableBase *inspectBase) const;
 
-    GroupInspectorControl computeGroup(CInspectableBase* inspectBase, int theIndex);
+    GroupInspectorControl computeGroup(CInspectableBase* inspectBase,
+                                       int theIndex, bool disableAnimation = false,
+                                       bool isReference = false);
     bool isGroupRebuildRequired(CInspectableBase *inspectable, int theIndex) const;
 
 };

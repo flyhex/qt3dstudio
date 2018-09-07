@@ -94,8 +94,8 @@ bool CSceneViewDropTarget::Accept(CDropSource &inSource)
     // We have to set this so we can adjust the Target to accept this source.
     SetDropSourceObjectType(inSource.GetObjectType());
 
-    // always allow DnD presentations on the scene
-    if (m_DropSourceObjectType == OBJTYPE_PRESENTATION) {
+    // always allow DnD presentations and qml streams to the scene
+    if (m_DropSourceObjectType & (OBJTYPE_PRESENTATION | OBJTYPE_QML_STREAM)) {
         inSource.SetHasValidTarget(true);
         return true;
     }
@@ -143,7 +143,7 @@ bool CSceneViewDropTarget::Drop(CDropSource &inSource)
 
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     qt3dsdm::Qt3DSDMInstanceHandle instance = GetInstance();
-    if (m_DropSourceObjectType == OBJTYPE_PRESENTATION) {
+    if (m_DropSourceObjectType & (OBJTYPE_PRESENTATION | OBJTYPE_QML_STREAM)) {
         QMessageBox msgBox;
         msgBox.setWindowTitle(QObject::tr("Set Sub-presentation"));
         msgBox.setText(QObject::tr("Set as sub-presentation to"));

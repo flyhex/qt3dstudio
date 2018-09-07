@@ -38,7 +38,7 @@
 #include <tuple>
 #include <memory>
 #include <map>
-#include <fbxsdk.h>
+#include "Qt3DSFBXSDK.h"
 #include "Qt3DSImportFbxDomUtils.h"
 #include "Qt3DSImportSceneGraphTranslation.h"
 #include "Qt3DSVec3.h"
@@ -1858,6 +1858,7 @@ void FbxDomWalker::ProcessTextureParameter(FbxTexture *inTexture,
                                            STextureParameters &outTextureParameters)
 {
     if (inTexture) {
+        outTextureParameters.m_Flag = true;
         outTextureParameters.m_offsetU.m_Value = (float)inTexture->GetTranslationU();
         outTextureParameters.m_offsetV.m_Value = (float)inTexture->GetTranslationV();
         if (inTexture->GetWrapModeU() == FbxTexture::eRepeat)

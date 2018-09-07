@@ -233,7 +233,8 @@ HEADERS += \
     Palettes/Project/EditPresentationIdDlg.h \
     Application/ProjectFile.h \
     Application/PresentationFile.h \
-    Palettes/Project/ChooseImagePropertyDlg.h
+    Palettes/Project/ChooseImagePropertyDlg.h \
+    Application/StudioTutorialPageIndicator.h
 
 FORMS += \
     MainFrm.ui \
@@ -393,7 +394,8 @@ SOURCES += \
     Palettes/Project/EditPresentationIdDlg.cpp \
     Application/ProjectFile.cpp \
     Application/PresentationFile.cpp \
-    Palettes/Project/ChooseImagePropertyDlg.cpp
+    Palettes/Project/ChooseImagePropertyDlg.cpp \
+    Application/StudioTutorialPageIndicator.cpp
 
 RESOURCES += \
     MainFrm.qrc \
@@ -416,6 +418,20 @@ macos:!isEmpty(QMAKE_LIBS_FBX) {
     fbxsdk.path = Contents/MacOS
     QMAKE_BUNDLE_DATA += fbxsdk
 }
+
+# TODO: Fix bundle creation with runtime2
+#macos: {
+#    qtstudio3d.files = $$absolute_path($$LIBDIR)/QtStudio3D.framework
+#    qtstudio3d.path = Contents/Frameworks
+
+#    studioruntime.files = $$absolute_path($$LIBDIR)/libqt3dsruntime.1.dylib
+#    studioruntime.path = Contents/Frameworks
+
+#    qmlstreamer.files = $$absolute_path($$LIBDIR)/libqt3dsqmlstreamer.1.dylib
+#    qmlstreamer.path = Contents/Frameworks
+
+#    QMAKE_BUNDLE_DATA += qtstudio3d studioruntime qmlstreamer
+#}
 
 macos {
     QMAKE_INFO_PLIST = Info.plist

@@ -127,12 +127,21 @@ Rectangle {
 
                             anchors.fill: parent
                             onClicked: {
-                                if (_objectBrowserView.selectable(model.index))
+                                if (_objectBrowserView.selectable(model.index)) {
                                     browserList.currentIndex = model.index;
+                                    // Set the selection here, as otherwise we can't set for
+                                    // example the same reference material to more than one target
+                                    // without selecting something else first
+                                    _objectBrowserView.selection = browserList.currentIndex;
+                                }
                             }
                             onDoubleClicked: {
                                 if (_objectBrowserView.selectable(model.index)) {
                                     browserList.currentIndex = model.index;
+                                    // Set the selection here, as otherwise we can't set for
+                                    // example the same reference material to more than one target
+                                    // without selecting something else first
+                                    _objectBrowserView.selection = browserList.currentIndex;
                                     _objectBrowserView.close();
                                 }
                             }
@@ -140,8 +149,6 @@ Rectangle {
                     }
                 }
             }
-
-            onCurrentIndexChanged: _objectBrowserView.selection = currentIndex
 
             Connections {
                 target: _objectBrowserView

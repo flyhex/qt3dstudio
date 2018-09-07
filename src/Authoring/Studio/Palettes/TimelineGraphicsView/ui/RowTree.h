@@ -91,7 +91,7 @@ public:
     void addChildAt(RowTree *child, int index);
     void removeChild(RowTree *child);
     void setDnDState(DnDState state, DnDState onlyIfState = DnDState::Any, bool recursive = false);
-    void setActionStates(RowTree::ActionStates states);
+    void setActionStates(ActionStates states);
     void setTreeWidth(double w);
     void setBinding(ITimelineItemBinding *binding);
     void setPropBinding(ITimelineItemProperty *binding); // for property rows
@@ -146,7 +146,7 @@ public:
     void updateArrowVisibility();
     void updateFilter();
     void updateLock(bool state);
-
+    void updateSubpresentations(int updateParentsOnlyVal = 0);
 protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
 
@@ -182,6 +182,8 @@ private:
     bool m_visibilityCtrld = false;
     DnDState m_dndState = DnDState::None;
     ActionStates m_actionStates = ActionState::None;
+    bool m_hasSubpresentation = false;
+    int m_numDescendantSubpresentations = 0;
     ExpandState m_expandState = ExpandState::HiddenCollapsed;
     TimelineGraphicsScene *m_scene;
     RowTreeLabelItem m_labelItem;

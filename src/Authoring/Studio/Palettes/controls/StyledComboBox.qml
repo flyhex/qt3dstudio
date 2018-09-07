@@ -40,6 +40,7 @@ ComboBox {
     bottomPadding: 0
     // hack to fix the color after Qt.Quick.Controls2 "optimization"
     property alias color: backgroundBox.color
+    property bool showArrow: true
 
     delegate: ItemDelegate {
         id: itemDelegate
@@ -89,6 +90,7 @@ ComboBox {
         y: control.topPadding + (control.availableHeight - height) / 2
         source: _resDir + "arrow_down.png"
         rotation: control.popup.visible ? 180 : 0
+        visible: control.showArrow
     }
 
     contentItem: StyledTextField {

@@ -168,6 +168,8 @@ CLayerTimelineItemBinding::GetOrCreateImageBinding(qt3dsdm::Qt3DSDMPropertyHandl
                                                    const wchar_t *inName)
 {
     qt3dsdm::Qt3DSDMInstanceHandle theImageInstance = GetImage(inPropertyHandle);
+    if (!theImageInstance.Valid())
+        return nullptr;
     ITimelineItemBinding *theImageTimelineRow = m_TransMgr->GetBinding(theImageInstance);
     if (!theImageTimelineRow) // create
     {

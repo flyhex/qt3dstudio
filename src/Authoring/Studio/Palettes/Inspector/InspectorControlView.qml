@@ -256,7 +256,11 @@ Rectangle {
                                                 _parentView.showDataInputChooser(
                                                             model.modelData.handle,
                                                             model.modelData.instance,
-                                                            mapToGlobal(mouse.x, mouse.y));
+                                                            mapToGlobal(
+                                                                ctrldPropButton.x
+                                                                + ctrldPropButton.width,
+                                                                ctrldPropButton.y
+                                                                + ctrldPropButton.height));
                                             } else {
                                                 groupDelegateItem.showContextMenu(
                                                             mapToItem(root, mouse.x, mouse.y));
@@ -270,7 +274,7 @@ Rectangle {
                                     }
 
                                     Image {
-                                        id: controlledPropertyButton
+                                        id: ctrldPropButton
 
                                         property bool controlled: model.modelData.controlled
 
@@ -288,8 +292,8 @@ Rectangle {
                                 }
 
                                 Item {
-                                    width: (controlledPropertyButton.visible
-                                            ? 4 : controlledPropertyButton.width + 4)
+                                    width: (ctrldPropButton.visible
+                                            ? 4 : ctrldPropButton.width + 4)
                                     height: loadedItem.height + 4 // Add little space between items
                                 }
 
@@ -319,12 +323,7 @@ Rectangle {
                                             acceptedButtons: Qt.RightButton | Qt.LeftButton
                                             hoverEnabled: true
                                             onClicked: {
-                                                if (mouse.button === Qt.LeftButton) {
-                                                    _parentView.showDataInputChooser(
-                                                                model.modelData.handle,
-                                                                model.modelData.instance,
-                                                                mapToGlobal(mouse.x, mouse.y));
-                                                } else {
+                                                if (mouse.button === Qt.RightButton) {
                                                     groupDelegateItem.showContextMenu(
                                                                 mapToItem(root, mouse.x, mouse.y));
                                                 }
@@ -381,7 +380,7 @@ Rectangle {
                                                 if (modelData.propertyType === AdditionalMetaDataType.MultiLine)
                                                     return multiLine;
                                                 if (modelData.propertyType === AdditionalMetaDataType.Font)
-                                                    return comboDropDown;
+                                                    return fontDropDown;
                                                 if (modelData.propertyType === AdditionalMetaDataType.Texture)
                                                     return textureChooser;
                                                 if (modelData.propertyType === AdditionalMetaDataType.String)
@@ -539,7 +538,10 @@ Rectangle {
             property int instance: parent.modelData.instance
             property int handle: parent.modelData.handle
             property variant values: parent.modelData.values
-            value: parent.modelData.value
+            value: {
+                var renderableId = _inspectorModel.renderableId(parent.modelData.value);
+                renderableId === "" ? parent.modelData.value : renderableId;
+            }
             onShowBrowser: {
                 activeBrowser = _parentView.showImageChooser(handle, instance,
                                                              mapToGlobal(width, 0))
@@ -553,7 +555,11 @@ Rectangle {
             property int instance: parent.modelData.instance
             property int handle: parent.modelData.handle
             property variant values: parent.modelData.values
-            value: parent.modelData.value === "" ? qsTr("[None]") : parent.modelData.value
+            value: {
+                parent.modelData.value === "" ? qsTr("[None]")
+                                              : _parentView.convertPathToProjectRoot(
+                                                    parent.modelData.value)
+            }
             onShowBrowser: {
                 activeBrowser = _parentView.showFilesChooser(handle, instance,
                                                              mapToGlobal(width, 0))
@@ -736,6 +742,44 @@ Rectangle {
     }
 
     Component  {
+        id: fontDropDown
+
+        StyledComboBox {
+            property int instance: parent.modelData.instance
+            property int handle: parent.modelData.handle
+            property var values: parent.modelData.values
+            property var value: parent.modelData.value
+            property bool blockIndexChange: false
+
+            model: values
+
+            implicitWidth: _valueWidth
+            implicitHeight: _controlBaseHeight
+
+            Component.onCompleted: {
+                currentIndex = find(value)
+            }
+            onCurrentIndexChanged: {
+                var newValue = textAt(currentIndex)
+                if (!blockIndexChange && value !== newValue && currentIndex !== -1)
+                    _inspectorModel.setPropertyValue(instance, handle, newValue)
+            }
+            onValueChanged: {
+                var newNewIndex = find(value);
+                if (!blockIndexChange || newNewIndex > 0)
+                    currentIndex = newNewIndex;
+                blockIndexChange = false;
+            }
+            onValuesChanged : {
+                // Changing the values list will reset the currentIndex to zero, so block setting
+                // the actual font. We'll get the proper index right after.
+                if (currentIndex > 0)
+                    blockIndexChange = true;
+            }
+        }
+    }
+
+    Component  {
         id: slideSelectionDropDown
 
         StyledComboBox {
@@ -818,6 +862,10 @@ Rectangle {
             property var values: parent.modelData.values
             property var value: parent.modelData.value
             model: values
+
+            // Disable for non-layer
+            enabled: _inspectorModel.isLayer(instance)
+            showArrow: enabled
 
             implicitWidth: _valueWidth
             implicitHeight: _controlBaseHeight

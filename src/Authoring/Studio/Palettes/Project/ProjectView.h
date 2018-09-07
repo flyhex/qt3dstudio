@@ -40,7 +40,9 @@ QT_FORWARD_DECLARE_CLASS(QQuickItem)
 
 class ProjectView : public QQuickWidget,
                     public CPresentationChangeListener,
-                    public IDataModelListener
+                    public IDataModelListener,
+                    public CFileOpenListener
+
 
 {
     Q_OBJECT
@@ -71,18 +73,30 @@ public:
     Q_INVOKABLE void copyPath(int row) const;
     Q_INVOKABLE void copyFullPath(int row) const;
     Q_INVOKABLE void refreshImport(int row) const;
+    Q_INVOKABLE void addMaterial(int row) const;
+    Q_INVOKABLE void editMaterial(int row) const;
+    Q_INVOKABLE void duplicate(int row) const;
 
     Q_INVOKABLE bool isGroup(int row) const;
     Q_INVOKABLE bool isRefreshable(int row) const;
     Q_INVOKABLE void showContextMenu(int x, int y, int index);
     Q_INVOKABLE bool toolTipsEnabled();
+    Q_INVOKABLE void openFile(int row);
+
     bool isPresentation(int row) const;
+    bool isQmlStream(int row) const;
     bool isCurrentPresentation(int row) const;
+    bool isMaterialFolder(int row) const;
+    bool isMaterialData(int row) const;
     void openPresentation(int row);
     void editPresentationId(int row);
 
     // CPresentationChangeListener
     void OnNewPresentation() override;
+    // CFileOpenListener
+    void OnOpenDocument(const QString &inFilename, bool inSucceeded) override;
+    void OnSaveDocument(const QString &inFilename, bool inSucceeded, bool inSaveCopy) override;
+    void OnDocumentPathChanged(const QString &inNewPath) override;
     // IDataModelListener
     void OnBeginDataModelNotifications() override;
     void OnEndDataModelNotifications() override;
@@ -112,6 +126,7 @@ private:
     QString m_defaultMaterialDir;
     QString m_defaultModelDir;
     QString m_defaultPresentationDir;
+    QString m_defaultQmlStreamDir;
     QString m_BehaviorDir;
     QString m_EffectDir;
     QString m_FontDir;
@@ -119,6 +134,7 @@ private:
     QString m_MaterialDir;
     QString m_ModelDir;
     QString m_presentationDir;
+    QString m_qmlStreamDir;
     QString m_assetImportDir;
     QSize m_preferredSize;
 };

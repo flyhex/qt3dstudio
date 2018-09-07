@@ -52,6 +52,8 @@ public:
     RowTree *insertionTarget() const;
     RowTree *insertionParent() const;
     QVector<RowTree *> sourceRows() const;
+    void removeSourceRow(RowTree *row);
+    bool shouldDeleteAfterMove() const;
     int type() const;
     Q3DStudio::DocumentEditorInsertType::Enum insertionType() const;
 
@@ -68,6 +70,7 @@ private:
     RowTree *m_rowAutoExpand = nullptr;
     QVector<RowTree *> m_sourceRows;      // dragged rows
     bool m_active = false;
+    bool m_deleteAfterMove = false;
     Q3DStudio::DocumentEditorInsertType::Enum m_insertType =
             Q3DStudio::DocumentEditorInsertType::Unknown;
     QTimer m_autoExpandTimer;

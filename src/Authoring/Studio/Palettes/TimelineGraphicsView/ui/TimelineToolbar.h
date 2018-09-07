@@ -74,12 +74,12 @@ public:
 
 public Q_SLOTS:
     void updatePlayButtonState(bool started);
+    void onZoomInButtonClicked();
+    void onZoomOutButtonClicked();
 
 private Q_SLOTS:
     void onPlayButtonClicked();
     void onZoomLevelChanged(int scale);
-    void onZoomInButtonClicked();
-    void onZoomOutButtonClicked();
     void onDiButtonClicked();
 
 private:

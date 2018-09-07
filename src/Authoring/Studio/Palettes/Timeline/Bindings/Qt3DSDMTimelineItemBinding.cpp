@@ -301,6 +301,28 @@ bool Qt3DSDMTimelineItemBinding::ComponentHasAction(bool inMaster)
     return false;
 }
 
+bool Qt3DSDMTimelineItemBinding::hasSubpresentation() const
+{
+    CClientDataModelBridge *bridge(m_StudioSystem->GetClientDataModelBridge());
+    IPropertySystem *propSystem = m_StudioSystem->GetPropertySystem();
+    EStudioObjectType objType = GetObjectType();
+
+    if (objType == OBJTYPE_LAYER) {
+        SValue sourcePathValue;
+        propSystem->GetInstancePropertyValue(m_DataHandle, bridge->GetSourcePathProperty(),
+                                             sourcePathValue);
+        return get<TDataStrPtr>(sourcePathValue)->GetLength() > 0;
+    } else if (objType == OBJTYPE_IMAGE) {
+        SValue subPresValue;
+        propSystem->GetInstancePropertyValue(m_DataHandle,
+                                             bridge->GetSceneImage().m_SubPresentation,
+                                             subPresValue);
+        return get<TDataStrPtr>(subPresValue)->GetLength() > 0;
+    }
+
+    return false;
+}
+
 ITimelineTimebar *Qt3DSDMTimelineItemBinding::GetTimebar()
 {
     if (!m_TimelineTimebar)

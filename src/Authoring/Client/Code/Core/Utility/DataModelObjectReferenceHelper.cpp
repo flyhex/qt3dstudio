@@ -135,13 +135,15 @@ CObjectReferenceHelper::GetSlideList(const qt3dsdm::Qt3DSDMInstanceHandle inInst
 // Return all children under inSlideIndex
 bool CObjectReferenceHelper::GetChildInstanceList(
     const qt3dsdm::Qt3DSDMInstanceHandle &inInstance, qt3dsdm::TInstanceHandleList &outList,
-    qt3dsdm::Qt3DSDMSlideHandle inSlide, const qt3dsdm::Qt3DSDMInstanceHandle &inOwningInstance) const
+    qt3dsdm::Qt3DSDMSlideHandle inSlide, const qt3dsdm::Qt3DSDMInstanceHandle &inOwningInstance,
+    bool ignoreMaterialProperties) const
 {
     (void)inOwningInstance;
     CClientDataModelBridge *theClientBridge = m_Doc->GetStudioSystem()->GetClientDataModelBridge();
     if (inInstance.Valid()) {
         //		ASSERT(0); // Should this work for more than Materials?
-        if (theClientBridge->IsMaterialInstance(inInstance)) { // DataModel objects
+        if (!ignoreMaterialProperties && theClientBridge->IsMaterialInstance(inInstance)) {
+            // DataModel objects
             long theSlideIndex = m_Doc->GetStudioSystem()->GetSlideSystem()->GetSlideIndex(inSlide);
             GetPropertyAsChildrenList(inInstance, outList, theSlideIndex);
             return true;
@@ -207,12 +209,14 @@ Q3DStudio::CString CObjectReferenceHelper::GetObjectReferenceString(
 bool CObjectReferenceHelper::ResolvePath(const qt3dsdm::Qt3DSDMInstanceHandle &inInstance,
                                          const Q3DStudio::CString &inPathValue,
                                          CRelativePathTools::EPathType &outType,
-                                         qt3dsdm::Qt3DSDMInstanceHandle &outResolvedInstance)
+                                         qt3dsdm::Qt3DSDMInstanceHandle &outResolvedInstance,
+                                         bool ignoreMaterialProperties)
 {
     if (inInstance.Valid()) {
         bool theFullResolvedFlag;
         outResolvedInstance = CRelativePathTools::FindAssetInstanceByObjectPath(
-            m_Doc, inInstance, inPathValue, outType, theFullResolvedFlag, this);
+                    m_Doc, inInstance, inPathValue, outType, theFullResolvedFlag, this,
+                    ignoreMaterialProperties);
         return outResolvedInstance.Valid();
     }
     return false;

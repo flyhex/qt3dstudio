@@ -54,7 +54,8 @@ class CDataInputListDlg : public QDialog
 public:
     CDataInputListDlg(QMap<QString, CDataInputDialogItem *> *datainputs,
                       bool goToAdd = false, QWidget *parent = nullptr,
-                      EDataType defaultType = EDataType::DataTypeFloat);
+                      EDataType defaultType = EDataType::DataTypeFloat,
+                      const QVector<EDataType> &acceptedTypes = allDataTypes);
     ~CDataInputListDlg();
 
     QString getAddedDataInput() { return m_mostRecentlyAdded; }
@@ -88,6 +89,7 @@ private:
     Qt::SortOrder m_sortOrder;
     QString m_mostRecentlyAdded;
     EDataType m_defaultType;
+    QVector<EDataType> m_acceptedTypes;
 };
 
 #endif

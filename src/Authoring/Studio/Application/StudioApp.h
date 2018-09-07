@@ -199,6 +199,7 @@ public:
     void ReduceUltraBigTime();
     void PlaybackToggle();
     CInspectableBase *GetInspectableFromSelectable(Q3DStudio::SSelectedValue inSelectable);
+    CInspectableBase *getInspectableFromInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
     bool OnSave(bool autosave = false);
     bool OnSaveAs();
@@ -252,8 +253,12 @@ public:
     QVector<SubPresentationRecord> m_subpresentations;
     QMap<QString, CDataInputDialogItem *> m_dataInputDialogItems;
 
-    void SaveUIAFile(bool subpresentations = true);
-    Q3DStudio::CFilePath getMostRecentDirectory() const;
+    QString getRenderableId(const QString &filePath) const;
+    QString getRenderableAbsolutePath(const QString &renderableId) const;
+    QSize getRenderableSize(const QString &renderableId);
+
+    QString getMostRecentDirectory() const;
+    QString getMostRecentProjectParentDir() const;
 
     void setLastActiveView(QWidget *widget) { m_lastActiveView = widget; }
     QWidget *lastActiveView() const { return m_lastActiveView; }

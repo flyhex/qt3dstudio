@@ -43,9 +43,9 @@
 // functionality should be gradually moved here whenever feasible.
 
 // static
-QSize PresentationFile::readSize(const QString &url)
+QSize PresentationFile::readSize(const QString &uipPath)
 {
-    QFile file(url);
+    QFile file(uipPath);
     file.open(QFile::Text | QFile::ReadOnly);
     if (!file.isOpen()) {
         qWarning() << file.errorString();
@@ -66,11 +66,18 @@ QSize PresentationFile::readSize(const QString &url)
     return QSize();
 }
 
+/**
+ * Find all occurrences of a presentation Id in a .uip file and replace them with a new value
+ *
+ * @param uipPath presentation file path
+ * @param oldId the presentation Id to find
+ * @param newId the presentation Id to replace
+ */
 // static
-void PresentationFile::updatePresentationId(const QString &url, const QString &oldId,
+void PresentationFile::updatePresentationId(const QString &uipPath, const QString &oldId,
                                             const QString &newId)
 {
-    QFile file(url);
+    QFile file(uipPath);
     if (!file.open(QFile::Text | QIODevice::ReadWrite)) {
         qWarning() << file.errorString();
         return;
@@ -88,7 +95,8 @@ void PresentationFile::updatePresentationId(const QString &url, const QString &o
             if (elem.attribute(QStringLiteral("sourcepath")) == oldId) {
                 elem.setAttribute(QStringLiteral("sourcepath"), newId);
                 updated = true;
-            } else if (elem.attribute(QStringLiteral("subpresentation")) == oldId) {
+            }
+            if (elem.attribute(QStringLiteral("subpresentation")) == oldId) {
                 elem.setAttribute(QStringLiteral("subpresentation"), newId);
                 updated = true;
             }
@@ -99,8 +107,6 @@ void PresentationFile::updatePresentationId(const QString &url, const QString &o
         file.resize(0);
         file.write(domDoc.toByteArray(4));
     }
-
-    file.close();
 }
 
 /**
@@ -115,7 +121,7 @@ QString PresentationFile::findProjectFile(const QString &uipPath)
     QFileInfo fi(uipPath);
 
     // first check if there is a uia in the same folder as the uip with the same name
-    QString uiaPath = fi.dir().absoluteFilePath(fi.baseName() + QStringLiteral(".uia"));
+    QString uiaPath = fi.dir().absoluteFilePath(fi.completeBaseName() + QStringLiteral(".uia"));
     if (QFile::exists(uiaPath))
         return uiaPath;
 

@@ -455,7 +455,7 @@ the depth buffer of the camera, such as the
 of the camera to be rendered. Aside from special clipping effects, you
 may need to adjust these values to more closely contain your content for
 better results with a layer effect that uses the depth buffer of the camera, such as the
-\l{best-practices-effects.html#using-depth-of-field}{Depth of Field effect}.}
+\l{Depth of Field}{Depth of Field effect}.}
 
 \list
 \li

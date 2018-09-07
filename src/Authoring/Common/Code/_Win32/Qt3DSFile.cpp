@@ -86,6 +86,21 @@ Qt3DSFile::Qt3DSFile(const Qt3DSFile &inFile)
     m_Path = inFile.m_Path;
 }
 
+Qt3DSFile::Qt3DSFile(const QString &inFile)
+{
+    m_Path = Q3DStudio::CString::fromQString(QDir::toNativeSeparators(inFile));
+}
+
+Qt3DSFile::Qt3DSFile(const char *inFile)
+{
+    m_Path = Q3DStudio::CString::fromQString(QDir::toNativeSeparators(QString::fromLatin1(inFile)));
+}
+
+Qt3DSFile::Qt3DSFile(const QFileInfo &inFile)
+{
+    m_Path = Q3DStudio::CString::fromQString(QDir::toNativeSeparators(inFile.absoluteFilePath()));
+}
+
 /**
  * Get an iterator for all the sub-files of this directory.
  */

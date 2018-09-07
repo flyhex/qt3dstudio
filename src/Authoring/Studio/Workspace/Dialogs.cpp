@@ -122,6 +122,14 @@ const wchar_t *widePresentationExts[] = {
     L"uip", nullptr,
 };
 
+const char *qmlStreamExts[] = {
+    "qml", nullptr,
+};
+
+const wchar_t *wideQmlStreamExts[] = {
+    L"qml", nullptr,
+};
+
 const char *projectExts[] = {
     "uia", nullptr,
 };
@@ -167,6 +175,7 @@ const wchar_t *wideSoundExts[] = {
 SAllowedTypesEntry g_AllowedImportTypes[] = {
     { Q3DStudio::DocumentEditorFileType::Presentation, QObject::tr("Presentations"),
       presentationExts },
+    { Q3DStudio::DocumentEditorFileType::QmlStream, QObject::tr("Qml streams"), qmlStreamExts },
     { Q3DStudio::DocumentEditorFileType::DAE, QObject::tr("Model Files"), modelExts },
     { Q3DStudio::DocumentEditorFileType::Image, QObject::tr("Image Files"), imgExts },
     { Q3DStudio::DocumentEditorFileType::Behavior, QObject::tr("Behavior Scripts"), behaviorExts },
@@ -174,7 +183,7 @@ SAllowedTypesEntry g_AllowedImportTypes[] = {
     { Q3DStudio::DocumentEditorFileType::Font, QObject::tr("Font Files"), fontExts },
     { Q3DStudio::DocumentEditorFileType::Material, QObject::tr("Material Files"), materialExts },
 };
-size_t g_NumAllowedImportTypes = sizeof(g_AllowedImportTypes) / sizeof(*g_AllowedImportTypes);
+int g_NumAllowedImportTypes = sizeof(g_AllowedImportTypes) / sizeof(*g_AllowedImportTypes);
 
 // List of file types allowed for file references
 SAllowedTypesEntry g_AllowedFileReferencesTypes[] = {
@@ -184,7 +193,7 @@ SAllowedTypesEntry g_AllowedFileReferencesTypes[] = {
     { Q3DStudio::DocumentEditorFileType::Import, QObject::tr("Import Files"), importExts },
     { Q3DStudio::DocumentEditorFileType::Effect, QObject::tr("Effect Files"), effectExts },
 };
-size_t g_NumAllowedFileReferencesTypes =
+int g_NumAllowedFileReferencesTypes =
         sizeof(g_AllowedFileReferencesTypes) / sizeof(*g_AllowedFileReferencesTypes);
 }
 
@@ -195,7 +204,7 @@ size_t g_NumAllowedFileReferencesTypes =
 CDialogs::CDialogs(bool inShowGUI /*= true*/)
     : m_ProgressPalette(nullptr)
     , m_ShowGUI(inShowGUI)
-    , m_LastSaveFile(Q3DStudio::CString("."))
+    , m_LastSaveFile(QStringLiteral("./"))
 {
     const auto effectExt = effectExtensions();
     const auto fontExt = fontExtensions();
@@ -399,11 +408,13 @@ bool CDialogs::DisplayUndefinedDatainputDlg(
     QLabel *theText = new QLabel;
     int keysSize = keys.size();
     if (keysSize > 1) {
-        theText->setText(QObject::tr("Could not find Data Inputs. %1 Data Inputs missing.")
-                    .arg(keysSize));
+        theText->setText(QObject::tr("Could not find Data Inputs. "
+                                     "%1 Data Inputs used as controllers are undefined.")
+                         .arg(keysSize));
     } else {
-        theText->setText(QObject::tr("Could not find Data Input. %1 Data Input missing.")
-                    .arg(keysSize));
+        theText->setText(QObject::tr("Could not find Data Input. "
+                                     "%1 Data Input used as controller is undefined.")
+                         .arg(keysSize));
     }
 
     QString theSmallText;
@@ -433,8 +444,8 @@ bool CDialogs::DisplayUndefinedDatainputDlg(
     layout->addWidget(warnLab, 1, 1);
     layout->addWidget(theText, 1, 2);
 
-    QPushButton *ok = new QPushButton(QObject::tr("Clear all bindings now"));
-    QPushButton *cancel = new QPushButton(QObject::tr("I'll replace bindings manually"));
+    QPushButton *ok = new QPushButton(QObject::tr("Clear invalid controllers now"));
+    QPushButton *cancel = new QPushButton(QObject::tr("I'll fix controllers manually"));
 
     QDialogButtonBox *buttonBox = new QDialogButtonBox(Qt::Horizontal);
     buttonBox->addButton(ok, QDialogButtonBox::AcceptRole);
@@ -465,10 +476,8 @@ QString CDialogs::ConfirmRefreshModelFile(const QString &inFile)
             CreateAllowedTypesString(Q3DStudio::DocumentEditorFileType::DAE, initialFilter,
                                      true, true);
 
-
     return QFileDialog::getOpenFileName(g_StudioApp.m_pMainWnd, QObject::tr("Open"),
-                                        inFile, theFileFilter, nullptr,
-                                        QFileDialog::DontUseNativeDialog);
+                                        inFile, theFileFilter, nullptr);
 }
 
 QList<QUrl> CDialogs::SelectAssets(QString &outPath,
@@ -477,9 +486,10 @@ QList<QUrl> CDialogs::SelectAssets(QString &outPath,
     QFileDialog fd(g_StudioApp.m_pMainWnd);
     fd.setDirectory(outPath);
     fd.setFileMode(QFileDialog::ExistingFiles);
-    fd.setOption(QFileDialog::DontUseNativeDialog, true);
     QString initialFilter;
-    fd.setNameFilter(CreateAllowedTypesString(assetType, initialFilter, true, false));
+    fd.setNameFilter(CreateAllowedTypesString(
+                         assetType, initialFilter, true,
+                         assetType != Q3DStudio::DocumentEditorFileType::Unknown));
     fd.selectNameFilter(initialFilter);
     fd.setWindowTitle(QObject::tr("Import Assets"));
 
@@ -571,11 +581,11 @@ void CDialogs::DisplaySavingPresentationFailed()
  *
  *	@return	void
  */
-void CDialogs::DisplaySaveReadOnlyFailed(const Qt3DSFile &inSavedLocation)
+void CDialogs::DisplaySaveReadOnlyFailed(const QString &inSavedLocation)
 {
     QString theMsg = QObject::tr("Studio cannot save the file '%1'. The file is marked Read-Only."
                                  "\nSave the file with another file name or to a different "
-                                 "location.").arg(inSavedLocation.GetName().toQString());
+                                 "location.").arg(inSavedLocation);
     QString theTitle = QObject::tr("Qt 3D Studio");
 
     if (m_ShowGUI) {
@@ -728,6 +738,11 @@ const char *CDialogs::GetQmlFileExtension()
     return "qml";
 }
 
+const char *CDialogs::GetMaterialDataFileExtension()
+{
+    return "matdata";
+}
+
 const char **CDialogs::GetFontFileExtensions()
 {
     return fontExts;
@@ -742,7 +757,6 @@ const char **CDialogs::GetMaterialFileExtensions()
 {
     return materialExts;
 }
-
 const char **CDialogs::GetSoundFileExtensions()
 {
     return soundExts;
@@ -909,8 +923,8 @@ QString CDialogs::CreateAllowedTypesString(Q3DStudio::DocumentEditorFileType::En
 {
     QString theReturnString;
     QString combinedFilter;
-    size_t theCount = forImport ? g_NumAllowedImportTypes : g_NumAllowedFileReferencesTypes;
-    for (size_t idx = 0; idx < theCount; ++idx) {
+    int theCount = forImport ? g_NumAllowedImportTypes : g_NumAllowedFileReferencesTypes;
+    for (int idx = 0; idx < theCount; ++idx) {
         const SAllowedTypesEntry &entry =
                 forImport ? g_AllowedImportTypes[idx] : g_AllowedFileReferencesTypes[idx];
         if (!exclusive || fileTypeFilter == entry.m_FileType) {
@@ -928,10 +942,13 @@ QString CDialogs::CreateAllowedTypesString(Q3DStudio::DocumentEditorFileType::En
         combinedFilter.chop(1); // Remove last separator
         theReturnString.prepend(QObject::tr("All Supported Asset types")
                                 + " (" + combinedFilter + ");;");
-        outInitialFilter = combinedFilter;
+        outInitialFilter = QObject::tr("All Supported Asset types")
+                + " (" + combinedFilter + ")";
     }
     theReturnString.chop(2);
-    outInitialFilter.chop(2);
+    if (exclusive)
+        outInitialFilter.chop(2);
+
     return theReturnString;
 }
 
@@ -995,15 +1012,17 @@ CDialogs::ESavePromptResult CDialogs::PromptForSave()
     return theResult;
 }
 
-//==============================================================================
 /**
- *	Prompt the user for a file to save to from the SaveAs menu option.
- *	@return	an invalid file if the user cancels the save dialog.
+ * Prompt the user for a file to save to.
+ * If browsing for location for presentation (isProject == false), then
+ * allow browsing only inside current project.
+ * Return an invalid file if the user cancels the save dialog.
  */
-Qt3DSFile CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
+QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
 {
-    Qt3DSFile theFile("");
+    QFileInfo theFile;
     QString theFileExt;
+    QString projPath(QDir::cleanPath(g_StudioApp.GetCore()->getProjectFile().getProjectPath()));
 
     QString theFilename
             = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetAbsolutePath().toQString();
@@ -1016,21 +1035,31 @@ Qt3DSFile CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject
     QFileDialog theFileDlg;
     theFileDlg.setOption(QFileDialog::DontConfirmOverwrite);
 
-    const QFileInfo fi(m_LastSaveFile.toQString());
+    const QFileInfo fi(m_LastSaveFile);
     // TODO: introduce a workspace concept?
-    theFileDlg.setDirectory(fi.path() == QStringLiteral(".") || isProject
-                            ? QStandardPaths::writableLocation(
-                                  QStandardPaths::DocumentsLocation)
-                            : fi.path());
+    theFileDlg.setDirectory(
+                fi.path() == QLatin1String(".")
+                ? QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
+                : fi.path());
     theFileDlg.setAcceptMode(QFileDialog::AcceptSave);
     theFileDlg.setDefaultSuffix(theFileExt);
-    theFileDlg.setOption(QFileDialog::DontUseNativeDialog, true);
     if (!inDialogTitle.isEmpty())
         theFileDlg.setWindowTitle(inDialogTitle);
 
     if (isProject) {
         theFileDlg.setLabelText(QFileDialog::FileName, QObject::tr("Project Name"));
         theFileDlg.setLabelText(QFileDialog::Accept, QObject::tr("Create"));
+    } else {
+        // Limit browsing to project directory
+        connect(&theFileDlg, &QFileDialog::directoryEntered,
+                [&theFileDlg, &projPath](const QString &dir) {
+            QFileInfo fi(QDir::cleanPath(dir));
+            const QString absPath = fi.absoluteFilePath();
+            if (!absPath.startsWith(projPath))
+                theFileDlg.setDirectory(projPath);
+        });
+        // Note that since we are using native file dialog, we cannot change the sidebar or
+        // "look in" combo contents of the file dialog, which may cause bit of confusion.
     }
 
     bool theShowDialog = true;
@@ -1043,19 +1072,28 @@ Qt3DSFile CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject
         if (!selectedName.endsWith(theFileExt))
             selectedName.append(theFileExt);
 
-        theFile = Qt3DSFile(Q3DStudio::CString::fromQString(selectedName));
+        if (!isProject) {
+            // If user somehow manages to select a file path outside project directory, save to
+            // default presentations directory
+            QFileInfo fi(QDir::cleanPath(selectedName));
+            const QString absPath = fi.absoluteFilePath();
+            if (!absPath.startsWith(projPath))
+                selectedName = projPath + QStringLiteral("/presentations/") + fi.fileName();
+        }
 
-        m_LastSaveFile = theFile.GetAbsolutePath();
+        theFile = QFileInfo(selectedName);
+
+        m_LastSaveFile = theFile.absoluteFilePath();
         // New directory is only created when creating a new project. When doing a "save as"
         // or "save copy", a new directory is not created.
         if (isProject) {
             Q3DStudio::CFilePath theFinalDir;
             Q3DStudio::CFilePath theFinalDoc;
             g_StudioApp.GetCore()->GetCreateDirectoryFileName(
-                        theFile.GetAbsolutePath().toQString(), theFinalDir, theFinalDoc);
+                        theFile.absoluteFilePath(), theFinalDir, theFinalDoc);
 
             // Update last save file to final doc
-            m_LastSaveFile = theFinalDoc;
+            m_LastSaveFile = theFinalDoc.absoluteFilePath();
             if (theFinalDoc.Exists()) {
                 const QString theTitle(QObject::tr("Confirm Save As"));
                 const QString filePath(theFinalDir.GetFileName().toQString() + QDir::separator()
@@ -1066,7 +1104,7 @@ Qt3DSFile CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject
                 auto result = QMessageBox::question(nullptr, theTitle, theString);
                 if (result != QMessageBox::Yes) {
                     // Reset the file and show the file dialog again
-                    theFile = Qt3DSFile("");
+                    theFile = QFileInfo();
                     theShowDialog = true;
                     continue;
                 }
@@ -1074,7 +1112,7 @@ Qt3DSFile CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject
         }
     }
 
-    return theFile;
+    return theFile.absoluteFilePath();
 }
 
 //==============================================================================
@@ -1083,11 +1121,10 @@ Qt3DSFile CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject
  * @param  isProject   true: new project, false: new presentation
  * @return an invalid file if the user cancels the save dialog.
  */
-Qt3DSFile CDialogs::GetNewDocumentChoice(const Q3DStudio::CString &inInitialDirectory,
-                                         bool isProject)
+QString CDialogs::GetNewDocumentChoice(const QString &inInitialDirectory, bool isProject)
 {
     if (inInitialDirectory.size())
-        m_LastSaveFile = inInitialDirectory;
+        m_LastSaveFile = inInitialDirectory + QStringLiteral("/");
     QString title = isProject ? QObject::tr("Create New Project")
                               : QObject::tr("Create New Presentation");
     return GetSaveAsChoice(title, isProject);
@@ -1098,29 +1135,24 @@ Qt3DSFile CDialogs::GetNewDocumentChoice(const Q3DStudio::CString &inInitialDire
  * Prompt the user for a file to open.
  * This will return an invalid file if the user cancels the save dialog.
  */
-Qt3DSFile CDialogs::GetFileOpenChoice(const Q3DStudio::CString &inInitialDirectory)
+QString CDialogs::GetFileOpenChoice(const QString &inInitialDirectory)
 {
-    Qt3DSFile theFile("");
+    QFileInfo theFile;
     QString theImportFilter = QObject::tr("Studio UI Presentation (*.uip *.uia)");
 
     QFileDialog theFileDlg(g_StudioApp.m_pMainWnd, QString(),
-                           (inInitialDirectory == Q3DStudio::CString("."))
+                           (inInitialDirectory == QLatin1String("."))
                            ? QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
-                           : inInitialDirectory.toQString(),
+                           : inInitialDirectory,
                            theImportFilter);
     theFileDlg.setAcceptMode(QFileDialog::AcceptOpen);
-    theFileDlg.setOption(QFileDialog::DontUseNativeDialog, true);
 
     if (theFileDlg.exec() == QDialog::Accepted) {
-        QFileInfo fi(theFileDlg.selectedFiles().first());
-        Q3DStudio::CString thePath = Q3DStudio::CString::fromQString(fi.absolutePath());
-        Q3DStudio::CString theName = Q3DStudio::CString::fromQString(fi.fileName());
-        theFile = Qt3DSFile(thePath, theName);
-
-        m_LastSaveFile = theFile.GetAbsolutePath();
+        theFile.setFile(theFileDlg.selectedFiles().first());
+        m_LastSaveFile = theFile.absoluteFilePath();
     }
 
-    return theFile;
+    return theFile.absoluteFilePath();
 }
 
 //==============================================================================
@@ -1219,7 +1251,7 @@ void CDialogs::ResetSettings(const Q3DStudio::CString &inCurrentDocPath)
     // Initialize the default dir/paths to the current document path if specified, otherwise leave
     // everything as it is.
     if (!inCurrentDocPath.IsEmpty())
-        m_LastSaveFile = inCurrentDocPath;
+        m_LastSaveFile = inCurrentDocPath.toQString();
 }
 
 bool CDialogs::DisplayResetKeyframeValuesDlg()
@@ -1436,7 +1468,9 @@ QColor CDialogs::displayColorDialog(const QColor &color) const
     theColorDlg.setCurrentColor(color);
     theColorDlg.setOption(QColorDialog::DontUseNativeDialog, true);
     connect(&theColorDlg, &QColorDialog::currentColorChanged, this, &CDialogs::onColorChanged);
-    if (theColorDlg.exec() == QDialog::Accepted)
+    int result = theColorDlg.exec();
+    disconnect(&theColorDlg, &QColorDialog::currentColorChanged, this, &CDialogs::onColorChanged);
+    if (result == QDialog::Accepted)
         return theColorDlg.selectedColor();
     else
         return color;

@@ -59,9 +59,86 @@ linux-clang {
 macos {
     DEFINES += _MACOSX _LINUXPLATFORM WIDE_IS_DIFFERENT_TYPE_THAN_CHAR16_T
     INCLUDEPATH += /usr/local/include
+}
 
-    QMAKE_CXXFLAGS += -Wno-unused-local-typedef
-    QMAKE_CFLAGS += -Wno-unused-local-typedef
+clang {
+# Suppress large number of warnings from the Qt 3D Studio Code.
+# Suppressions have been reported in JIRA with these bugs:
+# QT3DS-2214 -Wno-unused-local-typedefs
+# QT3DS-2216 -Wno-inconsistent-missing-override
+# QT3DS-2222 -Wno-reorder
+# QT3DS-2223 -Wno-format
+# QT3DS-2224 -Wno-unused-function
+# QT3DS-2227 -Wno-unused-value
+# QT3DS-2229 -Wno-delete-non-virtual-dtor
+# QT3DS-2234 -Wno-unused-variable
+# QT3DS-2235 -Wno-overloaded-virtual
+# QT3DS-2237 -Wno-unused-private-field
+# QT3DS-2238 -Wno-comment
+# QT3DS-2240 -Wno-enum-compare
+# QT3DS-2241 -Wno-int-to-pointer-cast
+# QT3DS-2242 -Wno-int-to-void-pointer-cast
+# QT3DS-2243 -Wno-switch
+# QT3DS-2244 -Wno-unused-lambda-capture
+# QT3DS-2245 -Wno-sometimes-uninitialized
+# QT3DS-2246 -Wno-deprecated-declarations
+# QT3DS-2247 -Wno-pointer-bool-conversion
+# QT3DS-2248 -Wno-self-assign
+# QT3DS-2249 -Wno-tautological-compare
+# QT3DS-2251 -Wno-tautological-constant-out-of-range-compare
+    QMAKE_CXXFLAGS_WARN_ON = -Wall \
+        -Wno-unknown-pragmas \
+        -Wno-unused-local-typedefs \
+        -Wno-inconsistent-missing-override \
+        -Wno-reorder \
+        -Wno-format \
+        -Wno-unused-function \
+        -Wno-unused-value \
+        -Wno-delete-non-virtual-dtor \
+        -Wno-unused-variable \
+        -Wno-overloaded-virtual \
+        -Wno-unused-private-field \
+        -Wno-comment \
+        -Wno-enum-compare \
+        -Wno-int-to-pointer-cast \
+        -Wno-int-to-void-pointer-cast \
+        -Wno-switch \
+        -Wno-unused-lambda-capture \
+        -Wno-sometimes-uninitialized \
+        -Wno-deprecated-declarations \
+        -Wno-pointer-bool-conversion \
+        -Wno-self-assign \
+        -Wno-tautological-compare \
+        -Wno-tautological-constant-out-of-range-compare
+    QMAKE_CFLAGS_WARN_ON = -Wall \
+        -Wno-unknown-pragmas \
+        -Wno-unused-local-typedefs \
+        -Wno-inconsistent-missing-override \
+        -Wno-reorder \
+        -Wno-format \
+        -Wno-unused-function \
+        -Wno-unused-value \
+        -Wno-delete-non-virtual-dtor \
+        -Wno-unused-variable \
+        -Wno-overloaded-virtual \
+        -Wno-unused-private-field \
+        -Wno-comment \
+        -Wno-enum-compare \
+        -Wno-int-to-pointer-cast \
+        -Wno-int-to-void-pointer-cast \
+        -Wno-switch \
+        -Wno-unused-lambda-capture \
+        -Wno-sometimes-uninitialized \
+        -Wno-deprecated-declarations \
+        -Wno-pointer-bool-conversion \
+        -Wno-self-assign \
+        -Wno-tautological-compare \
+        -Wno-tautological-constant-out-of-range-compare
+
+# Suppress the huge pile of Qt related warnings on "direct access in function
+# from file to global weak symbol". These arise when not using devbuilds of Qt.
+    QMAKE_CXXFLAGS += -fvisibility=hidden
+    QMAKE_CFLAGS += -fvisibility=hidden
 }
 
 android {

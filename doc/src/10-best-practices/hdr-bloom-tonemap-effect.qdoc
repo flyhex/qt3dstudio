@@ -1,0 +1,80 @@
+/****************************************************************************
+**
+** Copyright (C) 1993-2009 NVIDIA Corporation.
+** Copyright (C) 2018 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title HDR Bloom Tonemap
+\page hdr-bloom-tonemap-effect.html
+\ingroup qt3dstudio-best-practices
+
+\target hdrbloomtonemap
+\section1 Using HDRBloomTonemap
+
+\image Effects-HDRBloomTonemap.png
+
+The \"HDRBloomTonemap\" effect provides two features:
+
+\list 1
+\li
+  Adjust the gamma and exposure of the high-dynamic range rendered
+  content to achieve the image quality you want, and
+\li
+  Apply an adjustable 'bloom' effect to very bright areas (like the sun
+  glinting off a car).
+\endlist
+When you add an HDRBloomTonemap effect to a layer, the following
+properties are available in the Inspector palette:
+
+\list
+\li
+  \b{Gamma} - this affects the non-linear curve of the lighting.
+  Higher values will increase the exposure of mid tones, lightening the
+  image (and decreasing the contrast). A value of \c{1.0} causes no
+  adjustment to the image.
+\li
+  \b{Exposure} - this is a linear multiplier on the lighting,
+  brightening or darkening the image overall. A value of \c{0.0}
+  causes no adjustment to the image.
+\li
+  \b{Bloom Threshold} - lighting greater than this value will
+  bloom. A value of \c{1.0} corresponds to white in the original
+  render result. Lowering this value will cause more areas of the
+  rendered scene to bloom; at a value of \c{0.0} everything in the
+  scene will bloom.
+\list
+\li
+  \e{Tip: to disable bloom and use only the tone mapping, set this to
+  a sufficiently high value, like \c{999}.}
+\endlist
+\li
+  \b{Bloom Falloff} - adjusts the amount of bloom. Lower values
+  result in stronger bloom effect; higher values make the effect more
+  subtle.
+\endlist
+
+*/

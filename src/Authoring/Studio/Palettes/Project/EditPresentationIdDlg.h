@@ -56,8 +56,6 @@ private:
     Ui::EditPresentationIdDlg *m_ui;
     QString m_src; // src attribute value for the current presentation in the project file
     QString m_presentationId;
-
-    void onChangePresentationId();
 };
 
 #endif // EDITPRESENTATIONIDDLG_H

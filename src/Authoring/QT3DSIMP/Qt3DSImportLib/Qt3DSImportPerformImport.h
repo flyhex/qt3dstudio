@@ -131,6 +131,9 @@ public:
     virtual void CreateInstance(TImportId inImportId, ComposerObjectTypes::Enum type,
                                 TImportId inParent) = 0;
 
+    virtual void createMaterial(TImportId inImportId, ComposerObjectTypes::Enum type,
+                                TImportId inParent) = 0;
+
     // We guarantee that all instances will be created before their properties are updated thus you
     // can resolve references during this updateInstanceProperties call if necessary.
     virtual void UpdateInstanceProperties(TImportId hdl, const PropertyValue *propertBuffer,

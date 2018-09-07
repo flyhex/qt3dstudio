@@ -64,7 +64,7 @@ public:
     QString filePath(int row) const;
     bool isRefreshable(int row) const;
 
-    void updateReferences(bool emitDataChanged);
+    void updateReferences();
     Q3DStudio::DocumentEditorFileType::Enum assetTypeForRow(int row);
     int rowForPath(const QString &path) const;
 
@@ -73,6 +73,8 @@ public:
 
     Q_INVOKABLE void importUrls(const QList<QUrl> &urls, int row, bool autoSort = true);
     Q_INVOKABLE bool hasValidUrlsForDropping(const QList<QUrl> &urls) const;
+    Q_INVOKABLE void showInfo(int row);
+    Q_INVOKABLE void duplicate(int row);
 
 Q_SIGNALS:
     void modelChanged(QAbstractItemModel *model);
@@ -88,7 +90,7 @@ private:
     EStudioObjectType getIconType(const QString &path) const;
     bool isVisible(const QModelIndex& modelIndex) const;
     bool hasVisibleChildren(const QModelIndex &modelIndex) const;
-    void importUrl(const QDir &targetDir, const QUrl &url) const;
+    void importUrl(QDir &targetDir, const QUrl &url);
     void importPresentationAssets(const QFileInfo &uipSrc, const QFileInfo &uipTarget,
                                   const int overrideChoice = QMessageBox::NoButton) const;
 
@@ -96,8 +98,10 @@ private:
     void modelRowsRemoved(const QModelIndex &parent, int start, int end);
     void modelRowsMoved(const QModelIndex &parent, int start, int end);
     void modelLayoutChanged();
+    void importQmlAssets(const QObject *qmlNode, const QDir &srcDir, const QDir &targetDir);
 
     void updateDefaultDirMap();
+    void addPathsToReferences(const QString &projectPath, const QString &origPath);
 
     struct TreeItem {
         QPersistentModelIndex index;
@@ -110,8 +114,9 @@ private:
     QFileSystemModel *m_model = nullptr;
     QPersistentModelIndex m_rootIndex;
     QList<TreeItem> m_items;
-    QStringList m_references;
+    QSet<QString> m_references;
     QHash<QString, QString> m_defaultDirToAbsPathMap;
+    int m_importQmlOverrideChoice = QMessageBox::NoButton;
 };
 
 #endif // TREEVIEWADAPTOR_H

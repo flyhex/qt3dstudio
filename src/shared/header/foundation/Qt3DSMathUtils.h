@@ -47,7 +47,9 @@ namespace foundation {
     /**
     \brief sign returns the sign of its argument. The sign of zero is undefined.
     */
-    QT3DS_CUDA_CALLABLE QT3DS_FORCE_INLINE QT3DSF32 sign(const QT3DSF32 a) { return sign(a); }
+    QT3DS_CUDA_CALLABLE QT3DS_FORCE_INLINE QT3DSF32 sign(const QT3DSF32 a) {
+        return intrinsics::sign(a);
+    }
 
     /**
     \brief sign returns the sign of its argument. The sign of zero is undefined.

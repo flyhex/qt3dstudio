@@ -43,32 +43,32 @@ class ProjectFile
 public:
     ProjectFile();
 
-    void create(const Q3DStudio::CString &projectName,
+    void create(const QString &projectName,
                 const Q3DStudio::CFilePath &projectPath);
-    void setProjectNameAndPath(const Q3DStudio::CString &projectName,
-                               const Q3DStudio::CFilePath &projectPath);
-    void ensureProjectFile(const QDir &uipDirectory);
+    void ensureProjectFile(const QString &uipPath);
     void loadSubpresentationsAndDatainputs(
             QVector<SubPresentationRecord> &subpresentations,
             QMap<QString, CDataInputDialogItem *> &datainputs);
     void writePresentationId(const QString &id, const QString &src = {});
     void updateDocPresentationId();
+    void addPresentationNode(const QString &uip, const QString &pId = {});
     bool isUniquePresentationId(const QString &id,
                                 const QString &src = {}) const;
-    Q3DStudio::CFilePath getProjectPath() const;
-    Q3DStudio::CString getProjectName() const;
-    QString getFirstPresentationPath(const QString &uiaPath) const;
+    QString getProjectPath() const;
+    QString getProjectFilePath() const;
+    QString getProjectName() const;
     QString getPresentationId(const QString &src) const;
-    void addPresentationNode(const QString &uip, const QString &pId = {});
+    QString getResolvedPathTo(const QString &path) const;
+    QString createPreview();
 
+    static QString getInitialPresentationSrc(const QString &uiaPath);
     static void getPresentations(const QString &inUiaPath,
                                  QVector<SubPresentationRecord> &outSubpresentations,
                                  const QString &excludePresentationSrc = {});
 private:
     QString ensureUniquePresentationId(const QString &id) const;
 
-    Q3DStudio::CFilePath m_projectPath; // project directory
-    Q3DStudio::CString m_projectName;
+    QFileInfo m_fileInfo; // uia file info
 };
 
 #endif // PROJECTFILE_H

@@ -51,6 +51,7 @@
 
 #include <QtCore/quuid.h>
 #include <QtCore/qfileinfo.h>
+#include <QtCore/qsize.h>
 
 //==============================================================================
 //	Forwards
@@ -126,6 +127,7 @@ struct SubPresentationRecord
     QString m_type;
     QString m_id;
     QString m_argsOrSrc;
+    QSize m_size;
 
     SubPresentationRecord() {}
     SubPresentationRecord(const QString &type, const QString &id, const QString &args)
@@ -139,6 +141,7 @@ struct SubPresentationRecord
         m_type = o.m_type;
         m_id = o.m_id;
         m_argsOrSrc = o.m_argsOrSrc;
+        m_size = o.m_size;
         return *this;
     }
 
@@ -159,6 +162,13 @@ public:
     QString name;
     int type;
     QVector<qt3dsdm::Qt3DSDMInstanceHandle> controlledElems;
+    // The type of property/properties that this datainput controls
+    // for the purposes of limiting allowed datainput type changes.
+    // Note that there can be more than one type being controlled
+    // f.ex with Variant type. Boolean signifies "strict" type requirement
+    // i.e. only the exact equivalent mapping from datainput type to
+    // property type is allowed (float to float, string to string etc.)
+    QVector<QPair<qt3dsdm::DataModelDataType::Value, bool>> boundTypes;
 };
 
 //==============================================================================
@@ -420,6 +430,7 @@ public:
     int getSelectedInstancesCount() const;
 
     std::shared_ptr<Q3DStudio::IInternalDocumentEditor> getSceneEditor() { return m_SceneEditor; }
+    QVector<qt3dsdm::Qt3DSDMInstanceHandle> getLayers();
 
 protected:
     // Set the active slide, return true if delving
@@ -496,10 +507,6 @@ protected:
     std::shared_ptr<Q3DStudio::IDocSceneGraph> m_SceneGraph;
     Q3DStudio::SSelectedValue m_SelectedValue;
     bool m_nudging;
-
-    void GetOrUpdateFileList(std::vector<Q3DStudio::CString> &ioMyList,
-                             std::vector<Q3DStudio::CString> &outResult,
-                             const wchar_t **inExtensionList) const;
 
 public:
     void OnNewPresentation();

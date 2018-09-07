@@ -51,7 +51,7 @@ bool CFileDropSource::ValidateTarget(CDropTarget *inTarget)
 
     EStudioObjectType targetType = (EStudioObjectType)inTarget->GetObjectType();
 
-    if (m_ObjectType == OBJTYPE_PRESENTATION) {
+    if (m_ObjectType & (OBJTYPE_PRESENTATION | OBJTYPE_QML_STREAM)) {
         SetHasValidTarget(targetType & (OBJTYPE_LAYER | OBJTYPE_MATERIAL | OBJTYPE_IMAGE));
         return m_HasValidTarget;
     }
@@ -164,11 +164,14 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
         case Q3DStudio::DocumentEditorFileType::Presentation:
             theCommandName = QObject::tr("File Drop Subpresentation File");
             break;
+        case Q3DStudio::DocumentEditorFileType::QmlStream:
+            theCommandName = QObject::tr("File Drop Qml Stream File");
+            break;
         }
 
-        if (theDocType == Q3DStudio::DocumentEditorFileType::Presentation) { // set subpresentation
-            QString pathFromRoot = QDir(theDoc.GetCore()->getProjectFile()
-                                        .getProjectPath().filePath())
+        if (theDocType == Q3DStudio::DocumentEditorFileType::Presentation
+            || theDocType == Q3DStudio::DocumentEditorFileType::QmlStream) { // set subpresentation
+            QString pathFromRoot = QDir(theDoc.GetCore()->getProjectFile().getProjectPath())
                                         .relativeFilePath(theFilePath.toQString());
             Q3DStudio::CString presentationId = Q3DStudio::CString::fromQString(theDoc.GetCore()
                                                 ->getProjectFile().getPresentationId(pathFromRoot));

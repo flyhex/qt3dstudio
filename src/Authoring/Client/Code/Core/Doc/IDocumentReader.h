@@ -143,9 +143,6 @@ public:
     // children.
     virtual void GetAllAssociatedSlides(TInstanceHandle inInstance, TSlideList &outList) const = 0;
 
-    // Returns true if this object is the scene or a components
-    virtual bool IsComponent(TInstanceHandle inInstance) const = 0;
-
     // Get all the source paths for this instance.  If the slide is zero, this means the source
     // path is set in the data core.  Else this indicates exactly which slide the source path is
     // set under.
@@ -234,6 +231,8 @@ public:
                                                  std::vector<Q3DStudio::CString> &outFilePaths) = 0;
 
     virtual Q3DStudio::CString GetCustomMaterialName(const Q3DStudio::CString &inFullPathToFile) const = 0;
+    virtual void getMaterialInfo(const QString &inFullPathToFile,
+                                 QString &outName, QMap<QString, QString> &outValues) = 0;
 
     // Must not be a master slide.  Used during duplicate slide.
     virtual std::shared_ptr<qt3dsdm::IDOMReader> CopySlide(Qt3DSDMSlideHandle inSlide) = 0;

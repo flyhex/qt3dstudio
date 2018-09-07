@@ -39,24 +39,20 @@ EditPresentationIdDlg::EditPresentationIdDlg(const QString &src, QWidget *parent
     m_ui->setupUi(this);
 
     m_presentationId = g_StudioApp.GetCore()->getProjectFile().getPresentationId(src);
-
     m_ui->lineEditPresentationId->setText(m_presentationId);
-
-    connect(m_ui->lineEditPresentationId, &QLineEdit::textEdited, this,
-            &EditPresentationIdDlg::onChangePresentationId);
-}
-
-void EditPresentationIdDlg::onChangePresentationId()
-{
-    m_presentationId = m_ui->lineEditPresentationId->text();
 }
 
 void EditPresentationIdDlg::accept()
 {
-    if (!g_StudioApp.GetCore()->getProjectFile().isUniquePresentationId(m_presentationId, m_src)) {
-        g_StudioApp.showPresentationIdUniqueWarning();
+    QString newId = m_ui->lineEditPresentationId->text();
+    if (!newId.isEmpty() && newId != m_presentationId) {
+        if (!g_StudioApp.GetCore()->getProjectFile().isUniquePresentationId(newId, m_src)) {
+            g_StudioApp.showPresentationIdUniqueWarning();
+        } else {
+            g_StudioApp.GetCore()->getProjectFile().writePresentationId(newId, m_src);
+            QDialog::accept();
+        }
     } else {
-        g_StudioApp.GetCore()->getProjectFile().writePresentationId(m_presentationId, m_src);
         QDialog::accept();
     }
 }
