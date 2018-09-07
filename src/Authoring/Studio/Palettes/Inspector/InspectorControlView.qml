@@ -840,15 +840,15 @@ Rectangle {
             property var value: parent.modelData.value
             model: values
 
-            // Disable for non-layer
-            enabled: _inspectorModel.isLayer(instance)
             showArrow: enabled
 
             implicitWidth: _valueWidth
             implicitHeight: _controlBaseHeight
 
             Component.onCompleted: {
-                currentIndex = find(value)
+                // Disable for non-layer
+                enabled = _inspectorModel.isLayer(instance);
+                currentIndex = find(value);
             }
 
             onCurrentIndexChanged: {
