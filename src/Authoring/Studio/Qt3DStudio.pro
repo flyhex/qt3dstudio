@@ -234,7 +234,11 @@ HEADERS += \
     Application/ProjectFile.h \
     Application/PresentationFile.h \
     Palettes/Project/ChooseImagePropertyDlg.h \
-    Application/StudioTutorialPageIndicator.h
+    Application/StudioTutorialPageIndicator.h \
+    Render/Q3DSRenderWidgets.h \
+    Render/Q3DSGraphObjectTranslator.h \
+    Render/Q3DSTranslation.h \
+    Render/Q3DStudioRenderer.h
 
 FORMS += \
     MainFrm.ui \
@@ -395,7 +399,10 @@ SOURCES += \
     Application/ProjectFile.cpp \
     Application/PresentationFile.cpp \
     Palettes/Project/ChooseImagePropertyDlg.cpp \
-    Application/StudioTutorialPageIndicator.cpp
+    Application/StudioTutorialPageIndicator.cpp \
+    Render/Q3DStudioRenderer.cpp \
+    Render/Q3DSGraphObjectTranslator.cpp \
+    Render/Q3DSTranslation.cpp
 
 RESOURCES += \
     MainFrm.qrc \

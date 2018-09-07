@@ -141,10 +141,7 @@ SOURCES += \
     ../Client/Code/Core/Utility/q3dsdirsystem.cpp \
     ../Client/Code/Core/Utility/q3dsdirwatcher.cpp \
     ../Client/Code/Core/Runtime2Integration/Q3DSDocumentBufferCache.cpp \
-    ../Client/Code/Core/Runtime2Integration/Q3DSGraphObjectTranslator.cpp \
-    ../Client/Code/Core/Runtime2Integration/Q3DSTranslation.cpp \
-    ../Client/Code/Core/Runtime2Integration/Q3DSInputStreamFactory.cpp \
-    ../Client/Code/Core/Runtime2Integration/Q3DStudioRenderer.cpp
+    ../Client/Code/Core/Runtime2Integration/Q3DSInputStreamFactory.cpp
 
 HEADERS += \
     ../Client/Code/Core/Utility/q3dsdirsystem.h \
@@ -155,8 +152,4 @@ HEADERS += \
     ../Client/Code/Core/Runtime2Integration/Q3DSImageTextureData.h \
     ../Client/Code/Core/Runtime2Integration/q3dsruntime2api_p.h \
     ../Client/Code/Core/Runtime2Integration/Q3DSInputStreamFactory.h \
-    ../Client/Code/Core/Runtime2Integration/Q3DSRenderBufferManager.h \
-    ../Client/Code/Core/Runtime2Integration/Q3DSRenderWidgets.h \
-    ../Client/Code/Core/Runtime2Integration/Q3DSGraphObjectTranslator.h \
-    ../Client/Code/Core/Runtime2Integration/Q3DSTranslation.h \
-    ../Client/Code/Core/Runtime2Integration/Q3DStudioRenderer.h
+    ../Client/Code/Core/Runtime2Integration/Q3DSRenderBufferManager.h
