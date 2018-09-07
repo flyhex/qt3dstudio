@@ -208,6 +208,7 @@ struct DataConstructor<SObjectRefType>
 #define QT3DS_WCHAR_T_shdwfilter L"shdwfilter"
 #define QT3DS_WCHAR_T_orthographic L"orthographic"
 #define QT3DS_WCHAR_T_fov L"fov"
+#define QT3DS_WCHAR_T_fovhorizontal L"fovhorizontal"
 #define QT3DS_WCHAR_T_clipnear L"clipnear"
 #define QT3DS_WCHAR_T_clipfar L"clipfar"
 #define QT3DS_WCHAR_T_lookatlock L"lookatlock"

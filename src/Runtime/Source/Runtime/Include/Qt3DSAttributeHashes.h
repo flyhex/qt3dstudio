@@ -74,6 +74,7 @@ enum EAttribute {
     ATTRIBUTE_CLIPNEAR =             0x0068FF28, // clipnear
     ATTRIBUTE_CLIPFAR =              0x037EF699, // clipfar
     ATTRIBUTE_FOV =                  0x00D60213, // fov
+    ATTRIBUTE_FOVHORIZONTAL =        0x01BDB34F, // fovhorizontal
     ATTRIBUTE_SCALEMODE =            0x01FD2FD3, // scalemode
     ATTRIBUTE_SCALEANCHOR =          0x02CFCF41, // scaleanchor
     ATTRIBUTE_BRIGHTNESS =           0x0230D3AF, // brightness

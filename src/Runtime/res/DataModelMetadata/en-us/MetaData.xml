@@ -46,6 +46,9 @@
                 <Property name="fov" formalName="Field of View" description="Viewing angle of the camera\n(how much it can see)" min="1" max="180" default="60">
                         <ShowIfEqual property="orthographic" value="False"/>
                 </Property>
+                <Property name="fovhorizontal" formalName="FOV Horizontal" description="Field of view angle orientation" type="Boolean" default="False">
+                        <ShowIfEqual property="orthographic" value="False"/>
+                </Property>
                 <Property name="clipnear" formalName="Clipping Start" description="Near distance at which objects disappear" min="1" max="1000" default="10" />
                 <Property name="clipfar" formalName="Clipping End" description="Far distance at which objects disappear" default="5000" />
                 <Property name="scalemode" formalName="Scale Mode" description="Render more content as the layer expands\n(same size) or scale up the content (fit)" list="Same Size:Fit:Fit Horizontal:Fit Vertical" default="Fit" />

@@ -255,6 +255,7 @@ class IPropertySystem;
 #define ITERATE_COMPOSER_CAMERA_PROPERTIES                                                         \
     HANDLE_COMPOSER_PROPERTY(orthographic, m_Orthographic, bool, false)                            \
     HANDLE_COMPOSER_PROPERTY(fov, m_Fov, float, 60.f)                                              \
+    HANDLE_COMPOSER_PROPERTY(fovhorizontal, m_FovHorizontal, bool, false)                          \
     HANDLE_COMPOSER_PROPERTY(clipnear, m_ClipNear, float, 10.f)                                    \
     HANDLE_COMPOSER_PROPERTY(clipfar, m_ClipFar, float, 100000.f)                                  \
     HANDLE_COMPOSER_PROPERTY(scalemode, m_ScaleMode, TDataStrPtr, L"Fit")                          \

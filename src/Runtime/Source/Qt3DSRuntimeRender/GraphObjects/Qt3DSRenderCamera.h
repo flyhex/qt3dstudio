@@ -102,6 +102,7 @@ namespace render {
         QT3DSF32 m_ClipFar;
 
         QT3DSF32 m_FOV; // Radians
+        bool m_FOVHorizontal;
 
         QT3DSMat44 m_Projection;
         CameraScaleModes::Enum m_ScaleMode;
@@ -166,6 +167,9 @@ namespace render {
         // plane as inGlobalPos.
         // Expects CalculateGlobalVariables has been called or doesn't need to be.
         QT3DSVec3 UnprojectToPosition(const QT3DSVec3 &inGlobalPos, const SRay &inRay) const;
+
+        QT3DSF32 verticalFov(QT3DSF32 aspectRatio) const;
+        QT3DSF32 verticalFov(const NVRenderRectF &inViewport) const;
     };
 }
 }

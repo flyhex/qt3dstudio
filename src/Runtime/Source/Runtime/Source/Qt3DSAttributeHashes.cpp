@@ -83,6 +83,7 @@ const char *GetAttributeString(const EAttribute inAttribute)
         case ATTRIBUTE_CLIPNEAR: return "clipnear";
         case ATTRIBUTE_CLIPFAR: return "clipfar";
         case ATTRIBUTE_FOV: return "fov";
+        case ATTRIBUTE_FOVHORIZONTAL: return "fovhorizontal";
         case ATTRIBUTE_SCALEMODE: return "scalemode";
         case ATTRIBUTE_SCALEANCHOR: return "scaleanchor";
         case ATTRIBUTE_BRIGHTNESS: return "brightness";
