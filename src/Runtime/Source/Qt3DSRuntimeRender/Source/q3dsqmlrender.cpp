@@ -60,15 +60,24 @@ CRegisteredString Q3DSQmlRender::GetOffscreenRendererType()
 
 NVRenderTextureFormats::Enum convertTextureFormat(E_TEXTURE_FORMAT fmt)
 {
-    Q_UNUSED(fmt)
-    NVRenderTextureFormats::Enum ret = NVRenderTextureFormats::RGBA8;
+    NVRenderTextureFormats::Enum ret;
+
+    switch (fmt) {
+    case E_TEXTURE_RGBA8:
+        ret = NVRenderTextureFormats::RGBA8;
+        break;
+    default:
+        ret = NVRenderTextureFormats::Unknown;
+        break;
+    }
+
     return ret;
 }
 
 SOffscreenRendererEnvironment Q3DSQmlRender::GetDesiredEnvironment(QT3DSVec2 inPresScale)
 {
     QSize size(0, 0);
-    E_TEXTURE_FORMAT format;
+    E_TEXTURE_FORMAT format = E_TEXTURE_UNKNOWN;
 
     if (!m_qmlStreamRenderer)
         initializeRenderer();

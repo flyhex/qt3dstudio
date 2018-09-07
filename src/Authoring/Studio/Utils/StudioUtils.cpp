@@ -151,7 +151,7 @@ QString qmlImportPath()
 
 qreal devicePixelRatio()
 {
-    qreal pixelRatio;
+    qreal pixelRatio = 1.0;
 
     const QWindowList list = QGuiApplication::topLevelWindows();
     if (list.size() > 0)

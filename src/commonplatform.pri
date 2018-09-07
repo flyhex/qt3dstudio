@@ -80,7 +80,6 @@ clang {
 # QT3DS-2242 -Wno-int-to-void-pointer-cast
 # QT3DS-2243 -Wno-switch
 # QT3DS-2244 -Wno-unused-lambda-capture
-# QT3DS-2245 -Wno-sometimes-uninitialized
 # QT3DS-2246 -Wno-deprecated-declarations
 # QT3DS-2247 -Wno-pointer-bool-conversion
 # QT3DS-2248 -Wno-self-assign
@@ -104,7 +103,6 @@ clang {
         -Wno-int-to-void-pointer-cast \
         -Wno-switch \
         -Wno-unused-lambda-capture \
-        -Wno-sometimes-uninitialized \
         -Wno-deprecated-declarations \
         -Wno-pointer-bool-conversion \
         -Wno-self-assign \
@@ -128,7 +126,6 @@ clang {
         -Wno-int-to-void-pointer-cast \
         -Wno-switch \
         -Wno-unused-lambda-capture \
-        -Wno-sometimes-uninitialized \
         -Wno-deprecated-declarations \
         -Wno-pointer-bool-conversion \
         -Wno-self-assign \
