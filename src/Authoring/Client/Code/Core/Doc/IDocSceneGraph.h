@@ -32,6 +32,8 @@
 #include "Qt3DSDMHandles.h"
 #include "foundation/Qt3DSVec3.h"
 #include "Pt.h"
+#include <memory>
+
 namespace qt3ds {
 namespace foundation {
     class IStringTable;

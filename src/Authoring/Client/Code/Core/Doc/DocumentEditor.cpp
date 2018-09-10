@@ -852,7 +852,7 @@ public:
         Q3DStudio::CString retval;
         QSharedPointer<QFile> theStream(
                     openQFileStream(inFullPathToFile, qt3ds::foundation::FileReadFlags()));
-        if (theStream.isNull()) {
+        if (!theStream.isNull()) {
             std::shared_ptr<IDOMFactory> theFactory =
                 IDOMFactory::CreateDOMFactory(m_DataCore.GetStringTablePtr());
             SImportXmlErrorHandler theImportHandler(m_Doc.GetImportFailedHandler(),
@@ -877,31 +877,31 @@ public:
     void getMaterialInfo(const QString &inFullPathToFile,
                          QString &outName, QMap<QString, QString> &outValues) override
     {
-        // TODO: Merge from master, fix
-//        qt3ds::foundation::CFileSeekableIOStream theStream(inFullPathToFile,
-//                                                           qt3ds::foundation::FileReadFlags());
-//        if (theStream.IsOpen()) {
-//            std::shared_ptr<IDOMFactory> theFactory =
-//                IDOMFactory::CreateDOMFactory(m_DataCore.GetStringTablePtr());
-//            SImportXmlErrorHandler theImportHandler(m_Doc.GetImportFailedHandler(),
-//                                                    Q3DStudio::CString::fromQString(
-//                                                        inFullPathToFile));
-//            qt3dsdm::SDOMElement *theElem =
-//                CDOMSerializer::Read(*theFactory, theStream, &theImportHandler);
-//            if (theElem) {
-//                outName = QFileInfo(inFullPathToFile).completeBaseName();
-//                std::shared_ptr<IDOMReader> theReader = IDOMReader::CreateDOMReader(
-//                    *theElem, m_DataCore.GetStringTablePtr(), theFactory);
-//                for (bool success = theReader->MoveToFirstChild("Property"); success;
-//                     success = theReader->MoveToNextSibling("Property")) {
-//                    const char8_t *name = "";
-//                    const char8_t *value = "";
-//                    theReader->Att("name", name);
-//                    theReader->Value(value);
-//                    outValues[name] = value;
-//                }
-//            }
-//        }
+        QSharedPointer<QFile> theStream(
+                    openQFileStream(Q3DStudio::CString::fromQString(inFullPathToFile),
+                                    qt3ds::foundation::FileReadFlags()));
+        if (!theStream.isNull()) {
+            std::shared_ptr<IDOMFactory> theFactory =
+                IDOMFactory::CreateDOMFactory(m_DataCore.GetStringTablePtr());
+            SImportXmlErrorHandler theImportHandler(m_Doc.GetImportFailedHandler(),
+                                                    Q3DStudio::CString::fromQString(
+                                                        inFullPathToFile));
+            qt3dsdm::SDOMElement *theElem =
+                CDOMSerializer::Read(*theFactory, *theStream, &theImportHandler);
+            if (theElem) {
+                outName = QFileInfo(inFullPathToFile).completeBaseName();
+                std::shared_ptr<IDOMReader> theReader = IDOMReader::CreateDOMReader(
+                    *theElem, m_DataCore.GetStringTablePtr(), theFactory);
+                for (bool success = theReader->MoveToFirstChild("Property"); success;
+                     success = theReader->MoveToNextSibling("Property")) {
+                    const char8_t *name = "";
+                    const char8_t *value = "";
+                    theReader->Att("name", name);
+                    theReader->Value(value);
+                    outValues[name] = value;
+                }
+            }
+        }
     }
 
     ///////////////////////////////////////////////////////////////////
@@ -3061,7 +3061,7 @@ public:
     {
         QSharedPointer<QFile> theStream(openQFileStream(inFilePath.toCString(),
                                                         FileReadFlags()));
-        if (theStream.isNull() == false) {
+        if (!theStream.isNull()) {
             QT3DS_ASSERT(false);
             return 0;
         }
