@@ -314,7 +314,10 @@ const wchar_t *ComposerObjectTypes::Convert(ComposerObjectTypes::Enum inType)
         return QT3DS_WCHAR_T_##name;
         ITERATE_COMPOSER_OBJECT_TYPES
 #undef HANDLE_COMPOSER_OBJECT_TYPE
+    default:
+        break;
     }
+
     QT3DS_ASSERT(false);
     return L"Unknown";
 }
@@ -522,7 +525,10 @@ bool SComposerObjectDefinitions::IsA(Qt3DSDMInstanceHandle inInstance,
         return m_DataCore.IsInstanceOrDerivedFrom(inInstance, m_##name.m_Instance);
         ITERATE_COMPOSER_OBJECT_TYPES
 #undef HANDLE_COMPOSER_OBJECT_TYPE
+    default:
+        break;
     }
+
     QT3DS_ASSERT(false);
     return false;
 }
@@ -559,7 +565,10 @@ SComposerObjectDefinitions::GetInstanceForType(ComposerObjectTypes::Enum inType)
         return m_##name.m_Instance;
         ITERATE_COMPOSER_OBJECT_TYPES
 #undef HANDLE_COMPOSER_OBJECT_TYPE
+    default:
+        break;
     }
+
     QT3DS_ASSERT(false);
     return 0;
 }

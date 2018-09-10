@@ -436,6 +436,12 @@ InspectorControlBase* InspectorControlModel::createMaterialItem(Qt3DSDMInspectab
                 item->m_value = values[m_materials.size() + matIdx + 3];
         }
         break;
+    case OBJTYPE_CUSTOMMATERIAL:
+        // Handled in the loop after this switch case
+        break;
+    default:
+        QT3DS_ALWAYS_ASSERT_MESSAGE("Unknown material type");
+        break;
     }
 
     for (int matIdx = 0, end = int(m_materials.size()); matIdx < end; ++matIdx) {

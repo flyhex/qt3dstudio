@@ -245,6 +245,9 @@ Qt3DSDMInstanceHandle CClientDataModelBridge::CreateAssetInstance(Q3DStudio::CId
     case OBJTYPE_LIGHTMAPS:
         m_DataCore->DeriveInstance(theNewInstance, m_Lightmaps.m_Instance);
         break;
+    default:
+        // Ignore unknown object type
+        break;
     }
 
     m_DataCore->SetInstancePropertyValue(theNewInstance, GetObjectDefinitions().m_Guided.m_GuidProp,
@@ -855,8 +858,13 @@ CClientDataModelBridge::GetInstance(qt3dsdm::Qt3DSDMInstanceHandle inRoot,
             return CRelativePathTools::FindAssetInstanceByObjectPath(
                 m_Doc, inRoot, thePath, thePathType, theFullResolvedFlag, theObjRefHelper);
         }
-    } break;
     }
+        break;
+    default:
+        // Ignore unknown reference type
+        break;
+    }
+
     return 0;
 }
 // Get the instance handle from the info stored in inValue
@@ -1836,6 +1844,7 @@ void CClientDataModelBridge::ResetHandlerArguments(Qt3DSDMActionHandle inAction,
                 inAction, theArgMetaData.m_Name, theArgMetaData.m_ArgType,
                 theArgMetaData.GetDataType());
             SValue theValue = theArgMetaData.m_DefaultValue;
+
             switch (theArgMetaData.m_ArgType) {
             case HandlerArgumentType::Event:
                 theValue = 0; // TODO: Hardcode for now. Should query event meta data list.
@@ -1852,13 +1861,18 @@ void CClientDataModelBridge::ResetHandlerArguments(Qt3DSDMActionHandle inAction,
                     theValue = qt3dsdm::TDataStrPtr(new qt3dsdm::CDataStr(
                         thePropertySystem->GetName(theProperties[0]).wide_str()));
                 }
-            } break;
+            }
+                break;
             case HandlerArgumentType::Slide: {
                 std::list<Q3DStudio::CString> theSlideNames;
                 GetSlideNamesOfAction(inAction, theSlideNames);
                 if (theSlideNames.size() > 0)
                     theValue = TDataStrPtr(new CDataStr(*theSlideNames.begin()));
-            } break;
+            }
+                break;
+            default:
+                // Use default value for unknown argument type
+                break;
             }
             theActionCore->SetHandlerArgumentValue(theArgument, theValue.toOldSkool());
         }

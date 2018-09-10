@@ -381,9 +381,9 @@ bool CNDDView::HandleMessage(const QEvent *inEvent)
 {
     if (m_Application.mPtr == NULL || m_RenderEngine == NULL)
         return 0;
+
     bool ret = false;
     switch (inEvent->type()) {
-
     case QEvent::MouseButtonPress:
     case QEvent::MouseButtonRelease:
         {
@@ -393,14 +393,19 @@ bool CNDDView::HandleMessage(const QEvent *inEvent)
             m_InputEngine->SetPickFlags(inEvent->type() == QEvent::MouseButtonPress
                                         ? LMOUSE_DOWN : LMOUSE_UP);
             ret = true;
-        } break;
+        }
+        break;
     case QEvent::Resize:
         {
             if (m_Application->GetPrimaryPresentation())
                 m_RenderEngine->CheckResize(true, *m_Application->GetPrimaryPresentation());
             ret = true;
-        } break;
+        }
+        break;
+    default:
+        break;
     }
+
     m_InputEngine->HandleMessage(inEvent, *m_RenderEngine, m_Application->GetPrimaryPresentation());
     return ret ? 1 : 0;
 }
@@ -738,3 +743,4 @@ bool CTegraApplication::HandleMessage(const QEvent *inEvent)
     return m_NDDView->HandleMessage(inEvent);
 }
 } // namespace Q3DStudio
+

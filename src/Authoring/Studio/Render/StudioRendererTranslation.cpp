@@ -1663,7 +1663,8 @@ SGraphObjectTranslator *STranslation::CreateTranslator(qt3dsdm::Qt3DSDMInstanceH
                     *theSystem.CreateEffectInstance(theNameStr, m_Allocator));
             }
         }
-    } break;
+    }
+        break;
     case qt3dsdm::ComposerObjectTypes::CustomMaterial: {
         ICustomMaterialSystem &theSystem = m_Context.GetCustomMaterialSystem();
         if (theParentClass.Valid()) {
@@ -1691,11 +1692,16 @@ SGraphObjectTranslator *STranslation::CreateTranslator(qt3dsdm::Qt3DSDMInstanceH
                     &theSystem;
             }
         }
-    } break;
+    }
+        break;
     case qt3dsdm::ComposerObjectTypes::RenderPlugin: {
         theNewTranslator = QT3DS_NEW(m_Allocator, SRenderPluginTranslator)(inInstance, m_Allocator);
-    } break;
     }
+        break;
+    default:
+        break;
+    }
+
     return theNewTranslator;
 }
 
@@ -2449,8 +2455,11 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
                             case GraphObjectTypes::Path:
                                 DrawNonGroupBoundingBoxes(*theTranslator);
                                 break;
+                             default:
+                                break;
                             }
                         }
+
                         // Don't draw the axis if there is a widget.
                         if (CStudioPreferences::ShouldDisplayPivotPoint()
                             && shouldDisplayWidget == false) {
@@ -2460,8 +2469,11 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
                             case GraphObjectTypes::Model:
                                 DrawAxis(*theTranslator);
                                 break;
+                            default:
+                               break;
                             }
                         }
+
                         if (theType == GraphObjectTypes::Path && selectedPath == false) {
                             selectedPath = true;
                             if (!m_PathWidget) {
@@ -2519,6 +2531,7 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
                         theNextWidget = m_ScaleWidget.mPtr;
                         break;
                     }
+
                     if (theNextWidget) {
                         SNode &node = static_cast<SNode &>(theTranslator->GetGraphObject());
                         theNextWidget->SetNode(node);
@@ -2944,6 +2957,8 @@ SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::En
             case qt3dsdm::GuideDirections::Vertical:
                 if (fabs((float)renderSpacePt.x - theGuideInfo.m_Position) <= width)
                     return theGuides[guideIdx];
+                break;
+            default:
                 break;
             }
         }
@@ -3792,7 +3807,10 @@ void STranslation::CheckGuideInPresentationRect(Qt3DSDMGuideHandle inGuide,
     case qt3dsdm::GuideDirections::Vertical:
         inPresentation = 0.0f <= theInfo.m_Position && presWidth >= theInfo.m_Position;
         break;
+    default:
+        break;
     }
+
     if (!inPresentation)
         inEditor.EnsureEditor(L"Delete Guide", __FILE__, __LINE__).DeleteGuide(inGuide);
 }

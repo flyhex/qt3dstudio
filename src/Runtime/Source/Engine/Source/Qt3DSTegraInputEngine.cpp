@@ -114,7 +114,10 @@ void CTegraInputEngine::HandleMessage(const QEvent *inEvent,
 
                 s_PointerWasDown = false;
             }
-        } break;
+        }
+        break;
+    default:
+        break;
     }
 }
 

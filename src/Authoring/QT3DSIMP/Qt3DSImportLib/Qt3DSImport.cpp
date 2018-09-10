@@ -722,7 +722,12 @@ public:
             return ImportErrorCodes::ResourceNotWriteable;
         case Q3DStudio::FileErrorCodes::NoError:
             return ImportErrorCodes::NoError;
+        case Q3DStudio::FileErrorCodes::SourceNotExist:
+            return ImportErrorCodes::SourceFileDoesNotExist;
+        default:
+            break;
         }
+
         QT3DS_ASSERT(false);
         return ImportErrorCodes::ResourceNotWriteable;
     }

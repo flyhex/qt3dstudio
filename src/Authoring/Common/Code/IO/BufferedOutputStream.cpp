@@ -216,6 +216,8 @@ long CBufferedSeekOutputStream::Seek(ESeekPosition inPosition, long inOffset)
         break;
         // case Q3DStudio::ISeekable::EEND: // This case need not be optimized
         // break;
+    default:
+        break;
     }
 
     if (theAbsolutePosition >= theUnflushedPosition

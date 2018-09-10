@@ -77,6 +77,8 @@ public:
         case ETransformType_Scale3:
             m_Data = new float[3];
             break;
+        default:
+            break;
         }
 
         m_Type = inType;

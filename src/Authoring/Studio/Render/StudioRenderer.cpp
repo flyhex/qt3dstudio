@@ -894,6 +894,8 @@ struct SRendererImpl : public IStudioRenderer,
                                 m_Translation->RotateSelectedInstanceAboutCameraDirectionVector(
                                     m_PreviousMousePoint, inPoint, m_UpdatableEditor);
                                 break;
+                            default:
+                                break;
                             }
                         }
                     }

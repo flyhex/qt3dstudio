@@ -2174,6 +2174,8 @@ public:
                 }
                 break;
             }
+            default:
+                break;
             }
         }
     }
@@ -3592,6 +3594,9 @@ public:
             case MetaDataLoadWarningType::InvalidHandler:
                 theTypeStr = QObject::tr("Invalid Handler");
                 break;
+            default:
+                QT3DS_ALWAYS_ASSERT_MESSAGE("Unknown load warning type")
+                break;
             }
 
             switch (inWarnings[idx].m_Message) {
@@ -3603,6 +3608,9 @@ public:
                 break;
             case MetaDataLoadWarningMessage::InvalidDefault:
                 theMessageStr = QObject::tr("Invalid Default");
+                break;
+            default:
+                QT3DS_ALWAYS_ASSERT_MESSAGE("Unknown load warning message")
                 break;
             }
 
@@ -4909,7 +4917,10 @@ void IDocumentEditor::DisplayImportErrors(const QString &inImportSource,
         case ESceneGraphWarningCode_VertexBufferTooLarge:
             formatStr = L"A single mesh exceeds the maximum vertex count of 65535";
             break;
+        default:
+            break;
         }
+
         wchar_t buf[1024] = { 0 };
         swprintf(buf, 1024, formatStr, warning.second.c_str());
         if (resultDialogStr.size())

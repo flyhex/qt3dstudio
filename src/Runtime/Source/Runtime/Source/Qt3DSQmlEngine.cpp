@@ -769,6 +769,9 @@ void CQmlEngineImpl::SetDataInputValue(const QString &name, const QVariant &valu
                              valueStr.constData());
                 break;
             }
+            default:
+                QT3DS_ALWAYS_ASSERT_MESSAGE("Unexpected data input type");
+                break;
             }
         }
 

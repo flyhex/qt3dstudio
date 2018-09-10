@@ -78,7 +78,6 @@ clang {
 # QT3DS-2240 -Wno-enum-compare
 # QT3DS-2241 -Wno-int-to-pointer-cast
 # QT3DS-2242 -Wno-int-to-void-pointer-cast
-# QT3DS-2243 -Wno-switch
 # QT3DS-2244 -Wno-unused-lambda-capture
 # QT3DS-2246 -Wno-deprecated-declarations
 # QT3DS-2247 -Wno-pointer-bool-conversion
@@ -101,7 +100,6 @@ clang {
         -Wno-enum-compare \
         -Wno-int-to-pointer-cast \
         -Wno-int-to-void-pointer-cast \
-        -Wno-switch \
         -Wno-unused-lambda-capture \
         -Wno-deprecated-declarations \
         -Wno-pointer-bool-conversion \
@@ -124,7 +122,6 @@ clang {
         -Wno-enum-compare \
         -Wno-int-to-pointer-cast \
         -Wno-int-to-void-pointer-cast \
-        -Wno-switch \
         -Wno-unused-lambda-capture \
         -Wno-deprecated-declarations \
         -Wno-pointer-bool-conversion \

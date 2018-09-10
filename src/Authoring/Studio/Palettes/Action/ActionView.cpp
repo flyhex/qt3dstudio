@@ -728,7 +728,11 @@ void ActionView::OnSelectionSet(Q3DStudio::SSelectedValue inSelectable)
         Q_ASSERT(GuidValid(theComponentGuid));
         theInstance = theBridge->GetInstanceByGUID(theComponentGuid);
         Q_ASSERT(theInstance.Valid());
-    } break;
+    }
+        break;
+    default:
+        // Do nothing on slide insertion, guide and unknown types
+        return;
     };
 
     setItem(theInstance);

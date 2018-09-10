@@ -1401,12 +1401,17 @@ CInspectableBase *CStudioApp::GetInspectableFromSelectable(Q3DStudio::SSelectedV
                                 new Qt3DSDMInspectable(*this, m_core, theSelectedInstance);
                 }
             }
-        } break;
+        }
+            break;
         case Q3DStudio::SelectedValueTypes::Guide: {
             qt3dsdm::Qt3DSDMGuideHandle theGuide
                     = inSelectable.getData<qt3dsdm::Qt3DSDMGuideHandle>();
             theInspectableBase = CGuideInspectable::CreateInspectable(*m_core, theGuide);
-        } break;
+        }
+            break;
+        default:
+            // Ignore slide insertion and unknown selectable types
+            break;
         };
     }
 

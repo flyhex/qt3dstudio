@@ -84,6 +84,8 @@ bool CSlideTimelineItemBinding::IsValidTransaction(EUserTransaction inTransactio
     case EUserTransaction_MakeComponent:
     case EUserTransaction_EditComponent:
         return false;
+    default:
+        break;
     }
 
     return Qt3DSDMTimelineItemBinding::IsValidTransaction(inTransaction);

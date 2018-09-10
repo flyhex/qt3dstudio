@@ -165,7 +165,22 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
             theCommandName = QObject::tr("File Drop Subpresentation File");
             break;
         case Q3DStudio::DocumentEditorFileType::QmlStream:
-            theCommandName = QObject::tr("File Drop Qml Stream File");
+            theCommandName = QObject::tr("File Drop QML Stream File");
+            break;
+        case Q3DStudio::DocumentEditorFileType::FBX:
+            theCommandName = QObject::tr("File Drop FBX File");
+            break;
+        case Q3DStudio::DocumentEditorFileType::Sound:
+            theCommandName = QObject::tr("File Drop Sound File");
+            break;
+        case Q3DStudio::DocumentEditorFileType::Project:
+            theCommandName = QObject::tr("File Drop Project File");
+            break;
+        case Q3DStudio::DocumentEditorFileType::MaterialData:
+            theCommandName = QObject::tr("File Drop Material Data File");
+            break;
+        default:
+            theCommandName = QObject::tr("File Drop Unknown File");
             break;
         }
 

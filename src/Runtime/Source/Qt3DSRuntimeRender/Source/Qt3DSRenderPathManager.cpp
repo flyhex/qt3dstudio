@@ -274,6 +274,10 @@ struct SPathBuffer
             case PathTypes::Painted:
                 ClearPaintedPathData();
                 break;
+            default:
+                QT3DS_ALWAYS_ASSERT_MESSAGE("Unexpected path type");
+                // No further processing for unexpected path type
+                return;
             }
             m_Flags.clearOrSet(true, PathDirtyFlagValues::PathType);
         }
