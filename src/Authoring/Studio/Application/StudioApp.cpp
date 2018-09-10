@@ -53,6 +53,8 @@
 #include <QtQml/qqmlapplicationengine.h>
 #include <QtQuick/qquickitem.h>
 
+#include "q3dsruntime2api_p.h"
+
 const QString activePresentationQuery = QStringLiteral("activePresentation:");
 
 int main(int argc, char *argv[])
@@ -63,10 +65,10 @@ int main(int argc, char *argv[])
     qputenv("LC_ALL", "C");
 #endif
 
-    // init runtime static resources
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-    Q_INIT_RESOURCE(res);
-#endif
+    // init runtime resources by creating engine
+    {
+        Q3DSEngine engine;
+    }
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     SharedTools::QtSingleApplication guiApp(QStringLiteral("Qt3DStudio"), argc, argv);

@@ -32,6 +32,7 @@
 #include "StudioPreferences.h"
 #include "StudioClipboard.h"
 #include "Pt.h"
+#include "q3dsruntime2api_p.h"
 
 #include <QtWidgets/qapplication.h>
 #include <QtWidgets/qdesktopwidget.h>
@@ -129,7 +130,7 @@ void ShowURLInBrowser(const Q3DStudio::CString &inURL)
 
 QString resourcePath()
 {
-    return QStringLiteral(":/res");
+    return Q3DSUtils::resourcePrefix() + QStringLiteral("res");
 }
 
 QString resourceImagePath()

@@ -421,8 +421,7 @@ SOURCES += \
 RESOURCES += \
     MainFrm.qrc \
     qml.qrc \
-    images.qrc \
-    metadata.qrc
+    images.qrc
 
 PREDEPS_LIBS += \
     QT3DSDM \

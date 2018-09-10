@@ -40,6 +40,7 @@
 // We mean it.
 //
 
+#include "q3dsutils_p.h"
 #include "q3dsengine_p.h"
 #include "q3dsbehaviorobject_p.h"
 #include "q3dsuippresentation_p.h"
