@@ -196,7 +196,6 @@ private:
 
     GroupInspectorControl computeGroup(CInspectableBase* inspectBase, int theIndex);
     bool isGroupRebuildRequired(CInspectableBase *inspectable, int theIndex) const;
-
 };
 
 #endif // INSPECTORCONTROLMODEL_H

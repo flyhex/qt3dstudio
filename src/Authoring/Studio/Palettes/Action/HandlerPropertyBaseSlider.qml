@@ -54,6 +54,7 @@ Row {
     width: _valueWidth
 
     function doCommitValue() {
+        wheelCommitTimer.stop();
         if (rateLimiter.running)
             rateLimiter.stop();
         textField.setTextFieldValue();
@@ -82,9 +83,10 @@ Row {
                     delta = -delta;
                 slider.value = Number(slider.value + delta).toFixed(doubleValidator.decimals);
             }
+            wheelCommitTimer.stop();
             if (!rateLimiter.running)
                 rateLimiter.start();
-            textField.setTextFieldValue()
+            textField.setTextFieldValue();
         }
     }
 
@@ -121,10 +123,10 @@ Row {
         }
 
         onMoved: {
-            if (!rateLimiter.running) {
+            wheelCommitTimer.stop();
+            if (!rateLimiter.running)
                 rateLimiter.start();
-            }
-            textField.setTextFieldValue()
+            textField.setTextFieldValue();
         }
 
         // onPressedChanged is triggered both mouse clicks and arrow keys, so adjusting with arrow
@@ -142,15 +144,24 @@ Row {
                 var delta = (wheel.angleDelta.x != 0) ? wheel.angleDelta.x
                                                       : wheel.angleDelta.y;
 
-                if (delta > 0) {
+                if (delta > 0)
                     slider.increase();
-                } else {
+                else
                     slider.decrease();
-                }
-                if (!rateLimiter.running) {
+                if (!rateLimiter.running)
                     rateLimiter.start();
+                textField.setTextFieldValue();
+
+                // Leaving a transaction open can interfere with other editor functionality,
+                // so commit the wheel transaction after a brief delay
+                wheelCommitTimer.restart();
+            }
+            Timer {
+                id: wheelCommitTimer
+                interval: 1000
+                onTriggered: {
+                    root.doCommitValue();
                 }
-                textField.setTextFieldValue()
             }
         }
     }

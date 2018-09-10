@@ -116,6 +116,12 @@ InspectorControlModel::InspectorControlModel(QObject *parent)
 
 void InspectorControlModel::setInspectable(CInspectableBase *inInspectable)
 {
+    // Commit any pending transactions on selection change
+    m_UpdatableEditor.CommitEditor();
+    m_modifiedProperty.first = 0;
+    m_modifiedProperty.second = 0;
+    m_previouslyCommittedValue = {};
+
     const auto signalProvider
             = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetFullSystemSignalProvider();
 
