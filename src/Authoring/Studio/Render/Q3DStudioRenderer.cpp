@@ -95,11 +95,7 @@ Q3DStudioRenderer::Q3DStudioRenderer()
 
 Q3DStudioRenderer::~Q3DStudioRenderer()
 {
-    OnClosingPresentation();
-    m_dispatch.RemoveDataModelListener(this);
-    m_dispatch.RemovePresentationChangeListener(this);
-    m_dispatch.RemoveSceneDragListener(this);
-    m_dispatch.RemoveToolbarChangeListener(this);
+    Close();
 }
 
 QSharedPointer<Q3DSEngine> &Q3DStudioRenderer::engine()
@@ -222,7 +218,12 @@ void Q3DStudioRenderer::EditCameraZoomToFit()
 
 void Q3DStudioRenderer::Close()
 {
-
+    OnClosingPresentation();
+    m_engine.reset();
+    m_dispatch.RemoveDataModelListener(this);
+    m_dispatch.RemovePresentationChangeListener(this);
+    m_dispatch.RemoveSceneDragListener(this);
+    m_dispatch.RemoveToolbarChangeListener(this);
 }
 
 static void drawTopBottomTickMarks(QPainter &painter, qreal posX, qreal innerBottom,
@@ -436,9 +437,20 @@ void Q3DStudioRenderer::OnNewPresentation()
 
 void Q3DStudioRenderer::OnClosingPresentation()
 {
-    if (!m_engine.isNull())
+    if (!m_hasPresentation && m_widget)
+        return;
+    m_widget->makeCurrent();
+    if (!m_engine.isNull() && !m_translation.isNull()) {
+        auto renderAspectD = static_cast<Qt3DRender::QRenderAspectPrivate *>(
+                    Qt3DRender::QRenderAspectPrivate::get(m_renderAspect));
+        renderAspectD->renderShutdown();
+        m_renderAspect = nullptr;
+        m_widget->doneCurrent();
+        /* This would destroy render aspect. */
         m_engine->setPresentation(nullptr);
-    m_translation.reset();
+        m_engine.reset();
+        m_translation.reset();
+    }
     m_hasPresentation = false;
 }
 

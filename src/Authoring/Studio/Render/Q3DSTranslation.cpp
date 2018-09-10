@@ -1787,7 +1787,9 @@ void Q3DSTranslation::prepareRender(const QRect &rect, const QSize &size)
     clearDirtySet();
     if (m_engine->presentationCount() == 0) {
         m_engine->setPresentation(m_presentation.data());
+#if (Q3DS_ENABLE_PROFILEUI == 1)
         m_engine->setProfileUiVisible(true, true);
+#endif
         m_studioRenderer.SetViewRect(m_studioRenderer.viewRect());
     }
     if (rect != m_rect || size != m_size) {
