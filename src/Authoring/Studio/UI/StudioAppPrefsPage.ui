@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>347</width>
-    <height>511</height>
+    <width>418</width>
+    <height>543</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,6 +20,16 @@
       <string>General</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="m_checkTimelineAbsoluteSnapping">
+        <property name="text">
+         <string>Timeline Snapping Grid</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="m_DefaultInterpolation"/>
+      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="label_2">
         <property name="text">
@@ -30,25 +40,8 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="m_DefaultInterpolation"/>
-      </item>
       <item row="1" column="1">
        <widget class="QComboBox" name="m_SnapRangeCombo"/>
-      </item>
-      <item row="1" column="0">
-       <widget class="QCheckBox" name="m_checkTimelineAbsoluteSnapping">
-        <property name="text">
-         <string>Timeline Snapping Grid</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QCheckBox" name="m_checkLegacyViewer">
-        <property name="text">
-         <string>Legacy Viewer</string>
-        </property>
-       </widget>
       </item>
      </layout>
     </widget>

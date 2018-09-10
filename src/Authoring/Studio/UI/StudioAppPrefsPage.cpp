@@ -90,7 +90,6 @@ void CStudioAppPrefsPage::onInitDialog()
     // Add tool tips for controls
     m_ui->m_DefaultInterpolation->setToolTip(tr("Set default keyframe interpolation type"));
     m_ui->m_checkTimelineAbsoluteSnapping->setToolTip(tr("Enable timeline snapping grid"));
-    m_ui->m_checkLegacyViewer->setToolTip(tr("Enable preview with legacy Qt 3D Viewer 1.1"));
     m_ui->m_SnapRangeCombo->setToolTip(tr("Set resolution of timeline snapping grid"));
     m_ui->m_buttonRestoreDefaults->setToolTip(tr("Click to restore default Studio settings"));
 
@@ -119,8 +118,6 @@ void CStudioAppPrefsPage::onInitDialog()
     connect(m_ui->m_SnapRangeCombo, activated, this, [=](){ setModified(true); });
     connect(m_ui->m_checkTimelineAbsoluteSnapping, &QCheckBox::clicked,
             this, [=](){ setModified(true); enableOptions(); });
-    connect(m_ui->m_checkLegacyViewer, &QCheckBox::clicked,
-            this, [=](){ setModified(true); m_restartNeeded = true; });
     connect(m_ui->m_EditViewStartupView, activated, this, [=](){ setModified(true); });
     connect(m_ui->selectorWidth,
             static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
@@ -164,9 +161,6 @@ void CStudioAppPrefsPage::loadSettings()
     m_ui->m_checkTimelineAbsoluteSnapping->setChecked(
                 CStudioPreferences::IsTimelineSnappingGridActive());
 
-    // Legacy viewer
-    m_ui->m_checkLegacyViewer->setChecked(CStudioPreferences::IsLegacyViewerActive());
-
     // Tool handles
     m_ui->selectorWidth->setValue(CStudioPreferences::getSelectorLineWidth());
     m_ui->selectorLength->setValue(CStudioPreferences::getSelectorLineLength());
@@ -208,9 +202,6 @@ void CStudioAppPrefsPage::saveSettings()
                 m_ui->m_checkTimelineAbsoluteSnapping->isChecked());
     long theCurrentSelection = m_ui->m_SnapRangeCombo->currentIndex();
     CStudioPreferences::SetTimelineSnappingGridResolution((ESnapGridResolution)theCurrentSelection);
-
-    // Legacy viewer
-    CStudioPreferences::SetLegacyViewerActive(m_ui->m_checkLegacyViewer->isChecked());
 
     // Preferred Startup View
     long theSel = m_ui->m_EditViewStartupView->currentIndex();

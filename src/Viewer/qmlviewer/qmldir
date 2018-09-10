@@ -1,3 +1,0 @@
-module QtStudio3D
-plugin declarative_qtstudio3d
-classname Q3DSViewPlugin
