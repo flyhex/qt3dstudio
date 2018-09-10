@@ -219,7 +219,10 @@ void Q3DStudioRenderer::EditCameraZoomToFit()
 void Q3DStudioRenderer::Close()
 {
     OnClosingPresentation();
-    m_engine.reset();
+    if (m_engine.data()) {
+        m_engine->setPresentation(nullptr);
+        m_engine.reset();
+    }
     m_dispatch.RemoveDataModelListener(this);
     m_dispatch.RemovePresentationChangeListener(this);
     m_dispatch.RemoveSceneDragListener(this);
@@ -368,6 +371,8 @@ void Q3DStudioRenderer::RenderNow()
                     Qt3DRender::QRenderAspectPrivate::get(m_renderAspect));
         renderAspectD->renderInitialize(m_widget->context());
         m_widget->makeCurrent();
+        if (!m_translation.isNull() && m_hasPresentation)
+            createTranslation();
     }
 
     if (!m_translation.isNull()) {
@@ -432,7 +437,8 @@ void Q3DStudioRenderer::OnReloadEffectInstance(qt3dsdm::Qt3DSDMInstanceHandle in
 void Q3DStudioRenderer::OnNewPresentation()
 {
     m_hasPresentation = true;
-    createTranslation();
+    if (!m_engine.isNull())
+        createTranslation();
 }
 
 void Q3DStudioRenderer::OnClosingPresentation()

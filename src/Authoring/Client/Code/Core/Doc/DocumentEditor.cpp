@@ -198,10 +198,7 @@ public:
                                         std::bind(&CDocEditor::OnProjectDirChanged, this,
                                                   std::placeholders::_1));
         }
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-        qmlRegisterType<Q3DSBehaviorObject>("QtStudio3D.Behavior", 1, 0, "Behavior");
-        qmlRegisterType<Q3DSBehaviorObject, 1>("QtStudio3D.Behavior", 1, 1, "Behavior");
-#endif
+        // We need to register the qml types before runtime engine is initialized.
     }
     virtual ~CDocEditor()
     {
@@ -792,7 +789,13 @@ public:
 
     qt3ds::NVFoundationBase &GetFoundation() override { return *m_Foundation.m_Foundation; }
 
-    QSharedPointer<QFile> openQFileStream(Q3DStudio::CString inFile, FileOpenFlags flags) const
+    QSharedPointer<QFile> openQFileStream(const Q3DStudio::CString &inFile,
+                                          FileOpenFlags flags) const
+    {
+        return openQFileStream(inFile.toQString(), flags);
+    }
+
+    QSharedPointer<QFile> openQFileStream(const QString &inFile, FileOpenFlags flags) const
     {
         QFile::OpenMode qflags = QFile::ReadOnly;
         bool open = flags & FileOpenFlagValues::Open;
@@ -801,14 +804,17 @@ public:
             qflags |= QFile::Truncate;
         if (flags & FileOpenFlagValues::Write)
             qflags |= QFile::WriteOnly;
+        if (flags & FileOpenFlagValues::Append)
+            qflags |= QFile::Append;
 
-        QSharedPointer<QFile> file(new QFile(inFile.toQString()));
-        if (create && !file->exists())
+        QSharedPointer<QFile> file(new QFile(inFile));
+        if (open && !file->exists())
+            return {};
+        if (create && file->exists())
             return {};
         if (!file->open(qflags))
             return {};
-        if (!(flags & FileOpenFlagValues::Truncate) && open)
-            file->seek(file->size());
+
         return file;
     }
 
@@ -878,7 +884,7 @@ public:
                          QString &outName, QMap<QString, QString> &outValues) override
     {
         QSharedPointer<QFile> theStream(
-                    openQFileStream(Q3DStudio::CString::fromQString(inFullPathToFile),
+                    openQFileStream(inFullPathToFile,
                                     qt3ds::foundation::FileReadFlags()));
         if (!theStream.isNull()) {
             std::shared_ptr<IDOMFactory> theFactory =

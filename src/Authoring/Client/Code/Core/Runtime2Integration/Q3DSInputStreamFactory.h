@@ -79,7 +79,7 @@ public:
     virtual ~IInputStreamFactory() {}
 public:
     // These directories must have a '/' on them
-    virtual void addSearchDirectory(const char *inDirectory) = 0;
+    virtual void addSearchDirectory(const QString &inDirectory) = 0;
     virtual IRefCountedInputStream getStreamForFile(const QString &inFilename,
                                                     bool inQuiet = false) = 0;
     // Return a path for this file.  Returns true if getStreamForFile would

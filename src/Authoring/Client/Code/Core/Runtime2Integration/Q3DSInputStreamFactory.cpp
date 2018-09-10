@@ -28,6 +28,8 @@
 
 #include "Q3DSInputStreamFactory.h"
 #include <QtCore/qsharedpointer.h>
+#include <QtCore/qstringlist.h>
+#include <QtCore/qfileinfo.h>
 
 namespace Q3DStudio {
 
@@ -38,20 +40,49 @@ public:
     {
     }
 
-    void addSearchDirectory(const char *inDirectory) override
+    void addSearchDirectory(const QString &inDirectory) override
     {
-
+        if (m_list.contains(inDirectory))
+            return;
+        m_list.append(inDirectory);
     }
 
     IRefCountedInputStream getStreamForFile(const QString &inFilename, bool inQuiet) override
     {
-        return IRefCountedInputStream::create();
+        QString path = QStringLiteral("./");
+        QFileInfo info(inFilename);
+        IRefCountedInputStream stream;
+        int idx = 0;
+        QScopedPointer<QFile> file(new QFile(inFilename));
+        if (info.isRelative()) {
+            while (stream.isNull()) {
+                file->setFileName(path + inFilename);
+                if (file->exists()) {
+                    if (file->open(QFile::ReadOnly)) {
+                        stream.reset(file.take());
+                        break;
+                    }
+                }
+                path = m_list[idx++];
+                if (!path.endsWith(QStringLiteral("/")))
+                    path.append(QStringLiteral("/"));
+            }
+        } else {
+            file->setFileName(inFilename);
+            if (file->exists()) {
+                if (file->open(QFile::ReadOnly))
+                    stream.reset(file.take());
+            }
+        }
+        return stream;
     }
 
     bool getPathForFile(const char *inFilename, QString &outFile, bool inQuiet) override
     {
         return false;
     }
+private:
+    QStringList m_list;
 };
 
 QSharedPointer<Q3DStudio::IInputStreamFactory> &IInputStreamFactory::Create()

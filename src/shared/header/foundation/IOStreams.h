@@ -159,6 +159,7 @@ namespace foundation {
             Truncate = 1 << 1, // Truncate the file so an immediate close will empty it.
             Create = 1 << 2,
             Write = 1 << 3,
+            Append = 1 << 4,
         };
     };
 
