@@ -855,8 +855,9 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
                 RowTreeLabelItem *treeLabelItem = static_cast<RowTreeLabelItem *>(item);
                 if (treeLabelItem->parentRow()->isProperty()) {
                     treeLabelItem->parentRow()->togglePropertyExpanded();
-                } else if (!treeLabelItem->isLocked()) {
-                    // Tree labels text can be edited with double-click
+                } else if (!treeLabelItem->isLocked()
+                           && treeLabelItem->parentRow()->rowType() != OBJTYPE_SCENE) {
+                    // Tree labels text can be edited with double-click, except for Scene label
                     treeLabelItem->setEnabled(true);
                     treeLabelItem->setFocus();
                 }
