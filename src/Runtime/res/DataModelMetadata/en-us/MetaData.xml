@@ -227,18 +227,16 @@
                 <Property name="shdwmapfar" formalName="Shadow Far Clip" description="Affects the maximum distance for the shadow\ndepth map" default="5000" />
                 <Property name="shdwmapfov" formalName="Shadow Field of View" description="Affects the field of view of the shadow\ncamera" default="90" min="1" max="179" hidden="True" />
         </Light>
+        <MaterialBase>
+                <Property name="name" formalName="Name" description="Object name" type="String" default="Material" hidden="False" category="Basic Properties" />
+                <Property name="iblprobe" formalName="IBL Override" description="IBL probe to use in place of the\nlayer probe for this material" type="Image" category="Basic Properties" />
+        </MaterialBase>
         <Lightmaps>
-                <Property name="name" formalName="Name" description="Object name" type="String" default="Lightmaps" hidden="False" category="Lighting" />
                 <Property name="lightmapindirect" formalName="Indirect Lightmap" description="Image providing indirect light values\nfor GI" type="Image" category="Lighting" />
                 <Property name="lightmapradiosity" formalName="Radiosity Lightmap" description="Image providing directional light values" type="Image" category="Lighting" />
                 <Property name="lightmapshadow" formalName="Shadow Lightmap" description="Baked Shadow map" type="Image" category="Lighting" />
         </Lightmaps>
-        <MaterialBase>
-                <Property name="name" formalName="Name" description="Object name" type="String" default="MaterialBase" hidden="False" category="Material" />
-                <Property name="iblprobe" formalName="IBL Override" description="IBL probe to use in place of the\nlayer probe for this material" type="Image" category="Material" />
-        </MaterialBase>
         <Material>
-                <Property name="name" formalName="Name" description="Object name" type="String" default="Material" hidden="False" category="Material" />
                 <Property name="shaderlighting" formalName="Lighting" description="Light model" list="Pixel:None" default="Pixel" category="Material" />
                 <Property name="blendmode" formalName="Blending Mode" description="How this material blends with content\nbehind it. Modes marked with * are\navailable only with HW supporting\nadvanced blending modes." list="Normal:Screen:Multiply:*Overlay:*ColorBurn:*ColorDodge" default="Normal" category="Material" />
                 <Property name="vertexcolors" formalName="Enable Vertex Colors" description="Use vertex colors from the mesh" type="Boolean" default="False" animatable="False" category="Material" />
@@ -271,7 +269,6 @@
                 <Property name="diffuselightwrap" formalName="Diffuse Light Wrap" description="Diffuse Light Wrap" type="float" min='0.0' max='1.0' category="Material" />
         </Material>
         <ReferencedMaterial>
-                <Property name="name" formalName="Name" description="Object name" type="String" default="Material" hidden="True" category="Material" />
                 <Property name="referencedmaterial" formalName="Referenced Material" description="Material to use all settings from" type="ObjectRef" category="Material" />
         </ReferencedMaterial>
         <Model>

@@ -56,8 +56,8 @@ class IPropertySystem;
     HANDLE_COMPOSER_OBJECT_TYPE(Asset, ITERATE_COMPOSER_ASSET_PROPERTIES)                          \
     HANDLE_COMPOSER_OBJECT_TYPE(Scene, ITERATE_COMPOSER_SCENE_PROPERTIES)                          \
     HANDLE_COMPOSER_OBJECT_TYPE(Image, ITERATE_COMPOSER_IMAGE_PROPERTIES)                          \
-    HANDLE_COMPOSER_OBJECT_TYPE(Lightmaps, ITERATE_COMPOSER_LIGHTMAP_PROPERTIES)                   \
     HANDLE_COMPOSER_OBJECT_TYPE(MaterialBase, ITERATE_COMPOSER_MATERIAL_BASE_PROPERTIES)           \
+    HANDLE_COMPOSER_OBJECT_TYPE(Lightmaps, ITERATE_COMPOSER_LIGHTMAP_PROPERTIES)                   \
     HANDLE_COMPOSER_OBJECT_TYPE(Material, ITERATE_COMPOSER_MATERIAL_PROPERTIES)                    \
     HANDLE_COMPOSER_OBJECT_TYPE(CustomMaterial, ITERATE_COMPOSER_NO_ADDITIONAL_PROPERTIES)         \
     HANDLE_COMPOSER_OBJECT_TYPE(ReferencedMaterial,                                                \
@@ -582,23 +582,6 @@ struct SComposerObjectDefinition<ComposerObjectTypes::Image>
 };
 
 template <>
-struct SComposerObjectDefinition<ComposerObjectTypes::Lightmaps>
-    : public SComposerBaseObjectDefinition<ComposerObjectTypes::Lightmaps>
-
-{
-    SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
-                              Qt3DSDMInstanceHandle inInstance,
-                              SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
-                              SComposerObjectDefinition<ComposerObjectTypes::Asset> &inAsset)
-        : SComposerBaseObjectDefinition<ComposerObjectTypes::Lightmaps>(inCore, inMetaData,
-                                                                        inInstance)
-    {
-        Derive(inCore, inAsset);
-        SetType(inCore, inTyped);
-    }
-};
-
-template <>
 struct SComposerObjectDefinition<ComposerObjectTypes::MaterialBase>
     : public SComposerBaseObjectDefinition<ComposerObjectTypes::MaterialBase>
 
@@ -606,9 +589,26 @@ struct SComposerObjectDefinition<ComposerObjectTypes::MaterialBase>
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
                               Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
-                              SComposerObjectDefinition<ComposerObjectTypes::Lightmaps> &inBase)
+                              SComposerObjectDefinition<ComposerObjectTypes::Asset> &inAsset)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::MaterialBase>(inCore, inMetaData,
                                                                            inInstance)
+    {
+        Derive(inCore, inAsset);
+        SetType(inCore, inTyped);
+    }
+};
+
+template <>
+struct SComposerObjectDefinition<ComposerObjectTypes::Lightmaps>
+    : public SComposerBaseObjectDefinition<ComposerObjectTypes::Lightmaps>
+
+{
+    SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
+                              Qt3DSDMInstanceHandle inInstance,
+                              SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
+                              SComposerObjectDefinition<ComposerObjectTypes::MaterialBase> &inBase)
+        : SComposerBaseObjectDefinition<ComposerObjectTypes::Lightmaps>(inCore, inMetaData,
+                                                                        inInstance)
     {
         Derive(inCore, inBase);
         SetType(inCore, inTyped);
@@ -623,7 +623,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::Material>
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
                               Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
-                              SComposerObjectDefinition<ComposerObjectTypes::MaterialBase> &inBase)
+                              SComposerObjectDefinition<ComposerObjectTypes::Lightmaps> &inBase)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::Material>(inCore, inMetaData,
                                                                        inInstance)
     {
@@ -640,7 +640,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::CustomMaterial>
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
                               Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
-                              SComposerObjectDefinition<ComposerObjectTypes::MaterialBase> &inBase)
+                              SComposerObjectDefinition<ComposerObjectTypes::Lightmaps> &inBase)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::CustomMaterial>(inCore, inMetaData,
                                                                              inInstance)
     {
@@ -657,7 +657,7 @@ struct SComposerObjectDefinition<ComposerObjectTypes::ReferencedMaterial>
     SComposerObjectDefinition(IDataCore &inCore, IMetaData &inMetaData,
                               Qt3DSDMInstanceHandle inInstance,
                               SComposerObjectDefinition<ComposerObjectTypes::Typed> &inTyped,
-                              SComposerObjectDefinition<ComposerObjectTypes::MaterialBase> &inBase)
+                              SComposerObjectDefinition<ComposerObjectTypes::Lightmaps> &inBase)
         : SComposerBaseObjectDefinition<ComposerObjectTypes::ReferencedMaterial>(inCore, inMetaData,
                                                                                  inInstance)
     {
