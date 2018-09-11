@@ -605,10 +605,10 @@ Project palette using Import functionality.</string>
     <string>Rotation Tool</string>
    </property>
    <property name="toolTip">
-    <string>Rotate current selection (E)</string>
+    <string>Rotate current selection (R)</string>
    </property>
    <property name="shortcut">
-    <string>E</string>
+    <string>R</string>
    </property>
   </action>
   <action name="actionPosition_Tool">
@@ -641,10 +641,10 @@ Project palette using Import functionality.</string>
     <string>Scale Tool</string>
    </property>
    <property name="toolTip">
-    <string>Scale current selection (R)</string>
+    <string>Scale current selection (E)</string>
    </property>
    <property name="shortcut">
-    <string>R</string>
+    <string>E</string>
    </property>
   </action>
   <action name="actionLocal_Global_Manipulators">
