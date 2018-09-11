@@ -313,6 +313,8 @@ Rectangle {
                                 Loader {
                                     id: loader
                                     readonly property var modelData: propertyRow.modelData
+                                    enabled: modelData.enabled
+                                    opacity: enabled ? 1 : .5
                                     Layout.alignment: Qt.AlignTop
                                     sourceComponent: {
                                         const dataType = modelData.dataType;

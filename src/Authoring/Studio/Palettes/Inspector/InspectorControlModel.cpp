@@ -350,6 +350,11 @@ InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *insp
 
     item->m_controllable = metaProperty.m_Controllable;
 
+    // disable IBL Override for reference materials
+    if (item->m_title == QLatin1String("IBL Override") && studio->GetClientDataModelBridge()
+                                ->GetObjectType(item->m_instance) == OBJTYPE_REFERENCEDMATERIAL) {
+        item->m_enabled = false;
+    }
     auto signalProvider = studio->GetFullSystemSignalProvider();
     if (item->m_animatable) {
         item->m_animated = studio->GetAnimationSystem()->IsPropertyAnimated(item->m_instance,

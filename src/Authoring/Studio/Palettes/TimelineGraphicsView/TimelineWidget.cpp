@@ -514,10 +514,14 @@ void TimelineWidget::onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
             if (!binding->getRowTree()) { // row doesn't exist
                 Qt3DSDMTimelineItemBinding *bindingParent = getBindingForHandle(m_bridge
                                                         ->GetParentInstance(inInstance), m_binding);
-                RowTree *row = m_graphicsScene->rowManager()
-                               ->createRowFromBinding(binding, bindingParent->getRowTree());
-                row->updateSubpresentations();
-                insertToHandlesMap(binding);
+                if (bindingParent) {
+                    RowTree *row = m_graphicsScene->rowManager()
+                                   ->createRowFromBinding(binding, bindingParent->getRowTree());
+                    row->updateSubpresentations();
+                    insertToHandlesMap(binding);
+                } else {
+                    qWarning() << "Binding parent was not found.";
+                }
             }
         }
     }
