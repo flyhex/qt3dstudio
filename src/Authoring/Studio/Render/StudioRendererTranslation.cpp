@@ -2487,11 +2487,13 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
                     && theTranslator->GetGraphObject().m_Type != GraphObjectTypes::Layer) {
 
                 qt3ds::render::SNode &theNode(
-                    static_cast<qt3ds::render::SNode &>(theTranslator->GetGraphObject()));
+                            static_cast<qt3ds::render::SNode &>(theTranslator->GetGraphObject()));
                 SCamera *theRenderCamera = m_Context.GetRenderer().GetCameraForNode(theNode);
                 bool isActiveCamera = theRenderCamera == (static_cast<SCamera *>(&theNode));
-                if (shouldDisplayWidget && isActiveCamera == false
-                        && theTranslator->GetGraphObject().m_Type != GraphObjectTypes::Camera) {
+                const GraphObjectTypes::Enum type = theTranslator->GetGraphObject().m_Type;
+                if (shouldDisplayWidget && !isActiveCamera
+                        && ((type == GraphObjectTypes::Camera && m_EditCameraEnabled)
+                            || type != GraphObjectTypes::Camera)) {
                     switch (theToolMode) {
                     default:
                         QT3DS_ASSERT(false);
@@ -2501,14 +2503,14 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
                         if (!m_TranslationWidget) {
                             m_TranslationWidget
                                     = qt3ds::widgets::IStudioWidget::CreateTranslationWidget(
-                                            m_Context.GetAllocator());
+                                        m_Context.GetAllocator());
                         }
                         theNextWidget = m_TranslationWidget.mPtr;
                         break;
                     case STUDIO_TOOLMODE_ROTATE:
                         if (!m_RotationWidget) {
                             m_RotationWidget = qt3ds::widgets::IStudioWidget::CreateRotationWidget(
-                                m_Context.GetAllocator());
+                                        m_Context.GetAllocator());
                         }
                         theNextWidget = m_RotationWidget.mPtr;
                         break;
@@ -2516,7 +2518,7 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
                     case STUDIO_TOOLMODE_SCALE:
                         if (!m_ScaleWidget) {
                             m_ScaleWidget = qt3ds::widgets::IStudioWidget::CreateScaleWidget(
-                                m_Context.GetAllocator());
+                                        m_Context.GetAllocator());
                         }
                         theNextWidget = m_ScaleWidget.mPtr;
                         break;
