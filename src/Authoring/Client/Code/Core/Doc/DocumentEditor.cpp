@@ -2469,10 +2469,8 @@ public:
             || inInsertType == DocumentEditorInsertType::NextSibling)
             theParent = GetParent(inDest);
 
-        if (m_Bridge.IsComponentInstance(theParent)) {
-            moveIntoComponent(inInstances, theParent);
+        if (m_Bridge.IsComponentInstance(theParent) && moveIntoComponent(inInstances, theParent))
             return;
-        }
 
         for (size_t idx = 0, end = sortableList.size(); idx < end; ++idx) {
             qt3dsdm::Qt3DSDMInstanceHandle theInstance(sortableList[idx]);
@@ -2595,11 +2593,22 @@ public:
         return component;
     }
 
-    void moveIntoComponent(const qt3dsdm::TInstanceHandleList &inInstances,
+    // Moves specified instances into target component by a simulated cut and paste.
+    // This is only necessary when moving objects from outside the component into the component.
+    // Returns true if move was done. Returns false if instances are already in target component,
+    // which means a regular rearrange can be done.
+    bool moveIntoComponent(const qt3dsdm::TInstanceHandleList &inInstances,
                            const Qt3DSDMInstanceHandle targetComponent)
     {
         if (inInstances.empty())
-            return;
+            return false;
+
+        Qt3DSDMInstanceHandle rootInstance = GetParent(inInstances[0]);
+        while (rootInstance.Valid() && !m_Bridge.IsComponentInstance(rootInstance))
+            rootInstance = GetParent(rootInstance);
+
+        if (rootInstance == targetComponent)
+            return false;
 
         qt3dsdm::TInstanceHandleList theInstances = ToGraphOrdering(inInstances);
         QList<std::pair<long, long>> theStartEndTimes;
@@ -2630,6 +2639,7 @@ public:
                                  theStartEndTimes.at(i).second);
             }
         }
+        return true;
     }
 
     void DuplicateInstances(const qt3dsdm::TInstanceHandleList &inInstances) override
