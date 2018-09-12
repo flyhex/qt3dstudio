@@ -791,13 +791,10 @@ bool InspectorControlModel::isTreeRebuildRequired(CInspectableBase* inspectBase)
         return true;
 
     long theCount = m_inspectableBase->GetGroupCount();
-    long refMaterialGroupCount = 0;
     auto refMaterial = getReferenceMaterial(inspectBase);
-    if (refMaterial.Valid()) {
-        auto refMaterialInspectable = getReferenceMaterialInspectable(refMaterial);
-        if (refMaterialInspectable)
-            refMaterialGroupCount = refMaterialInspectable->GetGroupCount();
-    }
+    long refMaterialGroupCount = 0;
+    if (refMaterial.Valid())
+        refMaterialGroupCount = 1; // Only the last group of the refMaterial is used
 
     if (m_groupElements.size() != theCount + refMaterialGroupCount)
         return true;
@@ -883,9 +880,9 @@ auto InspectorControlModel::computeTree(CInspectableBase* inspectBase)
 
                 if (materialSrcPath != QLatin1String("Default")
                         && bridge->GetSourcePath(refMaterial) != "Default") {
-                    long theCount = refMaterialInspectable->GetGroupCount();
-                    for (long theIndex = theCount - 1; theIndex < theCount; ++theIndex)
-                        result.append(computeGroup(refMaterialInspectable, theIndex, true, true));
+                    result.append(computeGroup(refMaterialInspectable,
+                                               refMaterialInspectable->GetGroupCount() - 1,
+                                               true, true));
                 }
             }
         }
