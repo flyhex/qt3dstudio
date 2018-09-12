@@ -82,7 +82,7 @@ ProjectContextMenu::ProjectContextMenu(ProjectView *parent, int index)
     }
 
     if (m_view->isMaterialData(m_index)) {
-        action = new QAction(tr("Edit Material"));
+        action = new QAction(tr("Edit"));
         connect(action, &QAction::triggered, this, &ProjectContextMenu::handleEditMaterial);
         addAction(action);
 
@@ -113,11 +113,12 @@ ProjectContextMenu::ProjectContextMenu(ProjectView *parent, int index)
     connect(action, &QAction::triggered, this, &ProjectContextMenu::handleImportAssets);
     addAction(action);
 
-    if (m_view->isMaterialFolder(m_index)) {
+    if (m_view->isMaterialFolder(m_index) || m_view->isInMaterialFolder(m_index)) {
         addSeparator();
-        action = new QAction(tr("Add Material"));
+        QMenu *createMenu = addMenu(tr("Create"));
+        action = new QAction(tr("Shared Material"));
         connect(action, &QAction::triggered, this, &ProjectContextMenu::handleAddMaterial);
-        addAction(action);
+        createMenu->addAction(action);
     }
 
     if (m_view->isRefreshable(m_index)) {

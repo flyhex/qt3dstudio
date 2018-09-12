@@ -87,6 +87,7 @@ public:
     Q_INVOKABLE bool isQmlStream(int row) const;
     bool isCurrentPresentation(int row) const;
     bool isMaterialFolder(int row) const;
+    bool isInMaterialFolder(int row) const;
     bool isMaterialData(int row) const;
     bool isInitialPresentation(int row) const;
     QString presentationId(int row) const;
