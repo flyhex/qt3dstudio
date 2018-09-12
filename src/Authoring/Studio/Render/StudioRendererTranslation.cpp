@@ -3674,13 +3674,6 @@ void STranslation::PerformWidgetDrag(int inWidgetSubComponent, CPt inOriginalCoo
         QT3DSF32 theIntersectionCosine = theOriginalRay.m_Direction.dot(thePlaneNormal);
         QT3DSVec3 objToPrevious;
         QT3DSVec3 objToCurrent;
-        /*
-        long theModifiers = CHotKeys::GetCurrentKeyModifiers();
-        if ( theModifiers & CHotKeys::MODIFIER_SHIFT )
-        {
-            DebugBreak();
-        }
-        */
         if (!theOriginalPlaneCoords.hasValue() || !theCurrentPlaneCoords.hasValue())
                 return;
         if (fabs(theIntersectionCosine) > .08f) {
@@ -3688,6 +3681,16 @@ void STranslation::PerformWidgetDrag(int inWidgetSubComponent, CPt inOriginalCoo
             objToCurrent = globalPos - *theCurrentPlaneCoords;
             objToPrevious.normalize();
             QT3DSF32 lineLen = objToCurrent.normalize();
+
+            // Flip object vector if coords are behind camera to get the correct angle
+            QT3DSVec3 camToCurrent = camGlobalPos - *theCurrentPlaneCoords;
+            if (camToCurrent.dot(theCamDirection) >= 0.0f) {
+                objToCurrent = -objToCurrent;
+                // Negative line length seems counterintuitive, but since the end point is behind
+                // the camera, it results in correct line when rendered
+                lineLen = -lineLen;
+            }
+
             QT3DSF32 cosAngle = objToPrevious.dot(objToCurrent);
             QT3DSVec3 theCrossProd = objToPrevious.cross(objToCurrent);
             QT3DSF32 theCrossPlaneDot = theCrossProd.dot(thePlaneNormal);
@@ -3695,6 +3698,7 @@ void STranslation::PerformWidgetDrag(int inWidgetSubComponent, CPt inOriginalCoo
             QT3DSF32 angleRad = acos(cosAngle) * angleSign;
             angleRad = MakeNiceRotation(angleRad);
             QT3DSQuat theRotation(angleRad, thePlaneNormal);
+
             m_CumulativeRotation = ShortestAngleDifference(m_CumulativeRotation, angleRad);
             m_LastRenderedWidget->SetRotationEdges(-1.0f * objToPrevious, thePlaneNormal,
                                                    m_CumulativeRotation, lineLen);
