@@ -2469,8 +2469,10 @@ public:
             || inInsertType == DocumentEditorInsertType::NextSibling)
             theParent = GetParent(inDest);
 
-        if (m_Bridge.IsComponentInstance(theParent) && moveIntoComponent(inInstances, theParent))
+        if (m_Bridge.IsComponentInstance(theParent)
+                && moveIntoComponent(inInstances, theParent, checkUniqueName)) {
             return;
+        }
 
         for (size_t idx = 0, end = sortableList.size(); idx < end; ++idx) {
             qt3dsdm::Qt3DSDMInstanceHandle theInstance(sortableList[idx]);
@@ -2598,7 +2600,7 @@ public:
     // Returns true if move was done. Returns false if instances are already in target component,
     // which means a regular rearrange can be done.
     bool moveIntoComponent(const qt3dsdm::TInstanceHandleList &inInstances,
-                           const Qt3DSDMInstanceHandle targetComponent)
+                           const Qt3DSDMInstanceHandle targetComponent, bool checkUniqueName)
     {
         if (inInstances.empty())
             return false;
@@ -2610,10 +2612,10 @@ public:
         if (rootInstance == targetComponent)
             return false;
 
-        qt3dsdm::TInstanceHandleList theInstances = ToGraphOrdering(inInstances);
+        const qt3dsdm::TInstanceHandleList theInstances = ToGraphOrdering(inInstances);
         QList<std::pair<long, long>> theStartEndTimes;
 
-        for (auto instance : qAsConst(theInstances))
+        for (auto instance : theInstances)
             theStartEndTimes.append(GetTimeRange(instance));
 
         // Now cut the group from the scene.
@@ -2631,12 +2633,24 @@ public:
                     targetComponent,
                     m_SlideSystem.GetMasterSlide(theComponentSlide));
 
-        // Restore the original time range for all objects.
         if (insertedHandles.size()) {
+            // Restore the original time range for all objects.
             for (int i = 0; i < theStartEndTimes.size(); i++) {
                 if (theStartEndTimes.at(i) != std::make_pair(0L, 0L))
                     SetTimeRange(insertedHandles.at(i), theStartEndTimes.at(i).first,
                                  theStartEndTimes.at(i).second);
+            }
+            // Check for name uniqueness
+            if (checkUniqueName) {
+                for (auto instance : insertedHandles) {
+                    CString currName = m_Bridge.GetName(instance);
+                    if (!m_Bridge.CheckNameUnique(targetComponent, instance, currName)) {
+                        CString newName = m_Bridge.GetUniqueChildName(
+                                    targetComponent, instance, currName);
+                        m_Doc.getMoveRenameHandler()->displayMessageBox(currName, newName);
+                        SetName(instance, newName);
+                    }
+                }
             }
         }
         return true;
