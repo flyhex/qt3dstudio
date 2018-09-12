@@ -179,9 +179,9 @@ TextField {
         if (event.key === Qt.Key_Up || event.key === Qt.Key_Down) {
             event.accepted = true
             var delta = 1.0;
-            if (event.modifiers === Qt.ControlModifier)
+            if (event.modifiers & Qt.ControlModifier)
                 delta = 0.1;
-            else if (event.modifiers === Qt.ShiftModifier)
+            else if (event.modifiers & Qt.ShiftModifier)
                 delta = 10.0;
             if (event.key === Qt.Key_Down)
                 delta = -delta;
