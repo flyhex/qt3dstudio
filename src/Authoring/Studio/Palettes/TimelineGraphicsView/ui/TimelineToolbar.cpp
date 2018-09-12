@@ -43,6 +43,7 @@
 #include <QtWidgets/qslider.h>
 #include <QtCore/qdatetime.h>
 #include <QtCore/qtimer.h>
+#include <QtWidgets/qpushbutton.h>
 
 TimelineToolbar::TimelineToolbar() : QToolBar()
 {
@@ -75,11 +76,10 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     m_actionDataInput = new QAction(m_iconDiInactive, tr("No Controller"), this);
     m_actionDeleteRow = new QAction(iconDelete, tr("Delete Selected Object (Del)"), this);
     m_actionPlayStop = new QAction(this);
-    m_timeLabel = new TimelineToolbarLabel(this);
+    m_timeLabel = new QPushButton({}, this);
     m_diLabel = new QLabel();
     m_actionZoomIn = new QAction(iconZoomIn, tr("Zoom In"), this);
     m_actionZoomOut = new QAction(iconZoomOut, tr("Zoom Out"), this);
-    QAction *actionGoToTime = new QAction(this);
 
     m_scaleSlider = new QSlider();
     m_scaleSlider->setOrientation(Qt::Horizontal);
@@ -88,7 +88,8 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     m_scaleSlider->setMaximum(22);
     m_scaleSlider->setValue(2);
 
-    m_timeLabel->setText(tr("0:00.000"));
+    m_timeLabel->setObjectName(QLatin1String("timelineButton"));
+    m_timeLabel->setFlat(true);
     m_timeLabel->setMinimumWidth(80);
     m_timeLabel->setToolTip(tr("Go To Time (%1%2T)").arg(ctrlKey).arg(altKey));
 
@@ -104,7 +105,7 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     // connections
     connect(m_actionNewLayer, &QAction::triggered, this, &TimelineToolbar::newLayerTriggered);
     connect(m_actionDeleteRow, &QAction::triggered, this, &TimelineToolbar::deleteLayerTriggered);
-    connect(m_timeLabel, &TimelineToolbarLabel::clicked, this, &TimelineToolbar::gotoTimeTriggered);
+    connect(m_timeLabel, &QPushButton::clicked, this, &TimelineToolbar::gotoTimeTriggered);
     connect(actionFirst, &QAction::triggered, this, &TimelineToolbar::firstFrameTriggered);
     connect(m_actionPlayStop, &QAction::triggered, this, &TimelineToolbar::onPlayButtonClicked);
     connect(actionLast, &QAction::triggered, this, &TimelineToolbar::lastFrameTriggered);
@@ -112,7 +113,6 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     connect(m_actionZoomIn, &QAction::triggered, this, &TimelineToolbar::onZoomInButtonClicked);
     connect(m_actionZoomOut, &QAction::triggered, this, &TimelineToolbar::onZoomOutButtonClicked);
     connect(m_actionDataInput, &QAction::triggered, this, &TimelineToolbar::onDiButtonClicked);
-    connect(actionGoToTime, &QAction::triggered, this, &TimelineToolbar::gotoTimeTriggered);
 
     // add actions
     addAction(m_actionNewLayer);
@@ -131,16 +131,12 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     addWidget(m_scaleSlider);
     addAction(m_actionZoomIn);
 
-    // child-action, not visible in UI
-    m_timeLabel->addAction(actionGoToTime);
-
     // add keyboard shortcuts
     m_actionZoomOut->setShortcut(Qt::Key_Minus);
     m_actionZoomOut->setShortcutContext(Qt::ApplicationShortcut);
     m_actionZoomIn->setShortcut(Qt::Key_Plus);
     m_actionZoomIn->setShortcutContext(Qt::ApplicationShortcut);
-    actionGoToTime->setShortcut(QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::Key_T));
-    actionGoToTime->setShortcutContext(Qt::ApplicationShortcut);
+    m_timeLabel->setShortcut(QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::Key_T));
     m_actionNewLayer->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_L));
     m_actionNewLayer->setShortcutContext(Qt::ApplicationShortcut);
 

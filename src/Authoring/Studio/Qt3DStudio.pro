@@ -191,7 +191,6 @@ HEADERS += \
     Palettes/TimelineGraphicsView/ui/Ruler.h \
     Palettes/TimelineGraphicsView/ui/TimelineItem.h \
     Palettes/TimelineGraphicsView/ui/TimelineToolbar.h \
-    Palettes/TimelineGraphicsView/ui/TimelineToolbarLabel.h \
     Palettes/TimelineGraphicsView/ui/TreeHeader.h \
     Palettes/TimelineGraphicsView/ui/TreeHeaderView.h \
     PreviewHelper.h \
@@ -348,7 +347,6 @@ SOURCES += \
     Palettes/TimelineGraphicsView/ui/Ruler.cpp \
     Palettes/TimelineGraphicsView/ui/TimelineItem.cpp \
     Palettes/TimelineGraphicsView/ui/TimelineToolbar.cpp \
-    Palettes/TimelineGraphicsView/ui/TimelineToolbarLabel.cpp \
     Palettes/TimelineGraphicsView/ui/TreeHeader.cpp \
     Palettes/TimelineGraphicsView/ui/TreeHeaderView.cpp \
     PreviewHelper.cpp \
