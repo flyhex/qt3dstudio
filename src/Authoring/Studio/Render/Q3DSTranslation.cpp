@@ -843,7 +843,7 @@ public:
         } else if (name == QLatin1String("clipnear")) {
             HANDLE_CHANGE(theItem.setClipNear(value.getData<float>()))
         } else if (name == QLatin1String("clipfar")) {
-            HANDLE_CHANGE(theItem.setClipNear(value.getData<float>()))
+            HANDLE_CHANGE(theItem.setClipFar(value.getData<float>()))
         } else if (name == QLatin1String("fov")) {
             HANDLE_CHANGE(theItem.setFov(value.getData<float>()))
         }  else if (name == QLatin1String("scalemode")) {
@@ -1180,8 +1180,7 @@ public:
             HANDLE_CHANGE(theItem.setSpecularModel(
                               Q3DSValueParser::parseEnum<Q3DSDefaultMaterial::SpecularModel>(value)))
         } else if (name == QLatin1String("specularroughness")) {
-            HANDLE_CHANGE(theItem.setSpecularRoughness(
-                              Q3DSValueParser::parseEnum<Q3DSDefaultMaterial::BlendMode>(value)))
+            HANDLE_CHANGE(theItem.setSpecularRoughness(value.getData<float>()))
         } else if (name == QLatin1String("roughnessmap")) {
             HANDLE_CHANGE(theItem.setRoughnessMap(Q3DSValueParser::parseImage(&inContext, value)))
         } else if (name == QLatin1String("fresnelPower")) {
