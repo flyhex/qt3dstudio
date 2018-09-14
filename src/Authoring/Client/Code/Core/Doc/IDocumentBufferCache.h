@@ -76,12 +76,12 @@ public:
     // Get or create the model buffer.  May return NULL if the sourcepath doesn't
     // map to a loadable model buffer.
     // Takes a *relative* path from the document
-    virtual SModelBufferAndPath GetOrCreateModelBuffer(const QFileInfo &inSourcePath) = 0;
+    virtual SModelBufferAndPath GetOrCreateModelBuffer(const QString &inSourcePath) = 0;
     //
     // Get or create the image buffer.  May return NULL if the sourcepath doesn't
     // map to a loadable image buffer.
     // Takes a *relative* path from the document
-    virtual Q3DSImageTextureData GetOrCreateImageBuffer(const QFileInfo &inSourcePath) = 0;
+    virtual Q3DSImageTextureData GetOrCreateImageBuffer(const QString &inSourcePath) = 0;
 
     virtual void
     GetImageBuffers(std::vector<std::pair<QString, Q3DSImageTextureData>> &outBuffers) = 0;

@@ -171,10 +171,10 @@ struct SDocBufferCache : public IDocumentBufferCache
         BuildPrimitive(PRIMITIVETYPE_SPHERE);
     }
 
-    SModelBufferAndPath GetOrCreateModelBuffer(const QFileInfo &inPath) override
+    SModelBufferAndPath GetOrCreateModelBuffer(const QString &inPath) override
     {
         CheckAndCreatePrimitiveBuffers();
-        const QString path = inPath.filePath();
+        const QString path = inPath;
 
         if (m_Buffers.contains(path)) {
             SModelBufferAndPath retval = m_Buffers[path].FindModelBuffer(path);
@@ -185,9 +185,10 @@ struct SDocBufferCache : public IDocumentBufferCache
         if (path.size() == 0 || path[0] == '#')
             return SModelBufferAndPath();
 
-        QString theFullPath(m_Doc.GetResolvedPathToDoc(inPath));
+        QString theFullPath(m_Doc.GetResolvedPathToDoc(QFileInfo(inPath)));
         SModelBufferAndPath retval;
-        if (inPath.isFile()) {
+        QFileInfo rp(theFullPath);
+        if (rp.isFile()) {
             if (GetBufferManager()) {
                 Q3DSRenderMesh *theMesh = GetBufferManager()->LoadMesh(theFullPath);
                 if (theMesh) {
@@ -201,16 +202,17 @@ struct SDocBufferCache : public IDocumentBufferCache
         return retval;
     }
 
-    Q3DSImageTextureData GetOrCreateImageBuffer(const QFileInfo &inPath) override
+    Q3DSImageTextureData GetOrCreateImageBuffer(const QString &inPath) override
     {
-        const QString path = inPath.filePath();
+        const QString path = inPath;
         if (m_Buffers.contains(path)) {
             if (!m_Buffers[path].m_ImageBuffer.isNull())
                 return *m_Buffers[path].m_ImageBuffer.data();
         }
         Q3DSImageTextureData retval;
-        QString rpath = m_Doc.GetResolvedPathToDoc(inPath);
-        if (inPath.isFile() && GetBufferManager())
+        QString rpath = m_Doc.GetResolvedPathToDoc(QFileInfo(inPath));
+        QFileInfo rp(rpath);
+        if (rp.isFile() && GetBufferManager())
             retval = GetBufferManager()->LoadRenderImage(rpath);
 
         if (retval.m_texture)

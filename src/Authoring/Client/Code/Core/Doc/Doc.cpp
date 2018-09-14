@@ -2543,7 +2543,7 @@ void CDoc::SavePresentationFile(QIODevice *inOutputStream)
                                 theInstance, theBridge.GetObjectDefinitions().m_Image.m_Instance);
             }
             if (isImage)
-                m_DocumentBufferCache->GetOrCreateImageBuffer(QFileInfo(theIter.key()));
+                m_DocumentBufferCache->GetOrCreateImageBuffer(theIter.key());
         }
 
         std::vector<pair<QString, Q3DSImageTextureData>> theImageBuffers;

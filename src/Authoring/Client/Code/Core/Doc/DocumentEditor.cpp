@@ -198,7 +198,7 @@ public:
                                         std::bind(&CDocEditor::OnProjectDirChanged, this,
                                                   std::placeholders::_1));
         }
-        // We need to register the qml types before runtime engine is initialized.
+        // Qml types have been registered by the Q3DSEngine already.
     }
     virtual ~CDocEditor()
     {
@@ -1260,7 +1260,7 @@ public:
         for (size_t propIdx = 0, propEnd = theValues.size(); propIdx < propEnd; ++propIdx) {
             TDataStrPtr newValue(get<TDataStrPtr>(theValues[propIdx].second));
             Q3DSRenderMesh *theBuffer = m_Doc.GetBufferCache().GetOrCreateModelBuffer(
-                Q3DStudio::CFilePath(newValue->GetData()));
+                QString::fromWCharArray(newValue->GetData()));
             if (theBuffer)
                 numSubsets = qMax(numSubsets, theBuffer->m_subsets.size());
         }
@@ -1298,7 +1298,7 @@ public:
         for (size_t propIdx = 0, propEnd = theValues.size(); propIdx < propEnd; ++propIdx) {
             TDataStrPtr newValue(get<TDataStrPtr>(theValues[propIdx].second));
             Q3DSRenderMesh *theBuffer = m_Doc.GetBufferCache().GetOrCreateModelBuffer(
-                Q3DStudio::CFilePath(newValue->GetData()));
+                QString::fromWCharArray(newValue->GetData()));
             if (theBuffer == NULL)
                 continue;
             for (long subsetIdx = 0, subsetEnd = theBuffer->m_subsets.size(); subsetIdx < subsetEnd;
@@ -3474,7 +3474,7 @@ public:
         }
         CFilePath relativePath = m_Doc.GetRelativePathToDoc(imageSrc);
         Q3DSImageTextureData theImageBuffer =
-            m_Doc.GetBufferCache().GetOrCreateImageBuffer(relativePath);
+            m_Doc.GetBufferCache().GetOrCreateImageBuffer(relativePath.toQString());
         if (!theImageBuffer.m_texture) {
             if (theHandler)
                 theHandler->DisplayImportFailed(imageSrc.toQString(),
@@ -3540,7 +3540,7 @@ public:
         }
         Q3DStudio::CString theRelativePath(m_Doc.GetRelativePathToDoc(inFullPathToDocument));
         SModelBufferAndPath theModelBuffer =
-            m_Doc.GetBufferCache().GetOrCreateModelBuffer(QFileInfo(theRelativePath.toQString()));
+            m_Doc.GetBufferCache().GetOrCreateModelBuffer(theRelativePath.toQString());
         if (!theModelBuffer.m_modelBuffer) {
             if (theHandler)
                 theHandler->DisplayImportFailed(imageSrc.toQString(),

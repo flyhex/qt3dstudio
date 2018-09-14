@@ -112,6 +112,10 @@ namespace Q3DStudio {
 class Q3DSImageTextureData
 {
 public:
+    Q3DSImageTextureData()
+        : m_texture(nullptr), m_hasTransparency(false)
+    {
+    }
     Qt3DRender::QAbstractTexture *m_texture;
     bool m_hasTransparency;
 };
