@@ -82,6 +82,7 @@
         <file>res/effectlib/textureCoordinateInfo.glsllib</file>
         <file>res/effectlib/transformCoordinate.glsllib</file>
         <file>res/effectlib/defaultMaterialFileBumpTexture.glsllib</file>
+        <file>res/effectlib/defaultMaterialBumpNoLod.glsllib</file>
         <file>res/effectlib/defaultMaterialFileDisplacementTexture.glsllib</file>
         <file>res/effectlib/defaultMaterialFileNormalTexture.glsllib</file>
         <file>res/effectlib/vertexFragmentBase.glsllib</file>
