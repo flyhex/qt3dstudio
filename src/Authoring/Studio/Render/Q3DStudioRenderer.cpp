@@ -309,14 +309,10 @@ void Q3DStudioRenderer::drawTickMarksOnVerticalRects(QPainter &painter, qreal in
     }
 }
 
-void Q3DStudioRenderer::drawGuides()
+void Q3DStudioRenderer::drawGuides(QPainter &painter)
 {
     if (!m_guidesEnabled)
         return;
-
-    QOpenGLPaintDevice device;
-    device.setSize(m_widget->size());
-    QPainter painter(&device);
 
     QRect thePresentationViewport = m_viewRect;
 
@@ -337,11 +333,11 @@ void Q3DStudioRenderer::drawGuides()
     m_outerRect = QRect(outerLeft, outerTop, outerRight - outerLeft, outerBottom - outerTop);
 
     // Draw tick marks around the presentation
-    painter.fillRect(QRect(outerLeft, innerTop,
-                           innerLeft - outerLeft, innerBottom - innerTop),
+    painter.fillRect(QRect(outerLeft, outerTop,
+                           innerLeft - outerLeft, outerBottom - outerTop),
                      m_rectColor);
-    painter.fillRect(QRect(innerRight, innerTop,
-                           outerRight - innerRight, innerBottom - innerTop),
+    painter.fillRect(QRect(innerRight, outerTop,
+                           outerRight - innerRight, outerBottom - outerTop),
                      m_rectColor);
     painter.fillRect(QRect(innerLeft, innerBottom,
                            innerRight - innerLeft, outerBottom - innerBottom),
@@ -364,6 +360,10 @@ void Q3DStudioRenderer::RenderNow()
     QOpenGLContextPrivate *ctxD = QOpenGLContextPrivate::get(m_widget->context());
     QScopedValueRollback<GLuint> defaultFboRedirectRollback(ctxD->defaultFboRedirect, 0);
 
+    QOpenGLPaintDevice device;
+    device.setSize(m_widget->size());
+    QPainter painter(&device);
+
     if (m_engine.isNull()) {
         createEngine();
 
@@ -378,11 +378,6 @@ void Q3DStudioRenderer::RenderNow()
     if (!m_translation.isNull()) {
         QSize size = QSize(m_viewRect.width(), m_viewRect.height());
         QRect viewRect = QRect(0, 0, size.width(), size.height());
-        if (m_guidesEnabled) {
-            const int guideSize = CStudioPreferences::guideSize();
-            const int offset = guideSize / 2;
-            viewRect = QRect(offset, offset, size.width() - guideSize, size.height() - guideSize);
-        }
         m_translation->prepareRender(viewRect, size);
     }
 
@@ -390,7 +385,16 @@ void Q3DStudioRenderer::RenderNow()
                 Qt3DRender::QRenderAspectPrivate::get(m_renderAspect));
     renderAspectD->renderSynchronous(true);
 
-    drawGuides();
+    if (!QOpenGLContext::currentContext())
+        m_widget->makeCurrent();
+
+    // fix gl state leakage
+    QOpenGLContext::currentContext()->functions()->glDisable(GL_STENCIL_TEST);
+    QOpenGLContext::currentContext()->functions()->glDisable(GL_DEPTH_TEST);
+    QOpenGLContext::currentContext()->functions()->glDisable(GL_CULL_FACE);
+
+    // draw guides if enabled
+    drawGuides(painter);
 }
 
 void Q3DStudioRenderer::MakeContextCurrent()
@@ -443,7 +447,7 @@ void Q3DStudioRenderer::OnNewPresentation()
 
 void Q3DStudioRenderer::OnClosingPresentation()
 {
-    if (!m_hasPresentation && m_widget)
+    if (!m_hasPresentation || !m_widget)
         return;
     m_widget->makeCurrent();
     if (!m_engine.isNull() && !m_translation.isNull()) {

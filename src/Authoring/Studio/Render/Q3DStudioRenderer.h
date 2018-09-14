@@ -127,7 +127,7 @@ private:
     void createTranslation();
     void sendResizeToQt3D(const QSize &size);
     qreal fixedDevicePixelRatio() const;
-    void drawGuides();
+    void drawGuides(QPainter &painter);
 
     void drawTickMarksOnHorizontalRects(QPainter &painter, qreal innerLeft,
                                         qreal innerRight, qreal innerBottom, qreal innerTop,
