@@ -208,8 +208,9 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
             m_Editor.DeleteInstance(instance);
     }
 
-    Qt3DSDMInstanceHandle CreateInstance(ComposerObjectTypes::Enum type, Qt3DSDMInstanceHandle parent,
-                                        TImportId inImportId)
+    Qt3DSDMInstanceHandle CreateInstance(ComposerObjectTypes::Enum type,
+                                         Qt3DSDMInstanceHandle parent,
+                                         TImportId inImportId, bool useParentSlide = false)
     {
         if (parent.Valid() == false) {
             assert(0);
@@ -217,11 +218,14 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
         }
 
         // Map the type to the object type.
-        Qt3DSDMInstanceHandle retval = m_Editor.CreateSceneGraphInstance(type, parent, m_Slide);
+        auto slide = m_Slide;
+        if (useParentSlide)
+            slide = m_Editor.GetAssociatedSlide(parent);
+        Qt3DSDMInstanceHandle retval = m_Editor.CreateSceneGraphInstance(type, parent, slide);
         m_Editor.SetSpecificInstancePropertyValue(0, retval, L"importid",
                                                   std::make_shared<CDataStr>(inImportId));
         m_Editor.SetSpecificInstancePropertyValue(
-            m_Slide, retval, L"importfile",
+            slide, retval, L"importfile",
             std::make_shared<CDataStr>(m_Relativeimportfile.toCString()));
         AddInstanceMap(retval, inImportId);
         return retval;
@@ -251,8 +255,14 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
                                 TImportId inParent) override
     {
         Qt3DSDMInstanceHandle theParent(FindInstance(inParent));
+        bool useParentSlide = false;
+        if (!theParent.Valid()) {
+            theParent = findMaterial(inParent);
+            if (theParent.Valid())
+                useParentSlide = true;
+        }
         if (theParent.Valid())
-            CreateInstance(type, theParent, inImportId);
+            CreateInstance(type, theParent, inImportId, useParentSlide);
     }
 
     void createMaterial(const InstanceDesc &desc, TImportId inParent) override
@@ -262,13 +272,17 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
                                                                     ComposerPropertyNames::name);
         if (name.hasValue())
             materialName = qt3dsdm::get<TDataStrPtr>(*name)->GetData();
-        const auto material = m_Editor.getOrCreateMaterial(materialName);
-        m_Editor.SetSpecificInstancePropertyValue(0, material, L"importid",
-                                                  std::make_shared<CDataStr>(desc.m_Id));
-        m_Editor.SetSpecificInstancePropertyValue(
-            m_Slide, material, L"importfile",
-            std::make_shared<CDataStr>(m_Relativeimportfile.toCString()));
-        addMaterialMap(material, desc.m_Id);
+
+        auto material = m_Editor.getMaterial(materialName);
+        if (!material.Valid()) {
+            material = m_Editor.getOrCreateMaterial(materialName);
+            m_Editor.SetSpecificInstancePropertyValue(0, material, L"importid",
+                                                      std::make_shared<CDataStr>(desc.m_Id));
+            m_Editor.SetSpecificInstancePropertyValue(
+                m_Slide, material, L"importfile",
+                std::make_shared<CDataStr>(m_Relativeimportfile.toCString()));
+            addMaterialMap(material, desc.m_Id);
+        }
 
         const auto sourcePath = m_Editor.writeMaterialFile(material,
                                                            materialName.toQString(),
@@ -329,7 +343,11 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
     }
     void AddChild(TImportId parent, TImportId child, TImportId inSibling) override
     {
+        if (findMaterial(child).Valid())
+            return;
         Qt3DSDMInstanceHandle theParent(FindInstance(parent));
+        if (!theParent.Valid())
+            theParent = findMaterial(parent);
         Qt3DSDMInstanceHandle theChild(FindInstance(child));
         Qt3DSDMInstanceHandle theSibling(FindInstance(inSibling));
 
