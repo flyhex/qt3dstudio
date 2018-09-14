@@ -2557,6 +2557,24 @@ public:
         TInstanceHandle group = CreateSceneGraphInstance(ComposerObjectTypes::Group, sibling, slide,
                                                          DocumentEditorInsertType::PreviousSibling,
                                                          CPt(), PRIMITIVETYPE_UNKNOWN, -1);
+        // Move the pivot point of the group to the center of the grouped objects
+        // Calculate the center
+        SFloat3 pivotPoint;
+        for (auto it : sortedList) {
+            SFloat3 position = GetPosition(it);
+            pivotPoint[0] += position[0];
+            pivotPoint[1] += position[1];
+            pivotPoint[2] += position[2];
+        }
+        size_t objectCount = sortedList.size();
+        pivotPoint[0] /= objectCount;
+        pivotPoint[1] /= objectCount;
+        pivotPoint[2] /= objectCount;
+        // Modify the pivot point of the group
+        SetInstancePropertyValue(group, m_Bridge.GetObjectDefinitions().m_Node.m_Pivot,
+                                 pivotPoint, false);
+        // Modify the position of the group
+        SetPosition(group, pivotPoint);
 
         // Move items into the group
         RearrangeObjects(sortedList, group, DocumentEditorInsertType::LastChild, true);
