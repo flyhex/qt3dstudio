@@ -351,10 +351,11 @@ void InspectorControlModel::setMatDatas(std::vector<Q3DStudio::CFilePath> &matDa
 
         QString name;
         QMap<QString, QString> values;
+        QMap<QString, QMap<QString, QString>> textureValues;
         sceneEditor->getMaterialInfo(
-                    absolutePath.toQString(), name, values);
+                    absolutePath.toQString(), name, values, textureValues);
 
-        m_matDatas.push_back({name, relativePath, values});
+        m_matDatas.push_back({name, relativePath, values, textureValues});
         filenames.push_back(name);
 
         bool needRewrite = false;
@@ -379,7 +380,7 @@ void InspectorControlModel::setMatDatas(std::vector<Q3DStudio::CFilePath> &matDa
         bool isNewMaterial = !sceneEditor->getMaterial(nameCString).Valid();
 
         const auto material = sceneEditor->getOrCreateMaterial(nameCString);
-        sceneEditor->setMaterialValues(name, values);
+        sceneEditor->setMaterialValues(name, values, textureValues);
 
         if (isNewMaterial)
             doc->SelectDataModelObject(material);
@@ -1293,6 +1294,7 @@ void InspectorControlModel::setMaterialTypeValue(long instance, int handle, cons
     QString name;
     Q3DStudio::CString srcPath;
     QMap<QString, QString> values;
+    QMap<QString, QMap<QString, QString>> textureValues;
 
     bool changeMaterialFile = false;
     if (typeValue == getStandardMaterialString()) {
@@ -1327,7 +1329,7 @@ void InspectorControlModel::setMaterialTypeValue(long instance, int handle, cons
         scopedEditor->copyMaterialProperties(refMaterial, instance);
 
     if (changeMaterialFile) {
-        scopedEditor->setMaterialProperties(instance, name, srcPath, values);
+        scopedEditor->setMaterialProperties(instance, name, srcPath, values, textureValues);
 
         // Select original instance again since potentially
         // creating a material selects the created one
@@ -1366,6 +1368,7 @@ void InspectorControlModel::setMatDataValue(long instance, int handle, const QVa
     QString name;
     Q3DStudio::CString srcPath;
     QMap<QString, QString> values;
+    QMap<QString, QMap<QString, QString>> textureValues;
 
     bool changeMaterialFile = false;
     if (typeValue == getDefaultMaterialString()) {
@@ -1381,6 +1384,7 @@ void InspectorControlModel::setMatDataValue(long instance, int handle, const QVa
                 name = m_matDatas[matIdx].m_name;
                 srcPath = Q3DStudio::CString::fromQString(m_matDatas[matIdx].m_relativePath);
                 values = m_matDatas[matIdx].m_values;
+                textureValues = m_matDatas[matIdx].m_textureValues;
                 break;
             }
         }
@@ -1394,7 +1398,7 @@ void InspectorControlModel::setMatDataValue(long instance, int handle, const QVa
     scopedEditor->SetMaterialType(instance, v);
 
     if (changeMaterialFile) {
-        scopedEditor->setMaterialProperties(instance, name, srcPath, values);
+        scopedEditor->setMaterialProperties(instance, name, srcPath, values, textureValues);
 
         // Select original instance again since potentially
         // creating a material selects the created one

@@ -243,7 +243,9 @@ public:
 
     virtual void setMaterialProperties(TInstanceHandle instance, const QString &materialName,
                                        const Q3DStudio::CString &materialSourcePath,
-                                       const QMap<QString, QString> &values) = 0;
+                                       const QMap<QString, QString> &values,
+                                       const QMap<QString, QMap<QString, QString>>
+                                       &textureValues) = 0;
 
     virtual void setMaterialReferenceByName(TInstanceHandle instance,
                                             const Q3DStudio::CString &materialName) = 0;
@@ -252,10 +254,12 @@ public:
                                        const Q3DStudio::CString &materialSourcePath) = 0;
 
     virtual void setMaterialValues(const QString &materialName,
-                                   const QMap<QString, QString> &values) = 0;
+                                   const QMap<QString, QString> &values,
+                                   const QMap<QString, QMap<QString, QString>> &textureValues) = 0;
 
     virtual void setMaterialValues(TInstanceHandle instance,
-                                   const QMap<QString, QString> &values) = 0;
+                                   const QMap<QString, QString> &values,
+                                   const QMap<QString, QMap<QString, QString>> &textureValues) = 0;
 
     // Set the slide name property value
     // Also update all actions that point to the old slide name to new name

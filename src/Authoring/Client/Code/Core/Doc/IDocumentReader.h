@@ -232,7 +232,8 @@ public:
 
     virtual Q3DStudio::CString GetCustomMaterialName(const Q3DStudio::CString &inFullPathToFile) const = 0;
     virtual void getMaterialInfo(const QString &inFullPathToFile,
-                                 QString &outName, QMap<QString, QString> &outValues) = 0;
+                                 QString &outName, QMap<QString, QString> &outValues,
+                                 QMap<QString, QMap<QString, QString>> &outTextureValues) = 0;
 
     // Must not be a master slide.  Used during duplicate slide.
     virtual std::shared_ptr<qt3dsdm::IDOMReader> CopySlide(Qt3DSDMSlideHandle inSlide) = 0;

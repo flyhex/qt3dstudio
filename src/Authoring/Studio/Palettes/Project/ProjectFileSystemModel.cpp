@@ -357,8 +357,9 @@ void ProjectFileSystemModel::showInfo(int row)
                 ->getOrCreateMaterial(Q3DStudio::CString::fromQString(fi.completeBaseName()));
         QString name;
         QMap<QString, QString> values;
-        sceneEditor->getMaterialInfo(fi.absoluteFilePath(), name, values);
-        sceneEditor->setMaterialValues(name, values);
+        QMap<QString, QMap<QString, QString>> textureValues;
+        sceneEditor->getMaterialInfo(fi.absoluteFilePath(), name, values, textureValues);
+        sceneEditor->setMaterialValues(name, values, textureValues);
         if (material.Valid())
             g_StudioApp.GetCore()->GetDoc()->SelectDataModelObject(material);
     }
