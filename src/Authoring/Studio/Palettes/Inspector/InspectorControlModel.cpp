@@ -369,8 +369,14 @@ void InspectorControlModel::setMatDatas(std::vector<Q3DStudio::CFilePath> &matDa
             }
         }
 
-        auto material = sceneEditor->getOrCreateMaterial(Q3DStudio::CString::fromQString(name));
+        const auto nameCString = Q3DStudio::CString::fromQString(name);
+        bool isNewMaterial = !sceneEditor->getMaterial(nameCString).Valid();
+
+        const auto material = sceneEditor->getOrCreateMaterial(nameCString);
         sceneEditor->setMaterialValues(name, values);
+
+        if (isNewMaterial)
+            doc->SelectDataModelObject(material);
 
         if (needRewrite)
             sceneEditor->writeMaterialFile(material, name, false, absolutePath.toQString());
