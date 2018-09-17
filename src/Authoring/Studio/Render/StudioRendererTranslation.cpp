@@ -3000,8 +3000,11 @@ SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::En
             const SGraphObject &theObject = *thePickResult.m_HitObject;
 
             // check hit distance to cameras and lights
-            if (lastIndex != -1 && thePickResult.m_CameraDistanceSq > lastDist * lastDist)
+            if (lastIndex != -1 && thePickResult.m_CameraDistanceSq > lastDist * lastDist) {
+                DoPrepareForDrag(static_cast<SNode *>(
+                                     &(m_editModeCamerasAndLights[lastIndex]->GetGraphObject())));
                 return m_editModeCamerasAndLights[lastIndex]->GetInstanceHandle();
+            }
 
             if (theObject.m_Type == GraphObjectTypes::Model
                 || theObject.m_Type == GraphObjectTypes::Text
@@ -3074,8 +3077,11 @@ SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::En
             RequestRender();
     }
 
-    if (lastIndex != -1)
+    if (lastIndex != -1) {
+        DoPrepareForDrag(static_cast<SNode *>(
+                             &(m_editModeCamerasAndLights[lastIndex]->GetGraphObject())));
         return m_editModeCamerasAndLights[lastIndex]->GetInstanceHandle();
+    }
 
     return SStudioPickValue();
 }
