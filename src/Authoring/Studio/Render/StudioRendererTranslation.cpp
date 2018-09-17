@@ -3680,21 +3680,23 @@ void STranslation::PerformWidgetDrag(int inWidgetSubComponent, CPt inOriginalCoo
         QT3DSF32 theIntersectionCosine = theOriginalRay.m_Direction.dot(thePlaneNormal);
         QT3DSVec3 objToPrevious;
         QT3DSVec3 objToCurrent;
-        if (!theOriginalPlaneCoords.hasValue() || !theCurrentPlaneCoords.hasValue())
-                return;
         if (fabs(theIntersectionCosine) > .08f) {
+            if (!theOriginalPlaneCoords.hasValue() || !theCurrentPlaneCoords.hasValue())
+                    return;
             objToPrevious = globalPos - *theOriginalPlaneCoords;
             objToCurrent = globalPos - *theCurrentPlaneCoords;
             objToPrevious.normalize();
             QT3DSF32 lineLen = objToCurrent.normalize();
 
-            // Flip object vector if coords are behind camera to get the correct angle
-            QT3DSVec3 camToCurrent = camGlobalPos - *theCurrentPlaneCoords;
-            if (camToCurrent.dot(theCamDirection) >= 0.0f) {
-                objToCurrent = -objToCurrent;
-                // Negative line length seems counterintuitive, but since the end point is behind
-                // the camera, it results in correct line when rendered
-                lineLen = -lineLen;
+            if (!thePrepResult->m_Camera->m_Flags.IsOrthographic()) {
+                // Flip object vector if coords are behind camera to get the correct angle
+                QT3DSVec3 camToCurrent = camGlobalPos - *theCurrentPlaneCoords;
+                if (camToCurrent.dot(theCamDirection) >= 0.0f) {
+                    objToCurrent = -objToCurrent;
+                    // Negative line length seems counterintuitive, but since the end point is
+                    // behind the camera, it results in correct line when rendered
+                    lineLen = -lineLen;
+                }
             }
 
             QT3DSF32 cosAngle = objToPrevious.dot(objToCurrent);
