@@ -881,6 +881,7 @@ public:
                     theReader->Value(value);
                     outValues[name] = value;
                 }
+                outValues[QStringLiteral("name")] = outName;
             }
         }
     }
