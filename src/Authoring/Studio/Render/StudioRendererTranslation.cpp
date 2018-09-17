@@ -2489,9 +2489,17 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
 
                 qt3ds::render::SNode &theNode(
                             static_cast<qt3ds::render::SNode &>(theTranslator->GetGraphObject()));
+                const GraphObjectTypes::Enum type = theTranslator->GetGraphObject().m_Type;
+
+                // Don't draw widgets for non-visible nodes
+                bool isActive = theNode.m_Flags.IsActive();
+                // Light and camera nodes are never active, so check from doc
+                if (type == GraphObjectTypes::Camera || type == GraphObjectTypes::Light)
+                    isActive = m_Reader.IsCurrentlyActive(theHandles[0]);
+                shouldDisplayWidget = shouldDisplayWidget && isActive;
+
                 SCamera *theRenderCamera = m_Context.GetRenderer().GetCameraForNode(theNode);
                 bool isActiveCamera = theRenderCamera == (static_cast<SCamera *>(&theNode));
-                const GraphObjectTypes::Enum type = theTranslator->GetGraphObject().m_Type;
                 if (shouldDisplayWidget && !isActiveCamera
                         && ((type == GraphObjectTypes::Camera && m_EditCameraEnabled)
                             || type != GraphObjectTypes::Camera)) {
