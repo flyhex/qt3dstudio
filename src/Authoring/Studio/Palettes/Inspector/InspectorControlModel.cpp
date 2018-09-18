@@ -1254,17 +1254,25 @@ void InspectorControlModel::saveIfMaterial(qt3dsdm::Qt3DSDMInstanceHandle instan
     const auto doc = g_StudioApp.GetCore()->GetDoc();
     const auto sceneEditor = doc->getSceneEditor();
 
+    const auto studio = doc->GetStudioSystem();
+    const auto bridge = studio->GetClientDataModelBridge();
+    EStudioObjectType type = bridge->GetObjectType(instance);
+
     auto material = instance;
-    const auto refMaterial = getReferenceMaterial(instance);
+    if (type == EStudioObjectType::OBJTYPE_IMAGE)
+        material = sceneEditor->GetParent(instance);
+
+    if (!material.Valid())
+        return;
+
+    const auto refMaterial = getReferenceMaterial(material);
     if (refMaterial.Valid())
         material = refMaterial;
 
     if (!sceneEditor->isInsideMaterialContainer(material))
         return;
 
-    const auto studio = doc->GetStudioSystem();
-    const auto bridge = studio->GetClientDataModelBridge();
-    EStudioObjectType type = bridge->GetObjectType(material);
+    type = bridge->GetObjectType(material);
 
     if (type == EStudioObjectType::OBJTYPE_MATERIAL
         || type == EStudioObjectType::OBJTYPE_CUSTOMMATERIAL) {
