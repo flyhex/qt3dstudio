@@ -2466,15 +2466,14 @@ public:
     }
 
     void RearrangeObjects(const qt3dsdm::TInstanceHandleList &inInstances,
-                          TInstanceHandle inDest,
-                          DocumentEditorInsertType::Enum inInsertType,
-                          bool checkUniqueName, bool notifyRename = true) override
+                                  TInstanceHandle inDest,
+                                  DocumentEditorInsertType::Enum inInsertType,
+                                  bool checkUniqueName, bool notifyRename = true) override
     {
-        TInstanceHandleList sortableList(ToGraphOrdering(inInstances));
-        QSet<TInstanceHandle> updateList;
+        qt3dsdm::TInstanceHandleList sortableList(ToGraphOrdering(inInstances));
         TInstanceHandle theParent(inDest);
         if (inInsertType == DocumentEditorInsertType::PreviousSibling
-                || inInsertType == DocumentEditorInsertType::NextSibling)
+            || inInsertType == DocumentEditorInsertType::NextSibling)
             theParent = GetParent(inDest);
 
         if (m_Bridge.IsComponentInstance(theParent)
@@ -2499,53 +2498,13 @@ public:
                     SetName(theInstance, newName);
                 }
             }
-            TInstanceHandle oldParentHandle = GetParent(theInstance);
-
             if (inInsertType == DocumentEditorInsertType::PreviousSibling)
                 m_AssetGraph.MoveBefore(theInstance, inDest);
             else if (inInsertType == DocumentEditorInsertType::NextSibling)
                 m_AssetGraph.MoveAfter(theInstance, inDest);
             else if (inInsertType == DocumentEditorInsertType::LastChild)
                 m_AssetGraph.MoveTo(theInstance, inDest, COpaquePosition::LAST);
-
-            // If moving into a group, update the target group pivot point and position
-            TInstanceHandle newParentHandle = GetParent(theInstance);
-            if (m_Bridge.IsGroupInstance(newParentHandle))
-                updateList.insert(newParentHandle);
-            // If moving from a group, update the source group pivot and position
-            if (m_Bridge.IsGroupInstance(oldParentHandle))
-                updateList.insert(oldParentHandle);
         }
-
-        if (!updateList.empty()) {
-            for (auto it : qAsConst(updateList)) {
-                TInstanceHandleList childHandles;
-                GetChildren(GetActiveSlide(it), it, childHandles);
-                updatePivotAndPosition(it, childHandles);
-            }
-        }
-    }
-
-    // Move the pivot point and position to the center of the objects in list
-    void updatePivotAndPosition(TInstanceHandle handle, TInstanceHandleList objectList)
-    {
-        // Calculate the center
-        SFloat3 pivotPoint;
-        for (auto it : objectList) {
-            SFloat3 position = GetPosition(it);
-            pivotPoint[0] += position[0];
-            pivotPoint[1] += position[1];
-            pivotPoint[2] += position[2];
-        }
-        size_t objectCount = objectList.size();
-        pivotPoint[0] /= objectCount;
-        pivotPoint[1] /= objectCount;
-        pivotPoint[2] /= objectCount;
-        // Modify the pivot point of the target
-        SetInstancePropertyValue(handle, m_Bridge.GetObjectDefinitions().m_Node.m_Pivot,
-                                 pivotPoint, false);
-        // Modify the position of the target
-        SetPosition(handle, pivotPoint);
     }
 
     // Move all children out of a given parent instances and delete the instances.
