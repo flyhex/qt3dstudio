@@ -268,6 +268,29 @@ bool InspectorControlView::canLinkProperty(int instance, int handle) const
     return doc->GetDocumentReader().CanPropertyBeLinked(instance, handle);
 }
 
+bool InspectorControlView::canOpenInInspector(int instance, int handle) const
+{
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    qt3dsdm::SValue value;
+    doc->GetPropertySystem()->GetInstancePropertyValue(instance, handle, value);
+    if (!value.empty() && value.getType() == qt3dsdm::DataModelDataType::Long4) {
+        qt3dsdm::SLong4 guid = qt3dsdm::get<qt3dsdm::SLong4>(value);
+        return guid.Valid();
+    }
+    return false;
+}
+
+void InspectorControlView::openInInspector()
+{
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    qt3dsdm::SValue value;
+    doc->GetPropertySystem()->GetInstancePropertyValue(m_instance, m_handle, value);
+    qt3dsdm::SLong4 guid = qt3dsdm::get<qt3dsdm::SLong4>(value);
+    const auto instance = bridge->GetInstanceByGUID(guid);
+    doc->SelectDataModelObject(instance);
+}
+
 void InspectorControlView::onInstancePropertyValueChanged(
         qt3dsdm::Qt3DSDMPropertyHandle propertyHandle)
 {
@@ -338,6 +361,11 @@ void InspectorControlView::showContextMenu(int x, int y, int handle, int instanc
     QMenu theContextMenu;
 
     auto doc = g_StudioApp.GetCore()->GetDoc();
+
+    if (canOpenInInspector(instance, handle)) {
+        auto action = theContextMenu.addAction(QObject::tr("Open in Inspector"));
+        connect(action, &QAction::triggered, this, &InspectorControlView::openInInspector);
+    }
 
     bool canBeLinkedFlag = canLinkProperty(instance, handle);
     if (canBeLinkedFlag) {
