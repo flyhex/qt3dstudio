@@ -503,6 +503,7 @@ protected:
     std::shared_ptr<Q3DStudio::IDocSceneGraph> m_SceneGraph;
     Q3DStudio::SSelectedValue m_SelectedValue;
     bool m_nudging;
+    bool m_unnotifiedSelectionChange = false;
 
 public:
     void OnNewPresentation();

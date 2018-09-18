@@ -795,7 +795,7 @@ void CDoc::DeselectAllItems(bool inSendEvent)
     if (inSendEvent)
         NotifySelectionChanged();
     else
-        SetSelection();
+        m_unnotifiedSelectionChange = SetSelection();
 
     // Remove selection on keyframes.
     DeselectAllKeyframes();
@@ -1084,9 +1084,11 @@ bool CDoc::SetSelection(Q3DStudio::SSelectedValue inNewSelection)
 void CDoc::NotifySelectionChanged(Q3DStudio::SSelectedValue inNewSelection)
 {
     m_SelectedValue = inNewSelection;
-    if (SetSelection(inNewSelection)) {
+    if (SetSelection(inNewSelection))
         m_Core->GetDispatch()->FireSelectionChange(inNewSelection);
-    }
+    else if (m_unnotifiedSelectionChange)
+        m_Core->GetDispatch()->FireSelectionChange(m_SelectedObject);
+    m_unnotifiedSelectionChange = false;
 }
 
 template <typename TDataType>
