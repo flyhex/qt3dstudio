@@ -44,6 +44,7 @@
 #include <QtCore/qdatetime.h>
 #include <QtCore/qtimer.h>
 #include <QtWidgets/qpushbutton.h>
+#include <QtWidgets/qshortcut.h>
 
 TimelineToolbar::TimelineToolbar() : QToolBar()
 {
@@ -136,9 +137,13 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     m_actionZoomOut->setShortcutContext(Qt::ApplicationShortcut);
     m_actionZoomIn->setShortcut(Qt::Key_Plus);
     m_actionZoomIn->setShortcutContext(Qt::ApplicationShortcut);
-    m_timeLabel->setShortcut(QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::Key_T));
     m_actionNewLayer->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_L));
     m_actionNewLayer->setShortcutContext(Qt::ApplicationShortcut);
+
+    QShortcut *gotoTimeShortcut = new QShortcut(this);
+    gotoTimeShortcut->setKey(QKeySequence(Qt::ControlModifier | Qt::AltModifier | Qt::Key_T));
+    gotoTimeShortcut->setContext(Qt::ApplicationShortcut);
+    connect(gotoTimeShortcut, &QShortcut::activated, this, &TimelineToolbar::gotoTimeTriggered);
 
     m_connectSelectionChange = g_StudioApp.GetCore()->GetDispatch()->ConnectSelectionChange(
                 std::bind(&TimelineToolbar::onSelectionChange, this, std::placeholders::_1));
