@@ -4286,6 +4286,29 @@ public:
         }
     }
 
+    void toggleBoolPropertyOnSelected(TPropertyHandle property) override
+    {
+        qt3dsdm::IPropertySystem *propertySystem = m_Doc.GetStudioSystem()->GetPropertySystem();
+        qt3dsdm::TInstanceHandleList selectedInstances
+                = m_Doc.GetSelectedValue().GetSelectedInstances();
+
+        if (selectedInstances.size() > 0) {
+            bool boolValue = false;
+            SValue value;
+            for (size_t idx = 0, end = selectedInstances.size(); idx < end; ++idx) {
+                qt3dsdm::Qt3DSDMInstanceHandle handle(selectedInstances[idx]);
+                if (handle.Valid()) {
+                    if (value.empty()) {
+                        // First valid handle selects if all are hidden/unhidden
+                        propertySystem->GetInstancePropertyValue(handle, property, value);
+                        boolValue = !qt3dsdm::get<bool>(value);
+                    }
+                    propertySystem->SetInstancePropertyValue(handle, property, boolValue);
+                }
+            }
+        }
+    }
+
     void BuildDAEMap(const TFileModificationList &inList)
     {
         for (size_t fileIdx = 0, fileEnd = inList.size(); fileIdx < fileEnd; ++fileIdx) {

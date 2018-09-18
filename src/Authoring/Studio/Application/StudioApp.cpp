@@ -2011,32 +2011,38 @@ void CStudioApp::OnUndefinedDatainputsFail(
 
 void CStudioApp::toggleEyeball()
 {
-    CDoc *theDoc = m_core->GetDoc();
-    qt3dsdm::IPropertySystem *propertySystem = theDoc->GetStudioSystem()->GetPropertySystem();
-    qt3dsdm::TInstanceHandleList selectedInstances
-            = theDoc->GetSelectedValue().GetSelectedInstances();
+    CDoc *doc = m_core->GetDoc();
+    if (doc->getSelectedInstancesCount() > 0) {
+        qt3dsdm::Qt3DSDMPropertyHandle property
+                = doc->GetStudioSystem()->GetClientDataModelBridge()->GetSceneAsset().m_Eyeball;
+        SCOPED_DOCUMENT_EDITOR(*doc, tr("Visibility Toggle"))
+                ->toggleBoolPropertyOnSelected(property);
+    }
+}
 
-    if (selectedInstances.size() > 0) {
-        Q3DStudio::ScopedDocumentEditor editor(*theDoc,
-                                               L"Visibility Toggle",
-                                               __FILE__, __LINE__);
-        bool boolValue = false;
-        SValue value;
-        for (size_t idx = 0, end = selectedInstances.size(); idx < end; ++idx) {
-            qt3dsdm::Qt3DSDMInstanceHandle handle(selectedInstances[idx]);
+void CStudioApp::toggleShy()
+{
+    CDoc *doc = m_core->GetDoc();
+    if (doc->getSelectedInstancesCount() > 0) {
+        qt3dsdm::Qt3DSDMPropertyHandle property
+                = doc->GetStudioSystem()->GetClientDataModelBridge()->GetSceneAsset().m_Shy;
+        SCOPED_DOCUMENT_EDITOR(*doc, tr("Shy Toggle"))
+                ->toggleBoolPropertyOnSelected(property);
+    }
+}
 
-            if (handle.Valid()) {
-                qt3dsdm::Qt3DSDMPropertyHandle property
-                        = theDoc->GetStudioSystem()->GetClientDataModelBridge()
-                        ->GetSceneAsset().m_Eyeball;
-                if (value.empty()) {
-                    // First valid handle selects if all are hidden/unhidden
-                    propertySystem->GetInstancePropertyValue(handle, property, value);
-                    boolValue = !qt3dsdm::get<bool>(value);
-                }
-                editor->SetInstancePropertyValue(handle, property, boolValue);
-            }
-        }
+void CStudioApp::toggleLocked()
+{
+    CDoc *doc = m_core->GetDoc();
+    if (doc->getSelectedInstancesCount() > 0) {
+        qt3dsdm::Qt3DSDMPropertyHandle property
+                = doc->GetStudioSystem()->GetClientDataModelBridge()->GetSceneAsset().m_Locked;
+        SCOPED_DOCUMENT_EDITOR(*doc, tr("Locked Toggle"))
+                ->toggleBoolPropertyOnSelected(property);
+
+        // Since you are not supposed to be able to select locked objects,
+        // we just assume anything toggled was actually locked and deselect everything
+        doc->DeselectAllItems();
     }
 }
 

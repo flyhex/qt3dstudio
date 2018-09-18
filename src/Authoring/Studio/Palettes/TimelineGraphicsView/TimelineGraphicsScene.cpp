@@ -325,13 +325,13 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     action = new QAction(this);
     action->setShortcut(QKeySequence(Qt::ShiftModifier | Qt::Key_H));
     action->setShortcutContext(Qt::ApplicationShortcut);
-    connect(action, &QAction::triggered, this, &TimelineGraphicsScene::handleShySelected);
+    connect(action, &QAction::triggered, &g_StudioApp, &CStudioApp::toggleShy);
     timelineWidget->addAction(action);
 
     action = new QAction(this);
     action->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_H));
     action->setShortcutContext(Qt::ApplicationShortcut);
-    connect(action, &QAction::triggered, this, &TimelineGraphicsScene::handleLockSelected);
+    connect(action, &QAction::triggered, &g_StudioApp, &CStudioApp::toggleLocked);
     timelineWidget->addAction(action);
 }
 
@@ -1039,20 +1039,6 @@ void TimelineGraphicsScene::handleEditComponent()
                 ITimelineItemBinding::EUserTransaction_EditComponent)) {
         selectedRow->getBinding()->OpenAssociatedEditor();
     }
-}
-
-void TimelineGraphicsScene::handleShySelected()
-{
-    RowTree *selectedRow = m_rowManager->selectedRow();
-    if (selectedRow)
-        selectedRow->toggleShy();
-}
-
-void TimelineGraphicsScene::handleLockSelected()
-{
-    RowTree *selectedRow = m_rowManager->selectedRow();
-    if (selectedRow)
-        selectedRow->toggleLocked();
 }
 
 void TimelineGraphicsScene::handleApplicationFocusLoss()

@@ -214,6 +214,8 @@ public:
     void SetAutosaveEnabled(bool enabled);
     void SetAutosaveInterval(int interval);
     void toggleEyeball();
+    void toggleShy();
+    void toggleLocked();
     void showPresentationIdUniqueWarning();
     void showInvalidFilenameWarning();
     void checkDeletedDatainputs();

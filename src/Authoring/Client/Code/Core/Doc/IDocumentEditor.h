@@ -420,6 +420,8 @@ public:
     virtual void ExternalizePath(TInstanceHandle path) = 0;
     virtual void InternalizePath(TInstanceHandle path) = 0;
 
+    virtual void toggleBoolPropertyOnSelected(TPropertyHandle property) = 0;
+
     static std::shared_ptr<IDOMReader>
     ParseScriptFile(const Q3DStudio::CFilePath &inFullPathToDocument,
                     std::shared_ptr<qt3dsdm::IStringTable> inStringTable,

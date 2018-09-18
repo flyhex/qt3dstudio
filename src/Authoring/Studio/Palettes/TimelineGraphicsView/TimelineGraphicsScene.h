@@ -116,8 +116,6 @@ private:
     void handleMakeComponent();
     void handleCopyObjectPath();
     void handleEditComponent();
-    void handleShySelected();
-    void handleLockSelected();
     void handleApplicationFocusLoss();
 
     QGraphicsLinearLayout *m_layoutRoot;
