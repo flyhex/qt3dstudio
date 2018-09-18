@@ -2975,10 +2975,9 @@ public:
             ComposerObjectTypes::Component, theInstances[0], theSlide,
             DocumentEditorInsertType::NextSibling, CPt(), PRIMITIVETYPE_UNKNOWN, 0);
 
-        // After consultation with Stephen Mendoza about this we decided *not* to move the start
-        // position to the component.
-        // as this breaks embedded animations unless you move the position animations to the
-        // component as well.
+        // Update pivot and position
+        updatePivotAndPosition(component, inInstances);
+
         pair<long, long> theStartEndTimes = GetTimeRange(theInstances[0]);
 
         CString theName = GetName(theInstances[0]);
@@ -3036,6 +3035,12 @@ public:
                     SetTimeRange(insertedHandles.at(i), theStartEndTimes.at(i).first,
                                  theStartEndTimes.at(i).second);
             }
+
+            // Update pivot and position
+            TInstanceHandleList childHandles;
+            GetChildren(m_SlideSystem.GetMasterSlide(theComponentSlide), targetComponent,
+                        childHandles);
+            updatePivotAndPosition(targetComponent, childHandles);
         }
     }
 
