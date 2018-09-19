@@ -400,12 +400,12 @@
 			</State>
 			<State name="Master Slide" component="#TurnSignals" >
 				<Add ref="#TurnSignals_001" name="TurnSignals" />
-				<Add ref="#Icon_TurnLeft_ON2er" name="Icon_TurnLeft_ON2er" position="915.849 6.15812e-07 0" rotation="0 0 180" scale="0.7 0.7 1" sourcepath="#Rectangle" >
+				<Add ref="#Icon_TurnLeft_ON2er" name="Icon_TurnLeft_ON2er" position="610 0 0" rotation="0 0 180" scale="0.5 0.5 1" sourcepath="#Rectangle" >
 					<AnimationTrack property="opacity" type="EaseInOut" >0 100 0 0 1 0 0 0</AnimationTrack>
 				</Add>
 				<Add ref="#Material_001" diffuse="1 1 1" diffusemap="#Material_001_diffusemap" shaderlighting="None" />
 				<Add ref="#Material_001_diffusemap" sourcepath="maps/Icon_TurnLeft_ON.png" />
-				<Add ref="#Icon_TurnLeft_ON" name="Icon_TurnLeft_ON" position="-913 0 0" scale="0.7 0.7 1" sourcepath="#Rectangle" >
+				<Add ref="#Icon_TurnLeft_ON" name="Icon_TurnLeft_ON" position="-610 0 0" scale="0.5 0.5 1" sourcepath="#Rectangle" >
 					<AnimationTrack property="opacity" type="EaseInOut" >0 100 0 0 1 0 0 0</AnimationTrack>
 				</Add>
 				<Add ref="#Material_002" diffuse="1 1 1" diffusemap="#Material_002_diffusemap" shaderlighting="None" />
