@@ -267,21 +267,42 @@ QHeaderView::section:hover {
 /* Tutorial Dialog */
 QDialog#StudioTutorialWidget,
 QDialog#StudioTutorialWidget QWidget {
-    color: #ffffff;
     background-color: transparent;
     border: 0px;
 }
 
+QLabel#studioTutorialName {
+    font-size: 52px;
+    color: "#00cd45";
+}
+
+QLabel#studioTutorialWelcome {
+    font-size: 52px;
+    color: #ffffff;
+}
+
+QPushButton#studioTutorialOpen,
+QPushButton#studioTutorialNew,
+QPushButton#studioTutorialQuickStart {
+    font-size: 36px;
+    color: #ffffff;
+    padding: 0px 60px 0px 60px;
+}
+
 QPushButton:!pressed#studioTutorialOpen,
-QPushButton:!pressed#studioTutorialNew {
-    background: transparent;
-    border: 1px solid #41cd52;
+QPushButton:!pressed#studioTutorialNew,
+QPushButton:!pressed#studioTutorialQuickStart {
+    background: "#00cd45";
+    border: 3px solid "#00cd45";
+    border-radius: 10px;
 }
 
 QPushButton:pressed#studioTutorialOpen,
-QPushButton:pressed#studioTutorialNew {
-    background: #41cd52;
-    border: 1px solid #41cd52;
+QPushButton:pressed#studioTutorialNew,
+QPushButton:pressed#studioTutorialQuickStart {
+    background: transparent;
+    border: 3px solid "#00cd45";
+    border-radius: 10px;
 }
 
 /* Startup Dialog */

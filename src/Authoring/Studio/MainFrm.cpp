@@ -1717,7 +1717,7 @@ void CMainFrame::OnViewTooltips()
  */
 void CMainFrame::OnUpdateHelpIndex()
 {
-    QFile theFile(g_StudioApp.m_pszHelpFilePath.toQString());
+    QFile theFile(g_StudioApp.m_helpFilePath);
     m_ui->action_Reference_Manual->setEnabled(theFile.exists());
 }
 
@@ -1727,7 +1727,7 @@ void CMainFrame::OnUpdateHelpIndex()
  */
 void CMainFrame::OnHelpIndex()
 {
-    QFile theFile(g_StudioApp.m_pszHelpFilePath.toQString());
+    QFile theFile(g_StudioApp.m_helpFilePath);
     if (theFile.exists())
         QDesktopServices::openUrl(QUrl::fromLocalFile(theFile.fileName()));
 }
@@ -1747,8 +1747,9 @@ void CMainFrame::OnHelpVisitQt()
  */
 void CMainFrame::OnHelpOpenTutorial()
 {
-    StudioTutorialWidget tutorial(this, false, false);
-    tutorial.exec();
+    StudioTutorialWidget tutorial(this);
+    int welcomeRes = tutorial.exec();
+    g_StudioApp.handleWelcomeRes(welcomeRes, false);
 }
 
 //==============================================================================

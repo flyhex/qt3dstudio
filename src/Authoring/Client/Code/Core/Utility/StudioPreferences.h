@@ -33,6 +33,7 @@
 #pragma once
 
 #include <qglobal.h>
+#include <QtGui/qbrush.h>
 
 #include "CoreConst.h"
 #include "Qt3DSFile.h"
@@ -163,6 +164,7 @@ public:
     static QColor masterColor();
     static QColor disabledColor();
     static QColor dataInputColor();
+    static QLinearGradient welcomeBackgroundGradient();
 
     static QColor timelineRowColorNormal();
     static QColor timelineRowColorNormalProp();

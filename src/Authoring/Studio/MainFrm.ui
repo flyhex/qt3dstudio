@@ -45,7 +45,7 @@ Project palette using Import functionality.</string>
      <x>0</x>
      <y>0</y>
      <width>1800</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -274,7 +274,7 @@ Project palette using Import functionality.</string>
   </action>
   <action name="action_Open_Tutorial">
    <property name="text">
-    <string>&amp;Open Tutorial...</string>
+    <string>&amp;Show Welcome Screen...</string>
    </property>
   </action>
   <action name="actionSet_Changed_Keyframes">
