@@ -2753,7 +2753,7 @@ public:
         if (!theReader)
             return TInstanceHandleList();
         return DoPasteSceneGraphObject(theReader, inNewRoot, inGenerateUniqueName, inInsertType,
-                                       inPosition);
+                                       inPosition, false);
     }
 
     virtual TInstanceHandleList
@@ -2776,7 +2776,8 @@ public:
             if (inInsertType == DocumentEditorInsertType::NextSibling)
                 theInstance = retval[end - idx - 1];
 
-            FinalizeAddOrDrop(theInstance, inNewRoot, inInsertType, inPosition, false);
+            FinalizeAddOrDrop(theInstance, inNewRoot, inInsertType, inPosition, false, true,
+                              true, false);
 
             SetName(theInstance, GetName(theInstance), inGenerateUniqueName);
         }

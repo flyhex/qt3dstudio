@@ -234,8 +234,9 @@ public:
     bool IsModified();
     bool IsValid() const;
 
-    qt3dsdm::Qt3DSDMInstanceHandle GetInstanceFromSelectable(Q3DStudio::SSelectedValue inSelectedItem);
-    qt3dsdm::Qt3DSDMInstanceHandle GetSelectedInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle GetInstanceFromSelectable(
+            Q3DStudio::SSelectedValue inSelectedItem) const;
+    qt3dsdm::Qt3DSDMInstanceHandle GetSelectedInstance() const;
 
     void CutSelectedObject();
     void DeleteSelectedItems(bool slide = false);
@@ -260,6 +261,7 @@ public:
         CopyObject(objects);
     }
     // paste object to clipboard
+    qt3dsdm::Qt3DSDMInstanceHandle getPasteTarget(qt3dsdm::Qt3DSDMInstanceHandle selected) const;
     void PasteObject(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     void PasteObjectMaster(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     void DeleteObject(const qt3dsdm::TInstanceHandleList &inInstances);
@@ -282,7 +284,7 @@ public:
     bool CanCopyObject(const qt3dsdm::TInstanceHandleList &inInstances); // specifically for objects
     bool CanCopyKeyframe(); // specifically for keyframes
     bool CanCopyAction(); // specifically for actions
-    bool CanPasteObject(); // specifically for objects
+    bool CanPasteObject() const; // specifically for objects
     bool CanPasteKeyframe(); // specifically for keyframes
     bool CanPasteAction(); // specifically for actions
 

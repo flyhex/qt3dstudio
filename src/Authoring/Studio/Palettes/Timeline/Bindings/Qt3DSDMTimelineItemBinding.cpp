@@ -691,7 +691,7 @@ void Qt3DSDMTimelineItemBinding::PerformTransaction(EUserTransaction inTransacti
     } break;
     case EUserTransaction_Paste: {
         theDoc->DeselectAllKeyframes();
-        theDoc->PasteObject(GetInstance());
+        theDoc->PasteObject(theDoc->getPasteTarget(GetInstance()));
     } break;
     case EUserTransaction_Delete: {
         theDispatch.FireOnAsynchronousCommand(

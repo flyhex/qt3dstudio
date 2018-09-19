@@ -541,7 +541,7 @@ bool CDoc::IsValid() const
  * Get the Asset from inSelectedItem, if exists
  */
 qt3dsdm::Qt3DSDMInstanceHandle
-CDoc::GetInstanceFromSelectable(Q3DStudio::SSelectedValue inSelectedItem)
+CDoc::GetInstanceFromSelectable(Q3DStudio::SSelectedValue inSelectedItem) const
 {
     if (inSelectedItem.getType() == Q3DStudio::SelectedValueTypes::Instance) {
         // This is DataModel asset. Find corresponding CAsset if there is any
@@ -561,7 +561,7 @@ int CDoc::getSelectedInstancesCount() const
     return int(m_SelectedValue.GetSelectedInstances().size());
 }
 
-qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetSelectedInstance()
+qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetSelectedInstance() const
 {
     return GetInstanceFromSelectable(m_SelectedObject);
 }
@@ -880,23 +880,27 @@ void CDoc::CopyObject(qt3dsdm::TInstanceHandleList inInstances)
 void CDoc::PasteObject(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     using namespace Q3DStudio;
-    qt3dsdm::Qt3DSDMInstanceHandle theInstance(inInstance);
-    qint64 dummy = 0;
-    Qt3DSFile theTempAPFile = CStudioClipboard::GetObjectFromClipboard(false, dummy);
-    SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Paste Object"))
-            ->PasteSceneGraphObject(theTempAPFile.GetAbsolutePath(), theInstance, true,
-                                    DocumentEditorInsertType::LastChild, CPt());
+    if (inInstance.Valid()) {
+        qt3dsdm::Qt3DSDMInstanceHandle theInstance(inInstance);
+        qint64 dummy = 0;
+        Qt3DSFile theTempAPFile = CStudioClipboard::GetObjectFromClipboard(false, dummy);
+        SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Paste Object"))
+                ->PasteSceneGraphObject(theTempAPFile.GetAbsolutePath(), theInstance, true,
+                                        DocumentEditorInsertType::LastChild, CPt());
+    }
 }
 
 void CDoc::PasteObjectMaster(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     using namespace Q3DStudio;
-    qt3dsdm::Qt3DSDMInstanceHandle theInstance(inInstance);
-    qint64 dummy = 0;
-    Qt3DSFile theTempAPFile = CStudioClipboard::GetObjectFromClipboard(false, dummy);
-    SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Paste Object"))
-            ->PasteSceneGraphObjectMaster(theTempAPFile.GetAbsolutePath(), theInstance, true,
-                                          DocumentEditorInsertType::LastChild, CPt());
+    if (inInstance.Valid()) {
+        qt3dsdm::Qt3DSDMInstanceHandle theInstance(inInstance);
+        qint64 dummy = 0;
+        Qt3DSFile theTempAPFile = CStudioClipboard::GetObjectFromClipboard(false, dummy);
+        SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Paste Object"))
+                ->PasteSceneGraphObjectMaster(theTempAPFile.GetAbsolutePath(), theInstance, true,
+                                              DocumentEditorInsertType::LastChild, CPt());
+    }
 }
 
 //=============================================================================
@@ -1859,7 +1863,7 @@ void CDoc::HandlePaste()
         // m_StudioApp->GetViews( )->GetActionControl( )->OnPasteAction( );
         // m_StudioApp->GetViews( )->OnShowAction( );
     } else if (CanPasteObject()) {
-        PasteObject(GetSelectedInstance());
+        PasteObject(getPasteTarget(GetSelectedInstance()));
     } else {
         if (m_KeyframesManager)
             m_KeyframesManager->PasteKeyframes();
@@ -1883,7 +1887,7 @@ void CDoc::HandleMasterPaste()
         // m_StudioApp->GetViews( )->GetActionControl( )->OnPasteAction( );
         // m_StudioApp->GetViews( )->OnShowAction( );
     } else if (CanPasteObject()) {
-        qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = GetSelectedInstance();
+        qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = getPasteTarget(GetSelectedInstance());
         long theTargetObjectType =
                 GetStudioSystem()->GetClientDataModelBridge()->GetObjectType(theSelectedInstance);
         qt3dsdm::ISlideSystem *theSlideSystem = GetStudioSystem()->GetSlideSystem();
@@ -1991,25 +1995,9 @@ bool CDoc::CanCopyAction()
 /**
  * Check to see if an object can be pasted into the Scene.
  */
-bool CDoc::CanPasteObject()
+bool CDoc::CanPasteObject() const
 {
-    bool theCanPasteFlag = false;
-
-    qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = GetSelectedInstance();
-    if (theSelectedInstance.Valid()) {
-        // Check if there is object on clipboard and if the object type on clipboard can be attached
-        // to theSelectedInstance
-        theCanPasteFlag = CStudioClipboard::CanPasteObject(
-                    GetStudioSystem()->GetClientDataModelBridge()->GetObjectType(theSelectedInstance));
-
-        // Only allow component paste if we are in the component.
-        if (theCanPasteFlag
-                && m_StudioSystem->GetClientDataModelBridge()->GetObjectType(theSelectedInstance)
-                == OBJTYPE_COMPONENT)
-            theCanPasteFlag &=
-                    m_StudioSystem->GetClientDataModelBridge()->IsActiveComponent(theSelectedInstance);
-    }
-    return theCanPasteFlag;
+    return getPasteTarget(GetSelectedInstance()).Valid();
 }
 
 //==============================================================================
@@ -2591,6 +2579,36 @@ void CDoc::GetActionsAffectedByRename(qt3dsdm::Qt3DSDMInstanceHandle inAsset,
     //	CAsset* theChild = static_cast<CAsset*>( theChildren.GetCurrent( ) );
     //	GetActionsAffectedByRename( theChild, ioActionsAffected );
     //}
+}
+
+qt3dsdm::Qt3DSDMInstanceHandle CDoc::getPasteTarget(qt3dsdm::Qt3DSDMInstanceHandle selected) const
+{
+    // Logic for object pasting is:
+    // 1) If you can paste the object as a sibling of the selected object -> do that
+    //  Except: If selected object is the currently active component, never paste under its parent,
+    //          as that would be outside the current time context.
+    // 2) If you can paste the object as a child of the selected object -> do that
+    //  Except: If the selected object is a component that is not active, never paste under it.
+    //          Components can have children only in time context of their own.
+
+    qt3dsdm::Qt3DSDMInstanceHandle pasteTarget;
+    if (selected.Valid()) {
+        auto bridge = m_StudioSystem->GetClientDataModelBridge();
+        qt3dsdm::Qt3DSDMInstanceHandle selectedParent = bridge->GetParentInstance(selected);
+        bool componentSelected = bridge->IsComponentInstance(selected);
+        bool selectedComponentActive = false;
+        if (componentSelected)
+            selectedComponentActive = bridge->IsActiveComponent(selected);
+
+        if (!selectedComponentActive && selectedParent.Valid()
+                && CStudioClipboard::CanPasteObject(bridge->GetObjectType(selectedParent))) {
+            pasteTarget = selectedParent;
+        } else if (CStudioClipboard::CanPasteObject(bridge->GetObjectType(selected))
+                   && (!componentSelected || selectedComponentActive)) {
+            pasteTarget = selected;
+        }
+    }
+    return pasteTarget;
 }
 
 //==============================================================================
