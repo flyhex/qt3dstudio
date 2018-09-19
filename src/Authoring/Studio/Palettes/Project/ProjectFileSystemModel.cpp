@@ -173,6 +173,7 @@ void ProjectFileSystemModel::updateReferences()
     std::for_each(sourcePathList.begin(), sourcePathList.end(), addReferencesPresentation);
     std::for_each(fontFileList.begin(), fontFileList.end(), addReferencesPresentation);
     std::for_each(effectTextureList.begin(), effectTextureList.end(), addReferencesProject);
+    std::for_each(effectTextureList.begin(), effectTextureList.end(), addReferencesPresentation);
     std::for_each(renderableList.begin(), renderableList.end(), addReferencesRenderable);
 
     m_references.insert(projectPath);
