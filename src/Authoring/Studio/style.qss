@@ -273,11 +273,15 @@ QDialog#StudioTutorialWidget QWidget {
 
 QLabel#studioTutorialName {
     font-size: 52px;
+    font-family: "Titillium Web";
+    font-weight: 300;
     color: "#00cd45";
 }
 
 QLabel#studioTutorialWelcome {
     font-size: 52px;
+    font-family: "Titillium Web";
+    font-weight: 300;
     color: #ffffff;
 }
 
@@ -285,6 +289,8 @@ QPushButton#studioTutorialOpen,
 QPushButton#studioTutorialNew,
 QPushButton#studioTutorialQuickStart {
     font-size: 36px;
+    font-family: "Titillium Web";
+    font-weight: 300;
     color: #ffffff;
     padding: 0px 60px 0px 60px;
 }
