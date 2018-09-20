@@ -47,7 +47,6 @@ MeshChooserView::MeshChooserView(QWidget *parent)
     : QQuickWidget(parent)
     , m_model(new MeshChooserModel(this))
 {
-    setWindowTitle(tr("Meshes"));
     setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
     setResizeMode(QQuickWidget::SizeRootObjectToView);
     QTimer::singleShot(0, this, &MeshChooserView::initialize);
@@ -99,10 +98,22 @@ void MeshChooserView::setInstance(int instance)
     m_instance = instance;
 }
 
+bool MeshChooserView::isFocused() const
+{
+    return hasFocus();
+}
+
+void MeshChooserView::focusInEvent(QFocusEvent *event)
+{
+    QQuickWidget::focusInEvent(event);
+    emit focusChanged();
+}
+
 void MeshChooserView::focusOutEvent(QFocusEvent *event)
 {
     QQuickWidget::focusOutEvent(event);
-    QTimer::singleShot(0, this, &MeshChooserView::close);
+    emit focusChanged();
+    QTimer::singleShot(0, this, &QQuickWidget::close);
 }
 
 void MeshChooserView::showEvent(QShowEvent *event)

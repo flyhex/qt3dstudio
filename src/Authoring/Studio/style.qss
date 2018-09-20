@@ -223,6 +223,15 @@ QDateTimeEdit::up-arrow {
     image: url(:/images/arrow_up.png);
 }
 
+QListWidget {
+    border: 1px solid #727476;
+    background: #2e2f30;
+}
+
+QListWidget::item:hover {
+    background-color: #23516D;
+}
+
 QSpinBox::up-button,
 QSpinBox::down-button,
 QDoubleSpinBox::up-button,

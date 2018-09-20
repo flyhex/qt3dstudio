@@ -415,6 +415,8 @@ public:
     bool CanUndo() override;
     bool PreUndo() override;
 
+    void getSceneMaterials(qt3dsdm::Qt3DSDMInstanceHandle inParent,
+                           QVector<qt3dsdm::Qt3DSDMInstanceHandle> &outMats) const;
     void CheckActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     void SetActiveSlideWithTransaction(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide);
 

@@ -336,8 +336,11 @@ Rectangle {
                                                          modelData.propertyType);
                                             return null;
                                         case DataModelDataType.ObjectRef:
-                                            if (modelData.propertyType === AdditionalMetaDataType.ObjectRef)
-                                                return objectReference;
+                                            if (modelData.propertyType === AdditionalMetaDataType.ObjectRef) {
+                                                    return _parentView.isRefMaterial(modelData.instance)
+                                                           ? materialReference
+                                                           : objectReference;
+                                            }
                                             console.warn("KDAB_TODO: implement handler for type: \"objectref\" property:",
                                                          modelData.propertyType);
                                             return null;
@@ -903,6 +906,21 @@ Rectangle {
             onShowBrowser: {
                 activeBrowser = _parentView.showObjectReference(handle, instance,
                                                                 mapToGlobal(width, 0))
+            }
+        }
+    }
+
+    Component {
+        id: materialReference
+
+        HandlerGenericChooser {
+            property int instance: parent.modelData.instance
+            property int handle: parent.modelData.handle
+            property variant values: parent.modelData.values
+            value: parent.modelData.value
+            onShowBrowser: {
+                activeBrowser = _parentView.showMaterialReference(handle, instance,
+                                                                  mapToGlobal(width, 0))
             }
         }
     }

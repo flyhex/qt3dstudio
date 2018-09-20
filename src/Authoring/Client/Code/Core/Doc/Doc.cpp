@@ -2843,6 +2843,25 @@ void CDoc::OnPresentationDeactivated()
 {
 }
 
+/**
+ * Gets the list of standard and custom materials used in the scene.
+ *
+ * @param inParent search root
+ * @param outMats list of scene materials
+ */
+void CDoc::getSceneMaterials(qt3dsdm::Qt3DSDMInstanceHandle inParent,
+                             QVector<qt3dsdm::Qt3DSDMInstanceHandle> &outMats) const
+{
+    const CClientDataModelBridge *bridge = m_StudioSystem->GetClientDataModelBridge();
+    for (long i = 0, count = m_AssetGraph->GetChildCount(inParent); i < count; ++i) {
+        qt3dsdm::Qt3DSDMInstanceHandle theChild(m_AssetGraph->GetChild(inParent, i));
+        if (bridge->IsMaterialInstance(theChild) || bridge->IsCustomMaterialInstance(theChild))
+            outMats.push_back(theChild);
+
+        getSceneMaterials(theChild, outMats);
+    }
+}
+
 void CDoc::CheckActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     Q3DStudio::CString theListOfTargets;

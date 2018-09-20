@@ -168,7 +168,6 @@ int main(int argc, char *argv[])
 #include "IDocumentEditor.h"
 #include "StudioUtils.h"
 
-#include "IObjectReferenceHelper.h"
 #include "ClientDataModelBridge.h"
 #include "CommonConstants.h"
 #include "IOLibraryException.h"

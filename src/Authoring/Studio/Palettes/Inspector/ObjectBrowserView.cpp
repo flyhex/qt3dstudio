@@ -122,10 +122,22 @@ qt3dsdm::Qt3DSDMInstanceHandle ObjectBrowserView::selectedHandle() const
     return qt3dsdm::Qt3DSDMInstanceHandle(handleId);
 }
 
+bool ObjectBrowserView::isFocused() const
+{
+    return hasFocus();
+}
+
+void ObjectBrowserView::focusInEvent(QFocusEvent *event)
+{
+    QQuickWidget::focusInEvent(event);
+    emit focusChanged();
+}
+
 void ObjectBrowserView::focusOutEvent(QFocusEvent *event)
 {
     QQuickWidget::focusOutEvent(event);
-    QTimer::singleShot(0, this, &ObjectBrowserView::close);
+    emit focusChanged();
+    QTimer::singleShot(0, this, &QQuickWidget::close);
 }
 
 void ObjectBrowserView::initialize()

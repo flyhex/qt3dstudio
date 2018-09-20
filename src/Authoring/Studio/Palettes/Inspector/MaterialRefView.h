@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -26,33 +26,21 @@
 **
 ****************************************************************************/
 
-#ifndef IMAGECHOOSERVIEW_H
-#define IMAGECHOOSERVIEW_H
+#ifndef MATERIALREFVIEW_H
+#define MATERIALREFVIEW_H
 
-#include <QQuickWidget>
+#include <QtWidgets/qlistwidget.h>
+#include "Qt3DSDMHandles.h"
 
-class ImageChooserModel;
-
-class ImageChooserView : public QQuickWidget
+class MaterialRefView : public QListWidget
 {
     Q_OBJECT
     Q_PROPERTY(bool focused READ isFocused NOTIFY focusChanged)
-    Q_PROPERTY(int instance READ instance)
-    Q_PROPERTY(int handle READ handle)
 
 public:
-    explicit ImageChooserView(QWidget *parent = nullptr);
+    explicit MaterialRefView(QWidget *parent = nullptr);
 
-    QSize sizeHint() const override;
-
-    void setHandle(int handle);
-    int handle() const;
-
-    void setInstance(int instance);
-    int instance() const;
-
-Q_SIGNALS:
-    void imageSelected(int handle, int instance, const QString &name);
+    int refreshMaterials(qt3dsdm::Qt3DSDMInstanceHandle refInstance);
 
 protected:
     void focusInEvent(QFocusEvent *event) override;
@@ -62,13 +50,7 @@ Q_SIGNALS:
     void focusChanged();
 
 private:
-    void showEvent(QShowEvent *event) override;
-    void initialize();
     bool isFocused() const;
-
-    int m_handle = -1;
-    int m_instance = -1;
-    ImageChooserModel *m_model = nullptr;
 };
 
-#endif // IMAGECHOOSERVIEW_H
+#endif // MATERIALREFVIEW_H

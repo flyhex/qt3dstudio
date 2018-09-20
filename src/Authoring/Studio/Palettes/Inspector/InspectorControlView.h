@@ -39,7 +39,6 @@
 #include "DataInputSelectView.h"
 
 class InspectorControlModel;
-QT_FORWARD_DECLARE_CLASS(QAbstractItemModel)
 class CInspectableBase;
 class ImageChooserView;
 class DataInputSelectView;
@@ -49,6 +48,9 @@ class ObjectBrowserView;
 class ObjectListModel;
 class FileChooserView;
 class TextureChooserView;
+class MaterialRefView;
+
+QT_FORWARD_DECLARE_CLASS(QAbstractItemModel)
 
 class InspectorControlView : public QQuickWidget,
                              public CPresentationChangeListener,
@@ -74,11 +76,13 @@ public:
     Q_INVOKABLE QObject *showFilesChooser(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QObject *showMeshChooser(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QObject *showObjectReference(int handle, int instance, const QPoint &point);
+    Q_INVOKABLE QObject *showMaterialReference(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QObject *showTextureChooser(int handle, int instance, const QPoint &point);
     Q_INVOKABLE void showDataInputChooser(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QColor showColorDialog(const QColor &color);
     Q_INVOKABLE bool toolTipsEnabled();
     Q_INVOKABLE QString convertPathToProjectRoot(const QString &presentationPath);
+    Q_INVOKABLE bool isRefMaterial(int instance) const;
 
     // IDataModelListener
     void OnBeginDataModelNotifications() override;
@@ -127,6 +131,7 @@ private:
     QPointer<FileChooserView> m_fileChooserView;
     QPointer<TextureChooserView> m_textureChooserView;
     QPointer<ObjectBrowserView> m_objectReferenceView;
+    QPointer<MaterialRefView> m_matRefListWidget;
     QPointer<ObjectListModel> m_objectReferenceModel;
     QPointer<DataInputSelectView> m_dataInputChooserView;
     std::vector<Q3DStudio::CFilePath> m_fileList;
