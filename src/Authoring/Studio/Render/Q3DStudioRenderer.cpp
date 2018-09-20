@@ -33,6 +33,11 @@
 #include "StudioPreferences.h"
 #include "StudioProjectSettings.h"
 #include "Q3DSTranslation.h"
+#include "StudioUtils.h"
+#include "StudioPickValues.h"
+#include "StudioFullSystem.h"
+#include "StudioCoreSystem.h"
+#include "HotKeys.h"
 
 #include <QtWidgets/qwidget.h>
 #include <QtWidgets/qopenglwidget.h>
@@ -70,8 +75,8 @@ static SEditCameraDefinition g_editCameraDefinitions[] = {
     { EditCameraTypes::Directional, QVector3D(0, 1, 0), QObject::tr("Bottom View") },
     { EditCameraTypes::Directional, QVector3D(1, 0, 0), QObject::tr("Left View") },
     { EditCameraTypes::Directional, QVector3D(-1, 0, 0), QObject::tr("Right View") },
-    { EditCameraTypes::Directional, QVector3D(0, 0, -1), QObject::tr("Front View") },
-    { EditCameraTypes::Directional, QVector3D(0, 0, 1), QObject::tr("Back View") },
+    { EditCameraTypes::Directional, QVector3D(0, 0, 1), QObject::tr("Front View") },
+    { EditCameraTypes::Directional, QVector3D(0, 0, -1), QObject::tr("Back View") },
 };
 static int g_numEditCameras = sizeof(g_editCameraDefinitions)
                                         / sizeof(*g_editCameraDefinitions);
@@ -79,6 +84,7 @@ static int g_numEditCameras = sizeof(g_editCameraDefinitions)
 Q3DStudioRenderer::Q3DStudioRenderer()
     : m_dispatch(*g_StudioApp.GetCore()->GetDispatch())
     , m_doc(*g_StudioApp.GetCore()->GetDoc())
+    , m_updatableEditor(m_doc)
 {
     m_dispatch.AddReloadListener(this);
     m_dispatch.AddDataModelListener(this);
@@ -155,7 +161,7 @@ void Q3DStudioRenderer::SetViewRect(const QRect &inRect)
     m_viewRect = inRect;
     QSize size(inRect.width(), inRect.height());
     if (!m_engine.isNull())
-        m_engine->resize(size, fixedDevicePixelRatio(), true);
+        m_engine->resize(size, fixedDevicePixelRatio(), false);
     sendResizeToQt3D(size);
 }
 
@@ -415,7 +421,7 @@ void Q3DStudioRenderer::RenderNow()
     }
 
     if (!m_translation.isNull()) {
-        QSize size = QSize(m_viewRect.width(), m_viewRect.height());
+        const QSize size = m_viewRect.size();
         QRect viewRect = QRect(0, 0, size.width(), size.height());
         m_translation->prepareRender(viewRect, size);
     }
@@ -463,13 +469,19 @@ void Q3DStudioRenderer::OnEndDataModelNotifications()
 
 void Q3DStudioRenderer::OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
-
+    if (!m_translation.isNull()) {
+        m_translation->markDirty(inInstance);
+        RequestRender();
+    }
 }
 
 void Q3DStudioRenderer::OnImmediateRefreshInstanceMultiple(
         qt3dsdm::Qt3DSDMInstanceHandle *inInstance, long inInstanceCount)
 {
-
+    if (!m_translation.isNull()) {
+        m_translation->markDirty(inInstance, inInstanceCount);
+        RequestRender();
+    }
 }
 
 void Q3DStudioRenderer::OnReloadEffectInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
@@ -503,21 +515,318 @@ void Q3DStudioRenderer::OnClosingPresentation()
     m_hasPresentation = false;
 }
 
+PickTargetAreas Q3DStudioRenderer::getPickArea(CPt inPoint)
+{
+    const qreal pickPointX(inPoint.x);
+    const qreal pickPointY(m_viewRect.height() - inPoint.y);
+    QRectF rect = m_viewRect;
+    if (editCameraEnabled()) {
+        qreal offset = CStudioPreferences::guideSize() / 2;
+        rect.setLeft(rect.left() + offset);
+        rect.setRight(rect.left() - offset);
+        rect.setTop(rect.top() + offset);
+        rect.setBottom(rect.bottom() - offset);
+    }
+    if (pickPointX < rect.left() || pickPointX > rect.right()
+        || pickPointY < rect.bottom() || pickPointY > rect.top()) {
+        return PickTargetAreas::Matte;
+    }
+    return PickTargetAreas::Presentation;
+}
+
+qt3ds::foundation::Option<qt3dsdm::SGuideInfo> Q3DStudioRenderer::pickRulers(CPt inMouseCoords)
+{
+    CPt renderSpacePt(inMouseCoords.x, long(m_viewRect.y()) - inMouseCoords.y);
+    // If mouse is inside outer rect but outside inner rect.
+    if (m_outerRect.contains(renderSpacePt.x, renderSpacePt.y)
+        && !m_innerRect.contains(renderSpacePt.x, renderSpacePt.y)) {
+        std::shared_ptr<qt3dsdm::IGuideSystem> theGuideSystem =
+            g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetFullSystem()
+                ->GetCoreSystem()->GetGuideSystem();
+        if (renderSpacePt.x >= m_innerRect.left() && renderSpacePt.x <= m_innerRect.right()) {
+            return qt3dsdm::SGuideInfo(renderSpacePt.y - m_innerRect.bottom(),
+                                     qt3dsdm::GuideDirections::Horizontal);
+        } else if (renderSpacePt.y >= m_innerRect.bottom()
+                   && renderSpacePt.y <= m_innerRect.top()) {
+            return qt3dsdm::SGuideInfo(renderSpacePt.x - m_innerRect.left(),
+                                     qt3dsdm::GuideDirections::Vertical);
+        }
+    }
+    return qt3ds::foundation::Option<qt3dsdm::SGuideInfo>();
+}
+
 void Q3DStudioRenderer::OnSceneMouseDown(SceneDragSenderType::Enum inSenderType,
                                          QPoint inPoint, int)
 {
+    if (m_translation.isNull())
+        return;
 
+    inPoint.setX(int(inPoint.x() * devicePixelRatio()));
+    inPoint.setY(int(inPoint.y() * devicePixelRatio()));
+
+    m_pickResult = SStudioPickValue();
+    if (inSenderType == SceneDragSenderType::SceneWindow) {
+        PickTargetAreas pickArea = getPickArea(inPoint);
+        if (pickArea == PickTargetAreas::Presentation) {
+            TranslationSelectMode theSelectMode = TranslationSelectMode::Group;
+            switch (g_StudioApp.GetSelectMode()) {
+            case STUDIO_SELECTMODE_ENTITY:
+                theSelectMode = TranslationSelectMode::Single;
+                break;
+            case STUDIO_SELECTMODE_GROUP:
+                theSelectMode = TranslationSelectMode::Group;
+                break;
+            default:
+                QT3DS_ASSERT(false);
+                break;
+            }
+            // TODO: picking
+        } else if (pickArea == PickTargetAreas::Matte) {
+            qt3ds::foundation::Option<qt3dsdm::SGuideInfo> pickResult = pickRulers(inPoint);
+            if (pickResult.hasValue()) {
+                Q3DStudio::IDocumentEditor &docEditor(
+                            m_updatableEditor.EnsureEditor(QObject::tr("Create Guide"),
+                                                           __FILE__, __LINE__));
+                qt3dsdm::Qt3DSDMGuideHandle newGuide = docEditor.CreateGuide(*pickResult);
+                m_pickResult = SStudioPickValue(newGuide);
+                m_doc.NotifySelectionChanged(newGuide);
+            } else {
+                m_doc.DeselectAllItems(true);
+            }
+        }
+    }
+
+    m_lastDragToolMode = MovementTypes::Unknown;
+    m_maybeDragStart = true;
+    m_mouseDownPoint = inPoint;
+    m_previousMousePoint = inPoint;
+    m_mouseDownCameraInformation = m_translation->editCameraInfo();
+    m_lastToolMode = g_StudioApp.GetToolMode();
+}
+
+SEditCameraPersistentInformation panEditCamera(const QPoint &pan,
+                                               const QVector3D &position,
+                                               const SEditCameraPersistentInformation &theInfo,
+                                               const QSizeF &viewport)
+{
+    SEditCameraPersistentInformation info(theInfo);
+    QVector3D theXAxis = info.left();
+    QVector3D theYAxis = info.up();
+    QVector3D theXChange = -1.0f * theXAxis * pan.x() * info.zoomFactor(viewport);
+    QVector3D theYChange = theYAxis * pan.y() * info.zoomFactor(viewport);
+    QVector3D theDiff = theXChange + theYChange;
+    info.m_position = position + theDiff;
+    return info;
+}
+
+SEditCameraPersistentInformation rotateEditCamera(const QPoint &distance,
+                                                  qreal xrot, qreal yrot,
+                                                  const SEditCameraPersistentInformation &theInfo)
+{
+    SEditCameraPersistentInformation info(theInfo);
+    info.m_xRotation = xrot + (qreal(distance.x()) * g_rotationScaleFactor / 20.);
+    info.m_yRotation = yrot - (qreal(distance.y()) * g_rotationScaleFactor / 20.);
+
+    // Avoid rounding errors stemming from extremely large rotation angles
+    if (info.m_xRotation < -180.)
+        info.m_xRotation += 360.;
+    if (info.m_xRotation > 180.)
+        info.m_xRotation -= 360.;
+    if (info.m_yRotation < -180.)
+        info.m_yRotation += 360.;
+    if (info.m_yRotation > 180.)
+        info.m_yRotation -= 360.;
+    return info;
 }
 
 void Q3DStudioRenderer::OnSceneMouseDrag(SceneDragSenderType::Enum, QPoint inPoint, int inToolMode,
                                          int inFlags)
 {
+    if (m_translation.isNull())
+        return;
 
+    inPoint.setX(int(inPoint.x() * devicePixelRatio()));
+    inPoint.setY(int(inPoint.y() * devicePixelRatio()));
+
+    if (m_maybeDragStart) {
+        QPoint theDragDistance = inPoint - m_mouseDownPoint;
+        const int dragDistanceLimit = QApplication::startDragDistance();
+        if (m_pickResult.getType() == StudioPickValueTypes::Widget
+            || inToolMode != STUDIO_TOOLMODE_SCALE) {
+            if (theDragDistance.manhattanLength() <= dragDistanceLimit)
+                return;
+        } else {
+            if (qAbs(theDragDistance.y()) <= dragDistanceLimit)
+                return;
+        }
+    }
+
+    m_maybeDragStart = false;
+
+    // If the tool mode changes then we throw out the last widget pick if there was one.
+    if (m_lastToolMode != inToolMode)
+        m_pickResult = SStudioPickValue();
+    m_lastToolMode = inToolMode;
+
+    // General dragging
+    if (m_pickResult.getType() == StudioPickValueTypes::Instance
+        || m_pickResult.getType()
+            == StudioPickValueTypes::UnknownValueType) // matte drag and widget drag
+    {
+        // Not sure what right-click drag does in the scene.
+        const bool isEditCamera = editCameraEnabled();
+        const int theCameraToolMode = isEditCamera ? (inToolMode & (STUDIO_CAMERATOOL_MASK)) : 0;
+        const bool rightClick = (inFlags & CHotKeys::MOUSE_RBUTTON) != 0;
+
+        if (theCameraToolMode == 0) {
+            if (m_doc.GetDocumentReader().IsInstance(m_doc.GetSelectedInstance())) {
+                if (m_doc.getSelectedInstancesCount() == 1) {
+                    bool rightClick = (inFlags & CHotKeys::MOUSE_RBUTTON) != 0;
+                    MovementTypes theMovement(MovementTypes::Unknown);
+
+                    switch (inToolMode) {
+                    case STUDIO_TOOLMODE_MOVE:
+                        if (rightClick)
+                            theMovement = MovementTypes::TranslateAlongCameraDirection;
+                        else
+                            theMovement = MovementTypes::Translate;
+                        break;
+                    case STUDIO_TOOLMODE_SCALE:
+                        if (rightClick)
+                            theMovement = MovementTypes::ScaleZ;
+                        else
+                            theMovement = MovementTypes::Scale;
+                        break;
+                    case STUDIO_TOOLMODE_ROTATE:
+                        if (rightClick)
+                            theMovement = MovementTypes::RotationAboutCameraDirection;
+                        else
+                            theMovement = MovementTypes::Rotation;
+                        break;
+                    default:
+                        Q_ASSERT_X(false, "Q3DStudioRenderer::OnSceneMouseDrag", "unreachable code");
+                        break;
+                    }
+
+                    if (theMovement != MovementTypes::Unknown) {
+                        bool theLockToAxis = (inFlags & CHotKeys::MODIFIER_SHIFT) != 0;
+
+                        if (m_lastDragToolMode != MovementTypes::Unknown
+                            && theMovement != m_lastDragToolMode) {
+                            m_updatableEditor.RollbackEditor();
+                            m_mouseDownPoint = inPoint;
+                        }
+
+                        m_lastDragToolMode = theMovement;
+#if RUNTIME_SPLIT_TEMPORARILY_REMOVED
+                        switch (theMovement) {
+                        case MovementTypes::TranslateAlongCameraDirection:
+                            m_Translation->TranslateSelectedInstanceAlongCameraDirection(
+                                m_MouseDownPoint, inPoint, m_UpdatableEditor);
+                            break;
+                        case MovementTypes::Translate:
+                            m_Translation->TranslateSelectedInstance(
+                                m_MouseDownPoint, inPoint, m_UpdatableEditor, theLockToAxis);
+                            break;
+                        case MovementTypes::ScaleZ:
+                            m_Translation->ScaleSelectedInstanceZ(m_MouseDownPoint, inPoint,
+                                                                  m_UpdatableEditor);
+                            break;
+                        case MovementTypes::Scale:
+                            m_Translation->ScaleSelectedInstance(m_MouseDownPoint, inPoint,
+                                                                 m_UpdatableEditor);
+                            break;
+                        case MovementTypes::Rotation:
+                            m_Translation->RotateSelectedInstance(
+                                        m_MouseDownPoint, m_PreviousMousePoint, inPoint,
+                                        m_UpdatableEditor, theLockToAxis);
+                            break;
+                        case MovementTypes::RotationAboutCameraDirection:
+                            m_Translation->RotateSelectedInstanceAboutCameraDirectionVector(
+                                m_PreviousMousePoint, inPoint, m_UpdatableEditor);
+                            break;
+                        default:
+                            break;
+                        }
+#endif
+                    }
+                }
+            }
+        } else {
+            QPoint distance = inPoint - m_mouseDownPoint;
+            QPoint subsetDistance = inPoint - m_previousMousePoint;
+
+            switch (theCameraToolMode) {
+            case STUDIO_TOOLMODE_CAMERA_PAN: {
+                m_translation->enableEditCamera(panEditCamera(distance,
+                                                              m_mouseDownCameraInformation.m_position,
+                                                              m_translation->editCameraInfo(),
+                                                              m_viewRect.size()));
+                RequestRender();
+            } break;
+            case STUDIO_TOOLMODE_CAMERA_ZOOM: {
+                qreal theMultiplier = 1.0 + qreal(subsetDistance.y()) / 40.0;
+                m_translation->wheelZoom(theMultiplier);
+                RequestRender();
+            } break;
+            case STUDIO_TOOLMODE_CAMERA_ROTATE: {
+                if (m_translation->editCameraInfo().supportsRotation()) {
+                    if (!rightClick) {
+                        m_translation->enableEditCamera(
+                            rotateEditCamera(subsetDistance,
+                                             m_mouseDownCameraInformation.m_xRotation,
+                                             m_mouseDownCameraInformation.m_yRotation,
+                                             m_translation->editCameraInfo()));
+                    }
+                    m_mouseDownCameraInformation.m_xRotation =
+                        m_translation->editCameraInfo().m_xRotation;
+                    m_mouseDownCameraInformation.m_yRotation =
+                        m_translation->editCameraInfo().m_yRotation;
+                    RequestRender();
+                }
+            } break;
+            default:
+                break;
+            }
+        }
+    } // if ( m_PickResult.m_WidgetId.hasValue() == false )
+#if RUNTIME_SPLIT_TEMPORARILY_REMOVED
+    // We need to do widget-specific dragging.
+    else if (m_pickResult.getType() == StudioPickValueTypes::Widget) {
+        m_Translation->PerformWidgetDrag(m_PickResult.GetWidgetId(), m_MouseDownPoint,
+                                         m_PreviousMousePoint, inPoint, m_UpdatableEditor);
+    } else if (m_PickResult.getType() == StudioPickValueTypes::Guide) {
+        m_Translation->PerformGuideDrag(m_PickResult.getData<Qt3DSDMGuideHandle>(), inPoint,
+                                        m_UpdatableEditor);
+    } else if (m_PickResult.getType() == StudioPickValueTypes::Path) {
+        SPathPick thePick = m_PickResult.getData<SPathPick>();
+        m_Translation->PerformPathDrag(thePick, m_MouseDownPoint, m_PreviousMousePoint, inPoint,
+                                       m_UpdatableEditor);
+    }
+#endif
+    m_previousMousePoint = inPoint;
 }
 
 void Q3DStudioRenderer::OnSceneMouseUp(SceneDragSenderType::Enum)
 {
+    m_maybeDragStart = false;
+    qt3dsdm::Qt3DSDMGuideHandle theSelectedGuide;
+    if (m_pickResult.getType() == StudioPickValueTypes::Guide) {
+        theSelectedGuide = m_pickResult.getData<qt3dsdm::Qt3DSDMGuideHandle>();
+        // TODO:
+        //m_Translation->CheckGuideInPresentationRect(theSelectedGuide, m_UpdatableEditor);
+    }
+    m_updatableEditor.CommitEditor();
+    m_pickResult = SStudioPickValue();
 
+    if (theSelectedGuide.GetHandleValue()) {
+        // Get rid of selection if things aren't editable.
+        if (m_doc.GetDocumentReader().AreGuidesEditable())
+            m_doc.NotifySelectionChanged(theSelectedGuide);
+        else
+            m_doc.NotifySelectionChanged();
+    }
+    RequestRender();
 }
 
 void Q3DStudioRenderer::OnSceneMouseDblClick(SceneDragSenderType::Enum inSenderType, QPoint inPoint)
@@ -530,7 +839,7 @@ void Q3DStudioRenderer::OnSceneMouseWheel(SceneDragSenderType::Enum inSenderType
 {
     Q_ASSERT(inSenderType == SceneDragSenderType::Matte);
     if (inToolMode == STUDIO_TOOLMODE_CAMERA_ZOOM && m_translation.data()) {
-        qreal theMultiplier = 1.0 - inDelta / static_cast<qreal>(120 * g_wheelFactor);
+        qreal theMultiplier = 1.0 - inDelta / qreal(120 * g_wheelFactor);
         m_translation->wheelZoom(theMultiplier);
         RequestRender();
     }

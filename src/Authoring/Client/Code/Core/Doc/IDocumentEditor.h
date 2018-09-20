@@ -498,23 +498,22 @@ struct ScopedDocumentEditor
 
 class CUpdateableDocumentEditor
 {
-    IDoc &m_EditorIDocDoc;
-    const char *m_File;
-    int m_Line;
+    IDoc &m_editorIDocDoc;
+    QString m_file;
+    int m_line;
 
     CUpdateableDocumentEditor(const CUpdateableDocumentEditor &other);
     CUpdateableDocumentEditor &operator=(const CUpdateableDocumentEditor &other);
 
 public:
     CUpdateableDocumentEditor(IDoc &inDoc)
-        : m_EditorIDocDoc(inDoc)
-        , m_File(NULL)
+        : m_editorIDocDoc(inDoc)
     {
     }
     ~CUpdateableDocumentEditor();
-    IDoc &GetEditorDoc() { return m_EditorIDocDoc; }
+    IDoc &GetEditorDoc() { return m_editorIDocDoc; }
     bool HasEditor() const;
-    IDocumentEditor &EnsureEditor(const wchar_t *inCommandName, const char *inFile, int inLine);
+    IDocumentEditor &EnsureEditor(const QString &inCommandName, const char *inFile, int inLine);
     void FireImmediateRefresh(qt3dsdm::Qt3DSDMInstanceHandle *inInstances, long inInstanceCount);
     void FireImmediateRefresh(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     {

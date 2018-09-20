@@ -147,7 +147,6 @@ public:
     Q3DSTranslation(Q3DStudioRenderer &inRenderer);
 
 protected:
-    void markDirty(qt3dsdm::Qt3DSDMInstanceHandle instance);
     void markPropertyDirty(qt3dsdm::Qt3DSDMInstanceHandle instance,
                            qt3dsdm::Qt3DSDMPropertyHandle property);
     void releaseTranslation(qt3dsdm::Qt3DSDMInstanceHandle instance);
@@ -214,6 +213,7 @@ private:
 
     ThandleTranslatorOption findTranslator(THandleTranslatorPairList &list,
                                            qt3dsdm::Qt3DSDMInstanceHandle instance);
+    THandleTranslatorPairList &getTranslatorsForInstance(qt3dsdm::Qt3DSDMInstanceHandle instance);
 
     Q3DStudioRenderer &m_studioRenderer;
 
@@ -310,6 +310,13 @@ public:
     SEditCameraPersistentInformation editCameraInfo() const;
     void enableSceneCameras(bool enable);
     void wheelZoom(qreal factor);
+
+    void markDirty(qt3dsdm::Qt3DSDMInstanceHandle instance);
+    void markDirty(qt3dsdm::Qt3DSDMInstanceHandle *inInstance, long inInstanceCount)
+    {
+        for (long idx = 0; idx < inInstanceCount; ++idx)
+            markDirty(inInstance[idx]);
+    }
 };
 
 }

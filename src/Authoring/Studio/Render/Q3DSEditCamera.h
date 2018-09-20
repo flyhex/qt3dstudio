@@ -55,24 +55,19 @@ enum class EditCameraTypes
 };
 
 const qreal g_editCameraFOV = 45.0;
-const qreal g_rotationScaleFactor = 2.0 * qreal(M_PI) / 180.0;
+const qreal g_rotationScaleFactor = 2.0 * qreal(M_PI);
 
 struct SEditCameraPersistentInformation
 {
     QString m_name;
     QVector3D m_position;
     QVector3D m_direction;
-    qreal m_viewRadius;
-    qreal m_xRotation = 0.;
-    qreal m_yRotation = 0.;
-    EditCameraTypes m_cameraType;
-    bool m_initialized = false;
+    qreal m_xRotation = 0.0;
+    qreal m_yRotation = 0.0;
+    qreal m_viewRadius = 600.0;
 
-    SEditCameraPersistentInformation()
-        : m_viewRadius(600.f)
-        , m_cameraType(EditCameraTypes::Perspective)
-    {
-    }
+    EditCameraTypes m_cameraType = EditCameraTypes::Perspective;
+    bool m_initialized = false;
 
     QMatrix4x4 rotationMatrix() const;
 
@@ -85,6 +80,8 @@ struct SEditCameraPersistentInformation
     bool orthographic() const { return m_cameraType != EditCameraTypes::Perspective; }
 
     bool supportsRotation() const { return m_cameraType != EditCameraTypes::Directional; }
+
+    qreal zoomFactor(const QSizeF &viewport) const;
 };
 
 }

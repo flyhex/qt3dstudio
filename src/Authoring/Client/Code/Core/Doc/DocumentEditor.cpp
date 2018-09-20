@@ -5377,48 +5377,49 @@ ScopedDocumentEditor::ScopedDocumentEditor(IDoc &inDoc, const Q3DStudio::CString
 CUpdateableDocumentEditor::~CUpdateableDocumentEditor()
 {
     if (HasEditor()) {
-        qCWarning(qt3ds::WARNING) << m_File << "(" << m_Line
+        qCWarning(qt3ds::WARNING) << m_file << "(" << m_line
                                   << "): Document editor committed upon destruction";
         CommitEditor();
     }
 }
 
-IDocumentEditor &CUpdateableDocumentEditor::EnsureEditor(const wchar_t *inCommandName,
+IDocumentEditor &CUpdateableDocumentEditor::EnsureEditor(const QString &inCommandName,
                                                          const char *inFile, int inLine)
 {
     if (!HasEditor()) {
-        m_File = inFile;
-        m_Line = inLine;
+        m_file = inFile;
+        m_line = inLine;
     }
-    return m_EditorIDocDoc.MaybeOpenTransaction(inCommandName, inFile, inLine);
+    return m_editorIDocDoc.MaybeOpenTransaction(
+                CString::fromQString(inCommandName), inFile, inLine);
 }
 
 bool CUpdateableDocumentEditor::HasEditor() const
 {
-    return m_EditorIDocDoc.IsTransactionOpened() && m_File != NULL;
+    return m_editorIDocDoc.IsTransactionOpened() && !m_file.isEmpty();
 }
 
 void CUpdateableDocumentEditor::FireImmediateRefresh(qt3dsdm::Qt3DSDMInstanceHandle *inInstances,
                                                      long inInstanceCount)
 {
-    m_EditorIDocDoc.GetCore()->GetDispatch()->FireImmediateRefreshInstance(inInstances,
+    m_editorIDocDoc.GetCore()->GetDispatch()->FireImmediateRefreshInstance(inInstances,
                                                                            inInstanceCount);
 }
 
 void CUpdateableDocumentEditor::CommitEditor()
 {
     if (HasEditor()) {
-        m_EditorIDocDoc.CloseTransaction();
-        m_File = NULL;
+        m_editorIDocDoc.CloseTransaction();
+        m_file.clear();
     }
 }
 
 void CUpdateableDocumentEditor::RollbackEditor()
 {
     if (HasEditor()) {
-        m_EditorIDocDoc.RollbackTransaction();
-        m_EditorIDocDoc.CloseTransaction();
-        m_File = NULL;
+        m_editorIDocDoc.RollbackTransaction();
+        m_editorIDocDoc.CloseTransaction();
+        m_file.clear();
     }
 }
 

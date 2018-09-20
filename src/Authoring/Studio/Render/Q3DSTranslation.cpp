@@ -1581,8 +1581,9 @@ Q3DSTranslation::Q3DSTranslation(Q3DStudioRenderer &inRenderer)
 
     qt3dsdm::IStudioFullSystemSignalProvider *theProvider = m_fullSystem.GetSignalProvider();
     m_signalConnections.push_back(
-        theProvider->ConnectInstanceCreated(std::bind(&Q3DSTranslation::markDirty,
-                                                      this, std::placeholders::_1)));
+        theProvider->ConnectInstanceCreated(
+                    std::bind(static_cast<void(Q3DSTranslation::*)(qt3dsdm::Qt3DSDMInstanceHandle)>
+                              (&Q3DSTranslation::markDirty), this, std::placeholders::_1)));
     m_signalConnections.push_back(theProvider->ConnectInstanceDeleted(
         std::bind(&Q3DSTranslation::releaseTranslation, this, std::placeholders::_1)));
     m_signalConnections.push_back(
@@ -1604,9 +1605,29 @@ Q3DSTranslation::Q3DSTranslation(Q3DStudioRenderer &inRenderer)
         std::bind(&Q3DSTranslation::markComponentSeconds, this, std::placeholders::_1)));
 }
 
-void Q3DSTranslation::markDirty(qt3dsdm::Qt3DSDMInstanceHandle)
+Q3DSTranslation::THandleTranslatorPairList &Q3DSTranslation::getTranslatorsForInstance(
+        qt3dsdm::Qt3DSDMInstanceHandle instance)
 {
+    TInstanceToTranslatorMap::iterator theTranslatorList;
+    if (!m_translatorMap.contains(instance))
+        theTranslatorList = m_translatorMap.insert(instance, THandleTranslatorPairList());
+    else
+        theTranslatorList = m_translatorMap.find(instance);
+    return *theTranslatorList;
+}
 
+void Q3DSTranslation::markDirty(qt3dsdm::Qt3DSDMInstanceHandle instance)
+{
+    // Anchor points are not handled individually.
+    if (m_reader.GetObjectTypeName(instance) == L"PathAnchorPoint")
+        instance = m_assetGraph.GetParent(instance);
+    getOrCreateTranslator(instance);
+
+    THandleTranslatorPairList &theTranslators = getTranslatorsForInstance(instance);
+    for (int idx = 0, end = theTranslators.size(); idx < end; ++idx)
+        m_dirtySet.insert(*theTranslators[idx].second);
+
+    m_studioRenderer.RequestRender();
 }
 
 void Q3DSTranslation::markPropertyDirty(qt3dsdm::Qt3DSDMInstanceHandle instance,

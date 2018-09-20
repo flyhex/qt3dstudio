@@ -45,6 +45,9 @@
 #include "Core.h"
 #include "Dispatch.h"
 #include "Q3DSEditCamera.h"
+#include "StudioPickValues.h"
+#include "Qt3DSDMGuides.h"
+#include "IDocumentEditor.h"
 
 #include <q3dsruntime2api_p.h>
 #include <QtWidgets/qopenglwidget.h>
@@ -58,6 +61,23 @@ class QRenderAspect;
 QT_END_NAMESPACE
 
 namespace Q3DStudio {
+
+enum class PickTargetAreas
+{
+    Presentation = 0,
+    Matte,
+};
+
+enum class MovementTypes
+{
+    Unknown = 0,
+    Translate,
+    TranslateAlongCameraDirection,
+    Scale,
+    ScaleZ,
+    Rotation,
+    RotationAboutCameraDirection,
+};
 
 class Q3DSTranslation;
 class Q3DStudioRenderer : public IStudioRenderer,
@@ -141,6 +161,9 @@ private:
                                       qreal innerRight, qreal innerBottom, qreal innerTop,
                                       qreal outerLeft, qreal outerRight);
 
+    PickTargetAreas getPickArea(CPt inPoint);
+    qt3ds::foundation::Option<qt3dsdm::SGuideInfo> pickRulers(CPt inMouseCoords);
+
     CDispatch &m_dispatch;
     CDoc &m_doc;
     qt3dsdm::TSignalConnectionPtr m_selectionSignal;
@@ -159,6 +182,14 @@ private:
     bool m_hasPresentation = false;
     bool m_renderRequested = false;
     int m_editCameraIndex = -1;
+    SStudioPickValue m_pickResult;
+    CUpdateableDocumentEditor m_updatableEditor;
+    QPoint m_mouseDownPoint;
+    QPoint m_previousMousePoint;
+    MovementTypes m_lastDragToolMode = MovementTypes::Unknown;
+    bool m_maybeDragStart = false;
+    SEditCameraPersistentInformation m_mouseDownCameraInformation;
+    int m_lastToolMode = 0;
 };
 
 }

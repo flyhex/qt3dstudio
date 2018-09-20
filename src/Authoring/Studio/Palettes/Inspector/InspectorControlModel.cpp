@@ -1537,7 +1537,7 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
     Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.getRenderer());
     theRenderer.MakeContextCurrent();
 
-    m_UpdatableEditor.EnsureEditor(L"Set Property", __FILE__, __LINE__)
+    m_UpdatableEditor.EnsureEditor(QObject::tr("Set Property"), __FILE__, __LINE__)
             .SetInstancePropertyValue(instance, handle, v);
 
     theRenderer.ReleaseContext();

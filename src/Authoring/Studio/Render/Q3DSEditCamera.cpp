@@ -30,14 +30,16 @@
 
 namespace Q3DStudio {
 
+static const qreal g_defaultRadius = qSin(qDegreesToRadians(g_editCameraFOV) / 2.) * 600.;
+
 QMatrix4x4 SEditCameraPersistentInformation::rotationMatrix() const
 {
     QMatrix4x4 rotationMatrix;
     float rx, ry;
     if (m_cameraType == EditCameraTypes::Directional) {
-        rx = !qIsNull(m_direction.x()) ? (m_direction.x() < 0.f ? 90.f : 270.f): 0.f;
-        rx += m_direction.z() > 0.f ? 0.f : 180.f;
-        ry = !qIsNull(m_direction.y()) ? (m_direction.y() < 0.f ? 90.f : -90.f): 0.f;
+        rx = !qFuzzyIsNull(m_direction.x()) ? (m_direction.x() < 0.f ? 90.f : 270.f) : 0.f;
+        rx += !qFuzzyIsNull(m_direction.z()) ? (m_direction.z() < 0.f ? 180.f : 0.f) : 0.f;
+        ry = !qFuzzyIsNull(m_direction.y()) ? (m_direction.y() < 0.f ? 90.f : -90.f) : 0.f;
     } else {
         rx = float(m_xRotation);
         ry = float(-m_yRotation);
@@ -74,35 +76,38 @@ void SEditCameraPersistentInformation::applyToCamera(Q3DSCameraNode &camera,
         changeList.append(camera.setOrthographic(true));
     }
 
-    // The view radius dictates the zoom.
-    float zoom = 1.f;
-    if (camera.orthographic()) {
-        float theViewport = qMin(viewport.width(), viewport.height());
-        zoom = (m_viewRadius * 2.f) / theViewport;
-    } else {
-        // We know the hypotenuse is 600.
-        // So if we want to zoom the scene, we do this.
-        zoom = m_viewRadius / (qSin(qDegreesToRadians(camera.fov()) / 2.f) * 600.f);
-    }
+    qreal zoom = zoomFactor(viewport);
 
     QVector3D pos = m_position - front() * 600.f;
 
     float rx, ry;
     if (m_cameraType == EditCameraTypes::Directional) {
-        rx = !qIsNull(m_direction.x()) ? (m_direction.x() < 0.f ? 90.f : 270.f): 0.f;
-        rx += m_direction.z() > 0.f ? 0.f : 180.f;
-        ry = !qIsNull(m_direction.y()) ? (m_direction.y() < 0.f ? 90.f : -90.f): 0.f;
+        rx = !qFuzzyIsNull(m_direction.x()) ? (m_direction.x() < 0.f ? 90.f : 270.f) : 0.f;
+        rx += !qFuzzyIsNull(m_direction.z()) ? (m_direction.z() < 0.f ? 180.f : 0.f) : 0.f;
+        ry = !qFuzzyIsNull(m_direction.y()) ? (m_direction.y() < 0.f ? 90.f : -90.f) : 0.f;
     } else {
         rx = float(m_xRotation);
         ry = float(-m_yRotation);
     }
 
     changeList.append(camera.setPosition(pos));
-    changeList.append(camera.setZoom(zoom));
+    changeList.append(camera.setZoom(float(zoom)));
     changeList.append(camera.setRotation(QVector3D(ry, rx, 0)));
 
     if (!changeList.isEmpty())
         camera.notifyPropertyChanges(changeList);
+}
+
+qreal SEditCameraPersistentInformation::zoomFactor(const QSizeF &viewport) const
+{
+    qreal zoom = 1.;
+    if (m_cameraType != EditCameraTypes::Perspective) {
+        qreal theViewport = qMin(viewport.width(), viewport.height());
+        zoom = 2. * m_viewRadius / theViewport;
+    } else {
+        zoom = m_viewRadius / g_defaultRadius;
+    }
+    return zoom;
 }
 
 }

@@ -34,10 +34,7 @@
 #include "Qt3DSDMHandles.h"
 #include "StaticMaxSize.h"
 
-namespace qt3ds {
-namespace studio {
-    using qt3dsdm::Qt3DSDMInstanceHandle;
-    using qt3dsdm::Qt3DSDMGuideHandle;
+namespace Q3DStudio {
 
     struct StudioPickValueTypes
     {
@@ -89,7 +86,7 @@ namespace studio {
     };
 
     template <>
-    struct SStudioPickValueTypeMap<Qt3DSDMInstanceHandle>
+    struct SStudioPickValueTypeMap<qt3dsdm::Qt3DSDMInstanceHandle>
     {
         static StudioPickValueTypes::Enum GetType() { return StudioPickValueTypes::Instance; }
     };
@@ -101,7 +98,7 @@ namespace studio {
     };
 
     template <>
-    struct SStudioPickValueTypeMap<Qt3DSDMGuideHandle>
+    struct SStudioPickValueTypeMap<qt3dsdm::Qt3DSDMGuideHandle>
     {
         static StudioPickValueTypes::Enum GetType() { return StudioPickValueTypes::Guide; }
     };
@@ -179,7 +176,7 @@ namespace studio {
     struct SStudioPickValue : public TStudioPickValueType
     {
         SStudioPickValue() {}
-        SStudioPickValue(Qt3DSDMInstanceHandle inst)
+        SStudioPickValue(qt3dsdm::Qt3DSDMInstanceHandle inst)
             : TStudioPickValueType(inst)
         {
         }
@@ -187,7 +184,7 @@ namespace studio {
             : TStudioPickValueType(inst)
         {
         }
-        SStudioPickValue(Qt3DSDMGuideHandle inst)
+        SStudioPickValue(qt3dsdm::Qt3DSDMGuideHandle inst)
             : TStudioPickValueType(inst)
         {
         }
@@ -211,7 +208,6 @@ namespace studio {
             return 0;
         }
     };
-}
 }
 
 #endif
