@@ -69,6 +69,7 @@
 #include <QtCore/qurl.h>
 #include <QtCore/qdir.h>
 #include <QtCore/qprocess.h>
+#include <QtGui/qfontdatabase.h>
 
 // Constants
 const long PLAYBACK_TIMER_TIMEOUT = 10; // 10 milliseconds
@@ -88,6 +89,10 @@ CMainFrame::CMainFrame()
     , m_propSheet(nullptr)
 {
     m_ui->setupUi(this);
+
+    // Register TitilliumWeb as application font in case user doesn't have it already installed
+    QFontDatabase::addApplicationFont(QStringLiteral(":/TitilliumWeb-Light.ttf"));
+    QFontDatabase::addApplicationFont(QStringLiteral(":/TitilliumWeb-Regular.ttf"));
 
     OnCreate();
 
