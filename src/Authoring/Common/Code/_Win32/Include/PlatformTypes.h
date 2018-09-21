@@ -31,8 +31,8 @@
 //	Prefix
 //==============================================================================
 
-#ifndef __PLATFORMTYPES_H__
-#define __PLATFORMTYPES_H__
+#ifndef Q3DS_PLATFORMTYPES_H
+#define Q3DS_PLATFORMTYPES_H
 
 //==============================================================================
 //	This is the WIN32 file that defines the cross-platform data types used
@@ -137,4 +137,4 @@ typedef struct tagPIXELFORMATDESCRIPTOR {
 
 #endif // WIN32
 
-#endif // __PLATFORMTYPES_H__
+#endif // Q3DS_PLATFORMTYPES_H

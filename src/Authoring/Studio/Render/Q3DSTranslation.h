@@ -156,6 +156,7 @@ private:
     QVector<TSignalConnection> m_signalConnections;
     quint32 m_componentSecondsDepth;
     QVector<Q3DSGraphObjectTranslator *> m_slideTranslators;
+    QMap<qt3dsdm::Qt3DSDMInstanceHandle, Q3DSGraphObjectTranslator *> m_masterSlideMap;
     QVector<Q3DSCameraTranslator *> m_cameraTranslators;
     QRect m_rect;
     QSize m_size;

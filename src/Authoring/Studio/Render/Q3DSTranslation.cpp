@@ -760,6 +760,7 @@ public:
         ITERATE_Q3DS_SCENE_PROPERTIES
         theItem.removeAllChildNodes();
         int childCount = inContext.assetGraph().GetChildCount(instanceHandle());
+        QVector<Q3DSGraphObjectTranslator *> translators;
         for (long idx = 0; idx < childCount; ++idx) {
             qt3dsdm::Qt3DSDMInstanceHandle layer =
                 inContext.assetGraph().GetChild(instanceHandle(), idx);
@@ -768,10 +769,12 @@ public:
                 Q3DSLayerNode *theLayerObj
                         = static_cast<Q3DSLayerNode *>(&translator->graphObject());
                 theItem.appendChildNode(theLayerObj);
-                translator->pushTranslation(inContext);
+                translators << translator;
             }
         }
         theItem.resolveReferences(*inContext.presentation());
+        for (auto t : qAsConst(translators))
+            t->pushTranslation(inContext);
     }
 
     void appendChild(Q3DSGraphObject &inChild) override
@@ -995,6 +998,15 @@ public:
 
     }
 
+    bool canAddChild(Q3DSGraphObjectTranslator *child)
+    {
+        if (!child->graphObject().parent())
+            return true;
+        Q_ASSERT_X(child->graphObject().parent() == &graphObject(), __FUNCTION__,
+                   "Child has another parent");
+        return false;
+    }
+
     void pushTranslation(Q3DSTranslation &inContext) override
     {
         Q3DSNodeTranslator::pushTranslation(inContext);
@@ -1011,9 +1023,10 @@ public:
             Q3DSGraphObjectTranslator *childTranslator
                     = inContext.getOrCreateTranslator(childInstance);
             if (childTranslator) {
-                if (isMaterial(childTranslator->graphObject()))
+                if (isMaterial(childTranslator->graphObject()) && canAddChild(childTranslator)) {
                     theItem.appendChildNode(&childTranslator->graphObject());
-                childTranslator->pushTranslation(inContext);
+                    childTranslator->pushTranslation(inContext);
+                }
             }
         }
         theItem.resolveReferences(*inContext.presentation());
@@ -1620,15 +1633,27 @@ Q3DSTranslation::Q3DSTranslation(Q3DStudioRenderer &inRenderer)
     std::shared_ptr<qt3dsdm::ISlideSystem> slideSystem = m_fullSystem.GetSlideSystem();
     qt3dsdm::TSlideHandleList slideList;
     slideCore->GetSlides(slideList);
+
+    // Pass 1. Create slide translators
     for (qt3dsdm::TSlideHandleList::iterator it = slideList.begin(); it < slideList.end(); ++it) {
         qt3dsdm::Qt3DSDMInstanceHandle instance(slideCore->GetSlideInstance(*it));
+        qt3dsdm::Qt3DSDMInstanceHandle component(m_reader.GetComponentForSlide(*it));
         Q3DSGraphObjectTranslator *translator = getOrCreateTranslator(instance);
         Q3DSSlide &slide = static_cast<Q3DSSlide&>(translator->graphObject());
-        if (m_reader.IsMasterSlide(*it)) {
-            m_slideTranslators.push_front(translator);
-            static_cast<Q3DSSlideTranslator *>(m_slideTranslators[0])->setMasterSlide(true);
-        } else {
+
+        if (component.Valid()) {
             m_slideTranslators.push_back(translator);
+            Q3DSGraphObjectTranslator *componentTranslator = getOrCreateTranslator(component);
+
+            if (m_reader.IsMasterSlide(*it)) {
+                m_masterSlideMap.insert(component, translator);
+                if (componentTranslator->graphObject().type() == Q3DSGraphObject::Scene) {
+                    m_presentation->setMasterSlide(&slide);
+                } else {
+                    static_cast<Q3DSComponentNode &>(componentTranslator->graphObject())
+                        .setMasterSlide(&slide);
+                }
+            }
         }
         qt3dsdm::TInstanceHandleList slideInstances;
         slideSystem->GetAssociatedInstances(*it, slideInstances);
@@ -1643,10 +1668,22 @@ Q3DSTranslation::Q3DSTranslation(Q3DStudioRenderer &inRenderer)
             }
         }
     }
-    m_presentation->setMasterSlide(
-                static_cast<Q3DSSlide*>(&m_slideTranslators[0]->graphObject()));
-    for (int i = 1; i < m_slideTranslators.size(); ++i)
-        m_slideTranslators[0]->appendChild(m_slideTranslators[i]->graphObject());
+
+    // Pass 2. Add child slides to master slides
+    for (qt3dsdm::TSlideHandleList::iterator it = slideList.begin(); it < slideList.end(); ++it) {
+        qt3dsdm::Qt3DSDMInstanceHandle instance(slideCore->GetSlideInstance(*it));
+        qt3dsdm::Qt3DSDMInstanceHandle component(m_reader.GetComponentForSlide(*it));
+        Q3DSGraphObjectTranslator *translator = getOrCreateTranslator(instance);
+        Q3DSSlide &slide = static_cast<Q3DSSlide &>(translator->graphObject());
+
+        if (component.Valid() && getOrCreateTranslator(component)) {
+            m_slideTranslators.push_back(translator);
+            if (!m_reader.IsMasterSlide(*it)) {
+                Q3DSGraphObjectTranslator *slideTranslator = m_masterSlideMap[component];
+                slideTranslator->graphObject().appendChildNode(&slide);
+            }
+        }
+    }
 
     qt3dsdm::IStudioFullSystemSignalProvider *theProvider = m_fullSystem.GetSignalProvider();
     m_signalConnections.push_back(
@@ -1757,6 +1794,26 @@ QByteArray Q3DSTranslation::getInstanceObjectId(qt3dsdm::Qt3DSDMInstanceHandle i
                     .RegisterStr(theId.toQString());
         ret = rid.qstring().toLatin1();
     }
+
+    // slides require component name prepended
+    if (m_objectDefinitions.GetType(instance) == qt3dsdm::ComposerObjectTypes::Slide) {
+        qt3dsdm::Qt3DSDMSlideHandle slide(m_fullSystem.GetSlideSystem()
+                                          ->GetSlideByInstance(instance));
+        qt3dsdm::Qt3DSDMInstanceHandle component(m_reader.GetComponentForSlide(slide));
+        if (component.Valid()) {
+            Q3DStudio::CString cId = m_reader.GetFileId(component);
+            if (!theId.size())
+                cId = m_reader.GetName(component);
+            QString qcid(cId.toQString());
+            qcid.append(QLatin1String("-"));
+            ret = qcid.toLatin1().append(ret);
+        } else if (ret.isEmpty()) {
+            ret = QByteArrayLiteral("Master Slide");
+        } else if (ret != QByteArrayLiteral("Master Slide")){
+            ret = QByteArrayLiteral("Master-").append(ret);
+        }
+    }
+
     return ret;
 }
 
