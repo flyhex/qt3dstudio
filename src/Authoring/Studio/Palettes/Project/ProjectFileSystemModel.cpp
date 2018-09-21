@@ -440,19 +440,24 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url)
         QObject *qmlRoot = nullptr;
         if (extension == QLatin1String("qml")) {
             qmlEngine.load(sourceFile);
-            const char *rootClassName = qmlEngine.rootObjects().at(0)
-                                        ->metaObject()->superClass()->className();
-
-            // the assumption here is that any qml that is not a behavior is a qml stream
-            if (strcmp(rootClassName, "Q3DStudio::Q3DSQmlBehavior") != 0) { // not a behavior
-                qmlRoot = qmlEngine.rootObjects().at(0);
-
-                // put the qml in the correct folder
-                if (targetDir.path().endsWith(QLatin1String("/scripts"))) {
-                    const QString path(QStringLiteral("../qml streams"));
-                    targetDir.mkpath(path); // create the folder if doesn't exist (i.e. old project)
-                    targetDir.cd(path);
+            if (qmlEngine.rootObjects().size() > 0) {
+                const char *rootClassName = qmlEngine.rootObjects().at(0)
+                                            ->metaObject()->superClass()->className();
+                // the assumption here is that any qml that is not a behavior is a qml stream
+                if (strcmp(rootClassName, "Q3DStudio::Q3DSQmlBehavior") != 0) { // not a behavior
+                    qmlRoot = qmlEngine.rootObjects().at(0);
+                    // put the qml in the correct folder
+                    if (targetDir.path().endsWith(QLatin1String("/scripts"))) {
+                        const QString path(QStringLiteral("../qml streams"));
+                        targetDir.mkpath(path); // create the folder if doesn't exist
+                        targetDir.cd(path);
+                    }
                 }
+            } else {
+                // Invalid qml file, block import
+                g_StudioApp.GetDialogs()->DisplayKnownErrorDialog(
+                            tr("Failed to parse '%1'\nAborting import.").arg(sourceFile));
+                return;
             }
         }
         // Copy the file to target directory

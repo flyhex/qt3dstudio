@@ -1990,9 +1990,11 @@ QSize CStudioApp::getRenderableSize(const QString &renderableId)
                     r.m_size = PresentationFile::readSize(path);
                 } else { // QML stream
                     QQmlApplicationEngine qmlEngine(path);
-                    QQuickItem *item = qobject_cast<QQuickItem *>(qmlEngine.rootObjects().at(0));
-                    if (item)
-                        r.m_size = QSize(qRound(item->width()), qRound(item->height()));
+                    if (qmlEngine.rootObjects().size() > 0) {
+                        QQuickItem *item = qobject_cast<QQuickItem *>(qmlEngine.rootObjects().at(0));
+                        if (item)
+                            r.m_size = QSize(qRound(item->width()), qRound(item->height()));
+                    }
                 }
             }
             return r.m_size;

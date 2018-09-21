@@ -57,11 +57,13 @@ SObjectFileType ImportUtils::GetObjectFileTypeForFile(const CFilePath &inFile,
     } else if (theExtension.Compare(CDialogs::GetQmlFileExtension(),
                                     Q3DStudio::CString::ENDOFSTRING, false)) {
         QQmlApplicationEngine qmlEngine(inFile.absoluteFilePath());
-        const char *rootClassName = qmlEngine.rootObjects().at(0)
-                                    ->metaObject()->superClass()->className();
-        bool isQmlStream =  strcmp(rootClassName, "Q3DStudio::Q3DSQmlBehavior") != 0;
-        return isQmlStream ? SObjectFileType(OBJTYPE_QML_STREAM, DocumentEditorFileType::QmlStream)
-                           : SObjectFileType(OBJTYPE_BEHAVIOR, DocumentEditorFileType::Behavior);
+        if (qmlEngine.rootObjects().size() > 0) {
+            const char *rootClassName = qmlEngine.rootObjects().at(0)
+                                        ->metaObject()->superClass()->className();
+            bool isQmlStream =  strcmp(rootClassName, "Q3DStudio::Q3DSQmlBehavior") != 0;
+            return isQmlStream ? SObjectFileType(OBJTYPE_QML_STREAM, DocumentEditorFileType::QmlStream)
+                               : SObjectFileType(OBJTYPE_BEHAVIOR, DocumentEditorFileType::Behavior);
+        } // If qml file is invalid, it will be of unknown type
     } else if (CDialogs::IsFontFileExtension(theExtension)) {
         return SObjectFileType(OBJTYPE_TEXT, DocumentEditorFileType::Font);
     } else if (CDialogs::IsEffectFileExtension(theExtension)) {
