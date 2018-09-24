@@ -307,6 +307,9 @@ namespace render {
         if (!m_Layer.m_Flags.IsActive())
             return;
 
+        // Ensure we clear the widget layer always
+        m_Renderer.LayerNeedsFrameClear(*static_cast<SLayerRenderData *>(this));
+
         if (m_IRenderWidgets.size() < MAX_LAYER_WIDGETS)
             m_IRenderWidgets.push_back(&inWidget);
     }
