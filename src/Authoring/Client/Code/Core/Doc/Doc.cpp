@@ -814,7 +814,7 @@ void CDoc::DeselectAllItems(bool inSendEvent)
     if (inSendEvent)
         NotifySelectionChanged();
     else
-        SetSelection();
+        m_unnotifiedSelectionChange = SetSelection();
 
     // Remove selection on keyframes.
     DeselectAllKeyframes();
@@ -1103,9 +1103,11 @@ bool CDoc::SetSelection(Q3DStudio::SSelectedValue inNewSelection)
 void CDoc::NotifySelectionChanged(Q3DStudio::SSelectedValue inNewSelection)
 {
     m_SelectedValue = inNewSelection;
-    if (SetSelection(inNewSelection)) {
+    if (SetSelection(inNewSelection))
         m_Core->GetDispatch()->FireSelectionChange(inNewSelection);
-    }
+    else if (m_unnotifiedSelectionChange)
+        m_Core->GetDispatch()->FireSelectionChange(m_SelectedObject);
+    m_unnotifiedSelectionChange = false;
 }
 
 template <typename TDataType>
@@ -2883,6 +2885,8 @@ QString CDoc::GetDocumentUIAFile(bool master)
     return file.isEmpty() ? masterFile : file;
 }
 
+// TODO: use ProjectFile class framework to parse subpresentations and add datainput use
+// information from them to the map as well
 void CDoc::UpdateDatainputMap(
         const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
         QMultiMap<QString,

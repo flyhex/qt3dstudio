@@ -126,7 +126,8 @@ public:
                              qt3dsdm::IDataCore &inDataCore, qt3dsdm::ISlideSystem &inSlideSystem,
                              qt3dsdm::SComposerObjectDefinitions &inObjectDefs,
                              Q3DStudio::CGraph &inAssetGraph, qt3dsdm::IMetaData &inMetaData,
-                             TInstanceHandle inTargetId = TInstanceHandle());
+                             TInstanceHandle inTargetId = TInstanceHandle(),
+                             bool setTimeRange = true);
 
     static TInstanceHandle CreateSceneGraphInstance(
         Qt3DSDMInstanceHandle inMaster, TInstanceHandle parent, TSlideHandle inSlide,
@@ -148,14 +149,16 @@ public:
     virtual TInstanceHandle
     CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Enum type, TInstanceHandle parent,
                              TSlideHandle inSlide,
-                             TInstanceHandle inTargetId = TInstanceHandle()) = 0;
+                             TInstanceHandle inTargetId = TInstanceHandle(),
+                             bool setTimeRange = true) = 0;
 
     virtual TInstanceHandle CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Enum type,
                                                      TInstanceHandle parent, TSlideHandle inSlide,
                                                      DocumentEditorInsertType::Enum inInsertType,
                                                      const CPt &inPosition,
                                                      EPrimitiveType inPrimitiveType,
-                                                     long inStartTime) = 0;
+                                                     long inStartTime,
+                                                     bool setTimeRange = true) = 0;
     virtual void setInstanceImagePropertyValueAsRenderable(TInstanceHandle instance,
                                                            TPropertyHandle prop,
                                                            const CString &pId) = 0;
@@ -320,15 +323,15 @@ public:
     virtual void RearrangeObjects(const qt3dsdm::TInstanceHandleList &inInstances,
                                   TInstanceHandle inDest,
                                   DocumentEditorInsertType::Enum inInsertType,
-                                  bool checkUniqueName = true) = 0;
+                                  bool checkUniqueName = true, bool notifyRename = true) = 0;
 
     void RearrangeObject(TInstanceHandle inInstance, TInstanceHandle inDest,
                          DocumentEditorInsertType::Enum inInsertType,
-                         bool checkUniqueName = true)
+                         bool checkUniqueName = true, bool notifyRename = true)
     {
         qt3dsdm::TInstanceHandleList theInstances;
         theInstances.push_back(inInstance);
-        RearrangeObjects(theInstances, inDest, inInsertType, checkUniqueName);
+        RearrangeObjects(theInstances, inDest, inInsertType, checkUniqueName, notifyRename);
     }
 
     virtual void ungroupObjects(const qt3dsdm::TInstanceHandleList &inInstances) = 0;
@@ -455,6 +458,8 @@ public:
 
     virtual void ExternalizePath(TInstanceHandle path) = 0;
     virtual void InternalizePath(TInstanceHandle path) = 0;
+
+    virtual void toggleBoolPropertyOnSelected(TPropertyHandle property) = 0;
 
     static std::shared_ptr<IDOMReader>
     ParseScriptFile(const Q3DStudio::CFilePath &inFullPathToDocument,

@@ -65,6 +65,7 @@ class InspectorControlBase : public QObject
     Q_PROPERTY(int instance MEMBER m_instance CONSTANT)
     Q_PROPERTY(int handle MEMBER m_property CONSTANT)
 
+    Q_PROPERTY(bool enabled MEMBER m_enabled CONSTANT)
     Q_PROPERTY(bool animatable MEMBER m_animatable CONSTANT)
     Q_PROPERTY(bool animated MEMBER m_animated NOTIFY animatedChanged)
     Q_PROPERTY(bool controlled MEMBER m_controlled NOTIFY controlledChanged)
@@ -93,6 +94,7 @@ public:
     qt3dsdm::Qt3DSDMInstanceHandle m_instance;
     qt3dsdm::Qt3DSDMPropertyHandle m_property;
 
+    bool m_enabled = true;
     bool m_animatable  = false;
     bool m_animated = false;
     bool m_controlled = false;
@@ -226,7 +228,6 @@ private:
                                        int theIndex, bool disableAnimation = false,
                                        bool isReference = false);
     bool isGroupRebuildRequired(CInspectableBase *inspectable, int theIndex) const;
-
 };
 
 #endif // INSPECTORCONTROLMODEL_H

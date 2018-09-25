@@ -154,6 +154,7 @@ Rectangle {
                 Row {
                     rotation: 90
                     anchors.centerIn: parent
+                    spacing: 5
                     Image {
                         id: dataInputImage2
                         fillMode: Image.Pad
@@ -346,7 +347,7 @@ Rectangle {
                 property string currentController: _parentView.currController
                 property string toolTip: _parentView.toolTip
                 background: Rectangle {
-                    color: "transparent"
+                    color: controlButtonArea.containsMouse ? _studioColor1 : _backgroundColor
                 }
                 MouseArea {
                     id: controlButtonArea
@@ -364,8 +365,8 @@ Rectangle {
                     property bool controlled: parent.controlled
                     source: {
                         _resDir + (controlled
-                                   ? "Objects-DataInput-Normal.png"
-                                   : "Objects-DataInput-Disabled.png")
+                                   ? "Objects-DataInput-Active.png"
+                                   : "Objects-DataInput-Inactive.png")
                     }
                 }
                 StyledTooltip {
@@ -377,7 +378,6 @@ Rectangle {
             StyledLabel {
                 id: dataInputName
                 text: _parentView.currController
-                leftPadding: 10
                 color: _parentView.controlled ? _dataInputColor : "transparent"
             }
         }

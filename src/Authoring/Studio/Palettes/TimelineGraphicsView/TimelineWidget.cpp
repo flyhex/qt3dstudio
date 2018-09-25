@@ -529,15 +529,26 @@ void TimelineWidget::onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 
         Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inInstance, m_binding);
 
-        bool rowExists = binding && binding->getRowTree();
-        if (binding && !rowExists) {
-            auto parentInstance = m_bridge->GetParentInstance(inInstance);
-            Qt3DSDMTimelineItemBinding *bindingParent = getBindingForHandle(parentInstance,
-                                                                            m_binding);
-            RowTree *row = m_graphicsScene->rowManager()
-                           ->createRowFromBinding(binding, bindingParent->getRowTree());
-            row->updateSubpresentations();
-            insertToHandlesMap(binding);
+        if (!binding) {
+            // if binding is not found, refresh it (so far the only known case where this is needed
+            // is when setting a subpresentation on a ref mat row and checking 'Detach material')
+            m_fullReconstruct = true;
+            if (!m_asyncUpdateTimer.isActive())
+                m_asyncUpdateTimer.start();
+        } else {
+            if (!binding->getRowTree()) { // row doesn't exist
+                auto parentInstance = m_bridge->GetParentInstance(inInstance);
+                Qt3DSDMTimelineItemBinding *bindingParent = getBindingForHandle(parentInstance,
+                                                                                m_binding);
+                if (bindingParent) {
+                    RowTree *row = m_graphicsScene->rowManager()
+                                   ->createRowFromBinding(binding, bindingParent->getRowTree());
+                    row->updateSubpresentations();
+                    insertToHandlesMap(binding);
+                } else {
+                    qWarning() << "Binding parent was not found.";
+                }
+            }
         }
     }
 }

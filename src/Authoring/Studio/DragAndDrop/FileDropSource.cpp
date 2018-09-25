@@ -52,7 +52,8 @@ bool CFileDropSource::ValidateTarget(CDropTarget *inTarget)
     EStudioObjectType targetType = (EStudioObjectType)inTarget->GetObjectType();
 
     if (m_ObjectType & (OBJTYPE_PRESENTATION | OBJTYPE_QML_STREAM)) {
-        SetHasValidTarget(targetType & (OBJTYPE_LAYER | OBJTYPE_MATERIAL | OBJTYPE_IMAGE));
+        SetHasValidTarget(targetType & (OBJTYPE_LAYER | OBJTYPE_MATERIAL | OBJTYPE_CUSTOMMATERIAL
+                                        | OBJTYPE_REFERENCEDMATERIAL | OBJTYPE_IMAGE));
         return m_HasValidTarget;
     }
 
@@ -190,21 +191,45 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
                                         .relativeFilePath(theFilePath.toQString());
             Q3DStudio::CString presentationId = Q3DStudio::CString::fromQString(theDoc.GetCore()
                                                 ->getProjectFile().getPresentationId(pathFromRoot));
-            EStudioObjectType rowType = theDoc.GetStudioSystem()->GetClientDataModelBridge()
-                   ->GetObjectType(inTarget);
+            auto &bridge(*theDoc.GetStudioSystem()->GetClientDataModelBridge());
+            EStudioObjectType rowType = bridge.GetObjectType(inTarget);
 
             if (rowType == OBJTYPE_LAYER) {
                 qt3dsdm::Qt3DSDMPropertyHandle propHandle = theDoc.GetPropertySystem()
                         ->GetAggregateInstancePropertyByName(inTarget, L"sourcepath");
                 Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
                        ->SetInstancePropertyValueAsRenderable(inTarget, propHandle, presentationId);
-            } else if (rowType == OBJTYPE_MATERIAL) {
-                ChooseImagePropertyDlg dlg(inTarget);
+            } else if (rowType & (OBJTYPE_MATERIAL | OBJTYPE_CUSTOMMATERIAL
+                                  | OBJTYPE_REFERENCEDMATERIAL)) {
+                // if this is a ref material, update the material it references
+                qt3dsdm::Qt3DSDMInstanceHandle refInstance = 0;
+                if (rowType == OBJTYPE_REFERENCEDMATERIAL) {
+                    auto optValue = theDoc.getSceneEditor()->GetInstancePropertyValue(inTarget,
+                                    bridge.GetObjectDefinitions().m_ReferencedMaterial
+                                    .m_ReferencedMaterial.m_Property);
+                    if (optValue.hasValue()) {
+                        refInstance = bridge.GetInstance(theDoc.GetSceneInstance(),
+                                                         optValue.getValue());
+                    }
+                }
+                ChooseImagePropertyDlg dlg(refInstance ? refInstance : inTarget, refInstance != 0);
                 if (dlg.exec() == QDialog::Accepted) {
                     qt3dsdm::Qt3DSDMPropertyHandle propHandle = dlg.getSelectedPropertyHandle();
-                    Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
-                        ->setInstanceImagePropertyValueAsRenderable(inTarget, propHandle,
-                                                                    presentationId);
+                    if (dlg.detachMaterial()) {
+                        Q3DStudio::ScopedDocumentEditor editor(
+                            Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc,
+                                                              tr("Set material sub-presentation")));
+                        editor->BeginAggregateOperation();
+                        editor->SetMaterialType(inTarget, "Standard Material");
+                        editor->setInstanceImagePropertyValueAsRenderable(inTarget, propHandle,
+                                                                          presentationId);
+                        editor->EndAggregateOperation();
+                    } else {
+                        Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
+                        ->setInstanceImagePropertyValueAsRenderable(refInstance ? refInstance
+                                                                                : inTarget,
+                                                                    propHandle, presentationId);
+                    }
                 }
             } else if (rowType == OBJTYPE_IMAGE) {
                 qt3dsdm::Qt3DSDMPropertyHandle propHandle = theDoc.GetPropertySystem()

@@ -51,7 +51,8 @@ void SelectionRect::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
 void SelectionRect::start(const QPointF &origin)
 {
     m_rect.setTopLeft(origin);
-
+    m_rect.setWidth(0);
+    m_rect.setHeight(0);
     m_active = true;
 }
 
@@ -77,7 +78,7 @@ void SelectionRect::end()
     m_active = false;
 }
 
-bool SelectionRect::isActive()
+bool SelectionRect::isActive() const
 {
     return m_active;
 }

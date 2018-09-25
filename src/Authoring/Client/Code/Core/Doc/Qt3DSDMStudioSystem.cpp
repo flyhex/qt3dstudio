@@ -41,6 +41,10 @@
 #include "Qt3DSDMXML.h"
 #include "foundation/IOStreams.h"
 #include "StudioUtils.h"
+#include "Core.h"
+#include "Dispatch.h"
+
+#include <QtCore/qtimer.h>
 
 using namespace std;
 
@@ -184,6 +188,13 @@ void CStudioSystem::ResetDatabase()
     m_StudioSystem = std::shared_ptr<CStudioFullSystem>(new CStudioFullSystem(
         theCore, m_Bridge->GetSlideInstance(), m_Bridge->GetSlideComponentIdProperty(),
         m_Bridge->GetActionInstance(), m_Bridge->GetActionEyeball()));
+
+    m_StudioSystem->GetAnimationSystem()->setRefreshCallback(
+                [this](Qt3DSDMInstanceHandle instance) {
+        QTimer::singleShot(0,[this, instance]() {
+            m_Doc->GetCore()->GetDispatch()->FireImmediateRefreshInstance(instance);
+        });
+    });
 }
 
 IMetaData *CStudioSystem::GetActionMetaData()
@@ -201,7 +212,7 @@ ISlideCore *CStudioSystem::GetSlideCore()
     return m_StudioSystem->GetSlideCore().get();
 }
 
-IPropertySystem *CStudioSystem::GetPropertySystem()
+IPropertySystem *CStudioSystem::GetPropertySystem() const
 {
     return m_StudioSystem->GetPropertySystem().get();
 }

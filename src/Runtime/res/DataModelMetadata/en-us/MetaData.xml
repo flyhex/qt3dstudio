@@ -46,6 +46,9 @@
                 <Property name="fov" formalName="Field of View" description="Viewing angle of the camera\n(how much it can see)" min="1" max="180" default="60">
                         <ShowIfEqual property="orthographic" value="False"/>
                 </Property>
+                <Property name="fovhorizontal" formalName="FOV Horizontal" description="Field of view angle orientation" type="Boolean" default="False">
+                        <ShowIfEqual property="orthographic" value="False"/>
+                </Property>
                 <Property name="clipnear" formalName="Clipping Start" description="Near distance at which objects disappear" min="1" max="1000" default="10" />
                 <Property name="clipfar" formalName="Clipping End" description="Far distance at which objects disappear" default="5000" />
                 <Property name="scalemode" formalName="Scale Mode" description="Render more content as the layer expands\n(same size) or scale up the content (fit)" list="Same Size:Fit:Fit Horizontal:Fit Vertical" default="Fit" />
@@ -227,18 +230,16 @@
                 <Property name="shdwmapfar" formalName="Shadow Far Clip" description="Affects the maximum distance for the shadow\ndepth map" default="5000" />
                 <Property name="shdwmapfov" formalName="Shadow Field of View" description="Affects the field of view of the shadow\ncamera" default="90" min="1" max="179" hidden="True" />
         </Light>
+        <MaterialBase>
+                <Property name="name" formalName="Name" description="Object name" type="String" default="Material" hidden="False" category="Basic Properties" />
+                <Property name="iblprobe" formalName="IBL Override" description="IBL probe to use in place of the\nlayer probe for this material" type="Image" category="Basic Properties" />
+        </MaterialBase>
         <Lightmaps>
-                <Property name="name" formalName="Name" description="Object name" type="String" default="Lightmaps" hidden="False" category="Lighting" />
                 <Property name="lightmapindirect" formalName="Indirect Lightmap" description="Image providing indirect light values\nfor GI" type="Image" category="Lighting" />
                 <Property name="lightmapradiosity" formalName="Radiosity Lightmap" description="Image providing directional light values" type="Image" category="Lighting" />
                 <Property name="lightmapshadow" formalName="Shadow Lightmap" description="Baked Shadow map" type="Image" category="Lighting" />
         </Lightmaps>
-        <MaterialBase>
-                <Property name="name" formalName="Name" description="Object name" type="String" default="MaterialBase" hidden="False" category="Material" />
-                <Property name="iblprobe" formalName="IBL Override" description="IBL probe to use in place of the\nlayer probe for this material" type="Image" category="Material" />
-        </MaterialBase>
         <Material>
-                <Property name="name" formalName="Name" description="Object name" type="String" default="Material" hidden="False" category="Material" />
                 <Property name="shaderlighting" formalName="Lighting" description="Light model" list="Pixel:None" default="Pixel" category="Material" />
                 <Property name="blendmode" formalName="Blending Mode" description="How this material blends with content\nbehind it. Modes marked with * are\navailable only with HW supporting\nadvanced blending modes." list="Normal:Screen:Multiply:*Overlay:*ColorBurn:*ColorDodge" default="Normal" category="Material" />
                 <Property name="vertexcolors" formalName="Enable Vertex Colors" description="Use vertex colors from the mesh" type="Boolean" default="False" animatable="False" category="Material" />
@@ -271,7 +272,6 @@
                 <Property name="diffuselightwrap" formalName="Diffuse Light Wrap" description="Diffuse Light Wrap" type="float" min='0.0' max='1.0' category="Material" />
         </Material>
         <ReferencedMaterial>
-                <Property name="name" formalName="Name" description="Object name" type="String" default="Material" hidden="True" category="Material" />
                 <Property name="referencedmaterial" formalName="Referenced Material" description="Material to use all settings from" type="ObjectRef" category="Material" />
         </ReferencedMaterial>
         <Model>

@@ -372,9 +372,13 @@ bool ProjectView::isQmlStream(int row) const
         return false;
 
     QQmlApplicationEngine qmlEngine(filePath);
-    const char *rootClassName = qmlEngine.rootObjects().at(0)
-                                ->metaObject()->superClass()->className();
-    return strcmp(rootClassName, "Q3DStudio::Q3DSQmlBehavior") != 0;
+    if (qmlEngine.rootObjects().size() > 0) {
+        const char *rootClassName = qmlEngine.rootObjects().at(0)
+                                    ->metaObject()->superClass()->className();
+        return strcmp(rootClassName, "Q3DStudio::Q3DSQmlBehavior") != 0;
+    } else {
+        return false;
+    }
 }
 
 bool ProjectView::isMaterialFolder(int row) const

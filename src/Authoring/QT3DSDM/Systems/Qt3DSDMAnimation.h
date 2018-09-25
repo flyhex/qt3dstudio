@@ -403,6 +403,9 @@ public:
                                                   Qt3DSDMInstanceHandle inInstance,
                                                   Qt3DSDMPropertyHandle inProperty,
                                                   const SValue &inValue) = 0;
+
+    typedef std::function<void(Qt3DSDMInstanceHandle instance)> TRefreshCallbackFunc;
+    virtual void setRefreshCallback(TRefreshCallbackFunc func) = 0;
 };
 
 typedef std::shared_ptr<IStudioAnimationSystem> TStudioAnimationSystemPtr;

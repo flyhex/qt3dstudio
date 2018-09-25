@@ -33,9 +33,8 @@
 #include "render/Qt3DSRenderTexture2D.h"
 #include "render/Qt3DSRenderContext.h"
 #include "Qt3DSTextRenderer.h"
-/*
-#include <Windows.h>
-*/
+
+#include <qmath.h>
 
 using namespace qt3ds::render;
 
@@ -159,6 +158,7 @@ SCamera::SCamera()
     , m_ClipNear(10)
     , m_ClipFar(10000)
     , m_FOV(60)
+    , m_FOVHorizontal(false)
     , m_ScaleMode(CameraScaleModes::Fit)
     , m_ScaleAnchor(CameraScaleAnchors::Center)
 {
@@ -201,7 +201,7 @@ bool SCamera::ComputeFrustumPerspective(const NVRenderRectF &inViewport,
                                         const QT3DSVec2 &inDesignDimensions)
 {
     m_Projection = QT3DSMat44::createIdentity();
-    QT3DSF32 theAngleInRadians = m_FOV / 2.0f;
+    QT3DSF32 theAngleInRadians = verticalFov(inViewport) / 2.0f;
     QT3DSF32 theDeltaZ = m_ClipFar - m_ClipNear;
     QT3DSF32 theSine = sinf(theAngleInRadians);
     QT3DSF32 designAspect = GetAspectRatio(inDesignDimensions);
@@ -470,4 +470,17 @@ QT3DSVec3 SCamera::UnprojectToPosition(const QT3DSVec3 &inGlobalPos, const SRay 
     QT3DSF32 theDistance = -1.0f * theObjGlobalPos.dot(theCameraDir);
     NVPlane theCameraPlane(theCameraDir, theDistance);
     return inRay.Intersect(theCameraPlane);
+}
+
+QT3DSF32 SCamera::verticalFov(QT3DSF32 aspectRatio) const
+{
+    if (m_FOVHorizontal)
+        return 2.0f * qAtan(qTan(qreal(m_FOV) / 2.0) / qreal(aspectRatio));
+    else
+        return m_FOV;
+}
+
+QT3DSF32 SCamera::verticalFov(const NVRenderRectF &inViewport) const
+{
+    return verticalFov(GetAspectRatio(inViewport));
 }

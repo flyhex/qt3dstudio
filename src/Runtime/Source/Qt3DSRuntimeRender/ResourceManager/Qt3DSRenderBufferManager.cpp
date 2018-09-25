@@ -49,6 +49,7 @@
 #include "foundation/Qt3DSPerfTimer.h"
 #include "foundation/Qt3DSMutex.h"
 #include "Qt3DSRenderPrefilterTexture.h"
+#include <QtCore/qdir.h>
 
 using namespace qt3ds::render;
 
@@ -344,14 +345,36 @@ struct SBufferManager : public IBufferManager
                 // in sub-presentations. Note: Runtime 1 is going to be removed in Qt 3D Studio 2.x,
                 // so this should be ok.
                 if (!theLoadedImage) {
-                    QString searchPath = QStringLiteral(".");
-                    searchPath.append(inImagePath.c_str());
-                    int loops = 0;
-                    while (!theLoadedImage && ++loops <= 3) {
-                        theLoadedImage = SLoadedTexture::Load(
-                                    searchPath.toUtf8(), m_Context->GetFoundation(),
-                                    *m_InputStreamFactory, true, m_Context->GetRenderContextType());
-                        searchPath.prepend(QStringLiteral("../"));
+                    if (QDir(inImagePath.c_str()).isRelative()) {
+                        QString searchPath = QLatin1String(".");
+                        searchPath.append(inImagePath.c_str());
+                        int loops = 0;
+                        while (!theLoadedImage && ++loops <= 3) {
+                            theLoadedImage = SLoadedTexture::Load(
+                                        searchPath.toUtf8(), m_Context->GetFoundation(),
+                                        *m_InputStreamFactory, true,
+                                        m_Context->GetRenderContextType());
+                            searchPath.prepend(QLatin1String("../"));
+                        }
+                    } else {
+                        // Some textures, for example environment maps for custom materials,
+                        // have absolute path at this point. It point to the wrong place with
+                        // the new project structure, so we need to split it up and construct
+                        // the new absolute path here.
+                        QString wholePath = inImagePath.c_str();
+                        QStringList splitPath = wholePath.split(QLatin1String("../"));
+                        QString searchPath = splitPath.at(0) + splitPath.at(1);
+                        int loops = 0;
+                        while (!theLoadedImage && ++loops <= 3) {
+                            theLoadedImage = SLoadedTexture::Load(
+                                        searchPath.toUtf8(), m_Context->GetFoundation(),
+                                        *m_InputStreamFactory, true,
+                                        m_Context->GetRenderContextType());
+                            searchPath = splitPath.at(0);
+                            for (int i = 0; i < loops; i++)
+                                searchPath.append(QLatin1String("../"));
+                            searchPath.append(splitPath.at(1));
+                        }
                     }
                 }
             }

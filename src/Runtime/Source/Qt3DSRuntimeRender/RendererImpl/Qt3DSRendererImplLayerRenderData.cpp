@@ -316,7 +316,7 @@ namespace render {
             QT3DSVec3 camY(dataPtr[4], dataPtr[5], dataPtr[6]);
             QT3DSVec3 camZ(dataPtr[8], dataPtr[9], dataPtr[10]);
 
-            float tanFOV = tanf(inCamera.m_FOV * 0.5f);
+            float tanFOV = tanf(inCamera.verticalFov(inViewPort) * 0.5f);
             float asTanFOV = tanFOV * inViewPort.m_Width / inViewPort.m_Height;
             camEdges[0] = -asTanFOV * camX + tanFOV * camY + camZ;
             camEdges[1] = asTanFOV * camX + tanFOV * camY + camZ;

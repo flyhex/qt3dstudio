@@ -34,6 +34,7 @@
 
 // This dialog displays all texture properties of an object and allows the user to choose one
 ChooseImagePropertyDlg::ChooseImagePropertyDlg(qt3dsdm::Qt3DSDMInstanceHandle inTarget,
+                                               bool isRefMaterial,
                                                QWidget *parent)
     : QDialog(parent)
     , m_instance(inTarget)
@@ -50,12 +51,20 @@ ChooseImagePropertyDlg::ChooseImagePropertyDlg(qt3dsdm::Qt3DSDMInstanceHandle in
         QDialog::accept();
     });
 
+    if (!isRefMaterial)
+        m_ui->cbDetach->setVisible(false);
+
     fillList();
 }
 
 ChooseImagePropertyDlg::~ChooseImagePropertyDlg()
 {
     delete m_ui;
+}
+
+bool ChooseImagePropertyDlg::detachMaterial() const
+{
+    return m_ui->cbDetach->checkState() == Qt::Checked;
 }
 
 // fill the list with all material properties of type image

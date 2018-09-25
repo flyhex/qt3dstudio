@@ -368,6 +368,18 @@ bool CStudioAnimationSystem::SetAnimatedInstancePropertyValue(Qt3DSDMSlideHandle
             do_all(thePresentAnimations, std::bind(InsertUniqueAnimationFloatPair, std::placeholders::_1,
                                                      std::ref(m_AnimationFloatPairs),
                                                      std::cref(inValue), m_AnimationCore));
+
+
+            if (m_Consumer && m_refreshCallback) {
+                // Only create a single refresh per transaction stack
+                if (((CTransactionConsumer *)m_Consumer.get())->m_TransactionList.size() == 0) {
+                    CreateGenericTransactionWithConsumer(
+                        __FILE__, __LINE__, m_Consumer,
+                        std::bind(m_refreshCallback, inInstance),
+                        std::bind(m_refreshCallback, inInstance));
+                }
+            }
+
             CreateGenericTransactionWithConsumer(
                 __FILE__, __LINE__, m_Consumer,
                 std::bind(assign_to<TAnimationFloatPairList>, m_AnimationFloatPairs,
@@ -589,5 +601,10 @@ bool CStudioAnimationSystem::IsPropertyAnimated(Qt3DSDMInstanceHandle inInstance
 void CStudioAnimationSystem::SetConsumer(TTransactionConsumerPtr inConsumer)
 {
     m_Consumer = inConsumer;
+}
+
+void CStudioAnimationSystem::setRefreshCallback(TRefreshCallbackFunc func)
+{
+    m_refreshCallback = func;
 }
 }

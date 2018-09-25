@@ -68,7 +68,7 @@ public:
     CClientDataModelBridge *GetClientDataModelBridge() const { return m_Bridge.get(); }
     ISlideSystem *GetSlideSystem();
     ISlideCore *GetSlideCore();
-    IPropertySystem *GetPropertySystem();
+    IPropertySystem *GetPropertySystem() const;
     IStudioFullSystemSignalProvider *GetFullSystemSignalProvider();
     IStudioFullSystemSignalSender *GetFullSystemSignalSender();
     IAnimationCore *GetAnimationCore();

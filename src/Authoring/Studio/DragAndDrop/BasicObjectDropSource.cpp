@@ -253,7 +253,8 @@ CCmd *CBasicObjectDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandl
         } else {
             SCOPED_DOCUMENT_EDITOR(*theDoc, QObject::tr("Add Instance"))
                 ->CreateSceneGraphInstance(theComposerType, inTarget, inSlide, theInsertType,
-                                           thePoint, (EPrimitiveType)m_PrimitiveType, theStartTime);
+                                           thePoint, (EPrimitiveType)m_PrimitiveType, theStartTime,
+                                           false);
         }
     }
     return nullptr;

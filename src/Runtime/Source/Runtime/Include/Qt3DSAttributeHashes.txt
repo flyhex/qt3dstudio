@@ -34,6 +34,7 @@ orthographic
 clipnear
 clipfar
 fov
+fovhorizontal
 scalemode
 scaleanchor
 

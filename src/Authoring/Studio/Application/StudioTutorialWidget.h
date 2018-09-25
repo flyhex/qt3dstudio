@@ -51,7 +51,7 @@ class StudioTutorialWidget : public QDialog
 {
     Q_OBJECT
 public:
-    explicit StudioTutorialWidget(QWidget *parent, bool goToFileDialog, bool showProjectButtons);
+    explicit StudioTutorialWidget(QWidget *parent);
 
     ~StudioTutorialWidget();
 
@@ -63,42 +63,17 @@ public:
     };
 
 protected:
-    void paintEvent(QPaintEvent *event) override;
-    void OnInitDialog(bool goToFileDialog);
+    void OnInitDialog();
 
 public:
-    void handleFwd();
-    void handleBack();
-    void handleIndexChange(int index);
     void handleDoNotShowAgainChange(int state);
     void handleOpenSample();
     void handleCreateNew();
-    int page() const;
+    void handleQuickStartGuide();
 
 private:
     Ui::StudioTutorialWidget *m_ui;
-
-    QList<QString> *m_welcomeImages;
-    QList<QString>::iterator m_imgIter;
-    QList<QString>::iterator m_imgIterPrev;
-
-    QPalette *m_palette;
-    QPixmap m_pageInPixmap;
-    QPixmap m_pageOutPixmap;
-    QPixmap m_backgroundPixmap;
-
-    qreal m_displayScale;
-    qreal m_pageInOpacity = 0.0;
-    QTime m_opacityTime;
-
-    bool m_showProjectButtons;
-
-    void getImageList();
-    void updateButtons();
-    void animateInOut();
-
-    QPixmap getScaledPic(const QList<QString>::iterator &iter);
-    qreal getDisplayScalingForImage(const QPixmap &picOrig);
+    QPalette *m_backgroundPalette = nullptr;
 };
 
 #endif // STUDIOTUTORIALWIDGET_H

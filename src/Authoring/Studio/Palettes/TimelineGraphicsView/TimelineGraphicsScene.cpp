@@ -322,13 +322,13 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     action = new QAction(this);
     action->setShortcut(QKeySequence(Qt::ShiftModifier | Qt::Key_H));
     action->setShortcutContext(Qt::ApplicationShortcut);
-    connect(action, &QAction::triggered, this, &TimelineGraphicsScene::handleShySelected);
+    connect(action, &QAction::triggered, &g_StudioApp, &CStudioApp::toggleShy);
     timelineWidget->addAction(action);
 
     action = new QAction(this);
     action->setShortcut(QKeySequence(Qt::ControlModifier | Qt::Key_H));
     action->setShortcutContext(Qt::ApplicationShortcut);
-    connect(action, &QAction::triggered, this, &TimelineGraphicsScene::handleLockSelected);
+    connect(action, &QAction::triggered, &g_StudioApp, &CStudioApp::toggleLocked);
     timelineWidget->addAction(action);
 }
 
@@ -519,6 +519,8 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                     m_rowManager->selectRow(rowTree, ctrlKeyDown);
                     if (rowTree->draggable())
                         m_startRowMoverOnNextDrag = true;
+                } else if (m_clickedTreeControlType == TreeControlType::Arrow) {
+                    updateSnapSteps();
                 }
             } else if (item->type() == TimelineItem::TypeRowTimeline) {
                 m_editedTimelineRow = static_cast<RowTimeline *>(item);
@@ -817,6 +819,9 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         }
     }
 
+    if (m_timelineZooming)
+        updateSnapSteps();
+
     resetMousePressParams();
 
     QGraphicsScene::mouseReleaseEvent(event);
@@ -847,8 +852,9 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
                 RowTreeLabelItem *treeLabelItem = static_cast<RowTreeLabelItem *>(item);
                 if (treeLabelItem->parentRow()->isProperty()) {
                     treeLabelItem->parentRow()->togglePropertyExpanded();
-                } else if (!treeLabelItem->isLocked()) {
-                    // Tree labels text can be edited with double-click
+                } else if (!treeLabelItem->isLocked()
+                           && treeLabelItem->parentRow()->rowType() != OBJTYPE_SCENE) {
+                    // Tree labels text can be edited with double-click, except for Scene label
                     treeLabelItem->setEnabled(true);
                     treeLabelItem->setFocus();
                 }
@@ -1039,20 +1045,6 @@ void TimelineGraphicsScene::handleEditComponent()
                 ITimelineItemBinding::EUserTransaction_EditComponent)) {
         selectedRow->getBinding()->OpenAssociatedEditor();
     }
-}
-
-void TimelineGraphicsScene::handleShySelected()
-{
-    RowTree *selectedRow = m_rowManager->selectedRow();
-    if (selectedRow)
-        selectedRow->toggleShy();
-}
-
-void TimelineGraphicsScene::handleLockSelected()
-{
-    RowTree *selectedRow = m_rowManager->selectedRow();
-    if (selectedRow)
-        selectedRow->toggleLocked();
 }
 
 void TimelineGraphicsScene::handleApplicationFocusLoss()

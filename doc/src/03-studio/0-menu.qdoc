@@ -110,21 +110,11 @@
       \l{studio-timeline-palette.html#interpolation}{linear or smooth interpolation}.
     \li
       \uicontrol{Timeline Snapping Grid} - When using snapping in the
-      timeline, controls whether to snap to the largest ticks only (Low
-      Resolution), largest and halfway ticks (Medium Resolution), or every
-      tick mark (High Resolution).
-    \li
-      \uicontrol{Legacy Viewer} - Enables the legacy viewer preview button in the toolbar. Legacy
-      viewer uses Runtime from Qt 3D Studio 1.1, whereas the default viewer uses Runtime from
-      Qt 3D Studio 2.0. Requires a restart.
+      timeline, controls which ticks to snap to.
     \endlist
   \li
     \uicontrol{Editing View}
     \list
-    \li
-      \uicontrol{Background Color} - Sets the color of the background when
-      using an \l{studio-toolbar.html#edit-cameras}{Edit Camera view}.
-      \note This does not effect Scene Camera View background color.
     \li
       \uicontrol{Preferred Startup View} - Sets default camera view
       when starting Studio.

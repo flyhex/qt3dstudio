@@ -1058,23 +1058,12 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
             GenerateImageUVCoordinates(bumpImageIdx, *bumpImage);
             fragmentShader.AddUniform("bumpAmount", "float");
 
-            if (m_RenderContext.GetRenderContext().GetRenderContextType()
-                    == NVRenderContextValues::GLES2) {
-                fragmentShader.AddUniform(m_ImageSamplerSize, "vec2");
-                fragmentShader.AddInclude("defaultMaterialBumpNoLod.glsllib");
-                fragmentShader << "\tworld_normal = defaultMaterialBumpNoLod( " << m_ImageSampler
-                               << ", bumpAmount, " << m_ImageFragCoords
-                               << ", tangent, binormal, world_normal, "
-                               << m_ImageSamplerSize << ");" << Endl;
-            } else {
-                fragmentShader.AddInclude("defaultMaterialFileBumpTexture.glsllib");
-                // vec3 simplerFileBumpTexture( in sampler2D sampler, in float factor, vec2
-                // texCoord, vec3 tangent, vec3 binormal, vec3 normal )
-
-                fragmentShader << "\tworld_normal = simplerFileBumpTexture( " << m_ImageSampler
-                               << ", bumpAmount, " << m_ImageFragCoords
-                               << ", tangent, binormal, world_normal );" << Endl;
-            }
+            fragmentShader.AddUniform(m_ImageSamplerSize, "vec2");
+            fragmentShader.AddInclude("defaultMaterialBumpNoLod.glsllib");
+            fragmentShader << "\tworld_normal = defaultMaterialBumpNoLod( " << m_ImageSampler
+                           << ", bumpAmount, " << m_ImageFragCoords
+                           << ", tangent, binormal, world_normal, "
+                           << m_ImageSamplerSize << ");" << Endl;
             // Do gram schmidt
             fragmentShader << "\tbinormal = normalize(cross(world_normal, tangent) );\n";
             fragmentShader << "\ttangent = normalize(cross(binormal, world_normal) );\n";

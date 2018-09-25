@@ -966,12 +966,14 @@ public:
 
     virtual Qt3DSDMInstanceHandle
     CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Enum inType, TInstanceHandle inParent,
-                             TSlideHandle inSlide, TInstanceHandle inTargetId = TInstanceHandle()) override
+                             TSlideHandle inSlide, TInstanceHandle inTargetId = TInstanceHandle(),
+                             bool setTimeRange = true) override
     {
         Qt3DSDMInstanceHandle retval = IDocumentEditor::CreateSceneGraphInstance(
             ComposerObjectTypes::Convert(inType), inParent, inSlide, m_DataCore, m_SlideSystem,
-            m_Bridge.GetObjectDefinitions(), m_AssetGraph, m_MetaData, inTargetId);
-        SetTimeRangeToParent(retval);
+            m_Bridge.GetObjectDefinitions(), m_AssetGraph, m_MetaData, inTargetId, setTimeRange);
+        if (setTimeRange)
+            SetTimeRangeToParent(retval);
         return retval;
     }
 
@@ -980,9 +982,11 @@ public:
                                                      DocumentEditorInsertType::Enum inInsertType,
                                                      const CPt &inPosition,
                                                      EPrimitiveType inPrimitiveType,
-                                                     long inStartTime) override
+                                                     long inStartTime,
+                                                     bool setTimeRange = true) override
     {
-        TInstanceHandle retval(CreateSceneGraphInstance(inType, inParent, inSlide));
+        TInstanceHandle retval(CreateSceneGraphInstance(inType, inParent, inSlide,
+                                                        TInstanceHandle(), setTimeRange));
 
         Q3DStudio::CString theName;
         if (inType == ComposerObjectTypes::Model) {
@@ -998,9 +1002,14 @@ public:
                 theName = GetName(retval);
             }
         } else {
-            theName = GetName(retval);
+            theName = ComposerObjectTypes::Convert(inType);
+            // TODO: This should work (QT3DS-2278). The line above is a quick fix in case
+            // the actual reason for this to have stopped working is not found in time for 2.1
+            // release.
+            //theName = GetName(retval);
         }
-        SetTimeRangeToParent(retval);
+        if (setTimeRange)
+            SetTimeRangeToParent(retval);
 
         if (inType == ComposerObjectTypes::Layer) {
             CreateSceneGraphInstance(ComposerObjectTypes::Camera, retval, inSlide);
@@ -1013,9 +1022,9 @@ public:
         if (m_DataCore.IsInstanceOrDerivedFrom(
                 retval, m_Bridge.GetObjectDefinitions().m_SlideOwner.m_Instance))
             m_Bridge.GetOrCreateGraphRoot(retval);
-
+        // if we did not set time range earlier, let's set it now to match parent
         TInstanceHandle handle = FinalizeAddOrDrop(retval, inParent, inInsertType,
-                                                   inPosition, false, true, false);
+                                                   inPosition, !setTimeRange, true, false);
         SetName(retval, theName, true);
         return handle;
     }
@@ -1729,10 +1738,7 @@ public:
         if (!img)
             img = CreateImageInstanceForMaterialOrLayer(instance, prop);
 
-        Qt3DSDMPropertyHandle propHandleSP = m_PropertySystem
-                .GetAggregateInstancePropertyByName(img, L"subpresentation");
-
-        SetInstancePropertyValueAsRenderable(img, propHandleSP, pId);
+        SetInstancePropertyValueAsRenderable(img, m_Bridge.getSubpresentationProperty(), pId);
     }
 
     /**
@@ -1766,7 +1772,7 @@ public:
     }
 
     void SetMaterialType(TInstanceHandle instance,
-                                 const Q3DStudio::CString &inRelativePathToMaterialFile) override
+                         const Q3DStudio::CString &inRelativePathToMaterialFile) override
     {
         const Q3DStudio::CString existing = m_Bridge.GetSourcePath(instance);
         if (existing == inRelativePathToMaterialFile)
@@ -1820,10 +1826,8 @@ public:
                                              DocumentEditorInsertType::LastChild, 0, instance);
         }
 
-        if (newMaterial.Valid()) {
-            if (nextChild.Valid())
-                m_AssetGraph.MoveBefore(newMaterial, nextChild);
-        }
+        if (newMaterial.Valid() && nextChild.Valid())
+            m_AssetGraph.MoveBefore(newMaterial, nextChild);
 
         // restore current lightmap settings for new material
         if (theLightmapIndirectValue.hasValue())
@@ -2644,7 +2648,7 @@ public:
     FinalizeAddOrDrop(qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3dsdm::Qt3DSDMInstanceHandle inParent,
                       DocumentEditorInsertType::Enum inInsertType, const CPt &inPosition,
                       bool inSetTimeRangeToParent, bool inSelectInstanceWhenFinished = true,
-                      bool checkUniqueName = true)
+                      bool checkUniqueName = true, bool notifyRename = true)
     {
         if (inPosition.x != 0 && inPosition.y != 0) {
             Q3DStudio::IDocSceneGraph *theGraph(m_Doc.GetSceneGraph());
@@ -2656,7 +2660,7 @@ public:
                 QT3DS_ASSERT(false);
             }
         }
-        RearrangeObject(inInstance, inParent, inInsertType, checkUniqueName);
+        RearrangeObject(inInstance, inParent, inInsertType, checkUniqueName, notifyRename);
         if (inSetTimeRangeToParent)
             SetTimeRangeToParent(inInstance);
         if (inSelectInstanceWhenFinished)
@@ -2712,7 +2716,8 @@ public:
                                                 TInstanceHandle inNewRoot,
                                                 bool inGenerateUniqueName,
                                                 DocumentEditorInsertType::Enum inInsertType,
-                                                const CPt &inPosition)
+                                                const CPt &inPosition,
+                                                bool notifyRename = true)
     {
         std::shared_ptr<IComposerSerializer> theSerializer = m_Doc.CreateSerializer();
         TInstanceHandleList retval = theSerializer->SerializeSceneGraphObject(
@@ -2722,7 +2727,8 @@ public:
             if (inInsertType == DocumentEditorInsertType::NextSibling)
                 theInstance = retval[end - idx - 1];
 
-            FinalizeAddOrDrop(theInstance, inNewRoot, inInsertType, inPosition, false);
+            FinalizeAddOrDrop(theInstance, inNewRoot, inInsertType, inPosition, false, true, true,
+                              notifyRename);
 
             SetName(theInstance, GetName(theInstance), inGenerateUniqueName);
         }
@@ -2829,7 +2835,7 @@ public:
     void RearrangeObjects(const qt3dsdm::TInstanceHandleList &inInstances,
                                   TInstanceHandle inDest,
                                   DocumentEditorInsertType::Enum inInsertType,
-                                  bool checkUniqueName) override
+                                  bool checkUniqueName, bool notifyRename = true) override
     {
         qt3dsdm::TInstanceHandleList sortableList(ToGraphOrdering(inInstances));
         QSet<TInstanceHandle> updateList;
@@ -2838,8 +2844,8 @@ public:
             || inInsertType == DocumentEditorInsertType::NextSibling)
             theParent = GetParent(inDest);
 
-        if (m_Bridge.IsComponentInstance(theParent)) {
-            moveIntoComponent(inInstances, theParent);
+        if (m_Bridge.IsComponentInstance(theParent)
+                && moveIntoComponent(inInstances, theParent, checkUniqueName, notifyRename)) {
             return;
         }
 
@@ -2855,7 +2861,8 @@ public:
                 if (!m_Bridge.CheckNameUnique(theParent, theInstance, currName)) {
                     CString newName = m_Bridge.GetUniqueChildName(theParent, theInstance,
                                                                   currName);
-                    m_Doc.getMoveRenameHandler()->displayMessageBox(currName, newName);
+                    if (notifyRename)
+                        m_Doc.getMoveRenameHandler()->displayMessageBox(currName, newName);
                     SetName(theInstance, newName);
                 }
             }
@@ -2957,7 +2964,6 @@ public:
         TInstanceHandle group = CreateSceneGraphInstance(ComposerObjectTypes::Group, sibling, slide,
                                                          DocumentEditorInsertType::PreviousSibling,
                                                          CPt(), PRIMITIVETYPE_UNKNOWN, -1);
-
         // Move items into the group
         RearrangeObjects(sortedList, group, DocumentEditorInsertType::LastChild, true);
     }
@@ -2968,6 +2974,13 @@ public:
             return Qt3DSDMInstanceHandle();
 
         qt3dsdm::TInstanceHandleList theInstances = ToGraphOrdering(inInstances);
+
+        // Get the original start/end times
+        QList<std::pair<long, long>> theStartEndTimes;
+
+        for (auto instance : qAsConst(theInstances))
+            theStartEndTimes.append(GetTimeRange(instance));
+
         // Do this in reverse order.
         // first add new component.
         Qt3DSDMSlideHandle theSlide = GetAssociatedSlide(theInstances[0]);
@@ -2979,8 +2992,6 @@ public:
         // Update pivot and position
         updatePivotAndPosition(component, inInstances);
 
-        pair<long, long> theStartEndTimes = GetTimeRange(theInstances[0]);
-
         CString theName = GetName(theInstances[0]);
 
         // now cut the group
@@ -2991,27 +3002,48 @@ public:
         Qt3DSDMSlideHandle theComponentSlide(m_Bridge.GetComponentActiveSlide(component));
 
         // Paste into the master slide of the new component
-        theSerializer->SerializeSceneGraphObject(*theReader, m_Doc.GetDocumentDirectory(),
-                                                 component,
-                                                 m_SlideSystem.GetMasterSlide(theComponentSlide));
+        TInstanceHandleList insertedHandles = theSerializer->SerializeSceneGraphObject(
+                    *theReader,m_Doc.GetDocumentDirectory(), component,
+                    m_SlideSystem.GetMasterSlide(theComponentSlide));
 
-        SetTimeRange(component, theStartEndTimes.first, theStartEndTimes.second);
+        // Restore the original time range for all objects.
+        if (insertedHandles.size()) {
+            for (int i = 0; i < theStartEndTimes.size(); i++) {
+                if (theStartEndTimes.at(i) != std::make_pair(0L, 0L)) {
+                    SetTimeRange(insertedHandles.at(i), theStartEndTimes.at(i).first,
+                                 theStartEndTimes.at(i).second);
+                }
+            }
+        }
+
         SetName(component, theName);
 
         m_Doc.SelectDataModelObject(component);
         return component;
     }
 
-    void moveIntoComponent(const qt3dsdm::TInstanceHandleList &inInstances,
-                           const Qt3DSDMInstanceHandle targetComponent)
+    // Moves specified instances into target component by a simulated cut and paste.
+    // This is only necessary when moving objects from outside the component into the component.
+    // Returns true if move was done. Returns false if instances are already in target component,
+    // which means a regular rearrange can be done.
+    bool moveIntoComponent(const qt3dsdm::TInstanceHandleList &inInstances,
+                           const Qt3DSDMInstanceHandle targetComponent, bool checkUniqueName,
+                           bool notifyRename)
     {
         if (inInstances.empty())
-            return;
+            return false;
 
-        qt3dsdm::TInstanceHandleList theInstances = ToGraphOrdering(inInstances);
+        Qt3DSDMInstanceHandle rootInstance = GetParent(inInstances[0]);
+        while (rootInstance.Valid() && !m_Bridge.IsComponentInstance(rootInstance))
+            rootInstance = GetParent(rootInstance);
+
+        if (rootInstance == targetComponent)
+            return false;
+
+        const qt3dsdm::TInstanceHandleList theInstances = ToGraphOrdering(inInstances);
         QList<std::pair<long, long>> theStartEndTimes;
 
-        for (auto instance : qAsConst(theInstances))
+        for (auto instance : theInstances)
             theStartEndTimes.append(GetTimeRange(instance));
 
         // Now cut the group from the scene.
@@ -3029,8 +3061,8 @@ public:
                     targetComponent,
                     m_SlideSystem.GetMasterSlide(theComponentSlide));
 
-        // Restore the original time range for all objects.
         if (insertedHandles.size()) {
+            // Restore the original time range for all objects.
             for (int i = 0; i < theStartEndTimes.size(); i++) {
                 if (theStartEndTimes.at(i) != std::make_pair(0L, 0L))
                     SetTimeRange(insertedHandles.at(i), theStartEndTimes.at(i).first,
@@ -3042,7 +3074,22 @@ public:
             GetChildren(m_SlideSystem.GetMasterSlide(theComponentSlide), targetComponent,
                         childHandles);
             updatePivotAndPosition(targetComponent, childHandles);
+
+            // Check for name uniqueness
+            if (checkUniqueName) {
+                for (auto instance : insertedHandles) {
+                    CString currName = m_Bridge.GetName(instance);
+                    if (!m_Bridge.CheckNameUnique(targetComponent, instance, currName)) {
+                        CString newName = m_Bridge.GetUniqueChildName(
+                                    targetComponent, instance, currName);
+                        if (notifyRename)
+                            m_Doc.getMoveRenameHandler()->displayMessageBox(currName, newName);
+                        SetName(instance, newName);
+                    }
+                }
+            }
         }
+        return true;
     }
 
     void DuplicateInstances(const qt3dsdm::TInstanceHandleList &inInstances) override
@@ -3061,7 +3108,7 @@ public:
     {
         qt3dsdm::TInstanceHandleList theInstances(ToGraphOrdering(inInstances));
         std::shared_ptr<IDOMReader> theReader(CopySceneGraphObjectsToMemory(theInstances));
-        return DoPasteSceneGraphObject(theReader, inDest, true, inInsertType, CPt());
+        return DoPasteSceneGraphObject(theReader, inDest, true, inInsertType, CPt(), false);
     }
 
     Qt3DSDMActionHandle AddAction(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
@@ -3926,9 +3973,9 @@ public:
     };
 
     TInstanceHandle CreateText(const Q3DStudio::CString &inFullPathToDocument,
-                                       TInstanceHandle inParent, TSlideHandle inSlide,
-                                       DocumentEditorInsertType::Enum inDropType,
-                                       const CPt &inPosition = CPt(), long inStartTime = -1) override
+                               TInstanceHandle inParent, TSlideHandle inSlide,
+                               DocumentEditorInsertType::Enum inDropType,
+                               const CPt &inPosition = CPt(), long inStartTime = -1) override
     {
         (void)inStartTime;
 
@@ -3965,7 +4012,10 @@ public:
         // Set the name afterwards, do not do uniqueness check here
         auto handle = FinalizeAddOrDrop(theTextInstance, inParent, inDropType, inPosition,
                                         inStartTime == -1, true, false);
-        SetName(handle, GetName(handle), true);
+        SetName(handle, ComposerObjectTypes::Convert(ComposerObjectTypes::Text), true);
+        // TODO: This should work (QT3DS-2278). The line above is a quick fix in case the actual
+        // reason for this to have stopped working is not found in time for 2.1 release.
+        //SetName(handle, GetName(handle), true);
 
         return handle;
     }
@@ -4697,6 +4747,29 @@ public:
         }
     }
 
+    void toggleBoolPropertyOnSelected(TPropertyHandle property) override
+    {
+        qt3dsdm::IPropertySystem *propertySystem = m_Doc.GetStudioSystem()->GetPropertySystem();
+        qt3dsdm::TInstanceHandleList selectedInstances
+                = m_Doc.GetSelectedValue().GetSelectedInstances();
+
+        if (selectedInstances.size() > 0) {
+            bool boolValue = false;
+            SValue value;
+            for (size_t idx = 0, end = selectedInstances.size(); idx < end; ++idx) {
+                qt3dsdm::Qt3DSDMInstanceHandle handle(selectedInstances[idx]);
+                if (handle.Valid()) {
+                    if (value.empty()) {
+                        // First valid handle selects if all are hidden/unhidden
+                        propertySystem->GetInstancePropertyValue(handle, property, value);
+                        boolValue = !qt3dsdm::get<bool>(value);
+                    }
+                    propertySystem->SetInstancePropertyValue(handle, property, boolValue);
+                }
+            }
+        }
+    }
+
     void BuildDAEMap(const TFileModificationList &inList)
     {
         for (size_t fileIdx = 0, fileEnd = inList.size(); fileIdx < fileEnd; ++fileIdx) {
@@ -5005,7 +5078,7 @@ Qt3DSDMInstanceHandle IDocumentEditor::CreateSceneGraphInstance(
     const wchar_t *inType, TInstanceHandle inParent, TSlideHandle inSlide,
     qt3dsdm::IDataCore &inDataCore, qt3dsdm::ISlideSystem &inSlideSystem,
     qt3dsdm::SComposerObjectDefinitions &inObjectDefs, Q3DStudio::CGraph &inAssetGraph,
-    qt3dsdm::IMetaData &inMetaData, TInstanceHandle inTargetId)
+    qt3dsdm::IMetaData &inMetaData, TInstanceHandle inTargetId, bool setTimeRange)
 {
     return CreateSceneGraphInstance(inMetaData.GetCanonicalInstanceForType(inType), inParent,
                                     inSlide, inDataCore, inSlideSystem, inObjectDefs, inAssetGraph,

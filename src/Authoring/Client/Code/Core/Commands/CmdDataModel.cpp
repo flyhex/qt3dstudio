@@ -85,15 +85,15 @@ Q3DStudio::CString CmdDataModel::GetName() const
 {
     return m_Name;
 }
-bool CmdDataModel::HasTransactions()
+bool CmdDataModel::HasTransactions() const
 {
-    return m_Consumer != NULL
+    return m_Consumer != nullptr
         && ((CTransactionConsumer *)m_Consumer.get())->m_TransactionList.size() > 0;
 }
 
-bool CmdDataModel::ConsumerExists()
+bool CmdDataModel::ConsumerExists() const
 {
-    return m_Consumer != NULL;
+    return m_Consumer != nullptr;
 }
 
 void CmdDataModel::SetConsumer(ITransactionProducer *inProducer)
@@ -133,7 +133,7 @@ void CmdDataModel::ReleaseConsumer(bool inRunNotifications)
 
 void CmdDataModel::DataModelUndo()
 {
-    if (ConsumerExists() && HasTransactions()) {
+    if (HasTransactions()) {
         qCInfo(qt3ds::TRACE_INFO) << "Undoing " << m_Name.GetCharStar()
                   << " generated from: " << m_File.GetCharStar() << "(" << m_Line << ")";
         m_AfterDoAppState.Store(m_Doc);
@@ -154,7 +154,7 @@ void CmdDataModel::RunUndoNotifications()
 
 void CmdDataModel::DataModelRedo()
 {
-    if (ConsumerExists() && HasTransactions()) {
+    if (HasTransactions()) {
         qCInfo(qt3ds::TRACE_INFO) << "Redoing " << m_Name.GetCharStar()
                   << " generated from: " << m_File.GetCharStar() << "(" << m_Line << ")";
         m_BeforeDoAppState.Store(m_Doc);
@@ -182,4 +182,5 @@ void CmdDataModel::DataModelRollback()
         m_Consumer->m_TransactionList.clear();
     }
 }
+
 }

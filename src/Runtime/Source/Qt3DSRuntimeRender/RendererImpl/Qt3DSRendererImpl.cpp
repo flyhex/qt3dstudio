@@ -1649,11 +1649,12 @@ namespace render {
 
             QT3DSF32 R2 = pLayer->m_AoDistance * pLayer->m_AoDistance * 0.16f;
             QT3DSF32 rw = 100, rh = 100;
-            QT3DSF32 fov = (pCamera) ? pCamera->m_FOV : 1.0f;
+
             if (inDepthTexture && inDepthTexture.GetTexture()) {
                 rw = (QT3DSF32)inDepthTexture.GetTexture()->GetTextureDetails().m_Width;
                 rh = (QT3DSF32)inDepthTexture.GetTexture()->GetTextureDetails().m_Height;
             }
+            QT3DSF32 fov = (pCamera) ? pCamera->verticalFov(rw / rh) : 1.0f;
             QT3DSF32 tanHalfFovY = tanf(0.5f * fov * (rh / rw));
             QT3DSF32 invFocalLenX = tanHalfFovY * (rw / rh);
 

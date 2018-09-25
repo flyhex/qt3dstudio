@@ -43,17 +43,16 @@ class ProjectFile
 public:
     ProjectFile();
 
-    void create(const QString &projectName,
-                const Q3DStudio::CFilePath &projectPath);
-    void ensureProjectFile(const QString &uipPath);
+    void create(const QString &projectName, const QString &projectPath);
+    void ensureProjectFile();
+    void initProjectFile(const QString &presPath);
     void loadSubpresentationsAndDatainputs(
             QVector<SubPresentationRecord> &subpresentations,
             QMap<QString, CDataInputDialogItem *> &datainputs);
     void writePresentationId(const QString &id, const QString &src = {});
     void updateDocPresentationId();
     void addPresentationNode(const QString &uip, const QString &pId = {});
-    bool isUniquePresentationId(const QString &id,
-                                const QString &src = {}) const;
+    bool isUniquePresentationId(const QString &id, const QString &src = {}) const;
     QString getProjectPath() const;
     QString getProjectFilePath() const;
     QString getProjectName() const;

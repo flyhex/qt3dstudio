@@ -180,7 +180,7 @@ const QString &CStudioObjectTypes::GetNormalIconName(EStudioObjectType inType)
         return theString;
     }
     case OBJTYPE_DATAINPUT: {
-        static QString theString = QStringLiteral("Objects-DataInput-Normal.png");
+        static QString theString = QStringLiteral("Objects-DataInput-Active.png");
         return theString;
     }
     case OBJTYPE_PRESENTATION: {
@@ -282,7 +282,7 @@ const QString &CStudioObjectTypes::GetDisabledIconName(EStudioObjectType inType)
         return theString;
     }
     case OBJTYPE_DATAINPUT: {
-        static QString theString = QStringLiteral("Objects-DataInput-Disabled.png");
+        static QString theString = QStringLiteral("Objects-DataInput-Inactive.png");
         return theString;
     }
     case OBJTYPE_PRESENTATION: {

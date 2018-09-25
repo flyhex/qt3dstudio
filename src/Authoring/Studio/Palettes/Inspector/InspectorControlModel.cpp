@@ -116,6 +116,12 @@ InspectorControlModel::InspectorControlModel(QObject *parent)
 
 void InspectorControlModel::setInspectable(CInspectableBase *inInspectable)
 {
+    // Commit any pending transactions on selection change
+    m_UpdatableEditor.CommitEditor();
+    m_modifiedProperty.first = 0;
+    m_modifiedProperty.second = 0;
+    m_previouslyCommittedValue = {};
+
     const auto signalProvider
             = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetFullSystemSignalProvider();
 
@@ -646,6 +652,11 @@ InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *insp
 
     item->m_controllable = metaProperty.m_Controllable;
 
+    // disable IBL Override for reference materials
+    if (item->m_title == QLatin1String("IBL Override") && studio->GetClientDataModelBridge()
+                                ->GetObjectType(item->m_instance) == OBJTYPE_REFERENCEDMATERIAL) {
+        item->m_enabled = false;
+    }
     auto signalProvider = studio->GetFullSystemSignalProvider();
     if (item->m_animatable) {
         item->m_animated = studio->GetAnimationSystem()->IsPropertyAnimated(item->m_instance,
@@ -738,8 +749,6 @@ void InspectorControlModel::updateControlledToggleState(InspectorControlBase* in
     // Restore original tool tip from metadata when turning control off
     if (!currPropValStr.size()) {
         inItem->m_controlled = false;
-        inItem->m_tooltip = Q3DStudio::CString(
-            inItem->m_metaProperty.m_Description.c_str()).toQString();
         inItem->m_controller = "";
     } else {
        Q3DStudio::CString propName
@@ -751,8 +760,6 @@ void InspectorControlModel::updateControlledToggleState(InspectorControlBase* in
        if ((propNamePos == currPropValStr.ENDOFSTRING)
            && (propNamePos != 0)) {
            inItem->m_controlled = false;
-           inItem->m_tooltip = Q3DStudio::CString(
-               inItem->m_metaProperty.m_Description.c_str()).toQString();
            inItem->m_controller = "";
        } else {
            inItem->m_controlled = true;
@@ -769,7 +776,6 @@ void InspectorControlModel::updateControlledToggleState(InspectorControlBase* in
            const QString ctrlName = currPropValStr.substr(
                posCtrlr, propNamePos - posCtrlr).toQString();
 
-           inItem->m_tooltip = tr("Controlling Data Input:\n%1").arg(ctrlName);
            inItem->m_controller = ctrlName;
        }
     }

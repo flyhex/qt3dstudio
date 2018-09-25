@@ -67,8 +67,8 @@ public:
     ~CmdDataModel();
     void SetName(const Q3DStudio::CString &inName);
     Q3DStudio::CString GetName() const;
-    bool HasTransactions();
-    bool ConsumerExists();
+    bool HasTransactions() const;
+    bool ConsumerExists() const;
     void SetConsumer();
     void ReleaseConsumer(bool inRunNotifications = true);
     void DataModelUndo();

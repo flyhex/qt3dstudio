@@ -97,6 +97,7 @@ public:
 #if (defined Q_OS_MACOS)
     void openApplication(const QString &inFilename);
 #endif
+    bool handleWelcomeRes(int res, bool recursive);
 
 public Q_SLOTS:
     void handleMessageReceived(const QString &message, QObject *socket);
@@ -110,7 +111,6 @@ protected:
                                  bool isNewProject = true);
     void initCore();
     bool showStartupDialog();
-    bool handleWelcomeRes(int res, bool recursive);
     QString resolvePresentationFile(const QString &inFile);
 
     CCore *m_core;
@@ -217,6 +217,8 @@ public:
     void SetAutosaveEnabled(bool enabled);
     void SetAutosaveInterval(int interval);
     void toggleEyeball();
+    void toggleShy();
+    void toggleLocked();
     void showPresentationIdUniqueWarning();
     void showInvalidFilenameWarning();
     void checkDeletedDatainputs();
@@ -250,7 +252,8 @@ public:
     void OnNewPresentation() override;
     void OnPresentationModifiedExternally() override;
 
-    Q3DStudio::CString m_pszHelpFilePath;
+    QString m_helpFilePath;
+    QString m_gettingStartedFilePath;
 
     QVector<SubPresentationRecord> m_subpresentations;
     QMap<QString, CDataInputDialogItem *> m_dataInputDialogItems;

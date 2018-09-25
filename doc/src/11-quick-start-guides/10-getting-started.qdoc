@@ -33,24 +33,19 @@
 
 \section1 Introduction
 This guide will teach you how to create your first Qt 3D Studio project. Additionally it will
-explain the basics of assets, slides, layers, the timeline, and components.
+explain the basics of assets, slides, layers, the timeline, components, sub-presentations and data
+input.
 
 When you run Qt 3D Studio for the first time you will be greeted by the welcome screen.
-Read through the slides.
 
 \image welcomeScreen.png "Qt 3D Studio Welcome screen"
 
 \section1 Creating a New Project
 
-When you have read through the welcome screen slides, select \e{Create New} on the last slide to
-create a new project.
-
-\image createNewProject.png "Create new project"
+On the welcome slide, click the  \e{Create New Project} button to create a new project.
 
 You can also create a new project after closing the welcome screen by selecting
-\e{Create Project}.
-
-\image createNewProject2.png "Create new project"
+\e{Create Project}, or by selecting \uicontrol{File > New > Project} from the menu bar.
 
 Then browse to the location in your file system where you want to create your project and
 give your project a name. Your project file (\c{.uip}) and project folder will be
@@ -63,8 +58,10 @@ Create your 2D, 3D, and other assets in your favorite software and then use Qt 3
 to add them to your presentation.
 
 You can add new assets to your project by dragging the files from the file system to the
-\e{project  palette}. This will create a copy of the file in the project folder structure.
-The original file will \b always remain untouched.
+\e{project  palette}. Additionally, you can import assets by selecting
+\uicontrol{File > Import Assets} from the menu bar or by using the import assets icon in the
+project palette. Importing assets will  create a copy of the file in the project folder
+structure. The original file will \b always remain untouched.
 
 Once added to the project you can start using the assets by dragging them to either a layer in the
 \e{timeline palette} or to the \e{scene view}.
@@ -84,8 +81,9 @@ You can access sample assets from the bottom of the \e{project palette}.
 \image sampleAssets.png "Sample assets"
 
 Clicking any of the icons will open corresponding sample asset library in the file system.
-Add sample assets by dragging them to the \e{project palette}. This will create a copy of
-the file in the project folder structure. The original file will \b always remain untouched.
+Then, to add a sample asset to your project, select it and press \uicontrol{Open}. This will create
+a copy of the file in the project folder structure. The original file will \b always remain
+untouched.
 
 \section2 Related Content
 
@@ -111,7 +109,7 @@ the \e{inspector palette}. The basic properties includes scaling, rotating and p
 of the object.
 
 \section2 Material
-By clicking the black arrow on the left side of the object name in the
+By clicking the grey right arrow on the left side of the object name in the
 \e{timeline palette} you will toggle the visibility of the \e{Material} tab.
 Once visible you can click \e{Material} to show lighting and material properties for
 the object in the \e{inspector palette}. These properties includes object colors,
@@ -136,18 +134,18 @@ Elements placed on the \e{master slide} exist on all slides of that scene or com
 
 \section2 Slides
 In addition to the \e{master slide} each scene and component in a project have one or more
-\e{slide}.
+\e{slides}.
 
 These slides can be thought of as states or transitions between states that show small changes or
 completely different views when moving between them.
-\section2 Editing Slides
 
-The active slide is displayed in a light grey color while inactive slides are displayed in a dark
+\section2 Editing Slides
+The active slide is displayed in a blue color while inactive slides are displayed in a
 grey color. You can make a slide active by clicking on it.
 
 \image slidePalette.png "Slide palette"
 
-You can right-click on a slide to perform the following commands:
+You can right-click a slide to perform the following commands:
 \list
   \li
   \c{New slide}
@@ -157,7 +155,7 @@ You can right-click on a slide to perform the following commands:
   \c{Delete slide}
 \endlist
 
-To edit the \e{master slide} click the \e{Edit Master} button.
+To edit the \e{master slide}, click the \e{Edit Master} button.
 
 You can change the \c{play mode} and \c{initial play state} properties for the active slide from
 the \e{inspector palette}.
@@ -171,16 +169,16 @@ The following options are available:
   \li
   \c{Stop at end} - The playhead will stop at the end time. This is the default value.
   \li
-  \c{Looping} - When reaching the end time the playhead will jump to start time and start
+  \c{Looping} - When reaching the end time, the playhead will jump to start time and start
   playing again.
   \li
-  \c{PingPong} - When reaching the end time the playhead will start playing backwards until
+  \c{PingPong} - When reaching the end time, the playhead will start playing backwards until
   reaching the start time again where it will start playing forward again.
   \li
   \c{Ping} - Similar to \c{PingPong} but when the playhead returns to the start time it will
   stop.
   \li
-  \c{Play Through To} - When reaching the end time the scene or component will jump to
+  \c{Play Through To} - When reaching the end time, the scene or component will jump to
   another slide.
 \endlist
 
@@ -220,7 +218,7 @@ The basic elements of the \e{timeline palette} are:
   \c{Eyeball icon} - Controls visibility of elements in both the working area and in runtime.
   \li
   \c{Shy icon} - Controls visibility of elements in the \e{timeline palette}. Clicking the button
-at the top of this column will toggle the visibility of element rows marked as \e{Shy}.
+at the top of this column will toggle the visibility of element rows marked as \e{shy}.
 \endlist
 
 \image timeline.png "Timeline palette"
@@ -247,7 +245,7 @@ properties of slides, layers and other elements. You can control which propertie
 animated or changed.
 
 Properties that can be animated have a small stopwatch icon next to them in the
-\e{inspector palette}. Click on the icon to enable/disable animation for the specific property.
+\e{inspector palette}. Click the icon to enable/disable animation for the specific property.
 The icon is blue \inlineimage{animationIconActive.png}
 when animation is enabled and grey \inlineimage{animationIconInactive.png}
 when disabled.
@@ -276,7 +274,7 @@ properties in the \e{inspector palette}.
 \image component_timeline.png "Component timeline"
 
 \section2 Create a Component
-Right-click on an element or a group on the \e{layer palette} and choose \e{Make Component}
+Right-click on an element or a group in the \e{scene graph} and choose \e{Make Component}
 from the \e{context menu}.
 
 \section2 Edit a Component
@@ -295,5 +293,56 @@ content of the component. To leave the component and return to the scene, click 
     \li \l {studio-timeline-palette.html#editing-components}
     {Studio: Timeline Palette: Editing Components}
 \endtable
+
+\section1 Sub-presentations
+
+Parts of larger presentations can be authored as separate smaller presentations and embedded in
+a presentation either on a layer or as a texture on an object.
+
+Also QML files can be embedded in a presentation. For example, create a 3D UI in Qt Design Studio,
+import it and add it as a sub-presentation.
+
+Sub-presentations can be imported to your project just as any other asset. Once imported, you can
+add a sub-presentation to your scene by dragging and dropping it to the \e{scene view} or
+\e{timeline palette}. Additionally, you can add a sub-presentations by right-clicking a layer or
+a texture in the \e{timeline palette} and select \uicontrol{Set Sub-presentation}.
+
+\image subpresentation-scene-graph.png
+
+\section2 Related Content
+
+\table
+  \row
+    \li \inlineimage moreinfoicon.png
+    \li \l {using sub-presentations}
+    {Best Practices: Using Sub-presentations}
+\endtable
+
+\section1 Data Input
+
+With data inputs, it is possible to control timeline animations, slide transitions and element
+properties using data.
+
+First, define the data input by selecting \uicontrol{File > Data Inputs} from the menu bar.
+\image data-inputs.png
+Next, select the element to control by clicking the
+\inlineimage datainput-to-timeline-icon-inactive.png
+icon.
+
+Orange colors indicate that data input is in use.
+\image timeline-datainput.png
+
+\section2 Related Content
+
+\table
+  \row
+    \li \inlineimage moreinfoicon.png
+    \li \l {using data inputs}
+    {Best Practices: Using Data Inputs}
+\endtable
+
+
+
+
 
 */

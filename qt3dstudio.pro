@@ -28,32 +28,6 @@ load(qt_parts)
             deploytool = windeployqt
             exesuffix = .exe
 
-            # windeployqt will get confused when deploying viewer 1.0, because some of studio
-            # libraries it links detect as Qt libraries due to their naming scheme.
-            # Since viewer and studio have mostly identical Qt dependencies and both are deployed
-            # to the same directory, we can just omit deployment of viewer in windows and
-            # deploy the missing qml bits separately.
-
-            # Viewer 1.0 needs the studio qml plugin
-            # The assumption is that we are deploying release build in case both are built
-            release {
-                QML_FILE_R = QtStudio3D/declarative_qtstudio3d.dll
-                QMAKE_EXTRA_TARGETS += deployReleaseQml
-                deployTarget.depends += deployReleaseQml
-                deployReleaseQml.depends = mkStudioQmlDir
-                deployReleaseQml.commands = \
-                    $$QMAKE_COPY $$shell_quote($$shell_path($$OUT_PWD/qml/$$QML_FILE_R)) \
-                    $$shell_quote($$shell_path(\$(DEPLOY_DIR)/$$QML_FILE_R))
-            } else {
-                QML_FILE_D = QtStudio3D/declarative_qtstudio3dd.dll
-                QMAKE_EXTRA_TARGETS += deployDebugQml
-                deployTarget.depends += deployDebugQml
-                deployDebugQml.depends += mkStudioQmlDir
-                deployDebugQml.commands = \
-                    $$QMAKE_COPY $$shell_quote($$shell_path($$OUT_PWD/qml/$$QML_FILE_D)) \
-                    $$shell_quote($$shell_path(\$(DEPLOY_DIR)/$$QML_FILE_D))
-            }
-
             # copy QtStudio3D.dll
             release {
                 QTSTUDIO3D_LIB = Qt5Studio3D.dll
@@ -66,35 +40,14 @@ load(qt_parts)
                 $$QMAKE_COPY $$shell_quote($$shell_path( \
                     $$OUT_PWD/bin/$$QTSTUDIO3D_LIB)) \
                 $$shell_quote($$shell_path($$[QT_INSTALL_BINS]/$$QTSTUDIO3D_LIB))
-
-            QMLDIR_FILE = QtStudio3D/qmldir
-            QMAKE_EXTRA_TARGETS += deployQmldir
-            deployTarget.depends += deployQmldir
-            deployQmldir.depends += mkStudioQmlDir
-            deployQmldir.commands = \
-                $$QMAKE_COPY $$shell_quote($$shell_path($$OUT_PWD/qml/$$QMLDIR_FILE)) \
-                $$shell_quote($$shell_path(\$(DEPLOY_DIR)/$$QMLDIR_FILE))
-
-            QMAKE_EXTRA_TARGETS += mkStudioQmlDir
-            mkStudioQmlDir.commands = \
-                $$sprintf($$QMAKE_MKDIR_CMD, $$shell_quote($$shell_path(\$(DEPLOY_DIR)/QtStudio3D)))
-
-            # Deploy viewer 1.0 qml dependencies when deploying studio
-            EXTRA_DEPLOY_OPTIONS = -qmldir=$$shell_quote($$PWD/src/Viewer/Qt3DViewer)
         }
 
         qtPrepareTool(DEPLOY_TOOL, $$deploytool)
 
+        EXTRA_DEPLOY_OPTIONS = -qmldir=$$shell_quote($$PWD/src/shared/dummyqml)
         deployTarget.commands = \
             $$DEPLOY_TOOL $$shell_quote(\$(DEPLOY_DIR)/Qt3DStudio$${exesuffix}) \
                 -qmldir=$$shell_quote($$PWD/src/Authoring/Studio/Palettes) $$EXTRA_DEPLOY_OPTIONS
-
-        macos {
-            # Viewer 1.0
-            deployTarget.commands += && \
-                $$DEPLOY_TOOL $$shell_quote(\$(DEPLOY_DIR)/Qt3DViewer$${exesuffix}) \
-                -qmldir=$$shell_quote($$PWD/src/Viewer/Qt3DViewer)
-        }
 
         greaterThan(QT_MAJOR_VERSION, 5)|greaterThan(QT_MINOR_VERSION, 10) {
             # Viewer 2.0
@@ -116,8 +69,8 @@ load(qt_parts)
                     $$QMAKE_COPY $$shell_quote($$shell_path( \
                         $$OUT_PWD/src/Runtime/qt3d-runtime/bin/$$RUNTIME2_LIB)) \
                     $$shell_quote($$shell_path($$[QT_INSTALL_BINS]/$$RUNTIME2_LIB))
-                EXTRA_DEPLOY_OPTIONS = --qml --quick
             }
+
             deployTarget.commands += && \
                 $$DEPLOY_TOOL $$shell_quote(\$(DEPLOY_DIR)/q3dsviewer$${exesuffix}) \
                 $$EXTRA_DEPLOY_OPTIONS

@@ -496,15 +496,17 @@ struct SRendererImpl : public IStudioRenderer,
             || m_Translation->GetOrCreateTranslator(theInstance) == nullptr
             || GraphObjectTypes::IsNodeType(
                    m_Translation->GetOrCreateTranslator(theInstance)->GetGraphObject().m_Type)
-                == false)
+                == false) {
             theInstance = m_Doc.GetActiveLayer();
+        }
 
         // If we *still* aren't pointed at a node then bail.
         if (m_Translation->GetOrCreateTranslator(theInstance) == nullptr
             || GraphObjectTypes::IsNodeType(
                    m_Translation->GetOrCreateTranslator(theInstance)->GetGraphObject().m_Type)
-                == false)
+                == false) {
             return;
+        }
 
         SNode &theNode = static_cast<SNode &>(
             m_Translation->GetOrCreateTranslator(theInstance)->GetGraphObject());
@@ -523,10 +525,24 @@ struct SRendererImpl : public IStudioRenderer,
                     }
                 }
             }
-        } else
+        } else {
             theBounds =
                 theNode.GetBounds(m_Context->GetBufferManager(), m_Context->GetPathManager());
+        }
+
+        // Fake bounds for non-physical objects
+        if (theBounds.isEmpty()) {
+            const int dim = 50.0f; // Dimensions of a default sized cube
+            theBounds = qt3ds::NVBounds3(QT3DSVec3(-dim, -dim, -dim), QT3DSVec3(dim, dim, dim));
+        }
+
+        // Empty groups don't have proper global transform, so we need to recalculate it.
+        // For simplicity's sake, we recalculate for all groups, not just empty ones.
+        if (theNode.m_Type == GraphObjectTypes::Node)
+            theNode.CalculateGlobalVariables();
+
         QT3DSVec3 theCenter = theNode.m_GlobalTransform.transform(theBounds.getCenter());
+
         // Center the edit camera so that it points directly at the bounds center point
         m_Translation->m_EditCameraInfo.m_Position = theCenter;
         // Now we need to adjust the camera's zoom such that the view frustum contains the bounding

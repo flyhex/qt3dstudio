@@ -42,7 +42,11 @@
     \li Windows/Linux
     \li macOS
   \row
-    \li New
+    \li New project
+    \li \c{Ctrl + Shift + N}
+    \li \c{Cmd + Shift + N}
+  \row
+    \li New presentation
     \li \c{Ctrl + N}
     \li \c{Cmd + N}
   \row
@@ -106,6 +110,10 @@
     \li Delete
     \li Del
     \li Del
+  \row
+    \li Group objects
+    \li \c{Ctrl + G}
+    \li \c{Cmd + G}
   \row
     \li Studio preferences
     \li \c{Shift + U}
@@ -233,13 +241,13 @@
     \li \c{W}
     \li \c{W}
   \row
-    \li Scale mode
-    \li \c{R}
-    \li \c{R}
-  \row
     \li Rotate mode
     \li \c{E}
     \li \c{E}
+  \row
+    \li Scale mode
+    \li \c{R}
+    \li \c{R}
   \row
     \li Constrain drag to axis
     \li \c{Shift} + mouse drag
@@ -466,8 +474,8 @@ only in \e{Perspective View} and \e{Orthographic View}.
     \li \c{Cmd + C}
   \row
     \li Paste keyframe
-    \li \c{Ctrl + X}
-    \li \c{Cmd + X}
+    \li \c{Ctrl + V}
+    \li \c{Cmd + V}
   \row
     \li Delete selected keyframe
     \li \c{Del}
@@ -528,6 +536,10 @@ only in \e{Perspective View} and \e{Orthographic View}.
     \li Move playhead to previous medium tick mark
     \li \c{Shift + ,}
     \li \c{Shift + ,}
+  \row
+    \li Zoom timeline in/out
+    \li \c{Alt + right mouse button + right/left mouse drag}
+    \li \c{Option + right mouse button + right/left mouse drag}
 \endtable
 
 \section2 Slides

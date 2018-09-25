@@ -1,6 +1,5 @@
 /****************************************************************************
 **
-** Copyright (c) 2016 NVIDIA CORPORATION.
 ** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
@@ -28,33 +27,26 @@
 **
 ****************************************************************************/
 
-#ifndef Q3DSVIEW_PLUGIN_H
-#define Q3DSVIEW_PLUGIN_H
-
-#include <QtQml/qqmlextensionplugin.h>
-
-static void initResources()
+float calcRGBAvg(in vec4 rgba)
 {
-#ifdef QT_STATIC
-    Q_INIT_RESOURCE(qmake_QtStudio3D);
-#endif
+    return (rgba.r + rgba.g + rgba.b) / 3.0;
 }
 
-QT_BEGIN_NAMESPACE
-
-class Q3DSViewPlugin : public QQmlExtensionPlugin
+vec3 defaultMaterialBumpNoLod(in sampler2D sampler, in float factor,
+                              in vec2 texCoord, in vec3 tangent, in vec3 binormal,
+                              in vec3 normal, in vec2 bumpSize)
 {
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
+    // invert factor
+    float invFactor = -factor;
 
-public:
-    Q3DSViewPlugin(QObject *parent = 0) : QQmlExtensionPlugin(parent)
-    {
-        initResources();
-    }
-    void registerTypes(const char *uri) override;
-};
+    vec2 unitStep = 1.0 / bumpSize;
 
-QT_END_NAMESPACE
+    float du = calcRGBAvg(texture2D(sampler, vec2(texCoord.x + unitStep.x, texCoord.y)))
+             - calcRGBAvg(texture2D(sampler, vec2(texCoord.x, texCoord.y)));
+    float dv = calcRGBAvg(texture2D(sampler, vec2(texCoord.x, texCoord.y + unitStep.y)))
+             - calcRGBAvg(texture2D(sampler, vec2(texCoord.x, texCoord.y)));
 
-#endif // Q3DSVIEW_PLUGIN_H
+    vec3 n = normalize(vec3(invFactor * du, invFactor * dv, 1.0));
+    n = n.x * normalize(tangent) + n.y * normalize(binormal) + n.z * normal;
+    return normalize(normal + n);
+}

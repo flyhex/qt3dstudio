@@ -148,15 +148,15 @@ void Q3DSPresentation::setAttribute(const QString &elementPath, const QString &a
         float valueFloat;
 
         const void *theValue = nullptr;
-        switch (value.type()) {
-        case QVariant::Bool:
-        case QVariant::Int:
-        case QVariant::Double:
+        switch (static_cast<QMetaType::Type>(value.type())) {
+        case QMetaType::Bool:
+        case QMetaType::Int:
+        case QMetaType::Double:
         case QMetaType::Float:
             valueFloat = value.toFloat();
             theValue = &valueFloat;
             break;
-        case QVariant::String:
+        case QMetaType::QString:
         default: // Try string for other types
             valueStr = value.toString().toUtf8();
             theValue = valueStr.constData();

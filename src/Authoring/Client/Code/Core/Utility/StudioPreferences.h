@@ -33,6 +33,7 @@
 #pragma once
 
 #include <qglobal.h>
+#include <QtGui/qbrush.h>
 
 #include "CoreConst.h"
 #include "Qt3DSFile.h"
@@ -51,9 +52,6 @@ public:
 
     static bool IsTimelineSnappingGridActive();
     static void SetTimelineSnappingGridActive(bool inActive);
-
-    static bool IsLegacyViewerActive();
-    static void SetLegacyViewerActive(bool inActive);
 
     static ESnapGridResolution GetTimelineSnappingGridResolution();
     static void SetTimelineSnappingGridResolution(ESnapGridResolution inResolution);
@@ -166,6 +164,7 @@ public:
     static QColor masterColor();
     static QColor disabledColor();
     static QColor dataInputColor();
+    static QLinearGradient welcomeBackgroundGradient();
 
     static QColor timelineRowColorNormal();
     static QColor timelineRowColorNormalProp();

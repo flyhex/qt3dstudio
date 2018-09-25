@@ -181,8 +181,9 @@ public:
     virtual qt3dsdm::Qt3DSDMPropertyHandle GetSlideComponentIdProperty();
     virtual qt3dsdm::Qt3DSDMPropertyHandle GetNameProperty();
     virtual qt3dsdm::Qt3DSDMPropertyHandle GetIdProperty();
-    virtual qt3dsdm::Qt3DSDMPropertyHandle GetTypeProperty();
-    virtual qt3dsdm::Qt3DSDMPropertyHandle GetSourcePathProperty();
+    virtual qt3dsdm::Qt3DSDMPropertyHandle GetTypeProperty() const;
+    virtual qt3dsdm::Qt3DSDMPropertyHandle GetSourcePathProperty() const;
+    virtual qt3dsdm::Qt3DSDMPropertyHandle getSubpresentationProperty() const;
     virtual qt3dsdm::Qt3DSDMInstanceHandle GetActionInstance();
     virtual qt3dsdm::Qt3DSDMPropertyHandle GetActionEyeball();
     virtual qt3dsdm::Qt3DSDMPropertyHandle GetImportId();
@@ -364,6 +365,7 @@ public:
                          qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                          Q3DStudio::CString inDesiredName);
     Q3DStudio::CString GetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
+    Q3DStudio::CString getSubpresentation(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
     std::set<Q3DStudio::CString> GetSourcePathList() const;
     std::set<Q3DStudio::CString> GetFontFileList() const;
     std::set<Q3DStudio::CString> GetDynamicObjectTextureList() const;
@@ -395,7 +397,7 @@ public:
 
     // TODO: EStudioObjectType and EASSETTYPE can't co-exist, one must go. Think EStudioObjectType
     // should win since things are better classified
-    EStudioObjectType GetObjectType(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
+    EStudioObjectType GetObjectType(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
     bool IsBehaviorInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
     bool IsCameraInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
     bool IsGroupInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;

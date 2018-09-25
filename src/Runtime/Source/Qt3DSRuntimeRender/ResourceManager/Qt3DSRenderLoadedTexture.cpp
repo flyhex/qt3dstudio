@@ -655,27 +655,27 @@ SLoadedTexture *SLoadedTexture::Load(const QString &inPath, NVFoundationBase &in
                                      NVRenderContextType renderContextType)
 {
     if (inPath.isEmpty())
-        return NULL;
+        return nullptr;
 
-    SLoadedTexture *theLoadedImage = NULL;
+    SLoadedTexture *theLoadedImage = nullptr;
     NVScopedRefCounted<IRefCountedInputStream> theStream(inFactory.GetStreamForFile(inPath));
     QString fileName;
     inFactory.GetPathForFile(inPath, fileName);
     if (theStream.mPtr && inPath.size() > 3) {
-        if (inPath.endsWith("png", Qt::CaseInsensitive))
+        if (inPath.endsWith("png", Qt::CaseInsensitive)
+                || inPath.endsWith("jpg", Qt::CaseInsensitive)
+                || inPath.endsWith("peg", Qt::CaseInsensitive)
+                || inPath.endsWith("ktx", Qt::CaseInsensitive)) {
             theLoadedImage = LoadQImage(fileName, inFlipY, inFoundation, renderContextType);
-        else if (inPath.endsWith("jpg", Qt::CaseInsensitive)
-                 || inPath.endsWith("peg", Qt::CaseInsensitive))
-            theLoadedImage = LoadQImage(fileName, inFlipY, inFoundation, renderContextType);
-        else if (inPath.endsWith("dds", Qt::CaseInsensitive))
+        } else if (inPath.endsWith("dds", Qt::CaseInsensitive)) {
             theLoadedImage = LoadDDS(*theStream, inFlipY, inFoundation, renderContextType);
-        else if (inPath.endsWith("gif", Qt::CaseInsensitive))
+        } else if (inPath.endsWith("gif", Qt::CaseInsensitive)) {
             theLoadedImage = LoadGIF(*theStream, !inFlipY, inFoundation, renderContextType);
-        else if (inPath.endsWith("bmp", Qt::CaseInsensitive))
+        } else if (inPath.endsWith("bmp", Qt::CaseInsensitive)) {
             theLoadedImage = LoadBMP(*theStream, !inFlipY, inFoundation, renderContextType);
-        else if (inPath.endsWith("hdr", Qt::CaseInsensitive))
+        } else if (inPath.endsWith("hdr", Qt::CaseInsensitive)) {
             theLoadedImage = LoadHDR(*theStream, inFoundation, renderContextType);
-        else {
+        } else {
             qCCritical(INTERNAL_ERROR, "Unrecognized image extension: %s", qPrintable(inPath));
         }
     }

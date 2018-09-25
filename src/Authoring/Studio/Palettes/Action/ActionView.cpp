@@ -422,9 +422,8 @@ QObject *ActionView::showTriggerObjectBrowser(const QPoint &point)
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
     const auto instanceHandle = GetBridge()->GetInstance(actionInfo.m_Owner,
                                                          actionInfo.m_TriggerObject);
-    m_triggerObjectBrowser->selectAndExpand(instanceHandle, actionInfo.m_Owner);
-
     m_triggerObjectBrowser->disconnect();
+    m_triggerObjectBrowser->selectAndExpand(instanceHandle, actionInfo.m_Owner);
     CDialogs::showWidgetBrowser(this, m_triggerObjectBrowser, point);
 
     connect(m_triggerObjectBrowser, &ObjectBrowserView::selectionChanged,
@@ -454,9 +453,8 @@ QObject *ActionView::showTargetObjectBrowser(const QPoint &point)
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
     const auto instanceHandle = GetBridge()->GetInstance(actionInfo.m_Owner,
                                                          actionInfo.m_TargetObject);
-    m_targetObjectBrowser->selectAndExpand(instanceHandle, actionInfo.m_Owner);
-
     m_targetObjectBrowser->disconnect();
+    m_targetObjectBrowser->selectAndExpand(instanceHandle, actionInfo.m_Owner);
     CDialogs::showWidgetBrowser(this, m_targetObjectBrowser, point);
 
     connect(m_targetObjectBrowser, &ObjectBrowserView::selectionChanged,
@@ -517,8 +515,8 @@ QObject *ActionView::showEventBrowser(const QPoint &point)
 
     m_eventsBrowser->setModel(m_eventsModel);
 
-    m_eventsBrowser->selectAndExpand(QString::fromStdWString(actionInfo.m_Event));
     m_eventsBrowser->disconnect();
+    m_eventsBrowser->selectAndExpand(QString::fromStdWString(actionInfo.m_Event));
     CDialogs::showWidgetBrowser(this, m_eventsBrowser, point);
 
     connect(m_eventsBrowser, &EventsBrowserView::selectionChanged,
@@ -553,8 +551,8 @@ QObject *ActionView::showHandlerBrowser(const QPoint &point)
 
     m_handlerBrowser->setModel(m_handlersModel);
 
-    m_handlerBrowser->selectAndExpand(QString::fromStdWString(actionInfo.m_Handler));
     m_handlerBrowser->disconnect();
+    m_handlerBrowser->selectAndExpand(QString::fromStdWString(actionInfo.m_Handler));
     CDialogs::showWidgetBrowser(this, m_handlerBrowser, point);
 
     connect(m_handlerBrowser, &EventsBrowserView::selectionChanged,
@@ -601,8 +599,8 @@ QObject *ActionView::showEventBrowserForArgument(int handle, const QPoint &point
                 eventName = QString::fromWCharArray(eventInfo.m_Name.wide_str());
         }
     }
-    m_fireEventsBrowser->selectAndExpand(eventName);
     m_fireEventsBrowser->disconnect();
+    m_fireEventsBrowser->selectAndExpand(eventName);
     CDialogs::showWidgetBrowser(this, m_fireEventsBrowser, point);
 
     connect(m_fireEventsBrowser, &EventsBrowserView::selectionChanged,
