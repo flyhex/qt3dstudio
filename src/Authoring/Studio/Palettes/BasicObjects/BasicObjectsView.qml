@@ -53,19 +53,24 @@ Rectangle {
                 id: dragItem
                 anchors.fill: parent
 
-                Drag.active: dragArea.drag.active
-                Drag.hotSpot.x: width / 2
-                Drag.hotSpot.y: height / 2
-                Drag.dragType: Drag.Automatic
-                Drag.supportedActions: Qt.CopyAction
-
                 MouseArea {
                     id: dragArea
-                    anchors.fill: parent
-                    drag.target: dragItem
-                }
+                    property bool dragStarted: false
+                    property point pressPoint
 
-                Drag.onDragStarted: _basicObjectsView.startDrag(dragArea, model.index)
+                    anchors.fill: parent
+                    onPressed: {
+                        pressPoint = Qt.point(mouse.x, mouse.y);
+                        dragStarted = false;
+                    }
+                    onPositionChanged: {
+                        if (!dragStarted && (Math.abs(mouse.x - pressPoint.x) > 4
+                                             || Math.abs(mouse.y - pressPoint.y) > 4)) {
+                            dragStarted = true;
+                            _basicObjectsView.startDrag(dragItem, index);
+                        }
+                    }
+                }
             }
             Row {
                 id: contentRow

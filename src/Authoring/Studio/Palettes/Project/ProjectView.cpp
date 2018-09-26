@@ -271,6 +271,7 @@ void ProjectView::mousePressEvent(QMouseEvent *event)
 
 void ProjectView::startDrag(QQuickItem *item, int row)
 {
+    item->grabMouse(); // Grab to make sure we can ungrab after the drag
     const auto index = m_ProjectModel->index(row);
 
     QDrag drag(this);
@@ -281,6 +282,8 @@ void ProjectView::startDrag(QQuickItem *item, int row)
         drag.exec(Qt::IgnoreAction);
     else
         drag.exec(Qt::CopyAction);
+
+    // Ungrab to trigger mouse release on the originating item
     QTimer::singleShot(0, item, &QQuickItem::ungrabMouse);
 }
 
