@@ -43,6 +43,16 @@
     <widget class="QListWidget" name="listProps"/>
    </item>
    <item>
+    <widget class="QCheckBox" name="cbDetach">
+     <property name="toolTip">
+      <string>Detach from referenced material</string>
+     </property>
+     <property name="text">
+      <string>Detach Material</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>

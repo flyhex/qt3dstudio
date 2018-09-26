@@ -88,6 +88,9 @@ bool CStudioObjectTypes::AcceptableParent(EStudioObjectType inChild, EStudioObje
     case OBJTYPE_CUSTOMMATERIAL:
         theAcceptible = false; // TODO add drag and drop support
         break;
+    default:
+        // Do not accept unexpected type
+        break;
     }
 
     return theAcceptible;
@@ -177,7 +180,7 @@ const QString &CStudioObjectTypes::GetNormalIconName(EStudioObjectType inType)
         return theString;
     }
     case OBJTYPE_DATAINPUT: {
-        static QString theString = QStringLiteral("Objects-DataInput-Normal.png");
+        static QString theString = QStringLiteral("Objects-DataInput-Active.png");
         return theString;
     }
     case OBJTYPE_PRESENTATION: {
@@ -279,7 +282,7 @@ const QString &CStudioObjectTypes::GetDisabledIconName(EStudioObjectType inType)
         return theString;
     }
     case OBJTYPE_DATAINPUT: {
-        static QString theString = QStringLiteral("Objects-DataInput-Disabled.png");
+        static QString theString = QStringLiteral("Objects-DataInput-Inactive.png");
         return theString;
     }
     case OBJTYPE_PRESENTATION: {

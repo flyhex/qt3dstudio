@@ -739,12 +739,15 @@ void CGraphIterator::ApplyCriterias()
             std::stable_sort(m_Results.begin(), m_Results.end(), theCriteria.m_SortFunc);
             break;
 
-        case ECriteriaType_Filter:
+        case ECriteriaType_Filter: {
             TGraphableList::iterator theNewEnd;
             theNewEnd =
                 std::remove_if(m_Results.begin(), m_Results.end(),
                                theCriteria.m_FilterFunc); // exclude those that satisfy the filter
             m_Results.erase(theNewEnd, m_Results.end()); // clear away the junk
+        }
+            break;
+        default:
             break;
         }
     }

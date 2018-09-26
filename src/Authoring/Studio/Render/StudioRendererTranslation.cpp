@@ -382,6 +382,7 @@ struct STranslatorDataModelParser
 #define Camera_ClipNear m_Camera.m_ClipNear
 #define Camera_ClipFar m_Camera.m_ClipFar
 #define Camera_FOV m_Camera.m_Fov
+#define Camera_FOVHorizontal m_Camera.m_FovHorizontal
 #define Camera_Orthographic m_Camera.m_Orthographic
 #define Camera_ScaleMode m_Camera.m_ScaleMode
 #define Camera_ScaleAnchor m_Camera.m_ScaleAnchor
@@ -1663,7 +1664,8 @@ SGraphObjectTranslator *STranslation::CreateTranslator(qt3dsdm::Qt3DSDMInstanceH
                     *theSystem.CreateEffectInstance(theNameStr, m_Allocator));
             }
         }
-    } break;
+    }
+        break;
     case qt3dsdm::ComposerObjectTypes::CustomMaterial: {
         ICustomMaterialSystem &theSystem = m_Context.GetCustomMaterialSystem();
         if (theParentClass.Valid()) {
@@ -1691,11 +1693,16 @@ SGraphObjectTranslator *STranslation::CreateTranslator(qt3dsdm::Qt3DSDMInstanceH
                     &theSystem;
             }
         }
-    } break;
+    }
+        break;
     case qt3dsdm::ComposerObjectTypes::RenderPlugin: {
         theNewTranslator = QT3DS_NEW(m_Allocator, SRenderPluginTranslator)(inInstance, m_Allocator);
-    } break;
     }
+        break;
+    default:
+        break;
+    }
+
     return theNewTranslator;
 }
 
@@ -2449,8 +2456,11 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
                             case GraphObjectTypes::Path:
                                 DrawNonGroupBoundingBoxes(*theTranslator);
                                 break;
+                             default:
+                                break;
                             }
                         }
+
                         // Don't draw the axis if there is a widget.
                         if (CStudioPreferences::ShouldDisplayPivotPoint()
                             && shouldDisplayWidget == false) {
@@ -2460,8 +2470,11 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
                             case GraphObjectTypes::Model:
                                 DrawAxis(*theTranslator);
                                 break;
+                            default:
+                               break;
                             }
                         }
+
                         if (theType == GraphObjectTypes::Path && selectedPath == false) {
                             selectedPath = true;
                             if (!m_PathWidget) {
@@ -2485,11 +2498,21 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
                     && theTranslator->GetGraphObject().m_Type != GraphObjectTypes::Layer) {
 
                 qt3ds::render::SNode &theNode(
-                    static_cast<qt3ds::render::SNode &>(theTranslator->GetGraphObject()));
+                            static_cast<qt3ds::render::SNode &>(theTranslator->GetGraphObject()));
+                const GraphObjectTypes::Enum type = theTranslator->GetGraphObject().m_Type;
+
+                // Don't draw widgets for non-visible nodes
+                bool isActive = theNode.m_Flags.IsActive();
+                // Light and camera nodes are never active, so check from doc
+                if (type == GraphObjectTypes::Camera || type == GraphObjectTypes::Light)
+                    isActive = m_Reader.IsCurrentlyActive(theHandles[0]);
+                shouldDisplayWidget = shouldDisplayWidget && isActive;
+
                 SCamera *theRenderCamera = m_Context.GetRenderer().GetCameraForNode(theNode);
                 bool isActiveCamera = theRenderCamera == (static_cast<SCamera *>(&theNode));
-                if (shouldDisplayWidget && isActiveCamera == false
-                        && theTranslator->GetGraphObject().m_Type != GraphObjectTypes::Camera) {
+                if (shouldDisplayWidget && !isActiveCamera
+                        && ((type == GraphObjectTypes::Camera && m_EditCameraEnabled)
+                            || type != GraphObjectTypes::Camera)) {
                     switch (theToolMode) {
                     default:
                         QT3DS_ASSERT(false);
@@ -2499,14 +2522,14 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
                         if (!m_TranslationWidget) {
                             m_TranslationWidget
                                     = qt3ds::widgets::IStudioWidget::CreateTranslationWidget(
-                                            m_Context.GetAllocator());
+                                        m_Context.GetAllocator());
                         }
                         theNextWidget = m_TranslationWidget.mPtr;
                         break;
                     case STUDIO_TOOLMODE_ROTATE:
                         if (!m_RotationWidget) {
                             m_RotationWidget = qt3ds::widgets::IStudioWidget::CreateRotationWidget(
-                                m_Context.GetAllocator());
+                                        m_Context.GetAllocator());
                         }
                         theNextWidget = m_RotationWidget.mPtr;
                         break;
@@ -2514,11 +2537,12 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
                     case STUDIO_TOOLMODE_SCALE:
                         if (!m_ScaleWidget) {
                             m_ScaleWidget = qt3ds::widgets::IStudioWidget::CreateScaleWidget(
-                                m_Context.GetAllocator());
+                                        m_Context.GetAllocator());
                         }
                         theNextWidget = m_ScaleWidget.mPtr;
                         break;
                     }
+
                     if (theNextWidget) {
                         SNode &node = static_cast<SNode &>(theTranslator->GetGraphObject());
                         theNextWidget->SetNode(node);
@@ -2945,6 +2969,8 @@ SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::En
                 if (fabs((float)renderSpacePt.x - theGuideInfo.m_Position) <= width)
                     return theGuides[guideIdx];
                 break;
+            default:
+                break;
             }
         }
     }
@@ -2995,8 +3021,11 @@ SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::En
             const SGraphObject &theObject = *thePickResult.m_HitObject;
 
             // check hit distance to cameras and lights
-            if (lastIndex != -1 && thePickResult.m_CameraDistanceSq > lastDist * lastDist)
+            if (lastIndex != -1 && thePickResult.m_CameraDistanceSq > lastDist * lastDist) {
+                DoPrepareForDrag(static_cast<SNode *>(
+                                     &(m_editModeCamerasAndLights[lastIndex]->GetGraphObject())));
                 return m_editModeCamerasAndLights[lastIndex]->GetInstanceHandle();
+            }
 
             if (theObject.m_Type == GraphObjectTypes::Model
                 || theObject.m_Type == GraphObjectTypes::Text
@@ -3069,8 +3098,11 @@ SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::En
             RequestRender();
     }
 
-    if (lastIndex != -1)
+    if (lastIndex != -1) {
+        DoPrepareForDrag(static_cast<SNode *>(
+                             &(m_editModeCamerasAndLights[lastIndex]->GetGraphObject())));
         return m_editModeCamerasAndLights[lastIndex]->GetInstanceHandle();
+    }
 
     return SStudioPickValue();
 }
@@ -3669,20 +3701,25 @@ void STranslation::PerformWidgetDrag(int inWidgetSubComponent, CPt inOriginalCoo
         QT3DSF32 theIntersectionCosine = theOriginalRay.m_Direction.dot(thePlaneNormal);
         QT3DSVec3 objToPrevious;
         QT3DSVec3 objToCurrent;
-        /*
-        long theModifiers = CHotKeys::GetCurrentKeyModifiers();
-        if ( theModifiers & CHotKeys::MODIFIER_SHIFT )
-        {
-            DebugBreak();
-        }
-        */
-        if (!theOriginalPlaneCoords.hasValue() || !theCurrentPlaneCoords.hasValue())
-                return;
         if (fabs(theIntersectionCosine) > .08f) {
+            if (!theOriginalPlaneCoords.hasValue() || !theCurrentPlaneCoords.hasValue())
+                    return;
             objToPrevious = globalPos - *theOriginalPlaneCoords;
             objToCurrent = globalPos - *theCurrentPlaneCoords;
             objToPrevious.normalize();
             QT3DSF32 lineLen = objToCurrent.normalize();
+
+            if (!thePrepResult->m_Camera->m_Flags.IsOrthographic()) {
+                // Flip object vector if coords are behind camera to get the correct angle
+                QT3DSVec3 camToCurrent = camGlobalPos - *theCurrentPlaneCoords;
+                if (camToCurrent.dot(theCamDirection) >= 0.0f) {
+                    objToCurrent = -objToCurrent;
+                    // Negative line length seems counterintuitive, but since the end point is
+                    // behind the camera, it results in correct line when rendered
+                    lineLen = -lineLen;
+                }
+            }
+
             QT3DSF32 cosAngle = objToPrevious.dot(objToCurrent);
             QT3DSVec3 theCrossProd = objToPrevious.cross(objToCurrent);
             QT3DSF32 theCrossPlaneDot = theCrossProd.dot(thePlaneNormal);
@@ -3690,6 +3727,7 @@ void STranslation::PerformWidgetDrag(int inWidgetSubComponent, CPt inOriginalCoo
             QT3DSF32 angleRad = acos(cosAngle) * angleSign;
             angleRad = MakeNiceRotation(angleRad);
             QT3DSQuat theRotation(angleRad, thePlaneNormal);
+
             m_CumulativeRotation = ShortestAngleDifference(m_CumulativeRotation, angleRad);
             m_LastRenderedWidget->SetRotationEdges(-1.0f * objToPrevious, thePlaneNormal,
                                                    m_CumulativeRotation, lineLen);
@@ -3792,7 +3830,10 @@ void STranslation::CheckGuideInPresentationRect(Qt3DSDMGuideHandle inGuide,
     case qt3dsdm::GuideDirections::Vertical:
         inPresentation = 0.0f <= theInfo.m_Position && presWidth >= theInfo.m_Position;
         break;
+    default:
+        break;
     }
+
     if (!inPresentation)
         inEditor.EnsureEditor(L"Delete Guide", __FILE__, __LINE__).DeleteGuide(inGuide);
 }

@@ -223,6 +223,15 @@ QDateTimeEdit::up-arrow {
     image: url(:/images/arrow_up.png);
 }
 
+QListWidget {
+    border: 1px solid #727476;
+    background: #2e2f30;
+}
+
+QListWidget::item:hover {
+    background-color: #23516D;
+}
+
 QSpinBox::up-button,
 QSpinBox::down-button,
 QDoubleSpinBox::up-button,
@@ -267,21 +276,48 @@ QHeaderView::section:hover {
 /* Tutorial Dialog */
 QDialog#StudioTutorialWidget,
 QDialog#StudioTutorialWidget QWidget {
-    color: #ffffff;
     background-color: transparent;
     border: 0px;
 }
 
+QLabel#studioTutorialName {
+    font-size: 42px;
+    font-family: "Titillium Web";
+    font-weight: 300;
+    color: "#00cd45";
+}
+
+QLabel#studioTutorialWelcome {
+    font-size: 42px;
+    font-family: "Titillium Web";
+    font-weight: 300;
+    color: #ffffff;
+}
+
+QPushButton#studioTutorialOpen,
+QPushButton#studioTutorialNew,
+QPushButton#studioTutorialQuickStart {
+    font-size: 28px;
+    font-family: "Titillium Web";
+    font-weight: 300;
+    color: #ffffff;
+    padding: 0px 60px 0px 60px;
+}
+
 QPushButton:!pressed#studioTutorialOpen,
-QPushButton:!pressed#studioTutorialNew {
-    background: transparent;
-    border: 1px solid #41cd52;
+QPushButton:!pressed#studioTutorialNew,
+QPushButton:!pressed#studioTutorialQuickStart {
+    background: "#00cd45";
+    border: 3px solid "#00cd45";
+    border-radius: 10px;
 }
 
 QPushButton:pressed#studioTutorialOpen,
-QPushButton:pressed#studioTutorialNew {
-    background: #41cd52;
-    border: 1px solid #41cd52;
+QPushButton:pressed#studioTutorialNew,
+QPushButton:pressed#studioTutorialQuickStart {
+    background: transparent;
+    border: 3px solid "#00cd45";
+    border-radius: 10px;
 }
 
 /* Startup Dialog */
@@ -310,27 +346,17 @@ QDialog#AboutDlg QPushButton:pressed {
     border: 1px solid #41cd52;
 }
 
-/* TimeLineToolbar */
-QWidget#TimeLineParent,
-TimeLineToolbar QWidget#layoutWidget {
-    background: #404244;
-}
-
-TimeLineToolbar QPushButton#timeButton {
+/* TimelineToolbar */
+QPushButton#timelineButton {
     border: 0px;
 }
 
-TimeLineToolbar QLabel#dataInputName {
-    background: transparent;
-    color: #ff5102;
+QPushButton:pressed#timelineButton {
+    background: #46a2da;
 }
 
-QLabel#timebarToolTip {
-    background: #404244;
-    color: #ffffff;
-    font-size: 12px;
-    border: 1px solid #727476;
-    border-radius: 2;
+QPushButton:hover:!pressed#timelineButton {
+    background: #262829;
 }
 
 /* Loading progress dialog */
@@ -346,15 +372,12 @@ QDialog#ProgressDlg QWidget#progressActionText {
     font-size: 16px;
 }
 
-/* Sub-presentation Dialogs and Data Input Dialogs */
-QDialog#SubPresentationListDlg QTableView QTableCornerButton::section,
-QDialog#SubPresentationListDlg QHeaderView::section,
+/* Data Input Dialogs */
 QDialog#DataInputListDlg QTableView QTableCornerButton::section,
 QDialog#DataInputListDlg QHeaderView::section {
     font-weight: bold;
 }
 
-QDialog#SubPresentationListDlg QTableView,
 QDialog#DataInputListDlg QTableView {
     selection-background-color: #46a2da;
     gridline-color: #2e2f30;
@@ -370,7 +393,6 @@ QDialog#DataInputListDlg QComboBox QAbstractItemView::item
     margin-top: 5px;
 }
 
-QDialog#SubPresentationListDlg QPushButton#SubPresentationListButton,
 QDialog#DataInputListDlg QPushButton#DataInputListButton {
     background-color: transparent;
     border: 0px;
@@ -381,29 +403,14 @@ QDialog#DataInputListDlg QPushButton#DataInputListButton {
     padding: 0px;
 }
 
-QDialog#SubPresentationListDlg QPushButton#SubPresentationListButton:pressed,
 QDialog#DataInputListDlg QPushButton#DataInputListButton:pressed {
     background-color: #262829;
 }
 
-QDialog#SubPresentationDlg QPushButton:!enabled,
 QDialog#DataInputDlg QPushButton:!enabled,
 QDialog#DataInputDlg QComboBox QAbstractItemView::item:disabled {
     background: transparent;
     color: #727476;
-}
-
-/* Data input chooser */
-DataInputSelectDlg {
-    border: 1px solid #404244;
-}
-
-DataInputSelectDlg::item:selected {
-    background: #46a2da;
-}
-
-DataInputSelectDlg::item:hover {
-    background: #23516d;
 }
 
 /* QSlider horizontal */

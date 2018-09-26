@@ -31,9 +31,10 @@ load(qt_parts)
 
         qtPrepareTool(DEPLOY_TOOL, $$deploytool)
 
+        EXTRA_DEPLOY_OPTIONS = -qmldir=$$shell_quote($$PWD/src/shared/dummyqml)
         deployTarget.commands = \
             $$DEPLOY_TOOL $$shell_quote(\$(DEPLOY_DIR)/Qt3DStudio$${exesuffix}) \
-                -qmldir=$$shell_quote($$PWD/src/Authoring/Studio/Palettes)
+                -qmldir=$$shell_quote($$PWD/src/Authoring/Studio/Palettes) $$EXTRA_DEPLOY_OPTIONS
 
         greaterThan(QT_MAJOR_VERSION, 5)|greaterThan(QT_MINOR_VERSION, 10) {
             # Viewer 2.0
@@ -55,8 +56,8 @@ load(qt_parts)
                     $$QMAKE_COPY $$shell_quote($$shell_path( \
                         $$OUT_PWD/src/Runtime/qt3d-runtime/bin/$$RUNTIME2_LIB)) \
                     $$shell_quote($$shell_path($$[QT_INSTALL_BINS]/$$RUNTIME2_LIB))
-                EXTRA_DEPLOY_OPTIONS = --qml --quick
             }
+
             deployTarget.commands += && \
                 $$DEPLOY_TOOL $$shell_quote(\$(DEPLOY_DIR)/q3dsviewer$${exesuffix}) \
                 $$EXTRA_DEPLOY_OPTIONS

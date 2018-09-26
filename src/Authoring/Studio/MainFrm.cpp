@@ -69,6 +69,7 @@
 #include <QtCore/qurl.h>
 #include <QtCore/qdir.h>
 #include <QtCore/qprocess.h>
+#include <QtGui/qfontdatabase.h>
 
 // Constants
 const long PLAYBACK_TIMER_TIMEOUT = 10; // 10 milliseconds
@@ -88,6 +89,10 @@ CMainFrame::CMainFrame()
     , m_propSheet(nullptr)
 {
     m_ui->setupUi(this);
+
+    // Register TitilliumWeb as application font in case user doesn't have it already installed
+    QFontDatabase::addApplicationFont(QStringLiteral(":/TitilliumWeb-Light.ttf"));
+    QFontDatabase::addApplicationFont(QStringLiteral(":/TitilliumWeb-Regular.ttf"));
 
     OnCreate();
 
@@ -212,15 +217,6 @@ CMainFrame::CMainFrame()
 
     connect(m_ui->actionRemote_Preview, &QAction::triggered,
             this, &CMainFrame::OnPlaybackPreviewRemote);
-
-    // Only show runtime1 preview if we have appropriate viewer and it's enabled
-    if (CStudioPreferences::IsLegacyViewerActive()
-            && CPreviewHelper::viewerExists(QStringLiteral("Qt3DViewer"))) {
-        connect(m_ui->actionPreviewRuntime1, &QAction::triggered,
-                this, &CMainFrame::OnPlaybackPreviewRuntime1);
-    } else {
-        m_ui->actionPreviewRuntime1->setVisible(false);
-    }
 
     // Tool mode toolbar
     connect(m_ui->actionPosition_Tool, &QAction::triggered, this, &CMainFrame::OnToolMove);
@@ -388,6 +384,8 @@ void CMainFrame::OnCreate()
     m_ui->action_Revert->setEnabled(false);
     m_ui->actionImportAssets->setEnabled(false);
     m_ui->actionRemote_Preview->setEnabled(false);
+    m_ui->action_New_Presentation->setEnabled(false);
+    m_ui->actionData_Inputs->setEnabled(false);
 
 #if 1 // TODO: Hidden until UX decision is made if these buttons are needed at all or not
     m_ui->actionPan_Tool->setVisible(false);
@@ -426,6 +424,8 @@ void CMainFrame::OnNewPresentation()
     m_ui->action_Connect_to_Device->setEnabled(true);
     m_ui->action_Revert->setEnabled(true);
     m_ui->actionImportAssets->setEnabled(true);
+    m_ui->action_New_Presentation->setEnabled(true);
+    m_ui->actionData_Inputs->setEnabled(true);
 
     // Clear data input list and sub-presentation list
     g_StudioApp.m_subpresentations.clear();
@@ -906,9 +906,6 @@ void CMainFrame::EditPreferences(short inPageIndex)
         CStudioPreferences::SetBigTimeAdvanceAmount(CStudioPreferences::DEFAULT_BIG_TIME_ADVANCE);
         CStudioPreferences::SetTimelineSnappingGridActive(true);
         CStudioPreferences::SetTimelineSnappingGridResolution(SNAPGRID_SECONDS);
-        CStudioPreferences::SetLegacyViewerActive(false);
-        // Hide legacy viewer preview button
-        m_ui->actionPreviewRuntime1->setVisible(false);
         CStudioPreferences::SetEditViewFillMode(true);
         CStudioPreferences::SetPreferredStartupView(
                     CStudioPreferences::PREFERREDSTARTUP_DEFAULTINDEX);
@@ -1725,7 +1722,7 @@ void CMainFrame::OnViewTooltips()
  */
 void CMainFrame::OnUpdateHelpIndex()
 {
-    QFile theFile(g_StudioApp.m_pszHelpFilePath.toQString());
+    QFile theFile(g_StudioApp.m_helpFilePath);
     m_ui->action_Reference_Manual->setEnabled(theFile.exists());
 }
 
@@ -1735,7 +1732,7 @@ void CMainFrame::OnUpdateHelpIndex()
  */
 void CMainFrame::OnHelpIndex()
 {
-    QFile theFile(g_StudioApp.m_pszHelpFilePath.toQString());
+    QFile theFile(g_StudioApp.m_helpFilePath);
     if (theFile.exists())
         QDesktopServices::openUrl(QUrl::fromLocalFile(theFile.fileName()));
 }
@@ -1755,8 +1752,9 @@ void CMainFrame::OnHelpVisitQt()
  */
 void CMainFrame::OnHelpOpenTutorial()
 {
-    StudioTutorialWidget tutorial(this, false, false);
-    tutorial.exec();
+    StudioTutorialWidget tutorial(this);
+    int welcomeRes = tutorial.exec();
+    g_StudioApp.handleWelcomeRes(welcomeRes, false);
 }
 
 //==============================================================================

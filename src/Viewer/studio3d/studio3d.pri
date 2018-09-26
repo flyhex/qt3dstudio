@@ -36,7 +36,3 @@ SOURCES += q3dswidget.cpp \
 macos {
 INCLUDEPATH += $$PWD/../../Runtime/SDKsAndTools/nvap_sdk/libs/inc
 }
-
-android {
-SOURCES += $$PWD/../../Runtime/Source/PlatformSpecific/Android/jni/Qt3DSLibs/nv_thread/nv_thread.c
-}

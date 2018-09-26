@@ -244,6 +244,8 @@ struct WStrOps<DataModelDataType::Value>
         break;
             QT3DS_IMPORT_ITERATE_DMTYPE
 #undef QT3DS_IMPORT_HANDLE_DMTYPE
+    default:
+        break;
         }
         if (data == NULL) {
             QT3DS_ASSERT(false);
@@ -319,6 +321,8 @@ struct WStrOps<SValue>
     }
             QT3DS_IMPORT_ITERATE_DMTYPE
 #undef QT3DS_IMPORT_HANDLE_DMTYPE
+    default:
+        break;
         }
         QT3DS_ASSERT(false);
         return SValue();

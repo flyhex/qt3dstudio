@@ -41,6 +41,8 @@ class MeshChooserModel;
 class MeshChooserView : public QQuickWidget
 {
     Q_OBJECT
+    Q_PROPERTY(bool focused READ isFocused NOTIFY focusChanged)
+
 public:
     explicit MeshChooserView(QWidget *parent = nullptr);
 
@@ -55,11 +57,17 @@ Q_SIGNALS:
     void meshSelected(int handle, int instance, const QString &name);
 
 protected:
+    void focusInEvent(QFocusEvent *event) override;
     void focusOutEvent(QFocusEvent *event) override;
+
+Q_SIGNALS:
+    void focusChanged();
 
 private:
     void showEvent(QShowEvent *event) override;
     void initialize();
+    bool isFocused() const;
+
     int m_handle = -1;
     int m_instance = -1;
     MeshChooserModel *m_model = nullptr;

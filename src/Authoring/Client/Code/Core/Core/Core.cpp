@@ -244,13 +244,11 @@ bool CCore::OnNewDocument(const QString &inDocument, bool isNewProject, bool sil
         CFilePath::CombineBaseAndRelative(theFinalDir, CFilePath(L"scripts")).CreateDir(true);
 
         // create the project .uia file
-        m_projectFile.create(theDocument.completeBaseName(), theFinalDir);
+        m_projectFile.create(theDocument.completeBaseName(), theFinalDir.toQString());
 
         // set the default uip file path to the presentations folder
         theDocument.setFile(QDir(theDocument.absolutePath() + QStringLiteral("/presentations")),
                             theDocument.GetFileName().toQString());
-    } else {
-        m_projectFile.ensureProjectFile(theDocument.toQString());
     }
 
     Qt3DSFile fileDocument(theDocument.toCString());

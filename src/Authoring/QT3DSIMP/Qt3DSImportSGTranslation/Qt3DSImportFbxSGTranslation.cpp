@@ -1859,12 +1859,26 @@ void FbxDomWalker::ProcessTextureParameter(FbxTexture *inTexture,
 {
     if (inTexture) {
         outTextureParameters.m_Flag = true;
-        outTextureParameters.m_offsetU.m_Value = (float)inTexture->GetTranslationU();
-        outTextureParameters.m_offsetV.m_Value = (float)inTexture->GetTranslationV();
-        if (inTexture->GetWrapModeU() == FbxTexture::eRepeat)
+        outTextureParameters.m_offsetU.SetValue(inTexture->GetTranslationU());
+        outTextureParameters.m_offsetV.SetValue(inTexture->GetTranslationV());
+        outTextureParameters.m_repeatU.SetValue(inTexture->GetScaleU());
+        outTextureParameters.m_repeatV.SetValue(inTexture->GetScaleV());
+#if 0
+        // TODO: These parameters do not work correctly with current math in SetTexture, so they are
+        // ignored for now. Created a task (QT3DS-2255) to implement support later, if deemed
+        // necessary.
+        outTextureParameters.m_rotateUV.SetValue(inTexture->GetRotationW());
+        outTextureParameters.m_mirrorU.SetValue(inTexture->GetSwapUV());
+        outTextureParameters.m_mirrorV.SetValue(inTexture->GetSwapUV());
+#endif
+        if (inTexture->GetWrapModeU() == FbxTexture::eRepeat) {
             outTextureParameters.m_wrapU.m_Value = 1;
-        if (inTexture->GetWrapModeV() == FbxTexture::eRepeat)
+            outTextureParameters.m_wrapU.m_Flag = true;
+        }
+        if (inTexture->GetWrapModeV() == FbxTexture::eRepeat) {
             outTextureParameters.m_wrapV.m_Value = 1;
+            outTextureParameters.m_wrapV.m_Flag = true;
+        }
     }
 }
 

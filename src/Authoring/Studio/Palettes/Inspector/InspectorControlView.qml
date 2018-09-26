@@ -166,276 +166,261 @@ Rectangle {
                                                 modelData.instance, modelData.handle);
                                 }
 
-                                Item {
+                                ColumnLayout { // Property row and datainput control
                                     Layout.alignment: Qt.AlignTop
-                                    width: 16
-                                    height: _controlBaseHeight
-                                    visible: model.modelData.animatable
+                                    spacing: 0
+                                    RowLayout { // Property row
+                                        Layout.alignment: Qt.AlignLeft
+                                        Rectangle { // Property animation control button
+                                            width: 16
+                                            height: 16
+                                            color: animateButtonMouseArea.containsMouse
+                                                   ? _studioColor1 : _backgroundColor
 
-                                    Image {
-                                        id: animatedPropertyButton
+                                            Image {
+                                                id: animatedPropertyButton
+                                                visible: model.modelData.animatable
 
-                                        property bool animated: model.modelData.animated
+                                                property bool animated: model.modelData.animated
 
-                                        anchors.fill: parent
-                                        fillMode: Image.Pad
+                                                anchors.fill: parent
+                                                fillMode: Image.Pad
 
-                                        source: {
-                                            _resDir + (animated
-                                                       ? "Inspector-AnimateToggle-Active.png"
-                                                       : "Inspector-AnimateToggle-Normal.png")
+                                                source: {
+                                                    _resDir + (animated
+                                                               ? "Inspector-AnimateToggle-Active.png"
+                                                               : "Inspector-AnimateToggle-Normal.png")
+                                                }
+
+                                                MouseArea {
+                                                    id: animateButtonMouseArea
+                                                    anchors.fill: parent
+                                                    acceptedButtons: Qt.RightButton | Qt.LeftButton
+                                                    hoverEnabled: true
+                                                    onClicked:  {
+                                                        if (mouse.button === Qt.LeftButton) {
+                                                            _inspectorModel.setPropertyAnimated(
+                                                                        model.modelData.instance,
+                                                                        model.modelData.handle,
+                                                                        !model.modelData.animated)
+                                                        } else {
+                                                            const coords = mapToItem(root,
+                                                                                     mouse.x,
+                                                                                     mouse.y);
+                                                            groupDelegateItem.showContextMenu(coords);
+                                                        }
+                                                    }
+                                                }
+                                                StyledTooltip {
+                                                    text: qsTr("Enable animation")
+                                                    enabled: animateButtonMouseArea.containsMouse
+                                                }
+
+                                            }
                                         }
+                                        StyledLabel { // Property label
+                                            id: propertyRow
 
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            acceptedButtons: Qt.RightButton | Qt.LeftButton
-                                            onClicked:  {
-                                                if (mouse.button === Qt.LeftButton) {
-                                                    _inspectorModel.setPropertyAnimated(
-                                                                model.modelData.instance,
-                                                                model.modelData.handle,
-                                                                !model.modelData.animated)
-                                                } else {
+                                            readonly property var modelData: model.modelData
+                                            text: model.modelData.title
+                                            // Color picked from DataInput icon
+                                            color: model.modelData.controlled?
+                                                       _dataInputColor
+                                                     : _parentView.titleColor(modelData.instance,
+                                                                              modelData.handle)
+
+                                            Layout.alignment: Qt.AlignTop
+
+                                            MouseArea {
+                                                id: propertyLabelMouseArea
+                                                anchors.fill: parent
+                                                acceptedButtons: Qt.RightButton
+                                                hoverEnabled: true
+                                                onClicked: {
                                                     const coords = mapToItem(root, mouse.x, mouse.y);
                                                     groupDelegateItem.showContextMenu(coords);
-                                                 }
+                                                }
                                             }
+                                            StyledTooltip {
+                                                id: valueToolTip
+                                                text: modelData.toolTip
+                                                enabled: propertyLabelMouseArea.containsMouse
+                                            }
+                                        }
+                                    }
+
+                                    RowLayout { // Datainput button & label
+                                        Layout.alignment: Qt.AlignLeft
+                                        Rectangle { // Datainput control button
+                                            width: 16
+                                            height: 16
+                                            visible: model.modelData.controllable
+                                            color: dataInputButtonMouseArea.containsMouse
+                                                   ? _studioColor1 : _backgroundColor
+
+                                            MouseArea {
+                                                id: dataInputButtonMouseArea
+                                                anchors.fill: parent
+                                                acceptedButtons: Qt.RightButton | Qt.LeftButton
+                                                hoverEnabled: true
+                                                onClicked: {
+                                                    if (mouse.button === Qt.LeftButton) {
+                                                        _parentView.showDataInputChooser(
+                                                                    model.modelData.handle,
+                                                                    model.modelData.instance,
+                                                                    mapToGlobal(
+                                                                        ctrldPropButton.x
+                                                                        + ctrldPropButton.width,
+                                                                        ctrldPropButton.y
+                                                                        + ctrldPropButton.height));
+                                                    }
+                                                }
+                                            }
+                                            Image {
+                                                id: ctrldPropButton
+
+                                                property bool controlled: model.modelData.controlled
+
+                                                anchors.fill: parent
+                                                fillMode: Image.Pad
+
+                                                source: {
+                                                    _resDir + (controlled
+                                                               ? "Objects-DataInput-Active.png"
+                                                               : "Objects-DataInput-Inactive.png")
+                                                }
+                                            }
+                                            StyledTooltip {
+                                                text: qsTr("Select Data Input control")
+                                                enabled: dataInputButtonMouseArea.containsMouse
+                                            }
+                                        }
+                                        StyledLabel {
+                                            id: dataInputName
+                                            // use visible: modelData.controlled instead
+                                            // if label needs to be shown
+                                            // only when item is actually controlled
+                                            // (causes re-layouting of inspector panel)
+                                            visible: modelData.controllable
+                                            text: modelData.controlled ?
+                                                      modelData.controller : "[No datainput control]";
+                                            color: modelData.controlled ?
+                                                       _dataInputColor : _disabledColor;
                                         }
                                     }
                                 }
 
-                                Item {
-                                    width: (animatedPropertyButton.visible
-                                           ? 4 : animatedPropertyButton.width + 4)
-                                    height: loadedItem.height + 4 // Add little space between items
-                                }
-
-                                StyledLabel {
-                                    id: propertyRow
-
-                                    readonly property var modelData: model.modelData
-                                    text: model.modelData.title
-                                    // Color picked from DataInput icon
-                                    color: model.modelData.controlled?
-                                               _dataInputColor
-                                             : _parentView.titleColor(modelData.instance,
-                                                                      modelData.handle)
-
+                                Loader {
+                                    id: loader
+                                    readonly property var modelData: propertyRow.modelData
+                                    enabled: modelData.enabled
+                                    opacity: enabled ? 1 : .5
                                     Layout.alignment: Qt.AlignTop
-
-                                    MouseArea {
-                                        id: mouse
-                                        anchors.fill: parent
-                                        acceptedButtons: Qt.RightButton
-                                        hoverEnabled: true
-                                        onClicked: {
-                                            const coords = mapToItem(root, mouse.x, mouse.y);
-                                            groupDelegateItem.showContextMenu(coords);
-                                        }
-                                    }
-
-                                    StyledTooltip {
-                                        id: valueToolTip
-                                        text: modelData.toolTip
-                                        enabled: mouse.containsMouse
-                                    }
-                                }
-                                Item {
-                                    Layout.alignment: Qt.AlignTop
-                                    width: 16
-                                    height: _controlBaseHeight
-                                    visible: model.modelData.controllable
-
-                                    MouseArea {
-                                        id: mousearea
-                                        anchors.fill: parent
-                                        acceptedButtons: Qt.RightButton | Qt.LeftButton
-                                        hoverEnabled: true
-                                        onClicked: {
-                                            if (mouse.button === Qt.LeftButton) {
-                                                _parentView.showDataInputChooser(
-                                                            model.modelData.handle,
-                                                            model.modelData.instance,
-                                                            mapToGlobal(
-                                                                ctrldPropButton.x
-                                                                + ctrldPropButton.width,
-                                                                ctrldPropButton.y
-                                                                + ctrldPropButton.height));
-                                            } else {
-                                                groupDelegateItem.showContextMenu(
-                                                            mapToItem(root, mouse.x, mouse.y));
+                                    sourceComponent: {
+                                        const dataType = modelData.dataType;
+                                        switch (dataType) {
+                                        case DataModelDataType.Long:
+                                            if (modelData.propertyType ===
+                                                    AdditionalMetaDataType.ShadowMapResolution) {
+                                                return shadowResolutionComponent;
                                             }
-                                        }
-                                    }
-                                    StyledTooltip {
-                                        id: ctrlToolTip
-                                        text: modelData.toolTip
-                                        enabled: mousearea.containsMouse
-                                    }
-
-                                    Image {
-                                        id: ctrldPropButton
-
-                                        property bool controlled: model.modelData.controlled
-
-                                        anchors.fill: parent
-                                        fillMode: Image.Pad
-
-                                        source: {
-                                            _resDir + (controlled
-                                                       ? "Objects-DataInput-Normal.png"
-                                                       : "Objects-DataInput-Disabled.png")
-                                        }
-
-
-                                    }
-                                }
-
-                                Item {
-                                    width: (ctrldPropButton.visible
-                                            ? 4 : ctrldPropButton.width + 4)
-                                    height: loadedItem.height + 4 // Add little space between items
-                                }
-
-                                ColumnLayout {
-                                    StyledLabel {
-                                        id: dataInputName
-                                        Layout.preferredWidth: _valueWidth
-                                        // use visible: modelData.controlled instead
-                                        // if label needs to be shown
-                                        // only when item is actually controlled
-                                        // (causes re-layouting of inspector panel)
-                                        visible: modelData.controllable
-                                        text: modelData.controlled ?
-                                                  modelData.controller : "[No datainput control]";
-                                        color: modelData.controlled ?
-                                                  _dataInputColor : _disabledColor;
-
-                                        StyledTooltip {
-                                            id: dILabelToolTip
-                                            text: modelData.toolTip
-                                            enabled: mouseareaDILabel.containsMouse
-                                        }
-
-                                        MouseArea {
-                                            id: mouseareaDILabel
-                                            anchors.fill: parent
-                                            acceptedButtons: Qt.RightButton | Qt.LeftButton
-                                            hoverEnabled: true
-                                            onClicked: {
-                                                if (mouse.button === Qt.RightButton) {
-                                                    groupDelegateItem.showContextMenu(
-                                                                mapToItem(root, mouse.x, mouse.y));
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    Loader {
-                                        id: loader
-                                        readonly property var modelData: propertyRow.modelData
-                                        sourceComponent: {
-                                            const dataType = modelData.dataType;
-                                            switch (dataType) {
-                                            case DataModelDataType.Long:
-                                                if (modelData.propertyType ===
-                                                        AdditionalMetaDataType.ShadowMapResolution) {
-                                                    return shadowResolutionComponent;
-                                                }
-                                                if (modelData.propertyType === AdditionalMetaDataType.Range) {
-                                                    return intSliderComponent;
-                                                }
-                                                console.warn("KDAB_TODO: implement handler for type \"Long\", property:",
-                                                             modelData.propertyType);
-                                                return null;
-                                            case DataModelDataType.Long4:
-                                                if (modelData.propertyType === AdditionalMetaDataType.Image) {
-                                                    return imageChooser;
-                                                }
-                                                console.warn("KDAB_TODO: implement handler for type \"long4\" property:",
-                                                             modelData.propertyType);
-                                                return null;
-                                            case DataModelDataType.ObjectRef:
-                                                if (modelData.propertyType === AdditionalMetaDataType.ObjectRef)
-                                                    return objectReference;
-                                                console.warn("KDAB_TODO: implement handler for type: \"objectref\" property:",
-                                                             modelData.propertyType);
-                                                return null;
-                                            case DataModelDataType.StringOrInt:
-                                                //TODO: Maybe do some further check if the right combo is used
-                                                if (modelData.propertyType === AdditionalMetaDataType.StringList)
-                                                    return slideSelectionDropDown;
-                                                console.warn("KDAB_TODO: (String) implement handler for type \"stringOrInt\" property:",
-                                                             modelData.propertyType);
-                                                return null;
-                                            case DataModelDataType.String:
-                                                if (modelData.propertyType === AdditionalMetaDataType.Import)
-                                                    return fileChooser;
-                                                if (modelData.propertyType === AdditionalMetaDataType.StringList)
-                                                    return comboDropDown;
-                                                if (modelData.propertyType === AdditionalMetaDataType.Renderable)
-                                                    return renderableDropDown;
-                                                if (modelData.propertyType === AdditionalMetaDataType.Mesh)
-                                                    return meshChooser;
-                                                if (modelData.propertyType === AdditionalMetaDataType.MultiLine)
-                                                    return multiLine;
-                                                if (modelData.propertyType === AdditionalMetaDataType.Font)
-                                                    return fontDropDown;
-                                                if (modelData.propertyType === AdditionalMetaDataType.Texture)
-                                                    return textureChooser;
-                                                if (modelData.propertyType === AdditionalMetaDataType.String)
-                                                    return editLine;
-                                                if (modelData.propertyType === AdditionalMetaDataType.None)
-                                                    return null;
-                                                console.warn("KDAB_TODO: (String) implement handler for type \"string\" property:",
-                                                             modelData.propertyType);
-                                                return null;
-                                            case DataModelDataType.Bool:
-                                                return checkBox;
-                                            case DataModelDataType.Float:
-                                                if (modelData.propertyType === AdditionalMetaDataType.None)
-                                                    return valueComponent;
-                                                if (modelData.propertyType === AdditionalMetaDataType.Range)
-                                                    return sliderComponent;
-                                                if (modelData.propertyType === AdditionalMetaDataType.FontSize)
-                                                    return fontSizeComponent;
-                                                console.warn("KDAB_TODO: implement handler for type\"float\" property:",
-                                                             modelData.propertyType);
-                                                return null;
-                                            case DataModelDataType.Float2:
-                                                if (modelData.propertyType === AdditionalMetaDataType.None)
-                                                    return xyPropertyComponent;
-                                                console.warn("TODO: implement handler for type:\"float2\" property:",
-                                                             modelData.propertyType, "text ",
-                                                             model.modelData.title);
-                                                return null;
-                                            case DataModelDataType.Float3:
-                                                if (modelData.propertyType === AdditionalMetaDataType.Color)
-                                                    return colorBox;
-                                                if (modelData.propertyType === AdditionalMetaDataType.Rotation)
-                                                    return xyzPropertyComponent;
-                                                if (modelData.propertyType === AdditionalMetaDataType.None)
-                                                    return xyzPropertyComponent;
-                                                console.warn("KDAB_TODO: implement handler for type:\"float3\" property:",
-                                                             modelData.propertyType, "text ",
-                                                             model.modelData.title);
-                                                return null;
-                                            case DataModelDataType.StringRef:
-                                                if (modelData.propertyType === AdditionalMetaDataType.None)
-                                                    return materialDropDown;
-                                                console.warn("KDAB_TODO: implement handler for type:\"StringRef\" text ",
-                                                             model.modelData.title);
-                                                return null;
-                                            default:
-                                                console.warn("KDAB_TODO: implement handler for type",
-                                                             dataType, "property",
-                                                             modelData.propertyType, "text ",
-                                                             model.modelData.title);
-                                            }
+                                            if (modelData.propertyType === AdditionalMetaDataType.Range)
+                                                return intSliderComponent;
+                                            console.warn("KDAB_TODO: implement handler for type \"Long\", property:",
+                                                         modelData.propertyType);
                                             return null;
+                                        case DataModelDataType.Long4:
+                                            if (modelData.propertyType === AdditionalMetaDataType.Image)
+                                                return imageChooser;
+                                            console.warn("KDAB_TODO: implement handler for type \"long4\" property:",
+                                                         modelData.propertyType);
+                                            return null;
+                                        case DataModelDataType.ObjectRef:
+                                            if (modelData.propertyType === AdditionalMetaDataType.ObjectRef) {
+                                                    return _parentView.isRefMaterial(modelData.instance)
+                                                           ? materialReference
+                                                           : objectReference;
+                                            }
+                                            console.warn("KDAB_TODO: implement handler for type: \"objectref\" property:",
+                                                         modelData.propertyType);
+                                            return null;
+                                        case DataModelDataType.StringOrInt:
+                                            //TODO: Maybe do some further check if the right combo is used
+                                            if (modelData.propertyType === AdditionalMetaDataType.StringList)
+                                                return slideSelectionDropDown;
+                                            console.warn("KDAB_TODO: (String) implement handler for type \"stringOrInt\" property:",
+                                                         modelData.propertyType);
+                                            return null;
+                                        case DataModelDataType.String:
+                                            if (modelData.propertyType === AdditionalMetaDataType.Import)
+                                                return fileChooser;
+                                            if (modelData.propertyType === AdditionalMetaDataType.StringList)
+                                                return comboDropDown;
+                                            if (modelData.propertyType === AdditionalMetaDataType.Renderable)
+                                                return renderableDropDown;
+                                            if (modelData.propertyType === AdditionalMetaDataType.Mesh)
+                                                return meshChooser;
+                                            if (modelData.propertyType === AdditionalMetaDataType.MultiLine)
+                                                return multiLine;
+                                            if (modelData.propertyType === AdditionalMetaDataType.Font)
+                                                return fontDropDown;
+                                            if (modelData.propertyType === AdditionalMetaDataType.Texture)
+                                                return textureChooser;
+                                            if (modelData.propertyType === AdditionalMetaDataType.String)
+                                                return editLine;
+                                            if (modelData.propertyType === AdditionalMetaDataType.None)
+                                                return null;
+                                            console.warn("KDAB_TODO: (String) implement handler for type \"string\" property:",
+                                                         modelData.propertyType);
+                                            return null;
+                                        case DataModelDataType.Bool:
+                                            return checkBox;
+                                        case DataModelDataType.Float:
+                                            if (modelData.propertyType === AdditionalMetaDataType.None)
+                                                return valueComponent;
+                                            if (modelData.propertyType === AdditionalMetaDataType.Range)
+                                                return sliderComponent;
+                                            if (modelData.propertyType === AdditionalMetaDataType.FontSize)
+                                                return fontSizeComponent;
+                                            console.warn("KDAB_TODO: implement handler for type\"float\" property:",
+                                                         modelData.propertyType);
+                                            return null;
+                                        case DataModelDataType.Float2:
+                                            if (modelData.propertyType === AdditionalMetaDataType.None)
+                                                return xyPropertyComponent;
+                                            console.warn("TODO: implement handler for type:\"float2\" property:",
+                                                         modelData.propertyType, "text ",
+                                                         model.modelData.title);
+                                            return null;
+                                        case DataModelDataType.Float3:
+                                            if (modelData.propertyType === AdditionalMetaDataType.Color)
+                                                return colorBox;
+                                            if (modelData.propertyType === AdditionalMetaDataType.Rotation)
+                                                return xyzPropertyComponent;
+                                            if (modelData.propertyType === AdditionalMetaDataType.None)
+                                                return xyzPropertyComponent;
+                                            console.warn("KDAB_TODO: implement handler for type:\"float3\" property:",
+                                                         modelData.propertyType, "text ",
+                                                         model.modelData.title);
+                                            return null;
+                                        case DataModelDataType.StringRef:
+                                            if (modelData.propertyType === AdditionalMetaDataType.None)
+                                                return materialTypeDropDown;
+                                            if (modelData.propertyType === AdditionalMetaDataType.Renderable)
+                                                return shaderDropDown;
+                                            if (modelData.propertyType === AdditionalMetaDataType.ObjectRef)
+                                                return matDataDropDown;
+                                            console.warn("KDAB_TODO: implement handler for type:\"StringRef\" text ",
+                                                         model.modelData.title);
+                                            return null;
+                                        default:
+                                            console.warn("KDAB_TODO: implement handler for type",
+                                                         dataType, "property",
+                                                         modelData.propertyType, "text ",
+                                                         model.modelData.title);
                                         }
+                                        return null;
                                     }
-
                                 }
                             }
                         }
@@ -471,7 +456,6 @@ Rectangle {
             }
 
             MouseArea {
-                id: mouseAreaX
                 anchors.fill: parent
                 property int clickedPos
                 preventStealing: true
@@ -816,40 +800,26 @@ Rectangle {
     }
 
     Component  {
-        id: materialDropDown
+        id: materialTypeDropDown
 
-        StyledComboBox {
-            property int instance: parent.modelData.instance
-            property int handle: parent.modelData.handle
-            property var values: parent.modelData.values
-            property var value: parent.modelData.value
-            property bool blockIndexChange: false
+        MaterialDropDown {
+            callback: _inspectorModel.setMaterialTypeValue
+        }
+    }
 
-            model: values
+    Component  {
+        id: shaderDropDown
 
-            implicitWidth: _valueWidth
-            implicitHeight: _controlBaseHeight
+        MaterialDropDown {
+            callback: _inspectorModel.setShaderValue
+        }
+    }
 
-            Component.onCompleted: {
-                currentIndex = find(value)
-            }
-            onCurrentIndexChanged: {
-                var newValue = textAt(currentIndex)
-                if (!blockIndexChange && value !== newValue && currentIndex !== -1)
-                    _inspectorModel.setMaterialTypeValue(instance, handle, newValue)
-            }
-            onValueChanged: {
-                var newNewIndex = find(value);
-                if (!blockIndexChange || newNewIndex > 0)
-                    currentIndex = newNewIndex;
-                blockIndexChange = false;
-            }
-            onValuesChanged : {
-                // Changing the values list will reset the currentIndex to zero, so block setting
-                // the actual material. We'll get the proper index right after.
-                if (currentIndex > 0)
-                    blockIndexChange = true;
-            }
+    Component  {
+        id: matDataDropDown
+
+        MaterialDropDown {
+            callback: _inspectorModel.setMatDataValue
         }
     }
 
@@ -863,15 +833,15 @@ Rectangle {
             property var value: parent.modelData.value
             model: values
 
-            // Disable for non-layer
-            enabled: _inspectorModel.isLayer(instance)
             showArrow: enabled
 
             implicitWidth: _valueWidth
             implicitHeight: _controlBaseHeight
 
             Component.onCompleted: {
-                currentIndex = find(value)
+                // Disable for non-layer
+                enabled = _inspectorModel.isLayer(instance);
+                currentIndex = find(value);
             }
 
             onCurrentIndexChanged: {
@@ -888,16 +858,25 @@ Rectangle {
     Component {
         id: checkBox
 
-        Image {
+        Item {
+            id: checkboxItem
             property int instance: parent.modelData.instance
             property int handle: parent.modelData.handle
             property bool checked: parent.modelData.value
 
-            source: (_resDir + (checked ? "checkbox-checked.png" : "checkbox-unchecked.png"))
-
-            MouseArea {
+            width: 16
+            height: _controlBaseHeight
+            Image {
                 anchors.fill: parent
-                onClicked: _inspectorModel.setPropertyValue(instance, handle, !checked)
+                fillMode: Image.Pad
+                source: (_resDir + (checked ? "checkbox-checked.png" : "checkbox-unchecked.png"))
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: _inspectorModel.setPropertyValue(checkboxItem.instance,
+                                                                checkboxItem.handle,
+                                                                !checkboxItem.checked)
+                }
             }
         }
     }
@@ -927,6 +906,21 @@ Rectangle {
             onShowBrowser: {
                 activeBrowser = _parentView.showObjectReference(handle, instance,
                                                                 mapToGlobal(width, 0))
+            }
+        }
+    }
+
+    Component {
+        id: materialReference
+
+        HandlerGenericChooser {
+            property int instance: parent.modelData.instance
+            property int handle: parent.modelData.handle
+            property variant values: parent.modelData.values
+            value: parent.modelData.value
+            onShowBrowser: {
+                activeBrowser = _parentView.showMaterialReference(handle, instance,
+                                                                  mapToGlobal(width, 0))
             }
         }
     }

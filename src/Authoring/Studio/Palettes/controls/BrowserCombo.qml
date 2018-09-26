@@ -75,6 +75,7 @@ MouseArea {
             x: parent.width - 18
             y: parent.height / 2 - 8
             source: _resDir + "arrow_down.png"
+            rotation: activeBrowser && activeBrowser.focused ? 180 : 0
         }
     }
 }

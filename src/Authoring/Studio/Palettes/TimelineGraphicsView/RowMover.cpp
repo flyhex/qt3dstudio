@@ -74,7 +74,7 @@ void RowMover::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
 
 RowTree *RowMover::insertionTarget() const
 {
-    return m_insertionTarget;
+    return m_insertionTarget.data();
 }
 
 RowTree *RowMover::insertionParent() const
@@ -112,7 +112,7 @@ void RowMover::resetInsertionParent(RowTree *newParent)
     }
 }
 
-bool RowMover::isActive()
+bool RowMover::isActive() const
 {
     return m_active;
 }
@@ -153,7 +153,7 @@ void RowMover::end(bool force)
 
         m_sourceRows.clear();
 
-        if (m_insertionTarget)
+        if (!m_insertionTarget.isNull())
             m_insertionTarget->setDnDState(RowTree::DnDState::None);
 
         setVisible(false);
@@ -207,7 +207,7 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
 {
     // DnD a presentation / Qml stream from the project panel (to set it as a subpresentation)
     if (rowType == OBJTYPE_PRESENTATION || rowType == OBJTYPE_QML_STREAM) {
-        if (m_insertionTarget)
+        if (!m_insertionTarget.isNull())
             m_insertionTarget->setDnDState(RowTree::DnDState::None, RowTree::DnDState::SP_TARGET);
 
         RowTree *rowAtMouse = m_scene->rowManager()->getRowAtPos(scenePos);

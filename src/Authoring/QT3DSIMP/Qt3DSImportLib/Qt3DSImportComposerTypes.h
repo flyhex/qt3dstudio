@@ -167,7 +167,10 @@ inline void ImportVisitPropertyType(ComposerPropertyNames::Enum inName, TOperato
 #undef HANDLE_COMPOSER_PROPERTY
 #undef HANDLE_COMPOSER_PROPERTY_DUPLICATE
 #undef HANDLE_COMPOSER_PROPERTY_NO_DEFAULT
+    default:
+        break;
     }
+
     QT3DS_ASSERT(false);
 }
 

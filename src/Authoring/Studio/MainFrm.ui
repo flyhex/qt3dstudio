@@ -201,8 +201,8 @@ Project palette using Import functionality.</string>
    <addaction name="actionItem_Select_Tool"/>
    <addaction name="separator"/>
    <addaction name="actionPosition_Tool"/>
-   <addaction name="actionScale_Tool"/>
    <addaction name="actionRotation_Tool"/>
+   <addaction name="actionScale_Tool"/>
    <addaction name="actionLocal_Global_Manipulators"/>
    <addaction name="separator"/>
    <addaction name="actionAutoset_Keyframes"/>
@@ -250,7 +250,6 @@ Project palette using Import functionality.</string>
    </attribute>
    <addaction name="actionPreview"/>
    <addaction name="actionRemote_Preview"/>
-   <addaction name="actionPreviewRuntime1"/>
   </widget>
   <action name="action_Reference_Manual">
    <property name="text">
@@ -275,7 +274,7 @@ Project palette using Import functionality.</string>
   </action>
   <action name="action_Open_Tutorial">
    <property name="text">
-    <string>&amp;Open Tutorial...</string>
+    <string>&amp;Show Welcome Screen...</string>
    </property>
   </action>
   <action name="actionSet_Changed_Keyframes">
@@ -816,21 +815,6 @@ Project palette using Import functionality.</string>
    </property>
    <property name="iconVisibleInMenu">
     <bool>false</bool>
-   </property>
-  </action>
-  <action name="actionPreviewRuntime1">
-   <property name="icon">
-    <iconset resource="images.qrc">
-     <normaloff>:/images/playback_tools_low-02.png</normaloff>:/images/playback_tools_low-02.png</iconset>
-   </property>
-   <property name="text">
-    <string>Preview with Legacy Qt 3D Viewer 1.1</string>
-   </property>
-   <property name="iconText">
-    <string>Preview with Legacy Qt 3D Viewer 1.1</string>
-   </property>
-   <property name="toolTip">
-    <string>Preview with Legacy Qt 3D Viewer 1.1</string>
    </property>
   </action>
   <action name="actionImportAssets">

@@ -55,12 +55,14 @@
 #include "DataInputDlg.h"
 #include "Dialogs.h"
 #include "ProjectFile.h"
+#include "MaterialRefView.h"
 
 #include <QtCore/qtimer.h>
 #include <QtQml/qqmlcontext.h>
 #include <QtQml/qqmlengine.h>
 #include <QtWidgets/qmenu.h>
 #include <QtWidgets/qdesktopwidget.h>
+#include <QtWidgets/qlistwidget.h>
 
 InspectorControlView::InspectorControlView(const QSize &preferredSize, QWidget *parent)
     : QQuickWidget(parent),
@@ -245,24 +247,25 @@ QString InspectorControlView::titleText() const
     return tr("No Object Selected");
 }
 
-static EStudioObjectType instanceObjectType(int instance)
+bool InspectorControlView::isRefMaterial(int instance) const
 {
-    auto doc = g_StudioApp.GetCore()->GetDoc();
-    auto studio = doc->GetStudioSystem();
-    return studio->GetClientDataModelBridge()->GetObjectType(instance);
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+
+    return doc->GetStudioSystem()->GetClientDataModelBridge()->GetObjectType(instance)
+           == OBJTYPE_REFERENCEDMATERIAL;
 }
 
 bool InspectorControlView::canLinkProperty(int instance, int handle) const
 {
-    EStudioObjectType type = instanceObjectType(instance);
-    bool canBeLinkedFlag = g_StudioApp.GetCore()->GetDoc()->GetDocumentReader()
-                                .CanPropertyBeLinked(instance, handle);
-    if (qt3dsdm::Qt3DSDMPropertyHandle(handle).Valid() == false
-            && (type == OBJTYPE_CUSTOMMATERIAL || type == OBJTYPE_MATERIAL
-                || type == OBJTYPE_REFERENCEDMATERIAL)) {
-        canBeLinkedFlag = false;
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    EStudioObjectType type = doc->GetStudioSystem()->GetClientDataModelBridge()
+                                                                        ->GetObjectType(instance);
+    if (!qt3dsdm::Qt3DSDMPropertyHandle(handle).Valid()
+        && (type & (OBJTYPE_CUSTOMMATERIAL | OBJTYPE_MATERIAL | OBJTYPE_REFERENCEDMATERIAL))) {
+        return false;
     }
-    return canBeLinkedFlag;
+
+    return doc->GetDocumentReader().CanPropertyBeLinked(instance, handle);
 }
 
 void InspectorControlView::onInstancePropertyValueChanged(
@@ -524,6 +527,41 @@ QObject *InspectorControlView::showObjectReference(int handle, int instance, con
     });
 
     return m_objectReferenceView;
+}
+
+QObject *InspectorControlView::showMaterialReference(int handle, int instance, const QPoint &point)
+{
+    // create the list widget
+    if (!m_matRefListWidget)
+        m_matRefListWidget = new MaterialRefView(this);
+
+    disconnect(m_matRefListWidget, &QListWidget::itemClicked, nullptr, nullptr);
+
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
+
+    qt3dsdm::SValue value;
+    propertySystem->GetInstancePropertyValue(instance, handle, value);
+    qt3dsdm::Qt3DSDMInstanceHandle refInstance = doc->GetDataModelObjectReferenceHelper()
+                                                                        ->Resolve(value, instance);
+
+    const int numMats = m_matRefListWidget->refreshMaterials(refInstance);
+    const int popupHeight = qMin(numMats, 10) * CStudioPreferences::controlBaseHeight();
+
+    CDialogs::showWidgetBrowser(this, m_matRefListWidget, point,
+                                QSize(CStudioPreferences::valueWidth(), popupHeight));
+
+    connect(m_matRefListWidget, &QListWidget::itemClicked, this, [=](QListWidgetItem *item) {
+        auto selectedInstance = item->data(Qt::UserRole).toInt();
+        if (selectedInstance != refInstance) {
+            auto objRef = doc->GetDataModelObjectReferenceHelper()->GetAssetRefValue(
+                                    selectedInstance, instance, CRelativePathTools::EPATHTYPE_GUID);
+            Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Property"))
+                    ->SetInstancePropertyValue(instance, handle, objRef);
+        }
+    });
+
+    return m_matRefListWidget;
 }
 
 void InspectorControlView::showDataInputChooser(int handle, int instance, const QPoint &point)

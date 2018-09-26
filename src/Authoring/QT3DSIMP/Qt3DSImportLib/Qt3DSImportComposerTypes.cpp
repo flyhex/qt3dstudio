@@ -183,7 +183,10 @@ SImportAsset &SImportComposerTypes::GetImportAssetForType(ComposerObjectTypes::E
         return m_SubPath;
     case ComposerObjectTypes::PathAnchorPoint:
         return m_PathAnchorPoint;
+    default:
+        break;
     }
+
     QT3DS_ASSERT(false);
     return m_Asset;
 }

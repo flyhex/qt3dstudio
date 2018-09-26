@@ -208,6 +208,7 @@ struct DataConstructor<SObjectRefType>
 #define QT3DS_WCHAR_T_shdwfilter L"shdwfilter"
 #define QT3DS_WCHAR_T_orthographic L"orthographic"
 #define QT3DS_WCHAR_T_fov L"fov"
+#define QT3DS_WCHAR_T_fovhorizontal L"fovhorizontal"
 #define QT3DS_WCHAR_T_clipnear L"clipnear"
 #define QT3DS_WCHAR_T_clipfar L"clipfar"
 #define QT3DS_WCHAR_T_lookatlock L"lookatlock"
@@ -314,7 +315,10 @@ const wchar_t *ComposerObjectTypes::Convert(ComposerObjectTypes::Enum inType)
         return QT3DS_WCHAR_T_##name;
         ITERATE_COMPOSER_OBJECT_TYPES
 #undef HANDLE_COMPOSER_OBJECT_TYPE
+    default:
+        break;
     }
+
     QT3DS_ASSERT(false);
     return L"Unknown";
 }
@@ -487,21 +491,21 @@ SComposerObjectDefinitions::SComposerObjectDefinitions(
     , m_Asset(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Guided, m_Named)
     , m_Scene(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Asset, m_SlideOwner)
     , m_Image(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Asset)
-    , m_Lightmaps(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Asset)
-    , m_MaterialBase(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Lightmaps)
-    , m_Material(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_MaterialBase)
-    , m_CustomMaterial(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_MaterialBase)
-    , m_ReferencedMaterial(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_MaterialBase)
+    , m_MaterialBase(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Asset)
+    , m_Lightmaps(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_MaterialBase)
+    , m_Material(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Lightmaps)
+    , m_CustomMaterial(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Lightmaps)
+    , m_ReferencedMaterial(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Lightmaps)
     , m_Behavior(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Asset)
+    , m_Effect(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Asset)
     , m_Node(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Asset)
     , m_Layer(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Node)
-    , m_Model(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Node)
     , m_Group(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Node)
+    , m_Model(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Node)
     , m_Light(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Node)
     , m_Camera(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Node)
     , m_Component(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Node, m_SlideOwner)
     , m_Text(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Node)
-    , m_Effect(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Asset)
     , m_RenderPlugin(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Asset)
     , m_Alias(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Node)
     , m_Path(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Node)
@@ -522,7 +526,10 @@ bool SComposerObjectDefinitions::IsA(Qt3DSDMInstanceHandle inInstance,
         return m_DataCore.IsInstanceOrDerivedFrom(inInstance, m_##name.m_Instance);
         ITERATE_COMPOSER_OBJECT_TYPES
 #undef HANDLE_COMPOSER_OBJECT_TYPE
+    default:
+        break;
     }
+
     QT3DS_ASSERT(false);
     return false;
 }
@@ -559,7 +566,10 @@ SComposerObjectDefinitions::GetInstanceForType(ComposerObjectTypes::Enum inType)
         return m_##name.m_Instance;
         ITERATE_COMPOSER_OBJECT_TYPES
 #undef HANDLE_COMPOSER_OBJECT_TYPE
+    default:
+        break;
     }
+
     QT3DS_ASSERT(false);
     return 0;
 }

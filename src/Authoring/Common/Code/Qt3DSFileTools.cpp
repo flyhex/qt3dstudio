@@ -465,6 +465,9 @@ void SFile::SetPosition(const QSharedPointer<QFile> &fileHandle, QT3DSI64 inOffs
         case SeekPosition::End:
             fileHandle->seek(fileHandle->size() + inOffset);
             break;
+        default:
+            // Ignore unknown seek position
+            break;
         }
     }
 }

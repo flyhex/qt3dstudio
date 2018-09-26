@@ -171,7 +171,6 @@ int main(int argc, char *argv[])
 #include "IDocumentEditor.h"
 #include "StudioUtils.h"
 
-#include "IObjectReferenceHelper.h"
 #include "ClientDataModelBridge.h"
 #include "CommonConstants.h"
 #include "IOLibraryException.h"
@@ -274,6 +273,11 @@ void CStudioApp::performShutdown()
     if (m_core) {
         m_core->GetDispatch()->RemoveAppStatusListener(this);
         m_core->GetDispatch()->RemoveCoreAsynchronousEventListener(this);
+
+        // close transactions before we call destructors
+        if (m_core->GetDoc()->IsTransactionOpened())
+            m_core->GetDoc()->CloseTransaction();
+
         qCInfo(qt3ds::TRACE_INFO) << "Studio exiting successfully";
     }
 
@@ -322,9 +326,11 @@ bool CStudioApp::initInstance(const QCommandLineParser &parser)
                 thePreferencesPath, CFilePath(L"Qt3DSComposer\\Preferences.setting"));
     CPreferences::SetPreferencesFile(thePreferencesPath.toQString());
 
-    // Initialize help file path
-    m_pszHelpFilePath = Qt3DSFile::GetApplicationDirectory().GetPath() +
-            Q3DStudio::CString("/../doc/qt3dstudio/qt3dstudio-index.html");
+    // Initialize help file paths
+    m_helpFilePath = Qt3DSFile::GetApplicationDirectory().GetPath().toQString() +
+            QStringLiteral("/../doc/qt3dstudio/qt3dstudio-index.html");
+    m_gettingStartedFilePath = Qt3DSFile::GetApplicationDirectory().GetPath().toQString() +
+            QStringLiteral("/../doc/qt3dstudio/getting-started.html");
 
     CStudioPreferences::LoadPreferences();
 
@@ -405,81 +411,86 @@ bool CStudioApp::run(const QCommandLineParser &parser)
 bool CStudioApp::handleWelcomeRes(int res, bool recursive)
 {
     bool theReturn = true;
+    bool canceled = false;
     switch (res) {
     case StudioTutorialWidget::createNewResult: {
-        Qt3DSFile theFile(m_dialogs->GetNewDocumentChoice(getMostRecentProjectParentDir()));
-        if (theFile.GetPath() != "") {
-            if (!m_core->OnNewDocument(theFile.GetAbsolutePath().toQString(), true)) {
-                // Invalid filename, show a message box and the startup dialog
-                showInvalidFilenameWarning();
-                theReturn = showStartupDialog();
+        if (PerformSavePrompt()) {
+            Qt3DSFile theFile(m_dialogs->GetNewDocumentChoice(getMostRecentProjectParentDir()));
+            if (theFile.GetPath() != "") {
+                if (!m_core->OnNewDocument(theFile.GetAbsolutePath().toQString(), true)) {
+                    // Invalid filename, show a message box and the startup dialog
+                    showInvalidFilenameWarning();
+                    theReturn = showStartupDialog();
+                } else {
+                    theReturn = true;
+                    m_welcomeShownThisSession = true;
+                }
             } else {
-                theReturn = true;
-                m_welcomeShownThisSession = true;
+                canceled = true;
             }
         } else {
-            // User Cancels the dialog. Show the welcome screen.
-            if (recursive) {
-                m_welcomeShownThisSession = false;
-                m_goStraightToWelcomeFileDialog = true;
-                theReturn = showStartupDialog();
-            } else {
-                theReturn = false;
-            }
+            canceled = true;
         }
     } break;
 
     case StudioTutorialWidget::openSampleResult: {
-        // Try three options:
-        // - open a specific example .uip
-        // - failing that, show the main example root dir
-        // - failing all previous, show default Documents dir
-        QFileInfo filePath;
-        QFileInfo theFile = QFileInfo(QStringLiteral("."));
+        if (PerformSavePrompt()) {
+            // Try three options:
+            // - open a specific example .uip
+            // - failing that, show the main example root dir
+            // - failing all previous, show default Documents dir
+            QFileInfo filePath;
+            QFileInfo theFile = QFileInfo(QStringLiteral("."));
 
 #ifndef Q_OS_MACOS
-        filePath = applicationDirectory().path() +
-                QStringLiteral("/../examples/studio3d/SampleProject");
-
-        if (!filePath.exists()) {
             filePath = applicationDirectory().path() +
-                    QStringLiteral("/../examples/studio3d");
+                    QStringLiteral("/../examples/studio3d/SampleProject");
+
+            if (!filePath.exists()) {
+                filePath = applicationDirectory().path() +
+                        QStringLiteral("/../examples/studio3d");
 #else
-        filePath = applicationDirectory().path() +
-                QStringLiteral("/../../../../examples/studio3d/SampleProject");
-
-        if (!filePath.exists()) {
             filePath = applicationDirectory().path() +
-                    QStringLiteral("/../../../../examples/studio3d");
-#endif
-            if (!filePath.exists())
-                filePath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-            Qt3DSFile path = m_dialogs->GetFileOpenChoice(filePath.absoluteFilePath());
-            theFile = QFileInfo(path.GetAbsolutePath().toQString());
-        } else {
-            theFile = filePath.absolutePath() + QStringLiteral("/SampleProject.uip");
-        }
+                    QStringLiteral("/../../../../examples/studio3d/SampleProject");
 
-        if (theFile.path().isEmpty()) {
-            OnLoadDocument(theFile.absoluteFilePath());
-            theReturn = true;
-            m_welcomeShownThisSession = true;
-        } else {
-            // User Cancels the dialog. Show the welcome screen.
-            if (recursive) {
-                m_welcomeShownThisSession = false;
-                m_goStraightToWelcomeFileDialog = true;
-                theReturn = showStartupDialog();
+            if (!filePath.exists()) {
+                filePath = applicationDirectory().path() +
+                        QStringLiteral("/../../../../examples/studio3d");
+#endif
+                if (!filePath.exists())
+                    filePath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+                Qt3DSFile path = m_dialogs->GetFileOpenChoice(filePath.absoluteFilePath());
+                theFile = QFileInfo(path.GetAbsolutePath().toQString());
             } else {
-                theReturn = false;
+                theFile = filePath.absolutePath() + QStringLiteral("/SampleProject.uip");
             }
+
+            if (theFile.path().isEmpty()) {
+                OnLoadDocument(theFile.absoluteFilePath());
+                theReturn = true;
+                m_welcomeShownThisSession = true;
+            } else {
+                canceled = true;
+            }
+        } else {
+            canceled = true;
         }
     } break;
-
     default:
-        ASSERT(false); // Should not reach this block.
+        // Welcome screen was simply closed
         theReturn = false;
         break;
+    }
+
+    if (canceled) {
+        // User Cancels the dialog. Show the welcome screen.
+        if (recursive) {
+            m_welcomeShownThisSession = false;
+            m_goStraightToWelcomeFileDialog = true;
+            theReturn = showStartupDialog();
+        } else {
+            theReturn = false;
+        }
     }
     return theReturn;
 }
@@ -538,7 +549,7 @@ bool CStudioApp::showStartupDialog()
         }
 
         if (show) {
-            StudioTutorialWidget tutorial(m_pMainWnd, m_goStraightToWelcomeFileDialog, true);
+            StudioTutorialWidget tutorial(m_pMainWnd);
             welcomeRes = tutorial.exec();
         }
     }
@@ -1411,12 +1422,17 @@ CInspectableBase *CStudioApp::GetInspectableFromSelectable(Q3DStudio::SSelectedV
                                 new Qt3DSDMInspectable(*this, m_core, theSelectedInstance);
                 }
             }
-        } break;
+        }
+            break;
         case Q3DStudio::SelectedValueTypes::Guide: {
             qt3dsdm::Qt3DSDMGuideHandle theGuide
                     = inSelectable.getData<qt3dsdm::Qt3DSDMGuideHandle>();
             theInspectableBase = CGuideInspectable::CreateInspectable(*m_core, theGuide);
-        } break;
+        }
+            break;
+        default:
+            // Ignore slide insertion and unknown selectable types
+            break;
         };
     }
 
@@ -1627,9 +1643,7 @@ bool CStudioApp::OnLoadDocument(const QString &inDocument, bool inShowStartupDia
         m_views->getMainFrame()->showScene();
 
     try {
-        Q3DStudio::CFilePath docFilePath(inDocument);
-        // make sure a project (a .uia file) exists
-        m_core->getProjectFile().ensureProjectFile(docFilePath.toQString());
+        m_core->getProjectFile().initProjectFile(loadDocument.GetAbsolutePath().toQString());
         OnLoadDocumentCatcher(loadDocument);
         m_core->GetDispatch()->FireOnOpenDocument(loadDocument.GetAbsolutePath().toQString(), true);
         // Loading was successful
@@ -1710,6 +1724,7 @@ bool CStudioApp::OnLoadDocument(const QString &inDocument, bool inShowStartupDia
 void CStudioApp::saveDataInputsToProjectFile()
 {
     // open the uia file
+    m_core->getProjectFile().ensureProjectFile();
     QFile file(m_core->getProjectFile().getProjectFilePath());
     file.open(QIODevice::ReadWrite);
     QDomDocument doc;
@@ -2034,9 +2049,11 @@ QSize CStudioApp::getRenderableSize(const QString &renderableId)
                     r.m_size = PresentationFile::readSize(path);
                 } else { // QML stream
                     QQmlApplicationEngine qmlEngine(path);
-                    QQuickItem *item = qobject_cast<QQuickItem *>(qmlEngine.rootObjects().at(0));
-                    if (item)
-                        r.m_size = QSize(qRound(item->width()), qRound(item->height()));
+                    if (qmlEngine.rootObjects().size() > 0) {
+                        QQuickItem *item = qobject_cast<QQuickItem *>(qmlEngine.rootObjects().at(0));
+                        if (item)
+                            r.m_size = QSize(qRound(item->width()), qRound(item->height()));
+                    }
                 }
             }
             return r.m_size;
@@ -2062,32 +2079,38 @@ void CStudioApp::OnUndefinedDatainputsFail(
 
 void CStudioApp::toggleEyeball()
 {
-    CDoc *theDoc = m_core->GetDoc();
-    qt3dsdm::IPropertySystem *propertySystem = theDoc->GetStudioSystem()->GetPropertySystem();
-    qt3dsdm::TInstanceHandleList selectedInstances
-            = theDoc->GetSelectedValue().GetSelectedInstances();
+    CDoc *doc = m_core->GetDoc();
+    if (doc->getSelectedInstancesCount() > 0) {
+        qt3dsdm::Qt3DSDMPropertyHandle property
+                = doc->GetStudioSystem()->GetClientDataModelBridge()->GetSceneAsset().m_Eyeball;
+        SCOPED_DOCUMENT_EDITOR(*doc, tr("Visibility Toggle"))
+                ->toggleBoolPropertyOnSelected(property);
+    }
+}
 
-    if (selectedInstances.size() > 0) {
-        Q3DStudio::ScopedDocumentEditor editor(*theDoc,
-                                               L"Visibility Toggle",
-                                               __FILE__, __LINE__);
-        bool boolValue = false;
-        SValue value;
-        for (size_t idx = 0, end = selectedInstances.size(); idx < end; ++idx) {
-            qt3dsdm::Qt3DSDMInstanceHandle handle(selectedInstances[idx]);
+void CStudioApp::toggleShy()
+{
+    CDoc *doc = m_core->GetDoc();
+    if (doc->getSelectedInstancesCount() > 0) {
+        qt3dsdm::Qt3DSDMPropertyHandle property
+                = doc->GetStudioSystem()->GetClientDataModelBridge()->GetSceneAsset().m_Shy;
+        SCOPED_DOCUMENT_EDITOR(*doc, tr("Shy Toggle"))
+                ->toggleBoolPropertyOnSelected(property);
+    }
+}
 
-            if (handle.Valid()) {
-                qt3dsdm::Qt3DSDMPropertyHandle property
-                        = theDoc->GetStudioSystem()->GetClientDataModelBridge()
-                        ->GetSceneAsset().m_Eyeball;
-                if (value.empty()) {
-                    // First valid handle selects if all are hidden/unhidden
-                    propertySystem->GetInstancePropertyValue(handle, property, value);
-                    boolValue = !qt3dsdm::get<bool>(value);
-                }
-                editor->SetInstancePropertyValue(handle, property, boolValue);
-            }
-        }
+void CStudioApp::toggleLocked()
+{
+    CDoc *doc = m_core->GetDoc();
+    if (doc->getSelectedInstancesCount() > 0) {
+        qt3dsdm::Qt3DSDMPropertyHandle property
+                = doc->GetStudioSystem()->GetClientDataModelBridge()->GetSceneAsset().m_Locked;
+        SCOPED_DOCUMENT_EDITOR(*doc, tr("Locked Toggle"))
+                ->toggleBoolPropertyOnSelected(property);
+
+        // Since you are not supposed to be able to select locked objects,
+        // we just assume anything toggled was actually locked and deselect everything
+        doc->DeselectAllItems();
     }
 }
 
@@ -2110,10 +2133,51 @@ void CStudioApp::checkDeletedDatainputs()
     QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle>> *map;
     map = new QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
                                        qt3dsdm::Qt3DSDMPropertyHandle>>;
-    m_core->GetDoc()->UpdateDatainputMap(m_core->GetDoc()->GetActiveRootInstance(), map);
+
+    auto doc = m_core->GetDoc();
+    // Update datainputs for the currently open presentation
+    doc->UpdateDatainputMap(m_core->GetDoc()->GetActiveRootInstance(), map);
 
     if (!map->empty())
         m_core->GetDispatch()->FireOnUndefinedDatainputsFail(map);
+
+    // Update allowed property types for datainput-controlled properties
+    // in subpresentations. It is ok to do this once
+    // at the project opening, as the assumption is that subpresentation files
+    // do not change while we are editing currently open presentation.
+
+    // Clear the old subpresentation binding info only.
+    for (auto it : qAsConst(m_dataInputDialogItems))
+        it->externalPresBoundTypes.clear();
+
+    const QMultiMap<QString, QPair<QString, QString>> spDatainputs
+            = GetCore()->getProjectFile().getDiBindingtypesFromSubpresentations();
+
+    // For datainput bindings in subpresentations we do not have specific
+    // instance and/or property handles. Get the datatype for property using
+    // the generic name string and leave instance/property handle empty.
+    for (auto sp : spDatainputs) {
+        const QString propName = sp.second;
+        CDataInputDialogItem *item = m_dataInputDialogItems.find(sp.first).value();
+        QPair<qt3dsdm::DataModelDataType::Value, bool> spEntry;
+        if (propName == QLatin1String("@timeline")) {
+            spEntry.first = qt3dsdm::DataModelDataType::Value::RangedNumber;
+            spEntry.second = true;
+        } else if (propName == QLatin1String("@slide")) {
+            spEntry.first = qt3dsdm::DataModelDataType::Value::String;
+            spEntry.second = true;
+        } else {
+            qt3dsimp::SImportComposerTypes theTypes;
+            qt3dsimp::SImportAsset &theAsset(theTypes.GetImportAssetForType(
+                                                 qt3dsdm::ComposerObjectTypes::Node));
+            qt3dsdm::DataModelDataType::Value theType(
+                        theAsset.GetPropertyDataType(propName.toStdWString().c_str()));
+            spEntry.first = theType;
+            spEntry.second = false;
+        }
+
+        item->externalPresBoundTypes.insert(sp.first, spEntry);
+    }
 }
 
 void CStudioApp::verifyDatainputBindings()

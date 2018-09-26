@@ -81,7 +81,7 @@ ComboBox {
         }
         background: Rectangle {
             anchors.fill: itemDelegate
-            color: hovered ? _selectionColor : _studioColor2
+            color: hovered ? _selectionColor : _backgroundColor
         }
     }
 

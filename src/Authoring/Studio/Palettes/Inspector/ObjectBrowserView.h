@@ -43,6 +43,7 @@ QT_FORWARD_DECLARE_CLASS(QAbstractItemModel)
 class ObjectBrowserView : public QQuickWidget
 {
     Q_OBJECT
+    Q_PROPERTY(bool focused READ isFocused NOTIFY focusChanged)
     Q_PROPERTY(QAbstractItemModel *model READ model NOTIFY modelChanged FINAL)
     Q_PROPERTY(int selection READ selection WRITE setSelection NOTIFY selectionChanged FINAL)
     Q_PROPERTY(PathType pathType READ pathType WRITE setPathType NOTIFY pathTypeChanged FINAL)
@@ -82,10 +83,15 @@ Q_SIGNALS:
     void selectionChanged();
 
 protected:
+    void focusInEvent(QFocusEvent *event) override;
     void focusOutEvent(QFocusEvent *event) override;
+
+Q_SIGNALS:
+    void focusChanged();
 
 private:
     void initialize();
+    bool isFocused() const;
 
     FlatObjectListModel *m_model = nullptr;
     QHash<int, ObjectListModel *> m_subModels;

@@ -135,17 +135,17 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
             if (m_controllerDataInput.size()) {
                 static const QPixmap pixDataInput
                         = QPixmap(":/images/Objects-DataInput-White.png");
-                static const QFont normalFont = CAppFonts::GetInstance()->GetNormalFont();
-                static const QFontMetrics fm(normalFont);
+                static const QFontMetrics fm(painter->font());
 
                 // need clip region to limit datainput icon visibility to the same rect as we use
                 // for text
                 painter->setClipRect(x, 0, w, currentHeight);
                 painter->setClipping(true);
                 painter->setPen(QPen(CStudioPreferences::textColor(), 2));
-                painter->drawText(QRect(x + pixDataInput.width(), 0, w, currentHeight),
+                // +5 added to text location to make margin comparable to other datainput controls
+                painter->drawText(QRect(x + pixDataInput.width() + 5, 0, w, currentHeight),
                                   m_controllerDataInput, QTextOption(Qt::AlignCenter));
-                // place the icon marginY amount away from the datainput name
+                // place the icon in front of the text
                 int textwidth = fm.width(m_controllerDataInput);
                 int iconx = x + (w - textwidth) / 2;
                 if (iconx < x)

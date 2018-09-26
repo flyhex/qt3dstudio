@@ -152,6 +152,8 @@ QVariant SValue::toQVariant() const
     }
     case DataModelDataType::None:
         return {};
+    default:
+        break;
     }
     return {};
 }

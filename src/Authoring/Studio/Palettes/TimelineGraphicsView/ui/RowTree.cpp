@@ -376,7 +376,7 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
 
 int RowTree::treeWidth() const
 {
-    return m_scene->treeWidth();
+    return m_scene->treeWidth() - m_scene->getScrollbarOffsets().x();
 }
 
 void RowTree::setBinding(ITimelineItemBinding *binding)

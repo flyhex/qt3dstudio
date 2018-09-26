@@ -34,6 +34,7 @@
 #include "DocumentEditorEnumerations.h"
 #include "StudioObjectTypes.h"
 #include <QtCore/qtimer.h>
+#include <QtCore/qpointer.h>
 
 class RowTree;
 class TimelineGraphicsScene;
@@ -48,7 +49,7 @@ public:
     void start(const QVector<RowTree *> &rows);
     void end(bool force = false);
     void updateTargetRow(const QPointF &scenePos, EStudioObjectType rowType = OBJTYPE_UNKNOWN);
-    bool isActive();
+    bool isActive() const;
     RowTree *insertionTarget() const;
     RowTree *insertionParent() const;
     QVector<RowTree *> sourceRows() const;
@@ -65,7 +66,7 @@ private:
     bool isNextSiblingRow(RowTree *r1, RowTree *r2) const;
 
     TimelineGraphicsScene *m_scene = nullptr;
-    RowTree *m_insertionTarget = nullptr; // insertion target
+    QPointer<RowTree> m_insertionTarget; // insertion target
     RowTree *m_insertionParent = nullptr; // insertion parent
     RowTree *m_rowAutoExpand = nullptr;
     QVector<RowTree *> m_sourceRows;      // dragged rows

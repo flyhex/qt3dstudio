@@ -187,7 +187,7 @@ void CDataInputListDlg::updateContents()
             dataInput.append(new QStandardItem(tr("Variant")));
         }
         // highlight datainputs that are in use
-        if (it->controlledElems.size() != 0)
+        if (it->controlledElems.size() || it->externalPresBoundTypes.size())
             dataInput.first()->setForeground(QBrush(CStudioPreferences::dataInputColor()));
         m_tableContents->appendRow(dataInput);
     }
@@ -292,7 +292,10 @@ void CDataInputListDlg::onEditDataInput()
 
         // Only show types that are ok for _all_ currently controlled properties.
         // If datainput is not controlling any elements, all types are ok.
+
+        // Datainput binding types
         QVector<EDataType> allowedTypes;
+        bool strictFound = false;
         if (di->controlledElems.size()) {
             for (auto type : qAsConst(di->boundTypes)) {
                 // If we hit strict type requirement for a certain bound datatype, set allowed types
@@ -309,12 +312,35 @@ void CDataInputListDlg::onEditDataInput()
                         allowedTypes.append(t);
                 }
                 // if we just hit a strict type requirement we are finished
+                if (type.second) {
+                    strictFound = true;
+                    break;
+                }
+            }
+        }
+
+        // Datainput bindings for all other presentations, unless we already have a
+        // strict type requirement
+        if (di->externalPresBoundTypes.size() && !strictFound) {
+            for (auto type : qAsConst(di->externalPresBoundTypes)) {
+                if (type.second)
+                    allowedTypes.clear();
+
+                const auto acceptedTypes = CDataInputDlg::getAcceptedTypes(type.first, type.second);
+
+                for (auto t : acceptedTypes) {
+                    if (!allowedTypes.contains(t))
+                        allowedTypes.append(t);
+                }
+                // if we just hit a strict type requirement we are finished
                 if (type.second)
                     break;
             }
-        } else {
-            allowedTypes = allDataTypes;
         }
+
+        // no bindings in this or other presentations, all datatypes are ok
+        if (!allowedTypes.size())
+            allowedTypes = allDataTypes;
 
         CDataInputDlg datainputdialog(&di, m_tableContents, this, allowedTypes);
         datainputdialog.exec();

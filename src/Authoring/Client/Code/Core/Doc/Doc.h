@@ -169,6 +169,11 @@ public:
     // i.e. only the exact equivalent mapping from datainput type to
     // property type is allowed (float to float, string to string etc.)
     QVector<QPair<qt3dsdm::DataModelDataType::Value, bool>> boundTypes;
+    // Bindings in other subpresentations, of QMap format
+    // QMultiMap<subpresentation_id, QPair<datatype, strict>>.
+    // Stored separately so we can conveniently update/clear binding info
+    // for current presentation and keep subpresentation binding info intact or vice versa.
+    QMultiMap<QString, QPair<qt3dsdm::DataModelDataType::Value, bool>> externalPresBoundTypes;
 };
 
 //==============================================================================
@@ -413,6 +418,8 @@ public:
     bool CanUndo() override;
     bool PreUndo() override;
 
+    void getSceneMaterials(qt3dsdm::Qt3DSDMInstanceHandle inParent,
+                           QVector<qt3dsdm::Qt3DSDMInstanceHandle> &outMats) const;
     void CheckActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     void SetActiveSlideWithTransaction(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide);
 
@@ -507,6 +514,7 @@ protected:
     std::shared_ptr<Q3DStudio::IDocSceneGraph> m_SceneGraph;
     Q3DStudio::SSelectedValue m_SelectedValue;
     bool m_nudging;
+    bool m_unnotifiedSelectionChange = false;
 
 public:
     void OnNewPresentation();

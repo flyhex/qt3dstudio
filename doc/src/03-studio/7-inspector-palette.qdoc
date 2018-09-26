@@ -431,12 +431,19 @@ no foreshortening artifacts.
 
 \list
 \li
-  \b{Field of View} - For perspective cameras (ones without the
-  Orthographic box checked), this is the number of degrees between the
-  top and bottom edges of the camera frustum. The larger the value, the
-  stronger the sense of 3D in your scene. The horizontal field of view
-  is automatically calculated based on the aspect ratio of the
+  \target field of view
+  \b{Field of View} - By default, vertical field of view is used. This value is the
+  number of degrees between the top and bottom edges of the camera frustum.
+  The larger the value, the stronger the sense of 3D in your scene. The horizontal
+  field of view is automatically calculated based on the aspect ratio of the
   presentation as authored in Studio.
+  \note Field of view is ignored when using Orthographic cameras.
+\li
+  \b{FOV Horizontal} - When enabled, the \l{field of view} value will be the number of
+  degrees between the left and right edges of the camera frustum. The vertical field of
+  view is then automatically calculated based on the aspect ratio of the presentation
+  as authored in Studio. This property can be used when you want to translate field of view values
+  from software that are using horizontal fov; Maya and Blender in most cases for example.
 \li
   \b{Clipping Start/End} - Content closer to the camera than the
   clipping start or farther than the clipping end will not be rendered.

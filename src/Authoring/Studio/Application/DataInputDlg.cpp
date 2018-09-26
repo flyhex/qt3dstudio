@@ -68,13 +68,8 @@ CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemMode
     for (int i = 0; i < m_ui->comboBoxTypeList->model()->rowCount(); ++i)
     {
         QStandardItem *item = model->item(i, 0);
-        // We need special handling for Ranged Number as it is
-        // not a studio property datatype, but relevant only for datainput.
-        if (!acceptedTypes.contains((EDataType)i)
-            && !(m_dataInput->type == DataTypeRangedNumber
-                 && item->data(Qt::UserRole) == DataTypeRangedNumber)) {
+        if (!acceptedTypes.contains((EDataType)i))
             item->setEnabled(false);
-        }
     }
 
     initDialog();
@@ -241,8 +236,7 @@ const bool CDataInputDlg::isEquivalentDataType(int dlgType,
     if ((dlgType == EDataType::DataTypeString
          && dmType == qt3dsdm::DataModelDataType::String)
         || (dlgType == EDataType::DataTypeRangedNumber
-            && (dmType == qt3dsdm::DataModelDataType::Float
-                || dmType == qt3dsdm::DataModelDataType::String) && !strict)
+            && dmType == qt3dsdm::DataModelDataType::RangedNumber)
         || (dlgType == EDataType::DataTypeFloat
             && (dmType == qt3dsdm::DataModelDataType::Float
                 || (dmType == qt3dsdm::DataModelDataType::String && !strict)))
@@ -252,10 +246,12 @@ const bool CDataInputDlg::isEquivalentDataType(int dlgType,
             && dmType == qt3dsdm::DataModelDataType::Float3)
         || (dlgType == EDataType::DataTypeVector2
             && dmType == qt3dsdm::DataModelDataType::Float2)
-        // Variant can be bound to any property type.
-        // Allow also Evaluator binding to any property as we only know the evaluation
-        // result type at runtime.
-        || dlgType == EDataType::DataTypeVariant
+        // Variant can be bound to any property type except
+        // as timeline controller because only datainput of type Ranged Number
+        // has additional min/max information. For slide control,
+        // we can allow variant type in addition to String type.
+        || (dlgType == EDataType::DataTypeVariant
+            && dmType != qt3dsdm::DataModelDataType::RangedNumber)
 #ifdef DATAINPUT_EVALUATOR_ENABLED
         || dlgType == EDataType::DataTypeEvaluator
 #endif

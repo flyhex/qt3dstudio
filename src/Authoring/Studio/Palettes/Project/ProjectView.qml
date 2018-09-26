@@ -39,7 +39,6 @@ Rectangle {
     ColumnLayout {
         anchors.fill: parent
         spacing: 4
-        width: parent.width
 
         Item {
             Layout.fillWidth: true
@@ -240,7 +239,7 @@ Rectangle {
         }
 
         RowLayout {
-            width: parent.width
+            Layout.fillWidth: true
             Layout.margins: 4
             Layout.rightMargin: 12
             Layout.leftMargin: 12

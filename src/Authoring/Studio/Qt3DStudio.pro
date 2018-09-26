@@ -220,7 +220,6 @@ HEADERS += \
     Palettes/TimelineGraphicsView/ui/Ruler.h \
     Palettes/TimelineGraphicsView/ui/TimelineItem.h \
     Palettes/TimelineGraphicsView/ui/TimelineToolbar.h \
-    Palettes/TimelineGraphicsView/ui/TimelineToolbarLabel.h \
     Palettes/TimelineGraphicsView/ui/TreeHeader.h \
     Palettes/TimelineGraphicsView/ui/TreeHeaderView.h \
     PreviewHelper.h \
@@ -251,7 +250,8 @@ HEADERS += \
     Render/Q3DSGraphObjectTranslator.h \
     Render/Q3DSTranslation.h \
     Render/Q3DStudioRenderer.h \
-    UI/Q3DSPlayerWnd.h
+    UI/Q3DSPlayerWnd.h \
+    Palettes/Inspector/MaterialRefView.h
 
 FORMS += \
     MainFrm.ui \
@@ -382,7 +382,6 @@ SOURCES += \
     Palettes/TimelineGraphicsView/ui/Ruler.cpp \
     Palettes/TimelineGraphicsView/ui/TimelineItem.cpp \
     Palettes/TimelineGraphicsView/ui/TimelineToolbar.cpp \
-    Palettes/TimelineGraphicsView/ui/TimelineToolbarLabel.cpp \
     Palettes/TimelineGraphicsView/ui/TreeHeader.cpp \
     Palettes/TimelineGraphicsView/ui/TreeHeaderView.cpp \
     PreviewHelper.cpp \
@@ -416,7 +415,8 @@ SOURCES += \
     Render/Q3DStudioRenderer.cpp \
     Render/Q3DSGraphObjectTranslator.cpp \
     Render/Q3DSTranslation.cpp \
-    UI/Q3DSPlayerWnd.cpp
+    UI/Q3DSPlayerWnd.cpp \
+    Palettes/Inspector/MaterialRefView.cpp
 
 RESOURCES += \
     MainFrm.qrc \

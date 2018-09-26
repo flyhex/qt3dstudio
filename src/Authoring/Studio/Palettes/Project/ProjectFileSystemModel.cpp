@@ -174,6 +174,7 @@ void ProjectFileSystemModel::updateReferences()
     std::for_each(sourcePathList.begin(), sourcePathList.end(), addReferencesPresentation);
     std::for_each(fontFileList.begin(), fontFileList.end(), addReferencesPresentation);
     std::for_each(effectTextureList.begin(), effectTextureList.end(), addReferencesProject);
+    std::for_each(effectTextureList.begin(), effectTextureList.end(), addReferencesPresentation);
     std::for_each(renderableList.begin(), renderableList.end(), addReferencesRenderable);
 
     m_references.insert(projectPath);
@@ -353,7 +354,7 @@ void ProjectFileSystemModel::showInfo(int row)
     if (fi.suffix() == QLatin1String("matdata")) {
         const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
         const auto material = sceneEditor
-                ->getOrCreateMaterial(Q3DStudio::CString::fromQString(fi.baseName()));
+                ->getOrCreateMaterial(Q3DStudio::CString::fromQString(fi.completeBaseName()));
         QString name;
         QMap<QString, QString> values;
         sceneEditor->getMaterialInfo(fi.absoluteFilePath(), name, values);
@@ -373,7 +374,7 @@ void ProjectFileSystemModel::duplicate(int row)
 
     QFileInfo srcFile(path);
     const QString destPathStart = srcFile.dir().absolutePath() + QDir::separator()
-            + srcFile.baseName() + QStringLiteral(" Copy");
+            + srcFile.completeBaseName() + QStringLiteral(" Copy");
     const QString destPathEnd = QStringLiteral(".") + srcFile.suffix();
     QString destPath = destPathStart + destPathEnd;
 
@@ -486,19 +487,24 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url)
         QObject *qmlRoot = nullptr;
         if (extension == QLatin1String("qml")) {
             qmlEngine.load(sourceFile);
-            const char *rootClassName = qmlEngine.rootObjects().at(0)
-                                        ->metaObject()->superClass()->className();
-
-            // the assumption here is that any qml that is not a behavior is a qml stream
-            if (strcmp(rootClassName, "Q3DStudio::Q3DSQmlBehavior") != 0) { // not a behavior
-                qmlRoot = qmlEngine.rootObjects().at(0);
-
-                // put the qml in the correct folder
-                if (targetDir.path().endsWith(QLatin1String("/scripts"))) {
-                    const QString path(QStringLiteral("../qml streams"));
-                    targetDir.mkpath(path); // create the folder if doesn't exist (i.e. old project)
-                    targetDir.cd(path);
+            if (qmlEngine.rootObjects().size() > 0) {
+                const char *rootClassName = qmlEngine.rootObjects().at(0)
+                                            ->metaObject()->superClass()->className();
+                // the assumption here is that any qml that is not a behavior is a qml stream
+                if (strcmp(rootClassName, "Q3DStudio::Q3DSQmlBehavior") != 0) { // not a behavior
+                    qmlRoot = qmlEngine.rootObjects().at(0);
+                    // put the qml in the correct folder
+                    if (targetDir.path().endsWith(QLatin1String("/scripts"))) {
+                        const QString path(QStringLiteral("../qml streams"));
+                        targetDir.mkpath(path); // create the folder if doesn't exist
+                        targetDir.cd(path);
+                    }
                 }
+            } else {
+                // Invalid qml file, block import
+                g_StudioApp.GetDialogs()->DisplayKnownErrorDialog(
+                            tr("Failed to parse '%1'\nAborting import.").arg(sourceFile));
+                return;
             }
         }
         // Copy the file to target directory

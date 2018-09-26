@@ -30,7 +30,6 @@
 #define TIMELINETOOLBAR_H
 
 #include "SelectedValueImpl.h"
-#include "TimelineToolbarLabel.h"
 #include "Qt3DSDMSignals.h"
 #include "DispatchListeners.h"
 #include "Dispatch.h"
@@ -90,7 +89,7 @@ private:
     void updateDataInputStatus();
     void updateTimelineTitleColor(bool controlled);
 
-    TimelineToolbarLabel *m_timeLabel;
+    QPushButton *m_timeLabel;
     QLabel *m_diLabel;
     QAction *m_actionDeleteRow;
     QAction *m_actionPlayStop;

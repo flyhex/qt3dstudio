@@ -230,18 +230,16 @@
         <file>images/client_tools_hi_color-06@2x.png</file>
         <file>images/prefstab-00@2x.png</file>
         <file>images/playback_tools_low-03@2x.png</file>
-        <file>images/Tutorial/button_back.png</file>
-        <file>images/Tutorial/button_next.png</file>
-        <file>images/Tutorial/button_back@2x.png</file>
-        <file>images/Tutorial/button_next@2x.png</file>
         <file>images/Objects-edit-disabled.png</file>
         <file>images/Objects-edit-disabled@2x.png</file>
         <file>images/Objects-edit-normal.png</file>
         <file>images/Objects-edit-normal@2x.png</file>
-        <file>images/Objects-DataInput-Normal.png</file>
-        <file>images/Objects-DataInput-Normal@2x.png</file>
-        <file>images/Objects-DataInput-Disabled.png</file>
-        <file>images/Objects-DataInput-Disabled@2x.png</file>
+        <file>images/Objects-DataInput-Active.png</file>
+        <file>images/Objects-DataInput-Active@2x.png</file>
+        <file>images/Objects-DataInput-Inactive.png</file>
+        <file>images/Objects-DataInput-Inactive@2x.png</file>
+        <file>images/Objects-DataInput-White.png</file>
+        <file>images/Objects-DataInput-White@2x.png</file>
         <file>images/Asset-import-Normal.png</file>
         <file>images/Asset-import-Normal@2x.png</file>
         <file>images/arrow_up.png</file>
@@ -255,38 +253,12 @@
         <file>images/zoom_out@2x.png</file>
         <file>images/zoom_in.png</file>
         <file>images/zoom_in@2x.png</file>
-        <file>images/Tutorial/background.png</file>
-        <file>images/Tutorial/background@2x.png</file>
-        <file>images/Tutorial/dot_active.png</file>
-        <file>images/Tutorial/dot_active@2x.png</file>
-        <file>images/Tutorial/dot_inactive.png</file>
-        <file>images/Tutorial/dot_inactive@2x.png</file>
-        <file>images/Tutorial/screens/1x/1.png</file>
-        <file>images/Tutorial/screens/1x/2.png</file>
-        <file>images/Tutorial/screens/1x/3.png</file>
-        <file>images/Tutorial/screens/1x/4.png</file>
-        <file>images/Tutorial/screens/1x/5.png</file>
-        <file>images/Tutorial/screens/1x/6.png</file>
-        <file>images/Tutorial/screens/1x/7.png</file>
-        <file>images/Tutorial/screens/1x/8.png</file>
-        <file>images/Tutorial/screens/1x/9.png</file>
-        <file>images/Tutorial/screens/2x/1.png</file>
-        <file>images/Tutorial/screens/2x/2.png</file>
-        <file>images/Tutorial/screens/2x/3.png</file>
-        <file>images/Tutorial/screens/2x/4.png</file>
-        <file>images/Tutorial/screens/2x/5.png</file>
-        <file>images/Tutorial/screens/2x/6.png</file>
-        <file>images/Tutorial/screens/2x/7.png</file>
-        <file>images/Tutorial/screens/2x/8.png</file>
-        <file>images/Tutorial/screens/2x/9.png</file>
         <file>images/remote.png</file>
         <file>images/remote@2x.png</file>
         <file>images/remote-disabled.png</file>
         <file>images/remote-disabled@2x.png</file>
         <file>images/Assets-Model.png</file>
         <file>images/Assets-Model@2x.png</file>
-        <file>images/Objects-DataInput-White.png</file>
-        <file>images/Objects-DataInput-White@2x.png</file>
         <file>images/presentation_edit.png</file>
         <file>images/presentation_edit@2x.png</file>
         <file>images/presentation_notUsed.png</file>
@@ -299,6 +271,7 @@
         <file>images/qml_used@2x.png</file>
         <file>images/Toggle-HideShowControlled.png</file>
         <file>images/Toggle-HideShowControlled@2x.png</file>
+        <file>images/welcomedialog/laptop.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="open_dialog.png">images/open_dialog.png</file>

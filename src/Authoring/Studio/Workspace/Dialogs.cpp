@@ -87,11 +87,11 @@ struct SAllowedTypesEntry
 };
 
 const char *imgExts[] = {
-    "png", "jpg", "jpeg", "dds", "bmp", "gif", "hdr", nullptr,
+    "png", "jpg", "jpeg", "dds", "bmp", "gif", "hdr", "ktx", nullptr,
 };
 
 const wchar_t *wideImgExts[] = {
-    L"png", L"jpg", L"jpeg", L"dds", L"bmp", L"gif", L"hdr", nullptr,
+    L"png", L"jpg", L"jpeg", L"dds", L"bmp", L"gif", L"hdr", L"ktx", nullptr,
 };
 
 const char *modelExts[] = {
@@ -1302,9 +1302,10 @@ void CDialogs::DisplayGLVersionWarning(const Q3DStudio::CString &inGLVersion,
     DisplayGLVersionDialog(inGLVersion, inRecommendedVersion, false);
 }
 
-void CDialogs::showWidgetBrowser(QWidget *screenWidget, QWidget *browser, const QPoint &point)
+void CDialogs::showWidgetBrowser(QWidget *screenWidget, QWidget *browser, const QPoint &point,
+                                 QSize customSize)
 {
-    QSize popupSize = CStudioPreferences::browserPopupSize();
+    QSize popupSize = customSize.isEmpty() ? CStudioPreferences::browserPopupSize() : customSize;
     browser->resize(popupSize);
     QPoint newPos = point;
 
@@ -1321,16 +1322,20 @@ void CDialogs::showWidgetBrowser(QWidget *screenWidget, QWidget *browser, const 
         screen = QGuiApplication::screens().at(screenNum);
     }
     QRect screenRect = screen->availableGeometry();
-    QSize screenSize = screenRect.size();
-    newPos -= QPoint(popupSize.width(), popupSize.height()) + screenRect.topLeft();
+    const int COMBOBOX_H = 22;
+
+    // position the popup below the combobox
+    newPos -= QPoint(popupSize.width(), -COMBOBOX_H) + screenRect.topLeft();
+
+    // if no space below the combobox, move it above it
+    if (newPos.y() + popupSize.height() > screenRect.height())
+        newPos.setY(newPos.y() - popupSize.height() - COMBOBOX_H);
 
     if (newPos.y() < 0)
         newPos.setY(0);
-    else if (newPos.y() + popupSize.height() > screenSize.height())
-        newPos.setY(screenSize.height() - popupSize.height());
 
-    if (newPos.x() + popupSize.width() > screenSize.width())
-        newPos.setX(screenSize.width() - popupSize.width());
+    if (newPos.x() + popupSize.width() > screenRect.width())
+        newPos.setX(screenRect.width() - popupSize.width());
     else if (newPos.x() < 0)
         newPos.setX(0);
 

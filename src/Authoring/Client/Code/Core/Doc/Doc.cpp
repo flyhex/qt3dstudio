@@ -813,7 +813,7 @@ void CDoc::DeselectAllItems(bool inSendEvent)
     if (inSendEvent)
         NotifySelectionChanged();
     else
-        SetSelection();
+        m_unnotifiedSelectionChange = SetSelection();
 
     // Remove selection on keyframes.
     DeselectAllKeyframes();
@@ -1102,9 +1102,11 @@ bool CDoc::SetSelection(Q3DStudio::SSelectedValue inNewSelection)
 void CDoc::NotifySelectionChanged(Q3DStudio::SSelectedValue inNewSelection)
 {
     m_SelectedValue = inNewSelection;
-    if (SetSelection(inNewSelection)) {
+    if (SetSelection(inNewSelection))
         m_Core->GetDispatch()->FireSelectionChange(inNewSelection);
-    }
+    else if (m_unnotifiedSelectionChange)
+        m_Core->GetDispatch()->FireSelectionChange(m_SelectedObject);
+    m_unnotifiedSelectionChange = false;
 }
 
 template <typename TDataType>
@@ -2877,6 +2879,25 @@ void CDoc::OnPresentationDeactivated()
 {
 }
 
+/**
+ * Gets the list of standard and custom materials used in the scene.
+ *
+ * @param inParent search root
+ * @param outMats list of scene materials
+ */
+void CDoc::getSceneMaterials(qt3dsdm::Qt3DSDMInstanceHandle inParent,
+                             QVector<qt3dsdm::Qt3DSDMInstanceHandle> &outMats) const
+{
+    const CClientDataModelBridge *bridge = m_StudioSystem->GetClientDataModelBridge();
+    for (long i = 0, count = m_AssetGraph->GetChildCount(inParent); i < count; ++i) {
+        qt3dsdm::Qt3DSDMInstanceHandle theChild(m_AssetGraph->GetChild(inParent, i));
+        if (bridge->IsMaterialInstance(theChild) || bridge->IsCustomMaterialInstance(theChild))
+            outMats.push_back(theChild);
+
+        getSceneMaterials(theChild, outMats);
+    }
+}
+
 void CDoc::CheckActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     Q3DStudio::CString theListOfTargets;
@@ -2947,11 +2968,9 @@ void CDoc::UpdateDatainputMap(
             // Update the controlled elements and property types for
             // verified, existing datainputs. Note that for @timeline and
             // @slide controllers the property type is not found as these
-            // are pseudo-properties, and return from GetDataType will be invalid.
-            // For slide control, type is strictly set to String. For timeline,
-            // the datainput is strictly Ranged Number which cannot be represented
-            // with object property datatypes, so will be handled separately
-            // when allowable datainput types are checked.
+            // are pseudo-properties, so we handle them here.
+            // For slide control, type is strictly set to String.
+            // For timeline the datainput is strictly Ranged Number only.
             if (g_StudioApp.m_dataInputDialogItems.contains(diName)) {
                 g_StudioApp.m_dataInputDialogItems[diName]->
                     controlledElems.append(inInstance);
@@ -2963,6 +2982,11 @@ void CDoc::UpdateDatainputMap(
                             ->boundTypes.append(QPair<qt3dsdm::DataModelDataType::Value, bool>
                                                 (qt3dsdm::DataModelDataType::Value::String, true));
 
+                } else if (propName == QLatin1String("@timeline")) {
+                    g_StudioApp.m_dataInputDialogItems[diName]
+                            ->boundTypes.append(
+                                QPair<qt3dsdm::DataModelDataType::Value, bool>
+                                (qt3dsdm::DataModelDataType::Value::RangedNumber, true));
                 }
             } else if (outMap != nullptr) {
                 // Do multi insert as single datainput name can

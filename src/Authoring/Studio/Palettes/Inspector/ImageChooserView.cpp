@@ -89,10 +89,22 @@ int ImageChooserView::instance() const
     return m_instance;
 }
 
+bool ImageChooserView::isFocused() const
+{
+    return hasFocus();
+}
+
+void ImageChooserView::focusInEvent(QFocusEvent *event)
+{
+    QQuickWidget::focusOutEvent(event);
+    emit focusChanged();
+}
+
 void ImageChooserView::focusOutEvent(QFocusEvent *event)
 {
     QQuickWidget::focusOutEvent(event);
-    QTimer::singleShot(0, this, &ImageChooserView::close);
+    emit focusChanged();
+    QTimer::singleShot(0, this, &QQuickWidget::close);
 }
 
 void ImageChooserView::showEvent(QShowEvent *event)

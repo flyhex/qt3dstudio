@@ -35,6 +35,8 @@
 #include "Bindings/ITimelineItemBinding.h"
 #include "Bindings/Qt3DSDMTimelineItemBinding.h"
 #include "ChooseImagePropertyDlg.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "ClientDataModelBridge.h"
 
 RowTreeContextMenu::RowTreeContextMenu(RowTree *inRowTree, QWidget *parent)
     : QMenu(parent)
@@ -189,11 +191,34 @@ void RowTreeContextMenu::addSubPresentation(QAction *action)
         Q3DStudio::SCOPED_DOCUMENT_EDITOR(doc, tr("Set layer sub-presentation"))
                 ->SetInstancePropertyValueAsRenderable(instance, propHandle, presentationId);
     } else if (m_RowTree->rowType() == OBJTYPE_MATERIAL) {
-        ChooseImagePropertyDlg dlg(instance);
+        auto &bridge(*doc.GetStudioSystem()->GetClientDataModelBridge());
+        // if this is a ref material, update the material it references
+
+        qt3dsdm::Qt3DSDMInstanceHandle refInstance = 0;
+        if (bridge.GetObjectType(instance) == OBJTYPE_REFERENCEDMATERIAL) {
+            auto optValue = doc.getSceneEditor()->GetInstancePropertyValue(instance,
+                            bridge.GetObjectDefinitions().m_ReferencedMaterial
+                            .m_ReferencedMaterial.m_Property);
+            if (optValue.hasValue())
+                refInstance = bridge.GetInstance(doc.GetSceneInstance(), optValue.getValue());
+        }
+
+        ChooseImagePropertyDlg dlg(refInstance ? refInstance : instance, refInstance != 0);
         if (dlg.exec() == QDialog::Accepted) {
             qt3dsdm::Qt3DSDMPropertyHandle propHandle = dlg.getSelectedPropertyHandle();
-            Q3DStudio::SCOPED_DOCUMENT_EDITOR(doc, tr("Set material sub-presentation"))
-                ->setInstanceImagePropertyValueAsRenderable(instance, propHandle, presentationId);
+            if (dlg.detachMaterial()) {
+                Q3DStudio::ScopedDocumentEditor editor(Q3DStudio::SCOPED_DOCUMENT_EDITOR(doc,
+                                                            tr("Set material sub-presentation")));
+                editor->BeginAggregateOperation();
+                editor->SetMaterialType(instance, "Standard Material");
+                editor->setInstanceImagePropertyValueAsRenderable(instance, propHandle,
+                                                                  presentationId);
+                editor->EndAggregateOperation();
+            } else {
+                Q3DStudio::SCOPED_DOCUMENT_EDITOR(doc, tr("Set material sub-presentation"))
+                ->setInstanceImagePropertyValueAsRenderable(refInstance ? refInstance : instance,
+                                                            propHandle, presentationId);
+            }
         }
     } else if (m_RowTree->rowType() == OBJTYPE_IMAGE) {
         qt3dsdm::Qt3DSDMPropertyHandle propHandle = doc.GetPropertySystem()

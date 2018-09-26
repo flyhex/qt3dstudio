@@ -65,6 +65,7 @@ class InspectorControlBase : public QObject
     Q_PROPERTY(int instance MEMBER m_instance CONSTANT)
     Q_PROPERTY(int handle MEMBER m_property CONSTANT)
 
+    Q_PROPERTY(bool enabled MEMBER m_enabled CONSTANT)
     Q_PROPERTY(bool animatable MEMBER m_animatable CONSTANT)
     Q_PROPERTY(bool animated MEMBER m_animated NOTIFY animatedChanged)
     Q_PROPERTY(bool controlled MEMBER m_controlled NOTIFY controlledChanged)
@@ -93,6 +94,7 @@ public:
     qt3dsdm::Qt3DSDMInstanceHandle m_instance;
     qt3dsdm::Qt3DSDMPropertyHandle m_property;
 
+    bool m_enabled = true;
     bool m_animatable  = false;
     bool m_animated = false;
     bool m_controlled = false;
@@ -120,7 +122,6 @@ public:
 
     void setInspectable(CInspectableBase *inInspectable);
     CInspectableBase *inspectable() const;
-    void updateMaterialValues();
     void setMaterials(std::vector<Q3DStudio::CFilePath> &materials);
     void setMatDatas(std::vector<Q3DStudio::CFilePath> &matdatas);
     void updateFontValues(InspectorControlBase *element) const;
@@ -136,6 +137,8 @@ public:
                                        bool controlled);
 
     Q_INVOKABLE void setMaterialTypeValue(long instance, int handle, const QVariant &value);
+    Q_INVOKABLE void setShaderValue(long instance, int handle, const QVariant &value);
+    Q_INVOKABLE void setMatDataValue(long instance, int handle, const QVariant &value);
     Q_INVOKABLE void setRenderableValue(long instance, int handle, const QVariant &value);
     Q_INVOKABLE void setPropertyValue(long instance, int handle, const QVariant &value, bool commit = true);
     Q_INVOKABLE void setSlideSelection(long instance, int handle, int index,
@@ -183,6 +186,18 @@ private:
 
     qt3dsdm::SValue m_previouslyCommittedValue;
 
+    QString getStandardMaterialString() const;
+    QString getCustomMaterialString() const;
+    QString getSharedMaterialString() const;
+    QString getReferencedMaterialString() const;
+    QString getDefaultMaterialString() const;
+    bool isInsideMaterialContainer() const;
+    bool isShader() const;
+    bool isMatData() const;
+    void updateMaterialValues(const QStringList &values, int elementIndex);
+    void updateMaterialTypeValues();
+    void updateShaderValues();
+    void updateMatDataValues();
     void updatePropertyValue(InspectorControlBase *element) const;
     void rebuildTree();
     void refreshTree();
@@ -194,8 +209,12 @@ private:
     std::shared_ptr<qt3dsdm::ISignalConnection> m_notifier;
     std::shared_ptr<qt3dsdm::ISignalConnection> m_slideNotifier;
 
-    QStringList materialValues(qt3dsdm::Qt3DSDMInstanceHandle instance) const;
-    InspectorControlBase *createMaterialItem(Qt3DSDMInspectable *inspectable, int groupIndex);
+    QStringList materialTypeValues() const;
+    QStringList shaderValues() const;
+    QStringList matDataValues() const;
+    InspectorControlBase *createMaterialTypeItem(Qt3DSDMInspectable *inspectable, int groupIndex);
+    InspectorControlBase *createShaderItem(Qt3DSDMInspectable *inspectable, int groupIndex);
+    InspectorControlBase *createMatDataItem(Qt3DSDMInspectable *inspectable, int groupIndex);
     InspectorControlBase *createItem(Qt3DSDMInspectable *inspectable,
                                      Q3DStudio::Qt3DSDMInspectorRow *row, int groupIndex);
     InspectorControlBase *createItem(Qt3DSDMInspectable *inspectable,
@@ -209,7 +228,6 @@ private:
                                        int theIndex, bool disableAnimation = false,
                                        bool isReference = false);
     bool isGroupRebuildRequired(CInspectableBase *inspectable, int theIndex) const;
-
 };
 
 #endif // INSPECTORCONTROLMODEL_H

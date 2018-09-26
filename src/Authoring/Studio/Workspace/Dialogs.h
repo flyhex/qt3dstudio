@@ -176,7 +176,8 @@ public:
                                       const Q3DStudio::CString &inMinVersion);
     static void DisplayGLVersionWarning(const Q3DStudio::CString &inGLVersion,
                                         const Q3DStudio::CString &inRecommendedVersion);
-    static void showWidgetBrowser(QWidget *screenWidget, QWidget *browser, const QPoint &point);
+    static void showWidgetBrowser(QWidget *screenWidget, QWidget *browser, const QPoint &point,
+                                  QSize customSize = {});
 
 Q_SIGNALS:
     void onColorChanged(const QColor &color);

@@ -90,6 +90,7 @@ public:
     void resetMousePressParams();
     QLabel *timebarTooltip();
     void updateAutoScrolling(double scenePosY);
+    QPoint getScrollbarOffsets() const;
 
 protected:
     bool event(QEvent *event) override;
@@ -116,8 +117,6 @@ private:
     void handleMakeComponent();
     void handleCopyObjectPath();
     void handleEditComponent();
-    void handleShySelected();
-    void handleLockSelected();
     void handleApplicationFocusLoss();
 
     QGraphicsLinearLayout *m_layoutRoot;

@@ -34,37 +34,36 @@
 
 \image Studio-Timeline-Overview.png
 
-The Timeline palette is second-only to the
-\l{studio-inspector-palette.html}{Inspector palette} in frequency of
-use when editing a presentation. The Timeline palette provides direct
-access to all elements in your scene - including those not producing a
-visible result - and also gives you control over the animation and
+The timeline palette is second-only to the
+\l{studio-inspector-palette.html}{inspector palette} in frequency of
+use when editing a presentation. The timeline palette provides direct
+access to all elements in your scene, including those not producing a
+visible result, and also gives you control over the animation and
 timing within a slide.
 
-The palette is comprised of two connected sections: the Scene Graph (on
-the left side) and the Animation portion (on the right).
+The palette is comprised of two connected sections: the scene graph (on
+the left side) and the animation portion (on the right).
 
 \section1 Scene Graph
 
 \image Studio-Timeline-SceneGraph.png
 
-The left half of the Timeline palette shows all elements in your
+The left half of the timeline palette shows all elements in your
 presentation for the current slide (chosen in the
-\l{studio-slide-palette.html}{Slide palette}). The root of your
-presentation is the Scene, to which are attached one or more layers (and
+\l{studio-slide-palette.html}{slide palette}). The root of your
+presentation is the scene, to which are attached one or more layers (and
 possibly additional presentation behaviors).
 
 \section2 Name Color Indicates Slide
 
-The name of an item in the Scene Graph is colored based on its presence
+The name of an item in the scene graph is colored based on its presence
 on the master slide. Elements that are present on the master slide have
 a green name, while elements that are only present on the current slide
 have a light gray name.
 
 The same holds true for animated properties. Properties that are
 animated the same on all slides show with green text, while properties
-that have a custom animation on this slide (such as the \"Position\"
-property shown above) are shown with light gray text.
+that have a custom animation on this slide are shown with light gray text.
 
 \section2 Element Hierarchy
 
@@ -80,7 +79,7 @@ Placing one element as a child of another causes:
   The child element to inherit the opacity from the parent. As the
   parent becomes less opaque, so do its children.
 \li
-  The child element to inherit the 'active' state from the parent. If
+  The child element to inherit the active state from the parent. If
   the parent is eyeballed off on this slide, so are all its children.
 \li
   Events to bubble from the child to the parent. An
@@ -88,9 +87,22 @@ Placing one element as a child of another causes:
   by the parent element.
 \endlist
 
+\section2 Rearranging Elements
+
+It is possible to rearrange elements by dragging and dropping them within the scene graph. This way
+you can change positions of objects or alter parent/child relationships.
+
+When dragging an element, a yellow line will indicate where it will be dropped, while a
+yellow frame indicates under which parent element it will be dropped.
+Additionally, a slightly yellow background indicates which element is being dragged.
+
+A collapsed element will automatically expand if you drag and hold another element over it.
+
+\image scene-graph-rearranging.png
+
 \section2 Action Indicators
 
-The left-most column of the Timeline palette is used to show which
+The left-most column of the timeline palette is used to show which
 elements have actions on them.
 
 \list
@@ -115,48 +127,48 @@ Components are somewhat like mini scenes. A component has its own set of
 slides and independent time. Consequently the contents inside a
 component cannot sensibly be shown and edited at the same time as items
 outside a component. To see and edit the contents of a component, either
-\b{double-click} the component or right-click on it and choose
-\"Edit Component\". The Timeline and Slide palettes will both switch to
+double-click the component or right-click on it and choose
+\uicontrol{Edit Component}. The timeline and slide palettes will both switch to
 show the contents of the component.
 
-When you enter a component, a 'breadcrumb' is shown at the top of the
-Timeline palette:
+When you enter a component, a breadcrumb is shown at the top of the
+Timeline palette.
 
 \image Studio-Timeline-Breadcrumb.png
 
-To leave the component and return to the Scene, click on the Scene at
-the front of the breadcrumb.
+To leave the component and return to the scene, click on the scene in the beginning
+of the breadcrumb.
 
 Alternatively, double-click on an element outside the component in the
-rendered scene view; this will switch the Timeline palette as necessary
+rendered scene view; this will switch the timeline palette as necessary
 to select and show that item.
 
 \section2 Hiding Irrelevant Elements
 
 As your scene graph grows in elements you may find yourself annoyed by
 the presence of elements that you almost never edit. The first column
-after the name allows you to mark an element as "shy", indicated by
+after the name allows you to mark an element as shy, indicated by
 \inlineimage Studio-Timeline-Shy.png
 Clicking the button at the top of this column will toggle the visibility
-of element rows marked as "shy".
+of all element rows marked as shy.
 
-\note This is only an editing convenience within the Timeline
+\note This is only an editing convenience within the timeline
 palette, and has no effect on the visibility of elements rendered in the
 scene at runtime.
 
 \section2 Per-Slide Element Visibility
 
 If you have an element that should only appear on one slide, you should
-to create the element as a non-master element on the correct slide. If
+create the element as a non-master element on the correct slide. If
 you have an element that should appear on every slide, you should create
 the element on the master slide. But what if you have an element that
 should appear on a few slides, but not all?
 
 The second column after the name has eyeballs
 \inlineimage Studio-Timeline-Eyeball.png which are used
-to control the 'active' state of an element and all its descendants. To
+to control the active state of an element and all its descendants. To
 cause an element to not appear on only certain slides, place your
-element on the master slide and then 'eyeball it off' on slides where it
+element on the master slide and then eyeball it off on slides where it
 should not be present.
 
 The active state of an element controls more than just visibility.
@@ -167,7 +179,7 @@ Similar to the other columns, clicking the eyeball at the top of the
 column will hide the rows for elements that are eyeballed off on the
 current slide.
 
-\note Unlike the "shy" and "lock" columns, the presence or
+\note Unlike the shy and lock columns, the presence or
 absence of the eyeball changes the runtime behavior of your
 presentation. You may wish to use the eyeball to temporarily hide an
 element during editing, but be sure to re-enable the element if it is
@@ -183,7 +195,7 @@ from being selected.
 
 Similar to the other columns, clicking the lock at the top of the column
 will hide the rows for elements that are locked. Unlike the other
-column - hich take effect per slid - n element that is locked is
+columns, which take effect per slide, an element that is locked is
 locked on every slide.
 
 \note This is only an editing convenience, and has no effect
@@ -191,19 +203,20 @@ on interaction with elements at runtime.
 
 \section2 Copying Object Path
 
-The 'path' to an element is used both in presentation behaviors as well
+The path to an element is used both in presentation behaviors as well
 as by an application's
 \l{file-formats-uia.html#visual-actions}{Visual Actions}. While you could
 type out the name of each ancestor of the element, a more convenient
 option is available.
 
-Right-click on the name of any element and choose \"Copy Object Path\"
+Right-click on the name of any element and choose \uicontrol {Copy Object Path}
 from the context menu. This will put a string on your clipboard like
 \c{Scene.Overlays.Dialogs.Content.preloader}, ready for pasting
-elsewhere. \e{(Note that for visual actions you need to prefix this
+elsewhere.
+\note For visual actions you need to prefix this
 path with the \c{id} of the
 \c{<presentation>} asset in order to
-differentiate it from other possible presentations.)}
+differentiate it from other possible presentations.
 
 \section2 Layers
 
@@ -246,15 +259,17 @@ a data input to control the timeline by clicking the
 \inlineimage datainput-to-timeline-icon-inactive.png
 icon.
 
-An orange colored icon \inlineimage datainput-to-timeline-icon-active.png
-indicates that a data input is currently connected to the timeline. Click the icon to remove the
-data input.
+Orange color indicates which data input is currently connected to the timeline. Click the
+\inlineimage datainput-to-timeline-icon-active.png
+and select \uicontrol None to remove the data input.
+
+\image timeline-datainput.png
 
 \section1 Animation Portion
 
 \image Studio-Timeline-Animation.png
 
-To the right of the scene graph in the Timeline palette is the actual
+To the right of the scene graph in the timeline palette is the actual
 timeline. The time bars for each element control element lifespan. The
 keyframe markers control the timing of animation. The playhead (in red)
 allows the preview of animation effects. The time measure across the top
@@ -263,13 +278,12 @@ coordinates the timing of it all.
 \section2 Zooming In and Out
 
 When working with fast animations you may wish to zoom in to see the
-contents better. The simplest way to do this is with the plus and minus
-keys on the keypad. Pressing and holding these will adjust the time
-scale for the Timeline palette.
-
-Additionally, the bottom of the Timeline palette has a custom scrollbar
-with handles on the edges. Dragging these to make the scroll "thumb"
-smaller will also adjust the time scale.
+contents better. To zoom the timeline, do one of the following:
+\list
+  \li Press \c{Alt + mouse right click} and drag the mouse left/right to zoom in/out.
+  \li Press \c{+} or \c{-} on the keyboard to zoom in/out.
+  \li Use the slider locate in the bottom of the timeline palette
+\endlist
 
 \section2 Setting Playhead Time
 
@@ -279,10 +293,9 @@ playhead will teleport to your mouse.) This is used to set the time for
 a new keyframe, and the effects of dragging the playhead back and forth
 will also preview the effects in the rendered scene view in real time.
 
-To prevent keyframes from being misaligned (and to cater to your
-excellently obsessive nature, shared by most technical artists) you may
+To prevent keyframes from being misaligned, you may
 wish to ensure that the playhead is exactly at a particular time.
-Holding down the \b{shift key} while dragging the playhead will
+Holding down the \c{Shift} key while dragging the playhead will
 cause it to snap to keyframe markers as well as certain notches on the
 time measure.
 
@@ -291,9 +304,9 @@ Use the \c{Timeline Snapping Grid} setting in the
 of notches it snaps to.
 
 As you adjust the time for the playhead you will see the exact time
-displayed above the name column in the scene graph portion of the
+displayed below the scene graph portion of the
 palette. Clicking on these numbers will open the Go To Time palette,
-where you may type in an exact tim - own to the millisecon - o set
+where you may type in an exact time, down to milliseconds, to set
 the playhead to.
 
 \section2 Adjusting Animation
@@ -301,8 +314,8 @@ the playhead to.
 \image Studio-Timeline-Animation-Keyframes.png
 
 Most good visual effects do not "pop" into place, but provide a visual
-transition - even if brief - to help the user understand what happened.
-Animations to the rescue!
+transition, even if brief, to help the user understand what happened.
+This is an example on what you can achieve with animations.
 
 \section3 Creating Keyframes
 
@@ -310,22 +323,22 @@ To animate a property of an element, turn on the
 \l{studio-inspector-palette.html#animating-properties}{animation toggle
 in the Inspector palette}. This will add a new keyframe for that
 property at the current playhead time. If the property is not linked to
-the master slide (as with the Opacity shown in the picture above) the
+the master slide (as with the position shown in the picture above) the
 animation will only be created on the current slide.
 
-To create a new keyframe move the playhead to a new time and then
-either:
+To create a new keyframe, move the playhead to a new time and then
+do one of the following:
 
 \list
 \li
-  ensure that \l{studio-toolbar.html#keyframing}{Autoset Keyframes} is
+  Ensure that \l{studio-toolbar.html#keyframing}{Autoset Keyframes} is
   turned on (via the Toolbar, Timeline menu, or by pressing \c{K}),
   and then change the value of the property (via the Inspector palette
   or dragging the transform of the element), or
 \li
-  change the value of the property and then invoke the
+  Change the value of the property and then invoke the
   \l{studio-menu.html#timeline}{Set Changed Keyframes} command (from the
-  Timeline menu, or the keyboard shortcut \c{F6}).
+  Timeline menu, or the keyboard shortcut \c{Ctrl + Shift + K}).
 \endlist
 
 This will create a new keyframe at the current time. You can drag the
@@ -339,20 +352,18 @@ information, see the page
 
 \section3 Copying Keyframes
 
-Top copy keyframes from one element to another:
+To copy keyframes from one element to another, follow the steps below.
 
 \list 1
 \li
   Select the keyframe(s) to copy on an element.
 \li
-  Right-click on one of the selected keyframes and choose \"Copy
-  Selected Keyframes\".
+  Right-click on one of the selected keyframes and choose \uicontrol {Copy Selected Keyframes}.
 \li
   Position the playhead at the time where the first keyframe should be
   placed.
 \li
-  Right click on the time bar for the element and choose \"Paste
-  Keyframes\".
+  Right click on the time bar for the element and choose \uicontrol{Paste Keyframes}.
 \endlist
 
 \section3 Interpolation
@@ -374,10 +385,10 @@ controls how the value behaves as it approaches the keyframe and the
 \b {Ease Out} setting controls how the value behaves when leaving the
 keyframe.
 
-\e{If you find that you are constantly setting your keyframes from
+\note If you find that you are constantly setting your keyframes from
 Smooth to Linear, or vice-versa, you may wish to change the
 \b{Default Interpolation} setting for new keyframes in the
-\l{studio-menu.html#edit}{Application Preferences}.}
+\l{studio-menu.html#edit}{Application Preferences}.
 
 \section2 Adjusting Time Bars
 
@@ -406,20 +417,18 @@ To set the start or end time for many time bars at once:
   or the \c{]} key to set the end time to the playhead.
 \endlist
 
-\list
-\li
-  All descendant elements will also have their start or end time set to
-  the same value. It is thus common when entering a new slide for the
-  first time to select the scene or active component, set the playhead
-  to a particular time, and then press \c{]} to crop the entire
-  slide to that duration.
-\endlist
+All descendant elements will also have their start or end time set to
+the same value. It is thus common when entering a new slide for the
+first time to select the scene or active component, set the playhead
+to a particular time, and then press \c{]} to crop the entire
+slide to that duration.
+
 
 \section2 Customizing Time Bars
 
 To help you keep track of your assets, Studio allows you to apply custom
-colors and notes to time bars. Right-click on a time bar and choose
-either \b {Change Time Bar Color} or \b {Change Time Bar Text}.
+colors time bars. Right-click on a time bar and choose
+\b {Change Time Bar Color}.
 
 \section2 Playback Control
 
@@ -430,17 +439,17 @@ animations and slide transitions without leaving Studio.
 
 \list
 \li
-  The \b{Rewind} command sets the playhead to time 0.
+  The \uicontrol{Rewind} command sets the playhead to time 0.
 \li
-  The \b{Play} command starts advancing the playhead in realtime,
-  previewing animations on elements. The \b{Play Mode} for the
+  The \uicontrol{Play} command starts advancing the playhead in realtime,
+  previewing animations on elements. The \uicontrol{Play Mode} for the
   current slide is honored, possibly looping or ping-ponging playback,
   or causing Studio to switch to an new slide when the end time for the
   current slide is reached.
 \li
-  The \b{Stop} command stops any playback. Stop replaces \b{Play} when animation is playing.
+  The \uicontrol{Stop} command stops any playback. \uicontrol{Stop} replaces \uicontrol{Play} when animation is playing.
 \li
-  The \b{Fast-forward} command sets the playhead to the timeline end.
+  The \uicontrol{Fast-forward} command sets the playhead to the timeline end.
 \li
   Holding down the space bar temporarily enables playback while held
   down. Releasing the spacebar returns the playhead to its previous

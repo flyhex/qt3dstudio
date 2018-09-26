@@ -105,6 +105,11 @@ ratio of your image, with the image used as the diffuse map on the
 material. Dragging out a font file will create a text element with the
 font set correctly.
 
+\section1 Editing Assets
+
+Double-clicking an asset in the project palette will open the file in the application associated
+by the operating system. \c{.uip} files will open in Qt 3D Studio.
+
 Changes to the asset on disk (for example, editing an image in Photoshop),
 will automatically update inside Studio.
 

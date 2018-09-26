@@ -53,6 +53,7 @@ class CStudioAnimationSystem : public IStudioAnimationSystem,
     TSlideCorePtr m_SlideCore;
     TSlideGraphCorePtr m_SlideGraphCore;
     TAnimationCorePtr m_AnimationCore;
+    TRefreshCallbackFunc m_refreshCallback = nullptr;
 
     bool m_AutoKeyframe;
     // When a property has an animation associated with it, then writes
@@ -114,6 +115,8 @@ public:
     //====================================================================
 
     void SetConsumer(TTransactionConsumerPtr inConsumer) override;
+
+    void setRefreshCallback(TRefreshCallbackFunc func) override;
 
 private:
     void OnAnimationDeleted(Qt3DSDMAnimationHandle inAnimation);

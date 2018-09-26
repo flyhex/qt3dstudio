@@ -418,7 +418,10 @@ inline QT3DSU32 NextIndex(NVConstDataRef<QT3DSU8> inData,
         return NextIndex<QT3DSU32>(inData, idx);
     case NVRenderComponentTypes::QT3DSI32:
         return NextIndex<QT3DSI32>(inData, idx);
+    default:
+        break;
     }
+
     // Invalid index buffer index type.
     QT3DS_ASSERT(false);
     return 0;

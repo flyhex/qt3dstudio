@@ -27,12 +27,8 @@
 **
 ****************************************************************************/
 
-#include "Qt3DSCommonPrecompile.h"
 #include "ImageTimelineItemBinding.h"
 #include "TimelineTranslationManager.h"
-#include "Qt3DSDMHandles.h"
-#include "Doc.h"
-#include "IObjectReferenceHelper.h"
 #include "EmptyTimelineTimebar.h"
 
 using namespace qt3dsdm;

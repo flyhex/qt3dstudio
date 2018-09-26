@@ -272,6 +272,8 @@ EStudioObjectType Qt3DSDMInspectable::GetObjectType()
             return OBJTYPE_PATHANCHORPOINT;
         case ComposerObjectTypes::Lightmaps:
             return OBJTYPE_LIGHTMAPS;
+        default:
+            break;
         }
     }
     return OBJTYPE_UNKNOWN;

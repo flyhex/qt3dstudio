@@ -48,10 +48,12 @@ class ChooseImagePropertyDlg : public QDialog
 
 public:
     explicit ChooseImagePropertyDlg(qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                    bool isRefMaterial = false,
                                     QWidget *parent = 0);
     ~ChooseImagePropertyDlg();
 
     int getSelectedPropertyHandle() const;
+    bool detachMaterial() const;
 
 private:
     Ui::ChooseImagePropertyDlg *m_ui;

@@ -125,7 +125,7 @@ void CPerformImport::DoImportToComposer(Import &import, IComposerEditor &compose
             if (desc.m_Type != ComposerObjectTypes::Material)
                 composer.CreateInstance(desc.m_Id, desc.m_Type, parentId);
             else
-                composer.createMaterial(desc.m_Id, desc.m_Type, parentId);
+                composer.createMaterial(desc, parentId);
         }
     }
 

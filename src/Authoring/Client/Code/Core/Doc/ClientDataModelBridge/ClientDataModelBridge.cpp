@@ -245,6 +245,9 @@ Qt3DSDMInstanceHandle CClientDataModelBridge::CreateAssetInstance(Q3DStudio::CId
     case OBJTYPE_LIGHTMAPS:
         m_DataCore->DeriveInstance(theNewInstance, m_Lightmaps.m_Instance);
         break;
+    default:
+        // Ignore unknown object type
+        break;
     }
 
     m_DataCore->SetInstancePropertyValue(theNewInstance, GetObjectDefinitions().m_Guided.m_GuidProp,
@@ -294,13 +297,18 @@ qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::GetIdProperty()
 {
     return GetObjectDefinitions().m_Guided.m_GuidProp;
 }
-qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::GetTypeProperty()
+qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::GetTypeProperty() const
 {
     return GetObjectDefinitions().m_Typed.m_TypeProp;
 }
-qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::GetSourcePathProperty()
+qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::GetSourcePathProperty() const
 {
     return m_SceneAsset.m_SourcePath;
+}
+
+qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::getSubpresentationProperty() const
+{
+    return m_SceneImage.m_SubPresentation;
 }
 
 bool CClientDataModelBridge::IsInternalProperty(const TCharStr &inPropertyName) const
@@ -855,8 +863,13 @@ CClientDataModelBridge::GetInstance(qt3dsdm::Qt3DSDMInstanceHandle inRoot,
             return CRelativePathTools::FindAssetInstanceByObjectPath(
                 m_Doc, inRoot, thePath, thePathType, theFullResolvedFlag, theObjRefHelper);
         }
-    } break;
     }
+        break;
+    default:
+        // Ignore unknown reference type
+        break;
+    }
+
     return 0;
 }
 // Get the instance handle from the info stored in inValue
@@ -1072,6 +1085,28 @@ CClientDataModelBridge::GetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         return qt3dsdm::get<TDataStrPtr>(theValue)->GetData();
     } else
         return L"";
+}
+
+/**
+ * Get the sub-presentation property value for this instance (only images have a sub-presentation
+ * property)
+ *
+ * @param inInstance instance to check its properties
+ *
+ * @return the sub-presentation property value
+ */
+Q3DStudio::CString
+CClientDataModelBridge::getSubpresentation(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
+{
+    if (inInstance.Valid() && GetObjectType(inInstance) == OBJTYPE_IMAGE) {
+        qt3dsdm::SValue theValue;
+        IPropertySystem *thePropertySystem = m_Doc->GetStudioSystem()->GetPropertySystem();
+        thePropertySystem->GetInstancePropertyValue(inInstance, m_SceneImage.m_SubPresentation,
+                                                    theValue);
+        return qt3dsdm::get<TDataStrPtr>(theValue)->GetData();
+    }
+
+    return L"";
 }
 
 //=============================================================================
@@ -1527,7 +1562,8 @@ CClientDataModelBridge::GetParentInstance(qt3dsdm::Qt3DSDMInstanceHandle inInsta
     }
 }
 
-EStudioObjectType CClientDataModelBridge::GetObjectType(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
+EStudioObjectType
+CClientDataModelBridge::GetObjectType(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     SValue theTypeValue;
     IPropertySystem *thePropertySystem = m_Doc->GetStudioSystem()->GetPropertySystem();
@@ -1836,6 +1872,7 @@ void CClientDataModelBridge::ResetHandlerArguments(Qt3DSDMActionHandle inAction,
                 inAction, theArgMetaData.m_Name, theArgMetaData.m_ArgType,
                 theArgMetaData.GetDataType());
             SValue theValue = theArgMetaData.m_DefaultValue;
+
             switch (theArgMetaData.m_ArgType) {
             case HandlerArgumentType::Event:
                 theValue = 0; // TODO: Hardcode for now. Should query event meta data list.
@@ -1852,13 +1889,18 @@ void CClientDataModelBridge::ResetHandlerArguments(Qt3DSDMActionHandle inAction,
                     theValue = qt3dsdm::TDataStrPtr(new qt3dsdm::CDataStr(
                         thePropertySystem->GetName(theProperties[0]).wide_str()));
                 }
-            } break;
+            }
+                break;
             case HandlerArgumentType::Slide: {
                 std::list<Q3DStudio::CString> theSlideNames;
                 GetSlideNamesOfAction(inAction, theSlideNames);
                 if (theSlideNames.size() > 0)
                     theValue = TDataStrPtr(new CDataStr(*theSlideNames.begin()));
-            } break;
+            }
+                break;
+            default:
+                // Use default value for unknown argument type
+                break;
             }
             theActionCore->SetHandlerArgumentValue(theArgument, theValue.toOldSkool());
         }
