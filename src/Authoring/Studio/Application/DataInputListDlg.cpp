@@ -319,8 +319,16 @@ void CDataInputListDlg::onEditDataInput()
         CDataInputDlg datainputdialog(&di, m_tableContents, this, allowedTypes);
         datainputdialog.exec();
 
-        // insert replaces the previous key - value pair
+        // if we are renaming a datainput, remove the old key - value and
+        // add it again as new entry with new name
+        if (m_currentDataInputName != di->name) {
+            m_dataInputs.remove(m_currentDataInputName);
+            m_currentDataInputName = di->name;
+        }
+
+        // insert replaces the previous key - value pair if existing
         m_dataInputs.insert(m_currentDataInputName, di);
+
         updateButtons();
         updateContents();
 
