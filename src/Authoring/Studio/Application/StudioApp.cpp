@@ -1754,7 +1754,27 @@ QString CStudioApp::getMostRecentProjectParentDir() const
     return parentDirectory;
 }
 
-//=============================================================================
+bool CStudioApp::isQmlStream(const QString &fileName)
+{
+    bool retval = false;
+    if (m_qmlStreamMap.contains(fileName)) {
+        retval = m_qmlStreamMap[fileName];
+    } else {
+        if (!fileName.endsWith(QLatin1String(".qml"))) {
+            retval = false;
+        } else {
+            QQmlApplicationEngine qmlEngine(fileName);
+            if (qmlEngine.rootObjects().size() > 0) {
+                const char *rootClassName = qmlEngine.rootObjects().at(0)
+                                            ->metaObject()->superClass()->className();
+                retval = strcmp(rootClassName, "Q3DStudio::Q3DSQmlBehavior") != 0;
+            }
+        }
+        m_qmlStreamMap.insert(fileName, retval);
+    }
+    return retval;
+}
+
 /**
  * Called by OnLoadDocument, to allow the error reporting to be inserted.
  * Because of the nature of the error reporting, OnLoadDocument has to have

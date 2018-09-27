@@ -147,6 +147,7 @@ private:
 public:
     CMainFrame* m_pMainWnd;
     QWidget *m_lastActiveView = nullptr;
+    QHash<QString, bool> m_qmlStreamMap;
 
     CCore *GetCore();
     CViews *GetViews();
@@ -264,6 +265,8 @@ public:
 
     void setLastActiveView(QWidget *widget) { m_lastActiveView = widget; }
     QWidget *lastActiveView() const { return m_lastActiveView; }
+
+    bool isQmlStream(const QString &fileName);
 };
 
 extern CStudioApp g_StudioApp;

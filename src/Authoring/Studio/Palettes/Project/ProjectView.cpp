@@ -50,7 +50,6 @@
 #include <QtQml/qqmlengine.h>
 #include <QtQml/qqmlfile.h>
 #include <QtQuick/qquickitem.h>
-#include <QtQml/qqmlapplicationengine.h>
 
 ProjectView::ProjectView(const QSize &preferredSize, QWidget *parent) : QQuickWidget(parent)
   , m_ProjectModel(new ProjectFileSystemModel(this))
@@ -369,19 +368,7 @@ bool ProjectView::isPresentation(int row) const
 
 bool ProjectView::isQmlStream(int row) const
 {
-    const QString filePath = m_ProjectModel->filePath(row);
-
-    if (!filePath.endsWith(QLatin1String(".qml")))
-        return false;
-
-    QQmlApplicationEngine qmlEngine(filePath);
-    if (qmlEngine.rootObjects().size() > 0) {
-        const char *rootClassName = qmlEngine.rootObjects().at(0)
-                                    ->metaObject()->superClass()->className();
-        return strcmp(rootClassName, "Q3DStudio::Q3DSQmlBehavior") != 0;
-    } else {
-        return false;
-    }
+    return g_StudioApp.isQmlStream(m_ProjectModel->filePath(row));
 }
 
 bool ProjectView::isRefreshable(int row) const
