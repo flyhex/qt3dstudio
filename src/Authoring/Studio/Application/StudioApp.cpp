@@ -2094,7 +2094,7 @@ void CStudioApp::checkDeletedDatainputs()
     QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle>> *map;
     map = new QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
                                        qt3dsdm::Qt3DSDMPropertyHandle>>;
-    m_core->GetDoc()->UpdateDatainputMap(m_core->GetDoc()->GetActiveRootInstance(), map);
+    m_core->GetDoc()->UpdateDatainputMap(m_core->GetDoc()->GetSceneInstance(), map);
 
     if (!map->empty())
         m_core->GetDispatch()->FireOnUndefinedDatainputsFail(map);
