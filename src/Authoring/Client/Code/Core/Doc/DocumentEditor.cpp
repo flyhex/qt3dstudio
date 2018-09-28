@@ -1929,6 +1929,17 @@ public:
         return "";
     }
 
+    void writeProperty(QFile &file, const QString &name, const QString &value, int indent = 1)
+    {
+        for (int i = 0; i < indent; ++i)
+            file.write("\t");
+        file.write("<Property name=\"");
+        file.write(name.toUtf8().constData());
+        file.write("\">");
+        file.write(value.toUtf8().constData());
+        file.write("</Property>\n");
+    }
+
     void writeProperty(QFile &file, const QString &name, const SValue &value, int indent = 1)
     {
         MemoryBuffer<RawAllocator> tempBuffer;
@@ -1937,14 +1948,8 @@ public:
         tempBuffer.write(0);
 
         if (tempBuffer.size()) {
-            for (int i = 0; i < indent; ++i)
-                file.write("\t");
-            file.write("<Property name=\"");
-            file.write(name.toUtf8().constData());
-            file.write("\">");
-            file.write(QString::fromWCharArray(
-                           (const wchar_t *)tempBuffer.begin()).toUtf8().constData());
-            file.write("</Property>\n");
+            writeProperty(file, name,
+                          QString::fromWCharArray((const wchar_t *)tempBuffer.begin()), indent);
         }
     }
 
@@ -1994,27 +1999,18 @@ public:
                     }
                 }
 
-                if (path.isEmpty() && valid) {
+                if (path.isEmpty() && valid)
                     writeProperty(file, name, value);
-                } else {
-                    file.write("\t<Property name=\"");
-                    file.write(name.toUtf8().constData());
-                    file.write("\">");
-                    file.write(path.toUtf8().constData());
-                    file.write("</Property>\n");
-                }
+                else
+                    writeProperty(file, name, path);
             }
         }
-        file.write("\t<Property name=\"presentation\">");
-        file.write(m_Doc.GetDocumentPath().toUtf8().constData());
-        file.write("</Property>\n");
+
+        writeProperty(file, QStringLiteral("presentation"), m_Doc.GetDocumentPath());
+
         const QFileInfo fileInfo(file);
-        file.write("\t<Property name=\"path\">");
-        file.write(fileInfo.absoluteFilePath().toUtf8().constData());
-        file.write("</Property>\n");
-        file.write("\t<Property name=\"filename\">");
-        file.write(fileInfo.completeBaseName().toUtf8().constData());
-        file.write("</Property>\n");
+        writeProperty(file, QStringLiteral("path"), fileInfo.absoluteFilePath());
+        writeProperty(file, QStringLiteral("filename"), fileInfo.completeBaseName());
 
         QMapIterator<QString, Qt3DSDMInstanceHandle> i(textureHandles);
         while (i.hasNext()) {
