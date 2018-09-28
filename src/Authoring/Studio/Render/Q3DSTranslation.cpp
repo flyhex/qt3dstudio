@@ -606,6 +606,18 @@ struct Q3DSTranslatorDataModelParser
     HANDLE_Q3DS_NAME_PROPERTY                                                           \
     HANDLE_Q3DS_NOTIFY_CHANGES
 
+#define ITERATE_Q3DS_TEXT_PROPERTIES                                                    \
+    HANDLE_Q3DS_STRING_PROPERTY2(Text, TextString, Text)                                \
+    HANDLE_Q3DS_COLOR_PROPERTY2(Text, TextColor, Color)                                 \
+    HANDLE_Q3DS_STRING_PROPERTY(Text, Font)                                             \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Text, Size)                                              \
+    HANDLE_Q3DS_ENUM_PROPERTY2(Text, HorzAlign, HorizontalAlignment, Q3DSTextNode::HorizontalAlignment) \
+    HANDLE_Q3DS_ENUM_PROPERTY2(Text, VertAlign, VerticalAlignment, Q3DSTextNode::VerticalAlignment)     \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Text, Leading)                                           \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Text, Tracking)                                          \
+    HANDLE_Q3DS_NAME_PROPERTY                                                           \
+    HANDLE_Q3DS_NOTIFY_CHANGES
+
 #define HANDLE_CHANGE(x)    \
 {                           \
     changeList.append(x);   \
@@ -1527,6 +1539,62 @@ private:
     bool m_isMaster;
 };
 
+class Q3DSTextTranslator : public Q3DSNodeTranslator
+{
+public:
+    Q3DSTextTranslator(qt3dsdm::Qt3DSDMInstanceHandle instance, Q3DSTextNode &node)
+        : Q3DSNodeTranslator(instance, node)
+    {
+
+    }
+
+    void pushTranslation(Q3DSTranslation &inContext) override
+    {
+        Q3DSNodeTranslator::pushTranslation(inContext);
+
+        Q3DSTextNode &theItem = static_cast<Q3DSTextNode &>(graphObject());
+        Q3DSTranslatorDataModelParser theParser(inContext, instanceHandle());
+        Q3DSPropertyChangeList changeList;
+        ITERATE_Q3DS_TEXT_PROPERTIES
+    }
+
+    bool updateProperty(Q3DSTranslation &inContext,
+                        qt3dsdm::Qt3DSDMInstanceHandle instance,
+                        qt3dsdm::Qt3DSDMPropertyHandle property,
+                        qt3dsdm::SValue &value,
+                        const QString &name) override
+    {
+        bool ret = false;
+        if (Q3DSNodeTranslator::updateProperty(inContext, instance, property, value, name))
+            return true;
+
+        Q3DSPropertyChangeList changeList;
+        Q3DSTextNode &theItem = static_cast<Q3DSTextNode &>(graphObject());
+        if (name == QLatin1String("textstring")) {
+            HANDLE_CHANGE(theItem.setText(value.toQVariant().toString()))
+        } else if (name == QLatin1String("textcolor")) {
+            HANDLE_CHANGE(theItem.setColor(Q3DSValueParser::parseColor(value)))
+        } else if (name == QLatin1String("font")) {
+            HANDLE_CHANGE(theItem.setFont(value.toQVariant().toString()))
+        } else if (name == QLatin1String("size")) {
+            HANDLE_CHANGE(theItem.setSize(value.getData<float>()))
+        } else if (name == QLatin1String("horzalign")) {
+            HANDLE_CHANGE(theItem.setHorizontalAlignment(
+                              Q3DSValueParser::parseEnum<Q3DSTextNode::HorizontalAlignment>(value)))
+        } else if (name == QLatin1String("vertalign")) {
+            HANDLE_CHANGE(theItem.setVerticalAlignment(
+                              Q3DSValueParser::parseEnum<Q3DSTextNode::VerticalAlignment>(value)))
+        } else if (name == QLatin1String("leading")) {
+            HANDLE_CHANGE(theItem.setLeading(value.getData<float>()))
+        } else if (name == QLatin1String("tracking")) {
+            HANDLE_CHANGE(theItem.setTracking(value.getData<float>()))
+        }
+        if (ret)
+            theItem.notifyPropertyChanges(changeList);
+        return ret;
+    }
+};
+
 Q3DSTranslation::Q3DSTranslation(Q3DStudioRenderer &inRenderer)
     : m_studioRenderer(inRenderer)
     , m_doc(*g_StudioApp.GetCore()->GetDoc())
@@ -1790,7 +1858,11 @@ Q3DSGraphObjectTranslator *Q3DSTranslation::createTranslator(
         translator = new Q3DSImageTranslator(instance, *m_presentation->newObject<Q3DSImage>(id));
         break;
     }
-        // TODO: Text, ReferencedMaterial, Alias, Effect, CustomMaterial, RenderPlugin?
+    case qt3dsdm::ComposerObjectTypes::Text: {
+        translator = new Q3DSTextTranslator(instance, *m_presentation->newObject<Q3DSTextNode>(id));
+        break;
+    }
+        // TODO: ReferencedMaterial, Alias, Effect, CustomMaterial, RenderPlugin?
     default:
         break;
     }
