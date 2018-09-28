@@ -421,8 +421,8 @@ QString ProjectFile::createPreview()
 }
 
 void ProjectFile::loadSubpresentationsAndDatainputs(
-                                                QVector<SubPresentationRecord> &subpresentations,
-                                                QMap<QString, CDataInputDialogItem *> &datainputs)
+                    QVector<SubPresentationRecord> &subpresentations,
+                    QMap<QString, CDataInputDialogItem *> &datainputs) const
 {
     if (!m_fileInfo.exists())
         return;

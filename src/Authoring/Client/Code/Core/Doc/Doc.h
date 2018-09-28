@@ -215,7 +215,6 @@ public:
     void LoadDocument(const Qt3DSFile &inDocument);
     void SaveDocument(const Qt3DSFile &inDocument);
     void CreateNewDocument();
-    QString GetDocumentUIAFile(bool master = false);
     // In outMap, returns datainput names found from element control
     // bindings but which are missing from (UIP) datainput list
     void UpdateDatainputMap(

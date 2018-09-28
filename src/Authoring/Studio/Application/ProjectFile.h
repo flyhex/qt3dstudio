@@ -48,7 +48,7 @@ public:
     void initProjectFile(const QString &presPath);
     void loadSubpresentationsAndDatainputs(
             QVector<SubPresentationRecord> &subpresentations,
-            QMap<QString, CDataInputDialogItem *> &datainputs);
+            QMap<QString, CDataInputDialogItem *> &datainputs) const;
     void writePresentationId(const QString &id, const QString &src = {});
     void updateDocPresentationId();
     void addPresentationNode(const QString &uip, const QString &pId = {});

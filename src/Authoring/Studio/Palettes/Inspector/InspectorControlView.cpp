@@ -174,7 +174,9 @@ void InspectorControlView::onFilesChanged(
                 }
             } else if (record.m_ModificationType == Q3DStudio::FileModificationType::Modified
                        && record.m_File.toQString()
-                       == g_StudioApp.GetCore()->GetDoc()->GetDocumentUIAFile(false)) {
+                       == g_StudioApp.GetCore()->getProjectFile().getProjectFilePath()) {
+                g_StudioApp.GetCore()->getProjectFile().loadSubpresentationsAndDatainputs(
+                                g_StudioApp.m_subpresentations, g_StudioApp.m_dataInputDialogItems);
                 m_inspectorControlModel->refreshRenderables();
             }
         }
