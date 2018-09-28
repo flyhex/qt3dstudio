@@ -1929,7 +1929,7 @@ public:
         return "";
     }
 
-    void writeProperty(QFile &file, const TCharStr &name, const SValue &value, int indent = 1)
+    void writeProperty(QFile &file, const QString &name, const SValue &value, int indent = 1)
     {
         MemoryBuffer<RawAllocator> tempBuffer;
         WCharTWriter writer(tempBuffer);
@@ -1940,12 +1940,25 @@ public:
             for (int i = 0; i < indent; ++i)
                 file.write("\t");
             file.write("<Property name=\"");
-            file.write(QString::fromWCharArray(name.wide_str()).toUtf8().constData());
+            file.write(name.toUtf8().constData());
             file.write("\">");
             file.write(QString::fromWCharArray(
                            (const wchar_t *)tempBuffer.begin()).toUtf8().constData());
             file.write("</Property>\n");
         }
+    }
+
+    bool isSaveableMaterialProperty(const QString& name) {
+        return name != QLatin1String("starttime")
+                && name != QLatin1String("endtime")
+                && name != QLatin1String("controlledproperty")
+                && name != QLatin1String("eyeball")
+                && name != QLatin1String("shy")
+                && name != QLatin1String("locked")
+                && name != QLatin1String("id")
+                && name != QLatin1String("fileid")
+                && name != QLatin1String("timebarcolor")
+                && name != QLatin1String("timebartext");
     }
 
     void saveMaterial(Qt3DSDMInstanceHandle instance, QFile &file)
@@ -1957,20 +1970,10 @@ public:
         qt3dsdm::TPropertyHandleList propList;
         m_PropertySystem.GetAggregateInstanceProperties(instance, propList);
         for (auto &prop : propList) {
-            const auto name = m_PropertySystem.GetName(prop);
+            const auto name = QString::fromWCharArray(m_PropertySystem.GetName(prop).wide_str());
 
-            if (name == L"starttime"
-                    || name == L"endtime"
-                    || name == L"controlledproperty"
-                    || name == L"eyeball"
-                    || name == L"shy"
-                    || name == L"locked"
-                    || name == L"id"
-                    || name == L"fileid"
-                    || name == L"timebarcolor"
-                    || name == L"timebartext") {
+            if (!isSaveableMaterialProperty(name))
                 continue;
-            }
 
             if (m_AnimationSystem.IsPropertyAnimated(instance, prop))
                 continue;
@@ -1984,7 +1987,7 @@ public:
                     SLong4 guid = get<qt3dsdm::SLong4>(value);
                     if (guid.Valid()) {
                         auto ref = m_Bridge.GetInstanceByGUID(guid);
-                        textureHandles[QString::fromWCharArray(name.wide_str())] = ref;
+                        textureHandles[name] = ref;
                         path = m_Bridge.GetSourcePath(ref).toQString();
                     } else {
                         valid = false;
@@ -1995,7 +1998,7 @@ public:
                     writeProperty(file, name, value);
                 } else {
                     file.write("\t<Property name=\"");
-                    file.write(QString::fromWCharArray(name.wide_str()).toUtf8().constData());
+                    file.write(name.toUtf8().constData());
                     file.write("\">");
                     file.write(path.toUtf8().constData());
                     file.write("</Property>\n");
@@ -2023,20 +2026,11 @@ public:
             propList.clear();
             m_PropertySystem.GetAggregateInstanceProperties(handle, propList);
             for (auto &prop : propList) {
-                const auto name = m_PropertySystem.GetName(prop);
+                const auto name = QString::fromWCharArray(
+                            m_PropertySystem.GetName(prop).wide_str());
 
-                if (name == L"starttime"
-                        || name == L"endtime"
-                        || name == L"controlledproperty"
-                        || name == L"eyeball"
-                        || name == L"shy"
-                        || name == L"locked"
-                        || name == L"id"
-                        || name == L"fileid"
-                        || name == L"timebarcolor"
-                        || name == L"timebartext") {
+                if (!isSaveableMaterialProperty(name))
                     continue;
-                }
 
                 if (m_AnimationSystem.IsPropertyAnimated(handle, prop))
                     continue;
@@ -2213,18 +2207,8 @@ public:
         while (i.hasNext()) {
             i.next();
 
-            if (i.key() == QLatin1String("starttime")
-                    || i.key() == QLatin1String("endtime")
-                    || i.key() == QLatin1String("controlledproperty")
-                    || i.key() == QLatin1String("eyeball")
-                    || i.key() == QLatin1String("shy")
-                    || i.key() == QLatin1String("locked")
-                    || i.key() == QLatin1String("id")
-                    || i.key() == QLatin1String("fileid")
-                    || i.key() == QLatin1String("timebarcolor")
-                    || i.key() == QLatin1String("timebartext")) {
+            if (!isSaveableMaterialProperty(i.key()))
                 continue;
-            }
 
             TCharStr propName(i.key().toStdWString().c_str());
             Q3DStudio::CString propString = Q3DStudio::CString::fromQString(i.value());
@@ -2382,10 +2366,44 @@ public:
 
     void copyMaterialProperties(Qt3DSDMInstanceHandle src, Qt3DSDMInstanceHandle dst) override
     {
-        const auto srcSlide = m_Bridge.GetOrCreateGraphRoot(src);
-        const auto dstSlide = m_Bridge.GetOrCreateGraphRoot(dst);
+        const auto srcSlide = m_SlideSystem.GetApplicableSlide(src);
+        const auto dstSlide = m_SlideSystem.GetApplicableSlide(dst);
         const auto name = GetName(dst);
-        CopyProperties(srcSlide, src, dstSlide, dst);
+        SValue value;
+        qt3dsdm::TPropertyHandleList propList;
+        m_PropertySystem.GetAggregateInstanceProperties(src, propList);
+
+        for (auto &prop : propList) {
+            const auto name = QString::fromWCharArray(m_PropertySystem.GetName(prop).wide_str());
+
+            if (!isSaveableMaterialProperty(name))
+                continue;
+
+            TInstanceHandle srcChild;
+            m_PropertySystem.GetInstancePropertyValue(src, prop, value);
+            if (!value.empty() && value.getType() == DataModelDataType::Long4) {
+                SLong4 guid = get<qt3dsdm::SLong4>(value);
+                if (guid.Valid()) {
+                    srcChild = m_Bridge.GetInstanceByGUID(guid);
+                    const auto path = std::make_shared<CDataStr>(m_Bridge.GetSourcePath(srcChild));
+                    SetInstancePropertyValue(dst, prop, path);
+                }
+            } else {
+                m_PropertySystem.SetInstancePropertyValue(dst, prop, value);
+            }
+
+            TInstanceHandle dstChild;
+            m_PropertySystem.GetInstancePropertyValue(dst, prop, value);
+            if (!value.empty() && value.getType() == DataModelDataType::Long4) {
+                SLong4 guid = get<qt3dsdm::SLong4>(value);
+                if (guid.Valid())
+                    dstChild = m_Bridge.GetInstanceByGUID(guid);
+            }
+
+            if (srcChild.Valid() && dstChild.Valid())
+                CopyProperties(srcSlide, srcChild, dstSlide, dstChild);
+        }
+
         SetName(dst, name);
     }
 

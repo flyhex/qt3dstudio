@@ -144,6 +144,7 @@ struct SSlideSystem : public ISlideSystem
     Qt3DSDMInstanceHandle GetSlideSelectedInstance(Qt3DSDMSlideHandle inSlide) const override;
     void SetSlideSelectedInstance(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance) override;
 
+    Qt3DSDMSlideHandle GetApplicableSlide(Qt3DSDMInstanceHandle inHandle) override;
     Qt3DSDMSlideHandle GetApplicableSlide(Qt3DSDMInstanceHandle inHandle,
                                                  Qt3DSDMPropertyHandle inProperty) override;
 
