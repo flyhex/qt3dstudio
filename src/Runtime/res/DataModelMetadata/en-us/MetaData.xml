@@ -392,6 +392,7 @@
         </RenderPlugin>
         <Scene>
                 <Property name="name" formalName="Name" type="String" default="Scene" hidden="True" />
+                <Property name="eyeball" formalName="Visible" description="Item visibility" type="Boolean" default="True" hidden="True" controllable="False" />
                 <Property name="bgcolorenable" formalName="Use Background" description="Clear the contents to a solid color\nbefore each frame?" type="Boolean" default="True" />
                 <Property name="backgroundcolor" formalName="Background Color" description="Color to use for the background" type="Color" animatable="False" />
                 <Event name="onPressureDown" category="Gesture" />
