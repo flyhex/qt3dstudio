@@ -175,7 +175,6 @@ void CStartupDlg::paintEvent(QPaintEvent *event)
 
     m_palette = new QPalette;
     QPixmap pic = QPixmap(":/startup/open_dialog.png");
-    pic.setDevicePixelRatio(devicePixelRatio());
     m_palette->setBrush(QPalette::Window, pic);
     setPalette(*m_palette);
     resize(pic.size());
