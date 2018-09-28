@@ -1175,7 +1175,17 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
             IObjectReferenceHelper *objRefHelper = doc->GetDataModelObjectReferenceHelper();
             if (objRefHelper) {
                 qt3dsdm::Qt3DSDMInstanceHandle refInstance = objRefHelper->Resolve(value, instance);
-                element->m_value = objRefHelper->LookupObjectFormalName(refInstance).toQString();
+                QString refName = objRefHelper->LookupObjectFormalName(refInstance).toQString();
+                if (bridge->IsReferencedMaterialInstance(instance) && !refName.isEmpty()) {
+                    // get the material's object name (parent)
+                    auto parentInstance = bridge->GetParentInstance(refInstance);
+                    qt3dsdm::SValue vParent;
+                    propertySystem->GetInstancePropertyValue(parentInstance,
+                                        bridge->GetObjectDefinitions().m_Named.m_NameProp, vParent);
+                    QString parentName = qt3dsdm::get<QString>(vParent);
+                    refName.append(QLatin1String(" (") + parentName + QLatin1String(")"));
+                }
+                element->m_value = refName;
             }
         }
         break;

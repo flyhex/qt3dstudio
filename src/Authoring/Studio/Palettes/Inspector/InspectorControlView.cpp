@@ -251,10 +251,8 @@ QString InspectorControlView::titleText() const
 
 bool InspectorControlView::isRefMaterial(int instance) const
 {
-    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-
-    return doc->GetStudioSystem()->GetClientDataModelBridge()->GetObjectType(instance)
-           == OBJTYPE_REFERENCEDMATERIAL;
+    auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
+    return bridge->IsReferencedMaterialInstance(instance);
 }
 
 bool InspectorControlView::canLinkProperty(int instance, int handle) const
@@ -589,6 +587,7 @@ QObject *InspectorControlView::showMaterialReference(int handle, int instance, c
             Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Property"))
                     ->SetInstancePropertyValue(instance, handle, objRef);
         }
+       m_matRefListWidget->hide();
     });
 
     return m_matRefListWidget;
