@@ -667,6 +667,11 @@ int ProjectFileSystemModel::rowForPath(const QString &path) const
     return -1;
 }
 
+void ProjectFileSystemModel::updateIcons()
+{
+    Q_EMIT dataChanged(index(0, 0), index(rowCount() - 1, 0), {Qt::DecorationRole});
+}
+
 void ProjectFileSystemModel::collapse(int row)
 {
     Q_ASSERT(row >= 0 && row < m_items.size());
@@ -729,11 +734,14 @@ QString ProjectFileSystemModel::getIconName(const QString &path) const
         EStudioObjectType type = getIconType(path);
 
         if (type == OBJTYPE_PRESENTATION) {
-            Q3DStudio::CString documentPath
-                    = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetPath();
-            documentPath.Replace("\\", "/");
-            if (path == documentPath.toQString()) // current open presentation
+            const bool isCurrent = isCurrentPresentation(path);
+            const bool isInitial = isInitialPresentation(path);
+            if (isInitial) {
+                iconName = isCurrent ? QStringLiteral("initial_used.png")
+                                     : QStringLiteral("initial_notUsed.png");
+            } else if (isCurrent) {
                 iconName = QStringLiteral("presentation_edit.png");
+            }
         }
 
         if (iconName.isEmpty()) {
@@ -924,4 +932,29 @@ void ProjectFileSystemModel::addPathsToReferences(const QString &projectPath,
         path = parentPath;
         parentPath = QFileInfo(path).path();
     } while (path != projectPath && parentPath != path);
+}
+
+bool ProjectFileSystemModel::isCurrentPresentation(const QString &path) const
+{
+    return path == g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetPath().toQString()
+            .replace(QLatin1String("\\"), QLatin1String("/"));
+}
+
+bool ProjectFileSystemModel::isInitialPresentation(const QString &path) const
+{
+    QString checkId = presentationId(path);
+
+    return !checkId.isEmpty()
+            && checkId == g_StudioApp.GetCore()->getProjectFile().initialPresentation();
+}
+
+QString ProjectFileSystemModel::presentationId(const QString &path) const
+{
+    QString presId;
+    if (isCurrentPresentation(path))
+        presId = g_StudioApp.GetCore()->GetDoc()->getPresentationId();
+    else
+        presId = g_StudioApp.getRenderableId(QFileInfo(path).absoluteFilePath());
+
+    return presId;
 }

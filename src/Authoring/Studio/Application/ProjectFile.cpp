@@ -125,8 +125,10 @@ void ProjectFile::addPresentationNode(const QString &pPath, const QString &pId)
         QString presentationId = pId.isEmpty()
                 ? ensureUniquePresentationId(QFileInfo(pPath).completeBaseName()) : pId;
 
-        if (assetsElem.attribute(QStringLiteral("initial")).isEmpty())
+        if (assetsElem.attribute(QStringLiteral("initial")).isEmpty()) {
             assetsElem.setAttribute(QStringLiteral("initial"), presentationId);
+            m_initialPresentation = presentationId;
+        }
 
         // add the presentation node
         bool isQml = pPath.endsWith(QLatin1String(".qml"));
@@ -221,8 +223,10 @@ void ProjectFile::writePresentationId(const QString &id, const QString &src)
                 oldId = pqElem.attribute(QStringLiteral("id"));
                 pqElem.setAttribute(QStringLiteral("id"), theId);
 
-                if (assetsElem.attribute(QStringLiteral("initial")) == oldId)
+                if (assetsElem.attribute(QStringLiteral("initial")) == oldId) {
                     assetsElem.setAttribute(QStringLiteral("initial"), theId);
+                    m_initialPresentation = theId;
+                }
                 break;
             }
         }
@@ -281,9 +285,12 @@ void ProjectFile::writePresentationId(const QString &id, const QString &src)
 }
 
 // Set the doc PresentationId from the project file, this is called after a document is loaded.
-// If there is no project file, does nothing.
+// If there is no project file, it simply clears the id.
 void ProjectFile::updateDocPresentationId()
 {
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    doc->setPresentationId({});
+
     if (!m_fileInfo.exists())
         return;
 
@@ -294,7 +301,6 @@ void ProjectFile::updateDocPresentationId()
         return;
     }
 
-    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     QXmlStreamReader reader(&file);
     reader.setNamespaceProcessing(false);
 
@@ -421,8 +427,8 @@ QString ProjectFile::createPreview()
 }
 
 void ProjectFile::loadSubpresentationsAndDatainputs(
-                    QVector<SubPresentationRecord> &subpresentations,
-                    QMap<QString, CDataInputDialogItem *> &datainputs) const
+        QVector<SubPresentationRecord> &subpresentations,
+        QMap<QString, CDataInputDialogItem *> &datainputs)
 {
     if (!m_fileInfo.exists())
         return;
@@ -436,8 +442,13 @@ void ProjectFile::loadSubpresentationsAndDatainputs(
     doc.setContent(&file);
     file.close();
 
+    m_initialPresentation = g_StudioApp.GetCore()->GetDoc()->getPresentationId();
+
     QDomElement assetsElem = doc.documentElement().firstChildElement(QStringLiteral("assets"));
     if (!assetsElem.isNull()) {
+        QString initial = assetsElem.attribute(QStringLiteral("initial"));
+        if (!initial.isEmpty())
+            m_initialPresentation = initial;
         for (QDomElement p = assetsElem.firstChild().toElement(); !p.isNull();
             p = p.nextSibling().toElement()) {
             if ((p.nodeName() == QLatin1String("presentation")
@@ -447,7 +458,6 @@ void ProjectFile::loadSubpresentationsAndDatainputs(
                 QString argsOrSrc = p.attribute(QStringLiteral("src"));
                 if (argsOrSrc.isNull())
                     argsOrSrc = p.attribute(QStringLiteral("args"));
-
                 subpresentations.push_back(
                             SubPresentationRecord(p.nodeName(), p.attribute("id"), argsOrSrc));
             } else if (p.nodeName() == QLatin1String("dataInput")) {
@@ -609,6 +619,31 @@ void ProjectFile::getPresentations(const QString &inUiaPath,
                                               argsOrSrc));
         } else if (reader.name() == QLatin1String("assets") && !reader.isStartElement()) {
             break; // reached end of <assets>
+        }
+    }
+}
+
+void ProjectFile::setInitialPresentation(const QString &initialId)
+{
+    if (!initialId.isEmpty() && m_initialPresentation != initialId) {
+        m_initialPresentation = initialId;
+
+        ensureProjectFile();
+
+        QFile file(getProjectFilePath());
+        file.open(QIODevice::ReadWrite);
+        QDomDocument domDoc;
+        domDoc.setContent(&file);
+
+        QDomElement assetsElem
+                = domDoc.documentElement().firstChildElement(QStringLiteral("assets"));
+        if (!assetsElem.isNull() && assetsElem.attribute(QStringLiteral("initial"))
+                != m_initialPresentation) {
+            assetsElem.setAttribute(QStringLiteral("initial"), m_initialPresentation);
+
+            // Rewrite project file
+            file.resize(0);
+            file.write(domDoc.toByteArray(4));
         }
     }
 }

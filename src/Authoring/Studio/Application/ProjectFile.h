@@ -48,7 +48,7 @@ public:
     void initProjectFile(const QString &presPath);
     void loadSubpresentationsAndDatainputs(
             QVector<SubPresentationRecord> &subpresentations,
-            QMap<QString, CDataInputDialogItem *> &datainputs) const;
+            QMap<QString, CDataInputDialogItem *> &datainputs);
     void writePresentationId(const QString &id, const QString &src = {});
     void updateDocPresentationId();
     void addPresentationNode(const QString &uip, const QString &pId = {});
@@ -65,10 +65,14 @@ public:
     static void getPresentations(const QString &inUiaPath,
                                  QVector<SubPresentationRecord> &outSubpresentations,
                                  const QString &excludePresentationSrc = {});
+    QString initialPresentation() const { return m_initialPresentation; }
+    void setInitialPresentation(const QString &initialId);
+
 private:
     QString ensureUniquePresentationId(const QString &id) const;
 
     QFileInfo m_fileInfo; // uia file info
+    QString m_initialPresentation;
 };
 
 #endif // PROJECTFILE_H

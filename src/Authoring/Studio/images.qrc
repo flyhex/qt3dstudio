@@ -272,6 +272,10 @@
         <file>images/Toggle-HideShowControlled.png</file>
         <file>images/Toggle-HideShowControlled@2x.png</file>
         <file>images/welcomedialog/laptop.png</file>
+        <file>images/initial_notUsed.png</file>
+        <file>images/initial_notUsed@2x.png</file>
+        <file>images/initial_used.png</file>
+        <file>images/initial_used@2x.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="open_dialog.png">images/open_dialog.png</file>

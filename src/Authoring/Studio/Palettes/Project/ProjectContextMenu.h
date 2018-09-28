@@ -51,6 +51,7 @@ private Q_SLOTS:
     void handleAddMaterial();
     void handleEditMaterial();
     void handleDuplicate();
+    void handleInitialPresentation();
 
 private:
     ProjectView *m_view;

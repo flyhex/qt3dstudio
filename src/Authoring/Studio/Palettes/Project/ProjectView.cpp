@@ -295,10 +295,7 @@ void ProjectView::openPresentation(int row)
 
 bool ProjectView::isCurrentPresentation(int row) const
 {
-    QString docPath = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetPath().toQString()
-            .replace(QLatin1String("\\"), QLatin1String("/"));
-
-    return m_ProjectModel->filePath(row) == docPath;
+    return m_ProjectModel->isCurrentPresentation(m_ProjectModel->filePath(row));
 }
 
 void ProjectView::editPresentationId(int row)
@@ -389,6 +386,28 @@ bool ProjectView::isMaterialFolder(int row) const
 bool ProjectView::isMaterialData(int row) const
 {
     return m_ProjectModel->filePath(row).endsWith(QLatin1String(".matdata"));
+}
+
+bool ProjectView::isInitialPresentation(int row) const
+{
+    return m_ProjectModel->isInitialPresentation(m_ProjectModel->filePath(row));
+}
+
+QString ProjectView::presentationId(int row) const
+{
+    return m_ProjectModel->presentationId(m_ProjectModel->filePath(row));
+}
+
+void ProjectView::setInitialPresentation(int row)
+{
+    QString setId = presentationId(row);
+
+    // If presentation id is empty, it means .uip is not part of the project. It shouldn't be
+    // possible to set initial presentation in that case.
+    Q_ASSERT(!setId.isEmpty());
+
+    g_StudioApp.GetCore()->getProjectFile().setInitialPresentation(setId);
+    m_ProjectModel->updateIcons();
 }
 
 bool ProjectView::isRefreshable(int row) const

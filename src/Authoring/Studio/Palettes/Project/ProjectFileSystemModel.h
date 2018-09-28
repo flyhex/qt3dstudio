@@ -63,10 +63,14 @@ public:
 
     QString filePath(int row) const;
     bool isRefreshable(int row) const;
+    bool isCurrentPresentation(const QString &path) const;
+    bool isInitialPresentation(const QString &path) const;
+    QString presentationId(const QString &path) const;
 
     void updateReferences();
     Q3DStudio::DocumentEditorFileType::Enum assetTypeForRow(int row);
     int rowForPath(const QString &path) const;
+    void updateIcons();
 
     Q_INVOKABLE void expand(int row);
     Q_INVOKABLE void collapse(int row);
