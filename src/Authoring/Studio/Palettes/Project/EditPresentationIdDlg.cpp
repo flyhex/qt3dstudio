@@ -45,7 +45,9 @@ EditPresentationIdDlg::EditPresentationIdDlg(const QString &src, QWidget *parent
 void EditPresentationIdDlg::accept()
 {
     QString newId = m_ui->lineEditPresentationId->text();
-    if (!newId.isEmpty() && newId != m_presentationId) {
+    if (newId.isEmpty()) {
+        g_StudioApp.showPresentationIdEmptyWarning();
+    } else if (newId != m_presentationId) {
         if (!g_StudioApp.GetCore()->getProjectFile().isUniquePresentationId(newId, m_src)) {
             g_StudioApp.showPresentationIdUniqueWarning();
         } else {

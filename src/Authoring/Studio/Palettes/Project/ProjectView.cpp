@@ -214,13 +214,6 @@ void ProjectView::assetImportInContext(int row)
 void ProjectView::OnNewPresentation()
 {
     rebuild();
-
-    // expand presentation folder by default (if it exists)
-    QTimer::singleShot(0, [this]() {
-        QString path = g_StudioApp.GetCore()->getProjectFile().getProjectPath()
-                       + QStringLiteral("/presentations");
-        m_ProjectModel->expand(m_ProjectModel->rowForPath(path));
-    });
 }
 
 void ProjectView::OnOpenDocument(const Qt3DSFile &inFilename, bool inSucceeded)
@@ -407,7 +400,7 @@ void ProjectView::setInitialPresentation(int row)
     Q_ASSERT(!setId.isEmpty());
 
     g_StudioApp.GetCore()->getProjectFile().setInitialPresentation(setId);
-    m_ProjectModel->updateIcons();
+    m_ProjectModel->updateRoles({Qt::DecorationRole});
 }
 
 bool ProjectView::isRefreshable(int row) const

@@ -83,7 +83,7 @@ public:
     bool isGroup(int row) const;
     bool isRefreshable(int row) const;
 
-    bool isPresentation(int row) const;
+    Q_INVOKABLE bool isPresentation(int row) const;
     bool isQmlStream(int row) const;
     bool isCurrentPresentation(int row) const;
     bool isMaterialFolder(int row) const;
@@ -92,7 +92,7 @@ public:
     QString presentationId(int row) const;
     void setInitialPresentation(int row);
     void openPresentation(int row);
-    void editPresentationId(int row);
+    Q_INVOKABLE void editPresentationId(int row);
 
     // CPresentationChangeListener
     void OnNewPresentation() override;

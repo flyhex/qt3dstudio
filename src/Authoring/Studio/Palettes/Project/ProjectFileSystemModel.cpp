@@ -27,6 +27,7 @@
 ****************************************************************************/
 #include "qtAuthoring-config.h"
 #include <QtCore/qset.h>
+#include <QtCore/qtimer.h>
 
 #include "PresentationFile.h"
 #include "Qt3DSCommonPrecompile.h"
@@ -53,6 +54,8 @@ ProjectFileSystemModel::ProjectFileSystemModel(QObject *parent) : QAbstractListM
     connect(m_model, &QAbstractItemModel::rowsInserted, this, &ProjectFileSystemModel::modelRowsInserted);
     connect(m_model, &QAbstractItemModel::rowsAboutToBeRemoved, this, &ProjectFileSystemModel::modelRowsRemoved);
     connect(m_model, &QAbstractItemModel::layoutChanged, this, &ProjectFileSystemModel::modelLayoutChanged);
+    connect(&g_StudioApp.GetCore()->getProjectFile(), &ProjectFile::presentationIdChanged,
+            this, &ProjectFileSystemModel::handlePresentationIdChange);
 }
 
 QHash<int, QByteArray> ProjectFileSystemModel::roleNames() const
@@ -63,6 +66,8 @@ QHash<int, QByteArray> ProjectFileSystemModel::roleNames() const
     modelRoleNames.insert(IsReferencedRole, "_isReferenced");
     modelRoleNames.insert(DepthRole, "_depth");
     modelRoleNames.insert(ExpandedRole, "_expanded");
+    modelRoleNames.insert(FileIdRole, "_fileId");
+    modelRoleNames.insert(ExtraIconRole, "_extraIcon");
     return modelRoleNames;
 }
 
@@ -102,6 +107,28 @@ QVariant ProjectFileSystemModel::data(const QModelIndex &index, int role) const
 
     case ExpandedRole:
         return item.expanded;
+
+    case FileIdRole: {
+        const QString path = item.index.data(QFileSystemModel::FilePathRole).toString();
+        EStudioObjectType iconType = getIconType(path);
+        if (iconType == OBJTYPE_PRESENTATION || iconType == OBJTYPE_QML_STREAM)
+            return presentationId(path);
+        else
+            return {};
+    }
+
+    case ExtraIconRole: {
+        const QString path = item.index.data(QFileSystemModel::FilePathRole).toString();
+        EStudioObjectType iconType = getIconType(path);
+        if (iconType == OBJTYPE_PRESENTATION || iconType == OBJTYPE_QML_STREAM) {
+            if (presentationId(path).isEmpty())
+                return QStringLiteral("warning.png");
+            else
+                return {};
+        } else {
+            return {};
+        }
+    }
 
     default:
         return m_model->data(item.index, role);
@@ -179,8 +206,7 @@ void ProjectFileSystemModel::updateReferences()
 
     m_references.insert(projectPath);
 
-    Q_EMIT dataChanged(index(0, 0), index(rowCount() - 1, 0), {IsReferencedRole,
-                                                               Qt::DecorationRole});
+    updateRoles({IsReferencedRole, Qt::DecorationRole});
 }
 
 Q3DStudio::DocumentEditorFileType::Enum ProjectFileSystemModel::assetTypeForRow(int row)
@@ -220,6 +246,10 @@ Q3DStudio::DocumentEditorFileType::Enum ProjectFileSystemModel::assetTypeForRow(
 void ProjectFileSystemModel::setRootPath(const QString &path)
 {
     setRootIndex(m_model->setRootPath(path));
+
+    // Open the presentations folder by default
+    connect(this, &ProjectFileSystemModel::dataChanged,
+            this, &ProjectFileSystemModel::asyncExpandPresentations);
 }
 
 void ProjectFileSystemModel::setRootIndex(const QModelIndex &rootIndex)
@@ -667,9 +697,10 @@ int ProjectFileSystemModel::rowForPath(const QString &path) const
     return -1;
 }
 
-void ProjectFileSystemModel::updateIcons()
+void ProjectFileSystemModel::updateRoles(const QVector<int> &roles, int startRow, int endRow)
 {
-    Q_EMIT dataChanged(index(0, 0), index(rowCount() - 1, 0), {Qt::DecorationRole});
+    Q_EMIT dataChanged(index(startRow, 0),
+                       index(endRow < 0 ? rowCount() - 1 : endRow, 0), roles);
 }
 
 void ProjectFileSystemModel::collapse(int row)
@@ -932,6 +963,27 @@ void ProjectFileSystemModel::addPathsToReferences(const QString &projectPath,
         path = parentPath;
         parentPath = QFileInfo(path).path();
     } while (path != projectPath && parentPath != path);
+}
+
+void ProjectFileSystemModel::handlePresentationIdChange(const QString &path, const QString &id)
+{
+    int row = rowForPath(QDir::cleanPath(
+                             QDir(g_StudioApp.GetCore()->GetDoc()->GetCore()->getProjectFile()
+                                  .getProjectPath()).absoluteFilePath(path)));
+    updateRoles({FileIdRole, ExtraIconRole}, row, row);
+}
+
+void ProjectFileSystemModel::asyncExpandPresentations()
+{
+    disconnect(this, &ProjectFileSystemModel::dataChanged,
+               this, &ProjectFileSystemModel::asyncExpandPresentations);
+
+    // expand presentation folder by default (if it exists).
+    QTimer::singleShot(0, [this]() {
+        QString path = g_StudioApp.GetCore()->getProjectFile().getProjectPath()
+                       + QStringLiteral("/presentations");
+        expand(rowForPath(path));
+    });
 }
 
 bool ProjectFileSystemModel::isCurrentPresentation(const QString &path) const

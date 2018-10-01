@@ -210,7 +210,7 @@ public:
     void OnLoadDocumentCatcher(const Qt3DSFile &inLocation);
     void OnFileOpen();
     QString OnProjectNew();
-    QString OnFileNew();
+    void OnFileNew();
     bool IsAuthorZoom() const;
     bool isOnProgress() const;
     void SetAuthorZoom(bool inZoom);
@@ -220,6 +220,7 @@ public:
     void toggleShy();
     void toggleLocked();
     void showPresentationIdUniqueWarning();
+    void showPresentationIdEmptyWarning();
     void showInvalidFilenameWarning();
     void checkDeletedDatainputs();
     void saveDataInputsToProjectFile();

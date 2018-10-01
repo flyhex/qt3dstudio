@@ -38,8 +38,10 @@ class CString;
 struct SubPresentationRecord;
 class CDataInputDialogItem;
 
-class ProjectFile
+class ProjectFile : public QObject
 {
+    Q_OBJECT
+
 public:
     ProjectFile();
 
@@ -67,6 +69,9 @@ public:
                                  const QString &excludePresentationSrc = {});
     QString initialPresentation() const { return m_initialPresentation; }
     void setInitialPresentation(const QString &initialId);
+
+Q_SIGNALS:
+    void presentationIdChanged(const QString &path, const QString &id);
 
 private:
     QString ensureUniquePresentationId(const QString &id) const;

@@ -1854,23 +1854,13 @@ QString CStudioApp::OnProjectNew()
  * Create a new presentation
  * this creates a .uip file
  */
-QString CStudioApp::OnFileNew()
+void CStudioApp::OnFileNew()
 {
     if (PerformSavePrompt()) {
         Qt3DSFile theFile = m_dialogs->GetNewDocumentChoice(getMostRecentDirectory(), false);
-        if (theFile.GetPath() != "") {
-            if (!m_core->OnNewDocument(theFile, false)) {
-                showInvalidFilenameWarning();
-            } else {
-                m_core->getProjectFile().loadSubpresentationsAndDatainputs(m_subpresentations,
-                                                                           m_dataInputDialogItems);
-                getRenderer().RegisterSubpresentations(m_subpresentations);
-            }
-        } else {
-            return theFile.GetName().toQString();
-        }
+        if (!theFile.GetPath().IsEmpty() && !m_core->OnNewDocument(theFile, false))
+            showInvalidFilenameWarning();
     }
-    return QString();
 }
 
 bool CStudioApp::IsAuthorZoom() const
@@ -2109,6 +2099,13 @@ void CStudioApp::showPresentationIdUniqueWarning()
 {
     m_dialogs->DisplayMessageBox(tr("Warning"),
                                  tr("Presentation Id must be unique."),
+                                 Qt3DSMessageBox::ICON_WARNING, false);
+}
+
+void CStudioApp::showPresentationIdEmptyWarning()
+{
+    m_dialogs->DisplayMessageBox(tr("Warning"),
+                                 tr("Presentation Id must not be empty."),
                                  Qt3DSMessageBox::ICON_WARNING, false);
 }
 

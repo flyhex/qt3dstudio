@@ -276,6 +276,8 @@
         <file>images/initial_notUsed@2x.png</file>
         <file>images/initial_used.png</file>
         <file>images/initial_used@2x.png</file>
+        <file>images/warning.png</file>
+        <file>images/warning2x.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="open_dialog.png">images/open_dialog.png</file>

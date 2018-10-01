@@ -42,6 +42,7 @@
 #include "StudioApp.h"
 #include "Views/Views.h"
 #include "MainFrm.h"
+#include "IStudioRenderer.h"
 #include <QtWidgets/qaction.h>
 
 CCore::CCore()
@@ -264,6 +265,9 @@ bool CCore::OnNewDocument(const Qt3DSFile &inDocument, bool isNewProject, bool s
     // write a new presentation node to the uia file
     m_projectFile.addPresentationNode(theDocument.absoluteFilePath());
     m_projectFile.updateDocPresentationId();
+    m_projectFile.loadSubpresentationsAndDatainputs(g_StudioApp.m_subpresentations,
+                                                    g_StudioApp.m_dataInputDialogItems);
+    g_StudioApp.getRenderer().RegisterSubpresentations(g_StudioApp.m_subpresentations);
 
     // show the presentation settings panel
     if (!silent)

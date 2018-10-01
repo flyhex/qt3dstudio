@@ -52,6 +52,8 @@ public:
         IsReferencedRole,
         DepthRole,
         ExpandedRole,
+        FileIdRole,
+        ExtraIconRole
     };
 
     void setRootPath(const QString &path);
@@ -70,7 +72,7 @@ public:
     void updateReferences();
     Q3DStudio::DocumentEditorFileType::Enum assetTypeForRow(int row);
     int rowForPath(const QString &path) const;
-    void updateIcons();
+    void updateRoles(const QVector<int> &roles, int startRow = 0, int endRow = -1);
 
     Q_INVOKABLE void expand(int row);
     Q_INVOKABLE void collapse(int row);
@@ -106,6 +108,8 @@ private:
 
     void updateDefaultDirMap();
     void addPathsToReferences(const QString &projectPath, const QString &origPath);
+    void handlePresentationIdChange(const QString &path, const QString &id);
+    void asyncExpandPresentations();
 
     struct TreeItem {
         QPersistentModelIndex index;

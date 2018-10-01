@@ -149,6 +149,8 @@ void ProjectFile::addPresentationNode(const QString &pPath, const QString &pId)
                                               presentationId, relativePresentationPath));
             g_StudioApp.getRenderer().RegisterSubpresentations(g_StudioApp.m_subpresentations);
         }
+
+        Q_EMIT presentationIdChanged(relativePresentationPath, presentationId);
     }
 
     file.close();
@@ -187,8 +189,10 @@ QString ProjectFile::getInitialPresentationSrc(const QString &uiaPath)
 
 /**
  * Write a presentation id to the project file.
+ * If the presentation id doesn't exist yet in project, it's added.
  *
- * This also update the Doc presentation Id if the src param is empty
+ * This also updates the Doc presentation Id if the src param is empty
+ * or same as current presentation.
  *
  * @param id presentation Id
  * @param src source node, if empty the current document node is used
@@ -213,6 +217,7 @@ void ProjectFile::writePresentationId(const QString &id, const QString &src)
     QDomElement assetsElem = domDoc.documentElement().firstChildElement(QStringLiteral("assets"));
     QDomNodeList pqNodes = isQml ? assetsElem.elementsByTagName(QStringLiteral("presentation-qml"))
                                  : assetsElem.elementsByTagName(QStringLiteral("presentation"));
+
     QString oldId;
     if (!pqNodes.isEmpty()) {
         for (int i = 0; i < pqNodes.count(); ++i) {
@@ -232,7 +237,14 @@ void ProjectFile::writePresentationId(const QString &id, const QString &src)
         }
     }
 
-    if (!oldId.isEmpty()) { // a presentation id changed
+    if (!src.isEmpty() && oldId.isEmpty()) { // new presentation, add it
+        // overwrite the uia file
+        file.resize(0);
+        file.write(domDoc.toByteArray(4));
+        file.close();
+        QDir projectDir(getProjectPath());
+        addPresentationNode(QDir::cleanPath(projectDir.absoluteFilePath(theSrc)), theId);
+    } else if (!oldId.isEmpty()) { // the presentation id changed
         // overwrite the uia file
         file.resize(0);
         file.write(domDoc.toByteArray(4));
@@ -281,6 +293,7 @@ void ProjectFile::writePresentationId(const QString &id, const QString &src)
                                         .absoluteFilePath(pElem.attribute(QStringLiteral("src")));
             PresentationFile::updatePresentationId(path, oldId, theId);
         }
+        Q_EMIT presentationIdChanged(theSrc, theId);
     }
 }
 

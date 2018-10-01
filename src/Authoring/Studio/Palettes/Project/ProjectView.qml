@@ -123,7 +123,7 @@ Rectangle {
                         }
 
                         StyledLabel {
-                            text: fileName
+                            text: _fileId ? fileName + " <" + _fileId + ">" : fileName;
                             color: _isReferenced ? _textColor : _disabledColor
                             leftPadding: 2
 
@@ -146,6 +146,32 @@ Rectangle {
                                 }
 
                                 Drag.onDragStarted: _parentView.startDrag(dragArea, index)
+                            }
+                        }
+
+                        Item {
+                            // Spacer item
+                            width: 4
+                            height: 1
+                        }
+
+                        Image {
+                            source: _extraIcon ? _resDir + _extraIcon : ""
+                            visible: _extraIcon ? true : false
+
+                            MouseArea {
+                                id: warningMouseArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+
+                                onClicked: delegateMouseArea.clickPending = false
+                                onDoubleClicked: _parentView.editPresentationId(index)
+                            }
+                            StyledTooltip {
+                                text: _parentView.isPresentation(index)
+                                      ? qsTr("No presentation Id")
+                                      : qsTr("No Qml stream Id")
+                                enabled: warningMouseArea.containsMouse
                             }
                         }
                     }
