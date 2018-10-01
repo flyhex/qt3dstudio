@@ -96,21 +96,11 @@ QMenuBar::item:selected {
 }
 
 /* Menu */
-QMenu {
-    background: #262829;
-    border: 1px solid #727476;
-}
-
-QMenu::item {
-    padding: 4px 20px 4px 20px;
-}
-
 QMenu::item:selected:enabled {
     background: #46a2da;
 }
 
 QMenu::item:disabled {
-    padding: 4px 20px 4px 20px;
     color: #727476;
 }
 
@@ -223,15 +213,6 @@ QDateTimeEdit::up-arrow {
     image: url(:/images/arrow_up.png);
 }
 
-QListWidget {
-    border: 1px solid #727476;
-    background: #2e2f30;
-}
-
-QListWidget::item:hover {
-    background-color: #23516D;
-}
-
 QSpinBox::up-button,
 QSpinBox::down-button,
 QDoubleSpinBox::up-button,
@@ -271,6 +252,16 @@ QHeaderView::section {
 
 QHeaderView::section:hover {
     background: #46a2da;
+}
+
+/* Reference material list */
+MaterialRefView {
+    border: 1px solid #727476;
+    background: #2e2f30;
+}
+
+MaterialRefView::item:hover {
+    background-color: #23516D;
 }
 
 /* Tutorial Dialog */
