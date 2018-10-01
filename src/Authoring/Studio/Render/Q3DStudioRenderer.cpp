@@ -416,9 +416,10 @@ void Q3DStudioRenderer::RenderNow()
                     Qt3DRender::QRenderAspectPrivate::get(m_renderAspect));
         renderAspectD->renderInitialize(m_widget->context());
         m_widget->makeCurrent();
-        if (!m_translation.isNull() && m_hasPresentation)
-            createTranslation();
     }
+
+    if (m_translation.isNull() && m_hasPresentation)
+        createTranslation();
 
     if (!m_translation.isNull()) {
         const QSize size = m_viewRect.size();

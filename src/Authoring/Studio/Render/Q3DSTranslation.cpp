@@ -1923,6 +1923,8 @@ void Q3DSTranslation::prepareRender(const QRect &rect, const QSize &size)
         m_engine->setProfileUiVisible(true, true);
 #endif
         m_studioRenderer.SetViewRect(m_studioRenderer.viewRect());
+        m_engine->sceneManager()->slidePlayer()->setMode(Q3DSSlidePlayer::PlayerMode::Editor);
+        m_engine->sceneManager()->slidePlayer()->stop();
     }
     if (m_editCameraEnabled) {
         const auto values = m_editCameras.values();
