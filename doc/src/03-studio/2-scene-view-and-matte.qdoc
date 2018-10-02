@@ -58,9 +58,8 @@ select it in the \l{studio-timeline-palette.html}{Timeline palette}
 and show its properties in the
 \l{studio-inspector-palette.html}{Inspector palette}.
 
-Clicking in empty space will drop the current selection. If you don't
-have any empty space to click on, you can alternatively click on empty
-space in the \l{studio-slide-palette.html}{Slide palette} to drop the
+Clicking in empty space will drop the current selection. Alternatively, you can click on empty
+space in the \l{studio-slide-palette.html}{Slide palette} or on the matte to drop the
 current selection.
 
 \section2 Showing and Hiding Bounding Boxes
@@ -80,26 +79,28 @@ is controlled by the current
 Alternatively, you can click and drag on the element itself to affect
 the transform:
 
+In \b{Position} mode:
 \list
 \li
-  In \b{Position} mode...
-\li
   left-mouse dragging on the element will adjust the position
-  perpendicular to the camera's view axis. (That's a complicated way of
-  saying that if you drag an item to the left, it will move to the
-  left.)
+  perpendicular to the camera's view axis. (For example, if you drag an item to the left,
+  it will move to the left.)
 \li
   right-mouse dragging up/down on the element will move it farther
   from/closer to the camera.
-\li
-  In \b{Rotation} mode...
+\endlist
+
+In \b{Rotation} mode:
+\list
 \li
   left-mouse dragging on the element will tumble it.
 \li
   right-mouse dragging up/down on the element will rotate it counter
   clockwise/clockwise within the view.
-\li
-  In \b{Scale} mode...
+\endlist
+
+In \b{Scale} mode:
+\list
 \li
   left-mouse dragging up/down on the element will proportionately scale
   it smaller/larger.
