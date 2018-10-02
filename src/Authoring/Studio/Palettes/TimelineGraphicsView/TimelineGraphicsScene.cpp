@@ -677,6 +677,13 @@ void TimelineGraphicsScene::updateAutoScrolling(double scenePosY)
     }
 }
 
+void TimelineGraphicsScene::stopAutoScroll() {
+    m_autoScrollTimer.stop();
+    m_autoScrollTriggerTimer.stop();
+    m_autoScrollUpOn = false;
+    m_autoScrollDownOn = false;
+}
+
 void TimelineGraphicsScene::updateSnapSteps()
 {
     m_snapSteps.clear();
