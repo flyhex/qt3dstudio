@@ -254,6 +254,14 @@ QHeaderView::section:hover {
     background: #46a2da;
 }
 
+QCheckBox::indicator:unchecked {
+    image: url(:/images/checkbox-unchecked.png);
+}
+
+QCheckBox::indicator:checked {
+    image: url(:/images/checkbox-checked.png);
+}
+
 /* Reference material list */
 MaterialRefView {
     border: 1px solid #727476;
