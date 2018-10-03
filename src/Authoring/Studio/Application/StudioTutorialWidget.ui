@@ -65,7 +65,7 @@
          <item>
           <widget class="QCheckBox" name="studioTutorialShowAgain">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -74,12 +74,12 @@
             <string>studioTutorialShowAgain</string>
            </property>
            <property name="text">
-            <string/>
+            <string>Do Not Show This Again</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="checkBoxLabel">
+          <widget class="QLabel" name="dummyLabel">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -87,7 +87,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Do Not Show This Again</string>
+            <string>.</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -127,7 +127,7 @@
         <property name="sizeHint" stdset="0">
          <size>
           <width>20</width>
-          <height>150</height>
+          <height>125</height>
          </size>
         </property>
        </spacer>
@@ -142,8 +142,37 @@
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>685</width>
+          <width>620</width>
           <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="2" column="2">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>45</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="3" column="0">
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>200</height>
          </size>
         </property>
        </spacer>
@@ -350,35 +379,6 @@
          </widget>
         </item>
        </layout>
-      </item>
-      <item row="2" column="2">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>80</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="3" column="0">
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>200</height>
-         </size>
-        </property>
-       </spacer>
       </item>
      </layout>
     </widget>

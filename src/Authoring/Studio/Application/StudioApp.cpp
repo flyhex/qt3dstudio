@@ -1804,7 +1804,27 @@ QString CStudioApp::getMostRecentProjectParentDir() const
     return parentDirectory;
 }
 
-//=============================================================================
+bool CStudioApp::isQmlStream(const QString &fileName)
+{
+    bool retval = false;
+    if (m_qmlStreamMap.contains(fileName)) {
+        retval = m_qmlStreamMap[fileName];
+    } else {
+        if (!fileName.endsWith(QLatin1String(".qml"))) {
+            retval = false;
+        } else {
+            QQmlApplicationEngine qmlEngine(fileName);
+            if (qmlEngine.rootObjects().size() > 0) {
+                const char *rootClassName = qmlEngine.rootObjects().at(0)
+                                            ->metaObject()->superClass()->className();
+                retval = strcmp(rootClassName, "Q3DStudio::Q3DSQmlBehavior") != 0;
+            }
+        }
+        m_qmlStreamMap.insert(fileName, retval);
+    }
+    return retval;
+}
+
 /**
  * Called by OnLoadDocument, to allow the error reporting to be inserted.
  * Because of the nature of the error reporting, OnLoadDocument has to have
@@ -2121,10 +2141,9 @@ void CStudioApp::checkDeletedDatainputs()
     QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle>> *map;
     map = new QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
                                        qt3dsdm::Qt3DSDMPropertyHandle>>;
-
     auto doc = m_core->GetDoc();
     // Update datainputs for the currently open presentation
-    doc->UpdateDatainputMap(m_core->GetDoc()->GetActiveRootInstance(), map);
+    doc->UpdateDatainputMap(m_core->GetDoc()->GetSceneInstance(), map);
 
     if (!map->empty())
         m_core->GetDispatch()->FireOnUndefinedDatainputsFail(map);

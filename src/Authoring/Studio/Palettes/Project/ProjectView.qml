@@ -71,10 +71,26 @@ Rectangle {
                 delegate: Rectangle {
                     id: delegateItem
                     property bool dragging: false
+                    property bool dragStarted: false
+                    property point pressPoint
                     width: parent.width
                     height: 20
                     color: (index == projectTree.currentIndex || dragging) ? _selectionColor
                                                                            : "transparent"
+                    function handlePress(mouse) {
+                        if (_isDraggable) {
+                            pressPoint = Qt.point(mouse.x, mouse.y);
+                            dragStarted = false;
+                        }
+                    }
+                    function handlePositionChange(mouse, item) {
+                        if (_isDraggable && !dragStarted
+                                && (Math.abs(mouse.x - pressPoint.x) > 4
+                                    || Math.abs(mouse.y - pressPoint.y) > 4)) {
+                            dragStarted = true;
+                            _parentView.startDrag(item, index);
+                        }
+                    }
 
                     Row {
                         x: _depth*28
@@ -98,54 +114,27 @@ Rectangle {
                         }
 
                         Image {
+                            id: fileIconImage
                             source: fileIcon
-
-                            Item {
-                                id: dragItemIcon
-
-                                visible: _isDraggable
+                            MouseArea {
                                 anchors.fill: parent
-
-                                Drag.active: dragAreaIcon.drag.active
-                                Drag.hotSpot.x: width / 2
-                                Drag.hotSpot.y: height / 2
-                                Drag.dragType: Drag.Automatic
-                                Drag.supportedActions: Qt.CopyAction
-
-                                MouseArea {
-                                    id: dragAreaIcon
-                                    anchors.fill: parent
-                                    drag.target: dragItemIcon
-                                }
-
-                                Drag.onDragStarted: _parentView.startDrag(dragAreaIcon, index)
+                                onPressed: delegateItem.handlePress(mouse)
+                                onPositionChanged: delegateItem.handlePositionChange(mouse,
+                                                                                     fileIconImage)
                             }
                         }
 
                         StyledLabel {
+                            id: fileNameLabel
                             text: _fileId ? fileName + " <" + _fileId + ">" : fileName;
                             color: _isReferenced ? _textColor : _disabledColor
                             leftPadding: 2
 
-                            Item {
-                                id: dragItem
-
-                                visible: _isDraggable
+                            MouseArea {
                                 anchors.fill: parent
-
-                                Drag.active: dragArea.drag.active
-                                Drag.hotSpot.x: width / 2
-                                Drag.hotSpot.y: height / 2
-                                Drag.dragType: Drag.Automatic
-                                Drag.supportedActions: Qt.CopyAction
-
-                                MouseArea {
-                                    id: dragArea
-                                    anchors.fill: parent
-                                    drag.target: dragItem
-                                }
-
-                                Drag.onDragStarted: _parentView.startDrag(dragArea, index)
+                                onPressed: delegateItem.handlePress(mouse)
+                                onPositionChanged: delegateItem.handlePositionChange(mouse,
+                                                                                     fileNameLabel)
                             }
                         }
 

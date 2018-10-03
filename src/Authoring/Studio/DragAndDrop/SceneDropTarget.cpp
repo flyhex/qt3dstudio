@@ -44,6 +44,7 @@
 #include "Qt3DSDMSlides.h"
 #include "PresentationFile.h"
 #include "QtWidgets/qmessagebox.h"
+#include "QtWidgets/qpushbutton.h"
 
 // Sceneview stuff
 //===============================================================================
@@ -147,15 +148,15 @@ bool CSceneViewDropTarget::Drop(CDropSource &inSource)
         QMessageBox msgBox;
         msgBox.setWindowTitle(QObject::tr("Set Sub-presentation"));
         msgBox.setText(QObject::tr("Set as sub-presentation to"));
-        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-        msgBox.setButtonText(QMessageBox::Yes, QObject::tr("Layer"));
-        msgBox.setButtonText(QMessageBox::No, QObject::tr("Texture"));
+        QPushButton *layerButton = msgBox.addButton(QObject::tr("Layer"), QMessageBox::YesRole);
+        QPushButton *textureButton = msgBox.addButton(QObject::tr("Texture"), QMessageBox::NoRole);
+        msgBox.addButton(QMessageBox::Cancel);
 
-        int choice = msgBox.exec();
-        if (choice == QMessageBox::Yes) { // layer
+        msgBox.exec();
+        if (msgBox.clickedButton() == layerButton) {
             instance = doc->GetActiveLayer();
             // The GenerateAssetCommand below will take care of setting the subpresentation
-        } else if (choice == QMessageBox::No) { // texture
+        } else if (msgBox.clickedButton() == textureButton) { // texture
             instance = doc->GetActiveRootInstance();
             // The GenerateAssetCommand below will take care of setting the subpresentation
         } else {

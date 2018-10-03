@@ -1287,7 +1287,7 @@ void CDoc::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
             it->boundTypes.clear();
         }
 
-        UpdateDatainputMap(m_Core->GetDoc()->GetActiveRootInstance());
+        UpdateDatainputMap(m_Core->GetDoc()->GetSceneInstance());
     }
 }
 
