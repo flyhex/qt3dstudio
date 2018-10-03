@@ -267,6 +267,7 @@ ColumnLayout {
                     return comboPropertyComponent;
                 case AdditionalMetaDataType.Import:
                 case AdditionalMetaDataType.Renderable:
+                case AdditionalMetaDataType.String:
                     return genericTextComponent;
                 default:
                     console.warn("KDAB_TODO implement property handler for additional type: ",

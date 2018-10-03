@@ -433,44 +433,16 @@ Rectangle {
     Component {
         id: editLine
 
-        TextField {
+        StyledTextField {
             id: textArea
-            property bool ignoreHotkeys: true
             property int instance: parent.modelData.instance
             property int handle: parent.modelData.handle
             property variant value: parent.modelData.value
             property Item tabItem1: this
             width: _valueWidth
+            height: _controlBaseHeight
             horizontalAlignment: TextInput.AlignLeft
             verticalAlignment: TextInput.AlignVCenter
-            font.pixelSize: _fontSize
-            color: _textColor
-            selectionColor: _selectionColor
-            selectedTextColor: _textColor
-
-            background: Rectangle {
-                height: textArea.height
-                color: textArea.enabled ? _studioColor2 : "transparent"
-                border.width: textArea.activeFocus ? 1 : 0
-                border.color: textArea.activeFocus ? _selectionColor : _disabledColor
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                property int clickedPos
-                preventStealing: true
-
-                onPressed: {
-                    textArea.forceActiveFocus()
-                    clickedPos = textArea.positionAt(mouse.x, mouse.y)
-                    textArea.cursorPosition = clickedPos
-                }
-                onDoubleClicked: textArea.selectAll()
-                onPositionChanged: {
-                    textArea.cursorPosition = textArea.positionAt(mouse.x, mouse.y)
-                    textArea.select(clickedPos, textArea.cursorPosition)
-                }
-            }
 
             // Don't just bind text to value, since changing text explicitly in onEditingFinished
             // would break binding
