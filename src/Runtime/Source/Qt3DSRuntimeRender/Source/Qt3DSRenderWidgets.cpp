@@ -241,9 +241,9 @@ struct SWidgetAxis : public IRenderWidget
     inline QT3DSVec3 TransformDirection(const QT3DSMat33 &inMatrix, const QT3DSVec3 &inDir)
     {
         QT3DSVec3 retval = inMatrix.transform(inDir);
-        retval.normalize();
         return retval;
     }
+
     void Render(IRenderWidgetContext &inWidgetContext, NVRenderContext &inRenderContext) override
     {
         m_ItemName = inRenderContext.GetStringTable().RegisterStr("SWidgetAxis");
@@ -251,51 +251,44 @@ struct SWidgetAxis : public IRenderWidget
         SetupAxisShader(inWidgetContext);
 
         if (m_AxisShader) {
-            QT3DSVec3 Red = QT3DSVec3(1, 0, 0);
-            QT3DSVec3 Green = QT3DSVec3(0, 1, 0);
-            QT3DSVec3 Blue = QT3DSVec3(0, 0, 1);
+            static const QT3DSVec3 pivotCol = QT3DSVec3(0, 0, 1);
             if (m_Node->m_Parent && m_Node->m_Parent->m_Type != GraphObjectTypes::Layer) {
                 m_Node->m_Parent->CalculateGlobalVariables();
             }
             QT3DSVec3 thePivot(m_Node->m_Pivot);
             if (m_Node->m_Flags.IsLeftHanded())
                 thePivot.z *= -1;
+
             SWidgetRenderInformation theInfo(inWidgetContext.GetWidgetRenderInformation(
-                *m_Node, thePivot, RenderWidgetModes::Local));
+                *m_Node, QT3DSVec3(0, 0, 0), RenderWidgetModes::Local));
 
             QT3DSMat44 theNodeRotation;
             m_Node->CalculateRotationMatrix(theNodeRotation);
             if (m_Node->m_Flags.IsLeftHanded())
                 SNode::FlipCoordinateSystem(theNodeRotation);
+
             QT3DSMat33 theRotationMatrix(theNodeRotation.column0.getXYZ(),
                                       theNodeRotation.column1.getXYZ(),
                                       theNodeRotation.column2.getXYZ());
+
             // Move the camera position into camera space.  This is so that when we render we don't
             // have to account
             // for scaling done in the camera's MVP.
             QT3DSVec3 theItemPosition = theInfo.m_Position;
+
             QT3DSMat33 theAxisTransform = theInfo.m_NormalMatrix * theRotationMatrix;
-            QT3DSVec3 xAxis = TransformDirection(theAxisTransform, QT3DSVec3(1, 0, 0));
-            QT3DSVec3 yAxis = TransformDirection(theAxisTransform, QT3DSVec3(0, 1, 0));
-            QT3DSVec3 zAxis = TransformDirection(theAxisTransform, QT3DSVec3(0, 0, -1));
 
-            // This world to pixel scale factor function
-            QT3DSF32 theScaleFactor = theInfo.m_Scale;
-            theItemPosition = theInfo.m_Position;
+            // Scale the effective pivot line end point according to node scale
+            // so that pivot line always hits object center.
+            thePivot = thePivot.multiply(m_Node->m_Scale);
+            QT3DSVec3 pivotVec = TransformDirection(
+                        theAxisTransform, QT3DSVec3(-thePivot.x, -thePivot.y, -thePivot.z));
 
-            QT3DSF32 overshootFactor = 10.0f * theScaleFactor; // amount to scale past the origin in
-                                                            // the opposite direction as the axis
-            QT3DSF32 scaleFactor = 50.0f * theScaleFactor;
-            QT3DSVec3 theAxis[] = {
-                theItemPosition - (xAxis * overshootFactor), Red,
-                theItemPosition + (xAxis * scaleFactor),     Red, // X axis
-                theItemPosition - (yAxis * overshootFactor), Green,
-                theItemPosition + (yAxis * scaleFactor),     Green, // Y axis
-                theItemPosition - (zAxis * overshootFactor), Blue,
-                theItemPosition + (zAxis * scaleFactor),     Blue, // Z axis
+            QT3DSVec3 thePivotLine[] = {
+                theItemPosition, pivotCol, theItemPosition + pivotVec, pivotCol
             };
 
-            SetupAxesGraphicsObjects(inWidgetContext, toDataRef(theAxis, 3));
+            SetupAxesGraphicsObjects(inWidgetContext, toDataRef(thePivotLine, 3));
 
             if (m_AxisInputAssembler) {
                 inRenderContext.SetBlendingEnabled(false);
@@ -305,8 +298,8 @@ struct SWidgetAxis : public IRenderWidget
                 inRenderContext.SetActiveShader(m_AxisShader);
                 m_AxisShader->SetPropertyValue("model_view_projection", theInfo.m_LayerProjection);
                 inRenderContext.SetInputAssembler(m_AxisInputAssembler);
-                // Draw six points.
-                inRenderContext.Draw(qt3ds::render::NVRenderDrawMode::Lines, 6, 0);
+                // Draw line from pivot to object center.
+                inRenderContext.Draw(qt3ds::render::NVRenderDrawMode::Lines, 2, 0);
             }
         }
     }

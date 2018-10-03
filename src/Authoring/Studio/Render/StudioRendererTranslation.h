@@ -486,7 +486,7 @@ namespace studio {
             }
         }
 
-        void DrawAxis(SGraphObjectTranslator &inTranslator);
+        void drawPivot(SGraphObjectTranslator &inTranslator);
 
         void SetViewport(QT3DSF32 inWidth, QT3DSF32 inHeight) { m_Viewport = QT3DSVec2(inWidth, inHeight); }
 
