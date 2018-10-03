@@ -69,7 +69,6 @@ public:
     bool isInitialPresentation(const QString &path) const;
     QString presentationId(const QString &path) const;
 
-    void updateReferences();
     Q3DStudio::DocumentEditorFileType::Enum assetTypeForRow(int row);
     int rowForPath(const QString &path) const;
     void updateRoles(const QVector<int> &roles, int startRow = 0, int endRow = -1);
@@ -81,6 +80,8 @@ public:
     Q_INVOKABLE bool hasValidUrlsForDropping(const QList<QUrl> &urls) const;
     Q_INVOKABLE void showInfo(int row);
     Q_INVOKABLE void duplicate(int row);
+
+    void asyncUpdateReferences();
 
 Q_SIGNALS:
     void modelChanged(QAbstractItemModel *model);
@@ -110,6 +111,7 @@ private:
     void addPathsToReferences(const QString &projectPath, const QString &origPath);
     void handlePresentationIdChange(const QString &path, const QString &id);
     void asyncExpandPresentations();
+    void updateReferences();
 
     struct TreeItem {
         QPersistentModelIndex index;

@@ -56,6 +56,8 @@ ProjectFileSystemModel::ProjectFileSystemModel(QObject *parent) : QAbstractListM
     connect(m_model, &QAbstractItemModel::layoutChanged, this, &ProjectFileSystemModel::modelLayoutChanged);
     connect(&g_StudioApp.GetCore()->getProjectFile(), &ProjectFile::presentationIdChanged,
             this, &ProjectFileSystemModel::handlePresentationIdChange);
+    connect(&g_StudioApp.GetCore()->getProjectFile(), &ProjectFile::assetNameChanged,
+            this, &ProjectFileSystemModel::asyncUpdateReferences);
 }
 
 QHash<int, QByteArray> ProjectFileSystemModel::roleNames() const
@@ -984,6 +986,11 @@ void ProjectFileSystemModel::asyncExpandPresentations()
                        + QStringLiteral("/presentations");
         expand(rowForPath(path));
     });
+}
+
+void ProjectFileSystemModel::asyncUpdateReferences()
+{
+    QTimer::singleShot(0, this, &ProjectFileSystemModel::updateReferences);
 }
 
 bool ProjectFileSystemModel::isCurrentPresentation(const QString &path) const

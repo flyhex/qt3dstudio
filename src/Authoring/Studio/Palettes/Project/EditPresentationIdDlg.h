@@ -46,16 +46,31 @@ class EditPresentationIdDlg : public QDialog
     Q_OBJECT
 
 public:
-    explicit EditPresentationIdDlg(const QString &src, QWidget *parent = 0);
+    enum DialogType {
+        EditPresentationId,
+        EditQmlStreamId,
+        EditPresentationName,
+        EditQmlStreamName
+    };
+
+    explicit EditPresentationIdDlg(const QString &src, DialogType type = EditPresentationId,
+                                   QWidget *parent = nullptr);
     ~EditPresentationIdDlg();
 
 public Q_SLOTS:
     void accept() override;
 
 private:
+    enum WarningType {
+        EmptyWarning,
+        UniqueWarning
+    };
+    void displayWarning(WarningType warningType);
+
     Ui::EditPresentationIdDlg *m_ui;
     QString m_src; // src attribute value for the current presentation in the project file
     QString m_presentationId;
+    DialogType m_dialogType;
 };
 
 #endif // EDITPRESENTATIONIDDLG_H

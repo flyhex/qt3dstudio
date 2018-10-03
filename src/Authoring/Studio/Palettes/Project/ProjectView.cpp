@@ -226,7 +226,7 @@ void ProjectView::OnSaveDocument(const Qt3DSFile &inFilename, bool inSucceeded, 
     Q_UNUSED(inFilename)
     Q_UNUSED(inSucceeded)
     Q_UNUSED(inSaveCopy)
-    QTimer::singleShot(0, m_ProjectModel, &ProjectFileSystemModel::updateReferences);
+    m_ProjectModel->asyncUpdateReferences();
 }
 
 void ProjectView::OnDocumentPathChanged(const Qt3DSFile &inNewPath)
@@ -240,7 +240,7 @@ void ProjectView::OnBeginDataModelNotifications()
 
 void ProjectView::OnEndDataModelNotifications()
 {
-    QTimer::singleShot(0, m_ProjectModel, &ProjectFileSystemModel::updateReferences);
+    m_ProjectModel->asyncUpdateReferences();
 }
 
 void ProjectView::OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
@@ -293,12 +293,25 @@ bool ProjectView::isCurrentPresentation(int row) const
     return m_ProjectModel->isCurrentPresentation(m_ProjectModel->filePath(row));
 }
 
-void ProjectView::editPresentationId(int row)
+void ProjectView::editPresentationId(int row, bool qmlStream)
 {
     QString relativePresPath = QDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath())
                                .relativeFilePath(m_ProjectModel->filePath(row));
 
-    EditPresentationIdDlg dlg(relativePresPath, this);
+    EditPresentationIdDlg dlg(relativePresPath,
+                              qmlStream ? EditPresentationIdDlg::EditQmlStreamId
+                                        : EditPresentationIdDlg::EditPresentationId, this);
+    dlg.exec();
+}
+
+void ProjectView::renamePresentation(int row, bool qmlStream)
+{
+    QString relativePresPath = QDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath())
+                               .relativeFilePath(m_ProjectModel->filePath(row));
+
+    EditPresentationIdDlg dlg(relativePresPath,
+                              qmlStream ? EditPresentationIdDlg::EditQmlStreamName
+                                        : EditPresentationIdDlg::EditPresentationName, this);
     dlg.exec();
 }
 

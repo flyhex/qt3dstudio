@@ -661,6 +661,75 @@ void ProjectFile::setInitialPresentation(const QString &initialId)
     }
 }
 
+// Returns true if file rename was successful
+bool ProjectFile::renamePresentationFile(const QString &oldName, const QString &newName)
+{
+    const QString fullOldPath = getResolvedPathTo(oldName);
+    const QString fullNewPath = getResolvedPathTo(newName);
+    QFile presFile(fullOldPath);
+    const bool success = presFile.rename(fullNewPath);
+
+    if (success) {
+        // Update assets in .uia
+        ensureProjectFile();
+
+        const bool isQml = oldName.endsWith(QLatin1String(".qml"));
+
+        if (isQml && g_StudioApp.m_qmlStreamMap.contains(fullOldPath)) {
+            // Update Qml stream type cache
+            g_StudioApp.m_qmlStreamMap.remove(fullOldPath);
+            g_StudioApp.m_qmlStreamMap.insert(fullNewPath, true);
+        }
+
+        QFile file(getProjectFilePath());
+        file.open(QIODevice::ReadWrite);
+        QDomDocument domDoc;
+        domDoc.setContent(&file);
+
+        QDomElement assetsElem
+                = domDoc.documentElement().firstChildElement(QStringLiteral("assets"));
+        if (!assetsElem.isNull()) {
+            QDomNodeList pqNodes
+                    = isQml ? assetsElem.elementsByTagName(QStringLiteral("presentation-qml"))
+                            : assetsElem.elementsByTagName(QStringLiteral("presentation"));
+            if (!pqNodes.isEmpty()) {
+                CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+                for (int i = 0; i < pqNodes.count(); ++i) {
+                    QDomElement pqElem = pqNodes.at(i).toElement();
+                    const QString attTag = isQml ? QStringLiteral("args") : QStringLiteral("src");
+                    const QString srcOrArgs = pqElem.attribute(attTag);
+                    if (srcOrArgs == oldName) {
+                        pqElem.setAttribute(attTag, newName);
+
+                        if (pqElem.attribute(QStringLiteral("id")) != doc->getPresentationId()) {
+                            // update m_subpresentations
+                            auto *sp = std::find_if(
+                                        g_StudioApp.m_subpresentations.begin(),
+                                        g_StudioApp.m_subpresentations.end(),
+                                        [&oldName](const SubPresentationRecord &spr) -> bool {
+                                            return spr.m_argsOrSrc == oldName;
+                                        });
+                            if (sp != g_StudioApp.m_subpresentations.end())
+                                sp->m_argsOrSrc = newName;
+                        } else {
+                            // If renaming current presentation, need to update the doc path, too
+                            doc->SetDocumentPath(fullNewPath);
+                        }
+
+                        file.resize(0);
+                        file.write(domDoc.toByteArray(4));
+
+                        Q_EMIT assetNameChanged();
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    return success;
+}
+
 QString ProjectFile::getResolvedPathTo(const QString &path) const
 {
     auto projectPath = QDir(getProjectPath()).absoluteFilePath(path);

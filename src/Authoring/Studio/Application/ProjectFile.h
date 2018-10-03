@@ -69,9 +69,11 @@ public:
                                  const QString &excludePresentationSrc = {});
     QString initialPresentation() const { return m_initialPresentation; }
     void setInitialPresentation(const QString &initialId);
+    bool renamePresentationFile(const QString &oldName, const QString &newName);
 
 Q_SIGNALS:
     void presentationIdChanged(const QString &path, const QString &id);
+    void assetNameChanged();
 
 private:
     QString ensureUniquePresentationId(const QString &id) const;

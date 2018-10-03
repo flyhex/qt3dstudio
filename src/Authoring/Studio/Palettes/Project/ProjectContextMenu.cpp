@@ -43,6 +43,10 @@ ProjectContextMenu::ProjectContextMenu(ProjectView *parent, int index)
         action->setEnabled(!currentPresentation);
         addAction(action);
 
+        action = new QAction(tr("Rename Presentation"));
+        connect(action, &QAction::triggered, this, &ProjectContextMenu::handleRenamePresentation);
+        addAction(action);
+
         action = new QAction(tr("Edit Presentation Id"));
         connect(action, &QAction::triggered, this, &ProjectContextMenu::handleEditPresentationId);
         addAction(action);
@@ -66,8 +70,12 @@ ProjectContextMenu::ProjectContextMenu(ProjectView *parent, int index)
 
         addSeparator();
     } else if (m_view->isQmlStream(m_index)) {
-        action = new QAction(tr("Edit Qml stream Id"));
-        connect(action, &QAction::triggered, this, &ProjectContextMenu::handleEditPresentationId);
+        action = new QAction(tr("Rename Qml Stream"));
+        connect(action, &QAction::triggered, this, &ProjectContextMenu::handleRenameQmlStream);
+        addAction(action);
+
+        action = new QAction(tr("Edit Qml Stream Id"));
+        connect(action, &QAction::triggered, this, &ProjectContextMenu::handleEditQmlStreamId);
         addAction(action);
 
         addSeparator();
@@ -131,7 +139,12 @@ void ProjectContextMenu::handleOpenPresentation()
 
 void ProjectContextMenu::handleEditPresentationId()
 {
-    m_view->editPresentationId(m_index);
+    m_view->editPresentationId(m_index, false);
+}
+
+void ProjectContextMenu::handleEditQmlStreamId()
+{
+    m_view->editPresentationId(m_index, true);
 }
 
 void ProjectContextMenu::handleShowContainingFolder()
@@ -177,4 +190,14 @@ void ProjectContextMenu::handleDuplicate()
 void ProjectContextMenu::handleInitialPresentation()
 {
     m_view->setInitialPresentation(m_index);
+}
+
+void ProjectContextMenu::handleRenamePresentation()
+{
+    m_view->renamePresentation(m_index, false);
+}
+
+void ProjectContextMenu::handleRenameQmlStream()
+{
+    m_view->renamePresentation(m_index, true);
 }

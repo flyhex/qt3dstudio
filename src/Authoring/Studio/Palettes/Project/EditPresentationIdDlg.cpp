@@ -30,33 +30,126 @@
 #include "ui_EditPresentationIdDlg.h"
 #include "StudioApp.h"
 #include "Core.h"
+#include "Dialogs.h"
 
-EditPresentationIdDlg::EditPresentationIdDlg(const QString &src, QWidget *parent)
+EditPresentationIdDlg::EditPresentationIdDlg(const QString &src, DialogType type, QWidget *parent)
     : QDialog(parent)
     , m_src(src)
     , m_ui(new Ui::EditPresentationIdDlg)
+    , m_dialogType(type)
 {
     m_ui->setupUi(this);
 
-    m_presentationId = g_StudioApp.GetCore()->getProjectFile().getPresentationId(src);
-    m_ui->lineEditPresentationId->setText(m_presentationId);
+    switch (m_dialogType) {
+    case EditPresentationId:
+        m_ui->label->setText(tr("Presentation Id"));
+        setWindowTitle(tr("Edit Presentation Id"));
+        break;
+    case EditQmlStreamId:
+        m_ui->label->setText(tr("Qml Stream Id"));
+        setWindowTitle(tr("Edit Qml Stream Id"));
+        break;
+    case EditPresentationName:
+        m_ui->label->setText(tr("Presentation Name"));
+        setWindowTitle(tr("Rename Presentation"));
+        break;
+    case EditQmlStreamName:
+        m_ui->label->setText(tr("Qml Stream Name"));
+        setWindowTitle(tr("Rename Qml Stream"));
+        break;
+    default:
+        break;
+    }
+
+    if (m_dialogType == EditPresentationId || m_dialogType == EditQmlStreamId) {
+        m_presentationId = g_StudioApp.GetCore()->getProjectFile().getPresentationId(src);
+        m_ui->lineEditPresentationId->setText(m_presentationId);
+    } else {
+        QFileInfo fi(src);
+        m_ui->lineEditPresentationId->setText(fi.fileName());
+    }
 }
 
 void EditPresentationIdDlg::accept()
 {
-    QString newId = m_ui->lineEditPresentationId->text();
-    if (newId.isEmpty()) {
-        g_StudioApp.showPresentationIdEmptyWarning();
-    } else if (newId != m_presentationId) {
-        if (!g_StudioApp.GetCore()->getProjectFile().isUniquePresentationId(newId, m_src)) {
-            g_StudioApp.showPresentationIdUniqueWarning();
+    QString newValue = m_ui->lineEditPresentationId->text();
+    if (newValue.isEmpty()) {
+        displayWarning(EmptyWarning);
+    } else if (m_dialogType == EditPresentationId || m_dialogType == EditQmlStreamId) {
+        if (newValue != m_presentationId) {
+            if (!g_StudioApp.GetCore()->getProjectFile().isUniquePresentationId(newValue, m_src)) {
+                displayWarning(UniqueWarning);
+            } else {
+                g_StudioApp.GetCore()->getProjectFile().writePresentationId(newValue, m_src);
+                QDialog::accept();
+            }
         } else {
-            g_StudioApp.GetCore()->getProjectFile().writePresentationId(newId, m_src);
             QDialog::accept();
         }
-    } else {
-        QDialog::accept();
+    } else { // editing name
+        QFileInfo fi(m_src);
+        QString suffix = QStringLiteral(".") + fi.suffix();
+        if (!newValue.endsWith(suffix))
+            newValue.append(suffix);
+
+        if (newValue == suffix) {
+            // If we are left with just the suffix, treat it as an empty name
+            displayWarning(EmptyWarning);
+        } else {
+            int slashIndex = m_src.lastIndexOf(QLatin1Char('/'));
+            if (slashIndex >= 0)
+                newValue.prepend(m_src.left(slashIndex + 1));
+
+            if (newValue != m_src) {
+                if (g_StudioApp.GetCore()->getProjectFile().renamePresentationFile(m_src, newValue))
+                    QDialog::accept();
+                else
+                    displayWarning(UniqueWarning);
+            } else {
+                QDialog::accept();
+            }
+        }
     }
+}
+
+void EditPresentationIdDlg::displayWarning(WarningType warningType)
+{
+    QString warning;
+    switch (m_dialogType) {
+    // Presentation Id warnings are also displayed from preferences dialog, so they are handled
+    // by CStudioApp.
+    case EditPresentationId:
+        if (warningType == EmptyWarning)
+            g_StudioApp.showPresentationIdEmptyWarning();
+        else
+            g_StudioApp.showPresentationIdUniqueWarning();
+        return;
+    case EditQmlStreamId:
+        if (warningType == EmptyWarning)
+            warning = tr("Qml stream Id must not be empty.");
+        else
+            warning = tr("Qml stream Id must be unique.");
+        break;
+    case EditPresentationName:
+        if (warningType == EmptyWarning)
+            warning = tr("Presentation name must not be empty.");
+        else
+            warning = tr("Renaming presentation failed.\n"
+                         "The new name must be unique within its folder and a valid filename.");
+        break;
+    case EditQmlStreamName:
+        if (warningType == EmptyWarning)
+            warning = tr("Qml stream name must not be empty.");
+        else
+            warning = tr("Renaming Qml stream failed.\n"
+                         "The new name must be unique within its folder and a valid filename.");
+        break;
+    default:
+        break;
+    }
+
+    g_StudioApp.GetDialogs()->DisplayMessageBox(tr("Warning"), warning,
+                                                Qt3DSMessageBox::ICON_WARNING, false);
 }
 
 EditPresentationIdDlg::~EditPresentationIdDlg()

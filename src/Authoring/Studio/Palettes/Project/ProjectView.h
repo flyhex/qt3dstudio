@@ -92,7 +92,8 @@ public:
     QString presentationId(int row) const;
     void setInitialPresentation(int row);
     void openPresentation(int row);
-    Q_INVOKABLE void editPresentationId(int row);
+    Q_INVOKABLE void editPresentationId(int row, bool qmlStream);
+    void renamePresentation(int row, bool qmlStream);
 
     // CPresentationChangeListener
     void OnNewPresentation() override;
