@@ -1213,7 +1213,7 @@ public:
         DoDeleteInstance(instance);
     }
 
-    void DeleteInstances(qt3dsdm::TInstanceHandleList instances) override
+    void DeleteInstances(const qt3dsdm::TInstanceHandleList &instances) override
     {
         for (size_t idx = 0, end = instances.size(); idx < end; ++idx) {
             qt3dsdm::Qt3DSDMInstanceHandle theInstance(instances[idx]);
@@ -1775,27 +1775,30 @@ public:
      * Create a scene rect and set its material's texture from the provided subpresentation Id
      *
      * @param pId the presentation Id to set for the texture
-     * @param pPath the presentation file path
      * @param slide the slide to add to
      * @param pos add position in the scene
      * @param startTime add at this start time
      */
-    void addRectForSubpresentation(const CString &pId, const QString &pPath, TSlideHandle slide,
-                                   const CPt &pos = CPt(), long startTime = -1) override
+    void addRectForSubpresentation(const CString &pId, TSlideHandle slide, const CPt &pos = CPt(),
+                                   long startTime = -1) override
     {
         qt3dsdm::Qt3DSDMPropertyHandle activeLayer = m_Doc.GetActiveLayer();
         Qt3DSDMInstanceHandle rectInstance =
                 CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Model, activeLayer, slide,
                                          Q3DStudio::DocumentEditorInsertType::LastChild, pos,
-                                         PRIMITIVETYPE_RECT, startTime);
+                                         PRIMITIVETYPE_RECT, startTime, false);
 
         // Set the subpresentation for the rect's material's diffuseMap
-        for (long i = 0; i < m_AssetGraph.GetChildCount(rectInstance); ++i) {
-            Qt3DSDMInstanceHandle mat(m_AssetGraph.GetChild(rectInstance, i));
-            if (m_Bridge.IsMaterialBaseInstance(mat)) {
-                qt3dsdm::Qt3DSDMPropertyHandle prop = m_PropertySystem
-                        .GetAggregateInstancePropertyByName(mat, L"diffusemap");
-                setInstanceImagePropertyValueAsRenderable(mat, prop, pId);
+        const long childCount = m_AssetGraph.GetChildCount(rectInstance);
+        for (long i = 0; i < childCount; ++i) {
+            Qt3DSDMInstanceHandle matInstance(m_AssetGraph.GetChild(rectInstance, i));
+
+            if (m_Bridge.IsMaterialBaseInstance(matInstance)) {
+                if (m_Bridge.IsReferencedMaterialInstance(matInstance))
+                    SetMaterialType(matInstance, "Standard Material");
+
+                auto prop = m_Bridge.GetObjectDefinitions().m_Material.m_DiffuseMap1.m_Property;
+                setInstanceImagePropertyValueAsRenderable(matInstance, prop, pId);
                 break;
             }
         }
@@ -1804,8 +1807,7 @@ public:
     void SetMaterialType(TInstanceHandle instance,
                          const Q3DStudio::CString &inRelativePathToMaterialFile) override
     {
-        const Q3DStudio::CString existing = m_Bridge.GetSourcePath(instance);
-        if (existing == inRelativePathToMaterialFile)
+        if (m_Bridge.GetSourcePath(instance) == inRelativePathToMaterialFile)
             return;
 
         TInstanceHandle model = m_AssetGraph.GetParent(instance);
@@ -2102,8 +2104,7 @@ public:
                 parent = m_Doc.GetSceneInstance();
             Qt3DSDMSlideHandle slide = m_Bridge.GetOrCreateGraphRoot(parent);
             instance = CreateSceneGraphInstance(ComposerObjectTypes::Material, parent,
-                                                slide,
-                                                DocumentEditorInsertType::LastChild,
+                                                slide, DocumentEditorInsertType::LastChild,
                                                 CPt(), PRIMITIVETYPE_UNKNOWN, -1);
             SetName(instance, CString::fromQString(getMaterialContainerName()));
             SetTimeRange(instance, 0, 0);

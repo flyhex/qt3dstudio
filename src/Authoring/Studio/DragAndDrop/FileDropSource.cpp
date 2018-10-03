@@ -195,8 +195,7 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
             EStudioObjectType rowType = bridge.GetObjectType(inTarget);
 
             if (rowType == OBJTYPE_LAYER) {
-                qt3dsdm::Qt3DSDMPropertyHandle propHandle = theDoc.GetPropertySystem()
-                        ->GetAggregateInstancePropertyByName(inTarget, L"sourcepath");
+                auto propHandle = bridge.GetSourcePathProperty();
                 Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
                        ->SetInstancePropertyValueAsRenderable(inTarget, propHandle, presentationId);
             } else if (rowType & (OBJTYPE_MATERIAL | OBJTYPE_CUSTOMMATERIAL
@@ -232,14 +231,13 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
                     }
                 }
             } else if (rowType == OBJTYPE_IMAGE) {
-                qt3dsdm::Qt3DSDMPropertyHandle propHandle = theDoc.GetPropertySystem()
-                        ->GetAggregateInstancePropertyByName(inTarget, L"subpresentation");
+                auto propHandle = bridge.getSubpresentationProperty();
                 Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
                        ->SetInstancePropertyValueAsRenderable(inTarget, propHandle, presentationId);
             } else if (rowType == OBJTYPE_SCENE) { // dropping on the scene as a texture
-                    Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
-                        ->addRectForSubpresentation(presentationId, theFilePath.toQString(),
-                                                    inSlide, thePoint, theStartTime);
+                Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
+                       ->addRectForSubpresentation(presentationId, inSlide, thePoint,
+                                                   theStartTime);
             }
         } else {
             Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)

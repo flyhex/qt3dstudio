@@ -1306,13 +1306,10 @@ void InspectorControlModel::saveIfMaterial(qt3dsdm::Qt3DSDMInstanceHandle instan
 
 void InspectorControlModel::setMaterialTypeValue(long instance, int handle, const QVariant &value)
 {
-    Q_UNUSED(handle);
+    Q_UNUSED(handle)
+
     const QString typeValue = value.toString();
     Q3DStudio::CString v;
-    QString name;
-    Q3DStudio::CString srcPath;
-    QMap<QString, QString> values;
-    QMap<QString, QMap<QString, QString>> textureValues;
 
     bool changeMaterialFile = false;
     if (typeValue == getStandardMaterialString()) {
@@ -1322,8 +1319,6 @@ void InspectorControlModel::setMaterialTypeValue(long instance, int handle, cons
             v = Q3DStudio::CString::fromQString(m_materials[0].m_relativePath);
     } else if (typeValue == getSharedMaterialString()) {
         v = Q3DStudio::CString("Referenced Material");
-        name = QLatin1String("Default");
-        srcPath = "Default";
         changeMaterialFile = true;
     } else if (typeValue == getReferencedMaterialString()) {
         v = Q3DStudio::CString("Referenced Material");
@@ -1347,10 +1342,10 @@ void InspectorControlModel::setMaterialTypeValue(long instance, int handle, cons
         scopedEditor->copyMaterialProperties(refMaterial, instance);
 
     if (changeMaterialFile) {
-        scopedEditor->setMaterialProperties(instance, name, srcPath, values, textureValues);
+        scopedEditor->setMaterialProperties(instance, QLatin1String("Default"), "Default", {}, {});
 
-        // Select original instance again since potentially
-        // creating a material selects the created one
+        // Select the original instance again since potentially creating a material selects the
+        // created one
         doc->SelectDataModelObject(instance);
 
         rebuildTree(); // Hack to mimic value changing behavior of the type selector
