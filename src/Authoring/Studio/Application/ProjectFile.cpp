@@ -156,7 +156,7 @@ void ProjectFile::addPresentationNode(const QString &pPath, const QString &pId)
     file.close();
 }
 
-// get the src attribute (relative path) to the first presentation in a uia file, if no initial
+// Get the src attribute (relative path) to the initial presentation in a uia file, if no initial
 // presentation exists, the first one is returned.
 QString ProjectFile::getInitialPresentationSrc(const QString &uiaPath)
 {
@@ -172,10 +172,9 @@ QString ProjectFile::getInitialPresentationSrc(const QString &uiaPath)
         QString initialId = assetsElem.attribute(QStringLiteral("initial"));
         if (!initialId.isEmpty()) {
             QDomNodeList pNodes = assetsElem.elementsByTagName(QStringLiteral("presentation"));
-            const QString docPresentationId = g_StudioApp.GetCore()->GetDoc()->getPresentationId();
             for (int i = 0; i < pNodes.count(); ++i) {
                 QDomElement pElem = pNodes.at(i).toElement();
-                if (pElem.attribute(QStringLiteral("id")) == docPresentationId)
+                if (pElem.attribute(QStringLiteral("id")) == initialId)
                     return pElem.attribute(QStringLiteral("src"));
 
                 if (i == 0)
@@ -395,9 +394,11 @@ QString ProjectFile::createPreview()
         g_StudioApp.GetCore()->OnSaveDocument(uipPrvPath, true);
     }
 
+    // if no project file exist (.uia) just return the preview uip path
     if (!m_fileInfo.exists())
         return uipPrvPath;
 
+    // create a preview project file
     QString prvPath = getProjectFilePath();
     prvPath.replace(QLatin1String(".uia"), QLatin1String("_@preview@.uia"));
 
@@ -412,8 +413,7 @@ QString ProjectFile::createPreview()
 
         QDomElement assetsElem = domDoc.documentElement()
                                  .firstChildElement(QStringLiteral("assets"));
-        assetsElem.setAttribute(QStringLiteral("initial"),
-                                doc->getPresentationId());
+        assetsElem.setAttribute(QStringLiteral("initial"), doc->getPresentationId());
 
         if (doc->IsModified()) {
             // Set the preview uip path in the uia file

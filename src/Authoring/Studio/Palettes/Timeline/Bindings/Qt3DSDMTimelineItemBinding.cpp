@@ -1084,9 +1084,6 @@ void Qt3DSDMTimelineItemBinding::OnAddChild(Qt3DSDMInstanceHandle inInstance)
 
         if (theNextChild != 0)
             theNextItem = m_TransMgr->GetOrCreate(theNextChild);
-
-        // Mahmoud_TODO: remove
-//        m_Row->AddChildRow(m_TransMgr->GetOrCreate(inInstance), theNextItem);
     }
 }
 
