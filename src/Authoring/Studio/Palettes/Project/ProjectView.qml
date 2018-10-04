@@ -201,22 +201,24 @@ Rectangle {
                             // Presses must be ignored by this handler in order for dragging to work
                             mouse.accepted = false;
 
-                            // Since ignoring presses means we don't get doubleClicked events,
-                            // detect doubleclick using custom timer.
-                            if (clickPending) {
-                                if (_isExpandable) {
-                                    if (_expanded)
-                                        projectTree.model.collapse(index);
-                                    else
-                                        projectTree.model.expand(index);
-                                } else {
-                                    _parentView.openFile(index);
-                                }
+                            if (mouse.button === Qt.LeftButton) {
+                                // Since ignoring presses means we don't get doubleClicked events,
+                                // detect doubleclick using custom timer.
+                                if (clickPending) {
+                                    if (_isExpandable) {
+                                        if (_expanded)
+                                            projectTree.model.collapse(index);
+                                        else
+                                            projectTree.model.expand(index);
+                                    } else {
+                                        _parentView.openFile(index);
+                                    }
 
-                                clickPending = false;
-                            } else {
-                                clickPending = true;
-                                doubleClickTimer.restart();
+                                    clickPending = false;
+                                } else {
+                                    clickPending = true;
+                                    doubleClickTimer.restart();
+                                }
                             }
                         }
                         Timer {
