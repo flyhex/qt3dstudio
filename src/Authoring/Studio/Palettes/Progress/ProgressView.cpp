@@ -54,12 +54,12 @@ CProgressView::~CProgressView()
     delete m_ui;
 }
 
-void CProgressView::SetActionText(const Q3DStudio::CString &inActionText)
+void CProgressView::SetActionText(const QString &inActionText)
 {
-    m_ui->progressActionText->setText(inActionText.toQString());
+    m_ui->progressActionText->setText(inActionText);
 }
 
-void CProgressView::SetAdditionalText(const Q3DStudio::CString &inAdditionalText)
+void CProgressView::SetAdditionalText(const QString &inAdditionalText)
 {
-    m_ui->progressAdditionalText->setText(inAdditionalText.toQString());
+    m_ui->progressAdditionalText->setText(inAdditionalText);
 }

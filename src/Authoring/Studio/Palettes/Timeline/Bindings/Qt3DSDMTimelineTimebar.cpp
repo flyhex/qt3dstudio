@@ -174,7 +174,7 @@ void Qt3DSDMTimelineTimebar::OnBeginDrag()
 void Qt3DSDMTimelineTimebar::OffsetTime(long inDiff)
 {
     if (m_DataHandle.Valid()) {
-        ENSURE_EDITOR(L"Time Bar Move").OffsetTimeRange(m_DataHandle, inDiff);
+        ENSURE_EDITOR(QObject::tr("Time Bar Move")).OffsetTimeRange(m_DataHandle, inDiff);
         m_TimelineTranslationManager->GetDoc()
             ->GetCore()
             ->GetDispatch()
@@ -185,7 +185,8 @@ void Qt3DSDMTimelineTimebar::OffsetTime(long inDiff)
 void Qt3DSDMTimelineTimebar::ChangeTime(long inTime, bool inSetStart)
 {
     if (m_DataHandle.Valid()) {
-        ENSURE_EDITOR(L"Time Bar Resize").ResizeTimeRange(m_DataHandle, inTime, inSetStart);
+        ENSURE_EDITOR(QObject::tr("Time Bar Resize")).ResizeTimeRange(m_DataHandle, inTime,
+                                                                      inSetStart);
         m_TimelineTranslationManager->GetDoc()
             ->GetCore()
             ->GetDispatch()

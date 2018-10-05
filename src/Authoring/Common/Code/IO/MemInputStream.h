@@ -42,9 +42,9 @@ public:
     virtual ~CMemInputStream() = 0;
     long Read(void *inBuffer, long inBufferLength) override;
     void Close() override;
-    bool IsValid() override;
-    Q3DStudio::CString GetMimeType() override { return L""; }
-    Q3DStudio::CString GetSource() override { return L""; }
+    bool IsValid() const override;
+    QString GetMimeType() const override { return {}; }
+    QString GetSource() const override { return {}; }
     //========================================================================
     /**
             *	Returns amount read into buffer, which could be zero.

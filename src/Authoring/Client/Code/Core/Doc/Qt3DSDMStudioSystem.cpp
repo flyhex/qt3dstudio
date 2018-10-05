@@ -49,15 +49,6 @@
 using namespace std;
 
 namespace qt3dsdm {
-inline std::wstring GetFullPath(Q3DStudio::CString inSource)
-{
-#ifdef Q_OS_MACOS
-    if (inSource.Left(4) == "res/" || inSource.Left(4) == "res\\")
-        inSource = inSource.Mid(4);
-#endif
-    Qt3DSFile theSourcePath(Qt3DSFile::GetApplicationDirectory().GetAbsolutePath() + inSource);
-    return std::wstring(theSourcePath.GetAbsolutePath());
-}
 
 CStudioSystem::CStudioSystem(CDoc *inDoc)
     : m_Doc(inDoc)

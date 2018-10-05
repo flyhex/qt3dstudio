@@ -55,8 +55,7 @@ ProjectView::ProjectView(const QSize &preferredSize, QWidget *parent) : QQuickWi
   , m_ProjectModel(new ProjectFileSystemModel(this))
   , m_preferredSize(preferredSize)
 {
-    const QString theApplicationPath =
-            Qt3DSFile::GetApplicationDirectory().GetPath().toQString();
+    const QString theApplicationPath = Qt3DSFile::GetApplicationDirectory();
 
     m_defaultBehaviorDir = theApplicationPath + QStringLiteral("/Content/Behavior Library");
     m_defaultEffectDir = theApplicationPath + QStringLiteral("/Content/Effect Library");
@@ -215,13 +214,13 @@ void ProjectView::OnNewPresentation()
     rebuild();
 }
 
-void ProjectView::OnOpenDocument(const Qt3DSFile &inFilename, bool inSucceeded)
+void ProjectView::OnOpenDocument(const QString &inFilename, bool inSucceeded)
 {
     Q_UNUSED(inFilename)
     Q_UNUSED(inSucceeded)
 }
 
-void ProjectView::OnSaveDocument(const Qt3DSFile &inFilename, bool inSucceeded, bool inSaveCopy)
+void ProjectView::OnSaveDocument(const QString &inFilename, bool inSucceeded, bool inSaveCopy)
 {
     Q_UNUSED(inFilename)
     Q_UNUSED(inSucceeded)
@@ -229,7 +228,7 @@ void ProjectView::OnSaveDocument(const Qt3DSFile &inFilename, bool inSucceeded, 
     m_ProjectModel->asyncUpdateReferences();
 }
 
-void ProjectView::OnDocumentPathChanged(const Qt3DSFile &inNewPath)
+void ProjectView::OnDocumentPathChanged(const QString &inNewPath)
 {
     Q_UNUSED(inNewPath)
 }
@@ -285,8 +284,7 @@ void ProjectView::openPresentation(int row)
 {
     if (g_StudioApp.PerformSavePrompt()) {
         const QString path = m_ProjectModel->filePath(row);
-        const Qt3DSFile file(Q3DStudio::CString::fromQString(path));
-        g_StudioApp.OnLoadDocument(file);
+        g_StudioApp.OnLoadDocument(path);
     }
 }
 

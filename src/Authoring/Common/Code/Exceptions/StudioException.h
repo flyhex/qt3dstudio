@@ -28,18 +28,14 @@
 ****************************************************************************/
 
 #ifndef INCLUDED_STUDIO_EXCEPTION_H
-#define INCLUDED_STUDIO_EXCEPTION_H 1
+#define INCLUDED_STUDIO_EXCEPTION_H
 
-#pragma once
-
-#ifdef WIN32
-#include <wchar.h>
-#endif
+#include <QtCore/qstring.h>
 
 class CStudioException
 {
 public:
     virtual ~CStudioException() {}
-    virtual const wchar_t *GetDescription() const = 0;
+    virtual QString GetDescription() const = 0;
 };
 #endif // INCLUDED_STUDIO_EXCEPTION_H

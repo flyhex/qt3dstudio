@@ -200,8 +200,8 @@ public:
 
     // The system may be null in the case where we are running without a UI.
     Q3DStudio::IDirectoryWatchingSystem *GetDirectoryWatchingSystem();
-    bool SetDocumentPath(const Qt3DSFile &inFile);
-    Qt3DSFile GetDocumentPath() const;
+    bool SetDocumentPath(const QString &inFile);
+    QString GetDocumentPath() const;
     void setPresentationId(const QString &id);
     QString getPresentationId() const;
     Q3DStudio::CString GetDocumentDirectory() const;
@@ -209,11 +209,11 @@ public:
     Q3DStudio::CString GetResolvedPathToDoc(const Q3DStudio::CFilePath &inPath);
     QString getRelativePath() const;
 
-    Qt3DSFile CreateUntitledDocument() const;
+    QString CreateUntitledDocument() const;
 
     void CloseDocument();
-    void LoadDocument(const Qt3DSFile &inDocument);
-    void SaveDocument(const Qt3DSFile &inDocument);
+    void LoadDocument(const QString &inDocument);
+    void SaveDocument(const QString &inDocument);
     void CreateNewDocument();
     // In outMap, returns datainput names found from element control
     // bindings but which are missing from (UIP) datainput list
@@ -343,10 +343,10 @@ public:
                                            qt3dsdm::Qt3DSDMPropertyHandle>> *map) override;
     Q3DStudio::IDocumentBufferCache &GetBufferCache() override;
     Q3DStudio::IDocumentReader &GetDocumentReader() override;
-    Q3DStudio::IDocumentEditor &OpenTransaction(const Q3DStudio::CString &inCmdName,
-                                                const char *inFile, int inLine) override;
-    Q3DStudio::IDocumentEditor &MaybeOpenTransaction(const Q3DStudio::CString &cmdName,
-                                                     const char *inFile, int inLine) override;
+    Q3DStudio::IDocumentEditor &OpenTransaction(const QString &inCmdName, const char *inFile,
+                                                int inLine) override;
+    Q3DStudio::IDocumentEditor &MaybeOpenTransaction(const QString &cmdName, const char *inFile,
+                                                     int inLine) override;
     bool IsTransactionOpened() const override;
     void RollbackTransaction() override;
     void CloseTransaction() override;
@@ -487,7 +487,7 @@ protected:
     CCore *m_Core;
     bool m_IsModified;
     bool m_IsTemporary;
-    Qt3DSFile m_DocumentPath;
+    QString m_DocumentPath;
 
     CDataManager *m_DataManager; ///< Manager for handling data properties.
 

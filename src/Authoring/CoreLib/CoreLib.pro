@@ -92,7 +92,6 @@ SOURCES += \
     ../Client/Code/Core/Utility/StudioClipboard.cpp \
     ../Client/Code/Core/Utility/StudioObjectTypes.cpp \
     ../Client/Code/Core/Utility/StudioPreferences.cpp \
-    ../Client/Code/Core/Utility/StudioProjectVariables.cpp \
     ../Client/Code/Core/Utility/TestCmdUtils.cpp \
     ../Client/Code/Core/Commands/Cmd.cpp \
     ../Client/Code/Core/Commands/CmdActivateSlide.cpp \

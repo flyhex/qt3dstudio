@@ -61,7 +61,7 @@ void CMemInputStream::Close()
 {
 }
 
-bool CMemInputStream::IsValid()
+bool CMemInputStream::IsValid() const
 {
     return true;
 }

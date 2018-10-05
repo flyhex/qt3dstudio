@@ -70,9 +70,9 @@ public:
     // CInputStream functions
     long Read(void *outBuffer, long inByteCount) override;
     void Close() override;
-    bool IsValid() override;
-    Q3DStudio::CString GetMimeType() override { return L""; }
-    Q3DStudio::CString GetSource() override { return L""; }
+    bool IsValid() const override;
+    QString GetMimeType() const override { return {}; }
+    QString GetSource() const override { return {}; }
 
     // Ease of use function
     virtual void ReadData(void *inBuffer, long inBufferLength);
@@ -114,7 +114,7 @@ public:
     long Write(const void *inBuffer, long inBufferLength) override;
     void Flush() override;
     void Close() override;
-    bool IsValid() override;
+    bool IsValid() const override;
 
     // Ease of use function
     virtual void WriteData(const void *inBuffer, long inBufferLength);

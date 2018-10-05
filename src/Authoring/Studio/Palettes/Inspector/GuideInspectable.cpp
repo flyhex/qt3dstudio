@@ -309,7 +309,7 @@ qt3dsdm::SValue SGuideInspectableImpl::GetWidth()
 
 Q3DStudio::IDocumentEditor &SGuideInspectableImpl::Editor()
 {
-    return m_Editor.EnsureEditor(L"Set Property", __FILE__, __LINE__);
+    return m_Editor.EnsureEditor(QObject::tr("Set Property"), __FILE__, __LINE__);
 }
 
 void SGuideInspectableImpl::Commit()

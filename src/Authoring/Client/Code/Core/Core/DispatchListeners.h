@@ -170,7 +170,7 @@ public:
     /**
      * The current presentation is being saved.
      */
-    virtual void OnSavingPresentation(const Qt3DSFile *inNewPresentationFile)
+    virtual void OnSavingPresentation(const QString &inNewPresentationFile)
     {
         Q_UNUSED(inNewPresentationFile);
     }
@@ -211,21 +211,21 @@ public:
 class CNavigationListener
 {
 public:
-    virtual void OnNavigate(const Q3DStudio::CString &inURL, bool inForceDisplay) = 0;
+    virtual void OnNavigate(const QString &inURL, bool inForceDisplay) = 0;
 };
 
 class CFileOpenListener
 {
 public:
-    virtual void OnOpenDocument(const Qt3DSFile &inFilename, bool inSucceeded) = 0;
-    virtual void OnSaveDocument(const Qt3DSFile &inFilename, bool inSucceeded, bool inSaveCopy) = 0;
-    virtual void OnDocumentPathChanged(const Qt3DSFile &inNewPath) = 0;
+    virtual void OnOpenDocument(const QString &inFilename, bool inSucceeded) = 0;
+    virtual void OnSaveDocument(const QString &inFilename, bool inSucceeded, bool inSaveCopy) = 0;
+    virtual void OnDocumentPathChanged(const QString &inNewPath) = 0;
 };
 
 class CSelectedNodePropChangeListener
 {
 public:
-    virtual void OnPropValueChanged(const Q3DStudio::CString &inPropertyName) = 0;
+    virtual void OnPropValueChanged(const QString &inPropertyName) = 0;
     virtual void OnMouseDragged(bool inConstrainXAxis, bool inConstrainYAxis) = 0;
 };
 
@@ -263,9 +263,9 @@ class CAppStatusListener
 {
 public:
     virtual ~CAppStatusListener() {}
-    virtual void OnDisplayAppStatus(Q3DStudio::CString &inStatusMsg) = 0;
-    virtual void OnProgressBegin(const Q3DStudio::CString &inActionText,
-                                 const Q3DStudio::CString &inAdditionalText) = 0;
+    virtual void OnDisplayAppStatus(const QString &inStatusMsg) = 0;
+    virtual void OnProgressBegin(const QString &inActionText,
+                                 const QString &inAdditionalText) = 0;
     virtual void OnProgressEnd() = 0;
 };
 
@@ -277,12 +277,11 @@ public:
     virtual ~CFailListener() {}
     virtual void OnAssetDeleteFail() = 0;
     virtual void OnPasteFail() = 0;
-    virtual void OnBuildconfigurationFileParseFail(const Q3DStudio::CString &inMessage) = 0;
+    virtual void OnBuildconfigurationFileParseFail(const QString &inMessage) = 0;
     virtual void OnSaveFail(bool inKnownError) = 0;
-    virtual void OnProjectVariableFail(const Q3DStudio::CString &inMessage) = 0;
-    virtual void OnErrorFail(const Q3DStudio::CString &inText) = 0;
-    virtual void OnRefreshResourceFail(const Q3DStudio::CString &inResourceName,
-                                       const Q3DStudio::CString &inDescription) = 0;
+    virtual void OnErrorFail(const QString &inText) = 0;
+    virtual void OnRefreshResourceFail(const QString &inResourceName,
+                                       const QString &inDescription) = 0;
     virtual void OnUndefinedDatainputsFail(
             const QMultiMap<QString,
                             QPair<qt3dsdm::Qt3DSDMInstanceHandle,
@@ -319,7 +318,7 @@ class IDocumentBufferCacheListener
 public:
     virtual ~IDocumentBufferCacheListener() {}
     // I can't get reference messages to work with the dispatch system.
-    virtual void OnBufferInvalidated(Q3DStudio::CString inString) = 0;
+    virtual void OnBufferInvalidated(const QString &inString) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

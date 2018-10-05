@@ -195,7 +195,8 @@ void ToggleChildrenLock(Q3DStudio::ScopedDocumentEditor &scopedDocEditor,
 void Qt3DSDMTimelineItemBinding::SetLocked(bool inLocked)
 {
     CDoc *theDoc = dynamic_cast<CDoc *>(g_StudioApp.GetCore()->GetDoc());
-    Q3DStudio::ScopedDocumentEditor scopedDocEditor(*theDoc, L"SetLock", __FILE__, __LINE__);
+    Q3DStudio::ScopedDocumentEditor scopedDocEditor(*theDoc, QObject::tr("SetLock"), __FILE__,
+                                                    __LINE__);
 
     SDataModelSceneAsset sceneAsset = m_StudioSystem->GetClientDataModelBridge()->GetSceneAsset();
     ToggleChildrenLock(scopedDocEditor, this, sceneAsset, inLocked);
@@ -767,8 +768,8 @@ void Qt3DSDMTimelineItemBinding::InsertKeyframe()
         return;
 
     TPropertyBindingMap::const_iterator theIter = m_PropertyBindingMap.begin();
-    ScopedDocumentEditor editor(*g_StudioApp.GetCore()->GetDoc(), L"Insert Keyframe", __FILE__,
-                                __LINE__);
+    ScopedDocumentEditor editor(*g_StudioApp.GetCore()->GetDoc(), QObject::tr("Insert Keyframe"),
+                                __FILE__, __LINE__);
     for (; theIter != m_PropertyBindingMap.end(); ++theIter)
         editor->KeyframeProperty(m_DataHandle, theIter->first, false);
 }
@@ -779,13 +780,10 @@ void Qt3DSDMTimelineItemBinding::DeleteAllChannelKeyframes()
         return;
 
     CDoc *theDoc = m_TransMgr->GetDoc();
-    Q3DStudio::ScopedDocumentEditor editor(*theDoc, L"Delete Channel Keyframes", __FILE__,
-                                           __LINE__);
-    for (TPropertyBindingMap::iterator theIter = m_PropertyBindingMap.begin(),
-         theEnd = m_PropertyBindingMap.end();
-         theIter != theEnd; ++theIter) {
-        theIter->second->DeleteAllKeys();
-    }
+    Q3DStudio::ScopedDocumentEditor editor(*theDoc, QObject::tr("Delete Channel Keyframes"),
+                                           __FILE__, __LINE__);
+    for (auto &kv : m_PropertyBindingMap)
+        kv.second->DeleteAllKeys();
 }
 
 IKeyframe *Qt3DSDMTimelineItemBinding::GetKeyframeByTime(long inTime) const

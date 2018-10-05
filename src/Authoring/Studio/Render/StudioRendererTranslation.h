@@ -555,7 +555,7 @@ namespace studio {
 
         void SetPosition(const QT3DSVec3 &inPosition, CUpdateableDocumentEditor &inEditor)
         {
-            inEditor.EnsureEditor(L"Set Position", __FILE__, __LINE__)
+            inEditor.EnsureEditor(QObject::tr("Set Position"), __FILE__, __LINE__)
                 .SetInstancePropertyValue(m_Doc.GetSelectedInstance(),
                                           m_ObjectDefinitions.m_Node.m_Position,
                                           ToDataModel(inPosition));
@@ -563,7 +563,7 @@ namespace studio {
         }
         void SetRotation(const QT3DSVec3 &inRotation, CUpdateableDocumentEditor &inEditor)
         {
-            inEditor.EnsureEditor(L"Set Rotation", __FILE__, __LINE__)
+            inEditor.EnsureEditor(QObject::tr("Set Rotation"), __FILE__, __LINE__)
                 .SetInstancePropertyValue(m_Doc.GetSelectedInstance(),
                                           m_ObjectDefinitions.m_Node.m_Rotation,
                                           ToDataModelRotation(inRotation));
@@ -571,7 +571,7 @@ namespace studio {
         }
         void SetScale(const QT3DSVec3 &inScale, CUpdateableDocumentEditor &inEditor)
         {
-            inEditor.EnsureEditor(L"Set Scale", __FILE__, __LINE__)
+            inEditor.EnsureEditor(QObject::tr("Set Scale"), __FILE__, __LINE__)
                 .SetInstancePropertyValue(m_Doc.GetSelectedInstance(),
                                           m_ObjectDefinitions.m_Node.m_Scale, ToDataModel(inScale));
             inEditor.FireImmediateRefresh(m_Doc.GetSelectedInstance());

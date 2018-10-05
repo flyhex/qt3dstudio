@@ -61,7 +61,7 @@ public:
     virtual bool Write(std::wostringstream &inStringStream);
     void Flush() override;
     void Close() override;
-    bool IsValid() override;
+    bool IsValid() const override;
 };
 
 class CBufferedSeekOutputStream : public CSeekOutputStream
@@ -89,7 +89,7 @@ public:
 
     void Close() override;
 
-    bool IsValid() override;
+    bool IsValid() const override;
 
     // CSeekOutputStream
     long Seek(ESeekPosition inPosition, long inOffset) override;

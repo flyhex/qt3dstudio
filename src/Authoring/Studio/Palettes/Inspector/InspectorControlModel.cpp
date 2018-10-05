@@ -362,8 +362,7 @@ void InspectorControlModel::setMatDatas(std::vector<Q3DStudio::CFilePath> &matDa
         if (values.contains(QStringLiteral("presentation"))
                 && values.contains(QStringLiteral("path"))
                 && values.contains(QStringLiteral("filename"))) {
-            if (values[QStringLiteral("presentation")]
-                    == doc->GetDocumentPath().GetAbsolutePath().toQString()) {
+            if (values[QStringLiteral("presentation")] == doc->GetDocumentPath()) {
                 if (!QFileInfo(values["path"]).exists()) {
                     const auto instance = sceneEditor->getMaterial(
                                 Q3DStudio::CString::fromQString(
@@ -1554,7 +1553,7 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
     Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.getRenderer());
     theRenderer.MakeContextCurrent();
 
-    m_UpdatableEditor.EnsureEditor(L"Set Property", __FILE__, __LINE__)
+    m_UpdatableEditor.EnsureEditor(QObject::tr("Set Property"), __FILE__, __LINE__)
             .SetInstancePropertyValue(instance, handle, v);
 
     theRenderer.ReleaseContext();

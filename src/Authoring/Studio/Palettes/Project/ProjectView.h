@@ -98,9 +98,9 @@ public:
     // CPresentationChangeListener
     void OnNewPresentation() override;
     // CFileOpenListener
-    void OnOpenDocument(const Qt3DSFile &inFilename, bool inSucceeded) override;
-    void OnSaveDocument(const Qt3DSFile &inFilename, bool inSucceeded, bool inSaveCopy) override;
-    void OnDocumentPathChanged(const Qt3DSFile &inNewPath) override;
+    void OnOpenDocument(const QString &inFilename, bool inSucceeded) override;
+    void OnSaveDocument(const QString &inFilename, bool inSucceeded, bool inSaveCopy) override;
+    void OnDocumentPathChanged(const QString &inNewPath) override;
     // IDataModelListener
     void OnBeginDataModelNotifications() override;
     void OnEndDataModelNotifications() override;

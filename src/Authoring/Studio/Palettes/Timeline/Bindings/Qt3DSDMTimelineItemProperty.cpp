@@ -232,7 +232,8 @@ void Qt3DSDMTimelineItemProperty::DeleteAllKeys()
 
     using namespace Q3DStudio;
 
-    ScopedDocumentEditor editor(*m_TransMgr->GetDoc(), L"Delete All Keyframes", __FILE__, __LINE__);
+    ScopedDocumentEditor editor(*m_TransMgr->GetDoc(), QObject::tr("Delete All Keyframes"),
+                                __FILE__, __LINE__);
     for (size_t idx = 0, end = m_AnimationHandles.size(); idx < end; ++idx)
         editor->DeleteAllKeyframes(m_AnimationHandles[idx]);
 }

@@ -113,7 +113,7 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionData_Inputs, &QAction::triggered, this, &CMainFrame::OnFileDataInputs);
     connect(m_ui->action_Connect_to_Device, &QAction::triggered, this,
             &CMainFrame::OnFileConnectToDevice);
-    m_recentItems.reset(new CRecentItems(m_ui->menuRecent_Projects, 0));
+    m_recentItems.reset(new CRecentItems(m_ui->menuRecent_Projects));
     connect(m_recentItems.data(), &CRecentItems::openRecent, this, &CMainFrame::OnFileOpenRecent);
     connect(m_ui->action_Exit, &QAction::triggered, this, &CMainFrame::close);
 
@@ -355,11 +355,11 @@ void CMainFrame::OnCreate()
     CDialogs *theDialogs = g_StudioApp.GetDialogs();
     // this must NOT be in 'command line' mode
     if (theDialogs) {
-        Q3DStudio::CString theMostRecentOpen;
+        QString theMostRecentOpen;
         if (m_recentItems && m_recentItems->GetItemCount() > 0)
-            theMostRecentOpen = m_recentItems->GetItem(0).GetPath();
-        if (theMostRecentOpen.IsEmpty()) // default to exe
-            theMostRecentOpen = Qt3DSFile::GetApplicationDirectory().GetPath();
+            theMostRecentOpen = m_recentItems->GetItem(0);
+        if (theMostRecentOpen.isEmpty()) // default to exe
+            theMostRecentOpen = Qt3DSFile::GetApplicationDirectory();
 
         theDialogs->ResetSettings(theMostRecentOpen);
     }
@@ -1020,8 +1020,7 @@ void CMainFrame::OnPlaybackPreview(const QString &viewerExeName, bool remote)
 {
     if (remote && m_remoteDeploymentSender->isConnected()) {
         g_StudioApp.GetCore()->GetDispatch()->FireOnProgressBegin(
-                    Q3DStudio::CString::fromQString(QObject::tr("Deploying to remote device...")),
-                    "");
+                    QObject::tr("Deploying to remote device..."), {});
         CPreviewHelper::OnDeploy(*m_remoteDeploymentSender);
         g_StudioApp.GetCore()->GetDispatch()->FireOnProgressEnd();
     } else {
@@ -1775,15 +1774,13 @@ void CMainFrame::OnFileConnectToDevice()
 {
     if (m_remoteDeploymentSender->isConnected()) {
         g_StudioApp.GetCore()->GetDispatch()->FireOnProgressBegin(
-                    Q3DStudio::CString::fromQString(
-                        QObject::tr("Disconnecting from remote device...")), "");
+                            QObject::tr("Disconnecting from remote device..."), {});
         m_remoteDeploymentSender->disconnect();
     } else {
         QPair<QString, int> info = m_remoteDeploymentSender->initConnection();
         if (!info.first.isEmpty()) {
             g_StudioApp.GetCore()->GetDispatch()->FireOnProgressBegin(
-                        Q3DStudio::CString::fromQString(
-                            QObject::tr("Connecting to remote device...")), "");
+                            QObject::tr("Connecting to remote device..."), {});
             m_remoteDeploymentSender->connect(info);
         } else {
             m_ui->action_Connect_to_Device->setChecked(false);
@@ -1813,7 +1810,7 @@ void CMainFrame::RecheckSizingMode()
 /**
  * Callback when a Core is opened or fails to open.
  */
-void CMainFrame::OnOpenDocument(const Qt3DSFile &inFilename, bool inSucceeded)
+void CMainFrame::OnOpenDocument(const QString &inFilename, bool inSucceeded)
 {
     if (inSucceeded)
         m_recentItems->AddRecentItem(inFilename);
@@ -1825,7 +1822,7 @@ void CMainFrame::OnOpenDocument(const Qt3DSFile &inFilename, bool inSucceeded)
 /**
  * Callback when a Core is saved or fails to save.
  */
-void CMainFrame::OnSaveDocument(const Qt3DSFile &inFilename, bool inSucceeded, bool inSaveCopy)
+void CMainFrame::OnSaveDocument(const QString &inFilename, bool inSucceeded, bool inSaveCopy)
 {
     if (!inSaveCopy)
         OnOpenDocument(inFilename, inSucceeded);
@@ -1835,18 +1832,19 @@ void CMainFrame::OnSaveDocument(const Qt3DSFile &inFilename, bool inSucceeded, b
 /**
  * Callback for when a the doc gets a new path
  */
-void CMainFrame::OnDocumentPathChanged(const Qt3DSFile &inNewPath)
+void CMainFrame::OnDocumentPathChanged(const QString &inNewPath)
 {
-    QString theTitle = inNewPath.GetName().toQString();
+    QFileInfo info(inNewPath);
+    QString theTitle = info.fileName();
     if (theTitle.isEmpty())
         theTitle = QObject::tr("Untitled");
 
-    theTitle = theTitle + " - " + QObject::tr("Qt 3D Studio");
+    theTitle.append(QStringLiteral(" - ") + QObject::tr("Qt 3D Studio"));
 
     // TODO: Move this whole pile to the studio app
     setWindowTitle(theTitle);
 
-    if (inNewPath.Exists())
+    if (info.exists())
         m_recentItems->AddRecentItem(inNewPath);
 }
 
@@ -1972,8 +1970,7 @@ void CMainFrame::handleGeometryAndState(bool save)
 
 void CMainFrame::handleRestart()
 {
-    QStringList presentationFile = QStringList(g_StudioApp.GetCore()->GetDoc()
-                                               ->GetDocumentPath().GetAbsolutePath().toQString());
+    QStringList presentationFile = QStringList(g_StudioApp.GetCore()->GetDoc()->GetDocumentPath());
     close();
     QProcess::startDetached(qApp->arguments()[0], presentationFile);
 }

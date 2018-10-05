@@ -125,12 +125,12 @@ public:
     // then close the transaction and a command will be generated which will
     // automatically do most of the work of doing/undoing changes
     // to the data model (and the graphs, and the selection state).
-    virtual Q3DStudio::IDocumentEditor &OpenTransaction(const Q3DStudio::CString &cmdName,
+    virtual Q3DStudio::IDocumentEditor &OpenTransaction(const QString &cmdName,
                                                         const char *inFile, int inLine) = 0;
 
     // Get the document editor if a transaction has already been opened.
     // Else open a new transaction.
-    virtual Q3DStudio::IDocumentEditor &MaybeOpenTransaction(const Q3DStudio::CString &cmdName,
+    virtual Q3DStudio::IDocumentEditor &MaybeOpenTransaction(const QString &cmdName,
                                                              const char *inFile, int inLine) = 0;
     virtual bool IsTransactionOpened() const = 0;
     // Undo whatever has been done and clear the transaction's

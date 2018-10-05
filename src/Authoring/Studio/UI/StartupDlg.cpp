@@ -44,7 +44,6 @@
 CStartupDlg::CStartupDlg(QWidget *pParent)
     : QDialog(pParent, Qt::MSWindowsFixedSizeDialogHint)
     , m_Choice(EStartupChoice_Invalid)
-    , m_RecentDocSelected("")
     , m_ui(new Ui::StartupDlg)
     , m_palette(nullptr)
 {
@@ -97,8 +96,7 @@ void CStartupDlg::OnInitDialog()
     connect(m_ui->openDocument, &ClickableLabel::clicked, this, &CStartupDlg::OnOpenDocClicked);
 
     // Load the product version
-    m_ProductVersionStr = QStringLiteral("Qt 3D Studio v")
-            + CStudioPreferences::GetVersionString().toQString();
+    m_ProductVersionStr = QStringLiteral("Qt 3D Studio v") + CStudioPreferences::GetVersionString();
     m_ui->versionStr->setText(m_ProductVersionStr);
 
     // Populate the recent document list
@@ -111,10 +109,9 @@ void CStartupDlg::OnInitDialog()
 
         if (m_RecentDocs.size() > theIndex) {
             // Set the name
-            recent->setText(m_RecentDocs[theIndex].GetName().toQString());
+            recent->setText(QFileInfo(m_RecentDocs[theIndex]).fileName());
             // Set path and date to tooltip
-            QFileInfo thePath(m_RecentDocs[theIndex].GetAbsolutePath().toQString());
-            QString toolTip = thePath.absoluteDir().path();
+            QString toolTip = m_RecentDocs[theIndex];
             toolTip.append(QStringLiteral("\n"));
             toolTip.append(GetFileTimeReadable(m_RecentDocs[theIndex]));
             recent->setToolTip(toolTip);
@@ -125,7 +122,7 @@ void CStartupDlg::OnInitDialog()
     }
 }
 
-void CStartupDlg::AddRecentItem(const Qt3DSFile &inRecentItem)
+void CStartupDlg::AddRecentItem(const QString &inRecentItem)
 {
     m_RecentDocs.push_back(inRecentItem);
 }
@@ -135,7 +132,7 @@ CStartupDlg::EStartupChoice CStartupDlg::GetChoice()
     return m_Choice;
 }
 
-Qt3DSFile CStartupDlg::GetRecentDoc() const
+QString CStartupDlg::GetRecentDoc() const
 {
     return m_RecentDocSelected;
 }

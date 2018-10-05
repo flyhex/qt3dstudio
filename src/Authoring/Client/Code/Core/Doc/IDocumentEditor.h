@@ -90,7 +90,7 @@ protected:
     virtual ~IDeletingReferencedObjectHandler() {}
 
 public:
-    virtual void DisplayMessageBox(const Q3DStudio::CString &inDescription) = 0;
+    virtual void DisplayMessageBox(const QString &inDescription) = 0;
 };
 
 class IMoveRenameHandler
@@ -99,8 +99,7 @@ protected:
     virtual ~IMoveRenameHandler() {}
 
 public:
-    virtual void displayMessageBox(const Q3DStudio::CString &origName,
-                                   const Q3DStudio::CString &newName) = 0;
+    virtual void displayMessageBox(const QString &origName, const QString &newName) = 0;
 };
 
 class IDocumentEditor : public IDocumentReader
@@ -491,13 +490,13 @@ public:
 struct ScopedDocumentEditor
 {
     IDocumentEditor &m_Editor;
-    ScopedDocumentEditor(IDoc &inDoc, const Q3DStudio::CString &inCommandName, const char *inFile,
+    ScopedDocumentEditor(IDoc &inDoc, const QString &inCommandName, const char *inFile,
                          int inLine);
     ~ScopedDocumentEditor() { m_Editor.Release(); }
     IDocumentEditor *operator->() { return &m_Editor; }
 };
 
-#define SCOPED_DOCUMENT_EDITOR(doc, cmdname) ScopedDocumentEditor(doc, Q3DStudio::CString::fromQString(cmdname), __FILE__, __LINE__)
+#define SCOPED_DOCUMENT_EDITOR(doc, cmdname) ScopedDocumentEditor(doc, cmdname, __FILE__, __LINE__)
 
 class CUpdateableDocumentEditor
 {
@@ -517,7 +516,7 @@ public:
     ~CUpdateableDocumentEditor();
     IDoc &GetEditorDoc() { return m_EditorIDocDoc; }
     bool HasEditor() const;
-    IDocumentEditor &EnsureEditor(const wchar_t *inCommandName, const char *inFile, int inLine);
+    IDocumentEditor &EnsureEditor(const QString &inCommandName, const char *inFile, int inLine);
     void FireImmediateRefresh(qt3dsdm::Qt3DSDMInstanceHandle *inInstances, long inInstanceCount);
     void FireImmediateRefresh(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     {

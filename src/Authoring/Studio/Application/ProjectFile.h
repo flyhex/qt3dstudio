@@ -45,7 +45,7 @@ class ProjectFile : public QObject
 public:
     ProjectFile();
 
-    void create(const QString &projectName, const QString &projectPath);
+    void create(const QString &uiaPath);
     void ensureProjectFile();
     void initProjectFile(const QString &presPath);
     void loadSubpresentationsAndDatainputs(

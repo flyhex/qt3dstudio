@@ -783,7 +783,7 @@ struct SRendererImpl : public IStudioRenderer,
                         m_Translation->PickRulers(inPoint);
                 if (pickResult.hasValue()) {
                     Q3DStudio::IDocumentEditor &docEditor(
-                                m_UpdatableEditor.EnsureEditor(L"Create Guide",
+                                m_UpdatableEditor.EnsureEditor(QObject::tr("Create Guide"),
                                                                __FILE__, __LINE__));
                     Qt3DSDMGuideHandle newGuide = docEditor.CreateGuide(*pickResult);
                     m_PickResult = SStudioPickValue(newGuide);

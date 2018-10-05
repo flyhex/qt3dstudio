@@ -70,8 +70,7 @@ public:
     virtual ~CDialogs();
 
     void DisplayAssetDeleteFailed();
-    void DisplayRefreshResourceFailed(const Q3DStudio::CString &inResourceName,
-                                      const Q3DStudio::CString &inDescription);
+    void DisplayRefreshResourceFailed(const QString &inResourceName, const QString &inDescription);
     QString ConfirmRefreshModelFile(const QString &inOriginalPath);
     QList<QUrl> SelectAssets(QString &outPath, Q3DStudio::DocumentEditorFileType::Enum assetType);
 
@@ -134,10 +133,8 @@ public:
     QString GetNewDocumentChoice(const QString &inInitialDirectory = {}, bool isProject = true);
     QString GetFileOpenChoice(const QString &inInitialDirectory = {});
 
-    void DisplayImportFailed(const QUrl &inURL, const QString &inDescription,
-                             bool inWarningsOnly);
-    void DisplayLoadingPresentationFailed(const Qt3DSFile &inPresentation,
-                                          const QString &inErrorText);
+    void DisplayImportFailed(const QUrl &inURL, const QString &inDescription, bool inWarningsOnly);
+    void DisplayLoadingPresentationFailed(const QFileInfo &loadFileInfo, const QString &errorText);
     void DisplaySavingPresentationFailed();
     void DisplaySaveReadOnlyFailed(const QString &inSavedLocation);
     void DisplayObjectRenamed(const QString &origName, const QString &newName, bool async = false);
@@ -156,13 +153,13 @@ public:
 
     bool ConfirmRevert();
 
-    void DisplayProgressScreen(const Q3DStudio::CString &inActionText,
-                               const Q3DStudio::CString &inAdditionalText);
+    void DisplayProgressScreen(const QString &inActionText,
+                               const QString &inAdditionalText);
     void DestroyProgressScreen();
 
     void DisplayEnvironmentVariablesError(const Q3DStudio::CString &inErrorMessage);
 
-    void ResetSettings(const Q3DStudio::CString &inCurrentDocPath = "");
+    void ResetSettings(const QString &inCurrentDocPath = {});
 
     bool DisplayResetKeyframeValuesDlg();
     void DisplayPasteFailed();

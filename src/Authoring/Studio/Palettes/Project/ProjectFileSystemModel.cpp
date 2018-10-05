@@ -180,9 +180,8 @@ void ProjectFileSystemModel::updateReferences()
     // Add current presentation to renderables list
     renderableList.insert(doc->getPresentationId());
     subpresentationRecord.push_back(
-                SubPresentationRecord(
-                    QString(), doc->getPresentationId(),
-                    projectDir.relativeFilePath(doc->GetDocumentPath().GetPath().toQString())));
+                SubPresentationRecord({}, doc->getPresentationId(),
+                                      projectDir.relativeFilePath(doc->GetDocumentPath())));
 
     auto addReferencesPresentation = [this, doc, &projectPath](const Q3DStudio::CString &str) {
         addPathsToReferences(projectPath, doc->GetResolvedPathToDoc(str).toQString());
@@ -995,8 +994,7 @@ void ProjectFileSystemModel::asyncUpdateReferences()
 
 bool ProjectFileSystemModel::isCurrentPresentation(const QString &path) const
 {
-    return path == g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetPath().toQString()
-            .replace(QLatin1String("\\"), QLatin1String("/"));
+    return path == g_StudioApp.GetCore()->GetDoc()->GetDocumentPath();
 }
 
 bool ProjectFileSystemModel::isInitialPresentation(const QString &path) const

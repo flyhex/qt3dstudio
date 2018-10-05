@@ -78,6 +78,5 @@ SOURCES += \
     Code/Memory/MemoryObject.cpp \
     Code/Serialize/FormattedInputStream.cpp \
     Code/Serialize/FormattedOutputStream.cpp \
-    Code/Serialize/PreferencesSerializer.cpp \
 
 HEADERS = Code/Literals.h

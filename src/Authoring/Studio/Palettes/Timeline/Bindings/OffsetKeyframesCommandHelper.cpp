@@ -56,7 +56,7 @@ void COffsetKeyframesCommandHelper::SetCommandTime(qt3dsdm::Qt3DSDMKeyframeHandl
                                                    long inTime)
 {
     // The DataModel system will take care of merging these under the hood.
-    ENSURE_EDITOR(L"Set Keyframe Time").SetKeyframeTime(inKeyframe, inTime);
+    ENSURE_EDITOR(QObject::tr("Set Keyframe Time")).SetKeyframeTime(inKeyframe, inTime);
 }
 
 // equivalent to commit (onmouseup)

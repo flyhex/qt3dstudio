@@ -26,280 +26,175 @@
 **
 ****************************************************************************/
 
-#include "Qt3DSCommonPrecompile.h"
 #include "Preferences.h"
-#include "PreferencesSerializer.h"
-#include "StringTokenizer.h"
+#include <QtCore/qfile.h>
 
-CPreferencesSerializer CPreferences::s_PreferencesSerializer;
-
-//=============================================================================
-/**
- * Copy constructor.
- */
-CPreferences::CPreferences(const CPreferences &inPrefs)
+CPreferences::CPreferences()
 {
-    m_TagPath = inPrefs.m_TagPath;
 }
 
 CPreferences::~CPreferences()
 {
+    save();
 }
 
-CPreferences &CPreferences::operator=(const CPreferences &inPrefs)
+void CPreferences::save()
 {
-    if (&inPrefs != this) {
-        m_TagPath = inPrefs.m_TagPath;
+    if (!m_PreferencesFile.isEmpty()) {
+        QFile file(m_PreferencesFile);
+        file.open(QIODevice::WriteOnly);
+        file.resize(0);
+        file.write(m_domDoc.toByteArray(4));
     }
-    return *this;
 }
 
-//=============================================================================
 /**
- * Sets the preferences serialization file
+ * Sets the preferences file path
  * This sets the applications base path for all preferences that are to be
- * loaded. This should be called before any CPreferences are created.
- * @param inFileName preferences serialization file.
+ * loaded. It also creates the preferences file if it doesn't exist. This
+ *  should be called before any CPreferences are created.
+ * @param filePath preferences serialization file path.
  */
-void CPreferences::SetPreferencesFile(const Q3DStudio::CString &inFileName)
+void CPreferences::SetPreferencesFile(const QString &filePath)
 {
-    s_PreferencesSerializer.SetPreferencesFile(inFileName);
-}
+    if (m_PreferencesFile == filePath)
+        return;
 
-//=============================================================================
-/**
- * Get the User Preferences for this application.
- * This opens the Registry from HKEY_CURRENT_USER with key name set in
- * SetRegistryRoot.
- * Any values are in the user specific area of the registry.
- * @return the user preferences.
- */
-CPreferences CPreferences::GetUserPreferences()
-{
-    return CPreferences(L"");
-}
+    m_PreferencesFile = filePath;
 
-//=============================================================================
-/**
- * Get the User Preferences for this this application.
- * This opens the Registry from HKEY_CURRENT_USER with the key as inLocation
- * appended to the Registry Root.
- * Any values are in the user specific area of the registry.
- * @param inLocation appended to RegistryRoot to get the sub key location.
- * @return the user preferences.
- */
-CPreferences CPreferences::GetUserPreferences(const Q3DStudio::CString &inLocation)
-{
-    return CPreferences(inLocation);
-}
+    QFile file(m_PreferencesFile);
+    if (!file.exists()) {
+        m_domDoc.setContent(QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+                                           "<Settings>"
+                                           "</Settings>"));
 
-//=============================================================================
-/**
- * Set the value of inKey to inValue.
- * @param inKey the name of the key to set.
- * @param inValue the value for the key.
- */
-void CPreferences::SetStringValue(const Q3DStudio::CString &inKey,
-                                  const Q3DStudio::CString &inValue)
-{
-    s_PreferencesSerializer.Revert();
-    s_PreferencesSerializer.Begin(m_TagPath);
-    s_PreferencesSerializer.SetSubElemValue(inKey, inValue);
-}
-
-//=============================================================================
-/**
- * Get the value of inKey.
- * @param inKey the name of the key to get.
- * @param inDefaultValue the value to return if inKey's value cannot be gotten.
- * @return the value of inKey or inDefaultValue if an error ocurred.
- */
-Q3DStudio::CString CPreferences::GetStringValue(const Q3DStudio::CString &inKey,
-                                                const Q3DStudio::CString &inDefaultValue)
-{
-    Q3DStudio::CString theValue;
-    s_PreferencesSerializer.Revert();
-    s_PreferencesSerializer.Begin(m_TagPath);
-    if (!s_PreferencesSerializer.GetSubElemValue(inKey, theValue)) {
-        theValue = inDefaultValue;
-    }
-
-    return theValue;
-}
-
-//=============================================================================
-/**
- * Set the value of inKey to inValue.
- * @param inKey the name of the key to set.
- * @param inValue the value for the key.
- */
-void CPreferences::SetLongValue(const Q3DStudio::CString &inKey, long inValue)
-{
-    s_PreferencesSerializer.Revert();
-    s_PreferencesSerializer.Begin(m_TagPath);
-    Q3DStudio::CString theStrValue;
-    theStrValue.Format(_LSTR("%ld"), inValue);
-
-    s_PreferencesSerializer.SetSubElemValue(inKey, theStrValue);
-}
-
-//=============================================================================
-/**
- * Get the value of inKey.
- * @param inKey the name of the key to get.
- * @param inDefaultValue the value to return if inKey's value cannot be gotten.
- * @return the value of inKey or inDefaultValue if an error occurred.
- */
-long CPreferences::GetLongValue(const Q3DStudio::CString &inKey, long inDefaultValue)
-{
-    long theValue;
-    Q3DStudio::CString theStrValue = GetStringValue(inKey, Q3DStudio::CString(""));
-    if (theStrValue == "") {
-        theValue = inDefaultValue;
+        file.open(QIODevice::WriteOnly);
+        file.resize(0);
+        file.write(m_domDoc.toByteArray(4));
     } else {
-        theValue = atol(theStrValue.GetCharStar());
+        file.open(QIODevice::ReadOnly);
+        m_domDoc.setContent(&file);
     }
-
-    return theValue;
 }
 
-//=============================================================================
-/**
- * Set the value of inKey to inValue.
- * @param inKey the name of the key to set.
- * @param inValue the value for the key.
- */
-void CPreferences::SetValue(const Q3DStudio::CString &inKey, bool inValue)
+void CPreferences::SetStringValue(const QString &key, const QString &value,
+                                  const QString &group)
 {
-    long theRegValue = inValue ? 1 : 0;
-
-    SetLongValue(inKey, theRegValue);
+    setValue(key, value, group);
 }
 
-//=============================================================================
-/**
- * Get the value of inKey.
- * @param inKey the name of the key to get.
- * @param inDefaultValue the value to return if inKey's value cannot be gotten.
- * @return the value of inKey or inDefaultValue if an error occurred.
- */
-bool CPreferences::GetValue(const Q3DStudio::CString &inKey, bool inDefaultValue)
+QString CPreferences::GetStringValue(const QString &key, const QString &defaultValue,
+                                     const QString &group)
 {
-    long theDefaultValue = inDefaultValue ? 1 : 0;
-    long theRegValue = GetLongValue(inKey, theDefaultValue);
+    QString value = getValue(key, group);
+
+    return value.isEmpty() ? defaultValue : value;
+}
+
+void CPreferences::SetLongValue(const QString &key, long value,
+                                const QString &group)
+{
+    setValue(key, QString::number(value), group);
+}
+
+long CPreferences::GetLongValue(const QString &key, long defaultValue,
+                                const QString &group)
+{
+    QString theStrValue = GetStringValue(key, {}, group);
+
+    return theStrValue.isEmpty() ? defaultValue : theStrValue.toLong();
+}
+
+void CPreferences::SetValue(const QString &key, bool value, const QString &group)
+{
+    long theRegValue = value ? 1 : 0;
+
+    SetLongValue(key, theRegValue, group);
+}
+
+bool CPreferences::GetValue(const QString &key, bool defaultValue, const QString &group)
+{
+    long theDefaultValue = defaultValue ? 1 : 0;
+    long theRegValue = GetLongValue(key, theDefaultValue, group);
 
     return theRegValue ? true : false;
 }
 
-//=============================================================================
-/**
- * Set the value of inKey to inValue.
- * @param inKey the name of the key to set.
- * @param inValue the value for the key.
- */
-void CPreferences::SetValue(const Q3DStudio::CString &inKey, double inValue)
+void CPreferences::SetValue(const QString &key, double value, const QString &group)
 {
-    s_PreferencesSerializer.Revert();
-    s_PreferencesSerializer.Begin(m_TagPath);
-    Q3DStudio::CString theStrValue;
-    theStrValue.Format(_LSTR("%20.2f"), inValue);
-
-    s_PreferencesSerializer.SetSubElemValue(inKey, theStrValue);
+    setValue(key, QString::number(value), group);
 }
 
-//=============================================================================
-/**
- * Get the value of inKey.
- * @param inKey the name of the key to get.
- * @param inDefaultValue the value to return if inKey's value cannot be gotten.
- * @return the value of inKey or inDefaultValue if an error occurred.
- */
-double CPreferences::GetValue(const Q3DStudio::CString &inKey, double inDefaultValue)
+double CPreferences::GetValue(const QString &key, double defaultValue, const QString &group)
 {
-    double theValue;
-    Q3DStudio::CString theStrValue = GetStringValue(inKey, Q3DStudio::CString(""));
-    if (theStrValue == "") {
-        theValue = inDefaultValue;
-    } else {
-        theValue = atof(theStrValue.GetCharStar());
+    QString theStrValue = GetStringValue(key, {}, group);
+
+    return theStrValue.isEmpty() ? defaultValue : theStrValue.toDouble();
+}
+
+CColor CPreferences::GetColorValue(const QString &key, CColor defaultColor, const QString &group)
+{
+    QString theColorString = GetStringValue(key, {}, group);
+    if (!theColorString.isEmpty()) {
+        QStringList rgb = theColorString.split(QStringLiteral(" "));
+        return ::CColor(rgb.at(0).toInt(), rgb.at(1).toInt(), rgb.at(2).toInt());
     }
 
-    return theValue;
+    return defaultColor;
 }
 
-//=============================================================================
-/**
- * Get the value of inKey as a color.
- * @param inKey the name of the key to get.
- * @param inDefaultColor the value to return if inKey's value cannot be gotten.
- * @return the value of inKey or inDefaultColor if an error occurred.
- */
-CColor CPreferences::GetColorValue(const Q3DStudio::CString &inKey, CColor inDefaultColor)
+void CPreferences::SetColorValue(const QString &key, CColor value, const QString &group)
 {
-    CColor theRetColor = inDefaultColor;
-    Q3DStudio::CString theColorString = GetStringValue(inKey, "");
-    if (theColorString != "") {
-        CStringTokenizer theTokenizer(theColorString, " ");
-        Q3DStudio::CString theR = theTokenizer.GetCurrentPartition();
-        ++theTokenizer;
-        Q3DStudio::CString theG = theTokenizer.GetCurrentPartition();
-        ++theTokenizer;
-        Q3DStudio::CString theB = theTokenizer.GetCurrentPartition();
+    QString rgbStr = QString("%1 %2 %2").arg(value.red).arg(value.green).arg(value.blue);
+    setValue(key, rgbStr, group);
+}
 
-        theRetColor =
-            ::CColor(atol(theR.GetCharStar()), atol(theG.GetCharStar()), atol(theB.GetCharStar()));
+QString CPreferences::getValue(const QString &key, const QString &group)
+{
+    if (m_PreferencesFile.isEmpty())
+        return {};
+
+    QDomElement parentElem = group.isEmpty() ? m_domDoc.documentElement()
+                                             : m_domDoc.documentElement().firstChildElement(group);
+    if (!parentElem.isNull()) {
+        QDomNodeList itemNodes = parentElem.elementsByTagName(QStringLiteral("Item"));
+        if (!itemNodes.isEmpty()) {
+            for (int i = 0; i < itemNodes.count(); ++i) {
+                QDomElement itemElem = itemNodes.at(i).toElement();
+                if (itemElem.attribute(QStringLiteral("Name")) == key)
+                    return itemElem.attribute(QStringLiteral("value"));
+            }
+        }
     }
-    return theRetColor;
+
+    return {};
 }
 
-//=============================================================================
-/**
- * Set the value of inKey to inValue.
- * @param inKey the name of the key to set.
- * @param inValue the value for the key.
- */
-void CPreferences::SetColorValue(const Q3DStudio::CString &inKey, CColor inValue)
+void CPreferences::setValue(const QString &key, const QString &value,
+                            const QString &group)
 {
-    s_PreferencesSerializer.Revert();
-    s_PreferencesSerializer.Begin(m_TagPath);
-    Q3DStudio::CString theStrValue;
-    theStrValue.Format(_LSTR("%i %i %i"), inValue.GetRed(), inValue.GetGreen(), inValue.GetBlue());
-    s_PreferencesSerializer.SetSubElemValue(inKey, theStrValue);
-}
+    if (m_domDoc.isNull())
+        return;
 
-void CPreferences::Clear()
-{
-    s_PreferencesSerializer.Revert();
-    s_PreferencesSerializer.Remove(m_TagPath);
-}
+    QDomElement parentElem = group.isEmpty() ? m_domDoc.documentElement()
+                                             : m_domDoc.documentElement().firstChildElement(group);
+    if (!parentElem.isNull()) {
+        QDomNodeList itemNodes = parentElem.elementsByTagName(QStringLiteral("Item"));
+        if (!itemNodes.isEmpty()) {
+            for (int i = 0; i < itemNodes.count(); ++i) {
+                QDomElement itemElem = itemNodes.at(i).toElement();
+                if (itemElem.attribute(QStringLiteral("Name")) == key) {
+                    // property exist, update it
+                    itemElem.setAttribute(QStringLiteral("value"), value);
+                    return;
+                }
+            }
+        }
 
-long CPreferences::GetItemCount()
-{
-    s_PreferencesSerializer.Revert();
-    s_PreferencesSerializer.Begin(m_TagPath);
-    return s_PreferencesSerializer.CountSubElems();
-}
-
-//====================================================================
-/**
- * 	removes the specified sub element
- *	@param	inKeyName	the name of the sub element to be removed
- */
-void CPreferences::RemoveKey(const Q3DStudio::CString &inKeyName)
-{
-    s_PreferencesSerializer.Revert();
-    s_PreferencesSerializer.Begin(m_TagPath);
-    s_PreferencesSerializer.RemoveSubElem(inKeyName);
-}
-
-//====================================================================
-/**
- * 	Determines if the key exists
- *	@param	inKeyName	the name of the subkey
- */
-bool CPreferences::Exists(const Q3DStudio::CString &inKeyName)
-{
-    s_PreferencesSerializer.Revert();
-    s_PreferencesSerializer.Begin(m_TagPath);
-    return s_PreferencesSerializer.ExistElem(inKeyName);
+        // if property doesn't exist, create a new one
+        QDomElement elem = m_domDoc.createElement("Item");
+        elem.setAttribute(QStringLiteral("Name"), key);
+        elem.setAttribute(QStringLiteral("value"), value);
+        parentElem.appendChild(elem);
+    }
 }

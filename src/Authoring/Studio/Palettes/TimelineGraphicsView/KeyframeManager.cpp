@@ -554,7 +554,7 @@ void KeyframeManager::SetKeyframeInterpolation()
     if (g_StudioApp.GetDialogs()->PromptForKeyframeInterpolation(theEaseIn, theEaseOut)) {
         // Note: Having "editor" variable here is important as its destructor
         // creates proper transaction
-        Q3DStudio::ScopedDocumentEditor editor(*theDoc, L"Set Keyframe Interpolation",
+        Q3DStudio::ScopedDocumentEditor editor(*theDoc, QObject::tr("Set Keyframe Interpolation"),
                                         __FILE__, __LINE__);
         for (Keyframe *keyframe : qAsConst(m_selectedKeyframes)) {
             Qt3DSDMTimelineKeyframe *theTimelineKeyframe = keyframe->binding;
@@ -586,7 +586,7 @@ void KeyframeManager::SetChangedKeyframes()
     qt3dsdm::Qt3DSDMInstanceHandle selectedInstance = theDoc->GetSelectedInstance();
     if (selectedInstance.Valid()) {
         using namespace Q3DStudio;
-        Q3DStudio::ScopedDocumentEditor editor(*theDoc, L"Set Changed Keyframes",
+        Q3DStudio::ScopedDocumentEditor editor(*theDoc, QObject::tr("Set Changed Keyframes"),
                                                __FILE__, __LINE__);
         CStudioSystem *theStudioSystem = theDoc->GetStudioSystem();
         // Get all animated properties.

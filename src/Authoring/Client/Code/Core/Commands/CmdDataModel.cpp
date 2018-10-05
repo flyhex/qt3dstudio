@@ -77,11 +77,11 @@ CmdDataModel::~CmdDataModel()
 {
 }
 
-void CmdDataModel::SetName(const Q3DStudio::CString &inName)
+void CmdDataModel::SetName(const QString &inName)
 {
     m_Name = inName;
 }
-Q3DStudio::CString CmdDataModel::GetName() const
+QString CmdDataModel::GetName() const
 {
     return m_Name;
 }
@@ -134,7 +134,7 @@ void CmdDataModel::ReleaseConsumer(bool inRunNotifications)
 void CmdDataModel::DataModelUndo()
 {
     if (HasTransactions()) {
-        qCInfo(qt3ds::TRACE_INFO) << "Undoing " << m_Name.GetCharStar()
+        qCInfo(qt3ds::TRACE_INFO) << "Undoing " << m_Name
                   << " generated from: " << m_File.GetCharStar() << "(" << m_Line << ")";
         m_AfterDoAppState.Store(m_Doc);
         m_AfterDoAppState.PreNotify(m_BeforeDoAppState, m_Doc);
@@ -155,7 +155,7 @@ void CmdDataModel::RunUndoNotifications()
 void CmdDataModel::DataModelRedo()
 {
     if (HasTransactions()) {
-        qCInfo(qt3ds::TRACE_INFO) << "Redoing " << m_Name.GetCharStar()
+        qCInfo(qt3ds::TRACE_INFO) << "Redoing " << m_Name
                   << " generated from: " << m_File.GetCharStar() << "(" << m_Line << ")";
         m_BeforeDoAppState.Store(m_Doc);
         m_BeforeDoAppState.PreNotify(m_AfterDoAppState, m_Doc);

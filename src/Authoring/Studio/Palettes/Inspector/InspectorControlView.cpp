@@ -393,7 +393,7 @@ void InspectorControlView::showContextMenu(int x, int y, int handle, int instanc
 void InspectorControlView::toggleMasterLink()
 {
     Q3DStudio::ScopedDocumentEditor editor(*g_StudioApp.GetCore()->GetDoc(),
-                                           L"Link Property", __FILE__, __LINE__);
+                                           QObject::tr("Link Property"), __FILE__, __LINE__);
     bool wasLinked = editor->IsPropertyLinked(m_instance, m_handle);
 
     if (wasLinked)
@@ -650,10 +650,10 @@ bool InspectorControlView::toolTipsEnabled()
 QString InspectorControlView::convertPathToProjectRoot(const QString &presentationPath)
 {
     QDir projDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath());
-    QFileInfo presentationFile(g_StudioApp.GetCore()->GetDoc()->GetDocumentPath()
-                               .GetAbsolutePath().toQString());
+    QFileInfo presentationFile(g_StudioApp.GetCore()->GetDoc()->GetDocumentPath());
     QDir presentationDir(presentationFile.absolutePath());
     QString absPath = presentationDir.absoluteFilePath(presentationPath);
+
     return projDir.relativeFilePath(absPath);
 }
 

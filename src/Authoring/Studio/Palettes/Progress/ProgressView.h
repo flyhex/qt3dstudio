@@ -55,8 +55,8 @@ public:
     CProgressView(QWidget *parent = nullptr);
     virtual ~CProgressView();
 
-    void SetActionText(const Q3DStudio::CString &inActionText);
-    void SetAdditionalText(const Q3DStudio::CString &inAdditionalText);
+    void SetActionText(const QString &inActionText);
+    void SetAdditionalText(const QString &inAdditionalText);
 
 protected:
     Ui::ProgressDlg *m_ui;

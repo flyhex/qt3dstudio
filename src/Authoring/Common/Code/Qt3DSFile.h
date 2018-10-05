@@ -90,7 +90,7 @@ public:
 
     OSErr SetReadOnly(bool inReadOnlyFlag);
 
-    static Qt3DSFile GetApplicationDirectory();
+    static QString GetApplicationDirectory();
     static Qt3DSFile GetTemporaryFile(const Q3DStudio::CString &inExtension);
     static Qt3DSFile GetTemporaryFile();
     static bool IsPathRelative(const Q3DStudio::CString &inPath);

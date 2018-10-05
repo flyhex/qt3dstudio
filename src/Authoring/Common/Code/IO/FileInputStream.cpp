@@ -31,11 +31,11 @@
 #include "FileInputStream.h"
 #include "IOLibraryException.h"
 
-CFileInputStream::CFileInputStream(const Q3DStudio::CString &inFilename)
+CFileInputStream::CFileInputStream(const QString &inFilename)
     : m_FileName(inFilename)
     , m_ReadBytesFromCurrentBuffer(0)
     , m_AvailableBytesInBuffer(0)
-    , m_File(inFilename.toQString())
+    , m_File(inFilename)
 {
     m_InternalBuffer[0] = '\0';
     if (!m_File.open(QFile::ReadOnly))
@@ -178,12 +178,12 @@ void CFileInputStream::Close()
  *	Does not check for EOF.
  *	@param outResult true if file is open.
  */
-bool CFileInputStream::IsValid()
+bool CFileInputStream::IsValid() const
 {
     return m_File.isOpen();
 }
 
-Q3DStudio::CString CFileInputStream::GetSource()
+QString CFileInputStream::GetSource() const
 {
     return m_FileName;
 }

@@ -35,7 +35,6 @@
 #include "Doc.h"
 #include "StudioPreferences.h"
 #include "StudioProjectSettings.h"
-#include "StudioProjectVariables.h"
 #include "Core.h"
 #include "Qt3DSFileTools.h"
 
@@ -100,7 +99,7 @@ void CPreviewHelper::PreviewViaConfig(Q3DStudio::CBuildConfiguration *inSelected
 QString CPreviewHelper::getViewerFilePath(const QString &exeName)
 {
     using namespace Q3DStudio;
-    CFilePath currentPath(Qt3DSFile::GetApplicationDirectory().GetAbsolutePath());
+    CFilePath currentPath(Qt3DSFile::GetApplicationDirectory());
     CFilePath viewerDir(QApplication::applicationDirPath());
 
     QString viewerFile;
@@ -159,7 +158,7 @@ void CPreviewHelper::cleanupProcess(QProcess *p, QString *docPath)
     p->disconnect();
     if (docPath->endsWith(QLatin1String("_@preview@.uia"))) {
         QString uipPreviewPath = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath()
-                                 .GetAbsolutePath().toQString().replace(".uip", "_@preview@.uip");
+                                 .replace(QLatin1String(".uip"), QLatin1String("_@preview@.uip"));
         QFile(uipPreviewPath).remove(); // remove uip preview (if exists)
         QFile(*docPath).remove(); // remove uia preview
     } else if (docPath->endsWith(QLatin1String("_@preview@.uip"))) {
@@ -214,95 +213,4 @@ void CPreviewHelper::DoPreviewViaConfig(Q3DStudio::CBuildConfiguration * /*inSel
             return;
         }
     }
-}
-
-bool CPreviewHelper::viewerExists(const QString &exeName)
-{
-    return QFileInfo(getViewerFilePath(exeName)).exists();
-}
-
-//=============================================================================
-/**
- *	Interpret the string by resolving the variables.
- *	@param	inSourceString		String to be interpreted
- */
-Q3DStudio::CString CPreviewHelper::InterpretString(Q3DStudio::CBuildConfiguration *inSelectedConfig,
-                                                   const Q3DStudio::CString &inDocumentFile,
-                                                   const Q3DStudio::CString &inSourceString)
-{
-    Q3DStudio::CString theReturnString;
-    long theStart = 0; // start index of string
-    long theBeginIndex = 0; // index of '%'
-    long theEndIndex = 0; // index of '%'
-    while (Q3DStudio::CString::ENDOFSTRING != theEndIndex) {
-        theBeginIndex = inSourceString.Find('%', theStart);
-        if (Q3DStudio::CString::ENDOFSTRING != theBeginIndex) {
-            theReturnString += inSourceString.Extract(theStart, theBeginIndex - theStart);
-            // find the corresponding '%'
-            theEndIndex = inSourceString.Find('%', theBeginIndex + 1);
-            if (Q3DStudio::CString::ENDOFSTRING != theEndIndex) {
-                // first, resolve the variable by the toolbar selection
-                Q3DStudio::CString theVariable =
-                        inSourceString.Extract(theBeginIndex + 1, theEndIndex - theBeginIndex - 1);
-                Q3DStudio::CString theResolvedVariable;
-                bool theHasResolved = ResolveVariable(inSelectedConfig, inDocumentFile, theVariable,
-                                                      theResolvedVariable);
-
-                if (theHasResolved) {
-                    theReturnString += theResolvedVariable;
-                } else {
-                    theReturnString += "_NULL_";
-                }
-                theStart = theEndIndex + 1;
-            } else
-                theReturnString += inSourceString.Extract(theBeginIndex);
-        } else {
-            theEndIndex = theBeginIndex;
-            theReturnString += inSourceString.Extract(theStart);
-        }
-    }
-
-    return theReturnString;
-}
-
-//==============================================================================
-/**
- *	Resolves the passed in variable and write out the resolved value if it exists
- *	in the current selected build configuration.
- *	@param inVariable	the environment to be resolved
- *	@param outValue		the string to receive the resolved value
- *	@return true if the variable exists, else false
- */
-//==============================================================================
-bool CPreviewHelper::ResolveVariable(Q3DStudio::CBuildConfiguration *inSelectedConfig,
-                                     const Q3DStudio::CString &inDocumentFile,
-                                     const Q3DStudio::CString &inVariable,
-                                     Q3DStudio::CString &outValue)
-{
-    Q3DStudio::CString theReturnStr;
-    bool theHasResolved = false;
-
-    // Handle special variable
-    if (inVariable == "BUILDFILE") {
-        if (inSelectedConfig) {
-            theReturnStr = inSelectedConfig->GetPath();
-            theHasResolved = true;
-        }
-    } else if (inVariable == "UIPFILE") {
-        theReturnStr = inDocumentFile;
-        theHasResolved = true;
-    }
-
-    if (!theHasResolved) {
-        Q3DStudio::CString theValue = CStudioPreferences::GetPreviewProperty(inVariable);
-        if (theValue != "") {
-            theReturnStr = theValue;
-            theHasResolved = true;
-        }
-    }
-
-    if (theHasResolved)
-        outValue = InterpretString(inSelectedConfig, inDocumentFile, theReturnStr);
-
-    return theHasResolved;
 }

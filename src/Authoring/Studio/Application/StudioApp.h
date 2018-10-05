@@ -28,16 +28,13 @@
 ****************************************************************************/
 
 #ifndef INCLUDED_STUDIO_APP_H
-#define INCLUDED_STUDIO_APP_H 1
-
-#pragma once
+#define INCLUDED_STUDIO_APP_H
 
 #include "StudioObjectTypes.h"
 #include "Qt3DSImportComposerTypes.h"
 #include "Qt3DSDMComposerTypeDefinitions.h"
 #include "DispatchListeners.h"
 #include "Qt3DSDMHandles.h"
-#include "Qt3DSFileTools.h"
 #include <QtWidgets/qapplication.h>
 
 namespace Q3DStudio {
@@ -191,8 +188,8 @@ public:
     void PlaybackRewind();
     bool IsPlaying();
     void OnRevert();
-    bool CanRevert();
-    void OnFileOpenRecent(const Qt3DSFile &inDocument);
+    bool CanRevert() const;
+    void OnFileOpenRecent(const QString &inDocument);
     bool PerformSavePrompt();
     void PlaybackStop();
     bool isPlaybackPreviewOn() const;
@@ -207,8 +204,8 @@ public:
     bool OnSave(bool autosave = false);
     bool OnSaveAs();
     bool OnSaveCopy();
-    bool OnLoadDocument(const Qt3DSFile &inDocument, bool inShowStartupDialogOnError = true);
-    void OnLoadDocumentCatcher(const Qt3DSFile &inLocation);
+    bool OnLoadDocument(const QString &inDocument, bool inShowStartupDialogOnError = true);
+    void OnLoadDocumentCatcher(const QString &inLocation);
     void OnFileOpen();
     QString OnProjectNew();
     void OnFileNew();
@@ -231,20 +228,19 @@ public:
     void OnAsynchronousCommand(CCmd *inCmd) override;
 
     // CAppStatusListener
-    void OnDisplayAppStatus(Q3DStudio::CString &inStatusMsg) override;
-    void OnProgressBegin(const Q3DStudio::CString &inActionText,
-                         const Q3DStudio::CString &inAdditionalText) override;
+    void OnDisplayAppStatus(const QString &inStatusMsg) override;
+    void OnProgressBegin(const QString &inActionText,
+                         const QString &inAdditionalText) override;
     void OnProgressEnd() override;
 
     // CFailListener
     void OnAssetDeleteFail() override;
     void OnPasteFail() override;
-    void OnBuildconfigurationFileParseFail(const Q3DStudio::CString &inMessage) override;
+    void OnBuildconfigurationFileParseFail(const QString &inMessage) override;
     void OnSaveFail(bool inKnownError) override;
-    void OnProjectVariableFail(const Q3DStudio::CString &inMessage) override;
-    void OnErrorFail(const Q3DStudio::CString &inText) override;
-    void OnRefreshResourceFail(const Q3DStudio::CString &inResourceName,
-                               const Q3DStudio::CString &inDescription) override;
+    void OnErrorFail(const QString &inText) override;
+    void OnRefreshResourceFail(const QString &inResourceName,
+                               const QString &inDescription) override;
     void OnUndefinedDatainputsFail(
             const QMultiMap<QString,
                             QPair<qt3dsdm::Qt3DSDMInstanceHandle,

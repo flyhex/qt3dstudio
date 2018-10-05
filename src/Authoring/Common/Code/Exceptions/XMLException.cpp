@@ -27,10 +27,10 @@
 **
 ****************************************************************************/
 
-#include "Qt3DSCommonPrecompile.h"
 #include "XMLException.h"
 
-CXMLException::CXMLException(const wchar_t *inXMLDescription)
+CXMLException::CXMLException(const QString &inXMLDescription)
+    : m_Description(inXMLDescription)
 {
-    wcscpy(m_Description, inXMLDescription);
+
 }

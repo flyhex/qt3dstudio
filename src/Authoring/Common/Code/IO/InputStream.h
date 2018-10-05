@@ -36,7 +36,7 @@
 //	Includes
 //==============================================================================
 #include "Seekable.h"
-#include "Qt3DSString.h"
+#include <QtCore/qstring.h>
 
 //==============================================================================
 //	Forwards
@@ -54,9 +54,9 @@ public:
 
     virtual long Read(void *inBuffer, long inBufferLength) = 0;
     virtual void Close() = 0;
-    virtual bool IsValid() = 0;
-    virtual Q3DStudio::CString GetMimeType() = 0;
-    virtual Q3DStudio::CString GetSource() = 0;
+    virtual bool IsValid() const = 0;
+    virtual QString GetMimeType() const = 0;
+    virtual QString GetSource() const = 0;
 };
 
 #endif // INCLUDED_INPUT_STREAM_H

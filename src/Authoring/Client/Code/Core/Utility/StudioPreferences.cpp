@@ -88,8 +88,9 @@ static QSize s_browserPopupSize;
 #define STRINGIFY(x) STRINGIFY2(x)
 #define STRINGIFY2(x) #x
 
-// Static Consts
+// Statics
 const ::CColor CStudioPreferences::EDITVIEW_DEFAULTBGCOLOR = ::CColor("#262829");
+std::unique_ptr<CPreferences> CStudioPreferences::m_preferences = nullptr;
 
 CStudioPreferences::CStudioPreferences()
 {
@@ -104,15 +105,20 @@ CStudioPreferences::~CStudioPreferences()
  * Loads the default preferences from the registry.  Must be called after the
  * registry root has been set up, and before calling any of the Get functions.
  */
-void CStudioPreferences::LoadPreferences()
+void CStudioPreferences::LoadPreferences(const QString &filePath)
 {
-    s_BaseColor = CPreferences::GetUserPreferences("Preferences")
-                      .GetColorValue("BaseColor", ::CColor("#262829"));
+    if (!m_preferences)
+        m_preferences = std::unique_ptr<CPreferences>(new CPreferences);
 
-    s_NormalColor = CPreferences::GetUserPreferences("Preferences")
-                        .GetColorValue("NormalColor", ::CColor("#ffffff"));
-    s_MasterColor = CPreferences::GetUserPreferences("Preferences")
-                        .GetColorValue("MasterColor", ::CColor("#5caa15"));
+    m_preferences->SetPreferencesFile(filePath);
+
+    s_BaseColor = m_preferences->GetColorValue(QStringLiteral("BaseColor"), ::CColor("#262829"),
+                                               QStringLiteral("Preferences"));
+
+    s_NormalColor = m_preferences->GetColorValue(QStringLiteral("NormalColor"), ::CColor("#ffffff"),
+                                                 QStringLiteral("Preferences"));
+    s_MasterColor = m_preferences->GetColorValue(QStringLiteral("MasterColor"), ::CColor("#5caa15"),
+                                                 QStringLiteral("Preferences"));
 
     s_DarkBaseColor = s_BaseColor;
     s_DarkBaseColor.SetLuminance(s_DarkBaseColor.GetLuminance() - 0.10f);
@@ -176,7 +182,7 @@ void CStudioPreferences::LoadPreferences()
  */
 bool CStudioPreferences::IsTimelineSnappingGridActive()
 {
-    return CPreferences::GetUserPreferences().GetValue("SnappingGridActive", true);
+    return m_preferences->GetValue(QStringLiteral("SnappingGridActive"), true);
 }
 
 //==============================================================================
@@ -186,7 +192,7 @@ bool CStudioPreferences::IsTimelineSnappingGridActive()
  */
 void CStudioPreferences::SetTimelineSnappingGridActive(bool inActive)
 {
-    CPreferences::GetUserPreferences().SetValue("SnappingGridActive", inActive);
+    m_preferences->SetValue(QStringLiteral("SnappingGridActive"), inActive);
 }
 
 //==============================================================================
@@ -197,8 +203,8 @@ void CStudioPreferences::SetTimelineSnappingGridActive(bool inActive)
  */
 ESnapGridResolution CStudioPreferences::GetTimelineSnappingGridResolution()
 {
-    return (ESnapGridResolution)CPreferences::GetUserPreferences().GetLongValue(
-        "SnappingGridResolution", (long)SNAPGRID_SECONDS);
+    return (ESnapGridResolution)m_preferences->GetLongValue(
+            QStringLiteral("SnappingGridResolution"), (long)SNAPGRID_SECONDS);
 }
 
 //==============================================================================
@@ -209,7 +215,7 @@ ESnapGridResolution CStudioPreferences::GetTimelineSnappingGridResolution()
  */
 void CStudioPreferences::SetTimelineSnappingGridResolution(ESnapGridResolution inResolution)
 {
-    CPreferences::GetUserPreferences().SetLongValue("SnappingGridResolution", (long)inResolution);
+    m_preferences->SetLongValue(QStringLiteral("SnappingGridResolution"), (long)inResolution);
 }
 
 /**
@@ -218,7 +224,7 @@ void CStudioPreferences::SetTimelineSnappingGridResolution(ESnapGridResolution i
  */
 bool CStudioPreferences::GetEditViewFillMode()
 {
-    return CPreferences::GetUserPreferences().GetValue("EditViewFillMode", true);
+    return m_preferences->GetValue(QStringLiteral("EditViewFillMode"), true);
 }
 
 //==============================================================================
@@ -228,7 +234,7 @@ bool CStudioPreferences::GetEditViewFillMode()
  */
 void CStudioPreferences::SetEditViewFillMode(bool inRenderAsSolid)
 {
-    CPreferences::GetUserPreferences().SetValue("EditViewFillMode", inRenderAsSolid);
+    m_preferences->SetValue(QStringLiteral("EditViewFillMode"), inRenderAsSolid);
 }
 
 //==============================================================================
@@ -238,8 +244,8 @@ void CStudioPreferences::SetEditViewFillMode(bool inRenderAsSolid)
  */
 long CStudioPreferences::GetPreferredStartupView()
 {
-    return CPreferences::GetUserPreferences().GetLongValue("PreferredStartupView",
-                                                           PREFERREDSTARTUP_DEFAULTINDEX);
+    return m_preferences->GetLongValue(QStringLiteral("PreferredStartupView"),
+                                       PREFERREDSTARTUP_DEFAULTINDEX);
 }
 
 //==============================================================================
@@ -250,7 +256,7 @@ long CStudioPreferences::GetPreferredStartupView()
  */
 void CStudioPreferences::SetPreferredStartupView(long inStartupView)
 {
-    CPreferences::GetUserPreferences().SetLongValue("PreferredStartupView", inStartupView);
+    m_preferences->SetLongValue(QStringLiteral("PreferredStartupView"), inStartupView);
 }
 
 //==============================================================================
@@ -261,7 +267,7 @@ void CStudioPreferences::SetPreferredStartupView(long inStartupView)
  */
 bool CStudioPreferences::IsAutosetKeyframesOn()
 {
-    return CPreferences::GetUserPreferences().GetValue("AutosetKeyframes", true);
+    return m_preferences->GetValue(QStringLiteral("AutosetKeyframes"), true);
 }
 
 //==============================================================================
@@ -272,7 +278,7 @@ bool CStudioPreferences::IsAutosetKeyframesOn()
  */
 void CStudioPreferences::SetAutosetKeyframesOn(bool inEnable)
 {
-    CPreferences::GetUserPreferences().SetValue("AutosetKeyframes", inEnable);
+    m_preferences->SetValue(QStringLiteral("AutosetKeyframes"), inEnable);
 }
 
 //==============================================================================
@@ -283,7 +289,7 @@ void CStudioPreferences::SetAutosetKeyframesOn(bool inEnable)
  */
 bool CStudioPreferences::IsBoundingBoxesOn()
 {
-    return CPreferences::GetUserPreferences().GetValue("BoundingBoxes", true);
+    return m_preferences->GetValue(QStringLiteral("BoundingBoxes"), true);
 }
 
 //==============================================================================
@@ -294,7 +300,7 @@ bool CStudioPreferences::IsBoundingBoxesOn()
  */
 void CStudioPreferences::SetBoundingBoxesOn(bool inEnable)
 {
-    CPreferences::GetUserPreferences().SetValue("BoundingBoxes", inEnable);
+    m_preferences->SetValue(QStringLiteral("BoundingBoxes"), inEnable);
 }
 
 //==============================================================================
@@ -305,7 +311,7 @@ void CStudioPreferences::SetBoundingBoxesOn(bool inEnable)
  */
 bool CStudioPreferences::ShouldDisplayPivotPoint()
 {
-    return CPreferences::GetUserPreferences().GetValue("Display Pivot Point", true);
+    return m_preferences->GetValue(QStringLiteral("Display Pivot Point"), true);
 }
 
 //==============================================================================
@@ -316,7 +322,7 @@ bool CStudioPreferences::ShouldDisplayPivotPoint()
  */
 void CStudioPreferences::SetDisplayPivotPoint(bool inEnable)
 {
-    return CPreferences::GetUserPreferences().SetValue("Display Pivot Point", inEnable);
+    return m_preferences->SetValue(QStringLiteral("Display Pivot Point"), inEnable);
 }
 
 //==============================================================================
@@ -327,7 +333,7 @@ void CStudioPreferences::SetDisplayPivotPoint(bool inEnable)
  */
 bool CStudioPreferences::IsWireframeModeOn()
 {
-    return CPreferences::GetUserPreferences().GetValue("WireframeMode", true);
+    return m_preferences->GetValue(QStringLiteral("WireframeMode"), true);
 }
 
 //==============================================================================
@@ -338,7 +344,7 @@ bool CStudioPreferences::IsWireframeModeOn()
  */
 void CStudioPreferences::SetWireframeModeOn(bool inEnable)
 {
-    CPreferences::GetUserPreferences().SetValue("WireframeMode", inEnable);
+    m_preferences->SetValue(QStringLiteral("WireframeMode"), inEnable);
 }
 
 //==============================================================================
@@ -349,7 +355,7 @@ void CStudioPreferences::SetWireframeModeOn(bool inEnable)
  */
 bool CStudioPreferences::ShouldShowTooltips()
 {
-    return CPreferences::GetUserPreferences().GetValue("ShowTooltips", true);
+    return m_preferences->GetValue(QStringLiteral("ShowTooltips"), true);
 }
 
 //==============================================================================
@@ -360,7 +366,7 @@ bool CStudioPreferences::ShouldShowTooltips()
  */
 void CStudioPreferences::SetShowTooltips(bool inShowTooltips)
 {
-    CPreferences::GetUserPreferences().SetValue("ShowTooltips", inShowTooltips);
+    m_preferences->SetValue(QStringLiteral("ShowTooltips"), inShowTooltips);
 }
 
 //==============================================================================
@@ -369,7 +375,8 @@ void CStudioPreferences::SetShowTooltips(bool inShowTooltips)
  */
 long CStudioPreferences::GetTimelineSplitterLocation()
 {
-    return CPreferences::GetUserPreferences("Timeline").GetLongValue("TimelineSplitterLoc", 250);
+    return m_preferences->GetLongValue(QStringLiteral("TimelineSplitterLoc"), 250,
+                                       QStringLiteral("Timeline"));
 }
 
 //==============================================================================
@@ -379,7 +386,8 @@ long CStudioPreferences::GetTimelineSplitterLocation()
  */
 void CStudioPreferences::SetTimelineSplitterLocation(long inLocation)
 {
-    CPreferences::GetUserPreferences("Timeline").SetLongValue("TimelineSplitterLoc", inLocation);
+    m_preferences->SetLongValue(QStringLiteral("TimelineSplitterLoc"), inLocation,
+                                QStringLiteral("Timeline"));
 }
 
 //==============================================================================
@@ -391,7 +399,7 @@ void CStudioPreferences::SetTimelineSplitterLocation(long inLocation)
  */
 bool CStudioPreferences::GetInterpolation()
 {
-    return CPreferences::GetUserPreferences().GetValue("InterpolationPreference", true);
+    return m_preferences->GetValue(QStringLiteral("InterpolationPreference"), true);
 }
 
 //==============================================================================
@@ -401,7 +409,7 @@ bool CStudioPreferences::GetInterpolation()
  */
 void CStudioPreferences::SetInterpolation(bool inSmooth)
 {
-    CPreferences::GetUserPreferences().SetValue("InterpolationPreference", inSmooth);
+    m_preferences->SetValue(QStringLiteral("InterpolationPreference"), inSmooth);
 }
 
 //==============================================================================
@@ -411,7 +419,7 @@ void CStudioPreferences::SetInterpolation(bool inSmooth)
  */
 long CStudioPreferences::GetSnapRange()
 {
-    return CPreferences::GetUserPreferences().GetLongValue("SnapRange", DEFAULT_SNAPRANGE);
+    return m_preferences->GetLongValue(QStringLiteral("SnapRange"), DEFAULT_SNAPRANGE);
 }
 
 //==============================================================================
@@ -421,7 +429,7 @@ long CStudioPreferences::GetSnapRange()
  */
 void CStudioPreferences::SetSnapRange(long inSnapRange)
 {
-    CPreferences::GetUserPreferences().SetLongValue("SnapRange", inSnapRange);
+    m_preferences->SetLongValue(QStringLiteral("SnapRange"), inSnapRange);
 }
 
 //==============================================================================
@@ -432,8 +440,8 @@ void CStudioPreferences::SetSnapRange(long inSnapRange)
 long CStudioPreferences::GetAutoSaveDelay()
 {
     // default delay is 10 minutes (600 seconds)
-    return CPreferences::GetUserPreferences("AutoSave").GetLongValue("Delay",
-                                                                     DEFAULT_AUTOSAVE_DELAY);
+    return m_preferences->GetLongValue(QStringLiteral("Delay"), DEFAULT_AUTOSAVE_DELAY,
+                                       QStringLiteral("AutoSave"));
 }
 
 //==============================================================================
@@ -443,7 +451,8 @@ long CStudioPreferences::GetAutoSaveDelay()
  */
 void CStudioPreferences::SetAutoSaveDelay(long inAutoSaveDelay)
 {
-    CPreferences::GetUserPreferences("AutoSave").SetLongValue("Delay", inAutoSaveDelay);
+    m_preferences->SetLongValue(QStringLiteral("Delay"), inAutoSaveDelay,
+                                QStringLiteral("AutoSave"));
 }
 
 //==============================================================================
@@ -455,7 +464,7 @@ void CStudioPreferences::SetAutoSaveDelay(long inAutoSaveDelay)
  */
 bool CStudioPreferences::GetAutoSavePreference()
 {
-    return CPreferences::GetUserPreferences("AutoSave").GetValue("Preference", true);
+    return m_preferences->GetValue(QStringLiteral("Preference"), true, QStringLiteral("AutoSave"));
 }
 
 //==============================================================================
@@ -465,7 +474,7 @@ bool CStudioPreferences::GetAutoSavePreference()
  */
 void CStudioPreferences::SetAutoSavePreference(bool inActive)
 {
-    CPreferences::GetUserPreferences("AutoSave").SetValue("Preference", inActive);
+    m_preferences->SetValue(QStringLiteral("Preference"), inActive, QStringLiteral("AutoSave"));
 }
 
 //==============================================================================
@@ -478,8 +487,7 @@ void CStudioPreferences::SetAutoSavePreference(bool inActive)
  */
 long CStudioPreferences::GetDefaultObjectLifetime()
 {
-    return CPreferences::GetUserPreferences().GetLongValue("DefaultObjectLifetime",
-                                                           DEFAULT_LIFETIME);
+    return m_preferences->GetLongValue(QStringLiteral("DefaultObjectLifetime"), DEFAULT_LIFETIME);
 }
 
 //==============================================================================
@@ -492,7 +500,7 @@ long CStudioPreferences::GetDefaultObjectLifetime()
  */
 void CStudioPreferences::SetDefaultObjectLifetime(long inLifetime)
 {
-    CPreferences::GetUserPreferences().SetLongValue("DefaultObjectLifetime", inLifetime);
+    m_preferences->SetLongValue(QStringLiteral("DefaultObjectLifetime"), inLifetime);
 }
 
 //==============================================================================
@@ -505,7 +513,7 @@ void CStudioPreferences::SetDefaultObjectLifetime(long inLifetime)
  */
 bool CStudioPreferences::GetTimebarDisplayTime()
 {
-    return CPreferences::GetUserPreferences().GetValue("TimebarSetting", false);
+    return m_preferences->GetValue(QStringLiteral("TimebarSetting"), false);
 }
 
 //==============================================================================
@@ -518,7 +526,7 @@ bool CStudioPreferences::GetTimebarDisplayTime()
  */
 void CStudioPreferences::SetTimebarDisplayTime(bool inDisplayTime)
 {
-    CPreferences::GetUserPreferences().SetValue("TimebarSetting", inDisplayTime);
+    m_preferences->SetValue(QStringLiteral("TimebarSetting"), inDisplayTime);
 }
 
 //==============================================================================
@@ -531,7 +539,7 @@ void CStudioPreferences::SetTimebarDisplayTime(bool inDisplayTime)
  */
 bool CStudioPreferences::GetAdvancePropertyExpandedFlag()
 {
-    return CPreferences::GetUserPreferences().GetValue("AdvancePropertyFlag", false);
+    return m_preferences->GetValue(QStringLiteral("AdvancePropertyFlag"), false);
 }
 
 //==============================================================================
@@ -541,31 +549,30 @@ bool CStudioPreferences::GetAdvancePropertyExpandedFlag()
  */
 void CStudioPreferences::SetAdvancePropertyExpandedFlag(bool inAdvancePropertyFlag)
 {
-    CPreferences::GetUserPreferences().SetValue("AdvancePropertyFlag", inAdvancePropertyFlag);
+    m_preferences->SetValue(QStringLiteral("AdvancePropertyFlag"), inAdvancePropertyFlag);
 }
 
-Q3DStudio::CString CStudioPreferences::GetPreviewConfig()
+QString CStudioPreferences::GetPreviewConfig()
 {
-    return CPreferences::GetUserPreferences().GetStringValue("Preview.Config", "");
+    return m_preferences->GetStringValue(QStringLiteral("Preview.Config"));
 }
 
-void CStudioPreferences::SetPreviewConfig(const Q3DStudio::CString &inValue)
+void CStudioPreferences::SetPreviewConfig(const QString &inValue)
 {
-    CPreferences::GetUserPreferences().SetStringValue("Preview.Config", inValue);
+    m_preferences->SetStringValue(QStringLiteral("Preview.Config"), inValue);
 }
 
 // Preview Properties at the registry are prepend with Preview.
-Q3DStudio::CString CStudioPreferences::GetPreviewProperty(const Q3DStudio::CString &inName)
+QString CStudioPreferences::GetPreviewProperty(const QString &inName)
 {
-    Q3DStudio::CString theName = "Preview." + inName;
-    return CPreferences::GetUserPreferences().GetStringValue(theName, "");
+    QString theName = QStringLiteral("Preview.") + inName;
+    return m_preferences->GetStringValue(theName);
 }
 
-void CStudioPreferences::SetPreviewProperty(const Q3DStudio::CString &inName,
-                                            const Q3DStudio::CString &inValue)
+void CStudioPreferences::SetPreviewProperty(const QString &inName, const QString &inValue)
 {
-    Q3DStudio::CString theName = "Preview." + inName;
-    CPreferences::GetUserPreferences().SetStringValue(theName, inValue);
+    QString theName = QStringLiteral("Preview.") + inName;
+    m_preferences->SetStringValue(theName, inValue);
 }
 
 //=============================================================================
@@ -576,7 +583,7 @@ void CStudioPreferences::SetPreviewProperty(const Q3DStudio::CString &inName,
  */
 bool CStudioPreferences::GetDontShowGLVersionDialog()
 {
-    return CPreferences::GetUserPreferences().GetValue("DontShowGLVersionDialog", false);
+    return m_preferences->GetValue(QStringLiteral("DontShowGLVersionDialog"), false);
 }
 
 //=============================================================================
@@ -586,23 +593,43 @@ bool CStudioPreferences::GetDontShowGLVersionDialog()
  */
 void CStudioPreferences::SetDontShowGLVersionDialog(bool inValue)
 {
-    CPreferences::GetUserPreferences().SetValue("DontShowGLVersionDialog", inValue);
+    m_preferences->SetValue(QStringLiteral("DontShowGLVersionDialog"), inValue);
 }
 
 CPt CStudioPreferences::GetDefaultClientSize()
 {
     CPt theSize;
-    theSize.x = CPreferences::GetUserPreferences().GetLongValue("DefaultClientWidth",
-                                                                DEFAULT_CLIENT_WIDTH);
-    theSize.y = CPreferences::GetUserPreferences().GetLongValue("DefaultClientHeight",
-                                                                DEFAULT_CLIENT_HEIGHT);
+    theSize.x = m_preferences->GetLongValue(QStringLiteral("DefaultClientWidth"),
+                                            DEFAULT_CLIENT_WIDTH);
+    theSize.y = m_preferences->GetLongValue(QStringLiteral("DefaultClientHeight"),
+                                            DEFAULT_CLIENT_HEIGHT);
     return theSize;
 }
 
 void CStudioPreferences::SetDefaultClientSize(int width, int height)
 {
-    CPreferences::GetUserPreferences().SetLongValue("DefaultClientWidth", (long)width);
-    CPreferences::GetUserPreferences().SetLongValue("DefaultClientHeight", (long)height);
+    m_preferences->SetLongValue(QStringLiteral("DefaultClientWidth"), (long)width);
+    m_preferences->SetLongValue(QStringLiteral("DefaultClientHeight"), (long)height);
+}
+
+int CStudioPreferences::getNumRecentItems()
+{
+    return m_preferences->GetLongValue(QStringLiteral("RecentValid"));
+}
+
+void CStudioPreferences::setNumRecentItems(int n)
+{
+    m_preferences->SetLongValue(QStringLiteral("RecentValid"), n);
+}
+
+QString CStudioPreferences::getRecentItem(int index)
+{
+    return m_preferences->GetStringValue(QStringLiteral("RecentItem") + QString::number(index));
+}
+
+void CStudioPreferences::setRecentItem(int index, const QString &path)
+{
+    m_preferences->SetStringValue(QStringLiteral("RecentItem") + QString::number(index), path);
 }
 
 //==============================================================================
@@ -612,7 +639,7 @@ void CStudioPreferences::SetDefaultClientSize(int width, int height)
  */
 long CStudioPreferences::GetTimeAdvanceAmount()
 {
-    return CPreferences::GetUserPreferences().GetLongValue("TimeAdvance", DEFAULT_TIME_ADVANCE);
+    return m_preferences->GetLongValue(QStringLiteral("TimeAdvance"), DEFAULT_TIME_ADVANCE);
 }
 
 //==============================================================================
@@ -622,7 +649,7 @@ long CStudioPreferences::GetTimeAdvanceAmount()
  */
 void CStudioPreferences::SetTimeAdvanceAmount(long inTime)
 {
-    CPreferences::GetUserPreferences().SetLongValue("TimeAdvance", inTime);
+    m_preferences->SetLongValue(QStringLiteral("TimeAdvance"), inTime);
 }
 
 //==============================================================================
@@ -632,8 +659,7 @@ void CStudioPreferences::SetTimeAdvanceAmount(long inTime)
  */
 long CStudioPreferences::GetBigTimeAdvanceAmount()
 {
-    return CPreferences::GetUserPreferences().GetLongValue("BigTimeAdvance",
-                                                           DEFAULT_BIG_TIME_ADVANCE);
+    return m_preferences->GetLongValue(QStringLiteral("BigTimeAdvance"), DEFAULT_BIG_TIME_ADVANCE);
 }
 
 //==============================================================================
@@ -643,7 +669,7 @@ long CStudioPreferences::GetBigTimeAdvanceAmount()
  */
 void CStudioPreferences::SetBigTimeAdvanceAmount(long inTime)
 {
-    CPreferences::GetUserPreferences().SetLongValue("BigTimeAdvance", inTime);
+    m_preferences->SetLongValue(QStringLiteral("BigTimeAdvance"), inTime);
 }
 
 /**
@@ -765,24 +791,22 @@ QString CStudioPreferences::GetFontFaceName()
 
 float CStudioPreferences::getSelectorLineWidth()
 {
-    return CPreferences::GetUserPreferences().GetLongValue("SelectorLineWidth",
-                                                           DEFAULT_SELECTOR_WIDTH) / 10.0f;
+    return m_preferences->GetLongValue("SelectorLineWidth", DEFAULT_SELECTOR_WIDTH) / 10.0f;
 }
 
 void CStudioPreferences::setSelectorLineWidth(float width)
 {
-    CPreferences::GetUserPreferences().SetLongValue("SelectorLineWidth", int(width * 10.0f));
+    m_preferences->SetLongValue("SelectorLineWidth", int(width * 10.0f));
 }
 
 float CStudioPreferences::getSelectorLineLength()
 {
-    return float(CPreferences::GetUserPreferences().GetLongValue("SelectorLineLength",
-                                                                 DEFAULT_SELECTOR_LENGTH));
+    return float(m_preferences->GetLongValue("SelectorLineLength", DEFAULT_SELECTOR_LENGTH));
 }
 
 void CStudioPreferences::setSelectorLineLength(float length)
 {
-    CPreferences::GetUserPreferences().SetLongValue("SelectorLineLength", int(length));
+    m_preferences->SetLongValue("SelectorLineLength", int(length));
 }
 
 void CStudioPreferences::setQmlContextProperties(QQmlContext *qml)
@@ -985,30 +1009,30 @@ QSize CStudioPreferences::browserPopupSize()
     return s_browserPopupSize;
 }
 
-Q3DStudio::CString CStudioPreferences::GetVersionString()
+QString CStudioPreferences::GetVersionString()
 {
-    Q3DStudio::CString theVersionNumber = STRINGIFY(STUDIO_VERSION);
-    theVersionNumber.Replace(",", ".");
+    QString theVersionNumber = STRINGIFY(STUDIO_VERSION);
+    theVersionNumber.replace(QLatin1String(","), QLatin1String("."));
 
     return theVersionNumber;
 }
 
 bool CStudioPreferences::showEditModePreview()
 {
-    return CPreferences::GetUserPreferences().GetValue("showEditModePreview", true);
+    return m_preferences->GetValue("showEditModePreview", true);
 }
 
 void CStudioPreferences::setShowEditModePreview(bool show)
 {
-    CPreferences::GetUserPreferences().SetValue("showEditModePreview", show);
+    m_preferences->SetValue("showEditModePreview", show);
 }
 
 bool CStudioPreferences::editModeLightingEnabled()
 {
-    return CPreferences::GetUserPreferences().GetValue("editModeLightingEnabled", true);
+    return m_preferences->GetValue("editModeLightingEnabled", true);
 }
 
 void CStudioPreferences::setEditModeLightingEnabled(bool enabled)
 {
-    CPreferences::GetUserPreferences().SetValue("editModeLightingEnabled", enabled);
+    m_preferences->SetValue("editModeLightingEnabled", enabled);
 }

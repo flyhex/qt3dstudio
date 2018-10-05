@@ -1481,8 +1481,7 @@ public:
 
             TDataStrPtr newValue(get<TDataStrPtr>(value));
 
-            CFilePath docPath =
-                CFilePath(m_Doc.GetDocumentPath().GetAbsolutePath());
+            CFilePath docPath(m_Doc.GetDocumentPath());
             CFilePath docDir(docPath.GetDirectory());
             STranslationLog log;
             CFilePath theFullPathToDocument(
@@ -2004,8 +2003,7 @@ public:
             }
         }
         file.write("\t<Property name=\"presentation\">");
-        file.write(m_Doc.GetDocumentPath().GetAbsolutePath()
-                   .toQString().toUtf8().constData());
+        file.write(m_Doc.GetDocumentPath().toUtf8().constData());
         file.write("</Property>\n");
         const QFileInfo fileInfo(file);
         file.write("\t<Property name=\"path\">");
@@ -2998,8 +2996,10 @@ public:
                 if (!m_Bridge.CheckNameUnique(theParent, theInstance, currName)) {
                     CString newName = m_Bridge.GetUniqueChildName(theParent, theInstance,
                                                                   currName);
-                    if (notifyRename)
-                        m_Doc.getMoveRenameHandler()->displayMessageBox(currName, newName);
+                    if (notifyRename) {
+                        m_Doc.getMoveRenameHandler()->displayMessageBox(currName.toQString(),
+                                                                        newName.toQString());
+                    }
                     SetName(theInstance, newName);
                 }
             }
@@ -3219,8 +3219,10 @@ public:
                     if (!m_Bridge.CheckNameUnique(targetComponent, instance, currName)) {
                         CString newName = m_Bridge.GetUniqueChildName(
                                     targetComponent, instance, currName);
-                        if (notifyRename)
-                            m_Doc.getMoveRenameHandler()->displayMessageBox(currName, newName);
+                        if (notifyRename) {
+                            m_Doc.getMoveRenameHandler()->displayMessageBox(currName.toQString(),
+                                                                            newName.toQString());
+                        }
                         SetName(instance, newName);
                     }
                 }
@@ -3548,8 +3550,7 @@ public:
         CDispatch &theDispatch(*m_Doc.GetCore()->GetDispatch());
         CFilePath theDestFile(importToComposer->GetDestImportFile());
         try {
-            theDispatch.FireOnProgressBegin(Q3DStudio::CString::fromQString(
-                                                QObject::tr("Importing ")), importSrc);
+            theDispatch.FireOnProgressBegin(QObject::tr("Importing "), importSrc.toQString());
             SImportResult result = inImportFunction(*importToComposer, theDestFile);
             bool forceError = importToComposer->HasError();
             if (!forceError)
@@ -3602,8 +3603,7 @@ public:
             return 0;
         CFilePath theRelativeDAE = m_Doc.GetRelativePathToDoc(importSrc);
 
-        CFilePath docPath =
-            CFilePath(m_Doc.GetDocumentPath().GetAbsolutePath());
+        CFilePath docPath(m_Doc.GetDocumentPath());
         CFilePath docDir(docPath.GetDirectory());
         std::shared_ptr<IImportFailedHandler> theHandler(m_Doc.GetImportFailedHandler());
         if (docPath.size() == 0) {
@@ -3651,8 +3651,7 @@ public:
                                            const CPt &inPosition = CPt(), long inStartTime = -1) override
     {
         ScopedBoolean __ignoredDirs(m_IgnoreDirChange);
-        CFilePath docPath =
-            CFilePath(m_Doc.GetDocumentPath().GetAbsolutePath());
+        CFilePath docPath(m_Doc.GetDocumentPath());
         CFilePath docDir(docPath.GetDirectory());
         STranslationLog log;
         return DoImport(inFullPathToDocument, inFullPathToDocument, inParent, 0, inSlide, docDir,
@@ -4543,8 +4542,7 @@ public:
     {
         CDispatch &theDispatch(*m_Doc.GetCore()->GetDispatch());
         theDispatch.FireOnProgressBegin(
-            Q3DStudio::CString::fromQString(QObject::tr("Refreshing Import ")),
-            inOldFile.toCString());
+            QObject::tr("Refreshing Import "), inOldFile.toQString());
         ScopedBoolean __ignoredDirs(m_IgnoreDirChange);
         try {
             m_SourcePathInstanceMap.clear();
@@ -4559,8 +4557,7 @@ public:
     {
         CDispatch &theDispatch(*m_Doc.GetCore()->GetDispatch());
         theDispatch.FireOnProgressBegin(
-                    Q3DStudio::CString::fromQString(QObject::tr("Old UIP version")),
-                    Q3DStudio::CString::fromQString(QObject::tr("Cleaning up meshes")));
+                    QObject::tr("Old UIP version"), QObject::tr("Cleaning up meshes"));
         ScopedBoolean __ignoredDirs(m_IgnoreDirChange);
         bool cleanedSome = false;
         try {
@@ -4972,7 +4969,7 @@ public:
         bool requestRender = false;
 
         if (inList.size() == 1
-            && m_Doc.GetDocumentPath().GetName() == inList[0].m_File.GetFileName()
+            && m_Doc.GetDocumentPath().endsWith(inList[0].m_File.GetFileName().toQString())
             && inList[0].m_ModificationType == FileModificationType::Modified) {
             if (!m_Doc.GetCore()->HasJustSaved()) {
                 CDispatch &theDispatch(*m_Doc.GetCore()->GetDispatch());
@@ -4984,7 +4981,7 @@ public:
 
 #define ENSURE_PROGRESS                                                                            \
     if (!hasProgressFired) {                                                                       \
-        theDispatch.FireOnProgressBegin(Q3DStudio::CString::fromQString(QObject::tr("Updating project")), L"");                            \
+        theDispatch.FireOnProgressBegin(QObject::tr("Updating project"), {});                      \
         hasProgressFired = true;                                                                   \
     }
 
@@ -5337,7 +5334,7 @@ IDocumentEditor::ParseCustomMaterialFile(const Q3DStudio::CFilePath &inFullPathT
     return theReaderPtr;
 }
 
-ScopedDocumentEditor::ScopedDocumentEditor(IDoc &inDoc, const Q3DStudio::CString &inCommandName,
+ScopedDocumentEditor::ScopedDocumentEditor(IDoc &inDoc, const QString &inCommandName,
                                            const char *inFile, int inLine)
     : m_Editor(inDoc.OpenTransaction(inCommandName, inFile, inLine))
 {
@@ -5352,7 +5349,7 @@ CUpdateableDocumentEditor::~CUpdateableDocumentEditor()
     }
 }
 
-IDocumentEditor &CUpdateableDocumentEditor::EnsureEditor(const wchar_t *inCommandName,
+IDocumentEditor &CUpdateableDocumentEditor::EnsureEditor(const QString &inCommandName,
                                                          const char *inFile, int inLine)
 {
     if (!HasEditor()) {

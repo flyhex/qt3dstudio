@@ -59,7 +59,7 @@ void CFormattedInputStream::Close()
     m_InputStream->Close();
 }
 
-bool CFormattedInputStream::IsValid()
+bool CFormattedInputStream::IsValid() const
 {
     return m_InputStream->IsValid();
 }
@@ -146,9 +146,7 @@ unsigned short CFormattedInputStream::ReadUnsignedShort()
 void CFormattedInputStream::CopyToFile(const Qt3DSFile &inFile, long inLength,
                                        bool inCloseStream /*= true */)
 {
-    Q3DStudio::CString thePath = inFile.GetAbsolutePosixPath();
-
-    CFileOutputStream theFileStream(thePath);
+    CFileOutputStream theFileStream(inFile.GetAbsolutePosixPath().toQString());
 
     unsigned long theLength = inLength;
     unsigned long theBufferSize = 1024;

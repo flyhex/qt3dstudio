@@ -39,8 +39,8 @@ bool CPathTimelineItemBinding::IsExternalizeable()
 
 void CPathTimelineItemBinding::Externalize()
 {
-    Q3DStudio::ScopedDocumentEditor(*m_TransMgr->GetDoc(), L"Externalize Path Buffer", __FILE__,
-                                    __LINE__)
+    Q3DStudio::ScopedDocumentEditor(*m_TransMgr->GetDoc(), QObject::tr("Externalize Path Buffer"),
+                                    __FILE__, __LINE__)
         ->ExternalizePath(GetInstance());
 }
 
@@ -52,7 +52,7 @@ bool CPathTimelineItemBinding::IsInternalizeable()
 
 void CPathTimelineItemBinding::Internalize()
 {
-    Q3DStudio::ScopedDocumentEditor(*m_TransMgr->GetDoc(), L"Internalize Path Buffer", __FILE__,
-                                    __LINE__)
+    Q3DStudio::ScopedDocumentEditor(*m_TransMgr->GetDoc(), QObject::tr("Internalize Path Buffer"),
+                                    __FILE__, __LINE__)
         ->InternalizePath(GetInstance());
 }

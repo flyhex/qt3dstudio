@@ -59,14 +59,14 @@ struct SApplicationState
 class CmdDataModel
 {
 public:
-    Q3DStudio::CString m_Name;
+    QString m_Name;
     Q3DStudio::CString m_File;
     int m_Line;
 
     CmdDataModel(CDoc &inDoc);
     ~CmdDataModel();
-    void SetName(const Q3DStudio::CString &inName);
-    Q3DStudio::CString GetName() const;
+    void SetName(const QString &inName);
+    QString GetName() const;
     bool HasTransactions() const;
     bool ConsumerExists() const;
     void SetConsumer();

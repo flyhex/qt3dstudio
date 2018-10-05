@@ -398,11 +398,11 @@ void CDoc::SetInstancePropertyControlled(
     // Set the controlledproperty string in the controlled element
     // Use same transaction if "batch" is true
     if (!batch) {
-        Q3DStudio::ScopedDocumentEditor(*this, L"Set controlled", __FILE__, __LINE__)
+        Q3DStudio::ScopedDocumentEditor(*this, QObject::tr("Set controlled"), __FILE__, __LINE__)
                 ->SetInstancePropertyValue(instance, ctrldElemPropHandle, controlledProperty);
     } else {
         if (!IsTransactionOpened())
-            OpenTransaction(L"Set multiple controlled", __FILE__, __LINE__);
+            OpenTransaction(QObject::tr("Set multiple controlled"), __FILE__, __LINE__);
         SetInstancePropertyValue(instance, L"controlledproperty", controlledProperty);
     }
 }
@@ -421,8 +421,8 @@ Q3DStudio::IDocumentReader &CDoc::GetDocumentReader()
     return *m_SceneEditor;
 }
 
-Q3DStudio::IDocumentEditor &CDoc::OpenTransaction(const Q3DStudio::CString &inCmdName,
-                                                  const char *inFile, int inLine)
+Q3DStudio::IDocumentEditor &CDoc::OpenTransaction(const QString &inCmdName, const char *inFile,
+                                                  int inLine)
 {
     ++m_TransactionDepth;
     if (m_TransactionDepth == 1) {
@@ -432,7 +432,7 @@ Q3DStudio::IDocumentEditor &CDoc::OpenTransaction(const Q3DStudio::CString &inCm
         m_OpenTransaction->SetConsumer();
         m_Core->SetCommandStackModifier(this);
         qCInfo(qt3ds::TRACE_INFO) << inFile << "(" << inLine << "): Transaction opened: "
-                                  << inCmdName.toQString();
+                                  << inCmdName;
         m_OpenTransaction->m_File = inFile;
         m_OpenTransaction->m_Line = inLine;
         CCmdStack *theCommandStack = m_Core->GetCmdStack();
@@ -440,7 +440,7 @@ Q3DStudio::IDocumentEditor &CDoc::OpenTransaction(const Q3DStudio::CString &inCm
             theCommandStack->EmptyRedoStack();
     } else
         qCInfo(qt3ds::TRACE_INFO) << inFile << "(" << inLine << "): Open Transaction: "
-                                  << inCmdName.toQString();
+                                  << inCmdName;
 
     if (!m_SceneEditor) {
         m_SceneEditor = Q3DStudio::IInternalDocumentEditor::CreateEditor(*this);
@@ -448,7 +448,7 @@ Q3DStudio::IDocumentEditor &CDoc::OpenTransaction(const Q3DStudio::CString &inCm
     return *m_SceneEditor;
 }
 
-Q3DStudio::IDocumentEditor &CDoc::MaybeOpenTransaction(const Q3DStudio::CString &cmdName,
+Q3DStudio::IDocumentEditor &CDoc::MaybeOpenTransaction(const QString &cmdName,
                                                        const char *inFile, int inLine)
 {
     if (!m_OpenTransaction)
@@ -492,7 +492,7 @@ void CDoc::IKnowWhatIAmDoingForceCloseTransaction()
         theTransaction->ReleaseConsumer(false);
         if (theTransaction->HasTransactions()) {
             SDocTransactionCommand *newCommand = new SDocTransactionCommand(
-                        theTransaction, theTransaction->GetName().toQString(), *m_Core->GetDispatch());
+                        theTransaction, theTransaction->GetName(), *m_Core->GetDispatch());
             // Execute the command synchronously.  If you are getting crashes due to UI refreshes
             // then
             // you need to run your entire change system in a postmessage of some sort.
@@ -513,7 +513,6 @@ bool CDoc::PreUndo()
 {
     if (m_OpenTransaction && m_OpenTransaction->HasTransactions()) {
         qCInfo(qt3ds::TRACE_INFO) << "PreUndo begin";
-        const Q3DStudio::CString theCommandName(m_OpenTransaction->GetName());
         // In this case we want the command to absolutely immediately commit; we don't want it
         // to wait until a further post message else the previous command is the one that will get
         // undone.
@@ -534,7 +533,7 @@ bool CDoc::IsModified()
 
 bool CDoc::IsValid() const
 {
-    return !m_DocumentPath.GetPath().IsEmpty();
+    return !m_DocumentPath.isEmpty();
 }
 //=============================================================================
 /**
@@ -847,7 +846,7 @@ void CDoc::CutObject(qt3dsdm::TInstanceHandleList inInstances)
 
         if (!theListOfTargets.IsEmpty()) {
             if (m_DeletingReferencedObjectHandler)
-                m_DeletingReferencedObjectHandler->DisplayMessageBox(theListOfTargets);
+                m_DeletingReferencedObjectHandler->DisplayMessageBox(theListOfTargets.toQString());
             // theContinueCutFlag = false;
         }
     }
@@ -944,8 +943,10 @@ void CDoc::DeleteObject(const qt3dsdm::TInstanceHandleList &inInstances)
             GetActionDependencies(inInstances[idx], theListOfTargets);
 
             if (!theListOfTargets.IsEmpty()) {
-                if (m_DeletingReferencedObjectHandler)
-                    m_DeletingReferencedObjectHandler->DisplayMessageBox(theListOfTargets);
+                if (m_DeletingReferencedObjectHandler) {
+                    m_DeletingReferencedObjectHandler->DisplayMessageBox(theListOfTargets
+                                                                         .toQString());
+                }
             }
 
             deletableInstances.push_back(inInstances[idx]);
@@ -1440,7 +1441,8 @@ void CDoc::TruncateTimebar(bool inSetStart, bool inAffectsChildren)
     qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = GetSelectedInstance();
     // Cannot change the time bars for a material
     if (theSelectedInstance.Valid())
-        Q3DStudio::ScopedDocumentEditor(*this, L"Truncate Time Range", __FILE__, __LINE__)
+        Q3DStudio::ScopedDocumentEditor(*this, QObject::tr("Truncate Time Range"),
+                                        __FILE__, __LINE__)
                 ->TruncateTimeRange(theSelectedInstance, inSetStart, GetCurrentViewTime());
 }
 
@@ -1522,23 +1524,22 @@ Q3DStudio::IDirectoryWatchingSystem *CDoc::GetDirectoryWatchingSystem()
     return m_DirectoryWatchingSystem ? m_DirectoryWatchingSystem.get() : NULL;
 }
 
-bool CDoc::SetDocumentPath(const Qt3DSFile &inDocumentPath)
+bool CDoc::SetDocumentPath(const QString &inDocumentPath)
 {
-    Q3DStudio::CString theDocPath = inDocumentPath.GetName();
     // We always need to have a document path.
-    if (theDocPath.Length() == 0) {
+    if (inDocumentPath.isEmpty()) {
         ASSERT(false); // User should have specified which file.
         m_DocumentPath = CreateUntitledDocument();
     } else {
         m_DocumentPath = inDocumentPath;
-        if (!m_DocumentPath.Exists()) {
-            // If the file doesn't exist, create it.
-            Q3DStudio::CFilePath(m_DocumentPath.GetPath()).Touch();
-        }
+        QFile f(m_DocumentPath);
+        if (!f.exists()) // If the file doesn't exist, create it.
+            f.open(QIODevice::ReadWrite);
     }
 
     // Document path should always be absolute path and it should exist
-    if (Qt3DSFile::IsPathRelative(m_DocumentPath.GetPath()) || !m_DocumentPath.Exists())
+    QFileInfo info(m_DocumentPath);
+    if (info.isRelative() || !info.exists())
         return false;
 
     m_Core->GetDispatch()->FireOnDocumentPathChanged(m_DocumentPath);
@@ -1549,21 +1550,20 @@ bool CDoc::SetDocumentPath(const Qt3DSFile &inDocumentPath)
 /**
  * Create Untitled document in user directory
  */
-Qt3DSFile CDoc::CreateUntitledDocument() const
+QString CDoc::CreateUntitledDocument() const
 {
-    Q3DStudio::CFilePath theAppDirectory = Q3DStudio::CFilePath::GetUserApplicationDirectory();
-    Q3DStudio::CFilePath theDirectory = Q3DStudio::CFilePath::CombineBaseAndRelative(
-                theAppDirectory, Q3DStudio::CFilePath(L"Qt3DSComposer/Untitled"));
-    theDirectory.CreateDir(true);
-    Q3DStudio::CFilePath theFilePath = Q3DStudio::CFilePath::CombineBaseAndRelative(
-                theDirectory, Q3DStudio::CFilePath(L"Untitled.uip"));
-    // Keep jokers from screwing with our system.
-    if (theFilePath.IsDirectory())
-        theFilePath.DeleteThisDirectory(true);
+    QString dirPath = QDir::cleanPath(Q3DStudio::CFilePath::GetUserApplicationDirectory()
+                                              + QStringLiteral("/Qt3DSComposer/Untitled"));
+    QDir dir(dirPath);
+    dir.mkpath(QStringLiteral("."));
+    QString filePath = dirPath + QStringLiteral("/Untitled.uip");
 
-    if (!theFilePath.IsFile())
-        theFilePath.Touch();
-    return Qt3DSFile(theFilePath);
+     // create the file if doesnt exist
+    if (!QFileInfo(filePath).exists()) {
+        QFile f(filePath);
+        f.open(QIODevice::ReadWrite);
+    }
+    return filePath;
 }
 
 void CDoc::SetImportFailedHandler(std::shared_ptr<Q3DStudio::IImportFailedHandler> inHandler)
@@ -1592,7 +1592,8 @@ std::shared_ptr<Q3DStudio::IMoveRenameHandler> CDoc::getMoveRenameHandler()
     return m_moveRenameHandler;
 }
 
-Qt3DSFile CDoc::GetDocumentPath() const
+// absolute document path
+QString CDoc::GetDocumentPath() const
 {
     return m_DocumentPath;
 }
@@ -1603,7 +1604,7 @@ Qt3DSFile CDoc::GetDocumentPath() const
 QString CDoc::getRelativePath() const
 {
     return QDir(GetCore()->getProjectFile().getProjectPath())
-            .relativeFilePath(m_DocumentPath.GetPath().toQString());
+            .relativeFilePath(m_DocumentPath);
 }
 
 void CDoc::setPresentationId(const QString &id)
@@ -1618,7 +1619,7 @@ QString CDoc::getPresentationId() const
 
 Q3DStudio::CString CDoc::GetDocumentDirectory() const
 {
-    Q3DStudio::CFilePath thePath(m_DocumentPath.GetAbsolutePath());
+    Q3DStudio::CFilePath thePath(m_DocumentPath);
     return thePath.GetDirectory();
 }
 
@@ -1649,8 +1650,9 @@ Q3DStudio::CString CDoc::GetRelativePathToDoc(const Q3DStudio::CFilePath &inPath
 Q3DStudio::CString CDoc::GetResolvedPathToDoc(const Q3DStudio::CFilePath &inPath)
 {
     // If it is a relative path, resolve it.
-    if (inPath.IsAbsolute() == false) {
-        ASSERT(m_DocumentPath.Exists()); // Sanity check that document path has been set properly.
+    if (!inPath.IsAbsolute()) {
+        // Sanity check that document path has been set properly.
+        ASSERT(QFileInfo(m_DocumentPath).exists());
 
         return Q3DStudio::CFilePath::CombineBaseAndRelative(GetDocumentDirectory(), inPath);
     }
@@ -1701,12 +1703,12 @@ void CDoc::CloseDocument()
 /**
  * Called when the core opens a UIP file.
  */
-void CDoc::LoadDocument(const Qt3DSFile &inDocument)
+void CDoc::LoadDocument(const QString &inDocument)
 {
     ResetData();
 
-    CFileInputStream theFileStream(inDocument.GetAbsolutePosixPath());
-    CBufferedInputStream theBufferedStream(&theFileStream, inDocument.Length());
+    CFileInputStream theFileStream(inDocument);
+    CBufferedInputStream theBufferedStream(&theFileStream, QFileInfo(inDocument).size());
     SetDocumentPath(inDocument); // SetDocumentPath before LoadPresentation because we need
     // DocumentPath to load relative resources such as images
     LoadPresentationFile(&theBufferedStream);
@@ -1716,9 +1718,9 @@ void CDoc::LoadDocument(const Qt3DSFile &inDocument)
 /**
  * Save Document
  */
-void CDoc::SaveDocument(const Qt3DSFile &inDocument)
+void CDoc::SaveDocument(const QString &inDocument)
 {
-    CFileOutputStream theFileStream(inDocument.GetAbsolutePosixPath());
+    CFileOutputStream theFileStream(inDocument);
     // Exceptions here get propagated to the crash dialog.
     CBufferedOutputStream theBufferStream(&theFileStream);
     SavePresentationFile(&theBufferStream);
@@ -2887,7 +2889,7 @@ void CDoc::CheckActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 
     if (!theListOfTargets.IsEmpty()) {
         if (m_DeletingReferencedObjectHandler)
-            m_DeletingReferencedObjectHandler->DisplayMessageBox(theListOfTargets);
+            m_DeletingReferencedObjectHandler->DisplayMessageBox(theListOfTargets.toQString());
     }
 }
 

@@ -43,7 +43,6 @@
 //	Forwards
 //==============================================================================
 class CCore;
-class CStudioProjectVariables;
 
 class CStudioProjectSettings
 {

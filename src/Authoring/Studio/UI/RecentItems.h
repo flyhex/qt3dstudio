@@ -33,13 +33,7 @@
 #pragma once
 
 #include <QObject>
-
-#include "Qt3DSString.h"
-#include "Qt3DSFile.h"
-
 #include <vector>
-
-class Qt3DSFile;
 
 QT_FORWARD_DECLARE_CLASS(QMenu)
 
@@ -47,39 +41,28 @@ class CRecentItems : public QObject
 {
     Q_OBJECT
 
-    typedef std::vector<Qt3DSFile> TFileList;
-
 public:
-    static const Q3DStudio::CString RECENTITEM_KEY;
-    static const Q3DStudio::CString RECENTIMPORT_KEY;
-    static const Q3DStudio::CString RECENTITEM_VALID;
+    static const int MAX_ITEMS;
 
 Q_SIGNALS:
     void openRecent(int index);
 public:
-    CRecentItems(QMenu *inMenu, long inCommandID,
-                 Q3DStudio::CString inPreferenceKey = RECENTITEM_KEY);
+    CRecentItems(QMenu *inMenu);
     virtual ~CRecentItems();
 
-    void AddRecentItem(const Qt3DSFile &inItem);
-    void RemoveRecentItem(const Qt3DSFile &inItem);
+    void AddRecentItem(const QString &inItem);
+    void RemoveRecentItem(const QString &inItem, bool rebuild = true);
 
-    Qt3DSFile GetItem(long inIndex);
+    QString GetItem(long inIndex) const;
     long GetItemCount() const { return (long)m_RecentItems.size(); }
 
 protected:
-    void ClearMenu();
     void ReconstructList();
     void RebuildList();
-    void SaveRecentList();
-    void handleAboutToShow();
 
-    TFileList m_RecentItems;
+    std::vector<QString> m_RecentItems;
 
-    long m_CommandID;
-    long m_ValidItems;
     QMenu *m_Menu;
-    Q3DStudio::CString m_PreferenceKey;
 
 private Q_SLOTS:
     void onTriggerRecent();

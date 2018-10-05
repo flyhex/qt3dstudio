@@ -39,7 +39,6 @@
 //	Includes
 //==============================================================================
 #include "StudioProjectSettings.h"
-#include "StudioProjectVariables.h"
 #include "Qt3DSDMXML.h"
 #include "Qt3DSDMWStrOpsImpl.h"
 

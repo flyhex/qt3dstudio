@@ -28,22 +28,20 @@
 ****************************************************************************/
 
 #ifndef INCLUDED_THREAD_EXCEPTION_H
-#define INCLUDED_THREAD_EXCEPTION_H 1
-
-#pragma once
+#define INCLUDED_THREAD_EXCEPTION_H
 
 #include "StudioException.h"
-#include "Qt3DSString.h"
+#include <QtCore/qstring.h>
 
 class CThreadException : public CStudioException
 {
 public:
-    CThreadException(Q3DStudio::CString inWhat) { m_What = inWhat; }
+    CThreadException(const QString &inWhat) { m_What = inWhat; }
 
     virtual ~CThreadException() {}
 
-    const wchar_t *GetDescription() const override { return m_What; }
+    QString GetDescription() const override { return m_What; }
 protected:
-    Q3DStudio::CString m_What;
+    QString m_What;
 };
 #endif // INCLUDED_THREAD_EXCEPTION_H

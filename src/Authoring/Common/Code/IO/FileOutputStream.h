@@ -35,7 +35,6 @@
 #define INCLUDED_FILE_OUTPUT_STREAM_H
 
 #include "OutputStream.h"
-#include "Qt3DSString.h"
 #include <stdio.h>
 
 #ifdef WIN32
@@ -62,13 +61,13 @@ protected:
 
 public:
     // Construction
-    CFileOutputStream(const Q3DStudio::CString &inFilename, bool inAppend = false);
+    CFileOutputStream(const QString &inFilename, bool inAppend = false);
     virtual ~CFileOutputStream();
 
     long Write(const void *inBuffer, long inBufferLength) override;
     void Flush() override;
     void Close() override;
-    bool IsValid() override;
+    bool IsValid() const override;
 
     // CSeekOutputStream
     long GetCurrentPosition() override;

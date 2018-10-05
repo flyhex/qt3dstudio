@@ -33,24 +33,25 @@
 #pragma once
 
 #include "StudioException.h"
-#include "Qt3DSString.h"
+#include <QtCore/qstring.h>
+#include <QtCore/qobject.h>
 
 class CGeneralException : public CStudioException
 {
 public:
-    CGeneralException(const Q3DStudio::CString &inDescription)
+    CGeneralException(const QString &inDescription)
         : m_Description(inDescription)
     {
     }
     virtual ~CGeneralException() {}
 
-    const wchar_t *GetDescription() const override
+    QString GetDescription() const override
     {
-        return static_cast<const wchar_t *>(m_Description);
+        return m_Description;
     }
 
 protected:
-    Q3DStudio::CString m_Description;
+    QString m_Description;
 };
 
 class CNoClientException : public CStudioException
@@ -58,9 +59,9 @@ class CNoClientException : public CStudioException
 public:
     CNoClientException() {}
     virtual ~CNoClientException() {}
-    const wchar_t *GetDescription() const override
+    QString GetDescription() const override
     {
-        return Q3DStudio::CString(_LSTR("Client is not installed"));
+        return QObject::tr("Client is not installed");
     }
 };
 
@@ -69,9 +70,9 @@ class CClientCreationException : public CStudioException
 public:
     CClientCreationException() {}
     virtual ~CClientCreationException() {}
-    const wchar_t *GetDescription() const override
+    QString GetDescription() const override
     {
-        return Q3DStudio::CString(_LSTR("Unable to create Client"));
+        return QObject::tr("Unable to create Client");
     }
 };
 
@@ -80,9 +81,9 @@ class CInvalidFileFormatException : public CStudioException
 public:
     CInvalidFileFormatException() {}
     virtual ~CInvalidFileFormatException() {}
-    const wchar_t *GetDescription() const override
+    QString GetDescription() const override
     {
-        return Q3DStudio::CString(_LSTR("Invalid file format"));
+        return QObject::tr("Invalid file format");
     }
 };
 
@@ -91,9 +92,9 @@ class CUnsupportedFileFormatException : public CStudioException
 public:
     CUnsupportedFileFormatException() {}
     virtual ~CUnsupportedFileFormatException() {}
-    const wchar_t *GetDescription() const override
+    QString GetDescription() const override
     {
-        return Q3DStudio::CString(_LSTR("Unsupported file format"));
+        return QObject::tr("Unsupported file format");
     }
 };
 
@@ -102,9 +103,9 @@ class ProjectFileNotFoundException : public CStudioException
 public:
     ProjectFileNotFoundException() {}
     virtual ~ProjectFileNotFoundException() {}
-    const wchar_t *GetDescription() const override
+    QString GetDescription() const override
     {
-        return Q3DStudio::CString(_LSTR("Project file was not found"));
+        return QObject::tr("Project file was not found");
     }
 };
 
@@ -113,7 +114,7 @@ class CENotImplException : public CStudioException
 public:
     CENotImplException() {}
     virtual ~CENotImplException() {}
-    const wchar_t *GetDescription() const override { return Q3DStudio::CString(_LSTR("ENOTIMPL")); }
+    QString GetDescription() const override { return QObject::tr("ENOTIMPL"); }
 };
 
 class CInvalidArgumentsException : public CStudioException
@@ -121,9 +122,9 @@ class CInvalidArgumentsException : public CStudioException
 public:
     CInvalidArgumentsException() {}
     virtual ~CInvalidArgumentsException() {}
-    const wchar_t *GetDescription() const override
+    QString GetDescription() const override
     {
-        return Q3DStudio::CString(_LSTR("Invalid Argument"));
+        return QObject::tr("Invalid Argument");
     }
 };
 
@@ -132,9 +133,9 @@ class CNullPointerException : public CStudioException
 public:
     CNullPointerException() {}
     virtual ~CNullPointerException() {}
-    const wchar_t *GetDescription() const override
+    QString GetDescription() const override
     {
-        return Q3DStudio::CString(_LSTR("Null Pointer Error"));
+        return QObject::tr("Null Pointer Error");
     }
 };
 
@@ -143,9 +144,9 @@ class CUnexpectedResultException : public CStudioException
 public:
     CUnexpectedResultException() {}
     virtual ~CUnexpectedResultException() {}
-    const wchar_t *GetDescription() const override
+    QString GetDescription() const override
     {
-        return Q3DStudio::CString(_LSTR("Unexpected Result"));
+        return QObject::tr("Unexpected Result");
     }
 };
 
@@ -154,9 +155,9 @@ class CClientFailException : public CStudioException
 public:
     CClientFailException() {}
     virtual ~CClientFailException() {}
-    const wchar_t *GetDescription() const override
+    QString GetDescription() const override
     {
-        return Q3DStudio::CString(_LSTR("Client Failure"));
+        return QObject::tr("Client Failure");
     }
 };
 
@@ -164,17 +165,17 @@ public:
 class CLoadReferencedFileException : public CGeneralException
 {
 public:
-    CLoadReferencedFileException(const wchar_t *inFilePath, const Q3DStudio::CString &inDescription)
+    CLoadReferencedFileException(const QString &inFilePath, const QString &inDescription)
         : CGeneralException(inDescription)
     {
-        if (inFilePath)
+        if (!inFilePath.isEmpty())
             m_FilePath = inFilePath;
     }
     virtual ~CLoadReferencedFileException() {}
-    const wchar_t *GetFilePath() const { return static_cast<const wchar_t *>(m_FilePath); }
+    QString GetFilePath() const { return m_FilePath; }
 
 protected:
-    Q3DStudio::CString m_FilePath;
+    QString m_FilePath;
 };
 
 #endif // INCLUDED_EXCEPTIONS_H
