@@ -342,9 +342,10 @@ qreal Q3DSPlayerWnd::fixedDevicePixelRatio() const
 
 void Q3DSPlayerWnd::resizeGL(int width, int height)
 {
+    QSize size(width, height);
     Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.getRenderer());
     theRenderer.SetViewRect(QRect(0, 0, int(width * fixedDevicePixelRatio()),
-                                        int(height * fixedDevicePixelRatio())));
+                                        int(height * fixedDevicePixelRatio())), size);
 }
 
 }

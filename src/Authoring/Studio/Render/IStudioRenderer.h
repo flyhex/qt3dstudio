@@ -55,7 +55,7 @@ public:
 
     virtual void Initialize(QWidget *inWindow) = 0;
 
-    virtual void SetViewRect(const QRect &inRect) = 0;
+    virtual void SetViewRect(const QRect &inRect, const QSize &size) = 0;
 
     virtual void GetEditCameraList(QStringList &outCameras) = 0;
     virtual void SetPolygonFillModeEnabled(bool inEnableFillMode) = 0;

@@ -55,7 +55,7 @@ public:
     ~CPlayerContainerWnd() override;
 
     void SetPlayerWnd(Q3DStudio::Q3DSPlayerWnd *inPlayerWnd);
-    void SetPlayerWndPosition(long &outLeftPresentationEdge, long &outTopPresentionEdge);
+    void SetPlayerWndPosition();
     void SetScrollRanges();
     void RecenterClient();
     void OnRulerGuideToggled();

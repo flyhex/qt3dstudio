@@ -1922,7 +1922,7 @@ void Q3DSTranslation::prepareRender(const QRect &rect, const QSize &size)
 #if (Q3DS_ENABLE_PROFILEUI == 1)
         m_engine->setProfileUiVisible(true, true);
 #endif
-        m_studioRenderer.SetViewRect(m_studioRenderer.viewRect());
+        m_studioRenderer.SetViewRect(m_studioRenderer.viewRect(), size);
         m_engine->sceneManager()->slidePlayer()->setMode(Q3DSSlidePlayer::PlayerMode::Editor);
         m_engine->sceneManager()->slidePlayer()->stop();
     }

@@ -98,7 +98,7 @@ public:
     void RequestRender() override;
     bool IsInitialized() override;
     void Initialize(QWidget *inWindow) override;
-    void SetViewRect(const QRect &inRect) override;
+    void SetViewRect(const QRect &inRect, const QSize &size) override;
     void GetEditCameraList(QStringList &outCameras) override;
     void SetPolygonFillModeEnabled(bool inEnableFillMode) override;
     bool IsPolygonFillModeEnabled() const override;
@@ -174,6 +174,7 @@ private:
     QScopedPointer<Q3DSTranslation> m_translation;
     QVector<SEditCameraPersistentInformation> m_editCameraInformation;
     QRect m_viewRect;
+    QSize m_size;
     QRect m_innerRect;
     QRect m_outerRect;
     QColor m_rectColor;

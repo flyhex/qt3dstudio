@@ -156,10 +156,10 @@ void Q3DStudioRenderer::Initialize(QWidget *inWindow)
     m_widget = qobject_cast<QOpenGLWidget *>(inWindow);
 }
 
-void Q3DStudioRenderer::SetViewRect(const QRect &inRect)
+void Q3DStudioRenderer::SetViewRect(const QRect &inRect, const QSize &size)
 {
     m_viewRect = inRect;
-    QSize size(inRect.width(), inRect.height());
+    m_size = size;
     if (!m_engine.isNull())
         m_engine->resize(size, fixedDevicePixelRatio(), false);
     sendResizeToQt3D(size);
@@ -220,8 +220,10 @@ void Q3DStudioRenderer::SetEditCamera(QT3DSI32 inIndex)
         if (index == -1) {
             // use scene camera
             m_translation->disableEditCamera();
+            m_viewportSettings.setMatteEnabled(true);
         } else {
             // use edit camera
+            m_viewportSettings.setMatteEnabled(false);
             const SEditCameraDefinition &def(g_editCameraDefinitions[m_editCameraIndex]);
 
             SEditCameraPersistentInformation &cameraInfo
@@ -295,9 +297,10 @@ void Q3DStudioRenderer::drawTickMarksOnHorizontalRects(QPainter &painter, qreal 
                                                        qreal innerTop, qreal outerBottom,
                                                        qreal outerTop)
 {
+    qreal length = CStudioPreferences::guideSize() / 2.;
     qreal centerPosX = floor(innerLeft + (innerRight - innerLeft) / 2.0 + .5);
     drawTopBottomTickMarks(painter, centerPosX, innerBottom, innerTop, outerBottom,
-                           outerTop, 15);
+                           outerTop, 15. * length / 16.);
     for (unsigned int incrementor = 10;
          (centerPosX + incrementor) < innerRight && (centerPosX - incrementor) > innerLeft;
          incrementor += 10) {
@@ -305,11 +308,11 @@ void Q3DStudioRenderer::drawTickMarksOnHorizontalRects(QPainter &painter, qreal 
         qreal leftEdge = centerPosX - incrementor;
         qreal lineHeight = 0;
         if (incrementor % 100 == 0)
-            lineHeight = 11;
+            lineHeight = 11. * length / 16.;
         else if (incrementor % 20)
-            lineHeight = 4;
+            lineHeight = 4. * length / 16.;
         else
-            lineHeight = 2;
+            lineHeight = 2. * length / 16.;
 
         if (rightEdge < innerRight) {
             drawTopBottomTickMarks(painter, rightEdge, innerBottom, innerTop, outerBottom,
@@ -327,9 +330,10 @@ void Q3DStudioRenderer::drawTickMarksOnVerticalRects(QPainter &painter, qreal in
                                                      qreal innerTop, qreal outerLeft,
                                                      qreal outerRight)
 {
+    qreal length = CStudioPreferences::guideSize() / 2.;
     qreal centerPosY = floor(innerBottom + (innerTop - innerBottom) / 2.0 + .5);
     drawLeftRightTickMarks(painter, centerPosY, innerLeft, innerRight, outerLeft,
-                           outerRight, 15);
+                           outerRight, 15. * length / 16.);
     for (unsigned int incrementor = 10;
          (centerPosY + incrementor) < innerTop && (centerPosY - incrementor) > innerBottom;
          incrementor += 10) {
@@ -337,11 +341,11 @@ void Q3DStudioRenderer::drawTickMarksOnVerticalRects(QPainter &painter, qreal in
         qreal bottomEdge = centerPosY - incrementor;
         qreal lineHeight = 0;
         if (incrementor % 100 == 0)
-            lineHeight = 11;
+            lineHeight = 11. * length / 16.;
         else if (incrementor % 20)
-            lineHeight = 4;
+            lineHeight = 4. * length / 16.;
         else
-            lineHeight = 2;
+            lineHeight = 2. * length / 16.;
 
         if (topEdge < innerTop) {
             drawLeftRightTickMarks(painter, topEdge, innerLeft, innerRight, outerLeft,
@@ -356,17 +360,15 @@ void Q3DStudioRenderer::drawTickMarksOnVerticalRects(QPainter &painter, qreal in
 
 void Q3DStudioRenderer::drawGuides(QPainter &painter)
 {
-    if (!m_guidesEnabled)
+    if (!m_guidesEnabled || editCameraEnabled())
         return;
-
-    QRect thePresentationViewport = m_viewRect;
 
     int offset = CStudioPreferences::guideSize() / 2;
 
-    int innerLeft = offset;
-    int innerRight = thePresentationViewport.width() - offset;
-    int innerBottom = thePresentationViewport.height() - offset;
-    int innerTop = offset;
+    int innerLeft = m_viewRect.left() + offset;
+    int innerRight = m_viewRect.right() - offset + 1;
+    int innerBottom = m_viewRect.bottom() - offset + 1;
+    int innerTop = m_viewRect.top() + offset;
 
     int outerLeft = innerLeft - offset;
     int outerRight = innerRight + offset;
@@ -392,10 +394,10 @@ void Q3DStudioRenderer::drawGuides(QPainter &painter)
                      m_rectColor);
 
     painter.setPen(m_lineColor);
-    drawTickMarksOnHorizontalRects(painter, innerLeft, innerRight, innerTop, innerBottom,
+    drawTickMarksOnHorizontalRects(painter, innerLeft, innerRight + 1, innerTop - 1, innerBottom,
                                    outerTop, outerBottom);
 
-    drawTickMarksOnVerticalRects(painter, innerLeft, innerRight, innerTop, innerBottom,
+    drawTickMarksOnVerticalRects(painter, innerLeft, innerRight + 1, innerTop - 1, innerBottom,
                                  outerLeft, outerRight);
 }
 
@@ -421,18 +423,22 @@ void Q3DStudioRenderer::RenderNow()
     if (m_translation.isNull() && m_hasPresentation)
         createTranslation();
 
-    if (!m_translation.isNull()) {
-        const QSize size = m_viewRect.size();
-        QRect viewRect = QRect(0, 0, size.width(), size.height());
-        m_translation->prepareRender(viewRect, size);
-    }
-
-    auto renderAspectD = static_cast<Qt3DRender::QRenderAspectPrivate *>(
-                Qt3DRender::QRenderAspectPrivate::get(m_renderAspect));
-    renderAspectD->renderSynchronous(true);
+    if (!m_translation.isNull())
+        m_translation->prepareRender(m_viewRect, m_size);
 
     if (!QOpenGLContext::currentContext())
         m_widget->makeCurrent();
+
+    if (!editCameraEnabled()) {
+        QColor matteColor;
+        matteColor.setRgbF(.13, .13, .13);
+        painter.fillRect(0, 0, m_widget->width(), m_widget->height(), matteColor);
+    }
+    painter.beginNativePainting();
+    auto renderAspectD = static_cast<Qt3DRender::QRenderAspectPrivate *>(
+                Qt3DRender::QRenderAspectPrivate::get(m_renderAspect));
+    renderAspectD->renderSynchronous(true);
+    painter.endNativePainting();
 
     // fix gl state leakage
     QOpenGLContext::currentContext()->functions()->glDisable(GL_STENCIL_TEST);

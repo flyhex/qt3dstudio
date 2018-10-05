@@ -163,8 +163,8 @@ void CPlayerWnd::mouseMoveEvent(QMouseEvent *event)
 {
     if (m_mouseDown) {
         long theModifierKeys = 0;
-        if (event->buttons() & Qt::LeftButton
-                || (!g_StudioApp.GetCore()->GetDoc()->GetSelectedInstance().Valid())
+        if (((event->buttons() & Qt::LeftButton)
+                || (!g_StudioApp.GetCore()->GetDoc()->GetSelectedInstance().Valid()))
                 && !m_containerWnd->IsDeploymentView()) {
             // When in edit camera view and nothing is selected, all buttons are mapped
             // as left button. That is how camera control tools work, they are all
@@ -338,7 +338,8 @@ qreal CPlayerWnd::fixedDevicePixelRatio() const
 void CPlayerWnd::resizeGL(int width, int height)
 {
     // This also passes the new FBO to the OpenGLContext
+    QSize size(width, height);
     Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.getRenderer());
     theRenderer.SetViewRect(QRect(0, 0, width * fixedDevicePixelRatio(),
-                                  height * fixedDevicePixelRatio()));
+                                  height * fixedDevicePixelRatio()), size);
 }

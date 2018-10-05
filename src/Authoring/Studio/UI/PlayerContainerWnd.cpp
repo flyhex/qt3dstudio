@@ -72,46 +72,28 @@ bool CPlayerContainerWnd::ShouldHideScrollBars()
  * SetPlayerWndPosition: Sets the position of the child player window
  *
  * Called when the view is scrolled to position the child player window
- * @param outLeftPresentationEdge   the left edge of the presentation, with the scroll position
- *                                  taken into consideration
- * @param outTopPresentionEdge      the top edge of the presentation, with the scroll
- *                                  position taken into consideration
  *
  */
 //==============================================================================
-void CPlayerContainerWnd::SetPlayerWndPosition(long &outLeftPresentationEdge,
-                                               long &outTopPresentionEdge)
+void CPlayerContainerWnd::SetPlayerWndPosition()
 {
-    long theHScrollPosition, theVScrollPosition;
+    QRect viewRect = rect();
+    long theHScrollPosition = 0;
+    long theVScrollPosition = 0;
     // Negate to adjust actual client positions
-    theHScrollPosition = -horizontalScrollBar()->value();
-    theVScrollPosition = -verticalScrollBar()->value();
-
-    QRect theClientRect = rect();
-
-    // Horizontal scrollbar does not exist
-    if (m_ClientRect.width() < theClientRect.width()) {
-        theHScrollPosition =
-                theClientRect.left() + (theClientRect.width() / 2) - (m_ClientRect.width() / 2);
-        outLeftPresentationEdge = theHScrollPosition;
-    } else {
-        // This stays a negated value
-        outLeftPresentationEdge = theHScrollPosition;
+    if (!ShouldHideScrollBars()) {
+        if (m_ClientRect.width() > viewRect.width()) {
+            theHScrollPosition = -horizontalScrollBar()->value();
+            viewRect.setWidth(m_ClientRect.width());
+        }
+        if (m_ClientRect.height() > viewRect.height()) {
+            theVScrollPosition = -verticalScrollBar()->value();
+            viewRect.setHeight(m_ClientRect.height());
+        }
     }
-
-    // Vertical scrollbar does not exist
-    if (m_ClientRect.height() < theClientRect.height()) {
-        theVScrollPosition =
-                theClientRect.top() + (theClientRect.height() / 2) - (m_ClientRect.height() / 2);
-        outTopPresentionEdge = theVScrollPosition;
-    } else {
-        // This stays a negated value
-        outTopPresentionEdge = theVScrollPosition;
-    }
-
     // Move the child player window
     m_PlayerWnd->setGeometry(QRect(QPoint(theHScrollPosition, theVScrollPosition),
-                                   m_ClientRect.size()));
+                                   viewRect.size()));
 }
 
 //==============================================================================
@@ -121,7 +103,6 @@ void CPlayerContainerWnd::SetPlayerWndPosition(long &outLeftPresentationEdge,
 //==============================================================================
 void CPlayerContainerWnd::SetScrollRanges()
 {
-
     long theScrollWidth = 0;
     long theScrollHeight = 0;
 
@@ -178,6 +159,14 @@ qreal CPlayerContainerWnd::fixedDevicePixelRatio() const
     return ratio;
 }
 
+template<typename T>
+T even(const T val)
+{
+    // handle negative values
+    T corr = (val > 0) ? -1 : 1;
+    return (val % 2) ? (val + corr) : val;
+}
+
 //==============================================================================
 /**
  *	RecenterClient: Recenters the Client rect in the View's client area.
@@ -185,34 +174,36 @@ qreal CPlayerContainerWnd::fixedDevicePixelRatio() const
 //==============================================================================
 void CPlayerContainerWnd::RecenterClient()
 {
-    QRect theViewClientRect = rect();
+    QRect theViewRect = rect();
     QSize theClientSize;
-    m_ClientRect = theViewClientRect;
+    QSize viewSize;
+    m_ClientRect = theViewRect;
+    viewSize = theViewRect.size();
 
     if (!ShouldHideScrollBars()) {
         theClientSize = GetEffectivePresentationSize();
 
-        // Only center if we need to scroll
-        if (theClientSize.width() > theViewClientRect.width()) {
-            // compute the size of the client rectangle to display
+        if (theClientSize.width() < theViewRect.width()) {
             m_ClientRect.setLeft(
-                        (theViewClientRect.width() / 2) - (theClientSize.width() / 2)
-                        - (theClientSize.width() % 2));
-            m_ClientRect.setRight((theViewClientRect.width() / 2) + (theClientSize.width() / 2));
+                    even((theViewRect.width() / 2) - (theClientSize.width() / 2)));
+        } else {
+            viewSize.setWidth(theClientSize.width());
         }
+        m_ClientRect.setWidth(theClientSize.width());
 
-        if (theClientSize.height() > theViewClientRect.height()) {
+        if (theClientSize.height() < theViewRect.height()) {
             m_ClientRect.setTop(
-                        (theViewClientRect.height() / 2) - (theClientSize.height() / 2)
-                        - (theClientSize.height() % 2));
-            m_ClientRect.setBottom((theViewClientRect.height() / 2) + (theClientSize.height() / 2));
+                    even((theViewRect.height() / 2) - (theClientSize.height() / 2)));
+        } else {
+            viewSize.setHeight(theClientSize.height());
         }
+        m_ClientRect.setHeight(theClientSize.height());
     }
 
     QRect glRect = m_ClientRect;
     glRect.setWidth(int(fixedDevicePixelRatio() * m_ClientRect.width()));
     glRect.setHeight(int(fixedDevicePixelRatio() * m_ClientRect.height()));
-    g_StudioApp.getRenderer().SetViewRect(glRect);
+    g_StudioApp.getRenderer().SetViewRect(glRect, viewSize);
 }
 
 void CPlayerContainerWnd::wheelEvent(QWheelEvent* event)
@@ -231,8 +222,7 @@ void CPlayerContainerWnd::wheelEvent(QWheelEvent* event)
 
 void CPlayerContainerWnd::scrollContentsBy(int, int)
 {
-    long x, y;
-    SetPlayerWndPosition(x, y);
+    SetPlayerWndPosition();
 }
 
 //==============================================================================

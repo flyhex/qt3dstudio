@@ -277,9 +277,7 @@ void CSceneView::setPlayerWndPosition()
 {
     // Move the child player window to coincide with the scrollbars
     if (m_playerContainerWnd) {
-        long theLeft, theTop;
-        // Retrieve the left and top edge of the presentation currently in view
-        m_playerContainerWnd->SetPlayerWndPosition(theLeft, theTop);
+        m_playerContainerWnd->SetPlayerWndPosition();
         m_playerContainerWnd->update();
     }
 }
