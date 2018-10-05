@@ -407,6 +407,9 @@ void TimelineWidget::OnNewPresentation()
 
     // Clear active slide
     m_activeSlide = qt3dsdm::Qt3DSDMSlideHandle();
+
+    // Reset timeline time
+    OnTimeChanged(0);
 }
 
 void TimelineWidget::OnClosingPresentation()
