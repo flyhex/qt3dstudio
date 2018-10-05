@@ -48,6 +48,7 @@
 #include "StudioPickValues.h"
 #include "Qt3DSDMGuides.h"
 #include "IDocumentEditor.h"
+#include "StudioEnums.h"
 
 #include <q3dsruntime2api_p.h>
 #include <QtWidgets/qopenglwidget.h>
@@ -62,25 +63,9 @@ QT_END_NAMESPACE
 
 namespace Q3DStudio {
 
-enum class PickTargetAreas
-{
-    Presentation = 0,
-    Matte,
-};
-
-enum class MovementTypes
-{
-    Unknown = 0,
-    Translate,
-    TranslateAlongCameraDirection,
-    Scale,
-    ScaleZ,
-    Rotation,
-    RotationAboutCameraDirection,
-};
-
 class Q3DSTranslation;
-class Q3DStudioRenderer : public IStudioRenderer,
+class Q3DStudioRenderer : public QObject,
+                          public IStudioRenderer,
                           public IDataModelListener,
                           public IReloadListener,
                           public CPresentationChangeListener,
@@ -141,6 +126,7 @@ protected:
                            int inToolMode) override;
     void OnToolbarChange() override;
     void OnSelectionChange();
+    void onScenePick();
 
 private:
 
@@ -161,8 +147,12 @@ private:
                                       qreal innerRight, qreal innerBottom, qreal innerTop,
                                       qreal outerLeft, qreal outerRight);
 
-    PickTargetAreas getPickArea(CPt inPoint);
+    PickTargetAreas getPickArea(const QPoint &point);
+    QPoint scenePoint(const QPoint &viewPoint);
     qt3ds::foundation::Option<qt3dsdm::SGuideInfo> pickRulers(CPt inMouseCoords);
+    SStudioPickValue pick(const QPoint &inMouseCoords, SelectMode inSelectMode);
+    void handlePickResult();
+    SStudioPickValue postScenePick();
 
     CDispatch &m_dispatch;
     CDoc &m_doc;
@@ -191,6 +181,8 @@ private:
     bool m_maybeDragStart = false;
     SEditCameraPersistentInformation m_mouseDownCameraInformation;
     int m_lastToolMode = 0;
+    QScopedPointer<Q3DSScenePicker> m_scenePicker;
+    bool m_pickPending = false;
 };
 
 }

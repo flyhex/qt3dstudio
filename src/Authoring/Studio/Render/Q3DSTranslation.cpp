@@ -30,6 +30,7 @@
 #include "Q3DStudioRenderer.h"
 #include "Q3DSStringTable.h"
 #include "Q3DSGraphObjectTranslator.h"
+#include "Q3DSEditCamera.h"
 
 #include "StudioApp.h"
 #include "Core.h"
@@ -1717,7 +1718,7 @@ void Q3DSTranslation::markPropertyDirty(qt3dsdm::Qt3DSDMInstanceHandle instance,
         theTranslatorList = m_translatorMap.find(instance);
     THandleTranslatorPairList &theList = *theTranslatorList;
     ThandleTranslatorOption t = findTranslator(theList, qt3dsdm::Qt3DSDMInstanceHandle());
-    if (!t.isEmpty()) {
+    if (!t.isEmpty() && t->second->isAutoUpdateEnabled()) {
         t.getValue().second->updateProperty(*this, instance, property, value, name);
         m_studioRenderer.RequestRender();
     }
@@ -2005,6 +2006,261 @@ void Q3DSTranslation::enableSceneCameras(bool enable)
 void Q3DSTranslation::wheelZoom(qreal factor)
 {
     m_editCameraInfo.m_viewRadius = qMax(.0001, m_editCameraInfo.m_viewRadius * factor);
+}
+
+Q3DSCameraNode *Q3DSTranslation::cameraForNode(Q3DSGraphObject *node)
+{
+    if (node->type() == Q3DSGraphObject::Camera)
+        return static_cast<Q3DSCameraNode *>(node);
+
+    while (node && node->parent() && node->type() != Q3DSGraphObject::Layer)
+        node = node->parent();
+    Q3DSLayerNode *layer = static_cast<Q3DSLayerNode *>(node);
+    Q3DSGraphObject *child = layer->firstChild();
+    while (child) {
+        if (child->type() == Q3DSGraphObject::Camera
+                && static_cast<Q3DSNode *>(child)->eyeballEnabled()) {
+            break;
+        }
+        child = child->nextSibling();
+    }
+    if (child)
+        return static_cast<Q3DSCameraNode *>(child);
+
+    return nullptr;
+}
+
+void Q3DSTranslation::prepareDrag(Q3DSGraphObjectTranslator *selected)
+{
+    m_dragTranslator = selected;
+    selected->enableAutoUpdates(false);
+    Q3DSNode &node = static_cast<Q3DSNode &>(m_dragTranslator->graphObject());
+    m_beginDragState.t = node.position();
+    m_beginDragState.s = node.scale();
+    m_beginDragState.r = node.rotation();
+    m_currentDragState = m_beginDragState;
+    m_dragCamera = cameraForNode(&node);
+}
+
+void Q3DSTranslation::endDrag(bool dragReset, CUpdateableDocumentEditor &inEditor)
+{
+    m_dragTranslator->enableAutoUpdates(true);
+    if (!dragReset) {
+        // send drag state to document
+        IDocumentEditor &editor = inEditor.EnsureEditor(QObject::tr("Set Transformation"),
+                                                        __FILE__, __LINE__);
+        editor.SetInstancePropertyValue(m_doc.GetSelectedInstance(),
+                                      objectDefinitions().m_Node.m_Position,
+                                      qt3dsdm::SValue(QVariant::fromValue(m_currentDragState.t)));
+        editor.SetInstancePropertyValue(m_doc.GetSelectedInstance(),
+                                      objectDefinitions().m_Node.m_Rotation,
+                                      qt3dsdm::SValue(QVariant::fromValue(m_currentDragState.r)));
+        editor.SetInstancePropertyValue(m_doc.GetSelectedInstance(),
+                                      objectDefinitions().m_Node.m_Scale,
+                                      qt3dsdm::SValue(QVariant::fromValue(m_currentDragState.s)));
+        inEditor.FireImmediateRefresh(m_doc.GetSelectedInstance());
+    } else {
+        // reset node to beginning
+        Q3DSNode &node = static_cast<Q3DSNode &>(m_dragTranslator->graphObject());
+        Q3DSPropertyChangeList list;
+        list.append(node.setPosition(m_beginDragState.t));
+        list.append(node.setScale(m_beginDragState.s));
+        list.append(node.setRotation(m_beginDragState.r));
+        node.notifyPropertyChanges(list);
+    }
+    m_dragTranslator = nullptr;
+}
+
+void Q3DSTranslation::translateAlongCameraDirection(const QPoint &inOriginalCoords,
+                                                    const QPoint &inMouseCoords,
+                                                    CUpdateableDocumentEditor &inEditor)
+{
+    float theYDistance = float(inMouseCoords.y() - inOriginalCoords.y());
+    if (qFuzzyIsNull(theYDistance))
+        return;
+
+    Q3DSCameraNode *cameraNode = m_dragCamera;
+    Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
+    Q3DSNode *parentNode = static_cast<Q3DSNode *>(node->parent());
+    Q3DSNodeAttached *cameraAttached = cameraNode->attached<Q3DSNodeAttached>();
+    Q3DSNodeAttached *parentAttached = parentNode->attached<Q3DSNodeAttached>();
+    QMatrix4x4 cameraMatrix = cameraAttached->globalTransform;
+    QMatrix4x4 parentMatrix = parentAttached->globalTransform;
+
+    float distanceMultiplier = theYDistance * 0.5f + 1.f;
+    QVector3D cameraDirection = (cameraMatrix * QVector4D(0.f, 0.f, 1.f, 0.f)).toVector3D();
+    QVector3D diff = cameraDirection * distanceMultiplier;
+    diff = (parentMatrix.inverted() * QVector4D(diff.x(), diff.y(), -diff.z(), 0.f)).toVector3D();
+    m_currentDragState.t = m_beginDragState.t + diff;
+    Q3DSPropertyChangeList list;
+    list.append(node->setPosition(m_currentDragState.t));
+    node->notifyPropertyChanges(list);
+    inEditor.EnsureEditor(QObject::tr("Set Position"), __FILE__, __LINE__)
+        .SetInstancePropertyValue(m_doc.GetSelectedInstance(),
+                                  objectDefinitions().m_Node.m_Position,
+                                  qt3dsdm::SValue(QVariant::fromValue(m_currentDragState.t)));
+    inEditor.FireImmediateRefresh(m_doc.GetSelectedInstance());
+}
+
+void Q3DSTranslation::translate(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
+                                CUpdateableDocumentEditor &inEditor, bool inLockToAxis)
+{
+    float theXDistance = float(inMouseCoords.x() - inOriginalCoords.x());
+    float theYDistance = float(inMouseCoords.y() - inOriginalCoords.y());
+    if (qFuzzyIsNull(theXDistance) && qFuzzyIsNull(theYDistance))
+        return;
+
+    if (inLockToAxis) {
+        if (qAbs(theXDistance) > qAbs(theYDistance))
+            theYDistance = 0;
+        else
+            theXDistance = 0;
+    }
+
+    Q3DSCameraNode *cameraNode = m_dragCamera;
+    Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
+    Q3DSNode *parentNode = static_cast<Q3DSNode *>(node->parent());
+    Q3DSNodeAttached *cameraAttached = cameraNode->attached<Q3DSNodeAttached>();
+    Q3DSNodeAttached *parentAttached = parentNode->attached<Q3DSNodeAttached>();
+    QMatrix4x4 cameraMatrix = cameraAttached->globalTransform;
+    QMatrix4x4 parentMatrix = parentAttached->globalTransform;
+
+    float xMultiplier = theXDistance * 0.5f + 1.f;
+    float yMultiplier = theYDistance * 0.5f + 1.f;
+
+    QVector3D cameraLeft = (cameraMatrix * QVector4D(1.f, 0.f, 0.f, 0.f)).toVector3D();
+    QVector3D cameraUp = (cameraMatrix * QVector4D(0.f, -1.f, 0.f, 0.f)).toVector3D();
+
+    QVector3D diff = cameraLeft * xMultiplier + cameraUp * yMultiplier;
+    diff = (parentMatrix.inverted() * QVector4D(diff.x(), diff.y(), -diff.z(), 0.f)).toVector3D();
+    m_currentDragState.t = m_beginDragState.t + diff;
+    Q3DSPropertyChangeList list;
+    list.append(node->setPosition(m_currentDragState.t));
+    node->notifyPropertyChanges(list);
+    inEditor.EnsureEditor(QObject::tr("Set Position"), __FILE__, __LINE__)
+        .SetInstancePropertyValue(m_doc.GetSelectedInstance(),
+                                  objectDefinitions().m_Node.m_Position,
+                                  qt3dsdm::SValue(QVariant::fromValue(m_currentDragState.t)));
+    inEditor.FireImmediateRefresh(m_doc.GetSelectedInstance());
+}
+
+void Q3DSTranslation::scaleZ(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
+                             CUpdateableDocumentEditor &inEditor)
+{
+    // Scale scales uniformly and responds to mouse Y only.
+    float theYDistance = float(inMouseCoords.y() - inOriginalCoords.y());
+    if (qFuzzyIsNull(theYDistance))
+        return;
+
+    Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
+    float theScaleMultiplier = 1.0f + theYDistance * (1.0f / 40.0f);
+    m_currentDragState.s = QVector3D(m_beginDragState.s.x(), m_beginDragState.s.y(),
+                                     m_beginDragState.s.z() * theScaleMultiplier);
+
+    Q3DSPropertyChangeList list;
+    list.append(node->setScale(m_currentDragState.s));
+    node->notifyPropertyChanges(list);
+    inEditor.EnsureEditor(QObject::tr("Set Scale"), __FILE__, __LINE__)
+        .SetInstancePropertyValue(m_doc.GetSelectedInstance(),
+                                  objectDefinitions().m_Node.m_Scale,
+                                  qt3dsdm::SValue(QVariant::fromValue(m_currentDragState.s)));
+    inEditor.FireImmediateRefresh(m_doc.GetSelectedInstance());
+}
+
+void Q3DSTranslation::scale(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
+                            CUpdateableDocumentEditor &inEditor)
+{
+    // Scale scales uniformly and responds to mouse Y only.
+    float theYDistance = float(inMouseCoords.y() - inOriginalCoords.y());
+    if (qFuzzyIsNull(theYDistance))
+        return;
+
+    Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
+    float theScaleMultiplier = 1.0f + theYDistance * (1.0f / 40.0f);
+    m_currentDragState.s = m_beginDragState.s * theScaleMultiplier;
+
+    Q3DSPropertyChangeList list;
+    list.append(node->setScale(m_currentDragState.s));
+    node->notifyPropertyChanges(list);
+    inEditor.EnsureEditor(QObject::tr("Set Scale"), __FILE__, __LINE__)
+        .SetInstancePropertyValue(m_doc.GetSelectedInstance(),
+                                  objectDefinitions().m_Node.m_Scale,
+                                  qt3dsdm::SValue(QVariant::fromValue(m_currentDragState.s)));
+    inEditor.FireImmediateRefresh(m_doc.GetSelectedInstance());
+}
+
+void Q3DSTranslation::rotateAboutCameraDirectionVector(const QPoint &inOriginalCoords,
+                                                       const QPoint &inMouseCoords,
+                                                       CUpdateableDocumentEditor &inEditor)
+{
+    float theYDistance = float(inMouseCoords.y() - inOriginalCoords.y());
+    if (qFuzzyIsNull(theYDistance))
+        return;
+
+    Q3DSCameraNode *cameraNode = m_dragCamera;
+    Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
+    Q3DSNodeAttached *cameraAttached = cameraNode->attached<Q3DSNodeAttached>();
+    QMatrix4x4 cameraMatrix = cameraAttached->globalTransform;
+
+    QVector3D cameraDirection = (cameraMatrix * QVector4D(0.f, 0.f, -1.f, 0.f)).toVector3D();
+    QQuaternion yrotation = QQuaternion::fromAxisAndAngle(cameraDirection, .1f * theYDistance
+                                                          * float(g_rotationScaleFactor));
+    QQuaternion origRotation = QQuaternion::fromEulerAngles(m_beginDragState.r);
+    yrotation = origRotation * yrotation;
+    m_currentDragState.r = yrotation.toEulerAngles();
+    Q3DSPropertyChangeList list;
+    list.append(node->setRotation(m_currentDragState.r));
+    node->notifyPropertyChanges(list);
+    inEditor.EnsureEditor(QObject::tr("Set Rotation"), __FILE__, __LINE__)
+        .SetInstancePropertyValue(m_doc.GetSelectedInstance(),
+                                  objectDefinitions().m_Node.m_Rotation,
+                                  qt3dsdm::SValue(QVariant::fromValue(m_currentDragState.r)));
+    inEditor.FireImmediateRefresh(m_doc.GetSelectedInstance());
+}
+
+void Q3DSTranslation::rotate(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
+                             CUpdateableDocumentEditor &inEditor, bool inLockToAxis)
+{
+    float theXDistance = float(inMouseCoords.x() - inOriginalCoords.x());
+    float theYDistance = float(inMouseCoords.y() - inOriginalCoords.y());
+
+    if (qFuzzyIsNull(theXDistance) && qFuzzyIsNull(theYDistance))
+        return;
+
+    if (inLockToAxis) {
+        if (inLockToAxis) {
+            if (qAbs(theXDistance) > qAbs(theYDistance))
+                theYDistance = 0;
+            else
+                theXDistance = 0;
+        }
+    }
+
+    Q3DSCameraNode *cameraNode = m_dragCamera;
+    Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
+    Q3DSNodeAttached *cameraAttached = cameraNode->attached<Q3DSNodeAttached>();
+    QMatrix4x4 cameraMatrix = cameraAttached->globalTransform;
+
+    QVector3D cameraLeft = (cameraMatrix * QVector4D(1.f, 0.f, 0.f, 0.f)).toVector3D();
+    QVector3D cameraUp = (cameraMatrix * QVector4D(0.f, -1.f, 0.f, 0.f)).toVector3D();
+
+    QVector3D axis = theXDistance * cameraUp - theYDistance * cameraLeft;
+    float distance = axis.length();
+    axis.normalize();
+    QQuaternion yrotation = QQuaternion::fromAxisAndAngle(axis, .1f * distance
+                                                          * float(g_rotationScaleFactor));
+    QQuaternion origRotation = QQuaternion::fromEulerAngles(m_beginDragState.r);
+    yrotation = origRotation * yrotation;
+    m_currentDragState.r = yrotation.toEulerAngles();
+
+    Q3DSPropertyChangeList list;
+    list.append(node->setRotation(m_currentDragState.r));
+    node->notifyPropertyChanges(list);
+    inEditor.EnsureEditor(QObject::tr("Set Rotation"), __FILE__, __LINE__)
+        .SetInstancePropertyValue(m_doc.GetSelectedInstance(),
+                                  objectDefinitions().m_Node.m_Rotation,
+                                  qt3dsdm::SValue(QVariant::fromValue(m_currentDragState.r)));
+    inEditor.FireImmediateRefresh(m_doc.GetSelectedInstance());
 }
 
 }

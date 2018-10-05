@@ -26,27 +26,35 @@
 **
 ****************************************************************************/
 
-#ifndef Q3DS_RUNTIME2_API_H
-#define Q3DS_RUNTIME2_API_H
+#ifndef QT3DS_STUDIO_ENUMS_H
+#define QT3DS_STUDIO_ENUMS_H
 
-//
-//  W A R N I N G
-//  -------------
-//
-// This file is not part of the Qt API.  It exists purely as an
-// implementation detail.  This header file may change from version to
-// version without notice, or even be removed.
-//
-// We mean it.
-//
+namespace Q3DStudio {
 
-#include "q3dsutils_p.h"
-#include "q3dsengine_p.h"
-#include "q3dsbehaviorobject_p.h"
-#include "q3dsuippresentation_p.h"
-#include "q3dsviewportsettings_p.h"
-#include "q3dsenummaps_p.h"
-#include "q3dsslideplayer_p.h"
-#include "q3dsscenepicker_p.h"
+enum class MovementTypes
+{
+    Unknown,
+    Translate,
+    TranslateAlongCameraDirection,
+    Scale,
+    ScaleZ,
+    Rotation,
+    RotationAboutCameraDirection,
+};
+
+enum class PickTargetAreas
+{
+    Presentation,
+    Matte,
+};
+
+enum class SelectMode
+{
+    Group,
+    Single,
+    NestedComponentSingle,
+};
+
+}
 
 #endif

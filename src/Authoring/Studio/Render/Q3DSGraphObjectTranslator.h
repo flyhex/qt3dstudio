@@ -75,6 +75,14 @@ public:
             return m_aliasInstanceHandle;
         return instanceHandle();
     }
+    void enableAutoUpdates(bool enable)
+    {
+        m_autoUpdate = enable;
+    }
+    bool isAutoUpdateEnabled() const
+    {
+        return m_autoUpdate;
+    }
     quint32 dirtyIndex() const
     {
         return m_dirtyIndex;
@@ -104,6 +112,14 @@ public:
     {
         m_dirty = dirty;
     }
+    static Q3DSGraphObjectTranslator *translatorForObject(Q3DSGraphObject *object);
+
+    template <typename T>
+    T *graphObject() const
+    {
+        return static_cast<T *>(m_graphObject);
+    }
+
 private:
 
     // This will never be null.  The reason it is a pointer is because
@@ -112,9 +128,10 @@ private:
     qt3dsdm::Qt3DSDMInstanceHandle m_instanceHandle;
     qt3dsdm::Qt3DSDMInstanceHandle m_aliasInstanceHandle;
 
-    bool m_dirty;
+    bool m_dirty = true;
+    bool m_autoUpdate = true;
     quint32 m_dirtyIndex;
-    static QMap<Q3DSGraphObjectTranslator *, Q3DSGraphObject *> s_translatorMap;
+    static QMap<Q3DSGraphObject *, Q3DSGraphObjectTranslator *> s_translatorMap;
 };
 
 }

@@ -44,6 +44,7 @@ namespace Q3DStudio {
             Widget,
             Guide,
             Path,
+            Pending,
         };
     };
 
@@ -109,6 +110,12 @@ namespace Q3DStudio {
         static StudioPickValueTypes::Enum GetType() { return StudioPickValueTypes::Path; }
     };
 
+    template <>
+    struct SStudioPickValueTypeMap<StudioPickValueTypes::Enum>
+    {
+        static StudioPickValueTypes::Enum GetType() { return StudioPickValueTypes::Pending; }
+    };
+
     struct SStudioPickValueTraits
     {
         typedef StudioPickValueTypes::Enum TIdType;
@@ -141,6 +148,8 @@ namespace Q3DStudio {
                 return inVisitor(*qt3ds::NVUnionCast<SPathPick *>(inData));
             default:
                 QT3DS_ASSERT(false);
+            case StudioPickValueTypes::Pending:
+                break;
             case StudioPickValueTypes::UnknownValueType:
                 return inVisitor();
             }
@@ -160,6 +169,8 @@ namespace Q3DStudio {
                 return inVisitor(*qt3ds::NVUnionCast<const SPathPick *>(inData));
             default:
                 QT3DS_ASSERT(false);
+            case StudioPickValueTypes::Pending:
+                break;
             case StudioPickValueTypes::UnknownValueType:
                 return inVisitor();
             }
@@ -189,6 +200,10 @@ namespace Q3DStudio {
         {
         }
         SStudioPickValue(SPathPick inst)
+            : TStudioPickValueType(inst)
+        {
+        }
+        SStudioPickValue(StudioPickValueTypes::Enum inst)
             : TStudioPickValueType(inst)
         {
         }

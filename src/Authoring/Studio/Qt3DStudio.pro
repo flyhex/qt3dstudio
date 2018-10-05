@@ -252,7 +252,8 @@ HEADERS += \
     Render/Q3DStudioRenderer.h \
     Palettes/Inspector/MaterialRefView.h \
     Render/Q3DSEditCamera.h \
-    UI/Q3DSPlayerWnd.h
+    UI/Q3DSPlayerWnd.h \
+    Render/StudioEnums.h
 
 FORMS += \
     MainFrm.ui \

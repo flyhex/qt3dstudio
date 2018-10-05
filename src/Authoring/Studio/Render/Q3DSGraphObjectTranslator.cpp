@@ -36,7 +36,7 @@
 namespace Q3DStudio
 {
 
-QMap<Q3DSGraphObjectTranslator *, Q3DSGraphObject *> Q3DSGraphObjectTranslator::s_translatorMap;
+QMap<Q3DSGraphObject *, Q3DSGraphObjectTranslator *> Q3DSGraphObjectTranslator::s_translatorMap;
 
 Q3DSGraphObjectTranslator::Q3DSGraphObjectTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                                      Q3DSGraphObject &inObj)
@@ -44,7 +44,7 @@ Q3DSGraphObjectTranslator::Q3DSGraphObjectTranslator(qt3dsdm::Qt3DSDMInstanceHan
     , m_instanceHandle(inInstance)
     , m_dirtyIndex(std::numeric_limits<unsigned int>::max())
 {
-    s_translatorMap.insert(this, m_graphObject);
+    s_translatorMap.insert(m_graphObject, this);
 }
 
 void Q3DSGraphObjectTranslator::pushTranslation(Q3DSTranslation &translation)
@@ -84,6 +84,11 @@ bool Q3DSGraphObjectTranslator::updateProperty(Q3DSTranslation &context,
     if (ret)
         m_graphObject->notifyPropertyChanges(changeList);
     return ret;
+}
+
+Q3DSGraphObjectTranslator *Q3DSGraphObjectTranslator::translatorForObject(Q3DSGraphObject *object)
+{
+    return s_translatorMap.value(object, nullptr);
 }
 
 }

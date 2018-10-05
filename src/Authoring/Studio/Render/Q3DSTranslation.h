@@ -51,17 +51,12 @@
 #include "foundation/Qt3DSInvasiveSet.h"
 #include "foundation/Qt3DSOption.h"
 #include "Q3DSEditCamera.h"
+#include "StudioEnums.h"
 
 namespace Q3DStudio
 {
 
-enum class TranslationSelectMode
-{
-    Group = 0,
-    Single,
-    NestedComponentSingle,
-};
-
+class CUpdateableDocumentEditor;
 class Q3DStudioRenderer;
 class Q3DSGraphObjectTranslator;
 class Q3DSCameraTranslator;
@@ -86,6 +81,8 @@ private:
                                           qt3dsdm::Qt3DSDMInstanceHandle aliasInstance);
     void clearDirtySet();
     QByteArray getInstanceObjectId(qt3dsdm::Qt3DSDMInstanceHandle instance);
+
+    Q3DSCameraNode *cameraForNode(Q3DSGraphObject *node);
 
 
     struct TranslatorGetDirty
@@ -165,6 +162,18 @@ private:
     QHash<QByteArray, Q3DSCameraNode *> m_editCameras;
     SEditCameraPersistentInformation m_editCameraInfo;
     bool m_editCameraEnabled = false;
+    Q3DSGraphObjectTranslator *m_dragTranslator = nullptr;
+    Q3DSCameraNode *m_dragCamera = nullptr;
+
+    struct DragState
+    {
+        QVector3D t;
+        QVector3D s;
+        QVector3D r;
+    };
+
+    DragState m_beginDragState;
+    DragState m_currentDragState;
 
 public:
     qt3dsdm::SComposerObjectDefinitions &objectDefinitions() const
@@ -197,6 +206,22 @@ public:
         for (long idx = 0; idx < inInstanceCount; ++idx)
             markDirty(inInstance[idx]);
     }
+    void prepareDrag(Q3DSGraphObjectTranslator *selected);
+    void endDrag(bool dragReset, CUpdateableDocumentEditor &inEditor);
+
+    void translateAlongCameraDirection(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
+                                       CUpdateableDocumentEditor &inEditor);
+    void translate(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
+                   CUpdateableDocumentEditor &inEditor, bool inLockToAxis);
+    void scaleZ(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
+                CUpdateableDocumentEditor &inEditor);
+    void scale(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
+               CUpdateableDocumentEditor &inEditor);
+    void rotateAboutCameraDirectionVector(const QPoint &inOriginalCoords,
+                                          const QPoint &inMouseCoords,
+                                          CUpdateableDocumentEditor &inEditor);
+    void rotate(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
+                CUpdateableDocumentEditor &inEditor, bool inLockToAxis);
 };
 
 }
