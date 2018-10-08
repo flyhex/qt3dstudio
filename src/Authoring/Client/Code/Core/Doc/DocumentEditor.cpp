@@ -2186,6 +2186,7 @@ public:
                                  m_Bridge.GetObjectDefinitions().m_ReferencedMaterial
                                  .m_ReferencedMaterial.m_Property,
                                  objRef, false);
+        SetName(instance, materialName);
     }
 
     void setMaterialSourcePath(TInstanceHandle instance,
