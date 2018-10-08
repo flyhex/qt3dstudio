@@ -1310,12 +1310,32 @@ void InspectorControlModel::setMaterialTypeValue(long instance, int handle, cons
     const QString typeValue = value.toString();
     Q3DStudio::CString v;
 
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    const auto sceneEditor = doc->getSceneEditor();
+    const Q3DStudio::CString oldType = sceneEditor->GetObjectTypeName(instance);
+    qt3dsdm::Qt3DSDMInstanceHandle refMaterial;
+    if (oldType == "ReferencedMaterial")
+        sceneEditor->getMaterialReference(instance, refMaterial);
+
     bool changeMaterialFile = false;
+    bool canCopyProperties = false;
     if (typeValue == getStandardMaterialString()) {
         v = Q3DStudio::CString("Standard Material");
+        canCopyProperties = true;
     } else if (typeValue == getCustomMaterialString()) {
         if (m_materials.size() > 0)
             v = Q3DStudio::CString::fromQString(m_materials[0].m_relativePath);
+        if (refMaterial.Valid()) {
+            const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+            const auto refSourcePath = bridge->GetSourcePath(refMaterial);
+            for (auto &material : m_materials) {
+                if (refSourcePath.toQString() == material.m_relativePath) {
+                    v = Q3DStudio::CString::fromQString(material.m_relativePath);
+                    canCopyProperties = true;
+                    break;
+                }
+            }
+        }
     } else if (typeValue == getSharedMaterialString()) {
         v = Q3DStudio::CString("Referenced Material");
         changeMaterialFile = true;
@@ -1323,22 +1343,18 @@ void InspectorControlModel::setMaterialTypeValue(long instance, int handle, cons
         v = Q3DStudio::CString("Referenced Material");
     }
 
-    const auto doc = g_StudioApp.GetCore()->GetDoc();
-    const auto sceneEditor = doc->getSceneEditor();
-    const Q3DStudio::CString oldType = sceneEditor->GetObjectTypeName(instance);
-
-    qt3dsdm::Qt3DSDMInstanceHandle refMaterial;
-    if (oldType == "ReferencedMaterial" && typeValue == getStandardMaterialString())
-        sceneEditor->getMaterialReference(instance, refMaterial);
-
     Q3DStudio::ScopedDocumentEditor scopedEditor(
                 Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, tr("Set Material Type")));
 
     scopedEditor->BeginAggregateOperation();
     scopedEditor->SetMaterialType(instance, v);
 
-    if (refMaterial.Valid())
-        scopedEditor->copyMaterialProperties(refMaterial, instance);
+    if (refMaterial.Valid() && canCopyProperties) {
+        const Q3DStudio::CString newType = sceneEditor->GetObjectTypeName(instance);
+        const Q3DStudio::CString refType = sceneEditor->GetObjectTypeName(refMaterial);
+        if (refType == newType)
+            scopedEditor->copyMaterialProperties(refMaterial, instance);
+    }
 
     if (changeMaterialFile) {
         scopedEditor->setMaterialProperties(instance, QLatin1String("Default"), "Default", {}, {});
