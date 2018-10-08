@@ -269,11 +269,13 @@ void ProjectView::startDrag(QQuickItem *item, int row)
     QDrag drag(this);
     drag.setMimeData(m_ProjectModel->mimeData({index}));
     drag.setPixmap(QPixmap(QQmlFile::urlToLocalFileOrQrc(index.data(Qt::DecorationRole).toUrl())));
-    // prevent DnD the currently open presentation
-    if (isCurrentPresentation(row))
-        drag.exec(Qt::IgnoreAction);
-    else
-        drag.exec(Qt::CopyAction);
+    Qt::DropAction action = Qt::CopyAction;
+    // prevent DnD the currently open presentation and presentations with empty id
+    if (isCurrentPresentation(row) || ((isPresentation(row) || isQmlStream(row))
+            && presentationId(row).isEmpty())) {
+        action = Qt::IgnoreAction;
+    }
+    drag.exec(action);
 
     // Ungrab to trigger mouse release on the originating item
     QTimer::singleShot(0, item, &QQuickItem::ungrabMouse);

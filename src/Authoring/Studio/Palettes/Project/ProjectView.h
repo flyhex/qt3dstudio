@@ -84,7 +84,7 @@ public:
     bool isRefreshable(int row) const;
 
     Q_INVOKABLE bool isPresentation(int row) const;
-    bool isQmlStream(int row) const;
+    Q_INVOKABLE bool isQmlStream(int row) const;
     bool isCurrentPresentation(int row) const;
     bool isMaterialFolder(int row) const;
     bool isMaterialData(int row) const;
