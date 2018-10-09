@@ -274,15 +274,31 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
             materialName = qt3dsdm::get<TDataStrPtr>(*name)->GetData();
 
         auto material = m_Editor.getMaterial(materialName);
-        if (!material.Valid()) {
-            material = m_Editor.getOrCreateMaterial(materialName);
-            m_Editor.SetSpecificInstancePropertyValue(0, material, L"importid",
-                                                      std::make_shared<CDataStr>(desc.m_Id));
-            m_Editor.SetSpecificInstancePropertyValue(
-                m_Slide, material, L"importfile",
-                std::make_shared<CDataStr>(m_Relativeimportfile.toCString()));
-            addMaterialMap(material, desc.m_Id);
+        int i = 1;
+        const QString originalMaterialName = materialName.toQString();
+        while (material.Valid()) {
+            auto prop = m_Editor.FindProperty(material, L"importfile");
+            Option<SValue> importFile = m_Editor.GetSpecificInstancePropertyValue(
+                        m_Slide, material, prop);
+            if (importFile.hasValue()) {
+                if (Q3DStudio::CString(qt3dsdm::get<TDataStrPtr>(*importFile)->GetData())
+                        == m_Relativeimportfile.toCString()) {
+                    break;
+                }
+            }
+            materialName = CString::fromQString(originalMaterialName + QString::number(i));
+            material = m_Editor.getMaterial(materialName);
+            i++;
         }
+
+        if (!material.Valid())
+            material = m_Editor.getOrCreateMaterial(materialName);
+        m_Editor.SetSpecificInstancePropertyValue(0, material, L"importid",
+                                                  std::make_shared<CDataStr>(desc.m_Id));
+        m_Editor.SetSpecificInstancePropertyValue(
+            m_Slide, material, L"importfile",
+            std::make_shared<CDataStr>(m_Relativeimportfile.toCString()));
+        addMaterialMap(material, desc.m_Id);
 
         const auto sourcePath = m_Editor.writeMaterialFile(material,
                                                            materialName.toQString(),
