@@ -54,6 +54,7 @@ public:
     void writePresentationId(const QString &id, const QString &src = {});
     void updateDocPresentationId();
     void addPresentationNode(const QString &uip, const QString &pId = {});
+    void addPresentationNodes(const QHash<QString, QString> &nodeList);
     bool isUniquePresentationId(const QString &id, const QString &src = {}) const;
     QString getProjectPath() const;
     QString getProjectFilePath() const;

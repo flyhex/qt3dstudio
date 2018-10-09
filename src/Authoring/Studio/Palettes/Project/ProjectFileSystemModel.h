@@ -97,8 +97,10 @@ private:
     EStudioObjectType getIconType(const QString &path) const;
     bool isVisible(const QModelIndex& modelIndex) const;
     bool hasVisibleChildren(const QModelIndex &modelIndex) const;
-    void importUrl(QDir &targetDir, const QUrl &url);
+    void importUrl(QDir &targetDir, const QUrl &url,
+                   QHash<QString, QString> &outPresentationNodes);
     void importPresentationAssets(const QFileInfo &uipSrc, const QFileInfo &uipTarget,
+                                  QHash<QString, QString> &outPresentationNodes,
                                   const int overrideChoice = QMessageBox::NoButton) const;
 
     void modelRowsInserted(const QModelIndex &parent, int start, int end);

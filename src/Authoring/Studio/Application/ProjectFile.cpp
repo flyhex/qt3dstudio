@@ -54,7 +54,7 @@ void ProjectFile::ensureProjectFile()
         QString uiaPath(PresentationFile::findProjectFile(uipInfo.absoluteFilePath()));
 
         if (uiaPath.isEmpty()) {
-            // .uia not found, create a new one in the same uip filder. Creation sets file info.
+            // .uia not found, create a new one in the same folder as uip. Creation sets file info.
             create(uipInfo.absoluteFilePath().replace(QLatin1String(".uip"),
                                                       QLatin1String(".uia")));
             addPresentationNode(uipInfo.absoluteFilePath());
@@ -88,6 +88,12 @@ void ProjectFile::initProjectFile(const QString &presPath)
  */
 void ProjectFile::addPresentationNode(const QString &pPath, const QString &pId)
 {
+    addPresentationNodes({{pPath, pId}});
+}
+
+// Add a list of presentation or presentation-qml nodes to the project file
+void ProjectFile::addPresentationNodes(const QHash<QString, QString> &nodeList)
+{
     ensureProjectFile();
 
     // open the uia file
@@ -107,53 +113,72 @@ void ProjectFile::addPresentationNode(const QString &pPath, const QString &pId)
         initial = true;
     }
 
-    QString relativePresentationPath = QDir(getProjectPath()).relativeFilePath(pPath);
+    QHash<QString, QString> changesList;
+    QHashIterator<QString, QString> nodesIt(nodeList);
+    while (nodesIt.hasNext()) {
+        nodesIt.next();
+        const QString presPath = nodesIt.key();
+        const QString presId = nodesIt.value();
+        QString relativePresentationPath
+                = QDir(getProjectPath()).relativeFilePath(presPath);
 
-    // make sure the node doesn't already exist
-    bool nodeExists = false;
-    for (QDomElement p = assetsElem.firstChild().toElement(); !p.isNull();
-        p = p.nextSibling().toElement()) {
-        if ((p.nodeName() == QLatin1String("presentation")
-             || p.nodeName() == QLatin1String("presentation-qml"))
-                && p.attribute(QStringLiteral("src")) == relativePresentationPath) {
-            nodeExists = true;
-            break;
+        // make sure the node doesn't already exist
+        bool nodeExists = false;
+        for (QDomElement p = assetsElem.firstChild().toElement(); !p.isNull();
+            p = p.nextSibling().toElement()) {
+            if ((p.nodeName() == QLatin1String("presentation")
+                 || p.nodeName() == QLatin1String("presentation-qml"))
+                    && p.attribute(QStringLiteral("src")) == relativePresentationPath) {
+                nodeExists = true;
+                break;
+            }
+        }
+
+        if (!nodeExists) {
+            const QString presentationId
+                    = ensureUniquePresentationId(presId.isEmpty()
+                                                 ? QFileInfo(presPath).completeBaseName()
+                                                 : presId);
+
+            if (assetsElem.attribute(QStringLiteral("initial")).isEmpty()) {
+                assetsElem.setAttribute(QStringLiteral("initial"), presentationId);
+                m_initialPresentation = presentationId;
+            }
+
+            // add the presentation node
+            bool isQml = presPath.endsWith(QLatin1String(".qml"));
+            QDomElement pElem = isQml ? doc.createElement(QStringLiteral("presentation-qml"))
+                                      : doc.createElement(QStringLiteral("presentation"));
+            pElem.setAttribute(QStringLiteral("id"), presentationId);
+            pElem.setAttribute(isQml ? QStringLiteral("args") : QStringLiteral("src"),
+                               relativePresentationPath);
+            assetsElem.appendChild(pElem);
+            changesList.insert(relativePresentationPath, presentationId);
+
+            if (!initial) {
+                g_StudioApp.m_subpresentations.push_back(
+                            SubPresentationRecord(isQml ? QStringLiteral("presentation-qml")
+                                                        : QStringLiteral("presentation"),
+                                                  presentationId, relativePresentationPath));
+            }
         }
     }
 
-    if (!nodeExists) {
-        QString presentationId = pId.isEmpty()
-                ? ensureUniquePresentationId(QFileInfo(pPath).completeBaseName()) : pId;
-
-        if (assetsElem.attribute(QStringLiteral("initial")).isEmpty()) {
-            assetsElem.setAttribute(QStringLiteral("initial"), presentationId);
-            m_initialPresentation = presentationId;
-        }
-
-        // add the presentation node
-        bool isQml = pPath.endsWith(QLatin1String(".qml"));
-        QDomElement pElem = isQml ? doc.createElement(QStringLiteral("presentation-qml"))
-                                  : doc.createElement(QStringLiteral("presentation"));
-        pElem.setAttribute(QStringLiteral("id"), presentationId);
-        pElem.setAttribute(isQml ? QStringLiteral("args") : QStringLiteral("src"),
-                           relativePresentationPath);
-        assetsElem.appendChild(pElem);
-
+    if (initial || changesList.size() > 0) {
         file.resize(0);
         file.write(doc.toByteArray(4));
-
-        if (!initial) {
-            g_StudioApp.m_subpresentations.push_back(
-                        SubPresentationRecord(isQml ? QStringLiteral("presentation-qml")
-                                                    : QStringLiteral("presentation"),
-                                              presentationId, relativePresentationPath));
-            g_StudioApp.getRenderer().RegisterSubpresentations(g_StudioApp.m_subpresentations);
-        }
-
-        Q_EMIT presentationIdChanged(relativePresentationPath, presentationId);
     }
-
     file.close();
+
+    if (changesList.size() > 0) {
+        g_StudioApp.getRenderer().RegisterSubpresentations(g_StudioApp.m_subpresentations);
+
+        QHashIterator<QString, QString> changesIt(changesList);
+        while (changesIt.hasNext()) {
+            changesIt.next();
+            Q_EMIT presentationIdChanged(changesIt.key(), changesIt.value());
+        }
+    }
 }
 
 // Get the src attribute (relative path) to the initial presentation in a uia file, if no initial

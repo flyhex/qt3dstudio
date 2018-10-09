@@ -439,6 +439,7 @@ void ProjectFileSystemModel::importUrls(const QList<QUrl> &urls, int row, bool a
     const QDir targetDir(targetPath);
 
     QStringList expandPaths;
+    QHash<QString, QString> presentationNodes; // <absolute path to presentation, presentation id>
 
     for (const auto &url : urls) {
         QString sortedPath = targetPath;
@@ -454,10 +455,13 @@ void ProjectFileSystemModel::importUrls(const QList<QUrl> &urls, int row, bool a
         }
 
         if (sortedDir.exists()) {
-            importUrl(sortedDir, url);
+            importUrl(sortedDir, url, presentationNodes);
             expandPaths << sortedDir.path();
         }
     }
+
+    // Batch update all imported presentation nodes
+    g_StudioApp.GetCore()->getProjectFile().addPresentationNodes(presentationNodes);
 
     for (const QString &expandPath : qAsConst(expandPaths)) {
         int expandRow = rowForPath(expandPath);
@@ -466,7 +470,8 @@ void ProjectFileSystemModel::importUrls(const QList<QUrl> &urls, int row, bool a
     }
 }
 
-void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url)
+void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
+                                       QHash<QString, QString> &outPresentationNodes)
 {
     using namespace Q3DStudio;
     using namespace qt3dsimp;
@@ -547,11 +552,14 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url)
         Q_ASSERT(copyResult);
 
         if (CDialogs::isPresentationFileExtension(extension.toLatin1().data())) {
-            // add presentation node to the project file
-            g_StudioApp.GetCore()->getProjectFile().addPresentationNode(destPath);
-            importPresentationAssets(fileInfo, QFileInfo(destPath));
+            // Don't override id with empty if it is already added, which can happen when
+            // multi-importing both presentation and its subpresentation
+            if (!outPresentationNodes.contains(destPath))
+                outPresentationNodes.insert(destPath, {});
+            importPresentationAssets(fileInfo, QFileInfo(destPath), outPresentationNodes);
         } else if (qmlRoot) { // importing a qml stream
-            g_StudioApp.GetCore()->getProjectFile().addPresentationNode(destPath);
+            if (!outPresentationNodes.contains(destPath))
+                outPresentationNodes.insert(destPath, {});
             m_importQmlOverrideChoice = QMessageBox::NoButton;
             importQmlAssets(qmlRoot, fileInfo.dir(), targetDir);
         }
@@ -592,13 +600,14 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url)
  * @param overrideChoice tracks user choice (yes to all / no to all) to maintain the value through
  *                       recursive calls
  */
-void ProjectFileSystemModel::importPresentationAssets(const QFileInfo &uipSrc,
-                                                      const QFileInfo &uipTarget,
-                                                      const int overrideChoice) const
+void ProjectFileSystemModel::importPresentationAssets(
+        const QFileInfo &uipSrc, const QFileInfo &uipTarget,
+        QHash<QString, QString> &outPresentationNodes, const int overrideChoice) const
 {
     QList<QString> importSourcePaths;
     QString projPathSrc; // project absolute path for the source uip
-    PresentationFile::getSourcePaths(uipSrc, uipTarget, importSourcePaths, projPathSrc);
+    PresentationFile::getSourcePaths(uipSrc, uipTarget, importSourcePaths, projPathSrc,
+                                     outPresentationNodes);
     int overrideCh = overrideChoice;
     for (auto &path : qAsConst(importSourcePaths)) {
         QString srcAssetPath, targetAssetPath;
@@ -637,7 +646,7 @@ void ProjectFileSystemModel::importPresentationAssets(const QFileInfo &uipSrc,
         // recursively load any uip asset's assets
         if (path.endsWith(QLatin1String(".uip"))) {
             importPresentationAssets(QFileInfo(srcAssetPath), QFileInfo(targetAssetPath),
-                                     overrideCh);
+                                     outPresentationNodes, overrideCh);
         }
     }
 }

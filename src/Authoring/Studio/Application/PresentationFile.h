@@ -43,7 +43,8 @@ class PresentationFile
 {
 public:
     static void getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &uipTarget,
-                               QList<QString> &outPaths, QString &outRootPath);
+                               QList<QString> &outPaths, QString &outRootPath,
+                               QHash<QString, QString> &outPresentationNodes);
     static void updatePresentationId(const QString &url, const QString &oldId,
                                      const QString &newId);
     static QSize readSize(const QString &uipPath);
