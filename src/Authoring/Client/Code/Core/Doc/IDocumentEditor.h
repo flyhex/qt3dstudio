@@ -344,6 +344,8 @@ public:
     // Returns the new component.
     virtual TInstanceHandle MakeComponent(const qt3dsdm::TInstanceHandleList &inInstances) = 0;
 
+    virtual void makeAnimatable(const qt3dsdm::TInstanceHandleList &instances) = 0;
+
     virtual qt3dsdm::TInstanceHandleList
     DuplicateInstances(const qt3dsdm::TInstanceHandleList &inInstances, TInstanceHandle inDest,
                        DocumentEditorInsertType::Enum inInsertType) = 0;

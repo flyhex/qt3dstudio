@@ -3193,6 +3193,28 @@ public:
         return component;
     }
 
+    void makeAnimatable(const qt3dsdm::TInstanceHandleList &instances) override
+    {
+        for (auto &instance : instances) {
+            const Q3DStudio::CString oldType = GetObjectTypeName(instance);
+            if (oldType == "ReferencedMaterial") {
+                qt3dsdm::Qt3DSDMInstanceHandle refMaterial;
+                getMaterialReference(instance, refMaterial);
+
+                const Q3DStudio::CString refType = GetObjectTypeName(refMaterial);
+
+                Q3DStudio::CString v;
+                if (refType == "CustomMaterial")
+                    v = m_Bridge.GetSourcePath(refMaterial);
+                else
+                    v = "Standard Material";
+
+                SetMaterialType(instance, v);
+                copyMaterialProperties(refMaterial, instance);
+            }
+        }
+    }
+
     // Moves specified instances into target component by a simulated cut and paste.
     // This is only necessary when moving objects from outside the component into the component.
     // Returns true if move was done. Returns false if instances are already in target component,

@@ -609,6 +609,14 @@ bool Qt3DSDMTimelineItemBinding::IsValidTransaction(EUserTransaction inTransacti
     case EUserTransaction_EditComponent:
         return (GetObjectType() == OBJTYPE_COMPONENT);
 
+    case EUserTransaction_MakeAnimatable:
+        if (theInstance.Valid()) {
+            CClientDataModelBridge *bridge = m_StudioSystem->GetClientDataModelBridge();
+            EStudioObjectType type = bridge->GetObjectType(theInstance);
+            return !IsLocked() && type == OBJTYPE_REFERENCEDMATERIAL;
+        }
+        return false;
+
     case EUserTransaction_Group:
         return g_StudioApp.canGroupSelectedObjects();
 
@@ -642,6 +650,11 @@ inline void DoDelete(CDoc &inDoc, const qt3dsdm::TInstanceHandleList &inInstance
 inline void DoMakeComponent(CDoc &inDoc, const qt3dsdm::TInstanceHandleList &inInstances)
 {
     SCOPED_DOCUMENT_EDITOR(inDoc, QObject::tr("Make Component"))->MakeComponent(inInstances);
+}
+
+inline void doMakeAnimatable(CDoc &doc, const qt3dsdm::TInstanceHandleList &instances)
+{
+    SCOPED_DOCUMENT_EDITOR(doc, QObject::tr("Make Animatable"))->makeAnimatable(instances);
 }
 
 inline void DoGroupObjects(CDoc &inDoc, const qt3dsdm::TInstanceHandleList &inInstances)
@@ -701,6 +714,10 @@ void Qt3DSDMTimelineItemBinding::PerformTransaction(EUserTransaction inTransacti
     case EUserTransaction_MakeComponent: {
         theDispatch.FireOnAsynchronousCommand(
                     std::bind(DoMakeComponent, std::ref(*theDoc), theInstances));
+    } break;
+    case EUserTransaction_MakeAnimatable: {
+        theDispatch.FireOnAsynchronousCommand(
+                    std::bind(doMakeAnimatable, std::ref(*theDoc), theInstances));
     } break;
     case EUserTransaction_Group: {
         theDispatch.FireOnAsynchronousCommand(
