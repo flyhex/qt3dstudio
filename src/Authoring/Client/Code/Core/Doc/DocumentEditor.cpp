@@ -2011,6 +2011,8 @@ public:
                         auto ref = m_Bridge.GetInstanceByGUID(guid);
                         textureHandles[name] = ref;
                         path = m_Bridge.GetSourcePath(ref).toQString();
+                        if (path.isEmpty())
+                            path = m_Bridge.getSubpresentation(ref).toQString();
                     } else {
                         valid = false;
                     }
