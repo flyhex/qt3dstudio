@@ -163,6 +163,22 @@ public:
                         const QString &name) override;
 };
 
+class Q3DSReferencedMaterialTranslator : public Q3DSGraphObjectTranslator
+{
+public:
+    Q3DSReferencedMaterialTranslator(qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                     Q3DSReferencedMaterial &material);
+    void pushTranslation(Q3DSTranslation &inContext) override;
+    void setActive(bool) override;
+    void clearChildren() override;
+    void appendChild(Q3DSGraphObject &) override;
+    bool updateProperty(Q3DSTranslation &inContext,
+                        qt3dsdm::Qt3DSDMInstanceHandle instance,
+                        qt3dsdm::Qt3DSDMPropertyHandle property,
+                        qt3dsdm::SValue &value,
+                        const QString &name) override;
+};
+
 class Q3DSLayerTranslator : public Q3DSNodeTranslator
 {
 public:

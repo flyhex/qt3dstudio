@@ -586,6 +586,14 @@ struct Q3DSTranslatorDataModelParser
     HANDLE_Q3DS_NAME_PROPERTY                                                           \
     HANDLE_Q3DS_NOTIFY_CHANGES
 
+#define ITERATE_Q3DS_REFERENCED_MATERIAL_PROPERTIES                                     \
+    HANDLE_Q3DS_OBJREF_PROPERTY(ReferencedMaterial, ReferencedMaterial)                 \
+    HANDLE_Q3DS_IMAGE_PROPERTY2(Lightmaps, LightmapIndirect, LightmapIndirectMap)       \
+    HANDLE_Q3DS_IMAGE_PROPERTY2(Lightmaps, LightmapRadiosity, LightmapRadiosityMap)     \
+    HANDLE_Q3DS_IMAGE_PROPERTY2(Lightmaps, LightmapShadow, LightmapShadowMap)           \
+    HANDLE_Q3DS_NAME_PROPERTY                                                           \
+    HANDLE_Q3DS_NOTIFY_CHANGES
+
 #define ITERATE_Q3DS_IMAGE_PROPERTIES                                                   \
     HANDLE_Q3DS_STRING_PROPERTY(Asset, SourcePath)                                      \
     HANDLE_Q3DS_STRING_PROPERTY(Image, SubPresentation)                                 \
@@ -1270,6 +1278,69 @@ bool Q3DSDefaultMaterialTranslator::updateProperty(Q3DSTranslation &inContext,
     } else if (name == QLatin1String("lightmapshadow")) {
         HANDLE_CHANGE(list, ret, theItem.setLightmapShadowMap(
                           Q3DSValueParser::parseImage(&inContext, value)))
+    }
+    if (ret)
+        theItem.notifyPropertyChanges(list);
+    return ret;
+}
+
+
+Q3DSReferencedMaterialTranslator::Q3DSReferencedMaterialTranslator(
+        qt3dsdm::Qt3DSDMInstanceHandle instance, Q3DSReferencedMaterial &material)
+    : Q3DSGraphObjectTranslator(instance, material)
+{
+
+}
+
+void Q3DSReferencedMaterialTranslator::pushTranslation(Q3DSTranslation &inContext)
+{
+    Q3DSGraphObjectTranslator::pushTranslation(inContext);
+
+    Q3DSReferencedMaterial &theItem = static_cast<Q3DSReferencedMaterial &>(graphObject());
+    Q3DSTranslatorDataModelParser theParser(inContext, instanceHandle());
+    Q3DSPropertyChangeList list;
+    ITERATE_Q3DS_REFERENCED_MATERIAL_PROPERTIES
+
+    if (theItem.referencedMaterial() == &theItem) {
+        qCCritical(qt3ds::INVALID_OPERATION, "Referenced material is referencing itself.");
+    } else {
+        if (theItem.lightmapIndirectMap())
+            theItem.appendChildNode(theItem.lightmapIndirectMap());
+        if (theItem.lightmapRadiosityMap())
+            theItem.appendChildNode(theItem.lightmapRadiosityMap());
+        if (theItem.lightmapShadowMap())
+            theItem.appendChildNode(theItem.lightmapShadowMap());
+    }
+    theItem.resolveReferences(*inContext.presentation());
+}
+
+void Q3DSReferencedMaterialTranslator::setActive(bool)
+{
+}
+
+void Q3DSReferencedMaterialTranslator::clearChildren()
+{
+}
+
+void Q3DSReferencedMaterialTranslator::appendChild(Q3DSGraphObject &)
+{
+}
+
+bool Q3DSReferencedMaterialTranslator::updateProperty(Q3DSTranslation &inContext,
+                    qt3dsdm::Qt3DSDMInstanceHandle instance,
+                    qt3dsdm::Qt3DSDMPropertyHandle property,
+                    qt3dsdm::SValue &value,
+                    const QString &name)
+{
+    bool ret = false;
+    if (Q3DSGraphObjectTranslator::updateProperty(inContext, instance, property, value, name))
+        return true;
+
+    Q3DSPropertyChangeList list;
+    Q3DSReferencedMaterial &theItem = static_cast<Q3DSReferencedMaterial &>(graphObject());
+    if (name == QLatin1String("referencedmaterial")) {
+        HANDLE_CHANGE(list, ret, theItem.setReferencedMaterial(
+                          Q3DSValueParser::parseObjectRef(&inContext, instance, value)))
     }
     if (ret)
         theItem.notifyPropertyChanges(list);

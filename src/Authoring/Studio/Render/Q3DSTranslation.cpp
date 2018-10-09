@@ -356,7 +356,12 @@ Q3DSGraphObjectTranslator *Q3DSTranslation::createTranslator(
         translator = new Q3DSTextTranslator(instance, *m_presentation->newObject<Q3DSTextNode>(id));
         break;
     }
-        // TODO: ReferencedMaterial, Alias, Effect, CustomMaterial, RenderPlugin?
+    case qt3dsdm::ComposerObjectTypes::ReferencedMaterial: {
+        translator = new Q3DSReferencedMaterialTranslator(
+                            instance, *m_presentation->newObject<Q3DSReferencedMaterial>(id));
+        break;
+    }
+        // TODO: Alias, Effect, CustomMaterial, RenderPlugin?
     default:
         break;
     }
