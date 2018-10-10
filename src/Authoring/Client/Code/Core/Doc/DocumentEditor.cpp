@@ -794,38 +794,53 @@ public:
 
     qt3ds::NVFoundationBase &GetFoundation() override { return *m_Foundation.m_Foundation; }
 
-    void ParseSourcePathsOutOfEffectFile(Q3DStudio::CString inFile,
-                                                 std::vector<Q3DStudio::CString> &outFilePaths) override
-    {
-        qt3ds::foundation::CFileSeekableIOStream theStream(inFile,
-                                                           qt3ds::foundation::FileReadFlags());
-        if (theStream.IsOpen()) {
-            std::shared_ptr<IDOMFactory> theFactory =
-                IDOMFactory::CreateDOMFactory(m_DataCore.GetStringTablePtr());
-            SImportXmlErrorHandler theImportHandler(m_Doc.GetImportFailedHandler(), inFile);
-            qt3dsdm::SDOMElement *theElem =
-                CDOMSerializer::Read(*theFactory, theStream, &theImportHandler);
+    /**
+        Parses an effect or material file (they use the same syntax) for dependent assets
+        and returns them in outPathMap parameter.
 
-            CFilePath theFilePath(inFile);
-            CFilePath theFileDir(theFilePath.GetDirectory());
-            if (theElem) {
-                std::shared_ptr<IDOMReader> theReader = IDOMReader::CreateDOMReader(
-                    *theElem, m_DataCore.GetStringTablePtr(), theFactory);
-                if (theReader->MoveToFirstChild("MetaData")) {
-                    for (bool success = theReader->MoveToFirstChild("Property"); success;
-                         success = theReader->MoveToNextSibling("Property")) {
-                        const char8_t *type = "", *defValue = "";
-                        theReader->Att("type", type);
-                        theReader->Att("default", defValue);
-                        if (qt3dsdm::AreEqual(type, "Texture")) {
-                            CFilePath theDefPath =
-                                CFilePath::CombineBaseAndRelative(theFileDir, defValue);
-                            if (theDefPath.IsFile())
-                                outFilePaths.push_back(defValue);
-                        }
+        @param inFile The file to parse. Can be absolute or relative to current directory.
+        @param outPathMap A map to return the parsed assets.
+                          The key is the destination path parsed from the file. It is assumed to be
+                          relative to the project root rather than the asset file itself.
+                          The value is absolute source path of the asset.
+                          The map is only inserted into in this function, never cleared.
+                          Assets that are referred by inFile but don't actually exist are not added
+                          to this map.
+        @param projectPath The absolute path of the project root the inFile belongs to, if any.
+                           Can be left empty for files that are not in any project.
+    */
+    void ParseSourcePathsOutOfEffectFile(const QString &inFile,
+                                         QHash<QString, QString> &outPathMap,
+                                         const QString &projectPath) override
+    {
+        QFile f(inFile);
+        QFileInfo fi(inFile);
+        if (f.open(QFile::Text | QFile::ReadOnly)) {
+            QDomDocument domDocMat;
+            domDocMat.setContent(&f);
+
+            QDomNodeList propElems = domDocMat.documentElement()
+                    .firstChildElement(QStringLiteral("MetaData")).childNodes();
+
+            for (int i = 0, c = propElems.count(); i < c; ++i) {
+                QString type = propElems.at(i).toElement()
+                        .attribute(QStringLiteral("type"));
+                QString path = propElems.at(i).toElement()
+                        .attribute(QStringLiteral("default"));
+                if (type == QLatin1String("Texture") && !path.isEmpty()
+                        && !outPathMap.contains(path)) {
+                    QString absAssetPath = fi.absolutePath() + QStringLiteral("/") + path;
+                    if (QFile::exists(absAssetPath)) {
+                        outPathMap.insert(path, absAssetPath);
+                    } else if (!projectPath.isEmpty()) {
+                        absAssetPath = projectPath + QStringLiteral("/") + path;
+                        if (QFile::exists(absAssetPath))
+                            outPathMap.insert(path, absAssetPath);
                     }
                 }
             }
+        } else {
+            qWarning() << __FUNCTION__ << "Couldn't open file:" << inFile;
         }
     }
 

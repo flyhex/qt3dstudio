@@ -32,10 +32,10 @@
 #include "StudioApp.h"
 #include "Core.h"
 #include "Doc.h"
-#include "qdebug.h"
+#include "IDocumentReader.h"
 #include <QtCore/qfile.h>
 #include <QtXml/qdom.h>
-#include "QtCore/qfileinfo.h"
+#include <QtCore/qfileinfo.h>
 #include <QtCore/qdiriterator.h>
 #include <qxmlstream.h>
 #include <QtCore/qlist.h>
@@ -147,7 +147,8 @@ QString PresentationFile::findProjectFile(const QString &uipPath)
 // get all available child assets source paths (materials, images, effects, etc)
 // static
 void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &uipTarget,
-                                      QList<QString> &outPaths, QString &outProjPathSrc,
+                                      QHash<QString, QString> &outPathMap,
+                                      QString &outProjPathSrc,
                                       QHash<QString, QString> &outPresentationNodes)
 {
     QFile file(uipTarget.filePath());
@@ -173,9 +174,9 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
             .firstChildElement(QStringLiteral("Classes"));
     for (QDomElement p = classesElem.firstChild().toElement(); !p.isNull();
         p = p.nextSibling().toElement()) {
-        QString sourcepath = p.attribute(QStringLiteral("sourcepath"));
-        if (!sourcepath.isEmpty() && !outPaths.contains(sourcepath)) {
-            outPaths.push_back(p.attribute(QStringLiteral("sourcepath")));
+        const QString sourcepath = p.attribute(QStringLiteral("sourcepath"));
+        if (!sourcepath.isEmpty() && !outPathMap.contains(sourcepath)) {
+            outPathMap.insert(sourcepath, {});
 
             QFileInfo fi(sourcepath);
             QByteArray ext = fi.suffix().toLatin1();
@@ -183,28 +184,10 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
             // if material or effect, find and add their dependents
             if (CDialogs::IsMaterialFileExtension(ext.data()) ||
                 CDialogs::IsEffectFileExtension(ext.data())) {
-                QFile f(uipSrc.path() + QStringLiteral("/") + sourcepath);
-                if (f.open(QFile::Text | QFile::ReadOnly)) {
-                    QDomDocument domDocMat;
-                    domDocMat.setContent(&f);
-
-                    QDomNodeList propElems = domDocMat.documentElement()
-                            .firstChildElement(QStringLiteral("MetaData"))
-                            .childNodes();
-
-                    for (int i = 0; i < propElems.count(); ++i) {
-                        QString path = propElems.at(i).toElement()
-                                       .attribute(QStringLiteral("default"));
-                        if (!path.isEmpty()) {
-                            QString absAssetPath = path.startsWith(QLatin1String("./"))
-                                                   ? outProjPathSrc + QStringLiteral("/") + path
-                                                   : uipSrc.path() + QStringLiteral("/") + path;
-
-                            if (QFile::exists(absAssetPath) && !outPaths.contains(path))
-                                outPaths.push_back(path);
-                        }
-                    }
-                }
+                g_StudioApp.GetCore()->GetDoc()->GetDocumentReader()
+                    .ParseSourcePathsOutOfEffectFile(
+                            uipSrc.path() + QStringLiteral("/") + sourcepath,
+                            outPathMap, outProjPathSrc);
             }
         }
     }
@@ -216,15 +199,15 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
 
     for (int i = 0; i < addElems.count(); ++i) {
         QDomElement elem = addElems.at(i).toElement();
-        QString sourcePath = elem.attribute(QStringLiteral("sourcepath"));
+        const QString sourcePath = elem.attribute(QStringLiteral("sourcepath"));
         if (!sourcePath.isEmpty()) {
             QFileInfo fi(sourcePath);
             QByteArray ext = fi.suffix().toLatin1();
             // add image and mesh paths
             if (CDialogs::IsImageFileExtension(ext.data())
                     || CDialogs::isMeshFileExtension(ext.data())) {
-                if (!outPaths.contains(sourcePath))
-                    outPaths.push_back(sourcePath);
+                if (!outPathMap.contains(sourcePath))
+                    outPathMap.insert(sourcePath, {});
                 continue;
             }
 
@@ -242,8 +225,8 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
                     spPath.prepend(QLatin1String("./"));
                 }
 
-                if (!outPaths.contains(spPath)) {
-                    outPaths.push_back(spPath);
+                if (!outPathMap.contains(spPath)) {
+                    outPathMap.insert(spPath, {});
                     outPresentationNodes.insert(sp->m_argsOrSrc, sp->m_id);
                 }
                 continue;
@@ -266,8 +249,8 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
                     spPath.prepend(QLatin1String("./"));
                 }
 
-                if (!outPaths.contains(spPath)) {
-                    outPaths.push_back(spPath);
+                if (!outPathMap.contains(spPath)) {
+                    outPathMap.insert(spPath, {});
                     outPresentationNodes.insert(sp->m_argsOrSrc, sp->m_id);
                 }
             }
@@ -284,23 +267,26 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
 
             // this is the most probable place so lets search it first
             QString fontPath = QStringLiteral("../fonts/") + font + TTF_EXT;
-            if (QFile::exists(uipSrc.path() + QStringLiteral("/") + fontPath)) {
-                if (!outPaths.contains(fontPath))
-                    outPaths.push_back(fontPath);
+            QString absFontPath = uipSrc.path() + QStringLiteral("/") + fontPath;
+            if (QFile::exists(absFontPath)) {
+                if (!outPathMap.contains(fontPath))
+                    outPathMap.insert(fontPath, absFontPath);
                 continue;
             }
 
             fontPath = font + TTF_EXT;
-            if (QFile::exists(uipSrc.path() + QStringLiteral("/") + fontPath)) {
-                if (!outPaths.contains(fontPath))
-                    outPaths.push_back(fontPath);
+            absFontPath = uipSrc.path() + QStringLiteral("/") + fontPath;
+            if (QFile::exists(absFontPath)) {
+                if (!outPathMap.contains(fontPath))
+                    outPathMap.insert(fontPath, absFontPath);
                 continue;
             }
 
             fontPath = QStringLiteral("fonts/") + font + TTF_EXT;
-            if (QFile::exists(uipSrc.path() + QStringLiteral("/") + fontPath)) {
-                if (!outPaths.contains(fontPath))
-                    outPaths.push_back(fontPath);
+            absFontPath = uipSrc.path() + QStringLiteral("/") + fontPath;
+            if (QFile::exists(absFontPath)) {
+                if (!outPathMap.contains(fontPath))
+                    outPathMap.insert(fontPath, absFontPath);
                 continue;
             }
         }

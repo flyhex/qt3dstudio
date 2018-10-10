@@ -567,23 +567,42 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
         // For effect and custom material files, automatically copy related resources
         if (CDialogs::IsEffectFileExtension(extension.toLatin1().data())
                 || CDialogs::IsMaterialFileExtension(extension.toLatin1().data())) {
-            std::vector<Q3DStudio::CString> effectFileSourcePaths;
-            doc->GetDocumentReader().ParseSourcePathsOutOfEffectFile(
-                        Q3DStudio::CFilePath::GetAbsolutePath(CFilePath(sourceFile)),
-                        effectFileSourcePaths);
+            QHash<QString, QString> effectFileSourcePaths;
+            QString absSrcPath = fileInfo.absoluteFilePath();
+            QString projectPath
+                    = QFileInfo(PresentationFile::findProjectFile(absSrcPath)).absolutePath();
+            g_StudioApp.GetCore()->GetDoc()->GetDocumentReader()
+                .ParseSourcePathsOutOfEffectFile(absSrcPath, effectFileSourcePaths, projectPath);
 
-            const QDir fileDir = QFileInfo(sourceFile).dir();
-            const QDir projectDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath());
+            // TODO: Override choice needs to be unified across entire multi-import (QT3DS-2474)
+            // TODO: including all file types, not just effects and materials
+            // TODO: Also, there should not be override question if current multi-import
+            // TODO: copied the file in the first place, copying should just be auto-skipped.
+            int overrideChoice = QMessageBox::NoButton;
+            QHashIterator<QString, QString> pathIter(effectFileSourcePaths);
+            while (pathIter.hasNext()) {
+                pathIter.next();
+                const QString theSourcePath = pathIter.value();
+                const QString theResultPath
+                        = QDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath())
+                        .absoluteFilePath(pathIter.key());
+                QFileInfo fi(theResultPath);
+                if (!fi.dir().exists())
+                    fi.dir().mkpath(".");
 
-            for (const auto &effectFile : effectFileSourcePaths) {
-                const QString sourcePath = fileDir.filePath(effectFile.toQString());
-                const QString resultPath = projectDir.filePath(effectFile.toQString());
-
-                const QFileInfo resultFileInfo(resultPath);
-                if (!resultFileInfo.exists()) {
-                    resultFileInfo.dir().mkpath(".");
-                    QFile::copy(sourcePath, resultPath);
+                if (fi.exists()) { // asset exists, show override / skip box
+                    if (overrideChoice == QMessageBox::YesToAll) {
+                        QFile::remove(theResultPath);
+                    } else if (overrideChoice == QMessageBox::NoToAll) {
+                        // QFile::copy() does not override files
+                    } else {
+                        overrideChoice = g_StudioApp.GetDialogs()
+                                ->displayOverrideAssetBox(pathIter.key());
+                        if (overrideChoice & (QMessageBox::Yes | QMessageBox::YesToAll))
+                            QFile::remove(theResultPath);
+                    }
                 }
+                QFile::copy(theSourcePath, theResultPath);
             }
         }
     }
@@ -604,19 +623,26 @@ void ProjectFileSystemModel::importPresentationAssets(
         const QFileInfo &uipSrc, const QFileInfo &uipTarget,
         QHash<QString, QString> &outPresentationNodes, const int overrideChoice) const
 {
-    QList<QString> importSourcePaths;
+    QHash<QString, QString> importPathMap;
     QString projPathSrc; // project absolute path for the source uip
-    PresentationFile::getSourcePaths(uipSrc, uipTarget, importSourcePaths, projPathSrc,
+    PresentationFile::getSourcePaths(uipSrc, uipTarget, importPathMap, projPathSrc,
                                      outPresentationNodes);
     int overrideCh = overrideChoice;
-    for (auto &path : qAsConst(importSourcePaths)) {
-        QString srcAssetPath, targetAssetPath;
+
+    QHashIterator<QString, QString> pathIter(importPathMap);
+    while (pathIter.hasNext()) {
+        pathIter.next();
+        QString srcAssetPath = pathIter.value();
+        const QString path = pathIter.key();
+        QString targetAssetPath;
         if (path.startsWith(QLatin1String("./"))) { // path from project root
-            srcAssetPath = QDir(projPathSrc).absoluteFilePath(path);
+            if (srcAssetPath.isEmpty())
+                srcAssetPath = QDir(projPathSrc).absoluteFilePath(path);
             targetAssetPath = QDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath())
                                 .absoluteFilePath(path);
         } else { // relative path
-            srcAssetPath = uipSrc.dir().absoluteFilePath(path);
+            if (srcAssetPath.isEmpty())
+                srcAssetPath = uipSrc.dir().absoluteFilePath(path);
             targetAssetPath = uipTarget.dir().absoluteFilePath(path);
         }
 
@@ -634,7 +660,6 @@ void ProjectFileSystemModel::importPresentationAssets(
                 QString pathFromRoot = QDir(g_StudioApp.GetCore()->getProjectFile()
                                             .getProjectPath())
                                             .relativeFilePath(targetAssetPath);
-
                 overrideCh = g_StudioApp.GetDialogs()->displayOverrideAssetBox(pathFromRoot);
                 if (overrideCh & (QMessageBox::Yes | QMessageBox::YesToAll))
                     QFile::remove(targetAssetPath);

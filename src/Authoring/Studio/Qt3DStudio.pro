@@ -266,7 +266,6 @@ SOURCES += \
     DragAndDrop/DropTarget.cpp \
     DragAndDrop/ExplorerFileDropSource.cpp \
     DragAndDrop/FileDropSource.cpp \
-    DragAndDrop/ProjectDropTarget.cpp \
     DragAndDrop/SceneDropTarget.cpp \
     DragAndDrop/TimelineDropSource.cpp \
     DragAndDrop/TimelineDropTarget.cpp \
