@@ -60,7 +60,8 @@ public:
     QString getProjectFilePath() const;
     QString getProjectName() const;
     QString getPresentationId(const QString &src) const;
-    QString getResolvedPathTo(const QString &path) const;
+    QString getAbsoluteFilePathTo(const QString &relFilePath) const;
+    QString getRelativeFilePathTo(const QString &absFilePath) const;
     QString createPreview();
     QMultiMap<QString, QPair<QString, QString>> getDiBindingtypesFromSubpresentations() const;
 

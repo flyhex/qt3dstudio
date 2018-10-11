@@ -98,22 +98,24 @@ private:
     bool isVisible(const QModelIndex& modelIndex) const;
     bool hasVisibleChildren(const QModelIndex &modelIndex) const;
     void importUrl(QDir &targetDir, const QUrl &url,
-                   QHash<QString, QString> &outPresentationNodes);
+                   QHash<QString, QString> &outPresentationNodes, QStringList &outImportedFiles);
     void importPresentationAssets(const QFileInfo &uipSrc, const QFileInfo &uipTarget,
                                   QHash<QString, QString> &outPresentationNodes,
+                                  QStringList &outImportedFiles,
                                   const int overrideChoice = QMessageBox::NoButton) const;
 
     void modelRowsInserted(const QModelIndex &parent, int start, int end);
     void modelRowsRemoved(const QModelIndex &parent, int start, int end);
     void modelRowsMoved(const QModelIndex &parent, int start, int end);
     void modelLayoutChanged();
-    void importQmlAssets(const QObject *qmlNode, const QDir &srcDir, const QDir &targetDir);
-
+    void importQmlAssets(const QObject *qmlNode, const QDir &srcDir, const QDir &targetDir,
+                         QStringList &outImportedFiles);
     void updateDefaultDirMap();
     void addPathsToReferences(const QString &projectPath, const QString &origPath);
     void handlePresentationIdChange(const QString &path, const QString &id);
     void asyncExpandPresentations();
     void updateReferences();
+    bool addUniqueImportFile(const QString &importFile, QStringList &outImportedFiles) const;
 
     struct TreeItem {
         QPersistentModelIndex index;

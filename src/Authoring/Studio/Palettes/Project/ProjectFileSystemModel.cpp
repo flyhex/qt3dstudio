@@ -189,7 +189,7 @@ void ProjectFileSystemModel::updateReferences()
     auto addReferencesProject = [this, doc, &projectPath](const Q3DStudio::CString &str) {
         addPathsToReferences(
                     projectPath,
-                    doc->GetCore()->getProjectFile().getResolvedPathTo(str.toQString()));
+                    doc->GetCore()->getProjectFile().getAbsoluteFilePathTo(str.toQString()));
     };
     auto addReferencesRenderable = [this, &projectPath, &projectPathSlash, &subpresentationRecord]
             (const QString &id) {
@@ -208,6 +208,25 @@ void ProjectFileSystemModel::updateReferences()
     m_references.insert(projectPath);
 
     updateRoles({IsReferencedRole, Qt::DecorationRole});
+}
+
+/**
+ * Checks if file is already imported and if not, adds it to outImportedFiles
+ *
+ * @param importFile The new imported file to check
+ * @param outImportedFiles List of already imported files
+ * @return true if importFile was added
+ */
+bool ProjectFileSystemModel::addUniqueImportFile(const QString &importFile,
+                                                 QStringList &outImportedFiles) const
+{
+    const QString cleanPath = QFileInfo(importFile).canonicalFilePath();
+    if (outImportedFiles.contains(cleanPath)) {
+        return false;
+    } else {
+        outImportedFiles.append(cleanPath);
+        return true;
+    }
 }
 
 Q3DStudio::DocumentEditorFileType::Enum ProjectFileSystemModel::assetTypeForRow(int row)
@@ -439,7 +458,10 @@ void ProjectFileSystemModel::importUrls(const QList<QUrl> &urls, int row, bool a
     const QDir targetDir(targetPath);
 
     QStringList expandPaths;
-    QHash<QString, QString> presentationNodes; // <absolute path to presentation, presentation id>
+    QHash<QString, QString> presentationNodes; // <relative path to presentation, presentation id>
+    // List of all files that have been copied by this import. Used to avoid duplicate imports
+    // due to some of the imported files also being assets used by other imported files.
+    QStringList importedFiles;
 
     for (const auto &url : urls) {
         QString sortedPath = targetPath;
@@ -455,7 +477,7 @@ void ProjectFileSystemModel::importUrls(const QList<QUrl> &urls, int row, bool a
         }
 
         if (sortedDir.exists()) {
-            importUrl(sortedDir, url, presentationNodes);
+            importUrl(sortedDir, url, presentationNodes, importedFiles);
             expandPaths << sortedDir.path();
         }
     }
@@ -470,8 +492,20 @@ void ProjectFileSystemModel::importUrls(const QList<QUrl> &urls, int row, bool a
     }
 }
 
+/**
+ * Imports a single asset and the assets it depends on.
+ *
+ * @param targetDir target path where the asset is imported to
+ * @param url source url where the asset is imported from
+ * @param outPresentationNodes map where presentation node information is stored for later
+ *                             registration. The key is relative path to presentation. The value
+ *                             is presentation id.
+ * @param outImportedFiles list of absolute source paths of the dependent assets that are imported
+ *                         in the same import context.
+ */
 void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
-                                       QHash<QString, QString> &outPresentationNodes)
+                                       QHash<QString, QString> &outPresentationNodes,
+                                       QStringList &outImportedFiles)
 {
     using namespace Q3DStudio;
     using namespace qt3dsimp;
@@ -489,6 +523,10 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
 
     const QFileInfo fileInfo(sourceFile);
     if (!fileInfo.isFile())
+        return;
+
+    // Skip importing if the file has already been imported
+    if (!addUniqueImportFile(sourceFile, outImportedFiles))
         return;
 
     const auto doc = g_StudioApp.GetCore()->GetDoc();
@@ -554,14 +592,19 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
         if (CDialogs::isPresentationFileExtension(extension.toLatin1().data())) {
             // Don't override id with empty if it is already added, which can happen when
             // multi-importing both presentation and its subpresentation
-            if (!outPresentationNodes.contains(destPath))
-                outPresentationNodes.insert(destPath, {});
-            importPresentationAssets(fileInfo, QFileInfo(destPath), outPresentationNodes);
+            const QString presPath
+                    = doc->GetCore()->getProjectFile().getRelativeFilePathTo(destPath);
+            if (!outPresentationNodes.contains(presPath))
+                outPresentationNodes.insert(presPath, {});
+            importPresentationAssets(fileInfo, QFileInfo(destPath), outPresentationNodes,
+                                     outImportedFiles);
         } else if (qmlRoot) { // importing a qml stream
-            if (!outPresentationNodes.contains(destPath))
-                outPresentationNodes.insert(destPath, {});
+            const QString presPath
+                    = doc->GetCore()->getProjectFile().getRelativeFilePathTo(destPath);
+            if (!outPresentationNodes.contains(presPath))
+                outPresentationNodes.insert(presPath, {});
             m_importQmlOverrideChoice = QMessageBox::NoButton;
-            importQmlAssets(qmlRoot, fileInfo.dir(), targetDir);
+            importQmlAssets(qmlRoot, fileInfo.dir(), targetDir, outImportedFiles);
         }
 
         // For effect and custom material files, automatically copy related resources
@@ -583,12 +626,16 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
             while (pathIter.hasNext()) {
                 pathIter.next();
                 const QString theSourcePath = pathIter.value();
+
+                if (!addUniqueImportFile(theSourcePath, outImportedFiles))
+                    continue;
+
                 const QString theResultPath
                         = QDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath())
                         .absoluteFilePath(pathIter.key());
                 QFileInfo fi(theResultPath);
                 if (!fi.dir().exists())
-                    fi.dir().mkpath(".");
+                    fi.dir().mkpath(QStringLiteral("."));
 
                 if (fi.exists()) { // asset exists, show override / skip box
                     if (overrideChoice == QMessageBox::YesToAll) {
@@ -614,14 +661,20 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
  * imported in the same relative structure in the imported-from folder in order not to break the
  * assets paths.
  *
- * @param uipSrc source path where the uip is imported from
+ * @param uipSrc source file path where the uip is imported from
  * @param uipTarget target path where the uip is imported to
+ * @param outPresentationNodes map where presentation node information is stored for later
+ *                             registration. The key is relative path to presentation. The value
+ *                             is presentation id.
  * @param overrideChoice tracks user choice (yes to all / no to all) to maintain the value through
  *                       recursive calls
+ * @param outImportedFiles list of absolute source paths of the dependent assets that are imported
+ *                         in the same import context.
  */
 void ProjectFileSystemModel::importPresentationAssets(
         const QFileInfo &uipSrc, const QFileInfo &uipTarget,
-        QHash<QString, QString> &outPresentationNodes, const int overrideChoice) const
+        QHash<QString, QString> &outPresentationNodes, QStringList &outImportedFiles,
+        const int overrideChoice) const
 {
     QHash<QString, QString> importPathMap;
     QString projPathSrc; // project absolute path for the source uip
@@ -646,9 +699,12 @@ void ProjectFileSystemModel::importPresentationAssets(
             targetAssetPath = uipTarget.dir().absoluteFilePath(path);
         }
 
+        if (!addUniqueImportFile(srcAssetPath, outImportedFiles))
+            continue;
+
         QFileInfo fi(targetAssetPath);
         if (!fi.dir().exists())
-            fi.dir().mkpath(".");
+            fi.dir().mkpath(QStringLiteral("."));
 
         if (fi.exists()) { // asset exists, show override / skip box
             if (overrideCh == QMessageBox::YesToAll) {
@@ -671,13 +727,21 @@ void ProjectFileSystemModel::importPresentationAssets(
         // recursively load any uip asset's assets
         if (path.endsWith(QLatin1String(".uip"))) {
             importPresentationAssets(QFileInfo(srcAssetPath), QFileInfo(targetAssetPath),
-                                     outPresentationNodes, overrideCh);
+                                     outPresentationNodes, outImportedFiles, overrideCh);
         }
     }
 }
 
+/**
+ * Import all assets specified in "source" properties in a qml file.
+ *
+ * @param qmlNode The qml node to checkfor assets. Recursively checks all child nodes, too.
+ * @param srcDir target dir where the assets are imported to
+ * @param outImportedFiles list of absolute source paths of the dependent assets that are imported
+ *                         in the same import context.
+ */
 void ProjectFileSystemModel::importQmlAssets(const QObject *qmlNode, const QDir &srcDir,
-                                             const QDir &targetDir)
+                                             const QDir &targetDir, QStringList &outImportedFiles)
 {
     QString assetSrc = qmlNode->property("source").toString(); // absolute file path
 
@@ -690,36 +754,40 @@ void ProjectFileSystemModel::importQmlAssets(const QObject *qmlNode, const QDir 
 
         if (srcDir.exists(assetSrc)) { // there is an asset to import
             QString assetTarget = targetDir.absoluteFilePath(srcDir.relativeFilePath(assetSrc));
+            assetSrc = srcDir.absoluteFilePath(assetSrc);
 
-            QFileInfo fi(assetTarget);
-            if (!fi.dir().exists())
-                fi.dir().mkpath(".");
+            if (addUniqueImportFile(assetSrc, outImportedFiles)) {
+                QFileInfo fi(assetTarget);
+                if (!fi.dir().exists())
+                    fi.dir().mkpath(QStringLiteral("."));
 
-            if (fi.exists()) { // imported asset exists, show override / skip box
-                if (m_importQmlOverrideChoice == QMessageBox::YesToAll) {
-                    QFile::remove(assetTarget);
-                } else if (m_importQmlOverrideChoice == QMessageBox::NoToAll) {
-                    // QFile::copy() does not override files
-                } else {
-                    // get path relative to project root (for neat displaying)
-                    QString pathFromRoot = QDir(g_StudioApp.GetCore()->getProjectFile()
-                                                .getProjectPath()).relativeFilePath(assetTarget);
-
-                    m_importQmlOverrideChoice = g_StudioApp.GetDialogs()
-                            ->displayOverrideAssetBox(pathFromRoot);
-                    if (m_importQmlOverrideChoice & (QMessageBox::Yes | QMessageBox::YesToAll))
+                if (fi.exists()) { // imported asset exists, show override / skip box
+                    if (m_importQmlOverrideChoice == QMessageBox::YesToAll) {
                         QFile::remove(assetTarget);
-                }
-            }
+                    } else if (m_importQmlOverrideChoice == QMessageBox::NoToAll) {
+                        // QFile::copy() does not override files
+                    } else {
+                        // get path relative to project root (for neat displaying)
+                        QString pathFromRoot
+                                = QDir(g_StudioApp.GetCore()->getProjectFile()
+                                       .getProjectPath()).relativeFilePath(assetTarget);
 
-            QFile::copy(assetSrc, assetTarget);
+                        m_importQmlOverrideChoice = g_StudioApp.GetDialogs()
+                                ->displayOverrideAssetBox(pathFromRoot);
+                        if (m_importQmlOverrideChoice & (QMessageBox::Yes | QMessageBox::YesToAll))
+                            QFile::remove(assetTarget);
+                    }
+                }
+
+                QFile::copy(assetSrc, assetTarget);
+            }
         }
     }
 
     // recursively load child nodes
     const QObjectList qmlNodeChildren = qmlNode->children();
     for (int i = 0; i < qmlNodeChildren.count(); ++i)
-        importQmlAssets(qmlNodeChildren.at(i), srcDir, targetDir);
+        importQmlAssets(qmlNodeChildren.at(i), srcDir, targetDir, outImportedFiles);
 }
 
 int ProjectFileSystemModel::rowForPath(const QString &path) const

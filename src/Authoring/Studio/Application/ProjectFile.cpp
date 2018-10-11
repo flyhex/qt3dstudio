@@ -682,11 +682,11 @@ void ProjectFile::setInitialPresentation(const QString &initialId)
     }
 }
 
-// Returns true if file rename was successful
+// Returns true if file rename was successful. The parameters are relative to project root.
 bool ProjectFile::renamePresentationFile(const QString &oldName, const QString &newName)
 {
-    const QString fullOldPath = getResolvedPathTo(oldName);
-    const QString fullNewPath = getResolvedPathTo(newName);
+    const QString fullOldPath = getAbsoluteFilePathTo(oldName);
+    const QString fullNewPath = getAbsoluteFilePathTo(newName);
     QFile presFile(fullOldPath);
     const bool success = presFile.rename(fullNewPath);
 
@@ -751,10 +751,25 @@ bool ProjectFile::renamePresentationFile(const QString &oldName, const QString &
     return success;
 }
 
-QString ProjectFile::getResolvedPathTo(const QString &path) const
+/**
+ * Returns an absolute file path for a given relative file path.
+ *
+ * @param relFilePath A file path relative to project root to convert.
+ */
+QString ProjectFile::getAbsoluteFilePathTo(const QString &relFilePath) const
 {
-    auto projectPath = QDir(getProjectPath()).absoluteFilePath(path);
+    auto projectPath = QDir(getProjectPath()).absoluteFilePath(relFilePath);
     return QDir::cleanPath(projectPath);
+}
+
+/**
+ * Returns a file path relative to the project root for given absolute file path.
+ *
+ * @param absFilePath An absolute file path to convert.
+ */
+QString ProjectFile::getRelativeFilePathTo(const QString &absFilePath) const
+{
+    return QDir(getProjectPath()).relativeFilePath(absFilePath);
 }
 
 // Return multimap of type subpresentationid - QPair<datainput, propertyname>
