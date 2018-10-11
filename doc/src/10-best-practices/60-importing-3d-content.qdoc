@@ -146,8 +146,6 @@ use the following settings when exporting:
 
 \section1 3D Content via COLLADA
 
-\section2 Exporting COLLADA from Various 3D Modeling Applications
-
 Each 3D modeling application uses a specific COLLADA exporter that
 produces a format recognized by Studio. Autodesk's 3D Studio Max 2011
 and Maya 2011 use OpenCOLLADA which can be found by visiting
@@ -158,84 +156,13 @@ Maya and 3D Studio Max need to be installed prior to installing the
 correct OpenCOLLADA version. In addition, be sure that no 3D programs
 are open during the installation of OpenCOLLADA.
 
-\section2 Exporting OpenCOLLADA from Maya
-
-In order for the OpenCOLLADA exporter to become active, some options
-need to be checked and unchecked in the Plug-in Manager. To find the
-Plug-in Manager, go to Window > Settings/Preferences
-> Plug-in Manager.
-
-The \"fbxmaya.mll\" plug-in has to be unchecked. The COLLADAMaya.mll
-needs to be checked as both Loaded and Auto Load.
-
-\image 3D_Content/colladaMaya01.png
-
-Next, go to File > Export Selection and open the dialog
-box.
-
-\image 3D_Content/colladaMaya02.png
-
-Under General Options, be sure that OpenCOLLADA exporter is selected and
-set as the default file extension. Under general export options, check
-that the following options are active.
-
-\image 3D_Content/colladaMaya03.png
-
-The triangulate option must be checked on prior to export.
-
-Finally, choose the location for the COLLADA file to be saved. It is a
-good practice to keep all source art, including COLLADA files, in a
-folder outside of your Studio project folder.
-
-\image 3D_Content/colladaMaya04.png
-
-\section2 Exporting OpenCollada from 3D Studio Max
-
-Select the object to be exported. Next, open the Export dialog box.
-
-\image 3D_Content/colladaMax01.png
-
-Be sure to select OpenCOLLADA and not Autodesk Collada.
-
-Next, you will be prompted with another set of options for the
-OpenCOLLADA exporter.
-
-\image 3D_Content/colladaMax02.png
-
-Again, be sure that triangulate is checked on.
-
-\section2 Exporting COLLADA from Luxology's Modo 601
-
-Modo comes installed with a COLLADA exporter that works with Studio as
-of versions 501 and 601.
-
-With the mesh object selected, triangulate the mesh by pressing Shift+T.
-
-\image 3D_Content/colladaModo01.png
-
-\image 3D_Content/colladaModo02.png
-
-Next, go to System > Preferences to configure the COLLADA
-exporter.
-
-\image 3D_Content/colladaModo03.png
-
-In the Preferences dialog box, locate the Collada I/O section under File
-I/O. Be sure that Save Triangles as Triangles is checked on.
-
-\image 3D_Content/colladaModo04.png
-
-\section2 Exporting COLLADA from Blender
-
-Make sure triangulate is on. In addition, you'll need to make sure all of the meshes have materials.
-
-\section1 Description of supported features
+\section2 Description of supported features
 
 The following section describes the features supported by COLLADA import
 into Studio. Where appropriate, caveats, limitations, and differences
 between different DCC applications are discussed.
 
-\section2 Geometry
+\section3 Geometry
 
 Generally speaking, the geometry import capabilities are very solid.
 We've stress tested different high poly count scenarios. The one caveat
@@ -243,7 +170,7 @@ here is mentioned above, Studio only supports triangulated geometry, so
 be sure to check that option when exporting COLLADA data for use in
 Studio.
 
-\section2 Transformation
+\section3 Transformation
 
 As you would expect with COLLADA you can import full 3D transform
 information including position, rotation, scale, and pivot. Studio can
@@ -261,14 +188,14 @@ can be confusing or an impediment to your work.
 Please note: After freezing transforms, you may have to reposition the
 pivot point in some DCC tools.
 
-\section2 Hierarchy
+\section3 Hierarchy
 
 The plug-in supports translating hierarchical information from COLLADA
 into Scene Graph information inside of Studio. Hierarchies of arbitrary
 depth are supported, including grouped nodes. Hierarchical transforms
 are applied as expected.
 
-\section2 Materials
+\section3 Materials
 
 The plug-in supports translating material settings from the DCC
 application into material settings inside of Studio. Specific mappings
@@ -276,7 +203,7 @@ have been made to ensure consistent control of the look inside of NVIDIA
 from within the DCC application. Material settings for diffuse,
 specular, ambient, and opacity are all imported correctly.
 
-\section2 Textures
+\section3 Textures
 
 Images applied to different material IDs will be imported with the
 COLLADA file and applied inside of Studio. Note that the COLLADA files
@@ -291,7 +218,7 @@ alpha channels and allow for lossless editing. With .dds, you can set
 the compression to DXT5 with alpha blending if your image has
 transparency.
 
-\section2 Using Powers of Two Texture Map Pixel Dimensions
+\section3 Using Powers of Two Texture Map Pixel Dimensions
 
 As is the case with most real-time graphics, texture maps run optimally
 when their pixel dimensions are set to powers of two. An example of
@@ -300,7 +227,7 @@ powers of two texture maps include 32X32, 64X64, 128X128, 512X512,
 128X1024. Dimensions do not have to be square but they should be powers
 of two.
 
-\section2 Materials Inspector palette properties
+\section3 Materials Inspector palette properties
 
 Materials are found parented to a mesh object in the timeline. The image
 below describes the hierarchy of meshes, materials and texture maps:
@@ -374,7 +301,7 @@ supported images in your project directory.
   the amount and location of opacity on a material.
 \endlist
 
-\section2 Texture map Inspector palette properties
+\section3 Texture map Inspector palette properties
 
 With a texture map selected in the timeline, the inspector palette will
 display the following properties:
@@ -400,7 +327,7 @@ The animation toggle is associated with animatable properties.
   -.500 and the U and V pivot to .500.
 \endlist
 
-\section2 Adding Fonts and Using Text in Studio
+\section3 Adding Fonts and Using Text in Studio
 
 In order to use text in Studio, fonts need to be added to the fonts
 folder within the user's project directory. Before adding fonts to your
@@ -440,7 +367,7 @@ operation will not work. Save the \c{.uip} file after find/replace
 is complete and reopen the .uip in Studio. Voila! All specified fonts
 will be replaced with the desired font.
 
-\section2 Animation
+\section3 Animation
 
 Animations can be brought into Studio using COLLADA. Animation is
 supported on any imported attribute. Position, rotation, scale, pivot,
@@ -449,7 +376,27 @@ support for animations would be a hierarchy of items, rotated
 simultaneously on arbitrary axes in arbitrary axis order. Studio also
 supports importing bezier tangent value tweaked into animations.
 
+\section1 Exporting from Different Tools
+
+\table
+\header
+  \li \b Tool
+\row
+  \li
+      \b {\l{Exporting from Maya}{Maya}}
+\row
+  \li
+      \b {\l{Exporting from Blender}{Blender}}
+\row
+  \li
+      \b {\l{Exporting from 3D Studio Max}{3D Studio Max}}
+\row
+  \li
+      \b {\l{Exporting from Modo}{Modo}}
+\endtable
+
 \omit // TODO: Replace with our own example work flow
+
 \section1 3D Workflow Case Study
 
 The examples presented below use Luxology's Modo 601 for digital content
@@ -784,6 +731,5 @@ Some values to consider:
 
 Now with the needle selected in the timeline, rotate it about its Z axis
 and notice how it rotates correctly.
-
 \endomit
 */
