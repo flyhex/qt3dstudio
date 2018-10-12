@@ -199,6 +199,8 @@ public:
                                                   std::placeholders::_1));
         }
         // Qml types have been registered by the Q3DSEngine already.
+        m_InputStreamFactory->addSearchDirectory(m_Doc.GetCore()->getProjectFile()
+                                                 .getProjectPath());
     }
     virtual ~CDocEditor()
     {

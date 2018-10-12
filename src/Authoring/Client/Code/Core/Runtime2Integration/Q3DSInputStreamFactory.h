@@ -87,6 +87,8 @@ public:
     virtual bool getPathForFile(const char *inFilename, QString &outFile,
                                 bool inQuiet = false) = 0;
 
+    virtual void clearSearchPaths() = 0;
+
     // Create an input stream factory
     static QSharedPointer<Q3DStudio::IInputStreamFactory> &Create();
 };

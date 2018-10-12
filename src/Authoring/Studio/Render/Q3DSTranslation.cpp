@@ -31,6 +31,7 @@
 #include "Q3DSStringTable.h"
 #include "Q3DSGraphObjectTranslator.h"
 #include "Q3DSEditCamera.h"
+#include "Q3DSInputStreamFactory.h"
 #include "Q3DSTranslators.h"
 
 #include "StudioApp.h"
@@ -267,6 +268,73 @@ Q3DSTranslation::ThandleTranslatorOption Q3DSTranslation::findTranslator(
     return Q3DSTranslation::ThandleTranslatorOption();
 }
 
+Q3DSGraphObjectTranslator *Q3DSTranslation::createEffectTranslator(
+        qt3dsdm::Qt3DSDMInstanceHandle instance, qt3dsdm::Qt3DSDMInstanceHandle parentClass,
+        const QByteArray &id)
+{
+    const QString instanceName = m_reader.GetName(parentClass).toQString();
+    const QString instancePath = m_reader.GetSourcePath(parentClass).toQString();
+    const QString assetPath = m_presentation->assetFileName(instancePath, nullptr);
+    qt3dsdm::IMetaData &metadata(*m_studioSystem.GetActionMetaData());
+
+    if (!metadata.IsEffectInstanceRegistered(qPrintable(assetPath))) {
+        WQString nameStr(toWQString(instanceName));
+        auto inputStreamFactory = IInputStreamFactory::Create();
+        std::vector<qt3dsdm::SMetaDataLoadWarning> warnings;
+        IRefCountedInputStream stream = inputStreamFactory->getStreamForFile(assetPath);
+        if (stream.isNull()) {
+            qWarning() << __FUNCTION__ << " Unable to open effect: " << instancePath;
+            return nullptr;
+        }
+        metadata.LoadEffectXMLFromSourcePath(qPrintable(instancePath),
+                                             instance, nameStr.data(), warnings, *stream);
+    }
+
+    Q3DSEffect effect = m_presentation->effect(assetPath);
+    if (effect.isNull())
+        return nullptr;
+
+    Q3DSEffectInstance *effectInstance = m_presentation->newObject<Q3DSEffectInstance>(id);
+    effectInstance->setName(instanceName);
+    effectInstance->setSourcePath(instancePath);
+    effectInstance->resolveReferences(*m_presentation.data());
+    return new Q3DSEffectTranslator(instance, *effectInstance);
+}
+
+Q3DSGraphObjectTranslator *Q3DSTranslation::createCustomMaterialTranslator(
+        qt3dsdm::Qt3DSDMInstanceHandle instance, qt3dsdm::Qt3DSDMInstanceHandle parentClass,
+        const QByteArray &id)
+{
+    const QString instanceName = m_reader.GetName(parentClass).toQString();
+    const QString instancePath = m_reader.GetSourcePath(parentClass).toQString();
+    const QString assetPath = m_presentation->assetFileName(instancePath, nullptr);
+    qt3dsdm::IMetaData &metadata(*m_studioSystem.GetActionMetaData());
+
+    if (!metadata.IsMaterialClassRegistered(qPrintable(assetPath))) {
+        WQString nameStr(toWQString(instanceName));
+        auto inputStreamFactory = IInputStreamFactory::Create();
+        std::vector<qt3dsdm::SMetaDataLoadWarning> warnings;
+        IRefCountedInputStream stream = inputStreamFactory->getStreamForFile(assetPath);
+        if (stream.isNull()) {
+            qWarning() << __FUNCTION__ << " Unable to open custom material: " << instancePath;
+            return nullptr;
+        }
+        metadata.LoadMaterialClassFromSourcePath(qPrintable(instancePath),
+                                                 instance, nameStr.data(), warnings, *stream);
+    }
+
+    Q3DSCustomMaterial material = m_presentation->customMaterial(assetPath);
+    if (material.isNull())
+        return nullptr;
+
+    Q3DSCustomMaterialInstance *materialInstance
+            = m_presentation->newObject<Q3DSCustomMaterialInstance>(id);
+    materialInstance->setName(instanceName);
+    materialInstance->setSourcePath(instancePath);
+    materialInstance->resolveReferences(*m_presentation.data());
+    return new Q3DSCustomMaterialTranslator(instance, *materialInstance);
+}
+
 void Q3DSTranslation::setPresentationData()
 {
     CStudioProjectSettings *settings = m_doc.GetCore()->GetStudioProjectSettings();
@@ -287,8 +355,71 @@ void Q3DSTranslation::setPresentationData()
                                             : Q3DSUipPresentation::NoRotation);
 }
 
+Q3DSGraphObject *Q3DSTranslation::createAliasGraphObject(qt3dsdm::ComposerObjectTypes::Enum type,
+                                                         const QByteArray &id)
+{
+    Q3DSGraphObject *object = nullptr;
+    switch (type) {
+    case qt3dsdm::ComposerObjectTypes::Group: {
+        object = m_presentation->newObject<Q3DSGroupNode>(id);
+        break;
+    }
+    case qt3dsdm::ComposerObjectTypes::Component: {
+        object = m_presentation->newObject<Q3DSComponentNode>(id);
+        break;
+    }
+    case qt3dsdm::ComposerObjectTypes::Scene: {
+        object = m_presentation->newObject<Q3DSScene>(id);
+        break;
+    }
+    case qt3dsdm::ComposerObjectTypes::Layer: {
+        object = m_presentation->newObject<Q3DSLayerNode>(id);
+        break;
+    }
+    case qt3dsdm::ComposerObjectTypes::Slide: {
+        object = m_presentation->newObject<Q3DSSlide>(id);
+        break;
+    }
+    case qt3dsdm::ComposerObjectTypes::Camera: {
+        object = m_presentation->newObject<Q3DSCameraNode>(id);
+        break;
+    }
+    case qt3dsdm::ComposerObjectTypes::Light: {
+        object = m_presentation->newObject<Q3DSLightNode>(id);
+        break;
+    }
+    case qt3dsdm::ComposerObjectTypes::Model: {
+        object = m_presentation->newObject<Q3DSModelNode>(id);
+        break;
+    }
+    case qt3dsdm::ComposerObjectTypes::Material: {
+        object = m_presentation->newObject<Q3DSDefaultMaterial>(id);
+        break;
+    }
+    case qt3dsdm::ComposerObjectTypes::Image: {
+        object = m_presentation->newObject<Q3DSImage>(id);
+        break;
+    }
+    case qt3dsdm::ComposerObjectTypes::Text: {
+        object = m_presentation->newObject<Q3DSTextNode>(id);
+        break;
+    }
+    case qt3dsdm::ComposerObjectTypes::Effect: {
+        object = m_presentation->newObject<Q3DSEffectInstance>(id);
+        break;
+    }
+    case qt3dsdm::ComposerObjectTypes::CustomMaterial: {
+        object = m_presentation->newObject<Q3DSCustomMaterialInstance>(id);
+        break;
+    }
+    default:
+        break;
+    }
+    return object;
+}
+
 Q3DSGraphObjectTranslator *Q3DSTranslation::createTranslator(
-        qt3dsdm::Qt3DSDMInstanceHandle instance)
+        qt3dsdm::Qt3DSDMInstanceHandle instance, Q3DSGraphObjectTranslator *aliasTranslator)
 {
     Q3DSGraphObjectTranslator *translator = nullptr;
     qt3dsdm::ComposerObjectTypes::Enum type = m_objectDefinitions.GetType(instance);
@@ -297,6 +428,15 @@ Q3DSGraphObjectTranslator *Q3DSTranslation::createTranslator(
         type = m_objectDefinitions.GetType(parentClass);
 
     QByteArray id = getInstanceObjectId(instance);
+    if (aliasTranslator) {
+        // We are creating graph object for alias node tree
+        // prepend id with alias id
+        id.prepend(QByteArrayLiteral("_"));
+        id.prepend(aliasTranslator->graphObject().id());
+        translator = new Q3DSAliasedTranslator(aliasTranslator, instance,
+                                               *createAliasGraphObject(type, id));
+        return translator;
+    }
 
     // For the subset of possible instances, pick out the valid translators.
     switch (type) {
@@ -361,7 +501,20 @@ Q3DSGraphObjectTranslator *Q3DSTranslation::createTranslator(
                             instance, *m_presentation->newObject<Q3DSReferencedMaterial>(id));
         break;
     }
-        // TODO: Alias, Effect, CustomMaterial, RenderPlugin?
+    case qt3dsdm::ComposerObjectTypes::Effect: {
+        if (parentClass.Valid())
+            translator = createEffectTranslator(instance, parentClass, id);
+        break;
+    }
+    case qt3dsdm::ComposerObjectTypes::CustomMaterial: {
+        if (parentClass.Valid())
+            translator = createCustomMaterialTranslator(instance, parentClass, id);
+        break;
+    }
+    case qt3dsdm::ComposerObjectTypes::Alias: {
+        translator = new Q3DSAliasTranslator(instance, *m_presentation->newObject<Q3DSGroupNode>(id));
+        break;
+    }
     default:
         break;
     }
@@ -375,7 +528,8 @@ Q3DSGraphObjectTranslator *Q3DSTranslation::getOrCreateTranslator(
 }
 
 Q3DSGraphObjectTranslator *Q3DSTranslation::getOrCreateTranslator(
-        qt3dsdm::Qt3DSDMInstanceHandle instance, qt3dsdm::Qt3DSDMInstanceHandle aliasInstance)
+        qt3dsdm::Qt3DSDMInstanceHandle instance, qt3dsdm::Qt3DSDMInstanceHandle aliasInstance,
+        Q3DSGraphObjectTranslator *aliasTranslator)
 {
     TInstanceToTranslatorMap::iterator theTranslatorList;
     if (!m_translatorMap.contains(instance))
@@ -390,7 +544,7 @@ Q3DSGraphObjectTranslator *Q3DSTranslation::getOrCreateTranslator(
     if (m_reader.IsInstance(instance) == false)
         return nullptr;
 
-    Q3DSGraphObjectTranslator *theNewTranslator = createTranslator(instance);
+    Q3DSGraphObjectTranslator *theNewTranslator = createTranslator(instance, aliasTranslator);
     if (theNewTranslator != nullptr) {
         theNewTranslator->setAliasInstanceHandle(aliasInstance);
         m_dirtySet.insert(*theNewTranslator);

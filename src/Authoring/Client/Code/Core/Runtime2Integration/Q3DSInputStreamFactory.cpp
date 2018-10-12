@@ -63,9 +63,13 @@ public:
                         break;
                     }
                 }
-                path = m_list[idx++];
-                if (!path.endsWith(QStringLiteral("/")))
-                    path.append(QStringLiteral("/"));
+                if (idx < m_list.size()) {
+                    path = m_list[idx++];
+                    if (!path.endsWith(QLatin1Char('/')))
+                        path.append(QLatin1Char('/'));
+                } else {
+                    break;
+                }
             }
         } else {
             file->setFileName(inFilename);
@@ -80,6 +84,11 @@ public:
     bool getPathForFile(const char *inFilename, QString &outFile, bool inQuiet) override
     {
         return false;
+    }
+
+    void clearSearchPaths() override
+    {
+        m_list.clear();
     }
 private:
     QStringList m_list;

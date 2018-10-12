@@ -57,7 +57,6 @@ public:
     virtual ~Q3DSGraphObjectTranslator() {}
 
     virtual void pushTranslation(Q3DSTranslation &inTranslatorContext);
-    virtual void afterRenderGraphIsBuilt(Q3DSTranslation &) {}
     virtual void setActive(bool inActive) = 0;
     virtual void clearChildren() = 0;
     virtual void appendChild(Q3DSGraphObject &inChild) = 0;
@@ -75,6 +74,7 @@ public:
             return m_aliasInstanceHandle;
         return instanceHandle();
     }
+    virtual void copyProperties(Q3DSGraphObjectTranslator *targetTranslator);
     void enableAutoUpdates(bool enable)
     {
         m_autoUpdate = enable;
@@ -112,12 +112,26 @@ public:
     {
         m_dirty = dirty;
     }
+    bool ignoreReferenced() const
+    {
+        return m_ignoreReferenced;
+    }
+    void setIgnoreReferenced(bool ignore)
+    {
+        m_ignoreReferenced = ignore;
+    }
     static Q3DSGraphObjectTranslator *translatorForObject(Q3DSGraphObject *object);
 
     template <typename T>
     T *graphObject() const
     {
         return static_cast<T *>(m_graphObject);
+    }
+
+    void pushTranslationIfDirty(Q3DSTranslation &inTranslatorContext)
+    {
+        if (m_dirty)
+            pushTranslation(inTranslatorContext);
     }
 
 private:
@@ -130,8 +144,40 @@ private:
 
     bool m_dirty = true;
     bool m_autoUpdate = true;
+    bool m_ignoreReferenced = false;
     quint32 m_dirtyIndex;
     static QMap<Q3DSGraphObject *, Q3DSGraphObjectTranslator *> s_translatorMap;
+};
+
+class Q3DSAliasedTranslator : public Q3DSGraphObjectTranslator
+{
+public:
+    Q3DSAliasedTranslator(Q3DSGraphObjectTranslator *aliasTranslator,
+                          qt3dsdm::Qt3DSDMInstanceHandle inInstance, Q3DSGraphObject &inObj)
+        : Q3DSGraphObjectTranslator(inInstance, inObj), m_aliasTranslator(aliasTranslator)
+    {
+        setAliasInstanceHandle(m_aliasTranslator->instanceHandle());
+    }
+
+    Q3DSGraphObjectTranslator *aliasTranslator() const
+    {
+        return m_aliasTranslator;
+    }
+
+    void setActive(bool) override
+    {
+    }
+    void clearChildren() override
+    {
+    }
+    void appendChild(Q3DSGraphObject &) override
+    {
+    }
+
+    void pushTranslation(Q3DSTranslation &inTranslatorContext) override;
+
+private:
+    Q3DSGraphObjectTranslator *m_aliasTranslator = nullptr;
 };
 
 }

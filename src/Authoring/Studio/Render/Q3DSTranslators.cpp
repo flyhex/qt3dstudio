@@ -38,6 +38,7 @@
 #include "IDocumentReader.h"
 #include "StudioProjectSettings.h"
 #include "SlideSystem.h"
+#include "StudioCoreSystem.h"
 
 #include <QtCore/qmath.h>
 
@@ -358,6 +359,17 @@ struct Q3DSTranslatorDataModelParser
         }
         return true;
     }
+    bool parseProperty(Qt3DSDMPropertyHandle inProperty, qt3dsdm::SObjectRefType &ioObjRef) const
+    {
+        Option<qt3dsdm::SObjectRefType> theData
+                = propertyValue<qt3dsdm::SObjectRefType>(inProperty);
+        if (theData.hasValue()) {
+            ioObjRef = *theData;
+            return true;
+        }
+        return false;
+    }
+
 };
 
 
@@ -619,12 +631,17 @@ struct Q3DSTranslatorDataModelParser
     HANDLE_Q3DS_NAME_PROPERTY                                                           \
     HANDLE_Q3DS_NOTIFY_CHANGES
 
-#define HANDLE_CHANGE(list, ret, x)     \
-{                                       \
-    int size = list.count();            \
-    list.append(x);                     \
-    ret = size < list.count();          \
-}
+#define ITERATE_Q3DS_EFFECT_PROPERTIES                                                  \
+    HANDLE_Q3DS_BOOL_PROPERTY2(Asset, Eyeball, EyeballEnabled)                          \
+    HANDLE_Q3DS_NOTIFY_CHANGES
+
+#define ITERATE_Q3DS_CUSTOM_MATERIAL_PROPERTIES                                         \
+    HANDLE_Q3DS_IMAGE_PROPERTY2(MaterialBase, IblProbe, LightProbe)                     \
+    HANDLE_Q3DS_IMAGE_PROPERTY2(Lightmaps, LightmapIndirect, LightmapIndirectMap)       \
+    HANDLE_Q3DS_IMAGE_PROPERTY2(Lightmaps, LightmapRadiosity, LightmapRadiosityMap)     \
+    HANDLE_Q3DS_IMAGE_PROPERTY2(Lightmaps, LightmapShadow, LightmapShadowMap)           \
+    HANDLE_Q3DS_NOTIFY_CHANGES
+
 
 Q3DSNodeTranslator::Q3DSNodeTranslator(qt3dsdm::Qt3DSDMInstanceHandle instance, Q3DSNode &node)
     : Q3DSGraphObjectTranslator(instance, node)
@@ -644,9 +661,10 @@ void Q3DSNodeTranslator::pushTranslation(Q3DSTranslation &inContext)
         qt3dsdm::Qt3DSDMInstanceHandle child =
             inContext.assetGraph().GetChild(instanceHandle(), idx);
         Q3DSGraphObjectTranslator *translator = inContext.getOrCreateTranslator(child);
-        if (translator && translator->graphObject().isNode()) {
+        if (translator && translator->graphObject().isNode()
+                && translator->graphObject().parent() == nullptr) {
             theItem.appendChildNode(&translator->graphObject());
-            translator->pushTranslation(inContext);
+            translator->pushTranslationIfDirty(inContext);
         }
     }
     theItem.resolveReferences(*inContext.presentation());
@@ -685,38 +703,61 @@ bool Q3DSNodeTranslator::updateProperty(Q3DSTranslation &inContext,
                     qt3dsdm::Qt3DSDMPropertyHandle property,
                     qt3dsdm::SValue &value, const QString &name)
 {
-    bool ret = false;
     if (Q3DSGraphObjectTranslator::updateProperty(inContext, instance, property, value, name))
         return true;
 
     Q3DSPropertyChangeList list;
     Q3DSNode &theItem = static_cast<Q3DSNode &>(graphObject());
     if (name == QLatin1String("position")) {
-        HANDLE_CHANGE(list, ret, theItem.setPosition(Q3DSValueParser::parseVector(value)))
+        list.append(theItem.setPosition(Q3DSValueParser::parseVector(value)));
     } else if (name == QLatin1String("rotation")) {
-        HANDLE_CHANGE(list, ret, theItem.setRotation(Q3DSValueParser::parseVector(value)))
+        list.append(theItem.setRotation(Q3DSValueParser::parseVector(value)));
     } else if (name == QLatin1String("scale")) {
-        HANDLE_CHANGE(list, ret, theItem.setScale(Q3DSValueParser::parseVector(value)))
+        list.append(theItem.setScale(Q3DSValueParser::parseVector(value)));
     } else if (name == QLatin1String("pivot")) {
-        HANDLE_CHANGE(list, ret, theItem.setPivot(Q3DSValueParser::parseVector(value)))
+        list.append(theItem.setPivot(Q3DSValueParser::parseVector(value)));
     } else if (name == QLatin1String("opacity")) {
-        HANDLE_CHANGE(list, ret, theItem.setLocalOpacity(value.getData<float>()))
+        list.append(theItem.setLocalOpacity(value.getData<float>()));
     } else if (name == QLatin1String("rotationorder")) {
-        HANDLE_CHANGE(list, ret, theItem.setRotationOrder(Q3DSValueParser::parseEnum
-                                 <Q3DSNode::RotationOrder>(value)))
+        list.append(theItem.setRotationOrder(Q3DSValueParser::parseEnum
+                                 <Q3DSNode::RotationOrder>(value)));
     } else if (name == QLatin1String("orientation")) {
-        HANDLE_CHANGE(list, ret, theItem.setOrientation(Q3DSValueParser::parseEnum
-                               <Q3DSNode::Orientation>(value)))
+        list.append(theItem.setOrientation(Q3DSValueParser::parseEnum
+                               <Q3DSNode::Orientation>(value)));
     } else if (name == QLatin1String("boneid")) {
-        HANDLE_CHANGE(list, ret, theItem.setSkeletonId(value.getData<int>()))
+        list.append(theItem.setSkeletonId(value.getData<int>()));
     } else if (name == QLatin1String("ignoresparent")) {
-        HANDLE_CHANGE(list, ret, theItem.setIgnoresParent(value.getData<bool>()))
+        list.append(theItem.setIgnoresParent(value.getData<bool>()));
     } else if (name == QLatin1String("eyeball")) {
-        HANDLE_CHANGE(list, ret, theItem.setEyeballEnabled(value.getData<bool>()))
+        list.append(theItem.setEyeballEnabled(value.getData<bool>()));
     }
-    if (ret)
+    if (list.count()) {
         theItem.notifyPropertyChanges(list);
-    return ret;
+        return true;
+    }
+    return false;
+}
+
+void Q3DSNodeTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+{
+    Q3DSPropertyChangeList list;
+    Q3DSGraphObjectTranslator::copyProperties(targetTranslator);
+
+    Q3DSNode *targetNode = targetTranslator->graphObject<Q3DSNode>();
+    const Q3DSNode &theItem = *graphObject<Q3DSNode>();
+    if (!targetTranslator->ignoreReferenced()) {
+        list.append(targetNode->setPosition(theItem.position()));
+        list.append(targetNode->setScale(theItem.scale()));
+        list.append(targetNode->setRotation(theItem.rotation()));
+        list.append(targetNode->setPivot(theItem.pivot()));
+        list.append(targetNode->setLocalOpacity(theItem.localOpacity()));
+    }
+    list.append(targetNode->setRotationOrder(theItem.rotationOrder()));
+    list.append(targetNode->setOrientation(theItem.orientation()));
+    list.append(targetNode->setSkeletonId(theItem.skeletonId()));
+    list.append(targetNode->setIgnoresParent(theItem.ignoresParent()));
+    list.append(targetNode->setEyeballEnabled(theItem.eyeballEnabled()));
+    targetNode->notifyPropertyChanges(list);
 }
 
 
@@ -764,7 +805,7 @@ void Q3DSSceneTranslator::pushTranslation(Q3DSTranslation &inContext)
     }
     theItem.resolveReferences(*inContext.presentation());
     for (auto t : qAsConst(translators))
-        t->pushTranslation(inContext);
+        t->pushTranslationIfDirty(inContext);
 }
 
 void Q3DSSceneTranslator::appendChild(Q3DSGraphObject &inChild)
@@ -790,25 +831,37 @@ void Q3DSSceneTranslator::setActive(bool)
 }
 
 bool Q3DSSceneTranslator::updateProperty(Q3DSTranslation &inContext,
-                    qt3dsdm::Qt3DSDMInstanceHandle instance,
-                    qt3dsdm::Qt3DSDMPropertyHandle property,
-                    qt3dsdm::SValue &value,
-                    const QString &name)
+                                         qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                         qt3dsdm::Qt3DSDMPropertyHandle property,
+                                         qt3dsdm::SValue &value,
+                                         const QString &name)
 {
-    bool ret = false;
     if (Q3DSGraphObjectTranslator::updateProperty(inContext, instance, property, value, name))
         return true;
 
     Q3DSPropertyChangeList list;
     Q3DSScene &theItem = static_cast<Q3DSScene &>(graphObject());
     if (name == QLatin1String("bgcolorenable"))
-        HANDLE_CHANGE(list, ret, theItem.setUseClearColor(value.getData<bool>()))
+        list.append(theItem.setUseClearColor(value.getData<bool>()));
     else if (name == QLatin1String("backgroundcolor"))
-        HANDLE_CHANGE(list, ret, theItem.setClearColor(Q3DSValueParser::parseColor(value)))
+        list.append(theItem.setClearColor(Q3DSValueParser::parseColor(value)));
 
-    if (ret)
+    if (list.count()) {
         theItem.notifyPropertyChanges(list);
-    return ret;
+        return true;
+    }
+    return false;
+}
+
+void Q3DSSceneTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+{
+    Q3DSGraphObjectTranslator::copyProperties(targetTranslator);
+    Q3DSPropertyChangeList list;
+    Q3DSScene *targetScene = targetTranslator->graphObject<Q3DSScene>();
+    const Q3DSScene &theItem = *graphObject<Q3DSScene>();
+    list.append(targetScene->setUseClearColor(theItem.useClearColor()));
+    list.append(targetScene->setClearColor(theItem.clearColor()));
+    targetScene->notifyPropertyChanges(list);
 }
 
 
@@ -836,8 +889,6 @@ bool Q3DSCameraTranslator::updateProperty(Q3DSTranslation &inContext,
                     qt3dsdm::SValue &value,
                     const QString &name)
 {
-    bool ret = false;
-
     // we'll handle this
     if (name != QLatin1String("eyeball")) {
         if (Q3DSNodeTranslator::updateProperty(inContext, instance, property, value, name))
@@ -847,19 +898,19 @@ bool Q3DSCameraTranslator::updateProperty(Q3DSTranslation &inContext,
     Q3DSPropertyChangeList list;
     Q3DSCameraNode &theItem = static_cast<Q3DSCameraNode &>(graphObject());
     if (name == QLatin1String("orthographic")) {
-        HANDLE_CHANGE(list, ret, theItem.setOrthographic(value.getData<bool>()))
+        list.append(theItem.setOrthographic(value.getData<bool>()));
     } else if (name == QLatin1String("clipnear")) {
-        HANDLE_CHANGE(list, ret, theItem.setClipNear(value.getData<float>()))
+        list.append(theItem.setClipNear(value.getData<float>()));
     } else if (name == QLatin1String("clipfar")) {
-        HANDLE_CHANGE(list, ret, theItem.setClipFar(value.getData<float>()))
+        list.append(theItem.setClipFar(value.getData<float>()));
     } else if (name == QLatin1String("fov")) {
-        HANDLE_CHANGE(list, ret, theItem.setFov(value.getData<float>()))
+        list.append(theItem.setFov(value.getData<float>()));
     }  else if (name == QLatin1String("scalemode")) {
-        HANDLE_CHANGE(list, ret, theItem.setScaleMode(
-                          Q3DSValueParser::parseEnum<Q3DSCameraNode::ScaleMode>(value)))
+        list.append(theItem.setScaleMode(
+                          Q3DSValueParser::parseEnum<Q3DSCameraNode::ScaleMode>(value)));
     } else if (name == QLatin1String("scaleanchor")) {
-        HANDLE_CHANGE(list, ret, theItem.setScaleAnchor(
-                          Q3DSValueParser::parseEnum<Q3DSCameraNode::ScaleAnchor>(value)))
+        list.append(theItem.setScaleAnchor(
+                          Q3DSValueParser::parseEnum<Q3DSCameraNode::ScaleAnchor>(value)));
     } else if (name == QLatin1String("eyeball")) {
         if (m_editCameraEnabled) {
             m_activeState = value.getData<bool>();
@@ -869,9 +920,27 @@ bool Q3DSCameraTranslator::updateProperty(Q3DSTranslation &inContext,
                                                       property, value, name);
         }
     }
-    if (ret)
+    if (list.count()) {
         theItem.notifyPropertyChanges(list);
-    return ret;
+        return true;
+    }
+    return false;
+}
+
+void Q3DSCameraTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+{
+    Q3DSNodeTranslator::copyProperties(targetTranslator);
+    Q3DSPropertyChangeList list;
+    Q3DSCameraNode *targetCamera = targetTranslator->graphObject<Q3DSCameraNode>();
+    const Q3DSCameraNode &theItem = *graphObject<Q3DSCameraNode>();
+    list.append(targetCamera->setOrthographic(theItem.orthographic()));
+    list.append(targetCamera->setClipNear(theItem.clipNear()));
+    list.append(targetCamera->setClipFar(theItem.clipFar()));
+    list.append(targetCamera->setFov(theItem.fov()));
+    list.append(targetCamera->setScaleMode(theItem.scaleMode()));
+    list.append(targetCamera->setScaleAnchor(theItem.scaleAnchor()));
+    list.append(targetCamera->setEyeballEnabled(theItem.eyeballEnabled()));
+    targetCamera->notifyPropertyChanges(list);
 }
 
 void Q3DSCameraTranslator::setActive(bool inActive)
@@ -916,58 +985,85 @@ void Q3DSLightTranslator::pushTranslation(Q3DSTranslation &inContext)
 }
 
 bool Q3DSLightTranslator::updateProperty(Q3DSTranslation &inContext,
-                    qt3dsdm::Qt3DSDMInstanceHandle instance,
-                    qt3dsdm::Qt3DSDMPropertyHandle property,
-                    qt3dsdm::SValue &value,
-                    const QString &name)
+                                         qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                         qt3dsdm::Qt3DSDMPropertyHandle property,
+                                         qt3dsdm::SValue &value,
+                                         const QString &name)
 {
-    bool ret = false;
     if (Q3DSNodeTranslator::updateProperty(inContext, instance, property, value, name))
         return true;
 
     Q3DSPropertyChangeList list;
     Q3DSLightNode &theItem = static_cast<Q3DSLightNode &>(graphObject());
     if (name == QLatin1String("scope")) {
-        HANDLE_CHANGE(list, ret, theItem.setScope(
-                          Q3DSValueParser::parseObjectRef(&inContext, instance, value)))
+        list.append(theItem.setScope(
+                          Q3DSValueParser::parseObjectRef(&inContext, instance, value)));
         theItem.resolveReferences(*inContext.presentation());
     } else if (name == QLatin1String("lighttype")) {
-        HANDLE_CHANGE(list, ret, theItem.setLightType
-                      (Q3DSValueParser::parseEnum<Q3DSLightNode::LightType>(value)))
+        list.append(theItem.setLightType
+                      (Q3DSValueParser::parseEnum<Q3DSLightNode::LightType>(value)));
     } else if (name == QLatin1String("lightdiffuse")) {
-        HANDLE_CHANGE(list, ret, theItem.setDiffuse(Q3DSValueParser::parseColor(value)))
+        list.append(theItem.setDiffuse(Q3DSValueParser::parseColor(value)));
     } else if (name == QLatin1String("lightspecular")) {
-        HANDLE_CHANGE(list, ret, theItem.setSpecular(Q3DSValueParser::parseColor(value)))
+        list.append(theItem.setSpecular(Q3DSValueParser::parseColor(value)));
     } else if (name == QLatin1String("lightambient")) {
-        HANDLE_CHANGE(list, ret, theItem.setAmbient(Q3DSValueParser::parseColor(value)))
+        list.append(theItem.setAmbient(Q3DSValueParser::parseColor(value)));
     } else if (name == QLatin1String("brightness")) {
-        HANDLE_CHANGE(list, ret, theItem.setBrightness(value.getData<float>()))
+        list.append(theItem.setBrightness(value.getData<float>()));
     } else if (name == QLatin1String("linearfade")) {
-        HANDLE_CHANGE(list, ret, theItem.setLinearFade(value.getData<float>()))
+        list.append(theItem.setLinearFade(value.getData<float>()));
     } else if (name == QLatin1String("expfade")) {
-        HANDLE_CHANGE(list, ret, theItem.setExpFade(value.getData<float>()))
+        list.append(theItem.setExpFade(value.getData<float>()));
     } else if (name == QLatin1String("areawidth")) {
-        HANDLE_CHANGE(list, ret, theItem.setAreaWidth(value.getData<float>()))
+        list.append(theItem.setAreaWidth(value.getData<float>()));
     } else if (name == QLatin1String("areaheight")) {
-        HANDLE_CHANGE(list, ret, theItem.setAreaHeight(value.getData<float>()))
+        list.append(theItem.setAreaHeight(value.getData<float>()));
     } else if (name == QLatin1String("castshadow")) {
-        HANDLE_CHANGE(list, ret, theItem.setCastShadow(value.getData<bool>()))
+        list.append(theItem.setCastShadow(value.getData<bool>()));
     } else if (name == QLatin1String("shdwfactor")) {
-        HANDLE_CHANGE(list, ret, theItem.setShadowFactor(value.getData<float>()))
+        list.append(theItem.setShadowFactor(value.getData<float>()));
     } else if (name == QLatin1String("shdwfilter")) {
-        HANDLE_CHANGE(list, ret, theItem.setShadowFilter(value.getData<float>()))
+        list.append(theItem.setShadowFilter(value.getData<float>()));
     } else if (name == QLatin1String("shdwmapres")) {
-        HANDLE_CHANGE(list, ret, theItem.setShadowMapRes(value.getData<int>()))
+        list.append(theItem.setShadowMapRes(value.getData<int>()));
     } else if (name == QLatin1String("shdwbias")) {
-        HANDLE_CHANGE(list, ret, theItem.setShadowBias(value.getData<float>()))
+        list.append(theItem.setShadowBias(value.getData<float>()));
     } else if (name == QLatin1String("shdwmapfar")) {
-        HANDLE_CHANGE(list, ret, theItem.setShadowMapFar(value.getData<float>()))
+        list.append(theItem.setShadowMapFar(value.getData<float>()));
     } else if (name == QLatin1String("shdwmapfov")) {
-        HANDLE_CHANGE(list, ret, theItem.setShadowMapFov(value.getData<float>()))
+        list.append(theItem.setShadowMapFov(value.getData<float>()));
     }
-    if (ret)
+    if (list.count()) {
         theItem.notifyPropertyChanges(list);
-    return ret;
+        return true;
+    }
+    return false;
+}
+
+void Q3DSLightTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+{
+    Q3DSNodeTranslator::copyProperties(targetTranslator);
+    Q3DSPropertyChangeList list;
+    Q3DSLightNode *targetLight = targetTranslator->graphObject<Q3DSLightNode>();
+    const Q3DSLightNode &theItem = *graphObject<Q3DSLightNode>();
+    list.append(targetLight->setScope(theItem.scope()));
+    list.append(targetLight->setLightType(theItem.lightType()));
+    list.append(targetLight->setDiffuse(theItem.diffuse()));
+    list.append(targetLight->setSpecular(theItem.specular()));
+    list.append(targetLight->setAmbient(theItem.ambient()));
+    list.append(targetLight->setBrightness(theItem.brightness()));
+    list.append(targetLight->setLinearFade(theItem.linearFade()));
+    list.append(targetLight->setExpFade(theItem.expFade()));
+    list.append(targetLight->setAreaWidth(theItem.areaWidth()));
+    list.append(targetLight->setAreaHeight(theItem.areaHeight()));
+    list.append(targetLight->setCastShadow(theItem.castShadow()));
+    list.append(targetLight->setShadowFactor(theItem.shadowFactor()));
+    list.append(targetLight->setShadowFilter(theItem.shadowFilter()));
+    list.append(targetLight->setShadowMapRes(theItem.shadowMapRes()));
+    list.append(targetLight->setShadowBias(theItem.shadowBias()));
+    list.append(targetLight->setShadowMapFar(theItem.shadowMapFar()));
+    list.append(targetLight->setShadowMapFov(theItem.shadowMapFov()));
+    targetLight->notifyPropertyChanges(list);
 }
 
 
@@ -1005,7 +1101,7 @@ void Q3DSModelTranslator::pushTranslation(Q3DSTranslation &inContext)
         if (childTranslator) {
             if (isMaterial(childTranslator->graphObject()) && canAddChild(childTranslator)) {
                 theItem.appendChildNode(&childTranslator->graphObject());
-                childTranslator->pushTranslation(inContext);
+                childTranslator->pushTranslationIfDirty(inContext);
             }
         }
     }
@@ -1031,33 +1127,48 @@ void Q3DSModelTranslator::appendChild(Q3DSGraphObject &inChild)
 }
 
 bool Q3DSModelTranslator::updateProperty(Q3DSTranslation &inContext,
-                    qt3dsdm::Qt3DSDMInstanceHandle instance,
-                    qt3dsdm::Qt3DSDMPropertyHandle property,
-                    qt3dsdm::SValue &value,
-                    const QString &name)
+                                         qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                         qt3dsdm::Qt3DSDMPropertyHandle property,
+                                         qt3dsdm::SValue &value,
+                                         const QString &name)
 {
-    bool ret = false;
     if (Q3DSNodeTranslator::updateProperty(inContext, instance, property, value, name))
         return true;
 
     Q3DSPropertyChangeList list;
     Q3DSModelNode &theItem = static_cast<Q3DSModelNode &>(graphObject());
     if (name == QLatin1String("sourcepath")) {
-        HANDLE_CHANGE(list, ret, theItem.setMesh(value.toQVariant().toString()))
+        list.append(theItem.setMesh(value.toQVariant().toString()));
         theItem.resolveReferences(*inContext.presentation());
     } else if (name == QLatin1String("poseroot")) {
-        HANDLE_CHANGE(list, ret, theItem.setSkeletonRoot(value.getData<int>()))
+        list.append(theItem.setSkeletonRoot(value.getData<int>()));
     } else if (name == QLatin1String("tessellation")) {
-        HANDLE_CHANGE(list, ret, theItem.setTessellation(
-                          Q3DSValueParser::parseEnum<Q3DSModelNode::Tessellation>(value)))
+        list.append(theItem.setTessellation(
+                          Q3DSValueParser::parseEnum<Q3DSModelNode::Tessellation>(value)));
     } else if (name == QLatin1String("edgetess")) {
-        HANDLE_CHANGE(list, ret, theItem.setEdgeTess(value.getData<float>()))
+        list.append(theItem.setEdgeTess(value.getData<float>()));
     } else if (name == QLatin1String("innertess")) {
-        HANDLE_CHANGE(list, ret, theItem.setInnerTess(value.getData<float>()))
+        list.append(theItem.setInnerTess(value.getData<float>()));
     }
-    if (ret)
+    if (list.count()) {
         theItem.notifyPropertyChanges(list);
-    return ret;
+        return true;
+    }
+    return false;
+}
+
+void Q3DSModelTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+{
+    Q3DSNodeTranslator::copyProperties(targetTranslator);
+    Q3DSPropertyChangeList list;
+    Q3DSModelNode *targetModel = targetTranslator->graphObject<Q3DSModelNode>();
+    const Q3DSModelNode &theItem = *graphObject<Q3DSModelNode>();
+    list.append(targetModel->setMesh(theItem.sourcePath()));
+    list.append(targetModel->setSkeletonRoot(theItem.skeletonRoot()));
+    list.append(targetModel->setTessellation(theItem.tessellation()));
+    list.append(targetModel->setEdgeTess(theItem.edgeTess()));
+    list.append(targetModel->setInnerTess(theItem.innerTess()));
+    targetModel->notifyPropertyChanges(list);
 }
 
 
@@ -1092,47 +1203,68 @@ void Q3DSImageTranslator::clearChildren()
 }
 
 bool Q3DSImageTranslator::updateProperty(Q3DSTranslation &inContext,
-                    qt3dsdm::Qt3DSDMInstanceHandle instance,
-                    qt3dsdm::Qt3DSDMPropertyHandle property,
-                    qt3dsdm::SValue &value,
-                    const QString &name)
+                                         qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                         qt3dsdm::Qt3DSDMPropertyHandle property,
+                                         qt3dsdm::SValue &value,
+                                         const QString &name)
 {
-    bool ret = false;
     if (Q3DSGraphObjectTranslator::updateProperty(inContext, instance, property, value, name))
         return true;
 
     Q3DSPropertyChangeList list;
     Q3DSImage &theItem = static_cast<Q3DSImage &>(graphObject());
     if (name == QLatin1String("scaleu")) {
-        HANDLE_CHANGE(list, ret, theItem.setScaleU(value.getData<float>()))
+        list.append(theItem.setScaleU(value.getData<float>()));
     } else if (name == QLatin1String("scalev")) {
-        HANDLE_CHANGE(list, ret, theItem.setScaleV(value.getData<float>()))
+        list.append(theItem.setScaleV(value.getData<float>()));
     } else if (name == QLatin1String("subpresentation")) {
-        HANDLE_CHANGE(list, ret, theItem.setSubPresentation(value.toQVariant().toString()))
+        list.append(theItem.setSubPresentation(value.toQVariant().toString()));
         theItem.resolveReferences(*inContext.presentation());
     } else if (name == QLatin1String("mappingmode")) {
-        HANDLE_CHANGE(list, ret, theItem.setMappingMode(
-                          Q3DSValueParser::parseEnum<Q3DSImage::MappingMode>(value)))
+        list.append(theItem.setMappingMode(
+                          Q3DSValueParser::parseEnum<Q3DSImage::MappingMode>(value)));
     } else if (name == QLatin1String("tilingmodehorz")) {
-        HANDLE_CHANGE(list, ret, theItem.setHorizontalTiling(
-                          Q3DSValueParser::parseEnum<Q3DSImage::TilingMode>(value)))
+        list.append(theItem.setHorizontalTiling(
+                          Q3DSValueParser::parseEnum<Q3DSImage::TilingMode>(value)));
     } else if (name == QLatin1String("tilingmodevert")) {
-        HANDLE_CHANGE(list, ret, theItem.setVerticalTiling(
-                          Q3DSValueParser::parseEnum<Q3DSImage::TilingMode>(value)))
+        list.append(theItem.setVerticalTiling(
+                          Q3DSValueParser::parseEnum<Q3DSImage::TilingMode>(value)));
     } else if (name == QLatin1String("rotationuv")) {
-        HANDLE_CHANGE(list, ret, theItem.setRotationUV(value.getData<float>()))
+        list.append(theItem.setRotationUV(value.getData<float>()));
     } else if (name == QLatin1String("positionu")) {
-        HANDLE_CHANGE(list, ret, theItem.setPositionU(value.getData<float>()))
+        list.append(theItem.setPositionU(value.getData<float>()));
     } else if (name == QLatin1String("positionv")) {
-        HANDLE_CHANGE(list, ret, theItem.setPositionV(value.getData<float>()))
+        list.append(theItem.setPositionV(value.getData<float>()));
     } else if (name == QLatin1String("pivotu")) {
-        HANDLE_CHANGE(list, ret, theItem.setPivotU(value.getData<float>()))
+        list.append(theItem.setPivotU(value.getData<float>()));
     } else if (name == QLatin1String("pivotv")) {
-        HANDLE_CHANGE(list, ret, theItem.setPivotV(value.getData<float>()))
+        list.append(theItem.setPivotV(value.getData<float>()));
     }
-    if (ret)
+    if (list.count()) {
         theItem.notifyPropertyChanges(list);
-    return ret;
+        return true;
+    }
+    return false;
+}
+
+void Q3DSImageTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+{
+    Q3DSGraphObjectTranslator::copyProperties(targetTranslator);
+    Q3DSPropertyChangeList list;
+    Q3DSImage *targetImage = targetTranslator->graphObject<Q3DSImage>();
+    const Q3DSImage &theItem = *graphObject<Q3DSImage>();
+    list.append(targetImage->setScaleU(theItem.scaleU()));
+    list.append(targetImage->setScaleV(theItem.scaleV()));
+    list.append(targetImage->setSubPresentation(theItem.subPresentation()));
+    list.append(targetImage->setMappingMode(theItem.mappingMode()));
+    list.append(targetImage->setHorizontalTiling(theItem.horizontalTiling()));
+    list.append(targetImage->setVerticalTiling(theItem.verticalTiling()));
+    list.append(targetImage->setRotationUV(theItem.rotationUV()));
+    list.append(targetImage->setPositionU(theItem.positionU()));
+    list.append(targetImage->setPositionV(theItem.positionV()));
+    list.append(targetImage->setPivotU(theItem.pivotU()));
+    list.append(targetImage->setPivotV(theItem.pivotV()));
+    targetImage->notifyPropertyChanges(list);
 }
 
 
@@ -1159,7 +1291,7 @@ void Q3DSDefaultMaterialTranslator::pushTranslation(Q3DSTranslation &inContext)
                 = inContext.getOrCreateTranslator(childInstance);
         if (childTranslator->graphObject().type() == Q3DSGraphObject::Image)
             theItem.appendChildNode(&childTranslator->graphObject());
-        childTranslator->pushTranslation(inContext);
+        childTranslator->pushTranslationIfDirty(inContext);
     }
     theItem.resolveReferences(*inContext.presentation());
 }
@@ -1177,111 +1309,154 @@ void Q3DSDefaultMaterialTranslator::appendChild(Q3DSGraphObject &)
 }
 
 bool Q3DSDefaultMaterialTranslator::updateProperty(Q3DSTranslation &inContext,
-                    qt3dsdm::Qt3DSDMInstanceHandle instance,
-                    qt3dsdm::Qt3DSDMPropertyHandle property,
-                    qt3dsdm::SValue &value,
-                    const QString &name)
+                                                   qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                                   qt3dsdm::Qt3DSDMPropertyHandle property,
+                                                   qt3dsdm::SValue &value,
+                                                   const QString &name)
 {
-    bool ret = false;
     if (Q3DSGraphObjectTranslator::updateProperty(inContext, instance, property, value, name))
         return true;
 
     Q3DSPropertyChangeList list;
     Q3DSDefaultMaterial &theItem = static_cast<Q3DSDefaultMaterial &>(graphObject());
     if (name == QLatin1String("shaderlighting")) {
-        HANDLE_CHANGE(list, ret, theItem.setShaderLighting(
+        list.append(theItem.setShaderLighting(
                           Q3DSValueParser::parseEnum<
-                                                Q3DSDefaultMaterial::ShaderLighting>(value)))
+                                                Q3DSDefaultMaterial::ShaderLighting>(value)));
     } else if (name == QLatin1String("blendmode")) {
-        HANDLE_CHANGE(list, ret, theItem.setBlendMode(
-                          Q3DSValueParser::parseEnum<Q3DSDefaultMaterial::BlendMode>(value)))
+        list.append(theItem.setBlendMode(
+                          Q3DSValueParser::parseEnum<Q3DSDefaultMaterial::BlendMode>(value)));
     }/* else if (name == QLatin1String("vertexcolors")) {
         ret = true;
     } */else if (name == QLatin1String("diffuse")) {
-        HANDLE_CHANGE(list, ret, theItem.setDiffuse(Q3DSValueParser::parseColor(value)))
+        list.append(theItem.setDiffuse(Q3DSValueParser::parseColor(value)));
     } else if (name == QLatin1String("diffusemap")) {
-        HANDLE_CHANGE(list, ret, theItem.setDiffuseMap(
-                          Q3DSValueParser::parseImage(&inContext, value)))
+        list.append(theItem.setDiffuseMap(
+                          Q3DSValueParser::parseImage(&inContext, value)));
     } else if (name == QLatin1String("diffusemap2")) {
-        HANDLE_CHANGE(list, ret, theItem.setDiffuseMap2(
-                          Q3DSValueParser::parseImage(&inContext, value)))
+        list.append(theItem.setDiffuseMap2(
+                          Q3DSValueParser::parseImage(&inContext, value)));
     } else if (name == QLatin1String("diffusemap3")) {
-        HANDLE_CHANGE(list, ret, theItem.setDiffuseMap3(
-                          Q3DSValueParser::parseImage(&inContext, value)))
+        list.append(theItem.setDiffuseMap3(
+                          Q3DSValueParser::parseImage(&inContext, value)));
     } else if (name == QLatin1String("specularreflection")) {
-        HANDLE_CHANGE(list, ret, theItem.setSpecularReflection(
-                          Q3DSValueParser::parseImage(&inContext, value)))
+        list.append(theItem.setSpecularReflection(
+                          Q3DSValueParser::parseImage(&inContext, value)));
     } else if (name == QLatin1String("speculartint")) {
-        HANDLE_CHANGE(list, ret, theItem.setSpecularTint(Q3DSValueParser::parseColor(value)))
+        list.append(theItem.setSpecularTint(Q3DSValueParser::parseColor(value)));
     } else if (name == QLatin1String("specularamount")) {
-        HANDLE_CHANGE(list, ret, theItem.setSpecularAmount(value.getData<float>()))
+        list.append(theItem.setSpecularAmount(value.getData<float>()));
     } else if (name == QLatin1String("specularmap")) {
-        HANDLE_CHANGE(list, ret, theItem.setSpecularMap(
-                          Q3DSValueParser::parseImage(&inContext, value)))
+        list.append(theItem.setSpecularMap(
+                          Q3DSValueParser::parseImage(&inContext, value)));
     } else if (name == QLatin1String("specularmodel")) {
-        HANDLE_CHANGE(list, ret, theItem.setSpecularModel(
-                          Q3DSValueParser::parseEnum<Q3DSDefaultMaterial::SpecularModel>(value)))
+        list.append(theItem.setSpecularModel(
+                          Q3DSValueParser::parseEnum<Q3DSDefaultMaterial::SpecularModel>(value)));
     } else if (name == QLatin1String("specularroughness")) {
-        HANDLE_CHANGE(list, ret, theItem.setSpecularRoughness(value.getData<float>()))
+        list.append(theItem.setSpecularRoughness(value.getData<float>()));
     } else if (name == QLatin1String("roughnessmap")) {
-        HANDLE_CHANGE(list, ret, theItem.setRoughnessMap(
-                          Q3DSValueParser::parseImage(&inContext, value)))
+        list.append(theItem.setRoughnessMap(
+                          Q3DSValueParser::parseImage(&inContext, value)));
     } else if (name == QLatin1String("fresnelPower")) {
-        HANDLE_CHANGE(list, ret, theItem.setFresnelPower(value.getData<float>()))
+        list.append(theItem.setFresnelPower(value.getData<float>()));
     } else if (name == QLatin1String("ior")) {
-        HANDLE_CHANGE(list, ret, theItem.setIor(value.getData<float>()))
+        list.append(theItem.setIor(value.getData<float>()));
     } else if (name == QLatin1String("bumpmap")) {
-        HANDLE_CHANGE(list, ret, theItem.setBumpMap(
-                          Q3DSValueParser::parseImage(&inContext, value)))
+        list.append(theItem.setBumpMap(
+                          Q3DSValueParser::parseImage(&inContext, value)));
     } else if (name == QLatin1String("normalmap")) {
-        HANDLE_CHANGE(list, ret, theItem.setNormalMap(
-                          Q3DSValueParser::parseImage(&inContext, value)))
+        list.append(theItem.setNormalMap(
+                          Q3DSValueParser::parseImage(&inContext, value)));
     } else if (name == QLatin1String("bumpamount")) {
-        HANDLE_CHANGE(list, ret, theItem.setBumpAmount(value.getData<float>()))
+        list.append(theItem.setBumpAmount(value.getData<float>()));
     } else if (name == QLatin1String("displacementmap")) {
-        HANDLE_CHANGE(list, ret, theItem.setDisplacementMap(
-                          Q3DSValueParser::parseImage(&inContext, value)))
+        list.append(theItem.setDisplacementMap(
+                          Q3DSValueParser::parseImage(&inContext, value)));
     } else if (name == QLatin1String("displaceamount")) {
-        HANDLE_CHANGE(list, ret, theItem.setDisplaceAmount(value.getData<float>()))
+        list.append(theItem.setDisplaceAmount(value.getData<float>()));
     } else if (name == QLatin1String("opacity")) {
-        HANDLE_CHANGE(list, ret, theItem.setOpacity(value.getData<float>()))
+        list.append(theItem.setOpacity(value.getData<float>()));
     } else if (name == QLatin1String("opacitymap")) {
-        HANDLE_CHANGE(list, ret, theItem.setOpacityMap(
-                          Q3DSValueParser::parseImage(&inContext, value)))
+        list.append(theItem.setOpacityMap(
+                          Q3DSValueParser::parseImage(&inContext, value)));
     } else if (name == QLatin1String("emissivecolor")) {
-        HANDLE_CHANGE(list, ret, theItem.setEmissiveColor(
-                          Q3DSValueParser::parseColor(value)))
+        list.append(theItem.setEmissiveColor(
+                          Q3DSValueParser::parseColor(value)));
     } else if (name == QLatin1String("emissivepower")) {
-        HANDLE_CHANGE(list, ret, theItem.setEmissivePower(value.getData<float>()))
+        list.append(theItem.setEmissivePower(value.getData<float>()));
     } else if (name == QLatin1String("emissivemap")) {
-        HANDLE_CHANGE(list, ret, theItem.setEmissiveMap(
-                          Q3DSValueParser::parseImage(&inContext, value)))
+        list.append(theItem.setEmissiveMap(
+                          Q3DSValueParser::parseImage(&inContext, value)));
     } else if (name == QLatin1String("emissivemap2")) {
-        HANDLE_CHANGE(list, ret, theItem.setEmissiveMap2(
-                          Q3DSValueParser::parseImage(&inContext, value)))
+        list.append(theItem.setEmissiveMap2(
+                          Q3DSValueParser::parseImage(&inContext, value)));
     } else if (name == QLatin1String("translucencymap")) {
-        HANDLE_CHANGE(list, ret, theItem.setTranslucencyMap(
-                          Q3DSValueParser::parseImage(&inContext, value)))
+        list.append(theItem.setTranslucencyMap(
+                          Q3DSValueParser::parseImage(&inContext, value)));
     } else if (name == QLatin1String("translucentfalloff")) {
-        HANDLE_CHANGE(list, ret, theItem.setTranslucentFalloff(value.getData<float>()))
+        list.append(theItem.setTranslucentFalloff(value.getData<float>()));
     } else if (name == QLatin1String("diffuselightwrap")) {
-        HANDLE_CHANGE(list, ret, theItem.setDiffuseLightWrap(value.getData<float>()))
+        list.append(theItem.setDiffuseLightWrap(value.getData<float>()));
     } else if (name == QLatin1String("iblprobe")) {
-        HANDLE_CHANGE(list, ret, theItem.setLightProbe(
-                          Q3DSValueParser::parseImage(&inContext, value)))
+        list.append(theItem.setLightProbe(
+                          Q3DSValueParser::parseImage(&inContext, value)));
     } else if (name == QLatin1String("lightmapindirect")) {
-        HANDLE_CHANGE(list, ret, theItem.setLightmapIndirectMap(
-                          Q3DSValueParser::parseImage(&inContext, value)))
+        list.append(theItem.setLightmapIndirectMap(
+                          Q3DSValueParser::parseImage(&inContext, value)));
     } else if (name == QLatin1String("lightmapradiosity")) {
-        HANDLE_CHANGE(list, ret, theItem.setLightmapRadiosityMap(
-                          Q3DSValueParser::parseImage(&inContext, value)))
+        list.append(theItem.setLightmapRadiosityMap(
+                          Q3DSValueParser::parseImage(&inContext, value)));
     } else if (name == QLatin1String("lightmapshadow")) {
-        HANDLE_CHANGE(list, ret, theItem.setLightmapShadowMap(
-                          Q3DSValueParser::parseImage(&inContext, value)))
+        list.append(theItem.setLightmapShadowMap(
+                          Q3DSValueParser::parseImage(&inContext, value)));
     }
-    if (ret)
+    if (list.count()) {
         theItem.notifyPropertyChanges(list);
-    return ret;
+        return true;
+    }
+    return false;
+}
+
+void Q3DSDefaultMaterialTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+{
+    Q3DSGraphObjectTranslator::copyProperties(targetTranslator);
+    Q3DSDefaultMaterial *targetMaterial = targetTranslator->graphObject<Q3DSDefaultMaterial>();
+    const Q3DSDefaultMaterial &theItem = *graphObject<Q3DSDefaultMaterial>();
+    Q3DSPropertyChangeList list;
+    list.append(targetMaterial->setShaderLighting(theItem.shaderLighting()));
+    list.append(targetMaterial->setBlendMode(theItem.blendMode()));
+    list.append(targetMaterial->setDiffuse(theItem.diffuse()));
+    list.append(targetMaterial->setDiffuseMap(theItem.diffuseMap()));
+    list.append(targetMaterial->setDiffuseMap2(theItem.diffuseMap2()));
+    list.append(targetMaterial->setDiffuseMap3(theItem.diffuseMap3()));
+    list.append(targetMaterial->setSpecularReflection(theItem.specularReflection()));
+    list.append(targetMaterial->setSpecularTint(theItem.specularTint()));
+    list.append(targetMaterial->setSpecularAmount(theItem.specularAmount()));
+    list.append(targetMaterial->setSpecularMap(theItem.specularMap()));
+    list.append(targetMaterial->setSpecularModel(theItem.specularModel()));
+    list.append(targetMaterial->setSpecularRoughness(theItem.specularRoughness()));
+    list.append(targetMaterial->setRoughnessMap(theItem.roughnessMap()));
+    list.append(targetMaterial->setFresnelPower(theItem.fresnelPower()));
+    list.append(targetMaterial->setIor(theItem.ior()));
+    list.append(targetMaterial->setBumpMap(theItem.bumpMap()));
+    list.append(targetMaterial->setNormalMap(theItem.normalMap()));
+    list.append(targetMaterial->setBumpAmount(theItem.bumpAmount()));
+    list.append(targetMaterial->setDisplacementMap(theItem.displacementMap()));
+    list.append(targetMaterial->setDisplaceAmount(theItem.displaceAmount()));
+    list.append(targetMaterial->setOpacity(theItem.opacity()));
+    list.append(targetMaterial->setOpacityMap(theItem.opacityMap()));
+    list.append(targetMaterial->setEmissiveColor(theItem.emissiveColor()));
+    list.append(targetMaterial->setEmissivePower(theItem.emissivePower()));
+    list.append(targetMaterial->setEmissiveMap(theItem.emissiveMap()));
+    list.append(targetMaterial->setEmissiveMap2(theItem.emissiveMap2()));
+    list.append(targetMaterial->setTranslucencyMap(theItem.translucencyMap()));
+    list.append(targetMaterial->setTranslucentFalloff(theItem.translucentFalloff()));
+    list.append(targetMaterial->setDiffuseLightWrap(theItem.diffuseLightWrap()));
+    list.append(targetMaterial->setLightmapIndirectMap(theItem.lightmapIndirectMap()));
+    list.append(targetMaterial->setLightmapRadiosityMap(theItem.lightmapRadiosityMap()));
+    list.append(targetMaterial->setLightmapShadowMap(theItem.lightmapShadowMap()));
+    list.append(targetMaterial->setLightProbe(theItem.lightProbe()));
+    targetMaterial->notifyPropertyChanges(list);
 }
 
 
@@ -1327,24 +1502,38 @@ void Q3DSReferencedMaterialTranslator::appendChild(Q3DSGraphObject &)
 }
 
 bool Q3DSReferencedMaterialTranslator::updateProperty(Q3DSTranslation &inContext,
-                    qt3dsdm::Qt3DSDMInstanceHandle instance,
-                    qt3dsdm::Qt3DSDMPropertyHandle property,
-                    qt3dsdm::SValue &value,
-                    const QString &name)
+                                                      qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                                      qt3dsdm::Qt3DSDMPropertyHandle property,
+                                                      qt3dsdm::SValue &value,
+                                                      const QString &name)
 {
-    bool ret = false;
     if (Q3DSGraphObjectTranslator::updateProperty(inContext, instance, property, value, name))
         return true;
 
     Q3DSPropertyChangeList list;
     Q3DSReferencedMaterial &theItem = static_cast<Q3DSReferencedMaterial &>(graphObject());
     if (name == QLatin1String("referencedmaterial")) {
-        HANDLE_CHANGE(list, ret, theItem.setReferencedMaterial(
-                          Q3DSValueParser::parseObjectRef(&inContext, instance, value)))
-    }
-    if (ret)
+        list.append(theItem.setReferencedMaterial(
+                          Q3DSValueParser::parseObjectRef(&inContext, instance, value)));
         theItem.notifyPropertyChanges(list);
-    return ret;
+        return true;
+    }
+    return false;
+}
+
+void Q3DSReferencedMaterialTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+{
+    Q3DSGraphObjectTranslator::copyProperties(targetTranslator);
+    Q3DSReferencedMaterial *targetMaterial
+            = targetTranslator->graphObject<Q3DSReferencedMaterial>();
+    const Q3DSReferencedMaterial &theItem = *graphObject<Q3DSReferencedMaterial>();
+    Q3DSPropertyChangeList list;
+    list.append(targetMaterial->setReferencedMaterial(theItem.referencedMaterial()));
+    list.append(targetMaterial->setLightProbe(theItem.lightProbe()));
+    list.append(targetMaterial->setLightmapIndirectMap(theItem.lightmapIndirectMap()));
+    list.append(targetMaterial->setLightmapRadiosityMap(theItem.lightmapRadiosityMap()));
+    list.append(targetMaterial->setLightmapShadowMap(theItem.lightmapShadowMap()));
+    targetMaterial->notifyPropertyChanges(list);
 }
 
 
@@ -1370,10 +1559,10 @@ void Q3DSLayerTranslator::pushTranslation(Q3DSTranslation &inContext)
                 = inContext.assetGraph().GetChild(instanceHandle(), i);
         Q3DSGraphObjectTranslator *childTranslator
                 = inContext.getOrCreateTranslator(childInstance);
-        if (childTranslator && childTranslator->graphObject().isNode()
-                && childTranslator->graphObject().parent() == nullptr) {
-            theItem.appendChildNode(&childTranslator->graphObject());
-            childTranslator->pushTranslation(inContext);
+        if (childTranslator) {
+            if (childTranslator->graphObject().parent() == nullptr)
+                appendChild(childTranslator->graphObject());
+            childTranslator->pushTranslationIfDirty(inContext);
         }
     }
     theItem.resolveReferences(*inContext.presentation());
@@ -1394,119 +1583,171 @@ void Q3DSLayerTranslator::appendChild(Q3DSGraphObject &inChild)
 }
 
 bool Q3DSLayerTranslator::updateProperty(Q3DSTranslation &inContext,
-                    qt3dsdm::Qt3DSDMInstanceHandle instance,
-                    qt3dsdm::Qt3DSDMPropertyHandle property,
-                    qt3dsdm::SValue &value,
-                    const QString &name)
+                                         qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                         qt3dsdm::Qt3DSDMPropertyHandle property,
+                                         qt3dsdm::SValue &value,
+                                         const QString &name)
 {
-    bool ret = false;
     if (Q3DSNodeTranslator::updateProperty(inContext, instance, property, value, name))
         return true;
 
     Q3DSPropertyChangeList list;
     Q3DSLayerNode &theItem = static_cast<Q3DSLayerNode &>(graphObject());
     if (name == QLatin1String("disabledepthtest")) {
-        HANDLE_CHANGE(list, ret, theItem.setDepthTestDisabled(value.getData<bool>()))
+        list.append(theItem.setDepthTestDisabled(value.getData<bool>()));
     } else if (name == QLatin1String("disabledepthprepass")) {
-        HANDLE_CHANGE(list, ret, theItem.setDepthPrePassDisabled(value.getData<bool>()))
+        list.append(theItem.setDepthPrePassDisabled(value.getData<bool>()));
     } else if (name == QLatin1String("progressiveaa")) {
-        HANDLE_CHANGE(list, ret, theItem.setProgressiveAA(Q3DSValueParser::parseEnum
-                                 <Q3DSLayerNode::ProgressiveAA>(value)))
+        list.append(theItem.setProgressiveAA(Q3DSValueParser::parseEnum
+                                 <Q3DSLayerNode::ProgressiveAA>(value)));
     } else if (name == QLatin1String("multisampleaa")) {
-        HANDLE_CHANGE(list, ret, theItem.setMultisampleAA(Q3DSValueParser::parseEnum
-                                 <Q3DSLayerNode::MultisampleAA>(value)))
+        list.append(theItem.setMultisampleAA(Q3DSValueParser::parseEnum
+                                 <Q3DSLayerNode::MultisampleAA>(value)));
     } else if (name == QLatin1String("temporalaa")) {
-        HANDLE_CHANGE(list, ret, theItem.setTemporalAAEnabled(value.getData<bool>()))
+        list.append(theItem.setTemporalAAEnabled(value.getData<bool>()));
     } else if (name == QLatin1String("background")) {
-        HANDLE_CHANGE(list, ret, theItem.setLayerBackground(Q3DSValueParser::parseEnum
-                                   <Q3DSLayerNode::LayerBackground>(value)))
+        list.append(theItem.setLayerBackground(Q3DSValueParser::parseEnum
+                                   <Q3DSLayerNode::LayerBackground>(value)));
     } else if (name == QLatin1String("backgroundcolor")) {
-        HANDLE_CHANGE(list, ret, theItem.setBackgroundColor(Q3DSValueParser::parseColor(value)))
+        list.append(theItem.setBackgroundColor(Q3DSValueParser::parseColor(value)));
     } else if (name == QLatin1String("blendtype")) {
-        HANDLE_CHANGE(list, ret, theItem.setBlendType(Q3DSValueParser::parseEnum
-                                   <Q3DSLayerNode::BlendType>(value)))
+        list.append(theItem.setBlendType(Q3DSValueParser::parseEnum
+                                   <Q3DSLayerNode::BlendType>(value)));
     } else if (name == QLatin1String("horzfields")) {
-        HANDLE_CHANGE(list, ret, theItem.setHorizontalFields(Q3DSValueParser::parseEnum
-                                    <Q3DSLayerNode::HorizontalFields>(value)))
+        list.append(theItem.setHorizontalFields(Q3DSValueParser::parseEnum
+                                    <Q3DSLayerNode::HorizontalFields>(value)));
     } else if (name == QLatin1String("left")) {
-        HANDLE_CHANGE(list, ret, theItem.setLeft(value.getData<float>()))
+        list.append(theItem.setLeft(value.getData<float>()));
     } else if (name == QLatin1String("leftunits")) {
-        HANDLE_CHANGE(list, ret, theItem.setLeftUnits(Q3DSValueParser::parseEnum
-                                    <Q3DSLayerNode::Units>(value)))
+        list.append(theItem.setLeftUnits(Q3DSValueParser::parseEnum
+                                    <Q3DSLayerNode::Units>(value)));
     } else if (name == QLatin1String("width")) {
-        HANDLE_CHANGE(list, ret, theItem.setWidth(value.getData<float>()))
+        list.append(theItem.setWidth(value.getData<float>()));
     } else if (name == QLatin1String("widthunits")) {
-        HANDLE_CHANGE(list, ret, theItem.setLeftUnits(Q3DSValueParser::parseEnum
-                                    <Q3DSLayerNode::Units>(value)))
+        list.append(theItem.setLeftUnits(Q3DSValueParser::parseEnum
+                                    <Q3DSLayerNode::Units>(value)));
     } else if (name == QLatin1String("right")) {
-        HANDLE_CHANGE(list, ret, theItem.setRight(value.getData<float>()))
+        list.append(theItem.setRight(value.getData<float>()));
     } else if (name == QLatin1String("rightunits")) {
-        HANDLE_CHANGE(list, ret, theItem.setRightUnits(Q3DSValueParser::parseEnum
-                                    <Q3DSLayerNode::Units>(value)))
+        list.append(theItem.setRightUnits(Q3DSValueParser::parseEnum
+                                    <Q3DSLayerNode::Units>(value)));
     } else if (name == QLatin1String("vertfields")) {
-        HANDLE_CHANGE(list, ret, theItem.setVerticalFields(Q3DSValueParser::parseEnum
-                                    <Q3DSLayerNode::VerticalFields>(value)))
+        list.append(theItem.setVerticalFields(Q3DSValueParser::parseEnum
+                                    <Q3DSLayerNode::VerticalFields>(value)));
     } else if (name == QLatin1String("top")) {
-        HANDLE_CHANGE(list, ret, theItem.setTop(value.getData<float>()))
+        list.append(theItem.setTop(value.getData<float>()));
     } else if (name == QLatin1String("topunits")) {
-        HANDLE_CHANGE(list, ret, theItem.setTopUnits(Q3DSValueParser::parseEnum
-                                    <Q3DSLayerNode::Units>(value)))
+        list.append(theItem.setTopUnits(Q3DSValueParser::parseEnum
+                                    <Q3DSLayerNode::Units>(value)));
     } else if (name == QLatin1String("height")) {
-        HANDLE_CHANGE(list, ret, theItem.setHeight(value.getData<float>()))
+        list.append(theItem.setHeight(value.getData<float>()));
     } else if (name == QLatin1String("heightunits")) {
-        HANDLE_CHANGE(list, ret, theItem.setHeightUnits(Q3DSValueParser::parseEnum
-                                    <Q3DSLayerNode::Units>(value)))
+        list.append(theItem.setHeightUnits(Q3DSValueParser::parseEnum
+                                    <Q3DSLayerNode::Units>(value)));
     } else if (name == QLatin1String("bottom")) {
-        HANDLE_CHANGE(list, ret, theItem.setBottom(value.getData<float>()))
+        list.append(theItem.setBottom(value.getData<float>()));
     } else if (name == QLatin1String("bottomunits")) {
-        HANDLE_CHANGE(list, ret, theItem.setBottomUnits(Q3DSValueParser::parseEnum
-                                    <Q3DSLayerNode::Units>(value)))
+        list.append(theItem.setBottomUnits(Q3DSValueParser::parseEnum
+                                    <Q3DSLayerNode::Units>(value)));
     } else if (name == QLatin1String("sourcepath")) {
-        HANDLE_CHANGE(list, ret, theItem.setSourcePath(value.toQVariant().toString()))
+        list.append(theItem.setSourcePath(value.toQVariant().toString()));
         theItem.resolveReferences(*inContext.presentation());
     } else if (name == QLatin1String("aostrength")) {
-        HANDLE_CHANGE(list, ret, theItem.setAoStrength(value.getData<float>()))
+        list.append(theItem.setAoStrength(value.getData<float>()));
     } else if (name == QLatin1String("aodistance")) {
-        HANDLE_CHANGE(list, ret, theItem.setAoDistance(value.getData<float>()))
+        list.append(theItem.setAoDistance(value.getData<float>()));
     } else if (name == QLatin1String("aosoftness")) {
-        HANDLE_CHANGE(list, ret, theItem.setAoSoftness(value.getData<float>()))
+        list.append(theItem.setAoSoftness(value.getData<float>()));
     } else if (name == QLatin1String("aobias")) {
-        HANDLE_CHANGE(list, ret, theItem.setAoBias(value.getData<float>()))
+        list.append(theItem.setAoBias(value.getData<float>()));
     } else if (name == QLatin1String("aosamplerate")) {
-        HANDLE_CHANGE(list, ret, theItem.setAoSampleRate(value.getData<int>()))
+        list.append(theItem.setAoSampleRate(value.getData<int>()));
     } else if (name == QLatin1String("aodither")) {
-        HANDLE_CHANGE(list, ret, theItem.setAoDither(value.getData<bool>()))
+        list.append(theItem.setAoDither(value.getData<bool>()));
     } else if (name == QLatin1String("shadowstrength")) {
-        HANDLE_CHANGE(list, ret, theItem.setShadowStrength(value.getData<float>()))
+        list.append(theItem.setShadowStrength(value.getData<float>()));
     } else if (name == QLatin1String("shadowdist")) {
-        HANDLE_CHANGE(list, ret, theItem.setShadowDist(value.getData<float>()))
+        list.append(theItem.setShadowDist(value.getData<float>()));
     } else if (name == QLatin1String("shadowsoftness")) {
-        HANDLE_CHANGE(list, ret, theItem.setShadowSoftness(value.getData<float>()))
+        list.append(theItem.setShadowSoftness(value.getData<float>()));
     } else if (name == QLatin1String("shadowbias")) {
-        HANDLE_CHANGE(list, ret, theItem.setShadowBias(value.getData<float>()))
+        list.append(theItem.setShadowBias(value.getData<float>()));
     } else if (name == QLatin1String("lightprobe")) {
-        HANDLE_CHANGE(list, ret, theItem.setLightProbe(
-                          Q3DSValueParser::parseImage(&inContext, value)))
+        list.append(theItem.setLightProbe(
+                          Q3DSValueParser::parseImage(&inContext, value)));
     } else if (name == QLatin1String("probebright")) {
-        HANDLE_CHANGE(list, ret, theItem.setBottom(value.getData<float>()))
+        list.append(theItem.setBottom(value.getData<float>()));
     } else if (name == QLatin1String("fastibl")) {
-        HANDLE_CHANGE(list, ret, theItem.setBottom(value.getData<float>()))
+        list.append(theItem.setBottom(value.getData<float>()));
     } else if (name == QLatin1String("probehorizon")) {
-        HANDLE_CHANGE(list, ret, theItem.setBottom(value.getData<float>()))
+        list.append(theItem.setBottom(value.getData<float>()));
     } else if (name == QLatin1String("probefov")) {
-        HANDLE_CHANGE(list, ret, theItem.setBottom(value.getData<float>()))
+        list.append(theItem.setBottom(value.getData<float>()));
     } else if (name == QLatin1String("lightprobe2")) {
-        HANDLE_CHANGE(list, ret, theItem.setBottom(value.getData<float>()))
+        list.append(theItem.setBottom(value.getData<float>()));
     } else if (name == QLatin1String("probe2fade")) {
-        HANDLE_CHANGE(list, ret, theItem.setBottom(value.getData<float>()))
+        list.append(theItem.setBottom(value.getData<float>()));
     } else if (name == QLatin1String("probe2window")) {
-        HANDLE_CHANGE(list, ret, theItem.setBottom(value.getData<float>()))
+        list.append(theItem.setBottom(value.getData<float>()));
     } else if (name == QLatin1String("probe2pos")) {
-        HANDLE_CHANGE(list, ret, theItem.setBottom(value.getData<float>()))
+        list.append(theItem.setBottom(value.getData<float>()));
     }
-    if (ret)
+    if (list.count()) {
         theItem.notifyPropertyChanges(list);
-    return ret;
+        return true;
+    }
+    return false;
+}
+
+void Q3DSLayerTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+{
+    Q3DSGraphObjectTranslator::copyProperties(targetTranslator);
+    Q3DSLayerNode *targetLayer = targetTranslator->graphObject<Q3DSLayerNode>();
+    const Q3DSLayerNode &theItem = *graphObject<Q3DSLayerNode>();
+    Q3DSPropertyChangeList list;
+    list.append(targetLayer->setDepthTestDisabled(theItem.depthTestDisabled()));
+    list.append(targetLayer->setDepthPrePassDisabled(theItem.depthPrePassDisabled()));
+    list.append(targetLayer->setTemporalAAEnabled(theItem.temporalAAEnabled()));
+    list.append(targetLayer->setFastIBLEnabled(theItem.fastIBLEnabled()));
+    list.append(targetLayer->setProgressiveAA(theItem.progressiveAA()));
+    list.append(targetLayer->setMultisampleAA(theItem.multisampleAA()));
+    list.append(targetLayer->setLayerBackground(theItem.layerBackground()));
+    list.append(targetLayer->setBackgroundColor(theItem.backgroundColor()));
+    list.append(targetLayer->setBlendType(theItem.blendType()));
+    list.append(targetLayer->setHorizontalFields(theItem.horizontalFields()));
+    list.append(targetLayer->setLeft(theItem.left()));
+    list.append(targetLayer->setLeftUnits(theItem.leftUnits()));
+    list.append(targetLayer->setWidth(theItem.width()));
+    list.append(targetLayer->setWidthUnits(theItem.widthUnits()));
+    list.append(targetLayer->setRight(theItem.right()));
+    list.append(targetLayer->setRightUnits(theItem.rightUnits()));
+    list.append(targetLayer->setVerticalFields(theItem.verticalFields()));
+    list.append(targetLayer->setTop(theItem.top()));
+    list.append(targetLayer->setTopUnits(theItem.topUnits()));
+    list.append(targetLayer->setHeight(theItem.height()));
+    list.append(targetLayer->setHeightUnits(theItem.heightUnits()));
+    list.append(targetLayer->setBottom(theItem.bottom()));
+    list.append(targetLayer->setBottomUnits(theItem.bottomUnits()));
+    list.append(targetLayer->setSourcePath(theItem.sourcePath()));
+    list.append(targetLayer->setAoStrength(theItem.aoStrength()));
+    list.append(targetLayer->setAoDistance(theItem.aoDistance()));
+    list.append(targetLayer->setAoSoftness(theItem.aoSoftness()));
+    list.append(targetLayer->setAoBias(theItem.aoBias()));
+    list.append(targetLayer->setAoSampleRate(theItem.aoSampleRate()));
+    list.append(targetLayer->setAoDither(theItem.aoDither()));
+    list.append(targetLayer->setShadowStrength(theItem.shadowStrength()));
+    list.append(targetLayer->setShadowDist(theItem.shadowDist()));
+    list.append(targetLayer->setShadowSoftness(theItem.shadowSoftness()));
+    list.append(targetLayer->setShadowBias(theItem.shadowBias()));
+    list.append(targetLayer->setLightProbe(theItem.lightProbe()));
+    list.append(targetLayer->setProbeBright(theItem.probeBright()));
+    list.append(targetLayer->setProbeHorizon(theItem.probeHorizon()));
+    list.append(targetLayer->setProbeFov(theItem.probeFov()));
+    list.append(targetLayer->setLightProbe2(theItem.lightProbe2()));
+    list.append(targetLayer->setProbe2Fade(theItem.probe2Fade()));
+    list.append(targetLayer->setProbe2Window(theItem.probe2Window()));
+    list.append(targetLayer->setProbe2Pos(theItem.probe2Window()));
+    targetLayer->notifyPropertyChanges(list);
 }
 
 
@@ -1558,30 +1799,43 @@ void Q3DSSlideTranslator::setActive(bool)
 }
 
 bool Q3DSSlideTranslator::updateProperty(Q3DSTranslation &inContext,
-                    qt3dsdm::Qt3DSDMInstanceHandle instance,
-                    qt3dsdm::Qt3DSDMPropertyHandle property,
-                    qt3dsdm::SValue &value,
-                    const QString &name)
+                                         qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                         qt3dsdm::Qt3DSDMPropertyHandle property,
+                                         qt3dsdm::SValue &value,
+                                         const QString &name)
 {
-    bool ret = false;
     if (Q3DSGraphObjectTranslator::updateProperty(inContext, instance, property, value, name))
         return true;
 
     Q3DSPropertyChangeList list;
     Q3DSSlide &theItem = static_cast<Q3DSSlide &>(graphObject());
     if (name == QLatin1String("playmode")) {
-        HANDLE_CHANGE(list, ret, theItem.setPlayMode(
-                          Q3DSValueParser::parseEnum<Q3DSSlide::PlayMode>(value)))
+        list.append(theItem.setPlayMode(
+                          Q3DSValueParser::parseEnum<Q3DSSlide::PlayMode>(value)));
     } else if (name == QLatin1String("playthroughto")) {
-        HANDLE_CHANGE(list, ret, theItem.setPlayThrough(
-                          Q3DSValueParser::parseEnum<Q3DSSlide::PlayThrough>(value)))
+        list.append(theItem.setPlayThrough(
+                          Q3DSValueParser::parseEnum<Q3DSSlide::PlayThrough>(value)));
     } else if (name == QLatin1String("initialplaystate")) {
-        HANDLE_CHANGE(list, ret, theItem.setInitialPlayState(
-                          Q3DSValueParser::parseEnum<Q3DSSlide::InitialPlayState>(value)))
+        list.append(theItem.setInitialPlayState(
+                          Q3DSValueParser::parseEnum<Q3DSSlide::InitialPlayState>(value)));
     }
-    if (ret)
+    if (list.count()) {
         theItem.notifyPropertyChanges(list);
-    return ret;
+        return true;
+    }
+    return false;
+}
+
+void Q3DSSlideTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+{
+    Q3DSGraphObjectTranslator::copyProperties(targetTranslator);
+    Q3DSSlide *targetSlide = targetTranslator->graphObject<Q3DSSlide>();
+    const Q3DSSlide &theItem = *graphObject<Q3DSSlide>();
+    Q3DSPropertyChangeList list;
+    list.append(targetSlide->setPlayMode(theItem.playMode()));
+    list.append(targetSlide->setPlayThrough(theItem.playThrough()));
+    list.append(targetSlide->setInitialPlayState(theItem.initialPlayState()));
+    targetSlide->notifyPropertyChanges(list);
 }
 
 bool Q3DSSlideTranslator::masterSlide() const
@@ -1612,39 +1866,397 @@ void Q3DSTextTranslator::pushTranslation(Q3DSTranslation &inContext)
 }
 
 bool Q3DSTextTranslator::updateProperty(Q3DSTranslation &inContext,
-                    qt3dsdm::Qt3DSDMInstanceHandle instance,
-                    qt3dsdm::Qt3DSDMPropertyHandle property,
-                    qt3dsdm::SValue &value,
-                    const QString &name)
+                                        qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                        qt3dsdm::Qt3DSDMPropertyHandle property,
+                                        qt3dsdm::SValue &value,
+                                        const QString &name)
 {
-    bool ret = false;
     if (Q3DSNodeTranslator::updateProperty(inContext, instance, property, value, name))
         return true;
 
     Q3DSPropertyChangeList list;
     Q3DSTextNode &theItem = static_cast<Q3DSTextNode &>(graphObject());
     if (name == QLatin1String("textstring")) {
-        HANDLE_CHANGE(list, ret, theItem.setText(value.toQVariant().toString()))
+        list.append(theItem.setText(value.toQVariant().toString()));
     } else if (name == QLatin1String("textcolor")) {
-        HANDLE_CHANGE(list, ret, theItem.setColor(Q3DSValueParser::parseColor(value)))
+        list.append(theItem.setColor(Q3DSValueParser::parseColor(value)));
     } else if (name == QLatin1String("font")) {
-        HANDLE_CHANGE(list, ret, theItem.setFont(value.toQVariant().toString()))
+        list.append(theItem.setFont(value.toQVariant().toString()));
     } else if (name == QLatin1String("size")) {
-        HANDLE_CHANGE(list, ret, theItem.setSize(value.getData<float>()))
+        list.append(theItem.setSize(value.getData<float>()));
     } else if (name == QLatin1String("horzalign")) {
-        HANDLE_CHANGE(list, ret, theItem.setHorizontalAlignment(
-                          Q3DSValueParser::parseEnum<Q3DSTextNode::HorizontalAlignment>(value)))
+        list.append(theItem.setHorizontalAlignment(
+                          Q3DSValueParser::parseEnum<Q3DSTextNode::HorizontalAlignment>(value)));
     } else if (name == QLatin1String("vertalign")) {
-        HANDLE_CHANGE(list, ret, theItem.setVerticalAlignment(
-                          Q3DSValueParser::parseEnum<Q3DSTextNode::VerticalAlignment>(value)))
+        list.append(theItem.setVerticalAlignment(
+                          Q3DSValueParser::parseEnum<Q3DSTextNode::VerticalAlignment>(value)));
     } else if (name == QLatin1String("leading")) {
-        HANDLE_CHANGE(list, ret, theItem.setLeading(value.getData<float>()))
+        list.append(theItem.setLeading(value.getData<float>()));
     } else if (name == QLatin1String("tracking")) {
-        HANDLE_CHANGE(list, ret, theItem.setTracking(value.getData<float>()))
+        list.append(theItem.setTracking(value.getData<float>()));
     }
-    if (ret)
+    if (list.count()) {
         theItem.notifyPropertyChanges(list);
-    return ret;
+        return true;
+    }
+    return false;
+}
+
+void Q3DSTextTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+{
+    Q3DSNodeTranslator::copyProperties(targetTranslator);
+    Q3DSTextNode *targetText = targetTranslator->graphObject<Q3DSTextNode>();
+    const Q3DSTextNode &theItem = *graphObject<Q3DSTextNode>();
+    Q3DSPropertyChangeList list;
+    list.append(targetText->setText(theItem.text()));
+    list.append(targetText->setColor(theItem.color()));
+    list.append(targetText->setFont(theItem.font()));
+    list.append(targetText->setSize(theItem.size()));
+    list.append(targetText->setHorizontalAlignment(theItem.horizontalAlignment()));
+    list.append(targetText->setVerticalAlignment(theItem.verticalAlignment()));
+    list.append(targetText->setLeading(theItem.leading()));
+    list.append(targetText->setTracking(theItem.tracking()));
+    targetText->notifyPropertyChanges(list);
+}
+
+Q3DSDynamicObjectTranslator::Q3DSDynamicObjectTranslator(qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                                         Q3DSGraphObject &graphObject)
+    : Q3DSGraphObjectTranslator(instance, graphObject)
+{
+
+}
+
+void Q3DSDynamicObjectTranslator::pushTranslation(Q3DSTranslation &inContext)
+{
+    Q3DSGraphObjectTranslator::pushTranslation(inContext);
+    Q3DSGraphObject &theItem = graphObject();
+    Q3DSTranslatorDataModelParser theParser(inContext, instanceHandle());
+    Q3DSPropertyChangeList list;
+    const QMap<QString, Q3DSMaterial::PropertyElement> *properties;
+
+    if (theItem.type() == Q3DSGraphObject::Effect) {
+        Q3DSEffectInstance *effect = graphObject<Q3DSEffectInstance>();
+        properties = &effect->effect()->properties();
+    } else if (theItem.type() == Q3DSGraphObject::CustomMaterial) {
+        Q3DSCustomMaterialInstance *material = graphObject<Q3DSCustomMaterialInstance>();
+        properties = &material->material()->properties();
+    } else {
+        Q_ASSERT_X(false, __FUNCTION__, "Incorrect graphObject type");
+    }
+
+    std::shared_ptr<qt3dsdm::IDataCore> datacore
+            = inContext.fullSystem().GetCoreSystem()->GetDataCore();
+
+    const auto propertyKeys = properties->keys();
+    for (auto property : propertyKeys) {
+        WQString name(toWQString(property));
+        const Q3DSMaterial::PropertyElement &element = (*properties)[property];
+        qt3dsdm::Qt3DSDMPropertyHandle theProperty =
+            inContext.reader().FindProperty(instanceHandle(), name.data());
+        if (!datacore->IsProperty(theProperty))
+            continue;
+
+        Option<qt3dsdm::SValue> theValueOpt
+                = inContext.reader().GetInstancePropertyValue(instanceHandle(), theProperty);
+        if (theValueOpt.hasValue()) {
+            qt3dsdm::SValue &theValue(*theValueOpt);
+            switch (qt3dsdm::GetValueType(theValue)) {
+            case qt3dsdm::DataModelDataType::Long:
+                if (element.type == Q3DS::PropertyType::Long)
+                    theItem.setProperty(qPrintable(property),theValue.toQVariant());
+                break;
+            case qt3dsdm::DataModelDataType::Bool:
+                if (element.type == Q3DS::PropertyType::Boolean)
+                    theItem.setProperty(qPrintable(property), theValue.toQVariant());
+                break;
+            case qt3dsdm::DataModelDataType::Float:
+                if (element.type == Q3DS::PropertyType::Float)
+                    theItem.setProperty(qPrintable(property), theValue.toQVariant());
+                break;
+            case qt3dsdm::DataModelDataType::Float2:
+                if (element.type == Q3DS::PropertyType::Float2)
+                    theItem.setProperty(qPrintable(property), theValue.toQVariant());
+                break;
+            case qt3dsdm::DataModelDataType::Float3:
+                if (element.type == Q3DS::PropertyType::Vector)
+                    theItem.setProperty(qPrintable(property), theValue.toQVariant());
+                break;
+            // Could be either an enum or a texture.
+            case qt3dsdm::DataModelDataType::String: {
+                qt3dsdm::TDataStrPtr theData = qt3dsdm::get<qt3dsdm::TDataStrPtr>(theValue);
+                if (theData) {
+                    QString assetPath = inContext.presentation()
+                            ->assetFileName(theValue.toQVariant().toString(), nullptr);
+                    QFileInfo info(assetPath);
+                    if (info.exists() && info.isFile())
+                        theItem.setProperty(qPrintable(property), QVariant::fromValue(assetPath));
+                    else
+                        theItem.setProperty(qPrintable(property), theValue.toQVariant());
+                }
+            } break;
+            default:
+                Q_ASSERT_X(false, __FUNCTION__, "Incorrect datatype for effect.");
+            }
+        }
+    }
+}
+
+void Q3DSDynamicObjectTranslator::setActive(bool)
+{
+}
+
+void Q3DSDynamicObjectTranslator::clearChildren()
+{
+}
+
+void Q3DSDynamicObjectTranslator::appendChild(Q3DSGraphObject &)
+{
+}
+
+bool Q3DSDynamicObjectTranslator::updateProperty(Q3DSTranslation &inContext,
+                                                 qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                                 qt3dsdm::Qt3DSDMPropertyHandle property,
+                                                 qt3dsdm::SValue &value,
+                                                 const QString &name)
+{
+    if (Q3DSGraphObjectTranslator::updateProperty(inContext, instance, property, value, name))
+        return true;
+
+    Q3DSEffectInstance &theItem = static_cast<Q3DSEffectInstance &>(graphObject());
+    QByteArray key = name.toUtf8();
+
+    if (theItem.dynamicPropertyNames().contains(key)) {
+        Q3DSPropertyChangeList list;
+        if (qt3dsdm::GetValueType(value) == qt3dsdm::DataModelDataType::String) {
+            QString assetPath = inContext.presentation()
+                    ->assetFileName(value.toQVariant().toString(), nullptr);
+            QFileInfo info(assetPath);
+            if (info.exists() && info.isFile())
+                theItem.setProperty(qPrintable(name), QVariant::fromValue(assetPath));
+            else
+                theItem.setProperty(qPrintable(name), value.toQVariant());
+        } else {
+            theItem.setProperty(qPrintable(name), value.toQVariant());
+        }
+        list.append(Q3DSPropertyChange(name));
+        theItem.notifyPropertyChanges(list);
+        return true;
+    }
+    return false;
+}
+
+void Q3DSDynamicObjectTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+{
+    Q3DSGraphObjectTranslator::copyProperties(targetTranslator);
+    Q3DSGraphObject *targetObject = targetTranslator->graphObject<Q3DSGraphObject>();
+    const Q3DSGraphObject &theItem = *graphObject<Q3DSGraphObject>();
+    Q3DSPropertyChangeList list;
+    const QVector<QByteArray> &propertyNames = theItem.dynamicPropertyNames();
+    const QVector<QVariant> &propertyValues = theItem.dynamicPropertyValues();
+
+    for (int i = 0; i < propertyNames.size(); ++i) {
+        targetObject->setProperty(propertyNames[i], propertyValues[i]);
+        list.append(Q3DSPropertyChange(propertyNames[i]));
+    }
+    targetObject->notifyPropertyChanges(list);
+}
+
+Q3DSEffectTranslator::Q3DSEffectTranslator(qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                           Q3DSEffectInstance &effect)
+    : Q3DSDynamicObjectTranslator(instance, effect)
+{
+
+}
+
+void Q3DSEffectTranslator::pushTranslation(Q3DSTranslation &inContext)
+{
+    Q3DSDynamicObjectTranslator::pushTranslation(inContext);
+    Q3DSEffectInstance &theItem = static_cast<Q3DSEffectInstance &>(graphObject());
+    Q3DSTranslatorDataModelParser theParser(inContext, instanceHandle());
+    Q3DSPropertyChangeList list;
+    ITERATE_Q3DS_EFFECT_PROPERTIES
+}
+
+void Q3DSEffectTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+{
+    Q3DSDynamicObjectTranslator::copyProperties(targetTranslator);
+    Q3DSEffectInstance *targetEffect = targetTranslator->graphObject<Q3DSEffectInstance>();
+    const Q3DSEffectInstance &theItem = *graphObject<Q3DSEffectInstance>();
+    targetEffect->setEyeballEnabled(theItem.eyeballEnabled());
+}
+
+bool Q3DSEffectTranslator::updateProperty(Q3DSTranslation &inContext,
+                                          qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                          qt3dsdm::Qt3DSDMPropertyHandle property,
+                                          qt3dsdm::SValue &value,
+                                          const QString &name)
+{
+    if (Q3DSDynamicObjectTranslator::updateProperty(inContext, instance, property, value, name))
+        return true;
+
+    Q3DSPropertyChangeList list;
+    Q3DSEffectInstance &theItem = static_cast<Q3DSEffectInstance &>(graphObject());
+    if (name == QLatin1String("eyeball")) {
+        list.append(theItem.setEyeballEnabled(value.getData<bool>()));
+        theItem.notifyPropertyChanges(list);
+    }
+}
+
+Q3DSCustomMaterialTranslator::Q3DSCustomMaterialTranslator(qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                                           Q3DSCustomMaterialInstance &material)
+    : Q3DSDynamicObjectTranslator(instance, material)
+{
+
+}
+
+void Q3DSCustomMaterialTranslator::pushTranslation(Q3DSTranslation &inContext)
+{
+    Q3DSDynamicObjectTranslator::pushTranslation(inContext);
+    Q3DSCustomMaterialInstance &theItem = static_cast<Q3DSCustomMaterialInstance &>(graphObject());
+    Q3DSTranslatorDataModelParser theParser(inContext, instanceHandle());
+    Q3DSPropertyChangeList list;
+    ITERATE_Q3DS_CUSTOM_MATERIAL_PROPERTIES
+}
+
+bool Q3DSCustomMaterialTranslator::updateProperty(Q3DSTranslation &inContext,
+                                                  qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                                  qt3dsdm::Qt3DSDMPropertyHandle property,
+                                                  qt3dsdm::SValue &value,
+                                                  const QString &name)
+{
+    if (Q3DSDynamicObjectTranslator::updateProperty(inContext, instance, property, value, name))
+        return true;
+
+    Q3DSPropertyChangeList list;
+    Q3DSCustomMaterialInstance &theItem = static_cast<Q3DSCustomMaterialInstance &>(graphObject());
+
+    if (name == QLatin1String("lightmapindirect")) {
+        list.append(theItem.setLightmapIndirectMap(
+                          Q3DSValueParser::parseImage(&inContext, value)));
+    } else if (name == QLatin1String("lightmapradiosity")) {
+        list.append(theItem.setLightmapRadiosityMap(
+                          Q3DSValueParser::parseImage(&inContext, value)));
+    } else if (name == QLatin1String("lightmapshadow")) {
+        list.append(theItem.setLightmapShadowMap(
+                          Q3DSValueParser::parseImage(&inContext, value)));
+    }
+    if (list.count()) {
+        theItem.notifyPropertyChanges(list);
+        return true;
+    }
+    return false;
+}
+
+void Q3DSCustomMaterialTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+{
+    Q3DSDynamicObjectTranslator::copyProperties(targetTranslator);
+    Q3DSPropertyChangeList list;
+    Q3DSCustomMaterialInstance *targetMaterial
+            = targetTranslator->graphObject<Q3DSCustomMaterialInstance>();
+    const Q3DSCustomMaterialInstance &theItem = *graphObject<Q3DSCustomMaterialInstance>();
+    list.append(targetMaterial->setLightProbe(theItem.lightProbe()));
+    list.append(targetMaterial->setLightmapIndirectMap(theItem.lightmapIndirectMap()));
+    list.append(targetMaterial->setLightmapRadiosityMap(theItem.lightmapRadiosityMap()));
+    list.append(targetMaterial->setLightmapShadowMap(theItem.lightmapShadowMap()));
+    list.append(targetMaterial->setLightmapIndirectMap(theItem.lightmapIndirectMap()));
+    list.append(targetMaterial->setSourcePath(theItem.sourcePath()));
+    list.append(targetMaterial->setLightProbe(theItem.lightProbe()));
+    targetMaterial->notifyPropertyChanges(list);
+}
+
+
+Q3DSAliasTranslator::Q3DSAliasTranslator(qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                         Q3DSNode &aliasNode)
+    : Q3DSNodeTranslator(instance, aliasNode)
+{
+
+}
+
+void Q3DSAliasTranslator::pushTranslation(Q3DSTranslation &inContext)
+{
+    Q3DSTranslatorDataModelParser theParser(inContext, instanceHandle());
+    qt3dsdm::SObjectRefType objectReference;
+    if (theParser.parseProperty(inContext.objectDefinitions().m_Alias.m_ReferencedNode,
+                                objectReference)) {
+        qt3dsdm::Qt3DSDMInstanceHandle referenceHandle = qt3dsdm::Qt3DSDMInstanceHandle();
+        m_referencedInstance
+                = inContext.reader().GetInstanceForObjectRef(instanceHandle(), objectReference);
+        if (inContext.reader().IsInstance(m_referencedInstance)) {
+            m_referencedTree = inContext.getOrCreateTranslator(m_referencedInstance,
+                                                               instanceHandle(), this);
+            if (m_referencedTree && !m_referencedTree->graphObject().isNode()) {
+                delete m_referencedTree;
+                m_referencedTree = nullptr;
+                m_referencedInstance = qt3dsdm::Qt3DSDMInstanceHandle();
+            } else if (m_referencedTree) {
+                m_referencedTree->setIgnoreReferenced(true);
+                createTranslatorsRecursive(inContext, m_referencedInstance, m_referencedTree);
+                m_referencedTree->pushTranslation(inContext);
+            }
+        }
+    }
+    graphObject().appendChildNode(&m_referencedTree->graphObject());
+    Q3DSNodeTranslator::pushTranslation(inContext);
+
+    /* Alias nodes need to add themself to the slide here */
+    std::shared_ptr<qt3dsdm::ISlideCore> slideCore = inContext.fullSystem().GetSlideCore();
+    qt3dsdm::Qt3DSDMSlideHandle slideHandle
+            = inContext.reader().GetAssociatedSlide(m_referencedInstance);
+    qt3dsdm::Qt3DSDMInstanceHandle slideInstance = slideCore->GetSlideInstance(slideHandle);
+    Q3DSGraphObjectTranslator *slideTranslator = inContext.getOrCreateTranslator(slideInstance);
+    addToSlide(slideTranslator->graphObject<Q3DSSlide>());
+}
+
+void Q3DSAliasTranslator::createTranslatorsRecursive(Q3DSTranslation &inContext,
+                                                     qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                                     Q3DSGraphObjectTranslator *translator)
+{
+    long childCount = inContext.assetGraph().GetChildCount(instance);
+    for (long idx = 0; idx < childCount; ++idx) {
+        qt3dsdm::Qt3DSDMInstanceHandle theChild = inContext.assetGraph().GetChild(instance, idx);
+        Q3DSGraphObjectTranslator *childTranslator
+                = inContext.getOrCreateTranslator(theChild, instanceHandle(), this);
+        translator->graphObject().appendChildNode(&childTranslator->graphObject());
+        childTranslator->pushTranslation(inContext);
+        createTranslatorsRecursive(inContext, theChild, childTranslator);
+    }
+}
+
+bool Q3DSAliasTranslator::updateProperty(Q3DSTranslation &inContext,
+                                         qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                         qt3dsdm::Qt3DSDMPropertyHandle property,
+                                         qt3dsdm::SValue &value,
+                                         const QString &name)
+{
+    if (Q3DSNodeTranslator::updateProperty(inContext, instance, property, value, name))
+        return true;
+
+    return false;
+}
+
+void Q3DSAliasTranslator::copyProperties(Q3DSGraphObjectTranslator *)
+{
+    // copy alias properties does not make sense
+    Q_ASSERT_X(false, __FUNCTION__, "Alias node can not be copied");
+}
+
+void Q3DSAliasTranslator::addToSlide(Q3DSSlide *slide)
+{
+    if (m_referencedTree)
+        addToSlideRecursive(m_referencedTree, slide);
+}
+
+void Q3DSAliasTranslator::addToSlideRecursive(Q3DSGraphObjectTranslator *translator,
+                                              Q3DSSlide *slide)
+{
+    Q3DSGraphObject *obj = &translator->graphObject();
+    slide->addObject(obj);
+    obj = obj->firstChild();
+    while (obj) {
+        translator = Q3DSGraphObjectTranslator::translatorForObject(obj);
+        addToSlideRecursive(translator, slide);
+        obj = obj->nextSibling();
+    }
 }
 
 }

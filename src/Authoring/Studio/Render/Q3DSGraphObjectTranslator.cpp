@@ -70,25 +70,40 @@ bool Q3DSGraphObjectTranslator::updateProperty(Q3DSTranslation &context,
     Q_UNUSED(instance)
     Q_UNUSED(property)
     Q3DSPropertyChangeList changeList;
-    bool ret = false;
-    if (name == QLatin1String("name")) {
+    if (name == QLatin1String("name"))
         changeList.append(m_graphObject->setName(value.toQVariant().toString()));
-        ret = true;
-    } else if (name == QLatin1String("starttime")) {
+    else if (name == QLatin1String("starttime"))
         changeList.append(m_graphObject->setStartTime(value.getData<qint32>()));
-        ret = true;
-    } else if (name == QLatin1String("endtime")) {
+    else if (name == QLatin1String("endtime"))
         changeList.append(m_graphObject->setEndTime(value.getData<qint32>()));
-        ret = true;
-    }
-    if (ret)
+    if (changeList.count())
         m_graphObject->notifyPropertyChanges(changeList);
-    return ret;
+    return changeList.count() > 0;
+}
+
+void Q3DSGraphObjectTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+{
+    Q3DSPropertyChangeList changeList;
+    Q3DSGraphObject *target = &targetTranslator->graphObject();
+    changeList.append(target->setName(graphObject().name()));
+    changeList.append(target->setStartTime(graphObject().startTime()));
+    changeList.append(target->setEndTime(graphObject().endTime()));
+    target->notifyPropertyChanges(changeList);
 }
 
 Q3DSGraphObjectTranslator *Q3DSGraphObjectTranslator::translatorForObject(Q3DSGraphObject *object)
 {
     return s_translatorMap.value(object, nullptr);
+}
+
+void Q3DSAliasedTranslator::pushTranslation(Q3DSTranslation &translation)
+{
+    // copy object values from the referenced graph object
+    Q3DSGraphObjectTranslator *reference = translation.getOrCreateTranslator(instanceHandle());
+
+    reference->copyProperties(this);
+
+    setDirty(false);
 }
 
 }

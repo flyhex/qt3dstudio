@@ -76,9 +76,7 @@ protected:
 private:
 
     void setPresentationData();
-    Q3DSGraphObjectTranslator *createTranslator(qt3dsdm::Qt3DSDMInstanceHandle instance);
-    Q3DSGraphObjectTranslator *getOrCreateTranslator(qt3dsdm::Qt3DSDMInstanceHandle instance,
-                                          qt3dsdm::Qt3DSDMInstanceHandle aliasInstance);
+
     void clearDirtySet();
     QByteArray getInstanceObjectId(qt3dsdm::Qt3DSDMInstanceHandle instance);
 
@@ -135,6 +133,16 @@ private:
     ThandleTranslatorOption findTranslator(THandleTranslatorPairList &list,
                                            qt3dsdm::Qt3DSDMInstanceHandle instance);
     THandleTranslatorPairList &getTranslatorsForInstance(qt3dsdm::Qt3DSDMInstanceHandle instance);
+    Q3DSGraphObjectTranslator *createEffectTranslator(qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                                      qt3dsdm::Qt3DSDMInstanceHandle parentClass,
+                                                      const QByteArray &id);
+    Q3DSGraphObjectTranslator *createCustomMaterialTranslator(
+                                                    qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                                    qt3dsdm::Qt3DSDMInstanceHandle parentClass,
+                                                    const QByteArray &id);
+
+    Q3DSGraphObject *createAliasGraphObject(qt3dsdm::ComposerObjectTypes::Enum type,
+                                            const QByteArray &id);
 
     Q3DStudioRenderer &m_studioRenderer;
 
@@ -181,13 +189,17 @@ public:
     {
         return m_objectDefinitions;
     }
-    Q3DStudio::CGraph &assetGraph()
+    Q3DStudio::CGraph &assetGraph() const
     {
         return m_assetGraph;
     }
-    IDocumentReader &reader()
+    IDocumentReader &reader() const
     {
         return m_reader;
+    }
+    qt3dsdm::CStudioFullSystem &fullSystem() const
+    {
+        return m_fullSystem;
     }
     Q3DSUipPresentation *presentation() const
     {
@@ -207,6 +219,15 @@ public:
         for (long idx = 0; idx < inInstanceCount; ++idx)
             markDirty(inInstance[idx]);
     }
+
+    Q3DSGraphObjectTranslator *createTranslator(qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                                Q3DSGraphObjectTranslator *aliasTranslator
+                                                    = nullptr);
+    Q3DSGraphObjectTranslator *getOrCreateTranslator(qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                                     qt3dsdm::Qt3DSDMInstanceHandle aliasInstance,
+                                                     Q3DSGraphObjectTranslator *aliasTranslator
+                                                        = nullptr);
+
     void prepareDrag(Q3DSGraphObjectTranslator *selected);
     void endDrag(bool dragReset, CUpdateableDocumentEditor &inEditor);
 
