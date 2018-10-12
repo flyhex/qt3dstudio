@@ -52,7 +52,7 @@ using namespace qt3dsdm;
 struct ParentChildLink;
 struct PropertyValue;
 class Import;
-class InstanceDesc;
+struct InstanceDesc;
 
 struct ImportErrorData
 {
