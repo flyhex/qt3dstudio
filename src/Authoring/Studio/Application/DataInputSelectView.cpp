@@ -56,8 +56,7 @@ DataInputSelectView::DataInputSelectView(const QVector<EDataType> &acceptedTypes
 }
 
 void DataInputSelectView::setData(const QVector<QPair<QString, int>> &dataInputList,
-                                  const QString &currentController,
-                                  int handle, int instance)
+                                  const QString &currentController, int handle, int instance)
 {
     m_handle = handle;
     m_instance = instance;
@@ -80,14 +79,14 @@ void DataInputSelectView::updateData(const QVector<QPair<QString, int>> &dataInp
     QVector<QPair<QString, QString>> dataInputs;
     m_model->clear();
 
-    dataInputs.append(QPair<QString, QString>(getAddNewDataInputString(), QString("")));
+    dataInputs.append({getAddNewDataInputString(), {}});
     m_model->setFixedItemCount(m_model->getFixedItemCount() + 1);
 
-    dataInputs.append(QPair<QString, QString>(getNoneString(), QString("")));
+    dataInputs.append({getNoneString(), {}});
     m_model->setFixedItemCount(m_model->getFixedItemCount() + 1);
 
     for (auto i : dataInputList) {
-        dataInputs.append(QPair<QString, QString>(i.first, getDiTypeStr(i.second)));
+        dataInputs.append({i.first, getDiTypeStr(i.second)});
         if (i.first == m_currController)
             m_selection = dataInputs.size() - 1;
     }
@@ -125,7 +124,7 @@ QString DataInputSelectView::getDiTypeStr(int type)
         return tr("Vector3");
         break;
     default:
-        return QString("");
+        return {};
         Q_ASSERT(false);
         break;
     }
@@ -148,8 +147,8 @@ void DataInputSelectView::setSelection(int index)
                 Q_EMIT selectedChanged();
             }
         } else {
-            CDataInputListDlg dataInputDlg(&(g_StudioApp.m_dataInputDialogItems), true,
-                                           nullptr, m_defaultType, m_acceptedTypes);
+            CDataInputListDlg dataInputDlg(&g_StudioApp.m_dataInputDialogItems, true, nullptr,
+                                           m_defaultType, m_acceptedTypes);
             dataInputDlg.exec();
 
             if (dataInputDlg.result() == QDialog::Accepted) {

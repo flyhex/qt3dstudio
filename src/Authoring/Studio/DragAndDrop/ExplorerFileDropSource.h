@@ -53,18 +53,18 @@ class CDropTarget;
 class CExplorerFileDropSource : public CDropSource
 {
 protected:
-    Qt3DSFile m_File;
+    QString m_FilePath;
     static bool s_FileHasValidTarget;
 
 public:
-    CExplorerFileDropSource(long inFlavor, void *inData, unsigned long inSize);
+    CExplorerFileDropSource(long inFlavor, const QString &filePath);
 
     bool CanMove() override;
     bool CanCopy() override;
     bool ValidateTarget(CDropTarget *inTarget) override;
     bool GetHasValidTarget();
     void SetHasValidTarget(bool inValid) override;
-    Qt3DSFile GetFile() const { return m_File; }
+    QString getFilePath() const { return m_FilePath; }
 };
 
 #endif // #ifndef __EXPLORERFILEDROPSOURCE_H__

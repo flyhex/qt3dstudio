@@ -27,11 +27,8 @@
 **
 ****************************************************************************/
 
-#pragma once
 #ifndef DOCUMENTEDITORENUMERATIONSH
 #define DOCUMENTEDITORENUMERATIONSH
-
-#include "qtAuthoring-config.h"
 
 namespace Q3DStudio {
 struct DocumentEditorFileType

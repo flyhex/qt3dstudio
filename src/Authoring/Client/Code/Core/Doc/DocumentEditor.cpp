@@ -1685,7 +1685,6 @@ public:
                    && m_Bridge.GetSourcePathProperty() == propName
                    && !inSourcePath.IsEmpty()) {
             // Resize the layer to be the size of the presentation
-
             QSize presSize(g_StudioApp.getRenderableSize(inSourcePath.toQString()));
             auto &layer = m_Bridge.GetLayer();
 
@@ -1767,34 +1766,35 @@ public:
     }
 
     /**
-     * Sets a subpresentation for an instance's property that accepts a texture (image) as its value
-     * If there is no texture exists, a new one is created. Next, the texture subpresentation
-     *  property is set to the pId param
-     * @param instance  the instance
-     * @param prop  the image property
-     * @param pId   the presentation Id to set for the texture
+     * Sets an instance's image-type property from a renderable or image. If no texture exists, a
+     * new one is created. Next, the texture property from 'prop' param is set to the 'src' param.
+     *
+     * @param instance the instance
+     * @param prop the instance image property
+     * @param src the presentation Id or image file name to set for the texture
      */
-    void setInstanceImagePropertyValueAsRenderable(TInstanceHandle instance, TPropertyHandle prop,
-                                                   const CString &pId) override
+    void setInstanceImagePropertyValue(TInstanceHandle instance, TPropertyHandle prop,
+                                       const CString &src) override
     {
         Qt3DSDMPropertyHandle img = GetImageInstanceForProperty(instance, prop);
 
         if (!img)
             img = CreateImageInstanceForMaterialOrLayer(instance, prop);
 
-        SetInstancePropertyValueAsRenderable(img, m_Bridge.getSubpresentationProperty(), pId);
+        SetInstancePropertyValueAsRenderable(img, m_Bridge.getSubpresentationProperty(), src);
     }
 
     /**
-     * Create a scene rect and set its material's texture from the provided subpresentation Id
+     * Create a rect under the active layer and set its material's diffuse map from the provided
+     * source.
      *
-     * @param pId the presentation Id to set for the texture
+     * @param src the presentation Id or image file name to set for the texture
      * @param slide the slide to add to
      * @param pos add position in the scene
      * @param startTime add at this start time
      */
-    void addRectForSubpresentation(const CString &pId, TSlideHandle slide, const CPt &pos = CPt(),
-                                   long startTime = -1) override
+    void addRectFromSource(const CString &src, TSlideHandle slide, const CPt &pos = {},
+                           long startTime = -1) override
     {
         qt3dsdm::Qt3DSDMPropertyHandle activeLayer = m_Doc.GetActiveLayer();
         Qt3DSDMInstanceHandle rectInstance =
@@ -1802,7 +1802,7 @@ public:
                                          Q3DStudio::DocumentEditorInsertType::LastChild, pos,
                                          PRIMITIVETYPE_RECT, startTime, false);
 
-        // Set the subpresentation for the rect's material's diffuseMap
+        // Set the rect's material's diffuseMap
         const long childCount = m_AssetGraph.GetChildCount(rectInstance);
         for (long i = 0; i < childCount; ++i) {
             Qt3DSDMInstanceHandle matInstance(m_AssetGraph.GetChild(rectInstance, i));
@@ -1812,7 +1812,7 @@ public:
                     SetMaterialType(matInstance, "Standard Material");
 
                 auto prop = m_Bridge.GetObjectDefinitions().m_Material.m_DiffuseMap1.m_Property;
-                setInstanceImagePropertyValueAsRenderable(matInstance, prop, pId);
+                setInstanceImagePropertyValue(matInstance, prop, src);
                 break;
             }
         }

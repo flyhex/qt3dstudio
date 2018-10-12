@@ -356,14 +356,6 @@ void ProjectView::copyFullPath(int row) const
     CStudioClipboard::CopyTextToClipboard(path);
 }
 
-bool ProjectView::isGroup(int row) const
-{
-    if (row == -1)
-        return false;
-    Q3DStudio::CFilePath path(Q3DStudio::CString::fromQString(m_ProjectModel->filePath(row)));
-    return Q3DStudio::ImportUtils::GetObjectFileTypeForFile(path).m_ObjectType == OBJTYPE_GROUP;
-}
-
 bool ProjectView::isPresentation(int row) const
 {
     return m_ProjectModel->filePath(row).endsWith(QLatin1String(".uip"));

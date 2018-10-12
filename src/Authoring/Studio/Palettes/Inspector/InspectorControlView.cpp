@@ -430,7 +430,7 @@ QObject *InspectorControlView::showImageChooser(int handle, int instance, const 
             } else {
                 Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(),
                                                   QObject::tr("Set Property"))
-                        ->setInstanceImagePropertyValueAsRenderable(
+                        ->setInstanceImagePropertyValue(
                             instance, handle, Q3DStudio::CString::fromQString(renderableId));
             }
             m_imageChooserView->hide();

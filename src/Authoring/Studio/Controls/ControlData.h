@@ -35,6 +35,7 @@
 #include "Rct.h"
 #include "Multicaster.h"
 #include "Qt3DSString.h"
+#include "DocumentEditorEnumerations.h"
 
 class CControl;
 class CControlWindowListener;
@@ -189,7 +190,8 @@ protected:
 
 public:
     CDropTarget *FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags,
-                                   EStudioObjectType objectType);
+                                   EStudioObjectType objectType,
+                                   Q3DStudio::DocumentEditorFileType::Enum fileType);
 
     void AddChild(CControl *inControl, CControl *inInsertBefore = NULL);
     void RemoveChild(CControl *inControl);

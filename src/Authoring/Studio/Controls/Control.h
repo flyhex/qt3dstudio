@@ -39,6 +39,7 @@
 
 #include "DropTarget.h"
 #include "ControlGraphIterators.h"
+#include "DocumentEditorEnumerations.h"
 
 class CRenderer;
 class CContextMenu;
@@ -160,7 +161,8 @@ public:
     void SetFocusToLastAvailable();
 
     virtual CDropTarget *FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags,
-                                           EStudioObjectType objectType);
+                                           EStudioObjectType objectType,
+                                           Q3DStudio::DocumentEditorFileType::Enum fileType);
 
     virtual void AddChild(CControl *inControl, CControl *inInsertBefore = NULL);
     virtual void RemoveChild(CControl *inControl);

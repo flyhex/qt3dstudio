@@ -158,11 +158,10 @@ public:
                                                      EPrimitiveType inPrimitiveType,
                                                      long inStartTime,
                                                      bool setTimeRange = true) = 0;
-    virtual void setInstanceImagePropertyValueAsRenderable(TInstanceHandle instance,
-                                                           TPropertyHandle prop,
-                                                           const CString &pId) = 0;
-    virtual void addRectForSubpresentation(const CString &pId, TSlideHandle slide,
-                                           const CPt &pos = CPt(), long startTime = -1) = 0;
+    virtual void setInstanceImagePropertyValue(TInstanceHandle instance, TPropertyHandle prop,
+                                               const CString &pId) = 0;
+    virtual void addRectFromSource(const CString &src, TSlideHandle slide, const CPt &pos = {},
+                                   long startTime = -1) = 0;
 
     virtual void DeleteInstances(const qt3dsdm::TInstanceHandleList &instances) = 0;
     // Delete this data model instance.  Will recursively delete any attached children in the scene

@@ -139,11 +139,8 @@ QVariant ProjectFileSystemModel::data(const QModelIndex &index, int role) const
 
 QMimeData *ProjectFileSystemModel::mimeData(const QModelIndexList &indexes) const
 {
-    const auto path = filePath(indexes.first().row()); // can only drag one item
-    Qt3DSFile dragFile(Q3DStudio::CString::fromQString(path));
-    return CDropSourceFactory::Create(QT3DS_FLAVOR_ASSET_UICFILE,
-                                      reinterpret_cast<void *>(&dragFile),
-                                      sizeof(dragFile));
+    const QString path = filePath(indexes.first().row()); // can only drag one item
+    return CDropSourceFactory::Create(QT3DS_FLAVOR_ASSET_UICFILE, path);
 }
 
 QString ProjectFileSystemModel::filePath(int row) const
@@ -853,8 +850,7 @@ bool ProjectFileSystemModel::isExpanded(const QModelIndex &modelIndex) const
 
 EStudioObjectType ProjectFileSystemModel::getIconType(const QString &path) const
 {
-    Q3DStudio::CFilePath filePath(Q3DStudio::CString::fromQString(path));
-    return Q3DStudio::ImportUtils::GetObjectFileTypeForFile(filePath).m_IconType;
+    return Q3DStudio::ImportUtils::GetObjectFileTypeForFile(path).m_IconType;
 }
 
 QString ProjectFileSystemModel::getIconName(const QString &path) const

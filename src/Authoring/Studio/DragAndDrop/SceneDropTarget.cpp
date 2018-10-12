@@ -52,10 +52,8 @@
  * 	Constructor.
  */
 CSceneViewDropTarget::CSceneViewDropTarget()
-    : m_DropTime(-1)
 {
     m_ObjectType = OBJTYPE_LAYER;
-    m_DropSourceObjectType = OBJTYPE_UNKNOWN;
 }
 
 //===============================================================================
@@ -89,11 +87,9 @@ long CSceneViewDropTarget::GetObjectType()
  */
 bool CSceneViewDropTarget::Accept(CDropSource &inSource)
 {
-    CClientDataModelBridge *theBridge =
-        g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
-
     // We have to set this so we can adjust the Target to accept this source.
-    SetDropSourceObjectType(inSource.GetObjectType());
+    m_DropSourceObjectType = inSource.GetObjectType();
+    m_DropSourceFileType = inSource.getFileType();
 
     // always allow DnD presentations and qml streams to the scene
     if (m_DropSourceObjectType & (OBJTYPE_PRESENTATION | OBJTYPE_QML_STREAM)) {
@@ -106,21 +102,12 @@ bool CSceneViewDropTarget::Accept(CDropSource &inSource)
     theAcceptable = inSource.ValidateTarget(this);
 
     // The DropSource already generated the asset for this in the above.
-    if (theAcceptable && m_Instance.Valid()) {
+    CClientDataModelBridge *theBridge
+            = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
+    if (theAcceptable && m_Instance.Valid())
         theAcceptable = !theBridge->IsLockedAtAll(m_Instance);
-    }
 
     return theAcceptable;
-}
-
-//===============================================================================
-/**
- * 	 This is so the questioned object type can be cached so we can get the correct asset.
- *	@param inObjType the object type of the Questioned object.
- */
-void CSceneViewDropTarget::SetDropSourceObjectType(long inObjType)
-{
-    m_DropSourceObjectType = inObjType;
 }
 
 //===============================================================================
@@ -140,7 +127,8 @@ bool CSceneViewDropTarget::Drop(CDropSource &inSource)
 {
     // The Parent is a tree control item, so iwe know it can be converted to an Asset.
     // We have to set this so we can adjust the Target to accept this source.
-    SetDropSourceObjectType(inSource.GetObjectType());
+    m_DropSourceObjectType = inSource.GetObjectType();
+    m_DropSourceFileType = inSource.getFileType();
 
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     qt3dsdm::Qt3DSDMInstanceHandle instance = GetInstance();
@@ -198,7 +186,8 @@ qt3dsdm::Qt3DSDMInstanceHandle CSceneViewDropTarget::GetInstance()
 
     // Check if the inObjectType can just go ahead and drop onto the Root object.
     if (CStudioObjectTypes::AcceptableParent((EStudioObjectType)m_DropSourceObjectType,
-                                             theRootObjType)) {
+                                             theRootObjType)
+        || m_DropSourceFileType == Q3DStudio::DocumentEditorFileType::Image) {
         m_Instance = theRootObject;
     } else if (theRootObject == theDoc->GetSceneInstance()
                && CStudioObjectTypes::AcceptableParent((EStudioObjectType)m_DropSourceObjectType,

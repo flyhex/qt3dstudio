@@ -203,7 +203,8 @@ bool RowMover::isSourceRowsDescendant(RowTree *row) const
 
 // rowType parameter is used to highlight the target row when RowMover is not active,
 // i.e. when dragging from project or basic objects palettes
-void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowType)
+void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowType,
+                               Q3DStudio::DocumentEditorFileType::Enum fileType)
 {
     // DnD a presentation / Qml stream from the project panel (to set it as a subpresentation)
     if (rowType == OBJTYPE_PRESENTATION || rowType == OBJTYPE_QML_STREAM) {
@@ -228,6 +229,27 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
             m_autoExpandTimer.stop();
         }
         return;
+    } else if (fileType == Q3DStudio::DocumentEditorFileType::Image) { // DnD an image
+        if (!m_insertionTarget.isNull())
+            m_insertionTarget->setDnDState(RowTree::DnDState::None, RowTree::DnDState::SP_TARGET);
+        // if draggin in the middle of a layer, mat, or image row, set the image as a texture.
+        RowTree *rowAtMouse = m_scene->rowManager()->getRowAtPos(scenePos);
+        if (rowAtMouse) {
+            double y = rowAtMouse->mapFromScene(scenePos).y();
+            if (y > TimelineConstants::ROW_H * .25 && y < TimelineConstants::ROW_H * .75) {
+                if (rowAtMouse->rowType() & (OBJTYPE_LAYER | OBJTYPE_MATERIAL | OBJTYPE_IMAGE)) {
+                    m_rowAutoExpand = nullptr;
+                    m_autoExpandTimer.stop();
+                    setVisible(false);
+                    resetInsertionParent();
+
+                    m_insertionTarget = rowAtMouse;
+                    m_insertionTarget->setDnDState(RowTree::DnDState::SP_TARGET);
+                    m_insertType = Q3DStudio::DocumentEditorInsertType::LastChild;
+                    return;
+                }
+            }
+        }
     }
 
     EStudioObjectType theRowType = rowType;
@@ -241,7 +263,7 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
             ->getRowAtPos(scenePos + QPointF(0, TimelineConstants::ROW_H * .5));
 
     bool valid = rowInsert1 && theRowType != OBJTYPE_MATERIAL
-            && theRowType != OBJTYPE_CUSTOMMATERIAL;
+                 && theRowType != OBJTYPE_CUSTOMMATERIAL;
 
     if (valid) {
         // if dragging over a property or a parent of a property, move to the first row
@@ -249,11 +271,11 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
         if (rowInsert1->isProperty()) {
             rowInsert1 = rowInsert1->parentRow()->childProps().last();
             rowInsert2 = m_scene->rowManager()
-                    ->getRowAtPos(QPointF(0, rowInsert1->y() + TimelineConstants::ROW_H));
+                         ->getRowAtPos(QPointF(0, rowInsert1->y() + TimelineConstants::ROW_H));
         } else if (rowInsert1->hasPropertyChildren() && rowInsert1->expanded()) {
             rowInsert1 = rowInsert1->childProps().last();
             rowInsert2 = m_scene->rowManager()
-                    ->getRowAtPos(QPointF(0, rowInsert1->y() + TimelineConstants::ROW_H));
+                         ->getRowAtPos(QPointF(0, rowInsert1->y() + TimelineConstants::ROW_H));
         }
 
         // calc insertion depth
@@ -370,7 +392,7 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
                     && !rowInsert1->empty() && !isSourceRowsDescendant(rowInsert1)
                     && depth == rowInsert1->depth() + 1) {
                 updateTargetRowLater = std::bind(&RowMover::updateTargetRow, this,
-                                                 scenePos, rowType);
+                                                 scenePos, rowType, fileType);
                 m_rowAutoExpand = rowInsert1;
                 m_autoExpandTimer.start(TimelineConstants::AUTO_EXPAND_TIME);
             } else {

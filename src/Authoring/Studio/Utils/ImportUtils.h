@@ -26,9 +26,9 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#pragma once
 #ifndef IMPORTUTILSH
 #define IMPORTUTILSH
+
 #include "DocumentEditorEnumerations.h"
 #include "StudioObjectTypes.h"
 #include "DropSource.h"
@@ -63,8 +63,8 @@ struct SObjectFileType
 class ImportUtils
 {
 public:
-    static SObjectFileType GetObjectFileTypeForFile(const CFilePath &inPath,
-                                                    bool inCheckFileExists = true);
+    static SObjectFileType GetObjectFileTypeForFile(const QString &filePath,
+                                                    bool inCheckExists = true);
 
     static DocumentEditorInsertType::Enum GetInsertTypeForDropType(EDROPDESTINATION inDestination);
 };

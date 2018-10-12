@@ -190,11 +190,9 @@ RowTree *RowManager::createRow(EStudioObjectType rowType, RowTree *parentRow, co
 
 RowTree *RowManager::getRowAtPos(const QPointF &scenePos) const
 {
-    QList<QGraphicsItem *> items = m_scene->items(scenePos);
+    const QList<QGraphicsItem *> items = m_scene->items(scenePos);
 
-    int index = 0;
-    while (index < items.size()) {
-        QGraphicsItem *item = items.at(index++);
+    for (auto item : items) {
         if (item->type() == TimelineItem::TypeRowTree)
             return static_cast<RowTree *>(item);
     }

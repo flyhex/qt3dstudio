@@ -1113,7 +1113,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
                 Q3DStudio::CFilePath relPath(path);
                 element->m_value = QVariant(relPath.GetFileName().toQString());
             } else {
-                element->m_value = QVariant(QString(""));
+                element->m_value = QVariant(QString());
             }
         } else {
             qWarning() << "KDAB_TODO: InspectorControlModel::updatePropertyValue: need to implement:"

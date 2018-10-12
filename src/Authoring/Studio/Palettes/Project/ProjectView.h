@@ -80,7 +80,6 @@ public:
     void editMaterial(int row) const;
     void duplicate(int row) const;
 
-    bool isGroup(int row) const;
     bool isRefreshable(int row) const;
 
     Q_INVOKABLE bool isPresentation(int row) const;

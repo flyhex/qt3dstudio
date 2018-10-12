@@ -57,24 +57,19 @@ bool CExplorerFileDropSource::ValidateTarget(CDropTarget *inTarget)
 /**
  *
  */
-CExplorerFileDropSource::CExplorerFileDropSource(long inFlavor, void *inData, unsigned long inSize)
-    : CDropSource(inFlavor, inSize)
-    , m_File("")
+CExplorerFileDropSource::CExplorerFileDropSource(long inFlavor, const QString &filePath)
+    : CDropSource(inFlavor)
+    , m_FilePath(filePath)
 {
-    // Pull out all of the SDropItemData and build a file.
-    m_File = *(Qt3DSFile *)inData;
-    Q3DStudio::CFilePath thePath(m_File.GetAbsolutePath());
-    m_ObjectType = Q3DStudio::ImportUtils::GetObjectFileTypeForFile(thePath).m_IconType;
+    m_ObjectType = Q3DStudio::ImportUtils::GetObjectFileTypeForFile(filePath).m_IconType;
+
     // Fix because DAE files are the *only* thing you can drop onto the project
-    if (thePath.GetExtension().Compare(CDialogs::GetWideDAEFileExtension(),
-                                       Q3DStudio::CString::ENDOFSTRING, false)) {
+    if (filePath.endsWith(QLatin1String(".dae"), Qt::CaseInsensitive))
         m_ObjectType = OBJTYPE_GROUP;
-    }
+
 #ifdef QT_3DSTUDIO_FBX
-    else if (thePath.GetExtension().Compare(CDialogs::GetWideFbxFileExtension(),
-                                            Q3DStudio::CString::ENDOFSTRING, false)) {
+    else if (filePath.endsWith(QLatin1String(".fbx"), Qt::CaseInsensitive))
         m_ObjectType = OBJTYPE_GROUP;
-    }
 #endif
 }
 

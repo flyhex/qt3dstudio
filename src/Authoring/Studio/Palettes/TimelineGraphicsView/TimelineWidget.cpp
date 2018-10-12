@@ -1047,20 +1047,20 @@ void TimelineWidget::OnGainFocus()
 }
 
 CDropTarget *TimelineWidget::FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags,
-                                               EStudioObjectType objectType)
+                                               EStudioObjectType objectType,
+                                               Q3DStudio::DocumentEditorFileType::Enum fileType)
 {
     Q_UNUSED(inFlags)
 
     CTimeLineDropTarget *theTarget = new CTimeLineDropTarget();
 
-    // collapse all properties so index is counted correctly
     m_graphicsScene->rowManager()->collapseAllPropertyRows();
 
     int mouseY = inMousePoint.y - m_navigationBar->height()
                  + viewTreeContent()->verticalScrollBar()->value()
                  - viewTreeContent()->verticalScrollBar()->minimum();
     RowMover *mover = m_graphicsScene->rowMover();
-    mover->updateTargetRow(QPointF(inMousePoint.x, mouseY), objectType);
+    mover->updateTargetRow(QPointF(inMousePoint.x, mouseY), objectType, fileType);
 
     if (mover->insertionTarget() && !mover->insertionTarget()->isProperty()) {
         mover->insertionTarget()->getBinding()->SetDropTarget(theTarget);

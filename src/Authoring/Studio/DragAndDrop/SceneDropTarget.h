@@ -27,29 +27,17 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
 #ifndef __SCENEDROPTARGET_H__
 #define __SCENEDROPTARGET_H__
 
-//==============================================================================
-//	Includes
-//==============================================================================
 #include "DropTarget.h"
 
-//==============================================================================
-/**
- *	@class
- *	@brief	LEONARD.PONCE needs to enter a brief description here.
- *
- *	LEONARD.PONCE needs to enter a long description here.
- */
 class CSceneViewDropTarget : public CDropTarget
 {
 protected:
-    long m_DropTime; ///< The Time to drop any thing.
-    long m_DropSourceObjectType;
+    long m_DropTime = -1; // The Time a drop happens
+    long m_DropSourceObjectType = 0;
+    int m_DropSourceFileType = 0;
 
 public:
     CSceneViewDropTarget();
@@ -60,7 +48,6 @@ public:
     bool IsRelative(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override;
     bool IsSelf(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override;
     long GetObjectType() override;
-    void SetDropSourceObjectType(long inObjType);
     void SetDropTime(long inDropTime);
     long GetDropTime();
 };

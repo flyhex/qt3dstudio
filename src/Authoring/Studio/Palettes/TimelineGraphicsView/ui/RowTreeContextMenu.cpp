@@ -211,13 +211,12 @@ void RowTreeContextMenu::addSubPresentation(QAction *action)
                                                             tr("Set material sub-presentation")));
                 editor->BeginAggregateOperation();
                 editor->SetMaterialType(instance, "Standard Material");
-                editor->setInstanceImagePropertyValueAsRenderable(instance, propHandle,
-                                                                  presentationId);
+                editor->setInstanceImagePropertyValue(instance, propHandle, presentationId);
                 editor->EndAggregateOperation();
             } else {
                 Q3DStudio::SCOPED_DOCUMENT_EDITOR(doc, tr("Set material sub-presentation"))
-                ->setInstanceImagePropertyValueAsRenderable(refInstance ? refInstance : instance,
-                                                            propHandle, presentationId);
+                ->setInstanceImagePropertyValue(refInstance ? refInstance : instance, propHandle,
+                                                presentationId);
             }
         }
     } else if (m_RowTree->rowType() == OBJTYPE_IMAGE) {
