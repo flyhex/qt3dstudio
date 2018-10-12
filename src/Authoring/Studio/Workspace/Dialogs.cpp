@@ -1091,7 +1091,7 @@ QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
             m_LastSaveFile = theFinalDoc.absoluteFilePath();
             if (theFinalDoc.Exists()) {
                 const QString theTitle(QObject::tr("Confirm Save As"));
-                const QString filePath(theFinalDir.GetFileName().toQString() + QDir::separator()
+                const QString filePath(theFinalDir.GetFileName().toQString() + QStringLiteral("/")
                                        + theFinalDoc.GetFileName().toQString());
                 const QString theString = QObject::tr("%1 already exists.\nDo you want to "
                                                       "replace it?").arg(filePath);

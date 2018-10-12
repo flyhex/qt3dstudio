@@ -35,7 +35,6 @@
 
 #include <set>
 #include "Qt3DSString.h"
-#include "FileIterator.h"
 #include "PlatformTypes.h"
 #include <QtCore/QFileInfo>
 
@@ -59,8 +58,6 @@ public:
     Qt3DSFile(const QString &inFile);
     Qt3DSFile(const char *inFile);
     Qt3DSFile(const QFileInfo &inFile);
-
-    CFileIterator GetSubItems() const;
 
     ~Qt3DSFile();
 

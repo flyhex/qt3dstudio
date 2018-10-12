@@ -585,13 +585,13 @@ InspectorControlBase *InspectorControlModel::createMatDataItem(
     if (!sourcePath.isEmpty() && sourcePath != QLatin1String("Default")) {
         const auto doc = g_StudioApp.GetCore()->GetDoc();
         const auto dirPath = doc->GetDocumentDirectory().toQString();
-        QFileInfo fileInfo(dirPath + QStringLiteral("/") + sourcePath);
+        QFileInfo fileInfo(dirPath + QLatin1Char('/') + sourcePath);
         if (!fileInfo.exists()) {
             const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
             const auto refMaterial = getReferenceMaterial(item->m_instance);
             if (refMaterial.Valid()) {
                 const auto matName = sceneEditor->GetName(refMaterial);
-                QFileInfo newFileInfo(fileInfo.absoluteDir().path() + QStringLiteral("/")
+                QFileInfo newFileInfo(fileInfo.absoluteDir().path() + QLatin1Char('/')
                                       + matName.toQString() + QStringLiteral(".matdata"));
                 const QDir docDir(dirPath);
                 const auto relPath = docDir.relativeFilePath(newFileInfo.absoluteFilePath());
@@ -1293,7 +1293,7 @@ void InspectorControlModel::saveIfMaterial(qt3dsdm::Qt3DSDMInstanceHandle instan
         QString sourcePath;
         for (int i = 0; i < m_matDatas.size(); ++i) {
             if (m_matDatas[i].m_name == materialName) {
-                sourcePath = doc->GetDocumentDirectory().toQString() + QDir::separator()
+                sourcePath = doc->GetDocumentDirectory().toQString() + QLatin1Char('/')
                         + m_matDatas[i].m_relativePath;
             }
         }
@@ -1492,11 +1492,11 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
                     const auto dirPath = doc->GetDocumentDirectory().toQString();
                     for (size_t matIdx = 0, end = m_matDatas.size(); matIdx < end; ++matIdx) {
                         if (m_matDatas[matIdx].m_name == currentName.toQString()) {
-                            QFileInfo fileInfo(dirPath + QStringLiteral("/")
+                            QFileInfo fileInfo(dirPath + QLatin1Char('/')
                                                + m_matDatas[matIdx].m_relativePath);
                             const QString oldFile = fileInfo.absoluteFilePath();
                             const QString newFile = fileInfo.absolutePath()
-                                    + QStringLiteral("/")
+                                    + QLatin1Char('/')
                                     + newName.toQString()
                                     + QStringLiteral(".matdata");
                             canRename = QFile::rename(oldFile, newFile);

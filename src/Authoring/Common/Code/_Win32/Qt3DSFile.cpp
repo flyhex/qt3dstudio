@@ -52,11 +52,7 @@ Qt3DSFile::Qt3DSFile(const Q3DStudio::CString &inPathName, bool inIsPosix, bool 
     Q_UNUSED(inIsPosix);
     Q_UNUSED(inAddBase);
 
-    QString path = inPathName.toQString();
-#ifndef Q_OS_WIN
-    path.replace('\\', '/');
-#endif
-    m_Path = Q3DStudio::CString::fromQString(QDir::toNativeSeparators(path));
+    m_Path = Q3DStudio::CString::fromQString(QDir::fromNativeSeparators(inPathName.toQString()));
 }
 
 /**
@@ -88,25 +84,18 @@ Qt3DSFile::Qt3DSFile(const Qt3DSFile &inFile)
 
 Qt3DSFile::Qt3DSFile(const QString &inFile)
 {
-    m_Path = Q3DStudio::CString::fromQString(QDir::toNativeSeparators(inFile));
+    m_Path = Q3DStudio::CString::fromQString(QDir::fromNativeSeparators(inFile));
 }
 
 Qt3DSFile::Qt3DSFile(const char *inFile)
 {
-    m_Path = Q3DStudio::CString::fromQString(QDir::toNativeSeparators(QString::fromLatin1(inFile)));
+    m_Path = Q3DStudio::CString::fromQString(
+                QDir::fromNativeSeparators(QString::fromLatin1(inFile)));
 }
 
 Qt3DSFile::Qt3DSFile(const QFileInfo &inFile)
 {
-    m_Path = Q3DStudio::CString::fromQString(QDir::toNativeSeparators(inFile.absoluteFilePath()));
-}
-
-/**
- * Get an iterator for all the sub-files of this directory.
- */
-CFileIterator Qt3DSFile::GetSubItems() const
-{
-    return CFileIterator(this);
+    m_Path = Q3DStudio::CString::fromQString(inFile.absoluteFilePath());
 }
 
 /**
@@ -152,7 +141,7 @@ bool Qt3DSFile::DeleteFile() const
 {
     BOOL theFileDeleted = FALSE;
 
-    // check if AKFile to delete is a folder type, if it is, we want to recusively delete all its
+    // check if file to delete is a folder type, if it is, we want to recusively delete all its
     // subfolder
     if (!IsFile()) {
         theFileDeleted = QDir(m_Path.toQString()).removeRecursively();
@@ -184,7 +173,7 @@ Q3DStudio::CString Qt3DSFile::GetAbsolutePath() const
 {
     const QFileInfo fi(m_Path.toQString());
     if (fi.isDir())
-        return Q3DStudio::CString::fromQString(fi.absoluteFilePath() + QDir::separator());
+        return Q3DStudio::CString::fromQString(fi.absoluteFilePath() + QLatin1Char('/'));
     return m_Path;
 }
 

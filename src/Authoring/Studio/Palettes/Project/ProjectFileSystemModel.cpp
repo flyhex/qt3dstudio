@@ -172,7 +172,7 @@ void ProjectFileSystemModel::updateReferences()
 
     const QDir projectDir(doc->GetCore()->getProjectFile().getProjectPath());
     const QString projectPath = QDir::cleanPath(projectDir.absolutePath());
-    const QString projectPathSlash = projectPath + QStringLiteral("/");
+    const QString projectPathSlash = projectPath + QLatin1Char('/');
 
     // Add current presentation to renderables list
     renderableList.insert(doc->getPresentationId());
@@ -421,7 +421,7 @@ void ProjectFileSystemModel::duplicate(int row)
     QString path = item.index.data(QFileSystemModel::FilePathRole).toString();
 
     QFileInfo srcFile(path);
-    const QString destPathStart = srcFile.dir().absolutePath() + QDir::separator()
+    const QString destPathStart = srcFile.dir().absolutePath() + QLatin1Char('/')
             + srcFile.completeBaseName() + QStringLiteral(" Copy");
     const QString destPathEnd = QStringLiteral(".") + srcFile.suffix();
     QString destPath = destPathStart + destPathEnd;
@@ -1039,7 +1039,7 @@ void ProjectFileSystemModel::updateDefaultDirMap()
     for (const QString &key : keys) {
         QString currentValue = m_defaultDirToAbsPathMap[key];
         if (currentValue.isEmpty()) {
-            const QString defaultPath = rootPath + QStringLiteral("/") + key;
+            const QString defaultPath = rootPath + QLatin1Char('/') + key;
             const QFileInfo fi(defaultPath);
             if (fi.exists() && fi.isDir())
                 m_defaultDirToAbsPathMap.insert(key, defaultPath);
