@@ -183,20 +183,11 @@ public:
 
     virtual void updateMaterialInstances(const QStringList &filenames) = 0;
 
-    virtual bool isMaterialContainer(Qt3DSDMInstanceHandle instance) const = 0;
-
-    virtual bool isInsideMaterialContainer(Qt3DSDMInstanceHandle instance) const = 0;
-
-    virtual Qt3DSDMInstanceHandle getMaterialContainer() const = 0;
+    virtual void removeUnusedFromMaterialContainer() = 0;
 
     virtual Qt3DSDMInstanceHandle getMaterial(const Q3DStudio::CString &materialName) = 0;
     virtual Qt3DSDMInstanceHandle getOrCreateMaterial(const Q3DStudio::CString &materialName,
                                                       bool selectCreatedInstance = true) = 0;
-
-    virtual void getMaterialReference(Qt3DSDMInstanceHandle instance,
-                                      Qt3DSDMInstanceHandle &reference) const = 0;
-    virtual void setMaterialReference(Qt3DSDMInstanceHandle instance,
-                                      Qt3DSDMInstanceHandle reference) = 0;
 
     virtual void copyMaterialProperties(Qt3DSDMInstanceHandle src, Qt3DSDMInstanceHandle dst) = 0;
 

@@ -180,6 +180,7 @@ private:
 
     std::vector<MaterialEntry> m_materials;
     std::vector<MaterialDataEntry> m_matDatas;
+    std::vector<Q3DStudio::CFilePath> m_cachedMatDatas;
 
     Q3DStudio::CUpdateableDocumentEditor m_UpdatableEditor;
 

@@ -464,10 +464,8 @@ void TimelineWidget::onActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, 
 
 void TimelineWidget::insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *binding)
 {
-    if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()
-            ->isMaterialContainer(binding->GetInstance())) {
+    if (m_bridge->isMaterialContainer(binding->GetInstance()))
         return;
-    }
 
     insertToHandlesMap(binding);
     const QList<ITimelineItemBinding *> children = binding->GetChildren();
@@ -477,15 +475,11 @@ void TimelineWidget::insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *bin
 
 void TimelineWidget::insertToHandlesMap(Qt3DSDMTimelineItemBinding *binding)
 {
-    if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()
-            ->isMaterialContainer(binding->GetInstance())) {
+    if (m_bridge->isMaterialContainer(binding->GetInstance()))
         return;
-    }
 
-    if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()
-            ->isInsideMaterialContainer(binding->GetInstance())) {
+    if (m_bridge->isInsideMaterialContainer(binding->GetInstance()))
         return;
-    }
 
     m_handlesMap.insert(binding->GetInstance(), binding->getRowTree());
 }
@@ -520,15 +514,11 @@ void TimelineWidget::onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         return;
 
     if (m_bridge->IsSceneGraphInstance(inInstance)) {
-        if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()
-                ->isMaterialContainer(inInstance)) {
+        if (m_bridge->isMaterialContainer(inInstance))
             return;
-        }
 
-        if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()
-                ->isInsideMaterialContainer(inInstance)) {
+        if (m_bridge->isInsideMaterialContainer(inInstance))
             return;
-        }
 
         Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inInstance, m_binding);
 
@@ -737,6 +727,9 @@ void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance
                                        qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
     if (m_fullReconstruct)
+        return;
+
+    if (!m_bridge->IsSceneGraphInstance(inInstance))
         return;
 
     const SDataModelSceneAsset &asset = m_bridge->GetSceneAsset();

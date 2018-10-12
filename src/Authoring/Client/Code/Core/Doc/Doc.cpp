@@ -1716,6 +1716,7 @@ void CDoc::LoadDocument(const QString &inDocument)
  */
 void CDoc::SaveDocument(const QString &inDocument)
 {
+    getSceneEditor()->removeUnusedFromMaterialContainer();
     CFileOutputStream theFileStream(inDocument);
     // Exceptions here get propagated to the crash dialog.
     CBufferedOutputStream theBufferStream(&theFileStream);
@@ -2873,6 +2874,32 @@ void CDoc::getSceneMaterials(qt3dsdm::Qt3DSDMInstanceHandle inParent,
             outMats.push_back(theChild);
 
         getSceneMaterials(theChild, outMats);
+    }
+}
+
+void CDoc::getSceneReferencedMaterials(qt3dsdm::Qt3DSDMInstanceHandle inParent,
+                                       QVector<qt3dsdm::Qt3DSDMInstanceHandle> &outMats) const
+{
+    const CClientDataModelBridge *bridge = m_StudioSystem->GetClientDataModelBridge();
+    for (long i = 0, count = m_AssetGraph->GetChildCount(inParent); i < count; ++i) {
+        qt3dsdm::Qt3DSDMInstanceHandle theChild(m_AssetGraph->GetChild(inParent, i));
+        if (bridge->IsReferencedMaterialInstance(theChild))
+            outMats.push_back(theChild);
+
+        getSceneReferencedMaterials(theChild, outMats);
+    }
+}
+
+void CDoc::getUsedSharedMaterials(QVector<qt3dsdm::Qt3DSDMInstanceHandle> &outMats) const
+{
+    QVector<qt3dsdm::Qt3DSDMInstanceHandle> refMats;
+    getSceneReferencedMaterials(GetSceneInstance(), refMats);
+
+    CClientDataModelBridge *bridge = m_StudioSystem->GetClientDataModelBridge();
+    for (auto &refMat : qAsConst(refMats)) {
+        qt3dsdm::Qt3DSDMInstanceHandle original = bridge->getMaterialReference(refMat);
+        if (original.Valid())
+            outMats.append(original);
     }
 }
 

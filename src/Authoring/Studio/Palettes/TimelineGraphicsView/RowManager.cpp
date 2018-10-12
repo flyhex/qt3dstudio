@@ -41,6 +41,8 @@
 #include "StudioApp.h"
 #include "Core.h"
 #include "Doc.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "ClientDataModelBridge.h"
 
 #include <QtWidgets/qgraphicslinearlayout.h>
 #include <QtCore/qpointer.h>
@@ -133,8 +135,10 @@ RowTree *RowManager::createRowFromBinding(ITimelineItemBinding *binding, RowTree
 void RowManager::createRowsFromBindingRecursive(ITimelineItemBinding *binding, RowTree *parentRow)
 {
     auto instance = static_cast<Qt3DSDMTimelineItemBinding *>(binding)->GetInstance();
-    if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()->isMaterialContainer(instance))
+    if (g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+            ->GetClientDataModelBridge()->isMaterialContainer(instance)) {
         return;
+    }
 
     RowTree *newRow = createRowFromBinding(binding, parentRow);
     // create child rows recursively

@@ -2060,52 +2060,16 @@ public:
         file.write("</MaterialData>");
     }
 
-    bool isMaterialContainer(TInstanceHandle instance) const override
-    {
-        return instance == getMaterialContainer();
-    }
-
-    bool isInsideMaterialContainer(TInstanceHandle instance) const override
-    {
-        auto parentInstance = GetParent(instance);
-        return isMaterialContainer(parentInstance);
-    }
-
-    QString getMaterialContainerName() const
-    {
-        return QStringLiteral("MaterialContainer");
-    }
-
-    QString getMaterialContainerParentPath() const
-    {
-        return GetName(m_Doc.GetSceneInstance()).toQString();
-    }
-
-    QString getMaterialContainerPath() const
-    {
-        return getMaterialContainerParentPath() + QStringLiteral(".") + getMaterialContainerName();
-    }
-
-    Qt3DSDMInstanceHandle getMaterialContainer() const override
-    {
-        IObjectReferenceHelper *objRefHelper = m_Doc.GetDataModelObjectReferenceHelper();
-        Qt3DSDMInstanceHandle instance;
-        CRelativePathTools::EPathType type;
-        objRefHelper->ResolvePath(m_Doc.GetSceneInstance(),
-                                  CString::fromQString(getMaterialContainerPath()),
-                                  type, instance, true);
-        return instance;
-    }
-
     Qt3DSDMInstanceHandle getOrCreateMaterialContainer()
     {
-        auto instance = getMaterialContainer();
+        auto instance = m_Bridge.getMaterialContainer();
         if (!instance.Valid()) {
             IObjectReferenceHelper *objRefHelper = m_Doc.GetDataModelObjectReferenceHelper();
             Qt3DSDMInstanceHandle parent;
             CRelativePathTools::EPathType type;
             objRefHelper->ResolvePath(m_Doc.GetSceneInstance(),
-                                      CString::fromQString(getMaterialContainerParentPath()),
+                                      CString::fromQString(
+                                          m_Bridge.getMaterialContainerParentPath()),
                                       type, parent, true);
             if (!parent.Valid())
                 parent = m_Doc.GetSceneInstance();
@@ -2113,7 +2077,7 @@ public:
             instance = CreateSceneGraphInstance(ComposerObjectTypes::Material, parent,
                                                 slide, DocumentEditorInsertType::LastChild,
                                                 CPt(), PRIMITIVETYPE_UNKNOWN, -1);
-            SetName(instance, CString::fromQString(getMaterialContainerName()));
+            SetName(instance, CString::fromQString(m_Bridge.getMaterialContainerName()));
             SetTimeRange(instance, 0, 0);
         }
         return instance;
@@ -2122,7 +2086,7 @@ public:
     Qt3DSDMInstanceHandle getMaterial(const Q3DStudio::CString &materialName) override
     {
         IObjectReferenceHelper *objRefHelper = m_Doc.GetDataModelObjectReferenceHelper();
-        QString name = getMaterialContainerPath() + QStringLiteral(".")
+        QString name = m_Bridge.getMaterialContainerPath() + QStringLiteral(".")
                 + materialName.toQString().replace(QLatin1Char('.'), QLatin1String("\\."));
         Qt3DSDMInstanceHandle material;
         CRelativePathTools::EPathType type;
@@ -2148,17 +2112,6 @@ public:
         return material;
     }
 
-    void getMaterialReference(TInstanceHandle instance, TInstanceHandle &reference) const override
-    {
-        auto optValue = GetInstancePropertyValue(instance,
-                                 m_Bridge.GetObjectDefinitions().m_ReferencedMaterial
-                                                 .m_ReferencedMaterial.m_Property);
-        if (optValue.hasValue()) {
-            reference = GetInstanceForObjectRef(m_Doc.GetSceneInstance(),
-                                                get<SObjectRefType>(optValue.getValue()));
-        }
-    }
-
     void setMaterialProperties(TInstanceHandle instance, const QString &materialName,
                                const Q3DStudio::CString &materialSourcePath,
                                const QMap<QString, QString> &values,
@@ -2167,18 +2120,6 @@ public:
         setMaterialReferenceByName(instance, Q3DStudio::CString::fromQString(materialName));
         setMaterialSourcePath(instance, materialSourcePath);
         setMaterialValues(materialName, values, textureValues);
-    }
-
-    void setMaterialReference(TInstanceHandle instance, TInstanceHandle reference) override
-    {
-        IObjectReferenceHelper *objRefHelper = m_Doc.GetDataModelObjectReferenceHelper();
-        SObjectRefType objRef = objRefHelper->GetAssetRefValue(reference, m_Doc.GetSceneInstance(),
-                                                               CRelativePathTools::EPATHTYPE_GUID);
-        SetInstancePropertyValue(instance,
-                                 m_Bridge.GetObjectDefinitions().m_ReferencedMaterial
-                                 .m_ReferencedMaterial.m_Property,
-                                 objRef, false);
-        SetName(instance, GetName(reference));
     }
 
     void setMaterialReferenceByName(TInstanceHandle instance,
@@ -3200,8 +3141,7 @@ public:
         for (auto &instance : instances) {
             const Q3DStudio::CString oldType = GetObjectTypeName(instance);
             if (oldType == "ReferencedMaterial") {
-                qt3dsdm::Qt3DSDMInstanceHandle refMaterial;
-                getMaterialReference(instance, refMaterial);
+                Qt3DSDMInstanceHandle refMaterial = m_Bridge.getMaterialReference(instance);
 
                 const Q3DStudio::CString refType = GetObjectTypeName(refMaterial);
 
@@ -3572,7 +3512,7 @@ public:
 
     void updateMaterialInstances(const QStringList &filenames) override
     {
-        const auto parent = getMaterialContainer();
+        const auto parent = m_Bridge.getMaterialContainer();
         if (parent.Valid()) {
             TInstanceList children;
             GetChildren(GetAssociatedSlide(parent), parent, children);
@@ -3582,6 +3522,29 @@ public:
                 if (name != "Default" && !filenames.contains(name.toQString()))
                     DeleteInstance(instance);
             }
+        }
+    }
+
+    void removeUnusedFromMaterialContainer() override
+    {
+        QVector<Qt3DSDMInstanceHandle> usedMats;
+        m_Doc.getUsedSharedMaterials(usedMats);
+
+        const auto parent = m_Bridge.getMaterialContainer();
+        if (parent.Valid()) {
+            TInstanceList children;
+            GetChildren(GetAssociatedSlide(parent), parent, children);
+
+            unsigned int removedChildrenCount = 0;
+            for (auto &instance : children) {
+                if (!usedMats.contains(instance)) {
+                    DeleteInstance(instance);
+                    removedChildrenCount++;
+                }
+            }
+
+            if (removedChildrenCount == children.size())
+                DeleteInstance(parent);
         }
     }
 
