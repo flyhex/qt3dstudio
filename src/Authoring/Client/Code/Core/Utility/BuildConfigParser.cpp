@@ -27,16 +27,11 @@
 **
 ****************************************************************************/
 
-#include "Qt3DSCommonPrecompile.h"
 #include "BuildConfigParser.h"
-#include "Qt3DSFile.h"
-#include "Qt3DSFileTools.h"
+#include <QtCore/qdiriterator.h>
 
 namespace Q3DStudio {
 
-//==============================================================================
-// Constants
-//==============================================================================
 const auto STR_TAG_PROJECT = QStringLiteral("project");
 const auto STR_TAG_INTEGRATION = QStringLiteral("uic:integration");
 const auto STR_TAG_PREVIEW = QStringLiteral("uic:preview");
@@ -48,10 +43,6 @@ const auto STR_PARAM_NAME = QStringLiteral("name");
 const auto STR_PARAM_LABEL = QStringLiteral("label");
 const auto STR_PARAM_HELP = QStringLiteral("help");
 
-//===============================================================================
-/**
- *	Constructor
- */
 CBuildConfigParser::CBuildConfigParser(CBuildConfigurations &inConfigurations)
     : m_BuildConfigurations(inConfigurations)
     , m_CurrentConfiguration(nullptr)
@@ -60,42 +51,34 @@ CBuildConfigParser::CBuildConfigParser(CBuildConfigurations &inConfigurations)
 {
 }
 
-//===============================================================================
-/**
- *	Destructor
- */
 CBuildConfigParser::~CBuildConfigParser()
 {
 }
 
-//===============================================================================
 /**
  *	Load all the build configuration files in the directory.
  *	@param inDirectory		the directory to look for all the configuration files
  *	@return true if all files parsed successfully, else false
  */
-bool CBuildConfigParser::LoadConfigurations(const QString &inDirectory)
+bool CBuildConfigParser::LoadConfigurations(const QString &configDirPath)
 {
     m_ErrorMessage.clear();
 
-    Qt3DSFile directory(CString::fromQString(inDirectory));
-    CFileIterator theFileIter = directory.GetSubItems();
-    while (!theFileIter.IsDone()) {
-        Qt3DSFile theCurrentFile(theFileIter.GetCurrent());
-        m_CurrentFile = theCurrentFile.GetAbsolutePath().toQString();
-
-        if (QFileInfo(m_CurrentFile).suffix() == QLatin1String("build")) {
-            m_CurrentConfiguration = new CBuildConfiguration(m_CurrentFile);
-            QFile file(theCurrentFile.GetAbsolutePath().toQString());
+    QDirIterator di(configDirPath, QDir::NoDotAndDotDot | QDir::Files);
+    while (di.hasNext()) {
+        QFileInfo fi = di.next();
+        if (fi.suffix() == QLatin1String("build")) {
+            m_CurrentConfiguration = new CBuildConfiguration(fi.absoluteFilePath());
+            QFile file(fi.absoluteFilePath());
             file.open(QFile::ReadOnly);
             QXmlStreamReader reader(&file);
             reader.setNamespaceProcessing(false);
             while (!reader.atEnd()) {
                 QXmlStreamReader::TokenType token = reader.readNext();
                 if (token == QXmlStreamReader::StartElement)
-                    StartElement(reader.qualifiedName().toString(),reader.attributes());
+                    StartElement(reader.qualifiedName().toString(), reader.attributes());
                 else if (token == QXmlStreamReader::Characters)
-                    HandleCharacterData(reader.text().toString(),0);
+                    HandleCharacterData(reader.text().toString(), 0);
                 else if (token == QXmlStreamReader::EndElement)
                     EndElement(reader.qualifiedName().toString());
             }
@@ -108,8 +91,8 @@ bool CBuildConfigParser::LoadConfigurations(const QString &inDirectory)
             }
             file.close();
         }
-        ++theFileIter;
     }
+
 
     // Check the error message to see if parse successful or fail
     if (m_ErrorMessage.isEmpty())
@@ -119,7 +102,6 @@ bool CBuildConfigParser::LoadConfigurations(const QString &inDirectory)
 }
 
 
-//===============================================================================
 /**
  *	Callback when completed the parsing. Add the build configuration loaded to the
  *	stored list
@@ -132,7 +114,6 @@ void CBuildConfigParser::DocumentFinished()
     }
 }
 
-//===============================================================================
 /**
  *	Callback when starting parsing an element
  */
@@ -153,7 +134,6 @@ void CBuildConfigParser::StartElement(const QString &inElementName,
     }
 }
 
-//===============================================================================
 /**
  *	Callback after finished parsing an element
  */
@@ -166,7 +146,6 @@ void CBuildConfigParser::EndElement(const QString &inElementName)
     m_TagStarted = false;
 }
 
-//===============================================================================
 /**
  *	Callback when handling the value of an element
  */
@@ -176,7 +155,6 @@ void CBuildConfigParser::HandleCharacterData(const QString &data, int /*inLen*/)
         m_ElementData += data;
 }
 
-//===============================================================================
 /**
  *	Read in all the project related attributes
  */
@@ -188,7 +166,6 @@ void CBuildConfigParser::ParseProjectAttributes(const QXmlStreamAttributes &inAt
     }
 }
 
-//===============================================================================
 /**
  *	Read in all the property related attributes
  */
@@ -205,7 +182,6 @@ void CBuildConfigParser::ParsePropertyAttributes(CBuildConfiguration::SConfigPro
     }
 }
 
-//===============================================================================
 /**
  *	Read in all the property value related attributes
  */
@@ -214,24 +190,14 @@ void CBuildConfigParser::ParseValueAttributes(const QXmlStreamAttributes &inAttr
     CBuildConfiguration::SConfigPropertyValue theValue;
     for (const QXmlStreamAttribute &attrib : inAttributes) {
         if (attrib.name() == STR_PARAM_NAME)
-            theValue.SetName(attrib.value().toUtf8().constData());
+            theValue.SetName(attrib.value().toString());
         else if (attrib.name() == STR_PARAM_LABEL)
-            theValue.SetLabel(attrib.value().toUtf8().constData());
+            theValue.SetLabel(attrib.value().toString());
     }
 
-    QString thePropertyName = m_CurrentProperty->GetName();
-    if (thePropertyName == QLatin1String("MODE")) {
-        QString theValueName(theValue.GetName());
-        if (theValueName == QLatin1String("Debug")) {
-            CFilePath theFilePath;
-            theFilePath.GetModuleFilePath();
-            CFilePath theDir = theFilePath.GetDirectory().GetFileStem();
-            // If this isn't a developer build.
-            if (theDir.filePath() != QLatin1String("release")
-                    || theDir.filePath() != QLatin1String("debug")) {
-                return;
-            }
-        }
+    if (m_CurrentProperty->GetName() == QLatin1String("MODE")
+        && theValue.GetName() == QLatin1String("Debug")) {
+        return;
     }
 
     m_CurrentProperty->AddValue(theValue);

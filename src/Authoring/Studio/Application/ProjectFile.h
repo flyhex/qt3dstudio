@@ -38,12 +38,14 @@ class CString;
 struct SubPresentationRecord;
 class CDataInputDialogItem;
 
-class ProjectFile
+class ProjectFile : public QObject
 {
+    Q_OBJECT
+
 public:
     ProjectFile();
 
-    void create(const QString &projectName, const QString &projectPath);
+    void create(const QString &uiaPath);
     void ensureProjectFile();
     void initProjectFile(const QString &presPath);
     void loadSubpresentationsAndDatainputs(
@@ -52,6 +54,7 @@ public:
     void writePresentationId(const QString &id, const QString &src = {});
     void updateDocPresentationId();
     void addPresentationNode(const QString &uip, const QString &pId = {});
+    void addPresentationNodes(const QHash<QString, QString> &nodeList);
     bool isUniquePresentationId(const QString &id, const QString &src = {}) const;
     QString getProjectPath() const;
     QString getProjectFilePath() const;
@@ -65,10 +68,19 @@ public:
     static void getPresentations(const QString &inUiaPath,
                                  QVector<SubPresentationRecord> &outSubpresentations,
                                  const QString &excludePresentationSrc = {});
+    QString initialPresentation() const { return m_initialPresentation; }
+    void setInitialPresentation(const QString &initialId);
+    bool renamePresentationFile(const QString &oldName, const QString &newName);
+
+Q_SIGNALS:
+    void presentationIdChanged(const QString &path, const QString &id);
+    void assetNameChanged();
+
 private:
     QString ensureUniquePresentationId(const QString &id) const;
 
     QFileInfo m_fileInfo; // uia file info
+    QString m_initialPresentation;
 };
 
 #endif // PROJECTFILE_H

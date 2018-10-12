@@ -31,7 +31,6 @@
 #include "Dispatch.h"
 #include "DispatchListeners.h"
 #include "MasterP.h"
-#include "Qt3DSFile.h"
 #include "Cmd.h"
 #include "SelectedValueImpl.h"
 
@@ -133,7 +132,7 @@ void CDispatch::RemoveDocumentBufferCacheListener(IDocumentBufferCacheListener *
 {
     m_DocumentBufferCacheListeners.RemoveListener(inListener);
 }
-void CDispatch::FireDocumentBufferCacheInvalidated(const Q3DStudio::CString &inCache)
+void CDispatch::FireDocumentBufferCacheInvalidated(const QString &inCache)
 {
     m_DocumentBufferCacheListeners.FireEvent(&IDocumentBufferCacheListener::OnBufferInvalidated,
                                              inCache);
@@ -289,7 +288,7 @@ void CDispatch::FireOnClosingPresentation()
     m_PresentationChangeListeners.FireEvent(&CPresentationChangeListener::OnClosingPresentation);
 }
 
-void CDispatch::FireOnSavingPresentation(const QString *inNewPresentationFile)
+void CDispatch::FireOnSavingPresentation(const QString &inNewPresentationFile)
 {
     m_PresentationChangeListeners.FireEvent(&CPresentationChangeListener::OnSavingPresentation,
                                             inNewPresentationFile);
@@ -361,7 +360,7 @@ void CDispatch::RemoveNavigationListener(CNavigationListener *inListener)
  * Fire an event to the navigation listeners to navigate to the URL.
  * This is used to update the assistant palette to the specified URL.
  */
-void CDispatch::FireOnNavigate(const Q3DStudio::CString &inURL, bool inForceDisplay)
+void CDispatch::FireOnNavigate(const QString &inURL, bool inForceDisplay)
 {
     m_NavigationListeners.FireEvent(&CNavigationListener::OnNavigate, inURL, inForceDisplay);
 }
@@ -461,7 +460,7 @@ void CDispatch::RemoveSelectedNodePropChangeListener(CSelectedNodePropChangeList
 /**
  * Fire an event to all the selected node property change listeners
  */
-void CDispatch::FireOnSelectedNodePropChange(const Q3DStudio::CString &inPropertyName)
+void CDispatch::FireOnSelectedNodePropChange(const QString &inPropertyName)
 {
     m_SelectedNodePropChangeListeners.FireEvent(
         &CSelectedNodePropChangeListener::OnPropValueChanged, inPropertyName);
@@ -571,13 +570,13 @@ void CDispatch::RemoveAppStatusListener(CAppStatusListener *inListener)
     m_AppStatusListeners.RemoveListener(inListener);
 }
 
-void CDispatch::FireOnDisplayAppStatus(Q3DStudio::CString &inStatusMsg)
+void CDispatch::FireOnDisplayAppStatus(const QString &inStatusMsg)
 {
     m_AppStatusListeners.FireEvent(&CAppStatusListener::OnDisplayAppStatus, inStatusMsg);
 }
 
-void CDispatch::FireOnProgressBegin(const Q3DStudio::CString &inActionText,
-                                    const Q3DStudio::CString &inAdditionalText)
+void CDispatch::FireOnProgressBegin(const QString &inActionText,
+                                    const QString &inAdditionalText)
 {
     m_AppStatusListeners.FireEvent(&CAppStatusListener::OnProgressBegin, inActionText,
                                    inAdditionalText);
@@ -620,18 +619,13 @@ void CDispatch::FireOnSaveFail(bool inKnownError)
     m_FailListeners.FireEvent(&CFailListener::OnSaveFail, inKnownError);
 }
 
-void CDispatch::FireOnProjectVariableFail(const Q3DStudio::CString &inMessage)
-{
-    m_FailListeners.FireEvent(&CFailListener::OnProjectVariableFail, inMessage);
-}
-
-void CDispatch::FireOnErrorFail(const Q3DStudio::CString &inText)
+void CDispatch::FireOnErrorFail(const QString &inText)
 {
     m_FailListeners.FireEvent(&CFailListener::OnErrorFail, inText);
 }
 
-void CDispatch::FireOnRefreshResourceFail(const Q3DStudio::CString &inResourceName,
-                                          const Q3DStudio::CString &inDescription)
+void CDispatch::FireOnRefreshResourceFail(const QString &inResourceName,
+                                          const QString &inDescription)
 {
     m_FailListeners.FireEvent(&CFailListener::OnRefreshResourceFail, inResourceName, inDescription);
 }

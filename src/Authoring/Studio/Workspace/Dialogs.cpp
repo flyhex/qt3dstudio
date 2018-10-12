@@ -299,15 +299,15 @@ Qt3DSFile CDialogs::GetExportChoice(const Q3DStudio::CString &, const Q3DStudio:
 /**
  *	Notify that we are unable to refresh the resource.
  */
-void CDialogs::DisplayRefreshResourceFailed(const Q3DStudio::CString &inResourceName,
-                                            const Q3DStudio::CString &inDescription)
+void CDialogs::DisplayRefreshResourceFailed(const QString &inResourceName,
+                                            const QString &inDescription)
 {
     QString theTitle = QObject::tr("Refresh File Error");
     QString theText = QObject::tr("Studio was unable to refresh the resource '%1'.\n")
-            .arg(inResourceName.toQString());
+            .arg(inResourceName);
 
-    if (!inDescription.IsEmpty())
-        theText += inDescription.toQString();
+    if (!inDescription.isEmpty())
+        theText += inDescription;
 
     if (m_ShowGUI) {
         Qt3DSMessageBox::Show(theTitle, theText, Qt3DSMessageBox::ICON_WARNING, false,
@@ -498,8 +498,7 @@ QList<QUrl> CDialogs::SelectAssets(QString &outPath,
         files = fd.selectedUrls();
         QString newOutPath = fd.directory().absolutePath();
         QString contentPath = QDir::fromNativeSeparators(
-                    Qt3DSFile::GetApplicationDirectory().GetPath().toQString()
-                    + QStringLiteral("/Content"));
+                    Qt3DSFile::GetApplicationDirectory() + QStringLiteral("/Content"));
 
         if (assetType != Q3DStudio::DocumentEditorFileType::Unknown
                 || (assetType == Q3DStudio::DocumentEditorFileType::Unknown
@@ -527,20 +526,20 @@ QString CDialogs::defaultDirForUrl(const QUrl &url)
     return defaultDir;
 }
 
-//==============================================================================
 /**
- *	Notify the user that the presentation we tried to load has failed.
- *	@param	inPresentation	The AKFile that we failed to load.
+ * Notify the user that the presentation we tried to load has failed.
+ * @param loadFileInfo QFileInfo for the failing file
+ * @param errrorText error message
  */
-void CDialogs::DisplayLoadingPresentationFailed(const Qt3DSFile &inPresentation,
-                                                const QString &inErrorText)
+void CDialogs::DisplayLoadingPresentationFailed(const QFileInfo &loadFileInfo,
+                                                const QString &errorText)
 {
-    QString theErrorMessage = inPresentation.GetName().toQString();
+    QString theErrorMessage = loadFileInfo.fileName();
 
-    if (inErrorText.isEmpty())
+    if (errorText.isEmpty())
         theErrorMessage +=  QObject::tr(" failed to load.");
     else
-        theErrorMessage += inErrorText;
+        theErrorMessage += errorText;
 
     QString theErrorTitle = QObject::tr("Open File Error");
 
@@ -1020,17 +1019,14 @@ CDialogs::ESavePromptResult CDialogs::PromptForSave()
  */
 QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
 {
-    QFileInfo theFile;
-    QString theFileExt;
     QString projPath(QDir::cleanPath(g_StudioApp.GetCore()->getProjectFile().getProjectPath()));
 
-    QString theFilename
-            = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetAbsolutePath().toQString();
+    QString theFilename = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath();
 
     if (theFilename.isEmpty() || isProject)
         theFilename = QObject::tr("Untitled");
 
-    theFileExt = QStringLiteral(".uip");
+    QString theFileExt = QStringLiteral(".uip");
 
     QFileDialog theFileDlg;
     theFileDlg.setOption(QFileDialog::DontConfirmOverwrite);
@@ -1063,7 +1059,7 @@ QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
     }
 
     bool theShowDialog = true;
-
+    QString theFile = {};
     while (theShowDialog && theFileDlg.exec()) {
         theShowDialog = false;
         QString selectedName = theFileDlg.selectedFiles().front();
@@ -1081,16 +1077,15 @@ QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
                 selectedName = projPath + QStringLiteral("/presentations/") + fi.fileName();
         }
 
-        theFile = QFileInfo(selectedName);
-
-        m_LastSaveFile = theFile.absoluteFilePath();
+        theFile = selectedName;
+        m_LastSaveFile = selectedName;
         // New directory is only created when creating a new project. When doing a "save as"
         // or "save copy", a new directory is not created.
         if (isProject) {
             Q3DStudio::CFilePath theFinalDir;
             Q3DStudio::CFilePath theFinalDoc;
-            g_StudioApp.GetCore()->GetCreateDirectoryFileName(
-                        theFile.absoluteFilePath(), theFinalDir, theFinalDoc);
+            g_StudioApp.GetCore()->GetCreateDirectoryFileName(selectedName,
+                                                              theFinalDir, theFinalDoc);
 
             // Update last save file to final doc
             m_LastSaveFile = theFinalDoc.absoluteFilePath();
@@ -1104,7 +1099,7 @@ QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
                 auto result = QMessageBox::question(nullptr, theTitle, theString);
                 if (result != QMessageBox::Yes) {
                     // Reset the file and show the file dialog again
-                    theFile = QFileInfo();
+                    theFile.clear();
                     theShowDialog = true;
                     continue;
                 }
@@ -1112,7 +1107,7 @@ QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
         }
     }
 
-    return theFile.absoluteFilePath();
+    return theFile;
 }
 
 //==============================================================================
@@ -1192,8 +1187,8 @@ bool CDialogs::ConfirmRevert()
  * @param inActionText text to be displayed as the action
  * @param inAdditionalText additional text, for example a file name
  */
-void CDialogs::DisplayProgressScreen(const Q3DStudio::CString &inActionText,
-                                     const Q3DStudio::CString &inAdditionalText)
+void CDialogs::DisplayProgressScreen(const QString &inActionText,
+                                     const QString &inAdditionalText)
 {
     if (m_ShowGUI && !m_ProgressPalette) {
         m_ProgressPalette = new CProgressView(g_StudioApp.m_pMainWnd);
@@ -1246,12 +1241,12 @@ void CDialogs::DisplayEnvironmentVariablesError(const Q3DStudio::CString &inErro
  *	@param inCurrentDocPath	the current document path, if any. Application directory if
  *there is none.
  */
-void CDialogs::ResetSettings(const Q3DStudio::CString &inCurrentDocPath)
+void CDialogs::ResetSettings(const QString &inCurrentDocPath)
 {
     // Initialize the default dir/paths to the current document path if specified, otherwise leave
     // everything as it is.
-    if (!inCurrentDocPath.IsEmpty())
-        m_LastSaveFile = inCurrentDocPath.toQString();
+    if (!inCurrentDocPath.isEmpty())
+        m_LastSaveFile = inCurrentDocPath;
 }
 
 bool CDialogs::DisplayResetKeyframeValuesDlg()

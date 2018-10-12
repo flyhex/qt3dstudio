@@ -57,6 +57,7 @@ QSize BasicObjectsView::sizeHint() const
 
 void BasicObjectsView::startDrag(QQuickItem *item, int row)
 {
+    item->grabMouse(); // Grab to make sure we can ungrab after the drag
     const auto index = m_ObjectsModel->index(row);
 
     QDrag drag(this);

@@ -44,7 +44,6 @@ CStartupDlg::CStartupDlg(QWidget *pParent)
     : QDialog(pParent, Qt::MSWindowsFixedSizeDialogHint)
     , m_palette(nullptr)
     , m_Choice(EStartupChoice_Invalid)
-    , m_RecentDocSelected("")
     , m_ui(new Ui::StartupDlg)
 {
     m_ui->setupUi(this);
@@ -96,8 +95,7 @@ void CStartupDlg::OnInitDialog()
     connect(m_ui->openDocument, &ClickableLabel::clicked, this, &CStartupDlg::OnOpenDocClicked);
 
     // Load the product version
-    m_ProductVersionStr = QStringLiteral("Qt 3D Studio v")
-            + CStudioPreferences::GetVersionString();
+    m_ProductVersionStr = QStringLiteral("Qt 3D Studio v") + CStudioPreferences::GetVersionString();
     m_ui->versionStr->setText(m_ProductVersionStr);
 
     // Populate the recent document list
@@ -109,11 +107,10 @@ void CStartupDlg::OnInitDialog()
         recent->setProperty("recentIndex", theIndex);
 
         if (m_RecentDocs.size() > theIndex) {
-            QFileInfo thePath(m_RecentDocs[theIndex]);
             // Set the name
-            recent->setText(thePath.fileName());
+            recent->setText(QFileInfo(m_RecentDocs[theIndex]).fileName());
             // Set path and date to tooltip
-            QString toolTip = thePath.absoluteDir().path();
+            QString toolTip = m_RecentDocs[theIndex];
             toolTip.append(QStringLiteral("\n"));
             toolTip.append(GetFileTimeReadable(m_RecentDocs[theIndex]));
             recent->setToolTip(toolTip);
@@ -174,7 +171,6 @@ void CStartupDlg::paintEvent(QPaintEvent *event)
 
     m_palette = new QPalette;
     QPixmap pic = QPixmap(":/startup/open_dialog.png");
-    pic.setDevicePixelRatio(devicePixelRatio());
     m_palette->setBrush(QPalette::Window, pic);
     setPalette(*m_palette);
     resize(pic.size());

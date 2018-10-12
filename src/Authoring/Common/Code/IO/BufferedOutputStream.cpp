@@ -100,7 +100,7 @@ void CBufferedOutputStream::Close()
     m_OutputStream->Close();
 }
 
-bool CBufferedOutputStream::IsValid()
+bool CBufferedOutputStream::IsValid() const
 {
     if (m_OutputStream != NULL)
         return m_OutputStream->IsValid();
@@ -196,7 +196,7 @@ void CBufferedSeekOutputStream::Close()
     m_OutputStream->Close();
 }
 
-bool CBufferedSeekOutputStream::IsValid()
+bool CBufferedSeekOutputStream::IsValid() const
 {
     return m_OutputStream->IsValid();
 }

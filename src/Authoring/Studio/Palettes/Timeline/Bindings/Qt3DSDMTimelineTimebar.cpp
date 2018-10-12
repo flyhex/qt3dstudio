@@ -186,7 +186,7 @@ void Qt3DSDMTimelineTimebar::ChangeTime(long inTime, bool inSetStart)
 {
     if (m_DataHandle.Valid()) {
         ENSURE_EDITOR(QObject::tr("Time Bar Resize")).ResizeTimeRange(m_DataHandle, inTime,
-                                                                     inSetStart);
+                                                                      inSetStart);
         m_TimelineTranslationManager->GetDoc()
             ->GetCore()
             ->GetDispatch()

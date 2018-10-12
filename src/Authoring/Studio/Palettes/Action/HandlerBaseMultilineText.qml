@@ -28,12 +28,11 @@
 import QtQuick 2.6
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
-import "../controls"
 
 ScrollView {
     id: root
-    signal editingFinished()
-    signal textChanged()
+    signal editingFinished
+    signal textChanged
     property alias value: textArea.text
     property Item tabItem1: textArea
 
@@ -59,7 +58,7 @@ ScrollView {
 
         wrapMode: TextEdit.WrapAnywhere
         background: Rectangle {
-            height: textArea.height
+            anchors.fill: parent
             color: textArea.enabled ? _studioColor2 : "transparent"
             border.width: textArea.activeFocus ? 1 : 0
             border.color: textArea.activeFocus ? _selectionColor : _disabledColor

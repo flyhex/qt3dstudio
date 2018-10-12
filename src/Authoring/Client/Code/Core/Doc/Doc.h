@@ -201,8 +201,8 @@ public:
 
     // The system may be null in the case where we are running without a UI.
     Q3DStudio::IDirectoryWatchingSystem *GetDirectoryWatchingSystem();
-    bool SetDocumentPath(const Qt3DSFile &inFile);
-    Qt3DSFile GetDocumentPath() const;
+    bool SetDocumentPath(const QString &inFile);
+    QString GetDocumentPath() const;
     void setPresentationId(const QString &id);
     QString getPresentationId() const;
     Q3DStudio::CString GetDocumentDirectory() const;
@@ -212,13 +212,12 @@ public:
     QString GetResolvedPathToDoc(const QFileInfo &inPath);
     QString GetRelativePathToDoc(const QFileInfo &inPath);
 
-    Qt3DSFile CreateUntitledDocument() const;
+    QString CreateUntitledDocument() const;
 
     void CloseDocument();
-    void LoadDocument(const Qt3DSFile &inDocument);
-    void SaveDocument(const Qt3DSFile &inDocument);
+    void LoadDocument(const QString &inDocument);
+    void SaveDocument(const QString &inDocument);
     void CreateNewDocument();
-    QString GetDocumentUIAFile(bool master = false);
     // In outMap, returns datainput names found from element control
     // bindings but which are missing from (UIP) datainput list
     void UpdateDatainputMap(
@@ -237,8 +236,9 @@ public:
     bool IsModified();
     bool IsValid() const;
 
-    qt3dsdm::Qt3DSDMInstanceHandle GetInstanceFromSelectable(Q3DStudio::SSelectedValue inSelectedItem);
-    qt3dsdm::Qt3DSDMInstanceHandle GetSelectedInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle GetInstanceFromSelectable(
+            Q3DStudio::SSelectedValue inSelectedItem) const;
+    qt3dsdm::Qt3DSDMInstanceHandle GetSelectedInstance() const;
 
     void CutSelectedObject();
     void DeleteSelectedItems(bool slide = false);
@@ -263,6 +263,7 @@ public:
         CopyObject(objects);
     }
     // paste object to clipboard
+    qt3dsdm::Qt3DSDMInstanceHandle getPasteTarget(qt3dsdm::Qt3DSDMInstanceHandle selected) const;
     void PasteObject(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     void PasteObjectMaster(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     void DeleteObject(const qt3dsdm::TInstanceHandleList &inInstances);
@@ -285,7 +286,7 @@ public:
     bool CanCopyObject(const qt3dsdm::TInstanceHandleList &inInstances); // specifically for objects
     bool CanCopyKeyframe(); // specifically for keyframes
     bool CanCopyAction(); // specifically for actions
-    bool CanPasteObject(); // specifically for objects
+    bool CanPasteObject() const; // specifically for objects
     bool CanPasteKeyframe(); // specifically for keyframes
     bool CanPasteAction(); // specifically for actions
 
@@ -345,10 +346,10 @@ public:
                                            qt3dsdm::Qt3DSDMPropertyHandle>> *map) override;
     Q3DStudio::IDocumentBufferCache &GetBufferCache() override;
     Q3DStudio::IDocumentReader &GetDocumentReader() override;
-    Q3DStudio::IDocumentEditor &OpenTransaction(const Q3DStudio::CString &inCmdName,
-                                                const char *inFile, int inLine) override;
-    Q3DStudio::IDocumentEditor &MaybeOpenTransaction(const Q3DStudio::CString &cmdName,
-                                                     const char *inFile, int inLine) override;
+    Q3DStudio::IDocumentEditor &OpenTransaction(const QString &inCmdName, const char *inFile,
+                                                int inLine) override;
+    Q3DStudio::IDocumentEditor &MaybeOpenTransaction(const QString &cmdName, const char *inFile,
+                                                     int inLine) override;
     bool IsTransactionOpened() const override;
     void RollbackTransaction() override;
     void CloseTransaction() override;
@@ -489,7 +490,7 @@ protected:
     CCore *m_Core;
     bool m_IsModified;
     bool m_IsTemporary;
-    Qt3DSFile m_DocumentPath;
+    QString m_DocumentPath;
 
     CDataManager *m_DataManager; ///< Manager for handling data properties.
 

@@ -69,22 +69,13 @@ public:
                                  EExecMode inMode, const QString &viewerExeName,
                                  RemoteDeploymentSender *project = 0);
     static void DoPreviewViaConfig(Q3DStudio::CBuildConfiguration *inSelectedConfig,
-                                   const Q3DStudio::CString &inDocumentFile,
+                                   const QString &inDocumentFile,
                                    EExecMode inMode, const QString &viewerExeName,
                                    RemoteDeploymentSender *project = 0);
-    static bool viewerExists(const QString &exeName);
 
 protected:
-    static Q3DStudio::CString InterpretString(Q3DStudio::CBuildConfiguration *inSelectedConfig,
-                                              const Q3DStudio::CString &inDocumentFile,
-                                              const Q3DStudio::CString &inSourceString);
-    static bool ResolveVariable(Q3DStudio::CBuildConfiguration *inSelectedConfig,
-                                const Q3DStudio::CString &inDocumentFile,
-                                const Q3DStudio::CString &inVariable, Q3DStudio::CString &outValue);
-    static Qt3DSFile GetDocumentFile(bool &outUsingTempFile);
-    static Q3DStudio::CString GetLaunchFile(const Q3DStudio::CString &inDocFile);
     static QString getViewerFilePath(const QString &exeName);
-    static void cleanupProcess(QProcess *p, QString *pDocStr);
+    static void cleanupProcess(QProcess *p, QString *docPath);
 };
 
 #endif

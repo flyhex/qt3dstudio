@@ -41,7 +41,7 @@ public:
     virtual long Write(const void *inBuffer, long inBufferLength) = 0;
     virtual void Flush() = 0;
     virtual void Close() = 0;
-    virtual bool IsValid() = 0;
+    virtual bool IsValid() const = 0;
 };
 
 class CSeekOutputStream : public COutputStream, public Q3DStudio::ISeekable

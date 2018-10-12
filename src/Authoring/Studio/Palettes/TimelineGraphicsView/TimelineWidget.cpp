@@ -407,6 +407,9 @@ void TimelineWidget::OnNewPresentation()
 
     // Clear active slide
     m_activeSlide = qt3dsdm::Qt3DSDMSlideHandle();
+
+    // Reset timeline time
+    OnTimeChanged(0);
 }
 
 void TimelineWidget::OnClosingPresentation()
@@ -1074,7 +1077,6 @@ CDropTarget *TimelineWidget::FindDropCandidate(CPt &inMousePoint, Qt::KeyboardMo
             break;
         }
     }
-
     m_graphicsScene->updateAutoScrolling(mouseY);
 
     return theTarget;
@@ -1129,8 +1131,10 @@ void TimelineWidget::enableDnD(bool b)
     m_viewTreeHeader->setInteractive(!b);
     m_viewTreeContent->setInteractive(!b);
 
-    if (!b) // object successfully dropped on the timeline tree
+    if (!b) { // object successfully dropped on the timeline tree
         m_graphicsScene->rowMover()->end(true);
+        m_graphicsScene->stopAutoScroll();
+    }
 }
 
 Qt3DSDMTimelineItemBinding *TimelineWidget::getBindingForHandle(int handle,

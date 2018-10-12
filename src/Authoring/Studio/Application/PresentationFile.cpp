@@ -147,7 +147,8 @@ QString PresentationFile::findProjectFile(const QString &uipPath)
 // get all available child assets source paths (materials, images, effects, etc)
 // static
 void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &uipTarget,
-                                      QList<QString> &outPaths, QString &outProjPathSrc)
+                                      QList<QString> &outPaths, QString &outProjPathSrc,
+                                      QHash<QString, QString> &outPresentationNodes)
 {
     QFile file(uipTarget.filePath());
     file.open(QFile::Text | QFile::ReadOnly);
@@ -243,8 +244,7 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
 
                 if (!outPaths.contains(spPath)) {
                     outPaths.push_back(spPath);
-                    g_StudioApp.GetCore()->getProjectFile().addPresentationNode(sp->m_argsOrSrc,
-                                                                                sp->m_id);
+                    outPresentationNodes.insert(sp->m_argsOrSrc, sp->m_id);
                 }
                 continue;
             }
@@ -268,8 +268,7 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
 
                 if (!outPaths.contains(spPath)) {
                     outPaths.push_back(spPath);
-                    g_StudioApp.GetCore()->getProjectFile().addPresentationNode(sp->m_argsOrSrc,
-                                                                                sp->m_id);
+                    outPresentationNodes.insert(sp->m_argsOrSrc, sp->m_id);
                 }
             }
             continue;

@@ -51,7 +51,6 @@
 class CSceneDragListener;
 class CSelectionChangeListener;
 class CAsset;
-class Qt3DSFile;
 class CURL;
 class CPresentationChangeListener;
 class CResourceChangeListener;
@@ -110,7 +109,7 @@ public:
 
     void AddDocumentBufferCacheListener(IDocumentBufferCacheListener *inListener);
     void RemoveDocumentBufferCacheListener(IDocumentBufferCacheListener *inListener);
-    void FireDocumentBufferCacheInvalidated(const Q3DStudio::CString &inCache);
+    void FireDocumentBufferCacheInvalidated(const QString &inCache);
 
     // Scene drag
     void AddSceneDragListener(CSceneDragListener *inListener);
@@ -135,7 +134,7 @@ public:
     void FireOnLoadedSubPresentation();
     void FireOnNewPresentation();
     void FireOnClosingPresentation();
-    void FireOnSavingPresentation(const QString *inNewPresentationFile = nullptr);
+    void FireOnSavingPresentation(const QString &inNewPresentationFile);
     void FireOnExportingAsset(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     void FireOnPresentationModifiedExternally();
 
@@ -147,7 +146,7 @@ public:
 
     void AddNavigationListener(CNavigationListener *inListener);
     void RemoveNavigationListener(CNavigationListener *inListener);
-    void FireOnNavigate(const Q3DStudio::CString &inURL, bool inForceDisplay);
+    void FireOnNavigate(const QString &inURL, bool inForceDisplay);
 
     void AddFileOpenListener(CFileOpenListener *inListener);
     void RemoveFileOpenListener(CFileOpenListener *inListener);
@@ -163,7 +162,7 @@ public:
     // State Property changes
     void AddSelectedNodePropChangeListener(CSelectedNodePropChangeListener *inListener);
     void RemoveSelectedNodePropChangeListener(CSelectedNodePropChangeListener *inListener);
-    void FireOnSelectedNodePropChange(const Q3DStudio::CString &inPropertyName);
+    void FireOnSelectedNodePropChange(const QString &inPropertyName);
     void FireOnMouseDragged(bool inConstrainXAxis, bool inConstrainYAxis);
 
     // Edit Camera changes
@@ -182,9 +181,8 @@ public:
     // Cleanly display app status messages
     void AddAppStatusListener(CAppStatusListener *inListener);
     void RemoveAppStatusListener(CAppStatusListener *inListener);
-    void FireOnDisplayAppStatus(Q3DStudio::CString &inStatusMsg);
-    void FireOnProgressBegin(const Q3DStudio::CString &inActionText,
-                             const Q3DStudio::CString &inAdditionalText);
+    void FireOnDisplayAppStatus(const QString &inStatusMsg);
+    void FireOnProgressBegin(const QString &inActionText, const QString &inAdditionalText);
     void FireOnProgressEnd();
 
     // Failure notification
@@ -194,10 +192,9 @@ public:
     void FireOnPasteFail();
     void FireOnBuildConfigurationFileParseFail(const QString &inMessage);
     void FireOnSaveFail(bool inKnownError);
-    void FireOnProjectVariableFail(const Q3DStudio::CString &inMessage);
-    void FireOnErrorFail(const Q3DStudio::CString &inText);
-    void FireOnRefreshResourceFail(const Q3DStudio::CString &inResourceName,
-                                   const Q3DStudio::CString &inDescription);
+    void FireOnErrorFail(const QString &inText);
+    void FireOnRefreshResourceFail(const QString &inResourceName,
+                                   const QString &inDescription);
     void FireOnUndefinedDatainputsFail(
             const QMultiMap<QString,
                             QPair<qt3dsdm::Qt3DSDMInstanceHandle,

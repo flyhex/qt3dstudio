@@ -62,10 +62,10 @@ public:
 
     long Read(void *inBuffer, long inBufferLength) override;
     void Close() override;
-    bool IsValid() override;
+    bool IsValid() const override;
     virtual void InsertIntoBuffer(void *inData, long inDataLength);
-    Q3DStudio::CString GetMimeType() override { return L""; }
-    Q3DStudio::CString GetSource() override { return L""; }
+    QString GetMimeType() const override { return {}; }
+    QString GetSource() const override { return {}; }
 
 protected:
     long FillBuffer();

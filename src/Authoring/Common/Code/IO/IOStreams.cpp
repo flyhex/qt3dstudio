@@ -160,7 +160,7 @@ void CInStream::Close()
     m_Stream->Close();
 }
 
-bool CInStream::IsValid()
+bool CInStream::IsValid() const
 {
     return m_Stream->IsValid();
 }
@@ -248,7 +248,7 @@ void COutStream::Close()
     m_Stream->Close();
 }
 
-bool COutStream::IsValid()
+bool COutStream::IsValid() const
 {
     return m_Stream->IsValid();
 }

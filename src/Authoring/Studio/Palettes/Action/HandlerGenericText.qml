@@ -39,15 +39,18 @@ RowLayout {
     property alias validator: textField.validator
     property Item tabItem1: textField
 
-    signal editingFinished()
+    signal editingFinished
+
+    onValueChanged: {
+        textField.text = value;
+    }
 
     StyledLabel {
         id: labelField
-        text: qsTr("Argument")
     }
 
     StyledTextField {
         id: textField
-        onEditingFinished: root.editingFinished()
+        onEditingFinished: root.editingFinished();
     }
 }

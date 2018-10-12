@@ -116,8 +116,7 @@ struct SDocBufferCache : public IDocumentBufferCache
         if (m_Buffers.contains(path)) {
             m_Buffers[path].Release();
             m_Buffers.remove(path);
-            m_Doc.GetCore()->GetDispatch()
-                    ->FireDocumentBufferCacheInvalidated(CString::fromQString(path));
+            m_Doc.GetCore()->GetDispatch()->FireDocumentBufferCacheInvalidated(path);
         }
     }
 

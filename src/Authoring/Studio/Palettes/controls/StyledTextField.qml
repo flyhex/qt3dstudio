@@ -32,34 +32,86 @@ import QtQuick.Layouts 1.3
 
 TextField {
     id: styledTextFieldId
-
-    property alias backgroundColor: textBackground.color
     property bool ignoreHotkeys: true
+    property bool textChanged: false
 
+    signal editingFinished
+
+    selectByMouse: true
+    text: ""
     Layout.preferredWidth: _valueWidth
     Layout.preferredHeight: _controlBaseHeight
-    horizontalAlignment: TextInput.AlignRight
-    verticalAlignment: TextInput.AlignVCenter
 
     topPadding: 0
     bottomPadding: 0
     rightPadding: 6
 
-    selectByMouse: true
+    activeFocusOnPress: false
+
+    horizontalAlignment: TextInput.AlignRight
+    verticalAlignment: TextInput.AlignVCenter
+
     selectionColor: _selectionColor
     selectedTextColor: _textColor
-
     font.pixelSize: _fontSize
     color: _textColor
     background: Rectangle {
-        id: textBackground
         color: styledTextFieldId.enabled ? _studioColor2 : "transparent"
         border.width: styledTextFieldId.activeFocus ? 1 : 0
         border.color: styledTextFieldId.activeFocus ? _selectionColor : _disabledColor
     }
 
+    cursorVisible: false
     onActiveFocusChanged: {
-        if (activeFocus)
+        if (!activeFocus && textChanged) {
+            styledTextFieldId.editingFinished();
+            textChanged = false;
+        }
+
+        if (focusReason === Qt.OtherFocusReason) {
+            select(0, 0);
+            cursorVisible = false;
+        } else if (activeFocus) {
             selectAll();
+        }
+    }
+
+    MouseArea {
+        id: mouseArea
+        property int clickedPos: 0
+
+        acceptedButtons: Qt.LeftButton
+        preventStealing: true
+        anchors.fill: parent
+        onPressed: {
+            if (parent.activeFocus) {
+                clickedPos = parent.positionAt(mouse.x, mouse.y);
+                parent.cursorPosition = clickedPos;
+            } else {
+                parent.forceActiveFocus();
+            }
+        }
+
+        onClicked: {
+            if (!parent.cursorVisible) {
+                parent.cursorVisible = true;
+                parent.selectAll();
+            }
+        }
+
+        onDoubleClicked: {
+            parent.selectAll();
+            parent.cursorVisible = true;
+        }
+    }
+
+    onTextChanged: textChanged = true;
+
+    Keys.onPressed: {
+        if (textChanged && (event.key === Qt.Key_Return || event.key === Qt.Key_Enter)) {
+            event.accepted = true
+            styledTextFieldId.editingFinished();
+            textChanged = false;
+        }
     }
 }

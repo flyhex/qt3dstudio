@@ -175,6 +175,7 @@ private:
         QString m_name;
         QString m_relativePath;
         QMap<QString, QString> m_values;
+        QMap<QString, QMap<QString, QString>> m_textureValues;
     };
 
     std::vector<MaterialEntry> m_materials;

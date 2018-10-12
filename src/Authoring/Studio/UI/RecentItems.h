@@ -33,7 +33,6 @@
 #pragma once
 
 #include <QObject>
-
 #include <vector>
 
 QT_FORWARD_DECLARE_CLASS(QMenu)
@@ -42,39 +41,28 @@ class CRecentItems : public QObject
 {
     Q_OBJECT
 
-    typedef std::vector<QString> TFileList;
-
 public:
-    static const QString RECENTITEM_KEY;
-    static const QString RECENTIMPORT_KEY;
-    static const QString RECENTITEM_VALID;
+    static const int MAX_ITEMS;
 
 Q_SIGNALS:
     void openRecent(int index);
 public:
-    CRecentItems(QMenu *inMenu, long inCommandID,
-                 QString inPreferenceKey = RECENTITEM_KEY);
+    CRecentItems(QMenu *inMenu);
     virtual ~CRecentItems();
 
     void AddRecentItem(const QString &inItem);
-    void RemoveRecentItem(const QString &inItem);
+    void RemoveRecentItem(const QString &inItem, bool rebuild = true);
 
-    QString GetItem(long inIndex);
+    QString GetItem(long inIndex) const;
     long GetItemCount() const { return (long)m_RecentItems.size(); }
 
 protected:
-    void ClearMenu();
     void ReconstructList();
     void RebuildList();
-    void SaveRecentList();
-    void handleAboutToShow();
 
-    TFileList m_RecentItems;
+    std::vector<QString> m_RecentItems;
 
-    long m_CommandID;
-    long m_ValidItems;
     QMenu *m_Menu;
-    QString m_PreferenceKey;
 
 private Q_SLOTS:
     void onTriggerRecent();

@@ -37,12 +37,15 @@ RowLayout {
     property alias value: multiLine.value
     property alias tabItem1: multiLine.tabItem1
 
-    signal editingFinished()
-    signal textChanged()
+    signal editingFinished
+    signal textChanged
+
+    onValueChanged: {
+        multiLine.value = value;
+    }
 
     StyledLabel {
         id: labelField
-        text: qsTr("Argument")
     }
 
     HandlerBaseMultilineText {
@@ -51,9 +54,7 @@ RowLayout {
         Layout.preferredWidth: _valueWidth
         Layout.preferredHeight: _controlBaseHeight * 3
 
-        onTextChanged: root.textChanged()
-        onEditingFinished: root.editingFinished()
-
+        onTextChanged: root.textChanged();
+        onEditingFinished: root.editingFinished();
     }
-
 }

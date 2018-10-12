@@ -59,9 +59,10 @@ linux-clang {
 macos {
     DEFINES += _MACOSX _LINUXPLATFORM WIDE_IS_DIFFERENT_TYPE_THAN_CHAR16_T
     INCLUDEPATH += /usr/local/include
-}
 
-clang {
+# macOS builds treat most warnings as errors to prevent slipping more warnings
+# in to the code
+
 # Suppress large number of warnings from the Qt 3D Studio Code.
 # Suppressions have been reported in JIRA with these bugs:
 # QT3DS-2214 -Wno-unused-local-typedefs
@@ -85,6 +86,7 @@ clang {
 # QT3DS-2249 -Wno-tautological-compare
 # QT3DS-2251 -Wno-tautological-constant-out-of-range-compare
     QMAKE_CXXFLAGS_WARN_ON = -Wall \
+        -Werror \
         -Wno-unknown-pragmas \
         -Wno-unused-local-typedefs \
         -Wno-inconsistent-missing-override \
@@ -105,7 +107,122 @@ clang {
         -Wno-pointer-bool-conversion \
         -Wno-self-assign \
         -Wno-tautological-compare \
-        -Wno-tautological-constant-out-of-range-compare
+        -Wno-tautological-constant-out-of-range-compare \
+        -Wno-mismatched-tags \
+        -Wno-pragma-pack \
+        -Wno-error=unused-local-typedefs \
+        -Wno-error=inconsistent-missing-override \
+        -Wno-error=reorder \
+        -Wno-error=format \
+        -Wno-error=unused-function \
+        -Wno-error=unused-value \
+        -Wno-error=delete-non-virtual-dtor \
+        -Wno-error=unused-variable \
+        -Wno-error=overloaded-virtual \
+        -Wno-error=unused-private-field \
+        -Wno-error=comment \
+        -Wno-error=enum-compare \
+        -Wno-error=int-to-pointer-cast \
+        -Wno-error=int-to-void-pointer-cast \
+        -Wno-error=unused-lambda-capture \
+        -Wno-error=deprecated-declarations \
+        -Wno-error=pointer-bool-conversion \
+        -Wno-error=self-assign \
+        -Wno-error=tautological-compare \
+        -Wno-error=tautological-constant-out-of-range-compare \
+        -Wno-error=switch \
+        -Wno-error=mismatched-tags \
+        -Wno-error=logical-op-parentheses \
+        -Wno-error=pragmas \
+        -Wno-error=pragma-pack \
+        -Wno-error=mismatched-tags
+
+    QMAKE_CFLAGS_WARN_ON = -Wall \
+        -Werror \
+        -Wno-unknown-pragmas \
+        -Wno-unused-local-typedefs \
+        -Wno-inconsistent-missing-override \
+        -Wno-reorder \
+        -Wno-format \
+        -Wno-unused-function \
+        -Wno-unused-value \
+        -Wno-delete-non-virtual-dtor \
+        -Wno-unused-variable \
+        -Wno-overloaded-virtual \
+        -Wno-unused-private-field \
+        -Wno-comment \
+        -Wno-enum-compare \
+        -Wno-int-to-pointer-cast \
+        -Wno-int-to-void-pointer-cast \
+        -Wno-unused-lambda-capture \
+        -Wno-deprecated-declarations \
+        -Wno-pointer-bool-conversion \
+        -Wno-self-assign \
+        -Wno-tautological-compare \
+        -Wno-tautological-constant-out-of-range-compare \
+        -Wno-mismatched-tags \
+        -Wno-pragma-pack \
+        -Wno-error=unused-local-typedefs \
+        -Wno-error=inconsistent-missing-override \
+        -Wno-error=reorder \
+        -Wno-error=format \
+        -Wno-error=unused-function \
+        -Wno-error=unused-value \
+        -Wno-error=delete-non-virtual-dtor \
+        -Wno-error=unused-variable \
+        -Wno-error=overloaded-virtual \
+        -Wno-error=unused-private-field \
+        -Wno-error=comment \
+        -Wno-error=enum-compare \
+        -Wno-error=int-to-pointer-cast \
+        -Wno-error=int-to-void-pointer-cast \
+        -Wno-error=unused-lambda-capture \
+        -Wno-error=deprecated-declarations \
+        -Wno-error=pointer-bool-conversion \
+        -Wno-error=self-assign \
+        -Wno-error=tautological-compare \
+        -Wno-error=tautological-constant-out-of-range-compare \
+        -Wno-error=switch \
+        -Wno-error=mismatched-tags \
+        -Wno-error=logical-op-parentheses \
+        -Wno-error=pragmas \
+        -Wno-error=pragma-pack \
+        -Wno-error=mismatched-tags
+
+# Suppress the huge pile of Qt related warnings on "direct access in function
+# from file to global weak symbol". These arise when not using devbuilds of Qt.
+    QMAKE_CXXFLAGS += -fvisibility=hidden
+    QMAKE_CFLAGS += -fvisibility=hidden
+}
+
+clang {
+# Suppress large number of warnings from the Qt 3D Studio Code.
+# Suppressions have been reported in JIRA with bugs
+    QMAKE_CXXFLAGS_WARN_ON = -Wall \
+        -Wno-unknown-pragmas \
+        -Wno-unused-local-typedefs \
+        -Wno-inconsistent-missing-override \
+        -Wno-reorder \
+        -Wno-format \
+        -Wno-unused-function \
+        -Wno-unused-value \
+        -Wno-delete-non-virtual-dtor \
+        -Wno-unused-variable \
+        -Wno-overloaded-virtual \
+        -Wno-unused-private-field \
+        -Wno-comment \
+        -Wno-enum-compare \
+        -Wno-int-to-pointer-cast \
+        -Wno-int-to-void-pointer-cast \
+        -Wno-unused-lambda-capture \
+        -Wno-deprecated-declarations \
+        -Wno-pointer-bool-conversion \
+        -Wno-self-assign \
+        -Wno-tautological-compare \
+        -Wno-tautological-constant-out-of-range-compare \
+        -Wno-mismatched-tags \
+        -Wno-pragma-pack
+
     QMAKE_CFLAGS_WARN_ON = -Wall \
         -Wno-unknown-pragmas \
         -Wno-unused-local-typedefs \
@@ -127,7 +244,9 @@ clang {
         -Wno-pointer-bool-conversion \
         -Wno-self-assign \
         -Wno-tautological-compare \
-        -Wno-tautological-constant-out-of-range-compare
+        -Wno-tautological-constant-out-of-range-compare \
+        -Wno-mismatched-tags \
+        -Wno-pragma-pack
 
 # Suppress the huge pile of Qt related warnings on "direct access in function
 # from file to global weak symbol". These arise when not using devbuilds of Qt.

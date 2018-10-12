@@ -78,7 +78,6 @@ SOURCES += \
     Code/Memory/MemoryObject.cpp \
     Code/Serialize/FormattedInputStream.cpp \
     Code/Serialize/FormattedOutputStream.cpp \
-    Code/Serialize/PreferencesSerializer.cpp \
     ../Client/Code/Core/Runtime2Integration/Q3DSStringTable.cpp
 
 HEADERS = Code/Literals.h \

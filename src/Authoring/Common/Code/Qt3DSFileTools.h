@@ -97,8 +97,6 @@ public:
     void SetIdentifier(const CString &identifier)
     { m_identifier = identifier.toQString(); }
 
-    static CString GetModuleFilePath();
-
     void ConvertToRelative(const CFilePath &inBaseAbsolute);
     static CFilePath GetRelativePathFromBase(const CFilePath &inBase, const CFilePath &inPath)
     {
@@ -199,7 +197,7 @@ public:
     SFileData GetFileData() const;
 
     // Get the directory where applications can write data.
-    static CFilePath GetUserApplicationDirectory();
+    static QString GetUserApplicationDirectory();
 
 private:
     void normalizeAndSetPath(const QString& path);

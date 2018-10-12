@@ -65,8 +65,7 @@ ColumnLayout {
             readonly property var actionProperty: parent ? _parentView.property : null
 
             label: parent ? parent.label : ""
-            value: propertyModel && !_parentView.propertyValueInvalid && actionProperty
-                   && actionProperty.type === DataModelDataType.String
+            value: propertyModel && !_parentView.propertyValueInvalid
                    && propertyModel.value !== undefined ? propertyModel.value : ""
             onEditingFinished: _parentView.setArgumentValue(propertyModel.valueHandle, value)
         }
@@ -267,6 +266,7 @@ ColumnLayout {
                     return comboPropertyComponent;
                 case AdditionalMetaDataType.Import:
                 case AdditionalMetaDataType.Renderable:
+                case AdditionalMetaDataType.String:
                     return genericTextComponent;
                 default:
                     console.warn("KDAB_TODO implement property handler for additional type: ",

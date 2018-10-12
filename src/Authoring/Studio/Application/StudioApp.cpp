@@ -199,7 +199,6 @@ int main(int argc, char *argv[])
 #include "Qt3DSDMDataCore.h"
 #include "IDirectoryWatchingSystem.h"
 #include "ITickTock.h"
-#include "Qt3DSFileTools.h"
 #include "foundation/Qt3DSLogging.h"
 
 CStudioApp g_StudioApp;
@@ -217,7 +216,7 @@ void Qt3DSAssert(const char *exp, const char *file, int line, bool *ignore)
 }
 }
 
-QFileInfo CStudioApp::applicationDirectory()
+QString CStudioApp::applicationDirectory()
 {
 #ifdef Q_OS_MACOS
     QDir appDir(qApp->applicationDirPath());
@@ -225,9 +224,9 @@ QFileInfo CStudioApp::applicationDirectory()
         appDir.cdUp();
         appDir.cd(QStringLiteral("Resources"));
     }
-    return QFileInfo(appDir.absolutePath());
+    return appDir.absolutePath();
 #else
-    return QFileInfo(qApp->applicationDirPath());
+    return qApp->applicationDirPath();
 #endif
 }
 
@@ -315,24 +314,20 @@ bool CStudioApp::initInstance(const QCommandLineParser &parser)
     QApplication::setApplicationVersion(CStudioPreferences::GetVersionString());
 
     qCInfo(qt3ds::TRACE_INFO) << "Studio: " << QApplication::applicationFilePath();
-    qCInfo(qt3ds::TRACE_INFO) << "Version: "
-                              << CStudioPreferences::GetVersionString();
+    qCInfo(qt3ds::TRACE_INFO) << "Version: " << CStudioPreferences::GetVersionString();
 
     // Silent is ignored for everything but create
     m_isSilent = parser.isSet("silent") && parser.isSet("create");
 
-    CFilePath thePreferencesPath = CFilePath::GetUserApplicationDirectory();
-    thePreferencesPath = CFilePath::CombineBaseAndRelative(
-                thePreferencesPath, CFilePath(L"Qt3DSComposer\\Preferences.setting"));
-    CPreferences::SetPreferencesFile(thePreferencesPath.toQString());
-
     // Initialize help file paths
-    m_helpFilePath = Qt3DSFile::GetApplicationDirectory().GetPath().toQString() +
-            QStringLiteral("/../doc/qt3dstudio/qt3dstudio-index.html");
-    m_gettingStartedFilePath = Qt3DSFile::GetApplicationDirectory().GetPath().toQString() +
-            QStringLiteral("/../doc/qt3dstudio/getting-started.html");
+    m_helpFilePath = Qt3DSFile::GetApplicationDirectory()
+                     + QStringLiteral("/../doc/qt3dstudio/qt3dstudio-index.html");
+    m_gettingStartedFilePath = Qt3DSFile::GetApplicationDirectory()
+                               + QStringLiteral("/../doc/qt3dstudio/getting-started.html");
 
-    CStudioPreferences::LoadPreferences();
+    QString thePreferencesPath = CFilePath::GetUserApplicationDirectory()
+                                 + QStringLiteral("/Qt3DSComposer/Preferences.setting");
+    CStudioPreferences::LoadPreferences(thePreferencesPath);
 
     m_dialogs = new CDialogs(!m_isSilent);
 
@@ -415,9 +410,9 @@ bool CStudioApp::handleWelcomeRes(int res, bool recursive)
     switch (res) {
     case StudioTutorialWidget::createNewResult: {
         if (PerformSavePrompt()) {
-            Qt3DSFile theFile(m_dialogs->GetNewDocumentChoice(getMostRecentProjectParentDir()));
-            if (theFile.GetPath() != "") {
-                if (!m_core->OnNewDocument(theFile.GetAbsolutePath().toQString(), true)) {
+            QString theFile(m_dialogs->GetNewDocumentChoice(getMostRecentProjectParentDir()));
+            if (!theFile.isEmpty()) {
+                if (!m_core->OnNewDocument(theFile, true)) {
                     // Invalid filename, show a message box and the startup dialog
                     showInvalidFilenameWarning();
                     theReturn = showStartupDialog();
@@ -443,19 +438,18 @@ bool CStudioApp::handleWelcomeRes(int res, bool recursive)
             QFileInfo theFile = QFileInfo(QStringLiteral("."));
 
 #ifndef Q_OS_MACOS
-            filePath = applicationDirectory().path() +
-                    QStringLiteral("/../examples/studio3d/SampleProject");
+            filePath = applicationDirectory()
+                    + QStringLiteral("/../examples/studio3d/SampleProject");
 
             if (!filePath.exists()) {
-                filePath = applicationDirectory().path() +
-                        QStringLiteral("/../examples/studio3d");
+                filePath = applicationDirectory() + QStringLiteral("/../examples/studio3d");
 #else
-            filePath = applicationDirectory().path() +
-                    QStringLiteral("/../../../../examples/studio3d/SampleProject");
+            filePath = applicationDirectory()
+                    + QStringLiteral("/../../../../examples/studio3d/SampleProject");
 
             if (!filePath.exists()) {
-                filePath = applicationDirectory().path() +
-                        QStringLiteral("/../../../../examples/studio3d");
+                filePath = applicationDirectory()
+                        + QStringLiteral("/../../../../examples/studio3d");
 #endif
                 if (!filePath.exists())
                     filePath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
@@ -575,9 +569,9 @@ bool CStudioApp::showStartupDialog()
             break;
 
         case CStartupDlg::EStartupChoice_NewDoc: {
-            Qt3DSFile theFile = m_dialogs->GetNewDocumentChoice(getMostRecentProjectParentDir());
-            if (theFile.GetPath() != "") {
-                 if (!m_core->OnNewDocument(theFile.GetAbsolutePath().toQString(), true)) {
+            QString theFile = m_dialogs->GetNewDocumentChoice(getMostRecentProjectParentDir());
+            if (!theFile.isEmpty()) {
+                 if (!m_core->OnNewDocument(theFile, true)) {
                      // Invalid filename, show a message box and the dialog again
                      showInvalidFilenameWarning();
                      theReturn = showStartupDialog();
@@ -589,9 +583,9 @@ bool CStudioApp::showStartupDialog()
         } break;
 
         case CStartupDlg::EStartupChoice_OpenDoc: {
-            Qt3DSFile theFile = m_dialogs->GetFileOpenChoice(getMostRecentDirectory());
-            if (theFile.GetPath() != "") {
-                OnLoadDocument(theFile.GetAbsolutePath().toQString());
+            QString theFile = m_dialogs->GetFileOpenChoice(getMostRecentDirectory());
+            if (!theFile.isEmpty()) {
+                OnLoadDocument(theFile);
                 theReturn = true;
             } else {
                 // User Cancels the dialog. Show startup dialog again.
@@ -600,9 +594,9 @@ bool CStudioApp::showStartupDialog()
         } break;
 
         case CStartupDlg::EStartupChoice_OpenRecent: {
-            QFileInfo theFile = theStartupDlg.GetRecentDoc();
-            if (!theFile.path().isEmpty()) {
-                OnLoadDocument(theFile.absoluteFilePath());
+            QString theFile = theStartupDlg.GetRecentDoc();
+            if (!theFile.isEmpty()) {
+                OnLoadDocument(theFile);
                 theReturn = true;
             } else {
                 // User Cancels the dialog. Show startup dialog again.
@@ -687,12 +681,17 @@ bool CStudioApp::createAndRunApplication(const QString &filename, const QString 
     initCore();
     // Append .uip if it is not included in the filename
     QString actualFilename = filename;
-    if (!actualFilename.endsWith(QStringLiteral(".uip")))
-        actualFilename.append(QStringLiteral(".uip"));
+    if (!actualFilename.endsWith(QLatin1String(".uip")))
+        actualFilename.append(QLatin1String(".uip"));
+
+    QString actualFolder = folder;
+    if (!actualFolder.endsWith(QLatin1String("/")))
+        actualFilename.append(QLatin1String("/"));
+
     // Create presentation
-    QString theFile = folder + QStringLiteral("/") + actualFilename;
-    if (!theFile.isEmpty()) {
-        theSuccess = m_core->OnNewDocument(theFile, isNewProject, m_isSilent);
+    QString filePath = actualFolder + actualFilename;
+    if (!filePath.isEmpty()) {
+        theSuccess = m_core->OnNewDocument(filePath, isNewProject, m_isSilent);
         if (!theSuccess)
             return false;
 
@@ -741,8 +740,8 @@ struct SIImportFailedHandler : public Q3DStudio::IImportFailedHandler
         : m_Dialogs(dialogs)
     {
     }
-    void DisplayImportFailed(const QString &inDocumentPath,
-                             const QString &inDescription, bool inWarningsOnly) override
+    void DisplayImportFailed(const QString &inDocumentPath, const QString &inDescription,
+                             bool inWarningsOnly) override
     {
         m_Dialogs.DisplayImportFailed(QUrl(inDocumentPath), inDescription, inWarningsOnly);
     }
@@ -757,12 +756,12 @@ struct SIDeletingReferencedObjectHandler : public Q3DStudio::IDeletingReferenced
     {
     }
 
-    void DisplayMessageBox(const Q3DStudio::CString &inDescription) override
+    void DisplayMessageBox(const QString &inDescription) override
     {
         QString theTitle = QObject::tr("Warning");
         QString theMessage = QObject::tr("The following objects have action(s) that reference this "
                                          "object and/or its descendants:\n%1\nPlease fix the "
-                                         "action(s) accordingly.").arg(inDescription.toQString());
+                                         "action(s) accordingly.").arg(inDescription);
 
         m_Dialogs.DisplayMessageBox(theTitle, theMessage, Qt3DSMessageBox::ICON_WARNING, false);
     }
@@ -777,11 +776,9 @@ struct SIMoveRenameHandler : public Q3DStudio::IMoveRenameHandler
     {
     }
 
-    void displayMessageBox(const Q3DStudio::CString &origName,
-                           const Q3DStudio::CString &newName) override
+    void displayMessageBox(const QString &origName, const QString &newName) override
     {
-        g_StudioApp.GetDialogs()->DisplayObjectRenamed(
-                    origName.toQString(), newName.toQString());
+        g_StudioApp.GetDialogs()->DisplayObjectRenamed(origName, newName);
     }
 };
 
@@ -827,7 +824,7 @@ void CStudioApp::handleMessageReceived(const QString &message, QObject *socket)
             QFileInfo checkFile(checkPath);
             QString docPath;
             if (m_core)
-                docPath = m_core->GetDoc()->GetDocumentPath().GetAbsolutePath().toQString();
+                docPath = m_core->GetDoc()->GetDocumentPath();
             QFileInfo openFile(docPath);
             if (!checkPath.isEmpty() && checkFile == openFile) {
                 lsocket->write(SharedTools::QtLocalPeer::acceptReply(),
@@ -1240,8 +1237,8 @@ bool CStudioApp::IsPlaying()
 void CStudioApp::OnRevert()
 {
     if (!m_core->GetDoc()->IsModified() || m_dialogs->ConfirmRevert()) {
-        Qt3DSFile theCurrentDoc = m_core->GetDoc()->GetDocumentPath();
-        OnLoadDocument(theCurrentDoc.GetAbsolutePath().toQString());
+        QString theCurrentDoc = m_core->GetDoc()->GetDocumentPath();
+        OnLoadDocument(theCurrentDoc);
     }
 }
 
@@ -1249,9 +1246,9 @@ void CStudioApp::OnRevert()
 /**
  * Check to see if it is possible to perform a revert.
  */
-bool CStudioApp::CanRevert()
+bool CStudioApp::CanRevert() const
 {
-    return m_core->GetDoc()->IsModified() && m_core->GetDoc()->GetDocumentPath().GetPath() != "";
+    return m_core->GetDoc()->IsModified() && m_core->GetDoc()->IsValid();
 }
 
 //==============================================================================
@@ -1555,7 +1552,7 @@ bool CStudioApp::OnSave(bool autosave)
     } else {
         // Compose autosave filename (insert _autosave before extension)
         QString autosaveFile = theCurrentDoc.GetPath().toQString();
-        int insertionPoint = autosaveFile.lastIndexOf(QStringLiteral(".uip"));
+        int insertionPoint = autosaveFile.lastIndexOf(QLatin1String(".uip"));
         autosaveFile.insert(insertionPoint, QStringLiteral("_autosave"));
 
         if (autosave) {
@@ -1580,9 +1577,9 @@ bool CStudioApp::OnSave(bool autosave)
  */
 bool CStudioApp::OnSaveAs()
 {
-    Qt3DSFile theFile = m_dialogs->GetSaveAsChoice();
-    if (theFile.GetPath() != "") {
-        m_core->OnSaveDocument(theFile.GetAbsolutePath().toQString());
+    QString theFile = m_dialogs->GetSaveAsChoice();
+    if (!theFile.isEmpty()) {
+        m_core->OnSaveDocument(theFile);
         return true;
     }
     return false;
@@ -1597,10 +1594,10 @@ bool CStudioApp::OnSaveAs()
  */
 bool CStudioApp::OnSaveCopy()
 {
-    Qt3DSFile theFile = m_dialogs->GetSaveAsChoice();
-    if (theFile.GetPath() != "") {
+    QString theFile = m_dialogs->GetSaveAsChoice();
+    if (!theFile.isEmpty()) {
         // Send in a "true" to the save function to indicate this is a copy
-        m_core->OnSaveDocument(theFile.GetAbsolutePath().toQString(), true);
+        m_core->OnSaveDocument(theFile, true);
         return true;
     }
     return false;
@@ -1633,19 +1630,18 @@ bool CStudioApp::OnLoadDocument(const QString &inDocument, bool inShowStartupDia
     QString theLoadErrorParameter;
     QString theErrorText;
     QString loadFile = resolvePresentationFile(inDocument);
-    Qt3DSFile loadDocument(CString::fromQString(loadFile));
+    QFileInfo loadFileInfo(loadFile);
 
-    m_core->GetDispatch()->FireOnProgressBegin(CString::fromQString(QObject::tr("Loading ")),
-                                               loadDocument.GetName());
+    m_core->GetDispatch()->FireOnProgressBegin(QObject::tr("Loading "), inDocument);
 
     // Make sure scene is visible
     if (m_views)
         m_views->getMainFrame()->showScene();
 
     try {
-        m_core->getProjectFile().initProjectFile(loadDocument.GetAbsolutePath().toQString());
-        OnLoadDocumentCatcher(loadDocument);
-        m_core->GetDispatch()->FireOnOpenDocument(loadDocument.GetAbsolutePath().toQString(), true);
+        m_core->getProjectFile().initProjectFile(loadFile);
+        OnLoadDocumentCatcher(loadFile);
+        m_core->GetDispatch()->FireOnOpenDocument(loadFile, true);
         // Loading was successful
         theLoadResult = true;
     } catch (ProjectFileNotFoundException &) {
@@ -1661,16 +1657,14 @@ bool CStudioApp::OnLoadDocument(const QString &inDocument, bool inShowStartupDia
     } catch (CLoadReferencedFileException &inError) {
         // referenced files (e.g. Data Files) failed to load
         theErrorText = tr("%1 failed to load due to invalid referenced file: %2.").arg(
-                    loadDocument.GetName().toQString(),
-                    Q3DStudio::CString(inError.GetFilePath()).toQString());
-        const wchar_t *theDesc = inError.GetDescription();
-        if (theDesc && wcslen(theDesc) > 0) {
+                    loadFileInfo.completeBaseName(), inError.GetFilePath());
+        const QString theDesc = inError.GetDescription();
+        if (!theDesc.isEmpty()) {
             // append any description is provided
-            theErrorText += QStringLiteral("\n")
-                    + Q3DStudio::CString(inError.GetDescription()).toQString();
+            theErrorText += QStringLiteral("\n") + inError.GetDescription();
         }
     } catch (CIOException &) { // provide specific error message if possible
-        if (loadDocument.Exists() == false)
+        if (!loadFileInfo.exists())
             theLoadErrorParameter = tr(" does not exist.");
         qCCritical(qt3ds::INTERNAL_ERROR)
                 << "Failed to load document, IO error (file may be unreadable or nonexistent)";
@@ -1694,10 +1688,9 @@ bool CStudioApp::OnLoadDocument(const QString &inDocument, bool inShowStartupDia
         if (!theErrorText.isEmpty())
             m_dialogs->DisplayKnownErrorDialog(theErrorText);
         else
-            m_dialogs->DisplayLoadingPresentationFailed(loadDocument, theLoadErrorParameter);
+            m_dialogs->DisplayLoadingPresentationFailed(loadFileInfo, theLoadErrorParameter);
 
-        m_core->GetDispatch()->FireOnOpenDocument(
-                    loadDocument.GetAbsolutePath().toQString(), false);
+        m_core->GetDispatch()->FireOnOpenDocument(loadFile, false);
 
         // Show startup dialog
         if (inShowStartupDialogOnError) {
@@ -1705,7 +1698,7 @@ bool CStudioApp::OnLoadDocument(const QString &inDocument, bool inShowStartupDia
                 qApp->quit();
         }
     } else {
-        m_dialogs->ResetSettings(loadDocument.GetPath());
+        m_dialogs->ResetSettings(loadFile);
         m_core->getProjectFile().updateDocPresentationId();
         m_core->getProjectFile().loadSubpresentationsAndDatainputs(m_subpresentations,
                                                                    m_dataInputDialogItems);
@@ -1813,13 +1806,33 @@ QString CStudioApp::getMostRecentProjectParentDir() const
     return parentDirectory;
 }
 
-//=============================================================================
+bool CStudioApp::isQmlStream(const QString &fileName)
+{
+    bool retval = false;
+    if (m_qmlStreamMap.contains(fileName)) {
+        retval = m_qmlStreamMap[fileName];
+    } else {
+        if (!fileName.endsWith(QLatin1String(".qml"))) {
+            retval = false;
+        } else {
+            QQmlApplicationEngine qmlEngine(fileName);
+            if (qmlEngine.rootObjects().size() > 0) {
+                const char *rootClassName = qmlEngine.rootObjects().at(0)
+                                            ->metaObject()->superClass()->className();
+                retval = strcmp(rootClassName, "Q3DStudio::Q3DSQmlBehavior") != 0;
+            }
+        }
+        m_qmlStreamMap.insert(fileName, retval);
+    }
+    return retval;
+}
+
 /**
  * Called by OnLoadDocument, to allow the error reporting to be inserted.
  * Because of the nature of the error reporting, OnLoadDocument has to have
  * a certain structure that limits it (C type variables, no object destructors).
  */
-void CStudioApp::OnLoadDocumentCatcher(const Qt3DSFile &inDocument)
+void CStudioApp::OnLoadDocumentCatcher(const QString &inDocument)
 {
     {
         CDispatchDataModelNotificationScope __scope(*m_core->GetDispatch());
@@ -1835,9 +1848,9 @@ void CStudioApp::OnLoadDocumentCatcher(const Qt3DSFile &inDocument)
 void CStudioApp::OnFileOpen()
 {
     if (PerformSavePrompt()) {
-        Qt3DSFile theFile = m_dialogs->GetFileOpenChoice(getMostRecentDirectory());
-        if (theFile.GetPath() != "")
-            OnLoadDocument(theFile.GetAbsolutePath().toQString());
+        QString theFile = m_dialogs->GetFileOpenChoice(getMostRecentDirectory());
+        if (!theFile.isEmpty())
+            OnLoadDocument(theFile);
     }
 }
 
@@ -1848,38 +1861,26 @@ void CStudioApp::OnFileOpen()
 QString CStudioApp::OnProjectNew()
 {
     if (PerformSavePrompt()) {
-        Qt3DSFile theFile = m_dialogs->GetNewDocumentChoice(getMostRecentProjectParentDir(), true);
-        if (theFile.GetPath() != "") {
-            if (!m_core->OnNewDocument(theFile.GetAbsolutePath().toQString(), true))
+        QString theFile = m_dialogs->GetNewDocumentChoice(getMostRecentProjectParentDir(), true);
+        if (!theFile.isEmpty()) {
+            if (!m_core->OnNewDocument(theFile, true))
                 showInvalidFilenameWarning();
-        } else {
-            return theFile.GetName().toQString();
         }
     }
-    return QString();
+    return {};
 }
 
 /**
  * Create a new presentation
  * this creates a .uip file
  */
-QString CStudioApp::OnFileNew()
+void CStudioApp::OnFileNew()
 {
     if (PerformSavePrompt()) {
-        Qt3DSFile theFile = m_dialogs->GetNewDocumentChoice(getMostRecentDirectory(), false);
-        if (theFile.GetPath() != "") {
-            if (!m_core->OnNewDocument(theFile.GetAbsolutePath().toQString(), false)) {
-                showInvalidFilenameWarning();
-            } else {
-                m_core->getProjectFile().loadSubpresentationsAndDatainputs(m_subpresentations,
-                                                                           m_dataInputDialogItems);
-                getRenderer().RegisterSubpresentations(m_subpresentations);
-            }
-        } else {
-            return theFile.GetName().toQString();
-        }
+        QString theFile = m_dialogs->GetNewDocumentChoice(getMostRecentDirectory(), false);
+        if (!theFile.isEmpty() && !m_core->OnNewDocument(theFile, false))
+            showInvalidFilenameWarning();
     }
-    return QString();
 }
 
 bool CStudioApp::IsAuthorZoom() const
@@ -1908,13 +1909,13 @@ void CStudioApp::OnAsynchronousCommand(CCmd *inCmd)
     CMsgRouter::GetInstance()->SendCommand(inCmd, m_core);
 }
 
-void CStudioApp::OnDisplayAppStatus(Q3DStudio::CString &inStatusMsg)
+void CStudioApp::OnDisplayAppStatus(const QString &inStatusMsg)
 {
     // Do nothing, it was used to show this in the status bar
 }
 
-void CStudioApp::OnProgressBegin(const Q3DStudio::CString &inActionText,
-                                 const Q3DStudio::CString &inAdditionalText)
+void CStudioApp::OnProgressBegin(const QString &inActionText,
+                                 const QString &inAdditionalText)
 {
     m_isOnProgress = true;
     m_dialogs->DisplayProgressScreen(inActionText, inAdditionalText);
@@ -1954,24 +1955,17 @@ void CStudioApp::OnSaveFail(bool inKnownError)
         m_dialogs->DisplayKnownErrorDialog(tr("Unknown error encountered while saving."));
 }
 
-void CStudioApp::OnProjectVariableFail(const Q3DStudio::CString &inMessage)
+void CStudioApp::OnErrorFail(const QString &inText)
 {
-    m_dialogs->DisplayEnvironmentVariablesError(inMessage);
+    qCCritical(qt3ds::INTERNAL_ERROR) << inText;
+    m_dialogs->DisplayMessageBox(tr("Qt 3D Studio"), inText, Qt3DSMessageBox::ICON_ERROR, false);
 }
 
-void CStudioApp::OnErrorFail(const Q3DStudio::CString &inText)
-{
-    qCCritical(qt3ds::INTERNAL_ERROR) << inText.GetCharStar();
-    m_dialogs->DisplayMessageBox(tr("Qt 3D Studio"), inText.toQString(),
-                                 Qt3DSMessageBox::ICON_ERROR, false);
-}
-
-void CStudioApp::OnRefreshResourceFail(const Q3DStudio::CString &inResourceName,
-                                       const Q3DStudio::CString &inDescription)
+void CStudioApp::OnRefreshResourceFail(const QString &inResourceName, const QString &inDescription)
 {
     qCCritical(qt3ds::INTERNAL_ERROR) << "Failed to refresh resource: "
-                                      << inResourceName.GetCharStar();
-    qCCritical(qt3ds::INTERNAL_ERROR) << inDescription.GetCharStar();
+                                      << inResourceName;
+    qCCritical(qt3ds::INTERNAL_ERROR) << inDescription;
     m_dialogs->DisplayRefreshResourceFailed(inResourceName, inDescription);
 }
 
@@ -1980,7 +1974,7 @@ void CStudioApp::OnNewPresentation()
     m_core->GetDoc()->GetStudioSystem()->GetAnimationSystem()->SetAutoKeyframe(
                 CStudioPreferences::IsAutosetKeyframesOn());
     qCInfo(qt3ds::TRACE_INFO) << "New Presentation: "
-                              << m_core->GetDoc()->GetDocumentPath().GetAbsolutePath().GetCharStar();
+                              << m_core->GetDoc()->GetDocumentPath();
 }
 
 void CStudioApp::OnPresentationModifiedExternally()
@@ -1990,8 +1984,8 @@ void CStudioApp::OnPresentationModifiedExternally()
                 tr("This project has changed on disk. Do you want to reload it?"),
                 Qt3DSMessageBox::ICON_WARNING);
     if (theUserChoice == IDYES) {
-        Qt3DSFile theCurrentDoc = m_core->GetDoc()->GetDocumentPath();
-        OnLoadDocument(theCurrentDoc.GetAbsolutePath().toQString());
+        QString theCurrentDoc = m_core->GetDoc()->GetDocumentPath();
+        OnLoadDocument(theCurrentDoc);
     }
 }
 
@@ -2007,7 +2001,7 @@ QString CStudioApp::getRenderableId(const QString &filePath) const
     if (fi.isAbsolute()) {
         renderablePath = filePath.mid(index);
     } else {
-        QFileInfo presFile(m_core->GetDoc()->GetDocumentPath().GetAbsolutePath().toQString());
+        QFileInfo presFile(m_core->GetDoc()->GetDocumentPath());
         QDir presDir(presFile.absoluteDir());
         QString checkFile = QDir::cleanPath(presDir.absoluteFilePath(filePath));
         if (!QFileInfo(checkFile).exists()) {
@@ -2121,6 +2115,13 @@ void CStudioApp::showPresentationIdUniqueWarning()
                                  Qt3DSMessageBox::ICON_WARNING, false);
 }
 
+void CStudioApp::showPresentationIdEmptyWarning()
+{
+    m_dialogs->DisplayMessageBox(tr("Warning"),
+                                 tr("Presentation Id must not be empty."),
+                                 Qt3DSMessageBox::ICON_WARNING, false);
+}
+
 void CStudioApp::showInvalidFilenameWarning()
 {
     m_dialogs->DisplayMessageBox(tr("Invalid filename"),
@@ -2133,10 +2134,9 @@ void CStudioApp::checkDeletedDatainputs()
     QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle>> *map;
     map = new QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
                                        qt3dsdm::Qt3DSDMPropertyHandle>>;
-
     auto doc = m_core->GetDoc();
     // Update datainputs for the currently open presentation
-    doc->UpdateDatainputMap(m_core->GetDoc()->GetActiveRootInstance(), map);
+    doc->UpdateDatainputMap(m_core->GetDoc()->GetSceneInstance(), map);
 
     if (!map->empty())
         m_core->GetDispatch()->FireOnUndefinedDatainputsFail(map);

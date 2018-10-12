@@ -78,7 +78,6 @@ void CAboutDlg::paintEvent(QPaintEvent* event)
 
     m_palette = new QPalette;
     QPixmap pic = QPixmap(":/startup/open_dialog.png");
-    pic.setDevicePixelRatio(devicePixelRatio());
     m_palette->setBrush(QPalette::Window, pic);
     setPalette(*m_palette);
     resize(pic.size());
@@ -110,8 +109,7 @@ static QString compilerString()
 void CAboutDlg::OnInitDialog()
 {
     // Set the Studio version
-    m_ProductVersionStr = QStringLiteral("Qt 3D Studio v")
-            + CStudioPreferences::GetVersionString();
+    m_ProductVersionStr = QStringLiteral("Qt 3D Studio v") + CStudioPreferences::GetVersionString();
 
     // Set the copyright string
     m_CopyrightStr = QObject::tr("Copyright (C) %1 The Qt Company. All rights reserved.").arg(

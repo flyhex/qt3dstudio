@@ -50,14 +50,14 @@ ProjectFile::ProjectFile()
 void ProjectFile::ensureProjectFile()
 {
     if (!m_fileInfo.exists()) {
-        QFileInfo uipFile(g_StudioApp.GetCore()->GetDoc()
-                          ->GetDocumentPath().GetAbsolutePath().toQString());
-        QString uiaPath(PresentationFile::findProjectFile(uipFile.absoluteFilePath()));
+        QFileInfo uipInfo(g_StudioApp.GetCore()->GetDoc()->GetDocumentPath());
+        QString uiaPath(PresentationFile::findProjectFile(uipInfo.absoluteFilePath()));
 
         if (uiaPath.isEmpty()) {
-            // .uia not found, create new project .uia file. Creation sets info.
-            create(uipFile.completeBaseName(), uipFile.absolutePath());
-            addPresentationNode(uipFile.absoluteFilePath());
+            // .uia not found, create a new one in the same folder as uip. Creation sets file info.
+            create(uipInfo.absoluteFilePath().replace(QLatin1String(".uip"),
+                                                      QLatin1String(".uia")));
+            addPresentationNode(uipInfo.absoluteFilePath());
             updateDocPresentationId();
         } else {
             // .uia found, set project file info
@@ -88,6 +88,12 @@ void ProjectFile::initProjectFile(const QString &presPath)
  */
 void ProjectFile::addPresentationNode(const QString &pPath, const QString &pId)
 {
+    addPresentationNodes({{pPath, pId}});
+}
+
+// Add a list of presentation or presentation-qml nodes to the project file
+void ProjectFile::addPresentationNodes(const QHash<QString, QString> &nodeList)
+{
     ensureProjectFile();
 
     // open the uia file
@@ -107,52 +113,75 @@ void ProjectFile::addPresentationNode(const QString &pPath, const QString &pId)
         initial = true;
     }
 
-    QString relativePresentationPath = QDir(getProjectPath()).relativeFilePath(pPath);
+    QHash<QString, QString> changesList;
+    QHashIterator<QString, QString> nodesIt(nodeList);
+    while (nodesIt.hasNext()) {
+        nodesIt.next();
+        const QString presPath = nodesIt.key();
+        const QString presId = nodesIt.value();
+        QString relativePresentationPath
+                = QDir(getProjectPath()).relativeFilePath(presPath);
 
-    // make sure the node doesn't already exist
-    bool nodeExists = false;
-    for (QDomElement p = assetsElem.firstChild().toElement(); !p.isNull();
-        p = p.nextSibling().toElement()) {
-        if ((p.nodeName() == QLatin1String("presentation")
-             || p.nodeName() == QLatin1String("presentation-qml"))
-                && p.attribute(QStringLiteral("src")) == relativePresentationPath) {
-            nodeExists = true;
-            break;
+        // make sure the node doesn't already exist
+        bool nodeExists = false;
+        for (QDomElement p = assetsElem.firstChild().toElement(); !p.isNull();
+            p = p.nextSibling().toElement()) {
+            if ((p.nodeName() == QLatin1String("presentation")
+                 || p.nodeName() == QLatin1String("presentation-qml"))
+                    && p.attribute(QStringLiteral("src")) == relativePresentationPath) {
+                nodeExists = true;
+                break;
+            }
+        }
+
+        if (!nodeExists) {
+            const QString presentationId
+                    = ensureUniquePresentationId(presId.isEmpty()
+                                                 ? QFileInfo(presPath).completeBaseName()
+                                                 : presId);
+
+            if (assetsElem.attribute(QStringLiteral("initial")).isEmpty()) {
+                assetsElem.setAttribute(QStringLiteral("initial"), presentationId);
+                m_initialPresentation = presentationId;
+            }
+
+            // add the presentation node
+            bool isQml = presPath.endsWith(QLatin1String(".qml"));
+            QDomElement pElem = isQml ? doc.createElement(QStringLiteral("presentation-qml"))
+                                      : doc.createElement(QStringLiteral("presentation"));
+            pElem.setAttribute(QStringLiteral("id"), presentationId);
+            pElem.setAttribute(isQml ? QStringLiteral("args") : QStringLiteral("src"),
+                               relativePresentationPath);
+            assetsElem.appendChild(pElem);
+            changesList.insert(relativePresentationPath, presentationId);
+
+            if (!initial) {
+                g_StudioApp.m_subpresentations.push_back(
+                            SubPresentationRecord(isQml ? QStringLiteral("presentation-qml")
+                                                        : QStringLiteral("presentation"),
+                                                  presentationId, relativePresentationPath));
+            }
         }
     }
 
-    if (!nodeExists) {
-        QString presentationId = pId.isEmpty()
-                ? ensureUniquePresentationId(QFileInfo(pPath).completeBaseName()) : pId;
-
-        if (assetsElem.attribute(QStringLiteral("initial")).isEmpty())
-            assetsElem.setAttribute(QStringLiteral("initial"), presentationId);
-
-        // add the presentation node
-        bool isQml = pPath.endsWith(QLatin1String(".qml"));
-        QDomElement pElem = isQml ? doc.createElement(QStringLiteral("presentation-qml"))
-                                  : doc.createElement(QStringLiteral("presentation"));
-        pElem.setAttribute(QStringLiteral("id"), presentationId);
-        pElem.setAttribute(isQml ? QStringLiteral("args") : QStringLiteral("src"),
-                           relativePresentationPath);
-        assetsElem.appendChild(pElem);
-
+    if (initial || changesList.size() > 0) {
         file.resize(0);
         file.write(doc.toByteArray(4));
+    }
+    file.close();
 
-        if (!initial) {
-            g_StudioApp.m_subpresentations.push_back(
-                        SubPresentationRecord(isQml ? QStringLiteral("presentation-qml")
-                                                    : QStringLiteral("presentation"),
-                                              presentationId, relativePresentationPath));
-            g_StudioApp.getRenderer().RegisterSubpresentations(g_StudioApp.m_subpresentations);
+    if (changesList.size() > 0) {
+        g_StudioApp.getRenderer().RegisterSubpresentations(g_StudioApp.m_subpresentations);
+
+        QHashIterator<QString, QString> changesIt(changesList);
+        while (changesIt.hasNext()) {
+            changesIt.next();
+            Q_EMIT presentationIdChanged(changesIt.key(), changesIt.value());
         }
     }
-
-    file.close();
 }
 
-// get the src attribute (relative path) to the first presentation in a uia file, if no initial
+// Get the src attribute (relative path) to the initial presentation in a uia file, if no initial
 // presentation exists, the first one is returned.
 QString ProjectFile::getInitialPresentationSrc(const QString &uiaPath)
 {
@@ -168,10 +197,9 @@ QString ProjectFile::getInitialPresentationSrc(const QString &uiaPath)
         QString initialId = assetsElem.attribute(QStringLiteral("initial"));
         if (!initialId.isEmpty()) {
             QDomNodeList pNodes = assetsElem.elementsByTagName(QStringLiteral("presentation"));
-            const QString docPresentationId = g_StudioApp.GetCore()->GetDoc()->getPresentationId();
             for (int i = 0; i < pNodes.count(); ++i) {
                 QDomElement pElem = pNodes.at(i).toElement();
-                if (pElem.attribute(QStringLiteral("id")) == docPresentationId)
+                if (pElem.attribute(QStringLiteral("id")) == initialId)
                     return pElem.attribute(QStringLiteral("src"));
 
                 if (i == 0)
@@ -185,8 +213,10 @@ QString ProjectFile::getInitialPresentationSrc(const QString &uiaPath)
 
 /**
  * Write a presentation id to the project file.
+ * If the presentation id doesn't exist yet in project, it's added.
  *
- * This also update the Doc presentation Id if the src param is empty
+ * This also updates the Doc presentation Id if the src param is empty
+ * or same as current presentation.
  *
  * @param id presentation Id
  * @param src source node, if empty the current document node is used
@@ -211,6 +241,7 @@ void ProjectFile::writePresentationId(const QString &id, const QString &src)
     QDomElement assetsElem = domDoc.documentElement().firstChildElement(QStringLiteral("assets"));
     QDomNodeList pqNodes = isQml ? assetsElem.elementsByTagName(QStringLiteral("presentation-qml"))
                                  : assetsElem.elementsByTagName(QStringLiteral("presentation"));
+
     QString oldId;
     if (!pqNodes.isEmpty()) {
         for (int i = 0; i < pqNodes.count(); ++i) {
@@ -221,14 +252,23 @@ void ProjectFile::writePresentationId(const QString &id, const QString &src)
                 oldId = pqElem.attribute(QStringLiteral("id"));
                 pqElem.setAttribute(QStringLiteral("id"), theId);
 
-                if (assetsElem.attribute(QStringLiteral("initial")) == oldId)
+                if (assetsElem.attribute(QStringLiteral("initial")) == oldId) {
                     assetsElem.setAttribute(QStringLiteral("initial"), theId);
+                    m_initialPresentation = theId;
+                }
                 break;
             }
         }
     }
 
-    if (!oldId.isEmpty()) { // a presentation id changed
+    if (!src.isEmpty() && oldId.isEmpty()) { // new presentation, add it
+        // overwrite the uia file
+        file.resize(0);
+        file.write(domDoc.toByteArray(4));
+        file.close();
+        QDir projectDir(getProjectPath());
+        addPresentationNode(QDir::cleanPath(projectDir.absoluteFilePath(theSrc)), theId);
+    } else if (!oldId.isEmpty()) { // the presentation id changed
         // overwrite the uia file
         file.resize(0);
         file.write(domDoc.toByteArray(4));
@@ -277,13 +317,17 @@ void ProjectFile::writePresentationId(const QString &id, const QString &src)
                                         .absoluteFilePath(pElem.attribute(QStringLiteral("src")));
             PresentationFile::updatePresentationId(path, oldId, theId);
         }
+        Q_EMIT presentationIdChanged(theSrc, theId);
     }
 }
 
 // Set the doc PresentationId from the project file, this is called after a document is loaded.
-// If there is no project file, does nothing.
+// If there is no project file, it simply clears the id.
 void ProjectFile::updateDocPresentationId()
 {
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    doc->setPresentationId({});
+
     if (!m_fileInfo.exists())
         return;
 
@@ -294,7 +338,6 @@ void ProjectFile::updateDocPresentationId()
         return;
     }
 
-    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     QXmlStreamReader reader(&file);
     reader.setNamespaceProcessing(false);
 
@@ -332,7 +375,7 @@ QString ProjectFile::getPresentationId(const QString &src) const
 }
 
 // create the project .uia file
-void ProjectFile::create(const QString &projectName, const QString &projectPath)
+void ProjectFile::create(const QString &uiaPath)
 {
     QDomDocument doc;
     doc.setContent(QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\"?>"
@@ -347,8 +390,6 @@ void ProjectFile::create(const QString &projectName, const QString &projectPath)
                                       "</visual-states>"
                                     "</statemachine>"
                                   "</application>"));
-
-    QString uiaPath = projectPath + QStringLiteral("/") + projectName + QStringLiteral(".uia");
 
     QFile file(uiaPath);
     file.open(QIODevice::WriteOnly);
@@ -369,16 +410,18 @@ void ProjectFile::create(const QString &projectName, const QString &projectPath)
 QString ProjectFile::createPreview()
 {
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-    QString uipPrvPath = doc->GetDocumentPath().GetAbsolutePath().toQString();
+    QString uipPrvPath = doc->GetDocumentPath();
     // create a preview uip if doc modified
     if (doc->IsModified()) {
         uipPrvPath.replace(QLatin1String(".uip"), QLatin1String("_@preview@.uip"));
         g_StudioApp.GetCore()->OnSaveDocument(uipPrvPath, true);
     }
 
+    // if no project file exist (.uia) just return the preview uip path
     if (!m_fileInfo.exists())
         return uipPrvPath;
 
+    // create a preview project file
     QString prvPath = getProjectFilePath();
     prvPath.replace(QLatin1String(".uia"), QLatin1String("_@preview@.uia"));
 
@@ -393,8 +436,7 @@ QString ProjectFile::createPreview()
 
         QDomElement assetsElem = domDoc.documentElement()
                                  .firstChildElement(QStringLiteral("assets"));
-        assetsElem.setAttribute(QStringLiteral("initial"),
-                                doc->getPresentationId());
+        assetsElem.setAttribute(QStringLiteral("initial"), doc->getPresentationId());
 
         if (doc->IsModified()) {
             // Set the preview uip path in the uia file
@@ -421,8 +463,8 @@ QString ProjectFile::createPreview()
 }
 
 void ProjectFile::loadSubpresentationsAndDatainputs(
-                                                QVector<SubPresentationRecord> &subpresentations,
-                                                QMap<QString, CDataInputDialogItem *> &datainputs)
+        QVector<SubPresentationRecord> &subpresentations,
+        QMap<QString, CDataInputDialogItem *> &datainputs)
 {
     if (!m_fileInfo.exists())
         return;
@@ -436,8 +478,13 @@ void ProjectFile::loadSubpresentationsAndDatainputs(
     doc.setContent(&file);
     file.close();
 
+    m_initialPresentation = g_StudioApp.GetCore()->GetDoc()->getPresentationId();
+
     QDomElement assetsElem = doc.documentElement().firstChildElement(QStringLiteral("assets"));
     if (!assetsElem.isNull()) {
+        QString initial = assetsElem.attribute(QStringLiteral("initial"));
+        if (!initial.isEmpty())
+            m_initialPresentation = initial;
         for (QDomElement p = assetsElem.firstChild().toElement(); !p.isNull();
             p = p.nextSibling().toElement()) {
             if ((p.nodeName() == QLatin1String("presentation")
@@ -447,7 +494,6 @@ void ProjectFile::loadSubpresentationsAndDatainputs(
                 QString argsOrSrc = p.attribute(QStringLiteral("src"));
                 if (argsOrSrc.isNull())
                     argsOrSrc = p.attribute(QStringLiteral("args"));
-
                 subpresentations.push_back(
                             SubPresentationRecord(p.nodeName(), p.attribute("id"), argsOrSrc));
             } else if (p.nodeName() == QLatin1String("dataInput")) {
@@ -544,12 +590,10 @@ QString ProjectFile::ensureUniquePresentationId(const QString &id) const
 // Get the path to the project root. If .uia doesn't exist, return path to current presentation.
 QString ProjectFile::getProjectPath() const
 {
-    if (m_fileInfo.exists()) {
+    if (m_fileInfo.exists())
         return m_fileInfo.path();
-    } else {
-        return QFileInfo(g_StudioApp.GetCore()->GetDoc()
-                         ->GetDocumentPath().GetAbsolutePath().toQString()).absolutePath();
-    }
+    else
+        return QFileInfo(g_StudioApp.GetCore()->GetDoc()->GetDocumentPath()).absolutePath();
 }
 
 // Get the path to the project's .uia file. If .uia doesn't exist, return empty string.
@@ -611,6 +655,100 @@ void ProjectFile::getPresentations(const QString &inUiaPath,
             break; // reached end of <assets>
         }
     }
+}
+
+void ProjectFile::setInitialPresentation(const QString &initialId)
+{
+    if (!initialId.isEmpty() && m_initialPresentation != initialId) {
+        m_initialPresentation = initialId;
+
+        ensureProjectFile();
+
+        QFile file(getProjectFilePath());
+        file.open(QIODevice::ReadWrite);
+        QDomDocument domDoc;
+        domDoc.setContent(&file);
+
+        QDomElement assetsElem
+                = domDoc.documentElement().firstChildElement(QStringLiteral("assets"));
+        if (!assetsElem.isNull() && assetsElem.attribute(QStringLiteral("initial"))
+                != m_initialPresentation) {
+            assetsElem.setAttribute(QStringLiteral("initial"), m_initialPresentation);
+
+            // Rewrite project file
+            file.resize(0);
+            file.write(domDoc.toByteArray(4));
+        }
+    }
+}
+
+// Returns true if file rename was successful
+bool ProjectFile::renamePresentationFile(const QString &oldName, const QString &newName)
+{
+    const QString fullOldPath = getResolvedPathTo(oldName);
+    const QString fullNewPath = getResolvedPathTo(newName);
+    QFile presFile(fullOldPath);
+    const bool success = presFile.rename(fullNewPath);
+
+    if (success) {
+        // Update assets in .uia
+        ensureProjectFile();
+
+        const bool isQml = oldName.endsWith(QLatin1String(".qml"));
+
+        if (isQml && g_StudioApp.m_qmlStreamMap.contains(fullOldPath)) {
+            // Update Qml stream type cache
+            g_StudioApp.m_qmlStreamMap.remove(fullOldPath);
+            g_StudioApp.m_qmlStreamMap.insert(fullNewPath, true);
+        }
+
+        QFile file(getProjectFilePath());
+        file.open(QIODevice::ReadWrite);
+        QDomDocument domDoc;
+        domDoc.setContent(&file);
+
+        QDomElement assetsElem
+                = domDoc.documentElement().firstChildElement(QStringLiteral("assets"));
+        if (!assetsElem.isNull()) {
+            QDomNodeList pqNodes
+                    = isQml ? assetsElem.elementsByTagName(QStringLiteral("presentation-qml"))
+                            : assetsElem.elementsByTagName(QStringLiteral("presentation"));
+            if (!pqNodes.isEmpty()) {
+                CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+                for (int i = 0; i < pqNodes.count(); ++i) {
+                    QDomElement pqElem = pqNodes.at(i).toElement();
+                    const QString attTag = isQml ? QStringLiteral("args") : QStringLiteral("src");
+                    const QString srcOrArgs = pqElem.attribute(attTag);
+                    if (srcOrArgs == oldName) {
+                        pqElem.setAttribute(attTag, newName);
+
+                        if (pqElem.attribute(QStringLiteral("id")) != doc->getPresentationId()) {
+                            // update m_subpresentations
+                            auto *sp = std::find_if(
+                                        g_StudioApp.m_subpresentations.begin(),
+                                        g_StudioApp.m_subpresentations.end(),
+                                        [&oldName](const SubPresentationRecord &spr) -> bool {
+                                            return spr.m_argsOrSrc == oldName;
+                                        });
+                            if (sp != g_StudioApp.m_subpresentations.end())
+                                sp->m_argsOrSrc = newName;
+                        } else {
+                            // If renaming current presentation, need to update the doc path, too
+                            doc->SetDocumentPath(fullNewPath);
+                        }
+
+                        file.resize(0);
+                        file.write(domDoc.toByteArray(4));
+
+                        Q_EMIT assetNameChanged();
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    return success;
 }
 
 QString ProjectFile::getResolvedPathTo(const QString &path) const

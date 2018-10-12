@@ -191,11 +191,6 @@ const QString &CStudioObjectTypes::GetNormalIconName(EStudioObjectType inType)
         static QString theString = QStringLiteral("qml_used.png");
         return theString;
     }
-    case OBJTYPE_PROJECT: {
-        // Mahmoud_TODO: get a project icon from UX and replace this temp. one
-        static QString theString = QStringLiteral("qml_used.png");
-        return theString;
-    }
     default: {
         static QString theString = QStringLiteral("Objects-Model-Normal.png");
         return theString;
@@ -293,11 +288,6 @@ const QString &CStudioObjectTypes::GetDisabledIconName(EStudioObjectType inType)
         static QString theString = QStringLiteral("qml_notUsed.png");
         return theString;
     }
-    case OBJTYPE_PROJECT: {
-        // Mahmoud_TODO: get a project icon from UX and replace this temp. one
-        static QString theString = QStringLiteral("qml_notUsed.png");
-        return theString;
-    }
     default: {
         static QString theString = QStringLiteral("Objects-Model-Disabled.png");
         return theString;
@@ -385,11 +375,6 @@ const QString &CStudioObjectTypes::GetHighlightIconName(EStudioObjectType inType
     }
     case OBJTYPE_PRESENTATION: {
         static QString theString = QStringLiteral("presentation_used.png");
-        return theString;
-    }
-    case OBJTYPE_PROJECT: {
-        // Mahmoud_TODO: ask UX to provide a project icon and replace it
-        static QString theString = QStringLiteral("qml_used.png");
         return theString;
     }
     default: {

@@ -174,7 +174,9 @@ void InspectorControlView::onFilesChanged(
                 }
             } else if (record.m_ModificationType == Q3DStudio::FileModificationType::Modified
                        && record.m_File.toQString()
-                       == g_StudioApp.GetCore()->GetDoc()->GetDocumentUIAFile(false)) {
+                       == g_StudioApp.GetCore()->getProjectFile().getProjectFilePath()) {
+                g_StudioApp.GetCore()->getProjectFile().loadSubpresentationsAndDatainputs(
+                                g_StudioApp.m_subpresentations, g_StudioApp.m_dataInputDialogItems);
                 m_inspectorControlModel->refreshRenderables();
             }
         }
@@ -249,10 +251,8 @@ QString InspectorControlView::titleText() const
 
 bool InspectorControlView::isRefMaterial(int instance) const
 {
-    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-
-    return doc->GetStudioSystem()->GetClientDataModelBridge()->GetObjectType(instance)
-           == OBJTYPE_REFERENCEDMATERIAL;
+    auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
+    return bridge->IsReferencedMaterialInstance(instance);
 }
 
 bool InspectorControlView::canLinkProperty(int instance, int handle) const
@@ -266,6 +266,29 @@ bool InspectorControlView::canLinkProperty(int instance, int handle) const
     }
 
     return doc->GetDocumentReader().CanPropertyBeLinked(instance, handle);
+}
+
+bool InspectorControlView::canOpenInInspector(int instance, int handle) const
+{
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    qt3dsdm::SValue value;
+    doc->GetPropertySystem()->GetInstancePropertyValue(instance, handle, value);
+    if (!value.empty() && value.getType() == qt3dsdm::DataModelDataType::Long4) {
+        qt3dsdm::SLong4 guid = qt3dsdm::get<qt3dsdm::SLong4>(value);
+        return guid.Valid();
+    }
+    return false;
+}
+
+void InspectorControlView::openInInspector()
+{
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    qt3dsdm::SValue value;
+    doc->GetPropertySystem()->GetInstancePropertyValue(m_instance, m_handle, value);
+    qt3dsdm::SLong4 guid = qt3dsdm::get<qt3dsdm::SLong4>(value);
+    const auto instance = bridge->GetInstanceByGUID(guid);
+    doc->SelectDataModelObject(instance);
 }
 
 void InspectorControlView::onInstancePropertyValueChanged(
@@ -339,6 +362,11 @@ void InspectorControlView::showContextMenu(int x, int y, int handle, int instanc
 
     auto doc = g_StudioApp.GetCore()->GetDoc();
 
+    if (canOpenInInspector(instance, handle)) {
+        auto action = theContextMenu.addAction(QObject::tr("Open in Inspector"));
+        connect(action, &QAction::triggered, this, &InspectorControlView::openInInspector);
+    }
+
     bool canBeLinkedFlag = canLinkProperty(instance, handle);
     if (canBeLinkedFlag) {
         const bool isLinkedFlag = doc->GetDocumentReader().IsPropertyLinked(instance, handle);
@@ -365,7 +393,7 @@ void InspectorControlView::showContextMenu(int x, int y, int handle, int instanc
 void InspectorControlView::toggleMasterLink()
 {
     Q3DStudio::ScopedDocumentEditor editor(*g_StudioApp.GetCore()->GetDoc(),
-                                           L"Link Property", __FILE__, __LINE__);
+                                           QObject::tr("Link Property"), __FILE__, __LINE__);
     bool wasLinked = editor->IsPropertyLinked(m_instance, m_handle);
 
     if (wasLinked)
@@ -559,6 +587,7 @@ QObject *InspectorControlView::showMaterialReference(int handle, int instance, c
             Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Property"))
                     ->SetInstancePropertyValue(instance, handle, objRef);
         }
+       m_matRefListWidget->hide();
     });
 
     return m_matRefListWidget;
@@ -621,10 +650,10 @@ bool InspectorControlView::toolTipsEnabled()
 QString InspectorControlView::convertPathToProjectRoot(const QString &presentationPath)
 {
     QDir projDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath());
-    QFileInfo presentationFile(g_StudioApp.GetCore()->GetDoc()->GetDocumentPath()
-                               .GetAbsolutePath().toQString());
+    QFileInfo presentationFile(g_StudioApp.GetCore()->GetDoc()->GetDocumentPath());
     QDir presentationDir(presentationFile.absolutePath());
     QString absPath = presentationDir.absoluteFilePath(presentationPath);
+
     return projDir.relativeFilePath(absPath);
 }
 

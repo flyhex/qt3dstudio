@@ -28,16 +28,13 @@
 ****************************************************************************/
 
 #ifndef INCLUDED_STUDIO_APP_H
-#define INCLUDED_STUDIO_APP_H 1
-
-#pragma once
+#define INCLUDED_STUDIO_APP_H
 
 #include "StudioObjectTypes.h"
 #include "Qt3DSImportComposerTypes.h"
 #include "Qt3DSDMComposerTypeDefinitions.h"
 #include "DispatchListeners.h"
 #include "Qt3DSDMHandles.h"
-#include "Qt3DSFileTools.h"
 #include <QtWidgets/qapplication.h>
 
 namespace Q3DStudio {
@@ -149,6 +146,7 @@ private:
 public:
     CMainFrame* m_pMainWnd;
     QWidget *m_lastActiveView = nullptr;
+    QHash<QString, bool> m_qmlStreamMap;
 
     CCore *GetCore();
     CViews *GetViews();
@@ -190,7 +188,7 @@ public:
     void PlaybackRewind();
     bool IsPlaying();
     void OnRevert();
-    bool CanRevert();
+    bool CanRevert() const;
     void OnFileOpenRecent(const QString &inDocument);
     bool PerformSavePrompt();
     void PlaybackStop();
@@ -207,10 +205,10 @@ public:
     bool OnSaveAs();
     bool OnSaveCopy();
     bool OnLoadDocument(const QString &inDocument, bool inShowStartupDialogOnError = true);
-    void OnLoadDocumentCatcher(const Qt3DSFile &inLocation);
+    void OnLoadDocumentCatcher(const QString &inLocation);
     void OnFileOpen();
     QString OnProjectNew();
-    QString OnFileNew();
+    void OnFileNew();
     bool IsAuthorZoom() const;
     bool isOnProgress() const;
     void SetAuthorZoom(bool inZoom);
@@ -220,6 +218,7 @@ public:
     void toggleShy();
     void toggleLocked();
     void showPresentationIdUniqueWarning();
+    void showPresentationIdEmptyWarning();
     void showInvalidFilenameWarning();
     void checkDeletedDatainputs();
     void saveDataInputsToProjectFile();
@@ -229,9 +228,9 @@ public:
     void OnAsynchronousCommand(CCmd *inCmd) override;
 
     // CAppStatusListener
-    void OnDisplayAppStatus(Q3DStudio::CString &inStatusMsg) override;
-    void OnProgressBegin(const Q3DStudio::CString &inActionText,
-                         const Q3DStudio::CString &inAdditionalText) override;
+    void OnDisplayAppStatus(const QString &inStatusMsg) override;
+    void OnProgressBegin(const QString &inActionText,
+                         const QString &inAdditionalText) override;
     void OnProgressEnd() override;
 
     // CFailListener
@@ -239,10 +238,9 @@ public:
     void OnPasteFail() override;
     void OnBuildconfigurationFileParseFail(const QString &inMessage) override;
     void OnSaveFail(bool inKnownError) override;
-    void OnProjectVariableFail(const Q3DStudio::CString &inMessage) override;
-    void OnErrorFail(const Q3DStudio::CString &inText) override;
-    void OnRefreshResourceFail(const Q3DStudio::CString &inResourceName,
-                               const Q3DStudio::CString &inDescription) override;
+    void OnErrorFail(const QString &inText) override;
+    void OnRefreshResourceFail(const QString &inResourceName,
+                               const QString &inDescription) override;
     void OnUndefinedDatainputsFail(
             const QMultiMap<QString,
                             QPair<qt3dsdm::Qt3DSDMInstanceHandle,
@@ -268,7 +266,8 @@ public:
     void setLastActiveView(QWidget *widget) { m_lastActiveView = widget; }
     QWidget *lastActiveView() const { return m_lastActiveView; }
 
-    static QFileInfo applicationDirectory();
+    static QString applicationDirectory();
+    bool isQmlStream(const QString &fileName);
 };
 
 extern CStudioApp g_StudioApp;

@@ -50,14 +50,12 @@
 #include <QtQml/qqmlengine.h>
 #include <QtQml/qqmlfile.h>
 #include <QtQuick/qquickitem.h>
-#include <QtQml/qqmlapplicationengine.h>
 
 ProjectView::ProjectView(const QSize &preferredSize, QWidget *parent) : QQuickWidget(parent)
   , m_ProjectModel(new ProjectFileSystemModel(this))
   , m_preferredSize(preferredSize)
 {
-    const QString theApplicationPath =
-            Qt3DSFile::GetApplicationDirectory().GetPath().toQString();
+    const QString theApplicationPath = Qt3DSFile::GetApplicationDirectory();
 
     m_defaultBehaviorDir = theApplicationPath + QStringLiteral("/Content/Behavior Library");
     m_defaultEffectDir = theApplicationPath + QStringLiteral("/Content/Effect Library");
@@ -214,13 +212,6 @@ void ProjectView::assetImportInContext(int row)
 void ProjectView::OnNewPresentation()
 {
     rebuild();
-
-    // expand presentation folder by default (if it exists)
-    QTimer::singleShot(0, [this]() {
-        QString path = g_StudioApp.GetCore()->getProjectFile().getProjectPath()
-                       + QStringLiteral("/presentations");
-        m_ProjectModel->expand(m_ProjectModel->rowForPath(path));
-    });
 }
 
 void ProjectView::OnOpenDocument(const QString &inFilename, bool inSucceeded)
@@ -234,7 +225,7 @@ void ProjectView::OnSaveDocument(const QString &inFilename, bool inSucceeded, bo
     Q_UNUSED(inFilename)
     Q_UNUSED(inSucceeded)
     Q_UNUSED(inSaveCopy)
-    QTimer::singleShot(0, m_ProjectModel, &ProjectFileSystemModel::updateReferences);
+    m_ProjectModel->asyncUpdateReferences();
 }
 
 void ProjectView::OnDocumentPathChanged(const QString &inNewPath)
@@ -248,7 +239,7 @@ void ProjectView::OnBeginDataModelNotifications()
 
 void ProjectView::OnEndDataModelNotifications()
 {
-    QTimer::singleShot(0, m_ProjectModel, &ProjectFileSystemModel::updateReferences);
+    m_ProjectModel->asyncUpdateReferences();
 }
 
 void ProjectView::OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
@@ -271,16 +262,21 @@ void ProjectView::mousePressEvent(QMouseEvent *event)
 
 void ProjectView::startDrag(QQuickItem *item, int row)
 {
+    item->grabMouse(); // Grab to make sure we can ungrab after the drag
     const auto index = m_ProjectModel->index(row);
 
     QDrag drag(this);
     drag.setMimeData(m_ProjectModel->mimeData({index}));
     drag.setPixmap(QPixmap(QQmlFile::urlToLocalFileOrQrc(index.data(Qt::DecorationRole).toUrl())));
-    // prevent DnD the currently open presentation
-    if (isCurrentPresentation(row))
-        drag.exec(Qt::IgnoreAction);
-    else
-        drag.exec(Qt::CopyAction);
+    Qt::DropAction action = Qt::CopyAction;
+    // prevent DnD the currently open presentation and presentations with empty id
+    if (isCurrentPresentation(row) || ((isPresentation(row) || isQmlStream(row))
+            && presentationId(row).isEmpty())) {
+        action = Qt::IgnoreAction;
+    }
+    drag.exec(action);
+
+    // Ungrab to trigger mouse release on the originating item
     QTimer::singleShot(0, item, &QQuickItem::ungrabMouse);
 }
 
@@ -294,18 +290,28 @@ void ProjectView::openPresentation(int row)
 
 bool ProjectView::isCurrentPresentation(int row) const
 {
-    QString docPath = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath().GetPath().toQString()
-            .replace(QLatin1String("\\"), QLatin1String("/"));
-
-    return m_ProjectModel->filePath(row) == docPath;
+    return m_ProjectModel->isCurrentPresentation(m_ProjectModel->filePath(row));
 }
 
-void ProjectView::editPresentationId(int row)
+void ProjectView::editPresentationId(int row, bool qmlStream)
 {
     QString relativePresPath = QDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath())
                                .relativeFilePath(m_ProjectModel->filePath(row));
 
-    EditPresentationIdDlg dlg(relativePresPath, this);
+    EditPresentationIdDlg dlg(relativePresPath,
+                              qmlStream ? EditPresentationIdDlg::EditQmlStreamId
+                                        : EditPresentationIdDlg::EditPresentationId, this);
+    dlg.exec();
+}
+
+void ProjectView::renamePresentation(int row, bool qmlStream)
+{
+    QString relativePresPath = QDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath())
+                               .relativeFilePath(m_ProjectModel->filePath(row));
+
+    EditPresentationIdDlg dlg(relativePresPath,
+                              qmlStream ? EditPresentationIdDlg::EditQmlStreamName
+                                        : EditPresentationIdDlg::EditPresentationName, this);
     dlg.exec();
 }
 
@@ -365,19 +371,7 @@ bool ProjectView::isPresentation(int row) const
 
 bool ProjectView::isQmlStream(int row) const
 {
-    const QString filePath = m_ProjectModel->filePath(row);
-
-    if (!filePath.endsWith(QLatin1String(".qml")))
-        return false;
-
-    QQmlApplicationEngine qmlEngine(filePath);
-    if (qmlEngine.rootObjects().size() > 0) {
-        const char *rootClassName = qmlEngine.rootObjects().at(0)
-                                    ->metaObject()->superClass()->className();
-        return strcmp(rootClassName, "Q3DStudio::Q3DSQmlBehavior") != 0;
-    } else {
-        return false;
-    }
+    return g_StudioApp.isQmlStream(m_ProjectModel->filePath(row));
 }
 
 bool ProjectView::isMaterialFolder(int row) const
@@ -388,6 +382,28 @@ bool ProjectView::isMaterialFolder(int row) const
 bool ProjectView::isMaterialData(int row) const
 {
     return m_ProjectModel->filePath(row).endsWith(QLatin1String(".matdata"));
+}
+
+bool ProjectView::isInitialPresentation(int row) const
+{
+    return m_ProjectModel->isInitialPresentation(m_ProjectModel->filePath(row));
+}
+
+QString ProjectView::presentationId(int row) const
+{
+    return m_ProjectModel->presentationId(m_ProjectModel->filePath(row));
+}
+
+void ProjectView::setInitialPresentation(int row)
+{
+    QString setId = presentationId(row);
+
+    // If presentation id is empty, it means .uip is not part of the project. It shouldn't be
+    // possible to set initial presentation in that case.
+    Q_ASSERT(!setId.isEmpty());
+
+    g_StudioApp.GetCore()->getProjectFile().setInitialPresentation(setId);
+    m_ProjectModel->updateRoles({Qt::DecorationRole});
 }
 
 bool ProjectView::isRefreshable(int row) const

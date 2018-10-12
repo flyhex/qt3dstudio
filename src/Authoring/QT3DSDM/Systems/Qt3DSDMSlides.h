@@ -171,6 +171,7 @@ public:
     virtual void SetSlideSelectedInstance(Qt3DSDMSlideHandle inSlide,
                                           Qt3DSDMInstanceHandle inInstance) = 0;
 
+    virtual Qt3DSDMSlideHandle GetApplicableSlide(Qt3DSDMInstanceHandle inHandle) = 0;
     virtual Qt3DSDMSlideHandle GetApplicableSlide(Qt3DSDMInstanceHandle inHandle,
                                                  Qt3DSDMPropertyHandle inProperty) = 0;
 

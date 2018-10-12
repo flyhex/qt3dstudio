@@ -43,6 +43,7 @@ public:
 private Q_SLOTS:
     void handleOpenPresentation();
     void handleEditPresentationId();
+    void handleEditQmlStreamId();
     void handleShowContainingFolder();
     void handleCopyPath();
     void handleCopyFullPath();
@@ -51,6 +52,9 @@ private Q_SLOTS:
     void handleAddMaterial();
     void handleEditMaterial();
     void handleDuplicate();
+    void handleInitialPresentation();
+    void handleRenamePresentation();
+    void handleRenameQmlStream();
 
 private:
     ProjectView *m_view;

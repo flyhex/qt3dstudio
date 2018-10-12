@@ -298,17 +298,16 @@ void Qt3DSFile::SetReadOnly(bool inReadOnlyFlag)
 /**
  * Get the location of where this application resides.
  */
-Qt3DSFile Qt3DSFile::GetApplicationDirectory()
+QString Qt3DSFile::GetApplicationDirectory()
 {
 #ifdef Q_OS_MACOS
     QDir appDir(qApp->applicationDirPath());
-    if (appDir.dirName() == "MacOS") {
-        appDir.cdUp();
-        appDir.cd("Resources");
-    }
-    return Qt3DSFile(Q3DStudio::CString::fromQString(appDir.absolutePath()));
+    if (appDir.dirName() == QLatin1String("MacOS"))
+        appDir.cd("../Resources");
+
+    return appDir.absolutePath();
 #else
-    return Qt3DSFile(Q3DStudio::CString::fromQString(qApp->applicationDirPath()));
+    return qApp->applicationDirPath();
 #endif
 }
 

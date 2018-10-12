@@ -68,28 +68,32 @@ public:
     void assetImportInContext(int row);
 
     Q_INVOKABLE void startDrag(QQuickItem *item, int row);
-
-    Q_INVOKABLE void showContainingFolder(int row) const;
-    Q_INVOKABLE void copyPath(int row) const;
-    Q_INVOKABLE void copyFullPath(int row) const;
-    Q_INVOKABLE void refreshImport(int row) const;
-    Q_INVOKABLE void addMaterial(int row) const;
-    Q_INVOKABLE void editMaterial(int row) const;
-    Q_INVOKABLE void duplicate(int row) const;
-
-    Q_INVOKABLE bool isGroup(int row) const;
-    Q_INVOKABLE bool isRefreshable(int row) const;
     Q_INVOKABLE void showContextMenu(int x, int y, int index);
     Q_INVOKABLE bool toolTipsEnabled();
     Q_INVOKABLE void openFile(int row);
 
-    bool isPresentation(int row) const;
-    bool isQmlStream(int row) const;
+    void showContainingFolder(int row) const;
+    void copyPath(int row) const;
+    void copyFullPath(int row) const;
+    void refreshImport(int row) const;
+    void addMaterial(int row) const;
+    void editMaterial(int row) const;
+    void duplicate(int row) const;
+
+    bool isGroup(int row) const;
+    bool isRefreshable(int row) const;
+
+    Q_INVOKABLE bool isPresentation(int row) const;
+    Q_INVOKABLE bool isQmlStream(int row) const;
     bool isCurrentPresentation(int row) const;
     bool isMaterialFolder(int row) const;
     bool isMaterialData(int row) const;
+    bool isInitialPresentation(int row) const;
+    QString presentationId(int row) const;
+    void setInitialPresentation(int row);
     void openPresentation(int row);
-    void editPresentationId(int row);
+    Q_INVOKABLE void editPresentationId(int row, bool qmlStream);
+    void renamePresentation(int row, bool qmlStream);
 
     // CPresentationChangeListener
     void OnNewPresentation() override;

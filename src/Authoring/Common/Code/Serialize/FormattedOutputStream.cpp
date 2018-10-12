@@ -56,7 +56,7 @@ void CFormattedOutputStream::Flush()
     m_OutputStream->Flush();
 }
 
-bool CFormattedOutputStream::IsValid()
+bool CFormattedOutputStream::IsValid() const
 {
     return m_OutputStream->IsValid();
 }

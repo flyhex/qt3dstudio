@@ -116,7 +116,10 @@ void PropertyModel::setAction(const qt3dsdm::Qt3DSDMActionHandle &action)
                     default:
                         break;
                     }
-                    m_properties.append(property);
+                    // Skip Name, we don't want to allow changing that
+                    // TODO: To be localized when/if we add support for metadata localization
+                    if (property.m_name != QLatin1String("Name"))
+                        m_properties.append(property);
                 }
             }
         }
@@ -163,7 +166,6 @@ QVariant PropertyModel::data(const QModelIndex &index, int role) const
         return property.m_name;
     case HandleRole:
         return property.m_handle.GetHandleValue();
-
     default:
         return {};
     }
@@ -182,7 +184,7 @@ QHash<int, QByteArray> PropertyModel::roleNames() const
 
 PropertyInfo PropertyModel::property(int index) const
 {
-    if (index < 0 || index >= m_properties.size() )
+    if (index < 0 || index >= m_properties.size())
         return {};
     return m_properties[index];
 }
@@ -248,8 +250,6 @@ void PropertyModel::updateValue()
         studioSystem->GetActionCore()->GetHandlerArgumentValue(m_valueHandle, sValue);
         m_value = sValue.toQVariant();
     }
-    if (oldValue != m_value) {
-
+    if (oldValue != m_value)
         Q_EMIT valueChanged();
-    }
 }

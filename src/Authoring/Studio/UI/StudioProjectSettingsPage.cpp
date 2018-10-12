@@ -176,7 +176,11 @@ void CStudioProjectSettingsPage::onSettingsModified()
 // OnApply: Handler for the Apply button
 bool CStudioProjectSettingsPage::onApply()
 {
-    // make sure the presentation Id is unique
+    // make sure the presentation Id is unique and not empty
+    if (m_ui->m_PresentationId->text().isEmpty()) {
+        g_StudioApp.showPresentationIdEmptyWarning();
+        return false;
+    }
     if (!g_StudioApp.GetCore()->getProjectFile()
             .isUniquePresentationId(m_ui->m_PresentationId->text())) {
         g_StudioApp.showPresentationIdUniqueWarning();

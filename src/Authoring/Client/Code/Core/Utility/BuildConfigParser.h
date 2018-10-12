@@ -207,7 +207,7 @@ public:
     virtual ~CBuildConfigParser();
 
 public:
-    bool LoadConfigurations(const QString &inDirectory);
+    bool LoadConfigurations(const QString &configDirPath);
     QString GetErrorMessage() { return m_ErrorMessage; }
 
 protected:

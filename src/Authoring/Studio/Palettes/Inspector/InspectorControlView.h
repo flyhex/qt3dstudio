@@ -117,6 +117,8 @@ private:
     void filterMatDatas(std::vector<Q3DStudio::CFilePath> &matDatas);
     void setPropertyValueFromFilename(long instance, int handle, const QString &name);
     bool canLinkProperty(int instance, int handle) const;
+    bool canOpenInInspector(int instance, int handle) const;
+    void openInInspector();
     void onInstancePropertyValueChanged(qt3dsdm::Qt3DSDMPropertyHandle propertyHandle);
 
     std::shared_ptr<qt3dsdm::ISignalConnection> m_selectionChangedConnection;

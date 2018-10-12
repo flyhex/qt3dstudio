@@ -39,7 +39,7 @@ public:
     virtual void Write(const char *inData, unsigned long inLength, unsigned long &outWritten);
     long Write(const void *inBuffer, long inBufferLength) override;
     void Close() override {}
-    bool IsValid() override { return m_Position == m_Length; }
+    bool IsValid() const override { return m_Position == m_Length; }
     void Flush() override;
     long Seek(ESeekPosition inPosition, long inOffset) override;
     long GetCurrentPosition() override;

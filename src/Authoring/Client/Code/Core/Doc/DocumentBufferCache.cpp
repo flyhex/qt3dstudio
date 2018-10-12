@@ -131,7 +131,7 @@ struct SDocBufferCache : public IDocumentBufferCache
         if (entry != m_Buffers.end()) {
             const_cast<SModelBufferOrImage &>(entry->second).Release();
             m_Buffers.erase(entry);
-            m_Doc.GetCore()->GetDispatch()->FireDocumentBufferCacheInvalidated(inPath.toCString());
+            m_Doc.GetCore()->GetDispatch()->FireDocumentBufferCacheInvalidated(inPath.toQString());
         }
     }
 

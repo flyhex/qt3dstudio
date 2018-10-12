@@ -397,11 +397,11 @@ void CDoc::SetInstancePropertyControlled(
     // Set the controlledproperty string in the controlled element
     // Use same transaction if "batch" is true
     if (!batch) {
-        Q3DStudio::ScopedDocumentEditor(*this, L"Set controlled", __FILE__, __LINE__)
+        Q3DStudio::ScopedDocumentEditor(*this, QObject::tr("Set controlled"), __FILE__, __LINE__)
                 ->SetInstancePropertyValue(instance, ctrldElemPropHandle, controlledProperty);
     } else {
         if (!IsTransactionOpened())
-            OpenTransaction(L"Set multiple controlled", __FILE__, __LINE__);
+            OpenTransaction(QObject::tr("Set multiple controlled"), __FILE__, __LINE__);
         SetInstancePropertyValue(instance, L"controlledproperty", controlledProperty);
     }
 }
@@ -420,8 +420,8 @@ Q3DStudio::IDocumentReader &CDoc::GetDocumentReader()
     return *m_SceneEditor;
 }
 
-Q3DStudio::IDocumentEditor &CDoc::OpenTransaction(const Q3DStudio::CString &inCmdName,
-                                                  const char *inFile, int inLine)
+Q3DStudio::IDocumentEditor &CDoc::OpenTransaction(const QString &inCmdName, const char *inFile,
+                                                  int inLine)
 {
     ++m_TransactionDepth;
     if (m_TransactionDepth == 1) {
@@ -431,7 +431,7 @@ Q3DStudio::IDocumentEditor &CDoc::OpenTransaction(const Q3DStudio::CString &inCm
         m_OpenTransaction->SetConsumer();
         m_Core->SetCommandStackModifier(this);
         qCInfo(qt3ds::TRACE_INFO) << inFile << "(" << inLine << "): Transaction opened: "
-                                  << inCmdName.toQString();
+                                  << inCmdName;
         m_OpenTransaction->m_File = inFile;
         m_OpenTransaction->m_Line = inLine;
         CCmdStack *theCommandStack = m_Core->GetCmdStack();
@@ -439,7 +439,7 @@ Q3DStudio::IDocumentEditor &CDoc::OpenTransaction(const Q3DStudio::CString &inCm
             theCommandStack->EmptyRedoStack();
     } else
         qCInfo(qt3ds::TRACE_INFO) << inFile << "(" << inLine << "): Open Transaction: "
-                                  << inCmdName.toQString();
+                                  << inCmdName;
 
     if (!m_SceneEditor) {
         m_SceneEditor = Q3DStudio::IInternalDocumentEditor::CreateEditor(*this);
@@ -447,7 +447,7 @@ Q3DStudio::IDocumentEditor &CDoc::OpenTransaction(const Q3DStudio::CString &inCm
     return *m_SceneEditor;
 }
 
-Q3DStudio::IDocumentEditor &CDoc::MaybeOpenTransaction(const Q3DStudio::CString &cmdName,
+Q3DStudio::IDocumentEditor &CDoc::MaybeOpenTransaction(const QString &cmdName,
                                                        const char *inFile, int inLine)
 {
     if (!m_OpenTransaction)
@@ -491,7 +491,7 @@ void CDoc::IKnowWhatIAmDoingForceCloseTransaction()
         theTransaction->ReleaseConsumer(false);
         if (theTransaction->HasTransactions()) {
             SDocTransactionCommand *newCommand = new SDocTransactionCommand(
-                        theTransaction, theTransaction->GetName().toQString(), *m_Core->GetDispatch());
+                        theTransaction, theTransaction->GetName(), *m_Core->GetDispatch());
             // Execute the command synchronously.  If you are getting crashes due to UI refreshes
             // then
             // you need to run your entire change system in a postmessage of some sort.
@@ -512,7 +512,6 @@ bool CDoc::PreUndo()
 {
     if (m_OpenTransaction && m_OpenTransaction->HasTransactions()) {
         qCInfo(qt3ds::TRACE_INFO) << "PreUndo begin";
-        const Q3DStudio::CString theCommandName(m_OpenTransaction->GetName());
         // In this case we want the command to absolutely immediately commit; we don't want it
         // to wait until a further post message else the previous command is the one that will get
         // undone.
@@ -533,14 +532,14 @@ bool CDoc::IsModified()
 
 bool CDoc::IsValid() const
 {
-    return !m_DocumentPath.GetPath().IsEmpty();
+    return !m_DocumentPath.isEmpty();
 }
 //=============================================================================
 /**
  * Get the Asset from inSelectedItem, if exists
  */
 qt3dsdm::Qt3DSDMInstanceHandle
-CDoc::GetInstanceFromSelectable(Q3DStudio::SSelectedValue inSelectedItem)
+CDoc::GetInstanceFromSelectable(Q3DStudio::SSelectedValue inSelectedItem) const
 {
     if (inSelectedItem.getType() == Q3DStudio::SelectedValueTypes::Instance) {
         // This is DataModel asset. Find corresponding CAsset if there is any
@@ -560,7 +559,7 @@ int CDoc::getSelectedInstancesCount() const
     return int(m_SelectedValue.GetSelectedInstances().size());
 }
 
-qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetSelectedInstance()
+qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetSelectedInstance() const
 {
     return GetInstanceFromSelectable(m_SelectedObject);
 }
@@ -846,7 +845,7 @@ void CDoc::CutObject(qt3dsdm::TInstanceHandleList inInstances)
 
         if (!theListOfTargets.IsEmpty()) {
             if (m_DeletingReferencedObjectHandler)
-                m_DeletingReferencedObjectHandler->DisplayMessageBox(theListOfTargets);
+                m_DeletingReferencedObjectHandler->DisplayMessageBox(theListOfTargets.toQString());
             // theContinueCutFlag = false;
         }
     }
@@ -879,23 +878,27 @@ void CDoc::CopyObject(qt3dsdm::TInstanceHandleList inInstances)
 void CDoc::PasteObject(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     using namespace Q3DStudio;
-    qt3dsdm::Qt3DSDMInstanceHandle theInstance(inInstance);
-    qint64 dummy = 0;
-    Qt3DSFile theTempAPFile = CStudioClipboard::GetObjectFromClipboard(false, dummy);
-    SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Paste Object"))
-            ->PasteSceneGraphObject(theTempAPFile.GetAbsolutePath(), theInstance, true,
-                                    DocumentEditorInsertType::LastChild, CPt());
+    if (inInstance.Valid()) {
+        qt3dsdm::Qt3DSDMInstanceHandle theInstance(inInstance);
+        qint64 dummy = 0;
+        Qt3DSFile theTempAPFile = CStudioClipboard::GetObjectFromClipboard(false, dummy);
+        SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Paste Object"))
+                ->PasteSceneGraphObject(theTempAPFile.GetAbsolutePath(), theInstance, true,
+                                        DocumentEditorInsertType::LastChild, CPt());
+    }
 }
 
 void CDoc::PasteObjectMaster(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     using namespace Q3DStudio;
-    qt3dsdm::Qt3DSDMInstanceHandle theInstance(inInstance);
-    qint64 dummy = 0;
-    Qt3DSFile theTempAPFile = CStudioClipboard::GetObjectFromClipboard(false, dummy);
-    SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Paste Object"))
-            ->PasteSceneGraphObjectMaster(theTempAPFile.GetAbsolutePath(), theInstance, true,
-                                          DocumentEditorInsertType::LastChild, CPt());
+    if (inInstance.Valid()) {
+        qt3dsdm::Qt3DSDMInstanceHandle theInstance(inInstance);
+        qint64 dummy = 0;
+        Qt3DSFile theTempAPFile = CStudioClipboard::GetObjectFromClipboard(false, dummy);
+        SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Paste Object"))
+                ->PasteSceneGraphObjectMaster(theTempAPFile.GetAbsolutePath(), theInstance, true,
+                                              DocumentEditorInsertType::LastChild, CPt());
+    }
 }
 
 //=============================================================================
@@ -939,8 +942,10 @@ void CDoc::DeleteObject(const qt3dsdm::TInstanceHandleList &inInstances)
             GetActionDependencies(inInstances[idx], theListOfTargets);
 
             if (!theListOfTargets.IsEmpty()) {
-                if (m_DeletingReferencedObjectHandler)
-                    m_DeletingReferencedObjectHandler->DisplayMessageBox(theListOfTargets);
+                if (m_DeletingReferencedObjectHandler) {
+                    m_DeletingReferencedObjectHandler->DisplayMessageBox(theListOfTargets
+                                                                         .toQString());
+                }
             }
 
             deletableInstances.push_back(inInstances[idx]);
@@ -1288,7 +1293,7 @@ void CDoc::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
             it->boundTypes.clear();
         }
 
-        UpdateDatainputMap(m_Core->GetDoc()->GetActiveRootInstance());
+        UpdateDatainputMap(m_Core->GetDoc()->GetSceneInstance());
     }
 }
 
@@ -1441,7 +1446,8 @@ void CDoc::TruncateTimebar(bool inSetStart, bool inAffectsChildren)
     qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = GetSelectedInstance();
     // Cannot change the time bars for a material
     if (theSelectedInstance.Valid())
-        Q3DStudio::ScopedDocumentEditor(*this, L"Truncate Time Range", __FILE__, __LINE__)
+        Q3DStudio::ScopedDocumentEditor(*this, QObject::tr("Truncate Time Range"),
+                                        __FILE__, __LINE__)
                 ->TruncateTimeRange(theSelectedInstance, inSetStart, GetCurrentViewTime());
 }
 
@@ -1523,26 +1529,25 @@ Q3DStudio::IDirectoryWatchingSystem *CDoc::GetDirectoryWatchingSystem()
     return m_DirectoryWatchingSystem ? m_DirectoryWatchingSystem.get() : NULL;
 }
 
-bool CDoc::SetDocumentPath(const Qt3DSFile &inDocumentPath)
+bool CDoc::SetDocumentPath(const QString &inDocumentPath)
 {
-    Q3DStudio::CString theDocPath = inDocumentPath.GetName();
     // We always need to have a document path.
-    if (theDocPath.Length() == 0) {
+    if (inDocumentPath.isEmpty()) {
         ASSERT(false); // User should have specified which file.
         m_DocumentPath = CreateUntitledDocument();
     } else {
         m_DocumentPath = inDocumentPath;
-        if (!m_DocumentPath.Exists()) {
-            // If the file doesn't exist, create it.
-            Q3DStudio::CFilePath(m_DocumentPath.GetPath()).Touch();
-        }
+        QFile f(m_DocumentPath);
+        if (!f.exists()) // If the file doesn't exist, create it.
+            f.open(QIODevice::ReadWrite);
     }
 
     // Document path should always be absolute path and it should exist
-    if (Qt3DSFile::IsPathRelative(m_DocumentPath.GetPath()) || !m_DocumentPath.Exists())
+    QFileInfo info(m_DocumentPath);
+    if (info.isRelative() || !info.exists())
         return false;
 
-    m_Core->GetDispatch()->FireOnDocumentPathChanged(m_DocumentPath.GetAbsolutePath().toQString());
+    m_Core->GetDispatch()->FireOnDocumentPathChanged(m_DocumentPath);
     return true;
 }
 
@@ -1550,21 +1555,20 @@ bool CDoc::SetDocumentPath(const Qt3DSFile &inDocumentPath)
 /**
  * Create Untitled document in user directory
  */
-Qt3DSFile CDoc::CreateUntitledDocument() const
+QString CDoc::CreateUntitledDocument() const
 {
-    Q3DStudio::CFilePath theAppDirectory = Q3DStudio::CFilePath::GetUserApplicationDirectory();
-    Q3DStudio::CFilePath theDirectory = Q3DStudio::CFilePath::CombineBaseAndRelative(
-                theAppDirectory, Q3DStudio::CFilePath(L"Qt3DSComposer/Untitled"));
-    theDirectory.CreateDir(true);
-    Q3DStudio::CFilePath theFilePath = Q3DStudio::CFilePath::CombineBaseAndRelative(
-                theDirectory, Q3DStudio::CFilePath(L"Untitled.uip"));
-    // Keep jokers from screwing with our system.
-    if (theFilePath.IsDirectory())
-        theFilePath.DeleteThisDirectory(true);
+    QString dirPath = QDir::cleanPath(Q3DStudio::CFilePath::GetUserApplicationDirectory()
+                                              + QStringLiteral("/Qt3DSComposer/Untitled"));
+    QDir dir(dirPath);
+    dir.mkpath(QStringLiteral("."));
+    QString filePath = dirPath + QStringLiteral("/Untitled.uip");
 
-    if (!theFilePath.IsFile())
-        theFilePath.Touch();
-    return Qt3DSFile(theFilePath);
+     // create the file if doesnt exist
+    if (!QFileInfo(filePath).exists()) {
+        QFile f(filePath);
+        f.open(QIODevice::ReadWrite);
+    }
+    return filePath;
 }
 
 void CDoc::SetImportFailedHandler(std::shared_ptr<Q3DStudio::IImportFailedHandler> inHandler)
@@ -1593,7 +1597,8 @@ std::shared_ptr<Q3DStudio::IMoveRenameHandler> CDoc::getMoveRenameHandler()
     return m_moveRenameHandler;
 }
 
-Qt3DSFile CDoc::GetDocumentPath() const
+// absolute document path
+QString CDoc::GetDocumentPath() const
 {
     return m_DocumentPath;
 }
@@ -1604,7 +1609,7 @@ Qt3DSFile CDoc::GetDocumentPath() const
 QString CDoc::getRelativePath() const
 {
     return QDir(GetCore()->getProjectFile().getProjectPath())
-            .relativeFilePath(m_DocumentPath.GetPath().toQString());
+            .relativeFilePath(m_DocumentPath);
 }
 
 void CDoc::setPresentationId(const QString &id)
@@ -1619,7 +1624,7 @@ QString CDoc::getPresentationId() const
 
 Q3DStudio::CString CDoc::GetDocumentDirectory() const
 {
-    Q3DStudio::CFilePath thePath(m_DocumentPath.GetAbsolutePath());
+    Q3DStudio::CFilePath thePath(m_DocumentPath);
     return thePath.GetDirectory();
 }
 
@@ -1663,8 +1668,9 @@ QString CDoc::GetRelativePathToDoc(const QFileInfo &inPath)
 Q3DStudio::CString CDoc::GetResolvedPathToDoc(const Q3DStudio::CFilePath &inPath)
 {
     // If it is a relative path, resolve it.
-    if (inPath.IsAbsolute() == false) {
-        ASSERT(m_DocumentPath.Exists()); // Sanity check that document path has been set properly.
+    if (!inPath.IsAbsolute()) {
+        // Sanity check that document path has been set properly.
+        ASSERT(QFileInfo(m_DocumentPath).exists());
 
         return Q3DStudio::CFilePath::CombineBaseAndRelative(GetDocumentDirectory(), inPath);
     }
@@ -1674,7 +1680,8 @@ Q3DStudio::CString CDoc::GetResolvedPathToDoc(const Q3DStudio::CFilePath &inPath
 QString CDoc::GetResolvedPathToDoc(const QFileInfo &inPath)
 {
     if (inPath.isAbsolute() == false) {
-        ASSERT(m_DocumentPath.Exists()); // Sanity check that document path has been set properly.
+        // Sanity check that document path has been set properly.
+        ASSERT(QFileInfo(m_DocumentPath).exists());
         return GetDocumentDirectory().toQString() + "/" + inPath.filePath();
     }
     return inPath.absolutePath();
@@ -1724,11 +1731,11 @@ void CDoc::CloseDocument()
 /**
  * Called when the core opens a UIP file.
  */
-void CDoc::LoadDocument(const Qt3DSFile &inDocument)
+void CDoc::LoadDocument(const QString &inDocument)
 {
     ResetData();
 
-    QFile file(inDocument.GetAbsolutePosixPath().toQString());
+    QFile file(inDocument);
     if (!file.open(QFile::ReadOnly | QFile::ExistingOnly)) {
         QT3DS_ASSERT(0);
         return;
@@ -1742,9 +1749,9 @@ void CDoc::LoadDocument(const Qt3DSFile &inDocument)
 /**
  * Save Document
  */
-void CDoc::SaveDocument(const Qt3DSFile &inDocument)
+void CDoc::SaveDocument(const QString &inDocument)
 {
-    QFile file(inDocument.GetAbsolutePosixPath().toQString());
+    QFile file(inDocument);
     if (!file.open(QFile::ReadWrite | QFile::Truncate)) {
         QT3DS_ASSERT(0);
         return;
@@ -1892,7 +1899,7 @@ void CDoc::HandlePaste()
         // m_StudioApp->GetViews( )->GetActionControl( )->OnPasteAction( );
         // m_StudioApp->GetViews( )->OnShowAction( );
     } else if (CanPasteObject()) {
-        PasteObject(GetSelectedInstance());
+        PasteObject(getPasteTarget(GetSelectedInstance()));
     } else {
         if (m_KeyframesManager)
             m_KeyframesManager->PasteKeyframes();
@@ -1916,7 +1923,7 @@ void CDoc::HandleMasterPaste()
         // m_StudioApp->GetViews( )->GetActionControl( )->OnPasteAction( );
         // m_StudioApp->GetViews( )->OnShowAction( );
     } else if (CanPasteObject()) {
-        qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = GetSelectedInstance();
+        qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = getPasteTarget(GetSelectedInstance());
         long theTargetObjectType =
                 GetStudioSystem()->GetClientDataModelBridge()->GetObjectType(theSelectedInstance);
         qt3dsdm::ISlideSystem *theSlideSystem = GetStudioSystem()->GetSlideSystem();
@@ -2024,25 +2031,9 @@ bool CDoc::CanCopyAction()
 /**
  * Check to see if an object can be pasted into the Scene.
  */
-bool CDoc::CanPasteObject()
+bool CDoc::CanPasteObject() const
 {
-    bool theCanPasteFlag = false;
-
-    qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = GetSelectedInstance();
-    if (theSelectedInstance.Valid()) {
-        // Check if there is object on clipboard and if the object type on clipboard can be attached
-        // to theSelectedInstance
-        theCanPasteFlag = CStudioClipboard::CanPasteObject(
-                    GetStudioSystem()->GetClientDataModelBridge()->GetObjectType(theSelectedInstance));
-
-        // Only allow component paste if we are in the component.
-        if (theCanPasteFlag
-                && m_StudioSystem->GetClientDataModelBridge()->GetObjectType(theSelectedInstance)
-                == OBJTYPE_COMPONENT)
-            theCanPasteFlag &=
-                    m_StudioSystem->GetClientDataModelBridge()->IsActiveComponent(theSelectedInstance);
-    }
-    return theCanPasteFlag;
+    return getPasteTarget(GetSelectedInstance()).Valid();
 }
 
 //==============================================================================
@@ -2629,6 +2620,36 @@ void CDoc::GetActionsAffectedByRename(qt3dsdm::Qt3DSDMInstanceHandle inAsset,
     //}
 }
 
+qt3dsdm::Qt3DSDMInstanceHandle CDoc::getPasteTarget(qt3dsdm::Qt3DSDMInstanceHandle selected) const
+{
+    // Logic for object pasting is:
+    // 1) If you can paste the object as a sibling of the selected object -> do that
+    //  Except: If selected object is the currently active component, never paste under its parent,
+    //          as that would be outside the current time context.
+    // 2) If you can paste the object as a child of the selected object -> do that
+    //  Except: If the selected object is a component that is not active, never paste under it.
+    //          Components can have children only in time context of their own.
+
+    qt3dsdm::Qt3DSDMInstanceHandle pasteTarget;
+    if (selected.Valid()) {
+        auto bridge = m_StudioSystem->GetClientDataModelBridge();
+        qt3dsdm::Qt3DSDMInstanceHandle selectedParent = bridge->GetParentInstance(selected);
+        bool componentSelected = bridge->IsComponentInstance(selected);
+        bool selectedComponentActive = false;
+        if (componentSelected)
+            selectedComponentActive = bridge->IsActiveComponent(selected);
+
+        if (!selectedComponentActive && selectedParent.Valid()
+                && CStudioClipboard::CanPasteObject(bridge->GetObjectType(selectedParent))) {
+            pasteTarget = selectedParent;
+        } else if (CStudioClipboard::CanPasteObject(bridge->GetObjectType(selected))
+                   && (!componentSelected || selectedComponentActive)) {
+            pasteTarget = selected;
+        }
+    }
+    return pasteTarget;
+}
+
 //==============================================================================
 /**
  * Image is a property of the material.
@@ -2905,39 +2926,8 @@ void CDoc::CheckActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 
     if (!theListOfTargets.IsEmpty()) {
         if (m_DeletingReferencedObjectHandler)
-            m_DeletingReferencedObjectHandler->DisplayMessageBox(theListOfTargets);
+            m_DeletingReferencedObjectHandler->DisplayMessageBox(theListOfTargets.toQString());
     }
-}
-
-// Mahmoud_TODO: to be removed in next patches (after resolving its uses)
-QString CDoc::GetDocumentUIAFile(bool master)
-{
-    Q3DStudio::CString docDir = GetDocumentDirectory();
-    Q3DStudio::CString docName
-            = Q3DStudio::CFilePath(GetDocumentPath().GetName()).GetFileStem();
-
-    QString file;
-    QString masterFile;
-    std::vector<Q3DStudio::CFilePath> dirFiles;
-    Q3DStudio::CFilePath thePath(docDir);
-    thePath.ListFilesAndDirectories(dirFiles);
-    for (size_t idx = 0, end = dirFiles.size(); idx < end; ++idx) {
-        Q3DStudio::CFilePath dirEntry = dirFiles[idx];
-        if (dirEntry.IsFile() && dirEntry.GetExtension().CompareNoCase("uia")) {
-            // First check if there is an *.uia file with the same name as the *.uip
-            // If there is, that's what we want
-            // If not, then check if we are looking for the master *.uia, and take that instead
-            if (dirEntry.GetFileStem() == docName) {
-                file = dirEntry.toQString();
-                // We found what we're looking for, so stop looking
-                break;
-            } else if (master) {
-                masterFile = dirEntry.toQString();
-                // Keep looking, as we may still find another *.uia with the correct name
-            }
-        }
-    }
-    return file.isEmpty() ? masterFile : file;
 }
 
 // TODO: use ProjectFile class framework to parse subpresentations and add datainput use

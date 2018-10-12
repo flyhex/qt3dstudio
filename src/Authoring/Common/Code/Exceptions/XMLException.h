@@ -28,27 +28,20 @@
 ****************************************************************************/
 
 #ifndef INCLUDED_XML_EXCEPTION_H
-#define INCLUDED_XML_EXCEPTION_H 1
+#define INCLUDED_XML_EXCEPTION_H
 
-#pragma once
-
-const short XML_DESCRIPTION_LENGTH = 256;
-
-//==============================================================================
-//	Includes
-//==============================================================================
 #include "StudioException.h"
 
 class CXMLException : public CStudioException
 {
 
 public:
-    CXMLException(const wchar_t *inXMLDescription);
+    CXMLException(const QString &inXMLDescription);
     virtual ~CXMLException() {}
-    const wchar_t *GetDescription() const override { return m_Description; }
+    QString GetDescription() const override { return m_Description; }
 
 protected:
-    wchar_t m_Description[XML_DESCRIPTION_LENGTH]; ///< A description of the exception
+    QString m_Description; ///< A description of the exception
 };
 
 #endif // INCLUDED_XML_EXCEPTION_H

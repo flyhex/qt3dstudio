@@ -52,6 +52,8 @@ public:
         IsReferencedRole,
         DepthRole,
         ExpandedRole,
+        FileIdRole,
+        ExtraIconRole
     };
 
     void setRootPath(const QString &path);
@@ -63,10 +65,13 @@ public:
 
     QString filePath(int row) const;
     bool isRefreshable(int row) const;
+    bool isCurrentPresentation(const QString &path) const;
+    bool isInitialPresentation(const QString &path) const;
+    QString presentationId(const QString &path) const;
 
-    void updateReferences();
     Q3DStudio::DocumentEditorFileType::Enum assetTypeForRow(int row);
     int rowForPath(const QString &path) const;
+    void updateRoles(const QVector<int> &roles, int startRow = 0, int endRow = -1);
 
     Q_INVOKABLE void expand(int row);
     Q_INVOKABLE void collapse(int row);
@@ -75,6 +80,8 @@ public:
     Q_INVOKABLE bool hasValidUrlsForDropping(const QList<QUrl> &urls) const;
     Q_INVOKABLE void showInfo(int row);
     Q_INVOKABLE void duplicate(int row);
+
+    void asyncUpdateReferences();
 
 Q_SIGNALS:
     void modelChanged(QAbstractItemModel *model);
@@ -90,8 +97,10 @@ private:
     EStudioObjectType getIconType(const QString &path) const;
     bool isVisible(const QModelIndex& modelIndex) const;
     bool hasVisibleChildren(const QModelIndex &modelIndex) const;
-    void importUrl(QDir &targetDir, const QUrl &url);
+    void importUrl(QDir &targetDir, const QUrl &url,
+                   QHash<QString, QString> &outPresentationNodes);
     void importPresentationAssets(const QFileInfo &uipSrc, const QFileInfo &uipTarget,
+                                  QHash<QString, QString> &outPresentationNodes,
                                   const int overrideChoice = QMessageBox::NoButton) const;
 
     void modelRowsInserted(const QModelIndex &parent, int start, int end);
@@ -102,6 +111,9 @@ private:
 
     void updateDefaultDirMap();
     void addPathsToReferences(const QString &projectPath, const QString &origPath);
+    void handlePresentationIdChange(const QString &path, const QString &id);
+    void asyncExpandPresentations();
+    void updateReferences();
 
     struct TreeItem {
         QPersistentModelIndex index;

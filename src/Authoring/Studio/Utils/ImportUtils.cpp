@@ -31,7 +31,7 @@
 #include "ImportUtils.h"
 #include "Dialogs.h"
 #include "Qt3DSFileTools.h"
-#include <QtQml/qqmlapplicationengine.h>
+#include "StudioApp.h"
 
 namespace Q3DStudio {
 
@@ -56,14 +56,9 @@ SObjectFileType ImportUtils::GetObjectFileTypeForFile(const CFilePath &inFile,
             DocumentEditorFileType::Image); // Drag-drop image to scene will auto-map to Rectangle.
     } else if (theExtension.Compare(CDialogs::GetQmlFileExtension(),
                                     Q3DStudio::CString::ENDOFSTRING, false)) {
-        QQmlApplicationEngine qmlEngine(inFile.absoluteFilePath());
-        if (qmlEngine.rootObjects().size() > 0) {
-            const char *rootClassName = qmlEngine.rootObjects().at(0)
-                                        ->metaObject()->superClass()->className();
-            bool isQmlStream =  strcmp(rootClassName, "Q3DStudio::Q3DSQmlBehavior") != 0;
-            return isQmlStream ? SObjectFileType(OBJTYPE_QML_STREAM, DocumentEditorFileType::QmlStream)
-                               : SObjectFileType(OBJTYPE_BEHAVIOR, DocumentEditorFileType::Behavior);
-        } // If qml file is invalid, it will be of unknown type
+        return g_StudioApp.isQmlStream(inFile.absoluteFilePath())
+                ? SObjectFileType(OBJTYPE_QML_STREAM, DocumentEditorFileType::QmlStream)
+                : SObjectFileType(OBJTYPE_BEHAVIOR, DocumentEditorFileType::Behavior);
     } else if (theExtension.Compare(CDialogs::GetMaterialDataFileExtension(),
                                     Q3DStudio::CString::ENDOFSTRING, false)) {
         return SObjectFileType(OBJTYPE_MATERIALDATA, DocumentEditorFileType::MaterialData);

@@ -97,7 +97,7 @@ void CBufferedInputStream::Close()
         m_InputStream->Close();
 }
 
-bool CBufferedInputStream::IsValid()
+bool CBufferedInputStream::IsValid() const
 {
     if (m_InputStream != NULL)
         return m_InputStream->IsValid();

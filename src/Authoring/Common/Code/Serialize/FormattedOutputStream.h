@@ -43,7 +43,7 @@ public:
 
     long Write(const void *inData, long inLength) override;
     void Close() override;
-    bool IsValid() override;
+    bool IsValid() const override;
     void Flush() override;
 
     // CSeekOutputStream

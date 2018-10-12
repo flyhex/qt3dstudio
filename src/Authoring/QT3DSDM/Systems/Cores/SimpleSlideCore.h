@@ -34,6 +34,7 @@
 #include "SimpleDataCore.h"
 #include "Qt3DSDMStringTable.h"
 #include <unordered_map>
+#include <QtCore/qdebug.h>
 
 namespace std {
 
@@ -89,6 +90,7 @@ struct SSlide : public CHandleObject
         TSlideInstancePropertyPair theKey(inInstance.GetHandleValue(), inProperty.GetHandleValue());
         std::pair<TSlideEntryHash::iterator, bool> insertResult =
             m_Properties.insert(std::make_pair(theKey, inValue));
+
         if (insertResult.second == false)
             insertResult.first->second = inValue;
         return insertResult.second;
@@ -147,9 +149,10 @@ struct SSlide : public CHandleObject
                                              theEnd = m_Properties.end();
              theIter != theEnd; ++theIter) {
             if (inPredicate(TSlideEntry(theIter->first.first, theIter->first.second,
-                                        theIter->second.GetValue())))
+                                        theIter->second.GetValue()))) {
                 outList.push_back(TSlideEntry(theIter->first.first, theIter->first.second,
                                               theIter->second.GetValue()));
+            }
         }
         DeleteEntriesFromList(outList);
     }
@@ -164,9 +167,16 @@ struct SSlide : public CHandleObject
     void InsertSlideEntries(const TSlideEntryList &inList, IStringTable &inStringTable)
     {
         for (size_t idx = 0, end = inList.size(); idx < end; ++idx) {
-            TSlideInstancePropertyPair theKey(std::get<0>(inList[idx]),
-                                              std::get<1>(inList[idx]));
-            Q_ASSERT(m_Properties.find(theKey) == m_Properties.end());
+            TSlideInstancePropertyPair theKey(std::get<0>(inList[idx]), std::get<1>(inList[idx]));
+
+            if (m_Properties.find(theKey) != m_Properties.end()) {
+                // The only known case when this condition happens is when DnD a sub-presentation to
+                // the scene as a texture rect then undoing.
+                qWarning() << __FUNCTION__ << ": Instance/Property Pair" << theKey
+                                           << "already exists, erasing it.";
+                m_Properties.erase(theKey);
+            }
+
             m_Properties.insert(
                 std::make_pair(theKey, SInternValue(std::get<2>(inList[idx]), inStringTable)));
         }

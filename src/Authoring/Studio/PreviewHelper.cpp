@@ -35,7 +35,6 @@
 #include "Doc.h"
 #include "StudioPreferences.h"
 #include "StudioProjectSettings.h"
-#include "StudioProjectVariables.h"
 #include "Core.h"
 #include "Qt3DSFileTools.h"
 
@@ -45,53 +44,6 @@
 #include <ProjectFile.h>
 
 #include "remotedeploymentsender.h"
-
-static const Q3DStudio::CString previewSuffix("_@preview@");
-static const Q3DStudio::CString uipSuffix(".uip");
-static const Q3DStudio::CString uiaSuffix(".uia");
-
-Q3DStudio::CString CPreviewHelper::GetLaunchFile(const Q3DStudio::CString &inUipPath)
-{
-    const bool isPreview = inUipPath.Right(previewSuffix.Length() + uipSuffix.Length())
-            .Compare(previewSuffix + uipSuffix);
-
-    Q3DStudio::CFilePath theUipPath(inUipPath);
-    // Mahmoud_TODO: update to use PresentationFile::findProjectFile()
-    Q3DStudio::CString theDir = theUipPath.GetDirectory();
-    Q3DStudio::CString theStem = theUipPath.GetFileStem();
-    if (isPreview)
-        theStem = theStem.Left(theStem.Length() - previewSuffix.Length());
-
-    // Check if a corresponding .UIA file actually exists
-    theDir.append('/');
-    Q3DStudio::CString uiaPath = theDir + theStem + uiaSuffix;
-
-    Q3DStudio::CFilePath theUiaPath(uiaPath);
-    if (theUiaPath.IsFile()) {
-        if (isPreview) {
-            // We need to make a preview .uia that points to the preview .uip
-            Q3DStudio::CString previewPath = theDir + theStem + previewSuffix + uiaSuffix;
-            QFile previewFile(previewPath.toQString());
-            QFile origFile(uiaPath.toQString());
-            if (previewFile.open(QIODevice::WriteOnly) && origFile.open(QIODevice::ReadOnly)) {
-                QByteArray content = origFile.readAll();
-                QString origUip = (theStem + uipSuffix).toQString();
-                QString previewUip = (theStem + previewSuffix + uipSuffix).toQString();
-                content.replace(origUip, previewUip.toUtf8());
-                previewFile.write(content);
-                previewFile.flush();
-                return previewPath;
-            } else {
-                qCWarning(qt3ds::WARNING) << "Failed to create preview .uia file:"
-                                          << previewPath.toQString();
-                return inUipPath;
-            }
-        }
-        return uiaPath;
-    } else {
-        return inUipPath;
-    }
-}
 
 //=============================================================================
 /**
@@ -137,8 +89,7 @@ void CPreviewHelper::PreviewViaConfig(Q3DStudio::CBuildConfiguration *inSelected
     CCore *theCore = g_StudioApp.GetCore();
     QString prvPath = theCore->getProjectFile().createPreview();
     try {
-        DoPreviewViaConfig(inSelectedConfig, Q3DStudio::CString::fromQString(prvPath),
-                           inMode, viewerExeName, project);
+        DoPreviewViaConfig(inSelectedConfig, prvPath, inMode, viewerExeName, project);
     } catch (...) {
         theCore->GetDispatch()->FireOnProgressEnd();
         g_StudioApp.GetDialogs()->DisplaySaveReadOnlyFailed(prvPath);
@@ -148,7 +99,7 @@ void CPreviewHelper::PreviewViaConfig(Q3DStudio::CBuildConfiguration *inSelected
 QString CPreviewHelper::getViewerFilePath(const QString &exeName)
 {
     using namespace Q3DStudio;
-    CFilePath currentPath(Qt3DSFile::GetApplicationDirectory().GetAbsolutePath());
+    CFilePath currentPath(Qt3DSFile::GetApplicationDirectory());
     CFilePath viewerDir(QApplication::applicationDirPath());
 
     QString viewerFile;
@@ -202,36 +153,27 @@ QString CPreviewHelper::getViewerFilePath(const QString &exeName)
     return viewer;
 }
 
-void CPreviewHelper::cleanupProcess(QProcess *p, QString *pDocStr)
+void CPreviewHelper::cleanupProcess(QProcess *p, QString *docPath)
 {
     p->disconnect();
-    QString preview = previewSuffix.toQString();
-    QString uia = preview + uiaSuffix.toQString();
-    QString uip = preview + uipSuffix.toQString();
-    if (pDocStr->endsWith(uia)) {
-        // remove presentation preview (initial)
-        QString initialPresentationSrc = ProjectFile::getInitialPresentationSrc(*pDocStr);
-        if (!initialPresentationSrc.isEmpty() && initialPresentationSrc
-                                                 .endsWith(QLatin1String("_@preview@.uip"))) {
-            QString absUipPath = QDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath())
-                                                        .absoluteFilePath(initialPresentationSrc);
-            QFile(absUipPath).remove();
-        }
-
-        QFile(*pDocStr).remove(); // remove uia preview
-    } else if (pDocStr->endsWith(uip)) {
-        QFile(*pDocStr).remove();
+    if (docPath->endsWith(QLatin1String("_@preview@.uia"))) {
+        QString uipPreviewPath = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath()
+                                 .replace(QLatin1String(".uip"), QLatin1String("_@preview@.uip"));
+        QFile(uipPreviewPath).remove(); // remove uip preview (if exists)
+        QFile(*docPath).remove(); // remove uia preview
+    } else if (docPath->endsWith(QLatin1String("_@preview@.uip"))) {
+        QFile(*docPath).remove();  // remove uip preview (if exists)
     }
     if (p->state() == QProcess::Running) {
         p->terminate();
         p->waitForFinished(5000); // To avoid warning about deleting a running process
     }
     p->deleteLater();
-    delete pDocStr;
+    delete docPath;
 }
 
 void CPreviewHelper::DoPreviewViaConfig(Q3DStudio::CBuildConfiguration * /*inSelectedConfig*/,
-                                        const Q3DStudio::CString &inDocumentFile,
+                                        const QString &inDocumentFile,
                                         EExecMode inMode, const QString &viewerExeName,
                                         RemoteDeploymentSender *project)
 {
@@ -239,13 +181,12 @@ void CPreviewHelper::DoPreviewViaConfig(Q3DStudio::CBuildConfiguration * /*inSel
 
     if (inMode == EXECMODE_DEPLOY) {
         Q_ASSERT(project);
-        project->streamProject(inDocumentFile.toQString());
+        project->streamProject(inDocumentFile);
     } else if (inMode == EXECMODE_PREVIEW
                && CStudioPreferences::GetPreviewProperty("PLATFORM") == "PC") {
         // Quick Preview on PC without going via NANT
-        Q3DStudio::CString theDocumentFile = CPreviewHelper::GetLaunchFile(inDocumentFile);
         QString theCommandStr = getViewerFilePath(viewerExeName);
-        QString *pDocStr = new QString(theDocumentFile.toQString());
+        QString *pDocStr = new QString(inDocumentFile);
 
         QProcess *p = new QProcess;
         QMetaObject::Connection *connection = new QMetaObject::Connection(
@@ -272,119 +213,4 @@ void CPreviewHelper::DoPreviewViaConfig(Q3DStudio::CBuildConfiguration * /*inSel
             return;
         }
     }
-}
-
-bool CPreviewHelper::viewerExists(const QString &exeName)
-{
-    return QFileInfo(getViewerFilePath(exeName)).exists();
-}
-
-//=============================================================================
-/**
- *	Interpret the string by resolving the variables.
- *	@param	inSourceString		String to be interpreted
- */
-Q3DStudio::CString CPreviewHelper::InterpretString(Q3DStudio::CBuildConfiguration *inSelectedConfig,
-                                                   const Q3DStudio::CString &inDocumentFile,
-                                                   const Q3DStudio::CString &inSourceString)
-{
-    Q3DStudio::CString theReturnString;
-    long theStart = 0; // start index of string
-    long theBeginIndex = 0; // index of '%'
-    long theEndIndex = 0; // index of '%'
-    while (Q3DStudio::CString::ENDOFSTRING != theEndIndex) {
-        theBeginIndex = inSourceString.Find('%', theStart);
-        if (Q3DStudio::CString::ENDOFSTRING != theBeginIndex) {
-            theReturnString += inSourceString.Extract(theStart, theBeginIndex - theStart);
-            // find the corresponding '%'
-            theEndIndex = inSourceString.Find('%', theBeginIndex + 1);
-            if (Q3DStudio::CString::ENDOFSTRING != theEndIndex) {
-                // first, resolve the variable by the toolbar selection
-                Q3DStudio::CString theVariable =
-                        inSourceString.Extract(theBeginIndex + 1, theEndIndex - theBeginIndex - 1);
-                Q3DStudio::CString theResolvedVariable;
-                bool theHasResolved = ResolveVariable(inSelectedConfig, inDocumentFile, theVariable,
-                                                      theResolvedVariable);
-
-                if (theHasResolved) {
-                    theReturnString += theResolvedVariable;
-                } else {
-                    theReturnString += "_NULL_";
-                }
-                theStart = theEndIndex + 1;
-            } else
-                theReturnString += inSourceString.Extract(theBeginIndex);
-        } else {
-            theEndIndex = theBeginIndex;
-            theReturnString += inSourceString.Extract(theStart);
-        }
-    }
-
-    return theReturnString;
-}
-
-//==============================================================================
-/**
- *	Resolves the passed in variable and write out the resolved value if it exists
- *	in the current selected build configuration.
- *	@param inVariable	the environment to be resolved
- *	@param outValue		the string to receive the resolved value
- *	@return true if the variable exists, else false
- */
-//==============================================================================
-bool CPreviewHelper::ResolveVariable(Q3DStudio::CBuildConfiguration *inSelectedConfig,
-                                     const Q3DStudio::CString &inDocumentFile,
-                                     const Q3DStudio::CString &inVariable,
-                                     Q3DStudio::CString &outValue)
-{
-    Q3DStudio::CString theReturnStr;
-    bool theHasResolved = false;
-
-    // Handle special variable
-    if (inVariable == "BUILDFILE") {
-        if (inSelectedConfig) {
-            theReturnStr = Q3DStudio::CString::fromQString(inSelectedConfig->GetPath());
-            theHasResolved = true;
-        }
-    } else if (inVariable == "UIPFILE") {
-        theReturnStr = inDocumentFile;
-        theHasResolved = true;
-    }
-
-    if (!theHasResolved) {
-        QString theValue = CStudioPreferences::GetPreviewProperty(inVariable.toQString());
-        if (theValue != "") {
-            theReturnStr = Q3DStudio::CString::fromQString(theValue);
-            theHasResolved = true;
-        }
-    }
-
-    if (theHasResolved)
-        outValue = InterpretString(inSelectedConfig, inDocumentFile, theReturnStr);
-
-    return theHasResolved;
-}
-
-/**
- *  Gets a file to be previewed based on the current document.
- *  If the document is dirty, a temp file based on the current document is used.
- *  @param outUsingTempFile indicates if temp file is used
- *  @return the document file to be previewed
- */
-Qt3DSFile CPreviewHelper::GetDocumentFile(bool &outUsingTempFile)
-{
-    Qt3DSFile result("");
-    if (g_StudioApp.GetCore()->GetDoc()->IsModified()) {
-        Qt3DSFile document = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath();
-        Q3DStudio::CFilePath absPath = document.GetAbsolutePath();
-        Q3DStudio::CString dir = absPath.GetDirectory();
-        Q3DStudio::CString stem = absPath.GetFileStem();
-        dir.append('/');
-        result = dir + stem + previewSuffix + uipSuffix;
-        outUsingTempFile = true;
-    } else {
-        result = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath();
-        outUsingTempFile = false;
-    }
-    return result;
 }

@@ -36,7 +36,6 @@
 
 #include <stdio.h>
 #include "InputStream.h"
-#include "Qt3DSString.h"
 
 #include <QFile>
 
@@ -55,7 +54,7 @@ protected:
 
     // Field Members
 protected:
-    Q3DStudio::CString m_FileName;
+    QString m_FileName;
 
     char m_InternalBuffer[INTERNAL_BUFFER_SIZE];
     long m_ReadBytesFromCurrentBuffer;
@@ -64,7 +63,7 @@ protected:
 
     // Construction
 public:
-    CFileInputStream(const Q3DStudio::CString &inFileName);
+    CFileInputStream(const QString &inFileName);
     virtual ~CFileInputStream();
 
     // CInputStream
@@ -72,9 +71,9 @@ public:
     long Seek(Q3DStudio::ISeekable::ESeekPosition inSeekPosition, long inOffset) override;
     long Read(void *inBuffer, long inBufferLength) override;
     void Close() override;
-    bool IsValid() override;
-    Q3DStudio::CString GetMimeType() override { return L""; }
-    Q3DStudio::CString GetSource() override;
+    bool IsValid() const override;
+    QString GetMimeType() const override { return {}; }
+    QString GetSource() const override;
 };
 
 #endif // INCLUDED_FILEINPUTSTREAM_H

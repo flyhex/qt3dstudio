@@ -28,14 +28,10 @@
 ****************************************************************************/
 
 #ifndef INCLUDED_IOLIBRARYEXCEPTION_H
-#define INCLUDED_IOLIBRARYEXCEPTION_H 1
-
-#pragma once
+#define INCLUDED_IOLIBRARYEXCEPTION_H
 
 #include "StudioException.h"
-
-// This string should never be displayed to user, just for brief description.
-static const wchar_t IOLIBRARY_EXCEPTION_DESCRIPTION[] = L"IOLibrary Exception";
+#include <QtCore/qobject.h>
 
 class CIOException : public CStudioException
 {
@@ -43,6 +39,6 @@ public:
     CIOException() {}
     virtual ~CIOException() {}
 
-    const wchar_t *GetDescription() const override { return IOLIBRARY_EXCEPTION_DESCRIPTION; }
+    QString GetDescription() const override { return QObject::tr("IOLibrary Exception"); }
 };
 #endif // INCLUDED_IOLIBRARYEXCEPTION_H

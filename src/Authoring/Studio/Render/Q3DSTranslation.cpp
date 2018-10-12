@@ -274,7 +274,7 @@ void Q3DSTranslation::setPresentationData()
     m_presentation_data.m_company = settings->GetCompany();
     m_presentation_data.m_width = settings->GetPresentationSize().x;
     m_presentation_data.m_height = settings->GetPresentationSize().y;
-    m_presentation_data.m_srcPath = m_doc.GetDocumentPath().GetPath().toQString();
+    m_presentation_data.m_srcPath = m_doc.GetDocumentPath();
 
     m_presentation->setSourceFile(m_presentation_data.m_srcPath);
     m_presentation->setAuthor(m_presentation_data.m_author);

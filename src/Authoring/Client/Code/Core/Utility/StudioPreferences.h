@@ -36,7 +36,6 @@
 #include <QtGui/qbrush.h>
 
 #include "CoreConst.h"
-#include "Qt3DSFile.h"
 #include "Preferences.h"
 #include "Rct.h"
 
@@ -48,7 +47,7 @@ class CStudioPreferences
     virtual ~CStudioPreferences();
 
 public:
-    static void LoadPreferences();
+    static void LoadPreferences(const QString &filePath);
 
     static bool IsTimelineSnappingGridActive();
     static void SetTimelineSnappingGridActive(bool inActive);
@@ -117,14 +116,19 @@ public:
     static CPt GetDefaultClientSize();
     static void SetDefaultClientSize(int width, int height);
 
+    static int getNumRecentItems();
+    static void setNumRecentItems(int n);
+
+    static QString getRecentItem(int index);
+    static void setRecentItem(int index, const QString &path);
+
     static bool GetAdvancePropertyExpandedFlag();
     static void SetAdvancePropertyExpandedFlag(bool inAdvancePropertyFlag);
 
     static QString GetPreviewConfig();
     static void SetPreviewConfig(const QString &inValue);
     static QString GetPreviewProperty(const QString &inName);
-    static void SetPreviewProperty(const QString &inName,
-                                   const QString &inValue);
+    static void SetPreviewProperty(const QString &inName, const QString &inValue);
 
     static ::CColor GetNormalColor();
     static ::CColor GetMasterColor();
@@ -207,5 +211,8 @@ public:
     static const long DEFAULT_SELECTOR_WIDTH = 30;
     static const long DEFAULT_SELECTOR_LENGTH = 50;
     static const long DEFAULT_AUTOSAVE_DELAY = 600;
+
+private:
+    static std::unique_ptr<CPreferences> m_preferences;
 };
 #endif // INCLUDED_STUDIO_PREFERENCES_H

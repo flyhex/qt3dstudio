@@ -145,7 +145,7 @@ void CThread::Join()
     if (m_Thread != nullptr) {
         bool nret = m_Thread->wait();
         if (nret == false)
-            throw CThreadException("Thread.Join: join failed");
+            throw CThreadException(QObject::tr("Thread.Join: join failed"));
     }
 }
 

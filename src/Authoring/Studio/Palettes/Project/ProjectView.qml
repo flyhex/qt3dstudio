@@ -71,81 +71,139 @@ Rectangle {
                 delegate: Rectangle {
                     id: delegateItem
                     property bool dragging: false
+                    property bool dragStarted: false
+                    property point pressPoint
                     width: parent.width
                     height: 20
                     color: (index == projectTree.currentIndex || dragging) ? _selectionColor
                                                                            : "transparent"
+                    function handlePress(mouse, tryDrag) {
+                        projectTree.currentIndex = model.index;
 
-                    Row {
-                        x: _depth*28
-                        anchors.verticalCenter: delegateItem.verticalCenter
+                        if (mouse.button === Qt.LeftButton && tryDrag && _isDraggable) {
+                            pressPoint = Qt.point(mouse.x, mouse.y);
+                            dragStarted = false;
+                        }
+                    }
 
-                        Image {
-                            source: _resDir + (_expanded ? "arrow_down.png" : "arrow.png")
-                            opacity: _isExpandable ? 1 : 0
+                    function handlePositionChange(mouse, item) {
+                        if (_isDraggable && !dragStarted
+                                && (Math.abs(mouse.x - pressPoint.x) > 4
+                                    || Math.abs(mouse.y - pressPoint.y) > 4)) {
+                            dragStarted = true;
+                            _parentView.startDrag(item, index);
+                        }
+                    }
 
-                            MouseArea {
-                                visible: _isExpandable
-                                anchors.fill: parent
-                                onClicked: {
-                                    if (_expanded)
-                                       projectTree.model.collapse(index)
-                                    else
-                                        projectTree.model.expand(index)
-                                    delegateMouseArea.clickPending = false
-                                }
+                    function handleClick(mouse) {
+                        if (mouse.button === Qt.RightButton) {
+                            var rootPoint = mapToItem(root, mouse.x, mouse.y);
+                            _parentView.showContextMenu(rootPoint.x, rootPoint.y,
+                                                        projectTree.currentIndex);
+                        }
+                    }
+
+                    function handleDoubleClick(mouse) {
+                        if (mouse.button === Qt.LeftButton) {
+                            if (_isExpandable) {
+                                if (_expanded)
+                                    projectTree.model.collapse(index);
+                                else
+                                    projectTree.model.expand(index);
+                            } else {
+                                _parentView.openFile(index);
                             }
                         }
+                    }
 
-                        Image {
-                            source: fileIcon
+                    MouseArea {
+                        id: delegateMouseArea
+                        anchors.fill: parent
+                        acceptedButtons: Qt.RightButton | Qt.LeftButton
 
-                            Item {
-                                id: dragItemIcon
+                        onPressed: delegateItem.handlePress(mouse, false)
+                        onClicked: delegateItem.handleClick(mouse)
+                        onDoubleClicked: delegateItem.handleDoubleClick(mouse)
 
-                                visible: _isDraggable
-                                anchors.fill: parent
+                        Row {
+                            x: _depth*28
+                            anchors.verticalCenter: parent.verticalCenter
 
-                                Drag.active: dragAreaIcon.drag.active
-                                Drag.hotSpot.x: width / 2
-                                Drag.hotSpot.y: height / 2
-                                Drag.dragType: Drag.Automatic
-                                Drag.supportedActions: Qt.CopyAction
+                            Image {
+                                source: _resDir + (_expanded ? "arrow_down.png" : "arrow.png")
+                                opacity: _isExpandable ? 1 : 0
 
                                 MouseArea {
-                                    id: dragAreaIcon
+                                    visible: _isExpandable
                                     anchors.fill: parent
-                                    drag.target: dragItemIcon
+                                    acceptedButtons: Qt.LeftButton
+                                    onPressed: delegateItem.handlePress(mouse, false)
+                                    onClicked: {
+                                        if (_expanded)
+                                            projectTree.model.collapse(index)
+                                        else
+                                            projectTree.model.expand(index)
+                                    }
                                 }
-
-                                Drag.onDragStarted: _parentView.startDrag(dragAreaIcon, index)
                             }
-                        }
 
-                        StyledLabel {
-                            text: fileName
-                            color: _isReferenced ? _textColor : _disabledColor
-                            leftPadding: 2
+                            Image {
+                                id: fileIconImage
+                                source: fileIcon
+                                MouseArea {
+                                    anchors.fill: parent
+                                    acceptedButtons: Qt.RightButton | Qt.LeftButton
+                                    onPressed: delegateItem.handlePress(mouse, true)
+                                    onPositionChanged: delegateItem.handlePositionChange(
+                                                           mouse, fileIconImage)
+                                    onClicked: delegateItem.handleClick(mouse)
+                                    onDoubleClicked: delegateItem.handleDoubleClick(mouse)
+                                }
+                            }
 
-                            Item {
-                                id: dragItem
-
-                                visible: _isDraggable
-                                anchors.fill: parent
-
-                                Drag.active: dragArea.drag.active
-                                Drag.hotSpot.x: width / 2
-                                Drag.hotSpot.y: height / 2
-                                Drag.dragType: Drag.Automatic
-                                Drag.supportedActions: Qt.CopyAction
+                            StyledLabel {
+                                id: fileNameLabel
+                                text: _fileId ? fileName + " <" + _fileId + ">" : fileName;
+                                color: _isReferenced ? _textColor : _disabledColor
+                                leftPadding: 2
 
                                 MouseArea {
-                                    id: dragArea
                                     anchors.fill: parent
-                                    drag.target: dragItem
+                                    acceptedButtons: Qt.RightButton | Qt.LeftButton
+                                    onPressed: delegateItem.handlePress(mouse, true)
+                                    onPositionChanged: delegateItem.handlePositionChange(
+                                                           mouse, fileNameLabel)
+                                    onClicked: delegateItem.handleClick(mouse)
+                                    onDoubleClicked: delegateItem.handleDoubleClick(mouse)
                                 }
+                            }
 
-                                Drag.onDragStarted: _parentView.startDrag(dragArea, index)
+                            Item {
+                                // Spacer item
+                                width: 4
+                                height: 1
+                            }
+
+                            Image {
+                                source: _extraIcon ? _resDir + _extraIcon : ""
+                                visible: _extraIcon ? true : false
+
+                                MouseArea {
+                                    id: warningMouseArea
+                                    anchors.fill: parent
+                                    acceptedButtons: Qt.RightButton | Qt.LeftButton
+                                    hoverEnabled: true
+                                    onPressed: delegateItem.handlePress(mouse, false)
+                                    onClicked: delegateItem.handleClick(mouse)
+                                    onDoubleClicked: _parentView.editPresentationId(
+                                                         index, _parentView.isQmlStream(index))
+                                }
+                                StyledTooltip {
+                                    text: _parentView.isPresentation(index)
+                                          ? qsTr("No presentation Id")
+                                          : qsTr("No Qml stream Id")
+                                    enabled: warningMouseArea.containsMouse
+                                }
                             }
                         }
                     }
@@ -171,45 +229,6 @@ Rectangle {
                             if (drop.hasUrls)
                                 projectTree.model.importUrls(drop.urls, index, false);
                             dragging = false;
-                        }
-                    }
-
-                    MouseArea {
-                        id: delegateMouseArea
-                        property bool clickPending: false
-                        anchors.fill: parent
-                        acceptedButtons: Qt.RightButton|Qt.LeftButton
-                        propagateComposedEvents: true
-                        onPressed: {
-                            projectTree.currentIndex = model.index;
-
-                            // Presses must be ignored by this handler in order for dragging to work
-                            mouse.accepted = false;
-
-                            // Since ignoring presses means we don't get doubleClicked events,
-                            // detect doubleclick using custom timer.
-                            if (clickPending) {
-                                if (_isExpandable) {
-                                    if (_expanded)
-                                        projectTree.model.collapse(index);
-                                    else
-                                        projectTree.model.expand(index);
-                                } else {
-                                    _parentView.openFile(index);
-                                }
-
-                                clickPending = false;
-                            } else {
-                                clickPending = true;
-                                doubleClickTimer.restart();
-                            }
-                        }
-                        Timer {
-                            id: doubleClickTimer
-                            repeat: false
-                            triggeredOnStart: false
-                            interval: 500
-                            onTriggered: parent.clickPending = false;
                         }
                     }
                 }

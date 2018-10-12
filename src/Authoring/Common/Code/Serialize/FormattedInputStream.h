@@ -33,7 +33,6 @@
 #pragma once
 
 #include "Qt3DSFile.h"
-#include "Qt3DSString.h"
 #include "InputStream.h"
 
 class CFormattedInputStream : public CInputStream
@@ -44,9 +43,9 @@ public:
 
     long Read(void *inData, long inLength) override;
     void Close() override;
-    bool IsValid() override;
-    Q3DStudio::CString GetMimeType() override { return L""; }
-    Q3DStudio::CString GetSource() override { return L""; }
+    bool IsValid() const override;
+    QString GetMimeType() const override { return {}; }
+    QString GetSource() const override { return {}; }
 
     void SetBigEndian(bool inIsBigEndian);
 

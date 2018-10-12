@@ -153,11 +153,6 @@ CString CFilePath::GetPathWithIdentifier() const
     return CString::fromQString(filePath() + identifierSep + m_identifier);
 }
 
-CString CFilePath::GetModuleFilePath()
-{
-    return CString::fromQString(qApp->applicationFilePath());
-}
-
 //==============================================================================
 /**
 *	Converts the absolute path this string represents into a relative path.
@@ -352,9 +347,9 @@ SFileData CFilePath::GetFileData() const
     return data;
 }
 
-CFilePath CFilePath::GetUserApplicationDirectory()
+QString CFilePath::GetUserApplicationDirectory()
 {
-    return CFilePath(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation));
+    return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
 }
 
 SFile::SFile(const QSharedPointer<QFile> &of, const CFilePath &path)

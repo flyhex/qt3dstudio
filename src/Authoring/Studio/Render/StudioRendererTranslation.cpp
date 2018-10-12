@@ -3812,7 +3812,8 @@ void STranslation::PerformGuideDrag(Qt3DSDMGuideHandle inGuide, CPt inPoint,
         break;
         break;
     }
-    inEditor.EnsureEditor(L"Drag Guide", __FILE__, __LINE__).UpdateGuide(inGuide, theInfo);
+    inEditor.EnsureEditor(QObject::tr("Drag Guide"), __FILE__, __LINE__).UpdateGuide(inGuide,
+                                                                                     theInfo);
     inEditor.FireImmediateRefresh(qt3dsdm::Qt3DSDMInstanceHandle());
 }
 
@@ -3835,7 +3836,7 @@ void STranslation::CheckGuideInPresentationRect(Qt3DSDMGuideHandle inGuide,
     }
 
     if (!inPresentation)
-        inEditor.EnsureEditor(L"Delete Guide", __FILE__, __LINE__).DeleteGuide(inGuide);
+        inEditor.EnsureEditor(QObject::tr("Delete Guide"), __FILE__, __LINE__).DeleteGuide(inGuide);
 }
 
 void STranslation::PerformPathDrag(qt3ds::studio::SPathPick &inPathPick, CPt inOriginalCoords,
@@ -3910,8 +3911,8 @@ void STranslation::PerformPathDrag(qt3ds::studio::SPathPick &inPathPick, CPt inO
             }
             theCurrentValue[0] += theDiff.x;
             theCurrentValue[1] += theDiff.y;
-            Q3DStudio::IDocumentEditor &theEditor =
-                inEditor.EnsureEditor(L"Anchor Point Drag", __FILE__, __LINE__);
+            Q3DStudio::IDocumentEditor &theEditor = inEditor.EnsureEditor(
+                            QObject::tr("Anchor Point Drag"), __FILE__, __LINE__);
             switch (inPathPick.m_Property) {
             case SPathPick::Anchor:
                 theEditor.SetInstancePropertyValue(theAnchorHandle, thePosProperty,

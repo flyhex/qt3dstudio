@@ -252,7 +252,6 @@ void StudioSubpresentationRenderer::Render(const SOffscreenRendererEnvironment &
 {
     Q_UNUSED(inEnvironment)
     Q_UNUSED(inPresentationScaleFactor)
-    Q_UNUSED(inColorBufferNeedsClear)
     Q_UNUSED(instanceId)
     inRenderContext.PushPropertySet();
     if (!m_thread->m_initialized) {
@@ -265,7 +264,10 @@ void StudioSubpresentationRenderer::Render(const SOffscreenRendererEnvironment &
         QOpenGLFunctions *func = context->functions();
         GLuint texture = m_thread->m_fbo->texture();
         func->glDisable(GL_DEPTH_TEST);
-        func->glEnable(GL_BLEND);
+        if (inColorBufferNeedsClear == SScene::RenderClearCommand::AlwaysClear)
+            func->glDisable(GL_BLEND);
+        else
+            func->glEnable(GL_BLEND);
         func->glBlendEquation(GL_FUNC_ADD);
         func->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

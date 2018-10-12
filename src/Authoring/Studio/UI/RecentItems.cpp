@@ -27,27 +27,17 @@
 **
 ****************************************************************************/
 
-#include "Qt3DSCommonPrecompile.h"
-
 #include "RecentItems.h"
-#include "Preferences.h"
+#include "StudioPreferences.h"
 
 #include <QtWidgets/qmenu.h>
 #include <QtCore/qfileinfo.h>
 
-const QString CRecentItems::RECENTITEM_KEY = QStringLiteral("RecentItem");
-const QString CRecentItems::RECENTIMPORT_KEY = QStringLiteral("RecentImport");
-const QString CRecentItems::RECENTITEM_VALID = QStringLiteral("RecentValid");
+const int CRecentItems::MAX_ITEMS = 10; // maximum allowed number of recent items
 
-CRecentItems::CRecentItems(QMenu *inMenuID, long inCommandID, QString inPreferenceKey)
+CRecentItems::CRecentItems(QMenu *inMenuID)
 {
-    Q_UNUSED(inCommandID)
-
     m_Menu = inMenuID;
-    m_ValidItems = 10;
-    m_PreferenceKey = inPreferenceKey;
-
-    connect(m_Menu, &QMenu::aboutToShow, this, &CRecentItems::handleAboutToShow);
 
     ReconstructList();
 }
@@ -58,79 +48,67 @@ CRecentItems::~CRecentItems()
 
 void CRecentItems::AddRecentItem(const QString &inItem)
 {
-    RemoveRecentItem(inItem);
+    RemoveRecentItem(inItem, false);
 
     m_RecentItems.insert(m_RecentItems.begin(), inItem);
 
-    while (m_RecentItems.size() > 10)
+    while (m_RecentItems.size() > MAX_ITEMS)
         m_RecentItems.pop_back();
 
     RebuildList();
 }
 
-void CRecentItems::RemoveRecentItem(const QString &inItem)
+void CRecentItems::RemoveRecentItem(const QString &inItem, bool rebuild)
 {
-    TFileList::iterator thePos = m_RecentItems.begin();
+    auto thePos = m_RecentItems.begin();
     for (; thePos != m_RecentItems.end(); ++thePos) {
-        if ((*thePos) == inItem) {
+        if (*thePos == inItem) {
             m_RecentItems.erase(thePos);
             break;
         }
     }
 
-    RebuildList();
+    if (rebuild)
+        RebuildList();
 }
 
+// load the recent items from the preferences file to m_RecentItems
 void CRecentItems::ReconstructList()
 {
-    ClearMenu();
+    m_Menu->clear();
     m_RecentItems.clear();
 
-    CPreferences thePrefs = CPreferences::GetUserPreferences();
+    int numRecentItems = CStudioPreferences::getNumRecentItems();
+    if (numRecentItems > MAX_ITEMS)
+        numRecentItems = MAX_ITEMS;
 
-    m_ValidItems = thePrefs.GetLongValue(RECENTITEM_VALID, m_ValidItems);
-
-    for (long theIndex = 0; theIndex < (m_ValidItems > 10 ? 10 : m_ValidItems); ++theIndex) {
-        QString key = QStringLiteral("%1%2").arg(m_PreferenceKey).arg(theIndex);
-        QString filename = thePrefs.GetStringValue(key);
-        if (!filename.isEmpty()) {
-            QFileInfo info(filename);
-            if (info.exists())
-                m_RecentItems.push_back(filename);
-        }
+    for (int i = 0; i < numRecentItems; ++i) {
+        QString theFile = CStudioPreferences::getRecentItem(i);
+        if (!theFile.isEmpty() && QFileInfo(theFile).exists())
+            m_RecentItems.push_back(theFile);
     }
 }
 
+// save the recent items from m_RecentItems to the preferences file. Also recreate the menu.
 void CRecentItems::RebuildList()
 {
-    ClearMenu();
+    m_Menu->clear();
 
-    CPreferences thePrefs = CPreferences::GetUserPreferences();
-    thePrefs.SetLongValue(RECENTITEM_VALID, GetItemCount());
-    TFileList::iterator thePos = m_RecentItems.begin();
-    for (long theIndex = 0; thePos != m_RecentItems.end(); ++thePos, ++theIndex) {
-        QFileInfo theFile = *thePos;
-        if (theFile.exists()) {
-            QAction *act = m_Menu->addAction(theFile.fileName(),
-                                             this, &CRecentItems::onTriggerRecent);
-            act->setData(static_cast<int>(theIndex));
-            QString key = QStringLiteral("%1%2").arg(m_PreferenceKey).arg(theIndex);
-            thePrefs.SetStringValue(key, (*thePos));
+    CStudioPreferences::setNumRecentItems(GetItemCount());
+
+    for (int i = 0; i < m_RecentItems.size(); ++i) {
+        const QString &item_i = m_RecentItems.at(i);
+        QFileInfo fi(item_i);
+        if (fi.exists()) {
+            const QString itemName = fi.absoluteFilePath();
+            QAction *act = m_Menu->addAction(itemName, this, &CRecentItems::onTriggerRecent);
+            act->setData(i);
+            CStudioPreferences::setRecentItem(i, itemName);
         }
     }
 }
 
-void CRecentItems::handleAboutToShow()
-{
-    RebuildList();
-}
-
-void CRecentItems::ClearMenu()
-{
-    m_Menu->clear();
-}
-
-QString CRecentItems::GetItem(long inIndex)
+QString CRecentItems::GetItem(long inIndex) const
 {
     return m_RecentItems.at(inIndex);
 }

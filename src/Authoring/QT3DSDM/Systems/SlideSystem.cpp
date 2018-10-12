@@ -795,6 +795,19 @@ ISlideSystemSignalSender *SSlideSystem::GetSignalSender()
     return dynamic_cast<ISlideSystemSignalSender *>(m_Signaller.get());
 }
 
+qt3dsdm::Qt3DSDMSlideHandle SSlideSystem::GetApplicableSlide(Qt3DSDMInstanceHandle inHandle)
+{
+    TGraphSlidePair theGraphSlidePair = m_SlideGraphCore->GetAssociatedGraph(inHandle);
+    if (!theGraphSlidePair.first.Valid())
+        return Qt3DSDMSlideHandle();
+
+    Qt3DSDMSlideHandle theMaster = m_SlideGraphCore->GetGraphRoot(theGraphSlidePair.first);
+    if (theGraphSlidePair.second != theMaster)
+        return theGraphSlidePair.second;
+
+    return theMaster;
+}
+
 qt3dsdm::Qt3DSDMSlideHandle SSlideSystem::GetApplicableSlide(Qt3DSDMInstanceHandle inHandle,
                                                           Qt3DSDMPropertyHandle inProperty)
 {

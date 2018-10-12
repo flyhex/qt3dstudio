@@ -90,7 +90,7 @@ protected:
     virtual ~IDeletingReferencedObjectHandler() {}
 
 public:
-    virtual void DisplayMessageBox(const Q3DStudio::CString &inDescription) = 0;
+    virtual void DisplayMessageBox(const QString &inDescription) = 0;
 };
 
 class IMoveRenameHandler
@@ -99,8 +99,7 @@ protected:
     virtual ~IMoveRenameHandler() {}
 
 public:
-    virtual void displayMessageBox(const Q3DStudio::CString &origName,
-                                   const Q3DStudio::CString &newName) = 0;
+    virtual void displayMessageBox(const QString &origName, const QString &newName) = 0;
 };
 
 class IDocumentEditor : public IDocumentReader
@@ -162,11 +161,10 @@ public:
     virtual void setInstanceImagePropertyValueAsRenderable(TInstanceHandle instance,
                                                            TPropertyHandle prop,
                                                            const CString &pId) = 0;
-    virtual void addRectForSubpresentation(const CString &pId, const QString &pPath,
-                                           TSlideHandle slide, const CPt &pos = CPt(),
-                                           long startTime = -1) = 0;
+    virtual void addRectForSubpresentation(const CString &pId, TSlideHandle slide,
+                                           const CPt &pos = CPt(), long startTime = -1) = 0;
 
-    virtual void DeleteInstances(qt3dsdm::TInstanceHandleList inInstances) = 0;
+    virtual void DeleteInstances(const qt3dsdm::TInstanceHandleList &instances) = 0;
     // Delete this data model instance.  Will recursively delete any attached children in the scene
     // graph
     // if this instance is represented in the scene graph.
@@ -243,7 +241,9 @@ public:
 
     virtual void setMaterialProperties(TInstanceHandle instance, const QString &materialName,
                                        const Q3DStudio::CString &materialSourcePath,
-                                       const QMap<QString, QString> &values) = 0;
+                                       const QMap<QString, QString> &values,
+                                       const QMap<QString, QMap<QString, QString>>
+                                       &textureValues) = 0;
 
     virtual void setMaterialReferenceByName(TInstanceHandle instance,
                                             const Q3DStudio::CString &materialName) = 0;
@@ -252,10 +252,12 @@ public:
                                        const Q3DStudio::CString &materialSourcePath) = 0;
 
     virtual void setMaterialValues(const QString &materialName,
-                                   const QMap<QString, QString> &values) = 0;
+                                   const QMap<QString, QString> &values,
+                                   const QMap<QString, QMap<QString, QString>> &textureValues) = 0;
 
     virtual void setMaterialValues(TInstanceHandle instance,
-                                   const QMap<QString, QString> &values) = 0;
+                                   const QMap<QString, QString> &values,
+                                   const QMap<QString, QMap<QString, QString>> &textureValues) = 0;
 
     // Set the slide name property value
     // Also update all actions that point to the old slide name to new name
@@ -488,13 +490,13 @@ public:
 struct ScopedDocumentEditor
 {
     IDocumentEditor &m_Editor;
-    ScopedDocumentEditor(IDoc &inDoc, const Q3DStudio::CString &inCommandName, const char *inFile,
+    ScopedDocumentEditor(IDoc &inDoc, const QString &inCommandName, const char *inFile,
                          int inLine);
     ~ScopedDocumentEditor() { m_Editor.Release(); }
     IDocumentEditor *operator->() { return &m_Editor; }
 };
 
-#define SCOPED_DOCUMENT_EDITOR(doc, cmdname) ScopedDocumentEditor(doc, Q3DStudio::CString::fromQString(cmdname), __FILE__, __LINE__)
+#define SCOPED_DOCUMENT_EDITOR(doc, cmdname) ScopedDocumentEditor(doc, cmdname, __FILE__, __LINE__)
 
 class CUpdateableDocumentEditor
 {

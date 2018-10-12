@@ -34,12 +34,13 @@
 #include <QtCore/qbytearray.h>
 #include <QtCore/qstring.h>
 
-CFileOutputStream::CFileOutputStream(const Q3DStudio::CString &inFilename, bool inAppend /* = false */)
+CFileOutputStream::CFileOutputStream(const QString &inFilename, bool inAppend /* = false */)
     : m_Position(0)
     , m_Length(0)
 {
 #ifdef WIN32
-    m_File = ::CreateFile(inFilename, GENERIC_WRITE, FILE_SHARE_READ, NULL,
+    m_File = ::CreateFile(Q3DStudio::CString::fromQString(inFilename),
+                          GENERIC_WRITE, FILE_SHARE_READ, NULL,
                           (inAppend) ? OPEN_ALWAYS : CREATE_ALWAYS, FILE_FLAG_RANDOM_ACCESS, NULL);
     if (m_File == INVALID_HANDLE_VALUE)
         throw CIOException();
@@ -47,7 +48,7 @@ CFileOutputStream::CFileOutputStream(const Q3DStudio::CString &inFilename, bool 
     if (inAppend)
         ::SetFilePointer(m_File, 0, NULL, FILE_END);
 #else
-    QByteArray theUTFBuffer = inFilename.toQString().toUtf8();
+    QByteArray theUTFBuffer = inFilename.toUtf8();
     m_File = ::fopen(theUTFBuffer.constData(), (inAppend) ? "a" : "w");
     if (m_File == NULL)
         throw CIOException();
@@ -112,7 +113,7 @@ void CFileOutputStream::Close()
 
 /** Check to see if thus stream is valid (opened successfully and still open).
  */
-bool CFileOutputStream::IsValid()
+bool CFileOutputStream::IsValid() const
 {
 #ifdef WIN32
     return (m_File != INVALID_HANDLE_VALUE);
