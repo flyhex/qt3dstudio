@@ -98,24 +98,27 @@ private:
     bool isVisible(const QModelIndex& modelIndex) const;
     bool hasVisibleChildren(const QModelIndex &modelIndex) const;
     void importUrl(QDir &targetDir, const QUrl &url,
-                   QHash<QString, QString> &outPresentationNodes, QStringList &outImportedFiles);
+                   QHash<QString, QString> &outPresentationNodes,
+                   QStringList &outImportedFiles, int &outOverrideChoice) const;
     void importPresentationAssets(const QFileInfo &uipSrc, const QFileInfo &uipTarget,
                                   QHash<QString, QString> &outPresentationNodes,
                                   QStringList &outImportedFiles,
-                                  const int overrideChoice = QMessageBox::NoButton) const;
+                                  int &outOverrideChoice) const;
 
     void modelRowsInserted(const QModelIndex &parent, int start, int end);
     void modelRowsRemoved(const QModelIndex &parent, int start, int end);
     void modelRowsMoved(const QModelIndex &parent, int start, int end);
     void modelLayoutChanged();
     void importQmlAssets(const QObject *qmlNode, const QDir &srcDir, const QDir &targetDir,
-                         QStringList &outImportedFiles);
+                         QStringList &outImportedFiles, int &outOverrideChoice) const;
     void updateDefaultDirMap();
     void addPathsToReferences(const QString &projectPath, const QString &origPath);
     void handlePresentationIdChange(const QString &path, const QString &id);
     void asyncExpandPresentations();
     void updateReferences();
     bool addUniqueImportFile(const QString &importFile, QStringList &outImportedFiles) const;
+    void overridableCopyFile(const QString &srcFile, const QString &targetFile,
+                             QStringList &outImportedFiles, int &outOverrideChoice) const;
 
     struct TreeItem {
         QPersistentModelIndex index;
@@ -130,7 +133,6 @@ private:
     QList<TreeItem> m_items;
     QSet<QString> m_references;
     QHash<QString, QString> m_defaultDirToAbsPathMap;
-    int m_importQmlOverrideChoice = QMessageBox::NoButton;
 };
 
 #endif // TREEVIEWADAPTOR_H
