@@ -217,7 +217,7 @@ void CDataInputDlg::updateVisibility(int type)
 #endif
     // Adjust text label positioning according to the
     // visibility of info text warning about allowed datatypes.
-    if (m_dataInput->controlledElems.size()) {
+    if (m_dataInput->ctrldElems.size()) {
         m_ui->labelInfoText->setVisible(true);
         m_ui->infoTxtSpacer->changeSize(20, 18);
     } else {

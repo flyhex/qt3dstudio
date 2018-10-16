@@ -1266,8 +1266,8 @@ void CDoc::OnInstanceDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     }
     // Remove this instance from datainputs controlled element list
     for (auto &it : qAsConst(g_StudioApp.m_dataInputDialogItems)) {
-        if (it->controlledElems.contains(inInstance))
-            it->controlledElems.removeAll(inInstance);
+        if (it->countOfInstance(inInstance))
+            it->removeControlFromInstance(inInstance);
     }
 }
 
@@ -2920,10 +2920,8 @@ void CDoc::UpdateDatainputMap(QMultiMap<QString,
                               QPair<qt3dsdm::Qt3DSDMInstanceHandle,
                                     qt3dsdm::Qt3DSDMPropertyHandle>> *outMap)
 {
-    for (auto &it : qAsConst(g_StudioApp.m_dataInputDialogItems)) {
-        it->controlledElems.clear();
-        it->boundTypes.clear();
-    }
+    for (auto &it : qAsConst(g_StudioApp.m_dataInputDialogItems))
+        it->ctrldElems.clear();
 
     UpdateDatainputMapRecursive(GetSceneInstance(), outMap);
 }
@@ -2958,21 +2956,15 @@ void CDoc::UpdateDatainputMapRecursive(
             // For slide control, type is strictly set to String.
             // For timeline the datainput is strictly Ranged Number only.
             if (g_StudioApp.m_dataInputDialogItems.contains(diName)) {
-                g_StudioApp.m_dataInputDialogItems[diName]->controlledElems.append(inInstance);
-                if (propType) {
-                    g_StudioApp.m_dataInputDialogItems[diName]->boundTypes.append(
-                                QPair<qt3dsdm::DataModelDataType::Value, bool>(propType, false));
-                } else if (propName == QLatin1String("@slide")) {
-                    g_StudioApp.m_dataInputDialogItems[diName]
-                            ->boundTypes.append(QPair<qt3dsdm::DataModelDataType::Value, bool>
-                                                (qt3dsdm::DataModelDataType::Value::String, true));
+                CDataInputDialogItem::ControlledItem item(inInstance, propHandle);
+                if (propType)
+                    item.dataType = {propType, false};
+                else if (propName == QLatin1String("@slide"))
+                    item.dataType = {qt3dsdm::DataModelDataType::Value::String, true};
+                else if (propName == QLatin1String("@timeline"))
+                    item.dataType = {qt3dsdm::DataModelDataType::Value::RangedNumber, true};
 
-                } else if (propName == QLatin1String("@timeline")) {
-                    g_StudioApp.m_dataInputDialogItems[diName]
-                            ->boundTypes.append(
-                                QPair<qt3dsdm::DataModelDataType::Value, bool>
-                                (qt3dsdm::DataModelDataType::Value::RangedNumber, true));
-                }
+                g_StudioApp.m_dataInputDialogItems[diName]->ctrldElems.append(item);
             } else if (outMap != nullptr) {
                 // Do multi insert as single datainput name can
                 // be found in several elements.
@@ -3136,4 +3128,40 @@ void CDoc::setPlayBackPreviewState(bool state)
 bool CDoc::isPlayBackPreviewOn() const
 {
     return m_playbackPreviewOn;
+}
+
+int CDataInputDialogItem::countOfInstance(const qt3dsdm::Qt3DSDMInstanceHandle handle) const
+{
+    int count = 0;
+    for (auto &it : qAsConst(ctrldElems)) {
+        if (it.instHandle == handle)
+            count++;
+    }
+    return count;
+}
+
+void CDataInputDialogItem::getBoundTypes(
+        QVector<QPair<qt3dsdm::DataModelDataType::Value, bool>> &outVec) const
+{
+    for (auto &it : qAsConst(ctrldElems))
+        outVec.append(it.dataType);
+}
+
+void CDataInputDialogItem::getInstCtrldItems(const qt3dsdm::Qt3DSDMInstanceHandle handle,
+                                             QVector<ControlledItem> &outVec) const
+{
+    for (auto &it : qAsConst(ctrldElems)) {
+        if (it.instHandle == handle)
+            outVec.append(it);
+    }
+}
+
+void CDataInputDialogItem::removeControlFromInstance(const qt3dsdm::Qt3DSDMInstanceHandle handle)
+{
+    for (auto it = ctrldElems.begin(); it != ctrldElems.end();) {
+      if (it->instHandle == handle)
+        it = ctrldElems.erase(it);
+      else
+        ++it;
+    }
 }

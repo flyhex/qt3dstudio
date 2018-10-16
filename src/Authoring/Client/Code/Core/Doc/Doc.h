@@ -155,24 +155,47 @@ struct SubPresentationRecord
 class CDataInputDialogItem
 {
 public:
+    struct ControlledItem
+    {
+        qt3dsdm::Qt3DSDMInstanceHandle instHandle;
+        qt3dsdm::Qt3DSDMPropertyHandle propHandle;
+        // The type of property for the purposes of limiting allowed datainput type changes.
+        // Boolean signifies "strict" type requirement i.e. only the exact equivalent mapping
+        // from datainput type to property type is allowed (float to float, string to string etc.)
+        QPair<qt3dsdm::DataModelDataType::Value, bool> dataType;
+
+        ControlledItem(qt3dsdm::Qt3DSDMInstanceHandle inst = 0,
+                       qt3dsdm::Qt3DSDMPropertyHandle prop = 0,
+                       QPair<qt3dsdm::DataModelDataType::Value, bool> dt
+                       = {qt3dsdm::DataModelDataType::Value::None, false})
+            : instHandle(inst)
+            , propHandle(prop)
+            , dataType(dt) {}
+        bool operator==(const ControlledItem &item) const
+        {
+            return instHandle == item.instHandle && propHandle == item.propHandle
+                   && dataType == item.dataType;
+        }
+    };
+
     QString valueString;
     float minValue;
     float maxValue;
     QString name;
     int type;
-    QVector<qt3dsdm::Qt3DSDMInstanceHandle> controlledElems;
-    // The type of property/properties that this datainput controls
-    // for the purposes of limiting allowed datainput type changes.
-    // Note that there can be more than one type being controlled
-    // f.ex with Variant type. Boolean signifies "strict" type requirement
-    // i.e. only the exact equivalent mapping from datainput type to
-    // property type is allowed (float to float, string to string etc.)
-    QVector<QPair<qt3dsdm::DataModelDataType::Value, bool>> boundTypes;
+    QVector<ControlledItem> ctrldElems;
+
     // Bindings in other subpresentations, of QMap format
     // QMultiMap<subpresentation_id, QPair<datatype, strict>>.
     // Stored separately so we can conveniently update/clear binding info
     // for current presentation and keep subpresentation binding info intact or vice versa.
     QMultiMap<QString, QPair<qt3dsdm::DataModelDataType::Value, bool>> externalPresBoundTypes;
+
+    int countOfInstance(const qt3dsdm::Qt3DSDMInstanceHandle handle) const;
+    void getBoundTypes(QVector<QPair<qt3dsdm::DataModelDataType::Value, bool>> &outVec) const;
+    void getInstCtrldItems(const qt3dsdm::Qt3DSDMInstanceHandle handle,
+                                 QVector<ControlledItem> &outVec) const;
+    void removeControlFromInstance(const qt3dsdm::Qt3DSDMInstanceHandle handle);
 };
 
 //==============================================================================

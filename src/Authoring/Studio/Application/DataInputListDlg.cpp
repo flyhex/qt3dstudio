@@ -57,7 +57,7 @@ CDataInputListDlg::CDataInputListDlg(QMap<QString, CDataInputDialogItem *> *data
     , m_defaultType(defaultType)
     , m_currentDataInputIndex(-1)
     , m_tableContents(new QStandardItemModel(0, columnCount, this))
-    , m_infoContents(new QStandardItemModel(0, 2, this))
+    , m_infoContents(new QStandardItemModel(0, 3, this))
     , m_sortColumn(-1)
     , m_acceptedTypes(acceptedTypes)
 {
@@ -130,6 +130,7 @@ void CDataInputListDlg::initDialog()
     m_ui->elementInfo->addAction(m_replaceAllAction);
     m_ui->elementInfo->setContextMenuPolicy(Qt::ActionsContextMenu);
     m_ui->elementInfo->setFocusPolicy(Qt::NoFocus);
+    m_ui->elementInfo->resizeColumnsToContents();
     m_ui->elementInfo->horizontalHeader()->setStretchLastSection(true);
     m_ui->elementInfo->horizontalHeader()->setMinimumSectionSize(125);
     m_ui->elementInfo->setModel(m_infoContents);
@@ -216,7 +217,7 @@ void CDataInputListDlg::updateContents()
             dataInput.append(new QStandardItem(tr("Variant")));
         }
         // highlight datainputs that are in use
-        if (it->controlledElems.size() || it->externalPresBoundTypes.size())
+        if (it->ctrldElems.size() || it->externalPresBoundTypes.size())
             dataInput.first()->setForeground(QBrush(CStudioPreferences::dataInputColor()));
         m_tableContents->appendRow(dataInput);
     }
@@ -233,29 +234,63 @@ void CDataInputListDlg::updateInfo()
     auto refHelper = doc->GetDataModelObjectReferenceHelper();
 
     m_infoContents->clear();
+    // Only show controlled instances if we have a single datainput selected.
     if (m_ui->tableView->selectionModel()->selectedRows(0).size() == 1) {
-        for (auto it : qAsConst(m_dataInputs[m_currentDataInputName]->controlledElems)) {
+        for (auto allCtrldElemsIt = m_dataInputs[m_currentDataInputName]->ctrldElems.begin();
+             allCtrldElemsIt != m_dataInputs[m_currentDataInputName]->ctrldElems.end();) {
             QStandardItem *item = new QStandardItem(
-                        g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->
-                        GetClientDataModelBridge()->GetName(it.GetHandleValue()).toQString());
+                        g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+                        ->GetClientDataModelBridge()->GetName(
+                            allCtrldElemsIt->instHandle.GetHandleValue()).toQString());
             // Store actual handle value to Qt::Userdata+1
-            item->setData(it.GetHandleValue());
+            item->setData(allCtrldElemsIt->instHandle.GetHandleValue());
             auto path = refHelper->GetObjectReferenceString(
                         doc->GetSceneInstance(), CRelativePathTools::EPATHTYPE_GUID,
-                        it.GetHandleValue()).toQString();
+                        allCtrldElemsIt->instHandle).toQString();
             // One element can have several properties controlled by this datainput,
             // do not show element several times. Show the number of properties after
-            // the elementpath.
+            // the elementpath and the list of property names in a separate column.
             if (m_infoContents->findItems(path, Qt::MatchContains, 1).isEmpty()) {
                 item->setToolTip(path);
                 item->setEditable(false);
-                QStandardItem *item2
-                        = new QStandardItem(path + QStringLiteral(" (") + QString::number(
-                                                m_dataInputs[m_currentDataInputName]->
-                                                controlledElems.count(it.GetHandleValue()))
-                                                + QStringLiteral(")"));
+
+                QString propNames;
+                int count = 0;
+                CDataInputDialogItem *di = m_dataInputs[m_currentDataInputName];
+
+                QVector<CDataInputDialogItem::ControlledItem> thisInstCtrldItems;
+                di->getInstCtrldItems(
+                            allCtrldElemsIt->instHandle.GetHandleValue(), thisInstCtrldItems);
+                for (auto thisInstCtrldItemsIt : qAsConst(thisInstCtrldItems)) {
+                    if (propNames.size() != 0)
+                        propNames.append(QLatin1String(", "));
+
+                    if (thisInstCtrldItemsIt.propHandle.Valid()) {
+                        propNames.append(
+                                    QString::fromStdWString(
+                                        g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->
+                                        GetPropertySystem()->GetFormalName(
+                                            thisInstCtrldItemsIt.instHandle,
+                                            thisInstCtrldItemsIt.propHandle).wide_str()));
+                    } else {
+                        propNames.append(QObject::tr("timeline/slide"));
+                    }
+
+                    count++;
+                    // Advance main iterator so that after the inner loop we end up
+                    // at the start of next instance's batch of controlleditems.
+                    allCtrldElemsIt++;
+                }
+
+                QStandardItem *item2 = new QStandardItem(path + QStringLiteral("(")
+                                                         + QString::number(count)
+                                                         + QStringLiteral(")"));
+                item2->setToolTip(path);
                 item2->setEditable(false);
-                m_infoContents->appendRow(QList<QStandardItem *>({item, item2}));
+                QStandardItem *item3 = new QStandardItem(propNames);
+                item3->setToolTip(propNames);
+                item3->setEditable(false);
+                m_infoContents->appendRow(QList<QStandardItem *>({item, item2, item3}));
             }
         }
     }
@@ -369,8 +404,11 @@ void CDataInputListDlg::onEditDataInput()
         // Datainput binding types
         QVector<EDataType> allowedTypes;
         bool strictFound = false;
-        if (di->controlledElems.size()) {
-            for (auto type : qAsConst(di->boundTypes)) {
+        // Datatype and strictness requirement
+        QVector<QPair<qt3dsdm::DataModelDataType::Value, bool>> types;
+        di->getBoundTypes(types);
+        if (types.size()) {
+            for (auto type : qAsConst(types)) {
                 // If we hit strict type requirement for a certain bound datatype, set allowed types
                 // to only this data type (and Variant) and exit after appending it to
                 // allowedTypes vector.
@@ -464,6 +502,7 @@ void CDataInputListDlg::onSelectionChanged()
         m_currentDataInputName
                 = m_tableContents->itemFromIndex(indexes.at(0))->data(Qt::EditRole).toString();
     }
+
     updateButtons();
     updateInfo();
     onElementSelectionChanged();
@@ -500,7 +539,8 @@ void CDataInputListDlg::onReplaceSelected()
 
     const auto selRows = m_ui->elementInfo->selectionModel()->selectedRows(0);
     for (auto it : selRows)
-        selBoundTypes.append(m_dataInputs[m_currentDataInputName]->boundTypes[it.row()]);
+        selBoundTypes.append(m_dataInputs[m_currentDataInputName]
+                             ->ctrldElems[it.row()].dataType);
 
     setUniqueAcceptedDITypes(selBoundTypes);
 
@@ -529,9 +569,9 @@ void CDataInputListDlg::onReplaceAll()
         replaceDatainputs(indexes, controllerName);
         refreshDIs();
     });
-
-    setUniqueAcceptedDITypes(
-            m_dataInputs[m_currentDataInputName]->boundTypes);
+    QVector<QPair<qt3dsdm::DataModelDataType::Value, bool>> types;
+    m_dataInputs[m_currentDataInputName]->getBoundTypes(types);
+    setUniqueAcceptedDITypes(types);
 
     CDialogs::showWidgetBrowser(this, m_dataInputChooserView, geometry().center(),
                                 CDialogs::WidgetBrowserAlign::Center);
@@ -584,37 +624,15 @@ void CDataInputListDlg::replaceDatainputs(const QModelIndexList &selectedBinding
 
     // Update bindings for the internal list held by this dialog.
     for (auto it : qAsConst(elementHandles)) {
-        // Find the old datainput controller entry/entries.
-        // Same controlled element can appear several times if
-        // this datainput is controlling several properties.
-        // Replace them all.
         CDataInputDialogItem *oldDI = *m_dataInputs.find(m_currentDataInputName);
+        CDataInputDialogItem *newDI = *m_dataInputs.find(newDIName);
 
-        int index = oldDI->controlledElems.indexOf(it.GetHandleValue());
-        // Replicate controlledelement and bound type entries to new controller DI entry.
-        // Make sure that new DI name is valid i.e. included in datainput map.
-        while (index != -1) {
-            CDataInputDialogItem *newDI = *m_dataInputs.find(newDIName);
-            if (newDI) {
-                newDI->controlledElems.append(it.GetHandleValue());
-                newDI->boundTypes.append(oldDI->boundTypes[index]);
-            } else {
-                Q_ASSERT(false); // Trying to change controller to something
-                                 // that is not listed in the global table.
-            }
-            index = oldDI->controlledElems.indexOf(it.GetHandleValue(), index + 1);
-        }
+        QVector<CDataInputDialogItem::ControlledItem> ctrlItems;
+        oldDI->getInstCtrldItems(it.GetHandleValue(), ctrlItems);
 
-        // Remove entries from old datainput.
-        index = oldDI->controlledElems.indexOf(it.GetHandleValue());
-        while (index != -1) {
-            oldDI->controlledElems.remove(index);
-            // Boundtypes indexes correspond to controlledElems so we can simply
-            // use same index. Boundtypes can also have same datatype listed
-            // several times, so removing one count here does not eliminate other
-            // entries for the same datatype that may still be remaining.
-            oldDI->boundTypes.remove(index);
-            index = oldDI->controlledElems.indexOf(it.GetHandleValue());
+        for (auto &it2 : qAsConst(ctrlItems)) {
+            oldDI->ctrldElems.removeAll(it2);
+            newDI->ctrldElems.append(it2);
         }
     }
     // Make direct changes to object properties. Transaction that is opened will be
