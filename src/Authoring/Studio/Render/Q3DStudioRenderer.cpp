@@ -1117,9 +1117,9 @@ void Q3DStudioRenderer::createEngine()
     m_engine.reset(new Q3DSEngine);
 
     Q3DSEngine::Flags flags = Q3DSEngine::WithoutRenderAspect;
-#if (Q3DS_ENABLE_PROFILEUI == 1)
-    flags |= Q3DSEngine::EnableProfiling;
-#endif
+
+    if (CStudioApp::hasProfileUI())
+        flags |= Q3DSEngine::EnableProfiling;
 
     m_viewportSettings.setMatteEnabled(true);
     m_viewportSettings.setShowRenderStats(false);

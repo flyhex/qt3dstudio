@@ -266,8 +266,10 @@ public:
     void setLastActiveView(QWidget *widget) { m_lastActiveView = widget; }
     QWidget *lastActiveView() const { return m_lastActiveView; }
 
-    static QString applicationDirectory();
     bool isQmlStream(const QString &fileName);
+
+    static QString applicationDirectory();
+    static bool hasProfileUI();
 };
 
 extern CStudioApp g_StudioApp;

@@ -53,8 +53,6 @@
 #include <q3dsruntime2api_p.h>
 #include <QtWidgets/qopenglwidget.h>
 
-#define Q3DS_ENABLE_PROFILEUI 0
-
 QT_BEGIN_NAMESPACE
 namespace Qt3DRender {
 class QRenderAspect;

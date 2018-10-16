@@ -572,9 +572,10 @@ void Q3DSTranslation::prepareRender(const QRect &rect, const QSize &size)
     clearDirtySet();
     if (m_engine->presentationCount() == 0) {
         m_engine->setPresentation(m_presentation.data());
-#if (Q3DS_ENABLE_PROFILEUI == 1)
-        m_engine->setProfileUiVisible(true, true);
-#endif
+
+        const bool profileui = CStudioApp::hasProfileUI();
+        m_engine->setProfileUiVisible(profileui, profileui);
+
         m_studioRenderer.SetViewRect(m_studioRenderer.viewRect(), size);
         m_engine->sceneManager()->slidePlayer()->setMode(Q3DSSlidePlayer::PlayerMode::Editor);
         m_engine->sceneManager()->slidePlayer()->stop();

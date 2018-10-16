@@ -2198,3 +2198,10 @@ void CStudioApp::verifyDatainputBindings()
                                      Qt3DSMessageBox::ICON_WARNING, false);
     }
 }
+
+
+bool CStudioApp::hasProfileUI()
+{
+    static const bool profileui = qEnvironmentVariableIsSet("QT3DS_PROFILEUI");
+    return profileui;
+}
