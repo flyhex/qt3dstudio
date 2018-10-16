@@ -85,6 +85,15 @@ CDataInputListDlg::CDataInputListDlg(QMap<QString, CDataInputDialogItem *> *data
     buttons[1]->setToolTip(tr("Remove Data Input"));
     buttons[1]->setText(tr("Remove existing Data Input"));
 
+    m_ui->typeFilterCombo->addItems({tr("[All types]"), tr("Boolean"),
+                                     tr("Float"), tr("Ranged Number"), tr("String"), tr("Variant"),
+                                     tr("Vector2"), tr("Vector3")});
+
+    connect(m_ui->typeFilterCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &CDataInputListDlg::onFilterTypeChanged);
+    connect(m_ui->searchField, &QLineEdit::textChanged, this,
+            &CDataInputListDlg::onSearchTextChanged);
+
     initDialog();
 
     window()->setFixedSize(size());
@@ -175,40 +184,56 @@ void CDataInputListDlg::updateContents()
 
     QList<QStandardItem *> dataInput;
 
-    for (auto it : qAsConst(m_dataInputs)) {
+    for (auto &it : qAsConst(m_dataInputs)) {
         dataInput.clear();
-        dataInput.append(new QStandardItem(it->name));
+
         int dataInputType = it->type;
-        if (dataInputType == DataTypeRangedNumber) {
-            dataInput.append(new QStandardItem(tr("Ranged Number")));
-            QString expression = QStringLiteral("[ ")
-                    + QString::number(it->minValue)
-                    + QStringLiteral(" ... ")
-                    + QString::number(it->maxValue)
-                    + QStringLiteral(" ]");
-            dataInput.append(new QStandardItem(expression));
-        } else if (dataInputType == DataTypeString) {
-            dataInput.append(new QStandardItem(tr("String")));
-        } else if (dataInputType == DataTypeFloat) {
-            dataInput.append(new QStandardItem(tr("Float")));
+
+        if ((dataInputType == m_typeFilter || m_typeFilter == -1)
+            && it->name.contains(m_searchString)){
+
+            dataInput.append(new QStandardItem(it->name));
+
+            if (dataInputType == DataTypeRangedNumber
+                && (m_typeFilter == (int)DataTypeRangedNumber || m_typeFilter == -1)) {
+                dataInput.append(new QStandardItem(tr("Ranged Number")));
+                QString expression = QStringLiteral("[ ")
+                        + QString::number(it->minValue)
+                        + QStringLiteral(" ... ")
+                        + QString::number(it->maxValue)
+                        + QStringLiteral(" ]");
+                dataInput.append(new QStandardItem(expression));
+            } else if (dataInputType == DataTypeString
+                       && (m_typeFilter == (int)DataTypeString || m_typeFilter == -1)) {
+                dataInput.append(new QStandardItem(tr("String")));
+            } else if (dataInputType == DataTypeFloat
+                       && (m_typeFilter == (int)DataTypeFloat || m_typeFilter == -1)) {
+                dataInput.append(new QStandardItem(tr("Float")));
 #ifdef DATAINPUT_EVALUATOR_ENABLED
-        } else if (dataInputType == DataTypeEvaluator) {
-            dataInput.append(new QStandardItem(tr("Evaluator")));
-            dataInput.append(new QStandardItem(m_dataInputs.at(i)->valueString));
+            } else if (dataInputType == DataTypeEvaluator
+                       && (m_typeFilter == (int)DataTypeEvaluator || m_typeFilter == -1)) {
+                dataInput.append(new QStandardItem(tr("Evaluator")));
+                dataInput.append(new QStandardItem(m_dataInputs.at(i)->valueString));
 #endif
-        } else if (dataInputType == DataTypeBoolean) {
-            dataInput.append(new QStandardItem(tr("Boolean")));
-        } else if (dataInputType == DataTypeVector3) {
-            dataInput.append(new QStandardItem(tr("Vector3")));
-        } else if (dataInputType == DataTypeVector2) {
-            dataInput.append(new QStandardItem(tr("Vector2")));
-        } else if (dataInputType == DataTypeVariant) {
-            dataInput.append(new QStandardItem(tr("Variant")));
+            } else if (dataInputType == DataTypeBoolean
+                       && (m_typeFilter == (int)DataTypeBoolean || m_typeFilter == -1)) {
+                dataInput.append(new QStandardItem(tr("Boolean")));
+            } else if (dataInputType == DataTypeVector3
+                       && (m_typeFilter == (int)DataTypeVector3 || m_typeFilter == -1)) {
+                dataInput.append(new QStandardItem(tr("Vector3")));
+            } else if (dataInputType == DataTypeVector2
+                       && (m_typeFilter == (int)DataTypeVector2 || m_typeFilter == -1)) {
+                dataInput.append(new QStandardItem(tr("Vector2")));
+            } else if (dataInputType == DataTypeVariant
+                       && (m_typeFilter == (int)DataTypeVariant || m_typeFilter == -1)) {
+                dataInput.append(new QStandardItem(tr("Variant")));
+            }
+
+            // highlight datainputs that are in use
+            if (it->ctrldElems.size() || it->externalPresBoundTypes.size())
+                dataInput.first()->setForeground(QBrush(CStudioPreferences::dataInputColor()));
+            m_tableContents->appendRow(dataInput);
         }
-        // highlight datainputs that are in use
-        if (it->ctrldElems.size() || it->externalPresBoundTypes.size())
-            dataInput.first()->setForeground(QBrush(CStudioPreferences::dataInputColor()));
-        m_tableContents->appendRow(dataInput);
     }
 
     m_ui->tableView->setModel(m_tableContents);
@@ -596,6 +621,18 @@ void CDataInputListDlg::onElementSelectionChanged()
 
     m_replaceSelectedAction->setDisabled(disable);
     m_replaceAllAction->setDisabled(disable);
+}
+
+void CDataInputListDlg::onFilterTypeChanged(int index)
+{
+    m_typeFilter = index - 1;
+    updateContents();
+}
+
+void CDataInputListDlg::onSearchTextChanged()
+{
+    m_searchString = m_ui->searchField->text();
+    updateContents();
 }
 
 void CDataInputListDlg::refreshDIs()

@@ -88,6 +88,8 @@ private Q_SLOTS:
     void onReplaceSelected();
     void onReplaceAll();
     void onElementSelectionChanged();
+    void onFilterTypeChanged(int index);
+    void onSearchTextChanged();
 
 private:
     Ui::DataInputListDlg *m_ui;
@@ -104,6 +106,9 @@ private:
     EDataType m_defaultType;
     QVector<EDataType> m_acceptedTypes;
     QPointer<DataInputSelectView> m_dataInputChooserView;
+    // -1 all types, 0... matches EDataType enum
+    int m_typeFilter = -1;
+    QString m_searchString;
 
     QAction *m_replaceSelectedAction;
     QAction *m_replaceAllAction;

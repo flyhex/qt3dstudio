@@ -2145,9 +2145,9 @@ void CStudioApp::checkDeletedDatainputs()
     // For datainput bindings in subpresentations we do not have specific
     // instance and/or property handles. Get the datatype for property using
     // the generic name string and leave instance/property handle empty.
-    for (auto sp : spDatainputs) {
-        const QString propName = sp.second;
-        CDataInputDialogItem *item = m_dataInputDialogItems.find(sp.first).value();
+    for (auto sp = spDatainputs.cbegin(); sp != spDatainputs.cend(); ++sp) {
+        const QString propName = sp->second;
+        CDataInputDialogItem *item = m_dataInputDialogItems.find(sp->first).value();
         QPair<qt3dsdm::DataModelDataType::Value, bool> spEntry;
         if (propName == QLatin1String("@timeline")) {
             spEntry.first = qt3dsdm::DataModelDataType::Value::RangedNumber;
@@ -2165,7 +2165,7 @@ void CStudioApp::checkDeletedDatainputs()
             spEntry.second = false;
         }
 
-        item->externalPresBoundTypes.insert(sp.first, spEntry);
+        item->externalPresBoundTypes.insert(sp.key(), spEntry);
     }
 }
 
