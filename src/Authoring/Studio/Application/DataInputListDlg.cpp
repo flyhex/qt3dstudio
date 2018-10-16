@@ -419,10 +419,20 @@ void CDataInputListDlg::onEditDataInput()
         // if we are renaming a datainput, remove the old key - value and
         // add it again as new entry with new name
         if (m_currentDataInputName != di->name) {
+            m_ui->elementInfo->selectAll();
+            const QModelIndexList indexes = m_ui->elementInfo->selectionModel()->selectedRows();
+            QList<qt3dsdm::Qt3DSDMInstanceHandle> elementHandles;
+            for (auto it : indexes) {
+               elementHandles.append(
+                           m_ui->elementInfo->model()->data(it, Qt::UserRole + 1).toInt());
+            }
+            // Opens up a transaction if one is not existing; we will close it at
+            // dialog exit to batch ok/cancel all changes done in this dialog.
+            g_StudioApp.GetCore()->GetDoc()->ReplaceDatainput(m_currentDataInputName,
+                                                              di->name, elementHandles);
             m_dataInputs.remove(m_currentDataInputName);
             m_currentDataInputName = di->name;
         }
-
         // insert replaces the previous key - value pair if existing
         m_dataInputs.insert(m_currentDataInputName, di);
 
@@ -606,5 +616,4 @@ void CDataInputListDlg::replaceDatainputs(const QModelIndexList &selectedBinding
     // closed when the dialog ultimately exits.
     g_StudioApp.GetCore()->GetDoc()->ReplaceDatainput(m_currentDataInputName,
                                                       newDIName, elementHandles);
-
 }
