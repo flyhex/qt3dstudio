@@ -45,13 +45,16 @@ public:
     void setData(const QVector<QPair<QString, int>> &dataInputList,
                  const QString &currentController,
                  int handle = 0, int instance = 0);
-    void setAcceptedTypes(const QVector<EDataType> &acceptedTypes);
+    void setMatchingTypes(const QVector<EDataType> &matchingTypes);
     QString getAddNewDataInputString() { return tr("[Add New Datainput]"); }
     QString getNoneString() { return tr("[None]"); }
     DataInputSelectModel *getModel() const { return m_model; }
 
     Q_INVOKABLE void setSelection(int index);
     Q_INVOKABLE int selection() const { return m_selection; }
+    Q_INVOKABLE void setSearchString(const QString &string);
+    Q_INVOKABLE void setTypeFilter(const int index);
+
 Q_SIGNALS:
     void dataInputChanged(int handle, int instance, const QString &selected);
     void selectedChanged();
@@ -63,7 +66,7 @@ protected:
 
 private:
     void initialize();
-    void updateData(const QVector<QPair<QString, int>> &dataInputList);
+    void updateData();
     QString getDiTypeStr(int type);
     int m_handle = 0;
     int m_instance = 0;
@@ -72,7 +75,11 @@ private:
     QString m_currController;
     QString m_mostRecentlyAdded;
     EDataType m_defaultType;
-    QVector<EDataType> m_acceptedTypes;
+    QVector<EDataType> m_matchingTypes;
+    // -2 denotes allowed types, -1 all types, 0... matches EDataType enum
+    int m_typeFilter = -2;
+    QVector<QPair<QString, int>> m_dataInputList;
+    QString m_searchString;
 };
 
 #endif // DATAINPUTSELECTDLG_H

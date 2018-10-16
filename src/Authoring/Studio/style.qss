@@ -397,6 +397,10 @@ QDialog#DataInputListDlg QListView::item:selected {
     background-color: #46a2da;
 }
 
+QDialog#DataInputListDlg QHeaderView::section:hover {
+    background: transparent;
+}
+
 QDialog#DataInputListDlg QComboBox QAbstractItemView::item:selected
 {
     background-color: #46a2da;
@@ -411,7 +415,6 @@ QDialog#DataInputListDlg QPushButton#DataInputListButton {
     background-color: transparent;
     border: 0px;
     min-width: 16px;
-    max-width: 16px;
     min-height: 16px;
     max-height: 16px;
     padding: 0px;

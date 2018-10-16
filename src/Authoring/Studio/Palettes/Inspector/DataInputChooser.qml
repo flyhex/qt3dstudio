@@ -57,6 +57,57 @@ Rectangle {
         anchors.fill: parent
         anchors.topMargin: 30
         spacing: 10
+        RowLayout {
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            StyledComboBox {
+                readonly property int numOfFixedChoices: 2
+                Layout.leftMargin: 8
+                Layout.preferredWidth: 120
+
+                // Data type list must match with EDataType enum so we can use enum
+                // index directly without going through string -> int table lookup
+                model: [qsTr("[Allowed types]"), qsTr("[All types]"), qsTr("Boolean"),
+                        qsTr("Float"), qsTr("Ranged Number"), qsTr("String"), qsTr("Variant"),
+                        qsTr("Vector2"), qsTr("Vector3")]
+
+                onCurrentIndexChanged: _dataInputSelectView.setTypeFilter(
+                                           currentIndex - numOfFixedChoices);
+            }
+
+            StyledTextField {
+                Layout.leftMargin: 8
+                Layout.preferredWidth: 250
+                id: searchField
+                property string value
+
+                rightPadding: clearText.width + 2
+
+                onTextChanged: _dataInputSelectView.setSearchString(text);
+
+                Image {
+                    anchors { verticalCenter: parent.verticalCenter; right: parent.right; }
+                    id: clearText
+                    fillMode: Image.PreserveAspectFit
+                    smooth: true;
+                    source: _resDir + "add.png"
+                    rotation: 45
+
+                    MouseArea {
+                        id: clear
+                        anchors {
+                            horizontalCenter: parent.horizontalCenter;
+                            verticalCenter: parent.verticalCenter
+                        }
+                        height: clearText.height; width: clearText.height
+                        onClicked: {
+                            searchField.text = ""
+                            searchField.forceActiveFocus()
+                        }
+                    }
+                }
+            }
+        }
 
         ListView {
             id: listView

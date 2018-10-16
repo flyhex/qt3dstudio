@@ -53,12 +53,12 @@ CDataInputListDlg::CDataInputListDlg(QMap<QString, CDataInputDialogItem *> *data
     : QDialog(parent)
     , m_ui(new Ui::DataInputListDlg)
     , m_actualDataInputs(datainputs)
-    , m_goToAdd(goToAdd)
-    , m_defaultType(defaultType)
     , m_currentDataInputIndex(-1)
     , m_tableContents(new QStandardItemModel(0, columnCount, this))
     , m_infoContents(new QStandardItemModel(0, 3, this))
+    , m_goToAdd(goToAdd)
     , m_sortColumn(-1)
+    , m_defaultType(defaultType)
     , m_acceptedTypes(acceptedTypes)
 {
     m_ui->setupUi(this);
@@ -69,26 +69,21 @@ CDataInputListDlg::CDataInputListDlg(QMap<QString, CDataInputDialogItem *> *data
     addButton->setIcon(QIcon(":/images/add.png"));
     addButton->setAccessibleName(QStringLiteral("DataInputListButton"));
     addButton->setObjectName(QStringLiteral("DataInputListButton"));
-    QPushButton *editButton = new QPushButton(this);
-    editButton->setIcon(QIcon(":/images/Objects-edit-disabled.png"));
-    editButton->setAccessibleName(QStringLiteral("DataInputListButton"));
-    editButton->setObjectName(QStringLiteral("DataInputListButton"));
     QPushButton *removeButton = new QPushButton(this);
     removeButton->setIcon(QIcon(":/images/Action-Trash-Disabled.png"));
     removeButton->setAccessibleName(QStringLiteral("DataInputListButton"));
     removeButton->setObjectName(QStringLiteral("DataInputListButton"));
 
     m_ui->buttonBoxAddEditRemove->addButton(addButton, QDialogButtonBox::ActionRole);
-    m_ui->buttonBoxAddEditRemove->addButton(editButton, QDialogButtonBox::ActionRole);
     m_ui->buttonBoxAddEditRemove->addButton(removeButton, QDialogButtonBox::ActionRole);
     QList<QAbstractButton *>buttons = m_ui->buttonBoxAddEditRemove->buttons();
     connect(buttons.at(0), &QAbstractButton::clicked, this, &CDataInputListDlg::onAddDataInput);
-    connect(buttons.at(1), &QAbstractButton::clicked, this, &CDataInputListDlg::onEditDataInput);
-    connect(buttons.at(2), &QAbstractButton::clicked, this, &CDataInputListDlg::onRemoveDataInput);
+    connect(buttons.at(1), &QAbstractButton::clicked, this, &CDataInputListDlg::onRemoveDataInput);
 
     buttons[0]->setToolTip(tr("Add New Data Input..."));
-    buttons[1]->setToolTip(tr("Edit Data Input..."));
-    buttons[2]->setToolTip(tr("Remove Data Input"));
+    buttons[0]->setText(tr("Add Data Input"));
+    buttons[1]->setToolTip(tr("Remove Data Input"));
+    buttons[1]->setText(tr("Remove existing Data Input"));
 
     initDialog();
 
@@ -113,10 +108,12 @@ void CDataInputListDlg::initDialog()
 
     // Update table contents
     updateContents();
+    updateInfo();
 
     // Make the expression column wider than name and type
     m_ui->tableView->horizontalHeader()->setStretchLastSection(true);
     m_ui->tableView->horizontalHeader()->setMinimumSectionSize(125);
+    m_ui->tableView->setFocusPolicy(Qt::NoFocus);
 
     // Align columns left and prevent selecting the whole column
     m_ui->tableView->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
@@ -134,6 +131,7 @@ void CDataInputListDlg::initDialog()
     m_ui->elementInfo->horizontalHeader()->setStretchLastSection(true);
     m_ui->elementInfo->horizontalHeader()->setMinimumSectionSize(125);
     m_ui->elementInfo->setModel(m_infoContents);
+    m_ui->elementInfo->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 
     connect(m_replaceSelectedAction, &QAction::triggered, this,
             &CDataInputListDlg::onReplaceSelected);
@@ -156,23 +154,14 @@ void CDataInputListDlg::initDialog()
 void CDataInputListDlg::updateButtons()
 {
     if (m_ui->tableView->selectionModel()
-            && m_ui->tableView->selectionModel()->selectedIndexes().size() > 0) {
-        m_ui->buttonBoxAddEditRemove->buttons()[2]->setEnabled(true);
-        m_ui->buttonBoxAddEditRemove->buttons()[2]->setIcon(
-                    QIcon(":/images/Action-Trash-Normal.png"));
-    } else {
-        m_ui->buttonBoxAddEditRemove->buttons()[2]->setEnabled(false);
-        m_ui->buttonBoxAddEditRemove->buttons()[2]->setIcon(
-                    QIcon(":/images/Action-Trash-Disabled.png"));
-    }
-    if (m_dataInputs.isEmpty() || m_currentDataInputIndex == -1) {
-        m_ui->buttonBoxAddEditRemove->buttons()[1]->setEnabled(false);
-        m_ui->buttonBoxAddEditRemove->buttons()[1]->setIcon(
-                    QIcon(":/images/Objects-edit-disabled.png"));
-    } else {
+        && m_ui->tableView->selectionModel()->selectedIndexes().size() > 0) {
         m_ui->buttonBoxAddEditRemove->buttons()[1]->setEnabled(true);
         m_ui->buttonBoxAddEditRemove->buttons()[1]->setIcon(
-                    QIcon(":/images/Objects-edit-normal.png"));
+                    QIcon(":/images/Action-Trash-Normal.png"));
+    } else {
+        m_ui->buttonBoxAddEditRemove->buttons()[1]->setEnabled(false);
+        m_ui->buttonBoxAddEditRemove->buttons()[1]->setIcon(
+                    QIcon(":/images/Action-Trash-Disabled.png"));
     }
 }
 
@@ -234,6 +223,11 @@ void CDataInputListDlg::updateInfo()
     auto refHelper = doc->GetDataModelObjectReferenceHelper();
 
     m_infoContents->clear();
+
+    QStringList labels;
+    labels << tr("Object Name") << tr("Location") << tr("Properties");
+    m_infoContents->setHorizontalHeaderLabels(labels);
+
     // Only show controlled instances if we have a single datainput selected.
     if (m_ui->tableView->selectionModel()->selectedRows(0).size() == 1) {
         for (auto allCtrldElemsIt = m_dataInputs[m_currentDataInputName]->ctrldElems.begin();
@@ -292,6 +286,15 @@ void CDataInputListDlg::updateInfo()
                 item3->setEditable(false);
                 m_infoContents->appendRow(QList<QStandardItem *>({item, item2, item3}));
             }
+        }
+        // Show this datainput uses in subpresentations but leave property name list
+        // empty because we do not have that info.
+        const auto uniqueKeys
+                = m_dataInputs[m_currentDataInputName]->externalPresBoundTypes.uniqueKeys();
+        for (auto &k : uniqueKeys) {
+            m_infoContents->appendRow(QList<QStandardItem *>(
+                {new QStandardItem(QObject::tr("<subpresentation>")),
+                 new QStandardItem(k), new QStandardItem()}));
         }
     }
 
@@ -373,7 +376,7 @@ void CDataInputListDlg::onRemoveDataInput()
     QVector<int> removedRows;
     if (m_ui->tableView->selectionModel()) {
         const QModelIndexList indexes = m_ui->tableView->selectionModel()->selectedIndexes();
-        for (const auto index : indexes) {
+        for (const auto &index : indexes) {
             if (!removedRows.contains(index.row()))
                 removedRows.append(index.row());
         }
@@ -579,7 +582,18 @@ void CDataInputListDlg::onReplaceAll()
 
 void CDataInputListDlg::onElementSelectionChanged()
 {
-    bool disable = m_ui->elementInfo->selectionModel()->selectedRows().size() == 0;
+    bool disable = true;
+    QModelIndexList selected = m_ui->elementInfo->selectionModel()->selectedRows(2);
+    // We only can change bindings in the currently open project. Disable replace
+    // actions if we have selected a row denoting control in a subpresentation
+    // (fastest way to check is to see if property list is empty).
+    if (selected.isEmpty())
+        disable = true;
+    else if (m_ui->elementInfo->model()->data(selected.at(0)).isNull())
+        disable = true;
+    else
+        disable = false;
+
     m_replaceSelectedAction->setDisabled(disable);
     m_replaceAllAction->setDisabled(disable);
 }
@@ -605,12 +619,10 @@ void CDataInputListDlg::setUniqueAcceptedDITypes(
         }
 
         QVector<QPair<QString, int>> dataInputList;
+        for (auto &it : qAsConst(m_dataInputs))
+            dataInputList.append({it->name, it->type});
 
-        for (auto it : qAsConst(m_dataInputs)) {
-            if (okDiTypes.contains((EDataType)it->type))
-                dataInputList.append(QPair<QString, int>(it->name, it->type));
-        }
-
+        m_dataInputChooserView->setMatchingTypes(okDiTypes);
         m_dataInputChooserView->setData(dataInputList, m_currentDataInputName);
     }
 }

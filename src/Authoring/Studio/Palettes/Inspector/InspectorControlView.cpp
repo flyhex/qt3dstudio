@@ -618,11 +618,10 @@ void InspectorControlView::showDataInputChooser(int handle, int instance, const 
     // only add datainputs with matching type for this property
     QVector<QPair<QString, int>> dataInputList;
 
-    for (auto it : qAsConst(g_StudioApp.m_dataInputDialogItems)) {
-        if (CDataInputDlg::isEquivalentDataType(it->type, dataType))
-            dataInputList.append(QPair<QString, int>(it->name, it->type));
-    }
-    m_dataInputChooserView->setAcceptedTypes(CDataInputDlg::getAcceptedTypes(dataType));
+   for (auto &it : qAsConst(g_StudioApp.m_dataInputDialogItems))
+        dataInputList.append({it->name, it->type});
+
+    m_dataInputChooserView->setMatchingTypes(CDataInputDlg::getAcceptedTypes(dataType));
     m_dataInputChooserView->
             setData(dataInputList,
                     m_inspectorControlModel->currentControllerValue(instance, handle),

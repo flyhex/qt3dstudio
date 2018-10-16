@@ -306,10 +306,8 @@ void TimelineToolbar::showDataInputChooser(const QPoint &point)
         m_currController : m_dataInputSelector->getNoneString();
     QVector<QPair<QString, int>> dataInputList;
 
-    for (auto it : qAsConst(g_StudioApp.m_dataInputDialogItems)) {
-        if (it->type == EDataType::DataTypeRangedNumber)
-            dataInputList.append(QPair<QString, int>(it->name, it->type));
-    }
+    for (auto &it : qAsConst(g_StudioApp.m_dataInputDialogItems))
+            dataInputList.append({it->name, it->type});
 
     m_dataInputSelector->setData(dataInputList, currCtr);
 

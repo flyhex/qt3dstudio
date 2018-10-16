@@ -43,11 +43,11 @@ DataInputSelectView::DataInputSelectView(const QVector<EDataType> &acceptedTypes
     : QQuickWidget(parent)
     , m_model(new DataInputSelectModel(this))
     , m_defaultType(EDataType::DataTypeFloat)
-    , m_acceptedTypes(acceptedTypes)
-
+    , m_matchingTypes(acceptedTypes)
+    , m_dataInputList(QVector<QPair<QString, int>>())
 {
-    if (!m_acceptedTypes.isEmpty())
-        m_defaultType = m_acceptedTypes[0];
+    if (!m_matchingTypes.isEmpty())
+        m_defaultType = m_matchingTypes[0];
 
     setWindowTitle(tr("Datainputs"));
     setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
@@ -61,17 +61,18 @@ void DataInputSelectView::setData(const QVector<QPair<QString, int>> &dataInputL
     m_handle = handle;
     m_instance = instance;
     m_currController = currentController;
-    updateData(dataInputList);
+    m_dataInputList = dataInputList;
+    updateData();
 }
 
-void DataInputSelectView::setAcceptedTypes(const QVector<EDataType> &acceptedTypes)
+void DataInputSelectView::setMatchingTypes(const QVector<EDataType> &matchingTypes)
 {
-    m_acceptedTypes = acceptedTypes;
-    if (!m_acceptedTypes.isEmpty())
-        m_defaultType = m_acceptedTypes[0];
+    m_matchingTypes = matchingTypes;
+    if (!m_matchingTypes.isEmpty())
+        m_defaultType = m_matchingTypes[0];
 }
 
-void DataInputSelectView::updateData(const QVector<QPair<QString, int>> &dataInputList)
+void DataInputSelectView::updateData()
 {
     m_selection = -1;
 
@@ -87,10 +88,16 @@ void DataInputSelectView::updateData(const QVector<QPair<QString, int>> &dataInp
         m_model->setFixedItemCount(m_model->getFixedItemCount() + 1);
     }
 
-    for (auto i : dataInputList) {
-        dataInputs.append({i.first, getDiTypeStr(i.second)});
-        if (i.first == m_currController)
-            m_selection = dataInputs.size() - 1;
+    for (auto &i : qAsConst(m_dataInputList)) {
+        if (i.first.contains(m_searchString) || !m_searchString.size()) {
+            if (m_typeFilter == -1
+                || (m_typeFilter == -2 && m_matchingTypes.contains((EDataType)i.second))
+                || m_typeFilter == (EDataType)i.second) {
+                dataInputs.append({i.first, getDiTypeStr(i.second)});
+                if (i.first == m_currController)
+                    m_selection = dataInputs.size() - 1;
+            }
+        }
     }
 
     m_model->setData(dataInputs);
@@ -158,7 +165,7 @@ void DataInputSelectView::setSelection(int index)
             }
         } else {
             CDataInputListDlg dataInputDlg(&g_StudioApp.m_dataInputDialogItems, true, nullptr,
-                                           m_defaultType, m_acceptedTypes);
+                                           m_defaultType, m_matchingTypes);
             dataInputDlg.exec();
 
             if (dataInputDlg.result() == QDialog::Accepted) {
@@ -166,9 +173,9 @@ void DataInputSelectView::setSelection(int index)
                 if (m_mostRecentlyAdded.size()) {
                     CDataInputDialogItem *diItem = g_StudioApp.m_dataInputDialogItems.value(
                                 m_mostRecentlyAdded);
-                    if (m_acceptedTypes.isEmpty()
-                            || (diItem && m_acceptedTypes.contains(
-                                    static_cast<EDataType>(diItem->type)))) {
+                    if (m_matchingTypes.isEmpty()
+                        || (diItem && m_matchingTypes.contains(
+                                static_cast<EDataType>(diItem->type)))) {
                         Q_EMIT dataInputChanged(m_handle, m_instance, m_mostRecentlyAdded);
                     }
                 }
@@ -177,6 +184,18 @@ void DataInputSelectView::setSelection(int index)
         }
         QTimer::singleShot(0, this, &DataInputSelectView::close);
     }
+}
+
+void DataInputSelectView::setSearchString(const QString &string)
+{
+    m_searchString = string;
+    updateData();
+}
+
+void DataInputSelectView::setTypeFilter(const int index)
+{
+    m_typeFilter = index;
+    updateData();
 }
 
 void DataInputSelectView::focusOutEvent(QFocusEvent *event)
