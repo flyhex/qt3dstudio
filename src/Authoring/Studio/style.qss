@@ -388,6 +388,15 @@ QDialog#DataInputListDlg QTableView {
     gridline-color: #2e2f30;
 }
 
+QDialog#DataInputListDlg QListView {
+    border: 1px solid #808080;
+    selection-background-color: #46a2da;
+}
+
+QDialog#DataInputListDlg QListView::item:selected {
+    background-color: #46a2da;
+}
+
 QDialog#DataInputListDlg QComboBox QAbstractItemView::item:selected
 {
     background-color: #46a2da;

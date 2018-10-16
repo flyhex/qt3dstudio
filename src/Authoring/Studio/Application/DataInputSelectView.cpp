@@ -79,11 +79,13 @@ void DataInputSelectView::updateData(const QVector<QPair<QString, int>> &dataInp
     QVector<QPair<QString, QString>> dataInputs;
     m_model->clear();
 
-    dataInputs.append({getAddNewDataInputString(), {}});
-    m_model->setFixedItemCount(m_model->getFixedItemCount() + 1);
+    if (m_model->getShowFixedItems()) {
+        dataInputs.append({getAddNewDataInputString(), {}});
+        m_model->setFixedItemCount(m_model->getFixedItemCount() + 1);
 
-    dataInputs.append({getNoneString(), {}});
-    m_model->setFixedItemCount(m_model->getFixedItemCount() + 1);
+        dataInputs.append({getNoneString(), {}});
+        m_model->setFixedItemCount(m_model->getFixedItemCount() + 1);
+    }
 
     for (auto i : dataInputList) {
         dataInputs.append({i.first, getDiTypeStr(i.second)});

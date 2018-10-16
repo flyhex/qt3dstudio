@@ -215,20 +215,13 @@ public:
     void LoadDocument(const QString &inDocument);
     void SaveDocument(const QString &inDocument);
     void CreateNewDocument();
-    // In outMap, returns datainput names found from element control
-    // bindings but which are missing from (UIP) datainput list
     void UpdateDatainputMap(
-            const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
             QMultiMap<QString,
                       QPair<qt3dsdm::Qt3DSDMInstanceHandle,
                             qt3dsdm::Qt3DSDMPropertyHandle>> *outMap = nullptr);
-    // Sanity checks controlledproperty strings to see if controller names
-    // and target properties are valid. Removes invalid controller - property
-    // pairs from controlledproperty string. Transaction/undo points are not created
-    // for invalid pair deletions, so caller is responsible for dispatching datamodel
-    // notifications.
-    // Recurses through the entire tree and returns true only if all strings were valid.
     bool VerifyControlledProperties(const qt3dsdm::Qt3DSDMInstanceHandle inInstance);
+    void ReplaceDatainput(const QString &oldName, const QString &newName,
+                          const QList<qt3dsdm::Qt3DSDMInstanceHandle> &instances);
 
     bool IsModified();
     bool IsValid() const;
@@ -471,6 +464,11 @@ protected:
                                     std::set<Q3DStudio::CString> &ioActionsAffected);
 
     bool isFocusOnTextEditControl();
+
+    void UpdateDatainputMapRecursive(
+            const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+            QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
+                                     qt3dsdm::Qt3DSDMPropertyHandle>> *outMap);
 
     //==========================================================================
     //	Protected Fields

@@ -60,7 +60,7 @@
      <x>10</x>
      <y>10</y>
      <width>491</width>
-     <height>31</height>
+     <height>53</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -99,9 +99,9 @@
    <property name="geometry">
     <rect>
      <x>15</x>
-     <y>45</y>
+     <y>75</y>
      <width>482</width>
-     <height>425</height>
+     <height>291</height>
     </rect>
    </property>
    <property name="editTriggers">
@@ -117,9 +117,28 @@
     <bool>false</bool>
    </property>
    <attribute name="horizontalHeaderVisible">
-    <bool>true</bool>
+    <bool>false</bool>
    </attribute>
    <attribute name="verticalHeaderVisible">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QTableView" name="elementInfo">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>370</y>
+     <width>489</width>
+     <height>89</height>
+    </rect>
+   </property>
+   <property name="selectionMode">
+    <enum>QAbstractItemView::ExtendedSelection</enum>
+   </property>
+   <property name="selectionBehavior">
+    <enum>QAbstractItemView::SelectRows</enum>
+   </property>
+   <attribute name="horizontalHeaderVisible">
     <bool>false</bool>
    </attribute>
   </widget>

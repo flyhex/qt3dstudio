@@ -48,6 +48,7 @@ public:
     void setAcceptedTypes(const QVector<EDataType> &acceptedTypes);
     QString getAddNewDataInputString() { return tr("[Add New Datainput]"); }
     QString getNoneString() { return tr("[None]"); }
+    DataInputSelectModel *getModel() const { return m_model; }
 
     Q_INVOKABLE void setSelection(int index);
     Q_INVOKABLE int selection() const { return m_selection; }

@@ -527,6 +527,7 @@ void ProjectFile::loadSubpresentationsAndDatainputs(
             }
         }
     }
+    g_StudioApp.GetCore()->GetDoc()->UpdateDatainputMap();
 }
 
 /**

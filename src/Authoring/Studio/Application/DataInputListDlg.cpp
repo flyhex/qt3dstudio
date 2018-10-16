@@ -32,10 +32,16 @@
 #include "StudioPreferences.h"
 #include "StudioApp.h"
 #include "Dialogs.h"
+#include "Core.h"
+#include "Doc.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "ClientDataModelBridge.h"
+#include "DataModelObjectReferenceHelper.h"
 
 #include <QtWidgets/qpushbutton.h>
 #include <QtGui/qstandarditemmodel.h>
 #include <QtGui/qevent.h>
+#include <QtWidgets/qaction.h>
 #include <algorithm>
 #include <QtCore/qtimer.h>
 
@@ -51,6 +57,7 @@ CDataInputListDlg::CDataInputListDlg(QMap<QString, CDataInputDialogItem *> *data
     , m_defaultType(defaultType)
     , m_currentDataInputIndex(-1)
     , m_tableContents(new QStandardItemModel(0, columnCount, this))
+    , m_infoContents(new QStandardItemModel(0, 2, this))
     , m_sortColumn(-1)
     , m_acceptedTypes(acceptedTypes)
 {
@@ -111,6 +118,26 @@ void CDataInputListDlg::initDialog()
 
     // Align columns left and prevent selecting the whole column
     m_ui->tableView->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
+
+    m_replaceSelectedAction = new QAction(QObject::tr("Replace selected"), m_ui->elementInfo);
+    m_replaceAllAction = new QAction(QObject::tr("Replace all"), m_ui->elementInfo);
+    m_replaceSelectedAction->setDisabled(true);
+    m_replaceAllAction->setDisabled(true);
+
+    m_ui->elementInfo->addAction(m_replaceSelectedAction);
+    m_ui->elementInfo->addAction(m_replaceAllAction);
+    m_ui->elementInfo->setContextMenuPolicy(Qt::ActionsContextMenu);
+    m_ui->elementInfo->setFocusPolicy(Qt::NoFocus);
+    m_ui->elementInfo->horizontalHeader()->setStretchLastSection(true);
+    m_ui->elementInfo->horizontalHeader()->setMinimumSectionSize(125);
+    m_ui->elementInfo->setModel(m_infoContents);
+
+    connect(m_replaceSelectedAction, &QAction::triggered, this,
+            &CDataInputListDlg::onReplaceSelected);
+    connect(m_replaceAllAction, &QAction::triggered, this, &CDataInputListDlg::onReplaceAll);
+
+    connect(m_ui->elementInfo->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &CDataInputListDlg::onElementSelectionChanged);
 
     connect(m_ui->tableView->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &CDataInputListDlg::onSelectionChanged);
@@ -198,6 +225,42 @@ void CDataInputListDlg::updateContents()
         m_ui->tableView->sortByColumn(m_sortColumn, m_sortOrder);
 }
 
+void CDataInputListDlg::updateInfo()
+{
+    auto doc = g_StudioApp.GetCore()->GetDoc();
+    auto refHelper = doc->GetDataModelObjectReferenceHelper();
+
+    m_infoContents->clear();
+    if (m_ui->tableView->selectionModel()->selectedRows(0).size() == 1) {
+        for (auto it : qAsConst(m_dataInputs[m_currentDataInputName]->controlledElems)) {
+            QStandardItem *item = new QStandardItem(
+                        g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->
+                        GetClientDataModelBridge()->GetName(it.GetHandleValue()).toQString());
+            // Store actual handle value to Qt::Userdata+1
+            item->setData(it.GetHandleValue());
+            auto path = refHelper->GetObjectReferenceString(
+                        doc->GetSceneInstance(), CRelativePathTools::EPATHTYPE_GUID,
+                        it.GetHandleValue()).toQString();
+            // One element can have several properties controlled by this datainput,
+            // do not show element several times. Show the number of properties after
+            // the elementpath.
+            if (m_infoContents->findItems(path, Qt::MatchContains, 1).isEmpty()) {
+                item->setToolTip(path);
+                item->setEditable(false);
+                QStandardItem *item2
+                        = new QStandardItem(path + QStringLiteral(" (") + QString::number(
+                                                m_dataInputs[m_currentDataInputName]->
+                                                controlledElems.count(it.GetHandleValue()))
+                                                + QStringLiteral(")"));
+                item2->setEditable(false);
+                m_infoContents->appendRow(QList<QStandardItem *>({item, item2}));
+            }
+        }
+    }
+
+    m_ui->elementInfo->setModel(m_infoContents);
+}
+
 void CDataInputListDlg::keyPressEvent(QKeyEvent *event)
 {
     if (event->matches(QKeySequence::Delete)) {
@@ -216,16 +279,24 @@ void CDataInputListDlg::keyPressEvent(QKeyEvent *event)
 
 void CDataInputListDlg::on_buttonBox_accepted()
 {
+    if (g_StudioApp.GetCore()->GetDoc()->IsTransactionOpened())
+        g_StudioApp.GetCore()->GetDoc()->CloseTransaction();
+
     m_actualDataInputs->clear();
 
     const auto keys = m_dataInputs.keys();
     for (auto name : keys)
         m_actualDataInputs->insert(name, m_dataInputs.value(name));
+
     QDialog::accept();
 }
 
 void CDataInputListDlg::on_buttonBox_rejected()
 {
+    // If the user cancels, also roll back any possible changes to data input bindings.
+    if (g_StudioApp.GetCore()->GetDoc()->IsTransactionOpened())
+        g_StudioApp.GetCore()->GetDoc()->RollbackTransaction();
+
     QDialog::reject();
 }
 
@@ -382,10 +453,158 @@ void CDataInputListDlg::onSelectionChanged()
                 = m_tableContents->itemFromIndex(indexes.at(0))->data(Qt::EditRole).toString();
     }
     updateButtons();
+    updateInfo();
+    onElementSelectionChanged();
 }
 
 void CDataInputListDlg::onSortOrderChanged(int column, Qt::SortOrder order)
 {
     m_sortColumn = column;
     m_sortOrder = order;
+}
+
+void CDataInputListDlg::onReplaceSelected()
+{
+    if (!m_dataInputChooserView) {
+        m_dataInputChooserView = new DataInputSelectView(m_acceptedTypes, this);
+        // Do not show "Add new" and "None" choices.
+        m_dataInputChooserView->getModel()->showFixedItems(false);
+    } else {
+        disconnect(m_dataInputChooserView, nullptr, nullptr, nullptr);
+    }
+
+    connect(m_dataInputChooserView, &DataInputSelectView::dataInputChanged, this,
+            [this](int handle, int instance, const QString &controllerName) {
+        Q_UNUSED(handle)
+        Q_UNUSED(instance)
+
+        const QModelIndexList indexes = m_ui->elementInfo->selectionModel()->selectedRows();
+
+        replaceDatainputs(indexes, controllerName);
+        refreshDIs();
+    });
+
+    QVector<QPair<qt3dsdm::DataModelDataType::Value, bool>> selBoundTypes;
+
+    const auto selRows = m_ui->elementInfo->selectionModel()->selectedRows(0);
+    for (auto it : selRows)
+        selBoundTypes.append(m_dataInputs[m_currentDataInputName]->boundTypes[it.row()]);
+
+    setUniqueAcceptedDITypes(selBoundTypes);
+
+    CDialogs::showWidgetBrowser(this, m_dataInputChooserView, mapToGlobal(pos()));
+}
+
+void CDataInputListDlg::onReplaceAll()
+{
+    if (!m_dataInputChooserView) {
+        m_dataInputChooserView = new DataInputSelectView(m_acceptedTypes, this);
+        // Do not show "Add new" and "None" choices.
+        m_dataInputChooserView->getModel()->showFixedItems(false);
+    } else {
+        disconnect(m_dataInputChooserView, nullptr, nullptr, nullptr);
+    }
+
+    connect(m_dataInputChooserView, &DataInputSelectView::dataInputChanged, this,
+            [this](int handle, int instance, const QString &controllerName) {
+        Q_UNUSED(handle)
+        Q_UNUSED(instance)
+
+        m_ui->elementInfo->selectAll();
+        const QModelIndexList indexes = m_ui->elementInfo->selectionModel()->selectedRows();
+
+        replaceDatainputs(indexes, controllerName);
+        refreshDIs();
+    });
+
+    setUniqueAcceptedDITypes(
+            m_dataInputs[m_currentDataInputName]->boundTypes);
+    CDialogs::showWidgetBrowser(this, m_dataInputChooserView, mapToGlobal(pos()));
+}
+
+void CDataInputListDlg::onElementSelectionChanged()
+{
+    bool disable = m_ui->elementInfo->selectionModel()->selectedRows().size() == 0;
+    m_replaceSelectedAction->setDisabled(disable);
+    m_replaceAllAction->setDisabled(disable);
+}
+
+void CDataInputListDlg::refreshDIs()
+{
+    updateContents();
+    updateInfo();
+}
+
+void CDataInputListDlg::setUniqueAcceptedDITypes(
+        const QVector<QPair<qt3dsdm::DataModelDataType::Value, bool>> &boundTypes)
+{
+    QVector<EDataType> okDiTypes(allDataTypes);
+
+    for (auto it : qAsConst(allDataTypes)) {
+        for (auto it2 : boundTypes) {
+            if (!CDataInputDlg::isEquivalentDataType(it, it2.first, it2.second)) {
+                auto idx = okDiTypes.indexOf(it);
+                if (idx != -1)
+                    okDiTypes.remove(idx);
+            }
+        }
+
+        QVector<QPair<QString, int>> dataInputList;
+
+        for (auto it : qAsConst(m_dataInputs)) {
+            if (okDiTypes.contains((EDataType)it->type))
+                dataInputList.append(QPair<QString, int>(it->name, it->type));
+        }
+
+        m_dataInputChooserView->setData(dataInputList, m_currentDataInputName);
+    }
+}
+
+void CDataInputListDlg::replaceDatainputs(const QModelIndexList &selectedBindings,
+                                          const QString &newDIName)
+{
+    QList<qt3dsdm::Qt3DSDMInstanceHandle> elementHandles;
+    for (auto it : selectedBindings)
+       elementHandles.append(m_ui->elementInfo->model()->data(it, Qt::UserRole + 1).toInt());
+
+    // Update bindings for the internal list held by this dialog.
+    for (auto it : qAsConst(elementHandles)) {
+        // Find the old datainput controller entry/entries.
+        // Same controlled element can appear several times if
+        // this datainput is controlling several properties.
+        // Replace them all.
+        CDataInputDialogItem *oldDI = *m_dataInputs.find(m_currentDataInputName);
+
+        int index = oldDI->controlledElems.indexOf(it.GetHandleValue());
+        // Replicate controlledelement and bound type entries to new controller DI entry.
+        // Make sure that new DI name is valid i.e. included in datainput map.
+        while (index != -1) {
+            CDataInputDialogItem *newDI = *m_dataInputs.find(newDIName);
+            if (newDI) {
+                newDI->controlledElems.append(it.GetHandleValue());
+                newDI->boundTypes.append(oldDI->boundTypes[index]);
+            } else {
+                Q_ASSERT(false); // Trying to change controller to something
+                                 // that is not listed in the global table.
+            }
+            index = oldDI->controlledElems.indexOf(it.GetHandleValue(), index + 1);
+        }
+
+        // Remove entries from old datainput.
+        index = oldDI->controlledElems.indexOf(it.GetHandleValue());
+        while (index != -1) {
+            oldDI->controlledElems.remove(index);
+            // Boundtypes indexes correspond to controlledElems so we can simply
+            // use same index. Boundtypes can also have same datatype listed
+            // several times, so removing one count here does not eliminate other
+            // entries for the same datatype that may still be remaining.
+            oldDI->boundTypes.remove(index);
+            index = oldDI->controlledElems.indexOf(it.GetHandleValue());
+        }
+    }
+    // Make direct changes to object properties. Transaction that is opened will be
+    // closed when the dialog ultimately exits.
+    g_StudioApp.GetCore()->GetDoc()->ReplaceDatainput(m_currentDataInputName,
+                                                      newDIName, elementHandles);
+
 }

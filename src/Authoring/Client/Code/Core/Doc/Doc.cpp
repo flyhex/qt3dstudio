@@ -1283,12 +1283,7 @@ void CDoc::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
         // TODO: implement a pre-change signal that can be used to extract
         // controlledproperty string before and after the change, so we know exactly
         // what happened to the element
-        for (auto &it : qAsConst(g_StudioApp.m_dataInputDialogItems)) {
-            it->controlledElems.clear();
-            it->boundTypes.clear();
-        }
-
-        UpdateDatainputMap(m_Core->GetDoc()->GetSceneInstance());
+        UpdateDatainputMap();
     }
 }
 
@@ -2893,9 +2888,21 @@ void CDoc::CheckActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     }
 }
 
-// TODO: use ProjectFile class framework to parse subpresentations and add datainput use
-// information from them to the map as well
-void CDoc::UpdateDatainputMap(
+// In outMap, returns datainput names found from element control
+// bindings but which are missing from (UIP) datainput list.
+void CDoc::UpdateDatainputMap(QMultiMap<QString,
+                              QPair<qt3dsdm::Qt3DSDMInstanceHandle,
+                                    qt3dsdm::Qt3DSDMPropertyHandle>> *outMap)
+{
+    for (auto &it : qAsConst(g_StudioApp.m_dataInputDialogItems)) {
+        it->controlledElems.clear();
+        it->boundTypes.clear();
+    }
+
+    UpdateDatainputMapRecursive(GetSceneInstance(), outMap);
+}
+
+void CDoc::UpdateDatainputMapRecursive(
         const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
         QMultiMap<QString,
                   QPair<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle>> *outMap)
@@ -2925,8 +2932,7 @@ void CDoc::UpdateDatainputMap(
             // For slide control, type is strictly set to String.
             // For timeline the datainput is strictly Ranged Number only.
             if (g_StudioApp.m_dataInputDialogItems.contains(diName)) {
-                g_StudioApp.m_dataInputDialogItems[diName]->
-                    controlledElems.append(inInstance);
+                g_StudioApp.m_dataInputDialogItems[diName]->controlledElems.append(inInstance);
                 if (propType) {
                     g_StudioApp.m_dataInputDialogItems[diName]->boundTypes.append(
                                 QPair<qt3dsdm::DataModelDataType::Value, bool>(propType, false));
@@ -2958,9 +2964,15 @@ void CDoc::UpdateDatainputMap(
     Q3DStudio::CGraphIterator iter;
     GetAssetChildren(this, inInstance, iter);
     for (; !iter.IsDone(); ++iter)
-        UpdateDatainputMap(iter.GetCurrent(), outMap);
+        UpdateDatainputMapRecursive(iter.GetCurrent(), outMap);
 }
 
+// Sanity checks controlledproperty strings to see if controller names
+// and target properties are valid. Removes invalid controller - property
+// pairs from controlledproperty string. Transaction/undo points are not created
+// for invalid pair deletions, so caller is responsible for dispatching datamodel
+// notifications.
+// Recurses through the entire tree and returns true only if all strings were valid.
 bool CDoc::VerifyControlledProperties(const qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     auto propSystem = GetPropertySystem();
@@ -2984,7 +2996,6 @@ bool CDoc::VerifyControlledProperties(const qt3dsdm::Qt3DSDMInstanceHandle inIns
             // Not much to do to validate datainput name except to check that it has no illegal
             // characters. We will check elsewhere that datainput names correspond to ones
             // that are defined in the global UIA file.
-
             int pos;
             auto diValidationRes = rxp.validate(splitStr[i], pos);
 
@@ -3035,6 +3046,53 @@ bool CDoc::VerifyControlledProperties(const qt3dsdm::Qt3DSDMInstanceHandle inIns
     }
 
     return ret;
+}
+
+// Replaces datainput bindings in list given by "instances".
+// Opens up a single transaction that batches all binding changes.
+// NOTE: calling function is responsible for closing the transaction.
+void CDoc::ReplaceDatainput(const QString &oldName, const QString &newName,
+                            const QList<qt3dsdm::Qt3DSDMInstanceHandle> &instances)
+{
+    auto propSystem = GetPropertySystem();
+
+    // Open a single transaction for all datainput replaces, so that all binding replacements
+    // done from within f.ex datainput management dialog can be undone with a single undo.
+    if (!IsTransactionOpened())
+        OpenTransaction(QObject::tr("Replace datainput bindings"), __FILE__, __LINE__);
+
+    for (auto it : instances) {
+        qt3dsdm::Qt3DSDMPropertyHandle ctrldPropHandle
+                = propSystem->GetAggregateInstancePropertyByName(it.GetHandleValue(),
+                                                                 L"controlledproperty");
+        QString newStr;
+        bool renamed = false;
+        if (ctrldPropHandle && it.Valid()) {
+            qt3dsdm::SValue ctrldPropVal;
+            propSystem->GetInstancePropertyValue(it.GetHandleValue(), ctrldPropHandle,
+                                                 ctrldPropVal);
+            Q3DStudio::CString currCtrldPropsStr
+                    = qt3dsdm::get<qt3dsdm::TDataStrPtr>(ctrldPropVal)->GetData();
+            QStringList splitStr = currCtrldPropsStr.toQString().split(QLatin1Char(' '));
+
+            for (int i = 0; i < splitStr.size() - 1; i += 2) {
+                if (splitStr[i].contains(oldName)) {
+                    splitStr[i] = QLatin1String("$") + newName;
+                    renamed = true;
+                }
+                newStr.append(QStringLiteral(" ") + splitStr[i] + QStringLiteral(" ")
+                              + splitStr[i+1]);
+            }
+        }
+        // Make changes to property.
+        if (renamed) {
+            newStr = newStr.trimmed();
+            Q3DStudio::SValue controlledProperty
+                    = std::make_shared<qt3dsdm::CDataStr>(Q3DStudio::CString::fromQString(newStr));
+            SetInstancePropertyValue(it.GetHandleValue(), L"controlledproperty",
+                                     controlledProperty);
+        }
+    }
 }
 
 QDebug operator<<(QDebug dbg, const SubPresentationRecord &r)

@@ -2127,7 +2127,7 @@ void CStudioApp::checkDeletedDatainputs()
                                        qt3dsdm::Qt3DSDMPropertyHandle>>;
     auto doc = m_core->GetDoc();
     // Update datainputs for the currently open presentation
-    doc->UpdateDatainputMap(m_core->GetDoc()->GetSceneInstance(), map);
+    doc->UpdateDatainputMap(map);
 
     if (!map->empty())
         m_core->GetDispatch()->FireOnUndefinedDatainputsFail(map);

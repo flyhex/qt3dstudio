@@ -49,12 +49,15 @@ public:
     explicit DataInputSelectModel(QObject *parent = nullptr);
     virtual ~DataInputSelectModel();
     void setFixedItemCount(int count) { m_fixCount = count; }
-    int getFixedItemCount() { return m_fixCount; }
+    int getFixedItemCount() const { return m_fixCount; }
+    void showFixedItems(bool show) { m_showFixedItems = show; }
+    bool getShowFixedItems() const { return m_showFixedItems; }
 Q_SIGNALS:
     void fixCountChanged();
 
 private:
     int m_fixCount = 0;
+    bool m_showFixedItems = true;
     QVector<QPair<QString, QString>> m_diTypePairList;
     static const int TypeRole;
 
