@@ -319,6 +319,7 @@ struct ComposerObjectTypes
 #define HANDLE_COMPOSER_OBJECT_TYPE(name, propmacro) name,
         ITERATE_COMPOSER_OBJECT_TYPES
 #undef HANDLE_COMPOSER_OBJECT_TYPE
+        ControllableObject
     };
     static const wchar_t *Convert(ComposerObjectTypes::Enum inType);
     static ComposerObjectTypes::Enum Convert(const wchar_t *inType);

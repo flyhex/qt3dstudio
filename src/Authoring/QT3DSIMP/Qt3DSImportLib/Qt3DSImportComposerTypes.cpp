@@ -92,6 +92,17 @@ DataModelDataType::Value SImportPathAnchorPoint::GetPropertyDataType(const wchar
     return SImportAsset::GetPropertyDataType(inPropertyName);
 }
 
+DataModelDataType::Value SImportControllableObject::GetPropertyDataType(
+        const wchar_t *inPropertyName)
+{
+    ITERATE_COMPOSER_SCENE_PROPERTIES
+    ITERATE_COMPOSER_LAYER_PROPERTIES
+    ITERATE_COMPOSER_MODEL_PROPERTIES
+    ITERATE_COMPOSER_TEXT_PROPERTIES
+    ITERATE_COMPOSER_MATERIAL_PROPERTIES
+    return SImportAsset::GetPropertyDataType(inPropertyName);
+}
+
 #undef HANDLE_COMPOSER_PROPERTY_NO_DEFAULT
 #undef HANDLE_COMPOSER_PROPERTY
 #undef HANDLE_COMPOSER_PROPERTY_DUPLICATE
@@ -157,6 +168,17 @@ DataModelDataType::Value SImportPathAnchorPoint::GetPropertyDataType(const char8
     return SImportAsset::GetPropertyDataType(inPropertyName);
 }
 
+DataModelDataType::Value SImportControllableObject::GetPropertyDataType(
+        const char8_t *inPropertyName)
+{
+    ITERATE_COMPOSER_SCENE_PROPERTIES
+    ITERATE_COMPOSER_LAYER_PROPERTIES
+    ITERATE_COMPOSER_MODEL_PROPERTIES
+    ITERATE_COMPOSER_TEXT_PROPERTIES
+    ITERATE_COMPOSER_MATERIAL_PROPERTIES
+    return SImportAsset::GetPropertyDataType(inPropertyName);
+}
+
 #undef HANDLE_COMPOSER_PROPERTY_NO_DEFAULT
 #undef HANDLE_COMPOSER_PROPERTY
 #undef HANDLE_COMPOSER_PROPERTY_DUPLICATE
@@ -183,6 +205,8 @@ SImportAsset &SImportComposerTypes::GetImportAssetForType(ComposerObjectTypes::E
         return m_SubPath;
     case ComposerObjectTypes::PathAnchorPoint:
         return m_PathAnchorPoint;
+    case ComposerObjectTypes::ControllableObject:
+        return m_ControllableObject;
     default:
         break;
     }
