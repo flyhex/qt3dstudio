@@ -119,7 +119,7 @@ void SlideView::showControllerDialog(const QPoint &point)
     QVector<QPair<QString, int>> dataInputList;
 
     for (auto it : qAsConst(g_StudioApp.m_dataInputDialogItems)) {
-        if (it->type == EDataType::DataTypeString)
+        if (it->type == EDataType::DataTypeString || it->type == EDataType::DataTypeVariant)
             dataInputList.append(QPair<QString, int>(it->name, it->type));
     }
     m_dataInputSelector->setData(dataInputList, currCtr);
