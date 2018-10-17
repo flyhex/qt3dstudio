@@ -735,7 +735,7 @@ public:
     CFilePath WriteWriterToFile(IDOMWriter &inWriter, const CString &inStem)
     {
         CFilePath theTempFileDir = CFilePath::CombineBaseAndRelative(
-            CFilePath::GetUserApplicationDirectory(), CFilePath(L"Qt3DSComposer\\temp_files"));
+            CFilePath::GetUserApplicationDirectory(), CFilePath(L"Qt3DStudio/temp_files"));
         theTempFileDir.CreateDir(true);
         CFilePath theFinalPath;
         {
@@ -3639,7 +3639,7 @@ public:
         if (docPath.size() == 0) {
             if (theHandler)
                 theHandler->DisplayImportFailed(importSrc.toQString(),
-                                                QObject::tr("Qt3DSComposer Document Has No Path"),
+                                                QObject::tr("Qt3DStudio document has no path"),
                                                 false);
             return 0;
         }

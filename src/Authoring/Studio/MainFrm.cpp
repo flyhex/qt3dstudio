@@ -917,10 +917,16 @@ void CMainFrame::EditPreferences(short inPageIndex)
                     (float)CStudioPreferences::DEFAULT_SELECTOR_LENGTH);
 
         RecheckSizingMode();
+
+        // Save preferences, to make sure we do not lose them on a possible crash
+        QTimer::singleShot(0, [](){ CStudioPreferences::savePreferences(); });
     } else if (thePrefsReturn == PREFS_RESET_LAYOUT) {
         onViewResetLayout();
     } else if (thePrefsReturn == PREFS_SETTINGS_RESTART) {
         QTimer::singleShot(0, this, &CMainFrame::handleRestart);
+    } else if (thePrefsReturn != 0) {
+        // Save preferences, to make sure we do not lose them on a possible crash
+        QTimer::singleShot(0, [](){ CStudioPreferences::savePreferences(); });
     }
 }
 

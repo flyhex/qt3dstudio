@@ -27,7 +27,8 @@
 ****************************************************************************/
 
 #include "Preferences.h"
-#include <QtCore/qfile.h>
+#include <QtCore/qdir.h>
+#include <QtCore/qsavefile.h>
 
 CPreferences::CPreferences()
 {
@@ -35,16 +36,15 @@ CPreferences::CPreferences()
 
 CPreferences::~CPreferences()
 {
-    save();
 }
 
 void CPreferences::save()
 {
-    if (!m_PreferencesFile.isEmpty()) {
-        QFile file(m_PreferencesFile);
+    if (!m_PreferencesFile.isEmpty() && !m_domDoc.isNull()) {
+        QSaveFile file(m_PreferencesFile);
         file.open(QIODevice::WriteOnly);
-        file.resize(0);
-        file.write(m_domDoc.toByteArray(4));
+        if (file.write(m_domDoc.toByteArray(4)) != -1)
+            file.commit();
     }
 }
 
@@ -52,7 +52,7 @@ void CPreferences::save()
  * Sets the preferences file path
  * This sets the applications base path for all preferences that are to be
  * loaded. It also creates the preferences file if it doesn't exist. This
- *  should be called before any CPreferences are created.
+ * should be called before any CPreferences are created.
  * @param filePath preferences serialization file path.
  */
 void CPreferences::SetPreferencesFile(const QString &filePath)
@@ -61,15 +61,18 @@ void CPreferences::SetPreferencesFile(const QString &filePath)
         return;
 
     m_PreferencesFile = filePath;
+    QString preferencesFolder = QFileInfo(filePath).absolutePath();
+
+    QDir dir(preferencesFolder);
+    if (!dir.exists())
+        dir.mkpath(preferencesFolder);
 
     QFile file(m_PreferencesFile);
     if (!file.exists()) {
         m_domDoc.setContent(QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\"?>"
-                                           "<Settings>"
-                                           "</Settings>"));
+                                           "<Settings/>"));
 
         file.open(QIODevice::WriteOnly);
-        file.resize(0);
         file.write(m_domDoc.toByteArray(4));
     } else {
         file.open(QIODevice::ReadOnly);

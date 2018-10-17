@@ -105,7 +105,7 @@ CStudioPreferences::~CStudioPreferences()
  * Loads the default preferences from the registry.  Must be called after the
  * registry root has been set up, and before calling any of the Get functions.
  */
-void CStudioPreferences::LoadPreferences(const QString &filePath)
+void CStudioPreferences::loadPreferences(const QString &filePath)
 {
     if (!m_preferences)
         m_preferences = std::unique_ptr<CPreferences>(new CPreferences);
@@ -173,6 +173,11 @@ void CStudioPreferences::LoadPreferences(const QString &filePath)
     s_idWidth = 130;
     s_valueWidth = 250;
     s_browserPopupSize = QSize(400, 400);
+}
+
+void CStudioPreferences::savePreferences()
+{
+    m_preferences->save();
 }
 
 //==============================================================================
@@ -630,6 +635,7 @@ QString CStudioPreferences::getRecentItem(int index)
 void CStudioPreferences::setRecentItem(int index, const QString &path)
 {
     m_preferences->SetStringValue(QStringLiteral("RecentItem") + QString::number(index), path);
+    savePreferences();
 }
 
 //==============================================================================

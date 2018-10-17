@@ -47,7 +47,8 @@ class CStudioPreferences
     virtual ~CStudioPreferences();
 
 public:
-    static void LoadPreferences(const QString &filePath);
+    static void loadPreferences(const QString &filePath);
+    static void savePreferences();
 
     static bool IsTimelineSnappingGridActive();
     static void SetTimelineSnappingGridActive(bool inActive);

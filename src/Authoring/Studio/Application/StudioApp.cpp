@@ -313,8 +313,8 @@ bool CStudioApp::initInstance(const QCommandLineParser &parser)
                                + QStringLiteral("/../doc/qt3dstudio/getting-started.html");
 
     QString thePreferencesPath = CFilePath::GetUserApplicationDirectory()
-                                 + QStringLiteral("/Qt3DSComposer/Preferences.setting");
-    CStudioPreferences::LoadPreferences(thePreferencesPath);
+                                 + QStringLiteral("/Qt3DStudio/Preferences.setting");
+    CStudioPreferences::loadPreferences(thePreferencesPath);
 
     m_dialogs = new CDialogs(!m_isSilent);
 

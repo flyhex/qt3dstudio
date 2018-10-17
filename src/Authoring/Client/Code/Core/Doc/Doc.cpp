@@ -1548,12 +1548,12 @@ bool CDoc::SetDocumentPath(const QString &inDocumentPath)
 QString CDoc::CreateUntitledDocument() const
 {
     QString dirPath = QDir::cleanPath(Q3DStudio::CFilePath::GetUserApplicationDirectory()
-                                              + QStringLiteral("/Qt3DSComposer/Untitled"));
+                                              + QStringLiteral("/Qt3DStudio/Untitled"));
     QDir dir(dirPath);
     dir.mkpath(QStringLiteral("."));
     QString filePath = dirPath + QStringLiteral("/Untitled.uip");
 
-     // create the file if doesnt exist
+     // create the file if it doesn't exist
     if (!QFileInfo(filePath).exists()) {
         QFile f(filePath);
         f.open(QIODevice::ReadWrite);
