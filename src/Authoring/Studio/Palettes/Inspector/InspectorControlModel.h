@@ -188,16 +188,15 @@ private:
 
     qt3dsdm::SValue m_previouslyCommittedValue;
 
-    QString getStandardMaterialString() const;
-    QString getCustomMaterialString() const;
-    QString getSharedMaterialString() const;
+    QString getBasicMaterialString() const;
+    QString getAnimatableMaterialString() const;
     QString getReferencedMaterialString() const;
+    QString getStandardMaterialString() const;
     QString getDefaultMaterialString() const;
     bool isInsideMaterialContainer() const;
-    bool isShader() const;
-    bool isMatData() const;
+    bool isBasicMaterial() const;
+    bool isAnimatableMaterial() const;
     void updateMaterialValues(const QStringList &values, int elementIndex);
-    void updateMaterialTypeValues();
     void updateShaderValues();
     void updateMatDataValues();
     void updatePropertyValue(InspectorControlBase *element) const;

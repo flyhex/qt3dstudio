@@ -2117,9 +2117,9 @@ public:
                                const QMap<QString, QString> &values,
                                const QMap<QString, QMap<QString, QString>> &textureValues) override
     {
-        setMaterialReferenceByName(instance, Q3DStudio::CString::fromQString(materialName));
         setMaterialSourcePath(instance, materialSourcePath);
         setMaterialValues(materialName, values, textureValues);
+        setMaterialReferenceByName(instance, Q3DStudio::CString::fromQString(materialName));
     }
 
     void setMaterialReferenceByName(TInstanceHandle instance,
