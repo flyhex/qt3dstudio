@@ -126,13 +126,14 @@ public:
                              qt3dsdm::SComposerObjectDefinitions &inObjectDefs,
                              Q3DStudio::CGraph &inAssetGraph, qt3dsdm::IMetaData &inMetaData,
                              TInstanceHandle inTargetId = TInstanceHandle(),
-                             bool setTimeRange = true);
+                             bool setTimeRange = true, bool selectCreatedInstance = true);
 
     static TInstanceHandle CreateSceneGraphInstance(
         Qt3DSDMInstanceHandle inMaster, TInstanceHandle parent, TSlideHandle inSlide,
         qt3dsdm::IDataCore &inDataCore, qt3dsdm::ISlideSystem &inSlideSystem,
         qt3dsdm::SComposerObjectDefinitions &inObjectDefs, Q3DStudio::CGraph &inAssetGraph,
-        qt3dsdm::IMetaData &inMetaData, TInstanceHandle inTargetId = TInstanceHandle());
+        qt3dsdm::IMetaData &inMetaData, TInstanceHandle inTargetId = TInstanceHandle(),
+        bool selectCreatedInstance = true);
 
     static void UnlinkAlwaysUnlinkedProperties(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                                qt3dsdm::SComposerObjectDefinitions &inDefs,
@@ -149,7 +150,7 @@ public:
     CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Enum type, TInstanceHandle parent,
                              TSlideHandle inSlide,
                              TInstanceHandle inTargetId = TInstanceHandle(),
-                             bool setTimeRange = true) = 0;
+                             bool setTimeRange = true, bool selectCreatedInstance = true) = 0;
 
     virtual TInstanceHandle CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Enum type,
                                                      TInstanceHandle parent, TSlideHandle inSlide,
@@ -157,7 +158,8 @@ public:
                                                      const CPt &inPosition,
                                                      EPrimitiveType inPrimitiveType,
                                                      long inStartTime,
-                                                     bool setTimeRange = true) = 0;
+                                                     bool setTimeRange = true,
+                                                     bool selectCreatedInstance = true) = 0;
     virtual void setInstanceImagePropertyValue(TInstanceHandle instance, TPropertyHandle prop,
                                                const CString &pId) = 0;
     virtual void addRectFromSource(const CString &src, TSlideHandle slide, const CPt &pos = {},
@@ -188,7 +190,8 @@ public:
     virtual Qt3DSDMInstanceHandle getMaterialContainer() const = 0;
 
     virtual Qt3DSDMInstanceHandle getMaterial(const Q3DStudio::CString &materialName) = 0;
-    virtual Qt3DSDMInstanceHandle getOrCreateMaterial(const Q3DStudio::CString &materialName) = 0;
+    virtual Qt3DSDMInstanceHandle getOrCreateMaterial(const Q3DStudio::CString &materialName,
+                                                      bool selectCreatedInstance = true) = 0;
 
     virtual void getMaterialReference(Qt3DSDMInstanceHandle instance,
                                       Qt3DSDMInstanceHandle &reference) const = 0;

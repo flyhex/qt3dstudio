@@ -123,7 +123,7 @@ public:
     void setInspectable(CInspectableBase *inInspectable);
     CInspectableBase *inspectable() const;
     void setMaterials(std::vector<Q3DStudio::CFilePath> &materials);
-    void setMatDatas(std::vector<Q3DStudio::CFilePath> &matdatas);
+    void setMatDatas(const std::vector<Q3DStudio::CFilePath> &matdatas);
     void updateFontValues(InspectorControlBase *element) const;
     void refreshRenderables();
     void refresh();

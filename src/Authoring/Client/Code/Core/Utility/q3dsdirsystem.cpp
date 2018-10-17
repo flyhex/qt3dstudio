@@ -59,11 +59,11 @@ private:
 Q3DSDirSystem::Q3DSDirSystem(TCallbackCaller caller) : m_callbackCaller(caller) {}
 
 std::shared_ptr<ISignalConnection> Q3DSDirSystem::AddDirectory(const QString &directory,
-                                                                 TFileModCallbackType callback)
+                                                               TFileModCallbackType callback)
 {
     QString path = directory;
 
-    if (path.endsWith("\\") || path.endsWith("/"))
+    if (path.endsWith(QLatin1Char('\\')) || path.endsWith(QLatin1Char('/')))
         path = path.left(path.size() - 1);
 
     for (auto it = m_watchers.begin(); it != m_watchers.end();) {

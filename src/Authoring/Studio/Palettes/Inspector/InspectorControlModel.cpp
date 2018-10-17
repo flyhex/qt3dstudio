@@ -334,7 +334,7 @@ void InspectorControlModel::setMaterials(std::vector<Q3DStudio::CFilePath> &mate
         updateShaderValues();
 }
 
-void InspectorControlModel::setMatDatas(std::vector<Q3DStudio::CFilePath> &matDatas)
+void InspectorControlModel::setMatDatas(const std::vector<Q3DStudio::CFilePath> &matDatas)
 {
     m_matDatas.clear();
 
@@ -344,7 +344,8 @@ void InspectorControlModel::setMatDatas(std::vector<Q3DStudio::CFilePath> &matDa
         return;
 
     QStringList filenames;
-    for (Q3DStudio::CFilePath path : matDatas) {
+    bool newMaterialSelected = false;
+    for (const Q3DStudio::CFilePath &path : matDatas) {
         const QString relativePath = path.toQString();
         const Q3DStudio::CFilePath absolutePath
             = Q3DStudio::CFilePath::CombineBaseAndRelative(doc->GetDocumentDirectory(), path);
@@ -376,13 +377,14 @@ void InspectorControlModel::setMatDatas(std::vector<Q3DStudio::CFilePath> &matDa
         }
 
         const auto nameCString = Q3DStudio::CString::fromQString(name);
-        bool isNewMaterial = !sceneEditor->getMaterial(nameCString).Valid();
-
-        const auto material = sceneEditor->getOrCreateMaterial(nameCString);
+        const auto material = sceneEditor->getOrCreateMaterial(nameCString, false);
         sceneEditor->setMaterialValues(name, values, textureValues);
 
-        if (isNewMaterial)
+        // select the first new material if there is one
+        if (!newMaterialSelected && !sceneEditor->getMaterial(nameCString).Valid()) {
             doc->SelectDataModelObject(material);
+            newMaterialSelected = true;
+        }
 
         if (needRewrite)
             sceneEditor->writeMaterialFile(material, name, false, absolutePath.toQString());

@@ -871,22 +871,22 @@ public:
         return retval;
     }
 
-    void getMaterialInfo(const QString &inFullPathToFile,
+    void getMaterialInfo(const QString &inAbsoluteFilePath,
                          QString &outName, QMap<QString, QString> &outValues,
                          QMap<QString, QMap<QString, QString>> &outTextureValues) override
     {
-        qt3ds::foundation::CFileSeekableIOStream theStream(inFullPathToFile,
+        qt3ds::foundation::CFileSeekableIOStream theStream(inAbsoluteFilePath,
                                                            qt3ds::foundation::FileReadFlags());
         if (theStream.IsOpen()) {
             std::shared_ptr<IDOMFactory> theFactory =
                 IDOMFactory::CreateDOMFactory(m_DataCore.GetStringTablePtr());
             SImportXmlErrorHandler theImportHandler(m_Doc.GetImportFailedHandler(),
                                                     Q3DStudio::CString::fromQString(
-                                                        inFullPathToFile));
+                                                        inAbsoluteFilePath));
             qt3dsdm::SDOMElement *theElem =
                 CDOMSerializer::Read(*theFactory, theStream, &theImportHandler);
             if (theElem) {
-                outName = QFileInfo(inFullPathToFile).completeBaseName();
+                outName = QFileInfo(inAbsoluteFilePath).completeBaseName();
                 std::shared_ptr<IDOMReader> theReader = IDOMReader::CreateDOMReader(
                     *theElem, m_DataCore.GetStringTablePtr(), theFactory);
 
@@ -1005,29 +1005,28 @@ public:
     }
 
     virtual Qt3DSDMInstanceHandle
-    CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Enum inType, TInstanceHandle inParent,
+    CreateSceneGraphInstance(ComposerObjectTypes::Enum inType, TInstanceHandle inParent,
                              TSlideHandle inSlide, TInstanceHandle inTargetId = TInstanceHandle(),
-                             bool setTimeRange = true) override
+                             bool setTimeRange = true, bool selectCreatedInstance = true) override
     {
         Qt3DSDMInstanceHandle retval = IDocumentEditor::CreateSceneGraphInstance(
-            ComposerObjectTypes::Convert(inType), inParent, inSlide, m_DataCore, m_SlideSystem,
-            m_Bridge.GetObjectDefinitions(), m_AssetGraph, m_MetaData, inTargetId, setTimeRange);
+                    ComposerObjectTypes::Convert(inType), inParent, inSlide, m_DataCore,
+                    m_SlideSystem, m_Bridge.GetObjectDefinitions(), m_AssetGraph, m_MetaData,
+                    inTargetId, setTimeRange, selectCreatedInstance);
         if (setTimeRange)
             SetTimeRangeToParent(retval);
         return retval;
     }
 
-    TInstanceHandle CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Enum inType,
-                                                     TInstanceHandle inParent, TSlideHandle inSlide,
-                                                     DocumentEditorInsertType::Enum inInsertType,
-                                                     const CPt &inPosition,
-                                                     EPrimitiveType inPrimitiveType,
-                                                     long inStartTime,
-                                                     bool setTimeRange = true) override
+    TInstanceHandle CreateSceneGraphInstance(ComposerObjectTypes::Enum inType,
+                                             TInstanceHandle inParent, TSlideHandle inSlide,
+                                             DocumentEditorInsertType::Enum inInsertType,
+                                             const CPt &inPosition, EPrimitiveType inPrimitiveType,
+                                             long inStartTime, bool setTimeRange = true,
+                                             bool selectCreatedInstance = true) override
     {
         TInstanceHandle retval(CreateSceneGraphInstance(inType, inParent, inSlide,
                                                         TInstanceHandle(), setTimeRange));
-
         Q3DStudio::CString theName;
         if (inType == ComposerObjectTypes::Model) {
             const wchar_t *theSourcePath = m_Doc.GetBufferCache().GetPrimitiveName(inPrimitiveType);
@@ -1060,12 +1059,15 @@ public:
             SetStartTime(retval, inStartTime);
 
         if (m_DataCore.IsInstanceOrDerivedFrom(
-                retval, m_Bridge.GetObjectDefinitions().m_SlideOwner.m_Instance))
+                retval, m_Bridge.GetObjectDefinitions().m_SlideOwner.m_Instance)) {
             m_Bridge.GetOrCreateGraphRoot(retval);
+        }
+
         // if we did not set time range earlier, let's set it now to match parent
-        TInstanceHandle handle = FinalizeAddOrDrop(retval, inParent, inInsertType,
-                                                   inPosition, !setTimeRange, true, false);
+        TInstanceHandle handle = FinalizeAddOrDrop(retval, inParent, inInsertType, inPosition,
+                                                   !setTimeRange, selectCreatedInstance, false);
         SetName(retval, theName, true);
+
         return handle;
     }
 
@@ -2119,7 +2121,7 @@ public:
     {
         IObjectReferenceHelper *objRefHelper = m_Doc.GetDataModelObjectReferenceHelper();
         QString name = getMaterialContainerPath() + QStringLiteral(".")
-                + materialName.toQString().replace(QLatin1String("."), QLatin1String("\\."));
+                + materialName.toQString().replace(QLatin1Char('.'), QLatin1String("\\."));
         Qt3DSDMInstanceHandle material;
         CRelativePathTools::EPathType type;
         objRefHelper->ResolvePath(m_Doc.GetSceneInstance(),
@@ -2128,7 +2130,8 @@ public:
         return material;
     }
 
-    Qt3DSDMInstanceHandle getOrCreateMaterial(const Q3DStudio::CString &materialName) override
+    Qt3DSDMInstanceHandle getOrCreateMaterial(const Q3DStudio::CString &materialName,
+                                              bool selectCreatedInstance = true) override
     {
         auto material = getMaterial(materialName);
         if (!material.Valid()) {
@@ -2136,7 +2139,8 @@ public:
             material = CreateSceneGraphInstance(ComposerObjectTypes::Material, parent,
                                                 GetAssociatedSlide(parent),
                                                 DocumentEditorInsertType::LastChild,
-                                                CPt(), PRIMITIVETYPE_UNKNOWN, -1);
+                                                CPt(), PRIMITIVETYPE_UNKNOWN, -1, true,
+                                                selectCreatedInstance);
             SetName(material, materialName);
         }
         return material;
@@ -5238,22 +5242,25 @@ void IDocumentEditor::UnlinkAlwaysUnlinkedProperties(Qt3DSDMInstanceHandle inIns
         inSlideSystem.UnlinkProperty(inInstance, *theHandle);
 }
 
+// static
 Qt3DSDMInstanceHandle IDocumentEditor::CreateSceneGraphInstance(
     const wchar_t *inType, TInstanceHandle inParent, TSlideHandle inSlide,
     qt3dsdm::IDataCore &inDataCore, qt3dsdm::ISlideSystem &inSlideSystem,
     qt3dsdm::SComposerObjectDefinitions &inObjectDefs, Q3DStudio::CGraph &inAssetGraph,
-    qt3dsdm::IMetaData &inMetaData, TInstanceHandle inTargetId, bool setTimeRange)
+    qt3dsdm::IMetaData &inMetaData, TInstanceHandle inTargetId, bool setTimeRange,
+    bool selectCreatedInstance)
 {
     return CreateSceneGraphInstance(inMetaData.GetCanonicalInstanceForType(inType), inParent,
                                     inSlide, inDataCore, inSlideSystem, inObjectDefs, inAssetGraph,
-                                    inMetaData, inTargetId);
+                                    inMetaData, inTargetId, selectCreatedInstance);
 }
 
+// static
 Qt3DSDMInstanceHandle IDocumentEditor::CreateSceneGraphInstance(
     Qt3DSDMInstanceHandle inMaster, TInstanceHandle inParent, TSlideHandle inSlide,
     qt3dsdm::IDataCore &inDataCore, qt3dsdm::ISlideSystem &inSlideSystem,
     qt3dsdm::SComposerObjectDefinitions &inObjectDefs, Q3DStudio::CGraph &inAssetGraph,
-    qt3dsdm::IMetaData &inMetaData, TInstanceHandle inTargetId)
+    qt3dsdm::IMetaData &inMetaData, TInstanceHandle inTargetId, bool selectCreatedInstance)
 {
     Option<TCharStr> theTypeOpt = inMetaData.GetTypeForInstance(inMaster);
     if (theTypeOpt.hasValue() == false)

@@ -640,12 +640,12 @@ void CDoc::NotifyActiveSlideChanged(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide
 {
     using namespace qt3dsdm;
 
-    qt3dsdm::Qt3DSDMSlideHandle theLastActiveSlide = m_ActiveSlide;
+    Qt3DSDMSlideHandle theLastActiveSlide = m_ActiveSlide;
 
     // Record the last selected object in that slide
     ISlideSystem *theSlideSystem = GetStudioSystem()->GetSlideSystem();
     theSlideSystem->SetSlideSelectedInstance(theLastActiveSlide, GetSelectedInstance());
-    qt3dsdm::Qt3DSDMInstanceHandle theNextSelectedInstance = GetSelectedInstance();
+    Qt3DSDMInstanceHandle theNextSelectedInstance = GetSelectedInstance();
 
     // If we are forcing a refresh. and the incoming root is not valid, use the existing active time
     // context
@@ -693,10 +693,11 @@ void CDoc::NotifyActiveSlideChanged(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide
             // If nothing was selected, then select the component.
         }
 
-        if (theNextSelectedInstance.Valid() == false)
+        if (!theNextSelectedInstance.Valid())
             theNextSelectedInstance = GetDocumentReader().GetComponentForSlide(inNewActiveSlide);
 
-        SelectDataModelObject(theNextSelectedInstance);
+        if (theNextSelectedInstance != GetSelectedInstance())
+            SelectDataModelObject(theNextSelectedInstance);
     }
 }
 
