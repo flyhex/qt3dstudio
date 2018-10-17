@@ -46,6 +46,7 @@
 #include <QtGui/qsurfaceformat.h>
 #include <QtCore/qfileinfo.h>
 #include <QtCore/qurl.h>
+#include <QtCore/qsavefile.h>
 #include <QtGui/qopenglcontext.h>
 #include <QtWidgets/qaction.h>
 #include <QtCore/qstandardpaths.h>
@@ -1705,12 +1706,12 @@ bool CStudioApp::OnLoadDocument(const QString &inDocument, bool inShowStartupDia
 
 void CStudioApp::saveDataInputsToProjectFile()
 {
-    // open the uia file
     m_core->getProjectFile().ensureProjectFile();
-    QFile file(m_core->getProjectFile().getProjectFilePath());
-    file.open(QIODevice::ReadWrite);
+
     QDomDocument doc;
-    doc.setContent(&file);
+    QSaveFile file(m_core->getProjectFile().getProjectFilePath());
+    if (!StudioUtils::openDomDocumentSave(file, doc))
+        return;
 
     QDomElement assetsNode = doc.documentElement().firstChildElement(QStringLiteral("assets"));
 
@@ -1753,11 +1754,7 @@ void CStudioApp::saveDataInputsToProjectFile()
 #endif
             assetsNode.appendChild(diNode);
         }
-
-        // write the uia file
-        file.resize(0);
-        file.write(doc.toByteArray(4));
-        file.close();
+        StudioUtils::commitDomDocumentSave(file, doc);
     }
 }
 

@@ -32,12 +32,14 @@
 #include "StudioApp.h"
 #include "Core.h"
 #include "Doc.h"
+#include "StudioUtils.h"
 #include "IDocumentReader.h"
 #include <QtCore/qfile.h>
+#include <QtCore/qsavefile.h>
 #include <QtXml/qdom.h>
 #include <QtCore/qfileinfo.h>
 #include <QtCore/qdiriterator.h>
-#include <qxmlstream.h>
+#include <QtCore/qxmlstream.h>
 #include <QtCore/qlist.h>
 
 // This class provides utility static methods for working with presentation files (.uip). Old uip
@@ -78,13 +80,10 @@ QSize PresentationFile::readSize(const QString &uipPath)
 void PresentationFile::updatePresentationId(const QString &uipPath, const QString &oldId,
                                             const QString &newId)
 {
-    QFile file(uipPath);
-    if (!file.open(QFile::Text | QIODevice::ReadWrite)) {
-        qWarning() << file.errorString();
-        return;
-    }
     QDomDocument domDoc;
-    domDoc.setContent(&file);
+    QSaveFile file(uipPath);
+    if (!StudioUtils::openDomDocumentSave(file, domDoc))
+        return;
 
     QDomElement rootElem = domDoc.documentElement();
     QDomNodeList addNodes = rootElem.elementsByTagName(QStringLiteral("Add"));
@@ -104,10 +103,8 @@ void PresentationFile::updatePresentationId(const QString &uipPath, const QStrin
         }
     }
 
-    if (updated) {
-        file.resize(0);
-        file.write(domDoc.toByteArray(4));
-    }
+    if (updated)
+        StudioUtils::commitDomDocumentSave(file, domDoc);
 }
 
 /**
@@ -151,15 +148,9 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
                                       QString &outProjPathSrc,
                                       QHash<QString, QString> &outPresentationNodes)
 {
-    QFile file(uipTarget.filePath());
-    file.open(QFile::Text | QFile::ReadOnly);
-    if (!file.isOpen()) {
-        qWarning() << file.errorString();
-        return;
-    }
-
     QDomDocument domDoc;
-    domDoc.setContent(&file);
+    if (!StudioUtils::readFileToDomDocument(uipTarget.filePath(), domDoc))
+        return;
 
     QVector<SubPresentationRecord> subpresentations;
     QString uiaPath = findProjectFile(uipSrc.filePath());
@@ -306,16 +297,10 @@ bool PresentationFile::getDataInputBindings(const SubPresentationRecord &subpres
     QList<QString> ctrldPropList;
 
     QString spPath(g_StudioApp.getRenderableAbsolutePath(subpresentation.m_id));
-    QFile file(spPath);
-
-    file.open(QFile::Text | QFile::ReadOnly);
-    if (!file.isOpen()) {
-        qWarning() << file.errorString();
-        return false;
-    }
 
     QDomDocument domDoc;
-    domDoc.setContent(&file);
+    if (!StudioUtils::readFileToDomDocument(spPath, domDoc))
+        return false;
 
     // search <Graph>
     QDomElement graphElem = domDoc.documentElement().firstChild()

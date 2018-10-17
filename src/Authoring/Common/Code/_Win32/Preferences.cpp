@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "Preferences.h"
+#include "StudioUtils.h"
 #include <QtCore/qdir.h>
 #include <QtCore/qsavefile.h>
 
@@ -42,9 +43,8 @@ void CPreferences::save()
 {
     if (!m_PreferencesFile.isEmpty() && !m_domDoc.isNull()) {
         QSaveFile file(m_PreferencesFile);
-        file.open(QIODevice::WriteOnly);
-        if (file.write(m_domDoc.toByteArray(4)) != -1)
-            file.commit();
+        if (StudioUtils::openTextSave(file))
+            StudioUtils::commitDomDocumentSave(file, m_domDoc);
     }
 }
 

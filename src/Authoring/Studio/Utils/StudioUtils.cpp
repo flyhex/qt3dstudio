@@ -73,3 +73,48 @@ qreal StudioUtils::devicePixelRatio()
 
     return pixelRatio;
 }
+
+// Reads the contents of a text file into QDomDocument
+bool StudioUtils::readFileToDomDocument(const QString &filePath, QDomDocument &domDoc)
+{
+    QFile file(filePath);
+    if (!file.open(QFile::Text | QIODevice::ReadOnly)) {
+        qWarning() << __FUNCTION__ << file.errorString();
+        return false;
+    }
+
+    return domDoc.setContent(&file);
+}
+
+// Opens a text file for saving and reads its contents into QDomDocument
+bool StudioUtils::openDomDocumentSave(QSaveFile &file, QDomDocument &domDoc)
+{
+    if (!readFileToDomDocument(file.fileName(), domDoc))
+        return false;
+    if (!file.open(QFile::Text | QIODevice::WriteOnly)) {
+        qWarning() << __FUNCTION__ << file.errorString();
+        return false;
+    }
+    return true;
+}
+
+// Saves contents of a QDomDocument into a previously opened text file
+bool StudioUtils::commitDomDocumentSave(QSaveFile &file, const QDomDocument &domDoc)
+{
+    // Overwrites entire file
+    if (file.resize(0) && file.write(domDoc.toByteArray(4)) != -1 && file.commit())
+        return true;
+
+    qWarning() << __FUNCTION__ << file.errorString();
+    return false;
+}
+
+// Opens text file for saving without reading its contents
+bool StudioUtils::openTextSave(QSaveFile &file)
+{
+    if (!file.open(QFile::Text | QIODevice::WriteOnly)) {
+        qWarning() << __FUNCTION__ << file.errorString();
+        return false;
+    }
+    return true;
+}

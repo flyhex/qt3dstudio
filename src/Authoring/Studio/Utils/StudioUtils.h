@@ -30,18 +30,23 @@
 #ifndef INCLUDED_STUDIO_UTILS_H
 #define INCLUDED_STUDIO_UTILS_H
 
-#include <QtCore/qstring.h>
+#include <QtXml/qdom.h>
+#include <QtCore/qsavefile.h>
+#include <QtCore/qxmlstream.h>
 
 class StudioUtils {
 public:
     static QString resourceImagePath();
     static QString resourceImageUrl();
-
     static QString resourcePath();
-
     static QString qmlImportPath();
 
     static qreal devicePixelRatio();
+
+    static bool readFileToDomDocument(const QString &filePath, QDomDocument &domDoc);
+    static bool openDomDocumentSave(QSaveFile &file, QDomDocument &domDoc);
+    static bool commitDomDocumentSave(QSaveFile &file, const QDomDocument &domDoc);
+    static bool openTextSave(QSaveFile &file);
 };
 
 #endif // INCLUDED_STUDIO_UTILS_H

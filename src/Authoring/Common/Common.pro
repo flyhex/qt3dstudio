@@ -26,6 +26,7 @@ INCLUDEPATH += \
     ../Client/Code/Core/Utility \
     ../QT3DSDM \
     ../QT3DSDM/Systems \
+    ../Studio/Utils \
     ../../Runtime/Source/Qt3DSFoundation/Include \
     ../../Runtime/Source/Qt3DSFoundation/Include/foundation \
     ../../3rdparty/EASTL/UnknownVersion/include \
