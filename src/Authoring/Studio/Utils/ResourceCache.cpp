@@ -80,12 +80,12 @@ QPixmap CResourceCache::GetBitmap(const QString &inName)
         if (thePos != m_Images.end()) {
             theImage = thePos->second;
         } else {
-            const QString resPath = QString("%1%2").arg(resourceImagePath(), inName);
-            if (theImage.load(resPath)) {
+            const QString resPath = QStringLiteral("%1%2").arg(StudioUtils::resourceImagePath(),
+                                                               inName);
+            if (theImage.load(resPath))
                 m_Images[inName] = theImage;
-            } else {
+            else
                 qWarning() << Q_FUNC_INFO << "missing image at path:" << resPath;
-            }
         }
     }
     return theImage;

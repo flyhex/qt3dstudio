@@ -78,7 +78,7 @@ QVariant BasicObjectsModel::data(const QModelIndex &index, int role) const
 
     switch (role) {
     case NameRole: return m_ObjectItems.at(row).name();
-    case IconRole: return resourceImageUrl() +
+    case IconRole: return StudioUtils::resourceImageUrl() +
                 m_ObjectItems.at(row).icon();
     case ObjectTypeRole: return m_ObjectItems.at(row).objectType();
     case PrimitiveTypeRole: return m_ObjectItems.at(row).primitiveType();

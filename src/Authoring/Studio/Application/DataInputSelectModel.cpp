@@ -43,12 +43,14 @@ DataInputSelectModel::~DataInputSelectModel()
 
 QString DataInputSelectModel::getActiveIconPath() const
 {
-    return resourceImageUrl() + CStudioObjectTypes::GetNormalIconName(OBJTYPE_DATAINPUT);
+    return StudioUtils::resourceImageUrl()
+            + CStudioObjectTypes::GetNormalIconName(OBJTYPE_DATAINPUT);
 }
 
 QString DataInputSelectModel::getInactiveIconPath() const
 {
-    return resourceImageUrl() + CStudioObjectTypes::GetDisabledIconName(OBJTYPE_DATAINPUT);
+    return StudioUtils::resourceImageUrl()
+            + CStudioObjectTypes::GetDisabledIconName(OBJTYPE_DATAINPUT);
 }
 
 QVariant DataInputSelectModel::data(const QModelIndex &index, int role) const

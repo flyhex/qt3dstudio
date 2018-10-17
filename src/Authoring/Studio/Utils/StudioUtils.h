@@ -27,37 +27,21 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-// Prefix
-//==============================================================================
 #ifndef INCLUDED_STUDIO_UTILS_H
-#define INCLUDED_STUDIO_UTILS_H 1
+#define INCLUDED_STUDIO_UTILS_H
 
-#pragma once
+#include <QtCore/qstring.h>
 
-#include "Qt3DSString.h"
-#include <QPoint>
-#include <QSize>
+class StudioUtils {
+public:
+    static QString resourceImagePath();
+    static QString resourceImageUrl();
 
-//==============================================================================
-// Functions
-//==============================================================================
-Q3DStudio::CString FormatTimeString(long inTimeMS);
-bool IsNumericString(Q3DStudio::CString inString);
+    static QString resourcePath();
 
-long TimeToPos(long inTime, double inTimeRatio);
-long TimeToPos(double inTime, double inTimeRatio);
-long PosToTime(long inPos, double inTimeRatio);
+    static QString qmlImportPath();
 
-void ShowURLInBrowser(Q3DStudio::CString inURL);
-
-QString resourceImagePath();
-QString resourceImageUrl();
-
-QString resourcePath();
-
-QString qmlImportPath();
-
-qreal devicePixelRatio();
+    static qreal devicePixelRatio();
+};
 
 #endif // INCLUDED_STUDIO_UTILS_H

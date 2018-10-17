@@ -180,10 +180,10 @@ void DataInputSelectView::focusOutEvent(QFocusEvent *event)
 void DataInputSelectView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_resDir"_L1,
-                                      resourceImageUrl());
-    rootContext()->setContextProperty("_dataInputSelectView"_L1, this);
-    rootContext()->setContextProperty("_dataInputSelectModel"_L1, m_model);
-    engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Palettes/Inspector/DataInputChooser.qml"_L1));
+    rootContext()->setContextProperty(QStringLiteral("_resDir"),
+                                      StudioUtils::resourceImageUrl());
+    rootContext()->setContextProperty(QStringLiteral("_dataInputSelectView"), this);
+    rootContext()->setContextProperty(QStringLiteral("_dataInputSelectModel"), m_model);
+    engine()->addImportPath(StudioUtils::qmlImportPath());
+    setSource(QUrl(QStringLiteral("qrc:/Palettes/Inspector/DataInputChooser.qml")));
 }

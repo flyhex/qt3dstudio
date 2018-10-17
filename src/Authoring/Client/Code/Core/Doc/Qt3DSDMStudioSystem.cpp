@@ -148,7 +148,7 @@ void CStudioSystem::ResetDatabase()
     std::shared_ptr<IStringTable> theStringTable(theNewMetaData->GetStringTablePtr());
     std::shared_ptr<IDOMFactory> theFactory(IDOMFactory::CreateDOMFactory(theStringTable));
     Q3DStudio::CString theFullPath(Q3DStudio::CString::fromQString(
-                                       resourcePath()
+                                       StudioUtils::resourcePath()
                                        + QStringLiteral("/DataModelMetadata/en-us/MetaData.xml")));
     // Load the new meta data
     {

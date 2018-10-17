@@ -76,7 +76,7 @@ struct STranslationWidget : public SStudioWidgetImpl<StudioWidgetTypes::Translat
         inRenderContext.SetDepthTestEnabled(true);
         if (m_XAxis == nullptr) {
             TBase::SetupRender(inWidgetContext, inRenderContext);
-            float pixelRatio = float(devicePixelRatio());
+            float pixelRatio = float(StudioUtils::devicePixelRatio());
             QT3DSF32 axisWidth = pixelRatio;
             QT3DSF32 triWidth = 4 * CStudioPreferences::getSelectorLineWidth() * pixelRatio;
             QT3DSF32 axisStart = CStudioPreferences::getSelectorLineLength() / 3.0f * pixelRatio;

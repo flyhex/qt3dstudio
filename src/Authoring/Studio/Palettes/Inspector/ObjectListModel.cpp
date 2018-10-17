@@ -141,7 +141,7 @@ QVariant ObjectListModel::data(const QModelIndex &index,
     }
     case IconRole: {
         auto info = m_objRefHelper->GetInfo(handle);
-        return resourceImageUrl() + CStudioObjectTypes::GetNormalIconName(info.m_Type);
+        return StudioUtils::resourceImageUrl() + CStudioObjectTypes::GetNormalIconName(info.m_Type);
     }
     case TextColorRole: {
         auto bridge = m_core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();

@@ -212,7 +212,7 @@ CCmd *CBasicObjectDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandl
 
                 CFilePath theResFontFile;
 
-                QDir theResFontDir(resourcePath() + "/Font");
+                QDir theResFontDir(StudioUtils::resourcePath() + QStringLiteral("/Font"));
                 Q_FOREACH (QFileInfo fontFile, theResFontDir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot)) {
                     CString ext = CString::fromQString(fontFile.suffix());
                     if (CDialogs::IsFontFileExtension(ext)) {

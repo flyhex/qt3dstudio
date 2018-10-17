@@ -55,12 +55,12 @@ FileChooserView::FileChooserView(QWidget *parent)
 void FileChooserView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_resDir"_L1,
-                                      resourceImageUrl());
-    rootContext()->setContextProperty("_fileChooserView"_L1, this);
-    rootContext()->setContextProperty("_fileChooserModel"_L1, m_model);
-    engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Palettes/Inspector/FileChooser.qml"_L1));
+    rootContext()->setContextProperty(QStringLiteral("_resDir"),
+                                      StudioUtils::resourceImageUrl());
+    rootContext()->setContextProperty(QStringLiteral("_fileChooserView"), this);
+    rootContext()->setContextProperty(QStringLiteral("_fileChooserModel"), m_model);
+    engine()->addImportPath(StudioUtils::qmlImportPath());
+    setSource(QUrl(QStringLiteral("qrc:/Palettes/Inspector/FileChooser.qml")));
 }
 
 QSize FileChooserView::sizeHint() const

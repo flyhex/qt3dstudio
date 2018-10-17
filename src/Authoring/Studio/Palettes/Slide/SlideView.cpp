@@ -391,11 +391,11 @@ void SlideView::updateDataInputStatus()
 void SlideView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_parentView"_L1, this);
-    rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
+    rootContext()->setContextProperty(QStringLiteral("_parentView"), this);
+    rootContext()->setContextProperty(QStringLiteral("_resDir"), StudioUtils::resourceImageUrl());
 
-    engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Palettes/Slide/SlideView.qml"_L1));
+    engine()->addImportPath(StudioUtils::qmlImportPath());
+    setSource(QUrl(QStringLiteral("qrc:/Palettes/Slide/SlideView.qml")));
 
     const QVector<EDataType> acceptedTypes = { EDataType::DataTypeString };
     m_dataInputSelector = new DataInputSelectView(acceptedTypes, this);

@@ -56,12 +56,12 @@ ImageChooserView::ImageChooserView(QWidget *parent)
 void ImageChooserView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_resDir"_L1,
-                                      resourceImageUrl());
-    rootContext()->setContextProperty("_imageChooserView"_L1, this);
-    rootContext()->setContextProperty("_imageChooserModel"_L1, m_model);
-    engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Palettes/Inspector/ImageChooser.qml"_L1));
+    rootContext()->setContextProperty(QStringLiteral("_resDir"),
+                                      StudioUtils::resourceImageUrl());
+    rootContext()->setContextProperty(QStringLiteral("_imageChooserView"), this);
+    rootContext()->setContextProperty(QStringLiteral("_imageChooserModel"), m_model);
+    engine()->addImportPath(StudioUtils::qmlImportPath());
+    setSource(QUrl(QStringLiteral("qrc:/Palettes/Inspector/ImageChooser.qml")));
 }
 
 QSize ImageChooserView::sizeHint() const

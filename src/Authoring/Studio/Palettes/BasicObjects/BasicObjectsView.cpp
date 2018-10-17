@@ -77,10 +77,10 @@ void BasicObjectsView::mousePressEvent(QMouseEvent *event)
 void BasicObjectsView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_basicObjectsModel"_L1, m_ObjectsModel);
-    rootContext()->setContextProperty("_basicObjectsView"_L1, this);
-    rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
+    rootContext()->setContextProperty(QStringLiteral("_basicObjectsModel"), m_ObjectsModel);
+    rootContext()->setContextProperty(QStringLiteral("_basicObjectsView"), this);
+    rootContext()->setContextProperty(QStringLiteral("_resDir"), StudioUtils::resourceImageUrl());
 
-    engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Palettes/BasicObjects/BasicObjectsView.qml"_L1));
+    engine()->addImportPath(StudioUtils::qmlImportPath());
+    setSource(QUrl(QStringLiteral("qrc:/Palettes/BasicObjects/BasicObjectsView.qml")));
 }

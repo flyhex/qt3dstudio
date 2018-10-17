@@ -217,19 +217,20 @@ void InspectorControlView::mousePressEvent(QMouseEvent *event)
 void InspectorControlView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_parentView"_L1, this);
-    rootContext()->setContextProperty("_inspectorModel"_L1, m_inspectorControlModel);
-    rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
-    rootContext()->setContextProperty("_tabOrderHandler"_L1, tabOrderHandler());
-    rootContext()->setContextProperty("_mouseHelper"_L1, &m_mouseHelper);
+    rootContext()->setContextProperty(QStringLiteral("_parentView"), this);
+    rootContext()->setContextProperty(QStringLiteral("_inspectorModel"), m_inspectorControlModel);
+    rootContext()->setContextProperty(QStringLiteral("_resDir"), StudioUtils::resourceImageUrl());
+    rootContext()->setContextProperty(QStringLiteral("_tabOrderHandler"), tabOrderHandler());
+    rootContext()->setContextProperty(QStringLiteral("_mouseHelper"), &m_mouseHelper);
 
-    qmlRegisterUncreatableType<qt3dsdm::DataModelDataType>("Qt3DStudio", 1, 0, "DataModelDataType",
-                                                         "DataModelDataType is an enum container");
+    qmlRegisterUncreatableType<qt3dsdm::DataModelDataType>(
+                "Qt3DStudio", 1, 0, "DataModelDataType",
+                QStringLiteral("DataModelDataType is an enum container"));
     qmlRegisterUncreatableType<qt3dsdm::AdditionalMetaDataType>(
                 "Qt3DStudio", 1, 0, "AdditionalMetaDataType",
-                "AdditionalMetaDataType is an enum container");
-    engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Palettes/Inspector/InspectorControlView.qml"_L1));
+                QStringLiteral("AdditionalMetaDataType is an enum container"));
+    engine()->addImportPath(StudioUtils::qmlImportPath());
+    setSource(QUrl(QStringLiteral("qrc:/Palettes/Inspector/InspectorControlView.qml")));
 }
 
 QAbstractItemModel *InspectorControlView::inspectorControlModel() const

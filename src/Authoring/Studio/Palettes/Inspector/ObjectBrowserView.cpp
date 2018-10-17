@@ -143,10 +143,11 @@ void ObjectBrowserView::focusOutEvent(QFocusEvent *event)
 void ObjectBrowserView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_objectBrowserView"_L1, this);
-    rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
-    qmlRegisterUncreatableType<ObjectBrowserView>("Qt3DStudio", 1, 0, "ObjectBrowserView"
-                                                  , tr("Creation of ObjectBrowserView not allowed from QML"));
-    engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Palettes/Inspector/ObjectBrowser.qml"_L1));
+    rootContext()->setContextProperty(QStringLiteral("_objectBrowserView"), this);
+    rootContext()->setContextProperty(QStringLiteral("_resDir"), StudioUtils::resourceImageUrl());
+    qmlRegisterUncreatableType<ObjectBrowserView>(
+                "Qt3DStudio", 1, 0, "ObjectBrowserView",
+                QStringLiteral("Creation of ObjectBrowserView not allowed from QML"));
+    engine()->addImportPath(StudioUtils::qmlImportPath());
+    setSource(QUrl(QStringLiteral("qrc:/Palettes/Inspector/ObjectBrowser.qml")));
 }

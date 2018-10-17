@@ -303,7 +303,8 @@ struct SRendererImpl : public IStudioRenderer,
         try {
             m_RenderContext = std::make_shared<CWGLRenderContext>(inWindow);
 
-            Q3DStudio::CString theResourcePath = Q3DStudio::CString::fromQString(resourcePath());
+            Q3DStudio::CString theResourcePath = Q3DStudio::CString::fromQString(
+                        StudioUtils::resourcePath());
             NVScopedRefCounted<qt3ds::render::IQt3DSRenderContextCore> theCore =
                 qt3ds::render::IQt3DSRenderContextCore::Create(
                     m_RenderContext->GetRenderContext().GetFoundation(),
@@ -353,7 +354,7 @@ struct SRendererImpl : public IStudioRenderer,
 
         m_Rect = inRect;
         if (IsInitialized()) {
-            m_pixelRatio = devicePixelRatio();
+            m_pixelRatio = StudioUtils::devicePixelRatio();
             m_RenderContext->BeginRender();
             NVRenderContext &theContext = m_RenderContext->GetRenderContext();
             theContext.SetViewport(qt3ds::render::NVRenderRect(0, 0, inRect.width(),
@@ -675,8 +676,9 @@ struct SRendererImpl : public IStudioRenderer,
             QString projectPath = g_StudioApp.GetCore()->getProjectFile().getProjectPath();
             if (!projectPath.isEmpty()) {
                 // Add the installed font folders from the res dir.
-                Q3DStudio::CString thePath(Q3DStudio::CString::fromQString(
-                                               resourcePath() + QStringLiteral("/Font")));
+                Q3DStudio::CString thePath(
+                            Q3DStudio::CString::fromQString(
+                                StudioUtils::resourcePath() + QStringLiteral("/Font")));
                 m_Context->GetTextRenderer()->AddSystemFontDirectory(
                     m_Context->GetStringTable().RegisterStr(thePath.c_str()));
                 m_Context->GetTextRenderer()->AddProjectFontDirectory(

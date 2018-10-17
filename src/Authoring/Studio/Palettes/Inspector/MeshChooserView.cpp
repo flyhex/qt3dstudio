@@ -55,13 +55,13 @@ MeshChooserView::MeshChooserView(QWidget *parent)
 void MeshChooserView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_resDir"_L1,
-                                      resourceImageUrl());
-    rootContext()->setContextProperty("_meshChooserView"_L1, this);
-    rootContext()->setContextProperty("_meshChooserModel"_L1, m_model);
+    rootContext()->setContextProperty(QStringLiteral("_resDir"),
+                                      StudioUtils::resourceImageUrl());
+    rootContext()->setContextProperty(QStringLiteral("_meshChooserView"), this);
+    rootContext()->setContextProperty(QStringLiteral("_meshChooserModel"), m_model);
 
-    engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Palettes/Inspector/MeshChooser.qml"_L1));
+    engine()->addImportPath(StudioUtils::qmlImportPath());
+    setSource(QUrl(QStringLiteral("qrc:/Palettes/Inspector/MeshChooser.qml")));
 }
 
 QSize MeshChooserView::sizeHint() const

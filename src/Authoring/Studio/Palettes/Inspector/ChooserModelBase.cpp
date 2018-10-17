@@ -83,10 +83,12 @@ QVariant ChooserModelBase::data(const QModelIndex &index, int role) const
 
         switch (role) {
         case Qt::DecorationRole:
-            if (!item.iconSource.isEmpty())
-                return resourceImageUrl() + item.iconSource;
-            else
-                return resourceImageUrl() + CStudioObjectTypes::GetNormalIconName(item.iconType);
+            if (!item.iconSource.isEmpty()) {
+                return StudioUtils::resourceImageUrl() + item.iconSource;
+            } else {
+                return StudioUtils::resourceImageUrl()
+                        + CStudioObjectTypes::GetNormalIconName(item.iconType);
+            }
 
         case IsExpandableRole:
             return false;
@@ -112,7 +114,7 @@ QVariant ChooserModelBase::data(const QModelIndex &index, int role) const
         switch (role) {
         case Qt::DecorationRole: {
             QString path = item.index.data(QFileSystemModel::FilePathRole).toString();
-            return resourceImageUrl() + getIconName(path);
+            return StudioUtils::resourceImageUrl() + getIconName(path);
         }
 
         case IsExpandableRole: {

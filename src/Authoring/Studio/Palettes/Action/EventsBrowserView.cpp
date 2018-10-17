@@ -96,10 +96,10 @@ void EventsBrowserView::focusOutEvent(QFocusEvent *event)
 void EventsBrowserView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_eventsBrowserView"_L1, this);
-    rootContext()->setContextProperty("_resDir"_L1,
-                                      resourceImageUrl());
-    engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Palettes/Action/EventsBrowser.qml"_L1));
+    rootContext()->setContextProperty(QStringLiteral("_eventsBrowserView"), this);
+    rootContext()->setContextProperty(QStringLiteral("_resDir"),
+                                      StudioUtils::resourceImageUrl());
+    engine()->addImportPath(StudioUtils::qmlImportPath());
+    setSource(QUrl(QStringLiteral("qrc:/Palettes/Action/EventsBrowser.qml")));
 }
 

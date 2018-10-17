@@ -103,11 +103,11 @@ QSize ProjectView::sizeHint() const
 void ProjectView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
-    rootContext()->setContextProperty("_parentView"_L1, this);
+    rootContext()->setContextProperty(QStringLiteral("_resDir"), StudioUtils::resourceImageUrl());
+    rootContext()->setContextProperty(QStringLiteral("_parentView"), this);
 
-    engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Palettes/Project/ProjectView.qml"_L1));
+    engine()->addImportPath(StudioUtils::qmlImportPath());
+    setSource(QUrl(QStringLiteral("qrc:/Palettes/Project/ProjectView.qml")));
 }
 
 void ProjectView::effectAction(int row)

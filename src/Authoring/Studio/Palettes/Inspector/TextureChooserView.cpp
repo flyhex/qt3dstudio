@@ -56,11 +56,11 @@ TextureChooserView::TextureChooserView(QWidget *parent)
 void TextureChooserView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
-    rootContext()->setContextProperty("_textureChooserView"_L1, this);
-    rootContext()->setContextProperty("_textureChooserModel"_L1, m_model);
-    engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Palettes/Inspector/TextureChooser.qml"_L1));
+    rootContext()->setContextProperty(QStringLiteral("_resDir"), StudioUtils::resourceImageUrl());
+    rootContext()->setContextProperty(QStringLiteral("_textureChooserView"), this);
+    rootContext()->setContextProperty(QStringLiteral("_textureChooserModel"), m_model);
+    engine()->addImportPath(StudioUtils::qmlImportPath());
+    setSource(QUrl(QStringLiteral("qrc:/Palettes/Inspector/TextureChooser.qml")));
 }
 
 QSize TextureChooserView::sizeHint() const

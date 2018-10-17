@@ -85,7 +85,7 @@ QVariant ProjectFileSystemModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case Qt::DecorationRole: {
         QString path = item.index.data(QFileSystemModel::FilePathRole).toString();
-        return resourceImageUrl() + getIconName(path);
+        return StudioUtils::resourceImageUrl() + getIconName(path);
     }
 
     case IsExpandableRole: {
