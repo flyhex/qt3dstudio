@@ -1347,10 +1347,15 @@ void CDialogs::showWidgetBrowser(QWidget *screenWidget, QWidget *browser, const 
     browser->move(newPos);
 
     // Show asynchronously to avoid flashing blank window on first show
-    QTimer::singleShot(0, screenWidget, [browser] {
+    QTimer::singleShot(0, screenWidget, [browser, popupSize, screenWidget] {
         browser->show();
         browser->activateWindow();
         browser->setFocus();
+        // Make sure we are the desired size after show, as showing on a different screen
+        // can cause incorrectly sized popup.
+        QTimer::singleShot(0, screenWidget, [browser, popupSize] {
+            browser->resize(popupSize);
+        });
     });
 }
 
