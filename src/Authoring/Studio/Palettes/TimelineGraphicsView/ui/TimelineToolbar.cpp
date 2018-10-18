@@ -245,7 +245,12 @@ void TimelineToolbar::onZoomOutButtonClicked()
 
 void TimelineToolbar::onDiButtonClicked()
 {
-    showDataInputChooser(mapToGlobal(pos()));
+    QWidget *diButton = widgetForAction(m_actionDataInput);
+    if (diButton) {
+        QPoint chooserPos = diButton->pos() + QPoint(diButton->size().width(),
+                                                     diButton->size().height());
+        showDataInputChooser(mapToGlobal(chooserPos));
+    }
 }
 
 // Update datainput button state according to this timecontext control state.
@@ -308,7 +313,8 @@ void TimelineToolbar::showDataInputChooser(const QPoint &point)
 
     m_dataInputSelector->setData(dataInputList, currCtr);
 
-    CDialogs::showWidgetBrowser(this, m_dataInputSelector, point);
+    CDialogs::showWidgetBrowser(this, m_dataInputSelector, point,
+                                CDialogs::WidgetBrowserAlign::ToolButton);
 }
 
 void TimelineToolbar::onDataInputChange(int handle, int instance, const QString &dataInputName)

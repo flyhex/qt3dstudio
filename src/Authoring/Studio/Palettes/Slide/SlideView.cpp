@@ -123,7 +123,8 @@ void SlideView::showControllerDialog(const QPoint &point)
             dataInputList.append(QPair<QString, int>(it->name, it->type));
     }
     m_dataInputSelector->setData(dataInputList, currCtr);
-    CDialogs::showWidgetBrowser(this, m_dataInputSelector, point);
+    CDialogs::showWidgetBrowser(this, m_dataInputSelector, point,
+                                CDialogs::WidgetBrowserAlign::ToolButton);
 
     return;
 }

@@ -578,6 +578,7 @@ QObject *InspectorControlView::showMaterialReference(int handle, int instance, c
     const int popupHeight = qMin(numMats, 10) * CStudioPreferences::controlBaseHeight();
 
     CDialogs::showWidgetBrowser(this, m_matRefListWidget, point,
+                                CDialogs::WidgetBrowserAlign::ComboBox,
                                 QSize(CStudioPreferences::valueWidth(), popupHeight));
 
     connect(m_matRefListWidget, &QListWidget::itemClicked, this, [=](QListWidgetItem *item) {
@@ -626,7 +627,8 @@ void InspectorControlView::showDataInputChooser(int handle, int instance, const 
             setData(dataInputList,
                     m_inspectorControlModel->currentControllerValue(instance, handle),
                     handle, instance);
-    CDialogs::showWidgetBrowser(this, m_dataInputChooserView, point);
+    CDialogs::showWidgetBrowser(this, m_dataInputChooserView, point,
+                                CDialogs::WidgetBrowserAlign::ToolButton);
 }
 
 QColor InspectorControlView::showColorDialog(const QColor &color)

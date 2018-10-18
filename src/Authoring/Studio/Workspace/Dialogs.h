@@ -173,7 +173,14 @@ public:
                                       const Q3DStudio::CString &inMinVersion);
     static void DisplayGLVersionWarning(const Q3DStudio::CString &inGLVersion,
                                         const Q3DStudio::CString &inRecommendedVersion);
+
+    enum class WidgetBrowserAlign {
+        ComboBox,
+        ToolButton,
+        Center
+    };
     static void showWidgetBrowser(QWidget *screenWidget, QWidget *browser, const QPoint &point,
+                                  WidgetBrowserAlign align = WidgetBrowserAlign::ComboBox,
                                   QSize customSize = {});
 
 Q_SIGNALS:

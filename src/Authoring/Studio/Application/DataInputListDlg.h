@@ -75,6 +75,7 @@ protected:
     // work as controller for all of listed datatypes.
     void setUniqueAcceptedDITypes(
             const QVector<QPair<qt3dsdm::DataModelDataType::Value, bool>> &boundTypes);
+
 private Q_SLOTS:
     void on_buttonBox_accepted();
     void on_buttonBox_rejected();

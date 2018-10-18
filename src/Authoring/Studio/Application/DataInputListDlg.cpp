@@ -502,7 +502,8 @@ void CDataInputListDlg::onReplaceSelected()
 
     setUniqueAcceptedDITypes(selBoundTypes);
 
-    CDialogs::showWidgetBrowser(this, m_dataInputChooserView, mapToGlobal(pos()));
+    CDialogs::showWidgetBrowser(this, m_dataInputChooserView, geometry().center(),
+                                CDialogs::WidgetBrowserAlign::Center);
 }
 
 void CDataInputListDlg::onReplaceAll()
@@ -529,7 +530,9 @@ void CDataInputListDlg::onReplaceAll()
 
     setUniqueAcceptedDITypes(
             m_dataInputs[m_currentDataInputName]->boundTypes);
-    CDialogs::showWidgetBrowser(this, m_dataInputChooserView, mapToGlobal(pos()));
+
+    CDialogs::showWidgetBrowser(this, m_dataInputChooserView, geometry().center(),
+                                CDialogs::WidgetBrowserAlign::Center);
 }
 
 void CDataInputListDlg::onElementSelectionChanged()
