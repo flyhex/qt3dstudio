@@ -116,6 +116,14 @@ void MeshChooserView::focusOutEvent(QFocusEvent *event)
     QTimer::singleShot(0, this, &QQuickWidget::close);
 }
 
+void MeshChooserView::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape)
+        QTimer::singleShot(0, this, &MeshChooserView::close);
+
+    QQuickWidget::keyPressEvent(event);
+}
+
 void MeshChooserView::showEvent(QShowEvent *event)
 {
     const auto doc = g_StudioApp.GetCore()->GetDoc();

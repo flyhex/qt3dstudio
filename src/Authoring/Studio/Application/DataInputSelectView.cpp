@@ -137,6 +137,14 @@ void DataInputSelectView::showEvent(QShowEvent *event)
     QQuickWidget::showEvent(event);
 }
 
+void DataInputSelectView::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape)
+        QTimer::singleShot(0, this, &DataInputSelectView::close);
+
+    QQuickWidget::keyPressEvent(event);
+}
+
 void DataInputSelectView::setSelection(int index)
 {
     if (m_selection != index) {

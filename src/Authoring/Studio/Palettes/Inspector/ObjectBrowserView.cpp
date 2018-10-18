@@ -140,6 +140,14 @@ void ObjectBrowserView::focusOutEvent(QFocusEvent *event)
     QTimer::singleShot(0, this, &QQuickWidget::close);
 }
 
+void ObjectBrowserView::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape)
+        QTimer::singleShot(0, this, &ObjectBrowserView::close);
+
+    QQuickWidget::keyPressEvent(event);
+}
+
 void ObjectBrowserView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());

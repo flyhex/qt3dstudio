@@ -94,6 +94,14 @@ void TextureChooserView::focusOutEvent(QFocusEvent *event)
     QTimer::singleShot(0, this, &TextureChooserView::close);
 }
 
+void TextureChooserView::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape)
+        QTimer::singleShot(0, this, &TextureChooserView::close);
+
+    QQuickWidget::keyPressEvent(event);
+}
+
 void TextureChooserView::showEvent(QShowEvent *event)
 {
     const auto doc = g_StudioApp.GetCore()->GetDoc();

@@ -85,6 +85,7 @@ Q_SIGNALS:
 protected:
     void focusInEvent(QFocusEvent *event) override;
     void focusOutEvent(QFocusEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 
 Q_SIGNALS:
     void focusChanged();

@@ -94,6 +94,14 @@ void FileChooserView::focusOutEvent(QFocusEvent *event)
     QTimer::singleShot(0, this, &FileChooserView::close);
 }
 
+void FileChooserView::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape)
+        QTimer::singleShot(0, this, &FileChooserView::close);
+
+    QQuickWidget::keyPressEvent(event);
+}
+
 void FileChooserView::showEvent(QShowEvent *event)
 {
     const auto doc = g_StudioApp.GetCore()->GetDoc();

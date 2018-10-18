@@ -96,7 +96,7 @@ bool ImageChooserView::isFocused() const
 
 void ImageChooserView::focusInEvent(QFocusEvent *event)
 {
-    QQuickWidget::focusOutEvent(event);
+    QQuickWidget::focusInEvent(event);
     emit focusChanged();
 }
 
@@ -105,6 +105,14 @@ void ImageChooserView::focusOutEvent(QFocusEvent *event)
     QQuickWidget::focusOutEvent(event);
     emit focusChanged();
     QTimer::singleShot(0, this, &QQuickWidget::close);
+}
+
+void ImageChooserView::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape)
+        QTimer::singleShot(0, this, &ImageChooserView::close);
+
+    QQuickWidget::keyPressEvent(event);
 }
 
 void ImageChooserView::showEvent(QShowEvent *event)

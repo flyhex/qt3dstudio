@@ -93,6 +93,14 @@ void EventsBrowserView::focusOutEvent(QFocusEvent *event)
     QTimer::singleShot(0, this, &EventsBrowserView::close);
 }
 
+void EventsBrowserView::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape)
+        QTimer::singleShot(0, this, &EventsBrowserView::close);
+
+    QQuickWidget::keyPressEvent(event);
+}
+
 void EventsBrowserView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());

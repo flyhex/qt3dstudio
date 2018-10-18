@@ -55,6 +55,7 @@ Q_SIGNALS:
 
 protected:
     void focusOutEvent(QFocusEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 
 private:
     void showEvent(QShowEvent *event) override;
