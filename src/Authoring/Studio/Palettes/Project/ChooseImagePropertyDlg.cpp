@@ -55,6 +55,8 @@ ChooseImagePropertyDlg::ChooseImagePropertyDlg(qt3dsdm::Qt3DSDMInstanceHandle in
         m_ui->cbDetach->setVisible(false);
 
     fillList();
+
+    window()->setFixedSize(size());
 }
 
 ChooseImagePropertyDlg::~ChooseImagePropertyDlg()

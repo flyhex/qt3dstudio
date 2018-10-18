@@ -77,8 +77,8 @@ protected:
             const QVector<QPair<qt3dsdm::DataModelDataType::Value, bool>> &boundTypes);
 
 private Q_SLOTS:
-    void on_buttonBox_accepted();
-    void on_buttonBox_rejected();
+    void accept() override;
+    void reject() override;
     void onAddDataInput();
     void onRemoveDataInput();
     void onEditDataInput();

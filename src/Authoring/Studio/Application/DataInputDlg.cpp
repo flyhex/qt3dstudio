@@ -35,7 +35,7 @@
 
 CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemModel *data,
                              QWidget *parent, const QVector<EDataType> acceptedTypes)
-    : QDialog(parent, Qt::MSWindowsFixedSizeDialogHint)
+    : QDialog(parent)
     , m_ui(new Ui::DataInputDlg)
     , m_data(data)
     , m_dataInput(*datainput)
@@ -73,6 +73,8 @@ CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemMode
     }
 
     initDialog();
+
+    window()->setFixedSize(size());
 
     connect(m_ui->comboBoxTypeList,
             static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
@@ -128,7 +130,7 @@ void CDataInputDlg::initDialog()
     updateVisibility(m_dataInput->type);
 }
 
-void CDataInputDlg::on_buttonBox_accepted()
+void CDataInputDlg::accept()
 {
     m_dataInput->name = m_name;
     m_dataInput->type = m_type;
@@ -142,11 +144,6 @@ void CDataInputDlg::on_buttonBox_accepted()
     }
 #endif
     QDialog::accept();
-}
-
-void CDataInputDlg::on_buttonBox_rejected()
-{
-    QDialog::reject();
 }
 
 void CDataInputDlg::onTypeChanged(int type)

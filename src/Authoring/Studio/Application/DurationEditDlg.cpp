@@ -83,6 +83,8 @@ CDurationEditDlg::CDurationEditDlg(QWidget *pParent)
             this, &CDurationEditDlg::onEndTimeChanged);
     connect(m_ui->lineEditEndMilliseconds, &QLineEdit::textEdited,
             this, &CDurationEditDlg::onEndTimeChanged);
+
+    window()->setFixedSize(size());
 }
 
 CDurationEditDlg::~CDurationEditDlg()

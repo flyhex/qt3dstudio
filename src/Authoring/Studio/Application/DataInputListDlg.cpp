@@ -50,7 +50,7 @@ const int columnCount = 3;
 CDataInputListDlg::CDataInputListDlg(QMap<QString, CDataInputDialogItem *> *datainputs,
                                      bool goToAdd, QWidget *parent, EDataType defaultType,
                                      const QVector<EDataType> &acceptedTypes)
-    : QDialog(parent, Qt::MSWindowsFixedSizeDialogHint)
+    : QDialog(parent)
     , m_ui(new Ui::DataInputListDlg)
     , m_actualDataInputs(datainputs)
     , m_goToAdd(goToAdd)
@@ -91,6 +91,8 @@ CDataInputListDlg::CDataInputListDlg(QMap<QString, CDataInputDialogItem *> *data
     buttons[2]->setToolTip(tr("Remove Data Input"));
 
     initDialog();
+
+    window()->setFixedSize(size());
 }
 
 CDataInputListDlg::~CDataInputListDlg()
@@ -277,7 +279,7 @@ void CDataInputListDlg::keyPressEvent(QKeyEvent *event)
     }
 }
 
-void CDataInputListDlg::on_buttonBox_accepted()
+void CDataInputListDlg::accept()
 {
     if (g_StudioApp.GetCore()->GetDoc()->IsTransactionOpened())
         g_StudioApp.GetCore()->GetDoc()->CloseTransaction();
@@ -291,7 +293,7 @@ void CDataInputListDlg::on_buttonBox_accepted()
     QDialog::accept();
 }
 
-void CDataInputListDlg::on_buttonBox_rejected()
+void CDataInputListDlg::reject()
 {
     // If the user cancels, also roll back any possible changes to data input bindings.
     if (g_StudioApp.GetCore()->GetDoc()->IsTransactionOpened())
@@ -320,7 +322,7 @@ void CDataInputListDlg::onAddDataInput()
     // If we went straight to adding a new datainput, close
     // dialog automatically
     if (m_goToAdd)
-        on_buttonBox_accepted();
+        accept();
 }
 
 void CDataInputListDlg::onRemoveDataInput()

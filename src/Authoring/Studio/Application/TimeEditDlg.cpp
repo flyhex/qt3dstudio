@@ -61,6 +61,8 @@ CTimeEditDlg::CTimeEditDlg(QWidget *pParent)
     connect(m_ui->lineEditMinutes, &QLineEdit::textEdited, this, &CTimeEditDlg::onTimeChanged);
     connect(m_ui->lineEditSeconds, &QLineEdit::textEdited, this, &CTimeEditDlg::onTimeChanged);
     connect(m_ui->lineEditMilliseconds, &QLineEdit::textEdited, this, &CTimeEditDlg::onTimeChanged);
+
+    window()->setFixedSize(size());
 }
 
 CTimeEditDlg::~CTimeEditDlg()
