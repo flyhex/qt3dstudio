@@ -42,6 +42,7 @@
 #include "Views.h"
 #include "MasterP.h"
 #include "TimeEditDlg.h"
+#include "DurationEditDlg.h"
 #include "StudioPreferences.h"
 #include "ResetKeyframeValuesDlg.h"
 #include "GLVersionDlg.h"
@@ -1295,6 +1296,25 @@ void CDialogs::DisplayGLVersionWarning(const Q3DStudio::CString &inGLVersion,
                                        const Q3DStudio::CString &inRecommendedVersion)
 {
     DisplayGLVersionDialog(inGLVersion, inRecommendedVersion, false);
+}
+
+void CDialogs::asyncDisplayTimeEditDialog(long time, IDoc *doc, long objectAssociation,
+                                          ITimelineKeyframesManager *keyframesManager) const
+{
+    QTimer::singleShot(0, [time, doc, objectAssociation, keyframesManager]() {
+        CTimeEditDlg timeEditDlg;
+        timeEditDlg.setKeyframesManager(keyframesManager);
+        timeEditDlg.showDialog(time, doc, objectAssociation);
+    });
+}
+
+void CDialogs::asyncDisplayDurationEditDialog(long startTime, long endTime, IDoc *doc,
+                                              ITimeChangeCallback *callback) const
+{
+    QTimer::singleShot(0, [startTime, endTime, doc, callback]() {
+        CDurationEditDlg durationEditDlg;
+        durationEditDlg.showDialog(startTime, endTime, doc, callback);
+    });
 }
 
 void CDialogs::showWidgetBrowser(QWidget *screenWidget, QWidget *browser, const QPoint &point,

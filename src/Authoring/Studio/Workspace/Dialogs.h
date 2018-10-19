@@ -55,6 +55,8 @@ class CStudioApp;
 class CControl;
 class CDialogControl;
 class CProgressView;
+class ITimelineKeyframesManager;
+class ITimeChangeCallback;
 
 class CDialogs : public QObject
 {
@@ -173,6 +175,11 @@ public:
                                       const Q3DStudio::CString &inMinVersion);
     static void DisplayGLVersionWarning(const Q3DStudio::CString &inGLVersion,
                                         const Q3DStudio::CString &inRecommendedVersion);
+
+    void asyncDisplayTimeEditDialog(long time, IDoc *doc, long objectAssociation,
+                                    ITimelineKeyframesManager *keyframesManager = nullptr) const;
+    void asyncDisplayDurationEditDialog(long startTime, long endTime, IDoc *doc,
+                                        ITimeChangeCallback *callback) const;
 
     enum class WidgetBrowserAlign {
         ComboBox,

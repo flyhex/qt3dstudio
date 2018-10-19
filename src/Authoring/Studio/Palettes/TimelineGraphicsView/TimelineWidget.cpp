@@ -243,8 +243,8 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
 
     connect(m_toolbar, &TimelineToolbar::gotoTimeTriggered, this, [this]() {
         CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-        CTimeEditDlg timeEditDlg;
-        timeEditDlg.showDialog(doc->GetCurrentViewTime(), doc, PLAYHEAD);
+        g_StudioApp.GetDialogs()->asyncDisplayTimeEditDialog(doc->GetCurrentViewTime(),
+                                                             doc, PLAYHEAD);
     });
 
     connect(m_toolbar, &TimelineToolbar::firstFrameTriggered, this, [this]() {

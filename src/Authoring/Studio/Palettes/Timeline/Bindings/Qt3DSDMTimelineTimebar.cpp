@@ -44,6 +44,8 @@
 #include "ITimelineItemBinding.h"
 #include "RowTree.h"
 #include "RowTimeline.h"
+#include "StudioApp.h"
+#include "Dialogs.h"
 
 Qt3DSDMTimelineTimebar::Qt3DSDMTimelineTimebar(
     CTimelineTranslationManager *inTimelineTranslationManager,
@@ -216,9 +218,7 @@ void Qt3DSDMTimelineTimebar::SetTimebarComment(const Q3DStudio::CString &inComme
 
 void Qt3DSDMTimelineTimebar::SetTimebarTime(ITimeChangeCallback *inCallback /*= nullptr*/)
 {
-    long theStartTime = GetStartTime();
-    long theEndTime = GetEndTime();
-    CDurationEditDlg theDurationEditDlg;
-    theDurationEditDlg.showDialog(theStartTime, theEndTime, m_TimelineTranslationManager->GetDoc(),
-                                  inCallback);
+    g_StudioApp.GetDialogs()->asyncDisplayDurationEditDialog(GetStartTime(), GetEndTime(),
+                                                             m_TimelineTranslationManager->GetDoc(),
+                                                             inCallback);
 }
