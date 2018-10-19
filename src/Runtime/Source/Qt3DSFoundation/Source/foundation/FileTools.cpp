@@ -268,19 +268,11 @@ void CFileTools::NormalizePath(eastl::string &ioPath)
 
 QString CFileTools::NormalizePathForQtUsage(const QString &path)
 {
-    // The path here can be a file path or a qrc URL string. In the future
-    // we should pass around QUrl throughout this code path.
-    QString filePath = path;
+    // path can be a file path or a qrc URL string.
 
-    // Replace all occurrences of '\' with '/' as these windows directory
-    // separators can be hardcoded into the UIP files. Qt uses unix separator
-    // as universal sep. I'm not using QDir::fromNativeSeparators as this can
-    // be a noop on unix.
-    filePath.replace('\\', '/');
+    QString filePath = QDir::cleanPath(path);
 
-    filePath = QDir::cleanPath(filePath);
-    QUrl fileUrl = QUrl(filePath);
-    if (fileUrl.scheme() == QStringLiteral("qrc"))
+    if (filePath.startsWith(QLatin1String("qrc:/")))
         return filePath.mid(3);
     else
         return filePath;

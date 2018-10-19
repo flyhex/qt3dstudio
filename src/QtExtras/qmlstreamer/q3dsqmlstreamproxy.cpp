@@ -229,7 +229,6 @@ void Q3DSQmlStreamProxy::setSettings(Q3DSSubPresentationSettings *settings)
 
 void Q3DSQmlStreamProxy::setPath(const QString& path)
 {
-    QFileInfo fi(path);
-    QString modPath = fi.path(); // Strip filename out
+    QString modPath = QFileInfo(path).path(); // path() strips filename out
     m_path = pathToUrl(modPath);
 }

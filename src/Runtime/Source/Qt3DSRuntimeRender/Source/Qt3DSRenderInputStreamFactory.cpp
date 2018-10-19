@@ -112,13 +112,16 @@ struct SFactory : public IInputStreamFactory
     Mutex m_Mutex;
     typedef Mutex::ScopedLock TScopedLock;
 
+    const QString QT3DSTUDIO_TAG = QStringLiteral("qt3dstudio");
+
     SFactory(NVFoundationBase &inFoundation)
         : m_Foundation(inFoundation)
         , mRefCount(0)
         , m_Mutex(inFoundation.getAllocator())
     {
         // Add the top-level qrc directory
-        QDir::addSearchPath("qt3dstudio", ":/");
+        if (!QDir::searchPaths(QT3DSTUDIO_TAG).contains(QLatin1String(":/")))
+            QDir::addSearchPath(QT3DSTUDIO_TAG, QStringLiteral(":/"));
     }
 
     QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE_OVERRIDE(m_Foundation.getAllocator())
@@ -127,15 +130,17 @@ struct SFactory : public IInputStreamFactory
     {
         qCWarning(WARNING, PERF_INFO, "Case-insensitive matching with file: %s",
             file.toLatin1().constData());
-        QStringList searchDirectories = QDir::searchPaths("qt3dstudio");
-        for (const auto &directoryPath : qAsConst(searchDirectories)) {
+        const QStringList searchDirectories = QDir::searchPaths(QT3DSTUDIO_TAG);
+        for (const auto &directoryPath : searchDirectories) {
             QFileInfo fileInfo(file);
-            QDirIterator it(directoryPath, QStringList { fileInfo.fileName() },
-                QDir::NoFilter, QDirIterator::Subdirectories);
+            QDirIterator it(directoryPath, {fileInfo.fileName()}, QDir::NoFilter,
+                            QDirIterator::Subdirectories);
             while (it.hasNext()) {
                 QString filePath = it.next();
-                if (filePath.compare(directoryPath + '/' + file, Qt::CaseInsensitive) == 0)
+                if (filePath.compare(QDir::cleanPath(directoryPath + '/' + file),
+                                     Qt::CaseInsensitive) == 0) {
                     return QFileInfo(filePath);
+                }
             }
         }
 
@@ -152,8 +157,8 @@ struct SFactory : public IInputStreamFactory
             return;
         }
 
-        if (!QDir::searchPaths("qt3dstudio").contains(localDir))
-            QDir::addSearchPath("qt3dstudio", localDir);
+        if (!QDir::searchPaths(QT3DSTUDIO_TAG).contains(localDir))
+            QDir::addSearchPath(QT3DSTUDIO_TAG, localDir);
     }
 
 
@@ -162,10 +167,10 @@ struct SFactory : public IInputStreamFactory
         TScopedLock __factoryLocker(m_Mutex);
         QString localFile = CFileTools::NormalizePathForQtUsage(inFilename);
         QFileInfo fileInfo = QFileInfo(localFile);
-        SInputStream *inputStream = NULL;
+        SInputStream *inputStream = nullptr;
         // Try to match the file with the search paths
         if (!fileInfo.exists())
-            fileInfo = QFileInfo("qt3dstudio:" + localFile);
+            fileInfo.setFile(QStringLiteral("qt3dstudio:") + localFile);
 
         // Try to match the case-insensitive file with the given search paths
         if (!fileInfo.exists())
@@ -178,7 +183,7 @@ struct SFactory : public IInputStreamFactory
             // Print extensive debugging information.
             qCCritical(INTERNAL_ERROR, "Failed to find file: %s", inFilename.toLatin1().data());
             qCCritical(INTERNAL_ERROR, "Searched path: %s",
-                QDir::searchPaths("qt3dstudio").join(',').toLatin1().constData());
+                QDir::searchPaths(QT3DSTUDIO_TAG).join(',').toLatin1().constData());
         }
         return inputStream;
     }

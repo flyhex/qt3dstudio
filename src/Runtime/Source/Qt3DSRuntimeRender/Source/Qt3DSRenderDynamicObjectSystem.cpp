@@ -988,7 +988,7 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
             NVScopedRefCounted<IRefCountedInputStream> theStream;
             if (!platformDir.isEmpty()) {
                 QTextStream stream(&fullPath);
-                stream << platformDir << "\\" << inPathToEffect;
+                stream << platformDir << QLatin1Char('/') << inPathToEffect;
                 theStream = m_CoreContext.GetInputStreamFactory()
                         .GetStreamForFile(fullPath.toLatin1().data());
             }
@@ -996,13 +996,14 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
             if (theStream.mPtr == NULL) {
                 fullPath.clear();
                 QTextStream stream(&fullPath);
-                stream << defaultDir << "\\" << ver << "\\" << inPathToEffect;
+                stream << defaultDir << QLatin1Char('/') << ver << QLatin1Char('/')
+                       << inPathToEffect;
                 theStream = m_CoreContext.GetInputStreamFactory()
                         .GetStreamForFile(fullPath.toLatin1().data());
                 if (theStream.mPtr == NULL) {
                     fullPath.clear();
                     QTextStream stream(&fullPath);
-                    stream << defaultDir << "\\" << inPathToEffect;
+                    stream << defaultDir << QLatin1Char('/') << inPathToEffect;
                     theStream = m_CoreContext.GetInputStreamFactory()
                             .GetStreamForFile(fullPath.toLatin1().data());
                 }
@@ -1016,8 +1017,7 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
                         theReadBuffer.append((const char8_t *)readBuf, amountRead);
                 } while (amountRead);
             } else {
-                qCCritical(INVALID_OPERATION, "Failed to find include file %s",
-                    inPathToEffect);
+                qCCritical(INVALID_OPERATION, "Failed to find include file %s", inPathToEffect);
                 QT3DS_ASSERT(false);
             }
             theInsert.first->second = (char8_t *)m_Allocator.allocate(

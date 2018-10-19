@@ -165,7 +165,7 @@ struct SRendererImpl : public IStudioRenderer,
         IOffscreenRenderManager &offscreenMgr(m_Context->GetOffscreenRenderManager());
         const QString projectPath = m_Doc.GetCore()->getProjectFile().getProjectPath();
         // setPath expects full path, but strips the filename
-        m_proxy->setPath(projectPath + "/dummy.uip");
+        m_proxy->setPath(projectPath + QLatin1Char('/'));
         QVector<SubPresentationRecord> toUnregister;
         QVector<SubPresentationRecord> toRegister;
         const auto keys = m_subpresentations.keys();
@@ -221,7 +221,6 @@ struct SRendererImpl : public IStudioRenderer,
         // then get the desired environment to initialize the qml renderer.
         QCoreApplication::processEvents();
         for (int i = 0; i < toRegister.size(); ++i) {
-            QByteArray data = toRegister[i].m_id.toLocal8Bit();
             if (toRegister[i].m_type == QLatin1String("presentation-qml"))
                 m_subpresentations[toRegister[i].m_id].renderer
                         ->GetDesiredEnvironment(QT3DSVec2(1.0f, 1.0f));

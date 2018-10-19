@@ -2148,8 +2148,6 @@ bool CDoc::VerifyCanRename(qt3dsdm::Qt3DSDMInstanceHandle inAsset)
  */
 void CDoc::LoadPresentationFile(CBufferedInputStream *inInputStream)
 {
-    Q3DStudio::CString theOrigFileName;
-
     // Let any interested parties know that a presentation is going to be loaded
     m_Core->GetDispatch()->FireOnLoadingPresentation();
 
