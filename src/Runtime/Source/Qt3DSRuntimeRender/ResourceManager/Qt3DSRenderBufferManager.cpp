@@ -346,8 +346,9 @@ struct SBufferManager : public IBufferManager
                 // so this should be ok.
                 if (!theLoadedImage) {
                     if (QDir(inImagePath.c_str()).isRelative()) {
-                        QString searchPath = QLatin1String(".");
-                        searchPath.append(inImagePath.c_str());
+                        QString searchPath = inImagePath.c_str();
+                        if (searchPath.startsWith(QLatin1String("./")))
+                            searchPath.prepend(QLatin1String("."));
                         int loops = 0;
                         while (!theLoadedImage && ++loops <= 3) {
                             theLoadedImage = SLoadedTexture::Load(
@@ -358,22 +359,24 @@ struct SBufferManager : public IBufferManager
                         }
                     } else {
                         // Some textures, for example environment maps for custom materials,
-                        // have absolute path at this point. It point to the wrong place with
+                        // have absolute path at this point. It points to the wrong place with
                         // the new project structure, so we need to split it up and construct
                         // the new absolute path here.
                         QString wholePath = inImagePath.c_str();
                         QStringList splitPath = wholePath.split(QLatin1String("../"));
-                        QString searchPath = splitPath.at(0) + splitPath.at(1);
-                        int loops = 0;
-                        while (!theLoadedImage && ++loops <= 3) {
-                            theLoadedImage = SLoadedTexture::Load(
-                                        searchPath.toUtf8(), m_Context->GetFoundation(),
-                                        *m_InputStreamFactory, true,
-                                        m_Context->GetRenderContextType());
-                            searchPath = splitPath.at(0);
-                            for (int i = 0; i < loops; i++)
-                                searchPath.append(QLatin1String("../"));
-                            searchPath.append(splitPath.at(1));
+                        if (splitPath.size() > 1) {
+                            QString searchPath = splitPath.at(0) + splitPath.at(1);
+                            int loops = 0;
+                            while (!theLoadedImage && ++loops <= 3) {
+                                theLoadedImage = SLoadedTexture::Load(
+                                            searchPath.toUtf8(), m_Context->GetFoundation(),
+                                            *m_InputStreamFactory, true,
+                                            m_Context->GetRenderContextType());
+                                searchPath = splitPath.at(0);
+                                for (int i = 0; i < loops; i++)
+                                    searchPath.append(QLatin1String("../"));
+                                searchPath.append(splitPath.at(1));
+                            }
                         }
                     }
                 }

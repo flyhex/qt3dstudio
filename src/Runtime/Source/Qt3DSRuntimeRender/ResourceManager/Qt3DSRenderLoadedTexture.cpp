@@ -676,7 +676,7 @@ SLoadedTexture *SLoadedTexture::Load(const QString &inPath, NVFoundationBase &in
         } else if (inPath.endsWith("hdr", Qt::CaseInsensitive)) {
             theLoadedImage = LoadHDR(*theStream, inFoundation, renderContextType);
         } else {
-            qCCritical(INTERNAL_ERROR, "Unrecognized image extension: %s", qPrintable(inPath));
+            qCWarning(INTERNAL_ERROR, "Unrecognized image extension: %s", qPrintable(inPath));
         }
     }
     return theLoadedImage;
