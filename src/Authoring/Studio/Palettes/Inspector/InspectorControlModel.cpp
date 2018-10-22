@@ -1347,6 +1347,12 @@ void InspectorControlModel::setMaterialTypeValue(long instance, int handle, cons
         const Q3DStudio::CString refType = sceneEditor->GetObjectTypeName(refMaterial);
         if (refType == newType)
             scopedEditor->copyMaterialProperties(refMaterial, instance);
+
+        if (bridge->isInsideMaterialContainer(refMaterial)) {
+            const auto name = scopedEditor->GetName(instance);
+            if (!name.toQString().endsWith(QLatin1String("_animatable")))
+                scopedEditor->SetName(instance, name + "_animatable");
+        }
     }
 
     if (changeMaterialFile) {

@@ -3154,6 +3154,9 @@ public:
 
                 SetMaterialType(instance, v);
                 copyMaterialProperties(refMaterial, instance);
+                const auto name = GetName(instance);
+                if (!name.toQString().endsWith(QLatin1String("_animatable")))
+                    SetName(instance, name + "_animatable");
             }
         }
     }
