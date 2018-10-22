@@ -585,7 +585,7 @@ InspectorControlBase *InspectorControlModel::createMatDataItem(
             if (refMaterial.Valid()) {
                 const auto matName = sceneEditor->GetName(refMaterial);
                 QFileInfo newFileInfo(fileInfo.absoluteDir().path() + QLatin1Char('/')
-                                      + matName.toQString() + QStringLiteral(".matdata"));
+                                      + matName.toQString() + QStringLiteral(".materialdef"));
                 const QDir docDir(dirPath);
                 const auto relPath = docDir.relativeFilePath(newFileInfo.absoluteFilePath());
                 sceneEditor->setMaterialSourcePath(item->m_instance,
@@ -1495,7 +1495,7 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
                             const QString newFile = fileInfo.absolutePath()
                                     + QLatin1Char('/')
                                     + newName.toQString()
-                                    + QStringLiteral(".matdata");
+                                    + QStringLiteral(".materialdef");
                             canRename = QFile::rename(oldFile, newFile);
                             break;
                         }

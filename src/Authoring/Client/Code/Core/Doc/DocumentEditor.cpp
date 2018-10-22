@@ -1918,7 +1918,7 @@ public:
     {
         return m_Doc.GetCore()->getProjectFile().getProjectPath()
                 + QStringLiteral("/materials/")
-                + materialName + QStringLiteral(".matdata");
+                + materialName + QStringLiteral(".materialdef");
     }
 
     Q3DStudio::CString writeMaterialFile(Qt3DSDMInstanceHandle instance,

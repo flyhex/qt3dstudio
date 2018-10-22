@@ -379,7 +379,7 @@ bool ProjectView::isInMaterialFolder(int row) const
 
 bool ProjectView::isMaterialData(int row) const
 {
-    return m_ProjectModel->filePath(row).endsWith(QLatin1String(".matdata"));
+    return m_ProjectModel->filePath(row).endsWith(QLatin1String(".materialdef"));
 }
 
 bool ProjectView::isInitialPresentation(int row) const
@@ -435,7 +435,7 @@ void ProjectView::openFile(int row)
         if (filePath.endsWith(QLatin1String(".uip"), Qt::CaseInsensitive)) {
             if (g_StudioApp.PerformSavePrompt())
                 g_StudioApp.OnLoadDocument(filePath);
-        } else if (filePath.endsWith(QLatin1String(".matdata"), Qt::CaseInsensitive)) {
+        } else if (filePath.endsWith(QLatin1String(".materialdef"), Qt::CaseInsensitive)) {
             editMaterial(row);
         } else {
             QDesktopServices::openUrl(QUrl::fromLocalFile(filePath));
@@ -475,7 +475,7 @@ void ProjectView::addMaterial(int row) const
     if (info.isFile())
         path = info.dir().path();
     path += QLatin1String("/Material");
-    QString extension = QLatin1String(".matdata");
+    QString extension = QLatin1String(".materialdef");
 
     QFile file(path + extension);
     int i = 0;

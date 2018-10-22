@@ -436,7 +436,7 @@ void ProjectFileSystemModel::showInfo(int row)
 
     QFileInfo fi(path);
 
-    if (fi.suffix() == QLatin1String("matdata")) {
+    if (fi.suffix() == QLatin1String("materialdef")) {
         const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
         const auto material = sceneEditor
                 ->getOrCreateMaterial(Q3DStudio::CString::fromQString(fi.completeBaseName()));
