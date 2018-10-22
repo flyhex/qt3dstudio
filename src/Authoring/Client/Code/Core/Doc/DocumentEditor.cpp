@@ -3608,7 +3608,8 @@ public:
         CDispatch &theDispatch(*m_Doc.GetCore()->GetDispatch());
         CFilePath theDestFile(importToComposer->GetDestImportFile());
         try {
-            theDispatch.FireOnProgressBegin(QObject::tr("Importing "), importSrc.toQString());
+            theDispatch.FireOnProgressBegin(QObject::tr("Importing "),
+                                            QFileInfo(importSrc.toQString()).fileName());
             SImportResult result = inImportFunction(*importToComposer, theDestFile);
             bool forceError = importToComposer->HasError();
             if (!forceError)
@@ -4600,7 +4601,7 @@ public:
     {
         CDispatch &theDispatch(*m_Doc.GetCore()->GetDispatch());
         theDispatch.FireOnProgressBegin(
-            QObject::tr("Refreshing Import "), inOldFile.toQString());
+            QObject::tr("Refreshing Import "), QFileInfo(inNewFile.toQString()).fileName());
         ScopedBoolean __ignoredDirs(m_IgnoreDirChange);
         try {
             m_SourcePathInstanceMap.clear();

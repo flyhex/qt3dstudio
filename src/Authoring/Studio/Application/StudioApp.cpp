@@ -1622,7 +1622,7 @@ bool CStudioApp::OnLoadDocument(const QString &inDocument, bool inShowStartupDia
     QString loadFile = resolvePresentationFile(inDocument);
     QFileInfo loadFileInfo(loadFile);
 
-    m_core->GetDispatch()->FireOnProgressBegin(QObject::tr("Loading "), inDocument);
+    m_core->GetDispatch()->FireOnProgressBegin(QObject::tr("Loading "), loadFileInfo.fileName());
 
     // Make sure scene is visible
     if (m_views)
