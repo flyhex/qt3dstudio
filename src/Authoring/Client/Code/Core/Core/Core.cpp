@@ -219,6 +219,11 @@ bool CCore::OnNewDocument(const QString &inDocument, bool isNewProject, bool sil
 {
     CDispatchDataModelNotificationScope __dispatchScope(*m_Dispatch);
 
+    // Ensure project file is created before current presentation is closed to make sure the
+    // current presentation is added to the project.
+    if (!isNewProject)
+        m_projectFile.ensureProjectFile();
+
     m_Doc->CloseDocument();
 
     QString theDocument = inDocument;
