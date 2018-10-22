@@ -657,16 +657,13 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
     }
 
     bool MaybeAddMaterialFresnel(IShaderStageGenerator &fragmentShader, NVConstDataRef<QT3DSU32> inKey,
-                                 bool inFragmentHasSpecularAmount, bool supportStandardDerivates)
+                                 bool inFragmentHasSpecularAmount)
     {
         if (m_DefaultMaterialShaderKeyProperties.m_FresnelEnabled.GetValue(inKey)) {
             if (inFragmentHasSpecularAmount == false)
                 fragmentShader << "\tfloat specularAmount = 1.0;" << Endl;
             inFragmentHasSpecularAmount = true;
-            if (supportStandardDerivates)
-                fragmentShader.AddInclude("defaultMaterialFresnel.glsllib");
-            else
-                fragmentShader.AddInclude("defaultMaterialFresnelNoDvn.glsllib");
+            fragmentShader.AddInclude("defaultMaterialFresnel.glsllib");
             fragmentShader.AddUniform("fresnelPower", "float");
             fragmentShader.AddUniform("material_specular", "vec4");
             fragmentShader << "\tfloat fresnelRatio = defaultMaterialSimpleFresnel( world_normal, "
@@ -1181,8 +1178,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
             }
 
             fragmentHasSpecularAmount =
-                MaybeAddMaterialFresnel(fragmentShader, inKey, fragmentHasSpecularAmount,
-                                        supportStandardDerivatives);
+                MaybeAddMaterialFresnel(fragmentShader, inKey, fragmentHasSpecularAmount);
 
             // Iterate through all lights
             for (QT3DSU32 lightIdx = 0; lightIdx < m_Lights.size(); ++lightIdx) {
@@ -1374,15 +1370,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
 
             // We still have specular maps and such that could potentially use the fresnel variable.
             fragmentHasSpecularAmount =
-                MaybeAddMaterialFresnel(fragmentShader, inKey, fragmentHasSpecularAmount,
-                                        supportStandardDerivatives);
-        }
-
-        // Fresnel also modulates alpha.
-        if (m_DefaultMaterialShaderKeyProperties.m_FresnelEnabled.GetValue(inKey)) {
-            fragmentShader
-                << "\tglobal_diffuse_light.a = mix( global_diffuse_light.a, 1.0, fresnelRatio );"
-                << Endl;
+                MaybeAddMaterialFresnel(fragmentShader, inKey, fragmentHasSpecularAmount);
         }
 
         if (!hasEmissiveMap)
@@ -1416,7 +1404,6 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
 
         if (hasImage) {
             fragmentShader.Append("\tvec4 texture_color;");
-            AddLocalVariable(fragmentShader, "fresnelColor", "vec3");
             QT3DSU32 idx = 0;
             for (SRenderableImage *image = m_FirstImage; image; image = image->m_NextImage, ++idx) {
                 // Various maps are handled on a different locations
@@ -1448,7 +1435,6 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
                                    << m_ImageSampler << ", " << m_ImageFragCoords << ", "
                                    << texLodStr.c_str() << " )" << lookupSwizzle.c_str() << ";"
                                    << Endl;
-                    fragmentShader << "\ttexture_color.xyz *= fresnelColor;" << Endl;
                 }
 
                 if (image->m_Image.m_TextureData.m_TextureFlags.IsPreMultiplied() == true)

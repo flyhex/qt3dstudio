@@ -255,7 +255,7 @@
                 <Property name="specularroughness" formalName="Specular Roughness" description="Softening applied to reflections and\nhighlights" min='0.001' max='1' category="Material" />
                 <Property name="roughnessmap" formalName="Roughness Map" description="Image to vary the specular roughness across\nthe material" type="Image" category="Material" />
                 <Property name="fresnelPower" formalName="Fresnel Power" description="Damping of head-on reflections" category="Material" />
-                <Property name="ior" formalName="Index of Refraction" description="Angle at which fresnel reflection damping\napplies" min="0" max="1" default=".2" category="Material" />
+                <Property name="ior" formalName="Index of Refraction" description="Index of refraction of the material" min="1" default="1.5" category="Material" />
                 <Property name="bumpmap" formalName="Bump Map" description="Grayscale image simulating roughness in the\nlighting" type="Image" category="Material" />
                 <Property name="normalmap" formalName="Normal Map" description="Special RGB image describing surface\nroughness" type="Image" category="Material" />
                 <Property name="bumpamount" formalName="Bump Amount" description="Strength of bump/normal map effect" type="float" default=".5" category="Material" />
