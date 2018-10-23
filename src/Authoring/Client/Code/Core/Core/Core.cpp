@@ -219,17 +219,22 @@ bool CCore::OnNewDocument(const QString &inDocument, bool isNewProject, bool sil
 {
     CDispatchDataModelNotificationScope __dispatchScope(*m_Dispatch);
 
-    // Ensure project file is created before current presentation is closed to make sure the
-    // current presentation is added to the project.
-    if (!isNewProject)
+    QFileInfo info(inDocument);
+    if (!isNewProject) {
+        // If document with given name exists, bail out
+        if (info.exists())
+            return false;
+
+        // Ensure project file is created before current presentation is closed to make sure the
+        // current presentation is added to the project.
         m_projectFile.ensureProjectFile();
+    }
 
     m_Doc->CloseDocument();
 
     QString theDocument = inDocument;
 
     if (isNewProject) {
-        QFileInfo info(inDocument);
         QDir dir(info.absoluteDir());
         QString projName = info.completeBaseName(); // project name
         dir.mkdir(projName); // create project directory
