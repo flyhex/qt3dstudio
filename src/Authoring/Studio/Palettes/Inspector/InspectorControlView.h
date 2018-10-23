@@ -138,7 +138,6 @@ private:
     QPointer<DataInputSelectView> m_dataInputChooserView;
     std::vector<Q3DStudio::CFilePath> m_fileList;
     MouseHelper m_mouseHelper;
-    std::vector<Q3DStudio::CFilePath> m_cachedMatDatas;
 
     int m_instance;
     int m_handle;

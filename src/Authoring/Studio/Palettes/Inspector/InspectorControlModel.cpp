@@ -378,10 +378,12 @@ void InspectorControlModel::setMatDatas(const std::vector<Q3DStudio::CFilePath> 
         auto material = sceneEditor->getMaterial(nameCString);
         if (isNewFile && !newMaterialSelected && !material.Valid()) {
             material = sceneEditor->getOrCreateMaterial(nameCString, false);
-            sceneEditor->setMaterialValues(name, values, textureValues);
             doc->SelectDataModelObject(material);
             newMaterialSelected = true;
         }
+
+        if (material.Valid())
+            sceneEditor->setMaterialValues(name, values, textureValues);
 
         if (needRewrite && material.Valid())
             sceneEditor->writeMaterialFile(material, name, false, absolutePath.toQString());

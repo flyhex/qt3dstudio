@@ -187,21 +187,7 @@ void InspectorControlView::onFilesChanged(
 
     std::vector<Q3DStudio::CFilePath> matDatas;
     filterMatDatas(matDatas);
-    bool redoMatDatas = false;
-    if (m_cachedMatDatas.size() != matDatas.size()) {
-        redoMatDatas = true;
-    } else {
-        for (unsigned int i = 0; i < matDatas.size(); ++i) {
-            if (!(m_cachedMatDatas[i] == matDatas[i])) {
-                redoMatDatas = true;
-                break;
-            }
-        }
-    }
-
-    if (redoMatDatas)
-        m_inspectorControlModel->setMatDatas(matDatas);
-    m_cachedMatDatas = matDatas;
+    m_inspectorControlModel->setMatDatas(matDatas);
 
     if (updateFonts) {
         // The fonts list in doc is not necessarily yet updated, so do update async
