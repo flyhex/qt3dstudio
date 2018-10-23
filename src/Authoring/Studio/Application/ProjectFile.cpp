@@ -38,6 +38,7 @@
 #include "PresentationFile.h"
 #include "IStudioRenderer.h"
 #include "StudioUtils.h"
+#include "Dispatch.h"
 #include <QtCore/qdiriterator.h>
 #include <QtXml/qdom.h>
 #include <QtCore/qsavefile.h>
@@ -274,6 +275,7 @@ void ProjectFile::writePresentationId(const QString &id, const QString &src)
             sp->m_id = theId;
 
         // update current doc instances (layers and images) that are using this presentation Id
+        qt3dsdm::TInstanceHandleList instancesToRefresh;
         auto *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
         qt3dsdm::IPropertySystem *propSystem = doc->GetStudioSystem()->GetPropertySystem();
         std::function<void(qt3dsdm::Qt3DSDMInstanceHandle)>
@@ -284,15 +286,20 @@ void ProjectFile::writePresentationId(const QString &id, const QString &src)
             while (!iter.IsDone()) {
                 qt3dsdm::Qt3DSDMInstanceHandle child = iter.GetCurrent();
                 if (bridge->GetObjectType(child) & (OBJTYPE_LAYER | OBJTYPE_IMAGE)) {
+                    bool add = false;
                     if (bridge->GetSourcePath(child).toQString() == oldId) {
                         propSystem->SetInstancePropertyValue(child, bridge->GetSourcePathProperty(),
                                                              qt3dsdm::SValue(QVariant(theId)));
+                        add = true;
                     }
                     if (bridge->getSubpresentation(child).toQString() == oldId) {
                         propSystem->SetInstancePropertyValue(child,
                                                              bridge->getSubpresentationProperty(),
                                                              qt3dsdm::SValue(QVariant(theId)));
+                        add = true;
                     }
+                    if (add)
+                        instancesToRefresh.push_back(child);
                 }
                 parseChildren(child);
                 ++iter;
@@ -309,6 +316,12 @@ void ProjectFile::writePresentationId(const QString &id, const QString &src)
             PresentationFile::updatePresentationId(path, oldId, theId);
         }
         Q_EMIT presentationIdChanged(theSrc, theId);
+
+        g_StudioApp.getRenderer().RegisterSubpresentations(g_StudioApp.m_subpresentations);
+        if (instancesToRefresh.size() > 0) {
+            g_StudioApp.GetCore()->GetDispatch()->FireImmediateRefreshInstance(
+                        &(instancesToRefresh[0]), long(instancesToRefresh.size()));
+        }
     }
 }
 
