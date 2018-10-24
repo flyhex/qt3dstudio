@@ -45,6 +45,7 @@
 #include "PresentationFile.h"
 #include "QtWidgets/qmessagebox.h"
 #include "QtWidgets/qpushbutton.h"
+#include "IDocSceneGraph.h"
 
 // Sceneview stuff
 //===============================================================================
@@ -95,6 +96,19 @@ bool CSceneViewDropTarget::Accept(CDropSource &inSource)
     if (m_DropSourceObjectType & (OBJTYPE_PRESENTATION | OBJTYPE_QML_STREAM)) {
         inSource.SetHasValidTarget(true);
         return true;
+    }
+
+    if (m_DropSourceObjectType == OBJTYPE_MATERIALDATA) {
+        CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+        const auto pickedObject = doc->GetSceneGraph()->getObjectAt(inSource.GetCurrentPoint());
+        if (pickedObject.Valid()) {
+            const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+                    ->GetClientDataModelBridge();
+            if (bridge->GetObjectType(pickedObject) == OBJTYPE_MODEL) {
+                inSource.SetHasValidTarget(true);
+                return true;
+            }
+        }
     }
 
     bool theAcceptable = false;
@@ -149,6 +163,27 @@ bool CSceneViewDropTarget::Drop(CDropSource &inSource)
             // The GenerateAssetCommand below will take care of setting the subpresentation
         } else {
             return true; // cancel
+        }
+    }
+
+    if (m_DropSourceObjectType == OBJTYPE_MATERIALDATA) {
+        const auto pickedObject = doc->GetSceneGraph()->getObjectAt(inSource.GetCurrentPoint());
+        if (pickedObject.Valid()) {
+            const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+                    ->GetClientDataModelBridge();
+            if (bridge->GetObjectType(pickedObject) == OBJTYPE_MODEL) {
+                const auto sceneEditor = doc->getSceneEditor();
+                std::vector<qt3dsdm::Qt3DSDMInstanceHandle> children;
+                sceneEditor->GetChildren(doc->GetActiveSlide(), pickedObject, children);
+                for (auto &child : children) {
+                    const auto childType = bridge->GetObjectType(child);
+                    if (childType == OBJTYPE_REFERENCEDMATERIAL || childType == OBJTYPE_MATERIAL
+                            || childType == OBJTYPE_CUSTOMMATERIAL) {
+                        instance = child;
+                        break;
+                    }
+                }
+            }
         }
     }
 
