@@ -89,6 +89,10 @@ bool CStudioObjectTypes::AcceptableParent(EStudioObjectType inChild, EStudioObje
         theAcceptible = false; // TODO add drag and drop support
         break;
 
+    case OBJTYPE_MATERIALDATA:
+        theAcceptible = true;
+        break;
+
     default:
         // Do not accept unexpected type
         break;

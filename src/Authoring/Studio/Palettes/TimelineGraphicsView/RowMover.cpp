@@ -207,7 +207,8 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
                                Q3DStudio::DocumentEditorFileType::Enum fileType)
 {
     // DnD a presentation / Qml stream from the project panel (to set it as a subpresentation)
-    if (rowType == OBJTYPE_PRESENTATION || rowType == OBJTYPE_QML_STREAM) {
+    if (rowType == OBJTYPE_PRESENTATION || rowType == OBJTYPE_QML_STREAM
+            || rowType == OBJTYPE_MATERIALDATA) {
         if (!m_insertionTarget.isNull())
             m_insertionTarget->setDnDState(RowTree::DnDState::None, RowTree::DnDState::SP_TARGET);
 
@@ -218,9 +219,18 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
             m_insertionTarget = rowAtMouse;
             m_insertType = Q3DStudio::DocumentEditorInsertType::LastChild;
 
-            if (rowAtMouse->rowType() == OBJTYPE_LAYER || rowAtMouse->rowType() == OBJTYPE_MATERIAL
-                || rowAtMouse->rowType() == OBJTYPE_IMAGE) {
-                m_insertionTarget->setDnDState(RowTree::DnDState::SP_TARGET);
+            if (rowType == OBJTYPE_MATERIALDATA) {
+                if (rowAtMouse->rowType() == OBJTYPE_MATERIAL
+                        || rowAtMouse->rowType() == OBJTYPE_CUSTOMMATERIAL
+                        || rowAtMouse->rowType() == OBJTYPE_REFERENCEDMATERIAL) {
+                    m_insertionTarget->setDnDState(RowTree::DnDState::SP_TARGET);
+                }
+            } else {
+                if (rowAtMouse->rowType() == OBJTYPE_LAYER
+                        || rowAtMouse->rowType() == OBJTYPE_MATERIAL
+                        || rowAtMouse->rowType() == OBJTYPE_IMAGE) {
+                    m_insertionTarget->setDnDState(RowTree::DnDState::SP_TARGET);
+                }
             }
             m_rowAutoExpand = rowAtMouse;
             m_autoExpandTimer.start(TimelineConstants::AUTO_EXPAND_TIME);
