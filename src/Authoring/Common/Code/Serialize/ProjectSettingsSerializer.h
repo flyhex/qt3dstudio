@@ -43,6 +43,7 @@
 #include "Qt3DSDMWStrOpsImpl.h"
 
 #include <QtWidgets/qcolordialog.h>
+#include <QtCore/qsize.h>
 
 namespace qt3dsdm {
 }
@@ -99,24 +100,26 @@ public:
         using namespace std;
         CStudioProjectSettings *theProjectSettings = GetProjectSettings();
         Q3DStudio::CString author =
-                Q3DStudio::CString::fromQString(theProjectSettings->GetAuthor());
+                Q3DStudio::CString::fromQString(theProjectSettings->getAuthor());
         TCharPtr theAuthor = author;
         ar.Att(L"author", theAuthor);
         Q3DStudio::CString company =
-                Q3DStudio::CString::fromQString(theProjectSettings->GetCompany());
+                Q3DStudio::CString::fromQString(theProjectSettings->getCompany());
         TCharPtr theCompany = company;
         ar.Att(L"company", theCompany);
 
-        CPt theSize = theProjectSettings->GetPresentationSize();
-        ar.Att(L"presentationWidth", static_cast<qt3ds::QT3DSI32>(theSize.x));
-        ar.Att(L"presentationHeight", static_cast<qt3ds::QT3DSI32>(theSize.y));
+        QSize theSize = theProjectSettings->getPresentationSize();
+        ar.Att(L"presentationWidth", static_cast<qt3ds::QT3DSI32>(theSize.width()));
+        ar.Att(L"presentationHeight", static_cast<qt3ds::QT3DSI32>(theSize.height()));
 
-        if (theProjectSettings->GetRotatePresentation()) {
+        if (theProjectSettings->getRotatePresentation())
             ar.Att("presentationRotation", "90");
-        }
 
-        bool theMaintainAspect = theProjectSettings->GetMaintainAspect();
+        bool theMaintainAspect = theProjectSettings->getMaintainAspect();
         ar.Att("maintainAspect", theMaintainAspect);
+
+        bool thePreferKtx = theProjectSettings->getPreferCompressedTextures();
+        ar.Att("preferKtx", thePreferKtx);
 
         if (QColorDialog::customCount() > 0) {
             CustomColorSerializer ccs;
@@ -128,31 +131,35 @@ public:
         using namespace qt3dsdm;
         using namespace std;
         CStudioProjectSettings *theProjectSettings = GetProjectSettings();
-        theProjectSettings->Reset();
+        theProjectSettings->reset();
 
         TCharStr theAuthor;
         ar.Att(L"author", theAuthor);
         Q3DStudio::CString theAuthorStr(theAuthor.wide_str());
-        theProjectSettings->SetAuthor(theAuthorStr.toQString());
+        theProjectSettings->setAuthor(theAuthorStr.toQString());
 
         TCharStr theCompany;
         ar.Att(L"company", theCompany);
         Q3DStudio::CString theCompanyStr(theCompany.wide_str());
-        theProjectSettings->SetCompany(theCompanyStr.toQString());
+        theProjectSettings->setCompany(theCompanyStr.toQString());
 
         qt3ds::QT3DSI32 thePresentationWidth;
         qt3ds::QT3DSI32 thePresentationHeight;
         ar.Att("presentationWidth", thePresentationWidth);
         ar.Att("presentationHeight", thePresentationHeight);
-        theProjectSettings->SetPresentationSize(CPt(thePresentationWidth, thePresentationHeight));
+        theProjectSettings->setPresentationSize(QSize(thePresentationWidth, thePresentationHeight));
 
         qt3ds::QT3DSI32 thePresentationRotate;
         if (ar.Att("presentationRotation", thePresentationRotate) && thePresentationRotate == 90)
-            theProjectSettings->SetRotatePresentation(true);
+            theProjectSettings->setRotatePresentation(true);
 
         bool theMaintainAspect;
         ar.Att("maintainAspect", theMaintainAspect);
-        theProjectSettings->SetMaintainAspect(theMaintainAspect);
+        theProjectSettings->setMaintainAspect(theMaintainAspect);
+
+        bool thePreferKtx;
+        ar.Att("preferKtx", thePreferKtx);
+        theProjectSettings->setPreferCompressedTextures(thePreferKtx);
 
         {
             CustomColorSerializer ccs;

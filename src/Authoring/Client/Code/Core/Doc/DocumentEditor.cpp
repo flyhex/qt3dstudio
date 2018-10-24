@@ -1723,7 +1723,7 @@ public:
                 SetInstancePropertyValue(instance, layer.m_Width, float(presSize.width()), true);
             } else {
                 long curWidth = m_Doc.GetCore()->GetStudioProjectSettings()
-                        ->GetPresentationSize().x;
+                        ->getPresentationSize().width();
                 Option<SValue> leftVal = GetInstancePropertyValue(instance, layer.m_Left);
                 Option<SValue> leftUnitsVal = GetInstancePropertyValue(instance, layer.m_LeftUnits);
                 float left = qt3dsdm::get<float>(leftVal.getValue());
@@ -1739,7 +1739,7 @@ public:
                 SetInstancePropertyValue(instance, layer.m_Height, float(presSize.height()), true);
             } else {
                 long curHeight = m_Doc.GetCore()->GetStudioProjectSettings()
-                        ->GetPresentationSize().y;
+                        ->getPresentationSize().height();
                 Option<SValue> topVal = GetInstancePropertyValue(instance, layer.m_Top);
                 Option<SValue> topUnitsVal = GetInstancePropertyValue(instance, layer.m_TopUnits);
                 float top = qt3dsdm::get<float>(topVal.getValue());

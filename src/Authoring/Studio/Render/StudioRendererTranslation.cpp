@@ -2061,11 +2061,11 @@ void STranslation::MarkDirty(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 QT3DSVec2 STranslation::GetPreviewViewportDimensions()
 {
     CStudioProjectSettings *theSettings = m_Doc.GetCore()->GetStudioProjectSettings();
-    CPt thePresSize = theSettings->GetPresentationSize();
+    QSize thePresSize = theSettings->getPresentationSize();
     QT3DSVec2 vp(GetViewportDimensions());
     if (vp.x < m_previewViewportSize || vp.y < m_previewViewportSize)
         return QT3DSVec2(0.0f);
-    QT3DSVec2 ret(thePresSize.x, thePresSize.y);
+    QT3DSVec2 ret(thePresSize.width(), thePresSize.height());
     const float aspect = ret.x / ret.y;
     if (aspect > 1.0) {
         ret.x = m_previewViewportSize;
@@ -2108,7 +2108,7 @@ void STranslation::PreRender(bool scenePreviewPass)
 
     if (m_Scene) {
         CStudioProjectSettings *theSettings = m_Doc.GetCore()->GetStudioProjectSettings();
-        CPt thePresSize = theSettings->GetPresentationSize();
+        QSize thePresSize = theSettings->getPresentationSize();
         // The presentation sizes are used for when we have to render a layer offscreen.  If their
         // width and height
         // isn't set, then they use the presentation dimensions.
@@ -2117,7 +2117,7 @@ void STranslation::PreRender(bool scenePreviewPass)
                 QT3DSVec2((QT3DSF32)theViewportDims.x, (QT3DSF32)theViewportDims.y);
         } else {
             m_Presentation.m_PresentationDimensions =
-                QT3DSVec2((QT3DSF32)thePresSize.x, (QT3DSF32)thePresSize.y);
+                QT3DSVec2((QT3DSF32)thePresSize.width(), (QT3DSF32)thePresSize.height());
         }
         m_Context.SetWindowDimensions(
             QSize((QT3DSU32)theViewportDims.x, (QT3DSU32)theViewportDims.y));
@@ -2730,9 +2730,9 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
         m_Context.SetWindowDimensions(QSize((QT3DSU32)theViewportDims.x,
                                             (QT3DSU32)theViewportDims.y));
         CStudioProjectSettings *theSettings = m_Doc.GetCore()->GetStudioProjectSettings();
-        CPt thePresSize = theSettings->GetPresentationSize();
+        QSize thePresSize = theSettings->getPresentationSize();
         m_Presentation.m_PresentationDimensions =
-            QT3DSVec2((QT3DSF32)thePresSize.x, (QT3DSF32)thePresSize.y);
+            QT3DSVec2((QT3DSF32)thePresSize.width(), (QT3DSF32)thePresSize.height());
 
         if (m_ZoomRender.hasValue()) {
             RenderZoomRender(*m_ZoomRender);

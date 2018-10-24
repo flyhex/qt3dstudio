@@ -32,63 +32,46 @@
 
 #pragma once
 
-//==============================================================================
-//	Includes
-//==============================================================================
+#include <QtCore/qstring.h>
+#include <QtCore/qsize.h>
 
-#include "Pt.h"
-#include "CColor.h"
-
-//==============================================================================
-//	Forwards
-//==============================================================================
 class CCore;
 
 class CStudioProjectSettings
 {
-
-    // Construction
 public:
-    CStudioProjectSettings(CCore *inCore = NULL);
+    CStudioProjectSettings(CCore *inCore = nullptr);
     ~CStudioProjectSettings();
 
-    QString GetAuthor() { return m_Author; }
-    void SetAuthor(const QString &inAuthor);
+    QString getAuthor() const { return m_author; }
+    void setAuthor(const QString &inAuthor);
 
-    QString GetCompany() { return m_Company; }
-    void SetCompany(const QString &inCompany);
+    QString getCompany() const { return m_company; }
+    void setCompany(const QString &inCompany);
 
-    CPt GetPresentationSize() { return m_PresentationSize; }
-    void SetPresentationSize(CPt inSize);
+    QSize getPresentationSize() const { return m_presentationSize; }
+    void setPresentationSize(const QSize &inSize);
 
-    long GetFSAAMode() const { return m_FSAAMode; }
-    void SetFSAAMode(long inFSAAMode);
+    bool getMaintainAspect() const { return m_maintainAspect; }
+    void setMaintainAspect(bool inFlag);
 
-    bool GetMaintainAspect();
-    void SetMaintainAspect(bool inFlag);
+    bool getRotatePresentation() const { return m_rotatePresentation; }
+    void setRotatePresentation(bool inFlag);
 
-    bool GetEmbedFonts();
-    void SetEmbedFonts(bool inFlag);
+    bool getPreferCompressedTextures() const { return m_preferCompressedTextures; }
+    void setPreferCompressedTextures(bool inFlag);
 
-    bool GetRotatePresentation();
-    void SetRotatePresentation(bool inFlag);
+    void reset();
 
-    void Reset();
-    void RestoreDefaults();
-
-    // Implementation
 protected:
-    QString m_Author;
-    QString m_Company;
+    QString m_author;
+    QString m_company;
 
-    // TODO : remove m_EmbedFonts, m_FSAAMode
-    CPt m_PresentationSize;
-    long m_FSAAMode; ///< Fullscreen anti-aliasing mode
-    bool m_MaintainAspect;
-    bool m_RotatePresentation;
-    CCore *m_Core;
-
-    bool m_EmbedFonts; ///< Whether to embed fonts in am files
+    QSize m_presentationSize;
+    bool m_maintainAspect;
+    bool m_rotatePresentation;
+    bool m_preferCompressedTextures;
+    CCore *m_core;
 };
 
 #endif // INCLUDED_STUDIO_PROJECT_SETTINGS_H

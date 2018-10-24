@@ -434,7 +434,7 @@ void CCore::OnNewPresentation()
  */
 void CCore::OnClosingPresentation()
 {
-    m_StudioProjectSettings->Reset();
+    m_StudioProjectSettings->reset();
     m_CmdStack->Clear();
 }
 

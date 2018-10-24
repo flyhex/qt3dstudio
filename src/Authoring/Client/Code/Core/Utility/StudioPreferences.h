@@ -114,7 +114,7 @@ public:
     static long GetBigTimeAdvanceAmount();
     static void SetBigTimeAdvanceAmount(long inTime);
 
-    static CPt GetDefaultClientSize();
+    static QSize GetDefaultClientSize();
     static void SetDefaultClientSize(int width, int height);
 
     static int getNumRecentItems();

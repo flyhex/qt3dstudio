@@ -601,13 +601,13 @@ void CStudioPreferences::SetDontShowGLVersionDialog(bool inValue)
     m_preferences->SetValue(QStringLiteral("DontShowGLVersionDialog"), inValue);
 }
 
-CPt CStudioPreferences::GetDefaultClientSize()
+QSize CStudioPreferences::GetDefaultClientSize()
 {
-    CPt theSize;
-    theSize.x = m_preferences->GetLongValue(QStringLiteral("DefaultClientWidth"),
-                                            DEFAULT_CLIENT_WIDTH);
-    theSize.y = m_preferences->GetLongValue(QStringLiteral("DefaultClientHeight"),
-                                            DEFAULT_CLIENT_HEIGHT);
+    QSize theSize;
+    theSize.setWidth(m_preferences->GetLongValue(QStringLiteral("DefaultClientWidth"),
+                                                 DEFAULT_CLIENT_WIDTH));
+    theSize.setHeight(m_preferences->GetLongValue(QStringLiteral("DefaultClientHeight"),
+                                                  DEFAULT_CLIENT_HEIGHT));
     return theSize;
 }
 

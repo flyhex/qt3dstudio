@@ -72,6 +72,20 @@
         </property>
        </widget>
       </item>
+      <item row="4" column="0">
+       <widget class="QCheckBox" name="m_checkUseKtx">
+        <property name="toolTip">
+         <string>Force runtime to check first if there
+are ktx compressed textures available
+when loading texture maps.
+Note that this should only be checked
+when ktx textures are present.</string>
+        </property>
+        <property name="text">
+         <string>Use ktx textures if available</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
