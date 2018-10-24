@@ -176,6 +176,8 @@ public:
         DeleteInstances(theInstances);
     }
 
+    virtual QString getMaterialPath(const QString &materialName) const = 0;
+
     virtual Q3DStudio::CString writeMaterialFile(Qt3DSDMInstanceHandle instance,
                                          const QString &materialName,
                                          bool createNewFile,

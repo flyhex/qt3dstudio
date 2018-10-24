@@ -1914,7 +1914,7 @@ public:
         m_Doc.SelectDataModelObject(newMaterial);
     }
 
-    QString getMaterialPath(const QString &materialName) const
+    QString getMaterialPath(const QString &materialName) const override
     {
         return m_Doc.GetCore()->getProjectFile().getProjectPath()
                 + QStringLiteral("/materials/")

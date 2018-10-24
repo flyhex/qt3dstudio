@@ -273,26 +273,25 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
         if (name.hasValue())
             materialName = qt3dsdm::get<TDataStrPtr>(*name)->GetData();
 
-        auto material = m_Editor.getMaterial(materialName);
+        QString filepath = m_Editor.getMaterialPath(materialName.toQString());
         int i = 1;
         const QString originalMaterialName = materialName.toQString();
-        while (material.Valid()) {
-            auto prop = m_Editor.FindProperty(material, L"importfile");
-            Option<SValue> importFile = m_Editor.GetSpecificInstancePropertyValue(
-                        m_Slide, material, prop);
-            if (importFile.hasValue()) {
-                if (Q3DStudio::CString(qt3dsdm::get<TDataStrPtr>(*importFile)->GetData())
-                        == m_Relativeimportfile.toCString()) {
+        const QString importFile = QStringLiteral("importfile");
+        while (QFileInfo(filepath).exists()) {
+            QString name;
+            QMap<QString, QString> values;
+            QMap<QString, QMap<QString, QString>> textureValues;
+            m_Editor.getMaterialInfo(filepath, name, values, textureValues);
+            if (values.contains(importFile)) {
+                if (values[importFile] == m_Relativeimportfile.toQString())
                     break;
-                }
             }
             materialName = CString::fromQString(originalMaterialName + QString::number(i));
-            material = m_Editor.getMaterial(materialName);
+            filepath = m_Editor.getMaterialPath(materialName.toQString());
             i++;
         }
 
-        if (!material.Valid())
-            material = m_Editor.getOrCreateMaterial(materialName);
+        const auto material = m_Editor.getOrCreateMaterial(materialName);
         m_Editor.SetSpecificInstancePropertyValue(0, material, L"importid",
                                                   std::make_shared<CDataStr>(desc.m_Id));
         m_Editor.SetSpecificInstancePropertyValue(
