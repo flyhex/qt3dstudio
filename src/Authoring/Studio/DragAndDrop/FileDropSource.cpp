@@ -62,7 +62,8 @@ bool CFileDropSource::ValidateTarget(CDropTarget *inTarget)
 
     // allow material and image rows as valid targets for image drops
     if (!targetIsValid && m_FileType == DocumentEditorFileType::Image
-        && (targetType & (OBJTYPE_MATERIAL | OBJTYPE_IMAGE))) {
+        && (targetType & (OBJTYPE_MATERIAL | OBJTYPE_CUSTOMMATERIAL | OBJTYPE_REFERENCEDMATERIAL
+                          | OBJTYPE_IMAGE))) {
         targetIsValid = true;
     }
 
@@ -197,7 +198,8 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
                 src = Q3DStudio::CString::fromQString(theDoc.GetCore()
                                                 ->getProjectFile().getPresentationId(pathFromRoot));
             } else { // Image
-                src = Q3DStudio::CString::fromQString(QFileInfo(m_FilePath).fileName());
+                src = Q3DStudio::CString::fromQString(QFileInfo(theDoc.GetDocumentPath()).dir()
+                                                      .relativeFilePath(m_FilePath));
             }
 
             if (rowType == OBJTYPE_LAYER) { // Drop on a Layer
@@ -227,6 +229,9 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
                     }
                 }
                 ChooseImagePropertyDlg dlg(refInstance ? refInstance : inTarget, refInstance != 0);
+                if (isImage)
+                    dlg.setTextureTitle();
+
                 if (dlg.exec() == QDialog::Accepted) {
                     qt3dsdm::Qt3DSDMPropertyHandle propHandle = dlg.getSelectedPropertyHandle();
                     if (dlg.detachMaterial()) {
@@ -235,12 +240,12 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
                                                               tr("Set material diffuse map")));
                         editor->BeginAggregateOperation();
                         editor->SetMaterialType(inTarget, "Standard Material");
-                        editor->setInstanceImagePropertyValue(inTarget, propHandle, src);
+                        editor->setInstanceImagePropertyValue(inTarget, propHandle, src, isPres);
                         editor->EndAggregateOperation();
                     } else {
                         Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
                         ->setInstanceImagePropertyValue(refInstance ? refInstance : inTarget,
-                                                        propHandle, src);
+                                                        propHandle, src, isPres);
                     }
                 }
             } else if (rowType == OBJTYPE_IMAGE) {

@@ -161,7 +161,7 @@ public:
                                                      bool setTimeRange = true,
                                                      bool selectCreatedInstance = true) = 0;
     virtual void setInstanceImagePropertyValue(TInstanceHandle instance, TPropertyHandle prop,
-                                               const CString &pId) = 0;
+                                               const CString &src, bool isSubp = true) = 0;
     virtual void addRectFromSource(const CString &src, TSlideHandle slide, const CPt &pos = {},
                                    long startTime = -1) = 0;
 

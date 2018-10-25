@@ -64,6 +64,12 @@ ChooseImagePropertyDlg::~ChooseImagePropertyDlg()
     delete m_ui;
 }
 
+void ChooseImagePropertyDlg::setTextureTitle()
+{
+    setWindowTitle(tr("Set texture"));
+    m_ui->label->setText(tr("Set texture to:"));
+}
+
 bool ChooseImagePropertyDlg::detachMaterial() const
 {
     return m_ui->cbDetach->checkState() == Qt::Checked;

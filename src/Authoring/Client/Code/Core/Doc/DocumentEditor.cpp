@@ -1776,14 +1776,15 @@ public:
      * @param src the presentation Id or image file name to set for the texture
      */
     void setInstanceImagePropertyValue(TInstanceHandle instance, TPropertyHandle prop,
-                                       const CString &src) override
+                                       const CString &src, bool isSubp = true) override
     {
         Qt3DSDMPropertyHandle img = GetImageInstanceForProperty(instance, prop);
 
         if (!img)
             img = CreateImageInstanceForMaterialOrLayer(instance, prop);
 
-        SetInstancePropertyValueAsRenderable(img, m_Bridge.getSubpresentationProperty(), src);
+        SetInstancePropertyValueAsRenderable(img, isSubp ? m_Bridge.getSubpresentationProperty()
+                                                         : m_Bridge.GetSourcePathProperty(), src);
     }
 
     /**
