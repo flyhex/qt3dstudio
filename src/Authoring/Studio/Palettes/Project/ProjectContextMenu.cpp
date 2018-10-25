@@ -116,7 +116,7 @@ ProjectContextMenu::ProjectContextMenu(ProjectView *parent, int index)
     if (m_view->isMaterialFolder(m_index) || m_view->isInMaterialFolder(m_index)) {
         addSeparator();
         QMenu *createMenu = addMenu(tr("Create"));
-        action = new QAction(tr("Shared Material"));
+        action = new QAction(tr("Basic Material"));
         connect(action, &QAction::triggered, this, &ProjectContextMenu::handleAddMaterial);
         createMenu->addAction(action);
     }
