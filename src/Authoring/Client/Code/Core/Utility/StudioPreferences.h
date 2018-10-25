@@ -169,6 +169,8 @@ public:
     static QColor masterColor();
     static QColor disabledColor();
     static QColor dataInputColor();
+    static QColor matteColor();
+
     static QLinearGradient welcomeBackgroundGradient();
 
     static QColor timelineRowColorNormal();

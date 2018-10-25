@@ -48,6 +48,7 @@ class TimeLineToolbar;
 class TimelineView;
 class ProjectView;
 class TimelineWidget;
+class SceneCameraView;
 
 QT_FORWARD_DECLARE_CLASS(QDockWidget)
 
@@ -59,20 +60,15 @@ class CPaletteManager : public QObject
 {
     Q_OBJECT
 public:
-    // Do NOT change the order/values of this enum, these
-    // values are stored in the registry
     enum EControlTypes {
-        CONTROLTYPE_NONE = 0, ///<
-        CONTROLTYPE_ACTION = 1, ///<
-        CONTROLTYPE_BASICOBJECTS = 3, ///<
-        CONTROLTYPE_INSPECTOR = 4, ///<
-        CONTROLTYPE_SLIDE = 6, ///<
-        CONTROLTYPE_TIMELINE = 7, ///<
-        CONTROLTYPE_PROJECT = 9, ///<
-
-        CONTROLTYPE_MAXCONTROLS = 32, ///< the maximum number of palettes( a string of this length
-                                      ///is saved in the registry, changing this value will require
-                                      ///an upgrade process )
+        CONTROLTYPE_NONE = 0,
+        CONTROLTYPE_ACTION,
+        CONTROLTYPE_BASICOBJECTS,
+        CONTROLTYPE_INSPECTOR,
+        CONTROLTYPE_SLIDE,
+        CONTROLTYPE_TIMELINE,
+        CONTROLTYPE_PROJECT,
+        CONTROLTYPE_SCENECAMERA,
     };
 
 protected:
@@ -89,10 +85,12 @@ protected:
     QDockWidget *m_timelineDock;
     QDockWidget *m_actionDock;
     QDockWidget *m_inspectorDock;
+    QDockWidget *m_cameraDock;
 
     TimelineView *m_timelineView;
     ProjectView *m_projectView = nullptr;
     TimelineWidget *m_timelineWidget;
+    SceneCameraView *m_cameraWidget;
 
 public:
     CPaletteManager(CMainFrame *inMainFrame, QObject *parent = nullptr);

@@ -198,6 +198,8 @@ public:
     void OnUpdateViewSlide();
     void OnViewTimeline();
     void OnUpdateViewTimeline();
+    void onViewSceneCamera();
+    void onUpdateViewSceneCamera();
 
     void OnEditCameraZoomExtent();
     void OnEditCameraPan();

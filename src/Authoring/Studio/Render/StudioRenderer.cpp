@@ -117,6 +117,7 @@ struct SRendererImpl : public IStudioRenderer,
     QHash<QString, StudioSubPresentation> m_subpresentations;
     QScopedPointer<Q3DSQmlStreamProxy> m_proxy;
     QMap<QString, int> m_initialFrameMap;
+    bool m_fullSizePreview = false;
 
     SRendererImpl()
         : m_Dispatch(*g_StudioApp.GetCore()->GetDispatch())
@@ -362,6 +363,12 @@ struct SRendererImpl : public IStudioRenderer,
             m_RenderContext->EndRender();
         }
     }
+
+    void setFullSizePreview(bool enabled) override
+    {
+        m_fullSizePreview = enabled;
+    }
+
     // Request that this object renders.  May be ignored if a transaction
     // is ongoing so we don't get multiple rendering per transaction.
     void RequestRender() override
@@ -380,6 +387,25 @@ struct SRendererImpl : public IStudioRenderer,
     void RenderNow() override
     {
         Render();
+    }
+
+    void getFullSizePreviewFbo(QSize &outFboDim, qt3ds::QT3DSU32 &outFboTexture) override
+    {
+        if (m_Translation) {
+            outFboDim = QSize(m_Translation->m_previewFullSizeFboDimensions.x,
+                              m_Translation->m_previewFullSizeFboDimensions.y);
+            // The handle is a void * so first cast to size_t to avoid truncating pointer warning
+            if (m_Translation->m_previewFullSizeTexture) {
+                outFboTexture = static_cast<qt3ds::QT3DSU32>(reinterpret_cast<size_t>(
+                            m_Translation->m_previewFullSizeTexture->GetTextureObjectHandle()));
+            } else {
+                outFboTexture = 0;
+            }
+
+        } else {
+            outFboDim = QSize(0, 0);
+            outFboTexture = 0;
+        }
     }
 
     void MakeContextCurrent() override
@@ -401,8 +427,9 @@ struct SRendererImpl : public IStudioRenderer,
             if (m_Translation) {
                 preview = CStudioPreferences::showEditModePreview()
                         && m_Translation->m_EditCameraEnabled
-                        && !m_Translation->GetPreviewViewportDimensions().isZero();
-                m_Translation->PreRender(preview);
+                        && !m_Translation->GetPreviewViewportDimensions(false).isZero();
+                m_Translation->PreRender(preview || m_fullSizePreview,
+                                         m_fullSizePreview && !preview);
             }
             NVRenderContext &theContext = m_RenderContext->GetRenderContext();
             theContext.SetDepthWriteEnabled(true);
@@ -410,12 +437,19 @@ struct SRendererImpl : public IStudioRenderer,
                                  qt3ds::render::NVRenderClearValues::Color
                                  | qt3ds::render::NVRenderClearValues::Depth));
             if (m_Translation) {
-                // draw scene preview view screen display area layer
                 if (preview) {
-                    m_Translation->Render(0, false, true, false);
-                    m_Translation->PreRender(false);
+                    // draw scene preview view screen display area layer
+                    m_Translation->Render(0, false, true, false, false);
+                    m_Translation->PreRender(m_fullSizePreview, m_fullSizePreview);
                 }
-                m_Translation->Render(m_PickResult.GetWidgetId(), m_GuidesEnabled, false, preview);
+                if (m_fullSizePreview) {
+                    // We need separate full size preview for Scene camera tab even if we are
+                    // rendering the scene normally, since we don't want the guides or widgets
+                    m_Translation->Render(0, false, true, true, false);
+                    m_Translation->PreRender(false, false);
+                }
+                m_Translation->Render(m_PickResult.GetWidgetId(), m_GuidesEnabled, false,
+                                      m_fullSizePreview, preview);
             }
 
             m_RenderContext->EndRender();

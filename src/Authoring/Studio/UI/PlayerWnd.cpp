@@ -242,6 +242,8 @@ void CPlayerWnd::paintGL()
     Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.getRenderer());
     // Don't use request render here, this has to be synchronous inside paintGL
     theRenderer.RenderNow();
+
+    Q_EMIT newFrame();
 }
 
 qreal CPlayerWnd::fixedDevicePixelRatio() const

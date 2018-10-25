@@ -176,6 +176,7 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionProject, &QAction::triggered, this, &CMainFrame::OnViewProject);
     connect(m_ui->actionSlide, &QAction::triggered, this, &CMainFrame::OnViewSlide);
     connect(m_ui->actionTimeline, &QAction::triggered, this, &CMainFrame::OnViewTimeline);
+    connect(m_ui->actionSceneCamera, &QAction::triggered, this, &CMainFrame::onViewSceneCamera);
     connect(m_ui->actionBounding_Boxes, &QAction::triggered,
             this, &CMainFrame::OnViewBoundingBoxes);
     connect(m_ui->actionPivot_Point, &QAction::triggered, this, &CMainFrame::OnViewPivotPoint);
@@ -269,6 +270,7 @@ CMainFrame::CMainFrame()
         OnUpdateViewWireframe();
         OnUpdateViewTooltips();
         OnUpdateViewTimeline();
+        onUpdateViewSceneCamera();
         OnUpdateViewInspector();
         OnUpdateViewAction();
         OnUpdateViewBasicObjects();
@@ -1632,6 +1634,21 @@ void CMainFrame::OnUpdateViewTimeline()
 {
     m_ui->actionTimeline->setChecked(
                 m_paletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_TIMELINE));
+}
+
+void CMainFrame::onViewSceneCamera()
+{
+    m_paletteManager->ToggleControl(CPaletteManager::CONTROLTYPE_SCENECAMERA);
+    onUpdateViewSceneCamera();
+}
+
+void CMainFrame::onUpdateViewSceneCamera()
+{
+    const bool cameraVisible = m_paletteManager->IsControlVisible(
+                CPaletteManager::CONTROLTYPE_SCENECAMERA);
+    m_ui->actionSceneCamera->setChecked(cameraVisible);
+    g_StudioApp.getRenderer().setFullSizePreview(cameraVisible);
+    g_StudioApp.getRenderer().RequestRender();
 }
 
 //==============================================================================

@@ -56,6 +56,7 @@ public:
     virtual void Initialize(QWidget *inWindow) = 0;
 
     virtual void SetViewRect(const QRect &inRect) = 0;
+    virtual void setFullSizePreview(bool enabled) = 0;
 
     virtual void GetEditCameraList(QStringList &outCameras) = 0;
     virtual void SetPolygonFillModeEnabled(bool inEnableFillMode) = 0;
@@ -77,6 +78,7 @@ public:
 
     // synchronously render the content
     virtual void RenderNow() = 0;
+    virtual void getFullSizePreviewFbo(QSize &outFboDim, qt3ds::QT3DSU32 &outFboTexture) = 0;
 
     virtual void MakeContextCurrent() = 0;
     virtual void ReleaseContext() = 0;

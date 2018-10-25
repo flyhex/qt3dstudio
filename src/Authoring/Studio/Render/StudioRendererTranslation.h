@@ -409,6 +409,11 @@ namespace studio {
         NVScopedRefCounted<qt3ds::render::NVRenderRenderBuffer> m_previewRenderBuffer;
         QT3DSVec2 m_previewFboDimensions;
 
+        NVScopedRefCounted<qt3ds::render::NVRenderTexture2D> m_previewFullSizeTexture;
+        NVScopedRefCounted<qt3ds::render::NVRenderFrameBuffer> m_previewFullSizeFbo;
+        NVScopedRefCounted<qt3ds::render::NVRenderRenderBuffer> m_previewFullSizeRenderBuffer;
+        QT3DSVec2 m_previewFullSizeFboDimensions;
+
         STranslation(IStudioRenderer &inRenderer, IQt3DSRenderContext &inContext);
         void MarkBeginComponentSeconds(qt3dsdm::Qt3DSDMSlideHandle) { ++m_ComponentSecondsDepth; }
 
@@ -491,8 +496,8 @@ namespace studio {
         void SetViewport(QT3DSF32 inWidth, QT3DSF32 inHeight) { m_Viewport = QT3DSVec2(inWidth, inHeight); }
 
         QT3DSVec2 GetViewportDimensions() { return m_Viewport; }
-        QT3DSVec2 GetPreviewViewportDimensions();
-        qt3ds::render::NVRenderRect GetPreviewViewport();
+        QT3DSVec2 GetPreviewViewportDimensions(bool fullSize);
+        qt3ds::render::NVRenderRect GetPreviewViewport(bool fullSize);
 
         void ClearDirtySet()
         {
@@ -514,8 +519,9 @@ namespace studio {
         void
         DeactivateScan(SGraphObjectTranslator &inParent,
                        qt3dsdm::Qt3DSDMInstanceHandle inAliasHandle = qt3dsdm::Qt3DSDMInstanceHandle());
-        void PreRender(bool scenePreviewPass);
-        void Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPass, bool overlayPreview);
+        void PreRender(bool scenePreviewPass, bool fullSizePreview);
+        void Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPass, bool fullsizePreview,
+                    bool overlayPreview);
         void EndRender();
         void DoPrepareForDrag(SNode *inSelectedNode);
         void ResetWidgets();

@@ -44,6 +44,7 @@
 #include "ProjectView.h"
 #include "TabOrderHandler.h"
 #include "StudioPreferences.h"
+#include "scenecameraview.h"
 
 #include <QtWidgets/qdockwidget.h>
 #include <QtWidgets/qboxlayout.h>
@@ -65,24 +66,24 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame, QObject *parent)
     inMainFrame->setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
     m_projectDock = new QDockWidget(QObject::tr("Project"), inMainFrame);
-    m_projectDock->setObjectName("project");
+    m_projectDock->setObjectName(QStringLiteral("project"));
     m_projectDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
                                    | Qt::BottomDockWidgetArea);
 
     m_slideDock = new QDockWidget(QObject::tr("Slide"), inMainFrame);
-    m_slideDock->setObjectName("slide");
+    m_slideDock->setObjectName(QStringLiteral("slide"));
     m_slideDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     // Slide palette has a fixed size hint
     auto slideView = new SlideView(m_slideDock);
     slideView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     m_slideDock->setWidget(slideView);
     inMainFrame->addDockWidget(Qt::LeftDockWidgetArea, m_slideDock);
-    m_ControlList.insert(std::make_pair(CONTROLTYPE_SLIDE, m_slideDock));
+    m_ControlList.insert({CONTROLTYPE_SLIDE, m_slideDock});
     QObject::connect(m_slideDock, &QDockWidget::dockLocationChanged, slideView,
                      &SlideView::onDockLocationChange);
 
     m_basicObjectsDock = new QDockWidget(QObject::tr("Basic Objects"), inMainFrame);
-    m_basicObjectsDock->setObjectName("basic_objects");
+    m_basicObjectsDock->setObjectName(QStringLiteral("basic_objects"));
     m_basicObjectsDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
                                         | Qt::BottomDockWidgetArea);
     // Basic objects palette has a fixed size hint
@@ -91,10 +92,10 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame, QObject *parent)
     m_basicObjectsDock->setWidget(basicObjectsView);
     inMainFrame->addDockWidget(Qt::LeftDockWidgetArea, m_basicObjectsDock);
     inMainFrame->tabifyDockWidget(m_basicObjectsDock, m_slideDock);
-    m_ControlList.insert(std::make_pair(CONTROLTYPE_BASICOBJECTS, m_basicObjectsDock));
+    m_ControlList.insert({CONTROLTYPE_BASICOBJECTS, m_basicObjectsDock});
 
     m_timelineDock = new QDockWidget(QObject::tr("Timeline"));
-    m_timelineDock->setObjectName("timeline");
+    m_timelineDock->setObjectName(QStringLiteral("timeline"));
     m_timelineDock->setAllowedAreas(Qt::BottomDockWidgetArea);
 
     // Give the preferred size as percentages of the mainframe size
@@ -113,7 +114,20 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame, QObject *parent)
 
     m_timelineDock->setWidget(timeLineWidgetControl);
     inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, m_timelineDock);
-    m_ControlList.insert(std::make_pair(CONTROLTYPE_TIMELINE, m_timelineDock));
+    m_ControlList.insert({CONTROLTYPE_TIMELINE, m_timelineDock});
+
+    m_cameraDock = new QDockWidget(QObject::tr("Scene Camera"));
+    m_cameraDock->setObjectName(QStringLiteral("scenecamera"));
+    m_cameraDock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::LeftDockWidgetArea
+                                  | Qt::RightDockWidgetArea);
+
+    m_cameraWidget = new SceneCameraView(inMainFrame, m_cameraDock);
+    m_cameraWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+
+    m_cameraDock->setWidget(m_cameraWidget);
+    inMainFrame->addDockWidget(Qt::BottomDockWidgetArea, m_cameraDock);
+    inMainFrame->tabifyDockWidget(m_timelineDock, m_cameraDock);
+    m_ControlList.insert({CONTROLTYPE_SCENECAMERA, m_cameraDock});
 
     // Give the preferred size as percentages of the mainframe size
     m_projectView = new ProjectView(QSize(defaultRightDockWidth, defaultProjectHeight),
@@ -121,10 +135,10 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame, QObject *parent)
     m_projectView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     m_projectDock->setWidget(m_projectView);
     inMainFrame->addDockWidget(Qt::RightDockWidgetArea, m_projectDock);
-    m_ControlList.insert(std::make_pair(CONTROLTYPE_PROJECT, m_projectDock));
+    m_ControlList.insert({CONTROLTYPE_PROJECT, m_projectDock});
 
     m_actionDock = new QDockWidget(QObject::tr("Action"), inMainFrame);
-    m_actionDock->setObjectName("action");
+    m_actionDock->setObjectName(QStringLiteral("action"));
     m_actionDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
                                   | Qt::BottomDockWidgetArea);
     // Give the preferred size as percentages of the mainframe size
@@ -134,10 +148,10 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame, QObject *parent)
     actionView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     m_actionDock->setWidget(actionView);
     inMainFrame->addDockWidget(Qt::RightDockWidgetArea, m_actionDock);
-    m_ControlList.insert(std::make_pair(CONTROLTYPE_ACTION, m_actionDock));
+    m_ControlList.insert({CONTROLTYPE_ACTION, m_actionDock});
 
     m_inspectorDock = new QDockWidget(QObject::tr("Inspector"), inMainFrame);
-    m_inspectorDock->setObjectName("inspector_control");
+    m_inspectorDock->setObjectName(QStringLiteral("inspector_control"));
     m_inspectorDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea
                                      | Qt::BottomDockWidgetArea);
     // Give the preferred size as percentages of the mainframe size
@@ -148,7 +162,7 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame, QObject *parent)
     m_inspectorDock->setWidget(inspectorView);
     inMainFrame->addDockWidget(Qt::RightDockWidgetArea, m_inspectorDock);
     inMainFrame->tabifyDockWidget(m_inspectorDock, m_actionDock);
-    m_ControlList.insert(std::make_pair(CONTROLTYPE_INSPECTOR, m_inspectorDock));
+    m_ControlList.insert({CONTROLTYPE_INSPECTOR, m_inspectorDock});
 
     m_inspectorDock->raise();
 
@@ -280,5 +294,6 @@ void CPaletteManager::EnablePalettes()
     m_timelineDock->setEnabled(true);
     m_actionDock->setEnabled(true);
     m_inspectorDock->setEnabled(true);
+    m_cameraDock->setEnabled(true);
 }
 

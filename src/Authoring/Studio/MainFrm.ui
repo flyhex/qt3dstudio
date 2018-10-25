@@ -116,6 +116,7 @@ Project palette using Import functionality.</string>
     <addaction name="actionProject"/>
     <addaction name="actionSlide"/>
     <addaction name="actionTimeline"/>
+    <addaction name="actionSceneCamera"/>
     <addaction name="separator"/>
     <addaction name="actionBounding_Boxes"/>
     <addaction name="actionPivot_Point"/>
@@ -1008,6 +1009,20 @@ Project palette using Import functionality.</string>
    </property>
    <property name="toolTip">
     <string>Disable Lighting from Scene Lights in Edit Views</string>
+   </property>
+  </action>
+  <action name="actionSceneCamera">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Scene Camera</string>
+   </property>
+   <property name="toolTip">
+    <string>Scene Camera</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+F</string>
    </property>
   </action>
  </widget>

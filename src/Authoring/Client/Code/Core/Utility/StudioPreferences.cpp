@@ -56,6 +56,7 @@ static QColor s_textColor;
 static QColor s_masterColor;
 static QColor s_disabledColor;
 static QColor s_dataInputColor;
+static QColor s_matteColor;
 static QLinearGradient s_welcomeBackgroundGradient;
 
 static QColor s_timelineRowColorNormal;
@@ -142,6 +143,7 @@ void CStudioPreferences::loadPreferences(const QString &filePath)
     s_masterColor = QColor("#5caa15");
     s_disabledColor = QColor("#727476");
     s_dataInputColor = QColor("#ff5102");
+    s_matteColor = QColor("#222222");
 
     s_welcomeBackgroundGradient = QLinearGradient(0.0, 0.0, 1.0, 0.0);
     s_welcomeBackgroundGradient.setColorAt(0.0, QColor("#343E55"));
@@ -882,6 +884,11 @@ QColor CStudioPreferences::disabledColor()
 QColor CStudioPreferences::dataInputColor()
 {
     return s_dataInputColor;
+}
+
+QColor CStudioPreferences::matteColor()
+{
+    return s_matteColor;
 }
 
 QLinearGradient CStudioPreferences::welcomeBackgroundGradient()

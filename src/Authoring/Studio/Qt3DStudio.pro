@@ -37,6 +37,7 @@ INCLUDEPATH += \
     Palettes/Timeline \
     Palettes/TimelineGraphicsView \
     Palettes/TimelineGraphicsView/ui \
+    Palettes/scenecamera \
     Render \
     UI \
     Utils \
@@ -217,7 +218,10 @@ HEADERS += \
     Application/PresentationFile.h \
     Palettes/Project/ChooseImagePropertyDlg.h \
     Application/StudioTutorialPageIndicator.h \
-    Palettes/Inspector/MaterialRefView.h
+    Palettes/Inspector/MaterialRefView.h \
+    Palettes/scenecamera/scenecameraview.h \
+    Palettes/scenecamera/scenecamerascrollarea.h \
+    Palettes/scenecamera/scenecameraglwidget.h
 
 FORMS += \
     MainFrm.ui \
@@ -236,7 +240,8 @@ FORMS += \
     UI/GLVersionDlg.ui \
     UI/StartupDlg.ui \
     Palettes/Project/EditPresentationIdDlg.ui \
-    Palettes/Project/ChooseImagePropertyDlg.ui
+    Palettes/Project/ChooseImagePropertyDlg.ui \
+    Palettes/scenecamera/scenecameraview.ui
 
 SOURCES += \
     Application/AboutDlg.cpp \
@@ -388,7 +393,10 @@ SOURCES += \
     Application/PresentationFile.cpp \
     Palettes/Project/ChooseImagePropertyDlg.cpp \
     Application/StudioTutorialPageIndicator.cpp \
-    Palettes/Inspector/MaterialRefView.cpp
+    Palettes/Inspector/MaterialRefView.cpp \
+    Palettes/scenecamera/scenecameraview.cpp \
+    Palettes/scenecamera/scenecamerascrollarea.cpp \
+    Palettes/scenecamera/scenecameraglwidget.cpp
 
 RESOURCES += \
     MainFrm.qrc \
