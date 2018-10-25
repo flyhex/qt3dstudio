@@ -425,6 +425,15 @@ Rectangle {
                             }
                         }
                     }
+
+                    Column {
+                        visible: model.info.length > 0
+                        StyledLabel {
+                            width: groupElements.width
+                            horizontalAlignment: Text.AlignHCenter
+                            text: model.info;
+                        }
+                    }
                 }
             }
         }

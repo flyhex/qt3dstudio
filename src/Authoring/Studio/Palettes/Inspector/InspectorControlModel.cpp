@@ -228,6 +228,22 @@ bool InspectorControlModel::isInsideMaterialContainer() const
     return bridge->isInsideMaterialContainer(instance);
 }
 
+bool InspectorControlModel::isDefaultMaterial() const
+{
+    const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
+    const auto bridge = studio->GetClientDataModelBridge();
+
+    qt3dsdm::Qt3DSDMInstanceHandle instance;
+    if (const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase))
+        instance = inspectable->GetGroupInstance(0);
+
+    if (!instance.Valid() || !bridge->IsSceneGraphInstance(instance))
+        return false;
+
+    return bridge->GetObjectType(instance) == OBJTYPE_REFERENCEDMATERIAL
+            && bridge->GetSourcePath(instance) == "Default";
+}
+
 bool InspectorControlModel::isAnimatableMaterial() const
 {
     const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
@@ -876,6 +892,11 @@ auto InspectorControlModel::computeTree(CInspectableBase* inspectBase)
             result.append(computeGroup(inspectBase, theIndex, isMaterialFromFile, false));
         }
 
+        if (isDefaultMaterial() && result.size() > 0) {
+            result[result.size() - 1].groupInfo = tr("\nDefault material cannot be edited.\n\n"
+                                                     "Create new or import material, then apply.");
+        }
+
         //Show original material properties for referenced materials
         auto refMaterial = getReferenceMaterial(inspectBase);
         if (refMaterial.Valid()) {
@@ -905,9 +926,10 @@ auto InspectorControlModel::computeGroup(CInspectableBase* inspectable,
     CInspectorGroup* theInspectorGroup = inspectable->GetGroup(theIndex);
     GroupInspectorControl result;
     result.groupTitle = theInspectorGroup->GetName();
+    result.groupInfo.clear();
 
     if (isReference)
-        result.groupTitle += QLatin1String(" (Reference)");
+        result.groupTitle += tr(" (Reference)");
 
     if (const auto cdmInspectable = dynamic_cast<Qt3DSDMInspectable *>(inspectable)) {
         if (const auto group = dynamic_cast<Qt3DSDMInspectorGroup *>(theInspectorGroup)) {
@@ -1695,6 +1717,8 @@ QVariant InspectorControlModel::data(const QModelIndex &index, int role) const
         return m_groupElements.at(row).controlElements;
     case GroupTitleRole:
         return m_groupElements.at(row).groupTitle;
+    case GroupInfoRole:
+        return m_groupElements.at(row).groupInfo;
     }
     return {};
 }
@@ -1704,6 +1728,7 @@ QHash<int, QByteArray> InspectorControlModel::roleNames() const
     auto names = QAbstractListModel::roleNames();
     names.insert(GroupValuesRole, "values");
     names.insert(GroupTitleRole, "title");
+    names.insert(GroupInfoRole, "info");
     return names;
 }
 

@@ -112,7 +112,8 @@ public:
 
     enum Roles {
         GroupValuesRole = Qt::UserRole + 1,
-        GroupTitleRole
+        GroupTitleRole,
+        GroupInfoRole
     };
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -156,6 +157,7 @@ private:
     struct GroupInspectorControl {
         QString groupTitle;
         QVariantList controlElements;
+        QString groupInfo;
 
         ~GroupInspectorControl() {
         }
@@ -194,6 +196,7 @@ private:
     QString getStandardMaterialString() const;
     QString getDefaultMaterialString() const;
     bool isInsideMaterialContainer() const;
+    bool isDefaultMaterial() const;
     bool isBasicMaterial() const;
     bool isAnimatableMaterial() const;
     void updateMaterialValues(const QStringList &values, int elementIndex);
