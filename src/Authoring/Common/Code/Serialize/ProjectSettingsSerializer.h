@@ -157,9 +157,9 @@ public:
         ar.Att("maintainAspect", theMaintainAspect);
         theProjectSettings->setMaintainAspect(theMaintainAspect);
 
-        bool thePreferKtx;
-        ar.Att("preferKtx", thePreferKtx);
-        theProjectSettings->setPreferCompressedTextures(thePreferKtx);
+        bool thePreferKtx = false;
+        if (ar.Att("preferKtx", thePreferKtx))
+            theProjectSettings->setPreferCompressedTextures(thePreferKtx);
 
         {
             CustomColorSerializer ccs;
