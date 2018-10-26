@@ -31,7 +31,119 @@
 \page exporting-from-blender.html
 \ingroup qt3dstudio-best-practices
 
+It is possible to export meshes, transform animations (scale/rotation/location), UV layouts,
+pivot points, object hierarchy and material slots from Blender to Qt 3D Studio.
+
+\section2 Create Material Slots
+
+Material slots needs to be created and assigned in Blender before the export. If this is not done,
+one default material slot will be used for the object in Qt 3D Studio.
+
+\note Only material slots that has a material and that are assign to a mesh on the exported
+object, will be imported in Qt 3D Studio.
+
+To create material slots, follow the steps below.
+
+\list 1
+  \li In the properties panel, select the material tab.
+  \li Press the + to add a new material slots.
+  \li Press the \uicontrol{New} button.
+  \image 3d_Content/blender-export-1.png
+  \li Repeat steps 2 to 4 for each material slot to create.
+\endlist
+
+By default, the first material slot will be assigned to the object
+
+To assign a different material slot to the object, or to assign several material slots to the
+same object, follow the steps below.
+
+\list 1
+  \li In edit mode, select the desired faces.
+  (\e{Shift + Right Mouse Click} to multi select, \e{A} to select all faces).
+  \li In the properties panel, select the material tab.
+  \li In the material slots list, select the desired material slot.
+  \li Press the \uicontrol{Assign} button to assign the selected material slot to selected faces.
+  \image 3D_Content/blender-export-3.png
+\endlist
+
+In Studio, you will see all materials in the scene graph.
+\image 3D_Content/blender-export-7.png
+
+\section2 UV Unwrap Models
+
+UV unwrapping your model will create a UV layout. Without a UV layout you will not be able to
+render any textures on your model in Qt 3D Studio.
+
+There are many different ways and techniques to unwrap 3D meshes. The most basic way to do it in
+Blender is described below.
+
+\list 1
+  \li In edit mode, press \e A to select the whole mesh.
+  \li Press \e U, then select \uicontrol{Unwrap} from the context menu.
+  \image 3D_Content/blender-export-2.png
+\endlist
+
+\section2 Triangulate
+
+\list 1
+  \li In object mode, select the object.
+  \li In the properties panel, select the modifiers tab.
+  \li In the drop down list, select \uicontrol{Triangulate}.
+  \image 3D_Content/blender-export-4.png
+  \li Press \uicontrol{Apply}.
+\endlist
+
+\note When exporting as COLLADA, it is possible to do the triangulation in the actual export step.
+
+\section2 Bake Actions for Animations
+
+\note This step is necessary only if you are exporting animations that are using custom curves
+or object constraints to control the animation.
+
+Actions are data-blocks containing animation data. If you are exporting animations you need to
+bake actions.
+
+\list 1
+  \li Press \e{space bar}.
+  \li Type \e{bake actions}.
+  \li Press \e Enter.
+\endlist
+
+\section2 Apply Location, Rotation and Scale
+
+\note This should \b not be done when exporting animations.
+
+Applying transform values will reset the object's location, rotation and scale values. Location and
+rotation values will change to 0 while scale values will change to 1. The object itself will not
+visually change.
+
+\list 1
+  \li In object mode, select the object.
+  \li Press \e{Ctrl + A}.
+  \li Select Location.
+  \li From the check box in the panel, check also Rotation and Scale.
+  \image 3D_Content/blender-export-5.png
+\endlist
+
+\note Applying Location will also reset the object's origin (pivot point).
+
 \section1 Exporting COLLADA from Blender
 
-Make sure triangulate is on. In addition, you'll need to make sure all of the meshes have materials.
+\list 1
+  \li From the file menu, select \uicontrol {File > Export > Collada (.dae)}.
+  \li Ensure that \uicontrol Triangulation is checked on, unless you already have
+  triangulated all meshes.
+  \li Press the \uicontrol {Export COLLADA} button.
+\endlist
+
+\section1 Exporting FBX from Blender
+
+\list 1
+  \li From the file menu, select \uicontrol {File > Export > FBX (.fbx)}.
+  \li For animations, ensure that \uicontrol {Baked Animation} under the \uicontrol Animation
+  tab is checked on.
+  \image 3D_Content/blender-export-6.png
+  \li Press the \uicontrol {Export FBX} button.
+\endlist
+
 */
