@@ -284,6 +284,82 @@ bool InspectorControlModel::isBasicMaterial() const
     return false;
 }
 
+bool InspectorControlModel::isMaterial() const
+{
+    const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
+    const auto bridge = studio->GetClientDataModelBridge();
+
+    qt3dsdm::Qt3DSDMInstanceHandle instance;
+    if (const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase))
+        instance = inspectable->GetGroupInstance(0);
+
+    if (!instance.Valid())
+        return false;
+
+    const auto type = bridge->GetObjectType(instance);
+
+    return type == OBJTYPE_CUSTOMMATERIAL || type == OBJTYPE_MATERIAL
+            || type == OBJTYPE_REFERENCEDMATERIAL;
+}
+
+void InspectorControlModel::addMaterial() const
+{
+    const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
+    QString path = sceneEditor->getMaterialDirectoryPath() + QStringLiteral("/Material");
+    QString extension = QStringLiteral(".materialdef");
+
+    QFile file(path + extension);
+    int i = 0;
+    while (file.exists()) {
+        i++;
+        file.setFileName(path + QString::number(i) + extension);
+    }
+
+    file.open(QIODevice::WriteOnly);
+    file.write("<MaterialData version=\"1.0\">\n</MaterialData>");
+}
+
+void InspectorControlModel::duplicateMaterial()
+{
+    const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
+    qt3dsdm::Qt3DSDMInstanceHandle instance;
+    if (const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase))
+        instance = inspectable->GetGroupInstance(0);
+
+    if (!instance.Valid())
+        return;
+
+    const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
+    const auto bridge = studio->GetClientDataModelBridge();
+    const auto type = bridge->GetObjectType(instance);
+
+    if (type != OBJTYPE_MATERIAL && type != OBJTYPE_CUSTOMMATERIAL
+            && type != OBJTYPE_REFERENCEDMATERIAL) {
+        return;
+    }
+
+    auto material = instance;
+    if (type == OBJTYPE_REFERENCEDMATERIAL)
+        material = getReferenceMaterial(m_inspectableBase);
+
+    if (material.Valid()) {
+        const auto originalMaterialName = sceneEditor->GetName(material).toQString()
+                + QStringLiteral(" Copy");
+        auto materialName = originalMaterialName;
+        int i = 1;
+        while (QFileInfo(sceneEditor->getMaterialFilePath(materialName)).exists()) {
+            i++;
+            materialName = originalMaterialName + QString::number(i);
+        }
+
+        const auto duplicate = sceneEditor->getOrCreateMaterial(
+                    Q3DStudio::CString::fromQString(materialName), false);
+        sceneEditor->copyMaterialProperties(material, duplicate);
+        saveIfMaterial(duplicate);
+        g_StudioApp.GetCore()->GetDoc()->SelectDataModelObject(duplicate);
+    }
+}
+
 void InspectorControlModel::updateMaterialValues(const QStringList &values, int elementIndex)
 {
     // Find if there are any material items and update the values of those
@@ -1319,8 +1395,7 @@ void InspectorControlModel::saveIfMaterial(qt3dsdm::Qt3DSDMInstanceHandle instan
             }
         }
 
-        if (!sourcePath.isEmpty())
-            sceneEditor->writeMaterialFile(material, materialName, false, sourcePath);
+        sceneEditor->writeMaterialFile(material, materialName, sourcePath.isEmpty(), sourcePath);
     }
 }
 

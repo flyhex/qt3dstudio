@@ -464,7 +464,7 @@ void ProjectFileSystemModel::duplicate(int row)
     const QString destPathEnd = QStringLiteral(".") + srcFile.suffix();
     QString destPath = destPathStart + destPathEnd;
 
-    int i = 0;
+    int i = 1;
     while (QFile::exists(destPath)) {
         i++;
         destPath = destPathStart + QString::number(i) + destPathEnd;

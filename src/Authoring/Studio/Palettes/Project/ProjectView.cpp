@@ -478,7 +478,7 @@ void ProjectView::addMaterial(int row) const
     QString extension = QLatin1String(".materialdef");
 
     QFile file(path + extension);
-    int i = 0;
+    int i = 1;
     while (file.exists()) {
         i++;
         file.setFileName(path + QString::number(i) + extension);

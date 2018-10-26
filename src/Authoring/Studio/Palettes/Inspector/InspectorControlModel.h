@@ -148,6 +148,10 @@ public:
     Q_INVOKABLE void setPropertyControlled(long instance, int property);
     Q_INVOKABLE bool isLayer(long instance) const;
     Q_INVOKABLE QString renderableId(const QString &filePath) const;
+    Q_INVOKABLE bool isMaterial() const;
+    Q_INVOKABLE bool isDefaultMaterial() const;
+    Q_INVOKABLE void addMaterial() const;
+    Q_INVOKABLE void duplicateMaterial();
 
 private:
     void onSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inOldIndex,
@@ -196,9 +200,8 @@ private:
     QString getStandardMaterialString() const;
     QString getDefaultMaterialString() const;
     bool isInsideMaterialContainer() const;
-    bool isDefaultMaterial() const;
-    bool isBasicMaterial() const;
     bool isAnimatableMaterial() const;
+    bool isBasicMaterial() const;
     void updateMaterialValues(const QStringList &values, int elementIndex);
     void updateShaderValues();
     void updateMatDataValues();

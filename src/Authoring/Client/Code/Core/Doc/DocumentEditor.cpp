@@ -1914,11 +1914,14 @@ public:
         m_Doc.SelectDataModelObject(newMaterial);
     }
 
-    QString getMaterialPath(const QString &materialName) const override
+    QString getMaterialDirectoryPath() const override
     {
-        return m_Doc.GetCore()->getProjectFile().getProjectPath()
-                + QStringLiteral("/materials/")
-                + materialName + QStringLiteral(".materialdef");
+        return m_Doc.GetCore()->getProjectFile().getProjectPath() + QStringLiteral("/materials/");
+    }
+
+    QString getMaterialFilePath(const QString &materialName) const override
+    {
+        return getMaterialDirectoryPath() + materialName + QStringLiteral(".materialdef");
     }
 
     Q3DStudio::CString writeMaterialFile(Qt3DSDMInstanceHandle instance,
@@ -1932,7 +1935,7 @@ public:
             || type == EStudioObjectType::OBJTYPE_CUSTOMMATERIAL) {
             QString actualSourcePath = sourcePath;
             if (actualSourcePath.isEmpty())
-                actualSourcePath = getMaterialPath(materialName);
+                actualSourcePath = getMaterialFilePath(materialName);
 
             QFileInfo fileInfo(actualSourcePath);
             if (!fileInfo.dir().exists())

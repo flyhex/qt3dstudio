@@ -41,6 +41,12 @@ Rectangle {
        target: _inspectorModel
        onModelAboutToBeReset: {
            _tabOrderHandler.clear();
+           inspectorToolbar.model = null;
+           if (_inspectorModel.isDefaultMaterial())
+               inspectorToolbar.model = defaultMaterialToolbarModel;
+           else if (_inspectorModel.isMaterial())
+               inspectorToolbar.model = materialToolbarModel;
+           inspectorToolbar.visible = inspectorToolbar.model !== null;
        }
     }
 
@@ -61,6 +67,84 @@ Rectangle {
         Item {
             id: focusEater
             // Used to eat keyboard focus when user clicks outside any property control
+        }
+
+        ListModel {
+            id: materialToolbarModel
+
+            ListElement {
+                image: "add.png"
+                name: qsTr("New")
+                inUse: true
+            }
+
+            ListElement {
+                image: "add.png"
+                name: qsTr("Duplicate")
+                inUse: true
+            }
+
+            property var actions: [
+                function(){ _inspectorModel.addMaterial(); },
+                function(){ _inspectorModel.duplicateMaterial(); }
+            ]
+        }
+
+        ListModel {
+            id: defaultMaterialToolbarModel
+
+            ListElement {
+                image: "add.png"
+                name: qsTr("New")
+                inUse: true
+            }
+
+            ListElement {
+                image: "add-disabled.png"
+                name: qsTr("Duplicate")
+                inUse: false
+            }
+
+            property var actions: [
+                function(){ _inspectorModel.addMaterial(); }
+            ]
+        }
+
+        ListView {
+            id: inspectorToolbar
+            model: null
+            visible: false
+
+            Layout.fillWidth: true
+            Layout.preferredHeight: 32
+            orientation: ListView.Horizontal
+
+            spacing: 4
+
+            delegate: ToolButton {
+                id: control
+                enabled: inUse
+
+                onClicked: {
+                    inspectorToolbar.model.actions[index]();
+                }
+
+                background: Rectangle {
+                    color: control.pressed ? _selectionColor : (hovered ? _studioColor1 : "transparent")
+                    border.color: _studioColor1
+                }
+
+                contentItem: RowLayout {
+                    Image {
+                        source: _resDir + image
+                    }
+                    StyledLabel {
+                        text: name
+                        Layout.preferredWidth: -1
+                        color: control.enabled ? _textColor : _disabledColor
+                    }
+                }
+            }
         }
 
         RowLayout {

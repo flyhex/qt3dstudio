@@ -273,11 +273,12 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
         if (name.hasValue())
             materialName = qt3dsdm::get<TDataStrPtr>(*name)->GetData();
 
-        QString filepath = m_Editor.getMaterialPath(materialName.toQString());
+        QString filepath = m_Editor.getMaterialFilePath(materialName.toQString());
         int i = 1;
         const QString originalMaterialName = materialName.toQString();
         const QString importFile = QStringLiteral("importfile");
         while (QFileInfo(filepath).exists()) {
+            i++;
             QString name;
             QMap<QString, QString> values;
             QMap<QString, QMap<QString, QString>> textureValues;
@@ -287,8 +288,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
                     break;
             }
             materialName = CString::fromQString(originalMaterialName + QString::number(i));
-            filepath = m_Editor.getMaterialPath(materialName.toQString());
-            i++;
+            filepath = m_Editor.getMaterialFilePath(materialName.toQString());
         }
 
         const auto material = m_Editor.getOrCreateMaterial(materialName);
