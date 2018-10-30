@@ -729,7 +729,7 @@ struct SRendererImpl : public IStudioRenderer,
             return Qt3DSDMInstanceHandle();
 
         const QPoint point(pt * m_pixelRatio);
-        const auto pick = m_Translation->Pick(point, TranslationSelectMode::Single);
+        const auto pick = m_Translation->Pick(point, TranslationSelectMode::Single, true);
         if (pick.getType() == StudioPickValueTypes::Instance)
             return pick.getData<Qt3DSDMInstanceHandle>();
         return Qt3DSDMInstanceHandle();

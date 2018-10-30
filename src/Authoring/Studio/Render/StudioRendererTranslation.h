@@ -524,7 +524,8 @@ namespace studio {
 
         void PrepareForDrag() { DoPrepareForDrag(GetSelectedNode()); }
 
-        SStudioPickValue Pick(CPt inMouseCoords, TranslationSelectMode::Enum inSelectMode);
+        SStudioPickValue Pick(CPt inMouseCoords, TranslationSelectMode::Enum inSelectMode,
+                              bool ignoreWidgets = false);
         Option<QT3DSU32> PickWidget(CPt inMouseCoords, TranslationSelectMode::Enum inSelectMode,
                                  qt3ds::widgets::IStudioWidgetBase &inWidget);
 

@@ -2947,52 +2947,57 @@ Option<QT3DSU32> STranslation::PickWidget(CPt inMouseCoords, TranslationSelectMo
     return Empty();
 }
 
-SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::Enum inSelectMode)
+SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::Enum inSelectMode,
+                                    bool ignoreWidgets)
 {
     bool requestRender = false;
 
-    if (m_Doc.GetDocumentReader().AreGuidesEditable()) {
-        qt3dsdm::TGuideHandleList theGuides = m_Doc.GetDocumentReader().GetGuides();
-        CPt renderSpacePt(inMouseCoords.x - (long)m_InnerRect.m_Left,
-                          (long)GetViewportDimensions().y - inMouseCoords.y
-                              - (long)m_InnerRect.m_Bottom);
-        for (size_t guideIdx = 0, guideEnd = theGuides.size(); guideIdx < guideEnd; ++guideIdx) {
-            qt3dsdm::SGuideInfo theGuideInfo =
-                m_Doc.GetDocumentReader().GetGuideInfo(theGuides[guideIdx]);
-            float width = (theGuideInfo.m_Width / 2.0f) + 2.0f;
-            switch (theGuideInfo.m_Direction) {
-            case qt3dsdm::GuideDirections::Horizontal:
-                if (fabs((float)renderSpacePt.y - theGuideInfo.m_Position) <= width)
-                    return theGuides[guideIdx];
-                break;
-            case qt3dsdm::GuideDirections::Vertical:
-                if (fabs((float)renderSpacePt.x - theGuideInfo.m_Position) <= width)
-                    return theGuides[guideIdx];
-                break;
-            default:
-                break;
+    if (!ignoreWidgets) {
+        if (m_Doc.GetDocumentReader().AreGuidesEditable()) {
+            qt3dsdm::TGuideHandleList theGuides = m_Doc.GetDocumentReader().GetGuides();
+            CPt renderSpacePt(inMouseCoords.x - (long)m_InnerRect.m_Left,
+                              (long)GetViewportDimensions().y - inMouseCoords.y
+                                  - (long)m_InnerRect.m_Bottom);
+            for (size_t guideIdx = 0, guideEnd = theGuides.size();
+                 guideIdx < guideEnd; ++guideIdx) {
+                qt3dsdm::SGuideInfo theGuideInfo =
+                    m_Doc.GetDocumentReader().GetGuideInfo(theGuides[guideIdx]);
+                float width = (theGuideInfo.m_Width / 2.0f) + 2.0f;
+                switch (theGuideInfo.m_Direction) {
+                case qt3dsdm::GuideDirections::Horizontal:
+                    if (fabs((float)renderSpacePt.y - theGuideInfo.m_Position) <= width)
+                        return theGuides[guideIdx];
+                    break;
+                case qt3dsdm::GuideDirections::Vertical:
+                    if (fabs((float)renderSpacePt.x - theGuideInfo.m_Position) <= width)
+                        return theGuides[guideIdx];
+                    break;
+                default:
+                    break;
+                }
             }
         }
-    }
-    if (IsPathWidgetActive()) {
-        Option<QT3DSU32> picked = PickWidget(inMouseCoords, inSelectMode, *m_PathWidget);
-        if (picked.hasValue()) {
-            RequestRender();
-            DoPrepareForDrag(&m_PathWidget->GetNode());
-            return m_PathWidget->PickIndexToPickValue(*picked);
+        if (IsPathWidgetActive()) {
+            Option<QT3DSU32> picked = PickWidget(inMouseCoords, inSelectMode, *m_PathWidget);
+            if (picked.hasValue()) {
+                RequestRender();
+                DoPrepareForDrag(&m_PathWidget->GetNode());
+                return m_PathWidget->PickIndexToPickValue(*picked);
+            }
         }
-    }
-    // Pick against the widget first if possible.
-    if (m_LastRenderedWidget && (m_LastRenderedWidget->GetNode().m_Flags.IsActive()
-                                 || m_LastRenderedWidget->GetNode().m_Type
-                                 == GraphObjectTypes::Light
-                                 || m_LastRenderedWidget->GetNode().m_Type
-                                 == GraphObjectTypes::Camera)) {
-        Option<QT3DSU32> picked = PickWidget(inMouseCoords, inSelectMode, *m_LastRenderedWidget);
-        if (picked.hasValue()) {
-            RequestRender();
-            DoPrepareForDrag(&m_LastRenderedWidget->GetNode());
-            return m_LastRenderedWidget->PickIndexToPickValue(*picked);
+        // Pick against the widget first if possible.
+        if (m_LastRenderedWidget && (m_LastRenderedWidget->GetNode().m_Flags.IsActive()
+                                     || m_LastRenderedWidget->GetNode().m_Type
+                                     == GraphObjectTypes::Light
+                                     || m_LastRenderedWidget->GetNode().m_Type
+                                     == GraphObjectTypes::Camera)) {
+            Option<QT3DSU32> picked = PickWidget(inMouseCoords, inSelectMode,
+                                                 *m_LastRenderedWidget);
+            if (picked.hasValue()) {
+                RequestRender();
+                DoPrepareForDrag(&m_LastRenderedWidget->GetNode());
+                return m_LastRenderedWidget->PickIndexToPickValue(*picked);
+            }
         }
     }
     // Pick against Lights and Cameras
