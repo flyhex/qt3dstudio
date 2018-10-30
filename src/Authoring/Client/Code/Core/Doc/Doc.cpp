@@ -2870,8 +2870,11 @@ void CDoc::getSceneMaterials(qt3dsdm::Qt3DSDMInstanceHandle inParent,
     const CClientDataModelBridge *bridge = m_StudioSystem->GetClientDataModelBridge();
     for (long i = 0, count = m_AssetGraph->GetChildCount(inParent); i < count; ++i) {
         qt3dsdm::Qt3DSDMInstanceHandle theChild(m_AssetGraph->GetChild(inParent, i));
-        if (bridge->IsMaterialInstance(theChild) || bridge->IsCustomMaterialInstance(theChild))
+        if (!bridge->isMaterialContainer(theChild) && !bridge->isInsideMaterialContainer(theChild)
+                && (bridge->IsMaterialInstance(theChild)
+                    || bridge->IsCustomMaterialInstance(theChild))) {
             outMats.push_back(theChild);
+        }
 
         getSceneMaterials(theChild, outMats);
     }
