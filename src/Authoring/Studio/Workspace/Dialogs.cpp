@@ -155,11 +155,11 @@ const wchar_t *wideEffectExts[] = {
 };
 
 const char *materialExts[] = {
-    "material", nullptr,
+    "material", "materialdef", nullptr,
 };
 
 const wchar_t *wideMaterialExts[] = {
-    L"material", nullptr,
+    L"material", L"materialdef", nullptr,
 };
 
 const char *soundExts[] = {
