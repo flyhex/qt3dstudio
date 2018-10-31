@@ -1395,7 +1395,10 @@ void InspectorControlModel::saveIfMaterial(qt3dsdm::Qt3DSDMInstanceHandle instan
             }
         }
 
-        sceneEditor->writeMaterialFile(material, materialName, sourcePath.isEmpty(), sourcePath);
+        if (materialName != QLatin1String("Default")) {
+            sceneEditor->writeMaterialFile(material, materialName,
+                                           sourcePath.isEmpty(), sourcePath);
+        }
     }
 }
 
