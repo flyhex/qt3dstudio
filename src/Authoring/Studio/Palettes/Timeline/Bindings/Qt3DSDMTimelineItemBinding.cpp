@@ -363,6 +363,22 @@ void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
     }
 
     CClientDataModelBridge *theBridge = m_StudioSystem->GetClientDataModelBridge();
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+
+    // Display warning if the name and path are the same as the material container
+    if (theBridge->GetParentInstance(m_DataHandle) == doc->GetSceneInstance()
+            && inName.toQString() == theBridge->getMaterialContainerName()) {
+        QString theTitle = QObject::tr("Rename Object Error");
+        QString theString = theBridge->getMaterialContainerName()
+                + QObject::tr(" is a reserved name.");
+        g_StudioApp.GetDialogs()->DisplayMessageBox(theTitle, theString,
+                                                    Qt3DSMessageBox::ICON_ERROR, false);
+        // The timeline still shows the new name so refresh the name property
+        m_StudioSystem->GetFullSystemSignalSender()->SendInstancePropertyValue(
+                    m_DataHandle, theBridge->GetNameProperty());
+        return;
+    }
+
     // Display warning if we had to modify the user-given name to make it unique
     if (!theBridge->CheckNameUnique(theBridge->GetParentInstance(m_DataHandle),
                                     m_DataHandle, inName)) {

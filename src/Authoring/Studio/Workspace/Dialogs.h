@@ -146,6 +146,8 @@ public:
                                                          Qt3DSMessageBox::EMessageBoxIcon inIcon,
                                                          bool inShowCancel,
                                                          QWidget *parent = nullptr);
+    void asyncDisplayMessageBox(const QString &title, const QString &text,
+                                Qt3DSMessageBox::EMessageBoxIcon icon, QWidget *parent = nullptr);
     int displayOverrideAssetBox(const QString &assetPath);
     int DisplayChoiceBox(const QString &inTitle, const QString &inText, int inIcon);
     void DisplayKnownErrorDialog(const QString &inErrorText);

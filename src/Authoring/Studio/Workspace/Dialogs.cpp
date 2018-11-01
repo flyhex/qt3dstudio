@@ -644,6 +644,20 @@ CDialogs::DisplayMessageBox(const QString &inTitle, const QString &inText,
     return theUserChoice;
 }
 
+void CDialogs::asyncDisplayMessageBox(const QString &title, const QString &text,
+                                      Qt3DSMessageBox::EMessageBoxIcon icon, QWidget *parent)
+{
+    if (m_ShowGUI) {
+        if (parent == nullptr)
+            parent = g_StudioApp.m_pMainWnd;
+        QTimer::singleShot(0, [title, text, icon, parent]() {
+            Qt3DSMessageBox::Show(title, text, icon, false, parent);
+        });
+    } else {
+        qCDebug(qt3ds::TRACE_INFO) << title << ": " << text;
+    }
+}
+
 int CDialogs::DisplayChoiceBox(const QString &inTitle, const QString &inText, int inIcon)
 {
     if (m_ShowGUI) {

@@ -1559,7 +1559,8 @@ void InspectorControlModel::setRenderableValue(long instance, int handle, const 
 void InspectorControlModel::setPropertyValue(long instance, int handle, const QVariant &value,
                                              bool commit)
 {
-    const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    const auto studio = doc->GetStudioSystem();
     const auto bridge = studio->GetClientDataModelBridge();
     // Name property needs special handling
     if (handle == bridge->GetNameProperty()) {
@@ -1575,6 +1576,19 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
         Q3DStudio::CString newName = Q3DStudio::CString::fromQString(value.toString());
         if (!newName.IsEmpty()) {
             qt3dsdm::Qt3DSDMInstanceHandle parentInstance = bridge->GetParentInstance(instance);
+
+            if (parentInstance == doc->GetSceneInstance()
+                    && newName.toQString() == bridge->getMaterialContainerName()) {
+                QString theTitle = QObject::tr("Rename Object Error");
+                QString theString = bridge->getMaterialContainerName()
+                        + QObject::tr(" is a reserved name.");
+                // Display error message box asynchronously so focus loss won't trigger setting
+                // the name again
+                g_StudioApp.GetDialogs()->asyncDisplayMessageBox(theTitle, theString,
+                                                                 Qt3DSMessageBox::ICON_ERROR);
+                return;
+            }
+
             if (!bridge->CheckNameUnique(parentInstance, instance, newName)) {
                 QString origNewName = newName.toQString();
                 newName = bridge->GetUniqueChildName(parentInstance, instance, newName);
