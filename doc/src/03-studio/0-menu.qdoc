@@ -160,6 +160,12 @@
       on a rotated hardware device (for example a tablet), check this setting to
       have the presentation rotated correctly. This setting has no effect
       when previewing on your computer.
+    \li
+      \uicontrol{Use ktx textures if available} - Force runtime to check first if there are KTX
+      compressed textures available when loading texture maps. This allows designers to use i.e.
+      PNG or JPG textures while working in the editor, but to automatically use hardware optimized
+      compressed textures on the target device.
+      \note This should only be checked when KTX textures are present.
     \endlist
   \li
     \uicontrol{Project Info}
