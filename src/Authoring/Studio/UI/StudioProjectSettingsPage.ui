@@ -145,6 +145,7 @@ when ktx textures are present.</string>
   <tabstop>m_ClientSizeHeight</tabstop>
   <tabstop>m_checkConstrainProportions</tabstop>
   <tabstop>m_checkPortraitFormat</tabstop>
+  <tabstop>m_checkUseKtx</tabstop>
   <tabstop>m_Author</tabstop>
   <tabstop>m_Company</tabstop>
  </tabstops>
