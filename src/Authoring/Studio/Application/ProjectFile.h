@@ -72,6 +72,7 @@ public:
     QString initialPresentation() const { return m_initialPresentation; }
     void setInitialPresentation(const QString &initialId);
     bool renamePresentationFile(const QString &oldName, const QString &newName);
+    void deletePresentationFile(const QString &filePath);
 
 Q_SIGNALS:
     void presentationIdChanged(const QString &path, const QString &id);

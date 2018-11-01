@@ -41,7 +41,7 @@ public:
     virtual ~ProjectContextMenu();
 
 private Q_SLOTS:
-    void handleOpenPresentation();
+    void handleOpenFile();
     void handleEditPresentationId();
     void handleEditQmlStreamId();
     void handleShowContainingFolder();
@@ -50,11 +50,11 @@ private Q_SLOTS:
     void handleRefreshImport();
     void handleImportAssets();
     void handleAddMaterial();
-    void handleEditMaterial();
     void handleDuplicate();
     void handleInitialPresentation();
     void handleRenamePresentation();
     void handleRenameQmlStream();
+    void handleDeleteFile();
 
 private:
     ProjectView *m_view;

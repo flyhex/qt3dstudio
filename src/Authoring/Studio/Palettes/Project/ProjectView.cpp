@@ -280,14 +280,6 @@ void ProjectView::startDrag(QQuickItem *item, int row)
     QTimer::singleShot(0, item, &QQuickItem::ungrabMouse);
 }
 
-void ProjectView::openPresentation(int row)
-{
-    if (g_StudioApp.PerformSavePrompt()) {
-        const QString path = m_ProjectModel->filePath(row);
-        g_StudioApp.OnLoadDocument(path);
-    }
-}
-
 bool ProjectView::isCurrentPresentation(int row) const
 {
     return m_ProjectModel->isCurrentPresentation(m_ProjectModel->filePath(row));
@@ -385,6 +377,20 @@ bool ProjectView::isMaterialData(int row) const
 bool ProjectView::isInitialPresentation(int row) const
 {
     return m_ProjectModel->isInitialPresentation(m_ProjectModel->filePath(row));
+}
+
+bool ProjectView::isFolder(int row) const
+{
+    return QFileInfo(m_ProjectModel->filePath(row)).isDir();
+}
+
+bool ProjectView::isReferenced(int row) const
+{
+    // TODO: We should also check if the asset is referenced by any other presentation in the
+    // same project. Currently there is no role for that, but it'll be added in QT3DS-2594.
+
+    const auto index = m_ProjectModel->index(row);
+    return index.data(ProjectFileSystemModel::IsReferencedRole).toBool();
 }
 
 QString ProjectView::presentationId(int row) const
@@ -496,6 +502,20 @@ void ProjectView::editMaterial(int row) const
 void ProjectView::duplicate(int row) const
 {
     m_ProjectModel->duplicate(row);
+}
+
+void ProjectView::deleteFile(int row) const
+{
+    Q_ASSERT_X(!isReferenced(row), Q_FUNC_INFO, "Tried to delete referenced file");
+
+    if (isPresentation(row) || isQmlStream(row)) {
+        // When deleting renderables, project file assets needs to be updated
+        g_StudioApp.GetCore()->getProjectFile().deletePresentationFile(
+                    m_ProjectModel->filePath(row));
+    } else {
+        QFile file(m_ProjectModel->filePath(row));
+        file.remove();
+    }
 }
 
 void ProjectView::rebuild()

@@ -42,6 +42,7 @@
 #include <QtCore/qdiriterator.h>
 #include <QtXml/qdom.h>
 #include <QtCore/qsavefile.h>
+#include <QtCore/qtimer.h>
 
 ProjectFile::ProjectFile()
 {
@@ -741,6 +742,74 @@ bool ProjectFile::renamePresentationFile(const QString &oldName, const QString &
     }
 
     return success;
+}
+
+/**
+ * Delete a presentation (or qml-stream) file and remove references to it from the project file.
+ * This function assumes the removed presentation is not referenced by any presentation
+ * in the project and is not the current presentation.
+ *
+ * @param filePath Absolute file path to presentation to delete
+ */
+void ProjectFile::deletePresentationFile(const QString &filePath)
+{
+    QFile(filePath).remove();
+
+    if (m_fileInfo.exists()) {
+        const QString relPath = getRelativeFilePathTo(filePath);
+        const bool isQml = relPath.endsWith(QLatin1String(".qml"));
+
+        // Update records and caches
+        if (isQml && g_StudioApp.m_qmlStreamMap.contains(filePath))
+            g_StudioApp.m_qmlStreamMap.remove(filePath);
+        for (int i = 0, count = g_StudioApp.m_subpresentations.size(); i < count; ++i) {
+            SubPresentationRecord &rec = g_StudioApp.m_subpresentations[i];
+            if (rec.m_argsOrSrc == relPath) {
+                g_StudioApp.m_subpresentations.remove(i);
+                break;
+            }
+        }
+
+        // Update project file
+        QDomDocument domDoc;
+        QSaveFile projectFile(getProjectFilePath());
+        if (!StudioUtils::openDomDocumentSave(projectFile, domDoc))
+            return;
+
+        QDomElement assetsElem
+                = domDoc.documentElement().firstChildElement(QStringLiteral("assets"));
+        if (!assetsElem.isNull()) {
+            QDomNodeList pqNodes
+                    = isQml ? assetsElem.elementsByTagName(QStringLiteral("presentation-qml"))
+                            : assetsElem.elementsByTagName(QStringLiteral("presentation"));
+            if (!pqNodes.isEmpty()) {
+                for (int i = 0; i < pqNodes.count(); ++i) {
+                    QDomElement pqElem = pqNodes.at(i).toElement();
+                    const QString attTag = isQml ? QStringLiteral("args") : QStringLiteral("src");
+                    const QString srcOrArgs = pqElem.attribute(attTag);
+                    if (srcOrArgs == relPath) {
+                        const QString id = pqElem.attribute(QStringLiteral("id"));
+                        // If initial presentation is deleted, change current to initial
+                        if (assetsElem.attribute(QStringLiteral("initial")) == id) {
+                            m_initialPresentation
+                                    = g_StudioApp.GetCore()->GetDoc()->getPresentationId();
+                            assetsElem.setAttribute(QStringLiteral("initial"),
+                                                    m_initialPresentation);
+                        }
+                        assetsElem.removeChild(pqNodes.at(i));
+                        StudioUtils::commitDomDocumentSave(projectFile, domDoc);
+                        break;
+                    }
+                }
+            }
+        }
+        // Update registrations asynchronously, as it messes with event processing, which can
+        // cause issues with file models elsewhere in the editor unless file removal is fully
+        // handled.
+        QTimer::singleShot(0, []() {
+            g_StudioApp.getRenderer().RegisterSubpresentations(g_StudioApp.m_subpresentations);
+        });
+    }
 }
 
 /**
