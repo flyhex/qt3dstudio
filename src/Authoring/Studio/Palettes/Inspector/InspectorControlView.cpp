@@ -130,13 +130,6 @@ void InspectorControlView::OnClosingPresentation()
     m_fileList.clear();
 }
 
-void InspectorControlView::OnLoadedSubPresentation()
-{
-    m_DirectoryConnection = g_StudioApp.getDirectoryWatchingSystem().AddDirectory(
-                g_StudioApp.GetCore()->getProjectFile().getProjectPath(),
-                std::bind(&InspectorControlView::onFilesChanged, this, std::placeholders::_1));
-}
-
 void InspectorControlView::OnTimeChanged()
 {
     m_inspectorControlModel->refresh();

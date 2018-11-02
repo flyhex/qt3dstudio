@@ -131,7 +131,6 @@ public:
     void AddPresentationChangeListener(CPresentationChangeListener *inListener);
     void RemovePresentationChangeListener(CPresentationChangeListener *inListener);
     void FireOnLoadingPresentation(bool inIsSubPresentation = false);
-    void FireOnLoadedSubPresentation();
     void FireOnNewPresentation();
     void FireOnClosingPresentation();
     void FireOnSavingPresentation(const QString &inNewPresentationFile);
