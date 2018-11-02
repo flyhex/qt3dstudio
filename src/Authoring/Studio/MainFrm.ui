@@ -45,7 +45,7 @@ Project palette using Import functionality.</string>
      <x>0</x>
      <y>0</y>
      <width>1800</width>
-     <height>21</height>
+     <height>17</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -791,6 +791,9 @@ Project palette using Import functionality.</string>
    </property>
    <property name="shortcut">
     <string>M</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
    <property name="iconVisibleInMenu">
     <bool>false</bool>

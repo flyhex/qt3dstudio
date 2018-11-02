@@ -190,9 +190,11 @@
   \uicontrol{Pivot Point} - Toggles the display of the pivot point.
   \note Pivot point will only be visible on selected objects.
   selected item.
+\omit
 \li
   \uicontrol{Wireframe} - Toggles the display of wireframes for the selected item.
   \note Works only for tessellated meshes.
+\endomit
 \li
   \uicontrol{Tooltips} - Toggles the display of tool tips when hovering over
   rows in the \l{studio-inspector-palette.html}{Inspector palette}.

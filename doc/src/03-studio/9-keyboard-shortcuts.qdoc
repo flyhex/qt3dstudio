@@ -171,10 +171,12 @@
     \li Show/hide pivot point
     \li \c{Ctrl + Alt + P}
     \li \c{Cmd + Option + P}
+\omit
   \row
     \li Wireframe
     \li \c{M}
     \li \c{M}
+\endomit
   \row
     \li Rulers & guides
     \li \c{Ctrl + R}
@@ -346,10 +348,12 @@ only in \e{Perspective View} and \e{Orthographic View}.
     \li Shading
     \li \c{L}
     \li \c{L}
+\omit
   \row
     \li Wireframes
     \li \c{M}
     \li \c{M}
+\endomit
 \endtable
 
 \section2 Preview
