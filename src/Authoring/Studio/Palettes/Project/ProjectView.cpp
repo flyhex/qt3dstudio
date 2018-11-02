@@ -386,11 +386,9 @@ bool ProjectView::isFolder(int row) const
 
 bool ProjectView::isReferenced(int row) const
 {
-    // TODO: We should also check if the asset is referenced by any other presentation in the
-    // same project. Currently there is no role for that, but it'll be added in QT3DS-2594.
-
     const auto index = m_ProjectModel->index(row);
-    return index.data(ProjectFileSystemModel::IsReferencedRole).toBool();
+    return index.data(ProjectFileSystemModel::IsReferencedRole).toBool()
+            || index.data(ProjectFileSystemModel::IsProjectReferencedRole).toBool();
 }
 
 QString ProjectView::presentationId(int row) const
@@ -506,7 +504,13 @@ void ProjectView::duplicate(int row) const
 
 void ProjectView::deleteFile(int row) const
 {
-    Q_ASSERT_X(!isReferenced(row), Q_FUNC_INFO, "Tried to delete referenced file");
+    if (isReferenced(row)) {
+        // Execution should never get here, as menu option is disabled, but since reference cache
+        // updates are asynchronous, it is possible to have situation where menu item is enabled
+        // but deletion is no longer valid when selected.
+        qWarning() << __FUNCTION__ << "Tried to delete referenced file";
+        return;
+    }
 
     if (isPresentation(row) || isQmlStream(row)) {
         // When deleting renderables, project file assets needs to be updated

@@ -170,6 +170,7 @@ public:
     static QColor disabledColor();
     static QColor dataInputColor();
     static QColor matteColor();
+    static QColor projectReferencedColor();
 
     static QLinearGradient welcomeBackgroundGradient();
 

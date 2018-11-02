@@ -164,7 +164,11 @@ Rectangle {
                             StyledLabel {
                                 id: fileNameLabel
                                 text: _fileId ? fileName + " <" + _fileId + ">" : fileName;
-                                color: _isReferenced ? _textColor : _disabledColor
+                                color: {
+                                    _isReferenced ? _textColor
+                                                  : _isProjectReferenced ? _projectReferencedColor
+                                                                         : _disabledColor
+                                }
                                 leftPadding: 2
 
                                 MouseArea {

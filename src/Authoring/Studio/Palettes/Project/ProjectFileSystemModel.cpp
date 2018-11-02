@@ -47,6 +47,7 @@
 #include "IDragable.h"
 #include <QtQml/qqmlapplicationengine.h>
 #include "IObjectReferenceHelper.h"
+#include "IDirectoryWatchingSystem.h"
 
 ProjectFileSystemModel::ProjectFileSystemModel(QObject *parent) : QAbstractListModel(parent)
     , m_model(new QFileSystemModel(this))
@@ -58,6 +59,12 @@ ProjectFileSystemModel::ProjectFileSystemModel(QObject *parent) : QAbstractListM
             this, &ProjectFileSystemModel::handlePresentationIdChange);
     connect(&g_StudioApp.GetCore()->getProjectFile(), &ProjectFile::assetNameChanged,
             this, &ProjectFileSystemModel::asyncUpdateReferences);
+
+    m_projectReferencesUpdateTimer.setSingleShot(true);
+    m_projectReferencesUpdateTimer.setInterval(0);
+
+    connect(&m_projectReferencesUpdateTimer, &QTimer::timeout,
+            this, &ProjectFileSystemModel::updateProjectReferences);
 }
 
 QHash<int, QByteArray> ProjectFileSystemModel::roleNames() const
@@ -66,6 +73,7 @@ QHash<int, QByteArray> ProjectFileSystemModel::roleNames() const
     modelRoleNames.insert(IsExpandableRole, "_isExpandable");
     modelRoleNames.insert(IsDraggableRole, "_isDraggable");
     modelRoleNames.insert(IsReferencedRole, "_isReferenced");
+    modelRoleNames.insert(IsProjectReferencedRole, "_isProjectReferenced");
     modelRoleNames.insert(DepthRole, "_depth");
     modelRoleNames.insert(ExpandedRole, "_expanded");
     modelRoleNames.insert(FileIdRole, "_fileId");
@@ -102,6 +110,11 @@ QVariant ProjectFileSystemModel::data(const QModelIndex &index, int role) const
     case IsReferencedRole: {
         const QString path = item.index.data(QFileSystemModel::FilePathRole).toString();
         return m_references.contains(path);
+    }
+
+    case IsProjectReferencedRole: {
+        const QString path = item.index.data(QFileSystemModel::FilePathRole).toString();
+        return m_projectReferences.contains(path);
     }
 
     case DepthRole:
@@ -181,18 +194,18 @@ void ProjectFileSystemModel::updateReferences()
                                       projectDir.relativeFilePath(doc->GetDocumentPath())));
 
     auto addReferencesPresentation = [this, doc, &projectPath](const Q3DStudio::CString &str) {
-        addPathsToReferences(projectPath, doc->GetResolvedPathToDoc(str).toQString());
+        addPathsToReferences(m_references, projectPath, doc->GetResolvedPathToDoc(str).toQString());
     };
     auto addReferencesProject = [this, doc, &projectPath](const Q3DStudio::CString &str) {
         addPathsToReferences(
-                    projectPath,
+                    m_references, projectPath,
                     doc->GetCore()->getProjectFile().getAbsoluteFilePathTo(str.toQString()));
     };
     auto addReferencesRenderable = [this, &projectPath, &projectPathSlash, &subpresentationRecord]
             (const QString &id) {
         for (SubPresentationRecord r : qAsConst(subpresentationRecord)) {
             if (r.m_id == id)
-                addPathsToReferences(projectPath, projectPathSlash + r.m_argsOrSrc);
+                addPathsToReferences(m_references, projectPath, projectPathSlash + r.m_argsOrSrc);
         }
     };
 
@@ -264,6 +277,64 @@ void ProjectFileSystemModel::overridableCopyFile(const QString &srcFile, const Q
     }
 }
 
+void ProjectFileSystemModel::updateProjectReferences()
+{
+    m_projectReferences.clear();
+
+    const QDir projectDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath());
+    const QString projectPath = QDir::cleanPath(projectDir.absolutePath());
+
+    QHashIterator<QString, bool> updateIt(m_projectReferencesUpdateMap);
+    while (updateIt.hasNext()) {
+        updateIt.next();
+        m_presentationReferences.remove(updateIt.key());
+        if (updateIt.value()) {
+            // Presentation file added/modified, check that it is one of the subpresentations,
+            // or we don't care about it
+            const QString relPath = g_StudioApp.GetCore()->getProjectFile()
+                    .getRelativeFilePathTo(updateIt.key());
+            for (int i = 0, count = g_StudioApp.m_subpresentations.size(); i < count; ++i) {
+                SubPresentationRecord &rec = g_StudioApp.m_subpresentations[i];
+                if (rec.m_argsOrSrc == relPath) {
+                    QFileInfo fi(updateIt.key());
+                    QHash<QString, QString> importPathMap;
+                    QHash<QString, QString> dummyMap;
+                    QSet<QString> newReferences;
+                    QString dummyStr;
+                    // Since this is not actual import, source and target uip is the same, and we
+                    // are only interested in the absolute paths of the "imported" asset files
+                    PresentationFile::getSourcePaths(fi, fi, importPathMap, dummyStr, dummyMap);
+                    QHashIterator<QString, QString> pathIter(importPathMap);
+                    while (pathIter.hasNext()) {
+                        pathIter.next();
+                        const QString path = pathIter.key();
+                        QString targetAssetPath;
+                        if (path.startsWith(QLatin1String("./"))) // path from project root
+                            targetAssetPath = QDir(projectPath).absoluteFilePath(path);
+                        else // relative path
+                            targetAssetPath = fi.dir().absoluteFilePath(path);
+                        newReferences.insert(QDir::cleanPath(targetAssetPath));
+                    }
+                    m_presentationReferences.insert(updateIt.key(), newReferences);
+                    break;
+                }
+            }
+        }
+    }
+
+    // Update reference cache
+    QHashIterator<QString, QSet<QString>> presIt(m_presentationReferences);
+    while (presIt.hasNext()) {
+        presIt.next();
+        const auto &refs = presIt.value();
+        for (auto &ref : refs)
+            addPathsToReferences(m_projectReferences, projectPath, ref);
+    }
+
+    m_projectReferencesUpdateMap.clear();
+    updateRoles({IsProjectReferencedRole});
+}
+
 Q3DStudio::DocumentEditorFileType::Enum ProjectFileSystemModel::assetTypeForRow(int row)
 {
     if (row <= 0 || row >= m_items.size())
@@ -300,11 +371,26 @@ Q3DStudio::DocumentEditorFileType::Enum ProjectFileSystemModel::assetTypeForRow(
 
 void ProjectFileSystemModel::setRootPath(const QString &path)
 {
+    m_projectReferences.clear();
+    m_presentationReferences.clear();
+    m_projectReferencesUpdateMap.clear();
+    m_projectReferencesUpdateTimer.stop();
+
     setRootIndex(m_model->setRootPath(path));
 
     // Open the presentations folder by default
     connect(this, &ProjectFileSystemModel::dataChanged,
             this, &ProjectFileSystemModel::asyncExpandPresentations);
+
+    QTimer::singleShot(0, [this]() {
+        // Watch the project directory for changes to .uip files.
+        // Note that this initial connection will notify creation for all files, so we call it
+        // asynchronously to ensure the subpresentations are registered.
+        m_directoryConnection = g_StudioApp.getDirectoryWatchingSystem().AddDirectory(
+                    g_StudioApp.GetCore()->getProjectFile().getProjectPath(),
+                    std::bind(&ProjectFileSystemModel::onFilesChanged, this,
+                              std::placeholders::_1));
+    });
 }
 
 void ProjectFileSystemModel::setRootIndex(const QModelIndex &rootIndex)
@@ -1021,14 +1107,15 @@ void ProjectFileSystemModel::updateDefaultDirMap()
     }
 }
 
-void ProjectFileSystemModel::addPathsToReferences(const QString &projectPath,
+void ProjectFileSystemModel::addPathsToReferences(QSet<QString> &references,
+                                                  const QString &projectPath,
                                                   const QString &origPath)
 {
-    m_references.insert(origPath);
+    references.insert(origPath);
     QString path = origPath;
     QString parentPath = QFileInfo(path).path();
     do {
-        m_references.insert(path);
+        references.insert(path);
         path = parentPath;
         parentPath = QFileInfo(path).path();
     } while (path != projectPath && parentPath != path);
@@ -1058,6 +1145,28 @@ void ProjectFileSystemModel::asyncExpandPresentations()
 void ProjectFileSystemModel::asyncUpdateReferences()
 {
     QTimer::singleShot(0, this, &ProjectFileSystemModel::updateReferences);
+}
+
+void ProjectFileSystemModel::onFilesChanged(
+        const Q3DStudio::TFileModificationList &inFileModificationList)
+{
+    // If any presentation file changes, update asset reference caches
+    for (size_t idx = 0, end = inFileModificationList.size(); idx < end; ++idx) {
+        const Q3DStudio::SFileModificationRecord &record(inFileModificationList[idx]);
+        if (record.m_File.isFile()) {
+            if (record.m_File.suffix() == QLatin1String("uip")) {
+                const QString filePath = record.m_File.absoluteFilePath();
+                if (record.m_ModificationType == Q3DStudio::FileModificationType::Created
+                        || record.m_ModificationType == Q3DStudio::FileModificationType::Modified) {
+                    m_projectReferencesUpdateMap.insert(filePath, true);
+                } else if (record.m_ModificationType
+                           == Q3DStudio::FileModificationType::Destroyed) {
+                    m_projectReferencesUpdateMap.insert(filePath, false);
+                }
+                m_projectReferencesUpdateTimer.start();
+            }
+        }
+    }
 }
 
 bool ProjectFileSystemModel::isCurrentPresentation(const QString &path) const

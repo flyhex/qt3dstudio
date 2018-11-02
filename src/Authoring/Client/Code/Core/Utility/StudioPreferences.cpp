@@ -57,6 +57,7 @@ static QColor s_masterColor;
 static QColor s_disabledColor;
 static QColor s_dataInputColor;
 static QColor s_matteColor;
+static QColor s_projectReferencedColor;
 static QLinearGradient s_welcomeBackgroundGradient;
 
 static QColor s_timelineRowColorNormal;
@@ -144,6 +145,7 @@ void CStudioPreferences::loadPreferences(const QString &filePath)
     s_disabledColor = QColor("#727476");
     s_dataInputColor = QColor("#ff5102");
     s_matteColor = QColor("#222222");
+    s_projectReferencedColor = QColor("#aaaa00");
 
     s_welcomeBackgroundGradient = QLinearGradient(0.0, 0.0, 1.0, 0.0);
     s_welcomeBackgroundGradient.setColorAt(0.0, QColor("#343E55"));
@@ -830,6 +832,7 @@ void CStudioPreferences::setQmlContextProperties(QQmlContext *qml)
     qml->setContextProperty(QStringLiteral("_masterColor"), s_masterColor);
     qml->setContextProperty(QStringLiteral("_disabledColor"), s_disabledColor);
     qml->setContextProperty(QStringLiteral("_dataInputColor"), s_dataInputColor);
+    qml->setContextProperty(QStringLiteral("_projectReferencedColor"), s_projectReferencedColor);
     qml->setContextProperty(QStringLiteral("_fontSize"), s_fontSize);
     qml->setContextProperty(QStringLiteral("_controlBaseHeight"), s_controlBaseHeight);
     qml->setContextProperty(QStringLiteral("_idWidth"), s_idWidth);
@@ -889,6 +892,11 @@ QColor CStudioPreferences::dataInputColor()
 QColor CStudioPreferences::matteColor()
 {
     return s_matteColor;
+}
+
+QColor CStudioPreferences::projectReferencedColor()
+{
+    return s_projectReferencedColor;
 }
 
 QLinearGradient CStudioPreferences::welcomeBackgroundGradient()
