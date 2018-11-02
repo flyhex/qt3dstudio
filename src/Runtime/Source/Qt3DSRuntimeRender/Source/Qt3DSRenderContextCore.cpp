@@ -343,11 +343,11 @@ struct SRenderContext : public IQt3DSRenderContext
 #if defined (QT3DS_SHADER_PLATFORM_LIBRARY_DIR)
         const QString platformDirectory;
 #if defined(_WIN32)
-        platformDirectory = QStringLiteral("res\\platform\\win");
+        platformDirectory = QStringLiteral("res/platform/win");
 #elif defined(_LINUX)
-        platformDirectory = QStringLiteral("res\\platform\\linux");
+        platformDirectory = QStringLiteral("res/platform/linux");
 #elif defined(_MACOSX)
-        platformDirectory = QStringLiteral("res\\platform\\macos");
+        platformDirectory = QStringLiteral("res/platform/macos");
 #endif
         GetDynamicObjectSystem().setShaderCodeLibraryPlatformDirectory(platformDirectory);
 #endif

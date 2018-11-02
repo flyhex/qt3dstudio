@@ -281,7 +281,7 @@ namespace render {
         virtual void setShaderCodeLibraryPlatformDirectory(const QString &directory) = 0;
         virtual QString shaderCodeLibraryPlatformDirectory() = 0;
 
-        static QString GetShaderCodeLibraryDirectory() { return QStringLiteral("res\\effectlib\\"); }
+        static QString GetShaderCodeLibraryDirectory() { return QStringLiteral("res/effectlib"); }
     };
 }
 }
