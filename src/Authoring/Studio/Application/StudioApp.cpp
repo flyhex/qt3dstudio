@@ -545,8 +545,8 @@ bool CStudioApp::showStartupDialog()
         CStartupDlg theStartupDlg(m_pMainWnd);
 
         // Populate recent items
-        if (m_views) {
-            CRecentItems *theRecentItems = m_views->getMainFrame()->GetRecentItems();
+        if (m_pMainWnd) {
+            CRecentItems *theRecentItems = m_pMainWnd->GetRecentItems();
             for (long theIndex = 0; theIndex < theRecentItems->GetItemCount(); ++theIndex)
                 theStartupDlg.AddRecentItem(theRecentItems->GetItem(theIndex));
         }

@@ -72,7 +72,7 @@ void CRecentItems::RemoveRecentItem(const QString &inItem, bool rebuild)
         RebuildList();
 }
 
-// load the recent items from the preferences file to m_RecentItems
+// load the recent items from the preferences file to m_RecentItems and add them to menu
 void CRecentItems::ReconstructList()
 {
     m_Menu->clear();
@@ -84,8 +84,11 @@ void CRecentItems::ReconstructList()
 
     for (int i = 0; i < numRecentItems; ++i) {
         QString theFile = CStudioPreferences::getRecentItem(i);
-        if (!theFile.isEmpty() && QFileInfo(theFile).exists())
+        if (!theFile.isEmpty() && QFileInfo(theFile).exists()) {
             m_RecentItems.push_back(theFile);
+            QAction *act = m_Menu->addAction(theFile, this, &CRecentItems::onTriggerRecent);
+            act->setData(i);
+        }
     }
 }
 
