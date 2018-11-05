@@ -1801,8 +1801,8 @@ bool CStudioApp::isQmlStream(const QString &fileName)
     if (m_qmlStreamMap.contains(fileName)) {
         retval = m_qmlStreamMap[fileName];
     } else {
-        if (!fileName.endsWith(QLatin1String(".qml"))) {
-            retval = false;
+        if (!fileName.endsWith(QLatin1String(".qml")) || !QFileInfo(fileName).exists()) {
+            return false; // Don't pollute the map with non-qml or nonexistent files
         } else {
             QQmlApplicationEngine qmlEngine(fileName);
             if (qmlEngine.rootObjects().size() > 0) {

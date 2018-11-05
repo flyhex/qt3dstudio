@@ -512,12 +512,13 @@ void ProjectView::deleteFile(int row) const
         return;
     }
 
+    const QString &filePath = m_ProjectModel->filePath(row);
+
     if (isPresentation(row) || isQmlStream(row)) {
         // When deleting renderables, project file assets needs to be updated
-        g_StudioApp.GetCore()->getProjectFile().deletePresentationFile(
-                    m_ProjectModel->filePath(row));
+        g_StudioApp.GetCore()->getProjectFile().deletePresentationFile(filePath);
     } else {
-        QFile file(m_ProjectModel->filePath(row));
+        QFile file(filePath);
         file.remove();
     }
 }

@@ -45,7 +45,6 @@
 #include "Qt3DSMessageBox.h"
 #include "IDocumentEditor.h"
 #include "IDragable.h"
-#include <QtQml/qqmlapplicationengine.h>
 #include "IObjectReferenceHelper.h"
 #include "IDirectoryWatchingSystem.h"
 
@@ -297,23 +296,43 @@ void ProjectFileSystemModel::updateProjectReferences()
                 SubPresentationRecord &rec = g_StudioApp.m_subpresentations[i];
                 if (rec.m_argsOrSrc == relPath) {
                     QFileInfo fi(updateIt.key());
-                    QHash<QString, QString> importPathMap;
-                    QHash<QString, QString> dummyMap;
                     QSet<QString> newReferences;
-                    QString dummyStr;
-                    // Since this is not actual import, source and target uip is the same, and we
-                    // are only interested in the absolute paths of the "imported" asset files
-                    PresentationFile::getSourcePaths(fi, fi, importPathMap, dummyStr, dummyMap);
-                    QHashIterator<QString, QString> pathIter(importPathMap);
-                    while (pathIter.hasNext()) {
-                        pathIter.next();
-                        const QString path = pathIter.key();
-                        QString targetAssetPath;
-                        if (path.startsWith(QLatin1String("./"))) // path from project root
-                            targetAssetPath = QDir(projectPath).absoluteFilePath(path);
-                        else // relative path
-                            targetAssetPath = fi.dir().absoluteFilePath(path);
-                        newReferences.insert(QDir::cleanPath(targetAssetPath));
+                    if (rec.m_type == QLatin1String("presentation")) {
+                        // Since this is not actual import, source and target uip is the same,
+                        // and we are only interested in the absolute paths of the "imported"
+                        // asset files
+                        QHash<QString, QString> importPathMap;
+                        QHash<QString, QString> dummyMap;
+                        QString dummyStr;
+
+                        PresentationFile::getSourcePaths(fi, fi, importPathMap, dummyStr, dummyMap);
+
+                        QHashIterator<QString, QString> pathIter(importPathMap);
+                        while (pathIter.hasNext()) {
+                            pathIter.next();
+                            const QString path = pathIter.key();
+                            QString targetAssetPath;
+                            if (path.startsWith(QLatin1String("./"))) // path from project root
+                                targetAssetPath = projectDir.absoluteFilePath(path);
+                            else // relative path
+                                targetAssetPath = fi.dir().absoluteFilePath(path);
+                            newReferences.insert(QDir::cleanPath(targetAssetPath));
+                        }
+                    } else { // qml-stream
+                        QQmlApplicationEngine qmlEngine;
+                        bool isQmlStream = false;
+                        QObject *qmlRoot = getQmlStreamRootNode(qmlEngine, updateIt.key(),
+                                                                isQmlStream);
+                        if (qmlRoot && isQmlStream) {
+                            QSet<QString> assetPaths;
+                            getQmlAssets(qmlRoot, assetPaths);
+                            QDir qmlDir = fi.dir();
+                            for (auto &assetSrc : qAsConst(assetPaths)) {
+                                QString targetAssetPath;
+                                targetAssetPath = qmlDir.absoluteFilePath(assetSrc);
+                                newReferences.insert(QDir::cleanPath(targetAssetPath));
+                            }
+                        }
                     }
                     m_presentationReferences.insert(updateIt.key(), newReferences);
                     break;
@@ -333,6 +352,47 @@ void ProjectFileSystemModel::updateProjectReferences()
 
     m_projectReferencesUpdateMap.clear();
     updateRoles({IsProjectReferencedRole});
+}
+
+void ProjectFileSystemModel::getQmlAssets(const QObject *qmlNode,
+                                          QSet<QString> &outAssetPaths) const
+{
+    QString assetSrc = qmlNode->property("source").toString(); // absolute file path
+
+    if (!assetSrc.isEmpty()) {
+        // remove file:///
+        if (assetSrc.startsWith(QLatin1String("file:///")))
+            assetSrc = assetSrc.mid(8);
+        else if (assetSrc.startsWith(QLatin1String("file://")))
+            assetSrc = assetSrc.mid(7);
+
+        outAssetPaths.insert(assetSrc);
+    }
+
+    // recursively load child nodes
+    const QObjectList qmlNodeChildren = qmlNode->children();
+    for (auto &node : qmlNodeChildren)
+        getQmlAssets(node, outAssetPaths);
+}
+
+QObject *ProjectFileSystemModel::getQmlStreamRootNode(QQmlApplicationEngine &qmlEngine,
+                                                      const QString &filePath,
+                                                      bool &outIsQmlStream) const
+{
+    QObject *qmlRoot = nullptr;
+    outIsQmlStream = false;
+
+    qmlEngine.load(filePath);
+    if (qmlEngine.rootObjects().size() > 0) {
+        qmlRoot = qmlEngine.rootObjects().at(0);
+        const char *rootClassName = qmlEngine.rootObjects().at(0)
+                                    ->metaObject()->superClass()->className();
+        // The assumption here is that any qml that is not a behavior is a qml stream
+        if (strcmp(rootClassName, "Q3DStudio::Q3DSQmlBehavior") != 0)
+            outIsQmlStream = true;
+    }
+
+    return qmlRoot;
 }
 
 Q3DStudio::DocumentEditorFileType::Enum ProjectFileSystemModel::assetTypeForRow(int row)
@@ -684,20 +744,14 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
     } else {
         QQmlApplicationEngine qmlEngine;
         QObject *qmlRoot = nullptr;
+        bool isQmlStream = false;
         if (extension == QLatin1String("qml")) {
-            qmlEngine.load(sourceFile);
-            if (qmlEngine.rootObjects().size() > 0) {
-                const char *rootClassName = qmlEngine.rootObjects().at(0)
-                                            ->metaObject()->superClass()->className();
-                // the assumption here is that any qml that is not a behavior is a qml stream
-                if (strcmp(rootClassName, "Q3DStudio::Q3DSQmlBehavior") != 0) { // not a behavior
-                    qmlRoot = qmlEngine.rootObjects().at(0);
-                    // put the qml in the correct folder
-                    if (targetDir.path().endsWith(QLatin1String("/scripts"))) {
-                        const QString path(QStringLiteral("../qml streams"));
-                        targetDir.mkpath(path); // create the folder if doesn't exist
-                        targetDir.cd(path);
-                    }
+            qmlRoot = getQmlStreamRootNode(qmlEngine, sourceFile, isQmlStream);
+            if (qmlRoot) {
+                if (isQmlStream && targetDir.path().endsWith(QLatin1String("/scripts"))) {
+                    const QString path(QStringLiteral("../qml streams"));
+                    targetDir.mkpath(path); // create the folder if doesn't exist
+                    targetDir.cd(path);
                 }
             } else {
                 // Invalid qml file, block import
@@ -722,7 +776,7 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
                 outPresentationNodes.insert(presPath, {});
             importPresentationAssets(fileInfo, QFileInfo(destPath), outPresentationNodes,
                                      outImportedFiles, outOverrideChoice);
-        } else if (qmlRoot) { // importing a qml stream
+        } else if (qmlRoot && isQmlStream) { // importing a qml stream
             const QString presPath
                     = doc->GetCore()->getProjectFile().getRelativeFilePathTo(destPath);
             if (!outPresentationNodes.contains(presPath))
@@ -799,10 +853,20 @@ void ProjectFileSystemModel::importPresentationAssets(
 
         overridableCopyFile(srcAssetPath, targetAssetPath, outImportedFiles, outOverrideChoice);
 
-        // recursively load any uip asset's assets
         if (path.endsWith(QLatin1String(".uip"))) {
+            // recursively load any uip asset's assets
             importPresentationAssets(QFileInfo(srcAssetPath), QFileInfo(targetAssetPath),
                                      outPresentationNodes, outImportedFiles, outOverrideChoice);
+        } else if (path.endsWith(QLatin1String(".qml"))) {
+            // recursively load any qml stream assets
+            QQmlApplicationEngine qmlEngine;
+            bool isQmlStream = false;
+            QObject *qmlRoot = getQmlStreamRootNode(qmlEngine, srcAssetPath, isQmlStream);
+            if (qmlRoot && isQmlStream) {
+                importQmlAssets(qmlRoot, QFileInfo(srcAssetPath).dir(),
+                                QFileInfo(targetAssetPath).dir(), outImportedFiles,
+                                outOverrideChoice);
+            }
         }
     }
 }
@@ -821,25 +885,13 @@ void ProjectFileSystemModel::importQmlAssets(const QObject *qmlNode, const QDir 
                                              QStringList &outImportedFiles,
                                              int &outOverrideChoice) const
 {
-    QString assetSrc = qmlNode->property("source").toString(); // absolute file path
+    QSet<QString> assetPaths;
+    getQmlAssets(qmlNode, assetPaths);
 
-    if (!assetSrc.isEmpty()) {
-        // remove file:///
-        if (assetSrc.startsWith(QLatin1String("file:///")))
-            assetSrc = assetSrc.mid(8);
-        else if (assetSrc.startsWith(QLatin1String("file://")))
-            assetSrc = assetSrc.mid(7);
-
+    for (auto &assetSrc : qAsConst(assetPaths)) {
         overridableCopyFile(srcDir.absoluteFilePath(assetSrc),
                             targetDir.absoluteFilePath(srcDir.relativeFilePath(assetSrc)),
                             outImportedFiles, outOverrideChoice);
-    }
-
-    // recursively load child nodes
-    const QObjectList qmlNodeChildren = qmlNode->children();
-    for (int i = 0; i < qmlNodeChildren.count(); ++i) {
-        importQmlAssets(qmlNodeChildren.at(i), srcDir, targetDir, outImportedFiles,
-                        outOverrideChoice);
     }
 }
 
@@ -1123,9 +1175,12 @@ void ProjectFileSystemModel::addPathsToReferences(QSet<QString> &references,
 
 void ProjectFileSystemModel::handlePresentationIdChange(const QString &path, const QString &id)
 {
-    int row = rowForPath(QDir::cleanPath(
-                             QDir(g_StudioApp.GetCore()->GetDoc()->GetCore()->getProjectFile()
-                                  .getProjectPath()).absoluteFilePath(path)));
+    const QString cleanPath = QDir::cleanPath(
+                QDir(g_StudioApp.GetCore()->GetDoc()->GetCore()->getProjectFile()
+                     .getProjectPath()).absoluteFilePath(path));
+    int row = rowForPath(cleanPath);
+    m_projectReferencesUpdateMap.insert(cleanPath, true);
+    m_projectReferencesUpdateTimer.start();
     updateRoles({FileIdRole, ExtraIconRole}, row, row);
 }
 
@@ -1154,10 +1209,13 @@ void ProjectFileSystemModel::onFilesChanged(
     for (size_t idx = 0, end = inFileModificationList.size(); idx < end; ++idx) {
         const Q3DStudio::SFileModificationRecord &record(inFileModificationList[idx]);
         if (record.m_File.isFile()) {
-            if (record.m_File.suffix() == QLatin1String("uip")) {
+            const bool isQml = record.m_File.suffix() == QLatin1String("qml");
+            if (isQml || record.m_File.suffix() == QLatin1String("uip")) {
                 const QString filePath = record.m_File.absoluteFilePath();
                 if (record.m_ModificationType == Q3DStudio::FileModificationType::Created
                         || record.m_ModificationType == Q3DStudio::FileModificationType::Modified) {
+                    if (isQml && !g_StudioApp.isQmlStream(filePath))
+                        continue; // Skip non-stream qml's to match import logic
                     m_projectReferencesUpdateMap.insert(filePath, true);
                 } else if (record.m_ModificationType
                            == Q3DStudio::FileModificationType::Destroyed) {

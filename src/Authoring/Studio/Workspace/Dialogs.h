@@ -107,6 +107,7 @@ public:
     static bool IsSoundFileExtension(const char *inExt);
     static bool isPresentationFileExtension(const char *inExt);
     static bool isMeshFileExtension(const char *inExt);
+    static bool isImportFileExtension(const char *inExt);
     static bool isProjectFileExtension(const char *inExt);
 
     static const wchar_t *GetWideDAEFileExtension();

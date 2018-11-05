@@ -39,6 +39,7 @@
 #include <QtCore/qlist.h>
 #include <QtCore/qurl.h>
 #include <QtCore/qtimer.h>
+#include <QtQml/qqmlapplicationengine.h>
 
 QT_FORWARD_DECLARE_CLASS(QFileSystemModel)
 
@@ -126,6 +127,9 @@ private:
     void overridableCopyFile(const QString &srcFile, const QString &targetFile,
                              QStringList &outImportedFiles, int &outOverrideChoice) const;
     void updateProjectReferences();
+    void getQmlAssets(const QObject *qmlNode, QSet<QString> &outAssetPaths) const;
+    QObject *getQmlStreamRootNode(QQmlApplicationEngine &qmlEngine, const QString &filePath,
+                                  bool &outIsQmlStream) const;
 
     struct TreeItem {
         QPersistentModelIndex index;
@@ -141,7 +145,7 @@ private:
     QSet<QString> m_references;
     QHash<QString, QString> m_defaultDirToAbsPathMap;
 
-    // Cache of assets referred by other presentation files in the project
+    // Cache of assets referred by other presentation files and qml streams in the project
     // Key: Absolute presentation file path
     // Value: Set of absolute asset file paths referred by the presentation file
     QHash<QString, QSet<QString>> m_presentationReferences;

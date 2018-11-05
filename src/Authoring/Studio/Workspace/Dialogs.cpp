@@ -803,6 +803,11 @@ bool CDialogs::isMeshFileExtension(const char *inExt)
     return IsFileExtension(inExt, meshExts);
 }
 
+bool CDialogs::isImportFileExtension(const char *inExt)
+{
+    return IsFileExtension(inExt, importExts);
+}
+
 bool CDialogs::isPresentationFileExtension(const char *inExt)
 {
     return IsFileExtension(inExt, presentationExts);

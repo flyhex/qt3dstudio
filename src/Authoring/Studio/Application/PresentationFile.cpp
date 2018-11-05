@@ -183,6 +183,25 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
         }
     }
 
+    // mesh files for group imports are found under <Graph>
+    QDomNodeList modelElems = domDoc.documentElement().firstChild()
+            .firstChildElement(QStringLiteral("Graph"))
+            .elementsByTagName(QStringLiteral("Model"));
+
+    for (int i = 0; i < modelElems.count(); ++i) {
+        QDomElement elem = modelElems.at(i).toElement();
+        const QString sourcePath = elem.attribute(QStringLiteral("sourcepath"));
+        if (!sourcePath.isEmpty()) {
+            QFileInfo fi(sourcePath);
+            QByteArray ext = fi.suffix().toLatin1();
+            if (CDialogs::isMeshFileExtension(ext.data())) {
+                if (!outPathMap.contains(sourcePath))
+                    outPathMap.insert(sourcePath, {});
+                continue;
+            }
+        }
+    }
+
     // search <Logic> -> <State> -> <Add>
     QDomNodeList addElems = domDoc.documentElement().firstChild()
             .firstChildElement(QStringLiteral("Logic"))
@@ -194,9 +213,12 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
         if (!sourcePath.isEmpty()) {
             QFileInfo fi(sourcePath);
             QByteArray ext = fi.suffix().toLatin1();
-            // add image and mesh paths
+            // supported types:
+            // images, custom mesh files for basic objects, import files, materialdef files
             if (CDialogs::IsImageFileExtension(ext.data())
-                    || CDialogs::isMeshFileExtension(ext.data())) {
+                    || CDialogs::isMeshFileExtension(ext.data())
+                    || CDialogs::isImportFileExtension(ext.data())
+                    || CDialogs::IsMaterialFileExtension(ext.data())) {
                 if (!outPathMap.contains(sourcePath))
                     outPathMap.insert(sourcePath, {});
                 continue;
