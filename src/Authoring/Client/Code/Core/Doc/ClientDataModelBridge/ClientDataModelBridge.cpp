@@ -1163,7 +1163,7 @@ bool CClientDataModelBridge::isInsideMaterialContainerAndNotReferenced(
 
 QString CClientDataModelBridge::getMaterialContainerName() const
 {
-    return QStringLiteral("MaterialContainer");
+    return QStringLiteral("__Container");
 }
 
 QString CClientDataModelBridge::getMaterialContainerParentPath() const
