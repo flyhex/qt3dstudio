@@ -625,7 +625,6 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                 m_rowMover->start(m_rowManager->selectedRows());
             }
             if (m_rowMover->isActive()) {
-                m_rowManager->collapseAllPropertyRows();
                 m_rowMover->updateTargetRow(event->scenePos());
                 updateAutoScrolling(event->scenePos().y());
             }

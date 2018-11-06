@@ -1047,8 +1047,6 @@ CDropTarget *TimelineWidget::FindDropCandidate(CPt &inMousePoint, Qt::KeyboardMo
 
     CTimeLineDropTarget *theTarget = new CTimeLineDropTarget();
 
-    m_graphicsScene->rowManager()->collapseAllPropertyRows();
-
     int mouseY = inMousePoint.y - m_navigationBar->height()
                  + viewTreeContent()->verticalScrollBar()->value()
                  - viewTreeContent()->verticalScrollBar()->minimum();

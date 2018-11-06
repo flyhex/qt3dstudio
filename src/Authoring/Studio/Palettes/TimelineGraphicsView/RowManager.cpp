@@ -483,12 +483,3 @@ int RowManager::getLastChildIndex(RowTree *row, int index)
 
     return -1;
 }
-
-void RowManager::collapseAllPropertyRows()
-{
-    for (int i = 0; i < m_layoutTree->count(); ++i) {
-        RowTree *row = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
-        if (row->isProperty() && row->propertyExpanded())
-            row->setPropertyExpanded(false);
-    }
-}

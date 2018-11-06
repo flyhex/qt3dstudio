@@ -56,7 +56,6 @@ public:
     void updateFiltering(RowTree *rowTree = nullptr);
     void recreateRowsFromBinding(ITimelineItemBinding *rootBinding);
     void updateRulerDuration(bool updateMaxDuration = true);
-    void collapseAllPropertyRows();
     int getChildIndex(RowTree *parentRow, RowTree *childRow);
     int getRowIndex(RowTree *row, int startAt = 1);
     bool isFirstChild(RowTree *parent, RowTree *child);

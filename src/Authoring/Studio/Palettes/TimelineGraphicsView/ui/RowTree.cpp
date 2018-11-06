@@ -548,8 +548,13 @@ void RowTree::updateFilter()
     bool expandOk  = !expandHidden();
 
     m_filtered = !(shyOk && visibleOk && lockOk);
-    setVisible(parentOk && shyOk && visibleOk && lockOk && expandOk);
-    m_rowTimeline->setVisible(isVisible());
+    const bool visible = parentOk && shyOk && visibleOk && lockOk && expandOk;
+    setVisible(visible);
+    m_rowTimeline->setVisible(visible);
+    for (auto propRow : qAsConst(m_childProps)) {
+        propRow->setVisible(visible);
+        propRow->m_rowTimeline->setVisible(visible);
+    }
 }
 
 int RowTree::getCountDecendentsRecursive() const
