@@ -66,6 +66,7 @@ void SceneCameraGlWidget::initializeGL()
     m_program = new QOpenGLShaderProgram();
     if (!m_program->addShaderFromSourceCode(
                 QOpenGLShader::Vertex,
+                "#version 110\n"
                 "attribute highp vec2 aVertex;\n"
                 "attribute highp vec2 aUV;\n"
                 "uniform highp vec4 uTexOffset;\n"
@@ -82,6 +83,7 @@ void SceneCameraGlWidget::initializeGL()
     }
     if (!m_program->addShaderFromSourceCode(
                 QOpenGLShader::Fragment,
+                "#version 110\n"
                 "varying highp vec2 vUV;\n"
                 "uniform sampler2D uSampler;\n"
                 "void main(void) {\n"
