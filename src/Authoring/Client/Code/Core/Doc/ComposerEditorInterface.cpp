@@ -291,7 +291,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
             filepath = m_Editor.getMaterialFilePath(materialName.toQString());
         }
 
-        const auto material = m_Editor.getOrCreateMaterial(materialName);
+        const auto material = m_Editor.getOrCreateMaterial(materialName.toQString());
         m_Editor.SetSpecificInstancePropertyValue(0, material, L"importid",
                                                   std::make_shared<CDataStr>(desc.m_Id));
         m_Editor.SetSpecificInstancePropertyValue(
@@ -306,7 +306,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
         Qt3DSDMInstanceHandle parent(FindInstance(inParent));
         auto instance = m_Editor.CreateSceneGraphInstance(ComposerObjectTypes::ReferencedMaterial,
                                                           parent, m_Slide);
-        m_Editor.setMaterialReferenceByName(instance, materialName);
+        m_Editor.setMaterialReferenceByPath(instance, materialName.toQString());
         m_Editor.SetName(instance, materialName);
         m_Editor.setMaterialSourcePath(instance, sourcePath);
     }

@@ -188,8 +188,10 @@ public:
 
     virtual void removeUnusedFromMaterialContainer() = 0;
 
-    virtual Qt3DSDMInstanceHandle getMaterial(const Q3DStudio::CString &materialName) = 0;
-    virtual Qt3DSDMInstanceHandle getOrCreateMaterial(const Q3DStudio::CString &materialName,
+    virtual QString getMaterialNameFromFilePath(const QString &path) = 0;
+
+    virtual Qt3DSDMInstanceHandle getMaterial(const QString &path) = 0;
+    virtual Qt3DSDMInstanceHandle getOrCreateMaterial(const QString &path,
                                                       bool selectCreatedInstance = true) = 0;
 
     virtual void copyMaterialProperties(Qt3DSDMInstanceHandle src, Qt3DSDMInstanceHandle dst) = 0;
@@ -235,14 +237,15 @@ public:
     virtual void SetMaterialType(TInstanceHandle instance,
                                  const Q3DStudio::CString &inRelativePathToMaterialFile) = 0;
 
-    virtual void setMaterialProperties(TInstanceHandle instance, const QString &materialName,
+    virtual void setMaterialProperties(TInstanceHandle instance,
                                        const Q3DStudio::CString &materialSourcePath,
                                        const QMap<QString, QString> &values,
                                        const QMap<QString, QMap<QString, QString>>
                                        &textureValues) = 0;
 
-    virtual void setMaterialReferenceByName(TInstanceHandle instance,
-                                            const Q3DStudio::CString &materialName) = 0;
+    virtual void setMaterialReferenceByPath(TInstanceHandle instance, const QString &path) = 0;
+
+    virtual void setMaterialNameByPath(TInstanceHandle instance, const QString &path) = 0;
 
     virtual void setMaterialSourcePath(TInstanceHandle instance,
                                        const Q3DStudio::CString &materialSourcePath) = 0;

@@ -584,13 +584,12 @@ void ProjectFileSystemModel::showInfo(int row)
 
     if (fi.suffix() == QLatin1String("materialdef")) {
         const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
-        const auto material = sceneEditor
-                ->getOrCreateMaterial(Q3DStudio::CString::fromQString(fi.completeBaseName()));
+        const auto material = sceneEditor->getOrCreateMaterial(path);
         QString name;
         QMap<QString, QString> values;
         QMap<QString, QMap<QString, QString>> textureValues;
         sceneEditor->getMaterialInfo(fi.absoluteFilePath(), name, values, textureValues);
-        sceneEditor->setMaterialValues(name, values, textureValues);
+        sceneEditor->setMaterialValues(fi.absoluteFilePath(), values, textureValues);
         if (material.Valid())
             g_StudioApp.GetCore()->GetDoc()->SelectDataModelObject(material);
     }

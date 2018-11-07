@@ -275,12 +275,12 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
                 QMap<QString, QString> values;
                 QMap<QString, QMap<QString, QString>> textureValues;
                 sceneEditor->getMaterialInfo(m_FilePath, name, values, textureValues);
-                const auto material = sceneEditor->getOrCreateMaterial(materialName);
+                const auto material = sceneEditor->getOrCreateMaterial(m_FilePath);
                 Q3DStudio::CString docDir = theDoc.GetDocumentDirectory();
                 Q3DStudio::CFilePath relPath = Q3DStudio::CFilePath::GetRelativePathFromBase(
                             docDir, Q3DStudio::CString::fromQString(m_FilePath));
                 Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
-                        ->setMaterialProperties(inTarget, name, relPath, values, textureValues);
+                        ->setMaterialProperties(inTarget, relPath, values, textureValues);
                 theDoc.SelectDataModelObject(inTarget);
             }
         } else {

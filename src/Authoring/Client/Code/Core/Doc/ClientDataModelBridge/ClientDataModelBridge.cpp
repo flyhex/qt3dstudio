@@ -477,7 +477,7 @@ void CClientDataModelBridge::SetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHa
 }
 
 Q3DStudio::CString CClientDataModelBridge::GetName(
-        qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle) const
+        qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle, bool renameMaterials) const
 {
     IPropertySystem *thePropertySystem = m_Doc->GetStudioSystem()->GetPropertySystem();
     TDataStrPtr theString;
@@ -487,6 +487,12 @@ Q3DStudio::CString CClientDataModelBridge::GetName(
                                                         theValue)
             && GetValueType(theValue) == DataModelDataType::String)
             theString = qt3dsdm::get<TDataStrPtr>(theValue);
+        if (renameMaterials && isInsideMaterialContainer(inInstanceHandle)) {
+            auto name = Q3DStudio::CString(theString->GetData());
+            int index = name.rfind('/');
+            if (index != Q3DStudio::CString::ENDOFSTRING)
+                return name.substr(index + 1);
+        }
     }
     return (theString) ? Q3DStudio::CString(theString->GetData()) : "";
 }
@@ -1159,6 +1165,11 @@ bool CClientDataModelBridge::isInsideMaterialContainerAndNotReferenced(
         return !isReferenced;
     }
     return false;
+}
+
+QString CClientDataModelBridge::getDefaultMaterialName() const
+{
+    return QStringLiteral("/Default");
 }
 
 QString CClientDataModelBridge::getMaterialContainerName() const

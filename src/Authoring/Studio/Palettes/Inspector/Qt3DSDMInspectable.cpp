@@ -72,11 +72,11 @@ Q3DStudio::CString Qt3DSDMInspectable::GetName()
             m_Core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
 
     if (m_Instance == m_DualPersonalityInstance)
-        return theBridge->GetName(m_Instance);
+        return theBridge->GetName(m_Instance, true);
 
-    Q3DStudio::CString theName = theBridge->GetName(m_Instance);
+    Q3DStudio::CString theName = theBridge->GetName(m_Instance, true);
     theName += " (";
-    theName += theBridge->GetName(m_DualPersonalityInstance);
+    theName += theBridge->GetName(m_DualPersonalityInstance, true);
     theName += ")";
 
     return theName;

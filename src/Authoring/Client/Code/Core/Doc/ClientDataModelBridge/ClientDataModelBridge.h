@@ -347,7 +347,8 @@ public: // helpers
                         qt3dsdm::Qt3DSDMPropertyHandle inSlot, qt3dsdm::Qt3DSDMSlideHandle inSlide);
 
     void SetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle, const Q3DStudio::CString &inName);
-    Q3DStudio::CString GetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle) const;
+    Q3DStudio::CString GetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle,
+                               bool renameMaterials = false) const;
 
     // Convenience functions to get GUID property value from instance handle
 private:
@@ -373,6 +374,7 @@ public:
     bool isMaterialContainer(qt3dsdm::Qt3DSDMInstanceHandle instance) const;
     bool isInsideMaterialContainer(qt3dsdm::Qt3DSDMInstanceHandle instance) const;
     bool isInsideMaterialContainerAndNotReferenced(qt3dsdm::Qt3DSDMInstanceHandle instance) const;
+    QString getDefaultMaterialName() const;
     QString getMaterialContainerName() const;
     QString getMaterialContainerParentPath() const;
     QString getMaterialContainerPath() const;
