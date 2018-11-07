@@ -140,12 +140,14 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(positionv, m_PositionV, float, 0.f)                                   \
     HANDLE_COMPOSER_PROPERTY(pivotu, m_PivotU, float, 0.f)                                         \
     HANDLE_COMPOSER_PROPERTY(pivotv, m_PivotV, float, 0.f)                                         \
-    HANDLE_COMPOSER_PROPERTY(subpresentation, m_SubPresentation, TDataStrPtr, L"")
+    HANDLE_COMPOSER_PROPERTY(subpresentation, m_SubPresentation, TDataStrPtr, L"")                 \
+    HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_LIGHTMAP_PROPERTIES                                                       \
     HANDLE_COMPOSER_PROPERTY(lightmapindirect, m_LightmapIndirect, SLong4, 0)                      \
     HANDLE_COMPOSER_PROPERTY(lightmapradiosity, m_LightmapRadiosity, SLong4, 0)                    \
-    HANDLE_COMPOSER_PROPERTY(lightmapshadow, m_LightmapShadow, SLong4, 0)
+    HANDLE_COMPOSER_PROPERTY(lightmapshadow, m_LightmapShadow, SLong4, 0)                          \
+    HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_CUSTOM_MATERIAL_PROPERTIES                                                \
     HANDLE_QT3DS_RENDER_PROPERTY(iblprobe, m_IblProbe, SLong4, 0)
@@ -231,7 +233,8 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(lightprobe2, m_LightProbe2, SLong4, 0)                                \
     HANDLE_COMPOSER_PROPERTY(probe2fade, m_Probe2Fade, float, 1)                                   \
     HANDLE_COMPOSER_PROPERTY(probe2window, m_Probe2Window, float, 1)                               \
-    HANDLE_COMPOSER_PROPERTY(probe2pos, m_Probe2Pos, float, 0.5f)
+    HANDLE_COMPOSER_PROPERTY(probe2pos, m_Probe2Pos, float, 0.5f)                                  \
+    HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_LIGHT_PROPERTIES                                                          \
     HANDLE_COMPOSER_PROPERTY(lighttype, m_LightType, TDataStrPtr, L"Directional")                  \
@@ -250,7 +253,8 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(shdwmapres, m_ShadowMapRes, qt3ds::QT3DSI32, 9)                                  \
     HANDLE_COMPOSER_PROPERTY(shdwmapfar, m_ShadowMapFar, float, 5000.0f)                           \
     HANDLE_COMPOSER_PROPERTY(shdwmapfov, m_ShadowMapFov, float, 90.0f)                             \
-    HANDLE_COMPOSER_PROPERTY(shdwfilter, m_ShadowFilter, float, 35.0f)
+    HANDLE_COMPOSER_PROPERTY(shdwfilter, m_ShadowFilter, float, 35.0f)                             \
+    HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_CAMERA_PROPERTIES                                                         \
     HANDLE_COMPOSER_PROPERTY(orthographic, m_Orthographic, bool, false)                            \
@@ -259,7 +263,8 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(clipnear, m_ClipNear, float, 10.f)                                    \
     HANDLE_COMPOSER_PROPERTY(clipfar, m_ClipFar, float, 100000.f)                                  \
     HANDLE_COMPOSER_PROPERTY(scalemode, m_ScaleMode, TDataStrPtr, L"Fit")                          \
-    HANDLE_COMPOSER_PROPERTY(scaleanchor, m_ScaleAnchor, TDataStrPtr, L"Center")
+    HANDLE_COMPOSER_PROPERTY(scaleanchor, m_ScaleAnchor, TDataStrPtr, L"Center")                   \
+    HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_EDIT_CAMERA_PROPERTIES HANDLE_COMPOSER_PROPERTY(is3d, m_Is3d, bool, false)
 
@@ -279,13 +284,15 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(componentid, m_ComponentId, SLong4, 0)                                \
     HANDLE_COMPOSER_PROPERTY(playmode, m_PlayMode, TDataStrPtr, L"Looping")                        \
     HANDLE_COMPOSER_PROPERTY(playthroughto, m_PlaythroughTo, SStringOrInt, L"Next")                \
-    HANDLE_COMPOSER_PROPERTY(initialplaystate, m_InitialPlayState, TDataStrPtr, L"Play")
+    HANDLE_COMPOSER_PROPERTY(initialplaystate, m_InitialPlayState, TDataStrPtr, L"Play")           \
+    HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_ACTION_PROPERTIES                                                         \
     HANDLE_COMPOSER_PROPERTY(actioneyeball, m_ActionEyeball, bool, true)
 
 #define ITERATE_COMPOSER_ALIAS_PROPERTIES                                                          \
-    HANDLE_COMPOSER_PROPERTY(referencednode, m_ReferencedNode, SObjectRefType, L"")
+    HANDLE_COMPOSER_PROPERTY(referencednode, m_ReferencedNode, SObjectRefType, L"")                \
+    HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_PATH_PROPERTIES                                                           \
     HANDLE_COMPOSER_PROPERTY(pathtype, m_PathType, TDataStrPtr, L"Geometry")                       \
@@ -301,7 +308,8 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(endcapoffset, m_EndCapOffset, float, 0.0f)                            \
     HANDLE_COMPOSER_PROPERTY(endcapopacity, m_EndCapOpacity, float, 0.0f)                          \
     HANDLE_COMPOSER_PROPERTY(endcapwidth, m_EndCapWidth, float, 0.0f)                              \
-    HANDLE_COMPOSER_PROPERTY(paintstyle, m_PaintStyle, TDataStrPtr, L"Stroked")
+    HANDLE_COMPOSER_PROPERTY(paintstyle, m_PaintStyle, TDataStrPtr, L"Stroked")                    \
+    HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_PATH_ANCHOR_POINT_PROPERTIES                                              \
     HANDLE_COMPOSER_PROPERTY_DUPLICATE(position, m_Position, SFloat2, SFloat2(0.0f, 0.0f))         \

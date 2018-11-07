@@ -299,9 +299,57 @@ Rectangle {
                                                     text: qsTr("Enable animation")
                                                     enabled: animateButtonMouseArea.containsMouse
                                                 }
-
                                             }
                                         }
+
+                                        Rectangle { // Datainput control button
+                                            width: 16
+                                            height: 16
+                                            color: dataInputButtonMouseArea.containsMouse
+                                                   ? _studioColor1 : _backgroundColor
+
+                                            Image {
+                                                id: ctrldPropButton
+
+                                                property bool controlled: model.modelData.controlled
+                                                visible: model.modelData.controllable
+                                                anchors.fill: parent
+                                                fillMode: Image.Pad
+
+                                                source: {
+                                                    _resDir + (controlled
+                                                               ? "Objects-DataInput-Active.png"
+                                                               : "Objects-DataInput-Inactive.png")
+                                                }
+
+                                                MouseArea {
+                                                    id: dataInputButtonMouseArea
+                                                    anchors.fill: parent
+                                                    acceptedButtons: Qt.LeftButton
+                                                    hoverEnabled: true
+                                                    onClicked: {
+                                                        _parentView.showDataInputChooser(
+                                                                    model.modelData.handle,
+                                                                    model.modelData.instance,
+                                                                    mapToGlobal(
+                                                                        ctrldPropButton.x
+                                                                        + ctrldPropButton.width,
+                                                                        ctrldPropButton.y
+                                                                        + ctrldPropButton.height));
+
+                                                    }
+                                                }
+
+                                                StyledTooltip {
+                                                    text: model.modelData.controlled
+                                                          ? qsTr("Data Input controller:\n")
+                                                            + model.modelData.controller
+                                                          : qsTr("Set Data Input controller")
+                                                    enabled: dataInputButtonMouseArea.containsMouse
+                                                }
+                                            }
+                                        }
+
                                         StyledLabel { // Property label
                                             id: propertyRow
 
@@ -330,66 +378,6 @@ Rectangle {
                                                 text: modelData.toolTip
                                                 enabled: propertyLabelMouseArea.containsMouse
                                             }
-                                        }
-                                    }
-
-                                    RowLayout { // Datainput button & label
-                                        Layout.alignment: Qt.AlignLeft
-                                        Rectangle { // Datainput control button
-                                            width: 16
-                                            height: 16
-                                            visible: model.modelData.controllable
-                                            color: dataInputButtonMouseArea.containsMouse
-                                                   ? _studioColor1 : _backgroundColor
-
-                                            MouseArea {
-                                                id: dataInputButtonMouseArea
-                                                anchors.fill: parent
-                                                acceptedButtons: Qt.RightButton | Qt.LeftButton
-                                                hoverEnabled: true
-                                                onClicked: {
-                                                    if (mouse.button === Qt.LeftButton) {
-                                                        _parentView.showDataInputChooser(
-                                                                    model.modelData.handle,
-                                                                    model.modelData.instance,
-                                                                    mapToGlobal(
-                                                                        ctrldPropButton.x
-                                                                        + ctrldPropButton.width,
-                                                                        ctrldPropButton.y
-                                                                        + ctrldPropButton.height));
-                                                    }
-                                                }
-                                            }
-                                            Image {
-                                                id: ctrldPropButton
-
-                                                property bool controlled: model.modelData.controlled
-
-                                                anchors.fill: parent
-                                                fillMode: Image.Pad
-
-                                                source: {
-                                                    _resDir + (controlled
-                                                               ? "Objects-DataInput-Active.png"
-                                                               : "Objects-DataInput-Inactive.png")
-                                                }
-                                            }
-                                            StyledTooltip {
-                                                text: qsTr("Select Data Input control")
-                                                enabled: dataInputButtonMouseArea.containsMouse
-                                            }
-                                        }
-                                        StyledLabel {
-                                            id: dataInputName
-                                            // use visible: modelData.controlled instead
-                                            // if label needs to be shown
-                                            // only when item is actually controlled
-                                            // (causes re-layouting of inspector panel)
-                                            visible: modelData.controllable
-                                            text: modelData.controlled ?
-                                                      modelData.controller : "[No datainput control]";
-                                            color: modelData.controlled ?
-                                                       _dataInputColor : _disabledColor;
                                         }
                                     }
                                 }

@@ -736,8 +736,9 @@ InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *insp
     item->m_animatable = metaProperty.m_Animatable &&
             studio->GetAnimationSystem()->IsPropertyAnimatable(item->m_instance,
                                                                metaProperty.m_Property);
-
-    item->m_controllable = metaProperty.m_Controllable;
+    // If a property is animatable, it should be controllable in addition to
+    // properties explicitly set as controllable in metadata
+    item->m_controllable = item->m_animatable || metaProperty.m_Controllable;
 
     // disable IBL Override for reference materials
     if (item->m_title == QLatin1String("IBL Override") && studio->GetClientDataModelBridge()
