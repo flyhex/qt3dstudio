@@ -3658,6 +3658,28 @@ public:
         }
     }
 
+    void removeDeletedFromMaterialContainer() override
+    {
+        const auto parent = m_Bridge.getMaterialContainer();
+        if (parent.Valid()) {
+            TInstanceList children;
+            GetChildren(GetAssociatedSlide(parent), parent, children);
+
+            unsigned int removedChildrenCount = 0;
+            for (auto &instance : children) {
+                const auto name = GetName(instance).toQString();
+                if (name != getMaterialNameFromFilePath(m_Bridge.getDefaultMaterialName())
+                        && !QFileInfo(getFilePathFromMaterialName(name)).exists()) {
+                    DeleteInstance(instance);
+                    removedChildrenCount++;
+                }
+            }
+
+            if (removedChildrenCount == children.size())
+                DeleteInstance(parent);
+        }
+    }
+
     TInstanceHandle DoImport(
         CFilePath inImportFilePath, Q3DStudio::CString importSrc, Qt3DSDMInstanceHandle inParent,
         Qt3DSDMInstanceHandle inRoot, Qt3DSDMSlideHandle inSlide, Q3DStudio::CString inDocDir,

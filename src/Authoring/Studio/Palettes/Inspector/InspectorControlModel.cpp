@@ -481,6 +481,8 @@ void InspectorControlModel::setMatDatas(const std::vector<Q3DStudio::CFilePath> 
     if (isBasicMaterial())
         updateMatDataValues();
 
+    sceneEditor->removeDeletedFromMaterialContainer();
+
     m_cachedMatDatas = matDatas;
 }
 

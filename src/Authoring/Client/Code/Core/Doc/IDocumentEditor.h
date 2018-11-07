@@ -187,6 +187,7 @@ public:
     virtual void updateMaterialInstances(const QStringList &filenames) = 0;
 
     virtual void removeUnusedFromMaterialContainer() = 0;
+    virtual void removeDeletedFromMaterialContainer() = 0;
 
     virtual QString getMaterialNameFromFilePath(const QString &path) = 0;
 
