@@ -1045,12 +1045,10 @@ described above):
   \b{Edge Detail} - amount of GPU tessellation detail used to
   improve the appearance of the stroke.
 \list
-\omit
 \li
   \e{Tip: Turn on Wireframe
   view (from the View menu or the toolbar) to see the underlying
   geometry being created for the stroke.}
-\endomit
 \endlist
 \li
   \b{Width Detail} - amount of GPU tessellation detail used to
@@ -1058,11 +1056,9 @@ described above):
   material with a displacement map for the stroke, you likely should
   leave this set at the lowest setting to improve performance.
 \list
-\omit
 \li
   \e{Tip: Turn on Wireframe view (from the View menu or the toolbar)
   to see the underlying geometry being created for the stroke.}
-\endomit
 \endlist
 \li
   \b{Begin/End Cap Style} - set this to \"Taper\" to finely taper
