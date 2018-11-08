@@ -167,7 +167,7 @@ void SceneCameraGlWidget::paintGL()
 
         QSize fboSize;
         qt3ds::QT3DSU32 textureId;
-        renderer.getFullSizePreviewFbo(fboSize, textureId);
+        renderer.getPreviewFbo(fboSize, textureId);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, GLuint(textureId));
 

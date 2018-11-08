@@ -78,7 +78,7 @@ public:
 
     // synchronously render the content
     virtual void RenderNow() = 0;
-    virtual void getFullSizePreviewFbo(QSize &outFboDim, qt3ds::QT3DSU32 &outFboTexture) = 0;
+    virtual void getPreviewFbo(QSize &outFboDim, qt3ds::QT3DSU32 &outFboTexture) = 0;
 
     virtual void MakeContextCurrent() = 0;
     virtual void ReleaseContext() = 0;
