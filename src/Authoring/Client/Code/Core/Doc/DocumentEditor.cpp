@@ -431,6 +431,10 @@ public:
         outInstanceMap.clear();
         for (size_t idx = 0, end = existing.size(); idx < end; ++idx) {
             Qt3DSDMInstanceHandle theAsset(existing[idx]);
+
+            if (m_Bridge.isInsideMaterialContainer(theAsset))
+                continue;
+
             thePaths.clear();
             GetAllPaths(theAsset, inProperty, thePaths);
 
@@ -4702,6 +4706,8 @@ public:
                 m_Doc.GetImportFailedHandler(),
                 *translationLog, false);
         }
+
+        updateMaterialFiles();
     }
 
     void RefreshImport(const CFilePath &inOldFile, const CFilePath &inNewFile) override
