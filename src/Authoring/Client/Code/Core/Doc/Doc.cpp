@@ -90,7 +90,7 @@ using std::shared_ptr;
 //==============================================================================
 //	Constants
 //==============================================================================
-const long STUDIO_FILE_VERSION = 4;
+const long STUDIO_FILE_VERSION = 5;
 const long STUDIO_LAST_SUPPORTED_FILE_VERSION = 1;
 
 IMPLEMENT_OBJECT_COUNTER(CDoc)
