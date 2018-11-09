@@ -3,6 +3,11 @@ TARGET = Qt3DStudio
 include(../commoninclude.pri)
 include($$OUT_PWD/../qtAuthoring-config.pri)
 include(../../shared/qtsingleapplication/qtsingleapplication.pri)
+
+exists ($$(BREAKPAD_SOURCE_DIR)) {
+    include(../../shared/qt-breakpad/qtbreakpad.pri)
+}
+
 INCLUDEPATH += $$OUT_PWD/..
 
 CONFIG += nostrictstrings

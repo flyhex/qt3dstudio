@@ -55,6 +55,16 @@
 #include <QtQml/qqmlapplicationengine.h>
 #include <QtQuick/qquickitem.h>
 
+#ifdef ENABLE_QT_BREAKPAD
+#include <qtsystemexceptionhandler.h>
+#endif
+
+#ifdef QT3DSTUDIO_REVISION
+#define STRINGIFY_INTERNAL(x) #x
+#define STRINGIFY(x) STRINGIFY_INTERNAL(x)
+const char *const QT3DSTUDIO_REVISION_STR = STRINGIFY(QT3DSTUDIO_REVISION);
+#endif
+
 const QString activePresentationQuery = QStringLiteral("activePresentation:");
 
 int main(int argc, char *argv[])
@@ -95,6 +105,12 @@ int main(int argc, char *argv[])
         format.setMinorVersion(0);
         QSurfaceFormat::setDefaultFormat(format);
     }
+#endif
+
+#ifdef ENABLE_QT_BREAKPAD
+    const QString libexecPath = QCoreApplication::applicationDirPath() + QStringLiteral("/.");
+    QtSystemExceptionHandler systemExceptionHandler(libexecPath);
+    systemExceptionHandler.setBuildVersion(QT3DSTUDIO_REVISION_STR);
 #endif
 
     // Parse the command line so we know what's up
