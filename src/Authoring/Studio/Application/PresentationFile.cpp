@@ -160,6 +160,12 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
         ProjectFile::getPresentations(uiaPath, subpresentations, uipPathRelative);
     }
 
+    // Map to cache effect and material properties during the presentation file parsing,
+    // as we don't yet know which ones are actually assets.
+    // Key: Material/effect class id
+    // Value: Set of material/effect properties
+    QHash<QString, QSet<QString>> matEffPropertyMap;
+
     // search <Classes>
     QDomElement classesElem = domDoc.documentElement().firstChild()
             .firstChildElement(QStringLiteral("Classes"));
@@ -175,19 +181,22 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
             // if material or effect, find and add their dependents
             if (CDialogs::IsMaterialFileExtension(ext.data()) ||
                 CDialogs::IsEffectFileExtension(ext.data())) {
+                QSet<QString> propertySet;
                 g_StudioApp.GetCore()->GetDoc()->GetDocumentReader()
                     .ParseSourcePathsOutOfEffectFile(
                             uipSrc.path() + QStringLiteral("/") + sourcepath,
-                            outPathMap, outProjPathSrc);
+                            outProjPathSrc, outPathMap, propertySet);
+                matEffPropertyMap.insert(QStringLiteral("#") + p.attribute(QStringLiteral("id")),
+                                         propertySet);
             }
         }
     }
 
-    // mesh files for group imports are found under <Graph>
-    QDomNodeList modelElems = domDoc.documentElement().firstChild()
-            .firstChildElement(QStringLiteral("Graph"))
-            .elementsByTagName(QStringLiteral("Model"));
+    // mesh files for group imports, materials, and effects are found under <Graph>
+    QDomElement graphElement = domDoc.documentElement().firstChild()
+            .firstChildElement(QStringLiteral("Graph"));
 
+    QDomNodeList modelElems = graphElement.elementsByTagName(QStringLiteral("Model"));
     for (int i = 0; i < modelElems.count(); ++i) {
         QDomElement elem = modelElems.at(i).toElement();
         const QString sourcePath = elem.attribute(QStringLiteral("sourcepath"));
@@ -201,6 +210,22 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
             }
         }
     }
+
+    // find material and effect files instance ids
+    QHash<QString, QString> matEffClassIdMap;
+    auto parseMatEffIds = [&matEffClassIdMap](const QDomNodeList& nodes) {
+        for (int i = 0; i < nodes.count(); ++i) {
+            QDomElement elem = nodes.at(i).toElement();
+            const QString classId = elem.attribute(QStringLiteral("class"));
+            if (!classId.isEmpty()) {
+                const QString id = elem.attribute(QStringLiteral("id"));
+                matEffClassIdMap.insert(QStringLiteral("#") + id, classId);
+            }
+        }
+    };
+
+    parseMatEffIds(graphElement.elementsByTagName(QStringLiteral("Effect")));
+    parseMatEffIds(graphElement.elementsByTagName(QStringLiteral("CustomMaterial")));
 
     // search <Logic> -> <State> -> <Add>
     QDomNodeList addElems = domDoc.documentElement().firstChild()
@@ -221,28 +246,26 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
                     || CDialogs::IsMaterialFileExtension(ext.data())) {
                 if (!outPathMap.contains(sourcePath))
                     outPathMap.insert(sourcePath, {});
-                continue;
-            }
+            } else {
+                // add layer subpresentations paths
+                auto *sp = std::find_if(subpresentations.begin(), subpresentations.end(),
+                                       [&sourcePath](const SubPresentationRecord &spr) -> bool {
+                                           return spr.m_id == sourcePath;
+                                       });
+                if (sp != subpresentations.end()) { // has a subpresentation
+                    QString spPath = sp->m_argsOrSrc;
+                    // set as root path (if it is not root nor relative) to make sure importing
+                    // works correctly
+                    if (!spPath.startsWith(QLatin1String("../"))
+                        && !spPath.startsWith(QLatin1String("./"))) {
+                        spPath.prepend(QLatin1String("./"));
+                    }
 
-            // add layer subpresentations paths
-            auto *sp = std::find_if(subpresentations.begin(), subpresentations.end(),
-                                   [&sourcePath](const SubPresentationRecord &spr) -> bool {
-                                       return spr.m_id == sourcePath;
-                                   });
-            if (sp != subpresentations.end()) { // has a subpresentation
-                QString spPath = sp->m_argsOrSrc;
-                // set as root path (if it is not root nor relative) to make sure importing works
-                // correctly.
-                if (!spPath.startsWith(QLatin1String("../"))
-                    && !spPath.startsWith(QLatin1String("./"))) {
-                    spPath.prepend(QLatin1String("./"));
+                    if (!outPathMap.contains(spPath)) {
+                        outPathMap.insert(spPath, {});
+                        outPresentationNodes.insert(sp->m_argsOrSrc, sp->m_id);
+                    }
                 }
-
-                if (!outPathMap.contains(spPath)) {
-                    outPathMap.insert(spPath, {});
-                    outPresentationNodes.insert(sp->m_argsOrSrc, sp->m_id);
-                }
-                continue;
             }
         }
 
@@ -267,7 +290,6 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
                     outPresentationNodes.insert(sp->m_argsOrSrc, sp->m_id);
                 }
             }
-            continue;
         }
 
         // add fonts paths
@@ -277,30 +299,47 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
             // directory plus the 'fonts' directory at the same level or 1 level up.
 
             const QString TTF_EXT = QStringLiteral(".ttf"); // TODO: should we also consider .otf?
+            const QString slashUipPath = uipSrc.path() + QLatin1Char('/');
 
             // this is the most probable place so lets search it first
             QString fontPath = QStringLiteral("../fonts/") + font + TTF_EXT;
-            QString absFontPath = uipSrc.path() + QStringLiteral("/") + fontPath;
-            if (QFile::exists(absFontPath)) {
+            QFileInfo absFontPath(slashUipPath + fontPath);
+            if (absFontPath.exists()) {
                 if (!outPathMap.contains(fontPath))
-                    outPathMap.insert(fontPath, absFontPath);
-                continue;
+                    outPathMap.insert(fontPath, absFontPath.absoluteFilePath());
+            } else {
+                fontPath = font + TTF_EXT;
+                absFontPath = QFileInfo(slashUipPath + fontPath);
+                if (absFontPath.exists()) {
+                    if (!outPathMap.contains(fontPath))
+                        outPathMap.insert(fontPath, absFontPath.absoluteFilePath());
+                } else {
+                    fontPath = QStringLiteral("fonts/") + font + TTF_EXT;
+                    absFontPath = QFileInfo(slashUipPath + fontPath);
+                    if (absFontPath.exists()) {
+                        if (!outPathMap.contains(fontPath))
+                            outPathMap.insert(fontPath, absFontPath.absoluteFilePath());
+                    }
+                }
             }
+        }
 
-            fontPath = font + TTF_EXT;
-            absFontPath = uipSrc.path() + QStringLiteral("/") + fontPath;
-            if (QFile::exists(absFontPath)) {
-                if (!outPathMap.contains(fontPath))
-                    outPathMap.insert(fontPath, absFontPath);
-                continue;
-            }
-
-            fontPath = QStringLiteral("fonts/") + font + TTF_EXT;
-            absFontPath = uipSrc.path() + QStringLiteral("/") + fontPath;
-            if (QFile::exists(absFontPath)) {
-                if (!outPathMap.contains(fontPath))
-                    outPathMap.insert(fontPath, absFontPath);
-                continue;
+        // add custom material/effect assets
+        const QString ref = elem.attribute(QStringLiteral("ref"));
+        const QString classId = matEffClassIdMap.value(ref, {});
+        if (!classId.isEmpty()) {
+            const QSet<QString> textureProps = matEffPropertyMap.value(classId, {});
+            for (auto &prop : textureProps) {
+                QString texturePath = elem.attribute(prop);
+                if (!texturePath.isEmpty()) {
+                    // Typically these paths have ./ prepended even though they are relative to uip
+                    // Remove it as ./ at start interpreted as relative to project file
+                    if (texturePath.startsWith(QLatin1String("./")))
+                        texturePath = texturePath.mid(2);
+                    QFileInfo absTexPath(uipSrc.path() + QLatin1Char('/') + texturePath);
+                    if (absTexPath.exists() && !outPathMap.contains(texturePath))
+                        outPathMap.insert(texturePath, absTexPath.absoluteFilePath());
+                }
             }
         }
     }

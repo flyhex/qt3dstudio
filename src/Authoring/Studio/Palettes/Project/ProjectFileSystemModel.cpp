@@ -792,8 +792,12 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
             QString absSrcPath = fileInfo.absoluteFilePath();
             QString projectPath
                     = QFileInfo(PresentationFile::findProjectFile(absSrcPath)).absolutePath();
+            // Since we are importing a bare material/effect, we don't care about possible dynamic
+            // values of texture properties
+            QSet<QString> dummyPropertySet;
             g_StudioApp.GetCore()->GetDoc()->GetDocumentReader()
-                .ParseSourcePathsOutOfEffectFile(absSrcPath, effectFileSourcePaths, projectPath);
+                .ParseSourcePathsOutOfEffectFile(absSrcPath, projectPath, effectFileSourcePaths,
+                                                 dummyPropertySet);
 
             QHashIterator<QString, QString> pathIter(effectFileSourcePaths);
             while (pathIter.hasNext()) {

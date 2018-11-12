@@ -228,8 +228,9 @@ public:
     virtual CFilePath CopyAction(Qt3DSDMActionHandle inAction, Qt3DSDMSlideHandle inSlide) = 0;
 
     virtual void ParseSourcePathsOutOfEffectFile(const QString &inFile,
+                                                 const QString &projectPath,
                                                  QHash<QString, QString> &outPathMap,
-                                                 const QString &projectPath) = 0;
+                                                 QSet<QString> &outPropertyMap) = 0;
 
     virtual Q3DStudio::CString GetCustomMaterialName(const Q3DStudio::CString &inFullPathToFile) const = 0;
     virtual void getMaterialInfo(const QString &inFullPathToFile,
