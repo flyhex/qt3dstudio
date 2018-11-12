@@ -277,6 +277,11 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(vertalign, m_VertAlign, TDataStrPtr, L"Middle")                       \
     HANDLE_COMPOSER_PROPERTY(leading, m_Leading, float, 0.f)                                       \
     HANDLE_COMPOSER_PROPERTY(tracking, m_Tracking, float, 0.f)                                     \
+    HANDLE_COMPOSER_PROPERTY(dropshadow, m_DropShadow, bool, false)                                \
+    HANDLE_COMPOSER_PROPERTY(dropshadowstrength, m_DropShadowStrength, float, 80.f)                \
+    HANDLE_COMPOSER_PROPERTY(dropshadowoffset, m_DropShadowOffset, float, 10.f)                    \
+    HANDLE_COMPOSER_PROPERTY(dropshadowhorzalign, m_DropShadowHorizontalAlignment, TDataStrPtr, L"Right")  \
+    HANDLE_COMPOSER_PROPERTY(dropshadowvertalign, m_DropShadowVerticalAlignment, TDataStrPtr, L"Bottom")   \
     HANDLE_COMPOSER_PROPERTY(enableacceleratedfont, m_EnableAcceleratedFont, bool, false)          \
     HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 

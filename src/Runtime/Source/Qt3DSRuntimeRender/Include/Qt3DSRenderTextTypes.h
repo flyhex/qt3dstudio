@@ -151,6 +151,11 @@ namespace render {
         TextVerticalAlignment::Enum m_VerticalAlignment;
         QT3DSF32 m_Leading; // space between lines
         QT3DSF32 m_Tracking; // space between letters
+        bool m_DropShadow;
+        QT3DSF32 m_DropShadowStrength;
+        QT3DSF32 m_DropShadowOffset;
+        TextHorizontalAlignment::Enum m_DropShadowHorizontalAlignment;
+        TextVerticalAlignment::Enum m_DropShadowVerticalAlignment;
 
         QT3DSF32 m_ScaleX; // Pixel scale in X
         QT3DSF32 m_ScaleY; // Pixel scale in Y

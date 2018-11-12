@@ -2127,9 +2127,10 @@ namespace render {
                 // flip the y uv coord if the dimension's z variable is set
                 << "\tif ( text_textdimensions.z > 0.0 ) theCoords.y = 1.0 - theCoords.y;" << Endl;
             fragmentGenerator.Append(
-                "\tfloat alpha_mask = texture2D( text_image, theCoords ).r * text_textcolor.a;");
-            fragmentGenerator.Append("\tfragOutput = vec4(mix(text_backgroundcolor.rgb, "
-                                     "text_textcolor.rgb, alpha_mask), alpha_mask );");
+                        "\tvec4 c = texture2D(text_image, theCoords);");
+            fragmentGenerator.Append(
+                        "\tfragOutput = vec4(mix(text_backgroundcolor.rgb, "
+                        "text_textcolor.rgb, c.rgb), c.a) * text_textcolor.a;");
 
             vertexGenerator.Append("}");
             fragmentGenerator.Append("}");

@@ -207,6 +207,11 @@ enum EAttribute {
     ATTRIBUTE_TEXTCOLOR_B =          0x00D9ED96, // textcolor.b
     ATTRIBUTE_SIZE =                 0x00F2C81F, // size
     ATTRIBUTE_FONT =                 0x03412331, // font
+    ATTRIBUTE_DROPSHADOW =           0x03E3F231, // dropshadow
+    ATTRIBUTE_DROPSHADOWSTRENGTH =   0x03F8B7D0, // dropshadowstrength
+    ATTRIBUTE_DROPSHADOWOFFSET =     0x024A9C5E, // dropshadowoffset
+    ATTRIBUTE_DROPSHADOWHORZALIGN =  0x00D1BC39, // dropshadowhorzalign
+    ATTRIBUTE_DROPSHADOWVERTALIGN =  0x038D589B, // dropshadowvertalign
     ATTRIBUTE_TRACKING =             0x02A25049, // tracking
     ATTRIBUTE_LEADING =              0x016A6BDA, // leading
     ATTRIBUTE_RENDERSTYLE =          0x03567B85, // renderstyle

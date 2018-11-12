@@ -461,6 +461,11 @@ struct STranslatorDataModelParser
 #define Text_VerticalAlignment m_Text.m_VertAlign
 #define Text_Leading m_Text.m_Leading
 #define Text_Tracking m_Text.m_Tracking
+#define Text_DropShadow m_Text.m_DropShadow
+#define Text_DropShadowStrength m_Text.m_DropShadowStrength
+#define Text_DropShadowOffset m_Text.m_DropShadowOffset
+#define Text_DropShadowHorizontalAlignment m_Text.m_DropShadowHorizontalAlignment
+#define Text_DropShadowVerticalAlignment m_Text.m_DropShadowVerticalAlignment
 #define Text_TextColor m_Text.m_TextColor
 #define Text_EnableAcceleratedFont m_Text.m_EnableAcceleratedFont
 #define Path_Width m_Path.m_Width

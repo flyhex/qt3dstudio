@@ -494,7 +494,6 @@ struct Qt3DSQtTextRenderer : public ITextRenderer
         return qtAlign;
     }
 
-    // The system will use the 'r' channel as an alpha mask in order to render the text.
     STextTextureDetails RenderText(const STextRenderInfo &inSrcText,
                                    NVRenderTexture2D &inTexture) override
     {
@@ -502,12 +501,13 @@ struct Qt3DSQtTextRenderer : public ITextRenderer
         updateFontInfo(fi, inSrcText);
         QFontMetricsF fm(fi.font);
 
+        int shadowRgb = int(2.55f * (100 - int(inSrcText.m_DropShadowStrength)));
         QStringList lineList;
         QVector<qreal> lineWidths;
         QRectF boundingBox = textBoundingBox(inSrcText, fm, lineList, lineWidths);
 
         if (boundingBox.width() <= 0 || boundingBox.height() <= 0) {
-            return ITextRenderer::UploadData(toU8DataRef((char *)NULL, 0), inTexture, 4, 4,
+            return ITextRenderer::UploadData(toU8DataRef((char *)nullptr, 0), inTexture, 4, 4,
                                              0, 0,
                                              NVRenderTextureFormats::RGBA8, true);
         }
@@ -515,7 +515,7 @@ struct Qt3DSQtTextRenderer : public ITextRenderer
         int finalWidth = NextMultipleOf4(boundingBox.width());
         int finalHeight = NextMultipleOf4(boundingBox.height());
 
-        QImage image(finalWidth, finalHeight, QImage::Format_Grayscale8);
+        QImage image(finalWidth, finalHeight, QImage::Format_ARGB32);
         image.fill(0);
         QPainter painter(&image);
         painter.setPen(Qt::white);
@@ -532,6 +532,32 @@ struct Qt3DSQtTextRenderer : public ITextRenderer
             break;
         default:
             break; // Do nothing
+        }
+
+        qreal shadowOffsetX = 0.;
+        qreal shadowOffsetY = 0.;
+        if (inSrcText.m_DropShadow) {
+            const qreal offset = qreal(inSrcText.m_DropShadowOffset) / 10.;
+            switch (inSrcText.m_DropShadowHorizontalAlignment) {
+            case TextHorizontalAlignment::Left:
+                shadowOffsetX = -offset;
+                break;
+            case TextHorizontalAlignment::Right:
+                shadowOffsetX = offset;
+                break;
+            default:
+                break;
+            }
+            switch (inSrcText.m_DropShadowVerticalAlignment) {
+            case TextVerticalAlignment::Top:
+                shadowOffsetY = -offset;
+                break;
+            case TextVerticalAlignment::Bottom:
+                shadowOffsetY = offset;
+                break;
+            default:
+                break;
+            }
         }
 
         int lineHeight = fm.height();
@@ -551,17 +577,27 @@ struct Qt3DSQtTextRenderer : public ITextRenderer
             }
             QRectF bound(xTranslation, qreal(nextHeight), lineWidths.at(i), lineHeight);
             QRectF actualBound;
+            if (inSrcText.m_DropShadow) {
+                QRectF boundShadow(xTranslation + shadowOffsetX, nextHeight + shadowOffsetY,
+                                   qreal(lineWidths.at(i)), lineHeight);
+                // shadow is a darker shade of the given font color
+                painter.setPen(QColor(shadowRgb, shadowRgb, shadowRgb));
+                painter.drawText(boundShadow,
+                                 alignToQtAlign(inSrcText.m_VerticalAlignment) |
+                                 Qt::TextDontClip | Qt::AlignLeft, line, &actualBound);
+                painter.setPen(Qt::white); // coloring is done in the shader
+            }
             painter.drawText(bound,
-                alignToQtAlign(inSrcText.m_VerticalAlignment) |
-                Qt::TextDontClip | Qt::AlignLeft, line, &actualBound);
+                             alignToQtAlign(inSrcText.m_VerticalAlignment) |
+                             Qt::TextDontClip | Qt::AlignLeft, line, &actualBound);
 
             nextHeight += QT3DSF32(lineHeight) + inSrcText.m_Leading;
         }
 
         return ITextRenderer::UploadData(toU8DataRef(image.bits(), image.byteCount()), inTexture,
-                                         image.width(), image.height(), image.width(), image.height(),
-                                         NVRenderTextureFormats::Luminance8, true);
-
+                                         image.width(), image.height(),
+                                         image.width(), image.height(),
+                                         NVRenderTextureFormats::RGBA8, true);
     }
 
     STextTextureDetails RenderText(const STextRenderInfo &inText,

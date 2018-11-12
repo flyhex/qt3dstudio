@@ -437,6 +437,11 @@ namespace render {
     HANDLE_QT3DS_RENDER_ENUM_PROPERTY(Text, VerticalAlignment, TextDirty)                            \
     HANDLE_QT3DS_RENDER_PROPERTY(Text, Leading, TextDirty)                                           \
     HANDLE_QT3DS_RENDER_PROPERTY(Text, Tracking, TextDirty)                                          \
+    HANDLE_QT3DS_RENDER_PROPERTY(Text, DropShadow, TextDirty)                                        \
+    HANDLE_QT3DS_RENDER_PROPERTY(Text, DropShadowStrength, TextDirty)                                \
+    HANDLE_QT3DS_RENDER_PROPERTY(Text, DropShadowOffset, TextDirty)                                  \
+    HANDLE_QT3DS_RENDER_ENUM_PROPERTY(Text, DropShadowHorizontalAlignment, TextDirty)                \
+    HANDLE_QT3DS_RENDER_ENUM_PROPERTY(Text, DropShadowVerticalAlignment, TextDirty)                  \
     HANDLE_QT3DS_RENDER_COLOR_VEC3_PROPERTY(Text, TextColor, Dirty)                                  \
     HANDLE_QT3DS_RENDER_COLOR_PROPERTY(Text, TextColor, Dirty)                                       \
     HANDLE_QT3DS_RENDER_PROPERTY(Text, EnableAcceleratedFont, Dirty)

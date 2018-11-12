@@ -216,6 +216,11 @@ const char *GetAttributeString(const EAttribute inAttribute)
         case ATTRIBUTE_TEXTCOLOR_B: return "textcolor.b";
         case ATTRIBUTE_SIZE: return "size";
         case ATTRIBUTE_FONT: return "font";
+        case ATTRIBUTE_DROPSHADOW: return "dropshadow";
+        case ATTRIBUTE_DROPSHADOWSTRENGTH: return "dropshadowstrength";
+        case ATTRIBUTE_DROPSHADOWOFFSET: return "dropshadowoffset";
+        case ATTRIBUTE_DROPSHADOWHORZALIGN: return "dropshadowhorzalign";
+        case ATTRIBUTE_DROPSHADOWVERTALIGN: return "dropshadowvertalign";
         case ATTRIBUTE_TRACKING: return "tracking";
         case ATTRIBUTE_LEADING: return "leading";
         case ATTRIBUTE_RENDERSTYLE: return "renderstyle";
