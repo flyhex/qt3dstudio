@@ -907,6 +907,9 @@ public:
                          QString &outName, QMap<QString, QString> &outValues,
                          QMap<QString, QMap<QString, QString>> &outTextureValues) override
     {
+        if (!QFileInfo(inAbsoluteFilePath).exists())
+            return;
+
         qt3ds::foundation::CFileSeekableIOStream theStream(inAbsoluteFilePath,
                                                            qt3ds::foundation::FileReadFlags());
         if (theStream.IsOpen()) {
