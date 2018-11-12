@@ -819,38 +819,50 @@ public:
         QFileInfo fi(inFile);
         QDomDocument domDocMat;
         if (StudioUtils::readFileToDomDocument(inFile, domDocMat)) {
-            QDomNodeList propElems = domDocMat.documentElement()
-                    .firstChildElement(QStringLiteral("MetaData")).childNodes();
-
-            bool isMaterialDefinition = propElems.isEmpty();
-            if (isMaterialDefinition) {
-                propElems = domDocMat.documentElement()
-                        .firstChildElement(QStringLiteral("TextureData")).childNodes();
+            QVector<QDomNodeList> nodeLists;
+            QVector<bool> isMatDefs;
+            // Read properties from custom materials and effects
+            nodeLists.append(domDocMat.documentElement()
+                    .firstChildElement(QStringLiteral("MetaData")).childNodes());
+            isMatDefs.append(false);
+            // Read properties from material definitions
+            nodeLists.append(domDocMat.firstChildElement(
+                                 QStringLiteral("MaterialData")).childNodes());
+            isMatDefs.append(true);
+            // Read properties from each texture from the material definition
+            QDomNodeList textureDataElems = domDocMat.documentElement()
+                    .elementsByTagName(QStringLiteral("TextureData"));
+            for (int i = 0, c = textureDataElems.count(); i < c; ++i) {
+                nodeLists.append(textureDataElems.at(i).childNodes());
+                isMatDefs.append(true);
             }
 
             QString type, path, name;
-            for (int i = 0, c = propElems.count(); i < c; ++i) {
-                auto elem = propElems.at(i).toElement();
-                if (isMaterialDefinition) {
-                    type = elem.attribute(QStringLiteral("name"));
-                    path = elem.text();
-                    name = QLatin1String("sourcepath");
-                } else {
-                    type = elem.attribute(QStringLiteral("type"));
-                    path = elem.attribute(QStringLiteral("default"));
-                    name = QLatin1String("Texture");
-                }
-                if (type == name) {
-                    if (!isMaterialDefinition)
-                        outPropertySet.insert(elem.attribute(QStringLiteral("name")));
-                    if (!path.isEmpty() && !outPathMap.contains(path)) {
-                        QString absAssetPath = fi.absolutePath() + QStringLiteral("/") + path;
-                        if (QFile::exists(absAssetPath)) {
-                            outPathMap.insert(path, absAssetPath);
-                        } else if (!projectPath.isEmpty()) {
-                            absAssetPath = projectPath + QStringLiteral("/") + path;
-                            if (QFile::exists(absAssetPath))
+            for (int j = 0; j < nodeLists.count(); ++j) {
+                for (int i = 0, c = nodeLists[j].count(); i < c; ++i) {
+                    auto elem =  nodeLists[j].at(i).toElement();
+                    if (isMatDefs[j]) {
+                        type = elem.attribute(QStringLiteral("name"));
+                        path = elem.text();
+                        name = QLatin1String("sourcepath");
+                    } else {
+                        type = elem.attribute(QStringLiteral("type"));
+                        path = elem.attribute(QStringLiteral("default"));
+                        name = QLatin1String("Texture");
+                    }
+
+                    if (type == name) {
+                        if (!isMatDefs[j])
+                            outPropertySet.insert(elem.attribute(QStringLiteral("name")));
+                        if (!path.isEmpty() && !outPathMap.contains(path)) {
+                            QString absAssetPath = fi.absolutePath() + QStringLiteral("/") + path;
+                            if (QFile::exists(absAssetPath)) {
                                 outPathMap.insert(path, absAssetPath);
+                            } else if (!projectPath.isEmpty()) {
+                                absAssetPath = projectPath + QStringLiteral("/") + path;
+                                if (QFile::exists(absAssetPath))
+                                    outPathMap.insert(path, absAssetPath);
+                            }
                         }
                     }
                 }
