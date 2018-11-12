@@ -71,7 +71,11 @@ bool CFileDropSource::ValidateTarget(CDropTarget *inTarget)
     if (!targetIsValid && m_FileType == DocumentEditorFileType::Image
         && (targetType & (OBJTYPE_MATERIAL | OBJTYPE_CUSTOMMATERIAL | OBJTYPE_REFERENCEDMATERIAL
                           | OBJTYPE_IMAGE))) {
-        targetIsValid = true;
+        const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+                ->GetClientDataModelBridge();
+        // Default material shouldn't be targeatable
+        targetIsValid = bridge->GetSourcePath(inTarget->GetInstance()).toQString()
+                != bridge->getDefaultMaterialName();
     }
 
     if (!targetIsValid) {
