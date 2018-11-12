@@ -174,7 +174,8 @@ bool CSceneViewDropTarget::Drop(CDropSource &inSource)
             if (bridge->GetObjectType(pickedObject) == OBJTYPE_MODEL) {
                 const auto sceneEditor = doc->getSceneEditor();
                 std::vector<qt3dsdm::Qt3DSDMInstanceHandle> children;
-                sceneEditor->GetChildren(doc->GetActiveSlide(), pickedObject, children);
+                sceneEditor->GetChildren(sceneEditor->GetAssociatedSlide(pickedObject),
+                                         pickedObject, children);
                 for (auto &child : children) {
                     const auto childType = bridge->GetObjectType(child);
                     if (childType == OBJTYPE_REFERENCEDMATERIAL || childType == OBJTYPE_MATERIAL
