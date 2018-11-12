@@ -174,6 +174,7 @@ Rectangle {
                 // mouse handling for the area not covered by the delegates
                 propagateComposedEvents: true
                 anchors.fill: parent
+                z: -1 // Only reached when clicking outside delegates
                 acceptedButtons: Qt.AllButtons
                 onClicked: {
                     if (slideList.indexAt(mouse.x, mouse.y) === -1)
