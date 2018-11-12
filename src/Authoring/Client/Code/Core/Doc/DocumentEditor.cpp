@@ -3263,16 +3263,20 @@ public:
             if (oldType == "ReferencedMaterial") {
                 Qt3DSDMInstanceHandle refMaterial = m_Bridge.getMaterialReference(instance);
 
-                const Q3DStudio::CString refType = GetObjectTypeName(refMaterial);
+                if (refMaterial.Valid()) {
+                    const Q3DStudio::CString refType = GetObjectTypeName(refMaterial);
+                    Q3DStudio::CString v;
+                    if (refType == "CustomMaterial")
+                        v = m_Bridge.GetSourcePath(refMaterial);
+                    else
+                        v = "Standard Material";
 
-                Q3DStudio::CString v;
-                if (refType == "CustomMaterial")
-                    v = m_Bridge.GetSourcePath(refMaterial);
-                else
-                    v = "Standard Material";
+                    SetMaterialType(instance, v);
+                    copyMaterialProperties(refMaterial, instance);
+                } else {
+                    SetMaterialType(instance, "Standard Material");
+                }
 
-                SetMaterialType(instance, v);
-                copyMaterialProperties(refMaterial, instance);
                 const auto name = GetName(instance);
                 if (!name.toQString().endsWith(QLatin1String("_animatable")))
                     SetName(instance, name + "_animatable");
