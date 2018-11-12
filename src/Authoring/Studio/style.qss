@@ -8,14 +8,14 @@ QWidget {
 
 /* DockWidget */
 QMainWindow::separator {
-    background: #000000;
-    width: 1px;  /* when vertical */
-    height: 1px; /* when horizontal */
+    background: #727476;
+    width: 2px;  /* when vertical */
+    height: 2px; /* when horizontal */
 }
 
 QDockWidget::title {
-    border: 1px solid #262829;
-    background: #2e2f30;
+    border: 1px solid #727476;
+    background: #727476;
     padding: 3px;
 }
 
