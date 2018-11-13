@@ -427,8 +427,29 @@ slide to that duration.
 \section2 Customizing Time Bars
 
 To help you keep track of your assets, Studio allows you to apply custom
-colors time bars. Right-click on a time bar and choose
-\b {Change Time Bar Color}.
+colors and text to time bars.
+
+\section3 Custom Color
+
+To apply a custom color, right-click on a time bar and choose \uicontrol {Change Time Bar Color}
+from the context menu.
+
+\section3 Custom Text
+
+To apply a custom text, first do one of the following:
+\list
+  \li
+    Right-click anywhere in the timeline palette and select \uicontrol {Show All Time Bar Texts}
+    from the context menu.
+  \li
+    Click the
+    \inlineimage timeline-texts-icon.png
+    icon in the bottom of the scene graph.
+\endlist
+
+Now, the timeline is in comment mode. Click a time bar to add or edit a text.
+
+\image timeline-text-edit.png
 
 \section2 Playback Control
 
