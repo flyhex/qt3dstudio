@@ -179,6 +179,8 @@ public:
     virtual QString getMaterialDirectoryPath() const = 0;
     virtual QString getMaterialFilePath(const QString &materialName) const = 0;
 
+    virtual void saveIfMaterial(Qt3DSDMInstanceHandle instance) = 0;
+    virtual void writeMaterialFile(Qt3DSDMInstanceHandle instance, bool createNewFile) = 0;
     virtual Q3DStudio::CString writeMaterialFile(Qt3DSDMInstanceHandle instance,
                                          const QString &materialName,
                                          bool createNewFile,

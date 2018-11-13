@@ -1984,6 +1984,13 @@ public:
         return getMaterialDirectoryPath() + actualMaterialName + QStringLiteral(".materialdef");
     }
 
+    void writeMaterialFile(Qt3DSDMInstanceHandle instance, bool createNewFile) override
+    {
+        const auto materialName = GetName(instance).toQString();
+        writeMaterialFile(instance, materialName, createNewFile,
+                          getFilePathFromMaterialName(materialName));
+    }
+
     Q3DStudio::CString writeMaterialFile(Qt3DSDMInstanceHandle instance,
                                          const QString &materialName,
                                          bool createNewFile,
@@ -2056,6 +2063,25 @@ public:
                 && name != QLatin1String("fileid")
                 && name != QLatin1String("timebarcolor")
                 && name != QLatin1String("timebartext");
+    }
+
+    void saveIfMaterial(Qt3DSDMInstanceHandle instance)
+    {
+        Qt3DSDMInstanceHandle material;
+        if (m_Bridge.isInsideMaterialContainer(instance)) {
+            const auto type = m_Bridge.GetObjectType(instance);
+            if (type == OBJTYPE_MATERIAL || type == OBJTYPE_CUSTOMMATERIAL) {
+                material = instance;
+            } else {
+                const auto parent = m_Bridge.GetParentInstance(instance);
+                const auto parentType = m_Bridge.GetObjectType(parent);
+                if (parentType == OBJTYPE_MATERIAL || parentType == OBJTYPE_CUSTOMMATERIAL)
+                    material = parent;
+            }
+        }
+
+        if (material.Valid())
+            writeMaterialFile(material, false);
     }
 
     void saveMaterial(Qt3DSDMInstanceHandle instance, QFile &file)

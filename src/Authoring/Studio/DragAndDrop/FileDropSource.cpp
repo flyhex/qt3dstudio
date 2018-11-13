@@ -255,9 +255,10 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
                         editor->setInstanceImagePropertyValue(inTarget, propHandle, src, isPres);
                         editor->EndAggregateOperation();
                     } else {
+                        const auto finalTarget = refInstance ? refInstance : inTarget;
                         Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
-                        ->setInstanceImagePropertyValue(refInstance ? refInstance : inTarget,
-                                                        propHandle, src, isPres);
+                        ->setInstanceImagePropertyValue(finalTarget, propHandle, src, isPres);
+                        theDoc.getSceneEditor()->saveIfMaterial(finalTarget);
                     }
                 }
             } else if (rowType == OBJTYPE_IMAGE) {
