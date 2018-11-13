@@ -66,29 +66,30 @@ void SceneCameraGlWidget::initializeGL()
     m_program = new QOpenGLShaderProgram();
     if (!m_program->addShaderFromSourceCode(
                 QOpenGLShader::Vertex,
-                "#version 110\n"
-                "attribute highp vec2 aVertex;\n"
-                "attribute highp vec2 aUV;\n"
-                "uniform highp vec4 uTexOffset;\n"
-                "uniform highp vec4 uGeomOffset;\n"
-                "varying highp vec2 vUV;\n"
+                "#version 330 core\n"
+                "in vec2 vertexPos;\n"
+                "in vec2 vertexTexCoord;\n"
+                "uniform vec4 uTexOffset;\n"
+                "uniform vec4 uGeomOffset;\n"
+                "out vec2 texCoord;\n"
                 "void main(void)\n"
                 "{\n"
-                "  gl_Position = vec4(uGeomOffset.xy + aVertex * uGeomOffset.zw, 0.0, 1.0);\n"
-                "  vUV = vec2(uTexOffset.z * aUV.x + uTexOffset.x,\n"
-                "             uTexOffset.w * aUV.y + uTexOffset.y);\n"
+                "  gl_Position = vec4(uGeomOffset.xy + vertexPos * uGeomOffset.zw, 0.0, 1.0);\n"
+                "  texCoord = vec2(uTexOffset.z * vertexTexCoord.x + uTexOffset.x,\n"
+                "                  uTexOffset.w * vertexTexCoord.y + uTexOffset.y);\n"
                 "}")) {
         qWarning() << __FUNCTION__ << "Failed to add vertex shader for scene camera preview";
         return;
     }
     if (!m_program->addShaderFromSourceCode(
                 QOpenGLShader::Fragment,
-                "#version 110\n"
-                "varying highp vec2 vUV;\n"
+                "#version 330 core\n"
+                "in vec2 texCoord;\n"
                 "uniform sampler2D uSampler;\n"
+                "out vec4 fragColor;\n"
                 "void main(void) {\n"
-                "  lowp vec4 oc = texture2D(uSampler, vUV);\n"
-                "  gl_FragColor = vec4(oc);\n"
+                "  vec4 oc = texture(uSampler, texCoord);\n"
+                "  fragColor = vec4(oc);\n"
                 "}")) {
 
         qWarning() << __FUNCTION__ << "Failed to add fragment shader for scene camera preview";
@@ -102,8 +103,8 @@ void SceneCameraGlWidget::initializeGL()
         qWarning() << __FUNCTION__ << "Failed to bind program for scene camera preview";
         return;
     } else {
-        GLint vertexAtt = GLint(m_program->attributeLocation("aVertex"));
-        GLint uvAtt = GLint(m_program->attributeLocation("aUV"));
+        GLint vertexAtt = GLint(m_program->attributeLocation("vertexPos"));
+        GLint uvAtt = GLint(m_program->attributeLocation("vertexTexCoord"));
         m_uniformTextureOffset = GLint(m_program->uniformLocation("uTexOffset"));
         m_uniformGeometryOffset = GLint(m_program->uniformLocation("uGeomOffset"));
         m_program->setUniformValue("uSampler", 0);

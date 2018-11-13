@@ -93,8 +93,19 @@ static bool compareContextVersion(QSurfaceFormat a, QSurfaceFormat b)
     return true;
 }
 
-QSurfaceFormat CWGLRenderContext::selectSurfaceFormat(QOpenGLWidget* window)
+QSurfaceFormat CWGLRenderContext::selectSurfaceFormat(QOpenGLWidget *window)
 {
+#if defined(Q_OS_MACOS)
+    Q_UNUSED(window)
+    QSurfaceFormat openGL33Format;
+    openGL33Format.setRenderableType(QSurfaceFormat::OpenGL);
+    openGL33Format.setProfile(QSurfaceFormat::CoreProfile);
+    openGL33Format.setMajorVersion(3);
+    openGL33Format.setMinorVersion(3);
+    openGL33Format.setStencilBufferSize(8);
+    QSurfaceFormat::setDefaultFormat(openGL33Format);
+    return openGL33Format;
+#else
     struct ContextVersion {
         int major;
         int minor;
@@ -156,6 +167,7 @@ QSurfaceFormat CWGLRenderContext::selectSurfaceFormat(QOpenGLWidget* window)
     qDebug() << Q_FUNC_INFO << "selected surface format:" << result;
     QSurfaceFormat::setDefaultFormat(result);
     return result;
+#endif
 }
 
 //=============================================================================

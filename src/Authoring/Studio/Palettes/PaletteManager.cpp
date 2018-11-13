@@ -172,6 +172,7 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame, QObject *parent)
     m_actionDock->setEnabled(false);
     m_inspectorDock->setEnabled(false);
     m_timelineDock->setEnabled(false);
+    m_cameraDock->setEnabled(false);
 }
 
 //==============================================================================

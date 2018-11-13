@@ -69,7 +69,9 @@ int main(int argc, char *argv[])
     Q_INIT_RESOURCE(res);
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#if !defined(Q_OS_MACOS)
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+#endif
     SharedTools::QtSingleApplication guiApp(QStringLiteral("Qt3DStudio"), argc, argv);
 
 #if defined(Q_OS_MACOS)
