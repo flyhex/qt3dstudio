@@ -88,6 +88,24 @@ int TextureChooserView::instance() const
     return m_instance;
 }
 
+QString TextureChooserView::currentDataModelPath() const
+{
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
+
+    qt3dsdm::SValue value;
+    propertySystem->GetInstancePropertyValue(m_instance, m_handle, value);
+
+    QString cleanPath = qt3dsdm::get<QString>(value);
+    if (cleanPath.isEmpty() || cleanPath == QLatin1String("./")) {
+        cleanPath = ChooserModelBase::noneString();
+    } else {
+        cleanPath = QDir::cleanPath(QDir(doc->GetDocumentDirectory().toQString())
+                                    .filePath(cleanPath));
+    }
+    return cleanPath;
+}
+
 void TextureChooserView::focusOutEvent(QFocusEvent *event)
 {
     QQuickWidget::focusOutEvent(event);
@@ -104,13 +122,7 @@ void TextureChooserView::keyPressEvent(QKeyEvent *event)
 
 void TextureChooserView::showEvent(QShowEvent *event)
 {
-    const auto doc = g_StudioApp.GetCore()->GetDoc();
-    const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
-
-    qt3dsdm::SValue value;
-    propertySystem->GetInstancePropertyValue(m_instance, m_handle, value);
-
-    m_model->setCurrentFile(qt3dsdm::get<QString>(value));
+    m_model->setCurrentFile(currentDataModelPath());
 
     QQuickWidget::showEvent(event);
 }

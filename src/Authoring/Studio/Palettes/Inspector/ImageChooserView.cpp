@@ -37,7 +37,6 @@
 #include "Core.h"
 #include "Doc.h"
 #include "StudioApp.h"
-#include "StudioPreferences.h"
 
 #include <QtCore/qtimer.h>
 #include <QtQml/qqmlcontext.h>
@@ -89,6 +88,38 @@ int ImageChooserView::instance() const
     return m_instance;
 }
 
+QString ImageChooserView::currentDataModelPath() const
+{
+    QString cleanPath;
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
+
+    qt3dsdm::SValue value;
+    propertySystem->GetInstancePropertyValue(m_instance, m_handle, value);
+
+    const auto guid = qt3dsdm::get<qt3dsdm::SLong4>(value);
+
+    const auto imageInstance = doc->GetDocumentReader().GetInstanceForGuid(guid);
+    if (imageInstance.Valid()) {
+        const QString path = doc->GetDocumentReader().GetSourcePath(imageInstance).toQString();
+
+        // If path is renderable id, we need to resolve the actual path
+        const QString renderablePath = g_StudioApp.getRenderableAbsolutePath(path);
+
+        if (renderablePath.isEmpty())
+            cleanPath = path;
+        else
+            cleanPath = renderablePath;
+
+        cleanPath = QDir::cleanPath(
+                    QDir(doc->GetDocumentDirectory().toQString()).filePath(cleanPath));
+    } else {
+        cleanPath = ChooserModelBase::noneString();
+    }
+
+    return cleanPath;
+}
+
 bool ImageChooserView::isFocused() const
 {
     return hasFocus();
@@ -117,28 +148,6 @@ void ImageChooserView::keyPressEvent(QKeyEvent *event)
 
 void ImageChooserView::showEvent(QShowEvent *event)
 {
-    const auto doc = g_StudioApp.GetCore()->GetDoc();
-    const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
-
-    qt3dsdm::SValue value;
-    propertySystem->GetInstancePropertyValue(m_instance, m_handle, value);
-
-    const auto guid = qt3dsdm::get<qt3dsdm::SLong4>(value);
-
-    const auto imageInstance = doc->GetDocumentReader().GetInstanceForGuid(guid);
-    if (imageInstance.Valid()) {
-        const QString path = doc->GetDocumentReader().GetSourcePath(imageInstance).toQString();
-
-        // If path is renderable id, we need to resolve the actual path
-        const QString renderablePath = g_StudioApp.getRenderableAbsolutePath(path);
-
-        if (renderablePath.isEmpty())
-            m_model->setCurrentFile(path);
-        else
-            m_model->setCurrentFile(renderablePath);
-    } else {
-        m_model->setCurrentFile(tr("[None]"));
-    }
-
+    m_model->setCurrentFile(currentDataModelPath());
     QQuickWidget::showEvent(event);
 }

@@ -249,6 +249,11 @@ bool InspectorControlView::isRefMaterial(int instance) const
     return bridge->IsReferencedMaterialInstance(instance);
 }
 
+QString InspectorControlView::noneString() const
+{
+    return ChooserModelBase::noneString();
+}
+
 bool InspectorControlView::canLinkProperty(int instance, int handle) const
 {
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
@@ -401,7 +406,7 @@ void InspectorControlView::setPropertyValueFromFilename(long instance, int handl
 {
     if (m_inspectorControlModel) {
         QString value;
-        if (name != tr("[None]")) {
+        if (name != ChooserModelBase::noneString()) {
             // Relativize the path to the project
             const auto doc = g_StudioApp.GetCore()->GetDoc();
             const QDir documentDir(doc->GetDocumentDirectory().toQString());
@@ -417,17 +422,21 @@ QObject *InspectorControlView::showImageChooser(int handle, int instance, const 
     if (!m_imageChooserView) {
         m_imageChooserView = new ImageChooserView(this);
         connect(m_imageChooserView, &ImageChooserView::imageSelected, this,
-                [this] (int handle, int instance, const QString &imageName){
-            QString renderableId = g_StudioApp.getRenderableId(imageName);
-            if (renderableId.isEmpty()) {
-                setPropertyValueFromFilename(instance, handle, imageName);
-            } else {
-                Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(),
-                                                  QObject::tr("Set Property"))
-                        ->setInstanceImagePropertyValue(
-                            instance, handle, Q3DStudio::CString::fromQString(renderableId));
+                [this] (int handle, int instance, const QString &imageName) {
+            // To avoid duplicate undo points when setting image property we can't rely
+            // on regular property duplication checks, as images are not directly stored as
+            // their paths. Also, there is no check for duplication on renderables.
+            if (m_imageChooserView->currentDataModelPath() != imageName) {
+                QString renderableId = g_StudioApp.getRenderableId(imageName);
+                if (renderableId.isEmpty()) {
+                    setPropertyValueFromFilename(instance, handle, imageName);
+                } else {
+                    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(),
+                                                      QObject::tr("Set Property"))
+                            ->setInstanceImagePropertyValue(
+                                instance, handle, Q3DStudio::CString::fromQString(renderableId));
+                }
             }
-            m_imageChooserView->hide();
         });
     }
 
@@ -444,9 +453,8 @@ QObject *InspectorControlView::showFilesChooser(int handle, int instance, const 
     if (!m_fileChooserView) {
         m_fileChooserView = new FileChooserView(this);
         connect(m_fileChooserView, &FileChooserView::fileSelected, this,
-                [this] (int handle, int instance, const QString &fileName){
+                [this] (int handle, int instance, const QString &fileName) {
             setPropertyValueFromFilename(instance, handle, fileName);
-            m_fileChooserView->hide();
         });
     }
 
@@ -463,7 +471,7 @@ QObject *InspectorControlView::showMeshChooser(int handle, int instance, const Q
     if (!m_meshChooserView) {
         m_meshChooserView = new MeshChooserView(this);
         connect(m_meshChooserView, &MeshChooserView::meshSelected, this,
-                [this] (int handle, int instance, const QString &name){
+                [this] (int handle, int instance, const QString &name) {
             if (name.startsWith(QStringLiteral("#"))) {
                 if (m_inspectorControlModel)
                     m_inspectorControlModel->setPropertyValue(instance, handle, name);
@@ -486,9 +494,9 @@ QObject *InspectorControlView::showTextureChooser(int handle, int instance, cons
     if (!m_textureChooserView) {
         m_textureChooserView = new TextureChooserView(this);
         connect(m_textureChooserView, &TextureChooserView::textureSelected, this,
-                [this] (int handle, int instance, const QString &fileName){
-            setPropertyValueFromFilename(instance, handle, fileName);
-            m_textureChooserView->hide();
+                [this] (int handle, int instance, const QString &fileName) {
+            if (m_textureChooserView->currentDataModelPath() != fileName)
+                setPropertyValueFromFilename(instance, handle, fileName);
         });
     }
 
@@ -558,31 +566,37 @@ QObject *InspectorControlView::showMaterialReference(int handle, int instance, c
         m_matRefListWidget = new MaterialRefView(this);
 
     disconnect(m_matRefListWidget, &QListWidget::itemClicked, nullptr, nullptr);
+    disconnect(m_matRefListWidget, &QListWidget::itemDoubleClicked, nullptr, nullptr);
 
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
 
     qt3dsdm::SValue value;
     propertySystem->GetInstancePropertyValue(instance, handle, value);
-    qt3dsdm::Qt3DSDMInstanceHandle refInstance = doc->GetDataModelObjectReferenceHelper()
-                                                                        ->Resolve(value, instance);
 
-    const int numMats = m_matRefListWidget->refreshMaterials(refInstance);
+    const int numMats = m_matRefListWidget->refreshMaterials(
+                doc->GetDataModelObjectReferenceHelper()->Resolve(value, instance));
     const int popupHeight = qMin(numMats, 10) * CStudioPreferences::controlBaseHeight();
 
     CDialogs::showWidgetBrowser(this, m_matRefListWidget, point,
                                 CDialogs::WidgetBrowserAlign::ComboBox,
                                 QSize(CStudioPreferences::valueWidth(), popupHeight));
 
-    connect(m_matRefListWidget, &QListWidget::itemClicked, this, [=](QListWidgetItem *item) {
+    connect(m_matRefListWidget, &QListWidget::itemClicked, this,
+            [doc, propertySystem, instance, handle](QListWidgetItem *item) {
         auto selectedInstance = item->data(Qt::UserRole).toInt();
+        qt3dsdm::SValue value;
+        propertySystem->GetInstancePropertyValue(instance, handle, value);
+        auto refInstance = doc->GetDataModelObjectReferenceHelper()->Resolve(value, instance);
         if (selectedInstance != refInstance) {
             auto objRef = doc->GetDataModelObjectReferenceHelper()->GetAssetRefValue(
-                                    selectedInstance, instance, CRelativePathTools::EPATHTYPE_GUID);
+                        selectedInstance, instance, CRelativePathTools::EPATHTYPE_GUID);
             Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Property"))
                     ->SetInstancePropertyValue(instance, handle, objRef);
         }
-       m_matRefListWidget->hide();
+    });
+    connect(m_matRefListWidget, &QListWidget::itemDoubleClicked, this, [this]() {
+        m_matRefListWidget->hide();
     });
 
     return m_matRefListWidget;

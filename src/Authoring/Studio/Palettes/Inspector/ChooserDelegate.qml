@@ -75,9 +75,23 @@ Rectangle {
             MouseArea {
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton
-                visible: isSelectable
-                onClicked: item.clicked(filePath)
-                onDoubleClicked: item.doubleClicked(filePath)
+                onClicked: {
+                    if (isSelectable) {
+                        listView.model.setCurrentFile(filePath);
+                        item.clicked(filePath);
+                    }
+                }
+                onDoubleClicked: {
+                    if (isSelectable) {
+                        listView.model.setCurrentFile(filePath);
+                        item.doubleClicked(filePath);
+                    } else if (isExpandable) {
+                        if (expanded)
+                            listView.model.collapse(index);
+                        else
+                            listView.model.expand(index);
+                    }
+                }
             }
         }
     }

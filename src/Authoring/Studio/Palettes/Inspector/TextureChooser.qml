@@ -58,10 +58,13 @@ Rectangle {
 
             delegate: ChooserDelegate {
                 onClicked: {
-                    _textureChooserView.textureSelected(
-                                _textureChooserView.handle,
-                                _textureChooserView.instance,
-                                filePath);
+                    _textureChooserView.textureSelected(_textureChooserView.handle,
+                                                        _textureChooserView.instance, filePath);
+                }
+                onDoubleClicked: {
+                    _textureChooserView.textureSelected(_textureChooserView.handle,
+                                                        _textureChooserView.instance, filePath);
+                    _textureChooserView.hide();
                 }
             }
         }

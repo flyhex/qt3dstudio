@@ -30,6 +30,7 @@
 #define FILECHOOSERVIEW_H
 
 #include <QtQuickWidgets/qquickwidget.h>
+#include <QtCore/qtimer.h>
 
 class FileChooserModel;
 
@@ -63,6 +64,7 @@ private:
     int m_handle = -1;
     int m_instance = -1;
     FileChooserModel *m_model = nullptr;
+    QTimer *m_focusOutTimer = nullptr;
 };
 
 #endif // IMAGECHOOSERVIEW_H

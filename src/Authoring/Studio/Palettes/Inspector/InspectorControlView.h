@@ -83,6 +83,7 @@ public:
     Q_INVOKABLE bool toolTipsEnabled();
     Q_INVOKABLE QString convertPathToProjectRoot(const QString &presentationPath);
     Q_INVOKABLE bool isRefMaterial(int instance) const;
+    Q_INVOKABLE QString noneString() const;
 
     // IDataModelListener
     void OnBeginDataModelNotifications() override;

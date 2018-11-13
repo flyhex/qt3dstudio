@@ -50,6 +50,7 @@ public:
 
     void setInstance(int instance);
     int instance() const;
+    QString currentDataModelPath() const;
 
 Q_SIGNALS:
     void imageSelected(int handle, int instance, const QString &name);

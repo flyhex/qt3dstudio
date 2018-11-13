@@ -153,23 +153,29 @@ QVariant ChooserModelBase::data(const QModelIndex &index, int role) const
 
 void ChooserModelBase::setCurrentFile(const QString &path)
 {
+    const auto fixedItems = getFixedItems();
+    const int fixedItemCount = fixedItems.count();
+    const auto getFixedItemIndex = [fixedItemCount, &fixedItems](const QString &path) -> int {
+        for (int i = 0; i < fixedItemCount; ++i) {
+            const auto &item = fixedItems.at(i);
+            if (item.name == path)
+                return i;
+        }
+        return -1;
+    };
+    int fixedItemIndex = getFixedItemIndex(path);
+
     const auto doc = g_StudioApp.GetCore()->GetDoc();
     const QDir documentDir(doc->GetDocumentDirectory().toQString());
-    const QString fullPath = QDir::cleanPath(documentDir.filePath(path));
+    const QString fullPath = fixedItemIndex == -1 ? QDir::cleanPath(documentDir.filePath(path))
+                                                  : path;
 
     if (fullPath != m_currentFile) {
-        const auto fixedItems = getFixedItems();
-
-        const auto fileRow = [this, &fixedItems](const QString &path)
+        const auto fileRow = [this, getFixedItemIndex, fixedItemCount](const QString &path) -> int
         {
-            const int fixedItemCount = fixedItems.count();
-
-            for (int i = 0; i < fixedItemCount; ++i) {
-                const auto &item = fixedItems.at(i);
-
-                if (item.name == path)
-                    return i;
-            }
+            const int fixedItemIndex = getFixedItemIndex(path);
+            if (fixedItemIndex != -1)
+                return fixedItemIndex;
 
             const int itemCount = m_items.count();
 

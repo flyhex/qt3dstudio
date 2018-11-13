@@ -593,7 +593,7 @@ Rectangle {
             property int handle: parent.modelData.handle
             property variant values: parent.modelData.values
             value: {
-                parent.modelData.value === "" ? qsTr("[None]")
+                parent.modelData.value === "" ? _parentView.noneString()
                                               : _parentView.convertPathToProjectRoot(
                                                     parent.modelData.value)
             }

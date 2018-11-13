@@ -71,7 +71,6 @@ QSize MeshChooserView::sizeHint() const
 
 void MeshChooserView::setSelectedMeshName(const QString &name)
 {
-    hide();
     bool resourceName = false;
     QString meshName = QLatin1Char('#') + name;
     const wchar_t **files = g_StudioApp.GetCore()->GetDoc()->GetBufferCache().GetPrimitiveNames();
@@ -132,17 +131,14 @@ void MeshChooserView::showEvent(QShowEvent *event)
     qt3dsdm::SValue value;
     propertySystem->GetInstancePropertyValue(m_instance, m_handle, value);
 
-    const QString meshValue = qt3dsdm::get<QString>(value);
-    const Q3DStudio::CFilePath selectionItem = Q3DStudio::CFilePath(meshValue);
-    const Q3DStudio::CFilePath selectionWithoutId = selectionItem.filePath();
-
     QString currentFile;
-
-    QString selectionWithoutIdName = selectionWithoutId.GetFileName().toQString();
-    if (selectionWithoutIdName.size())
-        currentFile = selectionWithoutIdName;
-    else
-        currentFile = selectionItem.GetIdentifier().toQString();
+    const QString meshValue = qt3dsdm::get<QString>(value);
+    if (meshValue.startsWith(QLatin1Char('#'))) {
+        currentFile = meshValue.mid(1);
+    } else {
+        currentFile = QDir::cleanPath(QDir(doc->GetDocumentDirectory().toQString())
+                                      .filePath(meshValue));
+    }
 
     m_model->setCurrentFile(currentFile);
 
