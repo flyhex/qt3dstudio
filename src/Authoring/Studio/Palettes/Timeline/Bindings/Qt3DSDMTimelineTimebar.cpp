@@ -211,7 +211,8 @@ void Qt3DSDMTimelineTimebar::SetTimebarComment(const Q3DStudio::CString &inComme
     using namespace Q3DStudio;
     if (inComment != m_Comment) {
         qt3dsdm::Qt3DSDMInstanceHandle theHandle = m_DataHandle;
-        SCOPED_DOCUMENT_EDITOR(*m_TimelineTranslationManager->GetDoc(), QObject::tr("Set Timebar Text"))
+        SCOPED_DOCUMENT_EDITOR(*m_TimelineTranslationManager->GetDoc(),
+                               QObject::tr("Set Time Bar Text"))
             ->SetTimebarText(theHandle, inComment);
     }
 }

@@ -102,7 +102,7 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
             + QString(CStudioPreferences::dataInputColor().name()) + "; }";
     m_diLabel->setStyleSheet(styleString);
 
-    m_actionShowRowTexts = new QAction(iconTimebarTexts, tr("Show All Timebar Texts"), this);
+    m_actionShowRowTexts = new QAction(iconTimebarTexts, tr("Show All Time Bar Texts"), this);
     m_actionShowRowTexts->setCheckable(true);
 
     updatePlayButtonState(false);
@@ -267,7 +267,7 @@ void TimelineToolbar::onDiButtonClicked()
 void TimelineToolbar::onShowRowTextsToggled()
 {
     bool isChecked = m_actionShowRowTexts->isChecked();
-    QString text = tr("%1 All Timebar Texts").arg(isChecked ? tr("Hide") : tr("Show"));
+    QString text = tr("%1 All Time Bar Texts").arg(isChecked ? tr("Hide") : tr("Show"));
     m_actionShowRowTexts->setText(text);
     emit showRowTextsToggled(isChecked);
 }
