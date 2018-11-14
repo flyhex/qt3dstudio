@@ -344,8 +344,11 @@ void InspectorControlModel::duplicateMaterial()
         material = getReferenceMaterial(m_inspectableBase);
 
     if (material.Valid()) {
-        const auto originalMaterialName = sceneEditor->GetName(material).toQString()
+        auto originalMaterialName = sceneEditor->GetName(material).toQString()
                 + QStringLiteral(" Copy");
+        int slashIndex = originalMaterialName.lastIndexOf(QLatin1Char('/'));
+        if (slashIndex != -1)
+            originalMaterialName = originalMaterialName.mid(slashIndex + 1);
         auto materialName = originalMaterialName;
         int i = 1;
         while (QFileInfo(sceneEditor->getMaterialFilePath(materialName)).exists()) {
