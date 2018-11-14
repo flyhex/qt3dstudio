@@ -162,7 +162,7 @@ Q3DSTranslation::THandleTranslatorPairList &Q3DSTranslation::getTranslatorsForIn
 void Q3DSTranslation::markDirty(qt3dsdm::Qt3DSDMInstanceHandle instance)
 {
     // Anchor points are not handled individually.
-    if (m_reader.GetObjectTypeName(instance) == L"PathAnchorPoint")
+    if (m_reader.GetObjectTypeName(instance) == QLatin1String("PathAnchorPoint"))
         instance = m_assetGraph.GetParent(instance);
     getOrCreateTranslator(instance);
 
@@ -179,7 +179,7 @@ void Q3DSTranslation::markPropertyDirty(qt3dsdm::Qt3DSDMInstanceHandle instance,
     SValue value;
     qt3dsdm::IPropertySystem *prop = m_doc.GetPropertySystem();
     prop->GetInstancePropertyValue(instance, property, value);
-    QString name = QString::fromWCharArray(prop->GetName(property).wide_str());
+    QString name = prop->GetName(property);
 
     // ignore these properties
     if (name == QLatin1String("shy"))
@@ -221,16 +221,12 @@ void Q3DSTranslation::markComponentSeconds(qt3dsdm::Qt3DSDMSlideHandle)
 QByteArray Q3DSTranslation::getInstanceObjectId(qt3dsdm::Qt3DSDMInstanceHandle instance)
 {
     QByteArray ret;
-    Q3DStudio::CString theId = m_reader.GetFileId(instance);
-    if (!theId.size())
+    QString theId = m_reader.GetFileId(instance);
+    if (theId.isEmpty())
         theId = m_reader.GetName(instance);
 
-    if (theId.size()) {
-        qt3ds::foundation::CRegisteredString rid
-                = Q3DSStringTable::instance()->GetRenderStringTable()
-                    .RegisterStr(theId.toQString());
-        ret = rid.qstring().toLatin1();
-    }
+    if (!theId.isEmpty())
+        ret = theId.toLatin1();
 
     // slides require component name prepended
     if (m_objectDefinitions.GetType(instance) == qt3dsdm::ComposerObjectTypes::Slide) {
@@ -238,12 +234,11 @@ QByteArray Q3DSTranslation::getInstanceObjectId(qt3dsdm::Qt3DSDMInstanceHandle i
                                           ->GetSlideByInstance(instance));
         qt3dsdm::Qt3DSDMInstanceHandle component(m_reader.GetComponentForSlide(slide));
         if (component.Valid()) {
-            Q3DStudio::CString cId = m_reader.GetFileId(component);
-            if (!theId.size())
+            QString cId = m_reader.GetFileId(component);
+            if (theId.isEmpty())
                 cId = m_reader.GetName(component);
-            QString qcid(cId.toQString());
-            qcid.append(QLatin1String("-"));
-            ret = qcid.toLatin1().append(ret);
+            cId.append(QLatin1String("-"));
+            ret = cId.toLatin1().append(ret);
         } else if (ret.isEmpty()) {
             ret = QByteArrayLiteral("Master Slide");
         } else if (ret != QByteArrayLiteral("Master Slide")){
@@ -272,13 +267,12 @@ Q3DSGraphObjectTranslator *Q3DSTranslation::createEffectTranslator(
         qt3dsdm::Qt3DSDMInstanceHandle instance, qt3dsdm::Qt3DSDMInstanceHandle parentClass,
         const QByteArray &id)
 {
-    const QString instanceName = m_reader.GetName(parentClass).toQString();
-    const QString instancePath = m_reader.GetSourcePath(parentClass).toQString();
+    const QString instanceName = m_reader.GetName(parentClass);
+    const QString instancePath = m_reader.GetSourcePath(parentClass);
     const QString assetPath = m_presentation->assetFileName(instancePath, nullptr);
     qt3dsdm::IMetaData &metadata(*m_studioSystem.GetActionMetaData());
 
     if (!metadata.IsEffectInstanceRegistered(qPrintable(assetPath))) {
-        WQString nameStr(toWQString(instanceName));
         auto inputStreamFactory = IInputStreamFactory::Create();
         std::vector<qt3dsdm::SMetaDataLoadWarning> warnings;
         IRefCountedInputStream stream = inputStreamFactory->getStreamForFile(assetPath);
@@ -286,8 +280,8 @@ Q3DSGraphObjectTranslator *Q3DSTranslation::createEffectTranslator(
             qWarning() << __FUNCTION__ << " Unable to open effect: " << instancePath;
             return nullptr;
         }
-        metadata.LoadEffectXMLFromSourcePath(qPrintable(instancePath),
-                                             instance, nameStr.data(), warnings, *stream);
+        metadata.LoadEffectXMLFromSourcePath(instancePath,
+                                             instance, instanceName, warnings, *stream);
     }
 
     Q3DSEffect effect = m_presentation->effect(assetPath);
@@ -305,13 +299,12 @@ Q3DSGraphObjectTranslator *Q3DSTranslation::createCustomMaterialTranslator(
         qt3dsdm::Qt3DSDMInstanceHandle instance, qt3dsdm::Qt3DSDMInstanceHandle parentClass,
         const QByteArray &id)
 {
-    const QString instanceName = m_reader.GetName(parentClass).toQString();
-    const QString instancePath = m_reader.GetSourcePath(parentClass).toQString();
+    const QString instanceName = m_reader.GetName(parentClass);
+    const QString instancePath = m_reader.GetSourcePath(parentClass);
     const QString assetPath = m_presentation->assetFileName(instancePath, nullptr);
     qt3dsdm::IMetaData &metadata(*m_studioSystem.GetActionMetaData());
 
-    if (!metadata.IsMaterialClassRegistered(qPrintable(assetPath))) {
-        WQString nameStr(toWQString(instanceName));
+    if (!metadata.IsMaterialClassRegistered(assetPath)) {
         auto inputStreamFactory = IInputStreamFactory::Create();
         std::vector<qt3dsdm::SMetaDataLoadWarning> warnings;
         IRefCountedInputStream stream = inputStreamFactory->getStreamForFile(assetPath);
@@ -319,8 +312,8 @@ Q3DSGraphObjectTranslator *Q3DSTranslation::createCustomMaterialTranslator(
             qWarning() << __FUNCTION__ << " Unable to open custom material: " << instancePath;
             return nullptr;
         }
-        metadata.LoadMaterialClassFromSourcePath(qPrintable(instancePath),
-                                                 instance, nameStr.data(), warnings, *stream);
+        metadata.LoadMaterialClassFromSourcePath(instancePath,
+                                                 instance, instanceName, warnings, *stream);
     }
 
     Q3DSCustomMaterial material = m_presentation->customMaterial(assetPath);

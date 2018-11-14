@@ -276,15 +276,12 @@ struct Q3DSTranslatorDataModelParser
     {
         if (parseProperty(inProperty, outValue)) {
             if (!outValue.isEmpty() && outValue[0] != QLatin1Char('#')) {
-                Q3DStudio::CFilePath theDirectory
+                QString theDirectory
                         = g_StudioApp.GetCore()->GetDoc()->GetDocumentDirectory();
-                Q3DStudio::CFilePath theResolvedPath
-                        = Q3DStudio::CFilePath::CombineBaseAndRelative(theDirectory,
-                                                        Q3DStudio::CString::fromQString(outValue));
-                if (theResolvedPath.exists()) {
-                    std::shared_ptr<Q3DSStringTable> strTable = Q3DSStringTable::instance();
-                    outValue = strTable->GetRenderStringTable().RegisterStr(outValue);
-                }
+                QString theResolvedPath
+                        = Q3DStudio::CFilePath::CombineBaseAndRelative(theDirectory, outValue);
+                if (QFileInfo(theResolvedPath).exists())
+                    outValue = theResolvedPath;
             }
             return true;
         }
@@ -308,8 +305,7 @@ struct Q3DSTranslatorDataModelParser
         Option<qt3dsdm::SStringOrInt> temp = propertyValue<qt3dsdm::SStringOrInt>(inProperty);
         if (temp.hasValue()) {
             const bool isInt = temp->GetType() == qt3dsdm::SStringOrIntTypes::Int;
-            QString str = !isInt ? QString::fromWCharArray(
-                                       temp->m_Value.getData<qt3dsdm::TDataStrPtr>()->GetData())
+            QString str = !isInt ? temp->m_Value.getData<qt3dsdm::TDataStrPtr>()->toQString()
                                  : QString();
             const bool isRef = (!isInt && str[0] == QLatin1Char('#'));
             if (isInt || isRef) {
@@ -1949,10 +1945,9 @@ void Q3DSDynamicObjectTranslator::pushTranslation(Q3DSTranslation &inContext)
 
     const auto propertyKeys = properties->keys();
     for (auto property : propertyKeys) {
-        WQString name(toWQString(property));
         const Q3DSMaterial::PropertyElement &element = (*properties)[property];
         qt3dsdm::Qt3DSDMPropertyHandle theProperty =
-            inContext.reader().FindProperty(instanceHandle(), name.data());
+            inContext.reader().FindProperty(instanceHandle(), property);
         if (!datacore->IsProperty(theProperty))
             continue;
 

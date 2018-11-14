@@ -90,8 +90,8 @@ CFileDropSource::CFileDropSource(long inFlavor, void *inData, unsigned long inSi
 {
     // Pull out all of the SDropItemData and build a file.
     m_File = *(Qt3DSFile *)inData;
-    m_ObjectType =
-        Q3DStudio::ImportUtils::GetObjectFileTypeForFile(m_File.GetAbsolutePath()).m_ObjectType;
+    m_ObjectType = Q3DStudio::ImportUtils::GetObjectFileTypeForFile(
+                        m_File.GetAbsolutePath().toQString()).m_ObjectType;
 }
 
 void CFileDropSource::SetHasValidTarget(bool inValid)
@@ -131,7 +131,7 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
 
     if (theFilePath.IsFile()) {
         Q3DStudio::DocumentEditorFileType::Enum theDocType(
-            Q3DStudio::ImportUtils::GetObjectFileTypeForFile(theFilePath).m_FileType);
+            Q3DStudio::ImportUtils::GetObjectFileTypeForFile(theFilePath.toQString()).m_FileType);
         QString theCommandName;
         // TODO: internationalize
         switch (theDocType) {
@@ -189,8 +189,8 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
             || theDocType == Q3DStudio::DocumentEditorFileType::QmlStream) { // set subpresentation
             QString pathFromRoot = QDir(theDoc.GetCore()->getProjectFile().getProjectPath())
                                         .relativeFilePath(theFilePath.toQString());
-            Q3DStudio::CString presentationId = Q3DStudio::CString::fromQString(theDoc.GetCore()
-                                                ->getProjectFile().getPresentationId(pathFromRoot));
+            QString presentationId = theDoc.GetCore()
+                    ->getProjectFile().getPresentationId(pathFromRoot);
             auto &bridge(*theDoc.GetStudioSystem()->GetClientDataModelBridge());
             EStudioObjectType rowType = bridge.GetObjectType(inTarget);
 
@@ -241,7 +241,7 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
             }
         } else {
             Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
-                ->ImportFile(theDocType, theFilePath, inTarget, inSlide,
+                ->ImportFile(theDocType, theFilePath.toQString(), inTarget, inSlide,
                              CDialogs::GetImportFileExtension(),
                              Q3DStudio::ImportUtils::GetInsertTypeForDropType(inDestType), thePoint,
                              theStartTime);

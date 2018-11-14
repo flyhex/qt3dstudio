@@ -42,7 +42,7 @@
 #include "StudioObjectTypes.h"
 #include "Qt3DSMessageBox.h"
 #include "Qt3DSFileTools.h"
-#include "CColor.h"
+#include <QtGui/qcolor.h>
 #include "DocumentEditorEnumerations.h"
 
 #include <QtWidgets/qmessagebox.h>
@@ -86,48 +86,31 @@ public:
 
     // This is not an appropriate place for these, but better
     // in an inappropriate place than duplicated
-    static const char *GetDAEFileExtension();
-    static const char *GetFbxFileExtension();
+    static QString GetDAEFileExtension();
+    static QString GetFbxFileExtension();
     // Null terminated list
-    static const char **GetImgFileExtensions();
-    static const char *GetImportFileExtension();
-    static const char *GetMeshFileExtension();
-    static const char *GetQmlFileExtension();
-    static const char *GetMaterialDataFileExtension();
-    static const char **GetFontFileExtensions();
-    static const char **GetEffectFileExtensions();
-    static const char **GetMaterialFileExtensions();
-    static const char **GetSoundFileExtensions();
-    static bool IsImageFileExtension(const char *inExt);
-    static bool IsFontFileExtension(const char *inExt);
-    static bool IsEffectFileExtension(const char *inExt);
-    static bool IsMaterialFileExtension(const char *inExt);
-    static bool IsSoundFileExtension(const char *inExt);
-    static bool isPresentationFileExtension(const char *inExt);
-    static bool isMeshFileExtension(const char *inExt);
-    static bool isProjectFileExtension(const char *inExt);
+    static QStringList GetImgFileExtensions();
+    static QString GetImportFileExtension();
+    static QString GetMeshFileExtension();
+    static QString GetQmlFileExtension();
+    static QString GetMaterialDataFileExtension();
+    static QStringList GetFontFileExtensions();
+    static QStringList GetEffectFileExtensions();
+    static QStringList GetMaterialFileExtensions();
+    static QStringList GetSoundFileExtensions();
+    static bool IsImageFileExtension(const QString &inExt);
+    static bool IsFontFileExtension(const QString &inExt);
+    static bool IsEffectFileExtension(const QString &inExt);
+    static bool IsMaterialFileExtension(const QString &inExt);
+    static bool IsSoundFileExtension(const QString &inExt);
+    static bool isPresentationFileExtension(const QString &inExt);
+    static bool isMeshFileExtension(const QString &inExt);
+    static bool isProjectFileExtension(const QString &inExt);
+    static bool IsPathFileExtension(const QString &inExt);
+    static bool IsPathBufferExtension(const QString &inExt);
 
-    static const wchar_t *GetWideDAEFileExtension();
-    static const wchar_t *GetWideFbxFileExtension();
-    static const wchar_t *GetWideImportFileExtension();
-    static const wchar_t *GetWideMeshFileExtension();
-    static const wchar_t **GetWideFontFileExtensions();
-    static const wchar_t **GetWideImgFileExtensions();
-    static const wchar_t **GetWideEffectFileExtensions();
-    static const wchar_t **GetWideMaterialFileExtensions();
-    static const wchar_t **GetWideSoundFileExtensions();
-    static bool IsImageFileExtension(const wchar_t *inExt);
-    static bool IsFontFileExtension(const wchar_t *inExt);
-    static bool IsEffectFileExtension(const wchar_t *inExt);
-    static bool IsMaterialFileExtension(const wchar_t *inExt);
-    static bool IsPathFileExtension(const wchar_t *inExt);
-    static bool IsPathBufferExtension(const wchar_t *inExt);
-    static bool IsSoundFileExtension(const wchar_t *inExt);
-    static bool isPresentationFileExtension(const wchar_t *inExt);
-    static bool isProjectFileExtension(const wchar_t *inExt);
-
-    Qt3DSFile GetExportChoice(const Q3DStudio::CString &inExtension,
-                              const Q3DStudio::CString &inDefaultName);
+    Qt3DSFile GetExportChoice(const QString &inExtension,
+                              const QString &inDefaultName);
 
     QString GetSaveAsChoice(const QString &inDialogTitle = {}, bool isProject = false);
     QString GetNewDocumentChoice(const QString &inInitialDirectory = {}, bool isProject = true);

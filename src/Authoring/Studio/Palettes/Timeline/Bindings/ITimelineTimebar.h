@@ -33,9 +33,10 @@
 
 #include "Qt3DSString.h"
 
+#include <QtGui/qcolor.h>
+
 class ITimeChangeCallback;
 
-class CColor;
 
 //=============================================================================
 /**
@@ -64,7 +65,7 @@ public:
     virtual void CommitTimeChange() = 0;
     virtual void RollbackTimeChange() = 0;
     //
-    virtual CColor GetTimebarColor() = 0;
+    virtual QColor GetTimebarColor() = 0;
     virtual Q3DStudio::CString GetTimebarComment() = 0;
     virtual void SetTimebarComment(const Q3DStudio::CString &inComment) = 0;
     virtual void SetTimebarTime(ITimeChangeCallback *inCallback = nullptr) = 0;

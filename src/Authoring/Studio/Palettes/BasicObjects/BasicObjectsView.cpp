@@ -28,7 +28,7 @@
 
 #include "BasicObjectsView.h"
 #include "BasicObjectsModel.h"
-#include "CColor.h"
+#include <QtGui/qcolor.h>
 #include "Literals.h"
 #include "StudioPreferences.h"
 #include "StudioUtils.h"

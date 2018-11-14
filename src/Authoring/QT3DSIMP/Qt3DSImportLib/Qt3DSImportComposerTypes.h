@@ -69,17 +69,15 @@ struct SImportAsset
 {
     ITERATE_COMPOSER_NAMED_PROPERTIES
     ITERATE_COMPOSER_ASSET_PROPERTIES
-    virtual DataModelDataType::Value GetPropertyDataType(const wchar_t *inPropertyName);
-    virtual DataModelDataType::Value GetPropertyDataType(const char8_t *inPropertyName);
+    virtual DataModelDataType::Value GetPropertyDataType(const QString &inPropertyName);
     virtual ComposerObjectTypes::Enum GetObjectType() { return ComposerObjectTypes::Asset; }
-    const wchar_t *GetObjectName() { return ComposerObjectTypes::Convert(GetObjectType()); }
+    QString GetObjectName() { return ComposerObjectTypes::Convert(GetObjectType()); }
 };
 
 struct SImportNode : public SImportAsset
 {
     ITERATE_COMPOSER_NODE_PROPERTIES
-    DataModelDataType::Value GetPropertyDataType(const wchar_t *inPropertyName) override;
-    DataModelDataType::Value GetPropertyDataType(const char8_t *inPropertyName) override;
+    DataModelDataType::Value GetPropertyDataType(const QString &inPropertyName) override;
     ComposerObjectTypes::Enum GetObjectType() override { return ComposerObjectTypes::Node; }
 };
 
@@ -91,48 +89,42 @@ struct SImportGroup : public SImportNode
 struct SImportModel : public SImportNode
 {
     ITERATE_COMPOSER_MODEL_PROPERTIES
-    DataModelDataType::Value GetPropertyDataType(const wchar_t *inPropertyName) override;
-    DataModelDataType::Value GetPropertyDataType(const char8_t *inPropertyName) override;
+    DataModelDataType::Value GetPropertyDataType(const QString &inPropertyName) override;
     ComposerObjectTypes::Enum GetObjectType() override { return ComposerObjectTypes::Model; }
 };
 
 struct SImportMaterial : public SImportAsset
 {
     ITERATE_COMPOSER_MATERIAL_PROPERTIES
-    DataModelDataType::Value GetPropertyDataType(const wchar_t *inPropertyName) override;
-    DataModelDataType::Value GetPropertyDataType(const char8_t *inPropertyName) override;
+    DataModelDataType::Value GetPropertyDataType(const QString &inPropertyName) override;
     ComposerObjectTypes::Enum GetObjectType() override { return ComposerObjectTypes::Material; }
 };
 
 struct SImportImage : public SImportAsset
 {
     ITERATE_COMPOSER_IMAGE_PROPERTIES
-    DataModelDataType::Value GetPropertyDataType(const wchar_t *inPropertyName) override;
-    DataModelDataType::Value GetPropertyDataType(const char8_t *inPropertyName) override;
+    DataModelDataType::Value GetPropertyDataType(const QString &inPropertyName) override;
     ComposerObjectTypes::Enum GetObjectType() override { return ComposerObjectTypes::Image; }
 };
 
 struct SImportPath : public SImportNode
 {
     ITERATE_COMPOSER_PATH_PROPERTIES
-    DataModelDataType::Value GetPropertyDataType(const wchar_t *inPropertyName) override;
-    DataModelDataType::Value GetPropertyDataType(const char8_t *inPropertyName) override;
+    DataModelDataType::Value GetPropertyDataType(const QString &inPropertyName) override;
     ComposerObjectTypes::Enum GetObjectType() override { return ComposerObjectTypes::Path; }
 };
 
 struct SImportSubPath : public SImportAsset
 {
     ITERATE_COMPOSER_PATH_SUBPATH_PROPERTIES
-    DataModelDataType::Value GetPropertyDataType(const wchar_t *inPropertyName) override;
-    DataModelDataType::Value GetPropertyDataType(const char8_t *inPropertyName) override;
+    DataModelDataType::Value GetPropertyDataType(const QString &inPropertyName) override;
     ComposerObjectTypes::Enum GetObjectType() override { return ComposerObjectTypes::SubPath; }
 };
 
 struct SImportPathAnchorPoint : public SImportAsset
 {
     ITERATE_COMPOSER_PATH_ANCHOR_POINT_PROPERTIES
-    DataModelDataType::Value GetPropertyDataType(const wchar_t *inPropertyName) override;
-    DataModelDataType::Value GetPropertyDataType(const char8_t *inPropertyName) override;
+    DataModelDataType::Value GetPropertyDataType(const QString &inPropertyName) override;
     ComposerObjectTypes::Enum GetObjectType() override
     {
         return ComposerObjectTypes::PathAnchorPoint;

@@ -35,32 +35,29 @@
 
 namespace Q3DStudio {
 
-SObjectFileType ImportUtils::GetObjectFileTypeForFile(const CFilePath &inFile,
+SObjectFileType ImportUtils::GetObjectFileTypeForFile(const QString &inFile,
                                                       bool inCheckFileExists /*= true*/)
 {
-    if (inCheckFileExists && !inFile.isFile())
+    QFileInfo info(inFile);
+    if (inCheckFileExists && !info.isFile())
         return SObjectFileType(OBJTYPE_UNKNOWN, DocumentEditorFileType::Unknown);
 
-    Q3DStudio::CString theExtension(inFile.GetExtension());
-    theExtension.ToLower();
+    QString theExtension(info.suffix());
 
-    if (theExtension.Compare(CDialogs::GetImportFileExtension(), Q3DStudio::CString::ENDOFSTRING,
-                             false)) {
+    if (theExtension.compare(CDialogs::GetImportFileExtension(), Qt::CaseInsensitive) == 0) {
         return SObjectFileType(OBJTYPE_GROUP, DocumentEditorFileType::Import);
-    } else if (theExtension.Compare(CDialogs::GetMeshFileExtension(), Q3DStudio::CString::ENDOFSTRING,
-                                  false)) {
+    } else if (theExtension.compare(CDialogs::GetMeshFileExtension(), Qt::CaseInsensitive) == 0) {
         return SObjectFileType(OBJTYPE_MODEL, DocumentEditorFileType::Mesh);
     } else if (CDialogs::IsImageFileExtension(theExtension)) {
         return SObjectFileType(
             OBJTYPE_MODEL, OBJTYPE_IMAGE,
             DocumentEditorFileType::Image); // Drag-drop image to scene will auto-map to Rectangle.
-    } else if (theExtension.Compare(CDialogs::GetQmlFileExtension(),
-                                    Q3DStudio::CString::ENDOFSTRING, false)) {
-        return g_StudioApp.isQmlStream(inFile.absoluteFilePath())
+    } else if (theExtension.compare(CDialogs::GetQmlFileExtension(), Qt::CaseInsensitive) == 0) {
+        return g_StudioApp.isQmlStream(info.absoluteFilePath())
                 ? SObjectFileType(OBJTYPE_QML_STREAM, DocumentEditorFileType::QmlStream)
                 : SObjectFileType(OBJTYPE_BEHAVIOR, DocumentEditorFileType::Behavior);
-    } else if (theExtension.Compare(CDialogs::GetMaterialDataFileExtension(),
-                                    Q3DStudio::CString::ENDOFSTRING, false)) {
+    } else if (theExtension.compare(CDialogs::GetMaterialDataFileExtension(),
+                                    Qt::CaseInsensitive) == 0) {
         return SObjectFileType(OBJTYPE_MATERIALDATA, DocumentEditorFileType::MaterialData);
     } else if (CDialogs::IsFontFileExtension(theExtension)) {
         return SObjectFileType(OBJTYPE_TEXT, DocumentEditorFileType::Font);

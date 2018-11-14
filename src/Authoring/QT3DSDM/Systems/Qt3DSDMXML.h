@@ -167,30 +167,30 @@ public:
     // Return an attribute whose value *is* registered with the string table.
     virtual bool Att(TWideXMLCharPtr name, TWideXMLCharPtr &outValue) = 0;
     virtual bool Att(TXMLCharPtr name, TXMLCharPtr &outValue) = 0;
-    virtual eastl::pair<TWideXMLCharPtr, TWideXMLCharPtr> GetFirstAttribute() = 0;
-    virtual eastl::pair<TWideXMLCharPtr, TWideXMLCharPtr> GetNextAttribute() = 0;
-    virtual eastl::pair<TXMLCharPtr, TXMLCharPtr> GetNarrowFirstAttribute() = 0;
-    virtual eastl::pair<TXMLCharPtr, TXMLCharPtr> GetNarrowNextAttribute() = 0;
+    virtual std::pair<QString, QString> GetFirstAttribute() = 0;
+    virtual std::pair<QString, QString> GetNextAttribute() = 0;
     virtual QT3DSU32 CountChildren() = 0;
     virtual QT3DSU32 CountChildren(TWideXMLCharPtr childName) = 0;
     virtual QT3DSU32 CountChildren(TXMLCharPtr childName) = 0;
     virtual bool MoveToFirstChild(TWideXMLCharPtr childName) = 0;
     virtual bool MoveToFirstChild(TXMLCharPtr childName) = 0;
+    virtual bool MoveToFirstChild(const QString &childName) = 0;
     virtual bool MoveToFirstChild() = 0;
     virtual bool MoveToNextSibling(TWideXMLCharPtr siblingName) = 0;
     virtual bool MoveToNextSibling(TXMLCharPtr siblingName) = 0;
+    virtual bool MoveToNextSibling(const QString &childName) = 0;
     virtual bool MoveToNextSibling() = 0;
     // Leave element means go to its parent.
     virtual void Leave() = 0;
-    virtual TWideXMLCharPtr GetElementName() const = 0;
-    virtual TXMLCharPtr GetNarrowElementName() const = 0;
+    virtual QString GetElementName() const = 0;
 
     // Value is the concatentated text node values inside the element
     virtual bool Value(TWideXMLCharPtr &outValue) = 0;
     virtual bool Value(TXMLCharPtr &outValue) = 0;
+    virtual bool Value(QString &outValue) = 0;
 
     // Get the element this reader was created with
-    virtual SDOMElement *GetTopElement() = 0;
+    virtual SDOMElement *GetTopElement() const = 0;
 
     bool Att(TWideXMLCharPtr name, TXMLWideStr &outValue)
     {
@@ -207,6 +207,26 @@ public:
         TXMLCharPtr temp;
         if (UnregisteredAtt(name, temp)) {
             outValue.assign(temp);
+            return true;
+        }
+        return false;
+    }
+
+    bool Att(TWideXMLCharPtr name, QString &outValue)
+    {
+        TWideXMLCharPtr temp;
+        if (UnregisteredAtt(name, temp)) {
+            outValue = QString::fromWCharArray(temp);
+            return true;
+        }
+        return false;
+    }
+
+    bool Att(const QString &name, QString &outValue)
+    {
+        TWideXMLCharPtr temp;
+        if (UnregisteredAtt(qUtf16Printable(name), temp)) {
+            outValue = QString::fromWCharArray(temp);
             return true;
         }
         return false;
@@ -235,6 +255,17 @@ public:
             return false;
         }
     }
+    template <typename TDataType>
+    bool Att(const QString &name, TDataType &outValue)
+    {
+        TXMLCharPtr temp;
+        if (UnregisteredAtt(qPrintable(name), temp)) {
+            WStrOps<TDataType>().StrTo(temp, outValue);
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     bool ChildValue(TXMLCharPtr name, TXMLCharPtr &value)
     {
@@ -247,6 +278,16 @@ public:
     }
 
     bool ChildValue(TWideXMLCharPtr name, TWideXMLCharPtr &value)
+    {
+        if (MoveToFirstChild(name)) {
+            Value(value);
+            Leave();
+            return true;
+        }
+        return false;
+    }
+
+    bool ChildValue(const QString &name, QString &value)
     {
         if (MoveToFirstChild(name)) {
             Value(value);
@@ -322,9 +363,15 @@ public:
     void Serialize(const wchar_t *elemName, TSerializer &serializer)
     {
         IDOMReader::Scope __theScope(*this);
-        if (MoveToFirstChild(elemName)) {
+        if (MoveToFirstChild(elemName))
             serializer.Serialize(*this);
-        }
+    }
+    template <typename TSerializer>
+    void Serialize(const QString &elemName, TSerializer &serializer)
+    {
+        IDOMReader::Scope __theScope(*this);
+        if (MoveToFirstChild(elemName))
+            serializer.Serialize(*this);
     }
     // Optionally hold on to the factory to keep our elements in memory as long as we are.
     static std::shared_ptr<IDOMReader>
@@ -355,6 +402,11 @@ public:
         {
             m_Writer.Begin(inElemName);
         }
+        Scope(IDOMWriter &writer, const QString &inElemName)
+            : m_Writer(writer)
+        {
+            m_Writer.Begin(inElemName);
+        }
         ~Scope() { m_Writer.End(); }
     };
 
@@ -368,11 +420,13 @@ public:
     // and Values <b>onetwothree</b>
     virtual void Begin(TWideXMLCharPtr inElemName) = 0;
     virtual void Begin(TXMLCharPtr inElemName) = 0;
+    virtual void Begin(const QString &inElemName) = 0;
     // Attributes.  They may be sorted just before write
     virtual void Att(TWideXMLCharPtr name, TWideXMLCharPtr value) = 0;
     virtual void Att(TXMLCharPtr name, TXMLCharPtr value) = 0;
     virtual void Value(TWideXMLCharPtr value) = 0;
     virtual void Value(TXMLCharPtr value) = 0;
+    virtual void Value(const QString &value) = 0;
     virtual void End() = 0;
     virtual void RemoveCurrent() = 0;
     virtual void ReplaceCurrent(SDOMElement &inElement) = 0;
@@ -383,8 +437,8 @@ public:
     // Get the number of tabs required to line up the next line
     // with the opening of the previous line
     virtual QT3DSU32 GetTabs() = 0;
-    virtual SDOMElement *GetTopElement() = 0;
-    virtual std::shared_ptr<IDOMFactory> GetFactory() = 0;
+    virtual SDOMElement *GetTopElement() const = 0;
+    virtual std::shared_ptr<IDOMFactory> GetFactory() const = 0;
     // Move this item before this sibling.  Function does not rearrange the
     // tree in any major way and will not work if inItem and inSibling aren't
     // siblings.
@@ -399,6 +453,13 @@ public:
     }
 
     virtual void ChildValue(TXMLCharPtr name, TXMLCharPtr value)
+    {
+        Begin(name);
+        Value(value);
+        End();
+    }
+
+    virtual void ChildValue(const QString &name, const QString &value)
     {
         Begin(name);
         Value(value);
@@ -437,6 +498,14 @@ public:
     }
 
     void Att(TXMLCharPtr name, const TXMLStr &inValue) { return Att(name, inValue.c_str()); }
+    void Att(TWideXMLCharPtr name, const QString &inValue)
+    {
+        return Att(name, qUtf16Printable(inValue));
+    }
+    void Att(const QString &name, const QString &inValue)
+    {
+        return Att(qUtf16Printable(name), qUtf16Printable(inValue));
+    }
 
     template <typename TData>
     void Att(TWideXMLCharPtr name, TData value)
@@ -448,6 +517,12 @@ public:
     void Att(TXMLCharPtr name, TData value)
     {
         Att(name, ToNarrowStr(value));
+    }
+
+    template <typename TData>
+    void Att(const QString &name, TData value)
+    {
+        Att(qPrintable(name), ToNarrowStr(value));
     }
 
     template <typename TSerializer>
@@ -473,11 +548,11 @@ public:
 
     // Note that the default method of creating a writer also creates a reader; they can
     // both manipulation the DOM hierarch.
-    static eastl::pair<std::shared_ptr<IDOMWriter>, std::shared_ptr<IDOMReader>>
+    static std::pair<std::shared_ptr<IDOMWriter>, std::shared_ptr<IDOMReader>>
     CreateDOMWriter(std::shared_ptr<IDOMFactory> inFactory, SDOMElement &inRootElement,
                     std::shared_ptr<IStringTable> inStringTable);
 
-    static eastl::pair<std::shared_ptr<IDOMWriter>, std::shared_ptr<IDOMReader>>
+    static std::pair<std::shared_ptr<IDOMWriter>, std::shared_ptr<IDOMReader>>
     CreateDOMWriter(const wchar_t *inTopElemName, std::shared_ptr<IStringTable> inStringTable)
     {
         std::shared_ptr<IDOMFactory> theFactory(IDOMFactory::CreateDOMFactory(inStringTable));
@@ -502,5 +577,139 @@ public:
     static SDOMElement *Read(IDOMFactory &inFactory, QIODevice &inStream,
                              CXmlErrorHandler *inErrorHandler = NULL);
 };
+
+struct SDOMAttribute
+{
+    TXMLCharPtr m_Name;
+    TXMLCharPtr m_Value;
+    SDOMAttribute *m_NextAttribute;
+
+    SDOMAttribute(TXMLCharPtr nm, TXMLCharPtr val);
+};
+
+struct SDOMElement
+{
+    TXMLCharPtr m_Name;
+    SDOMAttribute *m_FirstAttribute;
+    SDOMAttribute *m_LastAttribute;
+    SDOMElement *m_Parent;
+    SDOMElement *m_FirstChild;
+    SDOMElement *m_LastChild;
+    SDOMElement *m_NextSibling;
+    TXMLCharPtr m_Value;
+
+    SDOMElement(TXMLCharPtr nm);
+
+    void AddAttribute(SDOMAttribute &att);
+    // Used to ensure duplicate attributes can't happen
+    void SetAttributeValue(TXMLCharPtr inName, TXMLCharPtr inValue, IDOMFactory &inFactory,
+                           const SDOMFlags &inFlags);
+    void SetAttributeValue(TWideXMLCharPtr inName, TWideXMLCharPtr inValue, IDOMFactory &inFactory,
+                           const SDOMFlags &inFlags);
+    const SDOMAttribute *FindAttribute(TXMLCharPtr nm, const SDOMFlags &inFlags) const;
+    SDOMAttribute *FindAttribute(TXMLCharPtr nm, const SDOMFlags &inFlags);
+    void RemoveAttribute(TXMLCharPtr nm, const SDOMFlags &inFlags);
+    TXMLCharPtr GetAttributeValue(TXMLCharPtr nm, SDOMFlags &inFlags) const;
+    void AddChild(SDOMElement &elem);
+    SDOMElement *FindPreviousChild(SDOMElement &elem);
+    void RemoveChild(SDOMElement &elem);
+
+    void ReplaceChild(SDOMElement &inChild, SDOMElement &inReplacement);
+
+    void InsertChildBefore(SDOMElement &elem, SDOMElement &theSibling);
+    QT3DSU32 GetNumChildren(TXMLCharPtr inChildName, const SDOMFlags &inFlags) const;
+    QT3DSU32 GetNumChildren() const;
+    SDOMElement *FindChildByName(TXMLCharPtr nm, const SDOMFlags &inFlags) const;
+    SDOMElement *FindNextSiblingByName(TXMLCharPtr nm, const SDOMFlags &inFlags) const;
+};
+
+struct SElemPointer : std::pair<SDOMElement *, SDOMAttribute *>
+{
+    SElemPointer(SDOMElement *elem = NULL);
+    SElemPointer &operator=(SDOMElement *elem);
+    SElemPointer &operator=(SDOMAttribute *att);
+    SElemPointer &operator=(const std::pair<SDOMElement *, SDOMAttribute *> &other);
+    operator SDOMElement *() const;
+    SDOMElement *operator->() const;
+};
+
+#include "foundation/StrConvertUTF.h"
+
+struct SDOMReader : public IDOMReader
+{
+    SElemPointer m_TopElement;
+    std::vector<std::pair<SDOMElement *, SDOMAttribute *>> m_ScopeStack;
+    std::shared_ptr<IDOMFactory> m_Factory;
+    SDOMFlags m_Flags;
+    eastl::basic_string<qt3ds::foundation::TWCharEASTLConverter::TCharType> m_TempBuffer;
+
+    SDOMReader(SDOMElement &te, std::shared_ptr<qt3dsdm::IStringTable> s,
+               std::shared_ptr<IDOMFactory> inFactory = std::shared_ptr<IDOMFactory>());
+    SDOMElement *Current() const;
+    void SetDOMFlags(SDOMFlags inFlags) override;
+    SDOMFlags GetDOMFlags() const override;
+    void PushScope() override;
+    void PopScope() override;
+    void *GetScope() override;
+    void SetScope(void *inScope) override;
+    QString GetElementName() const override;
+    bool UnregisteredAtt(TWideXMLCharPtr name, TWideXMLCharPtr &outValue) override;
+    bool UnregisteredAtt(TXMLCharPtr name, TXMLCharPtr &outValue) override;
+    bool Att(TWideXMLCharPtr name, TWideXMLCharPtr &outValue) override;
+    bool Att(TXMLCharPtr name, TXMLCharPtr &outValue) override;
+    QT3DSU32 CountChildren() override;
+    QT3DSU32 CountChildren(TWideXMLCharPtr childName) override;
+    QT3DSU32 CountChildren(TXMLCharPtr childName) override;
+    std::pair<QString, QString> CurrentAttNarrow();
+    std::pair<QString, QString> GetNextAttribute() override;
+    std::pair<QString, QString> GetFirstAttribute() override;
+    bool MoveToFirstChild() override;
+    bool MoveToFirstChild(TXMLCharPtr childName) override;
+    bool MoveToFirstChild(TWideXMLCharPtr childName) override;
+    bool MoveToNextSibling() override;
+    bool MoveToNextSibling(TXMLCharPtr childName) override;
+    bool MoveToNextSibling(TWideXMLCharPtr childName) override;
+    bool MoveToNextSibling(const QString &childName) override;
+    bool MoveToFirstChild(const QString &childName) override;
+    // Leave element means go to its parent.
+    void Leave() override;
+    bool Value(TXMLCharPtr &outValue) override;
+    bool Value(TWideXMLCharPtr &outValue) override;
+    bool Value(QString &outValue) override;
+    SDOMElement *GetTopElement() const override;
+    virtual std::shared_ptr<IDOMFactory> GetFactory() const;
+};
+
+
+struct SDOMWriter : public IDOMWriter, public SDOMReader
+{
+    std::shared_ptr<IDOMFactory> m_FactoryPtr;
+    IDOMFactory &m_Factory;
+
+    SDOMWriter(std::shared_ptr<IDOMFactory> inDOMFactory,
+               std::shared_ptr<qt3dsdm::IStringTable> inStringTable, SDOMElement &inTopElem);
+    void SetDOMFlags(SDOMFlags inFlags) override;
+    SDOMFlags GetDOMFlags() const override;
+    void Begin(TXMLCharPtr inElemName) override;
+    void Begin(TWideXMLCharPtr inElemName) override;
+    void Begin(const QString &inElemName) override;
+    void Att(TXMLCharPtr name, TXMLCharPtr value) override;
+    void Att(TWideXMLCharPtr name, TWideXMLCharPtr value) override;
+    void Value(TWideXMLCharPtr value) override;
+    void Value(TXMLCharPtr value) override;
+    void Value(const QString &value) override;
+    void End() override;
+    void RemoveCurrent() override;
+    void ReplaceCurrent(SDOMElement &inElement) override;
+    void AppendChildren(SDOMElement &inElement) override;
+    void RemoveAttribute(TXMLCharPtr inItem) override;
+    void RemoveAttribute(TWideXMLCharPtr inItem) override;
+    void MoveBefore(TXMLCharPtr inItem, TXMLCharPtr inSibling) override;
+    void MoveBefore(TWideXMLCharPtr inItem, TWideXMLCharPtr inSibling) override;
+    QT3DSU32 GetTabs() override;
+    SDOMElement *GetTopElement() const override;
+    std::shared_ptr<IDOMFactory> GetFactory() const override;
+};
+
 }
 #endif

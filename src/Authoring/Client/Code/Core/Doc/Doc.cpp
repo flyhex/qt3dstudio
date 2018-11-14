@@ -76,6 +76,7 @@
 #include "Dialogs.h"
 #include "Q3DSStringTable.h"
 #include "Q3DSImageTextureData.h"
+#include "Q3DSRenderBufferManager.h"
 
 #include <QtCore/qfileinfo.h>
 #include <QtWidgets/qaction.h>
@@ -225,12 +226,12 @@ qt3dsdm::IPropertySystem *CDoc::GetPropertySystem()
 }
 
 void CDoc::SetInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                                    const std::wstring &inPropertyName,
+                                    const QString &inPropertyName,
                                     const qt3dsdm::SValue &inValue)
 {
     qt3dsdm::IPropertySystem *thePropertySystem = GetStudioSystem()->GetPropertySystem();
     qt3dsdm::Qt3DSDMPropertyHandle theProperty =
-            thePropertySystem->GetAggregateInstancePropertyByName(inInstance, inPropertyName.c_str());
+            thePropertySystem->GetAggregateInstancePropertyByName(inInstance, inPropertyName);
     if (theProperty.Valid())
         thePropertySystem->SetInstancePropertyValue(inInstance, theProperty, inValue);
 }
@@ -238,43 +239,40 @@ void CDoc::SetInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
 // Utility that either adds or removes control string for the specified
 // property. Does not check if the property already has a controller
 // in the controlledPropStr. Returns true on success.
-bool ModifyControlStrForProperty(Q3DStudio::CString &controlledPropStr,
-                                 const Q3DStudio::CString &propName,
+bool ModifyControlStrForProperty(QString &controlledPropStr,
+                                 const QString &propName,
                                  bool controlled = false,
-                                 const Q3DStudio::CString diName = Q3DStudio::CString())
+                                 const QString &diName = {})
 {
-    Q3DStudio::CString cpStr = controlledPropStr;
+    QString cpStr = controlledPropStr;
 
     if (!controlled) {
         // get the length of to-be-deleted controller - property string and
         // delete it from the overall controlledproperty
-        long posProp = cpStr.find(" " + propName);
+        long posProp = cpStr.indexOf(QLatin1Char(' ') + propName);
 
-        if (posProp == Q3DStudio::CString::ENDOFSTRING)
+        if (posProp == -1)
             return false;
 
-        long posCtrlr = cpStr.substr(0, posProp - 1).ReverseFind(" ");
+        long posCtrlr = cpStr.left(posProp - 1).lastIndexOf(QLatin1Char(' '));
 
         // this is the first controller - property pair in controlledproperty
         if (posCtrlr < 0)
             posCtrlr = 0;
 
-        long deletableStrLen = (posProp + propName.Length()) - posCtrlr + 1;
+        long deletableStrLen = (posProp + propName.length()) - posCtrlr + 1;
 
-        cpStr.Delete(posCtrlr, deletableStrLen);
+        cpStr = cpStr.remove(posCtrlr, deletableStrLen);
 
         // clean up the string as we might have extra whitespaces
-        cpStr.Replace("  ", " ");
+        cpStr.replace(QLatin1String("  "), QLatin1String(" "));
 
-        cpStr.TrimLeft();
-        cpStr.TrimRight();
+        cpStr = cpStr.trimmed();
     } else {
         // Insert delimiter if we already have an existing string.
         if (cpStr.size())
-            cpStr.append(" ");
-        cpStr.append("$" + diName);
-        cpStr.append(" ");
-        cpStr.append(propName);
+            cpStr += QLatin1Char(' ');
+        cpStr += QLatin1Char('$') + diName + QLatin1Char(' ') + propName;
     }
     controlledPropStr = cpStr;
     return true;
@@ -289,9 +287,9 @@ void CDoc::RemoveDatainputBindings(
     const auto uniqueKeys = map->uniqueKeys();
     for (const auto &name : uniqueKeys) {
         const auto values = map->values(name);
-        for (const auto pair : values) {
-            SetInstancePropertyControlled(pair.first, Q3DStudio::CString(),
-                                          pair.second, Q3DStudio::CString::fromQString(name),
+        for (const auto &pair : values) {
+            SetInstancePropertyControlled(pair.first, QString(),
+                                          pair.second, name,
                                           false, true);
         }
     }
@@ -307,31 +305,30 @@ void CDoc::RemoveDatainputBindings(
 // If 'batch' is set to true, we group subsequent transactions together.
 // Caller is responsible for calling CloseTransaction() after all transactions
 // are finished
-void CDoc::SetInstancePropertyControlled(
-        qt3dsdm::Qt3DSDMInstanceHandle instance, Q3DStudio::CString instancepath,
-        qt3dsdm::Qt3DSDMPropertyHandle propName, Q3DStudio::CString newCtrl,
-        bool controlled, bool batch)
+void CDoc::SetInstancePropertyControlled(qt3dsdm::Qt3DSDMInstanceHandle instance,
+        const QString &instancepath, qt3dsdm::Qt3DSDMPropertyHandle propName,
+        const QString &newCtrl, bool controlled, bool batch)
 {
     qt3dsdm::IPropertySystem *thePropertySystem = GetStudioSystem()->GetPropertySystem();
     // We might have invalid controller (not found from the global list of datainputs)
     bool newCtrlrValid = false;
     qt3dsdm::SValue controlledProperty;
-    Q3DStudio::CString currCtrldPropsStr = Q3DStudio::CString();
+    QString currCtrldPropsStr;
     qt3dsdm::SValue currentCtrldProps;
     qt3dsdm::Qt3DSDMMetaDataPropertyHandle metadataHandle;
     qt3dsdm::Option<qt3dsdm::SMetaDataPropertyInfo> metadata;
 
     // Get current controller - property string for this element
     qt3dsdm::Qt3DSDMPropertyHandle ctrldElemPropHandle
-            = thePropertySystem->GetAggregateInstancePropertyByName(instance,
-                                                                    L"controlledproperty");
+            = thePropertySystem->GetAggregateInstancePropertyByName(
+                instance, QStringLiteral("controlledproperty"));
 
     // Get the controlledproperty tag for the target element
     if (ctrldElemPropHandle.Valid()) {
-        thePropertySystem->GetInstancePropertyValue(
-                    instance, ctrldElemPropHandle, currentCtrldProps);
+        thePropertySystem->GetInstancePropertyValue(instance, ctrldElemPropHandle,
+                                                    currentCtrldProps);
         if (!currentCtrldProps.empty())
-            currCtrldPropsStr = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currentCtrldProps)->GetData();
+            currCtrldPropsStr = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currentCtrldProps)->toQString();
     }
 
     // Get the name of controlled property if valid
@@ -342,7 +339,7 @@ void CDoc::SetInstancePropertyControlled(
     }
 
     // Check for new controller validity
-    if (g_StudioApp.m_dataInputDialogItems.contains(newCtrl.toQString()))
+    if (g_StudioApp.m_dataInputDialogItems.contains(newCtrl))
         newCtrlrValid = true;
     else if (controlled)
         return; // trying to set control on but new controller is not valid, abort
@@ -358,12 +355,12 @@ void CDoc::SetInstancePropertyControlled(
     // removal here just for the purposes of enabling recursive removal of control throughout
     // the graph
     if (!propName.Valid() && !controlled) {
-        if (currCtrldPropsStr.find(newCtrl + " @slide") != Q3DStudio::CString::ENDOFSTRING) {
-            ModifyControlStrForProperty(currCtrldPropsStr, Q3DStudio::CString("@slide"),
+        if (currCtrldPropsStr.contains(newCtrl + QStringLiteral(" @slide"))) {
+            ModifyControlStrForProperty(currCtrldPropsStr, QStringLiteral("@slide"),
                                         false, newCtrl);
         }
-        if (currCtrldPropsStr.find(newCtrl + " @timeline") != Q3DStudio::CString::ENDOFSTRING) {
-            ModifyControlStrForProperty(currCtrldPropsStr, Q3DStudio::CString("@timeline"),
+        if (currCtrldPropsStr.contains(newCtrl + QStringLiteral(" @timeline"))) {
+            ModifyControlStrForProperty(currCtrldPropsStr, QStringLiteral("@timeline"),
                                         false, newCtrl);
         }
         // in any case, write out the controlledproperty string even if unmodified
@@ -371,12 +368,12 @@ void CDoc::SetInstancePropertyControlled(
     } else {
         // We are going to set or change the controller for this property. Remove the
         // old controller - property pair from the controlledproperty string first if it exists.
-        if (currCtrldPropsStr.find(metadata->m_Name.c_str()) != Q3DStudio::CString::ENDOFSTRING)
-            ModifyControlStrForProperty(currCtrldPropsStr, metadata->m_Name.c_str(), false);
+        if (currCtrldPropsStr.contains(metadata->m_Name))
+            ModifyControlStrForProperty(currCtrldPropsStr, metadata->m_Name, false);
 
         // Modify the controlledproperty tag for the target element
         if (controlled) {
-            ModifyControlStrForProperty(currCtrldPropsStr, metadata->m_Name.c_str(), true, newCtrl);
+            ModifyControlStrForProperty(currCtrldPropsStr, metadata->m_Name, true, newCtrl);
             controlledProperty = std::make_shared<qt3dsdm::CDataStr>(currCtrldPropsStr);
         } else if (!controlled) {
             if (currCtrldPropsStr.size()) {
@@ -402,7 +399,8 @@ void CDoc::SetInstancePropertyControlled(
     } else {
         if (!IsTransactionOpened())
             OpenTransaction(QObject::tr("Set multiple controlled"), __FILE__, __LINE__);
-        SetInstancePropertyValue(instance, L"controlledproperty", controlledProperty);
+        SetInstancePropertyValue(instance, QStringLiteral("controlledproperty"),
+                                 controlledProperty);
     }
 }
 
@@ -840,12 +838,12 @@ void CDoc::CutObject(qt3dsdm::TInstanceHandleList inInstances)
             return;
 
         // Build the list of targets
-        Q3DStudio::CString theListOfTargets;
-        GetActionDependencies(inInstance, theListOfTargets);
+        QString theListOfTargets;
+        theListOfTargets = GetActionDependencies(inInstance, theListOfTargets);
 
-        if (!theListOfTargets.IsEmpty()) {
+        if (!theListOfTargets.isEmpty()) {
             if (m_DeletingReferencedObjectHandler)
-                m_DeletingReferencedObjectHandler->DisplayMessageBox(theListOfTargets.toQString());
+                m_DeletingReferencedObjectHandler->DisplayMessageBox(theListOfTargets);
             // theContinueCutFlag = false;
         }
     }
@@ -883,7 +881,8 @@ void CDoc::PasteObject(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         qint64 dummy = 0;
         Qt3DSFile theTempAPFile = CStudioClipboard::GetObjectFromClipboard(false, dummy);
         SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Paste Object"))
-                ->PasteSceneGraphObject(theTempAPFile.GetAbsolutePath(), theInstance, true,
+                ->PasteSceneGraphObject(theTempAPFile.GetAbsolutePath().toQString(),
+                                        theInstance, true,
                                         DocumentEditorInsertType::LastChild, CPt());
     }
 }
@@ -896,7 +895,8 @@ void CDoc::PasteObjectMaster(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         qint64 dummy = 0;
         Qt3DSFile theTempAPFile = CStudioClipboard::GetObjectFromClipboard(false, dummy);
         SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Paste Object"))
-                ->PasteSceneGraphObjectMaster(theTempAPFile.GetAbsolutePath(), theInstance, true,
+                ->PasteSceneGraphObjectMaster(theTempAPFile.GetAbsolutePath().toQString(),
+                                              theInstance, true,
                                               DocumentEditorInsertType::LastChild, CPt());
     }
 }
@@ -938,15 +938,11 @@ void CDoc::DeleteObject(const qt3dsdm::TInstanceHandleList &inInstances)
 
         // find all the custom items created for it and remove it all
         if (theClientBridge->CanDelete(inInstances[idx])) {
-            Q3DStudio::CString theListOfTargets;
-            GetActionDependencies(inInstances[idx], theListOfTargets);
+            QString theListOfTargets;
+            theListOfTargets = GetActionDependencies(inInstances[idx], theListOfTargets);
 
-            if (!theListOfTargets.IsEmpty()) {
-                if (m_DeletingReferencedObjectHandler) {
-                    m_DeletingReferencedObjectHandler->DisplayMessageBox(theListOfTargets
-                                                                         .toQString());
-                }
-            }
+            if (!theListOfTargets.isEmpty() && m_DeletingReferencedObjectHandler)
+                m_DeletingReferencedObjectHandler->DisplayMessageBox(theListOfTargets);
 
             deletableInstances.push_back(inInstances[idx]);
         }
@@ -954,7 +950,8 @@ void CDoc::DeleteObject(const qt3dsdm::TInstanceHandleList &inInstances)
 
     if (deletableInstances.empty() == false) {
         NotifySelectionChanged();
-        Q3DStudio::SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Delete"))->DeleteInstances(deletableInstances);
+        Q3DStudio::SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Delete"))
+                ->DeleteInstances(deletableInstances);
     }
 }
 
@@ -964,16 +961,16 @@ void CDoc::DeleteObject(const qt3dsdm::TInstanceHandleList &inInstances)
  *	@inAsset				The asset to check for dependencies.
  *	@ioActionDependencies	String representation of objects that have actions referencing it.
  */
-void CDoc::GetActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                                 Q3DStudio::CString &ioActionDependencies)
+QString CDoc::GetActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                    const QString &inActionDependencies)
 {
     // Step 1 : Get all actions affecting myself and all my descendents
+    QString actionDependencies = inActionDependencies;
     qt3dsdm::TActionHandleList theAffectedActions;
     GetActionDependencies(inInstance, theAffectedActions);
 
     // Set of unique owner names
-    typedef std::set<Q3DStudio::CString> TActionOwners;
-    TActionOwners theActionOwners;
+    std::set<QString> theActionOwners;
 
     qt3dsdm::IActionCore *theActionCore = m_StudioSystem->GetActionCore();
     qt3dsdm::TActionHandleList::iterator thePos = theAffectedActions.begin();
@@ -992,14 +989,13 @@ void CDoc::GetActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
     }
 
     // Iterate the set and form the output string
-    TActionOwners::iterator theActionOwnersPos = theActionOwners.begin();
-    TActionOwners::iterator theActionOwnersEnd = theActionOwners.end();
-    for (; theActionOwnersPos != theActionOwnersEnd; ++theActionOwnersPos) {
-        if (ioActionDependencies.IsEmpty())
-            ioActionDependencies += *theActionOwnersPos;
+    for (auto &actionOwner : theActionOwners) {
+        if (actionDependencies.isEmpty())
+            actionDependencies += actionOwner;
         else
-            ioActionDependencies += ", " + *theActionOwnersPos;
+            actionDependencies += QStringLiteral(", ") + actionOwner;
     }
+    return actionDependencies;
 }
 
 //=============================================================================
@@ -1156,7 +1152,7 @@ inline Q3DStudio::CString ConvertToWide(const char8_t *inStr)
 }
 
 void CDoc::GetProjectFonts(
-        std::vector<std::pair<Q3DStudio::CString, Q3DStudio::CString>> &outFontNameFileList)
+        std::vector<std::pair<QString, QString>> &outFontNameFileList)
 {
     outFontNameFileList.clear();
 #ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
@@ -1172,7 +1168,7 @@ void CDoc::GetProjectFonts(
 #endif
 }
 
-void CDoc::GetProjectFonts(std::vector<Q3DStudio::CString> &outFonts)
+void CDoc::GetProjectFonts(std::vector<QString> &outFonts)
 {
     outFonts.clear();
 #ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
@@ -1186,9 +1182,9 @@ void CDoc::GetProjectFonts(std::vector<Q3DStudio::CString> &outFonts)
 #endif
 }
 
-Q3DStudio::CString CDoc::GetProjectFontName(const Q3DStudio::CFilePath &inFullPathToFontFile)
+QString CDoc::GetProjectFontName(const QFileInfo &inFullPathToFontFile)
 {
-    Q3DStudio::CString theFont;
+    QString theFont;
 #ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     qt3ds::render::ITextRenderer *theRenderer = m_SceneGraph->GetTextRenderer();
     if (theRenderer) {
@@ -1281,8 +1277,8 @@ void CDoc::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
     using namespace qt3dsdm;
 
     // check if we changed datainput bindings
-    if (inProperty == m_StudioSystem->GetPropertySystem()
-            ->GetAggregateInstancePropertyByName(inInstance, L"controlledproperty")) {
+    if (inProperty == m_StudioSystem->GetPropertySystem()->GetAggregateInstancePropertyByName(
+                inInstance, QStringLiteral("controlledproperty"))) {
         // we need to rebuild the datainput map as we do not know what exactly
         // happened with controlledproperty property
         // TODO: implement a pre-change signal that can be used to extract
@@ -1622,10 +1618,9 @@ QString CDoc::getPresentationId() const
     return m_presentationId;
 }
 
-Q3DStudio::CString CDoc::GetDocumentDirectory() const
+QString CDoc::GetDocumentDirectory() const
 {
-    Q3DStudio::CFilePath thePath(m_DocumentPath);
-    return thePath.GetDirectory();
+    return QFileInfo(m_DocumentPath).canonicalPath();
 }
 
 //=============================================================================
@@ -1635,19 +1630,9 @@ Q3DStudio::CString CDoc::GetDocumentDirectory() const
  * This is used when we drag image / behavior / other files to scene.
  * In future we may want to return path to handle importing files from $CommonAssets.
  */
-Q3DStudio::CString CDoc::GetRelativePathToDoc(const Q3DStudio::CFilePath &inPath)
-{
-    Q3DStudio::CFilePath thePath(inPath);
-    Q3DStudio::CFilePath theDocumentPath(GetDocumentDirectory());
-    if (thePath.IsInSubDirectory(theDocumentPath))
-        thePath.ConvertToRelative(theDocumentPath);
-
-    return thePath;
-}
-
 QString CDoc::GetRelativePathToDoc(const QFileInfo &inPath)
 {
-    QString documentDirectory = GetDocumentDirectory().toQString();
+    QString documentDirectory = GetDocumentDirectory();
     QDir basePathDir = inPath.canonicalFilePath();
     if (basePathDir.exists() && basePathDir.exists(documentDirectory)) {
         basePathDir = QDir(documentDirectory);
@@ -1657,7 +1642,6 @@ QString CDoc::GetRelativePathToDoc(const QFileInfo &inPath)
     return inPath.filePath();
 }
 
-
 //=============================================================================
 /**
  * Given a path (may be relative or absolute), return the path with respect to doc.
@@ -1665,24 +1649,12 @@ QString CDoc::GetRelativePathToDoc(const QFileInfo &inPath)
  * Else, return normalized path so that we can easily do string comparison to compare path.
  * In future we may want to resolve path based on $CommonAssets.
  */
-Q3DStudio::CString CDoc::GetResolvedPathToDoc(const Q3DStudio::CFilePath &inPath)
-{
-    // If it is a relative path, resolve it.
-    if (!inPath.IsAbsolute()) {
-        // Sanity check that document path has been set properly.
-        ASSERT(QFileInfo(m_DocumentPath).exists());
-
-        return Q3DStudio::CFilePath::CombineBaseAndRelative(GetDocumentDirectory(), inPath);
-    }
-    return inPath.toCString();
-}
-
 QString CDoc::GetResolvedPathToDoc(const QFileInfo &inPath)
 {
     if (inPath.isAbsolute() == false) {
         // Sanity check that document path has been set properly.
-        ASSERT(QFileInfo(m_DocumentPath).exists());
-        return GetDocumentDirectory().toQString() + "/" + inPath.filePath();
+        Q_ASSERT(QFileInfo(m_DocumentPath).exists());
+        return GetDocumentDirectory() + QLatin1Char('/') + inPath.filePath();
     }
     return inPath.absolutePath();
 }
@@ -2153,16 +2125,15 @@ void CDoc::HandleDuplicateCommand(bool slide)
 bool CDoc::VerifyCanRename(qt3dsdm::Qt3DSDMInstanceHandle inAsset)
 {
     bool theResult = true;
-    std::set<Q3DStudio::CString> theAffectedList;
+    std::set<QString> theAffectedList;
     GetActionsAffectedByRename(inAsset, theAffectedList);
     if (!theAffectedList.empty()) {
-        Q3DStudio::CString theFormulatedString;
-        std::set<Q3DStudio::CString>::iterator thePos = theAffectedList.begin();
-        for (; thePos != theAffectedList.end(); ++thePos) {
-            if (theFormulatedString.IsEmpty())
-                theFormulatedString += (*thePos);
+        QString theFormulatedString;
+        for (auto &affected : theAffectedList) {
+            if (theFormulatedString.isEmpty())
+                theFormulatedString += affected;
             else
-                theFormulatedString += ", " + (*thePos);
+                theFormulatedString += QStringLiteral(", ") + affected;
         }
 
         ASSERT(0); // Dialogs by dispatch
@@ -2248,16 +2219,28 @@ int CDoc::LoadStudioData(QIODevice *inInputStream)
 
             IDOMReader &theReader(*theReaderPtr);
 
-            theReader.Att("version", theVersion);
+            theReader.Att(QStringLiteral("version"), theVersion);
 
             CProjectSettingsSerializer theProjectSettingsSerializer(
                         m_Core->GetStudioProjectSettings());
-            theReader.Serialize(L"ProjectSettings", theProjectSettingsSerializer);
+            theReader.Serialize(QStringLiteral("ProjectSettings"), theProjectSettingsSerializer);
 
             if (m_AssetGraph)
                 m_AssetGraph->Clear();
             else
                 m_AssetGraph = TAssetGraph::CreateGraph();
+
+            if (theReader.MoveToFirstChild(QStringLiteral("BufferData"))
+                    && theReader.MoveToFirstChild(QStringLiteral("ImageBuffer"))) {
+                do {
+                    bool transparency;
+                    QString sourcepath;
+                    theReader.Att(QStringLiteral("sourcepath"), sourcepath);
+                    theReader.Att(QStringLiteral("hasTransparency"), transparency);
+                    m_SceneGraph->GetBufferManager()
+                            ->SetImageHasTransparency(sourcepath, transparency);
+                } while (theReader.MoveToNextSibling(QStringLiteral("ImageBuffer")));
+            }
 
             // We definitely don't want a million events firing off during this deserialization.
             std::shared_ptr<IComposerSerializer> theSerializer(CreateTransactionlessSerializer());
@@ -2439,7 +2422,7 @@ DoCreateDOMReader(QIODevice &inStream,
     return std::shared_ptr<qt3dsdm::IDOMReader>();
 }
 
-std::shared_ptr<qt3dsdm::IDOMReader> CDoc::CreateDOMReader(const Q3DStudio::CString &inFilePath,
+std::shared_ptr<qt3dsdm::IDOMReader> CDoc::CreateDOMReader(const QString &inFilePath,
                                                            qt3ds::QT3DSI32 &outVersion)
 {
     using namespace qt3dsdm;
@@ -2594,7 +2577,7 @@ void CDoc::DeselectAllKeyframes()
  *reference, and hence all its descendants' action must be checked as well.
  */
 void CDoc::GetActionsAffectedByRename(qt3dsdm::Qt3DSDMInstanceHandle inAsset,
-                                      std::set<Q3DStudio::CString> &ioActionsAffected)
+                                      std::set<QString> &ioActionsAffected)
 {
     if (!inAsset)
         return;
@@ -2921,12 +2904,12 @@ void CDoc::getSceneMaterials(qt3dsdm::Qt3DSDMInstanceHandle inParent,
 
 void CDoc::CheckActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
-    Q3DStudio::CString theListOfTargets;
+    QString theListOfTargets;
     GetActionDependencies(inInstance, theListOfTargets);
 
-    if (!theListOfTargets.IsEmpty()) {
+    if (!theListOfTargets.isEmpty()) {
         if (m_DeletingReferencedObjectHandler)
-            m_DeletingReferencedObjectHandler->DisplayMessageBox(theListOfTargets.toQString());
+            m_DeletingReferencedObjectHandler->DisplayMessageBox(theListOfTargets);
     }
 }
 
@@ -2940,20 +2923,21 @@ void CDoc::UpdateDatainputMap(
     auto propSystem = GetPropertySystem();
 
     qt3dsdm::Qt3DSDMPropertyHandle ctrldPropHandle
-        = propSystem->GetAggregateInstancePropertyByName(inInstance, L"controlledproperty");
+        = propSystem->GetAggregateInstancePropertyByName(inInstance,
+                                                         QStringLiteral("controlledproperty"));
 
     if (propSystem->HasAggregateInstanceProperty(inInstance, ctrldPropHandle)) {
         qt3dsdm::SValue ctrldPropVal;
         propSystem->GetInstancePropertyValue(inInstance, ctrldPropHandle, ctrldPropVal);
-        Q3DStudio::CString currCtrldPropsStr
-            = qt3dsdm::get<qt3dsdm::TDataStrPtr>(ctrldPropVal)->GetData();
-        QStringList splitStr = currCtrldPropsStr.toQString().split(' ');
+        QString currCtrldPropsStr
+            = qt3dsdm::get<qt3dsdm::TDataStrPtr>(ctrldPropVal)->toQString();
+        QStringList splitStr = currCtrldPropsStr.split(' ');
         for (int i = 0; i < splitStr.size() - 1; i += 2) {
             QString diName = splitStr[i].startsWith('$') ? splitStr[i].remove(0, 1) : splitStr[i];
             QString propName = splitStr[i+1];
 
             auto propHandle = propSystem->GetAggregateInstancePropertyByName(
-                        inInstance, propName.toStdWString().c_str());
+                        inInstance, propName);
             auto propType = propSystem->GetDataType(propHandle);
             // Update the controlled elements and property types for
             // verified, existing datainputs. Note that for @timeline and
@@ -2983,7 +2967,7 @@ void CDoc::UpdateDatainputMap(
                 // be found in several elements.
                 qt3dsdm::Qt3DSDMPropertyHandle prop
                         = propSystem->GetAggregateInstancePropertyByName(
-                            inInstance, splitStr[i+1].toStdWString().c_str());
+                            inInstance, splitStr[i+1]);
                 QPair<qt3dsdm::Qt3DSDMInstanceHandle,
                       qt3dsdm::Qt3DSDMPropertyHandle> valuepair(inInstance, prop);
                 outMap->insertMulti(diName, valuepair);
@@ -3004,16 +2988,17 @@ bool CDoc::VerifyControlledProperties(const qt3dsdm::Qt3DSDMInstanceHandle inIns
     bool ret = true;
 
     qt3dsdm::Qt3DSDMPropertyHandle ctrldPropHandle
-        = propSystem->GetAggregateInstancePropertyByName(inInstance, L"controlledproperty");
+        = propSystem->GetAggregateInstancePropertyByName(inInstance,
+                                                         QStringLiteral("controlledproperty"));
     // Split controlledproperty string to parts and check each for validity.
     if (ctrldPropHandle) {
         qt3dsdm::SValue ctrldPropVal;
         propSystem->GetInstancePropertyValue(inInstance, ctrldPropHandle, ctrldPropVal);
-        Q3DStudio::CString currCtrldPropsStr
-                = qt3dsdm::get<qt3dsdm::TDataStrPtr>(ctrldPropVal)->GetData();
-        QStringList splitStr = currCtrldPropsStr.toQString().split(' ');
+        QString currCtrldPropsStr
+                = qt3dsdm::get<qt3dsdm::TDataStrPtr>(ctrldPropVal)->toQString();
+        QStringList splitStr = currCtrldPropsStr.split(QLatin1Char(' '));
 
-        Q3DStudio::CString validatedStr;
+        QString validatedStr;
 
         QRegExpValidator rxp(QRegExp("[A-Za-z0-9_$]+"));
 
@@ -3029,7 +3014,7 @@ bool CDoc::VerifyControlledProperties(const qt3dsdm::Qt3DSDMInstanceHandle inIns
             // check that target property exists or the target is @slide or @timeline
             qt3dsdm::Qt3DSDMPropertyHandle targetPropHandle
                     = propSystem->GetAggregateInstancePropertyByName(
-                        inInstance, splitStr[i+1].toStdWString().c_str());
+                        inInstance, splitStr[i+1]);
             if (targetPropHandle
                 || splitStr[i+1] == QLatin1String("@timeline")
                 || splitStr[i+1] == QLatin1String("@slide")) {
@@ -3042,9 +3027,8 @@ bool CDoc::VerifyControlledProperties(const qt3dsdm::Qt3DSDMInstanceHandle inIns
                 && splitStr[i].size() && splitStr[i] != QLatin1String("$")) {
                 // only add spacer if not at the first entry
                 if (validatedStr.size())
-                    validatedStr.append(" ");
-                validatedStr.append(Q3DStudio::CString::fromQString(splitStr[i]) + " "
-                                    + Q3DStudio::CString::fromQString(splitStr[i+1]));
+                    validatedStr += QLatin1Char(' ');
+                validatedStr += splitStr[i] + QLatin1Char(' ') + splitStr[i+1];
             } else {
                 ret = false;
             }
@@ -3057,7 +3041,8 @@ bool CDoc::VerifyControlledProperties(const qt3dsdm::Qt3DSDMInstanceHandle inIns
                     = std::make_shared<qt3dsdm::CDataStr>(validatedStr);
             // Set changed controlledproperty properties directly without creating
             // transaction and undo points
-            SetInstancePropertyValue(inInstance,  L"controlledproperty", controlledProperty);
+            SetInstancePropertyValue(inInstance, QStringLiteral("controlledproperty"),
+                                     controlledProperty);
         }
     }
 

@@ -125,7 +125,7 @@ void CActionCoreProducer::SetTargetObject(Qt3DSDMActionHandle inAction,
     GetSignalSender()->SendTargetObjectSet(inAction, theAction->m_ActionInfo.m_TargetObject);
 }
 
-void CActionCoreProducer::SetEvent(Qt3DSDMActionHandle inAction, const wstring &inEventHandle)
+void CActionCoreProducer::SetEvent(Qt3DSDMActionHandle inAction, const QString &inEventHandle)
 {
     SAction *theAction = CSimpleActionCore::GetActionNF(inAction, m_Data->m_Objects);
     if (m_Consumer) {
@@ -138,7 +138,7 @@ void CActionCoreProducer::SetEvent(Qt3DSDMActionHandle inAction, const wstring &
     GetSignalSender()->SendEventSet(inAction, inEventHandle);
 }
 
-void CActionCoreProducer::SetHandler(Qt3DSDMActionHandle inAction, const wstring &inHandlerHandle)
+void CActionCoreProducer::SetHandler(Qt3DSDMActionHandle inAction, const QString &inHandlerHandle)
 {
     SAction *theAction = CSimpleActionCore::GetActionNF(inAction, m_Data->m_Objects);
     if (m_Consumer) {
@@ -152,7 +152,7 @@ void CActionCoreProducer::SetHandler(Qt3DSDMActionHandle inAction, const wstring
 }
 
 Qt3DSDMHandlerArgHandle CActionCoreProducer::AddHandlerArgument(Qt3DSDMActionHandle inAction,
-                                                               const TCharStr &inName,
+                                                               const QString &inName,
                                                                HandlerArgumentType::Value inArgType,
                                                                DataModelDataType::Value inValueType)
 {
@@ -244,24 +244,24 @@ TSignalConnectionPtr CActionCoreProducer::ConnectTargetObjectSet(
     return GetSignalProvider()->ConnectTargetObjectSet(inCallback);
 }
 TSignalConnectionPtr CActionCoreProducer::ConnectEventSet(
-    const std::function<void(Qt3DSDMActionHandle, const wstring &)> &inCallback)
+    const std::function<void(Qt3DSDMActionHandle, const QString &)> &inCallback)
 {
     return GetSignalProvider()->ConnectEventSet(inCallback);
 }
 TSignalConnectionPtr CActionCoreProducer::ConnectHandlerSet(
-    const std::function<void(Qt3DSDMActionHandle, const wstring &)> &inCallback)
+    const std::function<void(Qt3DSDMActionHandle, const QString &)> &inCallback)
 {
     return GetSignalProvider()->ConnectHandlerSet(inCallback);
 }
 
 TSignalConnectionPtr CActionCoreProducer::ConnectHandlerArgumentAdded(
-    const std::function<void(Qt3DSDMActionHandle, Qt3DSDMHandlerArgHandle, const TCharStr &,
+    const std::function<void(Qt3DSDMActionHandle, Qt3DSDMHandlerArgHandle, const QString &,
                                HandlerArgumentType::Value, DataModelDataType::Value)> &inCallback)
 {
     return GetSignalProvider()->ConnectHandlerArgumentAdded(inCallback);
 }
 TSignalConnectionPtr CActionCoreProducer::ConnectHandlerArgumentRemoved(
-    const std::function<void(Qt3DSDMActionHandle, Qt3DSDMHandlerArgHandle, const TCharStr &,
+    const std::function<void(Qt3DSDMActionHandle, Qt3DSDMHandlerArgHandle, const QString &,
                                HandlerArgumentType::Value, DataModelDataType::Value)> &inCallback)
 {
     return GetSignalProvider()->ConnectHandlerArgumentRemoved(inCallback);

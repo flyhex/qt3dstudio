@@ -161,20 +161,20 @@ public:
     {
         return m_renderStringTable.GetWideStr(inStr);
     }
-    virtual const char8_t *RegisterStr(const char8_t *inStr) override
+    const char8_t *RegisterStr(const char8_t *inStr) override
     {
         return m_renderStringTable.GetNarrowStr(inStr);
     }
     // Get the utf-8 or utf-(sizeof wchar_t) converted strings
-    virtual const wchar_t *GetWideStr(const char8_t *inStr) override
+    const wchar_t *GetWideStr(const char8_t *inStr) override
     {
         return m_renderStringTable.GetWideStr(inStr);
     }
-    virtual const char8_t *GetNarrowStr(const wchar_t *inStr) override
+    const char8_t *GetNarrowStr(const wchar_t *inStr) override
     {
         return m_renderStringTable.GetNarrowStr(inStr);
     }
-    virtual qt3ds::foundation::IStringTable &GetRenderStringTable() override
+    qt3ds::foundation::IStringTable &GetRenderStringTable() override
     {
         return m_renderStringTable;
     }

@@ -48,7 +48,7 @@ class ITimelineItemProperty
 public:
     virtual ~ITimelineItemProperty() {}
 
-    virtual Q3DStudio::CString GetName() const = 0;
+    virtual QString GetName() const = 0;
     virtual bool IsMaster() const = 0;
     virtual qt3dsdm::TDataTypePair GetType() const = 0;
     virtual float GetMaximumValue() const = 0;

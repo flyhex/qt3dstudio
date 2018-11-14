@@ -138,7 +138,7 @@ void CAboutDlg::OnInitDialog()
 
     m_ui->m_WebSite->setText(QString("<a href=\"%1\"><font color=\"#%2\">%3</font></a>").arg(
                                  theURL,
-                                 CStudioPreferences::GetMasterColor().GetString().toQString(),
+                                 CStudioPreferences::GetMasterColor().name(),
                                  theURL));
     m_ui->m_WebSite->setToolTip(tr("Click to visit Qt web site"));
     m_ui->m_WebSite->setOpenExternalLinks(true);
@@ -148,7 +148,7 @@ void CAboutDlg::OnInitDialog()
 
     m_ui->m_Email->setText(QString("<a href=\"%1\"><font color=\"#%2\">%3</font></a>").arg(
                                theSupport,
-                               CStudioPreferences::GetMasterColor().GetString().toQString(),
+                               CStudioPreferences::GetMasterColor().name(),
                                theSupport));
     m_ui->m_Email->setToolTip(tr("Send a Studio support request to the Qt Company"));
     m_ui->m_Email->setOpenExternalLinks(true);

@@ -205,9 +205,7 @@ public:
     QString GetDocumentPath() const;
     void setPresentationId(const QString &id);
     QString getPresentationId() const;
-    Q3DStudio::CString GetDocumentDirectory() const;
-    Q3DStudio::CString GetRelativePathToDoc(const Q3DStudio::CFilePath &inPath);
-    Q3DStudio::CString GetResolvedPathToDoc(const Q3DStudio::CFilePath &inPath);
+    QString GetDocumentDirectory() const;
     QString getRelativePath() const;
     QString GetResolvedPathToDoc(const QFileInfo &inPath);
     QString GetRelativePathToDoc(const QFileInfo &inPath);
@@ -333,12 +331,12 @@ public:
     qt3dsdm::IPropertySystem *GetPropertySystem() override;
     qt3dsdm::IAnimationCore *GetAnimationCore() override;
     void SetInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                                  const std::wstring &inPropertyName,
+                                  const QString &inPropertyName,
                                   const qt3dsdm::SValue &inValue) override;
     void SetInstancePropertyControlled(qt3dsdm::Qt3DSDMInstanceHandle instance,
-                                       Q3DStudio::CString instancepath,
+                                       const QString &instancepath,
                                        qt3dsdm::Qt3DSDMPropertyHandle propName,
-                                       Q3DStudio::CString controller,
+                                       const QString &controller,
                                        bool controlled, bool batch = false) override;
 
     void RemoveDatainputBindings(
@@ -363,7 +361,7 @@ public:
     // Create a DOM reader and check that the top element's version is correct.  Opens the reader
     // to the project element.
     virtual std::shared_ptr<qt3dsdm::IDOMReader>
-    CreateDOMReader(const Q3DStudio::CString &inFilePath, qt3ds::QT3DSI32 &outVersion) override;
+    CreateDOMReader(const QString &inFilePath, qt3ds::QT3DSI32 &outVersion) override;
     virtual std::shared_ptr<qt3dsdm::IDOMReader> CreateDOMReader(QIODevice &inStream,
                                                                  qt3ds::QT3DSI32 &outVersion);
 
@@ -427,12 +425,10 @@ public:
     void SetSceneGraph(std::shared_ptr<Q3DStudio::IDocSceneGraph> inGraph);
     Q3DStudio::IDocSceneGraph *GetSceneGraph() { return m_SceneGraph.get(); }
 
-    void GetProjectFonts(
-            std::vector<std::pair<Q3DStudio::CString, Q3DStudio::CString>> &outFontNameFileList);
-    void GetProjectFonts(std::vector<Q3DStudio::CString> &outFonts);
-    Q3DStudio::CString
-    GetProjectFontName(const Q3DStudio::CFilePath
-                       &inFullPathToFontFile); // Given a font file, return the font name
+    void GetProjectFonts(std::vector<std::pair<QString, QString>> &outFontNameFileList);
+    void GetProjectFonts(std::vector<QString> &outFonts);
+     // Given a font file, return the font name
+    QString GetProjectFontName(const QFileInfo &inFullPathToFontFile);
     void setPlayBackPreviewState(bool state);
     bool isPlayBackPreviewOn() const;
     int getSelectedInstancesCount() const;
@@ -462,8 +458,8 @@ protected:
     void CreatePresentation();
     void ClosePresentation();
 
-    void GetActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                               Q3DStudio::CString &ioActionDependencies);
+    QString GetActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                  const QString &inActionDependencies);
     void GetActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                qt3dsdm::TActionHandleList &ioActionList);
 
@@ -471,7 +467,7 @@ protected:
     qt3dsdm::Qt3DSDMInstanceHandle GetTopmostGroup(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
 
     void GetActionsAffectedByRename(qt3dsdm::Qt3DSDMInstanceHandle inAsset,
-                                    std::set<Q3DStudio::CString> &ioActionsAffected);
+                                    std::set<QString> &ioActionsAffected);
 
     bool isFocusOnTextEditControl();
 

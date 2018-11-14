@@ -32,7 +32,7 @@
 using namespace qt3dsimp;
 
 #define HANDLE_COMPOSER_PROPERTY_NO_DEFAULT(name, memberName, dtype)                               \
-    if (AreEqual(inPropertyName, L"" #name))                                                          \
+    if (inPropertyName == QLatin1String(#name))                                                    \
         return TypeToDataType<dtype>();
 
 #define HANDLE_COMPOSER_PROPERTY(name, memberName, dtype, defaultValue)                            \
@@ -41,7 +41,7 @@ using namespace qt3dsimp;
 #define HANDLE_COMPOSER_PROPERTY_DUPLICATE(name, memberName, dtype, defaultValue)                  \
     HANDLE_COMPOSER_PROPERTY(name, memberName, dtype, defaultValue)
 
-DataModelDataType::Value SImportAsset::GetPropertyDataType(const wchar_t *inPropertyName)
+DataModelDataType::Value SImportAsset::GetPropertyDataType(const QString &inPropertyName)
 {
     ITERATE_COMPOSER_NAMED_PROPERTIES
     ITERATE_COMPOSER_ASSET_PROPERTIES
@@ -50,43 +50,43 @@ DataModelDataType::Value SImportAsset::GetPropertyDataType(const wchar_t *inProp
     return DataModelDataType::None;
 }
 
-DataModelDataType::Value SImportNode::GetPropertyDataType(const wchar_t *inPropertyName)
+DataModelDataType::Value SImportNode::GetPropertyDataType(const QString &inPropertyName)
 {
     ITERATE_COMPOSER_NODE_PROPERTIES
     return SImportAsset::GetPropertyDataType(inPropertyName);
 }
 
-DataModelDataType::Value SImportModel::GetPropertyDataType(const wchar_t *inPropertyName)
+DataModelDataType::Value SImportModel::GetPropertyDataType(const QString &inPropertyName)
 {
     ITERATE_COMPOSER_MODEL_PROPERTIES
     return SImportNode::GetPropertyDataType(inPropertyName);
 }
 
-DataModelDataType::Value SImportMaterial::GetPropertyDataType(const wchar_t *inPropertyName)
+DataModelDataType::Value SImportMaterial::GetPropertyDataType(const QString &inPropertyName)
 {
     ITERATE_COMPOSER_MATERIAL_PROPERTIES
     return SImportAsset::GetPropertyDataType(inPropertyName);
 }
 
-DataModelDataType::Value SImportImage::GetPropertyDataType(const wchar_t *inPropertyName)
+DataModelDataType::Value SImportImage::GetPropertyDataType(const QString &inPropertyName)
 {
     ITERATE_COMPOSER_IMAGE_PROPERTIES
     return SImportAsset::GetPropertyDataType(inPropertyName);
 }
 
-DataModelDataType::Value SImportPath::GetPropertyDataType(const wchar_t *inPropertyName)
+DataModelDataType::Value SImportPath::GetPropertyDataType(const QString &inPropertyName)
 {
     ITERATE_COMPOSER_PATH_PROPERTIES
     return SImportNode::GetPropertyDataType(inPropertyName);
 }
 
-DataModelDataType::Value SImportSubPath::GetPropertyDataType(const wchar_t *inPropertyName)
+DataModelDataType::Value SImportSubPath::GetPropertyDataType(const QString &inPropertyName)
 {
     ITERATE_COMPOSER_PATH_SUBPATH_PROPERTIES
     return SImportAsset::GetPropertyDataType(inPropertyName);
 }
 
-DataModelDataType::Value SImportPathAnchorPoint::GetPropertyDataType(const wchar_t *inPropertyName)
+DataModelDataType::Value SImportPathAnchorPoint::GetPropertyDataType(const QString &inPropertyName)
 {
     ITERATE_COMPOSER_PATH_ANCHOR_POINT_PROPERTIES
     return SImportAsset::GetPropertyDataType(inPropertyName);
@@ -105,57 +105,6 @@ DataModelDataType::Value SImportPathAnchorPoint::GetPropertyDataType(const wchar
 
 #define HANDLE_COMPOSER_PROPERTY_DUPLICATE(name, memberName, dtype, defaultValue)                  \
     HANDLE_COMPOSER_PROPERTY(name, memberName, dtype, defaultValue)
-
-DataModelDataType::Value SImportAsset::GetPropertyDataType(const char8_t *inPropertyName)
-{
-    ITERATE_COMPOSER_NAMED_PROPERTIES
-    ITERATE_COMPOSER_ASSET_PROPERTIES
-
-    QT3DS_ASSERT(false);
-    return DataModelDataType::None;
-}
-
-DataModelDataType::Value SImportNode::GetPropertyDataType(const char8_t *inPropertyName)
-{
-    ITERATE_COMPOSER_NODE_PROPERTIES
-    return SImportAsset::GetPropertyDataType(inPropertyName);
-}
-
-DataModelDataType::Value SImportModel::GetPropertyDataType(const char8_t *inPropertyName)
-{
-    ITERATE_COMPOSER_MODEL_PROPERTIES
-    return SImportNode::GetPropertyDataType(inPropertyName);
-}
-
-DataModelDataType::Value SImportMaterial::GetPropertyDataType(const char8_t *inPropertyName)
-{
-    ITERATE_COMPOSER_MATERIAL_PROPERTIES
-    return SImportAsset::GetPropertyDataType(inPropertyName);
-}
-
-DataModelDataType::Value SImportImage::GetPropertyDataType(const char8_t *inPropertyName)
-{
-    ITERATE_COMPOSER_IMAGE_PROPERTIES
-    return SImportAsset::GetPropertyDataType(inPropertyName);
-}
-
-DataModelDataType::Value SImportPath::GetPropertyDataType(const char8_t *inPropertyName)
-{
-    ITERATE_COMPOSER_PATH_PROPERTIES
-    return SImportNode::GetPropertyDataType(inPropertyName);
-}
-
-DataModelDataType::Value SImportSubPath::GetPropertyDataType(const char8_t *inPropertyName)
-{
-    ITERATE_COMPOSER_PATH_SUBPATH_PROPERTIES
-    return SImportAsset::GetPropertyDataType(inPropertyName);
-}
-
-DataModelDataType::Value SImportPathAnchorPoint::GetPropertyDataType(const char8_t *inPropertyName)
-{
-    ITERATE_COMPOSER_PATH_ANCHOR_POINT_PROPERTIES
-    return SImportAsset::GetPropertyDataType(inPropertyName);
-}
 
 #undef HANDLE_COMPOSER_PROPERTY_NO_DEFAULT
 #undef HANDLE_COMPOSER_PROPERTY

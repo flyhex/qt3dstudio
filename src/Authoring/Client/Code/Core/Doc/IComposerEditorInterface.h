@@ -50,7 +50,7 @@ namespace ComposerImport {
 
     // For the children of this instance that are associated with this slide,
     // update their information.
-    typedef unordered_map<const wchar_t *, vector<pair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle>>>
+    typedef QHash<QString, QVector<QPair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle>>>
         TIdMultiMap;
 
     // Interface between the import library (which defines IComposerEditor)
@@ -65,25 +65,24 @@ namespace ComposerImport {
 
         virtual bool HasError() = 0;
         // This file path contains the import document id.
-        virtual void Finalize(const Q3DStudio::CFilePath &inDestFilePath) = 0;
+        virtual void Finalize(const QString &inDestFilePath) = 0;
         virtual Qt3DSDMInstanceHandle FindInstance(TImportId inImportHdl) = 0;
-        virtual Qt3DSDMInstanceHandle GetRoot() = 0;
-        virtual const Q3DStudio::CFilePath &GetDestImportFile() = 0;
+        virtual Qt3DSDMInstanceHandle GetRoot() const = 0;
+        virtual const QString GetDestImportFile() const = 0;
         virtual void AddInstanceMap(Qt3DSDMInstanceHandle instanceHandle, TImportId inImportId) = 0;
 
         static std::shared_ptr<IComposerEditorInterface> CreateEditorInterface(
-            Q3DStudio::IDocumentEditor &editor, qt3dsdm::CDataModelHandle parent // Parent object
-            ,
-            qt3dsdm::CDataModelHandle root, qt3dsdm::Qt3DSDMSlideHandle slide,
-            const Q3DStudio::CFilePath &docPath, const Q3DStudio::CFilePath &fullPathToImportFile,
-            long inStartTime, qt3dsdm::IStringTable &inStringTable);
+                Q3DStudio::IDocumentEditor &editor, qt3dsdm::CDataModelHandle parent,
+                qt3dsdm::CDataModelHandle root, qt3dsdm::Qt3DSDMSlideHandle slide,
+                const QString &docPath, const QString &fullPathToImportFile,
+                long inStartTime);
 
         // The refresh interface is setup to refresh multiple trees automatically
         static std::shared_ptr<IComposerEditor>
         CreateEditorInterface(Q3DStudio::IDocumentEditor &editor, TIdMultiMap &inRoots,
-                              const Q3DStudio::CFilePath &docPath,
-                              const Q3DStudio::CFilePath &fullPathToImportFile, long inStartTime,
-                              qt3dsdm::IStringTable &inStringTable, CGraph &inAssetGraph);
+                              const QString &docPath,
+                              const QString &fullPathToImportFile, long inStartTime,
+                              CGraph &inAssetGraph);
     };
 }
 }

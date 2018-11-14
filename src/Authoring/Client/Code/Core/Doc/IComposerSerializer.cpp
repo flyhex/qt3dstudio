@@ -57,6 +57,20 @@ using namespace Q3DStudio;
 using namespace qt3ds;
 using namespace qt3ds::foundation;
 
+QT_BEGIN_NAMESPACE
+
+uint qHash(const qt3dsdm::SLong4 &t, uint seed)
+{
+    QtPrivate::QHashCombine hash;
+    seed = hash(seed, t.m_Longs[0]);
+    seed = hash(seed, t.m_Longs[1]);
+    seed = hash(seed, t.m_Longs[2]);
+    seed = hash(seed, t.m_Longs[3]);
+    return seed;
+}
+
+QT_END_NAMESPACE
+
 namespace std {
 template <>
 struct hash<SLong4>
@@ -258,13 +272,13 @@ struct SAttributeNameSorter
     bool operator()(const pair<Qt3DSDMPropertyHandle, SValue> &lhsPair,
                     const pair<Qt3DSDMPropertyHandle, SValue> &rhsPair)
     {
-        TCharStr lhs(m_Core.GetProperty(lhsPair.first).m_Name);
-        TCharStr rhs(m_Core.GetProperty(rhsPair.first).m_Name);
+        QString lhs(m_Core.GetProperty(lhsPair.first).m_Name);
+        QString rhs(m_Core.GetProperty(rhsPair.first).m_Name);
         if (lhs == rhs)
             return false;
-        if (lhs == L"name")
+        if (lhs == QLatin1String("name"))
             return true;
-        if (rhs == L"name")
+        if (rhs == QLatin1String("name"))
             return false;
         return lhs.compare(rhs) < 0;
     }
@@ -296,16 +310,16 @@ using std::tuple;
 // and write out the instances as we come to them.
 struct SComposerSerializerImpl : public IComposerSerializer
 {
-    typedef unordered_set<Qt3DSDMInstanceHandle, hash<int>> TInstanceSet;
-    typedef unordered_set<Qt3DSDMSlideHandle, hash<int>> TSlideSet;
-    typedef unordered_set<Qt3DSDMActionHandle, hash<int>> TActionSet;
+    typedef QSet<Qt3DSDMInstanceHandle> TInstanceSet;
+    typedef QSet<Qt3DSDMSlideHandle> TSlideSet;
+    typedef QSet<Qt3DSDMActionHandle> TActionSet;
     typedef vector<Qt3DSDMInstanceHandle> TInstanceList;
-    typedef unordered_map<int, TCharPtr> THandleToIdMap;
-    typedef unordered_map<TCharPtr, int> TIdToHandleMap;
-    typedef unordered_map<SLong4, int> TGUIDToHandleMap;
-    typedef unordered_map<int, SLong4> THandleToGUIDMap;
-    typedef unordered_map<Qt3DSDMInstanceHandle, int, hash<int>> TInstanceIntMap;
-    typedef unordered_map<Qt3DSDMInstanceHandle, TCharPtr, hash<int>> TInstanceToSiblingMap;
+    typedef QHash<int, QString> THandleToIdMap;
+    typedef QHash<QString, int> TIdToHandleMap;
+    typedef QHash<SLong4, int> TGUIDToHandleMap;
+    typedef QHash<int, SLong4> THandleToGUIDMap;
+    typedef QHash<Qt3DSDMInstanceHandle, int> TInstanceIntMap;
+    typedef QHash<Qt3DSDMInstanceHandle, QString> TInstanceToSiblingMap;
 
     IDataCore &m_DataCore;
     IMetaData &m_MetaData;
@@ -351,7 +365,6 @@ struct SComposerSerializerImpl : public IComposerSerializer
     // These are cleared just before use
     MemoryBuffer<RawAllocator> m_TempBuffer;
     MemoryBuffer<RawAllocator> m_ValueBuffer;
-    eastl::string m_ConvertStr;
 
     Q3DStudio::Foundation::SStudioFoundation m_Foundation;
     TStreamFactoryPtr m_InputStreamFactory;
@@ -362,6 +375,13 @@ struct SComposerSerializerImpl : public IComposerSerializer
     TInstanceToSiblingMap m_NewInstancesToSiblings;
 
     Option<int> m_UIPVersion;
+
+    QString idFromRef(const QString &ref) const
+    {
+        if (ref.startsWith(QLatin1Char('#')))
+            return ref.right(ref.length() - 1);
+        return ref;
+    }
 
     SComposerSerializerImpl(IDataCore &inDataCore, IMetaData &inMetaData, ISlideCore &inSlideCore,
                             IAnimationCore &inAnimationCore, IActionCore &inActionCore,
@@ -422,97 +442,90 @@ struct SComposerSerializerImpl : public IComposerSerializer
         m_UIPVersion = Option<int>();
     }
 
-    TCharPtr AddId(const wstring &inId, Qt3DSDMInstanceHandle inHandle)
+    QString AddId(const QString &inId, Qt3DSDMInstanceHandle inHandle)
     {
-        TCharPtr theIdStr = m_StringTable.RegisterStr(inId.c_str());
-        m_IdToHandleMap.insert(make_pair(theIdStr, inHandle));
-        m_HandleToIdMap.insert(make_pair(inHandle, theIdStr));
-        if (m_PreserveFileIds)
+        QString theIdStr(inId);
+        m_IdToHandleMap.insert(theIdStr, inHandle);
+        m_HandleToIdMap.insert(inHandle, theIdStr);
+        if (m_PreserveFileIds) {
             m_DataCore.SetInstancePropertyValue(inHandle, m_ObjectDefinitions.m_Asset.m_FileId,
-                                                std::make_shared<CDataStr>(inId.c_str()));
+                                                std::make_shared<CDataStr>(inId));
+        }
         return theIdStr;
     }
 
-    TCharPtr SetId(const wstring &inId, Qt3DSDMInstanceHandle inHandle)
+    QString SetId(const QString &inId, Qt3DSDMInstanceHandle inHandle)
     {
-        TCharPtr theIdStr = m_StringTable.RegisterStr(inId.c_str());
-        m_IdToHandleMap.insert(make_pair(theIdStr, inHandle)).first->second = inHandle;
-        m_HandleToIdMap.insert(make_pair(inHandle, theIdStr)).first->second = theIdStr;
-        if (m_PreserveFileIds)
+        QString theIdStr = inId;
+        *m_IdToHandleMap.insert(theIdStr, inHandle) = inHandle;
+        *m_HandleToIdMap.insert(inHandle, theIdStr) = theIdStr;
+        if (m_PreserveFileIds) {
             m_DataCore.SetInstancePropertyValue(inHandle, m_ObjectDefinitions.m_Asset.m_FileId,
-                                                std::make_shared<CDataStr>(inId.c_str()));
+                                                std::make_shared<CDataStr>(inId));
+        }
         return theIdStr;
     }
 
-    TCharPtr AddActionId(const wstring &inId, Qt3DSDMActionHandle inHandle)
+    QString AddActionId(const QString &inId, Qt3DSDMActionHandle inHandle)
     {
-        TCharPtr theIdStr = m_StringTable.RegisterStr(inId.c_str());
-        m_IdToActionMap.insert(make_pair(theIdStr, inHandle));
-        m_ActionToIdMap.insert(make_pair(inHandle, theIdStr));
+        QString theIdStr(inId);
+        m_IdToActionMap.insert(theIdStr, inHandle);
+        m_ActionToIdMap.insert(inHandle, theIdStr);
         return theIdStr;
     }
 
-    TCharPtr AddSlideId(const wstring &inId, Qt3DSDMSlideHandle inHandle)
+    QString AddSlideId(const QString &inId, Qt3DSDMSlideHandle inHandle)
     {
-        TCharPtr theIdStr = m_StringTable.RegisterStr(inId.c_str());
-        m_IdToSlideMap.insert(make_pair(theIdStr, inHandle));
-        m_SlideToIdMap.insert(make_pair(inHandle, theIdStr));
+        QString theIdStr(inId);
+        m_IdToSlideMap.insert(theIdStr, inHandle);
+        m_SlideToIdMap.insert(inHandle, theIdStr);
         return theIdStr;
     }
 
-    Qt3DSDMInstanceHandle GetInstanceById(TCharPtr inId)
+    Qt3DSDMInstanceHandle GetInstanceById(const QString &inId)
     {
         if (IsTrivial(inId))
             return 0;
-        if (inId[0] == '#')
-            ++inId;
 
-        inId = m_StringTable.RegisterStr(inId);
-        TIdToHandleMap::iterator find = m_IdToHandleMap.find(inId);
+        TIdToHandleMap::iterator find = m_IdToHandleMap.find(idFromRef(inId));
         if (find != m_IdToHandleMap.end())
-            return find->second;
+            return *find;
         return 0;
     }
 
-    Qt3DSDMSlideHandle GetSlideById(TCharPtr inId)
+    Qt3DSDMSlideHandle GetSlideById(const QString &inId)
     {
         if (IsTrivial(inId))
             return 0;
-        if (inId[0] == '#')
-            ++inId;
 
-        inId = m_StringTable.RegisterStr(inId);
-        TIdToHandleMap::iterator find = m_IdToSlideMap.find(inId);
+        TIdToHandleMap::iterator find = m_IdToSlideMap.find(idFromRef(inId));
         if (find != m_IdToSlideMap.end())
-            return find->second;
+            return *find;
         return 0;
     }
 
-    Qt3DSDMActionHandle GetActionById(TCharPtr inId)
+    Qt3DSDMActionHandle GetActionById(const QString &inId)
     {
         if (IsTrivial(inId))
             return 0;
-        if (inId[0] == '#')
-            ++inId;
 
-        inId = m_StringTable.RegisterStr(inId);
-        TIdToHandleMap::iterator find = m_IdToActionMap.find(inId);
+        TIdToHandleMap::iterator find = m_IdToActionMap.find(idFromRef(inId));
         if (find != m_IdToActionMap.end())
-            return find->second;
+            return *find;
         return 0;
     }
 
     void AddGuid(SLong4 inId, int inHandle)
     {
-        m_GUIDToHandleMap.insert(make_pair(inId, inHandle));
-        m_HandleToGUIDMap.insert(make_pair(inHandle, inId));
+        m_GUIDToHandleMap.insert(inId, inHandle);
+        m_HandleToGUIDMap.insert(inHandle, inId);
     }
 
     SLong4 GetInstanceGuid(Qt3DSDMInstanceHandle inInstance)
     {
         THandleToGUIDMap::iterator find = m_HandleToGUIDMap.find(inInstance);
         if (find != m_HandleToGUIDMap.end())
-            return find->second;
+            return *find;
         SValue theValue;
         if (m_DataCore.GetInstancePropertyValue(inInstance, m_ObjectDefinitions.m_Guided.m_GuidProp,
                                                 theValue)) {
@@ -523,7 +536,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         return SLong4();
     }
 
-    TCharPtr GetInstanceName(Qt3DSDMInstanceHandle inInstance)
+    QString GetInstanceName(Qt3DSDMInstanceHandle inInstance)
     {
         Qt3DSDMSlideHandle theAssociatedSlide = m_SlideSystem.GetAssociatedSlide(inInstance);
         SValue theValue;
@@ -532,88 +545,88 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                                                 m_ObjectDefinitions.m_Named.m_NameProp,
                                                                 theValue)) {
             TDataStrPtr theName(get<TDataStrPtr>(theValue));
-            TCharPtr retval = theName->GetData();
-            if (!IsTrivial(retval))
+            QString retval = theName->toQString();
+            if (!retval.isEmpty())
                 return retval;
         }
         SValue theDCValue;
         if (m_DataCore.GetInstancePropertyValue(inInstance, m_ObjectDefinitions.m_Named.m_NameProp,
                                                 theDCValue)) {
             TDataStrPtr theName(get<TDataStrPtr>(theDCValue));
-            TCharPtr retval = theName->GetData();
-            if (!IsTrivial(retval))
+            QString retval = theName->toQString();
+            if (!retval.isEmpty())
                 return retval;
         }
-        Option<TCharStr> theTypeStr = m_MetaData.GetTypeForInstance(inInstance);
+        Option<QString> theTypeStr = m_MetaData.GetTypeForInstance(inInstance);
         if (theTypeStr.hasValue())
-            return m_StringTable.RegisterStr(theTypeStr->wide_str());
+            return theTypeStr;
         QT3DS_ASSERT(false);
-        return L"";
+        return {};
     }
 
-    TCharPtr GetInstanceName(Qt3DSDMInstanceHandle inInstance, Qt3DSDMSlideHandle inSlide)
+    QString GetInstanceName(Qt3DSDMInstanceHandle inInstance, Qt3DSDMSlideHandle inSlide)
     {
         SValue theValue;
         if (m_SlideCore.GetSpecificInstancePropertyValue(
                     inSlide, inInstance, m_ObjectDefinitions.m_Named.m_NameProp, theValue)) {
             TDataStrPtr theName(get<TDataStrPtr>(theValue));
-            TCharPtr retval = theName->GetData();
-            if (!IsTrivial(retval))
+            QString retval = theName->toQString();
+            if (!retval.isEmpty())
                 return retval;
         }
         return GetInstanceName(inInstance);
     }
 
-    TCharPtr GetId(const wstring &inIdStem)
+    QString GetId(const QString &inIdStem)
     {
         // Create an ID for this instance
-        wstring theTypeStr(inIdStem);
-        wstring theTypeStem(theTypeStr);
-        wstring::size_type thePos = theTypeStem.find_last_of('_');
-        if (thePos != wstring::npos && thePos < theTypeStem.size() - 2) {
-            if (theTypeStem[thePos + 1] >= '0' && theTypeStem[thePos + 1] <= '1')
-                theTypeStem = theTypeStem.substr(0, thePos);
+        QString theTypeStr(inIdStem);
+        QString theTypeStem(theTypeStr);
+        QStringList split = theTypeStr.split(QLatin1Char('_'));
+        // remove number from the end
+        if (split.size() > 1) {
+            bool ok = false;
+            split.last().toLong(&ok);
+            if (ok)
+                theTypeStr = theTypeStr.left(theTypeStr.length() - split.last().length() - 1);
         }
-        QT3DSU32 idIdx = 1;
 
-        while (m_IdToActionMap.find(m_StringTable.RegisterStr(theTypeStr.c_str()))
-               != m_IdToActionMap.end()
-               || m_IdToHandleMap.find(m_StringTable.RegisterStr(theTypeStr.c_str()))
-               != m_IdToHandleMap.end()
-               || m_IdToSlideMap.find(m_StringTable.RegisterStr(theTypeStr.c_str()))
-               != m_IdToSlideMap.end()) {
-            wchar_t theBuffer[16];
-            swprintf(theBuffer, 16, L"_%03d", idIdx);
-            theTypeStr = theTypeStem + theBuffer;
+        uint idIdx = 1;
+
+        while (m_IdToActionMap.keys().contains(theTypeStr)
+               || m_IdToHandleMap.keys().contains(theTypeStr)
+               || m_IdToSlideMap.keys().contains(theTypeStr)) {
+            QString id = QString("_%1").arg(idIdx, 3, 10, QChar('0'));
+            theTypeStr = theTypeStem + id;
             ++idIdx;
         }
-        return m_StringTable.RegisterStr(theTypeStr.c_str());
+        return theTypeStr;
     }
 
-    TCharPtr GetInstanceId(Qt3DSDMInstanceHandle inInstance)
+    QString GetInstanceId(Qt3DSDMInstanceHandle inInstance)
     {
         QT3DS_ASSERT(inInstance.Valid());
         THandleToIdMap::iterator theFind(m_HandleToIdMap.find(inInstance));
         if (theFind != m_HandleToIdMap.end())
-            return theFind->second;
+            return *theFind;
 
-        TCharStr theName(GetInstanceName(inInstance));
-        Option<TCharStr> theType = m_MetaData.GetTypeForInstance(inInstance);
+        QString theName(GetInstanceName(inInstance));
+        Option<QString> theType = m_MetaData.GetTypeForInstance(inInstance);
         if (theType.hasValue() == false) {
             QT3DS_ASSERT(false);
-            return L"";
+            return {};
         }
 
         // for most instances we just want a simple id based on the object name.
         // for images, however, we want do to something else.
-        TCharPtr theNewId = L"";
+        QString theNewId;
         if (m_DataCore.IsInstanceOrDerivedFrom(inInstance,
                                                m_ObjectDefinitions.m_Image.m_Instance)) {
             Qt3DSDMInstanceHandle theMaterial = m_AssetGraph.GetParent(inInstance);
             if (theMaterial.Valid()) {
-                wstring theIdStr(GetInstanceId(theMaterial));
+                QString theIdStr(GetInstanceId(theMaterial));
                 SLong4 theGuid = GetInstanceGuid(inInstance);
-                theIdStr.append(L"_");
+                theIdStr += QLatin1Char('_');
                 TPropertyHandleList theProperties;
                 m_DataCore.GetAggregateInstanceProperties(theMaterial, theProperties);
                 Qt3DSDMPropertyHandle theProperty;
@@ -641,40 +654,40 @@ struct SComposerSerializerImpl : public IComposerSerializer
                     }
                 }
                 if (theProperty.Valid()) {
-                    theIdStr.append(m_DataCore.GetProperty(theProperty).m_Name.wide_str());
+                    theIdStr.append(m_DataCore.GetProperty(theProperty).m_Name);
                     theNewId = GetId(theIdStr);
                 }
             }
         }
 
         if (IsTrivial(theNewId))
-            theNewId = GetId(theName.wide_str());
+            theNewId = GetId(theName);
         return AddId(theNewId, inInstance);
     }
 
-    TCharPtr GetActionId(Qt3DSDMActionHandle inAction, Qt3DSDMSlideHandle inSlide,
+    QString GetActionId(Qt3DSDMActionHandle inAction, Qt3DSDMSlideHandle inSlide,
                          Qt3DSDMInstanceHandle inInstance)
     {
         QT3DS_ASSERT(inAction.Valid());
         THandleToIdMap::iterator theFind(m_ActionToIdMap.find(inAction));
         if (theFind != m_ActionToIdMap.end())
-            return theFind->second;
+            return *theFind;
 
-        wstring theActionName(GetInstanceName(inInstance, inSlide));
-        theActionName.append(L"-Action");
+        QString theActionName(GetInstanceName(inInstance, inSlide));
+        theActionName.append(QStringLiteral("-Action"));
 
-        TCharPtr theNewId = GetId(theActionName);
+        QString theNewId = GetId(theActionName);
         return AddActionId(theNewId, inAction);
     }
 
     // If this function is called with an invalid instance and we don't already have an id
     // then we assume we have an external reference and lookup the instance via the component id.
-    TCharPtr GetSlideId(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance)
+    QString GetSlideId(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance)
     {
         QT3DS_ASSERT(inSlide.Valid());
         THandleToIdMap::iterator theFind(m_SlideToIdMap.find(inSlide));
         if (theFind != m_SlideToIdMap.end())
-            return theFind->second;
+            return *theFind;
 
         if (inInstance.Valid() == false) {
             m_ExternalSlides.insert(inSlide);
@@ -688,11 +701,9 @@ struct SComposerSerializerImpl : public IComposerSerializer
             QT3DS_ASSERT(inInstance.Valid());
         }
 
-        wstring theSlideName(GetInstanceName(inInstance));
-        theSlideName.append(L"-");
-        theSlideName.append(GetSlideName(inSlide));
-
-        TCharPtr theNewId = GetId(theSlideName);
+        const QString theSlideName = GetInstanceName(inInstance) + QLatin1Char('-')
+                    + GetSlideName(inSlide);
+        const QString theNewId = GetId(theSlideName);
         return AddSlideId(theNewId, inSlide);
     }
 
@@ -732,9 +743,9 @@ struct SComposerSerializerImpl : public IComposerSerializer
             SValue theInstanceIdValue;
             if (m_DataCore.GetInstancePropertyValue(
                         theInstance, m_ObjectDefinitions.m_Asset.m_FileId, theInstanceIdValue)) {
-                TDataStrPtr theNamePtr = qt3dsdm::get<TDataStrPtr>(theInstanceIdValue);
-                if (theNamePtr && !IsTrivial(theNamePtr->GetData())) {
-                    const wchar_t *theId = GetId(theNamePtr->GetData());
+                QString theName = qt3dsdm::get<TDataStrPtr>(theInstanceIdValue)->toQString();
+                if (IsTrivial(theName)) {
+                    const QString theId = GetId(theName);
                     AddId(theId, theInstance);
                 }
             }
@@ -765,10 +776,9 @@ struct SComposerSerializerImpl : public IComposerSerializer
             if (m_DataCore.GetInstancePropertyValue(
                         theMaster, m_ObjectDefinitions.m_Asset.m_SourcePath, theValue)) {
                 TDataStrPtr theStr(get<TDataStrPtr>(theValue));
-                const wchar_t *thePath(theStr->GetData());
+                QString thePath(theStr->toQString());
                 if (!IsTrivial(thePath))
-                    m_SourcePathToMasterInstances.insert(
-                                make_pair(m_StringTable.RegisterStr(thePath), theMaster));
+                    m_SourcePathToMasterInstances.insert(thePath, theMaster);
             }
         }
     }
@@ -782,11 +792,11 @@ struct SComposerSerializerImpl : public IComposerSerializer
 
         TGUIDToHandleMap::iterator theIter(m_GUIDToHandleMap.find(theGuid));
         if (theIter != m_GUIDToHandleMap.end())
-            return theIter->second;
+            return *theIter;
         return 0;
     }
 
-    const wchar_t *WriteDataModelValue(const SValue &_inValue, TCharStr &theValueStr)
+    const QString WriteDataModelValue(const SValue &_inValue, QString &theValueStr)
     {
         DataModelDataType::Value theValueType(GetValueType(_inValue));
         SValue theValue(_inValue);
@@ -808,9 +818,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
             const SStringOrInt &theData(get<SStringOrInt>(theValue));
             if (theData.GetType() == SStringOrIntTypes::Int) {
                 Qt3DSDMSlideHandle theHandle(get<long>(theData.m_Value));
-                wstring theSlideId(L"#");
-                theSlideId.append(GetSlideId(theHandle, 0));
-                theValue = std::make_shared<CDataStr>(theSlideId.c_str());
+                const QString theSlideId(QLatin1Char('#') + GetSlideId(theHandle, 0));
+                theValue = std::make_shared<CDataStr>(theSlideId);
             } else
                 theValue = get<TDataStrPtr>(theData.m_Value);
         }
@@ -818,11 +827,10 @@ struct SComposerSerializerImpl : public IComposerSerializer
         if (GetValueType(theValue) == DataModelDataType::Long4) {
             SLong4 theDataValue = get<SLong4>(theValue);
             Qt3DSDMInstanceHandle theInstance = FindInstanceByGUID(theDataValue);
-            if (theInstance.Valid() == false)
-                theValueStr = L"";
-            else {
-                theValueStr.assign(L"#");
-                theValueStr.append(GetInstanceId(theInstance));
+            if (theInstance.Valid() == false) {
+                theValueStr.clear();
+            } else {
+                theValueStr = QLatin1Char('#') + GetInstanceId(theInstance);
                 if (m_InstanceSet.find(theInstance) == m_InstanceSet.end())
                     m_ExternalReferences.insert(theInstance);
             }
@@ -834,13 +842,13 @@ struct SComposerSerializerImpl : public IComposerSerializer
             if (GetValueType(theValue) == DataModelDataType::String || m_TempBuffer.size()) {
                 char buffer[] = { 0, 0, 0, 0 };
                 m_TempBuffer.write(buffer, 4);
-                theValueStr.assign((const wchar_t *)m_TempBuffer.begin());
+                theValueStr = QString::fromWCharArray((const wchar_t *)m_TempBuffer.begin());
             }
         }
-        return theValueStr.wide_str();
+        return theValueStr;
     }
 
-    SValue ParseValue(DataModelDataType::Value inType, TCharPtr inValue)
+    SValue ParseValue(DataModelDataType::Value inType, const QString &inValue)
     {
         if (IsTrivial(inValue)) {
             SValue retval;
@@ -852,8 +860,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
             return ParseObjectRef(inValue);
 
         if (inType == DataModelDataType::StringOrInt) {
-            if (inValue[0] == '#') {
-                Qt3DSDMSlideHandle theSlide = GetSlideById(inValue + 1);
+            if (inValue.startsWith(QLatin1Char('#'))) {
+                Qt3DSDMSlideHandle theSlide = GetSlideById(idFromRef(inValue));
                 QT3DS_ASSERT(theSlide.Valid());
                 return SStringOrInt((long)theSlide.GetHandleValue());
             } else
@@ -863,18 +871,14 @@ struct SComposerSerializerImpl : public IComposerSerializer
         if (inType == DataModelDataType::String)
             return std::make_shared<CDataStr>(inValue);
 
-        qt3ds::foundation::ConvertUTF(
-                    reinterpret_cast<const qt3ds::foundation::TWCharEASTLConverter::TCharType *>(inValue), 0,
-                    m_ConvertStr);
-        // Create a destructible value
-        m_ValueBuffer.clear();
-        m_ValueBuffer.write(m_ConvertStr.c_str(), m_ConvertStr.size() + 1);
-        // Clear the destination buffer
-        m_TempBuffer.clear();
-
         DataModelDataType::Value theParseType(inType);
         if (inType == DataModelDataType::Long4)
             theParseType = DataModelDataType::StringRef;
+
+        QByteArray data(inValue.toLatin1());
+        m_ValueBuffer.clear();
+        m_ValueBuffer.write(data.data(), data.size() + 1);
+        m_TempBuffer.clear();
 
         WCharTReader theReader((char8_t *)m_ValueBuffer.begin(), m_TempBuffer, m_StringTable);
         SValue retval = WStrOps<SValue>().BufTo(theParseType, theReader);
@@ -882,17 +886,18 @@ struct SComposerSerializerImpl : public IComposerSerializer
         if (inType == DataModelDataType::Long4) {
             SLong4 theFinalValue;
             SStringRef theRef(get<SStringRef>(retval));
-            Qt3DSDMInstanceHandle theRefInstance(GetInstanceById(theRef.m_Id));
+            Qt3DSDMInstanceHandle theRefInstance(
+                        GetInstanceById(QString::fromWCharArray(theRef.m_Id)));
             if (theRefInstance.Valid()) {
                 THandleToGUIDMap::iterator theGuidFind = m_HandleToGUIDMap.find(theRefInstance);
                 if (theGuidFind != m_HandleToGUIDMap.end())
-                    theFinalValue = theGuidFind->second;
+                    theFinalValue = *theGuidFind;
             }
             return theFinalValue;
         }
         return retval;
     }
-    const wchar_t *WriteObjectRef(const SObjectRefType &inValue, TCharStr &ioValueStr)
+    const QString WriteObjectRef(const SObjectRefType &inValue, QString &ioValueStr)
     {
         return WriteDataModelValue(SValue(inValue), ioValueStr);
     }
@@ -904,7 +909,22 @@ struct SComposerSerializerImpl : public IComposerSerializer
             return SObjectRefType(SLong4());
         if (inValue[0] == '#') {
             // absolute reference.
-            Qt3DSDMInstanceHandle theInstance = GetInstanceById(inValue + 1);
+            Qt3DSDMInstanceHandle theInstance
+                    = GetInstanceById(QString::fromWCharArray(inValue + 1));
+            return theInstance.Valid() ? GetInstanceGuid(theInstance) : 0;
+        } else {
+            return std::make_shared<CDataStr>(inValue);
+        }
+    }
+
+    SObjectRefType ParseObjectRef(const QString &inValue)
+    {
+        // One of two things, either an ID reference *or* pure string.
+        if (IsTrivial(inValue))
+            return SObjectRefType(SLong4());
+        if (inValue.startsWith(QLatin1Char('#'))) {
+            // absolute reference.
+            Qt3DSDMInstanceHandle theInstance = GetInstanceById(idFromRef(inValue));
             return theInstance.Valid() ? GetInstanceGuid(theInstance) : 0;
         } else {
             return std::make_shared<CDataStr>(inValue);
@@ -915,14 +935,14 @@ struct SComposerSerializerImpl : public IComposerSerializer
     {
         sort(inList.begin(), inList.end(), SAttributeNameSorter(m_DataCore));
 
-        TCharStr theValueStr;
+        QString theValueStr;
 
         for (size_t idx = 0, end = inList.size(); idx < end; ++idx) {
             const pair<Qt3DSDMPropertyHandle, SValue> &theValue(inList[idx]);
-            TCharStr theName(m_DataCore.GetProperty(theValue.first).m_Name);
+            QString theName(m_DataCore.GetProperty(theValue.first).m_Name);
             WriteDataModelValue(theValue.second, theValueStr);
             if (GetValueType(theValue.second) == DataModelDataType::String || theValueStr.size())
-                inWriter.Att(theName.wide_str(), theValueStr.wide_str());
+                inWriter.Att(theName, theValueStr);
         }
     }
 
@@ -969,27 +989,28 @@ struct SComposerSerializerImpl : public IComposerSerializer
 
             SMetaDataPropertyInfo thePropertyInfo(
                         m_MetaData.GetMetaDataPropertyInfo(theMetaDataProperty));
-            wstring theName = thePropertyInfo.m_Name.wide_str();
+            QString theName = thePropertyInfo.m_Name;
             size_t theArity = get<1>(GetDatatypeAnimatableAndArity(thePropertyInfo.GetDataType()));
             if (theArity > 1) {
-                theName.append(L".");
+                theName.append(QLatin1Char('.'));
                 switch (theInfo.m_Index) {
                 case 0:
-                    theName.append(L"x");
+                    theName.append(QLatin1Char('x'));
                     break;
                 case 1:
-                    theName.append(L"y");
+                    theName.append(QLatin1Char('y'));
                     break;
                 case 2:
-                    theName.append(L"z");
+                    theName.append(QLatin1Char('z'));
                     break;
                 case 3:
-                    theName.append(L"w");
+                    theName.append(QLatin1Char('w'));
                     break;
                 }
             }
-            inWriter.Att(L"property", theName.c_str());
-            inWriter.Att(L"type", theInfo.m_AnimationType);
+            const QString name(theName);
+            inWriter.Att(QStringLiteral("property"), name);
+            inWriter.Att(QStringLiteral("type"), theInfo.m_AnimationType);
 
             if (theInfo.m_DynamicFirstKeyframe)
                 inWriter.Att("dynamic", true);
@@ -1068,7 +1089,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
             }
         }
         Qt3DSDMMetaDataPropertyHandle theProperty =
-                m_MetaData.GetMetaDataProperty(inInstance, thePropertyName);
+                m_MetaData.GetMetaDataProperty(inInstance,
+                                               QString::fromWCharArray(thePropertyName.wide_str()));
         if (theProperty.Valid() == false) {
             QT3DS_ASSERT(false);
             return;
@@ -1140,7 +1162,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
     void SerializeAction(IDOMWriter &inWriter, Qt3DSDMSlideHandle inSlide,
                          Qt3DSDMInstanceHandle inInstance, Qt3DSDMActionHandle inAction)
     {
-        TCharStr valueStr;
+        QString valueStr;
         IDOMWriter::Scope __actionScope(inWriter, L"Action");
 
         Qt3DSDMActionHandle theAction(inAction);
@@ -1153,13 +1175,13 @@ struct SComposerSerializerImpl : public IComposerSerializer
         inWriter.Att(L"triggerObject", valueStr);
 
         if (theInfo.m_Event.size())
-            inWriter.Att(L"event", theInfo.m_Event.c_str());
+            inWriter.Att(L"event", theInfo.m_Event);
 
         WriteObjectRef(theInfo.m_TargetObject, valueStr);
         inWriter.Att(L"targetObject", valueStr);
 
         if (theInfo.m_Handler.size()) {
-            inWriter.Att(L"handler", theInfo.m_Handler.c_str());
+            inWriter.Att(L"handler", theInfo.m_Handler);
 
             for (size_t handlerArgIdx = 0, handlerArgEnd = theInfo.m_HandlerArgs.size();
                  handlerArgIdx < handlerArgEnd; ++handlerArgIdx) {
@@ -1174,7 +1196,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                     theArgType = DataModelDataType::String;
                     auto theEventHandle = get<qt3ds::QT3DSI32>(theArgInfo.m_Value);
                     theArgValue = SValue(std::make_shared<CDataStr>(
-                                             m_MetaData.GetEventInfo(theEventHandle)->m_Name.wide_str()));
+                                             m_MetaData.GetEventInfo(theEventHandle)->m_Name));
                 }
 
                 if (theArgType != DataModelDataType::Float)
@@ -1215,35 +1237,36 @@ struct SComposerSerializerImpl : public IComposerSerializer
         TDataStrPtr theStrPtr(get<TDataStrPtr>(inRef.m_Value));
         if (theStrPtr == NULL)
             return 0;
-        wstring theParseStr(theStrPtr->GetData());
+        QString theParseStr(theStrPtr->toQString());
 
         // Get rid of this or this. since it's referrng to inInstance
-        wstring theThisStr(L"this");
-        if (theParseStr.substr(0, theThisStr.size()) == theThisStr) {
-            theParseStr = theParseStr.substr(theThisStr.size());
-            if (theParseStr[0] == L'.')
-                theParseStr = theParseStr.substr(1);
+        QString theThisStr(QStringLiteral("this"));
+        if (theParseStr.left(theThisStr.size()) == theThisStr) {
+            theParseStr = theParseStr.left(theParseStr.length() - theThisStr.size());
+            if (theParseStr[0] == QLatin1Char('.'))
+                theParseStr = theParseStr.right(theParseStr.length() - 1);
         }
 
-        wstring theParentStr(L"parent.");
+        QString theParentStr(QStringLiteral("parent."));
         Qt3DSDMInstanceHandle theSourceInstance(inInstance);
-        while (theParseStr.find(theParentStr) != wstring::npos) {
+        while (theParseStr.indexOf(theParentStr) != -1) {
             Qt3DSDMInstanceHandle theParentInstance = m_AssetGraph.GetParent(inInstance);
             // this check is here since scene has no parent, see Bug#6532
             if (theParentInstance.Valid())
                 theSourceInstance = theParentInstance;
             else
                 return Qt3DSDMInstanceHandle(0);
-            theParseStr = theParseStr.substr(theParentStr.size());
+            theParseStr = theParseStr.right(theParseStr.length() - theParentStr.size());
         }
         while (theParseStr.size()) {
-            wstring::size_type periodPos = theParseStr.find('.');
-            wstring theNameStr = theParseStr;
-            if (periodPos != wstring::npos) {
-                theNameStr = theParseStr.substr(0, periodPos);
-                theParseStr = theParseStr.substr(periodPos + 1);
-            } else
-                theParseStr = L"";
+            int periodPos = theParseStr.indexOf(QChar('.'));
+            QString theNameStr = theParseStr;
+            if (periodPos != -1) {
+                theNameStr = theParseStr.left(periodPos);
+                theParseStr = theParseStr.right(theParseStr.length() - periodPos + 1);
+            } else {
+                theParseStr.clear();
+            }
             Qt3DSDMInstanceHandle theParent(theSourceInstance);
             bool theFound = false;
             for (long childIdx = 0, childEnd = m_AssetGraph.GetChildCount(theSourceInstance);
@@ -1265,7 +1288,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
     {
         IDOMReader::Scope __actionScope(inReader);
         Qt3DSDMActionHandle theAction;
-        TCharPtr theActionId;
+        QString theActionId;
         bool isRef = false;
         if (inReader.Att(L"id", theActionId)) {
             theAction = m_ActionSystem.CreateAction(inSlide, inInstance, SLong4());
@@ -1282,7 +1305,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         if (isRef)
             return theAction;
 
-        const wchar_t *tempStr;
+        QString tempStr;
         if (inReader.Att(L"triggerObject", tempStr))
             m_ActionCore.SetTriggerObject(theAction, ParseObjectRef(tempStr));
         if (inReader.Att(L"event", tempStr))
@@ -1299,15 +1322,14 @@ struct SComposerSerializerImpl : public IComposerSerializer
 
             for (bool success = inReader.MoveToFirstChild(); success;
                  success = inReader.MoveToNextSibling()) {
-                TCharStr theName;
+                QString theName;
                 inReader.Att(L"name", theName);
                 DataModelDataType::Value theDataType(DataModelDataType::Float);
                 inReader.Att(L"type", theDataType);
                 HandlerArgumentType::Value theArgType(HandlerArgumentType::None);
                 inReader.Att(L"argtype", theArgType);
 
-                tempStr = NULL;
-                inReader.UnregisteredAtt(L"value", tempStr);
+                inReader.Att(L"value", tempStr);
                 SValue theValue = ParseValue(theDataType, tempStr);
                 if (theArgType == HandlerArgumentType::Event) {
                     TDataStrPtr theStr;
@@ -1318,13 +1340,13 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                 ResolveObjectRef(inInstance, theTargetRef);
                         Qt3DSDMEventHandle theEvent = 0;
                         if (theTargetInstance.Valid())
-                            theEvent = m_MetaData.FindEvent(theTargetInstance, theStr->GetData());
+                            theEvent = m_MetaData.FindEvent(theTargetInstance, theStr->toQString());
                         theValue = SValue((qt3ds::QT3DSI32) theEvent);
                     }
                 }
 
                 Qt3DSDMHandlerArgHandle theArgHandle = m_ActionCore.AddHandlerArgument(
-                            theAction, theName.wide_str(), theArgType, theDataType);
+                            theAction, theName, theArgType, theDataType);
                 m_ActionCore.SetHandlerArgumentValue(theArgHandle, theValue);
             }
         }
@@ -1385,19 +1407,19 @@ struct SComposerSerializerImpl : public IComposerSerializer
         }
     }
 
-    TCharPtr GetSlideName(Qt3DSDMSlideHandle inSlide)
+    QString GetSlideName(Qt3DSDMSlideHandle inSlide)
     {
         if (inSlide.Valid() == false)
-            return L"";
+            return {};
         Qt3DSDMInstanceHandle theSlideInstance(m_SlideCore.GetSlideInstance(inSlide));
         SValue theValue;
         if (m_DataCore.GetInstancePropertyValue(theSlideInstance,
                                                 m_ObjectDefinitions.m_Named.m_NameProp, theValue)) {
             TDataStrPtr theName = get<TDataStrPtr>(theValue);
             if (theName)
-                return theName->GetData();
+                return theName->toQString();
         }
-        return L"";
+        return {};
     }
 
     Qt3DSDMSlideHandle GetAssociatedSlide(Qt3DSDMInstanceHandle inInstance)
@@ -1466,7 +1488,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
     }
 
     Option<pair<Qt3DSDMPropertyHandle, SValue>> ParseValue(Qt3DSDMInstanceHandle inInstance,
-                                                          TCharPtr inPropName, TCharPtr inValue)
+                                                           const QString &inPropName,
+                                                           const QString &inValue)
     {
         Qt3DSDMPropertyHandle theProperty =
                 m_DataCore.GetAggregateInstancePropertyByName(inInstance, inPropName);
@@ -1478,7 +1501,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
     }
 
     void ParseInstanceProperties(IDOMReader &inReader, Qt3DSDMInstanceHandle inInstance,
-                                 vector<pair<TCharPtr, TCharPtr>> &outExtraAttributes,
+                                 vector<pair<QString, QString>> &outExtraAttributes,
                                  TPropertyHandleValuePairList &outProperties)
     {
         bool hasNoLifetime =
@@ -1487,7 +1510,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                 || m_DataCore.IsInstanceOrDerivedFrom(inInstance,
                                                       m_ObjectDefinitions.m_Material.m_Instance);
 
-        for (eastl::pair<TCharPtr, TCharPtr> theAtt = inReader.GetFirstAttribute();
+        for (std::pair<QString, QString> theAtt = inReader.GetFirstAttribute();
              !IsTrivial(theAtt.first); theAtt = inReader.GetNextAttribute()) {
             Option<pair<Qt3DSDMPropertyHandle, SValue>> theValue =
                     ParseValue(inInstance, theAtt.first, theAtt.second);
@@ -1505,7 +1528,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
 
     void ParseAndSetInstanceProperties(IDOMReader &inReader, Qt3DSDMSlideHandle inSlide,
                                        Qt3DSDMInstanceHandle inInstance,
-                                       vector<pair<TCharPtr, TCharPtr>> &outExtraAttributes,
+                                       vector<pair<QString, QString>> &outExtraAttributes,
                                        TPropertyHandleValuePairList &ioProperties)
     {
         outExtraAttributes.clear();
@@ -1551,13 +1574,13 @@ struct SComposerSerializerImpl : public IComposerSerializer
                 == false)
             return false;
 
-        Option<TCharStr> theType = m_MetaData.GetTypeForInstance(inInstance);
+        Option<QString> theType = m_MetaData.GetTypeForInstance(inInstance);
         if (theType.hasValue() == false) {
             QT3DS_ASSERT(false);
             return false;
         }
 
-        wstring theMasterRef;
+        QString theMasterRef;
 
         TInstanceHandleList theParents;
         m_DataCore.GetInstanceParents(inInstance, theParents);
@@ -1567,25 +1590,25 @@ struct SComposerSerializerImpl : public IComposerSerializer
         // we need to save them out into the master classes section
         QT3DS_ASSERT(theParents.size() == 1);
         if (!theParents.empty()) {
-            Option<TCharStr> theCanonicalType =
+            Option<QString> theCanonicalType =
                     m_MetaData.GetTypeForCanonicalInstance(theParents[0]);
             // Meaning this isn't a canonical instance
             if (theCanonicalType.hasValue() == false) {
                 Qt3DSDMInstanceHandle theMaster(theParents[0]);
                 m_MasterObjectsSet.insert(theParents[0]);
-                theMasterRef = L"#";
+                theMasterRef = "#";
                 theMasterRef.append(GetInstanceId(theMaster));
             }
         }
 
-        IDOMWriter::Scope __instanceScope(inWriter, theType->wide_str());
+        IDOMWriter::Scope __instanceScope(inWriter, theType);
         inWriter.Att(L"id", GetInstanceId(inInstance));
 
         m_InstanceSet.insert(inInstance);
 
         Qt3DSDMSlideHandle theAssociatedSlide = GetAssociatedSlide(inInstance);
 
-        if (theAssociatedSlide.Valid())
+        if (theAssociatedSlide.Valid() && !m_SlideSet.contains(theAssociatedSlide))
             m_SlideSet.insert(theAssociatedSlide);
 
         bool isSlideOwner = m_DataCore.IsInstanceOrDerivedFrom(
@@ -1593,14 +1616,17 @@ struct SComposerSerializerImpl : public IComposerSerializer
         if (isSlideOwner) {
             // Ensure we mark all of those slides.
             SLong4 theGuid = GetGuid(inInstance, m_ObjectDefinitions.m_Guided.m_GuidProp);
-            Qt3DSDMSlideHandle theMasterSlide = m_SlideSystem.GetMasterSlideByComponentGuid(theGuid);
+            Qt3DSDMSlideHandle theMasterSlide(m_SlideSystem.GetMasterSlideByComponentGuid(theGuid));
             if (theMasterSlide.Valid()) {
                 TSlideHandleList theChildSlides;
                 m_SlideCore.GetChildSlides(theMasterSlide, theChildSlides);
-                m_SlideSet.insert(theMasterSlide);
+                if (!m_SlideSet.contains(theMasterSlide))
+                    m_SlideSet.insert(theMasterSlide);
                 for (size_t slideIdx = 0, slideEnd = theChildSlides.size(); slideIdx < slideEnd;
-                     ++slideIdx)
-                    m_SlideSet.insert(theChildSlides[slideIdx]);
+                     ++slideIdx) {
+                    if (!m_SlideSet.contains(theChildSlides[slideIdx]))
+                        m_SlideSet.insert(theChildSlides[slideIdx]);
+                }
             }
         }
         /////////////////////////////////////////////////////////////////////////
@@ -1613,23 +1639,23 @@ struct SComposerSerializerImpl : public IComposerSerializer
         SerializePropertyList(inWriter, theValues);
 
         if (theMasterRef.size())
-            inWriter.Att(L"class", theMasterRef.c_str());
+            inWriter.Att(QStringLiteral("class"), theMasterRef);
 
         if (inWriteParentRefs) {
             Qt3DSDMInstanceHandle theParent(m_AssetGraph.GetParent(inInstance));
             if (theParent.Valid()) {
-                wstring theParentRef(L"#");
+                QString theParentRef("#");
                 theParentRef.append(GetInstanceId(theParent));
                 m_ExternalReferences.insert(theParent);
-                inWriter.Att(L"graphparent", theParentRef.c_str());
+                inWriter.Att(QStringLiteral("graphparent"), theParentRef);
             }
 
             Qt3DSDMInstanceHandle theSibling = m_AssetGraph.GetSibling(inInstance, true);
             if (theSibling.Valid()) {
-                wstring theSiblingRef(L"#");
+                QString theSiblingRef("#");
                 theSiblingRef.append(GetInstanceId(theSibling));
                 m_ExternalReferences.insert(theSibling);
-                inWriter.Att(L"graphsibling", theSiblingRef.c_str());
+                inWriter.Att(QStringLiteral("graphsibling"), theSiblingRef);
             }
         }
 
@@ -1674,30 +1700,31 @@ struct SComposerSerializerImpl : public IComposerSerializer
              success = inReader.MoveToNextSibling()) {
 
             qt3dsdm::Qt3DSDMInstanceHandle theNewInstance;
-            TCharPtr theParentRef = L"";
+            QString theParentRef;
             if (inReader.Att(L"graphparent", theParentRef))
-                inParent = GetInstanceById(theParentRef + 1);
-            TCharPtr theSiblingRef = L"";
+                inParent = GetInstanceById(idFromRef(theParentRef));
+            QString theSiblingRef;
             bool theSilbingExists = false;
             if (inReader.Att(L"graphsibling", theSiblingRef))
                 theSilbingExists = true;
 
-            TCharPtr theId;
+            QString theId;
             inReader.Att(L"id", theId);
-            TCharPtr theMasterRef;
-            if (inReader.Att(L"class", theMasterRef) && GetInstanceById(theMasterRef + 1).Valid()) {
+            QString theMasterRef;
+            if (inReader.Att(L"class", theMasterRef)
+                    && GetInstanceById(idFromRef(theMasterRef)).Valid()) {
                 theNewInstance = IDocumentEditor::CreateSceneGraphInstance(
-                            GetInstanceById(theMasterRef + 1), inParent, 0, m_DataCore, m_SlideSystem,
-                            m_ObjectDefinitions, m_AssetGraph, m_MetaData);
+                            GetInstanceById(idFromRef(theMasterRef)), inParent, 0, m_DataCore,
+                            m_SlideSystem, m_ObjectDefinitions, m_AssetGraph, m_MetaData);
             } else {
-                TCharPtr theType(inReader.GetElementName());
+                QString theType(inReader.GetElementName());
                 theNewInstance = IDocumentEditor::CreateSceneGraphInstance(
                             theType, inParent, 0, m_DataCore, m_SlideSystem, m_ObjectDefinitions,
                             m_AssetGraph, m_MetaData);
             }
 
             if (theSilbingExists)
-                m_NewInstancesToSiblings.insert(std::make_pair(theNewInstance, theSiblingRef + 1));
+                m_NewInstancesToSiblings.insert(theNewInstance, idFromRef(theSiblingRef));
 
             SLong4 theGuid = GetGuid(theNewInstance, m_ObjectDefinitions.m_Guided.m_GuidProp);
             if (m_PreserveFileIds)
@@ -1718,7 +1745,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
     {
         TInstanceToSiblingMap::iterator itr = m_NewInstancesToSiblings.find(inNewInstance);
         if (itr != m_NewInstancesToSiblings.end()) {
-            Qt3DSDMInstanceHandle theSibling = GetInstanceById((*itr).second);
+            Qt3DSDMInstanceHandle theSibling = GetInstanceById(*itr);
             if (theSibling.Valid()) {
                 _MoveNewInstanceToItsPlaceRecursive(theSibling);
 
@@ -1734,8 +1761,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
         IDOMReader::Scope __childScope(inReader);
         for (bool success = inReader.MoveToFirstChild(); success;
              success = inReader.MoveToNextSibling()) {
-            TCharPtr theId;
-            inReader.Att(L"id", theId);
+            QString theId;
+            inReader.Att(QStringLiteral("id"), theId);
 
             Qt3DSDMInstanceHandle theNewInstance = GetInstanceById(theId);
             if (theNewInstance.Valid() == false) {
@@ -1744,7 +1771,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
             }
 
             TPropertyHandleValuePairList theValues;
-            vector<pair<TCharPtr, TCharPtr>> theExtraAtts;
+            vector<pair<QString, QString>> theExtraAtts;
             ParseAndSetInstanceProperties(inReader, 0, theNewInstance, theExtraAtts, theValues);
             ReadInstanceProperties(inReader);
 
@@ -1792,20 +1819,19 @@ struct SComposerSerializerImpl : public IComposerSerializer
                 m_ExternalReferences.insert(inInstance);
 
             IDOMWriter::Scope __instanceScope(inWriter, L"Set");
-            wstring theRef = GetInstanceId(inInstance);
-            theRef.insert(0, L"#");
-            inWriter.Att(L"ref", theRef.c_str());
+            const QString theRef(QLatin1Char('#') + GetInstanceId(inInstance));
+            inWriter.Att(QStringLiteral("ref"), theRef);
             SerializePropertyList(inWriter, theValues);
             SerializeAnimations(inWriter, theAnimations);
             SerializeActions(inWriter, inSlide, inInstance, theActions);
             for (size_t idx = 0, end = theEyeballChanges.size(); idx < end; ++idx) {
                 Qt3DSDMActionHandle theAction(theMasterActions[theEyeballChanges[idx].first]);
                 IDOMWriter::Scope __actionScope(inWriter, L"Action");
-                wstring theRef(L"#");
                 bool hadAction = m_ActionToIdMap.find(theAction) != m_ActionToIdMap.end();
-                theRef.append(GetActionId(theAction, inParent, inInstance));
-                inWriter.Att(L"ref", theRef.c_str());
-                inWriter.Att("eyeball", theEyeballChanges[idx].second);
+                const QString theRef(QLatin1Char('#') + GetActionId(theAction, inParent,
+                                                                    inInstance));
+                inWriter.Att(QStringLiteral("ref"), theRef);
+                inWriter.Att(QStringLiteral("eyeball"), theEyeballChanges[idx].second);
                 if (!hadAction)
                     m_ExternalActions.insert(theAction);
             }
@@ -1829,16 +1855,15 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                     theActions);
         // When copying slides, we don't automatically add all the instances like we do when we
         // cut/paste
-        const wchar_t *commandName = L"Set";
+        QString commandName = QStringLiteral("Set");
         if (inSlide == m_ActiveSlide || inSlide == m_SlideSystem.GetAssociatedSlide(inInstance))
-            commandName = L"Add";
+            commandName = QStringLiteral("Add");
 
-        if (AreEqual(commandName, L"Add") || theValues.size() || theAnimations.size()
+        if (commandName == QStringLiteral("Add") || theValues.size() || theAnimations.size()
                 || theActions.size()) {
             IDOMWriter::Scope __instanceScope(inWriter, commandName);
-            wstring theRef = GetInstanceId(inInstance);
-            theRef.insert(0, L"#");
-            inWriter.Att(L"ref", theRef.c_str());
+            const QString theRef(QLatin1Char('#') + GetInstanceId(inInstance));
+            inWriter.Att(QStringLiteral("ref"), theRef);
             SerializePropertyList(inWriter, theValues);
             SerializeAnimations(inWriter, theAnimations);
             SerializeActions(inWriter, inSlide, inInstance, theActions);
@@ -1890,7 +1915,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         {
             TInstanceIntMap::const_iterator theIter = m_DepthMap.find(inHdl);
             if (theIter != m_DepthMap.end())
-                return theIter->second;
+                return *theIter;
             return QT3DS_MAX_I32;
         }
         bool operator()(Qt3DSDMInstanceHandle lhs, Qt3DSDMInstanceHandle rhs) const
@@ -1913,8 +1938,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
     void SerializeSlides(IDOMWriter &inWriter, bool inSlideCopy = false)
     {
         if (m_ActiveSlide.Valid()) {
-            m_SlideSet.erase(m_ActiveSlide);
-            m_SlideSet.erase(m_ActiveSlideParent);
+            m_SlideSet.remove(m_ActiveSlide);
+            m_SlideSet.remove(m_ActiveSlideParent);
 
             IDOMWriter::Scope __writeScope(inWriter, L"ActiveState");
 
@@ -1962,7 +1987,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
              theIter != end; ++theIter) {
             Qt3DSDMSlideHandle theSlide = *theIter;
             Qt3DSDMSlideHandle theMasterSlide = m_SlideCore.GetParentSlide(theSlide);
-            if (theMasterSlide.Valid() && theMasterSlideSet.insert(theMasterSlide).second) {
+            if (theMasterSlide.Valid() && *theMasterSlideSet.insert(theMasterSlide)) {
                 Qt3DSDMInstanceHandle theSlideOwner(GetSlideComponent(theMasterSlide));
                 if (theSlideOwner.Valid())
                     theSerializationSlides.push_back(std::make_pair(theMasterSlide, theSlideOwner));
@@ -1977,10 +2002,9 @@ struct SComposerSerializerImpl : public IComposerSerializer
             Qt3DSDMInstanceHandle theComponent = theSerializationSlides[slideSetIdx].second;
             IDOMWriter::Scope __masterScope(inWriter, L"State");
 
-            inWriter.Att(L"name", GetSlideName(theMasterSlide));
-            wstring theComponentRef = L"#";
-            theComponentRef.append(GetInstanceId(theComponent));
-            inWriter.Att(L"component", theComponentRef.c_str());
+            inWriter.Att(QStringLiteral("name"), GetSlideName(theMasterSlide));
+            const QString theComponentRef(QLatin1Char('#') + GetInstanceId(theComponent));
+            inWriter.Att(QStringLiteral("component"), theComponentRef);
 
             TPropertyHandleValuePairList theValues;
             GetSlidePropertyValues(theMasterSlide, theValues);
@@ -2008,7 +2032,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
             }
             for (size_t idx = 0, end = theChildren.size(); idx < end; ++idx) {
                 Qt3DSDMSlideHandle theChildSlide(theChildren[idx]);
-                m_SlideSet.erase(theChildSlide);
+                m_SlideSet.remove(theChildSlide);
                 IDOMWriter::Scope __childSlideScope(inWriter, L"State");
                 inWriter.Att(L"id", GetSlideId(theChildSlide, theComponent));
                 inWriter.Att(L"name", GetSlideName(theChildSlide));
@@ -2067,7 +2091,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
     {
         IDOMReader::Scope __stateScope(inReader);
         TPropertyHandleValuePairList theValues;
-        vector<pair<TCharPtr, TCharPtr>> theExtraAtts;
+        vector<pair<QString, QString>> theExtraAtts;
         ParseAndSetInstanceProperties(inReader, 0, m_SlideCore.GetSlideInstance(inSlide),
                                       theExtraAtts, theValues);
         // Slides require a two-pass parsing system because slides can refer to each other via id.
@@ -2080,8 +2104,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
                 // references to other slides
                 // via id *in* the slide data.
                 {
-                    const wchar_t *theId = L"";
-                    inReader.Att(L"Id", theId);
+                    QString theId;
+                    inReader.Att(QStringLiteral("Id"), theId);
                     pair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle> theChildSlideInstPair =
                             CreateSlide();
                     m_SlideCore.DeriveSlide(theChildSlideInstPair.first, inSlide);
@@ -2103,11 +2127,11 @@ struct SComposerSerializerImpl : public IComposerSerializer
 
         for (bool success = inReader.MoveToFirstChild(); success;
              success = inReader.MoveToNextSibling()) {
-            if (AreEqual(inReader.GetElementName(), L"Set")
-                    || AreEqual(inReader.GetElementName(), L"Add")) {
-                TCharPtr theRef;
-                inReader.Att(L"ref", theRef);
-                Qt3DSDMInstanceHandle theInstance = GetInstanceById(theRef + 1);
+            if (inReader.GetElementName() == QLatin1String("Set")
+                    || inReader.GetElementName() == QLatin1String("Add")) {
+                QString theRef;
+                inReader.Att(QStringLiteral("ref"), theRef);
+                Qt3DSDMInstanceHandle theInstance = GetInstanceById(idFromRef(theRef));
                 if (theInstance.Valid() == false) {
                     QT3DS_ASSERT(false);
                     continue;
@@ -2132,14 +2156,14 @@ struct SComposerSerializerImpl : public IComposerSerializer
                 IDOMReader::Scope __instanceScope(inReader);
                 for (bool childSuccess = inReader.MoveToFirstChild(); childSuccess;
                      childSuccess = inReader.MoveToNextSibling()) {
-                    if (AreEqual(inReader.GetElementName(), L"AnimationTrack"))
+                    if (inReader.GetElementName() == QLatin1String("AnimationTrack"))
                         ParseAnimation(inReader, inSlide, theInstance);
-                    else if (AreEqual(inReader.GetElementName(), L"Action"))
+                    else if (inReader.GetElementName() == QLatin1String("Action"))
                         inUnparsedActions.push_back(
                                     SActionParseRecord(inReader.GetScope(), inSlide, theInstance));
                 }
-            } else if (AreEqual(inReader.GetElementName(), L"State")) {
-                const wchar_t *theId = L"";
+            } else if (inReader.GetElementName() == QLatin1String("State")) {
+                QString theId;
                 inReader.Att(L"Id", theId);
                 Qt3DSDMSlideHandle theSlide;
                 if (!IsTrivial(theId))
@@ -2165,7 +2189,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         IDOMReader::Scope __logicScope(inReader);
         for (bool success = inReader.MoveToFirstChild(); success;
              success = inReader.MoveToNextSibling()) {
-            if (AreEqual(inReader.GetElementName(), L"ActiveState")) {
+            if (inReader.GetElementName() == QLatin1String("ActiveState")) {
                 if (m_ActiveSlide.Valid() == false) {
                     QT3DS_ASSERT(false);
                     continue;
@@ -2176,10 +2200,10 @@ struct SComposerSerializerImpl : public IComposerSerializer
                 SLong4 theSceneGuid(thePackedGuid.Data1, thePackedGuid.Data2, thePackedGuid.Data3,
                                     thePackedGuid.Data4);
                 ParseSlide(inReader, m_ActiveSlide, theSceneGuid, theUnparsedActions);
-            } else if (AreEqual(inReader.GetElementName(), L"State")) {
-                TCharPtr componentRef = L"";
+            } else if (inReader.GetElementName() == QLatin1String("State")) {
+                QString componentRef;
                 inReader.Att(L"component", componentRef);
-                Qt3DSDMInstanceHandle component = GetInstanceById(componentRef + 1);
+                Qt3DSDMInstanceHandle component = GetInstanceById(idFromRef(componentRef));
                 if (component.Valid() == false) {
                     QT3DS_ASSERT(false);
                     continue;
@@ -2235,42 +2259,30 @@ struct SComposerSerializerImpl : public IComposerSerializer
     {
         // First filter the external references via the instance set
         for (TInstanceSet::iterator theIter = m_InstanceSet.begin(), end = m_InstanceSet.end();
-             theIter != end; ++theIter)
-            m_ExternalReferences.erase(*theIter);
+             theIter != end; ++theIter) {
+            m_ExternalReferences.remove(*theIter);
+        }
 
         if (m_ExternalReferences.empty() && m_ExternalActions.empty() && m_ExternalSlides.empty())
             return;
 
         IDOMWriter::Scope __refScope(inWriter, L"ExternalReferences");
-        wstring theWriteBuf;
-        wstring theId;
-        wchar_t tempBuf[256];
         for (TInstanceSet::iterator theIter = m_ExternalReferences.begin(),
              theEnd = m_ExternalReferences.end();
              theIter != theEnd; ++theIter) {
             IDOMWriter::Scope __refScope(inWriter, L"Reference");
-            theId.assign(L"#");
-            theId.append(GetInstanceId(*theIter));
-            inWriter.Att(L"ref", theId.c_str());
-            theWriteBuf.clear();
+            const QString theId(QLatin1Char('#') + GetInstanceId(*theIter));
+            inWriter.Att(L"ref", theId);
             SLong4 theGuid = GetInstanceGuid(*theIter);
-            for (size_t idx = 0; idx < 4; ++idx) {
-                WStrOps<qt3ds::QT3DSU32>().ToStr(theGuid.m_Longs[idx], toDataRef(tempBuf, 256));
-                if (idx)
-                    theWriteBuf.append(L" ");
-                theWriteBuf.append(tempBuf);
-            }
-            inWriter.Att(L"guid", theWriteBuf.c_str());
+            inWriter.Att(L"guid", theGuid.toQString());
         }
         for (TActionSet::iterator theIter = m_ExternalActions.begin(),
              theEnd = m_ExternalActions.end();
              theIter != theEnd; ++theIter) {
             Qt3DSDMActionHandle theAction(*theIter);
             IDOMWriter::Scope __refScope(inWriter, L"ActionReference");
-            theId.assign(L"#");
-            theId.append(GetActionId(theAction, 0, 0));
-            inWriter.Att(L"ref", theId.c_str());
-
+            const QString theId(QLatin1Char('#') + GetActionId(theAction, 0, 0));
+            inWriter.Att(L"ref", theId);
             inWriter.Att(L"handle", (int)theAction);
         }
         for (TSlideSet::iterator theIter = m_ExternalSlides.begin(),
@@ -2278,9 +2290,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
              theIter != theEnd; ++theIter) {
             Qt3DSDMSlideHandle theSlide(*theIter);
             IDOMWriter::Scope __refScope(inWriter, L"SlideReference");
-            theId.assign(L"#");
-            theId.append(GetSlideId(theSlide, 0));
-            inWriter.Att(L"ref", theId.c_str());
+            const QString theId(QLatin1Char('#') + GetSlideId(theSlide, 0));
+            inWriter.Att(L"ref", theId);
             inWriter.Att(L"handle", (int)theSlide);
         }
     }
@@ -2299,16 +2310,15 @@ struct SComposerSerializerImpl : public IComposerSerializer
             SValue lhsValue, rhsValue;
             m_DataCore.GetInstancePropertyValue(lhs, m_SourcePathProperty, lhsValue);
             m_DataCore.GetInstancePropertyValue(rhs, m_SourcePathProperty, rhsValue);
-            TDataStrPtr lhsStr = qt3dsdm::get<TDataStrPtr>(lhsValue);
-            TDataStrPtr rhsStr = qt3dsdm::get<TDataStrPtr>(rhsValue);
-            return QString::compare(QString::fromWCharArray(lhsStr->GetData()), QString::fromWCharArray(rhsStr->GetData())) < 0;
+            QString lhsStr = qt3dsdm::get<TDataStrPtr>(lhsValue)->toQString();
+            QString rhsStr = qt3dsdm::get<TDataStrPtr>(rhsValue)->toQString();
+            return QString::compare(lhsStr, rhsStr) < 0;
         }
     };
 
     void AddGraphInstanceToOrderMap(Qt3DSDMInstanceHandle inInstance)
     {
-        m_InstanceToGraphDepthMap.insert(
-                    std::make_pair(inInstance, (int)m_InstanceToGraphDepthMap.size()));
+        m_InstanceToGraphDepthMap.insert(inInstance, (int)m_InstanceToGraphDepthMap.size());
     }
 
     void BuildGraphOrderMap(const Qt3DSDMInstanceHandle *inTopInstances, QT3DSU32 inCount)
@@ -2364,12 +2374,12 @@ struct SComposerSerializerImpl : public IComposerSerializer
                      end = theMasterObjectsList.end();
                      theIter != end; ++theIter) {
                     Qt3DSDMInstanceHandle theMaster(*theIter);
-                    Option<TCharStr> theType = m_MetaData.GetTypeForInstance(theMaster);
+                    Option<QString> theType = m_MetaData.GetTypeForInstance(theMaster);
                     if (theType.hasValue() == false) {
                         QT3DS_ASSERT(false);
                         continue;
                     }
-                    IDOMWriter::Scope instScope(inWriter, theType->wide_str());
+                    IDOMWriter::Scope instScope(inWriter, theType);
                     inWriter.Att(L"id", GetInstanceId(theMaster));
                     // Write out all the properties that are on the instance but are not on *this*
                     // instance in the meta data.
@@ -2396,165 +2406,140 @@ struct SComposerSerializerImpl : public IComposerSerializer
         IDOMReader::Scope __externalReferencesScope(inReader);
         if (inReader.MoveToFirstChild(L"ExternalReferences")) {
             GetAllInstanceGuids();
-            TCharStr theRef;
-            TCharStr theGuidBuf;
+            QString theRef;
+            QString theGuidBuf;
             for (bool success = inReader.MoveToFirstChild(); success;
                  success = inReader.MoveToNextSibling()) {
-                if (AreEqual(inReader.GetElementName(), L"Reference")) {
+                if (inReader.GetElementName() == QLatin1String("Reference")) {
                     inReader.Att(L"ref", theRef);
                     inReader.Att(L"guid", theGuidBuf);
                     SLong4 theGuid;
-                    const wchar_t *theStartPtr(theGuidBuf.wide_str());
-                    wchar_t *theEndPtr(NULL);
-                    for (size_t idx = 0; idx < 4; ++idx) {
-                        theGuid.m_Longs[idx] = wcstol(theStartPtr, &theEndPtr, 10);
-                        theStartPtr = theEndPtr;
-                    }
+                    QStringList split(theGuidBuf.split(QLatin1Char(' ')));
+                    theGuid.m_Longs[0] = split[0].toLong();
+                    theGuid.m_Longs[1] = split[1].toLong();
+                    theGuid.m_Longs[2] = split[2].toLong();
+                    theGuid.m_Longs[3] = split[3].toLong();
                     Qt3DSDMInstanceHandle theInstance = FindInstanceByGUID(theGuid);
                     if (theInstance.Valid())
-                        AddId(theRef.wide_str() + 1, theInstance);
-                } else if (AreEqual(inReader.GetElementName(), L"ActionReference")) {
+                        AddId(idFromRef(theRef), theInstance);
+                } else if (inReader.GetElementName() == QLatin1String("ActionReference")) {
                     inReader.Att(L"ref", theRef);
                     inReader.Att(L"handle", theGuidBuf);
-                    long theHandleValue(wcstol(theGuidBuf.wide_str(), NULL, 10));
+                    long theHandleValue(theGuidBuf.toLong());
                     Qt3DSDMActionHandle theAction(theHandleValue);
                     QT3DS_ASSERT(m_ActionCore.HandleValid(theAction));
-                    AddActionId(theRef.wide_str() + 1, theAction);
-                } else if (AreEqual(inReader.GetElementName(), L"SlideReference")) {
+                    AddActionId(idFromRef(theRef), theAction);
+                } else if (inReader.GetElementName() == QLatin1String("SlideReference")) {
                     inReader.Att(L"ref", theRef);
                     inReader.Att(L"handle", theGuidBuf);
-                    long theHandleValue(wcstol(theGuidBuf.wide_str(), NULL, 10));
+                    long theHandleValue(theGuidBuf.toLong());
                     Qt3DSDMSlideHandle theSlide(theHandleValue);
                     QT3DS_ASSERT(m_SlideCore.IsSlide(theSlide));
-                    AddSlideId(theRef.wide_str() + 1, theSlide);
+                    AddSlideId(idFromRef(theRef), theSlide);
                 }
             }
         }
     }
 
+    Qt3DSDMInstanceHandle loadSourcePathFile(
+            IDOMReader &inReader, const QString &inDocumentDirectory, const QString &theSourcePath)
+    {
+        Qt3DSDMInstanceHandle theMaster;
+        QString theFullPath(CFilePath::CombineBaseAndRelative(inDocumentDirectory, theSourcePath));
+        QString theType(inReader.GetElementName());
+        Qt3DSDMInstanceHandle theCanonicalType(m_MetaData.GetCanonicalInstanceForType(theType));
+
+        if (theCanonicalType.Valid() == false) {
+            QT3DS_ASSERT(false);
+            return theMaster;
+        }
+
+        theMaster = m_DataCore.CreateInstance();
+        m_DataCore.DeriveInstance(theMaster, theCanonicalType);
+        m_SourcePathToMasterInstances.insert(theSourcePath, theMaster);
+        QFileInfo info(theFullPath);
+        if (!info.exists()) {
+            QT3DS_ASSERT(false);
+            return theMaster;
+        }
+        const QString suffix(info.suffix());
+        if (suffix.compare(QLatin1String("qml"), Qt::CaseInsensitive) == 0) {
+            std::shared_ptr<IDOMReader> theScriptPtr
+                    = IDocumentEditor::ParseScriptFile(theFullPath, m_DataCore.GetStringTablePtr(),
+                                                       m_ImportFailedHandler,
+                                                       *m_InputStreamFactory);
+            if (theScriptPtr) {
+                std::vector<SMetaDataLoadWarning> warnings;
+                m_MetaData.LoadInstance(*theScriptPtr, theMaster, info.baseName(), warnings);
+            }
+        } else if (suffix.compare(QLatin1String("glsl"), Qt::CaseInsensitive) == 0
+                   || suffix.compare(QLatin1String("effect"), Qt::CaseInsensitive) == 0) {
+            std::vector<SMetaDataLoadWarning> warnings;
+            Q3DStudio::IRefCountedInputStream theStream
+                    = m_InputStreamFactory->getStreamForFile(theFullPath);
+            if (theStream) {
+                m_MetaData.LoadEffectInstance(theSourcePath, theMaster, info.baseName(),
+                                              warnings, *theStream);
+            }
+        } else if (suffix.compare(QLatin1String("plugin"), Qt::CaseInsensitive) == 0) {
+            std::shared_ptr<IDOMReader> thePluginPtr
+                    = IDocumentEditor::ParsePluginFile(theFullPath, m_DataCore.GetStringTablePtr(),
+                                                       m_ImportFailedHandler,
+                                                       *m_InputStreamFactory);
+            if (thePluginPtr) {
+                std::vector<SMetaDataLoadWarning> warnings;
+                m_MetaData.LoadInstance(*thePluginPtr, theMaster, info.baseName(), warnings);
+            }
+        } else if (suffix.compare(QLatin1String("material"), Qt::CaseInsensitive) == 0) {
+            std::vector<SMetaDataLoadWarning> warnings;
+            IRefCountedInputStream theStream = m_InputStreamFactory->getStreamForFile(theFullPath);
+            if (theStream) {
+                m_MetaData.LoadMaterialInstance(theSourcePath, theMaster, info.baseName(),
+                                                warnings, *theStream);
+            }
+        } else {
+            QT3DS_ASSERT(false);
+        }
+        return theMaster;
+    }
+
     qt3dsdm::TInstanceHandleList DoSerializeScene(IDOMReader &inReader,
-                                                const CFilePath &inDocumentDirectory,
-                                                Qt3DSDMInstanceHandle inNewRoot)
+                                                  const QString &inDocumentDirectory,
+                                                  Qt3DSDMInstanceHandle inNewRoot)
     {
         // Attempt to work correctly whether we are pointing to the project or not.
         IDOMReader::Scope __outerScope(inReader);
-        if (AreEqual(inReader.GetElementName(), L"UIP"))
-            inReader.MoveToFirstChild(L"Project");
+        if (inReader.GetElementName() == QLatin1String("UIP"))
+            inReader.MoveToFirstChild(QStringLiteral("Project"));
 
         {
             ReadExternalReferences(inReader);
             IDOMReader::Scope __masterScope(inReader);
-            if (inReader.MoveToFirstChild(L"Classes")) {
+            if (inReader.MoveToFirstChild(QStringLiteral("Classes"))) {
                 BuildSourcePathMasterObjectMap();
                 for (bool success = inReader.MoveToFirstChild(); success;
                      success = inReader.MoveToNextSibling()) {
-                    const wchar_t *theSourcePath;
+                    QString theSourcePath;
                     // Ignore master objects that already exist in the project.
-                    if (inReader.Att(L"sourcepath", theSourcePath) == false) {
+                    if (inReader.Att(QStringLiteral("sourcepath"), theSourcePath) == false) {
                         QT3DS_ASSERT(false);
                         continue;
                     }
                     Qt3DSDMInstanceHandle theMaster;
-                    TIdToHandleMap::iterator theFind(m_SourcePathToMasterInstances.find(
-                                                         m_StringTable.RegisterStr(theSourcePath)));
+                    TIdToHandleMap::iterator theFind(m_SourcePathToMasterInstances
+                                                     .find(theSourcePath));
                     if (theFind != m_SourcePathToMasterInstances.end()) {
-                        theMaster = theFind->second;
+                        theMaster = *theFind;
                     } else {
-                        CFilePath theFullPath = CFilePath::CombineBaseAndRelative(
-                                    inDocumentDirectory, CFilePath(theSourcePath));
-
-                        const wchar_t *theType(inReader.GetElementName());
-                        Qt3DSDMInstanceHandle theCanonicalType(
-                                    m_MetaData.GetCanonicalInstanceForType(theType));
-                        if (theCanonicalType.Valid() == false) {
-                            QT3DS_ASSERT(false);
-                            continue;
-                        }
-
-                        theMaster = m_DataCore.CreateInstance();
-                        m_DataCore.DeriveInstance(theMaster, theCanonicalType);
                         TPropertyHandleValuePairList theValues;
-                        vector<pair<TCharPtr, TCharPtr>> theExtraAtts;
-                        m_SourcePathToMasterInstances.insert(
-                                    make_pair(m_StringTable.RegisterStr(theSourcePath), theMaster));
-
-                        if (theFullPath.Exists()) {
-                            if (theFullPath.GetExtension().Compare(L"qml",
-                                                                   CString::ENDOFSTRING, false)) {
-                                std::shared_ptr<IDOMReader> theScriptPtr =
-                                        IDocumentEditor::ParseScriptFile(
-                                            theFullPath, m_DataCore.GetStringTablePtr(),
-                                            m_ImportFailedHandler, *m_InputStreamFactory);
-                                if (theScriptPtr) {
-                                    std::vector<SMetaDataLoadWarning> warnings;
-                                    m_MetaData.LoadInstance(*theScriptPtr, theMaster,
-                                                            theFullPath.GetFileStem().c_str(),
-                                                            warnings);
-                                }
-                            } else if (theFullPath.GetExtension().Compare(
-                                           L"glsl", CString::ENDOFSTRING, false)
-                                       || theFullPath.GetExtension().Compare(
-                                           L"effect", CString::ENDOFSTRING, false)) {
-                                if (theFullPath.Exists()) {
-                                    std::vector<SMetaDataLoadWarning> warnings;
-                                    // Now the magic section
-                                    Q3DStudio::IRefCountedInputStream
-                                            theStream = m_InputStreamFactory->getStreamForFile(
-                                                theFullPath.toQString());
-                                    if (theStream) {
-                                        m_MetaData.LoadEffectInstance(
-                                                    m_StringTable.GetNarrowStr(theSourcePath),
-                                                    theMaster,
-                                                    theFullPath.GetFileStem().c_str(),
-                                                    warnings,
-                                                    *theStream);
-                                    }
-                                } else {
-                                    QT3DS_ASSERT(false);
-                                }
-                            } else if (theFullPath.GetExtension().Compare(
-                                           L"plugin", CString::ENDOFSTRING, false)) {
-                                std::shared_ptr<IDOMReader> thePluginPtr =
-                                        IDocumentEditor::ParsePluginFile(
-                                            theFullPath, m_DataCore.GetStringTablePtr(),
-                                            m_ImportFailedHandler, *m_InputStreamFactory);
-                                if (thePluginPtr) {
-                                    std::vector<SMetaDataLoadWarning> warnings;
-                                    // Now the magic section
-                                    m_MetaData.LoadInstance(*thePluginPtr, theMaster,
-                                                            theFullPath.GetFileStem().c_str(),
-                                                            warnings);
-                                }
-                            } else if (theFullPath.GetExtension().Compare(
-                                           L"material", CString::ENDOFSTRING, false)) {
-                                if (theFullPath.Exists()) {
-                                    std::vector<SMetaDataLoadWarning> warnings;
-                                    IRefCountedInputStream
-                                            theStream = m_InputStreamFactory->getStreamForFile(
-                                                theFullPath.toQString());
-                                    if (theStream) {
-                                        // Now the magic section
-                                        m_MetaData.LoadMaterialInstance(
-                                                    m_StringTable.GetNarrowStr(theSourcePath),
-                                                    theMaster,
-                                                    theFullPath.GetFileStem().c_str(),
-                                                    warnings,
-                                                    *theStream);
-                                    }
-                                } else {
-                                    QT3DS_ASSERT(false);
-                                }
-                            } else {
-                                QT3DS_ASSERT(false);
-                            }
-                        } else {
-                            QT3DS_ASSERT(false);
-                        }
+                        vector<pair<QString, QString>> theExtraAtts;
+                        theMaster = loadSourcePathFile(inReader, inDocumentDirectory,
+                                                       theSourcePath);
                         ParseAndSetInstanceProperties(inReader, 0, theMaster, theExtraAtts,
                                                       theValues);
                     }
-                    const wchar_t *theId;
-                    inReader.Att(L"id", theId);
+                    QString theId;
+                    inReader.Att(QStringLiteral("id"), theId);
                     AddId(theId, theMaster);
                 }
             }
@@ -2649,7 +2634,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         }
     }
 
-    void SerializeScene(IDOMReader &inReader, const CFilePath &inDocumentDirectory,
+    void SerializeScene(IDOMReader &inReader, const QString &inDocumentDirectory,
                                 int inUIPVersion) override
     {
         reset();
@@ -2674,7 +2659,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
     // Read a partial serialization into this slide, attaching the instance as the last child of the
     // new root.
     virtual qt3dsdm::TInstanceHandleList
-    SerializeSceneGraphObject(IDOMReader &inReader, const CFilePath &inDocumentDirectory,
+    SerializeSceneGraphObject(IDOMReader &inReader, const QString &inDocumentDirectory,
                               Qt3DSDMInstanceHandle inNewRoot, Qt3DSDMSlideHandle inActiveSlide) override
     {
         reset();
@@ -2784,8 +2769,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
     }
 
     Qt3DSDMSlideHandle SerializeSlide(qt3dsdm::IDOMReader &inReader,
-                                             const CFilePath &inDocumentDirectory,
-                                             qt3dsdm::Qt3DSDMSlideHandle inMaster, int newIndex) override
+                                      const QString &inDocumentDirectory,
+                                      qt3dsdm::Qt3DSDMSlideHandle inMaster, int newIndex) override
     {
         reset();
         m_PreserveFileIds = false;

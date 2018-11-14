@@ -118,7 +118,7 @@ void CSimpleDataCore::GetInstanceParents(Qt3DSDMInstanceHandle inHandle,
         outParents.push_back(theParent->first);
 }
 
-inline bool ComparePropertyNames(const TCharStr &inName, int inPropHandle,
+inline bool ComparePropertyNames(const QString &inName, int inPropHandle,
                                  const THandleObjectMap &inObjects)
 {
     if (CSimpleDataCore::GetPropertyDefinitionNF(inPropHandle, inObjects)->m_Definition.m_Name
@@ -127,19 +127,15 @@ inline bool ComparePropertyNames(const TCharStr &inName, int inPropHandle,
     return false;
 }
 
-inline const wchar_t *SafeStrPtr(const wchar_t *inData)
-{
-    return inData == NULL ? L"" : inData;
-}
-
 // Properties
-Qt3DSDMPropertyHandle CSimpleDataCore::AddProperty(Qt3DSDMInstanceHandle inInstance, TCharPtr inName,
-                                                  DataModelDataType::Value inPropType)
+Qt3DSDMPropertyHandle CSimpleDataCore::AddProperty(Qt3DSDMInstanceHandle inInstance,
+                                                   const QString &inName,
+                                                   DataModelDataType::Value inPropType)
 {
     QT3DSDM_LOG_FUNCTION("CSimpleDataCore::AddProperty");
-    QT3DSDM_DEBUG_LOG(m_StringTable->GetNarrowStr(inName));
+    QT3DSDM_DEBUG_LOG(inName);
     TDataModelInstancePtr theInstance = GetInstanceNF(inInstance, m_Objects);
-    TCharStr theName(inName);
+    QString theName(inName);
     if (find_if<TIntList::iterator>(
             theInstance->m_Properties,
             std::bind(ComparePropertyNames, std::ref(theName),
@@ -205,7 +201,7 @@ inline void CopyInstanceProperty(Qt3DSDMPropertyHandle inSrcPropertyHandle,
     // create the property definition that matches the source
     const Qt3DSDMPropertyDefinition &theProperty = inDataCore.GetProperty(inSrcPropertyHandle);
     Qt3DSDMPropertyHandle theNewProperty =
-        inDataCore.AddProperty(inInstanceHandle, theProperty.m_Name.wide_str(), theProperty.m_Type);
+        inDataCore.AddProperty(inInstanceHandle, theProperty.m_Name, theProperty.m_Type);
     // copy the value if one exists on the src.
     SValue theValue;
     if (GetInstanceValue(inSrcInstanceHandle, inSrcPropertyHandle, inDataCore, theValue))
@@ -288,7 +284,7 @@ RecurseFindProperty(const TDataModelInstancePtr inInstance, TPredicate inPredica
 }
 
 inline bool PropertyNameMatches(int inProperty, const THandleObjectMap &inObjects,
-                                const TCharStr &inStr)
+                                const QString &inStr)
 {
     const CDataModelPropertyDefinitionObject *theProp =
         CSimpleDataCore::GetPropertyDefinitionNF(inProperty, inObjects);
@@ -297,7 +293,7 @@ inline bool PropertyNameMatches(int inProperty, const THandleObjectMap &inObject
 
 Qt3DSDMPropertyHandle
 CSimpleDataCore::GetAggregateInstancePropertyByName(Qt3DSDMInstanceHandle inInstance,
-                                                    const TCharStr &inStr) const
+                                                    const QString &inStr) const
 {
     const TDataModelInstancePtr theInstance = GetInstanceNF(inInstance, m_Objects);
     return get<2>(
@@ -466,11 +462,11 @@ Qt3DSDMInstanceHandle CSimpleDataCore::CreateInstanceWithHandle(int inHandle)
 
 Qt3DSDMPropertyHandle CSimpleDataCore::AddPropertyWithHandle(int inHandle,
                                                             Qt3DSDMInstanceHandle inInstance,
-                                                            TCharPtr inName,
+                                                            const QString &inName,
                                                             DataModelDataType::Value inPropType)
 {
     QT3DSDM_DEBUG_LOG("CSimpleDataCore::AddPropertyWithHandle Enter");
-    QT3DSDM_DEBUG_LOG(m_StringTable->GetNarrowStr(inName));
+    QT3DSDM_DEBUG_LOG(inName);
     if (HandleValid(inHandle)) {
         if (g_DataModelDebugLogger) {
             g_DataModelDebugLogger("CSimpleDataCore::AddPropertyWithHandle Handle Exists!!");
@@ -484,7 +480,7 @@ Qt3DSDMPropertyHandle CSimpleDataCore::AddPropertyWithHandle(int inHandle,
 
     TDataModelInstancePtr theInstance = GetInstanceNF(inInstance, m_Objects);
 
-    Qt3DSDMPropertyDefinition theDefinition(inInstance, SafeStrPtr(inName), inPropType);
+    Qt3DSDMPropertyDefinition theDefinition(inInstance, inName, inPropType);
     THandleObjectPtr theHandleObjectPtr(
         new CDataModelPropertyDefinitionObject(inHandle, theDefinition));
     const pair<int, THandleObjectPtr> thePair(std::make_pair(inHandle, theHandleObjectPtr));

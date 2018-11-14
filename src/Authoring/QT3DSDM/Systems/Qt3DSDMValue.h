@@ -299,7 +299,7 @@ inline QColor get<QColor>(const SValue &inType)
 template <>
 inline QString get<QString>(const qt3dsdm::SValue &inType)
 {
-    return QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>(inType)->GetData());
+    return qt3dsdm::get<qt3dsdm::TDataStrPtr>(inType)->toQString();
 }
 
 template <>

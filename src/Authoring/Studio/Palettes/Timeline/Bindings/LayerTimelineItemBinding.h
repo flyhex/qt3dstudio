@@ -48,7 +48,7 @@ class CStudioSystem;
 class CLayerTimelineItemBinding : public Qt3DSDMTimelineItemBinding
 {
 public: // Types
-    typedef std::tuple<qt3dsdm::TCharStr, qt3dsdm::TCharStr, qt3dsdm::Qt3DSDMPropertyHandle>
+    typedef std::tuple<QString, QString, qt3dsdm::Qt3DSDMPropertyHandle>
         TNameFormalNamePair;
     typedef std::vector<TNameFormalNamePair> TNameFormalNamePairList;
 
@@ -72,7 +72,7 @@ public: // Qt3DSDMTimelineItemBinding
 protected:
     qt3dsdm::Qt3DSDMInstanceHandle GetImage(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle);
     ITimelineItemBinding *GetOrCreateImageBinding(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle,
-                                                  const wchar_t *inName);
+                                                  const QString &inName);
     ITimelineItemBinding *GetOrCreateBinding(qt3dsdm::Qt3DSDMInstanceHandle instance);
 };
 

@@ -72,12 +72,12 @@ public:
                                   const SObjectRefType &inTriggerObject) = 0;
     virtual void SetTargetObject(Qt3DSDMActionHandle inAction,
                                  const SObjectRefType &inTargetObject) = 0;
-    virtual void SetEvent(Qt3DSDMActionHandle inAction, const wstring &inEventName) = 0;
-    virtual void SetHandler(Qt3DSDMActionHandle inAction, const wstring &inHandlerName) = 0;
+    virtual void SetEvent(Qt3DSDMActionHandle inAction, const QString &inEventName) = 0;
+    virtual void SetHandler(Qt3DSDMActionHandle inAction, const QString &inHandlerName) = 0;
 
     // Handler Argument
     virtual Qt3DSDMHandlerArgHandle AddHandlerArgument(Qt3DSDMActionHandle inAction,
-                                                      const TCharStr &inName,
+                                                      const QString &inName,
                                                       HandlerArgumentType::Value inArgType,
                                                       DataModelDataType::Value inValueType) = 0;
     virtual void RemoveHandlerArgument(Qt3DSDMHandlerArgHandle inHandlerArgument) = 0;

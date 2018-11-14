@@ -57,7 +57,7 @@ public:
     // Interface
     virtual EStudioObjectType GetObjectType() = 0;
     // virtual std::wstring		GetTypeString() const { return L""; }
-    virtual Q3DStudio::CString GetName() = 0;
+    virtual QString GetName() = 0;
     virtual long GetGroupCount() = 0;
     virtual CInspectorGroup *GetGroup(long inIndex) = 0;
     virtual bool IsValid() const = 0;

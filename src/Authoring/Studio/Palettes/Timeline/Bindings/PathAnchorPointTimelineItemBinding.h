@@ -61,8 +61,8 @@ public: // Construction
     bool IsShy() const override { return false; }
     void SetShy(bool) override {}
     bool IsVisibilityControlled() const override { return false; }
-    Q3DStudio::CString GetName() const override { return L"Anchor Point"; }
-    void SetName(const Q3DStudio::CString &) override {}
+    QString GetName() const override { return QStringLiteral("Anchor Point"); }
+    void SetName(const QString &) override {}
 };
 
 #endif

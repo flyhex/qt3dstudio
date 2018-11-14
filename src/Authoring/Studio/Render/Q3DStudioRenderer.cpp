@@ -38,6 +38,7 @@
 #include "StudioFullSystem.h"
 #include "StudioCoreSystem.h"
 #include "HotKeys.h"
+#include "Q3DSRenderBufferManager.h"
 
 #include <QtWidgets/qwidget.h>
 #include <QtWidgets/qopenglwidget.h>
@@ -95,10 +96,10 @@ Q3DStudioRenderer::Q3DStudioRenderer()
     m_dispatch.AddSceneDragListener(this);
     m_dispatch.AddToolbarChangeListener(this);
 
-    ::CColor color = CStudioPreferences::GetRulerBackgroundColor(); // Rectangles under tick marks
-    m_rectColor = QColor(int(color.GetRed()), int(color.GetGreen()), int(color.GetBlue()));
-    color = CStudioPreferences::GetRulerTickColor(); // Tick marks
-    m_lineColor = QColor(int(color.GetRed()), int(color.GetGreen()), int(color.GetBlue()));
+    // Rectangles under tick marks
+    m_rectColor = CStudioPreferences::GetRulerBackgroundColor();
+    // Tick marks
+    m_lineColor = CStudioPreferences::GetRulerTickColor();
     m_editCameraInformation.resize(g_numEditCameras);
 }
 
@@ -125,7 +126,7 @@ QT3DSVec3 Q3DStudioRenderer::GetIntendedPosition(qt3dsdm::Qt3DSDMInstanceHandle 
 
 Q3DSRenderBufferManager *Q3DStudioRenderer::GetBufferManager()
 {
-    return nullptr;
+    return Q3DSRenderBufferManager::Create(m_engine.data(), *IInputStreamFactory::Create()).data();
 }
 
 IPathManager *Q3DStudioRenderer::GetPathManager()

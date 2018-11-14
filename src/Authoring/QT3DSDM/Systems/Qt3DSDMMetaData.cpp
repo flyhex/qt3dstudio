@@ -37,6 +37,7 @@
 #include <unordered_map>
 #include <memory>
 #include <unordered_set>
+#include <QtCore/qhash.h>
 #include "Qt3DSDMTransactions.h"
 #include "VectorTransactions.h"
 #include "Qt3DSDMSignals.h"
@@ -72,31 +73,34 @@ typedef Qt3DSDMMetaDataPropertyHandle TMetaDataPropertyHandle;
 typedef Qt3DSDMCategoryHandle TCategoryHandle;
 
 namespace qt3dsdm {
-#define QT3DS_WCHAR_T_None L"None"
-#define QT3DS_WCHAR_T_StringList L"StringList"
-#define QT3DS_WCHAR_T_Range L"Range"
-#define QT3DS_WCHAR_T_Image L"Image"
-#define QT3DS_WCHAR_T_Color L"Color"
-#define QT3DS_WCHAR_T_Rotation L"Rotation"
-#define QT3DS_WCHAR_T_Font L"Font"
-#define QT3DS_WCHAR_T_FontSize L"FontSize"
-#define QT3DS_WCHAR_T_MultiLine L"MultiLine"
-#define QT3DS_WCHAR_T_ObjectRef L"ObjectRef"
-#define QT3DS_WCHAR_T_Mesh L"Mesh"
-#define QT3DS_WCHAR_T_Import L"Import"
-#define QT3DS_WCHAR_T_Texture L"Texture"
-#define QT3DS_WCHAR_T_Image2D L"Image2D"
-#define QT3DS_WCHAR_T_Buffer L"Buffer"
-#define QT3DS_WCHAR_T_Property L"Property"
-#define QT3DS_WCHAR_T_Dependent L"Dependent"
-#define QT3DS_WCHAR_T_Slide L"Slide"
-#define QT3DS_WCHAR_T_Event L"Event"
-#define QT3DS_WCHAR_T_Object L"Object"
-#define QT3DS_WCHAR_T_Signal L"Signal"
-#define QT3DS_WCHAR_T_Renderable L"Renderable"
-#define QT3DS_WCHAR_T_PathBuffer L"PathBuffer"
-#define QT3DS_WCHAR_T_ShadowMapResolution L"ShadowMapResolution"
-#define QT3DS_WCHAR_T_String L"String"
+#define QT3DS_PROPNAME_None "None"
+#define QT3DS_PROPNAME_StringList "StringList"
+#define QT3DS_PROPNAME_Range "Range"
+#define QT3DS_PROPNAME_Image "Image"
+#define QT3DS_PROPNAME_Color "Color"
+#define QT3DS_PROPNAME_Rotation "Rotation"
+#define QT3DS_PROPNAME_Font "Font"
+#define QT3DS_PROPNAME_FontSize "FontSize"
+#define QT3DS_PROPNAME_MultiLine "MultiLine"
+#define QT3DS_PROPNAME_ObjectRef "ObjectRef"
+#define QT3DS_PROPNAME_Mesh "Mesh"
+#define QT3DS_PROPNAME_Import "Import"
+#define QT3DS_PROPNAME_Texture "Texture"
+#define QT3DS_PROPNAME_Image2D "Image2D"
+#define QT3DS_PROPNAME_Buffer "Buffer"
+#define QT3DS_PROPNAME_Property "Property"
+#define QT3DS_PROPNAME_Dependent "Dependent"
+#define QT3DS_PROPNAME_Slide "Slide"
+#define QT3DS_PROPNAME_Event "Event"
+#define QT3DS_PROPNAME_Object "Object"
+#define QT3DS_PROPNAME_Signal "Signa"
+#define QT3DS_PROPNAME_Renderable "Renderable"
+#define QT3DS_PROPNAME_PathBuffer "PathBuffer"
+#define QT3DS_PROPNAME_ShadowMapResolution "ShadowMapResolution"
+#define QT3DS_PROPNAME_String "String"
+
+#define LSTR2(x) L ## x
+#define LSTR(x) LSTR2(x)
 
 #define ITERATE_ADDITIONAL_META_DATA_TYPES                                                         \
     HANDLE_ADDITIONAL_META_DATA_TYPE(None)                                                         \
@@ -123,8 +127,8 @@ struct WStrOps<AdditionalMetaDataType::Value>
     {
         switch (item) {
 #define HANDLE_ADDITIONAL_META_DATA_TYPE(name)                                                     \
-        case AdditionalMetaDataType::name:                                                             \
-    wcscpy_s(buffer.begin(), buffer.size(), QT3DS_WCHAR_T_##name);                               \
+        case AdditionalMetaDataType::name:                                                         \
+    wcscpy_s(buffer.begin(), buffer.size(), LSTR(QT3DS_PROPNAME_##name));                          \
     return 1;
         ITERATE_ADDITIONAL_META_DATA_TYPES
         #undef HANDLE_ADDITIONAL_META_DATA_TYPE
@@ -134,9 +138,9 @@ struct WStrOps<AdditionalMetaDataType::Value>
     bool StrTo(const wchar_t *buffer, AdditionalMetaDataType::Value &item)
     {
 #define HANDLE_ADDITIONAL_META_DATA_TYPE(name)                                                     \
-    if (AreEqual(buffer, QT3DS_WCHAR_T_##name)) {                                                    \
-    item = AdditionalMetaDataType::name;                                                       \
-    return true;                                                                               \
+    if (AreEqual(buffer, LSTR(QT3DS_PROPNAME_##name))) {                                           \
+    item = AdditionalMetaDataType::name;                                                           \
+    return true;                                                                                   \
     }
         ITERATE_ADDITIONAL_META_DATA_TYPES
         #undef HANDLE_ADDITIONAL_META_DATA_TYPE
@@ -155,12 +159,13 @@ struct WStrOps<AdditionalMetaDataType::Value>
     HANDLE_HANDLER_ARG_TYPE(Object)                                                                \
     HANDLE_HANDLER_ARG_TYPE(Signal)
 
-QT3DSU32 WStrOps<HandlerArgumentType::Value>::ToStr(HandlerArgumentType::Value item, NVDataRef<wchar_t> buffer)
+QT3DSU32 WStrOps<HandlerArgumentType::Value>::ToStr(HandlerArgumentType::Value item,
+                                                    NVDataRef<wchar_t> buffer)
 {
     switch (item) {
 #define HANDLE_HANDLER_ARG_TYPE(name)                                                              \
-    case HandlerArgumentType::name:                                                               \
-    wcscpy_s(buffer.begin(), buffer.size(), QT3DS_WCHAR_T_##name);                               \
+    case HandlerArgumentType::name:                                                                \
+    wcscpy_s(buffer.begin(), buffer.size(), LSTR(QT3DS_PROPNAME_##name));                          \
     return 1;
     ITERATE_HANDLER_ARG_TYPES
         #undef HANDLE_HANDLER_ARG_TYPE
@@ -168,26 +173,57 @@ QT3DSU32 WStrOps<HandlerArgumentType::Value>::ToStr(HandlerArgumentType::Value i
     return 0;
 }
 
-bool WStrOps<HandlerArgumentType::Value>::StrTo(const wchar_t *buffer, HandlerArgumentType::Value &item)
+QT3DSU32 WStrOps<HandlerArgumentType::Value>::ToStr(HandlerArgumentType::Value item,
+                                                    NVDataRef<char8_t> buffer)
+{
+    switch (item) {
+#define HANDLE_HANDLER_ARG_TYPE(name)                                                              \
+    case HandlerArgumentType::name:                                                                \
+    _snprintf(buffer.begin(), buffer.size(), "%s", QT3DS_PROPNAME_##name);                                \
+    return 1;
+    ITERATE_HANDLER_ARG_TYPES
+        #undef HANDLE_HANDLER_ARG_TYPE
+    }
+    return 0;
+}
+
+bool WStrOps<HandlerArgumentType::Value>::StrTo(const wchar_t *buffer,
+                                                HandlerArgumentType::Value &item)
 {
 #define HANDLE_HANDLER_ARG_TYPE(name)                                                              \
-    if (AreEqual(buffer, QT3DS_WCHAR_T_##name)) {                                                    \
-    item = HandlerArgumentType::name;                                                              \
-    return true;                                                                               \
-}
+    if (AreEqual(buffer, LSTR(QT3DS_PROPNAME_##name))) {                                           \
+        item = HandlerArgumentType::name;                                                          \
+        return true;                                                                               \
+    }
     ITERATE_HANDLER_ARG_TYPES
         #undef HANDLE_HANDLER_ARG_TYPE
             return false;
 }
 
-#define QT3DS_WCHAR_T_FloatRange L"FloatRange"
-#define QT3DS_WCHAR_T_LongRange L"LongRange"
-#define QT3DS_WCHAR_T_Vector L"Vector"
-#define QT3DS_WCHAR_T_MultiLineString L"MultiLineString"
-#define QT3DS_WCHAR_T_Boolean L"Boolean"
-#define QT3DS_WCHAR_T_Guid L"Guid"
-#define QT3DS_WCHAR_T_StringListOrInt L"StringListOrInt"
-#define QT3DS_WCHAR_T_Scale L"Scale"
+bool WStrOps<HandlerArgumentType::Value>::StrTo(const char8_t *buffer,
+                                                HandlerArgumentType::Value &item)
+{
+#define HANDLE_HANDLER_ARG_TYPE(name)                                                              \
+    if (AreEqual(buffer, QT3DS_PROPNAME_##name)) {                                                 \
+        item = HandlerArgumentType::name;                                                          \
+        return true;                                                                               \
+    }
+    ITERATE_HANDLER_ARG_TYPES
+        #undef HANDLE_HANDLER_ARG_TYPE
+            return false;
+}
+
+#define QT3DS_PROPNAME_FloatRange "FloatRange"
+#define QT3DS_PROPNAME_LongRange "LongRange"
+#define QT3DS_PROPNAME_Vector "Vector"
+#define QT3DS_PROPNAME_MultiLineString "MultiLineString"
+#define QT3DS_PROPNAME_Boolean "Boolean"
+#define QT3DS_PROPNAME_Guid "Guid"
+#define QT3DS_PROPNAME_StringListOrInt "StringListOrInt"
+#define QT3DS_PROPNAME_Scale "Scale"
+#define QT3DS_PROPNAME_Float "Float"
+#define QT3DS_PROPNAME_Float2 "Float2"
+#define QT3DS_PROPNAME_Long "Long"
 
 #define ITERATE_QT3DSDM_COMPLETE_TYPES                                                               \
     HANDLE_QT3DSDM_COMPLETE_NONE_TYPE                                                                 \
@@ -278,13 +314,33 @@ QT3DSU32 WStrOps<CompleteMetaDataType::Enum>::ToStr(CompleteMetaDataType::Enum i
                                                     NVDataRef<wchar_t> buffer)
 {
     switch (item) {
-#define HANDLE_QT3DSDM_COMPLETE_NONE_TYPE                                                             \
+#define HANDLE_QT3DSDM_COMPLETE_NONE_TYPE                                                          \
     case CompleteMetaDataType::Unknown:                                                            \
-    wcscpy_s(buffer.begin(), buffer.size(), L"None");                                          \
+    wcscpy_s(buffer.begin(), buffer.size(), L"None");                                              \
     return 1;
-#define HANDLE_QT3DSDM_COMPLETE_TYPE(name, addtype, dtype)                                            \
+#define HANDLE_QT3DSDM_COMPLETE_TYPE(name, addtype, dtype)                                         \
     case CompleteMetaDataType::name:                                                               \
-    wcscpy_s(buffer.begin(), buffer.size(), QT3DS_WCHAR_T_##name);                               \
+    wcscpy_s(buffer.begin(), buffer.size(), LSTR(QT3DS_PROPNAME_##name));                          \
+    return 1;
+
+    ITERATE_QT3DSDM_COMPLETE_TYPES
+        #undef HANDLE_QT3DSDM_COMPLETE_NONE_TYPE
+        #undef HANDLE_QT3DSDM_COMPLETE_TYPE
+    }
+    QT3DS_ASSERT(false);
+    return 0;
+}
+QT3DSU32 WStrOps<CompleteMetaDataType::Enum>::ToStr(CompleteMetaDataType::Enum item,
+                                                    NVDataRef<char8_t> buffer)
+{
+    switch (item) {
+#define HANDLE_QT3DSDM_COMPLETE_NONE_TYPE                                                          \
+    case CompleteMetaDataType::Unknown:                                                            \
+    _snprintf(buffer.begin(), buffer.size(), "%s", "None");                                               \
+    return 1;
+#define HANDLE_QT3DSDM_COMPLETE_TYPE(name, addtype, dtype)                                         \
+    case CompleteMetaDataType::name:                                                               \
+    _snprintf(buffer.begin(), buffer.size(), "%s", QT3DS_PROPNAME_##name);                                \
     return 1;
 
     ITERATE_QT3DSDM_COMPLETE_TYPES
@@ -298,23 +354,44 @@ bool WStrOps<CompleteMetaDataType::Enum>::StrTo(const wchar_t *buffer,
                                                 CompleteMetaDataType::Enum &item)
 {
 
-#define HANDLE_QT3DSDM_COMPLETE_NONE_TYPE                                                             \
+#define HANDLE_QT3DSDM_COMPLETE_NONE_TYPE                                                          \
     if (AreEqual(buffer, L"None")) {                                                               \
-    item = CompleteMetaDataType::Unknown;                                                      \
-    return true;                                                                               \
-}
-#define HANDLE_QT3DSDM_COMPLETE_TYPE(name, addtype, dtype)                                            \
-    if (AreEqual(buffer, QT3DS_WCHAR_T_##name)) {                                                    \
-    item = CompleteMetaDataType::name;                                                         \
-    return true;                                                                               \
-}
+        item = CompleteMetaDataType::Unknown;                                                      \
+        return true;                                                                               \
+    }
+#define HANDLE_QT3DSDM_COMPLETE_TYPE(name, addtype, dtype)                                         \
+    if (AreEqual(buffer, LSTR(QT3DS_PROPNAME_##name))) {                                           \
+        item = CompleteMetaDataType::name;                                                         \
+        return true;                                                                               \
+    }
 
     ITERATE_QT3DSDM_COMPLETE_TYPES
         #undef HANDLE_QT3DSDM_COMPLETE_NONE_TYPE
         #undef HANDLE_QT3DSDM_COMPLETE_TYPE
             return false;
 }
+bool WStrOps<CompleteMetaDataType::Enum>::StrTo(const char8_t *buffer,
+                                                CompleteMetaDataType::Enum &item)
+{
+
+#define HANDLE_QT3DSDM_COMPLETE_NONE_TYPE                                                          \
+    if (AreEqual(buffer, "None")) {                                                                \
+        item = CompleteMetaDataType::Unknown;                                                      \
+        return true;                                                                               \
+    }
+#define HANDLE_QT3DSDM_COMPLETE_TYPE(name, addtype, dtype)                                         \
+    if (AreEqual(buffer, QT3DS_PROPNAME_##name)) {                                                 \
+        item = CompleteMetaDataType::name;                                                         \
+        return true;                                                                               \
+    }
+
+    ITERATE_QT3DSDM_COMPLETE_TYPES
+        #undef HANDLE_QT3DSDM_COMPLETE_NONE_TYPE
+        #undef HANDLE_QT3DSDM_COMPLETE_TYPE
+            return false;
 }
+
+} // namespace qt3dsdm
 
 namespace {
 
@@ -337,7 +414,6 @@ struct SNullFunc
 
 #endif
 
-typedef TCharStr TStrType;
 using std::hash;
 
 struct InstanceHandleVecHash
@@ -354,10 +430,10 @@ struct InstanceHandleVecHash
 struct SEventAndHandlerBase
 {
     Qt3DSDMInstanceHandle m_Instance;
-    TStrType m_Name;
-    TStrType m_FormalName;
-    TStrType m_Category;
-    TStrType m_Description;
+    QString m_Name;
+    QString m_FormalName;
+    QString m_Category;
+    QString m_Description;
     SEventAndHandlerBase() {}
     SEventAndHandlerBase(Qt3DSDMInstanceHandle hdl)
         : m_Instance(hdl)
@@ -388,29 +464,30 @@ struct SHandler : public SEventAndHandlerBase
 // These have the property that pointer comparison also indicates string equality.
 struct SInstanceStrHash
 {
-    size_t operator()(const pair<TInstanceHandle, TCharPtr> &inPair) const
+    size_t operator()(const pair<TInstanceHandle, QString> &inPair) const
     {
-        return hash<int>()(inPair.first) ^ hash<const void *>()(inPair.second);
+        return hash<int>()(inPair.first) ^ qHash(inPair.second);
     }
 };
 
-template <typename TDataType>
-NVConstDataRef<TDataType> VecToCRef(const eastl::vector<TDataType> &inType)
-{
-    return NVConstDataRef<TDataType>(inType.data(), (QT3DSU32)inType.size());
-}
-
 struct SMetaDataDynamicObjectImpl
 {
-private:
-    SMetaDataDynamicObjectImpl &operator=(const SMetaDataDynamicObjectImpl &inOther);
-
 public:
-    TCharStr m_Name;
-    TCharStr m_SourcePath;
-    eastl::vector<SMetaDataShader> m_Shaders;
-    eastl::vector<qt3ds::render::dynamic::SPropertyDefinition> m_Properties;
-    eastl::vector<eastl::vector<qt3ds::foundation::CRegisteredString> *> m_EnumValueNames;
+    SMetaDataDynamicObjectImpl &operator=(const SMetaDataDynamicObjectImpl &inOther)
+    {
+        m_Name = inOther.m_Name;
+        m_SourcePath = inOther.m_SourcePath;
+        m_Shaders = inOther.m_Shaders;
+        m_Properties = inOther.m_Properties;
+        m_EnumValueNames = inOther.m_EnumValueNames;
+        return *this;
+    }
+
+    QString m_Name;
+    QString m_SourcePath;
+    QVector<SMetaDataShader> m_Shaders;
+    QVector<qt3ds::render::dynamic::SPropertyDefinition> m_Properties;
+    QVector<QStringList *> m_EnumValueNames;
     ~SMetaDataDynamicObjectImpl() { ClearEnumValueNames(); }
 
     void ClearEnumValueNames()
@@ -423,33 +500,43 @@ public:
 
 struct SMetaDataEffectImpl : public SMetaDataDynamicObjectImpl
 {
-private:
-    SMetaDataEffectImpl &operator=(const SMetaDataEffectImpl &inOther);
-
 public:
-    eastl::vector<qt3ds::render::dynamic::SCommand *> m_EffectCommands;
+    SMetaDataEffectImpl &operator=(const SMetaDataEffectImpl &inOther)
+    {
+        SMetaDataDynamicObjectImpl::operator=(inOther);
+        m_EffectCommands = inOther.m_EffectCommands;
+        return *this;
+    }
+    QVector<qt3ds::render::dynamic::SCommand *> m_EffectCommands;
 
     void ClearEffectCommands()
     {
         for (QT3DSU32 idx = 0, end = m_EnumValueNames.size(); idx < end; ++idx)
-            free(m_EffectCommands[idx]);
+            delete m_EffectCommands[idx];
         m_EffectCommands.clear();
     }
     SMetaDataEffect ToEffect() const
     {
-        return SMetaDataEffect(m_Name, VecToCRef(m_Shaders), VecToCRef(m_Properties),
-                               VecToCRef(m_EffectCommands));
+        return SMetaDataEffect(m_Name, m_Shaders, m_Properties,
+                               m_EffectCommands);
     }
 };
 
 struct SMetaDataCustomMaterialImpl : public SMetaDataDynamicObjectImpl
 {
-private:
-    SMetaDataCustomMaterialImpl &operator=(const SMetaDataCustomMaterialImpl &);
-
 public:
-    eastl::vector<qt3ds::render::dynamic::SCommand *>
-    m_CustomerMaterialCommands; ///< our command stream used for rendering
+    SMetaDataCustomMaterialImpl &operator=(const SMetaDataCustomMaterialImpl &inOther)
+    {
+        SMetaDataDynamicObjectImpl::operator=(inOther);
+        m_CustomerMaterialCommands = inOther.m_CustomerMaterialCommands;
+        m_HasTransparency = inOther.m_HasTransparency;
+        m_HasRefraction = inOther.m_HasRefraction;
+        m_AlwaysDirty = inOther.m_AlwaysDirty;
+        m_ShaderKey = inOther.m_ShaderKey;
+        m_LayerCount = inOther.m_LayerCount;
+        return *this;
+    }
+    QVector<qt3ds::render::dynamic::SCommand *> m_CustomerMaterialCommands;
     bool m_HasTransparency; ///< this material is transparent
     bool m_HasRefraction; ///< this material is refractive (e.g glass)
     bool m_AlwaysDirty;
@@ -458,17 +545,16 @@ public:
 
     void ClearEffectCommands()
     {
-        for (QT3DSU32 idx = 0, end = m_EnumValueNames.size(); idx < end; ++idx) {
-            free(m_CustomerMaterialCommands[idx]);
-        }
+        for (QT3DSU32 idx = 0, end = m_EnumValueNames.size(); idx < end; ++idx)
+            delete m_CustomerMaterialCommands[idx];
 
         m_CustomerMaterialCommands.clear();
     }
 
     SMetaDataCustomMaterial ToMaterial() const
     {
-        return SMetaDataCustomMaterial(m_Name, VecToCRef(m_Shaders), VecToCRef(m_Properties),
-                                       VecToCRef(m_CustomerMaterialCommands), m_HasTransparency,
+        return SMetaDataCustomMaterial(m_Name, m_Shaders, m_Properties,
+                                       m_CustomerMaterialCommands, m_HasTransparency,
                                        m_HasRefraction, m_AlwaysDirty, m_ShaderKey, m_LayerCount);
     }
 };
@@ -482,40 +568,40 @@ class SNewMetaDataImpl : public IMetaData
 {
 #endif
 public:
-    typedef unordered_map<TCharPtr, TInstanceHandle> TStrInstanceMap;
-    typedef unordered_map<TInstanceHandle, TCharPtr, hash<int>> TInstanceStrMap;
+    typedef QHash<QString, TInstanceHandle> TStrInstanceMap;
+    typedef QHash<TInstanceHandle, QString> TInstanceStrMap;
     // Caching the derivation chain lookup so we can quickly lookup the entire list of
     // derived instances (and have it ordered, somewhat).
     typedef unordered_map<vector<TInstanceHandle>, vector<TInstanceHandle>, InstanceHandleVecHash>
     TDerivationMap;
 
     typedef unordered_map<TCategoryHandle, SCategoryInfo, hash<int>> TCategoryMap;
-    typedef unordered_map<TCharPtr, TCategoryHandle> TNameCategoryMap;
+    typedef QHash<QString, TCategoryHandle> TNameCategoryMap;
 
     typedef unordered_map<TMetaDataPropertyHandle, SMetaDataPropertyInfo, hash<int>>
     TMetaDataPropertyMap;
     typedef unordered_map<TInstanceHandle, vector<TMetaDataPropertyHandle>, hash<int>>
     TInstancePropertyMap;
-    typedef unordered_map<pair<TInstanceHandle, TCharPtr>, TMetaDataPropertyHandle,
+    typedef unordered_map<pair<TInstanceHandle, QString>, TMetaDataPropertyHandle,
     SInstanceStrHash>
     TInstancePropertyNamePropertyMap;
     typedef unordered_map<TMetaDataPropertyHandle, eastl::vector<SPropertyFilterInfo>, hash<int>>
     TMetaDataPropertyFilterMap;
-    typedef unordered_map<TInstanceHandle, vector<TCharPtr>, hash<int>> TInstanceGroupMap;
+    typedef unordered_map<TInstanceHandle, vector<QString>, hash<int>> TInstanceGroupMap;
 
     typedef unordered_map<TEventHandle, SEvent, hash<int>> TEventMap;
     typedef unordered_map<TInstanceHandle, vector<TEventHandle>, hash<int>> TInstanceEventMap;
-    typedef unordered_map<pair<TInstanceHandle, TCharPtr>, TEventHandle, SInstanceStrHash>
+    typedef unordered_map<pair<TInstanceHandle, QString>, TEventHandle, SInstanceStrHash>
     TInstanceEventNameEventMap;
 
     typedef unordered_map<THandlerHandle, SHandler, hash<int>> THandlerMap;
     typedef unordered_map<TInstanceHandle, vector<THandlerHandle>, hash<int>> TInstanceHandlerMap;
-    typedef unordered_map<pair<TInstanceHandle, TCharPtr>, THandlerHandle, SInstanceStrHash>
+    typedef unordered_map<pair<TInstanceHandle, QString>, THandlerHandle, SInstanceStrHash>
     TInstanceHandlerNameHandlerMap;
 
-    typedef unordered_map<TInstanceHandle, vector<TCharPtr>, hash<int>> TInstanceStringListMap;
-    typedef unordered_map<TCharPtr, SMetaDataEffectImpl> TEffectMap;
-    typedef unordered_map<TCharPtr, SMetaDataCustomMaterialImpl> TCustomMaterialMap;
+    typedef QHash<TInstanceHandle, vector<QString>> TInstanceStringListMap;
+    typedef QHash<QString, SMetaDataEffectImpl> TEffectMap;
+    typedef QHash<QString, SMetaDataCustomMaterialImpl> TCustomMaterialMap;
 
     std::shared_ptr<IDataCore> m_DataCore;
     IStringTable &m_StringTable;
@@ -556,9 +642,7 @@ public:
     MemoryBuffer<RawAllocator> m_TempBuffer;
     MemoryBuffer<RawAllocator> m_ReadBuffer;
 
-    eastl::string m_ConvertStr;
-
-    TCharStr m_ObjectName;
+    QString m_ObjectName;
 
     TEffectMap m_EffectMap;
     TCustomMaterialMap m_CustomMaterials;
@@ -604,9 +688,6 @@ public:
     ////////////////////////////////////////////////////////////////////////////
     // Helper Functions
 
-    const wchar_t *Intern(TStrType inData) { return m_StringTable.RegisterStr(inData.wide_str()); }
-    const wchar_t *Intern(const char *inData) { return m_StringTable.GetWideStr(inData); }
-
     inline int GetNextId()
     {
         int retval = m_NextId;
@@ -634,6 +715,27 @@ public:
         return offset;
     }
 
+    template <typename TMapType, typename THandleType>
+    static void AddQHashItemToInstanceList(TInstanceHandle inInstance, THandleType inHandle,
+                                           QT3DSU32 inIdx, TMapType &ioMap)
+    {
+        typename TMapType::iterator inserter
+                = ioMap.insert(inInstance, vector<THandleType>());
+        inserter->insert(inserter->begin() + inIdx, inHandle);
+    }
+
+    template <typename TMapType, typename THandleType>
+    static QT3DSU32 AddQHashItemToInstanceList(TInstanceHandle inInstance, THandleType inHandle,
+                                               TMapType &ioMap)
+    {
+        typename TMapType::iterator inserter
+                = ioMap.insert(inInstance, vector<THandleType>());
+        QT3DSU32 offset = (QT3DSU32)inserter->size();
+        inserter->push_back(inHandle);
+        return offset;
+    }
+
+
     template <typename TItemType>
     struct VectorEqualPred
     {
@@ -658,6 +760,26 @@ public:
                 QT3DSU32 retval = (QT3DSU32)(theVecFind - find->second.begin());
                 find->second.erase(theVecFind);
                 if (find->second.empty())
+                    ioMap.erase(find);
+                return retval;
+            }
+        }
+        QT3DS_ASSERT(false);
+        return QT3DS_MAX_U32;
+    }
+
+    template <typename THandleType, typename TMapType>
+    static QT3DSU32 DoQHashRemoveItemFromInstanceList(TInstanceHandle inInstance,
+                                                      THandleType inHandle, TMapType &ioMap)
+    {
+        typename TMapType::iterator find = ioMap.find(inInstance);
+        if (find != ioMap.end()) {
+            typename vector<THandleType>::iterator theVecFind =
+                    std::find(find->begin(), find->end(), inHandle);
+            if (theVecFind != find->end()) {
+                QT3DSU32 retval = (QT3DSU32)(theVecFind - find->begin());
+                find->erase(theVecFind);
+                if (find->empty())
                     ioMap.erase(find);
                 return retval;
             }
@@ -711,6 +833,52 @@ public:
         }
     };
 
+    template <typename TMapType, typename THandleType>
+    struct InstanceListQHashTransaction : ITransaction
+    {
+        TInstanceHandle m_Instance;
+        THandleType m_Handle;
+        TMapType &m_Map;
+        QT3DSU32 m_Idx;
+        bool m_InsertOnDo;
+
+        InstanceListQHashTransaction(const char *inFile, int inLine, TInstanceHandle inst,
+                                     THandleType handle, TMapType &map, QT3DSU32 inIdx,
+                                     bool inInsertOnDo)
+            : ITransaction(inFile, inLine)
+            , m_Instance(inst)
+            , m_Handle(handle)
+            , m_Map(map)
+            , m_Idx(inIdx)
+            , m_InsertOnDo(inInsertOnDo)
+        {
+        }
+
+        void insert()
+        {
+            SNewMetaDataImpl::AddQHashItemToInstanceList(m_Instance, m_Handle, m_Idx, m_Map);
+        }
+        void remove()
+        {
+            SNewMetaDataImpl::DoQHashRemoveItemFromInstanceList(m_Instance, m_Handle, m_Map);
+        }
+
+        void Do() override
+        {
+            if (m_InsertOnDo)
+                insert();
+            else
+                remove();
+        }
+        void Undo() override
+        {
+            if (m_InsertOnDo)
+                remove();
+            else
+                insert();
+        }
+    };
+
     template <typename THandleType, typename TMapType>
     void RemoveItemFromInstanceList(const char *inFile, int inLine, TInstanceHandle inInstance,
                                     THandleType inHandle, TMapType &ioMap)
@@ -718,7 +886,7 @@ public:
         typename TMapType::iterator find = ioMap.find(inInstance);
         if (find != ioMap.end()) {
             QT3DSU32 idx = DoRemoveItemFromInstanceList(inInstance, inHandle, ioMap);
-            if (m_Consumer != NULL) {
+            if (m_Consumer != nullptr) {
                 m_Consumer->OnTransaction(
                             std::make_shared<InstanceListTransaction<TMapType, THandleType>>(
                                 inFile, inLine, inInstance, inHandle, std::ref(ioMap), idx, false));
@@ -752,12 +920,13 @@ public:
                 ioHash.find(inHandle);
         if (find != ioHash.end())
             return &find->second;
-        return NULL;
+        return nullptr;
     }
 
     template <typename THandleType, typename TMapType>
-    static void DoReplaceNamedItem(TInstanceHandle inInst, TCharPtr inOldName, TCharPtr inNewName,
-                                   THandleType inNewHandle, TMapType &ioMap)
+    static void DoReplaceNamedItem(TInstanceHandle inInst, const QString &inOldName,
+                                   const QString &inNewName, THandleType inNewHandle,
+                                   TMapType &ioMap)
     {
         ioMap.erase(make_pair(inInst, inOldName));
         bool success = ioMap.insert(make_pair(make_pair(inInst, inNewName), inNewHandle)).second;
@@ -769,13 +938,13 @@ public:
     struct ReplaceNamedItemTransaction : ITransaction
     {
         TInstanceHandle m_Instance;
-        TCharPtr m_OldName;
-        TCharPtr m_NewName;
+        QString m_OldName;
+        QString m_NewName;
         THandleType m_OldHandle;
         THandleType m_NewHandle;
         TMapType &m_Map;
         ReplaceNamedItemTransaction(const char *inFile, int inLine, TInstanceHandle inst,
-                                    TCharPtr oldNm, TCharPtr newNm, THandleType oldHdl,
+                                    const QString &oldNm, const QString &newNm, THandleType oldHdl,
                                     THandleType newHdl, TMapType &map)
             : ITransaction(inFile, inLine)
             , m_Instance(inst)
@@ -800,8 +969,8 @@ public:
 
     template <typename THandleType, typename TMapType>
     void ReplaceNamedItem(const char *inFile, int inLine, TInstanceHandle inInst,
-                          TCharPtr inOldName, TCharPtr inNewName, THandleType inNewHandle,
-                          TMapType &ioMap)
+                          const QString &inOldName, const QString &inNewName,
+                          THandleType inNewHandle, TMapType &ioMap)
     {
         typename TMapType::iterator find = ioMap.find(std::make_pair(inInst, inOldName));
         THandleType oldHandle;
@@ -822,12 +991,12 @@ public:
     }
 
     template <typename THandleType, typename TMapType>
-    void DestroyNamedItem(const char *inFile, int inLine, TInstanceHandle inInst, TCharPtr inName,
-                          TMapType &ioMap)
+    void DestroyNamedItem(const char *inFile, int inLine, TInstanceHandle inInst,
+                          const QString &inName, TMapType &ioMap)
     {
         typename TMapType::iterator iter = ioMap.find(make_pair(inInst, inName));
         if (iter != ioMap.end()) {
-            pair<pair<TInstanceHandle, TCharPtr>, THandleType> existing(*iter);
+            pair<pair<TInstanceHandle, QString>, THandleType> existing(*iter);
             ioMap.erase(iter);
             CreateHashMapEraseTransaction(inFile, inLine, m_Consumer, existing, ioMap);
         }
@@ -837,8 +1006,8 @@ public:
     void SetItemInfo(const char *inFile, int inLine, THandleType inItem, const TInfoType &oldInfo,
                      const TInfoType &newInfo, TMapType &inMap, TNamedMapType &inNamedMap)
     {
-        TCharPtr newName = Intern(newInfo.m_Name.wide_str());
-        TCharPtr oldName = Intern(oldInfo.m_Name.wide_str());
+        QString newName = (newInfo.m_Name);
+        QString oldName = (oldInfo.m_Name);
         ReplaceNamedItem(inFile, inLine, newInfo.m_Instance, oldName, newName, inItem, inNamedMap);
         CreateHashMapSwapTransaction(inFile, inLine, m_Consumer, inItem, oldInfo, newInfo, inMap);
     }
@@ -881,7 +1050,7 @@ public:
     }
 
     template <typename THandleType, typename TMapType>
-    THandleType FindItemByName(TInstanceHandle inInst, TCharPtr inName, TMapType &ioMap)
+    THandleType FindItemByName(TInstanceHandle inInst, const QString &inName, TMapType &ioMap)
     {
         typename TMapType::iterator find(ioMap.find(make_pair(inInst, inName)));
         if (find != ioMap.end())
@@ -935,6 +1104,36 @@ public:
         }
     }
 
+    template <typename TListMapType, typename TSizeTOpType, typename TVectorType>
+    void DoGetQHashHandleList(Qt3DSDMInstanceHandle inInstance, TListMapType &inMap,
+                              TVectorType &outHandles, TSizeTOpType inOperator)
+    {
+        typename TListMapType::iterator find;
+        GetDerivationChain(inInstance);
+        for (size_t idx = 0, end = m_DerivationChain.size(); idx < end; ++idx) {
+            // Add base classes to the list first
+            find = inMap.find(m_DerivationChain[end - idx - 1]);
+            if (find != inMap.end())
+                AddListMapItems(*find, outHandles);
+        }
+        find = inMap.find(inInstance);
+        if (find != inMap.end())
+            AddListMapItems(*find, outHandles);
+        m_SizeTSet.clear();
+        for (size_t ridx = 0; ridx < outHandles.size(); ++ridx) {
+            size_t idx = outHandles.size() - ridx - 1;
+            // Run through the list backwards, making sure that items further in the list
+            // completely overshadow items earlier in the list.
+
+            // Create unique key from the item that we can check against
+            size_t item = inOperator(outHandles[idx]);
+            if (m_SizeTSet.insert(item).second == false) {
+                outHandles.erase(outHandles.begin() + idx);
+                --ridx;
+            }
+        }
+    }
+
     template <typename THandleType, typename TMapType>
     struct NameSizeTOpType
     {
@@ -948,7 +1147,7 @@ public:
 
         size_t operator()(THandleType inHandle)
         {
-            return reinterpret_cast<size_t>(m_Impl.Intern(m_Map[inHandle].m_Name));
+            return size_t(qHash(m_Map[inHandle].m_Name));
         }
     };
 
@@ -970,7 +1169,7 @@ public:
         if (find == inMap.end())
             return false;
         DestroyNamedItem<THandleType>(inFile, inLine, find->second.m_Instance,
-                                      Intern(find->second.m_Name.wide_str()), inNameMap);
+                                      find->second.m_Name, inNameMap);
         RemoveItemFromInstanceList(inFile, inLine, find->second.m_Instance, inItem, inListMap);
         CreateHashMapEraseTransaction(inFile, inLine, m_Consumer,
                                       make_pair(find->first, find->second), inMap);
@@ -1015,7 +1214,7 @@ public:
         SHandler *theHandler(FindHandler(inHandler));
         if (theHandler && theHandler->m_Arguments.size() > inIdx)
             return &theHandler->m_Arguments[inIdx];
-        return NULL;
+        return nullptr;
     }
 
     void OnPropertyRemoved(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty)
@@ -1055,6 +1254,25 @@ public:
     }
 
     template <typename TEntryType, typename TMapType>
+    void InsertQWithTransaction(const char *inFile, int inLine, const TEntryType &inEntry,
+                               TMapType &inMap)
+    {
+        inMap.insert(inEntry.first, inEntry.second);
+        CreateQHashInsertTransaction(inFile, inLine, m_Consumer, inEntry, inMap);
+    }
+
+    template <typename TKeyType, typename TMapType>
+    void EraseQWithTransaction(const char *inFile, int inLine, TKeyType inKey, TMapType &inMap)
+    {
+        typename TMapType::iterator find(inMap.find(inKey));
+        if (find != inMap.end()) {
+            CreateQHashEraseTransaction(inFile, inLine, m_Consumer,
+                                        std::make_pair(inKey, *find), inMap);
+            inMap.erase(find);
+        }
+    }
+
+    template <typename TEntryType, typename TMapType>
     void InsertOrUpdateWithTransaction(const TEntryType &inEntry, TMapType &inMap)
     {
         pair<typename TMapType::iterator, bool> inserter = inMap.insert(inEntry);
@@ -1079,44 +1297,44 @@ public:
 
     ////////////////////////////////////////////////////////////////////////////////////
     // Canonical Instances
-    void SetInstanceAsCanonical(Qt3DSDMInstanceHandle inInstance, TStrType inTypename) override
+    void SetInstanceAsCanonical(Qt3DSDMInstanceHandle inInstance,
+                                const QString &inTypename) override
     {
-        const wchar_t *theTypename(Intern(inTypename));
         if (g_DataModelDebugLogger)
             g_DataModelDebugLogger("IMetaData::SetInstanceAsCanonical Enter");
         if (g_DataModelDebugLogger)
-            g_DataModelDebugLogger(GetStringTable().GetNarrowStr(inTypename.wide_str()));
-        m_CanonicalTypeToInstances.insert(make_pair(theTypename, inInstance));
-        m_InstancesToCanonicalType.insert(make_pair(inInstance, theTypename));
-        CreateHashMapInsertTransaction(__FILE__, __LINE__, m_Consumer,
-                                       make_pair(theTypename, inInstance),
+            g_DataModelDebugLogger(inTypename);
+        m_CanonicalTypeToInstances.insert(inTypename, inInstance);
+        m_InstancesToCanonicalType.insert(inInstance, inTypename);
+        CreateQHashInsertTransaction(__FILE__, __LINE__, m_Consumer,
+                                       make_pair(inTypename, inInstance),
                                        m_CanonicalTypeToInstances);
-        CreateHashMapInsertTransaction(__FILE__, __LINE__, m_Consumer,
-                                       make_pair(inInstance, theTypename),
+        CreateQHashInsertTransaction(__FILE__, __LINE__, m_Consumer,
+                                       make_pair(inInstance, inTypename),
                                        m_InstancesToCanonicalType);
         if (g_DataModelDebugLogger)
             g_DataModelDebugLogger("IMetaData::SetInstanceAsCanonical Leave");
     }
 
-    Qt3DSDMInstanceHandle GetCanonicalInstanceForType(TStrType inTypename) override
+    Qt3DSDMInstanceHandle GetCanonicalInstanceForType(const QString &inTypename) override
     {
-        TStrInstanceMap::iterator find = m_CanonicalTypeToInstances.find(Intern(inTypename));
+        TStrInstanceMap::iterator find = m_CanonicalTypeToInstances.find(inTypename);
         if (find != m_CanonicalTypeToInstances.end())
-            return find->second;
+            return *find;
         return 0;
     }
 
-    Option<TCharStr> GetTypeForCanonicalInstance(Qt3DSDMInstanceHandle inInstance) override
+    Option<QString> GetTypeForCanonicalInstance(Qt3DSDMInstanceHandle inInstance) override
     {
         TInstanceStrMap::iterator find = m_InstancesToCanonicalType.find(inInstance);
         if (find != m_InstancesToCanonicalType.end())
-            return TCharStr(find->second);
+            return *find;
         return Empty();
     }
 
-    Option<TCharStr> GetTypeForInstance(Qt3DSDMInstanceHandle inInstance) override
+    Option<QString> GetTypeForInstance(Qt3DSDMInstanceHandle inInstance) override
     {
-        Option<TCharStr> theType = GetTypeForCanonicalInstance(inInstance);
+        Option<QString> theType = GetTypeForCanonicalInstance(inInstance);
         if (theType.hasValue())
             return theType;
         GetDerivationChain(inInstance);
@@ -1130,27 +1348,27 @@ public:
 
     QT3DSU32 GetGroupCountForInstance(Qt3DSDMInstanceHandle inInstance) override
     {
-        std::vector<TCharStr> outNames;
+        std::vector<QString> outNames;
         QT3DSU32 count = GetGroupNamesForInstance(inInstance, outNames);
         return (count == 0) ? 1 : count;
     }
 
     QT3DSU32 GetGroupNamesForInstance(Qt3DSDMInstanceHandle inInstance,
-                                      std::vector<TCharStr> &outNames) override
+                                      std::vector<QString> &outNames) override
     {
         TInstanceStrMap::iterator canonicalFind = m_InstancesToCanonicalType.find(inInstance);
         if (canonicalFind != m_InstancesToCanonicalType.end()) {
             TInstanceGroupMap::iterator find = m_InstanceGroupMap.find(inInstance);
             if (find != m_InstanceGroupMap.end()) {
                 pair<typename TInstanceGroupMap::iterator, bool> inserter =
-                        m_InstanceGroupMap.insert(make_pair(inInstance, vector<TCharPtr>()));
-                vector<TCharPtr> &itemList = inserter.first->second;
+                        m_InstanceGroupMap.insert(make_pair(inInstance, vector<QString>()));
+                vector<QString> &itemList = inserter.first->second;
                 for (size_t i = 0, j = itemList.size(); i < j; ++i) {
                     bool alreadyInList = false;
                     // discard duplicates
                     for (size_t k = 0, l = outNames.size(); k < l; ++k) {
-                        TCharStr curListName = itemList[i];
-                        if (curListName == outNames[k].wide_str()) {
+                        QString curListName = itemList[i];
+                        if (curListName == outNames[k]) {
                             alreadyInList = true;
                             break;
                         }
@@ -1169,14 +1387,14 @@ public:
             if (find != m_InstanceGroupMap.end()) {
                 pair<typename TInstanceGroupMap::iterator, bool> inserter =
                         m_InstanceGroupMap.insert(
-                            make_pair(m_DerivationChain[idx], vector<TCharPtr>()));
-                vector<TCharPtr> &itemList = inserter.first->second;
+                            make_pair(m_DerivationChain[idx], vector<QString>()));
+                vector<QString> &itemList = inserter.first->second;
                 for (size_t i = 0, j = itemList.size(); i < j; ++i) {
                     bool alreadyInList = false;
                     // discard duplicates
                     for (size_t k = 0, l = outNames.size(); k < l; ++k) {
-                        TCharStr curListName = itemList[i];
-                        if (curListName == outNames[k].wide_str()) {
+                        QString curListName = itemList[i];
+                        if (curListName == outNames[k]) {
                             alreadyInList = true;
                             break;
                         }
@@ -1190,10 +1408,10 @@ public:
         return (QT3DSU32)outNames.size();
     }
 
-    Option<TCharStr> GetGroupFilterNameForInstance(Qt3DSDMInstanceHandle inInstance,
+    Option<QString> GetGroupFilterNameForInstance(Qt3DSDMInstanceHandle inInstance,
                                                    long inIndex) override
     {
-        std::vector<TCharStr> outNames;
+        std::vector<QString> outNames;
         QT3DSU32 count = GetGroupNamesForInstance(inInstance, outNames);
         if (count > (QT3DSU32)inIndex)
             return outNames[inIndex];
@@ -1204,25 +1422,25 @@ public:
     ////////////////////////////////////////////////////////////////////////////////////
     // Categories
 
-    std::pair<Qt3DSDMCategoryHandle, bool> GetOrCreateCategory(TStrType inName) override
+    std::pair<Qt3DSDMCategoryHandle, bool> GetOrCreateCategory(const QString &inName) override
     {
-        TCharPtr theName(Intern(inName));
+        QString theName(inName);
         TNameCategoryMap::iterator find = m_NameToCategories.find(theName);
         if (find != m_NameToCategories.end())
-            return make_pair(find->second, false);
+            return make_pair(*find, false);
 
         TCategoryHandle retval(GetNextId());
         InsertWithTransaction(__FILE__, __LINE__, make_pair(retval, SCategoryInfo(inName)),
                               m_Categories);
-        InsertWithTransaction(__FILE__, __LINE__, make_pair(theName, retval), m_NameToCategories);
+        InsertQWithTransaction(__FILE__, __LINE__, make_pair(theName, retval), m_NameToCategories);
         return make_pair(retval, true);
     }
 
-    void SetCategoryInfo(Qt3DSDMCategoryHandle inCategory, TStrType inIcon,
-                         TStrType inHighlight, TStrType inDescription) override
+    void SetCategoryInfo(Qt3DSDMCategoryHandle inCategory, const QString &inIcon,
+                         const QString &inHighlight, const QString &inDescription) override
     {
         SCategoryInfo *infoPtr(FindCategory(inCategory));
-        if (infoPtr == NULL) {
+        if (infoPtr == nullptr) {
             QT3DS_ASSERT(false);
             return;
         }
@@ -1239,11 +1457,11 @@ public:
     void DestroyCategory(Qt3DSDMCategoryHandle inCategory) override
     {
         SCategoryInfo *infoPtr(FindCategory(inCategory));
-        if (infoPtr == NULL) {
+        if (infoPtr == nullptr) {
             QT3DS_ASSERT(false);
             return;
         }
-        EraseWithTransaction(__FILE__, __LINE__, Intern(infoPtr->m_Name), m_NameToCategories);
+        EraseQWithTransaction(__FILE__, __LINE__, infoPtr->m_Name, m_NameToCategories);
         EraseWithTransaction(__FILE__, __LINE__, inCategory, m_Categories);
     }
     Option<SCategoryInfo> GetCategoryInfo(Qt3DSDMCategoryHandle inCategory) override
@@ -1253,12 +1471,12 @@ public:
             return *infoPtr;
         return Empty();
     }
-    Qt3DSDMCategoryHandle FindCategoryByName(TStrType inName) override
+    Qt3DSDMCategoryHandle FindCategoryByName(const QString &inName) override
     {
-        TCharPtr theName(Intern(inName));
+        QString theName((inName));
         TNameCategoryMap::iterator find = m_NameToCategories.find(theName);
         if (find != m_NameToCategories.end())
-            return find->second;
+            return *find;
         return 0;
     }
 
@@ -1269,12 +1487,12 @@ public:
             outCategories.push_back(iter->first);
     }
 
-    Option<SCategoryInfo> GetEventCategory(TStrType inName) override
+    Option<SCategoryInfo> GetEventCategory(const QString &inName) override
     {
         return GetCategoryInfo(FindCategoryByName(inName));
     }
 
-    Option<SCategoryInfo> GetHandlerCategory(TStrType inName) override
+    Option<SCategoryInfo> GetHandlerCategory(const QString &inName) override
     {
         return GetCategoryInfo(FindCategoryByName(inName));
     }
@@ -1308,7 +1526,7 @@ public:
         // Finally, if we don't have a property at this point, create a new property
         if (theExistingProperty.Valid() == false)
             theExistingProperty = m_DataCore->AddProperty(
-                        newInfo.m_Instance, newInfo.m_Name.wide_str(), newInfo.GetDataType());
+                        newInfo.m_Instance, newInfo.m_Name, newInfo.GetDataType());
         newInfo.m_Property = theExistingProperty;
         m_IgnorePropertyDeleted = false;
     }
@@ -1342,8 +1560,9 @@ public:
         return inValue;
     }
 
-    void SetPropertyBaseInfo(SMetaPropertyBase &newInfo, TStrType inName, TStrType inFormalName,
-                             TStrType inDescription, TStrType inUsage,
+    void SetPropertyBaseInfo(SMetaPropertyBase &newInfo, const QString &inName,
+                             const QString &inFormalName,
+                             const QString &inDescription, const QString &inUsage,
                              CompleteMetaDataType::Enum inDataType, const SValue &inDefaultValue,
                              const TMetaDataData &inMetaData)
     {
@@ -1363,16 +1582,16 @@ public:
     // For properties, you set the default values separately
     // This may delete the underlying data model property rebuild it.
     void SetMetaDataPropertyInfo(Qt3DSDMMetaDataPropertyHandle inPropertyHandle,
-                                 TStrType inName, TStrType inFormalName,
-                                 TStrType inDescription, TStrType inUsage,
+                                 const QString &inName, const QString &inFormalName,
+                                 const QString &inDescription, const QString &inUsage,
                                  CompleteMetaDataType::Enum inDataType,
                                  const SValue &inDefaultValue,
-                                 const TMetaDataData &inMetaData, TStrType inGroupName,
+                                 const TMetaDataData &inMetaData, const QString &inGroupName,
                                  bool inIsHidden, bool inIsAnimatable,
                                  bool inIsControllable) override
     {
         SMetaDataPropertyInfo *infoPtr = FindProperty(inPropertyHandle);
-        if (infoPtr == NULL) {
+        if (infoPtr == nullptr) {
             QT3DS_ASSERT(false);
             return;
         }
@@ -1406,7 +1625,7 @@ public:
     void DestroyMetaDataProperty(Qt3DSDMMetaDataPropertyHandle inProperty) override
     {
         SMetaDataPropertyInfo *infoPtr = FindProperty(inProperty);
-        if (infoPtr == NULL) {
+        if (infoPtr == nullptr) {
             QT3DS_ASSERT(false);
             return;
         }
@@ -1419,9 +1638,9 @@ public:
     }
 
     Qt3DSDMMetaDataPropertyHandle GetMetaDataProperty(Qt3DSDMInstanceHandle inInstance,
-                                                      TStrType inPropertyName) override
+                                                      const QString &inPropertyName) override
     {
-        return FindItemByName<Qt3DSDMMetaDataPropertyHandle>(inInstance, Intern(inPropertyName),
+        return FindItemByName<Qt3DSDMMetaDataPropertyHandle>(inInstance, inPropertyName,
                                                              m_InstanceNameToProperties);
     }
     Qt3DSDMMetaDataPropertyHandle GetMetaDataProperty(Qt3DSDMInstanceHandle inInstance,
@@ -1435,9 +1654,8 @@ public:
     GetMetaDataPropertyInfo(Qt3DSDMMetaDataPropertyHandle inProperty) override
     {
         SMetaDataPropertyInfo *infoPtr = FindProperty(inProperty);
-        if (infoPtr == NULL) {
+        if (infoPtr == nullptr)
             return Empty();
-        }
         return *infoPtr;
     }
 
@@ -1448,17 +1666,17 @@ public:
                                                             m_Properties, outProperties);
     }
     virtual Qt3DSDMMetaDataPropertyHandle
-    GetSpecificMetaDataProperty(Qt3DSDMInstanceHandle inInstance, TStrType inPropertyName)
+    GetSpecificMetaDataProperty(Qt3DSDMInstanceHandle inInstance, const QString &inPropertyName)
     {
         TInstancePropertyNamePropertyMap::iterator theFind = m_InstanceNameToProperties.find(
-                    make_pair(inInstance, m_StringTable.RegisterStr(inPropertyName.wide_str())));
+                    make_pair(inInstance, inPropertyName));
         if (theFind != m_InstanceNameToProperties.end())
             return theFind->second;
         return 0;
     }
     virtual Qt3DSDMMetaDataPropertyHandle
     GetOrCreateSpecificMetaDataProperty(Qt3DSDMInstanceHandle inInstance,
-                                        TStrType inPropertyName) override
+                                        const QString &inPropertyName) override
     {
         Qt3DSDMMetaDataPropertyHandle theProp(
                     GetSpecificMetaDataProperty(inInstance, inPropertyName));
@@ -1475,14 +1693,14 @@ public:
             outProperties.insert(outProperties.end(), find->second.begin(), find->second.end());
     }
 
-    TCharStr GetFormalName(Qt3DSDMInstanceHandle inInstance,
+    QString GetFormalName(Qt3DSDMInstanceHandle inInstance,
                            Qt3DSDMPropertyHandle inProperty) override
     {
         Qt3DSDMMetaDataPropertyHandle propHandle(GetMetaDataProperty(inInstance, inProperty));
         SMetaDataPropertyInfo *infoPtr = FindProperty(propHandle);
         if (infoPtr)
             return infoPtr->m_FormalName;
-        return TCharStr();
+        return {};
     }
     AdditionalMetaDataType::Value GetAdditionalMetaDataType(
             Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty) override
@@ -1560,7 +1778,7 @@ public:
                                     NVConstDataRef<SPropertyFilterInfo> inFilters) override
     {
         SMetaDataPropertyInfo *infoPtr = FindProperty(inProperty);
-        if (infoPtr == NULL) {
+        if (infoPtr == nullptr) {
             QT3DS_ASSERT(false);
             return;
         }
@@ -1599,11 +1817,12 @@ public:
                                                       m_InstanceToEvents);
     }
 
-    void SetEventInfo(Qt3DSDMEventHandle inEventHandle, TStrType inName,
-                      TStrType inFormalName, TStrType inCategory, TStrType inDescription) override
+    void SetEventInfo(Qt3DSDMEventHandle inEventHandle, const QString &inName,
+                      const QString &inFormalName, const QString &inCategory,
+                      const QString &inDescription) override
     {
         SEvent *infoPtr = FindEvent(inEventHandle);
-        if (infoPtr == NULL) {
+        if (infoPtr == nullptr) {
             QT3DS_ASSERT(false);
             return;
         }
@@ -1631,18 +1850,18 @@ public:
                                                  outEvents);
     }
 
-    Qt3DSDMEventHandle FindEvent(Qt3DSDMInstanceHandle inInstance, TStrType inName) override
+    Qt3DSDMEventHandle FindEvent(Qt3DSDMInstanceHandle inInstance, const QString &inName) override
     {
-        return FindItemByName<Qt3DSDMEventHandle>(inInstance, Intern(inName),
+        return FindItemByName<Qt3DSDMEventHandle>(inInstance, inName,
                                                   m_InstanceNameToEvents);
     }
 
     Option<SEventInfo> GetEventInfo(Qt3DSDMEventHandle inEventHandle) override
     {
         SEvent *infoPtr = FindEvent(inEventHandle);
-        if (infoPtr == NULL) {
+        if (infoPtr == nullptr)
             return Empty();
-        }
+
         SEventInfo retval;
         retval.m_Name = infoPtr->m_Name;
         retval.m_FormalName = infoPtr->m_FormalName;
@@ -1654,7 +1873,7 @@ public:
     bool IsCustomEvent(Qt3DSDMEventHandle inEventHandle) override
     {
         SEvent *infoPtr = FindEvent(inEventHandle);
-        if (infoPtr != NULL)
+        if (infoPtr != nullptr)
             return IsCustomInstance(infoPtr->m_Instance);
         return false;
     }
@@ -1667,10 +1886,10 @@ public:
     }
 
     Qt3DSDMEventHandle GetOrCreateSpecificEvent(Qt3DSDMInstanceHandle inInstance,
-                                                TStrType inName) override
+                                                const QString &inName) override
     {
         TInstanceEventNameEventMap::iterator theFind(
-                    m_InstanceNameToEvents.find(make_pair(inInstance, Intern(inName))));
+                    m_InstanceNameToEvents.find(make_pair(inInstance, (inName))));
         if (theFind != m_InstanceNameToEvents.end())
             return theFind->second;
         return CreateMetaDataEvent(inInstance);
@@ -1685,12 +1904,12 @@ public:
                                                           m_Handlers, m_InstanceToHandlers);
     }
 
-    void SetHandlerInfo(Qt3DSDMHandlerHandle inHandle, TStrType inName,
-                        TStrType inFormalName, TStrType inCategoryName,
-                        TStrType inDescription) override
+    void SetHandlerInfo(Qt3DSDMHandlerHandle inHandle, const QString &inName,
+                        const QString &inFormalName, const QString &inCategoryName,
+                        const QString &inDescription) override
     {
         SHandler *infoPtr = FindHandler(inHandle);
-        if (infoPtr == NULL) {
+        if (infoPtr == nullptr) {
             QT3DS_ASSERT(false);
             return;
         }
@@ -1707,7 +1926,7 @@ public:
     void DestroyHandler(Qt3DSDMHandlerHandle inHandlerHandle) override
     {
         SHandler *infoPtr(FindHandler(inHandlerHandle));
-        if (infoPtr == NULL) {
+        if (infoPtr == nullptr) {
             QT3DS_ASSERT(false);
             return;
         }
@@ -1720,16 +1939,16 @@ public:
     }
 
     Qt3DSDMHandlerHandle FindHandlerByName(Qt3DSDMInstanceHandle inInstance,
-                                           TStrType inName) override
+                                           const QString &inName) override
     {
-        return FindItemByName<Qt3DSDMHandlerHandle>(inInstance, Intern(inName),
+        return FindItemByName<Qt3DSDMHandlerHandle>(inInstance, inName,
                                                     m_InstanceNameToHandlers);
     }
 
     Option<SHandlerInfo> GetHandlerInfo(Qt3DSDMHandlerHandle inHandlerHandle) override
     {
         SHandler *infoPtr = FindHandler(inHandlerHandle);
-        if (infoPtr == NULL)
+        if (infoPtr == nullptr)
             return Empty();
 
         SHandlerInfo retval;
@@ -1750,7 +1969,7 @@ public:
     bool IsCustomHandler(Qt3DSDMHandlerHandle inHandle) override
     {
         SHandler *infoPtr = FindHandler(inHandle);
-        if (infoPtr != NULL)
+        if (infoPtr != nullptr)
             return IsCustomInstance(infoPtr->m_Instance);
         return false;
     }
@@ -1764,10 +1983,10 @@ public:
     }
 
     Qt3DSDMHandlerHandle GetOrCreateSpecificHandler(Qt3DSDMInstanceHandle inInstance,
-                                                    TStrType inName) override
+                                                    const QString &inName) override
     {
         TInstanceHandlerNameHandlerMap::iterator theFind =
-                m_InstanceNameToHandlers.find(make_pair(inInstance, Intern(inName)));
+                m_InstanceNameToHandlers.find(make_pair(inInstance, inName));
         if (theFind != m_InstanceNameToHandlers.end())
             return theFind->second;
         return CreateHandler(inInstance);
@@ -1780,7 +1999,7 @@ public:
                               const SMetaDataHandlerArgumentInfo &inArgHandle, QT3DSU32 inIdx)
     {
         SHandler *infoPtr = FindHandler(inHandler);
-        if (infoPtr == NULL) {
+        if (infoPtr == nullptr) {
             QT3DS_ASSERT(false);
             return;
         }
@@ -1789,8 +2008,8 @@ public:
 
     struct ArgNameEqual
     {
-        const TCharStr &m_Name;
-        ArgNameEqual(const TCharStr &nm)
+        const QString &m_Name;
+        ArgNameEqual(const QString &nm)
             : m_Name(nm)
         {
         }
@@ -1804,7 +2023,7 @@ public:
                                  const SMetaDataHandlerArgumentInfo &inArgHandle)
     {
         SHandler *infoPtr = FindHandler(inHandler);
-        if (infoPtr == NULL) {
+        if (infoPtr == nullptr) {
             QT3DS_ASSERT(false);
             return;
         }
@@ -1852,7 +2071,7 @@ public:
     QT3DSU32 AddHandlerArgument(Qt3DSDMHandlerHandle inHandler) override
     {
         SHandler *infoPtr = FindHandler(inHandler);
-        if (infoPtr == NULL) {
+        if (infoPtr == nullptr) {
             QT3DS_ASSERT(false);
             return 0;
         }
@@ -1872,7 +2091,7 @@ public:
                               const SMetaDataHandlerArgumentInfo &inInfo)
     {
         SMetaDataHandlerArgumentInfo *infoPtr(FindHandlerArg(inHandler, inIdx));
-        if (infoPtr == NULL) {
+        if (infoPtr == nullptr) {
             QT3DS_ASSERT(false);
             return;
         }
@@ -1902,24 +2121,24 @@ public:
         void Undo() override { m_Impl.DoSetHandlerArgument(m_Handler, m_Idx, m_OldValue); }
     };
 
-    void SetHandlerArgumentInfo(THandlerHandle inHandler, QT3DSU32 inIdx, TStrType inName,
-                                TStrType inFormalName, TStrType inDescription,
+    void SetHandlerArgumentInfo(THandlerHandle inHandler, QT3DSU32 inIdx, const QString &inName,
+                                const QString &inFormalName, const QString &inDescription,
                                 CompleteMetaDataType::Enum inDataType,
                                 const SValue &inDefaultValue,
                                 const TMetaDataData &inMetaData,
                                 HandlerArgumentType::Value inArgType) override
     {
         SMetaDataHandlerArgumentInfo *infoPtr(FindHandlerArg(inHandler, inIdx));
-        if (infoPtr == NULL) {
+        if (infoPtr == nullptr) {
             QT3DS_ASSERT(false);
             return;
         }
         SMetaDataHandlerArgumentInfo &newInfo(*infoPtr);
         SMetaDataHandlerArgumentInfo oldInfo(newInfo);
-        SetPropertyBaseInfo(newInfo, inName, inFormalName, inDescription, L"", inDataType,
+        SetPropertyBaseInfo(newInfo, inName, inFormalName, inDescription, QString(), inDataType,
                             inDefaultValue, inMetaData);
         newInfo.m_ArgType = inArgType;
-        if (m_Consumer != NULL)
+        if (m_Consumer != nullptr)
             m_Consumer->OnTransaction(make_shared<SetHandlerArgumentInfoTrans>(
                                           __FILE__, __LINE__, ref(*this), inHandler, inIdx,
                                           newInfo, oldInfo));
@@ -1929,11 +2148,11 @@ public:
     {
         SHandler *ownerPtr = FindHandler(inHandler);
         SMetaDataHandlerArgumentInfo *infoPtr(FindHandlerArg(inHandler, inIdx));
-        if (infoPtr == NULL) {
+        if (infoPtr == nullptr) {
             QT3DS_ASSERT(false);
             return;
         }
-        if (ownerPtr == NULL) {
+        if (ownerPtr == nullptr) {
             QT3DS_ASSERT(false);
             return;
         }
@@ -1949,12 +2168,12 @@ public:
     }
 
     Option<SMetaDataHandlerArgumentInfo> FindHandlerArgumentByName(THandlerHandle inHandler,
-                                                                   TStrType inName) override
+                                                                   const QString & inName) override
     {
         SHandler *ownerPtr = FindHandler(inHandler);
-        if (ownerPtr == NULL) {
+        if (ownerPtr == nullptr)
             return Empty();
-        }
+
         for (size_t idx = 0, end = ownerPtr->m_Arguments.size(); idx < end; ++idx) {
             if (ownerPtr->m_Arguments[idx].m_Name == inName)
                 return ownerPtr->m_Arguments[idx];
@@ -1966,9 +2185,9 @@ public:
                              vector<SMetaDataHandlerArgumentInfo> &outArguments) override
     {
         SHandler *ownerPtr = FindHandler(inHandler);
-        if (ownerPtr == NULL) {
+        if (ownerPtr == nullptr)
             return;
-        }
+
         outArguments.insert(outArguments.end(), ownerPtr->m_Arguments.begin(),
                             ownerPtr->m_Arguments.end());
     }
@@ -1977,41 +2196,34 @@ public:
     GetHandlerArgumentInfo(Qt3DSDMHandlerHandle inHandle, QT3DSU32 inIdx) override
     {
         SMetaDataHandlerArgumentInfo *infoPtr(FindHandlerArg(inHandle, inIdx));
-        if (infoPtr == NULL) {
+        if (infoPtr == nullptr)
             return Empty();
-        }
+
         return *infoPtr;
     }
 
     QT3DSU32 GetNumHandlerArguments(Qt3DSDMHandlerHandle inHandler) override
     {
         SHandler *ownerPtr = FindHandler(inHandler);
-        if (ownerPtr == NULL) {
+        if (ownerPtr == nullptr)
             return 0;
-        }
+
         return (QT3DSU32)ownerPtr->m_Arguments.size();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////
     // References
-    void AddReference(Qt3DSDMInstanceHandle inInstance, TStrType inRefString) override
+    void AddReference(Qt3DSDMInstanceHandle inInstance, const QString &inRefString) override
     {
         // trim whitespace from the beginning and the end of the string
-        TCharStr::size_type startPos = inRefString.find_first_not_of(L"\n\r\t ");
-        TCharStr::size_type endPos = inRefString.find_last_not_of(L"\n\r\t ");
-        const wchar_t *theStr = NULL;
-        if (startPos != TCharStr::npos) {
-            TStrType temp = inRefString.substr(startPos, endPos - startPos + 1);
-            theStr = Intern(temp);
-        } else
-            theStr = Intern(inRefString);
+        QString trimmed = inRefString.trimmed();
 
-        QT3DSU32 idx = AddItemToInstanceList(inInstance, theStr, m_InstanceToReferences);
+        QT3DSU32 idx = AddQHashItemToInstanceList(inInstance, trimmed, m_InstanceToReferences);
         if (m_Consumer) {
             m_Consumer->OnTransaction(
-                        std::make_shared<InstanceListTransaction<TInstanceStringListMap,
-                        const wchar_t *>>(
-                            __FILE__, __LINE__, inInstance, theStr,
+                        std::make_shared<InstanceListQHashTransaction<TInstanceStringListMap,
+                        const QString &>>(
+                            __FILE__, __LINE__, inInstance, trimmed,
                             std::ref(m_InstanceToReferences), idx,
                             true));
         }
@@ -2024,8 +2236,8 @@ public:
         if (find == m_InstanceToReferences.end())
             return;
 
-        CreateHashMapEraseTransaction(__FILE__, __LINE__, m_Consumer,
-                                      make_pair(find->first, find->second), m_InstanceToReferences);
+        CreateQHashEraseTransaction(__FILE__, __LINE__, m_Consumer,
+                                      make_pair(inInstance, *find), m_InstanceToReferences);
         m_InstanceToReferences.erase(find);
     }
 
@@ -2037,16 +2249,16 @@ public:
         {
         }
 
-        size_t operator()(const TCharStr &inHandle)
+        size_t operator()(const QString &inHandle)
         {
-            return reinterpret_cast<size_t>(m_Impl.Intern(inHandle));
+            return size_t(qHash(inHandle));
         }
     };
 
-    void GetReferences(Qt3DSDMInstanceHandle inInstance, vector<TCharStr> &outReferences) override
+    void GetReferences(Qt3DSDMInstanceHandle inInstance, vector<QString> &outReferences) override
     {
-        DoGetHandleList(inInstance, m_InstanceToReferences, outReferences,
-                        InternSizeTOpType(*this));
+        DoGetQHashHandleList(inInstance, m_InstanceToReferences, outReferences,
+                             InternSizeTOpType(*this));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////
@@ -2071,13 +2283,13 @@ public:
 
         TInstanceStrMap::iterator find = m_InstancesToCanonicalType.find(inInstance);
         if (find != m_InstancesToCanonicalType.end()) {
-            TCharPtr theName(find->second);
-            m_CanonicalTypeToInstances.erase(theName);
-            m_InstancesToCanonicalType.erase(inInstance);
-            CreateHashMapEraseTransaction(__FILE__, __LINE__, m_Consumer,
+            QString theName(*find);
+            m_CanonicalTypeToInstances.erase(m_CanonicalTypeToInstances.find(theName));
+            m_InstancesToCanonicalType.erase(m_InstancesToCanonicalType.find(inInstance));
+            CreateQHashEraseTransaction(__FILE__, __LINE__, m_Consumer,
                                           make_pair(theName, inInstance),
                                           m_CanonicalTypeToInstances);
-            CreateHashMapEraseTransaction(__FILE__, __LINE__, m_Consumer,
+            CreateQHashEraseTransaction(__FILE__, __LINE__, m_Consumer,
                                           make_pair(inInstance, theName),
                                           m_InstancesToCanonicalType);
         }
@@ -2093,8 +2305,19 @@ public:
                               unordered_set<TInstanceHandle, hash<int>> &outInstances)
     {
         for (typename THashType::const_iterator iter = inHash.begin(), end = inHash.end();
-             iter != end; ++iter)
+             iter != end; ++iter) {
             outInstances.insert(iter->first);
+        }
+    }
+
+    template <typename THashType>
+    void AddInstancesFromQHash(THashType &inHash,
+                              unordered_set<TInstanceHandle, hash<int>> &outInstances)
+    {
+        for (typename THashType::const_iterator iter = inHash.begin(), end = inHash.end();
+             iter != end; ++iter) {
+            outInstances.insert(iter.key());
+        }
     }
 
     void SerializeMetaDataData(IDOMWriter &inWriter, TMetaDataData &inItem,
@@ -2103,17 +2326,17 @@ public:
         if (!inItem.empty()) {
             if (inType == AdditionalMetaDataType::Range) {
                 SMetaDataRange theRange(get<SMetaDataRange>(inItem));
-                inWriter.Att(L"min", theRange.m_Min);
-                inWriter.Att(L"max", theRange.m_Max);
+                inWriter.Att(QStringLiteral("min"), theRange.m_Min);
+                inWriter.Att(QStringLiteral("max"), theRange.m_Max);
             } else if (inType == AdditionalMetaDataType::StringList) {
                 const TMetaDataStringList &theList(get<TMetaDataStringList>(inItem));
-                TCharStr theBuffer;
+                QString theBuffer;
                 for (uint32_t idx = 0, end = theList.size(); idx < end; ++idx) {
                     if (idx)
-                        theBuffer.append(L":");
-                    theBuffer.append(theList[idx]);
+                        theBuffer += QLatin1Char(':');
+                    theBuffer += QString::fromWCharArray(theList[idx].wide_str());
                 }
-                inWriter.Att(L"list", theBuffer.wide_str());
+                inWriter.Att(QStringLiteral("list"), theBuffer);
             }
         }
     }
@@ -2140,11 +2363,8 @@ public:
                                  const wchar_t *inName = L"default")
     {
         const char8_t *theDefaultValue;
-        qt3ds::foundation::ConvertUTF(
-                    reinterpret_cast<const qt3ds::foundation::TWCharEASTLConverter::TCharType *>(
-                        inName), 0,
-                    m_ConvertStr);
-        if (inReader.UnregisteredAtt(m_ConvertStr.c_str(), theDefaultValue)) {
+        QString name(QString::fromWCharArray(inName));
+        if (inReader.UnregisteredAtt(qPrintable(name), theDefaultValue)) {
             m_TempBuffer.clear();
             // We have to write a temporary value because the parsing of floats,
             // in order to be efficient, is destructive.
@@ -2178,37 +2398,35 @@ public:
                 ioType = CompleteMetaDataType::FloatRange;
         } else {
             TMetaDataStringList theList;
-            TCharStr theItems;
-            if (inReader.Att(L"list", theItems)) {
-                for (TCharStr::size_type theIter = theItems.find_first_of(L":,");
-                     theIter != theItems.npos; theIter = theItems.find_first_of(L":,")) {
-                    theList.push_back(theItems.substr(0, theIter));
-                    theItems = theItems.substr(theIter + 1);
-                }
-                theList.push_back(theItems);
+            QString theItems;
+            if (inReader.Att(QStringLiteral("list"), theItems)) {
+                const QStringList items = theItems.split(QLatin1Char(':'));
+                for (const auto &item : qAsConst(items))
+                    theList.push_back(qUtf16Printable(item));
                 ioItem = theList;
                 if (ioType != CompleteMetaDataType::StringListOrInt)
                     ioType = CompleteMetaDataType::StringList;
             }
         }
     }
-    void EnsureCategory(IDOMWriter &, const TCharStr &, const TCharStr &) {}
-    void EnsureCategory(IDOMReader &, TCharStr &inCategory, const TCharStr &inObjectName)
+    void EnsureCategory(IDOMWriter &, const QString &, const QString &) {}
+    void EnsureCategory(IDOMReader &, QString &inCategory, const QString &inObjectName)
     {
         Qt3DSDMCategoryHandle theCategory = FindCategoryByName(inCategory);
         if (theCategory.Valid() == false) {
-            if (inObjectName.empty()) {
+            if (inObjectName.isEmpty()) {
                 QT3DS_ASSERT(false);
             } else {
-                if (inCategory.empty())
+                if (inCategory.isEmpty())
                     inCategory = inObjectName;
 
                 pair<Qt3DSDMCategoryHandle, bool> theGetOrCreateResult(
                             GetOrCreateCategory(inCategory));
 
                 if (theGetOrCreateResult.second == true) {
-                    SetCategoryInfo(theGetOrCreateResult.first, L"Objects-Behavior-Normal.png",
-                                    L"Objects-Behavior-Normal.png", inCategory);
+                    SetCategoryInfo(theGetOrCreateResult.first,
+                                    QStringLiteral("Objects-Behavior-Normal.png"),
+                                    QStringLiteral("Objects-Behavior-Normal.png"), inCategory);
                 }
             }
         }
@@ -2216,16 +2434,16 @@ public:
 
     void SerializePropertyBase(IDOMWriter &inArchive, SMetaPropertyBase &inItem)
     {
-        inArchive.Att(L"name", inItem.m_Name);
+        inArchive.Att(QStringLiteral("name"), inItem.m_Name);
         if (inItem.m_FormalName != inItem.m_Name)
-            inArchive.Att(L"formalName", inItem.m_FormalName);
+            inArchive.Att(QStringLiteral("formalName"), inItem.m_FormalName);
         if (inItem.m_Description != inItem.m_Name)
-            inArchive.Att(L"description", inItem.m_Description);
+            inArchive.Att(QStringLiteral("description"), inItem.m_Description);
         if (inItem.m_CompleteType != CompleteMetaDataType::Float
                 && inItem.m_CompleteType != CompleteMetaDataType::FloatRange
                 && inItem.m_CompleteType != CompleteMetaDataType::LongRange
                 && inItem.m_CompleteType != CompleteMetaDataType::StringList) {
-            inArchive.Att(L"type", inItem.m_CompleteType);
+            inArchive.Att(QStringLiteral("type"), inItem.m_CompleteType);
         }
 
         // Ensure that all types work
@@ -2242,16 +2460,16 @@ public:
 
     void SerializePropertyBase(IDOMReader &inArchive, SMetaPropertyBase &inItem)
     {
-        inArchive.Att(L"name", inItem.m_Name);
-        inArchive.Att(L"formalName", inItem.m_FormalName);
-        inArchive.Att(L"usage", inItem.m_Usage);
-        inArchive.Att(L"description", inItem.m_Description);
-        inArchive.Att(L"type", inItem.m_CompleteType);
+        inArchive.Att(QStringLiteral("name"), inItem.m_Name);
+        inArchive.Att(QStringLiteral("formalName"), inItem.m_FormalName);
+        inArchive.Att(QStringLiteral("usage"), inItem.m_Usage);
+        inArchive.Att(QStringLiteral("description"), inItem.m_Description);
+        inArchive.Att(QStringLiteral("type"), inItem.m_CompleteType);
         // Setup reasonable defaults in the case where the users are specifying little information
         // in the file format
-        if (inItem.m_FormalName.empty())
+        if (inItem.m_FormalName.isEmpty())
             inItem.m_FormalName = inItem.m_Name;
-        if (inItem.m_Description.empty())
+        if (inItem.m_Description.isEmpty())
             inItem.m_Description = inItem.m_Name;
 
         // Ensure that users can use a float type and make minimal decisions
@@ -2265,17 +2483,17 @@ public:
 
     void FinalizeCategory(IDOMReader &, SCategoryInfo &inCategory)
     {
-        if (inCategory.m_Description.empty())
+        if (inCategory.m_Description.isEmpty())
             inCategory.m_Description = inCategory.m_Name;
     }
 
     template <typename TArchiveType>
     void SerializeItem(TArchiveType &inArchive, SCategoryInfo &inItem)
     {
-        inArchive.Att(L"name", inItem.m_Name);
-        inArchive.Att(L"description", inItem.m_Description);
-        inArchive.Att(L"icon", inItem.m_Icon);
-        inArchive.Att(L"highlightIcon", inItem.m_HighlightIcon);
+        inArchive.Att(QStringLiteral("name"), inItem.m_Name);
+        inArchive.Att(QStringLiteral("description"), inItem.m_Description);
+        inArchive.Att(QStringLiteral("icon"), inItem.m_Icon);
+        inArchive.Att(QStringLiteral("highlightIcon"), inItem.m_HighlightIcon);
 
         FinalizeCategory(inArchive, inItem);
     }
@@ -2285,11 +2503,11 @@ public:
     {
         SerializePropertyBase(inArchive, inItem);
         if (inItem.m_IsHidden == true)
-            inArchive.Att("hidden", inItem.m_IsHidden);
+            inArchive.Att(QStringLiteral("hidden"), inItem.m_IsHidden);
         if (inItem.m_Animatable == false)
-            inArchive.Att("animatable", inItem.m_Animatable);
+            inArchive.Att(QStringLiteral("animatable"), inItem.m_Animatable);
         if (inItem.m_Controllable == true)
-            inArchive.Att("controllable", inItem.m_Controllable);
+            inArchive.Att(QStringLiteral("controllable"), inItem.m_Controllable);
         NVConstDataRef<SPropertyFilterInfo> theInfos = GetMetaDataPropertyFilters(inHandle);
         for (QT3DSU32 idx = 0, end = theInfos.size(); idx < end; ++idx) {
             const SPropertyFilterInfo &theInfo(theInfos[idx]);
@@ -2303,7 +2521,7 @@ public:
                 theFilterName = L"ShowIfEqual";
 
             IDOMWriter::Scope filterScope(inArchive, theFilterName);
-            inArchive.Att(L"property", thePropertyInfo.m_Name);
+            inArchive.Att(QStringLiteral("property"), thePropertyInfo.m_Name);
             SerializeDataModelValue(inArchive, theInfo.m_Value, thePropertyInfo.m_Type, L"value");
         }
     }
@@ -2314,10 +2532,10 @@ public:
         QT3DS_ASSERT(inHandle.Valid());
 
         SerializePropertyBase(inArchive, inItem);
-        inArchive.Att("hidden", inItem.m_IsHidden);
-        inArchive.Att("animatable", inItem.m_Animatable);
-        inArchive.Att("controllable", inItem.m_Controllable);
-        inArchive.Att(L"category", inItem.m_GroupName);
+        inArchive.Att(QStringLiteral("hidden"), inItem.m_IsHidden);
+        inArchive.Att(QStringLiteral("animatable"), inItem.m_Animatable);
+        inArchive.Att(QStringLiteral("controllable"), inItem.m_Controllable);
+        inArchive.Att(QStringLiteral("category"), inItem.m_GroupName);
     }
 
     void ReadChildren(IDOMReader &inArchive, SMetaDataPropertyInfo &inItem,
@@ -2328,9 +2546,9 @@ public:
         for (bool success = inArchive.MoveToFirstChild(); success;
              success = inArchive.MoveToNextSibling()) {
 
-            if (AreEqual(inArchive.GetElementName(), L"ShowIfEqual")) {
-                TCharStr theName;
-                inArchive.Att(L"property", theName);
+            if (inArchive.GetElementName() == QLatin1String("ShowIfEqual")) {
+                QString theName;
+                inArchive.Att(QStringLiteral("property"), theName);
                 Qt3DSDMPropertyHandle theProperty =
                         m_DataCore->GetAggregateInstancePropertyByName(inItem.m_Instance, theName);
                 if (theProperty.Valid() == false) {
@@ -2344,9 +2562,9 @@ public:
                 theInfo.m_FilterProperty = theProperty;
                 SerializeDataModelValue(inArchive, theInfo.m_Value, thePropDef.m_Type, L"value");
                 theFilters.push_back(theInfo);
-            } else if (AreEqual(inArchive.GetElementName(), L"HideIfEqual")) {
-                TCharStr theName;
-                inArchive.Att(L"property", theName);
+            } else if (inArchive.GetElementName() == QLatin1String("HideIfEqual")) {
+                QString theName;
+                inArchive.Att(QStringLiteral("property"), theName);
                 Qt3DSDMPropertyHandle theProperty =
                         m_DataCore->GetAggregateInstancePropertyByName(inItem.m_Instance, theName);
                 if (theProperty.Valid() == false) {
@@ -2374,21 +2592,21 @@ public:
 
     void EnsureEventHandlerBase(IDOMReader &, SEventAndHandlerBase &inItem)
     {
-        if (inItem.m_FormalName.empty())
+        if (inItem.m_FormalName.isEmpty())
             inItem.m_FormalName = inItem.m_Name;
-        if (inItem.m_Description.empty())
+        if (inItem.m_Description.isEmpty())
             inItem.m_Description = inItem.m_Name;
     }
 
     void SerializeItem(IDOMWriter &inArchive, SEvent &inItem, Qt3DSDMEventHandle &)
     {
-        inArchive.Att(L"name", inItem.m_Name);
+        inArchive.Att(QStringLiteral("name"), inItem.m_Name);
         if (inItem.m_Name != inItem.m_FormalName)
-            inArchive.Att(L"formalName", inItem.m_FormalName);
-        if (inItem.m_Category != L"Default")
-            inArchive.Att(L"category", inItem.m_Category);
+            inArchive.Att(QStringLiteral("formalName"), inItem.m_FormalName);
+        if (inItem.m_Category != QLatin1String("Default"))
+            inArchive.Att(QStringLiteral("category"), inItem.m_Category);
         if (inItem.m_Description != inItem.m_Name)
-            inArchive.Att(L"description", inItem.m_Description);
+            inArchive.Att(QStringLiteral("description"), inItem.m_Description);
 
         EnsureCategory(inArchive, inItem.m_Category, m_ObjectName);
         EnsureEventHandlerBase(inArchive, inItem);
@@ -2396,11 +2614,11 @@ public:
 
     void SerializeItem(IDOMReader &inArchive, SEvent &inItem, Qt3DSDMEventHandle &)
     {
-        inArchive.Att(L"name", inItem.m_Name);
-        inArchive.Att(L"formalName", inItem.m_FormalName);
-        inArchive.Att(L"category", inItem.m_Category);
+        inArchive.Att(QStringLiteral("name"), inItem.m_Name);
+        inArchive.Att(QStringLiteral("formalName"), inItem.m_FormalName);
+        inArchive.Att(QStringLiteral("category"), inItem.m_Category);
         EnsureCategory(inArchive, inItem.m_Category, m_ObjectName);
-        inArchive.Att(L"description", inItem.m_Description);
+        inArchive.Att(QStringLiteral("description"), inItem.m_Description);
         EnsureEventHandlerBase(inArchive, inItem);
     }
 
@@ -2408,20 +2626,20 @@ public:
     {
         SerializePropertyBase(inArchive, inArgument);
         if (inArgument.m_ArgType != HandlerArgumentType::None)
-            inArchive.Att(L"argumentType", inArgument.m_ArgType);
+            inArchive.Att(QStringLiteral("argumentType"), inArgument.m_ArgType);
     }
 
     void SerializeHandlerArgument(IDOMReader &inArchive, SMetaDataHandlerArgumentInfo &inArgument)
     {
         SerializePropertyBase(inArchive, inArgument);
-        inArchive.Att(L"argumentType", inArgument.m_ArgType);
+        inArchive.Att(QStringLiteral("argumentType"), inArgument.m_ArgType);
     }
 
     void SerializeHandlerArguments(IDOMWriter &inWriter, SHandler &inItem, Qt3DSDMHandlerHandle &)
     {
         for (size_t idx = 0, end = inItem.m_Arguments.size(); idx < end; ++idx) {
             SMetaDataHandlerArgumentInfo &theArg(inItem.m_Arguments[idx]);
-            IDOMWriter::Scope __argScope(inWriter, L"Argument");
+            IDOMWriter::Scope __argScope(inWriter, QStringLiteral("Argument"));
             SerializeHandlerArgument(inWriter, theArg);
         }
     }
@@ -2442,23 +2660,23 @@ public:
 
     void SerializeHandlerItem(IDOMWriter &inArchive, SHandler &inItem)
     {
-        inArchive.Att(L"name", inItem.m_Name);
+        inArchive.Att(QStringLiteral("name"), inItem.m_Name);
         if (inItem.m_FormalName != inItem.m_Name)
-            inArchive.Att(L"formalName", inItem.m_FormalName);
-        if (inItem.m_Category != L"Default")
-            inArchive.Att(L"category", inItem.m_Category);
+            inArchive.Att(QStringLiteral("formalName"), inItem.m_FormalName);
+        if (inItem.m_Category != QLatin1String("Default"))
+            inArchive.Att(QStringLiteral("category"), inItem.m_Category);
         if (inItem.m_Description != inItem.m_Name)
-            inArchive.Att(L"description", inItem.m_Description);
+            inArchive.Att(QStringLiteral("description"), inItem.m_Description);
         EnsureEventHandlerBase(inArchive, inItem);
     }
 
     void SerializeHandlerItem(IDOMReader &inArchive, SHandler &inItem)
     {
-        inArchive.Att(L"name", inItem.m_Name);
-        inArchive.Att(L"formalName", inItem.m_FormalName);
-        inArchive.Att(L"category", inItem.m_Category);
+        inArchive.Att(QStringLiteral("name"), inItem.m_Name);
+        inArchive.Att(QStringLiteral("formalName"), inItem.m_FormalName);
+        inArchive.Att(QStringLiteral("category"), inItem.m_Category);
         EnsureCategory(inArchive, inItem.m_Category, m_ObjectName);
-        inArchive.Att(L"description", inItem.m_Description);
+        inArchive.Att(QStringLiteral("description"), inItem.m_Description);
         EnsureEventHandlerBase(inArchive, inItem);
     }
 
@@ -2496,14 +2714,14 @@ public:
 
     void CreateInstanceGroupInfo(SMetaDataPropertyInfo &inProperty)
     {
-        if (!inProperty.m_GroupName.empty()) {
-            const wchar_t *theGroupName = Intern(inProperty.m_GroupName);
+        if (!inProperty.m_GroupName.isEmpty()) {
+            QString theGroupName = inProperty.m_GroupName;
             bool found = false;
             pair<typename TInstanceGroupMap::iterator, bool> inserter =
-                    m_InstanceGroupMap.insert(make_pair(inProperty.m_Instance, vector<TCharPtr>()));
-            vector<TCharPtr> &itemList = inserter.first->second;
+                    m_InstanceGroupMap.insert(make_pair(inProperty.m_Instance, vector<QString>()));
+            vector<QString> &itemList = inserter.first->second;
             for (size_t idx = 0, end = itemList.size(); idx < end; ++idx) {
-                TCharStr curListName = itemList[idx];
+                QString curListName = itemList[idx];
                 if (curListName == theGroupName) {
                     found = true;
                     break;
@@ -2547,7 +2765,7 @@ public:
             inMap.insert(make_pair(theHandle, theInfo));
             this->AddItemToInstanceList(inInstanceHandle, theHandle, inListMap);
             inNameMap.insert(
-                        make_pair(make_pair(inInstanceHandle, Intern(theInfo.m_Name)), theHandle));
+                        make_pair(make_pair(inInstanceHandle, theInfo.m_Name), theHandle));
             ReadChildren(inArchive, theInfo, theHandle);
         }
     }
@@ -2558,7 +2776,7 @@ public:
         TInstanceStringListMap::iterator iter = inMap.find(inInstance);
         if (iter == inMap.end())
             return;
-        const vector<TCharPtr> &theValueList(iter->second);
+        const vector<QString> &theValueList(*iter);
         for (size_t idx = 0, end = theValueList.size(); idx < end; ++idx) {
             IDOMWriter::Scope __elemScope(inArchive, inElementName);
             inArchive.Value(theValueList[idx]);
@@ -2573,7 +2791,7 @@ public:
              success = inArchive.MoveToNextSibling(inElementName)) {
             const wchar_t *theValue;
             if (inArchive.RegisteredValue(theValue))
-                AddItemToInstanceList(inInstance, theValue, inMap);
+                AddQHashItemToInstanceList(inInstance, QString::fromWCharArray(theValue), inMap);
         }
     }
 
@@ -2592,21 +2810,21 @@ public:
     {
         for (TCategoryMap::iterator iter = m_Categories.begin(), end = m_Categories.end();
              iter != end; ++iter) {
-            IDOMWriter::Scope __writerScope(inWriter, L"Category");
+            IDOMWriter::Scope __writerScope(inWriter, QStringLiteral("Category"));
             SerializeItem(inWriter, iter->second);
         }
     }
     void SerializeCategories(IDOMReader &inReader)
     {
         IDOMReader::Scope __readerScope(inReader);
-        for (bool success = inReader.MoveToFirstChild(L"Category"); success;
-             success = inReader.MoveToNextSibling(L"Category")) {
+        for (bool success = inReader.MoveToFirstChild(QStringLiteral("Category")); success;
+             success = inReader.MoveToNextSibling(QStringLiteral("Category"))) {
             SCategoryInfo theInfo;
             SerializeItem(inReader, theInfo);
             TCategoryHandle newHandle(GetNextId());
             theInfo.m_Canonical = true;
             m_Categories.insert(make_pair(newHandle, theInfo));
-            m_NameToCategories.insert(make_pair(Intern(theInfo.m_Name), newHandle));
+            m_NameToCategories.insert(theInfo.m_Name, newHandle);
         }
     }
 
@@ -2627,7 +2845,7 @@ public:
                 return false;
             if (rhsIter == m_Map.end())
                 return true;
-            return wcscmp(lhsIter->second, rhsIter->second) < 0;
+            return lhsIter->compare(*rhsIter) < 0;
         }
     };
 
@@ -2641,7 +2859,7 @@ public:
         AddInstancesFromHash(m_InstanceToProperties, theInstanceList);
         AddInstancesFromHash(m_InstanceToEvents, theInstanceList);
         AddInstancesFromHash(m_InstanceToHandlers, theInstanceList);
-        AddInstancesFromHash(m_InstanceToReferences, theInstanceList);
+        AddInstancesFromQHash(m_InstanceToReferences, theInstanceList);
 
         vector<TInstanceHandle> theInstances;
         theInstances.reserve(theInstanceList.size());
@@ -2652,9 +2870,9 @@ public:
              end = theInstances.end();
              iter != end; ++iter) {
             TInstanceHandle instHandle = *iter;
-            Option<TCharStr> theType(GetTypeForCanonicalInstance(*iter));
+            Option<QString> theType(GetTypeForCanonicalInstance(*iter));
             if (theType.hasValue()) {
-                IDOMWriter::Scope __instanceElem(inWriter, theType->wide_str());
+                IDOMWriter::Scope __instanceElem(inWriter, theType);
                 SerializeInstance(inWriter, *iter);
             }
         }
@@ -2666,18 +2884,17 @@ public:
     {
         if (!inReader.Att("NextId", m_NextId))
             m_NextId = 1;
-        m_ObjectName = L"";
+        m_ObjectName.clear();
         SerializeCategories(inReader);
         IDOMReader::Scope __instanceGatherScope(inReader);
         for (bool success = inReader.MoveToFirstChild(); success;
              success = inReader.MoveToNextSibling()) {
-            const wchar_t *elemName = inReader.GetElementName();
+            QString elemName = inReader.GetElementName();
             TStrInstanceMap::iterator find = m_CanonicalTypeToInstances.find(elemName);
-            if (find == m_CanonicalTypeToInstances.end()) {
+            if (find == m_CanonicalTypeToInstances.end())
                 continue;
-            }
 
-            SerializeInstance(inReader, find->second);
+            SerializeInstance(inReader, *find);
         }
     }
 
@@ -2701,10 +2918,10 @@ public:
     // This needs to be undoable so we have to do this through a slightly different
     // system than we did before.
     void LoadInstance(IDOMReader &inReader, Qt3DSDMInstanceHandle inInstance,
-                      const TCharStr &inObjectName,
+                      const QString &inObjectName,
                       std::vector<SMetaDataLoadWarning> &outWarnings) override
     {
-        const wchar_t *theAtt;
+        QString theAtt;
         vector<Qt3DSDMMetaDataPropertyHandle> theProperties;
         vector<Qt3DSDMEventHandle> theEvents;
         vector<Qt3DSDMHandlerHandle> theHandlers;
@@ -2712,15 +2929,15 @@ public:
         m_ObjectName = inObjectName;
         for (bool success = inReader.MoveToFirstChild(); success;
              success = inReader.MoveToNextSibling()) {
-            if (AreEqual(inReader.GetElementName(), L"Category")) {
+            if (inReader.GetElementName() == QLatin1String("Category")) {
                 SCategoryInfo theInfo;
                 SerializeItem(inReader, theInfo);
                 Qt3DSDMCategoryHandle theCategoryInfo(GetOrCreateCategory(theInfo.m_Name).first);
                 SetCategoryInfo(theCategoryInfo, theInfo.m_Icon, theInfo.m_HighlightIcon,
                                 theInfo.m_Description);
-            } else if (AreEqual(inReader.GetElementName(), L"Property")) {
+            } else if (inReader.GetElementName() == QLatin1String("Property")) {
                 SMetaDataPropertyInfo theInfo(inInstance);
-                if (inReader.Att(L"name", theAtt)) {
+                if (inReader.Att(QStringLiteral("name"), theAtt)) {
                     Qt3DSDMMetaDataPropertyHandle theProperty(
                                 GetOrCreateSpecificMetaDataProperty(inInstance, theAtt));
                     SerializeItem(inReader, theInfo, theProperty);
@@ -2737,9 +2954,9 @@ public:
                     outWarnings.push_back(
                                 SMetaDataLoadWarning(MetaDataLoadWarningType::InvalidProperty,
                                                      MetaDataLoadWarningMessage::MissingName));
-            } else if (AreEqual(inReader.GetElementName(), L"Event")) {
+            } else if (inReader.GetElementName() == QLatin1String("Event")) {
                 SEvent theInfo(inInstance);
-                if (inReader.Att(L"name", theAtt)) {
+                if (inReader.Att(QStringLiteral("name"), theAtt)) {
                     Qt3DSDMEventHandle theEvent(GetOrCreateSpecificEvent(inInstance, theAtt));
                     SerializeItem(inReader, theInfo, theEvent);
                     SetEventInfo(theEvent, theInfo.m_Name, theInfo.m_FormalName, theInfo.m_Category,
@@ -2749,8 +2966,8 @@ public:
                     outWarnings.push_back(
                                 SMetaDataLoadWarning(MetaDataLoadWarningType::InvalidEvent,
                                                      MetaDataLoadWarningMessage::MissingName));
-            } else if (AreEqual(inReader.GetElementName(), L"Handler")) {
-                if (inReader.Att(L"name", theAtt)) {
+            } else if (inReader.GetElementName() == QLatin1String("Handler")) {
+                if (inReader.Att(QStringLiteral("name"), theAtt)) {
                     Qt3DSDMHandlerHandle theHandler(GetOrCreateSpecificHandler(inInstance, theAtt));
                     SHandler theInfo(inInstance);
                     SerializeHandlerItem(inReader, theInfo);
@@ -2779,8 +2996,8 @@ public:
                     outWarnings.push_back(
                                 SMetaDataLoadWarning(MetaDataLoadWarningType::InvalidHandler,
                                                      MetaDataLoadWarningMessage::MissingName));
-            } else if (AreEqual(inReader.GetElementName(), L"Reference")) {
-                const wchar_t *theValue;
+            } else if (inReader.GetElementName() == QLatin1String("Reference")) {
+                QString theValue;
                 if (inReader.Value(theValue))
                     AddReference(inInstance, theValue);
             } else {
@@ -2802,19 +3019,8 @@ public:
         SerializeInstance(inWriter, inInstance);
     }
 
-    // Helper to convert char to wchar_t
-    eastl::basic_string<qt3ds::foundation::TWCharEASTLConverter::TCharType> m_Buf;
-    const wchar_t *ConvertChar(const char *inName)
-    {
-        if (inName && *inName) {
-            qt3ds::foundation::ConvertUTF(inName, 0, m_Buf);
-            return reinterpret_cast<const wchar_t *>(m_Buf.c_str());
-        }
-        return NULL;
-    }
-
-    void LoadEffectInstance(const char *inShaderFile, Qt3DSDMInstanceHandle inInstance,
-                            const TCharStr &inObjectName,
+    void LoadEffectInstance(const QString &inShaderFile, Qt3DSDMInstanceHandle inInstance,
+                            const QString &inObjectName,
                             std::vector<SMetaDataLoadWarning> &outWarnings,
                             QFile &inStream) override
     {
@@ -2827,48 +3033,48 @@ public:
         }
     }
 
-    bool IsEffectInstanceRegistered(const char *inName) override
+    bool IsEffectInstanceRegistered(const QString &inName) override
     {
-        return m_EffectMap.find(Intern(inName)) != m_EffectMap.end();
+        return m_EffectMap.find(inName) != m_EffectMap.end();
     }
 
     inline qt3ds::render::NVRenderTextureFormats::Enum
-    ConvertTypeAndFormatToTextureFormat(const char8_t *inType, const char8_t *inFormat)
+    ConvertTypeAndFormatToTextureFormat(const QString &inType, const QString &inFormat)
     {
         qt3ds::render::NVRenderTextureFormats::Enum retval
                 = qt3ds::render::NVRenderTextureFormats::RGBA8;
-        if (AreEqual(inFormat, "source"))
+        if (inFormat == QLatin1String("source"))
             retval = qt3ds::render::NVRenderTextureFormats::Unknown;
-        else if (AreEqual(inFormat, "depth24stencil8"))
+        else if (inFormat == QLatin1String("depth24stencil8"))
             retval = qt3ds::render::NVRenderTextureFormats::Depth24Stencil8;
         else {
-            if (AreEqual(inType, "ubyte")) {
-                if (AreEqual(inFormat, "rgb"))
+            if (inType == QLatin1String("ubyte")) {
+                if (inFormat == QLatin1String("rgb"))
                     retval = qt3ds::render::NVRenderTextureFormats::RGB8;
-                else if (AreEqual(inFormat, "rgba"))
+                else if (inFormat == QLatin1String("rgba"))
                     retval = qt3ds::render::NVRenderTextureFormats::RGBA8;
-                else if (AreEqual(inFormat, "alpha"))
+                else if (inFormat == QLatin1String("alpha"))
                     retval = qt3ds::render::NVRenderTextureFormats::Alpha8;
-                else if (AreEqual(inFormat, "lum"))
+                else if (inFormat == QLatin1String("lum"))
                     retval = qt3ds::render::NVRenderTextureFormats::Luminance8;
-                else if (AreEqual(inFormat, "lum_alpha"))
+                else if (inFormat == QLatin1String("lum_alpha"))
                     retval = qt3ds::render::NVRenderTextureFormats::LuminanceAlpha8;
-                else if (AreEqual(inFormat, "rg"))
+                else if (inFormat == QLatin1String("rg"))
                     retval = qt3ds::render::NVRenderTextureFormats::RG8;
-            } else if (AreEqual(inType, "ushort")) {
-                if (AreEqual(inFormat, "rgb"))
+            } else if (inType == QLatin1String("ushort")) {
+                if (inFormat == QLatin1String("rgb"))
                     retval = qt3ds::render::NVRenderTextureFormats::RGB565;
-                else if (AreEqual(inFormat, "rgba"))
+                else if (inFormat == QLatin1String("rgba"))
                     retval = qt3ds::render::NVRenderTextureFormats::RGBA5551;
-            } else if (AreEqual(inType, "fp16")) {
-                if (AreEqual(inFormat, "rgba"))
+            } else if (inType == QLatin1String("fp16")) {
+                if (inFormat == QLatin1String("rgba"))
                     retval = qt3ds::render::NVRenderTextureFormats::RGBA16F;
-                else if (AreEqual(inFormat, "rg"))
+                else if (inFormat == QLatin1String("rg"))
                     retval = qt3ds::render::NVRenderTextureFormats::RG16F;
-            } else if (AreEqual(inType, "fp32")) {
-                if (AreEqual(inFormat, "rgba"))
+            } else if (inType == QLatin1String("fp32")) {
+                if (inFormat == QLatin1String("rgba"))
                     retval = qt3ds::render::NVRenderTextureFormats::RGBA32F;
-                else if (AreEqual(inFormat, "rg"))
+                else if (inFormat == QLatin1String("rg"))
                     retval = qt3ds::render::NVRenderTextureFormats::RG32F;
             } else {
                 QT3DS_ASSERT(false);
@@ -2880,11 +3086,11 @@ public:
     }
 
     static inline qt3ds::render::NVRenderTextureMagnifyingOp::Enum
-    ConvertFilterToMagOp(const char8_t *inFilter)
+    ConvertFilterToMagOp(const QString &inFilter)
     {
-        if (AreEqual(inFilter, "linear"))
+        if (inFilter == QLatin1String("linear"))
             return qt3ds::render::NVRenderTextureMagnifyingOp::Linear;
-        if (IsTrivial(inFilter) || AreEqual(inFilter, "nearest"))
+        if (inFilter.isEmpty() || inFilter == QLatin1String("nearest"))
             return qt3ds::render::NVRenderTextureMagnifyingOp::Nearest;
         else {
             QT3DS_ASSERT(false);
@@ -2895,20 +3101,20 @@ public:
     }
 
     static inline qt3ds::render::NVRenderTextureMinifyingOp::Enum
-    ConvertFilterToMinOp(const char8_t *inFilter)
+    ConvertFilterToMinOp(const QString &inFilter)
     {
         // we make the decision based on the texture usage
-        if (AreEqual(inFilter, "linear"))
+        if (inFilter == QLatin1String("linear"))
             return qt3ds::render::NVRenderTextureMinifyingOp::Linear;
-        if (AreEqual(inFilter, "nearest"))
+        if (inFilter == QLatin1String("nearest"))
             return qt3ds::render::NVRenderTextureMinifyingOp::Nearest;
-        if (AreEqual(inFilter, "linearMipmapLinear"))
+        if (inFilter == QLatin1String("linearMipmapLinear"))
             return qt3ds::render::NVRenderTextureMinifyingOp::LinearMipmapLinear;
-        if (AreEqual(inFilter, "nearestMipmapNearest"))
+        if (inFilter == QLatin1String("nearestMipmapNearest"))
             return qt3ds::render::NVRenderTextureMinifyingOp::NearestMipmapNearest;
-        if (AreEqual(inFilter, "nearestMipmapLinear"))
+        if (inFilter == QLatin1String("nearestMipmapLinear"))
             return qt3ds::render::NVRenderTextureMinifyingOp::NearestMipmapLinear;
-        if (AreEqual(inFilter, "linearMipmapNearest"))
+        if (inFilter == QLatin1String("linearMipmapNearest"))
             return qt3ds::render::NVRenderTextureMinifyingOp::LinearMipmapNearest;
         else {
             QT3DS_ASSERT(false);
@@ -2919,11 +3125,11 @@ public:
     }
 
     static inline qt3ds::render::NVRenderTextureCoordOp::Enum
-    ConvertTextureCoordOp(const char8_t *inWrap)
+    ConvertTextureCoordOp(const QString &inWrap)
     {
-        if (IsTrivial(inWrap) || AreEqual(inWrap, "clamp"))
+        if (inWrap.isEmpty() || inWrap == QLatin1String("clamp"))
             return qt3ds::render::NVRenderTextureCoordOp::ClampToEdge;
-        if (AreEqual(inWrap, "repeat"))
+        if (inWrap == QLatin1String("repeat"))
             return qt3ds::render::NVRenderTextureCoordOp::Repeat;
         else {
             QT3DS_ASSERT(false);
@@ -2934,26 +3140,26 @@ public:
     }
 
     static inline qt3ds::render::NVRenderTextureTypeValue::Enum
-    ConvertTextureType(const char8_t *inTexType)
+    ConvertTextureType(const QString &inTexType)
     {
         // this usually comes from a MDL description file
-        if (IsTrivial(inTexType))
+        if (inTexType.isEmpty())
             return qt3ds::render::NVRenderTextureTypeValue::Unknown;
-        if (AreEqual(inTexType, "environment"))
+        if (inTexType == QLatin1String("environment"))
             return qt3ds::render::NVRenderTextureTypeValue::Environment;
-        if (AreEqual(inTexType, "diffuse"))
+        if (inTexType == QLatin1String("diffuse"))
             return qt3ds::render::NVRenderTextureTypeValue::Diffuse;
-        if (AreEqual(inTexType, "specular"))
+        if (inTexType == QLatin1String("specular"))
             return qt3ds::render::NVRenderTextureTypeValue::Specular;
-        if (AreEqual(inTexType, "bump"))
+        if (inTexType == QLatin1String("bump"))
             return qt3ds::render::NVRenderTextureTypeValue::Bump;
-        if (AreEqual(inTexType, "displacement"))
+        if (inTexType == QLatin1String("displacement"))
             return qt3ds::render::NVRenderTextureTypeValue::Displace;
-        if (AreEqual(inTexType, "shadow"))
+        if (inTexType == QLatin1String("shadow"))
             return qt3ds::render::NVRenderTextureTypeValue::LightmapShadow;
-        if (AreEqual(inTexType, "emissive"))
+        if (inTexType == QLatin1String("emissive"))
             return qt3ds::render::NVRenderTextureTypeValue::Emissive;
-        if (AreEqual(inTexType, "emissive_mask"))
+        if (inTexType == QLatin1String("emissive_mask"))
             return qt3ds::render::NVRenderTextureTypeValue::Emissive2;
         else {
             return qt3ds::render::NVRenderTextureTypeValue::Unknown;
@@ -2961,13 +3167,13 @@ public:
     }
 
     static inline qt3ds::render::NVRenderSrcBlendFunc::Enum
-    ConvertToSrcBlendFunc(const char8_t *inFilter)
+    ConvertToSrcBlendFunc(const QString &inFilter)
     {
-        if (AreEqual(inFilter, "SrcAlpha"))
+        if (inFilter == QLatin1String("SrcAlpha"))
             return qt3ds::render::NVRenderSrcBlendFunc::SrcAlpha;
-        if (AreEqual(inFilter, "OneMinusSrcAlpha"))
+        if (inFilter == QLatin1String("OneMinusSrcAlpha"))
             return qt3ds::render::NVRenderSrcBlendFunc::OneMinusSrcAlpha;
-        if (AreEqual(inFilter, "One"))
+        if (inFilter == QLatin1String("One"))
             return qt3ds::render::NVRenderSrcBlendFunc::One;
         else {
             QT3DS_ASSERT(false);
@@ -2978,13 +3184,13 @@ public:
     }
 
     static inline qt3ds::render::NVRenderDstBlendFunc::Enum
-    ConvertToDstBlendFunc(const char8_t *inFilter)
+    ConvertToDstBlendFunc(const QString &inFilter)
     {
-        if (AreEqual(inFilter, "SrcAlpha"))
+        if (inFilter == QLatin1String("SrcAlpha"))
             return qt3ds::render::NVRenderDstBlendFunc::SrcAlpha;
-        if (AreEqual(inFilter, "OneMinusSrcAlpha"))
+        if (inFilter == QLatin1String("OneMinusSrcAlpha"))
             return qt3ds::render::NVRenderDstBlendFunc::OneMinusSrcAlpha;
-        if (AreEqual(inFilter, "One"))
+        if (inFilter == QLatin1String("One"))
             return qt3ds::render::NVRenderDstBlendFunc::One;
         else {
             QT3DS_ASSERT(false);
@@ -2994,9 +3200,9 @@ public:
         }
     }
 
-    static inline qt3ds::render::NVRenderState::Enum ConvertRenderState(const char8_t *inState)
+    static inline qt3ds::render::NVRenderState::Enum ConvertRenderState(const QString &inState)
     {
-        if (AreEqual(inState, "Stencil"))
+        if (inState == QLatin1String("Stencil"))
             return qt3ds::render::NVRenderState::StencilTest;
         else {
             QT3DS_ASSERT(false);
@@ -3007,13 +3213,13 @@ public:
     }
 
     static inline qt3ds::render::NVRenderImageAccessType::Enum
-    ConvertToImageAccessType(const char8_t *inAccess)
+    ConvertToImageAccessType(const QString &inAccess)
     {
-        if (AreEqual(inAccess, "read"))
+        if (inAccess == QLatin1String("read"))
             return qt3ds::render::NVRenderImageAccessType::Read;
-        if (AreEqual(inAccess, "write"))
+        if (inAccess == QLatin1String("write"))
             return qt3ds::render::NVRenderImageAccessType::Write;
-        if (AreEqual(inAccess, "readwrite"))
+        if (inAccess == QLatin1String("readwrite"))
             return qt3ds::render::NVRenderImageAccessType::ReadWrite;
         else
             QT3DS_ASSERT(false);
@@ -3021,13 +3227,13 @@ public:
         return qt3ds::render::NVRenderImageAccessType::ReadWrite;
     }
 
-    static inline size_t GetTypeSize(const char8_t *inType)
+    static inline size_t GetTypeSize(const QString &inType)
     {
-        if (AreEqual(inType, "uint"))
+        if (inType == QLatin1String("uint"))
             return sizeof(QT3DSU32);
-        else if (AreEqual(inType, "int"))
+        else if (inType == QLatin1String("int"))
             return sizeof(QT3DSI32);
-        else if (AreEqual(inType, "uvec4"))
+        else if (inType == QLatin1String("uvec4"))
             return sizeof(QT3DSU32) * 4;
         else
             QT3DS_ASSERT(false);
@@ -3036,11 +3242,11 @@ public:
     }
 
     inline qt3ds::render::NVRenderBufferBindValues::Enum
-    ConvertFormatToBufferBindFlags(const char8_t *inFormat)
+    ConvertFormatToBufferBindFlags(const QString &inFormat)
     {
-        if (AreEqual(inFormat, "storage"))
+        if (inFormat == QLatin1String("storage"))
             return qt3ds::render::NVRenderBufferBindValues::Storage;
-        else if (AreEqual(inFormat, "indirect"))
+        else if (inFormat == QLatin1String("indirect"))
             return qt3ds::render::NVRenderBufferBindValues::Draw_Indirect;
         else
             QT3DS_ASSERT(false);
@@ -3048,27 +3254,26 @@ public:
         return qt3ds::render::NVRenderBufferBindValues::Unknown;
     }
 
-    static inline void AppendShaderUniform(const char8_t *type, const char8_t *name,
-                                           eastl::string &shaderPrefix)
+    static inline void AppendShaderUniform(const QString &type, const QString &name,
+                                           QString &shaderPrefix)
     {
-        shaderPrefix.append("uniform ");
-        shaderPrefix.append(type);
-        shaderPrefix.append(" ");
-        shaderPrefix.append(name);
-        shaderPrefix.append(";\n");
+        shaderPrefix += QLatin1String("uniform ") + type + QLatin1Char(' ')
+                            + name + QLatin1String(";\n");
     }
     static inline void AppendShaderCode(
-            const char8_t *inCode, Qt3DSDMStr &ioStr,
-            eastl::basic_string<qt3ds::foundation::TWCharEASTLConverter::TCharType>
-            &inConvertBuffer)
+            const char8_t *inCode, QString &ioStr)
     {
-        qt3ds::foundation::ConvertUTF(inCode, 0, inConvertBuffer);
-        ioStr.append(inConvertBuffer);
+        ioStr += QString::fromLatin1(inCode);
+    }
+    static inline void AppendShaderCode(
+            const QString &inCode, QString &ioStr)
+    {
+        ioStr += inCode;
     }
     void HideEffectProperty(Qt3DSDMInstanceHandle inInstance, const char8_t *inParamName)
     {
         Qt3DSDMMetaDataPropertyHandle theProp =
-                GetSpecificMetaDataProperty(inInstance, Intern(inParamName));
+                GetSpecificMetaDataProperty(inInstance, inParamName);
         if (theProp.Valid()) {
             SMetaDataPropertyInfo theInfo = GetMetaDataPropertyInfo(theProp);
             SetMetaDataPropertyInfo(theProp, theInfo.m_Name, theInfo.m_FormalName,
@@ -3079,26 +3284,23 @@ public:
         }
     }
 
-    static inline void GetShaderName(const TCharStr &inObjectName,
-                                     const char8_t *inShaderSpecificName,
-                                     eastl::string &outShaderName)
+    static inline void GetShaderName(const QString &inObjectName,
+                                     const QString &inShaderSpecificName,
+                                     QString &outShaderName)
     {
-        outShaderName.clear();
-        qt3ds::foundation::ConvertUTF(inObjectName.c_str(), 0, outShaderName);
-        outShaderName.append(" - ");
-        outShaderName.append(inShaderSpecificName);
+        outShaderName = QStringLiteral("%1 - %2").arg(inObjectName).arg(inShaderSpecificName);
     }
 
     void LoadDynamicObjectProperties(IDOMReader &inStream, SMetaDataDynamicObjectImpl &ioObject,
-                                     Qt3DSDMInstanceHandle inInstance, const TCharStr &inObjectName,
+                                     Qt3DSDMInstanceHandle inInstance, const QString &inObjectName,
                                      std::vector<SMetaDataLoadWarning> &outWarnings,
-                                     eastl::string &shaderPrefix)
+                                     QString &shaderPrefix)
     {
         using namespace qt3ds::render::dynamic;
         ioObject.m_Properties.clear();
         ioObject.ClearEnumValueNames();
         IDOMReader::Scope __readerScope(inStream);
-        if (inStream.MoveToFirstChild("MetaData")) {
+        if (inStream.MoveToFirstChild(QStringLiteral("MetaData"))) {
             {
                 IDOMReader::Scope __readerScope(inStream);
                 LoadInstance(inStream, inInstance, inObjectName, outWarnings);
@@ -3107,52 +3309,59 @@ public:
             vector<Qt3DSDMMetaDataPropertyHandle> theProperties;
             GetSpecificMetaDataProperties(inInstance, theProperties);
             size_t propIdx = 0, propEnd = theProperties.size();
-            for (bool success = inStream.MoveToFirstChild("Property"); success && propIdx < propEnd;
-                 success = inStream.MoveToNextSibling("Property"), ++propIdx) {
-                ioObject.m_Properties.push_back();
+            for (bool success = inStream.MoveToFirstChild(QStringLiteral("Property"));
+                 success && propIdx < propEnd;
+                 success = inStream.MoveToNextSibling(QStringLiteral("Property")), ++propIdx) {
+                ioObject.m_Properties.push_back(SPropertyDefinition());
                 SPropertyDefinition &theNewDefinition = ioObject.m_Properties.back();
                 SMetaDataPropertyInfo theInfo(GetMetaDataPropertyInfo(theProperties[propIdx]));
-                theNewDefinition.m_Name =
-                        m_StringTable.GetRenderStringTable().RegisterStr(theInfo.m_Name.c_str());
-                const char8_t *xmlName;
-                inStream.Att("name", xmlName);
-                if (AreEqual(xmlName, theNewDefinition.m_Name.c_str())) {
+                theNewDefinition.m_Name = theInfo.m_Name;
+                QString name;
+                inStream.Att(QStringLiteral("name"), name);
+                if (name == theNewDefinition.m_Name) {
                     switch (theInfo.GetDataType()) {
                     case DataModelDataType::Bool:
                         theNewDefinition.m_DataType =
                                 qt3ds::render::NVRenderShaderDataTypes::QT3DSRenderBool;
-                        AppendShaderUniform("bool", theNewDefinition.m_Name.c_str(), shaderPrefix);
+                        AppendShaderUniform(QStringLiteral("bool"), theNewDefinition.m_Name,
+                                            shaderPrefix);
                         break;
                     case DataModelDataType::Long:
                         theNewDefinition.m_DataType
                                 = qt3ds::render::NVRenderShaderDataTypes::QT3DSI32;
-                        AppendShaderUniform("int", theNewDefinition.m_Name.c_str(), shaderPrefix);
+                        AppendShaderUniform(QStringLiteral("int"), theNewDefinition.m_Name,
+                                            shaderPrefix);
                         break;
                     case DataModelDataType::Float2:
                         theNewDefinition.m_DataType
                                 = qt3ds::render::NVRenderShaderDataTypes::QT3DSVec2;
-                        AppendShaderUniform("vec2", theNewDefinition.m_Name.c_str(), shaderPrefix);
+                        AppendShaderUniform(QStringLiteral("vec2"), theNewDefinition.m_Name,
+                                            shaderPrefix);
                         break;
                     case DataModelDataType::Float3:
                         theNewDefinition.m_DataType
                                 = qt3ds::render::NVRenderShaderDataTypes::QT3DSVec3;
-                        AppendShaderUniform("vec3", theNewDefinition.m_Name.c_str(), shaderPrefix);
+                        AppendShaderUniform(QStringLiteral("vec3"), theNewDefinition.m_Name,
+                                            shaderPrefix);
                         break;
                     case DataModelDataType::String:
                         if (theInfo.m_CompleteType == CompleteMetaDataType::Texture) {
                             theNewDefinition.m_DataType =
                                     qt3ds::render::NVRenderShaderDataTypes::NVRenderTexture2DPtr;
-                            const char8_t *filter = "linear", *minFilter = "linear",
-                                    *clamp = "clamp", *usage = "", *path = "";
-                            if (inStream.Att("filter", filter))
+                            QString filter = QStringLiteral("linear");
+                            QString minFilter = QStringLiteral("linear");
+                            QString clamp = QStringLiteral("clamp");
+                            QString usage;
+                            QString path;
+                            if (inStream.Att(QStringLiteral("filter"), filter))
                                 theNewDefinition.m_MagFilterOp = ConvertFilterToMagOp(filter);
-                            if (inStream.Att("minfilter", minFilter))
+                            if (inStream.Att(QStringLiteral("minfilter"), minFilter))
                                 theNewDefinition.m_MinFilterOp = ConvertFilterToMinOp(minFilter);
-                            if (inStream.Att("clamp", clamp))
+                            if (inStream.Att(QStringLiteral("clamp"), clamp))
                                 theNewDefinition.m_CoordOp = ConvertTextureCoordOp(clamp);
-                            if (inStream.Att("usage", usage))
+                            if (inStream.Att(QStringLiteral("usage"), usage))
                                 theNewDefinition.m_TexUsageType = ConvertTextureType(usage);
-                            if (inStream.Att("default", path)) {
+                            if (inStream.Att(QStringLiteral("default"), path)) {
                                 TDataStrPtr theDataStr(
                                             theInfo.m_DefaultValue.getData<TDataStrPtr>());
                                 theNewDefinition.m_ImagePath =
@@ -3163,79 +3372,81 @@ public:
                             // Output macro so we can change the set of variables used for this
                             // independent of the
                             // meta data system.
-                            shaderPrefix.append("SNAPPER_SAMPLER2D(");
-                            shaderPrefix.append(theNewDefinition.m_Name.c_str());
-                            shaderPrefix.append(", ");
-                            shaderPrefix.append(theNewDefinition.m_Name.c_str());
-                            shaderPrefix.append(", ");
+                            shaderPrefix.append(QLatin1String("SNAPPER_SAMPLER2D("));
+                            shaderPrefix.append(theNewDefinition.m_Name);
+                            shaderPrefix.append(QLatin1String(", "));
+                            shaderPrefix.append(theNewDefinition.m_Name);
+                            shaderPrefix.append(QLatin1String(", "));
                             shaderPrefix.append(filter);
-                            shaderPrefix.append(", ");
+                            shaderPrefix.append(QLatin1String(", "));
                             shaderPrefix.append(clamp);
-                            shaderPrefix.append(", ");
-                            shaderPrefix.append("false )\n");
+                            shaderPrefix.append(QLatin1String(", "));
+                            shaderPrefix.append(QLatin1String("false )\n"));
                         } else if (theInfo.m_CompleteType == CompleteMetaDataType::StringList) {
                             theNewDefinition.m_DataType =
                                     qt3ds::render::NVRenderShaderDataTypes::QT3DSI32;
                             const TMetaDataStringList &theList =
                                     qt3dsdm::get<TMetaDataStringList>(theInfo.m_MetaDataData);
                             ioObject.m_EnumValueNames.push_back(
-                                        new eastl::vector<qt3ds::foundation::CRegisteredString>());
-                            eastl::vector<qt3ds::foundation::CRegisteredString> &theBack =
-                                    *ioObject.m_EnumValueNames.back();
+                                        new QStringList());
+                            QStringList &theBack = *ioObject.m_EnumValueNames.back();
                             for (QT3DSU32 idx = 0, end = (QT3DSU32)theList.size(); idx < end; ++idx)
-                                theBack.push_back(m_StringTable.GetRenderStringTable().RegisterStr(
-                                                      theList[idx].c_str()));
-                            theNewDefinition.m_EnumValueNames = VecToCRef(theBack);
+                                theBack.push_back(QString::fromWCharArray(theList[idx].wide_str()));
+                            theNewDefinition.m_EnumValueNames = theBack;
                             theNewDefinition.m_IsEnumProperty = true;
-                            AppendShaderUniform("int", theNewDefinition.m_Name.c_str(),
+                            AppendShaderUniform(QStringLiteral("int"), theNewDefinition.m_Name,
                                                 shaderPrefix);
                         } else if (theInfo.m_CompleteType == CompleteMetaDataType::Image2D) {
                             theNewDefinition.m_DataType =
                                     qt3ds::render::NVRenderShaderDataTypes::NVRenderImage2DPtr;
-                            const char8_t *format = "", *binding = "", *access = "readonly";
-                            shaderPrefix.append("layout(");
-                            inStream.Att("format", format);
+                            QString format;
+                            QString binding;
+                            QString access = QStringLiteral("readonly");
+                            shaderPrefix.append(QLatin1String("layout("));
+                            inStream.Att(QStringLiteral("format"), format);
                             shaderPrefix.append(format);
-                            if (inStream.Att("binding", binding)) {
-                                shaderPrefix.append(", binding = ");
+                            if (inStream.Att(QStringLiteral("binding"), binding)) {
+                                shaderPrefix.append(QLatin1String(", binding = "));
                                 shaderPrefix.append(binding);
                             }
-                            shaderPrefix.append(") ");
+                            shaderPrefix.append(QLatin1String(") "));
 
                             // if we have format layout we cannot set an additional access qualifier
-                            if (inStream.Att("access", access) && !AreEqual(format, ""))
+                            if (inStream.Att(QStringLiteral("access"), access) && !format.isEmpty())
                                 shaderPrefix.append(access);
 
-                            shaderPrefix.append(" uniform image2D ");
-                            shaderPrefix.append(theNewDefinition.m_Name.c_str());
-                            shaderPrefix.append(";\n");
+                            shaderPrefix.append(QLatin1String(" uniform image2D "));
+                            shaderPrefix.append(theNewDefinition.m_Name);
+                            shaderPrefix.append(QLatin1String(";\n"));
                         } else if (theInfo.m_CompleteType == CompleteMetaDataType::Buffer) {
                             theNewDefinition.m_DataType =
                                     qt3ds::render::NVRenderShaderDataTypes::NVRenderDataBufferPtr;
-                            const char8_t *align = "std140", *usage = "storage", *binding = "",
-                                    *format = "float";
-                            shaderPrefix.append("layout(");
+                            QString align = QStringLiteral("std140");
+                            QString usage = QStringLiteral("storage");
+                            QString binding;
+                            QString format = QStringLiteral("float");
+                            shaderPrefix.append(QLatin1String("layout("));
 
-                            inStream.Att("format", format);
-                            inStream.Att("usage", usage);
-                            if (AreEqual(usage, "storage")) {
-                                inStream.Att("align", align);
+                            inStream.Att(QStringLiteral("format"), format);
+                            inStream.Att(QStringLiteral("usage"), usage);
+                            if (usage == QLatin1String("storage")) {
+                                inStream.Att(QStringLiteral("align"), align);
                                 shaderPrefix.append(align);
 
-                                if (inStream.Att("binding", binding)) {
-                                    shaderPrefix.append(", binding = ");
+                                if (inStream.Att(QStringLiteral("binding"), binding)) {
+                                    shaderPrefix.append(QLatin1String(", binding = "));
                                     shaderPrefix.append(binding);
                                 }
 
-                                shaderPrefix.append(") ");
+                                shaderPrefix.append(QLatin1String(") "));
 
-                                shaderPrefix.append("buffer ");
-                                shaderPrefix.append(theNewDefinition.m_Name.c_str());
-                                shaderPrefix.append("\n{ \n");
+                                shaderPrefix.append(QLatin1String("buffer "));
+                                shaderPrefix.append(theNewDefinition.m_Name);
+                                shaderPrefix.append(QLatin1String("\n{ \n"));
                                 shaderPrefix.append(format);
-                                shaderPrefix.append(" ");
-                                shaderPrefix.append(theNewDefinition.m_Name.c_str());
-                                shaderPrefix.append("_data[]; \n};\n");
+                                shaderPrefix.append(QLatin1String(" "));
+                                shaderPrefix.append(theNewDefinition.m_Name);
+                                shaderPrefix.append(QLatin1String("_data[]; \n};\n"));
                             } else {
                                 // currently we only handle storage counters
                                 QT3DS_ASSERT(false);
@@ -3247,7 +3458,8 @@ public:
                         // Fallthrough intentional
                     case DataModelDataType::Float:
                         theNewDefinition.m_DataType = qt3ds::render::NVRenderShaderDataTypes::QT3DSF32;
-                        AppendShaderUniform("float", theNewDefinition.m_Name.c_str(), shaderPrefix);
+                        AppendShaderUniform(QStringLiteral("float"), theNewDefinition.m_Name,
+                                            shaderPrefix);
                         break;
                     }
                 } else {
@@ -3261,7 +3473,7 @@ public:
     }
 
     void LoadDynamicObjectShaders(IDOMReader &inStream, SMetaDataDynamicObjectImpl &ioObject,
-                                  eastl::string &shaderPrefix, const TCharStr &inObjectName)
+                                  QString &shaderPrefix, const QString &inObjectName)
     {
         eastl::string theShaderNameStr;
         eastl::string theShaderTypeStr;
@@ -3283,30 +3495,29 @@ public:
                 for (bool success = inStream.MoveToFirstChild(); success;
                      success = inStream.MoveToNextSibling()) {
                     IDOMReader::Scope __shaderScope(inStream);
-                    const char8_t *elemName = inStream.GetNarrowElementName();
+                    const QString elemName = inStream.GetElementName();
                     // If this is neither a compute shader nor a normal shader, go on and ignore
                     // element.
-                    if (!(AreEqual(elemName, "Shader") || AreEqual(elemName, "ComputeShader")))
+                    if (!(elemName == QLatin1String("Shader")
+                          || elemName == QLatin1String("ComputeShader"))) {
                         continue;
+                    }
 
-                    ioObject.m_Shaders.push_back();
+                    ioObject.m_Shaders.push_back(SMetaDataShader());
                     SMetaDataShader &theShader = ioObject.m_Shaders.back();
 
-                    qt3ds::foundation::ConvertUTF(theShaderTypeStr.c_str(), theShaderTypeStr.size(),
-                                                  theShader.m_Type);
-                    qt3ds::foundation::ConvertUTF(theShaderVersionStr.c_str(),
-                                                  theShaderVersionStr.size(), theShader.m_Version);
+                    theShader.m_Type = QString::fromLatin1(theShaderTypeStr.c_str());
+                    theShader.m_Version = QString::fromLatin1(theShaderVersionStr.c_str());
+
                     const char8_t *theName = "";
                     char8_t theITOABuffer[64] = { 0 };
                     if (!inStream.Att("name", theName)) {
                         sprintf(theITOABuffer, "%d", (int)ioObject.m_Shaders.size() - 1);
                         theName = theITOABuffer;
                     }
-                    GetShaderName(inObjectName, theName, theShaderNameStr);
-                    qt3ds::foundation::ConvertUTF(theShaderNameStr.c_str(), theShaderNameStr.size(),
-                                                  theShader.m_Name);
+                    GetShaderName(inObjectName, theName, theShader.m_Name);
 
-                    if (AreEqual(elemName, "Shader")) {
+                    if (elemName == QLatin1String("Shader")) {
                         const char8_t *shaderShared = "";
                         inStream.ChildValue("Shared", shaderShared);
                         const char8_t *vertexCode = "";
@@ -3320,31 +3531,28 @@ public:
                         const char8_t *geomCode = "";
                         inStream.ChildValue("GeometryShader", geomCode);
 
-                        AppendShaderCode(shaderPrefix.c_str(), theShader.m_Code, theConvertBuffer);
-                        AppendShaderCode(globalShared, theShader.m_Code, theConvertBuffer);
-                        AppendShaderCode(shaderShared, theShader.m_Code, theConvertBuffer);
-                        AppendShaderCode("\n#ifdef VERTEX_SHADER\n", theShader.m_Code,
-                                         theConvertBuffer);
-                        AppendShaderCode(globalVertexShared, theShader.m_Code, theConvertBuffer);
-                        AppendShaderCode(vertexCode, theShader.m_Code, theConvertBuffer);
-                        AppendShaderCode("\n#endif\n", theShader.m_Code, theConvertBuffer);
+                        AppendShaderCode(shaderPrefix, theShader.m_Code);
+                        AppendShaderCode(globalShared, theShader.m_Code);
+                        AppendShaderCode(shaderShared, theShader.m_Code);
+                        AppendShaderCode("\n#ifdef VERTEX_SHADER\n", theShader.m_Code);
+                        AppendShaderCode(globalVertexShared, theShader.m_Code);
+                        AppendShaderCode(vertexCode, theShader.m_Code);
+                        AppendShaderCode("\n#endif\n", theShader.m_Code);
                         if (!IsTrivial(geomCode)) {
-                            AppendShaderCode("\n#ifdef USER_GEOMETRY_SHADER\n", theShader.m_Code,
-                                             theConvertBuffer);
-                            AppendShaderCode(geomCode, theShader.m_Code, theConvertBuffer);
-                            AppendShaderCode("\n#endif\n", theShader.m_Code, theConvertBuffer);
+                            AppendShaderCode("\n#ifdef USER_GEOMETRY_SHADER\n", theShader.m_Code);
+                            AppendShaderCode(geomCode, theShader.m_Code);
+                            AppendShaderCode("\n#endif\n", theShader.m_Code);
                             theShader.m_HasGeomShader = true;
                         }
-                        AppendShaderCode("\n#ifdef FRAGMENT_SHADER\n", theShader.m_Code,
-                                         theConvertBuffer);
-                        AppendShaderCode(globalFragmentShared, theShader.m_Code, theConvertBuffer);
-                        AppendShaderCode(fragmentCode, theShader.m_Code, theConvertBuffer);
-                        AppendShaderCode("\n#endif\n", theShader.m_Code, theConvertBuffer);
-                    } else if (AreEqual(elemName, "ComputeShader")) {
+                        AppendShaderCode("\n#ifdef FRAGMENT_SHADER\n", theShader.m_Code);
+                        AppendShaderCode(globalFragmentShared, theShader.m_Code);
+                        AppendShaderCode(fragmentCode, theShader.m_Code);
+                        AppendShaderCode("\n#endif\n", theShader.m_Code);
+                    } else if (elemName == QLatin1String("ComputeShader")) {
                         const char8_t *shaderCode = "";
                         inStream.Value(shaderCode);
                         theShader.m_IsComputeShader = true;
-                        AppendShaderCode(shaderCode, theShader.m_Code, theConvertBuffer);
+                        AppendShaderCode(shaderCode, theShader.m_Code);
                     }
                 }
             }
@@ -3429,13 +3637,13 @@ public:
 
     // Reloads an effect if one is already loaded so we can replace the existing effect definition
     void LoadEffectXML(IDOMReader &inStream, Qt3DSDMInstanceHandle inInstance,
-                       const TCharStr &inObjectName,
+                       const QString &inObjectName,
                        std::vector<SMetaDataLoadWarning> &outWarnings,
-                       const TCharStr &inSourcePath) override
+                       const QString &inSourcePath) override
     {
         using namespace qt3ds::render::dynamic;
-        std::pair<TEffectMap::iterator, bool> theInserter =
-                m_EffectMap.insert(std::make_pair(Intern(inObjectName), SMetaDataEffectImpl()));
+        TEffectMap::iterator theInserter =
+                m_EffectMap.insert(inObjectName, SMetaDataEffectImpl());
         /*if ( inStream.MoveToFirstChild( "Effect" ) == false )
         {
                 outWarnings.push_back( SMetaDataLoadWarning( MetaDataLoadWarningType::Unknown,
@@ -3443,9 +3651,9 @@ public:
         missing top level Effect tag" ) );
                 return;
         }*/
-        eastl::string shaderPrefix = "#include \"effect.glsllib\"\n";
+        QString shaderPrefix = "#include \"effect.glsllib\"\n";
 
-        SMetaDataEffectImpl &theEffect = theInserter.first->second;
+        SMetaDataEffectImpl &theEffect = *theInserter;
         m_ObjectName = inObjectName;
         theEffect.m_Name = inObjectName;
         theEffect.m_SourcePath = inSourcePath;
@@ -3454,14 +3662,14 @@ public:
                                     shaderPrefix);
         theEffect.m_Shaders.clear();
         LoadDynamicObjectShaders(inStream, theEffect, shaderPrefix, inObjectName);
-        eastl::string theShaderNameStr;
+        QString theShaderNameStr;
         {
             IDOMReader::Scope __readerScope(inStream);
             if (inStream.MoveToFirstChild("Passes")) {
                 for (bool success = inStream.MoveToFirstChild(); success;
                      success = inStream.MoveToNextSibling()) {
                     IDOMReader::Scope __passScope(inStream);
-                    if (AreEqual("Pass", inStream.GetNarrowElementName())) {
+                    if (QLatin1String("Pass") == inStream.GetElementName()) {
                         bool drawIndirect = false;
                         const char8_t *shader = "", *input = "[source]", *output = "[dest]",
                                 *outputFormat = "rgba";
@@ -3477,26 +3685,25 @@ public:
                         else
                             theEffect.m_EffectCommands.push_back(
                                         new SBindBuffer(
-                                            m_StringTable.GetRenderStringTable().RegisterStr(output),
+                                            output,
                                             false));
                         GetShaderName(inObjectName, shader, theShaderNameStr);
                         theEffect.m_EffectCommands.push_back(
-                                    new SBindShader(m_StringTable.GetRenderStringTable().RegisterStr(
-                                                        theShaderNameStr.c_str())));
+                                    new SBindShader(theShaderNameStr));
                         theEffect.m_EffectCommands.push_back(new SApplyInstanceValue());
                         if (AreEqual(input, "[source]") || IsTrivial(input))
                             theEffect.m_EffectCommands.push_back(
                                         new SApplyBufferValue(
-                                            m_StringTable.GetRenderStringTable().RegisterStr(""),
-                                            m_StringTable.GetRenderStringTable().RegisterStr("")));
+                                            (""),
+                                            ("")));
                         else
                             theEffect.m_EffectCommands.push_back(
                                         new SApplyBufferValue(
-                                            m_StringTable.GetRenderStringTable().RegisterStr(input),
-                                            m_StringTable.GetRenderStringTable().RegisterStr("")));
+                                           (input),
+                                            ("")));
                         for (bool bufParam = inStream.MoveToFirstChild(); bufParam;
                              bufParam = inStream.MoveToNextSibling()) {
-                            if (AreEqual("BufferInput", inStream.GetNarrowElementName())) {
+                            if (QLatin1String("BufferInput") == inStream.GetElementName()) {
                                 const char8_t *param = "";
                                 const char8_t *value = "";
                                 inStream.Att("param", param);
@@ -3505,20 +3712,17 @@ public:
                                     value = "";
                                 theEffect.m_EffectCommands.push_back(
                                             new SApplyBufferValue(
-                                                m_StringTable.GetRenderStringTable().RegisterStr(
-                                                    value),
-                                                m_StringTable.GetRenderStringTable().RegisterStr(
-                                                    param)));
+                                                value,
+                                                param));
                                 HideEffectProperty(inInstance, param);
-                            } else if (AreEqual("DepthInput", inStream.GetNarrowElementName())) {
+                            } else if (QLatin1String("DepthInput") == inStream.GetElementName()) {
                                 const char8_t *param = "";
                                 inStream.Att("param", param);
                                 theEffect.m_EffectCommands.push_back(
                                             new SApplyDepthValue(
-                                                m_StringTable.GetRenderStringTable().RegisterStr(
-                                                    param)));
+                                               param));
                                 HideEffectProperty(inInstance, param);
-                            } else if (AreEqual("ImageInput", inStream.GetNarrowElementName())) {
+                            } else if (QLatin1String("ImageInput") == inStream.GetElementName()) {
                                 bool useAsTexture = false;
                                 bool needSync = false;
                                 const char8_t *param = "";
@@ -3538,13 +3742,11 @@ public:
 
                                 theEffect.m_EffectCommands.push_back(
                                             new SApplyImageValue(
-                                                m_StringTable.GetRenderStringTable().RegisterStr(
-                                                    value),
-                                                m_StringTable.GetRenderStringTable().RegisterStr(
-                                                    param), useAsTexture, needSync));
+                                                value,
+                                                param, useAsTexture, needSync));
                                 HideEffectProperty(inInstance, param);
-                            } else if (AreEqual("DataBufferInput",
-                                                inStream.GetNarrowElementName())) {
+                            } else if (QLatin1String("DataBufferInput") ==
+                                                inStream.GetElementName()) {
                                 const char8_t *param = "";
                                 const char8_t *usage = "";
                                 inStream.Att("param", param);
@@ -3558,62 +3760,51 @@ public:
 
                                 theEffect.m_EffectCommands.push_back(
                                             new SApplyDataBufferValue(
-                                                m_StringTable.GetRenderStringTable().RegisterStr(
-                                                    param), bufType));
+                                                param, bufType));
                                 HideEffectProperty(inInstance, param);
-                            } else if (AreEqual("SetParam", inStream.GetNarrowElementName())) {
+                            } else if (QLatin1String("SetParam") == inStream.GetElementName()) {
                                 const char8_t *name = "";
                                 inStream.Att("name", name);
                                 const char8_t *value = "";
                                 inStream.Att("value", value);
                                 // find the param and the type.
-                                qt3ds::foundation::CRegisteredString propName =
-                                        m_StringTable.GetRenderStringTable().RegisterStr(name);
-                                qt3ds::render::dynamic::SPropertyDefinition *theDefinition = NULL;
+                                QString propName = QString::fromLatin1(name);
+                                qt3ds::render::dynamic::SPropertyDefinition *theDefinition = nullptr;
                                 for (uint32_t propIdx = 0, propEnd = theEffect.m_Properties.size();
-                                     propIdx < propEnd && theDefinition == NULL; ++propIdx) {
+                                     propIdx < propEnd && theDefinition == nullptr; ++propIdx) {
                                     if (theEffect.m_Properties[propIdx].m_Name == propName)
                                         theDefinition = &theEffect.m_Properties[propIdx];
                                 }
-                                if (theDefinition != NULL) {
+                                if (theDefinition != nullptr) {
                                     // Hack it for now because the shader datatypes don't have a
                                     // built in sizeof operator.
-                                    QT3DSU32 valueSize = 4;
+
                                     qt3ds::render::NVRenderShaderDataTypes::Enum theDataType =
                                             theDefinition->m_DataType;
-                                    size_t allocSize = sizeof(SApplyValue) + valueSize;
-                                    QT3DSU8 *theCommandData = (QT3DSU8 *)malloc(allocSize);
-                                    QT3DSU8 *theValueData = theCommandData + sizeof(SApplyValue);
-                                    new (theCommandData) SApplyValue(propName, theDataType);
-                                    SApplyValue *theCommand =
-                                            reinterpret_cast<SApplyValue *>(theCommandData);
+                                    SApplyValue *theCommand = new SApplyValue(propName, theDataType);
+
                                     switch (theDataType) {
-                                    case qt3ds::render::NVRenderShaderDataTypes::QT3DSRenderBool: {
-                                        bool &target = *reinterpret_cast<bool *>(theValueData);
-                                        qt3ds::foundation::StringConversion<bool>().StrTo(value,
-                                                                                          target);
-                                    } break;
-                                    case qt3ds::render::NVRenderShaderDataTypes::QT3DSI32: {
-                                        QT3DSI32 &target = *reinterpret_cast<QT3DSI32 *>(
-                                                    theValueData);
-                                        qt3ds::foundation::StringConversion<QT3DSI32>().StrTo(
-                                                    value, target);
-                                    } break;
+                                    case qt3ds::render::NVRenderShaderDataTypes::QT3DSF32:
+                                        theCommand->m_Value
+                                                = QVariant::fromValue(QString::fromLatin1(value)
+                                                                      .toFloat());
+                                        break;
+                                    case qt3ds::render::NVRenderShaderDataTypes::QT3DSI32:
+                                        theCommand->m_Value
+                                                = QVariant::fromValue(QString::fromLatin1(value)
+                                                                      .toLong());
+                                        break;
+                                    case qt3ds::render::NVRenderShaderDataTypes::QT3DSRenderBool:
+                                        theCommand->m_Value
+                                                = QVariant::fromValue(QString::fromLatin1(value)
+                                                                      == QLatin1String("True"));
+                                        break;
                                     default:
-                                        QT3DS_ASSERT(false);
-                                        // Fallthrough intentional
-                                    case qt3ds::render::NVRenderShaderDataTypes::QT3DSF32: {
-                                        QT3DSF32 &target = *reinterpret_cast<QT3DSF32 *>(
-                                                    theValueData);
-                                        qt3ds::foundation::StringConversion<QT3DSF32>().StrTo(
-                                                    value, target);
-                                    } break;
+                                        break;
                                     }
-                                    theCommand->m_Value = NVDataRef<QT3DSU8>(theValueData,
-                                                                             valueSize);
                                     theEffect.m_EffectCommands.push_back(theCommand);
                                 }
-                            } else if (AreEqual("Blending", inStream.GetNarrowElementName())) {
+                            } else if (QLatin1String("Blending") == inStream.GetElementName()) {
                                 const char8_t *theSrcBlendFuncStr = "", *theDestBlendFuncStr = "";
                                 inStream.Att("source", theSrcBlendFuncStr);
                                 inStream.Att("dest", theDestBlendFuncStr);
@@ -3626,7 +3817,7 @@ public:
                                 // this will setup blending
                                 theEffect.m_EffectCommands.push_back(
                                             new SApplyBlending(theSrcBlendFunc, theDstBlendFuc));
-                            } else if (AreEqual("RenderState", inStream.GetNarrowElementName())) {
+                            } else if (QLatin1String("RenderState") == inStream.GetElementName()) {
                                 const char8_t *name = "";
                                 inStream.Att("name", name);
                                 const char8_t *value = "";
@@ -3641,7 +3832,7 @@ public:
                                 // this will setup blending
                                 theEffect.m_EffectCommands.push_back(
                                             new SApplyRenderState(theState, theStateEnable));
-                            } else if (AreEqual("DepthStencil", inStream.GetNarrowElementName())) {
+                            } else if (QLatin1String("DepthStencil") == inStream.GetElementName()) {
                                 const char8_t *bufferName = "";
                                 inStream.Att("buffer", bufferName);
                                 QT3DSU32 stencilvalue = 0;
@@ -3672,8 +3863,7 @@ public:
                                         ParseDepthStencilFlags(flags);
                                 theEffect.m_EffectCommands.push_back(
                                             new SDepthStencil(
-                                                m_StringTable.GetRenderStringTable().RegisterStr(
-                                                    bufferName), flagValues, stencilFailOperation,
+                                                bufferName, flagValues, stencilFailOperation,
                                                 depthPass, depthFail, stencilFunction, stencilvalue,
                                                 mask));
                             } else {
@@ -3681,13 +3871,13 @@ public:
                             }
                         }
                         theEffect.m_EffectCommands.push_back(new SRender(drawIndirect));
-                    } else if (AreEqual("Buffer", inStream.GetNarrowElementName())
-                               || AreEqual("Image", inStream.GetNarrowElementName())) {
+                    } else if (QLatin1String("Buffer") == inStream.GetElementName()
+                               || QLatin1String("Image") == inStream.GetElementName()) {
                         SAllocateBufferFlags theFlags;
                         const char8_t *theLifetimeStr = "", *theType = "", *theFormat = "",
                                 *theFilter = "", *theWrap = "", *theName = "";
                         QT3DSF32 theSize = 1.0f;
-                        bool isImage = AreEqual("Image", inStream.GetNarrowElementName());
+                        bool isImage = (QLatin1String("Image") == inStream.GetElementName());
                         inStream.Att("name", theName);
                         inStream.Att("lifetime", theLifetimeStr);
                         inStream.Att("type", theType);
@@ -3721,17 +3911,15 @@ public:
 
                             theEffect.m_EffectCommands.push_back(
                                         new SAllocateImage(
-                                            m_StringTable.GetRenderStringTable().RegisterStr(
-                                                theName), theTexFormat, theMagOp, theCoordOp,
+                                            theName, theTexFormat, theMagOp, theCoordOp,
                                             theSize, theFlags, theAccess));
                         } else {
                             theEffect.m_EffectCommands.push_back(
                                         new SAllocateBuffer(
-                                            m_StringTable.GetRenderStringTable().RegisterStr(
-                                                theName), theTexFormat, theMagOp, theCoordOp,
+                                            theName, theTexFormat, theMagOp, theCoordOp,
                                             theSize, theFlags));
                         }
-                    } else if (AreEqual("DataBuffer", inStream.GetNarrowElementName())) {
+                    } else if (QLatin1String("DataBuffer") == inStream.GetElementName()) {
                         SAllocateBufferFlags theFlags;
                         const char8_t *theLifetimeStr = "", *theType = "", *theWrapName = "",
                                 *theWrapType = "", *theFormat = "", *theName = "";
@@ -3765,10 +3953,9 @@ public:
                         } else {
                             theEffect.m_EffectCommands.push_back(
                                         new SAllocateDataBuffer(
-                                            m_StringTable.GetRenderStringTable().RegisterStr(
-                                                theName), bufType,
-                                            m_StringTable.GetRenderStringTable().RegisterStr(
-                                                theWrapName), wrapBufType, theSize, theFlags));
+
+                                                theName, bufType,
+                                           theWrapName, wrapBufType, theSize, theFlags));
                         }
                     } else {
                         QT3DS_ASSERT(false); // Unrecognized effect passes member.
@@ -3780,8 +3967,7 @@ public:
                     // Create the minimal set of commands that we could run the first shader with.
                     theEffect.m_EffectCommands.push_back(new SBindTarget());
                     theEffect.m_EffectCommands.push_back(
-                                new SBindShader(m_StringTable.GetRenderStringTable().RegisterStr(
-                                                    theEffect.m_Shaders[0].m_Name.c_str())));
+                                new SBindShader(theEffect.m_Shaders[0].m_Name));
                     theEffect.m_EffectCommands.push_back(new SApplyInstanceValue());
                     theEffect.m_EffectCommands.push_back(new SRender(false));
                 }
@@ -3789,41 +3975,40 @@ public:
         }
     }
 
-    bool LoadEffectXMLFromSourcePath(const char *inSourcePath,
+    bool LoadEffectXMLFromSourcePath(const QString &inSourcePath,
                                      Qt3DSDMInstanceHandle inInstance,
-                                     const TCharStr &inObjectName,
+                                     const QString &inObjectName,
                                      std::vector<SMetaDataLoadWarning> &outWarnings,
                                      QFile &inStream) override
     {
         std::shared_ptr<IDOMFactory> theFactory(
                     IDOMFactory::CreateDOMFactory(m_DataCore->GetStringTablePtr()));
-        qt3dsdm::SDOMElement *theElem = CDOMSerializer::Read(*theFactory, inStream, NULL);
-        if (theElem != NULL) {
+        qt3dsdm::SDOMElement *theElem = CDOMSerializer::Read(*theFactory, inStream, nullptr);
+        if (theElem != nullptr) {
             std::shared_ptr<IDOMReader> theReader(
                         IDOMReader::CreateDOMReader(*theElem, m_DataCore->GetStringTablePtr(),
                                                     theFactory));
             LoadEffectXML(*theReader, inInstance, inObjectName, outWarnings,
-                          TCharStr(Intern(inSourcePath)));
+                          inSourcePath);
             return true;
         }
         return false;
     }
 
-    Option<SMetaDataEffect> GetEffectBySourcePath(const char *inSourcePath) override
+    Option<SMetaDataEffect> GetEffectBySourcePath(const QString &inSourcePath) override
     {
         QDir sourcePath = QDir::cleanPath(QString(inSourcePath));
         for (TEffectMap::iterator iter = m_EffectMap.begin(), end = m_EffectMap.end(); iter != end;
              ++iter) {
-            QDir effectPath = QDir::cleanPath(QString::fromWCharArray(
-                                                  iter->second.m_SourcePath.wide_str()));
+            QDir effectPath = QDir::cleanPath(iter->m_SourcePath);
             if (effectPath == sourcePath)
-                return iter->second.ToEffect();
+                return iter->ToEffect();
         }
         return Empty();
     }
 
-    void LoadMaterialInstance(const char *inShaderFile, Qt3DSDMInstanceHandle inInstance,
-                              const TCharStr &inName,
+    void LoadMaterialInstance(const QString &inShaderFile, Qt3DSDMInstanceHandle inInstance,
+                              const QString &inName,
                               std::vector<SMetaDataLoadWarning> &outWarnings,
                               QFile &inStream) override
     {
@@ -3836,20 +4021,20 @@ public:
         }
     }
 
-    bool IsMaterialClassRegistered(const char *inName) override
+    bool IsMaterialClassRegistered(const QString &inName) override
     {
-        return m_CustomMaterials.find(Intern(inName)) != m_CustomMaterials.end();
+        return m_CustomMaterials.find(inName) != m_CustomMaterials.end();
     }
 
     void LoadMaterialClassXML(IDOMReader &inStream, Qt3DSDMInstanceHandle inInstance,
-                              const TCharStr &inObjectName,
+                              const QString &inObjectName,
                               std::vector<SMetaDataLoadWarning> &outWarnings,
-                              const TCharStr &inSourcePath) override
+                              const QString &inSourcePath) override
     {
         using namespace qt3ds::render::dynamic;
 
-        std::pair<TCustomMaterialMap::iterator, bool> theInserter = m_CustomMaterials.insert(
-                    std::make_pair(Intern(inObjectName), SMetaDataCustomMaterialImpl()));
+        TCustomMaterialMap::iterator theInserter = m_CustomMaterials.insert(
+                    inObjectName, SMetaDataCustomMaterialImpl());
         /*if ( inStream.MoveToFirstChild( "Effect" ) == false )
         {
                 outWarnings.push_back( SMetaDataLoadWarning( MetaDataLoadWarningType::Unknown,
@@ -3857,9 +4042,9 @@ public:
         missing top level Effect tag" ) );
                 return;
         }*/
-        eastl::string shaderPrefix = "#include \"customMaterial.glsllib\"\n";
+        QString shaderPrefix = QStringLiteral("#include \"customMaterial.glsllib\"\n");
 
-        SMetaDataCustomMaterialImpl &theMaterial = theInserter.first->second;
+        SMetaDataCustomMaterialImpl &theMaterial = *theInserter;
         m_ObjectName = inObjectName;
         theMaterial.m_Name = inObjectName;
         theMaterial.m_SourcePath = inSourcePath;
@@ -3868,71 +4053,71 @@ public:
         theMaterial.m_AlwaysDirty = false;
         theMaterial.m_ShaderKey = 0;
         theMaterial.m_LayerCount = 0;
-        inStream.Att("always-dirty", theMaterial.m_AlwaysDirty);
+        inStream.Att(QStringLiteral("always-dirty"), theMaterial.m_AlwaysDirty);
         LoadDynamicObjectProperties(inStream, theMaterial, inInstance, inObjectName, outWarnings,
                                     shaderPrefix);
         LoadDynamicObjectShaders(inStream, theMaterial, shaderPrefix, inObjectName);
 
         // currently single pass shader only
         if (theMaterial.m_Shaders.size()) {
-            eastl::string theShaderNameStr;
+            QString theShaderNameStr;
 
             // in Passes we store additional render commands
             IDOMReader::Scope __readerScope(inStream);
-            if (inStream.MoveToFirstChild("Passes")) {
+            if (inStream.MoveToFirstChild(QStringLiteral("Passes"))) {
                 for (bool success = inStream.MoveToFirstChild(); success;
                      success = inStream.MoveToNextSibling()) {
                     IDOMReader::Scope __passScope(inStream);
-                    if (AreEqual("Pass", inStream.GetNarrowElementName())) {
+                    if (QLatin1String("Pass") == inStream.GetElementName()) {
                         const char8_t *typeStr;
                         if (!inStream.UnregisteredAtt("type", typeStr))
                             typeStr = "render";
                         if (AreEqual(typeStr, "render")) {
-                            const char8_t *shader = "", *input = "[source]", *output = "[dest]",
-                                    *outputFormat = "rgba", *clear = "";
+                            QString shader;
+                            QString input = QStringLiteral("[source]");
+                            QString output = QStringLiteral("[dest]");
+                            QString outputFormat = QStringLiteral("rgba");
+                            QString clear;
                             bool needsClear = false;
-                            inStream.Att("shader", shader);
-                            inStream.Att("input", input);
-                            inStream.Att("output", output);
+                            inStream.Att(QStringLiteral("shader"), shader);
+                            inStream.Att(QStringLiteral("input"), input);
+                            inStream.Att(QStringLiteral("output"), output);
                             // for multi pass materials
-                            inStream.Att("clear", clear);
-                            if (AreEqual("true", clear))
+                            inStream.Att(QStringLiteral("clear"), clear);
+                            if (QLatin1String("true") == clear)
                                 needsClear = true;
 
                             GetShaderName(inObjectName, shader, theShaderNameStr);
                             // this is only for the final output of the effect
-                            inStream.Att("format", outputFormat);
+                            inStream.Att(QStringLiteral("format"), outputFormat);
                             qt3ds::render::NVRenderTextureFormats::Enum theOutputFormat =
-                                    ConvertTypeAndFormatToTextureFormat("ubyte", outputFormat);
+                                    ConvertTypeAndFormatToTextureFormat(QStringLiteral("ubyte"),
+                                                                        outputFormat);
 
-                            if (AreEqual(output, "[dest]") || IsTrivial(output)) {
+                            if (output == QLatin1String("[dest]") || output.isEmpty()) {
                                 theMaterial.m_CustomerMaterialCommands.push_back(
                                             new SBindTarget(theOutputFormat));
                             } else {
                                 theMaterial.m_CustomerMaterialCommands.push_back(
                                             new SBindBuffer(
-                                                m_StringTable.GetRenderStringTable().RegisterStr(
-                                                    output), needsClear));
+                                               output, needsClear));
                             }
 
                             // add shader to command stream
-                            qt3ds::render::CRegisteredString theShaderName;
+                            QString theShaderName;
                             if (!IsTrivial(shader)) {
                                 for (QT3DSU32 idx = 0, end = theMaterial.m_Shaders.size();
-                                     idx < end && theShaderName.IsValid() == false; ++idx) {
-                                    qt3ds::render::CRegisteredString thePossibleNameStr =
-                                            m_StringTable.GetRenderStringTable().RegisterStr(
-                                                theMaterial.m_Shaders[idx].m_Name.c_str());
-                                    if (AreEqual(thePossibleNameStr.c_str(),
-                                                 theShaderNameStr.c_str()))
+                                     idx < end && theShaderName.isNull() == true; ++idx) {
+                                    QString thePossibleNameStr =
+                                            theMaterial.m_Shaders[idx].m_Name;
+                                    if (thePossibleNameStr == theShaderNameStr)
                                         theShaderName = thePossibleNameStr;
                                 }
                             }
-                            if (theShaderName.IsValid() == false
-                                    && theMaterial.m_Shaders.empty() == false)
-                                theShaderName = m_StringTable.GetRenderStringTable().RegisterStr(
-                                            theMaterial.m_Shaders[0].m_Name.c_str());
-                            if (theShaderName.IsValid()) {
+                            if (theShaderName.isEmpty() == true
+                                    && theMaterial.m_Shaders.isEmpty() == false)
+                                theShaderName = theMaterial.m_Shaders[0].m_Name;
+                            if (!theShaderName.isEmpty()) {
                                 theMaterial.m_CustomerMaterialCommands.push_back(
                                             new SBindShader(theShaderName));
                                 // this is a place holder for our input values to the shader
@@ -3941,7 +4126,7 @@ public:
 
                                 for (bool bufParam = inStream.MoveToFirstChild(); bufParam;
                                      bufParam = inStream.MoveToNextSibling()) {
-                                    if (AreEqual("BufferBlit", inStream.GetNarrowElementName())) {
+                                    if (QLatin1String("BufferBlit") == inStream.GetElementName()) {
                                         const char8_t *value = "";
                                         const char8_t *dest = "";
                                         const char8_t *source = "";
@@ -3954,17 +4139,15 @@ public:
 
                                         theMaterial.m_CustomerMaterialCommands.push_back(
                                                     new SApplyBlitFramebuffer(
-                                                        m_StringTable.GetRenderStringTable().RegisterStr(
-                                                            source),
-                                                        m_StringTable.GetRenderStringTable().RegisterStr(
-                                                            dest)));
+                                                        source,
+                                                        dest));
 
                                         // note need a better way to pass information from MDL to
                                         // our input
                                         // We use buffer blits to simulate glass refraction
                                         theMaterial.m_HasRefraction = true;
-                                    } else if (AreEqual("BufferInput",
-                                                        inStream.GetNarrowElementName())) {
+                                    } else if (QLatin1String("BufferInput") ==
+                                                        inStream.GetElementName()) {
                                         const char8_t *param = "";
                                         const char8_t *value = "";
                                         inStream.Att("param", param);
@@ -3973,13 +4156,11 @@ public:
                                             value = "";
                                         theMaterial.m_CustomerMaterialCommands.push_back(
                                                     new SApplyBufferValue(
-                                                        m_StringTable.GetRenderStringTable().RegisterStr(
-                                                            value),
-                                                        m_StringTable.GetRenderStringTable().RegisterStr(
-                                                            param)));
+                                                        value,
+                                                        param));
                                         HideEffectProperty(inInstance, param);
-                                    } else if (AreEqual("Blending",
-                                                        inStream.GetNarrowElementName())) {
+                                    } else if (QLatin1String("Blending") ==
+                                                        inStream.GetElementName()) {
                                         const char8_t *theSrcBlendFuncStr = "",
                                                 *theDestBlendFuncStr = "";
                                         inStream.Att("source", theSrcBlendFuncStr);
@@ -3996,8 +4177,8 @@ public:
                                                                        theDstBlendFuc));
                                         // if we have blending we have transparency
                                         theMaterial.m_HasTransparency = true;
-                                    } else if (AreEqual("RenderState",
-                                                        inStream.GetNarrowElementName())) {
+                                    } else if (QLatin1String("RenderState") ==
+                                                        inStream.GetElementName()) {
                                         // UdoL Todo: add this one
                                     }
                                 }
@@ -4006,15 +4187,15 @@ public:
                             // pass.
                             theMaterial.m_CustomerMaterialCommands.push_back(new SRender(false));
                         }
-                    } else if (AreEqual("ShaderKey", inStream.GetNarrowElementName())) {
+                    } else if (QLatin1String("ShaderKey") == inStream.GetElementName()) {
                         QT3DSU32 theValue = 0;
                         inStream.Att("value", theValue);
                         theMaterial.m_ShaderKey = theValue;
-                    } else if (AreEqual("LayerKey", inStream.GetNarrowElementName())) {
+                    } else if (QLatin1String("LayerKey") == inStream.GetElementName()) {
                         QT3DSU32 theValue = 0;
                         inStream.Att("count", theValue);
                         theMaterial.m_LayerCount = theValue;
-                    } else if (AreEqual("Buffer", inStream.GetNarrowElementName())) {
+                    } else if (QLatin1String("Buffer") == inStream.GetElementName()) {
                         SAllocateBufferFlags theFlags;
                         const char8_t *theLifetimeStr = "", *theType = "", *theFormat = "",
                                 *theFilter = "", *theWrap = "", *theName = "";
@@ -4046,8 +4227,7 @@ public:
                         } else {
                             theMaterial.m_CustomerMaterialCommands.push_back(
                                         new SAllocateBuffer(
-                                            m_StringTable.GetRenderStringTable().RegisterStr(
-                                                theName), theTexFormat, theMagOp, theCoordOp,
+                                            theName, theTexFormat, theMagOp, theCoordOp,
                                             theSize, theFlags));
                         }
                     }
@@ -4058,8 +4238,7 @@ public:
                 // add minimal set
                 // add shader to command stream
                 theMaterial.m_CustomerMaterialCommands.push_back(
-                            new SBindShader(m_StringTable.GetRenderStringTable().RegisterStr(
-                                                theMaterial.m_Shaders[0].m_Name.c_str())));
+                            new SBindShader(theMaterial.m_Shaders[0].m_Name));
                 // this is a place holder for our input values to the shader
                 theMaterial.m_CustomerMaterialCommands.push_back(new SApplyInstanceValue());
                 // add the render command as last thing
@@ -4068,34 +4247,34 @@ public:
         }
     }
 
-    bool LoadMaterialClassFromSourcePath(const char *inSourcePath,
+    bool LoadMaterialClassFromSourcePath(const QString &inSourcePath,
                                          Qt3DSDMInstanceHandle inInstance,
-                                         const TCharStr &inObjectName,
+                                         const QString &inObjectName,
                                          std::vector<SMetaDataLoadWarning> &outWarnings,
                                          QFile &inStream) override
     {
         std::shared_ptr<IDOMFactory> theFactory(
                     IDOMFactory::CreateDOMFactory(m_DataCore->GetStringTablePtr()));
-        qt3dsdm::SDOMElement *theElem = CDOMSerializer::Read(*theFactory, inStream, NULL);
-        if (theElem != NULL) {
+        qt3dsdm::SDOMElement *theElem = CDOMSerializer::Read(*theFactory, inStream, nullptr);
+        if (theElem != nullptr) {
             std::shared_ptr<IDOMReader> theReader(
                         IDOMReader::CreateDOMReader(*theElem, m_DataCore->GetStringTablePtr(),
                                                     theFactory));
             LoadMaterialClassXML(*theReader, inInstance, inObjectName, outWarnings,
-                                 TCharStr(Intern(inSourcePath)));
+                                 inSourcePath);
             return true;
         }
         return false;
     }
 
-    Option<SMetaDataCustomMaterial> GetMaterialBySourcePath(const char *inSourcePath) override
+    Option<SMetaDataCustomMaterial> GetMaterialBySourcePath(const QString &inSourcePath) override
     {
-        TCharStr theSourcePath(Intern(inSourcePath));
+        QString theSourcePath(inSourcePath);
         for (TCustomMaterialMap::iterator iter = m_CustomMaterials.begin(),
              end = m_CustomMaterials.end();
              iter != end; ++iter) {
-            if (iter->second.m_SourcePath == theSourcePath)
-                return iter->second.ToMaterial();
+            if (iter->m_SourcePath == theSourcePath)
+                return iter->ToMaterial();
         }
         return Empty();
     }
@@ -4105,29 +4284,39 @@ public:
     void SetConsumer(TTransactionConsumerPtr inConsumer) override { m_Consumer = inConsumer; }
 
     ////////////////////////////////////////////////////////////////////////////////////
+#ifndef QT3DSDM_META_DATA_NO_SIGNALS
+#define QT3DSDM_SIGNAL_OVERRIDE override
+#else
+#define QT3DSDM_SIGNAL_OVERRIDE
+#endif
     // Signals
     virtual TSignalConnectionPtr
     ConnectInternalCategoryDestroyed(function<void(Qt3DSDMCategoryHandle)> inCallback)
+        QT3DSDM_SIGNAL_OVERRIDE
     {
         return CONNECT(&SNewMetaDataImpl::internalCategoryDestroyed);
     }
     virtual TSignalConnectionPtr
-    ConnectInternalPropertyDestroyed(function<void(Qt3DSDMMetaDataPropertyHandle)> inCallback)
+    ConnectInternalPropertyDestroyed(
+            function<void(Qt3DSDMMetaDataPropertyHandle)> inCallback) QT3DSDM_SIGNAL_OVERRIDE
     {
         return CONNECT(&SNewMetaDataImpl::internalMetaDataPropertyDestroyed);
     }
     virtual TSignalConnectionPtr
     ConnectInternalEventDestroyed(function<void(Qt3DSDMEventHandle)> inCallback)
+        QT3DSDM_SIGNAL_OVERRIDE
     {
         return CONNECT(&SNewMetaDataImpl::internalEventDestroyed);
     }
     virtual TSignalConnectionPtr
     ConnectInternalHandlerDestroyed(function<void(Qt3DSDMHandlerHandle)> inCallback)
+        QT3DSDM_SIGNAL_OVERRIDE
     {
         return CONNECT(&SNewMetaDataImpl::internalHandlerDestroyed);
     }
     virtual TSignalConnectionPtr
-    ConnectInternalHandlerArgDestroyed(function<void(Qt3DSDMHandlerHandle, QT3DSU32)> inCallback)
+    ConnectInternalHandlerArgDestroyed(
+            function<void(Qt3DSDMHandlerHandle, QT3DSU32)> inCallback) QT3DSDM_SIGNAL_OVERRIDE
     {
         return CONNECT(&SNewMetaDataImpl::internalHandlerArgDestroyed);
     }

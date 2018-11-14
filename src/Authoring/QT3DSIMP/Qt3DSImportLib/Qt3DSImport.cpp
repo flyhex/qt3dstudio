@@ -39,31 +39,37 @@
 
 using qt3dsdm::IStringTable;
 
-namespace qt3dsdm {
-}
-
 using namespace qt3dsimp;
 
-namespace eastl {
-template <>
-struct hash<AnimationId>
-{
-    size_t operator()(const AnimationId &id) const
-    {
-        return hash<TIMPHandle>()(id.m_Instance) ^ hash<TCharPtr>()(id.m_Property)
-            ^ hash<QT3DSU32>()(id.m_SubPropIndex);
-    }
-};
+namespace qt3dsimp {
 
-template <>
-struct equal_to<AnimationId>
+bool operator<(const AnimationId &a, const AnimationId &o)
 {
-    bool operator()(const AnimationId &lhs, const AnimationId &rhs) const
-    {
-        return lhs.m_Instance == rhs.m_Instance && AreEqual(lhs.m_Property, rhs.m_Property)
-            && lhs.m_SubPropIndex == rhs.m_SubPropIndex;
-    }
-};
+    if (a.m_Instance < o.m_Instance)
+        return true;
+    if (a.m_Property < o.m_Property)
+        return true;
+    if (a.m_SubPropIndex < o.m_SubPropIndex)
+        return true;
+    return false;
+}
+
+uint qHash(const AnimationId &aid, uint seed)
+{
+    QtPrivate::QHashCombine hash;
+    seed = hash(aid.m_Instance, seed);
+    seed = qHash(aid.m_Property, seed);
+    seed = hash(aid.m_SubPropIndex, seed);
+    return seed;
+}
+
+bool operator==(const AnimationId &a, const AnimationId &b)
+{
+    return a.m_Instance == b.m_Instance
+            && a.m_Property == b.m_Property
+            && a.m_SubPropIndex == b.m_SubPropIndex;
+}
+
 }
 
 using eastl::make_pair;
@@ -83,9 +89,9 @@ namespace {
 template <typename TDataType>
 struct AddRemoveImpl
 {
-    ImportArray<TDataType> m_Existing;
-    ImportArray<TDataType> m_Added;
-    ImportArray<TDataType> m_Removed;
+    QVector<TDataType> m_Existing;
+    QVector<TDataType> m_Added;
+    QVector<TDataType> m_Removed;
 
     operator AddRemoveData<TDataType>() const
     {
@@ -105,10 +111,10 @@ struct ImportReportImpl
     // added before children.
     AddRemoveImpl<InstanceDesc> m_Instances;
     AddRemoveImpl<ParentChildLink> m_Links;
-    ImportArray<Pair<InstanceDesc, ComposerObjectTypes::Enum>> m_TypeChanges;
-    AddRemoveImpl<Pair<TCharPtr, TCharPtr>> m_Images;
-    AddRemoveImpl<Pair<TCharPtr, TCharPtr>> m_Meshes;
-    AddRemoveImpl<Pair<TCharPtr, TCharPtr>> m_PathBuffers;
+    QVector<std::pair<InstanceDesc, ComposerObjectTypes::Enum>> m_TypeChanges;
+    AddRemoveImpl<std::pair<QString, QString>> m_Images;
+    AddRemoveImpl<std::pair<QString, QString>> m_Meshes;
+    AddRemoveImpl<std::pair<QString, QString>> m_PathBuffers;
     AddRemoveImpl<Animation> m_Animations;
 
     operator ImportReport()
@@ -130,7 +136,7 @@ struct ImportReportImpl
 struct InstanceDiffOp
 {
     QT3DSU32 NumItems(const Import &src) { return src.GetNumInstances(); }
-    void GetItems(const Import &src, NVDataRef<InstanceDesc> data) { src.GetInstances(data); }
+    void GetItems(const Import &src, QVector<InstanceDesc> &data) { src.GetInstances(data); }
     // ID's *and* types have to match in order to get valid output
     bool HasItem(const Import &src, const InstanceDesc &data)
     {
@@ -139,15 +145,15 @@ struct InstanceDiffOp
     }
 };
 
-bool FindChild(Option<InstanceDesc> hdlOpt, TCharPtr inCompareNextSibling,
-               ComposerObjectTypes::Enum childType, NVDataRef<InstanceDesc> children)
+bool FindChild(Option<InstanceDesc> hdlOpt, const QString &inCompareNextSibling,
+               ComposerObjectTypes::Enum childType, const QVector<InstanceDesc> &children)
 {
     if (hdlOpt.hasValue() == false)
         return false;
-    TCharPtr id = hdlOpt->m_Id;
+    QString id = hdlOpt->m_Id;
     QT3DSIMP_FOREACH(idx, children.size())
     {
-        TCharPtr nextSibling = idx + 1 < children.size() ? children[idx + 1].m_Id : L"";
+        QString nextSibling = ((idx + 1) < children.size()) ? children[idx + 1].m_Id : QString();
         // Because we know that the import objects share a single string table,
         // we know that equal strings will actually be equal via ptr comparison
         if (children[idx].m_Id == id && children[idx].m_Type == childType
@@ -160,11 +166,11 @@ bool FindChild(Option<InstanceDesc> hdlOpt, TCharPtr inCompareNextSibling,
 struct ImageDiffOp
 {
     QT3DSU32 NumItems(const Import &src) { return src.GetNumImages(); }
-    void GetItems(const Import &src, NVDataRef<Pair<TCharPtr, TCharPtr>> data)
+    void GetItems(const Import &src, QVector<std::pair<QString, QString>> &data)
     {
         src.GetImages(data);
     }
-    bool HasItem(const Import &src, const Pair<TCharPtr, TCharPtr> &data)
+    bool HasItem(const Import &src, const std::pair<QString, QString> &data)
     {
         return src.FindImageByRelativePath(data.first).hasValue();
     }
@@ -173,33 +179,33 @@ struct ImageDiffOp
 struct MeshDiffOp
 {
     QT3DSU32 NumItems(const Import &src) { return src.GetNumMeshes(); }
-    void GetItems(const Import &src, NVDataRef<Pair<TCharPtr, TCharPtr>> data)
+    void GetItems(const Import &src, QVector<std::pair<QString, QString>> &data)
     {
         src.GetMeshes(data);
     }
-    bool HasItem(const Import &src, const Pair<TCharPtr, TCharPtr> &data)
+    bool HasItem(const Import &src, const std::pair<QString, QString> &data)
     {
         return src.HasMesh(data.first);
     }
 };
-
+#if RUNTIME_SPLIT_TEMPORARILY_REMOVED
 struct PathBufferDiffOp
 {
     QT3DSU32 NumItems(const Import &src) { return src.GetNumPathBuffers(); }
-    void GetItems(const Import &src, NVDataRef<Pair<TCharPtr, TCharPtr>> data)
+    void GetItems(const Import &src, QVector<std::pair<QString, QString>> &data)
     {
         src.GetPathBuffers(data);
     }
-    bool HasItem(const Import &src, const Pair<TCharPtr, TCharPtr> &data)
+    bool HasItem(const Import &src, const std::pair<QString, QString> &data)
     {
         return src.FindPathBufferByRelativePath(data.first).hasValue();
     }
 };
-
+#endif
 struct AnimationDiffOp
 {
     QT3DSU32 NumItems(const Import &src) { return src.GetNumAnimations(); }
-    void GetItems(const Import &src, NVDataRef<Animation> data) { src.GetAnimations(data); }
+    void GetItems(const Import &src, QVector<Animation> &data) { src.GetAnimations(data); }
     bool HasItem(const Import &src, const Animation &data)
     {
         return src.FindAnimation(data.m_InstanceId, data.m_PropertyName, data.m_SubPropertyIndex)
@@ -214,157 +220,133 @@ struct AnimationDiffOp
 
 struct MeshEntry
 {
-    TCharPtr m_SourceId;
-    TCharPtr m_FilePath;
-    TCharPtr m_ReferencePath; // file path plus revision
-    MeshEntry(TCharPtr inSourceId, CFilePath inPath, QT3DSU32 inRevision,
-              qt3dsdm::IStringTable &inStringTable)
+    QString m_SourceId;
+    QString m_FilePath;
+    QString m_ReferencePath; // file path plus revision
+    QT3DSU32 m_revision;
+    MeshEntry(const QString &inSourceId, const QString &inPath, QT3DSU32 inRevision)
         : m_SourceId(inSourceId)
-        , m_FilePath(L"")
-        , m_ReferencePath(L"")
+        , m_FilePath(inPath)
+        , m_ReferencePath(inPath)
+        , m_revision(inRevision)
     {
-        m_FilePath = inStringTable.RegisterStr(inPath.toCString());
-        inPath.SetIdentifier(QString::number(inRevision));
-        m_ReferencePath = inStringTable.RegisterStr(inPath.toCString());
+        m_ReferencePath.append(QString::number(m_revision));
     }
 
-    MeshEntry(TCharPtr inSourceId, TCharPtr inPath, qt3dsdm::IStringTable &inStringTable)
-        : m_SourceId(inStringTable.RegisterStr(inSourceId))
-        , m_FilePath(inStringTable.RegisterStr(inPath))
-        , m_ReferencePath(L"")
+    MeshEntry(const QString &inSourceId, const QString &inPath)
+        : m_SourceId(inSourceId)
+        , m_FilePath(inPath)
+        , m_revision(0)
     {
     }
-};
-
-struct STCharPtrHash
-{
-#ifdef _WIN32
-    size_t operator()(TCharPtr nm) const
-    {
-        StaticAssert<sizeof(wchar_t) == sizeof(char16_t)>::valid_expression();
-        return eastl::hash<const char16_t *>()(reinterpret_cast<const char16_t *>(nm));
-    }
-
-#else
-    size_t operator()(TCharPtr nm) const
-    {
-        StaticAssert<sizeof(wchar_t) == sizeof(char32_t)>::valid_expression();
-        return eastl::hash<const char32_t *>()(reinterpret_cast<const char32_t *>(nm));
-    }
-#endif
-};
-
-struct STCharPtrEqualTo
-{
-    bool operator()(TCharPtr lhs, TCharPtr rhs) const { return AreEqual(lhs, rhs); }
 };
 
 class ImportImpl : public Import
 {
 public:
-    typedef ImportHashMap<TCharPtr, Instance *, STCharPtrHash, STCharPtrEqualTo> TIdToInstanceMap;
-    typedef ImportHashMap<TCharPtr, TCharPtr, STCharPtrHash, STCharPtrEqualTo> TStrToStrMap;
-    typedef ImportHashMap<TCharPtr, MeshEntry, STCharPtrHash, STCharPtrEqualTo> TPathToMeshMap;
+    typedef QHash<QString, Instance *> TIdToInstanceMap;
+    typedef QHash<QString, QString> TStrToStrMap;
+    typedef QHash<QString, MeshEntry> TPathToMeshMap;
 
     TStringTablePtr m_StringTablePtr;
     qt3dsdm::IStringTable &m_StringTable;
-    ImportHashSet<TIMPHandle> m_ValidInstances;
-    ImportHashSet<TIMPHandle> m_InValidInstances;
+    QSet<TIMPHandle> m_ValidInstances;
+    QSet<TIMPHandle> m_InValidInstances;
     TIdToInstanceMap m_IdToInstMap;
     // Mapping from original ID to new location
     TStrToStrMap m_Images;
     TStrToStrMap m_PathBuffers;
     // Mapping from mesh name to new location
     TPathToMeshMap m_Meshes;
-    ImportHashMap<AnimationId, Animation *> m_Animations;
+    QHash<AnimationId, Animation *> m_Animations;
 
-    CFilePath m_DestDirectory;
-    CFilePath m_SrcDirectory;
-    CFilePath m_SrcFile;
-    CFilePath m_FullSrcDirectory;
-    CFilePath m_ImageDir;
-    CFilePath m_MeshDir;
-    CFilePath m_PathBufferDir;
+    QString m_DestDirectory;
+    QString m_SrcDirectory;
+    QString m_SrcFile;
+    QString m_FullSrcDirectory;
+    QString m_ImageDir;
+    QString m_MeshDir;
+    QString m_PathBufferDir;
     mutable ImportReportImpl m_ImportReport;
-    eastl::string m_ConvertStr;
 
-    virtual ~ImportImpl()
+    ~ImportImpl() override
     {
-        for (ImportHashSet<TIMPHandle>::iterator iter = m_ValidInstances.begin(),
-                                                 end = m_ValidInstances.end();
-             iter != end; ++iter)
-            delete fromHdl((*iter));
-        for (ImportHashMap<AnimationId, Animation *>::iterator iter = m_Animations.begin(),
-                                                               end = m_Animations.end();
-             iter != end; ++iter)
-            free(iter->second);
+        for (auto instance : m_ValidInstances)
+            delete fromHdl(instance);
+        for (auto animation : m_Animations)
+            delete animation;
         m_ValidInstances.clear();
         m_Animations.clear();
         m_InValidInstances.clear();
     }
 
-    ImportImpl(TStringTablePtr strTable, const Q3DStudio::CString &srcFile,
-               const Q3DStudio::CString &destDirectory, const wchar_t *imagesDir = L"",
-               const wchar_t *meshesDir = L"")
+    ImportImpl(TStringTablePtr strTable, const QString &srcFile,
+               const QString &destDirectory, const QString &imagesDir = {},
+               const QString &meshesDir = {})
         : m_StringTablePtr(strTable)
         , m_StringTable(*strTable.get())
         , m_DestDirectory(destDirectory)
     {
-        if (srcFile.Length()) {
-            m_FullSrcDirectory = CFilePath(srcFile).GetDirectory();
+        if (!srcFile.isEmpty()) {
+            QFileInfo info(srcFile);
+            m_FullSrcDirectory = info.canonicalPath();
             m_SrcFile = CFilePath::GetRelativePathFromBase(destDirectory, srcFile);
-            m_SrcDirectory = CFilePath(m_SrcFile).GetDirectory();
+            m_SrcDirectory = QFileInfo(m_SrcFile).canonicalPath();
         }
         // On load, images and meshes directories will be trivial.
-        if (!IsTrivial(imagesDir)) {
+        if (!imagesDir.isEmpty()) {
             m_ImageDir = imagesDir;
-            if (m_ImageDir.isRelative())
-                m_ImageDir = CFilePath::CombineBaseAndRelative(destDirectory, CString(imagesDir));
+            if (QFileInfo(m_ImageDir).isRelative())
+                m_ImageDir = CFilePath::CombineBaseAndRelative(destDirectory, imagesDir);
         }
-        if (!IsTrivial(meshesDir)) {
+        if (!meshesDir.isEmpty()) {
             m_MeshDir = meshesDir;
-            if (m_MeshDir.isRelative())
-                m_MeshDir = CFilePath::CombineBaseAndRelative(destDirectory, CString(meshesDir));
+            if (QFileInfo(m_MeshDir).isRelative())
+                m_MeshDir = CFilePath::CombineBaseAndRelative(destDirectory, meshesDir);
         }
-        m_PathBufferDir = CFilePath::CombineBaseAndRelative(destDirectory, CString(L"paths"));
+        m_PathBufferDir = CFilePath::CombineBaseAndRelative(destDirectory, QStringLiteral("paths"));
     }
 
-    TCharPtr RegisterStr(TCharPtr str) override { return m_StringTable.RegisterStr(str); }
-    QString GetSrcFile() const override { return m_SrcFile.toQString(); }
-    QString GetDestDir() const override { return m_DestDirectory.toQString(); }
-    QString GetImageDir() const override { return m_ImageDir.toQString(); }
-    QString GetMeshDir() const override { return m_MeshDir.toQString(); }
-    QString GetPathBufferDir() const override { return m_PathBufferDir.toQString(); }
+    QString RegisterStr(TCharPtr str) override { return QString::fromWCharArray(str); }
+    QString GetSrcFile() const override { return m_SrcFile; }
+    QString GetDestDir() const override { return m_DestDirectory; }
+    QString GetImageDir() const override { return m_ImageDir; }
+    QString GetMeshDir() const override { return m_MeshDir; }
+#if RUNTIME_SPLIT_TEMPORARILY_REMOVED
+    QString GetPathBufferDir() const override { return m_PathBufferDir; }
+#endif
     void Release() override { delete this; }
 
     Instance *GetInstance(TIMPHandle inst) const
     {
         if (m_ValidInstances.contains(inst))
             return fromHdl(inst);
-        return NULL;
+        return nullptr;
     }
 
     Instance *GetInstance(TIMPHandle inst)
     {
         if (m_ValidInstances.contains(inst))
             return fromHdl(inst);
-        return NULL;
+        return nullptr;
     }
 
-    Instance *GetInstance(TCharPtr id)
+    Instance *GetInstance(const QString &id)
     {
-        ImportHashMap<TCharPtr, Instance *>::const_iterator entry = m_IdToInstMap.find(id);
+        QHash<QString, Instance *>::const_iterator entry
+                = m_IdToInstMap.find(id);
         if (entry != m_IdToInstMap.end())
-            return entry->second;
-        return NULL;
+            return *entry;
+        return nullptr;
     }
 
-    Instance *GetInstance(TCharPtr id) const
+    Instance *GetInstance(const QString &id) const
     {
-        ImportHashMap<TCharPtr, Instance *>::const_iterator entry = m_IdToInstMap.find(id);
+        QHash<QString, Instance *>::const_iterator entry
+                = m_IdToInstMap.find(id);
         if (entry != m_IdToInstMap.end())
-            return entry->second;
-        return NULL;
+            return *entry;
+        return nullptr;
     }
 
     Option<InstanceDesc> GetInstanceByHandle(TIMPHandle inst) const override
@@ -373,7 +355,7 @@ public:
             return *fromHdl(inst);
         return Empty();
     }
-    Option<InstanceDesc> FindInstanceById(TCharPtr inst) const override
+    Option<InstanceDesc> FindInstanceById(const QString &inst) const override
     {
         Instance *retval = GetInstance(inst);
         if (retval && retval->m_Valid)
@@ -381,7 +363,7 @@ public:
         return Empty();
     }
 
-    Option<InstanceDesc> FindAnyInstanceById(TCharPtr inst) const override
+    Option<InstanceDesc> FindAnyInstanceById(const QString &inst) const override
     {
         Instance *retval = GetInstance(inst);
         if (retval)
@@ -395,7 +377,7 @@ public:
         return (QT3DSU32)(m_ValidInstances.size() - m_InValidInstances.size());
     }
 
-    void AddInstance(Instance *inInstance, NVDataRef<InstanceDesc> &inAdded, QT3DSU32 &addIdx,
+    void AddInstance(Instance *inInstance, QVector<InstanceDesc> &inAdded, QT3DSU32 &addIdx,
                      QT3DSU32 numItems) const
     {
         if (addIdx < numItems) {
@@ -409,21 +391,17 @@ public:
         }
     }
 
-    QT3DSU32 GetInstances(NVDataRef<InstanceDesc> outDescs) const override
+    QT3DSU32 GetInstances(QVector<InstanceDesc> &outDescs) const override
     {
         QT3DS_ASSERT(outDescs.size() >= GetNumInstances());
-        QT3DSU32 numItems = qMin(outDescs.size(), GetNumInstances());
+        QT3DSU32 numItems = qMin(QT3DSU32(outDescs.size()), GetNumInstances());
         QT3DSU32 idx = 0;
 
-        ImportHashSet<TIMPHandle> &validInstances(
-            const_cast<ImportHashSet<TIMPHandle> &>(m_ValidInstances));
-        for (ImportHashSet<TIMPHandle>::iterator theIter = validInstances.begin(),
-                                                 end = validInstances.end();
-             theIter != end; ++theIter) {
-            if (m_InValidInstances.contains(*theIter))
+        for (auto instance : qAsConst(m_ValidInstances)) {
+            if (m_InValidInstances.contains(instance))
                 continue;
 
-            Instance *theInstance = GetInstance(*theIter);
+            Instance *theInstance = GetInstance(instance);
             if (theInstance->m_Parent == 0)
                 AddInstance(theInstance, outDescs, idx, numItems);
         }
@@ -433,40 +411,40 @@ public:
     QT3DSU32 GetNumProperties(TIMPHandle instance) const override
     {
         Instance *inst = GetInstance(instance);
-        if (inst == NULL) {
+        if (inst == nullptr) {
             QT3DS_ASSERT(false);
             return 0;
         }
         return (QT3DSU32)inst->m_PropertyValues.size();
     }
-    QT3DSU32 GetProperties(TIMPHandle instance, NVDataRef<PropertyValue> outBuffer) const override
+    QT3DSU32 GetProperties(TIMPHandle instance, QVector<PropertyValue> &outBuffer) const override
     {
         Instance *inst = GetInstance(instance);
-        if (inst == NULL) {
+        if (inst == nullptr) {
             QT3DS_ASSERT(false);
             return 0;
         }
-        QT3DSU32 numItems = qMin((QT3DSU32)outBuffer.size(), (QT3DSU32)inst->m_PropertyValues.size());
+        QT3DSU32 numItems = qMin(QT3DSU32(outBuffer.size()),
+                                 QT3DSU32(inst->m_PropertyValues.size()));
         QT3DSU32 idx = 0;
-        for (ImportHashMap<ComposerPropertyNames::Enum, SInternValue>::iterator
-                 iter = inst->m_PropertyValues.begin(),
-                 end = inst->m_PropertyValues.end();
-             iter != end && idx < numItems; ++iter, ++idx)
-            outBuffer[idx] = PropertyValue(iter->first, iter->second);
+        for (auto iter = inst->m_PropertyValues.begin(), end = inst->m_PropertyValues.end();
+             iter != end && idx < numItems; ++iter, ++idx) {
+            outBuffer[idx] = PropertyValue(iter.key(), iter.value());
+        }
         return numItems;
     }
     Option<SValue> GetInstancePropertyValue(TIMPHandle instance,
-                                                    ComposerPropertyNames::Enum val) const override
+                                            ComposerPropertyNames::Enum val) const override
     {
         Instance *inst = GetInstance(instance);
-        if (inst == NULL) {
+        if (inst == nullptr) {
             QT3DS_ASSERT(false);
             return Empty();
         }
-        const ImportHashMap<ComposerPropertyNames::Enum, SInternValue>::iterator entry =
+        const QHash<ComposerPropertyNames::Enum, SInternValue>::iterator entry =
             inst->m_PropertyValues.find(val);
         if (entry != inst->m_PropertyValues.end())
-            return entry->second.GetValue();
+            return entry->GetValue();
         return Empty();
     }
 
@@ -474,7 +452,7 @@ public:
     QT3DSU32 GetNumChildren(TIMPHandle instance) const override
     {
         Instance *inst = GetInstance(instance);
-        if (inst == NULL) {
+        if (inst == nullptr) {
             QT3DS_ASSERT(false);
             return 0;
         }
@@ -489,10 +467,10 @@ public:
     }
 
     // Returns valid children in the childBuffer parameter.
-    QT3DSU32 GetChildren(TIMPHandle instance, NVDataRef<InstanceDesc> childBuffer) const override
+    QT3DSU32 GetChildren(TIMPHandle instance, QVector<InstanceDesc> &childBuffer) const override
     {
         Instance *inst = GetInstance(instance);
-        if (inst == NULL) {
+        if (inst == nullptr) {
             QT3DS_ASSERT(false);
             return 0;
         }
@@ -513,11 +491,11 @@ public:
     void MarkInstanceInvalid(TIMPHandle instance) override
     {
         Instance *inst = GetInstance(instance);
-        if (inst == NULL) {
+        if (inst == nullptr) {
             QT3DS_ASSERT(false);
             return;
         }
-        if (m_InValidInstances.insert(instance).second) {
+        if (*m_InValidInstances.insert(instance)) {
             inst->MarkInvalid();
             QT3DSIMP_FOREACH(idx, (QT3DSU32)inst->m_Children.size())
             {
@@ -526,20 +504,18 @@ public:
                     MarkInstanceInvalid(toHdl(theInstance));
             }
             std::vector<AnimationId> animationsToErase;
-            for (ImportHashMap<AnimationId, Animation *>::iterator iter = m_Animations.begin(),
-                                                                   end = m_Animations.end();
-                 iter != end; ++iter) {
-                if (iter->first.m_Instance == instance)
-                    animationsToErase.push_back(iter->first);
+            for (auto iter = m_Animations.begin(), end = m_Animations.end(); iter != end; ++iter) {
+                if (iter.key().m_Instance == instance)
+                    animationsToErase.push_back(iter.key());
             }
-            for (size_t idx = 0, end = animationsToErase.size(); idx < end; ++idx)
-                m_Animations.erase(animationsToErase[idx]);
+            for (auto animation : qAsConst(animationsToErase))
+                m_Animations.remove(animation);
         }
     }
 
-    TIMPHandle CreateInstance(TCharPtr name, ComposerObjectTypes::Enum inType) override
+    TIMPHandle CreateInstance(const QString &name, ComposerObjectTypes::Enum inType) override
     {
-        if (IsTrivial(name) == false) {
+        if (name.isEmpty() == false) {
             Option<InstanceDesc> exists = FindInstanceById(name);
             bool hasValue = exists.hasValue();
             if (hasValue) {
@@ -547,38 +523,32 @@ public:
                 return exists->m_Handle;
             }
         }
-        name = m_StringTable.RegisterStr(name);
         InstanceDesc newDesc;
         newDesc.m_Id = name;
         newDesc.m_Type = inType;
         Instance *newInst = new Instance(newDesc);
         m_ValidInstances.insert(toHdl(newInst));
-        m_IdToInstMap.insert(eastl::make_pair(name, newInst));
+        m_IdToInstMap.insert(name, newInst);
         return toHdl(newInst);
     }
 
-    Instance *CopyInstanceHierarchy(Instance &inSource, ImportHashMap<TCharPtr, TCharPtr> &inIdMap)
+    Instance *CopyInstanceHierarchy(Instance &inSource, QHash<QString, QString> &inIdMap)
     {
-        wstring uniqueStem(inSource.m_Id);
-        wstring instId(uniqueStem);
+        QString uniqueStem(inSource.m_Id);
+        QString instId(uniqueStem);
         int index = 1;
         do {
-            wchar_t buf[16];
-            WStrOps<QT3DSU32>().ToStr(index, toDataRef(buf, 16));
+            instId = QStringLiteral("%1_%2").arg(uniqueStem).arg(index);
             ++index;
-            instId.assign(uniqueStem);
-            instId.append(L"_");
-            instId.append(buf);
-        } while (FindInstanceById(RegisterStr(instId.c_str())).hasValue());
+        } while (FindInstanceById(instId).hasValue());
 
-        Instance *retval =
-            GetInstance(CreateInstance(RegisterStr(instId.c_str()), inSource.m_Type));
-        inIdMap.insert(eastl::make_pair(RegisterStr(inSource.m_Id), RegisterStr(retval->m_Id)));
+        Instance *retval = GetInstance(CreateInstance(instId, inSource.m_Type));
+        inIdMap.insert(inSource.m_Id, retval->m_Id);
 
         QT3DSIMP_FOREACH(idx, (QT3DSU32)inSource.m_Children.size())
         {
             Instance *oldChild = GetInstance(inSource.m_Children[idx]);
-            if (oldChild == NULL) {
+            if (oldChild == nullptr) {
                 QT3DS_ASSERT(false);
                 return retval;
             }
@@ -589,40 +559,36 @@ public:
     }
 
     void CopyInstancePropertiesAndAnimation(Instance &inSource,
-                                            ImportHashMap<TCharPtr, TCharPtr> &inIdMap)
+                                            QHash<QString, QString> &inIdMap)
     {
-        const ImportHashMap<TCharPtr, TCharPtr>::iterator theNewItemId =
-            inIdMap.find(inSource.m_Id);
+        const QHash<QString, QString>::iterator theNewItemId = inIdMap.find(inSource.m_Id);
         if (theNewItemId == inIdMap.end()) {
             QT3DS_ASSERT(false);
             return;
         }
-        Instance *theCopy = GetInstance(theNewItemId->second);
-        if (theCopy == NULL) {
+        Instance *theCopy = GetInstance(*theNewItemId);
+        if (theCopy == nullptr) {
             QT3DS_ASSERT(false);
             return;
         }
 
-        for (ImportHashMap<ComposerPropertyNames::Enum, SInternValue>::iterator
-                 iter = inSource.m_PropertyValues.begin(),
-                 end = inSource.m_PropertyValues.end();
+        for (auto iter = inSource.m_PropertyValues.begin(), end = inSource.m_PropertyValues.end();
              iter != end; ++iter) {
-            SInternValue current(iter->second);
+            SInternValue current(*iter);
             if (GetValueType(current.GetValue()) == DataModelDataType::StringRef) {
                 const SStringRef &theRef = get<SStringRef>(current.GetValue());
-                const ImportHashMap<TCharPtr, TCharPtr>::iterator theNewId =
-                    inIdMap.find(theRef.m_Id);
-                if (theNewId != inIdMap.end())
+                const QHash<QString, QString>::iterator theNewId
+                        = inIdMap.find(QString::fromWCharArray(theRef.m_Id));
+                if (theNewId != inIdMap.end()) {
                     current = SInternValue::ISwearThisHasAlreadyBeenInternalized(
-                        SValue(SStringRef(theNewId->second)));
+                        SValue(QVariant::fromValue(*theNewId)));
+                }
             }
-            theCopy->m_PropertyValues.insert(eastl::make_pair(iter->first, current));
+            theCopy->m_PropertyValues.insert(iter.key(), current);
         }
-        for (ImportHashMap<AnimationId, Animation *>::iterator iter = m_Animations.begin(),
-                                                               end = m_Animations.end();
-             iter != end; ++iter) {
-            if (iter->first.m_Instance == toHdl(&inSource)) {
-                const Animation *theSrcAnimation = iter->second;
+        for (auto iter = m_Animations.begin(), end = m_Animations.end();  iter != end; ++iter) {
+            if (iter.key().m_Instance == toHdl(&inSource)) {
+                const Animation *theSrcAnimation = *iter;
                 DoAddAnimation(theCopy->m_Id, theSrcAnimation->m_PropertyName,
                                theSrcAnimation->m_SubPropertyIndex, theSrcAnimation->m_Type,
                                theSrcAnimation->m_Keyframes);
@@ -631,7 +597,7 @@ public:
         QT3DSIMP_FOREACH(idx, (QT3DSU32)inSource.m_Children.size())
         {
             Instance *oldChild = GetInstance(inSource.m_Children[idx]);
-            if (oldChild == NULL) {
+            if (oldChild == nullptr) {
                 QT3DS_ASSERT(false);
                 return;
             }
@@ -642,18 +608,18 @@ public:
     TIMPHandle CopyInstance(TIMPHandle inSource) override
     {
         Instance *inst = GetInstance(inSource);
-        if (inst == NULL) {
+        if (inst == nullptr) {
             QT3DS_ASSERT(false);
             return 0;
         }
 
         // map from old ids to new ids
-        ImportHashMap<TCharPtr, TCharPtr> idMap;
+        QHash<QString, QString> idMap;
         // copy the hierarchy first
         Instance *retval = CopyInstanceHierarchy(*inst, idMap);
 
         Instance *parent = fromHdl(inst->m_Parent);
-        if (parent != NULL)
+        if (parent != nullptr)
             parent->AddChild(retval, inst);
 
         // Copy properties and animations
@@ -662,10 +628,10 @@ public:
         return toHdl(retval);
     }
 
-    bool SetInstanceProperties(TIMPHandle instance, NVConstDataRef<PropertyValue> inBuffer) override
+    bool SetInstanceProperties(TIMPHandle instance, const QVector<PropertyValue> &inBuffer) override
     {
         Instance *inst = GetInstance(instance);
-        if (inst == NULL) {
+        if (inst == nullptr) {
             QT3DS_ASSERT(false);
             return false;
         }
@@ -673,10 +639,10 @@ public:
         return true;
     }
     bool DoSetInstancePropertyValue(TIMPHandle instance, ComposerPropertyNames::Enum pname,
-                                            const TImportModelValue &val) override
+                                    const TImportModelValue &val) override
     {
         Instance *inst = GetInstance(instance);
-        if (inst == NULL) {
+        if (inst == nullptr) {
             QT3DS_ASSERT(false);
             return false;
         }
@@ -685,7 +651,7 @@ public:
     }
 
     bool DoSetInstancePropertyValue(TIMPHandle inst, ComposerPropertyNames::Enum pname,
-                                            TCharPtr val) override
+                                    const QString &val) override
     {
         return DoSetInstancePropertyValue(inst, pname, std::make_shared<CDataStr>(val));
     }
@@ -693,11 +659,11 @@ public:
     {
         Instance *inst = GetInstance(instance);
         Instance *child = GetInstance(childHdl);
-        if (inst == NULL) {
+        if (inst == nullptr) {
             QT3DS_ASSERT(false);
             return false;
         }
-        if (child == NULL) {
+        if (child == nullptr) {
             QT3DS_ASSERT(false);
             return false;
         }
@@ -732,90 +698,89 @@ public:
     }
 
     QT3DSU32 GetNumImages() const override { return (QT3DSU32)m_Images.size(); }
-    QT3DSU32 GetImages(NVDataRef<Pair<TCharPtr, TCharPtr>> imgPaths) const override
+    QT3DSU32 GetImages(QVector<std::pair<QString, QString>> &imgPaths) const override
     {
         QT3DSU32 numItems = qMin((QT3DSU32)imgPaths.size(), (QT3DSU32)m_Images.size());
         QT3DS_ASSERT(numItems == m_Images.size());
         QT3DSU32 idx = 0;
-        for (ImportHashMap<TCharPtr, TCharPtr>::const_iterator iter = m_Images.begin(),
-                                                               end = m_Images.end();
+        for (auto iter = m_Images.begin(), end = m_Images.end();
              iter != end && idx < numItems; ++iter, ++idx)
-            imgPaths[idx] = Pair<TCharPtr, TCharPtr>(iter->first, iter->second);
+            imgPaths[idx] = std::pair<QString, QString>(iter.key(), iter.value());
         return numItems;
     }
 
+    bool ensureDirectoryExists(const QString &directory)
+    {
+        QDir dir(directory);
+        dir.mkpath(QStringLiteral("."));
+        return dir.exists();
+    }
     // Copies the an appropriate location in our import directory
     // Returns the path of the added image.  This may mangle the name slightly
     // In case of a conflict.
-    CharPtrOrError AddImage(TCharPtr _imgPath) override
+    QStringOrError AddImage(const QString &_imgPath) override
     {
-        Option<TCharPtr> added = FindImageByPath(_imgPath);
+        Option<QString> added = FindImageByPath(_imgPath);
         if (added.hasValue())
             return *added;
 
-        if (!m_ImageDir.IsDirectory())
-            m_ImageDir.CreateDir(true);
+        if (!ensureDirectoryExists(m_ImageDir))
+            return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_ImageDir);
 
-        if (!m_ImageDir.IsDirectory())
-            return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_ImageDir.toCString());
-
-        Q3DStudio::CString imgPath = CFilePath::GetAbsolutePath(CString(_imgPath));
-        Q3DStudio::CString srcImgPath =
+        QString imgPath = QFileInfo(_imgPath).absoluteFilePath();
+        QString srcImgPath =
             CFilePath::GetRelativePathFromBase(m_FullSrcDirectory, imgPath);
 
-        Q3DStudio::SFileErrorCodeFileNameAndNumBytes copyResult =
-            Q3DStudio::SFileTools::FindAndCopyDestFile(m_ImageDir, imgPath);
+        QString destFile;
+        bool copyResult = Q3DStudio::SFileTools::FindAndCopyDestFile(QDir(m_ImageDir), imgPath,
+                                                                     destFile);
         // Get the actual return value relative do our destination directory
-        Q3DStudio::CString _retval =
-            CFilePath::GetRelativePathFromBase(m_DestDirectory, copyResult.m_DestFilename);
-        // Register the string, so we can hand retval back to clients
-        TCharPtr retval = m_StringTable.RegisterStr(_retval.c_str());
-        m_Images.insert(eastl::make_pair(m_StringTable.RegisterStr(srcImgPath.c_str()), retval));
+        QString retval = CFilePath::GetRelativePathFromBase(m_DestDirectory, destFile);
 
-        if (copyResult.m_Error != Q3DStudio::FileErrorCodes::NoError) {
-            CharPtrOrError errorValue(
-                ImportErrorData(FromFileErrorCode(copyResult.m_Error), RegisterStr(imgPath)));
+        m_Images.insert(srcImgPath, retval);
+
+        if (!copyResult) {
+            QStringOrError errorValue(
+                ImportErrorData(ImportErrorCodes::ResourceNotWriteable, imgPath));
             errorValue.m_Value = retval;
             return errorValue;
         }
         return retval;
     }
-    CharPtrOrError AddOrReplaceImage(TCharPtr _imgPath, Option<TCharPtr> dstPath)
+    QStringOrError AddOrReplaceImage(const QString &_imgPath, Option<QString> dstPath)
     {
         if (dstPath.hasValue()) {
-            if (!m_ImageDir.IsDirectory())
-                m_ImageDir.CreateDir(true);
-            if (!m_ImageDir.IsDirectory())
-                return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_ImageDir.toCString());
+            if (!ensureDirectoryExists(m_ImageDir))
+                return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_ImageDir);
+
             CFilePath fullDestPath =
-                CFilePath::CombineBaseAndRelative(m_DestDirectory, CString(dstPath.getValue()));
+                CFilePath::CombineBaseAndRelative(m_DestDirectory, dstPath.getValue());
             Q3DStudio::SFileErrorCodeAndNumBytes copyResult = Q3DStudio::SFileTools::Copy(
                 fullDestPath, Q3DStudio::FileOpenFlags(Q3DStudio::FileOpenFlagValues::Truncate
                                                        | Q3DStudio::FileOpenFlagValues::Open
                                                        | Q3DStudio::FileOpenFlagValues::Create),
-                CString(_imgPath));
+                _imgPath);
             // Regardless of if the copy operation succeeds or not, if the destination exists
             // already
             // Then we enter it into our dictionary
             if (fullDestPath.IsFile()) {
-                CFilePath imgPath = CFilePath::GetAbsolutePath(CString(_imgPath));
-                CFilePath srcImgPath =
+                QString imgPath = QFileInfo(_imgPath).absoluteFilePath();
+                QString srcImgPath =
                     CFilePath::GetRelativePathFromBase(m_FullSrcDirectory, imgPath);
-                m_Images.insert(eastl::make_pair(m_StringTable.RegisterStr(srcImgPath.toCString()),
-                                                 m_StringTable.RegisterStr(dstPath.getValue())));
+                m_Images.insert(srcImgPath, dstPath.getValue());
             }
 
-            TCharPtr returnPath = dstPath.getValue();
+            QString returnPath = dstPath.getValue();
 
             if (copyResult.m_Error != Q3DStudio::FileErrorCodes::NoError) {
                 QT3DS_ASSERT(false);
-                const wchar_t *extraData = NULL;
+                QString extraData;
                 ImportErrorCodes::Enum error = FromFileErrorCode(copyResult.m_Error);
                 if (error == ImportErrorCodes::ResourceNotWriteable)
                     extraData = dstPath.getValue();
                 else if (error == ImportErrorCodes::SourceFileNotReadable)
                     extraData = _imgPath;
-                CharPtrOrError errorRet(ImportErrorData(error, extraData));
+                QStringOrError errorRet(ImportErrorData(error, extraData));
                 errorRet.m_Value = returnPath;
                 return errorRet;
             }
@@ -823,84 +788,76 @@ public:
         }
         return AddImage(_imgPath);
     }
-    Option<TCharPtr> FindImageByPath(TCharPtr _imgPath) const override
+    Option<QString> FindImageByPath(const QString &_imgPath) const override
     {
-        Q3DStudio::CString imgPath = CFilePath::GetAbsolutePath(CString(_imgPath));
-        Q3DStudio::CString srcImgPath =
-            CFilePath::GetRelativePathFromBase(m_FullSrcDirectory, imgPath);
-        return FindImageByRelativePath(srcImgPath.c_str());
+        const QString imgPath(QFileInfo(_imgPath).absoluteFilePath());
+        const QString srcImgPath(CFilePath::GetRelativePathFromBase(m_FullSrcDirectory, imgPath));
+        return FindImageByRelativePath(srcImgPath);
     }
 
-    Option<TCharPtr> FindImageByRelativePath(TCharPtr imgPath) const override
+    Option<QString> FindImageByRelativePath(const QString &imgPath) const override
     {
-        ImportHashMap<TCharPtr, TCharPtr>::const_iterator entry = m_Images.find(imgPath);
+        QHash<QString, QString>::const_iterator entry = m_Images.find(imgPath);
         if (entry != m_Images.end())
-            return entry->second;
+            return *entry;
         return Empty();
     }
 
     QT3DSU32 GetNumMeshes() const override { return (QT3DSU32)m_Meshes.size(); }
-    QT3DSU32 GetMeshes(NVDataRef<Pair<TCharPtr, TCharPtr>> bufferPaths) const override
+    QT3DSU32 GetMeshes(QVector<std::pair<QString, QString>> &bufferPaths) const override
     {
-        QT3DSU32 numItems = qMin((QT3DSU32)m_Meshes.size(), bufferPaths.size());
+        QT3DSU32 numItems = qMin(m_Meshes.size(), bufferPaths.size());
         QT3DS_ASSERT(numItems == m_Meshes.size());
         QT3DSU32 idx = 0;
-        for (ImportHashMap<TCharPtr, MeshEntry>::const_iterator iter = m_Meshes.begin(),
-                                                                end = m_Meshes.end();
-             iter != end && idx < numItems; ++iter, ++idx)
-            bufferPaths[idx] = Pair<TCharPtr, TCharPtr>(iter->first, iter->second.m_FilePath);
+        for (auto iter = m_Meshes.begin(), end = m_Meshes.end();
+             iter != end && idx < numItems; ++iter, ++idx) {
+            bufferPaths[idx] = std::make_pair(iter.key(), iter->m_FilePath);
+        }
         return numItems;
     }
-    // Copies the vertex buffer into the appropriate location, renaming if necessary.
-    CharPtrOrError AddMesh(const Mesh &meshBuffer, TCharPtr _name) override
-    {
-        if (IsTrivial(_name)) {
-            QT3DS_ASSERT(false);
-            return L"";
-        }
-        Q3DStudio::CString name = CFilePath::MakeSafeFileStem(_name);
 
-        Option<TCharPtr> meshOpt = FindMeshReferencePathByName(name.c_str());
+    // Copies the vertex buffer into the appropriate location, renaming if necessary.
+    QStringOrError AddMesh(const Mesh &meshBuffer, const QString &_name) override
+    {
+        if (_name.isNull()) {
+            QT3DS_ASSERT(false);
+            return QString();
+        }
+        QString name = CFilePath::MakeSafeFileStem(_name);
+
+        Option<QString> meshOpt = FindMeshReferencePathByName(name);
         if (meshOpt.hasValue())
             return *meshOpt;
 
-        if (!m_MeshDir.IsDirectory())
-            m_MeshDir.CreateDir(true);
-        if (!m_MeshDir.IsDirectory())
-            return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_MeshDir.toCString());
+        if (!ensureDirectoryExists(m_MeshDir))
+            return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_MeshDir);
 
-        Q3DStudio::TFilePtr handf =
-            Q3DStudio::SFileTools::FindUniqueDestFile(m_MeshDir, name, L"mesh");
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-        Qt3DSFileToolsSeekableMeshBufIOStream output(handf);
+        const QString handf = Q3DStudio::SFileTools::FindUniqueDestFile(m_MeshDir, name,
+                                                                        QStringLiteral("mesh"));
+        QFile output(handf);
+        output.open(QFile::WriteOnly | QFile::NewOnly);
         MallocAllocator alloc;
         QT3DSU32 meshId = meshBuffer.SaveMulti(alloc, output);
-        CFilePath _retval = CFilePath::GetRelativePathFromBase(m_DestDirectory, handf->m_Path);
-        MeshEntry newEntry(m_StringTable.RegisterStr(name.c_str()), _retval, meshId, m_StringTable);
-        m_Meshes.insert(eastl::make_pair(newEntry.m_SourceId, newEntry));
+        QString _retval = CFilePath::GetRelativePathFromBase(m_DestDirectory, handf);
+        MeshEntry newEntry(name, _retval, meshId);
+        m_Meshes.insert(newEntry.m_SourceId, newEntry);
         return newEntry.m_ReferencePath;
-#endif
-        return L"";
     }
 
-    CharPtrOrError AddOrReplaceMesh(const Mesh &meshBuffer, TCharPtr name, Option<TCharPtr> srcMesh)
+    QStringOrError AddOrReplaceMesh(const Mesh &meshBuffer, const QString &name,
+                                    Option<QString> srcMesh)
     {
         using namespace Q3DStudio;
         if (srcMesh.hasValue()) {
-            if (!m_MeshDir.IsDirectory())
-                m_MeshDir.CreateDir(true);
-            if (!m_MeshDir.IsDirectory()) {
-                return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory,
-                                       m_MeshDir.toCString());
-            }
+            if (!ensureDirectoryExists(m_MeshDir))
+                return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_MeshDir);
 
-            CFilePath meshPath =
-                    CFilePath::CombineBaseAndRelative(m_DestDirectory, CString(srcMesh.getValue()));
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-            meshPath = meshPath.filePath();
-            Qt3DSFileToolsSeekableMeshBufIOStream output(
-                        SFile::Wrap(SFile::OpenForWrite(meshPath, FileWriteFlags()), meshPath));
-            if (output.IsOpen() == false) {
+            const QString meshPath
+                    = CFilePath::CombineBaseAndRelative(m_DestDirectory, srcMesh.getValue());
+
+            QFile output(meshPath);
+            output.open(QFile::WriteOnly | QFile::Truncate);
+            if (output.isOpen() == false) {
                 QT3DS_ASSERT(false);
                 return ImportErrorData(ImportErrorCodes::ResourceNotWriteable, srcMesh.getValue());
             }
@@ -908,58 +865,55 @@ public:
             MallocAllocator allocator;
             QT3DSU32 meshId = meshBuffer.SaveMulti(allocator, output);
 
-            CFilePath relativePath = CFilePath::GetRelativePathFromBase(m_DestDirectory, meshPath);
+            QString relativePath = CFilePath::GetRelativePathFromBase(m_DestDirectory, meshPath);
 
-            MeshEntry newEntry(m_StringTable.RegisterStr(name), relativePath, meshId,
-                               m_StringTable);
-            m_Meshes.insert(eastl::make_pair(newEntry.m_SourceId, newEntry));
+            MeshEntry newEntry(name, relativePath, meshId);
+            m_Meshes.insert(newEntry.m_SourceId, newEntry);
             return newEntry.m_ReferencePath;
-#endif
-            return L"";
         }
         return AddMesh(meshBuffer, name);
     }
 
-    bool HasMesh(TCharPtr meshName) const override
+    bool HasMesh(const QString & meshName) const override
     {
         return m_Meshes.find(meshName) != m_Meshes.end();
     }
 
-    Option<TCharPtr> FindMeshReferencePathByName(TCharPtr meshName) const override
+    Option<QString> FindMeshReferencePathByName(const QString &meshName) const override
     {
-        ImportHashMap<TCharPtr, MeshEntry>::const_iterator entry = m_Meshes.find(meshName);
+        QHash<QString, MeshEntry>::const_iterator entry = m_Meshes.find(meshName);
         if (entry != m_Meshes.end()) {
-            QT3DS_ASSERT(!IsTrivial(entry->second.m_ReferencePath));
-            return entry->second.m_ReferencePath;
+            QT3DS_ASSERT(!entry->m_ReferencePath.isEmpty());
+            return entry->m_ReferencePath;
         }
         return Empty();
     }
 
-    Option<TCharPtr> FindMeshFilePathByName(TCharPtr meshName) const override
+    Option<QString> FindMeshFilePathByName(const QString &meshName) const override
     {
-        ImportHashMap<TCharPtr, MeshEntry>::const_iterator entry = m_Meshes.find(meshName);
+        QHash<QString, MeshEntry>::const_iterator entry = m_Meshes.find(meshName);
         if (entry != m_Meshes.end()) {
-            QT3DS_ASSERT(!IsTrivial(entry->second.m_FilePath));
-            return entry->second.m_FilePath;
+            QT3DS_ASSERT(!entry->m_FilePath.isEmpty());
+            return entry->m_FilePath;
         }
         return Empty();
     }
-
+#if RUNTIME_SPLIT_TEMPORARILY_REMOVED
     QT3DSU32 GetNumPathBuffers() const override { return (QT3DSU32)m_PathBuffers.size(); }
-    QT3DSU32 GetPathBuffers(NVDataRef<Pair<TCharPtr, TCharPtr>> pathBufferPaths) const override
+    QT3DSU32 GetPathBuffers(QVector<std::pair<QString, QString>> &pathBufferPaths) const override
     {
         QT3DSU32 numItems = qMin((QT3DSU32)pathBufferPaths.size(), (QT3DSU32)m_PathBuffers.size());
         QT3DS_ASSERT(numItems == m_PathBuffers.size());
         QT3DSU32 idx = 0;
-        for (ImportHashMap<TCharPtr, TCharPtr>::const_iterator iter = m_PathBuffers.begin(),
+        for (ImportHashMap<QString, QString>::const_iterator iter = m_PathBuffers.begin(),
                                                                end = m_PathBuffers.end();
              iter != end && idx < numItems; ++iter, ++idx)
-            pathBufferPaths[idx] = Pair<TCharPtr, TCharPtr>(iter->first, iter->second);
+            pathBufferPaths[idx] = std::make_pair(iter->first, iter->second);
         return numItems;
     }
 
     // Copies the vertex buffer into the appropriate location, renaming if necessary.
-    CharPtrOrError AddPathBuffer(const SPathBuffer &pathBuffer, TCharPtr _name) override
+    QStringOrError AddPathBuffer(const SPathBuffer &pathBuffer, const QString &_name) override
     {
         if (IsTrivial(_name)) {
             QT3DS_ASSERT(false);
@@ -967,7 +921,7 @@ public:
         }
         Q3DStudio::CString name = CFilePath::MakeSafeFileStem(_name);
 
-        Option<TCharPtr> pathBufferOpt = FindPathBufferByRelativePath(name.c_str());
+        Option<QString> pathBufferOpt = FindPathBufferByRelativePath(name.c_str());
         if (pathBufferOpt.hasValue())
             return *pathBufferOpt;
 
@@ -984,13 +938,13 @@ public:
         CFilePath _retval = CFilePath::GetRelativePathFromBase(m_DestDirectory, handf->m_Path);
         const wchar_t *return_Value = m_StringTable.RegisterStr(_retval.toCString());
         m_PathBuffers.insert(
-            eastl::make_pair(m_StringTable.RegisterStr(name.c_str()), return_Value));
+            std::make_pair(m_StringTable.RegisterStr(name.c_str()), return_Value));
 #endif
         return L"";
     }
 
-    CharPtrOrError AddOrReplacePathBuffer(const SPathBuffer &pathBuffer, TCharPtr name,
-                                          Option<TCharPtr> srcPathBuffer)
+    QStringOrError AddOrReplacePathBuffer(const SPathBuffer &pathBuffer, const QString &name,
+                                          Option<QString> srcPathBuffer)
     {
         using namespace Q3DStudio;
         if (srcPathBuffer.hasValue()) {
@@ -1027,7 +981,7 @@ public:
         return AddPathBuffer(pathBuffer, name);
     }
 
-    Option<TCharPtr> FindPathBufferByPath(TCharPtr _pathBufferPath) const override
+    Option<QString> FindPathBufferByPath(const QString &_pathBufferPath) const override
     {
         Q3DStudio::CString pathBufferPath = CFilePath::GetAbsolutePath(CString(_pathBufferPath));
         Q3DStudio::CString srcpathBufferPath =
@@ -1035,33 +989,28 @@ public:
         return FindPathBufferByRelativePath(srcpathBufferPath.c_str());
     }
 
-    Option<TCharPtr> FindPathBufferByRelativePath(TCharPtr pathBufferPath) const override
+    Option<QString> FindPathBufferByRelativePath(const QString &pathBufferPath) const override
     {
-        ImportHashMap<TCharPtr, TCharPtr>::const_iterator entry =
+        ImportHashMap<QString, QString>::const_iterator entry =
             m_PathBuffers.find(pathBufferPath);
         if (entry != m_PathBuffers.end())
             return entry->second;
         return Empty();
     }
-
+#endif
     QT3DSU32 GetNumAnimations() const override { return QT3DSU32(m_Animations.size()); }
-    QT3DSU32 GetAnimations(NVDataRef<Animation> outBuffers) const override
+    QT3DSU32 GetAnimations(QVector<Animation> &outBuffers) const override
     {
-        QT3DSU32 numItems = qMin(QT3DSU32(m_Animations.size()), outBuffers.size());
-        QT3DS_ASSERT(numItems == m_Animations.size());
-        QT3DSU32 idx = 0;
-        for (ImportHashMap<AnimationId, Animation *>::const_iterator iter = m_Animations.begin(),
-                                                                     end = m_Animations.end();
-             iter != end && idx < numItems; ++iter, ++idx)
-            outBuffers[idx] = *iter->second;
+        QT3DSU32 numItems = qMin(m_Animations.size(), outBuffers.size());
+        Q_ASSERT(numItems == m_Animations.size());
+        std::copy(m_Animations.begin(), m_Animations.begin() + numItems, outBuffers.begin());
         return numItems;
     }
 
     // Data is copied into this object, you can release the anim buffer data after this
-    void DoAddAnimation(TCharPtr instance, TCharPtr propName, QT3DSU32 subPropIndex,
-                                EAnimationType bufType, NVConstDataRef<QT3DSF32> values) override
+    void DoAddAnimation(const QString &instance, const QString &propName, QT3DSU32 subPropIndex,
+                        EAnimationType bufType, const QVector<QT3DSF32> &values) override
     {
-        propName = m_StringTable.RegisterStr(propName);
         Option<Animation> buffer(FindAnimation(instance, propName, subPropIndex));
         if (buffer.hasValue()) {
             QT3DS_ASSERT(false);
@@ -1072,21 +1021,21 @@ public:
         if (instOpt.hasValue() == false)
             return;
 
-        m_Animations.insert(eastl::make_pair(
+        m_Animations.insert(
             AnimationId(instOpt->m_Handle, propName, subPropIndex),
-            CreateAnimation(instOpt->m_Id, propName, subPropIndex, bufType, values)));
+            CreateAnimation(instOpt->m_Id, propName, subPropIndex, bufType, values));
     }
 
-    Option<Animation> FindAnimation(TCharPtr instId, TCharPtr propName,
+    Option<Animation> FindAnimation(const QString &instId, const QString &propName,
                                             QT3DSU32 subPropIndex) const override
     {
         Option<InstanceDesc> instance(FindInstanceById(instId));
         if (instance.hasValue() == false)
             return Empty();
         AnimationId id(instance->m_Handle, propName, subPropIndex);
-        ImportHashMap<AnimationId, Animation *>::const_iterator entry(m_Animations.find(id));
+        QHash<AnimationId, Animation *>::const_iterator entry(m_Animations.find(id));
         if (entry != m_Animations.end())
-            return *entry->second;
+            return **entry;
         return Empty();
     }
 
@@ -1119,7 +1068,7 @@ public:
         AddAddedItems(m_ImportReport.m_Meshes, MeshDiffOp());
         AddAddedItems(m_ImportReport.m_Animations, AnimationDiffOp());
 
-        ImportArray<InstanceDesc> childList;
+        QVector<InstanceDesc> childList;
         QT3DSIMP_FOREACH(idx, m_ImportReport.m_Instances.m_Added.size())
         {
             const InstanceDesc &inst(m_ImportReport.m_Instances.m_Added[idx]);
@@ -1128,7 +1077,8 @@ public:
             GetChildren(inst.m_Handle, childList);
             QT3DSIMP_FOREACH(child, childList.size())
             {
-                TCharPtr sibling = child + 1 < childList.size() ? childList[child + 1].m_Id : L"";
+                QString sibling = child + 1 < childList.size()
+                        ? childList[child + 1].m_Id : QString();
                 m_ImportReport.m_Links.m_Added.push_back(
                     ParentChildLink(inst.m_Id, childList[child].m_Id, sibling));
             }
@@ -1154,32 +1104,32 @@ public:
                    MemoryBuffer<RawAllocator> &inTempBuf)
     {
         Instance *theInstance = GetInstance(inAnimation.m_InstanceId);
-        if (theInstance == NULL || theInstance->m_Valid == false)
+        if (theInstance == nullptr || theInstance->m_Valid == false)
             return;
         IDOMWriter::Scope __animScope(writer, L"AnimationTrack");
-        TCharStr thePropName(inAnimation.m_PropertyName);
+        QString thePropName(inAnimation.m_PropertyName);
         SImportComposerTypes theTypes;
         SImportAsset &theAsset(theTypes.GetImportAssetForType(inType));
-        DataModelDataType::Value theType(theAsset.GetPropertyDataType(thePropName.wide_str()));
+        DataModelDataType::Value theType(theAsset.GetPropertyDataType(thePropName));
         std::tuple<bool, size_t> animAndArity = GetDatatypeAnimatableAndArity(theType);
         if (std::get<0>(animAndArity) == false) {
             QT3DS_ASSERT(false);
             return;
         };
         if (std::get<1>(animAndArity) > 1) {
-            thePropName.append(L".");
+            thePropName.append(QLatin1Char('.'));
             switch (inAnimation.m_SubPropertyIndex) {
             case 0:
-                thePropName.append(L"x");
+                thePropName.append(QLatin1Char('x'));
                 break;
             case 1:
-                thePropName.append(L"y");
+                thePropName.append(QLatin1Char('y'));
                 break;
             case 2:
-                thePropName.append(L"z");
+                thePropName.append(QLatin1Char('z'));
                 break;
             case 3:
-                thePropName.append(L"w");
+                thePropName.append(QLatin1Char('w'));
                 break;
             }
         }
@@ -1197,7 +1147,7 @@ public:
             writer.Value((const wchar_t *)inTempBuf.begin());
         }
     }
-    void SerializeAnimation(IDOMReader &reader, const wchar_t *inInstanceId,
+    void SerializeAnimation(IDOMReader &reader, const QString &inInstanceId,
                             MemoryBuffer<RawAllocator> &inTempBuf,
                             MemoryBuffer<RawAllocator> &inAttributeBuffer)
     {
@@ -1231,7 +1181,7 @@ public:
                 break;
             }
         }
-        theAnimation.m_PropertyName = m_StringTable.RegisterStr(theName.wide_str());
+        theAnimation.m_PropertyName = QString::fromWCharArray(theName.wide_str());
         reader.Att(L"type", theAnimation.m_Type);
         inAttributeBuffer.clear();
         const char8_t *theValue;
@@ -1239,15 +1189,15 @@ public:
         inAttributeBuffer.write(theValue, (QT3DSU32)strlen(theValue) + 1);
         inAttributeBuffer.write((QT3DSU16)0);
         WCharTReader theReader((char8_t *)inAttributeBuffer.begin(), inTempBuf, m_StringTable);
-        NVConstDataRef<float> theData;
+        QVector<float> theData;
         theReader.ReadBuffer(theData);
         Animation *newAnim =
             CreateAnimation(theAnimation.m_InstanceId, theAnimation.m_PropertyName,
                             theAnimation.m_SubPropertyIndex, theAnimation.m_Type, theData);
-        m_Animations.insert(eastl::make_pair(
+        m_Animations.insert(
             AnimationId(toHdl(GetInstance(theAnimation.m_InstanceId)), theAnimation.m_PropertyName,
                         theAnimation.m_SubPropertyIndex),
-            newAnim));
+            newAnim);
     }
     struct PropertyNameSorter
     {
@@ -1259,8 +1209,8 @@ public:
                 return true;
             if (rhs == ComposerPropertyNames::name)
                 return false;
-            return wcscmp(ComposerPropertyNames::Convert(lhs), ComposerPropertyNames::Convert(rhs))
-                < 0;
+            return ComposerPropertyNames::Convert(lhs).compare(ComposerPropertyNames::Convert(rhs))
+                    < 0;
         }
     };
 
@@ -1269,34 +1219,34 @@ public:
         if (inInstance.m_Valid == false)
             return;
         IDOMWriter::Scope __instanceScope(writer, ComposerObjectTypes::Convert(inInstance.m_Type));
-        writer.Att(L"id", inInstance.m_Id);
+        QString id;
+        writer.Att(QStringLiteral("id"), inInstance.m_Id);
         // Write properties, then write animations
-        ImportArray<ComposerPropertyNames::Enum> theNames;
-        for (ImportHashMap<ComposerPropertyNames::Enum, SInternValue>::iterator
+        QVector<ComposerPropertyNames::Enum> theNames;
+        for (QHash<ComposerPropertyNames::Enum, SInternValue>::iterator
                  iter = inInstance.m_PropertyValues.begin(),
                  end = inInstance.m_PropertyValues.end();
              iter != end; ++iter) {
-            theNames.push_back(iter->first);
+            theNames.push_back(iter.key());
         }
         std::sort(theNames.begin(), theNames.end(), PropertyNameSorter());
 
-        for (QT3DSU32 nameIdx = 0, nameEnd = (QT3DSU32)theNames.size(); nameIdx < nameEnd; ++nameIdx) {
-            ImportHashMap<ComposerPropertyNames::Enum, SInternValue>::const_iterator iter(
+        for (QT3DSU32 nameIdx = 0, nameEnd = (QT3DSU32)theNames.size();
+             nameIdx < nameEnd; ++nameIdx) {
+            QHash<ComposerPropertyNames::Enum, SInternValue>::const_iterator iter(
                 inInstance.m_PropertyValues.find(theNames[nameIdx]));
             inTempBuf.clear();
             WCharTWriter bufWriter(inTempBuf);
-            WStrOps<SValue>().ToBuf(iter->second.GetValue(), bufWriter);
+            WStrOps<SValue>().ToBuf(iter->GetValue(), bufWriter);
             if (inTempBuf.size()) {
                 inTempBuf.writeZeros(sizeof(wchar_t));
-                writer.Att(ComposerPropertyNames::Convert(iter->first),
-                           (const wchar_t *)inTempBuf.begin());
+                writer.Att(ComposerPropertyNames::Convert(iter.key()),
+                           QString::fromWCharArray((const wchar_t *)inTempBuf.begin()));
             }
         }
-        for (ImportHashMap<AnimationId, Animation *>::const_iterator iter = m_Animations.begin(),
-                                                                     end = m_Animations.end();
-             iter != end; ++iter) {
-            if (iter->first.m_Instance == toHdl(&inInstance))
-                Serialize(writer, inInstance.m_Type, *iter->second, inTempBuf);
+        for (auto iter = m_Animations.begin(), end = m_Animations.end(); iter != end; ++iter) {
+            if (iter.key().m_Instance == toHdl(&inInstance))
+                Serialize(writer, inInstance.m_Type, **iter, inTempBuf);
         }
         for (QT3DSU32 childIdx = 0, childEnd = (QT3DSU32)inInstance.m_Children.size();
              childIdx < childEnd; ++childIdx) {
@@ -1313,31 +1263,32 @@ public:
         SImportComposerTypes theTypes;
         SImportAsset &theAsset(theTypes.GetImportAssetForType(inInstance.m_Type));
         m_ValidInstances.insert(inInstance.m_Handle);
-        m_IdToInstMap.insert(eastl::make_pair(inInstance.m_Id, &inInstance));
-        for (eastl::pair<const char8_t *, const char8_t *> att = reader.GetNarrowFirstAttribute();
-             !IsTrivial(att.first); att = reader.GetNarrowNextAttribute()) {
-            if (AreEqual("id", att.first))
+        m_IdToInstMap.insert(inInstance.m_Id, &inInstance);
+        for (std::pair<QString, QString> att = reader.GetFirstAttribute();
+             !IsTrivial(att.first); att = reader.GetNextAttribute()) {
+            if (QLatin1String("id") == att.first)
                 continue;
             DataModelDataType::Value thePropertyType = theAsset.GetPropertyDataType(att.first);
             if (thePropertyType != DataModelDataType::None) {
                 if (thePropertyType == DataModelDataType::Long4)
                     thePropertyType = DataModelDataType::StringRef;
                 inAttributeBuffer.clear();
-                inAttributeBuffer.write(att.second, (QT3DSU32)strlen(att.second) + 1);
+                inAttributeBuffer.write(qPrintable(att.second),
+                                        (QT3DSU32)strlen(qPrintable(att.second)) + 1);
                 inAttributeBuffer.write((QT3DSU16)0);
                 WCharTReader theReader((char8_t *)inAttributeBuffer.begin(), inTempBuf,
                                        m_StringTable);
                 SValue theValue = WStrOps<SValue>().BufTo(thePropertyType, theReader);
                 inInstance.m_PropertyValues.insert(
-                    eastl::make_pair(ComposerPropertyNames::Convert(att.first),
-                                     SInternValue(theValue, m_StringTable)));
+                    ComposerPropertyNames::Convert(att.first),
+                                     SInternValue(theValue, m_StringTable));
             }
         }
         {
             IDOMReader::Scope animScope(reader);
             for (bool success = reader.MoveToFirstChild(); success;
                  success = reader.MoveToNextSibling()) {
-                if (AreEqual(reader.GetElementName(), L"AnimationTrack")) {
+                if (reader.GetElementName() == QLatin1String("AnimationTrack")) {
                     SerializeAnimation(reader, inInstance.m_Id, inTempBuf, inAttributeBuffer);
                 } else {
                     Instance *newInstance = new Instance();
@@ -1353,8 +1304,8 @@ public:
         for (TStrToStrMap::iterator iter = inHashMap.begin(), end = inHashMap.end(); iter != end;
              ++iter) {
             IDOMWriter::Scope __elemScope(inWriter, inElemName);
-            inWriter.ChildValue(L"Source", iter->first);
-            inWriter.ChildValue(L"Dest", iter->second);
+            inWriter.ChildValue(QStringLiteral("Source"), iter.key());
+            inWriter.ChildValue(QStringLiteral("Dest"), *iter);
         }
     }
 
@@ -1363,11 +1314,11 @@ public:
         IDOMReader::Scope itemScope(inReader);
         for (bool success = inReader.MoveToFirstChild(inElemName); success;
              success = inReader.MoveToNextSibling(inElemName)) {
-            const char8_t *source, *dest;
-            inReader.ChildValue("Source", source);
-            inReader.ChildValue("Dest", dest);
-            inHashMap.insert(
-                eastl::make_pair(m_StringTable.GetWideStr(source), m_StringTable.GetWideStr(dest)));
+            QString source;
+            QString dest;
+            inReader.ChildValue(QStringLiteral("Source"), source);
+            inReader.ChildValue(QStringLiteral("Dest"), dest);
+            inHashMap.insert(source, dest);
         }
     }
 
@@ -1376,8 +1327,8 @@ public:
         for (TPathToMeshMap::iterator iter = inHashMap.begin(), end = inHashMap.end(); iter != end;
              ++iter) {
             IDOMWriter::Scope __elemScope(inWriter, inElemName);
-            inWriter.ChildValue(L"Source", iter->first);
-            inWriter.ChildValue(L"Dest", iter->second.m_FilePath);
+            inWriter.ChildValue(QStringLiteral("Source"), iter.key());
+            inWriter.ChildValue(QStringLiteral("Dest"), iter->m_FilePath);
         }
     }
 
@@ -1386,29 +1337,29 @@ public:
         IDOMReader::Scope itemScope(inReader);
         for (bool success = inReader.MoveToFirstChild(inElemName); success;
              success = inReader.MoveToNextSibling(inElemName)) {
-            const char8_t *source, *dest;
-            inReader.ChildValue("Source", source);
-            inReader.ChildValue("Dest", dest);
-            MeshEntry theEntry(m_StringTable.GetWideStr(source), m_StringTable.GetWideStr(dest),
-                               m_StringTable);
-            inHashMap.insert(eastl::make_pair(theEntry.m_SourceId, theEntry));
+            QString source;
+            QString dest;
+            inReader.ChildValue(QStringLiteral("Source"), source);
+            inReader.ChildValue(QStringLiteral("Dest"), dest);
+            MeshEntry theEntry(source, dest);
+            inHashMap.insert(theEntry.m_SourceId, theEntry);
         }
     }
 
-    QT3DSU32 Save(TCharPtr fname) const override
+    QT3DSU32 Save(const QString &fname) const override
     {
         using namespace Q3DStudio;
         QT3DSU32 theRevisionId = 1;
-        CFilePath fullPath = CFilePath::CombineBaseAndRelative(m_DestDirectory, CString(fname));
+        QString fullPath = Q3DStudio::CFilePath::CombineBaseAndRelative(m_DestDirectory, fname);
 
         std::shared_ptr<IDOMFactory> factory(IDOMFactory::CreateDOMFactory(m_StringTablePtr));
         std::shared_ptr<IDOMWriter> theWriter;
-        SDOMElement *theTopElement = NULL;
-        bool exists = fullPath.Exists();
+        SDOMElement *theTopElement = nullptr;
+        bool exists = QFileInfo(fullPath).exists();
 
         {
             if (exists) {
-                QFile stream(fullPath.toQString());
+                QFile stream(fullPath);
 
                 // OK, ensure we can open this file in append mode.
                 // This is kind of tricky because we need to write the data to the file
@@ -1421,11 +1372,11 @@ public:
 
                 theTopElement = CDOMSerializer::Read(*factory, stream);
 
-                if (theTopElement == NULL) {
+                if (theTopElement == nullptr) {
                     QT3DS_ASSERT(false);
                     return 0;
                 }
-                eastl::pair<std::shared_ptr<IDOMWriter>, std::shared_ptr<IDOMReader>>
+                std::pair<std::shared_ptr<IDOMWriter>, std::shared_ptr<IDOMReader>>
                     theDomAccess(
                         IDOMWriter::CreateDOMWriter(factory, *theTopElement, m_StringTablePtr));
                 theWriter = theDomAccess.first;
@@ -1447,12 +1398,12 @@ public:
             writer.Att(L"Revision", theRevisionId);
 
             MemoryBuffer<RawAllocator> tempBuf;
-            ImportArray<Instance *> rootList;
-            for (ImportHashMap<TCharPtr, Instance *>::const_iterator iter = m_IdToInstMap.begin(),
+            QVector<Instance *> rootList;
+            for (QHash<QString, Instance *>::const_iterator iter = m_IdToInstMap.begin(),
                                                                      end = m_IdToInstMap.end();
                  iter != end; ++iter) {
-                if (iter->second->m_Parent == 0)
-                    rootList.push_back(iter->second);
+                if ((*iter)->m_Parent == 0)
+                    rootList.push_back(*iter);
             }
             {
                 IDOMWriter::Scope __graphScope(writer, L"Graph");
@@ -1461,13 +1412,11 @@ public:
             }
             {
                 IDOMWriter::Scope __importScope(writer, L"Import");
-                CFilePath theDirectory(fullPath.GetDirectory());
-                CFilePath theSrcFile = m_SrcFile;
-                if (theSrcFile.IsAbsolute())
-                    theSrcFile = CFilePath::GetRelativePathFromBase(theDirectory, m_SrcFile);
+                QString theSrcFile = m_SrcFile;
+                if (QFileInfo(theSrcFile).isAbsolute())
+                    theSrcFile = CFilePath::GetRelativePathFromBase(fullPath, m_SrcFile);
 
-                CString src = theSrcFile.toCString();
-                writer.Att(L"SrcFile", src.c_str());
+                writer.Att(L"SrcFile", theSrcFile);
                 writer.Att(L"ImageDir", L"Images");
                 writer.Att(L"MeshDir", L"Meshes");
                 Serialize(writer, L"Image", const_cast<TStrToStrMap &>(m_Images));
@@ -1475,7 +1424,7 @@ public:
             }
         }
         {
-            QFile stream(fullPath.toQString());
+            QFile stream(fullPath);
             stream.open(QFile::ReadWrite | QFile::Append);
             stream.seek(0);
             CDOMSerializer::WriteXMLHeader(stream);
@@ -1485,13 +1434,13 @@ public:
         return theRevisionId;
     }
 
-    bool Load(const Q3DStudio::CString &fname, QT3DSU32 inDocumentId)
+    bool Load(const QString &fname, QT3DSU32 inDocumentId)
     {
         using namespace Q3DStudio;
         std::shared_ptr<IDOMFactory> factory(IDOMFactory::CreateDOMFactory(m_StringTablePtr));
-        SDOMElement *topElement = NULL;
+        SDOMElement *topElement = nullptr;
         {
-            QFile stream(fname.toQString());
+            QFile stream(fname);
             if (stream.open(QFile::ReadOnly) == false) {
                 QT3DS_ASSERT(false);
                 return false;
@@ -1500,7 +1449,7 @@ public:
             topElement = CDOMSerializer::Read(*factory, stream);
         }
 
-        if (topElement == NULL) {
+        if (topElement == nullptr) {
             QT3DS_ASSERT(false);
             return false;
         }
@@ -1526,7 +1475,9 @@ public:
             return false;
         }
 
-        const wchar_t *srcFile, *imagesDir, *meshDir;
+        QString srcFile;
+        QString imagesDir;
+        QString meshDir;
 
         if (fileVersion > Import::GetImportFileVersion()) {
             QT3DS_ASSERT(false);
@@ -1553,12 +1504,14 @@ public:
                 reader.Att(L"MeshDir", meshDir);
                 // We ignore, however, srcpath.
                 // because it may be different.
-                m_SrcFile = CString(srcFile);
-                m_SrcDirectory = m_SrcFile.GetDirectory();
+                m_SrcFile = srcFile;
+                m_SrcDirectory = QFileInfo(m_SrcFile).absolutePath();
                 m_FullSrcDirectory =
                     CFilePath::CombineBaseAndRelative(m_DestDirectory, m_SrcDirectory);
-                m_ImageDir = CFilePath::CombineBaseAndRelative(m_DestDirectory, CString(imagesDir));
-                m_MeshDir = CFilePath::CombineBaseAndRelative(m_DestDirectory, CString(meshDir));
+                m_ImageDir = CFilePath::CombineBaseAndRelative(m_DestDirectory,
+                                                               imagesDir);
+                m_MeshDir = CFilePath::CombineBaseAndRelative(m_DestDirectory,
+                                                              meshDir);
                 Serialize(reader, L"Image", m_Images);
                 Serialize(reader, L"Mesh", m_Meshes);
             }
@@ -1575,9 +1528,9 @@ class RefreshImpl : public Import
     mutable MemoryBuffer<RawAllocator> m_TempBuffer;
 
 public:
-    RefreshImpl(ImportImpl &src, const Q3DStudio::CString &srcDirectory)
-        : m_Import(src.m_StringTablePtr, srcDirectory, src.m_DestDirectory, src.m_ImageDir.toCString(),
-                   src.m_MeshDir.toCString())
+    RefreshImpl(ImportImpl &src, const QString &srcDirectory)
+        : m_Import(src.m_StringTablePtr, srcDirectory, src.m_DestDirectory, src.m_ImageDir,
+                   src.m_MeshDir)
         , m_Source(src)
     {
     }
@@ -1588,29 +1541,29 @@ public:
 
     // Implement the import interface...
 
-    TCharPtr RegisterStr(TCharPtr str) override { return m_Import.RegisterStr(str); }
+    QString RegisterStr(TCharPtr str) override { return m_Import.RegisterStr(str); }
     QString GetSrcFile() const override { return m_Import.GetSrcFile(); }
     QString GetDestDir() const override { return m_Import.GetDestDir(); }
     QString GetImageDir() const override { return m_Import.GetImageDir(); }
     QString GetMeshDir() const override { return m_Import.GetMeshDir(); }
-    QString GetPathBufferDir() const override { return m_Import.GetPathBufferDir(); }
-    QT3DSU32 Save(TCharPtr fname) const override { return m_Import.Save(fname); }
+    //QString GetPathBufferDir() const override { return m_Import.GetPathBufferDir(); }
+    QT3DSU32 Save(const QString &fname) const override { return m_Import.Save(fname); }
 
     // Add a mapping from an named id to a handle
     Option<InstanceDesc> GetInstanceByHandle(TIMPHandle inst) const override
     {
         return m_Import.GetInstanceByHandle(inst);
     }
-    Option<InstanceDesc> FindInstanceById(TCharPtr inst) const override
+    Option<InstanceDesc> FindInstanceById(const QString &inst) const override
     {
         return m_Import.FindInstanceById(inst);
     }
-    Option<InstanceDesc> FindAnyInstanceById(TCharPtr inst) const override
+    Option<InstanceDesc> FindAnyInstanceById(const QString &inst) const override
     {
         return m_Import.FindAnyInstanceById(inst);
     }
     QT3DSU32 GetNumInstances() const override { return m_Import.GetNumInstances(); }
-    QT3DSU32 GetInstances(NVDataRef<InstanceDesc> outDescs) const override
+    QT3DSU32 GetInstances(QVector<InstanceDesc> &outDescs) const override
     {
         return m_Import.GetInstances(outDescs);
     }
@@ -1618,7 +1571,7 @@ public:
     {
         return m_Import.GetNumProperties(instance);
     }
-    QT3DSU32 GetProperties(TIMPHandle inst, NVDataRef<PropertyValue> outBuffer) const override
+    QT3DSU32 GetProperties(TIMPHandle inst, QVector<PropertyValue> &outBuffer) const override
     {
         return m_Import.GetProperties(inst, outBuffer);
     }
@@ -1631,13 +1584,13 @@ public:
     {
         return m_Import.GetNumChildren(instance);
     }
-    QT3DSU32 GetChildren(TIMPHandle instance, NVDataRef<InstanceDesc> childBuffer) const override
+    QT3DSU32 GetChildren(TIMPHandle instance, QVector<InstanceDesc> &childBuffer) const override
     {
         return m_Import.GetChildren(instance, childBuffer);
     }
 
     // Carry user id's across.
-    TIMPHandle CreateInstance(TCharPtr name, ComposerObjectTypes::Enum inType) override
+    TIMPHandle CreateInstance(const QString &name, ComposerObjectTypes::Enum inType) override
     {
         TIMPHandle retval = m_Import.CreateInstance(name, inType);
         Option<InstanceDesc> srcInst = m_Source.FindInstanceById(name);
@@ -1645,14 +1598,14 @@ public:
             if (srcInst->m_Type != inType) {
                 Instance *inst = fromHdl(retval);
                 m_ImportReport.m_TypeChanges.push_back(
-                    Pair<InstanceDesc, ComposerObjectTypes::Enum>(*inst, srcInst->m_Type));
+                    std::pair<InstanceDesc, ComposerObjectTypes::Enum>(*inst, srcInst->m_Type));
             }
         }
         return retval;
     }
 
     TIMPHandle CopyInstance(TIMPHandle inSource) override { return m_Import.CopyInstance(inSource); }
-    bool SetInstanceProperties(TIMPHandle inst, NVConstDataRef<PropertyValue> inBuffer) override
+    bool SetInstanceProperties(TIMPHandle inst, const QVector<PropertyValue> &inBuffer) override
     {
         return m_Import.SetInstanceProperties(inst, inBuffer);
     }
@@ -1662,7 +1615,7 @@ public:
         return m_Import.DoSetInstancePropertyValue(inst, pname, val);
     }
     bool DoSetInstancePropertyValue(TIMPHandle inst, ComposerPropertyNames::Enum pname,
-                                            TCharPtr val) override
+                                            const QString &val) override
     {
         return m_Import.DoSetInstancePropertyValue(inst, pname, val);
     }
@@ -1673,108 +1626,101 @@ public:
     void MarkInstanceInvalid(TIMPHandle inst) override { m_Import.MarkInstanceInvalid(inst); }
 
     QT3DSU32 GetNumImages() const override { return m_Import.GetNumImages(); }
-    QT3DSU32 GetImages(NVDataRef<Pair<TCharPtr, TCharPtr>> imgPaths) const override
+    QT3DSU32 GetImages(QVector<std::pair<QString, QString>> &imgPaths) const override
     {
         return m_Import.GetImages(imgPaths);
     }
     // Copies the an appropriate location in our import directory
     // Returns the path of the added image.  This may mangle the name slightly
     // In case of a conflict.
-    CharPtrOrError AddImage(TCharPtr _imgPath) override
+    QStringOrError AddImage(const QString &_imgPath) override
     {
-        Option<TCharPtr> added = m_Source.FindImageByPath(_imgPath);
+        Option<QString> added = m_Source.FindImageByPath(_imgPath);
         return m_Import.AddOrReplaceImage(_imgPath, added);
     }
-    Option<TCharPtr> FindImageByPath(TCharPtr imgPath) const override
+    Option<QString> FindImageByPath(const QString &imgPath) const override
     {
         return m_Import.FindImageByPath(imgPath);
     }
 
-    Option<TCharPtr> FindImageByRelativePath(TCharPtr imgPath) const override
+    Option<QString> FindImageByRelativePath(const QString &imgPath) const override
     {
         return m_Import.FindImageByRelativePath(imgPath);
     }
 
     QT3DSU32 GetNumMeshes() const override { return m_Import.GetNumMeshes(); }
-    QT3DSU32 GetMeshes(NVDataRef<Pair<TCharPtr, TCharPtr>> bufferPaths) const override
+    QT3DSU32 GetMeshes(QVector<std::pair<QString, QString>> &bufferPaths) const override
     {
         return m_Import.GetMeshes(bufferPaths);
     }
     // Copies the vertex buffer into the appropriate location, renaming if necessary.
     // Mesh name is used to write out a reasonable buffer *and* on refresh to know
     // if a buffer is changed/updated or not
-    CharPtrOrError AddMesh(const Mesh &meshBuffer, TCharPtr meshName) override
+    QStringOrError AddMesh(const Mesh &meshBuffer, const QString &meshName) override
     {
-        Q3DStudio::CString safeName = CFilePath::MakeSafeFileStem(meshName);
+        const QString &safeName = CFilePath::MakeSafeFileStem(meshName);
         return m_Import.AddOrReplaceMesh(meshBuffer, meshName,
-                                         m_Source.FindMeshFilePathByName(safeName.c_str()));
+                                         m_Source.FindMeshFilePathByName(safeName));
     }
 
-    bool HasMesh(TCharPtr meshName) const override { return m_Import.HasMesh(meshName); }
+    bool HasMesh(const QString & meshName) const override { return m_Import.HasMesh(meshName); }
 
-    Option<TCharPtr> FindMeshReferencePathByName(TCharPtr meshName) const override
+    Option<QString> FindMeshReferencePathByName(const QString &meshName) const override
     {
         return m_Import.FindMeshReferencePathByName(meshName);
     }
 
-    Option<TCharPtr> FindMeshFilePathByName(TCharPtr meshName) const override
+    Option<QString> FindMeshFilePathByName(const QString &meshName) const override
     {
         return m_Import.FindMeshFilePathByName(meshName);
     }
-
+#if RUNTIME_SPLIT_TEMPORARILY_REMOVED
     QT3DSU32 GetNumPathBuffers() const override { return m_Import.GetNumPathBuffers(); }
-    QT3DSU32 GetPathBuffers(NVDataRef<Pair<TCharPtr, TCharPtr>> pathBufferPaths) const override
+    QT3DSU32 GetPathBuffers(QVector<std::pair<QString, QString>> pathBufferPaths) const override
     {
         return m_Import.GetPathBuffers(pathBufferPaths);
     }
     // Copies the an appropriate location in our import directory
     // Returns the path of the added PathBuffer.  This may mangle the name slightly
     // In case of a conflict.
-    CharPtrOrError AddPathBuffer(const SPathBuffer &pathBuffer, TCharPtr pathName) override
+    QStringOrError AddPathBuffer(const SPathBuffer &pathBuffer, QString pathName) override
     {
-        Option<TCharPtr> added = m_Source.FindPathBufferByPath(pathName);
+        Option<QString> added = m_Source.FindPathBufferByPath(pathName);
         return m_Import.AddOrReplacePathBuffer(pathBuffer, pathName, added);
     }
 
-    Option<TCharPtr> FindPathBufferByPath(TCharPtr pathBufferPath) const override
+    Option<QString> FindPathBufferByPath(QString pathBufferPath) const override
     {
         return m_Import.FindPathBufferByPath(pathBufferPath);
     }
 
-    Option<TCharPtr> FindPathBufferByRelativePath(TCharPtr pathBufferPath) const override
+    Option<QString> FindPathBufferByRelativePath(QString pathBufferPath) const override
     {
         return m_Import.FindPathBufferByRelativePath(pathBufferPath);
     }
-
+#endif
     QT3DSU32 GetNumAnimations() const override { return m_Import.GetNumAnimations(); }
-    QT3DSU32 GetAnimations(NVDataRef<Animation> outBuffers) const override
+    QT3DSU32 GetAnimations(QVector<Animation> &outBuffers) const override
     {
         return m_Import.GetAnimations(outBuffers);
     }
     // Data is copied into this object, you can release the anim buffer data after this
-    void DoAddAnimation(TCharPtr instance, TCharPtr propName, QT3DSU32 subPropIndex,
-                                EAnimationType type, NVConstDataRef<QT3DSF32> values) override
+    void DoAddAnimation(const QString &instance, const QString &propName, QT3DSU32 subPropIndex,
+                                EAnimationType type, const QVector<QT3DSF32> &values) override
     {
         m_Import.DoAddAnimation(instance, propName, subPropIndex, type, values);
     }
-    Option<Animation> FindAnimation(TCharPtr instance, TCharPtr propName,
+    Option<Animation> FindAnimation(const QString &instance, const QString &propName,
                                             QT3DSU32 subPropIndex) const override
     {
         return m_Import.FindAnimation(instance, propName, subPropIndex);
-    }
-
-    template <typename TDataType>
-    NVDataRef<TDataType> TempAlloc(QT3DSU32 numItems) const
-    {
-        m_TempBuffer.reserve(numItems * sizeof(TDataType));
-        return toDataRef((TDataType *)m_TempBuffer.begin(), numItems);
     }
 
     template <typename TDataType, typename TDiffOp>
     void CompileItemReport(AddRemoveImpl<TDataType> &result, TDiffOp op) const
     {
         QT3DSU32 numItems = op.NumItems(m_Import);
-        NVDataRef<TDataType> tempData(TempAlloc<TDataType>(numItems));
+        QVector<TDataType> tempData(numItems);
         op.GetItems(m_Import, tempData);
         QT3DSIMP_FOREACH(idx, numItems)
         {
@@ -1785,7 +1731,7 @@ public:
                 result.m_Added.push_back(newDesc);
         }
         numItems = op.NumItems(m_Source);
-        tempData = TempAlloc<TDataType>(numItems);
+        tempData.resize(numItems);
         op.GetItems(m_Source, tempData);
         QT3DSIMP_FOREACH(idx, numItems)
         {
@@ -1795,6 +1741,14 @@ public:
         }
     }
 
+    QVector<InstanceDesc> toVector(const InstanceDesc *data, QT3DSU32 count)
+    {
+        QVector<InstanceDesc> ret(count);
+        for (int i = 0; i < count; ++i)
+            ret[i] = data[i];
+        return ret;
+    }
+
     ImportReport CompileReport() const override
     {
         m_ImportReport.clear();
@@ -1802,7 +1756,9 @@ public:
         CompileItemReport(m_ImportReport.m_Instances, InstanceDiffOp());
         CompileItemReport(m_ImportReport.m_Images, ImageDiffOp());
         CompileItemReport(m_ImportReport.m_Meshes, MeshDiffOp());
+#if RUNTIME_SPLIT_TEMPORARILY_REMOVED
         CompileItemReport(m_ImportReport.m_PathBuffers, PathBufferDiffOp());
+#endif
         CompileItemReport(m_ImportReport.m_Animations, AnimationDiffOp());
 
         // OK, prepare parent child links
@@ -1811,29 +1767,29 @@ public:
         {
             const InstanceDesc &oldDesc(m_ImportReport.m_Instances.m_Removed[idx]);
             QT3DSU32 numChildren = m_Source.GetNumChildren(oldDesc.m_Handle);
-            NVDataRef<InstanceDesc> tempData(TempAlloc<InstanceDesc>(numChildren));
+            QVector<InstanceDesc> tempData(numChildren);
             m_Source.GetChildren(oldDesc.m_Handle, tempData);
             QT3DSIMP_FOREACH(chld, numChildren)
             m_ImportReport.m_Links.m_Removed.push_back(
-                ParentChildLink(oldDesc.m_Id, tempData[chld].m_Id, L""));
+                ParentChildLink(oldDesc.m_Id, tempData[chld].m_Id, QString()));
         }
         QT3DSIMP_FOREACH(idx, m_ImportReport.m_Instances.m_Added.size())
         {
             const InstanceDesc &newDesc(m_ImportReport.m_Instances.m_Added[idx]);
             QT3DSU32 numChildren = GetNumChildren(newDesc.m_Handle);
-            NVDataRef<InstanceDesc> tempData(TempAlloc<InstanceDesc>(numChildren));
+            QVector<InstanceDesc> tempData(numChildren);
             m_Import.GetChildren(newDesc.m_Handle, tempData);
             QT3DSIMP_FOREACH(chldIdx, numChildren)
             {
                 // Run through children in reverse order
                 // so that we know the sibling pointer is good.
                 QT3DSU32 chld = numChildren - chldIdx - 1;
-                TCharPtr child = tempData[chld].m_Id;
+                QString child = tempData[chld].m_Id;
                 // If the chlid existed in the original, then it also needs to be added here.
                 // Because that means the a new object was added and an original object was
                 // re-attached.
                 if (m_Source.FindInstanceById(child).hasValue()) {
-                    TCharPtr sibling = chld + 1 < numChildren ? tempData[chld + 1].m_Id : L"";
+                    QString sibling = chld + 1 < numChildren ? tempData[chld + 1].m_Id : QString();
                     m_ImportReport.m_Links.m_Added.push_back(
                         ParentChildLink(newDesc.m_Id, child, sibling));
                 }
@@ -1845,10 +1801,8 @@ public:
             const InstanceDesc &oldDesc(m_Source.FindInstanceById(newDesc.m_Id));
             QT3DSU32 numNewChildren(GetNumChildren(newDesc.m_Handle));
             QT3DSU32 numOldChildren(m_Source.GetNumChildren(oldDesc.m_Handle));
-            NVDataRef<InstanceDesc> tempData(
-                TempAlloc<InstanceDesc>(numNewChildren + numOldChildren));
-            NVDataRef<InstanceDesc> newChildren(tempData.begin(), numNewChildren);
-            NVDataRef<InstanceDesc> oldChildren(tempData.begin() + numNewChildren, numOldChildren);
+            QVector<InstanceDesc> newChildren(numNewChildren);
+            QVector<InstanceDesc> oldChildren(numOldChildren);
             m_Import.GetChildren(newDesc.m_Handle, newChildren);
             m_Source.GetChildren(oldDesc.m_Handle, oldChildren);
             QT3DSIMP_FOREACH(childIdx, numNewChildren)
@@ -1857,7 +1811,8 @@ public:
                 // This is necessary for addChild.
                 QT3DSU32 child = numNewChildren - childIdx - 1;
                 const InstanceDesc &childDesc = newChildren[child];
-                TCharPtr sibling = child + 1 < numNewChildren ? newChildren[child + 1].m_Id : L"";
+                QString sibling = child + 1 < numNewChildren
+                        ? newChildren[child + 1].m_Id : QString();
                 ParentChildLink link(newDesc.m_Id, childDesc.m_Id, sibling);
                 if (FindChild(m_Source.FindInstanceById(childDesc.m_Id), sibling, childDesc.m_Type,
                               oldChildren))
@@ -1868,13 +1823,13 @@ public:
             QT3DSIMP_FOREACH(child, oldChildren.size())
             {
                 const InstanceDesc &childDesc = oldChildren[child];
-                TCharPtr sibling =
-                    child + 1 < oldChildren.size() ? oldChildren[child + 1].m_Id : L"";
+                QString sibling =
+                    child + 1 < oldChildren.size() ? oldChildren[child + 1].m_Id : QString();
                 if (FindChild(m_Import.FindInstanceById(childDesc.m_Id), sibling, childDesc.m_Type,
                               newChildren)
                     == false)
                     m_ImportReport.m_Links.m_Removed.push_back(
-                        ParentChildLink(oldDesc.m_Id, childDesc.m_Id, L""));
+                        ParentChildLink(oldDesc.m_Id, childDesc.m_Id, QString()));
             }
         }
         m_Import.FinalizeReport();
@@ -1889,60 +1844,55 @@ public:
 
 ImportPtrOrError Import::Create(const QString &_srcPath, const QString &_destDir)
 {
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-    CFilePath srcPath(CFilePath::GetAbsolutePath(_srcPath));
-    CFilePath destDir(CFilePath::GetAbsolutePath(_destDir));
+    QString srcPath(QFileInfo(_srcPath).absoluteFilePath());
+    QString destDir(QFileInfo(_destDir).absoluteFilePath());
 
-    if (!srcPath.IsFile())
-        return ImportErrorData(ImportErrorCodes::SourceFileDoesNotExist, srcPath.toCString());
+    if (!QFileInfo(_srcPath).isFile())
+        return ImportErrorData(ImportErrorCodes::SourceFileDoesNotExist, srcPath);
 
-    if (!destDir.CreateDir(true))
-        return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, destDir.toCString());
+    if (!CFilePath::CreateDir(destDir, true))
+        return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, destDir);
 
     TStringTablePtr strTable = qt3dsdm::IStringTable::CreateStringTable();
-    return new ImportImpl(strTable, srcPath, destDir, L"maps", L"meshes");
-#endif
-    return ImportErrorData();
+    return new ImportImpl(strTable, srcPath, destDir, QStringLiteral("maps"),
+                          QStringLiteral("meshes"));
 }
 
 ImportPtrOrError Import::Load(const QString &pathToFile, QT3DSU32 inImportVersion)
 {
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-    CFilePath fullFilePath(CFilePath::GetAbsolutePath(pathToFile));
-    CFilePath destDir(fullFilePath.GetDirectory());
+    QFileInfo info(pathToFile);
+    QString fullFilePath(info.absoluteFilePath());
+    QString destDir(info.canonicalPath());
 
-    if (fullFilePath.IsFile() == false)
-        return ImportErrorData(ImportErrorCodes::SourceFileNotReadable, fullFilePath.toCString());
+    if (info.isFile() == false)
+        return ImportErrorData(ImportErrorCodes::SourceFileNotReadable, fullFilePath);
 
     TStringTablePtr strTable = qt3dsdm::IStringTable::CreateStringTable();
-    ImportImpl *impl = new ImportImpl(strTable, Q3DStudio::CString(), destDir);
+    ImportImpl *impl = new ImportImpl(strTable, QString(), destDir);
     bool success = impl->Load(fullFilePath, inImportVersion);
     QT3DS_ASSERT(success);
     if (success == false) {
         impl->Release();
-        return ImportErrorData(ImportErrorCodes::SourceFileNotReadable, fullFilePath.toCString());
+        return ImportErrorData(ImportErrorCodes::SourceFileNotReadable, fullFilePath);
     }
     return impl;
-#endif
-    return ImportErrorData();
 }
 
-ImportPtrOrError Import::CreateForRefresh(Import &original, TCharPtr _srcPath)
+ImportPtrOrError Import::CreateForRefresh(Import &original, const QString &_srcPath)
 {
-    CFilePath srcPath(CFilePath::GetAbsolutePath(_srcPath));
+    QFileInfo srcPath(_srcPath);
 
-    if (!srcPath.IsFile()) {
+    if (!srcPath.isFile()) {
         original.Release();
-        return ImportErrorData(ImportErrorCodes::SourceFileDoesNotExist, srcPath.toCString());
+        return ImportErrorData(ImportErrorCodes::SourceFileDoesNotExist, _srcPath);
     }
 
-    RefreshImpl *refresh(new RefreshImpl(static_cast<ImportImpl &>(original), srcPath));
+    RefreshImpl *refresh(new RefreshImpl(static_cast<ImportImpl &>(original), _srcPath));
     return &refresh->GetImportInterface();
 }
 
 QT3DSU32 Import::GetHighestImportRevision(const QString &pathToFile)
 {
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     using std::shared_ptr;
     CFilePath fullFilePath(CFilePath::GetAbsolutePath(pathToFile));
     QFile stream(fullFilePath.toQString());
@@ -1956,7 +1906,7 @@ QT3DSU32 Import::GetHighestImportRevision(const QString &pathToFile)
     std::shared_ptr<IDOMFactory> theFactory = IDOMFactory::CreateDOMFactory(theStringTable);
     SDOMElement *theTopElement = CDOMSerializer::Read(*theFactory, stream);
 
-    if (theTopElement == NULL) {
+    if (theTopElement == nullptr) {
         QT3DS_ASSERT(false);
         return 0;
     }
@@ -1964,6 +1914,4 @@ QT3DSU32 Import::GetHighestImportRevision(const QString &pathToFile)
     std::shared_ptr<IDOMReader> theReader =
         IDOMReader::CreateDOMReader(*theTopElement, theStringTable);
     return ImportImpl::FindHighestRevisionInDocument(*theReader);
-#endif
-    return 0;
 }

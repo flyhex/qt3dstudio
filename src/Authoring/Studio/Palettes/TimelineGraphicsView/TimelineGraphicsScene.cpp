@@ -1041,7 +1041,7 @@ void TimelineGraphicsScene::handleCopyObjectPath()
     RowTree *selectedRow = m_rowManager->selectedRow();
     if (selectedRow) {
         CStudioClipboard::CopyTextToClipboard(
-                    selectedRow->getBinding()->GetObjectPath().toQString());
+                    selectedRow->getBinding()->GetObjectPath());
     }
 }
 

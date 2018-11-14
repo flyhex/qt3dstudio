@@ -39,14 +39,14 @@ using namespace Q3DStudio;
  *		@param inToken single char token
  *		@param	inEscapeChar single char escape char
  */
-CStackTokenizer::CStackTokenizer(const Q3DStudio::CString &inString, Q3DStudio::Qt3DSChar inDelimiter,
-                                 Q3DStudio::Qt3DSChar inEscapeChar)
+CStackTokenizer::CStackTokenizer(const QString &inString, const QChar &inDelimiter,
+                                 const QChar &inEscapeChar)
     : m_String(inString)
     , m_Delimiter(inDelimiter)
     , m_EscapeChar(inEscapeChar)
     , m_Index(0)
     , m_LastIndex(0)
-    , m_StringLength(inString.Length())
+    , m_StringLength(inString.length())
 {
 }
 
@@ -63,7 +63,7 @@ CStackTokenizer::~CStackTokenizer()
  *	Returns true if string contains another token that can be read.
  *		@return bool true of there is another token to be read
  */
-bool CStackTokenizer::HasNextPartition()
+bool CStackTokenizer::HasNextPartition() const
 {
     if (m_Index >= m_StringLength)
         return false;
@@ -77,19 +77,19 @@ bool CStackTokenizer::HasNextPartition()
  *		@return Q3DStudio::CString the string value of the token
  */
 
-Q3DStudio::CString CStackTokenizer::GetCurrentPartition()
+QString CStackTokenizer::GetCurrentPartition()
 
 {
-    std::deque<Q3DStudio::Qt3DSChar> theStack;
+    std::deque<QChar> theStack;
     bool theIgnoreEscapeChar = false;
     bool theFoundToken = false;
     long theCurrentIndex = m_Index;
-    Q3DStudio::CString theResult;
+    QString theResult;
 
-    if (!m_String.IsEmpty()) {
+    if (!m_String.isEmpty()) {
         while (!theFoundToken) {
             // get the char at this index
-            Q3DStudio::Qt3DSChar theChar = m_String.GetAt(theCurrentIndex++);
+            QChar theChar = m_String.at(theCurrentIndex++);
 
             if (theChar == m_Delimiter) {
                 if (theStack.size() != 0) {
@@ -121,7 +121,7 @@ Q3DStudio::CString CStackTokenizer::GetCurrentPartition()
         m_LastIndex = theCurrentIndex; // update the last 'tokenized' position
 
         while (theStack.size() != 0) {
-            theResult.Concat(theStack.back()); // put everything back into a string
+            theResult.append(theStack.back()); // put everything back into a string
             theStack.pop_back();
         }
     }

@@ -47,12 +47,12 @@ struct SActionInfo
 
     // Trigger object
     SObjectRefType m_TriggerObject; // trigger object
-    wstring m_Event; // the list of applicable events is based on object type and stored, by type,
+    QString m_Event; // the list of applicable events is based on object type and stored, by type,
                      // in metadata
 
     // Target object
     SObjectRefType m_TargetObject; // target object
-    wstring m_Handler; // the list of applicable action handlers is loaded from metadata xml file
+    QString m_Handler; // the list of applicable action handlers is loaded from metadata xml file
                        // and based on object type
     THandlerArgHandleList m_HandlerArgs; // the list of applicable action arguments is dependent on
                                          // the handler and loaded from the metadata xml file.
@@ -71,7 +71,7 @@ struct SActionInfo
 struct SHandlerArgumentInfo
 {
     Qt3DSDMActionHandle m_Action; // Action that owns this Action Argument
-    TCharStr m_Name; // Name of the Action Argument
+    QString m_Name; // Name of the Action Argument
     HandlerArgumentType::Value m_ArgType; // m_ArgType will override m_ValueType
     DataModelDataType::Value m_ValueType; // m_ValueType is ignored if ArgType is specified
     SValue m_Value; // Value of the Action Argument
@@ -82,7 +82,7 @@ struct SHandlerArgumentInfo
     {
     }
 
-    SHandlerArgumentInfo(Qt3DSDMActionHandle inAction, const TCharStr &inName,
+    SHandlerArgumentInfo(Qt3DSDMActionHandle inAction, const QString &inName,
                          HandlerArgumentType::Value inArgType, DataModelDataType::Value inValueType)
         : m_Action(inAction)
         , m_Name(inName)

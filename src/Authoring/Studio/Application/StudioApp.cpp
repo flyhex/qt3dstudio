@@ -2171,7 +2171,7 @@ void CStudioApp::checkDeletedDatainputs()
             qt3dsimp::SImportAsset &theAsset(theTypes.GetImportAssetForType(
                                                  qt3dsdm::ComposerObjectTypes::Node));
             qt3dsdm::DataModelDataType::Value theType(
-                        theAsset.GetPropertyDataType(propName.toStdWString().c_str()));
+                        theAsset.GetPropertyDataType(propName));
             spEntry.first = theType;
             spEntry.second = false;
         }

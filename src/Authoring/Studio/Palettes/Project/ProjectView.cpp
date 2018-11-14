@@ -343,9 +343,8 @@ void ProjectView::copyPath(int row) const
         return;
     const auto path = m_ProjectModel->filePath(row);
     const auto doc = g_StudioApp.GetCore()->GetDoc();
-    const auto relativePath = doc->GetRelativePathToDoc(
-                Q3DStudio::CFilePath(Q3DStudio::CString::fromQString(path)));
-    CStudioClipboard::CopyTextToClipboard(relativePath.toQString());
+    const auto relativePath = doc->GetRelativePathToDoc(path);
+    CStudioClipboard::CopyTextToClipboard(relativePath);
 }
 
 void ProjectView::copyFullPath(int row) const
@@ -360,7 +359,7 @@ bool ProjectView::isGroup(int row) const
 {
     if (row == -1)
         return false;
-    Q3DStudio::CFilePath path(Q3DStudio::CString::fromQString(m_ProjectModel->filePath(row)));
+    QString path(m_ProjectModel->filePath(row));
     return Q3DStudio::ImportUtils::GetObjectFileTypeForFile(path).m_ObjectType == OBJTYPE_GROUP;
 }
 

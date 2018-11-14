@@ -80,6 +80,7 @@
 //==============================================================================
 //	Common Player Includes
 //==============================================================================
+#include "Qt3DSHash.h"
 #include "Qt3DSMath.h"
 #include "Qt3DSPoint.h"
 #include "Qt3DSRect.h"

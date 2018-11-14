@@ -58,7 +58,7 @@ public:
     void ChangeTime(long inTime, bool inSetStart) override;
     void CommitTimeChange() override;
     void RollbackTimeChange() override;
-    ::CColor GetTimebarColor() override;
+    QColor GetTimebarColor() override;
     Q3DStudio::CString GetTimebarComment() override;
     void SetTimebarComment(const Q3DStudio::CString &inComment) override;
     void SetTimebarTime(ITimeChangeCallback *inCallback = nullptr) override;

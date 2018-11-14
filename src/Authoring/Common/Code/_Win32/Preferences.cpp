@@ -124,24 +124,26 @@ void CPreferences::SetValue(const QString &key, double value, const QString &gro
 
 double CPreferences::GetValue(const QString &key, double defaultValue, const QString &group)
 {
-    QString theStrValue = GetStringValue(key, {}, group);
+    const QString theStrValue(GetStringValue(key, {}, group));
     return theStrValue.isEmpty() ? defaultValue : theStrValue.toDouble();
 }
 
-CColor CPreferences::GetColorValue(const QString &key, CColor defaultColor, const QString &group)
+QColor CPreferences::GetColorValue(const QString &key, const QColor &defaultColor,
+                                   const QString &group)
 {
-    QString theColorString = GetStringValue(key, {}, group);
+    const QString theColorString(GetStringValue(key, {}, group));
     if (!theColorString.isEmpty()) {
-        QStringList rgb = theColorString.split(QStringLiteral(" "));
-        return ::CColor(rgb.at(0).toInt(), rgb.at(1).toInt(), rgb.at(2).toInt());
+        QStringList rgb = theColorString.split(QLatin1Char(' '));
+        return QColor(rgb.at(0).toInt(), rgb.at(1).toInt(), rgb.at(2).toInt());
     }
 
     return defaultColor;
 }
 
-void CPreferences::SetColorValue(const QString &key, CColor value, const QString &group)
+void CPreferences::SetColorValue(const QString &key, const QColor &value, const QString &group)
 {
-    QString rgbStr = QString("%1 %2 %2").arg(value.red).arg(value.green).arg(value.blue);
+    const QString rgbStr(QStringLiteral("%1 %2 %2").arg(value.red()).arg(value.green())
+                         .arg(value.blue()));
     setValue(key, rgbStr, group);
 }
 

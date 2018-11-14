@@ -31,20 +31,20 @@
 
 #include "StudioPreferences.h"
 #include "Preferences.h"
-#include "CColor.h"
+#include <QtGui/qcolor.h>
 #include "MasterP.h"
 #include "CommonConstants.h"
 
 #include <QtGui/qpalette.h>
 #include <QtQml/qqmlcontext.h>
 
-static ::CColor s_BaseColor;
-static ::CColor s_DarkBaseColor;
-static ::CColor s_NormalColor;
-static ::CColor s_MasterColor;
-static ::CColor s_MouseOverHighlightColor;
-static ::CColor s_ButtonDownColor;
-static ::CColor s_DisabledTextColor;
+static QColor s_BaseColor;
+static QColor s_DarkBaseColor;
+static QColor s_NormalColor;
+static QColor s_MasterColor;
+static QColor s_MouseOverHighlightColor;
+static QColor s_ButtonDownColor;
+static QColor s_DisabledTextColor;
 
 static QColor s_studioColor1;
 static QColor s_studioColor2;
@@ -90,7 +90,7 @@ static int s_guideSize;
 #define STRINGIFY2(x) #x
 
 // Statics
-const ::CColor CStudioPreferences::EDITVIEW_DEFAULTBGCOLOR = ::CColor("#262829");
+const QColor CStudioPreferences::EDITVIEW_DEFAULTBGCOLOR = QColor("#262829");
 std::unique_ptr<CPreferences> CStudioPreferences::m_preferences = nullptr;
 
 CStudioPreferences::CStudioPreferences()
@@ -99,6 +99,21 @@ CStudioPreferences::CStudioPreferences()
 
 CStudioPreferences::~CStudioPreferences()
 {
+}
+
+static void setColorLuminance(QColor &color, qreal luminance)
+{
+    qreal h, s, l;
+    color.getHslF(&h, &s, &l);
+    l = luminance;
+    color.setHslF(h, s, l);
+}
+
+static qreal getColorLuminance(const QColor &color)
+{
+    qreal h, s, l;
+    color.getHslF(&h, &s, &l);
+    return l;
 }
 
 //==============================================================================
@@ -113,25 +128,26 @@ void CStudioPreferences::LoadPreferences(const QString &filePath)
 
     m_preferences->SetPreferencesFile(filePath);
 
-    s_BaseColor = m_preferences->GetColorValue(QStringLiteral("BaseColor"), ::CColor("#262829"),
+    s_BaseColor = m_preferences->GetColorValue(QStringLiteral("BaseColor"), QColor("#262829"),
                                                QStringLiteral("Preferences"));
 
-    s_NormalColor = m_preferences->GetColorValue(QStringLiteral("NormalColor"), ::CColor("#ffffff"),
+    s_NormalColor = m_preferences->GetColorValue(QStringLiteral("NormalColor"), QColor("#ffffff"),
                                                  QStringLiteral("Preferences"));
-    s_MasterColor = m_preferences->GetColorValue(QStringLiteral("MasterColor"), ::CColor("#5caa15"),
+    s_MasterColor = m_preferences->GetColorValue(QStringLiteral("MasterColor"), QColor("#5caa15"),
                                                  QStringLiteral("Preferences"));
 
     s_DarkBaseColor = s_BaseColor;
-    s_DarkBaseColor.SetLuminance(s_DarkBaseColor.GetLuminance() - 0.10f);
+    setColorLuminance(s_DarkBaseColor, getColorLuminance(s_DarkBaseColor) - 0.10f);
 
     s_MouseOverHighlightColor = s_BaseColor;
-    s_MouseOverHighlightColor.SetLuminance(s_MouseOverHighlightColor.GetLuminance() - 0.05f);
+    setColorLuminance(s_MouseOverHighlightColor,
+                      getColorLuminance(s_MouseOverHighlightColor) - 0.05f);
 
     s_ButtonDownColor = s_DarkBaseColor; // CPreferences::GetUserPreferences( "Preferences"
-                                         // ).GetColorValue( "ButtonDownColor", ::CColor( 118, 202,
+                                         // ).GetColorValue( "ButtonDownColor", QColor( 118, 202,
                                          // 8 ) );
 
-    s_DisabledTextColor = ::CColor(128, 128, 128);
+    s_DisabledTextColor = QColor(128, 128, 128);
 
     s_studioColor1 = QColor("#262829");
     s_studioColor2 = QColor("#404244");
@@ -678,7 +694,7 @@ void CStudioPreferences::SetBigTimeAdvanceAmount(long inTime)
  * Retrieves the color that should be used when the mouse goes over a row, such
  * as in the timeline or inspector palettes.
  */
-::CColor CStudioPreferences::GetMouseOverHighlightColor()
+QColor CStudioPreferences::GetMouseOverHighlightColor()
 {
     return s_MouseOverHighlightColor;
 }
@@ -686,7 +702,7 @@ void CStudioPreferences::SetBigTimeAdvanceAmount(long inTime)
 /**
  * Returns the normal color used for non-master items and text throughout the UI
  */
-::CColor CStudioPreferences::GetNormalColor()
+QColor CStudioPreferences::GetNormalColor()
 {
     return s_NormalColor;
 }
@@ -695,7 +711,7 @@ void CStudioPreferences::SetBigTimeAdvanceAmount(long inTime)
 /**
  * Returns the color for master items and text throughout the UI
  */
-::CColor CStudioPreferences::GetMasterColor()
+QColor CStudioPreferences::GetMasterColor()
 {
     return s_MasterColor;
 }
@@ -704,7 +720,7 @@ void CStudioPreferences::SetBigTimeAdvanceAmount(long inTime)
 /**
  * Returns the color for inactive items and text throughout the UI
  */
-::CColor CStudioPreferences::GetInactiveColor()
+QColor CStudioPreferences::GetInactiveColor()
 {
     return s_disabledColor;
 }
@@ -713,24 +729,24 @@ void CStudioPreferences::SetBigTimeAdvanceAmount(long inTime)
  * @return default color for object timebars in the timeline (if not specified by one of these other
  * functions)
  */
-::CColor CStudioPreferences::GetObjectTimebarColor()
+QColor CStudioPreferences::GetObjectTimebarColor()
 {
-    return ::CColor("#788ac5");
+    return QColor("#788ac5");
 }
 
 //=============================================================================
 /**
  * @return default colors for specific timebars in the timeline
  */
-::CColor CStudioPreferences::GetLayerTimebarColor()
+QColor CStudioPreferences::GetLayerTimebarColor()
 {
-    return ::CColor("#e7e0cd");
+    return QColor("#e7e0cd");
 }
 
 /**
  *	Color when text is disabled
  */
-::CColor CStudioPreferences::GetDisabledTextColor()
+QColor CStudioPreferences::GetDisabledTextColor()
 {
     return s_DisabledTextColor;
 }
@@ -739,47 +755,47 @@ void CStudioPreferences::SetBigTimeAdvanceAmount(long inTime)
 /**
  *  Colors for bounding boxes
  */
-::CColor CStudioPreferences::GetSingleBoundingBoxColor()
+QColor CStudioPreferences::GetSingleBoundingBoxColor()
 {
-    return ::CColor("#ff0000");
+    return QColor("#ff0000");
 }
 
-::CColor CStudioPreferences::GetGroupBoundingBoxColor()
+QColor CStudioPreferences::GetGroupBoundingBoxColor()
 {
-    return ::CColor("#ff0000");
+    return QColor("#ff0000");
 }
 
 /**
  *  Colors for rulers and guides
  */
-::CColor CStudioPreferences::GetRulerBackgroundColor()
+QColor CStudioPreferences::GetRulerBackgroundColor()
 {
     return s_studioColor1;
 }
 
-::CColor CStudioPreferences::GetRulerTickColor()
+QColor CStudioPreferences::GetRulerTickColor()
 {
     return s_studioColor3;
 }
 
-::CColor CStudioPreferences::GetGuideColor()
+QColor CStudioPreferences::GetGuideColor()
 {
-    return ::CColor("#7a5f02"); // #f4be04 plus faked alpha 50%
+    return QColor("#7a5f02"); // #f4be04 plus faked alpha 50%
 }
 
-::CColor CStudioPreferences::GetGuideSelectedColor()
+QColor CStudioPreferences::GetGuideSelectedColor()
 {
     return s_guideColor;
 }
 
-::CColor CStudioPreferences::GetGuideFillColor()
+QColor CStudioPreferences::GetGuideFillColor()
 {
-    return ::CColor("#140F00"); // #f4be04 plus faked alpha 8%
+    return QColor("#140F00"); // #f4be04 plus faked alpha 8%
 }
 
-::CColor CStudioPreferences::GetGuideFillSelectedColor()
+QColor CStudioPreferences::GetGuideFillSelectedColor()
 {
-    return ::CColor("#7a5f02"); // #f4be04 plus faked alpha 50%
+    return QColor("#7a5f02"); // #f4be04 plus faked alpha 50%
 }
 
 //==============================================================================
@@ -817,7 +833,7 @@ void CStudioPreferences::setQmlContextProperties(QQmlContext *qml)
     qml->setContextProperty(QStringLiteral("_studioColor2"), s_studioColor2);
     qml->setContextProperty(QStringLiteral("_studioColor3"), s_studioColor3);
     qml->setContextProperty(QStringLiteral("_backgroundColor"), s_backgroundColor);
-    qml->setContextProperty(QStringLiteral("_buttonDownColor"), s_ButtonDownColor.getQColor());
+    qml->setContextProperty(QStringLiteral("_buttonDownColor"), s_ButtonDownColor);
     qml->setContextProperty(QStringLiteral("_guideColor"), s_guideColor);
     qml->setContextProperty(QStringLiteral("_selectionColor"), s_selectionColor);
     qml->setContextProperty(QStringLiteral("_textColor"), s_textColor);

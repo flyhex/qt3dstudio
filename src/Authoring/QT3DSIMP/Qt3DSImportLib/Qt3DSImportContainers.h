@@ -41,41 +41,6 @@ namespace qt3dsimp {
 #define QT3DSIMP_FOREACH(idxnm, val)                                                                  \
     for (QT3DSU32 idxnm = 0, __numItems = (QT3DSU32)val; idxnm < __numItems; ++idxnm)
 
-template <typename TKey, typename TValue, typename THash = eastl::hash<TKey>,
-          typename TPredicate = eastl::equal_to<TKey>>
-struct ImportHashMap : public eastl::hash_map<TKey, TValue, THash, TPredicate>
-{
-    using base_type = eastl::hash_map<TKey, TValue, THash, TPredicate>;
-
-    ImportHashMap() {}
-
-
-
-    bool contains(const TKey &key) const { return find(key) != base_type::end(); }
-};
-template <typename TKey>
-struct ImportHashSet : public eastl::hash_set<TKey, eastl::hash<TKey>, eastl::equal_to<TKey>>
-{
-    using base_type = eastl::hash_set<TKey, eastl::hash<TKey>, eastl::equal_to<TKey>>;
-    ImportHashSet() {}
-    bool contains(const TKey &key) const { return base_type::find(key) != base_type::end(); }
-};
-template <typename TValue>
-struct ImportArray : public eastl::vector<TValue>
-{
-    using base_type = eastl::vector<TValue>;
-
-    ImportArray() {}
-    operator NVConstDataRef<TValue>() const
-    {
-        return NVConstDataRef<TValue>(base_type::data(), (QT3DSU32) base_type::size());
-    }
-
-    operator NVDataRef<TValue>() {
-        return NVDataRef<TValue>(base_type::data(), (QT3DSU32) base_type::size());
-    }
-};
-
 inline NVConstDataRef<wchar_t> toRef(const wchar_t *data, QT3DSU32 len = 0)
 {
     if (IsTrivial(data))

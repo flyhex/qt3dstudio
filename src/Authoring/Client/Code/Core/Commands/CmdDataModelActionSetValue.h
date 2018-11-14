@@ -103,12 +103,12 @@ protected: // Members
     SObjectRefType m_Object;
 
     bool m_ResetEvent;
-    wstring m_Event;
+    QString m_Event;
 
 public: // Construction
     CCmdDataModelActionSetTriggerObject(CDoc *inDoc, Qt3DSDMActionHandle inAction,
                                         const SObjectRefType &inObject)
-        : CCmdDataModelActionSetValue(inDoc, inAction, "Set Trigger Object")
+        : CCmdDataModelActionSetValue(inDoc, inAction, QObject::tr("Set Trigger Object"))
         , m_Object(inObject)
         , m_ResetEvent(false)
     {
@@ -122,7 +122,7 @@ public: // Construction
         }
     }
 
-    virtual void ResetEvent(wstring inEvent)
+    virtual void ResetEvent(const QString &inEvent)
     {
         m_ResetEvent = true;
         m_Event = inEvent;
@@ -132,11 +132,11 @@ public: // Construction
 class CCmdDataModelActionSetEvent : public CCmdDataModelActionSetValue
 {
 protected: // Members
-    wstring m_Event;
+    QString m_Event;
 
 public: // Construction
-    CCmdDataModelActionSetEvent(CDoc *inDoc, Qt3DSDMActionHandle inAction, const wstring &inEvent)
-        : CCmdDataModelActionSetValue(inDoc, inAction, "Set Event")
+    CCmdDataModelActionSetEvent(CDoc *inDoc, Qt3DSDMActionHandle inAction, const QString &inEvent)
+        : CCmdDataModelActionSetValue(inDoc, inAction, QObject::tr("Set Event"))
         , m_Event(inEvent)
     {
     }
@@ -151,7 +151,7 @@ class CCmdDataModelActionResetHandler : public CCmdDataModelActionSetValue
 {
 protected: // Members
     bool m_ResetHandler;
-    wstring m_Handler;
+    QString m_Handler;
 
 protected: // helper functions
     virtual void ResetHandlerHandle()
@@ -159,7 +159,7 @@ protected: // helper functions
         m_Doc->GetStudioSystem()->GetActionCore()->SetHandler(m_Action, m_Handler);
     }
 
-    virtual void ResetHandlerArguments(const wstring &inHandler)
+    virtual void ResetHandlerArguments(const QString &inHandler)
     {
         m_Handler = inHandler;
         m_Doc->GetStudioSystem()->GetClientDataModelBridge()->ResetHandlerArguments(m_Action,
@@ -177,7 +177,7 @@ public: // Construction
     // Changing Trigger Object may make the current Action Name to be unapplicable.
     // Changing Action Name may make the current Action Args to be unapplicable.
     // If that's the case, Reset the Action Name and/or Action Args.
-    virtual void ResetHandler(const wstring &inHandler)
+    virtual void ResetHandler(const QString &inHandler)
     {
         m_ResetHandler = true;
         m_Handler = inHandler;
@@ -192,7 +192,7 @@ protected: // Members
 public: // Construction
     CCmdDataModelActionSetTargetObject(CDoc *inDoc, Qt3DSDMActionHandle inAction,
                                        const SObjectRefType &inObject)
-        : CCmdDataModelActionResetHandler(inDoc, inAction, "Set Target Object")
+        : CCmdDataModelActionResetHandler(inDoc, inAction, QObject::tr("Set Target Object"))
         , m_Object(inObject)
     {
     }
@@ -210,12 +210,12 @@ public: // Construction
 class CCmdDataModelActionSetHandler : public CCmdDataModelActionResetHandler
 {
 protected: // Members
-    qt3dsdm::wstring m_Handler;
+    QString m_Handler;
 
 public: // Construction
     CCmdDataModelActionSetHandler(CDoc *inDoc, Qt3DSDMActionHandle inAction,
-                                  qt3dsdm::wstring inHandler)
-        : CCmdDataModelActionResetHandler(inDoc, inAction, "Set Handler")
+                                  const QString &inHandler)
+        : CCmdDataModelActionResetHandler(inDoc, inAction, QObject::tr("Set Handler"))
         , m_Handler(inHandler)
     {
     }
@@ -289,7 +289,7 @@ protected: // Members
 public: // Construction
     CCmdDataModelActionSetEyeball(CDoc *inDoc, Qt3DSDMSlideHandle inActiveSlide,
                                   Qt3DSDMActionHandle inAction, bool inValue)
-        : CCmdDataModelActionSetValue(inDoc, inAction, "Set Action Eyeball")
+        : CCmdDataModelActionSetValue(inDoc, inAction, QObject::tr("Set Action Eyeball"))
         , m_Value(inValue)
         , m_ActiveSlide(inActiveSlide)
     {

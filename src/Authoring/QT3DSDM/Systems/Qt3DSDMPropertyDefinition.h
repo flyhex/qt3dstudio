@@ -36,7 +36,7 @@ namespace qt3dsdm {
 
 struct Qt3DSDMPropertyDefinition
 {
-    TCharStr m_Name;
+    QString m_Name;
     Qt3DSDMInstanceHandle m_Instance;
     DataModelDataType::Value m_Type;
 
@@ -44,7 +44,7 @@ struct Qt3DSDMPropertyDefinition
         : m_Type(DataModelDataType::None)
     {
     }
-    Qt3DSDMPropertyDefinition(Qt3DSDMInstanceHandle inInstanceHandle, TCharPtr inName,
+    Qt3DSDMPropertyDefinition(Qt3DSDMInstanceHandle inInstanceHandle, const QString &inName,
                              DataModelDataType::Value inType)
         : m_Name(inName)
         , m_Instance(inInstanceHandle)

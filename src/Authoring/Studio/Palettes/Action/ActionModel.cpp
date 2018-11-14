@@ -190,28 +190,28 @@ QString ActionModel::actionString(const Qt3DSDMActionHandle &action) const
         Qt3DSDMEventHandle eventHandle = bridge->ResolveEvent(actionInfo);
         if (eventHandle.Valid())
             eventFormalName =
-                QString::fromWCharArray(bridge->GetEventInfo(eventHandle).m_FormalName.wide_str());
+                bridge->GetEventInfo(eventHandle).m_FormalName;
 
         // Query the asset name
         QString assetName = tr("[Unknown]");
-        assetName = bridge->GetName(actionInfo.m_Owner).toQString();
+        assetName = bridge->GetName(actionInfo.m_Owner);
 
         const auto sourceInstance =
             bridge->GetInstance(actionInfo.m_Owner, actionInfo.m_TriggerObject);
         const auto targetInstance =
             bridge->GetInstance(actionInfo.m_Owner, actionInfo.m_TargetObject);
         QString sourceName = sourceInstance.Valid()
-            ? bridge->GetName(sourceInstance).toQString()
+            ? bridge->GetName(sourceInstance)
             : tr("[Unknown Source]");
         QString targetName = targetInstance.Valid()
-            ? bridge->GetName(targetInstance).toQString()
+            ? bridge->GetName(targetInstance)
             : tr("[Unknown Target]");
 
         // Query the action name
         QString handlerFormalName(tr("[Unknown Handler]"));
         const auto handlerHandle = bridge->ResolveHandler(actionInfo);
         if (handlerHandle.Valid())
-            handlerFormalName = QString::fromWCharArray(bridge->GetHandlerInfo(handlerHandle).m_FormalName.wide_str());
+            handlerFormalName = bridge->GetHandlerInfo(handlerHandle).m_FormalName;
 
         // Format the strings
         if (actionInfo.m_Owner == sourceInstance) {

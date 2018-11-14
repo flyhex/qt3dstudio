@@ -379,8 +379,7 @@ void TimelineToolbar::onDataInputChange(int handle, int instance, const QString 
 
     m_diLabel->setText(m_currController);
     qt3dsdm::SValue fullCtrlPropVal
-        = std::make_shared<qt3dsdm::CDataStr>(
-            Q3DStudio::CString::fromQString(existingCtrl));
+        = std::make_shared<qt3dsdm::CDataStr>(existingCtrl);
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Timeline control"))
         ->SetInstancePropertyValue(timeCtxRoot, ctrldPropertyHandle, fullCtrlPropVal);
 }

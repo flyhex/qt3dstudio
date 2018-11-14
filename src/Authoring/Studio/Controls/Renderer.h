@@ -35,7 +35,7 @@
 #include <QColor>
 #include <QPoint>
 
-#include "CColor.h"
+#include <QtGui/qcolor.h>
 
 QT_BEGIN_NAMESPACE
 class QPainter;

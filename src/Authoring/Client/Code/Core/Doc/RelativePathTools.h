@@ -60,17 +60,17 @@ public:
     static bool IsRelativePath(const qt3dsdm::SObjectRefType &inObjectRefValue);
     static EPathType GetPathType(const qt3dsdm::SObjectRefType &inObjectRefValue);
 
-    static Q3DStudio::CString BuildReferenceString(const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                                                   const qt3dsdm::Qt3DSDMInstanceHandle inRootInstance,
-                                                   EPathType inPathType, CDoc *inDoc);
-    static Q3DStudio::CString
+    static QString BuildReferenceString(const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                        const qt3dsdm::Qt3DSDMInstanceHandle inRootInstance,
+                                        EPathType inPathType, CDoc *inDoc);
+    static QString
     BuildAbsoluteReferenceString(const qt3dsdm::Qt3DSDMInstanceHandle inInstance, CDoc *inDoc);
-    static Q3DStudio::CString
+    static QString
     BuildRelativeReferenceString(const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                  const qt3dsdm::Qt3DSDMInstanceHandle inRootInstance, CDoc *inDoc);
     static qt3dsdm::Qt3DSDMInstanceHandle
     FindAssetInstanceByObjectPath(CDoc *inDoc, const qt3dsdm::Qt3DSDMInstanceHandle &inRootInstance,
-                                  const Q3DStudio::CString &inString, EPathType &outPathType,
+                                  const QString &inString, EPathType &outPathType,
                                   bool &outIsResolved,
                                   const IObjectReferenceHelper *inHelper = nullptr,
                                   bool ignoreMaterialProperties = false);
@@ -86,8 +86,7 @@ protected:
                                     qt3dsdm::Qt3DSDMSlideHandle inSlide, CStackTokenizer &ioTokenizer,
                                     bool &outIsResolved, const IObjectReferenceHelper *inHelper,
                                     bool ignoreMaterialProperties = false);
-    static Q3DStudio::CString LookupObjectName(const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                                               CDoc *inDoc);
+    static QString LookupObjectName(const qt3dsdm::Qt3DSDMInstanceHandle inInstance, CDoc *inDoc);
 };
 
 #endif // INCLUDED_RELATIVEPATHTOOLS_H

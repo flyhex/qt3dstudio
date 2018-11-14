@@ -96,8 +96,8 @@ bool CGroupTimelineItemBinding::IsImported() const
                                                                      ->GetSourcePathProperty(),
                                                     theValue)) {
         qt3dsdm::TDataStrPtr theSrcPath(qt3dsdm::get<qt3dsdm::TDataStrPtr>(theValue));
-        Q3DStudio::CFilePath theFilePath(theSrcPath->GetData());
-        if (theFilePath.GetExtension() == CDialogs::GetWideImportFileExtension())
+        QFileInfo theFilePath(theSrcPath->toQString());
+        if (theFilePath.suffix() == CDialogs::GetImportFileExtension())
             return true;
     }
     // If it is, check to be sure that

@@ -72,8 +72,8 @@ public:
     void SetCommandModifiedFlag(bool inModified) override;
     void CommandUpdate(unsigned long inUpdateFlags) override;
 
-    void GetCreateDirectoryFileName(const QString &inDocument, Q3DStudio::CFilePath &outFinalDir,
-                                    Q3DStudio::CFilePath &outFinalDoc);
+    void GetCreateDirectoryFileName(const QString &inDocument, QString &outFinalDir,
+                                    QString &outFinalDoc);
 
     // CPresentationListener
     void OnNewPresentation() override;

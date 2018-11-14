@@ -491,7 +491,7 @@ void SVisualAidWidget::renderCamera(SNode *node, IRenderWidgetContext &inWidgetC
                                                         * theSetup.m_WidgetInfo.m_NodeParentToCamera
                                                         * node->m_GlobalTransform);
 
-    ::CColor color = CStudioPreferences::GetSingleBoundingBoxColor();
+    QColor color = CStudioPreferences::GetSingleBoundingBoxColor();
     QT3DSVec3 colorVec(color.GetRed() / 255.f,
                        color.GetGreen() / 255.f,
                        color.GetBlue() / 255.f);
@@ -623,7 +623,7 @@ void SVisualAidWidget::renderLight(SNode *node, IRenderWidgetContext &inWidgetCo
                                             * node->m_GlobalTransform
                                             * areaScaleMatrix);
 
-        ::CColor color = CStudioPreferences::GetSingleBoundingBoxColor();
+        QColor color = CStudioPreferences::GetSingleBoundingBoxColor();
         QT3DSVec3 colorVec(color.GetRed() / 255.f,
                            color.GetGreen() / 255.f,
                            color.GetBlue() / 255.f);

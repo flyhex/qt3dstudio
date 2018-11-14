@@ -65,7 +65,7 @@ protected:
     qt3dsdm::Qt3DSDMInstanceHandle m_DataHandle; // The Instance Handle for this Timeline Timeber.
     qt3dsdm::Qt3DSDMPropertyHandle m_StartTime;
     qt3dsdm::Qt3DSDMPropertyHandle m_EndTime;
-    ::CColor m_Color; // Timebar color
+    QColor m_Color; // Timebar color
 
     Q3DStudio::CString m_Comment; // Timebar comment text
     std::shared_ptr<qt3dsdm::ISignalConnection> m_PropertyChangedSignal;
@@ -83,7 +83,7 @@ public:
     void ChangeTime(long inTime, bool inSetStart) override;
     void CommitTimeChange() override;
     void RollbackTimeChange() override;
-    ::CColor GetTimebarColor() override { return m_Color; }
+    QColor GetTimebarColor() override { return m_Color; }
     Q3DStudio::CString GetTimebarComment() override { return m_Comment; }
     void SetTimebarComment(const Q3DStudio::CString &inComment) override;
     void SetTimebarTime(ITimeChangeCallback *inCallback = nullptr) override;

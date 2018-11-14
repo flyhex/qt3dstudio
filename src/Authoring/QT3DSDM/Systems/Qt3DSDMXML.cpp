@@ -60,749 +60,725 @@ using qt3ds::foundation::Pool;
 
 namespace qt3dsdm {
 
-// All names are string table values so we can do straight
-// pointer comparisons on them, we don't have the compare their
-// values.
-struct SDOMAttribute
+SDOMAttribute::SDOMAttribute(TXMLCharPtr nm, TXMLCharPtr val)
+    : m_Name(nm)
+    , m_Value(val)
+    , m_NextAttribute(NULL)
 {
-    TXMLCharPtr m_Name;
-    TXMLCharPtr m_Value;
-    SDOMAttribute *m_NextAttribute;
-
-    SDOMAttribute(TXMLCharPtr nm, TXMLCharPtr val)
-        : m_Name(nm)
-        , m_Value(val)
-        , m_NextAttribute(NULL)
-    {
-    }
-};
-
-struct SDOMElement
-{
-    TXMLCharPtr m_Name;
-    SDOMAttribute *m_FirstAttribute;
-    SDOMAttribute *m_LastAttribute;
-    SDOMElement *m_Parent;
-    SDOMElement *m_FirstChild;
-    SDOMElement *m_LastChild;
-    SDOMElement *m_NextSibling;
-    TXMLCharPtr m_Value;
-
-    SDOMElement(TXMLCharPtr nm)
-        : m_Name(nm)
-        , m_FirstAttribute(nullptr)
-        , m_LastAttribute(nullptr)
-        , m_Parent(nullptr)
-        , m_FirstChild(nullptr)
-        , m_LastChild(nullptr)
-        , m_NextSibling(nullptr)
-        , m_Value("")
-    {
-    }
-
-    void AddAttribute(SDOMAttribute &att)
-    {
-        if (m_LastAttribute) {
-            m_LastAttribute->m_NextAttribute = &att;
-            m_LastAttribute = &att;
-        } else {
-            QT3DS_ASSERT(m_FirstAttribute == NULL);
-            m_FirstAttribute = m_LastAttribute = &att;
-        }
-    }
-    // Used to ensure duplicate attributes can't happen
-    void SetAttributeValue(TXMLCharPtr inName, TXMLCharPtr inValue, IDOMFactory &inFactory,
-                           const SDOMFlags &inFlags)
-    {
-        inName = inFactory.GetStringTable()->RegisterStr(inName);
-        SDOMAttribute *att = FindAttribute(inName, inFlags);
-        if (att) {
-            att->m_Value = inFactory.RegisterValue(inValue);
-        } else {
-            AddAttribute(*inFactory.NextAttribute(inName, inValue));
-        }
-    }
-    void SetAttributeValue(TWideXMLCharPtr inName, TWideXMLCharPtr inValue, IDOMFactory &inFactory,
-                           const SDOMFlags &inFlags)
-    {
-        TXMLCharPtr theName = inFactory.GetStringTable()->GetNarrowStr(inName);
-        SDOMAttribute *att = FindAttribute(theName, inFlags);
-        if (att) {
-            att->m_Value = inFactory.RegisterValue(inValue);
-        } else {
-            AddAttribute(
-                *inFactory.NextAttribute(inFactory.GetStringTable()->GetWideStr(inName), inValue));
-        }
-    }
-    const SDOMAttribute *FindAttribute(TXMLCharPtr nm, const SDOMFlags &inFlags) const
-    {
-        return const_cast<SDOMElement *>(this)->FindAttribute(nm, inFlags);
-    }
-    SDOMAttribute *FindAttribute(TXMLCharPtr nm, const SDOMFlags &inFlags)
-    {
-        for (SDOMAttribute *att = m_FirstAttribute; att != NULL; att = att->m_NextAttribute) {
-            if (att->m_Name == nm)
-                return att;
-            else if (inFlags.CaselessAttributes() && AreEqualCaseless(nm, att->m_Name))
-                return att;
-        }
-        return NULL;
-    }
-    void RemoveAttribute(TXMLCharPtr nm, const SDOMFlags &inFlags)
-    {
-        SDOMAttribute *preatt = m_FirstAttribute;
-        for (SDOMAttribute *att = m_FirstAttribute; att != NULL;
-             preatt = att, att = att->m_NextAttribute) {
-            if (att->m_Name == nm
-                || (inFlags.CaselessAttributes() && AreEqualCaseless(nm, att->m_Name))) {
-                if (att == m_FirstAttribute) {
-                    m_FirstAttribute = att->m_NextAttribute;
-                } else {
-                    preatt->m_NextAttribute = att->m_NextAttribute;
-                    if (att == m_LastAttribute)
-                        m_LastAttribute = preatt;
-                }
-
-                att->m_NextAttribute = NULL;
-            }
-        }
-    }
-    TXMLCharPtr GetAttributeValue(TXMLCharPtr nm, SDOMFlags &inFlags) const
-    {
-        const SDOMAttribute *att = FindAttribute(nm, inFlags);
-        if (att)
-            return att->m_Value;
-        return NULL;
-    }
-    void AddChild(SDOMElement &elem)
-    {
-        elem.m_Parent = this;
-        if (m_LastChild) {
-            m_LastChild->m_NextSibling = &elem;
-            m_LastChild = &elem;
-        } else {
-            QT3DS_ASSERT(m_FirstChild == NULL);
-            m_FirstChild = m_LastChild = &elem;
-        }
-    }
-    SDOMElement *FindPreviousChild(SDOMElement &elem)
-    {
-        if (&elem == m_FirstChild)
-            return NULL;
-        // Find the previous sibling.
-        SDOMElement *theChild = m_FirstChild;
-        // Empty loop intentional
-        for (; theChild && theChild->m_NextSibling != &elem; theChild = theChild->m_NextSibling) {
-        }
-
-        return theChild;
-    }
-    void RemoveChild(SDOMElement &elem)
-    {
-        if (elem.m_Parent != this) {
-            QT3DS_ASSERT(false);
-            return;
-        }
-        elem.m_Parent = NULL;
-        if (&elem == m_FirstChild) {
-            m_FirstChild = elem.m_NextSibling;
-        } else {
-            SDOMElement *theChild(FindPreviousChild(elem));
-            QT3DS_ASSERT(theChild);
-            if (theChild) {
-                theChild->m_NextSibling = elem.m_NextSibling;
-                if (&elem == m_LastChild)
-                    m_LastChild = theChild;
-            }
-        }
-        elem.m_NextSibling = NULL;
-    }
-
-    void ReplaceChild(SDOMElement &inChild, SDOMElement &inReplacement)
-    {
-        inChild.m_Parent = NULL;
-        if (&inChild == m_FirstChild)
-            m_FirstChild = &inReplacement;
-        else {
-            SDOMElement *theChild(FindPreviousChild(inChild));
-            QT3DS_ASSERT(theChild);
-            if (theChild) {
-                theChild->m_NextSibling = &inReplacement;
-                if (&inChild == m_LastChild)
-                    m_LastChild = &inReplacement;
-            }
-        }
-        inReplacement.m_NextSibling = inChild.m_NextSibling;
-        inReplacement.m_Parent = this;
-        inChild.m_NextSibling = NULL;
-    }
-
-    void InsertChildBefore(SDOMElement &elem, SDOMElement &theSibling)
-    {
-        // Ensure elem isn't in the graph.
-        QT3DS_ASSERT(elem.m_Parent == NULL);
-        QT3DS_ASSERT(elem.m_NextSibling == NULL);
-        elem.m_Parent = this;
-        if (&theSibling == m_FirstChild)
-            m_FirstChild = &elem;
-        else {
-            SDOMElement *thePrevious = FindPreviousChild(theSibling);
-            QT3DS_ASSERT(thePrevious);
-            if (thePrevious)
-                thePrevious->m_NextSibling = &elem;
-        }
-
-        elem.m_NextSibling = &theSibling;
-    }
-    QT3DSU32 GetNumChildren(TXMLCharPtr inChildName, const SDOMFlags &inFlags) const
-    {
-        QT3DSU32 idx = 0;
-        for (SDOMElement *elem = m_FirstChild; elem != NULL; elem = elem->m_NextSibling) {
-            if (elem->m_Name == inChildName)
-                ++idx;
-            else if (inFlags.CaselessElements() && AreEqualCaseless(inChildName, elem->m_Name))
-                ++idx;
-        }
-        return idx;
-    }
-    QT3DSU32 GetNumChildren() const
-    {
-        QT3DSU32 idx = 0;
-        for (SDOMElement *elem = m_FirstChild; elem != NULL; elem = elem->m_NextSibling)
-            ++idx;
-        return idx;
-    }
-    SDOMElement *FindChildByName(TXMLCharPtr nm, const SDOMFlags &inFlags) const
-    {
-        for (SDOMElement *elem = m_FirstChild; elem != NULL; elem = elem->m_NextSibling) {
-            if (elem->m_Name == nm)
-                return elem;
-            else if (inFlags.CaselessElements() && AreEqualCaseless(nm, elem->m_Name))
-                return elem;
-        }
-        return NULL;
-    }
-    SDOMElement *FindNextSiblingByName(TXMLCharPtr nm, const SDOMFlags &inFlags) const
-    {
-        for (SDOMElement *elem = m_NextSibling; elem != NULL; elem = elem->m_NextSibling) {
-            if (elem->m_Name == nm)
-                return elem;
-            else if (inFlags.CaselessElements() && AreEqualCaseless(nm, elem->m_Name))
-                return elem;
-        }
-        return NULL;
-    }
-};
 }
 
-namespace {
+SDOMElement::SDOMElement(TXMLCharPtr nm)
+    : m_Name(nm)
+    , m_FirstAttribute(nullptr)
+    , m_LastAttribute(nullptr)
+    , m_Parent(nullptr)
+    , m_FirstChild(nullptr)
+    , m_LastChild(nullptr)
+    , m_NextSibling(nullptr)
+    , m_Value("")
+{
+}
+
+void SDOMElement::AddAttribute(SDOMAttribute &att)
+{
+    if (m_LastAttribute) {
+        m_LastAttribute->m_NextAttribute = &att;
+        m_LastAttribute = &att;
+    } else {
+        QT3DS_ASSERT(m_FirstAttribute == NULL);
+        m_FirstAttribute = m_LastAttribute = &att;
+    }
+}
+// Used to ensure duplicate attributes can't happen
+void SDOMElement::SetAttributeValue(TXMLCharPtr inName, TXMLCharPtr inValue, IDOMFactory &inFactory,
+                                    const SDOMFlags &inFlags)
+{
+    inName = inFactory.GetStringTable()->RegisterStr(inName);
+    SDOMAttribute *att = FindAttribute(inName, inFlags);
+    if (att) {
+        att->m_Value = inFactory.RegisterValue(inValue);
+    } else {
+        AddAttribute(*inFactory.NextAttribute(inName, inValue));
+    }
+}
+void SDOMElement::SetAttributeValue(TWideXMLCharPtr inName, TWideXMLCharPtr inValue,
+                                    IDOMFactory &inFactory, const SDOMFlags &inFlags)
+{
+    TXMLCharPtr theName = inFactory.GetStringTable()->GetNarrowStr(inName);
+    SDOMAttribute *att = FindAttribute(theName, inFlags);
+    if (att) {
+        att->m_Value = inFactory.RegisterValue(inValue);
+    } else {
+        AddAttribute(
+            *inFactory.NextAttribute(inFactory.GetStringTable()->GetWideStr(inName), inValue));
+    }
+}
+const SDOMAttribute *SDOMElement::FindAttribute(TXMLCharPtr nm, const SDOMFlags &inFlags) const
+{
+    return const_cast<SDOMElement *>(this)->FindAttribute(nm, inFlags);
+}
+SDOMAttribute *SDOMElement::FindAttribute(TXMLCharPtr nm, const SDOMFlags &inFlags)
+{
+    for (SDOMAttribute *att = m_FirstAttribute; att != NULL; att = att->m_NextAttribute) {
+        if (att->m_Name == nm)
+            return att;
+        else if (inFlags.CaselessAttributes() && AreEqualCaseless(nm, att->m_Name))
+            return att;
+    }
+    return NULL;
+}
+void SDOMElement::RemoveAttribute(TXMLCharPtr nm, const SDOMFlags &inFlags)
+{
+    SDOMAttribute *preatt = m_FirstAttribute;
+    for (SDOMAttribute *att = m_FirstAttribute; att != NULL;
+         preatt = att, att = att->m_NextAttribute) {
+        if (att->m_Name == nm
+            || (inFlags.CaselessAttributes() && AreEqualCaseless(nm, att->m_Name))) {
+            if (att == m_FirstAttribute) {
+                m_FirstAttribute = att->m_NextAttribute;
+            } else {
+                preatt->m_NextAttribute = att->m_NextAttribute;
+                if (att == m_LastAttribute)
+                    m_LastAttribute = preatt;
+            }
+
+            att->m_NextAttribute = NULL;
+        }
+    }
+}
+TXMLCharPtr SDOMElement::GetAttributeValue(TXMLCharPtr nm, SDOMFlags &inFlags) const
+{
+    const SDOMAttribute *att = FindAttribute(nm, inFlags);
+    if (att)
+        return att->m_Value;
+    return NULL;
+}
+void SDOMElement::AddChild(SDOMElement &elem)
+{
+    elem.m_Parent = this;
+    if (m_LastChild) {
+        m_LastChild->m_NextSibling = &elem;
+        m_LastChild = &elem;
+    } else {
+        QT3DS_ASSERT(m_FirstChild == NULL);
+        m_FirstChild = m_LastChild = &elem;
+    }
+}
+SDOMElement *SDOMElement::FindPreviousChild(SDOMElement &elem)
+{
+    if (&elem == m_FirstChild)
+        return NULL;
+    // Find the previous sibling.
+    SDOMElement *theChild = m_FirstChild;
+    // Empty loop intentional
+    for (; theChild && theChild->m_NextSibling != &elem; theChild = theChild->m_NextSibling) {
+    }
+
+    return theChild;
+}
+void SDOMElement::RemoveChild(SDOMElement &elem)
+{
+    if (elem.m_Parent != this) {
+        QT3DS_ASSERT(false);
+        return;
+    }
+    elem.m_Parent = NULL;
+    if (&elem == m_FirstChild) {
+        m_FirstChild = elem.m_NextSibling;
+    } else {
+        SDOMElement *theChild(FindPreviousChild(elem));
+        QT3DS_ASSERT(theChild);
+        if (theChild) {
+            theChild->m_NextSibling = elem.m_NextSibling;
+            if (&elem == m_LastChild)
+                m_LastChild = theChild;
+        }
+    }
+    elem.m_NextSibling = NULL;
+}
+
+void SDOMElement::ReplaceChild(SDOMElement &inChild, SDOMElement &inReplacement)
+{
+    inChild.m_Parent = NULL;
+    if (&inChild == m_FirstChild)
+        m_FirstChild = &inReplacement;
+    else {
+        SDOMElement *theChild(FindPreviousChild(inChild));
+        QT3DS_ASSERT(theChild);
+        if (theChild) {
+            theChild->m_NextSibling = &inReplacement;
+            if (&inChild == m_LastChild)
+                m_LastChild = &inReplacement;
+        }
+    }
+    inReplacement.m_NextSibling = inChild.m_NextSibling;
+    inReplacement.m_Parent = this;
+    inChild.m_NextSibling = NULL;
+}
+
+void SDOMElement::InsertChildBefore(SDOMElement &elem, SDOMElement &theSibling)
+{
+    // Ensure elem isn't in the graph.
+    QT3DS_ASSERT(elem.m_Parent == NULL);
+    QT3DS_ASSERT(elem.m_NextSibling == NULL);
+    elem.m_Parent = this;
+    if (&theSibling == m_FirstChild)
+        m_FirstChild = &elem;
+    else {
+        SDOMElement *thePrevious = FindPreviousChild(theSibling);
+        QT3DS_ASSERT(thePrevious);
+        if (thePrevious)
+            thePrevious->m_NextSibling = &elem;
+    }
+
+    elem.m_NextSibling = &theSibling;
+}
+QT3DSU32 SDOMElement::GetNumChildren(TXMLCharPtr inChildName, const SDOMFlags &inFlags) const
+{
+    QT3DSU32 idx = 0;
+    for (SDOMElement *elem = m_FirstChild; elem != NULL; elem = elem->m_NextSibling) {
+        if (elem->m_Name == inChildName)
+            ++idx;
+        else if (inFlags.CaselessElements() && AreEqualCaseless(inChildName, elem->m_Name))
+            ++idx;
+    }
+    return idx;
+}
+QT3DSU32 SDOMElement::GetNumChildren() const
+{
+    QT3DSU32 idx = 0;
+    for (SDOMElement *elem = m_FirstChild; elem != NULL; elem = elem->m_NextSibling)
+        ++idx;
+    return idx;
+}
+SDOMElement *SDOMElement::FindChildByName(TXMLCharPtr nm, const SDOMFlags &inFlags) const
+{
+    for (SDOMElement *elem = m_FirstChild; elem != NULL; elem = elem->m_NextSibling) {
+        if (elem->m_Name == nm)
+            return elem;
+        else if (inFlags.CaselessElements() && AreEqualCaseless(nm, elem->m_Name))
+            return elem;
+    }
+    return NULL;
+}
+SDOMElement *SDOMElement::FindNextSiblingByName(TXMLCharPtr nm, const SDOMFlags &inFlags) const
+{
+    for (SDOMElement *elem = m_NextSibling; elem != NULL; elem = elem->m_NextSibling) {
+        if (elem->m_Name == nm)
+            return elem;
+        else if (inFlags.CaselessElements() && AreEqualCaseless(nm, elem->m_Name))
+            return elem;
+    }
+    return NULL;
+}
+
+}
+
 
 const QT3DSU16 g_BOMMarker = (QT3DSU16)0xFEFF;
 
-struct SElemPointer : eastl::pair<SDOMElement *, SDOMAttribute *>
+SElemPointer::SElemPointer(SDOMElement *elem)
+    : std::pair<SDOMElement *, SDOMAttribute *>(elem, NULL)
 {
-    SElemPointer(SDOMElement *elem = NULL)
-        : eastl::pair<SDOMElement *, SDOMAttribute *>(elem, NULL)
-    {
-    }
-    SElemPointer &operator=(SDOMElement *elem)
-    {
-        first = elem;
-        second = NULL;
-        return *this;
-    }
-    SElemPointer &operator=(SDOMAttribute *att)
-    {
-        second = att;
-        return *this;
-    }
-    SElemPointer &operator=(const eastl::pair<SDOMElement *, SDOMAttribute *> &other)
-    {
-        eastl::pair<SDOMElement *, SDOMAttribute *>::operator=(other);
-        return *this;
-    }
-    operator SDOMElement *() const { return first; }
-    SDOMElement *operator->() const { return first; }
-};
+}
+SElemPointer &SElemPointer::operator=(SDOMElement *elem)
+{
+    first = elem;
+    second = NULL;
+    return *this;
+}
+SElemPointer &SElemPointer::operator=(SDOMAttribute *att)
+{
+    second = att;
+    return *this;
+}
+SElemPointer &SElemPointer::operator=(const std::pair<SDOMElement *, SDOMAttribute *> &other)
+{
+    std::pair<SDOMElement *, SDOMAttribute *>::operator=(other);
+    return *this;
+}
+SElemPointer::operator SDOMElement *() const { return first; }
+SDOMElement *SElemPointer::operator->() const { return first; }
+
 
 // Some DOM parsing operations are destructive.  If you need
 // them to not be destructive, then we need to modify
 // the reader.  Specifically parsing lists of floats, due
 // to a bug in strtod, is destructive.
-struct SDOMReader : public IDOMReader
+
+SDOMReader::SDOMReader(SDOMElement &te, std::shared_ptr<qt3dsdm::IStringTable> s,
+           std::shared_ptr<IDOMFactory> inFactory)
+    : IDOMReader(s)
+    , m_TopElement(&te)
+    , m_Factory(inFactory)
 {
-    SElemPointer m_TopElement;
-    eastl::vector<eastl::pair<SDOMElement *, SDOMAttribute *>> m_ScopeStack;
-    std::shared_ptr<IDOMFactory> m_Factory;
-    SDOMFlags m_Flags;
-    eastl::basic_string<TWCharEASTLConverter::TCharType> m_TempBuffer;
+}
 
-    SDOMReader(SDOMElement &te, std::shared_ptr<qt3dsdm::IStringTable> s,
-               std::shared_ptr<IDOMFactory> inFactory = std::shared_ptr<IDOMFactory>())
-        : IDOMReader(s)
-        , m_TopElement(&te)
-        , m_Factory(inFactory)
-    {
-    }
+SDOMElement *SDOMReader::Current() const { return m_TopElement.first; }
+void SDOMReader::SetDOMFlags(SDOMFlags inFlags) { m_Flags = inFlags; }
+SDOMFlags SDOMReader::GetDOMFlags() const { return m_Flags; }
 
-    SDOMElement *Current() const { return m_TopElement.first; }
-    void SetDOMFlags(SDOMFlags inFlags) override { m_Flags = inFlags; }
-    SDOMFlags GetDOMFlags() const override { return m_Flags; }
+void SDOMReader::PushScope() { m_ScopeStack.push_back(m_TopElement); }
+void SDOMReader::PopScope() {
+    if (m_ScopeStack.size()) {
+        m_TopElement = m_ScopeStack.back();
+        m_ScopeStack.pop_back();
+    } else {
+        m_TopElement = std::pair<SDOMElement *, SDOMAttribute *>(NULL, NULL);
+    }
+}
 
-    void PushScope() override { m_ScopeStack.push_back(m_TopElement); }
-    void PopScope() override
-    {
-        if (m_ScopeStack.size()) {
-            m_TopElement = m_ScopeStack.back();
-            m_ScopeStack.pop_back();
-        } else
-            m_TopElement = eastl::pair<SDOMElement *, SDOMAttribute *>(NULL, NULL);
-    }
+void *SDOMReader::GetScope() { return m_TopElement.first; }
 
-    void *GetScope() override { return m_TopElement.first; }
+void SDOMReader::SetScope(void *inScope) {
+    m_TopElement =
+        std::make_pair(reinterpret_cast<SDOMElement *>(inScope), (SDOMAttribute *)NULL);
+}
 
-    void SetScope(void *inScope) override
-    {
-        m_TopElement =
-            eastl::make_pair(reinterpret_cast<SDOMElement *>(inScope), (SDOMAttribute *)NULL);
+QString SDOMReader::GetElementName() const {
+    if (!Current()) {
+        QT3DS_ASSERT(false);
+        return NULL;
     }
+    return QString::fromLatin1(Current()->m_Name);
+}
 
-    TWideXMLCharPtr GetElementName() const override
-    {
-        return m_StringTable->GetWideStr(GetNarrowElementName());
-    }
-
-    TXMLCharPtr GetNarrowElementName() const override
-    {
-        if (!Current()) {
-            QT3DS_ASSERT(false);
-            return NULL;
-        }
-        return Current()->m_Name;
-    }
-
-    bool UnregisteredAtt(TWideXMLCharPtr name, TWideXMLCharPtr &outValue) override
-    {
-        outValue = L"";
-        SDOMElement *current(Current());
-        if (current) {
-            TXMLCharPtr theValue =
-                current->GetAttributeValue(m_StringTable->GetNarrowStr(name), m_Flags);
-            if (theValue && *theValue) {
-                ConvertUTF(theValue, 0, m_TempBuffer);
-                outValue = reinterpret_cast<const wchar_t *>(m_TempBuffer.c_str());
-                return true;
-            }
-        } else {
-            QT3DS_ASSERT(false);
-        }
-        return false;
-    }
-
-    bool UnregisteredAtt(TXMLCharPtr name, TXMLCharPtr &outValue) override
-    {
-        outValue = "";
-        SDOMElement *current(Current());
-        if (current) {
-            outValue = current->GetAttributeValue(m_StringTable->GetNarrowStr(name), m_Flags);
-            if (outValue)
-                return true;
-        } else {
-            QT3DS_ASSERT(false);
-        }
-        return false;
-    }
-
-    bool Att(TWideXMLCharPtr name, TWideXMLCharPtr &outValue) override
-    {
-        if (UnregisteredAtt(name, outValue)) {
-            outValue = m_StringTable->RegisterStr(outValue);
-            return true;
-        }
-        return false;
-    }
-    bool Att(TXMLCharPtr name, TXMLCharPtr &outValue) override
-    {
-        if (UnregisteredAtt(name, outValue)) {
-            outValue = m_StringTable->RegisterStr(outValue);
-            return true;
-        }
-        return false;
-    }
-
-    QT3DSU32 CountChildren() override
-    {
-        SDOMElement *elem = Current();
-        if (elem == NULL) {
-            QT3DS_ASSERT(false);
-            return 0;
-        }
-        return elem->GetNumChildren();
-    }
-
-    QT3DSU32 CountChildren(TWideXMLCharPtr childName) override
-    {
-        return CountChildren(m_StringTable->GetNarrowStr(childName));
-    }
-
-    QT3DSU32 CountChildren(TXMLCharPtr childName) override
-    {
-        SDOMElement *elem = Current();
-        if (elem == NULL) {
-            QT3DS_ASSERT(false);
-            return 0;
-        }
-        return elem->GetNumChildren(m_StringTable->GetNarrowStr(childName), m_Flags);
-    }
-
-    eastl::pair<TWideXMLCharPtr, TWideXMLCharPtr>
-    ToWide(const eastl::pair<TXMLCharPtr, TXMLCharPtr> &att)
-    {
-        return eastl::make_pair(m_StringTable->GetWideStr(att.first),
-                                m_StringTable->GetWideStr(att.second));
-    }
-    eastl::pair<TWideXMLCharPtr, TWideXMLCharPtr> CurrentAtt()
-    {
-        return ToWide(CurrentAttNarrow());
-    }
-
-    eastl::pair<TXMLCharPtr, TXMLCharPtr> CurrentAttNarrow()
-    {
-        if (m_TopElement.second)
-            return eastl::make_pair(m_TopElement.second->m_Name, m_TopElement.second->m_Value);
-        return eastl::make_pair("", "");
-    }
-    eastl::pair<TXMLCharPtr, TXMLCharPtr> GetNarrowFirstAttribute() override
-    {
-        if (m_TopElement.first == NULL) {
-            QT3DS_ASSERT(false);
-            eastl::make_pair("", "");
-        }
-        m_TopElement.second = m_TopElement.first->m_FirstAttribute;
-        return CurrentAttNarrow();
-    }
-
-    eastl::pair<TWideXMLCharPtr, TWideXMLCharPtr> GetFirstAttribute() override
-    {
-        return ToWide(GetNarrowFirstAttribute());
-    }
-    eastl::pair<TXMLCharPtr, TXMLCharPtr> GetNarrowNextAttribute() override
-    {
-        if (m_TopElement.second)
-            m_TopElement.second = m_TopElement.second->m_NextAttribute;
-        return CurrentAttNarrow();
-    }
-
-    eastl::pair<TWideXMLCharPtr, TWideXMLCharPtr> GetNextAttribute() override
-    {
-        return ToWide(GetNarrowNextAttribute());
-    }
-
-    bool MoveToFirstChild() override
-    {
-        SDOMElement *elem = Current();
-        if (elem == NULL) {
-            QT3DS_ASSERT(false);
-            return false;
-        }
-        if (elem->m_FirstChild) {
-            m_TopElement = elem->m_FirstChild;
-            return true;
-        }
-        return false;
-    }
-    bool MoveToFirstChild(TXMLCharPtr childName) override
-    {
-        SDOMElement *elem = Current();
-        if (elem == NULL) {
-            QT3DS_ASSERT(false);
-            return false;
-        }
-        SDOMElement *child = elem->FindChildByName(m_StringTable->RegisterStr(childName), m_Flags);
-        if (child != NULL) {
-            m_TopElement = child;
-            return true;
-        }
-        return false;
-    }
-
-    bool MoveToFirstChild(TWideXMLCharPtr childName) override
-    {
-        return MoveToFirstChild(m_StringTable->GetNarrowStr(childName));
-    }
-
-    bool MoveToNextSibling() override
-    {
-        SDOMElement *elem = Current();
-        if (elem == NULL) {
-            QT3DS_ASSERT(false);
-            return false;
-        }
-        if (elem->m_NextSibling) {
-            m_TopElement = elem->m_NextSibling;
-            return true;
-        }
-        return false;
-    }
-    bool MoveToNextSibling(TXMLCharPtr childName) override
-    {
-        SDOMElement *elem = Current();
-        if (elem == NULL) {
-            QT3DS_ASSERT(false);
-            return false;
-        }
-        SDOMElement *nextSibling =
-            elem->FindNextSiblingByName(m_StringTable->RegisterStr(childName), m_Flags);
-        if (nextSibling) {
-            m_TopElement = nextSibling;
-            return true;
-        }
-        return false;
-    }
-    bool MoveToNextSibling(TWideXMLCharPtr childName) override
-    {
-        return MoveToNextSibling(m_StringTable->GetNarrowStr(childName));
-    }
-    // Leave element means go to its parent.
-    void Leave() override
-    {
-        if (m_TopElement)
-            m_TopElement = m_TopElement->m_Parent;
-
-        QT3DS_ASSERT(m_TopElement);
-    }
-    bool Value(TXMLCharPtr &outValue) override
-    {
-        SDOMElement *current(Current());
-        if (!current) {
-            QT3DS_ASSERT(false);
-            return false;
-        }
-        outValue = current->m_Value;
-        return true;
-    }
-
-    bool Value(TWideXMLCharPtr &outValue) override
-    {
-        outValue = L"";
-        TXMLCharPtr theValue;
-        if (Value(theValue)) {
+bool SDOMReader::UnregisteredAtt(TWideXMLCharPtr name, TWideXMLCharPtr &outValue) {
+    outValue = L"";
+    SDOMElement *current(Current());
+    if (current) {
+        TXMLCharPtr theValue =
+            current->GetAttributeValue(m_StringTable->GetNarrowStr(name), m_Flags);
+        if (theValue && *theValue) {
             ConvertUTF(theValue, 0, m_TempBuffer);
             outValue = reinterpret_cast<const wchar_t *>(m_TempBuffer.c_str());
             return true;
         }
+    } else {
+        QT3DS_ASSERT(false);
+    }
+    return false;
+}
+
+bool SDOMReader::UnregisteredAtt(TXMLCharPtr name, TXMLCharPtr &outValue) {
+    outValue = "";
+    SDOMElement *current(Current());
+    if (current) {
+        outValue = current->GetAttributeValue(m_StringTable->GetNarrowStr(name), m_Flags);
+        if (outValue)
+            return true;
+    } else {
+        QT3DS_ASSERT(false);
+    }
+    return false;
+}
+
+bool SDOMReader::Att(TWideXMLCharPtr name, TWideXMLCharPtr &outValue) {
+    if (UnregisteredAtt(name, outValue)) {
+        outValue = m_StringTable->RegisterStr(outValue);
+        return true;
+    }
+    return false;
+}
+bool SDOMReader::Att(TXMLCharPtr name, TXMLCharPtr &outValue) {
+    if (UnregisteredAtt(name, outValue)) {
+        outValue = m_StringTable->RegisterStr(outValue);
+        return true;
+    }
+    return false;
+}
+
+QT3DSU32 SDOMReader::CountChildren()
+{
+    SDOMElement *elem = Current();
+    if (elem == NULL) {
+        QT3DS_ASSERT(false);
+        return 0;
+    }
+    return elem->GetNumChildren();
+}
+
+QT3DSU32 SDOMReader::CountChildren(TWideXMLCharPtr childName)
+{
+    return CountChildren(m_StringTable->GetNarrowStr(childName));
+}
+
+QT3DSU32 SDOMReader::CountChildren(TXMLCharPtr childName)
+{
+    SDOMElement *elem = Current();
+    if (elem == NULL) {
+        QT3DS_ASSERT(false);
+        return 0;
+    }
+    return elem->GetNumChildren(m_StringTable->GetNarrowStr(childName), m_Flags);
+}
+
+std::pair<QString, QString> SDOMReader::CurrentAttNarrow()
+{
+    if (m_TopElement.second) {
+        return std::make_pair(QString::fromLatin1(m_TopElement.second->m_Name),
+                              QString::fromLatin1(m_TopElement.second->m_Value));
+    }
+    return std::make_pair(QString(), QString());
+}
+
+std::pair<QString, QString> SDOMReader::GetNextAttribute()
+{
+    if (m_TopElement.second)
+        m_TopElement.second = m_TopElement.second->m_NextAttribute;
+    return CurrentAttNarrow();
+}
+
+std::pair<QString, QString> SDOMReader::GetFirstAttribute()
+{
+    if (m_TopElement.first == NULL) {
+        QT3DS_ASSERT(false);
+        std::make_pair(QString(), QString());
+    }
+    m_TopElement.second = m_TopElement.first->m_FirstAttribute;
+    return CurrentAttNarrow();
+}
+
+bool SDOMReader::MoveToFirstChild()
+{
+    SDOMElement *elem = Current();
+    if (elem == NULL) {
+        QT3DS_ASSERT(false);
         return false;
     }
-
-    SDOMElement *GetTopElement() override
-    {
-        SDOMElement *current(Current());
-        while (current && current->m_Parent)
-            current = current->m_Parent;
-        return current;
+    if (elem->m_FirstChild) {
+        m_TopElement = elem->m_FirstChild;
+        return true;
     }
+    return false;
+}
 
-    virtual std::shared_ptr<IDOMFactory> GetFactory() { return m_Factory; }
-};
-
-struct SDOMWriter : public IDOMWriter, public SDOMReader
+bool SDOMReader::MoveToFirstChild(TXMLCharPtr childName)
 {
-    std::shared_ptr<IDOMFactory> m_FactoryPtr;
-    IDOMFactory &m_Factory;
+    SDOMElement *elem = Current();
+    if (elem == NULL) {
+        QT3DS_ASSERT(false);
+        return false;
+    }
+    SDOMElement *child = elem->FindChildByName(m_StringTable->RegisterStr(childName), m_Flags);
+    if (child != NULL) {
+        m_TopElement = child;
+        return true;
+    }
+    return false;
+}
 
-    SDOMWriter(std::shared_ptr<IDOMFactory> inDOMFactory,
-               std::shared_ptr<qt3dsdm::IStringTable> inStringTable, SDOMElement &inTopElem)
-        : m_FactoryPtr(inDOMFactory)
-        , m_Factory(*inDOMFactory)
-        , SDOMReader(inTopElem, inStringTable)
-    {
-    }
-    void SetDOMFlags(SDOMFlags inFlags) override { m_Flags = inFlags; }
-    SDOMFlags GetDOMFlags() const override { return m_Flags; }
+bool SDOMReader::MoveToFirstChild(TWideXMLCharPtr childName)
+{
+    return MoveToFirstChild(m_StringTable->GetNarrowStr(childName));
+}
 
-    void Begin(TXMLCharPtr inElemName) override
-    {
-        if (!m_TopElement) {
-            QT3DS_ASSERT(false);
-            return;
-        }
-        SDOMElement *current(Current());
-        SDOMElement *newElement(m_Factory.NextElement(inElemName));
-        current->AddChild(*newElement);
-        m_TopElement = newElement;
+bool SDOMReader::MoveToNextSibling()
+{
+    SDOMElement *elem = Current();
+    if (elem == NULL) {
+        QT3DS_ASSERT(false);
+        return false;
+    }
+    if (elem->m_NextSibling) {
+        m_TopElement = elem->m_NextSibling;
+        return true;
+    }
+    return false;
+}
+
+bool SDOMReader::MoveToNextSibling(TXMLCharPtr childName)
+{
+    SDOMElement *elem = Current();
+    if (elem == NULL) {
+        QT3DS_ASSERT(false);
+        return false;
+    }
+    SDOMElement *nextSibling
+            = elem->FindNextSiblingByName(m_StringTable->RegisterStr(childName), m_Flags);
+    if (nextSibling) {
+        m_TopElement = nextSibling;
+        return true;
+    }
+    return false;
+}
+
+bool SDOMReader::MoveToNextSibling(TWideXMLCharPtr childName)
+{
+    return MoveToNextSibling(m_StringTable->GetNarrowStr(childName));
+}
+
+bool SDOMReader::MoveToNextSibling(const QString &childName)
+{
+    return MoveToNextSibling(qPrintable(childName));
+}
+
+bool SDOMReader::MoveToFirstChild(const QString &childName)
+{
+    return MoveToFirstChild(qPrintable(childName));
+}
+
+// Leave element means go to its parent.
+void SDOMReader::Leave()
+{
+    if (m_TopElement)
+        m_TopElement = m_TopElement->m_Parent;
+
+    QT3DS_ASSERT(m_TopElement);
+}
+bool SDOMReader::Value(TXMLCharPtr &outValue)
+{
+    SDOMElement *current(Current());
+    if (!current) {
+        QT3DS_ASSERT(false);
+        return false;
+    }
+    outValue = current->m_Value;
+    return true;
+}
+
+bool SDOMReader::Value(TWideXMLCharPtr &outValue)
+{
+    outValue = L"";
+    TXMLCharPtr theValue;
+    if (Value(theValue)) {
+        ConvertUTF(theValue, 0, m_TempBuffer);
+        outValue = reinterpret_cast<const wchar_t *>(m_TempBuffer.c_str());
+        return true;
+    }
+    return false;
+}
+
+bool SDOMReader::Value(QString &outValue)
+{
+    outValue = "";
+    TXMLCharPtr theValue;
+    if (Value(theValue)) {
+        outValue = QString::fromLatin1(theValue);
+        return true;
+    }
+    return false;
+}
+
+SDOMElement *SDOMReader::GetTopElement() const
+{
+    SDOMElement *current(Current());
+    while (current && current->m_Parent)
+        current = current->m_Parent;
+    return current;
+}
+
+std::shared_ptr<IDOMFactory> SDOMReader::GetFactory() const
+{
+    return m_Factory;
+}
+
+SDOMWriter::SDOMWriter(std::shared_ptr<IDOMFactory> inDOMFactory,
+           std::shared_ptr<qt3dsdm::IStringTable> inStringTable, SDOMElement &inTopElem)
+    : m_FactoryPtr(inDOMFactory)
+    , m_Factory(*inDOMFactory)
+    , SDOMReader(inTopElem, inStringTable)
+{
+}
+void SDOMWriter::SetDOMFlags(SDOMFlags inFlags)  { m_Flags = inFlags; }
+SDOMFlags SDOMWriter::GetDOMFlags() const  { return m_Flags; }
+
+void SDOMWriter::Begin(TXMLCharPtr inElemName)
+{
+    if (!m_TopElement) {
+        QT3DS_ASSERT(false);
+        return;
+    }
+    SDOMElement *current(Current());
+    SDOMElement *newElement(m_Factory.NextElement(inElemName));
+    current->AddChild(*newElement);
+    m_TopElement = newElement;
+}
+
+void SDOMWriter::Begin(TWideXMLCharPtr inElemName)
+{
+    Begin(m_FactoryPtr->GetStringTable()->GetNarrowStr(inElemName));
+}
+
+void SDOMWriter::Begin(const QString &inElemName)
+{
+    Begin(qPrintable(inElemName));
+}
+
+void SDOMWriter::Att(TXMLCharPtr name, TXMLCharPtr value)
+{
+    if (!m_TopElement) {
+        QT3DS_ASSERT(false);
+        return;
+    }
+    m_TopElement->SetAttributeValue(name, value, m_Factory, m_Flags);
+}
+// Attributes.  They may be sorted just before write
+void SDOMWriter::Att(TWideXMLCharPtr name, TWideXMLCharPtr value)
+{
+    if (!m_TopElement) {
+        QT3DS_ASSERT(false);
+        return;
+    }
+    m_TopElement->SetAttributeValue(name, value, m_Factory, m_Flags);
+}
+
+void SDOMWriter::Value(TWideXMLCharPtr value)
+{
+    if (!m_TopElement) {
+        QT3DS_ASSERT(false);
+        return;
+    }
+    if (value == NULL)
+        value = L"";
+    size_t len = wcslen(value);
+    m_Factory.AppendStrBuf(value, (QT3DSU32)len);
+    m_TopElement->m_Value = m_Factory.FinalizeStrBuf();
+}
+void SDOMWriter::Value(TXMLCharPtr value)
+{
+    if (!m_TopElement) {
+        QT3DS_ASSERT(false);
+        return;
+    }
+    if (value == NULL)
+        value = "";
+    size_t len = strlen(value);
+    m_Factory.AppendStrBuf(value, (QT3DSU32)len);
+    m_TopElement->m_Value = m_Factory.FinalizeStrBuf();
+}
+
+void SDOMWriter::Value(const QString &value)
+{
+    Value(qUtf16Printable(value));
+}
+
+void SDOMWriter::End()
+{
+    if (!m_TopElement) {
+        QT3DS_ASSERT(false);
+        return;
+    }
+    Leave();
+}
+void SDOMWriter::RemoveCurrent()
+{
+    SDOMElement *current(Current());
+    if (!current) {
+        QT3DS_ASSERT(false);
+        return;
+    }
+    if (current->m_Parent) {
+        m_TopElement = current->m_Parent;
+        m_TopElement->RemoveChild(*current);
+    }
+}
+void SDOMWriter::ReplaceCurrent(SDOMElement &inElement)
+{
+    SDOMElement *current(Current());
+    if (!current) {
+        QT3DS_ASSERT(false);
+        return;
+    }
+    if (current->m_Parent) {
+        current->m_Parent->ReplaceChild(*current, inElement);
+        m_TopElement = &inElement;
+    } else {
+        m_TopElement = &inElement;
+        inElement.m_Parent = NULL;
+        inElement.m_NextSibling = NULL;
+    }
+}
+void SDOMWriter::AppendChildren(SDOMElement &inElement)
+{
+    SDOMElement *current(Current());
+    if (!current) {
+        QT3DS_ASSERT(false);
+        return;
+    }
+    SDOMElement *theChild = inElement.m_FirstChild;
+    inElement.m_FirstChild = inElement.m_LastChild = NULL;
+    while (theChild) {
+        SDOMElement *theCurrentChild = theChild;
+        theChild = theChild->m_NextSibling;
+
+        theCurrentChild->m_Parent = NULL;
+        theCurrentChild->m_NextSibling = NULL;
+        current->AddChild(*theCurrentChild);
+    }
+}
+void SDOMWriter::RemoveAttribute(TXMLCharPtr inItem)
+{
+    SDOMElement *current(Current());
+    if (!current) {
+        QT3DS_ASSERT(false);
+        return;
+    }
+    current->RemoveAttribute(m_StringTable->RegisterStr(inItem), m_Flags);
+}
+void SDOMWriter::RemoveAttribute(TWideXMLCharPtr inItem)
+{
+    RemoveAttribute(m_StringTable->GetNarrowStr(inItem));
+}
+
+void SDOMWriter::MoveBefore(TXMLCharPtr inItem, TXMLCharPtr inSibling)
+{
+    SDOMElement *current(Current());
+    if (!current) {
+        QT3DS_ASSERT(false);
+        return;
     }
 
-    void Begin(TWideXMLCharPtr inElemName) override
-    {
-        Begin(m_FactoryPtr->GetStringTable()->GetNarrowStr(inElemName));
+    SDOMElement *theItem = current->FindChildByName(m_StringTable->RegisterStr(inItem), m_Flags);
+    SDOMElement *theSibling
+            = current->FindChildByName(m_StringTable->RegisterStr(inSibling), m_Flags);
+    QT3DS_ASSERT(theItem && theSibling);
+    if (theItem && theSibling) {
+        current->RemoveChild(*theItem);
+        current->InsertChildBefore(*theItem, *theSibling);
     }
+}
 
-    void Att(TXMLCharPtr name, TXMLCharPtr value) override
-    {
-        if (!m_TopElement) {
-            QT3DS_ASSERT(false);
-            return;
-        }
-        m_TopElement->SetAttributeValue(name, value, m_Factory, m_Flags);
-    }
-    // Attributes.  They may be sorted just before write
-    void Att(TWideXMLCharPtr name, TWideXMLCharPtr value) override
-    {
-        if (!m_TopElement) {
-            QT3DS_ASSERT(false);
-            return;
-        }
-        m_TopElement->SetAttributeValue(name, value, m_Factory, m_Flags);
-    }
+void SDOMWriter::MoveBefore(TWideXMLCharPtr inItem, TWideXMLCharPtr inSibling)
+{
+    MoveBefore(m_StringTable->GetNarrowStr(inItem), m_StringTable->GetNarrowStr(inSibling));
+}
 
-    void Value(TWideXMLCharPtr value) override
-    {
-        if (!m_TopElement) {
-            QT3DS_ASSERT(false);
-            return;
-        }
-        if (value == NULL)
-            value = L"";
-        size_t len = wcslen(value);
-        m_Factory.AppendStrBuf(value, (QT3DSU32)len);
-        m_TopElement->m_Value = m_Factory.FinalizeStrBuf();
-    }
-    void Value(TXMLCharPtr value) override
-    {
-        if (!m_TopElement) {
-            QT3DS_ASSERT(false);
-            return;
-        }
-        if (value == NULL)
-            value = "";
-        size_t len = strlen(value);
-        m_Factory.AppendStrBuf(value, (QT3DSU32)len);
-        m_TopElement->m_Value = m_Factory.FinalizeStrBuf();
-    }
+// If current has no parent, then we are at the top
+// of the tree and we should return 0.  Or if there is no
+// current.
+// If there is one parent, we should return 1.
+QT3DSU32 SDOMWriter::GetTabs()
+{
+    QT3DSU32 retval = 0;
+    SDOMElement *current(Current());
+    do {
+        if (current)
+            current = current->m_Parent;
+        if (current)
+            ++retval;
+    } while (current);
+    return retval;
+}
 
-    void End() override
-    {
-        if (!m_TopElement) {
-            QT3DS_ASSERT(false);
-            return;
-        }
-        Leave();
-    }
-    void RemoveCurrent() override
-    {
-        SDOMElement *current(Current());
-        if (!current) {
-            QT3DS_ASSERT(false);
-            return;
-        }
-        if (current->m_Parent) {
-            m_TopElement = current->m_Parent;
-            m_TopElement->RemoveChild(*current);
-        }
-    }
-    void ReplaceCurrent(SDOMElement &inElement) override
-    {
-        SDOMElement *current(Current());
-        if (!current) {
-            QT3DS_ASSERT(false);
-            return;
-        }
-        if (current->m_Parent) {
-            current->m_Parent->ReplaceChild(*current, inElement);
-            m_TopElement = &inElement;
-        } else {
-            m_TopElement = &inElement;
-            inElement.m_Parent = NULL;
-            inElement.m_NextSibling = NULL;
-        }
-    }
-    void AppendChildren(SDOMElement &inElement) override
-    {
-        SDOMElement *current(Current());
-        if (!current) {
-            QT3DS_ASSERT(false);
-            return;
-        }
-        SDOMElement *theChild = inElement.m_FirstChild;
-        inElement.m_FirstChild = inElement.m_LastChild = NULL;
-        while (theChild) {
-            SDOMElement *theCurrentChild = theChild;
-            theChild = theChild->m_NextSibling;
+SDOMElement *SDOMWriter::GetTopElement() const
+{
+    return SDOMReader::GetTopElement();
+}
 
-            theCurrentChild->m_Parent = NULL;
-            theCurrentChild->m_NextSibling = NULL;
-            current->AddChild(*theCurrentChild);
-        }
-    }
-    void RemoveAttribute(TXMLCharPtr inItem) override
-    {
-        SDOMElement *current(Current());
-        if (!current) {
-            QT3DS_ASSERT(false);
-            return;
-        }
-        current->RemoveAttribute(m_StringTable->RegisterStr(inItem), m_Flags);
-    }
-    void RemoveAttribute(TWideXMLCharPtr inItem) override
-    {
-        RemoveAttribute(m_StringTable->GetNarrowStr(inItem));
-    }
+std::shared_ptr<IDOMFactory> SDOMWriter::GetFactory() const
+{
+    return m_FactoryPtr;
+}
 
-    void MoveBefore(TXMLCharPtr inItem, TXMLCharPtr inSibling) override
-    {
-        SDOMElement *current(Current());
-        if (!current) {
-            QT3DS_ASSERT(false);
-            return;
-        }
-
-        SDOMElement *theItem =
-            current->FindChildByName(m_StringTable->RegisterStr(inItem), m_Flags);
-        SDOMElement *theSibling =
-            current->FindChildByName(m_StringTable->RegisterStr(inSibling), m_Flags);
-        QT3DS_ASSERT(theItem && theSibling);
-        if (theItem && theSibling) {
-            current->RemoveChild(*theItem);
-            current->InsertChildBefore(*theItem, *theSibling);
-        }
-    }
-
-    void MoveBefore(TWideXMLCharPtr inItem, TWideXMLCharPtr inSibling) override
-    {
-        MoveBefore(m_StringTable->GetNarrowStr(inItem), m_StringTable->GetNarrowStr(inSibling));
-    }
-
-    // If current has no parent, then we are at the top
-    // of the tree and we should return 0.  Or if there is no
-    // current.
-    // If there is one parent, we should return 1.
-    QT3DSU32 GetTabs() override
-    {
-        QT3DSU32 retval = 0;
-        SDOMElement *current(Current());
-        do {
-            if (current)
-                current = current->m_Parent;
-            if (current)
-                ++retval;
-        } while (current);
-        return retval;
-    }
-
-    SDOMElement *GetTopElement() override { return SDOMReader::GetTopElement(); }
-
-    std::shared_ptr<IDOMFactory> GetFactory() override { return m_FactoryPtr; }
-};
 
 struct SimpleXmlWriter
 {
     QIODevice &m_file;
-    eastl::vector<eastl::pair<TXMLCharPtr, bool>> m_OpenElements;
+    std::vector<std::pair<TXMLCharPtr, bool>> m_OpenElements;
     bool m_ElementOpen;
     wchar_t m_PrintBuf[256];
     QT3DSU32 m_Tabs;
-    eastl::basic_string<char8_t> m_ConvertBuf;
-    eastl::basic_string<TWCharEASTLConverter::TCharType> m_WideBuffer;
     QTextStream m_stream;
 
     SimpleXmlWriter(QIODevice &stream, QT3DSU32 inTabs = 0)
@@ -852,7 +828,7 @@ struct SimpleXmlWriter
         Tabs();
         Write('<');
         Write(name);
-        m_OpenElements.push_back(eastl::pair<TXMLCharPtr, bool>(name, false));
+        m_OpenElements.push_back(std::pair<TXMLCharPtr, bool>(name, false));
         m_ElementOpen = true;
     }
     TWideXMLCharPtr ToStr(char8_t val)
@@ -962,7 +938,7 @@ struct SimpleXmlWriter
     void End(bool newlineAfterClose = true)
     {
         QT3DS_ASSERT(m_OpenElements.size());
-        eastl::pair<TXMLCharPtr, bool> topElem = m_OpenElements.back();
+        std::pair<TXMLCharPtr, bool> topElem = m_OpenElements.back();
         m_OpenElements.pop_back();
         if (m_ElementOpen)
             Write(" />");
@@ -981,7 +957,6 @@ struct SimpleXmlWriter
 
 struct DOMParser
 {
-    typedef eastl::basic_string<TWCharEASTLConverter::TCharType> TStrType;
     IDOMFactory &m_Factory;
     SDOMElement *m_TopElement;
     SDOMElement *m_FirstElement;
@@ -1183,7 +1158,6 @@ public:
 
     std::shared_ptr<qt3dsdm::IStringTable> GetStringTable() override { return m_StringTable; }
 };
-}
 
 bool IDOMReader::Value(DataModelDataType::Value type, SValue &outValue)
 {
@@ -1205,13 +1179,13 @@ IDOMReader::CreateDOMReader(SDOMElement &inRootElement,
                                           inFactory);
 }
 
-eastl::pair<std::shared_ptr<IDOMWriter>, std::shared_ptr<IDOMReader>>
+std::pair<std::shared_ptr<IDOMWriter>, std::shared_ptr<IDOMReader>>
 IDOMWriter::CreateDOMWriter(std::shared_ptr<IDOMFactory> inFactory, SDOMElement &inRootElement,
                             std::shared_ptr<qt3dsdm::IStringTable> inStringTable)
 {
     std::shared_ptr<SDOMWriter> writer(std::make_shared<SDOMWriter>(
         inFactory, std::ref(inStringTable), std::ref(inRootElement)));
-    return eastl::make_pair(writer, writer);
+    return std::make_pair(writer, writer);
 }
 
 TXMLCharPtr IDOMFactory::RegisterValue(TWideXMLCharPtr inValue)

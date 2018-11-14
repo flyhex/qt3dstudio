@@ -58,7 +58,7 @@ struct SHandlerArgument : public CHandleObject
 
     SHandlerArgument() {}
 
-    SHandlerArgument(int inHandle, Qt3DSDMActionHandle inAction, const TCharStr &inName,
+    SHandlerArgument(int inHandle, Qt3DSDMActionHandle inAction, const QString &inName,
                      HandlerArgumentType::Value inArgType, DataModelDataType::Value inValueType)
         : CHandleObject(inHandle)
         , m_HandlerArgInfo(inAction, inName, inArgType, inValueType)
@@ -100,11 +100,11 @@ public: // Use
     // Action Properties
     void SetTriggerObject(Qt3DSDMActionHandle inAction, const SObjectRefType &inTriggerObject) override;
     void SetTargetObject(Qt3DSDMActionHandle inAction, const SObjectRefType &inTargetObject) override;
-    void SetEvent(Qt3DSDMActionHandle inAction, const wstring &inEvent) override;
-    void SetHandler(Qt3DSDMActionHandle inAction, const wstring &inHandler) override;
+    void SetEvent(Qt3DSDMActionHandle inAction, const QString &inEvent) override;
+    void SetHandler(Qt3DSDMActionHandle inAction, const QString &inHandler) override;
 
     // Action Argument
-    Qt3DSDMHandlerArgHandle AddHandlerArgument(Qt3DSDMActionHandle inAction, const TCharStr &inName,
+    Qt3DSDMHandlerArgHandle AddHandlerArgument(Qt3DSDMActionHandle inAction, const QString &inName,
                                               HandlerArgumentType::Value inArgType,
                                               DataModelDataType::Value inValueType) override;
     void RemoveHandlerArgument(Qt3DSDMHandlerArgHandle inHandlerArgument) override;
@@ -125,7 +125,7 @@ public: // Use
                                               Qt3DSDMSlideHandle inSlide,
                                               Qt3DSDMInstanceHandle inOwner);
     Qt3DSDMHandlerArgHandle AddHandlerArgumentWithHandle(int inHandle, Qt3DSDMActionHandle inAction,
-                                                        const TCharStr &inName,
+                                                        const QString &inName,
                                                         HandlerArgumentType::Value inArgType,
                                                         DataModelDataType::Value inValueType);
 

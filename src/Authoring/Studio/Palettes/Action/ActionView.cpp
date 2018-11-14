@@ -75,7 +75,7 @@ ActionView::ActionView(const QSize &preferredSize, QWidget *parent)
             m_propertyModel = new PropertyModel(this);
 
         const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
-        if (actionInfo.m_Handler == L"Set Property") {
+        if (actionInfo.m_Handler == QLatin1String("Set Property")) {
             setPropertyValueInvalid(true);
             m_currentPropertyNameHandle = actionInfo.m_HandlerArgs.at(0);
             m_currentPropertyValueHandle = actionInfo.m_HandlerArgs.at(1);
@@ -213,7 +213,7 @@ QString ActionView::itemText() const
         return tr("No Object Selected");
 
     const auto data = m_objRefHelper->GetInfo(m_itemHandle);
-    return data.m_Name.toQString();
+    return data.m_Name;
 }
 
 QColor ActionView::itemColor() const
@@ -249,7 +249,7 @@ QString ActionView::targetObjectName() const
             GetBridge()->GetInstance(actionInfo.m_Owner, actionInfo.m_TargetObject);
 
     QString targetName = targetInstance.Valid()
-            ? GetBridge()->GetName(targetInstance).toQString()
+            ? GetBridge()->GetName(targetInstance)
             : tr("[Unknown Target]");
 
     return targetName;
@@ -266,7 +266,7 @@ QString ActionView::triggerObjectName() const
             GetBridge()->GetInstance(actionInfo.m_Owner, actionInfo.m_TriggerObject);
 
     QString sourceName = sourceInstance.Valid()
-            ? GetBridge()->GetName(sourceInstance).toQString()
+            ? GetBridge()->GetName(sourceInstance)
             : tr("[Unknown Source]");
 
     return sourceName;
@@ -282,14 +282,14 @@ QString ActionView::eventName() const
     const auto eventHandle = bridge->ResolveEvent(actionInfo);
     const auto eventInfo = bridge->GetEventInfo(eventHandle);
 
-    const QString formalName = QString::fromWCharArray(eventInfo.m_FormalName.wide_str());
+    const QString formalName = eventInfo.m_FormalName;
     return formalName.isEmpty() ? tr("[Unknown Event]") : formalName;
 }
 
 QString ActionView::handlerName() const
 {
     if (!GetDoc()->IsValid() || !m_itemHandle.Valid())
-        return QString();
+        return {};
 
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
     const auto bridge = GetBridge();
@@ -297,7 +297,7 @@ QString ActionView::handlerName() const
 
     if (handlerHandle.Valid()) {
         const auto handlerInfo = bridge->GetHandlerInfo(handlerHandle);
-        return QString::fromWCharArray(handlerInfo.m_FormalName.wide_str());
+        return handlerInfo.m_FormalName;
     }
 
     return tr("[Unknown Handler]");
@@ -380,8 +380,8 @@ void ActionView::addAction()
         // Query data model bridge to see the applicable events and actions for this instance.
         CClientDataModelBridge *theBridge = GetBridge();
 
-        std::wstring theEventName = theBridge->GetDefaultEvent(m_itemHandle);
-        std::wstring theHandlerName = theBridge->GetDefaultHandler(m_itemHandle);
+        QString theEventName = theBridge->GetDefaultEvent(m_itemHandle);
+        QString theHandlerName = theBridge->GetDefaultHandler(m_itemHandle);
 
         Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(), QObject::tr("Add Action"))
                 ->AddAction(GetDoc()->GetActiveSlide(), m_itemHandle, theEventName,
@@ -516,7 +516,7 @@ QObject *ActionView::showEventBrowser(const QPoint &point)
     m_eventsBrowser->setModel(m_eventsModel);
 
     m_eventsBrowser->disconnect();
-    m_eventsBrowser->selectAndExpand(QString::fromStdWString(actionInfo.m_Event));
+    m_eventsBrowser->selectAndExpand(actionInfo.m_Event);
     CDialogs::showWidgetBrowser(this, m_eventsBrowser, point);
 
     connect(m_eventsBrowser, &EventsBrowserView::selectionChanged,
@@ -552,7 +552,7 @@ QObject *ActionView::showHandlerBrowser(const QPoint &point)
     m_handlerBrowser->setModel(m_handlersModel);
 
     m_handlerBrowser->disconnect();
-    m_handlerBrowser->selectAndExpand(QString::fromStdWString(actionInfo.m_Handler));
+    m_handlerBrowser->selectAndExpand(actionInfo.m_Handler);
     CDialogs::showWidgetBrowser(this, m_handlerBrowser, point);
 
     connect(m_handlerBrowser, &EventsBrowserView::selectionChanged,
@@ -594,9 +594,9 @@ QObject *ActionView::showEventBrowserForArgument(int handle, const QPoint &point
     for (Qt3DSDMEventHandle eventHandle : eventList) {
         if (oldValue == eventHandle.GetHandleValue()) {
             qt3dsdm::SEventInfo eventInfo = bridge->GetEventInfo(eventHandle);
-            eventName = QString::fromWCharArray(eventInfo.m_FormalName.wide_str());
+            eventName = eventInfo.m_FormalName;
             if (eventName.isEmpty())
-                eventName = QString::fromWCharArray(eventInfo.m_Name.wide_str());
+                eventName = eventInfo.m_Name;
         }
     }
     m_fireEventsBrowser->disconnect();
@@ -618,7 +618,7 @@ void ActionView::updateFiredEvent()
         return;
 
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
-    if (actionInfo.m_Handler != L"Fire Event") {
+    if (actionInfo.m_Handler != QLatin1String("Fire Event")) {
         m_firedEvent = tr("[Unknown event]");
         return;
     }
@@ -640,7 +640,7 @@ void ActionView::updateFiredEvent()
                 theArgType = DataModelDataType::String;
                 auto theEventHandle = get<qt3ds::QT3DSI32>(argumentInfo.m_Value);
                 theArgValue = SValue(std::make_shared<CDataStr>(
-                                         bridge->GetEventInfo(theEventHandle).m_Name.wide_str()));
+                                         bridge->GetEventInfo(theEventHandle).m_Name));
                 m_firedEvent = theArgValue.toQVariant().toString();
                 Q_EMIT firedEventChanged();
             }
@@ -650,8 +650,7 @@ void ActionView::updateFiredEvent()
 
 void ActionView::updateFiredEventFromHandle(int handle)
 {
-    m_firedEvent = QString::fromWCharArray(
-                GetBridge()->GetEventInfo(handle).m_FormalName.wide_str());
+    m_firedEvent = GetBridge()->GetEventInfo(handle).m_FormalName;
     Q_EMIT firedEventChanged();
 }
 
@@ -840,7 +839,7 @@ void ActionView::pasteAction()
 
     Qt3DSFile theTempAPFile = CStudioClipboard::GetActionFromClipboard();
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(), QObject::tr("Paste Action"))
-            ->PasteAction(theTempAPFile.GetAbsolutePath(), m_itemHandle);
+            ->PasteAction(theTempAPFile.GetAbsolutePath().toQString(), m_itemHandle);
     updateActionStates();
 }
 
@@ -912,7 +911,7 @@ void ActionView::setEvent(const Qt3DSDMEventHandle &event)
                                                    doc->GetStudioSystem()
                                                    ->GetActionMetaData()
                                                    ->GetEventInfo(event)
-                                                   ->m_Name.wide_str());
+                                                   ->m_Name);
     g_StudioApp.GetCore()->ExecuteCommand(theCmd);
 }
 
@@ -923,8 +922,8 @@ void ActionView::setHandler(const Qt3DSDMHandlerHandle &handler)
 
     auto doc = GetDoc();
     const auto action = m_actionsModel->actionAt(m_currentActionIndex);
-    wstring handlerName(doc->GetStudioSystem()->GetActionMetaData()->GetHandlerInfo(handler)
-                        ->m_Name.wide_str());
+    QString handlerName(doc->GetStudioSystem()->GetActionMetaData()->GetHandlerInfo(handler)
+                        ->m_Name);
     CCmdDataModelActionSetHandler *theCmd =
             new CCmdDataModelActionSetHandler(doc, action, handlerName);
     theCmd->ResetHandler(handlerName); // reset the handler args
@@ -964,7 +963,7 @@ void ActionView::updateHandlerArguments()
             HandlerArgument argument;
             argument.m_handle = argHandle;
             argument.m_type = argMetaData->m_ArgType;
-            argument.m_name = QString::fromWCharArray(argumentInfo.m_Name.wide_str());
+            argument.m_name = argumentInfo.m_Name;
             argument.m_value = argumentInfo.m_Value.toQVariant();
             argument.m_completeType = argMetaData->m_CompleteType;
             m_handlerArguments.append(QVariant::fromValue(argument));
@@ -996,7 +995,7 @@ void ActionView::setArgumentValue(int handle, const QVariant &value)
     }
 
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
-    if (actionInfo.m_Handler == L"Fire Event") {
+    if (actionInfo.m_Handler == QLatin1String("Fire Event")) {
         if (value.toInt())
             updateFiredEventFromHandle(value.toInt());
     }
@@ -1048,7 +1047,7 @@ QStringList ActionView::slideNames()
     if (!m_itemHandle.Valid())
         return {};
 
-    std::list<Q3DStudio::CString> outSlideNames;
+    std::list<QString> outSlideNames;
     QStringList slideNames;
     CClientDataModelBridge *theBridge = GetBridge();
     const auto action = m_actionsModel->actionAt(m_currentActionIndex);
@@ -1056,7 +1055,7 @@ QStringList ActionView::slideNames()
     theBridge->GetSlideNamesOfAction(action, outSlideNames);
 
     for (auto slideName : outSlideNames)
-        slideNames.append(slideName.toQString());
+        slideNames.append(slideName);
 
     return slideNames;
 }

@@ -140,9 +140,8 @@ bool Qt3DSDMTimelineItemBinding::IsMaster() const
         theQueryHandle = theReader.GetParent(m_DataHandle);
 
     // logic: you can't unlink name, so if name is linked then, this is master.
-    Qt3DSDMPropertyHandle theNamePropHandle =
-            m_StudioSystem->GetPropertySystem()->GetAggregateInstancePropertyByName(theQueryHandle,
-                                                                                    L"name");
+    Qt3DSDMPropertyHandle theNamePropHandle = m_StudioSystem->GetPropertySystem()
+            ->GetAggregateInstancePropertyByName(theQueryHandle, QStringLiteral("name"));
     return theReader.IsPropertyLinked(theQueryHandle, theNamePropHandle);
 }
 
@@ -167,7 +166,7 @@ bool Qt3DSDMTimelineItemBinding::IsVisibilityControlled() const
 
     Qt3DSDMPropertyHandle theNamePropHandle =
             m_StudioSystem->GetPropertySystem()->GetAggregateInstancePropertyByName(
-                m_DataHandle, L"controlledproperty");
+                m_DataHandle, QStringLiteral("controlledproperty"));
 
     if (!theNamePropHandle)
         return false;
@@ -331,29 +330,26 @@ ITimelineTimebar *Qt3DSDMTimelineItemBinding::GetTimebar()
     return m_TimelineTimebar;
 }
 
-Q3DStudio::CString Qt3DSDMTimelineItemBinding::GetName() const
+QString Qt3DSDMTimelineItemBinding::GetName() const
 {
     if (m_StudioSystem->IsInstance(m_DataHandle) == false)
-        return L"";
-    Qt3DSDMPropertyHandle theNamePropHandle =
-            m_StudioSystem->GetPropertySystem()->GetAggregateInstancePropertyByName(m_DataHandle,
-                                                                                    L"name");
+        return {};
+    Qt3DSDMPropertyHandle theNamePropHandle = m_StudioSystem->GetPropertySystem()
+            ->GetAggregateInstancePropertyByName(m_DataHandle, QStringLiteral("name"));
     SValue theNameValue;
     m_StudioSystem->GetPropertySystem()->GetInstancePropertyValue(m_DataHandle, theNamePropHandle,
                                                                   theNameValue);
-    TDataStrPtr theName = qt3dsdm::get<TDataStrPtr>(theNameValue);
-
-    return (theName) ? Q3DStudio::CString(theName->GetData()) : "";
+    return qt3dsdm::get<TDataStrPtr>(theNameValue)->toQString();
 }
 
-void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
+void Qt3DSDMTimelineItemBinding::SetName(const QString &inName)
 {
     // Ignore if setting the name to what it currently is to avoid duplicate undo points
     if (inName == GetName())
         return;
 
     // Display warning dialog if user tried to enter an empty string
-    if (inName.IsEmpty()) {
+    if (inName.isEmpty()) {
         QString theTitle = QObject::tr("Rename Object Error");
         QString theString = QObject::tr("Object name cannot be an empty string.");
         g_StudioApp.GetDialogs()->DisplayMessageBox(theTitle, theString,
@@ -371,7 +367,7 @@ void Qt3DSDMTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
             *m_TransMgr->GetDoc(), QObject::tr("Set Name"))->SetName(m_DataHandle, inName, true);
 
         g_StudioApp.GetDialogs()->DisplayObjectRenamed(
-                    inName.toQString(), theBridge->GetName(m_DataHandle).toQString());
+                    inName, theBridge->GetName(m_DataHandle));
         return;
     }
 
@@ -719,7 +715,7 @@ void Qt3DSDMTimelineItemBinding::PerformTransaction(EUserTransaction inTransacti
     }
 }
 
-Q3DStudio::CString Qt3DSDMTimelineItemBinding::GetObjectPath()
+QString Qt3DSDMTimelineItemBinding::GetObjectPath()
 {
     CDoc *theDoc = m_TransMgr->GetDoc();
     // Because we are getting absolute path, the base id doesn't matter.

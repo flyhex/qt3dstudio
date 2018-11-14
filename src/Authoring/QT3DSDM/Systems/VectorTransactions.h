@@ -100,7 +100,10 @@ struct HashMapAction
         , m_Value(val)
     {
     }
-    bool Exists() { return m_HashMap.find(m_Value.first) != m_HashMap.end(); }
+    bool Exists() const
+    {
+        return m_HashMap.find(m_Value.first) != m_HashMap.end();
+    }
     void Add()
     {
         Q_ASSERT(!Exists());
@@ -110,6 +113,34 @@ struct HashMapAction
     {
         Q_ASSERT(Exists());
         m_HashMap.erase(m_HashMap.find(m_Value.first));
+    }
+};
+
+template <typename TKeyType, typename TValueType>
+struct QHashAction
+{
+    QHash<TKeyType, TValueType> &m_map;
+    std::pair<TKeyType, TValueType> m_Value;
+
+    QHashAction(QHash<TKeyType, TValueType> &map,
+                  const std::pair<TKeyType, TValueType> &val)
+        : m_map(map)
+        , m_Value(val)
+    {
+    }
+    bool Exists() const
+    {
+        return m_map.find(m_Value.first) != m_map.end();
+    }
+    void Add()
+    {
+        Q_ASSERT(!Exists());
+        m_map.insert(m_Value.first, m_Value.second);
+    }
+    void Remove()
+    {
+        Q_ASSERT(Exists());
+        m_map.erase(m_map.find(m_Value.first));
     }
 };
 
@@ -147,6 +178,40 @@ struct HashMapEraseTransaction : public HashMapAction<TKeyType, TValueType, THas
     void Undo() override { base::Add(); }
 };
 
+template <typename TKeyType, typename TValueType>
+struct QHashInsertTransaction : public QHashAction<TKeyType, TValueType>,
+                                public ITransaction,
+                                public IMergeableTransaction<TValueType>
+{
+    typedef QHashAction<TKeyType, TValueType> base;
+    QHashInsertTransaction(const char *inFile, int inLine,
+                           QHash<TKeyType, TValueType> &map,
+                           const std::pair<TKeyType, TValueType> &val)
+        : QHashAction<TKeyType, TValueType>(map, val)
+        , ITransaction(inFile, inLine)
+    {
+    }
+    void Do() override { base::Add(); }
+    void Undo() override { base::Remove(); }
+    void Update(const TValueType &inValue) override { base::m_Value.second = inValue; }
+};
+
+template <typename TKeyType, typename TValueType>
+struct QHashEraseTransaction : public QHashAction<TKeyType, TValueType>,
+                               public ITransaction
+{
+    typedef QHashAction<TKeyType, TValueType> base;
+    QHashEraseTransaction(const char *inFile, int inLine,
+                          QHash<TKeyType, TValueType> &map,
+                          const std::pair<TKeyType, TValueType> &val)
+        : QHashAction<TKeyType, TValueType>(map, val)
+        , ITransaction(inFile, inLine)
+    {
+    }
+    void Do() override { base::Remove(); }
+    void Undo() override { base::Add(); }
+};
+
 template <typename TKeyType, typename TValueType, typename THashType>
 inline std::shared_ptr<IMergeableTransaction<TValueType>>
 CreateHashMapInsertTransaction(const char *inFile, int inLine, TTransactionConsumerPtr inConsumer,
@@ -165,17 +230,48 @@ CreateHashMapInsertTransaction(const char *inFile, int inLine, TTransactionConsu
     return retval;
 }
 
+template <typename TKeyType, typename TValueType>
+inline std::shared_ptr<IMergeableTransaction<TValueType>>
+CreateQHashInsertTransaction(const char *inFile, int inLine, TTransactionConsumerPtr inConsumer,
+                             const std::pair<TKeyType, TValueType> &inItem,
+                             QHash<TKeyType, TValueType> &inItems)
+{
+    using namespace std;
+    std::shared_ptr<IMergeableTransaction<TValueType>> retval;
+    if (inConsumer) {
+        std::shared_ptr<QHashInsertTransaction<TKeyType, TValueType>> transaction(
+            std::make_shared<QHashInsertTransaction<TKeyType, TValueType>>(
+                inFile, inLine, std::ref(inItems), std::cref(inItem)));
+        retval = static_pointer_cast<IMergeableTransaction<TValueType>>(transaction);
+        inConsumer->OnTransaction(static_pointer_cast<ITransaction>(transaction));
+    }
+    return retval;
+}
+
 template <typename TKeyType, typename TValueType, typename THashType>
 inline void
 CreateHashMapEraseTransaction(const char *inFile, int inLine, TTransactionConsumerPtr inConsumer,
                               const std::pair<TKeyType, TValueType> &inItem,
                               std::unordered_map<TKeyType, TValueType, THashType> &inItems)
 {
-    using namespace std;
-    if (inConsumer)
+    if (inConsumer) {
         inConsumer->OnTransaction(static_pointer_cast<ITransaction>(
             std::make_shared<HashMapEraseTransaction<TKeyType, TValueType, THashType>>(
                 inFile, inLine, std::ref(inItems), std::cref(inItem))));
+    }
+}
+
+template <typename TKeyType, typename TValueType>
+inline void
+CreateQHashEraseTransaction(const char *inFile, int inLine, TTransactionConsumerPtr inConsumer,
+                            const std::pair<TKeyType, TValueType> &inItem,
+                            QHash<TKeyType, TValueType> &inItems)
+{
+    if (inConsumer) {
+        inConsumer->OnTransaction(static_pointer_cast<ITransaction>(
+            std::make_shared<QHashEraseTransaction<TKeyType, TValueType>>(
+                inFile, inLine, std::ref(inItems), std::cref(inItem))));
+    }
 }
 
 template <typename TKeyType, typename TValueType, typename THashType>

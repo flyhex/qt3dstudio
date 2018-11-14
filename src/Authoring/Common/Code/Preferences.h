@@ -30,7 +30,7 @@
 #ifndef INCLUDED_PREFERENCES_H
 #define INCLUDED_PREFERENCES_H
 
-#include "CColor.h"
+#include <QtGui/qcolor.h>
 #include <QtXml/qdom.h>
 
 class CPreferences
@@ -52,8 +52,8 @@ public:
     void SetValue(const QString &inKey, double inValue, const QString &group = {});
     double GetValue(const QString &inKey, double inDefaultValue, const QString &group = {});
 
-    void SetColorValue(const QString &inKey, ::CColor inValue, const QString &group = {});
-    ::CColor GetColorValue(const QString &inKey, ::CColor inDefaultValue,
+    void SetColorValue(const QString &inKey, const QColor &inValue, const QString &group = {});
+    QColor GetColorValue(const QString &inKey, const QColor &inDefaultValue,
                            const QString &group = {});
 
     void SetPreferencesFile(const QString &inFileName);

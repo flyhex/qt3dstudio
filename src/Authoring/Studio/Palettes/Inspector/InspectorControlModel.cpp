@@ -67,23 +67,24 @@ static QStringList renderableItems()
     QStringList renderables;
     renderables.push_back(QObject::tr("No renderable item"));
     const CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-    Q3DStudio::CString docDir = doc->GetDocumentDirectory();
+    QString docDir = doc->GetDocumentDirectory();
 
     for (SubPresentationRecord r : qAsConst(g_StudioApp.m_subpresentations))
         renderables.push_back(r.m_id);
 
     // second step, find the renderable plugins.
     {
-        Q3DStudio::CFilePath pluginDir
+        QFileInfo pluginDir
                 = Q3DStudio::CFilePath::CombineBaseAndRelative(docDir, "plugins");
-        if (pluginDir.Exists() && pluginDir.IsDirectory()) {
-            std::vector<Q3DStudio::CFilePath> dirFiles;
-            pluginDir.ListFilesAndDirectories(dirFiles);
+        if (pluginDir.exists() && pluginDir.isDir()) {
+            std::vector<QFileInfo> dirFiles;
+            Q3DStudio::CFilePath::ListFilesAndDirectories(pluginDir.canonicalPath(), dirFiles);
             for (size_t idx = 0, end = dirFiles.size(); idx < end; ++idx) {
-                if (dirFiles[idx].IsFile()) {
-                    Q3DStudio::CFilePath relPath =
-                        Q3DStudio::CFilePath::GetRelativePathFromBase(docDir, dirFiles[idx]);
-                    renderables.push_back(relPath.toQString());
+                if (dirFiles[idx].isFile()) {
+                    QString relPath
+                            = Q3DStudio::CFilePath::GetRelativePathFromBase(
+                                docDir, dirFiles[idx].canonicalPath());
+                    renderables.push_back(relPath);
                 }
             }
         }
@@ -313,17 +314,17 @@ void InspectorControlModel::updateMatDataValues()
 void InspectorControlModel::setMaterials(std::vector<Q3DStudio::CFilePath> &materials)
 {
     m_materials.clear();
-    const Q3DStudio::CString base = g_StudioApp.GetCore()->GetDoc()->GetDocumentDirectory();
+    const QString base = g_StudioApp.GetCore()->GetDoc()->GetDocumentDirectory();
 
     for (Q3DStudio::CFilePath path : materials) {
 
         const QString relativePath = path.toQString();
-        const Q3DStudio::CFilePath absolutePath
-            = Q3DStudio::CFilePath::CombineBaseAndRelative(base, path);
+        const QString absolutePath
+            = Q3DStudio::CFilePath::CombineBaseAndRelative(base, relativePath);
 
         const QString name = g_StudioApp.GetCore()->GetDoc()->GetDocumentReader()
                                   .GetCustomMaterialName(
-                                        absolutePath.toCString()).toQString();
+                                        absolutePath);
 
         m_materials.push_back({name, relativePath});
     }
@@ -364,21 +365,19 @@ void InspectorControlModel::setMatDatas(std::vector<Q3DStudio::CFilePath> &matDa
                 && values.contains(QStringLiteral("filename"))) {
             if (values[QStringLiteral("presentation")] == doc->GetDocumentPath()) {
                 if (!QFileInfo(values["path"]).exists()) {
-                    const auto instance = sceneEditor->getMaterial(
-                                Q3DStudio::CString::fromQString(
-                                    values[QStringLiteral("filename")]));
+                    const auto instance
+                            = sceneEditor->getMaterial(values[QStringLiteral("filename")]);
                     if (instance.Valid()) {
-                        sceneEditor->SetName(instance, Q3DStudio::CString::fromQString(name));
+                        sceneEditor->SetName(instance, name);
                         needRewrite = true;
                     }
                 }
             }
         }
 
-        const auto nameCString = Q3DStudio::CString::fromQString(name);
-        bool isNewMaterial = !sceneEditor->getMaterial(nameCString).Valid();
+        bool isNewMaterial = !sceneEditor->getMaterial(name).Valid();
 
-        const auto material = sceneEditor->getOrCreateMaterial(nameCString);
+        const auto material = sceneEditor->getOrCreateMaterial(name);
         sceneEditor->setMaterialValues(name, values, textureValues);
 
         if (isNewMaterial)
@@ -438,11 +437,11 @@ void InspectorControlModel::updateFontValues(InspectorControlBase *element) cons
     }
 
     if (fontElements.size()) {
-        std::vector<Q3DStudio::CString> fontNames;
+        std::vector<QString> fontNames;
         g_StudioApp.GetCore()->GetDoc()->GetProjectFonts(fontNames);
         QStringList possibleValues;
         for (const auto &fontName : fontNames)
-            possibleValues.append(fontName.toQString());
+            possibleValues.append(fontName);
         for (auto fontElement : qAsConst(fontElements)) {
             fontElement->m_values = possibleValues;
             Q_EMIT fontElement->valuesChanged();
@@ -505,7 +504,7 @@ InspectorControlBase *InspectorControlModel::createMaterialTypeItem(
     const QStringList values = materialTypeValues();
     item->m_values = values;
 
-    QString sourcePath = bridge->GetSourcePath(item->m_instance).toQString();
+    QString sourcePath = bridge->GetSourcePath(item->m_instance);
 
     switch (type) {
     case OBJTYPE_MATERIAL:
@@ -550,7 +549,7 @@ InspectorControlBase *InspectorControlModel::createShaderItem(
     const QStringList values = shaderValues();
     item->m_values = values;
 
-    QString sourcePath = bridge->GetSourcePath(item->m_instance).toQString();
+    QString sourcePath = bridge->GetSourcePath(item->m_instance);
 
     for (int matIdx = 0, end = int(m_materials.size()); matIdx < end; ++matIdx) {
         if (m_materials[matIdx].m_relativePath == sourcePath)
@@ -580,11 +579,11 @@ InspectorControlBase *InspectorControlModel::createMatDataItem(
     const QStringList values = matDataValues();
     item->m_values = values;
 
-    QString sourcePath = bridge->GetSourcePath(item->m_instance).toQString();
+    QString sourcePath = bridge->GetSourcePath(item->m_instance);
 
     if (!sourcePath.isEmpty() && sourcePath != QLatin1String("Default")) {
         const auto doc = g_StudioApp.GetCore()->GetDoc();
-        const auto dirPath = doc->GetDocumentDirectory().toQString();
+        const auto dirPath = doc->GetDocumentDirectory();
         QFileInfo fileInfo(dirPath + QStringLiteral("/") + sourcePath);
         if (!fileInfo.exists()) {
             const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
@@ -592,12 +591,11 @@ InspectorControlBase *InspectorControlModel::createMatDataItem(
             if (refMaterial.Valid()) {
                 const auto matName = sceneEditor->GetName(refMaterial);
                 QFileInfo newFileInfo(fileInfo.absoluteDir().path() + QStringLiteral("/")
-                                      + matName.toQString() + QStringLiteral(".matdata"));
+                                      + matName + QStringLiteral(".matdata"));
                 const QDir docDir(dirPath);
                 const auto relPath = docDir.relativeFilePath(newFileInfo.absoluteFilePath());
-                sceneEditor->setMaterialSourcePath(item->m_instance,
-                                                   Q3DStudio::CString::fromQString(relPath));
-                sourcePath = bridge->GetSourcePath(item->m_instance).toQString();
+                sceneEditor->setMaterialSourcePath(item->m_instance, relPath);
+                sourcePath = bridge->GetSourcePath(item->m_instance);
             }
         }
     }
@@ -631,17 +629,17 @@ InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *insp
     item->m_instance = inspectable->GetGroupInstance(groupIndex);
     item->m_metaProperty = metaProperty;
 
-    Q3DStudio::CString title;
-    title.Assign(metaProperty.m_FormalName.c_str());
-    if (title.IsEmpty())
-        title.Assign(metaProperty.m_Name.c_str());
-    item->m_title = title.toQString();
+    QString title;
+    title = metaProperty.m_FormalName;
+    if (title.isEmpty())
+        title = metaProperty.m_Name;
+    item->m_title = title;
 
     const auto propertySystem = studio->GetPropertySystem();
     item->m_dataType = propertySystem->GetDataType(metaProperty.m_Property);
     item->m_propertyType = static_cast<qt3dsdm::AdditionalMetaDataType::Value>
             (propertySystem->GetAdditionalMetaDataType(item->m_instance, metaProperty.m_Property));
-    item->m_tooltip = Q3DStudio::CString(metaProperty.m_Description.c_str()).toQString();
+    item->m_tooltip = metaProperty.m_Description;
     // \n is parsed as \\n from the material and effect files. Replace them to fix multi-line
     // tooltips
     item->m_tooltip.replace(QStringLiteral("\\n"), QStringLiteral("\n"));
@@ -705,20 +703,20 @@ QString InspectorControlModel::currentControllerValue(long instance, int handle)
 
     qt3dsdm::SValue currPropVal = currentPropertyValue(
                 instance, studio->GetPropertySystem()->GetAggregateInstancePropertyByName(
-                    instance, qt3dsdm::TCharStr(L"controlledproperty")));
+                    instance, QStringLiteral("controlledproperty")));
     if (!currPropVal.empty()) {
-        Q3DStudio::CString currPropValStr
-                = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currPropVal)->GetData();
+        QString currPropValStr
+                = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currPropVal)->toQString();
 
-        Q3DStudio::CString propName
-                = studio->GetPropertySystem()->GetName(handle).c_str();
+        QString propName
+                = studio->GetPropertySystem()->GetName(handle);
 
         // Datainput controller name is always prepended with "$". Differentiate
         // between datainput and property that has the same name by searching specifically
         // for whitespace followed by property name.
-        long propNamePos = currPropValStr.find(" " + propName);
-        if ((propNamePos != currPropValStr.ENDOFSTRING) && (propNamePos != 0)) {
-            long posCtrlr = currPropValStr.substr(0, propNamePos).ReverseFind("$");
+        long propNamePos = currPropValStr.indexOf(QStringLiteral(" ") + propName);
+        if (propNamePos != -1 && propNamePos != 0) {
+            long posCtrlr = currPropValStr.left(propNamePos).lastIndexOf(QLatin1Char('$'));
 
             // adjust pos if this is the first controller - property pair
             // in controlledproperty
@@ -727,7 +725,7 @@ QString InspectorControlModel::currentControllerValue(long instance, int handle)
 
             // remove $
             posCtrlr++;
-            return currPropValStr.substr(posCtrlr, propNamePos - posCtrlr).toQString();
+            return currPropValStr.mid(posCtrlr, propNamePos - posCtrlr);
         }
         else
             return {};
@@ -742,22 +740,22 @@ void InspectorControlModel::updateControlledToggleState(InspectorControlBase* in
     // toggle if controlledproperty contains the name of this property
     qt3dsdm::SValue currPropVal = currentPropertyValue(
         inItem->m_instance, studio->GetPropertySystem()->GetAggregateInstancePropertyByName(
-            inItem->m_instance, qt3dsdm::TCharStr(L"controlledproperty")));
-    Q3DStudio::CString currPropValStr;
+            inItem->m_instance, QStringLiteral("controlledproperty")));
+    QString currPropValStr;
     if (!currPropVal.empty())
-        currPropValStr = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currPropVal)->GetData();
+        currPropValStr = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currPropVal)->toQString();
     // Restore original tool tip from metadata when turning control off
     if (!currPropValStr.size()) {
         inItem->m_controlled = false;
         inItem->m_controller = "";
     } else {
-       Q3DStudio::CString propName
-           = studio->GetPropertySystem()->GetName(inItem->m_property).c_str();
+       QString propName
+           = studio->GetPropertySystem()->GetName(inItem->m_property);
        // Search specifically for whitespace followed with registered property name.
        // This avoids finding datainput with same name as the property, as datainput
        // name is always prepended with "$"
-       long propNamePos = currPropValStr.find(" " + propName);
-       if ((propNamePos == currPropValStr.ENDOFSTRING)
+       long propNamePos = currPropValStr.indexOf(QStringLiteral(" ") + propName);
+       if ((propNamePos == -1)
            && (propNamePos != 0)) {
            inItem->m_controlled = false;
            inItem->m_controller = "";
@@ -765,7 +763,7 @@ void InspectorControlModel::updateControlledToggleState(InspectorControlBase* in
            inItem->m_controlled = true;
            // controller name is prepended with "$" to differentiate from property
            // with same name. Reverse find specifically for $.
-           long posCtrlr = currPropValStr.substr(0, propNamePos).ReverseFind("$");
+           long posCtrlr = currPropValStr.left(propNamePos).lastIndexOf(QLatin1Char('$'));
 
            // this is the first controller - property pair in controlledproperty
            if (posCtrlr < 0)
@@ -773,8 +771,7 @@ void InspectorControlModel::updateControlledToggleState(InspectorControlBase* in
 
            // remove $ from controller name for showing it in UI
            posCtrlr++;
-           const QString ctrlName = currPropValStr.substr(
-               posCtrlr, propNamePos - posCtrlr).toQString();
+           const QString ctrlName = currPropValStr.mid(posCtrlr, propNamePos - posCtrlr);
 
            inItem->m_controller = ctrlName;
        }
@@ -888,7 +885,7 @@ auto InspectorControlModel::computeTree(CInspectableBase* inspectBase)
 
                 QString materialSrcPath;
                 if (instance.Valid())
-                    materialSrcPath = bridge->GetSourcePath(instance).toQString();
+                    materialSrcPath = bridge->GetSourcePath(instance);
 
                 if (materialSrcPath != QLatin1String("Default")
                         && bridge->GetSourcePath(refMaterial) != "Default") {
@@ -1032,8 +1029,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
                 int selectedIndex = -1;
                 qt3dsdm::SStringOrInt stringOrInt = qt3dsdm::get<qt3dsdm::SStringOrInt>(value);
                 if (stringOrInt.GetType() == qt3dsdm::SStringOrIntTypes::String)
-                    listOpt = QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>
-                                                      (stringOrInt.m_Value)->GetData());
+                    listOpt = qt3dsdm::get<qt3dsdm::TDataStrPtr>(stringOrInt.m_Value)->toQString();
                 else
                     selectedSlideHandle = qt3dsdm::get<long>(stringOrInt.m_Value);
 
@@ -1046,7 +1042,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
                     auto currentSlide = slideSystem->GetSlideByIndex(masterSlide, slideIndex);
                     auto currentInstance = slideSystem->GetSlideInstance(currentSlide);
 
-                    QString slideName = bridge->GetName(currentInstance).toQString();
+                    QString slideName = bridge->GetName(currentInstance);
                     //hack to add a separator before the item
                     if (slideIndex == 1 && itemCount > 0)
                         slideName += "|separator";
@@ -1109,9 +1105,9 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
             qt3dsdm::Qt3DSDMInstanceHandle imageInstance = doc->GetDocumentReader()
                     .GetInstanceForGuid(guid);
             if (imageInstance.Valid()) {
-                Q3DStudio::CString path = doc->GetDocumentReader().GetSourcePath(imageInstance);
-                Q3DStudio::CFilePath relPath(path);
-                element->m_value = QVariant(relPath.GetFileName().toQString());
+                QString path = doc->GetDocumentReader().GetSourcePath(imageInstance);
+                QFileInfo relPath(path);
+                element->m_value = QVariant(relPath.fileName());
             } else {
                 element->m_value = QVariant(QString(""));
             }
@@ -1174,7 +1170,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
             IObjectReferenceHelper *objRefHelper = doc->GetDataModelObjectReferenceHelper();
             if (objRefHelper) {
                 qt3dsdm::Qt3DSDMInstanceHandle refInstance = objRefHelper->Resolve(value, instance);
-                QString refName = objRefHelper->LookupObjectFormalName(refInstance).toQString();
+                QString refName = objRefHelper->LookupObjectFormalName(refInstance);
                 if (bridge->IsReferencedMaterialInstance(instance) && !refName.isEmpty()) {
                     // get the material's object name (parent)
                     auto parentInstance = bridge->GetParentInstance(refInstance);
@@ -1289,11 +1285,11 @@ void InspectorControlModel::saveIfMaterial(qt3dsdm::Qt3DSDMInstanceHandle instan
         studio->GetPropertySystem()->GetInstancePropertyValue(
             material, bridge->GetObjectDefinitions().m_Named.m_NameProp, value);
         qt3dsdm::TDataStrPtr namePtr(qt3dsdm::get<qt3dsdm::TDataStrPtr>(value));
-        QString materialName = QString::fromWCharArray(namePtr->GetData(), namePtr->GetLength());
+        QString materialName = namePtr->toQString();
         QString sourcePath;
         for (int i = 0; i < m_matDatas.size(); ++i) {
             if (m_matDatas[i].m_name == materialName) {
-                sourcePath = doc->GetDocumentDirectory().toQString() + QDir::separator()
+                sourcePath = doc->GetDocumentDirectory() + QDir::separator()
                         + m_matDatas[i].m_relativePath;
             }
         }
@@ -1308,27 +1304,27 @@ void InspectorControlModel::setMaterialTypeValue(long instance, int handle, cons
     Q_UNUSED(handle)
 
     const QString typeValue = value.toString();
-    Q3DStudio::CString v;
+    QString v;
 
     bool changeMaterialFile = false;
     if (typeValue == getStandardMaterialString()) {
-        v = Q3DStudio::CString("Standard Material");
+        v = QStringLiteral("Standard Material");
     } else if (typeValue == getCustomMaterialString()) {
         if (m_materials.size() > 0)
-            v = Q3DStudio::CString::fromQString(m_materials[0].m_relativePath);
+            v = m_materials[0].m_relativePath;
     } else if (typeValue == getSharedMaterialString()) {
-        v = Q3DStudio::CString("Referenced Material");
+        v = QStringLiteral("Referenced Material");
         changeMaterialFile = true;
     } else if (typeValue == getReferencedMaterialString()) {
-        v = Q3DStudio::CString("Referenced Material");
+        v = QStringLiteral("Referenced Material");
     }
 
     const auto doc = g_StudioApp.GetCore()->GetDoc();
     const auto sceneEditor = doc->getSceneEditor();
-    const Q3DStudio::CString oldType = sceneEditor->GetObjectTypeName(instance);
+    const QString oldType = sceneEditor->GetObjectTypeName(instance);
 
     qt3dsdm::Qt3DSDMInstanceHandle refMaterial;
-    if (oldType == "ReferencedMaterial" && typeValue == getStandardMaterialString())
+    if (oldType == QLatin1String("ReferencedMaterial") && typeValue == getStandardMaterialString())
         sceneEditor->getMaterialReference(instance, refMaterial);
 
     Q3DStudio::ScopedDocumentEditor scopedEditor(
@@ -1358,11 +1354,11 @@ void InspectorControlModel::setMaterialTypeValue(long instance, int handle, cons
 void InspectorControlModel::setShaderValue(long instance, int handle, const QVariant &value)
 {
     const QString typeValue = value.toString();
-    Q3DStudio::CString v;
+    QString v;
 
     for (size_t matIdx = 0, end = m_materials.size(); matIdx < end; ++matIdx) {
         if (m_materials[matIdx].m_name == typeValue)
-            v = Q3DStudio::CString::fromQString(m_materials[matIdx].m_relativePath);
+            v = m_materials[matIdx].m_relativePath;
     }
 
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(),
@@ -1376,25 +1372,25 @@ void InspectorControlModel::setMatDataValue(long instance, int handle, const QVa
 {
     Q_UNUSED(handle);
     const QString typeValue = value.toString();
-    Q3DStudio::CString v;
+    QString strValue;
     QString name;
-    Q3DStudio::CString srcPath;
+    QString srcPath;
     QMap<QString, QString> values;
     QMap<QString, QMap<QString, QString>> textureValues;
 
     bool changeMaterialFile = false;
     if (typeValue == getDefaultMaterialString()) {
-        v = Q3DStudio::CString("Referenced Material");
+        strValue = QStringLiteral("Referenced Material");
         name = QLatin1String("Default");
         srcPath = "Default";
         changeMaterialFile = true;
     } else {
         for (size_t matIdx = 0, end = m_matDatas.size(); matIdx < end; ++matIdx) {
             if (m_matDatas[matIdx].m_name == typeValue) {
-                v = Q3DStudio::CString("Referenced Material");
+                strValue = QStringLiteral("Referenced Material");
                 changeMaterialFile = true;
                 name = m_matDatas[matIdx].m_name;
-                srcPath = Q3DStudio::CString::fromQString(m_matDatas[matIdx].m_relativePath);
+                srcPath = m_matDatas[matIdx].m_relativePath;
                 values = m_matDatas[matIdx].m_values;
                 textureValues = m_matDatas[matIdx].m_textureValues;
                 break;
@@ -1407,7 +1403,7 @@ void InspectorControlModel::setMatDataValue(long instance, int handle, const QVa
                 Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, tr("Set Material Type")));
 
     scopedEditor->BeginAggregateOperation();
-    scopedEditor->SetMaterialType(instance, v);
+    scopedEditor->SetMaterialType(instance, strValue);
 
     if (changeMaterialFile) {
         scopedEditor->setMaterialProperties(instance, name, srcPath, values, textureValues);
@@ -1428,16 +1424,15 @@ void InspectorControlModel::setRenderableValue(long instance, int handle, const 
 {
     qt3dsdm::SValue oldValue = currentPropertyValue(instance, handle);
 
-    QString v = value.toString();
-    if (v == QObject::tr("No renderable item"))
-        v = QString();
+    QString strValue = value.toString();
+    if (strValue == QObject::tr("No renderable item"))
+        strValue.clear();
 
-    if (v == qt3dsdm::get<QString>(oldValue))
+    if (strValue == qt3dsdm::get<QString>(oldValue))
         return;
 
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(), QObject::tr("Set Property"))
-            ->SetInstancePropertyValueAsRenderable(instance, handle,
-                                                   Q3DStudio::CString::fromQString(v));
+            ->SetInstancePropertyValueAsRenderable(instance, handle, strValue);
 }
 
 void InspectorControlModel::setPropertyValue(long instance, int handle, const QVariant &value,
@@ -1455,17 +1450,16 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
         m_modifiedProperty.second = 0;
         m_previouslyCommittedValue = {};
 
-        Q3DStudio::CString currentName = bridge->GetName(instance);
-        Q3DStudio::CString newName = Q3DStudio::CString::fromQString(value.toString());
-        if (!newName.IsEmpty()) {
+        QString currentName = bridge->GetName(instance);
+        QString newName = value.toString();
+        if (!newName.isEmpty()) {
             qt3dsdm::Qt3DSDMInstanceHandle parentInstance = bridge->GetParentInstance(instance);
             if (!bridge->CheckNameUnique(parentInstance, instance, newName)) {
-                QString origNewName = newName.toQString();
+                QString origNewName = newName;
                 newName = bridge->GetUniqueChildName(parentInstance, instance, newName);
                 // Display rename message box asynchronously so focus loss won't trigger setting
                 // the name again
-                g_StudioApp.GetDialogs()->DisplayObjectRenamed(origNewName, newName.toQString(),
-                                                               true);
+                g_StudioApp.GetDialogs()->DisplayObjectRenamed(origNewName, newName, true);
             }
             if (newName != currentName) {
                 bool canRename = false;
@@ -1473,15 +1467,15 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
                 const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
                 if (sceneEditor->isInsideMaterialContainer(instance)) {
                     const auto doc = g_StudioApp.GetCore()->GetDoc();
-                    const auto dirPath = doc->GetDocumentDirectory().toQString();
+                    const auto dirPath = doc->GetDocumentDirectory();
                     for (size_t matIdx = 0, end = m_matDatas.size(); matIdx < end; ++matIdx) {
-                        if (m_matDatas[matIdx].m_name == currentName.toQString()) {
+                        if (m_matDatas[matIdx].m_name == currentName) {
                             QFileInfo fileInfo(dirPath + QStringLiteral("/")
                                                + m_matDatas[matIdx].m_relativePath);
                             const QString oldFile = fileInfo.absoluteFilePath();
                             const QString newFile = fileInfo.absolutePath()
                                     + QStringLiteral("/")
-                                    + newName.toQString()
+                                    + newName
                                     + QStringLiteral(".matdata");
                             canRename = QFile::rename(oldFile, newFile);
                             break;
@@ -1530,7 +1524,7 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
             = studio->GetPropertySystem()->GetAdditionalMetaDataType(instance, handle);
 
     if (theType == EStudioObjectType::OBJTYPE_CAMERA &&
-            studio->GetPropertySystem()->GetName(handle) == Q3DStudio::CString("scale")) {
+            studio->GetPropertySystem()->GetName(handle) == QLatin1String("scale")) {
         const QVector3D theFloat3 = qt3dsdm::get<QVector3D>(v);
         if (theFloat3.x() == 0.0f || theFloat3.y() == 0.0f || theFloat3.z() == 0.0f )
             v = oldValue;
@@ -1614,14 +1608,13 @@ void InspectorControlModel::setSlideSelection(long instance, int handle, int ind
 }
 
 void InspectorControlModel::setPropertyControllerInstance(
-    long instance,int property, Q3DStudio::CString controllerInstance, bool controlled)
+    long instance,int property, const QString &controllerInstance, bool controlled)
 {
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     IObjectReferenceHelper *objRefHelper = doc->GetDataModelObjectReferenceHelper();
 
-    Q3DStudio::CString instancepath = Q3DStudio::CString(
-        objRefHelper->GetObjectReferenceString(doc->GetSceneInstance(),
-                                               CRelativePathTools::EPATHTYPE_GUID, instance));
+    QString instancepath = objRefHelper->GetObjectReferenceString(doc->GetSceneInstance(),
+                                               CRelativePathTools::EPATHTYPE_GUID, instance);
     Q_ASSERT(instancepath.size());
 
     doc->SetInstancePropertyControlled(instance, instancepath, property,

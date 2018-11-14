@@ -140,7 +140,8 @@ SOURCES += \
     ../Client/Code/Core/Utility/q3dsdirsystem.cpp \
     ../Client/Code/Core/Utility/q3dsdirwatcher.cpp \
     ../Client/Code/Core/Runtime2Integration/Q3DSDocumentBufferCache.cpp \
-    ../Client/Code/Core/Runtime2Integration/Q3DSInputStreamFactory.cpp
+    ../Client/Code/Core/Runtime2Integration/Q3DSInputStreamFactory.cpp \
+    ../Client/Code/Core/Runtime2Integration/Q3DSRenderBufferManager.cpp
 
 HEADERS += \
     ../Client/Code/Core/Utility/q3dsdirsystem.h \

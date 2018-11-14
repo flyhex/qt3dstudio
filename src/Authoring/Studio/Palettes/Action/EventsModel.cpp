@@ -55,25 +55,25 @@ void EventsModel::setEventList(const qt3dsdm::TEventHandleList &eventList)
         qt3dsdm::SEventInfo theEvent = theBridge->GetEventInfo(*thePos);
 
         CategoryInfo category;
-        category.name = QString::fromWCharArray(theEvent.m_Category.wide_str());
+        category.name = (theEvent.m_Category);
         if (!m_events.contains(category.name)) {
           qt3dsdm::SCategoryInfo theCategoryMetaData = studioSystem->GetActionMetaData()
                   ->GetEventCategory(theEvent.m_Category);
-          category.icon = QString::fromWCharArray(theCategoryMetaData.m_Icon.wide_str());
-          category.highlightIcon = QString::fromWCharArray(theCategoryMetaData.m_HighlightIcon.wide_str());
-          category.description = QString::fromWCharArray(theCategoryMetaData.m_Description.wide_str());
+          category.icon = theCategoryMetaData.m_Icon;
+          category.highlightIcon = theCategoryMetaData.m_HighlightIcon;
+          category.description = theCategoryMetaData.m_Description;
           m_categories.append(category);
           m_rowCount++;
         }
 
         EventInfo eventInfo;
         // Use the formal name to display, but if the formal name is not set, use the name instead
-        eventInfo.name = QString::fromWCharArray(theEvent.m_FormalName.wide_str());
+        eventInfo.name = theEvent.m_FormalName;
         if (eventInfo.name.isEmpty())
-            eventInfo.name = QString::fromWCharArray(theEvent.m_Name.wide_str());
+            eventInfo.name = theEvent.m_Name;
         eventInfo.handle = *thePos;
 
-        eventInfo.description = QString::fromWCharArray(theEvent.m_Description.wide_str());
+        eventInfo.description = (theEvent.m_Description);
         m_events[category.name].append(eventInfo);
         m_rowCount++;
 
@@ -97,25 +97,25 @@ void EventsModel::setHandlerList(const qt3dsdm::THandlerHandleList &handlerList)
         qt3dsdm::SHandlerInfo handlerInfo = theBridge->GetHandlerInfo(*thePos);
 
         CategoryInfo category;
-        category.name = QString::fromWCharArray(handlerInfo.m_Category.wide_str());
+        category.name = (handlerInfo.m_Category);
         if (!m_events.contains(category.name)) {
           qt3dsdm::SCategoryInfo theCategoryMetaData = studioSystem->GetActionMetaData()
                   ->GetHandlerCategory(handlerInfo.m_Category);
-          category.icon = QString::fromWCharArray(theCategoryMetaData.m_Icon.wide_str());
-          category.highlightIcon = QString::fromWCharArray(theCategoryMetaData.m_HighlightIcon.wide_str());
-          category.description = QString::fromWCharArray(theCategoryMetaData.m_Description.wide_str());
+          category.icon = theCategoryMetaData.m_Icon;
+          category.highlightIcon = theCategoryMetaData.m_HighlightIcon;
+          category.description = theCategoryMetaData.m_Description;
           m_categories.append(category);
           m_rowCount++;
         }
 
         EventInfo eventInfo;
         // Use the formal name to display, but if the formal name is not set, use the name instead
-        eventInfo.name = QString::fromWCharArray(handlerInfo.m_FormalName.wide_str());
+        eventInfo.name = handlerInfo.m_FormalName;
         if (eventInfo.name.isEmpty())
-            eventInfo.name = QString::fromWCharArray(handlerInfo.m_Name.wide_str());
+            eventInfo.name = handlerInfo.m_Name;
         eventInfo.handle = *thePos;
 
-        eventInfo.description = QString::fromWCharArray(handlerInfo.m_Description.wide_str());
+        eventInfo.description = handlerInfo.m_Description;
         m_events[category.name].append(eventInfo);
         m_rowCount++;
 

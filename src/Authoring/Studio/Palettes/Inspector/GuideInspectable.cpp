@@ -188,9 +188,9 @@ EStudioObjectType SGuideInspectableImpl::GetObjectType()
     return OBJTYPE_GUIDE;
 }
 
-Q3DStudio::CString SGuideInspectableImpl::GetName()
+QString SGuideInspectableImpl::GetName()
 {
-    return L"Guide";
+    return QStringLiteral("Guide");
 }
 
 long SGuideInspectableImpl::GetGroupCount()

@@ -28,7 +28,7 @@
 ****************************************************************************/
 
 #include "Qt3DSCommonPrecompile.h"
-#include "CColor.h"
+#include <QtGui/qcolor.h>
 #include "SystemPreferences.h"
 
 #include <QtWidgets/qapplication.h>

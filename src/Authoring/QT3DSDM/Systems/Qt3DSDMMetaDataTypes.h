@@ -28,6 +28,7 @@
 ****************************************************************************/
 #pragma once
 #include "Qt3DSDMMetaDataValue.h"
+#include "render/Qt3DSRenderDynamicObjectSystemCommands.h"
 
 namespace qt3ds {
 namespace render {
@@ -119,10 +120,10 @@ inline AdditionalMetaDataType::Value GetMetaDataValueType(const TMetaDataData &i
 // and handler arguments.
 struct SMetaPropertyBase
 {
-    TCharStr m_Name;
-    TCharStr m_FormalName;
-    TCharStr m_Usage;
-    TCharStr m_Description;
+    QString m_Name;
+    QString m_FormalName;
+    QString m_Usage;
+    QString m_Description;
     CompleteMetaDataType::Enum m_CompleteType;
     TMetaDataData m_MetaDataData;
     SValue m_DefaultValue;
@@ -157,7 +158,7 @@ struct SMetaDataPropertyInfo : SMetaPropertyBase
     bool m_IsHidden; // Is this property visible in the UI
     bool m_Animatable; // Is this property visible in the UI
 
-    TCharStr m_GroupName; // Name of the group this property belongs to or "default"
+    QString m_GroupName; // Name of the group this property belongs to or "default"
 
     SMetaDataPropertyInfo(Qt3DSDMInstanceHandle inInstance)
         : m_Instance(inInstance)
@@ -198,17 +199,17 @@ struct SMetaDataHandlerArgumentInfo : SMetaPropertyBase
 
 struct SCategoryInfo
 {
-    TCharStr m_Name;
-    TCharStr m_Description;
-    TCharStr m_Icon;
-    TCharStr m_HighlightIcon;
+    QString m_Name;
+    QString m_Description;
+    QString m_Icon;
+    QString m_HighlightIcon;
     bool m_Canonical;
 
     SCategoryInfo()
         : m_Canonical(false)
     {
     }
-    SCategoryInfo(TCharStr inName)
+    SCategoryInfo(const QString &inName)
         : m_Name(inName)
         , m_Canonical(false)
     {
@@ -223,18 +224,18 @@ struct SEventInfo
                 || m_Category != inEvent.m_Category || m_Description != inEvent.m_Description);
     }
 
-    TCharStr m_Name;
-    TCharStr m_FormalName;
-    TCharStr m_Category;
-    TCharStr m_Description;
+    QString m_Name;
+    QString m_FormalName;
+    QString m_Category;
+    QString m_Description;
 };
 
 struct SHandlerInfo
 {
-    TCharStr m_Name;
-    TCharStr m_FormalName;
-    TCharStr m_Category;
-    TCharStr m_Description;
+    QString m_Name;
+    QString m_FormalName;
+    QString m_Category;
+    QString m_Description;
 
     bool operator!=(const SHandlerInfo &inHandler) const
     {
@@ -271,12 +272,12 @@ struct SPropertyFilterInfo
 };
 struct SMetaDataShader
 {
-    TCharStr m_Name;
-    TCharStr m_Type; ///< shader type (GLSL or HLSL)
-    TCharStr m_Version; ///< shader version (e.g. 330 vor GLSL)
+    QString m_Name;
+    QString m_Type; ///< shader type (GLSL or HLSL)
+    QString m_Version; ///< shader version (e.g. 330 vor GLSL)
     // Code contains both the vertex and fragment portions separated by #define's.
     //#define VERTEX_SHADER, #define FRAGMENT_SHADER
-    TCharStr m_Code;
+    QString m_Code;
     bool m_HasGeomShader;
     bool m_IsComputeShader;
     SMetaDataShader()
@@ -284,8 +285,8 @@ struct SMetaDataShader
         , m_IsComputeShader(false)
     {
     }
-    SMetaDataShader(const TCharStr &inName, const TCharStr &inType, const TCharStr &inVersion,
-                    const TCharStr &inCode, bool hasGeom, bool isCompute)
+    SMetaDataShader(const QString &inName, const QString &inType, const QString &inVersion,
+                    const QString &inCode, bool hasGeom, bool isCompute)
         : m_Name(inName)
         , m_Type(inType)
         , m_Version(inVersion)
@@ -298,13 +299,13 @@ struct SMetaDataShader
 
 struct SMetaDataDynamicObject
 {
-    TCharStr m_Name;
-    qt3ds::foundation::NVConstDataRef<SMetaDataShader> m_Shaders;
-    qt3ds::foundation::NVConstDataRef<qt3ds::render::dynamic::SPropertyDefinition> m_Properties;
+    QString m_Name;
+    QVector<SMetaDataShader> m_Shaders;
+    QVector<qt3ds::render::dynamic::SPropertyDefinition> m_Properties;
     SMetaDataDynamicObject() {}
     SMetaDataDynamicObject(
-        const TCharStr &inName, qt3ds::foundation::NVConstDataRef<SMetaDataShader> inShaders,
-        qt3ds::foundation::NVConstDataRef<qt3ds::render::dynamic::SPropertyDefinition> inProperties)
+        const QString &inName, const QVector<SMetaDataShader> &inShaders,
+        const QVector<qt3ds::render::dynamic::SPropertyDefinition> &inProperties)
         : m_Name(inName)
         , m_Shaders(inShaders)
         , m_Properties(inProperties)
@@ -314,12 +315,12 @@ struct SMetaDataDynamicObject
 
 struct SMetaDataEffect : public SMetaDataDynamicObject
 {
-    qt3ds::foundation::NVConstDataRef<qt3ds::render::dynamic::SCommand *> m_EffectCommands;
+    QVector<qt3ds::render::dynamic::SCommand *> m_EffectCommands;
     SMetaDataEffect() {}
     SMetaDataEffect(
-        const TCharStr &inName, qt3ds::foundation::NVConstDataRef<SMetaDataShader> inShaders,
-        qt3ds::foundation::NVConstDataRef<qt3ds::render::dynamic::SPropertyDefinition> inProperties,
-        qt3ds::foundation::NVConstDataRef<qt3ds::render::dynamic::SCommand *> inEffectCommands)
+        const QString &inName, const QVector<SMetaDataShader> &inShaders,
+        const QVector<qt3ds::render::dynamic::SPropertyDefinition> &inProperties,
+        const QVector<qt3ds::render::dynamic::SCommand *> &inEffectCommands)
         : SMetaDataDynamicObject(inName, inShaders, inProperties)
         , m_EffectCommands(inEffectCommands)
     {
@@ -328,7 +329,7 @@ struct SMetaDataEffect : public SMetaDataDynamicObject
 
 struct SMetaDataCustomMaterial : public SMetaDataDynamicObject
 {
-    qt3ds::foundation::NVConstDataRef<qt3ds::render::dynamic::SCommand *> m_CustomMaterialCommands;
+    QVector<qt3ds::render::dynamic::SCommand *> m_CustomMaterialCommands;
     bool m_HasTransparency;
     bool m_HasRefraction;
     bool m_AlwaysDirty;
@@ -336,9 +337,9 @@ struct SMetaDataCustomMaterial : public SMetaDataDynamicObject
     unsigned int m_LayerCount;
     SMetaDataCustomMaterial() {}
     SMetaDataCustomMaterial(
-        const TCharStr &inName, qt3ds::foundation::NVConstDataRef<SMetaDataShader> inShaders,
-        qt3ds::foundation::NVConstDataRef<qt3ds::render::dynamic::SPropertyDefinition> inProperties,
-        qt3ds::foundation::NVConstDataRef<qt3ds::render::dynamic::SCommand *> inCustomMaterialCommands,
+        const QString &inName, const QVector<SMetaDataShader> &inShaders,
+        const QVector<qt3ds::render::dynamic::SPropertyDefinition> &inProperties,
+        const QVector<qt3ds::render::dynamic::SCommand *> &inCustomMaterialCommands,
         bool inHasTransparency, bool inHasRefraction, bool inIsAlwaysDirty,
         unsigned int inShaderKey, unsigned int inLayerCount)
         : SMetaDataDynamicObject(inName, inShaders, inProperties)

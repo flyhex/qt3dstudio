@@ -53,7 +53,7 @@ using namespace qt3dsdm;
 namespace {
 
 bool ImageSlotIsFilled(qt3dsdm::IPropertySystem *inPropertySystem, Qt3DSDMInstanceHandle inInstance,
-                       const TCharStr &inStr)
+                       const QString &inStr)
 {
     Qt3DSDMPropertyHandle theProperty =
         inPropertySystem->GetAggregateInstancePropertyByName(inInstance, inStr);
@@ -84,8 +84,8 @@ CLayerTimelineItemBinding::CLayerTimelineItemBinding(CTimelineTranslationManager
             thePropertySystem->GetAdditionalMetaDataType(inDataHandle, theProperty);
 
         if (theAdditionalMetaDataType == AdditionalMetaDataType::Image) {
-            TCharStr theName(thePropertySystem->GetName(theProperty));
-            TCharStr theFormalName(thePropertySystem->GetFormalName(inDataHandle, theProperty));
+            QString theName(thePropertySystem->GetName(theProperty));
+            QString theFormalName(thePropertySystem->GetFormalName(inDataHandle, theProperty));
             TNameFormalNamePair thePair =
                 std::make_tuple(theName, theFormalName, theProperty);
             m_ImageNameFormalNamePairs.push_back(thePair);
@@ -165,7 +165,7 @@ CLayerTimelineItemBinding::GetImage(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHan
 
 ITimelineItemBinding *
 CLayerTimelineItemBinding::GetOrCreateImageBinding(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle,
-                                                   const wchar_t *inName)
+                                                   const QString &inName)
 {
     qt3dsdm::Qt3DSDMInstanceHandle theImageInstance = GetImage(inPropertyHandle);
     if (!theImageInstance.Valid())
@@ -202,7 +202,8 @@ ITimelineItemBinding *CLayerTimelineItemBinding::GetOrCreateBinding(Qt3DSDMInsta
             qt3dsdm::SLong4 theGuid;
             {
                 Qt3DSDMPropertyHandle theTypeProperty =
-                    thePropertySystem->GetAggregateInstancePropertyByName(instance, L"id");
+                    thePropertySystem->GetAggregateInstancePropertyByName(
+                            instance, QStringLiteral("id"));
                 SValue theIdValue;
                 thePropertySystem->GetInstancePropertyValue(instance, theTypeProperty, theIdValue);
                 theGuid = qt3dsdm::get<qt3dsdm::SLong4>(theIdValue);
@@ -246,7 +247,7 @@ ITimelineItemBinding *CLayerTimelineItemBinding::GetOrCreateBinding(Qt3DSDMInsta
                     m_DataHandle, std::get<0>(m_ImageNameFormalNamePairs[theSlotCursor]));
             return GetOrCreateImageBinding(
                 theImageProperty,
-                std::get<1>(m_ImageNameFormalNamePairs[theSlotCursor]).wide_str());
+                std::get<1>(m_ImageNameFormalNamePairs[theSlotCursor]));
         } else
             return m_TransMgr->GetOrCreate(instance);
     }

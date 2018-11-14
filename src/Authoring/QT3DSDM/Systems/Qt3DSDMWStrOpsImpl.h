@@ -611,6 +611,30 @@ struct WCharTReader
         else
             outBuffer = NVConstDataRef<TDataType>();
     }
+    template <typename TDataType>
+    void ReadBuffer(QVector<TDataType> &outBuffer)
+    {
+        m_Buffer.clear();
+        m_StartPtr = FindNextNonWhitespace(m_StartPtr);
+        while (m_StartPtr && *m_StartPtr) {
+            char8_t *nextPtr = FindNextWhitespace(m_StartPtr);
+            if (nextPtr && *nextPtr)
+                *nextPtr = 0;
+            else
+                nextPtr = NULL;
+            TDataType temp;
+            WStrOps<TDataType>().StrTo(m_StartPtr, temp);
+            m_Buffer.write(temp);
+            m_StartPtr = nextPtr;
+            if (m_StartPtr)
+                m_StartPtr = FindNextNonWhitespace(m_StartPtr + 1);
+        }
+        QT3DSU32 numItems = m_Buffer.size() / sizeof(TDataType);
+        if (numItems) {
+            outBuffer.resize(numItems);
+            memcpy(outBuffer.data(), m_Buffer.begin(), numItems * sizeof(TDataType));
+        }
+    }
 };
 
 template <>
@@ -679,6 +703,30 @@ struct WStrOps<EAnimationType>
             return 0;
         }
     }
+    QT3DSU32 ToStr(EAnimationType value, NVDataRef<char8_t> buffer)
+    {
+        const char8_t *animType = NULL;
+        switch (value) {
+        case EAnimationTypeLinear:
+            animType = "Linear";
+            break;
+        case EAnimationTypeBezier:
+            animType = "Bezier";
+            break;
+        case EAnimationTypeEaseInOut:
+            animType = "EaseInOut";
+            break;
+        default:
+            QT3DS_ASSERT(false);
+            break;
+        }
+        if (animType != NULL)
+            return snprintf(buffer.begin(), buffer.size(), "%s", animType);
+        else {
+            QT3DS_ASSERT(false);
+            return 0;
+        }
+    }
     bool StrTo(const wchar_t *buffer, EAnimationType &item)
     {
         if (AreEqual(L"Linear", buffer)) {
@@ -702,14 +750,18 @@ template <>
 struct WStrOps<CompleteMetaDataType::Enum>
 {
     QT3DSU32 ToStr(CompleteMetaDataType::Enum item, NVDataRef<wchar_t> buffer);
+    QT3DSU32 ToStr(CompleteMetaDataType::Enum item, NVDataRef<char8_t> buffer);
     bool StrTo(const wchar_t *buffer, CompleteMetaDataType::Enum &item);
+    bool StrTo(const char8_t *buffer, CompleteMetaDataType::Enum &item);
 };
 
 template <>
 struct WStrOps<HandlerArgumentType::Value>
 {
     QT3DSU32 ToStr(HandlerArgumentType::Value item, NVDataRef<wchar_t> buffer);
+    QT3DSU32 ToStr(HandlerArgumentType::Value item, NVDataRef<char8_t> buffer);
     bool StrTo(const wchar_t *buffer, HandlerArgumentType::Value &item);
+    bool StrTo(const char8_t *buffer, HandlerArgumentType::Value &item);
 };
 
 #ifndef __clang__

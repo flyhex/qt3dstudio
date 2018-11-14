@@ -56,8 +56,8 @@ public:
 
     // Qt3DSDMTimelineItemBinding
     ITimelineTimebar *GetTimebar() override;
-    Q3DStudio::CString GetName() const override;
-    void SetName(const Q3DStudio::CString &inName) override;
+    QString GetName() const override;
+    void SetName(const QString &inName) override;
     EStudioObjectType GetObjectType() const override;
     bool ShowToggleControls() const override;
     bool OpenAssociatedEditor() override;
@@ -69,7 +69,7 @@ public:
     qt3dsdm::Qt3DSDMPropertyHandle GetPropertyHandle() const { return m_PropertyHandle; }
 
 protected:
-    Q3DStudio::CString m_Name;
+    QString m_Name;
     qt3dsdm::Qt3DSDMPropertyHandle m_PropertyHandle;
 };
 

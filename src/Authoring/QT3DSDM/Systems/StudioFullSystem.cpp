@@ -623,7 +623,7 @@ bool CStudioFullSystem::GetCanonicalInstancePropertyValue(Qt3DSDMInstanceHandle 
 }
 
 Qt3DSDMInstanceHandle CStudioFullSystem::FindInstanceByName(Qt3DSDMPropertyHandle inNameProperty,
-                                                           const TCharStr &inName) const
+                                                            const QString &inName) const
 {
     return m_CoreSystem->FindInstanceByName(inNameProperty, inName);
 }

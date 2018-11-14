@@ -181,13 +181,13 @@ void RowTreeContextMenu::addSubPresentation(QAction *action)
     CDoc &doc(*g_StudioApp.GetCore()->GetDoc());
     qt3dsdm::Qt3DSDMInstanceHandle instance =
             static_cast<Qt3DSDMTimelineItemBinding *>(m_TimelineItemBinding)->GetInstance();
-    Q3DStudio::CString presentationId;
+    QString presentationId;
     if (action->text() != tr("[None]"))
-        presentationId = Q3DStudio::CString::fromQString(action->text());
+        presentationId = action->text();
 
     if (m_RowTree->rowType() == OBJTYPE_LAYER) {
         qt3dsdm::Qt3DSDMPropertyHandle propHandle = doc.GetPropertySystem()
-                ->GetAggregateInstancePropertyByName(instance, L"sourcepath");
+                ->GetAggregateInstancePropertyByName(instance, QStringLiteral("sourcepath"));
         Q3DStudio::SCOPED_DOCUMENT_EDITOR(doc, tr("Set layer sub-presentation"))
                 ->SetInstancePropertyValueAsRenderable(instance, propHandle, presentationId);
     } else if (m_RowTree->rowType() == OBJTYPE_MATERIAL) {
@@ -222,7 +222,7 @@ void RowTreeContextMenu::addSubPresentation(QAction *action)
         }
     } else if (m_RowTree->rowType() == OBJTYPE_IMAGE) {
         qt3dsdm::Qt3DSDMPropertyHandle propHandle = doc.GetPropertySystem()
-                ->GetAggregateInstancePropertyByName(instance, L"subpresentation");
+                ->GetAggregateInstancePropertyByName(instance, QStringLiteral("subpresentation"));
         Q3DStudio::SCOPED_DOCUMENT_EDITOR(doc, tr("Set image sub-presentation"))
                 ->SetInstancePropertyValueAsRenderable(instance, propHandle, presentationId);
     }
@@ -319,7 +319,7 @@ void RowTreeContextMenu::makeComponent()
 void RowTreeContextMenu::copyObjectPath()
 {
     CStudioClipboard::CopyTextToClipboard(
-                m_TimelineItemBinding->GetObjectPath().toQString());
+                m_TimelineItemBinding->GetObjectPath());
 }
 
 bool RowTreeContextMenu::canCopyObject() const

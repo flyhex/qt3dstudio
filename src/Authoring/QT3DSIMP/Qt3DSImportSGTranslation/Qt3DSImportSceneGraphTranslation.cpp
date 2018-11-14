@@ -82,8 +82,8 @@ struct SGKeyframe
 struct SGAnimationApplier
 {
     virtual ~SGAnimationApplier() {}
-    virtual void Apply(Import &inImport, const wchar_t *inInstanceId, QT3DSU32 subPropIndex,
-                       EAnimationType inAnimType, NVConstDataRef<float> inData) = 0;
+    virtual void Apply(Import &inImport, const QString &inInstanceId, QT3DSU32 subPropIndex,
+                       EAnimationType inAnimType, const QVector<float> &inData) = 0;
 };
 
 template <typename TDataType>
@@ -94,8 +94,8 @@ struct SSpecificSGAnimationApplier : public SGAnimationApplier
         : m_Property(inProp)
     {
     }
-    void Apply(Import &inImport, const wchar_t *inInstanceId, QT3DSU32 subPropIndex,
-                       EAnimationType inAnimType, NVConstDataRef<float> inData) override
+    void Apply(Import &inImport, const QString &inInstanceId, QT3DSU32 subPropIndex,
+               EAnimationType inAnimType, const QVector<float> &inData) override
     {
         inImport.AddAnimation(inInstanceId, m_Property, subPropIndex, inAnimType, inData);
     }
@@ -103,8 +103,8 @@ struct SSpecificSGAnimationApplier : public SGAnimationApplier
 
 struct SGAnimation
 {
-    std::function<void(Import &, QT3DSU32, ImportArray<SGKeyframe> &)> m_AnimationApplier;
-    ImportArray<SGKeyframe> m_Keyframes;
+    std::function<void(Import &, QT3DSU32, QVector<SGKeyframe> &)> m_AnimationApplier;
+    QVector<SGKeyframe> m_Keyframes;
     QT3DSU32 m_SubPropIndex;
 
     std::shared_ptr<SGAnimationApplier> m_Applier;
@@ -365,11 +365,11 @@ class SGTrans : public ISceneGraphTranslation, public SImportComposerTypes
 {
     // uses relationship, not owns.
     Import &m_Import;
-    ImportArray<TIMPHandle> m_InstanceStack;
-    ImportHashMap<TIMPHandle, MeshBuilder *> m_Helpers;
-    ImportHashSet<TIMPHandle> m_DuplicateMaterials;
-    ImportArray<SGAnimation> m_Animations;
-    ImportHashSet<TIMPHandle> m_Invalids;
+    QVector<TIMPHandle> m_InstanceStack;
+    QHash<TIMPHandle, MeshBuilder *> m_Helpers;
+    QSet<TIMPHandle> m_DuplicateMaterials;
+    QVector<SGAnimation> m_Animations;
+    QSet<TIMPHandle> m_Invalids;
     ISGTranslationLog &m_Log;
     MemoryBuffer<RawAllocator> m_TempBuffer;
     EAuthoringToolType m_AuthoringToolType;
@@ -391,10 +391,8 @@ public:
     }
     virtual ~SGTrans()
     {
-        for (ImportHashMap<TIMPHandle, MeshBuilder *>::iterator iter = m_Helpers.begin(),
-                                                                end = m_Helpers.end();
-             iter != end; ++iter)
-            iter->second->Release();
+        for (auto helper : qAsConst(m_Helpers))
+            helper->Release();
     }
 
     template <typename TDataType>
@@ -419,30 +417,27 @@ public:
 
     TCharPtr ToImport(const wchar_t *data) { return data; }
 
-    template <typename TNameType>
-    void InternalPushObject(const TNameType *inName, ComposerObjectTypes::Enum inType)
+    void InternalPushObject(const QString &inName, ComposerObjectTypes::Enum inType)
     {
         if (m_InstanceStack.size() == 0) {
             MarkInvalid();
             return;
         }
-        TCharPtr name(ToImport(inName));
+        QString name(inName);
 
-        if (name == NULL || *name == 0)
+        if (name.isEmpty())
             name = ComposerObjectTypes::Convert(inType);
 
-        Q3DStudio::CFilePath objectName = Q3DStudio::CFilePath(name);
-        Q3DStudio::CString normName = objectName.toCString();
-        name = normName;
+        name = QFileInfo(name).filePath();
 
-        TCharPtr nameStem = name;
+        QString nameStem = name;
         if (m_Import.FindInstanceById(name).hasValue()) {
-            wchar_t nameBuf[1024];
+            QString tempName;
             int idx = 1;
             do {
-                swprintf(nameBuf, 1024, L"%ls_%04d", nameStem, idx);
+                tempName = QStringLiteral("%1_%2").arg(nameStem).arg(idx, 4, 10, QLatin1Char('0'));
                 ++idx;
-                name = nameBuf;
+                name = tempName;
             } while (m_Import.FindAnyInstanceById(name)
                          .hasValue()); // don't use any instance which was already used valid or not
         }
@@ -510,16 +505,17 @@ public:
     {
         TIMPHandle model = PopObject();
         if (model) {
-            TCharPtr modelId = m_Import.GetInstanceByHandle(model)->m_Id;
-            ImportHashMap<TIMPHandle, MeshBuilder *>::const_iterator entry = m_Helpers.find(model);
+            QString modelId = m_Import.GetInstanceByHandle(model)->m_Id;
+            QHash<TIMPHandle, MeshBuilder *>::const_iterator entry = m_Helpers.find(model);
             if (entry != m_Helpers.end()) {
-                entry->second->ConnectSubMeshes();
-                entry->second->OptimizeMesh();
-                Mesh &mesh = entry->second->GetMesh();
-                CharPtrOrError meshData = m_Import.AddMesh(mesh, modelId);
-                if (meshData.m_Value && *meshData.m_Value)
+                (*entry)->ConnectSubMeshes();
+                (*entry)->OptimizeMesh();
+                Mesh &mesh = (*entry)->GetMesh();
+                QStringOrError meshData = m_Import.AddMesh(mesh, modelId);
+                if (!meshData.m_Value.isEmpty()) {
                     m_Import.SetInstancePropertyValue(model, m_Asset.m_SourcePath,
                                                       meshData.m_Value);
+                }
                 if (meshData.m_Error)
                     m_Log.OnWarning(ESceneGraphWarningCode_LockedDestFile, meshData.m_Value);
             }
@@ -530,7 +526,7 @@ public:
         // mark as not duplicated material
         m_isDuplicatedMaterial = false;
         // find if there exists already an instance of this material
-        TCharPtr name(ToImport(inName));
+        QString name(QString::fromLatin1(inName));
         Option<InstanceDesc> inst = m_Import.FindInstanceById(name);
 
         if (inst.hasValue()) {
@@ -577,59 +573,56 @@ public:
     }
     void PushTexture(const char * /*inName*/, const char *inSourcePath, long inMapType) override
     {
-        TCharPtr source = m_Import.RegisterStr(ToImport(inSourcePath));
+        QString source = QString::fromLatin1(inSourcePath);
         // Ignore paths such as:
         //  /d:/something
         if (source[2] == ':') {
             if (source[0] == '\\' || source[0] == '/')
-                ++source;
+                source = source.right(source.length() - 1);
         }
-        CharPtrOrError result = m_Import.AddImage(source);
-        TCharPtr dest = result.m_Value;
-        TCharPtr imgPath = NULL;
-        wchar_t pathBuf[1024];
+        QStringOrError result = m_Import.AddImage(source);
+        QString dest = result.m_Value;
+        QString imgPath;
         if (result.m_Error) {
+            QString errorStr;
             ESceneGraphWarningCode code = ESceneGraphWarningCode_Generic;
-            const wchar_t *errorStr = source;
             if (result.m_ErrorData.m_Error == ImportErrorCodes::SourceFileNotReadable)
                 code = ESceneGraphWarningCode_MissingSourceFile;
             else if (result.m_ErrorData.m_Error == ImportErrorCodes::ResourceNotWriteable) {
                 code = ESceneGraphWarningCode_LockedDestFile;
-                errorStr = m_Import.RegisterStr(dest);
+                errorStr = dest;
             }
             m_Log.OnWarning(code, errorStr);
         }
-        if (result.m_Value != NULL && *result.m_Value)
+        if (!result.m_Value.isNull())
             imgPath = result.m_Value;
-        else {
-            swprintf(pathBuf, 1024, L"%hs/missing.png",
-                     m_Import.GetImageDir().toStdString().c_str());
-            imgPath = pathBuf;
-        }
+        else
+            imgPath = QStringLiteral("%1/missing.png").arg(m_Import.GetImageDir());
+
         // We want to name the texture after the material id concatenated with the map type.
         // This ensures that we carry texture settings across for materials because the material
         // id doesn't change.
         TIMPHandle theMaterial = m_InstanceStack.back();
-        std::wstring theId(m_Import.GetInstanceByHandle(theMaterial)->m_Id);
-        theId.append(L"_");
+        QString theId(m_Import.GetInstanceByHandle(theMaterial)->m_Id);
+        theId.append(QLatin1Char('_'));
         switch (inMapType) {
         case ETextureMapTypeDiffuse:
-            theId.append(L"diffusemap");
+            theId.append(QStringLiteral("diffusemap"));
             break;
         case ETextureMapTypeOpacity:
-            theId.append(L"opacitymap");
+            theId.append(QStringLiteral("opacitymap"));
             break;
         case ETextureMapTypeSpecular:
-            theId.append(L"specularmap");
+            theId.append(QStringLiteral("specularmap"));
             break;
         case ETextureMapTypeEmissive:
-            theId.append(L"emissivemap");
+            theId.append(QStringLiteral("emissivemap"));
             break;
         case ETextureMapTypeRoughness:
-            theId.append(L"roughnessmap");
+            theId.append(QStringLiteral("roughnessmap"));
             break;
         }
-        InternalPushObject(theId.c_str(), ComposerObjectTypes::Image);
+        InternalPushObject(theId, ComposerObjectTypes::Image);
         TIMPHandle topObj = m_InstanceStack.back();
         m_Import.SetInstancePropertyValue(topObj, m_Image.m_SourcePath, imgPath);
     }
@@ -734,7 +727,7 @@ public:
         }
         SetInstancePropertyValue(theMaterial, m_Material.m_Opacity, theOpacity * 100.0f);
 
-        SetInstancePropertyValue(theMaterial, m_Material.m_BlendMode, L"Normal");
+        SetInstancePropertyValue(theMaterial, m_Material.m_BlendMode, QStringLiteral("Normal"));
     }
     void SetTexture(long inMapType, const STextureParameters &inTextureParameters) override
     {
@@ -836,32 +829,32 @@ public:
             }
 
             // tiling mode U
-            std::wstring theHorizontalTilingMode = L"Tiled"; // tiled
+            QString theHorizontalTilingMode = QStringLiteral("Tiled");
             if (inTextureParameters.m_wrapU.m_Flag) {
                 if (inTextureParameters.m_wrapU.m_Value == 0)
-                    theHorizontalTilingMode = L"No Tiling"; // not tiled
+                    theHorizontalTilingMode = QStringLiteral("No Tiling");
             }
             if (inTextureParameters.m_mirrorU.m_Flag) {
                 if (inTextureParameters.m_mirrorU.m_Value == 1)
-                    theHorizontalTilingMode = L"Mirrored"; // mirrored
+                    theHorizontalTilingMode = QStringLiteral("Mirrored");
             }
 
             SetInstancePropertyValue(theImageInstance, m_Image.m_TilingU,
-                                     theHorizontalTilingMode.c_str());
+                                     theHorizontalTilingMode);
 
             // tiling mode V
-            std::wstring theVerticalTilingMode = L"Tiled"; // tiled
+            QString theVerticalTilingMode = QStringLiteral("Tiled");
             if (inTextureParameters.m_wrapV.m_Flag) {
                 if (inTextureParameters.m_wrapV.m_Value == 0)
-                    theVerticalTilingMode = L"No Tiling"; // not tiled
+                    theVerticalTilingMode = QStringLiteral("No Tiling");
             }
             if (inTextureParameters.m_mirrorV.m_Flag) {
                 if (inTextureParameters.m_mirrorV.m_Value == 1)
-                    theVerticalTilingMode = L"Mirrored"; // mirrored
+                    theVerticalTilingMode = QStringLiteral("Mirrored");
             }
 
             SetInstancePropertyValue(theImageInstance, m_Image.m_TilingV,
-                                     theVerticalTilingMode.c_str());
+                                     theVerticalTilingMode);
         }
     }
 
@@ -937,18 +930,18 @@ public:
         SetInstancePropertyValue(theNode, m_Node.m_Position, ConvertToSValue(theTranslation));
         SetInstancePropertyValue(theNode, m_Node.m_Scale, ConvertToSValue(theScale));
 
-        SetInstancePropertyValue(theNode, m_Node.m_Orientation, L"Right Handed");
-        SetInstancePropertyValue(theNode, m_Node.m_RotationOrder, L"XYZr");
+        SetInstancePropertyValue(theNode, m_Node.m_Orientation, QStringLiteral("Right Handed"));
+        SetInstancePropertyValue(theNode, m_Node.m_RotationOrder, QStringLiteral("XYZr"));
     }
 
     MeshBuilder *GetOrCreateMeshBuilder()
     {
-        ImportHashMap<TIMPHandle, MeshBuilder *>::iterator entry =
+        QHash<TIMPHandle, MeshBuilder *>::iterator entry =
             m_Helpers.find(m_InstanceStack.back());
         if (entry != m_Helpers.end())
-            return entry->second;
+            return *entry;
         MeshBuilder *newHelper = &MeshBuilder::CreateMeshBuilder();
-        m_Helpers.insert(eastl::make_pair(m_InstanceStack.back(), newHelper));
+        m_Helpers.insert(m_InstanceStack.back(), newHelper);
         return newHelper;
     }
 
@@ -1077,10 +1070,11 @@ public:
         }
         TIMPHandle instance(m_InstanceStack.back());
         InstanceDesc theDesc(m_Import.GetInstanceByHandle(instance));
-        TCharPtr instId = theDesc.m_Id;
+        QString instId = theDesc.m_Id;
+        QVector<float> data(anim.m_Keyframes.size() * 4);
+        memcpy(data.data(), anim.m_Keyframes.data(), data.length() * 4);
         anim.m_Applier->Apply(
-            m_Import, instId, anim.m_SubPropIndex, EAnimationTypeEaseInOut,
-            toConstDataRef((float *)anim.m_Keyframes.begin(), (QT3DSU32)anim.m_Keyframes.size() * 4));
+            m_Import, instId, anim.m_SubPropIndex, EAnimationTypeEaseInOut, data);
     }
 
     void CacheAnimationKey(const char *inBaseProperty, const char *inSubPropertyName,
@@ -1138,14 +1132,14 @@ public:
 
         long idx = GetSubPropertyIndex(theSubPropertyName.c_str());
         theTrack.m_SubPropIndex = idx;
-        Q3DStudio::CString theName(theStudioPropertyName.c_str());
+        QString theName(theStudioPropertyName.c_str());
         ComposerPropertyNames::Enum thePropertyName(ComposerPropertyNames::Convert(theName));
         ImportVisitPropertyType(thePropertyName, theTrack);
     }
 
     void LogWarning(ESceneGraphWarningCode inWarningCode, const char *inAssociatedName) override
     {
-        m_Log.OnWarning(inWarningCode, m_Import.RegisterStr(ToImport(inAssociatedName)));
+        m_Log.OnWarning(inWarningCode, QString::fromLocal8Bit(inAssociatedName));
     }
 };
 }

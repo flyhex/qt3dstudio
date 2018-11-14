@@ -293,11 +293,11 @@ void ProjectFile::writePresentationId(const QString &id, const QString &src)
             while (!iter.IsDone()) {
                 qt3dsdm::Qt3DSDMInstanceHandle child = iter.GetCurrent();
                 if (bridge->GetObjectType(child) & (OBJTYPE_LAYER | OBJTYPE_IMAGE)) {
-                    if (bridge->GetSourcePath(child).toQString() == oldId) {
+                    if (bridge->GetSourcePath(child) == oldId) {
                         propSystem->SetInstancePropertyValue(child, bridge->GetSourcePathProperty(),
                                                              qt3dsdm::SValue(QVariant(theId)));
                     }
-                    if (bridge->getSubpresentation(child).toQString() == oldId) {
+                    if (bridge->getSubpresentation(child) == oldId) {
                         propSystem->SetInstancePropertyValue(child,
                                                              bridge->getSubpresentationProperty(),
                                                              qt3dsdm::SValue(QVariant(theId)));

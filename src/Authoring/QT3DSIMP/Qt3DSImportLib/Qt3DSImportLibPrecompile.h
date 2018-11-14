@@ -43,7 +43,6 @@
 #include <fstream>
 #include "Qt3DSDMDataTypes.h"
 #include "foundation/Qt3DSIntrinsics.h"
-#include "foundation/Qt3DSBasicTemplates.h"
 
 namespace qt3dsimp {
 using namespace qt3ds;

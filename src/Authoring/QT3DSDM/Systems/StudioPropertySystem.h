@@ -78,27 +78,28 @@ public:
     }
 
     DataModelDataType::Value GetDataType(Qt3DSDMPropertyHandle inProperty) const override;
-    TCharStr GetName(Qt3DSDMPropertyHandle inProperty) const override;
-    TCharStr GetFormalName(Qt3DSDMInstanceHandle inInstance,
-                                   Qt3DSDMPropertyHandle inProperty) const override;
+    QString GetName(Qt3DSDMPropertyHandle inProperty) const override;
+    QString GetFormalName(Qt3DSDMInstanceHandle inInstance,
+                          Qt3DSDMPropertyHandle inProperty) const override;
     virtual AdditionalMetaDataType::Value
     GetAdditionalMetaDataType(Qt3DSDMInstanceHandle inInstance,
                               Qt3DSDMPropertyHandle inProperty) const override;
     TMetaDataData GetAdditionalMetaDataData(Qt3DSDMInstanceHandle inInstance,
-                                                    Qt3DSDMPropertyHandle inProperty) const override;
+                                            Qt3DSDMPropertyHandle inProperty) const override;
     Qt3DSDMInstanceHandle GetPropertyOwner(Qt3DSDMPropertyHandle inProperty) const override;
 
     Qt3DSDMPropertyHandle GetAggregateInstancePropertyByName(Qt3DSDMInstanceHandle inInstance,
-                                                                    const TCharStr &inStr) const override;
+                                                             const QString &inStr) const override;
     void GetAggregateInstanceProperties(Qt3DSDMInstanceHandle inInstance,
-                                                TPropertyHandleList &outProperties) const override;
+                                        TPropertyHandleList &outProperties) const override;
     bool HasAggregateInstanceProperty(Qt3DSDMInstanceHandle inInstance,
-                                              Qt3DSDMPropertyHandle inProperty) const override;
+                                      Qt3DSDMPropertyHandle inProperty) const override;
 
     bool GetInstancePropertyValue(Qt3DSDMInstanceHandle inInstance,
-                                          Qt3DSDMPropertyHandle inProperty, SValue &outValue) const override;
+                                  Qt3DSDMPropertyHandle inProperty,
+                                  SValue &outValue) const override;
     void SetInstancePropertyValue(Qt3DSDMInstanceHandle inInstance,
-                                          Qt3DSDMPropertyHandle inProperty, const SValue &inValue) override;
+                                  Qt3DSDMPropertyHandle inProperty, const SValue &inValue) override;
 
     Qt3DSDMInstanceHandle CreateInstance() override;
     void GetInstances(TInstanceHandleList &outInstances) const override;
@@ -106,21 +107,23 @@ public:
 
     void DeriveInstance(Qt3DSDMInstanceHandle inInstance, Qt3DSDMInstanceHandle inParent) override;
     bool IsInstanceOrDerivedFrom(Qt3DSDMInstanceHandle inInstance,
-                                         Qt3DSDMInstanceHandle inParent) const override;
+                                 Qt3DSDMInstanceHandle inParent) const override;
 
-    Qt3DSDMPropertyHandle AddProperty(Qt3DSDMInstanceHandle inInstance, TCharPtr inName,
-                                             DataModelDataType::Value inPropType) override;
+    Qt3DSDMPropertyHandle AddProperty(Qt3DSDMInstanceHandle inInstance, const QString &inName,
+                                      DataModelDataType::Value inPropType) override;
     bool HandleValid(int inHandle) const override;
 
     // Get the instance property value from the slide that owns the instance or the data core if the
     // slide doesn't have the value
     bool GetCanonicalInstancePropertyValue(Qt3DSDMInstanceHandle inInstance,
-                                           Qt3DSDMPropertyHandle inProperty, SValue &outValue) const;
+                                           Qt3DSDMPropertyHandle inProperty,
+                                           SValue &outValue) const;
 
 private:
     static bool DerivedGuidMatches(qt3dsdm::IDataCore &inDataCore,
                                    qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                                   qt3dsdm::Qt3DSDMPropertyHandle inProperty, qt3dsdm::SLong4 inGuid);
+                                   qt3dsdm::Qt3DSDMPropertyHandle inProperty,
+                                   qt3dsdm::SLong4 inGuid);
     CStudioPropertySystem(const CStudioPropertySystem&) = delete;
     CStudioPropertySystem& operator=(const CStudioPropertySystem&) = delete;
 };

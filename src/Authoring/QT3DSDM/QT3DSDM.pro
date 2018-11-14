@@ -13,6 +13,7 @@ INCLUDEPATH += \
     \
     Systems \
     Systems/Cores \
+    ../Client/Code/Core/Runtime2Integration \
     ../../Runtime/Source/System/Include \
     ../../Runtime/Source/Qt3DSFoundation/Include \
     ../../Runtime/Source/Qt3DSRuntimeRender/Include \

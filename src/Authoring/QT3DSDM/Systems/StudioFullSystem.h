@@ -145,7 +145,7 @@ public:
     bool GetCanonicalInstancePropertyValue(Qt3DSDMInstanceHandle inInstance,
                                            Qt3DSDMPropertyHandle inProperty, SValue &outValue) const;
     Qt3DSDMInstanceHandle FindInstanceByName(Qt3DSDMPropertyHandle inNameProperty,
-                                            const TCharStr &inName) const;
+                                             const QString &inName) const;
 
     void SetConsumer(TTransactionConsumerPtr inConsumer) override;
     TTransactionConsumerPtr GetConsumer() { return m_Consumer; }

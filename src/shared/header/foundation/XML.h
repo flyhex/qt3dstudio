@@ -427,7 +427,7 @@ namespace foundation {
         virtual bool Value(TXMLCharPtr &outValue) = 0;
 
         // Get the element this reader was created with
-        virtual SDOMElement *GetTopElement() = 0;
+        virtual SDOMElement *GetTopElement() const  = 0;
 
         bool Att(TXMLCharPtr name, TXMLStr &outValue)
         {
@@ -569,8 +569,8 @@ namespace foundation {
         // Get the number of tabs required to line up the next line
         // with the opening of the previous line
         virtual QT3DSU32 GetTabs() = 0;
-        virtual SDOMElement *GetTopElement() = 0;
-        virtual NVScopedRefCounted<IDOMFactory> GetFactory() = 0;
+        virtual SDOMElement *GetTopElement() const = 0;
+        virtual NVScopedRefCounted<IDOMFactory> GetFactory() const = 0;
         // Move this item before this sibling.  Function does not rearrange the
         // tree in any major way and will not work if inItem and inSibling aren't
         // siblings.

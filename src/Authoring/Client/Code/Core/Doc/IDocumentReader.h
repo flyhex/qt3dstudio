@@ -57,7 +57,7 @@ using std::shared_ptr;
 
 typedef std::vector<std::pair<qt3dsdm::Qt3DSDMSlideHandle, qt3dsdm::Qt3DSDMInstanceHandle>>
     TSlideInstanceList;
-typedef std::vector<std::pair<qt3dsdm::Qt3DSDMSlideHandle, Q3DStudio::CString>> TSlideStringList;
+typedef std::vector<std::pair<qt3dsdm::Qt3DSDMSlideHandle, QString>> TSlideStringList;
 typedef QHash<QString, TSlideInstanceList> TCharPtrToSlideInstanceMap;
 using qt3ds::foundation::Option;
 using qt3dsdm::Qt3DSDMInstanceHandle;
@@ -93,7 +93,7 @@ public:
     virtual bool IsInstance(TInstanceHandle inInstance) const = 0;
     virtual bool IsCurrentlyActive(TInstanceHandle inInstance) const = 0;
     // Find a property on an instance by name.  Searches derivation parents as well
-    virtual TPropertyHandle FindProperty(TInstanceHandle instance, const wchar_t *inName) const = 0;
+    virtual TPropertyHandle FindProperty(TInstanceHandle instance, const QString &inName) const = 0;
     // Get the instance property value by going through the current slide
     // This will convert image properties to source paths.  If this is not desired, then use
     virtual Option<SValue> GetInstancePropertyValue(TInstanceHandle instance,
@@ -111,11 +111,11 @@ public:
                                                             TInstanceHandle instance,
                                                             TPropertyHandle inProperty) const = 0;
 
-    virtual Q3DStudio::CString GetObjectTypeName(TInstanceHandle instance) const = 0;
+    virtual QString GetObjectTypeName(TInstanceHandle instance) const = 0;
 
-    virtual CString GetName(Qt3DSDMInstanceHandle inInstance) const = 0;
+    virtual QString GetName(Qt3DSDMInstanceHandle inInstance) const = 0;
     virtual TInstanceHandle GetFirstBaseClass(Qt3DSDMInstanceHandle inInstance) const = 0;
-    virtual CString GetSourcePath(Qt3DSDMInstanceHandle inInstance) const = 0;
+    virtual QString GetSourcePath(Qt3DSDMInstanceHandle inInstance) const = 0;
 
     template <typename TDataType>
     inline Option<TDataType> GetTypedInstancePropertyValue(TInstanceHandle instance,
@@ -171,8 +171,8 @@ public:
                                              TPropertyHandle inProperty) const = 0;
     // Return true if this instance is an imported instance.
     virtual bool IsImported(TInstanceHandle inInstance) const = 0;
-    virtual CString GetImportId(TInstanceHandle inInstance) const = 0;
-    virtual CString GetFileId(TInstanceHandle inInstance) const = 0;
+    virtual QString GetImportId(TInstanceHandle inInstance) const = 0;
+    virtual QString GetFileId(TInstanceHandle inInstance) const = 0;
 
     // Return (start,end), inclusive, that represent this instance's lifetime.
     virtual std::pair<long, long> GetTimeRange(TInstanceHandle instance) const = 0;
@@ -197,9 +197,9 @@ public:
     virtual bool IsPathInternalizeable(TInstanceHandle path) const = 0;
 
     virtual bool AnimationExists(TSlideHandle inSlide, TInstanceHandle instance,
-                                 const wchar_t *propName, long subIndex) = 0;
+                                 const QString &propName, long subIndex) = 0;
     virtual bool IsAnimationArtistEdited(TSlideHandle inSlide, TInstanceHandle instance,
-                                         const wchar_t *propName, long subIndex) = 0;
+                                         const QString &propName, long subIndex) = 0;
 
     virtual qt3dsdm::TGuideHandleList GetGuides() const = 0;
     virtual qt3dsdm::SGuideInfo GetGuideInfo(qt3dsdm::Qt3DSDMGuideHandle inGuide) const = 0;
@@ -227,10 +227,10 @@ public:
 
     virtual CFilePath CopyAction(Qt3DSDMActionHandle inAction, Qt3DSDMSlideHandle inSlide) = 0;
 
-    virtual void ParseSourcePathsOutOfEffectFile(Q3DStudio::CString inFile,
-                                                 std::vector<Q3DStudio::CString> &outFilePaths) = 0;
+    virtual void ParseSourcePathsOutOfEffectFile(const QString &inFile,
+                                                 std::vector<QString> &outFilePaths) = 0;
 
-    virtual Q3DStudio::CString GetCustomMaterialName(const Q3DStudio::CString &inFullPathToFile) const = 0;
+    virtual QString GetCustomMaterialName(const QString &inFullPathToFile) const = 0;
     virtual void getMaterialInfo(const QString &inFullPathToFile,
                                  QString &outName, QMap<QString, QString> &outValues,
                                  QMap<QString, QMap<QString, QString>> &outTextureValues) = 0;

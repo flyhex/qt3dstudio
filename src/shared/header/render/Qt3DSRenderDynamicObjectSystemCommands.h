@@ -66,13 +66,13 @@ namespace dynamic {
 
     struct SPropertyDefinition
     {
-        CRegisteredString m_Name;
+        QString m_Name;
 
         //*not* relative to the presentation directory
-        CRegisteredString m_ImagePath;
+        QString m_ImagePath;
         // The datatypes map directly to the obvious types *except*
         // for NVRenderTexture2DPtr.  This type will be interpreted as a
-        // CRegisteredString and will be used to lookup the texture
+        // QString and will be used to lookup the texture
         // from the buffer manager.
         NVRenderShaderDataTypes::Enum m_DataType;
         // All offsets are relative to the beginning of the SEffect
@@ -80,7 +80,7 @@ namespace dynamic {
         QT3DSU32 m_Offset;
         // Sizeof this datatype.
         QT3DSU32 m_ByteSize;
-        NVConstDataRef<CRegisteredString> m_EnumValueNames;
+        QStringList m_EnumValueNames;
 
         NVRenderTextureTypeValue::Enum
             m_TexUsageType; ///< texture usage type like diffuse, specular, ...
@@ -102,7 +102,7 @@ namespace dynamic {
             , m_IsEnumProperty(false)
         {
         }
-        SPropertyDefinition(CRegisteredString inName, NVRenderShaderDataTypes::Enum inType,
+        SPropertyDefinition(const QString &inName, NVRenderShaderDataTypes::Enum inType,
                             QT3DSU32 inOffset, QT3DSU32 inByteSize)
             : m_Name(inName)
             , m_DataType(inType)
@@ -240,7 +240,7 @@ namespace dynamic {
 
         struct SAllocateBuffer : public SCommand
         {
-            CRegisteredString m_Name;
+            QString m_Name;
             NVRenderTextureFormats::Enum m_Format;
             NVRenderTextureMagnifyingOp::Enum m_FilterOp;
             NVRenderTextureCoordOp::Enum m_TexCoordOp;
@@ -254,7 +254,7 @@ namespace dynamic {
                 , m_SizeMultiplier(1.0f)
             {
             }
-            SAllocateBuffer(CRegisteredString inName, NVRenderTextureFormats::Enum inFormat,
+            SAllocateBuffer(const QString &inName, NVRenderTextureFormats::Enum inFormat,
                             NVRenderTextureMagnifyingOp::Enum inFilterOp,
                             NVRenderTextureCoordOp::Enum inCoordOp, QT3DSF32 inMultiplier,
                             SAllocateBufferFlags inFlags)
@@ -289,7 +289,7 @@ namespace dynamic {
             {
                 m_Type = CommandTypes::AllocateImage;
             }
-            SAllocateImage(CRegisteredString inName, NVRenderTextureFormats::Enum inFormat,
+            SAllocateImage(const QString &inName, NVRenderTextureFormats::Enum inFormat,
                            NVRenderTextureMagnifyingOp::Enum inFilterOp,
                            NVRenderTextureCoordOp::Enum inCoordOp, QT3DSF32 inMultiplier,
                            SAllocateBufferFlags inFlags, NVRenderImageAccessType::Enum inAccess)
@@ -311,9 +311,9 @@ namespace dynamic {
 
         struct SAllocateDataBuffer : public SCommand
         {
-            CRegisteredString m_Name;
+            QString m_Name;
             NVRenderBufferBindValues::Enum m_DataBufferType;
-            CRegisteredString m_WrapName;
+            QString m_WrapName;
             NVRenderBufferBindValues::Enum m_DataBufferWrapType;
             QT3DSF32 m_Size;
             SAllocateBufferFlags m_BufferFlags;
@@ -323,9 +323,9 @@ namespace dynamic {
             {
             }
 
-            SAllocateDataBuffer(CRegisteredString inName,
+            SAllocateDataBuffer(const QString &inName,
                                 NVRenderBufferBindValues::Enum inBufferType,
-                                CRegisteredString inWrapName,
+                                const QString &inWrapName,
                                 NVRenderBufferBindValues::Enum inBufferWrapType, QT3DSF32 inSize,
                                 SAllocateBufferFlags inFlags)
                 : SCommand(CommandTypes::AllocateDataBuffer)
@@ -368,9 +368,9 @@ namespace dynamic {
 
         struct SBindBuffer : public SCommand
         {
-            CRegisteredString m_BufferName;
+            QString m_BufferName;
             bool m_NeedsClear;
-            SBindBuffer(CRegisteredString inBufName, bool inNeedsClear)
+            SBindBuffer(const QString &inBufName, bool inNeedsClear)
                 : SCommand(CommandTypes::BindBuffer)
                 , m_BufferName(inBufName)
                 , m_NeedsClear(inNeedsClear)
@@ -386,14 +386,14 @@ namespace dynamic {
 
         struct SBindShader : public SCommand
         {
-            CRegisteredString m_ShaderPath;
+            QString m_ShaderPath;
             // One GLSL file can hold multiple shaders in the case of multipass effects.
             // This makes it significantly easier for authors to reason about the shader
             // but it means we need to #define a preprocessor token to indicate which
             // effect we intend to compile at this point.
-            CRegisteredString m_ShaderDefine;
-            SBindShader(CRegisteredString inShaderPath,
-                        CRegisteredString inShaderDefine = CRegisteredString())
+            QString m_ShaderDefine;
+            SBindShader(const QString &inShaderPath,
+                        const QString &inShaderDefine = {})
                 : SCommand(CommandTypes::BindShader)
                 , m_ShaderPath(inShaderPath)
                 , m_ShaderDefine(inShaderDefine)
@@ -418,12 +418,12 @@ namespace dynamic {
         struct SApplyInstanceValue : public SCommand
         {
             // Name of value to apply in shader
-            CRegisteredString m_PropertyName;
+            QString m_PropertyName;
             // type of value
             NVRenderShaderDataTypes::Enum m_ValueType;
             // offset in the effect data section of value.
             QT3DSU32 m_ValueOffset;
-            SApplyInstanceValue(CRegisteredString inName, NVRenderShaderDataTypes::Enum inValueType,
+            SApplyInstanceValue(const QString &inName, NVRenderShaderDataTypes::Enum inValueType,
                                 QT3DSU32 inValueOffset)
                 : SCommand(CommandTypes::ApplyInstanceValue)
                 , m_PropertyName(inName)
@@ -449,10 +449,10 @@ namespace dynamic {
 
         struct SApplyValue : public SCommand
         {
-            CRegisteredString m_PropertyName;
+            QString m_PropertyName;
             NVRenderShaderDataTypes::Enum m_ValueType;
-            NVDataRef<QT3DSU8> m_Value;
-            SApplyValue(CRegisteredString inName, NVRenderShaderDataTypes::Enum inValueType)
+            QVariant m_Value;
+            SApplyValue(const QString &inName, NVRenderShaderDataTypes::Enum inValueType)
                 : SCommand(CommandTypes::ApplyValue)
                 , m_PropertyName(inName)
                 , m_ValueType(inValueType)
@@ -479,12 +479,12 @@ namespace dynamic {
         {
             // If no buffer name is given then the special buffer [source]
             // is assumed.
-            CRegisteredString m_BufferName;
+            QString m_BufferName;
             // If no param name is given, the buffer is bound to the
             // input texture parameter (texture0).
-            CRegisteredString m_ParamName;
+            QString m_ParamName;
 
-            SApplyBufferValue(CRegisteredString bufferName, CRegisteredString shaderParam)
+            SApplyBufferValue(const QString &bufferName, const QString &shaderParam)
                 : SCommand(CommandTypes::ApplyBufferValue)
                 , m_BufferName(bufferName)
                 , m_ParamName(shaderParam)
@@ -501,12 +501,12 @@ namespace dynamic {
         // bind a buffer to a given shader parameter.
         struct SApplyImageValue : public SCommand
         {
-            CRegisteredString m_ImageName; ///< name which the image was allocated
-            CRegisteredString m_ParamName; ///< must match the name in the shader
+            QString m_ImageName; ///< name which the image was allocated
+            QString m_ParamName; ///< must match the name in the shader
             bool m_BindAsTexture; ///< bind image as texture
             bool m_NeedSync; ///< if true we add a memory barrier before usage
 
-            SApplyImageValue(CRegisteredString bufferName, CRegisteredString shaderParam,
+            SApplyImageValue(const QString &bufferName, const QString &shaderParam,
                              bool inBindAsTexture, bool inNeedSync)
                 : SCommand(CommandTypes::ApplyImageValue)
                 , m_ImageName(bufferName)
@@ -528,10 +528,10 @@ namespace dynamic {
         // bind a buffer to a given shader parameter.
         struct SApplyDataBufferValue : public SCommand
         {
-            CRegisteredString m_ParamName; ///< must match the name in the shader
+            QString m_ParamName; ///< must match the name in the shader
             NVRenderBufferBindValues::Enum m_BindAs; ///< to which target we bind this buffer
 
-            SApplyDataBufferValue(CRegisteredString inShaderParam,
+            SApplyDataBufferValue(const QString &inShaderParam,
                                   NVRenderBufferBindValues::Enum inBufferType)
                 : SCommand(CommandTypes::ApplyDataBufferValue)
                 , m_ParamName(inShaderParam)
@@ -550,8 +550,8 @@ namespace dynamic {
         {
             // If no param name is given, the buffer is bound to the
             // input texture parameter (texture0).
-            CRegisteredString m_ParamName;
-            SApplyDepthValue(CRegisteredString param)
+            QString m_ParamName;
+            SApplyDepthValue(const QString &param)
                 : SCommand(CommandTypes::ApplyDepthValue)
                 , m_ParamName(param)
             {
@@ -624,13 +624,13 @@ namespace dynamic {
         {
             // If no buffer name is given then the special buffer [source]
             // is assumed. Which is the default render target
-            CRegisteredString m_SourceBufferName;
+            QString m_SourceBufferName;
             // If no buffer name is given then the special buffer [dest]
             // is assumed. Which is the default render target
-            CRegisteredString m_DestBufferName;
+            QString m_DestBufferName;
 
-            SApplyBlitFramebuffer(CRegisteredString inSourceBufferName,
-                                  CRegisteredString inDestBufferName)
+            SApplyBlitFramebuffer(const QString &inSourceBufferName,
+                                  const QString &inDestBufferName)
                 : SCommand(CommandTypes::ApplyBlitFramebuffer)
                 , m_SourceBufferName(inSourceBufferName)
                 , m_DestBufferName(inDestBufferName)
@@ -671,7 +671,7 @@ namespace dynamic {
 
         struct SDepthStencil : public SCommand
         {
-            CRegisteredString m_BufferName;
+            QString m_BufferName;
             SDepthStencilFlags m_Flags;
             qt3ds::render::NVRenderStencilOp::Enum m_StencilFailOperation;
             qt3ds::render::NVRenderStencilOp::Enum m_DepthPassOperation;
@@ -691,7 +691,7 @@ namespace dynamic {
             {
             }
 
-            SDepthStencil(CRegisteredString bufName, SDepthStencilFlags flags,
+            SDepthStencil(const QString &bufName, SDepthStencilFlags flags,
                           qt3ds::render::NVRenderStencilOp::Enum inStencilOp,
                           qt3ds::render::NVRenderStencilOp::Enum inDepthPassOp,
                           qt3ds::render::NVRenderStencilOp::Enum inDepthFailOp,

@@ -52,7 +52,7 @@ public:
     Q3DStudio::IDocumentReader &Reader() const;
     // Interface
     EStudioObjectType GetObjectType() override;
-    Q3DStudio::CString GetName() override;
+    QString GetName() override;
     long GetGroupCount() override;
     CInspectorGroup *GetGroup(long) override;
     bool IsValid() const override;

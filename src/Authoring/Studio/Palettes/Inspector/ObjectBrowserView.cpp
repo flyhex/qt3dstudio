@@ -27,7 +27,7 @@
 ****************************************************************************/
 #include "ObjectBrowserView.h"
 
-#include "CColor.h"
+#include <QtGui/qcolor.h>
 #include "Literals.h"
 #include "ObjectListModel.h"
 #include "StudioPreferences.h"

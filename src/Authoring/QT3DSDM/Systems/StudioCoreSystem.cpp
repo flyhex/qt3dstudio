@@ -365,7 +365,7 @@ std::shared_ptr<IActionCore> CStudioCoreSystem::GetTransactionlessActionCore()
 }
 
 inline bool InstanceSpecificNameMatches(Qt3DSDMInstanceHandle inInstance,
-                                        Qt3DSDMPropertyHandle inProperty, const TCharStr &inName,
+                                        Qt3DSDMPropertyHandle inProperty, const QString &inName,
                                         const CSimpleDataCore &inData)
 {
     TPropertyHandleList theProperties;
@@ -373,13 +373,13 @@ inline bool InstanceSpecificNameMatches(Qt3DSDMInstanceHandle inInstance,
     SValue theValue;
     if (exists(theProperties, std::bind(equal_to<int>(), inProperty, std::placeholders::_1))
         && inData.GetSpecificInstancePropertyValue(inInstance, inProperty, theValue)) {
-        return inName == get<TDataStrPtr>(theValue)->GetData();
+        return inName == get<TDataStrPtr>(theValue)->toQString();
     }
     return false;
 }
 
 Qt3DSDMInstanceHandle CStudioCoreSystem::FindInstanceByName(Qt3DSDMPropertyHandle inNameProperty,
-                                                           const TCharStr &inName) const
+                                                            const QString &inName) const
 {
     TInstanceHandleList theInstances;
     m_DataCore->GetInstances(theInstances);

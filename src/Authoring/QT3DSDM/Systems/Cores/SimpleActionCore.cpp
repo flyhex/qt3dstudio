@@ -145,13 +145,13 @@ void CSimpleActionCore::SetTargetObject(Qt3DSDMActionHandle inAction,
     theAction->m_ActionInfo.m_TargetObject = inTargetObject;
 }
 
-void CSimpleActionCore::SetEvent(Qt3DSDMActionHandle inAction, const wstring &inEventHandle)
+void CSimpleActionCore::SetEvent(Qt3DSDMActionHandle inAction, const QString &inEventHandle)
 {
     SAction *theAction = GetActionNF(inAction, m_Objects);
     theAction->m_ActionInfo.m_Event = inEventHandle;
 }
 
-void CSimpleActionCore::SetHandler(Qt3DSDMActionHandle inAction, const wstring &inHandlerHandle)
+void CSimpleActionCore::SetHandler(Qt3DSDMActionHandle inAction, const QString &inHandlerHandle)
 {
     SAction *theAction = GetActionNF(inAction, m_Objects);
     theAction->m_ActionInfo.m_Handler = inHandlerHandle;
@@ -159,7 +159,7 @@ void CSimpleActionCore::SetHandler(Qt3DSDMActionHandle inAction, const wstring &
 
 // Action Argument
 Qt3DSDMHandlerArgHandle CSimpleActionCore::AddHandlerArgument(Qt3DSDMActionHandle inAction,
-                                                             const TCharStr &inName,
+                                                             const QString &inName,
                                                              HandlerArgumentType::Value inArgType,
                                                              DataModelDataType::Value inValueType)
 {
@@ -226,7 +226,8 @@ Qt3DSDMActionHandle CSimpleActionCore::CreateActionWithHandle(int inHandle,
 
 Qt3DSDMHandlerArgHandle
 CSimpleActionCore::AddHandlerArgumentWithHandle(int inHandle, Qt3DSDMActionHandle inAction,
-                                                const TCharStr &inName, HandlerArgumentType::Value inArgType,
+                                                const QString &inName,
+                                                HandlerArgumentType::Value inArgType,
                                                 DataModelDataType::Value inValueType)
 {
     if (HandleValid(inHandle))

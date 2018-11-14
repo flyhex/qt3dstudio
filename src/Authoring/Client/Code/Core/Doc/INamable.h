@@ -42,8 +42,8 @@
 class INamable
 {
 public:
-    virtual Q3DStudio::CString GetName() const = 0;
-    virtual void SetName(const Q3DStudio::CString &inName) = 0;
+    virtual QString GetName() const = 0;
+    virtual void SetName(const QString &inName) = 0;
 };
 
 #endif // #ifndef __INAMABLE_H__

@@ -37,7 +37,7 @@
 #include "CommonConstants.h"
 #include "StudioPreferences.h"
 #include "Qt3DSLargeInteger.h"
-#include "CColor.h"
+#include <QtGui/qcolor.h>
 #include "Qt3DSColor.h"
 
 /////////////////////////////////////////////////////////////////////////////

@@ -320,9 +320,8 @@ struct ComposerObjectTypes
         ITERATE_COMPOSER_OBJECT_TYPES
 #undef HANDLE_COMPOSER_OBJECT_TYPE
     };
-    static const wchar_t *Convert(ComposerObjectTypes::Enum inType);
-    static ComposerObjectTypes::Enum Convert(const wchar_t *inType);
-    static ComposerObjectTypes::Enum Convert(const char8_t *inType);
+    static QString Convert(ComposerObjectTypes::Enum inType);
+    static ComposerObjectTypes::Enum Convert(const QString &inType);
 };
 
 struct ComposerPropertyNames
@@ -340,10 +339,8 @@ struct ComposerPropertyNames
 #undef HANDLE_COMPOSER_PROPERTY_DUPLICATE
     };
 
-    static const wchar_t *Convert(ComposerPropertyNames::Enum inType);
-    static ComposerPropertyNames::Enum Convert(const wchar_t *inType);
-    static const char8_t *ConvertNarrow(ComposerPropertyNames::Enum inType);
-    static ComposerPropertyNames::Enum Convert(const char8_t *inType);
+    static QString Convert(ComposerPropertyNames::Enum inType);
+    static ComposerPropertyNames::Enum Convert(const QString &inType);
 };
 
 template <typename TDataType>
@@ -452,7 +449,7 @@ struct ComposerTypeDefinitionsHelper
                                        ComposerObjectTypes::Enum inObjectType);
     static void SetInstancePropertyValue(IDataCore &inDataCore, Qt3DSDMInstanceHandle inInstance,
                                          Qt3DSDMPropertyHandle inProperty,
-                                         const wchar_t *inPropValue);
+                                         const QString &inPropValue);
     static void DeriveInstance(IDataCore &inDataCore, Qt3DSDMInstanceHandle inInstance,
                                Qt3DSDMInstanceHandle inParent);
 };

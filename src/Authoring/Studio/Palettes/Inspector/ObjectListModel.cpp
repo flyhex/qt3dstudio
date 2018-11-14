@@ -117,7 +117,7 @@ QVariant ObjectListModel::data(const QModelIndex &index,
         return nameForHandle(handle);
     }
     case PathReferenceRole: {
-        Q3DStudio::CString data;
+        QString data;
         if (startingIndex.isValid()) {
             data = m_objRefHelper->GetObjectReferenceString(
                         handleForIndex(startingIndex),
@@ -129,12 +129,12 @@ QVariant ObjectListModel::data(const QModelIndex &index,
                         CRelativePathTools::EPATHTYPE_RELATIVE,
                         handle);
         }
-        return data.toQString();
+        return data;
     }
     case AbsolutePathRole: {
-        Q3DStudio::CString data(m_objRefHelper->GetObjectReferenceString(
+        QString data(m_objRefHelper->GetObjectReferenceString(
             m_baseHandle, CRelativePathTools::EPATHTYPE_GUID, handle));
-        return data.toQString();
+        return data;
     }
     case HandleRole: {
         return (int)handleForIndex(index);
@@ -250,7 +250,7 @@ qt3dsdm::TInstanceHandleList ObjectListModel::childrenList(
 QString ObjectListModel::nameForHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle) const
 {
     const auto data = m_objRefHelper->GetInfo(handle);
-    return data.m_Name.toQString();
+    return data.m_Name;
 }
 
 QModelIndex ObjectListModel::indexForHandle(const qt3dsdm::Qt3DSDMInstanceHandle &handle,

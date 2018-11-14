@@ -70,8 +70,15 @@ inline void for_each_item(TCountFunc inCountFunc, TItemByIndexFunc inItemByIndex
 template <typename TContainerType, typename TItemType>
 inline void insert_unique(TContainerType &inContainer, const TItemType &inItem)
 {
-    if (find(inContainer.begin(), inContainer.end(), inItem) == inContainer.end())
+    if (std::find(inContainer.begin(), inContainer.end(), inItem) == inContainer.end())
         inContainer.insert(inContainer.end(), inItem);
+}
+
+template <typename TContainerType, typename TItemType>
+inline void insert_unique_qt(TContainerType &inContainer, const TItemType &inItem)
+{
+    if (std::find(inContainer.begin(), inContainer.end(), inItem) == inContainer.end())
+        inContainer.push_back(inItem);
 }
 
 template <typename TContainerType, typename TItemType, typename TPred>

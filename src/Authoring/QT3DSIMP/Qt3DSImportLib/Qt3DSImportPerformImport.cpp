@@ -52,8 +52,8 @@ struct ScopedReleaser
 };
 
 void DoUpdateInstances(Import &import, IComposerEditor &composer,
-                       NVConstDataRef<InstanceDesc> instances,
-                       ImportArray<PropertyValue> &properties)
+                       const QVector<InstanceDesc> &instances,
+                       QVector<PropertyValue> &properties)
 {
     QT3DSIMP_FOREACH(idx, instances.size())
     {
@@ -73,11 +73,12 @@ void DoUpdateInstances(Import &import, IComposerEditor &composer,
 }
 }
 
-SImportResult::SImportResult(const Q3DStudio::CFilePath &inFilePath, QT3DSU32 inFileVersion)
+SImportResult::SImportResult(const QString &inFilePath, QT3DSU32 inFileVersion)
     : m_Error(ImportErrorCodes::NoError)
     , m_FilePath(inFilePath)
+    , m_fileVersion(inFileVersion)
 {
-    m_FilePath.SetIdentifier(QString::number(inFileVersion));
+
 }
 
 /**
@@ -115,11 +116,11 @@ void CPerformImport::DoImportToComposer(Import &import, IComposerEditor &compose
     QT3DSIMP_FOREACH(idx, report.m_Instances.m_Added.size())
     {
         const InstanceDesc &desc(report.m_Instances.m_Added[idx]);
-        if (AreEqual(desc.m_Id, L"__import__root__"))
+        if (desc.m_Id == QLatin1String("__import__root__"))
             composer.CreateRootInstance(desc.m_Id, desc.m_Type);
         else {
             Option<InstanceDesc> parent(import.GetInstanceByHandle(desc.m_Parent));
-            TImportId parentId = L"";
+            TImportId parentId;
             if (parent.hasValue())
                 parentId = parent->m_Id;
             if (desc.m_Type != ComposerObjectTypes::Material)
@@ -129,7 +130,7 @@ void CPerformImport::DoImportToComposer(Import &import, IComposerEditor &compose
         }
     }
 
-    ImportArray<PropertyValue> properties;
+    QVector<PropertyValue> properties;
     DoUpdateInstances(import, composer, report.m_Instances.m_Added, properties);
     DoUpdateInstances(import, composer, report.m_Instances.m_Existing, properties);
 
@@ -167,110 +168,99 @@ void CPerformImport::DoImportToComposer(Import &import, IComposerEditor &compose
 SImportResult CPerformImport::RefreshToComposer(ITranslator &translator,
                                                 IComposerEditor &inComposer,
                                                 Import &inOriginalImport,
-                                                const Q3DStudio::CFilePath &ioImportFile)
+                                                const QString &ioImportFile)
 {
     ScopedReleaser<Import> __originalScope(inOriginalImport);
 
     ScopedReleaser<ITranslator> __translatorScope(translator);
-    const CFilePath &importDestFile(ioImportFile);
+    const QFileInfo &importDestFile(ioImportFile);
 
-    if (importDestFile.IsFile() && importDestFile.GetFileFlags().CanWrite() == false)
+    if (importDestFile.isFile() && importDestFile.isWritable() == false)
         return ImportErrorCodes::ResourceNotWriteable;
 
-    __originalScope.dtype = NULL;
+    __originalScope.dtype = nullptr;
 
     ImportPtrOrError importPtr =
-        Import::CreateForRefresh(inOriginalImport, translator.GetSourceFile().toStdWString().c_str());
-    if (importPtr.m_Value == NULL)
+        Import::CreateForRefresh(inOriginalImport, translator.GetSourceFile());
+    if (importPtr.m_Value == nullptr)
         return importPtr.m_ErrorData.m_Error;
 
     ScopedReleaser<Import> __importScope(*importPtr.m_Value);
     if (translator.PerformTranslation(*importPtr.m_Value)) {
         DoImportToComposer(*importPtr.m_Value, inComposer);
-        Q3DStudio::CString fname = Q3DStudio::CFilePath(importDestFile).GetFileName();
-        QT3DSU32 importId = importPtr.m_Value->Save(fname.c_str());
-        return SImportResult(importDestFile, importId);
+        QT3DSU32 importId = importPtr.m_Value->Save(importDestFile.fileName());
+        return SImportResult(importDestFile.absoluteFilePath(), importId);
     }
     return ImportErrorCodes::TranslationToImportFailed;
 }
 SImportResult CPerformImport::RefreshToComposer(ITranslator &translator, IComposerEditor &composer,
-                                                const CFilePath &ioImportFile)
+                                                const QString &ioImportFile)
 {
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-    ImportPtrOrError originalPtr = Import::Load(ioImportFile.toCString());
-    if (originalPtr.m_Value == NULL)
+    ImportPtrOrError originalPtr = Import::Load(ioImportFile);
+    if (originalPtr.m_Value == nullptr)
         return originalPtr.m_ErrorData.m_Error;
 
     return RefreshToComposer(translator, composer, *originalPtr.m_Value, ioImportFile);
-#endif
-    return SImportResult(ImportErrorCodes::SourceFileNotReadable);
 }
 
 SImportResult CPerformImport::ImportToComposer(ITranslator &translator, IComposerEditor &composer,
-                                               const Q3DStudio::CFilePath &inImportFile)
+                                               const QString &inImportFile)
 {
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     ScopedReleaser<ITranslator> __translatorScope(translator);
-    const CFilePath &importDestFile(inImportFile);
-    if (importDestFile.IsFile() && importDestFile.GetFileFlags().CanWrite() == false)
+    const QFileInfo &importDestFile(inImportFile);
+    if (importDestFile.isFile() && importDestFile.isWritable() == false)
         return ImportErrorCodes::ResourceNotWriteable;
     ImportPtrOrError importPtr =
-        Import::Create(translator.GetSourceFile().toStdWString().c_str(), importDestFile.GetDirectory().toCString());
-    if (importPtr.m_Value == NULL)
+        Import::Create(translator.GetSourceFile(), importDestFile.absolutePath());
+    if (importPtr.m_Value == nullptr)
         return importPtr.m_ErrorData.m_Error;
     ScopedReleaser<Import> __importScope(*importPtr.m_Value);
     if (translator.PerformTranslation(*importPtr.m_Value)) {
         DoImportToComposer(*importPtr.m_Value, composer);
-        Q3DStudio::CString fname = importDestFile.GetFileName();
-        QT3DSU32 importId = importPtr.m_Value->Save(fname.c_str());
-        return SImportResult(importDestFile, importId);
+        QString fname = importDestFile.fileName();
+        QT3DSU32 importId = importPtr.m_Value->Save(fname);
+        return SImportResult(importDestFile.absoluteFilePath(), importId);
     }
-#endif
     return ImportErrorCodes::TranslationToImportFailed;
 }
 
 SImportResult
 CPerformImport::ImportToComposerFromImportFile(IComposerEditor &composer,
-                                               const Q3DStudio::CFilePath &inImportFile)
+                                               const QString &inImportFile)
 {
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-    const CFilePath &importDestFile(inImportFile);
-    if (importDestFile.IsFile() == false)
+    const QFileInfo &importDestFile(inImportFile);
+    if (importDestFile.isFile() == false)
         return ImportErrorCodes::SourceFileDoesNotExist;
 
-    QT3DSU32 fileId = Import::GetHighestImportRevision(inImportFile.toCString());
+    QT3DSU32 fileId = Import::GetHighestImportRevision(inImportFile);
     if (fileId == 0)
         return ImportErrorCodes::SourceFileNotReadable;
 
-    ImportPtrOrError importPtr = Import::Load(importDestFile.toCString(), fileId);
-    if (importPtr.m_Value == NULL)
+    ImportPtrOrError importPtr = Import::Load(inImportFile, fileId);
+    if (importPtr.m_Value == nullptr)
         return importPtr.m_ErrorData.m_Error;
     ScopedReleaser<Import> __importScope(*importPtr.m_Value);
     DoImportToComposer(*importPtr.m_Value, composer);
     return SImportResult(inImportFile, fileId);
-#endif
-    return ImportErrorCodes::SourceFileNotReadable;
 }
 
 SImportResult CPerformImport::TranslateToImportFile(ITranslator &translator,
-                                                    const Q3DStudio::CFilePath &inImportFile)
+                                                    const QString &inImportFile)
 {
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     ScopedReleaser<ITranslator> __translatorScope(translator);
-    const CFilePath &importDestFile(inImportFile);
-    if (importDestFile.IsFile() && importDestFile.GetFileFlags().CanWrite() == false)
+    const QFileInfo &importDestFile(inImportFile);
+    if (importDestFile.isFile() && importDestFile.isWritable() == false)
         return ImportErrorCodes::ResourceNotWriteable;
 
     ImportPtrOrError importPtr =
-        Import::Create(translator.GetSourceFile().toStdWString().c_str(), importDestFile.GetDirectory().toCString());
-    if (importPtr.m_Value == NULL)
+        Import::Create(translator.GetSourceFile(), importDestFile.absolutePath());
+    if (importPtr.m_Value == nullptr)
         return importPtr.m_ErrorData.m_Error;
     ScopedReleaser<Import> __importScope(*importPtr.m_Value);
     if (translator.PerformTranslation(*importPtr.m_Value)) {
-        Q3DStudio::CString fname = importDestFile.GetFileName();
-        QT3DSU32 importId = importPtr.m_Value->Save(fname.c_str());
+        QString fname = importDestFile.fileName();
+        QT3DSU32 importId = importPtr.m_Value->Save(fname);
         return SImportResult(inImportFile, importId);
     }
-#endif
     return ImportErrorCodes::TranslationToImportFailed;
 }

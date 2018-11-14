@@ -103,39 +103,41 @@ bool CProjectDropTarget::Drop(CDropSource &inSource)
 
         if (theSourceFile.IsFile() && m_TargetDir.IsDirectory()) {
             // Get the file extension
-            Q3DStudio::CString theExtension(theSourceFile.GetExtension());
+            QString theExtension(theSourceFile.suffix());
 
-            Q3DStudio::CString theFileStem = theSourceFile.GetFileStem();
-            Q3DStudio::CString outputFileName(theFileStem + L"."
-                                              + CDialogs::GetImportFileExtension());
+            QString theFileStem(theSourceFile.baseName());
+            QString outputFileName(theFileStem + QLatin1Char('.')
+                                   + CDialogs::GetImportFileExtension());
 
-            if (theExtension.Compare(CDialogs::GetWideDAEFileExtension(),
-                                     Q3DStudio::CString::ENDOFSTRING, false)) {
+            if (theSourceFile.suffix().compare(CDialogs::GetDAEFileExtension(),
+                                     Qt::CaseInsensitive) == 0) {
                 SColladaTranslator theTranslator(theSourceFile.toQString());
 
-                CFilePath theOutputDir =
-                    SFileTools::FindUniqueDestDirectory(m_TargetDir, theFileStem);
-                CFilePath theFullOutputFile(
-                    CFilePath::CombineBaseAndRelative(theOutputDir, outputFileName));
-                SImportResult theImportResult =
-                    CPerformImport::TranslateToImportFile(theTranslator, theFullOutputFile);
-                bool forceError = theFullOutputFile.IsFile() == false;
+                QDir theOutputDir
+                        = SFileTools::FindUniqueDestDirectory(m_TargetDir.toQString(), theFileStem);
+                QString theFullOutputFile(
+                    CFilePath::CombineBaseAndRelative(theOutputDir.canonicalPath(),
+                                                      outputFileName));
+                SImportResult theImportResult
+                        = CPerformImport::TranslateToImportFile(theTranslator, theFullOutputFile);
+                bool forceError = QFileInfo(theFullOutputFile).isFile() == false;
                 IDocumentEditor::DisplayImportErrors(
                     theSourceFile.toQString(), theImportResult.m_Error,
                     g_StudioApp.GetCore()->GetDoc()->GetImportFailedHandler(),
                     theTranslator.m_TranslationLog, forceError);
 #ifdef QT_3DSTUDIO_FBX
-            } else if (theExtension.Compare(CDialogs::GetWideFbxFileExtension(),
-                                            Q3DStudio::CString::ENDOFSTRING, false)) {
+            } else if (theSourceFile.suffix().compare(CDialogs::GetFbxFileExtension(),
+                                            Qt::CaseInsensitive) == 0) {
                 SFbxTranslator theTranslator(theSourceFile.toQString());
 
-                CFilePath theOutputDir =
-                    SFileTools::FindUniqueDestDirectory(m_TargetDir, theFileStem);
-                CFilePath theFullOutputFile(
-                    CFilePath::CombineBaseAndRelative(theOutputDir, outputFileName));
+                QDir theOutputDir
+                        = SFileTools::FindUniqueDestDirectory(m_TargetDir.toQString(), theFileStem);
+                QString theFullOutputFile(
+                    CFilePath::CombineBaseAndRelative(theOutputDir.canonicalPath(),
+                                                      outputFileName));
                 SImportResult theImportResult =
                     CPerformImport::TranslateToImportFile(theTranslator, theFullOutputFile);
-                bool forceError = theFullOutputFile.IsFile() == false;
+                bool forceError = QFileInfo(theFullOutputFile).isFile() == false;
                 IDocumentEditor::DisplayImportErrors(
                     theSourceFile.toQString(), theImportResult.m_Error,
                     g_StudioApp.GetCore()->GetDoc()->GetImportFailedHandler(),
@@ -165,12 +167,12 @@ bool CProjectDropTarget::Drop(CDropSource &inSource)
                     } else {
                     }
 
-                    std::vector<Q3DStudio::CString> theEffectFileSourcePaths;
+                    std::vector<QString> theEffectFileSourcePaths;
                     g_StudioApp.GetCore()
                         ->GetDoc()
                         ->GetDocumentReader()
                         .ParseSourcePathsOutOfEffectFile(
-                            Q3DStudio::CFilePath::GetAbsolutePath(theSourceFile),
+                            Q3DStudio::CFilePath::GetAbsolutePath(theSourceFile).toQString(),
                             theEffectFileSourcePaths);
 
                     CFilePath theFileDir(

@@ -27,7 +27,7 @@
 ****************************************************************************/
 #include "EventsBrowserView.h"
 
-#include "CColor.h"
+#include <QtGui/qcolor.h>
 #include "EventsModel.h"
 #include "Literals.h"
 #include "StudioUtils.h"

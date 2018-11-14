@@ -105,9 +105,7 @@ void RowTree::initialize()
             [this](const QString &label) {
         // Update label on timeline and on model
         m_label = label;
-        // TODO: Get rid of CString APIs
-        auto clabel = Q3DStudio::CString::fromQString(m_label);
-        m_binding->GetTimelineItem()->SetName(clabel);
+        m_binding->GetTimelineItem()->SetName(m_label);
     });
 }
 
@@ -738,7 +736,7 @@ void RowTree::updateFromBinding()
 void RowTree::updateLabel()
 {
     if (m_binding)
-        m_labelItem.setLabel(m_binding->GetTimelineItem()->GetName().toQString());
+        m_labelItem.setLabel(m_binding->GetTimelineItem()->GetName());
 }
 
 void RowTree::setRowVisible(bool visible)

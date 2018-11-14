@@ -57,7 +57,7 @@ public:
     virtual ~Qt3DSDMTimelineItemProperty();
 
     // ITimelineProperty
-    Q3DStudio::CString GetName() const override;
+    QString GetName() const override;
     bool IsMaster() const override;
     qt3dsdm::TDataTypePair GetType() const override;
     float GetMaximumValue() const override;
@@ -104,7 +104,7 @@ protected:
     CCmdDataModelSetKeyframeValue
         *m_SetKeyframeValueCommand; // for merging modifying keyframe values via graph
     qt3dsdm::TDataTypePair m_Type;
-    Q3DStudio::CString m_Name;
+    QString m_Name;
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_Signals;
 
 private:

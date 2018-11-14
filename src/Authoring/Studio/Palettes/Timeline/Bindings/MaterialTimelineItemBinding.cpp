@@ -64,8 +64,8 @@ CMaterialTimelineItemBinding::CMaterialTimelineItemBinding(CTimelineTranslationM
             thePropertySystem->GetAdditionalMetaDataType(inDataHandle, theProperty);
 
         if (theAdditionalMetaDataType == AdditionalMetaDataType::Image) {
-            TCharStr theName(thePropertySystem->GetName(theProperty));
-            TCharStr theFormalName(thePropertySystem->GetFormalName(inDataHandle, theProperty));
+            QString theName(thePropertySystem->GetName(theProperty));
+            QString theFormalName(thePropertySystem->GetFormalName(inDataHandle, theProperty));
             TNameFormalNamePair thePair = std::make_tuple(theName, theFormalName);
             m_ImageNameFormalNamePairs.push_back(thePair);
         }
@@ -93,7 +93,7 @@ bool CMaterialTimelineItemBinding::ShowToggleControls() const
 }
 
 bool ImageSlotIsFilled(qt3dsdm::IPropertySystem *inPropertySystem, Qt3DSDMInstanceHandle inInstance,
-                       const TCharStr &inStr)
+                       const QString &inStr)
 {
     Qt3DSDMPropertyHandle theProperty =
         inPropertySystem->GetAggregateInstancePropertyByName(inInstance, inStr);
@@ -149,7 +149,7 @@ ITimelineItemBinding *CMaterialTimelineItemBinding::GetChild(long inIndex)
     Qt3DSDMPropertyHandle theImageProperty = thePropertySystem->GetAggregateInstancePropertyByName(
         m_DataHandle, std::get<0>(m_ImageNameFormalNamePairs[theSlotCursor]));
     return GetOrCreateImageBinding(
-        theImageProperty, std::get<1>(m_ImageNameFormalNamePairs[theSlotCursor]).wide_str());
+        theImageProperty, std::get<1>(m_ImageNameFormalNamePairs[theSlotCursor]));
 }
 
 QList<ITimelineItemBinding *> CMaterialTimelineItemBinding::GetChildren()
@@ -197,7 +197,7 @@ CMaterialTimelineItemBinding::GetImage(qt3dsdm::Qt3DSDMPropertyHandle inProperty
 
 ITimelineItemBinding *
 CMaterialTimelineItemBinding::GetOrCreateImageBinding(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle,
-                                                      const wchar_t *inName)
+                                                      const QString &inName)
 {
     qt3dsdm::Qt3DSDMInstanceHandle theImageInstance = GetImage(inPropertyHandle);
     ITimelineItemBinding *theImageTimelineRow = m_TransMgr->GetBinding(theImageInstance);

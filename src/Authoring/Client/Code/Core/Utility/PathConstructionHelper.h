@@ -53,20 +53,20 @@ class CPathConstructionHelper
     //	 Static Methods
     //==============================================================================
 public:
-    static Q3DStudio::CString BuildAbsoluteReferenceString(CDoc *inDoc,
-                                                           qt3dsdm::Qt3DSDMInstanceHandle inInstance);
-    static Q3DStudio::CString
+    static QString BuildAbsoluteReferenceString(CDoc *inDoc,
+                                                qt3dsdm::Qt3DSDMInstanceHandle inInstance);
+    static QString
     BuildRelativeReferenceString(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                  qt3dsdm::Qt3DSDMInstanceHandle inRootInstance);
-    static Q3DStudio::CString BuildRelativeReferenceString(Q3DStudio::CString &inAbsObjPath,
-                                                           Q3DStudio::CString &inAbsRootPath);
-    static Q3DStudio::CString EscapeAssetName(Q3DStudio::CString inAssetName);
+    static QString BuildRelativeReferenceString(const QString &inAbsObjPath,
+                                                const QString &inAbsRootPath);
+    static QString EscapeAssetName(const QString &inAssetName);
 
-    static const Q3DStudio::CString &GetThisString();
-    static const Q3DStudio::CString &GetEscapeChar();
-    static const Q3DStudio::CString &GetSceneString();
-    static const Q3DStudio::CString &GetParentString();
-    static const Q3DStudio::CString &GetPathDelimiter();
+    static const QString &GetThisString();
+    static const QString &GetEscapeChar();
+    static const QString &GetSceneString();
+    static const QString &GetParentString();
+    static const QString &GetPathDelimiter();
 };
 
 #endif // INCLUDED_PATHCONSTRUCTIONHELPER_H

@@ -48,61 +48,65 @@
 
 namespace Q3DStudio {
 
-    class Q3DSRenderBufferManager
-    {
-    protected:
-        virtual ~Q3DSRenderBufferManager() {}
-    public:
-        // Path manipulation used to get the final path form a base path plus relative extension
-        /*virtual QString CombineBaseAndRelative(const char8_t *inBase,
-                                                         const char8_t *inRelative) = 0;*/
-        virtual void SetImageHasTransparency(const QString &inSourcePath,
-                                             bool inHasTransparency) = 0;
-        virtual bool GetImageHasTransparency(const QString & inSourcePath) const = 0;
-        virtual void SetImageTransparencyToFalseIfNotSet(const QString & inSourcePath) = 0;
-        virtual void SetInvertImageUVCoords(const QString & inSourcePath,
-                                            bool inShouldInvertCoords) = 0;
+class Q3DSRenderBufferManager
+{
+public:
+    Q3DSRenderBufferManager(Q3DSEngine *engine, IInputStreamFactory &inInputStreamFactory);
+    virtual ~Q3DSRenderBufferManager() {}
+    // Path manipulation used to get the final path form a base path plus relative extension
+    /*virtual QString CombineBaseAndRelative(const char8_t *inBase,
+                                                     const char8_t *inRelative) = 0;*/
+    virtual void SetImageHasTransparency(const QString &inSourcePath,
+                                         bool inHasTransparency);
+//    virtual bool GetImageHasTransparency(const QString & inSourcePath) const = 0;
+//    virtual void SetImageTransparencyToFalseIfNotSet(const QString & inSourcePath) = 0;
+//    virtual void SetInvertImageUVCoords(const QString & inSourcePath,
+//                                        bool inShouldInvertCoords) = 0;
 
-        // Returns true if this image has been loaded into memory
-        // This call is threadsafe.  Nothing else on this object is guaranteed to be.
-        virtual bool IsImageLoaded(const QString & inSourcePath) = 0;
+    // Returns true if this image has been loaded into memory
+    // This call is threadsafe.  Nothing else on this object is guaranteed to be.
+//    virtual bool IsImageLoaded(const QString & inSourcePath) = 0;
 
-        // Alias one image path with another image path. Optionally this object will ignore the
-        // call if the source path is already loaded. Aliasing is currently used to
-        // allow a default image to be shown in place of an image that is loading offline.
-        // Returns true if the image was aliased, false otherwise.
-        virtual bool AliasImagePath(const QString & inSourcePath, const QString & inAliasPath,
-                                    bool inIgnoreIfLoaded) = 0;
-        virtual void UnaliasImagePath(const QString & inSourcePath) = 0;
+    // Alias one image path with another image path. Optionally this object will ignore the
+    // call if the source path is already loaded. Aliasing is currently used to
+    // allow a default image to be shown in place of an image that is loading offline.
+    // Returns true if the image was aliased, false otherwise.
+//    virtual bool AliasImagePath(const QString & inSourcePath, const QString & inAliasPath,
+//                                bool inIgnoreIfLoaded) = 0;
+//    virtual void UnaliasImagePath(const QString & inSourcePath) = 0;
 
-        // Returns the given source path unless the source path is aliased; in which case returns
-        // the aliased path.
-        virtual QString GetImagePath(const QString &inSourcePath) = 0;
-        // Returns a texture and a boolean indicating if this texture has transparency in it or not.
-        // Can't name this LoadImage because that gets mangled by windows to LoadImageA (uggh)
-        // In some cases we need to only scan particular images for transparency.
-        /*virtual Q3DSImageTextureData LoadRenderImage(const QString & inImagePath,
-                                                  SLoadedTexture &inTexture,
-                                                  bool inForceScanForTransparency = false,
-                                                  bool inBsdfMipmaps = false) = 0;*/
-        virtual Q3DSImageTextureData LoadRenderImage(const QString & inSourcePath,
-                                                  bool inForceScanForTransparency = false,
-                                                  bool inBsdfMipmaps = false) = 0;
-        virtual Q3DSRenderMesh *LoadMesh(const QString & inSourcePath) = 0;
+    // Returns the given source path unless the source path is aliased; in which case returns
+    // the aliased path.
+    virtual QString GetImagePath(const QString &inSourcePath);
+    // Returns a texture and a boolean indicating if this texture has transparency in it or not.
+    // Can't name this LoadImage because that gets mangled by windows to LoadImageA (uggh)
+    // In some cases we need to only scan particular images for transparency.
+    /*virtual Q3DSImageTextureData LoadRenderImage(const QString & inImagePath,
+                                              SLoadedTexture &inTexture,
+                                              bool inForceScanForTransparency = false,
+                                              bool inBsdfMipmaps = false) = 0;*/
+    virtual Q3DSImageTextureData LoadRenderImage(const QString & inSourcePath,
+                                              bool inForceScanForTransparency = false,
+                                              bool inBsdfMipmaps = false);
+    virtual Q3DSRenderMesh *LoadMesh(const QString & inSourcePath);
 
-        virtual Q3DSRenderMesh *CreateMesh(const char *inSourcePath, void *inVertData,
-                                           unsigned int inNumVerts, unsigned int inVertStride,
-                                           unsigned int *inIndexData,
-                                           unsigned int inIndexCount
-                                           /*, qt3ds::NVBounds3 inBounds*/) = 0;
+    virtual Q3DSRenderMesh *CreateMesh(const char *inSourcePath, void *inVertData,
+                                       unsigned int inNumVerts, unsigned int inVertStride,
+                                       unsigned int *inIndexData,
+                                       unsigned int inIndexCount
+                                       /*, qt3ds::NVBounds3 inBounds*/);
 
-        // Remove *all* buffers from the buffer manager;
-        virtual void Clear() = 0;
-        virtual void InvalidateBuffer(const QString &inSourcePath) = 0;
+    // Remove *all* buffers from the buffer manager;
+    virtual void Clear();
+    virtual void InvalidateBuffer(const QString &inSourcePath);
 
-        static Q3DSRenderBufferManager &Create(Q3DSEngine *engine,
-                                               IInputStreamFactory &inInputStreamFactory);
-    };
+    static QSharedPointer<Q3DSRenderBufferManager> Create(Q3DSEngine *engine,
+                                                    IInputStreamFactory &inInputStreamFactory);
+private:
+    Q3DSEngine *m_engine;
+    IInputStreamFactory &m_inputStreamFactory;
+};
+
 } // namespace Q3DStudio
 
 #endif

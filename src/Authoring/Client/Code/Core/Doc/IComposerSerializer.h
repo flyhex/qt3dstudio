@@ -69,7 +69,7 @@ public:
     // inActiveSlide may be zero if the top item we find happens to be a scene or a component.
     // The graph roots hold the top items
     virtual void SerializeScene(qt3dsdm::IDOMReader &inReader,
-                                const Q3DStudio::CFilePath &inDocumentDirectory,
+                                const QString &inDocumentDirectory,
                                 int inUIPVersion) = 0;
 
     // Write this instance and its children (and possibly its slides) to a writer.
@@ -81,7 +81,7 @@ public:
     // Read a partial serialization into this slide, attaching the instance as the last child of the
     // new root.
     virtual qt3dsdm::TInstanceHandleList SerializeSceneGraphObject(
-        qt3dsdm::IDOMReader &inReader, const Q3DStudio::CFilePath &inDocumentDirectory,
+        qt3dsdm::IDOMReader &inReader, const QString &inDocumentDirectory,
         qt3dsdm::Qt3DSDMInstanceHandle inNewRoot, qt3dsdm::Qt3DSDMSlideHandle inActiveSlide) = 0;
 
     // Save and load just a single action
@@ -95,7 +95,7 @@ public:
     virtual void SerializeSlide(qt3dsdm::IDOMWriter &inWriter, qt3dsdm::Qt3DSDMSlideHandle inSlide) = 0;
 
     virtual qt3dsdm::Qt3DSDMSlideHandle SerializeSlide(qt3dsdm::IDOMReader &inReader,
-                                                    const CFilePath &inDocumentDirectory,
+                                                    const QString &inDocumentDirectory,
                                                     qt3dsdm::Qt3DSDMSlideHandle inMaster,
                                                     int inNewIndex = -1) = 0;
 

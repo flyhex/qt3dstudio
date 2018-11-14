@@ -83,7 +83,7 @@ public:
     std::shared_ptr<ICustomPropCore> GetTransactionlessCustomPropCore();
 
     Qt3DSDMInstanceHandle FindInstanceByName(Qt3DSDMPropertyHandle inNameProperty,
-                                            const TCharStr &inName) const;
+                                             const QString &inName) const;
 
     void SetConsumer(TTransactionConsumerPtr inConsumer) override;
 };

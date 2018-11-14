@@ -183,13 +183,13 @@ void ProjectFileSystemModel::updateReferences()
                 SubPresentationRecord({}, doc->getPresentationId(),
                                       projectDir.relativeFilePath(doc->GetDocumentPath())));
 
-    auto addReferencesPresentation = [this, doc, &projectPath](const Q3DStudio::CString &str) {
-        addPathsToReferences(projectPath, doc->GetResolvedPathToDoc(str).toQString());
+    auto addReferencesPresentation = [this, doc, &projectPath](const QString &str) {
+        addPathsToReferences(projectPath, doc->GetResolvedPathToDoc(str));
     };
-    auto addReferencesProject = [this, doc, &projectPath](const Q3DStudio::CString &str) {
+    auto addReferencesProject = [this, doc, &projectPath](const QString &str) {
         addPathsToReferences(
                     projectPath,
-                    doc->GetCore()->getProjectFile().getResolvedPathTo(str.toQString()));
+                    doc->GetCore()->getProjectFile().getResolvedPathTo(str));
     };
     auto addReferencesRenderable = [this, &projectPath, &projectPathSlash, &subpresentationRecord]
             (const QString &id) {
@@ -358,10 +358,10 @@ bool ProjectFileSystemModel::hasValidUrlsForDropping(const QList<QUrl> &urls) co
             const QFileInfo fileInfo(path);
             if (fileInfo.isFile()) {
                 const QString extension = fileInfo.suffix();
-                return extension.compare(QLatin1String(CDialogs::GetDAEFileExtension()),
+                return extension.compare(CDialogs::GetDAEFileExtension(),
                                          Qt::CaseInsensitive) == 0
 #ifdef QT_3DSTUDIO_FBX
-                       || extension.compare(QLatin1String(CDialogs::GetFbxFileExtension()),
+                       || extension.compare(CDialogs::GetFbxFileExtension(),
                                             Qt::CaseInsensitive) == 0
 #endif
                        || getIconType(path) != OBJTYPE_UNKNOWN;
@@ -385,7 +385,7 @@ void ProjectFileSystemModel::showInfo(int row)
     if (fi.suffix() == QLatin1String("matdata")) {
         const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
         const auto material = sceneEditor
-                ->getOrCreateMaterial(Q3DStudio::CString::fromQString(fi.completeBaseName()));
+                ->getOrCreateMaterial(fi.completeBaseName());
         QString name;
         QMap<QString, QString> values;
         QMap<QString, QMap<QString, QString>> textureValues;
@@ -497,23 +497,23 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
     const QString fileStem = fileInfo.baseName();
     const QString outputFileName = QStringLiteral("%1.%2").arg(fileStem).arg(CDialogs::GetImportFileExtension());
 
-    if (extension.compare(QLatin1String(CDialogs::GetDAEFileExtension()), Qt::CaseInsensitive) == 0) {
+    if (extension.compare(CDialogs::GetDAEFileExtension(), Qt::CaseInsensitive) == 0) {
         SColladaTranslator translator(sourceFile);
         const QDir outputDir = SFileTools::FindUniqueDestDirectory(targetDir, fileStem);
         const QString fullOutputFile = outputDir.filePath(outputFileName);
         const SImportResult importResult =
-            CPerformImport::TranslateToImportFile(translator, CFilePath(fullOutputFile));
+            CPerformImport::TranslateToImportFile(translator, fullOutputFile);
         bool forceError = QFileInfo(fullOutputFile).isFile() == false;
         IDocumentEditor::DisplayImportErrors(
                 sourceFile, importResult.m_Error, doc->GetImportFailedHandler(),
                 translator.m_TranslationLog, forceError);
 #ifdef QT_3DSTUDIO_FBX
-    } else if (extension.compare(QLatin1String(CDialogs::GetFbxFileExtension()), Qt::CaseInsensitive) == 0) {
+    } else if (extension.compare(CDialogs::GetFbxFileExtension(), Qt::CaseInsensitive) == 0) {
         SFbxTranslator translator(sourceFile);
         const QDir outputDir = SFileTools::FindUniqueDestDirectory(targetDir, fileStem);
         const QString fullOutputFile = outputDir.filePath(outputFileName);
         const SImportResult importResult =
-            CPerformImport::TranslateToImportFile(translator, CFilePath(fullOutputFile));
+            CPerformImport::TranslateToImportFile(translator, fullOutputFile);
         bool forceError = QFileInfo(fullOutputFile).isFile() == false;
         IDocumentEditor::DisplayImportErrors(
                 sourceFile, importResult.m_Error, doc->GetImportFailedHandler(),
@@ -551,7 +551,7 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
         bool copyResult = SFileTools::FindAndCopyDestFile(targetDir, sourceFile, destPath);
         Q_ASSERT(copyResult);
 
-        if (CDialogs::isPresentationFileExtension(extension.toLatin1().data())) {
+        if (CDialogs::isPresentationFileExtension(extension)) {
             // Don't override id with empty if it is already added, which can happen when
             // multi-importing both presentation and its subpresentation
             if (!outPresentationNodes.contains(destPath))
@@ -565,19 +565,19 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
         }
 
         // For effect and custom material files, automatically copy related resources
-        if (CDialogs::IsEffectFileExtension(extension.toLatin1().data())
-                || CDialogs::IsMaterialFileExtension(extension.toLatin1().data())) {
-            std::vector<Q3DStudio::CString> effectFileSourcePaths;
+        if (CDialogs::IsEffectFileExtension(extension)
+                || CDialogs::IsMaterialFileExtension(extension)) {
+            std::vector<QString> effectFileSourcePaths;
             doc->GetDocumentReader().ParseSourcePathsOutOfEffectFile(
-                        Q3DStudio::CFilePath::GetAbsolutePath(CFilePath(sourceFile)),
+                        QFileInfo(sourceFile).absoluteFilePath(),
                         effectFileSourcePaths);
 
             const QDir fileDir = QFileInfo(sourceFile).dir();
             const QDir projectDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath());
 
             for (const auto &effectFile : effectFileSourcePaths) {
-                const QString sourcePath = fileDir.filePath(effectFile.toQString());
-                const QString resultPath = projectDir.filePath(effectFile.toQString());
+                const QString sourcePath = fileDir.filePath(effectFile);
+                const QString resultPath = projectDir.filePath(effectFile);
 
                 const QFileInfo resultFileInfo(resultPath);
                 if (!resultFileInfo.exists()) {
@@ -760,8 +760,7 @@ bool ProjectFileSystemModel::isExpanded(const QModelIndex &modelIndex) const
 
 EStudioObjectType ProjectFileSystemModel::getIconType(const QString &path) const
 {
-    Q3DStudio::CFilePath filePath(Q3DStudio::CString::fromQString(path));
-    return Q3DStudio::ImportUtils::GetObjectFileTypeForFile(filePath).m_IconType;
+    return Q3DStudio::ImportUtils::GetObjectFileTypeForFile(path).m_IconType;
 }
 
 QString ProjectFileSystemModel::getIconName(const QString &path) const

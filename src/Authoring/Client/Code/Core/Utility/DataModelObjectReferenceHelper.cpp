@@ -89,7 +89,7 @@ CObjectReferenceHelper::GetInfo(const qt3dsdm::Qt3DSDMInstanceHandle &inInstance
                 inInstance, theClientBridge->GetNameProperty(), theNameValue);
             TDataStrPtr theName = qt3dsdm::get<TDataStrPtr>(theNameValue);
             if (theName)
-                theInfo.m_Name = theName->GetData();
+                theInfo.m_Name = theName->toQString();
         } else {
             qt3dsdm::Qt3DSDMInstanceHandle theParentInstance;
             qt3dsdm::Qt3DSDMPropertyHandle theProperty;
@@ -99,7 +99,7 @@ CObjectReferenceHelper::GetInfo(const qt3dsdm::Qt3DSDMInstanceHandle &inInstance
                                                                 theProperty);
             if (theParentInstance.Valid() && theProperty.Valid())
                 theInfo.m_Name =
-                    thePropertySystem->GetFormalName(theParentInstance, theProperty).c_str();
+                    thePropertySystem->GetFormalName(theParentInstance, theProperty);
         }
         // Master, by checking if guid property is linked.
         theInfo.m_Master = m_Doc->GetStudioSystem()->GetSlideSystem()->IsPropertyLinked(
@@ -163,7 +163,7 @@ bool CObjectReferenceHelper::GetChildInstanceList(
 /**
  * Figures out the object (displayed) name for a given instance
  */
-Q3DStudio::CString
+QString
 CObjectReferenceHelper::LookupObjectFormalName(const qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     qt3dsdm::IPropertySystem *thePropertySystem = m_Doc->GetStudioSystem()->GetPropertySystem();
@@ -175,18 +175,18 @@ CObjectReferenceHelper::LookupObjectFormalName(const qt3dsdm::Qt3DSDMInstanceHan
                                                            theProperty))
             theClientBridge->GetLayerFromImageProbeInstance(inInstance, theParentInstance,
                                                             theProperty);
-        qt3dsdm::TCharStr theFormalName =
+       QString theFormalName =
             thePropertySystem->GetFormalName(theParentInstance, theProperty);
-        return theFormalName.c_str();
+        return theFormalName;
     } else {
         qt3dsdm::SValue theNameValue;
         thePropertySystem->GetInstancePropertyValue(inInstance, theClientBridge->GetNameProperty(),
                                                     theNameValue);
         if (GetValueType(theNameValue) == qt3dsdm::DataModelDataType::String) {
             qt3dsdm::TDataStrPtr theName = qt3dsdm::get<qt3dsdm::TDataStrPtr>(theNameValue);
-            return theName->GetData();
+            return theName->toQString();
         }
-        return L"";
+        return {};
     }
 }
 
@@ -194,7 +194,7 @@ CObjectReferenceHelper::LookupObjectFormalName(const qt3dsdm::Qt3DSDMInstanceHan
 /**
  * String returned for displaying relative path values in the Object Ref Picker
  */
-Q3DStudio::CString CObjectReferenceHelper::GetObjectReferenceString(
+QString CObjectReferenceHelper::GetObjectReferenceString(
     const qt3dsdm::Qt3DSDMInstanceHandle &inBaseInstance, CRelativePathTools::EPathType inPathType,
     const qt3dsdm::Qt3DSDMInstanceHandle &inInstance) const
 {
@@ -207,7 +207,7 @@ Q3DStudio::CString CObjectReferenceHelper::GetObjectReferenceString(
  * objects.
  */
 bool CObjectReferenceHelper::ResolvePath(const qt3dsdm::Qt3DSDMInstanceHandle &inInstance,
-                                         const Q3DStudio::CString &inPathValue,
+                                         const QString &inPathValue,
                                          CRelativePathTools::EPathType &outType,
                                          qt3dsdm::Qt3DSDMInstanceHandle &outResolvedInstance,
                                          bool ignoreMaterialProperties)
@@ -252,7 +252,7 @@ CObjectReferenceHelper::Resolve(const qt3dsdm::SValue &inObjectRefValue,
             bool theFullResolvedFlag = false;
             CRelativePathTools::EPathType theUnusedPathType;
             return CRelativePathTools::FindAssetInstanceByObjectPath(
-                m_Doc, inBaseInstance, qt3dsdm::get<qt3dsdm::TDataStrPtr>(theRefValue)->GetData(),
+                m_Doc, inBaseInstance, qt3dsdm::get<qt3dsdm::TDataStrPtr>(theRefValue)->toQString(),
                 theUnusedPathType, theFullResolvedFlag, this);
         } else if (theValueType == qt3dsdm::DataModelDataType::Long) {
             return qt3dsdm::get<qt3ds::QT3DSI32>(theRefValue);

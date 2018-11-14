@@ -103,9 +103,9 @@ public:
         const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMInstanceHandle)> &inCallback) = 0;
     virtual TSignalConnectionPtr
     ConnectPropertyAdded(const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle,
-                                                    TCharPtr, DataModelDataType::Value)> &inCallback) = 0;
+                                const QString &, DataModelDataType::Value)> &inCallback) = 0;
     virtual TSignalConnectionPtr ConnectPropertyRemoved(
-        const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle, TCharPtr,
+        const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle, const QString &,
                                    DataModelDataType::Value)> &inCallback) = 0;
 };
 
@@ -120,10 +120,10 @@ public:
     virtual void SignalInstanceParentRemoved(Qt3DSDMInstanceHandle inInstance,
                                              Qt3DSDMInstanceHandle inParent) = 0;
     virtual void SignalPropertyAdded(Qt3DSDMInstanceHandle inInstance,
-                                     Qt3DSDMPropertyHandle inProperty, TCharPtr inName,
+                                     Qt3DSDMPropertyHandle inProperty, const QString &inName,
                                      DataModelDataType::Value inDataType) = 0;
     virtual void SignalPropertyRemoved(Qt3DSDMInstanceHandle inInstance,
-                                       Qt3DSDMPropertyHandle inProperty, TCharPtr inName,
+                                       Qt3DSDMPropertyHandle inProperty, const QString &inName,
                                        DataModelDataType::Value inDataType) = 0;
 };
 
@@ -253,16 +253,16 @@ public:
     virtual TSignalConnectionPtr ConnectTargetObjectSet(
         const std::function<void(Qt3DSDMActionHandle, SObjectRefType &)> &inCallback) = 0;
     virtual TSignalConnectionPtr ConnectEventSet(
-        const std::function<void(Qt3DSDMActionHandle, const wstring &)> &inCallback) = 0;
+        const std::function<void(Qt3DSDMActionHandle, const QString &)> &inCallback) = 0;
     virtual TSignalConnectionPtr ConnectHandlerSet(
-        const std::function<void(Qt3DSDMActionHandle, const wstring &)> &inCallback) = 0;
+        const std::function<void(Qt3DSDMActionHandle, const QString &)> &inCallback) = 0;
 
     virtual TSignalConnectionPtr ConnectHandlerArgumentAdded(
-        const std::function<void(Qt3DSDMActionHandle, Qt3DSDMHandlerArgHandle, const TCharStr &,
-                                   HandlerArgumentType::Value, DataModelDataType::Value)> &inCallback) = 0;
+        const std::function<void(Qt3DSDMActionHandle, Qt3DSDMHandlerArgHandle, const QString &,
+                           HandlerArgumentType::Value, DataModelDataType::Value)> &inCallback) = 0;
     virtual TSignalConnectionPtr ConnectHandlerArgumentRemoved(
-        const std::function<void(Qt3DSDMActionHandle, Qt3DSDMHandlerArgHandle, const TCharStr &,
-                                   HandlerArgumentType::Value, DataModelDataType::Value)> &inCallback) = 0;
+        const std::function<void(Qt3DSDMActionHandle, Qt3DSDMHandlerArgHandle, const QString &,
+                           HandlerArgumentType::Value, DataModelDataType::Value)> &inCallback) = 0;
     virtual TSignalConnectionPtr ConnectHandlerArgumentValueSet(
         const std::function<void(Qt3DSDMHandlerArgHandle, const SValue &)> &inCallback) = 0;
 };
@@ -274,16 +274,18 @@ public:
                                       SObjectRefType &inTriggerObject) = 0;
     virtual void SendTargetObjectSet(Qt3DSDMActionHandle inAction,
                                      SObjectRefType &inTargetObject) = 0;
-    virtual void SendEventSet(Qt3DSDMActionHandle inAction, const wstring &inEventHandle) = 0;
-    virtual void SendHandlerSet(Qt3DSDMActionHandle inAction, const wstring &inActionName) = 0;
+    virtual void SendEventSet(Qt3DSDMActionHandle inAction, const QString &inEventHandle) = 0;
+    virtual void SendHandlerSet(Qt3DSDMActionHandle inAction, const QString &inActionName) = 0;
 
     virtual void SendHandlerArgumentAdded(Qt3DSDMActionHandle inAction,
                                           Qt3DSDMHandlerArgHandle inHandlerArgument,
-                                          const TCharStr &inName, HandlerArgumentType::Value inArgType,
+                                          const QString &inName,
+                                          HandlerArgumentType::Value inArgType,
                                           DataModelDataType::Value inValueType) = 0;
     virtual void SendHandlerArgumentRemoved(Qt3DSDMActionHandle inAction,
                                             Qt3DSDMHandlerArgHandle inHandlerArgument,
-                                            const TCharStr &inName, HandlerArgumentType::Value inArgType,
+                                            const QString &inName,
+                                            HandlerArgumentType::Value inArgType,
                                             DataModelDataType::Value inValueType) = 0;
     virtual void SendHandlerArgumentValueSet(Qt3DSDMHandlerArgHandle inHandlerArgument,
                                              const SValue &inValue) = 0;
@@ -341,7 +343,7 @@ public:
         const std::function<void(Qt3DSDMHandlerParamHandle)> &inCallback) = 0;
 
     virtual TSignalConnectionPtr ConnectCustomReferencesModified(
-        const std::function<void(Qt3DSDMInstanceHandle, const TCharStr &)> &inCallback) = 0;
+        const std::function<void(Qt3DSDMInstanceHandle, const QString &)> &inCallback) = 0;
 };
 
 class ICustomPropCoreSignalSender : public ISignalItem
@@ -372,7 +374,7 @@ public:
     virtual void SendCustomHandlerParamModified(Qt3DSDMHandlerParamHandle inParameter) = 0;
 
     virtual void SendCustomReferencesModified(Qt3DSDMInstanceHandle inOwner,
-                                              const TCharStr &inString) = 0;
+                                              const QString &inString) = 0;
 };
 
 class ISlideSystemSignalProvider : public ISignalItem
@@ -513,7 +515,7 @@ public:
     virtual TSignalConnectionPtr ConnectCustomHandlerParamModified(
         const std::function<void(Qt3DSDMHandlerParamHandle)> &inCallback) = 0;
     virtual TSignalConnectionPtr ConnectCustomReferencesModified(
-        const std::function<void(Qt3DSDMInstanceHandle, const TCharStr &)> &inCallback) = 0;
+        const std::function<void(Qt3DSDMInstanceHandle, const QString &)> &inCallback) = 0;
     virtual TSignalConnectionPtr ConnectControlledToggled(
         const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle)> &inCallback) = 0;
 };
@@ -585,7 +587,7 @@ public:
                                                Qt3DSDMHandlerHandle inHandler) = 0;
     virtual void SendCustomHandlerParamModified(Qt3DSDMHandlerParamHandle inParameter) = 0;
     virtual void SendCustomReferencesModified(Qt3DSDMInstanceHandle inOwner,
-                                              const TCharStr &inString) = 0;
+                                              const QString &inString) = 0;
     virtual void SendControlledToggled(Qt3DSDMInstanceHandle inInstance,
                                        Qt3DSDMPropertyHandle inProperty) = 0;
 };

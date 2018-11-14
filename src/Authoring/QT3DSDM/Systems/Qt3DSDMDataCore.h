@@ -50,7 +50,7 @@ public:
      */
     virtual Qt3DSDMPropertyHandle
     GetAggregateInstancePropertyByName(Qt3DSDMInstanceHandle inInstance,
-                                       const TCharStr &inStr) const = 0;
+                                       const QString &inStr) const = 0;
     /**
      *	Get the entire list of instance properties;
      */
@@ -177,8 +177,9 @@ public:
      *	error - ValueTypeError if the default value exists and is if a different type than
      *inPropType
      */
-    virtual Qt3DSDMPropertyHandle AddProperty(Qt3DSDMInstanceHandle inInstance, TCharPtr inName,
-                                             DataModelDataType::Value inPropType) = 0;
+    virtual Qt3DSDMPropertyHandle AddProperty(Qt3DSDMInstanceHandle inInstance,
+                                              const QString &inName,
+                                              DataModelDataType::Value inPropType) = 0;
     /**
      *	Return the property definition that corresponds to a given property value.
      */
@@ -239,12 +240,13 @@ public:
 
     virtual void GetInstances(TInstanceHandleList &outInstances) const = 0;
 
-    virtual Qt3DSDMPropertyHandle AddProperty(Qt3DSDMInstanceHandle inInstance, TCharPtr inName,
-                                             DataModelDataType::Value inPropType) = 0;
+    virtual Qt3DSDMPropertyHandle AddProperty(Qt3DSDMInstanceHandle inInstance,
+                                              const QString &inName,
+                                              DataModelDataType::Value inPropType) = 0;
 
     virtual Qt3DSDMPropertyHandle
     GetAggregateInstancePropertyByName(Qt3DSDMInstanceHandle inInstance,
-                                       const TCharStr &inStr) const = 0;
+                                       const QString &inStr) const = 0;
     virtual void GetAggregateInstanceProperties(Qt3DSDMInstanceHandle inInstance,
                                                 TPropertyHandleList &outProperties) const = 0;
     virtual bool HasAggregateInstanceProperty(Qt3DSDMInstanceHandle inInstance,
@@ -261,9 +263,9 @@ public:
                                          Qt3DSDMInstanceHandle inParent) const = 0;
 
     virtual DataModelDataType::Value GetDataType(Qt3DSDMPropertyHandle inProperty) const = 0;
-    virtual TCharStr GetName(Qt3DSDMPropertyHandle inProperty) const = 0;
-    virtual TCharStr GetFormalName(Qt3DSDMInstanceHandle inInstance,
-                                   Qt3DSDMPropertyHandle inProperty) const = 0;
+    virtual QString GetName(Qt3DSDMPropertyHandle inProperty) const = 0;
+    virtual QString GetFormalName(Qt3DSDMInstanceHandle inInstance,
+                                  Qt3DSDMPropertyHandle inProperty) const = 0;
     virtual AdditionalMetaDataType::Value
     GetAdditionalMetaDataType(Qt3DSDMInstanceHandle inInstance,
                               Qt3DSDMPropertyHandle inProperty) const = 0;
@@ -294,7 +296,7 @@ inline TDataType GetSpecificInstancePropertyValue(TCoreType inDataCore,
 template <typename TDataType, typename TCoreType>
 inline TDataType GetNamedInstancePropertyValue(TCoreType inDataCore,
                                                Qt3DSDMInstanceHandle inInstance,
-                                               const TCharStr &inName)
+                                               const QString &inName)
 {
     Qt3DSDMPropertyHandle theProperty =
         inDataCore->GetAggregateInstancePropertyByName(inInstance, inName);
@@ -303,9 +305,10 @@ inline TDataType GetNamedInstancePropertyValue(TCoreType inDataCore,
 }
 
 inline Qt3DSDMPropertyHandle AddPropertyWithValue(IPropertySystem &inPropertySystem,
-                                                 Qt3DSDMInstanceHandle inInstance, TCharPtr inName,
-                                                 DataModelDataType::Value inDataType,
-                                                 const SValue &inValue)
+                                                  Qt3DSDMInstanceHandle inInstance,
+                                                  const QString &inName,
+                                                  DataModelDataType::Value inDataType,
+                                                  const SValue &inValue)
 {
     Qt3DSDMPropertyHandle theProperty(inPropertySystem.AddProperty(inInstance, inName, inDataType));
     inPropertySystem.SetInstancePropertyValue(inInstance, theProperty, inValue);

@@ -130,25 +130,25 @@ public:
     static QString GetPreviewProperty(const QString &inName);
     static void SetPreviewProperty(const QString &inName, const QString &inValue);
 
-    static ::CColor GetNormalColor();
-    static ::CColor GetMasterColor();
-    static ::CColor GetInactiveColor();
+    static QColor GetNormalColor();
+    static QColor GetMasterColor();
+    static QColor GetInactiveColor();
 
-    static ::CColor GetMouseOverHighlightColor();
+    static QColor GetMouseOverHighlightColor();
 
-    static ::CColor GetObjectTimebarColor();
-    static ::CColor GetLayerTimebarColor();
-    static ::CColor GetDisabledTextColor();
+    static QColor GetObjectTimebarColor();
+    static QColor GetLayerTimebarColor();
+    static QColor GetDisabledTextColor();
 
-    static ::CColor GetSingleBoundingBoxColor();
-    static ::CColor GetGroupBoundingBoxColor();
+    static QColor GetSingleBoundingBoxColor();
+    static QColor GetGroupBoundingBoxColor();
 
-    static ::CColor GetRulerBackgroundColor();
-    static ::CColor GetRulerTickColor();
-    static ::CColor GetGuideColor();
-    static ::CColor GetGuideSelectedColor();
-    static ::CColor GetGuideFillColor();
-    static ::CColor GetGuideFillSelectedColor();
+    static QColor GetRulerBackgroundColor();
+    static QColor GetRulerTickColor();
+    static QColor GetGuideColor();
+    static QColor GetGuideSelectedColor();
+    static QColor GetGuideFillColor();
+    static QColor GetGuideFillSelectedColor();
 
     static QString GetFontFaceName();
 
@@ -200,7 +200,7 @@ public:
 
     // Default values that Studio will start out with or to restore
     static const long GUTTER_SIZE = 10;
-    static const ::CColor EDITVIEW_DEFAULTBGCOLOR;
+    static const QColor EDITVIEW_DEFAULTBGCOLOR;
     static const long PREFERREDSTARTUP_DEFAULTINDEX = -1;
     static const long DEFAULT_SNAPRANGE = 10;
     static const long DEFAULT_LIFETIME = 10000;

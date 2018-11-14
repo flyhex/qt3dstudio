@@ -74,11 +74,11 @@ public:
     // Action Properties
     void SetTriggerObject(Qt3DSDMActionHandle inAction, const SObjectRefType &inTriggerObject) override;
     void SetTargetObject(Qt3DSDMActionHandle inAction, const SObjectRefType &inTargetObject) override;
-    void SetEvent(Qt3DSDMActionHandle inAction, const wstring &inEventHandle) override;
-    void SetHandler(Qt3DSDMActionHandle inAction, const wstring &inHandlerHandle) override;
+    void SetEvent(Qt3DSDMActionHandle inAction, const QString &inEventHandle) override;
+    void SetHandler(Qt3DSDMActionHandle inAction, const QString &inHandlerHandle) override;
 
     // Action Argument
-    Qt3DSDMHandlerArgHandle AddHandlerArgument(Qt3DSDMActionHandle inAction, const TCharStr &inName,
+    Qt3DSDMHandlerArgHandle AddHandlerArgument(Qt3DSDMActionHandle inAction, const QString &inName,
                                               HandlerArgumentType::Value inArgType,
                                               DataModelDataType::Value inValueType) override;
     void RemoveHandlerArgument(Qt3DSDMHandlerArgHandle inHandlerArgument) override;
@@ -88,8 +88,10 @@ public:
                              THandlerArgHandleList &outHandlerArguments) const override;
 
     // Action Argument Properties
-    void GetHandlerArgumentValue(Qt3DSDMHandlerArgHandle inHandlerArgument, SValue &outValue) const override;
-    void SetHandlerArgumentValue(Qt3DSDMHandlerArgHandle inHandlerArgument, const SValue &inValue) override;
+    void GetHandlerArgumentValue(
+            Qt3DSDMHandlerArgHandle inHandlerArgument, SValue &outValue) const override;
+    void SetHandlerArgumentValue(
+            Qt3DSDMHandlerArgHandle inHandlerArgument, const SValue &inValue) override;
 
     // CHandleBase
     bool HandleValid(int inHandle) const override;
@@ -102,16 +104,20 @@ public:
     TSignalConnectionPtr ConnectTargetObjectSet(
         const std::function<void(Qt3DSDMActionHandle, SObjectRefType &)> &inCallback) override;
     virtual TSignalConnectionPtr
-    ConnectEventSet(const std::function<void(Qt3DSDMActionHandle, const wstring &)> &inCallback) override;
+    ConnectEventSet(const std::function<void(Qt3DSDMActionHandle, const QString &)>
+                    &inCallback) override;
     virtual TSignalConnectionPtr
-    ConnectHandlerSet(const std::function<void(Qt3DSDMActionHandle, const wstring &)> &inCallback) override;
+    ConnectHandlerSet(const std::function<void(Qt3DSDMActionHandle, const QString &)>
+                      &inCallback) override;
 
     TSignalConnectionPtr ConnectHandlerArgumentAdded(
-        const std::function<void(Qt3DSDMActionHandle, Qt3DSDMHandlerArgHandle, const TCharStr &,
-                                   HandlerArgumentType::Value, DataModelDataType::Value)> &inCallback) override;
+        const std::function<void(Qt3DSDMActionHandle, Qt3DSDMHandlerArgHandle, const QString &,
+                                 HandlerArgumentType::Value, DataModelDataType::Value)>
+            &inCallback) override;
     TSignalConnectionPtr ConnectHandlerArgumentRemoved(
-        const std::function<void(Qt3DSDMActionHandle, Qt3DSDMHandlerArgHandle, const TCharStr &,
-                                   HandlerArgumentType::Value, DataModelDataType::Value)> &inCallback) override;
+        const std::function<void(Qt3DSDMActionHandle, Qt3DSDMHandlerArgHandle, const QString &,
+                                 HandlerArgumentType::Value, DataModelDataType::Value)>
+            &inCallback) override;
     TSignalConnectionPtr ConnectHandlerArgumentValueSet(
         const std::function<void(Qt3DSDMHandlerArgHandle, const SValue &)> &inCallback) override;
 

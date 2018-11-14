@@ -185,43 +185,50 @@ CCmd *CBasicObjectDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandl
     if (theComposerType != ComposerObjectTypes::Unknown) {
         if (theComposerType == ComposerObjectTypes::Text) {
             // For Text, we need to check if user already has font file inside fonts folder
-            CFilePath theFontFile;
-            CFilePath theFontDir = CFilePath::CombineBaseAndRelative(
-                        CFilePath(g_StudioApp.GetCore()->getProjectFile().getProjectPath()),
-                        CFilePath(L"fonts"));
-            if (!theFontDir.Exists()) {
+            QString theFontFile;
+            QString theFontDir = CFilePath::CombineBaseAndRelative(
+                        g_StudioApp.GetCore()->getProjectFile().getProjectPath(),
+                        QStringLiteral("fonts"));
+            QFileInfo info(theFontDir);
+            if (!info.exists()) {
                 // Create font dir if necessary
-                theFontDir.CreateDir(true);
+                CFilePath::CreateDir(theFontDir, true);
             } else {
                 // Recursively find the first font file in font dir
-                vector<CFilePath> theFiles;
-                theFontDir.RecursivelyFindFilesOfType(nullptr, theFiles, false);
+                vector<QFileInfo> theFiles;
+                QFileInfo fontDir(theFontDir);
+                Q3DStudio::CFilePath::RecursivelyFindFilesOfType(fontDir, QStringList(),
+                                                                 theFiles, false);
                 for (size_t i = 0; i < theFiles.size(); ++i) {
-                    if (CDialogs::IsFontFileExtension(theFiles[i].GetExtension())) {
+                    if (CDialogs::IsFontFileExtension(theFiles[i].suffix())) {
                         // Reuse the font in fonts subdirectory
-                        theFontFile = theFiles[i];
+                        theFontFile = theFiles[i].absoluteFilePath();
                         break;
                     }
                 }
             }
 
-            if (theFontFile.filePath().isEmpty()) {
+            QFileInfo fontInfo(theFontFile);
+            if (fontInfo.filePath().isEmpty()) {
                 // If user doesn't have any font file, copy the default font file from Studio's res
                 // folder
 
-                CFilePath theResFontFile;
+                QString theResFontFile;
 
                 QDir theResFontDir(resourcePath() + "/Font");
-                Q_FOREACH (QFileInfo fontFile, theResFontDir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot)) {
-                    CString ext = CString::fromQString(fontFile.suffix());
+                const QFileInfoList infoList(theResFontDir.entryInfoList(
+                                                 QDir::Files | QDir::NoDotAndDotDot));
+                for (const QFileInfo &fontFile : infoList) {
+                    QString ext = fontFile.suffix();
                     if (CDialogs::IsFontFileExtension(ext)) {
-                        theResFontFile = CString::fromQString(fontFile.absoluteFilePath());
-                        theFontFile = CFilePath::CombineBaseAndRelative(theFontDir, CString::fromQString(fontFile.fileName()));
+                        theResFontFile = fontFile.absoluteFilePath();
+                        theFontFile = CFilePath::CombineBaseAndRelative(theFontDir,
+                                                                        fontFile.fileName());
                         break;
                     }
                 }
 
-                if (theResFontFile.filePath().isEmpty()) {
+                if (theResFontFile.isEmpty()) {
                     QT3DS_ASSERT(false);
                     std::shared_ptr<IImportFailedHandler> theHandler(
                         theDoc->GetImportFailedHandler());

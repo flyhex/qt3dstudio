@@ -48,12 +48,12 @@ ITimelineTimebar *CImageTimelineItemBinding::GetTimebar()
     return new CEmptyTimelineTimebar();
 }
 
-Q3DStudio::CString CImageTimelineItemBinding::GetName() const
+QString CImageTimelineItemBinding::GetName() const
 {
     return m_Name;
 }
 
-void CImageTimelineItemBinding::SetName(const Q3DStudio::CString &inName)
+void CImageTimelineItemBinding::SetName(const QString &inName)
 {
     m_Name = inName;
 }

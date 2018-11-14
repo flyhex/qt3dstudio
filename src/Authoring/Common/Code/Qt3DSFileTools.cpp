@@ -125,6 +125,16 @@ void CFilePath::normalizeAndSetPath(const QString &path)
     setFile(ret);
 }
 
+QString CFilePath::stripIdentifier(const QString &path)
+{
+    QString ret = normalizeAndCleanPath(path);
+    if (ret.contains(identifierSep)) {
+        int i = ret.indexOf(identifierSep);
+        ret.truncate(i);
+    }
+    return ret;
+}
+
 CFilePath CFilePath::GetDirectory() const
 {
     return CFilePath(path());
@@ -208,6 +218,15 @@ CString CFilePath::MakeSafeFileStem(const CString &name)
     return CString::fromQString(ret);
 }
 
+QString CFilePath::MakeSafeFileStem(const QString &name)
+{
+    QString ret = normalizeAndCleanPath(name);
+
+    ret = ret.replace(illegalChar, replaceChar);
+
+    return ret;
+}
+
 bool CFilePath::CreateDir(bool recurse) const
 {
     QDir d(filePath());
@@ -218,6 +237,19 @@ bool CFilePath::CreateDir(bool recurse) const
         return d.mkpath(filePath());
     d.cdUp();
     return d.mkdir(fileName());
+}
+
+bool CFilePath::CreateDir(const QString &path, bool recurse)
+{
+    QFileInfo info(path);
+    QDir d(info.dir());
+    if (d.exists())
+        return true;
+
+    if (recurse)
+        return d.mkpath(info.path());
+    d.cdUp();
+    return d.mkdir(info.fileName());
 }
 
 bool CFilePath::IsDirectory() const
@@ -258,51 +290,47 @@ bool CFilePath::DeleteThisDirectory(bool recurse)
     return d.mkdir(fileName());
 }
 
-void CFilePath::ListFilesAndDirectories(std::vector<CFilePath> &files) const
+void CFilePath::ListFilesAndDirectories(const QString &directory, std::vector<QFileInfo> &files)
 {
-    if (!IsDirectory())
-        return;
-
-    CString findPath = CString::fromQString(filePath());
-    QDirIterator di(findPath.toQString(), QDir::NoDotAndDotDot | QDir::AllEntries);
+    QDirIterator di(directory, QDir::NoDotAndDotDot | QDir::AllEntries);
     while (di.hasNext())
-        files.push_back(CString::fromQString(di.next()));
+        files.push_back(di.next());
 }
 
-void CFilePath::RecursivelyFindFilesOfType(const wchar_t **inExtensionList,
-                                           std::vector<CFilePath> &files, bool inMakeRelative,
-                                           bool inIncludeDirectories) const
+bool compare(const QFileInfo &a, const QFileInfo &b)
 {
-    if (!IsDirectory()) {
-        QT3DS_ASSERT(false);
-        return;
-    }
-    std::vector<CFilePath> directoryVector;
-    std::vector<CFilePath> nextDirectoryVector;
-    std::vector<CFilePath> resultsVector;
+    return a.filePath() < b.filePath();
+}
 
-    directoryVector.push_back(*this);
+void CFilePath::RecursivelyFindFilesOfType(const QFileInfo &dir, const QStringList &inExtensionList,
+                                           std::vector<QFileInfo> &files, bool inMakeRelative,
+                                           bool inIncludeDirectories)
+{
+    std::vector<QFileInfo> directoryVector;
+    std::vector<QFileInfo> nextDirectoryVector;
+    std::vector<QFileInfo> resultsVector;
+
+    directoryVector.push_back(dir);
     // breadth first search.
     while (directoryVector.empty() == false && files.size() < 10000) {
         for (size_t dirIdx = 0, dirEnd = directoryVector.size();
              dirIdx < dirEnd && files.size() < 10000; ++dirIdx) {
             resultsVector.clear();
-            directoryVector[dirIdx].ListFilesAndDirectories(resultsVector);
+            ListFilesAndDirectories(directoryVector[dirIdx].canonicalPath(), resultsVector);
             for (size_t resultIdx = 0, resultEnd = resultsVector.size(); resultIdx < resultEnd;
                  ++resultIdx) {
-                const CFilePath &result(resultsVector[resultIdx]);
-                if (result.IsDirectory()) {
+                const QFileInfo &result(resultsVector[resultIdx]);
+                if (result.isDir()) {
                     nextDirectoryVector.push_back(result);
                     if (inIncludeDirectories)
                         files.push_back(result);
                 } else {
-                    Q3DStudio::CString extension(result.GetExtension());
-                    if (inExtensionList == NULL || *inExtensionList == NULL) {
+                    QString extension(result.suffix());
+                    if (inExtensionList.isEmpty()) {
                         files.push_back(result);
                     } else {
-                        for (const wchar_t **specificExt = inExtensionList; *specificExt;
-                             ++specificExt) {
-                            if (extension == *specificExt) {
+                        for (const QString &ext : qAsConst(inExtensionList)) {
+                            if (extension == ext) {
                                 files.push_back(result);
                                 break;
                             }
@@ -314,10 +342,10 @@ void CFilePath::RecursivelyFindFilesOfType(const wchar_t **inExtensionList,
         std::swap(directoryVector, nextDirectoryVector);
         nextDirectoryVector.clear();
     }
-    std::stable_sort(files.begin(), files.end());
+    std::stable_sort(files.begin(), files.end(), compare);
     if (inMakeRelative) {
         for (size_t idx = 0, end = files.size(); idx < end; ++idx)
-            files[idx] = GetRelativePathFromBase(*this, files[idx]);
+            files[idx] = GetRelativePathFromBase(dir, files[idx]);
     }
 }
 
@@ -663,6 +691,30 @@ SFileErrorCodeAndNumBytes SFileTools::Copy(const CFilePath &destFile, FileOpenFl
     bool ok = QFile::copy(srcFile.filePath(), destFileString);
     if (ok)
         return destFile.size();
+
+    return FileErrorCodes::DestNotWriteable;
+}
+
+SFileErrorCodeAndNumBytes SFileTools::Copy(const QString &destFile, FileOpenFlags fileFlags,
+                                           const QString &srcFile)
+{
+    QFileInfo src(srcFile);
+    QFileInfo dst(destFile);
+    if (!src.exists())
+        return FileErrorCodes::SourceNotExist;
+
+    if (!src.isReadable())
+        return FileErrorCodes::SourceNotReadable;
+
+    if (dst.exists()) {
+        bool ok = QFile::remove(destFile);
+        if (!ok)
+            return FileErrorCodes::DestNotWriteable;
+    }
+
+    bool ok = QFile::copy(srcFile, destFile);
+    if (ok)
+        return dst.size();
 
     return FileErrorCodes::DestNotWriteable;
 }

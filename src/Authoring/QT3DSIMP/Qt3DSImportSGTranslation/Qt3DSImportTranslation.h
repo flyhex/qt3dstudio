@@ -60,7 +60,7 @@ protected:
     virtual ~ISGTranslationLog() {}
 public:
     virtual void OnWarning(ESceneGraphWarningCode inWarningCode,
-                           const wchar_t *inAssociatedName) = 0;
+                           const QString &inAssociatedName) = 0;
 };
 
 #ifdef QT3DS_IMPORT_TRANSLATION_INTERNAL
@@ -72,7 +72,7 @@ public:
 class CImportTranslation
 {
 public:
-    static inline const wchar_t *GetRootNodeId() { return L"__import__root__"; }
+    static inline const QString GetRootNodeId() { return QStringLiteral("__import__root__"); }
     // Parse the collada file, marking when things don't line up correctly.
     // Translate a collada file into an import datastructure.
     static EXPORT_FUNCTION bool ParseColladaFile(const std::string &fileName, Import &import,
@@ -87,9 +87,9 @@ public:
 
 struct STranslationLog : public qt3dsimp::ISGTranslationLog
 {
-    vector<pair<qt3dsimp::ESceneGraphWarningCode, Q3DStudio::CString>> m_Warnings;
+    vector<pair<qt3dsimp::ESceneGraphWarningCode, QString>> m_Warnings;
     void OnWarning(qt3dsimp::ESceneGraphWarningCode inWarningCode,
-                           const wchar_t *inAssociatedName) override
+                           const QString &inAssociatedName) override
     {
         m_Warnings.push_back(std::make_pair(inWarningCode, inAssociatedName));
     }

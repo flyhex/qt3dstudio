@@ -56,7 +56,7 @@ public: // Constructor
                        qt3dsdm::Qt3DSDMInstanceHandle inDualPersonalityInstance = 0);
 
 public: // CInspectableBase
-    Q3DStudio::CString GetName() override;
+    QString GetName() override;
     long GetGroupCount() override;
     CInspectorGroup *GetGroup(long) override;
     EStudioObjectType GetObjectType() override;

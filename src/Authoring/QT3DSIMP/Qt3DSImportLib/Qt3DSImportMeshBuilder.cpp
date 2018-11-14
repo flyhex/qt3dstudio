@@ -54,7 +54,7 @@ NVConstDataRef<TDataType> toRefBuf(QT3DSU8 *bufData, QT3DSU32 off, QT3DSU32 size
 struct DynamicVBuf
 {
     QT3DSU32 m_Stride;
-    ImportArray<NVRenderVertexBufferEntry> m_VertexBufferEntries;
+    QVector<NVRenderVertexBufferEntry> m_VertexBufferEntries;
     MemoryBuffer<RawAllocator> m_VertexData;
 
     void clear()
@@ -104,13 +104,13 @@ class MeshBuilderImpl : public MeshBuilder
 {
     DynamicVBuf m_VertexBuffer;
     DynamicIndexBuf m_IndexBuffer;
-    ImportArray<Joint> m_Joints;
-    ImportArray<SubsetDesc> m_MeshSubsetDescs;
+    QVector<Joint> m_Joints;
+    QVector<SubsetDesc> m_MeshSubsetDescs;
     NVRenderDrawMode::Enum m_DrawMode;
     NVRenderWinding::Enum m_Winding;
     MemoryBuffer<RawAllocator> m_RemappedVertexData;
     MemoryBuffer<RawAllocator> m_NewIndexBuffer;
-    ImportArray<QT3DSU8> m_MeshBuffer;
+    QVector<QT3DSU8> m_MeshBuffer;
 
 public:
     MeshBuilderImpl() { Reset(); }
@@ -303,8 +303,8 @@ public:
 
         // did we find some duplicates?
         if (matDuplicates) {
-            ImportArray<SubsetDesc> newMeshSubsetDescs;
-            ImportArray<SubsetDesc>::iterator theIter;
+            QVector<SubsetDesc> newMeshSubsetDescs;
+            QVector<SubsetDesc>::iterator theIter;
             QString curMatName;
             m_NewIndexBuffer.clear();
 
@@ -312,7 +312,7 @@ public:
                  ++theIter) {
                 bool bProcessed = false;
 
-                for (ImportArray<SubsetDesc>::iterator iter = newMeshSubsetDescs.begin();
+                for (QVector<SubsetDesc>::iterator iter = newMeshSubsetDescs.begin();
                      iter != newMeshSubsetDescs.end(); ++iter) {
                     if (theIter->m_Name == iter->m_Name) {
                         bProcessed = true;

@@ -326,7 +326,7 @@ QString SlideModel::slideName(const qt3dsdm::Qt3DSDMSlideHandle &handle) const
     if (!doc->IsValid())
         return {};
     const auto instanceHandle = doc->GetStudioSystem()->GetSlideSystem()->GetSlideInstance(handle);
-    return GetBridge()->GetName(instanceHandle).toQString();
+    return GetBridge()->GetName(instanceHandle);
 }
 
 void SlideModel::setSlideName(const qt3dsdm::Qt3DSDMSlideHandle &handle, const QString &name)
@@ -373,7 +373,7 @@ void SlideModel::refreshSlideLabel(qt3dsdm::Qt3DSDMInstanceHandle instanceHandle
         qt3dsdm::Qt3DSDMSlideHandle slideHandle = m_slideLookupHash.value(instanceHandle);
         for (int i = 0; i < m_slides.size(); ++i) {
             if (m_slides[i] == slideHandle) {
-                setData(index(i, 0), GetBridge()->GetName(instanceHandle).toQString(),
+                setData(index(i, 0), GetBridge()->GetName(instanceHandle),
                         SlideModel::NameRole);
             }
         }

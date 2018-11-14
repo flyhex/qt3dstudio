@@ -52,28 +52,29 @@ using namespace qt3dsdm;
 struct ParentChildLink;
 struct PropertyValue;
 class Import;
-class InstanceDesc;
+struct InstanceDesc;
 
 struct ImportErrorData
 {
     ImportErrorCodes::Enum m_Error;
-    const wchar_t *m_ExtraInfo;
-    explicit ImportErrorData(ImportErrorCodes::Enum err, TCharPtr extraInfo)
+    QString m_ExtraInfo;
+    explicit ImportErrorData(ImportErrorCodes::Enum err, const QString &extraInfo)
         : m_Error(err)
         , m_ExtraInfo(extraInfo)
     {
     }
     ImportErrorData()
         : m_Error(ImportErrorCodes::NoError)
-        , m_ExtraInfo(L"")
     {
     }
 
     void PrintErrorString(wchar_t *buffer, QT3DSU32 bufLen)
     {
-        if (m_Error != ImportErrorCodes::NoError)
+        if (m_Error != ImportErrorCodes::NoError) {
+            QByteArray data(m_ExtraInfo.toLocal8Bit());
             swprintf(buffer, bufLen, ImportErrorCodes::GetEnglishFormatString(m_Error),
-                     m_ExtraInfo);
+                     data.data());
+        }
         else
             swprintf(buffer, bufLen, L"No error");
     }
@@ -97,7 +98,7 @@ struct PropertyValue
     }
 };
 
-typedef const wchar_t *TImportId;
+typedef QString TImportId;
 
 /**
  *	Interface to allow abstract UIComposer details (doc, slides, etc)
@@ -142,11 +143,11 @@ public:
     // they may be out of order so if the child already has this parent relationship you need
     // to check the order and ensure that is also (somewhat) correct.
     virtual void AddChild(TImportId parent, TImportId child, TImportId nextSibling) = 0;
-    virtual void RemoveAnimation(TImportId hdl, const wchar_t *propName, long propSubIndex) = 0;
-    virtual void UpdateAnimation(TImportId hdl, const wchar_t *propName, long propSubIndex,
+    virtual void RemoveAnimation(TImportId hdl, const QString &propName, long propSubIndex) = 0;
+    virtual void UpdateAnimation(TImportId hdl, const QString &propName, long propSubIndex,
                                  EAnimationType animType, const float *animData,
                                  QT3DSU32 numFloats) = 0;
-    virtual void AddAnimation(TImportId hdl, const wchar_t *propName, long propSubIndex,
+    virtual void AddAnimation(TImportId hdl, const QString &propName, long propSubIndex,
                               EAnimationType animType, const float *animData, QT3DSU32 numFloats) = 0;
 
     virtual void EndImport() = 0;
@@ -174,13 +175,14 @@ struct SImportResult
     ImportErrorCodes::Enum m_Error;
     // The file path will probably contain a version number at the end of the
     // string, so you need to be aware of this.
-    Q3DStudio::CFilePath m_FilePath;
+    QString m_FilePath;
+    QT3DSU32 m_fileVersion;
 
     SImportResult(ImportErrorCodes::Enum inError)
         : m_Error(inError)
     {
     }
-    SImportResult(const Q3DStudio::CFilePath &inFilePath, QT3DSU32 inFileVersion);
+    SImportResult(const QString &inFilePath, QT3DSU32 inFileVersion);
 };
 
 // The file path
@@ -205,7 +207,7 @@ public:
       */
     static SImportResult RefreshToComposer(ITranslator &translator, IComposerEditor &inComposers,
                                            Import &inOriginalFile,
-                                           const Q3DStudio::CFilePath &ioImportFile);
+                                           const QString &ioImportFile);
 
     /**
       *	Exception safe!  translator and importer are always released!!
@@ -220,7 +222,7 @@ public:
       *	that was imported.
       */
     static SImportResult RefreshToComposer(ITranslator &translator, IComposerEditor &inComposers,
-                                           const Q3DStudio::CFilePath &ioImportFile);
+                                           const QString &ioImportFile);
     /**
       *	Exception safe!  translator and importer are always released!!
       *	1.  Create blank importer
@@ -232,7 +234,7 @@ public:
       *	If the import file exists, a new import version will be written to the file.
       */
     static SImportResult ImportToComposer(ITranslator &translator, IComposerEditor &composer,
-                                          const Q3DStudio::CFilePath &inImportFile);
+                                          const QString &inImportFile);
 
     /**
      *	Load the dest file, and import the objects into composer.
@@ -241,7 +243,7 @@ public:
      *	The import file must exist.
      */
     static SImportResult ImportToComposerFromImportFile(IComposerEditor &composer,
-                                                        const Q3DStudio::CFilePath &inImportFile);
+                                                        const QString &inImportFile);
 
     /**
      *	Translate an outside file type to an import file but don't import that file.  If thei mport
@@ -249,7 +251,7 @@ public:
      *	version is written to the import file.
      */
     static SImportResult TranslateToImportFile(ITranslator &translator,
-                                               const Q3DStudio::CFilePath &inImportFile);
+                                               const QString &inImportFile);
 
     static void DoImportToComposer(Import &import, IComposerEditor &composer);
 };

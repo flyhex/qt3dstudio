@@ -27,7 +27,7 @@
 ****************************************************************************/
 
 #include "SlideView.h"
-#include "CColor.h"
+#include <QtGui/qcolor.h>
 #include "Core.h"
 #include "Dispatch.h"
 #include "Doc.h"
@@ -467,7 +467,7 @@ void SlideView::rebuildSlideList(const qt3dsdm::Qt3DSDMSlideHandle &inActiveSlid
             const auto instanceHandle =
                     GetDoc()->GetStudioSystem()->GetSlideSystem()->GetSlideInstance(theSlideHandle);
             m_SlidesModel->setData(index,
-                                   GetBridge()->GetName(instanceHandle).toQString(),
+                                   GetBridge()->GetName(instanceHandle),
                                    SlideModel::NameRole);
             // This slide is the active slide
             if (theSlideHandle == m_ActiveSlideHandle) {

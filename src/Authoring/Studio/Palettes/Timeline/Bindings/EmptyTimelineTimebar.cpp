@@ -82,7 +82,7 @@ void CEmptyTimelineTimebar::RollbackTimeChange()
 {
 }
 
-::CColor CEmptyTimelineTimebar::GetTimebarColor()
+QColor CEmptyTimelineTimebar::GetTimebarColor()
 {
     return CStudioPreferences::GetObjectTimebarColor();
 }

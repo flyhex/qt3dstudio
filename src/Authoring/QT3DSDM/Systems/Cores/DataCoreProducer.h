@@ -73,7 +73,7 @@ public:
     // IInstancePropertyCore
     //===============================================================
     Qt3DSDMPropertyHandle GetAggregateInstancePropertyByName(Qt3DSDMInstanceHandle inInstance,
-                                                            const TCharStr &inStr) const override;
+                                                            const QString &inStr) const override;
     void GetAggregateInstanceProperties(Qt3DSDMInstanceHandle inInstance,
                                                 TPropertyHandleList &outProperties) const override;
     void GetSpecificInstancePropertyValues(Qt3DSDMInstanceHandle inHandle,
@@ -103,7 +103,7 @@ public:
     bool IsInstanceOrDerivedFrom(Qt3DSDMInstanceHandle inInstance,
                                          Qt3DSDMInstanceHandle inParent) const override;
 
-    Qt3DSDMPropertyHandle AddProperty(Qt3DSDMInstanceHandle inInstance, TCharPtr inName,
+    Qt3DSDMPropertyHandle AddProperty(Qt3DSDMInstanceHandle inInstance, const QString &inName,
                                              DataModelDataType::Value inPropType) override;
     void GetInstanceProperties(Qt3DSDMInstanceHandle inInstance,
                                        TPropertyHandleList &outProperties) const override;
@@ -149,10 +149,10 @@ public:
         const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMInstanceHandle)> &inCallback) override;
     virtual TSignalConnectionPtr
     ConnectPropertyAdded(const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle,
-                                                    TCharPtr, DataModelDataType::Value)> &inCallback) override;
+                                  const QString &, DataModelDataType::Value)> &inCallback) override;
     virtual TSignalConnectionPtr
     ConnectPropertyRemoved(const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle,
-                                                      TCharPtr, DataModelDataType::Value)> &inCallback) override;
+                                  const QString &, DataModelDataType::Value)> &inCallback) override;
 
 private:
     CDataCoreProducer(const CDataCoreProducer&) = delete;

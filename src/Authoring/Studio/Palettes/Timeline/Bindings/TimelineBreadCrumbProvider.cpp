@@ -36,7 +36,7 @@
 #include "StudioApp.h"
 #include "Cmd.h"
 #include "ResourceCache.h"
-#include "CColor.h"
+#include <QtGui/qcolor.h>
 
 #include "ClientDataModelBridge.h"
 #include "Qt3DSDMStudioSystem.h"
@@ -83,10 +83,10 @@ static inline void FillBreadCrumb(SBreadCrumb &outBreadCrumb,
 
     // Determine the color
     outBreadCrumb.m_Color =
-            theIsMaster ? CColor(0, 0, 255) : CColor(0, 0, 0); // blue for master, black otherwise
+            theIsMaster ? QColor(0, 0, 255) : QColor(0, 0, 0); // blue for master, black otherwise
 
     // Determine the text string
-    outBreadCrumb.m_String = theBridge->GetName(inInstance).toQString();
+    outBreadCrumb.m_String = theBridge->GetName(inInstance);
     outBreadCrumb.m_String += " (";
     if (theIsMaster) {
         outBreadCrumb.m_String += QObject::tr("Master");
@@ -95,7 +95,7 @@ static inline void FillBreadCrumb(SBreadCrumb &outBreadCrumb,
                 theSlideSystem->GetSlideByIndex(theMasterSlide, theActiveIndex);
         Qt3DSDMInstanceHandle theInstanceHandle = theSlideSystem->GetSlideInstance(theActiveSlide);
         Q_ASSERT(theInstanceHandle.Valid());
-        outBreadCrumb.m_String += theBridge->GetName(theInstanceHandle).toQString();
+        outBreadCrumb.m_String += theBridge->GetName(theInstanceHandle);
     }
     outBreadCrumb.m_String += ")";
 }

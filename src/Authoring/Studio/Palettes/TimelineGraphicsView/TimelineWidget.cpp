@@ -589,7 +589,7 @@ void TimelineWidget::onAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentIns
 
             // create the property UI row
             RowTree *propRow = m_graphicsScene->rowManager()
-            ->getOrCreatePropertyRow(binding->getRowTree(), propBinding->GetName().toQString(),
+            ->getOrCreatePropertyRow(binding->getRowTree(), propBinding->GetName(),
                                      binding->getAnimatedPropertyIndex(property));
 
             // connect the row and binding
@@ -742,7 +742,7 @@ void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance
     const SDataModelSceneAsset &asset = m_bridge->GetSceneAsset();
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     auto ctrldPropHandle = doc->GetPropertySystem()
-            ->GetAggregateInstancePropertyByName(inInstance, L"controlledproperty");
+            ->GetAggregateInstancePropertyByName(inInstance, QStringLiteral("controlledproperty"));
 
     if (inProperty == asset.m_Eyeball || inProperty == asset.m_Locked || inProperty == asset.m_Shy
             || inProperty == asset.m_StartTime || inProperty == asset.m_EndTime
@@ -855,7 +855,7 @@ void TimelineWidget::onAsyncUpdate()
                 const auto props = m_dirtyProperties.values(instance);
                 const auto ctrldPropHandle =
                         doc->GetPropertySystem()->GetAggregateInstancePropertyByName(
-                            instance, L"controlledproperty");
+                            instance, QStringLiteral("controlledproperty"));
                 for (auto prop : props) {
                     filterProperty = filterProperty || prop == asset.m_Eyeball
                             || prop == asset.m_Locked || prop == asset.m_Shy

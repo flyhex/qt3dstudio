@@ -111,8 +111,9 @@ bool IsAscendant(Q3DStudio::TIdentifier inDescendant, Q3DStudio::TIdentifier inA
 
 Q3DStudio::TIdentifier GetSibling(const Q3DStudio::TIdentifier inNode, bool inAfter,
                                   const Q3DStudio::CGraphIterator &inIterator);
-
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
 void PrintAssetSubTree(qt3dsdm::Qt3DSDMInstanceHandle inInstance, CDoc *m_Doc, char *prefix);
 void PrintSlideInfo(CDoc *m_Doc, char *prefix, qt3dsdm::Qt3DSDMSlideHandle theMasterSlide);
+#endif
 
 #endif // INCLUDED_GRAPH_UTILS_H

@@ -49,11 +49,11 @@ class IObjectReferenceHelper
 public:
     struct SObjectRefInfo
     {
-        Q3DStudio::CString m_Name;
+        QString m_Name;
         EStudioObjectType m_Type;
         bool m_Master;
 
-        SObjectRefInfo(Q3DStudio::CString inName, EStudioObjectType inType, bool inMaster)
+        SObjectRefInfo(const QString &inName, EStudioObjectType inType, bool inMaster)
             : m_Name(inName)
             , m_Type(inType)
             , m_Master(inMaster)
@@ -79,15 +79,15 @@ public:
                          qt3dsdm::TInstanceHandleList &outlist, qt3dsdm::Qt3DSDMSlideHandle inSlide,
                          const qt3dsdm::Qt3DSDMInstanceHandle &inOwningInstance,
                          bool ignoreMaterialProperties = false) const = 0;
-    virtual Q3DStudio::CString
+    virtual QString
     LookupObjectFormalName(const qt3dsdm::Qt3DSDMInstanceHandle inInstance) const = 0;
 
-    virtual Q3DStudio::CString
+    virtual QString
     GetObjectReferenceString(const qt3dsdm::Qt3DSDMInstanceHandle &inBaseInstance,
                              CRelativePathTools::EPathType inPathType,
                              const qt3dsdm::Qt3DSDMInstanceHandle &inInstance) const = 0;
     virtual bool ResolvePath(const qt3dsdm::Qt3DSDMInstanceHandle &inInstance,
-                             const Q3DStudio::CString &inPathValue,
+                             const QString &inPathValue,
                              CRelativePathTools::EPathType &outType,
                              qt3dsdm::Qt3DSDMInstanceHandle &outResolvedInstance,
                              bool ignoreMaterialProperties = false) = 0;

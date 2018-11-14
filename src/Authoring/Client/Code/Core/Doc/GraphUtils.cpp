@@ -390,6 +390,7 @@ Q3DStudio::TIdentifier GetSibling(const Q3DStudio::TIdentifier inNode, bool inAf
 /**
  *	Prints the subtree of the asset
  */
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
 void PrintAssetSubTree(qt3dsdm::Qt3DSDMInstanceHandle inInstance, CDoc *inDoc, char *prefix)
 {
     CClientDataModelBridge *theBridge = inDoc->GetStudioSystem()->GetClientDataModelBridge();
@@ -424,3 +425,4 @@ void PrintSlideInfo(CDoc *m_Doc, char *prefix, qt3dsdm::Qt3DSDMSlideHandle theMa
         PrintAssetSubTree(slideInstance, m_Doc, prefix);
     }
 }
+#endif

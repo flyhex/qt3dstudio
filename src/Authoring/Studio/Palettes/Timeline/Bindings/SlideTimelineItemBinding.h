@@ -56,7 +56,7 @@ public:
 
     // Qt3DSDMTimelineItemBinding
     ITimelineTimebar *GetTimebar() override;
-    void SetName(const Q3DStudio::CString &inName) override;
+    void SetName(const QString &inName) override;
     bool IsValidTransaction(EUserTransaction inTransaction) override;
 
     // No properties

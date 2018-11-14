@@ -152,7 +152,7 @@ QVariant ChooserModelBase::data(const QModelIndex &index, int role) const
 void ChooserModelBase::setCurrentFile(const QString &path)
 {
     const auto doc = g_StudioApp.GetCore()->GetDoc();
-    const QDir documentDir(doc->GetDocumentDirectory().toQString());
+    const QDir documentDir(doc->GetDocumentDirectory());
     const QString fullPath = QDir::cleanPath(documentDir.filePath(path));
 
     if (fullPath != m_currentFile) {
@@ -379,7 +379,7 @@ bool ChooserModelBase::isExpanded(const QModelIndex &modelIndex) const
 
 EStudioObjectType ChooserModelBase::getIconType(const QString &path) const
 {
-    return Q3DStudio::ImportUtils::GetObjectFileTypeForFile(Q3DStudio::CFilePath(path)).m_IconType;
+    return Q3DStudio::ImportUtils::GetObjectFileTypeForFile(path).m_IconType;
 }
 
 QString ChooserModelBase::specialDisplayName(const ChooserModelBase::TreeItem &item) const

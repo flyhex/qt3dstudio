@@ -190,16 +190,15 @@ void CCore::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget
 }
 
 void CCore::GetCreateDirectoryFileName(const QString &inDocument,
-                                       Q3DStudio::CFilePath &outFinalDir,
-                                       Q3DStudio::CFilePath &outFinalDoc)
+                                       QString &outFinalDir,
+                                       QString &outFinalDoc)
 {
-    using namespace Q3DStudio;
-    CFilePath theOriginal(inDocument);
-    CFilePath theName(theOriginal.GetFileName());
-    CString theStem(theOriginal.GetFileStem());
-    CFilePath theDir = theOriginal.GetDirectory();
-    outFinalDir = CFilePath::CombineBaseAndRelative(theDir, theStem);
-    outFinalDoc = CFilePath::CombineBaseAndRelative(outFinalDir, theName);
+    QFileInfo theOriginal(inDocument);
+    QString theName(theOriginal.fileName());
+    QString theStem(theOriginal.baseName());
+    QString theDir = theOriginal.canonicalPath();
+    outFinalDir = Q3DStudio::CFilePath::CombineBaseAndRelative(theDir, theStem);
+    outFinalDoc = Q3DStudio::CFilePath::CombineBaseAndRelative(outFinalDir, theName);
 }
 
 ProjectFile &CCore::getProjectFile()

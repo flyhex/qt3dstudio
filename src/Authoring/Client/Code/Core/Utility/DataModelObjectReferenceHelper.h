@@ -64,15 +64,15 @@ public:
                               qt3dsdm::Qt3DSDMSlideHandle inSlide,
                               const qt3dsdm::Qt3DSDMInstanceHandle &inOwningInstance,
                               bool ignoreMaterialProperties = false) const override;
-    virtual Q3DStudio::CString
+    virtual QString
     LookupObjectFormalName(const qt3dsdm::Qt3DSDMInstanceHandle inInstance) const override;
 
-    virtual Q3DStudio::CString
+    virtual QString
     GetObjectReferenceString(const qt3dsdm::Qt3DSDMInstanceHandle &inBaseInstance,
                              CRelativePathTools::EPathType inPathType,
                              const qt3dsdm::Qt3DSDMInstanceHandle &inInstance) const override;
     bool ResolvePath(const qt3dsdm::Qt3DSDMInstanceHandle &inInstance,
-                             const Q3DStudio::CString &inPathValue,
+                             const QString &inPathValue,
                              CRelativePathTools::EPathType &outType,
                              qt3dsdm::Qt3DSDMInstanceHandle &outResolveInstance,
                              bool ignoreMaterialProperties = false) override;

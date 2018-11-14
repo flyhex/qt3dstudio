@@ -132,8 +132,8 @@ public:
 
     qt3dsdm::SValue currentPropertyValue(long instance, int handle) const;
     QString currentControllerValue(long instance, int handle) const;
-    void setPropertyControllerInstance(long instance,int handle,
-                                       Q3DStudio::CString controllerInstance,
+    void setPropertyControllerInstance(long instance, int handle,
+                                       const QString &controllerInstance,
                                        bool controlled);
 
     Q_INVOKABLE void setMaterialTypeValue(long instance, int handle, const QVariant &value);

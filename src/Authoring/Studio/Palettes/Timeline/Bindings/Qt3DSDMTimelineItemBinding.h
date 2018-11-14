@@ -115,8 +115,8 @@ public:
     ITimelineTimebar *GetTimebar() override;
 
     // INamable
-    Q3DStudio::CString GetName() const override;
-    void SetName(const Q3DStudio::CString &inName) override;
+    QString GetName() const override;
+    void SetName(const QString &inName) override;
 
     // ITimelineItemBinding
     ITimelineItem *GetTimelineItem() override;
@@ -142,7 +142,7 @@ public:
     // ContextMenu
     bool IsValidTransaction(EUserTransaction inTransaction) override;
     void PerformTransaction(EUserTransaction inTransaction) override;
-    Q3DStudio::CString GetObjectPath() override;
+    QString GetObjectPath() override;
 
     // ITimelineItemKeyframesHolder
     void InsertKeyframe() override;

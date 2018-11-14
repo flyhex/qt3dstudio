@@ -95,224 +95,224 @@ struct DataConstructor<SObjectRefType>
 };
 }
 
-#define QT3DS_WCHAR_T_Typed L"Typed"
-#define QT3DS_WCHAR_T_Guided L"Guided"
-#define QT3DS_WCHAR_T_Named L"Named"
-#define QT3DS_WCHAR_T_SlideOwner L"SlideOwner"
-#define QT3DS_WCHAR_T_Slide L"Slide"
-#define QT3DS_WCHAR_T_Action L"Action"
-#define QT3DS_WCHAR_T_Asset L"Asset"
-#define QT3DS_WCHAR_T_Scene L"Scene"
-#define QT3DS_WCHAR_T_Image L"Image"
-#define QT3DS_WCHAR_T_Material L"Material"
-#define QT3DS_WCHAR_T_Behavior L"Behavior"
-#define QT3DS_WCHAR_T_Node L"Node"
-#define QT3DS_WCHAR_T_Layer L"Layer"
-#define QT3DS_WCHAR_T_Group L"Group"
-#define QT3DS_WCHAR_T_Model L"Model"
-#define QT3DS_WCHAR_T_Light L"Light"
-#define QT3DS_WCHAR_T_Camera L"Camera"
-#define QT3DS_WCHAR_T_Component L"Component"
-#define QT3DS_WCHAR_T_Text L"Text"
-#define QT3DS_WCHAR_T_Effect L"Effect"
-#define QT3DS_WCHAR_T_RenderPlugin L"RenderPlugin"
-#define QT3DS_WCHAR_T_MaterialBase L"MaterialBase"
-#define QT3DS_WCHAR_T_CustomMaterial L"CustomMaterial"
-#define QT3DS_WCHAR_T_ReferencedMaterial L"ReferencedMaterial"
-#define QT3DS_WCHAR_T_Alias L"Alias"
-#define QT3DS_WCHAR_T_Lightmaps L"Lightmaps"
+#define QT3DS_PROPNAME_Typed "Typed"
+#define QT3DS_PROPNAME_Guided "Guided"
+#define QT3DS_PROPNAME_Named "Named"
+#define QT3DS_PROPNAME_SlideOwner "SlideOwner"
+#define QT3DS_PROPNAME_Slide "Slide"
+#define QT3DS_PROPNAME_Action "Action"
+#define QT3DS_PROPNAME_Asset "Asset"
+#define QT3DS_PROPNAME_Scene "Scene"
+#define QT3DS_PROPNAME_Image "Image"
+#define QT3DS_PROPNAME_Material "Material"
+#define QT3DS_PROPNAME_Behavior "Behavior"
+#define QT3DS_PROPNAME_Node "Node"
+#define QT3DS_PROPNAME_Layer "Layer"
+#define QT3DS_PROPNAME_Group "Group"
+#define QT3DS_PROPNAME_Model "Model"
+#define QT3DS_PROPNAME_Light "Light"
+#define QT3DS_PROPNAME_Camera "Camera"
+#define QT3DS_PROPNAME_Component "Component"
+#define QT3DS_PROPNAME_Text "Text"
+#define QT3DS_PROPNAME_Effect "Effect"
+#define QT3DS_PROPNAME_RenderPlugin "RenderPlugin"
+#define QT3DS_PROPNAME_MaterialBase "MaterialBase"
+#define QT3DS_PROPNAME_CustomMaterial "CustomMaterial"
+#define QT3DS_PROPNAME_ReferencedMaterial "ReferencedMaterial"
+#define QT3DS_PROPNAME_Alias "Alias"
+#define QT3DS_PROPNAME_Lightmaps "Lightmaps"
 
-#define QT3DS_WCHAR_T_type L"type"
-#define QT3DS_WCHAR_T_id L"id"
-#define QT3DS_WCHAR_T_name L"name"
-#define QT3DS_WCHAR_T_componentid L"componentid"
-#define QT3DS_WCHAR_T_playmode L"playmode"
-#define QT3DS_WCHAR_T_playthroughto L"playthroughto"
-#define QT3DS_WCHAR_T_initialplaystate L"initialplaystate"
-#define QT3DS_WCHAR_T_actioneyeball L"actioneyeball"
-#define QT3DS_WCHAR_T_sourcepath L"sourcepath"
-#define QT3DS_WCHAR_T_importid L"importid"
-#define QT3DS_WCHAR_T_starttime L"starttime"
-#define QT3DS_WCHAR_T_endtime L"endtime"
-#define QT3DS_WCHAR_T_eyeball L"eyeball"
-#define QT3DS_WCHAR_T_shy L"shy"
-#define QT3DS_WCHAR_T_locked L"locked"
-#define QT3DS_WCHAR_T_timebarcolor L"timebarcolor"
-#define QT3DS_WCHAR_T_timebartext L"timebartext"
-#define QT3DS_WCHAR_T_bgcolorenable L"bgcolorenable"
-#define QT3DS_WCHAR_T_background L"background"
-#define QT3DS_WCHAR_T_backgroundcolor L"backgroundcolor"
-#define QT3DS_WCHAR_T_blendtype L"blendtype"
-#define QT3DS_WCHAR_T_scaleu L"scaleu"
-#define QT3DS_WCHAR_T_scalev L"scalev"
-#define QT3DS_WCHAR_T_mappingmode L"mappingmode"
-#define QT3DS_WCHAR_T_tilingmodehorz L"tilingmodehorz"
-#define QT3DS_WCHAR_T_tilingmodevert L"tilingmodevert"
-#define QT3DS_WCHAR_T_rotationuv L"rotationuv"
-#define QT3DS_WCHAR_T_positionu L"positionu"
-#define QT3DS_WCHAR_T_positionv L"positionv"
-#define QT3DS_WCHAR_T_pivotu L"pivotu"
-#define QT3DS_WCHAR_T_pivotv L"pivotv"
-#define QT3DS_WCHAR_T_subpresentation L"subpresentation"
-#define QT3DS_WCHAR_T_iblprobe L"iblprobe"
-#define QT3DS_WCHAR_T_shaderlighting L"shaderlighting"
-#define QT3DS_WCHAR_T_blendmode L"blendmode"
-#define QT3DS_WCHAR_T_vertexcolors L"vertexcolors"
-#define QT3DS_WCHAR_T_diffuse L"diffuse"
-#define QT3DS_WCHAR_T_diffusemap L"diffusemap"
-#define QT3DS_WCHAR_T_diffusemap2 L"diffusemap2"
-#define QT3DS_WCHAR_T_diffusemap3 L"diffusemap3"
-#define QT3DS_WCHAR_T_specularreflection L"specularreflection"
-#define QT3DS_WCHAR_T_specularmap L"specularmap"
-#define QT3DS_WCHAR_T_specularmodel L"specularmodel"
-#define QT3DS_WCHAR_T_speculartint L"speculartint"
-#define QT3DS_WCHAR_T_ior L"ior"
-#define QT3DS_WCHAR_T_specularamount L"specularamount"
-#define QT3DS_WCHAR_T_specularroughness L"specularroughness"
-#define QT3DS_WCHAR_T_roughnessmap L"roughnessmap"
-#define QT3DS_WCHAR_T_opacitymap L"opacitymap"
-#define QT3DS_WCHAR_T_emissivepower L"emissivepower"
-#define QT3DS_WCHAR_T_emissivecolor L"emissivecolor"
-#define QT3DS_WCHAR_T_emissivemap L"emissivemap"
-#define QT3DS_WCHAR_T_emissivemap2 L"emissivemap2"
-#define QT3DS_WCHAR_T_normalmap L"normalmap"
-#define QT3DS_WCHAR_T_normalstrength L"normalstrength"
-#define QT3DS_WCHAR_T_position L"position"
-#define QT3DS_WCHAR_T_rotation L"rotation"
-#define QT3DS_WCHAR_T_scale L"scale"
-#define QT3DS_WCHAR_T_pivot L"pivot"
-#define QT3DS_WCHAR_T_opacity L"opacity"
-#define QT3DS_WCHAR_T_rotationorder L"rotationorder"
-#define QT3DS_WCHAR_T_orientation L"orientation"
-#define QT3DS_WCHAR_T_progressiveaa L"progressiveaa"
-#define QT3DS_WCHAR_T_multisampleaa L"multisampleaa"
-#define QT3DS_WCHAR_T_disabledepthtest L"disabledepthtest"
-#define QT3DS_WCHAR_T_disabledepthprepass L"disabledepthprepass"
-#define QT3DS_WCHAR_T_layerwidth L"layerwidth"
-#define QT3DS_WCHAR_T_layerheight L"layerheight"
-#define QT3DS_WCHAR_T_lighttype L"lighttype"
-#define QT3DS_WCHAR_T_lightdiffuse L"lightdiffuse"
-#define QT3DS_WCHAR_T_lightspecular L"lightspecular"
-#define QT3DS_WCHAR_T_lightambient L"lightambient"
-#define QT3DS_WCHAR_T_brightness L"brightness"
-#define QT3DS_WCHAR_T_linearfade L"linearfade"
-#define QT3DS_WCHAR_T_expfade L"expfade"
-#define QT3DS_WCHAR_T_areawidth L"areawidth"
-#define QT3DS_WCHAR_T_areaheight L"areaheight"
-#define QT3DS_WCHAR_T_castshadow L"castshadow"
-#define QT3DS_WCHAR_T_shdwbias L"shdwbias"
-#define QT3DS_WCHAR_T_shdwfactor L"shdwfactor"
-#define QT3DS_WCHAR_T_shdwmapres L"shdwmapres"
-#define QT3DS_WCHAR_T_shdwmapfar L"shdwmapfar"
-#define QT3DS_WCHAR_T_shdwmapfov L"shdwmapfov"
-#define QT3DS_WCHAR_T_shdwfilter L"shdwfilter"
-#define QT3DS_WCHAR_T_orthographic L"orthographic"
-#define QT3DS_WCHAR_T_fov L"fov"
-#define QT3DS_WCHAR_T_fovhorizontal L"fovhorizontal"
-#define QT3DS_WCHAR_T_clipnear L"clipnear"
-#define QT3DS_WCHAR_T_clipfar L"clipfar"
-#define QT3DS_WCHAR_T_lookatlock L"lookatlock"
-#define QT3DS_WCHAR_T_lookatpoint L"lookatpoint"
-#define QT3DS_WCHAR_T_textstring L"textstring"
-#define QT3DS_WCHAR_T_textcolor L"textcolor"
-#define QT3DS_WCHAR_T_font L"font"
-#define QT3DS_WCHAR_T_size L"size"
-#define QT3DS_WCHAR_T_horzalign L"horzalign"
-#define QT3DS_WCHAR_T_vertalign L"vertalign"
-#define QT3DS_WCHAR_T_leading L"leading"
-#define QT3DS_WCHAR_T_tracking L"tracking"
-#define QT3DS_WCHAR_T_enableacceleratedfont L"enableacceleratedfont"
-#define QT3DS_WCHAR_T_importfile L"importfile"
-#define QT3DS_WCHAR_T_fileid L"fileid"
-#define QT3DS_WCHAR_T_size L"size"
-#define QT3DS_WCHAR_T_location L"location"
-#define QT3DS_WCHAR_T_boneid L"boneid"
-#define QT3DS_WCHAR_T_poseroot L"poseroot"
-#define QT3DS_WCHAR_T_ignoresparent L"ignoresparent"
-#define QT3DS_WCHAR_T_tessellation L"tessellation"
-#define QT3DS_WCHAR_T_edgetess L"edgetess"
-#define QT3DS_WCHAR_T_innertess L"innertess"
-#define QT3DS_WCHAR_T_scalemode L"scalemode"
-#define QT3DS_WCHAR_T_scaleanchor L"scaleanchor"
-#define QT3DS_WCHAR_T_horzfields L"horzfields"
-#define QT3DS_WCHAR_T_left L"left"
-#define QT3DS_WCHAR_T_leftunits L"leftunits"
-#define QT3DS_WCHAR_T_width L"width"
-#define QT3DS_WCHAR_T_widthunits L"widthunits"
-#define QT3DS_WCHAR_T_right L"right"
-#define QT3DS_WCHAR_T_rightunits L"rightunits"
-#define QT3DS_WCHAR_T_vertfields L"vertfields"
-#define QT3DS_WCHAR_T_top L"top"
-#define QT3DS_WCHAR_T_topunits L"topunits"
-#define QT3DS_WCHAR_T_height L"height"
-#define QT3DS_WCHAR_T_heightunits L"heightunits"
-#define QT3DS_WCHAR_T_bottom L"bottom"
-#define QT3DS_WCHAR_T_bottomunits L"bottomunits"
-#define QT3DS_WCHAR_T_aostrength L"aostrength"
-#define QT3DS_WCHAR_T_aodistance L"aodistance"
-#define QT3DS_WCHAR_T_aosoftness L"aosoftness"
-#define QT3DS_WCHAR_T_aobias L"aobias"
-#define QT3DS_WCHAR_T_aosamplerate L"aosamplerate"
-#define QT3DS_WCHAR_T_aodither L"aodither"
-#define QT3DS_WCHAR_T_shadowstrength L"shadowstrength"
-#define QT3DS_WCHAR_T_shadowdist L"shadowdist"
-#define QT3DS_WCHAR_T_shadowsoftness L"shadowsoftness"
-#define QT3DS_WCHAR_T_shadowbias L"shadowbias"
-#define QT3DS_WCHAR_T_source L"source"
-#define QT3DS_WCHAR_T_referencedmaterial L"referencedmaterial"
-#define QT3DS_WCHAR_T_lightprobe L"lightprobe"
-#define QT3DS_WCHAR_T_probebright L"probebright"
-#define QT3DS_WCHAR_T_fastibl L"fastibl"
-#define QT3DS_WCHAR_T_probehorizon L"probehorizon"
-#define QT3DS_WCHAR_T_probefov L"probefov"
-#define QT3DS_WCHAR_T_lightprobe2 L"lightprobe2"
-#define QT3DS_WCHAR_T_probe2fade L"probe2fade"
-#define QT3DS_WCHAR_T_probe2window L"probe2window"
-#define QT3DS_WCHAR_T_probe2pos L"probe2pos"
-#define QT3DS_WCHAR_T_bumpmap L"bumpmap"
-#define QT3DS_WCHAR_T_bumpamount L"bumpamount"
-#define QT3DS_WCHAR_T_normalmap L"normalmap"
-#define QT3DS_WCHAR_T_displacementmap L"displacementmap"
-#define QT3DS_WCHAR_T_displaceamount L"displaceamount"
-#define QT3DS_WCHAR_T_translucencymap L"translucencymap"
-#define QT3DS_WCHAR_T_translucentfalloff L"translucentfalloff"
-#define QT3DS_WCHAR_T_diffuselightwrap L"diffuselightwrap"
-#define QT3DS_WCHAR_T_fresnelPower L"fresnelPower"
-#define QT3DS_WCHAR_T_referencednode L"referencednode"
-#define QT3DS_WCHAR_T_temporalaa L"temporalaa"
-#define QT3DS_WCHAR_T_scope L"scope"
-#define QT3DS_WCHAR_T_Path L"Path"
-#define QT3DS_WCHAR_T_pathdata L"pathdata"
-#define QT3DS_WCHAR_T_PathAnchorPoint L"PathAnchorPoint"
-#define QT3DS_WCHAR_T_incomingangle L"incomingangle"
-#define QT3DS_WCHAR_T_incomingdistance L"incomingdistance"
-#define QT3DS_WCHAR_T_outgoingdistance L"outgoingdistance"
-#define QT3DS_WCHAR_T_linearerror L"linearerror"
-#define QT3DS_WCHAR_T_edgetessamount L"edgetessamount"
-#define QT3DS_WCHAR_T_innertessamount L"innertessamount"
-#define QT3DS_WCHAR_T_begincap L"begincap"
-#define QT3DS_WCHAR_T_begincapoffset L"begincapoffset"
-#define QT3DS_WCHAR_T_begincapopacity L"begincapopacity"
-#define QT3DS_WCHAR_T_begincapwidth L"begincapwidth"
-#define QT3DS_WCHAR_T_endcap L"endcap"
-#define QT3DS_WCHAR_T_endcapoffset L"endcapoffset"
-#define QT3DS_WCHAR_T_endcapopacity L"endcapopacity"
-#define QT3DS_WCHAR_T_endcapwidth L"endcapwidth"
-#define QT3DS_WCHAR_T_pathtype L"pathtype"
-#define QT3DS_WCHAR_T_closed L"closed"
-#define QT3DS_WCHAR_T_paintstyle L"paintstyle"
-#define QT3DS_WCHAR_T_SubPath L"SubPath"
-#define QT3DS_WCHAR_T_lightmapindirect L"lightmapindirect"
-#define QT3DS_WCHAR_T_lightmapradiosity L"lightmapradiosity"
-#define QT3DS_WCHAR_T_lightmapshadow L"lightmapshadow"
-#define QT3DS_WCHAR_T_controlledproperty L"controlledproperty"
+#define QT3DS_PROPNAME_type "type"
+#define QT3DS_PROPNAME_id "id"
+#define QT3DS_PROPNAME_name "name"
+#define QT3DS_PROPNAME_componentid "componentid"
+#define QT3DS_PROPNAME_playmode "playmode"
+#define QT3DS_PROPNAME_playthroughto "playthroughto"
+#define QT3DS_PROPNAME_initialplaystate "initialplaystate"
+#define QT3DS_PROPNAME_actioneyeball "actioneyeball"
+#define QT3DS_PROPNAME_sourcepath "sourcepath"
+#define QT3DS_PROPNAME_importid "importid"
+#define QT3DS_PROPNAME_starttime "starttime"
+#define QT3DS_PROPNAME_endtime "endtime"
+#define QT3DS_PROPNAME_eyeball "eyeball"
+#define QT3DS_PROPNAME_shy "shy"
+#define QT3DS_PROPNAME_locked "locked"
+#define QT3DS_PROPNAME_timebarcolor "timebarcolor"
+#define QT3DS_PROPNAME_timebartext "timebartext"
+#define QT3DS_PROPNAME_bgcolorenable "bgcolorenable"
+#define QT3DS_PROPNAME_background "background"
+#define QT3DS_PROPNAME_backgroundcolor "backgroundcolor"
+#define QT3DS_PROPNAME_blendtype "blendtype"
+#define QT3DS_PROPNAME_scaleu "scaleu"
+#define QT3DS_PROPNAME_scalev "scalev"
+#define QT3DS_PROPNAME_mappingmode "mappingmode"
+#define QT3DS_PROPNAME_tilingmodehorz "tilingmodehorz"
+#define QT3DS_PROPNAME_tilingmodevert "tilingmodevert"
+#define QT3DS_PROPNAME_rotationuv "rotationuv"
+#define QT3DS_PROPNAME_positionu "positionu"
+#define QT3DS_PROPNAME_positionv "positionv"
+#define QT3DS_PROPNAME_pivotu "pivotu"
+#define QT3DS_PROPNAME_pivotv "pivotv"
+#define QT3DS_PROPNAME_subpresentation "subpresentation"
+#define QT3DS_PROPNAME_iblprobe "iblprobe"
+#define QT3DS_PROPNAME_shaderlighting "shaderlighting"
+#define QT3DS_PROPNAME_blendmode "blendmode"
+#define QT3DS_PROPNAME_vertexcolors "vertexcolors"
+#define QT3DS_PROPNAME_diffuse "diffuse"
+#define QT3DS_PROPNAME_diffusemap "diffusemap"
+#define QT3DS_PROPNAME_diffusemap2 "diffusemap2"
+#define QT3DS_PROPNAME_diffusemap3 "diffusemap3"
+#define QT3DS_PROPNAME_specularreflection "specularreflection"
+#define QT3DS_PROPNAME_specularmap "specularmap"
+#define QT3DS_PROPNAME_specularmodel "specularmodel"
+#define QT3DS_PROPNAME_speculartint "speculartint"
+#define QT3DS_PROPNAME_ior "ior"
+#define QT3DS_PROPNAME_specularamount "specularamount"
+#define QT3DS_PROPNAME_specularroughness "specularroughness"
+#define QT3DS_PROPNAME_roughnessmap "roughnessmap"
+#define QT3DS_PROPNAME_opacitymap "opacitymap"
+#define QT3DS_PROPNAME_emissivepower "emissivepower"
+#define QT3DS_PROPNAME_emissivecolor "emissivecolor"
+#define QT3DS_PROPNAME_emissivemap "emissivemap"
+#define QT3DS_PROPNAME_emissivemap2 "emissivemap2"
+#define QT3DS_PROPNAME_normalmap "normalmap"
+#define QT3DS_PROPNAME_normalstrength "normalstrength"
+#define QT3DS_PROPNAME_position "position"
+#define QT3DS_PROPNAME_rotation "rotation"
+#define QT3DS_PROPNAME_scale "scale"
+#define QT3DS_PROPNAME_pivot "pivot"
+#define QT3DS_PROPNAME_opacity "opacity"
+#define QT3DS_PROPNAME_rotationorder "rotationorder"
+#define QT3DS_PROPNAME_orientation "orientation"
+#define QT3DS_PROPNAME_progressiveaa "progressiveaa"
+#define QT3DS_PROPNAME_multisampleaa "multisampleaa"
+#define QT3DS_PROPNAME_disabledepthtest "disabledepthtest"
+#define QT3DS_PROPNAME_disabledepthprepass "disabledepthprepass"
+#define QT3DS_PROPNAME_layerwidth "layerwidth"
+#define QT3DS_PROPNAME_layerheight "layerheight"
+#define QT3DS_PROPNAME_lighttype "lighttype"
+#define QT3DS_PROPNAME_lightdiffuse "lightdiffuse"
+#define QT3DS_PROPNAME_lightspecular "lightspecular"
+#define QT3DS_PROPNAME_lightambient "lightambient"
+#define QT3DS_PROPNAME_brightness "brightness"
+#define QT3DS_PROPNAME_linearfade "linearfade"
+#define QT3DS_PROPNAME_expfade "expfade"
+#define QT3DS_PROPNAME_areawidth "areawidth"
+#define QT3DS_PROPNAME_areaheight "areaheight"
+#define QT3DS_PROPNAME_castshadow "castshadow"
+#define QT3DS_PROPNAME_shdwbias "shdwbias"
+#define QT3DS_PROPNAME_shdwfactor "shdwfactor"
+#define QT3DS_PROPNAME_shdwmapres "shdwmapres"
+#define QT3DS_PROPNAME_shdwmapfar "shdwmapfar"
+#define QT3DS_PROPNAME_shdwmapfov "shdwmapfov"
+#define QT3DS_PROPNAME_shdwfilter "shdwfilter"
+#define QT3DS_PROPNAME_orthographic "orthographic"
+#define QT3DS_PROPNAME_fov "fov"
+#define QT3DS_PROPNAME_fovhorizontal "fovhorizontal"
+#define QT3DS_PROPNAME_clipnear "clipnear"
+#define QT3DS_PROPNAME_clipfar "clipfar"
+#define QT3DS_PROPNAME_lookatlock "lookatlock"
+#define QT3DS_PROPNAME_lookatpoint "lookatpoint"
+#define QT3DS_PROPNAME_textstring "textstring"
+#define QT3DS_PROPNAME_textcolor "textcolor"
+#define QT3DS_PROPNAME_font "font"
+#define QT3DS_PROPNAME_size "size"
+#define QT3DS_PROPNAME_horzalign "horzalign"
+#define QT3DS_PROPNAME_vertalign "vertalign"
+#define QT3DS_PROPNAME_leading "leading"
+#define QT3DS_PROPNAME_tracking "tracking"
+#define QT3DS_PROPNAME_enableacceleratedfont "enableacceleratedfont"
+#define QT3DS_PROPNAME_importfile "importfile"
+#define QT3DS_PROPNAME_fileid "fileid"
+#define QT3DS_PROPNAME_size "size"
+#define QT3DS_PROPNAME_location "location"
+#define QT3DS_PROPNAME_boneid "boneid"
+#define QT3DS_PROPNAME_poseroot "poseroot"
+#define QT3DS_PROPNAME_ignoresparent "ignoresparent"
+#define QT3DS_PROPNAME_tessellation "tessellation"
+#define QT3DS_PROPNAME_edgetess "edgetess"
+#define QT3DS_PROPNAME_innertess "innertess"
+#define QT3DS_PROPNAME_scalemode "scalemode"
+#define QT3DS_PROPNAME_scaleanchor "scaleanchor"
+#define QT3DS_PROPNAME_horzfields "horzfields"
+#define QT3DS_PROPNAME_left "left"
+#define QT3DS_PROPNAME_leftunits "leftunits"
+#define QT3DS_PROPNAME_width "width"
+#define QT3DS_PROPNAME_widthunits "widthunits"
+#define QT3DS_PROPNAME_right "right"
+#define QT3DS_PROPNAME_rightunits "rightunits"
+#define QT3DS_PROPNAME_vertfields "vertfields"
+#define QT3DS_PROPNAME_top "top"
+#define QT3DS_PROPNAME_topunits "topunits"
+#define QT3DS_PROPNAME_height "height"
+#define QT3DS_PROPNAME_heightunits "heightunits"
+#define QT3DS_PROPNAME_bottom "bottom"
+#define QT3DS_PROPNAME_bottomunits "bottomunits"
+#define QT3DS_PROPNAME_aostrength "aostrength"
+#define QT3DS_PROPNAME_aodistance "aodistance"
+#define QT3DS_PROPNAME_aosoftness "aosoftness"
+#define QT3DS_PROPNAME_aobias "aobias"
+#define QT3DS_PROPNAME_aosamplerate "aosamplerate"
+#define QT3DS_PROPNAME_aodither "aodither"
+#define QT3DS_PROPNAME_shadowstrength "shadowstrength"
+#define QT3DS_PROPNAME_shadowdist "shadowdist"
+#define QT3DS_PROPNAME_shadowsoftness "shadowsoftness"
+#define QT3DS_PROPNAME_shadowbias "shadowbias"
+#define QT3DS_PROPNAME_source "source"
+#define QT3DS_PROPNAME_referencedmaterial "referencedmaterial"
+#define QT3DS_PROPNAME_lightprobe "lightprobe"
+#define QT3DS_PROPNAME_probebright "probebright"
+#define QT3DS_PROPNAME_fastibl "fastibl"
+#define QT3DS_PROPNAME_probehorizon "probehorizon"
+#define QT3DS_PROPNAME_probefov "probefov"
+#define QT3DS_PROPNAME_lightprobe2 "lightprobe2"
+#define QT3DS_PROPNAME_probe2fade "probe2fade"
+#define QT3DS_PROPNAME_probe2window "probe2window"
+#define QT3DS_PROPNAME_probe2pos "probe2pos"
+#define QT3DS_PROPNAME_bumpmap "bumpmap"
+#define QT3DS_PROPNAME_bumpamount "bumpamount"
+#define QT3DS_PROPNAME_normalmap "normalmap"
+#define QT3DS_PROPNAME_displacementmap "displacementmap"
+#define QT3DS_PROPNAME_displaceamount "displaceamount"
+#define QT3DS_PROPNAME_translucencymap "translucencymap"
+#define QT3DS_PROPNAME_translucentfalloff "translucentfalloff"
+#define QT3DS_PROPNAME_diffuselightwrap "diffuselightwrap"
+#define QT3DS_PROPNAME_fresnelPower "fresnelPower"
+#define QT3DS_PROPNAME_referencednode "referencednode"
+#define QT3DS_PROPNAME_temporalaa "temporalaa"
+#define QT3DS_PROPNAME_scope "scope"
+#define QT3DS_PROPNAME_Path "Path"
+#define QT3DS_PROPNAME_pathdata "pathdata"
+#define QT3DS_PROPNAME_PathAnchorPoint "PathAnchorPoint"
+#define QT3DS_PROPNAME_incomingangle "incomingangle"
+#define QT3DS_PROPNAME_incomingdistance "incomingdistance"
+#define QT3DS_PROPNAME_outgoingdistance "outgoingdistance"
+#define QT3DS_PROPNAME_linearerror "linearerror"
+#define QT3DS_PROPNAME_edgetessamount "edgetessamount"
+#define QT3DS_PROPNAME_innertessamount "innertessamount"
+#define QT3DS_PROPNAME_begincap "begincap"
+#define QT3DS_PROPNAME_begincapoffset "begincapoffset"
+#define QT3DS_PROPNAME_begincapopacity "begincapopacity"
+#define QT3DS_PROPNAME_begincapwidth "begincapwidth"
+#define QT3DS_PROPNAME_endcap "endcap"
+#define QT3DS_PROPNAME_endcapoffset "endcapoffset"
+#define QT3DS_PROPNAME_endcapopacity "endcapopacity"
+#define QT3DS_PROPNAME_endcapwidth "endcapwidth"
+#define QT3DS_PROPNAME_pathtype "pathtype"
+#define QT3DS_PROPNAME_closed "closed"
+#define QT3DS_PROPNAME_paintstyle "paintstyle"
+#define QT3DS_PROPNAME_SubPath "SubPath"
+#define QT3DS_PROPNAME_lightmapindirect "lightmapindirect"
+#define QT3DS_PROPNAME_lightmapradiosity "lightmapradiosity"
+#define QT3DS_PROPNAME_lightmapshadow "lightmapshadow"
+#define QT3DS_PROPNAME_controlledproperty "controlledproperty"
 
-const wchar_t *ComposerObjectTypes::Convert(ComposerObjectTypes::Enum inType)
+QString ComposerObjectTypes::Convert(ComposerObjectTypes::Enum inType)
 {
     switch (inType) {
 #define HANDLE_COMPOSER_OBJECT_TYPE(name, propmacro)                                               \
     case name:                                                                                     \
-        return QT3DS_WCHAR_T_##name;
+        return QStringLiteral(QT3DS_PROPNAME_##name);
         ITERATE_COMPOSER_OBJECT_TYPES
 #undef HANDLE_COMPOSER_OBJECT_TYPE
     default:
@@ -320,14 +320,14 @@ const wchar_t *ComposerObjectTypes::Convert(ComposerObjectTypes::Enum inType)
     }
 
     QT3DS_ASSERT(false);
-    return L"Unknown";
+    return QStringLiteral("Unknown");
 }
 
-ComposerObjectTypes::Enum ComposerObjectTypes::Convert(const wchar_t *inType)
+ComposerObjectTypes::Enum ComposerObjectTypes::Convert(const QString &inType)
 {
 
 #define HANDLE_COMPOSER_OBJECT_TYPE(name, propmacro)                                               \
-    if (AreEqual(QT3DS_WCHAR_T_##name, inType))                                                      \
+    if (inType == QLatin1String(QT3DS_PROPNAME_##name))                                                      \
         return ComposerObjectTypes::name;
     ITERATE_COMPOSER_OBJECT_TYPES
 #undef HANDLE_COMPOSER_OBJECT_TYPE
@@ -336,26 +336,13 @@ ComposerObjectTypes::Enum ComposerObjectTypes::Convert(const wchar_t *inType)
     return ComposerObjectTypes::Unknown;
 }
 
-ComposerObjectTypes::Enum ComposerObjectTypes::Convert(const char8_t *inType)
-{
-
-#define HANDLE_COMPOSER_OBJECT_TYPE(name, propmacro)                                               \
-    if (AreEqual(#name, inType))                                                                   \
-        return ComposerObjectTypes::name;
-    ITERATE_COMPOSER_OBJECT_TYPES
-#undef HANDLE_COMPOSER_OBJECT_TYPE
-
-    QT3DS_ASSERT(false);
-    return ComposerObjectTypes::Unknown;
-}
-
-const wchar_t *ComposerPropertyNames::Convert(ComposerPropertyNames::Enum inType)
+QString ComposerPropertyNames::Convert(ComposerPropertyNames::Enum inType)
 {
     switch (inType) {
 #define HANDLE_COMPOSER_PROPERTY_DUPLICATE(name, memberName, type, defaultValue)
 #define HANDLE_COMPOSER_PROPERTY_NO_DEFAULT(name, memberName, type)                                \
     case name:                                                                                     \
-        return QT3DS_WCHAR_T_##name;
+        return QStringLiteral(QT3DS_PROPNAME_##name);
 #define HANDLE_COMPOSER_PROPERTY(name, memberName, type, defaultValue)                             \
     HANDLE_COMPOSER_PROPERTY_NO_DEFAULT(name, memberName, type)
 #define HANDLE_COMPOSER_OBJECT_TYPE(name, propmacro) propmacro
@@ -368,54 +355,14 @@ const wchar_t *ComposerPropertyNames::Convert(ComposerPropertyNames::Enum inType
         break;
     }
     QT3DS_ASSERT(false);
-    return L"Unknown";
+    return QStringLiteral("Unknown");
 }
 
-ComposerPropertyNames::Enum ComposerPropertyNames::Convert(const wchar_t *inType)
+ComposerPropertyNames::Enum ComposerPropertyNames::Convert(const QString &inType)
 {
 #define HANDLE_COMPOSER_PROPERTY_DUPLICATE(name, memberName, type, defaultValue)
 #define HANDLE_COMPOSER_PROPERTY_NO_DEFAULT(name, memberName, type)                                \
-    if (AreEqual(inType, QT3DS_WCHAR_T_##name))                                                      \
-        return name;
-#define HANDLE_COMPOSER_PROPERTY(name, memberName, type, defaultValue)                             \
-    HANDLE_COMPOSER_PROPERTY_NO_DEFAULT(name, memberName, type)
-#define HANDLE_COMPOSER_OBJECT_TYPE(name, propmacro) propmacro
-    ITERATE_COMPOSER_OBJECT_TYPES
-#undef HANDLE_COMPOSER_OBJECT_TYPE
-#undef HANDLE_COMPOSER_PROPERTY
-#undef HANDLE_COMPOSER_PROPERTY_NO_DEFAULT
-#undef HANDLE_COMPOSER_PROPERTY_DUPLICATE
-    QT3DS_ASSERT(false);
-    return ComposerPropertyNames::Unknown;
-}
-
-const char8_t *ComposerPropertyNames::ConvertNarrow(ComposerPropertyNames::Enum inType)
-{
-    switch (inType) {
-#define HANDLE_COMPOSER_PROPERTY_DUPLICATE(name, memberName, type, defaultValue)
-#define HANDLE_COMPOSER_PROPERTY_NO_DEFAULT(name, memberName, type)                                \
-    case name:                                                                                     \
-        return #name;
-#define HANDLE_COMPOSER_PROPERTY(name, memberName, type, defaultValue)                             \
-    HANDLE_COMPOSER_PROPERTY_NO_DEFAULT(name, memberName, type)
-#define HANDLE_COMPOSER_OBJECT_TYPE(name, propmacro) propmacro
-        ITERATE_COMPOSER_OBJECT_TYPES
-#undef HANDLE_COMPOSER_OBJECT_TYPE
-#undef HANDLE_COMPOSER_PROPERTY
-#undef HANDLE_COMPOSER_PROPERTY_NO_DEFAULT
-#undef HANDLE_COMPOSER_PROPERTY_DUPLICATE
-    default:
-        break;
-    }
-    QT3DS_ASSERT(false);
-    return "Unknown";
-}
-
-ComposerPropertyNames::Enum ComposerPropertyNames::Convert(const char8_t *inType)
-{
-#define HANDLE_COMPOSER_PROPERTY_DUPLICATE(name, memberName, type, defaultValue)
-#define HANDLE_COMPOSER_PROPERTY_NO_DEFAULT(name, memberName, type)                                \
-    if (AreEqual(inType, #name))                                                                   \
+    if (inType == QLatin1String(QT3DS_PROPNAME_##name))                                                      \
         return name;
 #define HANDLE_COMPOSER_PROPERTY(name, memberName, type, defaultValue)                             \
     HANDLE_COMPOSER_PROPERTY_NO_DEFAULT(name, memberName, type)
@@ -462,7 +409,7 @@ void ComposerTypeDefinitionsHelper::SetInstanceAsCanonical(IMetaData &inMetaData
 void ComposerTypeDefinitionsHelper::SetInstancePropertyValue(IDataCore &inDataCore,
                                                              Qt3DSDMInstanceHandle inInstance,
                                                              Qt3DSDMPropertyHandle inProperty,
-                                                             const wchar_t *inPropValue)
+                                                             const QString &inPropValue)
 {
     inDataCore.SetInstancePropertyValue(inInstance, inProperty, make_shared<CDataStr>(inPropValue));
 }

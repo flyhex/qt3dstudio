@@ -350,6 +350,11 @@ struct SLong4
             retval = retval || m_Longs[0] > 0;
         return retval;
     }
+    QString toQString() const
+    {
+        return QStringLiteral("%1 %2 %3 %4").arg(m_Longs[0]).arg(m_Longs[1])
+                    .arg(m_Longs[2]).arg(m_Longs[3]);
+    }
 };
 
 typedef std::vector<SLong4> TLong4Vec;
@@ -423,6 +428,10 @@ inline bool AreEqual(const wchar_t *lhs, const wchar_t *rhs)
 inline bool IsTrivial(const char8_t *inStr)
 {
     return inStr == NULL || *inStr == 0;
+}
+inline bool IsTrivial(const QString &inStr)
+{
+    return inStr.isEmpty();
 }
 inline const char8_t *NonNull(const char8_t *inStr)
 {
@@ -820,7 +829,7 @@ inline bool SetDefault(DataModelDataType::Value inDataType, TDataType &outValue)
     return SDefaulter<TDataType>().SetDefault(inDataType, outValue);
 }
 
-typedef void (*Qt3DSDMDebugLogFunction)(const char *message);
+typedef void (*Qt3DSDMDebugLogFunction)(const QString &message);
 // UICDMSimpleDataCore.cpp
 extern Qt3DSDMDebugLogFunction g_DataModelDebugLogger;
 

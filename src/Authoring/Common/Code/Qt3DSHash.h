@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1999-2001 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -26,23 +25,19 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+#ifndef __QT3DS_HASH_H__
+#define __QT3DS_HASH_H__
 
-//==============================================================================
-//	Prefix
-//==============================================================================
-#ifndef __CCOLORCONVERSION_H_
-#define __CCOLORCONVERSION_H_
+#include <QtCore/qhashfunctions.h>
 
-class CColorConversion
-{
-public:
-    // Operations
-    static unsigned char GetRed(long inRGBA);
-    static unsigned char GetGreen(long inRGBA);
-    static unsigned char GetBlue(long inRGBA);
-    static unsigned char GetAlpha(long inRGBA);
-    static long MakeRGBA(float inRed, float inGreen, float inBlue, float inAlpha = 1.0f);
-    static long MakeRGBA(long inRed, long inGreen, long inBlue, long inAlpha = 255);
-};
+namespace qt3dsdm {
+struct SLong4;
+}
 
-#endif // __CCOLORCONVERSION_H_
+QT_BEGIN_NAMESPACE
+
+inline uint qHash(const qt3dsdm::SLong4 &v, uint seed);
+
+QT_END_NAMESPACE
+
+#endif

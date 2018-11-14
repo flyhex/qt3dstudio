@@ -70,7 +70,7 @@ ITimelineTimebar *CSlideTimelineItemBinding::GetTimebar()
     return new CEmptyTimelineTimebar();
 }
 
-void CSlideTimelineItemBinding::SetName(const Q3DStudio::CString & /*inName*/)
+void CSlideTimelineItemBinding::SetName(const QString & /*inName*/)
 {
     // Do nothing because name is read only
 }

@@ -104,12 +104,12 @@ public:
     virtual qt3dsdm::IPropertySystem *GetPropertySystem() = 0;
     virtual qt3dsdm::IAnimationCore *GetAnimationCore() = 0;
     virtual void SetInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                                          const std::wstring &inPropertyName,
+                                          const QString &inPropertyName,
                                           const qt3dsdm::SValue &inValue) = 0;
     virtual void SetInstancePropertyControlled(qt3dsdm::Qt3DSDMInstanceHandle instance,
-                                               Q3DStudio::CString instancepath,
+                                               const QString &instancepath,
                                                qt3dsdm::Qt3DSDMPropertyHandle propName,
-                                               Q3DStudio::CString controller,
+                                               const QString &controller,
                                                bool controlled, bool batch = false) = 0;
     virtual void RemoveDatainputBindings(
             const QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
@@ -154,7 +154,7 @@ public:
     // Create a DOM reader and check that the top element's version is correct.  Opens the reader
     // to the project element.
     virtual std::shared_ptr<qt3dsdm::IDOMReader>
-    CreateDOMReader(const Q3DStudio::CString &inFilePath, qt3ds::QT3DSI32 &outVersion) = 0;
+    CreateDOMReader(const QString &inFilePath, qt3ds::QT3DSI32 &outVersion) = 0;
 
     virtual CCore *GetCore() const = 0;
 };

@@ -85,7 +85,7 @@ RowTree *RowManager::createRowFromBinding(ITimelineItemBinding *binding, RowTree
                                           int index)
 {
     RowTree *newRow = createRow(binding->GetTimelineItem()->GetObjectType(), parentRow,
-                                binding->GetTimelineItem()->GetName().toQString(),
+                                binding->GetTimelineItem()->GetName(),
                                 QString(), index);
 
     // connect the new row and its binding
@@ -103,7 +103,7 @@ RowTree *RowManager::createRowFromBinding(ITimelineItemBinding *binding, RowTree
     // create property rows
     for (int i = 0; i < binding->GetPropertyCount(); i++) {
         ITimelineItemProperty *prop_i = binding->GetProperty(i);
-        RowTree *propRow = getOrCreatePropertyRow(newRow, prop_i->GetName().toQString());
+        RowTree *propRow = getOrCreatePropertyRow(newRow, prop_i->GetName());
 
         // connect the property row and its binding
         prop_i->setRowTree(propRow);

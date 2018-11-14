@@ -63,7 +63,7 @@ struct SObjectFileType
 class ImportUtils
 {
 public:
-    static SObjectFileType GetObjectFileTypeForFile(const CFilePath &inPath,
+    static SObjectFileType GetObjectFileTypeForFile(const QString &inPath,
                                                     bool inCheckFileExists = true);
 
     static DocumentEditorInsertType::Enum GetInsertTypeForDropType(EDROPDESTINATION inDestination);

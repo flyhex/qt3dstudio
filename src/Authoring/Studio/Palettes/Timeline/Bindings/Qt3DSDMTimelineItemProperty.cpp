@@ -141,14 +141,14 @@ void Qt3DSDMTimelineItemProperty::InitializeCachedVariables(qt3dsdm::Qt3DSDMInst
     m_Type.second = thePropertySystem->GetAdditionalMetaDataType(inInstance, m_PropertyHandle);
 
     // Name doesn't change either.
-    TCharStr theFormalName = thePropertySystem->GetFormalName(inInstance, m_PropertyHandle);
+    QString theFormalName = thePropertySystem->GetFormalName(inInstance, m_PropertyHandle);
 
-    if (theFormalName.empty()) // fallback on property name
+    if (theFormalName.isEmpty()) // fallback on property name
         theFormalName = thePropertySystem->GetName(m_PropertyHandle);
-    m_Name = theFormalName.c_str();
+    m_Name = theFormalName;
 }
 
-Q3DStudio::CString Qt3DSDMTimelineItemProperty::GetName() const
+QString Qt3DSDMTimelineItemProperty::GetName() const
 {
     return m_Name;
 }

@@ -107,7 +107,7 @@ public:
     // ContextMenu
     virtual bool IsValidTransaction(EUserTransaction inTransaction) = 0;
     virtual void PerformTransaction(EUserTransaction inTransaction) = 0;
-    virtual Q3DStudio::CString GetObjectPath() = 0;
+    virtual QString GetObjectPath() = 0;
 
     virtual bool IsExternalizeable() { return false; }
     virtual void Externalize() {}

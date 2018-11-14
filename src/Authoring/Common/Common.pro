@@ -35,7 +35,6 @@ INCLUDEPATH += \
 PRECOMPILED_HEADER += Code/Qt3DSCommonPrecompile.h
 
 SOURCES += \
-    ../../3rdparty/color/CColor.cpp \
     Code/HiResTimer.cpp \
     Code/MasterP.cpp \
     Code/MethProf.cpp \
@@ -81,4 +80,5 @@ SOURCES += \
     ../Client/Code/Core/Runtime2Integration/Q3DSStringTable.cpp
 
 HEADERS = Code/Literals.h \
-    ../Client/Code/Core/Runtime2Integration/Q3DSStringTable.h
+    ../Client/Code/Core/Runtime2Integration/Q3DSStringTable.h \
+    Code/Qt3DSHash.h

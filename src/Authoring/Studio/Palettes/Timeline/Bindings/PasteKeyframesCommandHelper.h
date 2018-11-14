@@ -82,7 +82,7 @@ public: // Construction
         CClientDataModelBridge *theBridge = inDoc->GetStudioSystem()->GetClientDataModelBridge();
 
         for (; theIter != m_CopiedKeyframeList.end(); ++theIter) {
-            TCharStr thePropertyName = thePropertySystem->GetName(theIter->m_Property);
+            QString thePropertyName = thePropertySystem->GetName(theIter->m_Property);
             DataModelDataType::Value thePropertyType =
                 thePropertySystem->GetDataType(theIter->m_Property);
             Qt3DSDMPropertyHandle theTargetPropertyHandle =

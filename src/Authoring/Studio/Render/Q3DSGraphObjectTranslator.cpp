@@ -49,12 +49,9 @@ Q3DSGraphObjectTranslator::Q3DSGraphObjectTranslator(qt3dsdm::Qt3DSDMInstanceHan
 
 void Q3DSGraphObjectTranslator::pushTranslation(Q3DSTranslation &translation)
 {
-    Q3DStudio::CString theId = translation.reader().GetFileId(instanceHandle());
-    if (theId.size() && theId.toQString() != graphObject().id()) {
-        qt3ds::foundation::CRegisteredString rid
-                = Q3DSStringTable::instance()->GetRenderStringTable()
-                    .RegisterStr(theId.toQString());
-        QByteArray data = rid.qstring().toLatin1();
+    QString theId = translation.reader().GetFileId(instanceHandle());
+    if (theId.size() && theId != graphObject().id()) {
+        QByteArray data = theId.toLatin1();
         translation.presentation()->registerObject(data, &graphObject());
     }
     setDirty(false);

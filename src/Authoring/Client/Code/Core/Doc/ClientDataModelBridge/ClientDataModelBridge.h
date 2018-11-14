@@ -254,20 +254,20 @@ public: // Bridging to Actions. These needs to be here as DataModel has no hiera
     void UpdateHandlerArgumentValue(qt3dsdm::HandlerArgumentType::Value inArgType,
                                     qt3dsdm::Qt3DSDMInstanceHandle inTargetObject,
                                     qt3dsdm::SValue inOrigValue, qt3dsdm::SValue inNewValue);
-    std::wstring GetDefaultHandler(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                                   std::wstring inOldHandler = L"");
-    std::wstring GetDefaultEvent(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                                 std::wstring inOldEvent = L"");
+    QString GetDefaultHandler(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                              const QString &inOldHandler = {});
+    QString GetDefaultEvent(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                            const QString &inOldEvent = {});
     void ResetHandlerArguments(qt3dsdm::Qt3DSDMActionHandle inAction,
                                qt3dsdm::Qt3DSDMHandlerHandle inHandler);
     // Resolve the path
-    void ResetHandlerArguments(qt3dsdm::Qt3DSDMActionHandle inAction, const std::wstring &inHandler);
+    void ResetHandlerArguments(qt3dsdm::Qt3DSDMActionHandle inAction, const QString &inHandler);
     qt3dsdm::Qt3DSDMEventHandle ResolveEvent(qt3dsdm::Qt3DSDMInstanceHandle inResolveRoot,
-                                          const qt3dsdm::SObjectRefType &inResolution,
-                                          const std::wstring &inEventName);
+                                             const qt3dsdm::SObjectRefType &inResolution,
+                                             const QString &inEventName);
     qt3dsdm::Qt3DSDMHandlerHandle ResolveHandler(qt3dsdm::Qt3DSDMInstanceHandle inResolveRoot,
-                                              const qt3dsdm::SObjectRefType &inResolution,
-                                              const std::wstring &inHandlerName);
+                                                 const qt3dsdm::SObjectRefType &inResolution,
+                                                 const QString &inHandlerName);
     qt3dsdm::Qt3DSDMEventHandle ResolveEvent(const qt3dsdm::SActionInfo &inInfo);
     qt3dsdm::Qt3DSDMHandlerHandle ResolveHandler(const qt3dsdm::SActionInfo &inInfo);
     void SetHandlerArgumentValue(qt3dsdm::Qt3DSDMHandlerArgHandle inHandlerArgument,
@@ -276,7 +276,7 @@ public: // Bridging to Actions. These needs to be here as DataModel has no hiera
                                     qt3dsdm::Qt3DSDMInstanceHandle &outInstance,
                                     qt3dsdm::Qt3DSDMPropertyHandle &outProperty);
     void GetSlideNamesOfAction(qt3dsdm::Qt3DSDMActionHandle inAction,
-                               std::list<Q3DStudio::CString> &outSlideNames);
+                               std::list<QString> &outSlideNames);
 
 protected:
     void SetArgTypeDependentDefaultValue(qt3dsdm::Qt3DSDMHandlerArgHandle inHandlerArgument,
@@ -294,7 +294,7 @@ public: // TODO: We should really consider having CStudioCoreSystem or CStudioFu
 
     qt3dsdm::Qt3DSDMPropertyHandle
     GetAggregateInstancePropertyByName(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                                       const qt3dsdm::TCharStr &inStr);
+                                       const QString &inStr);
 
 private:
     qt3dsdm::Qt3DSDMInstanceHandle
@@ -313,7 +313,7 @@ private:
     qt3dsdm::Qt3DSDMInstanceHandle GetSceneOrComponentInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     qt3dsdm::Qt3DSDMSlideHandle CreateNonMasterSlide(qt3dsdm::Qt3DSDMSlideHandle inMasterSlide,
                                                   Q3DStudio::CId inGuid,
-                                                  const Q3DStudio::CString &inName);
+                                                  const QString &inName);
 
 public: // helpers
     void BeginRender(); // enable cache to increase performance
@@ -343,8 +343,8 @@ public: // helpers
     CreateImageInstance(qt3dsdm::Qt3DSDMInstanceHandle inSourceInstance,
                         qt3dsdm::Qt3DSDMPropertyHandle inSlot, qt3dsdm::Qt3DSDMSlideHandle inSlide);
 
-    void SetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle, const Q3DStudio::CString &inName);
-    Q3DStudio::CString GetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle);
+    void SetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle, const QString &inName);
+    QString GetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle);
 
     // Convenience functions to get GUID property value from instance handle
 private:
@@ -357,18 +357,18 @@ public:
     bool IsInComponent(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                        qt3dsdm::Qt3DSDMInstanceHandle inComponentInstance);
     qt3dsdm::Qt3DSDMInstanceHandle GetParentComponent(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                                                   bool inIsFirstCall = true);
-    Q3DStudio::CString GetUniqueChildName(qt3dsdm::Qt3DSDMInstanceHandle inParent,
-                                          qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                                          Q3DStudio::CString inDesiredName);
+                                                      bool inIsFirstCall = true);
+    QString GetUniqueChildName(qt3dsdm::Qt3DSDMInstanceHandle inParent,
+                               qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                               const QString &inDesiredName);
     bool CheckNameUnique(qt3dsdm::Qt3DSDMInstanceHandle inParentInstance,
                          qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                         Q3DStudio::CString inDesiredName);
-    Q3DStudio::CString GetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
-    Q3DStudio::CString getSubpresentation(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
-    std::set<Q3DStudio::CString> GetSourcePathList() const;
-    std::set<Q3DStudio::CString> GetFontFileList() const;
-    std::set<Q3DStudio::CString> GetDynamicObjectTextureList() const;
+                         const QString &inDesiredName);
+    QString GetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
+    QString getSubpresentation(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
+    std::set<QString> GetSourcePathList() const;
+    std::set<QString> GetFontFileList() const;
+    std::set<QString> GetDynamicObjectTextureList() const;
     std::set<QString> getRenderableList() const;
     bool IsLockedAtAll(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     bool IsDuplicateable(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
@@ -383,7 +383,7 @@ public:
 
 protected:
     qt3dsdm::Qt3DSDMInstanceHandle GetChildByName(qt3dsdm::Qt3DSDMInstanceHandle inParent,
-                                                  Q3DStudio::CString inChildName,
+                                                  const QString &inChildName,
                                                   qt3dsdm::Qt3DSDMInstanceHandle skipInstance);
     std::vector<qt3dsdm::SValue>
     GetValueList(qt3dsdm::Qt3DSDMInstanceHandle inParentInstance,

@@ -59,8 +59,8 @@ inline Instance *fromHdl(TIMPHandle hdl)
 
 struct Instance : public InstanceDesc
 {
-    ImportHashMap<ComposerPropertyNames::Enum, SInternValue> m_PropertyValues;
-    eastl::vector<TCharPtr> m_Children;
+    QHash<ComposerPropertyNames::Enum, SInternValue> m_PropertyValues;
+    QStringList m_Children;
     bool m_Valid;
 
 public:
@@ -79,7 +79,8 @@ public:
     {
         m_PropertyValues[name] = val;
     }
-    void SetPropertyValues(NVConstDataRef<PropertyValue> values, qt3dsdm::IStringTable &inStringTable)
+    void SetPropertyValues(const QVector<PropertyValue> &values,
+                           qt3dsdm::IStringTable &inStringTable)
     {
         m_PropertyValues.clear();
         QT3DSIMP_FOREACH(idx, values.size())
@@ -113,7 +114,7 @@ public:
         }
         QT3DS_ASSERT(child->m_Parent == 0);
         child->m_Parent = toHdl(this);
-        eastl::vector<TCharPtr>::iterator theIter =
+        QStringList::iterator theIter =
             std::find(m_Children.begin(), m_Children.end(), inInsertAfter->m_Id);
         if (theIter != m_Children.end())
             ++theIter;
@@ -125,9 +126,9 @@ public:
 struct AnimationId
 {
     TIMPHandle m_Instance;
-    TCharPtr m_Property;
+    QString m_Property;
     QT3DSU32 m_SubPropIndex;
-    AnimationId(TIMPHandle inst, TCharPtr p, QT3DSU32 spi)
+    AnimationId(TIMPHandle inst, const QString &p, QT3DSU32 spi)
         : m_Instance(inst)
         , m_Property(p)
         , m_SubPropIndex(spi)
@@ -135,23 +136,21 @@ struct AnimationId
     }
     AnimationId()
         : m_Instance(0)
-        , m_Property(0)
         , m_SubPropIndex(0)
+    {
+    }
+    AnimationId(const AnimationId &o)
+        : m_Instance(o.m_Instance)
+        , m_Property(o.m_Property)
+        , m_SubPropIndex(o.m_SubPropIndex)
     {
     }
 };
 
-inline Animation *CreateAnimation(TCharPtr instance, TCharPtr propName, QT3DSU32 spi,
-                                  EAnimationType bufType, NVConstDataRef<QT3DSF32> values)
+inline Animation *CreateAnimation(const QString &instance, const QString &propName, QT3DSU32 spi,
+                                  EAnimationType bufType, const QVector<QT3DSF32> &values)
 {
-    QT3DSU32 animBufSize = sizeof(Animation);
-    QT3DSU32 valueSize = values.size() * sizeof(QT3DSF32);
-    QT3DSU8 *memBuf = (QT3DSU8 *)malloc(animBufSize + valueSize);
-    QT3DSF32 *framePtr = (QT3DSF32 *)(memBuf + animBufSize);
-    memCopy(framePtr, values.begin(), valueSize);
-    values = toConstDataRef(framePtr, values.size());
-    Animation *newBuf = new (memBuf) Animation(instance, propName, spi, bufType, values);
-    return newBuf;
+    return new Animation(instance, propName, spi, bufType, values);
 }
 }
 

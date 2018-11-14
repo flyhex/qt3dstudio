@@ -104,7 +104,7 @@ CClientDataModelBridge::~CClientDataModelBridge()
 
 Qt3DSDMSlideHandle CClientDataModelBridge::CreateNonMasterSlide(Qt3DSDMSlideHandle inMasterSlide,
                                                                Q3DStudio::CId inGuid,
-                                                               const Q3DStudio::CString &inName)
+                                                               const QString &inName)
 {
     Qt3DSDMInstanceHandle theInstance = m_DataCore->CreateInstance();
     m_DataCore->DeriveInstance(theInstance, m_SlideItem.m_Instance);
@@ -163,11 +163,11 @@ CClientDataModelBridge::GetOrCreateGraph(qt3dsdm::Qt3DSDMInstanceHandle inInstan
     m_DataCore->DeriveInstance(rootInstance, m_SlideItem.m_Instance);
     m_DataCore->SetInstancePropertyValue(rootInstance, m_SlideItem.m_ComponentId,
                                          GuidToLong4(theGuid));
-    SetName(rootInstance, Q3DStudio::CString::fromQString(QObject::tr("Master Slide")));
+    SetName(rootInstance, QObject::tr("Master Slide"));
     Qt3DSDMSlideHandle masterSlide = m_SlideCore->CreateSlide(rootInstance);
     Qt3DSDMSlideGraphHandle retval(m_SlideGraphCore->CreateSlideGraph(masterSlide));
     Qt3DSDMSlideHandle theSlide1Handle =
-        CreateNonMasterSlide(masterSlide, theGuid, Q3DStudio::CString::fromQString(QObject::tr("Slide1")));
+        CreateNonMasterSlide(masterSlide, theGuid, QObject::tr("Slide1"));
 
     // always activate slide 1 on create
     m_SlideGraphCore->SetGraphActiveSlide(retval, theSlide1Handle);
@@ -460,7 +460,7 @@ CClientDataModelBridge::GetComponentSlide(qt3dsdm::Qt3DSDMInstanceHandle inCompo
 
 //
 void CClientDataModelBridge::SetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle,
-                                     const Q3DStudio::CString &inName)
+                                     const QString &inName)
 {
     TDataStrPtr theName(new CDataStr(inName));
     Qt3DSDMSlideHandle theAssociatedSlide =
@@ -476,7 +476,7 @@ void CClientDataModelBridge::SetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHa
     }
 }
 
-Q3DStudio::CString CClientDataModelBridge::GetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle)
+QString CClientDataModelBridge::GetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle)
 {
     IPropertySystem *thePropertySystem = m_Doc->GetStudioSystem()->GetPropertySystem();
     TDataStrPtr theString;
@@ -487,7 +487,9 @@ Q3DStudio::CString CClientDataModelBridge::GetName(qt3dsdm::Qt3DSDMInstanceHandl
             && GetValueType(theValue) == DataModelDataType::String)
             theString = qt3dsdm::get<TDataStrPtr>(theValue);
     }
-    return (theString) ? Q3DStudio::CString(theString->GetData()) : "";
+    if (theString)
+        return theString->toQString();
+    return {};
 }
 
 bool CClientDataModelBridge::IsActiveComponent(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
@@ -504,20 +506,19 @@ bool CClientDataModelBridge::IsActiveComponent(qt3dsdm::Qt3DSDMInstanceHandle in
     return theActiveComponentId == theInstanceId;
 }
 
-// Helper for getting the type as a wstring... returns "" if it can't figure things out
-std::wstring GetInstanceType(IPropertySystem *inPropertySystem, Qt3DSDMInstanceHandle inInstance)
+// Helper for getting the type as a QString... returns "" if it can't figure things out
+QString GetInstanceType(IPropertySystem *inPropertySystem, Qt3DSDMInstanceHandle inInstance)
 {
-    std::wstring theReturn(L"");
+    QString theReturn;
     try {
         Qt3DSDMPropertyHandle theProperty =
-            inPropertySystem->GetAggregateInstancePropertyByName(inInstance, L"type");
+            inPropertySystem->GetAggregateInstancePropertyByName(inInstance, QStringLiteral("type"));
         SValue theTypeValue;
         if (theProperty
             && inPropertySystem->GetInstancePropertyValue(inInstance, theProperty, theTypeValue)) {
-            theReturn.assign(qt3dsdm::get<TDataStrPtr>(theTypeValue)->GetData());
+            theReturn = qt3dsdm::get<TDataStrPtr>(theTypeValue)->toQString();
         }
     } catch (...) {
-        theReturn.assign(L"");
     }
 
     return theReturn;
@@ -530,7 +531,7 @@ bool CClientDataModelBridge::GetMaterialFromImageInstance(
 {
     IPropertySystem *thePropertySystem = m_Doc->GetStudioSystem()->GetPropertySystem();
     SLong4 theDeletedImageLong4 =
-        GetNamedInstancePropertyValue<SLong4>(thePropertySystem, inInstance, L"id");
+        GetNamedInstancePropertyValue<SLong4>(thePropertySystem, inInstance, QStringLiteral("id"));
 
     TInstanceHandleList theInstances;
     m_DataCore->GetInstancesDerivedFrom(
@@ -538,8 +539,8 @@ bool CClientDataModelBridge::GetMaterialFromImageInstance(
     size_t theInstanceCount = theInstances.size();
     for (size_t theInstanceIndex = 0; theInstanceIndex < theInstanceCount; ++theInstanceIndex) {
         Qt3DSDMInstanceHandle theInstance = theInstances[theInstanceIndex];
-        std::wstring theWideTypeString(GetInstanceType(thePropertySystem, theInstance));
-        if (theWideTypeString == L"Material") {
+        QString type(GetInstanceType(thePropertySystem, theInstance));
+        if (type == QLatin1String("Material")) {
             TPropertyHandleList theProperties;
             thePropertySystem->GetAggregateInstanceProperties(theInstance, theProperties);
             size_t thePropertyCount = theProperties.size();
@@ -567,8 +568,8 @@ bool CClientDataModelBridge::GetMaterialFromImageInstance(
     theInstanceCount = theInstances.size();
     for (size_t theInstanceIndex = 0; theInstanceIndex < theInstanceCount; ++theInstanceIndex) {
         Qt3DSDMInstanceHandle theInstance = theInstances[theInstanceIndex];
-        std::wstring theWideTypeString(GetInstanceType(thePropertySystem, theInstance));
-        if (theWideTypeString == L"CustomMaterial") {
+        QString type(GetInstanceType(thePropertySystem, theInstance));
+        if (type == QLatin1String("CustomMaterial")) {
             TPropertyHandleList theProperties;
             thePropertySystem->GetAggregateInstanceProperties(theInstance, theProperties);
             size_t thePropertyCount = theProperties.size();
@@ -599,7 +600,7 @@ bool CClientDataModelBridge::GetLayerFromImageProbeInstance(
 {
     IPropertySystem *thePropertySystem = m_Doc->GetStudioSystem()->GetPropertySystem();
     SLong4 theDeletedImageLong4 =
-        GetNamedInstancePropertyValue<SLong4>(thePropertySystem, inInstance, L"id");
+        GetNamedInstancePropertyValue<SLong4>(thePropertySystem, inInstance, QStringLiteral("id"));
 
     TInstanceHandleList theInstances;
     m_DataCore->GetInstancesDerivedFrom(
@@ -608,8 +609,8 @@ bool CClientDataModelBridge::GetLayerFromImageProbeInstance(
 
     for (size_t theInstanceIndex = 0; theInstanceIndex < theInstanceCount; ++theInstanceIndex) {
         Qt3DSDMInstanceHandle theInstance = theInstances[theInstanceIndex];
-        std::wstring theWideTypeString(GetInstanceType(thePropertySystem, theInstance));
-        if (theWideTypeString == L"Layer") {
+        QString type(GetInstanceType(thePropertySystem, theInstance));
+        if (type == QLatin1String("Layer")) {
             // Layer should have only one image property, which is the light probe, but this is a
             // little more
             // generic should anyone ever add more in the future.
@@ -855,7 +856,7 @@ CClientDataModelBridge::GetInstance(qt3dsdm::Qt3DSDMInstanceHandle inRoot,
     case ObjectReferenceType::Absolute:
         return GetInstanceByGUID(get<SLong4>(inValue.m_Value));
     case ObjectReferenceType::Relative: {
-        Q3DStudio::CString thePath(qt3dsdm::get<qt3dsdm::TDataStrPtr>(inValue.m_Value)->GetData());
+        QString thePath(qt3dsdm::get<qt3dsdm::TDataStrPtr>(inValue.m_Value)->toQString());
         IObjectReferenceHelper *theObjRefHelper = m_Doc->GetDataModelObjectReferenceHelper();
         if (theObjRefHelper) {
             bool theFullResolvedFlag;
@@ -1000,55 +1001,48 @@ CClientDataModelBridge::GetParentComponent(qt3dsdm::Qt3DSDMInstanceHandle inInst
  *	@param inDesiredName the desired base name for the object.
  *	@return a unique name that no other child has.
  */
-Q3DStudio::CString
+QString
 CClientDataModelBridge::GetUniqueChildName(qt3dsdm::Qt3DSDMInstanceHandle inParent,
                                            qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                                           Q3DStudio::CString inDesiredName)
+                                           const QString &inDesiredName)
 {
     // fyi, if we get abc123, theBaseName gets abc and theBaseIndex gets 123
 
-    Q3DStudio::CString theBaseName = inDesiredName;
-    Q3DStudio::CString theBaseIndex;
+    QString theBaseName = inDesiredName;
+    QString theBaseIndex;
 
     // Strip off all trailing numbers to get the base name
-    if (theBaseName.Length() > 0) {
-        wchar_t theLastChar = static_cast<const wchar_t *>(theBaseName)[theBaseName.Length() - 1];
-        while (theBaseName.Length() > 0 && theLastChar >= '0' && theLastChar <= '9') {
-            // get a wchar_t* so we can index
-            const wchar_t *theBasePtr = theBaseName;
-            // find where the desired character is
-            long theDesiredOffset = theBaseName.Length() - 1;
-            // make a CString of the desired character and concatenate with the existing base index
-            theBaseIndex = Q3DStudio::CString(theBasePtr + theDesiredOffset, 1) + theBaseIndex;
-
-            // take out that last character
-            theBaseName = theBaseName.Extract(0, theBaseName.Length() - 1);
+    if (theBaseName.length() > 0) {
+        QChar theLastChar = theBaseName.at(theBaseName.length() - 1);
+        while (theBaseName.length() > 0 && theLastChar.isNumber()) {
+            theBaseIndex.insert(0, theLastChar);
+            theBaseName = theBaseName.left(theBaseName.length() - 1);
 
             // get the new last char
-            if (theBaseName.Length() > 0)
-                theLastChar = static_cast<const wchar_t *>(theBaseName)[theBaseName.Length() - 1];
+            if (theBaseName.length() > 0)
+                theLastChar = theBaseName.at(theBaseName.length() - 1);
         }
     }
 
     qt3dsdm::Qt3DSDMInstanceHandle theExistingChild = 0;
     // If there is a base name then use it
-    if (theBaseName.Length() > 0)
+    if (theBaseName.length() > 0)
         theExistingChild = GetChildByName(inParent, inDesiredName, inInstance);
     else // there is no base name, just set it to a random setting so it'll fall into the while loop
         theExistingChild = inParent;
 
-    Q3DStudio::CString theUniqueName = inDesiredName;
+    QString theUniqueName = inDesiredName;
 
     if (theExistingChild != 0 && theExistingChild != inInstance) {
         long theIndex;
-        if (theBaseIndex.Length() != 0)
-            theIndex = atoi(theBaseIndex.GetCharStar());
+        if (theBaseIndex.length() != 0)
+            theIndex = theBaseIndex.toLong();
         else
             theIndex = 2;
 
         // If the name is in use then increment the index until one is found.
         while (theExistingChild != 0 && theExistingChild != inInstance) {
-            theUniqueName.Format(_LSTR("%ls%d"), static_cast<const wchar_t *>(theBaseName), theIndex);
+            theUniqueName = theBaseName + QString::number(theIndex);
             ++theIndex;
             theExistingChild = GetChildByName(inParent, theUniqueName, inInstance);
         }
@@ -1059,10 +1053,10 @@ CClientDataModelBridge::GetUniqueChildName(qt3dsdm::Qt3DSDMInstanceHandle inPare
 
 bool CClientDataModelBridge::CheckNameUnique(qt3dsdm::Qt3DSDMInstanceHandle inParentInstance,
                                              qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                                             Q3DStudio::CString inDesiredName)
+                                             const QString &inDesiredName)
 {
     qt3dsdm::Qt3DSDMInstanceHandle theExistingChild = 0;
-    if (inDesiredName.Length() > 0) {
+    if (inDesiredName.length() > 0) {
         theExistingChild = GetChildByName(inParentInstance, inDesiredName,
                                           qt3dsdm::Qt3DSDMInstanceHandle());
     }
@@ -1074,7 +1068,7 @@ bool CClientDataModelBridge::CheckNameUnique(qt3dsdm::Qt3DSDMInstanceHandle inPa
 /**
  *	Get SourcePath value for this instance
  */
-Q3DStudio::CString
+QString
 CClientDataModelBridge::GetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     if (inInstance.Valid()) {
@@ -1082,9 +1076,9 @@ CClientDataModelBridge::GetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         IPropertySystem *thePropertySystem = m_Doc->GetStudioSystem()->GetPropertySystem();
         thePropertySystem->GetInstancePropertyValue(inInstance, m_SceneAsset.m_SourcePath,
                                                     theValue);
-        return qt3dsdm::get<TDataStrPtr>(theValue)->GetData();
-    } else
-        return L"";
+        return qt3dsdm::get<TDataStrPtr>(theValue)->toQString();
+    }
+    return {};
 }
 
 /**
@@ -1095,18 +1089,16 @@ CClientDataModelBridge::GetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
  *
  * @return the sub-presentation property value
  */
-Q3DStudio::CString
-CClientDataModelBridge::getSubpresentation(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
+QString CClientDataModelBridge::getSubpresentation(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     if (inInstance.Valid() && GetObjectType(inInstance) == OBJTYPE_IMAGE) {
         qt3dsdm::SValue theValue;
         IPropertySystem *thePropertySystem = m_Doc->GetStudioSystem()->GetPropertySystem();
         thePropertySystem->GetInstancePropertyValue(inInstance, m_SceneImage.m_SubPresentation,
                                                     theValue);
-        return qt3dsdm::get<TDataStrPtr>(theValue)->GetData();
+        return qt3dsdm::get<TDataStrPtr>(theValue)->toQString();
     }
-
-    return L"";
+    return {};
 }
 
 //=============================================================================
@@ -1120,12 +1112,12 @@ TInstanceHandleList CClientDataModelBridge::GetItemBaseInstances() const
     return theInstances;
 }
 
-inline void AddSourcePathToList(std::set<Q3DStudio::CString> &ioSourcePathList,
+inline void AddSourcePathToList(std::set<QString> &ioSourcePathList,
                                 const SValue &inValue)
 {
-    Q3DStudio::CFilePath theSourcePath = qt3dsdm::get<TDataStrPtr>(inValue)->GetData();
-    if (!theSourcePath.filePath().isEmpty())
-        ioSourcePathList.insert(theSourcePath.toCString());
+    QString theSourcePath = qt3dsdm::get<TDataStrPtr>(inValue)->toQString();
+    if (!theSourcePath.isEmpty())
+        ioSourcePathList.insert(theSourcePath);
 }
 
 //=============================================================================
@@ -1216,15 +1208,15 @@ struct SValueListFilter : public IValueFilter
 /**
  *	Get SourcePath list from all instances
  */
-std::set<Q3DStudio::CString> CClientDataModelBridge::GetSourcePathList() const
+std::set<QString> CClientDataModelBridge::GetSourcePathList() const
 {
     // Get the source path property list
     SValueListFilter theFilter(*this);
     std::vector<SValue> theValueList =
         GetValueList(m_SceneAsset.m_Instance, m_SceneAsset.m_SourcePath, &theFilter);
 
-    // Translate from SValue to Q3DStudio::CString and also remove the identifier
-    std::set<Q3DStudio::CString> theSourcePathList;
+    // Translate from SValue to QString and also remove the identifier
+    std::set<QString> theSourcePathList;
     for (std::vector<SValue>::iterator theIter = theValueList.begin();
          theIter != theValueList.end(); ++theIter)
         AddSourcePathToList(theSourcePathList, *theIter);
@@ -1232,10 +1224,10 @@ std::set<Q3DStudio::CString> CClientDataModelBridge::GetSourcePathList() const
     return theSourcePathList;
 }
 
-inline void AddStringToList(std::set<Q3DStudio::CString> &ioStringList, const SValue &inValue)
+inline void AddStringToList(std::set<QString> &ioStringList, const SValue &inValue)
 {
-    Q3DStudio::CString theString = qt3dsdm::get<TDataStrPtr>(inValue)->GetData();
-    if (theString != L"")
+    QString theString = qt3dsdm::get<TDataStrPtr>(inValue)->toQString();
+    if (!theString.isEmpty())
         ioStringList.insert(theString);
 }
 
@@ -1243,11 +1235,11 @@ inline void AddStringToList(std::set<Q3DStudio::CString> &ioStringList, const SV
 /**
  *	Get Font file list from all Text instances
  */
-std::set<Q3DStudio::CString> CClientDataModelBridge::GetFontFileList() const
+std::set<QString> CClientDataModelBridge::GetFontFileList() const
 {
     // Get the font name property list
     std::vector<SValue> theValueList = GetValueList(m_Text.m_Instance, m_Text.m_Font);
-    std::set<Q3DStudio::CString> theFontNameList;
+    std::set<QString> theFontNameList;
     for (std::vector<SValue>::iterator theIter = theValueList.begin();
          theIter != theValueList.end(); ++theIter)
         AddStringToList(theFontNameList, *theIter);
@@ -1257,30 +1249,28 @@ std::set<Q3DStudio::CString> CClientDataModelBridge::GetFontFileList() const
         return theFontNameList;
 
     // Translate the font name to font file
-    std::set<Q3DStudio::CString> theFontFileList;
-    std::vector<std::pair<Q3DStudio::CString, Q3DStudio::CString>> theFontNameFileList;
+    std::set<QString> theFontFileList;
+    std::vector<std::pair<QString, QString>> theFontNameFileList;
     m_Doc->GetProjectFonts(theFontNameFileList);
-    for (std::set<Q3DStudio::CString>::iterator theFontNameIter = theFontNameList.begin();
-         theFontNameIter != theFontNameList.end(); ++theFontNameIter) {
+    for (auto &fontName : theFontNameList) {
         // Given the font name, try to get the font file from the list of fonts registered in
         // Studio.
         // If the font is not found, it means that we are using missing font file.
         // Create some non-existing path to inform user that this font is missing.
         bool theFontFound = false;
-        Q3DStudio::CString theFontFile;
-        for (size_t idx = 0, end = theFontNameFileList.size(); idx < end; ++idx) {
-            if (theFontNameFileList[idx].first == *theFontNameIter) {
+        QString theFontFile;
+        for (auto &fontNamePair : theFontNameFileList) {
+            if (fontNamePair.first == fontName) {
                 theFontFound = true;
-                theFontFile = theFontNameFileList[idx].second;
+                theFontFile = fontNamePair.second;
                 break;
             }
         }
         if (!theFontFound) {
-            theFontFile = L"fonts\\File with font name [";
-            theFontFile.append(*theFontNameIter);
-            theFontFile.append(" ]");
+            theFontFile = QLatin1String("fonts\\File with font name [") + fontName
+                            + QLatin1String(" ]");
         }
-        theFontFileList.insert(Q3DStudio::CFilePath(theFontFile).toCString());
+        theFontFileList.insert(theFontFile);
     }
     return theFontFileList;
 }
@@ -1335,7 +1325,7 @@ static void GetDynamicObjecTextures(IDataCore &inDataCore, IPropertySystem &inPr
 /**
  *	Get texture list from all effect instances
  */
-std::set<Q3DStudio::CString> CClientDataModelBridge::GetDynamicObjectTextureList() const
+std::set<QString> CClientDataModelBridge::GetDynamicObjectTextureList() const
 {
     std::vector<SValue> theValueList;
 
@@ -1349,7 +1339,7 @@ std::set<Q3DStudio::CString> CClientDataModelBridge::GetDynamicObjectTextureList
                             theValueList, *this);
 
     // Translate from SValue to Q3DStudio::CString and also remove the identifier
-    std::set<Q3DStudio::CString> theSourcePathList;
+    std::set<QString> theSourcePathList;
     for (std::vector<SValue>::iterator theIter = theValueList.begin();
          theIter != theValueList.end(); ++theIter)
         AddSourcePathToList(theSourcePathList, *theIter);
@@ -1525,7 +1515,7 @@ CClientDataModelBridge::GetResidingLayer(qt3dsdm::Qt3DSDMInstanceHandle inInstan
  */
 qt3dsdm::Qt3DSDMInstanceHandle
 CClientDataModelBridge::GetChildByName(qt3dsdm::Qt3DSDMInstanceHandle inParent,
-                                       Q3DStudio::CString inName,
+                                       const QString &inName,
                                        qt3dsdm::Qt3DSDMInstanceHandle skipInstance)
 {
     Q3DStudio::CGraphIterator theChildren;
@@ -1568,49 +1558,49 @@ CClientDataModelBridge::GetObjectType(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     SValue theTypeValue;
     IPropertySystem *thePropertySystem = m_Doc->GetStudioSystem()->GetPropertySystem();
     thePropertySystem->GetInstancePropertyValue(inInstance, GetTypeProperty(), theTypeValue);
-    std::wstring theType(qt3dsdm::get<TDataStrPtr>(theTypeValue)->GetData());
+    QString theType(qt3dsdm::get<TDataStrPtr>(theTypeValue)->toQString());
 
-    if (theType == L"Behavior")
+    if (theType == QLatin1String("Behavior"))
         return OBJTYPE_BEHAVIOR;
-    else if (theType == L"Camera")
+    else if (theType == QLatin1String("Camera"))
         return OBJTYPE_CAMERA;
-    else if (theType == L"Group")
+    else if (theType == QLatin1String("Group"))
         return OBJTYPE_GROUP;
-    else if (theType == L"Component")
+    else if (theType == QLatin1String("Component"))
         return OBJTYPE_COMPONENT;
-    else if (theType == L"Image" || theType == L"LibraryImage")
+    else if (theType == QLatin1String("Image") || theType == QLatin1String("LibraryImage"))
         return OBJTYPE_IMAGE;
-    else if (theType == L"Layer")
+    else if (theType == QLatin1String("Layer"))
         return OBJTYPE_LAYER;
-    else if (theType == L"Light")
+    else if (theType == QLatin1String("Light"))
         return OBJTYPE_LIGHT;
-    else if (theType == L"Material")
+    else if (theType == QLatin1String("Material"))
         return OBJTYPE_MATERIAL;
-    else if (theType == L"Model")
+    else if (theType == QLatin1String("Model"))
         return OBJTYPE_MODEL;
-    else if (theType == L"Alias")
+    else if (theType == QLatin1String("Alias"))
         return OBJTYPE_ALIAS;
-    else if (theType == L"Scene")
+    else if (theType == QLatin1String("Scene"))
         return OBJTYPE_SCENE;
-    else if (theType == L"Slide")
+    else if (theType == QLatin1String("Slide"))
         return OBJTYPE_SLIDE;
-    else if (theType == L"Text")
+    else if (theType == QLatin1String("Text"))
         return OBJTYPE_TEXT;
-    else if (theType == L"Effect")
+    else if (theType == QLatin1String("Effect"))
         return OBJTYPE_EFFECT;
-    else if (theType == L"RenderPlugin")
+    else if (theType == QLatin1String("RenderPlugin"))
         return OBJTYPE_RENDERPLUGIN;
-    else if (theType == L"CustomMaterial")
+    else if (theType == QLatin1String("CustomMaterial"))
         return OBJTYPE_CUSTOMMATERIAL;
-    else if (theType == L"ReferencedMaterial")
+    else if (theType == QLatin1String("ReferencedMaterial"))
         return OBJTYPE_REFERENCEDMATERIAL;
-    else if (theType == L"Path")
+    else if (theType == QLatin1String("Path"))
         return OBJTYPE_PATH;
-    else if (theType == L"PathAnchorPoint")
+    else if (theType == QLatin1String("PathAnchorPoint"))
         return OBJTYPE_PATHANCHORPOINT;
-    else if (theType == L"SubPath")
+    else if (theType == QLatin1String("SubPath"))
         return OBJTYPE_SUBPATH;
-    else if (theType == L"Lightmaps")
+    else if (theType == QLatin1String("Lightmaps"))
         return OBJTYPE_LIGHTMAPS;
     else {
         ASSERT(0);
@@ -1787,25 +1777,25 @@ void CClientDataModelBridge::UpdateHandlerArgumentValue(qt3dsdm::HandlerArgument
     }
 }
 
-std::wstring CClientDataModelBridge::GetDefaultHandler(Qt3DSDMInstanceHandle inInstance,
-                                                       std::wstring inOldHandler)
+QString CClientDataModelBridge::GetDefaultHandler(Qt3DSDMInstanceHandle inInstance,
+                                                  const QString &inOldHandler)
 {
     IMetaData *theMetaData = m_Doc->GetStudioSystem()->GetActionMetaData();
 
     // We try to maintain old handler whenever possible.
     // This is to fix bug 6569: Maintain handler option under action palette when changing target
     // object
-    if (inOldHandler != L""
-        && theMetaData->FindHandlerByName(inInstance, inOldHandler.c_str()).Valid())
+    if (!inOldHandler.isEmpty()
+        && theMetaData->FindHandlerByName(inInstance, inOldHandler).Valid())
         return inOldHandler;
 
     // This is to fix bug 5106: Default action for components should be Go To Slide
-    std::wstring theHandlerName;
+    QString theHandlerName;
     if (m_DataCore->IsInstanceOrDerivedFrom(inInstance,
                                             m_ObjectDefinitions->m_SlideOwner.m_Instance)) {
-        theHandlerName = L"Go to Slide";
+        theHandlerName = "Go to Slide";
         // Verify that Go to Slide is valid, just in case MetaData.xml is changed
-        if (theMetaData->FindHandlerByName(inInstance, theHandlerName.c_str()).Valid())
+        if (theMetaData->FindHandlerByName(inInstance, theHandlerName).Valid())
             return theHandlerName;
     }
 
@@ -1813,29 +1803,27 @@ std::wstring CClientDataModelBridge::GetDefaultHandler(Qt3DSDMInstanceHandle inI
     THandlerHandleList theHandlerList;
     GetHandlers(inInstance, theHandlerList);
     if (theHandlerList.size() > 0)
-        theHandlerName = theMetaData->GetHandlerInfo(theHandlerList[0])->m_Name.wide_str();
+        theHandlerName = theMetaData->GetHandlerInfo(theHandlerList[0])->m_Name;
     else
-        theHandlerName = L""; // set to unknown handler
+        theHandlerName.clear(); // set to unknown handler
     return theHandlerName;
 }
 
-std::wstring CClientDataModelBridge::GetDefaultEvent(Qt3DSDMInstanceHandle inInstance,
-                                                     std::wstring inOldEvent)
+QString CClientDataModelBridge::GetDefaultEvent(Qt3DSDMInstanceHandle inInstance,
+                                                const QString &inOldEvent)
 {
     IMetaData *theMetaData = m_Doc->GetStudioSystem()->GetActionMetaData();
 
     // We try to maintain old event whenever possible.
-    if (inOldEvent != L"" && theMetaData->FindEvent(inInstance, inOldEvent.c_str()).Valid())
+    if (!inOldEvent.isEmpty() && theMetaData->FindEvent(inInstance, inOldEvent).Valid())
         return inOldEvent;
 
     // Default to the first event found
-    std::wstring theEventName;
+    QString theEventName;
     TEventHandleList theEventList;
     GetEvents(inInstance, theEventList);
     if (theEventList.size() > 0)
-        theEventName = theMetaData->GetEventInfo(theEventList[0])->m_Name.wide_str();
-    else
-        theEventName = L""; // set to unknown event
+        theEventName = theMetaData->GetEventInfo(theEventList[0])->m_Name;
     return theEventName;
 }
 
@@ -1887,12 +1875,12 @@ void CClientDataModelBridge::ResetHandlerArguments(Qt3DSDMActionHandle inAction,
                          SActionInvalidProperty(*thePropertySystem, theTargetObject));
                 if (theProperties.size() > 0) {
                     theValue = qt3dsdm::TDataStrPtr(new qt3dsdm::CDataStr(
-                        thePropertySystem->GetName(theProperties[0]).wide_str()));
+                        thePropertySystem->GetName(theProperties[0])));
                 }
             }
                 break;
             case HandlerArgumentType::Slide: {
-                std::list<Q3DStudio::CString> theSlideNames;
+                std::list<QString> theSlideNames;
                 GetSlideNamesOfAction(inAction, theSlideNames);
                 if (theSlideNames.size() > 0)
                     theValue = TDataStrPtr(new CDataStr(*theSlideNames.begin()));
@@ -1923,8 +1911,8 @@ void CClientDataModelBridge::ResetHandlerArguments(Qt3DSDMActionHandle inAction,
                 SActionInfo theActionInfo = theActionCore->GetActionInfo(inAction);
                 theDependentInstance =
                     GetInstance(theActionInfo.m_Owner, theActionInfo.m_TargetObject);
-                TCharStr thePropertyName =
-                    qt3dsdm::get<qt3dsdm::TDataStrPtr>(theArgument.m_Value)->GetData();
+                QString thePropertyName =
+                    qt3dsdm::get<qt3dsdm::TDataStrPtr>(theArgument.m_Value)->toQString();
                 theDependentProperty =
                     GetAggregateInstancePropertyByName(theDependentInstance, thePropertyName);
                 theDataType = thePropertySystem->GetDataType(theDependentProperty);
@@ -1942,7 +1930,7 @@ void CClientDataModelBridge::ResetHandlerArguments(Qt3DSDMActionHandle inAction,
 }
 // Resolve the path
 void CClientDataModelBridge::ResetHandlerArguments(qt3dsdm::Qt3DSDMActionHandle inAction,
-                                                   const std::wstring &inHandler)
+                                                   const QString &inHandler)
 {
     IActionCore &theActionCore = *m_Doc->GetStudioSystem()->GetActionCore();
     const SActionInfo &theInfo(theActionCore.GetActionInfo(inAction));
@@ -1953,25 +1941,25 @@ void CClientDataModelBridge::ResetHandlerArguments(qt3dsdm::Qt3DSDMActionHandle 
 qt3dsdm::Qt3DSDMEventHandle
 CClientDataModelBridge::ResolveEvent(qt3dsdm::Qt3DSDMInstanceHandle inResolveRoot,
                                      const qt3dsdm::SObjectRefType &inResolution,
-                                     const std::wstring &inEventName)
+                                     const QString &inEventName)
 {
     Qt3DSDMInstanceHandle theInstance = GetInstance(inResolveRoot, inResolution);
     if (theInstance.Valid() == false)
         return 0;
     IMetaData &theMetaData(*m_Doc->GetStudioSystem()->GetActionMetaData());
-    return theMetaData.FindEvent(theInstance, inEventName.c_str());
+    return theMetaData.FindEvent(theInstance, inEventName);
 }
 
 qt3dsdm::Qt3DSDMHandlerHandle
 CClientDataModelBridge::ResolveHandler(qt3dsdm::Qt3DSDMInstanceHandle inResolveRoot,
                                        const qt3dsdm::SObjectRefType &inResolution,
-                                       const std::wstring &inHandlerName)
+                                       const QString &inHandlerName)
 {
     Qt3DSDMInstanceHandle theInstance = GetInstance(inResolveRoot, inResolution);
     if (theInstance.Valid() == false)
         return 0;
     IMetaData &theMetaData(*m_Doc->GetStudioSystem()->GetActionMetaData());
-    return theMetaData.FindHandlerByName(theInstance, inHandlerName.c_str());
+    return theMetaData.FindHandlerByName(theInstance, inHandlerName);
 }
 
 qt3dsdm::Qt3DSDMEventHandle CClientDataModelBridge::ResolveEvent(const qt3dsdm::SActionInfo &inInfo)
@@ -2000,8 +1988,8 @@ void CClientDataModelBridge::SetHandlerArgumentValue(Qt3DSDMHandlerArgHandle inH
             theActionCore->GetActionInfo(theHandlerArgument.m_Action);
         Qt3DSDMInstanceHandle theInstance =
             GetInstance(theActionInfo.m_Owner, theActionInfo.m_TargetObject);
-        TCharStr thePropertyName =
-            qt3dsdm::get<qt3dsdm::TDataStrPtr>(theHandlerArgument.m_Value)->GetData();
+        QString thePropertyName =
+            qt3dsdm::get<qt3dsdm::TDataStrPtr>(theHandlerArgument.m_Value)->toQString();
         Qt3DSDMPropertyHandle thePropertyHandle =
             GetAggregateInstancePropertyByName(theInstance, thePropertyName);
         DataModelDataType::Value theDataType = thePropertySystem->GetDataType(thePropertyHandle);
@@ -2033,8 +2021,8 @@ void CClientDataModelBridge::GetActionDependentProperty(Qt3DSDMActionHandle inAc
         const SHandlerArgumentInfo &theArgument =
             theActionCore->GetHandlerArgumentInfo(*theIterator);
         if (theArgument.m_ArgType == HandlerArgumentType::Property) {
-            TCharStr thePropertyName =
-                qt3dsdm::get<qt3dsdm::TDataStrPtr>(theArgument.m_Value)->GetData();
+            QString thePropertyName =
+                qt3dsdm::get<qt3dsdm::TDataStrPtr>(theArgument.m_Value)->toQString();
             outProperty = GetAggregateInstancePropertyByName(outInstance, thePropertyName);
             break;
         }
@@ -2042,7 +2030,7 @@ void CClientDataModelBridge::GetActionDependentProperty(Qt3DSDMActionHandle inAc
 }
 
 void CClientDataModelBridge::GetSlideNamesOfAction(qt3dsdm::Qt3DSDMActionHandle inAction,
-                                                   std::list<Q3DStudio::CString> &outSlideNames)
+                                                   std::list<QString> &outSlideNames)
 {
     SActionInfo theActionInfo = m_Doc->GetStudioSystem()->GetActionCore()->GetActionInfo(inAction);
     Qt3DSDMInstanceHandle theTargetInstance =
@@ -2115,7 +2103,7 @@ qt3dsdm::SHandlerInfo CClientDataModelBridge::GetHandlerInfo(qt3dsdm::Qt3DSDMHan
 
 Qt3DSDMPropertyHandle
 CClientDataModelBridge::GetAggregateInstancePropertyByName(Qt3DSDMInstanceHandle inInstance,
-                                                           const TCharStr &inPropertyName)
+                                                           const QString &inPropertyName)
 {
     return m_DataCore->GetAggregateInstancePropertyByName(inInstance, inPropertyName);
 }

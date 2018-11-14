@@ -98,12 +98,19 @@ public:
     { m_identifier = identifier.toQString(); }
 
     void ConvertToRelative(const CFilePath &inBaseAbsolute);
-    static CFilePath GetRelativePathFromBase(const CFilePath &inBase, const CFilePath &inPath)
+
+    static QString GetRelativePathFromBase(const QFileInfo &inBase, const QFileInfo &inPath)
     {
-        CFilePath retval(inPath);
-        retval.ConvertToRelative(inBase);
-        return retval;
+        QFileInfo basePath(inBase);
+        QFileInfo relPath(inPath);
+        QT3DS_ASSERT(basePath.isAbsolute());
+        QT3DS_ASSERT(!relPath.isRelative());
+        QDir basePathDir = basePath.absoluteFilePath();
+        QString outPath = basePathDir.relativeFilePath(relPath.absoluteFilePath());
+        return outPath;
     }
+
+    static QString stripIdentifier(const QString &path);
 
     /**
     *	Return true if this string is in subdirectory of inBasePath
@@ -125,6 +132,15 @@ public:
         return retval;
     }
 
+    static QString CombineBaseAndRelative(const QString &base, const QString &inRelative)
+    {
+        QFileInfo basePath(base);
+        QT3DS_ASSERT(basePath.isAbsolute());
+        QDir basePathDir = basePath.absoluteFilePath();
+        QString absPath = basePathDir.absoluteFilePath(inRelative);
+        return QDir::cleanPath(absPath);
+    }
+
     bool IsAbsolute() const;
     bool ConvertToAbsolute();
     static CFilePath GetAbsolutePath(const CFilePath &inBaseFilePath)
@@ -136,10 +152,12 @@ public:
     // Make a save file stem from this string.  Involves replacing characters
     // that are illegal (:,\\,//,etc).
     static CString MakeSafeFileStem(const CString &name);
+    static QString MakeSafeFileStem(const QString &name);
 
     // Create this directory, recursively creating parent directories
     // if necessary.
     bool CreateDir(bool recurse) const;
+    static bool CreateDir(const QString &path, bool recurse);
     // Returns true if exists and is directory
     bool IsDirectory() const;
     // returns true if exists and is a file
@@ -159,7 +177,7 @@ public:
     // ignore special files ".\\" and "..\\"
     // Returns absolute paths combined with this
     // this.combineBaseAndRelative( result );
-    void ListFilesAndDirectories(std::vector<CFilePath> &files) const;
+    static void ListFilesAndDirectories(const QString &directory, std::vector<QFileInfo> &files);
 
     // Returns absolute paths
     // This object has to be a directory
@@ -171,8 +189,9 @@ public:
     // ExtensionList should not contain the "." in ".png" for example.
     // It should just contain { L"png", NULL }
     // An empty extension list means return all files.
-    void RecursivelyFindFilesOfType(const wchar_t **inExtensionList, std::vector<CFilePath> &files,
-                                    bool inMakeRelative, bool inIncludeDirectories = false) const;
+    static void RecursivelyFindFilesOfType(const QFileInfo &dir, const QStringList &inExtensionList,
+                                           std::vector<QFileInfo> &files, bool inMakeRelative,
+                                           bool inIncludeDirectories = false);
 
     // Given the list of differences from last time this function was called (which may be empty)
     // and the list of new differences to put new results into, recursively diff this directory's
@@ -206,7 +225,7 @@ private:
 
 struct SFileModificationRecord
 {
-    CFilePath m_File;
+    QFileInfo m_File;
     SFileInfoFlags m_FileInfo;
     SFileData m_FileData;
     FileModificationType::Enum m_ModificationType;
@@ -216,7 +235,7 @@ struct SFileModificationRecord
     {
     }
 
-    SFileModificationRecord(const CFilePath &inFile, const SFileInfoFlags &inFileInfo,
+    SFileModificationRecord(const QFileInfo &inFile, const SFileInfoFlags &inFileInfo,
                             const SFileData &inFileData, FileModificationType::Enum modType)
         : m_File(inFile)
         , m_FileInfo(inFileInfo)
@@ -359,6 +378,8 @@ struct SFileTools
     // Same file flags as SFile::OpenForWrite
     static SFileErrorCodeAndNumBytes Copy(const CFilePath &destFile, FileOpenFlags fileFlags,
                                           const CFilePath &srcFile);
+    static SFileErrorCodeAndNumBytes Copy(const QString &destFile, FileOpenFlags fileFlags,
+                                          const QString &srcFile);
 
     // Find a unique dest file based on the src file stem and extension but in the destination
     // directory

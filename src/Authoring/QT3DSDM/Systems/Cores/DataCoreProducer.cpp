@@ -54,7 +54,7 @@ inline void SignalPropertyRemoved(Qt3DSDMInstanceHandle inInstance,
                                   tuple<Qt3DSDMPropertyHandle, Qt3DSDMPropertyDefinition> inData,
                                   IDataCoreSignalSender *inSender)
 {
-    inSender->SignalPropertyRemoved(inInstance, get<0>(inData), get<1>(inData).m_Name.wide_str(),
+    inSender->SignalPropertyRemoved(inInstance, get<0>(inData), get<1>(inData).m_Name,
                                     get<1>(inData).m_Type);
 }
 
@@ -148,7 +148,8 @@ void CDataCoreProducer::GetInstanceParents(Qt3DSDMInstanceHandle inHandle,
 }
 
 Qt3DSDMPropertyHandle CDataCoreProducer::AddProperty(Qt3DSDMInstanceHandle inInstance,
-                                                    TCharPtr inName, DataModelDataType::Value inPropType)
+                                                     const QString &inName,
+                                                     DataModelDataType::Value inPropType)
 {
     Qt3DSDMPropertyHandle retval = m_Data->AddProperty(inInstance, inName, inPropType);
     TDataModelInstancePtr theInstance =
@@ -184,7 +185,7 @@ void CDataCoreProducer::RemoveProperty(Qt3DSDMPropertyHandle inProperty)
                                        theInstance->m_Properties);
         CREATE_HANDLE_DELETE_TRANSACTION(m_Consumer, inProperty, m_Data->m_Objects);
         GetDataCoreSender()->SignalPropertyRemoved(theDef.m_Instance, inProperty,
-                                                   theDef.m_Name.wide_str(), theDef.m_Type);
+                                                   theDef.m_Name, theDef.m_Type);
         m_Data->RemoveProperty(inProperty);
     } else {
         throw PropertyNotFound(L"");
@@ -277,7 +278,7 @@ void CDataCoreProducer::CopyInstanceProperties(Qt3DSDMInstanceHandle inSrcInstan
 
 Qt3DSDMPropertyHandle
 CDataCoreProducer::GetAggregateInstancePropertyByName(Qt3DSDMInstanceHandle inInstance,
-                                                      const TCharStr &inStr) const
+                                                      const QString &inStr) const
 {
     return m_Data->GetAggregateInstancePropertyByName(inInstance, inStr);
 }
@@ -415,14 +416,14 @@ TSignalConnectionPtr CDataCoreProducer::ConnectInstanceParentRemoved(
 }
 
 TSignalConnectionPtr CDataCoreProducer::ConnectPropertyAdded(
-    const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle, TCharPtr,
+    const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle, const QString &,
                                DataModelDataType::Value)> &inCallback)
 {
     return GetDataCoreProvider()->ConnectPropertyAdded(inCallback);
 }
 
 TSignalConnectionPtr CDataCoreProducer::ConnectPropertyRemoved(
-    const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle, TCharPtr,
+    const std::function<void(Qt3DSDMInstanceHandle, Qt3DSDMPropertyHandle, const QString &,
                                DataModelDataType::Value)> &inCallback)
 {
     return GetDataCoreProvider()->ConnectPropertyRemoved(inCallback);

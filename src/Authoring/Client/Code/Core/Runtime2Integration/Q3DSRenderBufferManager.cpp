@@ -59,14 +59,14 @@ Q3DSRenderMesh *Q3DSRenderBufferManager::LoadMesh(const QString &inSourcePath)
     return nullptr;
 }
 
-//Q3DSRenderMesh *Q3DSRenderBufferManager::CreateMesh(const char *inSourcePath, void *inVertData,
-//                                   unsigned int inNumVerts, unsigned int inVertStride,
-//                                   unsigned int *inIndexData,
-//                                   unsigned int inIndexCount
-//                                   /*, qt3ds::NVBounds3 inBounds*/)
-//{
-
-//}
+Q3DSRenderMesh *Q3DSRenderBufferManager::CreateMesh(const char *inSourcePath, void *inVertData,
+                                   unsigned int inNumVerts, unsigned int inVertStride,
+                                   unsigned int *inIndexData,
+                                   unsigned int inIndexCount
+                                   /*, qt3ds::NVBounds3 inBounds*/)
+{
+    return nullptr;
+}
 
 void Q3DSRenderBufferManager::Clear()
 {
@@ -76,6 +76,12 @@ void Q3DSRenderBufferManager::Clear()
 void Q3DSRenderBufferManager::InvalidateBuffer(const QString &inSourcePath)
 {
 
+}
+
+void Q3DSRenderBufferManager::SetImageHasTransparency(const QString &inSourcePath,
+                                                      bool inHasTransparency)
+{
+    m_engine->presentation()->registerImageBuffer(inSourcePath, inHasTransparency);
 }
 
 QSharedPointer<Q3DSRenderBufferManager> Q3DSRenderBufferManager::Create(Q3DSEngine *engine,

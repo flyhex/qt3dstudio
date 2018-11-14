@@ -40,7 +40,7 @@
 #include "DocumentEditorEnumerations.h"
 #include "IDocumentReader.h"
 #include "Qt3DSDMComposerTypeDefinitions.h"
-#include "CColor.h"
+#include <QtGui/qcolor.h>
 #include "Qt3DSDMHandles.h"
 
 #pragma once
@@ -68,7 +68,6 @@ namespace render {
 }
 
 namespace Q3DStudio {
-using std::wstring;
 class CGraph;
 class IInternalDocumentEditor;
 class IInputStreamFactory;
@@ -121,7 +120,7 @@ public:
 
     // Function callable without a document editor instance, used when loading document
     static TInstanceHandle
-    CreateSceneGraphInstance(const wchar_t *inType, TInstanceHandle parent, TSlideHandle inSlide,
+    CreateSceneGraphInstance(const QString &inType, TInstanceHandle parent, TSlideHandle inSlide,
                              qt3dsdm::IDataCore &inDataCore, qt3dsdm::ISlideSystem &inSlideSystem,
                              qt3dsdm::SComposerObjectDefinitions &inObjectDefs,
                              Q3DStudio::CGraph &inAssetGraph, qt3dsdm::IMetaData &inMetaData,
@@ -160,8 +159,8 @@ public:
                                                      bool setTimeRange = true) = 0;
     virtual void setInstanceImagePropertyValueAsRenderable(TInstanceHandle instance,
                                                            TPropertyHandle prop,
-                                                           const CString &pId) = 0;
-    virtual void addRectForSubpresentation(const CString &pId, TSlideHandle slide,
+                                                           const QString &pId) = 0;
+    virtual void addRectForSubpresentation(const QString &pId, TSlideHandle slide,
                                            const CPt &pos = CPt(), long startTime = -1) = 0;
 
     virtual void DeleteInstances(const qt3dsdm::TInstanceHandleList &instances) = 0;
@@ -175,10 +174,10 @@ public:
         DeleteInstances(theInstances);
     }
 
-    virtual Q3DStudio::CString writeMaterialFile(Qt3DSDMInstanceHandle instance,
-                                         const QString &materialName,
-                                         bool createNewFile,
-                                         const QString &sourcePath = {}) = 0;
+    virtual QString writeMaterialFile(Qt3DSDMInstanceHandle instance,
+                                      const QString &materialName,
+                                      bool createNewFile,
+                                      const QString &sourcePath = {}) = 0;
 
     virtual void updateMaterialInstances(const QStringList &filenames) = 0;
 
@@ -188,8 +187,8 @@ public:
 
     virtual Qt3DSDMInstanceHandle getMaterialContainer() const = 0;
 
-    virtual Qt3DSDMInstanceHandle getMaterial(const Q3DStudio::CString &materialName) = 0;
-    virtual Qt3DSDMInstanceHandle getOrCreateMaterial(const Q3DStudio::CString &materialName) = 0;
+    virtual Qt3DSDMInstanceHandle getMaterial(const QString &materialName) = 0;
+    virtual Qt3DSDMInstanceHandle getOrCreateMaterial(const QString &materialName) = 0;
 
     virtual void getMaterialReference(Qt3DSDMInstanceHandle instance,
                                       Qt3DSDMInstanceHandle &reference) const = 0;
@@ -206,7 +205,7 @@ public:
                                                   TPropertyHandle inProperty,
                                                   const SValue &value) = 0;
     void SetSpecificInstancePropertyValue(TSlideHandle inSlide, TInstanceHandle instance,
-                                          const wchar_t *inProperty, const SValue &value)
+                                          const QString &inProperty, const SValue &value)
     {
         SetSpecificInstancePropertyValue(inSlide, instance, FindProperty(instance, inProperty),
                                          value);
@@ -227,29 +226,29 @@ public:
     // the we will return 0 from this function.
     virtual TInstanceHandle
     SetInstancePropertyValueAsImage(TInstanceHandle instance, TPropertyHandle propName,
-                                    const Q3DStudio::CString &inSourcePath) = 0;
+                                    const QString &inSourcePath) = 0;
 
     // If sourcepath resolves to a valid plugin file, we create a renderable item and add it as a
     // child to the image.
     // else we return nothing and just set the value as is.
     virtual TInstanceHandle
     SetInstancePropertyValueAsRenderable(TInstanceHandle instance, TPropertyHandle propName,
-                                         const Q3DStudio::CString &inSourcePath) = 0;
+                                         const QString &inSourcePath) = 0;
 
     virtual void SetMaterialType(TInstanceHandle instance,
-                                 const Q3DStudio::CString &inRelativePathToMaterialFile) = 0;
+                                 const QString &inRelativePathToMaterialFile) = 0;
 
     virtual void setMaterialProperties(TInstanceHandle instance, const QString &materialName,
-                                       const Q3DStudio::CString &materialSourcePath,
+                                       const QString &materialSourcePath,
                                        const QMap<QString, QString> &values,
                                        const QMap<QString, QMap<QString, QString>>
                                        &textureValues) = 0;
 
     virtual void setMaterialReferenceByName(TInstanceHandle instance,
-                                            const Q3DStudio::CString &materialName) = 0;
+                                            const QString &materialName) = 0;
 
     virtual void setMaterialSourcePath(TInstanceHandle instance,
-                                       const Q3DStudio::CString &materialSourcePath) = 0;
+                                       const QString &materialSourcePath) = 0;
 
     virtual void setMaterialValues(const QString &materialName,
                                    const QMap<QString, QString> &values,
@@ -264,7 +263,7 @@ public:
     virtual void SetSlideName(TInstanceHandle instance, TPropertyHandle propName,
                               const wchar_t *inOldName, const wchar_t *inNewName) = 0;
 
-    virtual void SetName(Qt3DSDMInstanceHandle inInstance, const CString &inName,
+    virtual void SetName(Qt3DSDMInstanceHandle inInstance, const QString &inName,
                          bool inMakeUnique = false) = 0;
 
     // Linking/unlinking properties.  Functions take care of creating/destroying
@@ -282,7 +281,7 @@ public:
     // called when the user hits '[' or ']'.
     virtual void TruncateTimeRange(TInstanceHandle inInstance, bool inSetStart, long inTime) = 0;
 
-    virtual void SetTimebarColor(TInstanceHandle inInstance, ::CColor inColor) = 0;
+    virtual void SetTimebarColor(TInstanceHandle inInstance, const QColor &inColor) = 0;
     virtual void SetTimebarText(TInstanceHandle inInstance,
                                 const Q3DStudio::CString &inComment) = 0;
 
@@ -297,11 +296,11 @@ public:
     // time space is expected to be normalized to the object's start time when being input to this
     // function.
     virtual Qt3DSDMAnimationHandle
-    CreateOrSetAnimation(TSlideHandle inSlide, TInstanceHandle instance, const wchar_t *propName,
+    CreateOrSetAnimation(TSlideHandle inSlide, TInstanceHandle instance,const QString &propName,
                          long subIndex, qt3dsdm::EAnimationType animType, const float *keyframeValues,
                          long numValues, bool inUserEdited = true) = 0;
     virtual bool RemoveAnimation(TSlideHandle inSlide, TInstanceHandle instance,
-                                 const wchar_t *propName, long subIndex) = 0;
+                                 const QString &propName, long subIndex) = 0;
     virtual void SetKeyframeTime(TKeyframeHandle inKeyframe, long inTimeInMilliseconds) = 0;
     virtual void DeleteAllKeyframes(Qt3DSDMAnimationHandle inAnimation) = 0;
     virtual void KeyframeProperty(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty,
@@ -314,12 +313,12 @@ public:
     // Paste a scene graph object into this system at this location.  Returns the new object
     //(but it sets the new object as the selected object so clients probably don't need this)
     virtual qt3dsdm::TInstanceHandleList
-    PasteSceneGraphObject(const CFilePath &inFilePath, Qt3DSDMInstanceHandle inNewRoot,
+    PasteSceneGraphObject(const QString &inFilePath, Qt3DSDMInstanceHandle inNewRoot,
                           bool inGenerateUniqueName, DocumentEditorInsertType::Enum inInsertType,
                           const CPt &inPosition) = 0;
 
     virtual qt3dsdm::TInstanceHandleList PasteSceneGraphObjectMaster(
-        const CFilePath &inFilePath, Qt3DSDMInstanceHandle inNewRoot, bool inGenerateUniqueName,
+        const QString &inFilePath, Qt3DSDMInstanceHandle inNewRoot, bool inGenerateUniqueName,
         DocumentEditorInsertType::Enum inInsertType, const CPt &inPosition) = 0;
 
     virtual void RearrangeObjects(const qt3dsdm::TInstanceHandleList &inInstances,
@@ -366,12 +365,12 @@ public:
     }
 
     virtual Qt3DSDMActionHandle AddAction(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,
-                                         const wstring &inEvent, const wstring &inHandler) = 0;
+                                         const QString &inEvent, const QString &inHandler) = 0;
 
     virtual void DeleteAction(Qt3DSDMActionHandle inAction) = 0;
 
     // Paste a given action into this new root object.
-    virtual Qt3DSDMActionHandle PasteAction(const CFilePath &inFilePath,
+    virtual Qt3DSDMActionHandle PasteAction(const QString &inFilePath,
                                            Qt3DSDMInstanceHandle inNewRoot) = 0;
 
     virtual Qt3DSDMSlideHandle AddSlide(Qt3DSDMSlideHandle inMasterSlide, int inIndex = -1) = 0;
@@ -394,89 +393,89 @@ public:
     // Returns an invalid handle (0) if the import fails.
     // This is the only true import operation.  The rest don't move the files into the
     // document at this point.
-    virtual TInstanceHandle ImportDAE(const Q3DStudio::CString &inFullPathToDocument,
+    virtual TInstanceHandle ImportDAE(const QString &inFullPathToDocument,
                                       TInstanceHandle inParent, TSlideHandle inSlide,
-                                      const Q3DStudio::CString &inImportFileExtension,
+                                      const QString &inImportFileExtension,
                                       DocumentEditorInsertType::Enum inDropType,
                                       const CPt &inPosition = CPt(), long inStartTime = -1) = 0;
 
-    virtual TInstanceHandle LoadImportFile(const Q3DStudio::CString &inFullPathToDocument,
+    virtual TInstanceHandle LoadImportFile(const QString &inFullPathToDocument,
                                            TInstanceHandle inParent, TSlideHandle inSlide,
                                            DocumentEditorInsertType::Enum inDropType,
                                            const CPt &inPosition = CPt(),
                                            long inStartTime = -1) = 0;
     // Automap an image into the scene
-    virtual TInstanceHandle AutomapImage(const Q3DStudio::CString &inFullPathToDocument,
+    virtual TInstanceHandle AutomapImage(const QString &inFullPathToDocument,
                                          TInstanceHandle inParent, TSlideHandle inSlide,
                                          DocumentEditorInsertType::Enum inDropType,
                                          const CPt &inPosition = CPt(), long inStartTime = -1) = 0;
 
-    virtual TInstanceHandle LoadMesh(const Q3DStudio::CString &inFullPathToDocument,
+    virtual TInstanceHandle LoadMesh(const QString &inFullPathToDocument,
                                      TInstanceHandle inParent, TSlideHandle inSlide,
                                      DocumentEditorInsertType::Enum inDropType,
                                      const CPt &inPosition = CPt(), long inStartTime = -1) = 0;
 
-    virtual TInstanceHandle LoadBehavior(const Q3DStudio::CString &inFullPathToDocument,
+    virtual TInstanceHandle LoadBehavior(const QString &inFullPathToDocument,
                                          TInstanceHandle inParent, TSlideHandle inSlide,
                                          DocumentEditorInsertType::Enum inDropType,
                                          long inStartTime) = 0;
 
-    virtual TInstanceHandle LoadRenderPlugin(const Q3DStudio::CString &inFullPathToDocument,
+    virtual TInstanceHandle LoadRenderPlugin(const QString &inFullPathToDocument,
                                              TInstanceHandle inParent, TSlideHandle inSlide,
                                              DocumentEditorInsertType::Enum inDropType,
                                              long inStartTime) = 0;
 
-    virtual TInstanceHandle LoadCustomMaterial(const Q3DStudio::CString &inFullPathToDocument,
+    virtual TInstanceHandle LoadCustomMaterial(const QString &inFullPathToDocument,
                                                TInstanceHandle inParent, TSlideHandle inSlide,
                                                DocumentEditorInsertType::Enum inDropType,
                                                long inStartTime,
                                                TInstanceHandle inTargetId = TInstanceHandle()) = 0;
 
     // Create text from the font file
-    virtual TInstanceHandle CreateText(const Q3DStudio::CString &inFullPathToDocument,
+    virtual TInstanceHandle CreateText(const QString &inFullPathToDocument,
                                        TInstanceHandle inParent, TSlideHandle inSlide,
                                        DocumentEditorInsertType::Enum inDropType,
                                        const CPt &inPosition = CPt(), long inStartTime = -1) = 0;
 
-    virtual TInstanceHandle LoadEffect(const Q3DStudio::CString &inFullPathToDocument,
+    virtual TInstanceHandle LoadEffect(const QString &inFullPathToDocument,
                                        TInstanceHandle inParent, TSlideHandle inSlide,
                                        DocumentEditorInsertType::Enum inDropType,
                                        long inStartTime) = 0;
 
     virtual TInstanceHandle
     ImportFile(DocumentEditorFileType::Enum inFileType,
-               const Q3DStudio::CString &inFullPathToDocument, TInstanceHandle inParent,
-               TSlideHandle inSlide, const Q3DStudio::CString &inImportFileExtension,
+               const QString &inFullPathToDocument, TInstanceHandle inParent,
+               TSlideHandle inSlide, const QString &inImportFileExtension,
                DocumentEditorInsertType::Enum inDropType = DocumentEditorInsertType::LastChild,
                const CPt &inPosition = CPt(), long inStartTime = -1) = 0;
 
     // Refresh an import or dae file
     // Absolute path to the file.
-    virtual void RefreshImport(const CFilePath &inOldFile, const CFilePath &inNewFile) = 0;
+    virtual void RefreshImport(const QString &inOldFile, const QString &inNewFile) = 0;
 
     virtual bool CleanUpMeshes() = 0;
 
     virtual void ReplaceTextFontNameWithTextFileStem(qt3ds::render::ITextRenderer &inRenderer) = 0;
-
+#if  RUNTIME_SPLIT_TEMPORARILY_REMOVED
     virtual void ExternalizePath(TInstanceHandle path) = 0;
     virtual void InternalizePath(TInstanceHandle path) = 0;
-
+#endif
     virtual void toggleBoolPropertyOnSelected(TPropertyHandle property) = 0;
 
     static std::shared_ptr<IDOMReader>
-    ParseScriptFile(const Q3DStudio::CFilePath &inFullPathToDocument,
+    ParseScriptFile(const QString &inFullPathToDocument,
                     std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
                     std::shared_ptr<IImportFailedHandler> inHandler,
                     Q3DStudio::IInputStreamFactory &inInputStreamFactory);
 
     static std::shared_ptr<IDOMReader>
-    ParsePluginFile(const Q3DStudio::CFilePath &inFullPathToDocument,
+    ParsePluginFile(const QString &inFullPathToDocument,
                     std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
                     std::shared_ptr<IImportFailedHandler> inHandler,
                     Q3DStudio::IInputStreamFactory &inInputStreamFactory);
 
     static std::shared_ptr<IDOMReader>
-    ParseCustomMaterialFile(const Q3DStudio::CFilePath &inFullPathToDocument,
+    ParseCustomMaterialFile(const QString &inFullPathToDocument,
                             std::shared_ptr<qt3dsdm::IStringTable> inStringTable,
                             std::shared_ptr<IImportFailedHandler> inHandler,
                             Q3DStudio::IInputStreamFactory &inInputStreamFactory);

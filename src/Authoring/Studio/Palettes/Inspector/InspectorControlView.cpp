@@ -28,7 +28,7 @@
 
 #include "InspectorControlView.h"
 #include "Literals.h"
-#include "CColor.h"
+#include <QtGui/qcolor.h>
 #include "Qt3DSDMValue.h"
 #include "StudioUtils.h"
 #include "InspectorControlModel.h"
@@ -82,10 +82,10 @@ InspectorControlView::InspectorControlView(const QSize &preferredSize, QWidget *
                 std::bind(&InspectorControlView::OnSelectionSet, this, std::placeholders::_1));
 }
 
-static bool isInList(const wchar_t **list, const Q3DStudio::CString &inStr)
+static bool isInList(const QStringList &list, const QString &inStr)
 {
-    for (const wchar_t **item = list; item && *item; ++item) {
-        if (inStr.Compare(*item, Q3DStudio::CString::ENDOFSTRING, false))
+    for (const QString &item : list) {
+        if (inStr.compare(item, Qt::CaseInsensitive) == 0)
             return true;
     }
     return false;
@@ -93,24 +93,22 @@ static bool isInList(const wchar_t **list, const Q3DStudio::CString &inStr)
 
 void InspectorControlView::filterMaterials(std::vector<Q3DStudio::CFilePath> &materials)
 {
-    static const wchar_t *extensions[] = {
-        L"material",
-        nullptr
+    static const QStringList extensions = {
+        {"material"}
     };
     for (size_t i = 0; i < m_fileList.size(); ++i) {
-        if (isInList(extensions, m_fileList[i].GetExtension()))
+        if (isInList(extensions, m_fileList[i].suffix()))
             materials.push_back(m_fileList[i]);
     }
 }
 
 void InspectorControlView::filterMatDatas(std::vector<Q3DStudio::CFilePath> &matDatas)
 {
-    static const wchar_t *extensions[] = {
-        L"matdata",
-        nullptr
+    static const QStringList extensions = {
+        {"matdata"}
     };
     for (size_t i = 0; i < m_fileList.size(); ++i) {
-        if (isInList(extensions, m_fileList[i].GetExtension()))
+        if (isInList(extensions, m_fileList[i].suffix()))
             matDatas.push_back(m_fileList[i]);
     }
 }
@@ -145,35 +143,33 @@ void InspectorControlView::OnTimeChanged()
 void InspectorControlView::onFilesChanged(
         const Q3DStudio::TFileModificationList &inFileModificationList)
 {
-    static const wchar_t *materialExtensions[] = {
-        L"material", L"matdata",
-        nullptr
+    static const QStringList materialExtensions = {
+        {"material"}, {"matdata"}
     };
-    static const wchar_t *fontExtensions[] = {
-        L"ttf", L"otf",
-        nullptr
+    static const QStringList fontExtensions = {
+        {"ttf"}, {"otf"}
     };
 
     bool updateFonts = false;
     for (size_t idx = 0, end = inFileModificationList.size(); idx < end; ++idx) {
         const Q3DStudio::SFileModificationRecord &record(inFileModificationList[idx]);
         if (record.m_FileInfo.IsFile()) {
-            if (isInList(materialExtensions, record.m_File.GetExtension())) {
+            if (isInList(materialExtensions, record.m_File.suffix())) {
                 Q3DStudio::CFilePath relativePath(
                             Q3DStudio::CFilePath::GetRelativePathFromBase(
                                 g_StudioApp.GetCore()->GetDoc()->GetDocumentDirectory(),
-                                record.m_File));
+                                record.m_File.canonicalFilePath()));
                 if (record.m_ModificationType == Q3DStudio::FileModificationType::Created)
                     qt3dsdm::binary_sort_insert_unique(m_fileList, relativePath);
                 else if (record.m_ModificationType == Q3DStudio::FileModificationType::Destroyed)
                     qt3dsdm::binary_sort_erase(m_fileList, relativePath);
-            } else if (isInList(fontExtensions, record.m_File.GetExtension())) {
+            } else if (isInList(fontExtensions, record.m_File.suffix())) {
                 if (record.m_ModificationType == Q3DStudio::FileModificationType::Created
                     || record.m_ModificationType == Q3DStudio::FileModificationType::Destroyed) {
                     updateFonts = true;
                 }
             } else if (record.m_ModificationType == Q3DStudio::FileModificationType::Modified
-                       && record.m_File.toQString()
+                       && record.m_File.canonicalFilePath()
                        == g_StudioApp.GetCore()->getProjectFile().getProjectFilePath()) {
                 g_StudioApp.GetCore()->getProjectFile().loadSubpresentationsAndDatainputs(
                                 g_StudioApp.m_subpresentations, g_StudioApp.m_dataInputDialogItems);
@@ -240,11 +236,11 @@ QAbstractItemModel *InspectorControlView::inspectorControlModel() const
 QString InspectorControlView::titleText() const
 {
     if (m_inspectableBase) {
-        Q3DStudio::CString theName = m_inspectableBase->GetName();
-        if (theName == L"PathAnchorPoint")
+        QString theName = m_inspectableBase->GetName();
+        if (theName == QLatin1String("PathAnchorPoint"))
             return tr("Anchor Point");
         else
-            return theName.toQString();
+            return theName;
     }
     return tr("No Object Selected");
 }
@@ -410,7 +406,7 @@ void InspectorControlView::setPropertyValueFromFilename(long instance, int handl
         if (name != tr("[None]")) {
             // Relativize the path to the project
             const auto doc = g_StudioApp.GetCore()->GetDoc();
-            const QDir documentDir(doc->GetDocumentDirectory().toQString());
+            const QDir documentDir(doc->GetDocumentDirectory());
             QString relativeName = documentDir.relativeFilePath(name);
             value = relativeName;
         }
@@ -431,7 +427,7 @@ QObject *InspectorControlView::showImageChooser(int handle, int instance, const 
                 Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(),
                                                   QObject::tr("Set Property"))
                         ->setInstanceImagePropertyValueAsRenderable(
-                            instance, handle, Q3DStudio::CString::fromQString(renderableId));
+                            instance, handle, renderableId);
             }
             m_imageChooserView->hide();
         });
@@ -605,7 +601,7 @@ void InspectorControlView::showDataInputChooser(int handle, int instance, const 
             m_inspectorControlModel
                 ->setPropertyControllerInstance(
                     instance, handle,
-                    Q3DStudio::CString::fromQString(controllerName), controlled);
+                    controllerName, controlled);
             m_inspectorControlModel->setPropertyControlled(instance, handle);
         });
     }

@@ -55,19 +55,19 @@ DataModelDataType::Value CStudioPropertySystem::GetDataType(Qt3DSDMPropertyHandl
     return DataModelDataType::None;
 }
 
-TCharStr CStudioPropertySystem::GetName(Qt3DSDMPropertyHandle inProperty) const
+QString CStudioPropertySystem::GetName(Qt3DSDMPropertyHandle inProperty) const
 {
     if (m_DataCore->IsProperty(inProperty))
         return m_DataCore->GetProperty(inProperty).m_Name;
-    return TCharStr();
+    return {};
 }
 
-TCharStr CStudioPropertySystem::GetFormalName(Qt3DSDMInstanceHandle inInstance,
+QString CStudioPropertySystem::GetFormalName(Qt3DSDMInstanceHandle inInstance,
                                               Qt3DSDMPropertyHandle inProperty) const
 {
     if (inInstance.Valid() && inProperty.Valid())
         return m_MetaData->GetFormalName(inInstance, inProperty);
-    return TCharStr();
+    return {};
 }
 
 AdditionalMetaDataType::Value
@@ -93,7 +93,7 @@ Qt3DSDMInstanceHandle CStudioPropertySystem::GetPropertyOwner(Qt3DSDMPropertyHan
 
 Qt3DSDMPropertyHandle
 CStudioPropertySystem::GetAggregateInstancePropertyByName(Qt3DSDMInstanceHandle inInstance,
-                                                          const TCharStr &inStr) const
+                                                          const QString &inStr) const
 {
     return m_DataCore->GetAggregateInstancePropertyByName(inInstance, inStr);
 }
@@ -188,8 +188,8 @@ bool CStudioPropertySystem::IsInstanceOrDerivedFrom(Qt3DSDMInstanceHandle inInst
 }
 
 Qt3DSDMPropertyHandle CStudioPropertySystem::AddProperty(Qt3DSDMInstanceHandle inInstance,
-                                                        TCharPtr inName,
-                                                        DataModelDataType::Value inPropType)
+                                                         const QString &inName,
+                                                         DataModelDataType::Value inPropType)
 {
     return m_DataCore->AddProperty(inInstance, inName, inPropType);
 }

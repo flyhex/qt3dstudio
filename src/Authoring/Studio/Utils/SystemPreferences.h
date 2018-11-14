@@ -32,7 +32,7 @@
 
 #pragma once
 
-class CColor;
+#include <QtGui/qcolor.h>
 
 class CSystemPreferences
 {

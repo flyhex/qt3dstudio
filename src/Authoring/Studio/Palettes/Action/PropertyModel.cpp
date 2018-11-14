@@ -72,11 +72,8 @@ void PropertyModel::setAction(const qt3dsdm::Qt3DSDMActionHandle &action)
                 if (propertyMetaInfo->m_IsHidden == false) {
                     PropertyInfo property;
                     property.m_handle = propertyMetaInfo->m_Property;
-                    property.m_name = QString::fromWCharArray(
-                                propertySystem->GetFormalName(instance,
-                                                              property.m_handle).wide_str());
-                    property.m_nameId = QString::fromWCharArray(
-                                propertySystem->GetName(property.m_handle).wide_str());
+                    property.m_name = propertySystem->GetFormalName(instance, property.m_handle);
+                    property.m_nameId = propertySystem->GetName(property.m_handle);
                     property.m_type = propertyMetaInfo->GetDataType();
                     property.m_additionalType = propertyMetaInfo->GetAdditionalType();
 
@@ -105,11 +102,11 @@ void PropertyModel::setAction(const qt3dsdm::Qt3DSDMActionHandle &action)
                         break;
                     }
                     case qt3dsdm::AdditionalMetaDataType::Font: {
-                        std::vector<Q3DStudio::CString> fontNames;
+                        std::vector<QString> fontNames;
                         doc->GetProjectFonts(fontNames);
                         QStringList possibleValues;
                         for (const auto &fontName: fontNames)
-                            possibleValues.append(fontName.toQString());
+                            possibleValues.append(fontName);
                         property.m_possibleValues = possibleValues;
                         break;
                     }

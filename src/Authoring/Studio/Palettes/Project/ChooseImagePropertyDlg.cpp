@@ -76,8 +76,7 @@ void ChooseImagePropertyDlg::fillList()
     for (auto &p : props) {
         auto metaDataType = propertySystem->GetAdditionalMetaDataType(m_instance, p);
         if (metaDataType == qt3dsdm::AdditionalMetaDataType::Value::Image) {
-            QString propName = QString::fromStdWString(propertySystem->GetFormalName(m_instance, p)
-                                                       .wide_str());
+            QString propName = propertySystem->GetFormalName(m_instance, p);
             QListWidgetItem *newItem = new QListWidgetItem(propName);
             newItem->setData(Qt::UserRole, QVariant(p));
             m_ui->listProps->addItem(newItem);

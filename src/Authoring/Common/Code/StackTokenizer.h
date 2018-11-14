@@ -52,18 +52,18 @@
 class CStackTokenizer
 {
 public:
-    CStackTokenizer(const Q3DStudio::CString &inString, Q3DStudio::Qt3DSChar inDelimiter,
-                    Q3DStudio::Qt3DSChar inEscapeChar);
+    CStackTokenizer(const QString &inString, const QChar &inDelimiter,
+                    const QChar &inEscapeChar);
     virtual ~CStackTokenizer();
 
-    bool HasNextPartition();
-    Q3DStudio::CString GetCurrentPartition();
+    bool HasNextPartition() const;
+    QString GetCurrentPartition();
     void operator++();
 
 protected:
-    Q3DStudio::CString m_String; ///< contains the string to tokenize
-    Q3DStudio::Qt3DSChar m_Delimiter; ///< single char delimiter
-    Q3DStudio::Qt3DSChar m_EscapeChar; ///< single char escape char
+    QString m_String; ///< contains the string to tokenize
+    QChar m_Delimiter; ///< single char delimiter
+    QChar m_EscapeChar; ///< single char escape char
     long m_Index; ///< index to begin tokenizing the string from
     long m_LastIndex; ///< index of the string since last tokenize operation
     const long m_StringLength; ///< length of the string to tokenize

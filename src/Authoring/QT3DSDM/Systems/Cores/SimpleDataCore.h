@@ -211,19 +211,19 @@ public:
 
     // IInstancePropertyCore
     Qt3DSDMPropertyHandle GetAggregateInstancePropertyByName(Qt3DSDMInstanceHandle inInstance,
-                                                                    const TCharStr &inStr) const override;
+                                                             const QString &inStr) const override;
     void GetAggregateInstanceProperties(Qt3DSDMInstanceHandle inInstance,
-                                                TPropertyHandleList &outProperties) const override;
+                                        TPropertyHandleList &outProperties) const override;
     void GetSpecificInstancePropertyValues(Qt3DSDMInstanceHandle inHandle,
-                                                   TPropertyHandleValuePairList &outValues) override;
+                                           TPropertyHandleValuePairList &outValues) override;
     bool HasAggregateInstanceProperty(Qt3DSDMInstanceHandle inInstance,
-                                              Qt3DSDMPropertyHandle inProperty) const override;
+                                      Qt3DSDMPropertyHandle inProperty) const override;
     void CheckValue(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty,
-                            const SValue &inValue) const override;
+                     const SValue &inValue) const override;
     bool GetInstancePropertyValue(Qt3DSDMInstanceHandle inHandle,
-                                          Qt3DSDMPropertyHandle inProperty, SValue &outValue) const override;
+                                 Qt3DSDMPropertyHandle inProperty, SValue &outValue) const override;
     void SetInstancePropertyValue(Qt3DSDMInstanceHandle inHandle,
-                                          Qt3DSDMPropertyHandle inProperty, const SValue &inValue) override;
+                                  Qt3DSDMPropertyHandle inProperty, const SValue &inValue) override;
 
     // IDataCore
     //===============================================================
@@ -231,24 +231,24 @@ public:
     void DeleteInstance(Qt3DSDMInstanceHandle inHandle) override;
     void GetInstances(TInstanceHandleList &outInstances) const override;
     void GetInstancesDerivedFrom(TInstanceHandleList &outInstances,
-                                         Qt3DSDMInstanceHandle inParentHandle) const override;
+                                 Qt3DSDMInstanceHandle inParentHandle) const override;
 
     void DeriveInstance(Qt3DSDMInstanceHandle inInstance, Qt3DSDMInstanceHandle inParent) override;
     void GetInstanceParents(Qt3DSDMInstanceHandle inHandle,
-                                    TInstanceHandleList &outParents) const override;
+                            TInstanceHandleList &outParents) const override;
     // Returns true if inParent == inInstance || inInstance is derived from inParent somehow.
     // Recursive.
     bool IsInstanceOrDerivedFrom(Qt3DSDMInstanceHandle inInstance,
-                                         Qt3DSDMInstanceHandle inParent) const override;
+                                 Qt3DSDMInstanceHandle inParent) const override;
 
-    Qt3DSDMPropertyHandle AddProperty(Qt3DSDMInstanceHandle inClass, TCharPtr inName,
-                                             DataModelDataType::Value inPropType) override;
+    Qt3DSDMPropertyHandle AddProperty(Qt3DSDMInstanceHandle inClass, const QString &inName,
+                                      DataModelDataType::Value inPropType) override;
     const Qt3DSDMPropertyDefinition &GetProperty(Qt3DSDMPropertyHandle inProperty) const override;
     void GetInstanceProperties(Qt3DSDMInstanceHandle inInstance,
-                                       TPropertyHandleList &outProperties) const override;
+                               TPropertyHandleList &outProperties) const override;
     void RemoveProperty(Qt3DSDMPropertyHandle inProperty) override;
     void CopyInstanceProperties(Qt3DSDMInstanceHandle inSrcInstance,
-                                        Qt3DSDMInstanceHandle inDestInstance) override;
+                                Qt3DSDMInstanceHandle inDestInstance) override;
     void RemoveCachedValues(Qt3DSDMInstanceHandle inInstance) override;
 
     bool IsInstance(int inHandle) const override;
@@ -359,7 +359,8 @@ protected:
     // This is used for special cases of serialization
     Qt3DSDMInstanceHandle CreateInstanceWithHandle(int inHandle);
     Qt3DSDMPropertyHandle AddPropertyWithHandle(int inHandle, Qt3DSDMInstanceHandle inClass,
-                                               TCharPtr inName, DataModelDataType::Value inPropType);
+                                                const QString &inName,
+                                                DataModelDataType::Value inPropType);
 
     void UncheckedSetSpecificInstancePropertyValue(Qt3DSDMInstanceHandle inInstance,
                                                    Qt3DSDMPropertyHandle inProperty,

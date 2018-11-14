@@ -67,36 +67,37 @@ ITimelineItemBinding *CTimelineTranslationManager::GetOrCreate(Qt3DSDMInstanceHa
         Qt3DSDMTimelineItemBinding *theReturn = nullptr;
         qt3dsdm::IPropertySystem *thePropertySystem = GetStudioSystem()->GetPropertySystem();
         Qt3DSDMPropertyHandle theTypeProperty =
-            thePropertySystem->GetAggregateInstancePropertyByName(inInstance, L"type");
+            thePropertySystem->GetAggregateInstancePropertyByName(inInstance,
+                                                                  QStringLiteral("type"));
 
         SValue theTypeValue;
         thePropertySystem->GetInstancePropertyValue(inInstance, theTypeProperty, theTypeValue);
 
-        std::wstring theWideTypeString(qt3dsdm::get<TDataStrPtr>(theTypeValue)->GetData());
+        QString type(qt3dsdm::get<TDataStrPtr>(theTypeValue)->toQString());
 
-        if (theWideTypeString == L"Material" || theWideTypeString == L"CustomMaterial"
-            || theWideTypeString == L"ReferencedMaterial")
+        if (type == QLatin1String("Material") || type == QLatin1String("CustomMaterial")
+            || type == QLatin1String("ReferencedMaterial")) {
             theReturn = new CMaterialTimelineItemBinding(this, inInstance);
-        else if (theWideTypeString == L"Image")
+        } else if (type == QLatin1String("Image")) {
             theReturn = new CImageTimelineItemBinding(this, inInstance);
-        else if (theWideTypeString == L"Group" || theWideTypeString == L"Component")
+        } else if (type == QLatin1String("Group") || type == QLatin1String("Component")) {
             theReturn = new CGroupTimelineItemBinding(this, inInstance);
-        else if (theWideTypeString == L"Behavior")
+        } else if (type == QLatin1String("Behavior")) {
             theReturn = new CBehaviorTimelineItemBinding(this, inInstance);
-        else if (theWideTypeString == L"Slide")
+        } else if (type == QLatin1String("Slide")) {
             theReturn = new CSlideTimelineItemBinding(this, inInstance);
-        else if (theWideTypeString == L"PathAnchorPoint")
+        } else if (type == QLatin1String("PathAnchorPoint")) {
             theReturn = new CPathAnchorPointTimelineItemBinding(this, inInstance);
-        else if (theWideTypeString == L"Path")
+        } else if (type == QLatin1String("Path")) {
             theReturn = new CPathTimelineItemBinding(this, inInstance);
-        else if (theWideTypeString == L"Layer")
+        } else if (type == QLatin1String("Layer")) {
             theReturn = new CLayerTimelineItemBinding(this, inInstance);
-        else if (theWideTypeString == L"Model" || theWideTypeString == L"Text"
-                 || theWideTypeString == L"Camera" || theWideTypeString == L"Effect"
-                 || theWideTypeString == L"Light" || theWideTypeString == L"RenderPlugin"
-                 || theWideTypeString == L"Alias" || theWideTypeString == L"SubPath")
+        } else if (type == QLatin1String("Model") || type == QLatin1String("Text")
+                || type == QLatin1String("Camera") || type == QLatin1String("Effect")
+                || type == QLatin1String("Light") || type == QLatin1String("RenderPlugin")
+                || type == QLatin1String("Alias") || type == QLatin1String("SubPath")) {
             theReturn = new Qt3DSDMTimelineItemBinding(this, inInstance);
-        else {
+        } else {
             // Add support for additional DataModel types here.
             Q_ASSERT(0);
         }

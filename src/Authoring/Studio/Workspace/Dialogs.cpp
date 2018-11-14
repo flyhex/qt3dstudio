@@ -68,13 +68,13 @@
 
 namespace {
 
-inline Q3DStudio::CString CreateExtensionsList(const char **extList)
+inline QString CreateExtensionsList(const QStringList &extList)
 {
-    Q3DStudio::CString retval;
-    for (const char **ext = extList; *ext != nullptr; ++ext) {
-        if (retval.Length())
-            retval += " ";
-        retval += Q3DStudio::CString("*.") + *ext;
+    QString retval;
+    for (const QString &ext : extList) {
+        if (retval.length())
+            retval += QLatin1Char(' ');
+        retval += QStringLiteral("*.") + ext;
     }
     return retval;
 }
@@ -83,91 +83,68 @@ struct SAllowedTypesEntry
 {
     Q3DStudio::DocumentEditorFileType::Enum m_FileType;
     QString m_ResourceString; // Model Files, Image Files, etc
-    const char **m_FileExtensions;
+    QStringList m_FileExtensions;
 };
 
-const char *imgExts[] = {
-    "png", "jpg", "jpeg", "dds", "bmp", "gif", "hdr", "ktx", nullptr,
+static const QStringList imgExts = {
+    "png", "jpg", "jpeg", "dds", "bmp", "gif", "hdr", "ktx",
 };
 
-const wchar_t *wideImgExts[] = {
-    L"png", L"jpg", L"jpeg", L"dds", L"bmp", L"gif", L"hdr", L"ktx", nullptr,
-};
-
-const char *modelExts[] = {
+const QStringList modelExts = {
     CDialogs::GetDAEFileExtension(),
     #ifdef QT_3DSTUDIO_FBX
     CDialogs::GetFbxFileExtension(),
     #endif
-    nullptr,
 };
 
-const char *meshExts[] = {
-    CDialogs::GetMeshFileExtension(), nullptr,
+static const QStringList meshExts = {
+    CDialogs::GetMeshFileExtension()
 };
 
-const char *importExts[] = {
-    CDialogs::GetImportFileExtension(), nullptr,
+static const QStringList importExts = {
+    CDialogs::GetImportFileExtension()
 };
 
-const char *behaviorExts[] = {
-    CDialogs::GetQmlFileExtension(), nullptr,
+static const QStringList behaviorExts = {
+    CDialogs::GetQmlFileExtension()
 };
 
-const char *presentationExts[] = {
-    "uip", nullptr,
+static const QStringList presentationExts = {
+    "uip"
 };
 
-const wchar_t *widePresentationExts[] = {
-    L"uip", nullptr,
+static const QStringList qmlStreamExts = {
+    "qml"
 };
 
-const char *qmlStreamExts[] = {
-    "qml", nullptr,
+static const QStringList projectExts = {
+    "uia"
 };
 
-const wchar_t *wideQmlStreamExts[] = {
-    L"qml", nullptr,
+static const QStringList fontExts = {
+    "ttf", "otf"
 };
 
-const char *projectExts[] = {
-    "uia", nullptr,
+static const QStringList effectExts = {
+    "effect"
 };
 
-const wchar_t *wideProjectExts[] = {
-    L"uia", nullptr,
+static const QStringList materialExts = {
+    "material"
 };
 
-const char *fontExts[] = {
-    "ttf", "otf", nullptr,
-};
-const wchar_t *wideFontExts[] = {
-    L"ttf", L"otf", nullptr,
+static const QStringList soundExts = {
+    "wav"
 };
 
-const char *effectExts[] = {
-    "effect", nullptr,
+static const QStringList pathExts = {
+    "svg"
 };
 
-const wchar_t *wideEffectExts[] = {
-    L"effect", nullptr,
+static const QStringList bufferExts = {
+    "path"
 };
 
-const char *materialExts[] = {
-    "material", nullptr,
-};
-
-const wchar_t *wideMaterialExts[] = {
-    L"material", nullptr,
-};
-
-const char *soundExts[] = {
-    "wav", nullptr,
-};
-
-const wchar_t *wideSoundExts[] = {
-    L"wav", nullptr,
-};
 
 // List of file types allowed during import
 // Note: Despite its name, Q3DStudio::DocumentEditorFileType::DAE type includes
@@ -289,7 +266,7 @@ void CDialogs::DisplayAssetDeleteFailed()
 /**
  *	Get the export choice.
  */
-Qt3DSFile CDialogs::GetExportChoice(const Q3DStudio::CString &, const Q3DStudio::CString &)
+Qt3DSFile CDialogs::GetExportChoice(const QString &, const QString &)
 {
     // Need to fix this for windows if we decide to use it
     return Qt3DSFile("", false, false);
@@ -706,208 +683,118 @@ int CDialogs::displayOverrideAssetBox(const QString &assetPath)
     }
 }
 
-const char *CDialogs::GetDAEFileExtension()
+QString CDialogs::GetDAEFileExtension()
 {
-    return "dae";
+    return QStringLiteral("dae");
 }
 
-const char *CDialogs::GetFbxFileExtension()
+QString CDialogs::GetFbxFileExtension()
 {
-    return "fbx";
+    return QStringLiteral("fbx");
 }
 
 // Null terminated list
-const char **CDialogs::GetImgFileExtensions()
+QStringList CDialogs::GetImgFileExtensions()
 {
     return imgExts;
 }
 
-const char *CDialogs::GetImportFileExtension()
+QString CDialogs::GetImportFileExtension()
 {
-    return "import";
+    return QStringLiteral("import");
 }
 
-const char *CDialogs::GetMeshFileExtension()
+QString CDialogs::GetMeshFileExtension()
 {
-    return "mesh";
+    return QStringLiteral("mesh");
 }
 
-const char *CDialogs::GetQmlFileExtension()
+QString CDialogs::GetQmlFileExtension()
 {
-    return "qml";
+    return QStringLiteral("qml");
 }
 
-const char *CDialogs::GetMaterialDataFileExtension()
+QString CDialogs::GetMaterialDataFileExtension()
 {
-    return "matdata";
+    return QStringLiteral("matdata");
 }
 
-const char **CDialogs::GetFontFileExtensions()
+QStringList CDialogs::GetFontFileExtensions()
 {
     return fontExts;
 }
 
-const char **CDialogs::GetEffectFileExtensions()
+QStringList CDialogs::GetEffectFileExtensions()
 {
     return effectExts;
 }
 
-const char **CDialogs::GetMaterialFileExtensions()
+QStringList CDialogs::GetMaterialFileExtensions()
 {
     return materialExts;
 }
-const char **CDialogs::GetSoundFileExtensions()
+QStringList CDialogs::GetSoundFileExtensions()
 {
     return soundExts;
 }
 
-bool IsFileExtension(const char *inExt, const char **inExts)
+bool IsFileExtension(const QString &inExt, const QStringList &inExts)
 {
-    if (inExt == nullptr)
-        return false;
-    for (const char **ext = inExts; *ext != nullptr; ++ext) {
-        if (QString::compare(inExt, *ext, Qt::CaseInsensitive) == 0)
+    for (const QString ext: inExts) {
+        if (QString::compare(inExt, ext, Qt::CaseInsensitive) == 0)
             return true;
     }
     return false;
 }
 
-bool CDialogs::IsImageFileExtension(const char *inExt)
+bool CDialogs::IsImageFileExtension(const QString &inExt)
 {
     return IsFileExtension(inExt, imgExts);
 }
 
-bool CDialogs::IsFontFileExtension(const char *inExt)
+bool CDialogs::IsFontFileExtension(const QString &inExt)
 {
     return IsFileExtension(inExt, fontExts);
 }
 
-bool CDialogs::IsEffectFileExtension(const char *inExt)
+bool CDialogs::IsEffectFileExtension(const QString &inExt)
 {
     return IsFileExtension(inExt, effectExts);
 }
 
-bool CDialogs::IsMaterialFileExtension(const char *inExt)
+bool CDialogs::IsMaterialFileExtension(const QString &inExt)
 {
     return IsFileExtension(inExt, materialExts);
 }
 
-bool CDialogs::IsSoundFileExtension(const char *inExt)
+bool CDialogs::IsSoundFileExtension(const QString &inExt)
 {
     return IsFileExtension(inExt, soundExts);
 }
 
-bool CDialogs::isMeshFileExtension(const char *inExt)
+bool CDialogs::isMeshFileExtension(const QString &inExt)
 {
     return IsFileExtension(inExt, meshExts);
 }
 
-bool CDialogs::isPresentationFileExtension(const char *inExt)
+bool CDialogs::isPresentationFileExtension(const QString &inExt)
 {
     return IsFileExtension(inExt, presentationExts);
 }
 
-bool CDialogs::isProjectFileExtension(const char *inExt)
+bool CDialogs::isProjectFileExtension(const QString &inExt)
 {
     return IsFileExtension(inExt, projectExts);
 }
 
-const wchar_t **CDialogs::GetWideImgFileExtensions()
+bool CDialogs::IsPathFileExtension(const QString &inExt)
 {
-    return wideImgExts;
+    return IsFileExtension(inExt, pathExts);
 }
 
-const wchar_t *CDialogs::GetWideDAEFileExtension()
+bool CDialogs::IsPathBufferExtension(const QString &inExt)
 {
-    return L"dae";
-}
-
-const wchar_t *CDialogs::GetWideFbxFileExtension()
-{
-    return L"fbx";
-}
-
-const wchar_t *CDialogs::GetWideImportFileExtension()
-{
-    return L"import";
-}
-
-const wchar_t *CDialogs::GetWideMeshFileExtension()
-{
-    return L"mesh";
-}
-
-const wchar_t **CDialogs::GetWideFontFileExtensions()
-{
-    return wideFontExts;
-}
-
-const wchar_t **CDialogs::GetWideEffectFileExtensions()
-{
-    return wideEffectExts;
-}
-
-const wchar_t **CDialogs::GetWideMaterialFileExtensions()
-{
-    return wideMaterialExts;
-}
-
-bool IsFileExtension(const wchar_t *inExt, const wchar_t **inExts)
-{
-    if (inExt == nullptr)
-        return false;
-    for (const wchar_t **ext = inExts; *ext != nullptr; ++ext) {
-        if (QString::compare(QString::fromWCharArray(inExt),
-                             QString::fromWCharArray(*ext), Qt::CaseInsensitive) == 0) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool CDialogs::IsImageFileExtension(const wchar_t *inExt)
-{
-    return IsFileExtension(inExt, wideImgExts);
-}
-
-bool CDialogs::IsFontFileExtension(const wchar_t *inExt)
-{
-    return IsFileExtension(inExt, wideFontExts);
-}
-
-bool CDialogs::IsEffectFileExtension(const wchar_t *inExt)
-{
-    return IsFileExtension(inExt, wideEffectExts);
-}
-
-bool CDialogs::IsMaterialFileExtension(const wchar_t *inExt)
-{
-    return IsFileExtension(inExt, wideMaterialExts);
-}
-
-bool CDialogs::IsPathFileExtension(const wchar_t *inExt)
-{
-    return QString::compare(QString::fromWCharArray(inExt), "svg", Qt::CaseInsensitive) == 0;
-}
-
-bool CDialogs::IsPathBufferExtension(const wchar_t *inExt)
-{
-    return QString::compare(QString::fromWCharArray(inExt), "path", Qt::CaseInsensitive) == 0;
-}
-
-bool CDialogs::IsSoundFileExtension(const wchar_t *inExt)
-{
-    return IsFileExtension(inExt, wideSoundExts);
-}
-
-bool CDialogs::isPresentationFileExtension(const wchar_t *inExt)
-{
-    return IsFileExtension(inExt, widePresentationExts);
-}
-
-bool CDialogs::isProjectFileExtension(const wchar_t *inExt)
-{
-    return IsFileExtension(inExt, wideProjectExts);
+    return IsFileExtension(inExt, bufferExts);
 }
 
 //==============================================================================
@@ -928,13 +815,14 @@ QString CDialogs::CreateAllowedTypesString(Q3DStudio::DocumentEditorFileType::En
                 forImport ? g_AllowedImportTypes[idx] : g_AllowedFileReferencesTypes[idx];
         if (!exclusive || fileTypeFilter == entry.m_FileType) {
             QString theTypeString(entry.m_ResourceString);
-            QString theExtensions(CreateExtensionsList(entry.m_FileExtensions).toQString());
-            const QString filterString = theTypeString + " (" + theExtensions + ");;";
+            QString theExtensions(CreateExtensionsList(entry.m_FileExtensions));
+            const QString filterString = theTypeString + QStringLiteral(" (")
+                    + theExtensions + QStringLiteral(");;");
             theReturnString += filterString;
             if (exclusive)
                 outInitialFilter = filterString;
             else
-                combinedFilter += theExtensions + " ";
+                combinedFilter += theExtensions + QLatin1Char(' ');
         }
     }
     if (!combinedFilter.isEmpty()) {
@@ -1082,17 +970,17 @@ QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
         // New directory is only created when creating a new project. When doing a "save as"
         // or "save copy", a new directory is not created.
         if (isProject) {
-            Q3DStudio::CFilePath theFinalDir;
-            Q3DStudio::CFilePath theFinalDoc;
+            QString theFinalDir;
+            QString theFinalDoc;
             g_StudioApp.GetCore()->GetCreateDirectoryFileName(selectedName,
                                                               theFinalDir, theFinalDoc);
 
             // Update last save file to final doc
-            m_LastSaveFile = theFinalDoc.absoluteFilePath();
-            if (theFinalDoc.Exists()) {
+            m_LastSaveFile = theFinalDoc;
+            QFileInfo info(theFinalDoc);
+            if (info.exists()) {
                 const QString theTitle(QObject::tr("Confirm Save As"));
-                const QString filePath(theFinalDir.GetFileName().toQString() + QDir::separator()
-                                       + theFinalDoc.GetFileName().toQString());
+                const QString filePath(theFinalDir + QLatin1Char('/') + info.fileName());
                 const QString theString = QObject::tr("%1 already exists.\nDo you want to "
                                                       "replace it?").arg(filePath);
 
@@ -1380,86 +1268,37 @@ void CDialogs::DisplayGLVersionDialog(const Q3DStudio::CString &inGLVersion,
 
 QStringList CDialogs::effectExtensions()
 {
-    static QStringList exts;
-    if (exts.isEmpty()) {
-        for (const char *ext : effectExts) {
-            if (ext)
-                exts << QString::fromLatin1(ext);
-        }
-    }
-    return exts;
+    return effectExts;
 }
 
 QStringList CDialogs::fontExtensions()
 {
-    static QStringList exts;
-    if (exts.isEmpty()) {
-        for (const char *ext : fontExts) {
-            if (ext)
-                exts << QString::fromLatin1(ext);
-        }
-    }
-    return exts;
+    return fontExts;
 }
 
 QStringList CDialogs::mapExtensions()
 {
-    static QStringList exts;
-    if (exts.isEmpty()) {
-        for (const char *ext : imgExts) {
-            if (ext)
-                exts << QString::fromLatin1(ext);
-        }
-    }
-    return exts;
+    return imgExts;
 }
 
 QStringList CDialogs::materialExtensions()
 {
-    static QStringList exts;
-    if (exts.isEmpty()) {
-        for (const char *ext : materialExts) {
-            if (ext)
-                exts << QString::fromLatin1(ext);
-        }
-    }
-    return exts;
+    return materialExts;
 }
 
 QStringList CDialogs::modelExtensions()
 {
-    static QStringList exts;
-    if (exts.isEmpty()) {
-        for (const char *ext : modelExts) {
-            if (ext)
-                exts << QString::fromLatin1(ext);
-        }
-    }
-    return exts;
+    return modelExts;
 }
 
 QStringList CDialogs::behaviorExtensions()
 {
-    static QStringList exts;
-    if (exts.isEmpty()) {
-        for (const char *ext : behaviorExts) {
-            if (ext)
-                exts << QString::fromLatin1(ext);
-        }
-    }
-    return exts;
+    return behaviorExts;
 }
 
 QStringList CDialogs::presentationExtensions()
 {
-    static QStringList exts;
-    if (exts.isEmpty()) {
-        for (const char *ext : presentationExts) {
-            if (ext)
-                exts << QString::fromLatin1(ext);
-        }
-    }
-    return exts;
+    return presentationExts;
 }
 
 QColor CDialogs::displayColorDialog(const QColor &color) const

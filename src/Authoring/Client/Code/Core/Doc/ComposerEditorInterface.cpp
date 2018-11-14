@@ -38,75 +38,47 @@ using namespace Q3DStudio::ComposerImport;
 using namespace qt3ds::foundation;
 
 namespace {
+
 // base class between performing refresh and performing
 // imports
-
-struct STCharPtrHash
-{
-    size_t operator()(TCharPtr nm) const
-    {
-#ifdef KDAB_TEMPORARILY_REMOVED
-        StaticAssert<sizeof(wchar_t) == sizeof(char16_t)>::valid_expression();
-#endif
-        return eastl::hash<const char16_t *>()(reinterpret_cast<const char16_t *>(nm));
-    }
-};
-struct STCharPtrEqualTo
-{
-    bool operator()(TCharPtr lhs, TCharPtr rhs) const { return AreEqual(lhs, rhs); }
-};
-
 struct SComposerImportBase
 {
     IDocumentEditor &m_Editor;
-    CFilePath m_DocumentPath;
-    CFilePath m_DestImportDir;
-    CFilePath m_DestImportFile;
-    Q3DStudio::CFilePath m_Relativeimportfile;
+    QString m_DocumentPath; // Root directory where the studio file sits.
+    QString m_DestImportDir; // Directory where we are saving the import file
+    QString m_DestImportFile;
+    QString m_Relativeimportfile;
     qt3ds::QT3DSI32 m_StartTime;
-    qt3dsdm::IStringTable &m_StringTable;
-    SComposerImportBase(
-        IDocumentEditor &inEditor,
-        const Q3DStudio::CFilePath &docPath /// Root directory where the studio file sits.
-        ,
-        const Q3DStudio::CFilePath &inFullPathToImportFile, long inStartTime,
-        qt3dsdm::IStringTable &inStringTable)
+    SComposerImportBase(IDocumentEditor &inEditor, const QString &docPath,
+                        const QString &inFullPathToImportFile, long inStartTime)
         : m_Editor(inEditor)
         , m_DocumentPath(docPath)
-        , m_DestImportDir(inFullPathToImportFile
-                              .GetDirectory()) // Directory where we are saving the import file
+        , m_DestImportDir(QFileInfo(inFullPathToImportFile).absolutePath())
         , m_DestImportFile(inFullPathToImportFile)
-        , m_Relativeimportfile(
-              Q3DStudio::CFilePath::GetRelativePathFromBase(m_DocumentPath, inFullPathToImportFile))
+        , m_Relativeimportfile(Q3DStudio::CFilePath::GetRelativePathFromBase(
+                                   m_DocumentPath, inFullPathToImportFile))
         , m_StartTime(inStartTime)
-        , m_StringTable(inStringTable)
     {
     }
 };
 
 struct SComposerImportInterface : public SComposerImportBase, public IComposerEditorInterface
 {
-    typedef eastl::hash_map<TImportId, Qt3DSDMInstanceHandle, STCharPtrHash, STCharPtrEqualTo>
-        TImportInstanceMap;
+    typedef QHash<TImportId, Qt3DSDMInstanceHandle> TImportInstanceMap;
     Qt3DSDMInstanceHandle m_Parent;
     Qt3DSDMInstanceHandle m_Root;
     Qt3DSDMSlideHandle m_Slide;
-    Q3DStudio::CString m_TypeBuffer;
     qt3ds::QT3DSI32 m_StartTime;
     Import *m_ImportObj;
     TImportInstanceMap m_ImportToInstanceMap;
     TImportInstanceMap m_MaterialToInstanceMap;
 
     // When we are refreshing, the root assets is the group we are refreshing.
-    SComposerImportInterface(
-        Q3DStudio::IDocumentEditor &editor, qt3dsdm::CDataModelHandle parent // Parent object
-        ,
-        qt3dsdm::CDataModelHandle root, qt3dsdm::Qt3DSDMSlideHandle slide,
-        const Q3DStudio::CFilePath &docPath /// Root directory where the studio file sits.
-        ,
-        const Q3DStudio::CFilePath &inFullPathToImportFile, long inStartTime,
-        qt3dsdm::IStringTable &inStringTable)
-        : SComposerImportBase(editor, docPath, inFullPathToImportFile, inStartTime, inStringTable)
+    SComposerImportInterface(Q3DStudio::IDocumentEditor &editor, qt3dsdm::CDataModelHandle parent,
+                             qt3dsdm::CDataModelHandle root, qt3dsdm::Qt3DSDMSlideHandle slide,
+                             const QString &docPath, const QString &inFullPathToImportFile,
+                             long inStartTime)
+        : SComposerImportBase(editor, docPath, inFullPathToImportFile, inStartTime)
         , m_Parent(parent)
         , m_Root(root)
         , m_Slide(slide)
@@ -123,23 +95,23 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
 
     bool HasError() override { return m_Root.Valid() == false; }
 
-    const wchar_t *GetRelativeimportfile() const {return nullptr;}
+    QString GetRelativeimportfile() const { return {}; }
 
-    void Finalize(const Q3DStudio::CFilePath &inFilePath) override
+    void Finalize(const QString &inFilePath) override
     {
         m_Editor.SetSpecificInstancePropertyValue(
-            m_Slide, m_Root, L"sourcepath",
-            std::make_shared<CDataStr>(m_Relativeimportfile.toCString()));
+            m_Slide, m_Root, QStringLiteral("sourcepath"),
+            std::make_shared<CDataStr>(m_Relativeimportfile));
         m_Editor.SetSpecificInstancePropertyValue(
-            m_Slide, m_Root, L"importfile",
-            std::make_shared<CDataStr>(m_Relativeimportfile.toCString()));
+            m_Slide, m_Root, QStringLiteral("importfile"),
+            std::make_shared<CDataStr>(m_Relativeimportfile));
     }
 
     Qt3DSDMInstanceHandle FindInstance(TImportId inImportHdl) override
     {
         TImportInstanceMap::const_iterator entry(m_ImportToInstanceMap.find(inImportHdl));
         if (entry != m_ImportToInstanceMap.end())
-            return entry->second;
+            return *entry;
         return 0;
     }
 
@@ -147,40 +119,28 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
     {
         TImportInstanceMap::const_iterator entry(m_MaterialToInstanceMap.find(inImportHdl));
         if (entry != m_MaterialToInstanceMap.end())
-            return entry->second;
+            return *entry;
         return 0;
     }
 
     void AddInstanceMap(Qt3DSDMInstanceHandle instanceHandle, TImportId inImportId) override
     {
-        if (inImportId == NULL || *inImportId == 0) {
-            assert(0);
-            return;
-        }
-        bool success =
-            m_ImportToInstanceMap
-                .insert(eastl::make_pair(m_StringTable.RegisterStr(inImportId), instanceHandle))
-                .second;
-        (void)success;
-        assert(success);
+        Q_ASSERT(!inImportId.isEmpty());
+        bool success = m_ImportToInstanceMap.insert(inImportId, instanceHandle).key() == inImportId;
+        Q_ASSERT(success);
     }
 
     void addMaterialMap(Qt3DSDMInstanceHandle instanceHandle, TImportId inImportId)
     {
-        if (inImportId == nullptr || *inImportId == 0) {
-            assert(0);
-            return;
-        }
-        bool success =
-            m_MaterialToInstanceMap
-                .insert(eastl::make_pair(m_StringTable.RegisterStr(inImportId), instanceHandle))
-                .second;
-        assert(success);
+        Q_ASSERT(!inImportId.isEmpty());
+        bool success = m_MaterialToInstanceMap.insert(inImportId, instanceHandle).key()
+                            == inImportId;
+        Q_ASSERT(success);
     }
 
-    Qt3DSDMInstanceHandle GetRoot() override { return m_Root; }
+    Qt3DSDMInstanceHandle GetRoot() const override { return m_Root; }
 
-    const Q3DStudio::CFilePath &GetDestImportFile() override { return m_DestImportFile; }
+    const QString GetDestImportFile() const override { return m_DestImportFile; }
 
     // IComposerEditor
     // Object is stack created for now
@@ -222,11 +182,11 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
         if (useParentSlide)
             slide = m_Editor.GetAssociatedSlide(parent);
         Qt3DSDMInstanceHandle retval = m_Editor.CreateSceneGraphInstance(type, parent, slide);
-        m_Editor.SetSpecificInstancePropertyValue(0, retval, L"importid",
+        m_Editor.SetSpecificInstancePropertyValue(0, retval, "importid",
                                                   std::make_shared<CDataStr>(inImportId));
         m_Editor.SetSpecificInstancePropertyValue(
-            slide, retval, L"importfile",
-            std::make_shared<CDataStr>(m_Relativeimportfile.toCString()));
+            slide, retval, QStringLiteral("importfile"),
+            std::make_shared<CDataStr>(m_Relativeimportfile));
         AddInstanceMap(retval, inImportId);
         return retval;
     }
@@ -267,25 +227,25 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
 
     void createMaterial(const InstanceDesc &desc, TImportId inParent) override
     {
-        Q3DStudio::CString materialName = desc.m_Id;
+        QString materialName = desc.m_Id;
         Option<SValue> name = m_ImportObj->GetInstancePropertyValue(desc.m_Handle,
                                                                     ComposerPropertyNames::name);
         if (name.hasValue())
-            materialName = qt3dsdm::get<TDataStrPtr>(*name)->GetData();
+            materialName = qt3dsdm::get<TDataStrPtr>(*name)->toQString();
 
         auto material = m_Editor.getMaterial(materialName);
         if (!material.Valid()) {
             material = m_Editor.getOrCreateMaterial(materialName);
-            m_Editor.SetSpecificInstancePropertyValue(0, material, L"importid",
+            m_Editor.SetSpecificInstancePropertyValue(0, material, QStringLiteral("importid"),
                                                       std::make_shared<CDataStr>(desc.m_Id));
             m_Editor.SetSpecificInstancePropertyValue(
-                m_Slide, material, L"importfile",
-                std::make_shared<CDataStr>(m_Relativeimportfile.toCString()));
+                m_Slide, material, QStringLiteral("importfile"),
+                std::make_shared<CDataStr>(m_Relativeimportfile));
             addMaterialMap(material, desc.m_Id);
         }
 
         const auto sourcePath = m_Editor.writeMaterialFile(material,
-                                                           materialName.toQString(),
+                                                           materialName,
                                                            true);
 
         Qt3DSDMInstanceHandle parent(FindInstance(inParent));
@@ -297,7 +257,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
     }
 
     void UpdateInstanceProperties(TImportId inInstance, const PropertyValue *propertBuffer,
-                                          QT3DSU32 propertyBufferSize) override
+                                  QT3DSU32 propertyBufferSize) override
     {
         Qt3DSDMInstanceHandle hdl(FindInstance(inInstance));
         if (hdl.Valid() == false) {
@@ -319,17 +279,17 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
                 // is saved instead of where the import result is saved
                 TDataStrPtr value = qt3dsdm::get<TDataStrPtr>(theValue);
                 if (value->GetLength()) {
-                    Q3DStudio::CString valueStr(value->GetData());
-                    Q3DStudio::CFilePath fullPath =
+                    QString valueStr(value->toQString());
+                    QString fullPath =
                         Q3DStudio::CFilePath::CombineBaseAndRelative(m_DestImportDir, valueStr);
-                    Q3DStudio::CString relativePath =
+                    QString relativePath =
                         Q3DStudio::CFilePath::GetRelativePathFromBase(m_DocumentPath, fullPath);
-                    theValue = std::make_shared<CDataStr>(relativePath.c_str());
+                    theValue = std::make_shared<CDataStr>(relativePath);
                 }
             } else if (theType == DataModelDataType::StringRef) {
                 SStringRef theRef = get<SStringRef>(theValue);
                 SLong4 theGuid;
-                Qt3DSDMInstanceHandle target = FindInstance(theRef.m_Id);
+                Qt3DSDMInstanceHandle target = FindInstance(QString::fromWCharArray(theRef.m_Id));
                 if (target.Valid())
                     theGuid = m_Editor.GetGuidForInstance(target);
                 theValue = theGuid;
@@ -355,14 +315,14 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
             m_Editor.AddChild(theParent, theChild, theSibling);
     }
 
-    void RemoveAnimation(TImportId inInstance, const wchar_t *propName, long propSubIndex) override
+    void RemoveAnimation(TImportId inInstance, const QString &propName, long propSubIndex) override
     {
         Qt3DSDMInstanceHandle hdl(FindInstance(inInstance));
         if (hdl.Valid())
             m_Editor.RemoveAnimation(m_Slide, hdl, propName, propSubIndex);
     }
-    void UpdateAnimation(TImportId inInstance, const wchar_t *propName, long propSubIndex,
-                                 EAnimationType animType, const float *animData, QT3DSU32 numFloats) override
+    void UpdateAnimation(TImportId inInstance, const QString &propName, long propSubIndex,
+                         EAnimationType animType, const float *animData, QT3DSU32 numFloats) override
     {
         Qt3DSDMInstanceHandle hdl(FindInstance(inInstance));
         if (hdl.Valid()) {
@@ -373,8 +333,8 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
             }
         }
     }
-    void AddAnimation(TImportId inInstance, const wchar_t *propName, long propSubIndex,
-                              EAnimationType animType, const float *animData, QT3DSU32 numFloats) override
+    void AddAnimation(TImportId inInstance, const QString &propName, long propSubIndex,
+                      EAnimationType animType, const float *animData, QT3DSU32 numFloats) override
     {
         UpdateAnimation(inInstance, propName, propSubIndex, animType, animData, numFloats);
     }
@@ -390,17 +350,16 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
 
     struct SSlideInstanceIdMapIterator
     {
-        const vector<pair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle>> *m_CurrentItems;
+        const QVector<QPair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle>> *m_CurrentItems;
         size_t m_CurrentTreeIdx;
         size_t m_CurrentTreeEnd;
-        TCharPtr m_Id;
+        QString m_Id;
 
-        SSlideInstanceIdMapIterator(TImportId inImportId, TIdMultiMap &inItems,
-                                    qt3dsdm::IStringTable &inStringTable)
-            : m_CurrentItems(NULL)
+        SSlideInstanceIdMapIterator(TImportId inImportId, TIdMultiMap &inItems)
+            : m_CurrentItems(nullptr)
             , m_CurrentTreeIdx(0)
             , m_CurrentTreeEnd(0)
-            , m_Id(inStringTable.RegisterStr(inImportId))
+            , m_Id(inImportId)
         {
             FindNextValidList(inItems);
         }
@@ -408,12 +367,12 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
         {
             m_CurrentTreeIdx = 0;
             m_CurrentTreeEnd = 0;
-            m_CurrentItems = NULL;
+            m_CurrentItems = nullptr;
             TIdMultiMap::const_iterator theFind = inItems.find(m_Id);
             if (theFind != inItems.end()) {
-                m_CurrentItems = &theFind->second;
+                m_CurrentItems = &(*theFind);
                 m_CurrentTreeIdx = 0;
-                m_CurrentTreeEnd = theFind->second.size();
+                m_CurrentTreeEnd = theFind->size();
             }
         }
         bool IsDone() const
@@ -437,10 +396,9 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
     };
 
     SComposerRefreshInterface(Q3DStudio::IDocumentEditor &editor, TIdMultiMap &inIdToInstanceMap,
-                              const Q3DStudio::CFilePath &docPath,
-                              const Q3DStudio::CFilePath &inDestimportfile, long inStartTime,
-                              qt3dsdm::IStringTable &inStringTable, CGraph &inAssetGraph)
-        : SComposerImportBase(editor, docPath, inDestimportfile, inStartTime, inStringTable)
+                              const QString &docPath, const QString &inDestimportfile,
+                              long inStartTime, CGraph &inAssetGraph)
+        : SComposerImportBase(editor, docPath, inDestimportfile, inStartTime)
         , m_IdToSlideInstances(inIdToInstanceMap)
         , m_HasError(false)
         , m_AssetGraph(inAssetGraph)
@@ -452,13 +410,12 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
 
     void RemoveChild(TImportId inParentId, TImportId inChildId) override
     {
-        for (SSlideInstanceIdMapIterator theIterator(inParentId, m_IdToSlideInstances,
-                                                     m_StringTable);
+        for (SSlideInstanceIdMapIterator theIterator(inParentId, m_IdToSlideInstances);
              theIterator.IsDone() == false; theIterator.Next()) {
             Qt3DSDMInstanceHandle theParent = theIterator.GetCurrentInstance();
             for (long idx = 0; idx < m_AssetGraph.GetChildCount(theParent); ++idx) {
                 Qt3DSDMInstanceHandle theChild = m_AssetGraph.GetChild(theParent, idx);
-                CString theImportId = m_Editor.GetImportId(theChild);
+                QString theImportId = m_Editor.GetImportId(theChild);
                 if (m_Editor.GetAssociatedSlide(theChild) == theIterator.GetCurrentSlide()
                     && theImportId == inChildId) {
                     m_Editor.RemoveChild(theParent, theChild);
@@ -470,14 +427,14 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
 
     void RemoveInstance(TImportId inParentId) override
     {
-        SSlideInstanceIdMapIterator theIterator(inParentId, m_IdToSlideInstances, m_StringTable);
+        SSlideInstanceIdMapIterator theIterator(inParentId, m_IdToSlideInstances);
         if (!theIterator.IsDone()) {
             for (size_t parentIdx = 0, parentEnd = theIterator.m_CurrentTreeEnd;
                  parentIdx < parentEnd; ++parentIdx) {
                 if (m_Editor.IsInstance(theIterator.GetCurrentInstance()))
                     m_Editor.DeleteInstance(theIterator.GetCurrentInstance());
             }
-            m_IdToSlideInstances.erase(theIterator.m_Id);
+            m_IdToSlideInstances.erase(m_IdToSlideInstances.find(theIterator.m_Id));
         }
     }
     /**
@@ -491,25 +448,25 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
     void CreateInstance(TImportId inImportId, ComposerObjectTypes::Enum type,
                                 TImportId inParent) override
     {
-        const wchar_t *theInsertId(m_StringTable.GetWideStr(inImportId));
-        pair<TIdMultiMap::iterator, bool> theInserter(m_IdToSlideInstances.insert(
-            make_pair(theInsertId, vector<pair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle>>())));
+        const QString &theInsertId(inImportId);
+        TIdMultiMap::iterator theInserter(m_IdToSlideInstances.insert(
+            theInsertId, QVector<QPair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle>>()));
 
-        for (SSlideInstanceIdMapIterator theIterator(inParent, m_IdToSlideInstances, m_StringTable);
+        for (SSlideInstanceIdMapIterator theIterator(inParent, m_IdToSlideInstances);
              theIterator.IsDone() == false; theIterator.Next()) {
             Qt3DSDMInstanceHandle theParent = theIterator.GetCurrentInstance();
             Qt3DSDMInstanceHandle newInstance =
                 m_Editor.CreateSceneGraphInstance(type, theParent, theIterator.GetCurrentSlide());
             if (m_StartTime >= 0)
-                m_Editor.SetSpecificInstancePropertyValue(0, newInstance, L"starttime",
-                                                          m_StartTime);
-            m_Editor.SetSpecificInstancePropertyValue(0, newInstance, L"importid",
+                m_Editor.SetSpecificInstancePropertyValue(0, newInstance,
+                                                          QStringLiteral("starttime"), m_StartTime);
+            m_Editor.SetSpecificInstancePropertyValue(0, newInstance, QStringLiteral("importid"),
                                                       std::make_shared<CDataStr>(inImportId));
             m_Editor.SetSpecificInstancePropertyValue(
-                0, newInstance, L"importfile",
-                std::make_shared<CDataStr>(m_Relativeimportfile.toCString()));
-            insert_unique(theInserter.first->second,
-                          make_pair(theIterator.GetCurrentSlide(), newInstance));
+                0, newInstance, QStringLiteral("importfile"),
+                std::make_shared<CDataStr>(m_Relativeimportfile));
+            insert_unique_qt(*theInserter,
+                          QPair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle>(theIterator.GetCurrentSlide(), newInstance));
         }
     }
 
@@ -520,10 +477,9 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
     // We guarantee that all instances will be created before their properties are updated thus you
     // can resolve references during this updateInstanceProperties call if necessary.
     void UpdateInstanceProperties(TImportId inInstance, const PropertyValue *propertBuffer,
-                                          QT3DSU32 propertyBufferSize) override
+                                  QT3DSU32 propertyBufferSize) override
     {
-        for (SSlideInstanceIdMapIterator theIterator(inInstance, m_IdToSlideInstances,
-                                                     m_StringTable);
+        for (SSlideInstanceIdMapIterator theIterator(inInstance, m_IdToSlideInstances);
              theIterator.IsDone() == false; theIterator.Next()) {
             Qt3DSDMInstanceHandle hdl = theIterator.GetCurrentInstance();
             for (QT3DSU32 idx = 0; idx < propertyBufferSize; ++idx) {
@@ -536,12 +492,12 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
                     // is saved instead of where the import result is saved
                     TDataStrPtr value = qt3dsdm::get<TDataStrPtr>(theValue);
                     if (value->GetLength()) {
-                        Q3DStudio::CString valueStr(value->GetData());
-                        Q3DStudio::CFilePath fullPath =
+                        QString valueStr(value->toQString());
+                        QString fullPath =
                             Q3DStudio::CFilePath::CombineBaseAndRelative(m_DestImportDir, valueStr);
-                        Q3DStudio::CString relativePath =
+                        QString relativePath =
                             Q3DStudio::CFilePath::GetRelativePathFromBase(m_DocumentPath, fullPath);
-                        theValue = std::make_shared<CDataStr>(relativePath.c_str());
+                        theValue = std::make_shared<CDataStr>(relativePath);
                     }
                 } else if (theType == DataModelDataType::StringRef) {
                     SStringRef theRef = get<SStringRef>(theValue);
@@ -552,7 +508,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
                          childIdx < childCount; ++childIdx) {
                         Qt3DSDMInstanceHandle target = m_AssetGraph.GetChild(hdl, childIdx);
                         if (m_Editor.GetAssociatedSlide(hdl) == theIterator.GetCurrentSlide()
-                            && m_Editor.GetImportId(target).Compare(theRef.m_Id)) {
+                            && m_Editor.GetImportId(target) == QString::fromWCharArray(theRef.m_Id)) {
                             theGuid = m_Editor.GetGuidForInstance(target);
                             theValue = theGuid;
                         }
@@ -571,24 +527,24 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
     void AddChild(TImportId parent, TImportId child, TImportId nextSiblingId) override
     {
         TIdMultiMap::iterator theParentList =
-            m_IdToSlideInstances.find(m_StringTable.RegisterStr(parent));
+            m_IdToSlideInstances.find(parent);
         TIdMultiMap::iterator theChildList =
-            m_IdToSlideInstances.find(m_StringTable.RegisterStr(child));
+            m_IdToSlideInstances.find(child);
         if (theParentList == m_IdToSlideInstances.end()
             || theChildList == m_IdToSlideInstances.end())
             return;
-        size_t numItems = qMin(theParentList->second.size(), theChildList->second.size());
+        size_t numItems = qMin(theParentList->size(), theChildList->size());
         for (size_t idx = 0; idx < numItems; ++idx) {
-            Qt3DSDMSlideHandle theParentSlide = theParentList->second[idx].first;
-            Qt3DSDMInstanceHandle theParent(theParentList->second[idx].second);
-            Qt3DSDMInstanceHandle theChild(theChildList->second[idx].second);
+            Qt3DSDMSlideHandle theParentSlide = (*theParentList)[idx].first;
+            Qt3DSDMInstanceHandle theParent((*theParentList)[idx].second);
+            Qt3DSDMInstanceHandle theChild((*theChildList)[idx].second);
             Qt3DSDMInstanceHandle nextSibling;
-            if (!IsTrivial(nextSiblingId)) {
+            if (!nextSiblingId.isEmpty()) {
                 for (long childIdx = 0, childCount = m_AssetGraph.GetChildCount(theParent);
                      childIdx < childCount; ++childIdx) {
                     Qt3DSDMInstanceHandle theSibling = m_AssetGraph.GetChild(theParent, childIdx);
                     if (m_Editor.GetAssociatedSlide(theSibling) == theParentSlide
-                        && m_Editor.GetImportId(theSibling).Compare(nextSiblingId)) {
+                        && m_Editor.GetImportId(theSibling) == nextSiblingId) {
                         nextSibling = theSibling;
                         break;
                     }
@@ -601,19 +557,17 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
         }
     }
 
-    void RemoveAnimation(TImportId inInstance, const wchar_t *propName, long propSubIndex) override
+    void RemoveAnimation(TImportId inInstance, const QString &propName, long propSubIndex) override
     {
-        for (SSlideInstanceIdMapIterator theIterator(inInstance, m_IdToSlideInstances,
-                                                     m_StringTable);
+        for (SSlideInstanceIdMapIterator theIterator(inInstance, m_IdToSlideInstances);
              theIterator.IsDone() == false; theIterator.Next())
             m_Editor.RemoveAnimation(theIterator.GetCurrentSlide(),
                                      theIterator.GetCurrentInstance(), propName, propSubIndex);
     }
-    void UpdateAnimation(TImportId inInstance, const wchar_t *propName, long propSubIndex,
-                                 EAnimationType animType, const float *animData, QT3DSU32 numFloats) override
+    void UpdateAnimation(TImportId inInstance, const QString &propName, long propSubIndex,
+                         EAnimationType animType, const float *animData, QT3DSU32 numFloats) override
     {
-        for (SSlideInstanceIdMapIterator theIterator(inInstance, m_IdToSlideInstances,
-                                                     m_StringTable);
+        for (SSlideInstanceIdMapIterator theIterator(inInstance, m_IdToSlideInstances);
              theIterator.IsDone() == false; theIterator.Next()) {
             if (m_Editor.AnimationExists(theIterator.GetCurrentSlide(),
                                          theIterator.GetCurrentInstance(), propName, propSubIndex)
@@ -629,11 +583,10 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
         }
     }
 
-    void AddAnimation(TImportId inInstance, const wchar_t *propName, long propSubIndex,
-                              EAnimationType animType, const float *animData, QT3DSU32 numFloats) override
+    void AddAnimation(TImportId inInstance, const QString &propName, long propSubIndex,
+                      EAnimationType animType, const float *animData, QT3DSU32 numFloats) override
     {
-        for (SSlideInstanceIdMapIterator theIterator(inInstance, m_IdToSlideInstances,
-                                                     m_StringTable);
+        for (SSlideInstanceIdMapIterator theIterator(inInstance, m_IdToSlideInstances);
              theIterator.IsDone() == false; theIterator.Next()) {
             if (!m_Editor.AnimationExists(theIterator.GetCurrentSlide(),
                                           theIterator.GetCurrentInstance(), propName,
@@ -651,24 +604,21 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
 }
 
 std::shared_ptr<IComposerEditorInterface> IComposerEditorInterface::CreateEditorInterface(
-    Q3DStudio::IDocumentEditor &editor, qt3dsdm::CDataModelHandle parent // Parent object
-    ,
+    Q3DStudio::IDocumentEditor &editor, qt3dsdm::CDataModelHandle parent,
     qt3dsdm::CDataModelHandle root, qt3dsdm::Qt3DSDMSlideHandle slide,
-    const Q3DStudio::CFilePath &docPath, const Q3DStudio::CFilePath &destimportfile,
-    long inStartTime, qt3dsdm::IStringTable &inStringTable)
+    const QString &docPath, const QString &destimportfile,
+    long inStartTime)
 {
     return std::make_shared<SComposerImportInterface>(std::ref(editor), parent, root, slide,
-                                                        docPath, destimportfile, inStartTime,
-                                                        std::ref(inStringTable));
+                                                        docPath, destimportfile, inStartTime);
 }
 
 // The refresh interface is setup to refresh multiple trees automatically
 std::shared_ptr<IComposerEditor> IComposerEditorInterface::CreateEditorInterface(
-    Q3DStudio::IDocumentEditor &editor, TIdMultiMap &inRoots, const Q3DStudio::CFilePath &docPath,
-    const Q3DStudio::CFilePath &destimportfile, long inStartTime,
-    qt3dsdm::IStringTable &inStringTable, CGraph &inAssetGraph)
+        Q3DStudio::IDocumentEditor &editor, TIdMultiMap &inRoots, const QString &docPath,
+        const QString &destimportfile, long inStartTime, CGraph &inAssetGraph)
 {
     return std::make_shared<SComposerRefreshInterface>(
         std::ref(editor), std::ref(inRoots), docPath, destimportfile, inStartTime,
-        std::ref(inStringTable), std::ref(inAssetGraph));
+        std::ref(inAssetGraph));
 }

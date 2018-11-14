@@ -99,7 +99,7 @@ CRelativePathTools::GetPathType(const qt3dsdm::SObjectRefType &inObjectRefValue)
 /**
  *	Build a object reference path, via Ids
  */
-Q3DStudio::CString
+QString
 CRelativePathTools::BuildReferenceString(const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                          const qt3dsdm::Qt3DSDMInstanceHandle inRootInstance,
                                          EPathType inPathType, CDoc *inDoc)
@@ -110,7 +110,7 @@ CRelativePathTools::BuildReferenceString(const qt3dsdm::Qt3DSDMInstanceHandle in
     case EPATHTYPE_RELATIVE:
         return BuildRelativeReferenceString(inInstance, inRootInstance, inDoc);
     };
-    return L"";
+    return {};
 }
 
 //=============================================================================
@@ -118,14 +118,14 @@ CRelativePathTools::BuildReferenceString(const qt3dsdm::Qt3DSDMInstanceHandle in
  *	Note that this uses object names rather than nice names, because script access is via
  *property names, in the runtime.
  */
-Q3DStudio::CString
+QString
 CRelativePathTools::BuildAbsoluteReferenceString(const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                                  CDoc *inDoc)
 {
     if (inInstance.Valid() == false)
-        return L"";
-    Q3DStudio::CString theNameStart;
-    Q3DStudio::CString theNameEnd(
+        return {};
+    QString theNameStart;
+    QString theNameEnd(
         CPathConstructionHelper::EscapeAssetName(LookupObjectName(inInstance, inDoc)));
 
     qt3dsdm::Qt3DSDMInstanceHandle theParentInstance =
@@ -136,13 +136,13 @@ CRelativePathTools::BuildAbsoluteReferenceString(const qt3dsdm::Qt3DSDMInstanceH
     return theNameStart;
 }
 
-Q3DStudio::CString
+QString
 CRelativePathTools::BuildRelativeReferenceString(const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                                  const qt3dsdm::Qt3DSDMInstanceHandle inRootInstance,
                                                  CDoc *inDoc)
 {
-    Q3DStudio::CString theAbsRelPath(BuildAbsoluteReferenceString(inInstance, inDoc));
-    Q3DStudio::CString theAbsRootPath(BuildAbsoluteReferenceString(inRootInstance, inDoc));
+    QString theAbsRelPath(BuildAbsoluteReferenceString(inInstance, inDoc));
+    QString theAbsRootPath(BuildAbsoluteReferenceString(inRootInstance, inDoc));
     return CPathConstructionHelper::BuildRelativeReferenceString(theAbsRelPath, theAbsRootPath);
 }
 
@@ -160,19 +160,19 @@ CRelativePathTools::BuildRelativeReferenceString(const qt3dsdm::Qt3DSDMInstanceH
  */
 qt3dsdm::Qt3DSDMInstanceHandle CRelativePathTools::FindAssetInstanceByObjectPath(
     CDoc *inDoc, const qt3dsdm::Qt3DSDMInstanceHandle &inRootInstance,
-    const Q3DStudio::CString &inString, EPathType &outPathType, bool &outIsResolved,
+    const QString &inString, EPathType &outPathType, bool &outIsResolved,
     const IObjectReferenceHelper *inHelper,
     bool ignoreMaterialProperties)
 {
     CClientDataModelBridge *theBridge = inDoc->GetStudioSystem()->GetClientDataModelBridge();
 
-    CStackTokenizer theTokenizer(inString, CPathConstructionHelper::GetPathDelimiter().GetAt(0),
-                                 CPathConstructionHelper::GetEscapeChar().GetAt(0));
+    CStackTokenizer theTokenizer(inString, CPathConstructionHelper::GetPathDelimiter().at(0),
+                                 CPathConstructionHelper::GetEscapeChar().at(0));
     // Default to the scene if asset cannot be found.
     qt3dsdm::Qt3DSDMInstanceHandle theFoundInstance;
 
     if (theTokenizer.HasNextPartition()) {
-        Q3DStudio::CString theCurrentToken(theTokenizer.GetCurrentPartition());
+        QString theCurrentToken(theTokenizer.GetCurrentPartition());
 
         // this is the default path type
         outPathType = EPATHTYPE_RELATIVE;
@@ -180,15 +180,18 @@ qt3dsdm::Qt3DSDMInstanceHandle CRelativePathTools::FindAssetInstanceByObjectPath
         outIsResolved = false;
 
         // Start parsing from this object
-        if (theCurrentToken.Compare(CPathConstructionHelper::GetThisString(), false)) {
+        if (theCurrentToken.compare(CPathConstructionHelper::GetThisString(),
+                                    Qt::CaseInsensitive) == 0) {
             outIsResolved = true;
             theFoundInstance = inRootInstance;
             outPathType = EPATHTYPE_RELATIVE;
-        } else if (theCurrentToken.Compare(CPathConstructionHelper::GetSceneString(), false)) {
+        } else if (theCurrentToken.compare(CPathConstructionHelper::GetSceneString(),
+                                           Qt::CaseInsensitive) == 0) {
             outIsResolved = true;
             theFoundInstance = inRootInstance;
             outPathType = EPATHTYPE_RELATIVE;
-        } else if (theCurrentToken.Compare(CPathConstructionHelper::GetParentString(), false)) {
+        } else if (theCurrentToken.compare(CPathConstructionHelper::GetParentString(),
+                                           Qt::CaseInsensitive) == 0) {
             outIsResolved = true;
             theFoundInstance = theBridge->GetParentInstance(inRootInstance);
             outPathType = EPATHTYPE_RELATIVE;
@@ -267,11 +270,12 @@ qt3dsdm::Qt3DSDMInstanceHandle CRelativePathTools::DoFindAssetInstanceByObjectPa
     qt3dsdm::Qt3DSDMInstanceHandle theFoundInstance = inRootInstance;
     // There is another object to parse
     if (inRootInstance.Valid() && ioTokenizer.HasNextPartition()) {
-        Q3DStudio::CString theCurrentToken(ioTokenizer.GetCurrentPartition());
-        if (theCurrentToken.Length()) {
+        QString theCurrentToken(ioTokenizer.GetCurrentPartition());
+        if (theCurrentToken.length()) {
             outIsResolved = false;
             // Parent asset
-            if (theCurrentToken.Compare(CPathConstructionHelper::GetParentString(), false)) {
+            if (theCurrentToken.compare(CPathConstructionHelper::GetParentString(),
+                                        Qt::CaseInsensitive) == 0) {
                 ++ioTokenizer;
                 qt3dsdm::Qt3DSDMInstanceHandle theParentInstance =
                     theBridge->GetParentInstance(inRootInstance);
@@ -284,7 +288,7 @@ qt3dsdm::Qt3DSDMInstanceHandle CRelativePathTools::DoFindAssetInstanceByObjectPa
             }
             // Find the asset by name
             else {
-                Q3DStudio::CString theDesiredAssetName(ioTokenizer.GetCurrentPartition());
+                QString theDesiredAssetName(ioTokenizer.GetCurrentPartition());
 
                 if (!outIsResolved && inHelper) {
                     qt3dsdm::TInstanceHandleList theChildList;
@@ -292,9 +296,10 @@ qt3dsdm::Qt3DSDMInstanceHandle CRelativePathTools::DoFindAssetInstanceByObjectPa
                                                        inTimeParentInstance,
                                                        ignoreMaterialProperties)) {
                         for (size_t theIndex = 0; theIndex < theChildList.size(); ++theIndex) {
-                            Q3DStudio::CString theCurrentAssetName(
+                            QString theCurrentAssetName(
                                 LookupObjectName(theChildList[theIndex], inDoc));
-                            if (theDesiredAssetName.Compare(theCurrentAssetName, false)) {
+                            if (theDesiredAssetName.compare(theCurrentAssetName,
+                                                            Qt::CaseInsensitive) == 0) {
                                 ++ioTokenizer;
                                 outIsResolved = true;
                                 theFoundInstance = DoFindAssetInstanceByObjectPath(
@@ -316,7 +321,7 @@ qt3dsdm::Qt3DSDMInstanceHandle CRelativePathTools::DoFindAssetInstanceByObjectPa
 /**
  * Figures out the object name, used for script access. so that paths are valid in the runtime.
  */
-Q3DStudio::CString
+QString
 CRelativePathTools::LookupObjectName(const qt3dsdm::Qt3DSDMInstanceHandle inInstance, CDoc *inDoc)
 {
     qt3dsdm::IPropertySystem *thePropertySystem = inDoc->GetStudioSystem()->GetPropertySystem();
@@ -328,13 +333,11 @@ CRelativePathTools::LookupObjectName(const qt3dsdm::Qt3DSDMInstanceHandle inInst
                                                            theProperty))
             theClientBridge->GetLayerFromImageProbeInstance(inInstance, theParentInstance,
                                                             theProperty);
-        qt3dsdm::TCharStr theName = thePropertySystem->GetName(theProperty);
-        return theName.c_str();
+        return thePropertySystem->GetName(theProperty);
     } else {
         qt3dsdm::SValue theNameValue;
         thePropertySystem->GetInstancePropertyValue(inInstance, theClientBridge->GetNameProperty(),
                                                     theNameValue);
-        qt3dsdm::TDataStrPtr theName = qt3dsdm::get<qt3dsdm::TDataStrPtr>(theNameValue);
-        return theName->GetData();
+        return qt3dsdm::get<qt3dsdm::TDataStrPtr>(theNameValue)->toQString();
     }
 }
