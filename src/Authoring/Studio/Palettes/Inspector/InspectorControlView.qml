@@ -638,9 +638,6 @@ Rectangle {
                 xyzHandler.valueZ = Number(values[2]).toFixed(xyzHandler.numberOfDecimal);
             }
 
-            Item {
-                width: _valueWidth - xyzHandler.width
-            }
             HandlerPropertyBaseXYZ {
                 id: xyzHandler
                 valueX: Number(values[0]).toFixed(numberOfDecimal)
@@ -711,14 +708,12 @@ Rectangle {
             }
 
             spacing: 0
-            Item {
-                width: _valueWidth - floatField.width
-            }
+
             FloatTextField {
                 id: floatField
                 text: Number(parent.value).toFixed(decimalValue)
                 implicitHeight: _controlBaseHeight
-                implicitWidth: _valueWidth / 2
+                implicitWidth: _valueWidth / 3
 
                 onPreviewValueChanged: {
                     _inspectorModel.setPropertyValue(parent.instance, parent.handle,

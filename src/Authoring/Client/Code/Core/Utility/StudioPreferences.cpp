@@ -58,6 +58,9 @@ static QColor s_disabledColor;
 static QColor s_dataInputColor;
 static QColor s_matteColor;
 static QColor s_projectReferencedColor;
+static QColor s_xAxisColor;
+static QColor s_yAxisColor;
+static QColor s_zAxisColor;
 static QLinearGradient s_welcomeBackgroundGradient;
 
 static QColor s_timelineRowColorNormal;
@@ -147,6 +150,9 @@ void CStudioPreferences::loadPreferences(const QString &filePath)
     s_dataInputColor = QColor("#ff5102");
     s_matteColor = QColor("#222222");
     s_projectReferencedColor = QColor("#aaaa00");
+    s_xAxisColor = QColor("#ca2f2e");
+    s_yAxisColor = QColor("#64cd35");
+    s_zAxisColor = QColor("#1e9fcd");
 
     s_welcomeBackgroundGradient = QLinearGradient(0.0, 0.0, 1.0, 0.0);
     s_welcomeBackgroundGradient.setColorAt(0.0, QColor("#343E55"));
@@ -759,6 +765,21 @@ void CStudioPreferences::SetBigTimeAdvanceAmount(long inTime)
     return ::CColor("#ff0000");
 }
 
+QColor CStudioPreferences::GetXAxisColor()
+{
+    return s_xAxisColor;
+}
+
+QColor CStudioPreferences::GetYAxisColor()
+{
+    return s_yAxisColor;
+}
+
+QColor CStudioPreferences::GetZAxisColor()
+{
+    return s_zAxisColor;
+}
+
 /**
  *  Colors for rulers and guides
  */
@@ -835,6 +856,9 @@ void CStudioPreferences::setQmlContextProperties(QQmlContext *qml)
     qml->setContextProperty(QStringLiteral("_disabledColor"), s_disabledColor);
     qml->setContextProperty(QStringLiteral("_dataInputColor"), s_dataInputColor);
     qml->setContextProperty(QStringLiteral("_projectReferencedColor"), s_projectReferencedColor);
+    qml->setContextProperty(QStringLiteral("_xAxisColor"), s_xAxisColor);
+    qml->setContextProperty(QStringLiteral("_yAxisColor"), s_yAxisColor);
+    qml->setContextProperty(QStringLiteral("_zAxisColor"), s_zAxisColor);
     qml->setContextProperty(QStringLiteral("_fontSize"), s_fontSize);
     qml->setContextProperty(QStringLiteral("_controlBaseHeight"), s_controlBaseHeight);
     qml->setContextProperty(QStringLiteral("_idWidth"), s_idWidth);

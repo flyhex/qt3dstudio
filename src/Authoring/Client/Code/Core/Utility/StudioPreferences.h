@@ -143,6 +143,9 @@ public:
 
     static ::CColor GetSingleBoundingBoxColor();
     static ::CColor GetGroupBoundingBoxColor();
+    static QColor GetXAxisColor();
+    static QColor GetYAxisColor();
+    static QColor GetZAxisColor();
 
     static ::CColor GetRulerBackgroundColor();
     static ::CColor GetRulerTickColor();

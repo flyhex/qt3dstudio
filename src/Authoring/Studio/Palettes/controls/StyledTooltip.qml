@@ -41,10 +41,7 @@ ToolTip {
     // set for MainFrm catches the tooltip events for QML, it doesn't prevent showing them because
     // we were/are controlling the visibility in code.
     onEnabledChanged: {
-        if (enabled && _parentView.toolTipsEnabled())
-            visible = true;
-        else
-            visible = false;
+        visible = enabled && _parentView.toolTipsEnabled();
     }
 
     background: Rectangle {
