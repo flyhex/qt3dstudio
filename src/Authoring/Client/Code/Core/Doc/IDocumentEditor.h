@@ -191,6 +191,7 @@ public:
     virtual void removeUnusedFromMaterialContainer() = 0;
     virtual void removeDeletedFromMaterialContainer() = 0;
 
+    virtual QString getFilePathFromMaterialName(const QString &name) = 0;
     virtual QString getMaterialNameFromFilePath(const QString &path) = 0;
 
     virtual Qt3DSDMInstanceHandle getMaterial(const QString &path) = 0;

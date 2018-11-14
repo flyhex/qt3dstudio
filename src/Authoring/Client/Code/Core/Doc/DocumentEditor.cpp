@@ -2126,11 +2126,8 @@ public:
             }
         }
 
-        writeProperty(file, QStringLiteral("presentation"), m_Doc.GetDocumentPath());
-
         const QFileInfo fileInfo(file);
         writeProperty(file, QStringLiteral("path"), fileInfo.absoluteFilePath());
-        writeProperty(file, QStringLiteral("filename"), fileInfo.completeBaseName());
 
         QMapIterator<QString, Qt3DSDMInstanceHandle> i(textureHandles);
         while (i.hasNext()) {
@@ -2184,7 +2181,7 @@ public:
         return instance;
     }
 
-    QString getFilePathFromMaterialName(const QString &name)
+    QString getFilePathFromMaterialName(const QString &name) override
     {
         return QDir(m_Doc.GetCore()->getProjectFile().getProjectPath())
                 .absoluteFilePath(name + QStringLiteral(".materialdef"));
