@@ -229,6 +229,7 @@ public:
 
     virtual void ParseSourcePathsOutOfEffectFile(const QString &inFile,
                                                  const QString &projectPath,
+                                                 bool recurseSourceMaterial,
                                                  QHash<QString, QString> &outPathMap,
                                                  QSet<QString> &outPropertyMap) = 0;
 

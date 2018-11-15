@@ -195,11 +195,6 @@ void ProjectFileSystemModel::updateReferences()
     auto addReferencesPresentation = [this, doc, &projectPath](const Q3DStudio::CString &str) {
         addPathsToReferences(m_references, projectPath, doc->GetResolvedPathToDoc(str).toQString());
     };
-    auto addReferencesProject = [this, doc, &projectPath](const Q3DStudio::CString &str) {
-        addPathsToReferences(
-                    m_references, projectPath,
-                    doc->GetCore()->getProjectFile().getAbsoluteFilePathTo(str.toQString()));
-    };
     auto addReferencesRenderable = [this, &projectPath, &projectPathSlash, &subpresentationRecord]
             (const QString &id) {
         for (SubPresentationRecord r : qAsConst(subpresentationRecord)) {
@@ -210,7 +205,6 @@ void ProjectFileSystemModel::updateReferences()
 
     std::for_each(sourcePathList.begin(), sourcePathList.end(), addReferencesPresentation);
     std::for_each(fontFileList.begin(), fontFileList.end(), addReferencesPresentation);
-    std::for_each(effectTextureList.begin(), effectTextureList.end(), addReferencesProject);
     std::for_each(effectTextureList.begin(), effectTextureList.end(), addReferencesPresentation);
     std::for_each(renderableList.begin(), renderableList.end(), addReferencesRenderable);
 
@@ -288,56 +282,77 @@ void ProjectFileSystemModel::updateProjectReferences()
         updateIt.next();
         m_presentationReferences.remove(updateIt.key());
         if (updateIt.value()) {
-            // Presentation file added/modified, check that it is one of the subpresentations,
-            // or we don't care about it
-            const QString relPath = g_StudioApp.GetCore()->getProjectFile()
-                    .getRelativeFilePathTo(updateIt.key());
-            for (int i = 0, count = g_StudioApp.m_subpresentations.size(); i < count; ++i) {
-                SubPresentationRecord &rec = g_StudioApp.m_subpresentations[i];
-                if (rec.m_argsOrSrc == relPath) {
-                    QFileInfo fi(updateIt.key());
-                    QSet<QString> newReferences;
-                    if (rec.m_type == QLatin1String("presentation")) {
-                        // Since this is not actual import, source and target uip is the same,
-                        // and we are only interested in the absolute paths of the "imported"
-                        // asset files
-                        QHash<QString, QString> importPathMap;
-                        QHash<QString, QString> dummyMap;
-                        QString dummyStr;
+            QFileInfo fi(updateIt.key());
+            QDir fileDir = fi.dir();
+            const QString suffix = fi.suffix();
+            QHash<QString, QString> importPathMap;
+            QSet<QString> newReferences;
 
-                        PresentationFile::getSourcePaths(fi, fi, importPathMap, dummyStr, dummyMap);
+            const auto addReferencesFromImportMap = [&]() {
+                QHashIterator<QString, QString> pathIter(importPathMap);
+                while (pathIter.hasNext()) {
+                    pathIter.next();
+                    const QString path = pathIter.key();
+                    QString targetAssetPath;
+                    if (path.startsWith(QLatin1String("./"))) // path from project root
+                        targetAssetPath = projectDir.absoluteFilePath(path);
+                    else // relative path
+                        targetAssetPath = fileDir.absoluteFilePath(path);
+                    newReferences.insert(QDir::cleanPath(targetAssetPath));
+                }
+            };
 
-                        QHashIterator<QString, QString> pathIter(importPathMap);
-                        while (pathIter.hasNext()) {
-                            pathIter.next();
-                            const QString path = pathIter.key();
-                            QString targetAssetPath;
-                            if (path.startsWith(QLatin1String("./"))) // path from project root
-                                targetAssetPath = projectDir.absoluteFilePath(path);
-                            else // relative path
-                                targetAssetPath = fi.dir().absoluteFilePath(path);
-                            newReferences.insert(QDir::cleanPath(targetAssetPath));
-                        }
-                    } else { // qml-stream
-                        QQmlApplicationEngine qmlEngine;
-                        bool isQmlStream = false;
-                        QObject *qmlRoot = getQmlStreamRootNode(qmlEngine, updateIt.key(),
-                                                                isQmlStream);
-                        if (qmlRoot && isQmlStream) {
-                            QSet<QString> assetPaths;
-                            getQmlAssets(qmlRoot, assetPaths);
-                            QDir qmlDir = fi.dir();
-                            for (auto &assetSrc : qAsConst(assetPaths)) {
-                                QString targetAssetPath;
-                                targetAssetPath = qmlDir.absoluteFilePath(assetSrc);
-                                newReferences.insert(QDir::cleanPath(targetAssetPath));
+            if (CDialogs::presentationExtensions().contains(suffix)
+                    || CDialogs::qmlStreamExtensions().contains(suffix)) {
+                // Presentation file added/modified, check that it is one of the subpresentations,
+                // or we don't care about it
+                const QString relPath = g_StudioApp.GetCore()->getProjectFile()
+                        .getRelativeFilePathTo(updateIt.key());
+                for (int i = 0, count = g_StudioApp.m_subpresentations.size(); i < count; ++i) {
+                    SubPresentationRecord &rec = g_StudioApp.m_subpresentations[i];
+                    if (rec.m_argsOrSrc == relPath) {
+                        if (rec.m_type == QLatin1String("presentation")) {
+                            // Since this is not actual import, source and target uip is the same,
+                            // and we are only interested in the absolute paths of the "imported"
+                            // asset files
+                            QString dummyStr;
+                            QHash<QString, QString> dummyMap;
+                            PresentationFile::getSourcePaths(fi, fi, importPathMap,
+                                                             dummyStr, dummyMap);
+                            addReferencesFromImportMap();
+                        } else { // qml-stream
+                            QQmlApplicationEngine qmlEngine;
+                            bool isQmlStream = false;
+                            QObject *qmlRoot = getQmlStreamRootNode(qmlEngine, updateIt.key(),
+                                                                    isQmlStream);
+                            if (qmlRoot && isQmlStream) {
+                                QSet<QString> assetPaths;
+                                getQmlAssets(qmlRoot, assetPaths);
+                                QDir qmlDir = fi.dir();
+                                for (auto &assetSrc : qAsConst(assetPaths)) {
+                                    QString targetAssetPath;
+                                    targetAssetPath = qmlDir.absoluteFilePath(assetSrc);
+                                    newReferences.insert(QDir::cleanPath(targetAssetPath));
+                                }
                             }
                         }
+                        break;
                     }
-                    m_presentationReferences.insert(updateIt.key(), newReferences);
-                    break;
                 }
+            } else if (CDialogs::materialExtensions().contains(suffix)
+                       || CDialogs::effectExtensions().contains(suffix)) {
+                // Use dummy set, as we are only interested in values set in material files
+                QSet<QString> dummySet;
+                g_StudioApp.GetCore()->GetDoc()->GetDocumentReader()
+                    .ParseSourcePathsOutOfEffectFile(
+                            updateIt.key(),
+                            g_StudioApp.GetCore()->getProjectFile().getProjectPath(),
+                            false, // No need to recurse src mats; those get handled individually
+                            importPathMap, dummySet);
+                addReferencesFromImportMap();
             }
+            if (!newReferences.isEmpty())
+                m_presentationReferences.insert(updateIt.key(), newReferences);
         }
     }
 
@@ -795,8 +810,8 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
             // values of texture properties
             QSet<QString> dummyPropertySet;
             g_StudioApp.GetCore()->GetDoc()->GetDocumentReader()
-                .ParseSourcePathsOutOfEffectFile(absSrcPath, projectPath, effectFileSourcePaths,
-                                                 dummyPropertySet);
+                .ParseSourcePathsOutOfEffectFile(absSrcPath, projectPath, true,
+                                                 effectFileSourcePaths, dummyPropertySet);
 
             QHashIterator<QString, QString> pathIter(effectFileSourcePaths);
             while (pathIter.hasNext()) {
@@ -1212,8 +1227,11 @@ void ProjectFileSystemModel::onFilesChanged(
     for (size_t idx = 0, end = inFileModificationList.size(); idx < end; ++idx) {
         const Q3DStudio::SFileModificationRecord &record(inFileModificationList[idx]);
         if (record.m_File.isFile()) {
-            const bool isQml = record.m_File.suffix() == QLatin1String("qml");
-            if (isQml || record.m_File.suffix() == QLatin1String("uip")) {
+            const QString suffix = record.m_File.suffix();
+            const bool isQml = CDialogs::qmlStreamExtensions().contains(suffix);
+            if (isQml || CDialogs::presentationExtensions().contains(suffix)
+                    || CDialogs::materialExtensions().contains(suffix)
+                    || CDialogs::effectExtensions().contains(suffix)) {
                 const QString filePath = record.m_File.absoluteFilePath();
                 if (record.m_ModificationType == Q3DStudio::FileModificationType::Created
                         || record.m_ModificationType == Q3DStudio::FileModificationType::Modified) {

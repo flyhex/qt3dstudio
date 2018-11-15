@@ -185,7 +185,7 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
                 g_StudioApp.GetCore()->GetDoc()->GetDocumentReader()
                     .ParseSourcePathsOutOfEffectFile(
                             uipSrc.path() + QStringLiteral("/") + sourcepath,
-                            outProjPathSrc, outPathMap, propertySet);
+                            outProjPathSrc, true, outPathMap, propertySet);
                 matEffPropertyMap.insert(QStringLiteral("#") + p.attribute(QStringLiteral("id")),
                                          propertySet);
             }

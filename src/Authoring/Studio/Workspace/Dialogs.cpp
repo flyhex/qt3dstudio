@@ -1514,6 +1514,18 @@ QStringList CDialogs::presentationExtensions()
     return exts;
 }
 
+QStringList CDialogs::qmlStreamExtensions()
+{
+    static QStringList exts;
+    if (exts.isEmpty()) {
+        for (const char *ext : qmlStreamExts) {
+            if (ext)
+                exts << QString::fromLatin1(ext);
+        }
+    }
+    return exts;
+}
+
 QColor CDialogs::displayColorDialog(const QColor &color) const
 {
     QColorDialog theColorDlg;

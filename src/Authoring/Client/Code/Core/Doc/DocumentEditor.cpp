@@ -806,6 +806,8 @@ public:
         @param inFile The file to parse. Can be absolute or relative to current directory.
         @param projectPath The absolute path of the project root the inFile belongs to, if any.
                            Can be left empty for files that are not in any project.
+        @param recurseSourceMaterial If true, parsing .materialdef files will recursively also
+                                     parse the shader .material file.
         @param outPathMap A map to return the parsed assets.
                           The key is the destination path parsed from the file. It is assumed to be
                           relative to the project root rather than the asset file itself.
@@ -817,11 +819,13 @@ public:
     */
     void ParseSourcePathsOutOfEffectFile(const QString &inFile,
                                          const QString &projectPath,
+                                         bool recurseSourceMaterial,
                                          QHash<QString, QString> &outPathMap,
                                          QSet<QString> &outPropertySet) override
     {
-        QFileInfo fi(inFile);
         QDomDocument domDocMat;
+        QDir projDir(projectPath);
+        QDir fileDir(QFileInfo(inFile).dir());
         if (StudioUtils::readFileToDomDocument(inFile, domDocMat)) {
             QVector<QDomNodeList> nodeLists;
             QVector<bool> isMatDefs;
@@ -841,32 +845,38 @@ public:
                 isMatDefs.append(true);
             }
 
-            QString type, path, name;
             for (int j = 0; j < nodeLists.count(); ++j) {
                 for (int i = 0, c = nodeLists[j].count(); i < c; ++i) {
-                    auto elem =  nodeLists[j].at(i).toElement();
+                    auto elem = nodeLists[j].at(i).toElement();
+                    QString path;
                     if (isMatDefs[j]) {
-                        type = elem.attribute(QStringLiteral("name"));
-                        path = elem.text();
-                        name = QLatin1String("sourcepath");
-                    } else {
-                        type = elem.attribute(QStringLiteral("type"));
+                        if (elem.attribute(QStringLiteral("name")) == QLatin1String("sourcepath")
+                            || elem.attribute(QStringLiteral("type")) == QLatin1String("Texture")) {
+                            path = elem.text();
+                        }
+                    } else if (elem.attribute(QStringLiteral("type")) == QLatin1String("Texture")) {
                         path = elem.attribute(QStringLiteral("default"));
-                        name = QLatin1String("Texture");
                     }
 
-                    if (type == name) {
+                    if (!path.isEmpty()) {
                         if (!isMatDefs[j])
                             outPropertySet.insert(elem.attribute(QStringLiteral("name")));
                         if (!path.isEmpty() && !outPathMap.contains(path)) {
-                            QString absAssetPath = fi.absolutePath() + QStringLiteral("/") + path;
-                            if (QFile::exists(absAssetPath)) {
-                                outPathMap.insert(path, absAssetPath);
-                            } else if (!projectPath.isEmpty()) {
-                                absAssetPath = projectPath + QStringLiteral("/") + path;
-                                if (QFile::exists(absAssetPath))
-                                    outPathMap.insert(path, absAssetPath);
+                            QString absAssetPath;
+                            if (projectPath.isEmpty()) {
+                                // Importing from library, assume relative path to file itself
+                                absAssetPath = QDir::cleanPath(fileDir.absoluteFilePath(path));
+                            } else {
+                                // When importing from project, all paths are relative to project
+                                absAssetPath = QDir::cleanPath(projDir.absoluteFilePath(path));
                             }
+                            if (recurseSourceMaterial
+                                    && absAssetPath.endsWith(QLatin1String(".material"))
+                                    && !outPathMap.contains(path)) {
+                                ParseSourcePathsOutOfEffectFile(absAssetPath, projectPath,
+                                                                false, outPathMap, outPropertySet);
+                            }
+                            outPathMap.insert(path, absAssetPath);
                         }
                     }
                 }
@@ -913,6 +923,9 @@ public:
         qt3ds::foundation::CFileSeekableIOStream theStream(inAbsoluteFilePath,
                                                            qt3ds::foundation::FileReadFlags());
         if (theStream.IsOpen()) {
+            const QDir docDir(m_Doc.GetDocumentDirectory().toQString());
+            const QDir projDir = g_StudioApp.GetCore()->getProjectFile().getProjectPath();
+
             std::shared_ptr<IDOMFactory> theFactory =
                 IDOMFactory::CreateDOMFactory(m_DataCore.GetStringTablePtr());
             SImportXmlErrorHandler theImportHandler(m_Doc.GetImportFailedHandler(),
@@ -926,22 +939,28 @@ public:
                     *theElem, m_DataCore.GetStringTablePtr(), theFactory);
 
                 const QString sourcePath = QStringLiteral("sourcepath");
+                QStringList convertPaths;
                 for (bool success = theReader->MoveToFirstChild("Property"); success;
                      success = theReader->MoveToNextSibling("Property")) {
                     const char8_t *name = "";
                     const char8_t *value = "";
+                    const char8_t *type = "";
                     theReader->Att("name", name);
+                    theReader->Att("type", type);
                     theReader->Value(value);
-                    outValues[name] = value;
+                    const QString nameStr = QString::fromUtf8(name);
+                    const QString valueStr = QString::fromUtf8(value);
+                    if (!valueStr.isEmpty() && (QString::fromUtf8(type) == QLatin1String("Texture")
+                            || nameStr == sourcePath)) {
+                        convertPaths.append(nameStr);
+                    }
+                    outValues[nameStr] = valueStr;
                 }
 
-                if (outValues.contains(sourcePath) && !outValues[sourcePath].isEmpty()) {
+                for (const auto &prop : qAsConst(convertPaths)) {
                     // Change paths to be relative to the presentation
-                    QFileInfo sourcePathFileInfo(m_Doc.GetCore()->getProjectFile()
-                                                 .getProjectPath() + QLatin1Char('/')
-                                                 + outValues[sourcePath]);
-                    outValues[sourcePath] = QDir(m_Doc.GetDocumentDirectory().toQString())
-                            .relativeFilePath(sourcePathFileInfo.absoluteFilePath());
+                    const QString origPath = outValues[prop];
+                    outValues[prop] = docDir.relativeFilePath(projDir.absoluteFilePath(origPath));
                 }
 
                 if (AreEqual(theReader->GetElementName(), L"Property"))
@@ -962,12 +981,9 @@ public:
                     }
 
                     if (texValues.contains(sourcePath) && !texValues[sourcePath].isEmpty()) {
-                        // Change paths to be relative to the presentation
-                        QFileInfo sourcePathFileInfo(m_Doc.GetCore()->getProjectFile()
-                                                     .getProjectPath() + QLatin1Char('/')
-                                                     + texValues[sourcePath]);
-                        texValues[sourcePath] = QDir(m_Doc.GetDocumentDirectory().toQString())
-                                .relativeFilePath(sourcePathFileInfo.absoluteFilePath());
+                        // Change path to be relative to the presentation
+                        texValues[sourcePath] = docDir.relativeFilePath(
+                                    projDir.absoluteFilePath(texValues[sourcePath]));
                     }
 
                     outTextureValues[texName] = texValues;
@@ -2028,26 +2044,22 @@ public:
         return "";
     }
 
-    void writeProperty(QFile &file, const QString &name, const QString &value, int indent = 1)
+    void writeProperty(QFile &file, const QString &name, const QString &value,
+                       int indent = 1, bool isTexture = false)
     {
         for (int i = 0; i < indent; ++i)
             file.write("\t");
         file.write("<Property name=\"");
         file.write(name.toUtf8().constData());
+        if (isTexture)
+            file.write("\" type=\"Texture");
         file.write("\">");
-        QString finalValue = value;
-        if (name == QLatin1String("sourcepath") && !value.isEmpty()) {
-            // Save paths relative to the project, not the presentation
-            QFileInfo sourcePathFileInfo(m_Doc.GetDocumentDirectory().toQString()
-                                         + QLatin1Char('/') + finalValue);
-            finalValue = QDir(m_Doc.GetCore()->getProjectFile().getProjectPath())
-                    .relativeFilePath(sourcePathFileInfo.absoluteFilePath());
-        }
-        file.write(finalValue.toUtf8().constData());
+        file.write(value.toUtf8().constData());
         file.write("</Property>\n");
     }
 
-    void writeProperty(QFile &file, const QString &name, const SValue &value, int indent = 1)
+    void writeProperty(QFile &file, const QString &name, const SValue &value, int indent = 1,
+                       bool isTexture = false)
     {
         MemoryBuffer<RawAllocator> tempBuffer;
         WCharTWriter writer(tempBuffer);
@@ -2056,7 +2068,8 @@ public:
 
         if (tempBuffer.size()) {
             writeProperty(file, name,
-                          QString::fromWCharArray((const wchar_t *)tempBuffer.begin()), indent);
+                          QString::fromWCharArray((const wchar_t *)tempBuffer.begin()),
+                          indent, isTexture);
         }
     }
 
@@ -2099,6 +2112,13 @@ public:
         file.write("<MaterialData version=\"1.0\">\n");
         QMap<QString, Qt3DSDMInstanceHandle> textureHandles;
         qt3dsdm::TPropertyHandleList propList;
+
+        const QDir docDir(m_Doc.GetDocumentDirectory().toQString());
+        const QDir projDir = g_StudioApp.GetCore()->getProjectFile().getProjectPath();
+        auto sourcePathProp = m_Bridge.GetSourcePathProperty();
+        // Importing interprets "./" prefix to mean project dir relative
+        const QString projPrefix = QStringLiteral("./");
+
         m_PropertySystem.GetAggregateInstanceProperties(instance, propList);
         for (auto &prop : propList) {
             const auto name = QString::fromWCharArray(m_PropertySystem.GetName(prop).wide_str());
@@ -2113,24 +2133,47 @@ public:
 
             if (!value.empty()) {
                 bool valid = true;
-                QString path;
+                bool isTexture = false;
+                bool isPath = true;
+                QString strValue;
                 if (value.getType() == DataModelDataType::Long4) {
                     SLong4 guid = get<qt3dsdm::SLong4>(value);
                     if (guid.Valid()) {
                         auto ref = m_Bridge.GetInstanceByGUID(guid);
                         textureHandles[name] = ref;
-                        path = m_Bridge.GetSourcePath(ref).toQString();
-                        if (path.isEmpty())
-                            path = m_Bridge.getSubpresentation(ref).toQString();
+                        strValue = m_Bridge.GetSourcePath(ref).toQString();
+                        if (strValue.isEmpty()) {
+                            strValue = m_Bridge.getSubpresentation(ref).toQString();
+                            isPath = false;
+                        }
                     } else {
                         valid = false;
                     }
+                } else {
+                    qt3dsdm::AdditionalMetaDataType::Value additionalMetaDataType
+                        = m_PropertySystem.GetAdditionalMetaDataType(instance, prop);
+                    if (additionalMetaDataType == AdditionalMetaDataType::Texture) {
+                        isTexture = true;
+                        TDataStrPtr strPtr = get<TDataStrPtr>(value);
+                        strValue = QString::fromWCharArray(strPtr->GetData());
+                    } else if (sourcePathProp == prop) {
+                        TDataStrPtr strPtr = get<TDataStrPtr>(value);
+                        strValue = QString::fromWCharArray(strPtr->GetData());
+                    }
                 }
 
-                if (path.isEmpty() && valid)
+                if (strValue.isEmpty() && valid) {
                     writeProperty(file, name, value);
-                else
-                    writeProperty(file, name, path);
+                } else if (!strValue.isEmpty()) {
+                    // Save paths relative to the project instead of the presentation.
+                    // This makes it possible to use same material from multiple presentations
+                    // that are not all in the same folder.
+                    if (isPath) {
+                        strValue = projPrefix
+                                + projDir.relativeFilePath(docDir.absoluteFilePath(strValue));
+                    }
+                    writeProperty(file, name, strValue, 1, isTexture);
+                }
             }
         }
 
@@ -2157,8 +2200,17 @@ public:
                     continue;
 
                 m_PropertySystem.GetInstancePropertyValue(handle, prop, value);
-                if (!value.empty())
-                    writeProperty(file, name, value, 2);
+                if (!value.empty()) {
+                    if (sourcePathProp == prop) {
+                        TDataStrPtr strPtr = get<TDataStrPtr>(value);
+                        QString strValue = QString::fromWCharArray(strPtr->GetData());
+                        strValue = projPrefix
+                                + projDir.relativeFilePath(docDir.absoluteFilePath(strValue));
+                        writeProperty(file, name, strValue, 2);
+                    } else {
+                        writeProperty(file, name, value, 2);
+                    }
+                }
             }
             file.write("\t</TextureData>\n");
         }
@@ -4428,6 +4480,7 @@ public:
                                        theRelativePath.GetFileStem().c_str(),
                                        theWarnings,
                                        *theStream);
+                IDocumentEditor::fixDefaultTexturePaths(theParentInstance);
                 DisplayLoadWarnings(shaderFile, theWarnings, QString());
             } else {
                 if (theHandler)
@@ -5323,6 +5376,7 @@ public:
                                                   theInstances[0].second,
                                                   TCharStr(theNameStr),
                                                   theWarnings, *theStream);
+                    IDocumentEditor::fixDefaultTexturePaths(theInstances[0].second);
                 }
 
                 for (size_t i = 0; i < theInstances.size(); ++i) {
@@ -5407,6 +5461,37 @@ IDocumentEditor::GetAlwaysUnlinkedProperties(qt3dsdm::SComposerObjectDefinitions
     theProperties[3] = theDefs.m_Asset.m_Shy;
     theProperties[4] = Qt3DSDMPropertyHandle();
     return theProperties;
+}
+
+// Fixes the default texture paths loaded from material and effect to be presentation relative
+void IDocumentEditor::fixDefaultTexturePaths(Qt3DSDMInstanceHandle instance)
+{
+    const auto core = g_StudioApp.GetCore();
+    const QDir docDir(core->GetDoc()->GetDocumentDirectory().toQString());
+    const QDir projDir = core->getProjectFile().getProjectPath();
+    const auto propertySystem = core->GetDoc()->GetStudioSystem()->GetPropertySystem();
+    qt3dsdm::TPropertyHandleList propList;
+    SValue value;
+
+    propertySystem->GetAggregateInstanceProperties(instance, propList);
+    for (auto &prop : propList) {
+        qt3dsdm::AdditionalMetaDataType::Value additionalMetaDataType
+                = propertySystem->GetAdditionalMetaDataType(instance, prop);
+        if (additionalMetaDataType == AdditionalMetaDataType::Texture) {
+            propertySystem->GetInstancePropertyValue(instance, prop, value);
+            TDataStrPtr strPtr = get<TDataStrPtr>(value);
+            const QString strValue = QString::fromWCharArray(strPtr->GetData());
+            const QString docRelative = docDir.relativeFilePath(strValue);
+            const QString projRelative = projDir.relativeFilePath(strValue);
+            if (!QFileInfo(docRelative).exists() && !QFileInfo(projRelative).exists()) {
+                // Convert path to presentation relative
+                const QVariant newVarValue = QVariant::fromValue(
+                            docDir.relativeFilePath(projDir.absoluteFilePath(strValue)));
+                const SValue newValue = newVarValue;
+                propertySystem->SetInstancePropertyValue(instance, prop, newValue);
+            }
+        }
+    }
 }
 
 void IDocumentEditor::UnlinkAlwaysUnlinkedProperties(Qt3DSDMInstanceHandle inInstance,

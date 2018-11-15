@@ -2509,6 +2509,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                                     theFullPath.GetFileStem().c_str(),
                                                     warnings,
                                                     *theStream);
+                                        IDocumentEditor::fixDefaultTexturePaths(theMaster);
                                     }
                                 } else {
                                     QT3DS_ASSERT(false);
@@ -2541,6 +2542,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                                     theFullPath.GetFileStem().c_str(),
                                                     warnings,
                                                     *theStream);
+                                        IDocumentEditor::fixDefaultTexturePaths(theMaster);
                                     }
                                 } else {
                                     QT3DS_ASSERT(false);

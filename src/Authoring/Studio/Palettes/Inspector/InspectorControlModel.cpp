@@ -1723,18 +1723,6 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
         const QVector3D theFloat3 = qt3dsdm::get<QVector3D>(v);
         if (theFloat3.x() == 0.0f || theFloat3.y() == 0.0f || theFloat3.z() == 0.0f )
             v = oldValue;
-    } else if ((theType == EStudioObjectType::OBJTYPE_CUSTOMMATERIAL
-         || theType == EStudioObjectType::OBJTYPE_EFFECT) &&
-            studio->GetPropertySystem()->GetDataType(handle)
-                == qt3dsdm::DataModelDataType::String
-            && additionalType == qt3dsdm::AdditionalMetaDataType::Texture) {
-        // force . at the beginning of the url
-        QString x = value.toString();
-        QUrl url(x);
-        if (url.isRelative() && !x.startsWith("./")) {
-            QString s = QString("./%1").arg(url.path());
-            v = QVariant::fromValue(s);
-        }
     }
 
     // some properties may initialize OpenGL resources (e.g. loading meshes will

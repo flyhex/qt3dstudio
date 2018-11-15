@@ -85,6 +85,7 @@ public:
     static QStringList modelExtensions();
     static QStringList behaviorExtensions();
     static QStringList presentationExtensions();
+    static QStringList qmlStreamExtensions();
 
     // This is not an appropriate place for these, but better
     // in an inappropriate place than duplicated

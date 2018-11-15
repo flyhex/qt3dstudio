@@ -143,6 +143,8 @@ public:
     static Qt3DSDMPropertyHandle *
     GetAlwaysUnlinkedProperties(qt3dsdm::SComposerObjectDefinitions &inDefs);
 
+    static void fixDefaultTexturePaths(qt3dsdm::Qt3DSDMInstanceHandle instance);
+
     // Create a new instance in the scene under this slide and such
     // Target id must be an id of an invalid instance so that we can potentially change an object
     // type while still maintaining references to that logical object.
