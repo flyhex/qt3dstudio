@@ -435,6 +435,8 @@ QObject *InspectorControlView::showImageChooser(int handle, int instance, const 
                                                       QObject::tr("Set Property"))
                             ->setInstanceImagePropertyValue(
                                 instance, handle, Q3DStudio::CString::fromQString(renderableId));
+                    if (m_inspectorControlModel)
+                        m_inspectorControlModel->saveIfMaterial(instance);
                 }
             }
         });

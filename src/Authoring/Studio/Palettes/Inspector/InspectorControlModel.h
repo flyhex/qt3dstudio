@@ -128,6 +128,7 @@ public:
     void updateFontValues(InspectorControlBase *element) const;
     void refreshRenderables();
     void refresh();
+    void saveIfMaterial(qt3dsdm::Qt3DSDMInstanceHandle instance);
 
     QVariant getPropertyValue(long instance, int handle);
 
@@ -211,7 +212,6 @@ private:
     void notifyInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle inProperty);
     void updateAnimateToggleState(InspectorControlBase *inItem);
     void updateControlledToggleState(InspectorControlBase *inItem) const;
-    void saveIfMaterial(qt3dsdm::Qt3DSDMInstanceHandle instance);
 
     std::shared_ptr<qt3dsdm::ISignalConnection> m_notifier;
     std::shared_ptr<qt3dsdm::ISignalConnection> m_slideNotifier;
