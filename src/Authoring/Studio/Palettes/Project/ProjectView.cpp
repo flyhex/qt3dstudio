@@ -365,8 +365,8 @@ bool ProjectView::isMaterialFolder(int row) const
 
 bool ProjectView::isInMaterialFolder(int row) const
 {
-    return QFileInfo(m_ProjectModel->filePath(row)).absolutePath()
-            .endsWith(QLatin1String("/materials"));
+    return g_StudioApp.GetCore()->getProjectFile().getRelativeFilePathTo(
+                m_ProjectModel->filePath(row)).startsWith(QLatin1String("materials/"));
 }
 
 bool ProjectView::isMaterialData(int row) const
