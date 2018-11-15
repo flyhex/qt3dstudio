@@ -34,7 +34,6 @@
 #include "render/Qt3DSRenderBaseTypes.h"
 #include "foundation/Qt3DSBounds3.h"
 #include "foundation/Qt3DSAllocatorCallback.h"
-#include "foundation/IOStreams.h"
 #include "foundation/Qt3DSFoundation.h"
 #include "foundation/Qt3DSRefCounted.h"
 #include "foundation/Qt3DSVec2.h"
@@ -58,11 +57,11 @@ struct SPathBuffer
     // 64 bit random number to uniquely identify this file type.
     static QT3DSU64 GetFileTag() { return 0x7b1a41633c43a6afULL; }
     static QT3DSU32 GetFileVersion() { return 1; }
-    NVConstDataRef<PathCommand::Enum> m_Commands;
-    NVConstDataRef<QT3DSF32> m_Data;
+    std::vector<PathCommand::Enum> m_Commands;
+    std::vector<QT3DSF32> m_Data;
     SPathBuffer() {}
-    void Save(IOutStream &outStream) const;
-    static SPathBuffer *Load(IInStream &inStream, NVFoundationBase &inFoundation);
+    void Save(QIODevice &outStream) const;
+    static SPathBuffer *Load(QIODevice &inStream, NVFoundationBase &inFoundation);
 
     // Object is unused after this call.  Anything created with Load must use this function.
     void Free(NVAllocatorCallback &inAllocator);

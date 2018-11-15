@@ -30,7 +30,6 @@
 #pragma once
 #ifndef QT3DS_FOUNDATION_SOCKET_H
 #define QT3DS_FOUNDATION_SOCKET_H
-#include "IOStreams.h"
 #include "Qt3DSRefCounted.h"
 #include "Qt3DSMemoryBuffer.h"
 

@@ -34,18 +34,21 @@
 
 using namespace qt3dsimp;
 
-void SPathBuffer::Save(IOutStream &outStream) const
+void SPathBuffer::Save(QIODevice &outStream) const
 {
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     outStream.Write(GetFileTag());
     outStream.Write(GetFileVersion());
     outStream.Write((QT3DSU32)m_Commands.size());
     outStream.Write((QT3DSU32)m_Data.size());
     outStream.Write(toU8ConstDataRef((PathCommand::Enum *)m_Commands.begin(), m_Commands.size()));
     outStream.Write(toU8ConstDataRef((QT3DSF32 *)m_Data.begin(), m_Data.size()));
+#endif
 }
 
-SPathBuffer *SPathBuffer::Load(IInStream &inStream, NVFoundationBase &inFoundation)
+SPathBuffer *SPathBuffer::Load(QIODevice &inStream, NVFoundationBase &inFoundation)
 {
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
     QT3DSU64 fileTag;
     QT3DSU32 version, numCommands, numData;
     inStream.Read(fileTag);
@@ -74,6 +77,8 @@ SPathBuffer *SPathBuffer::Load(IInStream &inStream, NVFoundationBase &inFoundati
     retval->m_Commands = toDataRef((PathCommand::Enum *)commandBuffer, numCommands);
     retval->m_Data = toDataRef((QT3DSF32 *)dataBuffer, numData);
     return retval;
+#endif
+    return nullptr;
 }
 
 void SPathBuffer::Free(NVAllocatorCallback &inAllocator)
@@ -85,14 +90,12 @@ namespace {
 struct SBuilder : public IPathBufferBuilder
 {
     NVFoundationBase &m_Foundation;
-    nvvector<PathCommand::Enum> m_Commands;
-    nvvector<QT3DSF32> m_Data;
+    std::vector<PathCommand::Enum> m_Commands;
+    std::vector<QT3DSF32> m_Data;
     QAtomicInt m_refCount;
 
     SBuilder(NVFoundationBase &inFoundation)
         : m_Foundation(inFoundation)
-        , m_Commands(inFoundation.getAllocator(), "m_Commands")
-        , m_Data(inFoundation.getAllocator(), "m_Data")
         , m_refCount(0)
     {
     }

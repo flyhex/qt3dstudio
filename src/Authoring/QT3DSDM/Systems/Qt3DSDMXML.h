@@ -37,9 +37,10 @@
 #include "foundation/Qt3DSFlags.h"
 #include "EASTL/algorithm.h"
 #include "foundation/Qt3DSSimpleTypes.h"
-#include "foundation/IOStreams.h"
 #include "Qt3DSDMValue.h"
 #include <memory>
+
+#include <QtCore/qiodevice.h>
 
 namespace qt3dsdm {
 using qt3ds::foundation::MemoryBuffer;
@@ -60,7 +61,6 @@ using qt3ds::QT3DSU32;
 using qt3ds::NVFlags;
 using qt3ds::foundation::NVDataRef;
 using qt3ds::foundation::NVConstDataRef;
-using qt3ds::foundation::IOutStream;
 
 class IDOMFactory
 {

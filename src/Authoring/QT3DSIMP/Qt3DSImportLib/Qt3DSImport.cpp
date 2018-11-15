@@ -36,6 +36,7 @@
 #include "Qt3DSDMComposerTypeDefinitions.h"
 #include "Qt3DSImportComposerTypes.h"
 #include "foundation/StrConvertUTF.h"
+#include "foundation/TrackingAllocator.h"
 
 using qt3dsdm::IStringTable;
 
@@ -76,11 +77,6 @@ using eastl::make_pair;
 using std::get;
 using std::tuple;
 using std::shared_ptr;
-
-namespace qt3ds {
-namespace foundation {
-}
-}
 
 using namespace Q3DStudio;
 
@@ -230,7 +226,6 @@ struct MeshEntry
         , m_ReferencePath(inPath)
         , m_revision(inRevision)
     {
-        m_ReferencePath.append(QString::number(m_revision));
     }
 
     MeshEntry(const QString &inSourceId, const QString &inPath)

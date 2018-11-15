@@ -967,43 +967,6 @@ struct DOMParser
     {
     }
 
-    template <QT3DSU32 THeaderLen>
-    struct SHeaderInStream : public IInStream
-    {
-        QT3DSU8 m_Header[THeaderLen];
-        QT3DSU32 m_BytesRead;
-        IInStream &m_InStream;
-        SHeaderInStream(IInStream &inStream)
-            : m_InStream(inStream)
-            , m_BytesRead(0)
-        {
-        }
-        bool readHeader()
-        {
-            QT3DSU32 amountRead = m_InStream.Read(NVDataRef<QT3DSU8>(m_Header, THeaderLen));
-            return amountRead == THeaderLen;
-        }
-        QT3DSU32 Read(NVDataRef<QT3DSU8> data) override
-        {
-            if (data.size() == 0)
-                return 0;
-            QT3DSU8 *writePtr(data.begin());
-            QT3DSU32 amountToRead(data.size());
-            QT3DSU32 amountRead = 0;
-            if (m_BytesRead < THeaderLen) {
-                QT3DSU32 headerLeft = qMin(THeaderLen - m_BytesRead, amountToRead);
-                memCopy(writePtr, m_Header + m_BytesRead, headerLeft);
-                writePtr += headerLeft;
-                amountToRead -= headerLeft;
-                amountRead += headerLeft;
-            }
-            if (amountToRead)
-                amountRead += m_InStream.Read(NVDataRef<QT3DSU8>(writePtr, amountToRead));
-            m_BytesRead += amountRead;
-            return amountRead;
-        }
-    };
-
     static SDOMElement *ParseXMLFile(IDOMFactory &factory, QIODevice &inStream,
                                      CXmlErrorHandler *handler = nullptr)
     {

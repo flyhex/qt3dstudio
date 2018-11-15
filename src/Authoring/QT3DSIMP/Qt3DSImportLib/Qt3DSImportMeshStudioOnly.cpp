@@ -30,30 +30,27 @@
 #include "Qt3DSImportContainers.h"
 #include "Qt3DSImportMesh.h"
 #include "Qt3DSFileTools.h"
-#include "Qt3DSFileToolsSeekableMeshBufIOStream.h"
+#include "foundation/TrackingAllocator.h"
 
 using namespace qt3dsimp;
 using namespace Q3DStudio;
 
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-
-Mesh *Mesh::Load(const char *inFilePath)
+Mesh *Mesh::Load(const QString &inFilePath)
 {
-    Q3DStudio::CFilePath thePath(inFilePath);
-    CFileSeekableIOStream stream(thePath.toCString(), FileReadFlags());
-    if (stream.IsOpen() == false) {
-        QT3DS_ASSERT(false);
+    QFile stream(inFilePath);
+    if (!stream.open(QFile::ReadOnly)) {
+        Q_ASSERT(false);
         return NULL;
     }
     MallocAllocator allocator;
     return Load(allocator, stream);
 }
 
-bool Mesh::Save(const char *inFilePath) const
+bool Mesh::Save(const QString &inFilePath) const
 {
-    CFileSeekableIOStream stream(inFilePath, FileWriteFlags());
-    if (stream.IsOpen() == false) {
-        QT3DS_ASSERT(false);
+    QFile stream(inFilePath);
+    if (!stream.open(QFile::ReadWrite | QFile::Truncate)) {
+        Q_ASSERT(false);
         return false;
     }
     Save(stream);
@@ -63,55 +60,51 @@ bool Mesh::Save(const char *inFilePath) const
 // You can save multiple meshes in a file.  Each mesh returns an incrementing
 // integer for the multi file.  The original meshes aren't changed, and the file
 // is appended to.
-QT3DSU32 Mesh::SaveMulti(const char *inFilePath) const
+QT3DSU32 Mesh::SaveMulti(const QString &inFilePath) const
 {
     MallocAllocator allocator;
-    Q3DStudio::CFilePath thePath(inFilePath);
-    FileOpenFlags theFlags = thePath.Exists() ? FileAppendFlags() : FileWriteFlags();
-    CFileSeekableIOStream stream(thePath.toCString(), theFlags);
-    SaveMulti(allocator, stream);
+    QFileInfo thePath(inFilePath);
+    QFile::OpenMode theFlags = thePath.exists() ? (QFile::ReadWrite | QFile::Append)
+                                                : QFile::WriteOnly;
+    QFile stream(inFilePath);
+    if (!stream.open(theFlags)) {
+        Q_ASSERT(false);
+        return 0;
+    }
+    return SaveMulti(allocator, stream);
 }
 
 // Load a single mesh using c file API and malloc/free.
-SMultiLoadResult Mesh::LoadMulti(const char *inFilePath, QT3DSU32 inId)
+SMultiLoadResult Mesh::LoadMulti(const QString &inFilePath, QT3DSU32 inId)
 {
     MallocAllocator allocator;
-    Q3DStudio::CFilePath thePath(inFilePath);
-    CFileSeekableIOStream stream(thePath.toCString(), FileReadFlags());
+    QFile stream(inFilePath);
+    if (!stream.open(QFile::ReadOnly)) {
+        Q_ASSERT(false);
+        return {};
+    }
     return LoadMulti(allocator, stream, inId);
 }
 
 // Load a multi header from a file using malloc.  Header needs to be freed using free.
-MeshMultiHeader *Mesh::LoadMultiHeader(const char *inFilePath)
+MeshMultiHeader *Mesh::LoadMultiHeader(const QString &inFilePath)
 {
     MallocAllocator allocator;
-    Q3DStudio::CFilePath thePath(inFilePath);
-    CFileSeekableIOStream stream(thePath.toCString(), FileReadFlags());
+    QFile stream(inFilePath);
+    if (!stream.open(QFile::ReadOnly)) {
+        Q_ASSERT(false);
+        return {};
+    }
     return LoadMultiHeader(allocator, stream);
 }
 
-QT3DSU32 Mesh::GetHighestMultiVersion(const char *inFilePath)
+QT3DSU32 Mesh::GetHighestMultiVersion(const QString &inFilePath)
 {
     MallocAllocator allocator;
-    Q3DStudio::CFilePath thePath(inFilePath);
-    CFileSeekableIOStream stream(thePath.toCString(), FileReadFlags());
+    QFile stream(inFilePath);
+    if (!stream.open(QFile::ReadOnly)) {
+        Q_ASSERT(false);
+        return {};
+    }
     return GetHighestMultiVersion(allocator, stream);
 }
-
-void Qt3DSFileToolsSeekableMeshBufIOStream::SetPosition(QT3DSI64 inOffset, SeekPosition::Enum inEnum)
-{
-    m_File->SetPosition(inOffset, (Q3DStudio::SeekPosition::Enum)inEnum);
-}
-QT3DSI64 Qt3DSFileToolsSeekableMeshBufIOStream::GetPosition() const
-{
-    return m_File->GetPosition();
-}
-QT3DSU32 Qt3DSFileToolsSeekableMeshBufIOStream::Read(NVDataRef<QT3DSU8> data)
-{
-    return m_File->Read(data.begin(), data.size());
-}
-bool Qt3DSFileToolsSeekableMeshBufIOStream::Write(NVConstDataRef<QT3DSU8> data)
-{
-    return m_File->Write(data.begin(), data.size()) == data.size();
-}
-#endif

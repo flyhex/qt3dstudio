@@ -224,9 +224,19 @@ QByteArray Q3DSTranslation::getInstanceObjectId(qt3dsdm::Qt3DSDMInstanceHandle i
     QString theId = m_reader.GetFileId(instance);
     if (theId.isEmpty())
         theId = m_reader.GetName(instance);
+    if (theId.isEmpty())
+        theId = qt3dsdm::ComposerObjectTypes::Convert(m_objectDefinitions.GetType(instance));
 
     if (!theId.isEmpty())
         ret = theId.toLatin1();
+
+    Q_ASSERT_X(!m_instanceIdHash.contains(instance), __FUNCTION__,
+               "Instance translator already created");
+    int index = 1;
+    QByteArray testId = ret;
+    while (m_instanceIdHash.values().contains(testId))
+        testId = ret + (QStringLiteral("_%1").arg(index++, 3, 10, QLatin1Char('0'))).toLatin1();
+    ret = testId;
 
     // slides require component name prepended
     if (m_objectDefinitions.GetType(instance) == qt3dsdm::ComposerObjectTypes::Slide) {
@@ -428,6 +438,8 @@ Q3DSGraphObjectTranslator *Q3DSTranslation::createTranslator(
         id.prepend(aliasTranslator->graphObject().id());
         translator = new Q3DSAliasedTranslator(aliasTranslator, instance,
                                                *createAliasGraphObject(type, id));
+        if (translator)
+            m_instanceIdHash.insert(instance, id);
         return translator;
     }
 
@@ -511,6 +523,8 @@ Q3DSGraphObjectTranslator *Q3DSTranslation::createTranslator(
     default:
         break;
     }
+    if (translator)
+        m_instanceIdHash.insert(instance, id);
     return translator;
 }
 

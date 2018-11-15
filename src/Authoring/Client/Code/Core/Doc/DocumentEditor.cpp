@@ -715,24 +715,10 @@ public:
         return CopySceneGraphObjectsToMemory(instanceList);
     }
 
-    struct SFilePtrOutStream : public IOutStream
-    {
-        TFilePtr m_File;
-        SFilePtrOutStream(TFilePtr f)
-            : m_File(f)
-        {
-        }
-
-        bool Write(NVConstDataRef<QT3DSU8> data) override
-        {
-            return m_File->Write(data.begin(), data.size()) == data.size();
-        }
-    };
-
     CFilePath WriteWriterToFile(IDOMWriter &inWriter, const CString &inStem)
     {
         CFilePath theTempFileDir = CFilePath::CombineBaseAndRelative(
-            CFilePath::GetUserApplicationDirectory(), CFilePath(L"Qt3DSComposer\\temp_files"));
+            CFilePath::GetUserApplicationDirectory(), CFilePath(L"Qt3DStudio/temp_files"));
         theTempFileDir.CreateDir(true);
         CFilePath theFinalPath;
         {
@@ -742,10 +728,7 @@ public:
 
             Qt3DSFile::AddTempFile(theFile->m_Path);
 
-            SFilePtrOutStream theFileStream(theFile);
-
-            CDOMSerializer::Write(*inWriter.GetTopElement(),
-                                  *theFileStream.m_File->m_OpenFile.data());
+            CDOMSerializer::Write(*inWriter.GetTopElement(), *theFile->m_OpenFile.data());
         }
         return theFinalPath;
     }
@@ -824,8 +807,7 @@ public:
     void ParseSourcePathsOutOfEffectFile(const QString &inFile,
                                          std::vector<QString> &outFilePaths) override
     {
-        QSharedPointer<QFile> theStream(
-                    openQFileStream(inFile, qt3ds::foundation::FileReadFlags()));
+        QSharedPointer<QFile> theStream(openQFileStream(inFile, FileReadFlags()));
         if (!theStream.isNull()) {
             std::shared_ptr<IDOMFactory> theFactory =
                 IDOMFactory::CreateDOMFactory(m_DataCore.GetStringTablePtr());
@@ -861,8 +843,7 @@ public:
     QString GetCustomMaterialName(const QString &inFullPathToFile) const override
     {
         QString retval;
-        QSharedPointer<QFile> theStream(
-                    openQFileStream(inFullPathToFile, qt3ds::foundation::FileReadFlags()));
+        QSharedPointer<QFile> theStream(openQFileStream(inFullPathToFile, FileReadFlags()));
         if (!theStream.isNull()) {
             std::shared_ptr<IDOMFactory> theFactory =
                 IDOMFactory::CreateDOMFactory(m_DataCore.GetStringTablePtr());
@@ -890,9 +871,7 @@ public:
                          QString &outName, QMap<QString, QString> &outValues,
                          QMap<QString, QMap<QString, QString>> &outTextureValues) override
     {
-        QSharedPointer<QFile> theStream(
-                    openQFileStream(inFullPathToFile,
-                                    qt3ds::foundation::FileReadFlags()));
+        QSharedPointer<QFile> theStream(openQFileStream(inFullPathToFile, FileReadFlags()));
         if (!theStream.isNull()) {
             std::shared_ptr<IDOMFactory> theFactory =
                 IDOMFactory::CreateDOMFactory(m_DataCore.GetStringTablePtr());

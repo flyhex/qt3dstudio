@@ -36,7 +36,6 @@
 #include "foundation/StringConversion.h" //Conversion between string and various datatypes.
 #include "Qt3DSFlags.h"
 #include "EASTL/algorithm.h"
-#include "IOStreams.h"
 #include "EASTL/string.h"
 #include "Qt3DSAllocator.h"
 #include "Qt3DSRefCounted.h"

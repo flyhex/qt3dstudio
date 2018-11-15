@@ -35,7 +35,6 @@
 #include "Qt3DSImportMesh.h"
 #include "Qt3DSDMXML.h"
 #include "Qt3DSDMStringTable.h"
-#include "IOStreams.h"
 #include "render/NvRenderBaseTypes.h"
 #include "TrackingAllocator.h"
 #include "StandardExtensions.h"

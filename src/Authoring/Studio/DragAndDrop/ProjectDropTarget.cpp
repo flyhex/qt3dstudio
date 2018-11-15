@@ -188,11 +188,8 @@ bool CProjectDropTarget::Drop(CDropSource &inSource)
                         theResultDir.CreateDir(true);
                         // If the file already exists, these file flags will ensure it won't get
                         // overwritten.
-                        SFileTools::Copy(theResultPath,
-                                         qt3ds::foundation::FileOpenFlags(
-                                             qt3ds::foundation::FileOpenFlagValues::Create
-                                             | qt3ds::foundation::FileOpenFlagValues::Write),
-                                         theSourcePath);
+                        SFileTools::Copy(theResultPath, FileOpenFlags(FileOpenFlagValues::Create
+                                         | FileOpenFlagValues::Write), theSourcePath);
                     }
                 }
             }

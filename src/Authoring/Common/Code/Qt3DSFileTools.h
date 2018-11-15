@@ -50,9 +50,38 @@
 
 namespace Q3DStudio {
 using qt3ds::QT3DSI64;
-using qt3ds::foundation::SeekPosition;
-using qt3ds::foundation::FileOpenFlags;
-using qt3ds::foundation::FileOpenFlagValues;
+
+enum class SeekPosition {
+    Unknown,
+    Begin,
+    Current,
+    End,
+};
+
+enum FileOpenFlagValues {
+    Open = 1, // Without this flag, function fails if file exists
+    Truncate = 1 << 1, // Truncate the file so an immediate close will empty it.
+    Create = 1 << 2,
+    Write = 1 << 3,
+    Append = 1 << 4,
+};
+
+
+typedef NVFlags<FileOpenFlagValues, int> FileOpenFlags;
+
+static inline FileOpenFlags FileReadFlags() { return FileOpenFlags(FileOpenFlagValues::Open); }
+
+static inline FileOpenFlags FileWriteFlags()
+{
+    return FileOpenFlags(FileOpenFlagValues::Create | FileOpenFlagValues::Open
+                         | FileOpenFlagValues::Write | FileOpenFlagValues::Truncate);
+}
+static inline FileOpenFlags FileAppendFlags()
+{
+    return FileOpenFlags(FileOpenFlagValues::Create | FileOpenFlagValues::Open
+                         | FileOpenFlagValues::Write);
+}
+
 using qt3dsdm::WStrOps;
 
 struct SFileModificationRecord;
@@ -262,7 +291,7 @@ struct SFile
     QT3DSU32 Write(const void *buffPtr, QT3DSU32 byteSize);
 
     QT3DSI64 GetPosition() { return GetPosition(m_OpenFile); }
-    void SetPosition(QT3DSI64 inOffset, SeekPosition::Enum inSeekPos)
+    void SetPosition(QT3DSI64 inOffset, SeekPosition inSeekPos)
     {
         SetPosition(m_OpenFile, inOffset, inSeekPos);
     }
@@ -277,17 +306,21 @@ struct SFile
 
     // Copy src to dest, close both src and dest, and
     // return the number of bytes copied.
-    static QT3DSU64 Copy(const QSharedPointer<QFile> &destFile, const QSharedPointer<QFile> &srcFile);
+    static QT3DSU64 Copy(const QSharedPointer<QFile> &destFile,
+                         const QSharedPointer<QFile> &srcFile);
 
     // Attemt to write data, return the number of bytes written.
-    static QT3DSU32 WriteData(const QSharedPointer<QFile> &fileHandle, const void *data, QT3DSU32 byteSize);
+    static QT3DSU32 WriteData(const QSharedPointer<QFile> &fileHandle, const void *data,
+                              QT3DSU32 byteSize);
 
     // Attempt to read data, return the number of byte read
-    static QT3DSU32 ReadData(const QSharedPointer<QFile> &fileHandle, void *data, QT3DSU32 byteSize);
+    static QT3DSU32 ReadData(const QSharedPointer<QFile> &fileHandle, void *data,
+                             QT3DSU32 byteSize);
 
     static QT3DSI64 GetPosition(const QSharedPointer<QFile> &fileHandle);
 
-    static void SetPosition(const QSharedPointer<QFile> &fileHandle, QT3DSI64 inOffset, SeekPosition::Enum inSeekPos);
+    static void SetPosition(const QSharedPointer<QFile> &fileHandle, QT3DSI64 inOffset,
+                            SeekPosition inSeekPos);
 
     // Close the file handle.
     static void Close(const QSharedPointer<QFile> &fileHandle);
@@ -295,7 +328,8 @@ struct SFile
     // Set file modification time to the current time.
     static void SetFileTimeToCurrentTime(const QSharedPointer<QFile> &fileHandle);
 
-    static std::shared_ptr<SFile> Wrap(const QSharedPointer<QFile> &inFileHandle, const CFilePath &path);
+    static std::shared_ptr<SFile> Wrap(const QSharedPointer<QFile> &inFileHandle,
+                                       const CFilePath &path);
 };
 
 typedef std::shared_ptr<SFile> TFilePtr;

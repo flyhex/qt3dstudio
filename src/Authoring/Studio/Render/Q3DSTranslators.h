@@ -127,7 +127,6 @@ public:
     Q3DSModelTranslator(qt3dsdm::Qt3DSDMInstanceHandle instance, Q3DSModelNode &model);
     bool canAddChild(Q3DSGraphObjectTranslator *child);
     void pushTranslation(Q3DSTranslation &inContext) override;
-    bool isMaterial(const Q3DSGraphObject &inChild) const;
     void appendChild(Q3DSGraphObject &inChild) override;
     bool updateProperty(Q3DSTranslation &inContext,
                         qt3dsdm::Qt3DSDMInstanceHandle instance,

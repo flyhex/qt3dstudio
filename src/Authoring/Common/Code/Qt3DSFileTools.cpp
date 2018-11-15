@@ -474,7 +474,8 @@ QT3DSI64 SFile::GetPosition(const QSharedPointer<QFile> &fileHandle)
     return 0;
 }
 
-void SFile::SetPosition(const QSharedPointer<QFile> &fileHandle, QT3DSI64 inOffset, SeekPosition::Enum inSeekPos)
+void SFile::SetPosition(const QSharedPointer<QFile> &fileHandle, QT3DSI64 inOffset,
+                        SeekPosition inSeekPos)
 {
     QT3DS_ASSERT(fileHandle);
     if (fileHandle) {

@@ -55,6 +55,18 @@ QT3DS_COMPILE_TIME_ASSERT(sizeof(Mesh) == 56);
 
 namespace {
 
+template <typename T>
+qint64 readType(QIODevice &device, T *out)
+{
+    return device.read(reinterpret_cast<char *>(out), sizeof(T));
+}
+
+template <typename T>
+qint64 writeType(QIODevice &device, T *in)
+{
+    return device.write(reinterpret_cast<const char *>(in), sizeof(T));
+}
+
 struct MeshSubsetV1
 {
     // See description of a logical vertex buffer below
@@ -245,10 +257,10 @@ struct TotallingSerializer
 
 struct ByteWritingSerializer
 {
-    IOutStream &m_Stream;
+    QIODevice &m_Stream;
     TotallingSerializer m_ByteCounter;
     QT3DSU8 *m_BaseAddress;
-    ByteWritingSerializer(IOutStream &str, QT3DSU8 *inBaseAddress)
+    ByteWritingSerializer(QIODevice &str, QT3DSU8 *inBaseAddress)
         : m_Stream(str)
         , m_ByteCounter(inBaseAddress)
         , m_BaseAddress(inBaseAddress)
@@ -259,7 +271,8 @@ struct ByteWritingSerializer
     void streamify(const SOffsetDataRef<TDataType> &data)
     {
         m_ByteCounter.streamify(data);
-        m_Stream.Write(data.begin(m_BaseAddress), data.size());
+        m_Stream.write(reinterpret_cast<const char *>(data.begin(m_BaseAddress)),
+                       data.size() * sizeof(TDataType));
     }
     void streamify(const char *data)
     {
@@ -267,8 +280,8 @@ struct ByteWritingSerializer
         if (data == NULL)
             data = "";
         QT3DSU32 len = (QT3DSU32)strlen(data) + 1;
-        m_Stream.Write(len);
-        m_Stream.Write(data, len);
+        m_Stream.write(reinterpret_cast<const char *>(&len), sizeof(len));
+        m_Stream.write(data, len);
     }
     void streamifyCharPointerOffset(QT3DSU32 inOffset)
     {
@@ -280,7 +293,8 @@ struct ByteWritingSerializer
     {
         if (m_ByteCounter.needsAlignment()) {
             QT3DSU8 buffer[] = { 0, 0, 0, 0 };
-            m_Stream.Write(buffer, m_ByteCounter.getAlignmentAmount());
+            m_Stream.write(reinterpret_cast<const char *>(buffer),
+                           m_ByteCounter.getAlignmentAmount());
             m_ByteCounter.align();
         }
     }
@@ -477,14 +491,14 @@ NVBounds3 Mesh::CalculateSubsetBounds(const NVRenderVertexBufferEntry &inEntry,
     return retval;
 }
 
-void Mesh::Save(IOutStream &outStream) const
+void Mesh::Save(QIODevice &outStream) const
 {
     Mesh &mesh(const_cast<Mesh &>(*this));
     QT3DSU8 *baseAddress = reinterpret_cast<QT3DSU8 *>(&mesh);
     QT3DSU32 numBytes = sizeof(Mesh) + GetMeshDataSize(mesh);
     MeshDataHeader header(numBytes);
-    outStream.Write(header);
-    outStream.Write(*this);
+    writeType(outStream, &header);
+    writeType(outStream, this);
     ByteWritingSerializer writer(outStream, baseAddress);
     Serialize(writer, mesh);
 }
@@ -632,9 +646,7 @@ Mesh *CreateMeshFromPreviousMesh(TPreviousMeshType *temp, NVAllocatorCallback &a
 Mesh *Mesh::Load(NVAllocatorCallback &alloc, QIODevice &inStream)
 {
     MeshDataHeader header;
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-    inStream.Read(header);
-#endif
+    readType(inStream, &header);
     QT3DS_ASSERT(header.m_FileId == MeshDataHeader::GetFileId());
     if (header.m_FileId != MeshDataHeader::GetFileId())
         return NULL;
@@ -643,12 +655,11 @@ Mesh *Mesh::Load(NVAllocatorCallback &alloc, QIODevice &inStream)
     if (header.m_SizeInBytes < sizeof(Mesh))
         return NULL;
     QT3DSU8 *newMem = (QT3DSU8 *)alloc.allocate(header.m_SizeInBytes, "Mesh", __FILE__, __LINE__);
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-    QT3DSU32 amountRead = inStream.Read(NVDataRef<QT3DSU8>(newMem, header.m_SizeInBytes));
+    QT3DSU32 amountRead = inStream.read(reinterpret_cast<char *>(newMem), header.m_SizeInBytes);
 
     if (amountRead != header.m_SizeInBytes)
         goto failure;
-#endif
+
     if (header.m_FileVersion == 1) {
         MeshV1 *temp = DoInitialize<MeshV1>(header.m_HeaderFlags,
                                             NVDataRef<QT3DSU8>(newMem, header.m_SizeInBytes));
@@ -693,8 +704,7 @@ QT3DSU32 Mesh::SaveMulti(NVAllocatorCallback &alloc, QIODevice &inStream, QT3DSU
     MeshMultiHeader *theWriteHeader = NULL;
 
     QT3DSI64 newMeshStartPos = 0;
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-    if (inStream.GetLength() != 0) {
+    if (inStream.size() != 0) {
         theHeader = LoadMultiHeader(alloc, inStream);
         if (theHeader == NULL) {
             QT3DS_ASSERT(false);
@@ -713,8 +723,8 @@ QT3DSU32 Mesh::SaveMulti(NVAllocatorCallback &alloc, QIODevice &inStream, QT3DSU
     } else
         theWriteHeader = &tempHeader;
 
-    inStream.SetPosition(-newMeshStartPos, SeekPosition::End);
-    QT3DSI64 meshOffset = inStream.GetPosition();
+    inStream.seek(inStream.size() - newMeshStartPos);
+    QT3DSI64 meshOffset = inStream.pos();
 
     Save(inStream);
 
@@ -722,18 +732,16 @@ QT3DSU32 Mesh::SaveMulti(NVAllocatorCallback &alloc, QIODevice &inStream, QT3DSU
         nextId = inId;
     QT3DSU8 *theWriteBaseAddr = reinterpret_cast<QT3DSU8 *>(theWriteHeader);
     // Now write a new header out.
-    inStream.Write(theWriteHeader->m_Entries.begin(theWriteBaseAddr),
-                   theWriteHeader->m_Entries.size());
+    inStream.write(reinterpret_cast<const char *>(theWriteHeader->m_Entries.begin(theWriteBaseAddr)),
+                   theWriteHeader->m_Entries.size() * sizeof(MeshMultiEntry));
     MeshMultiEntry newEntry(static_cast<QT3DSI64>(meshOffset), nextId);
-    inStream.Write(newEntry);
+    writeType(inStream, &newEntry);
     theWriteHeader->m_Entries.m_Size++;
-    inStream.Write(*theWriteHeader);
+    writeType(inStream, theWriteHeader);
 
-    if (theHeader != NULL) {
+    if (theHeader != NULL)
         alloc.deallocate(theHeader);
-    }
     return static_cast<QT3DSU32>(nextId);
-#endif
     return 0;
 }
 
@@ -762,9 +770,7 @@ SMultiLoadResult Mesh::LoadMulti(NVAllocatorCallback &alloc, QIODevice &inStream
     if (fileOffset == (QT3DSU64)-1) {
         goto endFunction;
     }
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-    inStream.SetPosition(static_cast<QT3DSI64>(fileOffset), SeekPosition::Begin);
-#endif
+    inStream.seek(static_cast<QT3DSI64>(fileOffset));
     retval = Load(alloc, inStream);
 endFunction:
     if (theHeader != NULL)
@@ -776,27 +782,23 @@ endFunction:
 bool Mesh::IsMulti(QIODevice &inStream)
 {
     MeshMultiHeader theHeader;
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-    inStream.SetPosition(-((QT3DSI64)(sizeof(MeshMultiHeader))), SeekPosition::End);
-    QT3DSU32 numBytes = inStream.Read(theHeader);
+    inStream.seek(inStream.size() - ((QT3DSI64)(sizeof(MeshMultiHeader))));
+    QT3DSU32 numBytes = readType(inStream, &theHeader);
     if (numBytes != sizeof(MeshMultiHeader))
         return false;
-#endif
     return theHeader.m_Version == MeshMultiHeader::GetMultiStaticFileId();
 }
 // Load a multi header from a stream.
 MeshMultiHeader *Mesh::LoadMultiHeader(NVAllocatorCallback &alloc, QIODevice &inStream)
 {
     MeshMultiHeader theHeader;
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-    inStream.SetPosition(-((QT3DSI64)sizeof(MeshMultiHeader)), SeekPosition::End);
-    QT3DSU32 numBytes = inStream.Read(theHeader);
+    inStream.seek(inStream.size() - ((QT3DSI64)sizeof(MeshMultiHeader)));
+    QT3DSU32 numBytes = readType(inStream, &theHeader);
     if (numBytes != sizeof(MeshMultiHeader)
         || theHeader.m_FileId != MeshMultiHeader::GetMultiStaticFileId()
         || theHeader.m_Version > MeshMultiHeader::GetMultiStaticVersion()) {
         return NULL;
     }
-#endif
     size_t allocSize =
         sizeof(MeshMultiHeader) + theHeader.m_Entries.m_Size * sizeof(MeshMultiEntry);
     MeshMultiHeader *retval =
@@ -809,17 +811,16 @@ MeshMultiHeader *Mesh::LoadMultiHeader(NVAllocatorCallback &alloc, QIODevice &in
     QT3DSU8 *entryData = baseAddr + sizeof(MeshMultiHeader);
     *retval = theHeader;
     retval->m_Entries.m_Offset = (QT3DSU32)(entryData - baseAddr);
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-    inStream.SetPosition(-((QT3DSI64)allocSize), SeekPosition::End);
+    inStream.seek(inStream.size() - ((QT3DSI64)allocSize));
 
     numBytes =
-        inStream.Read(reinterpret_cast<MeshMultiEntry *>(entryData), retval->m_Entries.m_Size);
+        inStream.read(reinterpret_cast<char *>(entryData),
+                      retval->m_Entries.m_Size * sizeof(MeshMultiEntry));
     if (numBytes != retval->m_Entries.m_Size * sizeof(MeshMultiEntry)) {
         QT3DS_ASSERT(false);
         alloc.deallocate(retval);
         retval = NULL;
     }
-#endif
     return retval;
 }
 

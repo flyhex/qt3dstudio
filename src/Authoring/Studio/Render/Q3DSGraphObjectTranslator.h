@@ -134,6 +134,16 @@ public:
             pushTranslation(inTranslatorContext);
     }
 
+    bool isMaterial(const Q3DSGraphObject &inChild) const
+    {
+        if (inChild.type() == Q3DSGraphObject::ReferencedMaterial
+                || inChild.type() == Q3DSGraphObject::DefaultMaterial
+                || inChild.type() == Q3DSGraphObject::CustomMaterial) {
+            return true;
+        }
+        return false;
+    }
+
 private:
 
     // This will never be null.  The reason it is a pointer is because

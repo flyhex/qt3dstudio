@@ -789,15 +789,11 @@ void Q3DSSceneTranslator::pushTranslation(Q3DSTranslation &inContext)
     int childCount = inContext.assetGraph().GetChildCount(instanceHandle());
     QVector<Q3DSGraphObjectTranslator *> translators;
     for (long idx = 0; idx < childCount; ++idx) {
-        qt3dsdm::Qt3DSDMInstanceHandle layer =
+        qt3dsdm::Qt3DSDMInstanceHandle child =
             inContext.assetGraph().GetChild(instanceHandle(), idx);
-        Q3DSGraphObjectTranslator *translator = inContext.getOrCreateTranslator(layer);
-        if (translator && translator->graphObject().type() == Q3DSNode::Layer) {
-            Q3DSLayerNode *theLayerObj
-                    = static_cast<Q3DSLayerNode *>(&translator->graphObject());
-            theItem.appendChildNode(theLayerObj);
-            translators << translator;
-        }
+        Q3DSGraphObjectTranslator *translator = inContext.getOrCreateTranslator(child);
+        theItem.appendChildNode(&translator->graphObject());
+        translators << translator;
     }
     theItem.resolveReferences(*inContext.presentation());
     for (auto t : qAsConst(translators))
@@ -806,7 +802,7 @@ void Q3DSSceneTranslator::pushTranslation(Q3DSTranslation &inContext)
 
 void Q3DSSceneTranslator::appendChild(Q3DSGraphObject &inChild)
 {
-    if (inChild.type() != Q3DSNode::Layer) {
+    if (inChild.type() != Q3DSNode::Layer && !isMaterial(inChild)) {
         QT3DS_ASSERT(false);
         return;
     }
@@ -1104,16 +1100,6 @@ void Q3DSModelTranslator::pushTranslation(Q3DSTranslation &inContext)
     theItem.resolveReferences(*inContext.presentation());
 }
 
-bool Q3DSModelTranslator::isMaterial(const Q3DSGraphObject &inChild) const
-{
-    if (inChild.type() == Q3DSGraphObject::ReferencedMaterial ||
-        inChild.type() == Q3DSGraphObject::DefaultMaterial ||
-        inChild.type() == Q3DSGraphObject::CustomMaterial) {
-        return true;
-    }
-    return false;
-}
-
 void Q3DSModelTranslator::appendChild(Q3DSGraphObject &inChild)
 {
     if (inChild.isNode() || isMaterial(inChild))
@@ -1285,8 +1271,7 @@ void Q3DSDefaultMaterialTranslator::pushTranslation(Q3DSTranslation &inContext)
                 = inContext.assetGraph().GetChild(instanceHandle(), i);
         Q3DSGraphObjectTranslator *childTranslator
                 = inContext.getOrCreateTranslator(childInstance);
-        if (childTranslator->graphObject().type() == Q3DSGraphObject::Image)
-            theItem.appendChildNode(&childTranslator->graphObject());
+        appendChild(childTranslator->graphObject());
         childTranslator->pushTranslationIfDirty(inContext);
     }
     theItem.resolveReferences(*inContext.presentation());
@@ -1300,8 +1285,10 @@ void Q3DSDefaultMaterialTranslator::clearChildren()
 {
 }
 
-void Q3DSDefaultMaterialTranslator::appendChild(Q3DSGraphObject &)
+void Q3DSDefaultMaterialTranslator::appendChild(Q3DSGraphObject &child)
 {
+    Q3DSDefaultMaterial &theItem = static_cast<Q3DSDefaultMaterial &>(graphObject());
+    theItem.appendChildNode(&child);
 }
 
 bool Q3DSDefaultMaterialTranslator::updateProperty(Q3DSTranslation &inContext,

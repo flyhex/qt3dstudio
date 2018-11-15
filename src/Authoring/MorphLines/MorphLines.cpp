@@ -29,7 +29,6 @@
 
 #include <stdio.h>
 #include "Qt3DSFoundation.h"
-#include "IOStreams.h"
 #include "foundation/StringConversionImpl.h"
 #include "EASTL/string.h"
 #include "Qt3DSVec3.h"

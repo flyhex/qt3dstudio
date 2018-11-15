@@ -39,7 +39,6 @@
 #include "StudioCoreSystem.h"
 #include "StudioFullSystem.h"
 #include "Qt3DSDMXML.h"
-#include "IOStreams.h"
 #include "StudioUtils.h"
 #include "Core.h"
 #include "Dispatch.h"

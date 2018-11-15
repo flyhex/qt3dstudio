@@ -67,8 +67,6 @@ SOURCES += \
     Code/IO/BufferedOutputStream.cpp \
     Code/IO/FileInputStream.cpp \
     Code/IO/FileOutputStream.cpp \
-    Code/IO/IOStreams.cpp \
-    Code/IO/LEndianStreams.cpp \
     Code/IO/MemBuf.cpp \
     Code/IO/MemInputStream.cpp \
     Code/IO/MemOutputStream.cpp \

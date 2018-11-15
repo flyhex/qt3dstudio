@@ -35,7 +35,6 @@
 #define INCLUDED_QT3DS_FILETOOL_ENUMS_H
 #include "foundation/Qt3DS.h"
 #include "foundation/Qt3DSFlags.h"
-#include "foundation/IOStreams.h"
 
 namespace Q3DStudio {
 

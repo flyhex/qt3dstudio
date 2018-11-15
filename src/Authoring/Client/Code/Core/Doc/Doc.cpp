@@ -2362,40 +2362,6 @@ std::shared_ptr<qt3dsdm::IDOMWriter> CDoc::CreateDOMWriter()
 using namespace qt3ds;
 using namespace qt3ds::foundation;
 
-struct SBufferedInputStreamInStream : public qt3ds::foundation::IInStream
-{
-    CBufferedInputStream &m_Stream;
-
-    SBufferedInputStreamInStream(CBufferedInputStream &str)
-        : m_Stream(str)
-    {
-    }
-
-    QT3DSU32 Read(NVDataRef<QT3DSU8> data) override
-    {
-        long amountRead = m_Stream.Read(data.begin(), data.size());
-        if (amountRead < 0)
-            amountRead = 0;
-        return static_cast<QT3DSU32>(amountRead);
-    }
-};
-
-struct SBufferedOutputStreamOutStream : public qt3dsdm::IOutStream
-{
-    CBufferedOutputStream &m_Stream;
-
-    SBufferedOutputStreamOutStream(CBufferedOutputStream &str)
-        : m_Stream(str)
-    {
-    }
-
-    bool Write(NVConstDataRef<QT3DSU8> data) override
-    {
-        m_Stream.Write(data.begin(), data.size());
-        return true;
-    }
-};
-
 inline std::shared_ptr<qt3dsdm::IDOMReader>
 DoCreateDOMReader(QIODevice &inStream,
                   std::shared_ptr<qt3dsdm::IStringTable> theStringTable,

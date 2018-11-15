@@ -34,7 +34,8 @@
 #include "render/Qt3DSRenderBaseTypes.h"
 #include "foundation/Qt3DSBounds3.h"
 #include "foundation/Qt3DSAllocatorCallback.h"
-#include "foundation/IOStreams.h"
+
+#include <QtCore/qiodevice.h>
 
 namespace qt3dsimp {
 using namespace qt3ds;
@@ -368,10 +369,10 @@ struct Mesh
     // Format is:
     // MeshDataHeader
     // mesh data.
-    void Save(IOutStream &outStream) const;
+    void Save(QIODevice &outStream) const;
 
     // Save a mesh using fopen and fwrite
-    bool Save(const char *inFilePath) const;
+    bool Save(const QString &inFilePath) const;
 
     // read the header, then read the object.
     // Object data is written in LE format for now.
@@ -383,7 +384,7 @@ struct Mesh
 
     // Load a mesh using fopen and fread
     // Mesh needs to be freed by the caller using free
-    static Mesh *Load(const char *inFilePath);
+    static Mesh *Load(const QString &inFilePath);
 
     // Create a mesh given this header, and that data.  data.size() must match
     // header.SizeInBytes.  The mesh returned starts a data[0], so however data
@@ -396,26 +397,26 @@ struct Mesh
     // You can save multiple meshes in a file.  Each mesh returns an incrementing
     // integer for the multi file.  The original meshes aren't changed, and the file
     // is appended to.
-    QT3DSU32 SaveMulti(const char *inFilePath) const;
+    QT3DSU32 SaveMulti(const QString &inFilePath) const;
 
     // Load a single mesh directly from a multi file with the provided overridden items
     // Loading a multimesh with id == 0 indicates to just load the mesh with the highest id.
     static SMultiLoadResult LoadMulti(NVAllocatorCallback &alloc, QIODevice &inStream,
                                       QT3DSU32 inId = 0);
     // Load a single mesh using c file API and malloc/free.
-    static SMultiLoadResult LoadMulti(const char *inFilePath, QT3DSU32 inId);
+    static SMultiLoadResult LoadMulti(const QString &inFilePath, QT3DSU32 inId);
     // Returns true if this is a multimesh (several meshes in one file).
     static bool IsMulti(QIODevice &inStream);
     // Load a multi header from a stream.
     static MeshMultiHeader *LoadMultiHeader(NVAllocatorCallback &alloc,
                                             QIODevice &inStream);
     // Load a multi header from a file using malloc.  Header needs to be freed using free.
-    static MeshMultiHeader *LoadMultiHeader(const char *inFilePath);
+    static MeshMultiHeader *LoadMultiHeader(const QString &inFilePath);
 
     // Get the highest mesh version from a stream.
     static QT3DSU32 GetHighestMultiVersion(NVAllocatorCallback &alloc, QIODevice &inStream);
     // Get the highest mesh version from a file.
-    static QT3DSU32 GetHighestMultiVersion(const char *inFilePath);
+    static QT3DSU32 GetHighestMultiVersion(const QString &inFilePath);
 };
 
 struct ScopedMesh
