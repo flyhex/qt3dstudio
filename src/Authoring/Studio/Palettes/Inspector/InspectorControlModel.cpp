@@ -457,6 +457,7 @@ void InspectorControlModel::setMatDatas(const std::vector<Q3DStudio::CFilePath> 
         bool needRewrite = false;
         if (values.contains(QStringLiteral("path"))) {
             const QString oldPath = values[QStringLiteral("path")];
+            needRewrite = oldPath != absolutePath.toQString();
             if (!QFileInfo(oldPath).exists()) {
                 const auto instance = sceneEditor->getMaterial(oldPath);
                 if (instance.Valid()) {
@@ -464,7 +465,6 @@ void InspectorControlModel::setMatDatas(const std::vector<Q3DStudio::CFilePath> 
                                 sceneEditor->GetName(instance).toQString());
                     if (actualPath == oldPath) {
                         sceneEditor->setMaterialNameByPath(instance, relativePath);
-                        needRewrite = true;
 
                         QVector<qt3dsdm::Qt3DSDMInstanceHandle> refMats;
                         doc->getSceneReferencedMaterials(doc->GetSceneInstance(), refMats);
