@@ -151,7 +151,7 @@ public:
     Q_INVOKABLE QString renderableId(const QString &filePath) const;
     Q_INVOKABLE bool isMaterial() const;
     Q_INVOKABLE bool isDefaultMaterial() const;
-    Q_INVOKABLE void addMaterial() const;
+    Q_INVOKABLE void addMaterial();
     Q_INVOKABLE void duplicateMaterial();
 
 private:

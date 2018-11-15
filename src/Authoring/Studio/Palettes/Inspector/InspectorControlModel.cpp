@@ -303,21 +303,44 @@ bool InspectorControlModel::isMaterial() const
             || type == OBJTYPE_REFERENCEDMATERIAL;
 }
 
-void InspectorControlModel::addMaterial() const
+void InspectorControlModel::addMaterial()
 {
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    qt3dsdm::Qt3DSDMInstanceHandle instance;
+    if (const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase))
+        instance = inspectable->GetGroupInstance(0);
+
+    if (!instance.Valid())
+        return;
+
+    const auto studio = doc->GetStudioSystem();
+    const auto bridge = studio->GetClientDataModelBridge();
+
     const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
     QString path = sceneEditor->getMaterialDirectoryPath() + QStringLiteral("/Material");
     QString extension = QStringLiteral(".materialdef");
 
-    QFile file(path + extension);
-    int i = 0;
-    while (file.exists()) {
+    auto absPath = path + extension;
+    int i = 1;
+    while (QFileInfo(absPath).exists()) {
         i++;
-        file.setFileName(path + QString::number(i) + extension);
+        absPath = path + QString::number(i) + extension;
     }
 
-    file.open(QIODevice::WriteOnly);
-    file.write("<MaterialData version=\"1.0\">\n</MaterialData>");
+    const auto newMaterial = sceneEditor->getOrCreateMaterial(absPath, false);
+    saveIfMaterial(newMaterial);
+    doc->SelectDataModelObject(newMaterial);
+
+    const auto type = bridge->GetObjectType(instance);
+    if (type == OBJTYPE_REFERENCEDMATERIAL) {
+        sceneEditor->setMaterialReferenceByPath(instance, absPath);
+        const auto relPath = QDir(doc->GetDocumentDirectory().toQString())
+                .relativeFilePath(absPath);
+        sceneEditor->setMaterialSourcePath(instance, Q3DStudio::CString::fromQString(relPath));
+        sceneEditor->SetName(instance, bridge->GetName(newMaterial, true));
+        studio->GetFullSystemSignalSender()->SendInstancePropertyValue(
+                    instance, bridge->GetNameProperty());
+    }
 }
 
 void InspectorControlModel::duplicateMaterial()
@@ -330,7 +353,8 @@ void InspectorControlModel::duplicateMaterial()
     if (!instance.Valid())
         return;
 
-    const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    const auto studio = doc->GetStudioSystem();
     const auto bridge = studio->GetClientDataModelBridge();
     const auto type = bridge->GetObjectType(instance);
 
@@ -351,15 +375,27 @@ void InspectorControlModel::duplicateMaterial()
             originalMaterialName = originalMaterialName.mid(slashIndex + 1);
         auto materialName = originalMaterialName;
         int i = 1;
-        while (QFileInfo(sceneEditor->getMaterialFilePath(materialName)).exists()) {
+        auto absPath = sceneEditor->getMaterialFilePath(materialName);
+        while (QFileInfo(absPath).exists()) {
             i++;
             materialName = originalMaterialName + QString::number(i);
+            absPath = sceneEditor->getMaterialFilePath(materialName);
         }
 
         const auto duplicate = sceneEditor->getOrCreateMaterial(materialName, false);
         sceneEditor->copyMaterialProperties(material, duplicate);
         saveIfMaterial(duplicate);
-        g_StudioApp.GetCore()->GetDoc()->SelectDataModelObject(duplicate);
+        doc->SelectDataModelObject(duplicate);
+
+        if (type == OBJTYPE_REFERENCEDMATERIAL) {
+            sceneEditor->setMaterialReferenceByPath(instance, absPath);
+            const auto relPath = QDir(doc->GetDocumentDirectory().toQString())
+                    .relativeFilePath(absPath);
+            sceneEditor->setMaterialSourcePath(instance, Q3DStudio::CString::fromQString(relPath));
+            sceneEditor->SetName(instance, bridge->GetName(duplicate, true));
+            studio->GetFullSystemSignalSender()->SendInstancePropertyValue(
+                        instance, bridge->GetNameProperty());
+        }
     }
 }
 
