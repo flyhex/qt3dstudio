@@ -322,10 +322,10 @@ void RowTreeContextMenu::deleteObject()
 
 void RowTreeContextMenu::groupObjects()
 {
-    if (m_canGroupObjects)
-        m_TimelineItemBinding->PerformTransaction(ITimelineItemBinding::EUserTransaction_Group);
-    else if (m_canUngroupObjects)
+    if (m_canUngroupObjects)
         m_TimelineItemBinding->PerformTransaction(ITimelineItemBinding::EUserTransaction_Ungroup);
+    else if (m_canGroupObjects)
+        m_TimelineItemBinding->PerformTransaction(ITimelineItemBinding::EUserTransaction_Group);
 }
 
 bool RowTreeContextMenu::canInspectComponent() const

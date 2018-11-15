@@ -727,8 +727,8 @@ void CMainFrame::onEditDelete()
 
 void CMainFrame::onEditGroup()
 {
-    if (!g_StudioApp.groupSelectedObjects())
-        g_StudioApp.ungroupSelectedObjects();
+    if (!g_StudioApp.ungroupSelectedObjects())
+        g_StudioApp.groupSelectedObjects();
 }
 
 /**

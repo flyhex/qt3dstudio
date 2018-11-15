@@ -1042,10 +1042,10 @@ QString CStudioApp::getDeleteType() const
 
 bool CStudioApp::canGroupSelectedObjects() const
 {
-    // Grouping is never just one row, we always deal with multiple selected items
+    // Grouping is allowed for single and for multiple selected items.
     qt3dsdm::TInstanceHandleList selected = m_core->GetDoc()
             ->GetSelectedValue().GetSelectedInstances();
-    return (selected.size() > 1);
+    return (selected.size() >= 1);
 }
 
 bool CStudioApp::canUngroupSelectedObjects() const
