@@ -284,9 +284,12 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
             QMap<QString, QString> values;
             QMap<QString, QMap<QString, QString>> textureValues;
             m_Editor.getMaterialInfo(filepath, name, values, textureValues);
-            if (values.contains(importFile)) {
-                if (values[importFile] == m_Relativeimportfile.toQString())
-                    break;
+            if (values.contains(importFile) && values[importFile]
+                    == m_Relativeimportfile.toQString()) {
+                const auto material = m_Editor.getOrCreateMaterial(materialName.toQString());
+                if (!m_createdMaterials.contains(material))
+                    m_Editor.setMaterialValues(material, values, textureValues);
+                break;
             }
             materialName = CString::fromQString(originalMaterialName + QString::number(i));
             filepath = m_Editor.getMaterialFilePath(materialName.toQString());
@@ -556,9 +559,9 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
             QMap<QString, QString> values;
             QMap<QString, QMap<QString, QString>> textureValues;
             m_Editor.getMaterialInfo(filepath, name, values, textureValues);
-            if (values.contains(importFile)) {
-                if (values[importFile] == m_Relativeimportfile.toQString())
-                    break;
+            if (values.contains(importFile) && values[importFile]
+                    == m_Relativeimportfile.toQString()) {
+                break;
             }
             materialName = CString::fromQString(originalMaterialName + QString::number(i));
             filepath = m_Editor.getMaterialFilePath(materialName.toQString());
@@ -682,16 +685,17 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
                             theValue = theGuid;
                         }
                     }
-                } else if (value.m_Name != ComposerPropertyNames::name
-                           && m_createdMaterials.contains(hdl)) {
-                    m_Editor.SetSpecificInstancePropertyValue(
-                        m_Editor.GetAssociatedSlide(hdl), hdl,
-                                ComposerPropertyNames::Convert(value.m_Name), theValue);
                 }
                 // Note that we explicitly set the property values on the instance,
                 // not on any given slide.
                 m_Editor.SetSpecificInstancePropertyValue(
                     0, hdl, ComposerPropertyNames::Convert(value.m_Name), theValue);
+                if (value.m_Name != ComposerPropertyNames::name
+                        && m_createdMaterials.contains(hdl)) {
+                   m_Editor.SetSpecificInstancePropertyValue(
+                       m_Editor.GetAssociatedSlide(hdl), hdl,
+                               ComposerPropertyNames::Convert(value.m_Name), theValue);
+                }
             }
         }
     }
