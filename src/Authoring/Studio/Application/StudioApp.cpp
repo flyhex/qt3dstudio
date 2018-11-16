@@ -438,7 +438,7 @@ bool CStudioApp::handleWelcomeRes(int res, bool recursive)
     case StudioTutorialWidget::openSampleResult: {
         if (PerformSavePrompt()) {
             // Try three options:
-            // - open a specific example .uip
+            // - open a specific example .uia
             // - failing that, show the main example root dir
             // - failing all previous, show default Documents dir
             QFileInfo filePath;
@@ -465,7 +465,7 @@ bool CStudioApp::handleWelcomeRes(int res, bool recursive)
                 }
                 theFile = m_dialogs->GetFileOpenChoice(filePath.absoluteFilePath());
             } else {
-                theFile = filePath.absoluteFilePath() + QStringLiteral("/SampleProject.uip");
+                theFile = filePath.absoluteFilePath() + QStringLiteral("/SampleProject.uia");
             }
 
             if (!theFile.isEmpty()) {
