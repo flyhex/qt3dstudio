@@ -1712,13 +1712,13 @@ bool CStudioApp::OnLoadDocument(const QString &inDocument, bool inShowStartupDia
         m_core->getProjectFile().loadSubpresentationsAndDatainputs(m_subpresentations,
                                                                    m_dataInputDialogItems);
         getRenderer().RegisterSubpresentations(m_subpresentations);
+
+        m_authorZoom = false;
+
+        m_core->GetDispatch()->FireAuthorZoomChanged();
+        verifyDatainputBindings();
+        checkDeletedDatainputs();
     }
-
-    m_authorZoom = false;
-
-    m_core->GetDispatch()->FireAuthorZoomChanged();
-    verifyDatainputBindings();
-    checkDeletedDatainputs();
 
     return theLoadResult;
 }
