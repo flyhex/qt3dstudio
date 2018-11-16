@@ -2483,12 +2483,13 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
                         }
 
                         // Don't draw the axis if there is a widget.
-                        if (CStudioPreferences::ShouldDisplayPivotPoint()) {
+                        if (CStudioPreferences::ShouldDisplayPivotPoint()
+                            && shouldDisplayWidget == false) {
                             switch (theTranslator->GetGraphObject().m_Type) {
                             case GraphObjectTypes::Node:
                             case GraphObjectTypes::Text:
                             case GraphObjectTypes::Model:
-                                drawPivot(*theTranslator);
+                                DrawAxis(*theTranslator);
                                 break;
                             default:
                                break;
@@ -2886,7 +2887,7 @@ void STranslation::DrawBoundingBox(SNode &inNode, QT3DSVec3 inColor)
     m_Context.GetRenderer().AddRenderWidget(theBBoxWidget);
 }
 
-void STranslation::drawPivot(SGraphObjectTranslator &inTranslator)
+void STranslation::DrawAxis(SGraphObjectTranslator &inTranslator)
 {
     if (GraphObjectTypes::IsNodeType(inTranslator.GetGraphObject().m_Type)) {
         qt3ds::render::IRenderWidget &theAxisWidget = qt3ds::render::IRenderWidget::CreateAxisWidget(
