@@ -111,8 +111,8 @@ void DumpSender::sendDumpAndQuit()
 {
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
 
-    const QUrl SENTRY_URL = QUrl("https://sentry.io/api/1312159/minidump/"
-                                 "?sentry_key=233b24a2d9d549aaacde112de834ee85");
+    const QUrl SENTRY_URL = QUrl("https://sentry.io/api/1324269/minidump/"
+                                 "?sentry_key=6ab7097df8c54a65b1a7606dfb50849c");
 
     QNetworkRequest request(SENTRY_URL);
 
