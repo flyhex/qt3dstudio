@@ -45,7 +45,6 @@
 #include "GUIDUtilities.h"
 #include "GraphUtils.h"
 #include "CmdStackModifier.h"
-#include "Qt3DSColor.h"
 #include "SelectedValueImpl.h"
 #include "Utility/CoreConst.h"
 

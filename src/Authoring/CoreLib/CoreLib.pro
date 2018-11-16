@@ -93,11 +93,9 @@ SOURCES += \
     ../Client/Code/Core/Types/Pixel.cpp \
     ../Client/Code/Core/Types/Plane.cpp \
     ../Client/Code/Core/Types/Rotation3.cpp \
-    ../Client/Code/Core/Types/Qt3DSColor.cpp \
     ../Client/Code/Core/Types/Vector2.cpp \
     ../Client/Code/Core/Types/Vector3.cpp \
     ../Client/Code/Core/Utility/BuildConfigParser.cpp \
-    ../Client/Code/Core/Utility/ColorConversion.cpp \
     ../Client/Code/Core/Utility/CoreUtils.cpp \
     ../Client/Code/Core/Utility/cpuid.cpp \
     ../Client/Code/Core/Utility/DataModelObjectReferenceHelper.cpp \

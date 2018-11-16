@@ -54,7 +54,6 @@
 #include "Qt3DSDMDataCore.h"
 #include "CmdDataModelDeleteInstance.h"
 #include "PlaybackClock.h"
-#include "ColorConversion.h"
 #include "WGLRenderContext.h"
 #include "IDocumentEditor.h"
 #include "IDocumentBufferCache.h"

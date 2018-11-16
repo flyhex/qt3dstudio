@@ -38,7 +38,6 @@
 #include "StudioPreferences.h"
 #include "Qt3DSLargeInteger.h"
 #include <QtGui/qcolor.h>
-#include "Qt3DSColor.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CStudioProjectSettings property page
