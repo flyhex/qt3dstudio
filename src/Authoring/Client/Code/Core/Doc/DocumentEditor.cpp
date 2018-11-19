@@ -2288,7 +2288,7 @@ public:
         Qt3DSDMInstanceHandle material;
         CRelativePathTools::EPathType type;
         objRefHelper->ResolvePath(m_Doc.GetSceneInstance(),
-                                  name.toUtf8().constData(),
+                                  Q3DStudio::CString::fromQString(name),
                                   type, material, true);
         return material;
     }
