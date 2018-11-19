@@ -85,7 +85,7 @@ QQuickItem *TabOrderHandler::nextItem(int group, int index)
         // Get item in next available group
         int nextGroup = group + 1;
         while (nextGroup != group) {
-            if (m_itemMap.size() >= nextGroup)
+            if (nextGroup >= m_itemMap.size())
                 nextGroup = 0;
             if (m_itemMap[nextGroup].size() == 0)
                 nextGroup++;
