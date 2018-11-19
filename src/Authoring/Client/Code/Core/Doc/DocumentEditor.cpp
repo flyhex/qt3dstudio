@@ -2045,7 +2045,7 @@ public:
     }
 
     void writeProperty(QFile &file, const QString &name, const QString &value,
-                       int indent = 1, bool isTexture = false)
+                       int indent = 1, bool isTexture = false, bool useCData = true)
     {
         for (int i = 0; i < indent; ++i)
             file.write("\t");
@@ -2054,7 +2054,12 @@ public:
         if (isTexture)
             file.write("\" type=\"Texture");
         file.write("\">");
-        file.write(value.toUtf8().constData());
+        if (useCData) {
+            QString cDataValue = QStringLiteral("<![CDATA[") + value + QStringLiteral("]]>");
+            file.write(cDataValue.toUtf8().constData());
+        } else {
+            file.write(value.toUtf8().constData());
+        }
         file.write("</Property>\n");
     }
 
@@ -2067,9 +2072,10 @@ public:
         tempBuffer.write(0);
 
         if (tempBuffer.size()) {
+            bool useCData = name == QLatin1String("name");
             writeProperty(file, name,
                           QString::fromWCharArray((const wchar_t *)tempBuffer.begin()),
-                          indent, isTexture);
+                          indent, isTexture, useCData);
         }
     }
 
