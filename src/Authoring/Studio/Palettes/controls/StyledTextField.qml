@@ -45,6 +45,7 @@ TextField {
     topPadding: 0
     bottomPadding: 0
     rightPadding: 6
+    leftPadding: 6
 
     activeFocusOnPress: false
 
