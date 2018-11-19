@@ -1639,6 +1639,11 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
         Q3DStudio::CString currentName = bridge->GetName(instance, true);
         Q3DStudio::CString newName = Q3DStudio::CString::fromQString(value.toString());
         if (!newName.IsEmpty()) {
+            if (bridge->isInsideMaterialContainer(instance)
+                    && (newName.Find('/') != Q3DStudio::CString::ENDOFSTRING
+                        || newName.Find('#') != Q3DStudio::CString::ENDOFSTRING)) {
+                return;
+            }
             qt3dsdm::Qt3DSDMInstanceHandle parentInstance = bridge->GetParentInstance(instance);
 
             if (parentInstance == doc->GetSceneInstance()

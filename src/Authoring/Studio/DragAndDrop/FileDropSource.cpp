@@ -273,20 +273,25 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
         } else if (isMatData) {
             if (rowType == OBJTYPE_REFERENCEDMATERIAL || rowType == OBJTYPE_MATERIAL
                     || rowType == OBJTYPE_CUSTOMMATERIAL) {
-                const auto sceneEditor = theDoc.getSceneEditor();
-                const Q3DStudio::CString materialName = Q3DStudio::CString::fromQString(
-                            QFileInfo(m_FilePath).completeBaseName());
-                QString name;
-                QMap<QString, QString> values;
-                QMap<QString, QMap<QString, QString>> textureValues;
-                sceneEditor->getMaterialInfo(m_FilePath, name, values, textureValues);
-                const auto material = sceneEditor->getOrCreateMaterial(m_FilePath);
-                Q3DStudio::CString docDir = theDoc.GetDocumentDirectory();
-                Q3DStudio::CFilePath relPath = Q3DStudio::CFilePath::GetRelativePathFromBase(
-                            docDir, Q3DStudio::CString::fromQString(m_FilePath));
-                Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
-                        ->setMaterialProperties(inTarget, relPath, values, textureValues);
-                theDoc.SelectDataModelObject(inTarget);
+                if (!QFileInfo(m_FilePath).completeBaseName().contains(QLatin1Char('#'))) {
+                    const auto sceneEditor = theDoc.getSceneEditor();
+                    QString name;
+                    QMap<QString, QString> values;
+                    QMap<QString, QMap<QString, QString>> textureValues;
+                    sceneEditor->getMaterialInfo(m_FilePath, name, values, textureValues);
+                    const auto material = sceneEditor->getOrCreateMaterial(m_FilePath);
+                    Q3DStudio::CString docDir = theDoc.GetDocumentDirectory();
+                    Q3DStudio::CFilePath relPath = Q3DStudio::CFilePath::GetRelativePathFromBase(
+                                docDir, Q3DStudio::CString::fromQString(m_FilePath));
+                    Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
+                            ->setMaterialProperties(inTarget, relPath, values, textureValues);
+                    theDoc.SelectDataModelObject(inTarget);
+                } else {
+                    g_StudioApp.GetDialogs()->DisplayMessageBox(
+                                tr("Error"), tr("The character '#' is not allowed in "
+                                                "the name of a material definition file."),
+                                Qt3DSMessageBox::ICON_ERROR, false);
+                }
             }
         } else {
             Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
