@@ -61,6 +61,7 @@
 #include "IStudioRenderer.h"
 #include "foundation/Qt3DSLogging.h"
 #include "Dialogs.h"
+#include "Dispatch.h"
 
 static QStringList renderableItems()
 {
@@ -1553,9 +1554,19 @@ void InspectorControlModel::setShaderValue(long instance, int handle, const QVar
             v = Q3DStudio::CString::fromQString(m_materials[matIdx].m_relativePath);
     }
 
-    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(),
-                                      QObject::tr("Set Material Type"))
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Material Type"))
             ->SetMaterialType(instance, v);
+
+    const auto dispatch = g_StudioApp.GetCore()->GetDispatch();
+    QVector<qt3dsdm::Qt3DSDMInstanceHandle> refMats;
+    doc->getSceneReferencedMaterials(doc->GetSceneInstance(), refMats);
+    for (auto &refMat : qAsConst(refMats)) {
+        const auto origMat = bridge->getMaterialReference(refMat);
+        if (origMat.Valid() && (long)origMat == instance)
+            dispatch->FireImmediateRefreshInstance(refMat);
+    }
 
     saveIfMaterial(instance);
 }
