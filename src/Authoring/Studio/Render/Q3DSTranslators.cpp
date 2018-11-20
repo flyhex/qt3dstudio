@@ -2099,7 +2099,9 @@ bool Q3DSEffectTranslator::updateProperty(Q3DSTranslation &inContext,
     if (name == QLatin1String("eyeball")) {
         list.append(theItem.setEyeballEnabled(value.getData<bool>()));
         theItem.notifyPropertyChanges(list);
+        return true;
     }
+    return false;
 }
 
 Q3DSCustomMaterialTranslator::Q3DSCustomMaterialTranslator(qt3dsdm::Qt3DSDMInstanceHandle instance,
