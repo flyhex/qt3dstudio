@@ -196,7 +196,7 @@ void CCore::GetCreateDirectoryFileName(const QString &inDocument,
     QFileInfo theOriginal(inDocument);
     QString theName(theOriginal.fileName());
     QString theStem(theOriginal.baseName());
-    QString theDir = theOriginal.canonicalPath();
+    QString theDir = theOriginal.path();
     outFinalDir = Q3DStudio::CFilePath::CombineBaseAndRelative(theDir, theStem);
     outFinalDoc = Q3DStudio::CFilePath::CombineBaseAndRelative(outFinalDir, theName);
 }

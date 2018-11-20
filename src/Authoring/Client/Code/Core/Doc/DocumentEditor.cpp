@@ -3690,7 +3690,7 @@ public:
         QString relativePath = m_Doc.GetRelativePathToDoc(imageSrc);
         Q3DSImageTextureData theImageBuffer =
             m_Doc.GetBufferCache().GetOrCreateImageBuffer(relativePath);
-        if (!theImageBuffer.m_texture) {
+        if (!theImageBuffer.m_valid) {
             if (theHandler)
                 theHandler->DisplayImportFailed(imageSrc.filePath(),
                                                 QObject::tr("Can't Load Image File"), false);
@@ -3725,8 +3725,8 @@ public:
         if (inStartTime != -1)
             SetStartTime(theModelInstance, inStartTime);
 
-        float theHeight = theImageBuffer.m_texture->height() / 100.0f;
-        float theWidth = theImageBuffer.m_texture->width()/ 100.0f;
+        float theHeight = theImageBuffer.m_height / 100.0f;
+        float theWidth = theImageBuffer.m_width/ 100.0f;
         qt3dsdm::SFloat3 theScale = qt3dsdm::SFloat3(2, 2, 1); // Default, per Danc.
         if (!qIsNull(theHeight) && qIsNull(theWidth))
             theScale = qt3dsdm::SFloat3(theWidth, theHeight, 1);

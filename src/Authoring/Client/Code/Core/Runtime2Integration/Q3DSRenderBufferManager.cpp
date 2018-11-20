@@ -36,22 +36,45 @@
 namespace Q3DStudio {
 
 Q3DSRenderBufferManager::Q3DSRenderBufferManager(Q3DSEngine *engine,
+                                                 Q3DSUipPresentation *presentation,
                                                  IInputStreamFactory &inInputStreamFactory)
-    : m_engine(engine), m_inputStreamFactory(inInputStreamFactory)
+    : m_engine(engine), m_presentation(presentation), m_inputStreamFactory(inInputStreamFactory)
 {
 
 }
 
 QString Q3DSRenderBufferManager::GetImagePath(const QString &inSourcePath)
 {
-    return m_engine->presentation()->assetFileName(inSourcePath, nullptr);
+    return m_presentation->assetFileName(inSourcePath, nullptr);
 }
 
 Q3DSImageTextureData Q3DSRenderBufferManager::LoadRenderImage(const QString &inSourcePath,
                                                               bool inForceScanForTransparency,
                                                               bool inBsdfMipmaps)
 {
-    return Q3DSImageTextureData();
+    Q3DSImageTextureData data;
+    QImage imageData(inSourcePath);
+    if (imageData.isNull())
+        return data;
+
+    Q3DSUipPresentation *presentation = m_presentation;
+    const QByteArray uniqueId(QByteArrayLiteral("Q3DSRBM::imageId"));
+    Q3DSImage *image = presentation->newObject<Q3DSImage>(uniqueId);
+    image->setSourcePath(inSourcePath);
+
+    const bool transparency = image->hasTransparency(presentation);
+    const bool premultiplied = image->hasPremultipliedAlpha();
+    presentation->registerImageBuffer(inSourcePath, transparency);
+
+    presentation->unlinkObject(image);
+    delete image;
+
+    data.m_width = imageData.width();
+    data.m_height = imageData.width();
+    data.m_valid = true;
+    data.m_hasTransparency = transparency;
+    data.m_premultiplied = premultiplied;
+    return data;
 }
 
 Q3DSRenderMesh *Q3DSRenderBufferManager::LoadMesh(const QString &inSourcePath)
@@ -81,15 +104,19 @@ void Q3DSRenderBufferManager::InvalidateBuffer(const QString &inSourcePath)
 void Q3DSRenderBufferManager::SetImageHasTransparency(const QString &inSourcePath,
                                                       bool inHasTransparency)
 {
-    m_engine->presentation()->registerImageBuffer(inSourcePath, inHasTransparency);
+    Q_ASSERT(m_presentation);
+    m_presentation->registerImageBuffer(inSourcePath, inHasTransparency);
 }
 
-QSharedPointer<Q3DSRenderBufferManager> Q3DSRenderBufferManager::Create(Q3DSEngine *engine,
-                                               IInputStreamFactory &inInputStreamFactory)
+QSharedPointer<Q3DSRenderBufferManager>
+Q3DSRenderBufferManager::Create(Q3DSEngine *engine, Q3DSUipPresentation *presentation,
+                                IInputStreamFactory &inInputStreamFactory)
 {
     static QSharedPointer<Q3DSRenderBufferManager> s_renderBufferManager;
-    if (s_renderBufferManager.isNull() || s_renderBufferManager->m_engine != engine)
-        s_renderBufferManager.reset(new Q3DSRenderBufferManager(engine, inInputStreamFactory));
+    if (s_renderBufferManager.isNull() || s_renderBufferManager->m_engine != engine) {
+        s_renderBufferManager.reset(new Q3DSRenderBufferManager(engine, presentation,
+                                                                inInputStreamFactory));
+    }
     return s_renderBufferManager;
 }
 

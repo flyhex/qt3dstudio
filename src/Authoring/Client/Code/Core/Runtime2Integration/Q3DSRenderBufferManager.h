@@ -51,7 +51,8 @@ namespace Q3DStudio {
 class Q3DSRenderBufferManager
 {
 public:
-    Q3DSRenderBufferManager(Q3DSEngine *engine, IInputStreamFactory &inInputStreamFactory);
+    Q3DSRenderBufferManager(Q3DSEngine *engine, Q3DSUipPresentation *presentation,
+                            IInputStreamFactory &inInputStreamFactory);
     virtual ~Q3DSRenderBufferManager() {}
     // Path manipulation used to get the final path form a base path plus relative extension
     /*virtual QString CombineBaseAndRelative(const char8_t *inBase,
@@ -100,10 +101,12 @@ public:
     virtual void Clear();
     virtual void InvalidateBuffer(const QString &inSourcePath);
 
-    static QSharedPointer<Q3DSRenderBufferManager> Create(Q3DSEngine *engine,
-                                                    IInputStreamFactory &inInputStreamFactory);
+    static QSharedPointer<Q3DSRenderBufferManager>
+    Create(Q3DSEngine *engine, Q3DSUipPresentation *presentation,
+           IInputStreamFactory &inInputStreamFactory);
 private:
     Q3DSEngine *m_engine;
+    Q3DSUipPresentation *m_presentation;
     IInputStreamFactory &m_inputStreamFactory;
 };
 

@@ -126,7 +126,8 @@ QT3DSVec3 Q3DStudioRenderer::GetIntendedPosition(qt3dsdm::Qt3DSDMInstanceHandle 
 
 Q3DSRenderBufferManager *Q3DStudioRenderer::GetBufferManager()
 {
-    return Q3DSRenderBufferManager::Create(m_engine.data(), *IInputStreamFactory::Create()).data();
+    return Q3DSRenderBufferManager::Create(m_engine.data(), m_presentation.data(),
+                                           *IInputStreamFactory::Create()).data();
 }
 
 IPathManager *Q3DStudioRenderer::GetPathManager()
@@ -1116,6 +1117,7 @@ void Q3DStudioRenderer::createEngine()
     }
 
     m_engine.reset(new Q3DSEngine);
+    m_presentation.reset(new Q3DSUipPresentation);
 
     Q3DSEngine::Flags flags = Q3DSEngine::WithoutRenderAspect;
 
@@ -1141,7 +1143,7 @@ void Q3DStudioRenderer::createEngine()
 
 void Q3DStudioRenderer::createTranslation()
 {
-    m_translation.reset(new Q3DSTranslation(*this));
+    m_translation.reset(new Q3DSTranslation(*this, m_presentation));
 }
 
 std::shared_ptr<IStudioRenderer> IStudioRenderer::CreateStudioRenderer()

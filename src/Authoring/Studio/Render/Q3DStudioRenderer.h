@@ -156,6 +156,7 @@ private:
     CDoc &m_doc;
     qt3dsdm::TSignalConnectionPtr m_selectionSignal;
     QSharedPointer<Q3DSEngine> m_engine;
+    QSharedPointer<Q3DSUipPresentation> m_presentation;
     QOpenGLWidget *m_widget = nullptr;
     Qt3DRender::QRenderAspect *m_renderAspect = nullptr;
     Q3DSViewportSettings m_viewportSettings;

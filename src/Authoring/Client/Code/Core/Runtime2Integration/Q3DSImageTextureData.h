@@ -109,15 +109,14 @@
 
 namespace Q3DStudio {
 
-class Q3DSImageTextureData
+struct Q3DSImageTextureData
 {
-public:
-    Q3DSImageTextureData()
-        : m_texture(nullptr), m_hasTransparency(false)
-    {
-    }
-    Qt3DRender::QAbstractTexture *m_texture;
-    bool m_hasTransparency;
+    Q3DSImageTextureData() {}
+    uint m_width = 0;
+    uint m_height = 0;
+    bool m_valid = false;
+    bool m_hasTransparency = false;
+    bool m_premultiplied = false;
 };
 
 } // namespace Q3DStudio

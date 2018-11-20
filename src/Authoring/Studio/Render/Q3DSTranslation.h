@@ -63,7 +63,8 @@ class Q3DSCameraTranslator;
 class Q3DSTranslation
 {
 public:
-    Q3DSTranslation(Q3DStudioRenderer &inRenderer);
+    Q3DSTranslation(Q3DStudioRenderer &inRenderer,
+                    const QSharedPointer<Q3DSUipPresentation> &presentation);
 
 protected:
     void markPropertyDirty(qt3dsdm::Qt3DSDMInstanceHandle instance,
@@ -174,6 +175,7 @@ private:
     bool m_editCameraEnabled = false;
     Q3DSGraphObjectTranslator *m_dragTranslator = nullptr;
     Q3DSCameraNode *m_dragCamera = nullptr;
+    bool m_presentationInit = false;
 
     struct DragState
     {

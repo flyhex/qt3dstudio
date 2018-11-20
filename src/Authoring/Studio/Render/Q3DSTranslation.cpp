@@ -46,7 +46,8 @@
 
 namespace Q3DStudio {
 
-Q3DSTranslation::Q3DSTranslation(Q3DStudioRenderer &inRenderer)
+Q3DSTranslation::Q3DSTranslation(Q3DStudioRenderer &inRenderer,
+                                 const QSharedPointer<Q3DSUipPresentation> &presentation)
     : m_studioRenderer(inRenderer)
     , m_doc(*g_StudioApp.GetCore()->GetDoc())
     , m_reader(m_doc.GetDocumentReader())
@@ -56,7 +57,7 @@ Q3DSTranslation::Q3DSTranslation(Q3DStudioRenderer &inRenderer)
     , m_fullSystem(*m_doc.GetStudioSystem()->GetFullSystem())
     , m_assetGraph(*m_doc.GetAssetGraph())
     , m_engine(inRenderer.engine())
-    , m_presentation(new Q3DSUipPresentation())
+    , m_presentation(presentation)
 {
     qt3dsdm::Qt3DSDMInstanceHandle sceneRoot = m_assetGraph.GetRoot(0);
     m_graphIterator.ClearResults();
@@ -577,7 +578,7 @@ void Q3DSTranslation::prepareRender(const QRect &rect, const QSize &size)
     if (!m_scene)
         return;
     clearDirtySet();
-    if (m_engine->presentationCount() == 0) {
+    if (!m_presentationInit) {
         m_engine->setPresentation(m_presentation.data());
 
         const bool profileui = CStudioApp::hasProfileUI();
@@ -586,6 +587,7 @@ void Q3DSTranslation::prepareRender(const QRect &rect, const QSize &size)
         m_studioRenderer.SetViewRect(m_studioRenderer.viewRect(), size);
         m_engine->sceneManager()->slidePlayer()->setMode(Q3DSSlidePlayer::PlayerMode::Editor);
         m_engine->sceneManager()->slidePlayer()->stop();
+        m_presentationInit = true;
     }
     if (m_editCameraEnabled) {
         const auto values = m_editCameras.values();

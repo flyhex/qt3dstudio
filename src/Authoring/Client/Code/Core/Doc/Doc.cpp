@@ -2229,16 +2229,19 @@ int CDoc::LoadStudioData(QIODevice *inInputStream)
             else
                 m_AssetGraph = TAssetGraph::CreateGraph();
 
-            if (theReader.MoveToFirstChild(QStringLiteral("BufferData"))
-                    && theReader.MoveToFirstChild(QStringLiteral("ImageBuffer"))) {
-                do {
-                    bool transparency;
-                    QString sourcepath;
-                    theReader.Att(QStringLiteral("sourcepath"), sourcepath);
-                    theReader.Att(QStringLiteral("hasTransparency"), transparency);
-                    m_SceneGraph->GetBufferManager()
-                            ->SetImageHasTransparency(sourcepath, transparency);
-                } while (theReader.MoveToNextSibling(QStringLiteral("ImageBuffer")));
+            {
+                IDOMReader::Scope __theScope(theReader);
+                if (theReader.MoveToFirstChild(QStringLiteral("BufferData"))
+                        && theReader.MoveToFirstChild(QStringLiteral("ImageBuffer"))) {
+                    do {
+                        bool transparency;
+                        QString sourcepath;
+                        theReader.Att(QStringLiteral("sourcepath"), sourcepath);
+                        theReader.Att(QStringLiteral("hasTransparency"), transparency);
+                        m_SceneGraph->GetBufferManager()
+                                ->SetImageHasTransparency(sourcepath, transparency);
+                    } while (theReader.MoveToNextSibling(QStringLiteral("ImageBuffer")));
+                }
             }
 
             // We definitely don't want a million events firing off during this deserialization.
@@ -2500,15 +2503,12 @@ void CDoc::SavePresentationFile(QIODevice *inOutputStream)
             // control reasonable
             std::sort(theImageBuffers.begin(), theImageBuffers.end(),
                       SourcePathImageBufferLessThan);
-            IDOMWriter::Scope __BufferData(theWriter, L"BufferData");
+            IDOMWriter::Scope __BufferData(theWriter, QStringLiteral("BufferData"));
             for (size_t idx = 0, end = theImageBuffers.size(); idx < end; ++idx) {
                 Q3DSImageTextureData theBuffer = theImageBuffers[idx].second;
-                if (theBuffer.m_hasTransparency) {
-                    IDOMWriter::Scope __ImageScope(theWriter, L"ImageBuffer");
-                    Q3DStudio::WQString sp = Q3DStudio::toWQString(theImageBuffers[idx].first);
-                    theWriter.Att(L"sourcepath", sp.constData());
-                    theWriter.Att("hasTransparency", true);
-                }
+                IDOMWriter::Scope __ImageScope(theWriter, QStringLiteral("ImageBuffer"));
+                theWriter.Att(QStringLiteral("sourcepath"), theImageBuffers[idx].first);
+                theWriter.Att(QStringLiteral("hasTransparency"), theBuffer.m_hasTransparency);
             }
         }
     }
