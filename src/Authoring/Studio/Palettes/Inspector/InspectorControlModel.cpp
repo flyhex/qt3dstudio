@@ -216,9 +216,15 @@ QVariant InspectorControlModel::getPropertyValue(long instance, int handle)
 
 bool InspectorControlModel::isInsideMaterialContainer() const
 {
-    qt3dsdm::Qt3DSDMInstanceHandle instance;
-    if (const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase))
-        instance = inspectable->GetGroupInstance(0);
+    return isInsideMaterialContainer(dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase));
+}
+
+bool InspectorControlModel::isInsideMaterialContainer(Qt3DSDMInspectable *inspectable) const
+{
+    if (!inspectable)
+        return false;
+
+    const auto instance = inspectable->GetGroupInstance(0);
 
     if (!instance.Valid())
         return false;
@@ -247,13 +253,18 @@ bool InspectorControlModel::isDefaultMaterial() const
 
 bool InspectorControlModel::isAnimatableMaterial() const
 {
+    return isAnimatableMaterial(dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase));
+}
+
+bool InspectorControlModel::isAnimatableMaterial(Qt3DSDMInspectable *inspectable) const
+{
+    if (!inspectable)
+        return false;
+
     const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
     const auto bridge = studio->GetClientDataModelBridge();
 
-    qt3dsdm::Qt3DSDMInstanceHandle instance;
-    if (const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase))
-        instance = inspectable->GetGroupInstance(0);
-
+    const auto instance = inspectable->GetGroupInstance(0);
     if (!instance.Valid())
         return false;
 
@@ -264,13 +275,18 @@ bool InspectorControlModel::isAnimatableMaterial() const
 
 bool InspectorControlModel::isBasicMaterial() const
 {
+    return isBasicMaterial(dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase));
+}
+
+bool InspectorControlModel::isBasicMaterial(Qt3DSDMInspectable *inspectable) const
+{
+    if (!inspectable)
+        return false;
+
     const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
     const auto bridge = studio->GetClientDataModelBridge();
 
-    qt3dsdm::Qt3DSDMInstanceHandle instance;
-    if (const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase))
-        instance = inspectable->GetGroupInstance(0);
-
+    const auto instance = inspectable->GetGroupInstance(0);
     if (!instance.Valid())
         return false;
 
@@ -1062,17 +1078,17 @@ auto InspectorControlModel::computeGroup(CInspectableBase* inspectable,
         if (const auto group = dynamic_cast<Qt3DSDMInspectorGroup *>(theInspectorGroup)) {
             const auto materialGroup
                     = dynamic_cast<Qt3DSDMMaterialInspectorGroup *>(group);
-            bool isMatData = isBasicMaterial();
-            if (!isReference && materialGroup && materialGroup->isMaterialGroup()) {
+            bool isMatData = isBasicMaterial(cdmInspectable);
+            if (materialGroup && materialGroup->isMaterialGroup()) {
                 InspectorControlBase *item = nullptr;
 
-                if (!isInsideMaterialContainer()) {
+                if (!isInsideMaterialContainer(cdmInspectable)) {
                     item = createMaterialTypeItem(cdmInspectable, theIndex);
                     if (item)
                         result.controlElements.push_back(QVariant::fromValue(item));
                 }
 
-                if (isAnimatableMaterial()) {
+                if (isAnimatableMaterial(cdmInspectable)) {
                     item = createShaderItem(cdmInspectable, theIndex);
                     if (item)
                         result.controlElements.push_back(QVariant::fromValue(item));

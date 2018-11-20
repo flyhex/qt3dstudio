@@ -201,8 +201,11 @@ private:
     QString getStandardMaterialString() const;
     QString getDefaultMaterialString() const;
     bool isInsideMaterialContainer() const;
+    bool isInsideMaterialContainer(Qt3DSDMInspectable *inspectable) const;
     bool isAnimatableMaterial() const;
+    bool isAnimatableMaterial(Qt3DSDMInspectable *inspectable) const;
     bool isBasicMaterial() const;
+    bool isBasicMaterial(Qt3DSDMInspectable *inspectable) const;
     void updateMaterialValues(const QStringList &values, int elementIndex);
     void updateShaderValues();
     void updateMatDataValues();
