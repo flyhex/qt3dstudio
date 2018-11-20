@@ -1855,14 +1855,6 @@ public:
         if (!img)
             img = CreateImageInstanceForMaterialOrLayer(instance, prop);
 
-        // When a matdef is first created the source path is not set properly
-        // when setting a subpresentation so we set it here manually
-        // TODO: Replace this with an actual fix
-        if (m_Bridge.isInsideMaterialContainer(instance)) {
-            SetInstancePropertyValue(img, m_Bridge.GetSourcePathProperty(),
-                                     std::make_shared<qt3dsdm::CDataStr>(src.c_str()));
-        }
-
         SetInstancePropertyValueAsRenderable(img, isSubp ? m_Bridge.getSubpresentationProperty()
                                                          : m_Bridge.GetSourcePathProperty(), src);
     }
@@ -2360,7 +2352,7 @@ public:
                            const QMap<QString, QString> &values,
                            const QMap<QString, QMap<QString, QString>> &textureValues) override
     {
-        auto instance = getOrCreateMaterial(path);
+        auto instance = getOrCreateMaterial(path, false);
         if (instance.Valid())
             setMaterialValues(instance, values, textureValues);
     }

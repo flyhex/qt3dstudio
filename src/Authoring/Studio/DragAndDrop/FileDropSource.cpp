@@ -279,17 +279,33 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
             if (rowType == OBJTYPE_REFERENCEDMATERIAL || rowType == OBJTYPE_MATERIAL
                     || rowType == OBJTYPE_CUSTOMMATERIAL) {
                 if (!QFileInfo(m_FilePath).completeBaseName().contains(QLatin1Char('#'))) {
-                    const auto sceneEditor = theDoc.getSceneEditor();
-                    QString name;
-                    QMap<QString, QString> values;
-                    QMap<QString, QMap<QString, QString>> textureValues;
-                    sceneEditor->getMaterialInfo(m_FilePath, name, values, textureValues);
-                    const auto material = sceneEditor->getOrCreateMaterial(m_FilePath);
+                    const auto doc = g_StudioApp.GetCore()->GetDoc();
+                    { // Scope for the ScopedDocumentEditor
+                        Q3DStudio::ScopedDocumentEditor sceneEditor(
+                                    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QString()));
+                        QString name;
+                        QMap<QString, QString> values;
+                        QMap<QString, QMap<QString, QString>> textureValues;
+                        sceneEditor->getMaterialInfo(m_FilePath, name, values, textureValues);
+                        const auto material = sceneEditor->getOrCreateMaterial(m_FilePath);
+                        sceneEditor->setMaterialValues(material, values, textureValues);
+                    }
+                    // Several aspects of the editor are not updated correctly
+                    // if the data core is changed without a transaction
+                    // The above scope completes the transaction for creating a new material
+                    // Next the added undo has to be popped from the stack
+                    // TODO: Find a way to update the editor fully without a transaction
+                    doc->GetCore()->GetCmdStack()->RemoveLastUndo();
+
+                    Q3DStudio::ScopedDocumentEditor sceneEditor(
+                                Q3DStudio::SCOPED_DOCUMENT_EDITOR(
+                                    *doc, tr("Drag and Drop Material")));
                     Q3DStudio::CString docDir = theDoc.GetDocumentDirectory();
                     Q3DStudio::CFilePath relPath = Q3DStudio::CFilePath::GetRelativePathFromBase(
                                 docDir, Q3DStudio::CString::fromQString(m_FilePath));
-                    Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
-                            ->setMaterialProperties(inTarget, relPath, values, textureValues);
+                    sceneEditor->SetMaterialType(inTarget, "Referenced Material");
+                    sceneEditor->setMaterialSourcePath(inTarget, relPath);
+                    sceneEditor->setMaterialReferenceByPath(inTarget, relPath.toQString());
                     theDoc.SelectDataModelObject(inTarget);
                 } else {
                     g_StudioApp.GetDialogs()->DisplayMessageBox(

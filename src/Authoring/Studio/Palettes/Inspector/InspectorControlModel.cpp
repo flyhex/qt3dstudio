@@ -333,8 +333,8 @@ void InspectorControlModel::addMaterial()
     const auto studio = doc->GetStudioSystem();
     const auto bridge = studio->GetClientDataModelBridge();
 
-    const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
-    QString path = sceneEditor->getMaterialDirectoryPath() + QStringLiteral("/Material");
+    QString path = doc->getSceneEditor()->getMaterialDirectoryPath()
+            + QStringLiteral("/Material");
     QString extension = QStringLiteral(".materialdef");
 
     auto absPath = path + extension;
@@ -344,8 +344,22 @@ void InspectorControlModel::addMaterial()
         absPath = path + QString::number(i) + extension;
     }
 
-    const auto newMaterial = sceneEditor->getOrCreateMaterial(absPath, false);
+    qt3dsdm::Qt3DSDMInstanceHandle newMaterial;
+    {
+        newMaterial = Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QString())
+                ->getOrCreateMaterial(absPath, false);
+    }
+    // Several aspects of the editor are not updated correctly
+    // if the data core is changed without a transaction
+    // The above scope completes the transaction for creating a new material
+    // Next the added undo has to be popped from the stack
+    // TODO: Find a way to update the editor fully without a transaction
+    g_StudioApp.GetCore()->GetCmdStack()->RemoveLastUndo();
+
     saveIfMaterial(newMaterial);
+
+    Q3DStudio::ScopedDocumentEditor sceneEditor(
+                Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, tr("Set Material Type")));
     doc->SelectDataModelObject(newMaterial);
 
     const auto type = bridge->GetObjectType(instance);
@@ -362,7 +376,8 @@ void InspectorControlModel::addMaterial()
 
 void InspectorControlModel::duplicateMaterial()
 {
-    const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+
     qt3dsdm::Qt3DSDMInstanceHandle instance;
     if (const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase))
         instance = inspectable->GetGroupInstance(0);
@@ -370,7 +385,6 @@ void InspectorControlModel::duplicateMaterial()
     if (!instance.Valid())
         return;
 
-    const auto doc = g_StudioApp.GetCore()->GetDoc();
     const auto studio = doc->GetStudioSystem();
     const auto bridge = studio->GetClientDataModelBridge();
     const auto type = bridge->GetObjectType(instance);
@@ -385,6 +399,7 @@ void InspectorControlModel::duplicateMaterial()
         material = getReferenceMaterial(m_inspectableBase);
 
     if (material.Valid()) {
+        const auto sceneEditor = doc->getSceneEditor();
         auto originalMaterialName = sceneEditor->GetName(material).toQString()
                 + QStringLiteral(" Copy");
         int slashIndex = originalMaterialName.lastIndexOf(QLatin1Char('/'));
@@ -399,17 +414,32 @@ void InspectorControlModel::duplicateMaterial()
             absPath = sceneEditor->getMaterialFilePath(materialName);
         }
 
-        const auto duplicate = sceneEditor->getOrCreateMaterial(materialName, false);
-        sceneEditor->copyMaterialProperties(material, duplicate);
+        qt3dsdm::Qt3DSDMInstanceHandle duplicate;
+        {
+            Q3DStudio::ScopedDocumentEditor scopedEditor(
+                        Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QString()));
+            duplicate = scopedEditor->getOrCreateMaterial(materialName, false);
+            scopedEditor->copyMaterialProperties(material, duplicate);
+        }
+        // Several aspects of the editor are not updated correctly
+        // if the data core is changed without a transaction
+        // The above scope completes the transaction for creating a new material
+        // Next the added undo has to be popped from the stack
+        // TODO: Find a way to update the editor fully without a transaction
+        g_StudioApp.GetCore()->GetCmdStack()->RemoveLastUndo();
+
         saveIfMaterial(duplicate);
+
+        Q3DStudio::ScopedDocumentEditor scopedEditor(
+                    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, tr("Set Material Type")));
         doc->SelectDataModelObject(duplicate);
 
         if (type == OBJTYPE_REFERENCEDMATERIAL) {
-            sceneEditor->setMaterialReferenceByPath(instance, absPath);
+            scopedEditor->setMaterialReferenceByPath(instance, absPath);
             const auto relPath = QDir(doc->GetDocumentDirectory().toQString())
                     .relativeFilePath(absPath);
-            sceneEditor->setMaterialSourcePath(instance, Q3DStudio::CString::fromQString(relPath));
-            sceneEditor->SetName(instance, bridge->GetName(duplicate, true));
+            scopedEditor->setMaterialSourcePath(instance, Q3DStudio::CString::fromQString(relPath));
+            scopedEditor->SetName(instance, bridge->GetName(duplicate, true));
             studio->GetFullSystemSignalSender()->SendInstancePropertyValue(
                         instance, bridge->GetNameProperty());
         }
@@ -481,82 +511,94 @@ void InspectorControlModel::setMatDatas(const std::vector<Q3DStudio::CFilePath> 
     const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
     const auto bridge = studio->GetClientDataModelBridge();
     const auto doc = g_StudioApp.GetCore()->GetDoc();
-    const auto sceneEditor = doc->getSceneEditor();
-    if (!sceneEditor)
-        return;
 
-    bool newMaterialSelected = false;
-    for (const Q3DStudio::CFilePath &path : matDatas) {
-        bool isNewFile = true;
-        for (auto &oldPath : m_cachedMatDatas) {
-            if (path.toQString() == oldPath.toQString()) {
-                isNewFile = false;
-                break;
+    bool isDocModified = doc->IsModified();
+    { // Scope for the ScopedDocumentEditor
+        Q3DStudio::ScopedDocumentEditor sceneEditor(
+                    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QString()));
+
+        bool newMaterialSelected = false;
+        for (const Q3DStudio::CFilePath &path : matDatas) {
+            bool isNewFile = true;
+            for (auto &oldPath : m_cachedMatDatas) {
+                if (path.toQString() == oldPath.toQString()) {
+                    isNewFile = false;
+                    break;
+                }
             }
-        }
 
-        const QString relativePath = path.toQString();
-        const Q3DStudio::CFilePath absolutePath
-            = Q3DStudio::CFilePath::CombineBaseAndRelative(doc->GetDocumentDirectory(), path);
+            const QString relativePath = path.toQString();
+            const Q3DStudio::CFilePath absolutePath
+                = Q3DStudio::CFilePath::CombineBaseAndRelative(doc->GetDocumentDirectory(), path);
 
-        QString name;
-        QMap<QString, QString> values;
-        QMap<QString, QMap<QString, QString>> textureValues;
-        sceneEditor->getMaterialInfo(
-                    absolutePath.toQString(), name, values, textureValues);
+            QString name;
+            QMap<QString, QString> values;
+            QMap<QString, QMap<QString, QString>> textureValues;
+            sceneEditor->getMaterialInfo(
+                        absolutePath.toQString(), name, values, textureValues);
 
-        m_matDatas.push_back({name, relativePath, values, textureValues});
+            m_matDatas.push_back({name, relativePath, values, textureValues});
 
-        bool needRewrite = false;
-        if (values.contains(QStringLiteral("path"))) {
-            const QString oldPath = values[QStringLiteral("path")];
-            needRewrite = oldPath != absolutePath.toQString();
-            if (!QFileInfo(oldPath).exists()) {
-                const auto instance = sceneEditor->getMaterial(oldPath);
-                if (instance.Valid()) {
-                    const QString actualPath = sceneEditor->getFilePathFromMaterialName(
-                                sceneEditor->GetName(instance).toQString());
-                    if (actualPath == oldPath) {
-                        sceneEditor->setMaterialNameByPath(instance, relativePath);
+            bool needRewrite = false;
+            if (values.contains(QStringLiteral("path"))) {
+                const QString oldPath = values[QStringLiteral("path")];
+                needRewrite = oldPath != absolutePath.toQString();
+                if (!QFileInfo(oldPath).exists()) {
+                    const auto instance = sceneEditor->getMaterial(oldPath);
+                    if (instance.Valid()) {
+                        const QString actualPath = sceneEditor->getFilePathFromMaterialName(
+                                    sceneEditor->GetName(instance).toQString());
+                        if (actualPath == oldPath) {
+                            sceneEditor->setMaterialNameByPath(instance, relativePath);
 
-                        QVector<qt3dsdm::Qt3DSDMInstanceHandle> refMats;
-                        doc->getSceneReferencedMaterials(doc->GetSceneInstance(), refMats);
-                        for (auto &refMat : refMats) {
-                            const auto origMat = bridge->getMaterialReference(refMat);
-                            if (origMat.Valid() && origMat == instance) {
-                                sceneEditor->setMaterialSourcePath(
-                                            refMat, Q3DStudio::CString::fromQString(relativePath));
-                                sceneEditor->SetName(refMat, bridge->GetName(instance, true));
-                                studio->GetFullSystemSignalSender()
-                                        ->SendInstancePropertyValue(refMat,
-                                                                    bridge->GetNameProperty());
+                            QVector<qt3dsdm::Qt3DSDMInstanceHandle> refMats;
+                            doc->getSceneReferencedMaterials(doc->GetSceneInstance(), refMats);
+                            for (auto &refMat : qAsConst(refMats)) {
+                                const auto origMat = bridge->getMaterialReference(refMat);
+                                if (origMat.Valid() && origMat == instance) {
+                                    sceneEditor->setMaterialSourcePath(
+                                                refMat,
+                                                Q3DStudio::CString::fromQString(relativePath));
+                                    sceneEditor->SetName(refMat, bridge->GetName(instance, true));
+                                    studio->GetFullSystemSignalSender()
+                                            ->SendInstancePropertyValue(refMat,
+                                                                        bridge->GetNameProperty());
+                                }
                             }
                         }
                     }
                 }
             }
+
+            auto material = sceneEditor->getMaterial(relativePath);
+            if (isNewFile && !newMaterialSelected && !material.Valid())
+                material = sceneEditor->getOrCreateMaterial(relativePath, false);
+
+            if (material.Valid())
+                sceneEditor->setMaterialValues(relativePath, values, textureValues);
+
+            if (isNewFile && !newMaterialSelected) {
+                doc->SelectDataModelObject(material);
+                newMaterialSelected = true;
+            }
+
+            if (needRewrite && material.Valid())
+                sceneEditor->writeMaterialFile(material, name, false, absolutePath.toQString());
         }
 
-        auto material = sceneEditor->getMaterial(relativePath);
-        if (isNewFile && !newMaterialSelected && !material.Valid())
-            material = sceneEditor->getOrCreateMaterial(relativePath, false);
+        if (isBasicMaterial())
+            updateMatDataValues();
 
-        if (material.Valid())
-            sceneEditor->setMaterialValues(relativePath, values, textureValues);
-
-        if (isNewFile && !newMaterialSelected) {
-            doc->SelectDataModelObject(material);
-            newMaterialSelected = true;
-        }
-
-        if (needRewrite && material.Valid())
-            sceneEditor->writeMaterialFile(material, name, false, absolutePath.toQString());
+        sceneEditor->removeDeletedFromMaterialContainer();
     }
-
-    if (isBasicMaterial())
-        updateMatDataValues();
-
-    sceneEditor->removeDeletedFromMaterialContainer();
+    // Several aspects of the editor are not updated correctly
+    // if the data core is changed without a transaction
+    // The above scope completes the transaction for creating a new material
+    // Next the added undo has to be popped from the stack
+    // and the modified flag has to be restored
+    // TODO: Find a way to update the editor fully without a transaction
+    doc->SetModifiedFlag(isDocModified);
+    g_StudioApp.GetCore()->GetCmdStack()->RemoveLastUndo();
 
     m_cachedMatDatas = matDatas;
 }
@@ -1513,7 +1555,6 @@ void InspectorControlModel::setMaterialTypeValue(long instance, int handle, cons
     Q3DStudio::ScopedDocumentEditor scopedEditor(
                 Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, tr("Set Material Type")));
 
-    scopedEditor->BeginAggregateOperation();
     scopedEditor->SetMaterialType(instance, v);
 
     if (refMaterial.Valid() && canCopyProperties) {
@@ -1539,8 +1580,6 @@ void InspectorControlModel::setMaterialTypeValue(long instance, int handle, cons
 
         rebuildTree(); // Hack to mimic value changing behavior of the type selector
     }
-
-    scopedEditor->EndAggregateOperation();
 
     saveIfMaterial(instance);
 }
@@ -1610,14 +1649,26 @@ void InspectorControlModel::setMatDataValue(long instance, int handle, const QVa
         }
     }
 
+    if (changeMaterialFile) {
+        {
+            Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QString())
+                    ->setMaterialValues(srcPath.toQString(), values, textureValues);
+        }
+        // Several aspects of the editor are not updated correctly
+        // if the data core is changed without a transaction
+        // The above scope completes the transaction for creating a new material
+        // Next the added undo has to be popped from the stack
+        // TODO: Find a way to update the editor fully without a transaction
+        g_StudioApp.GetCore()->GetCmdStack()->RemoveLastUndo();
+    }
+
     Q3DStudio::ScopedDocumentEditor scopedEditor(
                 Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, tr("Set Material Type")));
-
-    scopedEditor->BeginAggregateOperation();
     scopedEditor->SetMaterialType(instance, v);
 
     if (changeMaterialFile) {
-        scopedEditor->setMaterialProperties(instance, srcPath, values, textureValues);
+        scopedEditor->setMaterialSourcePath(instance, srcPath);
+        scopedEditor->setMaterialReferenceByPath(instance, srcPath.toQString());
 
         // Select original instance again since potentially
         // creating a material selects the created one
@@ -1625,8 +1676,6 @@ void InspectorControlModel::setMatDataValue(long instance, int handle, const QVa
 
         rebuildTree(); // Hack to mimic value changing behavior of the type selector
     }
-
-    scopedEditor->EndAggregateOperation();
 
     saveIfMaterial(instance);
 }

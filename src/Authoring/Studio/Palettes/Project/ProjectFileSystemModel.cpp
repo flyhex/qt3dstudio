@@ -598,15 +598,28 @@ void ProjectFileSystemModel::showInfo(int row)
     QFileInfo fi(path);
 
     if (fi.suffix() == QLatin1String("materialdef")) {
-        const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
-        const auto material = sceneEditor->getOrCreateMaterial(path);
-        QString name;
-        QMap<QString, QString> values;
-        QMap<QString, QMap<QString, QString>> textureValues;
-        sceneEditor->getMaterialInfo(fi.absoluteFilePath(), name, values, textureValues);
-        sceneEditor->setMaterialValues(fi.absoluteFilePath(), values, textureValues);
-        if (material.Valid())
-            g_StudioApp.GetCore()->GetDoc()->SelectDataModelObject(material);
+        const auto doc = g_StudioApp.GetCore()->GetDoc();
+        bool isDocModified = doc->IsModified();
+        { // Scope for the ScopedDocumentEditor
+            Q3DStudio::ScopedDocumentEditor sceneEditor(
+                        Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QString()));
+            const auto material = sceneEditor->getOrCreateMaterial(path);
+            QString name;
+            QMap<QString, QString> values;
+            QMap<QString, QMap<QString, QString>> textureValues;
+            sceneEditor->getMaterialInfo(fi.absoluteFilePath(), name, values, textureValues);
+            sceneEditor->setMaterialValues(fi.absoluteFilePath(), values, textureValues);
+            if (material.Valid())
+                doc->SelectDataModelObject(material);
+        }
+        // Several aspects of the editor are not updated correctly
+        // if the data core is changed without a transaction
+        // The above scope completes the transaction for creating a new material
+        // Next the added undo has to be popped from the stack
+        // and the modified flag has to be restored
+        // TODO: Find a way to update the editor fully without a transaction
+        doc->SetModifiedFlag(isDocModified);
+        g_StudioApp.GetCore()->GetCmdStack()->RemoveLastUndo();
     }
 }
 

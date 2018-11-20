@@ -80,6 +80,8 @@ public:
     bool CanUndo();
     bool CanRedo();
 
+    void RemoveLastUndo();
+
     QString GetUndoDescription();
     QString GetRedoDescription();
 

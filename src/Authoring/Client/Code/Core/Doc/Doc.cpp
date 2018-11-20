@@ -1716,12 +1716,19 @@ void CDoc::LoadDocument(const QString &inDocument)
  */
 void CDoc::SaveDocument(const QString &inDocument)
 {
-    getSceneEditor()->removeUnusedFromMaterialContainer();
+    // Remove unused materials from the container during saving so that the .uip is not cluttered
+    Q3DStudio::CUpdateableDocumentEditor updatableEditor(*this);
+    updatableEditor.EnsureEditor(QString(), __FILE__, __LINE__)
+            .removeUnusedFromMaterialContainer();
+
     CFileOutputStream theFileStream(inDocument);
     // Exceptions here get propagated to the crash dialog.
     CBufferedOutputStream theBufferStream(&theFileStream);
     SavePresentationFile(&theBufferStream);
     theBufferStream.Close();
+
+    // Rollback material container changes so that undos work (material property changes etc.)
+    updatableEditor.RollbackEditor();
 }
 
 //=============================================================================

@@ -218,6 +218,17 @@ bool CCmdStack::CanRedo()
 
 //=============================================================================
 /**
+ * Remove the last command from the undo list
+ */
+//=============================================================================
+void CCmdStack::RemoveLastUndo()
+{
+    if (m_UndoList.size() > 0)
+        m_UndoList.pop_back();
+}
+
+//=============================================================================
+/**
  * Commit the last command on the undo stack.
  * This marks the last command as committed and prevents it from merging with
  * any future commands.
