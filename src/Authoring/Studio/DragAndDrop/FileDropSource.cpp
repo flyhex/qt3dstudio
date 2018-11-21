@@ -67,15 +67,20 @@ bool CFileDropSource::ValidateTarget(CDropTarget *inTarget)
     bool targetIsValid = CStudioObjectTypes::AcceptableParent((EStudioObjectType)m_ObjectType,
                                                               targetType);
 
-    // allow material and image rows as valid targets for image drops
-    if (!targetIsValid && m_FileType == DocumentEditorFileType::Image
-        && (targetType & (OBJTYPE_MATERIAL | OBJTYPE_CUSTOMMATERIAL | OBJTYPE_REFERENCEDMATERIAL
-                          | OBJTYPE_IMAGE))) {
-        const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
-                ->GetClientDataModelBridge();
-        // Default material shouldn't be targeatable
-        targetIsValid = bridge->GetSourcePath(inTarget->GetInstance()).toQString()
-                != bridge->getDefaultMaterialName();
+    // allow material, image, and scene as valid targets for image drops
+    if (!targetIsValid && m_FileType == DocumentEditorFileType::Image) {
+        if (targetType & (OBJTYPE_MATERIAL | OBJTYPE_CUSTOMMATERIAL | OBJTYPE_REFERENCEDMATERIAL
+                          | OBJTYPE_IMAGE)) {
+            const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+                    ->GetClientDataModelBridge();
+            // Default material shouldn't be targeatable
+            targetIsValid = bridge->GetSourcePath(inTarget->GetInstance()).toQString()
+                    != bridge->getDefaultMaterialName();
+        } else {
+            // Image isn't normally acceptable child of a scene, but dropping image on scene
+            // will create a rect with image as texture on active layer
+            targetIsValid = targetType == OBJTYPE_SCENE;
+        }
     }
 
     if (!targetIsValid) {
@@ -268,7 +273,7 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
                        ->SetInstancePropertyValueAsRenderable(inTarget, propHandle, src);
             } else if (rowType == OBJTYPE_SCENE) { // dropping on the scene as a texture
                 Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
-                       ->addRectFromSource(src, inSlide, thePoint, theStartTime);
+                       ->addRectFromSource(src, inSlide, isPres, thePoint, theStartTime);
             }
         } else if (isMatData) {
             if (rowType == OBJTYPE_REFERENCEDMATERIAL || rowType == OBJTYPE_MATERIAL

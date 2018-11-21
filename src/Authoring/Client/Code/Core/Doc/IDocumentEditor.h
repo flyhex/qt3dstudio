@@ -164,8 +164,8 @@ public:
                                                      bool selectCreatedInstance = true) = 0;
     virtual void setInstanceImagePropertyValue(TInstanceHandle instance, TPropertyHandle prop,
                                                const CString &src, bool isSubp = true) = 0;
-    virtual void addRectFromSource(const CString &src, TSlideHandle slide, const CPt &pos = {},
-                                   long startTime = -1) = 0;
+    virtual void addRectFromSource(const CString &src, TSlideHandle slide, bool isSubPres,
+                                   const CPt &pos = {}, long startTime = -1) = 0;
 
     virtual void DeleteInstances(const qt3dsdm::TInstanceHandleList &instances) = 0;
     // Delete this data model instance.  Will recursively delete any attached children in the scene

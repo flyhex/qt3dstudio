@@ -1871,13 +1871,14 @@ public:
      * Create a rect under the active layer and set its material's diffuse map from the provided
      * source.
      *
-     * @param src the presentation Id or image file name to set for the texture
-     * @param slide the slide to add to
-     * @param pos add position in the scene
-     * @param startTime add at this start time
+     * @param src The presentation Id or image file name to set for the texture
+     * @param slide The slide to add to
+     * @param isSubPres If true, the src parameter is a subpresentation Id
+     * @param pos Add position in the scene
+     * @param startTime Add at this start time
      */
-    void addRectFromSource(const CString &src, TSlideHandle slide, const CPt &pos = {},
-                           long startTime = -1) override
+    void addRectFromSource(const CString &src, TSlideHandle slide, bool isSubPres,
+                           const CPt &pos = {}, long startTime = -1) override
     {
         qt3dsdm::Qt3DSDMPropertyHandle activeLayer = m_Doc.GetActiveLayer();
         Qt3DSDMInstanceHandle rectInstance =
@@ -1895,7 +1896,7 @@ public:
                     SetMaterialType(matInstance, "Standard Material");
 
                 auto prop = m_Bridge.GetObjectDefinitions().m_Material.m_DiffuseMap1.m_Property;
-                setInstanceImagePropertyValue(matInstance, prop, src);
+                setInstanceImagePropertyValue(matInstance, prop, src, isSubPres);
                 break;
             }
         }
