@@ -812,6 +812,16 @@ void ProjectFile::deletePresentationFile(const QString &filePath)
     }
 }
 
+void ProjectFile::renameMaterial(const QString &oldName, const QString &newName)
+{
+    for (auto &pres : qAsConst(g_StudioApp.m_subpresentations)) {
+        if (pres.m_type == QLatin1String("presentation")) {
+            PresentationFile::renameMaterial(getAbsoluteFilePathTo(pres.m_argsOrSrc),
+                                             oldName, newName);
+        }
+    }
+}
+
 /**
  * Returns an absolute file path for a given relative file path.
  *

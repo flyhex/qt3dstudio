@@ -34,6 +34,9 @@
 #include "Doc.h"
 #include "StudioUtils.h"
 #include "IDocumentReader.h"
+#include "IDocumentEditor.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "ClientDataModelBridge.h"
 #include <QtCore/qfile.h>
 #include <QtCore/qsavefile.h>
 #include <QtXml/qdom.h>
@@ -98,6 +101,123 @@ void PresentationFile::updatePresentationId(const QString &uipPath, const QStrin
             }
             if (elem.attribute(QStringLiteral("subpresentation")) == oldId) {
                 elem.setAttribute(QStringLiteral("subpresentation"), newId);
+                updated = true;
+            }
+        }
+    }
+
+    if (updated)
+        StudioUtils::commitDomDocumentSave(file, domDoc);
+}
+
+/**
+ * Find all occurrences of a material name in a .uip file and replace them with a new value
+ *
+ * @param uipPath presentation file path
+ * @param oldName the material name to find
+ * @param newName the material name to replace
+ */
+// static
+void PresentationFile::renameMaterial(const QString &uipPath, const QString &oldName,
+                                      const QString &newName)
+{
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    const auto sceneEditor = doc->getSceneEditor();
+
+    const auto absOldPath = sceneEditor->getFilePathFromMaterialName(oldName);
+    const auto absNewPath = sceneEditor->getFilePathFromMaterialName(newName);
+
+    const auto dir = QFileInfo(uipPath).dir();
+    const auto relOldPath = dir.relativeFilePath(absOldPath);
+    const auto relNewPath = dir.relativeFilePath(absNewPath);
+
+    auto refNewName = newName;
+    int slashIndex = newName.lastIndexOf(QLatin1Char('/'));
+    if (slashIndex != -1)
+        refNewName = newName.mid(slashIndex + 1);
+
+    QDomDocument domDoc;
+    QSaveFile file(uipPath);
+    if (!StudioUtils::openDomDocumentSave(file, domDoc))
+        return;
+
+    QDomElement rootElem = domDoc.documentElement();
+    QDomNodeList addNodes = rootElem.elementsByTagName(QStringLiteral("Add"));
+    QDomNodeList setNodes = rootElem.elementsByTagName(QStringLiteral("Set"));
+
+    bool updated = false;
+
+    QDomNodeList materialNodes = rootElem.elementsByTagName(QStringLiteral("Material"));
+
+    // Find the material container
+    QDomElement materialContainer;
+    for (int i = 0; i < materialNodes.length(); ++i) {
+        QDomElement elem = materialNodes.at(i).toElement();
+        if (elem.attribute(QStringLiteral("id")) == bridge->getMaterialContainerName()) {
+            materialContainer = elem;
+            break;
+        }
+    }
+
+    if (materialContainer.isNull())
+        return;
+
+    QDomNodeList containerNodes = materialContainer.childNodes();
+
+    // Store the material ids for further use and change the names and ids to new ones
+    QStringList materialIds;
+    for (int i = 0; i < containerNodes.length(); ++i) {
+        QDomElement elem = containerNodes.at(i).toElement();
+        materialIds.append(elem.attribute(QStringLiteral("id")));
+        if (elem.attribute(QStringLiteral("id")) == oldName) {
+            elem.setAttribute(QStringLiteral("id"), newName);
+            updated = true;
+        }
+    }
+
+    // Since rename can change the visible name only in the original presentation
+    // and retain the old id, we have to cross-reference the ids here to the ids
+    // logged previously. If a material has the same visible name as the old name,
+    // the id and the new name are stored
+    QVector<QPair<QString, QString>> materialRenames;
+
+    const auto renameReferencedMaterial = [&](QDomElement &elem) {
+        QString ref = elem.attribute(QStringLiteral("ref"));
+        if (elem.attribute(QStringLiteral("name")) == oldName
+                && !ref.isEmpty() && materialIds.contains(ref.mid(1))) {
+            materialRenames.append(QPair<QString, QString>(ref.mid(1), newName));
+            elem.setAttribute(QStringLiteral("ref"), QLatin1Char('#') + newName);
+            elem.setAttribute(QStringLiteral("name"), newName);
+            updated = true;
+        }
+        if (elem.attribute(QStringLiteral("sourcepath")) == relOldPath) {
+            elem.setAttribute(QStringLiteral("sourcepath"), relNewPath);
+            if (elem.hasAttribute(QStringLiteral("referencedmaterial"))) {
+                elem.setAttribute(QStringLiteral("referencedmaterial"),
+                                  QLatin1Char('#') + newName);
+                elem.setAttribute(QStringLiteral("name"), refNewName);
+            }
+            updated = true;
+        }
+    };
+
+    for (int i = 0; i < addNodes.length(); ++i) {
+        QDomElement elem = addNodes.at(i).toElement();
+        renameReferencedMaterial(elem);
+    }
+
+    for (int i = 0; i < setNodes.length(); ++i) {
+        QDomElement elem = setNodes.at(i).toElement();
+        renameReferencedMaterial(elem);
+    }
+
+    // New pass is needed to change the ids stored when changing the Add and Set Nodes
+    for (int i = 0; i < containerNodes.length(); ++i) {
+        for (auto &materialRename : qAsConst(materialRenames)) {
+            QDomElement elem = containerNodes.at(i).toElement();
+            if (elem.attribute(QStringLiteral("id")) == materialRename.first) {
+                elem.setAttribute(QStringLiteral("id"), materialRename.second);
                 updated = true;
             }
         }

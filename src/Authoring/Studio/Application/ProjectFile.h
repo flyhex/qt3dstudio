@@ -73,6 +73,7 @@ public:
     void setInitialPresentation(const QString &initialId);
     bool renamePresentationFile(const QString &oldName, const QString &newName);
     void deletePresentationFile(const QString &filePath);
+    void renameMaterial(const QString &oldName, const QString &newName);
 
 Q_SIGNALS:
     void presentationIdChanged(const QString &path, const QString &id);

@@ -546,8 +546,11 @@ void InspectorControlModel::setMatDatas(const std::vector<Q3DStudio::CFilePath> 
                 if (!QFileInfo(oldPath).exists()) {
                     const auto instance = sceneEditor->getMaterial(oldPath);
                     if (instance.Valid()) {
-                        const QString actualPath = sceneEditor->getFilePathFromMaterialName(
-                                    sceneEditor->GetName(instance).toQString());
+                        const QString oldName = sceneEditor->GetName(instance).toQString();
+                        const QString newName = sceneEditor
+                                ->getMaterialNameFromFilePath(relativePath);
+                        const QString actualPath = sceneEditor
+                                ->getFilePathFromMaterialName(oldName);
                         if (actualPath == oldPath) {
                             sceneEditor->setMaterialNameByPath(instance, relativePath);
 
@@ -565,6 +568,9 @@ void InspectorControlModel::setMatDatas(const std::vector<Q3DStudio::CFilePath> 
                                                                         bridge->GetNameProperty());
                                 }
                             }
+                            g_StudioApp.GetCore()->getProjectFile().renameMaterial(
+                                        oldName, newName);
+                            isDocModified = true;
                         }
                     }
                 }
@@ -1793,6 +1799,10 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
                                 studio->GetFullSystemSignalSender()
                                         ->SendInstancePropertyValue(instance,
                                                                     bridge->GetNameProperty());
+                                g_StudioApp.GetCore()->getProjectFile().renameMaterial(
+                                            properName.toQString(), newName.toQString());
+                                refreshTree();
+                                doc->SetModifiedFlag();
                             }
                             break;
                         }
