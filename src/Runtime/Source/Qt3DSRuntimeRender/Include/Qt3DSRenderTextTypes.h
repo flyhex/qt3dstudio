@@ -59,6 +59,16 @@ namespace render {
         };
     };
 
+    struct TextWordWrap
+    {
+        enum Enum {
+            Unknown = 0,
+            Clip,
+            WrapWord,
+            WrapAnywhere,
+        };
+    };
+
     struct STextDimensions
     {
         QT3DSU32 m_TextWidth;
@@ -156,6 +166,8 @@ namespace render {
         QT3DSF32 m_DropShadowOffset;
         TextHorizontalAlignment::Enum m_DropShadowHorizontalAlignment;
         TextVerticalAlignment::Enum m_DropShadowVerticalAlignment;
+        TextWordWrap::Enum m_WordWrap;
+        QT3DSVec2 m_BoundingBox;
 
         QT3DSF32 m_ScaleX; // Pixel scale in X
         QT3DSF32 m_ScaleY; // Pixel scale in Y

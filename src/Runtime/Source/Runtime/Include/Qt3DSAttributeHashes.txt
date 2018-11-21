@@ -179,6 +179,9 @@ dropshadowstrength
 dropshadowoffset
 dropshadowhorzalign
 dropshadowvertalign
+boundingbox
+boundingbox.x
+boundingbox.y
 tracking
 leading
 renderstyle

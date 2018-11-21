@@ -629,6 +629,10 @@ struct SRuntimePropertyParser
 #define Text_DropShadowOffset ATTRIBUTE_DROPSHADOWOFFSET
 #define Text_DropShadowHorizontalAlignment ATTRIBUTE_DROPSHADOWHORZALIGN
 #define Text_DropShadowVerticalAlignment ATTRIBUTE_DROPSHADOWVERTALIGN
+#define Text_WordWrap ATTRIBUTE_WORDWRAP
+#define Text_BoundingBox ATTRIBUTE_BOUNDINGBOX
+#define Text_BoundingBox_X ATTRIBUTE_BOUNDINGBOX_X
+#define Text_BoundingBox_Y ATTRIBUTE_BOUNDINGBOX_Y
 #define Text_TextColor ATTRIBUTE_TEXTCOLOR
 #define Text_TextColor_R ATTRIBUTE_TEXTCOLOR_R
 #define Text_TextColor_G ATTRIBUTE_TEXTCOLOR_G
@@ -1159,7 +1163,6 @@ struct STextTranslator : public SNodeTranslator
             ITERATE_QT3DS_RENDER_TEXT_PROPERTIES
         case Q3DStudio::ATTRIBUTE_TEXTTYPE:
         case Q3DStudio::ATTRIBUTE_RENDERSTYLE:
-        case Q3DStudio::ATTRIBUTE_WORDWRAP:
         case Q3DStudio::ATTRIBUTE_HORZSCROLL:
         case Q3DStudio::ATTRIBUTE_VERTSCROLL:
         case Q3DStudio::ATTRIBUTE_BOXHEIGHT:

@@ -107,6 +107,9 @@ namespace render {
 #define WCHAR_T_Cloud L"Cloud"
 #define WCHAR_T_Fluid L"Fluid"
 #define WCHAR_T_User L"User"
+#define WCHAR_T_Clip L"Clip"
+#define WCHAR_T_WrapWord L"WrapWord"
+#define WCHAR_T_WrapAnywhere L"WrapAnywhere"
 
 #define CHAR_T_Directional "Directional"
 #define CHAR_T_Point "Point"
@@ -183,6 +186,9 @@ namespace render {
 #define CHAR_T_Cloud "Cloud"
 #define CHAR_T_Fluid "Fluid"
 #define CHAR_T_User "User"
+#define CHAR_T_Clip "Clip"
+#define CHAR_T_WrapWord "WrapWord"
+#define CHAR_T_WrapAnywhere "WrapAnywhere"
 
 #define DEFINE_NAME_MAP_ENTRY(enumval, name)                                                       \
     {                                                                                              \
@@ -237,6 +243,13 @@ namespace render {
         DEFINE_NAME_MAP_ENTRY(TextVerticalAlignment::Top, Top),
         DEFINE_NAME_MAP_ENTRY(TextVerticalAlignment::Middle, Middle),
         DEFINE_NAME_MAP_ENTRY(TextVerticalAlignment::Bottom, Bottom),
+        { (QT3DSU32)-1, NULL },
+    };
+
+    SEnumNameMap g_TextWordWrapMap[] = {
+        DEFINE_NAME_MAP_ENTRY(TextWordWrap::Clip, Clip),
+        DEFINE_NAME_MAP_ENTRY(TextWordWrap::WrapWord, WrapWord),
+        DEFINE_NAME_MAP_ENTRY(TextWordWrap::WrapAnywhere, WrapAnywhere),
         { (QT3DSU32)-1, NULL },
     };
 
@@ -377,6 +390,11 @@ namespace render {
     SEnumNameMap *SEnumParseMap<TextVerticalAlignment::Enum>::GetMap()
     {
         return g_TextVerticalAlignmentMap;
+    }
+
+    SEnumNameMap *SEnumParseMap<TextWordWrap::Enum>::GetMap()
+    {
+        return g_TextWordWrapMap;
     }
 
     SEnumNameMap *SEnumParseMap<AAModeValues::Enum>::GetMap() { return g_ProgressiveAAValuesMap; }

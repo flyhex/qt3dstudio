@@ -212,6 +212,9 @@ enum EAttribute {
     ATTRIBUTE_DROPSHADOWOFFSET =     0x024A9C5E, // dropshadowoffset
     ATTRIBUTE_DROPSHADOWHORZALIGN =  0x00D1BC39, // dropshadowhorzalign
     ATTRIBUTE_DROPSHADOWVERTALIGN =  0x038D589B, // dropshadowvertalign
+    ATTRIBUTE_BOUNDINGBOX =          0x02F3B6D9, // boundingbox
+    ATTRIBUTE_BOUNDINGBOX_X =        0x0272C10F, // boundingbox.x
+    ATTRIBUTE_BOUNDINGBOX_Y =        0x0273C14E, // boundingbox.y
     ATTRIBUTE_TRACKING =             0x02A25049, // tracking
     ATTRIBUTE_LEADING =              0x016A6BDA, // leading
     ATTRIBUTE_RENDERSTYLE =          0x03567B85, // renderstyle

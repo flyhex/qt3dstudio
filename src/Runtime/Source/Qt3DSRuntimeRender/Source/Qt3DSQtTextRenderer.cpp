@@ -504,7 +504,16 @@ struct Qt3DSQtTextRenderer : public ITextRenderer
         int shadowRgb = int(2.55f * (100 - int(inSrcText.m_DropShadowStrength)));
         QStringList lineList;
         QVector<qreal> lineWidths;
-        QRectF boundingBox = textBoundingBox(inSrcText, fm, lineList, lineWidths);
+        QRectF boundingBox;
+        const bool dynamicTextArea = inSrcText.m_BoundingBox.isZero();
+
+        if (dynamicTextArea) {
+            boundingBox = textBoundingBox(inSrcText, fm, lineList, lineWidths);
+        } else {
+            lineList << inSrcText.m_Text.c_str();
+            lineWidths << inSrcText.m_BoundingBox.x;
+            boundingBox = QRectF(0, 0, inSrcText.m_BoundingBox.x, inSrcText.m_BoundingBox.y);
+        }
 
         if (boundingBox.width() <= 0 || boundingBox.height() <= 0) {
             return ITextRenderer::UploadData(toU8DataRef((char *)nullptr, 0), inTexture, 4, 4,
@@ -560,7 +569,24 @@ struct Qt3DSQtTextRenderer : public ITextRenderer
             }
         }
 
-        int lineHeight = fm.height();
+        int wordWrapFlags = 0;
+        if (dynamicTextArea) {
+            wordWrapFlags = Qt::TextDontClip;
+        } else {
+            switch (inSrcText.m_WordWrap) {
+            case TextWordWrap::WrapWord:
+                wordWrapFlags = Qt::TextWordWrap | Qt::TextDontClip;
+                break;
+            case TextWordWrap::WrapAnywhere:
+                wordWrapFlags = Qt::TextWrapAnywhere | Qt::TextDontClip;
+                break;
+            case TextWordWrap::Clip:
+            default:
+                break;
+            }
+        }
+
+        int lineHeight = dynamicTextArea ? fm.height() : finalHeight;
         QT3DSF32 nextHeight = 0;
         for (int i = 0; i < lineList.size(); ++i) {
             const QString &line = lineList.at(i);
@@ -583,13 +609,13 @@ struct Qt3DSQtTextRenderer : public ITextRenderer
                 // shadow is a darker shade of the given font color
                 painter.setPen(QColor(shadowRgb, shadowRgb, shadowRgb));
                 painter.drawText(boundShadow,
-                                 alignToQtAlign(inSrcText.m_VerticalAlignment) |
-                                 Qt::TextDontClip | Qt::AlignLeft, line, &actualBound);
+                                 alignToQtAlign(inSrcText.m_VerticalAlignment) | wordWrapFlags
+                                 | Qt::AlignLeft, line, &actualBound);
                 painter.setPen(Qt::white); // coloring is done in the shader
             }
             painter.drawText(bound,
-                             alignToQtAlign(inSrcText.m_VerticalAlignment) |
-                             Qt::TextDontClip | Qt::AlignLeft, line, &actualBound);
+                             alignToQtAlign(inSrcText.m_VerticalAlignment) | wordWrapFlags
+                             | Qt::AlignLeft, line, &actualBound);
 
             nextHeight += QT3DSF32(lineHeight) + inSrcText.m_Leading;
         }
