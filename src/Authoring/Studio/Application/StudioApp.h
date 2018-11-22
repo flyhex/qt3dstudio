@@ -81,7 +81,7 @@ public:
     CStudioApp();
     virtual ~CStudioApp();
 
-    virtual bool initInstance(const QCommandLineParser &parser);
+    virtual bool initInstance(const QCommandLineParser &parser, bool isOpenGLES = false);
     virtual bool run(const QCommandLineParser &parser);
 
     void onAppAbout();

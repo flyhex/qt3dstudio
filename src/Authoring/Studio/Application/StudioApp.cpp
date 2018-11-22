@@ -75,6 +75,8 @@ int main(int argc, char *argv[])
     qputenv("LC_ALL", "C");
 #endif
 
+    bool isOpenGLES = false;
+
     // init runtime static resources
     Q_INIT_RESOURCE(res);
 
@@ -99,12 +101,7 @@ int main(int argc, char *argv[])
     QScopedPointer<QOpenGLContext> context(new QOpenGLContext());
     context->setFormat(format);
     context->create();
-    if (context->isOpenGLES()) {
-        format.setRenderableType(QSurfaceFormat::OpenGLES);
-        format.setMajorVersion(2);
-        format.setMinorVersion(0);
-        QSurfaceFormat::setDefaultFormat(format);
-    }
+    isOpenGLES = context->isOpenGLES();
 #endif
 
 #ifdef ENABLE_QT_BREAKPAD
@@ -161,7 +158,7 @@ int main(int argc, char *argv[])
     QFile styleFile(":/style.qss");
     styleFile.open(QFile::ReadOnly);
     guiApp.setStyleSheet(styleFile.readAll());
-    g_StudioApp.initInstance(parser);
+    g_StudioApp.initInstance(parser, isOpenGLES);
     return g_StudioApp.run(parser);
 }
 
@@ -313,7 +310,7 @@ void CStudioApp::performShutdown()
  * This creates the all the views, then returns if everything
  * was successful.
  */
-bool CStudioApp::initInstance(const QCommandLineParser &parser)
+bool CStudioApp::initInstance(const QCommandLineParser &parser, bool isOpenGLES)
 {
     QApplication::setOrganizationName("The Qt Company");
     QApplication::setOrganizationDomain("qt.io");
@@ -337,6 +334,15 @@ bool CStudioApp::initInstance(const QCommandLineParser &parser)
     CStudioPreferences::loadPreferences(thePreferencesPath);
 
     m_dialogs = new CDialogs(!m_isSilent);
+
+    if (isOpenGLES) {
+        m_dialogs->DisplayKnownErrorDialog(
+                    tr("Qt 3D Studio cannot be started.\n"
+                       "OpenGL ES is not supported for Qt 3D Studio Editor.\n"
+                       "Make sure you are not using a software renderer or\n"
+                       "wrapper like MESA or Angle before trying again."));
+        exit(0);
+    }
 
     m_views = new CViews();
 
