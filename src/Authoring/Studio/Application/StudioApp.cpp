@@ -1694,10 +1694,12 @@ bool CStudioApp::OnLoadDocument(const QString &inDocument, bool inShowStartupDia
 #if (defined Q_OS_MACOS)
         m_fileOpenEvent = false;
 #endif
-        if (!theErrorText.isEmpty())
+        if (!theErrorText.isEmpty()) {
             m_dialogs->DisplayKnownErrorDialog(theErrorText);
-        else
-            m_dialogs->DisplayLoadingPresentationFailed(loadFileInfo, theLoadErrorParameter);
+        } else {
+            m_dialogs->DisplayLoadingPresentationFailed(loadFileInfo, inDocument,
+                                                        theLoadErrorParameter);
+        }
 
         m_core->GetDispatch()->FireOnOpenDocument(loadFile, false);
 

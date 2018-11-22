@@ -533,9 +533,10 @@ QString CDialogs::defaultDirForUrl(const QUrl &url)
  * @param errrorText error message
  */
 void CDialogs::DisplayLoadingPresentationFailed(const QFileInfo &loadFileInfo,
+                                                const QString &loadFileName,
                                                 const QString &errorText)
 {
-    QString theErrorMessage = loadFileInfo.fileName();
+    QString theErrorMessage = loadFileInfo.isFile() ? loadFileInfo.fileName() : loadFileName;
 
     if (errorText.isEmpty())
         theErrorMessage +=  QObject::tr(" failed to load.");
