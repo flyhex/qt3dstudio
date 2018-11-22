@@ -950,6 +950,15 @@ public:
                     theReader->Value(value);
                     const QString nameStr = QString::fromUtf8(name);
                     const QString valueStr = QString::fromUtf8(value);
+                    if (nameStr == sourcePath) {
+                        // Check if the custom material still exists
+                        const auto absSourcePath = projDir.absoluteFilePath(valueStr);
+                        if (!QFileInfo(absSourcePath).exists()) {
+                            outValues.clear();
+                            outTextureValues.clear();
+                            return;
+                        }
+                    }
                     if (!valueStr.isEmpty() && (QString::fromUtf8(type) == QLatin1String("Texture")
                             || nameStr == sourcePath)) {
                         convertPaths.append(nameStr);
