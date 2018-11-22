@@ -89,10 +89,10 @@ void Q3DSDirWatcher::addCallback(TFileModCallbackType &callback)
     for (const QString &path : qAsConst(m_files))
         records.push_back(getRecordFromCache(path, FileModificationType::Created));
 
-    callback(records);
-
     if (!m_callbacks.contains(&callback))
         m_callbacks.insert(&callback, callback);
+
+    callback(records);
 }
 
 void Q3DSDirWatcher::removeCallback(TFileModCallbackType &callback)
