@@ -1275,7 +1275,11 @@ void CDoc::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                              qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
     using namespace qt3dsdm;
-
+    // Save the material definition upon undo and redo
+    if (m_Core->GetCmdStack()->isUndoingOrRedoing() &&
+            m_StudioSystem->GetClientDataModelBridge()->isInsideMaterialContainer(inInstance)) {
+        getSceneEditor()->saveIfMaterial(inInstance);
+    }
     // check if we changed datainput bindings
     if (inProperty == m_StudioSystem->GetPropertySystem()
             ->GetAggregateInstancePropertyByName(inInstance, L"controlledproperty")) {
