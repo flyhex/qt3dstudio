@@ -277,11 +277,6 @@ bool CPaletteManager::tabNavigateFocusedWidget(bool tabForward)
     return false;
 }
 
-void CPaletteManager::onTimeChanged(long time)
-{
-    //m_timeLineToolbar->onTimeChanged(time);
-}
-
 ProjectView *CPaletteManager::projectView() const
 {
     return m_projectView;

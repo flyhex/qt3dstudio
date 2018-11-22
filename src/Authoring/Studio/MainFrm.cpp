@@ -991,18 +991,14 @@ void CMainFrame::OnPlayStop()
     }
 }
 
-//==========================================================================
 /**
  *	Called when the presentation time changes.  Not handled by this class,
  *	but included because the base class requires it to be implemented.
  */
 void CMainFrame::OnTimeChanged(long inTime)
 {
-    if (m_paletteManager)
-        m_paletteManager->onTimeChanged(inTime);
 }
 
-//==============================================================================
 /**
  *	Handles pressing the play button.
  */
@@ -1011,7 +1007,6 @@ void CMainFrame::OnPlaybackPlay()
     g_StudioApp.PlaybackPlay();
 }
 
-//==============================================================================
 /**
  *	Handles pressing of the stop button.
  */
@@ -1020,7 +1015,6 @@ void CMainFrame::OnPlaybackStop()
     g_StudioApp.PlaybackStopNoRestore();
 }
 
-//==============================================================================
 /**
  *	Handles pressing the preview button.
  */
