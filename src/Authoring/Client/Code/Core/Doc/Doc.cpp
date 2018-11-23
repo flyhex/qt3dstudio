@@ -2232,11 +2232,20 @@ int CDoc::LoadStudioData(CBufferedInputStream *inInputStream)
             theSerializer->SerializeScene(theReader, GetDocumentDirectory(), (int)theVersion);
         }
 
+        auto bridge = GetStudioSystem()->GetClientDataModelBridge();
+
         // Setup the Presentation and Scene
         // Asset Graph has only one root and that's the scene
         m_SceneInstance = m_AssetGraph->GetRoot(0);
-        m_ActiveSlide = m_StudioSystem->GetClientDataModelBridge()->GetComponentSlide(
-                    m_SceneInstance, 1);
+        m_ActiveSlide = bridge->GetComponentSlide(m_SceneInstance, 1);
+
+        // Make sure material container has no duration
+        const auto matCont = bridge->getMaterialContainer();
+        const auto slideCore = GetStudioSystem()->GetFullSystem()->GetCoreSystem()->GetSlideCore();
+        if (matCont.Valid()) {
+            slideCore->forceSetInstancePropertyValueOnAllSlides(
+                        matCont, bridge->GetSceneAsset().m_EndTime, 0);
+        }
     } catch (...) {
         CleanupData();
         throw; // pass the error along to the caller, so the appropriate error message can be

@@ -2245,7 +2245,8 @@ public:
                                                 slide, DocumentEditorInsertType::LastChild,
                                                 CPt(), PRIMITIVETYPE_UNKNOWN, -1);
             SetName(instance, CString::fromQString(m_Bridge.getMaterialContainerName()));
-            SetTimeRange(instance, 0, 0);
+            m_SlideCore.forceSetInstancePropertyValueOnAllSlides(
+                        instance, m_Bridge.GetSceneAsset().m_EndTime, 0);
         }
         return instance;
     }

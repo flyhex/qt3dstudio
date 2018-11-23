@@ -139,6 +139,13 @@ public:
                                                const SValue &inValue) = 0;
 
     /**
+     * Set a property value on an instance on all slides.
+     */
+    virtual void forceSetInstancePropertyValueOnAllSlides(Qt3DSDMInstanceHandle inInstance,
+                                                          Qt3DSDMPropertyHandle inProperty,
+                                                          const SValue &inValue) = 0;
+
+    /**
      *	Return the value for this property if it exists on this slide.
      */
     virtual bool GetSpecificInstancePropertyValue(Qt3DSDMSlideHandle inSlide,

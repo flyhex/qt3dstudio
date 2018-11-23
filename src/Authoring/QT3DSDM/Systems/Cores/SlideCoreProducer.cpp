@@ -273,6 +273,13 @@ void CSlideCoreProducer::ForceSetInstancePropertyValue(Qt3DSDMSlideHandle inSlid
         m_Data->ForceSetInstancePropertyValue(inSlide, inHandle, inProperty, inValue);
 }
 
+void CSlideCoreProducer::forceSetInstancePropertyValueOnAllSlides(Qt3DSDMInstanceHandle inInstance,
+                                                                  Qt3DSDMPropertyHandle inProperty,
+                                                                  const SValue &inValue)
+{
+    m_Data->forceSetInstancePropertyValueOnAllSlides(inInstance, inProperty, inValue);
+}
+
 bool CSlideCoreProducer::GetSpecificInstancePropertyValue(Qt3DSDMSlideHandle inSlide,
                                                           Qt3DSDMInstanceHandle inInstance,
                                                           Qt3DSDMPropertyHandle inProperty,

@@ -117,6 +117,9 @@ public:
                                   Qt3DSDMPropertyHandle inProperty, const SValue &inValue) override;
     void ForceSetInstancePropertyValue(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inHandle,
                                        Qt3DSDMPropertyHandle inProperty, const SValue &inValue) override;
+    void forceSetInstancePropertyValueOnAllSlides(Qt3DSDMInstanceHandle inInstance,
+                                                  Qt3DSDMPropertyHandle inProperty,
+                                                  const SValue &inValue) override;
     bool GetSpecificInstancePropertyValue(Qt3DSDMSlideHandle inSlide,
                                           Qt3DSDMInstanceHandle inInstance,
                                           Qt3DSDMPropertyHandle inProperty, SValue &outValue) const override;
