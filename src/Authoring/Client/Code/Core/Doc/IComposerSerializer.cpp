@@ -1514,6 +1514,30 @@ struct SComposerSerializerImpl : public IComposerSerializer
         ioProperties.clear();
 
         ParseInstanceProperties(inReader, inInstance, outExtraAttributes, ioProperties);
+
+        // Fix for QT3DS-2581: if an image has mapping mode "Light Probe" without
+        // explicitly set U tiling mode, force horizontal tiling to "Tiled" to
+        // obey legacy behavior where light probe U tiling was hard-wired to tiled. This
+        // is to preserve behavior on old presentations that relied on hardcoding.
+        bool hasMappingAsProbe = false;
+        bool hasTilingH = false;
+        for (size_t idx = 0, end = ioProperties.size(); idx < end; ++idx) {
+            if (ioProperties[idx].first == m_ObjectDefinitions.m_Image.m_TilingU)
+                hasTilingH = true;
+            if (ioProperties[idx].first == m_ObjectDefinitions.m_Image.m_TextureMapping
+                && ioProperties[idx].second.toQVariant() == QVariant("Light Probe")) {
+                hasMappingAsProbe = true;
+            }
+        }
+
+        if (!hasTilingH && hasMappingAsProbe) {
+            qCDebug(qt3ds::TRACE_INFO)
+                    << "Setting light probe horizontal tiling default to 'Tiled'.";
+            qt3dsdm::SValue theValue(qt3dsdm::TDataStrPtr(new qt3dsdm::CDataStr(L"Tiled")));
+            ioProperties.push_back(std::make_pair(
+                                       m_ObjectDefinitions.m_Image.m_TilingU, theValue));
+        }
+
         if (inSlide.Valid()) {
             for (size_t idx = 0, end = ioProperties.size(); idx < end; ++idx)
                 m_SlideCore.ForceSetInstancePropertyValue(inSlide, inInstance,

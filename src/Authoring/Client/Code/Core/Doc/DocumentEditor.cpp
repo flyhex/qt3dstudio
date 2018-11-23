@@ -1677,21 +1677,36 @@ public:
             CreateSceneGraphInstance(ComposerObjectTypes::Image, instance, theSlide);
         const Q3DStudio::TGUIDPacked thePackedGuid(m_Bridge.GetGUID(theImageInstance));
         qt3dsdm::SLong4 theImageGuid(thePackedGuid.Data1, thePackedGuid.Data2, thePackedGuid.Data3,
-                                   thePackedGuid.Data4);
+                                     thePackedGuid.Data4);
         m_SlideCore.ForceSetInstancePropertyValue(theSlide, instance, propName, theImageGuid);
-        if (propName == m_Bridge.GetObjectDefinitions().m_Material.m_SpecularReflection)
+        if (propName == m_Bridge.GetObjectDefinitions().m_Material.m_SpecularReflection) {
             SetInstancePropertyValue(theImageInstance,
                                      m_Bridge.GetObjectDefinitions().m_Image.m_TextureMapping,
                                      std::make_shared<CDataStr>(L"Environmental Mapping"), false);
-        else if (propName == m_Bridge.GetObjectDefinitions().m_Layer.m_LightProbe
-                 || propName == m_Bridge.GetObjectDefinitions().m_Layer.m_LightProbe2)
+        } else if (propName == m_Bridge.GetObjectDefinitions().m_Layer.m_LightProbe
+                   || propName == m_Bridge.GetObjectDefinitions().m_Layer.m_LightProbe2) {
             SetInstancePropertyValue(theImageInstance,
                                      m_Bridge.GetObjectDefinitions().m_Image.m_TextureMapping,
                                      std::make_shared<CDataStr>(L"Light Probe"), false);
-        else if (propName == m_Bridge.GetObjectDefinitions().m_MaterialBase.m_IblProbe)
+            // Preserve legacy behavior where image based lighting used always tiling for
+            // horizontal direction
+            SetInstancePropertyValue(theImageInstance,
+                                     m_Bridge.GetObjectDefinitions().m_Image.m_TilingU,
+                                     std::make_shared<CDataStr>(L"Tiled"), false);
+            SetInstancePropertyValue(theImageInstance,
+                                     m_Bridge.GetObjectDefinitions().m_Image.m_TilingV,
+                                     std::make_shared<CDataStr>(L"No Tiling"), false);
+        } else if (propName == m_Bridge.GetObjectDefinitions().m_MaterialBase.m_IblProbe) {
             SetInstancePropertyValue(theImageInstance,
                                      m_Bridge.GetObjectDefinitions().m_Image.m_TextureMapping,
-                                     std::make_shared<CDataStr>(L"IBL Override"), false);
+                                     std::make_shared<CDataStr>(L"Light Probe"), false);
+            SetInstancePropertyValue(theImageInstance,
+                                     m_Bridge.GetObjectDefinitions().m_Image.m_TilingU,
+                                     std::make_shared<CDataStr>(L"Tiled"), false);
+            SetInstancePropertyValue(theImageInstance,
+                                     m_Bridge.GetObjectDefinitions().m_Image.m_TilingV,
+                                     std::make_shared<CDataStr>(L"No Tiling"), false);
+        }
         return theImageInstance;
     }
 

@@ -1693,7 +1693,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
         if (theLightProbe) {
             if (theLightProbe->m_TextureData.m_Texture) {
                 NVRenderTextureCoordOp::Enum theHorzLightProbeTilingMode =
-                    NVRenderTextureCoordOp::Repeat;
+                    theLightProbe->m_HorizontalTilingMode;
                 NVRenderTextureCoordOp::Enum theVertLightProbeTilingMode =
                     theLightProbe->m_VerticalTilingMode;
                 theLightProbe->m_TextureData.m_Texture->SetTextureWrapS(
