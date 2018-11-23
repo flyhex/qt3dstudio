@@ -402,6 +402,14 @@ void CDataInputListDlg::onAddDataInput()
     // dialog automatically
     if (m_goToAdd)
         accept();
+
+    // Otherwise find the new position of added DI and select it.
+    auto idxList = m_ui->tableView->selectionModel()->model()->match(
+                m_ui->tableView->selectionModel()->model()->index(
+                    0,0), Qt::EditRole, m_mostRecentlyAdded);
+
+    if (!idxList.empty())
+        m_ui->tableView->selectRow(idxList.first().row());
 }
 
 void CDataInputListDlg::onRemoveDataInput()
