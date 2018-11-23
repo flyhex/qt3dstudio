@@ -1353,10 +1353,7 @@ void CDoc::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
             ->GetAggregateInstancePropertyByName(inInstance, L"controlledproperty")) {
         // we need to rebuild the datainput map as we do not know what exactly
         // happened with controlledproperty property
-        // TODO: implement a pre-change signal that can be used to extract
-        // controlledproperty string before and after the change, so we know exactly
-        // what happened to the element
-        UpdateDatainputMap();
+        UpdateDatainputMapForInstance(inInstance);
     }
 }
 
@@ -3022,6 +3019,51 @@ void CDoc::UpdateDatainputMap(QMultiMap<QString,
         it->ctrldElems.clear();
 
     UpdateDatainputMapRecursive(GetSceneInstance(), outMap);
+}
+
+// Update global datainput map for all datainput bindings for a single instance.
+void CDoc::UpdateDatainputMapForInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
+{
+    auto propSystem = GetPropertySystem();
+
+    qt3dsdm::Qt3DSDMPropertyHandle ctrldPropHandle
+            = propSystem->GetAggregateInstancePropertyByName(inInstance, L"controlledproperty");
+
+    if (propSystem->HasAggregateInstanceProperty(inInstance, ctrldPropHandle)) {
+        qt3dsdm::SValue ctrldPropVal;
+        propSystem->GetInstancePropertyValue(inInstance, ctrldPropHandle, ctrldPropVal);
+        Q3DStudio::CString currCtrldPropsStr
+                = qt3dsdm::get<qt3dsdm::TDataStrPtr>(ctrldPropVal)->GetData();
+        QStringList splitStr = currCtrldPropsStr.toQString().split(QLatin1Char(' '));
+
+        // There is no way to detect a case where control is removed i.e. a controller-property
+        // pair simply disappears from controlledproperty string. We need to do a complete
+        // rebuild for inInstance references in the global map, but still avoid doing
+        // a scene-wide datainput map update.
+        for (auto &it : qAsConst(g_StudioApp.m_dataInputDialogItems))
+            it->removeControlFromInstance(inInstance);
+
+        // Rebuild controlled element items and append them to global datainput map.
+        for (int i = 0; i < splitStr.size() - 1; i += 2) {
+            // Check for '$' because Qt3DS v1.1 did not differentiate datainput
+            // names with it
+            QString diName = splitStr[i].startsWith(QLatin1Char('$'))
+                    ? splitStr[i].remove(0, 1) : splitStr[i];
+            QString propName = splitStr[i+1];
+            auto propHandle = propSystem->GetAggregateInstancePropertyByName(
+                        inInstance, propName.toStdWString().c_str());
+            auto propType = propSystem->GetDataType(propHandle);
+            CDataInputDialogItem::ControlledItem item(inInstance, propHandle);
+            if (propType)
+                item.dataType = {propType, false};
+            else if (propName == QLatin1String("@slide"))
+                item.dataType = {qt3dsdm::DataModelDataType::Value::String, true};
+            else if (propName == QLatin1String("@timeline"))
+                item.dataType = {qt3dsdm::DataModelDataType::Value::RangedNumber, true};
+
+            g_StudioApp.m_dataInputDialogItems[diName]->ctrldElems.append(item);
+        }
+    }
 }
 
 void CDoc::UpdateDatainputMapRecursive(

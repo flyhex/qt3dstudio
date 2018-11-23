@@ -242,6 +242,7 @@ public:
             QMultiMap<QString,
                       QPair<qt3dsdm::Qt3DSDMInstanceHandle,
                             qt3dsdm::Qt3DSDMPropertyHandle>> *outMap = nullptr);
+    void UpdateDatainputMapForInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     bool VerifyControlledProperties(const qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     void ReplaceDatainput(const QString &oldName, const QString &newName,
                           const QList<qt3dsdm::Qt3DSDMInstanceHandle> &instances);
