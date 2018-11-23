@@ -673,9 +673,6 @@ Rectangle {
                 xyHandler.valueY = Number(values[1]).toFixed(xyHandler.numberOfDecimal);
             }
 
-            Item {
-                width: _valueWidth - xyHandler.width
-            }
             HandlerPropertyBaseXY {
                 id: xyHandler
                 valueX: Number(values[0]).toFixed(numberOfDecimal)
