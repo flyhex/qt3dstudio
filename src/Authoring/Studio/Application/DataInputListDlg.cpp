@@ -321,7 +321,7 @@ void CDataInputListDlg::updateInfo()
                 = m_dataInputs[m_currentDataInputName]->externalPresBoundTypes.uniqueKeys();
         for (auto &k : uniqueKeys) {
             m_infoContents->appendRow(QList<QStandardItem *>(
-                {new QStandardItem(QObject::tr("<subpresentation>")),
+                {new QStandardItem(QObject::tr("<another presentation>")),
                  new QStandardItem(k), new QStandardItem()}));
         }
     }

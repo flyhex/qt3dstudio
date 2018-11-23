@@ -102,7 +102,9 @@ DataModelDataType::Value SImportControllableObject::GetPropertyDataType(
     ITERATE_COMPOSER_MATERIAL_PROPERTIES
     ITERATE_COMPOSER_NODE_PROPERTIES
     ITERATE_COMPOSER_LIGHT_PROPERTIES
-    return SImportAsset::GetPropertyDataType(inPropertyName);
+    // Cannot fall back to SImportAsset as we might receive custom material
+    // properties which are not known to property system and cause assert.
+    return DataModelDataType::None;
 }
 
 #undef HANDLE_COMPOSER_PROPERTY_NO_DEFAULT
@@ -180,7 +182,9 @@ DataModelDataType::Value SImportControllableObject::GetPropertyDataType(
     ITERATE_COMPOSER_MATERIAL_PROPERTIES
     ITERATE_COMPOSER_NODE_PROPERTIES
     ITERATE_COMPOSER_LIGHT_PROPERTIES
-    return SImportAsset::GetPropertyDataType(inPropertyName);
+    // Cannot fall back to SImportAsset as we might receive custom material
+    // properties which are not known to property system and cause assert.
+    return DataModelDataType::None;
 }
 
 #undef HANDLE_COMPOSER_PROPERTY_NO_DEFAULT
