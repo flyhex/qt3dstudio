@@ -369,6 +369,12 @@ void CDataInputListDlg::accept()
     for (auto name : keys)
         m_actualDataInputs->insert(name, m_dataInputs.value(name));
 
+    // Only show automatic binding removal choice if user has deleted
+    // in-use datainput during this activation of the dialog, to avoid constant
+    // nagging at closing of this dialog in case we have invalid datainputs.
+    if (m_deletedDiInUse)
+        QTimer::singleShot(0, &g_StudioApp, &CStudioApp::checkDeletedDatainputs);
+
     QDialog::accept();
 }
 
@@ -414,34 +420,51 @@ void CDataInputListDlg::onAddDataInput()
 
 void CDataInputListDlg::onRemoveDataInput()
 {
+    QVector<int> removedRows;
+    bool anyDiInUse = false;
+
+    if (m_ui->tableView->selectionModel()) {
+        const QModelIndexList indexes = m_ui->tableView->selectionModel()->selectedIndexes();
+        for (const auto &index : indexes) {
+            if (!removedRows.contains(index.row())) {
+                removedRows.append(index.row());
+                QString diName = m_tableContents
+                        ->itemFromIndex(index)->data(Qt::EditRole).toString();
+                if (m_dataInputs[diName]->ctrldElems.size()
+                        || m_dataInputs[diName]->externalPresBoundTypes.size() ) {
+                    anyDiInUse = true;
+                }
+            }
+        }
+    }
+
+
     QString title(QObject::tr("Warning"));
-    QString text(QObject::tr("This operation cannot be undone. Are you sure?"));
+    QString text;
+
+    if (anyDiInUse)
+        text.append(QObject::tr("One or more datainputs are currently in use. "));
+    text.append(QObject::tr("This operation cannot be undone.\n\nAre you sure?"));
+
     auto ret = g_StudioApp.GetDialogs()->DisplayMessageBox(title, text,
                                                            Qt3DSMessageBox::ICON_WARNING, true,
                                                            this);
     if (ret != Qt3DSMessageBox::MSGBX_OK)
         return;
 
-    QVector<int> removedRows;
-    if (m_ui->tableView->selectionModel()) {
-        const QModelIndexList indexes = m_ui->tableView->selectionModel()->selectedIndexes();
-        for (const auto &index : indexes) {
-            if (!removedRows.contains(index.row()))
-                removedRows.append(index.row());
+    m_deletedDiInUse = anyDiInUse;
+
+    if (removedRows.size() > 0) {
+        std::sort(removedRows.begin(), removedRows.end());
+        for (int i = removedRows.size() - 1; i >= 0; --i) {
+            m_dataInputs.remove(
+                        m_tableContents->item(removedRows[i])->data(Qt::EditRole).toString());
         }
+        m_ui->tableView->clearSelection();
+        m_currentDataInputIndex = -1;
 
-        if (removedRows.size() > 0) {
-            std::sort(removedRows.begin(), removedRows.end());
-            for (int i = removedRows.size() - 1; i >= 0; --i)
-                m_dataInputs.remove(
-                            m_tableContents->item(removedRows[i])->data(Qt::EditRole).toString());
-
-            m_ui->tableView->clearSelection();
-            m_currentDataInputIndex = -1;
-
-            updateButtons();
-            updateContents();
-        }
+        updateButtons();
+        updateContents();
     }
 }
 
