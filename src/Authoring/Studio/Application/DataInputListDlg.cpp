@@ -360,9 +360,6 @@ void CDataInputListDlg::keyPressEvent(QKeyEvent *event)
 
 void CDataInputListDlg::accept()
 {
-    if (g_StudioApp.GetCore()->GetDoc()->IsTransactionOpened())
-        g_StudioApp.GetCore()->GetDoc()->CloseTransaction();
-
     m_actualDataInputs->clear();
 
     const auto keys = m_dataInputs.keys();
@@ -374,6 +371,17 @@ void CDataInputListDlg::accept()
     // nagging at closing of this dialog in case we have invalid datainputs.
     if (m_deletedDiInUse)
         QTimer::singleShot(0, &g_StudioApp, &CStudioApp::checkDeletedDatainputs);
+
+    if (g_StudioApp.GetCore()->GetDoc()->IsTransactionOpened()) {
+        g_StudioApp.GetCore()->GetDoc()->CloseTransaction();
+        // If a datainput has been edited (and datainput controller names
+        // updated in element "controlledproperty" properties), we need to make all changes
+        // non-undoable. This is because datainput definitions in UIA file (and in global
+        // datainput map) are not participating in the command stack. Changes there cannot be
+        // reversed, leading to datainput map and element properties being out of sync after Undo.
+        if (m_diHasBeenEdited)
+            g_StudioApp.GetCore()->GetCmdStack()->RemoveLastUndo();
+    }
 
     QDialog::accept();
 }
@@ -547,6 +555,7 @@ void CDataInputListDlg::onEditDataInput()
                                                               di->name, elementHandles);
             m_dataInputs.remove(m_currentDataInputName);
             m_currentDataInputName = di->name;
+            m_diHasBeenEdited = true;
         }
         // Insert replaces the previous key - value pair if existing.
         m_dataInputs.insert(m_currentDataInputName, di);

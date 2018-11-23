@@ -111,6 +111,7 @@ private:
     int m_typeFilter = -1;
     QString m_searchString;
     bool m_deletedDiInUse = false;
+    bool m_diHasBeenEdited = false;
 
     QAction *m_replaceSelectedAction;
     QAction *m_replaceAllAction;
