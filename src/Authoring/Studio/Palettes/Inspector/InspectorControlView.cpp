@@ -608,7 +608,7 @@ void InspectorControlView::showDataInputChooser(int handle, int instance, const 
 {
     if (!m_dataInputChooserView) {
         const QVector<EDataType> acceptedTypes;
-        m_dataInputChooserView = new DataInputSelectView(acceptedTypes);
+        m_dataInputChooserView = new DataInputSelectView(acceptedTypes, this);
         connect(m_dataInputChooserView, &DataInputSelectView::dataInputChanged, this,
                 [this](int handle, int instance, const QString &controllerName) {
             bool controlled =
