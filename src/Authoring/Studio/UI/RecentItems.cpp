@@ -32,6 +32,7 @@
 
 #include <QtWidgets/qmenu.h>
 #include <QtCore/qfileinfo.h>
+#include <QtCore/qdir.h>
 
 const int CRecentItems::MAX_ITEMS = 10; // maximum allowed number of recent items
 
@@ -48,9 +49,10 @@ CRecentItems::~CRecentItems()
 
 void CRecentItems::AddRecentItem(const QString &inItem)
 {
-    RemoveRecentItem(inItem, false);
+    const QString item(QDir::fromNativeSeparators(inItem));
+    RemoveRecentItem(item, false);
 
-    m_RecentItems.insert(m_RecentItems.begin(), inItem);
+    m_RecentItems.insert(m_RecentItems.begin(), item);
 
     while (m_RecentItems.size() > MAX_ITEMS)
         m_RecentItems.pop_back();
@@ -83,7 +85,7 @@ void CRecentItems::ReconstructList()
         numRecentItems = MAX_ITEMS;
 
     for (int i = 0; i < numRecentItems; ++i) {
-        QString theFile = CStudioPreferences::getRecentItem(i);
+        QString theFile = QDir::fromNativeSeparators(CStudioPreferences::getRecentItem(i));
         if (!theFile.isEmpty() && QFileInfo(theFile).exists())
             m_RecentItems.push_back(theFile);
     }
