@@ -1928,13 +1928,17 @@ SElementData *CUIPParserImpl::AddSlideElement(IPresentation &inPresentation, boo
             theBuilder.AddSlideElement(*theElement, theActiveFlag);
             m_NumSlideElements++;
             if (outMaxTime) {
-                INT32 theElementMaxTime;
+                INT32 theElementMaxTime = 0;
                 SElement *theParent = theElement->GetParent();
-                if (theParent && theParent->IsComponent()) {
-                    if (inReader.Att("endtime", theElementMaxTime) == false) {
+                if (theParent && theParent->IsComponent() && theElement) {
+                    // Ignore material durations (in practice this is always a material container)
+                    qt3dsdm::ComposerObjectTypes::Enum composerType(
+                        qt3dsdm::ComposerObjectTypes::Convert(theElementData->m_Type.c_str()));
+                    if (composerType != qt3dsdm::ComposerObjectTypes::Material
+                            && inReader.Att("endtime", theElementMaxTime) == false) {
                         theElementMaxTime = m_MetaData.GetPropertyValueLong(
-                            theElementData->m_Type, m_MetaData.Register("endtime"),
-                            theElementData->m_Class);
+                                    theElementData->m_Type, m_MetaData.Register("endtime"),
+                                    theElementData->m_Class);
                     }
                     *outMaxTime = NVMax(*outMaxTime, theElementMaxTime);
                 }
@@ -2070,11 +2074,17 @@ BOOL CUIPParserImpl::LoadSlideElements(IPresentation &inPresentation, qt3dsdm::I
                         if (outMaxTime && theData->m_Element) {
                             SElement *theParent = theData->m_Element->GetParent();
                             if (theParent && theParent->IsComponent()) {
-                                long theoutMaxTime = (long)*outMaxTime;
-                                long theMaxTime = m_MetaData.GetPropertyValueLong(
-                                    theData->m_Type, m_MetaData.Register("endtime"),
-                                    theData->m_Class);
-                                *outMaxTime = NVMax(theoutMaxTime, theMaxTime);
+                                // Ignore material durations
+                                // (in practice this is always a material container)
+                                qt3dsdm::ComposerObjectTypes::Enum composerType(
+                                    qt3dsdm::ComposerObjectTypes::Convert(theData->m_Type.c_str()));
+                                if (composerType != qt3dsdm::ComposerObjectTypes::Material) {
+                                    long theoutMaxTime = (long)*outMaxTime;
+                                    long theMaxTime = m_MetaData.GetPropertyValueLong(
+                                        theData->m_Type, m_MetaData.Register("endtime"),
+                                        theData->m_Class);
+                                    *outMaxTime = NVMax(theoutMaxTime, theMaxTime);
+                                }
                             }
                         }
                     }
