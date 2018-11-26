@@ -1221,6 +1221,9 @@ bool Q3DSImageTranslator::updateProperty(Q3DSTranslation &inContext,
         list.append(theItem.setPivotU(value.getData<float>()));
     } else if (name == QLatin1String("pivotv")) {
         list.append(theItem.setPivotV(value.getData<float>()));
+    } else if (name == QLatin1String("sourcepath")) {
+        list.append(theItem.setSourcePath(value.toQVariant().toString()));
+        theItem.resolveReferences(*inContext.presentation());
     }
     if (list.count()) {
         theItem.notifyPropertyChanges(list);
