@@ -45,11 +45,11 @@ CFileIterator::CFileIterator(const Qt3DSFile *inFile)
 {
     m_File = inFile->GetAbsolutePath();
 
-    QDirIterator it(m_File.toQString(), QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot);
+    QDirIterator it(m_File, QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot);
     while (it.hasNext()) {
         it.next();
         QFileInfo theFindFile = it.fileInfo();
-        Q3DStudio::CString theFullPath = Q3DStudio::CString::fromQString(QDir::toNativeSeparators(theFindFile.absoluteFilePath()));
+        QString theFullPath = QDir::toNativeSeparators(theFindFile.absoluteFilePath());
         m_FileNames.push_back(theFullPath);
      }
 

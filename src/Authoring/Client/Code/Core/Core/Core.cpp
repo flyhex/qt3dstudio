@@ -322,19 +322,19 @@ void CCore::OnSaveDocumentCatcher(const QString &inDocument, bool inSaveCopy /*=
             if (theFileExists) {
                 theTempFile = Qt3DSFile::GetTemporaryFile();
                 // sanity check: if we fail to get a temporary file
-                if (theTempFile.GetAbsolutePosixPath().IsEmpty()) { // too bad, we'll have to use
+                if (theTempFile.GetAbsolutePosixPath().isEmpty()) { // too bad, we'll have to use
                     // the original (which might be
                     // the only writeable file)
-                    theTempFile = Qt3DSFile(Q3DStudio::CString::fromQString(inDocument));
+                    theTempFile = Qt3DSFile(inDocument);
                     theFileExists = false;
                 }
             }
 
-            m_Doc->SaveDocument(theTempFile.GetAbsolutePath().toQString());
+            m_Doc->SaveDocument(theTempFile.GetAbsolutePath());
 
             // update the original file
             if (theFileExists)
-                theTempFile.CopyTo(Qt3DSFile(Q3DStudio::CString::fromQString(inDocument)));
+                theTempFile.CopyTo(Qt3DSFile(inDocument));
 
             // If we are saving normally and not a copy, then we need to update the current document
             // to make sure it points to the saved file and make it not-dirty.  If we are saving a

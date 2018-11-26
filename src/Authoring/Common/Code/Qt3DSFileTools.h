@@ -304,6 +304,12 @@ struct SFile
                                                          | FileOpenFlagValues::Create
                                                          | FileOpenFlagValues::Truncate));
 
+    static QSharedPointer<QFile>
+    OpenForWrite(const QString &inPath,
+                 FileOpenFlags fileFlags = FileOpenFlags(FileOpenFlagValues::Open
+                                                         | FileOpenFlagValues::Create
+                                                         | FileOpenFlagValues::Truncate));
+
     // Copy src to dest, close both src and dest, and
     // return the number of bytes copied.
     static QT3DSU64 Copy(const QSharedPointer<QFile> &destFile,

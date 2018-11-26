@@ -208,7 +208,7 @@ void WidgetControl::DoStartDrag(IDragable *inDragable)
     m_isDragging = false;
 }
 
-void WidgetControl::DoStartDrag(std::vector<Q3DStudio::CString> &inDragFileNameList)
+void WidgetControl::DoStartDrag(std::vector<QString> &inDragFileNameList)
 {
     if (m_isDragging || !m_isLeftMouseDown)
         return;
@@ -222,8 +222,8 @@ void WidgetControl::DoStartDrag(std::vector<Q3DStudio::CString> &inDragFileNameL
 
         Q3DStudio::CAutoMemPtr<Qt3DSFile> theDragFile;
         for (; thePos != theEndPos; ++thePos) {
-            Q3DStudio::CString theDragFileName = *thePos;
-            if (theDragFileName.Length() > 0) {
+            QString theDragFileName = *thePos;
+            if (!theDragFileName.isEmpty()) {
                 theDragFile = new Qt3DSFile(theDragFileName);
                 CDropSource *theDropSource = CDropSourceFactory::Create(
                             QT3DS_FLAVOR_ASSET_UICFILE, (void *)theDragFile, sizeof(theDragFile));

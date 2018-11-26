@@ -63,7 +63,7 @@ CExplorerFileDropSource::CExplorerFileDropSource(long inFlavor, void *inData, un
 {
     // Pull out all of the SDropItemData and build a file.
     m_File = *(Qt3DSFile *)inData;
-    QFileInfo thePath(m_File.GetAbsolutePath().toQString());
+    QFileInfo thePath(m_File.GetAbsolutePath());
     m_ObjectType = Q3DStudio::ImportUtils::GetObjectFileTypeForFile(
                 thePath.absoluteFilePath()).m_IconType;
     // Fix because DAE files are the *only* thing you can drop onto the project

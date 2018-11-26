@@ -870,7 +870,7 @@ CDialogs::ESavePromptResult CDialogs::PromptForSave()
 
     Qt3DSFile theCurrentDoc = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath();
     if (theCurrentDoc.IsFile())
-        theDocTitle = theCurrentDoc.GetName().toQString();
+        theDocTitle = theCurrentDoc.GetName();
     else // if the current doc has not been saved then use the default title.
         theDocTitle = QObject::tr("Untitled");
 

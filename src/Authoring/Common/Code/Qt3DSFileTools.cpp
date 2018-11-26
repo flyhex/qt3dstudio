@@ -412,6 +412,11 @@ QSharedPointer<QFile> SFile::OpenForRead(const CFilePath &inPath)
 
 QSharedPointer<QFile> SFile::OpenForWrite(const CFilePath &inFullPath, FileOpenFlags fileFlags)
 {
+    return OpenForWrite(inFullPath.filePath(), fileFlags);
+}
+
+QSharedPointer<QFile> SFile::OpenForWrite(const QString &inPath, FileOpenFlags fileFlags)
+{
     QFile::OpenMode mode = QIODevice::ReadWrite;
     if (fileFlags & FileOpenFlagValues::Truncate)
         mode |= QIODevice::Truncate;
@@ -419,7 +424,7 @@ QSharedPointer<QFile> SFile::OpenForWrite(const CFilePath &inFullPath, FileOpenF
     bool open = (QT3DSU32)((fileFlags & FileOpenFlagValues::Open)) != 0;
     bool create = (QT3DSU32)((fileFlags & FileOpenFlagValues::Create)) != 0;
 
-    QSharedPointer<QFile> file(new QFile(inFullPath.filePath()));
+    QSharedPointer<QFile> file(new QFile(inPath));
     if ((!create && !file->exists()) || !file->open(mode))
         return nullptr;
     // If we aren't truncating, then we seek to the end to append.

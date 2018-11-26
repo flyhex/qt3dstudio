@@ -170,7 +170,7 @@ void CStudioClipboard::CopyObjectToGlobalClipboard(Qt3DSFile &inFile, qint64 inC
     QByteArray data;
     QDataStream stream(&data, QIODevice::WriteOnly);
     stream.setVersion(QDataStream::Qt_5_8);
-    QFile file(inFile.GetAbsolutePath().toQString());
+    QFile file(inFile.GetAbsolutePath());
     if (!file.open(QIODevice::ReadOnly))
         return;
 
@@ -286,7 +286,7 @@ void CStudioClipboard::GetObjectFromGlobalClipboard(const QString &inMimeType,
         QByteArray data;
         stream >> data;
         if (outFile) {
-            QFile file(outFile->GetAbsolutePath().toQString());
+            QFile file(outFile->GetAbsolutePath());
             if (file.open(QIODevice::WriteOnly)) {
                 file.write(data);
                 file.close();

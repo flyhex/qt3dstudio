@@ -54,9 +54,9 @@ public:
     virtual size_t GetTotal();
 
 protected:
-    Q3DStudio::CString m_File;
+    QString m_File;
     size_t m_Index;
-    std::vector<Q3DStudio::CString> m_FileNames;
+    std::vector<QString> m_FileNames;
 };
 
 #endif // INCLUDED_FILE_ITERATOR_H

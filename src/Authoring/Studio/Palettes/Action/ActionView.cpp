@@ -839,7 +839,7 @@ void ActionView::pasteAction()
 
     Qt3DSFile theTempAPFile = CStudioClipboard::GetActionFromClipboard();
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*GetDoc(), QObject::tr("Paste Action"))
-            ->PasteAction(theTempAPFile.GetAbsolutePath().toQString(), m_itemHandle);
+            ->PasteAction(theTempAPFile.GetAbsolutePath(), m_itemHandle);
     updateActionStates();
 }
 

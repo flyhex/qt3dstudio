@@ -42,7 +42,7 @@
 //=========================================================================================
 //	Typedefs
 //=========================================================================================
-typedef std::set<Q3DStudio::CString> TFilePathList;
+typedef std::set<QString> TFilePathList;
 typedef TFilePathList::iterator TFilePathListIterator;
 
 class Qt3DSFile
@@ -51,10 +51,9 @@ class Qt3DSFile
 public:
     typedef void OSErr; // this may be better typedefed to HRESULT
 
-    Qt3DSFile(const Q3DStudio::CString &inPathName, bool inIsPosix = false, bool inAddBase = true);
-    Qt3DSFile(const Q3DStudio::CString &inPathName, const Q3DStudio::CString &inName);
-    Qt3DSFile(const Qt3DSFile &inBasePath, const Q3DStudio::CString &inPathname,
-             bool inIsPosix = false);
+    Qt3DSFile(const QString &inPathName, bool inIsPosix, bool inAddBase);
+    Qt3DSFile(const QString &inPathName, const QString &inName);
+    Qt3DSFile(const Qt3DSFile &inBasePath, const QString &inPathname, bool inIsPosix);
     Qt3DSFile(const Qt3DSFile &inFile);
     Qt3DSFile(const QString &inFile);
     Qt3DSFile(const char *inFile);
@@ -71,13 +70,13 @@ public:
     bool DeleteFile() const;
     bool Exists() const;
 
-    Q3DStudio::CString GetAbsolutePath() const;
-    Q3DStudio::CString GetAbsolutePosixPath() const;
+    QString GetAbsolutePath() const;
+    QString GetAbsolutePosixPath() const;
 
-    Q3DStudio::CString GetName() const;
-    Q3DStudio::CString GetStem() const;
-    Q3DStudio::CString GetExtension() const;
-    Q3DStudio::CString GetPath() const;
+    QString GetName() const;
+    QString GetStem() const;
+    QString GetExtension() const;
+    QString GetPath() const;
 
     bool IsFile(bool inCheckForAlias = true) const;
     bool IsHidden() const;
@@ -91,27 +90,27 @@ public:
     OSErr SetReadOnly(bool inReadOnlyFlag);
 
     static QString GetApplicationDirectory();
-    static Qt3DSFile GetTemporaryFile(const Q3DStudio::CString &inExtension);
+    static Qt3DSFile GetTemporaryFile(const QString &inExtension);
     static Qt3DSFile GetTemporaryFile();
-    static bool IsPathRelative(const Q3DStudio::CString &inPath);
+    static bool IsPathRelative(const QString &inPath);
 
     QUrl GetURL() const;
 
-    static Qt3DSFile Combine(const Qt3DSFile &inFile, const Q3DStudio::CString &inRelPath);
+    static Qt3DSFile Combine(const Qt3DSFile &inFile, const QString &inRelPath);
     HANDLE OpenFileReadHandle() const;
     HANDLE OpenFileWriteHandle() const;
     void RenameTo(const Qt3DSFile &inDestination);
 
     static void ClearCurrentTempCache();
 
-    static void AddTempFile(const Q3DStudio::CString &inFile);
+    static void AddTempFile(const QString &inFile);
 
     // protected functions
 protected:
     static TFilePathList s_TempFilePathList; ///< List of temporary files that gets created; this
                                              ///should be cleared at end of program execution by
                                              ///calling ClearTempCache
-    Q3DStudio::CString m_Path;
+    QString m_Path;
 };
 
 #endif // INCLUDED_QT3DS_FILE_H

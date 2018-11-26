@@ -68,7 +68,7 @@ public:
 
 protected:
     void DoStartDrag(IDragable *inDragable);
-    void DoStartDrag(std::vector<Q3DStudio::CString> &inDragFileNameList);
+    void DoStartDrag(std::vector<QString> &inDragFileNameList);
 
     bool OnDragWithin(CDropSource &inSource) override;
     bool OnDragReceive(CDropSource &inSource) override;

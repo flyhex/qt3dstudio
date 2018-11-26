@@ -849,7 +849,7 @@ void CDoc::CutObject(qt3dsdm::TInstanceHandleList inInstances)
     using namespace Q3DStudio;
 
     if (theContinueCutFlag) {
-        CFilePath thePath(GetDocumentReader().CopySceneGraphObjects(inInstances));
+        QFileInfo thePath(GetDocumentReader().CopySceneGraphObjects(inInstances));
         Qt3DSFile theFile(thePath);
         CStudioClipboard::CopyObjectToClipboard(
                     theFile, false, false,
@@ -865,7 +865,7 @@ void CDoc::CopyObject(qt3dsdm::TInstanceHandleList inInstances)
     if (inInstances.empty())
         return;
     using namespace Q3DStudio;
-    CFilePath thePath(GetDocumentReader().CopySceneGraphObjects(inInstances));
+    QFileInfo thePath(GetDocumentReader().CopySceneGraphObjects(inInstances));
     Qt3DSFile theFile(thePath);
     CStudioClipboard::CopyObjectToClipboard(
                 theFile, false, false,
@@ -880,7 +880,7 @@ void CDoc::PasteObject(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         qint64 dummy = 0;
         Qt3DSFile theTempAPFile = CStudioClipboard::GetObjectFromClipboard(false, dummy);
         SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Paste Object"))
-                ->PasteSceneGraphObject(theTempAPFile.GetAbsolutePath().toQString(),
+                ->PasteSceneGraphObject(theTempAPFile.GetAbsolutePath(),
                                         theInstance, true,
                                         DocumentEditorInsertType::LastChild, CPt());
     }
@@ -894,7 +894,7 @@ void CDoc::PasteObjectMaster(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         qint64 dummy = 0;
         Qt3DSFile theTempAPFile = CStudioClipboard::GetObjectFromClipboard(false, dummy);
         SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Paste Object"))
-                ->PasteSceneGraphObjectMaster(theTempAPFile.GetAbsolutePath().toQString(),
+                ->PasteSceneGraphObjectMaster(theTempAPFile.GetAbsolutePath(),
                                               theInstance, true,
                                               DocumentEditorInsertType::LastChild, CPt());
     }

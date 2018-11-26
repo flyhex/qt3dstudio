@@ -139,8 +139,8 @@ QVariant ProjectFileSystemModel::data(const QModelIndex &index, int role) const
 
 QMimeData *ProjectFileSystemModel::mimeData(const QModelIndexList &indexes) const
 {
-    const auto path = filePath(indexes.first().row()); // can only drag one item
-    Qt3DSFile dragFile(Q3DStudio::CString::fromQString(path));
+    // can only drag one item
+    Qt3DSFile dragFile(filePath(indexes.first().row()));
     return CDropSourceFactory::Create(QT3DS_FLAVOR_ASSET_UICFILE,
                                       reinterpret_cast<void *>(&dragFile),
                                       sizeof(dragFile));

@@ -212,9 +212,9 @@ public:
     // Given the active slide on the document (which we query) and an instance,
     // produce a temporary file (Qt3DSFile::GetTemporaryFile) and serialize this object
     // to that temporary file.
-    virtual CFilePath CopySceneGraphObjects(qt3dsdm::TInstanceHandleList inInstances) = 0;
+    virtual QFileInfo CopySceneGraphObjects(qt3dsdm::TInstanceHandleList inInstances) = 0;
 
-    CFilePath CopySceneGraphObject(Qt3DSDMInstanceHandle inInstance)
+    QFileInfo CopySceneGraphObject(Qt3DSDMInstanceHandle inInstance)
     {
         qt3dsdm::TInstanceHandleList theInstances;
         theInstances.push_back(inInstance);
@@ -225,7 +225,7 @@ public:
     virtual std::shared_ptr<qt3dsdm::IDOMReader>
     CopySceneGraphObjectToMemory(Qt3DSDMInstanceHandle inInstance) = 0;
 
-    virtual CFilePath CopyAction(Qt3DSDMActionHandle inAction, Qt3DSDMSlideHandle inSlide) = 0;
+    virtual QFileInfo CopyAction(Qt3DSDMActionHandle inAction, Qt3DSDMSlideHandle inSlide) = 0;
 
     virtual void ParseSourcePathsOutOfEffectFile(const QString &inFile,
                                                  std::vector<QString> &outFilePaths) = 0;

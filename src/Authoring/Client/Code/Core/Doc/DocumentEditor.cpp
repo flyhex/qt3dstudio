@@ -685,7 +685,7 @@ public:
         return m_AnimationCore.IsArtistEdited(animHandle);
     }
 
-    pair<std::shared_ptr<qt3dsdm::IDOMWriter>, CFilePath>
+    pair<std::shared_ptr<qt3dsdm::IDOMWriter>, QFileInfo>
     DoCopySceneGraphObject(const TInstanceHandleList &inInstances)
     {
         if (inInstances.empty())
@@ -695,7 +695,7 @@ public:
         TInstanceHandleList theInstances = ToGraphOrdering(inInstances);
         m_Doc.CreateSerializer()->SerializeSceneGraphObjects(*theWriter, theInstances,
                                                              GetActiveSlide(inInstances[0]));
-        CFilePath theFile = WriteWriterToFile(*theWriter, L"SceneGraph");
+        QFileInfo theFile = WriteWriterToFile(*theWriter, QStringLiteral("SceneGraph"));
         return make_pair(theWriter, theFile);
     }
 
@@ -715,46 +715,52 @@ public:
         return CopySceneGraphObjectsToMemory(instanceList);
     }
 
-    CFilePath WriteWriterToFile(IDOMWriter &inWriter, const CString &inStem)
+    QFileInfo WriteWriterToFile(IDOMWriter &inWriter, const QString &inStem)
     {
-        CFilePath theTempFileDir = CFilePath::CombineBaseAndRelative(
-            CFilePath::GetUserApplicationDirectory(), CFilePath(L"Qt3DStudio/temp_files"));
-        theTempFileDir.CreateDir(true);
-        CFilePath theFinalPath;
+        QString theTempFileDir = CFilePath::CombineBaseAndRelative(
+            CFilePath::GetUserApplicationDirectory(), QStringLiteral("Qt3DStudio/temp_files"));
+        CFilePath::CreateDir(theTempFileDir, false);
+        QFileInfo theFinalPath;
         {
-            TFilePtr theFile = SFileTools::FindUniqueDestFile(theTempFileDir, inStem, L"uip", true);
+            QString theFile = SFileTools::FindUniqueDestFile(theTempFileDir, inStem,
+                                                             QStringLiteral("uip"), true);
 
-            theFinalPath = theFile->m_Path;
+            theFinalPath = theFile;
 
-            Qt3DSFile::AddTempFile(theFile->m_Path);
+            TFilePtr file
+                    = std::make_shared<SFile>(
+                        SFile::OpenForWrite(theFile, FileOpenFlags(FileOpenFlagValues::Create
+                                            | FileOpenFlagValues::Truncate)), theFile);
 
-            CDOMSerializer::Write(*inWriter.GetTopElement(), *theFile->m_OpenFile.data());
+            Qt3DSFile::AddTempFile(theFile);
+
+            CDOMSerializer::Write(*inWriter.GetTopElement(), *file->m_OpenFile.data());
         }
         return theFinalPath;
     }
 
-    CFilePath CopySceneGraphObjects(TInstanceHandleList inInstances) override
+    QFileInfo CopySceneGraphObjects(TInstanceHandleList inInstances) override
     {
         if (inInstances.empty())
-            return L"";
+            return {};
         bool shouldCopy = true;
         for (size_t idx = 0, end = inInstances.size(); idx < end && shouldCopy; ++idx)
             shouldCopy = IsInstance(inInstances[idx]);
 
         if (!shouldCopy)
-            return L"";
+            return {};
 
         return DoCopySceneGraphObject(inInstances).second;
     }
 
-    CFilePath CopyAction(Qt3DSDMActionHandle inAction, Qt3DSDMSlideHandle inSlide) override
+    QFileInfo CopyAction(Qt3DSDMActionHandle inAction, Qt3DSDMSlideHandle inSlide) override
     {
         std::shared_ptr<IComposerSerializer> theSerializer(m_Doc.CreateSerializer());
         std::shared_ptr<qt3dsdm::IDOMWriter> theWriter(
             IDOMWriter::CreateDOMWriter(L"UIPActionFragment", m_DataCore.GetStringTablePtr())
                 .first);
         theSerializer->SerializeAction(*theWriter, inSlide, inAction);
-        return WriteWriterToFile(*theWriter, L"Action");
+        return WriteWriterToFile(*theWriter, QStringLiteral("Action"));
     }
 
     std::shared_ptr<qt3dsdm::IDOMReader> CopySlide(Qt3DSDMSlideHandle inSlide) override
@@ -768,7 +774,7 @@ public:
             IDOMWriter::CreateDOMWriter(L"UIPSlideFragment", m_DataCore.GetStringTablePtr()).first);
         theSerializer->SerializeSlide(*theWriter, inSlide);
 #ifdef _DEBUG
-        WriteWriterToFile(*theWriter, L"Slide");
+        WriteWriterToFile(*theWriter, QStringLiteral("Slide"));
 #endif
         return theWriter->CreateDOMReader();
     }

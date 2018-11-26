@@ -146,7 +146,7 @@ unsigned short CFormattedInputStream::ReadUnsignedShort()
 void CFormattedInputStream::CopyToFile(const Qt3DSFile &inFile, long inLength,
                                        bool inCloseStream /*= true */)
 {
-    CFileOutputStream theFileStream(inFile.GetAbsolutePosixPath().toQString());
+    CFileOutputStream theFileStream(inFile.GetAbsolutePosixPath());
 
     unsigned long theLength = inLength;
     unsigned long theBufferSize = 1024;

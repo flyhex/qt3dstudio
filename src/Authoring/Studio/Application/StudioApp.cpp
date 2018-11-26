@@ -454,7 +454,7 @@ bool CStudioApp::handleWelcomeRes(int res, bool recursive)
                 if (!filePath.exists())
                     filePath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
                 Qt3DSFile path = m_dialogs->GetFileOpenChoice(filePath.absoluteFilePath());
-                theFile = QFileInfo(path.GetAbsolutePath().toQString());
+                theFile = QFileInfo(path.GetAbsolutePath());
             } else {
                 theFile = filePath.absolutePath() + QStringLiteral("/SampleProject.uip");
             }
@@ -1551,7 +1551,7 @@ bool CStudioApp::OnSave(bool autosave)
         return false;
     } else {
         // Compose autosave filename (insert _autosave before extension)
-        QString autosaveFile = theCurrentDoc.GetPath().toQString();
+        QString autosaveFile = theCurrentDoc.GetPath();
         int insertionPoint = autosaveFile.lastIndexOf(QLatin1String(".uip"));
         autosaveFile.insert(insertionPoint, QStringLiteral("_autosave"));
 
@@ -1559,7 +1559,7 @@ bool CStudioApp::OnSave(bool autosave)
             // Set the copy flag to avoid changing actual document name & history
             m_core->OnSaveDocument(autosaveFile, true);
         } else {
-            m_core->OnSaveDocument(theCurrentDoc.GetAbsolutePath().toQString());
+            m_core->OnSaveDocument(theCurrentDoc.GetAbsolutePath());
             // Delete previous autosave file
             QFile::remove(autosaveFile);
         }

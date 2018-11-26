@@ -47,22 +47,22 @@ TFilePathList Qt3DSFile::s_TempFilePathList;
  * @param inIsPosix ignored.
  * @param inAddBase ignored.
  */
-Qt3DSFile::Qt3DSFile(const Q3DStudio::CString &inPathName, bool inIsPosix, bool inAddBase)
+Qt3DSFile::Qt3DSFile(const QString &inPathName, bool inIsPosix, bool inAddBase)
 {
     Q_UNUSED(inIsPosix);
     Q_UNUSED(inAddBase);
 
-    QString path = inPathName.toQString();
+    QString path = inPathName;
 #ifndef Q_OS_WIN
     path.replace('\\', '/');
 #endif
-    m_Path = Q3DStudio::CString::fromQString(QDir::toNativeSeparators(path));
+    m_Path = QDir::toNativeSeparators(path);
 }
 
 /**
  * Create a file by combining the two paths.
  */
-Qt3DSFile::Qt3DSFile(const Q3DStudio::CString &inPathName, const Q3DStudio::CString &inName)
+Qt3DSFile::Qt3DSFile(const QString &inPathName, const QString &inName)
 {
     Qt3DSFile theBasePath(inPathName);
     Qt3DSFile theFile = Combine(theBasePath, inName);
@@ -72,7 +72,7 @@ Qt3DSFile::Qt3DSFile(const Q3DStudio::CString &inPathName, const Q3DStudio::CStr
 /**
  * Create a file by combining the base path with a relative path.
  */
-Qt3DSFile::Qt3DSFile(const Qt3DSFile &inBasePath, const Q3DStudio::CString &inPathname,
+Qt3DSFile::Qt3DSFile(const Qt3DSFile &inBasePath, const QString &inPathname,
                      bool inIsPosix)
 {
     Q_UNUSED(inIsPosix);
@@ -88,17 +88,17 @@ Qt3DSFile::Qt3DSFile(const Qt3DSFile &inFile)
 
 Qt3DSFile::Qt3DSFile(const QString &inFile)
 {
-    m_Path = Q3DStudio::CString::fromQString(QDir::toNativeSeparators(inFile));
+    m_Path = QDir::toNativeSeparators(inFile);
 }
 
 Qt3DSFile::Qt3DSFile(const char *inFile)
 {
-    m_Path = Q3DStudio::CString::fromQString(QDir::toNativeSeparators(QString::fromLatin1(inFile)));
+    m_Path = QDir::toNativeSeparators(QString::fromLatin1(inFile));
 }
 
 Qt3DSFile::Qt3DSFile(const QFileInfo &inFile)
 {
-    m_Path = Q3DStudio::CString::fromQString(QDir::toNativeSeparators(inFile.absoluteFilePath()));
+    m_Path = QDir::toNativeSeparators(inFile.absoluteFilePath());
 }
 
 /**
@@ -119,7 +119,7 @@ Qt3DSFile::~Qt3DSFile()
 bool Qt3DSFile::operator==(const Qt3DSFile &inRHS) const
 {
 #ifdef _WIN32
-    return GetAbsolutePath().CompareNoCase(inRHS.GetAbsolutePath());
+    return GetAbsolutePath().compare(inRHS.GetAbsolutePath(), Qt::CaseInsensitive) == 0;
 #else
     return GetAbsolutePath() == inRHS.GetAbsolutePath();
 #endif
@@ -138,7 +138,7 @@ bool Qt3DSFile::CanRead() const
  */
 bool Qt3DSFile::CanWrite() const
 {
-    QFileInfo info(m_Path.toQString());
+    QFileInfo info(m_Path);
     return info.isWritable();
 }
 
@@ -155,10 +155,10 @@ bool Qt3DSFile::DeleteFile() const
     // check if AKFile to delete is a folder type, if it is, we want to recusively delete all its
     // subfolder
     if (!IsFile()) {
-        theFileDeleted = QDir(m_Path.toQString()).removeRecursively();
+        theFileDeleted = QDir(m_Path).removeRecursively();
     } else {
         // delete the requested file or the main folder
-        theFileDeleted = QFile::remove(m_Path.toQString());
+        theFileDeleted = QFile::remove(m_Path);
     }
 
     // erase it from this list
@@ -172,7 +172,7 @@ bool Qt3DSFile::DeleteFile() const
  */
 bool Qt3DSFile::Exists() const
 {
-    QFileInfo info(m_Path.toQString());
+    QFileInfo info(m_Path);
     return info.exists();
 }
 
@@ -180,18 +180,18 @@ bool Qt3DSFile::Exists() const
  * Get the fully qualified absolute path.
  * This should resolve all relative parts of the path.
  */
-Q3DStudio::CString Qt3DSFile::GetAbsolutePath() const
+QString Qt3DSFile::GetAbsolutePath() const
 {
-    const QFileInfo fi(m_Path.toQString());
+    const QFileInfo fi(m_Path);
     if (fi.isDir())
-        return Q3DStudio::CString::fromQString(fi.absoluteFilePath() + QDir::separator());
+        return (fi.absoluteFilePath() + QDir::separator());
     return m_Path;
 }
 
 /**
  * @see GetAbsolutePath.
  */
-Q3DStudio::CString Qt3DSFile::GetAbsolutePosixPath() const
+QString Qt3DSFile::GetAbsolutePosixPath() const
 {
     return GetAbsolutePath();
 }
@@ -199,34 +199,34 @@ Q3DStudio::CString Qt3DSFile::GetAbsolutePosixPath() const
 /**
  * Get the filename section of this file, ignoring all drives and directories.
  */
-Q3DStudio::CString Qt3DSFile::GetName() const
+QString Qt3DSFile::GetName() const
 {
-    QFileInfo info(m_Path.toQString());
-    return Q3DStudio::CString::fromQString(info.fileName());
+    QFileInfo info(m_Path);
+    return info.fileName();
 }
 
 /**
  * Get the filename section of this file, without the extension
  */
-Q3DStudio::CString Qt3DSFile::GetStem() const
+QString Qt3DSFile::GetStem() const
 {
-    QFileInfo info(m_Path.toQString());
-    return Q3DStudio::CString::fromQString(info.baseName());
+    QFileInfo info(m_Path);
+    return info.baseName();
 }
 
 /**
  * Get the file extension, without the period.
  */
-Q3DStudio::CString Qt3DSFile::GetExtension() const
+QString Qt3DSFile::GetExtension() const
 {
-    QFileInfo info(m_Path.toQString());
-    return Q3DStudio::CString::fromQString(info.suffix());
+    QFileInfo info(m_Path);
+    return info.suffix();
 }
 
 /**
  * Get the underlying path for this file, this may include relativity.
  */
-Q3DStudio::CString Qt3DSFile::GetPath() const
+QString Qt3DSFile::GetPath() const
 {
     return m_Path;
 }
@@ -238,7 +238,7 @@ Q3DStudio::CString Qt3DSFile::GetPath() const
 bool Qt3DSFile::IsFile(bool inCheckForAlias /*true*/) const
 {
     Q_UNUSED(inCheckForAlias);
-    QFileInfo info(m_Path.toQString());
+    QFileInfo info(m_Path);
     return info.isFile();
 }
 
@@ -247,7 +247,7 @@ bool Qt3DSFile::IsFile(bool inCheckForAlias /*true*/) const
  */
 bool Qt3DSFile::IsHidden() const
 {
-    QFileInfo info(m_Path.toQString());
+    QFileInfo info(m_Path);
     return info.isHidden();
 }
 
@@ -256,7 +256,7 @@ bool Qt3DSFile::IsHidden() const
  */
 long Qt3DSFile::Length() const
 {
-    QFileInfo info(m_Path.toQString());
+    QFileInfo info(m_Path);
     return info.size();
 }
 
@@ -265,7 +265,7 @@ long Qt3DSFile::Length() const
  */
 void Qt3DSFile::RenameTo(const Qt3DSFile &inDestination)
 {
-    if (!QFile::rename(m_Path.toQString(), inDestination.GetAbsolutePath().toQString()))
+    if (!QFile::rename(m_Path, inDestination.GetAbsolutePath()))
         throw CIOException();
 }
 
@@ -274,10 +274,10 @@ void Qt3DSFile::RenameTo(const Qt3DSFile &inDestination)
  */
 void Qt3DSFile::CopyTo(const Qt3DSFile &inDestination)
 {
-    const QString destination(inDestination.GetAbsolutePath().toQString());
+    const QString destination(inDestination.GetAbsolutePath());
     if (QFile::exists(destination))
         QFile::remove(destination);
-    if (!QFile::copy(m_Path.toQString(), destination))
+    if (!QFile::copy(m_Path, destination))
         throw CIOException();
 }
 
@@ -286,7 +286,7 @@ void Qt3DSFile::CopyTo(const Qt3DSFile &inDestination)
  */
 void Qt3DSFile::SetReadOnly(bool inReadOnlyFlag)
 {
-    const QString qpath(m_Path.toQString());
+    const QString qpath(m_Path);
     QFile::Permissions perm = QFile::permissions(qpath);
     if (inReadOnlyFlag)
         perm &= ~QFile::WriteOwner;
@@ -315,12 +315,12 @@ QString Qt3DSFile::GetApplicationDirectory()
  * Create a temporary file from where the system holds it's temp files.
  * @param inExtension the file extension that should be used.
  */
-Qt3DSFile Qt3DSFile::GetTemporaryFile(const Q3DStudio::CString &inExtension)
+Qt3DSFile Qt3DSFile::GetTemporaryFile(const QString &inExtension)
 {
-    QTemporaryFile tempFile(QDir::tempPath() + "/~uiXXXXXX" + inExtension.toQString());
+    QTemporaryFile tempFile(QDir::tempPath() + "/~uiXXXXXX" + inExtension);
     tempFile.setAutoRemove(false);
     tempFile.open(); // force creation of the actual file name
-    return Qt3DSFile(Q3DStudio::CString::fromQString(tempFile.fileName()));
+    return Qt3DSFile(tempFile.fileName());
 }
 
 Qt3DSFile Qt3DSFile::GetTemporaryFile()
@@ -328,7 +328,7 @@ Qt3DSFile Qt3DSFile::GetTemporaryFile()
     QTemporaryFile tempFile(QDir::tempPath() + "/~uiXXXXXX");
     tempFile.setAutoRemove(false);
     tempFile.open(); // force creation of the actual file name
-    return Qt3DSFile(Q3DStudio::CString::fromQString(tempFile.fileName()));
+    return Qt3DSFile(tempFile.fileName());
 }
 
 /**
@@ -336,7 +336,7 @@ Qt3DSFile Qt3DSFile::GetTemporaryFile()
  */
 QUrl Qt3DSFile::GetURL() const
 {
-    return QUrl::fromLocalFile(m_Path.toQString());
+    return QUrl::fromLocalFile(m_Path);
 }
 
 /**
@@ -345,19 +345,19 @@ QUrl Qt3DSFile::GetURL() const
  */
 void Qt3DSFile::Execute() const
 {
-    Q3DStudio::CString sFile = GetAbsolutePath();
-    QUrl url = QUrl::fromLocalFile(sFile.toQString());
+    QString sFile = GetAbsolutePath();
+    QUrl url = QUrl::fromLocalFile(sFile);
     QDesktopServices::openUrl(url);
 }
 
 /**
  * Combine the file and relative path together into another file.
  */
-Qt3DSFile Qt3DSFile::Combine(const Qt3DSFile &inBasePath, const Q3DStudio::CString &inRelativePath)
+Qt3DSFile Qt3DSFile::Combine(const Qt3DSFile &inBasePath, const QString &inRelativePath)
 {
-    QDir basePath(inBasePath.GetAbsolutePath().toQString());
-    QString rel = basePath.absoluteFilePath(inRelativePath.toQString());
-    return Qt3DSFile(Q3DStudio::CString::fromQString(rel));
+    QDir basePath(inBasePath.GetAbsolutePath());
+    QString rel = basePath.absoluteFilePath(inRelativePath);
+    return Qt3DSFile(rel);
 }
 
 /**
@@ -390,13 +390,13 @@ void Qt3DSFile::ClearCurrentTempCache()
     if (!s_TempFilePathList.empty()) {
         // Delete all temp files created so far
         for (auto file : s_TempFilePathList)
-            QFile::remove(file.toQString());
+            QFile::remove(file);
 
         s_TempFilePathList.clear();
     }
 }
 
-void Qt3DSFile::AddTempFile(const Q3DStudio::CString &inFile)
+void Qt3DSFile::AddTempFile(const QString &inFile)
 {
     s_TempFilePathList.insert(inFile);
 }
@@ -407,8 +407,8 @@ void Qt3DSFile::AddTempFile(const Q3DStudio::CString &inFile)
  * @param inPath path to check
  * @return bool true to indicate this is a relative path
  */
-bool Qt3DSFile::IsPathRelative(const Q3DStudio::CString &inPath)
+bool Qt3DSFile::IsPathRelative(const QString &inPath)
 {
-    QFileInfo info(inPath.toQString());
+    QFileInfo info(inPath);
     return info.isRelative();
 }
