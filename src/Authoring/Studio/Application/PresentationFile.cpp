@@ -261,7 +261,8 @@ QString PresentationFile::findProjectFile(const QString &uipPath)
     return {};
 }
 
-// get all available child assets source paths (materials, images, effects, etc)
+// Get all available child assets source paths (materials, images, effects, etc).
+// The source paths returned are relative to the presentation file being parsed.
 // static
 void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &uipTarget,
                                       QHash<QString, QString> &outPathMap,
@@ -278,7 +279,18 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
         outProjPathSrc = QFileInfo(uiaPath).path();
         QString uipPathRelative = QFileInfo(uiaPath).dir().relativeFilePath(uipSrc.filePath());
         ProjectFile::getPresentations(uiaPath, subpresentations, uipPathRelative);
+    } else {
+        outProjPathSrc = uipSrc.path();
     }
+    QDir srcProjDir(outProjPathSrc);
+    QDir srcUipDir(uipSrc.path());
+
+    const auto convertPath = [&](const QString &path, bool forceProj = false) -> QString {
+        if (forceProj || path.startsWith(QLatin1String("./")))
+            return srcUipDir.relativeFilePath(srcProjDir.absoluteFilePath(path));
+        else
+            return path; // Assuming path is already presentation relative
+    };
 
     // Map to cache effect and material properties during the presentation file parsing,
     // as we don't yet know which ones are actually assets.
@@ -291,7 +303,7 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
             .firstChildElement(QStringLiteral("Classes"));
     for (QDomElement p = classesElem.firstChild().toElement(); !p.isNull();
         p = p.nextSibling().toElement()) {
-        const QString sourcepath = p.attribute(QStringLiteral("sourcepath"));
+        const QString sourcepath = convertPath(p.attribute(QStringLiteral("sourcepath")));
         if (!sourcepath.isEmpty() && !outPathMap.contains(sourcepath)) {
             outPathMap.insert(sourcepath, {});
 
@@ -302,10 +314,17 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
             if (CDialogs::IsMaterialFileExtension(ext.data()) ||
                 CDialogs::IsEffectFileExtension(ext.data())) {
                 QSet<QString> propertySet;
+                QHash<QString, QString> matEffPathMap;
                 g_StudioApp.GetCore()->GetDoc()->GetDocumentReader()
                     .ParseSourcePathsOutOfEffectFile(
                             uipSrc.path() + QStringLiteral("/") + sourcepath,
-                            outProjPathSrc, true, outPathMap, propertySet);
+                            outProjPathSrc, true, matEffPathMap, propertySet);
+                // ParseSourcePathsOutOfEffectFile returns paths relative to project
+                QHashIterator<QString, QString> pathIter(matEffPathMap);
+                while (pathIter.hasNext()) {
+                    pathIter.next();
+                    outPathMap.insert(convertPath(pathIter.key(), true), pathIter.value());
+                }
                 matEffPropertyMap.insert(QStringLiteral("#") + p.attribute(QStringLiteral("id")),
                                          propertySet);
             }
@@ -319,7 +338,7 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
     QDomNodeList modelElems = graphElement.elementsByTagName(QStringLiteral("Model"));
     for (int i = 0; i < modelElems.count(); ++i) {
         QDomElement elem = modelElems.at(i).toElement();
-        const QString sourcePath = elem.attribute(QStringLiteral("sourcepath"));
+        const QString sourcePath = convertPath(elem.attribute(QStringLiteral("sourcepath")));
         if (!sourcePath.isEmpty()) {
             QFileInfo fi(sourcePath);
             QByteArray ext = fi.suffix().toLatin1();
@@ -354,7 +373,7 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
 
     for (int i = 0; i < addElems.count(); ++i) {
         QDomElement elem = addElems.at(i).toElement();
-        const QString sourcePath = elem.attribute(QStringLiteral("sourcepath"));
+        const QString sourcePath = convertPath(elem.attribute(QStringLiteral("sourcepath")));
         if (!sourcePath.isEmpty()) {
             QFileInfo fi(sourcePath);
             QByteArray ext = fi.suffix().toLatin1();
@@ -373,17 +392,10 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
                                            return spr.m_id == sourcePath;
                                        });
                 if (sp != subpresentations.end()) { // has a subpresentation
-                    QString spPath = sp->m_argsOrSrc;
-                    // set as root path (if it is not root nor relative) to make sure importing
-                    // works correctly
-                    if (!spPath.startsWith(QLatin1String("../"))
-                        && !spPath.startsWith(QLatin1String("./"))) {
-                        spPath.prepend(QLatin1String("./"));
-                    }
-
+                    QString spPath = convertPath(sp->m_argsOrSrc, true);
                     if (!outPathMap.contains(spPath)) {
                         outPathMap.insert(spPath, {});
-                        outPresentationNodes.insert(sp->m_argsOrSrc, sp->m_id);
+                        outPresentationNodes.insert(spPath, sp->m_id);
                     }
                 }
             }
@@ -397,17 +409,10 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
                                        return spr.m_id == subpresentation;
                                    });
             if (sp != subpresentations.end()) { // has a subpresentation
-                QString spPath = sp->m_argsOrSrc;
-                // set as root path (if it is not root nor relative) to make sure importing works
-                // correctly.
-                if (!spPath.startsWith(QLatin1String("../"))
-                    && !spPath.startsWith(QLatin1String("./"))) {
-                    spPath.prepend(QLatin1String("./"));
-                }
-
+                QString spPath = convertPath(sp->m_argsOrSrc, true);
                 if (!outPathMap.contains(spPath)) {
                     outPathMap.insert(spPath, {});
-                    outPresentationNodes.insert(sp->m_argsOrSrc, sp->m_id);
+                    outPresentationNodes.insert(spPath, sp->m_id);
                 }
             }
         }
@@ -453,12 +458,16 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
                 QString texturePath = elem.attribute(prop);
                 if (!texturePath.isEmpty()) {
                     // Typically these paths have ./ prepended even though they are relative to uip
-                    // Remove it as ./ at start interpreted as relative to project file
+                    // Remove it as ./ at start is interpreted as relative to project file
                     if (texturePath.startsWith(QLatin1String("./")))
                         texturePath = texturePath.mid(2);
-                    QFileInfo absTexPath(uipSrc.path() + QLatin1Char('/') + texturePath);
-                    if (absTexPath.exists() && !outPathMap.contains(texturePath))
-                        outPathMap.insert(texturePath, absTexPath.absoluteFilePath());
+                    if (!texturePath.isEmpty()) {
+                        QFileInfo absTexPath(uipSrc.path() + QLatin1Char('/') + texturePath);
+                        if (!outPathMap.contains(texturePath) && absTexPath.exists()
+                                && absTexPath.isFile()) {
+                            outPathMap.insert(texturePath, absTexPath.absoluteFilePath());
+                        }
+                    }
                 }
             }
         }

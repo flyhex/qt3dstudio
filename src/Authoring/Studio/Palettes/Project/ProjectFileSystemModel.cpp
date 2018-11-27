@@ -864,6 +864,9 @@ void ProjectFileSystemModel::importPresentationAssets(
     QString projPathSrc; // project absolute path for the source uip
     PresentationFile::getSourcePaths(uipSrc, uipTarget, importPathMap, projPathSrc,
                                      outPresentationNodes);
+    const QDir projDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath());
+    const QDir uipSrcDir = uipSrc.dir();
+    const QDir uipTargetDir = uipTarget.dir();
 
     QHashIterator<QString, QString> pathIter(importPathMap);
     while (pathIter.hasNext()) {
@@ -871,16 +874,9 @@ void ProjectFileSystemModel::importPresentationAssets(
         QString srcAssetPath = pathIter.value();
         const QString path = pathIter.key();
         QString targetAssetPath;
-        if (path.startsWith(QLatin1String("./"))) { // path from project root
-            if (srcAssetPath.isEmpty())
-                srcAssetPath = QDir(projPathSrc).absoluteFilePath(path);
-            targetAssetPath = QDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath())
-                                .absoluteFilePath(path);
-        } else { // relative path
-            if (srcAssetPath.isEmpty())
-                srcAssetPath = uipSrc.dir().absoluteFilePath(path);
-            targetAssetPath = uipTarget.dir().absoluteFilePath(path);
-        }
+        if (srcAssetPath.isEmpty())
+            srcAssetPath = uipSrcDir.absoluteFilePath(path);
+        targetAssetPath = uipTargetDir.absoluteFilePath(path);
 
         overridableCopyFile(srcAssetPath, targetAssetPath, outImportedFiles, outOverrideChoice);
 
@@ -888,6 +884,11 @@ void ProjectFileSystemModel::importPresentationAssets(
             // recursively load any uip asset's assets
             importPresentationAssets(QFileInfo(srcAssetPath), QFileInfo(targetAssetPath),
                                      outPresentationNodes, outImportedFiles, outOverrideChoice);
+
+            // update the path in outPresentationNodes to be correctly relative in target project
+            const QString subId = outPresentationNodes.take(path);
+            if (!subId.isEmpty())
+                outPresentationNodes.insert(projDir.relativeFilePath(targetAssetPath), subId);
         } else if (path.endsWith(QLatin1String(".qml"))) {
             // recursively load any qml stream assets
             QQmlApplicationEngine qmlEngine;
@@ -897,6 +898,10 @@ void ProjectFileSystemModel::importPresentationAssets(
                 importQmlAssets(qmlRoot, QFileInfo(srcAssetPath).dir(),
                                 QFileInfo(targetAssetPath).dir(), outImportedFiles,
                                 outOverrideChoice);
+                // update path in outPresentationNodes to be correctly relative in target project
+                const QString subId = outPresentationNodes.take(path);
+                if (!subId.isEmpty())
+                    outPresentationNodes.insert(projDir.relativeFilePath(targetAssetPath), subId);
             }
         }
     }

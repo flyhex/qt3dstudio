@@ -856,28 +856,25 @@ public:
                         }
                     } else if (elem.attribute(QStringLiteral("type")) == QLatin1String("Texture")) {
                         path = elem.attribute(QStringLiteral("default"));
+                        outPropertySet.insert(elem.attribute(QStringLiteral("name")));
                     }
 
-                    if (!path.isEmpty()) {
-                        if (!isMatDefs[j])
-                            outPropertySet.insert(elem.attribute(QStringLiteral("name")));
-                        if (!path.isEmpty() && !outPathMap.contains(path)) {
-                            QString absAssetPath;
-                            if (projectPath.isEmpty()) {
-                                // Importing from library, assume relative path to file itself
-                                absAssetPath = QDir::cleanPath(fileDir.absoluteFilePath(path));
-                            } else {
-                                // When importing from project, all paths are relative to project
-                                absAssetPath = QDir::cleanPath(projDir.absoluteFilePath(path));
-                            }
-                            if (recurseSourceMaterial
-                                    && absAssetPath.endsWith(QLatin1String(".material"))
-                                    && !outPathMap.contains(path)) {
-                                ParseSourcePathsOutOfEffectFile(absAssetPath, projectPath,
-                                                                false, outPathMap, outPropertySet);
-                            }
-                            outPathMap.insert(path, absAssetPath);
+                    if (!path.isEmpty() && !outPathMap.contains(path)) {
+                        QString absAssetPath;
+                        if (projectPath.isEmpty()) {
+                            // Importing from library, assume relative path to file itself
+                            absAssetPath = QDir::cleanPath(fileDir.absoluteFilePath(path));
+                        } else {
+                            // When importing from project, all paths are relative to project
+                            absAssetPath = QDir::cleanPath(projDir.absoluteFilePath(path));
                         }
+                        if (recurseSourceMaterial
+                                && absAssetPath.endsWith(QLatin1String(".material"))
+                                && !outPathMap.contains(path)) {
+                            ParseSourcePathsOutOfEffectFile(absAssetPath, projectPath,
+                                                            false, outPathMap, outPropertySet);
+                        }
+                        outPathMap.insert(path, absAssetPath);
                     }
                 }
             }
