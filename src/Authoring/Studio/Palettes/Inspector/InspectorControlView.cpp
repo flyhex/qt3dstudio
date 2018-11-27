@@ -257,8 +257,10 @@ QString InspectorControlView::noneString() const
 bool InspectorControlView::canLinkProperty(int instance, int handle) const
 {
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-    EStudioObjectType type = doc->GetStudioSystem()->GetClientDataModelBridge()
-                                                                        ->GetObjectType(instance);
+    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    if (bridge->isInsideMaterialContainer(instance))
+        return false;
+    EStudioObjectType type = bridge->GetObjectType(instance);
     if (!qt3dsdm::Qt3DSDMPropertyHandle(handle).Valid()
         && (type & (OBJTYPE_CUSTOMMATERIAL | OBJTYPE_MATERIAL | OBJTYPE_REFERENCEDMATERIAL))) {
         return false;
