@@ -26,6 +26,7 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+#include <QtWidgets/qmessagebox.h>
 #include "Qt3DSCommonPrecompile.h"
 #include "IComposerSerializer.h"
 #include "Qt3DSDMDataCore.h"
@@ -2434,9 +2435,10 @@ struct SComposerSerializerImpl : public IComposerSerializer
     }
 
     qt3dsdm::TInstanceHandleList DoSerializeScene(IDOMReader &inReader,
-                                                const CFilePath &inDocumentDirectory,
-                                                Qt3DSDMInstanceHandle inNewRoot)
+                                                  const CFilePath &inDocumentDirectory,
+                                                  Qt3DSDMInstanceHandle inNewRoot)
     {
+        QStringList unknownList;
         // Attempt to work correctly whether we are pointing to the project or not.
         IDOMReader::Scope __outerScope(inReader);
         if (AreEqual(inReader.GetElementName(), L"UIP"))
@@ -2548,7 +2550,9 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                     QT3DS_ASSERT(false);
                                 }
                             } else {
-                                QT3DS_ASSERT(false);
+                                qCWarning(qt3ds::WARNING) << "Unknown asset type found: "
+                                                          << theFullPath.toQString();
+                                unknownList << theFullPath.toQString();
                             }
                         } else {
                             QT3DS_ASSERT(false);
@@ -2560,6 +2564,17 @@ struct SComposerSerializerImpl : public IComposerSerializer
                     inReader.Att(L"id", theId);
                     AddId(theId, theMaster);
                 }
+            }
+            if (!unknownList.isEmpty()) {
+                QString unknownAssets
+                        = QObject::tr("The presentation may not behave as expected.\n"
+                                      "The following assets were not recognized:\n");
+
+                for (auto asset : qAsConst(unknownList)) {
+                    unknownAssets.append(QLatin1String("\n"));
+                    unknownAssets.append(asset);
+                }
+                QMessageBox::warning(nullptr, QObject::tr("Unknown Assets"), unknownAssets);
             }
         }
 
