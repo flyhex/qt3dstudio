@@ -60,6 +60,7 @@ class CUpdateableDocumentEditor;
 class Q3DStudioRenderer;
 class Q3DSGraphObjectTranslator;
 class Q3DSCameraTranslator;
+class Q3DSReferencedMaterialTranslator;
 class Q3DSTranslation
 {
 public:
@@ -145,6 +146,11 @@ private:
     Q3DSGraphObject *createAliasGraphObject(qt3dsdm::ComposerObjectTypes::Enum type,
                                             const QByteArray &id);
 
+    void recompileShadersIfRequired(Q3DSGraphObjectTranslator *translator,
+                                    const qt3dsdm::SValue &value, const QString &name,
+                                    qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                    qt3dsdm::Qt3DSDMPropertyHandle property);
+
     Q3DStudioRenderer &m_studioRenderer;
 
     CDoc &m_doc;
@@ -164,7 +170,8 @@ private:
     Q3DStudio::CGraphIterator m_graphIterator;
     QVector<TSignalConnection> m_signalConnections;
     quint32 m_componentSecondsDepth;
-    QVector<Q3DSGraphObjectTranslator *> m_slideTranslators;
+    QMap<qt3dsdm::Qt3DSDMInstanceHandle, Q3DSGraphObjectTranslator *> m_slideTranslatorMap;
+    QVector<Q3DSReferencedMaterialTranslator *> m_refMatTranslators;
     QMap<qt3dsdm::Qt3DSDMInstanceHandle, Q3DSGraphObjectTranslator *> m_masterSlideMap;
     QHash<qt3dsdm::Qt3DSDMInstanceHandle, QByteArray> m_instanceIdHash;
     QVector<Q3DSCameraTranslator *> m_cameraTranslators;

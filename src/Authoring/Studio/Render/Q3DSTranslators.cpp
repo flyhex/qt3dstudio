@@ -114,7 +114,8 @@ struct Q3DSValueParser
         return ret;
     }
 
-    static Q3DSImage *parseImage(Q3DSTranslation *context, const SValue &value)
+    static Q3DSImage *parseImage(Q3DSTranslation *context, const SValue &value,
+                                 Q3DSGraphObject *parent)
     {
         qt3dsdm::SLong4 guid = value.getData<qt3dsdm::SLong4>();
         qt3dsdm::Qt3DSDMInstanceHandle theInstance(
@@ -122,6 +123,8 @@ struct Q3DSValueParser
         Q3DSGraphObjectTranslator *imageTranslator = context->getOrCreateTranslator(theInstance);
         if (imageTranslator && imageTranslator->graphObject().type() == Q3DSNode::Image) {
             Q3DSImage *theNewImage = static_cast<Q3DSImage *>(&imageTranslator->graphObject());
+            if (!theNewImage->parent())
+                parent->appendChildNode(theNewImage);
             return  theNewImage;
         }
         return nullptr;
@@ -638,6 +641,26 @@ struct Q3DSTranslatorDataModelParser
     HANDLE_Q3DS_IMAGE_PROPERTY2(Lightmaps, LightmapShadow, LightmapShadowMap)           \
     HANDLE_Q3DS_NOTIFY_CHANGES
 
+const QSet<QString> Q3DSDefaultMaterialTranslator::s_recompileProperties
+{
+    QStringLiteral("shaderlighting"),
+    QStringLiteral("diffusemap"),
+    QStringLiteral("diffusemap2"),
+    QStringLiteral("diffusemap3"),
+    QStringLiteral("specularreflection"),
+    QStringLiteral("specularmap"),
+    QStringLiteral("specularmodel"),
+    QStringLiteral("specularroughness"),
+    QStringLiteral("roughnessmap"),
+    QStringLiteral("bumpmap"),
+    QStringLiteral("normalmap"),
+    QStringLiteral("displacementmap"),
+    QStringLiteral("opacitymap"),
+    QStringLiteral("emissivemap"),
+    QStringLiteral("emissivemap2"),
+    QStringLiteral("translucencymap"),
+    QStringLiteral("iblprobe")
+};
 
 Q3DSNodeTranslator::Q3DSNodeTranslator(qt3dsdm::Qt3DSDMInstanceHandle instance, Q3DSNode &node)
     : Q3DSGraphObjectTranslator(instance, node)
@@ -734,14 +757,14 @@ bool Q3DSNodeTranslator::updateProperty(Q3DSTranslation &inContext,
     return false;
 }
 
-void Q3DSNodeTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+void Q3DSNodeTranslator::copyProperties(Q3DSGraphObject *target, bool ignoreReferenced)
 {
     Q3DSPropertyChangeList list;
-    Q3DSGraphObjectTranslator::copyProperties(targetTranslator);
+    Q3DSGraphObjectTranslator::copyProperties(target, ignoreReferenced);
 
-    Q3DSNode *targetNode = targetTranslator->graphObject<Q3DSNode>();
+    Q3DSNode *targetNode = static_cast<Q3DSNode *>(target);
     const Q3DSNode &theItem = *graphObject<Q3DSNode>();
-    if (!targetTranslator->ignoreReferenced()) {
+    if (!ignoreReferenced) {
         list.append(targetNode->setPosition(theItem.position()));
         list.append(targetNode->setScale(theItem.scale()));
         list.append(targetNode->setRotation(theItem.rotation()));
@@ -845,11 +868,11 @@ bool Q3DSSceneTranslator::updateProperty(Q3DSTranslation &inContext,
     return false;
 }
 
-void Q3DSSceneTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+void Q3DSSceneTranslator::copyProperties(Q3DSGraphObject *target, bool ignoreReferenced)
 {
-    Q3DSGraphObjectTranslator::copyProperties(targetTranslator);
+    Q3DSGraphObjectTranslator::copyProperties(target, ignoreReferenced);
     Q3DSPropertyChangeList list;
-    Q3DSScene *targetScene = targetTranslator->graphObject<Q3DSScene>();
+    Q3DSScene *targetScene = static_cast<Q3DSScene *>(target);
     const Q3DSScene &theItem = *graphObject<Q3DSScene>();
     list.append(targetScene->setUseClearColor(theItem.useClearColor()));
     list.append(targetScene->setClearColor(theItem.clearColor()));
@@ -919,11 +942,11 @@ bool Q3DSCameraTranslator::updateProperty(Q3DSTranslation &inContext,
     return false;
 }
 
-void Q3DSCameraTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+void Q3DSCameraTranslator::copyProperties(Q3DSGraphObject *target, bool ignoreReferenced)
 {
-    Q3DSNodeTranslator::copyProperties(targetTranslator);
+    Q3DSNodeTranslator::copyProperties(target, ignoreReferenced);
     Q3DSPropertyChangeList list;
-    Q3DSCameraNode *targetCamera = targetTranslator->graphObject<Q3DSCameraNode>();
+    Q3DSCameraNode *targetCamera = static_cast<Q3DSCameraNode *>(target);
     const Q3DSCameraNode &theItem = *graphObject<Q3DSCameraNode>();
     list.append(targetCamera->setOrthographic(theItem.orthographic()));
     list.append(targetCamera->setClipNear(theItem.clipNear()));
@@ -1032,11 +1055,11 @@ bool Q3DSLightTranslator::updateProperty(Q3DSTranslation &inContext,
     return false;
 }
 
-void Q3DSLightTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+void Q3DSLightTranslator::copyProperties(Q3DSGraphObject *target, bool ignoreReferenced)
 {
-    Q3DSNodeTranslator::copyProperties(targetTranslator);
+    Q3DSNodeTranslator::copyProperties(target, ignoreReferenced);
     Q3DSPropertyChangeList list;
-    Q3DSLightNode *targetLight = targetTranslator->graphObject<Q3DSLightNode>();
+    Q3DSLightNode *targetLight = static_cast<Q3DSLightNode *>(target);
     const Q3DSLightNode &theItem = *graphObject<Q3DSLightNode>();
     list.append(targetLight->setScope(theItem.scope()));
     list.append(targetLight->setLightType(theItem.lightType()));
@@ -1139,11 +1162,11 @@ bool Q3DSModelTranslator::updateProperty(Q3DSTranslation &inContext,
     return false;
 }
 
-void Q3DSModelTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+void Q3DSModelTranslator::copyProperties(Q3DSGraphObject *target, bool ignoreReferenced)
 {
-    Q3DSNodeTranslator::copyProperties(targetTranslator);
+    Q3DSNodeTranslator::copyProperties(target, ignoreReferenced);
     Q3DSPropertyChangeList list;
-    Q3DSModelNode *targetModel = targetTranslator->graphObject<Q3DSModelNode>();
+    Q3DSModelNode *targetModel = static_cast<Q3DSModelNode *>(target);
     const Q3DSModelNode &theItem = *graphObject<Q3DSModelNode>();
     list.append(targetModel->setMesh(theItem.sourcePath()));
     list.append(targetModel->setSkeletonRoot(theItem.skeletonRoot()));
@@ -1232,11 +1255,11 @@ bool Q3DSImageTranslator::updateProperty(Q3DSTranslation &inContext,
     return false;
 }
 
-void Q3DSImageTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+void Q3DSImageTranslator::copyProperties(Q3DSGraphObject *target, bool ignoreReferenced)
 {
-    Q3DSGraphObjectTranslator::copyProperties(targetTranslator);
+    Q3DSGraphObjectTranslator::copyProperties(target, ignoreReferenced);
     Q3DSPropertyChangeList list;
-    Q3DSImage *targetImage = targetTranslator->graphObject<Q3DSImage>();
+    Q3DSImage *targetImage = static_cast<Q3DSImage *>(target);
     const Q3DSImage &theItem = *graphObject<Q3DSImage>();
     list.append(targetImage->setScaleU(theItem.scaleU()));
     list.append(targetImage->setScaleV(theItem.scaleV()));
@@ -1278,6 +1301,11 @@ void Q3DSDefaultMaterialTranslator::pushTranslation(Q3DSTranslation &inContext)
         childTranslator->pushTranslationIfDirty(inContext);
     }
     theItem.resolveReferences(*inContext.presentation());
+
+    for (auto &change : qAsConst(list)) {
+        if (s_recompileProperties.contains(change.nameStr()))
+            m_specifiedImageMaps.insert(change.nameStr());
+    }
 }
 
 void Q3DSDefaultMaterialTranslator::setActive(bool)
@@ -1318,23 +1346,23 @@ bool Q3DSDefaultMaterialTranslator::updateProperty(Q3DSTranslation &inContext,
         list.append(theItem.setDiffuse(Q3DSValueParser::parseColor(value)));
     } else if (name == QLatin1String("diffusemap")) {
         list.append(theItem.setDiffuseMap(
-                          Q3DSValueParser::parseImage(&inContext, value)));
+                          Q3DSValueParser::parseImage(&inContext, value, &graphObject())));
     } else if (name == QLatin1String("diffusemap2")) {
         list.append(theItem.setDiffuseMap2(
-                          Q3DSValueParser::parseImage(&inContext, value)));
+                          Q3DSValueParser::parseImage(&inContext, value, &graphObject())));
     } else if (name == QLatin1String("diffusemap3")) {
         list.append(theItem.setDiffuseMap3(
-                          Q3DSValueParser::parseImage(&inContext, value)));
+                          Q3DSValueParser::parseImage(&inContext, value, &graphObject())));
     } else if (name == QLatin1String("specularreflection")) {
         list.append(theItem.setSpecularReflection(
-                          Q3DSValueParser::parseImage(&inContext, value)));
+                          Q3DSValueParser::parseImage(&inContext, value, &graphObject())));
     } else if (name == QLatin1String("speculartint")) {
         list.append(theItem.setSpecularTint(Q3DSValueParser::parseColor(value)));
     } else if (name == QLatin1String("specularamount")) {
         list.append(theItem.setSpecularAmount(value.getData<float>()));
     } else if (name == QLatin1String("specularmap")) {
         list.append(theItem.setSpecularMap(
-                          Q3DSValueParser::parseImage(&inContext, value)));
+                          Q3DSValueParser::parseImage(&inContext, value, &graphObject())));
     } else if (name == QLatin1String("specularmodel")) {
         list.append(theItem.setSpecularModel(
                           Q3DSValueParser::parseEnum<Q3DSDefaultMaterial::SpecularModel>(value)));
@@ -1342,29 +1370,29 @@ bool Q3DSDefaultMaterialTranslator::updateProperty(Q3DSTranslation &inContext,
         list.append(theItem.setSpecularRoughness(value.getData<float>()));
     } else if (name == QLatin1String("roughnessmap")) {
         list.append(theItem.setRoughnessMap(
-                          Q3DSValueParser::parseImage(&inContext, value)));
+                          Q3DSValueParser::parseImage(&inContext, value, &graphObject())));
     } else if (name == QLatin1String("fresnelPower")) {
         list.append(theItem.setFresnelPower(value.getData<float>()));
     } else if (name == QLatin1String("ior")) {
         list.append(theItem.setIor(value.getData<float>()));
     } else if (name == QLatin1String("bumpmap")) {
         list.append(theItem.setBumpMap(
-                          Q3DSValueParser::parseImage(&inContext, value)));
+                          Q3DSValueParser::parseImage(&inContext, value, &graphObject())));
     } else if (name == QLatin1String("normalmap")) {
         list.append(theItem.setNormalMap(
-                          Q3DSValueParser::parseImage(&inContext, value)));
+                          Q3DSValueParser::parseImage(&inContext, value, &graphObject())));
     } else if (name == QLatin1String("bumpamount")) {
         list.append(theItem.setBumpAmount(value.getData<float>()));
     } else if (name == QLatin1String("displacementmap")) {
         list.append(theItem.setDisplacementMap(
-                          Q3DSValueParser::parseImage(&inContext, value)));
+                          Q3DSValueParser::parseImage(&inContext, value, &graphObject())));
     } else if (name == QLatin1String("displaceamount")) {
         list.append(theItem.setDisplaceAmount(value.getData<float>()));
     } else if (name == QLatin1String("opacity")) {
         list.append(theItem.setOpacity(value.getData<float>()));
     } else if (name == QLatin1String("opacitymap")) {
         list.append(theItem.setOpacityMap(
-                          Q3DSValueParser::parseImage(&inContext, value)));
+                          Q3DSValueParser::parseImage(&inContext, value, &graphObject())));
     } else if (name == QLatin1String("emissivecolor")) {
         list.append(theItem.setEmissiveColor(
                           Q3DSValueParser::parseColor(value)));
@@ -1372,29 +1400,29 @@ bool Q3DSDefaultMaterialTranslator::updateProperty(Q3DSTranslation &inContext,
         list.append(theItem.setEmissivePower(value.getData<float>()));
     } else if (name == QLatin1String("emissivemap")) {
         list.append(theItem.setEmissiveMap(
-                          Q3DSValueParser::parseImage(&inContext, value)));
+                          Q3DSValueParser::parseImage(&inContext, value, &graphObject())));
     } else if (name == QLatin1String("emissivemap2")) {
         list.append(theItem.setEmissiveMap2(
-                          Q3DSValueParser::parseImage(&inContext, value)));
+                          Q3DSValueParser::parseImage(&inContext, value, &graphObject())));
     } else if (name == QLatin1String("translucencymap")) {
         list.append(theItem.setTranslucencyMap(
-                          Q3DSValueParser::parseImage(&inContext, value)));
+                          Q3DSValueParser::parseImage(&inContext, value, &graphObject())));
     } else if (name == QLatin1String("translucentfalloff")) {
         list.append(theItem.setTranslucentFalloff(value.getData<float>()));
     } else if (name == QLatin1String("diffuselightwrap")) {
         list.append(theItem.setDiffuseLightWrap(value.getData<float>()));
     } else if (name == QLatin1String("iblprobe")) {
         list.append(theItem.setLightProbe(
-                          Q3DSValueParser::parseImage(&inContext, value)));
+                          Q3DSValueParser::parseImage(&inContext, value, &graphObject())));
     } else if (name == QLatin1String("lightmapindirect")) {
         list.append(theItem.setLightmapIndirectMap(
-                          Q3DSValueParser::parseImage(&inContext, value)));
+                          Q3DSValueParser::parseImage(&inContext, value, &graphObject())));
     } else if (name == QLatin1String("lightmapradiosity")) {
         list.append(theItem.setLightmapRadiosityMap(
-                          Q3DSValueParser::parseImage(&inContext, value)));
+                          Q3DSValueParser::parseImage(&inContext, value, &graphObject())));
     } else if (name == QLatin1String("lightmapshadow")) {
         list.append(theItem.setLightmapShadowMap(
-                          Q3DSValueParser::parseImage(&inContext, value)));
+                          Q3DSValueParser::parseImage(&inContext, value, &graphObject())));
     }
     if (list.count()) {
         theItem.notifyPropertyChanges(list);
@@ -1403,10 +1431,10 @@ bool Q3DSDefaultMaterialTranslator::updateProperty(Q3DSTranslation &inContext,
     return false;
 }
 
-void Q3DSDefaultMaterialTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+void Q3DSDefaultMaterialTranslator::copyProperties(Q3DSGraphObject *target, bool ignoreReferenced)
 {
-    Q3DSGraphObjectTranslator::copyProperties(targetTranslator);
-    Q3DSDefaultMaterial *targetMaterial = targetTranslator->graphObject<Q3DSDefaultMaterial>();
+    Q3DSGraphObjectTranslator::copyProperties(target, ignoreReferenced);
+    Q3DSDefaultMaterial *targetMaterial = static_cast<Q3DSDefaultMaterial *>(target);
     const Q3DSDefaultMaterial &theItem = *graphObject<Q3DSDefaultMaterial>();
     Q3DSPropertyChangeList list;
     list.append(targetMaterial->setShaderLighting(theItem.shaderLighting()));
@@ -1443,6 +1471,34 @@ void Q3DSDefaultMaterialTranslator::copyProperties(Q3DSGraphObjectTranslator *ta
     list.append(targetMaterial->setLightmapShadowMap(theItem.lightmapShadowMap()));
     list.append(targetMaterial->setLightProbe(theItem.lightProbe()));
     targetMaterial->notifyPropertyChanges(list);
+}
+
+bool Q3DSDefaultMaterialTranslator::shaderRequiresRecompilation(
+        Q3DSTranslation &inContext, const qt3dsdm::SValue &value, const QString &name,
+        qt3dsdm::AdditionalMetaDataType::Value type)
+{
+    if (!s_recompileProperties.contains(name))
+        return false;
+    if (type == qt3dsdm::AdditionalMetaDataType::Image) {
+        Q3DSImage *image = Q3DSValueParser::parseImage(&inContext, value, &graphObject());
+        if (m_specifiedImageMaps.contains(name) && image == nullptr) {
+            m_specifiedImageMaps.remove(name);
+            return true;
+        } else if (!m_specifiedImageMaps.contains(name) && image != nullptr) {
+            m_specifiedImageMaps.insert(name);
+            return true;
+        }
+    } else {
+        Q3DSDefaultMaterial &theItem = *graphObject<Q3DSDefaultMaterial>();
+        if (name == QLatin1String("shaderlighting") && theItem.shaderLighting()
+                != Q3DSValueParser::parseEnum<Q3DSDefaultMaterial::ShaderLighting>(value)) {
+            return true;
+        } else if (name == QLatin1String("specularmodel") && theItem.specularModel()
+                != Q3DSValueParser::parseEnum<Q3DSDefaultMaterial::SpecularModel>(value)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 
@@ -1507,11 +1563,12 @@ bool Q3DSReferencedMaterialTranslator::updateProperty(Q3DSTranslation &inContext
     return false;
 }
 
-void Q3DSReferencedMaterialTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+void Q3DSReferencedMaterialTranslator::copyProperties(Q3DSGraphObject *target,
+                                                      bool ignoreReferenced)
 {
-    Q3DSGraphObjectTranslator::copyProperties(targetTranslator);
+    Q3DSGraphObjectTranslator::copyProperties(target, ignoreReferenced);
     Q3DSReferencedMaterial *targetMaterial
-            = targetTranslator->graphObject<Q3DSReferencedMaterial>();
+            = static_cast<Q3DSReferencedMaterial *>(target);
     const Q3DSReferencedMaterial &theItem = *graphObject<Q3DSReferencedMaterial>();
     Q3DSPropertyChangeList list;
     list.append(targetMaterial->setReferencedMaterial(theItem.referencedMaterial()));
@@ -1660,7 +1717,7 @@ bool Q3DSLayerTranslator::updateProperty(Q3DSTranslation &inContext,
         list.append(theItem.setShadowBias(value.getData<float>()));
     } else if (name == QLatin1String("lightprobe")) {
         list.append(theItem.setLightProbe(
-                          Q3DSValueParser::parseImage(&inContext, value)));
+                          Q3DSValueParser::parseImage(&inContext, value, &graphObject())));
     } else if (name == QLatin1String("probebright")) {
         list.append(theItem.setBottom(value.getData<float>()));
     } else if (name == QLatin1String("fastibl")) {
@@ -1685,10 +1742,10 @@ bool Q3DSLayerTranslator::updateProperty(Q3DSTranslation &inContext,
     return false;
 }
 
-void Q3DSLayerTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+void Q3DSLayerTranslator::copyProperties(Q3DSGraphObject *target, bool ignoreReferenced)
 {
-    Q3DSGraphObjectTranslator::copyProperties(targetTranslator);
-    Q3DSLayerNode *targetLayer = targetTranslator->graphObject<Q3DSLayerNode>();
+    Q3DSGraphObjectTranslator::copyProperties(target, ignoreReferenced);
+    Q3DSLayerNode *targetLayer = static_cast<Q3DSLayerNode *>(target);
     const Q3DSLayerNode &theItem = *graphObject<Q3DSLayerNode>();
     Q3DSPropertyChangeList list;
     list.append(targetLayer->setDepthTestDisabled(theItem.depthTestDisabled()));
@@ -1812,10 +1869,10 @@ bool Q3DSSlideTranslator::updateProperty(Q3DSTranslation &inContext,
     return false;
 }
 
-void Q3DSSlideTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+void Q3DSSlideTranslator::copyProperties(Q3DSGraphObject *target, bool ignoreReferenced)
 {
-    Q3DSGraphObjectTranslator::copyProperties(targetTranslator);
-    Q3DSSlide *targetSlide = targetTranslator->graphObject<Q3DSSlide>();
+    Q3DSGraphObjectTranslator::copyProperties(target, ignoreReferenced);
+    Q3DSSlide *targetSlide = static_cast<Q3DSSlide *>(target);
     const Q3DSSlide &theItem = *graphObject<Q3DSSlide>();
     Q3DSPropertyChangeList list;
     list.append(targetSlide->setPlayMode(theItem.playMode()));
@@ -1888,10 +1945,10 @@ bool Q3DSTextTranslator::updateProperty(Q3DSTranslation &inContext,
     return false;
 }
 
-void Q3DSTextTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+void Q3DSTextTranslator::copyProperties(Q3DSGraphObject *target, bool ignoreReferenced)
 {
-    Q3DSNodeTranslator::copyProperties(targetTranslator);
-    Q3DSTextNode *targetText = targetTranslator->graphObject<Q3DSTextNode>();
+    Q3DSNodeTranslator::copyProperties(target, ignoreReferenced);
+    Q3DSTextNode *targetText = static_cast<Q3DSTextNode *>(target);
     const Q3DSTextNode &theItem = *graphObject<Q3DSTextNode>();
     Q3DSPropertyChangeList list;
     list.append(targetText->setText(theItem.text()));
@@ -2030,10 +2087,10 @@ bool Q3DSDynamicObjectTranslator::updateProperty(Q3DSTranslation &inContext,
     return false;
 }
 
-void Q3DSDynamicObjectTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+void Q3DSDynamicObjectTranslator::copyProperties(Q3DSGraphObject *target, bool ignoreReferenced)
 {
-    Q3DSGraphObjectTranslator::copyProperties(targetTranslator);
-    Q3DSGraphObject *targetObject = targetTranslator->graphObject<Q3DSGraphObject>();
+    Q3DSGraphObjectTranslator::copyProperties(target, ignoreReferenced);
+    Q3DSGraphObject *targetObject = static_cast<Q3DSGraphObject *>(target);
     const Q3DSGraphObject &theItem = *graphObject<Q3DSGraphObject>();
     Q3DSPropertyChangeList list;
     const QVector<QByteArray> &propertyNames = theItem.dynamicPropertyNames();
@@ -2062,10 +2119,10 @@ void Q3DSEffectTranslator::pushTranslation(Q3DSTranslation &inContext)
     ITERATE_Q3DS_EFFECT_PROPERTIES
 }
 
-void Q3DSEffectTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+void Q3DSEffectTranslator::copyProperties(Q3DSGraphObject *target, bool ignoreReferenced)
 {
-    Q3DSDynamicObjectTranslator::copyProperties(targetTranslator);
-    Q3DSEffectInstance *targetEffect = targetTranslator->graphObject<Q3DSEffectInstance>();
+    Q3DSDynamicObjectTranslator::copyProperties(target, ignoreReferenced);
+    Q3DSEffectInstance *targetEffect = static_cast<Q3DSEffectInstance *>(target);
     const Q3DSEffectInstance &theItem = *graphObject<Q3DSEffectInstance>();
     targetEffect->setEyeballEnabled(theItem.eyeballEnabled());
 }
@@ -2088,6 +2145,19 @@ bool Q3DSEffectTranslator::updateProperty(Q3DSTranslation &inContext,
     }
     return false;
 }
+
+bool Q3DSEffectTranslator::shaderRequiresRecompilation(Q3DSTranslation &inContext,
+                                                       const qt3dsdm::SValue &value,
+                                                       const QString &name,
+                                                       qt3dsdm::AdditionalMetaDataType::Value type)
+{
+    Q_UNUSED(inContext);
+    Q_UNUSED(value);
+    Q_UNUSED(name);
+    Q_UNUSED(type);
+    return false;
+}
+
 
 Q3DSCustomMaterialTranslator::Q3DSCustomMaterialTranslator(qt3dsdm::Qt3DSDMInstanceHandle instance,
                                                            Q3DSCustomMaterialInstance &material)
@@ -2119,13 +2189,13 @@ bool Q3DSCustomMaterialTranslator::updateProperty(Q3DSTranslation &inContext,
 
     if (name == QLatin1String("lightmapindirect")) {
         list.append(theItem.setLightmapIndirectMap(
-                          Q3DSValueParser::parseImage(&inContext, value)));
+                          Q3DSValueParser::parseImage(&inContext, value, &graphObject())));
     } else if (name == QLatin1String("lightmapradiosity")) {
         list.append(theItem.setLightmapRadiosityMap(
-                          Q3DSValueParser::parseImage(&inContext, value)));
+                          Q3DSValueParser::parseImage(&inContext, value, &graphObject())));
     } else if (name == QLatin1String("lightmapshadow")) {
         list.append(theItem.setLightmapShadowMap(
-                          Q3DSValueParser::parseImage(&inContext, value)));
+                          Q3DSValueParser::parseImage(&inContext, value, &graphObject())));
     }
     if (list.count()) {
         theItem.notifyPropertyChanges(list);
@@ -2134,12 +2204,12 @@ bool Q3DSCustomMaterialTranslator::updateProperty(Q3DSTranslation &inContext,
     return false;
 }
 
-void Q3DSCustomMaterialTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+void Q3DSCustomMaterialTranslator::copyProperties(Q3DSGraphObject *target, bool ignoreReferenced)
 {
-    Q3DSDynamicObjectTranslator::copyProperties(targetTranslator);
+    Q3DSDynamicObjectTranslator::copyProperties(target, ignoreReferenced);
     Q3DSPropertyChangeList list;
     Q3DSCustomMaterialInstance *targetMaterial
-            = targetTranslator->graphObject<Q3DSCustomMaterialInstance>();
+            = static_cast<Q3DSCustomMaterialInstance *>(target);
     const Q3DSCustomMaterialInstance &theItem = *graphObject<Q3DSCustomMaterialInstance>();
     list.append(targetMaterial->setLightProbe(theItem.lightProbe()));
     list.append(targetMaterial->setLightmapIndirectMap(theItem.lightmapIndirectMap()));
@@ -2149,6 +2219,17 @@ void Q3DSCustomMaterialTranslator::copyProperties(Q3DSGraphObjectTranslator *tar
     list.append(targetMaterial->setSourcePath(theItem.sourcePath()));
     list.append(targetMaterial->setLightProbe(theItem.lightProbe()));
     targetMaterial->notifyPropertyChanges(list);
+}
+
+bool Q3DSCustomMaterialTranslator::shaderRequiresRecompilation(
+        Q3DSTranslation &inContext, const qt3dsdm::SValue &value, const QString &name,
+        qt3dsdm::AdditionalMetaDataType::Value type)
+{
+    Q_UNUSED(inContext);
+    Q_UNUSED(value);
+    Q_UNUSED(name);
+    Q_UNUSED(type);
+    return false;
 }
 
 
@@ -2176,7 +2257,6 @@ void Q3DSAliasTranslator::pushTranslation(Q3DSTranslation &inContext)
                 m_referencedTree = nullptr;
                 m_referencedInstance = qt3dsdm::Qt3DSDMInstanceHandle();
             } else if (m_referencedTree) {
-                m_referencedTree->setIgnoreReferenced(true);
                 createTranslatorsRecursive(inContext, m_referencedInstance, m_referencedTree);
                 m_referencedTree->pushTranslation(inContext);
             }
@@ -2221,7 +2301,7 @@ bool Q3DSAliasTranslator::updateProperty(Q3DSTranslation &inContext,
     return false;
 }
 
-void Q3DSAliasTranslator::copyProperties(Q3DSGraphObjectTranslator *)
+void Q3DSAliasTranslator::copyProperties(Q3DSGraphObject *, bool)
 {
     // copy alias properties does not make sense
     Q_ASSERT_X(false, __FUNCTION__, "Alias node can not be copied");

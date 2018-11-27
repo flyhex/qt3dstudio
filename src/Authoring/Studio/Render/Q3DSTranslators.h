@@ -58,7 +58,7 @@ public:
                         qt3dsdm::Qt3DSDMInstanceHandle instance,
                         qt3dsdm::Qt3DSDMPropertyHandle property,
                         qt3dsdm::SValue &value, const QString &name) override;
-    void copyProperties(Q3DSGraphObjectTranslator *targetTranslator) override;
+    void copyProperties(Q3DSGraphObject *target, bool ignoreReferenced) override;
 };
 
 class Q3DSGroupNodeTranslator : public Q3DSNodeTranslator
@@ -87,7 +87,7 @@ public:
                         qt3dsdm::Qt3DSDMPropertyHandle property,
                         qt3dsdm::SValue &value,
                         const QString &name) override;
-    void copyProperties(Q3DSGraphObjectTranslator *targetTranslator) override;
+    void copyProperties(Q3DSGraphObject *target, bool ignoreReferenced) override;
 };
 
 class Q3DSCameraTranslator : public Q3DSNodeTranslator
@@ -101,7 +101,7 @@ public:
                         qt3dsdm::SValue &value,
                         const QString &name) override;
     void setActive(bool inActive) override;
-    void copyProperties(Q3DSGraphObjectTranslator *targetTranslator) override;
+    void copyProperties(Q3DSGraphObject *target, bool ignoreReferenced) override;
     void setEditCameraEnabled(bool enabled);
 private:
     bool m_editCameraEnabled = false;
@@ -118,7 +118,7 @@ public:
                         qt3dsdm::Qt3DSDMPropertyHandle property,
                         qt3dsdm::SValue &value,
                         const QString &name) override;
-    void copyProperties(Q3DSGraphObjectTranslator *targetTranslator) override;
+    void copyProperties(Q3DSGraphObject *target, bool ignoreReferenced) override;
 };
 
 class Q3DSModelTranslator : public Q3DSNodeTranslator
@@ -133,7 +133,7 @@ public:
                         qt3dsdm::Qt3DSDMPropertyHandle property,
                         qt3dsdm::SValue &value,
                         const QString &name) override;
-    void copyProperties(Q3DSGraphObjectTranslator *targetTranslator) override;
+    void copyProperties(Q3DSGraphObject *target, bool ignoreReferenced) override;
 };
 
 class Q3DSImageTranslator : public Q3DSGraphObjectTranslator
@@ -149,7 +149,7 @@ public:
                         qt3dsdm::Qt3DSDMPropertyHandle property,
                         qt3dsdm::SValue &value,
                         const QString &name) override;
-    void copyProperties(Q3DSGraphObjectTranslator *targetTranslator) override;
+    void copyProperties(Q3DSGraphObject *target, bool ignoreReferenced) override;
 };
 
 class Q3DSDefaultMaterialTranslator : public Q3DSGraphObjectTranslator
@@ -166,7 +166,14 @@ public:
                         qt3dsdm::Qt3DSDMPropertyHandle property,
                         qt3dsdm::SValue &value,
                         const QString &name) override;
-    void copyProperties(Q3DSGraphObjectTranslator *targetTranslator) override;
+    void copyProperties(Q3DSGraphObject *target, bool ignoreReferenced) override;
+    bool shaderRequiresRecompilation(Q3DSTranslation &inContext,
+                                     const qt3dsdm::SValue &value,
+                                     const QString &name,
+                                     qt3dsdm::AdditionalMetaDataType::Value type) override;
+private:
+    static const QSet<QString> s_recompileProperties;
+    QSet<QString> m_specifiedImageMaps;
 };
 
 class Q3DSReferencedMaterialTranslator : public Q3DSGraphObjectTranslator
@@ -183,7 +190,12 @@ public:
                         qt3dsdm::Qt3DSDMPropertyHandle property,
                         qt3dsdm::SValue &value,
                         const QString &name) override;
-    void copyProperties(Q3DSGraphObjectTranslator *targetTranslator) override;
+    void copyProperties(Q3DSGraphObject *target, bool ignoreReferenced) override;
+
+    Q3DSReferencedMaterial *referenced() const
+    {
+        return graphObject<Q3DSReferencedMaterial>();
+    }
 };
 
 class Q3DSLayerTranslator : public Q3DSNodeTranslator
@@ -197,7 +209,7 @@ public:
                         qt3dsdm::Qt3DSDMPropertyHandle property,
                         qt3dsdm::SValue &value,
                         const QString &name) override;
-    void copyProperties(Q3DSGraphObjectTranslator *targetTranslator) override;
+    void copyProperties(Q3DSGraphObject *target, bool ignoreReferenced) override;
 };
 
 class Q3DSSlideTranslator : public Q3DSGraphObjectTranslator
@@ -213,7 +225,7 @@ public:
                         qt3dsdm::Qt3DSDMPropertyHandle property,
                         qt3dsdm::SValue &value,
                         const QString &name) override;
-    void copyProperties(Q3DSGraphObjectTranslator *targetTranslator) override;
+    void copyProperties(Q3DSGraphObject *target, bool ignoreReferenced) override;
     bool masterSlide() const;
     void setMasterSlide(bool master);
 
@@ -231,7 +243,7 @@ public:
                         qt3dsdm::Qt3DSDMPropertyHandle property,
                         qt3dsdm::SValue &value,
                         const QString &name) override;
-    void copyProperties(Q3DSGraphObjectTranslator *targetTranslator) override;
+    void copyProperties(Q3DSGraphObject *target, bool ignoreReferenced) override;
 };
 
 class Q3DSDynamicObjectTranslator : public Q3DSGraphObjectTranslator
@@ -248,7 +260,7 @@ public:
                         qt3dsdm::Qt3DSDMPropertyHandle property,
                         qt3dsdm::SValue &value,
                         const QString &name) override;
-    void copyProperties(Q3DSGraphObjectTranslator *targetTranslator) override;
+    void copyProperties(Q3DSGraphObject *target, bool ignoreReferenced) override;
 };
 
 class Q3DSEffectTranslator : public Q3DSDynamicObjectTranslator
@@ -261,7 +273,11 @@ public:
                         qt3dsdm::Qt3DSDMPropertyHandle property,
                         qt3dsdm::SValue &value,
                         const QString &name) override;
-    void copyProperties(Q3DSGraphObjectTranslator *targetTranslator) override;
+    void copyProperties(Q3DSGraphObject *target, bool ignoreReferenced) override;
+    bool shaderRequiresRecompilation(Q3DSTranslation &inContext,
+                                     const  qt3dsdm::SValue &value,
+                                     const QString &name,
+                                     qt3dsdm::AdditionalMetaDataType::Value type) override;
 };
 
 class Q3DSCustomMaterialTranslator : public Q3DSDynamicObjectTranslator
@@ -275,7 +291,11 @@ public:
                         qt3dsdm::Qt3DSDMPropertyHandle property,
                         qt3dsdm::SValue &value,
                         const QString &name) override;
-    void copyProperties(Q3DSGraphObjectTranslator *targetTranslator) override;
+    void copyProperties(Q3DSGraphObject *target, bool ignoreReferenced) override;
+    bool shaderRequiresRecompilation(Q3DSTranslation &inContext,
+                                     const qt3dsdm::SValue &value,
+                                     const QString &name,
+                                     qt3dsdm::AdditionalMetaDataType::Value type) override;
 };
 
 class Q3DSAliasTranslator : public Q3DSNodeTranslator
@@ -288,7 +308,7 @@ public:
                         qt3dsdm::Qt3DSDMPropertyHandle property,
                         qt3dsdm::SValue &value,
                         const QString &name) override;
-    void copyProperties(Q3DSGraphObjectTranslator *targetTranslator) override;
+    void copyProperties(Q3DSGraphObject *target, bool ignoreReferenced) override;
     void addToSlide(Q3DSSlide *slide);
 private:
     void createTranslatorsRecursive(Q3DSTranslation &inContext,

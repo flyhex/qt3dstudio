@@ -74,7 +74,7 @@ public:
             return m_aliasInstanceHandle;
         return instanceHandle();
     }
-    virtual void copyProperties(Q3DSGraphObjectTranslator *targetTranslator);
+    virtual void copyProperties(Q3DSGraphObject *target, bool ignoreReferenced);
     void enableAutoUpdates(bool enable)
     {
         m_autoUpdate = enable;
@@ -112,14 +112,7 @@ public:
     {
         m_dirty = dirty;
     }
-    bool ignoreReferenced() const
-    {
-        return m_ignoreReferenced;
-    }
-    void setIgnoreReferenced(bool ignore)
-    {
-        m_ignoreReferenced = ignore;
-    }
+
     static Q3DSGraphObjectTranslator *translatorForObject(Q3DSGraphObject *object);
 
     template <typename T>
@@ -142,6 +135,28 @@ public:
             return true;
         }
         return false;
+    }
+
+    virtual bool shaderRequiresRecompilation(Q3DSTranslation &inContext,
+                                             const qt3dsdm::SValue &value,
+                                             const QString &name,
+                                             qt3dsdm::AdditionalMetaDataType::Value type)
+    {
+        Q_UNUSED(inContext);
+        Q_UNUSED(value);
+        Q_UNUSED(name);
+        Q_UNUSED(type);
+        return false;
+    }
+
+    void setGraphObject(Q3DSGraphObject *object)
+    {
+        if (object != m_graphObject) {
+            if (m_graphObject)
+                s_translatorMap.remove(object);
+            m_graphObject = object;
+            s_translatorMap.insert(object, this);
+        }
     }
 
 private:

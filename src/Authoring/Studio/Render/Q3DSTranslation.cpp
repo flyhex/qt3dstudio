@@ -80,7 +80,7 @@ Q3DSTranslation::Q3DSTranslation(Q3DStudioRenderer &inRenderer,
         Q3DSSlide &slide = static_cast<Q3DSSlide&>(translator->graphObject());
 
         if (component.Valid()) {
-            m_slideTranslators.push_back(translator);
+            m_slideTranslatorMap.insert(instance, translator);
             Q3DSGraphObjectTranslator *componentTranslator = getOrCreateTranslator(component);
 
             if (m_reader.IsMasterSlide(*it)) {
@@ -115,7 +115,7 @@ Q3DSTranslation::Q3DSTranslation(Q3DStudioRenderer &inRenderer,
         Q3DSSlide &slide = static_cast<Q3DSSlide &>(translator->graphObject());
 
         if (component.Valid() && getOrCreateTranslator(component)) {
-            m_slideTranslators.push_back(translator);
+            m_slideTranslatorMap.insert(instance, translator);
             if (!m_reader.IsMasterSlide(*it)) {
                 Q3DSGraphObjectTranslator *slideTranslator = m_masterSlideMap[component];
                 slideTranslator->graphObject().appendChildNode(&slide);
@@ -174,6 +174,70 @@ void Q3DSTranslation::markDirty(qt3dsdm::Qt3DSDMInstanceHandle instance)
     m_studioRenderer.RequestRender();
 }
 
+void Q3DSTranslation::recompileShadersIfRequired(Q3DSGraphObjectTranslator *translator,
+                                                 const SValue &value, const QString &name,
+                                                 qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                                 qt3dsdm::Qt3DSDMPropertyHandle property)
+{
+    qt3dsdm::IPropertySystem *prop = m_doc.GetPropertySystem();
+    if (((translator->isMaterial(translator->graphObject())
+         && translator->graphObject().type() != Q3DSGraphObject::ReferencedMaterial)
+            || translator->graphObject().type() == Q3DSGraphObject::Effect)
+            && translator->shaderRequiresRecompilation(*this, value, name,
+                prop->GetAdditionalMetaDataType(instance, property))) {
+        QByteArray newId = getInstanceObjectId(instance);
+        Q3DSGraphObject *oldObject = &translator->graphObject();
+        Q3DSGraphObject *newObject = &translator->graphObject();
+        switch (oldObject->type()) {
+        case Q3DSGraphObject::DefaultMaterial:
+            newObject = m_presentation->newObject<Q3DSDefaultMaterial>(newId);
+            break;
+        case Q3DSGraphObject::CustomMaterial:
+            newObject = m_presentation->newObject<Q3DSCustomMaterialInstance>(newId);
+            break;
+        case Q3DSGraphObject::Effect:
+            newObject = m_presentation->newObject<Q3DSEffectInstance>(newId);
+            break;
+        default:
+            break;
+        }
+        if (!newObject) {
+            Q_ASSERT_X(newObject, __FUNCTION__, "GraphObject creation failed");
+            return;
+        }
+        Q3DSGraphObjectTranslator *slideTranslator = nullptr;
+        m_instanceIdHash[instance] = newId;
+        qt3dsdm::Qt3DSDMSlideHandle slideHandle(m_reader.GetAssociatedSlide(instance));
+        if (slideHandle.Valid()) {
+            std::shared_ptr<qt3dsdm::ISlideCore> slideCore = m_fullSystem.GetSlideCore();
+            qt3dsdm::Qt3DSDMInstanceHandle slideInstance(slideCore->GetSlideInstance(slideHandle));
+            if (slideInstance.Valid() && m_slideTranslatorMap.contains(slideInstance))
+                slideTranslator = m_slideTranslatorMap[slideInstance];
+        }
+        QVector<Q3DSReferencedMaterial *> updateList;
+        for (auto &refMat : qAsConst(m_refMatTranslators)) {
+            if (refMat->referenced()->referencedMaterial() == oldObject)
+                updateList << refMat->referenced();
+        }
+        Q3DSGraphObject *parent = oldObject->parent();
+        translator->copyProperties(newObject, false);
+        oldObject->reparentChildNodesTo(newObject);
+        m_presentation->unlinkObject(oldObject);
+        parent->appendChildNode(newObject);
+        delete oldObject;
+        for (auto &refMat : qAsConst(updateList)) {
+            Q3DSPropertyChangeList list;
+            list.append(refMat->setReferencedMaterial(newObject));
+            refMat->notifyPropertyChanges(list);
+        }
+        if (slideTranslator) {
+            Q3DSSlide *slide = slideTranslator->graphObject<Q3DSSlide>();
+            slide->addObject(newObject);
+        }
+        translator->setGraphObject(newObject);
+    }
+}
+
 void Q3DSTranslation::markPropertyDirty(qt3dsdm::Qt3DSDMInstanceHandle instance,
                                         qt3dsdm::Qt3DSDMPropertyHandle property)
 {
@@ -194,7 +258,9 @@ void Q3DSTranslation::markPropertyDirty(qt3dsdm::Qt3DSDMInstanceHandle instance,
     THandleTranslatorPairList &theList = *theTranslatorList;
     ThandleTranslatorOption t = findTranslator(theList, qt3dsdm::Qt3DSDMInstanceHandle());
     if (!t.isEmpty() && t->second->isAutoUpdateEnabled()) {
-        t.getValue().second->updateProperty(*this, instance, property, value, name);
+        Q3DSGraphObjectTranslator *translator = t->second;
+        translator->updateProperty(*this, instance, property, value, name);
+        recompileShadersIfRequired(translator, value, name, instance, property);
         m_studioRenderer.RequestRender();
     }
 }
@@ -231,8 +297,6 @@ QByteArray Q3DSTranslation::getInstanceObjectId(qt3dsdm::Qt3DSDMInstanceHandle i
     if (!theId.isEmpty())
         ret = theId.toLatin1();
 
-    Q_ASSERT_X(!m_instanceIdHash.contains(instance), __FUNCTION__,
-               "Instance translator already created");
     int index = 1;
     QByteArray testId = ret;
     while (m_instanceIdHash.values().contains(testId))
@@ -432,6 +496,8 @@ Q3DSGraphObjectTranslator *Q3DSTranslation::createTranslator(
         type = m_objectDefinitions.GetType(parentClass);
 
     QByteArray id = getInstanceObjectId(instance);
+    Q_ASSERT_X(!m_instanceIdHash.contains(instance), __FUNCTION__,
+               "Instance translator already created");
     if (aliasTranslator) {
         // We are creating graph object for alias node tree
         // prepend id with alias id
@@ -503,8 +569,10 @@ Q3DSGraphObjectTranslator *Q3DSTranslation::createTranslator(
         break;
     }
     case qt3dsdm::ComposerObjectTypes::ReferencedMaterial: {
-        translator = new Q3DSReferencedMaterialTranslator(
+        Q3DSReferencedMaterialTranslator *t = new Q3DSReferencedMaterialTranslator(
                             instance, *m_presentation->newObject<Q3DSReferencedMaterial>(id));
+        m_refMatTranslators.push_back(t);
+        translator = t;
         break;
     }
     case qt3dsdm::ComposerObjectTypes::Effect: {
@@ -557,6 +625,18 @@ Q3DSGraphObjectTranslator *Q3DSTranslation::getOrCreateTranslator(
         theNewTranslator->setAliasInstanceHandle(aliasInstance);
         m_dirtySet.insert(*theNewTranslator);
         theList.push_back(THandleTranslatorPair(aliasInstance, theNewTranslator));
+
+        qt3dsdm::Qt3DSDMSlideHandle slideHandle(m_reader.GetAssociatedSlide(instance));
+        if (slideHandle.Valid()) {
+            std::shared_ptr<qt3dsdm::ISlideCore> slideCore = m_fullSystem.GetSlideCore();
+            qt3dsdm::Qt3DSDMInstanceHandle slideInstance(slideCore->GetSlideInstance(slideHandle));
+            if (slideInstance.Valid() && m_slideTranslatorMap.contains(slideInstance)) {
+                Q3DSGraphObjectTranslator *translator = m_slideTranslatorMap[slideInstance];
+                Q3DSSlide *slide = translator->graphObject<Q3DSSlide>();
+                if (slide)
+                    slide->addObject(&theNewTranslator->graphObject());
+            }
+        }
     }
 
     return theNewTranslator;

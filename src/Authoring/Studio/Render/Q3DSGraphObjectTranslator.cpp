@@ -78,10 +78,10 @@ bool Q3DSGraphObjectTranslator::updateProperty(Q3DSTranslation &context,
     return changeList.count() > 0;
 }
 
-void Q3DSGraphObjectTranslator::copyProperties(Q3DSGraphObjectTranslator *targetTranslator)
+void Q3DSGraphObjectTranslator::copyProperties(Q3DSGraphObject *target, bool ignoreReferenced)
 {
+    Q_UNUSED(ignoreReferenced);
     Q3DSPropertyChangeList changeList;
-    Q3DSGraphObject *target = &targetTranslator->graphObject();
     changeList.append(target->setName(graphObject().name()));
     changeList.append(target->setStartTime(graphObject().startTime()));
     changeList.append(target->setEndTime(graphObject().endTime()));
@@ -98,7 +98,7 @@ void Q3DSAliasedTranslator::pushTranslation(Q3DSTranslation &translation)
     // copy object values from the referenced graph object
     Q3DSGraphObjectTranslator *reference = translation.getOrCreateTranslator(instanceHandle());
 
-    reference->copyProperties(this);
+    reference->copyProperties(&graphObject(), true);
 
     setDirty(false);
 }
