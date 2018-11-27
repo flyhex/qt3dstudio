@@ -35,6 +35,7 @@
 #include "ClientDataModelBridge.h"
 #include "Core.h"
 #include "Doc.h"
+#include "IDocumentEditor.h"
 #include "PresentationFile.h"
 #include "IStudioRenderer.h"
 #include "StudioUtils.h"
@@ -322,6 +323,8 @@ void ProjectFile::writePresentationId(const QString &id, const QString &src)
         if (instancesToRefresh.size() > 0) {
             g_StudioApp.GetCore()->GetDispatch()->FireImmediateRefreshInstance(
                         &(instancesToRefresh[0]), long(instancesToRefresh.size()));
+            for (auto &instance : instancesToRefresh)
+                doc->getSceneEditor()->saveIfMaterial(instance);
         }
     }
 }

@@ -1435,8 +1435,10 @@ void InspectorControlModel::refreshRenderables()
         for (int p = 0; p < group.controlElements.count(); ++p) {
             QVariant& element = group.controlElements[p];
             InspectorControlBase *property = element.value<InspectorControlBase *>();
-            if (property->m_propertyType == qt3dsdm::AdditionalMetaDataType::Renderable)
+            if (property->m_property.Valid()
+                    && property->m_propertyType == qt3dsdm::AdditionalMetaDataType::Renderable) {
                 updatePropertyValue(property);
+            }
         }
     }
 }
