@@ -166,6 +166,10 @@
     \li \c{Ctrl + Shift + T}
     \li \c{Cmd + Shift + T}
   \row
+    \li Show scene camera palette
+    \li \c{Ctrl + Shift + F}
+    \li \c{Cmd + Shift + F}
+  \row
     \li Show/hide bounding boxes
     \li \c{Ctrl + B}
     \li \c{Cmd + B}
@@ -582,4 +586,20 @@ only in \e{Perspective View} and \e{Orthographic View}.
     \li \c{Shift + A}
 \endtable
 
+\section2 Scene Camera
+
+\table
+  \header
+    \li Function
+    \li Windows/Linux
+    \li macOS
+  \row
+    \li Pan
+    \li Left mouse drag
+    \li Left mouse drag
+  \row
+    \li Zoom
+    \li Right mouse drag up/down or mouse scroll wheel
+    \li Right mouse drag up/down or mouse scroll wheel
+\endtable
 */

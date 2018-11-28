@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1993-2009 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -27,40 +26,41 @@
 ****************************************************************************/
 
 /*!
-\title Studio Index
-\group qt3dstudio-studio
+\title Studio: Scene Camera Palette
+\page studio-scene-camera-palette.html
+\ingroup qt3dstudio-studio
 
-Qt 3D Studio is an artist-centric tool
-designed for designing and building rich interactive interfaces. Though
-there is a strong emphasis on 3D content - all objects are placed in
-three dimensional space - it is not a 3D content creation tool. It is
-also not a drawing program, though it uses 2D images and vectors
-heavily. Studio is a compositing tool.
+\image scene-camera-palette.png
 
-Create your 2D, 3D, and script assets in other programs and then use
-Studio to place them in your presentation.
+The scene camera palette allows you to zoom in to pixel perfect level with the scene camera.
 
-\e{For more on importing models into your project see the section}
-\l{best-practices-importing-3d-content.html}{Working with 3D Content}.
+\section1 Navigation
 
-\noautolist
+\section2 Zooming
 
-\section1 Contents
+To zoom the scene camera, do one of the following:
 
-//! [toc]
 \list
-    \li \l {Studio: Menu}
-    \li \l {Studio: Toolbar}
-    \li \l {Studio: Scene View and Matte}
-    \li \l {Studio: Project Palette}
-    \li \l {Studio: Basic Objects Palette}
-    \li \l {Studio: Timeline Palette}
-    \li \l {Studio: Slide Palette}
-    \li \l {Studio: Inspector Palette}
-    \li \l {Studio: Action Palette}
-    \li \l {Studio: Scene Camera Palette}
-    \li \l {Studio: Keyboard Shortcuts}
+  \li
+  Use the zoom slide bar in the bottom part of the scene camera palette.
+  \li
+  Use the mouse scroll wheel.
+  \li
+  Use right mouse click and mouse drag up/down.
 \endlist
-//! [toc]
+
+\note Using the mouse to zoom in will zoom in to the location of the mouse cursor. Using the zoom
+scroll bar will zoom in to the center of the presentation.
+
+\section2 Panning
+
+To move around in the scene camera view, do one of the following:
+
+\list
+  \li
+  Hold the left mouse button and move the mouse.
+  \li
+  Use the horizontal and vertical scroll bars to move around.
+\endlist
 
 */
