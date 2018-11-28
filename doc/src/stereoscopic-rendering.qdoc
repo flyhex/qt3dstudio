@@ -70,4 +70,21 @@ are Red-Cyan and Green-Magenta.
 
 \image stereo-anaglyph.png
 
+\section1 Known Limitations
+
+In this technical preview of stereoscopic rendering the following limitations are known:
+
+\list
+  \li
+  All layers should match the presentation size. Stereoscopic modes do not duplicate layers to both
+  eyes, instead it duplicates the content inside layers. Layers smaller than the presentation will
+  not render correctly in top-bottom and left-right stereoscopic modes.
+  \li
+  Because of above mentioned layer size issue and performance impact, presentations with
+  sub-presentations do not fully work in stereoscopic modes.
+  \li
+  Currently, layer effects are not supported in stereoscopic modes. Effects will be disabled when
+  using any stereoscopic mode.
+\endlist
+
 */
