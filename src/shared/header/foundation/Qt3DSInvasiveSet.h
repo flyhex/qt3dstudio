@@ -84,7 +84,7 @@ namespace foundation {
 
         void clear()
         {
-            for (QT3DSU32 idx = 0; idx < m_set.size(); ++idx)
+            for (int idx = 0; idx < m_set.size(); ++idx)
                 TSetSetIndexOp()(*(m_set[idx]), QT3DS_MAX_U32);
             m_set.clear();
         }
