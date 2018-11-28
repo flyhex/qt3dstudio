@@ -37,9 +37,21 @@ interactive presentations, UIs and applications.
 \table
   \row
     \li
+    \div {align="center"}
+    \image getting-started-index.png
+    \enddiv
     \li
+    \div {align="center"}
+    \image graphics-index.png
+    \enddiv
     \li
+    \div {align="center"}
+    \image animation-index.png
+    \enddiv
     \li
+    \div {align="center"}
+    \image scripting-index.png
+    \enddiv
   \row
     \li \b {Getting Started}
       \list
@@ -70,7 +82,13 @@ interactive presentations, UIs and applications.
       \endlist
   \row
     \li
+    \div {align="center"}
+    \image deployment-index.png
+    \enddiv
     \li
+    \div {align="center"}
+    \image help-index.png
+    \enddiv
     \li
     \li
   \row
