@@ -57,6 +57,7 @@
     \li Save
     \li \c{Ctrl + S}
     \li \c{Cmd + S}
+\omit
   \row
     \li Save as...
     \li \c{Ctrl + Shift + S}
@@ -65,6 +66,7 @@
     \li Save a copy
     \li \c{Ctrl + Alt + S}
     \li \c{Cmd + Option + S}
+\endomit
   \row
     \li Exit
     \li \c{Ctrl + Q}

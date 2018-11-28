@@ -395,6 +395,10 @@ void CMainFrame::OnCreate()
     m_ui->actionZoom_Tool->setVisible(false);
 #endif
 
+    // TODO: Save as/save copy functionality hidden until it is redesigned (QT3DS-2630)
+    m_ui->actionSave_As->setVisible(false);
+    m_ui->actionSave_a_Copy->setVisible(false);
+
     // Show a message about opening or creating a presentation
     m_sceneView.data()->setVisible(false);
     setCentralWidget(m_ui->infoText);
@@ -421,8 +425,9 @@ void CMainFrame::OnNewPresentation()
     m_ui->menu_Edit->setEnabled(true);
     m_ui->menu_Timeline->setEnabled(true);
     m_ui->menu_View->setEnabled(true);
-    m_ui->actionSave_As->setEnabled(true);
-    m_ui->actionSave_a_Copy->setEnabled(true);
+    // TODO: Save as/save copy functionality disabled until it is redesigned (QT3DS-2630)
+//    m_ui->actionSave_As->setEnabled(true);
+//    m_ui->actionSave_a_Copy->setEnabled(true);
     m_ui->action_Connect_to_Device->setEnabled(true);
     m_ui->action_Revert->setEnabled(true);
     m_ui->actionImportAssets->setEnabled(true);

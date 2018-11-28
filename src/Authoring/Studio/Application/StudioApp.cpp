@@ -1577,7 +1577,6 @@ bool CStudioApp::OnSave(bool autosave)
     }
 }
 
-//=============================================================================
 /**
  * Command handler for the File Save As menu option.
  * This will prompt the user for a location to save the file out to then
@@ -1594,9 +1593,8 @@ bool CStudioApp::OnSaveAs()
     return false;
 }
 
-//=============================================================================
 /**
- * Command handler for the File Save As menu option.
+ * Command handler for the File Save Copy menu option.
  * This will prompt the user for a location to save the file out to then
  * save a copy, leaving the original file open in the editor.
  * @return true if the file was successfully saved.
