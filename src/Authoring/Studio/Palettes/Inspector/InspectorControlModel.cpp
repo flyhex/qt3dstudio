@@ -835,15 +835,20 @@ InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *insp
     if (metaProperty.m_IsHidden)
         return nullptr;
 
+    Q3DStudio::CString title;
+    title.Assign(metaProperty.m_FormalName.c_str());
+    if (title.IsEmpty())
+        title.Assign(metaProperty.m_Name.c_str());
+
+    // Hide name for basic materials
+    if (title == "Name" && isBasicMaterial())
+        return nullptr;
+
     InspectorControlBase *item = new InspectorControlBase;
     item->m_property = metaProperty.m_Property;
     item->m_instance = inspectable->GetGroupInstance(groupIndex);
     item->m_metaProperty = metaProperty;
 
-    Q3DStudio::CString title;
-    title.Assign(metaProperty.m_FormalName.c_str());
-    if (title.IsEmpty())
-        title.Assign(metaProperty.m_Name.c_str());
     item->m_title = title.toQString();
 
     const auto propertySystem = studio->GetPropertySystem();
@@ -1788,7 +1793,7 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
 
                                 QVector<qt3dsdm::Qt3DSDMInstanceHandle> refMats;
                                 doc->getSceneReferencedMaterials(doc->GetSceneInstance(), refMats);
-                                for (auto &refMat : refMats) {
+                                for (auto &refMat : qAsConst(refMats)) {
                                     const auto origMat = bridge->getMaterialReference(refMat);
                                     if (origMat.Valid() && (long)origMat == instance) {
                                         sceneEditor->setMaterialSourcePath(
@@ -1811,7 +1816,7 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
                                                                     bridge->GetNameProperty());
                                 g_StudioApp.GetCore()->getProjectFile().renameMaterial(
                                             properName.toQString(), newName.toQString());
-                                refreshTree();
+                                refresh();
                                 doc->SetModifiedFlag();
                             }
                             break;

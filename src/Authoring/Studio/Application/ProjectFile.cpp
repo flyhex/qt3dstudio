@@ -823,6 +823,7 @@ void ProjectFile::renameMaterial(const QString &oldName, const QString &newName)
                                              oldName, newName);
         }
     }
+    Q_EMIT assetNameChanged();
 }
 
 /**
