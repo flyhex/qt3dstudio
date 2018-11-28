@@ -446,14 +446,19 @@ void InspectorControlModel::duplicateMaterial()
     }
 }
 
-void InspectorControlModel::updateMaterialValues(const QStringList &values, int elementIndex)
+void InspectorControlModel::updateMaterialValues(const QStringList &values, int elementIndex,
+                                                 bool updatingShaders)
 {
     // Find if there are any material items and update the values of those
-    for (int row = 0; row < m_groupElements.count(); ++row) {
+    int startIndex = 0;
+    bool isReferenced = !isAnimatableMaterial() && updatingShaders;
+    if (isReferenced && m_groupElements.count() > 0)
+        startIndex = m_groupElements.count() - 1; // Update the last group for referenced materials
+    for (int row = startIndex; row < m_groupElements.count(); ++row) {
         const CInspectorGroup *inspectorGroup = m_inspectableBase->GetGroup(row);
         const auto group = dynamic_cast<const Qt3DSDMInspectorGroup *>(inspectorGroup);
         const auto materialGroup = dynamic_cast<const Qt3DSDMMaterialInspectorGroup *>(group);
-        if (materialGroup && materialGroup->isMaterialGroup()) {
+        if (materialGroup && (materialGroup->isMaterialGroup() || isReferenced)) {
             if (m_groupElements[row].controlElements.size()) {
                 auto item = m_groupElements[row].controlElements[elementIndex]
                         .value<InspectorControlBase *>();
@@ -469,9 +474,9 @@ void InspectorControlModel::updateMaterialValues(const QStringList &values, int 
 void InspectorControlModel::updateShaderValues()
 {
     int index = 0;
-    if (!isInsideMaterialContainer())
+    if (isAnimatableMaterial() && !isInsideMaterialContainer())
         index = 1;
-    updateMaterialValues(shaderValues(), index);
+    updateMaterialValues(shaderValues(), index, true);
 }
 
 void InspectorControlModel::updateMatDataValues()
@@ -500,7 +505,7 @@ void InspectorControlModel::setMaterials(std::vector<Q3DStudio::CFilePath> &mate
         m_materials.push_back({name, relativePath});
     }
 
-    if (isAnimatableMaterial())
+    if (!isDefaultMaterial())
         updateShaderValues();
 }
 
@@ -1134,7 +1139,7 @@ auto InspectorControlModel::computeGroup(CInspectableBase* inspectable,
             if (materialGroup && materialGroup->isMaterialGroup()) {
                 InspectorControlBase *item = nullptr;
 
-                if (!isInsideMaterialContainer(cdmInspectable)) {
+                if (!isInsideMaterialContainer(cdmInspectable) && !isReference) {
                     item = createMaterialTypeItem(cdmInspectable, theIndex);
                     if (item)
                         result.controlElements.push_back(QVariant::fromValue(item));

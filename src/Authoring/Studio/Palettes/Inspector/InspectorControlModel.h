@@ -206,7 +206,8 @@ private:
     bool isAnimatableMaterial(Qt3DSDMInspectable *inspectable) const;
     bool isBasicMaterial() const;
     bool isBasicMaterial(Qt3DSDMInspectable *inspectable) const;
-    void updateMaterialValues(const QStringList &values, int elementIndex);
+    void updateMaterialValues(const QStringList &values, int elementIndex,
+                              bool updatingShaders = false);
     void updateShaderValues();
     void updateMatDataValues();
     void updatePropertyValue(InspectorControlBase *element) const;
