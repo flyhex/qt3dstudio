@@ -456,6 +456,8 @@ public:
     std::shared_ptr<Q3DStudio::IInternalDocumentEditor> getSceneEditor() { return m_SceneEditor; }
     QVector<qt3dsdm::Qt3DSDMInstanceHandle> getLayers();
 
+    void queueMaterialRename(const QString &oldName, const QString &newName);
+
 protected:
     // Set the active slide, return true if delving
     void SetActiveSlideChange(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide);
@@ -537,6 +539,8 @@ protected:
     Q3DStudio::SSelectedValue m_SelectedValue;
     bool m_nudging;
     bool m_unnotifiedSelectionChange = false;
+    QVector<QPair<QString, QString>> m_materialRenames;
+    QVector<QPair<QString, QString>> m_materialUndoRenames;
 
 public:
     void OnNewPresentation();

@@ -513,10 +513,7 @@ void InspectorControlModel::setMatDatas(const std::vector<Q3DStudio::CFilePath> 
 {
     m_matDatas.clear();
 
-    const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
-    const auto bridge = studio->GetClientDataModelBridge();
     const auto doc = g_StudioApp.GetCore()->GetDoc();
-
     bool isDocModified = doc->IsModified();
     const auto sceneEditor = doc->getSceneEditor();
     if (!sceneEditor)
@@ -557,25 +554,9 @@ void InspectorControlModel::setMatDatas(const std::vector<Q3DStudio::CFilePath> 
                     const QString actualPath = sceneEditor
                             ->getFilePathFromMaterialName(oldName);
                     if (actualPath == oldPath) {
-                        sceneEditor->setMaterialNameByPath(instance, relativePath);
-
-                        QVector<qt3dsdm::Qt3DSDMInstanceHandle> refMats;
-                        doc->getSceneReferencedMaterials(doc->GetSceneInstance(), refMats);
-                        for (auto &refMat : qAsConst(refMats)) {
-                            const auto origMat = bridge->getMaterialReference(refMat);
-                            if (origMat.Valid() && origMat == instance) {
-                                sceneEditor->setMaterialSourcePath(
-                                            refMat,
-                                            Q3DStudio::CString::fromQString(relativePath));
-                                sceneEditor->SetName(refMat, bridge->GetName(instance, true));
-                                studio->GetFullSystemSignalSender()
-                                        ->SendInstancePropertyValue(refMat,
-                                                                    bridge->GetNameProperty());
-                            }
-                        }
-                        g_StudioApp.GetCore()->getProjectFile().renameMaterial(
-                                    oldName, newName);
-                        isDocModified = true;
+                        doc->queueMaterialRename(oldName, newName);
+                        Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, tr("Set Name"))
+                                ->setMaterialNameByPath(instance, relativePath);
                     }
                 }
             }
@@ -1777,56 +1758,26 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
             if (newName != currentName) {
                 if (bridge->isInsideMaterialContainer(instance)) {
                     const auto sceneEditor = doc->getSceneEditor();
-                    Q3DStudio::CString properName = sceneEditor->GetName(instance);
+                    const auto properOldName = sceneEditor->GetName(instance).toQString();
                     const auto dirPath = doc->GetDocumentDirectory().toQString();
                     for (size_t matIdx = 0, end = m_matDatas.size(); matIdx < end; ++matIdx) {
-                        if (m_matDatas[matIdx].m_name == properName.toQString()) {
+                        if (m_matDatas[matIdx].m_name == properOldName) {
                             QFileInfo fileInfo(dirPath + QLatin1Char('/')
                                                + m_matDatas[matIdx].m_relativePath);
-                            const QString oldFile = fileInfo.absoluteFilePath();
                             const QString newFile = fileInfo.absolutePath()
                                     + QLatin1Char('/')
                                     + newName.toQString()
                                     + QStringLiteral(".materialdef");
-                            if (QFile::rename(oldFile, newFile)) {
-                                const QString newRelPath = QDir(dirPath).relativeFilePath(newFile);
-
-                                QVector<qt3dsdm::Qt3DSDMInstanceHandle> refMats;
-                                doc->getSceneReferencedMaterials(doc->GetSceneInstance(), refMats);
-                                for (auto &refMat : qAsConst(refMats)) {
-                                    const auto origMat = bridge->getMaterialReference(refMat);
-                                    if (origMat.Valid() && (long)origMat == instance) {
-                                        sceneEditor->setMaterialSourcePath(
-                                                    refMat,
-                                                    Q3DStudio::CString::fromQString(newRelPath));
-                                        sceneEditor->SetName(refMat, newName);
-                                        studio->GetFullSystemSignalSender()
-                                                ->SendInstancePropertyValue(
-                                                    refMat,
-                                                    bridge->GetNameProperty());
-                                    }
-                                }
-
-                                newName = Q3DStudio::CString::fromQString(
-                                            sceneEditor->getMaterialNameFromFilePath(newFile));
-                                // Not undoable since this causes a file rename
-                                sceneEditor->SetName(instance, newName, false);
-                                studio->GetFullSystemSignalSender()
-                                        ->SendInstancePropertyValue(instance,
-                                                                    bridge->GetNameProperty());
-                                g_StudioApp.GetCore()->getProjectFile().renameMaterial(
-                                            properName.toQString(), newName.toQString());
-                                refresh();
-                                doc->SetModifiedFlag();
-                            }
-                            break;
+                            const auto properNewName
+                                    = sceneEditor->getMaterialNameFromFilePath(newFile);
+                            newName = Q3DStudio::CString::fromQString(properNewName);
+                            doc->queueMaterialRename(properOldName, properNewName);
                         }
                     }
-                } else {
-                    Q3DStudio::SCOPED_DOCUMENT_EDITOR(
-                                *g_StudioApp.GetCore()->GetDoc(),
-                                QObject::tr("Set Name"))->SetName(instance, newName, false);
                 }
+                Q3DStudio::SCOPED_DOCUMENT_EDITOR(
+                            *g_StudioApp.GetCore()->GetDoc(),
+                            QObject::tr("Set Name"))->SetName(instance, newName, false);
             }
         }
         return;

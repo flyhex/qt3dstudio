@@ -1275,10 +1275,76 @@ void CDoc::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                              qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
     using namespace qt3dsdm;
+    const auto bridge = m_StudioSystem->GetClientDataModelBridge();
     // Save the material definition upon undo and redo
     if (m_Core->GetCmdStack()->isUndoingOrRedoing() &&
-            m_StudioSystem->GetClientDataModelBridge()->isInsideMaterialContainer(inInstance)) {
+            bridge->isInsideMaterialContainer(inInstance)) {
         getSceneEditor()->saveIfMaterial(inInstance);
+    }
+
+    // If a material inside the material container is renamed, the file has to be renamed too
+    // and the referenced materials that refer to that renamed material
+    if (inProperty == bridge->GetNameProperty() && bridge->isInsideMaterialContainer(inInstance)) {
+        const auto sceneEditor = getSceneEditor();
+        const auto dirPath = GetDocumentDirectory().toQString();
+
+        const auto renameMaterial = [&](const QPair<QString, QString> &materialRename) {
+            const QString oldFile
+                    = sceneEditor->getFilePathFromMaterialName(materialRename.first);
+            const QString newFile
+                    = sceneEditor->getFilePathFromMaterialName(materialRename.second);
+            // If the newfile already exists ie. file was renamed manually by the user,
+            // rename the referenced materials regardless
+            if (QFileInfo(newFile).exists() || QFile::rename(oldFile, newFile)) {
+                const QString newRelPath = QDir(dirPath).relativeFilePath(newFile);
+
+                QVector<qt3dsdm::Qt3DSDMInstanceHandle> refMats;
+                getSceneReferencedMaterials(GetSceneInstance(), refMats);
+                for (auto &refMat : qAsConst(refMats)) {
+                    const auto origMat = bridge->getMaterialReference(refMat);
+                    if (origMat.Valid() && (long)origMat == inInstance) {
+                        sceneEditor->setMaterialSourcePath(refMat,
+                                    Q3DStudio::CString::fromQString(newRelPath));
+                        sceneEditor->SetName(refMat, bridge->GetName(inInstance, true));
+                        m_StudioSystem->GetFullSystemSignalSender()
+                                ->SendInstancePropertyValue(refMat, bridge->GetNameProperty());
+                    }
+                }
+            }
+            GetCore()->getProjectFile().renameMaterial(materialRename.first,
+                                                       materialRename.second);
+            m_materialUndoRenames.append(QPair<QString, QString>(materialRename.second,
+                                                                 materialRename.first));
+        };
+
+        // After a rename, the opposite rename is saved to an undo list
+        // While doing an undo or redo, this list is checked for renames
+        if (m_Core->GetCmdStack()->isUndoingOrRedoing()) {
+            // Make a copy of the undo list since renameMaterial adds new renames to the same list
+            auto materialUndoRenamesCopy = m_materialUndoRenames;
+            for (int i = 0; i < materialUndoRenamesCopy.size();) {
+                const auto &materialRename = materialUndoRenamesCopy[i];
+                if (sceneEditor->GetName(inInstance).toQString() == materialRename.second) {
+                    renameMaterial(materialRename);
+                    m_materialUndoRenames.remove(i);
+                    materialUndoRenamesCopy.remove(i);
+                } else {
+                    ++i;
+                }
+            }
+        }
+
+        // These renames are queued by the user by either renaming the material object
+        // or the .materialdef file.
+        for (int i = 0; i < m_materialRenames.size();) {
+            const auto &materialRename = m_materialRenames[i];
+            if (sceneEditor->GetName(inInstance).toQString() == materialRename.second) {
+                renameMaterial(materialRename);
+                m_materialRenames.remove(i);
+            } else {
+                ++i;
+            }
+        }
     }
     // check if we changed datainput bindings
     if (inProperty == m_StudioSystem->GetPropertySystem()
@@ -1290,6 +1356,10 @@ void CDoc::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
         // what happened to the element
         UpdateDatainputMap();
     }
+}
+
+void CDoc::queueMaterialRename(const QString &oldName, const QString &newName) {
+    m_materialRenames.append(QPair<QString, QString>(oldName, newName));
 }
 
 Q3DStudio::SSelectedValue CDoc::SetupInstanceSelection(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
@@ -2860,6 +2930,9 @@ void CDoc::AddToGraph(qt3dsdm::Qt3DSDMInstanceHandle inParentInstance,
 
 void CDoc::OnNewPresentation()
 {
+    m_materialRenames.clear();
+    m_materialUndoRenames.clear();
+
     m_PlaybackClock->Reset();
     m_Core->GetDispatch()->FireOnNewPresentation();
 
