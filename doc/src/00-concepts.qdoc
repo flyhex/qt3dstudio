@@ -65,6 +65,7 @@ interactive presentations, UIs and applications.
       \list
         \li \l{Working with 3D Content}{3D Assets}
         \li \l{Layers}
+        \li \l{Materials and Shaders}
         \li \l{Light Properties}{Lights}
         \li \l{Using Sub-Presentations}{Sub-Presentations}
         \li \l{Stereoscopic Rendering}
