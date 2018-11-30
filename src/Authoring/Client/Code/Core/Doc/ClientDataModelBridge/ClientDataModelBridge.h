@@ -441,15 +441,4 @@ inline qt3dsdm::SLong4 GuidtoSLong4(const Q3DStudio::CId &inId)
     return qt3dsdm::SLong4(thePacked.Data1, thePacked.Data2, thePacked.Data3, thePacked.Data4);
 }
 
-inline Q3DStudio::CId Long4ToGuid(const qt3dsdm::SLong4 &inLong4)
-{
-    return Q3DStudio::CId(inLong4.m_Longs[0], inLong4.m_Longs[1], inLong4.m_Longs[2],
-                          inLong4.m_Longs[3]);
-}
-
-inline bool GuidValid(const qt3dsdm::SLong4 &inLong4)
-{
-    return (inLong4.m_Longs[0] && inLong4.m_Longs[1] && inLong4.m_Longs[2] && inLong4.m_Longs[3]);
-}
-
 #endif

@@ -358,7 +358,7 @@ CClientDataModelBridge::GetOwningComponentInstance(qt3dsdm::Qt3DSDMSlideHandle i
                                                    int &outSlideIndex)
 {
     SLong4 theComponentGuid = GetComponentGuid(inSlideHandle);
-    if (!GuidValid(theComponentGuid))
+    if (!theComponentGuid.Valid())
         return {};
     Q3DStudio::CId theId(theComponentGuid.m_Longs[0], theComponentGuid.m_Longs[1],
                          theComponentGuid.m_Longs[2], theComponentGuid.m_Longs[3]);
