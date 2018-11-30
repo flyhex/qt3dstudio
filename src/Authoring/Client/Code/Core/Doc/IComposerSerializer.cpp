@@ -745,7 +745,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
             if (m_DataCore.GetInstancePropertyValue(
                         theInstance, m_ObjectDefinitions.m_Asset.m_FileId, theInstanceIdValue)) {
                 QString theName = qt3dsdm::get<TDataStrPtr>(theInstanceIdValue)->toQString();
-                if (IsTrivial(theName)) {
+                if (!theName.isEmpty()) {
                     const QString theId = GetId(theName);
                     AddId(theId, theInstance);
                 }
