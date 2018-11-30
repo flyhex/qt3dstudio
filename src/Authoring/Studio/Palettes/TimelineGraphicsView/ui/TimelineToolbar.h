@@ -107,6 +107,8 @@ private:
     QIcon m_iconPlay;
     QIcon m_iconDiActive;
     QIcon m_iconDiInactive;
+    QIcon m_iconTimebarTextsActive;
+    QIcon m_iconTimebarTextsInactive;
 
     QString m_currController;
 
