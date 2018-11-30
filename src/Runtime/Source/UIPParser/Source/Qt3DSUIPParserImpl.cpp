@@ -653,7 +653,7 @@ BOOL CUIPParserImpl::LoadClasses(IPresentation & /*inPresentation*/, IDOMReader 
                     theLoadFlag = m_MetaData.LoadEffectXMLFile(inReader.GetNarrowElementName(),
                                                                theId, theName,
                                                                theFullPath.toUtf8().data());
-                } else if (theFullPath.endsWith(".material")) {
+                } else if (theFullPath.endsWith(".material") || theFullPath.endsWith(".shader")) {
                     theLoadFlag = m_MetaData.LoadMaterialXMLFile(
                         inReader.GetNarrowElementName(), theId, theName,
                                 theFullPath.toUtf8().data());

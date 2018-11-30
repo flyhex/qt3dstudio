@@ -95,6 +95,7 @@ void InspectorControlView::filterMaterials(std::vector<Q3DStudio::CFilePath> &ma
 {
     static const wchar_t *extensions[] = {
         L"material",
+        L"shader",
         nullptr
     };
     for (size_t i = 0; i < m_fileList.size(); ++i) {
@@ -139,7 +140,7 @@ void InspectorControlView::onFilesChanged(
         const Q3DStudio::TFileModificationList &inFileModificationList)
 {
     static const wchar_t *materialExtensions[] = {
-        L"material", L"materialdef",
+        L"material", L"shader", L"materialdef",
         nullptr
     };
     static const wchar_t *fontExtensions[] = {

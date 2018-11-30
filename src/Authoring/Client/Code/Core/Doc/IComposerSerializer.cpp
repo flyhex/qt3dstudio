@@ -2530,7 +2530,9 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                                             warnings);
                                 }
                             } else if (theFullPath.GetExtension().Compare(
-                                           L"material", CString::ENDOFSTRING, false)) {
+                                           L"material", CString::ENDOFSTRING, false)
+                                       || theFullPath.GetExtension().Compare(
+                                           L"shader", CString::ENDOFSTRING, false)) {
                                 if (theFullPath.Exists()) {
                                     std::vector<SMetaDataLoadWarning> warnings;
                                     NVScopedRefCounted<qt3ds::render::IRefCountedInputStream>

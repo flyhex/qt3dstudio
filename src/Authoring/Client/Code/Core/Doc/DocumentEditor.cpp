@@ -869,7 +869,8 @@ public:
                             absAssetPath = QDir::cleanPath(projDir.absoluteFilePath(path));
                         }
                         if (recurseSourceMaterial
-                                && absAssetPath.endsWith(QLatin1String(".material"))
+                                && (absAssetPath.endsWith(QLatin1String(".material"))
+                                    || absAssetPath.endsWith(QLatin1String(".shader")))
                                 && !outPathMap.contains(path)) {
                             ParseSourcePathsOutOfEffectFile(absAssetPath, projectPath,
                                                             false, outPathMap, outPropertySet);
