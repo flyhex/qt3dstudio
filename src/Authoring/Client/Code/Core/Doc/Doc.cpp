@@ -748,9 +748,10 @@ QVector<qt3dsdm::Qt3DSDMInstanceHandle> CDoc::getLayers()
 
 qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetActiveRootInstance()
 {
-    if (m_ActiveSlide.Valid())
+    if (m_ActiveSlide.Valid()) {
         return m_StudioSystem->GetClientDataModelBridge()->GetOwningComponentInstance(
                     m_ActiveSlide);
+    }
     return m_SceneInstance;
 }
 

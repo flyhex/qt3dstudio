@@ -723,7 +723,7 @@ void ActionView::OnSelectionSet(Q3DStudio::SSelectedValue inSelectable)
         // Get the owning component instance
         CClientDataModelBridge *theBridge = GetBridge();
         qt3dsdm::SLong4 theComponentGuid = theBridge->GetComponentGuid(theSlideHandle);
-        Q_ASSERT(GuidValid(theComponentGuid));
+        Q_ASSERT(theComponentGuid.Valid());
         theInstance = theBridge->GetInstanceByGUID(theComponentGuid);
         Q_ASSERT(theInstance.Valid());
     }
