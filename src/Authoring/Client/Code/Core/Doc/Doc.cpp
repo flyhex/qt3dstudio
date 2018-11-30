@@ -1296,7 +1296,9 @@ void CDoc::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                     = sceneEditor->getFilePathFromMaterialName(materialRename.second);
             // If the newfile already exists ie. file was renamed manually by the user,
             // rename the referenced materials regardless
-            if (QFileInfo(newFile).exists() || QFile::rename(oldFile, newFile)) {
+            if (QFileInfo(oldFile).exists())
+                QFile::rename(oldFile, newFile);
+            if (QFileInfo(newFile).exists()) {
                 const QString newRelPath = QDir(dirPath).relativeFilePath(newFile);
 
                 QVector<qt3dsdm::Qt3DSDMInstanceHandle> refMats;
