@@ -1762,9 +1762,11 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
             if (!bridge->CheckNameUnique(parentInstance, instance, realNewName)) {
                 QString origNewName = newName.toQString();
                 newName = bridge->GetUniqueChildName(parentInstance, instance, realNewName);
-                int slashIndex = newName.find('/');
-                if (slashIndex != Q3DStudio::CString::ENDOFSTRING)
-                    newName = newName.substr(slashIndex + 1);
+                if (bridge->isInsideMaterialContainer(instance)) {
+                    int slashIndex = newName.rfind('/');
+                    if (slashIndex != Q3DStudio::CString::ENDOFSTRING)
+                        newName = newName.substr(slashIndex + 1);
+                }
                 // Display rename message box asynchronously so focus loss won't trigger setting
                 // the name again
                 g_StudioApp.GetDialogs()->DisplayObjectRenamed(origNewName, newName.toQString(),
