@@ -1761,7 +1761,8 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
 
             if (!bridge->CheckNameUnique(parentInstance, instance, realNewName)) {
                 QString origNewName = newName.toQString();
-                newName = bridge->GetUniqueChildName(parentInstance, instance, realNewName);
+                realNewName = bridge->GetUniqueChildName(parentInstance, instance, realNewName);
+                newName = realNewName;
                 if (bridge->isInsideMaterialContainer(instance)) {
                     int slashIndex = newName.rfind('/');
                     if (slashIndex != Q3DStudio::CString::ENDOFSTRING)
@@ -1772,9 +1773,31 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
                 g_StudioApp.GetDialogs()->DisplayObjectRenamed(origNewName, newName.toQString(),
                                                                true);
             }
+
+            const auto sceneEditor = doc->getSceneEditor();
+
+            // A materialdef with the same name might exists as a file but not in the container,
+            // so an additional check is needed for that case
+            if (bridge->isInsideMaterialContainer(instance)) {
+                int i = 1;
+                while (QFileInfo(sceneEditor->getFilePathFromMaterialName(
+                                     realNewName.toQString())).exists()) {
+                    ++i;
+                    realNewName = Q3DStudio::CString::fromQString(
+                                realNewName.toQString() + QString::number(i));
+                    if (!bridge->CheckNameUnique(parentInstance, instance, realNewName)) {
+                        realNewName = bridge->GetUniqueChildName(
+                                    parentInstance, instance, realNewName);
+                    }
+                }
+                newName = realNewName;
+                int slashIndex = newName.rfind('/');
+                if (slashIndex != Q3DStudio::CString::ENDOFSTRING)
+                    newName = newName.substr(slashIndex + 1);
+            }
+
             if (newName != currentName) {
                 if (bridge->isInsideMaterialContainer(instance)) {
-                    const auto sceneEditor = doc->getSceneEditor();
                     const auto properOldName = sceneEditor->GetName(instance).toQString();
                     const auto dirPath = doc->GetDocumentDirectory().toQString();
                     for (size_t matIdx = 0, end = m_matDatas.size(); matIdx < end; ++matIdx) {
