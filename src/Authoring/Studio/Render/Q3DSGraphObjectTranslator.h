@@ -54,7 +54,7 @@ class Q3DSGraphObjectTranslator
 public:
     Q3DSGraphObjectTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance, Q3DSGraphObject &inObj);
 
-    virtual ~Q3DSGraphObjectTranslator() {}
+    virtual ~Q3DSGraphObjectTranslator();
 
     virtual void pushTranslation(Q3DSTranslation &inTranslatorContext);
     virtual void setActive(bool inActive) = 0;
@@ -158,6 +158,9 @@ public:
             s_translatorMap.insert(object, this);
         }
     }
+
+    Q3DSGraphObjectTranslator *parent() const;
+    virtual void releaseGraphObjectsRecursive(Q3DSTranslation &inContext);
 
 private:
 

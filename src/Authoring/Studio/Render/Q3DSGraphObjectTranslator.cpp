@@ -47,6 +47,11 @@ Q3DSGraphObjectTranslator::Q3DSGraphObjectTranslator(qt3dsdm::Qt3DSDMInstanceHan
     s_translatorMap.insert(m_graphObject, this);
 }
 
+Q3DSGraphObjectTranslator::~Q3DSGraphObjectTranslator()
+{
+    s_translatorMap.remove(m_graphObject);
+}
+
 void Q3DSGraphObjectTranslator::pushTranslation(Q3DSTranslation &translation)
 {
     QString theId = translation.reader().GetFileId(instanceHandle());
@@ -91,6 +96,23 @@ void Q3DSGraphObjectTranslator::copyProperties(Q3DSGraphObject *target, bool ign
 Q3DSGraphObjectTranslator *Q3DSGraphObjectTranslator::translatorForObject(Q3DSGraphObject *object)
 {
     return s_translatorMap.value(object, nullptr);
+}
+
+Q3DSGraphObjectTranslator *Q3DSGraphObjectTranslator::parent() const
+{
+    return translatorForObject(m_graphObject->parent());
+}
+
+void Q3DSGraphObjectTranslator::releaseGraphObjectsRecursive(Q3DSTranslation &inContext)
+{
+    const Q3DStudio::CGraph &graph = inContext.assetGraph();
+    int childCount = graph.GetChildCount(instanceHandle());
+    for (int idx = 0; idx < childCount; ++idx) {
+        qt3dsdm::Qt3DSDMInstanceHandle childInstance = graph.GetChild(instanceHandle(), idx);
+        Q3DSGraphObjectTranslator *child = inContext.getOrCreateTranslator(childInstance);
+        child->releaseGraphObjectsRecursive(inContext);
+        inContext.releaseTranslator(child);
+    }
 }
 
 void Q3DSAliasedTranslator::pushTranslation(Q3DSTranslation &translation)

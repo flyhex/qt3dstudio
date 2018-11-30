@@ -165,6 +165,7 @@ private:
     // All translator related containers must come after the allocator
     TInstanceToTranslatorMap m_translatorMap;
     TTranslatorDirtySet m_dirtySet;
+    TTranslatorDirtySet m_releaseSet;
     Q3DSPresentationData m_presentation_data;
     Q3DSScene *m_scene;
     Q3DStudio::CGraphIterator m_graphIterator;
@@ -222,6 +223,7 @@ public:
     SEditCameraPersistentInformation editCameraInfo() const;
     void enableSceneCameras(bool enable);
     void wheelZoom(qreal factor);
+    void releaseTranslator(Q3DSGraphObjectTranslator *translator);
 
     void markDirty(qt3dsdm::Qt3DSDMInstanceHandle instance);
     void markDirty(qt3dsdm::Qt3DSDMInstanceHandle *inInstance, long inInstanceCount)

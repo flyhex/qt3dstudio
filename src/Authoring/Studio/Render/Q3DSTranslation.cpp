@@ -267,12 +267,16 @@ void Q3DSTranslation::markPropertyDirty(qt3dsdm::Qt3DSDMInstanceHandle instance,
 
 void Q3DSTranslation::releaseTranslation(qt3dsdm::Qt3DSDMInstanceHandle instance)
 {
+    THandleTranslatorPairList &theTranslators = getTranslatorsForInstance(instance);
+    for (int idx = 0, end = theTranslators.size(); idx < end; ++idx)
+        m_releaseSet.insert(*theTranslators[idx].second);
 
+    m_studioRenderer.RequestRender();
 }
 
-void Q3DSTranslation::markGraphInstanceDirty(int instance, int parent)
+void Q3DSTranslation::markGraphInstanceDirty(int instance, int)
 {
-
+    markDirty(instance);
 }
 
 void Q3DSTranslation::markBeginComponentSeconds(qt3dsdm::Qt3DSDMSlideHandle slide)
@@ -495,6 +499,9 @@ Q3DSGraphObjectTranslator *Q3DSTranslation::createTranslator(
     if (type == qt3dsdm::ComposerObjectTypes::Unknown && parentClass.Valid())
         type = m_objectDefinitions.GetType(parentClass);
 
+    if (type == qt3dsdm::ComposerObjectTypes::Unknown)
+        return nullptr;
+
     QByteArray id = getInstanceObjectId(instance);
     Q_ASSERT_X(!m_instanceIdHash.contains(instance), __FUNCTION__,
                "Instance translator already created");
@@ -642,14 +649,49 @@ Q3DSGraphObjectTranslator *Q3DSTranslation::getOrCreateTranslator(
     return theNewTranslator;
 }
 
+void Q3DSTranslation::releaseTranslator(Q3DSGraphObjectTranslator *translator)
+{
+    qt3dsdm::Qt3DSDMInstanceHandle instance = translator->instanceHandle();
+    Q3DSGraphObject *graphObject = &translator->graphObject();
+
+    if (static_cast<Q3DSCameraTranslator *>(translator))
+        m_cameraTranslators.removeAll(static_cast<Q3DSCameraTranslator *>(translator));
+    if (static_cast<Q3DSReferencedMaterialTranslator *>(translator))
+        m_refMatTranslators.removeAll(static_cast<Q3DSReferencedMaterialTranslator *>(translator));
+
+    qt3dsdm::Qt3DSDMSlideHandle slideHandle(m_reader.GetAssociatedSlide(instance));
+    if (slideHandle.Valid()) {
+        std::shared_ptr<qt3dsdm::ISlideCore> slideCore = m_fullSystem.GetSlideCore();
+        qt3dsdm::Qt3DSDMInstanceHandle slideInstance(slideCore->GetSlideInstance(slideHandle));
+        if (slideInstance.Valid() && m_slideTranslatorMap.contains(slideInstance)) {
+            Q3DSGraphObjectTranslator *translator = m_slideTranslatorMap[slideInstance];
+            Q3DSSlide *slide = translator->graphObject<Q3DSSlide>();
+            if (slide)
+                slide->removeObject(graphObject);
+        }
+    }
+
+    m_instanceIdHash.remove(instance);
+    m_translatorMap.remove(instance);
+    m_presentation->unlinkObject(graphObject);
+    delete translator;
+    delete graphObject;
+}
+
 void Q3DSTranslation::clearDirtySet()
 {
+    for (unsigned int idx = 0; idx < m_releaseSet.size(); ++idx) {
+        Q3DSGraphObjectTranslator *translator = m_releaseSet[idx];
+        translator->releaseGraphObjectsRecursive(*this);
+        releaseTranslator(translator);
+    }
     for (unsigned int idx = 0; idx < m_dirtySet.size(); ++idx) {
         if (m_reader.IsInstance(m_dirtySet[idx]->instanceHandle())
                 && m_dirtySet[idx]->dirty()) {
             m_dirtySet[idx]->pushTranslation(*this);
         }
     }
+    m_releaseSet.clear();
     m_dirtySet.clear();
 }
 
