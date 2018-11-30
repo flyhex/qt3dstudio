@@ -41,7 +41,6 @@
 #include "StudioUtils.h"
 #include "Dispatch.h"
 #include <QtCore/qdiriterator.h>
-#include <QtXml/qdom.h>
 #include <QtCore/qsavefile.h>
 #include <QtCore/qtimer.h>
 
@@ -464,6 +463,58 @@ QString ProjectFile::createPreview()
     return {};
 }
 
+void ProjectFile::parseDataInputElem(const QDomElement &elem,
+                                     QMap<QString, CDataInputDialogItem *> &dataInputs)
+{
+    if (elem.nodeName() == QLatin1String("dataInput")) {
+        CDataInputDialogItem *item = new CDataInputDialogItem();
+        item->name = elem.attribute(QStringLiteral("name"));
+        QString type = elem.attribute(QStringLiteral("type"));
+        if (type == QLatin1String("Ranged Number")) {
+            item->type = EDataType::DataTypeRangedNumber;
+            item->minValue = elem.attribute(QStringLiteral("min")).toFloat();
+            item->maxValue = elem.attribute(QStringLiteral("max")).toFloat();
+        } else if (type == QLatin1String("String")) {
+            item->type = EDataType::DataTypeString;
+        } else if (type == QLatin1String("Float")) {
+            item->type = EDataType::DataTypeFloat;
+        } else if (type == QLatin1String("Boolean")) {
+            item->type = EDataType::DataTypeBoolean;
+        } else if (type == QLatin1String("Vector3")) {
+            item->type = EDataType::DataTypeVector3;
+        } else if (type == QLatin1String("Vector2")) {
+            item->type = EDataType::DataTypeVector2;
+        } else if (type == QLatin1String("Variant")) {
+            item->type = EDataType::DataTypeVariant;
+        }
+#ifdef DATAINPUT_EVALUATOR_ENABLED
+        else if (type == QLatin1String("Evaluator")) {
+            item->type = EDataType::DataTypeEvaluator;
+            item->valueString = elem.attribute(QStringLiteral("evaluator"));
+        }
+#endif
+        dataInputs.insert(item->name, item);
+    }
+}
+
+void ProjectFile::loadDataInputs(const QString &projFile,
+                                 QMap<QString, CDataInputDialogItem *> &dataInputs)
+{
+    QFileInfo fi(projFile);
+    if (fi.exists()) {
+        QDomDocument doc;
+        if (!StudioUtils::readFileToDomDocument(projFile, doc))
+            return;
+        QDomElement assetsElem = doc.documentElement().firstChildElement(QStringLiteral("assets"));
+        if (!assetsElem.isNull()) {
+            for (QDomElement p = assetsElem.firstChild().toElement(); !p.isNull();
+                p = p.nextSibling().toElement()) {
+                parseDataInputElem(p, dataInputs);
+            }
+        }
+    }
+}
+
 void ProjectFile::loadSubpresentationsAndDatainputs(
         QVector<SubPresentationRecord> &subpresentations,
         QMap<QString, CDataInputDialogItem *> &datainputs)
@@ -496,34 +547,8 @@ void ProjectFile::loadSubpresentationsAndDatainputs(
                     argsOrSrc = p.attribute(QStringLiteral("args"));
                 subpresentations.push_back(
                             SubPresentationRecord(p.nodeName(), p.attribute("id"), argsOrSrc));
-            } else if (p.nodeName() == QLatin1String("dataInput")) {
-                CDataInputDialogItem *item = new CDataInputDialogItem();
-                item->name = p.attribute(QStringLiteral("name"));
-                QString type = p.attribute(QStringLiteral("type"));
-                if (type == QLatin1String("Ranged Number")) {
-                    item->type = EDataType::DataTypeRangedNumber;
-                    item->minValue = p.attribute(QStringLiteral("min")).toFloat();
-                    item->maxValue = p.attribute(QStringLiteral("max")).toFloat();
-                } else if (type == QLatin1String("String")) {
-                    item->type = EDataType::DataTypeString;
-                } else if (type == QLatin1String("Float")) {
-                    item->type = EDataType::DataTypeFloat;
-                } else if (type == QLatin1String("Boolean")) {
-                    item->type = EDataType::DataTypeBoolean;
-                } else if (type == QLatin1String("Vector3")) {
-                    item->type = EDataType::DataTypeVector3;
-                } else if (type == QLatin1String("Vector2")) {
-                    item->type = EDataType::DataTypeVector2;
-                } else if (type == QLatin1String("Variant")) {
-                    item->type = EDataType::DataTypeVariant;
-                }
-#ifdef DATAINPUT_EVALUATOR_ENABLED
-                else if (type == QLatin1String("Evaluator")) {
-                    item->type = EDataType::DataTypeEvaluator;
-                    item->valueString = p.attribute(QStringLiteral("evaluator"));
-                }
-#endif
-                datainputs.insert(item->name, item);
+            } else {
+                parseDataInputElem(p, datainputs);
             }
         }
     }

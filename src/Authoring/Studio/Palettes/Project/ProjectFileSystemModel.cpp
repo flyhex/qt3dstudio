@@ -317,8 +317,9 @@ void ProjectFileSystemModel::updateProjectReferences()
                             // asset files
                             QString dummyStr;
                             QHash<QString, QString> dummyMap;
+                            QSet<QString> dummySet;
                             PresentationFile::getSourcePaths(fi, fi, importPathMap,
-                                                             dummyStr, dummyMap);
+                                                             dummyStr, dummyMap, dummySet);
                             addReferencesFromImportMap();
                         } else { // qml-stream
                             QQmlApplicationEngine qmlEngine;
@@ -670,6 +671,7 @@ void ProjectFileSystemModel::importUrls(const QList<QUrl> &urls, int row, bool a
     // List of all files that have been copied by this import. Used to avoid duplicate imports
     // due to some of the imported files also being assets used by other imported files.
     QStringList importedFiles;
+    QMap<QString, CDataInputDialogItem *> importedDataInputs;
     int overrideChoice = QMessageBox::NoButton;
 
     for (const auto &url : urls) {
@@ -686,13 +688,32 @@ void ProjectFileSystemModel::importUrls(const QList<QUrl> &urls, int row, bool a
         }
 
         if (sortedDir.exists()) {
-            importUrl(sortedDir, url, presentationNodes, importedFiles, overrideChoice);
+            importUrl(sortedDir, url, presentationNodes, importedFiles, importedDataInputs,
+                      overrideChoice);
             expandPaths << sortedDir.path();
         }
     }
 
     // Batch update all imported presentation nodes
     g_StudioApp.GetCore()->getProjectFile().addPresentationNodes(presentationNodes);
+
+    // Add new data inputs that are missing from project's data inputs. Duplicates are ignored,
+    // even if they are different type.
+    QMapIterator<QString, CDataInputDialogItem *> diIt(importedDataInputs);
+    bool addedDi = false;
+    while (diIt.hasNext()) {
+        diIt.next();
+        if (!g_StudioApp.m_dataInputDialogItems.contains(diIt.key())) {
+            g_StudioApp.m_dataInputDialogItems.insert(diIt.key(), diIt.value());
+            addedDi = true;
+        } else {
+            delete diIt.value();
+        }
+    }
+    if (addedDi) {
+        g_StudioApp.saveDataInputsToProjectFile();
+        g_StudioApp.checkDeletedDatainputs();  // Updates externalPresBoundTypes
+    }
 
     for (const QString &expandPath : qAsConst(expandPaths)) {
         int expandRow = rowForPath(expandPath);
@@ -711,11 +732,13 @@ void ProjectFileSystemModel::importUrls(const QList<QUrl> &urls, int row, bool a
  *                             is presentation id.
  * @param outImportedFiles List of absolute source paths of the dependent assets that are imported
  *                         in the same import context.
+ * @param outDataInputs Map of data inputs that are in use in this import context.
  * @param outOverrideChoice The copy skip/override choice used in this import context.
  */
 void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
                                        QHash<QString, QString> &outPresentationNodes,
                                        QStringList &outImportedFiles,
+                                       QMap<QString, CDataInputDialogItem *> &outDataInputs,
                                        int &outOverrideChoice) const
 {
     using namespace Q3DStudio;
@@ -801,8 +824,16 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
                     = doc->GetCore()->getProjectFile().getRelativeFilePathTo(destPath);
             if (!outPresentationNodes.contains(presPath))
                 outPresentationNodes.insert(presPath, {});
+            QSet<QString> dataInputs;
             importPresentationAssets(fileInfo, QFileInfo(destPath), outPresentationNodes,
-                                     outImportedFiles, outOverrideChoice);
+                                     outImportedFiles, dataInputs, outOverrideChoice);
+            const QString projFile = PresentationFile::findProjectFile(fileInfo.absoluteFilePath());
+            QMap<QString, CDataInputDialogItem *> allDataInputs;
+            ProjectFile::loadDataInputs(projFile, allDataInputs);
+            for (auto &di : dataInputs) {
+                if (allDataInputs.contains(di))
+                    outDataInputs.insert(di, allDataInputs[di]);
+            }
         } else if (qmlRoot && isQmlStream) { // importing a qml stream
             const QString presPath
                     = doc->GetCore()->getProjectFile().getRelativeFilePathTo(destPath);
@@ -853,17 +884,19 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
  *                       recursive calls
  * @param outImportedFiles list of absolute source paths of the dependent assets that are imported
  *                         in the same import context.
+ * @param outDataInputs set of data input identifiers that are in use by this presentation and its
+ *                      subpresentations.
  * @param outOverrideChoice The copy skip/override choice used in this import context.
  */
 void ProjectFileSystemModel::importPresentationAssets(
         const QFileInfo &uipSrc, const QFileInfo &uipTarget,
         QHash<QString, QString> &outPresentationNodes, QStringList &outImportedFiles,
-        int &outOverrideChoice) const
+        QSet<QString> &outDataInputs, int &outOverrideChoice) const
 {
     QHash<QString, QString> importPathMap;
     QString projPathSrc; // project absolute path for the source uip
     PresentationFile::getSourcePaths(uipSrc, uipTarget, importPathMap, projPathSrc,
-                                     outPresentationNodes);
+                                     outPresentationNodes, outDataInputs);
     const QDir projDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath());
     const QDir uipSrcDir = uipSrc.dir();
     const QDir uipTargetDir = uipTarget.dir();
@@ -883,7 +916,8 @@ void ProjectFileSystemModel::importPresentationAssets(
         if (path.endsWith(QLatin1String(".uip"))) {
             // recursively load any uip asset's assets
             importPresentationAssets(QFileInfo(srcAssetPath), QFileInfo(targetAssetPath),
-                                     outPresentationNodes, outImportedFiles, outOverrideChoice);
+                                     outPresentationNodes, outImportedFiles, outDataInputs,
+                                     outOverrideChoice);
 
             // update the path in outPresentationNodes to be correctly relative in target project
             const QString subId = outPresentationNodes.take(path);

@@ -273,7 +273,8 @@ QString PresentationFile::findProjectFile(const QString &uipPath)
 void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &uipTarget,
                                       QHash<QString, QString> &outPathMap,
                                       QString &outProjPathSrc,
-                                      QHash<QString, QString> &outPresentationNodes)
+                                      QHash<QString, QString> &outPresentationNodes,
+                                      QSet<QString> &outDataInputs)
 {
     QDomDocument domDoc;
     if (!StudioUtils::readFileToDomDocument(uipTarget.filePath(), domDoc))
@@ -337,9 +338,28 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
         }
     }
 
+    std::function<void(const QDomElement &, bool)> parseDataInput;
+    parseDataInput = [&](const QDomElement &elem, bool parseChildren) {
+        const QString ctrlAtt = elem.attribute(QStringLiteral("controlledproperty"));
+        if (!ctrlAtt.isEmpty()) {
+            const QStringList dataInputs = ctrlAtt.split(QLatin1Char('$'));
+            for (auto &di : dataInputs) {
+                if (!di.isEmpty())
+                    outDataInputs.insert(di.left(di.indexOf(QLatin1Char(' '))));
+            }
+        }
+        if (parseChildren) {
+            const QDomNodeList children = elem.childNodes();
+            for (int i = 0; i < children.count(); ++i)
+                parseDataInput(children.at(i).toElement(), true);
+        }
+    };
+
     // mesh files for group imports, materials, and effects are found under <Graph>
     QDomElement graphElement = domDoc.documentElement().firstChild()
             .firstChildElement(QStringLiteral("Graph"));
+
+    parseDataInput(graphElement, true);
 
     QDomNodeList modelElems = graphElement.elementsByTagName(QStringLiteral("Model"));
     for (int i = 0; i < modelElems.count(); ++i) {
@@ -475,6 +495,8 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
                     }
                 }
             }
+
+            parseDataInput(elem, false);
         }
     };
 
