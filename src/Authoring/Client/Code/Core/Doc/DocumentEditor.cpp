@@ -2372,6 +2372,14 @@ public:
         TInstanceHandle handle;
     };
 
+    void setInstanceValueIfChanged(TInstanceHandle instance, TPropertyHandle prop, SValue value)
+    {
+        SValue oldValue;
+        m_PropertySystem.GetInstancePropertyValue(instance, prop, oldValue);
+        if (oldValue != value)
+            SetInstancePropertyValue(instance, prop, value);
+    }
+
     QVector<ChildInstance> setPropertyValues(TInstanceHandle instance,
                                              const QMap<QString, QString> &values)
     {
@@ -2396,8 +2404,7 @@ public:
             switch (type) {
             case DataModelDataType::Long4:
             {
-                SetInstancePropertyValue(instance, prop,
-                                         std::make_shared<CDataStr>(propString));
+                setInstanceValueIfChanged(instance, prop, std::make_shared<CDataStr>(propString));
                 SValue value;
                 m_PropertySystem.GetInstancePropertyValue(instance, prop, value);
                 if (!value.empty()) {
@@ -2412,7 +2419,7 @@ public:
             }
             case DataModelDataType::Float:
             {
-                SetInstancePropertyValue(instance, prop, i.value().toFloat());
+                setInstanceValueIfChanged(instance, prop, i.value().toFloat());
                 break;
             }
             case DataModelDataType::Float2:
@@ -2420,7 +2427,7 @@ public:
                 QStringList floats = i.value().split(QStringLiteral(" "));
                 if (floats.length() == 2) {
                     SFloat2 value(floats[0].toFloat(), floats[1].toFloat());
-                    SetInstancePropertyValue(instance, prop, value);
+                    setInstanceValueIfChanged(instance, prop, value);
                 }
                 break;
             }
@@ -2429,21 +2436,21 @@ public:
                 QStringList floats = i.value().split(QStringLiteral(" "));
                 if (floats.length() == 3) {
                     SFloat3 value(floats[0].toFloat(), floats[1].toFloat(), floats[2].toFloat());
-                    SetInstancePropertyValue(instance, prop, value);
+                    setInstanceValueIfChanged(instance, prop, value);
                 }
                 break;
             }
             case DataModelDataType::Bool:
             {
                 if (propString == "True")
-                    SetInstancePropertyValue(instance, prop, true);
+                    setInstanceValueIfChanged(instance, prop, true);
                 else if (propString == "False")
-                    SetInstancePropertyValue(instance, prop, false);
+                    setInstanceValueIfChanged(instance, prop, false);
                 break;
             }
             case DataModelDataType::String:
             {
-                SetInstancePropertyValue(instance, prop, std::make_shared<CDataStr>(propString));
+                setInstanceValueIfChanged(instance, prop, std::make_shared<CDataStr>(propString));
                 break;
             }
             default:
