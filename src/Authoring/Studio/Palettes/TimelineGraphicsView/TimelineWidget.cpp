@@ -1125,8 +1125,10 @@ void TimelineWidget::SetSize(long inX, long inY)
 // DnD, then this method can be removed (and it's callers)
 void TimelineWidget::enableDnD(bool b)
 {
-    m_viewTreeHeader->setInteractive(!b);
-    m_viewTreeContent->setInteractive(!b);
+    m_viewTreeHeader->setEnabled(!b);
+    m_viewTreeContent->setEnabled(!b);
+    m_viewTimelineHeader->setEnabled(!b);
+    m_viewTimelineContent->setEnabled(!b);
 
     if (!b) { // object successfully dropped on the timeline tree
         m_graphicsScene->rowMover()->end(true);

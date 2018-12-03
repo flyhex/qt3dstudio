@@ -88,6 +88,9 @@ CDataInputListDlg::CDataInputListDlg(QMap<QString, CDataInputDialogItem *> *data
     m_ui->typeFilterCombo->addItems({tr("[All types]"), tr("Boolean"),
                                      tr("Float"), tr("Ranged Number"), tr("String"), tr("Variant"),
                                      tr("Vector2"), tr("Vector3")});
+    m_ui->typeFilterCombo->setToolTip(tr("Filter the list by Data Input type"));
+
+    m_ui->searchField->setToolTip(tr("Search for Data Input"));
 
     connect(m_ui->typeFilterCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &CDataInputListDlg::onFilterTypeChanged);
@@ -325,12 +328,25 @@ void CDataInputListDlg::updateInfo()
 
     m_ui->elementInfo->setModel(m_infoContents);
 }
+bool CDataInputListDlg::event(QEvent *event)
+{
+    if (event->type() == QEvent::ShortcutOverride) {
+        QKeyEvent *ke = static_cast<QKeyEvent *>(event);
+        if (m_currentDataInputIndex >= 0 && (ke->key() == Qt::Key_Delete)) {
+            onRemoveDataInput();
+            event->accept();
+            return true;
+        } else {
+            return QDialog::event(event);
+        }
+    } else {
+        return QDialog::event(event);
+    }
+}
 
 void CDataInputListDlg::keyPressEvent(QKeyEvent *event)
 {
-    if (event->matches(QKeySequence::Delete)) {
-        onRemoveDataInput();
-    } else if ((event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)) {
+    if ((event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)) {
         // Eat enter if we have selections
         const QModelIndexList indexes = m_ui->tableView->selectionModel()->selectedIndexes();
         if (indexes.size() > 0)
@@ -386,6 +402,14 @@ void CDataInputListDlg::onAddDataInput()
     // dialog automatically
     if (m_goToAdd)
         accept();
+
+    // Otherwise find the new position of added DI and select it.
+    auto idxList = m_ui->tableView->selectionModel()->model()->match(
+                m_ui->tableView->selectionModel()->model()->index(
+                    0,0), Qt::EditRole, m_mostRecentlyAdded);
+
+    if (!idxList.empty())
+        m_ui->tableView->selectRow(idxList.first().row());
 }
 
 void CDataInputListDlg::onRemoveDataInput()
@@ -501,13 +525,19 @@ void CDataInputListDlg::onEditDataInput()
             m_dataInputs.remove(m_currentDataInputName);
             m_currentDataInputName = di->name;
         }
-        // insert replaces the previous key - value pair if existing
+        // Insert replaces the previous key - value pair if existing.
         m_dataInputs.insert(m_currentDataInputName, di);
 
         updateButtons();
         updateContents();
 
-        m_ui->tableView->selectRow(m_currentDataInputIndex);
+        // Find the new position of renamed DI and select it.
+        auto idxList = m_ui->tableView->selectionModel()->model()->match(
+                    m_ui->tableView->selectionModel()->model()->index(
+                        0,0), Qt::EditRole, m_currentDataInputName);
+
+        if (!idxList.empty())
+            m_ui->tableView->selectRow(idxList.first().row());
     }
 }
 

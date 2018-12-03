@@ -35,6 +35,29 @@
 The project palette displays the files and folders on disk for your project.
 Only files usable by Studio are displayed in the palette.
 
+\image project-palette.png
+
+The text color of assets in the project palette shows if they are currently being used in the
+project.
+
+\table
+  \row
+    \li
+    Dark grey
+    \li
+    The asset is not referenced by any presentation or another asset in the current project.
+  \row
+    \li
+    White
+    \li
+    The asset is in use in the presentation currently being edited.
+  \row
+    \li
+    Dark yellow
+    \li
+    The asset is required by other assets or presentations within the project.
+\endtable
+
 \section1 Importing Assets
 
 You can import assets to your project in the following ways:
@@ -85,25 +108,65 @@ desired files and press open to import them to your project, this will \e{copy} 
 into your project. Once you have a copy you are free to edit it without fear of damaging the
 pristine original.
 
-\section1 Managing Assets
+\section1 Deleting Assets
 
-If you wish to rename or delete items from your project, simply do so
-via the file system. Right-click the folder (or an asset in the folder) in the project
-palette and select \uicontrol{Show Containing Folder} to open the folder in the file
-system.
+To delete an asset from your project, right-click it in the project palette and select
+\uicontrol Delete from the context menu.
+
+\note Assets high-lighted in white or dark yellow cannot be deleted.
 
 \section1 Using Assets
 
-To use an item from the project palette in your presentation, drag the
-item into the \l{studio-scene-view-and-matte.html}{scene view}
-or \l{studio-timeline-palette.html}{timeline palette}. A new element
-will be created in your scene tied to that asset.
+To add an asset to a layer, do one of the following:
+\list
+  \li
+  Drag the asset from the project palette to the scene view. The asset will be added to the
+  active layer. If no layer is active, the asset will be added to the top-most layer.
+  \li
+  Drag the asset from the project palette to a layer in the scene graph.
+\endlist
 
-For convenience, dragging an image from the project palette into your
-scene will automatically create a rectangular model scaled to the aspect
-ratio of your image, with the image used as the diffuse map on the
-material. Dragging out a font file will create a text element with the
-font set correctly.
+A new element will be created in your scene tied to that asset.
+
+\section2 Fonts
+Dragging a font to the scene graph or the scene view will create a new text object with the font
+set correctly.
+
+\section2 Maps
+Dragging a map to the scene view or the scene graph will create a rectangle object, and apply
+the map as diffuse map to the rectangle.
+
+Dragging a map to a material slot or a layer in the scene graph will display a context menu where
+you can select which which material/layer property you want to apply the map to.
+
+\image set-texture-map.png
+
+\image set-layer-map.png
+
+\section2 Materials
+You can drag a material straight to an object in the scene view to apply the material to the
+object.
+
+\note Dropping the material on an object with more than one material slot will assign the
+material to the top-most material slot.
+
+You can also drag the material to a material slot in the scene graph.
+
+\image assign-material.png
+
+\section2 Presentations and QML Streams
+
+Dragging a presentation or QML stream to the scene view will display a pop-up window with two
+options; \uicontrol{Layer} and \uicontrol{Texture}.
+
+\image set-as-sub-to.png
+
+If you select \uicontrol{Layer}, the presentation will be set as the
+\uicontrol{Sub-presentation} property for the layer. The layer will re-size to match the size
+of the sub-presentation.
+
+If you select \uicontrol{Texture}, a rectangle object will be created and the sub-presentation
+will be set as the \uicontrol {Diffuse Map} property for the rectangle.
 
 \section1 Editing Assets
 

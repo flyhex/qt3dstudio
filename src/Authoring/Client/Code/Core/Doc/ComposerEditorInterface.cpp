@@ -614,7 +614,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
             m_Editor.GetChildren(0, parent, children);
             Qt3DSDMInstanceHandle oldVersion;
             for (auto &child : children) {
-                if (m_Editor.GetName(child) == materialName
+                if (m_Editor.GetSourcePath(child) == sourcePath
                         && m_Editor.GetObjectTypeName(child) == "ReferencedMaterial") {
                     oldVersion = child;
                     break;
@@ -716,6 +716,8 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
             Qt3DSDMSlideHandle theParentSlide = theParentList->second[idx].first;
             Qt3DSDMInstanceHandle theParent(theParentList->second[idx].second);
             Qt3DSDMInstanceHandle theChild(theChildList->second[idx].second);
+            if (m_createdMaterials.contains(theChild))
+                continue;
             Qt3DSDMInstanceHandle nextSibling;
             if (!IsTrivial(nextSiblingId)) {
                 for (long childIdx = 0, childCount = m_AssetGraph.GetChildCount(theParent);

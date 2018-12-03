@@ -67,15 +67,20 @@ bool CFileDropSource::ValidateTarget(CDropTarget *inTarget)
     bool targetIsValid = CStudioObjectTypes::AcceptableParent((EStudioObjectType)m_ObjectType,
                                                               targetType);
 
-    // allow material and image rows as valid targets for image drops
-    if (!targetIsValid && m_FileType == DocumentEditorFileType::Image
-        && (targetType & (OBJTYPE_MATERIAL | OBJTYPE_CUSTOMMATERIAL | OBJTYPE_REFERENCEDMATERIAL
-                          | OBJTYPE_IMAGE))) {
-        const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
-                ->GetClientDataModelBridge();
-        // Default material shouldn't be targeatable
-        targetIsValid = bridge->GetSourcePath(inTarget->GetInstance()).toQString()
-                != bridge->getDefaultMaterialName();
+    // allow material, image, and scene as valid targets for image drops
+    if (!targetIsValid && m_FileType == DocumentEditorFileType::Image) {
+        if (targetType & (OBJTYPE_MATERIAL | OBJTYPE_CUSTOMMATERIAL | OBJTYPE_REFERENCEDMATERIAL
+                          | OBJTYPE_IMAGE)) {
+            const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+                    ->GetClientDataModelBridge();
+            // Default material shouldn't be targeatable
+            targetIsValid = bridge->GetSourcePath(inTarget->GetInstance()).toQString()
+                    != bridge->getDefaultMaterialName();
+        } else {
+            // Image isn't normally acceptable child of a scene, but dropping image on scene
+            // will create a rect with image as texture on active layer
+            targetIsValid = targetType == OBJTYPE_SCENE;
+        }
     }
 
     if (!targetIsValid) {
@@ -268,25 +273,46 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
                        ->SetInstancePropertyValueAsRenderable(inTarget, propHandle, src);
             } else if (rowType == OBJTYPE_SCENE) { // dropping on the scene as a texture
                 Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
-                       ->addRectFromSource(src, inSlide, thePoint, theStartTime);
+                       ->addRectFromSource(src, inSlide, isPres, thePoint, theStartTime);
             }
         } else if (isMatData) {
             if (rowType == OBJTYPE_REFERENCEDMATERIAL || rowType == OBJTYPE_MATERIAL
                     || rowType == OBJTYPE_CUSTOMMATERIAL) {
-                const auto sceneEditor = theDoc.getSceneEditor();
-                const Q3DStudio::CString materialName = Q3DStudio::CString::fromQString(
-                            QFileInfo(m_FilePath).completeBaseName());
-                QString name;
-                QMap<QString, QString> values;
-                QMap<QString, QMap<QString, QString>> textureValues;
-                sceneEditor->getMaterialInfo(m_FilePath, name, values, textureValues);
-                const auto material = sceneEditor->getOrCreateMaterial(m_FilePath);
-                Q3DStudio::CString docDir = theDoc.GetDocumentDirectory();
-                Q3DStudio::CFilePath relPath = Q3DStudio::CFilePath::GetRelativePathFromBase(
-                            docDir, Q3DStudio::CString::fromQString(m_FilePath));
-                Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
-                        ->setMaterialProperties(inTarget, relPath, values, textureValues);
-                theDoc.SelectDataModelObject(inTarget);
+                if (!QFileInfo(m_FilePath).completeBaseName().contains(QLatin1Char('#'))) {
+                    const auto doc = g_StudioApp.GetCore()->GetDoc();
+                    { // Scope for the ScopedDocumentEditor
+                        Q3DStudio::ScopedDocumentEditor sceneEditor(
+                                    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QString()));
+                        QString name;
+                        QMap<QString, QString> values;
+                        QMap<QString, QMap<QString, QString>> textureValues;
+                        sceneEditor->getMaterialInfo(m_FilePath, name, values, textureValues);
+                        const auto material = sceneEditor->getOrCreateMaterial(m_FilePath);
+                        sceneEditor->setMaterialValues(material, values, textureValues);
+                    }
+                    // Several aspects of the editor are not updated correctly
+                    // if the data core is changed without a transaction
+                    // The above scope completes the transaction for creating a new material
+                    // Next the added undo has to be popped from the stack
+                    // TODO: Find a way to update the editor fully without a transaction
+                    doc->GetCore()->GetCmdStack()->RemoveLastUndo();
+
+                    Q3DStudio::ScopedDocumentEditor sceneEditor(
+                                Q3DStudio::SCOPED_DOCUMENT_EDITOR(
+                                    *doc, tr("Drag and Drop Material")));
+                    Q3DStudio::CString docDir = theDoc.GetDocumentDirectory();
+                    Q3DStudio::CFilePath relPath = Q3DStudio::CFilePath::GetRelativePathFromBase(
+                                docDir, Q3DStudio::CString::fromQString(m_FilePath));
+                    sceneEditor->SetMaterialType(inTarget, "Referenced Material");
+                    sceneEditor->setMaterialSourcePath(inTarget, relPath);
+                    sceneEditor->setMaterialReferenceByPath(inTarget, relPath.toQString());
+                    theDoc.SelectDataModelObject(inTarget);
+                } else {
+                    g_StudioApp.GetDialogs()->DisplayMessageBox(
+                                tr("Error"), tr("The character '#' is not allowed in "
+                                                "the name of a material definition file."),
+                                Qt3DSMessageBox::ICON_ERROR, false);
+                }
             }
         } else {
             Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)

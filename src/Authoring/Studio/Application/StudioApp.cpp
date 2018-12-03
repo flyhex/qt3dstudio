@@ -1583,7 +1583,6 @@ bool CStudioApp::OnSave(bool autosave)
     }
 }
 
-//=============================================================================
 /**
  * Command handler for the File Save As menu option.
  * This will prompt the user for a location to save the file out to then
@@ -1600,9 +1599,8 @@ bool CStudioApp::OnSaveAs()
     return false;
 }
 
-//=============================================================================
 /**
- * Command handler for the File Save As menu option.
+ * Command handler for the File Save Copy menu option.
  * This will prompt the user for a location to save the file out to then
  * save a copy, leaving the original file open in the editor.
  * @return true if the file was successfully saved.
@@ -1700,10 +1698,12 @@ bool CStudioApp::OnLoadDocument(const QString &inDocument, bool inShowStartupDia
 #if (defined Q_OS_MACOS)
         m_fileOpenEvent = false;
 #endif
-        if (!theErrorText.isEmpty())
+        if (!theErrorText.isEmpty()) {
             m_dialogs->DisplayKnownErrorDialog(theErrorText);
-        else
-            m_dialogs->DisplayLoadingPresentationFailed(loadFileInfo, theLoadErrorParameter);
+        } else {
+            m_dialogs->DisplayLoadingPresentationFailed(loadFileInfo, inDocument,
+                                                        theLoadErrorParameter);
+        }
 
         m_core->GetDispatch()->FireOnOpenDocument(loadFile, false);
 

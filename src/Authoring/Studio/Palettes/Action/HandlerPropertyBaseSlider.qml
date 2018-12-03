@@ -44,7 +44,7 @@ Row {
     property alias sliderMin: slider.from
     property alias sliderMax: slider.to
     property bool intSlider: false
-    property int decimalSlider: 1
+    property int decimalSlider: Math.min(precision(slider.stepSize), 3)
     property Item tabItem1: textField
 
     signal previewValue // Indicates desiredValue contains a preview value
@@ -59,6 +59,14 @@ Row {
             rateLimiter.stop();
         textField.setTextFieldValue();
         root.commitValue();
+    }
+
+    // get the number of decimals in a float/double
+    function precision(a) {
+      if (!isFinite(a)) return 0;
+      var e = 1, p = 0;
+      while (Math.round(a * e) / e !== a) { e *= 10; p++; }
+      return p;
     }
 
     onValueChanged: {

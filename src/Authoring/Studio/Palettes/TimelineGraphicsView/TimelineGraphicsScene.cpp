@@ -53,6 +53,8 @@
 #include "TimeEditDlg.h"
 #include "StudioClipboard.h"
 #include "Dialogs.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "ClientDataModelBridge.h"
 
 #include <QtWidgets/qcombobox.h>
 #include <QtWidgets/qgraphicssceneevent.h>
@@ -858,10 +860,20 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
                     if (treeLabelItem->parentRow()->isProperty()) {
                         treeLabelItem->parentRow()->togglePropertyExpanded();
                     } else if (!treeLabelItem->isLocked()
-                               && treeLabelItem->parentRow()->rowType() != OBJTYPE_SCENE) {
-                        // Tree labels text can be edited with double-click, except for Scene label
-                        treeLabelItem->setEnabled(true);
-                        treeLabelItem->setFocus();
+                               && treeLabelItem->parentRow()->rowType() != OBJTYPE_SCENE
+                               && treeLabelItem->parentRow()->rowType() != OBJTYPE_IMAGE) {
+                        qt3dsdm::Qt3DSDMInstanceHandle instance
+                                = static_cast<Qt3DSDMTimelineItemBinding *>(
+                                    treeLabelItem->parentRow()->getBinding())->GetInstance();
+                        const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+                                ->GetClientDataModelBridge();
+                        if (bridge->GetObjectType(instance) != OBJTYPE_REFERENCEDMATERIAL
+                                || bridge->GetSourcePath(instance).IsEmpty()) {
+                            // Tree labels text can be edited with double-click,
+                            // except for Scene label and basic materials
+                            treeLabelItem->setEnabled(true);
+                            treeLabelItem->setFocus();
+                        }
                     }
                 } else if (item->type() == TimelineItem::TypeRowTimeline) {
                     RowTimeline *rowTimeline = static_cast<RowTimeline *>(item);

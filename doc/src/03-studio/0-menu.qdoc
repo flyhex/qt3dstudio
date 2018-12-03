@@ -49,6 +49,7 @@
   \uicontrol{Open} - Opens a \c{.uip} presentation file.
 \li
   \uicontrol{Save} - Saves changes to the open presentation.
+\omit
 \li
   \uicontrol{Save As} - Saves the presentation to a new location.
   No \c{.uia} file will be created or modified in the new location.
@@ -56,6 +57,7 @@
   \uicontrol{Save a Copy} - Saves a copy of the presentation to a
   new location (but keep working on the current presentation). No
   \c{.uia} file will be created or modified in the new location.
+\endomit
 \li
   \uicontrol{Revert} - With confirmation, abandons all in-memory
   changes to the presentation and re-opens it from disk.

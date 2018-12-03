@@ -54,6 +54,7 @@ public:
     Q_INVOKABLE int selection() const { return m_selection; }
     Q_INVOKABLE void setSearchString(const QString &string);
     Q_INVOKABLE void setTypeFilter(const int index);
+    Q_INVOKABLE bool toolTipsEnabled() const;
 
 Q_SIGNALS:
     void dataInputChanged(int handle, int instance, const QString &selected);

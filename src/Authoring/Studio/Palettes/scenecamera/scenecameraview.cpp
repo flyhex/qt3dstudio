@@ -37,7 +37,6 @@
 #include "MouseCursor.h"
 #include "ResourceCache.h"
 
-#include <QtCore/qlocale.h>
 #include <QtGui/qevent.h>
 #include <QtWidgets/qscrollbar.h>
 
@@ -75,7 +74,10 @@ SceneCameraView::~SceneCameraView()
 void SceneCameraView::wheelEvent(QWheelEvent *e)
 {
     m_zoomPoint = m_ui->scrollArea->viewport()->mapFrom(this, e->pos());
-    m_ui->zoomSlider->setValue(m_ui->zoomSlider->value() + (e->angleDelta().y() / 60));
+    int currentZoomValue = m_ui->zoomSlider->value();
+    // Adjust amount of change based on zoom level
+    int divider = qMin(120, 1000 / currentZoomValue);
+    m_ui->zoomSlider->setValue(currentZoomValue + (e->angleDelta().y() / divider));
 }
 
 void SceneCameraView::resizeEvent(QResizeEvent *e)
@@ -87,6 +89,10 @@ void SceneCameraView::resizeEvent(QResizeEvent *e)
 
 void SceneCameraView::mousePressEvent(QMouseEvent *e)
 {
+    // Ignore panning starting outside scrollarea
+    if (!m_ui->scrollArea->rect().contains(e->pos()))
+        return;
+
     // Panning can be done with left or middle button. Left is more natural and we don't need it
     // for selection. Alt+middle pans in edit camera mode, so middle button is also supported for
     // panning.
@@ -133,9 +139,9 @@ void SceneCameraView::mouseReleaseEvent(QMouseEvent *e)
 
 void SceneCameraView::handleSliderValueChange()
 {
-    static const QString formatTemplate = tr("%1x");
     const qreal zoom = qreal(m_ui->zoomSlider->value()) / 10.0;
-    m_ui->slideValueLabel->setText(formatTemplate.arg(QLocale(QLocale::C).toString(zoom)));
+    QString valueString = QString::number(zoom, 'f', 1);
+    m_ui->slideValueLabel->setText(tr("%1x").arg(valueString));
     m_ui->scrollArea->setZoom(zoom, m_zoomPoint);
     m_zoomPoint = m_ui->scrollArea->viewport()->geometry().center();
 }

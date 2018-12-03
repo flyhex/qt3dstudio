@@ -48,7 +48,7 @@ To create material slots, follow the steps below.
   \li In the properties panel, select the material tab.
   \li Press the + to add a new material slots.
   \li Press the \uicontrol{New} button.
-  \image 3d_Content/blender-export-1.png
+  \image 3D_Content/blender-export-1.png
   \li Repeat steps 2 to 4 for each material slot to create.
 \endlist
 

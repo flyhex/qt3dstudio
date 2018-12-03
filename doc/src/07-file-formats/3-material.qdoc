@@ -28,8 +28,8 @@
 
 /*!
 
-\title The .material Format
-\page file-formats-material.html
+\title The .shader Format
+\page file-formats-shader.html
 \ingroup qt3dstudio-file-formats
 
 Qt 3D Studio supports custom
@@ -39,7 +39,7 @@ interface for tweaking material parameters in Studio.
 
 \section1 Overview
 
-The general structure of a \c{.material} file is shown below. Note
+The general structure of a \c{.shader} file is shown below. Note
 that some of the attributes and elements shown here are optional (and
 this example does not include all possible attributes):
 
@@ -67,7 +67,7 @@ The actual code for the shader is placed within the
 
 \section1 Schemata
 
-Legal \c{.material} files are described by the following formal
+Legal \c{.shader} files are described by the following formal
 schemata. The RelaxNG Compact schema is the reference from which the XML
 Schema Definition schema was derived.
 
@@ -109,7 +109,7 @@ grammar \{
     attribute type        \{"GLSL" | "HLSL"\?,   }# Optional shader type; only GLSL supported. default: GLSL
     attribute version     \{text\?,              }# Code version
     element Shared        \{text\?,              }# Arbitrary definition code to run for all shaders (optional)
-    ShaderElement+                              # There must be at least one <Shader> in the .material file
+    ShaderElement+                              # There must be at least one <Shader> in the .shader file
   \}
 
   ShaderElement = element Shader \{

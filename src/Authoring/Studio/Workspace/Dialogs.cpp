@@ -155,11 +155,11 @@ const wchar_t *wideEffectExts[] = {
 };
 
 const char *materialExts[] = {
-    "material", "materialdef", nullptr,
+    "material", "shader", "materialdef", nullptr,
 };
 
 const wchar_t *wideMaterialExts[] = {
-    L"material", L"materialdef", nullptr,
+    L"material", L"shader", L"materialdef", nullptr,
 };
 
 const char *soundExts[] = {
@@ -533,9 +533,10 @@ QString CDialogs::defaultDirForUrl(const QUrl &url)
  * @param errrorText error message
  */
 void CDialogs::DisplayLoadingPresentationFailed(const QFileInfo &loadFileInfo,
+                                                const QString &loadFileName,
                                                 const QString &errorText)
 {
-    QString theErrorMessage = loadFileInfo.fileName();
+    QString theErrorMessage = loadFileInfo.isFile() ? loadFileInfo.fileName() : loadFileName;
 
     if (errorText.isEmpty())
         theErrorMessage +=  QObject::tr(" failed to load.");

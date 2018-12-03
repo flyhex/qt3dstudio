@@ -44,9 +44,12 @@ class PresentationFile
 public:
     static void getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &uipTarget,
                                QHash<QString, QString> &outPathMap, QString &outRootPath,
-                               QHash<QString, QString> &outPresentationNodes);
+                               QHash<QString, QString> &outPresentationNodes,
+                               QSet<QString> &outDataInputs);
     static void updatePresentationId(const QString &url, const QString &oldId,
                                      const QString &newId);
+    static void renameMaterial(const QString &uipPath, const QString &oldName,
+                               const QString &newName);
     static QSize readSize(const QString &uipPath);
     static QString findProjectFile(const QString &uipPath);
     static bool getDataInputBindings(const SubPresentationRecord &subpresentation,

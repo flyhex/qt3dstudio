@@ -151,7 +151,7 @@ public:
     Q_INVOKABLE QString renderableId(const QString &filePath) const;
     Q_INVOKABLE bool isMaterial() const;
     Q_INVOKABLE bool isDefaultMaterial() const;
-    Q_INVOKABLE void addMaterial() const;
+    Q_INVOKABLE void addMaterial();
     Q_INVOKABLE void duplicateMaterial();
 
 private:
@@ -201,9 +201,13 @@ private:
     QString getStandardMaterialString() const;
     QString getDefaultMaterialString() const;
     bool isInsideMaterialContainer() const;
+    bool isInsideMaterialContainer(Qt3DSDMInspectable *inspectable) const;
     bool isAnimatableMaterial() const;
+    bool isAnimatableMaterial(Qt3DSDMInspectable *inspectable) const;
     bool isBasicMaterial() const;
-    void updateMaterialValues(const QStringList &values, int elementIndex);
+    bool isBasicMaterial(Qt3DSDMInspectable *inspectable) const;
+    void updateMaterialValues(const QStringList &values, int elementIndex,
+                              bool updatingShaders = false);
     void updateShaderValues();
     void updateMatDataValues();
     void updatePropertyValue(InspectorControlBase *element) const;

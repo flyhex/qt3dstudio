@@ -89,13 +89,16 @@ void DataInputSelectView::updateData()
     }
 
     for (auto &i : qAsConst(m_dataInputList)) {
-        if (i.first.contains(m_searchString) || !m_searchString.size()) {
+        bool isCurrentCtrlr = i.first == m_currController;
+        if (i.first.contains(m_searchString) || !m_searchString.size() || isCurrentCtrlr) {
             if (m_typeFilter == -1
                 || (m_typeFilter == -2 && m_matchingTypes.contains((EDataType)i.second))
-                || m_typeFilter == (EDataType)i.second) {
+                || m_typeFilter == (EDataType)i.second || isCurrentCtrlr) {
                 dataInputs.append({i.first, getDiTypeStr(i.second)});
-                if (i.first == m_currController)
+                if (isCurrentCtrlr) {
                     m_selection = dataInputs.size() - 1;
+                    dataInputs.last().first.append(tr(" (Current)"));
+                }
             }
         }
     }
@@ -204,12 +207,17 @@ void DataInputSelectView::focusOutEvent(QFocusEvent *event)
     QTimer::singleShot(0, this, &DataInputSelectView::close);
 }
 
+bool DataInputSelectView::toolTipsEnabled() const
+{
+    return CStudioPreferences::ShouldShowTooltips();
+}
+
 void DataInputSelectView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
     rootContext()->setContextProperty(QStringLiteral("_resDir"),
                                       StudioUtils::resourceImageUrl());
-    rootContext()->setContextProperty(QStringLiteral("_dataInputSelectView"), this);
+    rootContext()->setContextProperty(QStringLiteral("_parentView"), this);
     rootContext()->setContextProperty(QStringLiteral("_dataInputSelectModel"), m_model);
     engine()->addImportPath(StudioUtils::qmlImportPath());
     setSource(QUrl(QStringLiteral("qrc:/Palettes/Inspector/DataInputChooser.qml")));

@@ -79,7 +79,7 @@ bool StudioUtils::readFileToDomDocument(const QString &filePath, QDomDocument &d
 {
     QFile file(filePath);
     if (!file.open(QFile::Text | QIODevice::ReadOnly)) {
-        qWarning() << __FUNCTION__ << file.errorString();
+        qWarning() << __FUNCTION__ << file.errorString() << "'" << filePath << "'";
         return false;
     }
 

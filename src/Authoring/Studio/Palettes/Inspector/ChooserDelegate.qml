@@ -50,7 +50,7 @@ Rectangle {
             opacity: isExpandable ? 1 : 0
 
             MouseArea {
-                visible: isExpandable
+                visible: listView.model && isExpandable
                 anchors.fill: parent
                 onClicked: {
                     if (expanded)
@@ -62,13 +62,13 @@ Rectangle {
         }
 
         Image {
-            source: fileIcon
+            source: listView.model ? fileIcon : ""
             width: 16
             height: 16
         }
 
         StyledLabel {
-            text: fileName
+            text: listView.model ? fileName : ""
             color: _textColor
             leftPadding: 5
 

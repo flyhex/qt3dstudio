@@ -38,21 +38,21 @@ for adjusting properties in Studio.
 You can write your own materials and effects to use in Qt 3D Studio, this requires knowledge in
 OpenGL Shading Language (GLSL).
 
-This document explains the structure of the \c{.effect} and \c{.material} files but does not go
+This document explains the structure of the \c{.effect} and \c{.shader} files but does not go
 through how to write shaders in GLSL.
 
 \sa {Custom Material Reference}, {Effect Reference}
 
 \section1 Overview
 
-The general structure of an \c{.effect} and a \c{.material} is almost the same.
+The general structure of an \c{.effect} and a \c{.shader} is almost the same.
 The only different is the \c{<Effect>} and the \c{<Material>} elements.
 
 \note Some of the attributes and elements shown here are optional (and this example does not
 include all possible attributes).
 
 The structure of an \c{.effect} file. As mentioned above the same structure applies to
-\c{.material} files as well with the only difference that you will need to use \c{<Material>} and
+\c{.shader} files as well with the only difference that you will need to use \c{<Material>} and
 \c{</Material>} instead of \c{<Effect>} and \c{</Effect>}.
 
 \badcode

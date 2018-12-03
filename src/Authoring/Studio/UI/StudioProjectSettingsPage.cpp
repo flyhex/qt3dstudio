@@ -207,7 +207,7 @@ void CStudioProjectSettingsPage::onChangeEditPresWidth()
         thePresWidth = m_ui->m_ClientSizeWidth->value();
 
         // Change the height
-        thePresHeight = thePresWidth / long(m_aspectRatio);
+        thePresHeight = long(thePresWidth / m_aspectRatio);
 
         QSignalBlocker sb(m_ui->m_ClientSizeHeight);
         m_ui->m_ClientSizeHeight->setValue(thePresHeight);
@@ -227,7 +227,7 @@ void CStudioProjectSettingsPage::onChangeEditPresHeight()
         thePresHeight = m_ui->m_ClientSizeHeight->value();
 
         // Change the width
-        thePresWidth = thePresHeight * long(m_aspectRatio);
+        thePresWidth = long(thePresHeight * m_aspectRatio);
 
         QSignalBlocker sb(m_ui->m_ClientSizeWidth);
         m_ui->m_ClientSizeWidth->setValue(thePresWidth);

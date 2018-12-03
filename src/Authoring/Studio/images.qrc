@@ -278,6 +278,14 @@
         <file>images/initial_used@2x.png</file>
         <file>images/warning.png</file>
         <file>images/warning2x.png</file>
+        <file>images/timeline_text_shown.png</file>
+        <file>images/timeline_text_shown@2x.png</file>
+        <file>images/timeline_text_hidden.png</file>
+        <file>images/timeline_text_hidden@2x.png</file>
+        <file>images/matdef-active.png</file>
+        <file>images/matdef-active@2x.png</file>
+        <file>images/matdef-disabled.png</file>
+        <file>images/matdef-disabled@2x.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="open_dialog.png">images/open_dialog.png</file>

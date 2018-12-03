@@ -68,7 +68,8 @@ protected:
     void updateContents();
     void updateInfo();
     QVector<CDataInputDialogItem *> dataInputs() const;
-    void keyPressEvent(QKeyEvent *event);
+    void keyPressEvent(QKeyEvent *event) override;
+    bool event(QEvent *event) override;
     void refreshDIs();
     void replaceDatainputs(const QModelIndexList &selectedBindings, const QString &newDIName);
     // Given a list of data model datatypes, returns the type(s) of datainputs that can

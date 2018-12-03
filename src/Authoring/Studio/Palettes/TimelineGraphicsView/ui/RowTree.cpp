@@ -872,6 +872,7 @@ void RowTree::updateLockRecursive(bool state)
 void RowTree::updateLock(bool state)
 {
     m_locked = state;
+
     m_labelItem.setLocked(m_locked);
     update();
     if (!m_childProps.empty()) {
@@ -977,7 +978,10 @@ RowTree::DnDState RowTree::getDnDState() const
 
 void RowTree::setActionStates(ActionStates states)
 {
-    m_actionStates = states;
+    if (states != m_actionStates) {
+        m_actionStates = states;
+        update();
+    }
 }
 
 bool RowTree::isContainer() const

@@ -3828,7 +3828,7 @@ public:
                               qt3ds::foundation::IInStream &inStream) override
     {
         QString shaderFile(inShaderFile);
-        if (shaderFile.endsWith(".material")) {
+        if (shaderFile.endsWith(".material") || shaderFile.endsWith(".shader")) {
             LoadMaterialClassFromSourcePath(inShaderFile, inInstance, inName, outWarnings,
                                             inStream);
         } else {

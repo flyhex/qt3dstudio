@@ -90,18 +90,21 @@ int TextureChooserView::instance() const
 
 QString TextureChooserView::currentDataModelPath() const
 {
+    QString cleanPath;
     const auto doc = g_StudioApp.GetCore()->GetDoc();
     const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
 
     qt3dsdm::SValue value;
     propertySystem->GetInstancePropertyValue(m_instance, m_handle, value);
 
-    QString cleanPath = qt3dsdm::get<QString>(value);
-    if (cleanPath.isEmpty() || cleanPath == QLatin1String("./")) {
+    const QString currentValue = qt3dsdm::get<QString>(value);
+    // An empty value can sometimes be represented by a relative path either to project root or the
+    // presentation file, such as"./" or "../", so let's just consider all directory paths as empty
+    if (currentValue.isEmpty() || QFileInfo(currentValue).isDir()) {
         cleanPath = ChooserModelBase::noneString();
     } else {
         cleanPath = QDir::cleanPath(QDir(doc->GetDocumentDirectory().toQString())
-                                    .filePath(cleanPath));
+                                    .filePath(currentValue));
     }
     return cleanPath;
 }

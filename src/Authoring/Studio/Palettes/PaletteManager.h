@@ -104,7 +104,6 @@ public:
     QDockWidget *GetControl(long inType) const;
     QWidget *getFocusWidget() const;
     bool tabNavigateFocusedWidget(bool tabForward);
-    void onTimeChanged(long time);
     ProjectView *projectView() const;
 
     // Commands

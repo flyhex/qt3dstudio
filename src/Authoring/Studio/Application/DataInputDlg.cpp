@@ -132,7 +132,9 @@ void CDataInputDlg::initDialog()
 
 void CDataInputDlg::accept()
 {
-    m_dataInput->name = m_name;
+    if (m_dataInput->name != m_name)
+        m_dataInput->name = getUniqueId(m_name);
+
     m_dataInput->type = m_type;
     if (m_type == DataTypeRangedNumber) {
         m_dataInput->minValue = m_min;
@@ -169,7 +171,7 @@ void CDataInputDlg::onMaxChanged(float max)
 void CDataInputDlg::onNameChanged(const QString &name)
 {
     int cursorPos = m_ui->lineEditInputName->cursorPosition();
-    m_name = getUniqueId(name);
+    m_name = name;
     m_ui->lineEditInputName->setText(m_name);
     m_ui->lineEditInputName->setCursorPosition(cursorPos);
 }

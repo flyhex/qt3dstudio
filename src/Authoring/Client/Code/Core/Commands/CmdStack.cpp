@@ -141,6 +141,7 @@ void CCmdStack::Undo()
             return;
     }
     if (m_UndoList.size() > 0) {
+        m_undoingOrRedoing = true;
         CCmd *theLastCommand = m_UndoList.back();
         m_UndoList.pop_back();
 
@@ -162,6 +163,7 @@ void CCmdStack::Undo()
                 m_Listener->SetCommandModifiedFlag(TRUE);
             }
         }
+        m_undoingOrRedoing = false;
     }
 }
 
@@ -175,6 +177,7 @@ void CCmdStack::Undo()
 void CCmdStack::Redo()
 {
     if (m_RedoList.size() > 0) {
+        m_undoingOrRedoing = true;
         CCmd *theLastCommand = m_RedoList.back();
         m_RedoList.pop_back();
 
@@ -191,6 +194,7 @@ void CCmdStack::Redo()
                 m_Listener->SetCommandModifiedFlag(TRUE);
             }
         }
+        m_undoingOrRedoing = false;
     }
 }
 
@@ -214,6 +218,22 @@ bool CCmdStack::CanUndo()
 bool CCmdStack::CanRedo()
 {
     return m_RedoList.size() > 0;
+}
+
+bool CCmdStack::isUndoingOrRedoing() const
+{
+    return m_undoingOrRedoing;
+}
+
+//=============================================================================
+/**
+ * Remove the last command from the undo list
+ */
+//=============================================================================
+void CCmdStack::RemoveLastUndo()
+{
+    if (m_UndoList.size() > 0)
+        m_UndoList.pop_back();
 }
 
 //=============================================================================

@@ -196,6 +196,10 @@ const QString &CStudioObjectTypes::GetNormalIconName(EStudioObjectType inType)
         static QString theString = QStringLiteral("qml_used.png");
         return theString;
     }
+    case OBJTYPE_MATERIALDATA: {
+        static QString theString = QStringLiteral("matdef-active.png");
+        return theString;
+    }
     default: {
         static QString theString = QStringLiteral("Objects-Model-Normal.png");
         return theString;
@@ -293,6 +297,10 @@ const QString &CStudioObjectTypes::GetDisabledIconName(EStudioObjectType inType)
         static QString theString = QStringLiteral("qml_notUsed.png");
         return theString;
     }
+    case OBJTYPE_MATERIALDATA: {
+        static QString theString = QStringLiteral("matdef-disabled.png");
+        return theString;
+    }
     default: {
         static QString theString = QStringLiteral("Objects-Model-Disabled.png");
         return theString;
@@ -380,6 +388,10 @@ const QString &CStudioObjectTypes::GetHighlightIconName(EStudioObjectType inType
     }
     case OBJTYPE_PRESENTATION: {
         static QString theString = QStringLiteral("presentation_used.png");
+        return theString;
+    }
+    case OBJTYPE_MATERIALDATA: {
+        static QString theString = QStringLiteral("matdef-active.png");
         return theString;
     }
     default: {

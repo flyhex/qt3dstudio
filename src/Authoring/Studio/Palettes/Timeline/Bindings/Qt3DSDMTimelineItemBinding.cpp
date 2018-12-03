@@ -571,9 +571,12 @@ bool Qt3DSDMTimelineItemBinding::IsVisibleEnabled() const
 bool Qt3DSDMTimelineItemBinding::IsValidTransaction(EUserTransaction inTransaction)
 {
     qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
+    const auto bridge = m_StudioSystem->GetClientDataModelBridge();
     switch (inTransaction) {
     case EUserTransaction_Rename:
-        return (GetObjectType() != OBJTYPE_SCENE && GetObjectType() != OBJTYPE_IMAGE);
+        return (GetObjectType() != OBJTYPE_SCENE && GetObjectType() != OBJTYPE_IMAGE
+                && (bridge->GetObjectType(theInstance) != OBJTYPE_REFERENCEDMATERIAL
+                || bridge->GetSourcePath(theInstance).IsEmpty()));
 
     case EUserTransaction_Duplicate:
         if (theInstance.Valid())

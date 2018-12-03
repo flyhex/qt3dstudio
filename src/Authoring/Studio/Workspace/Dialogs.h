@@ -138,7 +138,8 @@ public:
     QString GetFileOpenChoice(const QString &inInitialDirectory = {});
 
     void DisplayImportFailed(const QUrl &inURL, const QString &inDescription, bool inWarningsOnly);
-    void DisplayLoadingPresentationFailed(const QFileInfo &loadFileInfo, const QString &errorText);
+    void DisplayLoadingPresentationFailed(const QFileInfo &loadFileInfo,
+                                          const QString &loadFileName, const QString &errorText);
     void DisplaySavingPresentationFailed();
     void DisplaySaveReadOnlyFailed(const QString &inSavedLocation);
     void DisplayObjectRenamed(const QString &origName, const QString &newName, bool async = false);

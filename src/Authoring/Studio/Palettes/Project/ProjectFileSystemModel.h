@@ -42,6 +42,7 @@
 #include <QtQml/qqmlapplicationengine.h>
 
 QT_FORWARD_DECLARE_CLASS(QFileSystemModel)
+class CDataInputDialogItem;
 
 class ProjectFileSystemModel : public QAbstractListModel
 {
@@ -105,10 +106,12 @@ private:
     bool hasVisibleChildren(const QModelIndex &modelIndex) const;
     void importUrl(QDir &targetDir, const QUrl &url,
                    QHash<QString, QString> &outPresentationNodes,
-                   QStringList &outImportedFiles, int &outOverrideChoice) const;
+                   QStringList &outImportedFiles,
+                   QMap<QString, CDataInputDialogItem *> &outDataInputs,
+                   int &outOverrideChoice) const;
     void importPresentationAssets(const QFileInfo &uipSrc, const QFileInfo &uipTarget,
                                   QHash<QString, QString> &outPresentationNodes,
-                                  QStringList &outImportedFiles,
+                                  QStringList &outImportedFiles, QSet<QString> &outDataInputs,
                                   int &outOverrideChoice) const;
 
     void modelRowsInserted(const QModelIndex &parent, int start, int end);

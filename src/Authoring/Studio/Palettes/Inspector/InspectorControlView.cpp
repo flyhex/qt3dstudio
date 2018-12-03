@@ -95,6 +95,7 @@ void InspectorControlView::filterMaterials(std::vector<Q3DStudio::CFilePath> &ma
 {
     static const wchar_t *extensions[] = {
         L"material",
+        L"shader",
         nullptr
     };
     for (size_t i = 0; i < m_fileList.size(); ++i) {
@@ -139,7 +140,7 @@ void InspectorControlView::onFilesChanged(
         const Q3DStudio::TFileModificationList &inFileModificationList)
 {
     static const wchar_t *materialExtensions[] = {
-        L"material", L"materialdef",
+        L"material", L"shader", L"materialdef",
         nullptr
     };
     static const wchar_t *fontExtensions[] = {
@@ -257,8 +258,10 @@ QString InspectorControlView::noneString() const
 bool InspectorControlView::canLinkProperty(int instance, int handle) const
 {
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-    EStudioObjectType type = doc->GetStudioSystem()->GetClientDataModelBridge()
-                                                                        ->GetObjectType(instance);
+    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    if (bridge->isInsideMaterialContainer(instance))
+        return false;
+    EStudioObjectType type = bridge->GetObjectType(instance);
     if (!qt3dsdm::Qt3DSDMPropertyHandle(handle).Valid()
         && (type & (OBJTYPE_CUSTOMMATERIAL | OBJTYPE_MATERIAL | OBJTYPE_REFERENCEDMATERIAL))) {
         return false;
@@ -608,7 +611,7 @@ void InspectorControlView::showDataInputChooser(int handle, int instance, const 
 {
     if (!m_dataInputChooserView) {
         const QVector<EDataType> acceptedTypes;
-        m_dataInputChooserView = new DataInputSelectView(acceptedTypes);
+        m_dataInputChooserView = new DataInputSelectView(acceptedTypes, this);
         connect(m_dataInputChooserView, &DataInputSelectView::dataInputChanged, this,
                 [this](int handle, int instance, const QString &controllerName) {
             bool controlled =

@@ -227,7 +227,7 @@ qt3dsdm::TInstanceHandleList ObjectListModel::childrenList(
     auto currentMaster = slideSystem->GetMasterSlide(slideHandle);
 
     qt3dsdm::TInstanceHandleList children;
-    m_objRefHelper->GetChildInstanceList(handle, children, slideHandle, m_baseHandle);
+    m_objRefHelper->GetChildInstanceList(handle, children, slideHandle, m_baseHandle, true);
     // allow action trigger/target from all objects
     if (m_AliasSelectList) {
         children.erase(

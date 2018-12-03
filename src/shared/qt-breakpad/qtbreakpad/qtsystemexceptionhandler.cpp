@@ -29,10 +29,8 @@
 #include "qtsystemexceptionhandler.h"
 
 #include <QCoreApplication>
-#include <QDebug>
 #include <QDir>
 #include <QProcess>
-#include "StudioPreferences.h"
 
 static QDateTime s_startTime;
 static QString s_plugins;
