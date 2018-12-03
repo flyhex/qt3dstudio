@@ -511,13 +511,18 @@ void InspectorControlModel::setMaterials(std::vector<Q3DStudio::CFilePath> &mate
 
 void InspectorControlModel::setMatDatas(const std::vector<Q3DStudio::CFilePath> &matDatas)
 {
-    m_matDatas.clear();
-
     const auto doc = g_StudioApp.GetCore()->GetDoc();
     bool isDocModified = doc->IsModified();
     const auto sceneEditor = doc->getSceneEditor();
     if (!sceneEditor)
         return;
+
+    if (sceneEditor->isIgnoringNextMaterialDefChange()) {
+        sceneEditor->stopIgnoringNextMaterialDefChange();
+        return;
+    }
+
+    m_matDatas.clear();
 
     bool newMaterialSelected = false;
     for (const Q3DStudio::CFilePath &path : matDatas) {
