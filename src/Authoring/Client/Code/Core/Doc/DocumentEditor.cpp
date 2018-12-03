@@ -2481,6 +2481,8 @@ public:
             if (textureValues.contains(child.name))
                 setPropertyValues(child.handle, textureValues[child.name]);
         }
+
+        m_Doc.GetCore()->GetDispatch()->FireImmediateRefreshInstance(instance);
     }
 
     void SetSlideName(TInstanceHandle inSlideInstance, TPropertyHandle propName,
