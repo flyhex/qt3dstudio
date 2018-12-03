@@ -1200,6 +1200,10 @@ void CStudioApp::SetAutosetKeyframes(bool inFlag)
  */
 void CStudioApp::PlaybackPlay()
 {
+    // Do not start playback if user is currently interacting with scene
+    if (getRenderer().isMouseDown())
+        return;
+
     CDoc *theDoc = m_core->GetDoc();
     if (!theDoc->IsPlaying()) {
         m_playbackTime = theDoc->GetCurrentViewTime();
