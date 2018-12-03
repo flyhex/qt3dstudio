@@ -87,6 +87,7 @@
 #include "IObjectReferenceHelper.h"
 #include "StudioProjectSettings.h"
 #include "StudioApp.h"
+#include "StudioUtils.h"
 
 namespace {
 
@@ -428,6 +429,10 @@ public:
         outInstanceMap.clear();
         for (size_t idx = 0, end = existing.size(); idx < end; ++idx) {
             Qt3DSDMInstanceHandle theAsset(existing[idx]);
+
+            if (m_Bridge.isInsideMaterialContainer(theAsset))
+                continue;
+
             thePaths.clear();
             GetAllPaths(theAsset, inProperty, thePaths);
 
@@ -726,7 +731,6 @@ public:
                                                              QStringLiteral("uip"), true);
 
             theFinalPath = theFile;
-
             TFilePtr file
                     = std::make_shared<SFile>(
                         SFile::OpenForWrite(theFile, FileOpenFlags(FileOpenFlagValues::Create
@@ -810,39 +814,88 @@ public:
         return file;
     }
 
-    void ParseSourcePathsOutOfEffectFile(const QString &inFile,
-                                         std::vector<QString> &outFilePaths) override
-    {
-        QSharedPointer<QFile> theStream(openQFileStream(inFile, FileReadFlags()));
-        if (!theStream.isNull()) {
-            std::shared_ptr<IDOMFactory> theFactory =
-                IDOMFactory::CreateDOMFactory(m_DataCore.GetStringTablePtr());
-            SImportXmlErrorHandler theImportHandler(m_Doc.GetImportFailedHandler(), inFile);
-            qt3dsdm::SDOMElement *theElem =
-                CDOMSerializer::Read(*theFactory, *theStream, &theImportHandler);
+    /**
+        Parses an effect, material (they use the same syntax) or material definition file
+        for dependent assets and returns them in outPathMap parameter.
 
-            QFileInfo theFilePath(inFile);
-            QString theFileDir(theFilePath.canonicalPath());
-            if (theElem) {
-                std::shared_ptr<IDOMReader> theReader = IDOMReader::CreateDOMReader(
-                    *theElem, m_DataCore.GetStringTablePtr(), theFactory);
-                if (theReader->MoveToFirstChild(QStringLiteral("MetaData"))) {
-                    for (bool success = theReader->MoveToFirstChild(QStringLiteral("Property"));
-                         success;
-                         success = theReader->MoveToNextSibling(QStringLiteral("Property"))) {
-                        QString type;
-                        QString defValue;
-                        theReader->Att(QStringLiteral("type"), type);
-                        theReader->Att(QStringLiteral("default"), defValue);
-                        if (type == QLatin1String("Texture")) {
-                           QFileInfo theDefPath(CFilePath::CombineBaseAndRelative(
-                                                    theFileDir, defValue));
-                            if (theDefPath.isFile())
-                                outFilePaths.push_back(defValue);
+        @param inFile The file to parse. Can be absolute or relative to current directory.
+        @param projectPath The absolute path of the project root the inFile belongs to, if any.
+                           Can be left empty for files that are not in any project.
+        @param recurseSourceMaterial If true, parsing .materialdef files will recursively also
+                                     parse the shader .material file.
+        @param outPathMap A map to return the parsed assets.
+                          The key is the destination path parsed from the file. It is assumed to be
+                          relative to the project root rather than the asset file itself.
+                          The value is absolute source path of the asset.
+                          The map is only inserted into in this function, never cleared.
+                          Assets that are referred by inFile but don't actually exist are not added
+                          to this map.
+        @param outPropertySet A set to return material/effect texture properties
+    */
+    void ParseSourcePathsOutOfEffectFile(const QString &inFile,
+                                         const QString &projectPath,
+                                         bool recurseSourceMaterial,
+                                         QHash<QString, QString> &outPathMap,
+                                         QSet<QString> &outPropertySet) override
+    {
+        QDomDocument domDocMat;
+        QDir projDir(projectPath);
+        QDir fileDir(QFileInfo(inFile).dir());
+        if (StudioUtils::readFileToDomDocument(inFile, domDocMat)) {
+            QVector<QDomNodeList> nodeLists;
+            QVector<bool> isMatDefs;
+            // Read properties from custom materials and effects
+            nodeLists.append(domDocMat.documentElement()
+                    .firstChildElement(QStringLiteral("MetaData")).childNodes());
+            isMatDefs.append(false);
+            // Read properties from material definitions
+            nodeLists.append(domDocMat.firstChildElement(
+                                 QStringLiteral("MaterialData")).childNodes());
+            isMatDefs.append(true);
+            // Read properties from each texture from the material definition
+            QDomNodeList textureDataElems = domDocMat.documentElement()
+                    .elementsByTagName(QStringLiteral("TextureData"));
+            for (int i = 0, c = textureDataElems.count(); i < c; ++i) {
+                nodeLists.append(textureDataElems.at(i).childNodes());
+                isMatDefs.append(true);
+            }
+
+            for (int j = 0; j < nodeLists.count(); ++j) {
+                for (int i = 0, c = nodeLists[j].count(); i < c; ++i) {
+                    auto elem = nodeLists[j].at(i).toElement();
+                    QString path;
+                    if (isMatDefs[j]) {
+                        if (elem.attribute(QStringLiteral("name")) == QLatin1String("sourcepath")
+                            || elem.attribute(QStringLiteral("type")) == QLatin1String("Texture")) {
+                            path = elem.text();
                         }
+                    } else if (elem.attribute(QStringLiteral("type")) == QLatin1String("Texture")) {
+                        path = elem.attribute(QStringLiteral("default"));
+                        outPropertySet.insert(elem.attribute(QStringLiteral("name")));
+                    }
+
+                    if (!path.isEmpty() && !outPathMap.contains(path)) {
+                        QString absAssetPath;
+                        if (projectPath.isEmpty()) {
+                            // Importing from library, assume relative path to file itself
+                            absAssetPath = QDir::cleanPath(fileDir.absoluteFilePath(path));
+                        } else {
+                            // When importing from project, all paths are relative to project
+                            absAssetPath = QDir::cleanPath(projDir.absoluteFilePath(path));
+                        }
+                        if (recurseSourceMaterial
+                                && (absAssetPath.endsWith(QLatin1String(".material"))
+                                    || absAssetPath.endsWith(QLatin1String(".shader")))
+                                && !outPathMap.contains(path)) {
+                            ParseSourcePathsOutOfEffectFile(absAssetPath, projectPath,
+                                                            false, outPathMap, outPropertySet);
+                        }
+                        outPathMap.insert(path, absAssetPath);
                     }
                 }
             }
+        } else {
+            qWarning() << __FUNCTION__ << "Couldn't open file:" << inFile;
         }
     }
 
@@ -873,31 +926,60 @@ public:
         return retval;
     }
 
-    void getMaterialInfo(const QString &inFullPathToFile,
+    void getMaterialInfo(const QString &inAbsoluteFilePath,
                          QString &outName, QMap<QString, QString> &outValues,
                          QMap<QString, QMap<QString, QString>> &outTextureValues) override
     {
-        QSharedPointer<QFile> theStream(openQFileStream(inFullPathToFile, FileReadFlags()));
+        if (!QFileInfo(inAbsoluteFilePath).exists())
+            return;
+
+        QSharedPointer<QFile> theStream(openQFileStream(inAbsoluteFilePath, FileReadFlags()));
         if (!theStream.isNull()) {
+            const QDir docDir(m_Doc.GetDocumentDirectory());
+            const QDir projDir = g_StudioApp.GetCore()->getProjectFile().getProjectPath();
+
             std::shared_ptr<IDOMFactory> theFactory =
                 IDOMFactory::CreateDOMFactory(m_DataCore.GetStringTablePtr());
             SImportXmlErrorHandler theImportHandler(m_Doc.GetImportFailedHandler(),
-                                                    inFullPathToFile);
+                                                    inAbsoluteFilePath);
             qt3dsdm::SDOMElement *theElem =
                 CDOMSerializer::Read(*theFactory, *theStream, &theImportHandler);
             if (theElem) {
-                outName = QFileInfo(inFullPathToFile).completeBaseName();
+                outName = getMaterialNameFromFilePath(inAbsoluteFilePath);
                 std::shared_ptr<IDOMReader> theReader = IDOMReader::CreateDOMReader(
                     *theElem, m_DataCore.GetStringTablePtr(), theFactory);
 
+                const QString sourcePath = QStringLiteral("sourcepath");
+                QStringList convertPaths;
                 for (bool success = theReader->MoveToFirstChild(QStringLiteral("Property"));
                      success;
                      success = theReader->MoveToNextSibling(QStringLiteral("Property"))) {
                     QString name;
                     QString value;
+                    QString type;
                     theReader->Att(QStringLiteral("name"), name);
+                    theReader->Att(QStringLiteral("type"), type);
                     theReader->Value(value);
+                    if (name == sourcePath) {
+                        // Check if the custom material still exists
+                        const auto absSourcePath = projDir.absoluteFilePath(value);
+                        if (!QFileInfo(absSourcePath).exists()) {
+                            outValues.clear();
+                            outTextureValues.clear();
+                            return;
+                        }
+                    }
+                    if (!value.isEmpty() && (type == QLatin1String("Texture")
+                                             || name == sourcePath)) {
+                        convertPaths.append(name);
+                    }
                     outValues[name] = value;
+                }
+
+                for (const auto &prop : qAsConst(convertPaths)) {
+                    // Change paths to be relative to the presentation
+                    const QString origPath = outValues[prop];
+                    outValues[prop] = docDir.relativeFilePath(projDir.absoluteFilePath(origPath));
                 }
 
                 if (theReader->GetElementName() == QLatin1String("Property"))
@@ -918,6 +1000,13 @@ public:
                         theReader->Value(value);
                         texValues[name] = value;
                     }
+
+                    if (texValues.contains(sourcePath) && !texValues[sourcePath].isEmpty()) {
+                        // Change path to be relative to the presentation
+                        texValues[sourcePath] = docDir.relativeFilePath(
+                                    projDir.absoluteFilePath(texValues[sourcePath]));
+                    }
+
                     outTextureValues[texName] = texValues;
 
                     if (theReader->GetElementName() == QLatin1String("Property"))
@@ -1008,29 +1097,28 @@ public:
     }
 
     virtual Qt3DSDMInstanceHandle
-    CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Enum inType, TInstanceHandle inParent,
+    CreateSceneGraphInstance(ComposerObjectTypes::Enum inType, TInstanceHandle inParent,
                              TSlideHandle inSlide, TInstanceHandle inTargetId = TInstanceHandle(),
-                             bool setTimeRange = true) override
+                             bool setTimeRange = true, bool selectCreatedInstance = true) override
     {
         Qt3DSDMInstanceHandle retval = IDocumentEditor::CreateSceneGraphInstance(
-            ComposerObjectTypes::Convert(inType), inParent, inSlide, m_DataCore, m_SlideSystem,
-            m_Bridge.GetObjectDefinitions(), m_AssetGraph, m_MetaData, inTargetId, setTimeRange);
+                    ComposerObjectTypes::Convert(inType), inParent, inSlide, m_DataCore,
+                    m_SlideSystem, m_Bridge.GetObjectDefinitions(), m_AssetGraph, m_MetaData,
+                    inTargetId, setTimeRange, selectCreatedInstance);
         if (setTimeRange)
             SetTimeRangeToParent(retval);
         return retval;
     }
 
-    TInstanceHandle CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Enum inType,
-                                                     TInstanceHandle inParent, TSlideHandle inSlide,
-                                                     DocumentEditorInsertType::Enum inInsertType,
-                                                     const CPt &inPosition,
-                                                     EPrimitiveType inPrimitiveType,
-                                                     long inStartTime,
-                                                     bool setTimeRange = true) override
+    TInstanceHandle CreateSceneGraphInstance(ComposerObjectTypes::Enum inType,
+                                             TInstanceHandle inParent, TSlideHandle inSlide,
+                                             DocumentEditorInsertType::Enum inInsertType,
+                                             const CPt &inPosition, EPrimitiveType inPrimitiveType,
+                                             long inStartTime, bool setTimeRange = true,
+                                             bool selectCreatedInstance = true) override
     {
         TInstanceHandle retval(CreateSceneGraphInstance(inType, inParent, inSlide,
                                                         TInstanceHandle(), setTimeRange));
-
         QString theName;
         if (inType == ComposerObjectTypes::Model) {
             QString theSourcePath = m_Doc.GetBufferCache().GetPrimitiveName(inPrimitiveType);
@@ -1062,12 +1150,15 @@ public:
             SetStartTime(retval, inStartTime);
 
         if (m_DataCore.IsInstanceOrDerivedFrom(
-                retval, m_Bridge.GetObjectDefinitions().m_SlideOwner.m_Instance))
+                retval, m_Bridge.GetObjectDefinitions().m_SlideOwner.m_Instance)) {
             m_Bridge.GetOrCreateGraphRoot(retval);
+        }
+
         // if we did not set time range earlier, let's set it now to match parent
-        TInstanceHandle handle = FinalizeAddOrDrop(retval, inParent, inInsertType,
-                                                   inPosition, !setTimeRange, true, false);
+        TInstanceHandle handle = FinalizeAddOrDrop(retval, inParent, inInsertType, inPosition,
+                                                   !setTimeRange, selectCreatedInstance, false);
         SetName(retval, theName, true);
+
         return handle;
     }
 
@@ -1308,7 +1399,7 @@ public:
             }
         }
 
-        QT3DSU32 numMaterials = (QT3DSU32)theMaterials.size();
+        int numMaterials = int(theMaterials.size());
         // Note that I create the materials in the associated slide of the instance,
         // not the active slide at this time.  This is because materials
         // need to be with the asset at all times and aren't attached via slides
@@ -1317,8 +1408,8 @@ public:
             theMaterials.push_back(
                         CreateSceneGraphInstance(ComposerObjectTypes::ReferencedMaterial, instance,
                                                  GetAssociatedSlide(instance)));
-            setMaterialReferenceByName(theMaterials.back(), "Default");
-            setMaterialSourcePath(theMaterials.back(), "Default");
+            setMaterialReferenceByPath(theMaterials.back(), m_Bridge.getDefaultMaterialName());
+            setMaterialSourcePath(theMaterials.back(), m_Bridge.getDefaultMaterialName());
         }
 
         // Now go through and if possible ensure that on each slide the name of the material matches
@@ -1681,7 +1772,6 @@ public:
                    && m_Bridge.GetSourcePathProperty() == propName
                    && !inSourcePath.isEmpty()) {
             // Resize the layer to be the size of the presentation
-
             QSize presSize(g_StudioApp.getRenderableSize(inSourcePath));
             auto &layer = m_Bridge.GetLayer();
 
@@ -1718,7 +1808,7 @@ public:
                 SetInstancePropertyValue(instance, layer.m_Width, float(presSize.width()), true);
             } else {
                 long curWidth = m_Doc.GetCore()->GetStudioProjectSettings()
-                        ->GetPresentationSize().x;
+                        ->getPresentationSize().width();
                 Option<SValue> leftVal = GetInstancePropertyValue(instance, layer.m_Left);
                 Option<SValue> leftUnitsVal = GetInstancePropertyValue(instance, layer.m_LeftUnits);
                 float left = qt3dsdm::get<float>(leftVal.getValue());
@@ -1734,7 +1824,7 @@ public:
                 SetInstancePropertyValue(instance, layer.m_Height, float(presSize.height()), true);
             } else {
                 long curHeight = m_Doc.GetCore()->GetStudioProjectSettings()
-                        ->GetPresentationSize().y;
+                        ->getPresentationSize().height();
                 Option<SValue> topVal = GetInstancePropertyValue(instance, layer.m_Top);
                 Option<SValue> topUnitsVal = GetInstancePropertyValue(instance, layer.m_TopUnits);
                 float top = qt3dsdm::get<float>(topVal.getValue());
@@ -1763,54 +1853,57 @@ public:
     }
 
     /**
-     * Sets a subpresentation for an instance's property that accepts a texture (image) as its value
-     * If there is no texture exists, a new one is created. Next, the texture subpresentation
-     *  property is set to the pId param
-     * @param instance  the instance
-     * @param prop  the image property
-     * @param pId   the presentation Id to set for the texture
+     * Sets an instance's image-type property from a renderable or image. If no texture exists, a
+     * new one is created. Next, the texture property from 'prop' param is set to the 'src' param.
+     *
+     * @param instance the instance
+     * @param prop the instance image property
+     * @param src the presentation Id or image file name to set for the texture
      */
-    void setInstanceImagePropertyValueAsRenderable(TInstanceHandle instance, TPropertyHandle prop,
-                                                   const QString &pId) override
+    void setInstanceImagePropertyValue(TInstanceHandle instance, TPropertyHandle prop,
+                                       const QString &src, bool isSubp = true) override
     {
         Qt3DSDMPropertyHandle img = GetImageInstanceForProperty(instance, prop);
 
         if (!img)
             img = CreateImageInstanceForMaterialOrLayer(instance, prop);
 
-        SetInstancePropertyValueAsRenderable(img, m_Bridge.getSubpresentationProperty(), pId);
+        SetInstancePropertyValueAsRenderable(img, isSubp ? m_Bridge.getSubpresentationProperty()
+                                                         : m_Bridge.GetSourcePathProperty(), src);
     }
 
     /**
-     * Create a scene rect and set its material's texture from the provided subpresentation Id
+     * Create a rect under the active layer and set its material's diffuse map from the provided
+     * source.
      *
-     * @param pId the presentation Id to set for the texture
-     * @param slide the slide to add to
-     * @param pos add position in the scene
-     * @param startTime add at this start time
+     * @param src The presentation Id or image file name to set for the texture
+     * @param slide The slide to add to
+     * @param isSubPres If true, the src parameter is a subpresentation Id
+     * @param pos Add position in the scene
+     * @param startTime Add at this start time
      */
-    void addRectForSubpresentation(const QString &pId, TSlideHandle slide, const CPt &pos = CPt(),
-                                   long startTime = -1) override
+    void addRectFromSource(const QString &src, TSlideHandle slide, bool isSubPres,
+                           const CPt &pos = {}, long startTime = -1) override
     {
         qt3dsdm::Qt3DSDMPropertyHandle activeLayer = m_Doc.GetActiveLayer();
-        Qt3DSDMInstanceHandle rectInstance =
-                CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Model, activeLayer, slide,
-                                         Q3DStudio::DocumentEditorInsertType::LastChild, pos,
-                                         PRIMITIVETYPE_RECT, startTime, false);
+        const auto absSrc = QFileInfo(m_Doc.GetDocumentPath()).dir().absoluteFilePath(src);
+        if (isSubPres) {
+            qt3dsdm::Qt3DSDMInstanceHandle rectInstance =
+                CreateSceneGraphInstance(ComposerObjectTypes::Model, activeLayer, slide);
+            m_PropertySystem.SetInstancePropertyValue(
+                rectInstance, m_Bridge.GetSourcePathProperty(),
+                std::make_shared<qt3dsdm::CDataStr>(
+                    m_Doc.GetBufferCache().GetPrimitiveName(PRIMITIVETYPE_RECT)));
 
-        // Set the subpresentation for the rect's material's diffuseMap
-        const long childCount = m_AssetGraph.GetChildCount(rectInstance);
-        for (long i = 0; i < childCount; ++i) {
-            Qt3DSDMInstanceHandle matInstance(m_AssetGraph.GetChild(rectInstance, i));
+            createRefMaterialFromImageOrPresentation(rectInstance, slide, src, true);
+            SetName(rectInstance, src, true);
 
-            if (m_Bridge.IsMaterialBaseInstance(matInstance)) {
-                if (m_Bridge.IsReferencedMaterialInstance(matInstance))
-                    SetMaterialType(matInstance, "Standard Material");
-
-                auto prop = m_Bridge.GetObjectDefinitions().m_Material.m_DiffuseMap1.m_Property;
-                setInstanceImagePropertyValueAsRenderable(matInstance, prop, pId);
-                break;
-            }
+            FinalizeAddOrDrop(rectInstance, activeLayer,
+                              Q3DStudio::DocumentEditorInsertType::LastChild,
+                              pos, startTime == -1);
+        } else {
+            AutomapImage(absSrc, activeLayer, slide,
+                         Q3DStudio::DocumentEditorInsertType::LastChild, pos, startTime);
         }
     }
 
@@ -1907,11 +2000,25 @@ public:
         m_Doc.SelectDataModelObject(newMaterial);
     }
 
-    QString getMaterialPath(const QString &materialName) const
+    QString getMaterialDirectoryPath() const override
     {
-        return m_Doc.GetCore()->getProjectFile().getProjectPath()
-                + QStringLiteral("/materials/")
-                + materialName + QStringLiteral(".matdata");
+        return m_Doc.GetCore()->getProjectFile().getProjectPath() + QStringLiteral("/materials/");
+    }
+
+    QString getMaterialFilePath(const QString &materialName) const override
+    {
+        QString actualMaterialName = materialName;
+        int slashIndex = actualMaterialName.lastIndexOf(QLatin1Char('/'));
+        if (slashIndex != -1)
+            actualMaterialName = actualMaterialName.mid(slashIndex + 1);
+        return getMaterialDirectoryPath() + actualMaterialName + QStringLiteral(".materialdef");
+    }
+
+    void writeMaterialFile(Qt3DSDMInstanceHandle instance, bool createNewFile) override
+    {
+        const auto materialName = GetName(instance);
+        writeMaterialFile(instance, materialName, createNewFile,
+                          getFilePathFromMaterialName(materialName));
     }
 
     QString writeMaterialFile(Qt3DSDMInstanceHandle instance,
@@ -1919,17 +2026,20 @@ public:
                               bool createNewFile,
                               const QString &sourcePath = {}) override
     {
+        if (materialName == getMaterialNameFromFilePath(m_Bridge.getDefaultMaterialName()))
+            return "";
+
         EStudioObjectType type = m_Bridge.GetObjectType(instance);
 
         if (type == EStudioObjectType::OBJTYPE_MATERIAL
             || type == EStudioObjectType::OBJTYPE_CUSTOMMATERIAL) {
             QString actualSourcePath = sourcePath;
             if (actualSourcePath.isEmpty())
-                actualSourcePath = getMaterialPath(materialName);
+                actualSourcePath = getMaterialFilePath(materialName);
 
             QFileInfo fileInfo(actualSourcePath);
             if (!fileInfo.dir().exists())
-                fileInfo.dir().mkdir(QStringLiteral("."));
+                fileInfo.dir().mkpath(QStringLiteral("."));
 
             QFile file(actualSourcePath);
             if ((createNewFile && !file.exists()) || (!createNewFile && file.exists()))
@@ -1940,18 +2050,27 @@ public:
         return {};
     }
 
-    void writeProperty(QFile &file, const QString &name, const QString &value, int indent = 1)
+    void writeProperty(QFile &file, const QString &name, const QString &value,
+                       int indent = 1, bool isTexture = false, bool useCData = true)
     {
         for (int i = 0; i < indent; ++i)
             file.write("\t");
         file.write("<Property name=\"");
         file.write(name.toUtf8().constData());
+        if (isTexture)
+            file.write("\" type=\"Texture");
         file.write("\">");
-        file.write(value.toUtf8().constData());
+        if (useCData) {
+            QString cDataValue = QStringLiteral("<![CDATA[") + value + QStringLiteral("]]>");
+            file.write(cDataValue.toUtf8().constData());
+        } else {
+            file.write(value.toUtf8().constData());
+        }
         file.write("</Property>\n");
     }
 
-    void writeProperty(QFile &file, const QString &name, const SValue &value, int indent = 1)
+    void writeProperty(QFile &file, const QString &name, const SValue &value, int indent = 1,
+                       bool isTexture = false)
     {
         MemoryBuffer<RawAllocator> tempBuffer;
         WCharTWriter writer(tempBuffer);
@@ -1959,8 +2078,10 @@ public:
         tempBuffer.write(0);
 
         if (tempBuffer.size()) {
+            bool useCData = name == QLatin1String("name");
             writeProperty(file, name,
-                          QString::fromWCharArray((const wchar_t *)tempBuffer.begin()), indent);
+                          QString::fromWCharArray((const wchar_t *)tempBuffer.begin()),
+                          indent, isTexture, useCData);
         }
     }
 
@@ -1977,6 +2098,25 @@ public:
                 && name != QLatin1String("timebartext");
     }
 
+    void saveIfMaterial(Qt3DSDMInstanceHandle instance)
+    {
+        Qt3DSDMInstanceHandle material;
+        if (m_Bridge.isInsideMaterialContainer(instance)) {
+            const auto type = m_Bridge.GetObjectType(instance);
+            if (type == OBJTYPE_MATERIAL || type == OBJTYPE_CUSTOMMATERIAL) {
+                material = instance;
+            } else {
+                const auto parent = m_Bridge.GetParentInstance(instance);
+                const auto parentType = m_Bridge.GetObjectType(parent);
+                if (parentType == OBJTYPE_MATERIAL || parentType == OBJTYPE_CUSTOMMATERIAL)
+                    material = parent;
+            }
+        }
+
+        if (material.Valid())
+            writeMaterialFile(material, false);
+    }
+
     void saveMaterial(Qt3DSDMInstanceHandle instance, QFile &file)
     {
         SValue value;
@@ -1984,6 +2124,13 @@ public:
         file.write("<MaterialData version=\"1.0\">\n");
         QMap<QString, Qt3DSDMInstanceHandle> textureHandles;
         qt3dsdm::TPropertyHandleList propList;
+
+        const QDir docDir(m_Doc.GetDocumentDirectory());
+        const QDir projDir = g_StudioApp.GetCore()->getProjectFile().getProjectPath();
+        auto sourcePathProp = m_Bridge.GetSourcePathProperty();
+        // Importing interprets "./" prefix to mean project dir relative
+        const QString projPrefix = QStringLiteral("./");
+
         m_PropertySystem.GetAggregateInstanceProperties(instance, propList);
         for (auto &prop : propList) {
             const auto name = m_PropertySystem.GetName(prop);
@@ -1998,30 +2145,52 @@ public:
 
             if (!value.empty()) {
                 bool valid = true;
-                QString path;
+                bool isTexture = false;
+                bool isPath = true;
+                QString strValue;
                 if (value.getType() == DataModelDataType::Long4) {
                     SLong4 guid = get<qt3dsdm::SLong4>(value);
                     if (guid.Valid()) {
                         auto ref = m_Bridge.GetInstanceByGUID(guid);
                         textureHandles[name] = ref;
-                        path = m_Bridge.GetSourcePath(ref);
+                        strValue = m_Bridge.GetSourcePath(ref);
+                        if (strValue.isEmpty()) {
+                            strValue = m_Bridge.getSubpresentation(ref);
+                            isPath = false;
+                        }
                     } else {
                         valid = false;
                     }
+                } else {
+                    qt3dsdm::AdditionalMetaDataType::Value additionalMetaDataType
+                        = m_PropertySystem.GetAdditionalMetaDataType(instance, prop);
+                    if (additionalMetaDataType == AdditionalMetaDataType::Texture) {
+                        isTexture = true;
+                        TDataStrPtr strPtr = get<TDataStrPtr>(value);
+                        strValue = QString::fromWCharArray(strPtr->GetData());
+                    } else if (sourcePathProp == prop) {
+                        TDataStrPtr strPtr = get<TDataStrPtr>(value);
+                        strValue = QString::fromWCharArray(strPtr->GetData());
+                    }
                 }
 
-                if (path.isEmpty() && valid)
+                if (strValue.isEmpty() && valid) {
                     writeProperty(file, name, value);
-                else
-                    writeProperty(file, name, path);
+                } else if (!strValue.isEmpty()) {
+                    // Save paths relative to the project instead of the presentation.
+                    // This makes it possible to use same material from multiple presentations
+                    // that are not all in the same folder.
+                    if (isPath) {
+                        strValue = projPrefix
+                                + projDir.relativeFilePath(docDir.absoluteFilePath(strValue));
+                    }
+                    writeProperty(file, name, strValue, 1, isTexture);
+                }
             }
         }
 
-        writeProperty(file, QStringLiteral("presentation"), m_Doc.GetDocumentPath());
-
         const QFileInfo fileInfo(file);
         writeProperty(file, QStringLiteral("path"), fileInfo.absoluteFilePath());
-        writeProperty(file, QStringLiteral("filename"), fileInfo.completeBaseName());
 
         QMapIterator<QString, Qt3DSDMInstanceHandle> i(textureHandles);
         while (i.hasNext()) {
@@ -2042,8 +2211,17 @@ public:
                     continue;
 
                 m_PropertySystem.GetInstancePropertyValue(handle, prop, value);
-                if (!value.empty())
-                    writeProperty(file, name, value, 2);
+                if (!value.empty()) {
+                    if (sourcePathProp == prop) {
+                        TDataStrPtr strPtr = get<TDataStrPtr>(value);
+                        QString strValue = QString::fromWCharArray(strPtr->GetData());
+                        strValue = projPrefix
+                                + projDir.relativeFilePath(docDir.absoluteFilePath(strValue));
+                        writeProperty(file, name, strValue, 2);
+                    } else {
+                        writeProperty(file, name, value, 2);
+                    }
+                }
             }
             file.write("\t</TextureData>\n");
         }
@@ -2051,52 +2229,15 @@ public:
         file.write("</MaterialData>");
     }
 
-    bool isMaterialContainer(TInstanceHandle instance) const override
-    {
-        return instance == getMaterialContainer();
-    }
-
-    bool isInsideMaterialContainer(TInstanceHandle instance) const override
-    {
-        auto parentInstance = GetParent(instance);
-        return isMaterialContainer(parentInstance);
-    }
-
-    QString getMaterialContainerName() const
-    {
-        return QStringLiteral("MaterialContainer");
-    }
-
-    QString getMaterialContainerParentPath() const
-    {
-        return GetName(m_Doc.GetSceneInstance());
-    }
-
-    QString getMaterialContainerPath() const
-    {
-        return getMaterialContainerParentPath() + QStringLiteral(".") + getMaterialContainerName();
-    }
-
-    Qt3DSDMInstanceHandle getMaterialContainer() const override
-    {
-        IObjectReferenceHelper *objRefHelper = m_Doc.GetDataModelObjectReferenceHelper();
-        Qt3DSDMInstanceHandle instance;
-        CRelativePathTools::EPathType type;
-        objRefHelper->ResolvePath(m_Doc.GetSceneInstance(),
-                                  getMaterialContainerPath(),
-                                  type, instance, true);
-        return instance;
-    }
-
     Qt3DSDMInstanceHandle getOrCreateMaterialContainer()
     {
-        auto instance = getMaterialContainer();
+        auto instance = m_Bridge.getMaterialContainer();
         if (!instance.Valid()) {
             IObjectReferenceHelper *objRefHelper = m_Doc.GetDataModelObjectReferenceHelper();
             Qt3DSDMInstanceHandle parent;
             CRelativePathTools::EPathType type;
             objRefHelper->ResolvePath(m_Doc.GetSceneInstance(),
-                                      getMaterialContainerParentPath(),
+                                      m_Bridge.getMaterialContainerParentPath(),
                                       type, parent, true);
             if (!parent.Valid())
                 parent = m_Doc.GetSceneInstance();
@@ -2104,76 +2245,87 @@ public:
             instance = CreateSceneGraphInstance(ComposerObjectTypes::Material, parent,
                                                 slide, DocumentEditorInsertType::LastChild,
                                                 CPt(), PRIMITIVETYPE_UNKNOWN, -1);
-            SetName(instance, getMaterialContainerName());
-            SetTimeRange(instance, 0, 0);
+            SetName(instance, m_Bridge.getMaterialContainerName());
+            m_SlideCore.forceSetInstancePropertyValueOnAllSlides(
+                        instance, m_Bridge.GetSceneAsset().m_EndTime, 0);
         }
         return instance;
     }
 
-    Qt3DSDMInstanceHandle getMaterial(const QString &materialName) override
+    QString getFilePathFromMaterialName(const QString &name) override
+    {
+        return QDir(m_Doc.GetCore()->getProjectFile().getProjectPath())
+                .absoluteFilePath(name + QStringLiteral(".materialdef"));
+    }
+
+    QString getMaterialNameFromFilePath(const QString &path) override
+    {
+        QString materialName;
+        QString dirPath;
+        if (path.contains(QLatin1String(".materialdef"))) {
+            QDir dir(path);
+            if (dir.isAbsolute())
+                dirPath = QDir(m_Doc.GetDocumentDirectory()).relativeFilePath(path);
+            else
+                dirPath = dir.path();
+            QFileInfo fi = QFileInfo(dirPath);
+            materialName = fi.completeBaseName();
+            dirPath = fi.path();
+            dirPath.remove(QLatin1String("../"));
+            if (dirPath.startsWith(QLatin1String("..")))
+                dirPath = dirPath.mid(2);
+        } else {
+            if (!materialName.startsWith(QLatin1String("materials/")))
+                dirPath = QLatin1String("materials");
+            materialName = path;
+        }
+        if (dirPath.size() == 0)
+            return materialName;
+        return dirPath + QLatin1Char('/') + materialName;
+    }
+
+    Qt3DSDMInstanceHandle getMaterial(const QString &path) override
     {
         IObjectReferenceHelper *objRefHelper = m_Doc.GetDataModelObjectReferenceHelper();
-        QString name = getMaterialContainerPath() + QStringLiteral(".")
-                + QString(materialName).replace(QLatin1String("."), QLatin1String("\\."));
+        QString name = m_Bridge.getMaterialContainerPath() + QStringLiteral(".")
+                + getMaterialNameFromFilePath(path)
+                .replace(QLatin1Char('.'), QLatin1String("\\."));
         Qt3DSDMInstanceHandle material;
         CRelativePathTools::EPathType type;
-        objRefHelper->ResolvePath(m_Doc.GetSceneInstance(),
-                                  name.toUtf8().constData(),
-                                  type, material, true);
+        objRefHelper->ResolvePath(m_Doc.GetSceneInstance(), name, type, material, true);
         return material;
     }
 
-    Qt3DSDMInstanceHandle getOrCreateMaterial(const QString &materialName) override
+    Qt3DSDMInstanceHandle getOrCreateMaterial(const QString &path,
+                                              bool selectCreatedInstance = true) override
     {
-        auto material = getMaterial(materialName);
+        auto material = getMaterial(path);
         if (!material.Valid()) {
             auto parent = getOrCreateMaterialContainer();
             material = CreateSceneGraphInstance(ComposerObjectTypes::Material, parent,
                                                 GetAssociatedSlide(parent),
                                                 DocumentEditorInsertType::LastChild,
-                                                CPt(), PRIMITIVETYPE_UNKNOWN, -1);
-            SetName(material, materialName);
+                                                CPt(), PRIMITIVETYPE_UNKNOWN, -1, true,
+                                                selectCreatedInstance);
+            SetName(material, getMaterialNameFromFilePath(path));
         }
         return material;
     }
 
-    void getMaterialReference(TInstanceHandle instance, TInstanceHandle &reference) const override
-    {
-        auto optValue = GetInstancePropertyValue(instance,
-                                 m_Bridge.GetObjectDefinitions().m_ReferencedMaterial
-                                                 .m_ReferencedMaterial.m_Property);
-        if (optValue.hasValue()) {
-            reference = GetInstanceForObjectRef(m_Doc.GetSceneInstance(),
-                                                get<SObjectRefType>(optValue.getValue()));
-        }
-    }
-
-    void setMaterialProperties(TInstanceHandle instance, const QString &materialName,
+    void setMaterialProperties(TInstanceHandle instance,
                                const QString &materialSourcePath,
                                const QMap<QString, QString> &values,
                                const QMap<QString, QMap<QString, QString>> &textureValues) override
     {
-        setMaterialReferenceByName(instance, materialName);
+        SetMaterialType(instance, QStringLiteral("Referenced Material"));
         setMaterialSourcePath(instance, materialSourcePath);
-        setMaterialValues(materialName, values, textureValues);
+        setMaterialValues(materialSourcePath, values, textureValues);
+        setMaterialReferenceByPath(instance, materialSourcePath);
     }
 
-    void setMaterialReference(TInstanceHandle instance, TInstanceHandle reference) override
+    void setMaterialReferenceByPath(TInstanceHandle instance, const QString &path) override
     {
-        IObjectReferenceHelper *objRefHelper = m_Doc.GetDataModelObjectReferenceHelper();
-        SObjectRefType objRef = objRefHelper->GetAssetRefValue(reference, m_Doc.GetSceneInstance(),
-                                                               CRelativePathTools::EPATHTYPE_GUID);
-        SetInstancePropertyValue(instance,
-                                 m_Bridge.GetObjectDefinitions().m_ReferencedMaterial
-                                 .m_ReferencedMaterial.m_Property,
-                                 objRef, false);
-        SetName(instance, GetName(reference));
-    }
-
-    void setMaterialReferenceByName(TInstanceHandle instance,
-                                    const QString &materialName) override
-    {
-        Qt3DSDMInstanceHandle material = getOrCreateMaterial(materialName);
+        Qt3DSDMInstanceHandle material = getOrCreateMaterial(path);
         IObjectReferenceHelper *objRefHelper = m_Doc.GetDataModelObjectReferenceHelper();
         SObjectRefType objRef = objRefHelper->GetAssetRefValue(material, m_Doc.GetSceneInstance(),
                                                                CRelativePathTools::EPATHTYPE_GUID);
@@ -2181,6 +2333,21 @@ public:
                                  m_Bridge.GetObjectDefinitions().m_ReferencedMaterial
                                  .m_ReferencedMaterial.m_Property,
                                  objRef, false);
+        setReferencedMaterialNameByPath(instance, path);
+    }
+
+    void setReferencedMaterialNameByPath(TInstanceHandle instance, const QString &path)
+    {
+        auto name = getMaterialNameFromFilePath(path);
+        int slashIndex = name.lastIndexOf(QLatin1Char('/'));
+        if (slashIndex != -1)
+            name = name.mid(slashIndex + 1);
+        SetName(instance, name);
+    }
+
+    void setMaterialNameByPath(TInstanceHandle instance, const QString &path) override
+    {
+        SetName(instance, getMaterialNameFromFilePath(path));
     }
 
     void setMaterialSourcePath(TInstanceHandle instance,
@@ -2190,11 +2357,11 @@ public:
                                  std::make_shared<CDataStr>(materialSourcePath));
     }
 
-    void setMaterialValues(const QString &materialName,
+    void setMaterialValues(const QString &path,
                            const QMap<QString, QString> &values,
                            const QMap<QString, QMap<QString, QString>> &textureValues) override
     {
-        auto instance = getOrCreateMaterial(materialName);
+        auto instance = getOrCreateMaterial(path, false);
         if (instance.Valid())
             setMaterialValues(instance, values, textureValues);
     }
@@ -2995,7 +3162,6 @@ public:
                                   bool checkUniqueName, bool notifyRename = true) override
     {
         qt3dsdm::TInstanceHandleList sortableList(ToGraphOrdering(inInstances));
-        QSet<TInstanceHandle> updateList;
         TInstanceHandle theParent(inDest);
         if (inInsertType == DocumentEditorInsertType::PreviousSibling
             || inInsertType == DocumentEditorInsertType::NextSibling)
@@ -3022,52 +3188,13 @@ public:
                     SetName(theInstance, newName);
                 }
             }
-            TInstanceHandle oldParentHandle = GetParent(theInstance);
             if (inInsertType == DocumentEditorInsertType::PreviousSibling)
                 m_AssetGraph.MoveBefore(theInstance, inDest);
             else if (inInsertType == DocumentEditorInsertType::NextSibling)
                 m_AssetGraph.MoveAfter(theInstance, inDest);
             else if (inInsertType == DocumentEditorInsertType::LastChild)
                 m_AssetGraph.MoveTo(theInstance, inDest, COpaquePosition::LAST);
-
-            // If moving into a group, update the target group pivot point and position
-            TInstanceHandle newParentHandle = GetParent(theInstance);
-            if (m_Bridge.IsGroupInstance(newParentHandle))
-                updateList.insert(newParentHandle);
-            // If moving from a group, update the source group pivot and position
-            if (m_Bridge.IsGroupInstance(oldParentHandle))
-                updateList.insert(oldParentHandle);
         }
-
-        if (!updateList.empty()) {
-            for (auto it : qAsConst(updateList)) {
-                TInstanceHandleList childHandles;
-                GetChildren(GetActiveSlide(it), it, childHandles);
-                updatePivotAndPosition(it, childHandles);
-            }
-        }
-    }
-
-    // Move the pivot point and position to the center of the objects in list
-    void updatePivotAndPosition(TInstanceHandle handle, TInstanceHandleList objectList)
-    {
-        // Calculate the center
-        SFloat3 pivotPoint;
-        for (auto it : objectList) {
-            SFloat3 position = GetPosition(it);
-            pivotPoint[0] += position[0];
-            pivotPoint[1] += position[1];
-            pivotPoint[2] += position[2];
-        }
-        size_t objectCount = objectList.size();
-        pivotPoint[0] /= objectCount;
-        pivotPoint[1] /= objectCount;
-        pivotPoint[2] /= objectCount;
-        // Modify the pivot point of the target
-        SetInstancePropertyValue(handle, m_Bridge.GetObjectDefinitions().m_Node.m_Pivot,
-                                 pivotPoint, false);
-        // Modify the position of the target
-        SetPosition(handle, pivotPoint);
     }
 
     // Move all children out of a given parent instances and delete the instances.
@@ -3144,9 +3271,6 @@ public:
             ComposerObjectTypes::Component, theInstances[0], theSlide,
             DocumentEditorInsertType::NextSibling, CPt(), PRIMITIVETYPE_UNKNOWN, 0);
 
-        // Update pivot and position
-        updatePivotAndPosition(component, inInstances);
-
         QString theName = GetName(theInstances[0]);
 
         // now cut the group
@@ -3175,6 +3299,34 @@ public:
 
         m_Doc.SelectDataModelObject(component);
         return component;
+    }
+
+    void makeAnimatable(const qt3dsdm::TInstanceHandleList &instances) override
+    {
+        for (auto &instance : instances) {
+            const QString oldType = GetObjectTypeName(instance);
+            if (oldType == QLatin1String("ReferencedMaterial")) {
+                Qt3DSDMInstanceHandle refMaterial = m_Bridge.getMaterialReference(instance);
+
+                if (refMaterial.Valid()) {
+                    const QString refType = GetObjectTypeName(refMaterial);
+                    QString v;
+                    if (refType == QLatin1String("CustomMaterial"))
+                        v = m_Bridge.GetSourcePath(refMaterial);
+                    else
+                        v = QLatin1String("Standard Material");
+
+                    SetMaterialType(instance, v);
+                    copyMaterialProperties(refMaterial, instance);
+                } else {
+                    SetMaterialType(instance, "Standard Material");
+                }
+
+                const auto name = GetName(instance);
+                if (!name.endsWith(QLatin1String("_animatable")))
+                    SetName(instance, name + QLatin1String("_animatable"));
+            }
+        }
     }
 
     // Moves specified instances into target component by a simulated cut and paste.
@@ -3223,12 +3375,6 @@ public:
                     SetTimeRange(insertedHandles.at(i), theStartEndTimes.at(i).first,
                                  theStartEndTimes.at(i).second);
             }
-
-            // Update pivot and position
-            TInstanceHandleList childHandles;
-            GetChildren(m_SlideSystem.GetMasterSlide(theComponentSlide), targetComponent,
-                        childHandles);
-            updatePivotAndPosition(targetComponent, childHandles);
 
             // Check for name uniqueness
             if (checkUniqueName) {
@@ -3523,22 +3669,70 @@ public:
 
         for (auto &instance : children) {
             const auto name = GetName(instance);
-            writeMaterialFile(getOrCreateMaterial(name), name, false);
+            const QString path = getFilePathFromMaterialName(name);
+            writeMaterialFile(getOrCreateMaterial(path), name, false, path);
         }
     }
 
     void updateMaterialInstances(const QStringList &filenames) override
     {
-        const auto parent = getMaterialContainer();
+        const auto parent = m_Bridge.getMaterialContainer();
         if (parent.Valid()) {
             TInstanceList children;
             GetChildren(GetAssociatedSlide(parent), parent, children);
 
             for (auto &instance : children) {
                 auto name = GetName(instance);
-                if (name != QLatin1String("Default") && !filenames.contains(name))
+                if (name != getMaterialNameFromFilePath(m_Bridge.getDefaultMaterialName())
+                        && !filenames.contains(name)) {
                     DeleteInstance(instance);
+                }
             }
+        }
+    }
+
+    void removeUnusedFromMaterialContainer() override
+    {
+        QVector<Qt3DSDMInstanceHandle> usedMats;
+        m_Doc.getUsedSharedMaterials(usedMats);
+
+        const auto parent = m_Bridge.getMaterialContainer();
+        if (parent.Valid()) {
+            TInstanceList children;
+            GetChildren(GetAssociatedSlide(parent), parent, children);
+
+            unsigned int removedChildrenCount = 0;
+            for (auto &instance : children) {
+                if (!usedMats.contains(instance)) {
+                    DeleteInstance(instance);
+                    removedChildrenCount++;
+                }
+            }
+
+            if (removedChildrenCount == children.size())
+                DeleteInstance(parent);
+        }
+    }
+
+    void removeDeletedFromMaterialContainer() override
+    {
+        const auto parent = m_Bridge.getMaterialContainer();
+        if (parent.Valid()) {
+            TInstanceList children;
+            GetChildren(GetAssociatedSlide(parent), parent, children);
+
+            unsigned int removedChildrenCount = 0;
+            for (auto &instance : children) {
+                const auto name = GetName(instance);
+                if (name != getMaterialNameFromFilePath(m_Bridge.getDefaultMaterialName())
+                        && !QFileInfo(getFilePathFromMaterialName(name)).exists()) {
+                    DeleteInstance(instance);
+                    removedChildrenCount++;
+                }
+            }
+
+            if (removedChildrenCount == children.size())
+                DeleteInstance(parent);
         }
     }
 
@@ -3565,7 +3759,8 @@ public:
         CDispatch &theDispatch(*m_Doc.GetCore()->GetDispatch());
         QString theDestFile(importToComposer->GetDestImportFile());
         try {
-            theDispatch.FireOnProgressBegin(QObject::tr("Importing "), importSrc);
+            theDispatch.FireOnProgressBegin(QObject::tr("Importing "),
+                                            QFileInfo(importSrc).fileName());
             SImportResult result = inImportFunction(*importToComposer, theDestFile);
             bool forceError = importToComposer->HasError();
             if (!forceError)
@@ -3624,7 +3819,7 @@ public:
         if (docPath.size() == 0) {
             if (theHandler) {
                 theHandler->DisplayImportFailed(importSrc.filePath(),
-                                                QObject::tr("Qt3DSComposer Document Has No Path"),
+                                                QObject::tr("Qt3DStudio document has no path"),
                                                 false);
             }
             return 0;
@@ -3677,6 +3872,65 @@ public:
                                        inDropType, inPosition, inStartTime);
     }
 
+    QString findUniqueMaterialName(const QString &name, const QString &importPath)
+    {
+        auto materialName = name;
+        QString potentialPath = getFilePathFromMaterialName(
+                    getMaterialNameFromFilePath(materialName));
+        int i = 1;
+        const auto originalMaterialName = materialName;
+        const QString importFile = QStringLiteral("importfile");
+        while (QFileInfo(potentialPath).exists()) {
+            i++;
+            QString name;
+            QMap<QString, QString> values;
+            QMap<QString, QMap<QString, QString>> textureValues;
+            getMaterialInfo(potentialPath, name, values, textureValues);
+            if (values.contains(importFile) && values[importFile] == importPath) {
+                const auto material = getOrCreateMaterial(materialName);
+                setMaterialValues(material, values, textureValues);
+                break;
+            }
+            materialName = originalMaterialName + QString::number(i);
+            potentialPath = getFilePathFromMaterialName(
+                        getMaterialNameFromFilePath(materialName));
+        }
+        return materialName;
+    }
+
+    TInstanceHandle createRefMaterialFromImageOrPresentation(
+            TInstanceHandle parent, TSlideHandle slide, const QString &absSrc, bool isSubp)
+    {
+        qt3dsdm::Qt3DSDMInstanceHandle refInstance
+                = CreateSceneGraphInstance(ComposerObjectTypes::ReferencedMaterial, parent, slide);
+        TInstanceHandle imageMaterial;
+        QString relPath;
+        QString materialName;
+        if (isSubp) {
+            relPath = absSrc;
+            materialName = findUniqueMaterialName(absSrc, relPath);
+            imageMaterial = getOrCreateMaterial(materialName);
+            const auto prop = m_Bridge.GetObjectDefinitions().m_Material.m_DiffuseMap1.m_Property;
+            setInstanceImagePropertyValue(imageMaterial, prop, absSrc, true);
+        } else {
+            QFileInfo absPath(absSrc);
+            relPath = m_Doc.GetRelativePathToDoc(absPath);
+            materialName = findUniqueMaterialName(absPath.completeBaseName(), relPath);
+            imageMaterial = getOrCreateMaterial(materialName);
+            SetInstancePropertyValueAsImage(
+                imageMaterial, m_Bridge.GetDefaultMaterial().m_DiffuseMap1, relPath);
+        }
+        IDocumentEditor::SetSpecificInstancePropertyValue(0, imageMaterial,
+                                                          QStringLiteral("importfile"),
+                                                          std::make_shared<CDataStr>(relPath));
+        auto sourcePath = writeMaterialFile(imageMaterial, materialName, true);
+
+        setMaterialReferenceByPath(refInstance, materialName);
+        setMaterialSourcePath(refInstance, sourcePath);
+        SetName(refInstance, materialName);
+        return refInstance;
+    }
+
     TInstanceHandle AutomapImage(const QString &inFullPathToDocument,
                                  TInstanceHandle inParent, TSlideHandle inSlide,
                                  DocumentEditorInsertType::Enum inDropType,
@@ -3712,21 +3966,8 @@ public:
             std::make_shared<qt3dsdm::CDataStr>(
                 m_Doc.GetBufferCache().GetPrimitiveName(PRIMITIVETYPE_RECT)));
         // Create the object material
-        qt3dsdm::Qt3DSDMInstanceHandle theMaterialInstance =
-            CreateSceneGraphInstance(ComposerObjectTypes::ReferencedMaterial, theModelInstance,
-                                                        inSlide);
-        CFilePath theFilePath(inFullPathToDocument);
-        // Create the reference material
-        auto imageMaterial = getOrCreateMaterial(theFilePath.GetFileStem().toQString());
-        // Load the image as the child of the reference material
-        qt3dsdm::Qt3DSDMInstanceHandle theImageInstance = SetInstancePropertyValueAsImage(
-            imageMaterial, m_Bridge.GetDefaultMaterial().m_DiffuseMap1, relativePath);
-        auto sourcePath = writeMaterialFile(imageMaterial,
-                                            theFilePath.GetFileStem().toQString(), true);
-
-        setMaterialReferenceByName(theMaterialInstance, theFilePath.GetFileStem().toQString());
-        setMaterialSourcePath(theMaterialInstance, sourcePath);
-        SetName(theMaterialInstance, theFilePath.GetFileStem().toQString());
+        createRefMaterialFromImageOrPresentation(theModelInstance, inSlide,
+                                                 inFullPathToDocument, false);
 
         if (inStartTime != -1)
             SetStartTime(theModelInstance, inStartTime);
@@ -3739,7 +3980,7 @@ public:
         m_PropertySystem.SetInstancePropertyValue(theModelInstance, m_Bridge.GetNode().m_Scale,
                                                   theScale);
 
-        SetName(theModelInstance, theFilePath.GetFileStem().toQString(), true);
+        SetName(theModelInstance, imageSrc.completeBaseName(), true);
 
         // Set the image as the property of the first diffuse map.
         return FinalizeAddOrDrop(theModelInstance, inParent, inDropType, inPosition,
@@ -4224,6 +4465,7 @@ public:
                                        QFileInfo(theRelativePath).baseName(),
                                        theWarnings,
                                        *theStream);
+                IDocumentEditor::fixDefaultTexturePaths(theParentInstance);
                 DisplayLoadWarnings(shaderFile, theWarnings, QString());
             } else {
                 if (theHandler) {
@@ -4536,13 +4778,15 @@ public:
                 m_Doc.GetImportFailedHandler(),
                 *translationLog, false);
         }
+
+        updateMaterialFiles();
     }
 
     void RefreshImport(const QString &inOldFile, const QString &inNewFile) override
     {
         CDispatch &theDispatch(*m_Doc.GetCore()->GetDispatch());
         theDispatch.FireOnProgressBegin(
-            QObject::tr("Refreshing Import "), inOldFile);
+            QObject::tr("Refreshing Import "), QFileInfo(inNewFile).fileName());
         ScopedBoolean __ignoredDirs(m_IgnoreDirChange);
         try {
             m_SourcePathInstanceMap.clear();
@@ -5117,6 +5361,7 @@ public:
                                                   theInstances[0].second,
                                                   theNameStr,
                                                   theWarnings, *theStream);
+                    IDocumentEditor::fixDefaultTexturePaths(theInstances[0].second);
                 }
 
                 for (size_t i = 0; i < theInstances.size(); ++i) {
@@ -5203,6 +5448,37 @@ IDocumentEditor::GetAlwaysUnlinkedProperties(qt3dsdm::SComposerObjectDefinitions
     return theProperties;
 }
 
+// Fixes the default texture paths loaded from material and effect to be presentation relative
+void IDocumentEditor::fixDefaultTexturePaths(Qt3DSDMInstanceHandle instance)
+{
+    const auto core = g_StudioApp.GetCore();
+    const QDir docDir(core->GetDoc()->GetDocumentDirectory());
+    const QDir projDir = core->getProjectFile().getProjectPath();
+    const auto propertySystem = core->GetDoc()->GetStudioSystem()->GetPropertySystem();
+    qt3dsdm::TPropertyHandleList propList;
+    SValue value;
+
+    propertySystem->GetAggregateInstanceProperties(instance, propList);
+    for (auto &prop : propList) {
+        qt3dsdm::AdditionalMetaDataType::Value additionalMetaDataType
+                = propertySystem->GetAdditionalMetaDataType(instance, prop);
+        if (additionalMetaDataType == AdditionalMetaDataType::Texture) {
+            propertySystem->GetInstancePropertyValue(instance, prop, value);
+            TDataStrPtr strPtr = get<TDataStrPtr>(value);
+            const QString strValue = QString::fromWCharArray(strPtr->GetData());
+            const QString docRelative = docDir.relativeFilePath(strValue);
+            const QString projRelative = projDir.relativeFilePath(strValue);
+            if (!QFileInfo(docRelative).exists() && !QFileInfo(projRelative).exists()) {
+                // Convert path to presentation relative
+                const QVariant newVarValue = QVariant::fromValue(
+                            docDir.relativeFilePath(projDir.absoluteFilePath(strValue)));
+                const SValue newValue = newVarValue;
+                propertySystem->SetInstancePropertyValue(instance, prop, newValue);
+            }
+        }
+    }
+}
+
 void IDocumentEditor::UnlinkAlwaysUnlinkedProperties(Qt3DSDMInstanceHandle inInstance,
                                                      SComposerObjectDefinitions &inDefs,
                                                      ISlideSystem &inSlideSystem)
@@ -5212,22 +5488,25 @@ void IDocumentEditor::UnlinkAlwaysUnlinkedProperties(Qt3DSDMInstanceHandle inIns
         inSlideSystem.UnlinkProperty(inInstance, *theHandle);
 }
 
+// static
 Qt3DSDMInstanceHandle IDocumentEditor::CreateSceneGraphInstance(
     const QString &inType, TInstanceHandle inParent, TSlideHandle inSlide,
     qt3dsdm::IDataCore &inDataCore, qt3dsdm::ISlideSystem &inSlideSystem,
     qt3dsdm::SComposerObjectDefinitions &inObjectDefs, Q3DStudio::CGraph &inAssetGraph,
-    qt3dsdm::IMetaData &inMetaData, TInstanceHandle inTargetId, bool setTimeRange)
+    qt3dsdm::IMetaData &inMetaData, TInstanceHandle inTargetId, bool setTimeRange,
+    bool selectCreatedInstance)
 {
-    return CreateSceneGraphInstance(inMetaData.GetCanonicalInstanceForType(inType),
-                                    inParent, inSlide, inDataCore, inSlideSystem, inObjectDefs,
-                                    inAssetGraph, inMetaData, inTargetId);
+    return CreateSceneGraphInstance(inMetaData.GetCanonicalInstanceForType(inType), inParent,
+                                    inSlide, inDataCore, inSlideSystem, inObjectDefs, inAssetGraph,
+                                    inMetaData, inTargetId, selectCreatedInstance);
 }
 
+// static
 Qt3DSDMInstanceHandle IDocumentEditor::CreateSceneGraphInstance(
     Qt3DSDMInstanceHandle inMaster, TInstanceHandle inParent, TSlideHandle inSlide,
     qt3dsdm::IDataCore &inDataCore, qt3dsdm::ISlideSystem &inSlideSystem,
     qt3dsdm::SComposerObjectDefinitions &inObjectDefs, Q3DStudio::CGraph &inAssetGraph,
-    qt3dsdm::IMetaData &inMetaData, TInstanceHandle inTargetId)
+    qt3dsdm::IMetaData &inMetaData, TInstanceHandle inTargetId, bool selectCreatedInstance)
 {
     Option<QString> theTypeOpt = inMetaData.GetTypeForInstance(inMaster);
     if (theTypeOpt.hasValue() == false)

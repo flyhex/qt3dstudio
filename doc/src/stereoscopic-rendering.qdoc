@@ -1,0 +1,90 @@
+/****************************************************************************
+**
+** Copyright (C) 2018 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Stereoscopic Rendering
+\page stereoscopic-rendering.html
+
+This is a technical preview on how stereoscopic rendering could work in Qt 3D Studio.
+
+Stereoscopy is a technique that adds the illusion of depth to a flat image. Special glasses or
+stereoscopic displays are needed to view stereoscopic images.
+
+\section1 Use Stereoscopic Rendering
+
+To enable stereoscopic rendering, follow the steps below:
+\list 1
+  \li
+  Run your presentation in the Viewer.
+  \li
+  Select the desired stereo mode from \uicontrol {View > Stereo Mode} in the menu bar. Select
+  \uicontrol {Mono} to disable stereoscopic rendering.
+  \image stereo-mode-menu.png
+\endlist
+
+You can decrease or increase camera separation from
+\uicontrol{View > Stereo Mode} or by using shortcut keys
+\e {Ctrl + Shift + -} and \e {Ctrl + Shift + +}
+
+\section1 Stereo Modes
+The following stereo modes are available.
+
+\section2 Top-Bottom
+Render two images, one for each eye, one above the other.
+
+\image stereo-topbottom.png
+
+\section2 Left-Right
+Render two images, one for each eye, side-by-side.
+
+\image stereo-leftright.png
+
+\section2 Anaglyph
+Render two differently colored images, one for each eye. Supported anaglyph glasses
+are Red-Cyan and Green-Magenta.
+
+\image stereo-anaglyph.png
+
+\section1 Known Limitations
+
+In this technical preview of stereoscopic rendering the following limitations are known:
+
+\list
+  \li
+  All layers should match the presentation size. Stereoscopic modes do not duplicate layers to both
+  eyes, instead it duplicates the content inside layers. Layers smaller than the presentation will
+  not render correctly in top-bottom and left-right stereoscopic modes.
+  \li
+  Because of above mentioned layer size issue and performance impact, presentations with
+  sub-presentations do not fully work in stereoscopic modes.
+  \li
+  Currently, layer effects are not supported in stereoscopic modes. Effects will be disabled when
+  using any stereoscopic mode.
+\endlist
+
+*/

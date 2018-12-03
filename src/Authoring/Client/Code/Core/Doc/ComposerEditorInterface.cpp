@@ -72,6 +72,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
     Import *m_ImportObj;
     TImportInstanceMap m_ImportToInstanceMap;
     TImportInstanceMap m_MaterialToInstanceMap;
+    QVector<Qt3DSDMInstanceHandle> m_createdMaterials;
 
     // When we are refreshing, the root assets is the group we are refreshing.
     SComposerImportInterface(Q3DStudio::IDocumentEditor &editor, qt3dsdm::CDataModelHandle parent,
@@ -233,15 +234,36 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
         if (name.hasValue())
             materialName = qt3dsdm::get<TDataStrPtr>(*name)->toQString();
 
-        auto material = m_Editor.getMaterial(materialName);
-        if (!material.Valid()) {
-            material = m_Editor.getOrCreateMaterial(materialName);
+        QString filepath = m_Editor.getMaterialFilePath(materialName);
+        int i = 1;
+        const QString originalMaterialName = materialName;
+        const QString importFile = QStringLiteral("importfile");
+        while (QFileInfo(filepath).exists()) {
+            i++;
+            QString name;
+            QMap<QString, QString> values;
+            QMap<QString, QMap<QString, QString>> textureValues;
+            m_Editor.getMaterialInfo(filepath, name, values, textureValues);
+            if (values.contains(importFile) && values[importFile] == m_Relativeimportfile) {
+                const auto material = m_Editor.getOrCreateMaterial(materialName);
+                if (!m_createdMaterials.contains(material))
+                    m_Editor.setMaterialValues(material, values, textureValues);
+                break;
+            }
+            materialName = originalMaterialName + QString::number(i);
+            filepath = m_Editor.getMaterialFilePath(materialName);
+        }
+
+        bool isNewMaterial = !m_Editor.getMaterial(materialName).Valid();
+        const auto material = m_Editor.getOrCreateMaterial(materialName);
+        if (!m_createdMaterials.contains(material) && isNewMaterial) {
             m_Editor.SetSpecificInstancePropertyValue(0, material, QStringLiteral("importid"),
                                                       std::make_shared<CDataStr>(desc.m_Id));
             m_Editor.SetSpecificInstancePropertyValue(
-                m_Slide, material, QStringLiteral("importfile"),
-                std::make_shared<CDataStr>(m_Relativeimportfile));
+            0, material, QStringLiteral("importfile"),
+            std::make_shared<CDataStr>(m_Relativeimportfile));
             addMaterialMap(material, desc.m_Id);
+            m_createdMaterials.append(material);
         }
 
         const auto sourcePath = m_Editor.writeMaterialFile(material,
@@ -251,7 +273,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
         Qt3DSDMInstanceHandle parent(FindInstance(inParent));
         auto instance = m_Editor.CreateSceneGraphInstance(ComposerObjectTypes::ReferencedMaterial,
                                                           parent, m_Slide);
-        m_Editor.setMaterialReferenceByName(instance, materialName);
+        m_Editor.setMaterialReferenceByPath(instance, materialName);
         m_Editor.SetName(instance, materialName);
         m_Editor.setMaterialSourcePath(instance, sourcePath);
     }
@@ -347,6 +369,8 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
     TIdMultiMap &m_IdToSlideInstances;
     bool m_HasError;
     CGraph &m_AssetGraph;
+    Import *m_importObj;
+    QVector<Qt3DSDMInstanceHandle> m_createdMaterials;
 
     struct SSlideInstanceIdMapIterator
     {
@@ -402,11 +426,12 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
         , m_IdToSlideInstances(inIdToInstanceMap)
         , m_HasError(false)
         , m_AssetGraph(inAssetGraph)
+        , m_importObj(nullptr)
     {
     }
 
     void Release() override {}
-    void BeginImport(Import &) override {}
+    void BeginImport(Import &importObj) override { m_importObj = &importObj; }
 
     void RemoveChild(TImportId inParentId, TImportId inChildId) override
     {
@@ -472,6 +497,107 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
 
     void createMaterial(const InstanceDesc &desc, TImportId inParent) override
     {
+        QString materialName = desc.m_Id;
+        Option<SValue> name = m_importObj->GetInstancePropertyValue(desc.m_Handle,
+                                                                    ComposerPropertyNames::name);
+        if (name.hasValue())
+            materialName = qt3dsdm::get<QString>(*name);
+
+        // Get a unique material name
+        // Reuse a material name if previously imported from the same source
+        QString filepath = m_Editor.getMaterialFilePath(materialName);
+        int i = 1;
+        const QString originalMaterialName = materialName;
+        const QString importFile = QStringLiteral("importfile");
+        while (QFileInfo(filepath).exists()) {
+            i++;
+            QString name;
+            QMap<QString, QString> values;
+            QMap<QString, QMap<QString, QString>> textureValues;
+            m_Editor.getMaterialInfo(filepath, name, values, textureValues);
+            if (values.contains(importFile) && values[importFile] == m_Relativeimportfile) {
+                break;
+            }
+            materialName = originalMaterialName + QString::number(i);
+            filepath = m_Editor.getMaterialFilePath(materialName);
+        }
+
+        TIdMultiMap::iterator matInserter(m_IdToSlideInstances.insert(
+            desc.m_Id, QVector<QPair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle>>()));
+
+        // If previous material exists, remove its children
+        auto material = m_Editor.getMaterial(materialName);
+        if (material.Valid() && !m_createdMaterials.contains(material)) {
+            std::vector<Qt3DSDMInstanceHandle> children;
+            m_Editor.GetChildren(0, material, children);
+            for (auto &child : children)
+                m_Editor.RemoveChild(material, child);
+        } else {
+            material = m_Editor.getOrCreateMaterial(materialName);
+        }
+
+        if (!m_createdMaterials.contains(material)) {
+            m_Editor.SetSpecificInstancePropertyValue(0, material, QStringLiteral("importid"),
+                                                      SValue(QVariant(desc.m_Id)));
+            m_Editor.SetSpecificInstancePropertyValue(
+                        0, material, QStringLiteral("importfile"),
+                        SValue(QVariant(m_Relativeimportfile)));
+            // Insert material in the material container to the map
+            // so that its properties are updated
+            insert_unique_qt(*matInserter,
+                          QPair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle>(
+                                 m_Editor.GetAssociatedSlide(material), material));
+            m_createdMaterials.append(material);
+        }
+
+        const auto sourcePath = m_Editor.writeMaterialFile(material,
+                                                           materialName,
+                                                           true);
+
+        // Actual material inside material container has been created
+        // Next create the referenced material located inside the model
+        QString refName = desc.m_Id;
+        refName += QLatin1String("_ref");
+        TIdMultiMap::iterator refInserter(m_IdToSlideInstances.insert(
+            refName, QVector<QPair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle>>()));
+
+        for (SSlideInstanceIdMapIterator theIterator(inParent, m_IdToSlideInstances);
+             theIterator.IsDone() == false; theIterator.Next()) {
+            Qt3DSDMInstanceHandle parent = theIterator.GetCurrentInstance();
+            std::vector<Qt3DSDMInstanceHandle> children;
+            m_Editor.GetChildren(0, parent, children);
+            Qt3DSDMInstanceHandle oldVersion;
+            for (auto &child : children) {
+                if (m_Editor.GetSourcePath(child) == sourcePath
+                        && m_Editor.GetObjectTypeName(child) == "ReferencedMaterial") {
+                    oldVersion = child;
+                    break;
+                }
+            }
+            Qt3DSDMInstanceHandle instance;
+            // If an old referenced material with the same name exists, the new one is added
+            // as a sibling so that the order remains the same. The old one is then deleted.
+            if (oldVersion.Valid()) {
+                instance = m_Editor.CreateSceneGraphInstance(
+                            ComposerObjectTypes::ReferencedMaterial, oldVersion,
+                            theIterator.GetCurrentSlide(), DocumentEditorInsertType::NextSibling,
+                            CPt(), PRIMITIVETYPE_UNKNOWN, 0);
+                 m_Editor.DeleteInstance(oldVersion);
+            } else {
+                instance = m_Editor.CreateSceneGraphInstance(
+                            ComposerObjectTypes::ReferencedMaterial, parent,
+                            theIterator.GetCurrentSlide(), DocumentEditorInsertType::LastChild,
+                            CPt(), PRIMITIVETYPE_UNKNOWN, 0);
+            }
+            m_Editor.setMaterialReferenceByPath(instance, materialName);
+            m_Editor.SetName(instance, materialName);
+            m_Editor.setMaterialSourcePath(instance, sourcePath);
+            // Insert the referenced material to the map
+            // so that the child structure remains the same
+            insert_unique_qt(*refInserter,
+                             QPair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle>(
+                                 theIterator.GetCurrentSlide(), instance));
+        }
     }
 
     // We guarantee that all instances will be created before their properties are updated thus you
@@ -518,6 +644,12 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
                 // not on any given slide.
                 m_Editor.SetSpecificInstancePropertyValue(
                     0, hdl, ComposerPropertyNames::Convert(value.m_Name), theValue);
+                if (value.m_Name != ComposerPropertyNames::name
+                        && m_createdMaterials.contains(hdl)) {
+                   m_Editor.SetSpecificInstancePropertyValue(
+                       m_Editor.GetAssociatedSlide(hdl), hdl,
+                               ComposerPropertyNames::Convert(value.m_Name), theValue);
+                }
             }
         }
     }
@@ -538,6 +670,8 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
             Qt3DSDMSlideHandle theParentSlide = (*theParentList)[idx].first;
             Qt3DSDMInstanceHandle theParent((*theParentList)[idx].second);
             Qt3DSDMInstanceHandle theChild((*theChildList)[idx].second);
+            if (m_createdMaterials.contains(theChild))
+                continue;
             Qt3DSDMInstanceHandle nextSibling;
             if (!nextSiblingId.isEmpty()) {
                 for (long childIdx = 0, childCount = m_AssetGraph.GetChildCount(theParent);

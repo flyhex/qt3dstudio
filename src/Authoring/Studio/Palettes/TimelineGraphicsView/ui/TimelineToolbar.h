@@ -56,6 +56,7 @@ signals:
     void lastFrameTriggered();
     void timelineScaleChanged(int scale);
     void setDurationTriggered();
+    void showRowTextsToggled(bool toggled);
 
 public:
     TimelineToolbar();
@@ -63,6 +64,7 @@ public:
     void setTime(long totalMillis);
     QString getCurrentController() const;
     void setNewLayerEnabled(bool enable);
+    QAction *actionShowRowTexts() const;
 
     // IDataModelListener
     void OnBeginDataModelNotifications() override;
@@ -80,6 +82,7 @@ private Q_SLOTS:
     void onPlayButtonClicked();
     void onZoomLevelChanged(int scale);
     void onDiButtonClicked();
+    void onShowRowTextsToggled();
 
 private:
     void addSpacing(int width);
@@ -97,12 +100,15 @@ private:
     QAction *m_actionZoomOut;
     QAction *m_actionDataInput;
     QAction *m_actionNewLayer;
+    QAction *m_actionShowRowTexts;
     qt3dsdm::TSignalConnectionPtr m_connectSelectionChange;
     QSlider *m_scaleSlider;
     QIcon m_iconStop;
     QIcon m_iconPlay;
     QIcon m_iconDiActive;
     QIcon m_iconDiInactive;
+    QIcon m_iconTimebarTextsActive;
+    QIcon m_iconTimebarTextsInactive;
 
     QString m_currController;
 

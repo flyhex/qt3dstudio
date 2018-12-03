@@ -26,6 +26,7 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+#include <QtWidgets/qmessagebox.h>
 #include "Qt3DSCommonPrecompile.h"
 #include "IComposerSerializer.h"
 #include "Qt3DSDMDataCore.h"
@@ -2480,6 +2481,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
             if (theStream) {
                 m_MetaData.LoadEffectInstance(theSourcePath, theMaster, info.baseName(),
                                               warnings, *theStream);
+                IDocumentEditor::fixDefaultTexturePaths(theMaster);
             }
         } else if (suffix.compare(QLatin1String("plugin"), Qt::CaseInsensitive) == 0) {
             std::shared_ptr<IDOMReader> thePluginPtr
@@ -2490,12 +2492,14 @@ struct SComposerSerializerImpl : public IComposerSerializer
                 std::vector<SMetaDataLoadWarning> warnings;
                 m_MetaData.LoadInstance(*thePluginPtr, theMaster, info.baseName(), warnings);
             }
-        } else if (suffix.compare(QLatin1String("material"), Qt::CaseInsensitive) == 0) {
+        } else if (suffix.compare(QLatin1String("material"), Qt::CaseInsensitive) == 0
+                   || suffix.compare(QLatin1String("shader"), Qt::CaseInsensitive) == 0) {
             std::vector<SMetaDataLoadWarning> warnings;
             IRefCountedInputStream theStream = m_InputStreamFactory->getStreamForFile(theFullPath);
             if (theStream) {
                 m_MetaData.LoadMaterialInstance(theSourcePath, theMaster, info.baseName(),
                                                 warnings, *theStream);
+                IDocumentEditor::fixDefaultTexturePaths(theMaster);
             }
         } else {
             QT3DS_ASSERT(false);
@@ -2507,6 +2511,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                                                   const QString &inDocumentDirectory,
                                                   Qt3DSDMInstanceHandle inNewRoot)
     {
+        QStringList unknownList;
         // Attempt to work correctly whether we are pointing to the project or not.
         IDOMReader::Scope __outerScope(inReader);
         if (inReader.GetElementName() == QLatin1String("UIP"))
@@ -2542,6 +2547,17 @@ struct SComposerSerializerImpl : public IComposerSerializer
                     inReader.Att(QStringLiteral("id"), theId);
                     AddId(theId, theMaster);
                 }
+            }
+            if (!unknownList.isEmpty()) {
+                QString unknownAssets
+                        = QObject::tr("The presentation may not behave as expected.\n"
+                                      "The following assets were not recognized:\n");
+
+                for (auto asset : qAsConst(unknownList)) {
+                    unknownAssets.append(QLatin1String("\n"));
+                    unknownAssets.append(asset);
+                }
+                QMessageBox::warning(nullptr, QObject::tr("Unknown Assets"), unknownAssets);
             }
         }
 

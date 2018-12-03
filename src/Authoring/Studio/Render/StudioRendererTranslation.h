@@ -402,7 +402,7 @@ namespace studio {
         QT3DSVec4 m_guideFillColor;
         QT3DSVec4 m_selectedGuideFillColor;
 
-        const float m_previewViewportSize = 600.0f;
+        const float m_overlayPreviewSize = 600.0f;
 
         NVScopedRefCounted<qt3ds::render::NVRenderTexture2D> m_previewTexture;
         NVScopedRefCounted<qt3ds::render::NVRenderFrameBuffer> m_previewFbo;
@@ -486,13 +486,16 @@ namespace studio {
             }
         }
 
-        void DrawAxis(SGraphObjectTranslator &inTranslator);
+        void drawPivot(SGraphObjectTranslator &inTranslator);
 
         void SetViewport(QT3DSF32 inWidth, QT3DSF32 inHeight) { m_Viewport = QT3DSVec2(inWidth, inHeight); }
 
-        QT3DSVec2 GetViewportDimensions() { return m_Viewport; }
-        QT3DSVec2 GetPreviewViewportDimensions();
-        qt3ds::render::NVRenderRect GetPreviewViewport();
+        QT3DSVec2 GetViewportDimensions() const { return m_Viewport; }
+        QT3DSVec2 GetPreviewViewportDimensions() const;
+        QT3DSVec2 GetOverlayPreviewDimensions() const;
+        qt3ds::render::NVRenderRect GetPreviewViewport() const;
+        qt3ds::render::NVRenderRect GetOverlayPreviewViewport() const;
+        bool hasRoomForOverlayPreview() const;
 
         void ClearDirtySet()
         {
@@ -515,7 +518,8 @@ namespace studio {
         DeactivateScan(SGraphObjectTranslator &inParent,
                        qt3dsdm::Qt3DSDMInstanceHandle inAliasHandle = qt3dsdm::Qt3DSDMInstanceHandle());
         void PreRender(bool scenePreviewPass);
-        void Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPass, bool overlayPreview);
+        void Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPass,
+                    bool overlayPreview);
         void EndRender();
         void DoPrepareForDrag(SNode *inSelectedNode);
         void ResetWidgets();
@@ -524,7 +528,8 @@ namespace studio {
 
         void PrepareForDrag() { DoPrepareForDrag(GetSelectedNode()); }
 
-        SStudioPickValue Pick(CPt inMouseCoords, TranslationSelectMode::Enum inSelectMode);
+        SStudioPickValue Pick(CPt inMouseCoords, TranslationSelectMode::Enum inSelectMode,
+                              bool ignoreWidgets = false);
         Option<QT3DSU32> PickWidget(CPt inMouseCoords, TranslationSelectMode::Enum inSelectMode,
                                  qt3ds::widgets::IStudioWidgetBase &inWidget);
 

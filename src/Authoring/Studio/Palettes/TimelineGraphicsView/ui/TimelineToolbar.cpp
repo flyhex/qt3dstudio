@@ -58,6 +58,8 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     static const QIcon iconLast = QIcon(":/images/playback_tools_low-04.png");
     static const QIcon iconZoomIn = QIcon(":/images/zoom_in.png");
     static const QIcon iconZoomOut = QIcon(":/images/zoom_out.png");
+    m_iconTimebarTextsActive = QIcon(":/images/timeline_text_shown.png");
+    m_iconTimebarTextsInactive = QIcon(":/images/timeline_text_hidden.png");
     m_iconDiActive = QIcon(":/images/Objects-DataInput-Active.png");
     m_iconDiInactive = QIcon(":/images/Objects-DataInput-Inactive.png");
     m_iconStop = QIcon(":/images/playback_tools_low-01.png");
@@ -101,6 +103,10 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
             + QString(CStudioPreferences::dataInputColor().name()) + "; }";
     m_diLabel->setStyleSheet(styleString);
 
+    m_actionShowRowTexts = new QAction(m_iconTimebarTextsInactive,
+                                       tr("Show All Time Bar Texts"), this);
+    m_actionShowRowTexts->setCheckable(true);
+
     updatePlayButtonState(false);
 
     // connections
@@ -114,12 +120,14 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     connect(m_actionZoomIn, &QAction::triggered, this, &TimelineToolbar::onZoomInButtonClicked);
     connect(m_actionZoomOut, &QAction::triggered, this, &TimelineToolbar::onZoomOutButtonClicked);
     connect(m_actionDataInput, &QAction::triggered, this, &TimelineToolbar::onDiButtonClicked);
+    connect(m_actionShowRowTexts, &QAction::toggled, this, &TimelineToolbar::onShowRowTextsToggled);
 
     // add actions
     addAction(m_actionNewLayer);
     addAction(m_actionDeleteRow);
     addAction(m_actionDataInput);
     addSpacing(2);
+    addAction(m_actionShowRowTexts);
     addWidget(m_diLabel);
     addSpacing(20);
     addWidget(m_timeLabel);
@@ -200,6 +208,11 @@ QString TimelineToolbar::getCurrentController() const
     return m_currController;
 }
 
+QAction *TimelineToolbar::actionShowRowTexts() const
+{
+    return m_actionShowRowTexts;
+}
+
 void TimelineToolbar::setNewLayerEnabled(bool enable)
 {
     m_actionNewLayer->setEnabled(enable);
@@ -245,7 +258,22 @@ void TimelineToolbar::onZoomOutButtonClicked()
 
 void TimelineToolbar::onDiButtonClicked()
 {
-    showDataInputChooser(mapToGlobal(pos()));
+    QWidget *diButton = widgetForAction(m_actionDataInput);
+    if (diButton) {
+        QPoint chooserPos = diButton->pos() + QPoint(diButton->size().width(),
+                                                     diButton->size().height());
+        showDataInputChooser(mapToGlobal(chooserPos));
+    }
+}
+
+void TimelineToolbar::onShowRowTextsToggled()
+{
+    bool isChecked = m_actionShowRowTexts->isChecked();
+    m_actionShowRowTexts->setIcon(isChecked ? m_iconTimebarTextsActive
+                                            : m_iconTimebarTextsInactive);
+    QString text = tr("%1 All Time Bar Texts").arg(isChecked ? tr("Hide") : tr("Show"));
+    m_actionShowRowTexts->setText(text);
+    emit showRowTextsToggled(isChecked);
 }
 
 // Update datainput button state according to this timecontext control state.
@@ -301,14 +329,13 @@ void TimelineToolbar::showDataInputChooser(const QPoint &point)
         m_currController : m_dataInputSelector->getNoneString();
     QVector<QPair<QString, int>> dataInputList;
 
-    for (auto it : qAsConst(g_StudioApp.m_dataInputDialogItems)) {
-        if (it->type == EDataType::DataTypeRangedNumber)
-            dataInputList.append(QPair<QString, int>(it->name, it->type));
-    }
+    for (auto &it : qAsConst(g_StudioApp.m_dataInputDialogItems))
+            dataInputList.append({it->name, it->type});
 
     m_dataInputSelector->setData(dataInputList, currCtr);
 
-    CDialogs::showWidgetBrowser(this, m_dataInputSelector, point);
+    CDialogs::showWidgetBrowser(this, m_dataInputSelector, point,
+                                CDialogs::WidgetBrowserAlign::ToolButton);
 }
 
 void TimelineToolbar::onDataInputChange(int handle, int instance, const QString &dataInputName)

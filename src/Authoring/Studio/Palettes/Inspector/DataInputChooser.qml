@@ -57,6 +57,94 @@ Rectangle {
         anchors.fill: parent
         anchors.topMargin: 30
         spacing: 10
+        RowLayout {
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            StyledComboBox {
+                id: filterCombo
+                readonly property int numOfFixedChoices: 2
+                Layout.leftMargin: 8
+                Layout.preferredWidth: 150
+
+                // Data type list must match with EDataType enum so we can use enum
+                // index directly without going through string -> int table lookup
+                model: [qsTr("[Compatible types]"), qsTr("[All types]"), qsTr("Boolean"),
+                        qsTr("Float"), qsTr("Ranged Number"), qsTr("String"), qsTr("Variant"),
+                        qsTr("Vector2"), qsTr("Vector3")]
+
+                onCurrentIndexChanged: _parentView.setTypeFilter(currentIndex - numOfFixedChoices);
+
+                MouseArea {
+                    id: filterBoxMouseArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    // pass through mouse click to Combobox
+                    onPressed: {
+                        mouse.accepted = false;
+                    }
+                }
+
+                StyledTooltip {
+                    text: qsTr("Filter the list by Data Input type or\n"
+                                + "by compatibility with current property")
+                    enabled: filterBoxMouseArea.containsMouse && !filterCombo.popup.activeFocus
+                }
+            }
+
+            StyledTextField {
+                Layout.leftMargin: 8
+                Layout.rightMargin: 8
+                Layout.preferredWidth: 200
+                Layout.fillWidth: true
+                id: searchField
+                placeholderText: qsTr("[search]")
+                horizontalAlignment: TextInput.AlignLeft
+
+                property string value
+
+                rightPadding: clearText.width + 2
+
+                onTextChanged: _parentView.setSearchString(text);
+
+                MouseArea {
+                    id: searchMouseArea
+                    anchors.fill: parent
+                    propagateComposedEvents: true
+                    hoverEnabled: true
+                    onClicked: {
+                        searchField.forceActiveFocus();
+                    }
+                }
+
+                StyledTooltip {
+                    id: searchTt
+                    text: qsTr("Search for Data Input")
+                    enabled: searchMouseArea.containsMouse && !searchField.focus
+                }
+
+                Image {
+                    anchors { verticalCenter: parent.verticalCenter; right: parent.right; }
+                    id: clearText
+                    fillMode: Image.PreserveAspectFit
+                    smooth: true;
+                    source: _resDir + "add.png"
+                    rotation: 45
+
+                    MouseArea {
+                        id: clear
+                        anchors {
+                            horizontalCenter: parent.horizontalCenter;
+                            verticalCenter: parent.verticalCenter
+                        }
+                        height: clearText.height; width: clearText.height
+                        onClicked: {
+                            searchField.text = ""
+                            searchField.forceActiveFocus()
+                        }
+                    }
+                }
+            }
+        }
 
         ListView {
             id: listView
@@ -77,7 +165,7 @@ Rectangle {
                 Image {
                     // do not show item icon for fixed items
                     visible: index >= _dataInputSelectModel.fixedItemCount
-                    source: index === _dataInputSelectView.selected
+                    source: index === _parentView.selected
                                       ? _dataInputSelectModel.getActiveIconPath()
                                       : _dataInputSelectModel.getInactiveIconPath();
                 }
@@ -86,13 +174,13 @@ Rectangle {
                     text: model.display
                     width: listView.width / 2;
                     color: (index >= _dataInputSelectModel.fixedItemCount)
-                           && (index === _dataInputSelectView.selected)
+                           && (index === _parentView.selected)
                            ? _dataInputColor : _textColor;
 
                     MouseArea {
                         anchors.fill: parent
                         acceptedButtons: Qt.LeftButton
-                        onClicked: _dataInputSelectView.setSelection(index)
+                        onClicked: _parentView.setSelection(index)
                     }
                 }
                 StyledLabel {
@@ -100,13 +188,13 @@ Rectangle {
                     visible: index >= _dataInputSelectModel.fixedItemCount
                     text:  "(" + model.datatype + ")"
                     color: (index >= _dataInputSelectModel.fixedItemCount)
-                           && (index === _dataInputSelectView.selected)
+                           && (index === _parentView.selected)
                            ? _dataInputColor : _textColor;
 
                     MouseArea {
                         anchors.fill: parent
                         acceptedButtons: Qt.LeftButton
-                        onClicked: _dataInputSelectView.setSelection(index)
+                        onClicked: _parentView.setSelection(index)
                     }
                 }
             }

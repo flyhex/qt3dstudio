@@ -179,7 +179,7 @@ public:
     virtual qt3dsdm::Qt3DSDMSlideHandle GetOrCreateGraphRoot(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     virtual qt3dsdm::Qt3DSDMInstanceHandle GetSlideInstance();
     virtual qt3dsdm::Qt3DSDMPropertyHandle GetSlideComponentIdProperty();
-    virtual qt3dsdm::Qt3DSDMPropertyHandle GetNameProperty();
+    virtual qt3dsdm::Qt3DSDMPropertyHandle GetNameProperty() const;
     virtual qt3dsdm::Qt3DSDMPropertyHandle GetIdProperty();
     virtual qt3dsdm::Qt3DSDMPropertyHandle GetTypeProperty() const;
     virtual qt3dsdm::Qt3DSDMPropertyHandle GetSourcePathProperty() const;
@@ -241,10 +241,10 @@ public:
 public: // Operations which likely don't belong on this class
     virtual bool GetMaterialFromImageInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                               qt3dsdm::Qt3DSDMInstanceHandle &outMaterialInstance,
-                                              qt3dsdm::Qt3DSDMPropertyHandle &outProperty);
+                                              qt3dsdm::Qt3DSDMPropertyHandle &outProperty) const;
     virtual bool GetLayerFromImageProbeInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                                 qt3dsdm::Qt3DSDMInstanceHandle &outLayerInstance,
-                                                qt3dsdm::Qt3DSDMPropertyHandle &outProperty);
+                                                qt3dsdm::Qt3DSDMPropertyHandle &outProperty) const;
 
 public: // Bridging to Actions. These needs to be here as DataModel has no hierarchy info and we need to
         // resolve the path to idenitfy the object referenced
@@ -333,6 +333,9 @@ public: // helpers
     qt3dsdm::Qt3DSDMInstanceHandle GetModelInstanceByGUID(qt3dsdm::SLong4 inLong4);
     qt3dsdm::Qt3DSDMInstanceHandle GetComponentInstanceByGUID(const Q3DStudio::CId &inId);
     qt3dsdm::Qt3DSDMInstanceHandle GetComponentInstanceByGUID(qt3dsdm::SLong4 inLong4);
+    qt3dsdm::Qt3DSDMInstanceHandle GetInstanceByRelativeRef(
+            qt3dsdm::Qt3DSDMInstanceHandle inRoot,
+            const qt3dsdm::SObjectRefType &inValue) const;
     qt3dsdm::Qt3DSDMInstanceHandle GetInstance(qt3dsdm::Qt3DSDMInstanceHandle inRoot,
                                             const qt3dsdm::SValue &inValue);
     qt3dsdm::Qt3DSDMInstanceHandle GetInstance(qt3dsdm::Qt3DSDMInstanceHandle inRoot,
@@ -344,7 +347,8 @@ public: // helpers
                         qt3dsdm::Qt3DSDMPropertyHandle inSlot, qt3dsdm::Qt3DSDMSlideHandle inSlide);
 
     void SetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle, const QString &inName);
-    QString GetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle);
+    QString GetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle,
+                    bool renameMaterials = false) const;
 
     // Convenience functions to get GUID property value from instance handle
 private:
@@ -366,6 +370,15 @@ public:
                          const QString &inDesiredName);
     QString GetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
     QString getSubpresentation(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
+    qt3dsdm::Qt3DSDMInstanceHandle getMaterialReference(qt3dsdm::Qt3DSDMInstanceHandle instance);
+    bool isMaterialContainer(qt3dsdm::Qt3DSDMInstanceHandle instance) const;
+    bool isInsideMaterialContainer(qt3dsdm::Qt3DSDMInstanceHandle instance) const;
+    bool isInsideMaterialContainerAndNotReferenced(qt3dsdm::Qt3DSDMInstanceHandle instance) const;
+    QString getDefaultMaterialName() const;
+    QString getMaterialContainerName() const;
+    QString getMaterialContainerParentPath() const;
+    QString getMaterialContainerPath() const;
+    qt3dsdm::Qt3DSDMInstanceHandle getMaterialContainer() const;
     std::set<QString> GetSourcePathList() const;
     std::set<QString> GetFontFileList() const;
     std::set<QString> GetDynamicObjectTextureList() const;
@@ -393,7 +406,8 @@ protected:
 public:
     Q3DStudio::CId GetGUID(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
 
-    qt3dsdm::Qt3DSDMInstanceHandle GetParentInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
+    qt3dsdm::Qt3DSDMInstanceHandle GetParentInstance(
+            qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
 
     // TODO: EStudioObjectType and EASSETTYPE can't co-exist, one must go. Think EStudioObjectType
     // should win since things are better classified
@@ -425,17 +439,6 @@ inline qt3dsdm::SLong4 GuidtoSLong4(const Q3DStudio::CId &inId)
 {
     Q3DStudio::TGUIDPacked thePacked(inId);
     return qt3dsdm::SLong4(thePacked.Data1, thePacked.Data2, thePacked.Data3, thePacked.Data4);
-}
-
-inline Q3DStudio::CId Long4ToGuid(const qt3dsdm::SLong4 &inLong4)
-{
-    return Q3DStudio::CId(inLong4.m_Longs[0], inLong4.m_Longs[1], inLong4.m_Longs[2],
-                          inLong4.m_Longs[3]);
-}
-
-inline bool GuidValid(const qt3dsdm::SLong4 &inLong4)
-{
-    return (inLong4.m_Longs[0] && inLong4.m_Longs[1] && inLong4.m_Longs[2] && inLong4.m_Longs[3]);
 }
 
 #endif

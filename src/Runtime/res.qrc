@@ -89,7 +89,6 @@
         <file>res/effectlib/viewProperties.glsllib</file>
         <file>res/effectlib/weightedLayer.glsllib</file>
         <file>res/effectlib/wireframeCM.glsllib</file>
-        <file>res/effectlib/defaultMaterialFresnelNoDvn.glsllib</file>
         <file>res/effectlib/gles2/funcsampleLightVars.glsllib</file>
         <file>res/effectlib/gles2/sampleProbe.glsllib</file>
         <file>res/effectlib/gles2/SSAOCustomMaterial.glsllib</file>

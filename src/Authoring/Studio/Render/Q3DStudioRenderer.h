@@ -76,12 +76,14 @@ public:
     ITextRenderer *GetTextRenderer() override;
     QT3DSVec3 GetIntendedPosition(qt3dsdm::Qt3DSDMInstanceHandle inHandle, CPt inPoint) override;
     Q3DSRenderBufferManager *GetBufferManager() override;
+    qt3dsdm::Qt3DSDMInstanceHandle getObjectAt(const QPoint &pt) override;
     IPathManager *GetPathManager() override;
     qt3ds::foundation::IStringTable *GetRenderStringTable() override;
     void RequestRender() override;
     bool IsInitialized() override;
     void Initialize(QWidget *inWindow) override;
     void SetViewRect(const QRect &inRect, const QSize &size) override;
+    void setFullSizePreview(bool enabled) override;
     void GetEditCameraList(QStringList &outCameras) override;
     void SetPolygonFillModeEnabled(bool inEnableFillMode) override;
     bool IsPolygonFillModeEnabled() const override;
@@ -95,6 +97,7 @@ public:
     void EditCameraZoomToFit() override;
     void Close() override;
     void RenderNow() override;
+    void getPreviewFbo(QSize &outFboDim, qt3ds::QT3DSU32 &outFboTexture) override;
     void MakeContextCurrent() override;
     void ReleaseContext() override;
     void RegisterSubpresentations(

@@ -406,10 +406,10 @@ Q3DSGraphObjectTranslator *Q3DSTranslation::createCustomMaterialTranslator(
 void Q3DSTranslation::setPresentationData()
 {
     CStudioProjectSettings *settings = m_doc.GetCore()->GetStudioProjectSettings();
-    m_presentation_data.m_author = settings->GetAuthor();
-    m_presentation_data.m_company = settings->GetCompany();
-    m_presentation_data.m_width = settings->GetPresentationSize().x;
-    m_presentation_data.m_height = settings->GetPresentationSize().y;
+    m_presentation_data.m_author = settings->getAuthor();
+    m_presentation_data.m_company = settings->getCompany();
+    m_presentation_data.m_width = settings->getPresentationSize().width();
+    m_presentation_data.m_height = settings->getPresentationSize().height();
     m_presentation_data.m_srcPath = m_doc.GetDocumentPath();
 
     m_presentation->setSourceFile(m_presentation_data.m_srcPath);
@@ -417,8 +417,8 @@ void Q3DSTranslation::setPresentationData()
     m_presentation->setCompany(m_presentation_data.m_author);
     m_presentation->setPresentationWidth(m_presentation_data.m_width);
     m_presentation->setPresentationHeight(m_presentation_data.m_height);
-    m_presentation->setMaintainAspectRatio(settings->GetMaintainAspect());
-    m_presentation->setPresentationRotation(settings->GetRotatePresentation()
+    m_presentation->setMaintainAspectRatio(settings->getMaintainAspect());
+    m_presentation->setPresentationRotation(settings->getRotatePresentation()
                                             ? Q3DSUipPresentation::Clockwise90
                                             : Q3DSUipPresentation::NoRotation);
 }

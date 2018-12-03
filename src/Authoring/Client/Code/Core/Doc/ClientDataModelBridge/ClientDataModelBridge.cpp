@@ -289,7 +289,7 @@ qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::GetImportId()
 {
     return m_SceneAsset.m_ImportId;
 }
-qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::GetNameProperty()
+qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::GetNameProperty() const
 {
     return GetObjectDefinitions().m_Named.m_NameProp;
 }
@@ -358,7 +358,7 @@ CClientDataModelBridge::GetOwningComponentInstance(qt3dsdm::Qt3DSDMSlideHandle i
                                                    int &outSlideIndex)
 {
     SLong4 theComponentGuid = GetComponentGuid(inSlideHandle);
-    if (!GuidValid(theComponentGuid))
+    if (!theComponentGuid.Valid())
         return {};
     Q3DStudio::CId theId(theComponentGuid.m_Longs[0], theComponentGuid.m_Longs[1],
                          theComponentGuid.m_Longs[2], theComponentGuid.m_Longs[3]);
@@ -476,19 +476,25 @@ void CClientDataModelBridge::SetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHa
     }
 }
 
-QString CClientDataModelBridge::GetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle)
+QString CClientDataModelBridge::GetName(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle,
+                                        bool renameMaterials) const
 {
     IPropertySystem *thePropertySystem = m_Doc->GetStudioSystem()->GetPropertySystem();
-    TDataStrPtr theString;
+    QString theString;
     if (m_Doc->GetStudioSystem()->IsInstance(inInstanceHandle)) {
         SValue theValue;
         if (thePropertySystem->GetInstancePropertyValue(inInstanceHandle, GetNameProperty(),
                                                         theValue)
             && GetValueType(theValue) == DataModelDataType::String)
-            theString = qt3dsdm::get<TDataStrPtr>(theValue);
+            theString = qt3dsdm::get<QString>(theValue);
+        if (renameMaterials && isInsideMaterialContainer(inInstanceHandle)) {
+            int index = theString.lastIndexOf(QLatin1Char('/'));
+            if (index != -1)
+                return theString.mid(index + 1);
+        }
     }
-    if (theString)
-        return theString->toQString();
+    if (!theString.isEmpty())
+        return theString;
     return {};
 }
 
@@ -527,7 +533,7 @@ QString GetInstanceType(IPropertySystem *inPropertySystem, Qt3DSDMInstanceHandle
 // Find which material that uses this image instance
 bool CClientDataModelBridge::GetMaterialFromImageInstance(
     qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3dsdm::Qt3DSDMInstanceHandle &outMaterialInstance,
-    qt3dsdm::Qt3DSDMPropertyHandle &outProperty)
+    qt3dsdm::Qt3DSDMPropertyHandle &outProperty) const
 {
     IPropertySystem *thePropertySystem = m_Doc->GetStudioSystem()->GetPropertySystem();
     SLong4 theDeletedImageLong4 =
@@ -596,7 +602,7 @@ bool CClientDataModelBridge::GetMaterialFromImageInstance(
 
 bool CClientDataModelBridge::GetLayerFromImageProbeInstance(
     qt3dsdm::Qt3DSDMInstanceHandle inInstance, qt3dsdm::Qt3DSDMInstanceHandle &outLayerInstance,
-    qt3dsdm::Qt3DSDMPropertyHandle &outProperty)
+    qt3dsdm::Qt3DSDMPropertyHandle &outProperty) const
 {
     IPropertySystem *thePropertySystem = m_Doc->GetStudioSystem()->GetPropertySystem();
     SLong4 theDeletedImageLong4 =
@@ -1101,7 +1107,90 @@ QString CClientDataModelBridge::getSubpresentation(qt3dsdm::Qt3DSDMInstanceHandl
     return {};
 }
 
-//=============================================================================
+Qt3DSDMInstanceHandle CClientDataModelBridge::getMaterialReference(Qt3DSDMInstanceHandle instance)
+{
+    if (instance.Valid() && GetObjectType(instance) == OBJTYPE_REFERENCEDMATERIAL) {
+        qt3dsdm::SValue value;
+        IPropertySystem *propertySystem = m_Doc->GetStudioSystem()->GetPropertySystem();
+        propertySystem->GetInstancePropertyValue(instance,
+                                                 m_ObjectDefinitions
+                                                 ->m_ReferencedMaterial.m_ReferencedMaterial,
+                                                 value);
+        return GetInstance(m_Doc->GetSceneInstance(), get<SObjectRefType>(value));
+    }
+    return Qt3DSDMInstanceHandle();
+}
+
+bool CClientDataModelBridge::isMaterialContainer(Qt3DSDMInstanceHandle instance) const
+{
+    return instance == getMaterialContainer();
+}
+
+bool CClientDataModelBridge::isInsideMaterialContainer(Qt3DSDMInstanceHandle instance) const
+{
+    auto parentInstance = GetParentInstance(instance);
+    if (parentInstance.Valid() && isMaterialContainer(parentInstance))
+        return true;
+
+    //Check if an image inside a material inside the material container
+    parentInstance = GetParentInstance(parentInstance);
+    if (parentInstance.Valid())
+        return isMaterialContainer(parentInstance);
+    return false;
+}
+
+bool CClientDataModelBridge::isInsideMaterialContainerAndNotReferenced(
+        Qt3DSDMInstanceHandle instance) const
+{
+    if (isInsideMaterialContainer(instance)) {
+        QVector<Qt3DSDMInstanceHandle> usedMats;
+        m_Doc->getUsedSharedMaterials(usedMats);
+
+        bool isReferenced = false;
+        for (auto &usedMat : qAsConst(usedMats)) {
+            if (usedMat == instance || usedMat == GetParentInstance(instance)) {
+                isReferenced = true;
+                break;
+            }
+        }
+        return !isReferenced;
+    }
+    return false;
+}
+
+QString CClientDataModelBridge::getDefaultMaterialName() const
+{
+    return QStringLiteral("/Default");
+}
+
+QString CClientDataModelBridge::getMaterialContainerName() const
+{
+    return QStringLiteral("__Container");
+}
+
+QString CClientDataModelBridge::getMaterialContainerParentPath() const
+{
+    return GetName(m_Doc->GetSceneInstance());
+}
+
+QString CClientDataModelBridge::getMaterialContainerPath() const
+{
+    return getMaterialContainerParentPath() + QStringLiteral(".") + getMaterialContainerName();
+}
+
+Qt3DSDMInstanceHandle CClientDataModelBridge::getMaterialContainer() const
+{
+    IObjectReferenceHelper *objRefHelper = m_Doc->GetDataModelObjectReferenceHelper();
+    if (objRefHelper) {
+        bool fullResolvedFlag;
+        CRelativePathTools::EPathType thePathType;
+        return CRelativePathTools::FindAssetInstanceByObjectPath(
+                    m_Doc, m_Doc->GetSceneInstance(), getMaterialContainerPath(),
+                    thePathType, fullResolvedFlag, objRefHelper);
+    }
+    return Qt3DSDMInstanceHandle();
+}
+
 /**
  *	Get all instances that are derived from ItemBase Instance.
  */
@@ -1138,6 +1227,12 @@ std::vector<SValue> CClientDataModelBridge::GetValueList(Qt3DSDMInstanceHandle i
          theIter != theInstances.end(); ++theIter) {
         // Skip the parent instance.
         if (*theIter == inParentInstance)
+            continue;
+
+        if (!GetParentInstance(*theIter).Valid())
+            continue;
+
+        if (isInsideMaterialContainerAndNotReferenced(*theIter))
             continue;
 
         GetValueListFromAllSlides(*theIter, inProperty, theValueList, inFilter);
@@ -1290,6 +1385,9 @@ static void GetDynamicObjecTextures(IDataCore &inDataCore, IPropertySystem &inPr
     for (TInstanceHandleList::const_iterator theIter = theDerivedInstances.begin();
          theIter != theDerivedInstances.end(); ++theIter) {
         Qt3DSDMInstanceHandle theInstance = *theIter;
+
+        if (inBridge.isInsideMaterialContainerAndNotReferenced(theInstance))
+            continue;
 
         // Skip the parent instance
         // This works because when we import a custom material, we create a new class that is
@@ -1535,7 +1633,7 @@ Q3DStudio::CId CClientDataModelBridge::GetGUID(qt3dsdm::Qt3DSDMInstanceHandle in
 }
 
 qt3dsdm::Qt3DSDMInstanceHandle
-CClientDataModelBridge::GetParentInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
+CClientDataModelBridge::GetParentInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     if (IsImageInstance(inInstance)) {
         qt3dsdm::Qt3DSDMInstanceHandle theParentInstance;

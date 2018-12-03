@@ -155,24 +155,47 @@ struct SubPresentationRecord
 class CDataInputDialogItem
 {
 public:
+    struct ControlledItem
+    {
+        qt3dsdm::Qt3DSDMInstanceHandle instHandle;
+        qt3dsdm::Qt3DSDMPropertyHandle propHandle;
+        // The type of property for the purposes of limiting allowed datainput type changes.
+        // Boolean signifies "strict" type requirement i.e. only the exact equivalent mapping
+        // from datainput type to property type is allowed (float to float, string to string etc.)
+        QPair<qt3dsdm::DataModelDataType::Value, bool> dataType;
+
+        ControlledItem(qt3dsdm::Qt3DSDMInstanceHandle inst = 0,
+                       qt3dsdm::Qt3DSDMPropertyHandle prop = 0,
+                       QPair<qt3dsdm::DataModelDataType::Value, bool> dt
+                       = {qt3dsdm::DataModelDataType::Value::None, false})
+            : instHandle(inst)
+            , propHandle(prop)
+            , dataType(dt) {}
+        bool operator==(const ControlledItem &item) const
+        {
+            return instHandle == item.instHandle && propHandle == item.propHandle
+                   && dataType == item.dataType;
+        }
+    };
+
     QString valueString;
     float minValue;
     float maxValue;
     QString name;
     int type;
-    QVector<qt3dsdm::Qt3DSDMInstanceHandle> controlledElems;
-    // The type of property/properties that this datainput controls
-    // for the purposes of limiting allowed datainput type changes.
-    // Note that there can be more than one type being controlled
-    // f.ex with Variant type. Boolean signifies "strict" type requirement
-    // i.e. only the exact equivalent mapping from datainput type to
-    // property type is allowed (float to float, string to string etc.)
-    QVector<QPair<qt3dsdm::DataModelDataType::Value, bool>> boundTypes;
+    QVector<ControlledItem> ctrldElems;
+
     // Bindings in other subpresentations, of QMap format
     // QMultiMap<subpresentation_id, QPair<datatype, strict>>.
     // Stored separately so we can conveniently update/clear binding info
     // for current presentation and keep subpresentation binding info intact or vice versa.
     QMultiMap<QString, QPair<qt3dsdm::DataModelDataType::Value, bool>> externalPresBoundTypes;
+
+    int countOfInstance(const qt3dsdm::Qt3DSDMInstanceHandle handle) const;
+    void getBoundTypes(QVector<QPair<qt3dsdm::DataModelDataType::Value, bool>> &outVec) const;
+    void getInstCtrldItems(const qt3dsdm::Qt3DSDMInstanceHandle handle,
+                                 QVector<ControlledItem> &outVec) const;
+    void removeControlFromInstance(const qt3dsdm::Qt3DSDMInstanceHandle handle);
 };
 
 //==============================================================================
@@ -215,20 +238,13 @@ public:
     void LoadDocument(const QString &inDocument);
     void SaveDocument(const QString &inDocument);
     void CreateNewDocument();
-    // In outMap, returns datainput names found from element control
-    // bindings but which are missing from (UIP) datainput list
     void UpdateDatainputMap(
-            const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
             QMultiMap<QString,
                       QPair<qt3dsdm::Qt3DSDMInstanceHandle,
                             qt3dsdm::Qt3DSDMPropertyHandle>> *outMap = nullptr);
-    // Sanity checks controlledproperty strings to see if controller names
-    // and target properties are valid. Removes invalid controller - property
-    // pairs from controlledproperty string. Transaction/undo points are not created
-    // for invalid pair deletions, so caller is responsible for dispatching datamodel
-    // notifications.
-    // Recurses through the entire tree and returns true only if all strings were valid.
     bool VerifyControlledProperties(const qt3dsdm::Qt3DSDMInstanceHandle inInstance);
+    void ReplaceDatainput(const QString &oldName, const QString &newName,
+                          const QList<qt3dsdm::Qt3DSDMInstanceHandle> &instances);
 
     bool IsModified();
     bool IsValid() const;
@@ -305,7 +321,7 @@ public:
     bool IsPlaying();
     long GetCurrentClientTime();
 
-    qt3dsdm::Qt3DSDMInstanceHandle GetSceneInstance() { return m_SceneInstance; }
+    qt3dsdm::Qt3DSDMInstanceHandle GetSceneInstance() const { return m_SceneInstance; }
 
     // IDoc
     virtual qt3dsdm::Qt3DSDMInstanceHandle GetActiveRootInstance();
@@ -418,6 +434,9 @@ public:
 
     void getSceneMaterials(qt3dsdm::Qt3DSDMInstanceHandle inParent,
                            QVector<qt3dsdm::Qt3DSDMInstanceHandle> &outMats) const;
+    void getSceneReferencedMaterials(qt3dsdm::Qt3DSDMInstanceHandle inParent,
+                                     QVector<qt3dsdm::Qt3DSDMInstanceHandle> &outMats) const;
+    void getUsedSharedMaterials(QVector<qt3dsdm::Qt3DSDMInstanceHandle> &outMats) const;
     void CheckActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     void SetActiveSlideWithTransaction(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide);
 
@@ -434,6 +453,8 @@ public:
 
     std::shared_ptr<Q3DStudio::IInternalDocumentEditor> getSceneEditor() { return m_SceneEditor; }
     QVector<qt3dsdm::Qt3DSDMInstanceHandle> getLayers();
+
+    void queueMaterialRename(const QString &oldName, const QString &newName);
 
 protected:
     // Set the active slide, return true if delving
@@ -469,6 +490,11 @@ protected:
                                     std::set<QString> &ioActionsAffected);
 
     bool isFocusOnTextEditControl();
+
+    void UpdateDatainputMapRecursive(
+            const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+            QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
+                                     qt3dsdm::Qt3DSDMPropertyHandle>> *outMap);
 
     //==========================================================================
     //	Protected Fields
@@ -511,6 +537,8 @@ protected:
     Q3DStudio::SSelectedValue m_SelectedValue;
     bool m_nudging;
     bool m_unnotifiedSelectionChange = false;
+    QVector<QPair<QString, QString>> m_materialRenames;
+    QVector<QPair<QString, QString>> m_materialUndoRenames;
 
 public:
     void OnNewPresentation();

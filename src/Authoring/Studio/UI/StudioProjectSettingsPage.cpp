@@ -41,19 +41,18 @@
 
 CStudioProjectSettingsPage::CStudioProjectSettingsPage(QWidget *parent)
     : CStudioPreferencesPropPage(parent)
-    , m_AspectRatio(0.0f)
+    , m_aspectRatio(0.0)
     , m_ui(new Ui::StudioProjectSettingsPage)
 {
-    m_Font = QFont(CStudioPreferences::GetFontFaceName());
-    m_Font.setPixelSize(CStudioPreferences::fontSize());
+    m_font = QFont(CStudioPreferences::GetFontFaceName());
+    m_font.setPixelSize(CStudioPreferences::fontSize());
 
     // Create a bold font for the group box text
-    m_BoldFont = m_Font;
-    m_BoldFont.setBold(true);
+    m_boldFont = m_font;
+    m_boldFont.setBold(true);
 
     onInitDialog();
 }
-
 
 CStudioProjectSettingsPage::~CStudioProjectSettingsPage()
 {
@@ -80,97 +79,97 @@ void CStudioProjectSettingsPage::onInitDialog()
 
     // Set fonts for child windows.
     for (auto w : findChildren<QWidget *>())
-        w->setFont(m_Font);
+        w->setFont(m_font);
 
     // Make the group text bold
     for (auto w : findChildren<QGroupBox *>())
-        w->setFont(m_BoldFont);
+        w->setFont(m_boldFont);
 
     // Set the ranges of the client width and height
     m_ui->m_ClientSizeWidth->setRange(1, 16384);
     m_ui->m_ClientSizeHeight->setRange(1, 16384);
 
     // Load the settings for the controls
-    this->LoadSettings();
+    this->loadSettings();
 
     auto valueChanged = static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged);
-    connect(m_ui->m_PresentationId, &QLineEdit::textEdited,
-            this, &CStudioProjectSettingsPage::onChangePresentationId);
+    connect(m_ui->m_PresentationId, &QLineEdit::textEdited, [=](){ this->setModified(true); });
     connect(m_ui->m_ClientSizeWidth, valueChanged,
             this, &CStudioProjectSettingsPage::onChangeEditPresWidth);
     connect(m_ui->m_ClientSizeHeight, valueChanged,
             this, &CStudioProjectSettingsPage::onChangeEditPresHeight);
     connect(m_ui->m_checkConstrainProportions, &QCheckBox::clicked,
             this, &CStudioProjectSettingsPage::onCheckMaintainRatio);
-    connect(m_ui->m_Author, &QLineEdit::textEdited,
-            this, &CStudioProjectSettingsPage::onChangeAuthor);
-    connect(m_ui->m_Company, &QLineEdit::textEdited,
-            this, &CStudioProjectSettingsPage::onChangeCompany);
+    connect(m_ui->m_checkUseKtx, &QCheckBox::clicked, [=](){ this->setModified(true); });
+    connect(m_ui->m_Author, &QLineEdit::textEdited, [=](){ this->setModified(true); });
+    connect(m_ui->m_Company, &QLineEdit::textEdited, [=](){ this->setModified(true); });
 }
 
 // LoadSettings: Load the settings from the project settings and set the control values.
-void CStudioProjectSettingsPage::LoadSettings()
+void CStudioProjectSettingsPage::loadSettings()
 {
     // Presentation Id
     m_ui->m_PresentationId->setText(g_StudioApp.GetCore()->GetDoc()->getPresentationId());
 
     // Get the Client size
     CStudioProjectSettings *theProjectSettings = g_StudioApp.GetCore()->GetStudioProjectSettings();
-    CPt theClientSize = theProjectSettings->GetPresentationSize();
+    QSize theClientSize = theProjectSettings->getPresentationSize();
 
     // Set client width & height
-    m_ui->m_ClientSizeWidth->setValue(theClientSize.x);
-    m_ui->m_ClientSizeHeight->setValue(theClientSize.y);
+    m_ui->m_ClientSizeWidth->setValue(theClientSize.width());
+    m_ui->m_ClientSizeHeight->setValue(theClientSize.height());
 
     // Save the aspect ratio
-    m_AspectRatio = (double)theClientSize.x / (double)theClientSize.y;
+    m_aspectRatio = double(theClientSize.width()) / double(theClientSize.height());
 
     // Maintain Aspect Ratio checkbox
-    m_ui->m_checkConstrainProportions->setChecked(theProjectSettings->GetMaintainAspect());
+    m_ui->m_checkConstrainProportions->setChecked(theProjectSettings->getMaintainAspect());
 
-    m_ui->m_checkPortraitFormat->setChecked(theProjectSettings->GetRotatePresentation());
+    // Portrait mode, i.e. rotate presentation
+    m_ui->m_checkPortraitFormat->setChecked(theProjectSettings->getRotatePresentation());
+
+    // Prefer compressed textures
+    m_ui->m_checkUseKtx->setChecked(theProjectSettings->getPreferCompressedTextures());
 
     // Author
-    m_ui->m_Author->setText(theProjectSettings->GetAuthor());
+    m_ui->m_Author->setText(theProjectSettings->getAuthor());
 
     // Company
-    m_ui->m_Company->setText(theProjectSettings->GetCompany());
+    m_ui->m_Company->setText(theProjectSettings->getCompany());
 }
 
 // SaveSettings: Save the settings from the controls to the project settings.
-void CStudioProjectSettingsPage::SaveSettings()
+void CStudioProjectSettingsPage::saveSettings()
 {
-    CPt theClientSize;
+    QSize theClientSize;
     CStudioProjectSettings *theProjectSettings = g_StudioApp.GetCore()->GetStudioProjectSettings();
 
     // Presentation Id
     g_StudioApp.GetCore()->getProjectFile().writePresentationId(m_ui->m_PresentationId->text());
 
     // Presentation width & height
-    theClientSize.x = m_ui->m_ClientSizeWidth->value();
-    theClientSize.y = m_ui->m_ClientSizeHeight->value();
-    theProjectSettings->SetPresentationSize(theClientSize);
+    theClientSize.setWidth(m_ui->m_ClientSizeWidth->value());
+    theClientSize.setHeight(m_ui->m_ClientSizeHeight->value());
+    theProjectSettings->setPresentationSize(theClientSize);
 
     // Author
     QString theAuthor = m_ui->m_Author->text();
-    theProjectSettings->SetAuthor(theAuthor);
+    theProjectSettings->setAuthor(theAuthor);
 
     // Company
     QString theCompany = m_ui->m_Company->text();
-    theProjectSettings->SetCompany(theCompany);
+    theProjectSettings->setCompany(theCompany);
 
     g_StudioApp.GetViews()->recheckMainframeSizingMode();
 
     // Maintain Aspect Ratio checkbox
-    theProjectSettings->SetMaintainAspect(m_ui->m_checkConstrainProportions->isChecked());
+    theProjectSettings->setMaintainAspect(m_ui->m_checkConstrainProportions->isChecked());
 
-    theProjectSettings->SetRotatePresentation(m_ui->m_checkPortraitFormat->isChecked());
-}
+    // Portrait mode, i.e. rotate presentation
+    theProjectSettings->setRotatePresentation(m_ui->m_checkPortraitFormat->isChecked());
 
-// Generic function when settings are modified.
-void CStudioProjectSettingsPage::onSettingsModified()
-{
-    this->setModified(TRUE);
+    // Prefer compressed textures
+    theProjectSettings->setPreferCompressedTextures(m_ui->m_checkUseKtx->isChecked());
 }
 
 // OnApply: Handler for the Apply button
@@ -187,10 +186,10 @@ bool CStudioProjectSettingsPage::onApply()
         return false;
     }
 
-    // Apply was clicked - save settings and disabled the Apply button
-    this->SaveSettings();
+    // Apply was clicked - save settings and disable the Apply button
+    this->saveSettings();
 
-    this->setModified(FALSE);
+    this->setModified(false);
 
     return CStudioPreferencesPropPage::onApply();
 }
@@ -198,16 +197,17 @@ bool CStudioProjectSettingsPage::onApply()
 // OnChangeEditPresWidth: EN_CHANGE handler for the IDC_EDIT_PRESWIDTH field
 void CStudioProjectSettingsPage::onChangeEditPresWidth()
 {
-    this->setModified(TRUE);
+    this->setModified(true);
 
     // Should the aspect ratio be maintained?
     if (m_ui->m_checkConstrainProportions->isChecked()) {
-        long thePresWidth, thePresHeight;
+        long thePresWidth;
+        long thePresHeight;
 
         thePresWidth = m_ui->m_ClientSizeWidth->value();
 
         // Change the height
-        thePresHeight = ((double)thePresWidth / m_AspectRatio);
+        thePresHeight = long(thePresWidth / m_aspectRatio);
 
         QSignalBlocker sb(m_ui->m_ClientSizeHeight);
         m_ui->m_ClientSizeHeight->setValue(thePresHeight);
@@ -217,16 +217,17 @@ void CStudioProjectSettingsPage::onChangeEditPresWidth()
 // OnChangeEditPresHeight: EN_CHANGE handler for the IDC_EDIT_PRESHEIGHT field
 void CStudioProjectSettingsPage::onChangeEditPresHeight()
 {
-    this->setModified(TRUE);
+    this->setModified(true);
 
     // Should the aspect ratio be maintained?
     if (m_ui->m_checkConstrainProportions->isChecked()) {
-        long thePresWidth, thePresHeight;
+        long thePresWidth;
+        long thePresHeight;
 
         thePresHeight = m_ui->m_ClientSizeHeight->value();
 
         // Change the width
-        thePresWidth = ((double)thePresHeight * m_AspectRatio);
+        thePresWidth = long(thePresHeight * m_aspectRatio);
 
         QSignalBlocker sb(m_ui->m_ClientSizeWidth);
         m_ui->m_ClientSizeWidth->setValue(thePresWidth);
@@ -236,55 +237,15 @@ void CStudioProjectSettingsPage::onChangeEditPresHeight()
 // OnCheckMaintainRatio: The aspect ratio checkbox has changed.
 void CStudioProjectSettingsPage::onCheckMaintainRatio()
 {
-    this->setModified(TRUE);
+    this->setModified(true);
 
-    long thePresWidth, thePresHeight;
+    long thePresWidth;
+    long thePresHeight;
 
     // Get the width and height
     thePresWidth = m_ui->m_ClientSizeWidth->value();
     thePresHeight = m_ui->m_ClientSizeHeight->value();
 
     // Save the Aspect Ratio
-    m_AspectRatio = (double)thePresWidth / (double)thePresHeight;
-}
-
-void CStudioProjectSettingsPage::onChangePresentationId()
-{
-    this->setModified(TRUE);
-}
-
-// OnChangeAuthor: EN_CHANGE handler for the IDC_AUTHOR field.
-void CStudioProjectSettingsPage::onChangeAuthor()
-{
-    this->setModified(TRUE);
-}
-
-// OnChangeCompany: EN_CHANGE handler for the IDC_COMPANY field.
-void CStudioProjectSettingsPage::onChangeCompany()
-{
-    this->setModified(TRUE);
-}
-
-// OnChangeSet1: EN_CHANGE handler for the IDC_SET1 field.
-void CStudioProjectSettingsPage::onChangeSet1()
-{
-    this->setModified(TRUE);
-}
-
-// OnChangeSet2: EN_CHANGE handler for the IDC_SET2 field.
-void CStudioProjectSettingsPage::onChangeSet2()
-{
-    this->setModified(TRUE);
-}
-
-// OnChangeSet3: EN_CHANGE handler for the IDC_SET3 field.
-void CStudioProjectSettingsPage::onChangeSet3()
-{
-    this->setModified(TRUE);
-}
-
-// OnChangeSet5: EN_CHANGE handler for the IDC_SET5 field.
-void CStudioProjectSettingsPage::onChangeSet5()
-{
-    this->setModified(TRUE);
+    m_aspectRatio = double(thePresWidth) / double(thePresHeight);
 }

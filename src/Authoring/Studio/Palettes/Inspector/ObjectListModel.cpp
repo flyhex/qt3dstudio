@@ -141,7 +141,7 @@ QVariant ObjectListModel::data(const QModelIndex &index,
     }
     case IconRole: {
         auto info = m_objRefHelper->GetInfo(handle);
-        return resourceImageUrl() + CStudioObjectTypes::GetNormalIconName(info.m_Type);
+        return StudioUtils::resourceImageUrl() + CStudioObjectTypes::GetNormalIconName(info.m_Type);
     }
     case TextColorRole: {
         auto bridge = m_core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
@@ -227,7 +227,7 @@ qt3dsdm::TInstanceHandleList ObjectListModel::childrenList(
     auto currentMaster = slideSystem->GetMasterSlide(slideHandle);
 
     qt3dsdm::TInstanceHandleList children;
-    m_objRefHelper->GetChildInstanceList(handle, children, slideHandle, m_baseHandle);
+    m_objRefHelper->GetChildInstanceList(handle, children, slideHandle, m_baseHandle, true);
     // allow action trigger/target from all objects
     if (m_AliasSelectList) {
         children.erase(

@@ -217,6 +217,12 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     connect(m_viewTreeContent->horizontalScrollBar(), &QAbstractSlider::valueChanged, this,
             [this](int value) {
         m_viewTreeHeader->horizontalScrollBar()->setValue(value);
+        // Keep m_viewTreeContent always positioned at 0
+        // This hack is required due to RowTimelineCommentItem (QGraphicsTextItem)
+        // ensuring that all views see the text item when it gets focus or content
+        // changes with setPlainText(). See QTBUG-71241 and QT3DS-1508.
+        if (value != 0)
+            m_viewTreeContent->horizontalScrollBar()->setValue(0);
     });
 
     connect(m_toolbar, &TimelineToolbar::newLayerTriggered, this, [this]() {
@@ -243,8 +249,8 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
 
     connect(m_toolbar, &TimelineToolbar::gotoTimeTriggered, this, [this]() {
         CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-        CTimeEditDlg timeEditDlg;
-        timeEditDlg.showDialog(doc->GetCurrentViewTime(), doc, PLAYHEAD);
+        g_StudioApp.GetDialogs()->asyncDisplayTimeEditDialog(doc->GetCurrentViewTime(),
+                                                             doc, PLAYHEAD);
     });
 
     connect(m_toolbar, &TimelineToolbar::firstFrameTriggered, this, [this]() {
@@ -464,10 +470,8 @@ void TimelineWidget::onActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, 
 
 void TimelineWidget::insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *binding)
 {
-    if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()
-            ->isMaterialContainer(binding->GetInstance())) {
+    if (m_bridge->isMaterialContainer(binding->GetInstance()))
         return;
-    }
 
     insertToHandlesMap(binding);
     const QList<ITimelineItemBinding *> children = binding->GetChildren();
@@ -477,15 +481,11 @@ void TimelineWidget::insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *bin
 
 void TimelineWidget::insertToHandlesMap(Qt3DSDMTimelineItemBinding *binding)
 {
-    if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()
-            ->isMaterialContainer(binding->GetInstance())) {
+    if (m_bridge->isMaterialContainer(binding->GetInstance()))
         return;
-    }
 
-    if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()
-            ->isInsideMaterialContainer(binding->GetInstance())) {
+    if (m_bridge->isInsideMaterialContainer(binding->GetInstance()))
         return;
-    }
 
     m_handlesMap.insert(binding->GetInstance(), binding->getRowTree());
 }
@@ -520,15 +520,11 @@ void TimelineWidget::onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         return;
 
     if (m_bridge->IsSceneGraphInstance(inInstance)) {
-        if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()
-                ->isMaterialContainer(inInstance)) {
+        if (m_bridge->isMaterialContainer(inInstance))
             return;
-        }
 
-        if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()
-                ->isInsideMaterialContainer(inInstance)) {
+        if (m_bridge->isInsideMaterialContainer(inInstance))
             return;
-        }
 
         Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inInstance, m_binding);
 
@@ -737,6 +733,9 @@ void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance
                                        qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
     if (m_fullReconstruct)
+        return;
+
+    if (!m_bridge->IsSceneGraphInstance(inInstance))
         return;
 
     const SDataModelSceneAsset &asset = m_bridge->GetSceneAsset();
@@ -1047,20 +1046,18 @@ void TimelineWidget::OnGainFocus()
 }
 
 CDropTarget *TimelineWidget::FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags,
-                                               EStudioObjectType objectType)
+                                               EStudioObjectType objectType,
+                                               Q3DStudio::DocumentEditorFileType::Enum fileType)
 {
     Q_UNUSED(inFlags)
 
     CTimeLineDropTarget *theTarget = new CTimeLineDropTarget();
 
-    // collapse all properties so index is counted correctly
-    m_graphicsScene->rowManager()->collapseAllPropertyRows();
-
     int mouseY = inMousePoint.y - m_navigationBar->height()
                  + viewTreeContent()->verticalScrollBar()->value()
                  - viewTreeContent()->verticalScrollBar()->minimum();
     RowMover *mover = m_graphicsScene->rowMover();
-    mover->updateTargetRow(QPointF(inMousePoint.x, mouseY), objectType);
+    mover->updateTargetRow(QPointF(inMousePoint.x, mouseY), objectType, fileType);
 
     if (mover->insertionTarget() && !mover->insertionTarget()->isProperty()) {
         mover->insertionTarget()->getBinding()->SetDropTarget(theTarget);
@@ -1128,8 +1125,10 @@ void TimelineWidget::SetSize(long inX, long inY)
 // DnD, then this method can be removed (and it's callers)
 void TimelineWidget::enableDnD(bool b)
 {
-    m_viewTreeHeader->setInteractive(!b);
-    m_viewTreeContent->setInteractive(!b);
+    m_viewTreeHeader->setEnabled(!b);
+    m_viewTreeContent->setEnabled(!b);
+    m_viewTimelineHeader->setEnabled(!b);
+    m_viewTimelineContent->setEnabled(!b);
 
     if (!b) { // object successfully dropped on the timeline tree
         m_graphicsScene->rowMover()->end(true);

@@ -91,7 +91,8 @@ public:
     void Draw(CRenderer *inRenderer) override;
     void OnGainFocus() override;
     CDropTarget *FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags,
-                                   EStudioObjectType objectType) override;
+                                   EStudioObjectType objectType,
+                                   Q3DStudio::DocumentEditorFileType::Enum fileType) override;
     bool OnMouseHover(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
     void OnMouseMove(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
     void OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inFlags) override;

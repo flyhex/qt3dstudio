@@ -92,6 +92,19 @@ DataModelDataType::Value SImportPathAnchorPoint::GetPropertyDataType(const QStri
     return SImportAsset::GetPropertyDataType(inPropertyName);
 }
 
+DataModelDataType::Value SImportControllableObject::GetPropertyDataType(
+        const QString &inPropertyName)
+{
+    ITERATE_COMPOSER_SCENE_PROPERTIES
+    ITERATE_COMPOSER_LAYER_PROPERTIES
+    ITERATE_COMPOSER_MODEL_PROPERTIES
+    ITERATE_COMPOSER_TEXT_PROPERTIES
+    ITERATE_COMPOSER_MATERIAL_PROPERTIES
+    ITERATE_COMPOSER_NODE_PROPERTIES
+    ITERATE_COMPOSER_LIGHT_PROPERTIES
+    return SImportAsset::GetPropertyDataType(inPropertyName);
+}
+
 #undef HANDLE_COMPOSER_PROPERTY_NO_DEFAULT
 #undef HANDLE_COMPOSER_PROPERTY
 #undef HANDLE_COMPOSER_PROPERTY_DUPLICATE
@@ -132,6 +145,8 @@ SImportAsset &SImportComposerTypes::GetImportAssetForType(ComposerObjectTypes::E
         return m_SubPath;
     case ComposerObjectTypes::PathAnchorPoint:
         return m_PathAnchorPoint;
+    case ComposerObjectTypes::ControllableObject:
+        return m_ControllableObject;
     default:
         break;
     }

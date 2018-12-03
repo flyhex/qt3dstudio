@@ -34,6 +34,7 @@
 #include "StudioProjectSettingsPage.h"
 
 #include <QtWidgets/qpushbutton.h>
+#include <QtCore/qtimer.h>
 
 CStudioPreferencesPropPage::CStudioPreferencesPropPage(QWidget *parent)
     : QWidget(parent)
@@ -82,6 +83,11 @@ CStudioPreferencesPropSheet::CStudioPreferencesPropSheet(const QString &pszCapti
     setWindowTitle(pszCaption);
     onInitDialog();
     m_ui->m_TabCtrl->setCurrentIndex(iSelectPage);
+
+    // Fix the size after property sheets have loaded and done their necessary resizes
+    QTimer::singleShot(500, this, [this]() {
+        window()->setFixedSize(size());
+    });
 }
 
 CStudioPreferencesPropSheet::~CStudioPreferencesPropSheet()

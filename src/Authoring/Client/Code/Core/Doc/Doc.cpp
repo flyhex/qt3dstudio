@@ -89,7 +89,7 @@ using std::shared_ptr;
 //==============================================================================
 //	Constants
 //==============================================================================
-const long STUDIO_FILE_VERSION = 4;
+const long STUDIO_FILE_VERSION = 5;
 const long STUDIO_LAST_SUPPORTED_FILE_VERSION = 1;
 
 IMPLEMENT_OBJECT_COUNTER(CDoc)
@@ -636,12 +636,12 @@ void CDoc::NotifyActiveSlideChanged(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide
 {
     using namespace qt3dsdm;
 
-    qt3dsdm::Qt3DSDMSlideHandle theLastActiveSlide = m_ActiveSlide;
+    Qt3DSDMSlideHandle theLastActiveSlide = m_ActiveSlide;
 
     // Record the last selected object in that slide
     ISlideSystem *theSlideSystem = GetStudioSystem()->GetSlideSystem();
     theSlideSystem->SetSlideSelectedInstance(theLastActiveSlide, GetSelectedInstance());
-    qt3dsdm::Qt3DSDMInstanceHandle theNextSelectedInstance = GetSelectedInstance();
+    Qt3DSDMInstanceHandle theNextSelectedInstance = GetSelectedInstance();
 
     // If we are forcing a refresh. and the incoming root is not valid, use the existing active time
     // context
@@ -689,10 +689,11 @@ void CDoc::NotifyActiveSlideChanged(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide
             // If nothing was selected, then select the component.
         }
 
-        if (theNextSelectedInstance.Valid() == false)
+        if (!theNextSelectedInstance.Valid())
             theNextSelectedInstance = GetDocumentReader().GetComponentForSlide(inNewActiveSlide);
 
-        SelectDataModelObject(theNextSelectedInstance);
+        if (theNextSelectedInstance != GetSelectedInstance())
+            SelectDataModelObject(theNextSelectedInstance);
     }
 }
 
@@ -743,9 +744,10 @@ QVector<qt3dsdm::Qt3DSDMInstanceHandle> CDoc::getLayers()
 
 qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetActiveRootInstance()
 {
-    if (m_ActiveSlide.Valid())
+    if (m_ActiveSlide.Valid()) {
         return m_StudioSystem->GetClientDataModelBridge()->GetOwningComponentInstance(
                     m_ActiveSlide);
+    }
     return m_SceneInstance;
 }
 
@@ -1265,8 +1267,8 @@ void CDoc::OnInstanceDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     }
     // Remove this instance from datainputs controlled element list
     for (auto &it : qAsConst(g_StudioApp.m_dataInputDialogItems)) {
-        if (it->controlledElems.contains(inInstance))
-            it->controlledElems.removeAll(inInstance);
+        if (it->countOfInstance(inInstance))
+            it->removeControlFromInstance(inInstance);
     }
 }
 
@@ -1274,7 +1276,78 @@ void CDoc::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                              qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
     using namespace qt3dsdm;
+    const auto bridge = m_StudioSystem->GetClientDataModelBridge();
+    // Save the material definition upon undo and redo
+    if (m_Core->GetCmdStack()->isUndoingOrRedoing() &&
+            bridge->isInsideMaterialContainer(inInstance)) {
+        getSceneEditor()->saveIfMaterial(inInstance);
+    }
 
+    // If a material inside the material container is renamed, the file has to be renamed too
+    // and the referenced materials that refer to that renamed material
+    if (inProperty == bridge->GetNameProperty() && bridge->isInsideMaterialContainer(inInstance)) {
+        const auto sceneEditor = getSceneEditor();
+        const auto dirPath = GetDocumentDirectory();
+
+        const auto renameMaterial = [&](const QPair<QString, QString> &materialRename) {
+            const QString oldFile
+                    = sceneEditor->getFilePathFromMaterialName(materialRename.first);
+            const QString newFile
+                    = sceneEditor->getFilePathFromMaterialName(materialRename.second);
+            // If the newfile already exists ie. file was renamed manually by the user,
+            // rename the referenced materials regardless
+            if (QFileInfo(oldFile).exists())
+                QFile::rename(oldFile, newFile);
+            if (QFileInfo(newFile).exists()) {
+                const QString newRelPath = QDir(dirPath).relativeFilePath(newFile);
+
+                QVector<qt3dsdm::Qt3DSDMInstanceHandle> refMats;
+                getSceneReferencedMaterials(GetSceneInstance(), refMats);
+                for (auto &refMat : qAsConst(refMats)) {
+                    const auto origMat = bridge->getMaterialReference(refMat);
+                    if (origMat.Valid() && (long)origMat == inInstance) {
+                        sceneEditor->setMaterialSourcePath(refMat, newRelPath);
+                        sceneEditor->SetName(refMat, bridge->GetName(inInstance, true));
+                        m_StudioSystem->GetFullSystemSignalSender()
+                                ->SendInstancePropertyValue(refMat, bridge->GetNameProperty());
+                    }
+                }
+            }
+            GetCore()->getProjectFile().renameMaterial(materialRename.first,
+                                                       materialRename.second);
+            m_materialUndoRenames.append(QPair<QString, QString>(materialRename.second,
+                                                                 materialRename.first));
+        };
+
+        // After a rename, the opposite rename is saved to an undo list
+        // While doing an undo or redo, this list is checked for renames
+        if (m_Core->GetCmdStack()->isUndoingOrRedoing()) {
+            // Make a copy of the undo list since renameMaterial adds new renames to the same list
+            auto materialUndoRenamesCopy = m_materialUndoRenames;
+            for (int i = 0; i < materialUndoRenamesCopy.size();) {
+                const auto &materialRename = materialUndoRenamesCopy[i];
+                if (sceneEditor->GetName(inInstance) == materialRename.second) {
+                    renameMaterial(materialRename);
+                    m_materialUndoRenames.remove(i);
+                    materialUndoRenamesCopy.remove(i);
+                } else {
+                    ++i;
+                }
+            }
+        }
+
+        // These renames are queued by the user by either renaming the material object
+        // or the .materialdef file.
+        for (int i = 0; i < m_materialRenames.size();) {
+            const auto &materialRename = m_materialRenames[i];
+            if (sceneEditor->GetName(inInstance) == materialRename.second) {
+                renameMaterial(materialRename);
+                m_materialRenames.remove(i);
+            } else {
+                ++i;
+            }
+        }
+    }
     // check if we changed datainput bindings
     if (inProperty == m_StudioSystem->GetPropertySystem()->GetAggregateInstancePropertyByName(
                 inInstance, QStringLiteral("controlledproperty"))) {
@@ -1283,13 +1356,12 @@ void CDoc::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
         // TODO: implement a pre-change signal that can be used to extract
         // controlledproperty string before and after the change, so we know exactly
         // what happened to the element
-        for (auto &it : qAsConst(g_StudioApp.m_dataInputDialogItems)) {
-            it->controlledElems.clear();
-            it->boundTypes.clear();
-        }
-
-        UpdateDatainputMap(m_Core->GetDoc()->GetSceneInstance());
+        UpdateDatainputMap();
     }
+}
+
+void CDoc::queueMaterialRename(const QString &oldName, const QString &newName) {
+    m_materialRenames.append(QPair<QString, QString>(oldName, newName));
 }
 
 Q3DStudio::SSelectedValue CDoc::SetupInstanceSelection(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
@@ -1553,12 +1625,12 @@ bool CDoc::SetDocumentPath(const QString &inDocumentPath)
 QString CDoc::CreateUntitledDocument() const
 {
     QString dirPath = QDir::cleanPath(Q3DStudio::CFilePath::GetUserApplicationDirectory()
-                                              + QStringLiteral("/Qt3DSComposer/Untitled"));
+                                              + QStringLiteral("/Qt3DStudio/Untitled"));
     QDir dir(dirPath);
     dir.mkpath(QStringLiteral("."));
     QString filePath = dirPath + QStringLiteral("/Untitled.uip");
 
-     // create the file if doesnt exist
+     // create the file if it doesn't exist
     if (!QFileInfo(filePath).exists()) {
         QFile f(filePath);
         f.open(QIODevice::ReadWrite);
@@ -1722,6 +1794,12 @@ void CDoc::LoadDocument(const QString &inDocument)
  */
 void CDoc::SaveDocument(const QString &inDocument)
 {
+    // Remove unused materials from the container during saving so that the .uip is not cluttered
+    Q3DStudio::CUpdateableDocumentEditor updatableEditor(*this);
+    updatableEditor.EnsureEditor(QString(), __FILE__, __LINE__)
+            .removeUnusedFromMaterialContainer();
+
+    // TODO: This should use QSaveFile to ensure .uip contents are never lost during a failed save
     QFile file(inDocument);
     if (!file.open(QFile::ReadWrite | QFile::Truncate)) {
         QT3DS_ASSERT(0);
@@ -1730,6 +1808,9 @@ void CDoc::SaveDocument(const QString &inDocument)
     // Exceptions here get propagated to the crash dialog.
     SavePresentationFile(&file);
     file.close();
+
+    // Rollback material container changes so that undos work (material property changes etc.)
+    updatableEditor.RollbackEditor();
 }
 
 //=============================================================================
@@ -2156,8 +2237,6 @@ bool CDoc::VerifyCanRename(qt3dsdm::Qt3DSDMInstanceHandle inAsset)
  */
 void CDoc::LoadPresentationFile(QIODevice *inInputStream)
 {
-    Q3DStudio::CString theOrigFileName;
-
     // Let any interested parties know that a presentation is going to be loaded
     m_Core->GetDispatch()->FireOnLoadingPresentation();
 
@@ -2249,11 +2328,20 @@ int CDoc::LoadStudioData(QIODevice *inInputStream)
             theSerializer->SerializeScene(theReader, GetDocumentDirectory(), (int)theVersion);
         }
 
+        auto bridge = GetStudioSystem()->GetClientDataModelBridge();
+
         // Setup the Presentation and Scene
         // Asset Graph has only one root and that's the scene
         m_SceneInstance = m_AssetGraph->GetRoot(0);
-        m_ActiveSlide = m_StudioSystem->GetClientDataModelBridge()->GetComponentSlide(
-                    m_SceneInstance, 1);
+        m_ActiveSlide = bridge->GetComponentSlide(m_SceneInstance, 1);
+
+        // Make sure material container has no duration
+        const auto matCont = bridge->getMaterialContainer();
+        const auto slideCore = GetStudioSystem()->GetFullSystem()->GetCoreSystem()->GetSlideCore();
+        if (matCont.Valid()) {
+            slideCore->forceSetInstancePropertyValueOnAllSlides(
+                        matCont, bridge->GetSceneAsset().m_EndTime, 0);
+        }
     } catch (...) {
         CleanupData();
         throw; // pass the error along to the caller, so the appropriate error message can be
@@ -2830,6 +2918,9 @@ void CDoc::AddToGraph(qt3dsdm::Qt3DSDMInstanceHandle inParentInstance,
 
 void CDoc::OnNewPresentation()
 {
+    m_materialRenames.clear();
+    m_materialUndoRenames.clear();
+
     m_PlaybackClock->Reset();
     m_Core->GetDispatch()->FireOnNewPresentation();
 
@@ -2860,10 +2951,39 @@ void CDoc::getSceneMaterials(qt3dsdm::Qt3DSDMInstanceHandle inParent,
     const CClientDataModelBridge *bridge = m_StudioSystem->GetClientDataModelBridge();
     for (long i = 0, count = m_AssetGraph->GetChildCount(inParent); i < count; ++i) {
         qt3dsdm::Qt3DSDMInstanceHandle theChild(m_AssetGraph->GetChild(inParent, i));
-        if (bridge->IsMaterialInstance(theChild) || bridge->IsCustomMaterialInstance(theChild))
+        if (!bridge->isMaterialContainer(theChild) && !bridge->isInsideMaterialContainer(theChild)
+                && (bridge->IsMaterialInstance(theChild)
+                    || bridge->IsCustomMaterialInstance(theChild))) {
             outMats.push_back(theChild);
+        }
 
         getSceneMaterials(theChild, outMats);
+    }
+}
+
+void CDoc::getSceneReferencedMaterials(qt3dsdm::Qt3DSDMInstanceHandle inParent,
+                                       QVector<qt3dsdm::Qt3DSDMInstanceHandle> &outMats) const
+{
+    const CClientDataModelBridge *bridge = m_StudioSystem->GetClientDataModelBridge();
+    for (long i = 0, count = m_AssetGraph->GetChildCount(inParent); i < count; ++i) {
+        qt3dsdm::Qt3DSDMInstanceHandle theChild(m_AssetGraph->GetChild(inParent, i));
+        if (bridge->IsReferencedMaterialInstance(theChild))
+            outMats.push_back(theChild);
+
+        getSceneReferencedMaterials(theChild, outMats);
+    }
+}
+
+void CDoc::getUsedSharedMaterials(QVector<qt3dsdm::Qt3DSDMInstanceHandle> &outMats) const
+{
+    QVector<qt3dsdm::Qt3DSDMInstanceHandle> refMats;
+    getSceneReferencedMaterials(GetSceneInstance(), refMats);
+
+    CClientDataModelBridge *bridge = m_StudioSystem->GetClientDataModelBridge();
+    for (auto &refMat : qAsConst(refMats)) {
+        qt3dsdm::Qt3DSDMInstanceHandle original = bridge->getMaterialReference(refMat);
+        if (original.Valid())
+            outMats.append(original);
     }
 }
 
@@ -2878,9 +2998,19 @@ void CDoc::CheckActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     }
 }
 
-// TODO: use ProjectFile class framework to parse subpresentations and add datainput use
-// information from them to the map as well
-void CDoc::UpdateDatainputMap(
+// In outMap, returns datainput names found from element control
+// bindings but which are missing from (UIP) datainput list.
+void CDoc::UpdateDatainputMap(QMultiMap<QString,
+                              QPair<qt3dsdm::Qt3DSDMInstanceHandle,
+                                    qt3dsdm::Qt3DSDMPropertyHandle>> *outMap)
+{
+    for (auto &it : qAsConst(g_StudioApp.m_dataInputDialogItems))
+        it->ctrldElems.clear();
+
+    UpdateDatainputMapRecursive(GetSceneInstance(), outMap);
+}
+
+void CDoc::UpdateDatainputMapRecursive(
         const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
         QMultiMap<QString,
                   QPair<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle>> *outMap)
@@ -2911,22 +3041,15 @@ void CDoc::UpdateDatainputMap(
             // For slide control, type is strictly set to String.
             // For timeline the datainput is strictly Ranged Number only.
             if (g_StudioApp.m_dataInputDialogItems.contains(diName)) {
-                g_StudioApp.m_dataInputDialogItems[diName]->
-                    controlledElems.append(inInstance);
-                if (propType) {
-                    g_StudioApp.m_dataInputDialogItems[diName]->boundTypes.append(
-                                QPair<qt3dsdm::DataModelDataType::Value, bool>(propType, false));
-                } else if (propName == QLatin1String("@slide")) {
-                    g_StudioApp.m_dataInputDialogItems[diName]
-                            ->boundTypes.append(QPair<qt3dsdm::DataModelDataType::Value, bool>
-                                                (qt3dsdm::DataModelDataType::Value::String, true));
+                CDataInputDialogItem::ControlledItem item(inInstance, propHandle);
+                if (propType)
+                    item.dataType = {propType, false};
+                else if (propName == QLatin1String("@slide"))
+                    item.dataType = {qt3dsdm::DataModelDataType::Value::String, true};
+                else if (propName == QLatin1String("@timeline"))
+                    item.dataType = {qt3dsdm::DataModelDataType::Value::RangedNumber, true};
 
-                } else if (propName == QLatin1String("@timeline")) {
-                    g_StudioApp.m_dataInputDialogItems[diName]
-                            ->boundTypes.append(
-                                QPair<qt3dsdm::DataModelDataType::Value, bool>
-                                (qt3dsdm::DataModelDataType::Value::RangedNumber, true));
-                }
+                g_StudioApp.m_dataInputDialogItems[diName]->ctrldElems.append(item);
             } else if (outMap != nullptr) {
                 // Do multi insert as single datainput name can
                 // be found in several elements.
@@ -2944,9 +3067,15 @@ void CDoc::UpdateDatainputMap(
     Q3DStudio::CGraphIterator iter;
     GetAssetChildren(this, inInstance, iter);
     for (; !iter.IsDone(); ++iter)
-        UpdateDatainputMap(iter.GetCurrent(), outMap);
+        UpdateDatainputMapRecursive(iter.GetCurrent(), outMap);
 }
 
+// Sanity checks controlledproperty strings to see if controller names
+// and target properties are valid. Removes invalid controller - property
+// pairs from controlledproperty string. Transaction/undo points are not created
+// for invalid pair deletions, so caller is responsible for dispatching datamodel
+// notifications.
+// Recurses through the entire tree and returns true only if all strings were valid.
 bool CDoc::VerifyControlledProperties(const qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     auto propSystem = GetPropertySystem();
@@ -2971,7 +3100,6 @@ bool CDoc::VerifyControlledProperties(const qt3dsdm::Qt3DSDMInstanceHandle inIns
             // Not much to do to validate datainput name except to check that it has no illegal
             // characters. We will check elsewhere that datainput names correspond to ones
             // that are defined in the global UIA file.
-
             int pos;
             auto diValidationRes = rxp.validate(splitStr[i], pos);
 
@@ -3024,6 +3152,53 @@ bool CDoc::VerifyControlledProperties(const qt3dsdm::Qt3DSDMInstanceHandle inIns
     return ret;
 }
 
+// Replaces datainput bindings in list given by "instances".
+// Opens up a single transaction that batches all binding changes.
+// NOTE: calling function is responsible for closing the transaction.
+void CDoc::ReplaceDatainput(const QString &oldName, const QString &newName,
+                            const QList<qt3dsdm::Qt3DSDMInstanceHandle> &instances)
+{
+    auto propSystem = GetPropertySystem();
+
+    // Open a single transaction for all datainput replaces, so that all binding replacements
+    // done from within f.ex datainput management dialog can be undone with a single undo.
+    if (!IsTransactionOpened())
+        OpenTransaction(QObject::tr("Replace datainput bindings"), __FILE__, __LINE__);
+
+    for (auto it : instances) {
+        qt3dsdm::Qt3DSDMPropertyHandle ctrldPropHandle
+                = propSystem->GetAggregateInstancePropertyByName(
+                    it.GetHandleValue(), QStringLiteral("controlledproperty"));
+        QString newStr;
+        bool renamed = false;
+        if (ctrldPropHandle && it.Valid()) {
+            qt3dsdm::SValue ctrldPropVal;
+            propSystem->GetInstancePropertyValue(it.GetHandleValue(), ctrldPropHandle,
+                                                 ctrldPropVal);
+            Q3DStudio::CString currCtrldPropsStr
+                    = qt3dsdm::get<qt3dsdm::TDataStrPtr>(ctrldPropVal)->GetData();
+            QStringList splitStr = currCtrldPropsStr.toQString().split(QLatin1Char(' '));
+
+            for (int i = 0; i < splitStr.size() - 1; i += 2) {
+                if (splitStr[i].contains(oldName)) {
+                    splitStr[i] = QLatin1String("$") + newName;
+                    renamed = true;
+                }
+                newStr.append(QStringLiteral(" ") + splitStr[i] + QStringLiteral(" ")
+                              + splitStr[i+1]);
+            }
+        }
+        // Make changes to property.
+        if (renamed) {
+            newStr = newStr.trimmed();
+            Q3DStudio::SValue controlledProperty
+                    = std::make_shared<qt3dsdm::CDataStr>(Q3DStudio::CString::fromQString(newStr));
+            SetInstancePropertyValue(it.GetHandleValue(), QStringLiteral("controlledproperty"),
+                                     controlledProperty);
+        }
+    }
+}
+
 QDebug operator<<(QDebug dbg, const SubPresentationRecord &r)
 {
     QDebugStateSaver stateSaver(dbg);
@@ -3039,4 +3214,40 @@ void CDoc::setPlayBackPreviewState(bool state)
 bool CDoc::isPlayBackPreviewOn() const
 {
     return m_playbackPreviewOn;
+}
+
+int CDataInputDialogItem::countOfInstance(const qt3dsdm::Qt3DSDMInstanceHandle handle) const
+{
+    int count = 0;
+    for (auto &it : qAsConst(ctrldElems)) {
+        if (it.instHandle == handle)
+            count++;
+    }
+    return count;
+}
+
+void CDataInputDialogItem::getBoundTypes(
+        QVector<QPair<qt3dsdm::DataModelDataType::Value, bool>> &outVec) const
+{
+    for (auto &it : qAsConst(ctrldElems))
+        outVec.append(it.dataType);
+}
+
+void CDataInputDialogItem::getInstCtrldItems(const qt3dsdm::Qt3DSDMInstanceHandle handle,
+                                             QVector<ControlledItem> &outVec) const
+{
+    for (auto &it : qAsConst(ctrldElems)) {
+        if (it.instHandle == handle)
+            outVec.append(it);
+    }
+}
+
+void CDataInputDialogItem::removeControlFromInstance(const qt3dsdm::Qt3DSDMInstanceHandle handle)
+{
+    for (auto it = ctrldElems.begin(); it != ctrldElems.end();) {
+      if (it->instHandle == handle)
+        it = ctrldElems.erase(it);
+      else
+        ++it;
+    }
 }

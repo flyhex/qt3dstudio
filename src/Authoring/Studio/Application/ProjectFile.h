@@ -30,6 +30,7 @@
 #define PROJECTFILE_H
 
 #include "Qt3DSFileTools.h"
+#include <QtXml/qdom.h>
 
 namespace Q3DStudio {
 class CFilePath;
@@ -48,6 +49,10 @@ public:
     void create(const QString &uiaPath);
     void ensureProjectFile();
     void initProjectFile(const QString &presPath);
+    static void parseDataInputElem(const QDomElement &elem,
+                                   QMap<QString, CDataInputDialogItem *> &dataInputs);
+    static void loadDataInputs(const QString &projFile,
+                               QMap<QString, CDataInputDialogItem *> &dataInputs);
     void loadSubpresentationsAndDatainputs(
             QVector<SubPresentationRecord> &subpresentations,
             QMap<QString, CDataInputDialogItem *> &datainputs);
@@ -60,7 +65,8 @@ public:
     QString getProjectFilePath() const;
     QString getProjectName() const;
     QString getPresentationId(const QString &src) const;
-    QString getResolvedPathTo(const QString &path) const;
+    QString getAbsoluteFilePathTo(const QString &relFilePath) const;
+    QString getRelativeFilePathTo(const QString &absFilePath) const;
     QString createPreview();
     QMultiMap<QString, QPair<QString, QString>> getDiBindingtypesFromSubpresentations() const;
 
@@ -71,6 +77,8 @@ public:
     QString initialPresentation() const { return m_initialPresentation; }
     void setInitialPresentation(const QString &initialId);
     bool renamePresentationFile(const QString &oldName, const QString &newName);
+    void deletePresentationFile(const QString &filePath);
+    void renameMaterial(const QString &oldName, const QString &newName);
 
 Q_SIGNALS:
     void presentationIdChanged(const QString &path, const QString &id);

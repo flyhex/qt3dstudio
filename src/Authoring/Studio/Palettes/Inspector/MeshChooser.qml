@@ -55,7 +55,11 @@ Rectangle {
             model: _meshChooserModel
 
             delegate: ChooserDelegate {
-                onClicked: _meshChooserView.setSelectedMeshName(filePath)
+                onClicked: _meshChooserView.setSelectedMeshName(filePath);
+                onDoubleClicked: {
+                    _meshChooserView.setSelectedMeshName(filePath);
+                    _meshChooserView.hide();
+                }
             }
         }
     }

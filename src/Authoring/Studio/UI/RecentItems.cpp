@@ -74,7 +74,7 @@ void CRecentItems::RemoveRecentItem(const QString &inItem, bool rebuild)
         RebuildList();
 }
 
-// load the recent items from the preferences file to m_RecentItems
+// load the recent items from the preferences file to m_RecentItems and add them to menu
 void CRecentItems::ReconstructList()
 {
     m_Menu->clear();
@@ -85,9 +85,12 @@ void CRecentItems::ReconstructList()
         numRecentItems = MAX_ITEMS;
 
     for (int i = 0; i < numRecentItems; ++i) {
-        QString theFile = QDir::fromNativeSeparators(CStudioPreferences::getRecentItem(i));
-        if (!theFile.isEmpty() && QFileInfo(theFile).exists())
+        QString theFile = CStudioPreferences::getRecentItem(i);
+        if (!theFile.isEmpty() && QFileInfo(theFile).exists()) {
             m_RecentItems.push_back(theFile);
+            QAction *act = m_Menu->addAction(theFile, this, &CRecentItems::onTriggerRecent);
+            act->setData(i);
+        }
     }
 }
 
@@ -100,12 +103,10 @@ void CRecentItems::RebuildList()
 
     for (int i = 0; i < m_RecentItems.size(); ++i) {
         const QString &item_i = m_RecentItems.at(i);
-        QFileInfo fi(item_i);
-        if (fi.exists()) {
-            const QString itemName = fi.absoluteFilePath();
-            QAction *act = m_Menu->addAction(itemName, this, &CRecentItems::onTriggerRecent);
+        if (QFileInfo(item_i).exists()) {
+            QAction *act = m_Menu->addAction(item_i, this, &CRecentItems::onTriggerRecent);
             act->setData(i);
-            CStudioPreferences::setRecentItem(i, itemName);
+            CStudioPreferences::setRecentItem(i, item_i);
         }
     }
 }

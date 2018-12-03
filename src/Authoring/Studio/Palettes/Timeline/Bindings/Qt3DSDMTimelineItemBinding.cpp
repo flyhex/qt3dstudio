@@ -359,6 +359,22 @@ void Qt3DSDMTimelineItemBinding::SetName(const QString &inName)
     }
 
     CClientDataModelBridge *theBridge = m_StudioSystem->GetClientDataModelBridge();
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+
+    // Display warning if the name and path are the same as the material container
+    if (theBridge->GetParentInstance(m_DataHandle) == doc->GetSceneInstance()
+            && inName == theBridge->getMaterialContainerName()) {
+        QString theTitle = QObject::tr("Rename Object Error");
+        QString theString = theBridge->getMaterialContainerName()
+                + QObject::tr(" is a reserved name.");
+        g_StudioApp.GetDialogs()->DisplayMessageBox(theTitle, theString,
+                                                    Qt3DSMessageBox::ICON_ERROR, false);
+        // The timeline still shows the new name so refresh the name property
+        m_StudioSystem->GetFullSystemSignalSender()->SendInstancePropertyValue(
+                    m_DataHandle, theBridge->GetNameProperty());
+        return;
+    }
+
     // Display warning if we had to modify the user-given name to make it unique
     if (!theBridge->CheckNameUnique(theBridge->GetParentInstance(m_DataHandle),
                                     m_DataHandle, inName)) {
@@ -551,9 +567,12 @@ bool Qt3DSDMTimelineItemBinding::IsVisibleEnabled() const
 bool Qt3DSDMTimelineItemBinding::IsValidTransaction(EUserTransaction inTransaction)
 {
     qt3dsdm::Qt3DSDMInstanceHandle theInstance = GetInstance();
+    const auto bridge = m_StudioSystem->GetClientDataModelBridge();
     switch (inTransaction) {
     case EUserTransaction_Rename:
-        return (GetObjectType() != OBJTYPE_SCENE && GetObjectType() != OBJTYPE_IMAGE);
+        return (GetObjectType() != OBJTYPE_SCENE && GetObjectType() != OBJTYPE_IMAGE
+                && (bridge->GetObjectType(theInstance) != OBJTYPE_REFERENCEDMATERIAL
+                || bridge->GetSourcePath(theInstance).isEmpty()));
 
     case EUserTransaction_Duplicate:
         if (theInstance.Valid())
@@ -605,6 +624,14 @@ bool Qt3DSDMTimelineItemBinding::IsValidTransaction(EUserTransaction inTransacti
     case EUserTransaction_EditComponent:
         return (GetObjectType() == OBJTYPE_COMPONENT);
 
+    case EUserTransaction_MakeAnimatable:
+        if (theInstance.Valid()) {
+            CClientDataModelBridge *bridge = m_StudioSystem->GetClientDataModelBridge();
+            EStudioObjectType type = bridge->GetObjectType(theInstance);
+            return !IsLocked() && type == OBJTYPE_REFERENCEDMATERIAL;
+        }
+        return false;
+
     case EUserTransaction_Group:
         return g_StudioApp.canGroupSelectedObjects();
 
@@ -638,6 +665,11 @@ inline void DoDelete(CDoc &inDoc, const qt3dsdm::TInstanceHandleList &inInstance
 inline void DoMakeComponent(CDoc &inDoc, const qt3dsdm::TInstanceHandleList &inInstances)
 {
     SCOPED_DOCUMENT_EDITOR(inDoc, QObject::tr("Make Component"))->MakeComponent(inInstances);
+}
+
+inline void doMakeAnimatable(CDoc &doc, const qt3dsdm::TInstanceHandleList &instances)
+{
+    SCOPED_DOCUMENT_EDITOR(doc, QObject::tr("Make Animatable"))->makeAnimatable(instances);
 }
 
 inline void DoGroupObjects(CDoc &inDoc, const qt3dsdm::TInstanceHandleList &inInstances)
@@ -697,6 +729,10 @@ void Qt3DSDMTimelineItemBinding::PerformTransaction(EUserTransaction inTransacti
     case EUserTransaction_MakeComponent: {
         theDispatch.FireOnAsynchronousCommand(
                     std::bind(DoMakeComponent, std::ref(*theDoc), theInstances));
+    } break;
+    case EUserTransaction_MakeAnimatable: {
+        theDispatch.FireOnAsynchronousCommand(
+                    std::bind(doMakeAnimatable, std::ref(*theDoc), theInstances));
     } break;
     case EUserTransaction_Group: {
         theDispatch.FireOnAsynchronousCommand(

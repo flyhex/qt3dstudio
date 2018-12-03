@@ -436,11 +436,11 @@ bool Qt3DSRenderTestCustomMaterialGenerator::run(NVRenderContext *context,
     }
 
     if (success) {
-        CRegisteredString name = context->GetStringTable().RegisterStr("qrc:/copper.material");
+        CRegisteredString name = context->GetStringTable().RegisterStr("qrc:/copper.shader");
 
-        metadata()->LoadMaterialXMLFile("CustomMaterial", "", "copper", "qrc:/copper.material");
+        metadata()->LoadMaterialXMLFile("CustomMaterial", "", "copper", "qrc:/copper.shader");
         Option<qt3dsdm::SMetaDataCustomMaterial> metaMaterial =
-                            metadata()->GetMaterialMetaDataBySourcePath("qrc:/copper.material");
+                            metadata()->GetMaterialMetaDataBySourcePath("qrc:/copper.shader");
 
         if (metaMaterial.hasValue()) {
             qt3ds::render::IUIPLoader::CreateMaterialClassFromMetaMaterial(

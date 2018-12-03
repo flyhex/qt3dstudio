@@ -91,7 +91,7 @@ CDropSource *CDropProxy::GetDropSource(const QMimeData *inDataObject, long inFla
 {
     const CDropSource *theDropSource = nullptr;
     switch (inFlavor) {
-    case QT3DS_FLAVOR_FILE: {
+    case QT3DS_FLAVOR_FILE:
         // Check if we have a Drop File on our hands.
         if (inDataObject->hasUrls()) {
             // Get the number of files being dragged
@@ -99,29 +99,21 @@ CDropSource *CDropProxy::GetDropSource(const QMimeData *inDataObject, long inFla
 
             // Only allow single files to be dragged
             if (theFileCount > inItem && !inDataObject->urls().isEmpty()) {
-                // Get the filename of the object being dragged
-                QString theFilename = inDataObject->urls().at(inItem).toLocalFile();
-
-                Qt3DSFile theFile(theFilename);
-                // Dragging a single file
-                theDropSource =
-                    CDropSourceFactory::Create(QT3DS_FLAVOR_FILE, &theFile, sizeof(Qt3DSFile *));
+                QString filePath = inDataObject->urls().at(inItem).toLocalFile();
+                theDropSource = CDropSourceFactory::Create(QT3DS_FLAVOR_FILE, filePath);
             }
         }
-    } break;
+        break;
+
     case QT3DS_FLAVOR_TEXT:
-    // Don't do anything for this
     case QT3DS_FLAVOR_BASIC_OBJECTS:
-    // Don't do anything for this
     case QT3DS_FLAVOR_ASSET_LIB:
-    // make an asset out of this
     case QT3DS_FLAVOR_ASSET_TL:
-    // make an asset out of this
     case QT3DS_FLAVOR_ASSET_UICFILE:
         // make an asset out of this
         // Get a pointer to the object
         theDropSource = dynamic_cast<const CDropSource *>(inDataObject);
-        if (theDropSource != nullptr && theDropSource->GetFlavor() != inFlavor)
+        if (theDropSource && theDropSource->GetFlavor() != inFlavor)
             theDropSource = nullptr;
         break;
     }

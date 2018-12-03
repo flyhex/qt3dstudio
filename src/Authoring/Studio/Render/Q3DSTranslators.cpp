@@ -630,6 +630,9 @@ struct Q3DSTranslatorDataModelParser
     HANDLE_Q3DS_NAME_PROPERTY                                                           \
     HANDLE_Q3DS_NOTIFY_CHANGES
 
+// TODO: Add dropshadow text properties
+// TODO: Add text bounding/wrap properties
+
 #define ITERATE_Q3DS_EFFECT_PROPERTIES                                                  \
     HANDLE_Q3DS_BOOL_PROPERTY2(Asset, Eyeball, EyeballEnabled)                          \
     HANDLE_Q3DS_NOTIFY_CHANGES
@@ -1938,6 +1941,8 @@ bool Q3DSTextTranslator::updateProperty(Q3DSTranslation &inContext,
     } else if (name == QLatin1String("tracking")) {
         list.append(theItem.setTracking(value.getData<float>()));
     }
+    // TODO handle dropshadow properties (commit 4e97e4edc636b306eb1009cc5c6c189d78ae7774)
+    // TODO handle wordwarp/boundingbox (commit d53d85e208b5c400142f0389ef16f073229af908)
     if (list.count()) {
         theItem.notifyPropertyChanges(list);
         return true;

@@ -8,14 +8,14 @@ QWidget {
 
 /* DockWidget */
 QMainWindow::separator {
-    background: #000000;
-    width: 1px;  /* when vertical */
-    height: 1px; /* when horizontal */
+    background: #727476;
+    width: 2px;  /* when vertical */
+    height: 2px; /* when horizontal */
 }
 
 QDockWidget::title {
-    border: 1px solid #262829;
-    background: #2e2f30;
+    border: 1px solid #727476;
+    background: #727476;
     padding: 3px;
 }
 
@@ -388,6 +388,19 @@ QDialog#DataInputListDlg QTableView {
     gridline-color: #2e2f30;
 }
 
+QDialog#DataInputListDlg QListView {
+    border: 1px solid #808080;
+    selection-background-color: #46a2da;
+}
+
+QDialog#DataInputListDlg QListView::item:selected {
+    background-color: #46a2da;
+}
+
+QDialog#DataInputListDlg QHeaderView::section:hover {
+    background: transparent;
+}
+
 QDialog#DataInputListDlg QComboBox QAbstractItemView::item:selected
 {
     background-color: #46a2da;
@@ -402,7 +415,6 @@ QDialog#DataInputListDlg QPushButton#DataInputListButton {
     background-color: transparent;
     border: 0px;
     min-width: 16px;
-    max-width: 16px;
     min-height: 16px;
     max-height: 16px;
     padding: 0px;

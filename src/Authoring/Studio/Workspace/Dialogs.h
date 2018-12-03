@@ -55,6 +55,8 @@ class CStudioApp;
 class CControl;
 class CDialogControl;
 class CProgressView;
+class ITimelineKeyframesManager;
+class ITimeChangeCallback;
 
 class CDialogs : public QObject
 {
@@ -83,6 +85,7 @@ public:
     static QStringList modelExtensions();
     static QStringList behaviorExtensions();
     static QStringList presentationExtensions();
+    static QStringList qmlStreamExtensions();
 
     // This is not an appropriate place for these, but better
     // in an inappropriate place than duplicated
@@ -105,6 +108,7 @@ public:
     static bool IsSoundFileExtension(const QString &inExt);
     static bool isPresentationFileExtension(const QString &inExt);
     static bool isMeshFileExtension(const QString &inExt);
+    static bool isImportFileExtension(const QString &inExt);
     static bool isProjectFileExtension(const QString &inExt);
     static bool IsPathFileExtension(const QString &inExt);
     static bool IsPathBufferExtension(const QString &inExt);
@@ -117,7 +121,8 @@ public:
     QString GetFileOpenChoice(const QString &inInitialDirectory = {});
 
     void DisplayImportFailed(const QUrl &inURL, const QString &inDescription, bool inWarningsOnly);
-    void DisplayLoadingPresentationFailed(const QFileInfo &loadFileInfo, const QString &errorText);
+    void DisplayLoadingPresentationFailed(const QFileInfo &loadFileInfo,
+                                          const QString &loadFileName, const QString &errorText);
     void DisplaySavingPresentationFailed();
     void DisplaySaveReadOnlyFailed(const QString &inSavedLocation);
     void DisplayObjectRenamed(const QString &origName, const QString &newName, bool async = false);
@@ -126,6 +131,8 @@ public:
                                                          Qt3DSMessageBox::EMessageBoxIcon inIcon,
                                                          bool inShowCancel,
                                                          QWidget *parent = nullptr);
+    void asyncDisplayMessageBox(const QString &title, const QString &text,
+                                Qt3DSMessageBox::EMessageBoxIcon icon, QWidget *parent = nullptr);
     int displayOverrideAssetBox(const QString &assetPath);
     int DisplayChoiceBox(const QString &inTitle, const QString &inText, int inIcon);
     void DisplayKnownErrorDialog(const QString &inErrorText);
@@ -156,7 +163,19 @@ public:
                                       const Q3DStudio::CString &inMinVersion);
     static void DisplayGLVersionWarning(const Q3DStudio::CString &inGLVersion,
                                         const Q3DStudio::CString &inRecommendedVersion);
+
+    void asyncDisplayTimeEditDialog(long time, IDoc *doc, long objectAssociation,
+                                    ITimelineKeyframesManager *keyframesManager = nullptr) const;
+    void asyncDisplayDurationEditDialog(long startTime, long endTime, IDoc *doc,
+                                        ITimeChangeCallback *callback) const;
+
+    enum class WidgetBrowserAlign {
+        ComboBox,
+        ToolButton,
+        Center
+    };
     static void showWidgetBrowser(QWidget *screenWidget, QWidget *browser, const QPoint &point,
+                                  WidgetBrowserAlign align = WidgetBrowserAlign::ComboBox,
                                   QSize customSize = {});
 
 Q_SIGNALS:

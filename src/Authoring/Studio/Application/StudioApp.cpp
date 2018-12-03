@@ -45,6 +45,7 @@
 #include <QtGui/qsurfaceformat.h>
 #include <QtCore/qfileinfo.h>
 #include <QtCore/qurl.h>
+#include <QtCore/qsavefile.h>
 #include <QtGui/qopenglcontext.h>
 #include <QtWidgets/qaction.h>
 #include <QtCore/qstandardpaths.h>
@@ -54,6 +55,16 @@
 #include <QtQuick/qquickitem.h>
 
 #include "q3dsruntime2api_p.h"
+
+#ifdef ENABLE_QT_BREAKPAD
+#include <qtsystemexceptionhandler.h>
+#endif
+
+#ifdef QT3DSTUDIO_REVISION
+#define STRINGIFY_INTERNAL(x) #x
+#define STRINGIFY(x) STRINGIFY_INTERNAL(x)
+const char *const QT3DSTUDIO_REVISION_STR = STRINGIFY(QT3DSTUDIO_REVISION);
+#endif
 
 const QString activePresentationQuery = QStringLiteral("activePresentation:");
 
@@ -70,7 +81,12 @@ int main(int argc, char *argv[])
         Q3DSEngine engine;
     }
 
+    bool isOpenGLES = false;
+
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#if !defined(Q_OS_MACOS)
+    QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+#endif
     SharedTools::QtSingleApplication guiApp(QStringLiteral("Qt3DStudio"), argc, argv);
 
 #if defined(Q_OS_MACOS)
@@ -88,12 +104,13 @@ int main(int argc, char *argv[])
     QScopedPointer<QOpenGLContext> context(new QOpenGLContext());
     context->setFormat(format);
     context->create();
-    if (context->isOpenGLES()) {
-        format.setRenderableType(QSurfaceFormat::OpenGLES);
-        format.setMajorVersion(2);
-        format.setMinorVersion(0);
-        QSurfaceFormat::setDefaultFormat(format);
-    }
+    isOpenGLES = context->isOpenGLES();
+#endif
+
+#ifdef ENABLE_QT_BREAKPAD
+    const QString libexecPath = QCoreApplication::applicationDirPath() + QStringLiteral("/.");
+    QtSystemExceptionHandler systemExceptionHandler(libexecPath);
+    systemExceptionHandler.setBuildVersion(QT3DSTUDIO_REVISION_STR);
 #endif
 
     // Parse the command line so we know what's up
@@ -144,7 +161,7 @@ int main(int argc, char *argv[])
     QFile styleFile(":/style.qss");
     styleFile.open(QFile::ReadOnly);
     guiApp.setStyleSheet(styleFile.readAll());
-    g_StudioApp.initInstance(parser);
+    g_StudioApp.initInstance(parser, isOpenGLES);
     return g_StudioApp.run(parser);
 }
 
@@ -306,7 +323,7 @@ void CStudioApp::performShutdown()
  * This creates the all the views, then returns if everything
  * was successful.
  */
-bool CStudioApp::initInstance(const QCommandLineParser &parser)
+bool CStudioApp::initInstance(const QCommandLineParser &parser, bool isOpenGLES)
 {
     QApplication::setOrganizationName("The Qt Company");
     QApplication::setOrganizationDomain("qt.io");
@@ -326,10 +343,19 @@ bool CStudioApp::initInstance(const QCommandLineParser &parser)
                                + QStringLiteral("/../doc/qt3dstudio/getting-started.html");
 
     QString thePreferencesPath = CFilePath::GetUserApplicationDirectory()
-                                 + QStringLiteral("/Qt3DSComposer/Preferences.setting");
-    CStudioPreferences::LoadPreferences(thePreferencesPath);
+                                 + QStringLiteral("/Qt3DStudio/Preferences.setting");
+    CStudioPreferences::loadPreferences(thePreferencesPath);
 
     m_dialogs = new CDialogs(!m_isSilent);
+
+    if (isOpenGLES) {
+        m_dialogs->DisplayKnownErrorDialog(
+                    tr("Qt 3D Studio cannot be started.\n"
+                       "OpenGL ES is not supported for Qt 3D Studio Editor.\n"
+                       "Make sure you are not using a software renderer or\n"
+                       "wrapper like MESA or Angle before trying again."));
+        exit(0);
+    }
 
     m_views = new CViews();
 
@@ -431,7 +457,7 @@ bool CStudioApp::handleWelcomeRes(int res, bool recursive)
     case StudioTutorialWidget::openSampleResult: {
         if (PerformSavePrompt()) {
             // Try three options:
-            // - open a specific example .uip
+            // - open a specific example .uia
             // - failing that, show the main example root dir
             // - failing all previous, show default Documents dir
             QFileInfo filePath;
@@ -456,7 +482,7 @@ bool CStudioApp::handleWelcomeRes(int res, bool recursive)
                 Qt3DSFile path = m_dialogs->GetFileOpenChoice(filePath.absoluteFilePath());
                 theFile = QFileInfo(path.GetAbsolutePath());
             } else {
-                theFile = filePath.absolutePath() + QStringLiteral("/SampleProject.uip");
+                theFile = filePath.absoluteFilePath() + QStringLiteral("/SampleProject.uia");
             }
 
             if (theFile.path().isEmpty()) {
@@ -554,8 +580,8 @@ bool CStudioApp::showStartupDialog()
         CStartupDlg theStartupDlg(m_pMainWnd);
 
         // Populate recent items
-        if (m_views) {
-            CRecentItems *theRecentItems = m_views->getMainFrame()->GetRecentItems();
+        if (m_pMainWnd) {
+            CRecentItems *theRecentItems = m_pMainWnd->GetRecentItems();
             for (long theIndex = 0; theIndex < theRecentItems->GetItemCount(); ++theIndex)
                 theStartupDlg.AddRecentItem(theRecentItems->GetItem(theIndex));
         }
@@ -1568,7 +1594,6 @@ bool CStudioApp::OnSave(bool autosave)
     }
 }
 
-//=============================================================================
 /**
  * Command handler for the File Save As menu option.
  * This will prompt the user for a location to save the file out to then
@@ -1585,9 +1610,8 @@ bool CStudioApp::OnSaveAs()
     return false;
 }
 
-//=============================================================================
 /**
- * Command handler for the File Save As menu option.
+ * Command handler for the File Save Copy menu option.
  * This will prompt the user for a location to save the file out to then
  * save a copy, leaving the original file open in the editor.
  * @return true if the file was successfully saved.
@@ -1632,7 +1656,7 @@ bool CStudioApp::OnLoadDocument(const QString &inDocument, bool inShowStartupDia
     QString loadFile = resolvePresentationFile(inDocument);
     QFileInfo loadFileInfo(loadFile);
 
-    m_core->GetDispatch()->FireOnProgressBegin(QObject::tr("Loading "), inDocument);
+    m_core->GetDispatch()->FireOnProgressBegin(QObject::tr("Loading "), loadFileInfo.fileName());
 
     // Make sure scene is visible
     if (m_views)
@@ -1685,10 +1709,12 @@ bool CStudioApp::OnLoadDocument(const QString &inDocument, bool inShowStartupDia
 #if (defined Q_OS_MACOS)
         m_fileOpenEvent = false;
 #endif
-        if (!theErrorText.isEmpty())
+        if (!theErrorText.isEmpty()) {
             m_dialogs->DisplayKnownErrorDialog(theErrorText);
-        else
-            m_dialogs->DisplayLoadingPresentationFailed(loadFileInfo, theLoadErrorParameter);
+        } else {
+            m_dialogs->DisplayLoadingPresentationFailed(loadFileInfo, inDocument,
+                                                        theLoadErrorParameter);
+        }
 
         m_core->GetDispatch()->FireOnOpenDocument(loadFile, false);
 
@@ -1703,25 +1729,25 @@ bool CStudioApp::OnLoadDocument(const QString &inDocument, bool inShowStartupDia
         m_core->getProjectFile().loadSubpresentationsAndDatainputs(m_subpresentations,
                                                                    m_dataInputDialogItems);
         getRenderer().RegisterSubpresentations(m_subpresentations);
+
+        m_authorZoom = false;
+
+        m_core->GetDispatch()->FireAuthorZoomChanged();
+        verifyDatainputBindings();
+        checkDeletedDatainputs();
     }
-
-    m_authorZoom = false;
-
-    m_core->GetDispatch()->FireAuthorZoomChanged();
-    verifyDatainputBindings();
-    checkDeletedDatainputs();
 
     return theLoadResult;
 }
 
 void CStudioApp::saveDataInputsToProjectFile()
 {
-    // open the uia file
     m_core->getProjectFile().ensureProjectFile();
-    QFile file(m_core->getProjectFile().getProjectFilePath());
-    file.open(QIODevice::ReadWrite);
+
     QDomDocument doc;
-    doc.setContent(&file);
+    QSaveFile file(m_core->getProjectFile().getProjectFilePath());
+    if (!StudioUtils::openDomDocumentSave(file, doc))
+        return;
 
     QDomElement assetsNode = doc.documentElement().firstChildElement(QStringLiteral("assets"));
 
@@ -1764,11 +1790,7 @@ void CStudioApp::saveDataInputsToProjectFile()
 #endif
             assetsNode.appendChild(diNode);
         }
-
-        // write the uia file
-        file.resize(0);
-        file.write(doc.toByteArray(4));
-        file.close();
+        StudioUtils::commitDomDocumentSave(file, doc);
     }
 }
 
@@ -1812,8 +1834,8 @@ bool CStudioApp::isQmlStream(const QString &fileName)
     if (m_qmlStreamMap.contains(fileName)) {
         retval = m_qmlStreamMap[fileName];
     } else {
-        if (!fileName.endsWith(QLatin1String(".qml"))) {
-            retval = false;
+        if (!fileName.endsWith(QLatin1String(".qml")) || !QFileInfo(fileName).exists()) {
+            return false; // Don't pollute the map with non-qml or nonexistent files
         } else {
             QQmlApplicationEngine qmlEngine(fileName);
             if (qmlEngine.rootObjects().size() > 0) {
@@ -2136,7 +2158,7 @@ void CStudioApp::checkDeletedDatainputs()
                                        qt3dsdm::Qt3DSDMPropertyHandle>>;
     auto doc = m_core->GetDoc();
     // Update datainputs for the currently open presentation
-    doc->UpdateDatainputMap(m_core->GetDoc()->GetSceneInstance(), map);
+    doc->UpdateDatainputMap(map);
 
     if (!map->empty())
         m_core->GetDispatch()->FireOnUndefinedDatainputsFail(map);
@@ -2156,9 +2178,9 @@ void CStudioApp::checkDeletedDatainputs()
     // For datainput bindings in subpresentations we do not have specific
     // instance and/or property handles. Get the datatype for property using
     // the generic name string and leave instance/property handle empty.
-    for (auto sp : spDatainputs) {
-        const QString propName = sp.second;
-        CDataInputDialogItem *item = m_dataInputDialogItems.find(sp.first).value();
+    for (auto sp = spDatainputs.cbegin(); sp != spDatainputs.cend(); ++sp) {
+        const QString propName = sp->second;
+        CDataInputDialogItem *item = m_dataInputDialogItems.find(sp->first).value();
         QPair<qt3dsdm::DataModelDataType::Value, bool> spEntry;
         if (propName == QLatin1String("@timeline")) {
             spEntry.first = qt3dsdm::DataModelDataType::Value::RangedNumber;
@@ -2169,14 +2191,14 @@ void CStudioApp::checkDeletedDatainputs()
         } else {
             qt3dsimp::SImportComposerTypes theTypes;
             qt3dsimp::SImportAsset &theAsset(theTypes.GetImportAssetForType(
-                                                 qt3dsdm::ComposerObjectTypes::Node));
+                                                 qt3dsdm::ComposerObjectTypes::ControllableObject));
             qt3dsdm::DataModelDataType::Value theType(
                         theAsset.GetPropertyDataType(propName));
             spEntry.first = theType;
             spEntry.second = false;
         }
 
-        item->externalPresBoundTypes.insert(sp.first, spEntry);
+        item->externalPresBoundTypes.insert(sp.key(), spEntry);
     }
 }
 

@@ -93,13 +93,21 @@ void EventsBrowserView::focusOutEvent(QFocusEvent *event)
     QTimer::singleShot(0, this, &EventsBrowserView::close);
 }
 
+void EventsBrowserView::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape)
+        QTimer::singleShot(0, this, &EventsBrowserView::close);
+
+    QQuickWidget::keyPressEvent(event);
+}
+
 void EventsBrowserView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_eventsBrowserView"_L1, this);
-    rootContext()->setContextProperty("_resDir"_L1,
-                                      resourceImageUrl());
-    engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Palettes/Action/EventsBrowser.qml"_L1));
+    rootContext()->setContextProperty(QStringLiteral("_eventsBrowserView"), this);
+    rootContext()->setContextProperty(QStringLiteral("_resDir"),
+                                      StudioUtils::resourceImageUrl());
+    engine()->addImportPath(StudioUtils::qmlImportPath());
+    setSource(QUrl(QStringLiteral("qrc:/Palettes/Action/EventsBrowser.qml")));
 }
 

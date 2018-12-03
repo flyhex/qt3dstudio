@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2002 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -27,36 +26,33 @@
 **
 ****************************************************************************/
 
-#ifndef INCLUDED_FILE_ITERATOR_H
-#define INCLUDED_FILE_ITERATOR_H 1
+#include "detaildialog.h"
 
-#pragma once
+#include <QDialogButtonBox>
+#include <QTextBrowser>
+#include <QVBoxLayout>
 
-//==============================================================================
-//	Includes
-//==============================================================================
-#include <vector>
-#include "Qt3DSString.h"
-
-class Qt3DSFile;
-
-class CFileIterator
+DetailDialog::DetailDialog(QWidget *parent) :
+    QDialog(parent)
 {
-public:
-    CFileIterator(const Qt3DSFile *inFile);
-    virtual ~CFileIterator();
-    virtual bool IsDone();
-    virtual void operator++();
+    resize(640, 480);
+    QVBoxLayout *verticalLayout = new QVBoxLayout(this);
+    textBrowser = new QTextBrowser(this);
+    verticalLayout->addWidget(textBrowser);
+    buttonBox = new QDialogButtonBox(this);
+    buttonBox->setOrientation(Qt::Horizontal);
+    buttonBox->setStandardButtons(QDialogButtonBox::Close);
 
-    virtual void operator+=(const long inNumToInc);
-    virtual Qt3DSFile GetCurrent();
+    verticalLayout->addWidget(buttonBox);
+    connect(buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
+}
 
-    virtual size_t GetTotal();
+DetailDialog::~DetailDialog()
+{
+}
 
-protected:
-    QString m_File;
-    size_t m_Index;
-    std::vector<QString> m_FileNames;
-};
-
-#endif // INCLUDED_FILE_ITERATOR_H
+void DetailDialog::setText(const QString &text)
+{
+    textBrowser->setPlainText(text);
+}

@@ -49,12 +49,14 @@ public:
 
     void setInstance(int instance);
     int instance() const;
+    QString currentDataModelPath() const;
 
 Q_SIGNALS:
     void textureSelected(int handle, int instance, const QString &name);
 
 protected:
     void focusOutEvent(QFocusEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 
 private:
     void showEvent(QShowEvent *event) override;

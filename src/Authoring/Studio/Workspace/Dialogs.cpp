@@ -42,6 +42,7 @@
 #include "Views.h"
 #include "MasterP.h"
 #include "TimeEditDlg.h"
+#include "DurationEditDlg.h"
 #include "StudioPreferences.h"
 #include "ResetKeyframeValuesDlg.h"
 #include "GLVersionDlg.h"
@@ -130,7 +131,7 @@ static const QStringList effectExts = {
 };
 
 static const QStringList materialExts = {
-    "material"
+    "material", "shader", "materialdef"
 };
 
 static const QStringList soundExts = {
@@ -144,7 +145,6 @@ static const QStringList pathExts = {
 static const QStringList bufferExts = {
     "path"
 };
-
 
 // List of file types allowed during import
 // Note: Despite its name, Q3DStudio::DocumentEditorFileType::DAE type includes
@@ -509,9 +509,10 @@ QString CDialogs::defaultDirForUrl(const QUrl &url)
  * @param errrorText error message
  */
 void CDialogs::DisplayLoadingPresentationFailed(const QFileInfo &loadFileInfo,
+                                                const QString &loadFileName,
                                                 const QString &errorText)
 {
-    QString theErrorMessage = loadFileInfo.fileName();
+    QString theErrorMessage = loadFileInfo.isFile() ? loadFileInfo.fileName() : loadFileName;
 
     if (errorText.isEmpty())
         theErrorMessage +=  QObject::tr(" failed to load.");
@@ -620,6 +621,20 @@ CDialogs::DisplayMessageBox(const QString &inTitle, const QString &inText,
     return theUserChoice;
 }
 
+void CDialogs::asyncDisplayMessageBox(const QString &title, const QString &text,
+                                      Qt3DSMessageBox::EMessageBoxIcon icon, QWidget *parent)
+{
+    if (m_ShowGUI) {
+        if (parent == nullptr)
+            parent = g_StudioApp.m_pMainWnd;
+        QTimer::singleShot(0, [title, text, icon, parent]() {
+            Qt3DSMessageBox::Show(title, text, icon, false, parent);
+        });
+    } else {
+        qCDebug(qt3ds::TRACE_INFO) << title << ": " << text;
+    }
+}
+
 int CDialogs::DisplayChoiceBox(const QString &inTitle, const QString &inText, int inIcon)
 {
     if (m_ShowGUI) {
@@ -716,7 +731,7 @@ QString CDialogs::GetQmlFileExtension()
 
 QString CDialogs::GetMaterialDataFileExtension()
 {
-    return QStringLiteral("matdata");
+    return QStringLiteral("materialdef");
 }
 
 QStringList CDialogs::GetFontFileExtensions()
@@ -775,6 +790,11 @@ bool CDialogs::IsSoundFileExtension(const QString &inExt)
 bool CDialogs::isMeshFileExtension(const QString &inExt)
 {
     return IsFileExtension(inExt, meshExts);
+}
+
+bool CDialogs::isImportFileExtension(const QString &inExt)
+{
+    return IsFileExtension(inExt, importExts);
 }
 
 bool CDialogs::isPresentationFileExtension(const QString &inExt)
@@ -1185,8 +1205,27 @@ void CDialogs::DisplayGLVersionWarning(const Q3DStudio::CString &inGLVersion,
     DisplayGLVersionDialog(inGLVersion, inRecommendedVersion, false);
 }
 
+void CDialogs::asyncDisplayTimeEditDialog(long time, IDoc *doc, long objectAssociation,
+                                          ITimelineKeyframesManager *keyframesManager) const
+{
+    QTimer::singleShot(0, [time, doc, objectAssociation, keyframesManager]() {
+        CTimeEditDlg timeEditDlg;
+        timeEditDlg.setKeyframesManager(keyframesManager);
+        timeEditDlg.showDialog(time, doc, objectAssociation);
+    });
+}
+
+void CDialogs::asyncDisplayDurationEditDialog(long startTime, long endTime, IDoc *doc,
+                                              ITimeChangeCallback *callback) const
+{
+    QTimer::singleShot(0, [startTime, endTime, doc, callback]() {
+        CDurationEditDlg durationEditDlg;
+        durationEditDlg.showDialog(startTime, endTime, doc, callback);
+    });
+}
+
 void CDialogs::showWidgetBrowser(QWidget *screenWidget, QWidget *browser, const QPoint &point,
-                                 QSize customSize)
+                                 WidgetBrowserAlign align, QSize customSize)
 {
     QSize popupSize = customSize.isEmpty() ? CStudioPreferences::browserPopupSize() : customSize;
     browser->resize(popupSize);
@@ -1205,14 +1244,22 @@ void CDialogs::showWidgetBrowser(QWidget *screenWidget, QWidget *browser, const 
         screen = QGuiApplication::screens().at(screenNum);
     }
     QRect screenRect = screen->availableGeometry();
-    const int COMBOBOX_H = 22;
 
-    // position the popup below the combobox
-    newPos -= QPoint(popupSize.width(), -COMBOBOX_H) + screenRect.topLeft();
-
-    // if no space below the combobox, move it above it
-    if (newPos.y() + popupSize.height() > screenRect.height())
-        newPos.setY(newPos.y() - popupSize.height() - COMBOBOX_H);
+    const int CONTROL_H = 22;
+    if (align == WidgetBrowserAlign::ComboBox) {
+        // position the popup below the combobox
+        newPos -= QPoint(popupSize.width(), -CONTROL_H) + screenRect.topLeft();
+        // if no space below the combobox, move it above it
+        if (newPos.y() + popupSize.height() > screenRect.height())
+            newPos.setY(newPos.y() - popupSize.height() - CONTROL_H);
+    } else if (align == WidgetBrowserAlign::ToolButton){
+        // The point is assumed to be the lower right corner of the button
+        newPos -= QPoint(popupSize.width(), popupSize.height()) + screenRect.topLeft();
+        if (newPos.y() < 0)
+            newPos.setY(newPos.y() + popupSize.height() - CONTROL_H);
+    } else { // WidgetBrowserAlign::Center
+        newPos -= QPoint(popupSize.width() / 2, popupSize.height() / 2) + screenRect.topLeft();
+    }
 
     if (newPos.y() < 0)
         newPos.setY(0);
@@ -1227,10 +1274,15 @@ void CDialogs::showWidgetBrowser(QWidget *screenWidget, QWidget *browser, const 
     browser->move(newPos);
 
     // Show asynchronously to avoid flashing blank window on first show
-    QTimer::singleShot(0, screenWidget, [browser] {
+    QTimer::singleShot(0, screenWidget, [browser, popupSize, screenWidget] {
         browser->show();
         browser->activateWindow();
         browser->setFocus();
+        // Make sure we are the desired size after show, as showing on a different screen
+        // can cause incorrectly sized popup.
+        QTimer::singleShot(0, screenWidget, [browser, popupSize] {
+            browser->resize(popupSize);
+        });
     });
 }
 
@@ -1299,6 +1351,11 @@ QStringList CDialogs::behaviorExtensions()
 QStringList CDialogs::presentationExtensions()
 {
     return presentationExts;
+}
+
+QStringList CDialogs::qmlStreamExtensions()
+{
+    return qmlStreamExts;
 }
 
 QColor CDialogs::displayColorDialog(const QColor &color) const

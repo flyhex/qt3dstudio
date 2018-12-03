@@ -30,7 +30,7 @@
 \page custom-material-reference.html
 \ingroup qt3dstudio-file-formats
 
-This page explains how to write custom \l {file-formats-material.html}{materials}.
+This page explains how to write custom \l {The .shader Format}{materials}.
 
 \section1 Overview
 

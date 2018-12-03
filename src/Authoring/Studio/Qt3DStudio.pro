@@ -3,6 +3,11 @@ TARGET = Qt3DStudio
 include(../commoninclude.pri)
 include($$OUT_PWD/../qtAuthoring-config.pri)
 include(../../shared/qtsingleapplication/qtsingleapplication.pri)
+
+exists ($$(BREAKPAD_SOURCE_DIR)) {
+    include(../../shared/qt-breakpad/qtbreakpad.pri)
+}
+
 INCLUDEPATH += $$OUT_PWD/..
 CONFIG += nostrictstrings
 DEFINES += _UNICODE UNICODE QT3DS_AUTHORING _AFXDLL \
@@ -63,6 +68,7 @@ INCLUDEPATH += \
     Palettes/Timeline \
     Palettes/TimelineGraphicsView \
     Palettes/TimelineGraphicsView/ui \
+    Palettes/scenecamera \
     Render \
     UI \
     Utils \
@@ -250,11 +256,15 @@ HEADERS += \
     Render/Q3DSGraphObjectTranslator.h \
     Render/Q3DSTranslation.h \
     Render/Q3DStudioRenderer.h \
-    Palettes/Inspector/MaterialRefView.h \
     Render/Q3DSEditCamera.h \
     UI/Q3DSPlayerWnd.h \
     Render/StudioEnums.h \
-    Render/Q3DSTranslators.h
+    Render/Q3DSTranslators.h \
+    Palettes/Inspector/MaterialRefView.h \
+    Palettes/scenecamera/scenecameraview.h \
+    Palettes/scenecamera/scenecamerascrollarea.h \
+    Palettes/scenecamera/scenecameraglwidget.h \
+    Palettes/TimelineGraphicsView/ui/RowTimelineCommentItem.h
 
 FORMS += \
     MainFrm.ui \
@@ -273,7 +283,8 @@ FORMS += \
     UI/GLVersionDlg.ui \
     UI/StartupDlg.ui \
     Palettes/Project/EditPresentationIdDlg.ui \
-    Palettes/Project/ChooseImagePropertyDlg.ui
+    Palettes/Project/ChooseImagePropertyDlg.ui \
+    Palettes/scenecamera/scenecameraview.ui
 
 SOURCES += \
     Application/AboutDlg.cpp \
@@ -303,7 +314,6 @@ SOURCES += \
     DragAndDrop/DropTarget.cpp \
     DragAndDrop/ExplorerFileDropSource.cpp \
     DragAndDrop/FileDropSource.cpp \
-    DragAndDrop/ProjectDropTarget.cpp \
     DragAndDrop/SceneDropTarget.cpp \
     DragAndDrop/TimelineDropSource.cpp \
     DragAndDrop/TimelineDropTarget.cpp \
@@ -418,10 +428,14 @@ SOURCES += \
     Render/Q3DStudioRenderer.cpp \
     Render/Q3DSGraphObjectTranslator.cpp \
     Render/Q3DSTranslation.cpp \
-    Palettes/Inspector/MaterialRefView.cpp \
     UI/Q3DSPlayerWnd.cpp \
     Render/Q3DSEditCamera.cpp \
-    Render/Q3DSTranslators.cpp
+    Render/Q3DSTranslators.cpp \
+    Palettes/Inspector/MaterialRefView.cpp \
+    Palettes/scenecamera/scenecameraview.cpp \
+    Palettes/scenecamera/scenecamerascrollarea.cpp \
+    Palettes/scenecamera/scenecameraglwidget.cpp \
+    Palettes/TimelineGraphicsView/ui/RowTimelineCommentItem.cpp
 
 RESOURCES += \
     MainFrm.qrc \

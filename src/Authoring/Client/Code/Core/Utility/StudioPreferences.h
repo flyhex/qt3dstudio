@@ -47,7 +47,8 @@ class CStudioPreferences
     virtual ~CStudioPreferences();
 
 public:
-    static void LoadPreferences(const QString &filePath);
+    static void loadPreferences(const QString &filePath);
+    static void savePreferences();
 
     static bool IsTimelineSnappingGridActive();
     static void SetTimelineSnappingGridActive(bool inActive);
@@ -113,7 +114,7 @@ public:
     static long GetBigTimeAdvanceAmount();
     static void SetBigTimeAdvanceAmount(long inTime);
 
-    static CPt GetDefaultClientSize();
+    static QSize GetDefaultClientSize();
     static void SetDefaultClientSize(int width, int height);
 
     static int getNumRecentItems();
@@ -142,6 +143,9 @@ public:
 
     static QColor GetSingleBoundingBoxColor();
     static QColor GetGroupBoundingBoxColor();
+    static QColor GetXAxisColor();
+    static QColor GetYAxisColor();
+    static QColor GetZAxisColor();
 
     static QColor GetRulerBackgroundColor();
     static QColor GetRulerTickColor();
@@ -168,6 +172,9 @@ public:
     static QColor masterColor();
     static QColor disabledColor();
     static QColor dataInputColor();
+    static QColor matteColor();
+    static QColor projectReferencedColor();
+
     static QLinearGradient welcomeBackgroundGradient();
 
     static QColor timelineRowColorNormal();
@@ -190,6 +197,7 @@ public:
     static QColor timelineFilterButtonHoveredColor();
     static QColor timelineRowSubpColor();
     static QColor timelineRowSubpDescendantColor();
+    static QColor timelineRowCommentBgColor();
 
     static int fontSize();
     static int controlBaseHeight();

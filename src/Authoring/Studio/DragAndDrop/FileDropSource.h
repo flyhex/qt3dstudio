@@ -27,38 +27,29 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
 #ifndef __FILEDROPSOURCE_H__
 #define __FILEDROPSOURCE_H__
 
-//==============================================================================
-//	Includes
-//==============================================================================
-// This should go into its own FileDropSourceFile.
 #include "DropSource.h"
-#include "Qt3DSFile.h"
 
-class CStudioApp;
 class CDropTarget;
 
-//==============================================================================
 /**
- *	@class	CFileDropSource
- *	@brief	Drop Source for QT3DS_FLAVOR_ASSET_UICFILE
+ * @class CFileDropSource
+ * @brief Drop Source for QT3DS_FLAVOR_ASSET_UICFILE
  *
- *	This class is meant to handle drag and drop for QT3DS_FLAVOR_ASSET_UICFILE,
- *	for example when user drags a file from within Studio.
+ * This class is meant to handle drag and drop for QT3DS_FLAVOR_ASSET_UICFILE,
+ * for example when user drags a file from within Studio.
  */
 class CFileDropSource : public CDropSource
 {
 protected:
-    Qt3DSFile m_File;
+    QString m_FilePath;
+
     static bool s_FileHasValidTarget;
 
 public:
-    CFileDropSource(long inFlavor, void *inData, unsigned long inSize);
+    CFileDropSource(long inFlavor, const QString &filePath);
 
     bool CanMove() override;
     bool CanCopy() override;
@@ -66,9 +57,8 @@ public:
     bool GetHasValidTarget();
     void SetHasValidTarget(bool inValid) override;
 
-    CCmd *GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTarget,
-                                       EDROPDESTINATION inDestType,
-                                       qt3dsdm::Qt3DSDMSlideHandle inSlide) override;
+    CCmd *GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTarget, EDROPDESTINATION inDestType,
+                               qt3dsdm::Qt3DSDMSlideHandle inSlide) override;
 };
 
 #endif // #ifndef __FILEDROPSOURCE_H__

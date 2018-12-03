@@ -43,11 +43,11 @@ DataInputSelectView::DataInputSelectView(const QVector<EDataType> &acceptedTypes
     : QQuickWidget(parent)
     , m_model(new DataInputSelectModel(this))
     , m_defaultType(EDataType::DataTypeFloat)
-    , m_acceptedTypes(acceptedTypes)
-
+    , m_matchingTypes(acceptedTypes)
+    , m_dataInputList(QVector<QPair<QString, int>>())
 {
-    if (!m_acceptedTypes.isEmpty())
-        m_defaultType = m_acceptedTypes[0];
+    if (!m_matchingTypes.isEmpty())
+        m_defaultType = m_matchingTypes[0];
 
     setWindowTitle(tr("Datainputs"));
     setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
@@ -56,23 +56,23 @@ DataInputSelectView::DataInputSelectView(const QVector<EDataType> &acceptedTypes
 }
 
 void DataInputSelectView::setData(const QVector<QPair<QString, int>> &dataInputList,
-                                  const QString &currentController,
-                                  int handle, int instance)
+                                  const QString &currentController, int handle, int instance)
 {
     m_handle = handle;
     m_instance = instance;
     m_currController = currentController;
-    updateData(dataInputList);
+    m_dataInputList = dataInputList;
+    updateData();
 }
 
-void DataInputSelectView::setAcceptedTypes(const QVector<EDataType> &acceptedTypes)
+void DataInputSelectView::setMatchingTypes(const QVector<EDataType> &matchingTypes)
 {
-    m_acceptedTypes = acceptedTypes;
-    if (!m_acceptedTypes.isEmpty())
-        m_defaultType = m_acceptedTypes[0];
+    m_matchingTypes = matchingTypes;
+    if (!m_matchingTypes.isEmpty())
+        m_defaultType = m_matchingTypes[0];
 }
 
-void DataInputSelectView::updateData(const QVector<QPair<QString, int>> &dataInputList)
+void DataInputSelectView::updateData()
 {
     m_selection = -1;
 
@@ -80,16 +80,27 @@ void DataInputSelectView::updateData(const QVector<QPair<QString, int>> &dataInp
     QVector<QPair<QString, QString>> dataInputs;
     m_model->clear();
 
-    dataInputs.append(QPair<QString, QString>(getAddNewDataInputString(), QString("")));
-    m_model->setFixedItemCount(m_model->getFixedItemCount() + 1);
+    if (m_model->getShowFixedItems()) {
+        dataInputs.append({getAddNewDataInputString(), {}});
+        m_model->setFixedItemCount(m_model->getFixedItemCount() + 1);
 
-    dataInputs.append(QPair<QString, QString>(getNoneString(), QString("")));
-    m_model->setFixedItemCount(m_model->getFixedItemCount() + 1);
+        dataInputs.append({getNoneString(), {}});
+        m_model->setFixedItemCount(m_model->getFixedItemCount() + 1);
+    }
 
-    for (auto i : dataInputList) {
-        dataInputs.append(QPair<QString, QString>(i.first, getDiTypeStr(i.second)));
-        if (i.first == m_currController)
-            m_selection = dataInputs.size() - 1;
+    for (auto &i : qAsConst(m_dataInputList)) {
+        bool isCurrentCtrlr = i.first == m_currController;
+        if (i.first.contains(m_searchString) || !m_searchString.size() || isCurrentCtrlr) {
+            if (m_typeFilter == -1
+                || (m_typeFilter == -2 && m_matchingTypes.contains((EDataType)i.second))
+                || m_typeFilter == (EDataType)i.second || isCurrentCtrlr) {
+                dataInputs.append({i.first, getDiTypeStr(i.second)});
+                if (isCurrentCtrlr) {
+                    m_selection = dataInputs.size() - 1;
+                    dataInputs.last().first.append(tr(" (Current)"));
+                }
+            }
+        }
     }
 
     m_model->setData(dataInputs);
@@ -125,7 +136,7 @@ QString DataInputSelectView::getDiTypeStr(int type)
         return tr("Vector3");
         break;
     default:
-        return QString("");
+        return {};
         Q_ASSERT(false);
         break;
     }
@@ -134,6 +145,14 @@ QString DataInputSelectView::getDiTypeStr(int type)
 void DataInputSelectView::showEvent(QShowEvent *event)
 {
     QQuickWidget::showEvent(event);
+}
+
+void DataInputSelectView::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape)
+        QTimer::singleShot(0, this, &DataInputSelectView::close);
+
+    QQuickWidget::keyPressEvent(event);
 }
 
 void DataInputSelectView::setSelection(int index)
@@ -148,8 +167,8 @@ void DataInputSelectView::setSelection(int index)
                 Q_EMIT selectedChanged();
             }
         } else {
-            CDataInputListDlg dataInputDlg(&(g_StudioApp.m_dataInputDialogItems), true,
-                                           nullptr, m_defaultType, m_acceptedTypes);
+            CDataInputListDlg dataInputDlg(&g_StudioApp.m_dataInputDialogItems, true, nullptr,
+                                           m_defaultType, m_matchingTypes);
             dataInputDlg.exec();
 
             if (dataInputDlg.result() == QDialog::Accepted) {
@@ -157,9 +176,9 @@ void DataInputSelectView::setSelection(int index)
                 if (m_mostRecentlyAdded.size()) {
                     CDataInputDialogItem *diItem = g_StudioApp.m_dataInputDialogItems.value(
                                 m_mostRecentlyAdded);
-                    if (m_acceptedTypes.isEmpty()
-                            || (diItem && m_acceptedTypes.contains(
-                                    static_cast<EDataType>(diItem->type)))) {
+                    if (m_matchingTypes.isEmpty()
+                        || (diItem && m_matchingTypes.contains(
+                                static_cast<EDataType>(diItem->type)))) {
                         Q_EMIT dataInputChanged(m_handle, m_instance, m_mostRecentlyAdded);
                     }
                 }
@@ -170,19 +189,36 @@ void DataInputSelectView::setSelection(int index)
     }
 }
 
+void DataInputSelectView::setSearchString(const QString &string)
+{
+    m_searchString = string;
+    updateData();
+}
+
+void DataInputSelectView::setTypeFilter(const int index)
+{
+    m_typeFilter = index;
+    updateData();
+}
+
 void DataInputSelectView::focusOutEvent(QFocusEvent *event)
 {
     QQuickWidget::focusOutEvent(event);
     QTimer::singleShot(0, this, &DataInputSelectView::close);
 }
 
+bool DataInputSelectView::toolTipsEnabled() const
+{
+    return CStudioPreferences::ShouldShowTooltips();
+}
+
 void DataInputSelectView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_resDir"_L1,
-                                      resourceImageUrl());
-    rootContext()->setContextProperty("_dataInputSelectView"_L1, this);
-    rootContext()->setContextProperty("_dataInputSelectModel"_L1, m_model);
-    engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Palettes/Inspector/DataInputChooser.qml"_L1));
+    rootContext()->setContextProperty(QStringLiteral("_resDir"),
+                                      StudioUtils::resourceImageUrl());
+    rootContext()->setContextProperty(QStringLiteral("_parentView"), this);
+    rootContext()->setContextProperty(QStringLiteral("_dataInputSelectModel"), m_model);
+    engine()->addImportPath(StudioUtils::qmlImportPath());
+    setSource(QUrl(QStringLiteral("qrc:/Palettes/Inspector/DataInputChooser.qml")));
 }

@@ -152,9 +152,9 @@ QVariant EventsModel::data(const QModelIndex &index, int role) const
     case DescriptionRole:
         return isCategory ? category.description: event.description;
     case IconRole:
-        return isCategory ? resourceImageUrl() + category.icon : "";
+        return isCategory ? StudioUtils::resourceImageUrl() + category.icon : QString();
     case HighlightedIconRole:
-        return isCategory ? resourceImageUrl() + category.highlightIcon : "";
+        return isCategory ? StudioUtils::resourceImageUrl() + category.highlightIcon : QString();
     case ExpandedRole:
         return isCategory ? category.expanded : false;
     case ParentExpandedRole: {

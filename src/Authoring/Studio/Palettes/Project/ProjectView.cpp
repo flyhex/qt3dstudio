@@ -103,11 +103,11 @@ QSize ProjectView::sizeHint() const
 void ProjectView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
-    rootContext()->setContextProperty("_parentView"_L1, this);
+    rootContext()->setContextProperty(QStringLiteral("_resDir"), StudioUtils::resourceImageUrl());
+    rootContext()->setContextProperty(QStringLiteral("_parentView"), this);
 
-    engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Palettes/Project/ProjectView.qml"_L1));
+    engine()->addImportPath(StudioUtils::qmlImportPath());
+    setSource(QUrl(QStringLiteral("qrc:/Palettes/Project/ProjectView.qml")));
 }
 
 void ProjectView::effectAction(int row)
@@ -280,14 +280,6 @@ void ProjectView::startDrag(QQuickItem *item, int row)
     QTimer::singleShot(0, item, &QQuickItem::ungrabMouse);
 }
 
-void ProjectView::openPresentation(int row)
-{
-    if (g_StudioApp.PerformSavePrompt()) {
-        const QString path = m_ProjectModel->filePath(row);
-        g_StudioApp.OnLoadDocument(path);
-    }
-}
-
 bool ProjectView::isCurrentPresentation(int row) const
 {
     return m_ProjectModel->isCurrentPresentation(m_ProjectModel->filePath(row));
@@ -355,14 +347,6 @@ void ProjectView::copyFullPath(int row) const
     CStudioClipboard::CopyTextToClipboard(path);
 }
 
-bool ProjectView::isGroup(int row) const
-{
-    if (row == -1)
-        return false;
-    QString path(m_ProjectModel->filePath(row));
-    return Q3DStudio::ImportUtils::GetObjectFileTypeForFile(path).m_ObjectType == OBJTYPE_GROUP;
-}
-
 bool ProjectView::isPresentation(int row) const
 {
     return m_ProjectModel->filePath(row).endsWith(QLatin1String(".uip"));
@@ -378,14 +362,32 @@ bool ProjectView::isMaterialFolder(int row) const
     return m_ProjectModel->filePath(row).endsWith(QLatin1String("/materials"));
 }
 
+bool ProjectView::isInMaterialFolder(int row) const
+{
+    return g_StudioApp.GetCore()->getProjectFile().getRelativeFilePathTo(
+                m_ProjectModel->filePath(row)).startsWith(QLatin1String("materials/"));
+}
+
 bool ProjectView::isMaterialData(int row) const
 {
-    return m_ProjectModel->filePath(row).endsWith(QLatin1String(".matdata"));
+    return m_ProjectModel->filePath(row).endsWith(QLatin1String(".materialdef"));
 }
 
 bool ProjectView::isInitialPresentation(int row) const
 {
     return m_ProjectModel->isInitialPresentation(m_ProjectModel->filePath(row));
+}
+
+bool ProjectView::isFolder(int row) const
+{
+    return QFileInfo(m_ProjectModel->filePath(row)).isDir();
+}
+
+bool ProjectView::isReferenced(int row) const
+{
+    const auto index = m_ProjectModel->index(row);
+    return index.data(ProjectFileSystemModel::IsReferencedRole).toBool()
+            || index.data(ProjectFileSystemModel::IsProjectReferencedRole).toBool();
 }
 
 QString ProjectView::presentationId(int row) const
@@ -436,7 +438,7 @@ void ProjectView::openFile(int row)
         if (filePath.endsWith(QLatin1String(".uip"), Qt::CaseInsensitive)) {
             if (g_StudioApp.PerformSavePrompt())
                 g_StudioApp.OnLoadDocument(filePath);
-        } else if (filePath.endsWith(QLatin1String(".matdata"), Qt::CaseInsensitive)) {
+        } else if (filePath.endsWith(QLatin1String(".materialdef"), Qt::CaseInsensitive)) {
             editMaterial(row);
         } else {
             QDesktopServices::openUrl(QUrl::fromLocalFile(filePath));
@@ -476,10 +478,10 @@ void ProjectView::addMaterial(int row) const
     if (info.isFile())
         path = info.dir().path();
     path += QLatin1String("/Material");
-    QString extension = QLatin1String(".matdata");
+    QString extension = QLatin1String(".materialdef");
 
     QFile file(path + extension);
-    int i = 0;
+    int i = 1;
     while (file.exists()) {
         i++;
         file.setFileName(path + QString::number(i) + extension);
@@ -497,6 +499,27 @@ void ProjectView::editMaterial(int row) const
 void ProjectView::duplicate(int row) const
 {
     m_ProjectModel->duplicate(row);
+}
+
+void ProjectView::deleteFile(int row) const
+{
+    if (isReferenced(row)) {
+        // Execution should never get here, as menu option is disabled, but since reference cache
+        // updates are asynchronous, it is possible to have situation where menu item is enabled
+        // but deletion is no longer valid when selected.
+        qWarning() << __FUNCTION__ << "Tried to delete referenced file";
+        return;
+    }
+
+    const QString &filePath = m_ProjectModel->filePath(row);
+
+    if (isPresentation(row) || isQmlStream(row)) {
+        // When deleting renderables, project file assets needs to be updated
+        g_StudioApp.GetCore()->getProjectFile().deletePresentationFile(filePath);
+    } else {
+        QFile file(filePath);
+        file.remove();
+    }
 }
 
 void ProjectView::rebuild()

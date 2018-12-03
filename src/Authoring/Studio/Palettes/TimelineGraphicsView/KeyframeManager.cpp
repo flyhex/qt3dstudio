@@ -425,9 +425,8 @@ bool KeyframeManager::hasDynamicKeyframes(RowTree *row) const
 // ITimelineKeyframesManager interface
 void KeyframeManager::SetKeyframeTime(long inTime)
 {
-    CTimeEditDlg theTimeEditDlg;
-    theTimeEditDlg.setKeyframesManager(this);
-    theTimeEditDlg.showDialog(inTime, g_StudioApp.GetCore()->GetDoc(), ASSETKEYFRAME);
+    g_StudioApp.GetDialogs()->asyncDisplayTimeEditDialog(inTime, g_StudioApp.GetCore()->GetDoc(),
+                                                         ASSETKEYFRAME, this);
 }
 
 void KeyframeManager::SetKeyframesDynamic(bool inDynamic)

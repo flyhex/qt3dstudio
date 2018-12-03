@@ -79,19 +79,21 @@ public:
     void addMaterial(int row) const;
     void editMaterial(int row) const;
     void duplicate(int row) const;
+    void deleteFile(int row) const;
 
-    bool isGroup(int row) const;
     bool isRefreshable(int row) const;
 
     Q_INVOKABLE bool isPresentation(int row) const;
     Q_INVOKABLE bool isQmlStream(int row) const;
     bool isCurrentPresentation(int row) const;
     bool isMaterialFolder(int row) const;
+    bool isInMaterialFolder(int row) const;
     bool isMaterialData(int row) const;
     bool isInitialPresentation(int row) const;
+    bool isFolder(int row) const;
+    bool isReferenced(int row) const;
     QString presentationId(int row) const;
     void setInitialPresentation(int row);
-    void openPresentation(int row);
     Q_INVOKABLE void editPresentationId(int row, bool qmlStream);
     void renamePresentation(int row, bool qmlStream);
 

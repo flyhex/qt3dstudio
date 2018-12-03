@@ -67,9 +67,6 @@ public:
     CControl *getControl() const;
 
 protected:
-    void DoStartDrag(IDragable *inDragable);
-    void DoStartDrag(std::vector<QString> &inDragFileNameList);
-
     bool OnDragWithin(CDropSource &inSource) override;
     bool OnDragReceive(CDropSource &inSource) override;
     void OnDragLeave() override;
@@ -80,7 +77,6 @@ private:
 
     CControl *m_control;
     bool m_isLeftMouseDown = false;
-    bool m_isDragging = false;
     bool m_isContextMenuShown = false;
 };
 

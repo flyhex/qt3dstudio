@@ -62,6 +62,7 @@ public:
     virtual ITextRenderer *GetTextRenderer() = 0;
     virtual QT3DSVec3 GetIntendedPosition(qt3dsdm::Qt3DSDMInstanceHandle inHandle, CPt inPoint) = 0;
     virtual Q3DSRenderBufferManager *GetBufferManager() = 0;
+    virtual qt3dsdm::Qt3DSDMInstanceHandle getObjectAt(const QPoint &pt) = 0;
     virtual IPathManager *GetPathManager() = 0;
     virtual qt3ds::foundation::IStringTable *GetRenderStringTable() = 0;
     // Request that this object renders.  May be ignored if a transaction

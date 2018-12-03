@@ -461,6 +461,13 @@ struct STranslatorDataModelParser
 #define Text_VerticalAlignment m_Text.m_VertAlign
 #define Text_Leading m_Text.m_Leading
 #define Text_Tracking m_Text.m_Tracking
+#define Text_DropShadow m_Text.m_DropShadow
+#define Text_DropShadowStrength m_Text.m_DropShadowStrength
+#define Text_DropShadowOffset m_Text.m_DropShadowOffset
+#define Text_DropShadowHorizontalAlignment m_Text.m_DropShadowHorizontalAlignment
+#define Text_DropShadowVerticalAlignment m_Text.m_DropShadowVerticalAlignment
+#define Text_WordWrap m_Text.m_WordWrap
+#define Text_BoundingBox m_Text.m_BoundingBox
 #define Text_TextColor m_Text.m_TextColor
 #define Text_EnableAcceleratedFont m_Text.m_EnableAcceleratedFont
 #define Path_Width m_Path.m_Width
@@ -2058,23 +2065,30 @@ void STranslation::MarkDirty(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     RequestRender();
 }
 
-QT3DSVec2 STranslation::GetPreviewViewportDimensions()
+QT3DSVec2 STranslation::GetPreviewViewportDimensions() const
 {
     CStudioProjectSettings *theSettings = m_Doc.GetCore()->GetStudioProjectSettings();
-    CPt thePresSize = theSettings->GetPresentationSize();
-    QT3DSVec2 vp(GetViewportDimensions());
-    if (vp.x < m_previewViewportSize || vp.y < m_previewViewportSize)
-        return QT3DSVec2(0.0f);
-    QT3DSVec2 ret(thePresSize.x, thePresSize.y);
-    const float aspect = ret.x / ret.y;
-    if (aspect > 1.0) {
-        ret.x = m_previewViewportSize;
-        ret.y = m_previewViewportSize / aspect;
-    } else {
-        ret.x = m_previewViewportSize * aspect;
-        ret.y = m_previewViewportSize;
-    }
+    QSize thePresSize = theSettings->getPresentationSize();
+    return QT3DSVec2(thePresSize.width(), thePresSize.height());
+}
 
+qt3ds::QT3DSVec2 STranslation::GetOverlayPreviewDimensions() const
+{
+    QT3DSVec2 ret(0.0f);
+    if (hasRoomForOverlayPreview()) {
+        CStudioProjectSettings *theSettings = m_Doc.GetCore()->GetStudioProjectSettings();
+        QSize thePresSize = theSettings->getPresentationSize();
+        ret = QT3DSVec2(thePresSize.width(), thePresSize.height());
+
+        const float aspect = ret.x / ret.y;
+        if (aspect > 1.0) {
+            ret.x = m_overlayPreviewSize > ret.x ? ret.x : m_overlayPreviewSize;
+            ret.y = ret.x / aspect;
+        } else {
+            ret.y = m_overlayPreviewSize > ret.y ? ret.y : m_overlayPreviewSize;
+            ret.x = ret.y * aspect;
+        }
+    }
     return ret;
 }
 
@@ -2099,7 +2113,10 @@ void STranslation::PreRender(bool scenePreviewPass)
         m_Context.SetScaleMode(qt3ds::render::ScaleModes::ExactSize);
     }
 
-    m_Context.SetMatteColor(QT3DSVec4(.13f, .13f, .13f, 1.0f));
+    static const QT3DSVec4 matteColor(CStudioPreferences::matteColor().redF(),
+                                      CStudioPreferences::matteColor().greenF(),
+                                      CStudioPreferences::matteColor().blueF(), 1.0f);
+    m_Context.SetMatteColor(matteColor);
     // Ensure the camera points where it should
     if (m_EditCameraEnabled && !scenePreviewPass) {
         m_EditCameraInfo.ApplyToCamera(m_EditCamera, theViewportDims);
@@ -2108,17 +2125,11 @@ void STranslation::PreRender(bool scenePreviewPass)
 
     if (m_Scene) {
         CStudioProjectSettings *theSettings = m_Doc.GetCore()->GetStudioProjectSettings();
-        CPt thePresSize = theSettings->GetPresentationSize();
-        // The presentation sizes are used for when we have to render a layer offscreen.  If their
-        // width and height
-        // isn't set, then they use the presentation dimensions.
-        if (scenePreviewPass) {
-            m_Presentation.m_PresentationDimensions =
-                QT3DSVec2((QT3DSF32)theViewportDims.x, (QT3DSF32)theViewportDims.y);
-        } else {
-            m_Presentation.m_PresentationDimensions =
-                QT3DSVec2((QT3DSF32)thePresSize.x, (QT3DSF32)thePresSize.y);
-        }
+        QSize thePresSize = theSettings->getPresentationSize();
+        // The presentation sizes are used for when we have to render a layer offscreen.
+        // If their width and height isn't set, then they use the presentation dimensions.
+        m_Presentation.m_PresentationDimensions
+            = QT3DSVec2((QT3DSF32)thePresSize.width(), (QT3DSF32)thePresSize.height());
         m_Context.SetWindowDimensions(
             QSize((QT3DSU32)theViewportDims.x, (QT3DSU32)theViewportDims.y));
         m_Context.SetPresentationDimensions(
@@ -2351,10 +2362,22 @@ struct SVerticalGuideFactory : public IGuideElementFactory
     }
 };
 
-qt3ds::render::NVRenderRect STranslation::GetPreviewViewport()
+qt3ds::render::NVRenderRect STranslation::GetPreviewViewport() const
 {
     QT3DSVec2 vp = GetPreviewViewportDimensions();
     return qt3ds::render::NVRenderRect(0, 0, vp.x, vp.y);
+}
+
+qt3ds::render::NVRenderRect STranslation::GetOverlayPreviewViewport() const
+{
+    QT3DSVec2 vp = GetOverlayPreviewDimensions();
+    return qt3ds::render::NVRenderRect(0, 0, vp.x, vp.y);
+}
+
+bool STranslation::hasRoomForOverlayPreview() const
+{
+    QT3DSVec2 vp(GetViewportDimensions());
+    return vp.x > m_overlayPreviewSize && vp.y > m_overlayPreviewSize;
 }
 
 void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPass,
@@ -2462,13 +2485,12 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
                         }
 
                         // Don't draw the axis if there is a widget.
-                        if (CStudioPreferences::ShouldDisplayPivotPoint()
-                            && shouldDisplayWidget == false) {
+                        if (CStudioPreferences::ShouldDisplayPivotPoint()) {
                             switch (theTranslator->GetGraphObject().m_Type) {
                             case GraphObjectTypes::Node:
                             case GraphObjectTypes::Text:
                             case GraphObjectTypes::Model:
-                                DrawAxis(*theTranslator);
+                                drawPivot(*theTranslator);
                                 break;
                             default:
                                break;
@@ -2577,9 +2599,8 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
             m_Context.SetSceneColor(Option<QT3DSVec4>());
         }
 
-        m_Scene->PrepareForRender(scenePreviewPass
-                                  ? GetPreviewViewportDimensions()
-                                  : GetViewportDimensions(), m_Context);
+        m_Scene->PrepareForRender(scenePreviewPass ? GetPreviewViewportDimensions()
+                                                   : GetViewportDimensions(), m_Context);
 
         m_Context.RunRenderTasks();
 
@@ -2702,23 +2723,31 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
             m_GuideAllocator.reset();
         }
 
-        if (overlayPreview) {
-            // Draw the overlay framebuffer
-            qt3ds::render::NVRenderContext &renderContext(m_Context.GetRenderContext());
-            renderContext.SetViewport(GetPreviewViewport());
-            qt3ds::render::SCamera camera;
-            camera.MarkDirty(qt3ds::render::NodeTransformDirtyFlag::TransformIsDirty);
-            camera.m_Flags.SetOrthographic(true);
-            QT3DSVec2 previewDims(GetPreviewViewportDimensions());
-            camera.CalculateGlobalVariables(
-                        render::NVRenderRectF(0, 0, previewDims.x, previewDims.y), previewDims);
-            QT3DSMat44 theVP;
-            camera.CalculateViewProjectionMatrix(theVP);
-            renderContext.SetCullingEnabled(false);
-            renderContext.SetBlendingEnabled(false);
-            renderContext.SetDepthTestEnabled(false);
-            renderContext.SetDepthWriteEnabled(false);
-            m_Context.GetRenderer().RenderQuad(previewDims, theVP, *m_previewTexture);
+        if (!scenePreviewPass && m_previewTexture) {
+            if (overlayPreview) {
+                // Draw the overlay framebuffer
+                qt3ds::render::NVRenderContext &renderContext(m_Context.GetRenderContext());
+                renderContext.SetViewport(GetOverlayPreviewViewport());
+                qt3ds::render::SCamera camera;
+                camera.MarkDirty(qt3ds::render::NodeTransformDirtyFlag::TransformIsDirty);
+                camera.m_Flags.SetOrthographic(true);
+                QT3DSVec2 previewDims(GetOverlayPreviewDimensions());
+                camera.CalculateGlobalVariables(
+                            render::NVRenderRectF(0, 0, previewDims.x, previewDims.y), previewDims);
+                QT3DSMat44 theVP;
+                camera.CalculateViewProjectionMatrix(theVP);
+                renderContext.SetCullingEnabled(false);
+                renderContext.SetBlendingEnabled(false);
+                renderContext.SetDepthTestEnabled(false);
+                renderContext.SetDepthWriteEnabled(false);
+                m_Context.GetRenderer().RenderQuad(previewDims, theVP, *m_previewTexture);
+            } else {
+                // Hack: For some reason, the m_previewTexture is only valid later if it is
+                // actually drawn somewhere during the main render pass, so draw a dummy quad
+                m_Context.GetRenderContext().SetViewport(NVRenderRect(0, 0, 0, 0));
+                m_Context.GetRenderer().RenderQuad(QT3DSVec2(0.0f), QT3DSMat44(),
+                                                   *m_previewTexture);
+            }
         }
 
         if (scenePreviewPass)
@@ -2730,9 +2759,9 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
         m_Context.SetWindowDimensions(QSize((QT3DSU32)theViewportDims.x,
                                             (QT3DSU32)theViewportDims.y));
         CStudioProjectSettings *theSettings = m_Doc.GetCore()->GetStudioProjectSettings();
-        CPt thePresSize = theSettings->GetPresentationSize();
+        QSize thePresSize = theSettings->getPresentationSize();
         m_Presentation.m_PresentationDimensions =
-            QT3DSVec2((QT3DSF32)thePresSize.x, (QT3DSF32)thePresSize.y);
+            QT3DSVec2((QT3DSF32)thePresSize.width(), (QT3DSF32)thePresSize.height());
 
         if (m_ZoomRender.hasValue()) {
             RenderZoomRender(*m_ZoomRender);
@@ -2859,7 +2888,7 @@ void STranslation::DrawBoundingBox(SNode &inNode, QT3DSVec3 inColor)
     m_Context.GetRenderer().AddRenderWidget(theBBoxWidget);
 }
 
-void STranslation::DrawAxis(SGraphObjectTranslator &inTranslator)
+void STranslation::drawPivot(SGraphObjectTranslator &inTranslator)
 {
     if (GraphObjectTypes::IsNodeType(inTranslator.GetGraphObject().m_Type)) {
         qt3ds::render::IRenderWidget &theAxisWidget = qt3ds::render::IRenderWidget::CreateAxisWidget(
@@ -2947,52 +2976,57 @@ Option<QT3DSU32> STranslation::PickWidget(CPt inMouseCoords, TranslationSelectMo
     return Empty();
 }
 
-SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::Enum inSelectMode)
+SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::Enum inSelectMode,
+                                    bool ignoreWidgets)
 {
     bool requestRender = false;
 
-    if (m_Doc.GetDocumentReader().AreGuidesEditable()) {
-        qt3dsdm::TGuideHandleList theGuides = m_Doc.GetDocumentReader().GetGuides();
-        CPt renderSpacePt(inMouseCoords.x - (long)m_InnerRect.m_Left,
-                          (long)GetViewportDimensions().y - inMouseCoords.y
-                              - (long)m_InnerRect.m_Bottom);
-        for (size_t guideIdx = 0, guideEnd = theGuides.size(); guideIdx < guideEnd; ++guideIdx) {
-            qt3dsdm::SGuideInfo theGuideInfo =
-                m_Doc.GetDocumentReader().GetGuideInfo(theGuides[guideIdx]);
-            float width = (theGuideInfo.m_Width / 2.0f) + 2.0f;
-            switch (theGuideInfo.m_Direction) {
-            case qt3dsdm::GuideDirections::Horizontal:
-                if (fabs((float)renderSpacePt.y - theGuideInfo.m_Position) <= width)
-                    return theGuides[guideIdx];
-                break;
-            case qt3dsdm::GuideDirections::Vertical:
-                if (fabs((float)renderSpacePt.x - theGuideInfo.m_Position) <= width)
-                    return theGuides[guideIdx];
-                break;
-            default:
-                break;
+    if (!ignoreWidgets) {
+        if (m_Doc.GetDocumentReader().AreGuidesEditable()) {
+            qt3dsdm::TGuideHandleList theGuides = m_Doc.GetDocumentReader().GetGuides();
+            CPt renderSpacePt(inMouseCoords.x - (long)m_InnerRect.m_Left,
+                              (long)GetViewportDimensions().y - inMouseCoords.y
+                                  - (long)m_InnerRect.m_Bottom);
+            for (size_t guideIdx = 0, guideEnd = theGuides.size();
+                 guideIdx < guideEnd; ++guideIdx) {
+                qt3dsdm::SGuideInfo theGuideInfo =
+                    m_Doc.GetDocumentReader().GetGuideInfo(theGuides[guideIdx]);
+                float width = (theGuideInfo.m_Width / 2.0f) + 2.0f;
+                switch (theGuideInfo.m_Direction) {
+                case qt3dsdm::GuideDirections::Horizontal:
+                    if (fabs((float)renderSpacePt.y - theGuideInfo.m_Position) <= width)
+                        return theGuides[guideIdx];
+                    break;
+                case qt3dsdm::GuideDirections::Vertical:
+                    if (fabs((float)renderSpacePt.x - theGuideInfo.m_Position) <= width)
+                        return theGuides[guideIdx];
+                    break;
+                default:
+                    break;
+                }
             }
         }
-    }
-    if (IsPathWidgetActive()) {
-        Option<QT3DSU32> picked = PickWidget(inMouseCoords, inSelectMode, *m_PathWidget);
-        if (picked.hasValue()) {
-            RequestRender();
-            DoPrepareForDrag(&m_PathWidget->GetNode());
-            return m_PathWidget->PickIndexToPickValue(*picked);
+        if (IsPathWidgetActive()) {
+            Option<QT3DSU32> picked = PickWidget(inMouseCoords, inSelectMode, *m_PathWidget);
+            if (picked.hasValue()) {
+                RequestRender();
+                DoPrepareForDrag(&m_PathWidget->GetNode());
+                return m_PathWidget->PickIndexToPickValue(*picked);
+            }
         }
-    }
-    // Pick against the widget first if possible.
-    if (m_LastRenderedWidget && (m_LastRenderedWidget->GetNode().m_Flags.IsActive()
-                                 || m_LastRenderedWidget->GetNode().m_Type
-                                 == GraphObjectTypes::Light
-                                 || m_LastRenderedWidget->GetNode().m_Type
-                                 == GraphObjectTypes::Camera)) {
-        Option<QT3DSU32> picked = PickWidget(inMouseCoords, inSelectMode, *m_LastRenderedWidget);
-        if (picked.hasValue()) {
-            RequestRender();
-            DoPrepareForDrag(&m_LastRenderedWidget->GetNode());
-            return m_LastRenderedWidget->PickIndexToPickValue(*picked);
+        // Pick against the widget first if possible.
+        if (m_LastRenderedWidget && (m_LastRenderedWidget->GetNode().m_Flags.IsActive()
+                                     || m_LastRenderedWidget->GetNode().m_Type
+                                     == GraphObjectTypes::Light
+                                     || m_LastRenderedWidget->GetNode().m_Type
+                                     == GraphObjectTypes::Camera)) {
+            Option<QT3DSU32> picked = PickWidget(inMouseCoords, inSelectMode,
+                                                 *m_LastRenderedWidget);
+            if (picked.hasValue()) {
+                RequestRender();
+                DoPrepareForDrag(&m_LastRenderedWidget->GetNode());
+                return m_LastRenderedWidget->PickIndexToPickValue(*picked);
+            }
         }
     }
     // Pick against Lights and Cameras

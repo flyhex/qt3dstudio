@@ -52,6 +52,9 @@
 #include "StudioPreferences.h"
 #include "TimeEditDlg.h"
 #include "StudioClipboard.h"
+#include "Dialogs.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "ClientDataModelBridge.h"
 
 #include <QtWidgets/qcombobox.h>
 #include <QtWidgets/qgraphicssceneevent.h>
@@ -624,7 +627,6 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                 m_rowMover->start(m_rowManager->selectedRows());
             }
             if (m_rowMover->isActive()) {
-                m_rowManager->collapseAllPropertyRows();
                 m_rowMover->updateTargetRow(event->scenePos());
                 updateAutoScrolling(event->scenePos().y());
             }
@@ -845,37 +847,45 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
             if (item->type() == TimelineItem::TypeRuler
                     || itemBelowPlayhead->type() == TimelineItem::TypeRuler) {
                 CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-                CTimeEditDlg timeEditDlg;
-                timeEditDlg.showDialog(doc->GetCurrentViewTime(), doc, PLAYHEAD);
-                return;
-            }
-
-            item = itemBelowPlayhead;
-            if (item->type() == TimelineItem::TypeRowTree) {
-                RowTree *treeItem = static_cast<RowTree *>(item);
-                if (treeItem->isProperty())
-                    treeItem->togglePropertyExpanded();
-            } else if (item->type() == TimelineItem::TypeRowTreeLabelItem) {
-                RowTreeLabelItem *treeLabelItem = static_cast<RowTreeLabelItem *>(item);
-                if (treeLabelItem->parentRow()->isProperty()) {
-                    treeLabelItem->parentRow()->togglePropertyExpanded();
-                } else if (!treeLabelItem->isLocked()
-                           && treeLabelItem->parentRow()->rowType() != OBJTYPE_SCENE) {
-                    // Tree labels text can be edited with double-click, except for Scene label
-                    treeLabelItem->setEnabled(true);
-                    treeLabelItem->setFocus();
-                }
-            } else if (item->type() == TimelineItem::TypeRowTimeline) {
-                RowTimeline *rowTimeline = static_cast<RowTimeline *>(item);
-                Keyframe *clickedKeyframe = rowTimeline->getClickedKeyframe(scenePos);
-                if (clickedKeyframe) {
-                    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-                    CTimeEditDlg timeEditDlg;
-                    timeEditDlg.setKeyframesManager(m_keyframeManager);
-                    timeEditDlg.showDialog(clickedKeyframe->time * 1000, doc, ASSETKEYFRAME);
-                } else {
-                    if (!rowTimeline->rowTree()->locked())
-                        handleSetTimeBarTime();
+                g_StudioApp.GetDialogs()->asyncDisplayTimeEditDialog(doc->GetCurrentViewTime(),
+                                                                     doc, PLAYHEAD);
+            } else {
+                item = itemBelowPlayhead;
+                if (item->type() == TimelineItem::TypeRowTree) {
+                    RowTree *treeItem = static_cast<RowTree *>(item);
+                    if (treeItem->isProperty())
+                        treeItem->togglePropertyExpanded();
+                } else if (item->type() == TimelineItem::TypeRowTreeLabelItem) {
+                    RowTreeLabelItem *treeLabelItem = static_cast<RowTreeLabelItem *>(item);
+                    if (treeLabelItem->parentRow()->isProperty()) {
+                        treeLabelItem->parentRow()->togglePropertyExpanded();
+                    } else if (!treeLabelItem->isLocked()
+                               && treeLabelItem->parentRow()->rowType() != OBJTYPE_SCENE
+                               && treeLabelItem->parentRow()->rowType() != OBJTYPE_IMAGE) {
+                        qt3dsdm::Qt3DSDMInstanceHandle instance
+                                = static_cast<Qt3DSDMTimelineItemBinding *>(
+                                    treeLabelItem->parentRow()->getBinding())->GetInstance();
+                        const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+                                ->GetClientDataModelBridge();
+                        if (bridge->GetObjectType(instance) != OBJTYPE_REFERENCEDMATERIAL
+                                || bridge->GetSourcePath(instance).isEmpty()) {
+                            // Tree labels text can be edited with double-click,
+                            // except for Scene label and basic materials
+                            treeLabelItem->setEnabled(true);
+                            treeLabelItem->setFocus();
+                        }
+                    }
+                } else if (item->type() == TimelineItem::TypeRowTimeline) {
+                    RowTimeline *rowTimeline = static_cast<RowTimeline *>(item);
+                    Keyframe *clickedKeyframe = rowTimeline->getClickedKeyframe(scenePos);
+                    if (clickedKeyframe) {
+                        g_StudioApp.GetDialogs()->asyncDisplayTimeEditDialog(
+                                    clickedKeyframe->time * 1000, g_StudioApp.GetCore()->GetDoc(),
+                                    ASSETKEYFRAME, m_keyframeManager);
+                    } else {
+                        if (!rowTimeline->rowTree()->locked())
+                            handleSetTimeBarTime();
+                    }
                 }
             }
         }

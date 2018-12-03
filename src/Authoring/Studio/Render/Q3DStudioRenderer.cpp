@@ -130,6 +130,20 @@ Q3DSRenderBufferManager *Q3DStudioRenderer::GetBufferManager()
                                            *IInputStreamFactory::Create()).data();
 }
 
+qt3dsdm::Qt3DSDMInstanceHandle Q3DStudioRenderer::getObjectAt(const QPoint &pt)
+{
+    // TODO, old code below
+//    if (m_Translation == nullptr)
+//        return Qt3DSDMInstanceHandle();
+
+//    const QPoint point(pt * m_pixelRatio);
+//    const auto pick = m_Translation->Pick(point, TranslationSelectMode::Single, true);
+//    if (pick.getType() == StudioPickValueTypes::Instance)
+//        return pick.getData<Qt3DSDMInstanceHandle>();
+//    return Qt3DSDMInstanceHandle();
+    return 0;
+}
+
 IPathManager *Q3DStudioRenderer::GetPathManager()
 {
     return nullptr;
@@ -165,6 +179,11 @@ void Q3DStudioRenderer::SetViewRect(const QRect &inRect, const QSize &size)
     if (!m_engine.isNull())
         m_engine->resize(size, fixedDevicePixelRatio(), false);
     sendResizeToQt3D(size);
+}
+
+void Q3DStudioRenderer::setFullSizePreview(bool enabled)
+{
+    // TODO
 }
 
 void Q3DStudioRenderer::SetPolygonFillModeEnabled(bool inEnableFillMode)
@@ -449,6 +468,26 @@ void Q3DStudioRenderer::RenderNow()
 
     // draw guides if enabled
     drawGuides(painter);
+}
+
+void Q3DStudioRenderer::getPreviewFbo(QSize &outFboDim, qt3ds::QT3DSU32 &outFboTexture)
+{
+    // TODO, old code below:
+//    if (m_Translation) {
+//        outFboDim = QSize(m_Translation->m_previewFboDimensions.x,
+//                          m_Translation->m_previewFboDimensions.y);
+//        // The handle is a void * so first cast to size_t to avoid truncating pointer warning
+//        if (m_Translation->m_previewTexture) {
+//            outFboTexture = static_cast<qt3ds::QT3DSU32>(reinterpret_cast<size_t>(
+//                        m_Translation->m_previewTexture->GetTextureObjectHandle()));
+//        } else {
+//            outFboTexture = 0;
+//        }
+
+//    } else {
+//        outFboDim = QSize(0, 0);
+//        outFboTexture = 0;
+//    }
 }
 
 void Q3DStudioRenderer::MakeContextCurrent()
@@ -769,8 +808,8 @@ void Q3DStudioRenderer::OnSceneMouseDown(SceneDragSenderType::Enum inSenderType,
     if (m_translation.isNull())
         return;
 
-    inPoint.setX(int(inPoint.x() * devicePixelRatio()));
-    inPoint.setY(int(inPoint.y() * devicePixelRatio()));
+    inPoint.setX(int(inPoint.x() * StudioUtils::devicePixelRatio()));
+    inPoint.setY(int(inPoint.y() * StudioUtils::devicePixelRatio()));
 
     m_pickResult = SStudioPickValue();
     if (inSenderType == SceneDragSenderType::SceneWindow) {
@@ -864,8 +903,8 @@ void Q3DStudioRenderer::OnSceneMouseDrag(SceneDragSenderType::Enum, QPoint inPoi
     if (m_translation.isNull() || m_pickPending)
         return;
 
-    inPoint.setX(int(inPoint.x() * devicePixelRatio()));
-    inPoint.setY(int(inPoint.y() * devicePixelRatio()));
+    inPoint.setX(int(inPoint.x() * StudioUtils::devicePixelRatio()));
+    inPoint.setY(int(inPoint.y() * StudioUtils::devicePixelRatio()));
 
     if (m_maybeDragStart) {
         QPoint theDragDistance = inPoint - m_mouseDownPoint;

@@ -39,7 +39,7 @@
 TODO: The whole qdoc for uia needs to be rewritten.
     \li \l {The .uia File Format}
 \endomit
-    \li \l {The .material Format}
+    \li \l {The .shader Format}
     \li \l {Custom Materials and Effects}
 \endlist
 //! [toc]

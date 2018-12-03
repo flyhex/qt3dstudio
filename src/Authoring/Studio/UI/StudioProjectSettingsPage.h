@@ -34,30 +34,19 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-//==============================================================================
-//	Includes
-//==============================================================================
-
 #include "StudioPreferencesPropSheet.h"
 
 #ifdef _USENEWCOLORPICKER_
 #include "StudioColorPicker.h"
 #endif
-
-//==============================================================================
-//	Forwards
-//==============================================================================
 class CStudioApp;
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
-    class StudioProjectSettingsPage;
+class StudioProjectSettingsPage;
 }
 QT_END_NAMESPACE
 
-//==============================================================================
-//	Base class for the settings for different modes
-//==============================================================================
 class CStudioProjectSettingsPage : public CStudioPreferencesPropPage
 {
     Q_OBJECT
@@ -72,29 +61,19 @@ public:
 
     // Implementation
 protected:
-    double m_AspectRatio; ///< Stores the presentation width divided by the presentation height
-    QFont m_Font; ///< Font for text
-    QFont m_BoldFont; ///< Bold font for drawing the group boxes
+    double m_aspectRatio; ///< Stores the presentation width divided by the presentation height
+    QFont m_font; ///< Font for text
+    QFont m_boldFont; ///< Bold font for drawing the group boxes
 
-    void LoadSettings();
-    void SaveSettings();
+    void loadSettings();
+    void saveSettings();
 
 protected:
     // Generated message map functions
     virtual void onInitDialog();
-    void onChangePresentationId();
     void onChangeEditPresWidth();
     void onChangeEditPresHeight();
     void onCheckMaintainRatio();
-    void onChangeAuthor();
-    void onChangeCompany();
-    void onSettingsModified();
-    void onSelChangePreviewApp();
-    void onCustomPreviewMore();
-    void onChangeSet1();
-    void onChangeSet2();
-    void onChangeSet3();
-    void onChangeSet5();
 
     QScopedPointer<QT_PREPEND_NAMESPACE(Ui::StudioProjectSettingsPage)> m_ui;
 };

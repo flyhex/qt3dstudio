@@ -61,7 +61,8 @@ public:
     Q_INVOKABLE void expand(int row);
     Q_INVOKABLE void collapse(int row);
 
-    void setCurrentFile(const QString &path);
+    Q_INVOKABLE void setCurrentFile(const QString &path);
+    static QString noneString() { return tr("[None]"); }
 
     // CPresentationChangeListener
     void OnNewPresentation() override;

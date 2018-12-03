@@ -193,61 +193,14 @@ void WidgetControl::setControlSize(const QSize &size)
     m_control->SetSize(size.width(), size.height());
 }
 
-void WidgetControl::DoStartDrag(IDragable *inDragable)
-{
-    if (m_isDragging || !m_isLeftMouseDown)
-        return;
-
-    QDrag drag(this);
-    m_isDragging = true;
-
-    drag.setMimeData(CDropSourceFactory::Create(inDragable->GetFlavor(), inDragable));
-    drag.exec();
-    m_isLeftMouseDown = false;
-
-    m_isDragging = false;
-}
-
-void WidgetControl::DoStartDrag(std::vector<QString> &inDragFileNameList)
-{
-    if (m_isDragging || !m_isLeftMouseDown)
-        return;
-
-    QDrag drag(this);
-    m_isDragging = true;
-
-    try {
-        auto thePos = inDragFileNameList.begin();
-        auto theEndPos = inDragFileNameList.end();
-
-        Q3DStudio::CAutoMemPtr<Qt3DSFile> theDragFile;
-        for (; thePos != theEndPos; ++thePos) {
-            QString theDragFileName = *thePos;
-            if (!theDragFileName.isEmpty()) {
-                theDragFile = new Qt3DSFile(theDragFileName);
-                CDropSource *theDropSource = CDropSourceFactory::Create(
-                            QT3DS_FLAVOR_ASSET_UICFILE, (void *)theDragFile, sizeof(theDragFile));
-                // Add the QT3DS_GESTURE_FLAVOR.  This will allow us to drag to StudioControls.
-                drag.setMimeData(theDropSource);
-                break;
-            }
-        }
-        drag.exec();
-        m_isLeftMouseDown = false;
-    } catch (...) { // if there are any errors that throws an exception, there
-        // there will be no more drag and drop, since the flag will not be reset.
-    }
-
-    m_isDragging = false;
-}
-
 bool WidgetControl::OnDragWithin(CDropSource &inSource)
 {
     bool theReturn = false;
     CPt thePoint = inSource.GetCurrentPoint();
     Qt::KeyboardModifiers theFlags = inSource.GetCurrentFlags();
     CDropTarget *theDropTarget = m_control->FindDropCandidate(
-                thePoint, theFlags, static_cast<EStudioObjectType>(inSource.GetObjectType()));
+                thePoint, theFlags, static_cast<EStudioObjectType>(inSource.GetObjectType()),
+                static_cast<Q3DStudio::DocumentEditorFileType::Enum>(inSource.getFileType()));
 
     if (theDropTarget) {
         theReturn = theDropTarget->Accept(inSource);
@@ -263,7 +216,8 @@ bool WidgetControl::OnDragReceive(CDropSource &inSource)
     Qt::KeyboardModifiers theFlags = inSource.GetCurrentFlags();
 
     CDropTarget *theDropTarget = m_control->FindDropCandidate(
-                thePoint, theFlags, static_cast<EStudioObjectType>(inSource.GetObjectType()));
+                thePoint, theFlags, static_cast<EStudioObjectType>(inSource.GetObjectType()),
+                static_cast<Q3DStudio::DocumentEditorFileType::Enum>(inSource.getFileType()));
 
     if (theDropTarget) {
         theReturn = theDropTarget->Drop(inSource);

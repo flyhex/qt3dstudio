@@ -56,6 +56,11 @@ static QColor s_textColor;
 static QColor s_masterColor;
 static QColor s_disabledColor;
 static QColor s_dataInputColor;
+static QColor s_matteColor;
+static QColor s_projectReferencedColor;
+static QColor s_xAxisColor;
+static QColor s_yAxisColor;
+static QColor s_zAxisColor;
 static QLinearGradient s_welcomeBackgroundGradient;
 
 static QColor s_timelineRowColorNormal;
@@ -78,6 +83,7 @@ static QColor s_timelineWidgetBgColor;
 static QColor s_timelinePlayheadLineColor;
 static QColor s_timelineFilterButtonSelectedColor;
 static QColor s_timelineFilterButtonHoveredColor;
+static QColor s_timelineRowCommentBgColor;
 
 static int s_fontSize;
 static int s_controlBaseHeight;
@@ -121,7 +127,7 @@ static qreal getColorLuminance(const QColor &color)
  * Loads the default preferences from the registry.  Must be called after the
  * registry root has been set up, and before calling any of the Get functions.
  */
-void CStudioPreferences::LoadPreferences(const QString &filePath)
+void CStudioPreferences::loadPreferences(const QString &filePath)
 {
     if (!m_preferences)
         m_preferences = std::unique_ptr<CPreferences>(new CPreferences);
@@ -159,6 +165,11 @@ void CStudioPreferences::LoadPreferences(const QString &filePath)
     s_masterColor = QColor("#5caa15");
     s_disabledColor = QColor("#727476");
     s_dataInputColor = QColor("#ff5102");
+    s_matteColor = QColor("#222222");
+    s_projectReferencedColor = QColor("#aaaa00");
+    s_xAxisColor = QColor("#ca2f2e");
+    s_yAxisColor = QColor("#64cd35");
+    s_zAxisColor = QColor("#1e9fcd");
 
     s_welcomeBackgroundGradient = QLinearGradient(0.0, 0.0, 1.0, 0.0);
     s_welcomeBackgroundGradient.setColorAt(0.0, QColor("#343E55"));
@@ -184,6 +195,7 @@ void CStudioPreferences::LoadPreferences(const QString &filePath)
     s_timelineFilterButtonHoveredColor = QColor("#40000000");
     s_timelineRowSubpColor = QColor("#e2ceff");
     s_timelineRowSubpDescendantColor = QColor("#a263ff");
+    s_timelineRowCommentBgColor = QColor("#d0000000");
 
     s_fontSize = 12;
     s_controlBaseHeight = 22;
@@ -191,6 +203,11 @@ void CStudioPreferences::LoadPreferences(const QString &filePath)
     s_valueWidth = 250;
     s_browserPopupSize = QSize(400, 400);
     s_guideSize = 32;
+}
+
+void CStudioPreferences::savePreferences()
+{
+    m_preferences->save();
 }
 
 //==============================================================================
@@ -614,13 +631,13 @@ void CStudioPreferences::SetDontShowGLVersionDialog(bool inValue)
     m_preferences->SetValue(QStringLiteral("DontShowGLVersionDialog"), inValue);
 }
 
-CPt CStudioPreferences::GetDefaultClientSize()
+QSize CStudioPreferences::GetDefaultClientSize()
 {
-    CPt theSize;
-    theSize.x = m_preferences->GetLongValue(QStringLiteral("DefaultClientWidth"),
-                                            DEFAULT_CLIENT_WIDTH);
-    theSize.y = m_preferences->GetLongValue(QStringLiteral("DefaultClientHeight"),
-                                            DEFAULT_CLIENT_HEIGHT);
+    QSize theSize;
+    theSize.setWidth(m_preferences->GetLongValue(QStringLiteral("DefaultClientWidth"),
+                                                 DEFAULT_CLIENT_WIDTH));
+    theSize.setHeight(m_preferences->GetLongValue(QStringLiteral("DefaultClientHeight"),
+                                                  DEFAULT_CLIENT_HEIGHT));
     return theSize;
 }
 
@@ -648,6 +665,7 @@ QString CStudioPreferences::getRecentItem(int index)
 void CStudioPreferences::setRecentItem(int index, const QString &path)
 {
     m_preferences->SetStringValue(QStringLiteral("RecentItem") + QString::number(index), path);
+    savePreferences();
 }
 
 //==============================================================================
@@ -765,6 +783,21 @@ QColor CStudioPreferences::GetGroupBoundingBoxColor()
     return QColor("#ff0000");
 }
 
+QColor CStudioPreferences::GetXAxisColor()
+{
+    return s_xAxisColor;
+}
+
+QColor CStudioPreferences::GetYAxisColor()
+{
+    return s_yAxisColor;
+}
+
+QColor CStudioPreferences::GetZAxisColor()
+{
+    return s_zAxisColor;
+}
+
 /**
  *  Colors for rulers and guides
  */
@@ -840,6 +873,10 @@ void CStudioPreferences::setQmlContextProperties(QQmlContext *qml)
     qml->setContextProperty(QStringLiteral("_masterColor"), s_masterColor);
     qml->setContextProperty(QStringLiteral("_disabledColor"), s_disabledColor);
     qml->setContextProperty(QStringLiteral("_dataInputColor"), s_dataInputColor);
+    qml->setContextProperty(QStringLiteral("_projectReferencedColor"), s_projectReferencedColor);
+    qml->setContextProperty(QStringLiteral("_xAxisColor"), s_xAxisColor);
+    qml->setContextProperty(QStringLiteral("_yAxisColor"), s_yAxisColor);
+    qml->setContextProperty(QStringLiteral("_zAxisColor"), s_zAxisColor);
     qml->setContextProperty(QStringLiteral("_fontSize"), s_fontSize);
     qml->setContextProperty(QStringLiteral("_controlBaseHeight"), s_controlBaseHeight);
     qml->setContextProperty(QStringLiteral("_idWidth"), s_idWidth);
@@ -894,6 +931,16 @@ QColor CStudioPreferences::disabledColor()
 QColor CStudioPreferences::dataInputColor()
 {
     return s_dataInputColor;
+}
+
+QColor CStudioPreferences::matteColor()
+{
+    return s_matteColor;
+}
+
+QColor CStudioPreferences::projectReferencedColor()
+{
+    return s_projectReferencedColor;
 }
 
 QLinearGradient CStudioPreferences::welcomeBackgroundGradient()
@@ -1000,6 +1047,11 @@ QColor CStudioPreferences::timelineRowSubpColor()
 QColor CStudioPreferences::timelineRowSubpDescendantColor()
 {
     return s_timelineRowSubpDescendantColor;
+}
+
+QColor CStudioPreferences::timelineRowCommentBgColor()
+{
+    return s_timelineRowCommentBgColor;
 }
 
 int CStudioPreferences::fontSize()

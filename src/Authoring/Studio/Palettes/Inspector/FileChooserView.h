@@ -30,6 +30,7 @@
 #define FILECHOOSERVIEW_H
 
 #include <QtQuickWidgets/qquickwidget.h>
+#include <QtCore/qtimer.h>
 
 class FileChooserModel;
 
@@ -55,6 +56,7 @@ Q_SIGNALS:
 
 protected:
     void focusOutEvent(QFocusEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 
 private:
     void showEvent(QShowEvent *event) override;
@@ -62,6 +64,7 @@ private:
     int m_handle = -1;
     int m_instance = -1;
     FileChooserModel *m_model = nullptr;
+    QTimer *m_focusOutTimer = nullptr;
 };
 
 #endif // IMAGECHOOSERVIEW_H

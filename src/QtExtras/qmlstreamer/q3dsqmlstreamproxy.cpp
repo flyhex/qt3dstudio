@@ -174,7 +174,7 @@ bool Q3DSQmlStreamProxy::event(QEvent *event)
     if (event->type() == QEvent::User) {
         Qt3DSQmlStreamEvent *e = static_cast<Qt3DSQmlStreamEvent *>(event);
         Q3DSQmlStreamProducer *producer = nullptr;
-        if (e->unregister && m_streamProducers.value(e->presentationId, nullptr)) {
+        if (e->unregister && m_streamProducers.contains(e->presentationId)) {
             for (int i = 0; i < m_loadedItems.size(); i++) {
                 if (m_loadedItems[i]->presentationId == e->presentationId) {
                     delete m_loadedItems[i];
@@ -182,12 +182,13 @@ bool Q3DSQmlStreamProxy::event(QEvent *event)
                     break;
                 }
             }
-            producer = static_cast<Q3DSQmlStreamProducer *>(m_streamProducers[e->presentationId]);
+            producer = static_cast<Q3DSQmlStreamProducer *>(
+                        m_streamProducers.take(e->presentationId));
             IQ3DSQmlStreamService::getQmlStreamService()->unregisterProducer(producer);
             delete producer;
             return true;
         }
-        if (m_streamProducers.value(e->presentationId, nullptr) == nullptr) {
+        if (!m_streamProducers.contains(e->presentationId)) {
             producer = new Q3DSQmlStreamProducer(e->presentationId, e->presentationArgs, this);
             m_streamProducers[e->presentationId] = producer;
             IQ3DSQmlStreamService::getQmlStreamService()
@@ -229,7 +230,6 @@ void Q3DSQmlStreamProxy::setSettings(Q3DSSubPresentationSettings *settings)
 
 void Q3DSQmlStreamProxy::setPath(const QString& path)
 {
-    QFileInfo fi(path);
-    QString modPath = fi.path(); // Strip filename out
+    QString modPath = QFileInfo(path).path(); // path() strips filename out
     m_path = pathToUrl(modPath);
 }

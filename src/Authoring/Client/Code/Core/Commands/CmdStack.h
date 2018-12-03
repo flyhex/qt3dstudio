@@ -80,6 +80,10 @@ public:
     bool CanUndo();
     bool CanRedo();
 
+    bool isUndoingOrRedoing() const;
+
+    void RemoveLastUndo();
+
     QString GetUndoDescription();
     QString GetRedoDescription();
 
@@ -102,6 +106,8 @@ protected:
 
     TCmdList m_UndoList;
     TCmdList m_RedoList;
+
+    bool m_undoingOrRedoing = false;
 
     unsigned long m_MaxUndoStackSize;
 

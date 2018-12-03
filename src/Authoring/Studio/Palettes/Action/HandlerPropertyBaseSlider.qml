@@ -44,7 +44,7 @@ Row {
     property alias sliderMin: slider.from
     property alias sliderMax: slider.to
     property bool intSlider: false
-    property int decimalSlider: 3
+    property int decimalSlider: Math.min(precision(slider.stepSize), 3)
     property Item tabItem1: textField
 
     signal previewValue // Indicates desiredValue contains a preview value
@@ -59,6 +59,14 @@ Row {
             rateLimiter.stop();
         textField.setTextFieldValue();
         root.commitValue();
+    }
+
+    // get the number of decimals in a float/double
+    function precision(a) {
+      if (!isFinite(a)) return 0;
+      var e = 1, p = 0;
+      while (Math.round(a * e) / e !== a) { e *= 10; p++; }
+      return p;
     }
 
     onValueChanged: {
@@ -98,7 +106,7 @@ Row {
         background: Rectangle {
             x: slider.leftPadding
             y: slider.topPadding + slider.availableHeight / 2 - height / 2
-            implicitWidth: _valueWidth / 2 - 5
+            implicitWidth: _valueWidth - textField.width - 5
             implicitHeight: 6
             height: implicitHeight
             radius: 2
@@ -194,7 +202,7 @@ Row {
         id: textField
 
         height: _controlBaseHeight
-        width: _valueWidth / 2
+        width: 55
         text: intSlider ? slider.value.toFixed(0) : slider.value.toFixed(decimalSlider)
 
         validator: intSlider ? intValidator : doubleValidator

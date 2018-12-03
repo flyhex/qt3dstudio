@@ -54,6 +54,7 @@ public:
 
     int getSelectedPropertyHandle() const;
     bool detachMaterial() const;
+    void setTextureTitle(); // make title/label show 'texture' instead of 'sub-presentation'
 
 private:
     Ui::ChooseImagePropertyDlg *m_ui;

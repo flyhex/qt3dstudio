@@ -31,9 +31,9 @@ import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 import "../controls"
 
-/* Use for: Tiling ... */
+// Used for: Tiling
 
-GridLayout {
+RowLayout {
     id: root
 
     property alias valueX: textFieldX.text
@@ -42,33 +42,36 @@ GridLayout {
     property Item tabItem1: textFieldX
     property Item tabItem2: textFieldY
 
-    columns: 2
-    rowSpacing: 1
-
     signal editingFinished
     signal previewValueChanged
+
+    spacing: 0
 
     StyledLabel {
         Layout.preferredWidth: 10
         text: qsTr("X")
+        color: _xAxisColor
     }
 
     FloatTextField {
         id: textFieldX
-
+        Layout.preferredWidth: (_valueWidth - 40) / 2
         decimalValue: numberOfDecimal
         onEditingFinished: root.editingFinished()
         onPreviewValueChanged: root.previewValueChanged()
     }
 
+    Item { width: 20 }
+
     StyledLabel {
         Layout.preferredWidth: 10
         text: qsTr("Y")
+        color: _yAxisColor
     }
 
     FloatTextField {
         id: textFieldY
-
+        Layout.preferredWidth: (_valueWidth - 40) / 2
         decimalValue: numberOfDecimal
         onEditingFinished: root.editingFinished()
         onPreviewValueChanged: root.previewValueChanged()

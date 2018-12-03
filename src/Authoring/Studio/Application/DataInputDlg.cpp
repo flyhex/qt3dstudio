@@ -35,7 +35,7 @@
 
 CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemModel *data,
                              QWidget *parent, const QVector<EDataType> acceptedTypes)
-    : QDialog(parent, Qt::MSWindowsFixedSizeDialogHint)
+    : QDialog(parent)
     , m_ui(new Ui::DataInputDlg)
     , m_data(data)
     , m_dataInput(*datainput)
@@ -73,6 +73,8 @@ CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemMode
     }
 
     initDialog();
+
+    window()->setFixedSize(size());
 
     connect(m_ui->comboBoxTypeList,
             static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
@@ -128,9 +130,11 @@ void CDataInputDlg::initDialog()
     updateVisibility(m_dataInput->type);
 }
 
-void CDataInputDlg::on_buttonBox_accepted()
+void CDataInputDlg::accept()
 {
-    m_dataInput->name = m_name;
+    if (m_dataInput->name != m_name)
+        m_dataInput->name = getUniqueId(m_name);
+
     m_dataInput->type = m_type;
     if (m_type == DataTypeRangedNumber) {
         m_dataInput->minValue = m_min;
@@ -142,11 +146,6 @@ void CDataInputDlg::on_buttonBox_accepted()
     }
 #endif
     QDialog::accept();
-}
-
-void CDataInputDlg::on_buttonBox_rejected()
-{
-    QDialog::reject();
 }
 
 void CDataInputDlg::onTypeChanged(int type)
@@ -172,7 +171,7 @@ void CDataInputDlg::onMaxChanged(float max)
 void CDataInputDlg::onNameChanged(const QString &name)
 {
     int cursorPos = m_ui->lineEditInputName->cursorPosition();
-    m_name = getUniqueId(name);
+    m_name = name;
     m_ui->lineEditInputName->setText(m_name);
     m_ui->lineEditInputName->setCursorPosition(cursorPos);
 }
@@ -220,7 +219,7 @@ void CDataInputDlg::updateVisibility(int type)
 #endif
     // Adjust text label positioning according to the
     // visibility of info text warning about allowed datatypes.
-    if (m_dataInput->controlledElems.size()) {
+    if (m_dataInput->ctrldElems.size()) {
         m_ui->labelInfoText->setVisible(true);
         m_ui->infoTxtSpacer->changeSize(20, 18);
     } else {

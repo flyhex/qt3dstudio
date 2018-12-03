@@ -83,6 +83,7 @@ public:
     Q_INVOKABLE bool toolTipsEnabled();
     Q_INVOKABLE QString convertPathToProjectRoot(const QString &presentationPath);
     Q_INVOKABLE bool isRefMaterial(int instance) const;
+    Q_INVOKABLE QString noneString() const;
 
     // IDataModelListener
     void OnBeginDataModelNotifications() override;
@@ -111,7 +112,6 @@ private:
     void onFilesChanged(const Q3DStudio::TFileModificationList &inFileModificationList);
     void OnNewPresentation() override;
     void OnClosingPresentation() override;
-    void OnLoadedSubPresentation() override;
     void OnTimeChanged();
     void filterMaterials(std::vector<Q3DStudio::CFilePath> &materials);
     void filterMatDatas(std::vector<Q3DStudio::CFilePath> &matDatas);

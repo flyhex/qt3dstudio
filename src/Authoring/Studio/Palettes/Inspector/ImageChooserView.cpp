@@ -37,7 +37,6 @@
 #include "Core.h"
 #include "Doc.h"
 #include "StudioApp.h"
-#include "StudioPreferences.h"
 
 #include <QtCore/qtimer.h>
 #include <QtQml/qqmlcontext.h>
@@ -56,12 +55,12 @@ ImageChooserView::ImageChooserView(QWidget *parent)
 void ImageChooserView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_resDir"_L1,
-                                      resourceImageUrl());
-    rootContext()->setContextProperty("_imageChooserView"_L1, this);
-    rootContext()->setContextProperty("_imageChooserModel"_L1, m_model);
-    engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Palettes/Inspector/ImageChooser.qml"_L1));
+    rootContext()->setContextProperty(QStringLiteral("_resDir"),
+                                      StudioUtils::resourceImageUrl());
+    rootContext()->setContextProperty(QStringLiteral("_imageChooserView"), this);
+    rootContext()->setContextProperty(QStringLiteral("_imageChooserModel"), m_model);
+    engine()->addImportPath(StudioUtils::qmlImportPath());
+    setSource(QUrl(QStringLiteral("qrc:/Palettes/Inspector/ImageChooser.qml")));
 }
 
 QSize ImageChooserView::sizeHint() const
@@ -89,26 +88,9 @@ int ImageChooserView::instance() const
     return m_instance;
 }
 
-bool ImageChooserView::isFocused() const
+QString ImageChooserView::currentDataModelPath() const
 {
-    return hasFocus();
-}
-
-void ImageChooserView::focusInEvent(QFocusEvent *event)
-{
-    QQuickWidget::focusOutEvent(event);
-    emit focusChanged();
-}
-
-void ImageChooserView::focusOutEvent(QFocusEvent *event)
-{
-    QQuickWidget::focusOutEvent(event);
-    emit focusChanged();
-    QTimer::singleShot(0, this, &QQuickWidget::close);
-}
-
-void ImageChooserView::showEvent(QShowEvent *event)
-{
+    QString cleanPath;
     const auto doc = g_StudioApp.GetCore()->GetDoc();
     const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
 
@@ -125,12 +107,47 @@ void ImageChooserView::showEvent(QShowEvent *event)
         const QString renderablePath = g_StudioApp.getRenderableAbsolutePath(path);
 
         if (renderablePath.isEmpty())
-            m_model->setCurrentFile(path);
+            cleanPath = path;
         else
-            m_model->setCurrentFile(renderablePath);
+            cleanPath = renderablePath;
+
+        cleanPath = QDir::cleanPath(
+                    QDir(doc->GetDocumentDirectory()).filePath(cleanPath));
     } else {
-        m_model->setCurrentFile(tr("[None]"));
+        cleanPath = ChooserModelBase::noneString();
     }
 
+    return cleanPath;
+}
+
+bool ImageChooserView::isFocused() const
+{
+    return hasFocus();
+}
+
+void ImageChooserView::focusInEvent(QFocusEvent *event)
+{
+    QQuickWidget::focusInEvent(event);
+    emit focusChanged();
+}
+
+void ImageChooserView::focusOutEvent(QFocusEvent *event)
+{
+    QQuickWidget::focusOutEvent(event);
+    emit focusChanged();
+    QTimer::singleShot(0, this, &QQuickWidget::close);
+}
+
+void ImageChooserView::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape)
+        QTimer::singleShot(0, this, &ImageChooserView::close);
+
+    QQuickWidget::keyPressEvent(event);
+}
+
+void ImageChooserView::showEvent(QShowEvent *event)
+{
+    m_model->setCurrentFile(currentDataModelPath());
     QQuickWidget::showEvent(event);
 }

@@ -32,6 +32,8 @@
 #include <QtWidgets/qdialog.h>
 #include <QtCore/qmap.h>
 #include "DataInputDlg.h"
+#include "DataInputSelectView.h"
+#include <QtCore/qpointer.h>
 
 #ifdef QT_NAMESPACE
 using namespace QT_NAMESPACE;
@@ -64,18 +66,31 @@ protected:
     void initDialog();
     void updateButtons();
     void updateContents();
+    void updateInfo();
     QVector<CDataInputDialogItem *> dataInputs() const;
-    void keyPressEvent(QKeyEvent *event);
+    void keyPressEvent(QKeyEvent *event) override;
+    bool event(QEvent *event) override;
+    void refreshDIs();
+    void replaceDatainputs(const QModelIndexList &selectedBindings, const QString &newDIName);
+    // Given a list of data model datatypes, returns the type(s) of datainputs that can
+    // work as controller for all of listed datatypes.
+    void setUniqueAcceptedDITypes(
+            const QVector<QPair<qt3dsdm::DataModelDataType::Value, bool>> &boundTypes);
 
 private Q_SLOTS:
-    void on_buttonBox_accepted();
-    void on_buttonBox_rejected();
+    void accept() override;
+    void reject() override;
     void onAddDataInput();
     void onRemoveDataInput();
     void onEditDataInput();
     void onActivated(const QModelIndex &index);
     void onSelectionChanged();
     void onSortOrderChanged(int column, Qt::SortOrder order);
+    void onReplaceSelected();
+    void onReplaceAll();
+    void onElementSelectionChanged();
+    void onFilterTypeChanged(int index);
+    void onSearchTextChanged();
 
 private:
     Ui::DataInputListDlg *m_ui;
@@ -84,12 +99,20 @@ private:
     int m_currentDataInputIndex;
     QString m_currentDataInputName;
     QStandardItemModel *m_tableContents;
+    QStandardItemModel *m_infoContents;
     bool m_goToAdd;
     int m_sortColumn;
     Qt::SortOrder m_sortOrder;
     QString m_mostRecentlyAdded;
     EDataType m_defaultType;
     QVector<EDataType> m_acceptedTypes;
+    QPointer<DataInputSelectView> m_dataInputChooserView;
+    // -1 all types, 0... matches EDataType enum
+    int m_typeFilter = -1;
+    QString m_searchString;
+
+    QAction *m_replaceSelectedAction;
+    QAction *m_replaceAllAction;
 };
 
 #endif

@@ -118,12 +118,12 @@ void SlideView::showControllerDialog(const QPoint &point)
         m_currentController : m_dataInputSelector->getNoneString();
     QVector<QPair<QString, int>> dataInputList;
 
-    for (auto it : qAsConst(g_StudioApp.m_dataInputDialogItems)) {
-        if (it->type == EDataType::DataTypeString)
-            dataInputList.append(QPair<QString, int>(it->name, it->type));
-    }
+    for (auto &it : qAsConst(g_StudioApp.m_dataInputDialogItems))
+        dataInputList.append({it->name, it->type});
+
     m_dataInputSelector->setData(dataInputList, currCtr);
-    CDialogs::showWidgetBrowser(this, m_dataInputSelector, point);
+    CDialogs::showWidgetBrowser(this, m_dataInputSelector, point,
+                                CDialogs::WidgetBrowserAlign::ToolButton);
 
     return;
 }
@@ -391,11 +391,11 @@ void SlideView::updateDataInputStatus()
 void SlideView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_parentView"_L1, this);
-    rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
+    rootContext()->setContextProperty(QStringLiteral("_parentView"), this);
+    rootContext()->setContextProperty(QStringLiteral("_resDir"), StudioUtils::resourceImageUrl());
 
-    engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Palettes/Slide/SlideView.qml"_L1));
+    engine()->addImportPath(StudioUtils::qmlImportPath());
+    setSource(QUrl(QStringLiteral("qrc:/Palettes/Slide/SlideView.qml")));
 
     const QVector<EDataType> acceptedTypes = { EDataType::DataTypeString };
     m_dataInputSelector = new DataInputSelectView(acceptedTypes, this);

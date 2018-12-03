@@ -435,10 +435,11 @@ ControlEventState::Enum CControlData::GetMouseWheelEventState()
 }
 
 CDropTarget *CControlData::FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags,
-                                             EStudioObjectType objectType)
+                                             EStudioObjectType objectType,
+                                             Q3DStudio::DocumentEditorFileType::Enum fileType)
 {
     if (m_Control)
-        return m_Control->FindDropCandidate(inMousePoint, inFlags, objectType);
+        return m_Control->FindDropCandidate(inMousePoint, inFlags, objectType, fileType);
     return nullptr;
 }
 

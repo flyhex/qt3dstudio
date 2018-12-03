@@ -125,13 +125,14 @@ public:
                              qt3dsdm::SComposerObjectDefinitions &inObjectDefs,
                              Q3DStudio::CGraph &inAssetGraph, qt3dsdm::IMetaData &inMetaData,
                              TInstanceHandle inTargetId = TInstanceHandle(),
-                             bool setTimeRange = true);
+                             bool setTimeRange = true, bool selectCreatedInstance = true);
 
     static TInstanceHandle CreateSceneGraphInstance(
         Qt3DSDMInstanceHandle inMaster, TInstanceHandle parent, TSlideHandle inSlide,
         qt3dsdm::IDataCore &inDataCore, qt3dsdm::ISlideSystem &inSlideSystem,
         qt3dsdm::SComposerObjectDefinitions &inObjectDefs, Q3DStudio::CGraph &inAssetGraph,
-        qt3dsdm::IMetaData &inMetaData, TInstanceHandle inTargetId = TInstanceHandle());
+        qt3dsdm::IMetaData &inMetaData, TInstanceHandle inTargetId = TInstanceHandle(),
+        bool selectCreatedInstance = true);
 
     static void UnlinkAlwaysUnlinkedProperties(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                                qt3dsdm::SComposerObjectDefinitions &inDefs,
@@ -141,6 +142,8 @@ public:
     static Qt3DSDMPropertyHandle *
     GetAlwaysUnlinkedProperties(qt3dsdm::SComposerObjectDefinitions &inDefs);
 
+    static void fixDefaultTexturePaths(qt3dsdm::Qt3DSDMInstanceHandle instance);
+
     // Create a new instance in the scene under this slide and such
     // Target id must be an id of an invalid instance so that we can potentially change an object
     // type while still maintaining references to that logical object.
@@ -148,7 +151,7 @@ public:
     CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Enum type, TInstanceHandle parent,
                              TSlideHandle inSlide,
                              TInstanceHandle inTargetId = TInstanceHandle(),
-                             bool setTimeRange = true) = 0;
+                             bool setTimeRange = true, bool selectCreatedInstance = true) = 0;
 
     virtual TInstanceHandle CreateSceneGraphInstance(qt3dsdm::ComposerObjectTypes::Enum type,
                                                      TInstanceHandle parent, TSlideHandle inSlide,
@@ -156,12 +159,12 @@ public:
                                                      const CPt &inPosition,
                                                      EPrimitiveType inPrimitiveType,
                                                      long inStartTime,
-                                                     bool setTimeRange = true) = 0;
-    virtual void setInstanceImagePropertyValueAsRenderable(TInstanceHandle instance,
-                                                           TPropertyHandle prop,
-                                                           const QString &pId) = 0;
-    virtual void addRectForSubpresentation(const QString &pId, TSlideHandle slide,
-                                           const CPt &pos = CPt(), long startTime = -1) = 0;
+                                                     bool setTimeRange = true,
+                                                     bool selectCreatedInstance = true) = 0;
+    virtual void setInstanceImagePropertyValue(TInstanceHandle instance, TPropertyHandle prop,
+                                               const QString &src, bool isSubp = true) = 0;
+    virtual void addRectFromSource(const QString &src, TSlideHandle slide, bool isSubPres,
+                                   const CPt &pos = {}, long startTime = -1) = 0;
 
     virtual void DeleteInstances(const qt3dsdm::TInstanceHandleList &instances) = 0;
     // Delete this data model instance.  Will recursively delete any attached children in the scene
@@ -174,6 +177,11 @@ public:
         DeleteInstances(theInstances);
     }
 
+    virtual QString getMaterialDirectoryPath() const = 0;
+    virtual QString getMaterialFilePath(const QString &materialName) const = 0;
+
+    virtual void saveIfMaterial(Qt3DSDMInstanceHandle instance) = 0;
+    virtual void writeMaterialFile(Qt3DSDMInstanceHandle instance, bool createNewFile) = 0;
     virtual QString writeMaterialFile(Qt3DSDMInstanceHandle instance,
                                       const QString &materialName,
                                       bool createNewFile,
@@ -181,19 +189,15 @@ public:
 
     virtual void updateMaterialInstances(const QStringList &filenames) = 0;
 
-    virtual bool isMaterialContainer(Qt3DSDMInstanceHandle instance) const = 0;
+    virtual void removeUnusedFromMaterialContainer() = 0;
+    virtual void removeDeletedFromMaterialContainer() = 0;
 
-    virtual bool isInsideMaterialContainer(Qt3DSDMInstanceHandle instance) const = 0;
+    virtual QString getFilePathFromMaterialName(const QString &name) = 0;
+    virtual QString getMaterialNameFromFilePath(const QString &path) = 0;
 
-    virtual Qt3DSDMInstanceHandle getMaterialContainer() const = 0;
-
-    virtual Qt3DSDMInstanceHandle getMaterial(const QString &materialName) = 0;
-    virtual Qt3DSDMInstanceHandle getOrCreateMaterial(const QString &materialName) = 0;
-
-    virtual void getMaterialReference(Qt3DSDMInstanceHandle instance,
-                                      Qt3DSDMInstanceHandle &reference) const = 0;
-    virtual void setMaterialReference(Qt3DSDMInstanceHandle instance,
-                                      Qt3DSDMInstanceHandle reference) = 0;
+    virtual Qt3DSDMInstanceHandle getMaterial(const QString &path) = 0;
+    virtual Qt3DSDMInstanceHandle getOrCreateMaterial(const QString &path,
+                                                      bool selectCreatedInstance = true) = 0;
 
     virtual void copyMaterialProperties(Qt3DSDMInstanceHandle src, Qt3DSDMInstanceHandle dst) = 0;
 
@@ -238,14 +242,15 @@ public:
     virtual void SetMaterialType(TInstanceHandle instance,
                                  const QString &inRelativePathToMaterialFile) = 0;
 
-    virtual void setMaterialProperties(TInstanceHandle instance, const QString &materialName,
+    virtual void setMaterialProperties(TInstanceHandle instance,
                                        const QString &materialSourcePath,
                                        const QMap<QString, QString> &values,
                                        const QMap<QString, QMap<QString, QString>>
                                        &textureValues) = 0;
 
-    virtual void setMaterialReferenceByName(TInstanceHandle instance,
-                                            const QString &materialName) = 0;
+    virtual void setMaterialReferenceByPath(TInstanceHandle instance, const QString &path) = 0;
+
+    virtual void setMaterialNameByPath(TInstanceHandle instance, const QString &path) = 0;
 
     virtual void setMaterialSourcePath(TInstanceHandle instance,
                                        const QString &materialSourcePath) = 0;
@@ -340,6 +345,8 @@ public:
 
     // Returns the new component.
     virtual TInstanceHandle MakeComponent(const qt3dsdm::TInstanceHandleList &inInstances) = 0;
+
+    virtual void makeAnimatable(const qt3dsdm::TInstanceHandleList &instances) = 0;
 
     virtual qt3dsdm::TInstanceHandleList
     DuplicateInstances(const qt3dsdm::TInstanceHandleList &inInstances, TInstanceHandle inDest,

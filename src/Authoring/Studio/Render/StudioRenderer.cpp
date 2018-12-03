@@ -117,6 +117,7 @@ struct SRendererImpl : public IStudioRenderer,
     QHash<QString, StudioSubPresentation> m_subpresentations;
     QScopedPointer<Q3DSQmlStreamProxy> m_proxy;
     QMap<QString, int> m_initialFrameMap;
+    bool m_fullSizePreview = false;
 
     SRendererImpl()
         : m_Dispatch(*g_StudioApp.GetCore()->GetDispatch())
@@ -165,7 +166,7 @@ struct SRendererImpl : public IStudioRenderer,
         IOffscreenRenderManager &offscreenMgr(m_Context->GetOffscreenRenderManager());
         const QString projectPath = m_Doc.GetCore()->getProjectFile().getProjectPath();
         // setPath expects full path, but strips the filename
-        m_proxy->setPath(projectPath + "/dummy.uip");
+        m_proxy->setPath(projectPath + QLatin1Char('/'));
         QVector<SubPresentationRecord> toUnregister;
         QVector<SubPresentationRecord> toRegister;
         const auto keys = m_subpresentations.keys();
@@ -221,7 +222,6 @@ struct SRendererImpl : public IStudioRenderer,
         // then get the desired environment to initialize the qml renderer.
         QCoreApplication::processEvents();
         for (int i = 0; i < toRegister.size(); ++i) {
-            QByteArray data = toRegister[i].m_id.toLocal8Bit();
             if (toRegister[i].m_type == QLatin1String("presentation-qml"))
                 m_subpresentations[toRegister[i].m_id].renderer
                         ->GetDesiredEnvironment(QT3DSVec2(1.0f, 1.0f));
@@ -303,7 +303,8 @@ struct SRendererImpl : public IStudioRenderer,
         try {
             m_RenderContext = std::make_shared<CWGLRenderContext>(inWindow);
 
-            Q3DStudio::CString theResourcePath = Q3DStudio::CString::fromQString(resourcePath());
+            Q3DStudio::CString theResourcePath = Q3DStudio::CString::fromQString(
+                        StudioUtils::resourcePath());
             NVScopedRefCounted<qt3ds::render::IQt3DSRenderContextCore> theCore =
                 qt3ds::render::IQt3DSRenderContextCore::Create(
                     m_RenderContext->GetRenderContext().GetFoundation(),
@@ -353,7 +354,7 @@ struct SRendererImpl : public IStudioRenderer,
 
         m_Rect = inRect;
         if (IsInitialized()) {
-            m_pixelRatio = devicePixelRatio();
+            m_pixelRatio = StudioUtils::devicePixelRatio();
             m_RenderContext->BeginRender();
             NVRenderContext &theContext = m_RenderContext->GetRenderContext();
             theContext.SetViewport(qt3ds::render::NVRenderRect(0, 0, inRect.width(),
@@ -362,6 +363,12 @@ struct SRendererImpl : public IStudioRenderer,
             m_RenderContext->EndRender();
         }
     }
+
+    void setFullSizePreview(bool enabled) override
+    {
+        m_fullSizePreview = enabled;
+    }
+
     // Request that this object renders.  May be ignored if a transaction
     // is ongoing so we don't get multiple rendering per transaction.
     void RequestRender() override
@@ -382,6 +389,25 @@ struct SRendererImpl : public IStudioRenderer,
         Render();
     }
 
+    void getPreviewFbo(QSize &outFboDim, qt3ds::QT3DSU32 &outFboTexture) override
+    {
+        if (m_Translation) {
+            outFboDim = QSize(m_Translation->m_previewFboDimensions.x,
+                              m_Translation->m_previewFboDimensions.y);
+            // The handle is a void * so first cast to size_t to avoid truncating pointer warning
+            if (m_Translation->m_previewTexture) {
+                outFboTexture = static_cast<qt3ds::QT3DSU32>(reinterpret_cast<size_t>(
+                            m_Translation->m_previewTexture->GetTextureObjectHandle()));
+            } else {
+                outFboTexture = 0;
+            }
+
+        } else {
+            outFboDim = QSize(0, 0);
+            outFboTexture = 0;
+        }
+    }
+
     void MakeContextCurrent() override
     {
         m_RenderContext->BeginRender();
@@ -397,12 +423,12 @@ struct SRendererImpl : public IStudioRenderer,
         m_RenderRequested = false;
         if (!m_Closed && IsInitialized()) {
             m_RenderContext->BeginRender();
-            bool preview = false;
+            bool overlayPreview = false;
             if (m_Translation) {
-                preview = CStudioPreferences::showEditModePreview()
+                overlayPreview = CStudioPreferences::showEditModePreview()
                         && m_Translation->m_EditCameraEnabled
-                        && !m_Translation->GetPreviewViewportDimensions().isZero();
-                m_Translation->PreRender(preview);
+                        && m_Translation->hasRoomForOverlayPreview();
+                m_Translation->PreRender(overlayPreview || m_fullSizePreview);
             }
             NVRenderContext &theContext = m_RenderContext->GetRenderContext();
             theContext.SetDepthWriteEnabled(true);
@@ -410,12 +436,13 @@ struct SRendererImpl : public IStudioRenderer,
                                  qt3ds::render::NVRenderClearValues::Color
                                  | qt3ds::render::NVRenderClearValues::Depth));
             if (m_Translation) {
-                // draw scene preview view screen display area layer
-                if (preview) {
+                if (overlayPreview || m_fullSizePreview) {
+                    // Full size preview is used for both scene camera tab and overlay preview
                     m_Translation->Render(0, false, true, false);
                     m_Translation->PreRender(false);
                 }
-                m_Translation->Render(m_PickResult.GetWidgetId(), m_GuidesEnabled, false, preview);
+                m_Translation->Render(m_PickResult.GetWidgetId(), m_GuidesEnabled, false,
+                                      overlayPreview);
             }
 
             m_RenderContext->EndRender();
@@ -675,8 +702,9 @@ struct SRendererImpl : public IStudioRenderer,
             QString projectPath = g_StudioApp.GetCore()->getProjectFile().getProjectPath();
             if (!projectPath.isEmpty()) {
                 // Add the installed font folders from the res dir.
-                Q3DStudio::CString thePath(Q3DStudio::CString::fromQString(
-                                               resourcePath() + QStringLiteral("/Font")));
+                Q3DStudio::CString thePath(
+                            Q3DStudio::CString::fromQString(
+                                StudioUtils::resourcePath() + QStringLiteral("/Font")));
                 m_Context->GetTextRenderer()->AddSystemFontDirectory(
                     m_Context->GetStringTable().RegisterStr(thePath.c_str()));
                 m_Context->GetTextRenderer()->AddProjectFontDirectory(
@@ -720,6 +748,18 @@ struct SRendererImpl : public IStudioRenderer,
     qt3dsdm::Qt3DSDMInstanceHandle GetAnchorPointFromPick(SPathPick &inPick)
     {
         return m_Translation->GetAnchorPoint(inPick);
+    }
+
+    Qt3DSDMInstanceHandle getObjectAt(const QPoint &pt) override
+    {
+        if (m_Translation == nullptr)
+            return Qt3DSDMInstanceHandle();
+
+        const QPoint point(pt * m_pixelRatio);
+        const auto pick = m_Translation->Pick(point, TranslationSelectMode::Single, true);
+        if (pick.getType() == StudioPickValueTypes::Instance)
+            return pick.getData<Qt3DSDMInstanceHandle>();
+        return Qt3DSDMInstanceHandle();
     }
 
     //==========================================================================

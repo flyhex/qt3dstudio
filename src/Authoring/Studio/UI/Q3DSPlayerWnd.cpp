@@ -331,6 +331,8 @@ void Q3DSPlayerWnd::initializeGL()
 void Q3DSPlayerWnd::paintGL()
 {
     g_StudioApp.getRenderer().RenderNow();
+
+    Q_EMIT newFrame();
 }
 
 qreal Q3DSPlayerWnd::fixedDevicePixelRatio() const

@@ -72,12 +72,12 @@ QString Qt3DSDMInspectable::GetName()
             m_Core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
 
     if (m_Instance == m_DualPersonalityInstance)
-        return theBridge->GetName(m_Instance);
+        return theBridge->GetName(m_Instance, true);
 
-    QString theName = theBridge->GetName(m_Instance);
-    theName += " (";
-    theName += theBridge->GetName(m_DualPersonalityInstance);
-    theName += ")";
+    QString theName = theBridge->GetName(m_Instance, true);
+    theName += QLatin1String(" (");
+    theName += theBridge->GetName(m_DualPersonalityInstance, true);
+    theName += QLatin1String(")");
 
     return theName;
 }

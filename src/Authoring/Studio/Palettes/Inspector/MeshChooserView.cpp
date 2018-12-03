@@ -55,13 +55,13 @@ MeshChooserView::MeshChooserView(QWidget *parent)
 void MeshChooserView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_resDir"_L1,
-                                      resourceImageUrl());
-    rootContext()->setContextProperty("_meshChooserView"_L1, this);
-    rootContext()->setContextProperty("_meshChooserModel"_L1, m_model);
+    rootContext()->setContextProperty(QStringLiteral("_resDir"),
+                                      StudioUtils::resourceImageUrl());
+    rootContext()->setContextProperty(QStringLiteral("_meshChooserView"), this);
+    rootContext()->setContextProperty(QStringLiteral("_meshChooserModel"), m_model);
 
-    engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Palettes/Inspector/MeshChooser.qml"_L1));
+    engine()->addImportPath(StudioUtils::qmlImportPath());
+    setSource(QUrl(QStringLiteral("qrc:/Palettes/Inspector/MeshChooser.qml")));
 }
 
 QSize MeshChooserView::sizeHint() const
@@ -71,7 +71,6 @@ QSize MeshChooserView::sizeHint() const
 
 void MeshChooserView::setSelectedMeshName(const QString &name)
 {
-    hide();
     bool resourceName = false;
     QString meshName = QLatin1Char('#') + name;
     QStringList files = g_StudioApp.GetCore()->GetDoc()->GetBufferCache().GetPrimitiveNames();
@@ -115,6 +114,14 @@ void MeshChooserView::focusOutEvent(QFocusEvent *event)
     QTimer::singleShot(0, this, &QQuickWidget::close);
 }
 
+void MeshChooserView::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape)
+        QTimer::singleShot(0, this, &MeshChooserView::close);
+
+    QQuickWidget::keyPressEvent(event);
+}
+
 void MeshChooserView::showEvent(QShowEvent *event)
 {
     const auto doc = g_StudioApp.GetCore()->GetDoc();
@@ -123,17 +130,12 @@ void MeshChooserView::showEvent(QShowEvent *event)
     qt3dsdm::SValue value;
     propertySystem->GetInstancePropertyValue(m_instance, m_handle, value);
 
-    const QString meshValue = qt3dsdm::get<QString>(value);
-    const Q3DStudio::CFilePath selectionItem = Q3DStudio::CFilePath(meshValue);
-    const Q3DStudio::CFilePath selectionWithoutId = selectionItem.filePath();
-
     QString currentFile;
-
-    QString selectionWithoutIdName = selectionWithoutId.GetFileName().toQString();
-    if (selectionWithoutIdName.size())
-        currentFile = selectionWithoutIdName;
+    const QString meshValue = qt3dsdm::get<QString>(value);
+    if (meshValue.startsWith(QLatin1Char('#')))
+        currentFile = meshValue.mid(1);
     else
-        currentFile = selectionItem.GetIdentifier().toQString();
+        currentFile = QDir::cleanPath(QDir(doc->GetDocumentDirectory()).filePath(meshValue));
 
     m_model->setCurrentFile(currentFile);
 

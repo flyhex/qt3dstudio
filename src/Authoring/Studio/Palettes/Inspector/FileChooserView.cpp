@@ -55,12 +55,12 @@ FileChooserView::FileChooserView(QWidget *parent)
 void FileChooserView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_resDir"_L1,
-                                      resourceImageUrl());
-    rootContext()->setContextProperty("_fileChooserView"_L1, this);
-    rootContext()->setContextProperty("_fileChooserModel"_L1, m_model);
-    engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Palettes/Inspector/FileChooser.qml"_L1));
+    rootContext()->setContextProperty(QStringLiteral("_resDir"),
+                                      StudioUtils::resourceImageUrl());
+    rootContext()->setContextProperty(QStringLiteral("_fileChooserView"), this);
+    rootContext()->setContextProperty(QStringLiteral("_fileChooserModel"), m_model);
+    engine()->addImportPath(StudioUtils::qmlImportPath());
+    setSource(QUrl(QStringLiteral("qrc:/Palettes/Inspector/FileChooser.qml")));
 }
 
 QSize FileChooserView::sizeHint() const
@@ -91,7 +91,33 @@ int FileChooserView::instance() const
 void FileChooserView::focusOutEvent(QFocusEvent *event)
 {
     QQuickWidget::focusOutEvent(event);
-    QTimer::singleShot(0, this, &FileChooserView::close);
+    // Don't lose focus because of progress dialog pops up which happens e.g. when importing mesh
+    // in response to file selection
+    if (g_StudioApp.isOnProgress()) {
+        if (!m_focusOutTimer) {
+            m_focusOutTimer = new QTimer(this);
+            connect(m_focusOutTimer, &QTimer::timeout, [this]() {
+                // Periodically check if progress is done to refocus the chooser view
+                if (!g_StudioApp.isOnProgress()) {
+                    m_focusOutTimer->stop();
+                    m_focusOutTimer->deleteLater();
+                    m_focusOutTimer = nullptr;
+                    this->activateWindow();
+                }
+            });
+            m_focusOutTimer->start(250);
+        }
+    } else {
+        QTimer::singleShot(0, this, &FileChooserView::close);
+    }
+}
+
+void FileChooserView::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape)
+        QTimer::singleShot(0, this, &FileChooserView::close);
+
+    QQuickWidget::keyPressEvent(event);
 }
 
 void FileChooserView::showEvent(QShowEvent *event)

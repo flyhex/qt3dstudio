@@ -50,7 +50,7 @@ Rectangle {
             opacity: isExpandable ? 1 : 0
 
             MouseArea {
-                visible: isExpandable
+                visible: listView.model && isExpandable
                 anchors.fill: parent
                 onClicked: {
                     if (expanded)
@@ -62,22 +62,36 @@ Rectangle {
         }
 
         Image {
-            source: fileIcon
+            source: listView.model ? fileIcon : ""
             width: 16
             height: 16
         }
 
         StyledLabel {
-            text: fileName
+            text: listView.model ? fileName : ""
             color: _textColor
             leftPadding: 5
 
             MouseArea {
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton
-                visible: isSelectable
-                onClicked: item.clicked(filePath)
-                onDoubleClicked: item.doubleClicked(filePath)
+                onClicked: {
+                    if (isSelectable) {
+                        listView.model.setCurrentFile(filePath);
+                        item.clicked(filePath);
+                    }
+                }
+                onDoubleClicked: {
+                    if (isSelectable) {
+                        listView.model.setCurrentFile(filePath);
+                        item.doubleClicked(filePath);
+                    } else if (isExpandable) {
+                        if (expanded)
+                            listView.model.collapse(index);
+                        else
+                            listView.model.expand(index);
+                    }
+                }
             }
         }
     }

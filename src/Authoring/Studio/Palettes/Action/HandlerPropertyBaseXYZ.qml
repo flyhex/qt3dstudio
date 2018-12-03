@@ -33,7 +33,7 @@ import "../controls"
 
 /* Use for: Position, Rotation, Scale, Pivot ... */
 
-GridLayout {
+RowLayout {
     id: root
 
     property alias valueX: textFieldX.text
@@ -44,46 +44,52 @@ GridLayout {
     property Item tabItem2: textFieldY
     property Item tabItem3: textFieldZ
 
-    columns: 2
-    rowSpacing: 1
-
     signal editingFinished
     signal previewValueChanged
+    transformOrigin: Item.Center
+    spacing: 0
 
     StyledLabel {
         Layout.preferredWidth: 10
         text: qsTr("X")
+        color: _xAxisColor
     }
 
     FloatTextField {
         id: textFieldX
-
+        Layout.preferredWidth: (_valueWidth - 50) / 3
         decimalValue: numberOfDecimal
         onEditingFinished: root.editingFinished()
         onPreviewValueChanged: root.previewValueChanged()
     }
+
+    Item { width: 10 }
 
     StyledLabel {
         Layout.preferredWidth: 10
         text: qsTr("Y")
+        color: _yAxisColor
     }
 
     FloatTextField {
         id: textFieldY
-
+        Layout.preferredWidth: (_valueWidth - 50) / 3
         decimalValue: numberOfDecimal
         onEditingFinished: root.editingFinished()
         onPreviewValueChanged: root.previewValueChanged()
     }
 
+    Item { width: 10 }
+
     StyledLabel {
         Layout.preferredWidth: 10
         text: qsTr("Z")
+        color: _zAxisColor
     }
 
     FloatTextField {
         id: textFieldZ
-
+        Layout.preferredWidth: (_valueWidth - 50) / 3
         decimalValue: numberOfDecimal
         onEditingFinished: root.editingFinished()
         onPreviewValueChanged: root.previewValueChanged()

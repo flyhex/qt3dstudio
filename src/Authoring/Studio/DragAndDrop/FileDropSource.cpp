@@ -42,6 +42,7 @@
 #include "Qt3DSFileTools.h"
 #include "ImportUtils.h"
 #include "ChooseImagePropertyDlg.h"
+#include "Dispatch.h"
 
 bool CFileDropSource::s_FileHasValidTarget = false;
 
@@ -50,22 +51,41 @@ bool CFileDropSource::ValidateTarget(CDropTarget *inTarget)
     using namespace Q3DStudio;
 
     EStudioObjectType targetType = (EStudioObjectType)inTarget->GetObjectType();
-
     if (m_ObjectType & (OBJTYPE_PRESENTATION | OBJTYPE_QML_STREAM)) {
         SetHasValidTarget(targetType & (OBJTYPE_LAYER | OBJTYPE_MATERIAL | OBJTYPE_CUSTOMMATERIAL
                                         | OBJTYPE_REFERENCEDMATERIAL | OBJTYPE_IMAGE));
         return m_HasValidTarget;
     }
 
-    bool theValidTarget = false;
+    if (m_ObjectType == OBJTYPE_MATERIALDATA) {
+        SetHasValidTarget(targetType & (OBJTYPE_MATERIAL | OBJTYPE_CUSTOMMATERIAL
+                                        | OBJTYPE_REFERENCEDMATERIAL));
+        return m_HasValidTarget;
+    }
 
     // the only thing we want to do from here is check the type.
-    theValidTarget = CStudioObjectTypes::AcceptableParent(
-        (EStudioObjectType)m_ObjectType, (EStudioObjectType)inTarget->GetObjectType());
+    bool targetIsValid = CStudioObjectTypes::AcceptableParent((EStudioObjectType)m_ObjectType,
+                                                              targetType);
 
-    if (!theValidTarget) {
-        SetHasValidTarget(theValidTarget);
-        return theValidTarget;
+    // allow material, image, and scene as valid targets for image drops
+    if (!targetIsValid && m_FileType == DocumentEditorFileType::Image) {
+        if (targetType & (OBJTYPE_MATERIAL | OBJTYPE_CUSTOMMATERIAL | OBJTYPE_REFERENCEDMATERIAL
+                          | OBJTYPE_IMAGE)) {
+            const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+                    ->GetClientDataModelBridge();
+            // Default material shouldn't be targeatable
+            targetIsValid = bridge->GetSourcePath(inTarget->GetInstance())
+                    != bridge->getDefaultMaterialName();
+        } else {
+            // Image isn't normally acceptable child of a scene, but dropping image on scene
+            // will create a rect with image as texture on active layer
+            targetIsValid = targetType == OBJTYPE_SCENE;
+        }
+    }
+
+    if (!targetIsValid) {
+        SetHasValidTarget(false);
+        return false;
     } else {
         if (CHotKeys::IsKeyDown(Qt::AltModifier) && targetType != OBJTYPE_SCENE
             && targetType != OBJTYPE_COMPONENT) {
@@ -73,25 +93,23 @@ bool CFileDropSource::ValidateTarget(CDropTarget *inTarget)
             CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
             IDocumentReader &theReader(theDoc->GetDocumentReader());
             qt3dsdm::Qt3DSDMSlideHandle toSlide = theReader.GetAssociatedSlide(theTarget);
-            ;
 
             if (!theReader.IsMasterSlide(toSlide))
-                theValidTarget = false;
+                targetIsValid = false;
         }
 
-        SetHasValidTarget(theValidTarget);
-        return theValidTarget;
+        SetHasValidTarget(targetIsValid);
+        return targetIsValid;
     }
 }
 
-CFileDropSource::CFileDropSource(long inFlavor, void *inData, unsigned long inSize)
-    : CDropSource(inFlavor, inSize)
-    , m_File("")
+CFileDropSource::CFileDropSource(long inFlavor, const QString &filePath)
+    : CDropSource(inFlavor)
+    , m_FilePath(filePath)
 {
-    // Pull out all of the SDropItemData and build a file.
-    m_File = *(Qt3DSFile *)inData;
-    m_ObjectType = Q3DStudio::ImportUtils::GetObjectFileTypeForFile(
-                        m_File.GetAbsolutePath()).m_ObjectType;
+    const auto objFileType = Q3DStudio::ImportUtils::GetObjectFileTypeForFile(filePath);
+    m_ObjectType = objFileType.m_ObjectType;
+    m_FileType = objFileType.m_FileType;
 }
 
 void CFileDropSource::SetHasValidTarget(bool inValid)
@@ -120,7 +138,6 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
                                             qt3dsdm::Qt3DSDMSlideHandle inSlide)
 {
     CDoc &theDoc(*g_StudioApp.GetCore()->GetDoc());
-    Q3DStudio::CFilePath theFilePath(m_File.GetAbsolutePath());
     CPt thePoint;
     //  if ( CHotKeys::IsKeyDown( Qt::AltModifier ) )
     //      thePoint = GetCurrentPoint();
@@ -129,12 +146,10 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
     if (CHotKeys::IsKeyDown(Qt::ControlModifier))
         theStartTime = theDoc.GetCurrentViewTime();
 
-    if (theFilePath.IsFile()) {
-        Q3DStudio::DocumentEditorFileType::Enum theDocType(
-            Q3DStudio::ImportUtils::GetObjectFileTypeForFile(theFilePath.toQString()).m_FileType);
+    if (QFileInfo(m_FilePath).isFile()) {
         QString theCommandName;
         // TODO: internationalize
-        switch (theDocType) {
+        switch (m_FileType) {
         case Q3DStudio::DocumentEditorFileType::DAE:
             theCommandName = QObject::tr("File Drop DAE File");
             break;
@@ -185,21 +200,37 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
             break;
         }
 
-        if (theDocType == Q3DStudio::DocumentEditorFileType::Presentation
-            || theDocType == Q3DStudio::DocumentEditorFileType::QmlStream) { // set subpresentation
-            QString pathFromRoot = QDir(theDoc.GetCore()->getProjectFile().getProjectPath())
-                                        .relativeFilePath(theFilePath.toQString());
-            QString presentationId = theDoc.GetCore()
-                    ->getProjectFile().getPresentationId(pathFromRoot);
-            auto &bridge(*theDoc.GetStudioSystem()->GetClientDataModelBridge());
-            EStudioObjectType rowType = bridge.GetObjectType(inTarget);
-
-            if (rowType == OBJTYPE_LAYER) {
-                auto propHandle = bridge.GetSourcePathProperty();
-                Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
-                       ->SetInstancePropertyValueAsRenderable(inTarget, propHandle, presentationId);
+        auto &bridge(*theDoc.GetStudioSystem()->GetClientDataModelBridge());
+        bool isPres = m_FileType == Q3DStudio::DocumentEditorFileType::Presentation
+                      || m_FileType == Q3DStudio::DocumentEditorFileType::QmlStream;
+        bool isImage =  m_FileType == Q3DStudio::DocumentEditorFileType::Image
+                        && inDestType == EDROPDESTINATION_ON;
+        bool isMatData =  m_FileType == Q3DStudio::DocumentEditorFileType::MaterialData;
+        EStudioObjectType rowType = bridge.GetObjectType(inTarget);
+        if (isPres || isImage) { // set as a texture
+            QString src; // presentation id or image file name
+            if (isPres) {
+                QString pathFromRoot = QDir(theDoc.GetCore()->getProjectFile().getProjectPath())
+                                            .relativeFilePath(m_FilePath);
+                src = theDoc.GetCore()->getProjectFile().getPresentationId(pathFromRoot);
+            } else { // Image
+                src = QFileInfo(theDoc.GetDocumentPath()).dir().relativeFilePath(m_FilePath);
+            }
+            if (rowType == OBJTYPE_LAYER) { // Drop on a Layer
+                if (isPres) {
+                    auto propHandle = bridge.GetSourcePathProperty();
+                    Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
+                            ->SetInstancePropertyValueAsRenderable(inTarget, propHandle, src);
+                } else { // Image
+                    ChooseImagePropertyDlg dlg(inTarget);
+                    if (dlg.exec() == QDialog::Accepted) {
+                        qt3dsdm::Qt3DSDMPropertyHandle propHandle = dlg.getSelectedPropertyHandle();
+                        Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
+                            ->SetInstancePropertyValueAsRenderable(inTarget, propHandle, src);
+                    }
+                }
             } else if (rowType & (OBJTYPE_MATERIAL | OBJTYPE_CUSTOMMATERIAL
-                                  | OBJTYPE_REFERENCEDMATERIAL)) {
+                                  | OBJTYPE_REFERENCEDMATERIAL)) { // Drop on a Material
                 // if this is a ref material, update the material it references
                 qt3dsdm::Qt3DSDMInstanceHandle refInstance = 0;
                 if (rowType == OBJTYPE_REFERENCEDMATERIAL) {
@@ -212,36 +243,78 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
                     }
                 }
                 ChooseImagePropertyDlg dlg(refInstance ? refInstance : inTarget, refInstance != 0);
+                if (isImage)
+                    dlg.setTextureTitle();
+
                 if (dlg.exec() == QDialog::Accepted) {
                     qt3dsdm::Qt3DSDMPropertyHandle propHandle = dlg.getSelectedPropertyHandle();
                     if (dlg.detachMaterial()) {
                         Q3DStudio::ScopedDocumentEditor editor(
                             Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc,
-                                                              tr("Set material sub-presentation")));
+                                                              tr("Set material diffuse map")));
                         editor->BeginAggregateOperation();
                         editor->SetMaterialType(inTarget, "Standard Material");
-                        editor->setInstanceImagePropertyValueAsRenderable(inTarget, propHandle,
-                                                                          presentationId);
+                        editor->setInstanceImagePropertyValue(inTarget, propHandle, src, isPres);
                         editor->EndAggregateOperation();
                     } else {
+                        const auto finalTarget = refInstance ? refInstance : inTarget;
                         Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
-                        ->setInstanceImagePropertyValueAsRenderable(refInstance ? refInstance
-                                                                                : inTarget,
-                                                                    propHandle, presentationId);
+                        ->setInstanceImagePropertyValue(finalTarget, propHandle, src, isPres);
+                        theDoc.getSceneEditor()->saveIfMaterial(finalTarget);
                     }
                 }
             } else if (rowType == OBJTYPE_IMAGE) {
-                auto propHandle = bridge.getSubpresentationProperty();
+                auto propHandle = isPres ? bridge.getSubpresentationProperty()
+                                         : bridge.GetSourcePathProperty();
                 Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
-                       ->SetInstancePropertyValueAsRenderable(inTarget, propHandle, presentationId);
+                       ->SetInstancePropertyValueAsRenderable(inTarget, propHandle, src);
             } else if (rowType == OBJTYPE_SCENE) { // dropping on the scene as a texture
                 Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
-                       ->addRectForSubpresentation(presentationId, inSlide, thePoint,
-                                                   theStartTime);
+                       ->addRectFromSource(src, inSlide, isPres, thePoint, theStartTime);
+            }
+        } else if (isMatData) {
+            if (rowType == OBJTYPE_REFERENCEDMATERIAL || rowType == OBJTYPE_MATERIAL
+                    || rowType == OBJTYPE_CUSTOMMATERIAL) {
+                if (!QFileInfo(m_FilePath).completeBaseName().contains(QLatin1Char('#'))) {
+                    const auto doc = g_StudioApp.GetCore()->GetDoc();
+                    { // Scope for the ScopedDocumentEditor
+                        Q3DStudio::ScopedDocumentEditor sceneEditor(
+                                    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QString()));
+                        QString name;
+                        QMap<QString, QString> values;
+                        QMap<QString, QMap<QString, QString>> textureValues;
+                        sceneEditor->getMaterialInfo(m_FilePath, name, values, textureValues);
+                        const auto material = sceneEditor->getOrCreateMaterial(m_FilePath);
+                        sceneEditor->setMaterialValues(material, values, textureValues);
+                    }
+                    // Several aspects of the editor are not updated correctly
+                    // if the data core is changed without a transaction
+                    // The above scope completes the transaction for creating a new material
+                    // Next the added undo has to be popped from the stack
+                    // TODO: Find a way to update the editor fully without a transaction
+                    doc->GetCore()->GetCmdStack()->RemoveLastUndo();
+
+                    Q3DStudio::ScopedDocumentEditor sceneEditor(
+                                Q3DStudio::SCOPED_DOCUMENT_EDITOR(
+                                    *doc, tr("Drag and Drop Material")));
+                    QString docDir = theDoc.GetDocumentDirectory();
+                    QString relPath = Q3DStudio::CFilePath::GetRelativePathFromBase(
+                                docDir, m_FilePath);
+                    sceneEditor->SetMaterialType(inTarget, QStringLiteral("Referenced Material"));
+                    sceneEditor->setMaterialSourcePath(inTarget, relPath);
+                    sceneEditor->setMaterialReferenceByPath(inTarget, relPath);
+                    theDoc.SelectDataModelObject(inTarget);
+                } else {
+                    g_StudioApp.GetDialogs()->DisplayMessageBox(
+                                tr("Error"), tr("The character '#' is not allowed in "
+                                                "the name of a material definition file."),
+                                Qt3DSMessageBox::ICON_ERROR, false);
+                }
             }
         } else {
             Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc, theCommandName)
-                ->ImportFile(theDocType, theFilePath.toQString(), inTarget, inSlide,
+                ->ImportFile(static_cast<Q3DStudio::DocumentEditorFileType::Enum>(m_FileType),
+                             m_FilePath, inTarget, inSlide,
                              CDialogs::GetImportFileExtension(),
                              Q3DStudio::ImportUtils::GetInsertTypeForDropType(inDestType), thePoint,
                              theStartTime);

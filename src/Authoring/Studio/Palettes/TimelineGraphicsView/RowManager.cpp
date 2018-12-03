@@ -41,6 +41,8 @@
 #include "StudioApp.h"
 #include "Core.h"
 #include "Doc.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "ClientDataModelBridge.h"
 
 #include <QtWidgets/qgraphicslinearlayout.h>
 #include <QtCore/qpointer.h>
@@ -133,8 +135,10 @@ RowTree *RowManager::createRowFromBinding(ITimelineItemBinding *binding, RowTree
 void RowManager::createRowsFromBindingRecursive(ITimelineItemBinding *binding, RowTree *parentRow)
 {
     auto instance = static_cast<Qt3DSDMTimelineItemBinding *>(binding)->GetInstance();
-    if (g_StudioApp.GetCore()->GetDoc()->getSceneEditor()->isMaterialContainer(instance))
+    if (g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+            ->GetClientDataModelBridge()->isMaterialContainer(instance)) {
         return;
+    }
 
     RowTree *newRow = createRowFromBinding(binding, parentRow);
     // create child rows recursively
@@ -190,11 +194,9 @@ RowTree *RowManager::createRow(EStudioObjectType rowType, RowTree *parentRow, co
 
 RowTree *RowManager::getRowAtPos(const QPointF &scenePos) const
 {
-    QList<QGraphicsItem *> items = m_scene->items(scenePos);
+    const QList<QGraphicsItem *> items = m_scene->items(scenePos);
 
-    int index = 0;
-    while (index < items.size()) {
-        QGraphicsItem *item = items.at(index++);
+    for (auto item : items) {
         if (item->type() == TimelineItem::TypeRowTree)
             return static_cast<RowTree *>(item);
     }
@@ -480,13 +482,4 @@ int RowManager::getLastChildIndex(RowTree *row, int index)
     }
 
     return -1;
-}
-
-void RowManager::collapseAllPropertyRows()
-{
-    for (int i = 0; i < m_layoutTree->count(); ++i) {
-        RowTree *row = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
-        if (row->isProperty() && row->propertyExpanded())
-            row->setPropertyExpanded(false);
-    }
 }

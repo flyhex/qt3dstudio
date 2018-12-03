@@ -31,122 +31,82 @@
 \title Qt 3D Studio Index
 \page qt3dstudio-index.html
 
-\section1 Table of Contents
+Qt 3D Studio is a compositing tool where you import 3D models, images and other assets to create
+interactive presentations, UIs and applications.
 
-\list
-    \li \l {Getting started}
-    \li \l {Studio Index}{Studio}
-    \li \l {Viewer Index}{Viewer}
-    \li \l {File Formats}
-    \omit
-    TODO: Needs to be checked. Maybe a rewrite, or just remove it all.
-    \li \l {Integrating with Qt 3D Studio}
-    \endomit
-    \li \l {Best Practices}
-    \li \l {Requirements}
-    \li \l {Experimental Features}
-    \li \l {Copyright Notices}
-\endlist
-
-\section1 Applications
-
-The Qt 3D Studio suite includes:
 \table
-  \header
-    \li \section2 Studio
-    \li \section2 Viewer
-  \row
-    \li \inlineimage studio_128.png
-    \li \inlineimage viewer_128.png
-  \row
-    \li An authoring tool for creating interactive 3D presentations and applications.
-    \li A runtime player to test and deploy interfaces created in Studio.
   \row
     \li
+    \div {align="center"}
+    \image getting-started-index.png
+    \enddiv
+    \li
+    \div {align="center"}
+    \image graphics-index.png
+    \enddiv
+    \li
+    \div {align="center"}
+    \image animation-index.png
+    \enddiv
+    \li
+    \div {align="center"}
+    \image scripting-index.png
+    \enddiv
+  \row
+    \li \b {Getting Started}
       \list
-        \li \l {Getting started}
-        \li \l {Studio Index}
+        \li \l{About Qt 3D Studio}
+        \li \l{Getting Started}{Quick Start Guide}
+        \li \l{Best Practices}
+        \li \l{Studio Index}
+        \li \l{Viewer Index}
+      \endlist
+    \li \b {Graphics}
+      \list
+        \li \l{Working with 3D Content}{3D Assets}
+        \li \l{Layers}
+        \li \l{Materials and Shaders}
+        \li \l{Light Properties}{Lights}
+        \li \l{Using Sub-Presentations}{Sub-Presentations}
+        \li \l{Stereoscopic Rendering}
+      \endlist
+    \li \b {Animations}
+      \list
+        \li \l{Studio: Timeline Palette}{The Timeline}
+        \li \l{Dynamic Keyframes}
+      \endlist
+    \li \b {Scripting}
+      \list
+        \li \l{Using Data Inputs}{Data Input}
+        \li \l{Using Behavior Scripts}{Behavior}
+        \li \l{File Formats}
+      \endlist
+  \row
+    \li
+    \div {align="center"}
+    \image deployment-index.png
+    \enddiv
+    \li
+    \div {align="center"}
+    \image help-index.png
+    \enddiv
+    \li
+    \li
+  \row
+    \li \b {Deployment}
+      \list
+        \li \l{Viewer Remote Deployment}
+      \endlist
+    \li \b {Getting Help}
+      \list
+        \li \l{Studio Keyboard Shortcuts}
+        \li \l{Viewer Keyboard Shortcuts}
       \endlist
     \li
-      \list
-        \li \l {Viewer Index}
-      \endlist
+    \li
+  \row
+    \li {4,1} \note To report bugs and suggestions to the Qt Bug
+      Tracker, visit \l https://bugreports.qt.io.
 \endtable
-
-\section1 Concepts
-
-\section2 Project
-
-A \e{\"project\"} is simply a folder on your computer holding all the art and other assets needed
-for your application. You can create a \e project by creating folders in your file system, or you
-can also have a template project created for you (with suggested folders for organization) from
-\l Studio application.
-
-\section2 Application
-
-Your \e{\"application\"} is the entry point of your project. It is represented by a single \c{.uia}
-file at the root of your project folder. This file references the presentation and
-sub-presentations in your project. The \e application is what is displayed by the \l Viewer.
-
-\omit
-TODO: To be updated for the open source release. Not really needed or even usable now.
-\e{Learn more about the file format for an application in}
-\l{file-formats-uia.html}{The .uia File Format}.
-\endomit
-
-\section2 Presentation
-
-Artists use \l Studio to create \e{presentation} files, represented by \c{.uip} files in your
-project. A presentation has one or more \e{layers} composited to the screen, comprised of 2D and
-3D assets created in other applications.
-
-Each application can only have one main presentation shown on screen (specified by the \c{.uia})
-but this presentation may reference other \e{sub-presentations}, either on flat layers or as images
-and textures drawn in a scene.
-
-\e{Learn more about creating presentations in the reference for}
-\l{Studio Index}{Studio application}.
-
-\section2 QML
-
-Additional functionality can be built on top of the Qt 3D Studio presentations with QML by
-incorporating applications or presentations into QML with the \l Studio3D element.
-
-\e{Learn more in}
-\l{QML API}{QML API Reference}.
-
-\section2 Layer
-
-A single \l Studio presentation combines one or more \e{layers}. The visual result of each \e layer
-comes from rendering a 3D scene, 2D scene (via an orthographic camera), or sub-presentation. Layers
-are then composited with items on upper layers drawing on top of the content on lower layers.
-
-\e{Learn more about the properties of layers in}
-\l{studio-inspector-palette.html#layer-properties}{Layer Properties}.
-
-\section2 Slide
-
-A \l Studio presentation combines 3D assets with animations and \e{slides}. Slides provide visual
-variations within the presentation.
-
-\e{Learn more about slides in}
-\l{studio-slide-palette.html}{Slide Palette}.
-
-\section1 Known Issues
-
-\section2 Possible problems after automatic mesh optimization
-
-When loading a presentation made with an earlier version (2.0 beta2 or older) of Qt 3D Studio
-which has imported FBX or DAE models, you may see the following messagebox:
-
-\image {mesh_optimization.png}{Old presentation version}
-
-If your \b{imported} models are not visible in the Viewer after seeing the message, you need to
-edit your \c{*.uip} file(s) manually. Some older versions of Studio referenced meshes with revision
-number in the \c{*.uip} file, and that revision causes it to be missing in the scope of the
-Viewer.
-
-You'll need to find all occurrences of \c{.mesh#<revision_number>} from you \c{*.uip} and
-replace them with \c{.mesh}.
 
 */

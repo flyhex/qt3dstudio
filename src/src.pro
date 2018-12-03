@@ -3,7 +3,8 @@ CONFIG += ordered
 SUBDIRS += \
     3rdparty \
     QtExtras \
-    Runtime
+    Runtime \
+    shared
 
 !cross_compile:!qnx:!mingw {
     SUBDIRS += Authoring

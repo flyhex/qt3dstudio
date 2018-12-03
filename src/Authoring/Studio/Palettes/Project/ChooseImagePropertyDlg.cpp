@@ -55,11 +55,19 @@ ChooseImagePropertyDlg::ChooseImagePropertyDlg(qt3dsdm::Qt3DSDMInstanceHandle in
         m_ui->cbDetach->setVisible(false);
 
     fillList();
+
+    window()->setFixedSize(size());
 }
 
 ChooseImagePropertyDlg::~ChooseImagePropertyDlg()
 {
     delete m_ui;
+}
+
+void ChooseImagePropertyDlg::setTextureTitle()
+{
+    setWindowTitle(tr("Set texture"));
+    m_ui->label->setText(tr("Set texture to:"));
 }
 
 bool ChooseImagePropertyDlg::detachMaterial() const

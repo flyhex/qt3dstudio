@@ -57,7 +57,15 @@ Rectangle {
             model: _fileChooserModel
 
             delegate: ChooserDelegate {
-                onClicked: _fileChooserView.fileSelected(_fileChooserView.handle, _fileChooserView.instance, filePath)
+                onClicked: {
+                    _fileChooserView.fileSelected(_fileChooserView.handle,
+                                                  _fileChooserView.instance, filePath);
+                }
+                onDoubleClicked: {
+                    _fileChooserView.fileSelected(_fileChooserView.handle,
+                                                  _fileChooserView.instance, filePath);
+                    _fileChooserView.hide();
+                }
             }
         }
     }

@@ -112,7 +112,8 @@ public:
 
     enum Roles {
         GroupValuesRole = Qt::UserRole + 1,
-        GroupTitleRole
+        GroupTitleRole,
+        GroupInfoRole
     };
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -123,10 +124,11 @@ public:
     void setInspectable(CInspectableBase *inInspectable);
     CInspectableBase *inspectable() const;
     void setMaterials(std::vector<Q3DStudio::CFilePath> &materials);
-    void setMatDatas(std::vector<Q3DStudio::CFilePath> &matdatas);
+    void setMatDatas(const std::vector<Q3DStudio::CFilePath> &matdatas);
     void updateFontValues(InspectorControlBase *element) const;
     void refreshRenderables();
     void refresh();
+    void saveIfMaterial(qt3dsdm::Qt3DSDMInstanceHandle instance);
 
     QVariant getPropertyValue(long instance, int handle);
 
@@ -147,6 +149,10 @@ public:
     Q_INVOKABLE void setPropertyControlled(long instance, int property);
     Q_INVOKABLE bool isLayer(long instance) const;
     Q_INVOKABLE QString renderableId(const QString &filePath) const;
+    Q_INVOKABLE bool isMaterial() const;
+    Q_INVOKABLE bool isDefaultMaterial() const;
+    Q_INVOKABLE void addMaterial();
+    Q_INVOKABLE void duplicateMaterial();
 
 private:
     void onSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inOldIndex,
@@ -156,6 +162,7 @@ private:
     struct GroupInspectorControl {
         QString groupTitle;
         QVariantList controlElements;
+        QString groupInfo;
 
         ~GroupInspectorControl() {
         }
@@ -180,6 +187,7 @@ private:
 
     std::vector<MaterialEntry> m_materials;
     std::vector<MaterialDataEntry> m_matDatas;
+    std::vector<Q3DStudio::CFilePath> m_cachedMatDatas;
 
     Q3DStudio::CUpdateableDocumentEditor m_UpdatableEditor;
 
@@ -187,16 +195,19 @@ private:
 
     qt3dsdm::SValue m_previouslyCommittedValue;
 
-    QString getStandardMaterialString() const;
-    QString getCustomMaterialString() const;
-    QString getSharedMaterialString() const;
+    QString getBasicMaterialString() const;
+    QString getAnimatableMaterialString() const;
     QString getReferencedMaterialString() const;
+    QString getStandardMaterialString() const;
     QString getDefaultMaterialString() const;
     bool isInsideMaterialContainer() const;
-    bool isShader() const;
-    bool isMatData() const;
-    void updateMaterialValues(const QStringList &values, int elementIndex);
-    void updateMaterialTypeValues();
+    bool isInsideMaterialContainer(Qt3DSDMInspectable *inspectable) const;
+    bool isAnimatableMaterial() const;
+    bool isAnimatableMaterial(Qt3DSDMInspectable *inspectable) const;
+    bool isBasicMaterial() const;
+    bool isBasicMaterial(Qt3DSDMInspectable *inspectable) const;
+    void updateMaterialValues(const QStringList &values, int elementIndex,
+                              bool updatingShaders = false);
     void updateShaderValues();
     void updateMatDataValues();
     void updatePropertyValue(InspectorControlBase *element) const;
@@ -205,7 +216,6 @@ private:
     void notifyInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle inProperty);
     void updateAnimateToggleState(InspectorControlBase *inItem);
     void updateControlledToggleState(InspectorControlBase *inItem) const;
-    void saveIfMaterial(qt3dsdm::Qt3DSDMInstanceHandle instance);
 
     std::shared_ptr<qt3dsdm::ISignalConnection> m_notifier;
     std::shared_ptr<qt3dsdm::ISignalConnection> m_slideNotifier;

@@ -35,45 +35,43 @@
 
 namespace Q3DStudio {
 
-SObjectFileType ImportUtils::GetObjectFileTypeForFile(const QString &inFile,
+SObjectFileType ImportUtils::GetObjectFileTypeForFile(const QString &filePath,
                                                       bool inCheckFileExists /*= true*/)
 {
-    QFileInfo info(inFile);
+    QFileInfo info(filePath);
     if (inCheckFileExists && !info.isFile())
         return SObjectFileType(OBJTYPE_UNKNOWN, DocumentEditorFileType::Unknown);
 
-    QString theExtension(info.suffix());
+    QString ext(info.suffix()); // file extension
 
-    if (theExtension.compare(CDialogs::GetImportFileExtension(), Qt::CaseInsensitive) == 0) {
+    if (ext.compare(CDialogs::GetImportFileExtension(), Qt::CaseInsensitive) == 0) {
         return SObjectFileType(OBJTYPE_GROUP, DocumentEditorFileType::Import);
-    } else if (theExtension.compare(CDialogs::GetMeshFileExtension(), Qt::CaseInsensitive) == 0) {
+    } else if (ext.compare(CDialogs::GetMeshFileExtension(), Qt::CaseInsensitive) == 0) {
         return SObjectFileType(OBJTYPE_MODEL, DocumentEditorFileType::Mesh);
-    } else if (CDialogs::IsImageFileExtension(theExtension)) {
-        return SObjectFileType(
-            OBJTYPE_MODEL, OBJTYPE_IMAGE,
-            DocumentEditorFileType::Image); // Drag-drop image to scene will auto-map to Rectangle.
-    } else if (theExtension.compare(CDialogs::GetQmlFileExtension(), Qt::CaseInsensitive) == 0) {
-        return g_StudioApp.isQmlStream(info.absoluteFilePath())
+    } else if (CDialogs::IsImageFileExtension(ext)) {
+        // Drag-drop image to scene will auto-map to Rectangle.
+        return SObjectFileType(OBJTYPE_MODEL, OBJTYPE_IMAGE, DocumentEditorFileType::Image);
+    } else if (ext.compare(CDialogs::GetQmlFileExtension(), Qt::CaseInsensitive) == 0) {
+        return g_StudioApp.isQmlStream(filePath)
                 ? SObjectFileType(OBJTYPE_QML_STREAM, DocumentEditorFileType::QmlStream)
                 : SObjectFileType(OBJTYPE_BEHAVIOR, DocumentEditorFileType::Behavior);
-    } else if (theExtension.compare(CDialogs::GetMaterialDataFileExtension(),
-                                    Qt::CaseInsensitive) == 0) {
+    } else if (ext.compare(CDialogs::GetMaterialDataFileExtension(), Qt::CaseInsensitive) == 0) {
         return SObjectFileType(OBJTYPE_MATERIALDATA, DocumentEditorFileType::MaterialData);
-    } else if (CDialogs::IsFontFileExtension(theExtension)) {
+    } else if (CDialogs::IsFontFileExtension(ext)) {
         return SObjectFileType(OBJTYPE_TEXT, DocumentEditorFileType::Font);
-    } else if (CDialogs::IsEffectFileExtension(theExtension)) {
+    } else if (CDialogs::IsEffectFileExtension(ext)) {
         return SObjectFileType(OBJTYPE_EFFECT, DocumentEditorFileType::Effect);
-    } else if (CDialogs::IsMaterialFileExtension(theExtension)) {
+    } else if (CDialogs::IsMaterialFileExtension(ext)) {
         return SObjectFileType(OBJTYPE_CUSTOMMATERIAL, DocumentEditorFileType::Material);
-    } else if (CDialogs::IsPathFileExtension(theExtension)) {
+    } else if (CDialogs::IsPathFileExtension(ext)) {
         return SObjectFileType(OBJTYPE_PATH, DocumentEditorFileType::Path);
-    } else if (CDialogs::IsPathBufferExtension(theExtension)) {
+    } else if (CDialogs::IsPathBufferExtension(ext)) {
         return SObjectFileType(OBJTYPE_PATH, DocumentEditorFileType::Path);
-    } else if (CDialogs::IsSoundFileExtension(theExtension)) {
+    } else if (CDialogs::IsSoundFileExtension(ext)) {
         return SObjectFileType(OBJTYPE_SOUND, DocumentEditorFileType::Sound);
-    } else if (CDialogs::isPresentationFileExtension(theExtension)) {
+    } else if (CDialogs::isPresentationFileExtension(ext)) {
         return SObjectFileType(OBJTYPE_PRESENTATION, DocumentEditorFileType::Presentation);
-    } else if (CDialogs::isProjectFileExtension(theExtension)) {
+    } else if (CDialogs::isProjectFileExtension(ext)) {
         return SObjectFileType(OBJTYPE_PROJECT, DocumentEditorFileType::Project);
     }
 

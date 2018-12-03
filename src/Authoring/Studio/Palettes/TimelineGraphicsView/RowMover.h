@@ -48,7 +48,9 @@ public:
 
     void start(const QVector<RowTree *> &rows);
     void end(bool force = false);
-    void updateTargetRow(const QPointF &scenePos, EStudioObjectType rowType = OBJTYPE_UNKNOWN);
+    void updateTargetRow(const QPointF &scenePos, EStudioObjectType rowType = OBJTYPE_UNKNOWN,
+                         Q3DStudio::DocumentEditorFileType::Enum fileType
+                                                    = Q3DStudio::DocumentEditorFileType::Unknown);
     bool isActive() const;
     RowTree *insertionTarget() const;
     RowTree *insertionParent() const;

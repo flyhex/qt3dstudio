@@ -146,7 +146,8 @@ void CStudioSystem::ResetDatabase()
     TNewMetaDataPtr theNewMetaData(theCore->GetNewMetaData());
     std::shared_ptr<IStringTable> theStringTable(theNewMetaData->GetStringTablePtr());
     std::shared_ptr<IDOMFactory> theFactory(IDOMFactory::CreateDOMFactory(theStringTable));
-    QString theFullPath(resourcePath() + QStringLiteral("/DataModelMetadata/en-us/MetaData.xml"));
+    QString theFullPath(StudioUtils::resourcePath()
+                        + QStringLiteral("/DataModelMetadata/en-us/MetaData.xml"));
     // Load the new meta data
     {
         QFile theStream(theFullPath);

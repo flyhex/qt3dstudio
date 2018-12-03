@@ -546,8 +546,13 @@ void RowTree::updateFilter()
     bool expandOk  = !expandHidden();
 
     m_filtered = !(shyOk && visibleOk && lockOk);
-    setVisible(parentOk && shyOk && visibleOk && lockOk && expandOk);
-    m_rowTimeline->setVisible(isVisible());
+    const bool visible = parentOk && shyOk && visibleOk && lockOk && expandOk;
+    setVisible(visible);
+    m_rowTimeline->setVisible(visible);
+    for (auto propRow : qAsConst(m_childProps)) {
+        propRow->setVisible(visible);
+        propRow->m_rowTimeline->setVisible(visible);
+    }
 }
 
 int RowTree::getCountDecendentsRecursive() const
@@ -731,6 +736,8 @@ void RowTree::updateFromBinding()
             static_cast<Qt3DSDMTimelineItemBinding *>(m_binding);
     m_master = itemBinding->IsMaster();
     m_labelItem.setMaster(m_master);
+    // Update timeline comments
+    m_rowTimeline->updateCommentItem();
 }
 
 void RowTree::updateLabel()
@@ -863,6 +870,7 @@ void RowTree::updateLockRecursive(bool state)
 void RowTree::updateLock(bool state)
 {
     m_locked = state;
+
     m_labelItem.setLocked(m_locked);
     update();
     if (!m_childProps.empty()) {
@@ -968,7 +976,10 @@ RowTree::DnDState RowTree::getDnDState() const
 
 void RowTree::setActionStates(ActionStates states)
 {
-    m_actionStates = states;
+    if (states != m_actionStates) {
+        m_actionStates = states;
+        update();
+    }
 }
 
 bool RowTree::isContainer() const

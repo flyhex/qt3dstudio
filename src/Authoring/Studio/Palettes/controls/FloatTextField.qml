@@ -41,7 +41,7 @@ TextField {
 
     selectByMouse: true
     text: "0.000"
-    Layout.preferredWidth: _valueWidth / 2
+    Layout.preferredWidth: _valueWidth / 3
     Layout.preferredHeight: _controlBaseHeight
 
     topPadding: 0

@@ -268,8 +268,7 @@ void CPlayerContainerWnd::setToolMode(long inMode)
 
 QSize CPlayerContainerWnd::GetEffectivePresentationSize() const
 {
-    CPt cSize = g_StudioApp.GetCore()->GetStudioProjectSettings()->GetPresentationSize();
-    QSize theSize(cSize.x, cSize.y);
+    QSize theSize = g_StudioApp.GetCore()->GetStudioProjectSettings()->getPresentationSize();
 
     // If we have guides, resize the window with enough space for the guides as well as the
     // presentation

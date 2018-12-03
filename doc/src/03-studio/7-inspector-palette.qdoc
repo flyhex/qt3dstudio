@@ -610,6 +610,7 @@ in the Inspector palette (in addition to the
   for the geometry. Clicking the drop-down for this property will open a
   floating mesh picker. Hover a mesh to see how it appears in the scene
   for this model, and click on a mesh to pick it as the new mesh.
+\omit
 \li
   \b{Tesselation Mode} - Dynamically generate additional geometry
   for the model. Tessellation is useful if you are using a
@@ -619,6 +620,7 @@ in the Inspector palette (in addition to the
 \li
   \e{Tip: turn on tessellation wireframe mode (View menu or toolbar)
   to display the tessellation result.}
+\endomit
 \endlist
 
 \target material-properties

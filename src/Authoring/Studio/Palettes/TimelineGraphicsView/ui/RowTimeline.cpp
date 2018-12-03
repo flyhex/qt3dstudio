@@ -40,6 +40,7 @@
 #include "Bindings/Qt3DSDMTimelineItemProperty.h"
 #include "AppFonts.h"
 #include "StudioPreferences.h"
+#include "TimelineToolbar.h"
 
 #include <QtGui/qpainter.h>
 #include <QtGui/qbrush.h>
@@ -67,6 +68,33 @@ RowTimeline::~RowTimeline()
 
         m_keyframes.clear();
     }
+}
+
+void RowTimeline::initialize()
+{
+    // Called once m_rowTree exists
+
+    m_commentItem = new RowTimelineCommentItem(this);
+    m_commentItem->setParentRow(m_rowTree);
+    updateCommentItemPos();
+
+    TimelineToolbar *toolbar = m_rowTree->m_scene->widgetTimeline()->toolbar();
+    connect(toolbar, &TimelineToolbar::showRowTextsToggled, this, [this]() {
+        updateCommentItem();
+    });
+
+    connect(m_commentItem, &RowTimelineCommentItem::labelChanged, this,
+            [this](const QString &label) {
+        // Update label on timeline and on model
+        // TODO: Get rid of CString APIs
+        auto ccomment = Q3DStudio::CString::fromQString(label);
+        ITimelineTimebar *timebar = m_rowTree->m_binding->GetTimelineItem()->GetTimebar();
+        timebar->SetTimebarComment(ccomment);
+    });
+
+    connect(m_rowTree->m_scene->ruler(), &Ruler::viewportXChanged, this, [this]() {
+        updateCommentItemPos();
+    });
 }
 
 void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -780,6 +808,30 @@ void RowTimeline::updateChildrenMaxEndXRecursive(RowTree *rowTree)
     }
 }
 
+void RowTimeline::updateCommentItem()
+{
+    if (!m_commentItem)
+        return;
+    TimelineToolbar *toolbar = m_rowTree->m_scene->widgetTimeline()->toolbar();
+    // Backend allows storing comments for rows with duration bar
+    bool canHaveComment = m_rowTree->hasDurationBar();
+    bool showComments = canHaveComment && toolbar->actionShowRowTexts()->isChecked();
+    m_commentItem->setVisible(showComments);
+    if (showComments && m_rowTree->m_binding) {
+        ITimelineTimebar *timebar = m_rowTree->m_binding->GetTimelineItem()->GetTimebar();
+        m_commentItem->setLabel(timebar->GetTimebarComment().toQString());
+    }
+}
+
+void RowTimeline::updateCommentItemPos()
+{
+    if (!m_commentItem)
+        return;
+    Ruler *ruler = m_rowTree->m_scene->ruler();
+    m_commentItem->setPos(TimelineConstants::RULER_EDGE_OFFSET + ruler->viewportX(),
+                         -TimelineConstants::ROW_TEXT_OFFSET_Y);
+}
+
 void RowTimeline::setStartTime(double startTime)
 {
     m_startTime = startTime;
@@ -847,6 +899,7 @@ void RowTimeline::setRowTree(RowTree *rowTree)
             delete m_propertyGraph;
         m_propertyGraph = new RowTimelinePropertyGraph(this);
     }
+    initialize();
 }
 
 RowTree *RowTimeline::rowTree() const

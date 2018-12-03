@@ -37,6 +37,7 @@
 
 #include "Qt3DSRenderNode.h"
 #include "Qt3DSRenderShaderCodeGeneratorV2.h"
+#include "StudioPreferences.h"
 
 namespace qt3ds {
 namespace widgets {
@@ -327,15 +328,14 @@ namespace widgets {
 
         void ClearRotationEdges() override { m_RotationWedge = Empty(); }
 
-        static inline QT3DSF32 ToGLSLColor(QT3DSU32 inItem) { return (QT3DSF32)inItem * 1.0f / 255.0f; }
-        static inline QT3DSVec3 ToGLSLColor(QT3DSU32 R, QT3DSU32 G, QT3DSU32 B)
+        static inline QT3DSVec3 ToGLSLColor(const QColor &c)
         {
-            return QT3DSVec3(ToGLSLColor(R), ToGLSLColor(G), ToGLSLColor(B));
+            return QT3DSVec3(c.redF(), c.greenF(), c.blueF());
         }
 
-        static QT3DSVec3 GetXAxisColor() { return ToGLSLColor(202, 47, 46); }
-        static QT3DSVec3 GetYAxisColor() { return ToGLSLColor(100, 205, 53); }
-        static QT3DSVec3 GetZAxisColor() { return ToGLSLColor(30, 159, 205); }
+        static QT3DSVec3 GetXAxisColor() { return ToGLSLColor(CStudioPreferences::GetXAxisColor()); }
+        static QT3DSVec3 GetYAxisColor() { return ToGLSLColor(CStudioPreferences::GetYAxisColor()); }
+        static QT3DSVec3 GetZAxisColor() { return ToGLSLColor(CStudioPreferences::GetZAxisColor()); }
 
         static inline QT3DSF32 GetDiscPos() { return 65.0f; }
         static inline QT3DSF32 GetDiscRadius() { return 7.0f; }

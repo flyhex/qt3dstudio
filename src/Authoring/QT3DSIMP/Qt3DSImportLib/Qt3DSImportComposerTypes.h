@@ -131,6 +131,16 @@ struct SImportPathAnchorPoint : public SImportAsset
     }
 };
 
+// A generic type for querying property datatypes based on property name
+struct SImportControllableObject : public SImportAsset
+{
+    DataModelDataType::Value GetPropertyDataType(const QString &inPropertyName) override;
+    ComposerObjectTypes::Enum GetObjectType() override
+    {
+        return ComposerObjectTypes::ControllableObject;
+    }
+};
+
 #undef HANDLE_COMPOSER_PROPERTY
 #undef HANDLE_COMPOSER_PROPERTY_DUPLICATE
 #undef HANDLE_COMPOSER_PROPERTY_NO_DEFAULT
@@ -177,6 +187,7 @@ struct SImportComposerTypes
     SImportPath m_Path;
     SImportSubPath m_SubPath;
     SImportPathAnchorPoint m_PathAnchorPoint;
+    SImportControllableObject m_ControllableObject;
 
     SImportAsset &GetImportAssetForType(ComposerObjectTypes::Enum inTypeName);
 };

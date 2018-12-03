@@ -131,6 +131,12 @@ void RowTreeContextMenu::initialize()
         addAction(m_inspectAction);
     }
 
+    if (canMakeAnimatable()) {
+        m_animAction = new QAction(tr("Make Animatable"), this);
+        connect(m_animAction, &QAction::triggered, this, &RowTreeContextMenu::makeAnimatable);
+        addAction(m_animAction);
+    }
+
     addSeparator();
 
     m_copyPathAction = new QAction(tr("Copy Object Path"), this);
@@ -211,13 +217,12 @@ void RowTreeContextMenu::addSubPresentation(QAction *action)
                                                             tr("Set material sub-presentation")));
                 editor->BeginAggregateOperation();
                 editor->SetMaterialType(instance, "Standard Material");
-                editor->setInstanceImagePropertyValueAsRenderable(instance, propHandle,
-                                                                  presentationId);
+                editor->setInstanceImagePropertyValue(instance, propHandle, presentationId);
                 editor->EndAggregateOperation();
             } else {
                 Q3DStudio::SCOPED_DOCUMENT_EDITOR(doc, tr("Set material sub-presentation"))
-                ->setInstanceImagePropertyValueAsRenderable(refInstance ? refInstance : instance,
-                                                            propHandle, presentationId);
+                ->setInstanceImagePropertyValue(refInstance ? refInstance : instance, propHandle,
+                                                presentationId);
             }
         }
     } else if (m_RowTree->rowType() == OBJTYPE_IMAGE) {
@@ -309,6 +314,25 @@ void RowTreeContextMenu::makeComponent()
 {
     m_TimelineItemBinding->PerformTransaction(
                 ITimelineItemBinding::EUserTransaction_MakeComponent);
+}
+
+/**
+ * Returns true if the object is a referenced material and thus can be made animatable
+ */
+bool RowTreeContextMenu::canMakeAnimatable() const
+{
+    return m_TimelineItemBinding->IsValidTransaction(
+                ITimelineItemBinding::EUserTransaction_MakeAnimatable);
+}
+
+/**
+ * Makes a referenced material animatable aka changing it to a standard or a custom material
+ * with the same properties
+ */
+void RowTreeContextMenu::makeAnimatable()
+{
+    m_TimelineItemBinding->PerformTransaction(
+                ITimelineItemBinding::EUserTransaction_MakeAnimatable);
 }
 
 /**

@@ -54,6 +54,7 @@ private Q_SLOTS:
     void groupObjects();
     void inspectComponent();
     void makeComponent();
+    void makeAnimatable();
     void copyObject();
     void copyObjectPath();
     void pasteObject();
@@ -71,6 +72,7 @@ private:
     bool canUngroupObjects() const;
     bool canInspectComponent() const;
     bool canMakeComponent() const;
+    bool canMakeAnimatable() const;
     bool canCopyObject() const;
     bool canPasteObject() const;
     bool canCutObject() const;
@@ -86,6 +88,7 @@ private:
     QAction *m_addLayerAction = nullptr;
     QAction *m_inspectAction = nullptr;
     QAction *m_makeAction = nullptr;
+    QAction *m_animAction = nullptr;
     QAction *m_copyPathAction = nullptr;
     QAction *m_cutAction = nullptr;
     QAction *m_copyAction = nullptr;

@@ -1,0 +1,234 @@
+/****************************************************************************
+**
+** Copyright (C) 2018 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Materials and Shaders
+\page materials-shaders.html
+
+\image materials.png
+
+Materials and shaders define how object surfaces are rendered in Studio and Viewer.
+
+\note Basic materials are using the \c{.materialdef} file extension, while shaders are using the
+\c{.shader} file extension. For backward compatibility, also the \c{.material} file extension
+is valid for shaders.
+
+\section1 Materials
+
+There are three different types of materials:
+
+\section3 Basic Material
+The basic material is used for materials without any property animations. You can create your own
+basic materials, save them in your project, and assign them to objects. Basic materials are saved
+as \c{.materialdef} files in the \uicontrol materials folder of your project.
+
+\image project-materials.png
+
+\section3 Animatable Material
+The animatable material is used when you want to animate any property of the material.
+Such property can be i.e. colors, opacity, or specularity. Animatable materials are not saved
+in your project. To edit an animatable material, you need to edit it on an object where it is
+assigned or referenced.
+
+\section3 Referenced Material
+The referenced material is used when you want to use the same animatable material in more than one
+material slot.
+
+Read more about animatable and referenced materials in the \l{animatable materials} section.
+
+\section2 Material Slots
+By default, a 3D model in Studio has at least one material slot assigned to it. This is true for
+all the basic objects and all imported objects that have been exported with none or
+one material slot.
+
+\image basic-object-material-slot.png
+
+If an imported 3D model has been exported with many material slots, these will be imported
+to Studio.
+
+However, no material will be assigned to the material slots by default. You will have to create
+a material, and then assign it to the desired material slot.
+
+\image imported-object-material-slots.png
+
+\section2 Create a Basic Material
+To create a new basic material, do one of the following:
+\list
+  \li
+    \list 1
+      \li
+      Anywhere in the project palette, right-click and select
+      \uicontrol {Create > Basic Material} from the context menu.
+      \li
+      A new material is now created in the \uicontrol materials folder. In the inspector palette
+      you will see all the properties of the material. Changes to properties are immediate,
+      you do not need to save.
+      For a full description on all material properties, see the
+      \l{Material Properties} documentation.
+    \endlist
+  \li
+     \list 1
+      \li
+      In the scene graph, select a material slot.
+      \li
+      In the inspector palette, click the \uicontrol {New} button. This will create a new material
+      and assign it to the selected material slot immediately.
+      \note Instead of clicking the \uicontrol{New} button, you can click the \uicontrol{Duplicate}
+      button. This will create a new material with the properties of the current material.
+    \endlist
+\endlist
+
+\section2 Apply a Material to an Object
+To apply a material to an object, do one of the following:
+\list
+  \li
+  Drag a material from the project palette to either an object in the scene view, or to a
+  material slot in the scene graph.
+  \note Dropping the material on an object with more than one material slot will assign the
+  material to the top-most material slot.
+  \image assign-material.png
+  \li
+  First, select the material in the scene graph. Then, in the inspector palette, set desired
+  material as the \uicontrol{Source Material} property.
+  \image assign-material-inspector.png
+\endlist
+
+\section2 Edit a Material
+To edit a material, do one of the following:
+
+\list
+  \li
+  Double-click the material in the project palette.
+  \li
+  Right-click the material in the project palette and select \uicontrol{Edit}.
+  \li
+  Select a material slot in the scene graph, where the material is applied.
+\endlist
+
+Now, edit the desired properties in the inspector palette. Changes to the properties are immediate,
+you do not need to save.
+
+\section3 Working with Texture Maps
+
+You can apply texture maps for a material by setting an image as the desired map property in the
+inspector palette.
+
+Additionally, you can apply a texture map by dragging the image from the project palette to the
+material in the scene graph. When you drop the image on the material, you can select which type
+of map you want to apply the image as.
+\image set-texture-map.png
+
+\section2 Animatable Materials
+You can create keyframe animations to material properties. To do this,
+you need to use a material of \e {animatable material} type.
+
+You cannot create and save animatable materials the way you can with basic materials. An
+animatable material is created directly under an object. To re-use the same material on another
+object, you need to reference the material.
+
+\section3 Create an Animatable Material
+To create an animatable material, do one of the following:
+\list
+  \li
+    \list 1
+      \li
+      In the scene graph, select the material slot of an object.
+      \li
+      In the inspector palette, set the \uicontrol{Material Type} to animatable material.
+    \endlist
+  \li Right-click a material slot in the scene graph and select \uicontrol{Make Animatable} from
+  the context menu.
+\endlist
+
+\note If you already have a basic material assigned to the material slot, the properties from
+that material will be copied to the animatable material.
+
+Now you can animate desired properties of the material.
+
+\section2 Referenced Materials
+To re-use an animatable material on another object, follow the steps below:
+
+\list 1
+  \li
+  In the scene graph, select the material slot of an object.
+  \li
+  In the inspector palette, set the \uicontrol{Material Type} to referenced material.
+  \li
+  Then set the \uicontrol{Reference Material} to the desired material. This drop-down list
+  contains all animatable materials in your project.
+\endlist
+
+To edit any property of an animatable material, you can edit it on any object where it is in use.
+Any edit will apply to all instances of the material.
+
+\section1 Shaders
+
+Shaders are arbitrary GLSL Shaders, wrapped in a file format providing an artist-friendly interface
+for adjusting properties in Studio.
+
+Studio comes with a set of pre-defined shaders, you find these in the material library. You can
+also write your own shaders.
+
+\section2 Import Shaders
+To import a shader from the material library, follow the steps below:
+
+\list 1
+  \li
+  Click the material library icon
+  \inlineimage material-library-icon.png
+  in the bottom of the project palette.
+  \li
+  Select the desired shader (\c{Ctrl + left mouse click} to multi-select), then press
+  \uicontrol {Ok}.
+  \li Once imported, the shader will be located in the \uicontrol materials folder. Shaders are
+  using the file extension \c{.shader}.
+  \image project-materials.png
+
+\endlist
+
+\section2 Apply a Shader
+
+To apply a shader to an object, follow the steps below:
+\list 1
+  \li
+  The shader needs to be applied to a material. \l{Create A Basic Material}{Create a material}
+  for the shader.
+  \li Set the desired shader as the \uicontrol{Shader} property for the material.
+  \image set-material-shader.png
+\endlist
+
+\section2 Edit a Shader
+
+You cannot edit shader properties directly. Once you assign a shader to a material, the shader
+properties are copied to the material where you can edit them the same way you
+\l{Edit a Material}{edit any material}.
+
+\section2 Write Your Own Shader
+Read more about writing shaders in the \l{Custom Materials and Effects} section.
+
+*/

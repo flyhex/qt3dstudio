@@ -61,6 +61,7 @@
 #include "IStudioRenderer.h"
 #include "foundation/Qt3DSLogging.h"
 #include "Dialogs.h"
+#include "Dispatch.h"
 
 static QStringList renderableItems()
 {
@@ -149,33 +150,22 @@ CInspectableBase *InspectorControlModel::inspectable() const
     return m_inspectableBase;
 }
 
-qt3dsdm::Qt3DSDMInstanceHandle getReferenceMaterial(qt3dsdm::Qt3DSDMInstanceHandle instance)
-{
-    qt3dsdm::Qt3DSDMInstanceHandle refMaterial;
-    const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
-    sceneEditor->getMaterialReference(instance, refMaterial);
-    return refMaterial;
-}
-
 qt3dsdm::Qt3DSDMInstanceHandle getReferenceMaterial(CInspectableBase *inspectBase)
 {
+    const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+            ->GetClientDataModelBridge();
     qt3dsdm::Qt3DSDMInstanceHandle refMaterial;
     if (const auto cdmInspectable = dynamic_cast<Qt3DSDMInspectable *>(inspectBase))
-        refMaterial = getReferenceMaterial(cdmInspectable->GetGroupInstance(0));
+        refMaterial = bridge->getMaterialReference(cdmInspectable->GetGroupInstance(0));
     return refMaterial;
-}
-
-CInspectableBase *getReferenceMaterialInspectable(qt3dsdm::Qt3DSDMInstanceHandle instance)
-{
-    if (instance.Valid())
-        return g_StudioApp.getInspectableFromInstance(instance);
-    return nullptr;
 }
 
 CInspectableBase *getReferenceMaterialInspectable(CInspectableBase *inspectBase)
 {
+    const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+            ->GetClientDataModelBridge();
     if (const auto cdmInspectable = dynamic_cast<Qt3DSDMInspectable *>(inspectBase)) {
-        auto refMaterial = getReferenceMaterial(cdmInspectable->GetGroupInstance(0));
+        auto refMaterial = bridge->getMaterialReference(cdmInspectable->GetGroupInstance(0));
         if (refMaterial.Valid())
             return g_StudioApp.getInspectableFromInstance(refMaterial);
     }
@@ -186,6 +176,10 @@ void InspectorControlModel::notifyInstancePropertyValue(qt3dsdm::Qt3DSDMInstance
                                                         qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
     auto doc = g_StudioApp.GetCore()->GetDoc();
+    const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+            ->GetClientDataModelBridge();
+    if (!bridge->IsSceneGraphInstance(inHandle))
+        return;
     bool changed = false;
     for (int row = 0; row < m_groupElements.count(); ++row) {
         auto group = m_groupElements[row];
@@ -224,18 +218,25 @@ QVariant InspectorControlModel::getPropertyValue(long instance, int handle)
 
 bool InspectorControlModel::isInsideMaterialContainer() const
 {
-    qt3dsdm::Qt3DSDMInstanceHandle instance;
-    if (const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase))
-        instance = inspectable->GetGroupInstance(0);
+    return isInsideMaterialContainer(dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase));
+}
+
+bool InspectorControlModel::isInsideMaterialContainer(Qt3DSDMInspectable *inspectable) const
+{
+    if (!inspectable)
+        return false;
+
+    const auto instance = inspectable->GetGroupInstance(0);
 
     if (!instance.Valid())
         return false;
 
-    const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
-    return sceneEditor->isInsideMaterialContainer(instance);
+    const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+            ->GetClientDataModelBridge();
+    return bridge->isInsideMaterialContainer(instance);
 }
 
-bool InspectorControlModel::isShader() const
+bool InspectorControlModel::isDefaultMaterial() const
 {
     const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
     const auto bridge = studio->GetClientDataModelBridge();
@@ -244,46 +245,218 @@ bool InspectorControlModel::isShader() const
     if (const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase))
         instance = inspectable->GetGroupInstance(0);
 
+    if (!instance.Valid() || !bridge->IsSceneGraphInstance(instance))
+        return false;
+
+    return bridge->GetObjectType(instance) == OBJTYPE_REFERENCEDMATERIAL
+            && bridge->GetSourcePath(instance) == bridge->getDefaultMaterialName();
+}
+
+bool InspectorControlModel::isAnimatableMaterial() const
+{
+    return isAnimatableMaterial(dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase));
+}
+
+bool InspectorControlModel::isAnimatableMaterial(Qt3DSDMInspectable *inspectable) const
+{
+    if (!inspectable)
+        return false;
+
+    const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
+    const auto bridge = studio->GetClientDataModelBridge();
+
+    const auto instance = inspectable->GetGroupInstance(0);
     if (!instance.Valid())
         return false;
 
     const auto type = bridge->GetObjectType(instance);
 
-    return type == OBJTYPE_CUSTOMMATERIAL;
+    return type == OBJTYPE_CUSTOMMATERIAL || type == OBJTYPE_MATERIAL;
 }
 
-bool InspectorControlModel::isMatData() const
+bool InspectorControlModel::isBasicMaterial() const
 {
+    return isBasicMaterial(dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase));
+}
+
+bool InspectorControlModel::isBasicMaterial(Qt3DSDMInspectable *inspectable) const
+{
+    if (!inspectable)
+        return false;
+
     const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
     const auto bridge = studio->GetClientDataModelBridge();
 
-    qt3dsdm::Qt3DSDMInstanceHandle instance;
-    if (const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase))
-        instance = inspectable->GetGroupInstance(0);
-
+    const auto instance = inspectable->GetGroupInstance(0);
     if (!instance.Valid())
         return false;
 
     const auto type = bridge->GetObjectType(instance);
 
     if (type == OBJTYPE_REFERENCEDMATERIAL) {
-        const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
-        const auto refMaterial = getReferenceMaterial(instance);
-        if (refMaterial.Valid() && sceneEditor->isInsideMaterialContainer(refMaterial))
+        const auto refMaterial = bridge->getMaterialReference(instance);
+        if (refMaterial.Valid() && bridge->isInsideMaterialContainer(refMaterial))
             return true;
     }
 
     return false;
 }
 
-void InspectorControlModel::updateMaterialValues(const QStringList &values, int elementIndex)
+bool InspectorControlModel::isMaterial() const
+{
+    const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
+    const auto bridge = studio->GetClientDataModelBridge();
+
+    qt3dsdm::Qt3DSDMInstanceHandle instance;
+    if (const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase))
+        instance = inspectable->GetGroupInstance(0);
+
+    if (!instance.Valid())
+        return false;
+
+    const auto type = bridge->GetObjectType(instance);
+
+    return type == OBJTYPE_CUSTOMMATERIAL || type == OBJTYPE_MATERIAL
+            || type == OBJTYPE_REFERENCEDMATERIAL;
+}
+
+void InspectorControlModel::addMaterial()
+{
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    qt3dsdm::Qt3DSDMInstanceHandle instance;
+    if (const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase))
+        instance = inspectable->GetGroupInstance(0);
+
+    if (!instance.Valid())
+        return;
+
+    const auto studio = doc->GetStudioSystem();
+    const auto bridge = studio->GetClientDataModelBridge();
+
+    QString path = doc->getSceneEditor()->getMaterialDirectoryPath()
+            + QStringLiteral("/Material");
+    QString extension = QStringLiteral(".materialdef");
+
+    auto absPath = path + extension;
+    int i = 1;
+    while (QFileInfo(absPath).exists()) {
+        i++;
+        absPath = path + QString::number(i) + extension;
+    }
+
+    qt3dsdm::Qt3DSDMInstanceHandle newMaterial;
+    {
+        newMaterial = Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QString())
+                ->getOrCreateMaterial(absPath, false);
+    }
+    // Several aspects of the editor are not updated correctly
+    // if the data core is changed without a transaction
+    // The above scope completes the transaction for creating a new material
+    // Next the added undo has to be popped from the stack
+    // TODO: Find a way to update the editor fully without a transaction
+    g_StudioApp.GetCore()->GetCmdStack()->RemoveLastUndo();
+
+    saveIfMaterial(newMaterial);
+
+    Q3DStudio::ScopedDocumentEditor sceneEditor(
+                Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, tr("Set Material Type")));
+    doc->SelectDataModelObject(newMaterial);
+
+    const auto type = bridge->GetObjectType(instance);
+    if (type == OBJTYPE_REFERENCEDMATERIAL) {
+        sceneEditor->setMaterialReferenceByPath(instance, absPath);
+        const auto relPath = QDir(doc->GetDocumentDirectory()).relativeFilePath(absPath);
+        sceneEditor->setMaterialSourcePath(instance, relPath);
+        sceneEditor->SetName(instance, bridge->GetName(newMaterial, true));
+        studio->GetFullSystemSignalSender()->SendInstancePropertyValue(
+                    instance, bridge->GetNameProperty());
+    }
+}
+
+void InspectorControlModel::duplicateMaterial()
+{
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+
+    qt3dsdm::Qt3DSDMInstanceHandle instance;
+    if (const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase))
+        instance = inspectable->GetGroupInstance(0);
+
+    if (!instance.Valid())
+        return;
+
+    const auto studio = doc->GetStudioSystem();
+    const auto bridge = studio->GetClientDataModelBridge();
+    const auto type = bridge->GetObjectType(instance);
+
+    if (type != OBJTYPE_MATERIAL && type != OBJTYPE_CUSTOMMATERIAL
+            && type != OBJTYPE_REFERENCEDMATERIAL) {
+        return;
+    }
+
+    auto material = instance;
+    if (type == OBJTYPE_REFERENCEDMATERIAL)
+        material = getReferenceMaterial(m_inspectableBase);
+
+    if (material.Valid()) {
+        const auto sceneEditor = doc->getSceneEditor();
+        auto originalMaterialName = sceneEditor->GetName(material) + QStringLiteral(" Copy");
+        int slashIndex = originalMaterialName.lastIndexOf(QLatin1Char('/'));
+        if (slashIndex != -1)
+            originalMaterialName = originalMaterialName.mid(slashIndex + 1);
+        auto materialName = originalMaterialName;
+        int i = 1;
+        auto absPath = sceneEditor->getMaterialFilePath(materialName);
+        while (QFileInfo(absPath).exists()) {
+            i++;
+            materialName = originalMaterialName + QString::number(i);
+            absPath = sceneEditor->getMaterialFilePath(materialName);
+        }
+
+        qt3dsdm::Qt3DSDMInstanceHandle duplicate;
+        {
+            Q3DStudio::ScopedDocumentEditor scopedEditor(
+                        Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QString()));
+            duplicate = scopedEditor->getOrCreateMaterial(materialName, false);
+            scopedEditor->copyMaterialProperties(material, duplicate);
+        }
+        // Several aspects of the editor are not updated correctly
+        // if the data core is changed without a transaction
+        // The above scope completes the transaction for creating a new material
+        // Next the added undo has to be popped from the stack
+        // TODO: Find a way to update the editor fully without a transaction
+        g_StudioApp.GetCore()->GetCmdStack()->RemoveLastUndo();
+
+        saveIfMaterial(duplicate);
+
+        Q3DStudio::ScopedDocumentEditor scopedEditor(
+                    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, tr("Set Material Type")));
+        doc->SelectDataModelObject(duplicate);
+
+        if (type == OBJTYPE_REFERENCEDMATERIAL) {
+            scopedEditor->setMaterialReferenceByPath(instance, absPath);
+            const auto relPath = QDir(doc->GetDocumentDirectory())
+                    .relativeFilePath(absPath);
+            scopedEditor->setMaterialSourcePath(instance, relPath);
+            scopedEditor->SetName(instance, bridge->GetName(duplicate, true));
+            studio->GetFullSystemSignalSender()->SendInstancePropertyValue(
+                        instance, bridge->GetNameProperty());
+        }
+    }
+}
+
+void InspectorControlModel::updateMaterialValues(const QStringList &values, int elementIndex,
+                                                 bool updatingShaders)
 {
     // Find if there are any material items and update the values of those
-    for (int row = 0; row < m_groupElements.count(); ++row) {
+    int startIndex = 0;
+    bool isReferenced = !isAnimatableMaterial() && updatingShaders;
+    if (isReferenced && m_groupElements.count() > 0)
+        startIndex = m_groupElements.count() - 1; // Update the last group for referenced materials
+    for (int row = startIndex; row < m_groupElements.count(); ++row) {
         const CInspectorGroup *inspectorGroup = m_inspectableBase->GetGroup(row);
         const auto group = dynamic_cast<const Qt3DSDMInspectorGroup *>(inspectorGroup);
         const auto materialGroup = dynamic_cast<const Qt3DSDMMaterialInspectorGroup *>(group);
-        if (materialGroup && materialGroup->isMaterialGroup()) {
+        if (materialGroup && (materialGroup->isMaterialGroup() || isReferenced)) {
             if (m_groupElements[row].controlElements.size()) {
                 auto item = m_groupElements[row].controlElements[elementIndex]
                         .value<InspectorControlBase *>();
@@ -296,19 +469,20 @@ void InspectorControlModel::updateMaterialValues(const QStringList &values, int 
     }
 }
 
-void InspectorControlModel::updateMaterialTypeValues()
-{
-    updateMaterialValues(materialTypeValues(), 0);
-}
-
 void InspectorControlModel::updateShaderValues()
 {
-    updateMaterialValues(shaderValues(), 1);
+    int index = 0;
+    if (isAnimatableMaterial() && !isInsideMaterialContainer())
+        index = 1;
+    updateMaterialValues(shaderValues(), index, true);
 }
 
 void InspectorControlModel::updateMatDataValues()
 {
-    updateMaterialValues(matDataValues(), 1);
+    int index = 0;
+    if (!isInsideMaterialContainer())
+        index = 1;
+    updateMaterialValues(matDataValues(), index);
 }
 
 void InspectorControlModel::setMaterials(std::vector<Q3DStudio::CFilePath> &materials)
@@ -329,23 +503,30 @@ void InspectorControlModel::setMaterials(std::vector<Q3DStudio::CFilePath> &mate
         m_materials.push_back({name, relativePath});
     }
 
-    updateMaterialTypeValues();
-
-    if (isShader())
+    if (!isDefaultMaterial())
         updateShaderValues();
 }
 
-void InspectorControlModel::setMatDatas(std::vector<Q3DStudio::CFilePath> &matDatas)
+void InspectorControlModel::setMatDatas(const std::vector<Q3DStudio::CFilePath> &matDatas)
 {
     m_matDatas.clear();
 
     const auto doc = g_StudioApp.GetCore()->GetDoc();
+    bool isDocModified = doc->IsModified();
     const auto sceneEditor = doc->getSceneEditor();
     if (!sceneEditor)
         return;
 
-    QStringList filenames;
-    for (Q3DStudio::CFilePath path : matDatas) {
+    bool newMaterialSelected = false;
+    for (const Q3DStudio::CFilePath &path : matDatas) {
+        bool isNewFile = true;
+        for (auto &oldPath : m_cachedMatDatas) {
+            if (path.toQString() == oldPath.toQString()) {
+                isNewFile = false;
+                break;
+            }
+        }
+
         const QString relativePath = path.toQString();
         const Q3DStudio::CFilePath absolutePath
             = Q3DStudio::CFilePath::CombineBaseAndRelative(doc->GetDocumentDirectory(), path);
@@ -357,60 +538,82 @@ void InspectorControlModel::setMatDatas(std::vector<Q3DStudio::CFilePath> &matDa
                     absolutePath.toQString(), name, values, textureValues);
 
         m_matDatas.push_back({name, relativePath, values, textureValues});
-        filenames.push_back(name);
 
         bool needRewrite = false;
-        if (values.contains(QStringLiteral("presentation"))
-                && values.contains(QStringLiteral("path"))
-                && values.contains(QStringLiteral("filename"))) {
-            if (values[QStringLiteral("presentation")] == doc->GetDocumentPath()) {
-                if (!QFileInfo(values["path"]).exists()) {
-                    const auto instance
-                            = sceneEditor->getMaterial(values[QStringLiteral("filename")]);
-                    if (instance.Valid()) {
-                        sceneEditor->SetName(instance, name);
-                        needRewrite = true;
+        if (values.contains(QStringLiteral("path"))) {
+            const QString oldPath = values[QStringLiteral("path")];
+            needRewrite = oldPath != absolutePath.toQString();
+            if (!QFileInfo(oldPath).exists()) {
+                const auto instance = sceneEditor->getMaterial(oldPath);
+                if (instance.Valid()) {
+                    const QString oldName = sceneEditor->GetName(instance);
+                    const QString newName = sceneEditor
+                            ->getMaterialNameFromFilePath(relativePath);
+                    const QString actualPath = sceneEditor
+                            ->getFilePathFromMaterialName(oldName);
+                    if (actualPath == oldPath) {
+                        doc->queueMaterialRename(oldName, newName);
+                        Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, tr("Set Name"))
+                                ->setMaterialNameByPath(instance, relativePath);
                     }
                 }
             }
         }
 
-        bool isNewMaterial = !sceneEditor->getMaterial(name).Valid();
+        auto material = sceneEditor->getMaterial(relativePath);
+        if (isNewFile && !newMaterialSelected && !material.Valid()) {
+            {
+                material = Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QString())
+                        ->getOrCreateMaterial(relativePath, false);
+            }
+            // Several aspects of the editor are not updated correctly
+            // if the data core is changed without a transaction
+            // The above scope completes the transaction for creating a new material
+            // Next the added undo has to be popped from the stack
+            // TODO: Find a way to update the editor fully without a transaction
+            g_StudioApp.GetCore()->GetCmdStack()->RemoveLastUndo();
+        }
 
-        const auto material = sceneEditor->getOrCreateMaterial(name);
-        sceneEditor->setMaterialValues(name, values, textureValues);
+        if (material.Valid())
+            sceneEditor->setMaterialValues(relativePath, values, textureValues);
 
-        if (isNewMaterial)
+        if (isNewFile && !newMaterialSelected) {
             doc->SelectDataModelObject(material);
+            newMaterialSelected = true;
+        }
 
-        if (needRewrite)
+        if (needRewrite && material.Valid())
             sceneEditor->writeMaterialFile(material, name, false, absolutePath.toQString());
     }
 
-    sceneEditor->updateMaterialInstances(filenames);
-
-    if (isMatData())
+    if (isBasicMaterial())
         updateMatDataValues();
+
+    sceneEditor->removeDeletedFromMaterialContainer();
+    // Modified flag has to be restored because of the hidden transaction
+    doc->SetModifiedFlag(isDocModified);
+
+    m_cachedMatDatas = matDatas;
 }
 
-QString InspectorControlModel::getStandardMaterialString() const
+QString InspectorControlModel::getBasicMaterialString() const
 {
-    return QObject::tr("Standard Material");
+    return QObject::tr("Basic Material");
 }
 
-QString InspectorControlModel::getCustomMaterialString() const
+QString InspectorControlModel::getAnimatableMaterialString() const
 {
-    return QObject::tr("Custom Material");
-}
-
-QString InspectorControlModel::getSharedMaterialString() const
-{
-    return QObject::tr("Shared Material");
+    return QObject::tr("Animatable Material");
 }
 
 QString InspectorControlModel::getReferencedMaterialString() const
 {
     return QObject::tr("Referenced Material");
+}
+
+QString InspectorControlModel::getStandardMaterialString() const
+{
+    return QObject::tr("Standard");
 }
 
 QString InspectorControlModel::getDefaultMaterialString() const
@@ -455,20 +658,16 @@ void InspectorControlModel::updateFontValues(InspectorControlBase *element) cons
 QStringList InspectorControlModel::materialTypeValues() const
 {
     QStringList values;
-    values.push_back(getStandardMaterialString());
-    if (m_materials.size() > 0)
-        values.push_back(getCustomMaterialString());
-
-    if (!isInsideMaterialContainer()) {
-        values.push_back(getSharedMaterialString());
-        values.push_back(getReferencedMaterialString());
-    }
+    values.push_back(getBasicMaterialString());
+    values.push_back(getAnimatableMaterialString());
+    values.push_back(getReferencedMaterialString());
     return values;
 }
 
 QStringList InspectorControlModel::shaderValues() const
 {
     QStringList values;
+    values.push_back(getStandardMaterialString());
     for (size_t matIdx = 0, end = m_materials.size(); matIdx < end; ++matIdx)
         values.push_back(m_materials[matIdx].m_name);
     return values;
@@ -477,9 +676,21 @@ QStringList InspectorControlModel::shaderValues() const
 QStringList InspectorControlModel::matDataValues() const
 {
     QStringList values;
-    values.push_back(getDefaultMaterialString());
-    for (size_t matIdx = 0, end = m_matDatas.size(); matIdx < end; ++matIdx)
-        values.push_back(m_matDatas[matIdx].m_name);
+    QStringList names;
+    const QString defaultMaterialShownName = getDefaultMaterialString();
+    values.push_back(defaultMaterialShownName);
+    names.push_back(defaultMaterialShownName);
+    for (size_t matIdx = 0, end = m_matDatas.size(); matIdx < end; ++matIdx) {
+        QString shownName = m_matDatas[matIdx].m_name;
+        int slashIndex = shownName.lastIndexOf(QLatin1Char('/'));
+        if (slashIndex != -1)
+            shownName = shownName.mid(slashIndex + 1);
+        if (names.contains(shownName))
+            shownName += QLatin1String(" (") + m_matDatas[matIdx].m_relativePath + QLatin1Char(')');
+        else
+            names.push_back(shownName);
+        values.push_back(shownName);
+    }
     return values;
 }
 
@@ -508,20 +719,19 @@ InspectorControlBase *InspectorControlModel::createMaterialTypeItem(
 
     switch (type) {
     case OBJTYPE_MATERIAL:
-        item->m_value = getStandardMaterialString();
-        break;
-
     case OBJTYPE_CUSTOMMATERIAL:
-        item->m_value = getCustomMaterialString();
+        item->m_value = getAnimatableMaterialString();
         break;
 
     case OBJTYPE_REFERENCEDMATERIAL:
         item->m_value = getReferencedMaterialString();
-        if (sourcePath == QLatin1String("Default"))
-            item->m_value = getSharedMaterialString();
+        if (sourcePath == bridge->getDefaultMaterialName())
+            item->m_value = getBasicMaterialString();
         for (int matIdx = 0, end = int(m_matDatas.size()); matIdx < end; ++matIdx) {
-            if (m_matDatas[matIdx].m_relativePath == sourcePath)
-                item->m_value = getSharedMaterialString();
+            if (QString::compare(m_matDatas[matIdx].m_relativePath,
+                                 sourcePath, Qt::CaseInsensitive) == 0) {
+                item->m_value = getBasicMaterialString();
+            }
         }
         break;
     }
@@ -542,7 +752,7 @@ InspectorControlBase *InspectorControlModel::createShaderItem(
     item->m_title = tr("Shader");
     item->m_dataType = qt3dsdm::DataModelDataType::StringRef;
     item->m_propertyType = qt3dsdm::AdditionalMetaDataType::Renderable;
-    item->m_tooltip = tr("Custom shader being used");
+    item->m_tooltip = tr("Shader being used");
 
     item->m_animatable = false;
 
@@ -551,9 +761,10 @@ InspectorControlBase *InspectorControlModel::createShaderItem(
 
     QString sourcePath = bridge->GetSourcePath(item->m_instance);
 
+    item->m_value = values[0];
     for (int matIdx = 0, end = int(m_materials.size()); matIdx < end; ++matIdx) {
         if (m_materials[matIdx].m_relativePath == sourcePath)
-            item->m_value = values[matIdx];
+            item->m_value = values[matIdx + 1];
     }
 
     return item;
@@ -564,15 +775,15 @@ InspectorControlBase *InspectorControlModel::createMatDataItem(
 {
     const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
     const auto instance = inspectable->GetGroupInstance(groupIndex);
-    const auto *bridge = studio->GetClientDataModelBridge();
+    const auto bridge = studio->GetClientDataModelBridge();
 
     InspectorControlBase *item = new InspectorControlBase;
     item->m_instance = instance;
 
-    item->m_title = tr("Shared Material");
+    item->m_title = tr("Source Material");
     item->m_dataType = qt3dsdm::DataModelDataType::StringRef;
     item->m_propertyType = qt3dsdm::AdditionalMetaDataType::ObjectRef;
-    item->m_tooltip = tr("Shared material being used");
+    item->m_tooltip = tr("Source material definitions used");
 
     item->m_animatable = false;
 
@@ -581,29 +792,12 @@ InspectorControlBase *InspectorControlModel::createMatDataItem(
 
     QString sourcePath = bridge->GetSourcePath(item->m_instance);
 
-    if (!sourcePath.isEmpty() && sourcePath != QLatin1String("Default")) {
-        const auto doc = g_StudioApp.GetCore()->GetDoc();
-        const auto dirPath = doc->GetDocumentDirectory();
-        QFileInfo fileInfo(dirPath + QStringLiteral("/") + sourcePath);
-        if (!fileInfo.exists()) {
-            const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
-            const auto refMaterial = getReferenceMaterial(item->m_instance);
-            if (refMaterial.Valid()) {
-                const auto matName = sceneEditor->GetName(refMaterial);
-                QFileInfo newFileInfo(fileInfo.absoluteDir().path() + QStringLiteral("/")
-                                      + matName + QStringLiteral(".matdata"));
-                const QDir docDir(dirPath);
-                const auto relPath = docDir.relativeFilePath(newFileInfo.absoluteFilePath());
-                sceneEditor->setMaterialSourcePath(item->m_instance, relPath);
-                sourcePath = bridge->GetSourcePath(item->m_instance);
-            }
-        }
-    }
-
     item->m_value = getDefaultMaterialString();
     for (int matIdx = 0, end = int(m_matDatas.size()); matIdx < end; ++matIdx) {
-        if (m_matDatas[matIdx].m_relativePath == sourcePath)
-            item->m_value = values[matIdx + 1]; // + 1 for Default shared material
+        if (QString::compare(m_matDatas[matIdx].m_relativePath,
+                             sourcePath, Qt::CaseInsensitive) == 0) {
+            item->m_value = values[matIdx + 1]; // + 1 for Default basic material
+        }
     }
 
     return item;
@@ -624,15 +818,19 @@ InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *insp
     if (metaProperty.m_IsHidden)
         return nullptr;
 
+    QString title = metaProperty.m_FormalName;
+    if (title.isEmpty())
+        title = metaProperty.m_Name;
+
+    // Hide name for basic materials
+    if (title == QLatin1String("Name") && isBasicMaterial())
+        return nullptr;
+
     InspectorControlBase *item = new InspectorControlBase;
     item->m_property = metaProperty.m_Property;
     item->m_instance = inspectable->GetGroupInstance(groupIndex);
     item->m_metaProperty = metaProperty;
 
-    QString title;
-    title = metaProperty.m_FormalName;
-    if (title.isEmpty())
-        title = metaProperty.m_Name;
     item->m_title = title;
 
     const auto propertySystem = studio->GetPropertySystem();
@@ -647,8 +845,9 @@ InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *insp
     item->m_animatable = metaProperty.m_Animatable &&
             studio->GetAnimationSystem()->IsPropertyAnimatable(item->m_instance,
                                                                metaProperty.m_Property);
-
-    item->m_controllable = metaProperty.m_Controllable;
+    // If a property is animatable, it should be controllable in addition to
+    // properties explicitly set as controllable in metadata
+    item->m_controllable = item->m_animatable || metaProperty.m_Controllable;
 
     // disable IBL Override for reference materials
     if (item->m_title == QLatin1String("IBL Override") && studio->GetClientDataModelBridge()
@@ -834,6 +1033,8 @@ bool InspectorControlModel::isGroupRebuildRequired(CInspectableBase* inspectable
                 auto i = existingGroup.controlElements.at(existingIndex++).value<InspectorControlBase*>();
                 if (i->m_instance != cdmInspectable->GetGroupInstance(theIndex))
                     return true;
+                if (!isInsideMaterialContainer())
+                    existingIndex++; // Add material type dropdown to existing elements
             }
 
             if ((existingGroup.controlElements.size() - existingIndex) != group->GetRows().size())
@@ -861,34 +1062,37 @@ auto InspectorControlModel::computeTree(CInspectableBase* inspectBase)
     if (inspectBase) {
         bool isMaterialFromFile = false;
 
-        const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
+        const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+                ->GetClientDataModelBridge();;
 
         qt3dsdm::Qt3DSDMInstanceHandle instance;
         if (const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(inspectBase))
             instance = inspectable->GetGroupInstance(0);
 
         if (instance.Valid())
-            isMaterialFromFile = sceneEditor->isInsideMaterialContainer(instance);
+            isMaterialFromFile = bridge->isInsideMaterialContainer(instance);
 
         long theCount = inspectBase->GetGroupCount();
         for (long theIndex = 0; theIndex < theCount; ++theIndex) {
             result.append(computeGroup(inspectBase, theIndex, isMaterialFromFile, false));
         }
 
+        if (isDefaultMaterial() && result.size() > 0) {
+            result[result.size() - 1].groupInfo = tr("\nDefault material cannot be edited.\n\n"
+                                                     "Create new or import material, then apply.");
+        }
+
         //Show original material properties for referenced materials
         auto refMaterial = getReferenceMaterial(inspectBase);
         if (refMaterial.Valid()) {
-            auto refMaterialInspectable = getReferenceMaterialInspectable(refMaterial);
+            auto refMaterialInspectable = g_StudioApp.getInspectableFromInstance(refMaterial);
             if (refMaterialInspectable) {
-                const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
-                        ->GetClientDataModelBridge();
-
                 QString materialSrcPath;
                 if (instance.Valid())
                     materialSrcPath = bridge->GetSourcePath(instance);
 
-                if (materialSrcPath != QLatin1String("Default")
-                        && bridge->GetSourcePath(refMaterial) != "Default") {
+                if (materialSrcPath != bridge->getDefaultMaterialName()
+                        && bridge->GetSourcePath(refMaterial) != bridge->getDefaultMaterialName()) {
                     result.append(computeGroup(refMaterialInspectable,
                                                refMaterialInspectable->GetGroupCount() - 1,
                                                true, true));
@@ -907,25 +1111,30 @@ auto InspectorControlModel::computeGroup(CInspectableBase* inspectable,
     CInspectorGroup* theInspectorGroup = inspectable->GetGroup(theIndex);
     GroupInspectorControl result;
     result.groupTitle = theInspectorGroup->GetName();
+    result.groupInfo.clear();
 
     if (isReference)
-        result.groupTitle += QLatin1String(" (Reference)");
+        result.groupTitle += tr(" (Reference)");
 
     if (const auto cdmInspectable = dynamic_cast<Qt3DSDMInspectable *>(inspectable)) {
         if (const auto group = dynamic_cast<Qt3DSDMInspectorGroup *>(theInspectorGroup)) {
             const auto materialGroup
                     = dynamic_cast<Qt3DSDMMaterialInspectorGroup *>(group);
-            bool isMatDataFile = isMatData();
-            if (!isReference && materialGroup && materialGroup->isMaterialGroup()) {
-                InspectorControlBase *item = createMaterialTypeItem(cdmInspectable, theIndex);
-                if (item)
-                    result.controlElements.push_back(QVariant::fromValue(item));
+            bool isMatData = isBasicMaterial(cdmInspectable);
+            if (materialGroup && materialGroup->isMaterialGroup()) {
+                InspectorControlBase *item = nullptr;
 
-                if (isShader()) {
+                if (!isInsideMaterialContainer(cdmInspectable) && !isReference) {
+                    item = createMaterialTypeItem(cdmInspectable, theIndex);
+                    if (item)
+                        result.controlElements.push_back(QVariant::fromValue(item));
+                }
+
+                if (isAnimatableMaterial(cdmInspectable)) {
                     item = createShaderItem(cdmInspectable, theIndex);
                     if (item)
                         result.controlElements.push_back(QVariant::fromValue(item));
-                } else if (isMatDataFile) {
+                } else if (isMatData) {
                     item = createMatDataItem(cdmInspectable, theIndex);
                     if (item)
                         result.controlElements.push_back(QVariant::fromValue(item));
@@ -941,7 +1150,7 @@ auto InspectorControlModel::computeGroup(CInspectableBase* inspectable,
                 if (disableAnimation)
                     item->m_animatable = false;
 
-                if (!isMatDataFile || item->m_title != getReferencedMaterialString())
+                if (!isMatData || item->m_title != getReferencedMaterialString())
                     result.controlElements.push_back(QVariant::fromValue(item));
             }
         }
@@ -994,9 +1203,15 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
                 metaDataProvider->GetMetaDataProperty(instance, element->m_property));
     bool skipEmits = false;
     switch (element->m_dataType) {
-    case qt3dsdm::DataModelDataType::String:
-        element->m_value = qt3dsdm::get<QString>(value);
-        // intentional fall-through for other String-derived datatypes
+    case qt3dsdm::DataModelDataType::String: {
+        QString stringValue = qt3dsdm::get<QString>(value);
+        if (bridge->isInsideMaterialContainer(element->m_instance)) {
+            int index = stringValue.lastIndexOf(QLatin1Char('/'));
+            if (index != -1)
+                stringValue = stringValue.mid(index + 1);
+        }
+        element->m_value = stringValue;
+    } // intentional fall-through for other String-derived datatypes
     case qt3dsdm::DataModelDataType::StringOrInt:
         if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::StringList) {
             QStringList stringlist = qt3dsdm::get<QStringList>(info->m_MetaDataData);
@@ -1109,7 +1324,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
                 QFileInfo relPath(path);
                 element->m_value = QVariant(relPath.fileName());
             } else {
-                element->m_value = QVariant(QString(""));
+                element->m_value = QVariant(QString());
             }
         } else {
             qWarning() << "KDAB_TODO: InspectorControlModel::updatePropertyValue: need to implement:"
@@ -1209,8 +1424,10 @@ void InspectorControlModel::refreshRenderables()
         for (int p = 0; p < group.controlElements.count(); ++p) {
             QVariant& element = group.controlElements[p];
             InspectorControlBase *property = element.value<InspectorControlBase *>();
-            if (property->m_propertyType == qt3dsdm::AdditionalMetaDataType::Renderable)
+            if (property->m_property.Valid()
+                    && property->m_propertyType == qt3dsdm::AdditionalMetaDataType::Renderable) {
                 updatePropertyValue(property);
+            }
         }
     }
 }
@@ -1270,11 +1487,11 @@ void InspectorControlModel::saveIfMaterial(qt3dsdm::Qt3DSDMInstanceHandle instan
     if (!material.Valid())
         return;
 
-    const auto refMaterial = getReferenceMaterial(material);
+    const auto refMaterial = bridge->getMaterialReference(material);
     if (refMaterial.Valid())
         material = refMaterial;
 
-    if (!sceneEditor->isInsideMaterialContainer(material))
+    if (!bridge->isInsideMaterialContainer(material))
         return;
 
     type = bridge->GetObjectType(material);
@@ -1288,14 +1505,14 @@ void InspectorControlModel::saveIfMaterial(qt3dsdm::Qt3DSDMInstanceHandle instan
         QString materialName = namePtr->toQString();
         QString sourcePath;
         for (int i = 0; i < m_matDatas.size(); ++i) {
-            if (m_matDatas[i].m_name == materialName) {
-                sourcePath = doc->GetDocumentDirectory() + QDir::separator()
+            if (QString::compare(m_matDatas[i].m_name, materialName, Qt::CaseInsensitive) == 0) {
+                sourcePath = doc->GetDocumentDirectory() + QLatin1Char('/')
                         + m_matDatas[i].m_relativePath;
             }
         }
 
-        if (!sourcePath.isEmpty())
-            sceneEditor->writeMaterialFile(material, materialName, false, sourcePath);
+        sceneEditor->writeMaterialFile(material, materialName,
+                                       sourcePath.isEmpty(), sourcePath);
     }
 }
 
@@ -1306,38 +1523,55 @@ void InspectorControlModel::setMaterialTypeValue(long instance, int handle, cons
     const QString typeValue = value.toString();
     QString v;
 
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    const auto sceneEditor = doc->getSceneEditor();
+    const QString oldType = sceneEditor->GetObjectTypeName(instance);
+    qt3dsdm::Qt3DSDMInstanceHandle refMaterial;
+    if (oldType == QStringLiteral("ReferencedMaterial"))
+        refMaterial = bridge->getMaterialReference(instance);
+
     bool changeMaterialFile = false;
-    if (typeValue == getStandardMaterialString()) {
+    bool canCopyProperties = false;
+    if (typeValue == getAnimatableMaterialString()) {
         v = QStringLiteral("Standard Material");
-    } else if (typeValue == getCustomMaterialString()) {
-        if (m_materials.size() > 0)
-            v = m_materials[0].m_relativePath;
-    } else if (typeValue == getSharedMaterialString()) {
+        if (refMaterial.Valid()) {
+            const auto refSourcePath = bridge->GetSourcePath(refMaterial);
+            for (auto &material : m_materials) {
+                if (refSourcePath == material.m_relativePath) {
+                    v = material.m_relativePath;
+                    break;
+                }
+            }
+        }
+        canCopyProperties = true;
+    } else if (typeValue == getBasicMaterialString()) {
         v = QStringLiteral("Referenced Material");
         changeMaterialFile = true;
     } else if (typeValue == getReferencedMaterialString()) {
         v = QStringLiteral("Referenced Material");
     }
 
-    const auto doc = g_StudioApp.GetCore()->GetDoc();
-    const auto sceneEditor = doc->getSceneEditor();
-    const QString oldType = sceneEditor->GetObjectTypeName(instance);
-
-    qt3dsdm::Qt3DSDMInstanceHandle refMaterial;
-    if (oldType == QLatin1String("ReferencedMaterial") && typeValue == getStandardMaterialString())
-        sceneEditor->getMaterialReference(instance, refMaterial);
-
     Q3DStudio::ScopedDocumentEditor scopedEditor(
                 Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, tr("Set Material Type")));
 
-    scopedEditor->BeginAggregateOperation();
     scopedEditor->SetMaterialType(instance, v);
 
-    if (refMaterial.Valid())
-        scopedEditor->copyMaterialProperties(refMaterial, instance);
+    if (refMaterial.Valid() && canCopyProperties) {
+        const QString newType = sceneEditor->GetObjectTypeName(instance);
+        const QString refType = sceneEditor->GetObjectTypeName(refMaterial);
+        if (refType == newType)
+            scopedEditor->copyMaterialProperties(refMaterial, instance);
+
+        if (bridge->isInsideMaterialContainer(refMaterial)) {
+            const auto name = scopedEditor->GetName(instance);
+            if (!name.endsWith(QLatin1String("_animatable")))
+                scopedEditor->SetName(instance, name + QLatin1String("_animatable"));
+        }
+    }
 
     if (changeMaterialFile) {
-        scopedEditor->setMaterialProperties(instance, QLatin1String("Default"), "Default", {}, {});
+        scopedEditor->setMaterialProperties(instance, bridge->getDefaultMaterialName(), {}, {});
 
         // Select the original instance again since potentially creating a material selects the
         // created one
@@ -1346,24 +1580,32 @@ void InspectorControlModel::setMaterialTypeValue(long instance, int handle, cons
         rebuildTree(); // Hack to mimic value changing behavior of the type selector
     }
 
-    scopedEditor->EndAggregateOperation();
-
     saveIfMaterial(instance);
 }
 
 void InspectorControlModel::setShaderValue(long instance, int handle, const QVariant &value)
 {
     const QString typeValue = value.toString();
-    QString v;
+    QString v = QStringLiteral("Standard Material");
 
     for (size_t matIdx = 0, end = m_materials.size(); matIdx < end; ++matIdx) {
         if (m_materials[matIdx].m_name == typeValue)
             v = m_materials[matIdx].m_relativePath;
     }
 
-    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(),
-                                      QObject::tr("Set Material Type"))
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Material Type"))
             ->SetMaterialType(instance, v);
+
+    const auto dispatch = g_StudioApp.GetCore()->GetDispatch();
+    QVector<qt3dsdm::Qt3DSDMInstanceHandle> refMats;
+    doc->getSceneReferencedMaterials(doc->GetSceneInstance(), refMats);
+    for (auto &refMat : qAsConst(refMats)) {
+        const auto origMat = bridge->getMaterialReference(refMat);
+        if (origMat.Valid() && (long)origMat == instance)
+            dispatch->FireImmediateRefreshInstance(refMat);
+    }
 
     saveIfMaterial(instance);
 }
@@ -1378,19 +1620,37 @@ void InspectorControlModel::setMatDataValue(long instance, int handle, const QVa
     QMap<QString, QString> values;
     QMap<QString, QMap<QString, QString>> textureValues;
 
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+
     bool changeMaterialFile = false;
     if (typeValue == getDefaultMaterialString()) {
         strValue = QStringLiteral("Referenced Material");
         name = QLatin1String("Default");
-        srcPath = "Default";
+        srcPath = name;
         changeMaterialFile = true;
     } else {
+        const auto sceneEditor = doc->getSceneEditor();
         for (size_t matIdx = 0, end = m_matDatas.size(); matIdx < end; ++matIdx) {
-            if (m_matDatas[matIdx].m_name == typeValue) {
+            QString shownName = m_matDatas[matIdx].m_name;
+            int slashIndex = shownName.lastIndexOf(QLatin1Char('/'));
+            if (slashIndex != -1)
+                shownName = shownName.mid(slashIndex + 1);
+            if (QString::compare(shownName + QLatin1String(" (")
+                    + m_matDatas[matIdx].m_relativePath + QLatin1Char(')'),
+                                 typeValue, Qt::CaseInsensitive) == 0
+                    || QString::compare(shownName, typeValue, Qt::CaseInsensitive) == 0) {
                 strValue = QStringLiteral("Referenced Material");
                 changeMaterialFile = true;
                 name = m_matDatas[matIdx].m_name;
                 srcPath = m_matDatas[matIdx].m_relativePath;
+                const auto material = sceneEditor->getMaterial(srcPath);
+                if (material.Valid()) {
+                    // Get the correct case source path
+                    const auto absPath = sceneEditor->getFilePathFromMaterialName(
+                                sceneEditor->GetName(material));
+                    srcPath = QDir(doc->GetDocumentDirectory()).relativeFilePath(absPath);
+                }
                 values = m_matDatas[matIdx].m_values;
                 textureValues = m_matDatas[matIdx].m_textureValues;
                 break;
@@ -1398,15 +1658,26 @@ void InspectorControlModel::setMatDataValue(long instance, int handle, const QVa
         }
     }
 
-    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    if (changeMaterialFile) {
+        {
+            Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QString())
+                    ->setMaterialValues(srcPath, values, textureValues);
+        }
+        // Several aspects of the editor are not updated correctly
+        // if the data core is changed without a transaction
+        // The above scope completes the transaction for creating a new material
+        // Next the added undo has to be popped from the stack
+        // TODO: Find a way to update the editor fully without a transaction
+        g_StudioApp.GetCore()->GetCmdStack()->RemoveLastUndo();
+    }
+
     Q3DStudio::ScopedDocumentEditor scopedEditor(
                 Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, tr("Set Material Type")));
-
-    scopedEditor->BeginAggregateOperation();
     scopedEditor->SetMaterialType(instance, strValue);
 
     if (changeMaterialFile) {
-        scopedEditor->setMaterialProperties(instance, name, srcPath, values, textureValues);
+        scopedEditor->setMaterialSourcePath(instance, srcPath);
+        scopedEditor->setMaterialReferenceByPath(instance, srcPath);
 
         // Select original instance again since potentially
         // creating a material selects the created one
@@ -1414,8 +1685,6 @@ void InspectorControlModel::setMatDataValue(long instance, int handle, const QVa
 
         rebuildTree(); // Hack to mimic value changing behavior of the type selector
     }
-
-    scopedEditor->EndAggregateOperation();
 
     saveIfMaterial(instance);
 }
@@ -1438,7 +1707,8 @@ void InspectorControlModel::setRenderableValue(long instance, int handle, const 
 void InspectorControlModel::setPropertyValue(long instance, int handle, const QVariant &value,
                                              bool commit)
 {
-    const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    const auto studio = doc->GetStudioSystem();
     const auto bridge = studio->GetClientDataModelBridge();
     // Name property needs special handling
     if (handle == bridge->GetNameProperty()) {
@@ -1450,46 +1720,92 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
         m_modifiedProperty.second = 0;
         m_previouslyCommittedValue = {};
 
-        QString currentName = bridge->GetName(instance);
+        QString currentName = bridge->GetName(instance, true);
         QString newName = value.toString();
         if (!newName.isEmpty()) {
+            if (bridge->isInsideMaterialContainer(instance)
+                    && (newName.indexOf(QLatin1Char('/')) != -1
+                        || newName.indexOf(QLatin1Char('#')) != -1)) {
+                return;
+            }
             qt3dsdm::Qt3DSDMInstanceHandle parentInstance = bridge->GetParentInstance(instance);
-            if (!bridge->CheckNameUnique(parentInstance, instance, newName)) {
+
+            if (parentInstance == doc->GetSceneInstance()
+                    && newName == bridge->getMaterialContainerName()) {
+                QString theTitle = QObject::tr("Rename Object Error");
+                QString theString = bridge->getMaterialContainerName()
+                        + QObject::tr(" is a reserved name.");
+                // Display error message box asynchronously so focus loss won't trigger setting
+                // the name again
+                g_StudioApp.GetDialogs()->asyncDisplayMessageBox(theTitle, theString,
+                                                                 Qt3DSMessageBox::ICON_ERROR);
+                return;
+            }
+
+            QString realNewName = newName;
+            if (bridge->isInsideMaterialContainer(instance)) {
+                QString realName = bridge->GetName(instance);
+                int slashIndex = realName.lastIndexOf(QLatin1Char('/'));
+                if (slashIndex != -1)
+                    realNewName = realName.left(slashIndex + 1) + newName;
+            }
+
+            if (!bridge->CheckNameUnique(parentInstance, instance, realNewName)) {
                 QString origNewName = newName;
-                newName = bridge->GetUniqueChildName(parentInstance, instance, newName);
+                realNewName = bridge->GetUniqueChildName(parentInstance, instance, realNewName);
+                newName = realNewName;
+                if (bridge->isInsideMaterialContainer(instance)) {
+                    int slashIndex = newName.lastIndexOf(QLatin1Char('/'));
+                    if (slashIndex != -1)
+                        newName = newName.mid(slashIndex + 1);
+                }
                 // Display rename message box asynchronously so focus loss won't trigger setting
                 // the name again
                 g_StudioApp.GetDialogs()->DisplayObjectRenamed(origNewName, newName, true);
             }
-            if (newName != currentName) {
-                bool canRename = false;
 
-                const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
-                if (sceneEditor->isInsideMaterialContainer(instance)) {
-                    const auto doc = g_StudioApp.GetCore()->GetDoc();
+            const auto sceneEditor = doc->getSceneEditor();
+
+            // A materialdef with the same name might exists as a file but not in the container,
+            // so an additional check is needed for that case
+            if (bridge->isInsideMaterialContainer(instance)) {
+                int i = 1;
+                while (QFileInfo(sceneEditor->getFilePathFromMaterialName(realNewName)).exists()) {
+                    ++i;
+                    realNewName = realNewName + QString::number(i);
+                    if (!bridge->CheckNameUnique(parentInstance, instance, realNewName)) {
+                        realNewName = bridge->GetUniqueChildName(
+                                    parentInstance, instance, realNewName);
+                    }
+                }
+                newName = realNewName;
+                int slashIndex = newName.lastIndexOf(QLatin1Char('/'));
+                if (slashIndex != -1)
+                    newName = newName.mid(slashIndex + 1);
+            }
+
+            if (newName != currentName) {
+                if (bridge->isInsideMaterialContainer(instance)) {
+                    const auto properOldName = sceneEditor->GetName(instance);
                     const auto dirPath = doc->GetDocumentDirectory();
                     for (size_t matIdx = 0, end = m_matDatas.size(); matIdx < end; ++matIdx) {
-                        if (m_matDatas[matIdx].m_name == currentName) {
-                            QFileInfo fileInfo(dirPath + QStringLiteral("/")
+                        if (m_matDatas[matIdx].m_name == properOldName) {
+                            QFileInfo fileInfo(dirPath + QLatin1Char('/')
                                                + m_matDatas[matIdx].m_relativePath);
-                            const QString oldFile = fileInfo.absoluteFilePath();
                             const QString newFile = fileInfo.absolutePath()
-                                    + QStringLiteral("/")
+                                    + QLatin1Char('/')
                                     + newName
-                                    + QStringLiteral(".matdata");
-                            canRename = QFile::rename(oldFile, newFile);
-                            break;
+                                    + QStringLiteral(".materialdef");
+                            const auto properNewName
+                                    = sceneEditor->getMaterialNameFromFilePath(newFile);
+                            newName = properNewName;
+                            doc->queueMaterialRename(properOldName, properNewName);
                         }
                     }
-                } else {
-                    canRename = true;
                 }
-
-                if (canRename) {
-                    Q3DStudio::SCOPED_DOCUMENT_EDITOR(
-                                *g_StudioApp.GetCore()->GetDoc(),
-                                QObject::tr("Set Name"))->SetName(instance, newName, false);
-                }
+                Q3DStudio::SCOPED_DOCUMENT_EDITOR(
+                            *g_StudioApp.GetCore()->GetDoc(),
+                            QObject::tr("Set Name"))->SetName(instance, newName, false);
             }
         }
         return;
@@ -1528,18 +1844,6 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
         const QVector3D theFloat3 = qt3dsdm::get<QVector3D>(v);
         if (theFloat3.x() == 0.0f || theFloat3.y() == 0.0f || theFloat3.z() == 0.0f )
             v = oldValue;
-    } else if ((theType == EStudioObjectType::OBJTYPE_CUSTOMMATERIAL
-         || theType == EStudioObjectType::OBJTYPE_EFFECT) &&
-            studio->GetPropertySystem()->GetDataType(handle)
-                == qt3dsdm::DataModelDataType::String
-            && additionalType == qt3dsdm::AdditionalMetaDataType::Texture) {
-        // force . at the beginning of the url
-        QString x = value.toString();
-        QUrl url(x);
-        if (url.isRelative() && !x.startsWith("./")) {
-            QString s = QString("./%1").arg(url.path());
-            v = QVariant::fromValue(s);
-        }
     }
 
     // some properties may initialize OpenGL resources (e.g. loading meshes will
@@ -1673,6 +1977,8 @@ QVariant InspectorControlModel::data(const QModelIndex &index, int role) const
         return m_groupElements.at(row).controlElements;
     case GroupTitleRole:
         return m_groupElements.at(row).groupTitle;
+    case GroupInfoRole:
+        return m_groupElements.at(row).groupInfo;
     }
     return {};
 }
@@ -1682,6 +1988,7 @@ QHash<int, QByteArray> InspectorControlModel::roleNames() const
     auto names = QAbstractListModel::roleNames();
     names.insert(GroupValuesRole, "values");
     names.insert(GroupTitleRole, "title");
+    names.insert(GroupInfoRole, "info");
     return names;
 }
 

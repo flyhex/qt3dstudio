@@ -206,6 +206,18 @@ void CSimpleSlideCore::ForceSetInstancePropertyValue(Qt3DSDMSlideHandle inSlide,
                                             inProperty, inValue);
 }
 
+void CSimpleSlideCore::forceSetInstancePropertyValueOnAllSlides(Qt3DSDMInstanceHandle inInstance,
+                                                                Qt3DSDMPropertyHandle inProperty,
+                                                                const SValue &inValue)
+{
+    for (auto &it : m_Objects) {
+        if (it.second->GetType() == SSlide::s_Type) {
+            Qt3DSDMSlideHandle slide(it.first);
+            ForceSetInstancePropertyValue(slide, inInstance, inProperty, inValue);
+        }
+    }
+}
+
 bool CSimpleSlideCore::GetSpecificInstancePropertyValue(Qt3DSDMSlideHandle inSlide,
                                                         Qt3DSDMInstanceHandle inInstance,
                                                         Qt3DSDMPropertyHandle inProperty,

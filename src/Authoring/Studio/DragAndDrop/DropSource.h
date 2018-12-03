@@ -36,7 +36,6 @@
 #include "Qt3DSDMHandles.h"
 #include "Pt.h"
 #include "Cmd.h"
-
 #include <QMimeData>
 
 typedef enum _EDROPDESTINATION {
@@ -56,18 +55,20 @@ protected:
     unsigned long m_Size;
 
     qt3dsdm::TInstanceHandleList m_Instances;
-    long m_ObjectType;
-    bool m_HasValidTarget;
+    long m_ObjectType = 0;
+    int m_FileType = 0;
+    bool m_HasValidTarget = false;
     CPt m_CurrentPoint;
-    Qt::KeyboardModifiers m_CurrentFlags;
+    Qt::KeyboardModifiers m_CurrentFlags = 0;
 
 public:
-    CDropSource(long inFlavor, unsigned long inSize);
+    CDropSource(long inFlavor, unsigned long inSize = 0);
     virtual ~CDropSource();
 
     virtual bool CanMove() = 0;
     virtual bool CanCopy() = 0;
     long GetObjectType() const { return m_ObjectType; }
+    long getFileType() const { return m_FileType; }
     long GetFlavor()  const { return m_Flavor; }
     virtual bool ValidateTarget(CDropTarget *) = 0;
 
@@ -93,8 +94,7 @@ class CDropSourceFactory
 {
 public:
     static CDropSource *Create(long inFlavor, IDragable *inDragable);
-    static CDropSource *Create(long inFlavor, void *inData, unsigned long inSize);
-    static CDropSource *Extract(long inFlavor, void *inData, unsigned long inSize);
+    static CDropSource *Create(long inFlavor, const QString &filePath);
 };
 
 #endif

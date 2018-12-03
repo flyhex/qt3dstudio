@@ -34,6 +34,8 @@
 #include "StudioApp.h"
 #include "TimelineControl.h"
 #include "Bindings/ITimelineItemBinding.h"
+#include "TimelineGraphicsScene.h"
+#include "TimelineToolbar.h"
 
 RowTimelineContextMenu::RowTimelineContextMenu(RowTree *inRowTree,
                                                KeyframeManager *inKeyframeManager,
@@ -149,6 +151,11 @@ void RowTimelineContextMenu::initialize()
         connect(m_setTimeBarTimeAction, &QAction::triggered, this,
                 &RowTimelineContextMenu::setTimeBarTime);
         addAction(m_setTimeBarTimeAction);
+
+        QAction *showRowTextsAction
+                = m_rowTree->m_scene->widgetTimeline()->toolbar()->actionShowRowTexts();
+        showRowTextsAction->setShortcutVisibleInContextMenu(true);
+        addAction(showRowTextsAction);
     }
 }
 

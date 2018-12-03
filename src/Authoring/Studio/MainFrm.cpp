@@ -176,6 +176,7 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionProject, &QAction::triggered, this, &CMainFrame::OnViewProject);
     connect(m_ui->actionSlide, &QAction::triggered, this, &CMainFrame::OnViewSlide);
     connect(m_ui->actionTimeline, &QAction::triggered, this, &CMainFrame::OnViewTimeline);
+    connect(m_ui->actionSceneCamera, &QAction::triggered, this, &CMainFrame::onViewSceneCamera);
     connect(m_ui->actionBounding_Boxes, &QAction::triggered,
             this, &CMainFrame::OnViewBoundingBoxes);
     connect(m_ui->actionPivot_Point, &QAction::triggered, this, &CMainFrame::OnViewPivotPoint);
@@ -269,6 +270,7 @@ CMainFrame::CMainFrame()
         OnUpdateViewWireframe();
         OnUpdateViewTooltips();
         OnUpdateViewTimeline();
+        onUpdateViewSceneCamera();
         OnUpdateViewInspector();
         OnUpdateViewAction();
         OnUpdateViewBasicObjects();
@@ -393,6 +395,10 @@ void CMainFrame::OnCreate()
     m_ui->actionZoom_Tool->setVisible(false);
 #endif
 
+    // TODO: Save as/save copy functionality hidden until it is redesigned (QT3DS-2630)
+    m_ui->actionSave_As->setVisible(false);
+    m_ui->actionSave_a_Copy->setVisible(false);
+
     // Show a message about opening or creating a presentation
     m_sceneView.data()->setVisible(false);
     setCentralWidget(m_ui->infoText);
@@ -419,8 +425,9 @@ void CMainFrame::OnNewPresentation()
     m_ui->menu_Edit->setEnabled(true);
     m_ui->menu_Timeline->setEnabled(true);
     m_ui->menu_View->setEnabled(true);
-    m_ui->actionSave_As->setEnabled(true);
-    m_ui->actionSave_a_Copy->setEnabled(true);
+    // TODO: Save as/save copy functionality disabled until it is redesigned (QT3DS-2630)
+//    m_ui->actionSave_As->setEnabled(true);
+//    m_ui->actionSave_a_Copy->setEnabled(true);
     m_ui->action_Connect_to_Device->setEnabled(true);
     m_ui->action_Revert->setEnabled(true);
     m_ui->actionImportAssets->setEnabled(true);
@@ -917,10 +924,16 @@ void CMainFrame::EditPreferences(short inPageIndex)
                     (float)CStudioPreferences::DEFAULT_SELECTOR_LENGTH);
 
         RecheckSizingMode();
+
+        // Save preferences, to make sure we do not lose them on a possible crash
+        QTimer::singleShot(0, [](){ CStudioPreferences::savePreferences(); });
     } else if (thePrefsReturn == PREFS_RESET_LAYOUT) {
         onViewResetLayout();
     } else if (thePrefsReturn == PREFS_SETTINGS_RESTART) {
         QTimer::singleShot(0, this, &CMainFrame::handleRestart);
+    } else if (thePrefsReturn != 0) {
+        // Save preferences, to make sure we do not lose them on a possible crash
+        QTimer::singleShot(0, [](){ CStudioPreferences::savePreferences(); });
     }
 }
 
@@ -983,18 +996,14 @@ void CMainFrame::OnPlayStop()
     }
 }
 
-//==========================================================================
 /**
  *	Called when the presentation time changes.  Not handled by this class,
  *	but included because the base class requires it to be implemented.
  */
 void CMainFrame::OnTimeChanged(long inTime)
 {
-    if (m_paletteManager)
-        m_paletteManager->onTimeChanged(inTime);
 }
 
-//==============================================================================
 /**
  *	Handles pressing the play button.
  */
@@ -1003,7 +1012,6 @@ void CMainFrame::OnPlaybackPlay()
     g_StudioApp.PlaybackPlay();
 }
 
-//==============================================================================
 /**
  *	Handles pressing of the stop button.
  */
@@ -1012,7 +1020,6 @@ void CMainFrame::OnPlaybackStop()
     g_StudioApp.PlaybackStopNoRestore();
 }
 
-//==============================================================================
 /**
  *	Handles pressing the preview button.
  */
@@ -1626,6 +1633,21 @@ void CMainFrame::OnUpdateViewTimeline()
 {
     m_ui->actionTimeline->setChecked(
                 m_paletteManager->IsControlVisible(CPaletteManager::CONTROLTYPE_TIMELINE));
+}
+
+void CMainFrame::onViewSceneCamera()
+{
+    m_paletteManager->ToggleControl(CPaletteManager::CONTROLTYPE_SCENECAMERA);
+    onUpdateViewSceneCamera();
+}
+
+void CMainFrame::onUpdateViewSceneCamera()
+{
+    const bool cameraVisible = m_paletteManager->IsControlVisible(
+                CPaletteManager::CONTROLTYPE_SCENECAMERA);
+    m_ui->actionSceneCamera->setChecked(cameraVisible);
+    g_StudioApp.getRenderer().setFullSizePreview(cameraVisible);
+    g_StudioApp.getRenderer().RequestRender();
 }
 
 //==============================================================================

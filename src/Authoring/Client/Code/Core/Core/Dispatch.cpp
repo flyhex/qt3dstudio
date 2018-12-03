@@ -258,17 +258,6 @@ void CDispatch::FireOnLoadingPresentation(bool inIsSubPresentation /*= false */)
                                             inIsSubPresentation);
 }
 
-//=============================================================================
-/**
- * Notify when a subpresentation has been loaded.
- * Called if FireOnLoadingPresentation has been called earlier.
- */
-void CDispatch::FireOnLoadedSubPresentation()
-{
-    m_PresentationChangeListeners.FireEvent(&CPresentationChangeListener::OnLoadedSubPresentation);
-}
-
-//=============================================================================
 /**
  * Notify all the presentation change listeners that a new presentation was loaded.
  */

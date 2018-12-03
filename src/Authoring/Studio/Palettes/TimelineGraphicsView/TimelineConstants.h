@@ -49,6 +49,7 @@ namespace TimelineConstants
     const int RULER_TICK_SCALE3 = 6;
     const int RULER_TICK_SCALE4 = 21;
     const int TOOLBAR_MARGIN    = 10;    // margin between the timeline and the toolbar
+    const int ROW_TEXT_OFFSET_Y = 3;     // offset Y of comment text on row
 
     const double RULER_EDGE_OFFSET = 15;
     const double TREE_MIN_W     = 160;

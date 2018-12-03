@@ -777,7 +777,8 @@ bool CControl::OnKeyUp(unsigned int inChar, Qt::KeyboardModifiers)
  *	Find the first child (descendant) control that has a valid drop target.
  */
 CDropTarget *CControl::FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags,
-                                         EStudioObjectType objectType)
+                                         EStudioObjectType objectType,
+                                         Q3DStudio::DocumentEditorFileType::Enum fileType)
 {
     CDropTarget *theDropTarget = NULL;
 
@@ -790,7 +791,8 @@ CDropTarget *CControl::FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifier
             CPt theChildPoint = inMousePoint - theChild->GetPosition();
 
             // Allow the child the opportunity to respond
-            theDropTarget = theChild->FindDropCandidate(theChildPoint, inFlags, objectType);
+            theDropTarget = theChild->FindDropCandidate(theChildPoint, inFlags, objectType,
+                                                        fileType);
 
             if (theDropTarget)
                 break;

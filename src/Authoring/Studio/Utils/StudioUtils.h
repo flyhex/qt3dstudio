@@ -27,37 +27,26 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-// Prefix
-//==============================================================================
 #ifndef INCLUDED_STUDIO_UTILS_H
-#define INCLUDED_STUDIO_UTILS_H 1
+#define INCLUDED_STUDIO_UTILS_H
 
-#pragma once
+#include <QtXml/qdom.h>
+#include <QtCore/qsavefile.h>
+#include <QtCore/qxmlstream.h>
 
-#include "Qt3DSString.h"
-#include <QPoint>
-#include <QSize>
+class StudioUtils {
+public:
+    static QString resourceImagePath();
+    static QString resourceImageUrl();
+    static QString resourcePath();
+    static QString qmlImportPath();
 
-//==============================================================================
-// Functions
-//==============================================================================
-Q3DStudio::CString FormatTimeString(long inTimeMS);
-bool IsNumericString(Q3DStudio::CString inString);
+    static qreal devicePixelRatio();
 
-long TimeToPos(long inTime, double inTimeRatio);
-long TimeToPos(double inTime, double inTimeRatio);
-long PosToTime(long inPos, double inTimeRatio);
-
-void ShowURLInBrowser(Q3DStudio::CString inURL);
-
-QString resourceImagePath();
-QString resourceImageUrl();
-
-QString resourcePath();
-
-QString qmlImportPath();
-
-qreal devicePixelRatio();
+    static bool readFileToDomDocument(const QString &filePath, QDomDocument &domDoc);
+    static bool openDomDocumentSave(QSaveFile &file, QDomDocument &domDoc);
+    static bool commitDomDocumentSave(QSaveFile &file, const QDomDocument &domDoc);
+    static bool openTextSave(QSaveFile &file);
+};
 
 #endif // INCLUDED_STUDIO_UTILS_H

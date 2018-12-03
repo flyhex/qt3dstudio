@@ -80,6 +80,7 @@ protected:
 
 Q_SIGNALS:
     void dropReceived();
+    void newFrame();
 
 protected:
     void mouseMoveEvent(QMouseEvent *event) override;

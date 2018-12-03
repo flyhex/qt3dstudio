@@ -93,8 +93,7 @@ protected:
     void updateVisibility(int type);
 
 private Q_SLOTS:
-    void on_buttonBox_accepted();
-    void on_buttonBox_rejected();
+    void accept() override;
     void onTypeChanged(int type);
     void onMinChanged(float min);
     void onMaxChanged(float max);

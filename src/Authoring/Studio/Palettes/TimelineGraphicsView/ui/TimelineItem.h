@@ -45,6 +45,7 @@ public:
         TypeRowTree,
         TypeRowTreeLabelItem,
         TypeRowTimeline,
+        TypeRowTimelineCommentItem,
         TypePlayHead,
         TypeRuler,
         TypeRowMover

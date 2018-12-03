@@ -171,7 +171,8 @@ struct SMetaDataPropertyInfo : SMetaPropertyBase
         m_IsHidden = false;
         // We default to being animatable
         m_Animatable = true;
-        // Default to not being controlled
+        // Default to not being explicitly controllable.
+        // (Note that all animables are controllable.)
         m_Controllable = false;
     }
     bool operator==(const SMetaDataPropertyInfo &inOther) const

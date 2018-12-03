@@ -50,6 +50,7 @@ public:
 
     void setInstance(int instance);
     int instance() const;
+    QString currentDataModelPath() const;
 
 Q_SIGNALS:
     void imageSelected(int handle, int instance, const QString &name);
@@ -57,6 +58,7 @@ Q_SIGNALS:
 protected:
     void focusInEvent(QFocusEvent *event) override;
     void focusOutEvent(QFocusEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 
 Q_SIGNALS:
     void focusChanged();

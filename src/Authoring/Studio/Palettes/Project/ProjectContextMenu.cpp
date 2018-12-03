@@ -35,13 +35,25 @@ ProjectContextMenu::ProjectContextMenu(ProjectView *parent, int index)
     , m_index(index)
 {
     QAction *action = nullptr;
+    QAction *openFileAction = nullptr;
+    QAction *deleteFileAction = nullptr;
+
+    if (!m_view->isFolder(m_index)) {
+        openFileAction = new QAction(tr("Open"));
+        connect(openFileAction, &QAction::triggered, this, &ProjectContextMenu::handleOpenFile);
+        addAction(openFileAction);
+
+        deleteFileAction = new QAction(tr("Delete"));
+        connect(deleteFileAction, &QAction::triggered, this, &ProjectContextMenu::handleDeleteFile);
+        // Delete file action is added after other file actions later
+    }
+
     if (m_view->isPresentation(m_index)) {
         const bool currentPresentation = m_view->isCurrentPresentation(m_index);
+        openFileAction->setText(tr("Open Presentation"));
+        openFileAction->setEnabled(!currentPresentation);
 
-        action = new QAction(tr("Open Presentation"));
-        connect(action, &QAction::triggered, this, &ProjectContextMenu::handleOpenPresentation);
-        action->setEnabled(!currentPresentation);
-        addAction(action);
+        deleteFileAction->setEnabled(!currentPresentation);
 
         action = new QAction(tr("Rename Presentation"));
         connect(action, &QAction::triggered, this, &ProjectContextMenu::handleRenamePresentation);
@@ -67,8 +79,6 @@ ProjectContextMenu::ProjectContextMenu(ProjectView *parent, int index)
             }
         }
         addAction(action);
-
-        addSeparator();
     } else if (m_view->isQmlStream(m_index)) {
         action = new QAction(tr("Rename Qml Stream"));
         connect(action, &QAction::triggered, this, &ProjectContextMenu::handleRenameQmlStream);
@@ -77,21 +87,23 @@ ProjectContextMenu::ProjectContextMenu(ProjectView *parent, int index)
         action = new QAction(tr("Edit Qml Stream Id"));
         connect(action, &QAction::triggered, this, &ProjectContextMenu::handleEditQmlStreamId);
         addAction(action);
-
-        addSeparator();
     }
 
     if (m_view->isMaterialData(m_index)) {
-        action = new QAction(tr("Edit Material"));
-        connect(action, &QAction::triggered, this, &ProjectContextMenu::handleEditMaterial);
-        addAction(action);
+        openFileAction->setText(tr("Edit"));
 
         action = new QAction(tr("Duplicate"));
         connect(action, &QAction::triggered, this, &ProjectContextMenu::handleDuplicate);
         addAction(action);
-
-        addSeparator();
     }
+
+    if (deleteFileAction) {
+        deleteFileAction->setEnabled(deleteFileAction->isEnabled()
+                                     && !m_view->isReferenced(m_index));
+        addAction(deleteFileAction);
+    }
+
+    addSeparator();
 
     action = new QAction(tr("Show Containing Folder"));
     connect(action, &QAction::triggered, this, &ProjectContextMenu::handleShowContainingFolder);
@@ -113,11 +125,12 @@ ProjectContextMenu::ProjectContextMenu(ProjectView *parent, int index)
     connect(action, &QAction::triggered, this, &ProjectContextMenu::handleImportAssets);
     addAction(action);
 
-    if (m_view->isMaterialFolder(m_index)) {
+    if (m_view->isMaterialFolder(m_index) || m_view->isInMaterialFolder(m_index)) {
         addSeparator();
-        action = new QAction(tr("Add Material"));
+        QMenu *createMenu = addMenu(tr("Create"));
+        action = new QAction(tr("Basic Material"));
         connect(action, &QAction::triggered, this, &ProjectContextMenu::handleAddMaterial);
-        addAction(action);
+        createMenu->addAction(action);
     }
 
     if (m_view->isRefreshable(m_index)) {
@@ -132,9 +145,9 @@ ProjectContextMenu::~ProjectContextMenu()
 {
 }
 
-void ProjectContextMenu::handleOpenPresentation()
+void ProjectContextMenu::handleOpenFile()
 {
-    m_view->openPresentation(m_index);
+    m_view->openFile(m_index);
 }
 
 void ProjectContextMenu::handleEditPresentationId()
@@ -177,11 +190,6 @@ void ProjectContextMenu::handleAddMaterial()
     m_view->addMaterial(m_index);
 }
 
-void ProjectContextMenu::handleEditMaterial()
-{
-    m_view->editMaterial(m_index);
-}
-
 void ProjectContextMenu::handleDuplicate()
 {
     m_view->duplicate(m_index);
@@ -200,4 +208,9 @@ void ProjectContextMenu::handleRenamePresentation()
 void ProjectContextMenu::handleRenameQmlStream()
 {
     m_view->renamePresentation(m_index, true);
+}
+
+void ProjectContextMenu::handleDeleteFile()
+{
+    m_view->deleteFile(m_index);
 }

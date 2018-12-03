@@ -57,7 +57,15 @@ Rectangle {
             model: _imageChooserModel
 
             delegate: ChooserDelegate {
-                onClicked: _imageChooserView.imageSelected(_imageChooserView.handle, _imageChooserView.instance, filePath);
+                onClicked: {
+                    _imageChooserView.imageSelected(_imageChooserView.handle,
+                                                    _imageChooserView.instance, filePath);
+                }
+                onDoubleClicked: {
+                    _imageChooserView.imageSelected(_imageChooserView.handle,
+                                                    _imageChooserView.instance, filePath);
+                    _imageChooserView.hide();
+                }
             }
         }
     }

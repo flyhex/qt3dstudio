@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1999-2002 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -27,36 +26,26 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
-#ifndef __PROJECTDROPTARGET_H__
-#define __PROJECTDROPTARGET_H__
+#pragma once
 
-//==============================================================================
-//	Includes
-//==============================================================================
-#include "DropTarget.h"
-#include "Qt3DSFileTools.h"
+#include <QDialog>
 
-class CDropSource;
+QT_BEGIN_NAMESPACE
+class QTextBrowser;
+class QDialogButtonBox;
+QT_END_NAMESPACE
 
-//==============================================================================
-/**
- *	@class	CProjectDropTarget
- *	@brief	Drop Target for Project Palette
- */
-class CProjectDropTarget : public CDropTarget
+class DetailDialog : public QDialog
 {
+    Q_OBJECT
+
 public:
-    CProjectDropTarget(const Q3DStudio::CFilePath &inTargetDir);
+    explicit DetailDialog(QWidget *parent = nullptr);
+    ~DetailDialog();
 
-    bool Accept(CDropSource &inSource) override;
-    bool Drop(CDropSource &inSource) override;
-    long GetObjectType() override;
+    void setText(const QString &text);
 
-protected:
-    Q3DStudio::CFilePath m_TargetDir; ///< The target directory to copy file to.
+private:
+    QTextBrowser *textBrowser = nullptr;
+    QDialogButtonBox *buttonBox = nullptr;
 };
-
-#endif // #ifndef __PROJECTDROPTARGET_H__

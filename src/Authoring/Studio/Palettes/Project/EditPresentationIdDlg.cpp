@@ -68,6 +68,8 @@ EditPresentationIdDlg::EditPresentationIdDlg(const QString &src, DialogType type
         QFileInfo fi(src);
         m_ui->lineEditPresentationId->setText(fi.fileName());
     }
+
+    window()->setFixedSize(size());
 }
 
 void EditPresentationIdDlg::accept()

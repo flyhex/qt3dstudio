@@ -39,17 +39,13 @@
 #include "Qt3DSLargeInteger.h"
 #include <QtGui/qcolor.h>
 
-/////////////////////////////////////////////////////////////////////////////
-// CStudioProjectSettings property page
-
-//==============================================================================
 /**
  *	Constructor: Initializes the object.
  */
 CStudioProjectSettings::CStudioProjectSettings(CCore *inCore)
-    : m_Core(inCore)
+    : m_core(inCore)
 {
-    this->Reset();
+    this->reset();
 }
 
 //==============================================================================
@@ -68,24 +64,15 @@ CStudioProjectSettings::~CStudioProjectSettings()
  *	@param	None
  */
 //==============================================================================
-void CStudioProjectSettings::Reset()
+void CStudioProjectSettings::reset()
 {
     // Reset the internal variables
-
-    m_Author.clear();
-    m_Company.clear();
-
-    m_PresentationSize = CStudioPreferences::GetDefaultClientSize();
-
-    // fsaa
-    m_FSAAMode = FSAA_OFF;
-
-    m_MaintainAspect = false;
-
-    // do not embed fonts by default
-    m_EmbedFonts = false;
-
-    m_RotatePresentation = false;
+    m_author.clear();
+    m_company.clear();
+    m_presentationSize = CStudioPreferences::GetDefaultClientSize();
+    m_maintainAspect = false;
+    m_rotatePresentation = false;
+    m_preferCompressedTextures = false;
 }
 
 //==============================================================================
@@ -95,11 +82,11 @@ void CStudioProjectSettings::Reset()
  *	@param	inAuthor				Author name
  */
 //==============================================================================
-void CStudioProjectSettings::SetAuthor(const QString &inAuthor)
+void CStudioProjectSettings::setAuthor(const QString &inAuthor)
 {
-    if (m_Author != inAuthor) {
-        m_Author = inAuthor;
-        m_Core->GetDoc()->SetModifiedFlag();
+    if (m_author != inAuthor) {
+        m_author = inAuthor;
+        m_core->GetDoc()->SetModifiedFlag();
     }
 }
 
@@ -110,11 +97,11 @@ void CStudioProjectSettings::SetAuthor(const QString &inAuthor)
  *	@param	inCompany				Company name
  */
 //==============================================================================
-void CStudioProjectSettings::SetCompany(const QString &inCompany)
+void CStudioProjectSettings::setCompany(const QString &inCompany)
 {
-    if (m_Company != inCompany) {
-        m_Company = inCompany;
-        m_Core->GetDoc()->SetModifiedFlag();
+    if (m_company != inCompany) {
+        m_company = inCompany;
+        m_core->GetDoc()->SetModifiedFlag();
     }
 }
 
@@ -125,84 +112,38 @@ void CStudioProjectSettings::SetCompany(const QString &inCompany)
  * @param inSize the size that the presentation should be.
  */
 //=============================================================================
-void CStudioProjectSettings::SetPresentationSize(CPt inSize)
+void CStudioProjectSettings::setPresentationSize(const QSize &inSize)
 {
-    if (m_PresentationSize != inSize) {
-        m_Core->GetDoc()->SetModifiedFlag();
-        m_PresentationSize = inSize;
+    if (m_presentationSize != inSize) {
+        m_core->GetDoc()->SetModifiedFlag();
+        m_presentationSize = inSize;
     }
-}
-
-//=============================================================================
-/**
- * Restore all parameters to what they would be if they were fresh from the installation.
- * Slightly different from a Reset, this will nuke the registry settings for the custom preview
- * options and
- * reset the preview app.
- */
-void CStudioProjectSettings::RestoreDefaults()
-{
-    Reset();
-}
-
-//=============================================================================
-/**
- * @return true if we are maintaining the aspect ratio for the scene
- */
-bool CStudioProjectSettings::GetMaintainAspect()
-{
-    return m_MaintainAspect;
 }
 
 //=============================================================================
 /**
  * @param inFlag true if we want to maintain the aspect ratio when changing sizes
  */
-void CStudioProjectSettings::SetMaintainAspect(bool inFlag)
+void CStudioProjectSettings::setMaintainAspect(bool inFlag)
 {
-    if (m_MaintainAspect != inFlag) {
-        m_MaintainAspect = inFlag;
-        m_Core->GetDoc()->SetModifiedFlag();
+    if (m_maintainAspect != inFlag) {
+        m_maintainAspect = inFlag;
+        m_core->GetDoc()->SetModifiedFlag();
     }
 }
 
-//=============================================================================
-/**
- * @param inEngine the rendering engine we want to use
- */
-void CStudioProjectSettings::SetFSAAMode(long inFSAAMode)
+void CStudioProjectSettings::setRotatePresentation(bool inFlag)
 {
-    m_FSAAMode = inFSAAMode;
-    m_Core->GetDoc()->SetModifiedFlag();
+    if (m_rotatePresentation != inFlag) {
+        m_rotatePresentation = inFlag;
+        m_core->GetDoc()->SetModifiedFlag();
+    }
 }
 
-//=============================================================================
-/**
- * @return the flag on whether to embed fonts in am file
- */
-bool CStudioProjectSettings::GetEmbedFonts()
+void CStudioProjectSettings::setPreferCompressedTextures(bool inFlag)
 {
-    return m_EmbedFonts;
-}
-
-bool CStudioProjectSettings::GetRotatePresentation()
-{
-    return m_RotatePresentation;
-}
-
-void CStudioProjectSettings::SetRotatePresentation(bool inFlag)
-{
-    m_RotatePresentation = inFlag;
-}
-
-//=============================================================================
-/**
- * @param inFlag		the flag on whether to embed fonts in am file
- */
-void CStudioProjectSettings::SetEmbedFonts(bool inFlag)
-{
-    if (m_EmbedFonts != inFlag) {
-        m_EmbedFonts = inFlag;
-        m_Core->GetDoc()->SetModifiedFlag();
+    if (m_preferCompressedTextures != inFlag) {
+        m_preferCompressedTextures = inFlag;
+        m_core->GetDoc()->SetModifiedFlag();
     }
 }

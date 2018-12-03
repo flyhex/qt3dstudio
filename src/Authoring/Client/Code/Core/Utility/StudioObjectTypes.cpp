@@ -37,9 +37,11 @@ bool CStudioObjectTypes::AcceptableParent(EStudioObjectType inChild, EStudioObje
     case OBJTYPE_SCENE:
         theAcceptible = false;
         break;
+
     case OBJTYPE_LAYER:
         theAcceptible = inParent == OBJTYPE_SCENE;
         break;
+
     case OBJTYPE_BEHAVIOR:
         theAcceptible = (inParent == OBJTYPE_SCENE) || (inParent == OBJTYPE_LAYER)
             || (inParent == OBJTYPE_BEHAVIOR) || (inParent == OBJTYPE_CAMERA)
@@ -53,41 +55,44 @@ bool CStudioObjectTypes::AcceptableParent(EStudioObjectType inChild, EStudioObje
         break;
 
     case OBJTYPE_TEXT:
-    // Skip the break because these cases have the same parent.
     case OBJTYPE_CAMERA:
-    // Skip the break because these cases have the same parent.
     case OBJTYPE_LIGHT:
-    // Skip the break because these cases have the same parent.
     case OBJTYPE_MODEL:
-    // Skip the break because these cases have the same parent.
     case OBJTYPE_GROUP:
-    // Skip the break because these cases have the same parent.
     case OBJTYPE_PATH:
-    // Skip the break because these cases have the same parent.
     case OBJTYPE_COMPONENT:
         theAcceptible = (inParent == OBJTYPE_LAYER) || (inParent == OBJTYPE_CAMERA)
             || (inParent == OBJTYPE_LIGHT) || (inParent == OBJTYPE_MODEL)
             || (inParent == OBJTYPE_GROUP) || (inParent == OBJTYPE_COMPONENT)
             || (inParent == OBJTYPE_PATH);
-
         break;
+
     case OBJTYPE_ALIAS:
         theAcceptible = (inParent == OBJTYPE_LAYER) || (inParent == OBJTYPE_GROUP)
             || (inParent == OBJTYPE_COMPONENT) || (inParent == OBJTYPE_PATH);
         break;
+
     case OBJTYPE_IMAGE:
         theAcceptible = false;
         break;
+
     case OBJTYPE_EFFECT:
         theAcceptible = (inParent == OBJTYPE_LAYER) || (inParent == OBJTYPE_EFFECT);
         break;
+
     case OBJTYPE_PRESENTATION:
     case OBJTYPE_QML_STREAM:
         theAcceptible = inParent & (OBJTYPE_LAYER | OBJTYPE_SCENE);
         break;
+
     case OBJTYPE_CUSTOMMATERIAL:
         theAcceptible = false; // TODO add drag and drop support
         break;
+
+    case OBJTYPE_MATERIALDATA:
+        theAcceptible = true;
+        break;
+
     default:
         // Do not accept unexpected type
         break;
@@ -191,6 +196,10 @@ const QString &CStudioObjectTypes::GetNormalIconName(EStudioObjectType inType)
         static QString theString = QStringLiteral("qml_used.png");
         return theString;
     }
+    case OBJTYPE_MATERIALDATA: {
+        static QString theString = QStringLiteral("matdef-active.png");
+        return theString;
+    }
     default: {
         static QString theString = QStringLiteral("Objects-Model-Normal.png");
         return theString;
@@ -288,6 +297,10 @@ const QString &CStudioObjectTypes::GetDisabledIconName(EStudioObjectType inType)
         static QString theString = QStringLiteral("qml_notUsed.png");
         return theString;
     }
+    case OBJTYPE_MATERIALDATA: {
+        static QString theString = QStringLiteral("matdef-disabled.png");
+        return theString;
+    }
     default: {
         static QString theString = QStringLiteral("Objects-Model-Disabled.png");
         return theString;
@@ -375,6 +388,10 @@ const QString &CStudioObjectTypes::GetHighlightIconName(EStudioObjectType inType
     }
     case OBJTYPE_PRESENTATION: {
         static QString theString = QStringLiteral("presentation_used.png");
+        return theString;
+    }
+    case OBJTYPE_MATERIALDATA: {
+        static QString theString = QStringLiteral("matdef-active.png");
         return theString;
     }
     default: {

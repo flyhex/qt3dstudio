@@ -28,6 +28,7 @@ INCLUDEPATH += \
     ../Client/Code/Core/Utility \
     ../QT3DSDM \
     ../QT3DSDM/Systems \
+    ../Studio/Utils \
     ../../3rdparty/EASTL/UnknownVersion/include \
     ../../3rdparty/color \
     ..
@@ -54,7 +55,6 @@ SOURCES += \
     Code/Thread/Mutex.cpp \
     Code/Thread/Thread.cpp \
     Code/Exceptions/XMLException.cpp \
-    Code/_Win32/FileIterator.cpp \
     Code/_Win32/Preferences.cpp \
     Code/_Win32/Qt3DSFile.cpp \
     Code/Graph/Graph.cpp \

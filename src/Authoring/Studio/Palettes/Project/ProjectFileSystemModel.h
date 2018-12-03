@@ -30,14 +30,19 @@
 
 #include "StudioObjectTypes.h"
 #include "DocumentEditorEnumerations.h"
+#include "Qt3DSFileTools.h"
+#include "Dispatch.h"
 
 #include <QtWidgets/qfilesystemmodel.h>
+#include <QtWidgets/qmessagebox.h>
 #include <QtCore/qabstractitemmodel.h>
 #include <QtCore/qlist.h>
-#include <QtWidgets/qmessagebox.h>
 #include <QtCore/qurl.h>
+#include <QtCore/qtimer.h>
+#include <QtQml/qqmlapplicationengine.h>
 
 QT_FORWARD_DECLARE_CLASS(QFileSystemModel)
+class CDataInputDialogItem;
 
 class ProjectFileSystemModel : public QAbstractListModel
 {
@@ -50,6 +55,7 @@ public:
         IsExpandableRole = QFileSystemModel::FilePermissions + 1,
         IsDraggableRole,
         IsReferencedRole,
+        IsProjectReferencedRole, // Means some other presentation in the project uses this file
         DepthRole,
         ExpandedRole,
         FileIdRole,
@@ -82,6 +88,7 @@ public:
     Q_INVOKABLE void duplicate(int row);
 
     void asyncUpdateReferences();
+    void onFilesChanged(const Q3DStudio::TFileModificationList &inFileModificationList);
 
 Q_SIGNALS:
     void modelChanged(QAbstractItemModel *model);
@@ -98,22 +105,34 @@ private:
     bool isVisible(const QModelIndex& modelIndex) const;
     bool hasVisibleChildren(const QModelIndex &modelIndex) const;
     void importUrl(QDir &targetDir, const QUrl &url,
-                   QHash<QString, QString> &outPresentationNodes);
+                   QHash<QString, QString> &outPresentationNodes,
+                   QStringList &outImportedFiles,
+                   QMap<QString, CDataInputDialogItem *> &outDataInputs,
+                   int &outOverrideChoice) const;
     void importPresentationAssets(const QFileInfo &uipSrc, const QFileInfo &uipTarget,
                                   QHash<QString, QString> &outPresentationNodes,
-                                  const int overrideChoice = QMessageBox::NoButton) const;
+                                  QStringList &outImportedFiles, QSet<QString> &outDataInputs,
+                                  int &outOverrideChoice) const;
 
     void modelRowsInserted(const QModelIndex &parent, int start, int end);
     void modelRowsRemoved(const QModelIndex &parent, int start, int end);
     void modelRowsMoved(const QModelIndex &parent, int start, int end);
     void modelLayoutChanged();
-    void importQmlAssets(const QObject *qmlNode, const QDir &srcDir, const QDir &targetDir);
-
+    void importQmlAssets(const QObject *qmlNode, const QDir &srcDir, const QDir &targetDir,
+                         QStringList &outImportedFiles, int &outOverrideChoice) const;
     void updateDefaultDirMap();
-    void addPathsToReferences(const QString &projectPath, const QString &origPath);
+    void addPathsToReferences(QSet<QString> &references, const QString &projectPath,
+                              const QString &origPath);
     void handlePresentationIdChange(const QString &path, const QString &id);
     void asyncExpandPresentations();
     void updateReferences();
+    bool addUniqueImportFile(const QString &importFile, QStringList &outImportedFiles) const;
+    void overridableCopyFile(const QString &srcFile, const QString &targetFile,
+                             QStringList &outImportedFiles, int &outOverrideChoice) const;
+    void updateProjectReferences();
+    void getQmlAssets(const QObject *qmlNode, QSet<QString> &outAssetPaths) const;
+    QObject *getQmlStreamRootNode(QQmlApplicationEngine &qmlEngine, const QString &filePath,
+                                  bool &outIsQmlStream) const;
 
     struct TreeItem {
         QPersistentModelIndex index;
@@ -128,7 +147,20 @@ private:
     QList<TreeItem> m_items;
     QSet<QString> m_references;
     QHash<QString, QString> m_defaultDirToAbsPathMap;
-    int m_importQmlOverrideChoice = QMessageBox::NoButton;
+
+    // Cache of assets referred by other presentation files and qml streams in the project
+    // Key: Absolute presentation file path
+    // Value: Set of absolute asset file paths referred by the presentation file
+    QHash<QString, QSet<QString>> m_presentationReferences;
+
+    // Compilation of all m_presentationReferences sets and their parent paths
+    QSet<QString> m_projectReferences;
+
+    // Key: uip that needs update
+    // Value: if true, uip was modified or created. If false, it was removed.
+    QHash<QString, bool> m_projectReferencesUpdateMap;
+    QTimer m_projectReferencesUpdateTimer;
+    std::shared_ptr<qt3dsdm::ISignalConnection> m_directoryConnection;
 };
 
 #endif // TREEVIEWADAPTOR_H

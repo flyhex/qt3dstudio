@@ -140,6 +140,7 @@ void CmdDataModel::DataModelUndo()
         m_AfterDoAppState.PreNotify(m_BeforeDoAppState, m_Doc);
         Undo(m_Consumer->m_TransactionList);
         RunUndoNotifications();
+        m_Doc.UpdateDatainputMap();
     }
 }
 
@@ -161,6 +162,7 @@ void CmdDataModel::DataModelRedo()
         m_BeforeDoAppState.PreNotify(m_AfterDoAppState, m_Doc);
         Redo(m_Consumer->m_TransactionList);
         RunDoNotifications();
+        m_Doc.UpdateDatainputMap();
     }
 }
 

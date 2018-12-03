@@ -42,6 +42,7 @@ CInterpolationDlg::CInterpolationDlg(QWidget *parent)
     , m_ui(new Ui::InterpolationDlg)
 {
     m_ui->setupUi(this);
+    window()->setFixedSize(size());
 }
 
 CInterpolationDlg::~CInterpolationDlg()

@@ -49,6 +49,7 @@
   \uicontrol{Open} - Opens a \c{.uip} presentation file.
 \li
   \uicontrol{Save} - Saves changes to the open presentation.
+\omit
 \li
   \uicontrol{Save As} - Saves the presentation to a new location.
   No \c{.uia} file will be created or modified in the new location.
@@ -56,6 +57,7 @@
   \uicontrol{Save a Copy} - Saves a copy of the presentation to a
   new location (but keep working on the current presentation). No
   \c{.uia} file will be created or modified in the new location.
+\endomit
 \li
   \uicontrol{Revert} - With confirmation, abandons all in-memory
   changes to the presentation and re-opens it from disk.
@@ -160,6 +162,12 @@
       on a rotated hardware device (for example a tablet), check this setting to
       have the presentation rotated correctly. This setting has no effect
       when previewing on your computer.
+    \li
+      \uicontrol{Use ktx textures if available} - Force runtime to check first if there are KTX
+      compressed textures available when loading texture maps. This allows designers to use i.e.
+      PNG or JPG textures while working in the editor, but to automatically use hardware optimized
+      compressed textures on the target device.
+      \note This should only be checked when KTX textures are present.
     \endlist
   \li
     \uicontrol{Project Info}
@@ -190,9 +198,11 @@
   \uicontrol{Pivot Point} - Toggles the display of the pivot point.
   \note Pivot point will only be visible on selected objects.
   selected item.
+\omit
 \li
   \uicontrol{Wireframe} - Toggles the display of wireframes for the selected item.
   \note Works only for tessellated meshes.
+\endomit
 \li
   \uicontrol{Tooltips} - Toggles the display of tool tips when hovering over
   rows in the \l{studio-inspector-palette.html}{Inspector palette}.

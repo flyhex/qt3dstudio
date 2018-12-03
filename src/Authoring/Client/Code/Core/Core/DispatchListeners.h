@@ -140,7 +140,6 @@ class CPresentationChangeListener
 {
 public:
     virtual ~CPresentationChangeListener() {}
-    //==========================================================================
     /**
      * New presentation or subpresentation (e.g. subtree such as component or pasted object) is
      * being loaded.
@@ -149,24 +148,17 @@ public:
     {
         Q_UNUSED(inIsSubPresentation);
     }
-    //==========================================================================
-    /**
-     * A subpresentation is loaded.
-     */
-    virtual void OnLoadedSubPresentation() {}
-    //==========================================================================
+
     /**
      * New presentation is being created.
      */
     virtual void OnNewPresentation() {}
 
-    //==========================================================================
     /**
      * The current presentation is being closed.
      */
     virtual void OnClosingPresentation() {}
 
-    //==========================================================================
     /**
      * The current presentation is being saved.
      */

@@ -56,11 +56,11 @@ TextureChooserView::TextureChooserView(QWidget *parent)
 void TextureChooserView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
-    rootContext()->setContextProperty("_textureChooserView"_L1, this);
-    rootContext()->setContextProperty("_textureChooserModel"_L1, m_model);
-    engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Palettes/Inspector/TextureChooser.qml"_L1));
+    rootContext()->setContextProperty(QStringLiteral("_resDir"), StudioUtils::resourceImageUrl());
+    rootContext()->setContextProperty(QStringLiteral("_textureChooserView"), this);
+    rootContext()->setContextProperty(QStringLiteral("_textureChooserModel"), m_model);
+    engine()->addImportPath(StudioUtils::qmlImportPath());
+    setSource(QUrl(QStringLiteral("qrc:/Palettes/Inspector/TextureChooser.qml")));
 }
 
 QSize TextureChooserView::sizeHint() const
@@ -88,21 +88,44 @@ int TextureChooserView::instance() const
     return m_instance;
 }
 
-void TextureChooserView::focusOutEvent(QFocusEvent *event)
+QString TextureChooserView::currentDataModelPath() const
 {
-    QQuickWidget::focusOutEvent(event);
-    QTimer::singleShot(0, this, &TextureChooserView::close);
-}
-
-void TextureChooserView::showEvent(QShowEvent *event)
-{
+    QString cleanPath;
     const auto doc = g_StudioApp.GetCore()->GetDoc();
     const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
 
     qt3dsdm::SValue value;
     propertySystem->GetInstancePropertyValue(m_instance, m_handle, value);
 
-    m_model->setCurrentFile(qt3dsdm::get<QString>(value));
+    const QString currentValue = qt3dsdm::get<QString>(value);
+    // An empty value can sometimes be represented by a relative path either to project root or the
+    // presentation file, such as"./" or "../", so let's just consider all directory paths as empty
+    if (currentValue.isEmpty() || QFileInfo(currentValue).isDir()) {
+        cleanPath = ChooserModelBase::noneString();
+    } else {
+        cleanPath = QDir::cleanPath(QDir(doc->GetDocumentDirectory())
+                                    .filePath(currentValue));
+    }
+    return cleanPath;
+}
+
+void TextureChooserView::focusOutEvent(QFocusEvent *event)
+{
+    QQuickWidget::focusOutEvent(event);
+    QTimer::singleShot(0, this, &TextureChooserView::close);
+}
+
+void TextureChooserView::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Escape)
+        QTimer::singleShot(0, this, &TextureChooserView::close);
+
+    QQuickWidget::keyPressEvent(event);
+}
+
+void TextureChooserView::showEvent(QShowEvent *event)
+{
+    m_model->setCurrentFile(currentDataModelPath());
 
     QQuickWidget::showEvent(event);
 }

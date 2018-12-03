@@ -83,10 +83,12 @@ QVariant ChooserModelBase::data(const QModelIndex &index, int role) const
 
         switch (role) {
         case Qt::DecorationRole:
-            if (!item.iconSource.isEmpty())
-                return resourceImageUrl() + item.iconSource;
-            else
-                return resourceImageUrl() + CStudioObjectTypes::GetNormalIconName(item.iconType);
+            if (!item.iconSource.isEmpty()) {
+                return StudioUtils::resourceImageUrl() + item.iconSource;
+            } else {
+                return StudioUtils::resourceImageUrl()
+                        + CStudioObjectTypes::GetNormalIconName(item.iconType);
+            }
 
         case IsExpandableRole:
             return false;
@@ -112,7 +114,7 @@ QVariant ChooserModelBase::data(const QModelIndex &index, int role) const
         switch (role) {
         case Qt::DecorationRole: {
             QString path = item.index.data(QFileSystemModel::FilePathRole).toString();
-            return resourceImageUrl() + getIconName(path);
+            return StudioUtils::resourceImageUrl() + getIconName(path);
         }
 
         case IsExpandableRole: {
@@ -151,23 +153,29 @@ QVariant ChooserModelBase::data(const QModelIndex &index, int role) const
 
 void ChooserModelBase::setCurrentFile(const QString &path)
 {
+    const auto fixedItems = getFixedItems();
+    const int fixedItemCount = fixedItems.count();
+    const auto getFixedItemIndex = [fixedItemCount, &fixedItems](const QString &path) -> int {
+        for (int i = 0; i < fixedItemCount; ++i) {
+            const auto &item = fixedItems.at(i);
+            if (item.name == path)
+                return i;
+        }
+        return -1;
+    };
+    int fixedItemIndex = getFixedItemIndex(path);
+
     const auto doc = g_StudioApp.GetCore()->GetDoc();
     const QDir documentDir(doc->GetDocumentDirectory());
-    const QString fullPath = QDir::cleanPath(documentDir.filePath(path));
+    const QString fullPath = fixedItemIndex == -1 ? QDir::cleanPath(documentDir.filePath(path))
+                                                  : path;
 
     if (fullPath != m_currentFile) {
-        const auto fixedItems = getFixedItems();
-
-        const auto fileRow = [this, &fixedItems](const QString &path)
+        const auto fileRow = [this, getFixedItemIndex, fixedItemCount](const QString &path) -> int
         {
-            const int fixedItemCount = fixedItems.count();
-
-            for (int i = 0; i < fixedItemCount; ++i) {
-                const auto &item = fixedItems.at(i);
-
-                if (item.name == path)
-                    return i;
-            }
+            const int fixedItemIndex = getFixedItemIndex(path);
+            if (fixedItemIndex != -1)
+                return fixedItemIndex;
 
             const int itemCount = m_items.count();
 

@@ -722,7 +722,7 @@ void ActionView::OnSelectionSet(Q3DStudio::SSelectedValue inSelectable)
         // Get the owning component instance
         CClientDataModelBridge *theBridge = GetBridge();
         qt3dsdm::SLong4 theComponentGuid = theBridge->GetComponentGuid(theSlideHandle);
-        Q_ASSERT(GuidValid(theComponentGuid));
+        Q_ASSERT(theComponentGuid.Valid());
         theInstance = theBridge->GetInstanceByGUID(theComponentGuid);
         Q_ASSERT(theInstance.Valid());
     }
@@ -1014,32 +1014,32 @@ CClientDataModelBridge *ActionView::GetBridge()
 void ActionView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());
-    rootContext()->setContextProperty("_parentView"_L1, this);
-    rootContext()->setContextProperty("_resDir"_L1, resourceImageUrl());
-    rootContext()->setContextProperty("_tabOrderHandler"_L1, tabOrderHandler());
-    rootContext()->setContextProperty("_mouseHelper"_L1, &m_mouseHelper);
+    rootContext()->setContextProperty(QStringLiteral("_parentView"), this);
+    rootContext()->setContextProperty(QStringLiteral("_resDir"), StudioUtils::resourceImageUrl());
+    rootContext()->setContextProperty(QStringLiteral("_tabOrderHandler"), tabOrderHandler());
+    rootContext()->setContextProperty(QStringLiteral("_mouseHelper"), &m_mouseHelper);
     QString shiftKey(QStringLiteral("Shift+"));
 #ifdef Q_OS_MACOS
     shiftKey = "⇧";
 #endif
-    rootContext()->setContextProperty("_shiftKey"_L1, shiftKey);
+    rootContext()->setContextProperty(QStringLiteral("_shiftKey"), shiftKey);
     qmlRegisterUncreatableType<qt3dsdm::HandlerArgumentType>(
                 "Qt3DStudio", 1, 0, "HandlerArgumentType",
-                "HandlerArgumentType is an enum container"_L1);
+                QStringLiteral("HandlerArgumentType is an enum container"));
     qmlRegisterUncreatableType<qt3dsdm::DataModelDataType>(
                 "Qt3DStudio", 1, 0, "DataModelDataType",
-                "DataModelDataType is an enum container"_L1);
+                QStringLiteral("DataModelDataType is an enum container"));
     qmlRegisterUncreatableType<qt3dsdm::AdditionalMetaDataType>(
                 "Qt3DStudio", 1, 0, "AdditionalMetaDataType",
-                "AdditionalMetaDataType is an enum container"_L1);
+                QStringLiteral("AdditionalMetaDataType is an enum container"));
     qmlRegisterUncreatableType<PropertyInfo>(
                 "Qt3DStudio", 1, 0, "PropertyInfo",
-                "PropertyInfo is anot creatable in QML"_L1);
+                QStringLiteral("PropertyInfo is not creatable in QML"));
     qmlRegisterUncreatableType<qt3dsdm::CompleteMetaDataType>(
                 "Qt3DStudio", 1, 0, "CompleteMetaDataType",
-                "CompleteMetaDataType is an enum container"_L1);
-    engine()->addImportPath(qmlImportPath());
-    setSource(QUrl("qrc:/Palettes/Action/ActionView.qml"_L1));
+                QStringLiteral("CompleteMetaDataType is an enum container"));
+    engine()->addImportPath(StudioUtils::qmlImportPath());
+    setSource(QUrl(QStringLiteral("qrc:/Palettes/Action/ActionView.qml")));
 }
 
 QStringList ActionView::slideNames()

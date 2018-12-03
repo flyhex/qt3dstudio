@@ -52,11 +52,7 @@ Qt3DSFile::Qt3DSFile(const QString &inPathName, bool inIsPosix, bool inAddBase)
     Q_UNUSED(inIsPosix);
     Q_UNUSED(inAddBase);
 
-    QString path = inPathName;
-#ifndef Q_OS_WIN
-    path.replace('\\', '/');
-#endif
-    m_Path = QDir::toNativeSeparators(path);
+    m_Path = QDir::fromNativeSeparators(inPathName);
 }
 
 /**
@@ -88,25 +84,17 @@ Qt3DSFile::Qt3DSFile(const Qt3DSFile &inFile)
 
 Qt3DSFile::Qt3DSFile(const QString &inFile)
 {
-    m_Path = QDir::toNativeSeparators(inFile);
+    m_Path = QDir::fromNativeSeparators(inFile);
 }
 
 Qt3DSFile::Qt3DSFile(const char *inFile)
 {
-    m_Path = QDir::toNativeSeparators(QString::fromLatin1(inFile));
+    m_Path = QDir::fromNativeSeparators(QString::fromLatin1(inFile));
 }
 
 Qt3DSFile::Qt3DSFile(const QFileInfo &inFile)
 {
-    m_Path = QDir::toNativeSeparators(inFile.absoluteFilePath());
-}
-
-/**
- * Get an iterator for all the sub-files of this directory.
- */
-CFileIterator Qt3DSFile::GetSubItems() const
-{
-    return CFileIterator(this);
+    m_Path = inFile.absoluteFilePath();
 }
 
 /**
@@ -152,7 +140,7 @@ bool Qt3DSFile::DeleteFile() const
 {
     BOOL theFileDeleted = FALSE;
 
-    // check if AKFile to delete is a folder type, if it is, we want to recusively delete all its
+    // check if file to delete is a folder type, if it is, we want to recusively delete all its
     // subfolder
     if (!IsFile()) {
         theFileDeleted = QDir(m_Path).removeRecursively();
@@ -184,7 +172,7 @@ QString Qt3DSFile::GetAbsolutePath() const
 {
     const QFileInfo fi(m_Path);
     if (fi.isDir())
-        return (fi.absoluteFilePath() + QDir::separator());
+        return fi.absoluteFilePath() + QLatin1Char('/');
     return m_Path;
 }
 
