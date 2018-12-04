@@ -171,7 +171,6 @@ class CDocEditor : public Q3DStudio::IInternalDocumentEditor
     Q3DStudio::Foundation::SStudioFoundation m_Foundation;
     TStreamFactoryPtr m_InputStreamFactory;
     std::unordered_map<long, QT3DSU32> m_GraphOrderMap;
-    bool m_ignoreNextMaterialDefChange = false;
 
 public:
     CDocEditor(CDoc &inDoc)
@@ -2038,11 +2037,8 @@ public:
                 fileInfo.dir().mkpath(QStringLiteral("."));
 
             QFile file(actualSourcePath);
-            if ((createNewFile && !file.exists()) || (!createNewFile && file.exists())) {
-                if (!createNewFile)
-                    m_ignoreNextMaterialDefChange = true;
+            if ((createNewFile && !file.exists()) || (!createNewFile && file.exists()))
                 saveMaterial(instance, file);
-            }
             return m_Doc.GetRelativePathToDoc(actualSourcePath);
         }
 
@@ -2114,16 +2110,6 @@ public:
 
         if (material.Valid())
             writeMaterialFile(material, false);
-    }
-
-    bool isIgnoringNextMaterialDefChange() override
-    {
-        return m_ignoreNextMaterialDefChange;
-    }
-
-    void stopIgnoringNextMaterialDefChange() override
-    {
-        m_ignoreNextMaterialDefChange = false;
     }
 
     void saveMaterial(Qt3DSDMInstanceHandle instance, QFile &file)
