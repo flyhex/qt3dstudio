@@ -37,10 +37,9 @@ Rectangle {
 
     readonly property bool masterSlide: _parentView.showMasterSlide
 
-    function handleMouseClicks(mouse) {
+    function handleMouseClicks(mouse, mappedCoords) {
         if (mouse.button === Qt.RightButton) {
-            const coords = slideList.mapToItem(root, mouse.x, mouse.y);
-            _parentView.showContextMenu(coords.x, coords.y, -1);
+            _parentView.showContextMenu(mappedCoords.x, mappedCoords.y, -1);
         } else {
             root.focus = true;
             //Unselect All element when we click outside slider item in listView.
@@ -75,7 +74,10 @@ Rectangle {
 
             propagateComposedEvents: true
             acceptedButtons: Qt.AllButtons
-            onClicked: root.handleMouseClicks(mouse)
+            onClicked: {
+                const coords = mapToItem(root, mouse.x, mouse.y);
+                root.handleMouseClicks(mouse, coords);
+            }
 
             Column {
                 id: masterButtonColumn
@@ -177,10 +179,12 @@ Rectangle {
                 z: -1 // Only reached when clicking outside delegates
                 acceptedButtons: Qt.AllButtons
                 onClicked: {
-                    if (slideList.indexAt(mouse.x, mouse.y) === -1)
-                        root.handleMouseClicks(mouse);
-                    else
+                    if (slideList.indexAt(mouse.x, mouse.y) === -1) {
+                        const coords = mapToItem(root, mouse.x, mouse.y);
+                        root.handleMouseClicks(mouse, coords);
+                    } else {
                         mouse.accepted = false;
+                    }
                 }
                 onPressed: {
                     if (slideList.indexAt(mouse.x, mouse.y) !== -1)
