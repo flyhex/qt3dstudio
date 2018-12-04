@@ -981,8 +981,6 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
                     .GetShaderCodeLibraryDirectory();
             const QString platformDir = m_Context->GetDynamicObjectSystem()
                     .shaderCodeLibraryPlatformDirectory();
-            const QString ver = m_Context->GetDynamicObjectSystem()
-                    .shaderCodeLibraryVersion();
 
             QString fullPath;
             NVScopedRefCounted<IRefCountedInputStream> theStream;
@@ -996,8 +994,7 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
             if (theStream.mPtr == NULL) {
                 fullPath.clear();
                 QTextStream stream(&fullPath);
-                stream << defaultDir << QLatin1Char('/') << ver << QLatin1Char('/')
-                       << inPathToEffect;
+                stream << defaultDir << QLatin1Char('/') << inPathToEffect;
                 theStream = m_CoreContext.GetInputStreamFactory()
                         .GetStreamForFile(fullPath.toLatin1().data());
                 if (theStream.mPtr == NULL) {
@@ -1513,16 +1510,6 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
             theInsertResult.first->second = TShaderAndFlags(theProgram, flags);
         }
         return theInsertResult.first->second;
-    }
-
-    void setShaderCodeLibraryVersion(const QString &version) override
-    {
-        m_shaderLibraryVersion = version;
-    }
-
-    QString shaderCodeLibraryVersion() override
-    {
-        return m_shaderLibraryVersion;
     }
 
     virtual void setShaderCodeLibraryPlatformDirectory(const QString &directory) override
