@@ -1203,6 +1203,9 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
         return;
     propertySystem->GetInstancePropertyValue(instance, element->m_property, value);
 
+    if (value.getType() == qt3dsdm::DataModelDataType::None)
+        return;
+
     const auto metaDataProvider = doc->GetStudioSystem()->GetActionMetaData();
     const auto info = metaDataProvider->GetMetaDataPropertyInfo(
                 metaDataProvider->GetMetaDataProperty(instance, element->m_property));
