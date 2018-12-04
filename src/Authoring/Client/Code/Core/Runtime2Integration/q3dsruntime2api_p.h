@@ -48,5 +48,6 @@
 #include "q3dsenummaps_p.h"
 #include "q3dsslideplayer_p.h"
 #include "q3dsscenepicker_p.h"
+#include "q3dsmeshloader_p.h"
 
 #endif

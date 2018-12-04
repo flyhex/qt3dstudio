@@ -79,7 +79,15 @@ Q3DSImageTextureData Q3DSRenderBufferManager::LoadRenderImage(const QString &inS
 
 Q3DSRenderMesh *Q3DSRenderBufferManager::LoadMesh(const QString &inSourcePath)
 {
-    return nullptr;
+    if (m_meshes.contains(inSourcePath))
+        return &m_meshes[inSourcePath];
+
+    Q3DSRenderMesh rm;
+    rm.m_subsets = Q3DSMeshLoader::loadMesh(inSourcePath);
+    for (auto mesh : rm.m_subsets)
+        rm.m_subsetNames.append(mesh->objectName());
+    m_meshes[inSourcePath] = rm;
+    return &m_meshes[inSourcePath];
 }
 
 Q3DSRenderMesh *Q3DSRenderBufferManager::CreateMesh(const char *inSourcePath, void *inVertData,

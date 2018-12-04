@@ -88,7 +88,7 @@ struct SDocBufferCache : public IDocumentBufferCache
     // offset by the empty primitive
     QStringList GetPrimitiveNames() override;
     QString GetPrimitiveName(EPrimitiveType inPrimitiveType) override;
-    void AddModelBuffer(const QFileInfo &inFile, Q3DSRenderMesh *inBuffer,
+    void AddModelBuffer(const QString &inFile, Q3DSRenderMesh *inBuffer,
                         const QString &identifier);
     void BuildPrimitive(EPrimitiveType inPrimitiveType);
     void CheckAndCreatePrimitiveBuffers();

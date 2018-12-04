@@ -105,6 +105,7 @@ public:
     Create(Q3DSEngine *engine, Q3DSUipPresentation *presentation,
            IInputStreamFactory &inInputStreamFactory);
 private:
+    QMap<QString, Q3DSRenderMesh> m_meshes;
     Q3DSEngine *m_engine;
     Q3DSUipPresentation *m_presentation;
     IInputStreamFactory &m_inputStreamFactory;

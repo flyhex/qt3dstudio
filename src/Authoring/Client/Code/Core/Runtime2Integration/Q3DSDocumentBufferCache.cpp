@@ -101,12 +101,11 @@ QString SDocBufferCache::GetPrimitiveName(EPrimitiveType inPrimitiveType)
     return {};
 }
 
-void SDocBufferCache::AddModelBuffer(const QFileInfo &inFile, Q3DSRenderMesh *inBuffer,
+void SDocBufferCache::AddModelBuffer(const QString &inFile, Q3DSRenderMesh *inBuffer,
                                      const QString &identifier)
 {
-    const QString path = inFile.filePath();
-    m_Buffers.insert(path, SModelBufferOrImage());
-    m_Buffers[path].AddModelBuffer(path, inBuffer, identifier);
+    m_Buffers.insert(inFile, SModelBufferOrImage());
+    m_Buffers[inFile].AddModelBuffer(inFile, inBuffer, identifier);
 }
 
 void SDocBufferCache::BuildPrimitive(EPrimitiveType inPrimitiveType)
@@ -114,7 +113,7 @@ void SDocBufferCache::BuildPrimitive(EPrimitiveType inPrimitiveType)
     QString thePrimitiveName(GetPrimitiveName(inPrimitiveType));
     if (GetBufferManager()) {
         Q3DSRenderMesh *theBuffer = GetBufferManager()->LoadMesh(thePrimitiveName);
-        AddModelBuffer(CFilePath(thePrimitiveName), theBuffer, QString::number(0));
+        AddModelBuffer(thePrimitiveName, theBuffer, QString::number(1));
     }
 }
 

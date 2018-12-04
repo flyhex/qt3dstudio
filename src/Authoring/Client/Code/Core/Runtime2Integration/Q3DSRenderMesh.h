@@ -191,9 +191,20 @@ namespace Q3DStudio {
 class Q3DSRenderMesh
 {
 public:
-    QVector<Q3DSMesh> m_subsets;
+    QVector<Q3DSMesh *> m_subsets;
     QStringList m_subsetNames;
-    unsigned int m_meshId;
+    unsigned int m_meshId = 0;
+
+    Q3DSRenderMesh()
+    {
+    }
+
+    Q3DSRenderMesh(const Q3DSRenderMesh &o)
+        : m_subsets(o.m_subsets)
+        , m_subsetNames(o.m_subsetNames)
+        , m_meshId(o.m_meshId)
+    {
+    }
 };
 
 } // namespace Q3DStudio
