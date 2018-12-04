@@ -140,7 +140,7 @@ public:
             }
 
             m_surfaceViewer->update();
-
+            m_context->functions()->glFlush();
             m_updated = true;
             m_context->doneCurrent();
             lock.unlock();
