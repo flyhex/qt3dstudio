@@ -997,13 +997,17 @@ void InspectorControlModel::updateAnimateToggleState(InspectorControlBase* inIte
     }
 }
 
-bool InspectorControlModel::isTreeRebuildRequired(CInspectableBase* inspectBase) const
+bool InspectorControlModel::isTreeRebuildRequired(CInspectableBase* inspectBase)
 {
     if (inspectBase != m_inspectableBase || !inspectBase)
         return true;
 
     long theCount = m_inspectableBase->GetGroupCount();
     auto refMaterial = getReferenceMaterial(inspectBase);
+    if (refMaterial != m_refMaterial) {
+        m_refMaterial = refMaterial;
+        return true;
+    }
     long refMaterialGroupCount = 0;
     if (refMaterial.Valid())
         refMaterialGroupCount = 1; // Only the last group of the refMaterial is used
