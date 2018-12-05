@@ -46,7 +46,6 @@ public:
         , m_mainThread(mainThread)
         , m_semaphore(0)
     {
-
     }
 
     QSize readPresentationSize(const QString &url)
@@ -136,8 +135,8 @@ public:
         m_context->doneCurrent();
 
 #ifndef Q_OS_LINUX
-        // TODO: Updating the subpresentation does not work on macOS and crashes on Linux,
-        // this hack fixes it for now
+        // TODO: Updating the subpresentation on loop crashes or hangs on Linux, this hack fixes
+        // it for now
         while (true) {
             QMutexLocker lock(&m_mutex);
             if (!m_running)
@@ -158,17 +157,17 @@ public:
             QThread::usleep(33000);
         }
         m_fbo.reset();
+        m_context->doneCurrent();
+        m_context.reset();
+#endif
 #ifdef Q3DS_PREVIEW_SUBPRESENTATION_RT2
         m_surfaceViewer->destroy();
 #else
         m_surfaceViewer->shutdown();
 #endif
         m_surfaceViewer.reset();
-        m_context->doneCurrent();
-        m_context.reset();
         m_surface->moveToThread(m_mainThread);
         m_semaphore.release();
-#endif
     }
 
     void frameRendered()
