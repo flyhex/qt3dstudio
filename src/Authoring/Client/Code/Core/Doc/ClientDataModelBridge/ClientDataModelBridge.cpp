@@ -49,6 +49,7 @@
 #include "FormattedOutputStream.h"
 #include "Dispatch.h"
 #include "Qt3DSFileTools.h"
+#include "IDocSceneGraph.h"
 
 using namespace qt3dsdm;
 using namespace std;
@@ -1345,19 +1346,19 @@ std::set<QString> CClientDataModelBridge::GetFontFileList() const
 
     // Translate the font name to font file
     std::set<QString> theFontFileList;
-    std::vector<std::pair<QString, QString>> theFontNameFileList;
+    QVector<Q3DStudio::SFontEntry> theFontNameFileList;
     m_Doc->GetProjectFonts(theFontNameFileList);
-    for (auto &fontName : theFontNameList) {
+    for (auto &fontName : qAsConst(theFontNameList)) {
         // Given the font name, try to get the font file from the list of fonts registered in
         // Studio.
         // If the font is not found, it means that we are using missing font file.
         // Create some non-existing path to inform user that this font is missing.
         bool theFontFound = false;
         QString theFontFile;
-        for (auto &fontNamePair : theFontNameFileList) {
-            if (fontNamePair.first == fontName) {
+        for (auto &entry : qAsConst(theFontNameFileList)) {
+            if (entry.m_fontName == fontName) {
                 theFontFound = true;
-                theFontFile = fontNamePair.second;
+                theFontFile = entry.m_fontFile;
                 break;
             }
         }

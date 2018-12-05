@@ -640,7 +640,7 @@ void InspectorControlModel::updateFontValues(InspectorControlBase *element) cons
     }
 
     if (fontElements.size()) {
-        std::vector<QString> fontNames;
+        QVector<QString> fontNames;
         g_StudioApp.GetCore()->GetDoc()->GetProjectFonts(fontNames);
         QStringList possibleValues;
         for (const auto &fontName : fontNames)

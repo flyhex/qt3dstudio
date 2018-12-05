@@ -115,7 +115,7 @@ QSharedPointer<Q3DSEngine> &Q3DStudioRenderer::engine()
 
 ITextRenderer *Q3DStudioRenderer::GetTextRenderer()
 {
-    return nullptr;
+    return this;
 }
 
 QT3DSVec3 Q3DStudioRenderer::GetIntendedPosition(qt3dsdm::Qt3DSDMInstanceHandle inHandle,
@@ -540,8 +540,10 @@ void Q3DStudioRenderer::OnReloadEffectInstance(qt3dsdm::Qt3DSDMInstanceHandle in
 void Q3DStudioRenderer::OnNewPresentation()
 {
     m_hasPresentation = true;
-    if (!m_engine.isNull())
+    if (!m_engine.isNull()) {
         createTranslation();
+        setupTextRenderer();
+    }
 }
 
 void Q3DStudioRenderer::OnClosingPresentation()
@@ -1183,6 +1185,35 @@ void Q3DStudioRenderer::createEngine()
 void Q3DStudioRenderer::createTranslation()
 {
     m_translation.reset(new Q3DSTranslation(*this, m_presentation));
+}
+
+void Q3DStudioRenderer::reloadFonts()
+{
+    setupTextRenderer();
+}
+
+void Q3DStudioRenderer::setupTextRenderer()
+{
+    if (!m_engine.isNull() && m_engine->sceneManager()) {
+        m_systemFonts.clear();
+        m_projectFonts.clear();
+        Q3DSTextRenderer *tr = m_engine->sceneManager()->textRenderer();
+        tr->clearFonts();
+
+        QString projectPath = g_StudioApp.GetCore()->getProjectFile().getProjectPath();
+        if (!projectPath.isEmpty()) {
+            // Add the installed font folders from the res dir.
+            QString thePath(StudioUtils::resourcePath() + QStringLiteral("/Font"));
+            m_systemFonts.push_back(thePath);
+            m_projectFonts.push_back(projectPath);
+            tr->registerFonts({thePath, projectPath});
+        }
+    }
+}
+
+QVector<SFontEntry> &Q3DStudioRenderer::projectFontList()
+{
+    return m_fonts;
 }
 
 std::shared_ptr<IStudioRenderer> IStudioRenderer::CreateStudioRenderer()

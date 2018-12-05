@@ -102,7 +102,7 @@ void PropertyModel::setAction(const qt3dsdm::Qt3DSDMActionHandle &action)
                         break;
                     }
                     case qt3dsdm::AdditionalMetaDataType::Font: {
-                        std::vector<QString> fontNames;
+                        QVector<QString> fontNames;
                         doc->GetProjectFonts(fontNames);
                         QStringList possibleValues;
                         for (const auto &fontName: fontNames)

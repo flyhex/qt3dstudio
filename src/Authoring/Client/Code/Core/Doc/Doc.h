@@ -84,6 +84,7 @@ class IMoveRenameHandler;
 class CTransactionCloseListenerSignaller;
 class IDocSceneGraph;
 struct SSelectedValue;
+struct SFontEntry;
 }
 
 namespace qt3dsdm {
@@ -443,8 +444,8 @@ public:
     void SetSceneGraph(std::shared_ptr<Q3DStudio::IDocSceneGraph> inGraph);
     Q3DStudio::IDocSceneGraph *GetSceneGraph() { return m_SceneGraph.get(); }
 
-    void GetProjectFonts(std::vector<std::pair<QString, QString>> &outFontNameFileList);
-    void GetProjectFonts(std::vector<QString> &outFonts);
+    void GetProjectFonts(QVector<Q3DStudio::SFontEntry> &outFontNameFileList);
+    void GetProjectFonts(QVector<QString> &outFonts);
      // Given a font file, return the font name
     QString GetProjectFontName(const QFileInfo &inFullPathToFontFile);
     void setPlayBackPreviewState(bool state);

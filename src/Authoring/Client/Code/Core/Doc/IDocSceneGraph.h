@@ -34,6 +34,8 @@
 #include "Pt.h"
 #include <memory>
 
+#include <QtCore/qstring.h>
+
 namespace qt3ds {
 namespace foundation {
     class IStringTable;
@@ -44,11 +46,27 @@ namespace foundation {
 namespace Q3DStudio {
 using qt3ds::QT3DSVec3;
 class Q3DSRenderBufferManager;
+
+struct SFontEntry
+{
+    QString m_fontName;
+    QString m_fontFile;
+    SFontEntry() {}
+    SFontEntry(const QString &fontName, const QString &file)
+        : m_fontName(fontName)
+        , m_fontFile(file)
+    {
+    }
+};
+
 class ITextRenderer
 {
 public:
-    void ReloadFonts();
+    virtual ~ITextRenderer() {};
+    virtual void reloadFonts() = 0;
+    virtual QVector<SFontEntry> &projectFontList() = 0;
 };
+
 class SGraphObject;
 class IPathManager;
 

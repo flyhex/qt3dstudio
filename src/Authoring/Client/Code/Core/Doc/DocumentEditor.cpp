@@ -5249,16 +5249,16 @@ public:
                                                  Qt::CaseInsensitive) == 0;
             QString theRelativePath(m_Doc.GetRelativePathToDoc(theRecord.m_File));
 
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-            if ((theExtension.CompareNoCase(L"ttf")
-                 || theExtension.CompareNoCase(L"otf")) // should use CDialogs::IsFontFileExtension
+            if ((theExtension == QLatin1String("ttf") || theExtension == QLatin1String("otf"))
                 && m_Doc.GetSceneGraph() && m_Doc.GetSceneGraph()->GetTextRenderer()) {
-                m_Doc.GetSceneGraph()->GetTextRenderer()->ReloadFonts();
-                CFilePath thePath = m_Doc.GetDocumentDirectory();
-                CFilePath theFontCache = CFilePath::CombineBaseAndRelative(thePath, L"fontcache");
-                theFontCache.DeleteThisDirectory(true);
+                m_Doc.GetSceneGraph()->GetTextRenderer()->reloadFonts();
+                QString thePath = m_Doc.GetDocumentDirectory();
+                QString theFontCache
+                        = CFilePath::CombineBaseAndRelative(thePath, QStringLiteral("fontcache"));
+                CFilePath::DeleteDirectory(theFontCache, true);
+                CFilePath::CreateDir(QFileInfo(theFontCache).fileName(), false);
             }
-#endif
+
             if (theRecord.m_ModificationType == FileModificationType::InfoChanged
                 || theRecord.m_ModificationType == FileModificationType::Destroyed) {
                 if (isImport)

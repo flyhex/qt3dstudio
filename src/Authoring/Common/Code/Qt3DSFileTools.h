@@ -199,8 +199,8 @@ public:
     bool Exists() const;
     // Delete this file from the filesystem
     bool DeleteThisFile();
-    // Delete this directory
-    bool DeleteThisDirectory(bool recursive);
+
+    static bool DeleteDirectory(const QString &dir, bool recursive);
 
     // If this is a directory, list all contents.
     // ignore special files ".\\" and "..\\"

@@ -49,6 +49,7 @@
 #include "Qt3DSDMGuides.h"
 #include "IDocumentEditor.h"
 #include "StudioEnums.h"
+#include "IDocSceneGraph.h"
 
 #include <q3dsruntime2api_p.h>
 #include <QtWidgets/qopenglwidget.h>
@@ -68,7 +69,8 @@ class Q3DStudioRenderer : public QObject,
                           public IReloadListener,
                           public CPresentationChangeListener,
                           public CSceneDragListener,
-                          public CToolbarChangeListener
+                          public CToolbarChangeListener,
+                          public ITextRenderer
 {
 public:
     Q3DStudioRenderer();
@@ -129,6 +131,10 @@ protected:
     void OnSelectionChange();
     void onScenePick();
 
+    virtual void reloadFonts() override;
+    virtual QVector<SFontEntry> &projectFontList() override;
+    void setupTextRenderer();
+
 private:
 
     bool editCameraEnabled() const
@@ -185,6 +191,9 @@ private:
     int m_lastToolMode = 0;
     QScopedPointer<Q3DSScenePicker> m_scenePicker;
     bool m_pickPending = false;
+    QVector<SFontEntry> m_fonts;
+    QVector<QString> m_systemFonts;
+    QVector<QString> m_projectFonts;
 };
 
 }

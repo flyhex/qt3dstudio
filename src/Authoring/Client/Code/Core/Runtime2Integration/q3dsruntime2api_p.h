@@ -49,5 +49,6 @@
 #include "q3dsslideplayer_p.h"
 #include "q3dsscenepicker_p.h"
 #include "q3dsmeshloader_p.h"
+#include "q3dstextrenderer_p.h"
 
 #endif

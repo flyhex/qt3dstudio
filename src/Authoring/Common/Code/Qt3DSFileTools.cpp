@@ -278,16 +278,13 @@ bool CFilePath::DeleteThisFile()
     return QFile::remove(filePath());
 }
 
-bool CFilePath::DeleteThisDirectory(bool recurse)
+bool CFilePath::DeleteDirectory(const QString &dir, bool recurse)
 {
-    QDir d(filePath());
+    QDir d(dir);
     if (!d.exists())
-        return true;
+        return false;
 
-    if (recurse)
-        return d.rmpath(filePath());
-    d.cdUp();
-    return d.mkdir(fileName());
+    return d.rmpath(dir);
 }
 
 void CFilePath::ListFilesAndDirectories(const QString &directory, std::vector<QFileInfo> &files)

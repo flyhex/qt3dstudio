@@ -1145,64 +1145,39 @@ void CDoc::SetSceneGraph(std::shared_ptr<Q3DStudio::IDocSceneGraph> inGraph)
     m_SceneGraph = inGraph;
 }
 
-inline Q3DStudio::CString ConvertToWide(const char8_t *inStr)
-{
-    eastl::basic_string<char16_t> theConvertStr;
-    qt3ds::foundation::ConvertUTF(inStr, 0, theConvertStr);
-    return Q3DStudio::CString(theConvertStr.c_str());
-}
-
-void CDoc::GetProjectFonts(
-        std::vector<std::pair<QString, QString>> &outFontNameFileList)
+void CDoc::GetProjectFonts(QVector<Q3DStudio::SFontEntry> &outFontNameFileList)
 {
     outFontNameFileList.clear();
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-    ITextRenderer *theRenderer = m_SceneGraph->GetTextRenderer();
-    if (theRenderer) {
-        qt3ds::render::NVConstDataRef<qt3ds::render::SRendererFontEntry> theProjectFonts =
-                theRenderer->GetProjectFontList();
-        for (uint32_t idx = 0, end = theProjectFonts.size(); idx < end; ++idx)
-            outFontNameFileList.push_back(
-                        std::make_pair(ConvertToWide(theProjectFonts[idx].m_FontName),
-                                       ConvertToWide(theProjectFonts[idx].m_FontFile)));
-    }
-#endif
+    Q3DStudio::ITextRenderer *theRenderer = m_SceneGraph->GetTextRenderer();
+    if (theRenderer)
+        outFontNameFileList = theRenderer->projectFontList();
 }
 
-void CDoc::GetProjectFonts(std::vector<QString> &outFonts)
+void CDoc::GetProjectFonts(QVector<QString> &outFonts)
 {
     outFonts.clear();
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-    qt3ds::render::ITextRenderer *theRenderer = m_SceneGraph->GetTextRenderer();
+    Q3DStudio::ITextRenderer *theRenderer = m_SceneGraph->GetTextRenderer();
     if (theRenderer) {
-        qt3ds::render::NVConstDataRef<qt3ds::render::SRendererFontEntry> theProjectFonts =
-                theRenderer->GetProjectFontList();
-        for (uint32_t idx = 0, end = theProjectFonts.size(); idx < end; ++idx)
-            outFonts.push_back(ConvertToWide(theProjectFonts[idx].m_FontName));
+        const QVector<Q3DStudio::SFontEntry> theProjectFonts = theRenderer->projectFontList();
+        for (auto &entry : theProjectFonts)
+            outFonts.push_back(entry.m_fontName);
     }
-#endif
 }
 
 QString CDoc::GetProjectFontName(const QFileInfo &inFullPathToFontFile)
 {
     QString theFont;
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-    qt3ds::render::ITextRenderer *theRenderer = m_SceneGraph->GetTextRenderer();
+    Q3DStudio::ITextRenderer *theRenderer = m_SceneGraph->GetTextRenderer();
     if (theRenderer) {
-        qt3ds::render::NVConstDataRef<qt3ds::render::SRendererFontEntry> theProjectFonts =
-                theRenderer->GetProjectFontList();
+        const QVector<Q3DStudio::SFontEntry> theProjectFonts = theRenderer->projectFontList();
         qCInfo(qt3ds::TRACE_INFO) << "Attempting to find font: "
                                   << inFullPathToFontFile.filePath();
-        for (uint32_t idx = 0, end = theProjectFonts.size(); idx < end; ++idx) {
-            // Using a CFilePath here instead of a CString means the file path object will normalize
-            // the data coming from fontconfig.  For example, they always use forward slashes
-            // instead of
-            // back slashes.
-            Q3DStudio::CFilePath theFontFile(ConvertToWide(theProjectFonts[idx].m_FontFile));
+        for (const auto &entry : theProjectFonts) {
+            QFileInfo theFontFile(entry.m_fontFile);
             if (inFullPathToFontFile == theFontFile) {
                 qCInfo(qt3ds::TRACE_INFO) << "Matching against: " << theFontFile.filePath()
                                           << " SUCCEEDED";
-                theFont = ConvertToWide(theProjectFonts[idx].m_FontName);
+                theFont = entry.m_fontName;
                 break;
             } else {
                 qCInfo(qt3ds::TRACE_INFO) << "Matching against: " << theFontFile.filePath()
@@ -1210,7 +1185,6 @@ QString CDoc::GetProjectFontName(const QFileInfo &inFullPathToFontFile)
             }
         }
     }
-#endif
     return theFont;
 }
 
