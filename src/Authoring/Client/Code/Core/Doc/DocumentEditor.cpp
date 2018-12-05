@@ -5577,7 +5577,7 @@ struct SScriptParser
             if (end == -1)
                 return std::shared_ptr<IDOMReader>();
 
-            QString xml = code.mid(start, end - start).trimmed();
+            QString xml = code.mid(start, end - start + 1).trimmed();
 
             tagged.append(xml);
         }
@@ -5585,9 +5585,8 @@ struct SScriptParser
         tagged.replace(QLatin1String("\r\n"), QLatin1String("\n"));
 
         QByteArray array = tagged.toLatin1();
-        QBuffer xmlStream(&array);
 
-        SDOMElement *element(CDOMSerializer::Read(*factory, xmlStream, &errorHandler));
+        SDOMElement *element(CDOMSerializer::Read(*factory, array, &errorHandler));
         if (!element)
             return std::shared_ptr<IDOMReader>();
 

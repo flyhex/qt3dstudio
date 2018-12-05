@@ -575,7 +575,9 @@ public:
     static void WriteXMLHeader(QIODevice &inStream);
     static void Write(SDOMElement &inElement, QIODevice &inStream, QT3DSU32 inTabs = 0);
     static SDOMElement *Read(IDOMFactory &inFactory, QIODevice &inStream,
-                             CXmlErrorHandler *inErrorHandler = NULL);
+                             CXmlErrorHandler *inErrorHandler = nullptr);
+    static SDOMElement *Read(IDOMFactory &inFactory, const QByteArray &inData,
+                             CXmlErrorHandler *inErrorHandler = nullptr);
 };
 
 struct SDOMAttribute

@@ -970,11 +970,17 @@ struct DOMParser
     static SDOMElement *ParseXMLFile(IDOMFactory &factory, QIODevice &inStream,
                                      CXmlErrorHandler *handler = nullptr)
     {
+        QByteArray dataRead = inStream.readAll();
+        return ParseXMLFile(factory, dataRead, handler);
+    }
+    static SDOMElement *ParseXMLFile(IDOMFactory &factory, const QByteArray &inData,
+                                     CXmlErrorHandler *handler = nullptr)
+    {
         QXmlStreamReader sreader;
 
         DOMParser domParser(factory);
-        QByteArray dataRead = inStream.readAll();
-        sreader.addData(dataRead);
+
+        sreader.addData(inData);
 
         while (!sreader.atEnd()) {
             QXmlStreamReader::TokenType token = sreader.readNext();
@@ -1244,4 +1250,10 @@ SDOMElement *CDOMSerializer::Read(IDOMFactory &inFactory, QIODevice &inStream,
                                   CXmlErrorHandler *inErrorHandler)
 {
     return DOMParser::ParseXMLFile(inFactory, inStream, inErrorHandler);
+}
+
+SDOMElement *CDOMSerializer::Read(IDOMFactory &inFactory, const QByteArray &inData,
+                                  CXmlErrorHandler *inErrorHandler)
+{
+    return DOMParser::ParseXMLFile(inFactory, inData, inErrorHandler);
 }
