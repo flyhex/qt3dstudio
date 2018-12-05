@@ -126,10 +126,15 @@ struct SFactory : public IInputStreamFactory
 
     QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE_OVERRIDE(m_Foundation.getAllocator())
 
-    QFileInfo matchCaseInsensitiveFile(const QString& file)
+    QFileInfo matchCaseInsensitiveFile(const QString& file, bool inQuiet)
     {
-        qCWarning(WARNING, PERF_INFO, "Case-insensitive matching with file: %s",
-            file.toLatin1().constData());
+        if (!inQuiet) {
+            // Some assets are searched for in several levels in the project structure,
+            // we don't want to alert user of things that can't be fixed in the presentation
+            // itself.
+            qCWarning(WARNING, PERF_INFO, "Case-insensitive matching with file: %s",
+                file.toLatin1().constData());
+        }
         const QStringList searchDirectories = QDir::searchPaths(QT3DSTUDIO_TAG);
         for (const auto &directoryPath : searchDirectories) {
             QFileInfo fileInfo(file);
@@ -174,14 +179,14 @@ struct SFactory : public IInputStreamFactory
 
         // Try to match the case-insensitive file with the given search paths
         if (!fileInfo.exists())
-            fileInfo = matchCaseInsensitiveFile(localFile);
+            fileInfo = matchCaseInsensitiveFile(localFile, inQuiet);
 
         if (fileInfo.exists())
             inputStream = SInputStream::OpenFile(fileInfo.absoluteFilePath(), m_Foundation);
 
         if (!inputStream && !inQuiet) {
             // Print extensive debugging information.
-            qCCritical(INTERNAL_ERROR, "Failed to find file: %s", inFilename.toLatin1().data());
+            qCCritical(INTERNAL_ERROR, "Failed to find file: %s", localFile.toLatin1().constData());
             qCCritical(INTERNAL_ERROR, "Searched path: %s",
                 QDir::searchPaths(QT3DSTUDIO_TAG).join(',').toLatin1().constData());
         }
