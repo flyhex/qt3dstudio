@@ -1933,10 +1933,8 @@ namespace render {
             break;
         case GL_BOOL:
             {
-                // Cast int value to be 0 or 1, matching to bool
-                GLint *boolValue = (GLint *)value;
-                *boolValue = *(GLboolean *)value;
-                GL_CALL_FUNCTION(glUniform1iv(id, count, boolValue));
+                GLint boolValue = *(GLboolean *)value;
+                GL_CALL_FUNCTION(glUniform1iv(id, count, &boolValue));
             }
             break;
         case GL_INT_VEC2:
