@@ -187,15 +187,6 @@ struct CTransactionConsumer : public ITransactionConsumer
     }
 };
 
-struct SIgnorantTransactionConsumer : public ITransactionConsumer
-{
-    void OnTransaction(qt3dsdm::TTransactionPtr) override {}
-    // Notifications to be sent for undo/redo  These are used to
-    // notify clients that something is different.
-    void OnDoNotification(std::function<void()>) override {}
-    void OnUndoNotification(std::function<void()>) override {}
-};
-
 template <typename TTransactionType>
 inline void RunWithConsumer(TTransactionConsumerPtr inConsumer, TTransactionType inTransaction)
 {

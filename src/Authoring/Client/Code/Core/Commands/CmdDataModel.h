@@ -87,10 +87,6 @@ protected:
     SApplicationState m_BeforeDoAppState;
     // The application state after this command.
     SApplicationState m_AfterDoAppState;
-
-private:
-    void SetConsumer(ITransactionProducer *inProducer);
-    void ReleaseConsumer(ITransactionProducer *inProducer, bool inRunNotifications);
 };
 
 struct SScopedDataModelConsumer

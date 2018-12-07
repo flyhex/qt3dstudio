@@ -1608,6 +1608,7 @@ void InspectorControlModel::setShaderValue(long instance, int handle, const QVar
 
     const auto doc = g_StudioApp.GetCore()->GetDoc();
     const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Material Type"))
             ->SetMaterialType(instance, v);
 

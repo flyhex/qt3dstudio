@@ -5703,5 +5703,5 @@ void CUpdateableDocumentEditor::RollbackEditor()
 
 std::shared_ptr<IInternalDocumentEditor> IInternalDocumentEditor::CreateEditor(CDoc &doc)
 {
-    return std::shared_ptr<IInternalDocumentEditor>(new CDocEditor(doc));
+    return std::make_shared<CDocEditor>(doc);
 }

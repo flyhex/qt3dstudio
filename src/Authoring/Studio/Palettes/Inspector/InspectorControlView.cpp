@@ -121,6 +121,24 @@ void InspectorControlView::OnNewPresentation()
     m_DirectoryConnection = g_StudioApp.getDirectoryWatchingSystem().AddDirectory(
                 g_StudioApp.GetCore()->getProjectFile().getProjectPath(),
                 std::bind(&InspectorControlView::onFilesChanged, this, std::placeholders::_1));
+
+    Q3DStudio::CGraph &theGraph(*g_StudioApp.GetCore()->GetDoc()->GetAssetGraph());
+    m_connections.push_back(theGraph.ConnectChildAdded(
+        std::bind(&InspectorControlView::onChildAdded, this, std::placeholders::_2)));
+}
+
+void InspectorControlView::onChildAdded(int inChild)
+{
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    if (bridge->IsCustomMaterialInstance(inChild)) {
+        QVector<qt3dsdm::Qt3DSDMInstanceHandle> refMats;
+        doc->getSceneReferencedMaterials(doc->GetSceneInstance(), refMats);
+        for (auto &refMat : qAsConst(refMats)) {
+            if ((int)bridge->getMaterialReference(refMat) == inChild)
+                g_StudioApp.GetCore()->GetDispatch()->FireImmediateRefreshInstance(refMat);
+        }
+    }
 }
 
 void InspectorControlView::OnClosingPresentation()
@@ -129,6 +147,7 @@ void InspectorControlView::OnClosingPresentation()
     // presentations count as subpresentations
     delete m_imageChooserView;
     m_fileList.clear();
+    m_connections.clear();
 }
 
 void InspectorControlView::OnTimeChanged()
@@ -158,29 +177,10 @@ void InspectorControlView::onFilesChanged(
                                 g_StudioApp.GetCore()->GetDoc()->GetDocumentDirectory(),
                                 record.m_File));
 
-                if (record.m_ModificationType == Q3DStudio::FileModificationType::Created) {
+                if (record.m_ModificationType == Q3DStudio::FileModificationType::Created)
                     qt3dsdm::binary_sort_insert_unique(m_fileList, relativePath);
-                } else if (record.m_ModificationType
-                           == Q3DStudio::FileModificationType::Destroyed) {
+                else if (record.m_ModificationType == Q3DStudio::FileModificationType::Destroyed)
                     qt3dsdm::binary_sort_erase(m_fileList, relativePath);
-                } else if (record.m_ModificationType == Q3DStudio::FileModificationType::Modified) {
-                    // TODO: Hot fix for a case when undoing a material type change does not update
-                    // in the scene (QT3DS-2768) (any better solution?)
-                    // This fix should be checked and removed if not needed after (QT3DS-2827) is
-                    // fixed
-                    const auto doc = g_StudioApp.GetCore()->GetDoc();
-                    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
-                    auto mat = doc->getSceneEditor()->getMaterial(record.m_File.toQString());
-                    QVector<qt3dsdm::Qt3DSDMInstanceHandle> refMats;
-                    doc->getSceneReferencedMaterials(doc->GetSceneInstance(), refMats);
-                    for (auto &refMat : qAsConst(refMats)) {
-                        if (bridge->getMaterialReference(refMat) == mat) {
-                            const auto dispatch = g_StudioApp.GetCore()->GetDispatch();
-                            dispatch->FireImmediateRefreshInstance(refMat);
-                            break;
-                        }
-                    }
-                }
             } else if (isInList(fontExtensions, record.m_File.GetExtension())) {
                 if (record.m_ModificationType == Q3DStudio::FileModificationType::Created
                     || record.m_ModificationType == Q3DStudio::FileModificationType::Destroyed) {

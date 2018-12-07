@@ -27,16 +27,13 @@
 **
 ****************************************************************************/
 
-#include "Qt3DSCommonPrecompile.h"
 #include "CmdStack.h"
 #include "Cmd.h"
 #include "CmdStackModifier.h"
 
 CCmdStack::CCmdStack()
 {
-    m_Listener = NULL;
-    m_MaxUndoStackSize = 100;
-    m_CommandStackModifier = NULL;
+
 }
 
 CCmdStack::~CCmdStack()
@@ -66,14 +63,13 @@ bool CCmdStack::ExecuteCommand(CCmd *inCommand)
     // Execute the command.
     unsigned long theUpdateMask = inCommand->Do();
 
-
     // If the listener is not null then do the notifications.
-    if (m_Listener != NULL) {
+    if (m_Listener) {
         m_Listener->CommandUpdate(theUpdateMask);
 
         // Set the modified flag if it needs to be set.
         if (inCommand->ShouldSetModifiedFlag()) {
-            m_Listener->SetCommandModifiedFlag(TRUE);
+            m_Listener->SetCommandModifiedFlag(true);
         }
     }
 
@@ -135,18 +131,17 @@ bool CCmdStack::ExecuteCommand(CCmd *inCommand)
 //=============================================================================
 void CCmdStack::Undo()
 {
-
     if (m_CommandStackModifier) {
         if (m_CommandStackModifier->PreUndo() == false)
             return;
     }
+
     if (m_UndoList.size() > 0) {
         m_undoingOrRedoing = true;
         CCmd *theLastCommand = m_UndoList.back();
         m_UndoList.pop_back();
 
         unsigned long theUpdateMask = theLastCommand->Undo();
-
 
         // Once a command is undone then it is considered committed. Prevents merging after this has
         // been redone.
@@ -155,13 +150,12 @@ void CCmdStack::Undo()
         m_RedoList.push_back(theLastCommand);
 
         // If the listener is not null then do the notifications.
-        if (m_Listener != NULL) {
+        if (m_Listener) {
             m_Listener->CommandUpdate(theUpdateMask);
 
             // Set the modified flag if it needs to be set.
-            if (theLastCommand->ShouldSetModifiedFlag()) {
-                m_Listener->SetCommandModifiedFlag(TRUE);
-            }
+            if (theLastCommand->ShouldSetModifiedFlag())
+                m_Listener->SetCommandModifiedFlag(true);
         }
         m_undoingOrRedoing = false;
     }
@@ -186,13 +180,12 @@ void CCmdStack::Redo()
         m_UndoList.push_back(theLastCommand);
 
         // If the listener is not null then do the notifications.
-        if (m_Listener != NULL) {
+        if (m_Listener) {
             m_Listener->CommandUpdate(theUpdateMask);
 
             // Set the modified flag if it needs to be set.
-            if (theLastCommand->ShouldSetModifiedFlag()) {
-                m_Listener->SetCommandModifiedFlag(TRUE);
-            }
+            if (theLastCommand->ShouldSetModifiedFlag())
+                m_Listener->SetCommandModifiedFlag(true);
         }
         m_undoingOrRedoing = false;
     }

@@ -120,6 +120,7 @@ private:
     bool canOpenInInspector(int instance, int handle) const;
     void openInInspector();
     void onInstancePropertyValueChanged(qt3dsdm::Qt3DSDMPropertyHandle propertyHandle);
+    void onChildAdded(int inChild);
 
     std::shared_ptr<qt3dsdm::ISignalConnection> m_selectionChangedConnection;
     std::shared_ptr<qt3dsdm::ISignalConnection> m_timeChanged;
@@ -138,6 +139,7 @@ private:
     QPointer<DataInputSelectView> m_dataInputChooserView;
     std::vector<Q3DStudio::CFilePath> m_fileList;
     MouseHelper m_mouseHelper;
+    std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_connections;
 
     int m_instance;
     int m_handle;
