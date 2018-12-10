@@ -2241,7 +2241,7 @@ public:
             Qt3DSDMSlideHandle slide = m_Bridge.GetOrCreateGraphRoot(parent);
             instance = CreateSceneGraphInstance(ComposerObjectTypes::Material, parent,
                                                 slide, DocumentEditorInsertType::LastChild,
-                                                CPt(), PRIMITIVETYPE_UNKNOWN, -1);
+                                                CPt(), PRIMITIVETYPE_UNKNOWN, -1, true, false);
             SetName(instance, CString::fromQString(m_Bridge.getMaterialContainerName()));
             m_SlideCore.forceSetInstancePropertyValueOnAllSlides(
                         instance, m_Bridge.GetSceneAsset().m_EndTime, 0);

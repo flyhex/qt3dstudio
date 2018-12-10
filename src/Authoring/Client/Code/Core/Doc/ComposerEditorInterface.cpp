@@ -286,7 +286,8 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
             m_Editor.getMaterialInfo(filepath, name, values, textureValues);
             if (values.contains(importFile) && values[importFile]
                     == m_Relativeimportfile.toQString()) {
-                const auto material = m_Editor.getOrCreateMaterial(materialName.toQString());
+                const auto material = m_Editor.getOrCreateMaterial(materialName.toQString(),
+                                                                   false);
                 if (!m_createdMaterials.contains(material))
                     m_Editor.setMaterialValues(material, values, textureValues);
                 break;
@@ -296,7 +297,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
         }
 
         bool isNewMaterial = !m_Editor.getMaterial(materialName.toQString()).Valid();
-        const auto material = m_Editor.getOrCreateMaterial(materialName.toQString());
+        const auto material = m_Editor.getOrCreateMaterial(materialName.toQString(), false);
         if (!m_createdMaterials.contains(material) && isNewMaterial) {
             m_Editor.SetSpecificInstancePropertyValue(0, material, L"importid",
                                                       std::make_shared<CDataStr>(desc.m_Id));
@@ -579,7 +580,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
             for (auto &child : children)
                 m_Editor.RemoveChild(material, child);
         } else {
-            material = m_Editor.getOrCreateMaterial(materialName.toQString());
+            material = m_Editor.getOrCreateMaterial(materialName.toQString(), false);
         }
 
         if (!m_createdMaterials.contains(material)) {
@@ -627,13 +628,13 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
                 instance = m_Editor.CreateSceneGraphInstance(
                             ComposerObjectTypes::ReferencedMaterial, oldVersion,
                             theIterator.GetCurrentSlide(), DocumentEditorInsertType::NextSibling,
-                            CPt(), PRIMITIVETYPE_UNKNOWN, 0);
+                            CPt(), PRIMITIVETYPE_UNKNOWN, 0, true, false);
                  m_Editor.DeleteInstance(oldVersion);
             } else {
                 instance = m_Editor.CreateSceneGraphInstance(
                             ComposerObjectTypes::ReferencedMaterial, parent,
                             theIterator.GetCurrentSlide(), DocumentEditorInsertType::LastChild,
-                            CPt(), PRIMITIVETYPE_UNKNOWN, 0);
+                            CPt(), PRIMITIVETYPE_UNKNOWN, 0, true, false);
             }
             m_Editor.setMaterialReferenceByPath(instance, materialName.toQString());
             m_Editor.SetName(instance, materialName);
