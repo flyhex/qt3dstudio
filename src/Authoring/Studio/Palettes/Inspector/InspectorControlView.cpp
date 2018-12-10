@@ -362,6 +362,7 @@ void InspectorControlView::updateInspectable(CInspectableBase *inInspectable)
 void InspectorControlView::setInspectable(CInspectableBase *inInspectable)
 {
     if (m_inspectableBase != inInspectable) {
+        m_activeBrowser.clear();
         m_inspectableBase = inInspectable;
         m_inspectorControlModel->setInspectable(inInspectable);
 
@@ -469,6 +470,7 @@ QObject *InspectorControlView::showImageChooser(int handle, int instance, const 
     m_imageChooserView->setInstance(instance);
 
     CDialogs::showWidgetBrowser(this, m_imageChooserView, point);
+    m_activeBrowser.setData(m_imageChooserView, handle, instance);
 
     return m_imageChooserView;
 }
@@ -487,6 +489,7 @@ QObject *InspectorControlView::showFilesChooser(int handle, int instance, const 
     m_fileChooserView->setInstance(instance);
 
     CDialogs::showWidgetBrowser(this, m_fileChooserView, point);
+    m_activeBrowser.setData(m_fileChooserView, handle, instance);
 
     return m_fileChooserView;
 }
@@ -510,6 +513,7 @@ QObject *InspectorControlView::showMeshChooser(int handle, int instance, const Q
     m_meshChooserView->setInstance(instance);
 
     CDialogs::showWidgetBrowser(this, m_meshChooserView, point);
+    m_activeBrowser.setData(m_meshChooserView, handle, instance);
 
     return m_meshChooserView;
 }
@@ -529,6 +533,7 @@ QObject *InspectorControlView::showTextureChooser(int handle, int instance, cons
     m_textureChooserView->setInstance(instance);
 
     CDialogs::showWidgetBrowser(this, m_textureChooserView, point);
+    m_activeBrowser.setData(m_textureChooserView, handle, instance);
 
     return m_textureChooserView;
 }
@@ -570,6 +575,7 @@ QObject *InspectorControlView::showObjectReference(int handle, int instance, con
     }
 
     CDialogs::showWidgetBrowser(this, m_objectReferenceView, point);
+    m_activeBrowser.setData(m_objectReferenceView, handle, instance);
 
     connect(m_objectReferenceView, &ObjectBrowserView::selectionChanged,
             this, [this, doc, handle, instance] {
@@ -606,6 +612,7 @@ QObject *InspectorControlView::showMaterialReference(int handle, int instance, c
     CDialogs::showWidgetBrowser(this, m_matRefListWidget, point,
                                 CDialogs::WidgetBrowserAlign::ComboBox,
                                 QSize(CStudioPreferences::valueWidth(), popupHeight));
+    m_activeBrowser.setData(m_matRefListWidget, handle, instance);
 
     connect(m_matRefListWidget, &QListWidget::itemClicked, this,
             [doc, propertySystem, instance, handle](QListWidgetItem *item) {
@@ -660,6 +667,7 @@ void InspectorControlView::showDataInputChooser(int handle, int instance, const 
                     handle, instance);
     CDialogs::showWidgetBrowser(this, m_dataInputChooserView, point,
                                 CDialogs::WidgetBrowserAlign::ToolButton);
+    m_activeBrowser.setData(m_dataInputChooserView, handle, instance);
 }
 
 QColor InspectorControlView::showColorDialog(const QColor &color)
@@ -702,6 +710,12 @@ void InspectorControlView::OnEndDataModelNotifications()
     if (inspectable && !inspectable->IsValid())
         OnSelectionSet(Q3DStudio::SSelectedValue());
     m_inspectorControlModel->refresh();
+
+    // Check if the instance/handle pair still has an active UI control. If not, close browser.
+    if (m_activeBrowser.isActive() && !m_inspectorControlModel->hasInstanceProperty(
+                m_activeBrowser.m_instance, m_activeBrowser.m_handle)) {
+        m_activeBrowser.clear();
+    }
 }
 
 void InspectorControlView::OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance)

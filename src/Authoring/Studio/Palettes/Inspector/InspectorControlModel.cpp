@@ -201,18 +201,18 @@ void InspectorControlModel::notifyInstancePropertyValue(qt3dsdm::Qt3DSDMInstance
         Q_EMIT dataChanged(index(0), index(rowCount() - 1));
 }
 
-QVariant InspectorControlModel::getPropertyValue(long instance, int handle)
+bool InspectorControlModel::hasInstanceProperty(long instance, int handle)
 {
-    for (int row = 0; row < m_groupElements.count(); ++row) {
-        auto group = m_groupElements[row];
-        for (int p = 0; p < group.controlElements.count(); ++p) {
-            QVariant& element = group.controlElements[p];
+    for (const auto &group : qAsConst(m_groupElements)) {
+        for (const auto &element : qAsConst(group.controlElements)) {
             InspectorControlBase *property = element.value<InspectorControlBase *>();
-            if (property->m_property == qt3dsdm::CDataModelHandle(handle))
-                return property->m_value;
+            if (property->m_property == qt3dsdm::CDataModelHandle(handle)
+                    && property->m_instance == qt3dsdm::CDataModelHandle(instance)) {
+                return true;
+            }
         }
     }
-    return {};
+    return false;
 }
 
 bool InspectorControlModel::isInsideMaterialContainer() const

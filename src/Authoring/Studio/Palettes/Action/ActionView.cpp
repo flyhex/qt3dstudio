@@ -186,6 +186,11 @@ bool ActionView::event(QEvent *event)
 
 void ActionView::setItem(const qt3dsdm::Qt3DSDMInstanceHandle &handle)
 {
+    if (!m_activeBrowser.isNull() && m_activeBrowser->isVisible()) {
+        m_activeBrowser->close();
+        m_activeBrowser.clear();
+    }
+
     m_objRefHelper = GetDoc()->GetDataModelObjectReferenceHelper();
     m_itemHandle = handle;
     m_actionsModel->setInstanceHandle(handle);
@@ -425,6 +430,7 @@ QObject *ActionView::showTriggerObjectBrowser(const QPoint &point)
     m_triggerObjectBrowser->disconnect();
     m_triggerObjectBrowser->selectAndExpand(instanceHandle, actionInfo.m_Owner);
     CDialogs::showWidgetBrowser(this, m_triggerObjectBrowser, point);
+    m_activeBrowser = m_triggerObjectBrowser;
 
     connect(m_triggerObjectBrowser, &ObjectBrowserView::selectionChanged,
             this, &ActionView::OnTriggerSelectionChanged);
@@ -456,6 +462,7 @@ QObject *ActionView::showTargetObjectBrowser(const QPoint &point)
     m_targetObjectBrowser->disconnect();
     m_targetObjectBrowser->selectAndExpand(instanceHandle, actionInfo.m_Owner);
     CDialogs::showWidgetBrowser(this, m_targetObjectBrowser, point);
+    m_activeBrowser = m_targetObjectBrowser;
 
     connect(m_targetObjectBrowser, &ObjectBrowserView::selectionChanged,
             this, &ActionView::OnTargetSelectionChanged);
@@ -518,6 +525,7 @@ QObject *ActionView::showEventBrowser(const QPoint &point)
     m_eventsBrowser->disconnect();
     m_eventsBrowser->selectAndExpand(QString::fromStdWString(actionInfo.m_Event));
     CDialogs::showWidgetBrowser(this, m_eventsBrowser, point);
+    m_activeBrowser = m_eventsBrowser;
 
     connect(m_eventsBrowser, &EventsBrowserView::selectionChanged,
             this, [this] {
@@ -554,6 +562,7 @@ QObject *ActionView::showHandlerBrowser(const QPoint &point)
     m_handlerBrowser->disconnect();
     m_handlerBrowser->selectAndExpand(QString::fromStdWString(actionInfo.m_Handler));
     CDialogs::showWidgetBrowser(this, m_handlerBrowser, point);
+    m_activeBrowser = m_handlerBrowser;
 
     connect(m_handlerBrowser, &EventsBrowserView::selectionChanged,
             this, [this] {
@@ -602,6 +611,7 @@ QObject *ActionView::showEventBrowserForArgument(int handle, const QPoint &point
     m_fireEventsBrowser->disconnect();
     m_fireEventsBrowser->selectAndExpand(eventName);
     CDialogs::showWidgetBrowser(this, m_fireEventsBrowser, point);
+    m_activeBrowser = m_fireEventsBrowser;
 
     connect(m_fireEventsBrowser, &EventsBrowserView::selectionChanged,
             this, [this, handle] {
@@ -749,6 +759,11 @@ void ActionView::OnActionAdded(qt3dsdm::Qt3DSDMActionHandle inAction,
     qt3dsdm::Qt3DSDMSlideHandle theMasterOfCurrentSlide =
             theStudioSystem->GetSlideSystem()->GetMasterSlide(theCurrentSlide);
 
+    if (!m_activeBrowser.isNull() && m_activeBrowser->isVisible()) {
+        m_activeBrowser->close();
+        m_activeBrowser.clear();
+    }
+
     if (inOwner == m_itemHandle  // the action is added to current viewed instance
             && (theCurrentSlide == inSlide // and is added to the current viewed slide
                 || (theMasterSlideOfAction == inSlide
@@ -765,6 +780,10 @@ void ActionView::OnActionDeleted(qt3dsdm::Qt3DSDMActionHandle inAction,
     Q_UNUSED(inSlide);
     Q_UNUSED(inOwner);
 
+    if (!m_activeBrowser.isNull() && m_activeBrowser->isVisible()) {
+        m_activeBrowser->close();
+        m_activeBrowser.clear();
+    }
     m_actionsModel->removeAction(inAction);
 }
 
@@ -784,6 +803,17 @@ void ActionView::OnHandlerArgumentModified(qt3dsdm::Qt3DSDMHandlerArgHandle inHa
     if (!m_itemHandle.Valid())
         return;
 
+    // m_fireEventsBrowser needs to be closed if another type of target handler is chosen.
+    // Other browsers will remain valid always as long as the action is selected.
+    if (!m_fireEventsBrowser.isNull() && m_activeBrowser == m_fireEventsBrowser
+            && m_activeBrowser->isVisible()) {
+        const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
+        if (actionInfo.m_Handler != L"Fire Event") {
+            m_activeBrowser->close();
+            m_activeBrowser.clear();
+        }
+
+    }
     emitActionChanged();
 }
 
