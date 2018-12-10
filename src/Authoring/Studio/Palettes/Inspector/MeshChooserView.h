@@ -36,8 +36,10 @@ class CFilePath;
 class CString;
 }
 
-QT_FORWARD_DECLARE_CLASS(QAbstractItemModel)
 class MeshChooserModel;
+
+QT_FORWARD_DECLARE_CLASS(QAbstractItemModel)
+
 class MeshChooserView : public QQuickWidget
 {
     Q_OBJECT
@@ -46,12 +48,11 @@ class MeshChooserView : public QQuickWidget
 public:
     explicit MeshChooserView(QWidget *parent = nullptr);
 
-    QSize sizeHint() const override;
-
     Q_INVOKABLE void setSelectedMeshName(const QString &name);
 
     void setHandle(int handle);
     void setInstance(int instance);
+    int numMeshes() const;
 
 Q_SIGNALS:
     void meshSelected(int handle, int instance, const QString &name);

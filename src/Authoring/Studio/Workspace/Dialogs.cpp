@@ -1358,18 +1358,18 @@ void CDialogs::showWidgetBrowser(QWidget *screenWidget, QWidget *browser, const 
     }
     QRect screenRect = screen->availableGeometry();
 
-    const int CONTROL_H = 22;
+    const int controlH = CStudioPreferences::controlBaseHeight();
     if (align == WidgetBrowserAlign::ComboBox) {
         // position the popup below the combobox
-        newPos -= QPoint(popupSize.width(), -CONTROL_H) + screenRect.topLeft();
+        newPos -= QPoint(popupSize.width(), -controlH) + screenRect.topLeft();
         // if no space below the combobox, move it above it
         if (newPos.y() + popupSize.height() > screenRect.height())
-            newPos.setY(newPos.y() - popupSize.height() - CONTROL_H);
-    } else if (align == WidgetBrowserAlign::ToolButton){
+            newPos.setY(newPos.y() - popupSize.height() - controlH);
+    } else if (align == WidgetBrowserAlign::ToolButton) {
         // The point is assumed to be the lower right corner of the button
         newPos -= QPoint(popupSize.width(), popupSize.height()) + screenRect.topLeft();
         if (newPos.y() < 0)
-            newPos.setY(newPos.y() + popupSize.height() - CONTROL_H);
+            newPos.setY(newPos.y() + popupSize.height() - controlH);
     } else { // WidgetBrowserAlign::Center
         newPos -= QPoint(popupSize.width() / 2, popupSize.height() / 2) + screenRect.topLeft();
     }

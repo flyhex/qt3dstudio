@@ -43,8 +43,6 @@ class FileChooserView : public QQuickWidget
 public:
     explicit FileChooserView(QWidget *parent = nullptr);
 
-    QSize sizeHint() const override;
-
     void setHandle(int handle);
     int handle() const;
 

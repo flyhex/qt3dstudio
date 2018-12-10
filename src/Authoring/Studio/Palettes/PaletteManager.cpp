@@ -40,7 +40,6 @@
 #include "InspectorControlView.h"
 #include "ActionView.h"
 #include "IDragable.h"
-#include "ActionView.h"
 #include "ProjectView.h"
 #include "TabOrderHandler.h"
 #include "StudioPreferences.h"

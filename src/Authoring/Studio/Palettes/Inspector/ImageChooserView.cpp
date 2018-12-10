@@ -63,11 +63,6 @@ void ImageChooserView::initialize()
     setSource(QUrl(QStringLiteral("qrc:/Palettes/Inspector/ImageChooser.qml")));
 }
 
-QSize ImageChooserView::sizeHint() const
-{
-    return {500, 500};
-}
-
 void ImageChooserView::setHandle(int handle)
 {
     m_handle = handle;

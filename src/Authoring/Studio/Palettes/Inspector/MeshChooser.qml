@@ -47,7 +47,6 @@ Rectangle {
             Layout.margins: 4
 
             boundsBehavior: Flickable.StopAtBounds
-            spacing: 4
             clip: true
 
             ScrollBar.vertical: ScrollBar {}
@@ -55,7 +54,9 @@ Rectangle {
             model: _meshChooserModel
 
             delegate: ChooserDelegate {
-                onClicked: _meshChooserView.setSelectedMeshName(filePath);
+                onClicked: {
+                    _meshChooserView.setSelectedMeshName(filePath);
+                }
                 onDoubleClicked: {
                     _meshChooserView.setSelectedMeshName(filePath);
                     _meshChooserView.hide();

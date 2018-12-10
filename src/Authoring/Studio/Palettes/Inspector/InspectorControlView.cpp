@@ -56,6 +56,7 @@
 #include "Dialogs.h"
 #include "ProjectFile.h"
 #include "MaterialRefView.h"
+#include "BasicObjectsModel.h"
 
 #include <QtCore/qtimer.h>
 #include <QtQml/qqmlcontext.h>
@@ -68,6 +69,7 @@ InspectorControlView::InspectorControlView(const QSize &preferredSize, QWidget *
     : QQuickWidget(parent),
       TabNavigable(),
       m_inspectorControlModel(new InspectorControlModel(this)),
+      m_meshChooserView(new MeshChooserView(this)),
       m_instance(0),
       m_handle(0),
       m_preferredSize(preferredSize)
@@ -80,6 +82,16 @@ InspectorControlView::InspectorControlView(const QSize &preferredSize, QWidget *
 
     m_selectionChangedConnection = g_StudioApp.GetCore()->GetDispatch()->ConnectSelectionChange(
                 std::bind(&InspectorControlView::OnSelectionSet, this, std::placeholders::_1));
+
+    connect(m_meshChooserView, &MeshChooserView::meshSelected, this,
+            [this] (int handle, int instance, const QString &name) {
+        if (name.startsWith(QLatin1Char('#'))) {
+            if (m_inspectorControlModel)
+                m_inspectorControlModel->setPropertyValue(instance, handle, name);
+        } else {
+            setPropertyValueFromFilename(instance, handle, name);
+        }
+    });
 }
 
 static bool isInList(const wchar_t **list, const Q3DStudio::CString &inStr)
@@ -496,24 +508,18 @@ QObject *InspectorControlView::showFilesChooser(int handle, int instance, const 
 
 QObject *InspectorControlView::showMeshChooser(int handle, int instance, const QPoint &point)
 {
-    if (!m_meshChooserView) {
-        m_meshChooserView = new MeshChooserView(this);
-        connect(m_meshChooserView, &MeshChooserView::meshSelected, this,
-                [this] (int handle, int instance, const QString &name) {
-            if (name.startsWith(QStringLiteral("#"))) {
-                if (m_inspectorControlModel)
-                    m_inspectorControlModel->setPropertyValue(instance, handle, name);
-            } else {
-                setPropertyValueFromFilename(instance, handle, name);
-            }
-        });
-    }
-
     m_meshChooserView->setHandle(handle);
     m_meshChooserView->setInstance(instance);
 
-    CDialogs::showWidgetBrowser(this, m_meshChooserView, point);
     m_activeBrowser.setData(m_meshChooserView, handle, instance);
+    int numPrimitives = BasicObjectsModel::BasicMeshesModel().count();
+    bool combo = numPrimitives == m_meshChooserView->numMeshes(); // make a combobox size popup
+    int comboH = qMin(m_meshChooserView->numMeshes(), 15) // max popup height: 15 items
+                 * CStudioPreferences::controlBaseHeight();
+
+    CDialogs::showWidgetBrowser(this, m_meshChooserView, point,
+                                CDialogs::WidgetBrowserAlign::ComboBox,
+                                combo ? QSize(CStudioPreferences::valueWidth(), comboH) : QSize());
 
     return m_meshChooserView;
 }

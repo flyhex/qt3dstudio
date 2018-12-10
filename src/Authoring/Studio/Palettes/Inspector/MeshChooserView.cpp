@@ -64,9 +64,9 @@ void MeshChooserView::initialize()
     setSource(QUrl(QStringLiteral("qrc:/Palettes/Inspector/MeshChooser.qml")));
 }
 
-QSize MeshChooserView::sizeHint() const
+int MeshChooserView::numMeshes() const
 {
-    return {500, 500};
+    return m_model->rowCount();
 }
 
 void MeshChooserView::setSelectedMeshName(const QString &name)

@@ -27,9 +27,7 @@
 ****************************************************************************/
 #include "EventsBrowserView.h"
 
-#include "CColor.h"
 #include "EventsModel.h"
-#include "Literals.h"
 #include "StudioUtils.h"
 #include "StudioPreferences.h"
 
@@ -56,11 +54,6 @@ void EventsBrowserView::setModel(EventsModel *model)
         m_model = model;
         Q_EMIT modelChanged();
     }
-}
-
-QSize EventsBrowserView::sizeHint() const
-{
-    return {500, 500};
 }
 
 qt3dsdm::CDataModelHandle EventsBrowserView::selectedHandle() const

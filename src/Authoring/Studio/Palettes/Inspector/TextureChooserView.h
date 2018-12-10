@@ -42,8 +42,6 @@ class TextureChooserView : public QQuickWidget
 public:
     explicit TextureChooserView(QWidget *parent = nullptr);
 
-    QSize sizeHint() const override;
-
     void setHandle(int handle);
     int handle() const;
 

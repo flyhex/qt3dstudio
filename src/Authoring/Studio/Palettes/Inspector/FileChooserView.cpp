@@ -63,11 +63,6 @@ void FileChooserView::initialize()
     setSource(QUrl(QStringLiteral("qrc:/Palettes/Inspector/FileChooser.qml")));
 }
 
-QSize FileChooserView::sizeHint() const
-{
-    return {500, 500};
-}
-
 void FileChooserView::setHandle(int handle)
 {
     m_handle = handle;

@@ -46,7 +46,6 @@ public:
 
     QAbstractItemModel *model() const;
     void setModel(EventsModel *model);
-    QSize sizeHint() const override;
     qt3dsdm::CDataModelHandle selectedHandle() const;
 
     void selectAndExpand(const QString &event);

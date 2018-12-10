@@ -60,7 +60,6 @@ public:
 
     QAbstractItemModel *model() const;
     void setModel(ObjectListModel *model);
-    QSize sizeHint() const override;
 
     Q_INVOKABLE QString absPath(int index) const;
     Q_INVOKABLE QString relPath(int index) const;

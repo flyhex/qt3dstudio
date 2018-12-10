@@ -63,11 +63,6 @@ void TextureChooserView::initialize()
     setSource(QUrl(QStringLiteral("qrc:/Palettes/Inspector/TextureChooser.qml")));
 }
 
-QSize TextureChooserView::sizeHint() const
-{
-    return {500, 500};
-}
-
 void TextureChooserView::setHandle(int handle)
 {
     m_handle = handle;
