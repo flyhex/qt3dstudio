@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1993-2009 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -28,23 +27,22 @@
 
 /*!
 
-\title Best Practices
-\group qt3dstudio-best-practices
-\noautolist
+\title Animations
+\page animations.html
 
-\section1 Contents
-//! [toc]
 \list
-\li \l {Optimizing Images}
-\li \l {Anti-Aliasing}
-\li \l {Creating Optimized Presentations}
-\li \l {Using Scale Modes}
-\li \l {Disable Depth Test}
-\li \l {Blend Mode}
-\li \l {Working with 3D Content}
-\li \l {Applying Layer Effects}
-\endlist
-//! [toc]
+  \li
+  \l{Studio: Timeline Palette}{The Timeline}
 
+  The timeline palette provides direct access to all elements in your scene, and also gives you
+  control over the animation and timing within a slide.
+
+  \li
+  \l{Dynamic Keyframes}
+
+  Dynamic keyframes are a powerful feature that allow you to smoothly interpolate between different
+  animated values on different slides.
+
+\endlist
 
 */

@@ -46,7 +46,6 @@ public:
         , m_mainThread(mainThread)
         , m_semaphore(0)
     {
-
     }
 
     QSize readPresentationSize(const QString &url)
@@ -127,8 +126,17 @@ public:
         m_running = true;
         m_semaphore.release();
 
+#ifdef Q_OS_LINUX
+        // TODO: Updating the subpresentation on loop crashes or hangs on Linux, this hack fixes
+        // it for now
+        m_surfaceViewer->update();
+#endif
+
         m_context->doneCurrent();
 
+#ifndef Q_OS_LINUX
+        // TODO: Updating the subpresentation on loop crashes or hangs on Linux, this hack fixes
+        // it for now
         while (true) {
             QMutexLocker lock(&m_mutex);
             if (!m_running)
@@ -140,7 +148,7 @@ public:
             }
 
             m_surfaceViewer->update();
-
+            m_context->functions()->glFlush();
             m_updated = true;
             m_context->doneCurrent();
             lock.unlock();
@@ -149,14 +157,15 @@ public:
             QThread::usleep(33000);
         }
         m_fbo.reset();
+        m_context->doneCurrent();
+        m_context.reset();
+#endif
 #ifdef Q3DS_PREVIEW_SUBPRESENTATION_RT2
         m_surfaceViewer->destroy();
 #else
         m_surfaceViewer->shutdown();
 #endif
         m_surfaceViewer.reset();
-        m_context->doneCurrent();
-        m_context.reset();
         m_surface->moveToThread(m_mainThread);
         m_semaphore.release();
     }

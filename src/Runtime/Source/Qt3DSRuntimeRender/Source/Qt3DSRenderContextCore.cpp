@@ -315,31 +315,6 @@ struct SRenderContext : public IQt3DSRenderContext
         }
         m_PathManager = inCore.GetPathManagerCore().OnRenderSystemInitialize(*this);
 
-        QString versionString;
-        switch ((QT3DSU32)ctx.GetRenderContextType()) {
-        case NVRenderContextValues::GLES2:
-            versionString = QLatin1Literal("gles2");
-            break;
-        case NVRenderContextValues::GL2:
-            versionString = QLatin1Literal("gl2");
-            break;
-        case NVRenderContextValues::GLES3:
-            versionString = QLatin1Literal("gles3");
-            break;
-        case NVRenderContextValues::GL3:
-            versionString = QLatin1Literal("gl3");
-            break;
-        case NVRenderContextValues::GLES3PLUS:
-            versionString = QLatin1Literal("gles3x");
-            break;
-        case NVRenderContextValues::GL4:
-            versionString = QLatin1Literal("gl4");
-            break;
-        default:
-            break;
-        }
-
-        GetDynamicObjectSystem().setShaderCodeLibraryVersion(versionString);
 #if defined (QT3DS_SHADER_PLATFORM_LIBRARY_DIR)
         const QString platformDirectory;
 #if defined(_WIN32)

@@ -212,11 +212,16 @@ void Q3DSDirWatcher::sendRecords()
 
 void Q3DSDirWatcher::addRecord(const QString &path, FileModificationType::Enum type)
 {
-    m_records.push_back(getRecordFromCache(path, type));
+    auto iter = std::find_if(m_records.begin(), m_records.end(),
+                             [&](SFileModificationRecord &m) -> bool
+                             { return m.m_File == path && m.m_ModificationType == type; });
+
+    if (iter == m_records.end()) // add only unique entries
+        m_records.push_back(getRecordFromCache(path, type));
 }
 
 SFileModificationRecord Q3DSDirWatcher::getRecordFromCache(const QString &path,
-                                                            FileModificationType::Enum type)
+                                                           FileModificationType::Enum type)
 {
     if (m_recordCache.contains(path)) {
         m_recordCache[path].m_ModificationType = type;

@@ -427,7 +427,7 @@ Q3DStudio::IDocumentEditor &CDoc::OpenTransaction(const QString &inCmdName, cons
     ++m_TransactionDepth;
     if (m_TransactionDepth == 1) {
         assert(!m_OpenTransaction);
-        m_OpenTransaction = std::make_shared<qt3dsdm::CmdDataModel>(std::ref(*this));
+        m_OpenTransaction = std::make_shared<qt3dsdm::CmdDataModel>(*this);
         m_OpenTransaction->SetName(inCmdName);
         m_OpenTransaction->SetConsumer();
         m_Core->SetCommandStackModifier(this);
@@ -442,9 +442,9 @@ Q3DStudio::IDocumentEditor &CDoc::OpenTransaction(const QString &inCmdName, cons
         qCInfo(qt3ds::TRACE_INFO) << inFile << "(" << inLine << "): Open Transaction: "
                                   << inCmdName;
 
-    if (!m_SceneEditor) {
+    if (!m_SceneEditor)
         m_SceneEditor = Q3DStudio::IInternalDocumentEditor::CreateEditor(*this);
-    }
+
     return *m_SceneEditor;
 }
 
@@ -484,9 +484,9 @@ void CDoc::IKnowWhatIAmDoingForceCloseTransaction()
         qCInfo(qt3ds::TRACE_INFO) << "Closing transaction";
         // Ensure hasTransaction will return false right at this second.
         std::shared_ptr<qt3dsdm::CmdDataModel> theTransaction(m_OpenTransaction);
-        m_OpenTransaction = std::shared_ptr<qt3dsdm::CmdDataModel>();
+        m_OpenTransaction.reset();
 
-        m_Core->SetCommandStackModifier(NULL);
+        m_Core->SetCommandStackModifier(nullptr);
         // Release the consumer without running notifications because our command will run
         // the notifications when it first gets executed.
         theTransaction->ReleaseConsumer(false);
@@ -1231,7 +1231,6 @@ void CDoc::OnSlideDeleted(qt3dsdm::Qt3DSDMSlideHandle inSlide)
 }
 void CDoc::OnInstanceDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
-    qt3dsdm::TTransactionConsumerPtr theConsumer = m_StudioSystem->GetFullSystem()->GetConsumer();
     if (GetSelectedInstance() == inInstance)
         DeselectAllItems();
 
@@ -1744,7 +1743,7 @@ void CDoc::CloseDocument()
     // selection would be invalid from this point onwards
     DeselectAllItems();
 
-    m_SceneEditor = std::shared_ptr<Q3DStudio::IInternalDocumentEditor>();
+    m_SceneEditor.reset();
     if (m_DocumentBufferCache) {
         // Ensure old buffers aren't picked up for the same relative path.
         m_DocumentBufferCache->Clear();

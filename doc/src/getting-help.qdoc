@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1993-2009 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -28,23 +27,20 @@
 
 /*!
 
-\title Best Practices
-\group qt3dstudio-best-practices
-\noautolist
+\title Getting Help
+\page getting-help.html
 
-\section1 Contents
-//! [toc]
 \list
-\li \l {Optimizing Images}
-\li \l {Anti-Aliasing}
-\li \l {Creating Optimized Presentations}
-\li \l {Using Scale Modes}
-\li \l {Disable Depth Test}
-\li \l {Blend Mode}
-\li \l {Working with 3D Content}
-\li \l {Applying Layer Effects}
-\endlist
-//! [toc]
+  \li
+  \l{Studio Keyboard Shortcuts}
 
+  A list of all keyboard shortcuts for the Studio.
+
+  \li
+  \l{Viewer Keyboard Shortcuts}
+
+  A list of all keyboard shortcuts for the Viewer.
+
+\endlist
 
 */

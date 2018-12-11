@@ -224,6 +224,7 @@ private:
     QAction *m_actionPaste;
     bool m_propertyValueInvalid = true;
     QColor m_currentColor;
+    QPointer<QWidget> m_activeBrowser = nullptr;
 };
 
 #endif // ACTIONVIEW_H

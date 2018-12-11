@@ -50,11 +50,6 @@
     \li \c{F5}
     \li \c{Ctrl + R}
     \li \c{F5}
-  \row
-    \li Exit
-    \li \c{Ctrl + Q}
-    \li \c{Ctrl + Q}
-    \li \c{Cmd + Q}
 \endtable
 
 \section1 View Menu
@@ -66,7 +61,32 @@
     \li Linux
     \li macOS
   \row
-    \li Full Screen
+    \li Show matte
+    \li \c{Ctrl + D}
+    \li \c{Ctrl + D}
+    \li \c{Cmd + D}
+  \row
+    \li Scale mode (toggle)
+    \li \c{Ctrl + Shift + S}
+    \li \c{Ctrl + Shift + S}
+    \li \c{Cmd + Shift + S}
+  \row
+    \li Stereo mode (toggle)
+    \li \c{Ctrl + Shift + T}
+    \li \c{Ctrl + Shift + T}
+    \li \c{Cmd + Shift + T}
+  \row
+    \li Increase separation (in stereo mode)
+    \li \c{Ctrl + Shift + +}
+    \li \c{Ctrl + Shift + +}
+    \li \c{Cmd + Shift + +}
+  \row
+    \li Decrease separation (in stereo mode)
+    \li \c{Ctrl + Shift + -}
+    \li \c{Ctrl + Shift + -}
+    \li \c{Cmd + Shift + -}
+  \row
+    \li Full screen
     \li \c{F11}
     \li \c{Ctrl + F11}
     \li \c{F11}
@@ -74,10 +94,25 @@
     \li
     \li {3, 1} To exit full screen, \c {F11}, \c {ESC} or swipe down gesture can be used.
   \row
-    \li Toggle debug view
+    \li Toggle in-scene debug view
     \li \c{F10}
     \li \c{F10}
     \li \c{F10}
+  \row
+    \li Toggle console
+    \li \c{`}
+    \li \c{`}
+    \li \c{`}
+  \row
+    \li Scale in-scene debug up
+    \li \c{Ctrl + F10}
+    \li \c{Ctrl + F10}
+    \li \c{Cmd + F10}
+  \row
+    \li Scale in-scene debug down
+    \li \c{Alt + F10}
+    \li \c{Alt + F10}
+    \li \c{Option + F10}
 \endtable
 
 */

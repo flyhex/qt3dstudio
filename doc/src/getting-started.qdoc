@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 1993-2009 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -28,23 +27,40 @@
 
 /*!
 
-\title Best Practices
-\group qt3dstudio-best-practices
-\noautolist
+\title Getting Started
+\page getting-started.html
 
-\section1 Contents
-//! [toc]
 \list
-\li \l {Optimizing Images}
-\li \l {Anti-Aliasing}
-\li \l {Creating Optimized Presentations}
-\li \l {Using Scale Modes}
-\li \l {Disable Depth Test}
-\li \l {Blend Mode}
-\li \l {Working with 3D Content}
-\li \l {Applying Layer Effects}
-\endlist
-//! [toc]
+  \li
+  \l{About Qt 3D Studio}
 
+  All about the Qt 3D Studio suite concept including requirements, copyright notices and known
+  issues.
+
+  \li
+  \l{Quick Start Guide}
+
+  The quick start guide is the best way to get started if you are new to Qt 3D Studio.
+
+  \li
+  \l{Tutorials}
+
+  A collection of tutorials.
+
+  \li
+  \l{Best Practices}
+
+  A collection of best practices guides.
+
+  \li
+  \l{Studio Index}
+
+  A more in-depth introduction to the Qt 3D Studio editor.
+
+  \li
+  \l{Viewer Index}
+
+  A more in-depth introduction to the Qt 3D Studio viewer.
+\endlist
 
 */

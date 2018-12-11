@@ -136,22 +136,26 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionPresentation_Settings, &QAction::triggered,
             this, &CMainFrame::OnEditPresentationPreferences);
     connect(m_ui->menu_Edit, &QMenu::aboutToShow, [this]() {
-        QString type = g_StudioApp.getDuplicateType();
-        QString label = tr("Duplicate %1").arg(type);
-        m_ui->action_Duplicate_Object->setText(label);
-        m_ui->action_Duplicate_Object->setEnabled(!type.isEmpty());
+        // macOS doesn't block menubar while startup dialog is being shown, and that causes a
+        // crash on aboutToShow if it's called before everything is set
+        if (m_ui->menu_Edit->isEnabled()) {
+            QString type = g_StudioApp.getDuplicateType();
+            QString label = tr("Duplicate %1").arg(type);
+            m_ui->action_Duplicate_Object->setText(label);
+            m_ui->action_Duplicate_Object->setEnabled(!type.isEmpty());
 
-        type = g_StudioApp.getDeleteType();
-        label = tr("Delete %1").arg(type);
-        m_ui->actionDelete->setText(label);
-        m_ui->actionDelete->setEnabled(!type.isEmpty());
+            type = g_StudioApp.getDeleteType();
+            label = tr("Delete %1").arg(type);
+            m_ui->actionDelete->setText(label);
+            m_ui->actionDelete->setEnabled(!type.isEmpty());
 
-        if (g_StudioApp.canUngroupSelectedObjects()) {
-            m_ui->actionGroup->setText(tr("Ungroup Objects"));
-            m_ui->actionGroup->setEnabled(true);
-        } else {
-            m_ui->actionGroup->setText(tr("Group Objects"));
-            m_ui->actionGroup->setEnabled(g_StudioApp.canGroupSelectedObjects());
+            if (g_StudioApp.canUngroupSelectedObjects()) {
+                m_ui->actionGroup->setText(tr("Ungroup Objects"));
+                m_ui->actionGroup->setEnabled(true);
+            } else {
+                m_ui->actionGroup->setText(tr("Group Objects"));
+                m_ui->actionGroup->setEnabled(g_StudioApp.canGroupSelectedObjects());
+            }
         }
     });
     connect(m_ui->menu_Edit, &QMenu::aboutToHide, [this]() {

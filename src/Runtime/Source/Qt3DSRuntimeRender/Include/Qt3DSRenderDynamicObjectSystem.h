@@ -275,9 +275,6 @@ namespace render {
                                                       CRegisteredString inProgramMacro,
                                                       TShaderFeatureSet inFeatureSet) = 0;
 
-        virtual void setShaderCodeLibraryVersion(const QString &version) = 0;
-        virtual QString shaderCodeLibraryVersion() = 0;
-
         virtual void setShaderCodeLibraryPlatformDirectory(const QString &directory) = 0;
         virtual QString shaderCodeLibraryPlatformDirectory() = 0;
 

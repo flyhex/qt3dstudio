@@ -102,15 +102,15 @@ public:
 protected:
     void EmptyUndoStack();
 
-    ICmdStackModifier *m_CommandStackModifier;
+    ICmdStackModifier *m_CommandStackModifier = nullptr;
 
     TCmdList m_UndoList;
     TCmdList m_RedoList;
 
     bool m_undoingOrRedoing = false;
 
-    unsigned long m_MaxUndoStackSize;
+    unsigned long m_MaxUndoStackSize = 100;
 
-    CModificationListener *m_Listener;
+    CModificationListener *m_Listener = nullptr;
 };
 #endif // INCLUDED_CMD_STACK_H

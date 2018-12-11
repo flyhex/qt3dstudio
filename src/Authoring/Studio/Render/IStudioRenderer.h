@@ -73,6 +73,8 @@ public:
     virtual QT3DSI32 GetEditCamera() const = 0;
     virtual void EditCameraZoomToFit() = 0;
 
+    virtual bool isMouseDown() const = 0;
+
     // This must be safe to call from multiple places
     virtual void Close() = 0;
 

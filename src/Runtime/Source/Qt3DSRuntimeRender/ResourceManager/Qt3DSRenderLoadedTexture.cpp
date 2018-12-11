@@ -658,9 +658,11 @@ SLoadedTexture *SLoadedTexture::Load(const QString &inPath, NVFoundationBase &in
         return nullptr;
 
     SLoadedTexture *theLoadedImage = nullptr;
-    NVScopedRefCounted<IRefCountedInputStream> theStream(inFactory.GetStreamForFile(inPath));
+    // We will get invalid error logs of files not found if we don't force quiet mode
+    // If the file is actually missing, it will be logged later (loaded image is null)
+    NVScopedRefCounted<IRefCountedInputStream> theStream(inFactory.GetStreamForFile(inPath, true));
     QString fileName;
-    inFactory.GetPathForFile(inPath, fileName);
+    inFactory.GetPathForFile(inPath, fileName, true);
     if (theStream.mPtr && inPath.size() > 3) {
         if (inPath.endsWith("png", Qt::CaseInsensitive)
                 || inPath.endsWith("jpg", Qt::CaseInsensitive)
@@ -679,5 +681,6 @@ SLoadedTexture *SLoadedTexture::Load(const QString &inPath, NVFoundationBase &in
             qCWarning(INTERNAL_ERROR, "Unrecognized image extension: %s", qPrintable(inPath));
         }
     }
+
     return theLoadedImage;
 }

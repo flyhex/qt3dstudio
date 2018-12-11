@@ -248,6 +248,8 @@ void ProjectFileSystemModel::overridableCopyFile(const QString &srcFile, const Q
     QFileInfo srcFileInfo(srcFile);
     if (srcFileInfo.exists() && addUniqueImportFile(srcFile, outImportedFiles)) {
         QFileInfo targetFileInfo(targetFile);
+        if (srcFileInfo == targetFileInfo)
+            return; // Autoskip when source and target is the same
         if (!targetFileInfo.dir().exists())
             targetFileInfo.dir().mkpath(QStringLiteral("."));
 

@@ -118,6 +118,7 @@ struct SRendererImpl : public IStudioRenderer,
     QScopedPointer<Q3DSQmlStreamProxy> m_proxy;
     QMap<QString, int> m_initialFrameMap;
     bool m_fullSizePreview = false;
+    bool m_mouseDown = false;
 
     SRendererImpl()
         : m_Dispatch(*g_StudioApp.GetCore()->GetDispatch())
@@ -406,6 +407,11 @@ struct SRendererImpl : public IStudioRenderer,
             outFboDim = QSize(0, 0);
             outFboTexture = 0;
         }
+    }
+
+    bool isMouseDown() const override
+    {
+        return m_mouseDown;
     }
 
     void MakeContextCurrent() override
@@ -770,6 +776,7 @@ struct SRendererImpl : public IStudioRenderer,
         if (m_Translation == nullptr)
             return;
 
+        m_mouseDown = true;
         inPoint.setX(inPoint.x() * m_pixelRatio);
         inPoint.setY(inPoint.y() * m_pixelRatio);
 
@@ -1033,6 +1040,7 @@ struct SRendererImpl : public IStudioRenderer,
     void OnSceneMouseUp(SceneDragSenderType::Enum) override
     {
         m_MaybeDragStart = false;
+        m_mouseDown = false;
         Qt3DSDMGuideHandle theSelectedGuide;
         if (m_PickResult.getType() == StudioPickValueTypes::Guide) {
             theSelectedGuide = m_PickResult.getData<Qt3DSDMGuideHandle>();

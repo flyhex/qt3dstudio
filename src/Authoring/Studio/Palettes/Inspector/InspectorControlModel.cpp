@@ -201,18 +201,18 @@ void InspectorControlModel::notifyInstancePropertyValue(qt3dsdm::Qt3DSDMInstance
         Q_EMIT dataChanged(index(0), index(rowCount() - 1));
 }
 
-QVariant InspectorControlModel::getPropertyValue(long instance, int handle)
+bool InspectorControlModel::hasInstanceProperty(long instance, int handle)
 {
-    for (int row = 0; row < m_groupElements.count(); ++row) {
-        auto group = m_groupElements[row];
-        for (int p = 0; p < group.controlElements.count(); ++p) {
-            QVariant& element = group.controlElements[p];
+    for (const auto &group : qAsConst(m_groupElements)) {
+        for (const auto &element : qAsConst(group.controlElements)) {
             InspectorControlBase *property = element.value<InspectorControlBase *>();
-            if (property->m_property == qt3dsdm::CDataModelHandle(handle))
-                return property->m_value;
+            if (property->m_property == qt3dsdm::CDataModelHandle(handle)
+                    && property->m_instance == qt3dsdm::CDataModelHandle(instance)) {
+                return true;
+            }
         }
     }
-    return {};
+    return false;
 }
 
 bool InspectorControlModel::isInsideMaterialContainer() const
@@ -997,13 +997,17 @@ void InspectorControlModel::updateAnimateToggleState(InspectorControlBase* inIte
     }
 }
 
-bool InspectorControlModel::isTreeRebuildRequired(CInspectableBase* inspectBase) const
+bool InspectorControlModel::isTreeRebuildRequired(CInspectableBase* inspectBase)
 {
     if (inspectBase != m_inspectableBase || !inspectBase)
         return true;
 
     long theCount = m_inspectableBase->GetGroupCount();
     auto refMaterial = getReferenceMaterial(inspectBase);
+    if (refMaterial != m_refMaterial) {
+        m_refMaterial = refMaterial;
+        return true;
+    }
     long refMaterialGroupCount = 0;
     if (refMaterial.Valid())
         refMaterialGroupCount = 1; // Only the last group of the refMaterial is used
@@ -1202,6 +1206,9 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
     if (!propertySystem->HandleValid(instance))
         return;
     propertySystem->GetInstancePropertyValue(instance, element->m_property, value);
+
+    if (value.getType() == qt3dsdm::DataModelDataType::None)
+        return;
 
     const auto metaDataProvider = doc->GetStudioSystem()->GetActionMetaData();
     const auto info = metaDataProvider->GetMetaDataPropertyInfo(
@@ -1601,6 +1608,7 @@ void InspectorControlModel::setShaderValue(long instance, int handle, const QVar
 
     const auto doc = g_StudioApp.GetCore()->GetDoc();
     const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Material Type"))
             ->SetMaterialType(instance, v);
 
