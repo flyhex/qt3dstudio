@@ -88,7 +88,9 @@ void ObjectBrowserView::selectAndExpand(const qt3dsdm::Qt3DSDMInstanceHandle &ha
     if (!index.isValid())
         return;
     m_model->expandTo(QModelIndex(), index);
+    m_blockCommit = true;
     setSelection(m_model->rowForSourceIndex(index));
+    m_blockCommit = false;
 }
 
 void ObjectBrowserView::setSelection(int index)

@@ -53,6 +53,11 @@ public:
     int selection() const { return m_selection; }
     void setSelection(int index);
 
+    void setHandle(int handle) { m_handle = handle; }
+    int handle() const { return m_handle; }
+
+    bool canCommit() const { return !m_blockCommit; }
+
 Q_SIGNALS:
     void modelChanged();
     void selectionChanged();
@@ -67,6 +72,8 @@ private:
     QColor m_baseColor = QColor::fromRgb(75, 75, 75);
     QColor m_selectColor;
     int m_selection = -1;
+    int m_handle = -1;
+    bool m_blockCommit = false;
 };
 
 #endif // EVENTSBROWSERVIEW_H

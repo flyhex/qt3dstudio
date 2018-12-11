@@ -49,6 +49,8 @@ public:
     void setInstance(int instance);
     int instance() const;
 
+    void updateSelection();
+
 Q_SIGNALS:
     void fileSelected(int handle, int instance, const QString &name);
 

@@ -49,6 +49,8 @@ public:
     int instance() const;
     QString currentDataModelPath() const;
 
+    void updateSelection();
+
 Q_SIGNALS:
     void textureSelected(int handle, int instance, const QString &name);
 

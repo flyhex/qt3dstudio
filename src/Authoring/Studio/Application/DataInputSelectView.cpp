@@ -212,6 +212,13 @@ bool DataInputSelectView::toolTipsEnabled() const
     return CStudioPreferences::ShouldShowTooltips();
 }
 
+void DataInputSelectView::setCurrentController(const QString &currentController)
+{
+    m_currController = currentController;
+    // Need to update the entire data as being current controller affects if the item is visible
+    updateData();
+}
+
 void DataInputSelectView::initialize()
 {
     CStudioPreferences::setQmlContextProperties(rootContext());

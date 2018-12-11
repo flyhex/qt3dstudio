@@ -121,11 +121,9 @@ private:
     void openInInspector();
     void onInstancePropertyValueChanged(qt3dsdm::Qt3DSDMPropertyHandle propertyHandle);
     void onChildAdded(int inChild);
+    void onChildRemoved();
 
-    std::shared_ptr<qt3dsdm::ISignalConnection> m_selectionChangedConnection;
-    std::shared_ptr<qt3dsdm::ISignalConnection> m_timeChanged;
-    std::shared_ptr<qt3dsdm::ISignalConnection> m_DirectoryConnection;
-    std::shared_ptr<qt3dsdm::ISignalConnection> m_PropertyChangeConnection;
+    std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_connections;
     QColor m_backgroundColor;
     InspectorControlModel *m_inspectorControlModel = nullptr;
     CInspectableBase *m_inspectableBase = nullptr;
@@ -139,7 +137,6 @@ private:
     QPointer<DataInputSelectView> m_dataInputChooserView;
     std::vector<Q3DStudio::CFilePath> m_fileList;
     MouseHelper m_mouseHelper;
-    std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_connections;
 
     int m_instance;
     int m_handle;
@@ -152,24 +149,24 @@ private:
     public:
         void setData(QWidget *browser, int handle, int instance)
         {
-            m_activeBrowser = browser;
+            m_browser = browser;
             m_handle = handle;
             m_instance = instance;
         }
         void clear()
         {
             if (isActive())
-                m_activeBrowser->close();
-            m_activeBrowser.clear();
+                m_browser->close();
+            m_browser.clear();
             m_handle = -1;
             m_instance = -1;
         }
         bool isActive() const
         {
-            return !m_activeBrowser.isNull() && m_activeBrowser->isVisible();
+            return !m_browser.isNull() && m_browser->isVisible();
         }
 
-        QPointer<QWidget> m_activeBrowser = nullptr;
+        QPointer<QWidget> m_browser = nullptr;
         int m_handle = -1;
         int m_instance = -1;
     };

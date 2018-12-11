@@ -76,6 +76,8 @@ public:
 
     qt3dsdm::Qt3DSDMInstanceHandle selectedHandle() const;
 
+    bool canCommit() const { return !m_blockCommit; }
+
 Q_SIGNALS:
     void modelChanged();
     void pathTypeChanged();
@@ -100,6 +102,7 @@ private:
     int m_selection = -1;
     PathType m_pathType = Absolute;
     qt3dsdm::Qt3DSDMInstanceHandle m_ownerInstance = 0;
+    bool m_blockCommit = false;
 };
 
 #endif // OBJECTBROWSERVIEW_H

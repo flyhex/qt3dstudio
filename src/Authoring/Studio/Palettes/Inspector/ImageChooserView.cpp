@@ -115,6 +115,11 @@ QString ImageChooserView::currentDataModelPath() const
     return cleanPath;
 }
 
+void ImageChooserView::updateSelection()
+{
+    m_model->setCurrentFile(currentDataModelPath());
+}
+
 bool ImageChooserView::isFocused() const
 {
     return hasFocus();
@@ -143,6 +148,6 @@ void ImageChooserView::keyPressEvent(QKeyEvent *event)
 
 void ImageChooserView::showEvent(QShowEvent *event)
 {
-    m_model->setCurrentFile(currentDataModelPath());
+    updateSelection();
     QQuickWidget::showEvent(event);
 }

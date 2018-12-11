@@ -104,6 +104,11 @@ QString TextureChooserView::currentDataModelPath() const
     return cleanPath;
 }
 
+void TextureChooserView::updateSelection()
+{
+    m_model->setCurrentFile(currentDataModelPath());
+}
+
 void TextureChooserView::focusOutEvent(QFocusEvent *event)
 {
     QQuickWidget::focusOutEvent(event);
@@ -120,7 +125,6 @@ void TextureChooserView::keyPressEvent(QKeyEvent *event)
 
 void TextureChooserView::showEvent(QShowEvent *event)
 {
-    m_model->setCurrentFile(currentDataModelPath());
-
+    updateSelection();
     QQuickWidget::showEvent(event);
 }

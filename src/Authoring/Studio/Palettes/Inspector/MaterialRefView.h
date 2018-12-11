@@ -40,8 +40,9 @@ class MaterialRefView : public QListWidget
 public:
     explicit MaterialRefView(QWidget *parent = nullptr);
 
-    int refreshMaterials(qt3dsdm::Qt3DSDMInstanceHandle refInstance);
+    int refreshMaterials(int instance, int handle);
 
+    void updateSelection();
 protected:
     void focusInEvent(QFocusEvent *event) override;
     void focusOutEvent(QFocusEvent *event) override;
@@ -51,6 +52,10 @@ Q_SIGNALS:
 
 private:
     bool isFocused() const;
+    int getRefInstance() const;
+
+    int m_instance = -1;
+    int m_handle = -1;
 };
 
 #endif // MATERIALREFVIEW_H

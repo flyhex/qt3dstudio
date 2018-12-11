@@ -134,6 +134,7 @@ public:
 
     // CPresentationChangeListener
     void OnNewPresentation() override;
+    void OnClosingPresentation() override;
 
     // ISelectionChangeListener
     void OnSelectionSet(Q3DStudio::SSelectedValue inSelectable);
@@ -186,6 +187,7 @@ private:
     void updateActionStates();
     void setPropertyValueInvalid(bool invalid);
     void clearPropertyValueInvalid();
+    void onAssetGraphChanged();
 
     static CDoc *GetDoc();
     static CClientDataModelBridge *GetBridge();

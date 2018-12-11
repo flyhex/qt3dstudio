@@ -320,6 +320,8 @@ void TimelineToolbar::updateDataInputStatus()
         }
         m_diLabel->setText(m_currController);
         emit controllerChanged(m_currController);
+        if (m_dataInputSelector && m_dataInputSelector->isVisible())
+            m_dataInputSelector->setCurrentController(m_currController);
     }
 }
 

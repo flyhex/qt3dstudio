@@ -130,7 +130,6 @@ ActionView::ActionView(const QSize &preferredSize, QWidget *parent)
 
 ActionView::~ActionView()
 {
-    m_connections.clear();
 }
 
 QSize ActionView::sizeHint() const
@@ -529,7 +528,8 @@ QObject *ActionView::showEventBrowser(const QPoint &point)
 
     connect(m_eventsBrowser, &EventsBrowserView::selectionChanged,
             this, [this] {
-        setEvent(qt3dsdm::Qt3DSDMEventHandle(m_eventsBrowser->selectedHandle()));
+        if (m_eventsBrowser->canCommit())
+            setEvent(qt3dsdm::Qt3DSDMEventHandle(m_eventsBrowser->selectedHandle()));
     });
 
     return m_eventsBrowser;
@@ -566,7 +566,8 @@ QObject *ActionView::showHandlerBrowser(const QPoint &point)
 
     connect(m_handlerBrowser, &EventsBrowserView::selectionChanged,
             this, [this] {
-        setHandler(qt3dsdm::Qt3DSDMHandlerHandle(m_handlerBrowser->selectedHandle()));
+        if (m_handlerBrowser->canCommit())
+            setHandler(qt3dsdm::Qt3DSDMHandlerHandle(m_handlerBrowser->selectedHandle()));
     });
 
     return m_handlerBrowser;
@@ -595,6 +596,7 @@ QObject *ActionView::showEventBrowserForArgument(int handle, const QPoint &point
         m_fireEventsBrowser = new EventsBrowserView(this);
 
     m_fireEventsBrowser->setModel(m_fireEventsModel);
+    m_fireEventsBrowser->setHandle(handle);
 
     qt3dsdm::SValue oldValue;
     GetDoc()->GetStudioSystem()->GetActionCore()->GetHandlerArgumentValue(handle, oldValue);
@@ -710,6 +712,17 @@ void ActionView::OnNewPresentation()
     m_connections.push_back(theDispatch->ConnectSelectionChange(
                                 std::bind(&ActionView::OnSelectionSet, this,
                                           std::placeholders::_1)));
+
+    auto assetGraph = g_StudioApp.GetCore()->GetDoc()->GetAssetGraph();
+    m_connections.push_back(assetGraph->ConnectChildAdded(
+                std::bind(&ActionView::onAssetGraphChanged, this)));
+    m_connections.push_back(assetGraph->ConnectChildRemoved(
+                                std::bind(&ActionView::onAssetGraphChanged, this)));
+}
+
+void ActionView::OnClosingPresentation()
+{
+    m_connections.clear();
 }
 
 void ActionView::OnSelectionSet(Q3DStudio::SSelectedValue inSelectable)
@@ -793,6 +806,29 @@ void ActionView::OnActionModified(qt3dsdm::Qt3DSDMActionHandle inAction)
         return;
 
     if (GetDoc()->GetStudioSystem()->GetActionCore()->HandleValid(inAction)) {
+        if (!m_activeBrowser.isNull() && m_activeBrowser->isVisible()) {
+            const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
+            if (actionInfo.m_Instance.GetHandleValue() == -1) {
+                m_activeBrowser->close();
+                m_activeBrowser.clear();
+            } else {
+                // Update the selection in an active browser dialog
+                if (m_activeBrowser == m_triggerObjectBrowser) {
+                    const auto instanceHandle = GetBridge()->GetInstance(
+                                actionInfo.m_Owner, actionInfo.m_TriggerObject);
+                    m_triggerObjectBrowser->selectAndExpand(instanceHandle, actionInfo.m_Owner);
+                } else if (m_activeBrowser == m_targetObjectBrowser) {
+                    const auto instanceHandle = GetBridge()->GetInstance(
+                                actionInfo.m_Owner, actionInfo.m_TargetObject);
+                    m_targetObjectBrowser->selectAndExpand(instanceHandle, actionInfo.m_Owner);
+                } else if (m_activeBrowser == m_eventsBrowser) {
+                    m_eventsBrowser->selectAndExpand(QString::fromStdWString(actionInfo.m_Event));
+                } else if (m_activeBrowser == m_handlerBrowser) {
+                    m_handlerBrowser->selectAndExpand(
+                                QString::fromStdWString(actionInfo.m_Handler));
+                }
+            }
+        }
         m_actionsModel->updateAction(inAction);
         emitActionChanged();
     }
@@ -803,16 +839,36 @@ void ActionView::OnHandlerArgumentModified(qt3dsdm::Qt3DSDMHandlerArgHandle inHa
     if (!m_itemHandle.Valid())
         return;
 
-    // m_fireEventsBrowser needs to be closed if another type of target handler is chosen.
-    // Other browsers will remain valid always as long as the action is selected.
     if (!m_fireEventsBrowser.isNull() && m_activeBrowser == m_fireEventsBrowser
             && m_activeBrowser->isVisible()) {
         const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
+
+        // m_fireEventsBrowser needs to be closed if another type of target handler is chosen.
+        // Other browsers will remain valid always as long as the action is selected.
         if (actionInfo.m_Handler != L"Fire Event") {
             m_activeBrowser->close();
             m_activeBrowser.clear();
+        } else {
+            // Update the selection in an active browser dialog
+            const auto bridge = GetBridge();
+            const auto instanceHandle = bridge->GetInstance(actionInfo.m_Owner,
+                                                            actionInfo.m_TargetObject);
+            qt3dsdm::TEventHandleList eventList;
+            bridge->GetEvents(instanceHandle, eventList);
+            qt3dsdm::SValue value;
+            GetDoc()->GetStudioSystem()->GetActionCore()->GetHandlerArgumentValue(
+                        m_fireEventsBrowser->handle(), value);
+            QString eventName;
+            for (Qt3DSDMEventHandle eventHandle : eventList) {
+                if (value == eventHandle.GetHandleValue()) {
+                    qt3dsdm::SEventInfo eventInfo = bridge->GetEventInfo(eventHandle);
+                    eventName = QString::fromWCharArray(eventInfo.m_FormalName.wide_str());
+                    if (eventName.isEmpty())
+                        eventName = QString::fromWCharArray(eventInfo.m_Name.wide_str());
+                }
+            }
+            m_fireEventsBrowser->selectAndExpand(eventName);
         }
-
     }
     emitActionChanged();
 }
@@ -880,25 +936,27 @@ void ActionView::setTriggerObject(const qt3dsdm::SObjectRefType &object)
     if (!action.Valid())
         return;
 
-    auto core = g_StudioApp.GetCore();
-    auto theBridge = GetBridge();
+    if (!m_triggerObjectBrowser.isNull() && m_triggerObjectBrowser->canCommit()) {
+        auto core = g_StudioApp.GetCore();
+        auto theBridge = GetBridge();
 
-    auto theCmd = new CCmdDataModelActionSetTriggerObject(GetDoc(), action, object);
-    const SActionInfo &theActionInfo
-            = GetDoc()->GetStudioSystem()->GetActionCore()->GetActionInfo(action);
+        auto theCmd = new CCmdDataModelActionSetTriggerObject(GetDoc(), action, object);
+        const SActionInfo &theActionInfo
+                = GetDoc()->GetStudioSystem()->GetActionCore()->GetActionInfo(action);
 
-    Qt3DSDMInstanceHandle theBaseInstance = theActionInfo.m_Owner;
-    Qt3DSDMInstanceHandle theObjectInstance = theBridge->GetInstance(theBaseInstance, object);
-    Qt3DSDMInstanceHandle theOldInstance = theBridge->GetInstance(theBaseInstance,
-                                                                  theActionInfo.m_TargetObject);
-    // old instance and object instance could be the same, for example if user changes the type
-    // from Absolute to Path. In this case we don't need to reset handler or event.
-    if (theOldInstance != theObjectInstance) {
-        theCmd->ResetEvent(
-                    theBridge->GetDefaultEvent(theObjectInstance, theActionInfo.m_Event));
+        Qt3DSDMInstanceHandle theBaseInstance = theActionInfo.m_Owner;
+        Qt3DSDMInstanceHandle theObjectInstance = theBridge->GetInstance(theBaseInstance, object);
+        Qt3DSDMInstanceHandle theOldInstance = theBridge->GetInstance(theBaseInstance,
+                                                                      theActionInfo.m_TargetObject);
+        // old instance and object instance could be the same, for example if user changes the type
+        // from Absolute to Path. In this case we don't need to reset handler or event.
+        if (theOldInstance != theObjectInstance) {
+            theCmd->ResetEvent(
+                        theBridge->GetDefaultEvent(theObjectInstance, theActionInfo.m_Event));
+        }
+
+        core->ExecuteCommand(theCmd);
     }
-
-    core->ExecuteCommand(theCmd);
     emitActionChanged();
 }
 
@@ -908,26 +966,28 @@ void ActionView::setTargetObject(const qt3dsdm::SObjectRefType &object)
     if (!action.Valid())
         return;
 
-    auto core = g_StudioApp.GetCore();
-    auto doc = GetDoc();
-    auto theBridge = GetBridge();
+    if (!m_targetObjectBrowser.isNull() && m_targetObjectBrowser->canCommit()) {
+        auto core = g_StudioApp.GetCore();
+        auto doc = GetDoc();
+        auto theBridge = GetBridge();
 
-    auto theCmd = new CCmdDataModelActionSetTargetObject(doc, action, object);
-    const SActionInfo &theActionInfo = doc->GetStudioSystem()->GetActionCore()->GetActionInfo(
-                action);
+        auto theCmd = new CCmdDataModelActionSetTargetObject(doc, action, object);
+        const SActionInfo &theActionInfo = doc->GetStudioSystem()->GetActionCore()->GetActionInfo(
+                    action);
 
-    Qt3DSDMInstanceHandle theBaseInstance = theActionInfo.m_Owner;
-    Qt3DSDMInstanceHandle theObjectInstance = theBridge->GetInstance(theBaseInstance, object);
-    Qt3DSDMInstanceHandle theOldInstance = theBridge->GetInstance(theBaseInstance,
-                                                                  theActionInfo.m_TargetObject);
-    // old instance and object instance could be the same, for example if user changes the type
-    // from Absolute to Path. In this case we don't need to reset handler or event.
-    if (theOldInstance != theObjectInstance) {
-        theCmd->ResetHandler(
-                    theBridge->GetDefaultHandler(theObjectInstance, theActionInfo.m_Handler));
+        Qt3DSDMInstanceHandle theBaseInstance = theActionInfo.m_Owner;
+        Qt3DSDMInstanceHandle theObjectInstance = theBridge->GetInstance(theBaseInstance, object);
+        Qt3DSDMInstanceHandle theOldInstance = theBridge->GetInstance(theBaseInstance,
+                                                                      theActionInfo.m_TargetObject);
+        // old instance and object instance could be the same, for example if user changes the type
+        // from Absolute to Path. In this case we don't need to reset handler or event.
+        if (theOldInstance != theObjectInstance) {
+            theCmd->ResetHandler(
+                        theBridge->GetDefaultHandler(theObjectInstance, theActionInfo.m_Handler));
+        }
+
+        core->ExecuteCommand(theCmd);
     }
-
-    core->ExecuteCommand(theCmd);
     emitActionChanged();
 }
 
@@ -1137,4 +1197,15 @@ void ActionView::setPropertyValueInvalid(bool invalid)
 void ActionView::clearPropertyValueInvalid()
 {
     setPropertyValueInvalid(false);
+}
+
+void ActionView::onAssetGraphChanged()
+{
+    // Changes to asset graph invalidate the object browser model, so close it if it is open
+    if (!m_activeBrowser.isNull() && m_activeBrowser->isVisible()
+            && (m_activeBrowser == m_targetObjectBrowser
+                || m_activeBrowser == m_triggerObjectBrowser)) {
+        m_activeBrowser->close();
+        m_activeBrowser.clear();
+    }
 }

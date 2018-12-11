@@ -54,6 +54,8 @@ public:
     void setInstance(int instance);
     int numMeshes() const;
 
+    void updateSelection();
+
 Q_SIGNALS:
     void meshSelected(int handle, int instance, const QString &name);
 

@@ -49,12 +49,16 @@ public:
     QString getAddNewDataInputString() { return tr("[Add New Datainput]"); }
     QString getNoneString() { return tr("[None]"); }
     DataInputSelectModel *getModel() const { return m_model; }
+    int instance() const { return m_instance; }
+    int handle() const { return m_handle; }
 
     Q_INVOKABLE void setSelection(int index);
     Q_INVOKABLE int selection() const { return m_selection; }
     Q_INVOKABLE void setSearchString(const QString &string);
     Q_INVOKABLE void setTypeFilter(const int index);
     Q_INVOKABLE bool toolTipsEnabled() const;
+
+    void setCurrentController(const QString &currentController);
 
 Q_SIGNALS:
     void dataInputChanged(int handle, int instance, const QString &selected);

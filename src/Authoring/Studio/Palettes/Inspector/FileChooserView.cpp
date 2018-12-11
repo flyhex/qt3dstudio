@@ -83,6 +83,21 @@ int FileChooserView::instance() const
     return m_instance;
 }
 
+void FileChooserView::updateSelection()
+{
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
+
+    qt3dsdm::SValue value;
+    propertySystem->GetInstancePropertyValue(m_instance, m_handle, value);
+
+    QString valueStr = qt3dsdm::get<QString>(value);
+    if (valueStr.isEmpty())
+        valueStr = ChooserModelBase::noneString();
+
+    m_model->setCurrentFile(valueStr);
+}
+
 void FileChooserView::focusOutEvent(QFocusEvent *event)
 {
     QQuickWidget::focusOutEvent(event);
@@ -117,13 +132,6 @@ void FileChooserView::keyPressEvent(QKeyEvent *event)
 
 void FileChooserView::showEvent(QShowEvent *event)
 {
-    const auto doc = g_StudioApp.GetCore()->GetDoc();
-    const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
-
-    qt3dsdm::SValue value;
-    propertySystem->GetInstancePropertyValue(m_instance, m_handle, value);
-
-    m_model->setCurrentFile(qt3dsdm::get<QString>(value));
-
+    updateSelection();
     QQuickWidget::showEvent(event);
 }

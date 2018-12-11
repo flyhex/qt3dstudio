@@ -65,7 +65,10 @@ qt3dsdm::CDataModelHandle EventsBrowserView::selectedHandle() const
 void EventsBrowserView::selectAndExpand(const QString &event)
 {
     // All categories are expanded by default, so let's just select
+    m_blockCommit = true;
     setSelection(m_model->rowForEventName(event));
+    m_blockCommit = false;
+
 }
 
 void EventsBrowserView::setSelection(int index)

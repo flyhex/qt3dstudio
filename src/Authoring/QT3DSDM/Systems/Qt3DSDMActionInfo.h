@@ -37,8 +37,8 @@ namespace qt3dsdm {
 using std::wstring;
 struct SActionInfo
 {
-    Qt3DSDMInstanceHandle m_Instance; // InstanceHandle corresponding to this action (to store other
-                                     // properties not listed here)
+    // InstanceHandle corresponding to this action (to store other properties not listed here)
+    Qt3DSDMInstanceHandle m_Instance = -1;
 
     // Where the action is added to
     Qt3DSDMSlideHandle m_Slide; // the slide that the action is added to
