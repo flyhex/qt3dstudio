@@ -76,6 +76,8 @@ public:
     void Commit();
     void Rollback();
     void FireRefresh();
+
+    const std::vector<std::shared_ptr<IInspectableAttributeItem>> &properties() const;
 private:
     qt3dsdm::Qt3DSDMGuideHandle m_Guide;
     Q3DStudio::CUpdateableDocumentEditor m_Editor;

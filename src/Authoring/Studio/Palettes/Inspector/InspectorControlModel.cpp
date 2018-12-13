@@ -938,52 +938,54 @@ QString InspectorControlModel::currentControllerValue(long instance, int handle)
 
 void InspectorControlModel::updateControlledToggleState(InspectorControlBase* inItem) const
 {
-    const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
-    // toggle if controlledproperty contains the name of this property
-    qt3dsdm::SValue currPropVal = currentPropertyValue(
-        inItem->m_instance, studio->GetPropertySystem()->GetAggregateInstancePropertyByName(
-            inItem->m_instance, qt3dsdm::TCharStr(L"controlledproperty")));
-    Q3DStudio::CString currPropValStr;
-    if (!currPropVal.empty())
-        currPropValStr = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currPropVal)->GetData();
-    // Restore original tool tip from metadata when turning control off
-    if (!currPropValStr.size()) {
-        inItem->m_controlled = false;
-        inItem->m_controller = "";
-    } else {
-       Q3DStudio::CString propName
-           = studio->GetPropertySystem()->GetName(inItem->m_property).c_str();
-       // Search specifically for whitespace followed with registered property name.
-       // This avoids finding datainput with same name as the property, as datainput
-       // name is always prepended with "$"
-       long propNamePos = currPropValStr.find(" " + propName);
-       if ((propNamePos == currPropValStr.ENDOFSTRING)
-           && (propNamePos != 0)) {
-           inItem->m_controlled = false;
-           inItem->m_controller = "";
-       } else {
-           inItem->m_controlled = true;
-           // controller name is prepended with "$" to differentiate from property
-           // with same name. Reverse find specifically for $.
-           long posCtrlr = currPropValStr.substr(0, propNamePos).ReverseFind("$");
+    if (inItem->m_instance) {
+        const auto studio = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
+        // toggle if controlledproperty contains the name of this property
+        qt3dsdm::SValue currPropVal = currentPropertyValue(
+            inItem->m_instance, studio->GetPropertySystem()->GetAggregateInstancePropertyByName(
+                inItem->m_instance, qt3dsdm::TCharStr(L"controlledproperty")));
+        Q3DStudio::CString currPropValStr;
+        if (!currPropVal.empty())
+            currPropValStr = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currPropVal)->GetData();
+        // Restore original tool tip from metadata when turning control off
+        if (!currPropValStr.size()) {
+            inItem->m_controlled = false;
+            inItem->m_controller = "";
+        } else {
+           Q3DStudio::CString propName
+               = studio->GetPropertySystem()->GetName(inItem->m_property).c_str();
+           // Search specifically for whitespace followed with registered property name.
+           // This avoids finding datainput with same name as the property, as datainput
+           // name is always prepended with "$"
+           long propNamePos = currPropValStr.find(" " + propName);
+           if ((propNamePos == currPropValStr.ENDOFSTRING)
+               && (propNamePos != 0)) {
+               inItem->m_controlled = false;
+               inItem->m_controller = "";
+           } else {
+               inItem->m_controlled = true;
+               // controller name is prepended with "$" to differentiate from property
+               // with same name. Reverse find specifically for $.
+               long posCtrlr = currPropValStr.substr(0, propNamePos).ReverseFind("$");
 
-           // this is the first controller - property pair in controlledproperty
-           if (posCtrlr < 0)
-               posCtrlr = 0;
+               // this is the first controller - property pair in controlledproperty
+               if (posCtrlr < 0)
+                   posCtrlr = 0;
 
-           // remove $ from controller name for showing it in UI
-           posCtrlr++;
-           const QString ctrlName = currPropValStr.substr(
-               posCtrlr, propNamePos - posCtrlr).toQString();
+               // remove $ from controller name for showing it in UI
+               posCtrlr++;
+               const QString ctrlName = currPropValStr.substr(
+                   posCtrlr, propNamePos - posCtrlr).toQString();
 
-           inItem->m_controller = ctrlName;
-       }
+               inItem->m_controller = ctrlName;
+           }
+        }
+
+        Q_EMIT inItem->tooltipChanged();
+        // Emit signal always to trigger updating of controller name in UI
+        // also when user switches from one controller to another
+        Q_EMIT inItem->controlledChanged();
     }
-
-    Q_EMIT inItem->tooltipChanged();
-    // Emit signal always to trigger updating of controller name in UI
-    // also when user switches from one controller to another
-    Q_EMIT inItem->controlledChanged();
 }
 
 void InspectorControlModel::updateAnimateToggleState(InspectorControlBase* inItem)
@@ -1150,7 +1152,6 @@ auto InspectorControlModel::computeGroup(CInspectableBase* inspectable,
                 }
             }
 
-            const auto sceneEditor = g_StudioApp.GetCore()->GetDoc()->getSceneEditor();
             for (const auto row : group->GetRows()) {
                 InspectorControlBase *item = createItem(cdmInspectable, row, theIndex);
                 if (!item)
@@ -1163,8 +1164,23 @@ auto InspectorControlModel::computeGroup(CInspectableBase* inspectable,
                     result.controlElements.push_back(QVariant::fromValue(item));
             }
         }
-    } else if (dynamic_cast<SGuideInspectableImpl *>(inspectable)) {
-        //KDAB_FIXME: load row element (How ?)
+    } else if (const auto guideInspectable = dynamic_cast<SGuideInspectableImpl *>(inspectable)) {
+        // Guide properties don't come from metadata as they are not actual objects
+        m_guideInspectable = guideInspectable;
+        const auto &properties = m_guideInspectable->properties();
+        for (int i = 0, count = int(properties.size()); i < count; ++i) {
+            auto &prop = properties[i];
+            InspectorControlBase *item = new InspectorControlBase;
+            item->m_title = prop->GetInspectableFormalName();
+            item->m_dataType = prop->GetInspectableType();
+            item->m_propertyType = prop->GetInspectableAdditionalType();
+            item->m_tooltip = prop->GetInspectableDescription();
+            item->m_animatable = false;
+            item->m_controllable = false;
+            item->m_property = i + 1; // Zero property is considered invalid, so +1
+            result.controlElements.push_back(QVariant::fromValue(item));
+            updatePropertyValue(item);
+        }
     }
 
     return result;
@@ -1173,6 +1189,7 @@ auto InspectorControlModel::computeGroup(CInspectableBase* inspectable,
 void InspectorControlModel::rebuildTree()
 {
     beginResetModel();
+    m_guideInspectable = nullptr;
     QVector<QObject *> deleteVector;
     for (int i = 0; i < m_groupElements.count(); ++i) {
         auto group = m_groupElements[i];
@@ -1199,20 +1216,28 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
 {
     const auto doc = g_StudioApp.GetCore()->GetDoc();
     auto studioSystem = doc->GetStudioSystem();
-    const auto propertySystem = studioSystem->GetPropertySystem();
     auto bridge = studioSystem->GetClientDataModelBridge();
+    const auto propertySystem = studioSystem->GetPropertySystem();
     qt3dsdm::SValue value;
     const auto instance = element->m_instance;
-    if (!propertySystem->HandleValid(instance))
-        return;
-    propertySystem->GetInstancePropertyValue(instance, element->m_property, value);
+    qt3dsdm::Option<qt3dsdm::SMetaDataPropertyInfo> info;
+    if (m_guideInspectable) {
+        value = m_guideInspectable->properties()
+                [handleToGuidePropIndex(element->m_property)]->GetInspectableData();
+    } else {
+        if (!propertySystem->HandleValid(instance))
+            return;
+        propertySystem->GetInstancePropertyValue(instance, element->m_property, value);
 
-    if (value.getType() == qt3dsdm::DataModelDataType::None)
-        return;
+        if (value.getType() == qt3dsdm::DataModelDataType::None)
+            return;
 
-    const auto metaDataProvider = doc->GetStudioSystem()->GetActionMetaData();
-    const auto info = metaDataProvider->GetMetaDataPropertyInfo(
-                metaDataProvider->GetMetaDataProperty(instance, element->m_property));
+        const auto metaDataProvider = doc->GetStudioSystem()->GetActionMetaData();
+        info = metaDataProvider->GetMetaDataPropertyInfo(
+                    metaDataProvider->GetMetaDataProperty(instance, element->m_property));
+    }
+
+
     bool skipEmits = false;
     switch (element->m_dataType) {
     case qt3dsdm::DataModelDataType::String: {
@@ -1226,7 +1251,15 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
     } // intentional fall-through for other String-derived datatypes
     case qt3dsdm::DataModelDataType::StringOrInt:
         if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::StringList) {
-            QStringList stringlist = qt3dsdm::get<QStringList>(info->m_MetaDataData);
+            QStringList stringlist;
+            if (m_guideInspectable) {
+                const auto strings = m_guideInspectable->properties()
+                        [handleToGuidePropIndex(element->m_property)]->GetInspectableList();
+                for (auto &str : strings)
+                    stringlist.append(QString::fromWCharArray(str.wide_str()));
+            } else {
+                stringlist = qt3dsdm::get<QStringList>(info->m_MetaDataData);;
+            }
             auto slideSystem = studioSystem->GetSlideSystem();
 
             if (element->m_title == QStringLiteral("Play Mode")) {
@@ -1347,7 +1380,15 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
     case qt3dsdm::DataModelDataType::Long:
         if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Range) {
             element->m_value = qt3dsdm::get<int>(value);
-            const qt3dsdm::SMetaDataRange ranges = qt3dsdm::get<qt3dsdm::SMetaDataRange>(info->m_MetaDataData);
+            qt3dsdm::SMetaDataRange ranges;
+            if (m_guideInspectable) {
+                const auto prop = m_guideInspectable->properties()
+                        [handleToGuidePropIndex(element->m_property)];
+                ranges.m_Min = prop->GetInspectableMin();
+                ranges.m_Max = prop->GetInspectableMax();
+            } else {
+                ranges = qt3dsdm::get<qt3dsdm::SMetaDataRange>(info->m_MetaDataData);
+            }
             const QList<double> rangesValues{ranges.m_Min, ranges.m_Max};
             element->m_values = QVariant::fromValue<QList<double> >(rangesValues);
         }
@@ -1486,6 +1527,9 @@ void InspectorControlModel::refresh()
 
 void InspectorControlModel::saveIfMaterial(qt3dsdm::Qt3DSDMInstanceHandle instance)
 {
+    if (!instance.Valid())
+        return;
+
     const auto doc = g_StudioApp.GetCore()->GetDoc();
     const auto sceneEditor = doc->getSceneEditor();
 
@@ -1515,7 +1559,8 @@ void InspectorControlModel::saveIfMaterial(qt3dsdm::Qt3DSDMInstanceHandle instan
         studio->GetPropertySystem()->GetInstancePropertyValue(
             material, bridge->GetObjectDefinitions().m_Named.m_NameProp, value);
         qt3dsdm::TDataStrPtr namePtr(qt3dsdm::get<qt3dsdm::TDataStrPtr>(value));
-        QString materialName = QString::fromWCharArray(namePtr->GetData(), namePtr->GetLength());
+        QString materialName = QString::fromWCharArray(namePtr->GetData(),
+                                                       int(namePtr->GetLength()));
         QString sourcePath;
         for (int i = 0; i < m_matDatas.size(); ++i) {
             if (QString::compare(m_matDatas[i].m_name, materialName, Qt::CaseInsensitive) == 0) {
@@ -1728,7 +1773,7 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
     const auto studio = doc->GetStudioSystem();
     const auto bridge = studio->GetClientDataModelBridge();
     // Name property needs special handling
-    if (handle == bridge->GetNameProperty()) {
+    if (instance && handle == bridge->GetNameProperty()) {
         // Ignore preview of name property change
         if (!commit)
             return;
@@ -1831,7 +1876,9 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
         return;
     }
 
-    qt3dsdm::SValue oldValue = currentPropertyValue(instance, handle);
+    qt3dsdm::SValue oldValue = m_guideInspectable
+            ? m_guideInspectable->properties()[handleToGuidePropIndex(handle)]->GetInspectableData()
+            : currentPropertyValue(instance, handle);
     qt3dsdm::SValue v = value;
 
     const bool hasPreview = (m_modifiedProperty.first == instance
@@ -1849,42 +1896,51 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
         m_modifiedProperty.second = handle;
     }
 
-    // If the user enters 0.0 to any (x, y, z) values of camera scale,
-    // we reset the value back to original, because zero scale factor will crash
-    // camera-specific inverse matrix math. (Additionally, scale of zero for a camera
-    // is generally not useful anyway.) We could silently discard zero values also deeper in the
-    // value setter code, but then the inspector panel value would not be updated as opposed
-    // to both rejecting invalid and resetting the original value here.
-    EStudioObjectType theType = bridge->GetObjectType(instance);
-    qt3dsdm::AdditionalMetaDataType::Value additionalType
-            = studio->GetPropertySystem()->GetAdditionalMetaDataType(instance, handle);
+    if (instance) {
+        // If the user enters 0.0 to any (x, y, z) values of camera scale,
+        // we reset the value back to original, because zero scale factor will crash
+        // camera-specific inverse matrix math. (Additionally, scale of zero for a camera
+        // is generally not useful anyway.) We could silently discard zero values also deeper in the
+        // value setter code, but then the inspector panel value would not be updated as opposed
+        // to both rejecting invalid and resetting the original value here.
+        EStudioObjectType theType = bridge->GetObjectType(instance);
 
-    if (theType == EStudioObjectType::OBJTYPE_CAMERA &&
-            studio->GetPropertySystem()->GetName(handle) == Q3DStudio::CString("scale")) {
-        const QVector3D theFloat3 = qt3dsdm::get<QVector3D>(v);
-        if (theFloat3.x() == 0.0f || theFloat3.y() == 0.0f || theFloat3.z() == 0.0f )
-            v = oldValue;
+        if (theType == EStudioObjectType::OBJTYPE_CAMERA &&
+                studio->GetPropertySystem()->GetName(handle) == Q3DStudio::CString("scale")) {
+            const QVector3D theFloat3 = qt3dsdm::get<QVector3D>(v);
+            if (theFloat3.x() == 0.0f || theFloat3.y() == 0.0f || theFloat3.z() == 0.0f )
+                v = oldValue;
+        }
+
+        // some properties may initialize OpenGL resources (e.g. loading meshes will
+        // initialize vertex buffers), so the renderer's OpenGL context must be current
+        Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.getRenderer());
+        theRenderer.MakeContextCurrent();
+
+        m_UpdatableEditor.EnsureEditor(QObject::tr("Set Property"), __FILE__, __LINE__)
+                .SetInstancePropertyValue(instance, handle, v);
+
+        theRenderer.ReleaseContext();
+
+        m_UpdatableEditor.FireImmediateRefresh(instance);
+    } else if (m_guideInspectable) {
+        m_guideInspectable->properties()[handleToGuidePropIndex(handle)]->ChangeInspectableData(v);
     }
-
-    // some properties may initialize OpenGL resources (e.g. loading meshes will
-    // initialize vertex buffers), so the renderer's OpenGL context must be current
-    Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.getRenderer());
-    theRenderer.MakeContextCurrent();
-
-    m_UpdatableEditor.EnsureEditor(QObject::tr("Set Property"), __FILE__, __LINE__)
-            .SetInstancePropertyValue(instance, handle, v);
-
-    theRenderer.ReleaseContext();
-
-    m_UpdatableEditor.FireImmediateRefresh(instance);
 
     if (commit) {
         m_modifiedProperty.first = 0;
         m_modifiedProperty.second = 0;
-        if (m_previouslyCommittedValue == v)
-            m_UpdatableEditor.RollbackEditor();
-        else
-            m_UpdatableEditor.CommitEditor();
+        if (m_previouslyCommittedValue == v) {
+            if (m_guideInspectable)
+                m_guideInspectable->Rollback();
+            else
+                m_UpdatableEditor.RollbackEditor();
+        } else {
+            if (m_guideInspectable)
+                m_guideInspectable->Commit();
+            else
+                m_UpdatableEditor.CommitEditor();
+        }
 
         m_previouslyCommittedValue = {};
         refreshTree();

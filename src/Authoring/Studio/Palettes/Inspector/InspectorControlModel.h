@@ -170,6 +170,7 @@ private:
 
     mutable QVector<GroupInspectorControl> m_groupElements;
     CInspectableBase *m_inspectableBase = nullptr;
+    SGuideInspectableImpl *m_guideInspectable = nullptr;
 
     struct MaterialEntry
     {
@@ -240,6 +241,8 @@ private:
                                        int theIndex, bool disableAnimation = false,
                                        bool isReference = false);
     bool isGroupRebuildRequired(CInspectableBase *inspectable, int theIndex) const;
+
+    static int handleToGuidePropIndex(int handle) { return handle - 1; }
 };
 
 #endif // INSPECTORCONTROLMODEL_H
