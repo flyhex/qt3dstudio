@@ -808,7 +808,7 @@ void ActionView::OnActionModified(qt3dsdm::Qt3DSDMActionHandle inAction)
     if (GetDoc()->GetStudioSystem()->GetActionCore()->HandleValid(inAction)) {
         if (!m_activeBrowser.isNull() && m_activeBrowser->isVisible()) {
             const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
-            if (actionInfo.m_Instance.GetHandleValue() == -1) {
+            if (!actionInfo.m_Instance.Valid()) {
                 m_activeBrowser->close();
                 m_activeBrowser.clear();
             } else {
