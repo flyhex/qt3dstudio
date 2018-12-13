@@ -232,7 +232,7 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     // Hidden descendant keyframe indicators
     if (!m_rowTree->expanded()) {
         static const QPixmap pixKeyframeHidden = QPixmap(":/images/keyframe-hidden-normal.png");
-        QVector<double> childKeyframeTimes;
+        QVector<long> childKeyframeTimes;
         collectChildKeyframeTimes(childKeyframeTimes);
 
         const qreal oldOpacity = painter->opacity();
@@ -343,12 +343,11 @@ void RowTimeline::drawColorPropertyGradient(QPainter *painter, int width)
         double xPos = timeToX(keyframe->time);
         double gradPos = xPos / width;
         gradPos = qBound(0.0, gradPos, 1.0);
-        long timeMs = keyframe->time * 1000;
         QColor currentColor;
         // Get the color at the specified time.
-        currentColor.setRed(propBinding->GetChannelValueAtTime(0, timeMs));
-        currentColor.setGreen(propBinding->GetChannelValueAtTime(1, timeMs));
-        currentColor.setBlue(propBinding->GetChannelValueAtTime(2, timeMs));
+        currentColor.setRed(propBinding->GetChannelValueAtTime(0, keyframe->time));
+        currentColor.setGreen(propBinding->GetChannelValueAtTime(1, keyframe->time));
+        currentColor.setBlue(propBinding->GetChannelValueAtTime(2, keyframe->time));
         bgGradient.setColorAt(gradPos, currentColor);
     }
     painter->fillRect(TimelineConstants::RULER_EDGE_OFFSET, 0,
@@ -409,8 +408,8 @@ void RowTimeline::updateDurationFromBinding()
 
     ITimelineTimebar *timebar = m_rowTree->m_binding->GetTimelineItem()->GetTimebar();
     clearBoundChildren();
-    setStartTime(timebar->GetStartTime() * .001);
-    setEndTime(timebar->GetEndTime() * .001);
+    setStartTime(timebar->GetStartTime());
+    setEndTime(timebar->GetEndTime());
 }
 
 void RowTimeline::updateKeyframesFromBinding(const QList<int> &properties)
@@ -430,8 +429,7 @@ void RowTimeline::updateKeyframesFromBinding(const QList<int> &properties)
                 Qt3DSDMTimelineKeyframe *kf = static_cast<Qt3DSDMTimelineKeyframe *>
                         (child->m_PropBinding->GetKeyframeByIndex(i));
 
-                Keyframe *kfUI = new Keyframe(static_cast<double>(kf->GetTime() * .001),
-                                              child->rowTimeline());
+                Keyframe *kfUI = new Keyframe(kf->GetTime(), child->rowTimeline());
                 kfUI->binding = kf;
                 kfUI->dynamic = kf->IsDynamic();
                 kf->setUI(kfUI);
@@ -507,7 +505,7 @@ TimelineControlType RowTimeline::getClickedControl(const QPointF &scenePos) cons
         const int halfHandle = TimelineConstants::DURATION_HANDLE_W * .5;
         // Never choose start handle if end time is zero, as you cannot adjust it in that case
         bool startHandle = p.x() > m_startX - halfHandle && p.x() < m_startX + halfHandle
-                && !qFuzzyIsNull(m_endTime);
+                && m_endTime > 0;
         bool endHandle = p.x() > m_endX - halfHandle && p.x() < m_endX + halfHandle;
         if (startHandle && endHandle) {
             // If handles overlap, choose the handle based on the side of the click relative to start
@@ -639,7 +637,7 @@ void RowTimeline::moveDurationTo(double newX)
     }
 }
 
-double RowTimeline::getDurationMoveTime() const
+long RowTimeline::getDurationMoveTime() const
 {
     return m_startTime - m_startDurationMoveStartTime;
 }
@@ -649,26 +647,26 @@ double RowTimeline::getDurationMoveOffsetX() const
     return m_startDurationMoveOffsetX;
 }
 
-double RowTimeline::getDuration() const
+long RowTimeline::getDuration() const
 {
     return m_endTime - m_startTime;
 }
 
 // convert time (seconds) values to x
-double RowTimeline::timeToX(double time) const
+double RowTimeline::timeToX(long time) const
 {
-    return TimelineConstants::RULER_EDGE_OFFSET + time * TimelineConstants::RULER_SEC_W
+    return TimelineConstants::RULER_EDGE_OFFSET + time * TimelineConstants::RULER_MILLI_W
            * rowTree()->m_scene->ruler()->timelineScale();
 }
 
 // convert x values to time (seconds)
-double RowTimeline::xToTime(double xPos) const
+long RowTimeline::xToTime(double xPos) const
 {
     return (xPos - TimelineConstants::RULER_EDGE_OFFSET)
-            / (TimelineConstants::RULER_SEC_W * rowTree()->m_scene->ruler()->timelineScale());
+            / (TimelineConstants::RULER_MILLI_W * rowTree()->m_scene->ruler()->timelineScale());
 }
 
-void RowTimeline::collectChildKeyframeTimes(QVector<double> &childKeyframeTimes)
+void RowTimeline::collectChildKeyframeTimes(QVector<long> &childKeyframeTimes)
 {
     const auto childRows = m_rowTree->childRows();
     for (const auto row : childRows) {
@@ -832,7 +830,7 @@ void RowTimeline::updateCommentItemPos()
                          -TimelineConstants::ROW_TEXT_OFFSET_Y);
 }
 
-void RowTimeline::setStartTime(double startTime)
+void RowTimeline::setStartTime(long startTime)
 {
     m_startTime = startTime;
     m_startX = timeToX(startTime);
@@ -847,7 +845,7 @@ void RowTimeline::setStartTime(double startTime)
     update();
 }
 
-void RowTimeline::setEndTime(double endTime)
+void RowTimeline::setEndTime(long endTime)
 {
     m_endTime = endTime;
     m_endX = timeToX(endTime);
@@ -872,12 +870,12 @@ double RowTimeline::getEndX() const
     return m_endX;
 }
 
-double RowTimeline::getStartTime() const
+long RowTimeline::getStartTime() const
 {
     return m_startTime;
 }
 
-double RowTimeline::getEndTime() const
+long RowTimeline::getEndTime() const
 {
     return m_endTime;
 }
@@ -912,16 +910,16 @@ QList<Keyframe *> RowTimeline::keyframes() const
     return m_keyframes;
 }
 
-QString RowTimeline::formatTime(double seconds) const
+QString RowTimeline::formatTime(long millis) const
 {
     static const QString timeTemplate = tr("%1:%2.%3");
     static const QChar fillChar = tr("0").at(0);
 
-    long mins = seconds / 60;
-    long secs = seconds - mins * 60;
-    long millis = qRound((seconds - (int)seconds) * 1000);
+    long mins = millis % 3600000 / 60000;
+    long secs = millis % 60000 / 1000;
+    long mils = millis % 1000;
 
-    return timeTemplate.arg(mins).arg(secs, 2, 10, fillChar).arg(millis, 3, 10, fillChar);
+    return timeTemplate.arg(mins).arg(secs, 2, 10, fillChar).arg(mils, 3, 10, fillChar);
 }
 
 void RowTimeline::showToolTip(const QPointF &pos)

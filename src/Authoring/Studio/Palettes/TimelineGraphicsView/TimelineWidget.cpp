@@ -58,6 +58,7 @@
 #include "TimelineDropTarget.h"
 #include "StudioPreferences.h"
 #include "Dialogs.h"
+#include "TimeEnums.h"
 
 #include <QtGui/qevent.h>
 #include <QtWidgets/qgraphicslinearlayout.h>
@@ -84,7 +85,7 @@ public:
 };
 
 TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
-    : QWidget()
+    : QWidget(parent)
     , m_toolbar(new TimelineToolbar())
     , m_viewTreeHeader(new TreeHeaderView(this))
     , m_viewTreeContent(new QGraphicsView(this))
@@ -247,17 +248,17 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     connect(m_toolbar, &TimelineToolbar::deleteLayerTriggered,
             [=](){ doc->DeleteSelectedObject(); });
 
-    connect(m_toolbar, &TimelineToolbar::gotoTimeTriggered, this, [this]() {
+    connect(m_toolbar, &TimelineToolbar::gotoTimeTriggered, this, []() {
         CDoc *doc = g_StudioApp.GetCore()->GetDoc();
         g_StudioApp.GetDialogs()->asyncDisplayTimeEditDialog(doc->GetCurrentViewTime(),
                                                              doc, PLAYHEAD);
     });
 
-    connect(m_toolbar, &TimelineToolbar::firstFrameTriggered, this, [this]() {
+    connect(m_toolbar, &TimelineToolbar::firstFrameTriggered, this, []() {
         g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(0);
     });
 
-    connect(m_toolbar, &TimelineToolbar::stopTriggered, this, [this]() {
+    connect(m_toolbar, &TimelineToolbar::stopTriggered, this, []() {
         g_StudioApp.PlaybackStopNoRestore();
     });
 
@@ -270,7 +271,7 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     });
 
     connect(m_toolbar, &TimelineToolbar::lastFrameTriggered, this, [this]() {
-        double dur = m_graphicsScene->ruler()->duration() * 1000;
+        long dur = m_graphicsScene->ruler()->duration();
         g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(dur);
     });
 
@@ -305,15 +306,13 @@ Q3DStudio::CString TimelineWidget::getPlaybackMode()
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     qt3dsdm::Qt3DSDMSlideHandle theActiveSlide(doc->GetActiveSlide());
     // clock has passed the end, check whether needs to switch slide
-    qt3dsdm::Qt3DSDMInstanceHandle theInstanceHandle = doc->GetStudioSystem()->GetSlideSystem()
-        ->GetSlideInstance(theActiveSlide);
+    qt3dsdm::Qt3DSDMInstanceHandle instance = doc->GetStudioSystem()->GetSlideSystem()
+                                              ->GetSlideInstance(theActiveSlide);
 
-    CClientDataModelBridge *clientDataModelBridge = doc->GetStudioSystem()
-            ->GetClientDataModelBridge();
+    CClientDataModelBridge *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
     qt3dsdm::IPropertySystem *propertySystem = doc->GetStudioSystem()->GetPropertySystem();
     qt3dsdm::SValue theValue;
-    propertySystem->GetInstancePropertyValue(theInstanceHandle, clientDataModelBridge->GetSlide()
-                                             .m_PlayMode, theValue);
+    propertySystem->GetInstancePropertyValue(instance, bridge->GetSlide().m_PlayMode, theValue);
     return qt3dsdm::get<qt3dsdm::TDataStrPtr>(theValue)->GetData();
 }
 
@@ -377,7 +376,7 @@ void TimelineWidget::OnNewPresentation()
              std::placeholders::_1, std::placeholders::_2)));
     m_connections.push_back(theSignalProvider->ConnectFirstKeyframeDynamicSet(
         std::bind(&TimelineWidget::onFirstKeyframeDynamicSet, this,
-                  std::placeholders::_1, std::placeholders::_2)));
+                  std::placeholders::_1)));
 
     // action created/deleted
     m_connections.push_back(theSignalProvider->ConnectActionCreated(
@@ -426,7 +425,7 @@ void TimelineWidget::OnClosingPresentation()
 
 void TimelineWidget::OnTimeChanged(long inTime)
 {
-    m_graphicsScene->playHead()->setTime(inTime * .001);
+    m_graphicsScene->playHead()->setTime(inTime);
     m_toolbar->setTime(inTime);
 
     double left = m_viewTimelineHeader->horizontalScrollBar()->value()
@@ -596,8 +595,7 @@ void TimelineWidget::onAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentIns
             for (int i = 0; i < propBinding->GetKeyframeCount(); i++) {
                 IKeyframe *kf = propBinding->GetKeyframeByIndex(i);
                 Keyframe *kfUI = m_graphicsScene->keyframeManager()->insertKeyframe(
-                            propRow->rowTimeline(), static_cast<double>(kf->GetTime()) * .001, false)
-                            .at(0);
+                                 propRow->rowTimeline(), kf->GetTime(), false).at(0);
 
                 kf->setUI(kfUI);
                 kfUI->binding = static_cast<Qt3DSDMTimelineKeyframe *>(kf);
@@ -685,10 +683,8 @@ void TimelineWidget::refreshKeyframe(qt3dsdm::Qt3DSDMAnimationHandle inAnimation
     }
 }
 
-void TimelineWidget::onFirstKeyframeDynamicSet(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
-                                               bool inDynamic)
+void TimelineWidget::onFirstKeyframeDynamicSet(qt3dsdm::Qt3DSDMAnimationHandle inAnimation)
 {
-    Q_UNUSED(inDynamic)
     refreshKeyframe(inAnimation, 0, ETimelineKeyframeTransaction_DynamicChanged);
 }
 
@@ -977,8 +973,7 @@ void TimelineWidget::onPropertyLinked(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
             for (int i = 0; i < propBinding->GetKeyframeCount(); i++) {
                 IKeyframe *kf = propBinding->GetKeyframeByIndex(i);
                 Keyframe *kfUI = m_graphicsScene->keyframeManager()->insertKeyframe(
-                            propRow->rowTimeline(), static_cast<double>(kf->GetTime()) * .001,
-                            false).at(0);
+                            propRow->rowTimeline(), kf->GetTime(), false).at(0);
 
                 kf->setUI(kfUI);
                 kfUI->binding = static_cast<Qt3DSDMTimelineKeyframe *>(kf);
@@ -1030,21 +1025,6 @@ void TimelineWidget::onChildMoved(int inParent, int inChild, long inOldIndex,
     onChildAdded(inParent, inChild, inNewIndex);
 }
 
-void TimelineWidget::OnDraw(CRenderer *inRenderer, CRct &inDirtyRect, bool inIgnoreValidation)
-{
-
-}
-
-void TimelineWidget::Draw(CRenderer *inRenderer)
-{
-
-}
-
-void TimelineWidget::OnGainFocus()
-{
-
-}
-
 CDropTarget *TimelineWidget::FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags,
                                                EStudioObjectType objectType,
                                                Q3DStudio::DocumentEditorFileType::Enum fileType)
@@ -1079,12 +1059,6 @@ CDropTarget *TimelineWidget::FindDropCandidate(CPt &inMousePoint, Qt::KeyboardMo
     return theTarget;
 }
 
-bool TimelineWidget::OnMouseHover(CPt inPoint, Qt::KeyboardModifiers inFlags)
-{
-    return true;
-}
-
-
 void TimelineWidget::OnMouseMove(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
     Q_UNUSED(inFlags)
@@ -1101,14 +1075,6 @@ void TimelineWidget::OnMouseMove(CPt inPoint, Qt::KeyboardModifiers inFlags)
 bool TimelineWidget::blockMousePress() const
 {
     return m_blockMousePress;
-}
-
-void TimelineWidget::OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inFlags)
-{
-}
-
-void TimelineWidget::OnMouseUp(CPt inPoint, Qt::KeyboardModifiers inFlags)
-{
 }
 
 CPt TimelineWidget::GetPreferredSize()

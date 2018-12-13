@@ -44,14 +44,14 @@ public:
     void setHeight(int height);
     void setPosition(double posX); // set x poisiotn
     void updatePosition(); // sync x poisiotn based on time value
-    void setTime(double time); // set time (sets x based on time input)
+    void setTime(long time); // set time (sets x based on time (ms) input)
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                QWidget *widget = nullptr) override;
-    double time() const;
-    int type() const;
+    long time() const;
+    int type() const override;
 
 private:
-    double m_time = 0;
+    long m_time = 0;
     Ruler *m_ruler;
 };
 

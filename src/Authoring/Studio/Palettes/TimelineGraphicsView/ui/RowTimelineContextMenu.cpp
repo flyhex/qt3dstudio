@@ -232,7 +232,7 @@ void RowTimelineContextMenu::setInterpolation()
 
 void RowTimelineContextMenu::setKeyframeTime()
 {
-    m_keyframeManager->SetKeyframeTime(m_keyframe->time * 1000.0);
+    m_keyframeManager->SetKeyframeTime(m_keyframe->time);
 }
 
 void RowTimelineContextMenu::changeTimeBarColor()

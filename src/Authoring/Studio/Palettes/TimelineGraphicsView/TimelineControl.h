@@ -53,8 +53,8 @@ private:
     TimelineGraphicsScene *m_scene = nullptr;
     RowTimeline *m_rowTimeline = nullptr;
     ITimelineTimebar *m_timebar = nullptr;
-    double m_startTime = 0;
-    double m_endTime = 0;
+    long m_startTime = 0;
+    long m_endTime = 0;
 };
 
 #endif // TIMELINECONTROL_H

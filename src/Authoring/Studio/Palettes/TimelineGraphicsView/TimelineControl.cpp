@@ -54,29 +54,25 @@ void TimelineControl::setRowTimeline(RowTimeline *rowTimeline)
 
 void TimelineControl::showDurationEditDialog()
 {
-    g_StudioApp.GetDialogs()->asyncDisplayDurationEditDialog(m_startTime * 1000, m_endTime * 1000,
+    g_StudioApp.GetDialogs()->asyncDisplayDurationEditDialog(m_startTime, m_endTime,
                                                              g_StudioApp.GetCore()->GetDoc(), this);
 }
 
 void TimelineControl::ChangeStartTime(long inTime)
 {
-    double time = (double)inTime / 1000;
-    m_rowTimeline->setStartTime(time);
+    m_rowTimeline->setStartTime(inTime);
 }
 
 void TimelineControl::ChangeEndTime(long inTime)
 {
-    double time = (double)inTime / 1000;
-    m_rowTimeline->setEndTime(time);
+    m_rowTimeline->setEndTime(inTime);
     m_scene->rowManager()->updateRulerDuration();
 }
 
 void TimelineControl::Commit()
 {
-    long startTime = m_rowTimeline->getStartTime() * 1000;
-    m_timebar->ChangeTime(startTime, true);
-    long endTime = m_rowTimeline->getEndTime() * 1000;
-    m_timebar->ChangeTime(endTime, false);
+    m_timebar->ChangeTime(m_rowTimeline->getStartTime(), true);
+    m_timebar->ChangeTime(m_rowTimeline->getEndTime(), false);
     m_timebar->CommitTimeChange();
 }
 

@@ -28,21 +28,14 @@
 ****************************************************************************/
 
 #ifndef INCLUDED_IKEYFRAMES_MANAGER_H
-#define INCLUDED_IKEYFRAMES_MANAGER_H 1
+#define INCLUDED_IKEYFRAMES_MANAGER_H
 
-#pragma once
-
-//=============================================================================
-/**
- * Interface to manage keyframes related actions
- */
-//=============================================================================
 class IKeyframesManager
 {
 public:
     virtual ~IKeyframesManager() {}
 
-    virtual bool HasSelectedKeyframes(bool inOnlyDynamic = false) = 0;
+    virtual bool HasSelectedKeyframes() = 0;
     virtual bool HasDynamicKeyframes() = 0;
     virtual bool CanPerformKeyframeCopy() = 0;
     virtual bool CanPerformKeyframePaste() = 0;
@@ -50,9 +43,14 @@ public:
     virtual bool RemoveKeyframes(bool inPerformCopy) = 0;
     virtual void PasteKeyframes() = 0;
     virtual void SetKeyframeInterpolation() = 0;
-    virtual void SelectAllKeyframes() = 0;
     virtual void DeselectAllKeyframes() = 0;
     virtual void SetChangedKeyframes() = 0;
+
+    virtual void SetKeyframeTime(long inTime) = 0;
+    virtual void SetKeyframesDynamic(bool inDynamic) = 0;
+    virtual long OffsetSelectedKeyframes(long inOffset) = 0;
+    virtual void CommitChangedKeyframes() = 0;
+    virtual void RollbackChangedKeyframes() = 0;
 };
 
 #endif // INCLUDED_IKEYFRAMES_MANAGER_H

@@ -36,7 +36,8 @@ namespace TimelineConstants
     const int ROW_H_EXPANDED    = 120;   // property rows height when graph is shown
     const int ROW_SPACING       = 2;
     const int ROW_DEPTH_STEP    = 15;    // x-distance between 2 consecutive depths
-    const int RULER_SEC_W       = 30;    // width of 1 second section (at scale 1)
+    const double RULER_SEC_W    = 30;    // width of 1 second section (at scale 1)
+    const double RULER_MILLI_W  = RULER_SEC_W / 1000.0; // width of 1 millisecond section at scale 1
     const int RULER_SEC_DIV     = 10;    // second divisions
     const int RULER_DIV_H1      = 5;     // height of main divisions
     const int RULER_DIV_H2      = 3;     // height of secondary divisions
@@ -69,7 +70,7 @@ namespace TimelineConstants
     const int AUTO_SCROLL_DELTA         = 8;   // increment in scroll at each time step
     const int AUTO_SCROLL_TRIGGER       = 500; // time after which auto scroll starts (millis)
     const int AUTO_EXPAND_TIME          = 500; // auto expand a hovered row (while DnD-ing)
-    const double MAX_SLIDE_TIME         = 3599.0; // seconds
+    const long MAX_SLIDE_TIME           = 3599000; // milliseconds
 
     const int TIMELINE_SCROLL_MAX_DELTA = 25; // Maximum amount of pixels to scroll per frame
     const int TIMELINE_SCROLL_DIVISOR = 6;    // Divisor for timeline autoscroll distance

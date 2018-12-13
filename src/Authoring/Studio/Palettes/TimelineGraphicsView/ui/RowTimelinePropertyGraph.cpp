@@ -85,7 +85,7 @@ void RowTimelinePropertyGraph::paintSingleChannel(QPainter *painter, long inChan
     QPainterPath path;
     for (int i = 0; i < m_rect.width(); i += interval) {
         // Value time in ms
-        long time = 1000 * (i / (TimelineConstants::RULER_SEC_W * timelineScale));
+        long time = i / (TimelineConstants::RULER_MILLI_W * timelineScale);
         float value = m_propBinding->GetChannelValueAtTime(inChannelIndex, time);
         float yPos = graphY + (1.0 - (value - minVal) / (maxVal - minVal)) * graphHeight;
 

@@ -57,14 +57,10 @@ void PlayHead::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
 
 void PlayHead::setHeight(int height)
 {
-    setRect(
-        rect().x(),
-        rect().y(),
-        rect().width(),
-        height);
+    setRect(rect().x(), rect().y(), rect().width(), height);
 }
 
-void PlayHead::setTime(double time)
+void PlayHead::setTime(long time)
 {
     if (time < 0)
         time = 0;
@@ -78,21 +74,21 @@ void PlayHead::setTime(double time)
 void PlayHead::setPosition(double posX)
 {
     posX = qBound(TimelineConstants::RULER_EDGE_OFFSET, posX, m_ruler->duration()
-                  * TimelineConstants::RULER_SEC_W * m_ruler->timelineScale()
+                  * TimelineConstants::RULER_MILLI_W * m_ruler->timelineScale()
                   + TimelineConstants::RULER_EDGE_OFFSET);
 
     setX(m_ruler->x() + posX);
     m_time = (posX - TimelineConstants::RULER_EDGE_OFFSET)
-            / (TimelineConstants::RULER_SEC_W * m_ruler->timelineScale());
+             / (TimelineConstants::RULER_MILLI_W * m_ruler->timelineScale());
 }
 
 void PlayHead::updatePosition()
 {
     setX(m_ruler->x() + TimelineConstants::RULER_EDGE_OFFSET
-         + m_time * TimelineConstants::RULER_SEC_W * m_ruler->timelineScale());
+         + m_time * TimelineConstants::RULER_MILLI_W * m_ruler->timelineScale());
 }
 
-double PlayHead::time() const
+long PlayHead::time() const
 {
     return m_time;
 }

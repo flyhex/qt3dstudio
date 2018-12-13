@@ -45,9 +45,9 @@ void Ruler::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
 
     double xStep = TimelineConstants::RULER_SEC_W / TimelineConstants::RULER_SEC_DIV * m_timeScale;
     double activeSegmentsWidth = TimelineConstants::RULER_EDGE_OFFSET
-            + m_duration * xStep * TimelineConstants::RULER_SEC_DIV;
+            + m_duration / 1000.0 * xStep * TimelineConstants::RULER_SEC_DIV;
     double totalSegmentsWidth = TimelineConstants::RULER_EDGE_OFFSET
-            + m_maxDuration * xStep * TimelineConstants::RULER_SEC_DIV;
+            + m_maxDuration / 1000.0 * xStep * TimelineConstants::RULER_SEC_DIV;
 
     // Ruler painted width to be at least widget width
     double minRulerWidth = widget->width();
@@ -80,9 +80,9 @@ void Ruler::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
         if (rowX < (m_viewportX - margin) || rowX > (m_viewportX + minRulerWidth + margin))
             continue;
 
-        const int h = i % secDiv == 0 ? TimelineConstants::RULER_DIV_H1 :
-                i % secDiv == secDiv * 0.5 ? TimelineConstants::RULER_DIV_H2 :
-                TimelineConstants::RULER_DIV_H3;
+        const int h = i % secDiv == 0 ? TimelineConstants::RULER_DIV_H1
+         : i % secDiv == secDiv * 0.5 ? TimelineConstants::RULER_DIV_H2
+                                      : TimelineConstants::RULER_DIV_H3;
 
         if (!useDisabledColor && rowX > activeSegmentsWidth) {
             painter->setPen(CStudioPreferences::timelineRulerColorDisabled());
@@ -122,16 +122,16 @@ void Ruler::setTimelineScale(double scl)
     update();
 }
 
-// convert distance values to time (seconds)
-double Ruler::distanceToTime(double distance) const
+// convert distance values to time (milliseconds)
+long Ruler::distanceToTime(double distance) const
 {
-    return distance / (TimelineConstants::RULER_SEC_W * m_timeScale);
+    return distance / (TimelineConstants::RULER_MILLI_W * m_timeScale);
 }
 
-// convert time (seconds) values to distance
-double Ruler::timeToDistance(double time) const
+// convert time (milliseconds) values to distance
+double Ruler::timeToDistance(long time) const
 {
-    return time * TimelineConstants::RULER_SEC_W * m_timeScale;
+    return time * TimelineConstants::RULER_MILLI_W * m_timeScale;
 }
 
 // x position of ruler value 0
@@ -154,7 +154,7 @@ double Ruler::timelineScale() const
 // Returns end of right-most layer/component row.
 // Active color of ruler is used up to this point.
 // Slide plays up to this point.
-double Ruler::duration() const
+long Ruler::duration() const
 {
     return m_duration;
 }
@@ -162,12 +162,12 @@ double Ruler::duration() const
 // Returns end of right-most row.
 // Ruler steps & labels are drawn up to this point.
 // Timeline scrollbar allows scrolling up to this point.
-double Ruler::maxDuration() const
+long Ruler::maxDuration() const
 {
     return m_maxDuration;
 }
 
-void Ruler::setDuration(double duration)
+void Ruler::setDuration(long duration)
 {
     if (m_duration != duration) {
         m_duration = duration;
@@ -176,7 +176,7 @@ void Ruler::setDuration(double duration)
     }
 }
 
-void Ruler::setMaxDuration(double maxDuration)
+void Ruler::setMaxDuration(long maxDuration)
 {
     if (m_maxDuration != maxDuration) {
         m_maxDuration = maxDuration;

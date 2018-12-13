@@ -55,7 +55,7 @@ class CStudioApp;
 class CControl;
 class CDialogControl;
 class CProgressView;
-class ITimelineKeyframesManager;
+class IKeyframesManager;
 class ITimeChangeCallback;
 
 class CDialogs : public QObject
@@ -183,7 +183,7 @@ public:
                                         const Q3DStudio::CString &inRecommendedVersion);
 
     void asyncDisplayTimeEditDialog(long time, IDoc *doc, long objectAssociation,
-                                    ITimelineKeyframesManager *keyframesManager = nullptr) const;
+                                    IKeyframesManager *keyframesManager = nullptr) const;
     void asyncDisplayDurationEditDialog(long startTime, long endTime, IDoc *doc,
                                         ITimeChangeCallback *callback) const;
 

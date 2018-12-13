@@ -1339,11 +1339,10 @@ void CDialogs::DisplayGLVersionWarning(const Q3DStudio::CString &inGLVersion,
 }
 
 void CDialogs::asyncDisplayTimeEditDialog(long time, IDoc *doc, long objectAssociation,
-                                          ITimelineKeyframesManager *keyframesManager) const
+                                          IKeyframesManager *keyframesManager) const
 {
     QTimer::singleShot(0, [time, doc, objectAssociation, keyframesManager]() {
-        CTimeEditDlg timeEditDlg;
-        timeEditDlg.setKeyframesManager(keyframesManager);
+        CTimeEditDlg timeEditDlg(keyframesManager);
         timeEditDlg.showDialog(time, doc, objectAssociation);
     });
 }

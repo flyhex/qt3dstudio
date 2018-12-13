@@ -42,33 +42,33 @@ public:
     explicit Ruler(TimelineItem *parent = nullptr);
 
     void setTimelineScale(double scl);
-    double distanceToTime(double distance) const;
-    double timeToDistance(double time) const;
+    long distanceToTime(double distance) const;
+    double timeToDistance(long time) const;
     double durationStartX() const;
     double durationEndX() const;
     double timelineScale() const;
-    double duration() const;
-    double maxDuration() const;
-    void setDuration(double duration);
-    void setMaxDuration(double maxDuration);
+    long duration() const;
+    long maxDuration() const;
+    void setDuration(long duration);
+    void setMaxDuration(long maxDuration);
     void setViewportX(int viewportX);
     int viewportX() const;
-    int type() const;
+    int type() const override;
 
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                QWidget *widget = nullptr) override;
 
 signals:
-    void maxDurationChanged(double maxDuration);
-    void durationChanged(double duration);
+    void maxDurationChanged(long maxDuration);
+    void durationChanged(long duration);
     void viewportXChanged(int viewportX);
 
 private:
     const QString timestampString(int timeMs);
     double m_timeScale = 2;
-    double m_duration = 0; // in seconds
-    double m_maxDuration = 0; // in seconds
+    long m_duration = 0; // milliseconds
+    long m_maxDuration = 0; // milliseconds
     int m_viewportX = 0;
 };
 

@@ -29,21 +29,14 @@
 
 #include "ui_TimeEditDlg.h"
 #include "TimeEditDlg.h"
+#include "IKeyframesManager.h"
 #include "IDoc.h"
-#include "Bindings/ITimelineKeyframesManager.h"
-
+#include "TimeEnums.h"
 #include <QtGui/qvalidator.h>
 
-CTimeEditDlg::CTimeEditDlg(QWidget *pParent)
-    : QDialog(pParent)
-    , m_ui(new Ui::TimeEditDlg)
-    , m_Doc(nullptr)
-    , m_KeyframesManager(nullptr)
-    , m_InitialTime(0)
-    , m_ObjectAssociation(0)
-    , m_OffsetFromInitialTime(0)
-    , m_min(-1)
-    , m_sec(-1)
+CTimeEditDlg::CTimeEditDlg(IKeyframesManager *keyframeManager)
+    : m_ui(new Ui::TimeEditDlg)
+    , m_KeyframesManager(keyframeManager)
 {
     m_ui->setupUi(this);
     setAutoFillBackground(true);
@@ -68,11 +61,6 @@ CTimeEditDlg::CTimeEditDlg(QWidget *pParent)
 CTimeEditDlg::~CTimeEditDlg()
 {
     delete m_ui;
-}
-
-void CTimeEditDlg::setKeyframesManager(ITimelineKeyframesManager *inKeyframesManager)
-{
-    m_KeyframesManager = inKeyframesManager;
 }
 
 //=============================================================================
@@ -145,6 +133,7 @@ void CTimeEditDlg::onInitDialog()
         break;
     case ASSETKEYFRAME:
         title = QObject::tr("Set Keyframe Time");
+        Q_ASSERT(m_KeyframesManager != nullptr);
         break;
     }
     setWindowTitle(title);
@@ -154,7 +143,7 @@ void CTimeEditDlg::onInitDialog()
 void CTimeEditDlg::accept()
 {
     // Only commit here, cos dup keyframes will be deleted.
-    if (m_ObjectAssociation == ASSETKEYFRAME && m_Doc && m_KeyframesManager) {
+    if (m_ObjectAssociation == ASSETKEYFRAME && m_Doc) {
         if (m_OffsetFromInitialTime == 0)
             m_KeyframesManager->RollbackChangedKeyframes();
         else
@@ -167,17 +156,18 @@ void CTimeEditDlg::accept()
 void CTimeEditDlg::reject()
 {
     // Only commit here, cos dup keyframes will be deleted.
-    if (m_ObjectAssociation == ASSETKEYFRAME && m_Doc && m_KeyframesManager)
+    if (m_ObjectAssociation == ASSETKEYFRAME && m_Doc)
         m_KeyframesManager->RollbackChangedKeyframes();
     QDialog::reject();
 }
 
 int CTimeEditDlg::numberOfDigits(long number)
 {
-    long theNumberOfDigits = 0;
-    for (long theNumber = number; theNumber >= 1; theNumber = theNumber / 10)
-        theNumberOfDigits++;
-    return theNumberOfDigits;
+    long n = 0;
+    for (long i = number; i >= 1; i /= 10)
+        ++n;
+
+    return n;
 }
 
 //==============================================================================
@@ -194,70 +184,18 @@ int CTimeEditDlg::numberOfDigits(long number)
  */
 long CTimeEditDlg::timeConversion(long inTime, long inOperationCode)
 {
-    long theResult = 0;
     switch (inOperationCode) {
     case CONVERT_MIN_TO_MSEC:
-        theResult = inTime * 60 * 1000;
-        break;
+        return inTime * 60000;
     case CONVERT_SEC_TO_MSEC:
-        theResult = inTime * 1000;
-        break;
+        return inTime * 1000;
     case CONVERT_MSEC_TO_MIN:
-        theResult = inTime / (60 * 1000);
-        break;
+        return inTime / 60000;
     case CONVERT_MSEC_TO_SEC:
-        theResult = inTime / 1000;
-        break;
+        return inTime / 1000;
     }
-    return theResult;
-}
 
-//==============================================================================
-/**
- *  timeConversion:         Takes in the time in mins:secs:msec and convert it to
- *                          the corresponding time in msec.
- *  @param  inMin           stores the minutes to be converted.
- *          inSec           stores the seconds to be converted.
- *          inMsec          stores the milliseconds to be converted.
- *          inOperationCode determines the type of time conversion to be done on the
- *                          inMin, inSec and inMsec.
- *  @return theResult       stores the result of the time conversion.
- */
-long CTimeEditDlg::timeConversion(long inMin, long inSec, long inMsec, long inOperationCode)
-{
-    long theResult = 0;
-    switch (inOperationCode) {
-    case CONVERT_TIME_TO_MSEC:
-        theResult = timeConversion(inMin, CONVERT_MIN_TO_MSEC)
-                + timeConversion(inSec, CONVERT_SEC_TO_MSEC) + inMsec;
-        break;
-    }
-    return theResult;
-}
-
-//==============================================================================
-/**
- *  timeConversion:         Takes in the time in milliseconds and converts them
- *                          to min : sec : msec.
- *  @param  inTotalTime     stores the total time in msec.
- *          ioMin           stores the mins result of the time conversion
- *          ioSec           stores the secs result of the time conversion
- *          ioMsec          stores the msecs result of the time conversion
- *          inOperationCode determines the type of time conversion to be done on the
- *                          inTotalTime.
- */
-void CTimeEditDlg::timeConversion(long inTotalTime, long *ioMin, long *ioSec, long *ioMsec,
-                                  long inOperationCode)
-{
-    switch (inOperationCode) {
-    case CONVERT_MSEC_TO_MIN_SEC_MSEC:
-        *ioMin = timeConversion(inTotalTime, CONVERT_MSEC_TO_MIN);
-        *ioSec = inTotalTime - timeConversion(*ioMin, CONVERT_MIN_TO_MSEC);
-        *ioSec = timeConversion(*ioSec, CONVERT_MSEC_TO_SEC);
-        *ioMsec = inTotalTime - timeConversion(*ioMin, CONVERT_MIN_TO_MSEC)
-                - timeConversion(*ioSec, CONVERT_SEC_TO_MSEC);
-        break;
-    }
+    return 0;
 }
 
 //==============================================================================
@@ -278,7 +216,7 @@ void CTimeEditDlg::updateObjectTime(long inTime)
         if (m_Doc) {
             theDiff = inTime - m_OffsetFromInitialTime - m_InitialTime;
             m_OffsetFromInitialTime = m_OffsetFromInitialTime + theDiff;
-            if (theDiff != 0 && m_KeyframesManager)
+            if (theDiff != 0)
                 m_KeyframesManager->OffsetSelectedKeyframes(theDiff);
         }
         break;

@@ -51,6 +51,7 @@
 #include "RowTimelineContextMenu.h"
 #include "StudioPreferences.h"
 #include "TimeEditDlg.h"
+#include "TimeEnums.h"
 #include "StudioClipboard.h"
 #include "Dialogs.h"
 #include "Qt3DSDMStudioSystem.h"
@@ -211,7 +212,7 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
 
             if (m_rulerPressed) {
                 long time = m_ruler->distanceToTime(
-                            distance - TimelineConstants::RULER_EDGE_OFFSET) * 1000;
+                            distance - TimelineConstants::RULER_EDGE_OFFSET);
                 if (time < 0)
                     time = 0;
                 g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(time);
@@ -233,12 +234,12 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
                         timelineContent->ensureVisible(TimelineConstants::TREE_BOUND_W + visiblePtX,
                                                        m_editedTimelineRow->y(), 0, 0, 0, 0);
                     } else if (m_clickedTimelineControlType == TimelineControlType::EndHandle) {
-                        double time = m_ruler->distanceToTime(
+                        long time = m_ruler->distanceToTime(
                                     distance - TimelineConstants::RULER_EDGE_OFFSET);
                         double edgeMargin = 0;
                         if (time > TimelineConstants::MAX_SLIDE_TIME) {
                             distance = m_ruler->timeToDistance(TimelineConstants::MAX_SLIDE_TIME)
-                                    + TimelineConstants::RULER_EDGE_OFFSET;
+                                       + TimelineConstants::RULER_EDGE_OFFSET;
                             edgeMargin = TimelineConstants::RULER_EDGE_OFFSET;
                         } else if (time < m_editedTimelineRow->getStartTime()) {
                             edgeMargin = -TimelineConstants::RULER_EDGE_OFFSET;
@@ -251,17 +252,17 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
                                     + m_editedTimelineRow->getEndX() + edgeMargin,
                                     m_editedTimelineRow->y(), 0, 0, 0, 0);
                     } else if (m_clickedTimelineControlType == TimelineControlType::Duration) {
-                        double time = m_ruler->distanceToTime(
-                                    distance - TimelineConstants::RULER_EDGE_OFFSET)
-                                + m_editedTimelineRow->getDuration(); // seconds
+                        long time = m_ruler->distanceToTime(
+                                      distance - TimelineConstants::RULER_EDGE_OFFSET)
+                                      + m_editedTimelineRow->getDuration(); // milliseconds
                         double visiblePtX = distance
-                                + m_editedTimelineRow->getDurationMoveOffsetX();
+                                            + m_editedTimelineRow->getDurationMoveOffsetX();
                         if (time > TimelineConstants::MAX_SLIDE_TIME) {
                             distance = m_ruler->timeToDistance(TimelineConstants::MAX_SLIDE_TIME
                                                                - m_editedTimelineRow->getDuration())
-                                    + TimelineConstants::RULER_EDGE_OFFSET;
+                                       + TimelineConstants::RULER_EDGE_OFFSET;
                             visiblePtX = m_editedTimelineRow->getEndX()
-                                    + TimelineConstants::RULER_EDGE_OFFSET;
+                                         + TimelineConstants::RULER_EDGE_OFFSET;
                         }
 
                         m_editedTimelineRow->moveDurationTo(distance);
@@ -365,8 +366,8 @@ void TimelineGraphicsScene::setControllerText(const QString &controller)
 void TimelineGraphicsScene::updateTimelineLayoutWidth()
 {
     double timelineWidth = TimelineConstants::RULER_EDGE_OFFSET * 2
-                           + m_ruler->maxDuration() * TimelineConstants::RULER_SEC_W
-                           * m_ruler->timelineScale();
+                           + m_ruler->maxDuration() * TimelineConstants::RULER_MILLI_W
+                             * m_ruler->timelineScale();
 
     m_layoutTimeline->setMinimumWidth(timelineWidth);
     m_layoutTimeline->setMaximumWidth(timelineWidth);
@@ -551,8 +552,8 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                     }
                 } else {
                     m_keyframeManager->deselectAllKeyframes();
-                    m_clickedTimelineControlType =
-                            m_editedTimelineRow->getClickedControl(m_pressPos);
+                    m_clickedTimelineControlType
+                            = m_editedTimelineRow->getClickedControl(m_pressPos);
 
                     // clicked an empty spot on a timeline row, start selection rect.
                     if (m_clickedTimelineControlType == TimelineControlType::None) {
@@ -560,7 +561,7 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                     } else if (m_clickedTimelineControlType == TimelineControlType::Duration) {
                         if (!ctrlKeyDown
                                 && m_rowManager->isRowSelected(m_editedTimelineRow->rowTree())
-                                && !m_rowManager->isSingleSelected() ) {
+                                && !m_rowManager->isSingleSelected()) {
                             m_releaseSelectRow = m_editedTimelineRow->rowTree();
                         }
 
@@ -795,30 +796,26 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
                 if (!m_editedTimelineRow.isNull()) {
                     ITimelineTimebar *timebar = m_editedTimelineRow->rowTree()->getBinding()
                             ->GetTimelineItem()->GetTimebar();
-                    timebar->ChangeTime(m_editedTimelineRow->getStartTime() * 1000, true);
+                    timebar->ChangeTime(m_editedTimelineRow->getStartTime(), true);
                     timebar->CommitTimeChange();
                 }
             } else if (m_clickedTimelineControlType == TimelineControlType::EndHandle) {
                 if (!m_editedTimelineRow.isNull()) {
                     ITimelineTimebar *timebar = m_editedTimelineRow->rowTree()->getBinding()
-                            ->GetTimelineItem()->GetTimebar();
-                    timebar->ChangeTime(m_editedTimelineRow->getEndTime() * 1000, false);
+                                                ->GetTimelineItem()->GetTimebar();
+                    timebar->ChangeTime(m_editedTimelineRow->getEndTime(), false);
                     timebar->CommitTimeChange();
-                    if (m_playHead->time() > ruler()->duration()) {
-                        g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(ruler()->duration()
-                                                                           * 1000);
-                    }
+                    if (m_playHead->time() > ruler()->duration())
+                        g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(ruler()->duration());
                 }
             } else if (m_clickedTimelineControlType == TimelineControlType::Duration) {
                 if (!m_editedTimelineRow.isNull()) {
                     ITimelineTimebar *timebar = m_editedTimelineRow->rowTree()->getBinding()
                             ->GetTimelineItem()->GetTimebar();
-                    timebar->OffsetTime(m_editedTimelineRow->getDurationMoveTime() * 1000);
+                    timebar->OffsetTime(m_editedTimelineRow->getDurationMoveTime());
                     timebar->CommitTimeChange();
-                    if (m_playHead->time() > ruler()->duration()) {
-                        g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(ruler()->duration()
-                                                                           * 1000);
-                    }
+                    if (m_playHead->time() > ruler()->duration())
+                        g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(ruler()->duration());
                 }
             }
         } else if (!m_rulerPressed && (!m_releaseSelectRow.isNull() || !itemAt(event->scenePos(),
@@ -881,7 +878,7 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
                     Keyframe *clickedKeyframe = rowTimeline->getClickedKeyframe(scenePos);
                     if (clickedKeyframe) {
                         g_StudioApp.GetDialogs()->asyncDisplayTimeEditDialog(
-                                    clickedKeyframe->time * 1000, g_StudioApp.GetCore()->GetDoc(),
+                                    clickedKeyframe->time, g_StudioApp.GetCore()->GetDoc(),
                                     ASSETKEYFRAME, m_keyframeManager);
                     } else {
                         if (!rowTimeline->rowTree()->locked())
@@ -980,8 +977,7 @@ void TimelineGraphicsScene::updateHoverStatus(const QPointF &scenePos)
         item = getItemBelowType(TimelineItem::TypePlayHead, item, scenePos);
         if (item->type() == TimelineItem::TypeRowTimeline) {
             RowTimeline *timelineItem = static_cast<RowTimeline *>(item);
-            TimelineControlType controlType =
-                    timelineItem->getClickedControl(scenePos);
+            TimelineControlType controlType = timelineItem->getClickedControl(scenePos);
             if (controlType == TimelineControlType::StartHandle
                     || controlType == TimelineControlType::EndHandle) {
                 setMouseCursor(CMouseCursor::CURSOR_RESIZE_LEFTRIGHT);

@@ -170,7 +170,6 @@ HEADERS += \
     Palettes/Timeline/Bindings/ITimelineItem.h \
     Palettes/Timeline/Bindings/ITimelineItemBinding.h \
     Palettes/Timeline/Bindings/ITimelineItemProperty.h \
-    Palettes/Timeline/Bindings/ITimelineKeyframesManager.h \
     Palettes/Timeline/Bindings/ITimelineTimebar.h \
     Palettes/Timeline/Bindings/IBreadCrumbProvider.h \
     Palettes/TimelineGraphicsView/Keyframe.h \

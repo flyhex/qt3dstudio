@@ -29,10 +29,10 @@
 #ifndef KEYFRAMEMANAGER_H
 #define KEYFRAMEMANAGER_H
 
-#include "Bindings/ITimelineKeyframesManager.h"
+#include "IKeyframesManager.h"
+#include "Qt3DSDMAnimation.h"
 #include <QtCore/qlist.h>
 #include <StudioObjectTypes.h>
-#include "Qt3DSDMAnimation.h"
 
 class RowTimeline;
 class RowTree;
@@ -43,13 +43,13 @@ struct Keyframe;
 QT_FORWARD_DECLARE_CLASS(QGraphicsSceneContextMenuEvent)
 QT_FORWARD_DECLARE_CLASS(QRectF)
 
-class KeyframeManager : public ITimelineKeyframesManager
+class KeyframeManager : public IKeyframesManager
 {
 public:
     KeyframeManager(TimelineGraphicsScene *m_scene);
-    virtual ~KeyframeManager();
+    virtual ~KeyframeManager() override;
 
-    QList<Keyframe *> insertKeyframe(RowTimeline *row, double time,
+    QList<Keyframe *> insertKeyframe(RowTimeline *row, long time,
                                      bool selectInsertedKeyframes = true);
     void selectKeyframe(Keyframe *keyframe);
     void selectConnectedKeyframes(Keyframe *keyframe);
@@ -72,16 +72,12 @@ public:
     bool hasDynamicKeyframes(RowTree *row) const;
 
     // IKeyframesManager interface
-    // Mahmoud_TODO: rewrite a better interface for the new timeline
-    // ITimelineKeyframesManager interface
     void SetKeyframeTime(long inTime) override;
     void SetKeyframesDynamic(bool inDynamic) override;
     long OffsetSelectedKeyframes(long inOffset) override;
-    bool CanMakeSelectedKeyframesDynamic() override;
     void CommitChangedKeyframes() override;
     void RollbackChangedKeyframes() override;
-    // IKeyframesManager interface
-    bool HasSelectedKeyframes(bool inOnlyDynamic) override;
+    bool HasSelectedKeyframes() override;
     bool HasDynamicKeyframes() override;
     bool CanPerformKeyframeCopy() override;
     bool CanPerformKeyframePaste() override;
@@ -89,14 +85,13 @@ public:
     bool RemoveKeyframes(bool inPerformCopy) override;
     void PasteKeyframes() override;
     void SetKeyframeInterpolation() override;
-    void SelectAllKeyframes() override;
     void DeselectAllKeyframes() override;
     void SetChangedKeyframes() override;
 
 private:
     qt3dsdm::SGetOrSetKeyframeInfo setKeyframeInfo(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
                                                    qt3dsdm::IAnimationCore &inCore);
-    CPasteKeyframeCommandHelper *m_pasteKeyframeCommandHelper;
+    CPasteKeyframeCommandHelper *m_pasteKeyframeCommandHelper = nullptr;
     TimelineGraphicsScene *m_scene;
     QList<Keyframe *> m_selectedKeyframes;
     QList<RowTimeline *> m_selectedKeyframesMasterRows;

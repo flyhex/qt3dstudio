@@ -53,6 +53,7 @@
 #include "Qt3DSDMAnimation.h"
 #include "Dialogs.h"
 #include "TimeEditDlg.h"
+#include "TimeEnums.h"
 #include "Bindings/PasteKeyframesCommandHelper.h"
 
 #include <qglobal.h>
@@ -61,9 +62,7 @@
 
 using namespace qt3dsdm;
 
-KeyframeManager::KeyframeManager(TimelineGraphicsScene *scene)
-    : m_scene(scene)
-    , m_pasteKeyframeCommandHelper(nullptr)
+KeyframeManager::KeyframeManager(TimelineGraphicsScene *scene) : m_scene(scene)
 {
 }
 
@@ -72,7 +71,7 @@ KeyframeManager::~KeyframeManager()
     delete m_pasteKeyframeCommandHelper;
 }
 
-QList<Keyframe *> KeyframeManager::insertKeyframe(RowTimeline *row, double time,
+QList<Keyframe *> KeyframeManager::insertKeyframe(RowTimeline *row, long time,
                                                   bool selectInsertedKeyframes)
 {
     QList<Keyframe *> addedKeyframes;
@@ -159,10 +158,9 @@ void KeyframeManager::commitMoveSelectedKeyframes()
 {
     CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
     COffsetKeyframesCommandHelper h(*theDoc);
-    for (Keyframe *keyframe : qAsConst(m_selectedKeyframes)) {
-        const long msTime = round(keyframe->time * 1000);
-        keyframe->binding->UpdateKeyframesTime(&h, msTime);
-    }
+
+    for (Keyframe *keyframe : qAsConst(m_selectedKeyframes))
+        keyframe->binding->UpdateKeyframesTime(&h, keyframe->time);
 }
 
 void KeyframeManager::selectKeyframesInRect(const QRectF &rect)
@@ -300,7 +298,7 @@ void KeyframeManager::copySelectedKeyframes()
             m_pasteKeyframeCommandHelper = new CPasteKeyframeCommandHelper();
 
         // calc min copied frames time
-        double minTime = 999999.0; // in seconds (~277.78 hrs)
+        long minTime = LONG_MAX;
         for (auto keyframe : qAsConst(m_selectedKeyframes)) {
             if (keyframe->time < minTime)
                 minTime = keyframe->time;
@@ -331,9 +329,9 @@ void KeyframeManager::copySelectedKeyframes()
                     break;
                 }
 
-                double dt = Qt3DSDMTimelineKeyframe::GetTimeInSecs(kf->GetTime()) - minTime;
-                qt3dsdm::Qt3DSDMAnimationHandle animation =
-                    animationCore->GetAnimationForKeyframe(theKeyframeHandles[0]);
+                float dt = Qt3DSDMTimelineKeyframe::GetTimeInSecs(kf->GetTime() - minTime);
+                qt3dsdm::Qt3DSDMAnimationHandle animation
+                        = animationCore->GetAnimationForKeyframe(theKeyframeHandles[0]);
                 m_pasteKeyframeCommandHelper->AddKeyframeData(
                     animationCore->GetAnimationInfo(animation).m_Property, dt, info, infoCount);
             }
@@ -375,10 +373,10 @@ void KeyframeManager::pasteKeyframes()
 
 void KeyframeManager::moveSelectedKeyframes(double dx)
 {
-    double dt = m_scene->ruler()->distanceToTime(dx);
+    long dt = m_scene->ruler()->distanceToTime(dx);
 
     if (dt < 0) { // check min limit
-        double minTime = 999999; // seconds (~277.78 hrs)
+        long minTime = LONG_MAX;
         for (auto keyframe : qAsConst(m_selectedKeyframes)) {
             if (keyframe->time < minTime)
                 minTime = keyframe->time;
@@ -422,9 +420,7 @@ bool KeyframeManager::hasDynamicKeyframes(RowTree *row) const
     return false;
 }
 
-// IKeyframesManager interface to connect Doc and KeyframeManager
-// Mahmoud_TODO: rewrite a better interface for the new timeline
-// ITimelineKeyframesManager interface
+// IKeyframesManager interface
 void KeyframeManager::SetKeyframeTime(long inTime)
 {
     g_StudioApp.GetDialogs()->asyncDisplayTimeEditDialog(inTime, g_StudioApp.GetCore()->GetDoc(),
@@ -461,15 +457,9 @@ void KeyframeManager::SetKeyframesDynamic(bool inDynamic)
 
 long KeyframeManager::OffsetSelectedKeyframes(long inOffset)
 {
-    double dx = m_scene->ruler()->timeToDistance(inOffset / 1000.0);
+    double dx = m_scene->ruler()->timeToDistance(inOffset);
     moveSelectedKeyframes(dx);
     return 0;
-}
-
-bool KeyframeManager::CanMakeSelectedKeyframesDynamic()
-{
-    // Mahmoud_TODO: implement if needed
-    return false;
 }
 
 void KeyframeManager::CommitChangedKeyframes()
@@ -480,14 +470,14 @@ void KeyframeManager::CommitChangedKeyframes()
 void KeyframeManager::RollbackChangedKeyframes()
 {
     for (Keyframe *keyframe : qAsConst(m_selectedKeyframes))
-        keyframe->time = keyframe->binding->GetTime() / 1000.0;
+        keyframe->time = keyframe->binding->GetTime();
 
     for (auto row : qAsConst(m_selectedKeyframesMasterRows))
         row->updateKeyframes();
 }
 
 // IKeyframesManager interface
-bool KeyframeManager::HasSelectedKeyframes(bool inOnlyDynamic)
+bool KeyframeManager::HasSelectedKeyframes()
 {
     return hasSelectedKeyframes();
 }
@@ -569,11 +559,6 @@ void KeyframeManager::SetKeyframeInterpolation()
             }
         }
     }
-}
-
-void KeyframeManager::SelectAllKeyframes()
-{
-    // Mahmoud_TODO: implement if needed
 }
 
 void KeyframeManager::DeselectAllKeyframes()

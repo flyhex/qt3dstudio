@@ -29,30 +29,12 @@
 
 #include "ui_DurationEditDlg.h"
 #include "DurationEditDlg.h"
-#include "IDoc.h"
-#include "Bindings/ITimelineKeyframesManager.h"
-
+#include "TimeEnums.h"
 #include <QtGui/qvalidator.h>
 
-//=============================================================================
-/**
- * Constructor
- */
-CDurationEditDlg::CDurationEditDlg(QWidget *pParent)
-    : QDialog(pParent)
+CDurationEditDlg::CDurationEditDlg(QWidget *parent)
+    : QDialog(parent)
     , m_ui(new Ui::DurationEditDlg)
-    , m_Doc(nullptr)
-    , m_KeyframesManager(nullptr)
-    , m_Callback(nullptr)
-    , m_MaxTime(0)
-    , m_MaxTimeDisplay(0)
-    , m_MinTimeDisplay(0)
-    , m_InitialTimeStart(0)
-    , m_InitialTimeEnd(0)
-    , m_minStart(-1)
-    , m_secStart(-1)
-    , m_minEnd(-1)
-    , m_secEnd(-1)
 {
     m_ui->setupUi(this);
     setAutoFillBackground(true);
@@ -92,11 +74,6 @@ CDurationEditDlg::~CDurationEditDlg()
     delete m_ui;
 }
 
-void CDurationEditDlg::setKeyframesManager(ITimelineKeyframesManager *inKeyframesManager)
-{
-    m_KeyframesManager = inKeyframesManager;
-}
-
 //=============================================================================
 /**
  *  showDialog: Initializes and shows the Duration Edit Dialog Box.
@@ -121,8 +98,7 @@ void CDurationEditDlg::showDialog(long startTime, long endTime, IDoc *inDoc,
     m_MaxTimeDisplay = LONG_MAX;
 
     // 9999:59:999 converted to milliseconds
-    m_MaxTime = timeConversion(9999, CONVERT_MIN_TO_MSEC)
-            + timeConversion(59, CONVERT_SEC_TO_MSEC) + 999;
+    m_MaxTime = 599999999; // 9999 * 60,000 + 59 * 1000 + 999
 
     // Set initial values to dialog
     formatTime(m_InitialTimeStart, true);
@@ -171,11 +147,6 @@ void CDurationEditDlg::formatTime(long inTime, bool startTime)
     }
 }
 
-void CDurationEditDlg::showEvent(QShowEvent *ev)
-{
-    QDialog::showEvent(ev);
-}
-
 void CDurationEditDlg::accept()
 {
     m_Callback->Commit();
@@ -190,10 +161,11 @@ void CDurationEditDlg::reject()
 
 long CDurationEditDlg::numberOfDigits(long number)
 {
-    long theNumberOfDigits = 0;
-    for (long theNumber = number; theNumber >= 1; theNumber = theNumber / 10)
-        theNumberOfDigits++;
-    return theNumberOfDigits;
+    long n = 0;
+    for (long i = number; i >= 1; i /= 10)
+        ++n;
+
+    return n;
 }
 
 //==============================================================================
@@ -210,70 +182,18 @@ long CDurationEditDlg::numberOfDigits(long number)
  */
 long CDurationEditDlg::timeConversion(long inTime, long inOperationCode)
 {
-    long theResult = 0;
     switch (inOperationCode) {
     case CONVERT_MIN_TO_MSEC:
-        theResult = inTime * 60 * 1000;
-        break;
+        return inTime * 60000;
     case CONVERT_SEC_TO_MSEC:
-        theResult = inTime * 1000;
-        break;
+        return inTime * 1000;
     case CONVERT_MSEC_TO_MIN:
-        theResult = inTime / (60 * 1000);
-        break;
+        return inTime / 60000;
     case CONVERT_MSEC_TO_SEC:
-        theResult = inTime / 1000;
-        break;
+        return inTime / 1000;
     }
-    return theResult;
-}
 
-//==============================================================================
-/**
- *  timeConversion:         Takes in the time in mins:secs:msec and convert it to
- *                          the corresponding time in msec.
- *  @param  inMin           stores the minutes to be converted.
- *          inSec           stores the seconds to be converted.
- *          inMsec          stores the milliseconds to be converted.
- *          inOperationCode determines the type of time conversion to be done on the
- *                          inMin, inSec and inMsec.
- *  @return theResult       stores the result of the time conversion.
- */
-long CDurationEditDlg::timeConversion(long inMin, long inSec, long inMsec, long inOperationCode)
-{
-    long theResult = 0;
-    switch (inOperationCode) {
-    case CONVERT_TIME_TO_MSEC:
-        theResult = timeConversion(inMin, CONVERT_MIN_TO_MSEC)
-                + timeConversion(inSec, CONVERT_SEC_TO_MSEC) + inMsec;
-        break;
-    }
-    return theResult;
-}
-
-//==============================================================================
-/**
- *  timeConversion:         Takes in the time in milliseconds and converts them
- *                          to min : sec : msec.
- *  @param  inTotalTime     stores the total time in msec.
- *          ioMin           stores the mins result of the time conversion
- *          ioSec           stores the secs result of the time conversion
- *          ioMsec          stores the msecs result of the time conversion
- *          inOperationCode determines the type of time conversion to be done on the
- *                          inTotalTime.
- */
-void CDurationEditDlg::timeConversion(long inTotalTime, long *ioMin, long *ioSec, long *ioMsec,
-                                      long inOperationCode)
-{
-    switch (inOperationCode) {
-    case CONVERT_MSEC_TO_MIN_SEC_MSEC:
-        *ioMin = timeConversion(inTotalTime, CONVERT_MSEC_TO_MIN);
-        *ioSec = inTotalTime - timeConversion(*ioMin, CONVERT_MIN_TO_MSEC);
-        *ioSec = timeConversion(*ioSec, CONVERT_MSEC_TO_SEC);
-        *ioMsec = inTotalTime - timeConversion(*ioMin, CONVERT_MIN_TO_MSEC)
-                - timeConversion(*ioSec, CONVERT_SEC_TO_MSEC);
-        break;
-    }
+    return 0;
 }
 
 void CDurationEditDlg::updateObjectTime(long inTime, bool startTime)

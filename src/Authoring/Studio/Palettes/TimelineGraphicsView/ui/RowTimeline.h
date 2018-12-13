@@ -57,8 +57,8 @@ public:
     void clearBoundChildren();
     void moveDurationBy(double dx);
     void moveDurationTo(double newX);
-    void setStartTime(double startTime);
-    void setEndTime(double endTime);
+    void setStartTime(long startTime);
+    void setEndTime(long endTime);
     void setStartX(double startX);
     void setEndX(double endX);
     void setBarColor(const QColor &color);
@@ -72,13 +72,13 @@ public:
     TimelineControlType getClickedControl(const QPointF &scenePos) const;
     double getStartX() const;
     double getEndX() const;
-    double getStartTime() const;
-    double getEndTime() const;
-    double getDurationMoveTime() const; // the time a row duration has moved (to commit to binding)
+    long getStartTime() const;
+    long getEndTime() const;
+    long getDurationMoveTime() const; // the time a row duration has moved (to commit to binding)
     double getDurationMoveOffsetX() const;
-    double getDuration() const;
+    long getDuration() const;
     QColor barColor() const;
-    int type() const;
+    int type() const override;
     RowTimeline *parentRow() const;
     RowTree *rowTree() const;
     Keyframe *getClickedKeyframe(const QPointF &scenePos);
@@ -99,18 +99,18 @@ private:
     void updateCommentItemPos();
     void drawColorPropertyGradient(QPainter *painter, int width);
     bool isColorProperty() const;
-    QString formatTime(double seconds) const;
-    double timeToX(double time) const;
-    double xToTime(double xPos) const;
-    void collectChildKeyframeTimes(QVector<double> &childKeyframeTimes);
+    QString formatTime(long millis) const;
+    double timeToX(long time) const;
+    long xToTime(double xPos) const;
+    void collectChildKeyframeTimes(QVector<long> &childKeyframeTimes);
 
     RowTree *m_rowTree;
     RowTimelinePropertyGraph *m_propertyGraph = nullptr;
     RowTimelineCommentItem *m_commentItem = nullptr;
-    double m_startTime = 0;
-    double m_startDurationMoveStartTime = 0;
+    long m_startTime = 0;
+    long m_startDurationMoveStartTime = 0;
     double m_startDurationMoveOffsetX = 0;
-    double m_endTime = 0;
+    long m_endTime = 0;
     double m_startX = 0;
     double m_endX = 0;
     double m_minStartX = 0;
