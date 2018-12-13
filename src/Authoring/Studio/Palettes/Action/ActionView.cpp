@@ -752,8 +752,8 @@ void ActionView::OnSelectionSet(Q3DStudio::SSelectedValue inSelectable)
     }
         break;
     default:
-        // Do nothing on slide insertion, guide and unknown types
-        return;
+        // Clear selection on selecting other types or nothing at all
+        break;
     };
 
     setItem(theInstance);
