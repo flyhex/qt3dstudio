@@ -28,11 +28,15 @@
 
 #include "ImageChooserModel.h"
 #include "StudioApp.h"
+#include "ProjectFile.h"
+#include "Core.h"
 
 ImageChooserModel::ImageChooserModel(bool showRenderables, QObject *parent)
     : ChooserModelBase(parent)
     , m_showRenderables(showRenderables)
 {
+    connect(&g_StudioApp.GetCore()->getProjectFile(), &ProjectFile::presentationIdChanged,
+            this, &ImageChooserModel::handlePresentationIdChange);
 }
 
 ImageChooserModel::~ImageChooserModel()
@@ -56,4 +60,13 @@ QString ImageChooserModel::specialDisplayName(const ChooserModelBase::TreeItem &
     // Renderable items display the id instead of file name
     const QString path = item.index.data(QFileSystemModel::FilePathRole).toString();
     return g_StudioApp.getRenderableId(path);
+}
+
+void ImageChooserModel::handlePresentationIdChange(const QString &path, const QString &id)
+{
+    Q_UNUSED(path)
+    Q_UNUSED(id)
+
+    // Simply update the filename for all rows
+    Q_EMIT dataChanged(index(0), index(rowCount() - 1), {QFileSystemModel::FileNameRole});
 }

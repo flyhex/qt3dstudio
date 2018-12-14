@@ -151,6 +151,7 @@ void InspectorControlView::OnClosingPresentation()
 {
     // Image chooser model needs to be deleted, because otherwise it'll try to update the model for
     // the new presentation before subpresentations are resolved, corrupting the model.
+    // The model also has a connection to project file which needs to refreshed if project changes.
     delete m_imageChooserView;
     m_fileList.clear();
     m_connections.clear();
