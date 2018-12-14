@@ -819,13 +819,9 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
         bool copyResult = SFileTools::FindAndCopyDestFile(targetDir, sourceFile, destPath);
         Q_ASSERT(copyResult);
 
+        QString presentationPath;
         if (CDialogs::isPresentationFileExtension(extension.toLatin1().data())) {
-            // Don't override id with empty if it is already added, which can happen when
-            // multi-importing both presentation and its subpresentation
-            const QString presPath
-                    = doc->GetCore()->getProjectFile().getRelativeFilePathTo(destPath);
-            if (!outPresentationNodes.contains(presPath))
-                outPresentationNodes.insert(presPath, {});
+            presentationPath = doc->GetCore()->getProjectFile().getRelativeFilePathTo(destPath);
             QSet<QString> dataInputs;
             importPresentationAssets(fileInfo, QFileInfo(destPath), outPresentationNodes,
                                      outImportedFiles, dataInputs, outOverrideChoice);
@@ -837,12 +833,34 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
                     outDataInputs.insert(di, allDataInputs[di]);
             }
         } else if (qmlRoot && isQmlStream) { // importing a qml stream
-            const QString presPath
-                    = doc->GetCore()->getProjectFile().getRelativeFilePathTo(destPath);
-            if (!outPresentationNodes.contains(presPath))
-                outPresentationNodes.insert(presPath, {});
+            presentationPath = doc->GetCore()->getProjectFile().getRelativeFilePathTo(destPath);
             importQmlAssets(qmlRoot, fileInfo.dir(), targetDir, outImportedFiles,
                             outOverrideChoice);
+        }
+
+        // outPresentationNodes can already contain this presentation in case of multi-importing
+        // both a presentation and its subpresentation
+        if (!presentationPath.isEmpty() && !outPresentationNodes.contains(presentationPath)) {
+            const QString srcProjFile = PresentationFile::findProjectFile(sourceFile);
+            QString presId;
+            if (!srcProjFile.isEmpty()) {
+                QVector<SubPresentationRecord> subpresentations;
+                ProjectFile::getPresentations(srcProjFile, subpresentations);
+                QDir srcProjDir(QFileInfo(srcProjFile).path());
+                const QString relSrcPresFilePath = srcProjDir.relativeFilePath(sourceFile);
+                auto *sp = std::find_if(
+                            subpresentations.begin(), subpresentations.end(),
+                            [&relSrcPresFilePath](const SubPresentationRecord &spr) -> bool {
+                    return spr.m_argsOrSrc == relSrcPresFilePath;
+                });
+                // Make sure we are not adding a duplicate id. In that case presId will be empty
+                // which causes autogeneration of an unique id.
+                if (sp != subpresentations.end()
+                    && g_StudioApp.GetCore()->getProjectFile().isUniquePresentationId(sp->m_id)) {
+                    presId = sp->m_id;
+                }
+            }
+            outPresentationNodes.insert(presentationPath, presId);
         }
 
         // For effect and custom material files, automatically copy related resources

@@ -559,23 +559,23 @@ void ProjectFile::loadSubpresentationsAndDatainputs(
  * Check that a given presentation's or Qml stream's id is unique
  *
  * @param id presentation's or Qml stream's Id
- * @param src source node to exclude from the check, if empty the current document node is used
+ * @param src source node to exclude from the check. Defaults to empty.
  */
 bool ProjectFile::isUniquePresentationId(const QString &id, const QString &src) const
 {
     if (!m_fileInfo.exists())
         return true;
 
-    QString theSrc = src.isEmpty() ? g_StudioApp.GetCore()->GetDoc()->getRelativePath() : src;
-    bool isCurrDoc = theSrc == g_StudioApp.GetCore()->GetDoc()->getRelativePath();
+
+    bool isCurrDoc = src == g_StudioApp.GetCore()->GetDoc()->getRelativePath();
 
     if (!isCurrDoc && id == g_StudioApp.GetCore()->GetDoc()->getPresentationId())
         return false;
 
     auto *sp = std::find_if(g_StudioApp.m_subpresentations.begin(),
                             g_StudioApp.m_subpresentations.end(),
-                           [&id, &theSrc](const SubPresentationRecord &spr) -> bool {
-                               return spr.m_id == id && spr.m_argsOrSrc != theSrc;
+                           [&id, &src](const SubPresentationRecord &spr) -> bool {
+                               return spr.m_id == id && spr.m_argsOrSrc != src;
                            });
     return  sp == g_StudioApp.m_subpresentations.end();
 }
