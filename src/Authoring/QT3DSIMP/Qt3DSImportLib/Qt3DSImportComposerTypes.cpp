@@ -199,6 +199,10 @@ SImportAsset &SImportComposerTypes::GetImportAssetForType(ComposerObjectTypes::E
         return m_Asset;
     case ComposerObjectTypes::Group:
         return m_Group;
+    case ComposerObjectTypes::Light:
+        return m_Light;
+    case ComposerObjectTypes::Camera:
+        return m_Camera;
     case ComposerObjectTypes::Model:
         return m_Model;
     case ComposerObjectTypes::Node:

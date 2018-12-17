@@ -483,8 +483,18 @@ public:
     {
         return ((inAuthoringToolType == EAuthoringToolType_FBX_Max)
                 || (inAuthoringToolType == EAuthoringToolType_FBX_Modo)
-                || (inAuthoringToolType == EAuthoringToolType_FBX_Maya));
+                || (inAuthoringToolType == EAuthoringToolType_FBX_Maya)
+                || (inAuthoringToolType == EAuthoringToolType_FBX_Blender));
     }
+
+    void PushLight(const char *inName) override { PushObject(inName, ComposerObjectTypes::Light); }
+    void PopLight() override { PopObject(); }
+
+    void PushCamera(const char *inName) override
+    {
+        PushObject(inName, ComposerObjectTypes::Camera);
+    }
+    void PopCamera() override { PopObject(); }
 
     void PushGroup(const char *inName) override { PushObject(inName, ComposerObjectTypes::Group); }
     void SetGroupSkeletonId(long inId) override

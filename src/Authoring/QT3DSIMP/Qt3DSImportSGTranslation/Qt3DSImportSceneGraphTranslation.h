@@ -340,6 +340,7 @@ typedef enum _EAuthoringToolType {
     EAuthoringToolType_FBX_Max,
     EAuthoringToolType_FBX_Modo,
     EAuthoringToolType_FBX_Maya,
+    EAuthoringToolType_FBX_Blender
 } EAuthoringToolType;
 
 //==============================================================================
@@ -357,6 +358,10 @@ public:
     virtual void SetAuthoringTool(EAuthoringToolType inAuthoringToolType,
                                   long inAuthoringToolVersion) = 0;
 
+    virtual void PushLight(const char *inName) = 0;
+    virtual void PopLight() = 0;
+    virtual void PushCamera(const char *inName) = 0;
+    virtual void PopCamera() = 0;
     virtual void PushGroup(const char *inName) = 0;
     virtual void SetGroupSkeletonId(long inId) = 0;
     virtual void SetIgnoresParentTransform(bool inValue) = 0;

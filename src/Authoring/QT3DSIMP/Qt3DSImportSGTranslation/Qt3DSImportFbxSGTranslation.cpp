@@ -91,10 +91,12 @@ protected:
     void FilterNodeHierarchy(TNodeFilter inFilter, TNodeSet &inSet);
     void ProcessNode(FbxNode *inFbxNode);
     void ProcessGroup(FbxNode *inFbxNode);
+    void ProcessLight(FbxNode *inFbxNode);
+    void ProcessCamera(FbxNode *inFbxNode);
     void ProcessMesh(FbxNode *inFbxNode);
     void ProcessNodeChildren(FbxNode *inFbxNode);
     long ProcessSkeletonNode(FbxNode *inFbxNode, TNodeSet &inNodeSet, bool inIsRoot);
-    void ProcessTransform(FbxNode *inFbxNode);
+    void ProcessTransform(FbxNode *inFbxNode, bool ignoreScale = false);
     void ReadVertex(const FbxVector4 *inFbxCtrlPoints, int inFbxCtrlPointIndex, float *outValue,
                     FbxAMatrix &geometricTransformation);
     void ReadVertex(const TPerVertexWeightInfo &inFbxWeights, int inFbxCtrlPointIndex,
@@ -156,14 +158,13 @@ protected:
     TNodeToIndicesMap m_NodeToIndicies;
     TNodeIsAnimatedMap m_NodeIsAnimatedMap;
     TJointNodeHierarchyMap m_JointNodeHierarchyMap;
-    // Set if nodes we need to export in order to see all meshes in the file.
-    TNodeSet m_meshNodes;
+    TNodeSet m_importNodes;
     EAuthoringToolType m_AuthoringToolType;
 };
 
 FbxDomWalker::FbxDomWalker(ISceneGraphTranslation *inTranslation)
-    : m_FbxManager(NULL)
-    , m_FbxScene(NULL)
+    : m_FbxManager(nullptr)
+    , m_FbxScene(nullptr)
     , m_Translator(inTranslation)
     , m_AnimationTrackCount(0)
     , m_AuthoringToolType(EAuthoringToolType_Unknown)
@@ -172,9 +173,9 @@ FbxDomWalker::FbxDomWalker(ISceneGraphTranslation *inTranslation)
 
 FbxDomWalker::~FbxDomWalker()
 {
-    if (m_FbxScene != NULL)
+    if (m_FbxScene != nullptr)
         m_FbxScene->Destroy();
-    if (m_FbxManager != NULL)
+    if (m_FbxManager != nullptr)
         m_FbxManager->Destroy();
 }
 
@@ -256,6 +257,11 @@ bool FbxDomWalker::LoadDocument(const std::string &inFilePath)
                     m_Translator->SetAuthoringTool(EAuthoringToolType_FBX_Maya,
                                                    major * 1000 + minor * 100 + revision);
                     m_AuthoringToolType = EAuthoringToolType_FBX_Maya;
+                } else if (strstr(appName, "Blender")) {
+                    qWarning("Importing from Blender. Light and Camera rotations may be incorrect");
+                    m_Translator->SetAuthoringTool(EAuthoringToolType_FBX_Blender,
+                                                   major * 1000 + minor * 100 + revision);
+                    m_AuthoringToolType = EAuthoringToolType_FBX_Blender;
                 } else {
                     m_Translator->SetAuthoringTool(EAuthoringToolType_FBX_Max,
                                                    major * 1000 + minor * 100 + revision);
@@ -311,15 +317,30 @@ struct SMeshFilter
     // filter out valid meshes.  Anything else we don't care about.
     bool operator()(FbxNode &inFbxNode) const
     {
-        if (inFbxNode.GetNodeAttribute() != NULL) {
+        if (inFbxNode.GetNodeAttribute() != nullptr) {
             return inFbxNode.GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eMesh
-                && inFbxNode.GetMesh() && inFbxNode.GetMesh()->GetControlPointsCount() != 0;
+                    && inFbxNode.GetMesh() && inFbxNode.GetMesh()->GetControlPointsCount() != 0;
         }
 
         return false;
     }
 };
 
+struct SLightCameraFilter
+{
+    // filter out valid lights and cameras.
+    bool operator()(FbxNode &inFbxNode) const
+    {
+        if (inFbxNode.GetNodeAttribute() != nullptr) {
+            return (inFbxNode.GetNodeAttribute()->GetAttributeType() == FbxNodeAttribute::eLight
+                    && inFbxNode.GetLight())
+                    || (inFbxNode.GetNodeAttribute()->GetAttributeType()
+                        == FbxNodeAttribute::eCamera && inFbxNode.GetCamera());
+        }
+
+        return false;
+    }
+};
 struct SNodeSetFilter
 {
     const TNodeSet &m_NodeSet;
@@ -337,7 +358,7 @@ struct SNodeSetFilter
 */
 void FbxDomWalker::ProcessScene()
 {
-    if (m_FbxScene != NULL) {
+    if (m_FbxScene != nullptr) {
         // FbxAxisSystem::MayaYUp.ConvertScene( m_FbxScene );
         int sign;
         FbxAxisSystem SceneAxisSystem = m_FbxScene->GetGlobalSettings().GetAxisSystem();
@@ -362,8 +383,9 @@ void FbxDomWalker::ProcessScene()
             QT3DS_ASSERT(false);
         }
 
-        m_meshNodes.clear();
-        FilterNodeHierarchy(SMeshFilter(), m_meshNodes);
+        m_importNodes.clear();
+        FilterNodeHierarchy(SMeshFilter(), m_importNodes);
+        FilterNodeHierarchy(SLightCameraFilter(), m_importNodes);
         ProcessNode(m_FbxScene->GetRootNode());
     }
 }
@@ -426,7 +448,7 @@ int FbxDomWalker::GetParentJointID(const FbxNode *inFbxNode)
 void FbxDomWalker::ProcessNodeChildren(FbxNode *inFbxNode)
 {
     for (int i = 0; i < inFbxNode->GetChildCount(); ++i) {
-        if (m_meshNodes.find(inFbxNode) != m_meshNodes.end())
+        if (m_importNodes.find(inFbxNode) != m_importNodes.end())
             ProcessNode(inFbxNode->GetChild(i));
     }
 }
@@ -449,6 +471,40 @@ void FbxDomWalker::ProcessGroup(FbxNode *inFbxNode)
 }
 
 /**
+* @brief Process a light
+*
+* @param[in] inFbxNode    Pointer to node element
+*
+* @return no return
+*/
+void FbxDomWalker::ProcessLight(FbxNode *inFbxNode)
+{
+    std::string lightName = inFbxNode->GetName();
+    m_Translator->PushLight(lightName.c_str());
+    ProcessTransform(inFbxNode, true);
+    // TODO: Import light properties, if possible (QT3DS-2856)
+    ProcessNodeChildren(inFbxNode);
+    m_Translator->PopLight();
+}
+
+/**
+* @brief Process a camera
+*
+* @param[in] inFbxNode    Pointer to node element
+*
+* @return no return
+*/
+void FbxDomWalker::ProcessCamera(FbxNode *inFbxNode)
+{
+    std::string cameraName = inFbxNode->GetName();
+    m_Translator->PushCamera(cameraName.c_str());
+    ProcessTransform(inFbxNode, true);
+    // TODO: Import camera properties, if possible (QT3DS-2856)
+    ProcessNodeChildren(inFbxNode);
+    m_Translator->PopCamera();
+}
+
+/**
 * @brief Process a skeleton node and the children
 *
 * @param[in] inFbxNode	Pointer to node element
@@ -461,7 +517,7 @@ long FbxDomWalker::ProcessSkeletonNode(FbxNode *inFbxNode, TNodeSet &inNodeSet, 
 {
     bool pushGroup = false;
     long groupId = -1;
-    if (inFbxNode->GetNodeAttribute() != NULL) {
+    if (inFbxNode->GetNodeAttribute() != nullptr) {
         std::string groupName = "Skeleton_";
         groupName += inFbxNode->GetName();
         m_Translator->PushGroup(groupName.c_str());
@@ -501,28 +557,39 @@ long FbxDomWalker::ProcessSkeletonNode(FbxNode *inFbxNode, TNodeSet &inNodeSet, 
 */
 void FbxDomWalker::ProcessNode(FbxNode *inFbxNode)
 {
-    if (inFbxNode->GetNodeAttribute() != NULL && m_meshNodes.find(inFbxNode) != m_meshNodes.end()) {
-
+    if (inFbxNode->GetNodeAttribute() != nullptr && m_importNodes.find(inFbxNode)
+            != m_importNodes.end()) {
         FbxNodeAttribute::EType theAttribType = inFbxNode->GetNodeAttribute()->GetAttributeType();
         switch (theAttribType) {
         case FbxNodeAttribute::eMesh: {
             FbxMesh *theFbxMesh = inFbxNode->GetMesh();
-            if (theFbxMesh == NULL || theFbxMesh->GetControlPointsCount() == 0) {
+            if (theFbxMesh == nullptr || theFbxMesh->GetControlPointsCount() == 0)
                 ProcessGroup(inFbxNode);
-            } else {
+            else
                 ProcessMesh(inFbxNode);
-            }
-        } break;
-        // Ignore skeleton for now; we add them as the first child of the model with a special
-        // flag indicating they ignore parent transforms.
-        case FbxNodeAttribute::eSkeleton:
             break;
-        default:
+        }
+        case FbxNodeAttribute::eLight: {
+            ProcessLight(inFbxNode);
+            break;
+        }
+        case FbxNodeAttribute::eCamera: {
+            ProcessCamera(inFbxNode);
+            break;
+        }
+        case FbxNodeAttribute::eSkeleton: {
+            // Ignore skeleton for now; we add them as the first child of the model with a special
+            // flag indicating they ignore parent transforms.
+            break;
+        }
+        default: {
             ProcessGroup(inFbxNode);
             break;
         }
-    } else
+        }
+    } else {
         ProcessNodeChildren(inFbxNode);
+    }
 }
 
 /**
@@ -550,7 +617,7 @@ FbxAMatrix getGeometricTransform(const FbxNode *pNode)
 *
 * @returna no return
 */
-void FbxDomWalker::ProcessTransform(FbxNode *inFbxNode)
+void FbxDomWalker::ProcessTransform(FbxNode *inFbxNode, bool ignoreScale)
 {
     std::vector<INodeTransform *> theTransforms;
 
@@ -563,6 +630,11 @@ void FbxDomWalker::ProcessTransform(FbxNode *inFbxNode)
         FbxAMatrix theTransformMatrix;
 
         theTransformMatrix = inFbxNode->EvaluateLocalTransform();
+
+        // Lights and cameras should ignore scale
+        if (ignoreScale)
+            theTransformMatrix.SetS(FbxVector4(1.0, 1.0, 1.0, 1.0));
+        // TODO: Do some rotation magic if m_AuthoringToolType == Blender?
 
         theTransforms.push_back(new NodeTransform(ETransformType_Matrix4x4));
 
@@ -1134,7 +1206,7 @@ long RetrieveFaceIndex(FbxDomWalker::TFaceIndicies &ioFaceIndicies,
 void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
 {
     FbxMesh *theFbxMesh = inFbxNode->GetMesh();
-    if (theFbxMesh == NULL) {
+    if (theFbxMesh == nullptr) {
         QT3DS_ASSERT(false);
         return;
     }
@@ -1950,7 +2022,7 @@ void FbxDomWalker::QueryMaterialInfo(FbxMesh *fbxMesh, SFaceMaterialInfo *info)
 {
     for (int l = 0; l < fbxMesh->GetElementMaterialCount(); l++) {
         FbxGeometryElementMaterial *theMaterialElement = fbxMesh->GetElementMaterial(l);
-        FbxSurfaceMaterial *theMaterial = NULL;
+        FbxSurfaceMaterial *theMaterial = nullptr;
         int theMatId = -1;
         theMaterial = fbxMesh->GetNode()->GetMaterial(
             theMaterialElement->GetIndexArray().GetAt(info->m_StartFace));
@@ -2307,9 +2379,9 @@ void FbxDomWalker::ProcessAnimLayer(FbxNode *inNode, FbxAnimLayer *inAnimLayer)
         FbxAnimCurveNode *theRotateCurveNode = inNode->LclRotation.GetCurveNode(inAnimLayer);
         FbxAnimCurveNode *theScaleCurveNode = inNode->LclScaling.GetCurveNode(inAnimLayer);
         // color animation
-        FbxAnimCurve *redAnimCurve = NULL;
-        FbxAnimCurve *greenAnimCurve = NULL;
-        FbxAnimCurve *blueAnimCurve = NULL;
+        FbxAnimCurve *redAnimCurve = nullptr;
+        FbxAnimCurve *greenAnimCurve = nullptr;
+        FbxAnimCurve *blueAnimCurve = nullptr;
 
         FbxNodeAttribute *nodeAttribute = inNode->GetNodeAttribute();
         if (nodeAttribute) {
@@ -2417,7 +2489,7 @@ void FbxDomWalker::ProcessAnimLayer(FbxNode *inNode, FbxAnimLayer *inAnimLayer)
 */
 void FbxDomWalker::ProcessAnimationStacks()
 {
-    if (m_FbxScene != NULL) {
+    if (m_FbxScene != nullptr) {
         // get animation stack count
         int numAnimStacks = m_FbxScene->GetSrcObjectCount<FbxAnimStack>();
 
