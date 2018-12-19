@@ -62,6 +62,18 @@ DataModelDataType::Value SImportModel::GetPropertyDataType(const wchar_t *inProp
     return SImportNode::GetPropertyDataType(inPropertyName);
 }
 
+DataModelDataType::Value SImportLight::GetPropertyDataType(const wchar_t *inPropertyName)
+{
+    ITERATE_COMPOSER_LIGHT_PROPERTIES
+    return SImportNode::GetPropertyDataType(inPropertyName);
+}
+
+DataModelDataType::Value SImportCamera::GetPropertyDataType(const wchar_t *inPropertyName)
+{
+    ITERATE_COMPOSER_CAMERA_PROPERTIES
+    return SImportNode::GetPropertyDataType(inPropertyName);
+}
+
 DataModelDataType::Value SImportMaterial::GetPropertyDataType(const wchar_t *inPropertyName)
 {
     ITERATE_COMPOSER_MATERIAL_PROPERTIES
@@ -139,6 +151,18 @@ DataModelDataType::Value SImportNode::GetPropertyDataType(const char8_t *inPrope
 DataModelDataType::Value SImportModel::GetPropertyDataType(const char8_t *inPropertyName)
 {
     ITERATE_COMPOSER_MODEL_PROPERTIES
+    return SImportNode::GetPropertyDataType(inPropertyName);
+}
+
+DataModelDataType::Value SImportLight::GetPropertyDataType(const char8_t *inPropertyName)
+{
+    ITERATE_COMPOSER_LIGHT_PROPERTIES
+    return SImportNode::GetPropertyDataType(inPropertyName);
+}
+
+DataModelDataType::Value SImportCamera::GetPropertyDataType(const char8_t *inPropertyName)
+{
+    ITERATE_COMPOSER_CAMERA_PROPERTIES
     return SImportNode::GetPropertyDataType(inPropertyName);
 }
 

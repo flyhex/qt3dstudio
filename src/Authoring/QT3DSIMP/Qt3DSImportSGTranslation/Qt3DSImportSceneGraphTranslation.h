@@ -359,8 +359,11 @@ public:
                                   long inAuthoringToolVersion) = 0;
 
     virtual void PushLight(const char *inName) = 0;
+    virtual void SetLightProperties(int type, const SFloat3 &color, double intensity,
+                                    double linearfade, double quadfade, bool shadows) = 0;
     virtual void PopLight() = 0;
     virtual void PushCamera(const char *inName) = 0;
+    virtual void SetCameraProperties(double clipstart, double clipend, bool ortho, double fov) = 0;
     virtual void PopCamera() = 0;
     virtual void PushGroup(const char *inName) = 0;
     virtual void SetGroupSkeletonId(long inId) = 0;

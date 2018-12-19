@@ -90,11 +90,17 @@ struct SImportGroup : public SImportNode
 
 struct SImportLight : public SImportNode
 {
+    ITERATE_COMPOSER_LIGHT_PROPERTIES
+    DataModelDataType::Value GetPropertyDataType(const wchar_t *inPropertyName) override;
+    DataModelDataType::Value GetPropertyDataType(const char8_t *inPropertyName) override;
     ComposerObjectTypes::Enum GetObjectType() override { return ComposerObjectTypes::Light; }
 };
 
 struct SImportCamera : public SImportNode
 {
+    ITERATE_COMPOSER_CAMERA_PROPERTIES
+    DataModelDataType::Value GetPropertyDataType(const wchar_t *inPropertyName) override;
+    DataModelDataType::Value GetPropertyDataType(const char8_t *inPropertyName) override;
     ComposerObjectTypes::Enum GetObjectType() override { return ComposerObjectTypes::Camera; }
 };
 

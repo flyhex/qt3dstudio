@@ -482,7 +482,10 @@ void FbxDomWalker::ProcessLight(FbxNode *inFbxNode)
     std::string lightName = inFbxNode->GetName();
     m_Translator->PushLight(lightName.c_str());
     ProcessTransform(inFbxNode, true);
-    // TODO: Import light properties, if possible (QT3DS-2856)
+    FbxLight *light = inFbxNode->GetLight();
+    FbxDouble3 color = light->Color.Get();
+    m_Translator->SetLightProperties(light->LightType.Get(), SFloat3(color[0], color[1], color[2]),
+            light->Intensity.Get(), 0, 0, light->CastShadows.Get());
     ProcessNodeChildren(inFbxNode);
     m_Translator->PopLight();
 }
@@ -499,7 +502,10 @@ void FbxDomWalker::ProcessCamera(FbxNode *inFbxNode)
     std::string cameraName = inFbxNode->GetName();
     m_Translator->PushCamera(cameraName.c_str());
     ProcessTransform(inFbxNode, true);
-    // TODO: Import camera properties, if possible (QT3DS-2856)
+    FbxCamera *camera = inFbxNode->GetCamera();
+    m_Translator->SetCameraProperties(camera->GetNearPlane(), camera->GetFarPlane(),
+                                      camera->ProjectionType.Get() == FbxCamera::eOrthogonal,
+                                      camera->FieldOfView.Get());
     ProcessNodeChildren(inFbxNode);
     m_Translator->PopCamera();
 }
