@@ -19,7 +19,7 @@ qhp.projects            = Qt3DStudio
 qhp.Qt3DStudio.file                = qt3dstudio.qhp
 qhp.Qt3DStudio.namespace           = io.qt.qt3dstudio.$QT_VERSION_TAG
 qhp.Qt3DStudio.virtualFolder       = qt3dstudio
-qhp.Qt3DStudio.indexTitle          = Qt 3D Studio
+qhp.Qt3DStudio.indexTitle          = Qt 3D Studio Manual
 qhp.Qt3DStudio.indexRoot           =
 
 qhp.Qt3DStudio.filterAttributes    = qt3dstudio $QT_VERSION
