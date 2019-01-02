@@ -35,10 +35,14 @@
 #include "Dispatch.h"
 #include "SceneDropTarget.h"
 #include "Q3DStudioRenderer.h"
+#include "SceneView.h"
+#include "StudioPreferences.h"
+#include "StudioProjectSettings.h"
 
 #include <QtGui/qoffscreensurface.h>
 #include <QtGui/qopenglcontext.h>
 #include <QtWidgets/qmessagebox.h>
+#include <QtWidgets/qscrollbar.h>
 #include <QtGui/qevent.h>
 #include <QtGui/qwindow.h>
 #include <QtGui/qscreen.h>
@@ -46,7 +50,15 @@
 namespace Q3DStudio
 {
 
-static bool compareSurfaceFormatVersion(QSurfaceFormat a, QSurfaceFormat b)
+template<typename T>
+T even(const T val)
+{
+    // handle negative values
+    T corr = (val > 0) ? -1 : 1;
+    return (val % 2) ? (val + corr) : val;
+}
+
+static bool compareSurfaceFormatVersion(const QSurfaceFormat &a, const QSurfaceFormat &b)
 {
     if (a.renderableType() != b.renderableType())
         return false;
@@ -122,10 +134,19 @@ static QSurfaceFormat selectSurfaceFormat(QOpenGLWidget *window)
 }
 
 Q3DSPlayerWnd::Q3DSPlayerWnd(QWidget *parent)
-    : QOpenGLWidget(parent)
-    , m_containerWnd(nullptr)
+    : QScrollArea(parent)
     , m_mouseDown(false)
+    , m_renderWindow(new RenderWindow())
+    , m_ViewMode(VIEW_SCENE)
 {
+    m_widget = QWidget::createWindowContainer(m_renderWindow, this);
+    m_widget->setMinimumSize(800, 600);
+    m_widget->setMaximumSize(1920, 1080);
+    m_widget->setAttribute(Qt::WA_TransparentForMouseEvents);
+    m_renderWindow->setFlags(Qt::WindowTransparentForInput);
+    m_renderWindow->m_container = m_widget;
+    setWidget(m_widget);
+
     setAcceptDrops(true);
     RegisterForDnd(this);
     AddMainFlavor(QT3DS_FLAVOR_FILE);
@@ -133,10 +154,23 @@ Q3DSPlayerWnd::Q3DSPlayerWnd(QWidget *parent)
     AddMainFlavor(QT3DS_FLAVOR_ASSET_LIB);
     AddMainFlavor(QT3DS_FLAVOR_BASIC_OBJECTS);
 
-    setFormat(selectSurfaceFormat(this));
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     m_previousToolMode = g_StudioApp.GetToolMode();
+
+    Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.getRenderer());
+    if (!theRenderer.IsInitialized()) {
+        try {
+            theRenderer.Initialize(m_renderWindow);
+        } catch (...) {
+            QMessageBox::critical(this, tr("Fatal Error"),
+                                  tr("Unable to initialize OpenGL.\nThis may be because your "
+                                     "graphic device is not sufficient, or simply because your "
+                                     "driver is too old.\n\nPlease try upgrading your graphics "
+                                     "driver and try again."));
+            exit(1);
+        }
+    }
 }
 
 Q3DSPlayerWnd::~Q3DSPlayerWnd()
@@ -146,7 +180,8 @@ Q3DSPlayerWnd::~Q3DSPlayerWnd()
 
 void Q3DSPlayerWnd::resizeEvent(QResizeEvent *event)
 {
-    QOpenGLWidget::resizeEvent(event);
+    setScrollRanges();
+    recenterClient();
     update();
 }
 
@@ -154,14 +189,16 @@ void Q3DSPlayerWnd::mouseMoveEvent(QMouseEvent *event)
 {
     if (CStudioApp::hasProfileUI()) {
         Q3DStudioRenderer &sr(static_cast<Q3DStudioRenderer &>(g_StudioApp.getRenderer()));
-        sr.engine()->handleMouseMoveEvent(event);
+        QMouseEvent e = *event;
+        e.setLocalPos(sr.scenePoint(e.pos()));
+        sr.engine()->handleMouseMoveEvent(&e);
     }
 
     if (m_mouseDown) {
         long theModifierKeys = 0;
         if (event->buttons() & Qt::LeftButton
                 || (!g_StudioApp.GetCore()->GetDoc()->GetSelectedInstance().Valid()
-                && !m_containerWnd->IsDeploymentView())) {
+                && !isDeploymentView())) {
             // When in edit camera view and nothing is selected, all buttons are mapped
             // as left button. That is how camera control tools work, they are all
             // assuming left button.
@@ -184,7 +221,9 @@ void Q3DSPlayerWnd::mousePressEvent(QMouseEvent *event)
 {
     if (CStudioApp::hasProfileUI()) {
         Q3DStudioRenderer &sr(static_cast<Q3DStudioRenderer &>(g_StudioApp.getRenderer()));
-        sr.engine()->handleMouseMoveEvent(event);
+        QMouseEvent e = *event;
+        e.setLocalPos(sr.scenePoint(e.pos()));
+        sr.engine()->handleMousePressEvent(&e);
     }
 
     g_StudioApp.setLastActiveView(this);
@@ -193,7 +232,7 @@ void Q3DSPlayerWnd::mousePressEvent(QMouseEvent *event)
     const Qt::MouseButton btn = event->button();
     bool toolChanged = false;
 
-    if (!m_containerWnd->IsDeploymentView() && (event->modifiers() & Qt::AltModifier)) {
+    if (!isDeploymentView() && (event->modifiers() & Qt::AltModifier)) {
         // We are in edit camera view, so we are in Alt-click camera tool
         // controlling mode
         m_mouseDown = true;
@@ -216,7 +255,7 @@ void Q3DSPlayerWnd::mousePressEvent(QMouseEvent *event)
 
         if (toolChanged) {
             g_StudioApp.SetToolMode(toolMode);
-            Q_EMIT m_containerWnd->toolChanged();
+            Q_EMIT Q3DSPlayerWnd::toolChanged();
             g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDown(SceneDragSenderType::Matte,
                                                                      event->pos(), toolMode);
         }
@@ -244,19 +283,21 @@ void Q3DSPlayerWnd::mouseReleaseEvent(QMouseEvent *event)
 {
     if (CStudioApp::hasProfileUI()) {
         Q3DStudioRenderer &sr(static_cast<Q3DStudioRenderer &>(g_StudioApp.getRenderer()));
-        sr.engine()->handleMouseMoveEvent(event);
+        QMouseEvent e = *event;
+        e.setLocalPos(sr.scenePoint(e.pos()));
+        sr.engine()->handleMouseReleaseEvent(event);
     }
 
     const Qt::MouseButton btn = event->button();
 
-    if (!m_containerWnd->IsDeploymentView()) {
+    if (!isDeploymentView()) {
         // We are in edit camera view
         g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseUp(SceneDragSenderType::Matte);
         g_StudioApp.GetCore()->CommitCurrentCommand();
         m_mouseDown = false;
         // Restore normal tool mode
         g_StudioApp.SetToolMode(m_previousToolMode);
-        Q_EMIT m_containerWnd->toolChanged();
+        Q_EMIT toolChanged();
     } else {
         if (btn == Qt::LeftButton || btn == Qt::RightButton) {
             g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseUp(
@@ -277,7 +318,9 @@ void Q3DSPlayerWnd::mouseDoubleClickEvent(QMouseEvent *event)
 {
     if (CStudioApp::hasProfileUI()) {
         Q3DStudioRenderer &sr(static_cast<Q3DStudioRenderer &>(g_StudioApp.getRenderer()));
-        sr.engine()->handleMouseMoveEvent(event);
+        QMouseEvent e = *event;
+        e.setLocalPos(sr.scenePoint(e.pos()));
+        sr.engine()->handleMouseDoubleClickEvent(&e);
     }
 
     g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDblClick(
@@ -297,42 +340,9 @@ bool Q3DSPlayerWnd::OnDragReceive(CDropSource &inSource)
     return theTarget.Drop(inSource);
 }
 
-void Q3DSPlayerWnd::setContainerWnd(CPlayerContainerWnd *inContainerWnd)
-{
-    m_containerWnd = inContainerWnd;
-    updateGeometry();
-}
-
 QSize Q3DSPlayerWnd::sizeHint() const
 {
-    if (m_containerWnd)
-        return m_containerWnd->GetEffectivePresentationSize();
-    else
-        return QOpenGLWidget::sizeHint();
-}
-
-void Q3DSPlayerWnd::initializeGL()
-{
-    Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.getRenderer());
-    if (!theRenderer.IsInitialized()) {
-        try {
-            theRenderer.Initialize(this);
-        } catch (...) {
-            QMessageBox::critical(this, tr("Fatal Error"),
-                                  tr("Unable to initialize OpenGL.\nThis may be because your "
-                                     "graphic device is not sufficient, or simply because your "
-                                     "driver is too old.\n\nPlease try upgrading your graphics "
-                                     "driver and try again."));
-            exit(1);
-        }
-    }
-}
-
-void Q3DSPlayerWnd::paintGL()
-{
-    g_StudioApp.getRenderer().RenderNow();
-
-    Q_EMIT newFrame();
+    return effectivePresentationSize();
 }
 
 qreal Q3DSPlayerWnd::fixedDevicePixelRatio() const
@@ -346,12 +356,178 @@ qreal Q3DSPlayerWnd::fixedDevicePixelRatio() const
     return ratio;
 }
 
-void Q3DSPlayerWnd::resizeGL(int width, int height)
+//==============================================================================
+/**
+ * SetPlayerWndPosition: Sets the position of the child player window
+ *
+ * Called when the view is scrolled to position the child player window
+ *
+ */
+//==============================================================================
+void Q3DSPlayerWnd::setWindowPosition()
 {
-    QSize size(width, height);
-    Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.getRenderer());
-    theRenderer.SetViewRect(QRect(0, 0, int(width * fixedDevicePixelRatio()),
-                                        int(height * fixedDevicePixelRatio())), size);
+    recenterClient();
+}
+
+//==============================================================================
+/**
+ *  SetScrollRanges: Sets the scroll ranges when the view is being resized
+ */
+//==============================================================================
+void Q3DSPlayerWnd::setScrollRanges()
+{
+    long theScrollWidth = 0;
+    long theScrollHeight = 0;
+
+    if (shouldHideScrollBars()) {
+        horizontalScrollBar()->setRange(0, 0);
+        verticalScrollBar()->setRange(0, 0);
+        horizontalScrollBar()->setValue(0);
+        verticalScrollBar()->setValue(0);
+    } else {
+        QSize theSize = effectivePresentationSize();
+
+        theScrollWidth = theSize.width();
+        theScrollHeight = theSize.height();
+
+        // Set scrollbar ranges
+        horizontalScrollBar()->setRange(0, theScrollWidth - width());
+        verticalScrollBar()->setRange(0, theScrollHeight - height());
+        horizontalScrollBar()->setPageStep(width());
+        verticalScrollBar()->setPageStep(height());
+        horizontalScrollBar()->setVisible(true);
+        verticalScrollBar()->setVisible(true);
+    }
+}
+
+
+//==============================================================================
+/**
+ *  RecenterClient: Recenters the Client rect in the View's client area.
+ */
+//==============================================================================
+void Q3DSPlayerWnd::recenterClient()
+{
+    QRect theViewRect = rect();
+    QSize theClientSize;
+    QSize viewSize;
+    m_ClientRect = theViewRect;
+    viewSize = theViewRect.size();
+
+    if (!shouldHideScrollBars()) {
+        theClientSize = effectivePresentationSize();
+
+        if (theClientSize.width() < theViewRect.width()) {
+            m_ClientRect.setLeft(
+                    even((theViewRect.width() / 2) - (theClientSize.width() / 2)));
+        } else {
+            m_ClientRect.setLeft(-horizontalScrollBar()->value());
+        }
+        m_ClientRect.setWidth(theClientSize.width());
+
+        if (theClientSize.height() < theViewRect.height()) {
+            m_ClientRect.setTop(
+                    even((theViewRect.height() / 2) - (theClientSize.height() / 2)));
+        } else {
+            m_ClientRect.setTop(-verticalScrollBar()->value());
+        }
+        m_ClientRect.setHeight(theClientSize.height());
+
+    }
+
+    QRect glRect = m_ClientRect;
+    glRect.setX(m_ClientRect.left() * fixedDevicePixelRatio());
+    glRect.setY(m_ClientRect.top() * fixedDevicePixelRatio());
+    glRect.setWidth(int(fixedDevicePixelRatio() * m_ClientRect.width()));
+    glRect.setHeight(int(fixedDevicePixelRatio() * m_ClientRect.height()));
+    m_widget->setGeometry(m_ClientRect);
+    m_widget->setFixedSize(m_ClientRect.size());
+    m_renderWindow->resize(glRect.size());
+    g_StudioApp.getRenderer().SetViewRect(glRect, glRect.size());
+}
+
+//==============================================================================
+/**
+ *  OnRulerGuideToggled:
+ *  Handle scrollbar position when ruler, guide has been toggled
+ */
+//==============================================================================
+void Q3DSPlayerWnd::onRulerGuideToggled()
+{
+    int scrollAmount = g_StudioApp.getRenderer().AreGuidesEnabled() ? 16 : -16;
+    bool hasHorz = horizontalScrollBar()->isVisible();
+    bool hasVert = verticalScrollBar()->isVisible();
+    int hscrollPos = 0, vscrollPos = 0;
+    if (hasHorz)
+        hscrollPos = qMax(horizontalScrollBar()->value() + scrollAmount, 0);
+    if (hasVert)
+        vscrollPos = qMax(verticalScrollBar()->value() + scrollAmount, 0);
+    horizontalScrollBar()->setValue(hscrollPos);
+    verticalScrollBar()->setValue(vscrollPos);
+    m_widget->update();
+}
+
+//==============================================================================
+/**
+ *  Set the view mode of the current scene view, whether we are in editing mode
+ *  or deployment mode. For editing mode, we want to use the full scene area without
+ *  any matte area.
+ *  @param inViewMode  the view mode of this scene
+ */
+void Q3DSPlayerWnd::setViewMode(EViewMode inViewMode)
+{
+    m_ViewMode = inViewMode;
+    m_SceneView->recheckSizingMode();
+}
+
+//==============================================================================
+/**
+ *  Checks whether we are in deployment view mode.
+ *  @return true if is in deployment view mode, else false
+ */
+bool Q3DSPlayerWnd::isDeploymentView()
+{
+    return m_ViewMode == VIEW_SCENE ? true : false;
+}
+
+QSize Q3DSPlayerWnd::effectivePresentationSize() const
+{
+    QSize theSize = g_StudioApp.GetCore()->GetStudioProjectSettings()->getPresentationSize();
+
+    // If we have guides, resize the window with enough space for the guides as well as the
+    // presentation
+    // This is a very dirty hack because we are of course hardcoding the size of the guides.
+    // If the size of the guides never changes, the bet paid off.
+    // TODO: redo for guide rendering
+#if RUNTIME_SPLIT_TEMPORARILY_REMOVED
+    if (g_StudioApp.getRenderer().AreGuidesEnabled())
+        theSize += QSize(CStudioPreferences::guideSize(), CStudioPreferences::guideSize());
+#endif
+    return theSize / fixedDevicePixelRatio();
+}
+
+void Q3DSPlayerWnd::wheelEvent(QWheelEvent* event)
+{
+    const bool theCtrlKeyIsDown = event->modifiers() & Qt::ControlModifier;
+
+    if (!theCtrlKeyIsDown && !isDeploymentView()) {
+        // Zoom when in edit camera view
+        g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseWheel(
+                    SceneDragSenderType::Matte, event->delta(), STUDIO_TOOLMODE_CAMERA_ZOOM);
+    } else {
+        // Otherwise, scroll the view
+        QScrollArea::wheelEvent(event);
+    }
+}
+
+void Q3DSPlayerWnd::scrollContentsBy(int, int)
+{
+    setWindowPosition();
+}
+
+bool Q3DSPlayerWnd::shouldHideScrollBars()
+{
+    return m_ViewMode == VIEW_EDIT || g_StudioApp.IsAuthorZoom();
 }
 
 }

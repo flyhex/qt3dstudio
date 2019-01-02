@@ -238,8 +238,6 @@ HEADERS += \
     UI/EditCameraBar.h \
     UI/GLVersionDlg.h \
     UI/InterpolationDlg.h \
-    UI/PlayerContainerWnd.h \
-    UI/PlayerWnd.h \
     UI/RecentItems.h \
     UI/ResetKeyframeValuesDlg.h \
     UI/SceneView.h \
@@ -405,8 +403,6 @@ SOURCES += \
     UI/EditorPane.cpp \
     UI/GLVersionDlg.cpp \
     UI/InterpolationDlg.cpp \
-    UI/PlayerContainerWnd.cpp \
-    UI/PlayerWnd.cpp \
     UI/RecentItems.cpp \
     UI/ResetKeyframeValuesDlg.cpp \
     UI/SceneView.cpp \

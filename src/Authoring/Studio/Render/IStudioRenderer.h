@@ -39,6 +39,7 @@
 
 QT_BEGIN_NAMESPACE
 class QWidget;
+class QWindow;
 QT_END_NAMESPACE
 
 namespace Q3DStudio {
@@ -53,7 +54,7 @@ public:
 
     virtual bool IsInitialized() = 0;
 
-    virtual void Initialize(QWidget *inWindow) = 0;
+    virtual void Initialize(QWindow *inWindow) = 0;
 
     virtual void SetViewRect(const QRect &inRect, const QSize &size) = 0;
     virtual void setFullSizePreview(bool enabled) = 0;
@@ -77,11 +78,7 @@ public:
     virtual void Close() = 0;
 
     // synchronously render the content
-    virtual void RenderNow() = 0;
     virtual void getPreviewFbo(QSize &outFboDim, qt3ds::QT3DSU32 &outFboTexture) = 0;
-
-    virtual void MakeContextCurrent() = 0;
-    virtual void ReleaseContext() = 0;
 
     virtual void RegisterSubpresentations(
             const QVector<SubPresentationRecord> &subpresentations) = 0;

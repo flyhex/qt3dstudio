@@ -37,23 +37,22 @@
 #include "ResourceCache.h"
 #include "Core.h"
 #include "IStudioRenderer.h"
+#include "Q3DSPlayerWnd.h"
 
 #include <QtGui/qevent.h>
 
 CSceneView::CSceneView(QWidget *parent)
     : QWidget(parent)
-    , m_playerContainerWnd(new CPlayerContainerWnd(this))
-    , m_playerWnd(new Q3DStudio::Q3DSPlayerWnd(m_playerContainerWnd.data()))
+    , m_playerWnd(new Q3DStudio::Q3DSPlayerWnd(this))
 {
+    m_playerWnd->setSceneView(this);
     m_previousSelectMode = g_StudioApp.GetSelectMode();
 
-    connect(m_playerContainerWnd.data(), &CPlayerContainerWnd::toolChanged,
+    connect(m_playerWnd.data(), &Q3DStudio::Q3DSPlayerWnd::toolChanged,
             this, [=](){ setViewCursor(); Q_EMIT toolChanged(); });
 
     connect(m_playerWnd.data(), &Q3DStudio::Q3DSPlayerWnd::dropReceived,
             this, &CSceneView::onDropReceived);
-
-    m_playerContainerWnd->SetPlayerWnd(m_playerWnd.data());
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
@@ -96,10 +95,10 @@ void CSceneView::showEvent(QShowEvent *event)
 {
     QWidget::showEvent(event);
 
-    m_playerContainerWnd->RecenterClient();
+    m_playerWnd->recenterClient();
 
     // Set the scroll information.
-    m_playerContainerWnd->SetScrollRanges();
+    m_playerWnd->setScrollRanges();
 
     // Create the cursors
     m_arrowCursor = CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_ARROW);
@@ -244,20 +243,20 @@ void CSceneView::recalcMatte()
     QRect theClientRect = rect();
 
     // Adjust the client area based if rulers are visible
-    if (m_playerContainerWnd) {
-        m_playerContainerWnd->setGeometry(theXOffset, theYOffset,
+    if (m_playerWnd) {
+        m_playerWnd->setGeometry(theXOffset, theYOffset,
                                           theClientRect.width() - theXOffset,
                                           theClientRect.height() - theYOffset);
 
         // Recenter the Client rect
-        m_playerContainerWnd->RecenterClient();
+        m_playerWnd->recenterClient();
     }
 }
 
 void CSceneView::resizeEvent(QResizeEvent* event)
 {
     QWidget::resizeEvent(event);
-    if (m_playerContainerWnd) {
+    if (m_playerWnd) {
         recalcMatte();
         setPlayerWndPosition();
         g_StudioApp.GetCore()->GetDoc( )->GetSceneGraph()->RequestRender();
@@ -275,9 +274,9 @@ void CSceneView::resizeEvent(QResizeEvent* event)
 void CSceneView::setPlayerWndPosition()
 {
     // Move the child player window to coincide with the scrollbars
-    if (m_playerContainerWnd) {
-        m_playerContainerWnd->SetPlayerWndPosition();
-        m_playerContainerWnd->update();
+    if (m_playerWnd) {
+        m_playerWnd->setWindowPosition();
+        m_playerWnd->update();
     }
 }
 
@@ -289,8 +288,8 @@ void CSceneView::setPlayerWndPosition()
  */
 void CSceneView::recheckSizingMode()
 {
-    if (m_playerContainerWnd)
-        m_playerContainerWnd->SetScrollRanges();
+    if (m_playerWnd)
+        m_playerWnd->setScrollRanges();
 }
 
 //==============================================================================
@@ -303,8 +302,8 @@ bool CSceneView::isDeploymentView()
     // Default mode is SCENE_VIEW so if playercontainerwnd does not exist (should only happen on
     // startup), it is deployment view
     bool theStatus = true;
-    if (m_playerContainerWnd)
-        theStatus = m_playerContainerWnd->IsDeploymentView();
+    if (m_playerWnd)
+        theStatus = m_playerWnd->isDeploymentView();
 
     return theStatus;
 }
@@ -316,16 +315,16 @@ bool CSceneView::isDeploymentView()
  *	use the full scene area without any matte area.
  *	@param inViewMode	the view mode of this scene
  */
-void CSceneView::setViewMode(CPlayerContainerWnd::EViewMode inViewMode)
+void CSceneView::setViewMode(Q3DStudio::Q3DSPlayerWnd::EViewMode inViewMode)
 {
-    if (m_playerContainerWnd)
-        m_playerContainerWnd->SetViewMode(inViewMode);
+    if (m_playerWnd)
+        m_playerWnd->setViewMode(inViewMode);
 }
 
 void CSceneView::setToolMode(long inMode)
 {
-    if (m_playerContainerWnd)
-        m_playerContainerWnd->setToolMode(inMode);
+    if (m_playerWnd)
+        m_playerWnd->setToolMode(inMode);
     setViewCursor();
 }
 
@@ -338,15 +337,15 @@ void CSceneView::setToolMode(long inMode)
 void CSceneView::onEditCameraChanged()
 {
     // Reset any scrolling and recalculate the window position.
-    if (m_playerContainerWnd) {
-        m_playerContainerWnd->SetScrollRanges();
+    if (m_playerWnd) {
+        m_playerWnd->setScrollRanges();
         recalcMatte();
         setPlayerWndPosition();
     }
 
     // Update the view mode accordingly
-    setViewMode(g_StudioApp.getRenderer().GetEditCamera() >= 0 ? CPlayerContainerWnd::VIEW_EDIT
-                                                               : CPlayerContainerWnd::VIEW_SCENE);
+    setViewMode(g_StudioApp.getRenderer().GetEditCamera() >= 0
+                ? Q3DStudio::Q3DSPlayerWnd::VIEW_EDIT : Q3DStudio::Q3DSPlayerWnd::VIEW_SCENE);
     m_playerWnd->update();
 }
 
@@ -357,5 +356,5 @@ void CSceneView::onAuthorZoomChanged()
 
 void CSceneView::onRulerGuideToggled()
 {
-    m_playerContainerWnd->OnRulerGuideToggled();
+    m_playerWnd->onRulerGuideToggled();
 }

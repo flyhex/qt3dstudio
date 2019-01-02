@@ -41,25 +41,75 @@
 //
 
 #include "DropContainer.h"
-#include "PlayerContainerWnd.h"
 
-#include <QtWidgets/qopenglwidget.h>
+#include <QtWidgets/qscrollarea.h>
+#include <QtGui/qwindow.h>
+#include <QtCore/qcoreapplication.h>
 
-class CPlayerContainerWnd;
+class CSceneView;
 class CStudioApp;
 class CMouseCursor;
 class CHotkeys;
 
 namespace Q3DStudio {
 
-class Q3DSPlayerWnd : public QOpenGLWidget, public CWinDropContainer
+class RenderWindow : public QWindow
 {
     Q_OBJECT
 public:
+    QWidget *m_container = nullptr;
+    RenderWindow(QWindow *window = nullptr)
+        : QWindow(window)
+    {
+
+    }
+#ifdef Q_OS_WIN //QTBUG-50505
+    bool event(QEvent *e) override
+    {
+        switch (e->type())
+        {
+            case QEvent::MouseButtonPress:
+            case QEvent::MouseButtonRelease:
+            case QEvent::MouseButtonDblClick:
+            case QEvent::MouseMove:
+            case QEvent::FocusIn:
+            case QEvent::FocusOut:
+            case QEvent::FocusAboutToChange:
+            case QEvent::Enter:
+            case QEvent::Leave:
+            case QEvent::Wheel:
+            case QEvent::TabletMove:
+            case QEvent::TabletPress:
+            case QEvent::TabletRelease:
+            case QEvent::TabletEnterProximity:
+            case QEvent::TabletLeaveProximity:
+            case QEvent::TouchBegin:
+            case QEvent::TouchUpdate:
+            case QEvent::TouchEnd:
+            case QEvent::InputMethodQuery:
+            case QEvent::TouchCancel:
+                return QCoreApplication::sendEvent(m_container, e);
+            default:
+                break;
+        }
+        return QWindow::event(e);
+    }
+#endif
+};
+
+class Q3DSPlayerWnd : public QScrollArea, public CWinDropContainer
+{
+    Q_OBJECT
+public:
+
+    typedef enum
+    {
+        VIEW_EDIT = 0,
+        VIEW_SCENE,
+    }  EViewMode;
+
     explicit Q3DSPlayerWnd(QWidget *parent = nullptr);
     ~Q3DSPlayerWnd() override;
-
-    void setContainerWnd(CPlayerContainerWnd *inSceneView);
 
     QSize sizeHint() const override;
 
@@ -70,17 +120,37 @@ public:
 
     qreal fixedDevicePixelRatio() const;
     void setToolMode(long toolMode) { m_previousToolMode = toolMode; }
+    void setWindowPosition();
+
+    void setScrollRanges();
+    void recenterClient();
+    void onRulerGuideToggled();
+
+    void setViewMode(EViewMode inViewMode);
+    EViewMode viewMode();
+    bool isDeploymentView();
+
+    QRect displayedClientRect() const { return m_ClientRect; }
+
+    QSize effectivePresentationSize() const;
+
+    void setSceneView(CSceneView *view) { m_SceneView = view; }
 
 protected:
 
-    CPlayerContainerWnd *m_containerWnd;
+    RenderWindow *m_renderWindow;
+    QWidget *m_widget;
     bool m_mouseDown;
     bool m_resumePlayOnMouseRelease = false;
     long m_previousToolMode;
+    CSceneView *m_SceneView;
+    QRect m_ClientRect;
+    EViewMode m_ViewMode;
 
 Q_SIGNALS:
     void dropReceived();
     void newFrame();
+    void toolChanged();
 
 protected:
     void mouseMoveEvent(QMouseEvent *event) override;
@@ -88,9 +158,10 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseDoubleClickEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
-    void initializeGL() override;
-    void resizeGL(int w, int h) override;
-    void paintGL() override;
+    void wheelEvent(QWheelEvent *) override;
+    void scrollContentsBy(int, int) override;
+
+    bool shouldHideScrollBars();
 };
 
 }

@@ -33,7 +33,6 @@
 #pragma once
 
 #include "Q3DSPlayerWnd.h"
-#include "PlayerContainerWnd.h"
 #include "DispatchListeners.h"
 
 #include <QtWidgets/qwidget.h>
@@ -46,7 +45,6 @@ class CSceneView : public QWidget,
 {
     Q_OBJECT
 protected:
-    QScopedPointer<CPlayerContainerWnd> m_playerContainerWnd; // first-level child
     QScopedPointer<Q3DStudio::Q3DSPlayerWnd> m_playerWnd; // second-level child (grandchild)
     QCursor m_arrowCursor; // A pointer to the current cursor (changes according to mode)
     QCursor m_cursorGroupMove; // The move group cursor
@@ -73,7 +71,7 @@ public:
 
     // redirect to/from PlayerContainerWnd
     bool isDeploymentView();
-    void setViewMode(CPlayerContainerWnd::EViewMode inViewMode);
+    void setViewMode(Q3DStudio::Q3DSPlayerWnd::EViewMode inViewMode);
     void setToolMode(long inMode);
 
     void onRulerGuideToggled();

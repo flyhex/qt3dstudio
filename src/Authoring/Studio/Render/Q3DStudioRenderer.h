@@ -83,7 +83,7 @@ public:
     qt3ds::foundation::IStringTable *GetRenderStringTable() override;
     void RequestRender() override;
     bool IsInitialized() override;
-    void Initialize(QWidget *inWindow) override;
+    void Initialize(QWindow *inWindow) override;
     void SetViewRect(const QRect &inRect, const QSize &size) override;
     void setFullSizePreview(bool enabled) override;
     void GetEditCameraList(QStringList &outCameras) override;
@@ -98,10 +98,7 @@ public:
     QT3DSI32 GetEditCamera() const override;
     void EditCameraZoomToFit() override;
     void Close() override;
-    void RenderNow() override;
     void getPreviewFbo(QSize &outFboDim, qt3ds::QT3DSU32 &outFboTexture) override;
-    void MakeContextCurrent() override;
-    void ReleaseContext() override;
     void RegisterSubpresentations(
             const QVector<SubPresentationRecord> &subpresentations) override;
 
@@ -111,6 +108,7 @@ public:
     {
         return m_viewRect;
     }
+    QPoint scenePoint(const QPoint &viewPoint);
 protected:
     void OnBeginDataModelNotifications() override;
     void OnEndDataModelNotifications() override;
@@ -155,7 +153,7 @@ private:
                                       qreal outerLeft, qreal outerRight);
 
     PickTargetAreas getPickArea(const QPoint &point);
-    QPoint scenePoint(const QPoint &viewPoint);
+
     qt3ds::foundation::Option<qt3dsdm::SGuideInfo> pickRulers(CPt inMouseCoords);
     SStudioPickValue pick(const QPoint &inMouseCoords, SelectMode inSelectMode);
     void handlePickResult();
@@ -166,7 +164,7 @@ private:
     qt3dsdm::TSignalConnectionPtr m_selectionSignal;
     QSharedPointer<Q3DSEngine> m_engine;
     QSharedPointer<Q3DSUipPresentation> m_presentation;
-    QOpenGLWidget *m_widget = nullptr;
+    QWindow *m_window = nullptr;
     Qt3DRender::QRenderAspect *m_renderAspect = nullptr;
     Q3DSViewportSettings m_viewportSettings;
     QScopedPointer<Q3DSTranslation> m_translation;
@@ -180,6 +178,7 @@ private:
     bool m_guidesEnabled = true;
     bool m_hasPresentation = false;
     bool m_renderRequested = false;
+    bool m_setSubpresentationsCalled = false;
     int m_editCameraIndex = -1;
     SStudioPickValue m_pickResult;
     CUpdateableDocumentEditor m_updatableEditor;
@@ -194,6 +193,7 @@ private:
     QVector<SFontEntry> m_fonts;
     QVector<QString> m_systemFonts;
     QVector<QString> m_projectFonts;
+    QVector<SubPresentationRecord> m_subpresentations;
 };
 
 }

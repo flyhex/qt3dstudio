@@ -147,6 +147,8 @@ Q3DSTranslation::Q3DSTranslation(Q3DStudioRenderer &inRenderer,
         std::bind(&Q3DSTranslation::markBeginComponentSeconds, this, std::placeholders::_1)));
     m_signalConnections.push_back(theProvider->ConnectComponentSeconds(
         std::bind(&Q3DSTranslation::markComponentSeconds, this, std::placeholders::_1)));
+
+    clearDirtySet();
 }
 
 Q3DSTranslation::THandleTranslatorPairList &Q3DSTranslation::getTranslatorsForInstance(

@@ -33,7 +33,6 @@
 #pragma warning(disable : 4100) // unreferenced formal parameter
 #endif
 #include "StudioApp.h"
-#include "PlayerWnd.h"
 #include "DataInputDlg.h"
 #include "qtsingleapplication.h"
 #include "qtlocalpeer.h"
@@ -2215,6 +2214,6 @@ void CStudioApp::verifyDatainputBindings()
 
 bool CStudioApp::hasProfileUI()
 {
-    static const bool profileui = qEnvironmentVariableIsSet("QT3DS_PROFILEUI");
+    static const bool profileui = qEnvironmentVariableIntValue("QT3DS_PROFILEUI") > 0;
     return profileui;
 }

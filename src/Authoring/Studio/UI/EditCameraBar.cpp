@@ -141,12 +141,12 @@ void CEditCameraBar::HandleCameraChanged(int inIndex)
         theRenderer.SetEditCamera(inIndex);
         m_ActiveCameraIndex = inIndex;
         if (m_SceneView)
-            m_SceneView->setViewMode(CPlayerContainerWnd::VIEW_EDIT);
+            m_SceneView->setViewMode(Q3DStudio::Q3DSPlayerWnd::VIEW_EDIT);
     } else if (inIndex > theNumCameras) {
         theRenderer.SetEditCamera(-1);
         m_ActiveCameraIndex = inIndex;
         if (m_SceneView)
-            m_SceneView->setViewMode(CPlayerContainerWnd::VIEW_SCENE);
+            m_SceneView->setViewMode(Q3DStudio::Q3DSPlayerWnd::VIEW_SCENE);
     } else {
         m_CameraSelector->setCurrentIndex(m_ActiveCameraIndex);
     }

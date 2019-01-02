@@ -101,6 +101,10 @@ Q3DStudioRenderer::Q3DStudioRenderer()
     // Tick marks
     m_lineColor = CStudioPreferences::GetRulerTickColor();
     m_editCameraInformation.resize(g_numEditCameras);
+
+    // create these
+    m_engine.reset(new Q3DSEngine);
+    m_presentation.reset(new Q3DSUipPresentation);
 }
 
 Q3DStudioRenderer::~Q3DStudioRenderer()
@@ -156,29 +160,27 @@ qt3ds::foundation::IStringTable *Q3DStudioRenderer::GetRenderStringTable()
 
 void Q3DStudioRenderer::RequestRender()
 {
-    if (m_widget && !m_renderRequested) {
-        m_widget->update();
-        m_renderRequested = true;
-    }
+
 }
 
 bool Q3DStudioRenderer::IsInitialized()
 {
-    return !m_engine.isNull();
+    return m_window != nullptr;
 }
 
-void Q3DStudioRenderer::Initialize(QWidget *inWindow)
+void Q3DStudioRenderer::Initialize(QWindow *inWindow)
 {
-    m_widget = qobject_cast<QOpenGLWidget *>(inWindow);
+    m_window = inWindow;
 }
 
 void Q3DStudioRenderer::SetViewRect(const QRect &inRect, const QSize &size)
 {
     m_viewRect = inRect;
-    m_size = size;
-    if (!m_engine.isNull())
+    if (!m_engine.isNull() && m_window && size != m_size) {
         m_engine->resize(size, fixedDevicePixelRatio(), false);
-    sendResizeToQt3D(size);
+        //sendResizeToQt3D(size);
+    }
+    m_size = size;
 }
 
 void Q3DStudioRenderer::setFullSizePreview(bool enabled)
@@ -287,10 +289,8 @@ void Q3DStudioRenderer::EditCameraZoomToFit()
 void Q3DStudioRenderer::Close()
 {
     OnClosingPresentation();
-    if (m_engine.data()) {
-        m_engine->setPresentation(nullptr);
-        m_engine.reset();
-    }
+    m_engine.reset();
+    m_presentation.reset();
     m_dispatch.RemoveDataModelListener(this);
     m_dispatch.RemovePresentationChangeListener(this);
     m_dispatch.RemoveSceneDragListener(this);
@@ -422,8 +422,12 @@ void Q3DStudioRenderer::drawGuides(QPainter &painter)
                                  outerLeft, outerRight);
 }
 
+// TODO: redo guide drawing for async rendering
+#if RUNTIME_SPLIT_TEMPORARILY_REMOVED
 void Q3DStudioRenderer::RenderNow()
 {
+    if (m_setSubpresentationsCalled == false)
+        return;
     m_renderRequested = false;
     QOpenGLContextPrivate *ctxD = QOpenGLContextPrivate::get(m_widget->context());
     QScopedValueRollback<GLuint> defaultFboRedirectRollback(ctxD->defaultFboRedirect, 0);
@@ -469,40 +473,33 @@ void Q3DStudioRenderer::RenderNow()
     // draw guides if enabled
     drawGuides(painter);
 }
+#endif
 
 void Q3DStudioRenderer::getPreviewFbo(QSize &outFboDim, qt3ds::QT3DSU32 &outFboTexture)
 {
-    // TODO, old code below:
-//    if (m_Translation) {
-//        outFboDim = QSize(m_Translation->m_previewFboDimensions.x,
-//                          m_Translation->m_previewFboDimensions.y);
-//        // The handle is a void * so first cast to size_t to avoid truncating pointer warning
-//        if (m_Translation->m_previewTexture) {
-//            outFboTexture = static_cast<qt3ds::QT3DSU32>(reinterpret_cast<size_t>(
-//                        m_Translation->m_previewTexture->GetTextureObjectHandle()));
-//        } else {
-//            outFboTexture = 0;
-//        }
+#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
+    if (m_Translation) {
+        outFboDim = QSize(m_Translation->m_previewFboDimensions.x,
+                          m_Translation->m_previewFboDimensions.y);
+        // The handle is a void * so first cast to size_t to avoid truncating pointer warning
+        if (m_Translation->m_previewTexture) {
+            outFboTexture = static_cast<qt3ds::QT3DSU32>(reinterpret_cast<size_t>(
+                        m_Translation->m_previewTexture->GetTextureObjectHandle()));
+        } else {
+            outFboTexture = 0;
+        }
 
-//    } else {
-//        outFboDim = QSize(0, 0);
-//        outFboTexture = 0;
-//    }
-}
-
-void Q3DStudioRenderer::MakeContextCurrent()
-{
-
-}
-
-void Q3DStudioRenderer::ReleaseContext()
-{
-
+    } else {
+        outFboDim = QSize(0, 0);
+        outFboTexture = 0;
+    }
+#endif
 }
 
 void Q3DStudioRenderer::RegisterSubpresentations(
         const QVector<SubPresentationRecord> &subpresentations){
-
+    m_subpresentations = subpresentations;
+    m_setSubpresentationsCalled = true;
 }
 
 void Q3DStudioRenderer::OnBeginDataModelNotifications()
@@ -540,6 +537,7 @@ void Q3DStudioRenderer::OnReloadEffectInstance(qt3dsdm::Qt3DSDMInstanceHandle in
 void Q3DStudioRenderer::OnNewPresentation()
 {
     m_hasPresentation = true;
+    createEngine();
     if (!m_engine.isNull()) {
         createTranslation();
         setupTextRenderer();
@@ -548,19 +546,20 @@ void Q3DStudioRenderer::OnNewPresentation()
 
 void Q3DStudioRenderer::OnClosingPresentation()
 {
-    if (!m_hasPresentation || !m_widget)
+    if (!m_hasPresentation || !m_window)
         return;
-    m_widget->makeCurrent();
+
     if (!m_engine.isNull() && !m_translation.isNull()) {
         auto renderAspectD = static_cast<Qt3DRender::QRenderAspectPrivate *>(
                     Qt3DRender::QRenderAspectPrivate::get(m_renderAspect));
         renderAspectD->renderShutdown();
         m_renderAspect = nullptr;
-        m_widget->doneCurrent();
+
         /* This would destroy render aspect. */
         m_engine->setPresentation(nullptr);
-        m_engine.reset();
+        m_engine.reset(new Q3DSEngine);
         m_translation.reset();
+        m_presentation.reset(new Q3DSUipPresentation);
     }
     m_hasPresentation = false;
 }
@@ -1118,8 +1117,8 @@ void Q3DStudioRenderer::OnSelectionChange()
 qreal Q3DStudioRenderer::fixedDevicePixelRatio() const
 {
     // Fix a problem on X11: https://bugreports.qt.io/browse/QTBUG-65570
-    qreal ratio = m_widget->devicePixelRatio();
-    if (QWindow *w = m_widget->window()->windowHandle()) {
+    qreal ratio = m_window->devicePixelRatio();
+    if (QWindow *w = m_window) {
         if (QScreen *s = w->screen())
             ratio = s->devicePixelRatio();
     }
@@ -1144,21 +1143,14 @@ void Q3DStudioRenderer::sendResizeToQt3D(const QSize &size)
 
 void Q3DStudioRenderer::createEngine()
 {
-    QOpenGLContext *context = QOpenGLContext::currentContext();
-    QSurface *surface = context->surface();
-    QOffscreenSurface *offscreen = nullptr;
     QWindow *window = nullptr;
     QObject *surfaceObject = nullptr;
-    if (surface->surfaceClass() == QSurface::Offscreen) {
-        offscreen = static_cast<QOffscreenSurface*>(surface);
-        surfaceObject = offscreen;
-    } else {
-        window = static_cast<QWindow*>(surface);
-        surfaceObject = window;
-    }
+    surfaceObject = m_window;
 
-    m_engine.reset(new Q3DSEngine);
-    m_presentation.reset(new Q3DSUipPresentation);
+    if (m_engine.isNull())
+        m_engine.reset(new Q3DSEngine);
+    if (m_presentation.isNull())
+        m_presentation.reset(new Q3DSUipPresentation);
 
     Q3DSEngine::Flags flags = Q3DSEngine::WithoutRenderAspect;
 
@@ -1177,7 +1169,7 @@ void Q3DStudioRenderer::createEngine()
     m_engine->setSurface(surfaceObject);
     m_engine->setViewportSettings(&m_viewportSettings);
 
-    m_renderAspect = new Qt3DRender::QRenderAspect(Qt3DRender::QRenderAspect::Synchronous);
+    m_renderAspect = new Qt3DRender::QRenderAspect(Qt3DRender::QRenderAspect::Threaded);
     m_engine->createAspectEngine();
     m_engine->aspectEngine()->registerAspect(m_renderAspect);
 }
@@ -1185,6 +1177,8 @@ void Q3DStudioRenderer::createEngine()
 void Q3DStudioRenderer::createTranslation()
 {
     m_translation.reset(new Q3DSTranslation(*this, m_presentation));
+    m_translation->prepareRender(QRect(0, 0, m_window->size().width(),
+                                       m_window->size().height()), m_window->size());
 }
 
 void Q3DStudioRenderer::reloadFonts()
