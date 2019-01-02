@@ -97,9 +97,9 @@ void CString::Free()
 void CString::SyncCharBuffer() const
 {
     // NULL buffers means it was never created or was dirtied
-    if (m_CharData == NULL) {
+    if (m_CharData.get() == nullptr) {
         // Create new buffer equally as long but char based
-        m_CharData = CreateBuffer<char>();
+        m_CharData.reset(CreateBuffer<char>());
     }
 }
 
@@ -110,9 +110,9 @@ void CString::SyncCharBuffer() const
 void CString::SyncWideBuffer() const
 {
     // NULL buffers means it was never created or was dirtied
-    if (m_WideData == NULL) {
+    if (m_WideData.get() == nullptr) {
         // Create new buffer equally as long but char based
-        m_WideData = CreateBuffer<wchar_t>();
+        m_WideData.reset(CreateBuffer<wchar_t>());
     }
 }
 
@@ -122,10 +122,10 @@ void CString::SyncWideBuffer() const
  */
 void CString::DirtyBuffers()
 {
-    m_CharData = NULL;
-    m_WideData = NULL;
+    m_CharData.reset();
+    m_WideData.reset();
 #ifdef WIN32
-    m_MultiData = NULL;
+    m_MultiData.reset();
 #endif
 }
 
@@ -878,62 +878,6 @@ long CString::Replace(const CString &inString, const CString &inReplacement)
     }
 
     return theFoundCount;
-}
-
-//====================================================================
-/**
- * Sets this string to a string specified via inFormat and parameters
- * in sprintf style
- * DO NOT PASS AN OBJECT INTO THE ...!!  these old sprintf methods work
- * via stack magic and the ... will suck up anything without casting it
- *
- * @param inFormat the format string, e.g. "Qt rocks the %ls"
- * @param ... the parameters to sprint into the format string
- */
-void CString::Format(const wchar_t *inFormat, ...)
-{
-    va_list theArgs;
-    va_start(theArgs, inFormat);
-
-    long theBufferSize = 512;
-
-    long theWrittenCount = -1;
-
-    while (-1 == theWrittenCount) {
-        // If using existing buffer failed, retry using progressively larger temp buffers
-        CAutoPtr<CArrayDeleteHandler<wchar_t>, wchar_t> theBuffer;
-        theBuffer = new wchar_t[theBufferSize];
-
-#ifdef WIN32
-        theWrittenCount = ::_vsnwprintf(theBuffer, theBufferSize, inFormat, theArgs);
-#else
-        theWrittenCount = vswprintf(theBuffer, theBufferSize, inFormat, theArgs);
-#endif
-
-        if (-1 == theWrittenCount) {
-            // Quadruple the buffer size every time we fail
-            theBufferSize *= 4;
-        } else {
-            // Copy the temp buffer to the main string buffer on success
-            Assign(static_cast<wchar_t *>(theBuffer), theWrittenCount);
-        }
-    }
-}
-
-//====================================================================
-/**
- * Scan.
- * @param inFormat is
- */
-long CString::Scan(const char *inFormat, ...) const
-{
-    va_list theArgs;
-    va_start(theArgs, inFormat);
-
-    AssertChar(m_Data); // ok?
-    SyncCharBuffer();
-    return 0; // Bastard Microsoft doesn't implement an sscanf with va_arg...  will have to copy
-              // some code over.
 }
 
 //====================================================================

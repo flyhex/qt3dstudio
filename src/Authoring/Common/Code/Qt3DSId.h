@@ -47,16 +47,9 @@
 #else
 #include "PlatformTypes.h"
 #endif
+#include <QtCore/quuid.h>
 
 namespace Q3DStudio {
-
-typedef struct _TGuidStd
-{
-    unsigned long Data1;
-    unsigned short Data2;
-    unsigned short Data3;
-    unsigned char Data4[8];
-} TGUIDStd;
 
 typedef struct _TGuidPacked
 {
@@ -65,15 +58,6 @@ typedef struct _TGuidPacked
     unsigned long Data3;
     unsigned long Data4;
 } TGUIDPacked;
-
-union UUID {
-    // uuid_t leach;
-    TGUIDStd GuidStd;
-    TGUIDPacked GuidPacked;
-};
-
-// {E5D7768B-9111-45bc-98E6-9B0C44C0B1B6}
-static const UUID UUID_ZERO = {{ 0x0, 0x0, 0x0, { 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 } }};
 
 class CId
 {
@@ -87,22 +71,19 @@ public:
     GUID Convert() const;
 
     bool operator==(const CId &inRVal) const;
-    bool operator==(const Q3DStudio::UUID &inRVal) const;
     bool operator!=(const CId &inRVal) const;
     CId &operator=(const CId &inRVal);
     bool operator<(const CId &inRVal) const;
     bool IsZero() const;
     operator GUID() const;
-    // Not perfected yet!
 
-    Q3DStudio::CString ToString() const;
-    CId &FromString(const Q3DStudio::CString &inStringId);
+    QString ToString() const;
+    CId &FromString(const QString &inStringId);
 
-    operator TGUIDPacked &() { return m_Key.GuidPacked; }
-    operator const TGUIDPacked &() const { return m_Key.GuidPacked; }
+    operator TGUIDPacked () const;
 
 private:
-    UUID m_Key;
+    QUuid m_Key;
 };
 
 typedef std::map<Q3DStudio::CId, Q3DStudio::CId> TIDIDMap;

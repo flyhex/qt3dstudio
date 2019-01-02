@@ -92,10 +92,6 @@
 #include "PlatformStrings.h"
 #include "PlatformConversion.h"
 #include "CommonConstants.h"
-#include "Mutex.h"
-#include "Guard.h"
-#include "Thread.h"
-#include "Conditional.h"
 #include "STLHelpers.h"
 #include "GenericFunctor.h"
 

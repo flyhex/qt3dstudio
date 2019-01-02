@@ -183,7 +183,6 @@ int main(int argc, char *argv[])
 #include "Views.h"
 #include "Qt3DSFile.h"
 #include "Qt3DSFileTools.h"
-#include "ITickTock.h"
 #include "IStudioRenderer.h"
 #include "IDocumentEditor.h"
 #include "StudioUtils.h"
@@ -215,7 +214,7 @@ int main(int argc, char *argv[])
 #include "Qt3DSDMAnimation.h"
 #include "Qt3DSDMDataCore.h"
 #include "IDirectoryWatchingSystem.h"
-#include "ITickTock.h"
+
 #include "foundation/Qt3DSLogging.h"
 
 CStudioApp g_StudioApp;
@@ -808,9 +807,8 @@ struct SIMoveRenameHandler : public Q3DStudio::IMoveRenameHandler
     }
 };
 
-void CStudioApp::setupTimer(long inMessageId, QWidget *inWnd)
+void CStudioApp::setupHandlers(QWidget *inWnd)
 {
-    m_tickTock = ITickTock::CreateTickTock(inMessageId, inWnd);
     getDirectoryWatchingSystem();
     m_core->GetDoc()->SetDirectoryWatchingSystem(m_directoryWatchingSystem);
     m_core->GetDoc()->SetImportFailedHandler(
@@ -819,13 +817,6 @@ void CStudioApp::setupTimer(long inMessageId, QWidget *inWnd)
                 std::make_shared<SIDeletingReferencedObjectHandler>(std::ref(*GetDialogs())));
     m_core->GetDoc()->setMoveRenameHandler(
                 std::make_shared<SIMoveRenameHandler>(std::ref(*GetDialogs())));
-}
-
-ITickTock &CStudioApp::getTickTock()
-{
-    if (m_tickTock == nullptr)
-        throw std::runtime_error("Uninitialized TickTock");
-    return *m_tickTock;
 }
 
 Q3DStudio::IStudioRenderer &CStudioApp::getRenderer()

@@ -32,7 +32,6 @@
 #include "StudioPreferences.h"
 #include "Preferences.h"
 #include <QtGui/qcolor.h>
-#include "MasterP.h"
 #include "CommonConstants.h"
 
 #include <QtGui/qpalette.h>

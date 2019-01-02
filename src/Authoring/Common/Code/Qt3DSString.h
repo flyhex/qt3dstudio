@@ -35,7 +35,6 @@
 #pragma warning(push)
 #endif
 
-#include "AutoPtr.h"
 #include "Qt3DSMacros.h"
 #include "Qt3DSObjectCounter.h"
 
@@ -43,6 +42,7 @@
 #include <stdarg.h>
 #include <ctype.h>
 #include <EASTL/string.h>
+#include <memory>
 
 #include <QtCore/qstring.h>
 
@@ -105,11 +105,11 @@ public:
 protected:
     // Fields
     Qt3DSChar *m_Data;
-    mutable CAutoArrayPtr<wchar_t> m_WideData; ///< Mutable to allow const buffer access operators
-    mutable CAutoArrayPtr<char> m_CharData;
+    mutable std::unique_ptr<wchar_t []> m_WideData; ///< Mutable to allow const buffer access operators
+    mutable std::unique_ptr<char []> m_CharData;
 #ifdef WIN32
     /// Multibyte used on Windows only
-    mutable CAutoArrayPtr<char> m_MultiData;
+    mutable std::unique_ptr<char []> m_MultiData;
 #endif
 
     // Memory management
@@ -304,7 +304,7 @@ public:
     char *GetCharStar() const
     {
         SyncCharBuffer();
-        return m_CharData;
+        return m_CharData.get();
     }
 
 public:
@@ -358,10 +358,6 @@ public:
     long Replace(const CString &inString, const CString &inReplacement);
 
     const Qt3DSChar *c_str() const { return (const wchar_t *)*this; }
-
-    // Format and Scan
-    void Format(const wchar_t *inFormat, ...);
-    long Scan(const char *inFormat, ...) const;
 
     // Static utilities
     static void AssertChar(const Qt3DSChar *inString); ///< Throw if any Qt3DSChar is greater than 255

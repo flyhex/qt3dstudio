@@ -381,11 +381,9 @@ float CVector2::DotProduct(const CVector2 &inVector)
  *	This method takes the current values of the Vector and returns them
  *	in a string in the format X Y Z
  */
-Q3DStudio::CString CVector2::toString()
+QString CVector2::toString()
 {
-    Q3DStudio::CString theStringBuffer;
-    theStringBuffer.Format(_LSTR("%.6f %.6f"), x, y);
-    return theStringBuffer;
+    return QStringLiteral("%1 %2").arg(x, 0, 'g', 6).arg(y, 0, 'g', 6);
 }
 
 //==============================================================================

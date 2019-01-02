@@ -30,7 +30,6 @@
 #include "Qt3DSCommonPrecompile.h"
 
 #include "WinRenderer.h"
-#include "MasterP.h"
 #include "CoreUtils.h"
 
 //=============================================================================

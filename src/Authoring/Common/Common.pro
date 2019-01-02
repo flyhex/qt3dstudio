@@ -37,8 +37,6 @@ PRECOMPILED_HEADER += Code/Qt3DSCommonPrecompile.h
 
 SOURCES += \
     Code/HiResTimer.cpp \
-    Code/MasterP.cpp \
-    Code/MethProf.cpp \
     Code/Pt.cpp \
     Code/StackTokenizer.cpp \
     Code/StringTokenizer.cpp \
@@ -52,8 +50,6 @@ SOURCES += \
     Code/Qt3DSObjectCounter.cpp \
     Code/Qt3DSString.cpp \
     Code/Qt3DSTime.cpp \
-    Code/Thread/Mutex.cpp \
-    Code/Thread/Thread.cpp \
     Code/Exceptions/XMLException.cpp \
     Code/_Win32/Preferences.cpp \
     Code/_Win32/Qt3DSFile.cpp \
@@ -63,8 +59,6 @@ SOURCES += \
     Code/InfoDump/InfoDump.cpp \
     Code/InfoDump/InfoSink.cpp \
     Code/InfoDump/StrVecSink.cpp \
-    Code/IO/BufferedInputStream.cpp \
-    Code/IO/BufferedOutputStream.cpp \
     Code/IO/FileInputStream.cpp \
     Code/IO/FileOutputStream.cpp \
     Code/IO/MemBuf.cpp \
@@ -72,7 +66,6 @@ SOURCES += \
     Code/IO/MemOutputStream.cpp \
     Code/IO/Seekable.cpp \
     Code/EulerAngles/EulerAngles.cpp \
-    Code/Memory/MemoryObject.cpp \
     Code/Serialize/FormattedInputStream.cpp \
     Code/Serialize/FormattedOutputStream.cpp \
     ../Client/Code/Core/Runtime2Integration/Q3DSStringTable.cpp

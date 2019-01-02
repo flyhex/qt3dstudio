@@ -50,7 +50,6 @@
 #include "RecentItems.h"
 #include "PaletteManager.h"
 #include "Core.h"
-#include "ITickTock.h"
 #include "IStudioRenderer.h"
 #include "DataInputListDlg.h"
 #include "StudioTutorialWidget.h"
@@ -99,7 +98,7 @@ CMainFrame::CMainFrame()
     g_StudioApp.GetCore()->GetDispatch()->AddPresentationChangeListener(this);
     g_StudioApp.GetCore()->GetDispatch()->AddFileOpenListener(this);
     g_StudioApp.GetCore()->GetDispatch()->AddClientPlayChangeListener(this);
-    g_StudioApp.setupTimer(WM_STUDIO_TIMER, this);
+    g_StudioApp.setupHandlers(this);
 
     // File Menu
     connect(m_ui->action_New_Project, &QAction::triggered, this, &CMainFrame::OnProjectNew);
@@ -1528,13 +1527,6 @@ void CMainFrame::OnUpdateEditViewLightingEnabled()
 {
     m_ui->actionEdit_Lighting->setChecked(CStudioPreferences::editModeLightingEnabled());
     g_StudioApp.getRenderer().RequestRender();
-}
-
-void CMainFrame::timerEvent(QTimerEvent *event)
-{
-    if (event->timerId() == WM_STUDIO_TIMER)
-        g_StudioApp.getTickTock().ProcessMessages();
-    QMainWindow::timerEvent(event);
 }
 
 void CMainFrame::onViewResetLayout()

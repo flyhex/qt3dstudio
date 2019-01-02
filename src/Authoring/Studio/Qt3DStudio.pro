@@ -419,7 +419,6 @@ SOURCES += \
     Utils/ResourceCache.cpp \
     Utils/StudioUtils.cpp \
     Utils/SystemPreferences.cpp \
-    Utils/TickTock.cpp \
     Workspace/Dialogs.cpp \
     Workspace/Views.cpp \
     Palettes/Project/EditPresentationIdDlg.cpp \

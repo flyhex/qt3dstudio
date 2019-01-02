@@ -30,7 +30,6 @@
 #include "Qt3DSCommonPrecompile.h"
 #include "Dispatch.h"
 #include "DispatchListeners.h"
-#include "MasterP.h"
 #include "Cmd.h"
 #include "SelectedValueImpl.h"
 
@@ -263,8 +262,6 @@ void CDispatch::FireOnLoadingPresentation(bool inIsSubPresentation /*= false */)
  */
 void CDispatch::FireOnNewPresentation()
 {
-    QT3DS_PROFILE(FireOnNewPresentation);
-
     m_PresentationChangeListeners.FireEvent(&CPresentationChangeListener::OnNewPresentation);
 }
 

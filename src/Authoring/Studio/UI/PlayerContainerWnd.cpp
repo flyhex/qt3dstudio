@@ -33,7 +33,6 @@
 #include "StudioProjectSettings.h"
 #include "Dispatch.h"
 #include "HotKeys.h"
-#include "MasterP.h"
 #include "StudioApp.h"
 #include "IStudioRenderer.h"
 #include "PlatformStrings.h"

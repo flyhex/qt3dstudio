@@ -81,7 +81,7 @@ public:
         if (qobject_cast<CSceneView *>(watched) == nullptr
                 && qobject_cast<CMainFrame *>(watched) == nullptr
                 && qobject_cast<QComboBox *>(watched) == nullptr
-                && qobject_cast<CPlayerContainerWnd *>(watched) == nullptr
+                && qobject_cast<Q3DStudio::Q3DSPlayerWnd *>(watched) == nullptr
                 && qobject_cast<QAbstractButton *>(watched) == nullptr) {
             return false;
         }

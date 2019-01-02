@@ -84,7 +84,7 @@ public:
     float DotProduct(const CVector2 &inVector);
     float LengthSquared();
     float Length();
-    Q3DStudio::CString toString();
+    QString toString();
     void fromString(const Q3DStudio::CString &inStringValue);
 };
 

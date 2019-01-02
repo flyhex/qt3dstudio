@@ -45,8 +45,6 @@
 
 #include "Core.h"
 #include "RelativePathTools.h"
-#include "FormattedInputStream.h"
-#include "FormattedOutputStream.h"
 #include "Dispatch.h"
 #include "Qt3DSFileTools.h"
 #include "IDocSceneGraph.h"

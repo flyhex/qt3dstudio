@@ -31,6 +31,7 @@
 #define CMDDATAMODELH
 #include "Qt3DSDMHandles.h"
 #include "Qt3DSString.h"
+#include <memory>
 
 class CDoc;
 class CDispatch;

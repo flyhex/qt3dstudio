@@ -40,7 +40,6 @@
 #include "Preferences.h"
 #include "ProgressView.h"
 #include "Views.h"
-#include "MasterP.h"
 #include "TimeEditDlg.h"
 #include "DurationEditDlg.h"
 #include "StudioPreferences.h"

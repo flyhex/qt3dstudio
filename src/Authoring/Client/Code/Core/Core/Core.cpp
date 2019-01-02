@@ -38,6 +38,7 @@
 #include "Cmd.h"
 #include "StudioConst.h"
 #include "StudioPreferences.h"
+#include "StudioException.h"
 
 #include <QtWidgets/qaction.h>
 

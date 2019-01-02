@@ -87,8 +87,7 @@ public:
     void onAppAbout();
 
     Q3DStudio::IDirectoryWatchingSystem &getDirectoryWatchingSystem();
-    void setupTimer(long inMessageId, QWidget *inWnd);
-    Q3DStudio::ITickTock &getTickTock();
+    void setupHandlers(QWidget *inWnd);
     Q3DStudio::IStudioRenderer &getRenderer();
     void clearGuides();
 #if (defined Q_OS_MACOS)

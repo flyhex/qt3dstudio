@@ -36,14 +36,7 @@
 #include "Qt3DSDMSlides.h"
 #include "Qt3DSDMSignals.h"
 #include "IKeyframesManager.h"
-#include "FileInputStream.h"
-#include "FileOutputStream.h"
-#include "BufferedInputStream.h"
-#include "BufferedOutputStream.h"
-#include "FormattedInputStream.h"
-#include "FormattedOutputStream.h"
 #include "DataModelObjectReferenceHelper.h"
-#include "MasterP.h"
 #include "Dispatch.h"
 #include "Exceptions.h"
 #include "StudioClipboard.h"
@@ -78,6 +71,7 @@
 #include "Q3DSRenderBufferManager.h"
 
 #include <QtCore/qfileinfo.h>
+#include <QtCore/qsavefile.h>
 #include <QtWidgets/qaction.h>
 #include <QtWidgets/qwidget.h>
 #include <QtCore/qtimer.h>
@@ -1436,7 +1430,6 @@ void CDoc::OnComponentSeconds()
     long theTime = GetCurrentClientTime();
 
     m_CurrentViewTime = theTime;
-    QT3DS_PROFILE(NotifyTimeChanged_UpdateAllViews);
 
     m_Core->GetDispatch()->FireOnTimeChanged(m_CurrentViewTime);
 }
@@ -1455,8 +1448,6 @@ void CDoc::NotifyTimeChanged(long inNewTime)
 
 void CDoc::DoNotifyTimeChanged(long inNewTime)
 {
-    QT3DS_PROFILE(NotifyTimeChanged);
-
     // Make sure time is within valid range
     long theMinTime = 0; // min time is always 0
     if (inNewTime < theMinTime)
@@ -1773,15 +1764,14 @@ void CDoc::SaveDocument(const QString &inDocument)
     updatableEditor.EnsureEditor(QString(), __FILE__, __LINE__)
             .removeUnusedFromMaterialContainer();
 
-    // TODO: This should use QSaveFile to ensure .uip contents are never lost during a failed save
-    QFile file(inDocument);
-    if (!file.open(QFile::ReadWrite | QFile::Truncate)) {
+    QSaveFile file(inDocument);
+    if (!file.open(QFile::WriteOnly | QFile::Truncate)) {
         QT3DS_ASSERT(0);
         return;
     }
     // Exceptions here get propagated to the crash dialog.
     SavePresentationFile(&file);
-    file.close();
+    file.commit();
 
     // Rollback material container changes so that undos work (material property changes etc.)
     updatableEditor.RollbackEditor();
@@ -2255,7 +2245,6 @@ int CDoc::LoadStudioData(QIODevice *inInputStream)
     using namespace Q3DStudio;
     qt3ds::QT3DSI32 theVersion = 0;
 
-    QT3DS_PROFILE(LoadStudioData);
     bool theModifiedFlag = false;
 
     try {
@@ -2455,17 +2444,14 @@ DoCreateDOMReader(QIODevice &inStream,
 std::shared_ptr<qt3dsdm::IDOMReader> CDoc::CreateDOMReader(const QString &inFilePath,
                                                            qt3ds::QT3DSI32 &outVersion)
 {
-    using namespace qt3dsdm;
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-    TStringTablePtr theStringTable(
-                m_StudioSystem->GetFullSystem()->GetCoreSystem()->GetDataCore()->GetStringTablePtr());
-    CFileSeekableIOStream theStream(inFilePath.GetCharStar(), FileReadFlags());
-    if (!theStream.IsOpen())
-        return std::shared_ptr<qt3dsdm::IDOMReader>();
-
-    return DoCreateDOMReader(theStream, theStringTable, outVersion);
-#endif
-    return std::shared_ptr<qt3dsdm::IDOMReader>();
+    QFileInfo info(inFilePath);
+    if (info.exists()) {
+        QFile f(info.filePath());
+        f.open(QIODevice::ReadOnly);
+        if (f.isOpen())
+            return CreateDOMReader(f, outVersion);
+    }
+    return {};
 }
 
 std::shared_ptr<qt3dsdm::IDOMReader> CDoc::CreateDOMReader(QIODevice &inStream,

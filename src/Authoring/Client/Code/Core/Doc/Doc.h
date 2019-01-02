@@ -38,7 +38,6 @@
 //==============================================================================
 //	Includes
 //==============================================================================
-#include "Conditional.h"
 #include "Qt3DSFile.h"
 #include "Qt3DSRect.h"
 #include "IDoc.h"
@@ -63,8 +62,6 @@ class CCmdBatch;
 class CStudioProjectSettings;
 class CView;
 class ISelectable;
-class CBufferedInputStream;
-class CBufferedOutputStream;
 class CDataManager;
 class CClientDataModelBridge;
 class IKeyframesManager;

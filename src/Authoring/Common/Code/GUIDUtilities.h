@@ -146,7 +146,7 @@ public:
         outGuid = theID.Convert();
     }
 
-    static GUID FromString(const Q3DStudio::CString &inGuidStr)
+    static GUID FromString(const QString &inGuidStr)
     {
         GUID theGUID = { 0, 0, 0, "" };
         // unsigned long theData[8];
@@ -178,9 +178,9 @@ public:
         return theGUID;
     }
 
-    static Q3DStudio::CString ToString(REFGUID inGuid)
+    static QString ToString(REFGUID inGuid)
     {
-        Q3DStudio::CString theGuidStr;
+        QString theGuidStr;
 
         // theGuidStr.Format( _LSTR( "{%08X-%04hX-%04hX-%02X%02X-%02X%02X%02X%02X%02X%02X}" ),
         //										inGuid.Data1,

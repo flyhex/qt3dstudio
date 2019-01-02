@@ -31,7 +31,6 @@
 
 #include "Control.h"
 #include "Renderer.h"
-#include "MasterP.h"
 #include "StudioUtils.h"
 #include "HotKeys.h"
 #include "ControlGraph.h"

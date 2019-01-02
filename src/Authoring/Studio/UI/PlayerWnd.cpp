@@ -32,7 +32,6 @@
 #include "MainFrm.h"
 #include "SceneView.h"
 #include "Dispatch.h"
-#include "MasterP.h"
 #include "HotKeys.h"
 #include "StudioApp.h"
 #include "Doc.h"

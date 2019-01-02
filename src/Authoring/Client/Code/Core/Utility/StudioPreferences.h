@@ -35,6 +35,8 @@
 #include <qglobal.h>
 #include <QtGui/qbrush.h>
 
+#include <memory>
+
 #include "CoreConst.h"
 #include "Preferences.h"
 #include "Rct.h"
