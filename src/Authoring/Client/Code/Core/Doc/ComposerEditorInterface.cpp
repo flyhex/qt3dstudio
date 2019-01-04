@@ -268,15 +268,15 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
 
     void createMaterial(const InstanceDesc &desc, TImportId inParent) override
     {
-        Q3DStudio::CString materialName = desc.m_Id;
+        Q3DStudio::CString materialName = CFilePath::MakeSafeFileStem(desc.m_Id);
         Option<SValue> name = m_ImportObj->GetInstancePropertyValue(desc.m_Handle,
                                                                     ComposerPropertyNames::name);
         if (name.hasValue())
-            materialName = qt3dsdm::get<TDataStrPtr>(*name)->GetData();
+            materialName = CFilePath::MakeSafeFileStem(qt3dsdm::get<TDataStrPtr>(*name)->GetData());
 
         QString filepath = m_Editor.getMaterialFilePath(materialName.toQString());
         int i = 1;
-        const QString originalMaterialName = materialName.toQString();
+        Q3DStudio::CString originalMaterialName = materialName;
         const QString importFile = QStringLiteral("importfile");
         while (QFileInfo(filepath).exists()) {
             i++;
@@ -292,15 +292,16 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
                     m_Editor.setMaterialValues(material, values, textureValues);
                 break;
             }
-            materialName = CString::fromQString(originalMaterialName + QString::number(i));
+            materialName = originalMaterialName
+                    + Q3DStudio::CString::fromQString(QString::number(i));
             filepath = m_Editor.getMaterialFilePath(materialName.toQString());
         }
 
         bool isNewMaterial = !m_Editor.getMaterial(materialName.toQString()).Valid();
         const auto material = m_Editor.getOrCreateMaterial(materialName.toQString(), false);
         if (!m_createdMaterials.contains(material) && isNewMaterial) {
-            m_Editor.SetSpecificInstancePropertyValue(0, material, L"importid",
-                                                      std::make_shared<CDataStr>(desc.m_Id));
+            m_Editor.SetSpecificInstancePropertyValue(
+                        0, material, L"importid", std::make_shared<CDataStr>(desc.m_Id));
             m_Editor.SetSpecificInstancePropertyValue(
             0, material, L"importfile",
             std::make_shared<CDataStr>(m_Relativeimportfile.toCString()));
@@ -542,17 +543,17 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
 
     void createMaterial(const InstanceDesc &desc, TImportId inParent) override
     {
-        Q3DStudio::CString materialName = desc.m_Id;
+        Q3DStudio::CString materialName = CFilePath::MakeSafeFileStem(desc.m_Id);
         Option<SValue> name = m_importObj->GetInstancePropertyValue(desc.m_Handle,
                                                                     ComposerPropertyNames::name);
         if (name.hasValue())
-            materialName = qt3dsdm::get<TDataStrPtr>(*name)->GetData();
+            materialName = CFilePath::MakeSafeFileStem(qt3dsdm::get<TDataStrPtr>(*name)->GetData());
 
         // Get a unique material name
         // Reuse a material name if previously imported from the same source
         QString filepath = m_Editor.getMaterialFilePath(materialName.toQString());
         int i = 1;
-        const QString originalMaterialName = materialName.toQString();
+        Q3DStudio::CString originalMaterialName = materialName;
         const QString importFile = QStringLiteral("importfile");
         while (QFileInfo(filepath).exists()) {
             i++;
@@ -564,7 +565,8 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
                     == m_Relativeimportfile.toQString()) {
                 break;
             }
-            materialName = CString::fromQString(originalMaterialName + QString::number(i));
+            materialName = originalMaterialName
+                    + Q3DStudio::CString::fromQString(QString::number(i));
             filepath = m_Editor.getMaterialFilePath(materialName.toQString());
         }
 
@@ -584,8 +586,8 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
         }
 
         if (!m_createdMaterials.contains(material)) {
-            m_Editor.SetSpecificInstancePropertyValue(0, material, L"importid",
-                                                      std::make_shared<CDataStr>(desc.m_Id));
+            m_Editor.SetSpecificInstancePropertyValue(
+                        0, material, L"importid", std::make_shared<CDataStr>(desc.m_Id));
             m_Editor.SetSpecificInstancePropertyValue(
                         0, material, L"importfile",
                         std::make_shared<CDataStr>(m_Relativeimportfile.toCString()));
@@ -602,7 +604,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
 
         // Actual material inside material container has been created
         // Next create the referenced material located inside the model
-        Q3DStudio::CString refName = desc.m_Id;
+        Q3DStudio::CString refName = originalMaterialName;
         refName += "_ref";
         const wchar_t *refInsertId(m_StringTable.GetWideStr(refName));
         pair<TIdMultiMap::iterator, bool> refInserter(m_IdToSlideInstances.insert(

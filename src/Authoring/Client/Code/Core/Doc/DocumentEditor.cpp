@@ -2011,7 +2011,7 @@ public:
 
     void writeMaterialFile(Qt3DSDMInstanceHandle instance, bool createNewFile) override
     {
-        const auto materialName = GetName(instance).toQString();
+        const auto materialName = CFilePath::MakeSafeFileStem(GetName(instance)).toQString();
         writeMaterialFile(instance, materialName, createNewFile,
                           getFilePathFromMaterialName(materialName));
     }
