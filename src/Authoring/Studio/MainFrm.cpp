@@ -106,8 +106,9 @@ CMainFrame::CMainFrame()
     connect(m_ui->action_New_Presentation, &QAction::triggered, this, &CMainFrame::OnFileNew);
     connect(m_ui->action_Open, &QAction::triggered, this, &CMainFrame::OnFileOpen);
     connect(m_ui->action_Save, &QAction::triggered, this, &CMainFrame::OnFileSave);
-    connect(m_ui->actionSave_As, &QAction::triggered, this, &CMainFrame::OnFileSaveAs);
-    connect(m_ui->actionSave_a_Copy, &QAction::triggered, this, &CMainFrame::OnFileSaveCopy);
+    connect(m_ui->action_Save_Project_As, &QAction::triggered, this, &CMainFrame::onProjectSaveAs);
+    connect(m_ui->action_Duplicate_Presentation, &QAction::triggered,
+            this, &CMainFrame::onDuplicatePresentation);
     connect(m_ui->action_Revert, &QAction::triggered, this, &CMainFrame::OnFileRevert);
     connect(m_ui->actionImportAssets, &QAction::triggered, this, &CMainFrame::OnFileImportAssets);
     connect(m_ui->actionData_Inputs, &QAction::triggered, this, &CMainFrame::OnFileDataInputs);
@@ -384,8 +385,8 @@ void CMainFrame::OnCreate()
     m_ui->menu_Edit->setEnabled(false);
     m_ui->menu_Timeline->setEnabled(false);
     m_ui->menu_View->setEnabled(false);
-    m_ui->actionSave_As->setEnabled(false);
-    m_ui->actionSave_a_Copy->setEnabled(false);
+    m_ui->action_Save_Project_As->setEnabled(false);
+    m_ui->action_Duplicate_Presentation->setEnabled(false);
     m_ui->action_Connect_to_Device->setEnabled(false);
     m_ui->action_Revert->setEnabled(false);
     m_ui->actionImportAssets->setEnabled(false);
@@ -398,10 +399,6 @@ void CMainFrame::OnCreate()
     m_ui->actionOrbit_Tool->setVisible(false);
     m_ui->actionZoom_Tool->setVisible(false);
 #endif
-
-    // TODO: Save as/save copy functionality hidden until it is redesigned (QT3DS-2630)
-    m_ui->actionSave_As->setVisible(false);
-    m_ui->actionSave_a_Copy->setVisible(false);
 
     // Show a message about opening or creating a presentation
     m_sceneView.data()->setVisible(false);
@@ -429,9 +426,8 @@ void CMainFrame::OnNewPresentation()
     m_ui->menu_Edit->setEnabled(true);
     m_ui->menu_Timeline->setEnabled(true);
     m_ui->menu_View->setEnabled(true);
-    // TODO: Save as/save copy functionality disabled until it is redesigned (QT3DS-2630)
-//    m_ui->actionSave_As->setEnabled(true);
-//    m_ui->actionSave_a_Copy->setEnabled(true);
+    m_ui->action_Save_Project_As->setEnabled(true);
+    m_ui->action_Duplicate_Presentation->setEnabled(true);
     m_ui->action_Connect_to_Device->setEnabled(true);
     m_ui->action_Revert->setEnabled(true);
     m_ui->actionImportAssets->setEnabled(true);
@@ -759,29 +755,23 @@ void CMainFrame::OnUpdateFileSave()
 {
     m_ui->action_Save->setEnabled(g_StudioApp.GetCore()->GetDoc()->IsModified());
 }
-//=============================================================================
+
 /**
- * Command handler for the File Save As menu option.
- * This will prompt the user for a location to save the file out to then
- * will perform the save.
+ * Command handler for the File Save Project As menu option.
  */
-void CMainFrame::OnFileSaveAs()
+void CMainFrame::onProjectSaveAs()
 {
-    g_StudioApp.OnSaveAs();
+    g_StudioApp.onProjectSaveAs();
 }
 
-//=============================================================================
 /**
- * Command handler for the File Save a Copy menu option.
- * This will prompt the user for a location to save the file out to then
- * save a copy, leaving the original file open in the editor.
+ * Command handler for the File Duplicate Presentation menu option.
  */
-void CMainFrame::OnFileSaveCopy()
+void CMainFrame::onDuplicatePresentation()
 {
-    g_StudioApp.OnSaveCopy();
+    g_StudioApp.duplicatePresentation();
 }
 
-//=============================================================================
 /**
  * Command handler for the New Project menu option.
  * This will also create a new default presentation.

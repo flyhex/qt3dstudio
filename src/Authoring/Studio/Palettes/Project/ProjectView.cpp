@@ -502,6 +502,11 @@ void ProjectView::duplicate(int row) const
     m_ProjectModel->duplicate(row);
 }
 
+void ProjectView::duplicatePresentation(int row) const
+{
+    g_StudioApp.duplicatePresentation(m_ProjectModel->filePath(row));
+}
+
 void ProjectView::deleteFile(int row) const
 {
     if (isReferenced(row)) {

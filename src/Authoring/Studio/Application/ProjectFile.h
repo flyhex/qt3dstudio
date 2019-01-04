@@ -61,6 +61,7 @@ public:
     void addPresentationNode(const QString &uip, const QString &pId = {});
     void addPresentationNodes(const QHash<QString, QString> &nodeList);
     bool isUniquePresentationId(const QString &id, const QString &src = {}) const;
+    QString getUniquePresentationName(const QString &presSrc) const;
     QString getProjectPath() const;
     QString getProjectFilePath() const;
     QString getProjectName() const;
@@ -79,6 +80,7 @@ public:
     bool renamePresentationFile(const QString &oldName, const QString &newName);
     void deletePresentationFile(const QString &filePath);
     void renameMaterial(const QString &oldName, const QString &newName);
+    bool duplicatePresentation(const QString &oldPres, const QString &newPres);
 
 Q_SIGNALS:
     void presentationIdChanged(const QString &path, const QString &id);

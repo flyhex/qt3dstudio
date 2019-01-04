@@ -1036,12 +1036,15 @@ CDialogs::ESavePromptResult CDialogs::PromptForSave()
  * Prompt the user for a file to save to.
  * If browsing for location for presentation (isProject == false), then
  * allow browsing only inside current project.
+ * If browsing for a location for a project, then disallow browsing inside current project.
+ * If isCopy is true, then create a copy of the existing project rather than a new one.
+ * isCopy is ignored if isProject is false;
  * Return an invalid file if the user cancels the save dialog.
  */
-QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
+QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject, bool isCopy)
 {
     QString projPath(QDir::cleanPath(g_StudioApp.GetCore()->getProjectFile().getProjectPath()));
-
+    QString previousFolder;
     QString theFilename = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath();
 
     if (theFilename.isEmpty() || isProject)
@@ -1065,7 +1068,25 @@ QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
 
     if (isProject) {
         theFileDlg.setLabelText(QFileDialog::FileName, QObject::tr("Project Name"));
-        theFileDlg.setLabelText(QFileDialog::Accept, QObject::tr("Create"));
+        if (!isCopy)
+            theFileDlg.setLabelText(QFileDialog::Accept, QObject::tr("Create"));
+        // Limit browsing to outside project directory
+        if (!projPath.isEmpty()) {
+            QDir projDir(projPath);
+            projDir.cdUp();
+            previousFolder = projDir.absolutePath();
+            if (isCopy)
+                theFileDlg.setDirectory(previousFolder);
+            connect(&theFileDlg, &QFileDialog::directoryEntered,
+                    [&](const QString &dir) {
+                QFileInfo fi(QDir::cleanPath(dir));
+                const QString absPath = fi.absoluteFilePath();
+                if (absPath.startsWith(projPath))
+                    theFileDlg.setDirectory(previousFolder);
+                else
+                    previousFolder = absPath;
+            });
+        }
     } else {
         // Limit browsing to project directory
         connect(&theFileDlg, &QFileDialog::directoryEntered,
@@ -1080,13 +1101,15 @@ QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
     }
 
     bool theShowDialog = true;
-    QString theFile = {};
+    QString theFile;
     while (theShowDialog && theFileDlg.exec()) {
         theShowDialog = false;
         QString selectedName = theFileDlg.selectedFiles().front();
 
         // Make sure file name has correct extension
-        if (!selectedName.endsWith(theFileExt))
+        if (isProject && isCopy && selectedName.endsWith(theFileExt))
+            selectedName.chop(theFileExt.length());
+        else if (!selectedName.endsWith(theFileExt))
             selectedName.append(theFileExt);
 
         if (!isProject) {
@@ -1100,8 +1123,7 @@ QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
 
         theFile = selectedName;
         m_LastSaveFile = selectedName;
-        // New directory is only created when creating a new project. When doing a "save as"
-        // or "save copy", a new directory is not created.
+        // New directory is only created when creating a new project.
         if (isProject) {
             Q3DStudio::CFilePath theFinalDir;
             Q3DStudio::CFilePath theFinalDoc;
@@ -1110,21 +1132,19 @@ QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
 
             // Update last save file to final doc
             m_LastSaveFile = theFinalDoc.absoluteFilePath();
-            if (theFinalDoc.Exists()) {
-                const QString theTitle(QObject::tr("Confirm Save As"));
-                const QString filePath(theFinalDir.GetFileName().toQString() + QStringLiteral("/")
-                                       + theFinalDoc.GetFileName().toQString());
-                const QString theString = QObject::tr("%1 already exists.\nDo you want to "
-                                                      "replace it?").arg(filePath);
 
-                auto result = QMessageBox::question(nullptr, theTitle, theString);
-                if (result != QMessageBox::Yes) {
-                    // Reset the file and show the file dialog again
-                    theFile.clear();
-                    theShowDialog = true;
-                    continue;
-                }
-            } // of over-writing case
+            // File dialog shouldn't allow choosing existing folder for project, but since we
+            // are using native dialog, let's play it safe and check.
+            if (theFinalDir.Exists()) {
+                const QString title(QObject::tr("Existing directory"));
+                const QString warning = QObject::tr("%1 already exists.")
+                        .arg(theFinalDir.GetFileName().toQString());
+                QMessageBox::warning(nullptr, title, warning);
+                // Reset the file and show the file dialog again
+                theFile.clear();
+                theShowDialog = true;
+                continue;
+            }
         }
     }
 

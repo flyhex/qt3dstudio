@@ -133,7 +133,8 @@ public:
     Qt3DSFile GetExportChoice(const Q3DStudio::CString &inExtension,
                               const Q3DStudio::CString &inDefaultName);
 
-    QString GetSaveAsChoice(const QString &inDialogTitle = {}, bool isProject = false);
+    QString GetSaveAsChoice(const QString &inDialogTitle = {}, bool isProject = false,
+                            bool isCopy = false);
     QString GetNewDocumentChoice(const QString &inInitialDirectory = {}, bool isProject = true);
     QString GetFileOpenChoice(const QString &inInitialDirectory = {});
 

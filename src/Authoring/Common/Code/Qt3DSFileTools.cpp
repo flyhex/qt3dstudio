@@ -352,6 +352,38 @@ QString CFilePath::GetUserApplicationDirectory()
     return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
 }
 
+// Qt has no native folder copy, so do it the hard way
+bool CFilePath::copyFolder(const QString &srcFolder, const QString &destFolder)
+{
+    bool success = false;
+
+    QDir srcDir(srcFolder);
+    if (!srcDir.exists())
+        return false;
+
+    QDir destDir(destFolder);
+    if (!destDir.exists())
+        destDir.mkpath(QStringLiteral("."));
+
+    const QStringList files = srcDir.entryList(QDir::Files);
+    for (const auto &file : files) {
+        success = QFile::copy(srcFolder + QLatin1Char('/') + file,
+                              destFolder + QLatin1Char('/') + file);
+        if (!success)
+            return false;
+    }
+
+    const QStringList dirs = srcDir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot);
+    for (const auto &dir : dirs) {
+        success = copyFolder(srcFolder + QLatin1Char('/') + dir,
+                             destFolder + QLatin1Char('/') + dir);
+        if (!success)
+            return false;
+    }
+
+    return true;
+}
+
 SFile::SFile(const QSharedPointer<QFile> &of, const CFilePath &path)
     : m_OpenFile(of)
     , m_Path(path)

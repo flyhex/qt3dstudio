@@ -57,6 +57,14 @@ EditPresentationIdDlg::EditPresentationIdDlg(const QString &src, DialogType type
         m_ui->label->setText(tr("Qml Stream Name"));
         setWindowTitle(tr("Rename Qml Stream"));
         break;
+    case DuplicatePresentation:
+        m_ui->label->setText(tr("Presentation Name"));
+        setWindowTitle(tr("Duplicate Presentation"));
+        break;
+    case DuplicateQmlStream:
+        m_ui->label->setText(tr("Qml Stream Name"));
+        setWindowTitle(tr("Duplicate Qml Stream"));
+        break;
     default:
         break;
     }
@@ -66,7 +74,10 @@ EditPresentationIdDlg::EditPresentationIdDlg(const QString &src, DialogType type
         m_ui->lineEditPresentationId->setText(m_presentationId);
     } else {
         QFileInfo fi(src);
-        m_ui->lineEditPresentationId->setText(fi.fileName());
+        QString initialText = fi.completeBaseName();
+        if (m_dialogType == DuplicatePresentation || m_dialogType == DuplicateQmlStream)
+            initialText = g_StudioApp.GetCore()->getProjectFile().getUniquePresentationName(src);
+        m_ui->lineEditPresentationId->setText(initialText);
     }
 
     window()->setFixedSize(size());
@@ -103,7 +114,19 @@ void EditPresentationIdDlg::accept()
                 newValue.prepend(m_src.left(slashIndex + 1));
 
             if (newValue != m_src) {
-                if (g_StudioApp.GetCore()->getProjectFile().renamePresentationFile(m_src, newValue))
+                bool success = false;
+                if (m_dialogType == DuplicatePresentation || m_dialogType == DuplicateQmlStream) {
+                    success = g_StudioApp.GetCore()->getProjectFile().duplicatePresentation(
+                                m_src, newValue);
+                    if (success) {
+                        m_duplicateFile = g_StudioApp.GetCore()->getProjectFile()
+                                .getAbsoluteFilePathTo(newValue);
+                    }
+                } else {
+                    success = g_StudioApp.GetCore()->getProjectFile().renamePresentationFile(
+                                m_src, newValue);
+                }
+                if (success)
                     QDialog::accept();
                 else
                     displayWarning(UniqueWarning);
@@ -117,6 +140,10 @@ void EditPresentationIdDlg::accept()
 void EditPresentationIdDlg::displayWarning(WarningType warningType)
 {
     QString warning;
+    QString uniqueFileNote;
+    if (warningType == UniqueWarning)
+        uniqueFileNote = tr("The new name must be unique within its folder and a valid filename.");
+
     switch (m_dialogType) {
     // Presentation Id warnings are also displayed from preferences dialog, so they are handled
     // by CStudioApp.
@@ -136,15 +163,25 @@ void EditPresentationIdDlg::displayWarning(WarningType warningType)
         if (warningType == EmptyWarning)
             warning = tr("Presentation name must not be empty.");
         else
-            warning = tr("Renaming presentation failed.\n"
-                         "The new name must be unique within its folder and a valid filename.");
+            warning = tr("Renaming presentation failed.\n") + uniqueFileNote;
         break;
     case EditQmlStreamName:
         if (warningType == EmptyWarning)
             warning = tr("Qml stream name must not be empty.");
         else
-            warning = tr("Renaming Qml stream failed.\n"
-                         "The new name must be unique within its folder and a valid filename.");
+            warning = tr("Renaming Qml stream failed.\n") + uniqueFileNote;
+        break;
+    case DuplicatePresentation:
+        if (warningType == EmptyWarning)
+            warning = tr("Presentation name must not be empty.");
+        else
+            warning = tr("Duplicating presentation failed.\n") + uniqueFileNote;
+        break;
+    case DuplicateQmlStream:
+        if (warningType == EmptyWarning)
+            warning = tr("Qml stream name must not be empty.");
+        else
+            warning = tr("Duplicating Qml stream failed.\n") + uniqueFileNote;
         break;
     default:
         break;

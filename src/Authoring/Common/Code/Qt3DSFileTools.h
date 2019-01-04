@@ -199,6 +199,8 @@ public:
     // Get the directory where applications can write data.
     static QString GetUserApplicationDirectory();
 
+    static bool copyFolder(const QString &srcFolder, const QString &destFolder);
+
 private:
     void normalizeAndSetPath(const QString& path);
     QString m_identifier;
