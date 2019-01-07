@@ -78,6 +78,7 @@ void RowTreeContextMenu::initialize()
         const QVector<qt3dsdm::Qt3DSDMPropertyHandle> propList
                 = doc.GetStudioSystem()->GetPropertySystem()->GetControllableProperties(instance);
 
+        QMap<int, QAction *> sections;
         for (const auto &prop : propList) {
             QAction *action = new QAction(QString::fromStdWString(
                                               doc.GetPropertySystem()
@@ -85,10 +86,22 @@ void RowTreeContextMenu::initialize()
             action->setData(QString::fromStdWString(
                                 doc.GetPropertySystem()
                                 ->GetName(prop).wide_str()));
-            m_diMenu->addAction(action);
-        }
 
-        addSeparator();
+            auto metadata = doc.GetStudioSystem()->GetActionMetaData()->GetMetaDataPropertyInfo(
+                        doc.GetStudioSystem()->GetActionMetaData()->GetMetaDataProperty(
+                            instance, prop));
+
+            if (sections.contains(metadata->m_CompleteType) ) {
+                m_diMenu->insertAction(sections[metadata->m_CompleteType], action);
+            } else {
+                // Create a QAction for a section so that we can insert properties above it
+                // to maintain category groupings. Sections are shown as separators in Studio
+                // style i.e. enum text is not shown.
+                QAction *section = m_diMenu->addSection(QString(metadata->m_CompleteType));
+                sections.insert(metadata->m_CompleteType, section);
+                m_diMenu->insertAction(section, action);
+            }
+        }
     }
     m_renameAction = new QAction(tr("Rename Object"), this);
     connect(m_renameAction, &QAction::triggered, this, &RowTreeContextMenu::renameObject);
