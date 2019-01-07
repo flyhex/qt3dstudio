@@ -98,6 +98,7 @@ public:
     void selectLabel();
     void togglePropertyExpanded();
     void setPropertyExpanded(bool expand);
+    void showDataInputSelector(const QString &propertyname, const QPoint &pos);
     ITimelineItemProperty *propBinding();
     TreeControlType getClickedControl(const QPointF &scenePos);
     bool shy() const;

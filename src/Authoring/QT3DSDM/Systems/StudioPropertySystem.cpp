@@ -187,6 +187,26 @@ bool CStudioPropertySystem::IsInstanceOrDerivedFrom(Qt3DSDMInstanceHandle inInst
     return m_DataCore->IsInstanceOrDerivedFrom(inInstance, inParent);
 }
 
+QVector<Qt3DSDMPropertyHandle>
+CStudioPropertySystem::GetControllableProperties(Qt3DSDMInstanceHandle inInst) const
+{
+    vector<Qt3DSDMMetaDataPropertyHandle> propList;
+    QVector<Qt3DSDMPropertyHandle> outList;
+    m_MetaData->GetMetaDataProperties(inInst, propList);
+
+    for (const auto it : qAsConst(propList)) {
+        auto metadata = m_MetaData->GetMetaDataPropertyInfo(it).getValue();
+
+        if ((metadata.m_Controllable
+             || (metadata.m_Animatable
+                 && m_StudioAnimationSystem->IsPropertyAnimatable(inInst, metadata.m_Property)))
+            && !metadata.m_IsHidden) {
+            outList.append(metadata.m_Property);
+        }
+    }
+    return outList;
+}
+
 Qt3DSDMPropertyHandle CStudioPropertySystem::AddProperty(Qt3DSDMInstanceHandle inInstance,
                                                         TCharPtr inName,
                                                         DataModelDataType::Value inPropType)

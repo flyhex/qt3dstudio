@@ -35,13 +35,20 @@
 
 class DataInputSelectModel;
 
+enum DataInputTypeFilter {
+    MatchingTypes = -2,
+    AllTypes = -1,
+};
+
 class DataInputSelectView : public QQuickWidget
 {
     Q_OBJECT
     Q_PROPERTY(int selected MEMBER m_selection NOTIFY selectedChanged)
+    Q_PROPERTY(int typeFilter MEMBER m_typeFilter NOTIFY filterChanged)
 public:
     explicit DataInputSelectView(const QVector<EDataType> &acceptedTypes,
                                  QWidget *parent = nullptr);
+    ~DataInputSelectView();
     void setData(const QVector<QPair<QString, int>> &dataInputList,
                  const QString &currentController,
                  int handle = 0, int instance = 0);
@@ -63,6 +70,7 @@ public:
 Q_SIGNALS:
     void dataInputChanged(int handle, int instance, const QString &selected);
     void selectedChanged();
+    void filterChanged();
 
 protected:
     void focusOutEvent(QFocusEvent *event) override;
@@ -81,8 +89,8 @@ private:
     QString m_mostRecentlyAdded;
     EDataType m_defaultType;
     QVector<EDataType> m_matchingTypes;
-    // -2 denotes allowed types, -1 all types, 0... matches EDataType enum
-    int m_typeFilter = -2;
+    // 0... matches EDataType enum
+    int m_typeFilter = DataInputTypeFilter::MatchingTypes;
     QVector<QPair<QString, int>> m_dataInputList;
     QString m_searchString;
 };

@@ -3253,6 +3253,46 @@ void CDoc::ReplaceDatainput(const QString &oldName, const QString &newName,
     }
 }
 
+QString CDoc::GetCurrentController(qt3dsdm::Qt3DSDMInstanceHandle instHandle,
+                                   qt3dsdm::Qt3DSDMPropertyHandle propHandle)
+{
+    auto propSys = GetPropertySystem();
+    qt3dsdm::SValue currPropVal;
+    propSys->GetInstancePropertyValue(
+                instHandle,
+                propSys->GetAggregateInstancePropertyByName(
+                    instHandle, qt3dsdm::TCharStr(L"controlledproperty")),
+                currPropVal);
+    if (!currPropVal.empty()) {
+        Q3DStudio::CString currPropValStr
+                = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currPropVal)->GetData();
+
+        Q3DStudio::CString propName
+                = propSys->GetName(propHandle).c_str();
+
+        // Datainput controller name is always prepended with "$". Differentiate
+        // between datainput and property that has the same name by searching specifically
+        // for whitespace followed by property name.
+        long propNamePos = currPropValStr.find(" " + propName);
+        if ((propNamePos != currPropValStr.ENDOFSTRING) && (propNamePos != 0)) {
+            long posCtrlr = currPropValStr.substr(0, propNamePos).ReverseFind("$");
+
+            // adjust pos if this is the first controller - property pair
+            // in controlledproperty
+            if (posCtrlr < 0)
+                posCtrlr = 0;
+
+            // remove $
+            posCtrlr++;
+            return currPropValStr.substr(posCtrlr, propNamePos - posCtrlr).toQString();
+        } else {
+            return {};
+        }
+    }
+
+    return {};
+}
+
 QDebug operator<<(QDebug dbg, const SubPresentationRecord &r)
 {
     QDebugStateSaver stateSaver(dbg);

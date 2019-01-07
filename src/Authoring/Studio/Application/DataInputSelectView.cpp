@@ -55,6 +55,10 @@ DataInputSelectView::DataInputSelectView(const QVector<EDataType> &acceptedTypes
     QTimer::singleShot(0, this, &DataInputSelectView::initialize);
 }
 
+DataInputSelectView::~DataInputSelectView()
+{
+}
+
 void DataInputSelectView::setData(const QVector<QPair<QString, int>> &dataInputList,
                                   const QString &currentController, int handle, int instance)
 {
@@ -70,6 +74,7 @@ void DataInputSelectView::setMatchingTypes(const QVector<EDataType> &matchingTyp
     m_matchingTypes = matchingTypes;
     if (!m_matchingTypes.isEmpty())
         m_defaultType = m_matchingTypes[0];
+    updateData();
 }
 
 void DataInputSelectView::updateData()
@@ -91,8 +96,9 @@ void DataInputSelectView::updateData()
     for (auto &i : qAsConst(m_dataInputList)) {
         bool isCurrentCtrlr = i.first == m_currController;
         if (i.first.contains(m_searchString) || !m_searchString.size() || isCurrentCtrlr) {
-            if (m_typeFilter == -1
-                || (m_typeFilter == -2 && m_matchingTypes.contains((EDataType)i.second))
+            if (m_typeFilter == DataInputTypeFilter::AllTypes
+                || (m_typeFilter == DataInputTypeFilter::MatchingTypes
+                    && m_matchingTypes.contains((EDataType)i.second))
                 || m_typeFilter == (EDataType)i.second || isCurrentCtrlr) {
                 dataInputs.append({i.first, getDiTypeStr(i.second)});
                 if (isCurrentCtrlr) {
@@ -199,6 +205,7 @@ void DataInputSelectView::setTypeFilter(const int index)
 {
     m_typeFilter = index;
     updateData();
+    Q_EMIT filterChanged();
 }
 
 void DataInputSelectView::focusOutEvent(QFocusEvent *event)

@@ -89,6 +89,14 @@ Rectangle {
                                 + "by compatibility with current property")
                     enabled: filterBoxMouseArea.containsMouse && !filterCombo.popup.activeFocus
                 }
+                Connections {
+                    target: _parentView
+                    // Filter type can be changed also from cpp side
+                    onFilterChanged: {
+                        filterCombo.currentIndex = _parentView.typeFilter
+                                                   + filterCombo.numOfFixedChoices;
+                    }
+                }
             }
 
             StyledTextField {

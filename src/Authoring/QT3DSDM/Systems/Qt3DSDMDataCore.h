@@ -270,6 +270,10 @@ public:
     virtual TMetaDataData GetAdditionalMetaDataData(Qt3DSDMInstanceHandle inInstance,
                                                     Qt3DSDMPropertyHandle inProperty) const = 0;
     virtual Qt3DSDMInstanceHandle GetPropertyOwner(Qt3DSDMPropertyHandle inProperty) const = 0;
+
+    virtual QVector<Qt3DSDMPropertyHandle> GetControllableProperties(
+            Qt3DSDMInstanceHandle inInst) const = 0;
+
 };
 typedef std::shared_ptr<IPropertySystem> TPropertySystemPtr;
 

@@ -48,6 +48,7 @@ protected:
 
 private Q_SLOTS:
     void addSubPresentation(QAction *action);
+    void addDiController(QAction *action);
     void renameObject();
     void duplicateObject();
     void deleteObject();
@@ -81,6 +82,7 @@ private:
     RowTree *m_RowTree;
     ITimelineItemBinding *m_TimelineItemBinding;
     QMenu *m_subpMenu = nullptr; // sub-presentation submenu
+    QMenu *m_diMenu = nullptr; // datainput submenu
     QAction *m_renameAction = nullptr;
     QAction *m_duplicateAction = nullptr;
     QAction *m_deleteAction = nullptr;

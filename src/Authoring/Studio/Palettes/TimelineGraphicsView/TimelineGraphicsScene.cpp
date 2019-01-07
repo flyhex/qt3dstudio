@@ -339,6 +339,7 @@ TimelineGraphicsScene::~TimelineGraphicsScene()
 {
     disconnect(qApp, &QApplication::focusChanged,
                this, &TimelineGraphicsScene::handleApplicationFocusLoss);
+    delete m_dataInputSelector;
 }
 
 void TimelineGraphicsScene::setTimelineScale(int scl)
@@ -1069,6 +1070,44 @@ void TimelineGraphicsScene::handleApplicationFocusLoss()
     // Hide the timebar tooltip if application loses focus
     if (!QApplication::focusWidget())
         m_timebarToolTip->hide();
+}
+
+void TimelineGraphicsScene::handleShowDISelector(const QString &propertyname,
+                                                 qt3dsdm::Qt3DSDMInstanceHandle inInst,
+                                                 const QPoint &pos)
+{
+    auto doc = g_StudioApp.GetCore()->GetDoc();
+    qt3dsdm::Qt3DSDMPropertyHandle propHandle = doc->GetPropertySystem()
+            ->GetAggregateInstancePropertyByName(inInst, propertyname.toStdWString().c_str());
+
+    QVector<EDataType> allowedTypes = CDataInputDlg::getAcceptedTypes(
+                doc->GetPropertySystem()->GetDataType(propHandle));
+
+    // Instantiate selector in TimelineGraphicsScene instead of the originating context menu,
+    // as context menu gets destructed when a selection is made.
+    if (!m_dataInputSelector)
+        m_dataInputSelector = new DataInputSelectView(allowedTypes, widgetTimeline());
+
+    QVector<QPair<QString, int>> dataInputList;
+    for (auto &it : qAsConst(g_StudioApp.m_dataInputDialogItems))
+        dataInputList.append({it->name, it->type});
+    // needs to be set just in case we are reusing an existing datainput selector instance
+    m_dataInputSelector->setMatchingTypes(allowedTypes);
+    m_dataInputSelector->setTypeFilter(DataInputTypeFilter::MatchingTypes);
+    m_dataInputSelector->setData(dataInputList, m_dataInputSelector->getNoneString(),
+                                 propHandle, inInst);
+    m_dataInputSelector->setCurrentController(doc->GetCurrentController(inInst, propHandle));
+
+    connect(m_dataInputSelector, &DataInputSelectView::dataInputChanged,
+            [&](int handle, int instance, const QString &controllerName) {
+        bool controlled = controllerName != m_dataInputSelector->getNoneString();
+        g_StudioApp.GetCore()->GetDoc()
+                ->SetInstancePropertyControlled(instance, Q3DStudio::CString(), handle,
+                                                Q3DStudio::CString::fromQString(controllerName),
+                                                controlled);
+    });
+
+    CDialogs::showWidgetBrowser(widgetTimeline(), m_dataInputSelector, pos);
 }
 
 // Getters

@@ -895,45 +895,12 @@ qt3dsdm::SValue InspectorControlModel::currentPropertyValue(long instance, int h
     const auto propertySystem = studioSystem->GetPropertySystem();
     propertySystem->GetInstancePropertyValue(instance, handle,  value);
 
-    return  value;
+    return value;
 }
 
 QString InspectorControlModel::currentControllerValue(long instance, int handle) const
 {
-    const auto doc = g_StudioApp.GetCore()->GetDoc();
-    auto studio = doc->GetStudioSystem();
-
-    qt3dsdm::SValue currPropVal = currentPropertyValue(
-                instance, studio->GetPropertySystem()->GetAggregateInstancePropertyByName(
-                    instance, qt3dsdm::TCharStr(L"controlledproperty")));
-    if (!currPropVal.empty()) {
-        Q3DStudio::CString currPropValStr
-                = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currPropVal)->GetData();
-
-        Q3DStudio::CString propName
-                = studio->GetPropertySystem()->GetName(handle).c_str();
-
-        // Datainput controller name is always prepended with "$". Differentiate
-        // between datainput and property that has the same name by searching specifically
-        // for whitespace followed by property name.
-        long propNamePos = currPropValStr.find(" " + propName);
-        if ((propNamePos != currPropValStr.ENDOFSTRING) && (propNamePos != 0)) {
-            long posCtrlr = currPropValStr.substr(0, propNamePos).ReverseFind("$");
-
-            // adjust pos if this is the first controller - property pair
-            // in controlledproperty
-            if (posCtrlr < 0)
-                posCtrlr = 0;
-
-            // remove $
-            posCtrlr++;
-            return currPropValStr.substr(posCtrlr, propNamePos - posCtrlr).toQString();
-        }
-        else
-            return {};
-    } else {
-        return {};
-    }
+    return g_StudioApp.GetCore()->GetDoc()->GetCurrentController(instance, handle);
 }
 
 void InspectorControlModel::updateControlledToggleState(InspectorControlBase* inItem) const
