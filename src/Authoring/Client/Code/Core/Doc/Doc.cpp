@@ -3061,7 +3061,11 @@ void CDoc::UpdateDatainputMapForInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstan
             else if (propName == QLatin1String("@timeline"))
                 item.dataType = {qt3dsdm::DataModelDataType::Value::RangedNumber, true};
 
-            g_StudioApp.m_dataInputDialogItems[diName]->ctrldElems.append(item);
+            // Check for DI name validity because we might have broken
+            // presentations with property control bindings set to non-existent
+            // datainputs
+            if (g_StudioApp.m_dataInputDialogItems.contains(diName))
+                g_StudioApp.m_dataInputDialogItems[diName]->ctrldElems.append(item);
         }
     }
 }
