@@ -28,6 +28,7 @@
 
 #include "DataInputDlg.h"
 #include "ui_DataInputDlg.h"
+#include "Qt3DSMessageBox.h"
 
 #include <QtWidgets/qabstractbutton.h>
 #include <QtGui/qstandarditemmodel.h>
@@ -43,6 +44,8 @@ CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemMode
     , m_type(0)
     , m_min(0.0)
     , m_max(10.0)
+    , m_metadataKey(m_dataInput->metaDataKey)
+    , m_metadata(m_dataInput->metaData)
     , m_acceptedTypes(acceptedTypes)
 {
     m_ui->setupUi(this);
@@ -87,6 +90,10 @@ CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemMode
             this, &CDataInputDlg::onMaxChanged);
     connect(m_ui->lineEditInputName, &QLineEdit::textChanged, this, &CDataInputDlg::onNameChanged);
     connect(m_ui->lineEditEvaluation, &QLineEdit::textChanged, this, &CDataInputDlg::onTextChanged);
+    connect(m_ui->lineEditMetadata, &QLineEdit::textChanged, this,
+            &CDataInputDlg::onMetadataChanged);
+    connect(m_ui->lineEditMetadataKey, &QLineEdit::textChanged, this,
+            &CDataInputDlg::onMetadataKeyChanged);
 }
 
 CDataInputDlg::~CDataInputDlg()
@@ -127,11 +134,20 @@ void CDataInputDlg::initDialog()
         m_ui->doubleSpinBoxMax->setValue(m_dataInput->maxValue);
     }
 
+    m_metadata = m_dataInput->metaData;
+    m_metadataKey = m_dataInput->metaDataKey;
+    m_ui->lineEditMetadata->setText(m_metadata);
+    m_ui->lineEditMetadataKey->setText(m_metadataKey);
     updateVisibility(m_dataInput->type);
 }
 
 void CDataInputDlg::accept()
 {
+    if (m_metadataKey.isEmpty() && !m_metadata.isEmpty()) {
+        Qt3DSMessageBox::Show(tr("Metadata Error"), tr("Metadata key cannot be empty."),
+                              Qt3DSMessageBox::ICON_WARNING, false, this);
+        return;
+    }
     if (m_dataInput->name != m_name)
         m_dataInput->name = getUniqueId(m_name);
 
@@ -145,6 +161,8 @@ void CDataInputDlg::accept()
         m_dataInput->valueString = m_text;
     }
 #endif
+    m_dataInput->metaData = m_metadata;
+    m_dataInput->metaDataKey = m_metadataKey;
     QDialog::accept();
 }
 
@@ -179,6 +197,22 @@ void CDataInputDlg::onNameChanged(const QString &name)
 void CDataInputDlg::onTextChanged(const QString &text)
 {
     m_text = text;
+}
+
+void CDataInputDlg::onMetadataChanged(const QString &metadata)
+{
+    int cursorPos = m_ui->lineEditMetadata->cursorPosition();
+    m_metadata = metadata;
+    m_ui->lineEditMetadata->setText(metadata);
+    m_ui->lineEditMetadata->setCursorPosition(cursorPos);
+}
+
+void CDataInputDlg::onMetadataKeyChanged(const QString &metadataKey)
+{
+    int cursorPos = m_ui->lineEditMetadataKey->cursorPosition();
+    m_metadataKey = metadataKey;
+    m_ui->lineEditMetadataKey->setText(metadataKey);
+    m_ui->lineEditMetadataKey->setCursorPosition(cursorPos);
 }
 
 QString CDataInputDlg::getUniqueId(const QString &id)

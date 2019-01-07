@@ -99,6 +99,8 @@ private Q_SLOTS:
     void onMaxChanged(float max);
     void onNameChanged(const QString &name);
     void onTextChanged(const QString &text);
+    void onMetadataChanged(const QString &metadata);
+    void onMetadataKeyChanged(const QString &metadataKey);
 
 private:
     Ui::DataInputDlg *m_ui;
@@ -109,6 +111,8 @@ private:
     float m_min;
     int m_type;
     QString m_text;
+    QString m_metadataKey;
+    QString m_metadata;
     QVector<EDataType> m_acceptedTypes;
 };
 

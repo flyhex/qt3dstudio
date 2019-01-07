@@ -493,6 +493,8 @@ void ProjectFile::parseDataInputElem(const QDomElement &elem,
             item->valueString = elem.attribute(QStringLiteral("evaluator"));
         }
 #endif
+        item->metaDataKey = elem.attribute((QStringLiteral("metadatakey")));
+        item->metaData = elem.attribute((QStringLiteral("metadata")));
         dataInputs.insert(item->name, item);
     }
 }
