@@ -200,6 +200,8 @@ public:
     static QColor timelineRowCommentBgColor();
     static QColor timelinePressedKeyframeColor();
 
+    static QColor invalidDataInputIndicatorColor();
+
     static int fontSize();
     static int controlBaseHeight();
     static int idWidth();

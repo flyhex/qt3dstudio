@@ -85,6 +85,7 @@ static QColor s_timelineFilterButtonSelectedColor;
 static QColor s_timelineFilterButtonHoveredColor;
 static QColor s_timelineRowCommentBgColor;
 static QColor s_timelinePressedKeyframeColor; // pressed keyframe from multiple selection
+static QColor s_invalidDataInputIndicatorColor;
 
 static int s_fontSize;
 static int s_controlBaseHeight;
@@ -181,6 +182,8 @@ void CStudioPreferences::loadPreferences(const QString &filePath)
     s_timelineRowSubpDescendantColor = QColor("#a263ff");
     s_timelineRowCommentBgColor = QColor("#d0000000");
     s_timelinePressedKeyframeColor = QColor("#ffff00");
+
+    s_invalidDataInputIndicatorColor = QColor("#ff2121");
 
     s_fontSize = 12;
     s_controlBaseHeight = 22;
@@ -1041,6 +1044,11 @@ QColor CStudioPreferences::timelineRowCommentBgColor()
 QColor CStudioPreferences::timelinePressedKeyframeColor()
 {
     return s_timelinePressedKeyframeColor;
+}
+
+QColor CStudioPreferences::invalidDataInputIndicatorColor()
+{
+    return s_invalidDataInputIndicatorColor;
 }
 
 int CStudioPreferences::fontSize()

@@ -190,7 +190,7 @@ void CDataInputListDlg::updateContents()
     for (auto &it : qAsConst(m_dataInputs)) {
         dataInput.clear();
 
-        int dataInputType = it->type;
+        EDataType dataInputType = (EDataType)it->type;
 
         if ((dataInputType == m_typeFilter || m_typeFilter == -1)
             && it->name.contains(m_searchString)){
@@ -235,6 +235,26 @@ void CDataInputListDlg::updateContents()
             // highlight datainputs that are in use
             if (it->ctrldElems.size() || it->externalPresBoundTypes.size())
                 dataInput.first()->setForeground(QBrush(CStudioPreferences::dataInputColor()));
+
+            // warn if any datainputs have mismatching datatype with an icon after datatype
+            // indicator
+            static QString warning(tr("Data Input type is not matching with one "
+                                      "or several bound properties"));
+            for (const auto &ctrlElem : qAsConst(it->ctrldElems)) {
+                if (!CDataInputDlg::getAcceptedTypes(ctrlElem.dataType.first)
+                        .contains(dataInputType)) {
+                    dataInput[1]->setIcon(QIcon(":/images/warning.png"));
+                    dataInput[1]->setToolTip(warning);
+                }
+            }
+
+            for (const auto &extBoundType : qAsConst(it->externalPresBoundTypes)) {
+                if (!CDataInputDlg::getAcceptedTypes(extBoundType.first).contains(dataInputType)) {
+                    dataInput[1]->setIcon(QIcon(":/images/warning.png"));
+                    dataInput[1]->setToolTip(warning);
+                }
+            }
+
             m_tableContents->appendRow(dataInput);
         }
     }
@@ -312,6 +332,16 @@ void CDataInputListDlg::updateInfo()
                 QStandardItem *item3 = new QStandardItem(propNames);
                 item3->setToolTip(propNames);
                 item3->setEditable(false);
+                // If we have warning icon set for this datainput, we have something
+                // wrong with the property types in this object. Highlight properties
+                // to provide additional reminder.
+                if (!m_tableContents->item(m_currentDataInputIndex, 1)->icon().isNull()) {
+                    item3->setForeground(
+                                QBrush(CStudioPreferences::invalidDataInputIndicatorColor()));
+                    static QString warning(tr("\n\nData Input type is not matching with one or "
+                                              "several bound properties"));
+                    item3->setToolTip(propNames + warning);
+                }
                 m_infoContents->appendRow(QList<QStandardItem *>({item, item2, item3}));
             }
         }
