@@ -44,8 +44,7 @@ CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemMode
     , m_type(0)
     , m_min(0.0)
     , m_max(10.0)
-    , m_metadataKey(m_dataInput->metaDataKey)
-    , m_metadata(m_dataInput->metaData)
+    , m_metadata(m_dataInput->metadata)
     , m_acceptedTypes(acceptedTypes)
 {
     m_ui->setupUi(this);
@@ -89,11 +88,15 @@ CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemMode
             static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
             this, &CDataInputDlg::onMaxChanged);
     connect(m_ui->lineEditInputName, &QLineEdit::textChanged, this, &CDataInputDlg::onNameChanged);
-    connect(m_ui->lineEditEvaluation, &QLineEdit::textChanged, this, &CDataInputDlg::onTextChanged);
-    connect(m_ui->lineEditMetadata, &QLineEdit::textChanged, this,
-            &CDataInputDlg::onMetadataChanged);
-    connect(m_ui->lineEditMetadataKey, &QLineEdit::textChanged, this,
-            &CDataInputDlg::onMetadataKeyChanged);
+    connect(m_ui->pushButtonAddMeta, &QPushButton::clicked, this, &CDataInputDlg::onMetadataAdded);
+    connect(m_ui->tableEditMetadata, &QTableWidget::itemDoubleClicked, this,
+            [this](QTableWidgetItem *item) {
+        m_ui->lineEditMetadataKey->setText(m_ui->tableEditMetadata->item(item->row(), 0)->text());
+        m_ui->lineEditMetadata->setText(m_ui->tableEditMetadata->item(item->row(), 1)->text());
+        m_metadataEdit = true;
+        m_editMetadataKey = m_ui->tableEditMetadata->item(item->row(), 0)->text();
+        m_ui->lineEditMetadataKey->setFocus();
+    });
 }
 
 CDataInputDlg::~CDataInputDlg()
@@ -105,7 +108,10 @@ void CDataInputDlg::initDialog()
 {
     // Disallow special characters and whitespaces
     QRegExpValidator *rxp = new QRegExpValidator(QRegExp("[A-Za-z0-9_]+"), this);
+    QRegExpValidator *rxpWsOk = new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]+"), this);
     m_ui->lineEditInputName->setValidator(rxp);
+    m_ui->lineEditMetadataKey->setValidator(rxp);
+    m_ui->lineEditMetadata->setValidator(rxpWsOk);
 
     if (!m_dataInput->name.isEmpty()) {
         m_name = m_dataInput->name;
@@ -134,20 +140,23 @@ void CDataInputDlg::initDialog()
         m_ui->doubleSpinBoxMax->setValue(m_dataInput->maxValue);
     }
 
-    m_metadata = m_dataInput->metaData;
-    m_metadataKey = m_dataInput->metaDataKey;
-    m_ui->lineEditMetadata->setText(m_metadata);
-    m_ui->lineEditMetadataKey->setText(m_metadataKey);
+    m_metadata = m_dataInput->metadata;
+    // Removes focus dotted border, does not disable double-click
+    // to start editing an entry.
+    m_ui->tableEditMetadata->setFocusPolicy(Qt::NoFocus);
+    m_ui->tableEditMetadata->setRowCount(m_metadata.size());
+    m_ui->tableEditMetadata->setColumnCount(3);
+    m_ui->tableEditMetadata->setColumnWidth(0, 150);
+    m_ui->tableEditMetadata->setColumnWidth(1, 280);
+    m_ui->tableEditMetadata->setColumnWidth(2, 30);
+    m_ui->tableEditMetadata->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    populateMetadata();
     updateVisibility(m_dataInput->type);
 }
 
 void CDataInputDlg::accept()
 {
-    if (m_metadataKey.isEmpty() && !m_metadata.isEmpty()) {
-        Qt3DSMessageBox::Show(tr("Metadata Error"), tr("Metadata key cannot be empty."),
-                              Qt3DSMessageBox::ICON_WARNING, false, this);
-        return;
-    }
     if (m_dataInput->name != m_name)
         m_dataInput->name = getUniqueId(m_name);
 
@@ -161,8 +170,8 @@ void CDataInputDlg::accept()
         m_dataInput->valueString = m_text;
     }
 #endif
-    m_dataInput->metaData = m_metadata;
-    m_dataInput->metaDataKey = m_metadataKey;
+    m_dataInput->metadata = m_metadata;
+
     QDialog::accept();
 }
 
@@ -194,25 +203,33 @@ void CDataInputDlg::onNameChanged(const QString &name)
     m_ui->lineEditInputName->setCursorPosition(cursorPos);
 }
 
-void CDataInputDlg::onTextChanged(const QString &text)
+void CDataInputDlg::onMetadataAdded()
 {
-    m_text = text;
-}
+    auto key = m_ui->lineEditMetadataKey->text();
+    auto metadata = m_ui->lineEditMetadata->text();
+    // Let's allow empty metadata because it might have significance to
+    // metadata user
+    if (key.isEmpty()) {
+        Qt3DSMessageBox::Show(tr("Metadata Error"), tr("Metadata key cannot be empty."),
+                              Qt3DSMessageBox::ICON_WARNING, false, this);
+        return;
+    }
 
-void CDataInputDlg::onMetadataChanged(const QString &metadata)
-{
-    int cursorPos = m_ui->lineEditMetadata->cursorPosition();
-    m_metadata = metadata;
-    m_ui->lineEditMetadata->setText(metadata);
-    m_ui->lineEditMetadata->setCursorPosition(cursorPos);
-}
+    // We are editing an existing key - value, remove old entry
+    if (m_metadataEdit) {
+        m_metadata.remove(m_editMetadataKey);
+        m_metadataEdit = false;
+        m_editMetadataKey.clear();
+    }
 
-void CDataInputDlg::onMetadataKeyChanged(const QString &metadataKey)
-{
-    int cursorPos = m_ui->lineEditMetadataKey->cursorPosition();
-    m_metadataKey = metadataKey;
-    m_ui->lineEditMetadataKey->setText(metadataKey);
-    m_ui->lineEditMetadataKey->setCursorPosition(cursorPos);
+    m_metadata.insert(key, metadata);
+    m_ui->tableEditMetadata->setRowCount(m_metadata.size());
+    m_ui->lineEditMetadata->clear();
+    m_ui->lineEditMetadataKey->clear();
+
+    // Let's update all entries since we do not know if QHash::insert() replaced an existing
+    // entry of just appended a new one.
+    populateMetadata();
 }
 
 QString CDataInputDlg::getUniqueId(const QString &id)
@@ -247,9 +264,6 @@ void CDataInputDlg::updateVisibility(int type)
         m_ui->lineEditEvaluation->setVisible(false);
         m_ui->labelEvaluation->setVisible(false);
     }
-#else
-    m_ui->lineEditEvaluation->setVisible(false);
-    m_ui->labelEvaluation->setVisible(false);
 #endif
     // Adjust text label positioning according to the
     // visibility of info text warning about allowed datatypes.
@@ -260,6 +274,23 @@ void CDataInputDlg::updateVisibility(int type)
         m_ui->labelInfoText->setVisible(false);
         m_ui->infoTxtSpacer->changeSize(20, 0);
     }
+}
+
+void CDataInputDlg::keyPressEvent(QKeyEvent *e)
+{
+    // If we are editing metadata entry, grab ESC event and clear text fields.
+    // Also get out of editing existing metadata entry -mode without saving changes.
+    if (e->key() == Qt::Key_Escape) {
+        if (m_ui->lineEditMetadata->hasFocus() || m_ui->lineEditMetadataKey->hasFocus()) {
+            m_ui->lineEditMetadata->clear();
+            m_ui->lineEditMetadataKey->clear();
+            m_metadataEdit = false;
+            // Return focus to main dialog to allow it to receive ESC events.
+            this->setFocus();
+            return;
+        }
+    }
+    QDialog::keyPressEvent(e);
 }
 
 const bool CDataInputDlg::isEquivalentDataType(int dlgType,
@@ -304,4 +335,27 @@ QVector<EDataType> CDataInputDlg::getAcceptedTypes(qt3dsdm::DataModelDataType::V
             acceptedTypes.append(candidate);
     }
     return acceptedTypes;
+}
+
+void CDataInputDlg::populateMetadata()
+{
+    static const QIcon trashIcon = QIcon(":/images/Action-Trash-Normal.png");
+    m_ui->tableEditMetadata->clearContents();
+    QHashIterator<QString, QString> i(m_metadata);
+    int currRow = 0;
+    while (i.hasNext()) {
+        i.next();
+        QTableWidgetItem *key = new QTableWidgetItem(i.key());
+        QTableWidgetItem *metadata = new QTableWidgetItem(i.value());
+        m_ui->tableEditMetadata->setItem(currRow, 0, key);
+        m_ui->tableEditMetadata->setItem(currRow, 1, metadata);
+        QPushButton *delButton = new QPushButton(trashIcon, {}, nullptr);
+
+        m_ui->tableEditMetadata->setCellWidget(currRow, 2, delButton);
+        connect(delButton, &QPushButton::clicked, this, [this, i]{
+            m_metadata.remove(i.key());
+            populateMetadata();
+        });
+        ++currRow;
+    }
 }

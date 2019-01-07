@@ -495,8 +495,25 @@ void ProjectFile::parseDataInputElem(const QDomElement &elem,
             item->valueString = elem.attribute(QStringLiteral("evaluator"));
         }
 #endif
-        item->metaDataKey = elem.attribute((QStringLiteral("metadatakey")));
-        item->metaData = elem.attribute((QStringLiteral("metadata")));
+
+        auto metadata = elem.attribute(QStringLiteral("metadata"));
+        if (!metadata.isEmpty()) {
+            auto metadataList = metadata.split(QLatin1Char('$'));
+
+            if (metadataList.size() & 1) {
+                qWarning("Malformed datainput metadata for datainput %s, cannot parse key"
+                         " - value pairs. Stop parsing metadata.", qUtf8Printable(item->name));
+            } else {
+                for (int i = 0; i < metadataList.size(); i += 2) {
+                    if (metadataList[i].isEmpty()) {
+                        qWarning("Malformed datainput metadata for datainput %s - metadata"
+                                 " key empty. Stop parsing metadata.", qUtf8Printable(item->name));
+                        break;
+                    }
+                    item->metadata.insert(metadataList[i], metadataList[i+1]);
+                }
+            }
+        }
         dataInputs.insert(item->name, item);
     }
 }

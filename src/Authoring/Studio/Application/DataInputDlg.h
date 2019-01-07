@@ -30,6 +30,10 @@
 #define DATAINPUTDLG_H
 
 #include <QtWidgets/qdialog.h>
+#include <QtWidgets/QTableWidgetItem>
+#include <QtWidgets/QTableWidget>
+#include <QtCore/qhash.h>
+#include <QKeyEvent>
 
 #include "Doc.h"
 #include "Qt3DSDMDataTypes.h"
@@ -91,6 +95,7 @@ protected:
     void initDialog();
     QString getUniqueId(const QString &id);
     void updateVisibility(int type);
+    void keyPressEvent(QKeyEvent *e) override;
 
 private Q_SLOTS:
     void accept() override;
@@ -98,11 +103,11 @@ private Q_SLOTS:
     void onMinChanged(float min);
     void onMaxChanged(float max);
     void onNameChanged(const QString &name);
-    void onTextChanged(const QString &text);
-    void onMetadataChanged(const QString &metadata);
-    void onMetadataKeyChanged(const QString &metadataKey);
+    void onMetadataAdded();
 
 private:
+    void populateMetadata();
+
     Ui::DataInputDlg *m_ui;
     CDataInputDialogItem *m_dataInput;
     QStandardItemModel *m_data;
@@ -110,10 +115,10 @@ private:
     float m_max;
     float m_min;
     int m_type;
-    QString m_text;
-    QString m_metadataKey;
-    QString m_metadata;
+    QHash<QString, QString> m_metadata;
     QVector<EDataType> m_acceptedTypes;
+    bool m_metadataEdit = false; // are we editing existing metadata?
+    QString m_editMetadataKey; // original metadata key now being edited
 };
 
 #endif

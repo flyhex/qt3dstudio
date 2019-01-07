@@ -435,6 +435,17 @@ QDialog#DataInputDlg QComboBox QAbstractItemView::item:disabled {
     color: #727476;
 }
 
+QDialog#DataInputDlg QTableView {
+    selection-background-color: #46a2da;
+    gridline-color: transparent;
+    border: 1px solid #808080;
+    background-color: transparent;
+}
+
+QDialog#DataInputDlg QTableView::item:selected {
+    background-color: #46a2da;
+}
+
 /* QSlider horizontal */
 QSlider {
     background: transparent;
