@@ -28,6 +28,8 @@ if (qtHaveModule(3dstudioruntime2)) {
     INCLUDEPATH += $$OUT_PWD/../../Runtime/qt3d-runtime/include \
                    $$OUT_PWD/../../Runtime/qt3d-runtime/include/Qt3DStudioRuntime2/$$MODULE_VERSION  \
                    $$OUT_PWD/../../Runtime/qt3d-runtime/include/Qt3DStudioRuntime2/$$MODULE_VERSION/Qt3DStudioRuntime2 \
+                   $$OUT_PWD/../../Runtime/qt3d-runtime/include/Qt3DStudioRuntime2/2.3.0  \
+                   $$OUT_PWD/../../Runtime/qt3d-runtime/include/Qt3DStudioRuntime2/2.3.0/Qt3DStudioRuntime2 \
                    $$OUT_PWD/../../Runtime/qt3d-runtime/include/Qt3DStudioRuntime2/2.2.0  \
                    $$OUT_PWD/../../Runtime/qt3d-runtime/include/Qt3DStudioRuntime2/2.2.0/Qt3DStudioRuntime2 \
                    $$OUT_PWD/../../Runtime/qt3d-runtime/include/Qt3DStudioRuntime2/2.1.0  \
