@@ -165,6 +165,8 @@ private:
     void handlePickResult(const SStudioPickValue &pickResult, bool objectPick);
     SStudioPickValue postScenePick(bool objectPick);
 
+    void scheduleDirtySetUpdate();
+
     CDispatch &m_dispatch;
     CDoc &m_doc;
     qt3dsdm::TSignalConnectionPtr m_selectionSignal;
@@ -200,6 +202,7 @@ private:
     QVector<QString> m_systemFonts;
     QVector<QString> m_projectFonts;
     QVector<SubPresentationRecord> m_subpresentations;
+    bool m_dirtySetUpdate = false;
 };
 
 }

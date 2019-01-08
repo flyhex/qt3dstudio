@@ -48,6 +48,7 @@
 #include <QtGui/qopenglfunctions.h>
 #include <QtGui/qoffscreensurface.h>
 #include <QtCore/qscopedvaluerollback.h>
+#include <QtCore/qtimer.h>
 
 #include <Qt3DRender/qrendersurfaceselector.h>
 #include <Qt3DRender/private/qrendersurfaceselector_p.h>
@@ -164,7 +165,8 @@ qt3ds::foundation::IStringTable *Q3DStudioRenderer::GetRenderStringTable()
 
 void Q3DStudioRenderer::RequestRender()
 {
-
+    // Now we only schedule dirty set update
+    scheduleDirtySetUpdate();
 }
 
 bool Q3DStudioRenderer::IsInitialized()
@@ -1228,6 +1230,17 @@ void Q3DStudioRenderer::setupTextRenderer()
 QVector<SFontEntry> &Q3DStudioRenderer::projectFontList()
 {
     return m_fonts;
+}
+
+void Q3DStudioRenderer::scheduleDirtySetUpdate()
+{
+    if (!m_dirtySetUpdate) {
+        m_dirtySetUpdate = true;
+        QTimer::singleShot(0, [this]() {
+            m_translation->clearDirtySet();
+            m_dirtySetUpdate = false;
+        });
+    }
 }
 
 std::shared_ptr<IStudioRenderer> IStudioRenderer::CreateStudioRenderer()

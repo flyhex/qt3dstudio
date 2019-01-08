@@ -79,7 +79,7 @@ private:
 
     void setPresentationData();
 
-    void clearDirtySet();
+
     QByteArray getInstanceObjectId(qt3dsdm::Qt3DSDMInstanceHandle instance);
 
     Q3DSCameraNode *cameraForNode(Q3DSGraphObject *node);
@@ -224,7 +224,7 @@ public:
     void enableSceneCameras(bool enable);
     void wheelZoom(qreal factor);
     void releaseTranslator(Q3DSGraphObjectTranslator *translator);
-
+    void clearDirtySet();
     void markDirty(qt3dsdm::Qt3DSDMInstanceHandle instance);
     void markDirty(qt3dsdm::Qt3DSDMInstanceHandle *inInstance, long inInstanceCount)
     {
