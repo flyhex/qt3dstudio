@@ -149,6 +149,8 @@ Q3DSTranslation::Q3DSTranslation(Q3DStudioRenderer &inRenderer,
         std::bind(&Q3DSTranslation::markComponentSeconds, this, std::placeholders::_1)));
 
     clearDirtySet();
+
+    enableBackgroundLayer();
 }
 
 Q3DSTranslation::THandleTranslatorPairList &Q3DSTranslation::getTranslatorsForInstance(
@@ -776,6 +778,7 @@ void Q3DSTranslation::disableEditCamera()
     }
     enableSceneCameras(true);
     m_editCameraEnabled = false;
+    m_oldCameraType = EditCameraTypes::SceneCamera;
 }
 
 SEditCameraPersistentInformation Q3DSTranslation::editCameraInfo() const
@@ -792,6 +795,114 @@ void Q3DSTranslation::enableSceneCameras(bool enable)
 void Q3DSTranslation::wheelZoom(qreal factor)
 {
     m_editCameraInfo.m_viewRadius = qMax(.0001, m_editCameraInfo.m_viewRadius * factor);
+}
+
+void Q3DSTranslation::enableBackgroundLayer()
+{
+    if (!m_backgroundLayer) {
+        m_backgroundLayer = m_presentation->newObject<Q3DSLayerNode>("StudioBackgroundLayer_");
+        m_scene->appendChildNode(m_backgroundLayer);
+        m_presentation->masterSlide()->addObject(m_backgroundLayer);
+    }
+}
+
+void Q3DSTranslation::disableGradient()
+{
+    if (m_gradient) {
+        m_presentation->unlinkObject(m_gradientMaterial);
+        m_presentation->masterSlide()->removeObject(m_gradient);
+        m_presentation->unlinkObject(m_gradient);
+        delete m_gradient;
+        m_gradient = nullptr;
+    }
+}
+
+void Q3DSTranslation::enableGradient()
+{
+    if (m_oldCameraType != m_editCameraInfo.m_cameraType) {
+        disableGradient();
+        if (m_backgroundLayer) {
+            m_gradient = m_presentation->newObject<Q3DSModelNode>("StudioGradient_");
+            m_backgroundLayer->appendChildNode(m_gradient);
+            m_presentation->masterSlide()->addObject(m_gradient);
+
+            Q3DSPropertyChangeList list;
+            list.append(m_gradient->setMesh(QStringLiteral(":/res/InvertedCube.mesh")));
+            m_gradient->notifyPropertyChanges(list);
+
+            QString matData;
+            if (m_editCameraInfo.m_cameraType == EditCameraTypes::Perspective) {
+                matData =
+                        "<Material name=\"StudioGradientMaterial_\" version=\"1.0\">\n"
+                        "<MetaData></MetaData>\n"
+                        "<Shaders type=\"GLSL\" version=\"330\">\n"
+                        "<Shader>\n"
+                        "<VertexShader>\n"
+                        "attribute vec3 attr_pos;\n"
+                        "varying vec3 pos;\n"
+                        "uniform mat4 projectionMatrix;\n"
+                        "uniform mat3 modelViewNormal;\n"
+                        "void main() {\n"
+                        "pos = attr_pos * 1000.0;\n"
+                        "gl_Position = projectionMatrix * vec4(modelViewNormal * pos, 1.0);\n"
+                        "</VertexShader>\n"
+                        "<FragmentShader>\n"
+                        "varying vec3 pos;\n"
+                        "void main() {\n"
+                        "vec3 npos = normalize(pos);\n"
+                        "vec3 color = vec3(0.0);\n"
+                        "if (npos.y > 0.0)\n"
+                        "color = mix(vec3(0.4, 0.4, 0.4), vec3(0.6, 0.6, 0.6),"
+                        " pow(npos.y, 0.25));\n"
+                        "else\n"
+                        "color = mix(vec3(0.35, 0.35, 0.35), vec3(0.1, 0.1, 0.1),"
+                        " pow(-npos.y, 0.5));\n"
+                        "fragOutput = vec4(color, 1.0);\n"
+                        "</FragmentShader>\n"
+                        "</Shader>\n"
+                        "</Shaders>\n"
+                        "<Passes><Pass></Pass></Passes>\n"
+                        "</Material>\n";
+            } else {
+                matData =
+                        "<Material name=\"StudioGradientMaterial_\" version=\"1.0\">\n"
+                        "<MetaData></MetaData>\n"
+                        "<Shaders type=\"GLSL\" version=\"330\">\n"
+                        "<Shader>\n"
+                        "<VertexShader>\n"
+                        "attribute vec3 attr_pos;\n"
+                        "varying vec3 pos;\n"
+                        "void main() {\n"
+                        "pos = attr_pos * 1000.0;\n"
+                        "gl_Position = vec4(pos.x > 0 ? 1.0 : -1.0, pos.y > 0"
+                        " ? 1.0 : -1.0, 0.0, 1.0);\n"
+                        "</VertexShader>\n"
+                        "<FragmentShader>\n"
+                        "varying vec3 pos;\n"
+                        "void main() {\n"
+                        "vec3 npos = normalize(pos);\n"
+                        "vec3 color = vec3(0.0);\n"
+                        "color = mix(vec3(0.6, 0.6, 0.6), vec3(0.35, 0.35, 0.35),"
+                        " 0.5 * npos.y + 0.5);\n"
+                        "fragOutput = vec4(color, 1.0);\n"
+                        "</FragmentShader>\n"
+                        "</Shader>\n"
+                        "</Shaders>\n"
+                        "<Passes><Pass></Pass></Passes>\n"
+                        "</Material>\n";
+            }
+
+            const QByteArray matId = QByteArrayLiteral("#StudioGradientMaterial_");
+            Q3DSCustomMaterial material = m_presentation->customMaterial(matId, matData.toUtf8());
+            if (!material.isNull()) {
+                m_gradientMaterial = m_presentation->newObject<Q3DSCustomMaterialInstance>(matId);
+                m_gradientMaterial->setSourcePath(matId);
+                m_gradientMaterial->resolveReferences(*m_presentation.data());
+                m_gradient->appendChildNode(m_gradientMaterial);
+            }
+        }
+        m_oldCameraType = m_editCameraInfo.m_cameraType;
+    }
 }
 
 Q3DSCameraNode *Q3DSTranslation::cameraForNode(Q3DSGraphObject *node)

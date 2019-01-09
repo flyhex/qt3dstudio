@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="res/InvertedCube.mesh">../../../res/InvertedCube.mesh</file>
+    </qresource>
+</RCC>

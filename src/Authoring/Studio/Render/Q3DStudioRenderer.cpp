@@ -252,6 +252,7 @@ void Q3DStudioRenderer::SetEditCamera(QT3DSI32 inIndex)
             // use scene camera
             m_translation->disableEditCamera();
             m_viewportSettings.setMatteEnabled(true);
+            m_translation->disableGradient();
         } else {
             // use edit camera
             m_viewportSettings.setMatteEnabled(false);
@@ -277,6 +278,7 @@ void Q3DStudioRenderer::SetEditCamera(QT3DSI32 inIndex)
             }
 
             m_translation->enableEditCamera(cameraInfo);
+            m_translation->enableGradient();
         }
         RequestRender();
     }

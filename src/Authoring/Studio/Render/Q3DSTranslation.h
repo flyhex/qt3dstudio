@@ -184,6 +184,10 @@ private:
     Q3DSGraphObjectTranslator *m_dragTranslator = nullptr;
     Q3DSCameraNode *m_dragCamera = nullptr;
     bool m_presentationInit = false;
+    Q3DSLayerNode *m_backgroundLayer = nullptr;
+    Q3DSModelNode *m_gradient = nullptr;
+    Q3DSCustomMaterialInstance *m_gradientMaterial = nullptr;
+    EditCameraTypes m_oldCameraType = EditCameraTypes::SceneCamera;
 
     struct DragState
     {
@@ -223,6 +227,9 @@ public:
     SEditCameraPersistentInformation editCameraInfo() const;
     void enableSceneCameras(bool enable);
     void wheelZoom(qreal factor);
+    void enableBackgroundLayer();
+    void disableGradient();
+    void enableGradient();
     void releaseTranslator(Q3DSGraphObjectTranslator *translator);
     void clearDirtySet();
     void markDirty(qt3dsdm::Qt3DSDMInstanceHandle instance);
