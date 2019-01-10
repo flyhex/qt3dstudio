@@ -981,6 +981,21 @@ TODO: Only one font for now. More to be added?
   horizontal spacing between every character pair.
 \endlist
 
+
+\section1 Guide Properties
+
+A guide selected in the scene view shows the following properties in the inspector palette:
+
+\list
+\li
+  \b Position - Position of the guide, in pixels. (0,0) is the lower left corner of the
+  scene view.
+\li
+  \b Orientation - Orientation of the guide.
+\li
+  \b Width - Width of the guide, in pixels.
+\endlist
+
 \omit
 \section1 Path Properties
 

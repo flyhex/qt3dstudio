@@ -109,6 +109,41 @@ In \b{Scale} mode:
   scale.
 \endlist
 
+\section2 Using Guides
+
+Guides help you position elements in the scene view. They appear as yellow lines overlaying the
+scene.
+
+\section3 Create a guide
+
+To create a guide, simply grab the ruler at the edge of the scene view and drag into the scene view.
+Dragging from the horizontal ruler will create a horizontal guide, while dragging from the vertical
+ruler will create a vertical guide.
+
+\image create-guides.png
+
+\section3 Delete a guide
+
+To delete a guide, grab it and drag it back to the ruler outside of the scene view. It is possible
+to delete all guides by selecting \uicontrol {View > Clear Guides} from the menu.
+
+\section3 Edit a guide
+
+To change the position of a guide, do one of the following:
+
+\list
+  \li
+  Drag and drop it to the new position using the mouse.
+  \li
+  Left-click it in the scene view. Then, in the inspector palette, enter the desired position in
+  pixels. (0,0) is the lower left corner of the scene view.
+\endlist
+
+\image guide-properties.png
+
+Additional properties available in the inspector palette allow you to set orientation and width for
+the selected guide.
+
 \section1 Matte
 
 Clicking the matte will deselect all selected objects in the presentation.
