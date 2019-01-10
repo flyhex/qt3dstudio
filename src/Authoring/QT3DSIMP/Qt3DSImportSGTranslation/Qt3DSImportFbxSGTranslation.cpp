@@ -503,9 +503,12 @@ void FbxDomWalker::ProcessCamera(FbxNode *inFbxNode)
     m_Translator->PushCamera(cameraName.c_str());
     ProcessTransform(inFbxNode, true);
     FbxCamera *camera = inFbxNode->GetCamera();
+    // Maya does not export FOV, but focal length. We need to convert it to FOV.
+    FbxDouble fov = (m_AuthoringToolType == EAuthoringToolType_FBX_Maya)
+            ? camera->ComputeFieldOfView(camera->FocalLength.Get()) : camera->FieldOfView.Get();
     m_Translator->SetCameraProperties(camera->GetNearPlane(), camera->GetFarPlane(),
                                       camera->ProjectionType.Get() == FbxCamera::eOrthogonal,
-                                      camera->FieldOfView.Get());
+                                      fov);
     ProcessNodeChildren(inFbxNode);
     m_Translator->PopCamera();
 }

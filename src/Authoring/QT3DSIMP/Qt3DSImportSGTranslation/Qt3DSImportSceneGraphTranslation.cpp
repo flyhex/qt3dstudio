@@ -530,6 +530,8 @@ public:
         m_Import.SetInstancePropertyValue(camera, m_Camera.m_ClipFar, clipend);
         m_Import.SetInstancePropertyValue(camera, m_Camera.m_Orthographic, ortho);
         m_Import.SetInstancePropertyValue(camera, m_Camera.m_Fov, fov);
+        if (m_AuthoringToolType == EAuthoringToolType_FBX_Maya)
+            m_Import.SetInstancePropertyValue(camera, m_Camera.m_FovHorizontal, true);
     }
     void PopCamera() override { PopObject(); }
 
