@@ -177,6 +177,8 @@ font
 dropshadow
 dropshadowstrength
 dropshadowoffset
+dropshadowoffsetx
+dropshadowoffsety
 dropshadowhorzalign
 dropshadowvertalign
 boundingbox

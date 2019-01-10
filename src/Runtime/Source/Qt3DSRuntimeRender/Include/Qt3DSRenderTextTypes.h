@@ -163,9 +163,11 @@ namespace render {
         QT3DSF32 m_Tracking; // space between letters
         bool m_DropShadow;
         QT3DSF32 m_DropShadowStrength;
-        QT3DSF32 m_DropShadowOffset;
-        TextHorizontalAlignment::Enum m_DropShadowHorizontalAlignment;
-        TextVerticalAlignment::Enum m_DropShadowVerticalAlignment;
+        QT3DSF32 m_DropShadowOffset; // To be removed in 2.x (when UIP version is next updated)
+        QT3DSF32 m_DropShadowOffsetX;
+        QT3DSF32 m_DropShadowOffsetY;
+        TextHorizontalAlignment::Enum m_DropShadowHorizontalAlignment; // To be removed in 2.x (when UIP version is next updated)
+        TextVerticalAlignment::Enum m_DropShadowVerticalAlignment; // To be removed in 2.x (when UIP version is next updated)
         TextWordWrap::Enum m_WordWrap;
         QT3DSVec2 m_BoundingBox;
         bool m_Elide;

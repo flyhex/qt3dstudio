@@ -543,9 +543,10 @@ struct Qt3DSQtTextRenderer : public ITextRenderer
             break; // Do nothing
         }
 
-        qreal shadowOffsetX = 0.;
-        qreal shadowOffsetY = 0.;
-        if (inSrcText.m_DropShadow) {
+        qreal shadowOffsetX = qreal(inSrcText.m_FontSize * inSrcText.m_DropShadowOffsetX) / 1000.;
+        qreal shadowOffsetY = qreal(inSrcText.m_FontSize * inSrcText.m_DropShadowOffsetY) / 1000.;
+        // To be removed in 2.x (when UIP version is next updated)
+        if (inSrcText.m_DropShadow && shadowOffsetX == 0. && shadowOffsetY == 0.) {
             const qreal offset = qreal(inSrcText.m_DropShadowOffset) / 10.;
             switch (inSrcText.m_DropShadowHorizontalAlignment) {
             case TextHorizontalAlignment::Left:

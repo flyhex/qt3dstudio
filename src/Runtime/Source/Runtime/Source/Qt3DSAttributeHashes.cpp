@@ -219,6 +219,8 @@ const char *GetAttributeString(const EAttribute inAttribute)
         case ATTRIBUTE_DROPSHADOW: return "dropshadow";
         case ATTRIBUTE_DROPSHADOWSTRENGTH: return "dropshadowstrength";
         case ATTRIBUTE_DROPSHADOWOFFSET: return "dropshadowoffset";
+        case ATTRIBUTE_DROPSHADOWOFFSETX: return "dropshadowoffsetx";
+        case ATTRIBUTE_DROPSHADOWOFFSETY: return "dropshadowoffsety";
         case ATTRIBUTE_DROPSHADOWHORZALIGN: return "dropshadowhorzalign";
         case ATTRIBUTE_DROPSHADOWVERTALIGN: return "dropshadowvertalign";
         case ATTRIBUTE_BOUNDINGBOX: return "boundingbox";

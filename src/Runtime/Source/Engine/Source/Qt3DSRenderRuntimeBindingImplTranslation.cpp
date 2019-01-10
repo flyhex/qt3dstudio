@@ -627,6 +627,8 @@ struct SRuntimePropertyParser
 #define Text_DropShadow ATTRIBUTE_DROPSHADOW
 #define Text_DropShadowStrength ATTRIBUTE_DROPSHADOWSTRENGTH
 #define Text_DropShadowOffset ATTRIBUTE_DROPSHADOWOFFSET
+#define Text_DropShadowOffsetX ATTRIBUTE_DROPSHADOWOFFSETX
+#define Text_DropShadowOffsetY ATTRIBUTE_DROPSHADOWOFFSETY
 #define Text_DropShadowHorizontalAlignment ATTRIBUTE_DROPSHADOWHORZALIGN
 #define Text_DropShadowVerticalAlignment ATTRIBUTE_DROPSHADOWVERTALIGN
 #define Text_WordWrap ATTRIBUTE_WORDWRAP
