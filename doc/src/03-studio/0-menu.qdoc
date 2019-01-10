@@ -106,7 +106,7 @@
     \li
       \uicontrol{Default Interpolation} - Controls whether new animation
       keyframes are created with
-      \l{studio-timeline-palette.html#interpolation}{linear or smooth interpolation}.
+      \l{animations.html#interpolation}{linear or smooth interpolation}.
     \li
       \uicontrol{Timeline Snapping Grid} - When using snapping in the
       timeline, controls which ticks to snap to.
@@ -236,7 +236,7 @@
   press the \c{Delete} key after selecting the keyframes to delete them.
 \li
   \uicontrol{Set Interpolation} - Changes the in and out
-  \l{studio-timeline-palette.html#interpolation}{interpolation}
+  \l{animations.html#interpolation}{interpolation}
   setting for the selected keyframes. This command is
   also available from the context menu when right-clicking in the
   animation portion of the \e{timeline palette}.
