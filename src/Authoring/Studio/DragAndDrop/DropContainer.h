@@ -58,6 +58,7 @@ public:
     void AddMainFlavor(long inMainFlavor);
 
     // These need to get implemented by the Cross platform Container.
+    virtual void onDragEnter() = 0;
     virtual bool OnDragWithin(CDropSource &inSource) = 0;
     virtual bool OnDragReceive(CDropSource &inSource) = 0;
     virtual void OnDragLeave() = 0;

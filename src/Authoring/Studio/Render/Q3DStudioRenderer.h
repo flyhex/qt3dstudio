@@ -72,13 +72,15 @@ class Q3DStudioRenderer : public QObject,
                           public CToolbarChangeListener,
                           public ITextRenderer
 {
+    Q_OBJECT
+
 public:
     Q3DStudioRenderer();
     ~Q3DStudioRenderer() override;
     ITextRenderer *GetTextRenderer() override;
     QT3DSVec3 GetIntendedPosition(qt3dsdm::Qt3DSDMInstanceHandle inHandle, CPt inPoint) override;
     Q3DSRenderBufferManager *GetBufferManager() override;
-    qt3dsdm::Qt3DSDMInstanceHandle getObjectAt(const QPoint &pt) override;
+    bool requestObjectAt(const QPoint &pt) override;
     IPathManager *GetPathManager() override;
     qt3ds::foundation::IStringTable *GetRenderStringTable() override;
     void RequestRender() override;
@@ -109,6 +111,10 @@ public:
         return m_viewRect;
     }
     QPoint scenePoint(const QPoint &viewPoint);
+
+Q_SIGNALS:
+    void objectPicked(int instance);
+
 protected:
     void OnBeginDataModelNotifications() override;
     void OnEndDataModelNotifications() override;
@@ -155,9 +161,10 @@ private:
     PickTargetAreas getPickArea(const QPoint &point);
 
     qt3ds::foundation::Option<qt3dsdm::SGuideInfo> pickRulers(CPt inMouseCoords);
-    SStudioPickValue pick(const QPoint &inMouseCoords, SelectMode inSelectMode);
-    void handlePickResult();
-    SStudioPickValue postScenePick();
+    SStudioPickValue pick(const QPoint &inMouseCoords, SelectMode inSelectMode, bool objectPick);
+    void ensurePicker();
+    void handlePickResult(const SStudioPickValue &pickResult, bool objectPick);
+    SStudioPickValue postScenePick(bool objectPick);
 
     CDispatch &m_dispatch;
     CDoc &m_doc;
@@ -180,7 +187,7 @@ private:
     bool m_renderRequested = false;
     bool m_setSubpresentationsCalled = false;
     int m_editCameraIndex = -1;
-    SStudioPickValue m_pickResult;
+    SStudioPickValue m_dragPickResult;
     CUpdateableDocumentEditor m_updatableEditor;
     QPoint m_mouseDownPoint;
     QPoint m_previousMousePoint;
@@ -189,7 +196,7 @@ private:
     SEditCameraPersistentInformation m_mouseDownCameraInformation;
     int m_lastToolMode = 0;
     QScopedPointer<Q3DSScenePicker> m_scenePicker;
-    bool m_pickPending = false;
+    bool m_objectPicking = false;
     QVector<SFontEntry> m_fonts;
     QVector<QString> m_systemFonts;
     QVector<QString> m_projectFonts;

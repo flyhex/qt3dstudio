@@ -188,6 +188,11 @@ CControl *WidgetControl::getControl() const
     return m_control;
 }
 
+void WidgetControl::onDragEnter()
+{
+    // Do nothing
+}
+
 void WidgetControl::setControlSize(const QSize &size)
 {
     m_control->SetSize(size.width(), size.height());

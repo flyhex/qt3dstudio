@@ -75,6 +75,7 @@ void CDropProxy::dragEnterEvent(QDragEnterEvent *event)
                 break;
             }
         }
+        m_Parent->onDragEnter();
     }
 }
 

@@ -34,11 +34,6 @@
 
 class CSceneViewDropTarget : public CDropTarget
 {
-protected:
-    long m_DropTime = -1; // The Time a drop happens
-    long m_DropSourceObjectType = 0;
-    int m_DropSourceFileType = 0;
-
 public:
     CSceneViewDropTarget();
     bool Accept(CDropSource &inSource) override;
@@ -48,7 +43,12 @@ public:
     bool IsRelative(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override;
     bool IsSelf(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override;
     long GetObjectType() override;
-    void SetDropTime(long inDropTime);
-    long GetDropTime();
+    bool objectRequestPending() const { return m_objectRequestPending; }
+    long sourceObjectType() const { return m_DropSourceObjectType; }
+
+protected:
+    long m_DropSourceObjectType = 0;
+    int m_DropSourceFileType = 0;
+    bool m_objectRequestPending = false;
 };
 #endif // #ifndef __SCENEDROPTARGET_H__

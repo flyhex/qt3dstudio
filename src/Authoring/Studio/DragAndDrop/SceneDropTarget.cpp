@@ -100,15 +100,7 @@ bool CSceneViewDropTarget::Accept(CDropSource &inSource)
 
     if (m_DropSourceObjectType == OBJTYPE_MATERIALDATA) {
         CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-        const auto pickedObject = doc->GetSceneGraph()->getObjectAt(inSource.GetCurrentPoint());
-        if (pickedObject.Valid()) {
-            const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
-                    ->GetClientDataModelBridge();
-            if (bridge->GetObjectType(pickedObject) == OBJTYPE_MODEL) {
-                inSource.SetHasValidTarget(true);
-                return true;
-            }
-        }
+        m_objectRequestPending = doc->GetSceneGraph()->requestObjectAt(inSource.GetCurrentPoint());
     }
 
     bool theAcceptable = false;
@@ -166,27 +158,8 @@ bool CSceneViewDropTarget::Drop(CDropSource &inSource)
         }
     }
 
-    if (m_DropSourceObjectType == OBJTYPE_MATERIALDATA) {
-        const auto pickedObject = doc->GetSceneGraph()->getObjectAt(inSource.GetCurrentPoint());
-        if (pickedObject.Valid()) {
-            const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
-                    ->GetClientDataModelBridge();
-            if (bridge->GetObjectType(pickedObject) == OBJTYPE_MODEL) {
-                const auto sceneEditor = doc->getSceneEditor();
-                std::vector<qt3dsdm::Qt3DSDMInstanceHandle> children;
-                sceneEditor->GetChildren(sceneEditor->GetAssociatedSlide(pickedObject),
-                                         pickedObject, children);
-                for (auto &child : children) {
-                    const auto childType = bridge->GetObjectType(child);
-                    if (childType == OBJTYPE_REFERENCEDMATERIAL || childType == OBJTYPE_MATERIAL
-                            || childType == OBJTYPE_CUSTOMMATERIAL) {
-                        instance = child;
-                        break;
-                    }
-                }
-            }
-        }
-    }
+    if (m_DropSourceObjectType == OBJTYPE_MATERIALDATA)
+        m_objectRequestPending = doc->GetSceneGraph()->requestObjectAt(inSource.GetCurrentPoint());
 
     if (instance.Valid()) {
         qt3dsdm::ISlideSystem *theSlideSystem = doc->GetStudioSystem()->GetSlideSystem();
@@ -262,24 +235,3 @@ bool CSceneViewDropTarget::IsSelf(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     qt3dsdm::Qt3DSDMInstanceHandle theThisInstance = GetInstance();
     return (theThisInstance == inInstance);
 }
-
-//===============================================================================
-/**
- * 	 Set the Drop time for all sources.
- *	 @param inDropTime The time to drop the source.
- */
-void CSceneViewDropTarget::SetDropTime(long inDropTime)
-{
-    m_DropTime = inDropTime;
-}
-
-//===============================================================================
-/**
- *	 @return The time that all sources will be droped.
- */
-long CSceneViewDropTarget::GetDropTime()
-{
-    return m_DropTime;
-}
-
-// Last Sceneview related stuff.

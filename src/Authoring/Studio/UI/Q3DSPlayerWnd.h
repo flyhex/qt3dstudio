@@ -113,9 +113,10 @@ public:
 
     QSize sizeHint() const override;
 
+    void onDragEnter() override;
     bool OnDragWithin(CDropSource &inSource) override;
     bool OnDragReceive(CDropSource &inSource) override;
-    void OnDragLeave() override {}
+    void OnDragLeave() override;
     void OnReflectMouse(CPt &, Qt::KeyboardModifiers) override {}
 
     qreal fixedDevicePixelRatio() const;
@@ -136,21 +137,13 @@ public:
 
     void setSceneView(CSceneView *view) { m_SceneView = view; }
 
-protected:
-
-    RenderWindow *m_renderWindow;
-    QWidget *m_widget;
-    bool m_mouseDown;
-    bool m_resumePlayOnMouseRelease = false;
-    long m_previousToolMode;
-    CSceneView *m_SceneView;
-    QRect m_ClientRect;
-    EViewMode m_ViewMode;
-
 Q_SIGNALS:
     void dropReceived();
     void newFrame();
     void toolChanged();
+
+private Q_SLOTS:
+    void handleObjectPicked(int instance);
 
 protected:
     void mouseMoveEvent(QMouseEvent *event) override;
@@ -162,6 +155,29 @@ protected:
     void scrollContentsBy(int, int) override;
 
     bool shouldHideScrollBars();
+
+    class ObjectRequestData {
+    public:
+        int m_instance = 0;
+        bool m_dropping = false;
+        QString m_matFilePath;
+
+        void clear() {
+            m_instance = 0;
+            m_dropping = false;
+            m_matFilePath.clear();
+        }
+    };
+
+    RenderWindow *m_renderWindow;
+    QWidget *m_widget;
+    bool m_mouseDown;
+    bool m_resumePlayOnMouseRelease = false;
+    long m_previousToolMode;
+    CSceneView *m_SceneView;
+    QRect m_ClientRect;
+    EViewMode m_ViewMode;
+    ObjectRequestData m_objectRequestData;
 };
 
 }

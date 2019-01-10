@@ -57,6 +57,8 @@ public:
     bool GetHasValidTarget();
     void SetHasValidTarget(bool inValid) override;
 
+    QString filePath() const { return m_FilePath; }
+
     CCmd *GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTarget, EDROPDESTINATION inDestType,
                                qt3dsdm::Qt3DSDMSlideHandle inSlide) override;
 };

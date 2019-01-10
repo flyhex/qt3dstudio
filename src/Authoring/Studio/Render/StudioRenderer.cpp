@@ -750,16 +750,9 @@ struct SRendererImpl : public IStudioRenderer,
         return m_Translation->GetAnchorPoint(inPick);
     }
 
-    Qt3DSDMInstanceHandle getObjectAt(const QPoint &pt) override
+    void requestObjectAt(const QPoint &pt) override
     {
-        if (m_Translation == nullptr)
-            return Qt3DSDMInstanceHandle();
-
-        const QPoint point(pt * m_pixelRatio);
-        const auto pick = m_Translation->Pick(point, TranslationSelectMode::Single, true);
-        if (pick.getType() == StudioPickValueTypes::Instance)
-            return pick.getData<Qt3DSDMInstanceHandle>();
-        return Qt3DSDMInstanceHandle();
+        Q_UNUSED(pt)
     }
 
     //==========================================================================

@@ -67,6 +67,7 @@ public:
     CControl *getControl() const;
 
 protected:
+    void onDragEnter() override;
     bool OnDragWithin(CDropSource &inSource) override;
     bool OnDragReceive(CDropSource &inSource) override;
     void OnDragLeave() override;

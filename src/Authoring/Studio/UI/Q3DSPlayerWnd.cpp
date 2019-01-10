@@ -38,6 +38,11 @@
 #include "SceneView.h"
 #include "StudioPreferences.h"
 #include "StudioProjectSettings.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "ClientDataModelBridge.h"
+#include "Qt3DSDMSlides.h"
+#include "FileDropSource.h"
+#include "Dialogs.h"
 
 #include <QtGui/qoffscreensurface.h>
 #include <QtGui/qopenglcontext.h>
@@ -162,6 +167,13 @@ Q3DSPlayerWnd::Q3DSPlayerWnd(QWidget *parent)
     if (!theRenderer.IsInitialized()) {
         try {
             theRenderer.Initialize(m_renderWindow);
+
+            // Connect using signal name because IStudioRenderer interface doesn't have the signal
+            QObject *obj = dynamic_cast<QObject *>(&theRenderer);
+            if (obj) {
+                QObject::connect(obj, SIGNAL(objectPicked(int)),
+                                 this, SLOT(handleObjectPicked(int)));
+            }
         } catch (...) {
             QMessageBox::critical(this, tr("Fatal Error"),
                                   tr("Unable to initialize OpenGL.\nThis may be because your "
@@ -330,19 +342,119 @@ void Q3DSPlayerWnd::mouseDoubleClickEvent(QMouseEvent *event)
 bool Q3DSPlayerWnd::OnDragWithin(CDropSource &inSource)
 {
     CSceneViewDropTarget theTarget;
-    return theTarget.Accept(inSource);
+    const bool currentAccept = theTarget.Accept(inSource);
+    bool accept = currentAccept;
+
+    if (theTarget.sourceObjectType() == OBJTYPE_MATERIALDATA) {
+        // Always use previous pending request accept value, since this type of acceptance
+        // cannot be determined synchronously
+        accept = m_objectRequestData.m_instance != 0;
+        inSource.SetHasValidTarget(accept);
+        m_objectRequestData.m_dropping = false;
+    } else {
+        m_objectRequestData.m_instance = 0;
+    }
+
+    return accept;
 }
 
 bool Q3DSPlayerWnd::OnDragReceive(CDropSource &inSource)
 {
     CSceneViewDropTarget theTarget;
     Q_EMIT dropReceived();
-    return theTarget.Drop(inSource);
+
+    theTarget.Drop(inSource);
+
+    if (theTarget.sourceObjectType() == OBJTYPE_MATERIALDATA) {
+        // Material data is always a file source, so this cast should be safe
+        auto fileSource = static_cast<CFileDropSource *>(&inSource);
+        m_objectRequestData.m_matFilePath = fileSource->filePath();
+        m_objectRequestData.m_dropping = true;
+    }
+
+    return true; // theTarget.Drop() always returns true and the return value isn't used anyway
+}
+
+void Q3DSPlayerWnd::OnDragLeave()
+{
+    m_objectRequestData.clear();
+}
+
+void Q3DSPlayerWnd::handleObjectPicked(int instance)
+{
+    const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+            ->GetClientDataModelBridge();
+    m_objectRequestData.m_instance = 0;
+    if (instance && bridge->GetObjectType(instance) == OBJTYPE_MODEL)
+        m_objectRequestData.m_instance = instance;
+
+    if (m_objectRequestData.m_dropping && m_objectRequestData.m_instance) {
+        CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+        const auto editor = doc->getSceneEditor();
+        std::vector<qt3dsdm::Qt3DSDMInstanceHandle> children;
+        editor->GetChildren(editor->GetAssociatedSlide(m_objectRequestData.m_instance),
+                            m_objectRequestData.m_instance, children);
+        qt3dsdm::Qt3DSDMInstanceHandle matInstance;
+        for (auto &child : children) {
+            const auto childType = bridge->GetObjectType(child);
+            if (childType == OBJTYPE_REFERENCEDMATERIAL || childType == OBJTYPE_MATERIAL
+                    || childType == OBJTYPE_CUSTOMMATERIAL) {
+                matInstance = child;
+                break;
+            }
+        }
+        if (matInstance.Valid()) {
+            // Logic copied from CFileDropSource::GenerateAssetCommand
+            if (!QFileInfo(m_objectRequestData.m_matFilePath).completeBaseName()
+                    .contains(QLatin1Char('#'))) {
+                const auto doc = g_StudioApp.GetCore()->GetDoc();
+                { // Scope for the ScopedDocumentEditor
+                    Q3DStudio::ScopedDocumentEditor sceneEditor(
+                                Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QString()));
+                    QString name;
+                    QMap<QString, QString> values;
+                    QMap<QString, QMap<QString, QString>> textureValues;
+                    sceneEditor->getMaterialInfo(m_objectRequestData.m_matFilePath, name, values,
+                                                 textureValues);
+                    const auto material = sceneEditor->getOrCreateMaterial(
+                                m_objectRequestData.m_matFilePath);
+                    sceneEditor->setMaterialValues(material, values, textureValues);
+                }
+                // Several aspects of the editor are not updated correctly
+                // if the data core is changed without a transaction
+                // The above scope completes the transaction for creating a new material
+                // Next the added undo has to be popped from the stack
+                // TODO: Find a way to update the editor fully without a transaction
+                doc->GetCore()->GetCmdStack()->RemoveLastUndo();
+
+                Q3DStudio::ScopedDocumentEditor sceneEditor(
+                            Q3DStudio::SCOPED_DOCUMENT_EDITOR(
+                                *doc, tr("Drag and Drop Material")));
+                QString docDir = doc->GetDocumentDirectory();
+                QString relPath = Q3DStudio::CFilePath::GetRelativePathFromBase(
+                            docDir, m_objectRequestData.m_matFilePath);
+                sceneEditor->SetMaterialType(matInstance, QStringLiteral("Referenced Material"));
+                sceneEditor->setMaterialSourcePath(matInstance, relPath);
+                sceneEditor->setMaterialReferenceByPath(matInstance, relPath);
+                doc->SelectDataModelObject(matInstance);
+            } else {
+                g_StudioApp.GetDialogs()->DisplayMessageBox(
+                            tr("Error"), tr("The character '#' is not allowed in "
+                                            "the name of a material definition file."),
+                            Qt3DSMessageBox::ICON_ERROR, false);
+            }
+        }
+    }
 }
 
 QSize Q3DSPlayerWnd::sizeHint() const
 {
     return effectivePresentationSize();
+}
+
+void Q3DSPlayerWnd::onDragEnter()
+{
+    m_objectRequestData.clear();
 }
 
 qreal Q3DSPlayerWnd::fixedDevicePixelRatio() const
