@@ -2064,14 +2064,14 @@ void FbxDomWalker::ReadMaterial(const FbxSurfaceMaterial *inMaterial, const int 
         return;
 
     QT3DS_ASSERT(inMaterial->GetClassId().Is(FbxSurfaceMaterial::ClassId)
-              || inMaterial->GetClassId().Is(FbxSurfacePhong::ClassId)
-              || inMaterial->GetClassId().Is(FbxSurfaceLambert::ClassId));
+                 || inMaterial->GetClassId().Is(FbxSurfacePhong::ClassId)
+                 || inMaterial->GetClassId().Is(FbxSurfaceLambert::ClassId));
 
     // init some base values
     theNewMaterial.m_Ambient.SetColor(0, 0, 0, 1);
     theNewMaterial.m_Diffuse.SetColor(1, 1, 1, 1);
 
-    if (inMaterial->GetClassId().Is(FbxSurfacePhong::ClassId)) {
+    if (inMaterial->GetClassId().Is(FbxSurfaceLambert::ClassId)) {
         // lambert is base for all materials
         // for phong we override the type and read the additional values later below
         FbxSurfaceLambert *lambertMaterial = (FbxSurfaceLambert *)inMaterial;
@@ -2080,21 +2080,21 @@ void FbxDomWalker::ReadMaterial(const FbxSurfaceMaterial *inMaterial, const int 
         fbxColor = lambertMaterial->Ambient;
         attenuationFactor = (float)lambertMaterial->AmbientFactor;
         theNewMaterial.m_Ambient.SetColor((float)fbxColor.mData[0] * attenuationFactor,
-                                          (float)fbxColor.mData[1] * attenuationFactor,
-                                          (float)fbxColor.mData[2] * attenuationFactor, 1);
+                (float)fbxColor.mData[1] * attenuationFactor,
+                (float)fbxColor.mData[2] * attenuationFactor, 1);
         fbxColor = lambertMaterial->Diffuse;
         attenuationFactor = (float)lambertMaterial->DiffuseFactor;
         theNewMaterial.m_Diffuse.SetColor((float)fbxColor.mData[0] * attenuationFactor,
-                                          (float)fbxColor.mData[1] * attenuationFactor,
-                                          (float)fbxColor.mData[2] * attenuationFactor, 1);
+                (float)fbxColor.mData[1] * attenuationFactor,
+                (float)fbxColor.mData[2] * attenuationFactor, 1);
         fbxColor = lambertMaterial->Emissive;
         attenuationFactor = (float)lambertMaterial->EmissiveFactor;
         theNewMaterial.m_Emission.SetColor((float)fbxColor.mData[0] * attenuationFactor,
-                                           (float)fbxColor.mData[1] * attenuationFactor,
-                                           (float)fbxColor.mData[2] * attenuationFactor, 1);
+                (float)fbxColor.mData[1] * attenuationFactor,
+                (float)fbxColor.mData[2] * attenuationFactor, 1);
         fbxColor = lambertMaterial->TransparentColor;
         theNewMaterial.m_Transparent.SetColor((float)fbxColor.mData[0], (float)fbxColor.mData[1],
-                                              (float)fbxColor.mData[2], 1);
+                (float)fbxColor.mData[2], 1);
         theNewMaterial.m_Transparency.SetValue((float)lambertMaterial->TransparencyFactor);
     }
 
@@ -2105,11 +2105,11 @@ void FbxDomWalker::ReadMaterial(const FbxSurfaceMaterial *inMaterial, const int 
         fbxColor = phongMaterial->Specular;
         attenuationFactor = (float)phongMaterial->SpecularFactor;
         theNewMaterial.m_Specular.SetColor((float)fbxColor.mData[0] * attenuationFactor,
-                                           (float)fbxColor.mData[1] * attenuationFactor,
-                                           (float)fbxColor.mData[2] * attenuationFactor, 1);
+                (float)fbxColor.mData[1] * attenuationFactor,
+                (float)fbxColor.mData[2] * attenuationFactor, 1);
         fbxColor = phongMaterial->Reflection;
         theNewMaterial.m_Reflective.SetColor((float)fbxColor.mData[0], (float)fbxColor.mData[1],
-                                             (float)fbxColor.mData[2], 1);
+                (float)fbxColor.mData[2], 1);
         theNewMaterial.m_Reflectivity.SetValue((float)phongMaterial->ReflectionFactor);
         theNewMaterial.m_Shininess.SetValue((float)phongMaterial->Shininess);
     }
