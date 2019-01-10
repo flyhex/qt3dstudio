@@ -753,9 +753,8 @@ public:
         // Opacity
         float theTransparency = 1.0f;
         if (inMaterialParameters.m_Transparency.m_Flag) {
-            // This is true for MAX and MODO but not for MAYA
-            if ((m_AuthoringToolType == EAuthoringToolType_FBX_Max)
-                || (m_AuthoringToolType == EAuthoringToolType_FBX_Modo)) {
+            // This is true for MAX, Blender and MODO but not for MAYA
+            if (m_AuthoringToolType != EAuthoringToolType_FBX_Maya) {
                 // on FBX 0 is fully opaque and 1 is fully transparent
                 // we treat it vice versa
                 theTransparency = 1.0f - inMaterialParameters.m_Transparency.m_Value;
