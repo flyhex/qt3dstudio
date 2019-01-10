@@ -764,18 +764,21 @@ public:
         }
         float theTransparent = 1.0f;
         float theOpacity = theTransparency * theTransparent;
-        if (inMaterialParameters.m_TransparentOpaqueType.m_Flag
-            && inMaterialParameters.m_Transparent.m_Type == SColorOrTexture::Color) {
-            if (inMaterialParameters.m_TransparentOpaqueType.m_Value == EMatOpaqueType_A_ONE) {
+        if (((inMaterialParameters.m_Transparency.m_Flag && theOpacity == 1.0f)
+             || inMaterialParameters.m_TransparentOpaqueType.m_Flag)
+                && inMaterialParameters.m_Transparent.m_Type == SColorOrTexture::Color) {
+            if (m_AuthoringToolType == EAuthoringToolType_FBX_Maya
+                    || inMaterialParameters.m_TransparentOpaqueType.m_Value
+                    != EMatOpaqueType_A_ONE) {
+                // EMatOpaqueType_RGB_ZERO or importing from Maya
+                theTransparent = (inMaterialParameters.m_Transparent.m_Color[0]
+                        + inMaterialParameters.m_Transparent.m_Color[1]
+                        + inMaterialParameters.m_Transparent.m_Color[2])
+                        / 3.0f;
+                theOpacity = 1.0f - (theTransparency * theTransparent);
+            } else {
                 theTransparent = inMaterialParameters.m_Transparent.m_Color[3];
                 theOpacity = theTransparency * theTransparent;
-            } else // EMatOpaqueType_RGB_ZERO
-            {
-                theTransparent = (inMaterialParameters.m_Transparent.m_Color[0]
-                                  + inMaterialParameters.m_Transparent.m_Color[1]
-                                  + inMaterialParameters.m_Transparent.m_Color[2])
-                    / 3.0f;
-                theOpacity = 1.0f - (theTransparency * theTransparent);
             }
         }
         SetInstancePropertyValue(theMaterial, m_Material.m_Opacity, theOpacity * 100.0f);
