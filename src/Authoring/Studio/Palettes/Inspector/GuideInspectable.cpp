@@ -226,8 +226,8 @@ CInspectorGroup *SGuideInspectableImpl::GetGroup(long)
 
     m_Properties.push_back(
                 std::make_shared<SComboAttItem>(
-                    SInspectableDataInfo(QStringLiteral("Direction"), QObject::tr("Direction"),
-                                         QObject::tr("Direction of the guide"),
+                    SInspectableDataInfo(QStringLiteral("Orientation"), QObject::tr("Orientation"),
+                                         QObject::tr("Orientation of the guide"),
                                          std::bind(&SGuideInspectableImpl::GetDirection, this),
                                          std::bind(&SGuideInspectableImpl::SetDirection, this,
                                                    std::placeholders::_1),
