@@ -34,6 +34,8 @@
 #include "Pt.h"
 #include "q3dsruntime2api_p.h"
 #include "StudioUtils.h"
+#include "StudioApp.h"
+#include "MainFrm.h"
 
 #include <QtWidgets/qapplication.h>
 #include <QtWidgets/qdesktopwidget.h>
@@ -64,14 +66,16 @@ QString StudioUtils::qmlImportPath()
     return extraImportPath.arg(QApplication::applicationDirPath());
 }
 
-qreal StudioUtils::devicePixelRatio()
+qreal StudioUtils::devicePixelRatio(QWindow *window)
 {
     qreal pixelRatio = 1.0;
 
-    const QWindowList list = QGuiApplication::topLevelWindows();
-    if (list.size() > 0)
-        pixelRatio = list[0]->devicePixelRatio();
-
+    QWindow *w = window ? window : g_StudioApp.m_pMainWnd->windowHandle();
+    if (w) {
+        QScreen *s = w->screen();
+        if (s)
+            pixelRatio = s->devicePixelRatio();
+    }
     return pixelRatio;
 }
 

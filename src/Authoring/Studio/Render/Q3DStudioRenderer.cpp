@@ -139,8 +139,8 @@ Q3DSRenderBufferManager *Q3DStudioRenderer::GetBufferManager()
 bool Q3DStudioRenderer::requestObjectAt(const QPoint &pt)
 {
     QPoint point;
-    point.setX(int(pt.x() * StudioUtils::devicePixelRatio()));
-    point.setY(int(pt.y() * StudioUtils::devicePixelRatio()));
+    point.setX(int(pt.x() * StudioUtils::devicePixelRatio(m_window)));
+    point.setY(int(pt.y() * StudioUtils::devicePixelRatio(m_window)));
     PickTargetAreas pickArea = getPickArea(point);
     if (pickArea == PickTargetAreas::Presentation) {
         SStudioPickValue pickValue = pick(point, SelectMode::Single, true);
@@ -181,7 +181,7 @@ void Q3DStudioRenderer::SetViewRect(const QRect &inRect, const QSize &size)
 {
     m_viewRect = inRect;
     if (!m_engine.isNull() && m_window && size != m_size) {
-        m_engine->resize(size, fixedDevicePixelRatio(), false);
+        m_engine->resize(size, StudioUtils::devicePixelRatio(m_window), false);
         //sendResizeToQt3D(size);
     }
     m_size = size;
@@ -845,8 +845,8 @@ void Q3DStudioRenderer::OnSceneMouseDown(SceneDragSenderType::Enum inSenderType,
     if (m_translation.isNull())
         return;
 
-    inPoint.setX(int(inPoint.x() * StudioUtils::devicePixelRatio()));
-    inPoint.setY(int(inPoint.y() * StudioUtils::devicePixelRatio()));
+    inPoint.setX(int(inPoint.x() * StudioUtils::devicePixelRatio(m_window)));
+    inPoint.setY(int(inPoint.y() * StudioUtils::devicePixelRatio(m_window)));
 
     m_dragPickResult = SStudioPickValue();
     if (inSenderType == SceneDragSenderType::SceneWindow) {
@@ -933,8 +933,8 @@ void Q3DStudioRenderer::OnSceneMouseDrag(SceneDragSenderType::Enum, QPoint inPoi
     if (m_translation.isNull() || m_dragPickResult.getType() == StudioPickValueTypes::Pending)
         return;
 
-    inPoint.setX(int(inPoint.x() * StudioUtils::devicePixelRatio()));
-    inPoint.setY(int(inPoint.y() * StudioUtils::devicePixelRatio()));
+    inPoint.setX(int(inPoint.x() * StudioUtils::devicePixelRatio(m_window)));
+    inPoint.setY(int(inPoint.y() * StudioUtils::devicePixelRatio(m_window)));
 
     if (m_maybeDragStart) {
         QPoint theDragDistance = inPoint - m_mouseDownPoint;
@@ -1143,17 +1143,6 @@ void Q3DStudioRenderer::OnSelectionChange()
 
 }
 
-qreal Q3DStudioRenderer::fixedDevicePixelRatio() const
-{
-    // Fix a problem on X11: https://bugreports.qt.io/browse/QTBUG-65570
-    qreal ratio = m_window->devicePixelRatio();
-    if (QWindow *w = m_window) {
-        if (QScreen *s = w->screen())
-            ratio = s->devicePixelRatio();
-    }
-    return ratio;
-}
-
 void Q3DStudioRenderer::sendResizeToQt3D(const QSize &size)
 {
     if (!m_engine)
@@ -1165,7 +1154,7 @@ void Q3DStudioRenderer::sendResizeToQt3D(const QSize &size)
 
         if (surfaceSelector) {
             surfaceSelector->setExternalRenderTargetSize(size);
-            surfaceSelector->setSurfacePixelRatio(float(fixedDevicePixelRatio()));
+            surfaceSelector->setSurfacePixelRatio(float(StudioUtils::devicePixelRatio(m_window)));
         }
     }
 }

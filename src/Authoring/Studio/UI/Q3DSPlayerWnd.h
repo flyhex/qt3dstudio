@@ -119,7 +119,6 @@ public:
     void OnDragLeave() override;
     void OnReflectMouse(CPt &, Qt::KeyboardModifiers) override {}
 
-    qreal fixedDevicePixelRatio() const;
     void setToolMode(long toolMode) { m_previousToolMode = toolMode; }
     void setWindowPosition();
 

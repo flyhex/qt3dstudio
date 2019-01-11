@@ -43,6 +43,7 @@
 #include "Qt3DSDMSlides.h"
 #include "FileDropSource.h"
 #include "Dialogs.h"
+#include "StudioUtils.h"
 
 #include <QtGui/qoffscreensurface.h>
 #include <QtGui/qopenglcontext.h>
@@ -457,17 +458,6 @@ void Q3DSPlayerWnd::onDragEnter()
     m_objectRequestData.clear();
 }
 
-qreal Q3DSPlayerWnd::fixedDevicePixelRatio() const
-{
-    // Fix a problem on X11: https://bugreports.qt.io/browse/QTBUG-65570
-    qreal ratio = devicePixelRatio();
-    if (QWindow *w = window()->windowHandle()) {
-        if (QScreen *s = w->screen())
-            ratio = s->devicePixelRatio();
-    }
-    return ratio;
-}
-
 //==============================================================================
 /**
  * SetPlayerWndPosition: Sets the position of the child player window
@@ -548,10 +538,11 @@ void Q3DSPlayerWnd::recenterClient()
     }
 
     QRect glRect = m_ClientRect;
-    glRect.setX(m_ClientRect.left() * fixedDevicePixelRatio());
-    glRect.setY(m_ClientRect.top() * fixedDevicePixelRatio());
-    glRect.setWidth(int(fixedDevicePixelRatio() * m_ClientRect.width()));
-    glRect.setHeight(int(fixedDevicePixelRatio() * m_ClientRect.height()));
+    const qreal pixelRatio = StudioUtils::devicePixelRatio(window()->windowHandle());
+    glRect.setX(m_ClientRect.left() * pixelRatio);
+    glRect.setY(m_ClientRect.top() * pixelRatio);
+    glRect.setWidth(int(pixelRatio * m_ClientRect.width()));
+    glRect.setHeight(int(pixelRatio * m_ClientRect.height()));
     m_widget->setGeometry(m_ClientRect);
     m_widget->setFixedSize(m_ClientRect.size());
     m_renderWindow->resize(glRect.size());
@@ -615,7 +606,7 @@ QSize Q3DSPlayerWnd::effectivePresentationSize() const
     if (g_StudioApp.getRenderer().AreGuidesEnabled())
         theSize += QSize(CStudioPreferences::guideSize(), CStudioPreferences::guideSize());
 #endif
-    return theSize / fixedDevicePixelRatio();
+    return theSize / StudioUtils::devicePixelRatio(window()->windowHandle());
 }
 
 void Q3DSPlayerWnd::wheelEvent(QWheelEvent* event)
