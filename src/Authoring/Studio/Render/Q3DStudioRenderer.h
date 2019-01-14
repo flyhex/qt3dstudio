@@ -136,7 +136,7 @@ protected:
     void OnSceneMouseWheel(SceneDragSenderType::Enum inSenderType, short inDelta,
                            int inToolMode) override;
     void OnToolbarChange() override;
-    void OnSelectionChange();
+    void onSelectionChange(Q3DStudio::SSelectedValue selectable);
     void onScenePick();
 
     virtual void reloadFonts() override;

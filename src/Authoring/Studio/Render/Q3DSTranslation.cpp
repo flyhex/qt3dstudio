@@ -151,6 +151,7 @@ Q3DSTranslation::Q3DSTranslation(Q3DStudioRenderer &inRenderer,
     clearDirtySet();
 
     enableBackgroundLayer();
+    enableForegroundLayer();
 }
 
 Q3DSTranslation::THandleTranslatorPairList &Q3DSTranslation::getTranslatorsForInstance(
@@ -697,6 +698,9 @@ void Q3DSTranslation::clearDirtySet()
     }
     m_releaseSet.clear();
     m_dirtySet.clear();
+
+    updateForegroundCameraProperties();
+    updateSelectionWidgetProperties();
 }
 
 void Q3DSTranslation::prepareRender(const QRect &rect, const QSize &size, qreal pixelRatio)
@@ -767,6 +771,7 @@ void Q3DSTranslation::enableEditCamera(const SEditCameraPersistentInformation &i
     }
     enableSceneCameras(false);
     m_editCameraEnabled = true;
+    updateForegroundCameraProperties();
 }
 
 void Q3DSTranslation::disableEditCamera()
@@ -780,6 +785,7 @@ void Q3DSTranslation::disableEditCamera()
     enableSceneCameras(true);
     m_editCameraEnabled = false;
     m_oldCameraType = EditCameraTypes::SceneCamera;
+    updateForegroundCameraProperties();
 }
 
 SEditCameraPersistentInformation Q3DSTranslation::editCameraInfo() const
@@ -804,6 +810,15 @@ void Q3DSTranslation::enableBackgroundLayer()
         m_backgroundLayer = m_presentation->newObject<Q3DSLayerNode>("StudioBackgroundLayer_");
         m_scene->appendChildNode(m_backgroundLayer);
         m_presentation->masterSlide()->addObject(m_backgroundLayer);
+    }
+}
+
+void Q3DSTranslation::enableForegroundLayer()
+{
+    if (!m_foregroundLayer) {
+        m_foregroundLayer = m_presentation->newObject<Q3DSLayerNode>("StudioForegroundLayer_");
+        m_scene->prependChildNode(m_foregroundLayer);
+        m_presentation->masterSlide()->addObject(m_foregroundLayer);
     }
 }
 
@@ -906,6 +921,44 @@ void Q3DSTranslation::enableGradient()
     }
 }
 
+void Q3DSTranslation::disableSelectionWidget()
+{
+    m_selectionWidget.destroy(m_presentation.data());
+    m_selectedObject = nullptr;
+}
+
+void Q3DSTranslation::enableSelectionWidget(Qt3DSDMInstanceHandle instance)
+{
+    Q3DSGraphObjectTranslator *translator = getOrCreateTranslator(instance);
+    if (!translator)
+        return;
+
+    m_selectedObject = &translator->graphObject();
+
+    if (!m_selectedObject || (m_selectedObject->type() != Q3DSGraphObject::Model
+                              && m_selectedObject->type() != Q3DSGraphObject::Alias
+                              && m_selectedObject->type() != Q3DSGraphObject::Group
+                              && m_selectedObject->type() != Q3DSGraphObject::Light
+                              && m_selectedObject->type() != Q3DSGraphObject::Camera
+                              && m_selectedObject->type() != Q3DSGraphObject::Text
+                              && m_selectedObject->type() != Q3DSGraphObject::Component)) {
+        m_selectionWidget.setEyeballEnabled(false);
+    }
+
+    if (m_foregroundLayer && !m_foregroundCamera) {
+        m_foregroundCamera = m_presentation->newObject<Q3DSCameraNode>("StudioForegroundCamera_");
+        m_foregroundLayer->appendChildNode(m_foregroundCamera);
+        m_presentation->masterSlide()->addObject(m_foregroundCamera);
+
+        Q3DSLayerAttached *attached = m_foregroundLayer->attached<Q3DSLayerAttached>();
+        if (attached && !attached->layerRayCaster)
+            attached->createRayCaster();
+    }
+
+    updateForegroundCameraProperties();
+    updateSelectionWidgetProperties();
+}
+
 Q3DSCameraNode *Q3DSTranslation::cameraForNode(Q3DSGraphObject *node)
 {
     if (node->type() == Q3DSGraphObject::Camera)
@@ -928,8 +981,67 @@ Q3DSCameraNode *Q3DSTranslation::cameraForNode(Q3DSGraphObject *node)
     return nullptr;
 }
 
+void Q3DSTranslation::updateForegroundCameraProperties()
+{
+    if (m_selectedObject)
+        m_selectedCamera = cameraForNode(m_selectedObject);
+    if (m_selectedCamera && m_foregroundCamera) {
+        Q3DSPropertyChangeList list;
+        list.append(m_foregroundCamera->setFov(m_selectedCamera->fov()));
+        list.append(m_foregroundCamera->setZoom(m_selectedCamera->zoom()));
+        list.append(m_foregroundCamera->setClipFar(m_selectedCamera->clipFar()));
+        list.append(m_foregroundCamera->setClipNear(m_selectedCamera->clipNear()));
+        list.append(m_foregroundCamera->setScaleMode(m_selectedCamera->scaleMode()));
+        list.append(m_foregroundCamera->setScaleAnchor(m_selectedCamera->scaleAnchor()));
+        list.append(m_foregroundCamera->setOrthographic(m_selectedCamera->orthographic()));
+        list.append(m_foregroundCamera->setFovHorizontal(m_selectedCamera->fovHorizontal()));
+        list.append(m_foregroundCamera->setPivot(m_selectedCamera->pivot()));
+        list.append(m_foregroundCamera->setScale(m_selectedCamera->scale()));
+        list.append(m_foregroundCamera->setPosition(m_selectedCamera->position()));
+        list.append(m_foregroundCamera->setRotation(m_selectedCamera->rotation()));
+        m_foregroundCamera->notifyPropertyChanges(list);
+    }
+}
+
+void Q3DSTranslation::updateSelectionWidgetProperties()
+{
+    if (m_selectedObject) {
+        if (!m_selectionWidget.isCreated()) {
+            createSelectionWidget();
+        } else if (g_StudioApp.GetToolMode() != m_toolMode) {
+            m_selectionWidget.destroy(m_presentation.data());
+            createSelectionWidget();
+        }
+        m_selectionWidget.setEyeballEnabled(false);
+
+        if (m_foregroundCamera)
+            m_selectionWidget.applyProperties(m_selectedObject, m_foregroundCamera);
+    }
+}
+
+void Q3DSTranslation::createSelectionWidget()
+{
+    m_toolMode = g_StudioApp.GetToolMode();
+    if (m_toolMode == STUDIO_TOOLMODE_MOVE) {
+        m_selectionWidget.create(m_presentation.data(), m_foregroundLayer,
+                                 SelectionWidgetType::Translation);
+    } else if (m_toolMode == STUDIO_TOOLMODE_ROTATE) {
+        m_selectionWidget.create(m_presentation.data(), m_foregroundLayer,
+                                 SelectionWidgetType::Rotation);
+    } else if (m_toolMode == STUDIO_TOOLMODE_SCALE) {
+        m_selectionWidget.create(m_presentation.data(), m_foregroundLayer,
+                                 SelectionWidgetType::Scale);
+    }
+}
+
 void Q3DSTranslation::prepareDrag(Q3DSGraphObjectTranslator *selected)
 {
+    if (!selected) {
+        if (m_selectedObject)
+            selected = Q3DSGraphObjectTranslator::translatorForObject(m_selectedObject);
+        else
+            return;
+    }
     m_dragTranslator = selected;
     selected->enableAutoUpdates(false);
     Q3DSNode &node = static_cast<Q3DSNode &>(m_dragTranslator->graphObject());
@@ -938,6 +1050,13 @@ void Q3DSTranslation::prepareDrag(Q3DSGraphObjectTranslator *selected)
     m_beginDragState.r = node.rotation();
     m_currentDragState = m_beginDragState;
     m_dragCamera = cameraForNode(&node);
+}
+
+void Q3DSTranslation::prepareWidgetDrag(Q3DSGraphObject *obj)
+{
+    prepareDrag();
+    m_pickedWidget = obj;
+    m_selectionWidget.setColor(m_pickedWidget, Qt::yellow);
 }
 
 void Q3DSTranslation::endDrag(bool dragReset, CUpdateableDocumentEditor &inEditor)
@@ -967,6 +1086,16 @@ void Q3DSTranslation::endDrag(bool dragReset, CUpdateableDocumentEditor &inEdito
         node.notifyPropertyChanges(list);
     }
     m_dragTranslator = nullptr;
+    endPickWidget();
+}
+
+void Q3DSTranslation::endPickWidget()
+{
+    if (m_pickedWidget) {
+        m_selectionWidget.resetColor(m_pickedWidget);
+        m_selectionWidget.resetScale(m_pickedWidget);
+    }
+    m_pickedWidget = nullptr;
 }
 
 void Q3DSTranslation::translateAlongCameraDirection(const QPoint &inOriginalCoords,
@@ -1003,6 +1132,11 @@ void Q3DSTranslation::translateAlongCameraDirection(const QPoint &inOriginalCoor
 void Q3DSTranslation::translate(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
                                 CUpdateableDocumentEditor &inEditor, bool inLockToAxis)
 {
+    if (m_pickedWidget) {
+        translateAlongWidget(inOriginalCoords, inMouseCoords, inEditor);
+        return;
+    }
+
     float theXDistance = float(inMouseCoords.x() - inOriginalCoords.x());
     float theYDistance = float(inMouseCoords.y() - inOriginalCoords.y());
     if (qFuzzyIsNull(theXDistance) && qFuzzyIsNull(theYDistance))
@@ -1021,7 +1155,9 @@ void Q3DSTranslation::translate(const QPoint &inOriginalCoords, const QPoint &in
     Q3DSNodeAttached *cameraAttached = cameraNode->attached<Q3DSNodeAttached>();
     Q3DSNodeAttached *parentAttached = parentNode->attached<Q3DSNodeAttached>();
     QMatrix4x4 cameraMatrix = cameraAttached->globalTransform;
+    Q3DSSelectionWidget::adjustRotationLeftToRight(&cameraMatrix);
     QMatrix4x4 parentMatrix = parentAttached->globalTransform;
+    Q3DSSelectionWidget::adjustRotationLeftToRight(&parentMatrix);
 
     float xMultiplier = theXDistance * 0.5f + 1.f;
     float yMultiplier = theYDistance * 0.5f + 1.f;
@@ -1030,8 +1166,64 @@ void Q3DSTranslation::translate(const QPoint &inOriginalCoords, const QPoint &in
     QVector3D cameraUp = (cameraMatrix * QVector4D(0.f, -1.f, 0.f, 0.f)).toVector3D();
 
     QVector3D diff = cameraLeft * xMultiplier + cameraUp * yMultiplier;
-    diff = (parentMatrix.inverted() * QVector4D(diff.x(), diff.y(), -diff.z(), 0.f)).toVector3D();
+    diff = (parentMatrix.inverted() * QVector4D(diff, 0.f)).toVector3D();
     m_currentDragState.t = m_beginDragState.t + diff;
+    Q3DSPropertyChangeList list;
+    list.append(node->setPosition(m_currentDragState.t));
+    node->notifyPropertyChanges(list);
+    inEditor.EnsureEditor(QObject::tr("Set Position"), __FILE__, __LINE__)
+        .SetInstancePropertyValue(m_doc.GetSelectedInstance(),
+                                  objectDefinitions().m_Node.m_Position,
+                                  qt3dsdm::SValue(QVariant::fromValue(m_currentDragState.t)));
+    inEditor.FireImmediateRefresh(m_doc.GetSelectedInstance());
+}
+
+void Q3DSTranslation::translateAlongWidget(const QPoint &inOriginalCoords,
+                                           const QPoint &inMouseCoords,
+                                           CUpdateableDocumentEditor &inEditor)
+{
+    // TODO: implement proper dragging that follows the mouse
+    float xDistance = float(inMouseCoords.x() - inOriginalCoords.x());
+    float yDistance = float(inMouseCoords.y() - inOriginalCoords.y());
+    float xMultiplier = xDistance * 0.011f;
+    float yMultiplier = yDistance * 0.011f;
+
+    Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
+    Q3DSNodeAttached *widgetAttached = m_pickedWidget->attached<Q3DSNodeAttached>();
+    QMatrix4x4 widgetMatrix = widgetAttached->globalTransform;
+    Q3DSSelectionWidget::adjustRotationLeftToRight(&widgetMatrix);
+
+    Q3DSNode *parentNode = static_cast<Q3DSNode *>(node->parent());
+    Q3DSNodeAttached *parentAttached = parentNode->attached<Q3DSNodeAttached>();
+    QMatrix4x4 parentMatrix = parentAttached->globalTransform;
+    Q3DSSelectionWidget::adjustRotationLeftToRight(&parentMatrix);
+
+    QVector4D direction1;
+    QVector4D direction2;
+    if (m_selectionWidget.isXAxis(m_pickedWidget)) {
+        direction1 = QVector4D(1.f, 0.f, 0.f, 0.f);
+        direction2 = QVector4D(0.f, 0.f, 0.f, 0.f);
+    } else if (m_selectionWidget.isYAxis(m_pickedWidget)) {
+        direction1 = QVector4D(0.f, 1.f, 0.f, 0.f);
+        direction2 = QVector4D(0.f, 0.f, 0.f, 0.f);
+    } else if (m_selectionWidget.isZAxis(m_pickedWidget)) {
+        direction1 = QVector4D(0.f, 0.f, 1.f, 0.f);
+        direction2 = QVector4D(0.f, 0.f, 0.f, 0.f);
+    } else if (m_selectionWidget.isXYPlane(m_pickedWidget)) {
+        direction1 = QVector4D(1.f, 0.f, 0.f, 0.f);
+        direction2 = QVector4D(0.f, 1.f, 0.f, 0.f);
+    } else if (m_selectionWidget.isYZPlane(m_pickedWidget)) {
+        direction1 = QVector4D(0.f, 1.f, 0.f, 0.f);
+        direction2 = QVector4D(0.f, 0.f, 1.f, 0.f);
+    } else if (m_selectionWidget.isZXPlane(m_pickedWidget)) {
+        direction1 = QVector4D(0.f, 0.f, 1.f, 0.f);
+        direction2 = QVector4D(1.f, 0.f, 0.f, 0.f);
+    }
+    QVector3D diff = (widgetMatrix * direction1).toVector3D() * xMultiplier
+            + (widgetMatrix * direction2).toVector3D() * yMultiplier;
+    diff = (parentMatrix.inverted() * QVector4D(diff, 0.f)).toVector3D();
+    m_currentDragState.t = m_beginDragState.t + diff;
+
     Q3DSPropertyChangeList list;
     list.append(node->setPosition(m_currentDragState.t));
     node->notifyPropertyChanges(list);
@@ -1068,6 +1260,11 @@ void Q3DSTranslation::scaleZ(const QPoint &inOriginalCoords, const QPoint &inMou
 void Q3DSTranslation::scale(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
                             CUpdateableDocumentEditor &inEditor)
 {
+    if (m_pickedWidget) {
+        scaleAlongWidget(inOriginalCoords, inMouseCoords, inEditor);
+        return;
+    }
+
     // Scale scales uniformly and responds to mouse Y only.
     float theYDistance = float(inMouseCoords.y() - inOriginalCoords.y());
     if (qFuzzyIsNull(theYDistance))
@@ -1087,10 +1284,69 @@ void Q3DSTranslation::scale(const QPoint &inOriginalCoords, const QPoint &inMous
     inEditor.FireImmediateRefresh(m_doc.GetSelectedInstance());
 }
 
+void Q3DSTranslation::scaleAlongWidget(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
+                                       CUpdateableDocumentEditor &inEditor)
+{
+    // TODO: implement proper scaling that follows the mouse
+    float xDistance = float(inMouseCoords.x() - inOriginalCoords.x());
+    float yDistance = float(inMouseCoords.y() - inOriginalCoords.y());
+    if (qFuzzyIsNull(yDistance))
+        return;
+
+    Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
+
+    QVector4D direction1;
+    QVector4D direction2;
+    if (m_selectionWidget.isXAxis(m_pickedWidget)) {
+        direction1 = QVector4D(1.f, 0.f, 0.f, 0.f);
+        direction2 = QVector4D(0.f, 0.f, 0.f, 0.f);
+    } else if (m_selectionWidget.isYAxis(m_pickedWidget)) {
+        direction1 = QVector4D(0.f, 1.f, 0.f, 0.f);
+        direction2 = QVector4D(0.f, 0.f, 0.f, 0.f);
+    } else if (m_selectionWidget.isZAxis(m_pickedWidget)) {
+        direction1 = QVector4D(0.f, 0.f, 1.f, 0.f);
+        direction2 = QVector4D(0.f, 0.f, 0.f, 0.f);
+    } else if (m_selectionWidget.isXYPlane(m_pickedWidget)) {
+        direction1 = QVector4D(1.f, 0.f, 0.f, 0.f);
+        direction2 = QVector4D(0.f, 1.f, 0.f, 0.f);
+    } else if (m_selectionWidget.isYZPlane(m_pickedWidget)) {
+        direction1 = QVector4D(0.f, 1.f, 0.f, 0.f);
+        direction2 = QVector4D(0.f, 0.f, 1.f, 0.f);
+    } else if (m_selectionWidget.isZXPlane(m_pickedWidget)) {
+        direction1 = QVector4D(0.f, 0.f, 1.f, 0.f);
+        direction2 = QVector4D(1.f, 0.f, 0.f, 0.f);
+    }
+
+    QVector3D scaleMultiplier(1.0f + xDistance * (1.0f / 40.0f) * direction1.x()
+                              + yDistance * (1.0f / 40.0f) * direction2.x(),
+                              1.0f + xDistance * (1.0f / 40.0f) * direction1.y()
+                              + yDistance * (1.0f / 40.0f) * direction2.y(),
+                              1.0f + xDistance * (1.0f / 40.0f) * direction1.z()
+                              + yDistance * (1.0f / 40.0f) * direction2.z());
+
+    if (!qFuzzyIsNull(scaleMultiplier.x()) && !qFuzzyIsNull(scaleMultiplier.y())
+            && !qFuzzyIsNull(scaleMultiplier.z())) {
+        m_selectionWidget.setScale(m_pickedWidget, scaleMultiplier);
+        m_currentDragState.s = QVector3D(m_beginDragState.s.x() * scaleMultiplier.x(),
+                                         m_beginDragState.s.y() * scaleMultiplier.y(),
+                                         m_beginDragState.s.z() * scaleMultiplier.z());
+
+        Q3DSPropertyChangeList list;
+        list.append(node->setScale(m_currentDragState.s));
+        node->notifyPropertyChanges(list);
+        inEditor.EnsureEditor(QObject::tr("Set Scale"), __FILE__, __LINE__)
+            .SetInstancePropertyValue(m_doc.GetSelectedInstance(),
+                                      objectDefinitions().m_Node.m_Scale,
+                                      qt3dsdm::SValue(QVariant::fromValue(m_currentDragState.s)));
+        inEditor.FireImmediateRefresh(m_doc.GetSelectedInstance());
+    }
+}
+
 void Q3DSTranslation::rotateAboutCameraDirectionVector(const QPoint &inOriginalCoords,
                                                        const QPoint &inMouseCoords,
                                                        CUpdateableDocumentEditor &inEditor)
 {
+    // TODO: Fix this to actually rotate around the camera direction
     float theYDistance = float(inMouseCoords.y() - inOriginalCoords.y());
     if (qFuzzyIsNull(theYDistance))
         return;
@@ -1119,6 +1375,11 @@ void Q3DSTranslation::rotateAboutCameraDirectionVector(const QPoint &inOriginalC
 void Q3DSTranslation::rotate(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
                              CUpdateableDocumentEditor &inEditor, bool inLockToAxis)
 {
+    if (m_pickedWidget) {
+        rotateAlongWidget(inOriginalCoords, inMouseCoords, inEditor);
+        return;
+    }
+
     float theXDistance = float(inMouseCoords.x() - inOriginalCoords.x());
     float theYDistance = float(inMouseCoords.y() - inOriginalCoords.y());
 
@@ -1150,6 +1411,42 @@ void Q3DSTranslation::rotate(const QPoint &inOriginalCoords, const QPoint &inMou
     QQuaternion origRotation = QQuaternion::fromEulerAngles(m_beginDragState.r);
     yrotation = origRotation * yrotation;
     m_currentDragState.r = yrotation.toEulerAngles();
+
+    Q3DSPropertyChangeList list;
+    list.append(node->setRotation(m_currentDragState.r));
+    node->notifyPropertyChanges(list);
+    inEditor.EnsureEditor(QObject::tr("Set Rotation"), __FILE__, __LINE__)
+        .SetInstancePropertyValue(m_doc.GetSelectedInstance(),
+                                  objectDefinitions().m_Node.m_Rotation,
+                                  qt3dsdm::SValue(QVariant::fromValue(m_currentDragState.r)));
+    inEditor.FireImmediateRefresh(m_doc.GetSelectedInstance());
+}
+
+void Q3DSTranslation::rotateAlongWidget(const QPoint &inOriginalCoords,
+                                        const QPoint &inMouseCoords,
+                                        CUpdateableDocumentEditor &inEditor)
+{
+    // TODO: implement proper rotation that follows the mouse
+    QVector4D direction;
+    if (m_selectionWidget.isXYCircle(m_pickedWidget)) {
+        direction = QVector4D(1.f, 0.f, 0.f, 0.f);
+    } else if (m_selectionWidget.isYZCircle(m_pickedWidget)) {
+        direction = QVector4D(0.f, 1.f, 0.f, 0.f);
+    } else if (m_selectionWidget.isZXCircle(m_pickedWidget)) {
+        direction = QVector4D(0.f, 0.f, 1.f, 0.f);
+    } else if (m_selectionWidget.isCameraCircle(m_pickedWidget)) {
+        rotateAboutCameraDirectionVector(inOriginalCoords, inMouseCoords, inEditor);
+        return;
+    }
+
+    float yDistance = float(inMouseCoords.y() - inOriginalCoords.y());
+    Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
+
+    QQuaternion yRotation = QQuaternion::fromAxisAndAngle(direction.toVector3D(), .1f * yDistance
+                                                          * float(g_rotationScaleFactor));
+    QQuaternion origRotation = QQuaternion::fromEulerAngles(m_beginDragState.r);
+    yRotation = origRotation * yRotation;
+    m_currentDragState.r = yRotation.toEulerAngles();
 
     Q3DSPropertyChangeList list;
     list.append(node->setRotation(m_currentDragState.r));

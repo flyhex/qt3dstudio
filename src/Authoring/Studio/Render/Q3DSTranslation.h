@@ -51,6 +51,7 @@
 #include "foundation/Qt3DSInvasiveSet.h"
 #include "foundation/Qt3DSOption.h"
 #include "Q3DSEditCamera.h"
+#include "Q3DSSelectionWidget.h"
 #include "StudioEnums.h"
 
 namespace Q3DStudio
@@ -76,14 +77,12 @@ protected:
     void markComponentSeconds(qt3dsdm::Qt3DSDMSlideHandle);
 
 private:
-
     void setPresentationData();
-
-
     QByteArray getInstanceObjectId(qt3dsdm::Qt3DSDMInstanceHandle instance);
-
     Q3DSCameraNode *cameraForNode(Q3DSGraphObject *node);
-
+    void updateForegroundCameraProperties();
+    void updateSelectionWidgetProperties();
+    void createSelectionWidget();
 
     struct TranslatorGetDirty
     {
@@ -185,9 +184,18 @@ private:
     Q3DSGraphObjectTranslator *m_dragTranslator = nullptr;
     Q3DSCameraNode *m_dragCamera = nullptr;
     bool m_presentationInit = false;
+
     Q3DSLayerNode *m_backgroundLayer = nullptr;
+    Q3DSLayerNode *m_foregroundLayer = nullptr;
+    Q3DSCameraNode *m_foregroundCamera = nullptr;
+    Q3DSCameraNode *m_selectedCamera = nullptr;
+    Q3DSGraphObject *m_selectedObject = nullptr;
     Q3DSModelNode *m_gradient = nullptr;
     Q3DSCustomMaterialInstance *m_gradientMaterial = nullptr;
+    long m_toolMode = STUDIO_TOOLMODE_MOVE;
+    Q3DSGraphObject *m_pickedWidget = nullptr;
+    QColor m_pickedWidgetColor;
+    Q3DSSelectionWidget m_selectionWidget;
     EditCameraTypes m_oldCameraType = EditCameraTypes::SceneCamera;
 
     struct DragState
@@ -229,8 +237,11 @@ public:
     void enableSceneCameras(bool enable);
     void wheelZoom(qreal factor);
     void enableBackgroundLayer();
+    void enableForegroundLayer();
     void disableGradient();
     void enableGradient();
+    void disableSelectionWidget();
+    void enableSelectionWidget(qt3dsdm::Qt3DSDMInstanceHandle instance);
     void releaseTranslator(Q3DSGraphObjectTranslator *translator);
     void clearDirtySet();
     void markDirty(qt3dsdm::Qt3DSDMInstanceHandle instance);
@@ -248,22 +259,30 @@ public:
                                                      Q3DSGraphObjectTranslator *aliasTranslator
                                                         = nullptr);
 
-    void prepareDrag(Q3DSGraphObjectTranslator *selected);
+    void prepareDrag(Q3DSGraphObjectTranslator *selected = nullptr);
+    void prepareWidgetDrag(Q3DSGraphObject *obj);
     void endDrag(bool dragReset, CUpdateableDocumentEditor &inEditor);
+    void endPickWidget();
 
     void translateAlongCameraDirection(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
                                        CUpdateableDocumentEditor &inEditor);
     void translate(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
                    CUpdateableDocumentEditor &inEditor, bool inLockToAxis);
+    void translateAlongWidget(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
+                              CUpdateableDocumentEditor &inEditor);
     void scaleZ(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
                 CUpdateableDocumentEditor &inEditor);
     void scale(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
                CUpdateableDocumentEditor &inEditor);
+    void scaleAlongWidget(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
+                          CUpdateableDocumentEditor &inEditor);
     void rotateAboutCameraDirectionVector(const QPoint &inOriginalCoords,
                                           const QPoint &inMouseCoords,
                                           CUpdateableDocumentEditor &inEditor);
     void rotate(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
                 CUpdateableDocumentEditor &inEditor, bool inLockToAxis);
+    void rotateAlongWidget(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
+                           CUpdateableDocumentEditor &inEditor);
 };
 
 }

@@ -1,5 +1,17 @@
 <RCC>
     <qresource prefix="/">
         <file alias="res/InvertedCube.mesh">../../../res/InvertedCube.mesh</file>
+        <file alias="res/GreenArrow.mesh">../../../res/GreenArrow.mesh</file>
+        <file alias="res/BlueArrow.mesh">../../../res/BlueArrow.mesh</file>
+        <file alias="res/RedArrow.mesh">../../../res/RedArrow.mesh</file>
+        <file alias="res/GreenCircle.mesh">../../../res/GreenCircle.mesh</file>
+        <file alias="res/BlueCircle.mesh">../../../res/BlueCircle.mesh</file>
+        <file alias="res/RedCircle.mesh">../../../res/RedCircle.mesh</file>
+        <file alias="res/GreenScale.mesh">../../../res/GreenScale.mesh</file>
+        <file alias="res/BlueScale.mesh">../../../res/BlueScale.mesh</file>
+        <file alias="res/RedScale.mesh">../../../res/RedScale.mesh</file>
+        <file alias="res/GreenRotation.mesh">../../../res/GreenRotation.mesh</file>
+        <file alias="res/BlueRotation.mesh">../../../res/BlueRotation.mesh</file>
+        <file alias="res/RedRotation.mesh">../../../res/RedRotation.mesh</file>
     </qresource>
 </RCC>

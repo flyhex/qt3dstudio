@@ -93,8 +93,8 @@ Q3DStudioRenderer::Q3DStudioRenderer()
     m_dispatch.AddDataModelListener(this);
     m_dispatch.AddPresentationChangeListener(this);
     m_selectionSignal
-            = m_dispatch.ConnectSelectionChange(std::bind(&Q3DStudioRenderer::OnSelectionChange,
-                                                          this));
+            = m_dispatch.ConnectSelectionChange(std::bind(&Q3DStudioRenderer::onSelectionChange,
+                                                          this, std::placeholders::_1));
     m_dispatch.AddSceneDragListener(this);
     m_dispatch.AddToolbarChangeListener(this);
 
@@ -751,6 +751,13 @@ SStudioPickValue Q3DStudioRenderer::postScenePick(bool objectPick)
     }
 #endif
 
+    if (!translator) {
+        if (objectPick)
+            return SStudioPickValue();
+        m_translation->prepareWidgetDrag(object);
+        return SWidgetPick(0);
+    }
+
     if (object->type() == Q3DSGraphObject::Model || object->type() == Q3DSGraphObject::Text) {
         if (translator->possiblyAliasedInstanceHandle() != translator->instanceHandle()) {
             translator = m_translation->getOrCreateTranslator(
@@ -976,6 +983,7 @@ void Q3DStudioRenderer::OnSceneMouseDrag(SceneDragSenderType::Enum, QPoint inPoi
 
     // General dragging
     if (m_dragPickResult.getType() == StudioPickValueTypes::Instance
+        || m_dragPickResult.getType() == StudioPickValueTypes::Widget
         || m_dragPickResult.getType()
             == StudioPickValueTypes::UnknownValueType) // matte drag and widget drag
     {
@@ -1123,6 +1131,8 @@ void Q3DStudioRenderer::OnSceneMouseUp(SceneDragSenderType::Enum)
     }
     if (m_lastDragToolMode != MovementTypes::Unknown)
         m_translation->endDrag(false, m_updatableEditor);
+    else
+        m_translation->endPickWidget();
     m_updatableEditor.CommitEditor();
 
     m_dragPickResult = SStudioPickValue();
@@ -1158,9 +1168,20 @@ void Q3DStudioRenderer::OnToolbarChange()
 
 }
 
-void Q3DStudioRenderer::OnSelectionChange()
+void Q3DStudioRenderer::onSelectionChange(Q3DStudio::SSelectedValue selected)
 {
+    if (m_translation.isNull())
+        return;
 
+    qt3dsdm::TInstanceHandleList instances = selected.GetSelectedInstances();
+    if (!instances.empty()) {
+        for (auto &instance : instances) {
+            if (g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->IsInstance(instance))
+                m_translation->enableSelectionWidget(instance);
+        }
+    } else {
+        m_translation->disableSelectionWidget();
+    }
 }
 
 void Q3DStudioRenderer::sendResizeToQt3D()
