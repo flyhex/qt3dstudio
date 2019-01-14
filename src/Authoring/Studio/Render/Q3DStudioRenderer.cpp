@@ -183,7 +183,9 @@ void Q3DStudioRenderer::SetViewRect(const QRect &inRect, const QSize &size)
 {
     m_viewRect = inRect;
     if (!m_engine.isNull() && m_window && size != m_size) {
-        m_engine->resize(size, StudioUtils::devicePixelRatio(m_window), false);
+        // size already has pixel ratio baked in
+        m_engine->resize(size / StudioUtils::devicePixelRatio(m_window),
+                         StudioUtils::devicePixelRatio(m_window), false);
         //sendResizeToQt3D(size);
     }
     m_size = size;
@@ -1200,7 +1202,8 @@ void Q3DStudioRenderer::createTranslation()
 {
     m_translation.reset(new Q3DSTranslation(*this, m_presentation));
     m_translation->prepareRender(QRect(0, 0, m_window->size().width(),
-                                       m_window->size().height()), m_window->size());
+                                       m_window->size().height()), m_window->size(),
+                                 StudioUtils::devicePixelRatio(m_window));
 }
 
 void Q3DStudioRenderer::reloadFonts()

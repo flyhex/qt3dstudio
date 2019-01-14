@@ -697,7 +697,7 @@ void Q3DSTranslation::clearDirtySet()
     m_dirtySet.clear();
 }
 
-void Q3DSTranslation::prepareRender(const QRect &rect, const QSize &size)
+void Q3DSTranslation::prepareRender(const QRect &rect, const QSize &size, qreal pixelRatio)
 {
     if (!m_scene)
         return;
@@ -719,7 +719,7 @@ void Q3DSTranslation::prepareRender(const QRect &rect, const QSize &size)
             m_editCameraInfo.applyToCamera(*camera, QSizeF(m_size));
     }
     if (rect != m_rect || size != m_size) {
-        m_engine->sceneManager()->updateSizes(size, 1.0, rect, true);
+        m_engine->sceneManager()->updateSizes(size, pixelRatio, rect, true);
         m_rect = rect;
         m_size = size;
     }

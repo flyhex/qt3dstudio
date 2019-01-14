@@ -606,7 +606,7 @@ QSize Q3DSPlayerWnd::effectivePresentationSize() const
     if (g_StudioApp.getRenderer().AreGuidesEnabled())
         theSize += QSize(CStudioPreferences::guideSize(), CStudioPreferences::guideSize());
 #endif
-    return theSize / StudioUtils::devicePixelRatio(window()->windowHandle());
+    return theSize;
 }
 
 void Q3DSPlayerWnd::wheelEvent(QWheelEvent* event)

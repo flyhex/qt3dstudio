@@ -216,7 +216,7 @@ public:
     {
         return m_presentation.data();
     }
-    void prepareRender(const QRect &rect, const QSize &size);
+    void prepareRender(const QRect &rect, const QSize &size, qreal pixelRatio);
     Q3DSGraphObjectTranslator *getOrCreateTranslator(qt3dsdm::Qt3DSDMInstanceHandle instance);
     void enableEditCamera(const SEditCameraPersistentInformation &info);
     void disableEditCamera();
