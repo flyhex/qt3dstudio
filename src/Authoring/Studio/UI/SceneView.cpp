@@ -95,8 +95,6 @@ void CSceneView::showEvent(QShowEvent *event)
 {
     QWidget::showEvent(event);
 
-    m_playerWnd->recenterClient();
-
     // Set the scroll information.
     m_playerWnd->setScrollRanges();
 

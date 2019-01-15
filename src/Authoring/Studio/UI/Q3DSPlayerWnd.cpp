@@ -52,6 +52,7 @@
 #include <QtGui/qevent.h>
 #include <QtGui/qwindow.h>
 #include <QtGui/qscreen.h>
+#include <QtCore/qtimer.h>
 
 namespace Q3DStudio
 {
@@ -194,8 +195,6 @@ Q3DSPlayerWnd::~Q3DSPlayerWnd()
 void Q3DSPlayerWnd::resizeEvent(QResizeEvent *event)
 {
     setScrollRanges();
-    recenterClient();
-    update();
 }
 
 void Q3DSPlayerWnd::mouseMoveEvent(QMouseEvent *event)
@@ -500,6 +499,12 @@ void Q3DSPlayerWnd::setScrollRanges()
         horizontalScrollBar()->setVisible(true);
         verticalScrollBar()->setVisible(true);
     }
+
+    // Setting scroll ranges will do some async geometry adjustments, so do the
+    // recentering asynchronously as well
+    QTimer::singleShot(0, [this]() {
+        recenterClient();
+    });
 }
 
 
@@ -534,7 +539,6 @@ void Q3DSPlayerWnd::recenterClient()
             m_ClientRect.setTop(-verticalScrollBar()->value());
         }
         m_ClientRect.setHeight(theClientSize.height());
-
     }
 
     QRect glRect = m_ClientRect;
@@ -544,8 +548,6 @@ void Q3DSPlayerWnd::recenterClient()
     glRect.setWidth(int(pixelRatio * m_ClientRect.width()));
     glRect.setHeight(int(pixelRatio * m_ClientRect.height()));
     m_widget->setGeometry(m_ClientRect);
-    m_widget->setFixedSize(m_ClientRect.size());
-    m_renderWindow->resize(glRect.size());
     g_StudioApp.getRenderer().SetViewRect(glRect, glRect.size());
 }
 
