@@ -284,6 +284,7 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(dropshadowvertalign, m_DropShadowVerticalAlignment, TDataStrPtr, L"Bottom")   \
     HANDLE_COMPOSER_PROPERTY(wordwrap, m_WordWrap, TDataStrPtr, L"WrapWord")                       \
     HANDLE_COMPOSER_PROPERTY(boundingbox, m_BoundingBox, SFloat2, SFloat2(0, 0))                   \
+    HANDLE_COMPOSER_PROPERTY(elide, m_Elide, bool, false)                                          \
     HANDLE_COMPOSER_PROPERTY(enableacceleratedfont, m_EnableAcceleratedFont, bool, false)          \
     HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 

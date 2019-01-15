@@ -224,6 +224,7 @@ const char *GetAttributeString(const EAttribute inAttribute)
         case ATTRIBUTE_BOUNDINGBOX: return "boundingbox";
         case ATTRIBUTE_BOUNDINGBOX_X: return "boundingbox.x";
         case ATTRIBUTE_BOUNDINGBOX_Y: return "boundingbox.y";
+        case ATTRIBUTE_ELIDE: return "elide";
         case ATTRIBUTE_TRACKING: return "tracking";
         case ATTRIBUTE_LEADING: return "leading";
         case ATTRIBUTE_RENDERSTYLE: return "renderstyle";

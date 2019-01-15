@@ -798,6 +798,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
 #define Text_DropShadowVerticalAlignment "dropshadowvertalign"
 #define Text_WordWrap "wordwrap"
 #define Text_BoundingBox "boundingbox"
+#define Text_Elide "elide"
 #define Text_TextColor "textcolor"
 #define Text_BackColor "backcolor"
 #define Text_EnableAcceleratedFont "enableacceleratedfont"

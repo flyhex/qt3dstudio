@@ -455,6 +455,7 @@
                 <Property name="tracking" formalName="Tracking" description="Tracking" />
                 <Property name="boundingbox" formalName="Text Area" description="Fixed size text area. If not set,\ntext area grows with text." type="Float2" default="0 0" />
                 <Property name="wordwrap" formalName="Word Wrapping" description="Word wrapping. Has effect only if fixed size\ntext area is used.\nClip: Cut text if it does not fit.\nWrapWord: Wrap between words, if possible.\nWrapAnywhere: Wrap even in the middle\nof words." list="Clip:WrapWord:WrapAnywhere" default="WrapWord" />
+                <Property name="elide" formalName="Eliding" description="Elide text that does not fit the\ntext area. Has effect only if\nfixed text area is defined." type="Boolean" default="False" />
                 <Property name="dropshadow" formalName="Drop-Shadow" description="Add a drop-shadow to the text.\nThe shadow is a darker shade of the given color." type="Boolean" default="False" />
                 <Property name="dropshadowstrength" formalName="Shadow Darkness" description="Darkness of the shadow in percents.\n100 is black, 0 is the same color as the text." min="0" max="100" type="Float" default="80" />
                 <Property name="dropshadowoffset" formalName="Shadow Offset" description="Offset of the shadow. It\nis relative to the font size." min="1" max="100" type="Float" default="10" />

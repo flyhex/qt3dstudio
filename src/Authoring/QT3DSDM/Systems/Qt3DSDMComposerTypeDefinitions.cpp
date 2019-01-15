@@ -228,6 +228,7 @@ struct DataConstructor<SObjectRefType>
 #define QT3DS_WCHAR_T_dropshadowvertalign L"dropshadowvertalign"
 #define QT3DS_WCHAR_T_wordwrap L"wordwrap"
 #define QT3DS_WCHAR_T_boundingbox L"boundingbox"
+#define QT3DS_WCHAR_T_elide L"elide"
 #define QT3DS_WCHAR_T_enableacceleratedfont L"enableacceleratedfont"
 #define QT3DS_WCHAR_T_importfile L"importfile"
 #define QT3DS_WCHAR_T_fileid L"fileid"

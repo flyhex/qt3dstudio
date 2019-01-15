@@ -633,6 +633,7 @@ struct SRuntimePropertyParser
 #define Text_BoundingBox ATTRIBUTE_BOUNDINGBOX
 #define Text_BoundingBox_X ATTRIBUTE_BOUNDINGBOX_X
 #define Text_BoundingBox_Y ATTRIBUTE_BOUNDINGBOX_Y
+#define Text_Elide ATTRIBUTE_ELIDE
 #define Text_TextColor ATTRIBUTE_TEXTCOLOR
 #define Text_TextColor_R ATTRIBUTE_TEXTCOLOR_R
 #define Text_TextColor_G ATTRIBUTE_TEXTCOLOR_G

@@ -168,6 +168,7 @@ namespace render {
         TextVerticalAlignment::Enum m_DropShadowVerticalAlignment;
         TextWordWrap::Enum m_WordWrap;
         QT3DSVec2 m_BoundingBox;
+        bool m_Elide;
 
         QT3DSF32 m_ScaleX; // Pixel scale in X
         QT3DSF32 m_ScaleY; // Pixel scale in Y

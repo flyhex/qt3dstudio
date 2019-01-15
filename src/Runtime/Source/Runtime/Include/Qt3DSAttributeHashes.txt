@@ -182,6 +182,7 @@ dropshadowvertalign
 boundingbox
 boundingbox.x
 boundingbox.y
+elide
 tracking
 leading
 renderstyle

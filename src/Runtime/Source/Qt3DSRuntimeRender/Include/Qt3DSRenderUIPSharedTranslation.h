@@ -450,6 +450,7 @@ namespace render {
     HANDLE_QT3DS_RENDER_ENUM_PROPERTY(Text, DropShadowVerticalAlignment, TextDirty)                  \
     HANDLE_QT3DS_RENDER_ENUM_PROPERTY(Text, WordWrap, TextDirty)                                     \
     HANDLE_QT3DS_RENDER_REAL_VEC2_PROPERTY(Text, BoundingBox, TextDirty)                             \
+    HANDLE_QT3DS_RENDER_PROPERTY(Text, Elide, TextDirty)                                             \
     HANDLE_QT3DS_RENDER_COLOR_VEC3_PROPERTY(Text, TextColor, Dirty)                                  \
     HANDLE_QT3DS_RENDER_COLOR_PROPERTY(Text, TextColor, Dirty)                                       \
     HANDLE_QT3DS_RENDER_PROPERTY(Text, EnableAcceleratedFont, Dirty)
