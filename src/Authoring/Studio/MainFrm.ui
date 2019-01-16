@@ -294,6 +294,9 @@ Project palette using Import functionality.</string>
    <property name="text">
     <string>Delete Selected Keyframe(s)</string>
    </property>
+   <property name="shortcut">
+    <string>Del</string>
+   </property>
   </action>
   <action name="actionSet_Interpolation">
    <property name="text">
