@@ -1754,7 +1754,8 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
         if (!newName.IsEmpty()) {
             if (bridge->isInsideMaterialContainer(instance)
                     && (newName.Find('/') != Q3DStudio::CString::ENDOFSTRING
-                        || newName.Find('#') != Q3DStudio::CString::ENDOFSTRING)) {
+                        || newName.Find('#') != Q3DStudio::CString::ENDOFSTRING
+                        || newName.Find(':') != Q3DStudio::CString::ENDOFSTRING)) {
                 return;
             }
             qt3dsdm::Qt3DSDMInstanceHandle parentInstance = bridge->GetParentInstance(instance);
