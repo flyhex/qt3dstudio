@@ -43,13 +43,13 @@ class FileChooserView : public QQuickWidget
 public:
     explicit FileChooserView(QWidget *parent = nullptr);
 
-    QSize sizeHint() const override;
-
     void setHandle(int handle);
     int handle() const;
 
     void setInstance(int instance);
     int instance() const;
+
+    void updateSelection();
 
 Q_SIGNALS:
     void fileSelected(int handle, int instance, const QString &name);

@@ -27,9 +27,8 @@
 
 /*!
 
-\title Getting Started
-\page getting-started.html
-\ingroup qt3dstudio-quick-start-guides
+\title Quick Start Guide
+\page quick-start-guide.html
 
 \section1 Introduction
 This guide will teach you how to create your first Qt 3D Studio project. Additionally it will

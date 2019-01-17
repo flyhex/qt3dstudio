@@ -54,19 +54,13 @@
     \li \c{Ctrl + O}
     \li \c{Cmd + O}
   \row
-    \li Save
+    \li Save Presentation
     \li \c{Ctrl + S}
     \li \c{Cmd + S}
-\omit
   \row
-    \li Save as...
+    \li Save Project As...
     \li \c{Ctrl + Shift + S}
     \li \c{Cmd + Shift + S}
-  \row
-    \li Save a copy
-    \li \c{Ctrl + Alt + S}
-    \li \c{Cmd + Option + S}
-\endomit
   \row
     \li Exit
     \li \c{Ctrl + Q}

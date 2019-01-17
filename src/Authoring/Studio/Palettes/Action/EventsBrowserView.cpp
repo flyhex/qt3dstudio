@@ -27,9 +27,7 @@
 ****************************************************************************/
 #include "EventsBrowserView.h"
 
-#include <QtGui/qcolor.h>
 #include "EventsModel.h"
-#include "Literals.h"
 #include "StudioUtils.h"
 #include "StudioPreferences.h"
 
@@ -58,11 +56,6 @@ void EventsBrowserView::setModel(EventsModel *model)
     }
 }
 
-QSize EventsBrowserView::sizeHint() const
-{
-    return {500, 500};
-}
-
 qt3dsdm::CDataModelHandle EventsBrowserView::selectedHandle() const
 {
     const auto handleId = m_model->handleForRow(m_selection);
@@ -72,7 +65,10 @@ qt3dsdm::CDataModelHandle EventsBrowserView::selectedHandle() const
 void EventsBrowserView::selectAndExpand(const QString &event)
 {
     // All categories are expanded by default, so let's just select
+    m_blockCommit = true;
     setSelection(m_model->rowForEventName(event));
+    m_blockCommit = false;
+
 }
 
 void EventsBrowserView::setSelection(int index)

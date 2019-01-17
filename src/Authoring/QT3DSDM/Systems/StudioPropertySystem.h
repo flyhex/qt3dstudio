@@ -119,6 +119,9 @@ public:
                                            Qt3DSDMPropertyHandle inProperty,
                                            SValue &outValue) const;
 
+    QVector<Qt3DSDMPropertyHandle> GetControllableProperties(
+            Qt3DSDMInstanceHandle inInst) const override;
+
 private:
     static bool DerivedGuidMatches(qt3dsdm::IDataCore &inDataCore,
                                    qt3dsdm::Qt3DSDMInstanceHandle inInstance,

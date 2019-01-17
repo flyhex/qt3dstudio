@@ -417,7 +417,7 @@ Q3DStudio::IDocumentEditor &CDoc::OpenTransaction(const QString &inCmdName, cons
     ++m_TransactionDepth;
     if (m_TransactionDepth == 1) {
         assert(!m_OpenTransaction);
-        m_OpenTransaction = std::make_shared<qt3dsdm::CmdDataModel>(std::ref(*this));
+        m_OpenTransaction = std::make_shared<qt3dsdm::CmdDataModel>(*this);
         m_OpenTransaction->SetName(inCmdName);
         m_OpenTransaction->SetConsumer();
         m_Core->SetCommandStackModifier(this);
@@ -432,9 +432,9 @@ Q3DStudio::IDocumentEditor &CDoc::OpenTransaction(const QString &inCmdName, cons
         qCInfo(qt3ds::TRACE_INFO) << inFile << "(" << inLine << "): Open Transaction: "
                                   << inCmdName;
 
-    if (!m_SceneEditor) {
+    if (!m_SceneEditor)
         m_SceneEditor = Q3DStudio::IInternalDocumentEditor::CreateEditor(*this);
-    }
+
     return *m_SceneEditor;
 }
 
@@ -474,9 +474,9 @@ void CDoc::IKnowWhatIAmDoingForceCloseTransaction()
         qCInfo(qt3ds::TRACE_INFO) << "Closing transaction";
         // Ensure hasTransaction will return false right at this second.
         std::shared_ptr<qt3dsdm::CmdDataModel> theTransaction(m_OpenTransaction);
-        m_OpenTransaction = std::shared_ptr<qt3dsdm::CmdDataModel>();
+        m_OpenTransaction.reset();
 
-        m_Core->SetCommandStackModifier(NULL);
+        m_Core->SetCommandStackModifier(nullptr);
         // Release the consumer without running notifications because our command will run
         // the notifications when it first gets executed.
         theTransaction->ReleaseConsumer(false);
@@ -1199,7 +1199,6 @@ void CDoc::OnSlideDeleted(qt3dsdm::Qt3DSDMSlideHandle inSlide)
 }
 void CDoc::OnInstanceDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
-    qt3dsdm::TTransactionConsumerPtr theConsumer = m_StudioSystem->GetFullSystem()->GetConsumer();
     if (GetSelectedInstance() == inInstance)
         DeselectAllItems();
 
@@ -1321,10 +1320,7 @@ void CDoc::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                 inInstance, QStringLiteral("controlledproperty"))) {
         // we need to rebuild the datainput map as we do not know what exactly
         // happened with controlledproperty property
-        // TODO: implement a pre-change signal that can be used to extract
-        // controlledproperty string before and after the change, so we know exactly
-        // what happened to the element
-        UpdateDatainputMap();
+        UpdateDatainputMapForInstance(inInstance);
     }
 }
 
@@ -1707,7 +1703,7 @@ void CDoc::CloseDocument()
     // selection would be invalid from this point onwards
     DeselectAllItems();
 
-    m_SceneEditor = std::shared_ptr<Q3DStudio::IInternalDocumentEditor>();
+    m_SceneEditor.reset();
     if (m_DocumentBufferCache) {
         // Ensure old buffers aren't picked up for the same relative path.
         m_DocumentBufferCache->Clear();
@@ -2970,6 +2966,56 @@ void CDoc::UpdateDatainputMap(QMultiMap<QString,
     UpdateDatainputMapRecursive(GetSceneInstance(), outMap);
 }
 
+// Update global datainput map for all datainput bindings for a single instance.
+void CDoc::UpdateDatainputMapForInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
+{
+    auto propSystem = GetPropertySystem();
+
+    qt3dsdm::Qt3DSDMPropertyHandle ctrldPropHandle
+            = propSystem->GetAggregateInstancePropertyByName(inInstance,
+                                                             QStringLiteral("controlledproperty"));
+
+    if (propSystem->HasAggregateInstanceProperty(inInstance, ctrldPropHandle)) {
+        qt3dsdm::SValue ctrldPropVal;
+        propSystem->GetInstancePropertyValue(inInstance, ctrldPropHandle, ctrldPropVal);
+        Q3DStudio::CString currCtrldPropsStr
+                = qt3dsdm::get<qt3dsdm::TDataStrPtr>(ctrldPropVal)->GetData();
+        QStringList splitStr = currCtrldPropsStr.toQString().split(QLatin1Char(' '));
+
+        // There is no way to detect a case where control is removed i.e. a controller-property
+        // pair simply disappears from controlledproperty string. We need to do a complete
+        // rebuild for inInstance references in the global map, but still avoid doing
+        // a scene-wide datainput map update.
+        for (auto &it : qAsConst(g_StudioApp.m_dataInputDialogItems))
+            it->removeControlFromInstance(inInstance);
+
+        // Rebuild controlled element items and append them to global datainput map.
+        for (int i = 0; i < splitStr.size() - 1; i += 2) {
+            // Check for '$' because Qt3DS v1.1 did not differentiate datainput
+            // names with it
+            QString diName = splitStr[i].startsWith(QLatin1Char('$'))
+                    ? splitStr[i].remove(0, 1) : splitStr[i];
+            QString propName = splitStr[i+1];
+            auto propHandle = propSystem->GetAggregateInstancePropertyByName(
+                        inInstance, propName);
+            auto propType = propSystem->GetDataType(propHandle);
+            CDataInputDialogItem::ControlledItem item(inInstance, propHandle);
+            if (propType)
+                item.dataType = {propType, false};
+            else if (propName == QLatin1String("@slide"))
+                item.dataType = {qt3dsdm::DataModelDataType::Value::String, true};
+            else if (propName == QLatin1String("@timeline"))
+                item.dataType = {qt3dsdm::DataModelDataType::Value::RangedNumber, true};
+
+            // Check for DI name validity because we might have broken
+            // presentations with property control bindings set to non-existent
+            // datainputs
+            if (g_StudioApp.m_dataInputDialogItems.contains(diName))
+                g_StudioApp.m_dataInputDialogItems[diName]->ctrldElems.append(item);
+        }
+    }
+}
+
 void CDoc::UpdateDatainputMapRecursive(
         const qt3dsdm::Qt3DSDMInstanceHandle inInstance,
         QMultiMap<QString,
@@ -3157,6 +3203,42 @@ void CDoc::ReplaceDatainput(const QString &oldName, const QString &newName,
                                      controlledProperty);
         }
     }
+}
+
+QString CDoc::GetCurrentController(qt3dsdm::Qt3DSDMInstanceHandle instHandle,
+                                   qt3dsdm::Qt3DSDMPropertyHandle propHandle)
+{
+    auto propSys = GetPropertySystem();
+    qt3dsdm::SValue currPropVal;
+    propSys->GetInstancePropertyValue(
+                instHandle,
+                propSys->GetAggregateInstancePropertyByName(
+                    instHandle, QStringLiteral("controlledproperty")),
+                currPropVal);
+    if (!currPropVal.empty()) {
+        QString currPropValStr = qt3dsdm::get<QString>(currPropVal);
+        QString propName = propSys->GetName(propHandle);
+
+        // Datainput controller name is always prepended with "$". Differentiate
+        // between datainput and property that has the same name by searching specifically
+        // for whitespace followed by property name.
+        int propNamePos = currPropValStr.indexOf(" " + propName);
+        if ((propNamePos != -1) && (propNamePos != 0)) {
+            int posCtrlr = currPropValStr.mid(0, propNamePos).lastIndexOf("$");
+
+            // adjust pos if this is the first controller - property pair in controlledproperty
+            if (posCtrlr < 0)
+                posCtrlr = 0;
+
+            // remove $
+            posCtrlr++;
+            return currPropValStr.mid(posCtrlr, propNamePos - posCtrlr);
+        } else {
+            return {};
+        }
+    }
+
+    return {};
 }
 
 QDebug operator<<(QDebug dbg, const SubPresentationRecord &r)

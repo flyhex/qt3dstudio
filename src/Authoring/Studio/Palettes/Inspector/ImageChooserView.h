@@ -43,14 +43,14 @@ class ImageChooserView : public QQuickWidget
 public:
     explicit ImageChooserView(QWidget *parent = nullptr);
 
-    QSize sizeHint() const override;
-
     void setHandle(int handle);
     int handle() const;
 
     void setInstance(int instance);
     int instance() const;
     QString currentDataModelPath() const;
+
+    void updateSelection();
 
 Q_SIGNALS:
     void imageSelected(int handle, int instance, const QString &name);

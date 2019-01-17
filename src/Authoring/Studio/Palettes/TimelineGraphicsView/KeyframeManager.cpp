@@ -159,8 +159,10 @@ void KeyframeManager::commitMoveSelectedKeyframes()
 {
     CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
     COffsetKeyframesCommandHelper h(*theDoc);
-    for (Keyframe *keyframe : qAsConst(m_selectedKeyframes))
-        keyframe->binding->UpdateKeyframesTime(&h, keyframe->time * 1000);
+    for (Keyframe *keyframe : qAsConst(m_selectedKeyframes)) {
+        const long msTime = round(keyframe->time * 1000);
+        keyframe->binding->UpdateKeyframesTime(&h, msTime);
+    }
 }
 
 void KeyframeManager::selectKeyframesInRect(const QRectF &rect)

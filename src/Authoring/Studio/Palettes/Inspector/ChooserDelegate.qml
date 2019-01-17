@@ -42,7 +42,7 @@ Rectangle {
     color: isCurrentFile ? _selectionColor : "transparent"
 
     Row {
-        x: depth*28
+        x: depth * 28 - (item.width <= _valueWidth ? 14 : 0)
         anchors.verticalCenter: item.verticalCenter
 
         Image {

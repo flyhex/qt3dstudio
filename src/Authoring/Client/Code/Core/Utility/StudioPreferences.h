@@ -217,7 +217,7 @@ public:
     static const long DEFAULT_CLIENT_WIDTH = 1920;
     static const long DEFAULT_CLIENT_HEIGHT = 1080;
     static const long DEFAULT_TIME_ADVANCE = 100;
-    static const long DEFAULT_BIG_TIME_ADVANCE = 200;
+    static const long DEFAULT_BIG_TIME_ADVANCE = 500;
     static const long DEFAULT_SELECTOR_WIDTH = 30;
     static const long DEFAULT_SELECTOR_LENGTH = 50;
     static const long DEFAULT_AUTOSAVE_DELAY = 600;

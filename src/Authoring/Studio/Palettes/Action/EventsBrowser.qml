@@ -43,13 +43,9 @@ Rectangle {
         ListView {
             id: eventsList
 
-            Layout.margins: 10
-            Layout.columnSpan: 2
+            Layout.margins: 5
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.minimumHeight: 80
-            Layout.preferredHeight: count * 20
-            Layout.preferredWidth: root.width
 
             ScrollBar.vertical: ScrollBar {}
 
@@ -64,9 +60,8 @@ Rectangle {
 
                 readonly property bool isCategory: model.isCategory
 
-                x: isCategory ? 0 : 50
                 width: parent.width
-                height: model.parentExpanded ? 30 : 0
+                height: model.parentExpanded ? _controlBaseHeight : 0
                 visible: height > 0
 
                 Behavior on height {
@@ -76,66 +71,63 @@ Rectangle {
                     }
                 }
 
-                Row {
-                    id: row
+                Rectangle {
+                    width: parent.width
+                    height: parent.height
+                    color: model.index === eventsList.currentIndex ? _selectionColor
+                                                                   : "transparent"
+                    Row {
+                        id: row
+                        width: parent.width
+                        height: parent.height
+                        spacing: 5
 
-                    height: categoryIcon.height
-                    spacing: 5
+                        Image {
+                            id: arrow
+                            anchors.verticalCenter: parent.verticalCenter
+                            source: {
+                                if (!delegateItem.isCategory)
+                                    return "";
+                                model.expanded ? _resDir + "arrow_down.png"
+                                               : _resDir + "arrow.png";
+                            }
 
-                    Image {
-                        source: {
-                            if (!delegateItem.isCategory)
-                                return "";
-                            model.expanded ? _resDir + "arrow_down.png"
-                                           : _resDir + "arrow.png";
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: model.expanded = !model.expanded
+                            }
                         }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: model.expanded = !model.expanded
+                        Image { // group icon
+                            anchors.verticalCenter: parent.verticalCenter
+                            source: model.icon
+                        }
+
+                        StyledLabel {
+                            id: name
+                            leftPadding: isCategory ? 0 : 45
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: model.name
                         }
                     }
 
-                    Rectangle {
-                        height: name.height
-                        width: categoryIcon.width + name.width + 10
-
-                        color: model.index === eventsList.currentIndex ? _selectionColor
-                                                                       : "transparent"
-
-                        Row {
-                            id: textRow
-
-                            spacing: 10
-                            Image {
-                                id: categoryIcon
-
-                                source: model.icon
-                            }
-
-                            StyledLabel {
-                                id: name
-                                anchors.verticalCenter:  textRow.verticalCenter
-                                text: model.name
-                            }
+                    MouseArea {
+                        id: delegateArea
+                        anchors.fill: parent
+                        anchors.leftMargin: arrow.width
+                        hoverEnabled: true
+                        onClicked: {
+                            if (!delegateItem.isCategory)
+                                eventsList.currentIndex = model.index;
                         }
-
-                        MouseArea {
-                            id: delegateArea
-
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            onClicked: {
-                                if (!delegateItem.isCategory)
-                                    eventsList.currentIndex = model.index;
-                            }
-                            onEntered: itemDescription.text = model.description
-                            onExited: itemDescription.text = ""
-                            onDoubleClicked: {
-                                if (!delegateItem.isCategory) {
-                                    eventsList.currentIndex = model.index;
-                                    _eventsBrowserView.close();
-                                }
+                        onEntered: itemDescription.text = model.description
+                        onExited: itemDescription.text = ""
+                        onDoubleClicked: {
+                            if (!delegateItem.isCategory) {
+                                eventsList.currentIndex = model.index;
+                                _eventsBrowserView.close();
+                            } else {
+                                model.expanded = !model.expanded
                             }
                         }
                     }

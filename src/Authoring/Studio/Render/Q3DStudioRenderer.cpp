@@ -296,6 +296,12 @@ void Q3DStudioRenderer::EditCameraZoomToFit()
 
 }
 
+bool Q3DStudioRenderer::isMouseDown() const
+{
+    return m_mouseDown || m_scenePicker->state() == Q3DSScenePicker::Triggered
+            || m_scenePicker->state() == Q3DSScenePicker::Queued;
+}
+
 void Q3DStudioRenderer::Close()
 {
     OnClosingPresentation();
@@ -851,6 +857,8 @@ void Q3DStudioRenderer::OnSceneMouseDown(SceneDragSenderType::Enum inSenderType,
     if (m_translation.isNull())
         return;
 
+    m_mouseDown = true;
+
     inPoint.setX(int(inPoint.x() * StudioUtils::devicePixelRatio(m_window)));
     inPoint.setY(int(inPoint.y() * StudioUtils::devicePixelRatio(m_window)));
 
@@ -1102,6 +1110,7 @@ void Q3DStudioRenderer::OnSceneMouseDrag(SceneDragSenderType::Enum, QPoint inPoi
 void Q3DStudioRenderer::OnSceneMouseUp(SceneDragSenderType::Enum)
 {
     m_maybeDragStart = false;
+    m_mouseDown = false;
     qt3dsdm::Qt3DSDMGuideHandle theSelectedGuide;
     if (m_dragPickResult.getType() == StudioPickValueTypes::Guide) {
         theSelectedGuide = m_dragPickResult.getData<qt3dsdm::Qt3DSDMGuideHandle>();

@@ -309,86 +309,9 @@ palette. Clicking on these numbers will open the Go To Time palette,
 where you may type in an exact time, down to milliseconds, to set
 the playhead to.
 
-\section2 Adjusting Animation
+\section2 Working with Animations
 
-\image Studio-Timeline-Animation-Keyframes.png
-
-Most good visual effects do not "pop" into place, but provide a visual
-transition, even if brief, to help the user understand what happened.
-This is an example on what you can achieve with animations.
-
-\section3 Creating Keyframes
-
-To animate a property of an element, turn on the
-\l{studio-inspector-palette.html#animating-properties}{animation toggle
-in the Inspector palette}. This will add a new keyframe for that
-property at the current playhead time. If the property is not linked to
-the master slide (as with the position shown in the picture above) the
-animation will only be created on the current slide.
-
-To create a new keyframe, move the playhead to a new time and then
-do one of the following:
-
-\list
-\li
-  Ensure that \l{studio-toolbar.html#keyframing}{Autoset Keyframes} is
-  turned on (via the Toolbar, Timeline menu, or by pressing \c{K}),
-  and then change the value of the property (via the Inspector palette
-  or dragging the transform of the element), or
-\li
-  Change the value of the property and then invoke the
-  \l{studio-menu.html#timeline}{Set Changed Keyframes} command (from the
-  Timeline menu, or the keyboard shortcut \c{Ctrl + Shift + K}).
-\endlist
-
-This will create a new keyframe at the current time. You can drag the
-keyframe in the Timeline palette to adjust its time, or double-click it
-to show the Set Keyframe Time dialog where you can enter an exact timing
-value.
-
-Keyframes displayed in green are "dynamic keyframes". For more
-information, see the page
-\e{\l{best-practices-dynamic-keyframes.html}{Dynamic Keyframes}}.
-
-\section3 Copying Keyframes
-
-To copy keyframes from one element to another, follow the steps below.
-
-\list 1
-\li
-  Select the keyframe(s) to copy on an element.
-\li
-  Right-click on one of the selected keyframes and choose \uicontrol {Copy Selected Keyframes}.
-\li
-  Position the playhead at the time where the first keyframe should be
-  placed.
-\li
-  Right click on the time bar for the element and choose \uicontrol{Paste Keyframes}.
-\endlist
-
-\section3 Interpolation
-
-\image Studio-Timeline-Interpolation.png
-
-As the playhead moves from one keyframe to the next, the Qt 3D Studio
-Runtime can perform \e {linear interpolation}, \e {smooth
-interpolation}, or a custom blending somewhere in-between. With linear
-interpolation the value changes at the same rate from one value to the
-next. With smooth interpolation the value starts off holding the
-previous keyframe value, 'accelerates' towards the next keyframe value,
-and then 'decelerates' to stop at the new value.
-
-To set the interpolation, first select the keyframe(s) that you want to
-adjust, then right-click on one of the selected keyframes, and from the
-context menu choose \b {Set Interpolation}. The \b {Ease In} setting
-controls how the value behaves as it approaches the keyframe and the
-\b {Ease Out} setting controls how the value behaves when leaving the
-keyframe.
-
-\note If you find that you are constantly setting your keyframes from
-Smooth to Linear, or vice-versa, you may wish to change the
-\b{Default Interpolation} setting for new keyframes in the
-\l{studio-menu.html#edit}{Application Preferences}.
+For more information on how to work with animations, see the \l Animations documentation.
 
 \section2 Adjusting Time Bars
 
@@ -422,7 +345,6 @@ the same value. It is thus common when entering a new slide for the
 first time to select the scene or active component, set the playhead
 to a particular time, and then press \c{]} to crop the entire
 slide to that duration.
-
 
 \section2 Customizing Time Bars
 
@@ -468,7 +390,8 @@ animations and slide transitions without leaving Studio.
   or causing Studio to switch to an new slide when the end time for the
   current slide is reached.
 \li
-  The \uicontrol{Stop} command stops any playback. \uicontrol{Stop} replaces \uicontrol{Play} when animation is playing.
+  The \uicontrol{Stop} command stops any playback. \uicontrol{Stop} replaces \uicontrol{Play}
+  when animation is playing.
 \li
   The \uicontrol{Fast-forward} command sets the playhead to the timeline end.
 \li

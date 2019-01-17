@@ -62,6 +62,18 @@ DataModelDataType::Value SImportModel::GetPropertyDataType(const QString &inProp
     return SImportNode::GetPropertyDataType(inPropertyName);
 }
 
+DataModelDataType::Value SImportLight::GetPropertyDataType(const QString &inPropertyName)
+{
+    ITERATE_COMPOSER_LIGHT_PROPERTIES
+    return SImportNode::GetPropertyDataType(inPropertyName);
+}
+
+DataModelDataType::Value SImportCamera::GetPropertyDataType(const QString &inPropertyName)
+{
+    ITERATE_COMPOSER_CAMERA_PROPERTIES
+    return SImportNode::GetPropertyDataType(inPropertyName);
+}
+
 DataModelDataType::Value SImportMaterial::GetPropertyDataType(const QString &inPropertyName)
 {
     ITERATE_COMPOSER_MATERIAL_PROPERTIES
@@ -102,7 +114,9 @@ DataModelDataType::Value SImportControllableObject::GetPropertyDataType(
     ITERATE_COMPOSER_MATERIAL_PROPERTIES
     ITERATE_COMPOSER_NODE_PROPERTIES
     ITERATE_COMPOSER_LIGHT_PROPERTIES
-    return SImportAsset::GetPropertyDataType(inPropertyName);
+    // Cannot fall back to SImportAsset as we might receive custom material
+    // properties which are not known to property system and cause assert.
+    return DataModelDataType::None;
 }
 
 #undef HANDLE_COMPOSER_PROPERTY_NO_DEFAULT
@@ -131,6 +145,10 @@ SImportAsset &SImportComposerTypes::GetImportAssetForType(ComposerObjectTypes::E
         return m_Asset;
     case ComposerObjectTypes::Group:
         return m_Group;
+    case ComposerObjectTypes::Light:
+        return m_Light;
+    case ComposerObjectTypes::Camera:
+        return m_Camera;
     case ComposerObjectTypes::Model:
         return m_Model;
     case ComposerObjectTypes::Node:

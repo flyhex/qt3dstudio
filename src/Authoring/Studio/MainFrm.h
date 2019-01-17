@@ -107,8 +107,8 @@ public:
     void OnFileOpen();
     void OnFileSave();
     void OnUpdateFileSave();
-    void OnFileSaveAs();
-    void OnFileSaveCopy();
+    void onProjectSaveAs();
+    void onDuplicatePresentation();
     void OnProjectNew();
     void OnFileNew();
     void OnFileRevert();

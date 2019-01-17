@@ -114,6 +114,9 @@ public:
     virtual void RemoveDatainputBindings(
             const QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
                                            qt3dsdm::Qt3DSDMPropertyHandle>> *map) = 0;
+
+    virtual QString GetCurrentController(qt3dsdm::Qt3DSDMInstanceHandle instHandle,
+                                         qt3dsdm::Qt3DSDMPropertyHandle propHandle) = 0;
     // Return an editor to editing the scene graph of the document.
     // This editor takes care of putting objects into the property slide
     // as well as updating the world

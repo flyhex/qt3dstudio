@@ -51,6 +51,7 @@ private Q_SLOTS:
     void handleImportAssets();
     void handleAddMaterial();
     void handleDuplicate();
+    void handleDuplicatePresentation();
     void handleInitialPresentation();
     void handleRenamePresentation();
     void handleRenameQmlStream();

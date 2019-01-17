@@ -64,9 +64,8 @@ void SApplicationState::Notify(const SApplicationState &inOther, CDoc &inDoc)
 // to a deleted item
 void SApplicationState::PreNotify(const SApplicationState &inOther, CDoc &inDoc)
 {
-    if (m_SelectedInstance != inOther.m_SelectedInstance) {
+    if (m_SelectedInstance != inOther.m_SelectedInstance)
         inDoc.DeselectAllItems(false);
-    }
 }
 
 CmdDataModel::CmdDataModel(CDoc &inDoc)
@@ -96,25 +95,11 @@ bool CmdDataModel::ConsumerExists() const
     return m_Consumer != nullptr;
 }
 
-void CmdDataModel::SetConsumer(ITransactionProducer *inProducer)
-{
-    if (!ConsumerExists())
-        m_Consumer = std::make_shared<CTransactionConsumer>();
-    inProducer->SetConsumer(m_Consumer);
-}
-
-void CmdDataModel::ReleaseConsumer(ITransactionProducer *inProducer, bool inRunNotifications)
-{
-    inProducer->SetConsumer(TTransactionConsumerPtr());
-    if (inRunNotifications)
-        RunDoNotifications();
-}
-
 void CmdDataModel::SetConsumer()
 {
     if (!ConsumerExists()) {
-        m_Doc.GetCore()->GetDispatch();
-        SetConsumer(m_Doc.GetStudioSystem());
+        m_Consumer = std::make_shared<CTransactionConsumer>();
+        m_Doc.GetStudioSystem()->SetConsumer(m_Consumer);
         m_Doc.GetAssetGraph()->SetConsumer(m_Consumer);
         m_BeforeDoAppState.Store(m_Doc);
     }
@@ -123,11 +108,16 @@ void CmdDataModel::SetConsumer()
 void CmdDataModel::ReleaseConsumer(bool inRunNotifications)
 {
     if (ConsumerExists()) {
-        m_Doc.GetAssetGraph()->SetConsumer(TTransactionConsumerPtr());
+        m_Doc.GetAssetGraph()->SetConsumer(nullptr);
+
         if (HasTransactions())
             m_Doc.SetModifiedFlag(true);
         m_AfterDoAppState.Store(m_Doc);
-        ReleaseConsumer(m_Doc.GetStudioSystem(), inRunNotifications);
+
+        m_Doc.GetStudioSystem()->SetConsumer(nullptr);
+
+        if (inRunNotifications)
+            RunDoNotifications();
     }
 }
 

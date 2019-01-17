@@ -181,7 +181,8 @@ bool CStudioProjectSettingsPage::onApply()
         return false;
     }
     if (!g_StudioApp.GetCore()->getProjectFile()
-            .isUniquePresentationId(m_ui->m_PresentationId->text())) {
+            .isUniquePresentationId(m_ui->m_PresentationId->text(),
+                                    g_StudioApp.GetCore()->GetDoc()->getRelativePath())) {
         g_StudioApp.showPresentationIdUniqueWarning();
         return false;
     }

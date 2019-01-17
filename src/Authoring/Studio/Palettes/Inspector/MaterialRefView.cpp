@@ -48,13 +48,18 @@ MaterialRefView::MaterialRefView(QWidget *parent)
 /**
  * Gather and display the currently used standard and custom material list
  *
- * @param refInstance referenced material instance of the currently selected reference material
+ * @param instance The instance that owns the property handle
+ * @param handle The property handle this materials list is for
  *
  * @return number of items in the list
  */
-int MaterialRefView::refreshMaterials(qt3dsdm::Qt3DSDMInstanceHandle refInstance)
+int MaterialRefView::refreshMaterials(int instance, int handle)
 {
     clear(); // clear old material list
+
+    m_instance = instance;
+    m_handle = handle;
+    qt3dsdm::Qt3DSDMInstanceHandle refInstance = getRefInstance();
 
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
@@ -91,9 +96,31 @@ int MaterialRefView::refreshMaterials(qt3dsdm::Qt3DSDMInstanceHandle refInstance
     return (int)mats.size();
 }
 
+void MaterialRefView::updateSelection()
+{
+    int refInstance = getRefInstance();
+    for (int i = 0, itemCount = count(); i < itemCount; ++i) {
+        int matInstance = item(i)->data(Qt::UserRole).toInt();
+        if (matInstance == refInstance) {
+            setCurrentRow(i);
+            break;
+        }
+    }
+}
+
 bool MaterialRefView::isFocused() const
 {
     return hasFocus();
+}
+
+int MaterialRefView::getRefInstance() const
+{
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
+
+    qt3dsdm::SValue value;
+    propertySystem->GetInstancePropertyValue(m_instance, m_handle, value);
+    return doc->GetDataModelObjectReferenceHelper()->Resolve(value, m_instance);
 }
 
 void MaterialRefView::focusInEvent(QFocusEvent *event)

@@ -79,6 +79,7 @@ public:
     void addMaterial(int row) const;
     void editMaterial(int row) const;
     void duplicate(int row) const;
+    void duplicatePresentation(int row) const;
     void deleteFile(int row) const;
 
     bool isRefreshable(int row) const;

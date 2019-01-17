@@ -126,7 +126,7 @@ shown in the Inspector palette \e{specific to the active slide}:
   scene or component will switch to a new slide. This is useful to have
   an intro animation that then leads into a looping animation (on a
   separate slide). You may specify a specific slide to play through to,
-  or simply the next/previous slide in the Slide palette. \^{}
+  or simply the next/previous slide in the Slide palette.
 \endlist
 \li
   \b{Initial Play State} - When entering this slide, should the
@@ -232,17 +232,10 @@ in the Inspector palette:
   presentation and the layer, either in pixels or as a percentage of the
   presentation's height.
 \li
-  \b{Sub-Presentation} - If you specify a value here, it is
-  intepreted to be the \c{id} attribute of another presentation in
-  \omit
-  TODO: Not really usable right now.
-  \l{file-formats-uia.html}{the \c{.uia} application file}.
-  \endomit
-  the \c{.uia} application file.
-   Instead of rendering the contents of this layer,
-  the specified presentation will be rendered and composited in place of
-  this layer. For more information, see the discussion on the
-  \e{\l{best-practices-using-sub-presentations.html}{Using Sub-Presentations}} page.
+  \b{Sub-Presentation} - Select a presentation (\.uip) or QML (\c.qml) file to render as a
+  sub-presentation on this layer. Other objects on the layer will not render when a sub-presentation
+  is applied. For more information, see
+  \e{\l{Using Sub-Presentations}}.
 \li
   \b{Ambient Occlusion} - Controls the strength of ambient
   occlusion (AO). AO is a form of approximated global illumination which
@@ -344,7 +337,7 @@ in the Inspector palette:
   \b{Light Probe} - Select an image (preferably a high dynamic
   range image (\c{.hdr})) to use to light the scene, either instead of or
   in addition to standard lights. If selected, note that this image will
-  be used as the environment for any custom \c{.material}, instead
+  be used as the environment for any custom \c{.shader}, instead
   of the environment often associated with them. For details see \l{Using Image-based Lighting}.
 \li
   \b{IBL Brightness} - The amount of light emitted by the light probe.
@@ -450,18 +443,12 @@ no foreshortening artifacts.
   This occurs at the pixel level, not the element level: a model that
   crosses the clipping plane may be only partially rendered.
 \endlist
-\omit
-TODO: Replace the following paragraph with this once AO is back.
+
 \e{The default values are intended to cause anything within the view
 of the camera to be rendered. Aside from special clipping effects, you
 may need to adjust these values to more closely contain your content for
 better results with Ambient Occlusion, or with a layer effect that uses
 the depth buffer of the camera, such as the
-\endomit
-\e{The default values are intended to cause anything within the view
-of the camera to be rendered. Aside from special clipping effects, you
-may need to adjust these values to more closely contain your content for
-better results with a layer effect that uses the depth buffer of the camera, such as the
 \l{Depth of Field}{Depth of Field effect}.}
 
 \list
@@ -545,7 +532,7 @@ in the Inspector palette (in addition to the
   \b{Ambient Color} - The diffuse color (and intensity) applied to
   materials before being lit by this light.
 \li
-  \b{Brightness} (point light only) - An overall multiplier for the
+  \b{Brightness} - An overall multiplier for the
   light's effects.
 \li
   \b{Linear Fade} (point light only) - Turn up this value to
@@ -572,8 +559,6 @@ in the Inspector palette (in addition to the
 \li
   \b{Shadow Far Clip} - Maximum distance for the shadow map;
   smaller values may improve the precision and effects of the map.
-\li
-  \b{Shadow Field of View} - Shadow camera field of view.
 \endlist
 
 \b Notes:
@@ -626,16 +611,13 @@ in the Inspector palette (in addition to the
 \target material-properties
 \section1 Material Properties
 
-A material selected in the Timeline palette shows the different
-properties in the Inspector palette depending on the type of the
-material, chosen in the top-most property:
+Editing a material shows the different properties in the Inspector palette. For more information
+about working with materials, see \l {Materials and Shaders}.
 
 \list
 \li
   \b{Material Type} - Controls the type of material to be used. The
-  values are \"Standard Material\" and \"Referenced Material\", followed
-  by a list of any custom \c{.material} files present your
-  application folder.
+  values are Basic Material, Animatable Material and Referenced Material.
 \li
   \e{Tip: Material Type is a special type of property that cannot be
   unlinked or changed at runtime. If you want to change the type of
@@ -646,13 +628,17 @@ material, chosen in the top-most property:
 \endlist
 
 \target standard-materials
-\section2 Standard Materials
+\section2 Basic Materials
 
 \list
+\li
+  \b{Name} - Name of the material.
 \li
   \b{IBL override} - IBL probe to use in place of the layer probe.
 \endlist
 \list
+\li
+  \b{Shader} - Choose a customer shader (\c{.shader}) file to use for the material.
 \li
   \b{Lighting} - Choose the type of lighting calculations used for
   this material:
@@ -847,20 +833,23 @@ Note that the Runtime custom-compiles shaders for each unique
 combination of material properties used. Each additional material
 feature that you use results in a (slight) additional performance hit.
 
+\target animated-materials
+\section2 Animated Materials
+
+Animatable materials are used when you want to animate properties of a material. The properties in
+the inspector palette are the same as for a basic material.
+
 \target referenced-materials
 \section2 Referenced Materials
 
-A \"referenced material\" uses whatever settings are present on another
-material element. This both allows you to have 'master'
-materials - changing the settings on one material affects all the
-others - and also provides a mechanism for quickly switching between
-different material types (in either Studio or at runtime). When you
-select this type of material, the Inspector palette shows only a single
-property:
+A \"referenced material\" uses the material properties on another
+material. These are used when you want to re-use an animatable material on another
+object. Changing material properties on one object will affect all object using the material
+The Inspector palette shows only a single property:
 
 \list
 \li
-  \b{Referenced Material} - a picker for selecting another material
+  \b{Referenced Material} - a picker for selecting an animatable material
   within the presentation.
 \li
   \e{Tip: the material you reference does \b{not} have to be
@@ -870,11 +859,16 @@ property:
 \endlist
 \section1 Image Properties
 
-When image maps are applied to a material (e.g. Diffuse, Specular,
-Opacity, etc.) a new element appears in the Timeline palette as a child
-of the material. This element represents the properties that control
-that image, allowing them to be animated over time. Selecting one of
-these images shows the following properties in the Inspector palette:
+When image maps (e.g. Diffuse, Specular, Opacity, etc.) are applied to an animated material,
+a new element appears in the scene graph as a child of the material. This element represents
+the properties that control that image, allowing them to be animated over time. Selecting one of
+these images shows the image properties in the Inspector palette.
+
+For basic and referenced materials, you need to first select the material in the scene graph. Then,
+right-click the map property name in the inspector and select \uicontrol {Open in inspector} from
+the context menu. Now the properties of the image map will show in the inspector palette.
+
+\image material-open-in-inspector.png
 
 \list
 \li
@@ -983,6 +977,21 @@ TODO: Only one font for now. More to be added?
 \li
   \b{Tracking} - Controls the amount of extra (or negative)
   horizontal spacing between every character pair.
+\endlist
+
+
+\section1 Guide Properties
+
+A guide selected in the scene view shows the following properties in the inspector palette:
+
+\list
+\li
+  \b Position - Position of the guide, in pixels. (0,0) is the lower left corner of the
+  scene view.
+\li
+  \b Orientation - Orientation of the guide.
+\li
+  \b Width - Width of the guide, in pixels.
 \endlist
 
 \omit

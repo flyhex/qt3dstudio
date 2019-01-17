@@ -27,13 +27,10 @@
 ****************************************************************************/
 #include "ObjectBrowserView.h"
 
-#include <QtGui/qcolor.h>
-#include "Literals.h"
 #include "ObjectListModel.h"
 #include "StudioPreferences.h"
 #include "StudioUtils.h"
 
-#include <QtCore/qcoreapplication.h>
 #include <QtCore/qtimer.h>
 #include <QtQml/qqmlcontext.h>
 #include <QtQml/qqmlengine.h>
@@ -61,12 +58,6 @@ void ObjectBrowserView::setModel(ObjectListModel *model)
     m_selection = -1;
 
     Q_EMIT modelChanged();
-}
-
-
-QSize ObjectBrowserView::sizeHint() const
-{
-    return {500, 500};
 }
 
 QString ObjectBrowserView::absPath(int index) const
@@ -97,7 +88,9 @@ void ObjectBrowserView::selectAndExpand(const qt3dsdm::Qt3DSDMInstanceHandle &ha
     if (!index.isValid())
         return;
     m_model->expandTo(QModelIndex(), index);
+    m_blockCommit = true;
     setSelection(m_model->rowForSourceIndex(index));
+    m_blockCommit = false;
 }
 
 void ObjectBrowserView::setSelection(int index)

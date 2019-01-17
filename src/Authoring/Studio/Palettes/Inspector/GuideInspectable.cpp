@@ -97,6 +97,12 @@ struct SComboAttItem : public IInspectableAttributeItem
         m_BaseInspectableInfo.m_Commit();
     }
 
+    void ChangeInspectableData(const qt3dsdm::SValue &inValue) override
+    {
+        m_BaseInspectableInfo.m_Setter(inValue);
+    }
+    void CancelInspectableData() override { m_BaseInspectableInfo.m_Cancel(); }
+
     float GetInspectableMin() const override { return 0; }
     float GetInspectableMax() const override { return 0; }
     qt3dsdm::TMetaDataStringList GetInspectableList() const override { return m_MetaDataTypes; }
@@ -160,7 +166,10 @@ struct SFloatIntItem : public IInspectableAttributeItem
     qt3dsdm::DataModelDataType::Value GetInspectableType() const override { return m_DataType; }
     qt3dsdm::AdditionalMetaDataType::Value GetInspectableAdditionalType() const override
     {
-        return qt3dsdm::AdditionalMetaDataType::None;
+        if (m_Max > 0)
+            return qt3dsdm::AdditionalMetaDataType::Range;
+        else
+            return qt3dsdm::AdditionalMetaDataType::None;
     }
 };
 
@@ -217,8 +226,8 @@ CInspectorGroup *SGuideInspectableImpl::GetGroup(long)
 
     m_Properties.push_back(
                 std::make_shared<SComboAttItem>(
-                    SInspectableDataInfo(QStringLiteral("Direction"), QObject::tr("Direction"),
-                                         QObject::tr("Direction of the guide"),
+                    SInspectableDataInfo(QStringLiteral("Orientation"), QObject::tr("Orientation"),
+                                         QObject::tr("Orientation of the guide"),
                                          std::bind(&SGuideInspectableImpl::GetDirection, this),
                                          std::bind(&SGuideInspectableImpl::SetDirection, this,
                                                    std::placeholders::_1),
@@ -325,4 +334,10 @@ void SGuideInspectableImpl::Rollback()
 void SGuideInspectableImpl::FireRefresh()
 {
     m_Editor.FireImmediateRefresh(qt3dsdm::Qt3DSDMInstanceHandle());
+}
+
+const std::vector<std::shared_ptr<IInspectableAttributeItem>> &
+SGuideInspectableImpl::properties() const
+{
+    return m_Properties;
 }

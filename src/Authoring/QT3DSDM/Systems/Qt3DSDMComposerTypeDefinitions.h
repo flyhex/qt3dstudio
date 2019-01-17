@@ -280,10 +280,13 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(dropshadow, m_DropShadow, bool, false)                                \
     HANDLE_COMPOSER_PROPERTY(dropshadowstrength, m_DropShadowStrength, float, 80.f)                \
     HANDLE_COMPOSER_PROPERTY(dropshadowoffset, m_DropShadowOffset, float, 10.f)                    \
+    HANDLE_COMPOSER_PROPERTY(dropshadowoffsetx, m_DropShadowOffsetX, float, 0.f)                  \
+    HANDLE_COMPOSER_PROPERTY(dropshadowoffsety, m_DropShadowOffsetY, float, 0.f)                  \
     HANDLE_COMPOSER_PROPERTY(dropshadowhorzalign, m_DropShadowHorizontalAlignment, TDataStrPtr, L"Right")  \
     HANDLE_COMPOSER_PROPERTY(dropshadowvertalign, m_DropShadowVerticalAlignment, TDataStrPtr, L"Bottom")   \
     HANDLE_COMPOSER_PROPERTY(wordwrap, m_WordWrap, TDataStrPtr, L"WrapWord")                       \
     HANDLE_COMPOSER_PROPERTY(boundingbox, m_BoundingBox, SFloat2, SFloat2(0, 0))                   \
+    HANDLE_COMPOSER_PROPERTY(elide, m_Elide, bool, false)                                          \
     HANDLE_COMPOSER_PROPERTY(enableacceleratedfont, m_EnableAcceleratedFont, bool, false)          \
     HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 

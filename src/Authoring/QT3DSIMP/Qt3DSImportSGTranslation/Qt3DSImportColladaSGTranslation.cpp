@@ -139,6 +139,10 @@ protected:
     std::function<void(long, long)> PopMaterial;
     std::function<void(const char *, const char *, long)> PushTexture;
     std::function<void()> PopTexture;
+    std::function<void(const char *)> PushLight;
+    std::function<void()> PopLight;
+    std::function<void(const char *)> PushCamera;
+    std::function<void()> PopCamera;
     std::function<void(daeElement *inElement)> CacheAnimationTrack;
     std::function<void(long)> ApplyAnimationTrack;
 
@@ -150,6 +154,10 @@ protected:
     std::function<void(const TTransformList &inTransforms)> SetTransforms;
     std::function<void(const SMaterialParameters &inMaterialParameters)> SetMaterial;
     std::function<void(long inMapType, const STextureParameters &inTextureParameters)> SetTexture;
+    std::function<void(double clipstart, double clipend, bool ortho,
+                       double fov)> SetCameraProperties;
+    std::function<void(int type, const SFloat3 &color, double intensity,
+                       double linearfade, double quadfade, bool shadows)> SetLightProperties;
 
     std::function<void(const char *, const char *)> SetAnimationTrack;
     std::function<void(const char *, const char *, const SKeyframeParameters &)>
@@ -182,7 +190,7 @@ void FindTexturesViaNewParam(daeElement *inElementPtr, ColladaDOMWalker::TURILis
             if (theSourceRef) {
                 const xsNCName theSourceSid = theSourceRef->getValue();
 
-                daeElement *theSurfaceNewParamPtr = NULL;
+                daeElement *theSurfaceNewParamPtr = nullptr;
                 if (RecursiveFindElementBySid(theSourceSid, theSurfaceNewParamPtr,
                                               theNewParam->getParent(), -1, domEffect::ID())) {
                     FindTexturesViaNewParam(theSurfaceNewParamPtr, outTexturePaths);
@@ -241,7 +249,7 @@ long RetrieveFaceIndex(ColladaDOMWalker::TFaceIndicies &ioFaceIndicies,
  *	the actual functions within that class.
  */
 ColladaDOMWalker::ColladaDOMWalker(ISceneGraphTranslation *inTranslation)
-    : m_ColladaRoot(NULL)
+    : m_ColladaRoot(nullptr)
     , m_Translator(inTranslation)
 {
     PushGroup = std::bind(&ISceneGraphTranslation::PushGroup, m_Translator, std::placeholders::_1);
@@ -256,6 +264,20 @@ ColladaDOMWalker::ColladaDOMWalker(ISceneGraphTranslation *inTranslation)
     PushTexture = std::bind(&ISceneGraphTranslation::PushTexture, m_Translator,
                             std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
     PopTexture = std::bind(&ISceneGraphTranslation::PopTexture, m_Translator);
+
+    PushLight = std::bind(&ISceneGraphTranslation::PushLight, m_Translator, std::placeholders::_1);
+    SetLightProperties = std::bind(&ISceneGraphTranslation::SetLightProperties, m_Translator,
+                                   std::placeholders::_1, std::placeholders::_2,
+                                   std::placeholders::_3, std::placeholders::_4,
+                                   std::placeholders::_5, std::placeholders::_6);
+    PopLight = std::bind(&ISceneGraphTranslation::PopLight, m_Translator);
+
+    PushCamera = std::bind(&ISceneGraphTranslation::PushCamera, m_Translator,
+                           std::placeholders::_1);
+    SetCameraProperties = std::bind(&ISceneGraphTranslation::SetCameraProperties, m_Translator,
+                                   std::placeholders::_1, std::placeholders::_2,
+                                   std::placeholders::_3, std::placeholders::_4);
+    PopCamera = std::bind(&ISceneGraphTranslation::PopCamera, m_Translator);
 
     CacheAnimationTrack =
         std::bind(&ColladaDOMWalker::TrackObjectIndex, this, std::placeholders::_1,
@@ -341,7 +363,7 @@ bool ColladaDOMWalker::LoadDocument(const std::string &inFilePath)
  */
 void ColladaDOMWalker::ProcessScene()
 {
-    if (m_ColladaRoot != NULL) {
+    if (m_ColladaRoot != nullptr) {
         const domCOLLADA::domSceneRef theScene = m_ColladaRoot->getScene();
         // Retrieve the active visual_scene
         const domInstanceWithExtraRef theInstanceVisualScene = theScene->getInstance_visual_scene();
@@ -498,9 +520,12 @@ void ColladaDOMWalker::ProcessNode(const domNodeRef inNode)
             inNode->getInstance_geometry_array();
         long theGeometryCount = (long)theInstanceGeometryArray.getCount();
         bool thePushModelFlag = false;
+        bool lightFlag = false;
+        bool cameraFlag = false;
 
-        if (theGeometryCount == 1) // Just a single model
-        {
+        // Process the node
+        if (theGeometryCount == 1) {
+            // Just a single model
             thePushModelFlag = true;
             PushModel(GetNameOrIDOrSid(inNode));
             ProcessTransform(inNode);
@@ -511,8 +536,8 @@ void ColladaDOMWalker::ProcessNode(const domNodeRef inNode)
                 PushGroup(GetNameOrIDOrSid(inNode));
                 ProcessTransform(inNode);
             }
-        } else // Multiple models
-        {
+        } else if (theGeometryCount > 1) {
+            // Multiple models
             thePushModelFlag = false;
             PushGroup(GetNameOrIDOrSid(inNode));
             ProcessTransform(inNode);
@@ -524,19 +549,103 @@ void ColladaDOMWalker::ProcessNode(const domNodeRef inNode)
                 ProcessInstanceGeometry(inNode, theInstanceGeometryRef);
                 PopModel();
             }
+        } else {
+            // No geometry
+            const domInstance_light_Array &lights = inNode->getInstance_light_array();
+            const domInstance_camera_Array &cameras = inNode->getInstance_camera_array();
+            if (cameras.getCount()) {
+                // Camera
+                cameraFlag = true;
+                PushCamera(GetNameOrIDOrSid(inNode));
+                ProcessTransform(inNode);
+                // Process camera properties
+                const domInstance_cameraRef cameraRef = cameras[0];
+                const xsAnyURI &cameraURI = cameraRef->getUrl();
+                const daeElementRef cameraElementRef = cameraURI.getElement();
+                const domCamera *camera = daeSafeCast<domCamera>(cameraElementRef);
+                domCamera::domOptics::domTechnique_commonRef technique
+                        = camera->getOptics()->getTechnique_common();
+                double fov = 0;
+                double clipstart = 0;
+                double clipend = 0;
+                bool ortho = false;
+                if (technique->getPerspective()) {
+                    fov = technique->getPerspective()->getXfov() != nullptr
+                            ? technique->getPerspective()->getXfov()->getValue()
+                            : technique->getPerspective()->getYfov()->getValue();
+                    clipstart = technique->getPerspective()->getZnear()->getValue();
+                    clipend = technique->getPerspective()->getZfar()->getValue();
+                } else if (technique->getOrthographic()) {
+                    fov = technique->getOrthographic()->getXmag() != nullptr
+                            ? technique->getOrthographic()->getXmag()->getValue()
+                            : technique->getOrthographic()->getYmag()->getValue();
+                    clipstart = technique->getOrthographic()->getZnear()->getValue();
+                    clipend = technique->getOrthographic()->getZfar()->getValue();
+                    ortho = true;
+                }
+                SetCameraProperties(clipstart, clipend, ortho, fov);
+            } else if (lights.getCount()) {
+                // Light
+                lightFlag = true;
+                PushLight(GetNameOrIDOrSid(inNode));
+                ProcessTransform(inNode);
+                // Process light properties
+                const domInstance_lightRef lightRef = lights[0];
+                const xsAnyURI &lightURI = lightRef->getUrl();
+                const daeElementRef lightElementRef = lightURI.getElement();
+                const domLight *light = daeSafeCast<domLight>(lightElementRef);
+                domLight::domTechnique_commonRef technique = light->getTechnique_common();
+                int type = 0;
+                domFloat3 color;
+                double linearFade = 0;
+                double quadFade = 0;
+                if (technique->getPoint()) {
+                    domLight::domTechnique_common::domPointRef point = technique->getPoint();
+                    color = point->getColor()->getValue();
+                    linearFade = point->getLinear_attenuation()->getValue() * 1000;
+                    quadFade = point->getQuadratic_attenuation()->getValue() * 1000;
+                } else if (technique->getDirectional()) {
+                    type = 1;
+                    domLight::domTechnique_common::domDirectionalRef directional
+                            = technique->getDirectional();
+                    color = directional->getColor()->getValue();
+                } else if (technique->getAmbient()) {
+                    type = 4;
+                    domLight::domTechnique_common::domAmbientRef ambient = technique->getAmbient();
+                    color = ambient->getColor()->getValue();
+                } else {
+                    // We do not have support for spot light. It will be handled as
+                    // directional in SetLightProperties.
+                    type = 2;
+                    domLight::domTechnique_common::domSpotRef spot = technique->getSpot();
+                    color = spot->getColor()->getValue();
+                    linearFade = spot->getLinear_attenuation()->getValue() * 1000;
+                    quadFade = spot->getQuadratic_attenuation()->getValue() * 1000;
+                }
+                // Collada does not seem to have info about casting shadows or light intensity.
+                // We'll use the defaults (intensity 100, no shadows)
+                SetLightProperties(type, SFloat3(color.get(0), color.get(1), color.get(2)),
+                                   100, linearFade, quadFade, false);
+            }
         }
 
+        // Process the children
         const domNode_Array &theNodes = inNode->getNode_array();
         long theNodesCount = (long)theNodes.getCount();
 
-        for (long theIndex = 0; theIndex < theNodesCount; ++theIndex) {
+        for (long theIndex = 0; theIndex < theNodesCount; ++theIndex)
             ProcessNode(theNodes[theIndex]);
-        }
 
-        if (thePushModelFlag)
+        if (thePushModelFlag) {
             PopModel();
-        else
-            PopGroup();
+        } else {
+            if (lightFlag)
+                PopLight();
+            else if (cameraFlag)
+                PopCamera();
+            else
+                PopGroup();
+        }
     } break;
     default: // No support for other types currently
         break;
@@ -1297,14 +1406,14 @@ void ColladaDOMWalker::ProcessTextureParameters(const domExtraRef inTextureExtra
 void ColladaDOMWalker::ProcessTexture(
     const domCommon_color_or_texture_type_complexType::domTextureRef inTextureRef, long inMapType)
 {
-    if (inTextureRef != NULL) {
+    if (inTextureRef != nullptr) {
         // TODO: What about texcoord?
         const xsNCName theTextureParamSid = inTextureRef->getTexture();
         ColladaDOMWalker::TURIList theTextures;
         STextureParameters theTextureParameters;
         ProcessTextureParameters(inTextureRef->getExtra(), theTextureParameters);
 
-        daeElement *theNewParamPtr = NULL;
+        daeElement *theNewParamPtr = nullptr;
 
         // Look for param name in <newparam>s
         if (RecursiveFindElementBySid(theTextureParamSid, theNewParamPtr, inTextureRef,
@@ -1496,7 +1605,7 @@ void ColladaDOMWalker::ProcessAnimation(const domAnimationRef inAnimation)
 void ColladaDOMWalker::ProcessChannel(const domChannelRef inChannel)
 {
     TStringList theIdentifierList;
-    daeElement *theContainerElement = NULL;
+    daeElement *theContainerElement = nullptr;
 
     const char *theBaseProperty = GetAnimatedPropertyInfoFromElement(
         inChannel->getTarget(), m_ColladaRoot, theContainerElement, theIdentifierList);
@@ -1564,22 +1673,22 @@ void ColladaDOMWalker::ProcessSampler(const domSampler *inSamplerRef,
                 (float)theOUTPUTInfo.m_Array
                     ->getValue()[theKeyframeIndex * theOUTPUTInfo.m_Stride
                                  + theOUTPUTInfo.m_Offset[theAnimatedSubPropertyIndex]],
-                theIN_TANGENTInfo.m_Array != NULL
+                theIN_TANGENTInfo.m_Array != nullptr
                     ? (float)theIN_TANGENTInfo.m_Array
                           ->getValue()[theKeyframeIndex * theIN_TANGENTInfo.m_Stride
                                        + theAnimatedSubPropertyIndex * 2]
                     : 0.0f,
-                theIN_TANGENTInfo.m_Array != NULL
+                theIN_TANGENTInfo.m_Array != nullptr
                     ? (float)theIN_TANGENTInfo.m_Array
                           ->getValue()[theKeyframeIndex * theIN_TANGENTInfo.m_Stride
                                        + theAnimatedSubPropertyIndex * 2 + 1]
                     : 0.0f,
-                theOUT_TANGENTInfo.m_Array != NULL
+                theOUT_TANGENTInfo.m_Array != nullptr
                     ? (float)theOUT_TANGENTInfo.m_Array
                           ->getValue()[theKeyframeIndex * theOUT_TANGENTInfo.m_Stride
                                        + theAnimatedSubPropertyIndex * 2]
                     : 0.0f,
-                theOUT_TANGENTInfo.m_Array != NULL
+                theOUT_TANGENTInfo.m_Array != nullptr
                     ? (float)theOUT_TANGENTInfo.m_Array
                           ->getValue()[theKeyframeIndex * theOUT_TANGENTInfo.m_Stride
                                        + theAnimatedSubPropertyIndex * 2 + 1]

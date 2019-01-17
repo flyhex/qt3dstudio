@@ -35,6 +35,7 @@
 #include "RowTypes.h"
 #include "TimelineConstants.h"
 #include "MouseCursor.h"
+#include "DataInputSelectView.h"
 
 #include <QtWidgets/qgraphicsscene.h>
 #include <QtCore/qlist.h>
@@ -92,6 +93,8 @@ public:
     void updateAutoScrolling(double scenePosY);
     void stopAutoScroll();
     QPoint getScrollbarOffsets() const;
+    void handleShowDISelector(const QString &propertyname, qt3dsdm::Qt3DSDMInstanceHandle inInst,
+                              const QPoint &pos);
 
 protected:
     bool event(QEvent *event) override;
@@ -139,6 +142,8 @@ private:
     QList<double> m_snapSteps;
     CMouseCursor::Qt3DSMouseCursor m_currentCursor;
     TimelineControl *m_timelineControl = nullptr;
+    DataInputSelectView *m_dataInputSelector = nullptr; // triggered by context menu but owned by
+                                                        // rowtree
 
     bool m_rulerPressed = false;
     bool m_keyframePressed = false;

@@ -1,0 +1,68 @@
+/****************************************************************************
+**
+** Copyright (C) 2018 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Graphics
+\page graphics.html
+
+\list
+  \li
+  \l{Working with 3D Content}{3D Assets}
+
+  Best practices on how to work with 3D content in Studio, and how to import 3D content from
+  various 3D content creation tools.
+
+  \li
+  \l{Layers}
+
+  A single Studio presentation combines one or more layers. The visual result of each layer comes
+  from rendering a 3D scene, 2D scene, or sub-presentation.
+
+  \li
+  \l{Materials and shaders}
+
+  Materials and shaders define how object surfaces are rendered in Studio and Viewer.
+
+  \li
+  \l{Light Properties}{Lights}
+
+  In Qt 3D Studio, scenes are illuminated with one or more lights.
+
+  \li
+  \l{Using Sub-Presentations}{Sub-Presentations}
+
+  Sub-Presentations is a feature which allows a Studio presentation or a QML file to
+  be embedded in a Studio presentation.
+
+  \li
+  \l{Stereoscopic rendering}
+
+  This is a technical preview on how stereoscopic rendering could work in Qt 3D Studio.
+\endlist
+
+*/

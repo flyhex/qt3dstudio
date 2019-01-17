@@ -130,7 +130,7 @@ public:
     void refresh();
     void saveIfMaterial(qt3dsdm::Qt3DSDMInstanceHandle instance);
 
-    QVariant getPropertyValue(long instance, int handle);
+    bool hasInstanceProperty(long instance, int handle);
 
     qt3dsdm::SValue currentPropertyValue(long instance, int handle) const;
     QString currentControllerValue(long instance, int handle) const;
@@ -170,6 +170,7 @@ private:
 
     mutable QVector<GroupInspectorControl> m_groupElements;
     CInspectableBase *m_inspectableBase = nullptr;
+    SGuideInspectableImpl *m_guideInspectable = nullptr;
 
     struct MaterialEntry
     {
@@ -188,6 +189,7 @@ private:
     std::vector<MaterialEntry> m_materials;
     std::vector<MaterialDataEntry> m_matDatas;
     std::vector<Q3DStudio::CFilePath> m_cachedMatDatas;
+    qt3dsdm::Qt3DSDMInstanceHandle m_refMaterial;
 
     Q3DStudio::CUpdateableDocumentEditor m_UpdatableEditor;
 
@@ -233,12 +235,14 @@ private:
                                      int groupIndex);
 
     QVector<GroupInspectorControl> computeTree(CInspectableBase *inspectBase);
-    bool isTreeRebuildRequired(CInspectableBase *inspectBase) const;
+    bool isTreeRebuildRequired(CInspectableBase *inspectBase);
 
     GroupInspectorControl computeGroup(CInspectableBase* inspectBase,
                                        int theIndex, bool disableAnimation = false,
                                        bool isReference = false);
     bool isGroupRebuildRequired(CInspectableBase *inspectable, int theIndex) const;
+
+    static int handleToGuidePropIndex(int handle) { return handle - 1; }
 };
 
 #endif // INSPECTORCONTROLMODEL_H

@@ -35,19 +35,14 @@
 \section1 Contents
 //! [toc]
 \list
-\li \l {Dynamic Keyframes}
 \li \l {Optimizing Images}
 \li \l {Anti-Aliasing}
 \li \l {Creating Optimized Presentations}
-\li \l {Using Sub-Presentations}
 \li \l {Using Scale Modes}
 \li \l {Disable Depth Test}
 \li \l {Blend Mode}
 \li \l {Working with 3D Content}
 \li \l {Applying Layer Effects}
-\li \l {Using Image-based Lighting}
-\li \l {Using Data Inputs}
-\li \l {Using Behavior Scripts}
 \endlist
 //! [toc]
 

@@ -1,0 +1,205 @@
+/****************************************************************************
+**
+** Copyright (C) 2018 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Animations
+\page animations.html
+
+In Studio, it is easy to create keyframe animations to object and material properties. It is also
+possible to import animations from 3D creation tools such as Maya, 3D Studio Max, or Blender.
+
+A keyframe is a a time marker that stores the value of a property. A keyframe can for example
+define the X position for an element. To create an animation, add another keyframe for the X
+position of the same element but in another position on the timeline. Studio will determine the
+correct X position for all frames between the two keyframes.
+
+You can animate almost any object or material property. Animatable properties have the
+\inlineimage animationIconInactive.png
+icon next to their name in the inspector palette.
+
+\image light-properties.png
+
+\section1 Create Animations
+
+To animate a property, follow the steps below:
+
+\list 1
+  \li
+  Ensure that \l{studio-toolbar.html#keyframing}{autoset keyframes} is toggled on.
+  \li
+  Select the element in the timeline palette, and set the desire starting value for the
+  animated property.
+  \li
+  Move the playhead to the position in the timeline where you want the animation to start.
+  \li
+  Enable animation for the property by clicking the \inlineimage animationIconInactive.png
+  icon next to the property name in the inspector palette.
+  \li
+  Move the playhead to a new position, then change the value for the animated property.
+\endlist
+
+\image Studio-Timeline-Breadcrumb.png
+
+Now that you have two keyframes in the timeline, you can preview the animation by dragging the
+playhead in the timeline palette, or by running the presentation in the Studio or the Viewer.
+
+Moving the playhead to a new position, and then changing the value of a property with animation
+enabled will create a new keyframe.
+
+\section1 Edit Animations
+
+\section2 Insert Keyframes
+
+As mentioned above, changing the value of an animated property will create a new keyframe if there
+isn't already a keyframe in the same position. This requires that \uicontrol {Autoset Keyframes}
+is toggled on.
+
+To manually insert a keyframe, first place the playhead in the position where you want to create the
+keyframe. Next, do one of the following:
+\list
+  \li
+  Right-click the timebar of the animated element, next select \uicontrol {Insert Keyframe}
+  from the context menu.
+  \li
+  Left-click the timebar of the animated element, next press \uicontrol {S}.
+\endlist
+
+Keyframes will be created for all animated properties for the selected element.
+
+\section2 Delete Keyframes
+
+To delete a keyframe, first select it (\uicontrol {Ctrl + left mouse click} to multi select). Next,
+do one of the following:
+\list
+  \li
+  Press \uicontrol {Del}.
+  \li Right-click the keyframe and select \uicontrol{Delete Selected Keyframe} from the
+  context menu.
+\endlist
+
+To delete all keyframes of an element, do one of the following:
+\list
+  \li
+  Right-click the timebar and select \uicontrol {Delete All Channel Keyframes}.
+  \li
+  Left-click the timebar, next press \uicontrol {Ctrl + Alt + K}.
+\endlist
+
+\section2 Move Keyframes
+
+To move a keyframe to a desired position in the timeline, do one of the following:
+\list
+  \li
+  With the left mouse button, drag and drop it.
+  \note Hold \uicontrol {Shift} while dragging to snap to timeline markers.
+  \li
+  Double-click the keyframe and enter the desired timeline position in the dialog window.
+  \li
+  Right-click the keyframe and select \uicontrol {Set Keyframe Time}. Next, enter the desired
+  timeline position in the dialog window.
+\endlist
+
+\section2 Change Property Values
+
+To change a property value for a keyframe, follow the steps below:
+
+\list 1
+  \li
+  Move the playhead to the keyframe, hold \c {Shift} to snap the playhead to the keyframe.
+  \li
+  Select the desired element in the timeline palette.
+  \li
+  In the inspector palette, change the value of the desired animated property.
+\endlist
+
+\section2 Copy Keyframes
+
+To copy keyframes from one element to another, follow the steps below:
+
+\list 1
+  \li
+  Select the keyframe(s) to copy on an element.
+  \li
+  Right-click on one of the selected keyframes and select \uicontrol{Copy Selected Keyframes} from
+  the context menu.
+  \li
+  Position the playhead at the time where the first keyframe should be placed.
+  \li
+  Right click on the time bar for the element and select \uicontrol {Paste Keyframes} from.
+  the context menu.
+\endlist
+
+\section2 Interpolation
+
+As the playhead moves from one keyframe to the next, the Qt 3D Studio
+Runtime can perform \e {linear interpolation}, \e {smooth
+interpolation}, or a custom blending somewhere in-between. With linear
+interpolation the value changes at the same rate from one value to the
+next. With smooth interpolation the value starts off holding the
+previous keyframe value, accelerates towards the next keyframe value,
+and then decelerates to stop at the new value.
+
+To set the interpolation, first select the keyframe(s) that you want to
+adjust, then right-click one of the selected keyframes, and from the
+context menu choose \uicontrol {Set Interpolation}. The \uicontrol {Ease In} setting
+controls how the value behaves as it approaches the keyframe and the
+\uicontrol {Ease Out} setting controls how the value behaves when leaving the
+keyframe.
+
+\image Studio-Timeline-Interpolation.png
+
+\note If you find that you are constantly setting your keyframes from
+Smooth to Linear, or vice-versa, you may wish to change the
+\uicontrol{Default Interpolation} setting for new keyframes in the
+\l{studio-menu.html#edit}{Application Preferences}.
+
+\section1 Import Animations
+
+You can import transform (scale/rotation/location) animations from 3D creation tools
+such as Maya, Blender, 3D Studio Max and Modo.
+
+Read more in the \l {Working with 3D Content} section.
+
+\section1 Further Topics
+
+\list
+  \li
+  \l{Studio: Timeline Palette}{The Timeline}
+
+  The timeline palette provides direct access to all elements in your scene, and also gives you
+  control over the animation and timing within a slide.
+
+  \li
+  \l{Dynamic Keyframes}
+
+  Dynamic keyframes are a powerful feature that allow you to smoothly interpolate between different
+  animated values on different slides.
+
+\endlist
+
+*/

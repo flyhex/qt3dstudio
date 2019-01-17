@@ -42,14 +42,14 @@ class TextureChooserView : public QQuickWidget
 public:
     explicit TextureChooserView(QWidget *parent = nullptr);
 
-    QSize sizeHint() const override;
-
     void setHandle(int handle);
     int handle() const;
 
     void setInstance(int instance);
     int instance() const;
     QString currentDataModelPath() const;
+
+    void updateSelection();
 
 Q_SIGNALS:
     void textureSelected(int handle, int instance, const QString &name);

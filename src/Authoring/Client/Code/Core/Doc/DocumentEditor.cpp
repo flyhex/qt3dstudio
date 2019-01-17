@@ -1681,21 +1681,36 @@ public:
             CreateSceneGraphInstance(ComposerObjectTypes::Image, instance, theSlide);
         const Q3DStudio::TGUIDPacked thePackedGuid(m_Bridge.GetGUID(theImageInstance));
         qt3dsdm::SLong4 theImageGuid(thePackedGuid.Data1, thePackedGuid.Data2, thePackedGuid.Data3,
-                                   thePackedGuid.Data4);
+                                     thePackedGuid.Data4);
         m_SlideCore.ForceSetInstancePropertyValue(theSlide, instance, propName, theImageGuid);
-        if (propName == m_Bridge.GetObjectDefinitions().m_Material.m_SpecularReflection)
+        if (propName == m_Bridge.GetObjectDefinitions().m_Material.m_SpecularReflection) {
             SetInstancePropertyValue(theImageInstance,
                                      m_Bridge.GetObjectDefinitions().m_Image.m_TextureMapping,
                                      std::make_shared<CDataStr>(L"Environmental Mapping"), false);
-        else if (propName == m_Bridge.GetObjectDefinitions().m_Layer.m_LightProbe
-                 || propName == m_Bridge.GetObjectDefinitions().m_Layer.m_LightProbe2)
+        } else if (propName == m_Bridge.GetObjectDefinitions().m_Layer.m_LightProbe
+                   || propName == m_Bridge.GetObjectDefinitions().m_Layer.m_LightProbe2) {
             SetInstancePropertyValue(theImageInstance,
                                      m_Bridge.GetObjectDefinitions().m_Image.m_TextureMapping,
                                      std::make_shared<CDataStr>(L"Light Probe"), false);
-        else if (propName == m_Bridge.GetObjectDefinitions().m_MaterialBase.m_IblProbe)
+            // Preserve legacy behavior where image based lighting used always tiling for
+            // horizontal direction
+            SetInstancePropertyValue(theImageInstance,
+                                     m_Bridge.GetObjectDefinitions().m_Image.m_TilingU,
+                                     std::make_shared<CDataStr>(L"Tiled"), false);
+            SetInstancePropertyValue(theImageInstance,
+                                     m_Bridge.GetObjectDefinitions().m_Image.m_TilingV,
+                                     std::make_shared<CDataStr>(L"No Tiling"), false);
+        } else if (propName == m_Bridge.GetObjectDefinitions().m_MaterialBase.m_IblProbe) {
             SetInstancePropertyValue(theImageInstance,
                                      m_Bridge.GetObjectDefinitions().m_Image.m_TextureMapping,
-                                     std::make_shared<CDataStr>(L"IBL Override"), false);
+                                     std::make_shared<CDataStr>(L"Light Probe"), false);
+            SetInstancePropertyValue(theImageInstance,
+                                     m_Bridge.GetObjectDefinitions().m_Image.m_TilingU,
+                                     std::make_shared<CDataStr>(L"Tiled"), false);
+            SetInstancePropertyValue(theImageInstance,
+                                     m_Bridge.GetObjectDefinitions().m_Image.m_TilingV,
+                                     std::make_shared<CDataStr>(L"No Tiling"), false);
+        }
         return theImageInstance;
     }
 
@@ -2016,7 +2031,7 @@ public:
 
     void writeMaterialFile(Qt3DSDMInstanceHandle instance, bool createNewFile) override
     {
-        const auto materialName = GetName(instance);
+        const auto materialName = CFilePath::MakeSafeFileStem(GetName(instance));
         writeMaterialFile(instance, materialName, createNewFile,
                           getFilePathFromMaterialName(materialName));
     }
@@ -2244,7 +2259,7 @@ public:
             Qt3DSDMSlideHandle slide = m_Bridge.GetOrCreateGraphRoot(parent);
             instance = CreateSceneGraphInstance(ComposerObjectTypes::Material, parent,
                                                 slide, DocumentEditorInsertType::LastChild,
-                                                CPt(), PRIMITIVETYPE_UNKNOWN, -1);
+                                                CPt(), PRIMITIVETYPE_UNKNOWN, -1, true, false);
             SetName(instance, m_Bridge.getMaterialContainerName());
             m_SlideCore.forceSetInstancePropertyValueOnAllSlides(
                         instance, m_Bridge.GetSceneAsset().m_EndTime, 0);
@@ -2372,6 +2387,14 @@ public:
         TInstanceHandle handle;
     };
 
+    void setInstanceValueIfChanged(TInstanceHandle instance, TPropertyHandle prop, SValue value)
+    {
+        SValue oldValue;
+        m_PropertySystem.GetInstancePropertyValue(instance, prop, oldValue);
+        if (oldValue != value)
+            SetInstancePropertyValue(instance, prop, value);
+    }
+
     QVector<ChildInstance> setPropertyValues(TInstanceHandle instance,
                                              const QMap<QString, QString> &values)
     {
@@ -2396,8 +2419,7 @@ public:
             switch (type) {
             case DataModelDataType::Long4:
             {
-                SetInstancePropertyValue(instance, prop,
-                                         std::make_shared<CDataStr>(propString));
+                setInstanceValueIfChanged(instance, prop, std::make_shared<CDataStr>(propString));
                 SValue value;
                 m_PropertySystem.GetInstancePropertyValue(instance, prop, value);
                 if (!value.empty()) {
@@ -2412,7 +2434,7 @@ public:
             }
             case DataModelDataType::Float:
             {
-                SetInstancePropertyValue(instance, prop, i.value().toFloat());
+                setInstanceValueIfChanged(instance, prop, i.value().toFloat());
                 break;
             }
             case DataModelDataType::Float2:
@@ -2420,7 +2442,7 @@ public:
                 QStringList floats = i.value().split(QStringLiteral(" "));
                 if (floats.length() == 2) {
                     SFloat2 value(floats[0].toFloat(), floats[1].toFloat());
-                    SetInstancePropertyValue(instance, prop, value);
+                    setInstanceValueIfChanged(instance, prop, value);
                 }
                 break;
             }
@@ -2429,21 +2451,21 @@ public:
                 QStringList floats = i.value().split(QStringLiteral(" "));
                 if (floats.length() == 3) {
                     SFloat3 value(floats[0].toFloat(), floats[1].toFloat(), floats[2].toFloat());
-                    SetInstancePropertyValue(instance, prop, value);
+                    setInstanceValueIfChanged(instance, prop, value);
                 }
                 break;
             }
             case DataModelDataType::Bool:
             {
                 if (propString == "True")
-                    SetInstancePropertyValue(instance, prop, true);
+                    setInstanceValueIfChanged(instance, prop, true);
                 else if (propString == "False")
-                    SetInstancePropertyValue(instance, prop, false);
+                    setInstanceValueIfChanged(instance, prop, false);
                 break;
             }
             case DataModelDataType::String:
             {
-                SetInstancePropertyValue(instance, prop, std::make_shared<CDataStr>(propString));
+                setInstanceValueIfChanged(instance, prop, std::make_shared<CDataStr>(propString));
                 break;
             }
             default:
@@ -2471,6 +2493,8 @@ public:
             if (textureValues.contains(child.name))
                 setPropertyValues(child.handle, textureValues[child.name]);
         }
+
+        m_Doc.GetCore()->GetDispatch()->FireImmediateRefreshInstance(instance);
     }
 
     void SetSlideName(TInstanceHandle inSlideInstance, TPropertyHandle propName,
@@ -5793,5 +5817,5 @@ void CUpdateableDocumentEditor::RollbackEditor()
 
 std::shared_ptr<IInternalDocumentEditor> IInternalDocumentEditor::CreateEditor(CDoc &doc)
 {
-    return std::shared_ptr<IInternalDocumentEditor>(new CDocEditor(doc));
+    return std::make_shared<CDocEditor>(doc);
 }

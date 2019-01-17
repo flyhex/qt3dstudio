@@ -27,8 +27,8 @@
 ****************************************************************************/
 
 /*!
-\keyword Qt 3D Studio
-\title Qt 3D Studio Index
+\keyword Qt 3D Studio Index
+\title Qt 3D Studio Manual
 \page qt3dstudio-index.html
 
 Qt 3D Studio is a compositing tool where you import 3D models, images and other assets to create
@@ -48,20 +48,18 @@ interactive presentations, UIs and applications.
     \div {align="center"}
     \image animation-index.png
     \enddiv
-    \li
-    \div {align="center"}
-    \image scripting-index.png
-    \enddiv
+
   \row
-    \li \b {Getting Started}
+    \li \b {\l{Getting Started}}
       \list
         \li \l{About Qt 3D Studio}
-        \li \l{Getting Started}{Quick Start Guide}
+        \li \l{Quick Start Guide}
+        \li \l{Tutorials}
         \li \l{Best Practices}
         \li \l{Studio Index}
         \li \l{Viewer Index}
       \endlist
-    \li \b {Graphics}
+    \li \b {\l{Graphics}}
       \list
         \li \l{Working with 3D Content}{3D Assets}
         \li \l{Layers}
@@ -70,18 +68,16 @@ interactive presentations, UIs and applications.
         \li \l{Using Sub-Presentations}{Sub-Presentations}
         \li \l{Stereoscopic Rendering}
       \endlist
-    \li \b {Animations}
+    \li \b {\l{Animations}}
       \list
         \li \l{Studio: Timeline Palette}{The Timeline}
         \li \l{Dynamic Keyframes}
       \endlist
-    \li \b {Scripting}
-      \list
-        \li \l{Using Data Inputs}{Data Input}
-        \li \l{Using Behavior Scripts}{Behavior}
-        \li \l{File Formats}
-      \endlist
   \row
+    \li
+    \div {align="center"}
+    \image scripting-index.png
+    \enddiv
     \li
     \div {align="center"}
     \image deployment-index.png
@@ -90,22 +86,25 @@ interactive presentations, UIs and applications.
     \div {align="center"}
     \image help-index.png
     \enddiv
-    \li
-    \li
   \row
-    \li \b {Deployment}
+    \li \b {\l{Scripting}}
+      \list
+        \li \l{Using Data Inputs}{Data Input}
+        \li \l{Using Behavior Scripts}{Behavior}
+        \li \l{File Formats}
+      \endlist
+    \li \b {\l{Deployment}}
       \list
         \li \l{Viewer Remote Deployment}
       \endlist
-    \li \b {Getting Help}
+    \li \b {\l{Getting Help}}
       \list
         \li \l{Studio Keyboard Shortcuts}
         \li \l{Viewer Keyboard Shortcuts}
       \endlist
-    \li
-    \li
+
   \row
-    \li {4,1} \note To report bugs and suggestions to the Qt Bug
+    \li {3,1} \note To report bugs and suggestions to the Qt Bug
       Tracker, visit \l https://bugreports.qt.io.
 \endtable
 

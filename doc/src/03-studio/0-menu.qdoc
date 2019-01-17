@@ -46,34 +46,29 @@
       Default location is the \e{presentations} folder in current project.
   \endlist
 \li
+  \uicontrol{Duplicate Presentation} - Saves a copy of the open presentation to
+  the same folder and adds it to the project. The assets are not duplicated as they are
+  available via the same relative paths already.
+\li
   \uicontrol{Open} - Opens a \c{.uip} presentation file.
 \li
-  \uicontrol{Save} - Saves changes to the open presentation.
-\omit
+  \uicontrol{Recent Presentations} - Provides quick access to the last 10
+  presentations opened in Studio.
 \li
-  \uicontrol{Save As} - Saves the presentation to a new location.
-  No \c{.uia} file will be created or modified in the new location.
-\li
-  \uicontrol{Save a Copy} - Saves a copy of the presentation to a
-  new location (but keep working on the current presentation). No
-  \c{.uia} file will be created or modified in the new location.
-\endomit
-\li
-  \uicontrol{Revert} - With confirmation, abandons all in-memory
+  \uicontrol{Revert to Last Save} - With confirmation, abandons all in-memory
   changes to the presentation and re-opens it from disk.
   \note this resets the state of Studio (resetting all components to the first
   slide, playheads to time 0, etc.). This command is also a convenient
   way to re-open a presentation that may have changed on disk, for
   example via hand editing or source control updating.
 \li
-  \uicontrol{Import Assets} - Opens the assets library folder to import assets to your project.
+  \uicontrol{Save Presentation} - Saves changes to the open presentation.
+\li
+  \uicontrol{Save Project As} - Saves the open project and all its assets to a new location.
+\li
+  \uicontrol{Import} - Opens the assets library folder to import assets to your project.
 \li
   \uicontrol{Data Inputs} - Manage \l{Using Data Inputs}{data inputs}.
-\li
-  \uicontrol{Connect to Device} - Opens a dialog to connect to a remote device.
-\li
-  \uicontrol{Recent Projects} - Provides quick access to the last 10
-  projects opened in Studio.
 \li
   \uicontrol{Exit} - Quits Studio (prompting to save changes).
 \endlist
@@ -100,6 +95,8 @@
 \li
   \uicontrol{Group Objects} - Creates a group and moves selected objects into that group.
 \li
+  \uicontrol{Connect to Device} - Opens a dialog to connect to a remote device.
+\li
   \uicontrol{Studio Preferences} - Opens the Studio Preferences dialog.
   \image ApplicationPreferences.png
   \list
@@ -109,7 +106,7 @@
     \li
       \uicontrol{Default Interpolation} - Controls whether new animation
       keyframes are created with
-      \l{studio-timeline-palette.html#interpolation}{linear or smooth interpolation}.
+      \l{animations.html#interpolation}{linear or smooth interpolation}.
     \li
       \uicontrol{Timeline Snapping Grid} - When using snapping in the
       timeline, controls which ticks to snap to.
@@ -239,7 +236,7 @@
   press the \c{Delete} key after selecting the keyframes to delete them.
 \li
   \uicontrol{Set Interpolation} - Changes the in and out
-  \l{studio-timeline-palette.html#interpolation}{interpolation}
+  \l{animations.html#interpolation}{interpolation}
   setting for the selected keyframes. This command is
   also available from the context menu when right-clicking in the
   animation portion of the \e{timeline palette}.

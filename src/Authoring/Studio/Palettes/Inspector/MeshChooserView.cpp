@@ -64,9 +64,9 @@ void MeshChooserView::initialize()
     setSource(QUrl(QStringLiteral("qrc:/Palettes/Inspector/MeshChooser.qml")));
 }
 
-QSize MeshChooserView::sizeHint() const
+int MeshChooserView::numMeshes() const
 {
-    return {500, 500};
+    return m_model->rowCount();
 }
 
 void MeshChooserView::setSelectedMeshName(const QString &name)
@@ -94,6 +94,25 @@ void MeshChooserView::setHandle(int handle)
 void MeshChooserView::setInstance(int instance)
 {
     m_instance = instance;
+}
+
+void MeshChooserView::updateSelection()
+{
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
+
+    qt3dsdm::SValue value;
+    propertySystem->GetInstancePropertyValue(m_instance, m_handle, value);
+
+    QString currentFile;
+    const QString meshValue = qt3dsdm::get<QString>(value);
+    if (meshValue.startsWith(QLatin1Char('#'))) {
+        currentFile = meshValue.mid(1);
+    } else {
+        currentFile = QDir::cleanPath(QDir(doc->GetDocumentDirectory()).filePath(meshValue));
+    }
+
+    m_model->setCurrentFile(currentFile);
 }
 
 bool MeshChooserView::isFocused() const
@@ -124,20 +143,6 @@ void MeshChooserView::keyPressEvent(QKeyEvent *event)
 
 void MeshChooserView::showEvent(QShowEvent *event)
 {
-    const auto doc = g_StudioApp.GetCore()->GetDoc();
-    const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
-
-    qt3dsdm::SValue value;
-    propertySystem->GetInstancePropertyValue(m_instance, m_handle, value);
-
-    QString currentFile;
-    const QString meshValue = qt3dsdm::get<QString>(value);
-    if (meshValue.startsWith(QLatin1Char('#')))
-        currentFile = meshValue.mid(1);
-    else
-        currentFile = QDir::cleanPath(QDir(doc->GetDocumentDirectory()).filePath(meshValue));
-
-    m_model->setCurrentFile(currentFile);
-
+    updateSelection();
     QQuickWidget::showEvent(event);
 }

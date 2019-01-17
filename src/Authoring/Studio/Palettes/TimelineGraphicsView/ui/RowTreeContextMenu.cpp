@@ -37,6 +37,7 @@
 #include "ChooseImagePropertyDlg.h"
 #include "Qt3DSDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
+#include "qcursor.h"
 
 RowTreeContextMenu::RowTreeContextMenu(RowTree *inRowTree, QWidget *parent)
     : QMenu(parent)
@@ -52,6 +53,10 @@ RowTreeContextMenu::~RowTreeContextMenu()
 
 void RowTreeContextMenu::initialize()
 {
+    CDoc &doc(*g_StudioApp.GetCore()->GetDoc());
+    qt3dsdm::Qt3DSDMInstanceHandle instance
+            = static_cast<Qt3DSDMTimelineItemBinding *>(m_TimelineItemBinding)->GetInstance();
+
     // add sub-presentations submenu
     if (m_RowTree->rowType() & (OBJTYPE_LAYER | OBJTYPE_MATERIAL | OBJTYPE_IMAGE)) {
         m_subpMenu = addMenu(tr("Set sub-presentation"));
@@ -64,6 +69,36 @@ void RowTreeContextMenu::initialize()
         addSeparator();
     }
 
+    // add datainput controller submenu
+    if (!(m_RowTree->rowType() & (OBJTYPE_GUIDE | OBJTYPE_EFFECT | OBJTYPE_ALIAS
+                                  | OBJTYPE_SCENE))) {
+        m_diMenu = addMenu(tr("Set datainput controller"));
+        connect(m_diMenu, &QMenu::triggered, this, &RowTreeContextMenu::addDiController);
+
+        const QVector<qt3dsdm::Qt3DSDMPropertyHandle> propList
+                = doc.GetStudioSystem()->GetPropertySystem()->GetControllableProperties(instance);
+
+        QMap<int, QAction *> sections;
+        for (const auto &prop : propList) {
+            QAction *action = new QAction(doc.GetPropertySystem()->GetFormalName(instance, prop));
+            action->setData(doc.GetPropertySystem()->GetName(prop));
+
+            auto metadata = doc.GetStudioSystem()->GetActionMetaData()->GetMetaDataPropertyInfo(
+                        doc.GetStudioSystem()->GetActionMetaData()->GetMetaDataProperty(
+                            instance, prop));
+
+            if (sections.contains(metadata->m_CompleteType) ) {
+                m_diMenu->insertAction(sections[metadata->m_CompleteType], action);
+            } else {
+                // Create a QAction for a section so that we can insert properties above it
+                // to maintain category groupings. Sections are shown as separators in Studio
+                // style i.e. enum text is not shown.
+                QAction *section = m_diMenu->addSection(QString(metadata->m_CompleteType));
+                sections.insert(metadata->m_CompleteType, section);
+                m_diMenu->insertAction(section, action);
+            }
+        }
+    }
     m_renameAction = new QAction(tr("Rename Object"), this);
     connect(m_renameAction, &QAction::triggered, this, &RowTreeContextMenu::renameObject);
     addAction(m_renameAction);
@@ -151,6 +186,8 @@ void RowTreeContextMenu::showEvent(QShowEvent *event)
 {
     if (m_subpMenu)
         m_subpMenu->setEnabled(canAddSubPresentation());
+    if (m_diMenu)
+        m_diMenu->setEnabled(true);
     m_renameAction->setEnabled(canRenameObject());
     m_duplicateAction->setEnabled(canDuplicateObject());
     m_deleteAction->setEnabled(canDeleteObject());
@@ -231,6 +268,11 @@ void RowTreeContextMenu::addSubPresentation(QAction *action)
         Q3DStudio::SCOPED_DOCUMENT_EDITOR(doc, tr("Set image sub-presentation"))
                 ->SetInstancePropertyValueAsRenderable(instance, propHandle, presentationId);
     }
+}
+
+void RowTreeContextMenu::addDiController(QAction *action)
+{
+    m_RowTree->showDataInputSelector(action->data().toString(), QCursor::pos());
 }
 
 void RowTreeContextMenu::renameObject()

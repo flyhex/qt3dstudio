@@ -63,6 +63,11 @@ ProjectContextMenu::ProjectContextMenu(ProjectView *parent, int index)
         connect(action, &QAction::triggered, this, &ProjectContextMenu::handleEditPresentationId);
         addAction(action);
 
+        action = new QAction(tr("Duplicate Presentation"));
+        connect(action, &QAction::triggered,
+                this, &ProjectContextMenu::handleDuplicatePresentation);
+        addAction(action);
+
         static const QIcon iconInitial = QIcon(QStringLiteral(":/images/initial_notUsed.png"));
 
         if (m_view->isInitialPresentation(m_index)) {
@@ -86,6 +91,11 @@ ProjectContextMenu::ProjectContextMenu(ProjectView *parent, int index)
 
         action = new QAction(tr("Edit Qml Stream Id"));
         connect(action, &QAction::triggered, this, &ProjectContextMenu::handleEditQmlStreamId);
+        addAction(action);
+
+        action = new QAction(tr("Duplicate Qml Stream"));
+        connect(action, &QAction::triggered,
+                this, &ProjectContextMenu::handleDuplicatePresentation);
         addAction(action);
     }
 
@@ -193,6 +203,11 @@ void ProjectContextMenu::handleAddMaterial()
 void ProjectContextMenu::handleDuplicate()
 {
     m_view->duplicate(m_index);
+}
+
+void ProjectContextMenu::handleDuplicatePresentation()
+{
+    m_view->duplicatePresentation(m_index);
 }
 
 void ProjectContextMenu::handleInitialPresentation()

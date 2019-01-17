@@ -228,11 +228,13 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
 
     void createMaterial(const InstanceDesc &desc, TImportId inParent) override
     {
-        QString materialName = desc.m_Id;
+        QString materialName = CFilePath::MakeSafeFileStem(desc.m_Id);
         Option<SValue> name = m_ImportObj->GetInstancePropertyValue(desc.m_Handle,
                                                                     ComposerPropertyNames::name);
-        if (name.hasValue())
-            materialName = qt3dsdm::get<TDataStrPtr>(*name)->toQString();
+        if (name.hasValue()) {
+            materialName = CFilePath::MakeSafeFileStem(
+                        qt3dsdm::get<TDataStrPtr>(*name)->toQString());
+        }
 
         QString filepath = m_Editor.getMaterialFilePath(materialName);
         int i = 1;
@@ -245,7 +247,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
             QMap<QString, QMap<QString, QString>> textureValues;
             m_Editor.getMaterialInfo(filepath, name, values, textureValues);
             if (values.contains(importFile) && values[importFile] == m_Relativeimportfile) {
-                const auto material = m_Editor.getOrCreateMaterial(materialName);
+                const auto material = m_Editor.getOrCreateMaterial(materialName, false);
                 if (!m_createdMaterials.contains(material))
                     m_Editor.setMaterialValues(material, values, textureValues);
                 break;
@@ -255,7 +257,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
         }
 
         bool isNewMaterial = !m_Editor.getMaterial(materialName).Valid();
-        const auto material = m_Editor.getOrCreateMaterial(materialName);
+        const auto material = m_Editor.getOrCreateMaterial(materialName, false);
         if (!m_createdMaterials.contains(material) && isNewMaterial) {
             m_Editor.SetSpecificInstancePropertyValue(0, material, QStringLiteral("importid"),
                                                       std::make_shared<CDataStr>(desc.m_Id));
@@ -497,11 +499,11 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
 
     void createMaterial(const InstanceDesc &desc, TImportId inParent) override
     {
-        QString materialName = desc.m_Id;
+        QString materialName = CFilePath::MakeSafeFileStem(desc.m_Id);
         Option<SValue> name = m_importObj->GetInstancePropertyValue(desc.m_Handle,
                                                                     ComposerPropertyNames::name);
         if (name.hasValue())
-            materialName = qt3dsdm::get<QString>(*name);
+            materialName = CFilePath::MakeSafeFileStem(qt3dsdm::get<QString>(*name));
 
         // Get a unique material name
         // Reuse a material name if previously imported from the same source
@@ -533,7 +535,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
             for (auto &child : children)
                 m_Editor.RemoveChild(material, child);
         } else {
-            material = m_Editor.getOrCreateMaterial(materialName);
+            material = m_Editor.getOrCreateMaterial(materialName, false);
         }
 
         if (!m_createdMaterials.contains(material)) {
@@ -556,7 +558,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
 
         // Actual material inside material container has been created
         // Next create the referenced material located inside the model
-        QString refName = desc.m_Id;
+        QString refName = originalMaterialName;
         refName += QLatin1String("_ref");
         TIdMultiMap::iterator refInserter(m_IdToSlideInstances.insert(
             refName, QVector<QPair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle>>()));
@@ -581,13 +583,13 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
                 instance = m_Editor.CreateSceneGraphInstance(
                             ComposerObjectTypes::ReferencedMaterial, oldVersion,
                             theIterator.GetCurrentSlide(), DocumentEditorInsertType::NextSibling,
-                            CPt(), PRIMITIVETYPE_UNKNOWN, 0);
+                            CPt(), PRIMITIVETYPE_UNKNOWN, 0, true, false);
                  m_Editor.DeleteInstance(oldVersion);
             } else {
                 instance = m_Editor.CreateSceneGraphInstance(
                             ComposerObjectTypes::ReferencedMaterial, parent,
                             theIterator.GetCurrentSlide(), DocumentEditorInsertType::LastChild,
-                            CPt(), PRIMITIVETYPE_UNKNOWN, 0);
+                            CPt(), PRIMITIVETYPE_UNKNOWN, 0, true, false);
             }
             m_Editor.setMaterialReferenceByPath(instance, materialName);
             m_Editor.SetName(instance, materialName);

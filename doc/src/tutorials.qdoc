@@ -1,0 +1,57 @@
+/****************************************************************************
+**
+** Copyright (C) 2018 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Tutorials
+\page tutorials.html
+
+\list
+  \li
+  \l {Using Sub-Presentations}
+
+  Learn how to use sub-presentations on layers and textures.
+  \li
+  \l {Using Image-Based Lighting}
+
+  Learn how to illuminate your scenes with HDR images.
+  \li
+  \l {Dynamic Keyframes}
+
+  Learn how to create smooth animation transitions using dynamic keyframes.
+  \li
+  \l {Using Data Inputs}
+
+  Learn how to set up your project to use data for controlling animations, slides and object
+  properties.
+  \li
+  \l {Using Behavior Scripts}
+
+  Learn how to use behavior scripts in your project.
+\endlist
+
+*/

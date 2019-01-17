@@ -86,6 +86,20 @@ struct SImportGroup : public SImportNode
     ComposerObjectTypes::Enum GetObjectType() override { return ComposerObjectTypes::Group; }
 };
 
+struct SImportLight : public SImportNode
+{
+    ITERATE_COMPOSER_LIGHT_PROPERTIES
+    DataModelDataType::Value GetPropertyDataType(const QString &inPropertyName) override;
+    ComposerObjectTypes::Enum GetObjectType() override { return ComposerObjectTypes::Light; }
+};
+
+struct SImportCamera : public SImportNode
+{
+    ITERATE_COMPOSER_CAMERA_PROPERTIES
+    DataModelDataType::Value GetPropertyDataType(const QString &inPropertyName) override;
+    ComposerObjectTypes::Enum GetObjectType() override { return ComposerObjectTypes::Camera; }
+};
+
 struct SImportModel : public SImportNode
 {
     ITERATE_COMPOSER_MODEL_PROPERTIES
@@ -180,6 +194,8 @@ struct SImportComposerTypes
 {
     SImportAsset m_Asset;
     SImportGroup m_Group;
+    SImportLight m_Light;
+    SImportCamera m_Camera;
     SImportModel m_Model;
     SImportNode m_Node;
     SImportMaterial m_Material;

@@ -50,12 +50,16 @@ public:
         EditPresentationId,
         EditQmlStreamId,
         EditPresentationName,
-        EditQmlStreamName
+        EditQmlStreamName,
+        DuplicatePresentation,
+        DuplicateQmlStream
     };
 
     explicit EditPresentationIdDlg(const QString &src, DialogType type = EditPresentationId,
                                    QWidget *parent = nullptr);
     ~EditPresentationIdDlg();
+
+    QString getDuplicateFile() const { return m_duplicateFile; }
 
 public Q_SLOTS:
     void accept() override;
@@ -71,6 +75,7 @@ private:
     QString m_src; // src attribute value for the current presentation in the project file
     QString m_presentationId;
     DialogType m_dialogType;
+    QString m_duplicateFile;
 };
 
 #endif // EDITPRESENTATIONIDDLG_H

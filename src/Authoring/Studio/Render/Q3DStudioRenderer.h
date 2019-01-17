@@ -99,6 +99,7 @@ public:
     void SetEditCamera(QT3DSI32 inIndex) override;
     QT3DSI32 GetEditCamera() const override;
     void EditCameraZoomToFit() override;
+    bool isMouseDown() const override;
     void Close() override;
     void getPreviewFbo(QSize &outFboDim, qt3ds::QT3DSU32 &outFboTexture) override;
     void RegisterSubpresentations(
@@ -191,6 +192,7 @@ private:
     SStudioPickValue m_dragPickResult;
     CUpdateableDocumentEditor m_updatableEditor;
     QPoint m_mouseDownPoint;
+    bool m_mouseDown;
     QPoint m_previousMousePoint;
     MovementTypes m_lastDragToolMode = MovementTypes::Unknown;
     bool m_maybeDragStart = false;

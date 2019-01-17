@@ -478,8 +478,59 @@ public:
     {
         return ((inAuthoringToolType == EAuthoringToolType_FBX_Max)
                 || (inAuthoringToolType == EAuthoringToolType_FBX_Modo)
-                || (inAuthoringToolType == EAuthoringToolType_FBX_Maya));
+                || (inAuthoringToolType == EAuthoringToolType_FBX_Maya)
+                || (inAuthoringToolType == EAuthoringToolType_FBX_Blender));
     }
+
+    void PushLight(const char *inName) override { PushObject(inName, ComposerObjectTypes::Light); }
+    void SetLightProperties(int type, const SFloat3 &color, double intensity, double linearfade,
+                            double quadfade, bool shadows) override
+    {
+        Q_UNUSED(linearfade)
+        Q_UNUSED(quadfade)
+        TIMPHandle light = m_InstanceStack.back();
+        switch (type) {
+        case 0:
+            m_Import.SetInstancePropertyValue(light, m_Light.m_LightType, QStringLiteral("Point"));
+            break;
+        case 1:
+            m_Import.SetInstancePropertyValue(light, m_Light.m_LightType,
+                                              QStringLiteral("Directional"));
+            break;
+        case 4:
+            m_Import.SetInstancePropertyValue(light, m_Light.m_LightType, QStringLiteral("Area"));
+            break;
+        default:
+            qWarning("Unsupported light type, converting to directional.");
+            m_Import.SetInstancePropertyValue(light, m_Light.m_LightType,
+                                              QStringLiteral("Directional"));
+            break;
+        }
+        m_Import.SetInstancePropertyValue(light, m_Light.m_LightColor, color);
+        m_Import.SetInstancePropertyValue(light, m_Light.m_Brightness, intensity);
+        // TODO: These do not seem to be incuded in FbxLight. Kept here in case Collada has support
+        // for them (QT3DS-2857)
+        //m_Import.SetInstancePropertyValue(light, m_Light.m_LinearFade, linearfade);
+        //m_Import.SetInstancePropertyValue(light, m_Light.m_ExpFade, quadfade);
+        m_Import.SetInstancePropertyValue(light, m_Light.m_CastShadow, shadows);
+    }
+    void PopLight() override { PopObject(); }
+
+    void PushCamera(const char *inName) override
+    {
+        PushObject(inName, ComposerObjectTypes::Camera);
+    }
+    void SetCameraProperties(double clipstart, double clipend, bool ortho, double fov) override
+    {
+        TIMPHandle camera = m_InstanceStack.back();
+        m_Import.SetInstancePropertyValue(camera, m_Camera.m_ClipNear, clipstart);
+        m_Import.SetInstancePropertyValue(camera, m_Camera.m_ClipFar, clipend);
+        m_Import.SetInstancePropertyValue(camera, m_Camera.m_Orthographic, ortho);
+        m_Import.SetInstancePropertyValue(camera, m_Camera.m_Fov, fov);
+        if (m_AuthoringToolType == EAuthoringToolType_FBX_Maya)
+            m_Import.SetInstancePropertyValue(camera, m_Camera.m_FovHorizontal, true);
+    }
+    void PopCamera() override { PopObject(); }
 
     void PushGroup(const char *inName) override { PushObject(inName, ComposerObjectTypes::Group); }
     void SetGroupSkeletonId(long inId) override
@@ -699,9 +750,8 @@ public:
         // Opacity
         float theTransparency = 1.0f;
         if (inMaterialParameters.m_Transparency.m_Flag) {
-            // This is true for MAX and MODO but not for MAYA
-            if ((m_AuthoringToolType == EAuthoringToolType_FBX_Max)
-                || (m_AuthoringToolType == EAuthoringToolType_FBX_Modo)) {
+            // This is true for MAX, Blender and MODO but not for MAYA
+            if (m_AuthoringToolType != EAuthoringToolType_FBX_Maya) {
                 // on FBX 0 is fully opaque and 1 is fully transparent
                 // we treat it vice versa
                 theTransparency = 1.0f - inMaterialParameters.m_Transparency.m_Value;
@@ -711,18 +761,21 @@ public:
         }
         float theTransparent = 1.0f;
         float theOpacity = theTransparency * theTransparent;
-        if (inMaterialParameters.m_TransparentOpaqueType.m_Flag
-            && inMaterialParameters.m_Transparent.m_Type == SColorOrTexture::Color) {
-            if (inMaterialParameters.m_TransparentOpaqueType.m_Value == EMatOpaqueType_A_ONE) {
+        if (((inMaterialParameters.m_Transparency.m_Flag && theOpacity == 1.0f)
+             || inMaterialParameters.m_TransparentOpaqueType.m_Flag)
+                && inMaterialParameters.m_Transparent.m_Type == SColorOrTexture::Color) {
+            if (m_AuthoringToolType == EAuthoringToolType_FBX_Maya
+                    || inMaterialParameters.m_TransparentOpaqueType.m_Value
+                    != EMatOpaqueType_A_ONE) {
+                // EMatOpaqueType_RGB_ZERO or importing from Maya
+                theTransparent = (inMaterialParameters.m_Transparent.m_Color[0]
+                        + inMaterialParameters.m_Transparent.m_Color[1]
+                        + inMaterialParameters.m_Transparent.m_Color[2])
+                        / 3.0f;
+                theOpacity = 1.0f - (theTransparency * theTransparent);
+            } else {
                 theTransparent = inMaterialParameters.m_Transparent.m_Color[3];
                 theOpacity = theTransparency * theTransparent;
-            } else // EMatOpaqueType_RGB_ZERO
-            {
-                theTransparent = (inMaterialParameters.m_Transparent.m_Color[0]
-                                  + inMaterialParameters.m_Transparent.m_Color[1]
-                                  + inMaterialParameters.m_Transparent.m_Color[2])
-                    / 3.0f;
-                theOpacity = 1.0f - (theTransparency * theTransparent);
             }
         }
         SetInstancePropertyValue(theMaterial, m_Material.m_Opacity, theOpacity * 100.0f);

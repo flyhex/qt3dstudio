@@ -63,11 +63,6 @@ void ImageChooserView::initialize()
     setSource(QUrl(QStringLiteral("qrc:/Palettes/Inspector/ImageChooser.qml")));
 }
 
-QSize ImageChooserView::sizeHint() const
-{
-    return {500, 500};
-}
-
 void ImageChooserView::setHandle(int handle)
 {
     m_handle = handle;
@@ -120,6 +115,11 @@ QString ImageChooserView::currentDataModelPath() const
     return cleanPath;
 }
 
+void ImageChooserView::updateSelection()
+{
+    m_model->setCurrentFile(currentDataModelPath());
+}
+
 bool ImageChooserView::isFocused() const
 {
     return hasFocus();
@@ -148,6 +148,6 @@ void ImageChooserView::keyPressEvent(QKeyEvent *event)
 
 void ImageChooserView::showEvent(QShowEvent *event)
 {
-    m_model->setCurrentFile(currentDataModelPath());
+    updateSelection();
     QQuickWidget::showEvent(event);
 }

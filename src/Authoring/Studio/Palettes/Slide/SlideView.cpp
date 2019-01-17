@@ -386,6 +386,8 @@ void SlideView::updateDataInputStatus()
         // update UI
         UpdateSlideViewTitleColor();
         Q_EMIT controlledChanged();
+        if (m_dataInputSelector && m_dataInputSelector->isVisible())
+            m_dataInputSelector->setCurrentController(m_currentController);
     }
 }
 void SlideView::initialize()

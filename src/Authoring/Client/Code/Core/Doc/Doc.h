@@ -240,9 +240,13 @@ public:
             QMultiMap<QString,
                       QPair<qt3dsdm::Qt3DSDMInstanceHandle,
                             qt3dsdm::Qt3DSDMPropertyHandle>> *outMap = nullptr);
+    void UpdateDatainputMapForInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     bool VerifyControlledProperties(const qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     void ReplaceDatainput(const QString &oldName, const QString &newName,
                           const QList<qt3dsdm::Qt3DSDMInstanceHandle> &instances);
+
+    QString GetCurrentController(qt3dsdm::Qt3DSDMInstanceHandle instHandle,
+                                 qt3dsdm::Qt3DSDMPropertyHandle propHandle) const;
 
     bool IsModified();
     bool IsValid() const;
@@ -355,6 +359,8 @@ public:
     void RemoveDatainputBindings(
             const QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
                                            qt3dsdm::Qt3DSDMPropertyHandle>> *map) override;
+    QString GetCurrentController(qt3dsdm::Qt3DSDMInstanceHandle instHandle,
+                                 qt3dsdm::Qt3DSDMPropertyHandle propHandle) override;
     Q3DStudio::IDocumentBufferCache &GetBufferCache() override;
     Q3DStudio::IDocumentReader &GetDocumentReader() override;
     Q3DStudio::IDocumentEditor &OpenTransaction(const QString &inCmdName, const char *inFile,

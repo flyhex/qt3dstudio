@@ -60,7 +60,6 @@ public:
 
     QAbstractItemModel *model() const;
     void setModel(ObjectListModel *model);
-    QSize sizeHint() const override;
 
     Q_INVOKABLE QString absPath(int index) const;
     Q_INVOKABLE QString relPath(int index) const;
@@ -76,6 +75,8 @@ public:
     void setPathType(PathType type);
 
     qt3dsdm::Qt3DSDMInstanceHandle selectedHandle() const;
+
+    bool canCommit() const { return !m_blockCommit; }
 
 Q_SIGNALS:
     void modelChanged();
@@ -101,6 +102,7 @@ private:
     int m_selection = -1;
     PathType m_pathType = Absolute;
     qt3dsdm::Qt3DSDMInstanceHandle m_ownerInstance = 0;
+    bool m_blockCommit = false;
 };
 
 #endif // OBJECTBROWSERVIEW_H

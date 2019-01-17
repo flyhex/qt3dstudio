@@ -201,8 +201,7 @@ public:
     CInspectableBase *getInspectableFromInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
     bool OnSave(bool autosave = false);
-    bool OnSaveAs();
-    bool OnSaveCopy();
+    void onProjectSaveAs();
     bool OnLoadDocument(const QString &inDocument, bool inShowStartupDialogOnError = true);
     void OnLoadDocumentCatcher(const QString &inLocation);
     void OnFileOpen();
@@ -222,6 +221,7 @@ public:
     void checkDeletedDatainputs();
     void saveDataInputsToProjectFile();
     void verifyDatainputBindings();
+    void duplicatePresentation(const QString &presFile = {});
 
     // CCoreAsynchronousEventListener
     void OnAsynchronousCommand(CCmd *inCmd) override;

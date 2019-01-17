@@ -1142,3 +1142,12 @@ void RowTree::setPropertyExpanded(bool expand)
     else
         animateExpand(ExpandState::Collapsed);
 }
+
+void RowTree::showDataInputSelector(const QString &propertyname, const QPoint &pos)
+{
+    m_scene->handleShowDISelector(
+                propertyname, static_cast<Qt3DSDMTimelineItemBinding *>(m_binding)->GetInstance(),
+                pos);
+
+}
+

@@ -56,6 +56,7 @@
 #include "Dialogs.h"
 #include "ProjectFile.h"
 #include "MaterialRefView.h"
+#include "BasicObjectsModel.h"
 
 #include <QtCore/qtimer.h>
 #include <QtQml/qqmlcontext.h>
@@ -68,6 +69,7 @@ InspectorControlView::InspectorControlView(const QSize &preferredSize, QWidget *
     : QQuickWidget(parent),
       TabNavigable(),
       m_inspectorControlModel(new InspectorControlModel(this)),
+      m_meshChooserView(new MeshChooserView(this)),
       m_instance(0),
       m_handle(0),
       m_preferredSize(preferredSize)
@@ -78,8 +80,15 @@ InspectorControlView::InspectorControlView(const QSize &preferredSize, QWidget *
     dispatch->AddPresentationChangeListener(this);
     dispatch->AddDataModelListener(this);
 
-    m_selectionChangedConnection = g_StudioApp.GetCore()->GetDispatch()->ConnectSelectionChange(
-                std::bind(&InspectorControlView::OnSelectionSet, this, std::placeholders::_1));
+    connect(m_meshChooserView, &MeshChooserView::meshSelected, this,
+            [this] (int handle, int instance, const QString &name) {
+        if (name.startsWith(QLatin1Char('#'))) {
+            if (m_inspectorControlModel)
+                m_inspectorControlModel->setPropertyValue(instance, handle, name);
+        } else {
+            setPropertyValueFromFilename(instance, handle, name);
+        }
+    });
 }
 
 static bool isInList(const QStringList &list, const QString &inStr)
@@ -116,17 +125,34 @@ void InspectorControlView::filterMatDatas(std::vector<Q3DStudio::CFilePath> &mat
 
 void InspectorControlView::OnNewPresentation()
 {
-    m_DirectoryConnection = g_StudioApp.getDirectoryWatchingSystem().AddDirectory(
+    auto core = g_StudioApp.GetCore();
+    auto sp = core->GetDoc()->GetStudioSystem()->GetFullSystem()->GetSignalProvider();
+    auto assetGraph = core->GetDoc()->GetAssetGraph();
+
+    m_connections.push_back(core->GetDispatch()->ConnectSelectionChange(
+                std::bind(&InspectorControlView::OnSelectionSet, this, std::placeholders::_1)));
+    m_connections.push_back(g_StudioApp.getDirectoryWatchingSystem().AddDirectory(
                 g_StudioApp.GetCore()->getProjectFile().getProjectPath(),
-                std::bind(&InspectorControlView::onFilesChanged, this, std::placeholders::_1));
+                std::bind(&InspectorControlView::onFilesChanged, this, std::placeholders::_1)));
+    m_connections.push_back(sp->ConnectInstancePropertyValue(
+                std::bind(&InspectorControlView::onInstancePropertyValueChanged, this,
+                          std::placeholders::_2)));
+    m_connections.push_back(sp->ConnectComponentSeconds(
+                std::bind(&InspectorControlView::OnTimeChanged, this)));
+    m_connections.push_back(assetGraph->ConnectChildAdded(
+                std::bind(&InspectorControlView::onChildAdded, this, std::placeholders::_2)));
+    m_connections.push_back(assetGraph->ConnectChildRemoved(
+                std::bind(&InspectorControlView::onChildRemoved, this)));
 }
 
 void InspectorControlView::OnClosingPresentation()
 {
-    // Image chooser model needs to be rebuilt from scratch for each presentation, as different
-    // presentations count as subpresentations
+    // Image chooser model needs to be deleted, because otherwise it'll try to update the model for
+    // the new presentation before subpresentations are resolved, corrupting the model.
+    // The model also has a connection to project file which needs to refreshed if project changes.
     delete m_imageChooserView;
     m_fileList.clear();
+    m_connections.clear();
 }
 
 void InspectorControlView::OnTimeChanged()
@@ -302,6 +328,31 @@ void InspectorControlView::onInstancePropertyValueChanged(
     }
 }
 
+void InspectorControlView::onChildAdded(int inChild)
+{
+    // Changes to asset graph invalidate the object browser model, so close it if it is open
+    if (m_activeBrowser.isActive() && m_activeBrowser.m_browser == m_objectReferenceView)
+        m_activeBrowser.clear();
+
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    if (bridge->IsCustomMaterialInstance(inChild)) {
+        QVector<qt3dsdm::Qt3DSDMInstanceHandle> refMats;
+        doc->getSceneReferencedMaterials(doc->GetSceneInstance(), refMats);
+        for (auto &refMat : qAsConst(refMats)) {
+            if ((int)bridge->getMaterialReference(refMat) == inChild)
+                g_StudioApp.GetCore()->GetDispatch()->FireImmediateRefreshInstance(refMat);
+        }
+    }
+}
+
+void InspectorControlView::onChildRemoved()
+{
+    // Changes to asset graph invalidate the object browser model, so close it if it is open
+    if (m_activeBrowser.isActive() && m_activeBrowser.m_browser == m_objectReferenceView)
+        m_activeBrowser.clear();
+}
+
 QColor InspectorControlView::titleColor(int instance, int handle) const
 {
     QColor ret = CStudioPreferences::textColor();
@@ -338,16 +389,11 @@ void InspectorControlView::updateInspectable(CInspectableBase *inInspectable)
 void InspectorControlView::setInspectable(CInspectableBase *inInspectable)
 {
     if (m_inspectableBase != inInspectable) {
+        m_activeBrowser.clear();
         m_inspectableBase = inInspectable;
         m_inspectorControlModel->setInspectable(inInspectable);
 
         Q_EMIT titleChanged();
-        auto sp = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetFullSystem()->GetSignalProvider();
-        m_PropertyChangeConnection = sp->ConnectInstancePropertyValue(
-                    std::bind(&InspectorControlView::onInstancePropertyValueChanged, this,
-                              std::placeholders::_2));
-        m_timeChanged = sp->ConnectComponentSeconds(
-                    std::bind(&InspectorControlView::OnTimeChanged, this));
     }
 }
 
@@ -445,6 +491,7 @@ QObject *InspectorControlView::showImageChooser(int handle, int instance, const 
     m_imageChooserView->setInstance(instance);
 
     CDialogs::showWidgetBrowser(this, m_imageChooserView, point);
+    m_activeBrowser.setData(m_imageChooserView, handle, instance);
 
     return m_imageChooserView;
 }
@@ -463,29 +510,25 @@ QObject *InspectorControlView::showFilesChooser(int handle, int instance, const 
     m_fileChooserView->setInstance(instance);
 
     CDialogs::showWidgetBrowser(this, m_fileChooserView, point);
+    m_activeBrowser.setData(m_fileChooserView, handle, instance);
 
     return m_fileChooserView;
 }
 
 QObject *InspectorControlView::showMeshChooser(int handle, int instance, const QPoint &point)
 {
-    if (!m_meshChooserView) {
-        m_meshChooserView = new MeshChooserView(this);
-        connect(m_meshChooserView, &MeshChooserView::meshSelected, this,
-                [this] (int handle, int instance, const QString &name) {
-            if (name.startsWith(QStringLiteral("#"))) {
-                if (m_inspectorControlModel)
-                    m_inspectorControlModel->setPropertyValue(instance, handle, name);
-            } else {
-                setPropertyValueFromFilename(instance, handle, name);
-            }
-        });
-    }
-
     m_meshChooserView->setHandle(handle);
     m_meshChooserView->setInstance(instance);
 
-    CDialogs::showWidgetBrowser(this, m_meshChooserView, point);
+    m_activeBrowser.setData(m_meshChooserView, handle, instance);
+    int numPrimitives = BasicObjectsModel::BasicMeshesModel().count();
+    bool combo = numPrimitives == m_meshChooserView->numMeshes(); // make a combobox size popup
+    int comboH = qMin(m_meshChooserView->numMeshes(), 15) // max popup height: 15 items
+                 * CStudioPreferences::controlBaseHeight();
+
+    CDialogs::showWidgetBrowser(this, m_meshChooserView, point,
+                                CDialogs::WidgetBrowserAlign::ComboBox,
+                                combo ? QSize(CStudioPreferences::valueWidth(), comboH) : QSize());
 
     return m_meshChooserView;
 }
@@ -505,6 +548,7 @@ QObject *InspectorControlView::showTextureChooser(int handle, int instance, cons
     m_textureChooserView->setInstance(instance);
 
     CDialogs::showWidgetBrowser(this, m_textureChooserView, point);
+    m_activeBrowser.setData(m_textureChooserView, handle, instance);
 
     return m_textureChooserView;
 }
@@ -546,6 +590,7 @@ QObject *InspectorControlView::showObjectReference(int handle, int instance, con
     }
 
     CDialogs::showWidgetBrowser(this, m_objectReferenceView, point);
+    m_activeBrowser.setData(m_objectReferenceView, handle, instance);
 
     connect(m_objectReferenceView, &ObjectBrowserView::selectionChanged,
             this, [this, doc, handle, instance] {
@@ -553,8 +598,11 @@ QObject *InspectorControlView::showObjectReference(int handle, int instance, con
         qt3dsdm::SObjectRefType objRef = doc->GetDataModelObjectReferenceHelper()->GetAssetRefValue(
                     selectedItem, instance,
                     (CRelativePathTools::EPathType)(m_objectReferenceView->pathType()));
-        Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Property"))
-                ->SetInstancePropertyValue(instance, handle, objRef);
+        qt3dsdm::SValue value = m_inspectorControlModel->currentPropertyValue(instance, handle);
+        if (!(value.getData<qt3dsdm::SObjectRefType>() == objRef)) {
+            Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Property"))
+                    ->SetInstancePropertyValue(instance, handle, objRef);
+        }
     });
 
     return m_objectReferenceView;
@@ -569,24 +617,20 @@ QObject *InspectorControlView::showMaterialReference(int handle, int instance, c
     disconnect(m_matRefListWidget, &QListWidget::itemClicked, nullptr, nullptr);
     disconnect(m_matRefListWidget, &QListWidget::itemDoubleClicked, nullptr, nullptr);
 
-    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-    const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
-
-    qt3dsdm::SValue value;
-    propertySystem->GetInstancePropertyValue(instance, handle, value);
-
-    const int numMats = m_matRefListWidget->refreshMaterials(
-                doc->GetDataModelObjectReferenceHelper()->Resolve(value, instance));
+    const int numMats = m_matRefListWidget->refreshMaterials(instance, handle);
     const int popupHeight = qMin(numMats, 10) * CStudioPreferences::controlBaseHeight();
 
     CDialogs::showWidgetBrowser(this, m_matRefListWidget, point,
                                 CDialogs::WidgetBrowserAlign::ComboBox,
                                 QSize(CStudioPreferences::valueWidth(), popupHeight));
+    m_activeBrowser.setData(m_matRefListWidget, handle, instance);
 
     connect(m_matRefListWidget, &QListWidget::itemClicked, this,
-            [doc, propertySystem, instance, handle](QListWidgetItem *item) {
+            [instance, handle](QListWidgetItem *item) {
         auto selectedInstance = item->data(Qt::UserRole).toInt();
         qt3dsdm::SValue value;
+        CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+        const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
         propertySystem->GetInstancePropertyValue(instance, handle, value);
         auto refInstance = doc->GetDataModelObjectReferenceHelper()->Resolve(value, instance);
         if (selectedInstance != refInstance) {
@@ -636,6 +680,7 @@ void InspectorControlView::showDataInputChooser(int handle, int instance, const 
                     handle, instance);
     CDialogs::showWidgetBrowser(this, m_dataInputChooserView, point,
                                 CDialogs::WidgetBrowserAlign::ToolButton);
+    m_activeBrowser.setData(m_dataInputChooserView, handle, instance);
 }
 
 QColor InspectorControlView::showColorDialog(const QColor &color)
@@ -669,7 +714,6 @@ QString InspectorControlView::convertPathToProjectRoot(const QString &presentati
 
 void InspectorControlView::OnBeginDataModelNotifications()
 {
-
 }
 
 void InspectorControlView::OnEndDataModelNotifications()
@@ -678,6 +722,42 @@ void InspectorControlView::OnEndDataModelNotifications()
     if (inspectable && !inspectable->IsValid())
         OnSelectionSet(Q3DStudio::SSelectedValue());
     m_inspectorControlModel->refresh();
+
+    if (m_activeBrowser.isActive()) {
+        // Check if the instance/handle pair still has an active UI control. If not, close browser.
+        if (!m_inspectorControlModel->hasInstanceProperty(
+                m_activeBrowser.m_instance, m_activeBrowser.m_handle)) {
+            m_activeBrowser.clear();
+        } else {
+            // Update browser selection
+            if (m_activeBrowser.m_browser == m_imageChooserView) {
+                m_imageChooserView->updateSelection();
+            } else if (m_activeBrowser.m_browser == m_fileChooserView) {
+                m_fileChooserView->updateSelection();
+            } else if (m_activeBrowser.m_browser == m_meshChooserView) {
+                m_meshChooserView->updateSelection();
+            } else if (m_activeBrowser.m_browser == m_textureChooserView) {
+                m_textureChooserView->updateSelection();
+            } else if (m_activeBrowser.m_browser == m_objectReferenceView) {
+                IObjectReferenceHelper *objRefHelper
+                        = g_StudioApp.GetCore()->GetDoc()->GetDataModelObjectReferenceHelper();
+                if (objRefHelper) {
+                    qt3dsdm::SValue value = m_inspectorControlModel->currentPropertyValue(
+                                m_activeBrowser.m_instance, m_activeBrowser.m_handle);
+                    qt3dsdm::Qt3DSDMInstanceHandle refInstance
+                            = objRefHelper->Resolve(value, m_activeBrowser.m_instance);
+                    m_objectReferenceView->selectAndExpand(refInstance, m_activeBrowser.m_instance);
+                }
+            } else if (m_activeBrowser.m_browser == m_matRefListWidget) {
+                m_matRefListWidget->updateSelection();
+            } else if (m_activeBrowser.m_browser == m_dataInputChooserView) {
+                m_dataInputChooserView->setCurrentController(
+                            m_inspectorControlModel->currentControllerValue(
+                                m_dataInputChooserView->instance(),
+                                m_dataInputChooserView->handle()));
+            }
+        }
+    }
 }
 
 void InspectorControlView::OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance)

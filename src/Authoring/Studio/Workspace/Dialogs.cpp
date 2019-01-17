@@ -922,12 +922,15 @@ CDialogs::ESavePromptResult CDialogs::PromptForSave()
  * Prompt the user for a file to save to.
  * If browsing for location for presentation (isProject == false), then
  * allow browsing only inside current project.
+ * If browsing for a location for a project, then disallow browsing inside current project.
+ * If isCopy is true, then create a copy of the existing project rather than a new one.
+ * isCopy is ignored if isProject is false;
  * Return an invalid file if the user cancels the save dialog.
  */
-QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
+QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject, bool isCopy)
 {
     QString projPath(QDir::cleanPath(g_StudioApp.GetCore()->getProjectFile().getProjectPath()));
-
+    QString previousFolder;
     QString theFilename = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath();
 
     if (theFilename.isEmpty() || isProject)
@@ -951,7 +954,25 @@ QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
 
     if (isProject) {
         theFileDlg.setLabelText(QFileDialog::FileName, QObject::tr("Project Name"));
-        theFileDlg.setLabelText(QFileDialog::Accept, QObject::tr("Create"));
+        if (!isCopy)
+            theFileDlg.setLabelText(QFileDialog::Accept, QObject::tr("Create"));
+        // Limit browsing to outside project directory
+        if (!projPath.isEmpty()) {
+            QDir projDir(projPath);
+            projDir.cdUp();
+            previousFolder = projDir.absolutePath();
+            if (isCopy)
+                theFileDlg.setDirectory(previousFolder);
+            connect(&theFileDlg, &QFileDialog::directoryEntered,
+                    [&](const QString &dir) {
+                QFileInfo fi(QDir::cleanPath(dir));
+                const QString absPath = fi.absoluteFilePath();
+                if (absPath.startsWith(projPath))
+                    theFileDlg.setDirectory(previousFolder);
+                else
+                    previousFolder = absPath;
+            });
+        }
     } else {
         // Limit browsing to project directory
         connect(&theFileDlg, &QFileDialog::directoryEntered,
@@ -966,13 +987,15 @@ QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
     }
 
     bool theShowDialog = true;
-    QString theFile = {};
+    QString theFile;
     while (theShowDialog && theFileDlg.exec()) {
         theShowDialog = false;
         QString selectedName = theFileDlg.selectedFiles().front();
 
         // Make sure file name has correct extension
-        if (!selectedName.endsWith(theFileExt))
+        if (isProject && isCopy && selectedName.endsWith(theFileExt))
+            selectedName.chop(theFileExt.length());
+        else if (!selectedName.endsWith(theFileExt))
             selectedName.append(theFileExt);
 
         if (!isProject) {
@@ -986,8 +1009,7 @@ QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
 
         theFile = selectedName;
         m_LastSaveFile = selectedName;
-        // New directory is only created when creating a new project. When doing a "save as"
-        // or "save copy", a new directory is not created.
+        // New directory is only created when creating a new project.
         if (isProject) {
             QString theFinalDir;
             QString theFinalDoc;
@@ -995,22 +1017,20 @@ QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject)
                                                               theFinalDir, theFinalDoc);
 
             // Update last save file to final doc
-            m_LastSaveFile = theFinalDoc;
-            QFileInfo info(theFinalDoc);
-            if (info.exists()) {
-                const QString theTitle(QObject::tr("Confirm Save As"));
-                const QString filePath(theFinalDir + QLatin1Char('/') + info.fileName());
-                const QString theString = QObject::tr("%1 already exists.\nDo you want to "
-                                                      "replace it?").arg(filePath);
+            m_LastSaveFile = QFileInfo(theFinalDoc).absoluteFilePath();
 
-                auto result = QMessageBox::question(nullptr, theTitle, theString);
-                if (result != QMessageBox::Yes) {
-                    // Reset the file and show the file dialog again
-                    theFile.clear();
-                    theShowDialog = true;
-                    continue;
-                }
-            } // of over-writing case
+            // File dialog shouldn't allow choosing existing folder for project, but since we
+            // are using native dialog, let's play it safe and check.
+            if (QFileInfo(theFinalDir).exists()) {
+                const QString title(QObject::tr("Existing directory"));
+                const QString warning = QObject::tr("%1 already exists.")
+                        .arg(QFileInfo(theFinalDir).fileName());
+                QMessageBox::warning(nullptr, title, warning);
+                // Reset the file and show the file dialog again
+                theFile.clear();
+                theShowDialog = true;
+                continue;
+            }
         }
     }
 
@@ -1244,18 +1264,18 @@ void CDialogs::showWidgetBrowser(QWidget *screenWidget, QWidget *browser, const 
     }
     QRect screenRect = screen->availableGeometry();
 
-    const int CONTROL_H = 22;
+    const int controlH = CStudioPreferences::controlBaseHeight();
     if (align == WidgetBrowserAlign::ComboBox) {
         // position the popup below the combobox
-        newPos -= QPoint(popupSize.width(), -CONTROL_H) + screenRect.topLeft();
+        newPos -= QPoint(popupSize.width(), -controlH) + screenRect.topLeft();
         // if no space below the combobox, move it above it
         if (newPos.y() + popupSize.height() > screenRect.height())
-            newPos.setY(newPos.y() - popupSize.height() - CONTROL_H);
-    } else if (align == WidgetBrowserAlign::ToolButton){
+            newPos.setY(newPos.y() - popupSize.height() - controlH);
+    } else if (align == WidgetBrowserAlign::ToolButton) {
         // The point is assumed to be the lower right corner of the button
         newPos -= QPoint(popupSize.width(), popupSize.height()) + screenRect.topLeft();
         if (newPos.y() < 0)
-            newPos.setY(newPos.y() + popupSize.height() - CONTROL_H);
+            newPos.setY(newPos.y() + popupSize.height() - controlH);
     } else { // WidgetBrowserAlign::Center
         newPos -= QPoint(popupSize.width() / 2, popupSize.height() / 2) + screenRect.topLeft();
     }

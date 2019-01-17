@@ -63,11 +63,6 @@ void TextureChooserView::initialize()
     setSource(QUrl(QStringLiteral("qrc:/Palettes/Inspector/TextureChooser.qml")));
 }
 
-QSize TextureChooserView::sizeHint() const
-{
-    return {500, 500};
-}
-
 void TextureChooserView::setHandle(int handle)
 {
     m_handle = handle;
@@ -109,6 +104,11 @@ QString TextureChooserView::currentDataModelPath() const
     return cleanPath;
 }
 
+void TextureChooserView::updateSelection()
+{
+    m_model->setCurrentFile(currentDataModelPath());
+}
+
 void TextureChooserView::focusOutEvent(QFocusEvent *event)
 {
     QQuickWidget::focusOutEvent(event);
@@ -125,7 +125,6 @@ void TextureChooserView::keyPressEvent(QKeyEvent *event)
 
 void TextureChooserView::showEvent(QShowEvent *event)
 {
-    m_model->setCurrentFile(currentDataModelPath());
-
+    updateSelection();
     QQuickWidget::showEvent(event);
 }

@@ -134,6 +134,7 @@ public:
 
     // CPresentationChangeListener
     void OnNewPresentation() override;
+    void OnClosingPresentation() override;
 
     // ISelectionChangeListener
     void OnSelectionSet(Q3DStudio::SSelectedValue inSelectable);
@@ -186,6 +187,7 @@ private:
     void updateActionStates();
     void setPropertyValueInvalid(bool invalid);
     void clearPropertyValueInvalid();
+    void onAssetGraphChanged();
 
     static CDoc *GetDoc();
     static CClientDataModelBridge *GetBridge();
@@ -224,6 +226,7 @@ private:
     QAction *m_actionPaste;
     bool m_propertyValueInvalid = true;
     QColor m_currentColor;
+    QPointer<QWidget> m_activeBrowser = nullptr;
 };
 
 #endif // ACTIONVIEW_H
