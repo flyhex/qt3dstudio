@@ -38,7 +38,7 @@
 #include <QRect>
 
 QT_BEGIN_NAMESPACE
-class QWidget;
+class QOpenGLWidget;
 class QWindow;
 QT_END_NAMESPACE
 
@@ -54,7 +54,7 @@ public:
 
     virtual bool IsInitialized() = 0;
 
-    virtual void Initialize(QWindow *inWindow) = 0;
+    virtual void initialize(QOpenGLWidget *widget) = 0;
 
     virtual void SetViewRect(const QRect &inRect, const QSize &size) = 0;
     virtual void setFullSizePreview(bool enabled) = 0;
@@ -80,8 +80,8 @@ public:
     virtual void Close() = 0;
 
     // synchronously render the content
+    virtual void renderNow() = 0;
     virtual void getPreviewFbo(QSize &outFboDim, qt3ds::QT3DSU32 &outFboTexture) = 0;
-
     virtual void RegisterSubpresentations(
             const QVector<SubPresentationRecord> &subpresentations) = 0;
 

@@ -720,10 +720,11 @@ void Q3DSTranslation::prepareRender(const QRect &rect, const QSize &size, qreal 
         for (auto camera : values)
             m_editCameraInfo.applyToCamera(*camera, QSizeF(m_size));
     }
-    if (rect != m_rect || size != m_size) {
+    if (rect != m_rect || size != m_size || pixelRatio != m_pixelRatio) {
         m_engine->sceneManager()->updateSizes(size, pixelRatio, rect, true);
         m_rect = rect;
         m_size = size;
+        m_pixelRatio = pixelRatio;
     }
 }
 

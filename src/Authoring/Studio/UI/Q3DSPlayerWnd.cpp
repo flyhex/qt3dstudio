@@ -27,6 +27,7 @@
 ****************************************************************************/
 
 #include "Q3DSPlayerWnd.h"
+#include "Q3DSPlayerWidget.h"
 #include "IDragable.h"
 #include "StudioApp.h"
 #include "IStudioRenderer.h"
@@ -65,94 +66,13 @@ T even(const T val)
     return (val % 2) ? (val + corr) : val;
 }
 
-static bool compareSurfaceFormatVersion(const QSurfaceFormat &a, const QSurfaceFormat &b)
-{
-    if (a.renderableType() != b.renderableType())
-        return false;
-    if (a.majorVersion() != b.majorVersion())
-        return false;
-    if (a.minorVersion() > b.minorVersion())
-        return false;
-    return true;
-}
-
-static QSurfaceFormat selectSurfaceFormat(QOpenGLWidget *window)
-{
-    struct ContextVersion {
-        int major;
-        int minor;
-        bool gles;
-    };
-
-    ContextVersion versions[] = {
-        {4, 5, false},
-        {4, 4, false},
-        {4, 3, false},
-        {4, 2, false},
-        {4, 1, false},
-        {3, 3, false},
-        {2, 1, false},
-        {3, 2, true},
-        {3, 1, true},
-        {3, 0, true},
-        {2, 1, true},
-        {2, 0, true},
-    };
-
-    QSurfaceFormat result = window->format();
-    bool valid = false;
-
-    for (const auto &ver : versions) {
-        // make an offscreen surface + context to query version
-        QScopedPointer<QOffscreenSurface> offscreenSurface(new QOffscreenSurface);
-
-        QSurfaceFormat format = window->format();
-        if (ver.gles) {
-            format.setRenderableType(QSurfaceFormat::OpenGLES);
-        } else {
-            format.setRenderableType(QSurfaceFormat::OpenGL);
-            if (ver.major >= 2)
-                format.setProfile(QSurfaceFormat::CoreProfile);
-        }
-        format.setMajorVersion(ver.major);
-        format.setMinorVersion(ver.minor);
-        format.setDepthBufferSize(24);
-        format.setStencilBufferSize(8);
-
-        offscreenSurface->setFormat(format);
-        offscreenSurface->create();
-        Q_ASSERT(offscreenSurface->isValid());
-
-        QScopedPointer<QOpenGLContext> queryContext(new QOpenGLContext);
-        queryContext->setFormat(format);
-        if (queryContext->create() && compareSurfaceFormatVersion(format, queryContext->format())) {
-            valid = true;
-            result = format;
-            break;
-        }
-    } // of version test iteration
-
-    if (!valid)
-        qFatal("Unable to select suitable OpenGL context");
-
-    qDebug() << Q_FUNC_INFO << "selected surface format:" << result;
-    QSurfaceFormat::setDefaultFormat(result);
-    return result;
-}
-
 Q3DSPlayerWnd::Q3DSPlayerWnd(QWidget *parent)
     : QScrollArea(parent)
     , m_mouseDown(false)
-    , m_renderWindow(new RenderWindow())
+    , m_glWidget(new Q3DSPlayerWidget())
     , m_ViewMode(VIEW_SCENE)
 {
-    m_widget = QWidget::createWindowContainer(m_renderWindow, this);
-    m_widget->setMinimumSize(800, 600);
-    m_widget->setMaximumSize(1920, 1080);
-    m_widget->setAttribute(Qt::WA_TransparentForMouseEvents);
-    m_renderWindow->setFlags(Qt::WindowTransparentForInput);
-    m_renderWindow->m_container = m_widget;
-    setWidget(m_widget);
+    setWidget(m_glWidget);
 
     setAcceptDrops(true);
     RegisterForDnd(this);
@@ -166,24 +86,11 @@ Q3DSPlayerWnd::Q3DSPlayerWnd(QWidget *parent)
     m_previousToolMode = g_StudioApp.GetToolMode();
 
     Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.getRenderer());
-    if (!theRenderer.IsInitialized()) {
-        try {
-            theRenderer.Initialize(m_renderWindow);
-
-            // Connect using signal name because IStudioRenderer interface doesn't have the signal
-            QObject *obj = dynamic_cast<QObject *>(&theRenderer);
-            if (obj) {
-                QObject::connect(obj, SIGNAL(objectPicked(int)),
-                                 this, SLOT(handleObjectPicked(int)));
-            }
-        } catch (...) {
-            QMessageBox::critical(this, tr("Fatal Error"),
-                                  tr("Unable to initialize OpenGL.\nThis may be because your "
-                                     "graphic device is not sufficient, or simply because your "
-                                     "driver is too old.\n\nPlease try upgrading your graphics "
-                                     "driver and try again."));
-            exit(1);
-        }
+    // Connect using signal name because IStudioRenderer interface doesn't have the signal
+    QObject *obj = dynamic_cast<QObject *>(&theRenderer);
+    if (obj) {
+        QObject::connect(obj, SIGNAL(objectPicked(int)),
+                         this, SLOT(handleObjectPicked(int)));
     }
 }
 
@@ -541,14 +448,10 @@ void Q3DSPlayerWnd::recenterClient()
         m_ClientRect.setHeight(theClientSize.height());
     }
 
-    QRect glRect = m_ClientRect;
-    const qreal pixelRatio = StudioUtils::devicePixelRatio(window()->windowHandle());
-    glRect.setX(m_ClientRect.left() * pixelRatio);
-    glRect.setY(m_ClientRect.top() * pixelRatio);
-    glRect.setWidth(int(pixelRatio * m_ClientRect.width()));
-    glRect.setHeight(int(pixelRatio * m_ClientRect.height()));
-    m_widget->setGeometry(m_ClientRect);
-    g_StudioApp.getRenderer().SetViewRect(glRect, glRect.size());
+    // Need explicit invalidate as changing editor to different ratio screen doesn't trigger
+    // resizeGL call.
+    m_glWidget->maybeInvalidateFbo();
+    m_glWidget->setGeometry(m_ClientRect);
 }
 
 //==============================================================================
@@ -569,7 +472,7 @@ void Q3DSPlayerWnd::onRulerGuideToggled()
         vscrollPos = qMax(verticalScrollBar()->value() + scrollAmount, 0);
     horizontalScrollBar()->setValue(hscrollPos);
     verticalScrollBar()->setValue(vscrollPos);
-    m_widget->update();
+    m_glWidget->update();
 }
 
 //==============================================================================

@@ -178,6 +178,7 @@ private:
     QVector<Q3DSCameraTranslator *> m_cameraTranslators;
     QRect m_rect;
     QSize m_size;
+    qreal m_pixelRatio = 0.0;
     QHash<QByteArray, Q3DSCameraNode *> m_editCameras;
     SEditCameraPersistentInformation m_editCameraInfo;
     bool m_editCameraEnabled = false;

@@ -47,55 +47,10 @@
 #include <QtCore/qcoreapplication.h>
 
 class CSceneView;
-class CStudioApp;
-class CMouseCursor;
-class CHotkeys;
 
 namespace Q3DStudio {
 
-class RenderWindow : public QWindow
-{
-    Q_OBJECT
-public:
-    QWidget *m_container = nullptr;
-    RenderWindow(QWindow *window = nullptr)
-        : QWindow(window)
-    {
-
-    }
-#ifdef Q_OS_WIN //QTBUG-50505
-    bool event(QEvent *e) override
-    {
-        switch (e->type())
-        {
-            case QEvent::MouseButtonPress:
-            case QEvent::MouseButtonRelease:
-            case QEvent::MouseButtonDblClick:
-            case QEvent::MouseMove:
-            case QEvent::FocusIn:
-            case QEvent::FocusOut:
-            case QEvent::FocusAboutToChange:
-            case QEvent::Enter:
-            case QEvent::Leave:
-            case QEvent::Wheel:
-            case QEvent::TabletMove:
-            case QEvent::TabletPress:
-            case QEvent::TabletRelease:
-            case QEvent::TabletEnterProximity:
-            case QEvent::TabletLeaveProximity:
-            case QEvent::TouchBegin:
-            case QEvent::TouchUpdate:
-            case QEvent::TouchEnd:
-            case QEvent::InputMethodQuery:
-            case QEvent::TouchCancel:
-                return QCoreApplication::sendEvent(m_container, e);
-            default:
-                break;
-        }
-        return QWindow::event(e);
-    }
-#endif
-};
+class Q3DSPlayerWidget;
 
 class Q3DSPlayerWnd : public QScrollArea, public CWinDropContainer
 {
@@ -168,8 +123,7 @@ protected:
         }
     };
 
-    RenderWindow *m_renderWindow;
-    QWidget *m_widget;
+    Q3DSPlayerWidget *m_glWidget = nullptr;
     bool m_mouseDown;
     bool m_resumePlayOnMouseRelease = false;
     long m_previousToolMode;

@@ -84,8 +84,9 @@ public:
     IPathManager *GetPathManager() override;
     qt3ds::foundation::IStringTable *GetRenderStringTable() override;
     void RequestRender() override;
+    void renderNow() override;
     bool IsInitialized() override;
-    void Initialize(QWindow *inWindow) override;
+    void initialize(QOpenGLWidget *widget) override;
     void SetViewRect(const QRect &inRect, const QSize &size) override;
     void setFullSizePreview(bool enabled) override;
     void GetEditCameraList(QStringList &outCameras) override;
@@ -146,9 +147,9 @@ private:
     {
         return m_editCameraIndex > -1 ? true : false;
     }
-    void createEngine();
+    void initEngineAndTranslation();
     void createTranslation();
-    void sendResizeToQt3D(const QSize &size);
+    void sendResizeToQt3D();
     void drawGuides(QPainter &painter);
 
     void drawTickMarksOnHorizontalRects(QPainter &painter, qreal innerLeft,
@@ -173,9 +174,9 @@ private:
     qt3dsdm::TSignalConnectionPtr m_selectionSignal;
     QSharedPointer<Q3DSEngine> m_engine;
     QSharedPointer<Q3DSUipPresentation> m_presentation;
-    QWindow *m_window = nullptr;
+    QOpenGLWidget *m_widget = nullptr;
     Qt3DRender::QRenderAspect *m_renderAspect = nullptr;
-    Q3DSViewportSettings m_viewportSettings;
+    QScopedPointer<Q3DSViewportSettings> m_viewportSettings;
     QScopedPointer<Q3DSTranslation> m_translation;
     QVector<SEditCameraPersistentInformation> m_editCameraInformation;
     QRect m_viewRect;
@@ -189,6 +190,7 @@ private:
     bool m_renderRequested = false;
     bool m_setSubpresentationsCalled = false;
     int m_editCameraIndex = -1;
+    int m_pendingEditCameraIndex = -1;
     SStudioPickValue m_dragPickResult;
     CUpdateableDocumentEditor m_updatableEditor;
     QPoint m_mouseDownPoint;
@@ -205,6 +207,7 @@ private:
     QVector<QString> m_projectFonts;
     QVector<SubPresentationRecord> m_subpresentations;
     bool m_dirtySetUpdate = false;
+    bool m_resizeToQt3DSent = false;
 };
 
 }

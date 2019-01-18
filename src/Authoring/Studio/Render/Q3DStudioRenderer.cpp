@@ -57,6 +57,7 @@
 #include <Qt3DRender/qrenderaspect.h>
 #include <Qt3DRender/private/qrenderaspect_p.h>
 #include <QtGui/private/qopenglcontext_p.h>
+#include <QtGui/qopenglframebufferobject.h>
 
 namespace Q3DStudio {
 
@@ -101,11 +102,13 @@ Q3DStudioRenderer::Q3DStudioRenderer()
     m_rectColor = CStudioPreferences::GetRulerBackgroundColor();
     // Tick marks
     m_lineColor = CStudioPreferences::GetRulerTickColor();
+
     m_editCameraInformation.resize(g_numEditCameras);
 
-    // create these
+    // Create engine and presentation as RenderBufferManager needs them before presentation is set
     m_engine.reset(new Q3DSEngine);
     m_presentation.reset(new Q3DSUipPresentation);
+    m_viewportSettings.reset(new Q3DSViewportSettings);
 }
 
 Q3DStudioRenderer::~Q3DStudioRenderer()
@@ -140,8 +143,8 @@ Q3DSRenderBufferManager *Q3DStudioRenderer::GetBufferManager()
 bool Q3DStudioRenderer::requestObjectAt(const QPoint &pt)
 {
     QPoint point;
-    point.setX(int(pt.x() * StudioUtils::devicePixelRatio(m_window)));
-    point.setY(int(pt.y() * StudioUtils::devicePixelRatio(m_window)));
+    point.setX(int(pt.x() * StudioUtils::devicePixelRatio()));
+    point.setY(int(pt.y() * StudioUtils::devicePixelRatio()));
     PickTargetAreas pickArea = getPickArea(point);
     if (pickArea == PickTargetAreas::Presentation) {
         SStudioPickValue pickValue = pick(point, SelectMode::Single, true);
@@ -165,30 +168,37 @@ qt3ds::foundation::IStringTable *Q3DStudioRenderer::GetRenderStringTable()
 
 void Q3DStudioRenderer::RequestRender()
 {
-    // Now we only schedule dirty set update
-    scheduleDirtySetUpdate();
+    if (m_widget && !m_renderRequested) {
+        m_widget->update();
+        m_renderRequested = true;
+    }
 }
 
 bool Q3DStudioRenderer::IsInitialized()
 {
-    return m_window != nullptr;
+    return m_widget != nullptr;
 }
 
-void Q3DStudioRenderer::Initialize(QWindow *inWindow)
+void Q3DStudioRenderer::initialize(QOpenGLWidget *widget)
 {
-    m_window = inWindow;
+    m_widget = widget;
+
+    if (m_widget && m_translation.isNull() && m_hasPresentation)
+        initEngineAndTranslation();
 }
 
 void Q3DStudioRenderer::SetViewRect(const QRect &inRect, const QSize &size)
 {
     m_viewRect = inRect;
-    if (!m_engine.isNull() && m_window && size != m_size) {
-        // size already has pixel ratio baked in
-        m_engine->resize(size / StudioUtils::devicePixelRatio(m_window),
-                         StudioUtils::devicePixelRatio(m_window), false);
-        //sendResizeToQt3D(size);
+    if (!m_engine.isNull() && m_widget && size != m_size) {
+        m_engine->resize(size, false);
+        m_resizeToQt3DSent = false;
+        if (m_engine->sceneManager())
+            m_engine->sceneManager()->uncacheLayers();
     }
     m_size = size;
+    if (!m_resizeToQt3DSent)
+        sendResizeToQt3D();
 }
 
 void Q3DStudioRenderer::setFullSizePreview(bool enabled)
@@ -243,7 +253,8 @@ void Q3DStudioRenderer::SetGuidesEditable(bool val)
 void Q3DStudioRenderer::SetEditCamera(QT3DSI32 inIndex)
 {
     int index = qMin(inIndex, g_numEditCameras);
-    if (index != m_editCameraIndex) {
+    m_pendingEditCameraIndex = index;
+    if (index != m_editCameraIndex && !m_translation.isNull()) {
         // save old edit camera info
         if (editCameraEnabled())
             m_editCameraInformation[m_editCameraIndex] = m_translation->editCameraInfo();
@@ -251,11 +262,11 @@ void Q3DStudioRenderer::SetEditCamera(QT3DSI32 inIndex)
         if (index == -1) {
             // use scene camera
             m_translation->disableEditCamera();
-            m_viewportSettings.setMatteEnabled(true);
+            m_viewportSettings->setMatteEnabled(true);
             m_translation->disableGradient();
         } else {
             // use edit camera
-            m_viewportSettings.setMatteEnabled(false);
+            m_viewportSettings->setMatteEnabled(false);
             const SEditCameraDefinition &def(g_editCameraDefinitions[m_editCameraIndex]);
 
             SEditCameraPersistentInformation &cameraInfo
@@ -311,6 +322,7 @@ void Q3DStudioRenderer::Close()
     m_dispatch.RemovePresentationChangeListener(this);
     m_dispatch.RemoveSceneDragListener(this);
     m_dispatch.RemoveToolbarChangeListener(this);
+    m_widget = nullptr;
 }
 
 static void drawTopBottomTickMarks(QPainter &painter, qreal posX, qreal innerBottom,
@@ -438,58 +450,46 @@ void Q3DStudioRenderer::drawGuides(QPainter &painter)
                                  outerLeft, outerRight);
 }
 
-// TODO: redo guide drawing for async rendering
-#if RUNTIME_SPLIT_TEMPORARILY_REMOVED
-void Q3DStudioRenderer::RenderNow()
+void Q3DStudioRenderer::renderNow()
 {
     if (m_setSubpresentationsCalled == false)
         return;
+
+    initialize(m_widget);
+
     m_renderRequested = false;
     QOpenGLContextPrivate *ctxD = QOpenGLContextPrivate::get(m_widget->context());
     QScopedValueRollback<GLuint> defaultFboRedirectRollback(ctxD->defaultFboRedirect, 0);
 
-    QOpenGLPaintDevice device;
-    device.setSize(m_widget->size());
-    QPainter painter(&device);
+    if (!m_translation.isNull()) {
+        // We are always rendering into a fbo with 1x pixel ratio. The scene widget will
+        // display it a proper size.
+        m_translation->prepareRender(QRect(0, 0, m_size.width(), m_size.height()), m_size, 1.0);
 
-    if (m_engine.isNull()) {
-        createEngine();
+        // m_translation->prepareRender clears context, so make sure to activate it again
+        if (!QOpenGLContext::currentContext())
+            m_widget->makeCurrent();
 
         auto renderAspectD = static_cast<Qt3DRender::QRenderAspectPrivate *>(
                     Qt3DRender::QRenderAspectPrivate::get(m_renderAspect));
-        renderAspectD->renderInitialize(m_widget->context());
-        m_widget->makeCurrent();
+        renderAspectD->renderSynchronous(true);
+
+        // fix gl state leakage
+        QOpenGLContext::currentContext()->functions()->glDisable(GL_STENCIL_TEST);
+        QOpenGLContext::currentContext()->functions()->glDisable(GL_DEPTH_TEST);
+        QOpenGLContext::currentContext()->functions()->glDisable(GL_CULL_FACE);
+        QOpenGLContext::currentContext()->functions()->glDisable(GL_SCISSOR_TEST);
+        QOpenGLContext::currentContext()->functions()->glDisable(GL_BLEND);
     }
 
-    if (m_translation.isNull() && m_hasPresentation)
-        createTranslation();
-
-    if (!m_translation.isNull())
-        m_translation->prepareRender(m_viewRect, m_size);
-
-    if (!QOpenGLContext::currentContext())
-        m_widget->makeCurrent();
-
-    if (!editCameraEnabled()) {
-        QColor matteColor;
-        matteColor.setRgbF(.13, .13, .13);
-        painter.fillRect(0, 0, m_widget->width(), m_widget->height(), matteColor);
-    }
-    painter.beginNativePainting();
-    auto renderAspectD = static_cast<Qt3DRender::QRenderAspectPrivate *>(
-                Qt3DRender::QRenderAspectPrivate::get(m_renderAspect));
-    renderAspectD->renderSynchronous(true);
-    painter.endNativePainting();
-
-    // fix gl state leakage
-    QOpenGLContext::currentContext()->functions()->glDisable(GL_STENCIL_TEST);
-    QOpenGLContext::currentContext()->functions()->glDisable(GL_DEPTH_TEST);
-    QOpenGLContext::currentContext()->functions()->glDisable(GL_CULL_FACE);
+    // TODO: Guides drawing is not working
+    QOpenGLPaintDevice device;
+    device.setSize(m_size);
+    QPainter painter(&device);
 
     // draw guides if enabled
     drawGuides(painter);
 }
-#endif
 
 void Q3DStudioRenderer::getPreviewFbo(QSize &outFboDim, qt3ds::QT3DSU32 &outFboTexture)
 {
@@ -553,29 +553,27 @@ void Q3DStudioRenderer::OnReloadEffectInstance(qt3dsdm::Qt3DSDMInstanceHandle in
 void Q3DStudioRenderer::OnNewPresentation()
 {
     m_hasPresentation = true;
-    createEngine();
-    if (!m_engine.isNull()) {
-        createTranslation();
-        setupTextRenderer();
-    }
 }
 
 void Q3DStudioRenderer::OnClosingPresentation()
 {
-    if (!m_hasPresentation || !m_window)
+    if (!m_hasPresentation || !m_widget)
         return;
 
     if (!m_engine.isNull() && !m_translation.isNull()) {
+        m_widget->makeCurrent();
         auto renderAspectD = static_cast<Qt3DRender::QRenderAspectPrivate *>(
                     Qt3DRender::QRenderAspectPrivate::get(m_renderAspect));
         renderAspectD->renderShutdown();
+        m_widget->doneCurrent();
         m_renderAspect = nullptr;
 
-        /* This would destroy render aspect. */
+        // This will destroy render aspect
         m_engine->setPresentation(nullptr);
-        m_engine.reset(new Q3DSEngine);
         m_translation.reset();
+        m_engine.reset(new Q3DSEngine);
         m_presentation.reset(new Q3DSUipPresentation);
+        m_viewportSettings.reset(new Q3DSViewportSettings);
     }
     m_hasPresentation = false;
 }
@@ -727,7 +725,6 @@ void Q3DStudioRenderer::onScenePick()
             pickResult = postScenePick(m_objectPicking);
         handlePickResult(pickResult, m_objectPicking);
     }
-    // TODO: Fix reset (or remove it and just delete the picker)
     m_scenePicker->reset();
     m_objectPicking = false;
 }
@@ -859,8 +856,8 @@ void Q3DStudioRenderer::OnSceneMouseDown(SceneDragSenderType::Enum inSenderType,
 
     m_mouseDown = true;
 
-    inPoint.setX(int(inPoint.x() * StudioUtils::devicePixelRatio(m_window)));
-    inPoint.setY(int(inPoint.y() * StudioUtils::devicePixelRatio(m_window)));
+    inPoint.setX(int(inPoint.x() * StudioUtils::devicePixelRatio()));
+    inPoint.setY(int(inPoint.y() * StudioUtils::devicePixelRatio()));
 
     m_dragPickResult = SStudioPickValue();
     if (inSenderType == SceneDragSenderType::SceneWindow) {
@@ -947,8 +944,8 @@ void Q3DStudioRenderer::OnSceneMouseDrag(SceneDragSenderType::Enum, QPoint inPoi
     if (m_translation.isNull() || m_dragPickResult.getType() == StudioPickValueTypes::Pending)
         return;
 
-    inPoint.setX(int(inPoint.x() * StudioUtils::devicePixelRatio(m_window)));
-    inPoint.setY(int(inPoint.y() * StudioUtils::devicePixelRatio(m_window)));
+    inPoint.setX(int(inPoint.x() * StudioUtils::devicePixelRatio()));
+    inPoint.setY(int(inPoint.y() * StudioUtils::devicePixelRatio()));
 
     if (m_maybeDragStart) {
         QPoint theDragDistance = inPoint - m_mouseDownPoint;
@@ -1158,9 +1155,9 @@ void Q3DStudioRenderer::OnSelectionChange()
 
 }
 
-void Q3DStudioRenderer::sendResizeToQt3D(const QSize &size)
+void Q3DStudioRenderer::sendResizeToQt3D()
 {
-    if (!m_engine)
+    if (m_engine.isNull())
         return;
     Qt3DCore::QEntity *rootEntity = m_engine->rootEntity();
     if (rootEntity) {
@@ -1168,22 +1165,29 @@ void Q3DStudioRenderer::sendResizeToQt3D(const QSize &size)
                 = Qt3DRender::QRenderSurfaceSelectorPrivate::find(rootEntity);
 
         if (surfaceSelector) {
-            surfaceSelector->setExternalRenderTargetSize(size);
-            surfaceSelector->setSurfacePixelRatio(float(StudioUtils::devicePixelRatio(m_window)));
+            surfaceSelector->setExternalRenderTargetSize(m_size);
+            // We are always rendering into an fbo with 1x pixel ratio
+            surfaceSelector->setSurfacePixelRatio(1.0f);
+            m_resizeToQt3DSent = true;
+            RequestRender();
         }
     }
 }
 
-void Q3DStudioRenderer::createEngine()
+void Q3DStudioRenderer::initEngineAndTranslation()
 {
+    QOpenGLContext *context = QOpenGLContext::currentContext();
+    QSurface *surface = context->surface();
     QWindow *window = nullptr;
+    QOffscreenSurface *offscreen = nullptr;
     QObject *surfaceObject = nullptr;
-    surfaceObject = m_window;
-
-    if (m_engine.isNull())
-        m_engine.reset(new Q3DSEngine);
-    if (m_presentation.isNull())
-        m_presentation.reset(new Q3DSUipPresentation);
+    if (surface->surfaceClass() == QSurface::Offscreen) {
+        offscreen = static_cast<QOffscreenSurface *>(surface);
+        surfaceObject = offscreen;
+    } else {
+        window = static_cast<QWindow *>(surface);
+        surfaceObject = window;
+    }
 
     m_scenePicker.reset();
 
@@ -1192,29 +1196,36 @@ void Q3DStudioRenderer::createEngine()
     if (CStudioApp::hasProfileUI())
         flags |= Q3DSEngine::EnableProfiling;
 
-    m_viewportSettings.setMatteEnabled(true);
-    m_viewportSettings.setShowRenderStats(false);
+    m_viewportSettings->setMatteEnabled(true);
+    m_viewportSettings->setShowRenderStats(false);
     QColor matteColor;
     matteColor.setRgbF(.13, .13, .13);
-    m_viewportSettings.setMatteColor(matteColor);
+    m_viewportSettings->setMatteColor(matteColor);
 
     m_engine->setFlags(flags);
     m_engine->setAutoToggleProfileUi(false);
 
     m_engine->setSurface(surfaceObject);
-    m_engine->setViewportSettings(&m_viewportSettings);
+    m_engine->setViewportSettings(m_viewportSettings.data());
 
-    m_renderAspect = new Qt3DRender::QRenderAspect(Qt3DRender::QRenderAspect::Threaded);
+    m_renderAspect = new Qt3DRender::QRenderAspect(Qt3DRender::QRenderAspect::Synchronous);
     m_engine->createAspectEngine();
     m_engine->aspectEngine()->registerAspect(m_renderAspect);
+
+    auto renderAspectD = static_cast<Qt3DRender::QRenderAspectPrivate *>(
+                Qt3DRender::QRenderAspectPrivate::get(m_renderAspect));
+    renderAspectD->renderInitialize(m_widget->context());
+
+    createTranslation();
+    setupTextRenderer();
+
+    if (m_editCameraIndex != m_pendingEditCameraIndex)
+        SetEditCamera(m_pendingEditCameraIndex);
 }
 
 void Q3DStudioRenderer::createTranslation()
 {
     m_translation.reset(new Q3DSTranslation(*this, m_presentation));
-    m_translation->prepareRender(QRect(0, 0, m_window->size().width(),
-                                       m_window->size().height()), m_window->size(),
-                                 StudioUtils::devicePixelRatio(m_window));
 }
 
 void Q3DStudioRenderer::reloadFonts()

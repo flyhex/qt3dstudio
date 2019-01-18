@@ -258,6 +258,7 @@ HEADERS += \
     Render/Q3DStudioRenderer.h \
     Render/Q3DSEditCamera.h \
     UI/Q3DSPlayerWnd.h \
+    UI/Q3DSPlayerWidget.h \
     Render/StudioEnums.h \
     Render/Q3DSTranslators.h \
     Palettes/Inspector/MaterialRefView.h \
@@ -426,6 +427,7 @@ SOURCES += \
     Render/Q3DSGraphObjectTranslator.cpp \
     Render/Q3DSTranslation.cpp \
     UI/Q3DSPlayerWnd.cpp \
+    UI/Q3DSPlayerWidget.cpp \
     Render/Q3DSEditCamera.cpp \
     Render/Q3DSTranslators.cpp \
     Palettes/Inspector/MaterialRefView.cpp \
