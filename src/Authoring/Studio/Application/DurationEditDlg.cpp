@@ -124,10 +124,13 @@ void CDurationEditDlg::formatTime(long inTime, bool startTime)
         msec = theTime;
     }
 
+    // Default to 3 digits, e.g. "5" -> "005"
+    QString msecString = QString("%1").arg(msec, 3, 10, QChar('0'));
+
     if (startTime) {
         m_ui->lineEditMinutes->setText(QString::number(min));
         m_ui->lineEditSeconds->setText(QString::number(sec));
-        m_ui->lineEditMilliseconds->setText(QString::number(msec));
+        m_ui->lineEditMilliseconds->setText(msecString);
 
         // Select the biggest non-zero unit
         if (min > 0) {
@@ -143,7 +146,7 @@ void CDurationEditDlg::formatTime(long inTime, bool startTime)
     } else {
         m_ui->lineEditEndMinutes->setText(QString::number(min));
         m_ui->lineEditEndSeconds->setText(QString::number(sec));
-        m_ui->lineEditEndMilliseconds->setText(QString::number(msec));
+        m_ui->lineEditEndMilliseconds->setText(msecString);
     }
 }
 

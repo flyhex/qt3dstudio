@@ -100,9 +100,11 @@ void CTimeEditDlg::formatTime(long inTime)
         theTime = theTime - timeConversion(sec, CONVERT_SEC_TO_MSEC);
         msec = theTime;
     }
+    // Default to 3 digits, e.g. "5" -> "005"
+    QString msecString = QString("%1").arg(msec, 3, 10, QChar('0'));
     m_ui->lineEditMinutes->setText(QString::number(min));
     m_ui->lineEditSeconds->setText(QString::number(sec));
-    m_ui->lineEditMilliseconds->setText(QString::number(msec));
+    m_ui->lineEditMilliseconds->setText(msecString);
 
     // Select the biggest non-zero unit
     if (min > 0) {
