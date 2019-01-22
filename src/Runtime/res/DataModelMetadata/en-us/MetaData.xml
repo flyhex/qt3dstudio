@@ -223,7 +223,7 @@
                 <Property name="areaheight" formalName="Height" description="Height of the surface of the area light" min="0" default="100" hidden="True">
                         <ShowIfEqual property="lighttype" value="Area"/>
                 </Property>
-                <Property name="castshadow" formalName="Cast Shadows?" description="Enable shadow casting for this light" type="Boolean" default="False"/>
+                <Property name="castshadow" formalName="Cast Shadows" description="Enable shadow casting for this light" type="Boolean" default="False"/>
                 <Property name="shdwfactor" formalName="Shadow Darkness" description="Factor used to darken shadows" default="10.0" min="1.0" max="100.0" />
                 <Property name="shdwfilter" formalName="Shadow Softness" description="Width of the blur filter on the shadow map" min="1" max="100" default="35" />
                 <Property name="shdwmapres" formalName="Shadow Resolution" description="Resolution of shadow map\n(powers of two)" type="ShadowMapResolution" default="9" animatable="False" />
