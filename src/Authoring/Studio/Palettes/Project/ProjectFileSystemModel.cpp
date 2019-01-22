@@ -454,6 +454,24 @@ void ProjectFileSystemModel::setRootPath(const QString &path)
     m_projectReferencesUpdateMap.clear();
     m_projectReferencesUpdateTimer.stop();
 
+    // Delete the old model. If the new project is in a totally different directory tree, not
+    // doing this will result in unexplicable crashes when trying to parse something that should
+    // not be parsed.
+    disconnect(m_model, &QAbstractItemModel::rowsInserted,
+               this, &ProjectFileSystemModel::modelRowsInserted);
+    disconnect(m_model, &QAbstractItemModel::rowsAboutToBeRemoved,
+               this, &ProjectFileSystemModel::modelRowsRemoved);
+    disconnect(m_model, &QAbstractItemModel::layoutChanged,
+               this, &ProjectFileSystemModel::modelLayoutChanged);
+    delete m_model;
+    m_model = new QFileSystemModel(this);
+    connect(m_model, &QAbstractItemModel::rowsInserted,
+            this, &ProjectFileSystemModel::modelRowsInserted);
+    connect(m_model, &QAbstractItemModel::rowsAboutToBeRemoved,
+            this, &ProjectFileSystemModel::modelRowsRemoved);
+    connect(m_model, &QAbstractItemModel::layoutChanged,
+            this, &ProjectFileSystemModel::modelLayoutChanged);
+
     setRootIndex(m_model->setRootPath(path));
 
     // Open the presentations folder by default
