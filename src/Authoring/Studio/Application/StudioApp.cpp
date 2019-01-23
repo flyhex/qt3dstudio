@@ -82,6 +82,7 @@ int main(int argc, char *argv[])
     Q_INIT_RESOURCE(res);
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 #if !defined(Q_OS_MACOS)
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 #endif
