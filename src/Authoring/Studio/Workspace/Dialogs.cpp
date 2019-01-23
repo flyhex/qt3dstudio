@@ -1549,8 +1549,8 @@ QStringList CDialogs::qmlStreamExtensions()
 QColor CDialogs::displayColorDialog(const QColor &color) const
 {
     QColorDialog theColorDlg;
-    theColorDlg.setCurrentColor(color);
     theColorDlg.setOption(QColorDialog::DontUseNativeDialog, true);
+    theColorDlg.setCurrentColor(color);
     connect(&theColorDlg, &QColorDialog::currentColorChanged, this, &CDialogs::onColorChanged);
     int result = theColorDlg.exec();
     disconnect(&theColorDlg, &QColorDialog::currentColorChanged, this, &CDialogs::onColorChanged);
