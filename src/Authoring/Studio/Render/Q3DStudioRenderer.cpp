@@ -309,8 +309,9 @@ void Q3DStudioRenderer::EditCameraZoomToFit()
 
 bool Q3DStudioRenderer::isMouseDown() const
 {
-    return m_mouseDown || m_scenePicker->state() == Q3DSScenePicker::Triggered
-            || m_scenePicker->state() == Q3DSScenePicker::Queued;
+    return m_mouseDown || (!m_scenePicker.isNull()
+                           && (m_scenePicker->state() == Q3DSScenePicker::Triggered
+                               || m_scenePicker->state() == Q3DSScenePicker::Queued));
 }
 
 void Q3DStudioRenderer::Close()

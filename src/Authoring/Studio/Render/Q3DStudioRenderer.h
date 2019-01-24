@@ -194,7 +194,7 @@ private:
     SStudioPickValue m_dragPickResult;
     CUpdateableDocumentEditor m_updatableEditor;
     QPoint m_mouseDownPoint;
-    bool m_mouseDown;
+    bool m_mouseDown = false;
     QPoint m_previousMousePoint;
     MovementTypes m_lastDragToolMode = MovementTypes::Unknown;
     bool m_maybeDragStart = false;
