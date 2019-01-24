@@ -448,6 +448,14 @@ void Q3DSPlayerWnd::recenterClient()
         m_ClientRect.setHeight(theClientSize.height());
     }
 
+    QRect glRect;
+    const qreal pixelRatio = StudioUtils::devicePixelRatio(window()->windowHandle());
+    glRect.setX(m_ClientRect.left() * pixelRatio);
+    glRect.setY(m_ClientRect.top() * pixelRatio);
+    glRect.setWidth(int(pixelRatio * m_ClientRect.width()));
+    glRect.setHeight(int(pixelRatio * m_ClientRect.height()));
+    g_StudioApp.getRenderer().SetViewRect(glRect, glRect.size());
+
     // Need explicit invalidate as changing editor to different ratio screen doesn't trigger
     // resizeGL call.
     m_glWidget->maybeInvalidateFbo();

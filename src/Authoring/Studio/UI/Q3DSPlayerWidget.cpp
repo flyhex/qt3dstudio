@@ -195,18 +195,14 @@ void Q3DSPlayerWidget::paintGL()
 
 void Q3DSPlayerWidget::resizeGL(int w, int h)
 {
-    QRect clientRect(0, 0, w, h);
-    QRect glRect;
+    QSize fboSize;
     const qreal pixelRatio = StudioUtils::devicePixelRatio(window()->windowHandle());
-    glRect.setX(clientRect.left() * pixelRatio);
-    glRect.setY(clientRect.top() * pixelRatio);
-    glRect.setWidth(int(pixelRatio * clientRect.width()));
-    glRect.setHeight(int(pixelRatio * clientRect.height()));
-    g_StudioApp.getRenderer().SetViewRect(glRect, glRect.size());
+    fboSize.setWidth(int(pixelRatio * w));
+    fboSize.setHeight(int(pixelRatio * h));
 
-    if (!m_fbo || m_fbo->size() != glRect.size()) {
+    if (!m_fbo || m_fbo->size() != fboSize) {
         delete m_fbo;
-        m_fbo = new QOpenGLFramebufferObject(glRect.size(),
+        m_fbo = new QOpenGLFramebufferObject(fboSize,
                                              QOpenGLFramebufferObject::CombinedDepthStencil);
         m_fboPixelRatio = StudioUtils::devicePixelRatio(window()->windowHandle());
         m_invalidateFbo = false;
