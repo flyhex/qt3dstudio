@@ -407,6 +407,14 @@ int FlatObjectListModel::rowCount(const QModelIndex &parent) const
     return m_sourceInfo.count();
 }
 
+bool FlatObjectListModel::removeRows(int row, int count, const QModelIndex &parent)
+{
+    beginRemoveRows(parent, row, row + count - 1);
+    m_sourceInfo.remove(row, count);
+    endRemoveRows();
+    return true;
+}
+
 void FlatObjectListModel::setSourceModel(ObjectListModel *sourceModel)
 {
     beginResetModel();
