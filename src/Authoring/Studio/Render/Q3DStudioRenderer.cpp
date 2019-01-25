@@ -720,7 +720,8 @@ void Q3DStudioRenderer::ensurePicker()
 
 void Q3DStudioRenderer::onScenePick()
 {
-    if (m_scenePicker->state() == Q3DSScenePicker::Ready) {
+    if (m_scenePicker->state() == Q3DSScenePicker::Ready
+            && (m_objectPicking || m_dragPickResult.getType() == StudioPickValueTypes::Pending)) {
         SStudioPickValue pickResult;
         if (m_scenePicker->isHit())
             pickResult = postScenePick(m_objectPicking);
@@ -732,8 +733,7 @@ void Q3DStudioRenderer::onScenePick()
 
 SStudioPickValue Q3DStudioRenderer::postScenePick(bool objectPick)
 {
-    Q3DSGraphObject *object = m_scenePicker->objects().first();
-    const qreal distance = m_scenePicker->distances().first();
+    Q3DSGraphObject *object = m_scenePicker->pickResults().first().m_object;
     Q3DSGraphObjectTranslator *translator = Q3DSGraphObjectTranslator::translatorForObject(object);
 
 #if RUNTIME_SPLIT_TEMPORARILY_REMOVED
@@ -840,8 +840,8 @@ void Q3DStudioRenderer::handlePickResult(const SStudioPickValue &pickResult, boo
         break;
     }
     case StudioPickValueTypes::Pending:
-        qWarning() << __FUNCTION__ << "Got a pending result for a pick";
-        break;
+        // Proper pick result will be obtained asynchronously
+        return;
     default:
         break;
     }
@@ -877,9 +877,9 @@ void Q3DStudioRenderer::OnSceneMouseDown(SceneDragSenderType::Enum inSenderType,
                 break;
             }
 
-            m_dragPickResult = pick(inPoint, theSelectMode, false);
+            SStudioPickValue pickResult = pick(inPoint, theSelectMode, false);
+            handlePickResult(pickResult, false);
             RequestRender();
-
         } else if (pickArea == PickTargetAreas::Matte) {
             qt3ds::foundation::Option<qt3dsdm::SGuideInfo> pickResult = pickRulers(inPoint);
             if (pickResult.hasValue()) {
