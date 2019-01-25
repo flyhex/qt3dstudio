@@ -189,6 +189,9 @@ void Q3DStudioRenderer::initialize(QOpenGLWidget *widget)
 
 void Q3DStudioRenderer::SetViewRect(const QRect &inRect, const QSize &size)
 {
+    if (m_widget)
+        m_parentPixelRatio = StudioUtils::devicePixelRatio(m_widget->window()->windowHandle());
+
     m_viewRect = inRect;
     if (!m_engine.isNull() && m_widget && size != m_size) {
         m_engine->resize(size, false);
@@ -347,22 +350,25 @@ void Q3DStudioRenderer::drawTickMarksOnHorizontalRects(QPainter &painter, qreal 
                                                        qreal innerTop, qreal outerBottom,
                                                        qreal outerTop)
 {
-    qreal length = CStudioPreferences::guideSize() / 2.;
+    qreal length = m_parentPixelRatio * CStudioPreferences::guideSize() / 32.;
     qreal centerPosX = floor(innerLeft + (innerRight - innerLeft) / 2.0 + .5);
     drawTopBottomTickMarks(painter, centerPosX, innerBottom, innerTop, outerBottom,
-                           outerTop, 15. * length / 16.);
-    for (unsigned int incrementor = 10;
+                           outerTop, 15. * length);
+    int tickInterval = 10 * m_parentPixelRatio;
+    int largeTickInterval = 10 * tickInterval;
+    int mediumTickInterval = 2 * tickInterval;
+    for (unsigned int incrementor = tickInterval;
          (centerPosX + incrementor) < innerRight && (centerPosX - incrementor) > innerLeft;
-         incrementor += 10) {
+         incrementor += tickInterval) {
         qreal rightEdge = centerPosX + incrementor;
         qreal leftEdge = centerPosX - incrementor;
         qreal lineHeight = 0;
-        if (incrementor % 100 == 0)
-            lineHeight = 11. * length / 16.;
-        else if (incrementor % 20)
-            lineHeight = 4. * length / 16.;
+        if (incrementor % largeTickInterval == 0)
+            lineHeight = 11. * length;
+        else if (incrementor % mediumTickInterval)
+            lineHeight = 4. * length;
         else
-            lineHeight = 2. * length / 16.;
+            lineHeight = 2. * length;
 
         if (rightEdge < innerRight) {
             drawTopBottomTickMarks(painter, rightEdge, innerBottom, innerTop, outerBottom,
@@ -380,22 +386,25 @@ void Q3DStudioRenderer::drawTickMarksOnVerticalRects(QPainter &painter, qreal in
                                                      qreal innerTop, qreal outerLeft,
                                                      qreal outerRight)
 {
-    qreal length = CStudioPreferences::guideSize() / 2.;
+    qreal length = m_parentPixelRatio * CStudioPreferences::guideSize() / 32.;
     qreal centerPosY = floor(innerBottom + (innerTop - innerBottom) / 2.0 + .5);
     drawLeftRightTickMarks(painter, centerPosY, innerLeft, innerRight, outerLeft,
-                           outerRight, 15. * length / 16.);
-    for (unsigned int incrementor = 10;
+                           outerRight, 15. * length);
+    int tickInterval = 10 * m_parentPixelRatio;
+    int largeTickInterval = 10 * tickInterval;
+    int mediumTickInterval = 2 * tickInterval;
+    for (unsigned int incrementor = tickInterval;
          (centerPosY + incrementor) < innerTop && (centerPosY - incrementor) > innerBottom;
-         incrementor += 10) {
+         incrementor += tickInterval) {
         qreal topEdge = centerPosY + incrementor;
         qreal bottomEdge = centerPosY - incrementor;
         qreal lineHeight = 0;
-        if (incrementor % 100 == 0)
-            lineHeight = 11. * length / 16.;
-        else if (incrementor % 20)
-            lineHeight = 4. * length / 16.;
+        if (incrementor % largeTickInterval == 0)
+            lineHeight = 11. * length;
+        else if (incrementor % mediumTickInterval)
+            lineHeight = 4. * length;
         else
-            lineHeight = 2. * length / 16.;
+            lineHeight = 2. * length;
 
         if (topEdge < innerTop) {
             drawLeftRightTickMarks(painter, topEdge, innerLeft, innerRight, outerLeft,
@@ -408,17 +417,17 @@ void Q3DStudioRenderer::drawTickMarksOnVerticalRects(QPainter &painter, qreal in
     }
 }
 
-void Q3DStudioRenderer::drawGuides(QPainter &painter)
+void Q3DStudioRenderer::drawGuides(QPainter *painter)
 {
     if (!m_guidesEnabled || editCameraEnabled())
         return;
 
-    int offset = CStudioPreferences::guideSize() / 2;
+    int offset = m_parentPixelRatio * (CStudioPreferences::guideSize() / 2);
 
-    int innerLeft = m_viewRect.left() + offset;
-    int innerRight = m_viewRect.right() - offset + 1;
-    int innerBottom = m_viewRect.bottom() - offset + 1;
-    int innerTop = m_viewRect.top() + offset;
+    int innerLeft = offset;
+    int innerRight = m_viewRect.width() + offset;
+    int innerBottom = m_viewRect.height() + offset;
+    int innerTop = offset;
 
     int outerLeft = innerLeft - offset;
     int outerRight = innerRight + offset;
@@ -430,24 +439,24 @@ void Q3DStudioRenderer::drawGuides(QPainter &painter)
     m_outerRect = QRect(outerLeft, outerTop, outerRight - outerLeft, outerBottom - outerTop);
 
     // Draw tick marks around the presentation
-    painter.fillRect(QRect(outerLeft, outerTop,
+    painter->fillRect(QRect(outerLeft, outerTop,
                            innerLeft - outerLeft, outerBottom - outerTop),
                      m_rectColor);
-    painter.fillRect(QRect(innerRight, outerTop,
+    painter->fillRect(QRect(innerRight, outerTop,
                            outerRight - innerRight, outerBottom - outerTop),
                      m_rectColor);
-    painter.fillRect(QRect(innerLeft, innerBottom,
+    painter->fillRect(QRect(innerLeft, innerBottom,
                            innerRight - innerLeft, outerBottom - innerBottom),
                      m_rectColor);
-    painter.fillRect(QRect(innerLeft, outerTop,
+    painter->fillRect(QRect(innerLeft, outerTop,
                            innerRight - innerLeft, innerTop - outerTop),
                      m_rectColor);
 
-    painter.setPen(m_lineColor);
-    drawTickMarksOnHorizontalRects(painter, innerLeft, innerRight + 1, innerTop - 1, innerBottom,
+    painter->setPen(m_lineColor);
+    drawTickMarksOnHorizontalRects(*painter, innerLeft, innerRight + 1, innerTop - 1, innerBottom,
                                    outerTop, outerBottom);
 
-    drawTickMarksOnVerticalRects(painter, innerLeft, innerRight + 1, innerTop - 1, innerBottom,
+    drawTickMarksOnVerticalRects(*painter, innerLeft, innerRight + 1, innerTop - 1, innerBottom,
                                  outerLeft, outerRight);
 }
 
@@ -474,22 +483,7 @@ void Q3DStudioRenderer::renderNow()
         auto renderAspectD = static_cast<Qt3DRender::QRenderAspectPrivate *>(
                     Qt3DRender::QRenderAspectPrivate::get(m_renderAspect));
         renderAspectD->renderSynchronous(true);
-
-        // fix gl state leakage
-        QOpenGLContext::currentContext()->functions()->glDisable(GL_STENCIL_TEST);
-        QOpenGLContext::currentContext()->functions()->glDisable(GL_DEPTH_TEST);
-        QOpenGLContext::currentContext()->functions()->glDisable(GL_CULL_FACE);
-        QOpenGLContext::currentContext()->functions()->glDisable(GL_SCISSOR_TEST);
-        QOpenGLContext::currentContext()->functions()->glDisable(GL_BLEND);
     }
-
-    // TODO: Guides drawing is not working
-    QOpenGLPaintDevice device;
-    device.setSize(m_size);
-    QPainter painter(&device);
-
-    // draw guides if enabled
-    drawGuides(painter);
 }
 
 void Q3DStudioRenderer::getPreviewFbo(QSize &outFboDim, qt3ds::QT3DSU32 &outFboTexture)
@@ -584,12 +578,9 @@ PickTargetAreas Q3DStudioRenderer::getPickArea(const QPoint &point)
 {
     const int pickPointX(point.x());
     const int pickPointY(point.y());
-    const int offset = !editCameraEnabled() ? CStudioPreferences::guideSize() / 2 : 0;
-    QRect rect = QRect(offset + m_viewRect.left(), + m_viewRect.top() + offset,
-                       m_viewRect.width() - 2 * offset,
-                       m_viewRect.height() - 2 * offset);
-    if (pickPointX < rect.left() || pickPointX > rect.right()
-        || pickPointY < rect.top() || pickPointY > rect.bottom()) {
+
+    if (pickPointX < m_viewRect.left() || pickPointX > m_viewRect.right()
+        || pickPointY < m_viewRect.top() || pickPointY > m_viewRect.bottom()) {
         return PickTargetAreas::Matte;
     }
     return PickTargetAreas::Presentation;
@@ -597,12 +588,8 @@ PickTargetAreas Q3DStudioRenderer::getPickArea(const QPoint &point)
 
 QPoint Q3DStudioRenderer::scenePoint(const QPoint &viewPoint)
 {
-    // TODO: fix point mapping according to current screen pixel ratio
-    // TODO: fix camera offset when edge guides are added
-    //int offset = !editCameraEnabled() ? CStudioPreferences::guideSize() / 2 : 0;
-    int offset = 0;
-    return QPoint(viewPoint.x() - offset - m_viewRect.left(),
-                  viewPoint.y() - offset - m_viewRect.top());
+    return QPoint(viewPoint.x() - m_viewRect.left(),
+                  viewPoint.y() - m_viewRect.top());
 }
 
 qt3ds::foundation::Option<qt3dsdm::SGuideInfo> Q3DStudioRenderer::pickRulers(CPt inMouseCoords)

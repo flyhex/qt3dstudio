@@ -427,9 +427,12 @@ void Q3DSPlayerWnd::recenterClient()
     QSize viewSize;
     m_ClientRect = theViewRect;
     viewSize = theViewRect.size();
+    int rulerOffset = 0;
 
     if (!shouldHideScrollBars()) {
         theClientSize = effectivePresentationSize();
+        if (g_StudioApp.getRenderer().AreGuidesEnabled())
+            rulerOffset = CStudioPreferences::guideSize() / 2;
 
         if (theClientSize.width() < theViewRect.width()) {
             m_ClientRect.setLeft(
@@ -448,17 +451,18 @@ void Q3DSPlayerWnd::recenterClient()
         m_ClientRect.setHeight(theClientSize.height());
     }
 
+    // glRect is the rect of the offscreen fbo where the presentation is rendered
     QRect glRect;
     const qreal pixelRatio = StudioUtils::devicePixelRatio(window()->windowHandle());
-    glRect.setX(m_ClientRect.left() * pixelRatio);
-    glRect.setY(m_ClientRect.top() * pixelRatio);
-    glRect.setWidth(int(pixelRatio * m_ClientRect.width()));
-    glRect.setHeight(int(pixelRatio * m_ClientRect.height()));
+    glRect.setX((rulerOffset + m_ClientRect.left()) * pixelRatio);
+    glRect.setY((rulerOffset + m_ClientRect.top()) * pixelRatio);
+    glRect.setWidth(int(pixelRatio * (m_ClientRect.width() - (rulerOffset * 2))));
+    glRect.setHeight(int(pixelRatio * (m_ClientRect.height() - (rulerOffset * 2))));
     g_StudioApp.getRenderer().SetViewRect(glRect, glRect.size());
 
     // Need explicit invalidate as changing editor to different ratio screen doesn't trigger
     // resizeGL call.
-    m_glWidget->maybeInvalidateFbo();
+    m_glWidget->maybeInvalidateFbo(glRect.size());
     m_glWidget->setGeometry(m_ClientRect);
 }
 
@@ -514,11 +518,8 @@ QSize Q3DSPlayerWnd::effectivePresentationSize() const
     // presentation
     // This is a very dirty hack because we are of course hardcoding the size of the guides.
     // If the size of the guides never changes, the bet paid off.
-    // TODO: redo for guide rendering
-#if RUNTIME_SPLIT_TEMPORARILY_REMOVED
     if (g_StudioApp.getRenderer().AreGuidesEnabled())
         theSize += QSize(CStudioPreferences::guideSize(), CStudioPreferences::guideSize());
-#endif
     return theSize;
 }
 

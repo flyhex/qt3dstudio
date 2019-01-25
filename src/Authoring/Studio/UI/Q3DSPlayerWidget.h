@@ -47,7 +47,7 @@ public:
     explicit Q3DSPlayerWidget(QWidget *parent = nullptr);
     ~Q3DSPlayerWidget();
 
-    void maybeInvalidateFbo();
+    void maybeInvalidateFbo(const QSize &size);
 
 protected:
     void initializeGL() override;
@@ -64,6 +64,8 @@ private:
     QOpenGLFramebufferObject *m_fbo = nullptr;
     qreal m_fboPixelRatio = 0.0;
     bool m_invalidateFbo = false;
+    QSize m_fboSize;
+    GLint m_uniformGeometryOffset = 0;
 };
 
 }

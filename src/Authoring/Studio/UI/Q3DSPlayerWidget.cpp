@@ -40,7 +40,12 @@
 #include <QtGui/qopenglframebufferobject.h>
 #include <QtGui/qoffscreensurface.h>
 #include <QtGui/qwindow.h>
+#include <QtGui/qopenglpaintdevice.h>
+#include <QtGui/qpainter.h>
+#include <QtGui/qvector2d.h>
 #include <QtWidgets/qmessagebox.h>
+
+const QVector2D defaultGeometryOffset = QVector2D(1.0f, 1.0f);
 
 namespace Q3DStudio {
 
@@ -55,10 +60,13 @@ Q3DSPlayerWidget::~Q3DSPlayerWidget()
     cleanup();
 }
 
-void Q3DSPlayerWidget::maybeInvalidateFbo()
+void Q3DSPlayerWidget::maybeInvalidateFbo(const QSize &size)
 {
-    if (m_fboPixelRatio != StudioUtils::devicePixelRatio(window()->windowHandle()))
+    m_fboSize = size;
+    if (m_fboPixelRatio != StudioUtils::devicePixelRatio(window()->windowHandle())
+            || !m_fbo || m_fboSize != m_fbo->size()) {
         m_invalidateFbo = true;
+    }
 }
 
 void Q3DSPlayerWidget::initializeGL()
@@ -87,10 +95,11 @@ void Q3DSPlayerWidget::initializeGL()
                 "#version 330 core\n"
                 "in vec2 vertexPos;\n"
                 "in vec2 vertexTexCoord;\n"
+                "uniform vec2 uGeomOffset;\n"
                 "out vec2 texCoord;\n"
                 "void main(void)\n"
                 "{\n"
-                "  gl_Position = vec4(vertexPos, 0.0, 1.0);\n"
+                "  gl_Position = vec4(vertexPos * uGeomOffset.xy, 0.0, 1.0);\n"
                 "  texCoord = vec2(vertexTexCoord);\n"
                 "}")) {
         qWarning() << __FUNCTION__ << "Failed to add vertex shader for scene view";
@@ -120,6 +129,7 @@ void Q3DSPlayerWidget::initializeGL()
     } else {
         GLint vertexAtt = GLint(m_program->attributeLocation("vertexPos"));
         GLint uvAtt = GLint(m_program->attributeLocation("vertexTexCoord"));
+        m_uniformGeometryOffset = GLint(m_program->uniformLocation("uGeomOffset"));
         m_program->setUniformValue("uSampler", 0);
 
         m_vao = new QOpenGLVertexArrayObject;
@@ -134,6 +144,7 @@ void Q3DSPlayerWidget::initializeGL()
                 m_vertexBuffer->allocate(vertexBuffer, 8 * sizeof(GLfloat));
                 glEnableVertexAttribArray(vertexAtt);
                 glVertexAttribPointer(vertexAtt, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
+                m_vertexBuffer->release();
             } else {
                 qWarning() << __FUNCTION__
                            << "Failed to create/bind vertex buffer for scene view";
@@ -148,6 +159,7 @@ void Q3DSPlayerWidget::initializeGL()
                 m_uvBuffer->allocate(uvBuffer, 8 * sizeof(GLfloat));
                 glEnableVertexAttribArray(uvAtt);
                 glVertexAttribPointer(uvAtt, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
+                m_uvBuffer->release();
             } else {
                 qWarning() << __FUNCTION__
                            << "Failed to create/bind UV buffer for scene view";
@@ -159,6 +171,7 @@ void Q3DSPlayerWidget::initializeGL()
             qWarning() << __FUNCTION__ << "Failed to create/bind vertex array object";
             return;
         }
+        m_program->release();
     }
 
     const QColor matteColor = CStudioPreferences::matteColor();
@@ -175,13 +188,18 @@ void Q3DSPlayerWidget::paintGL()
         renderer.renderNow();
         m_fbo->bindDefault();
 
-        m_program->bind();
-        m_vao->bind();
-
+        // Clean the OpenGL state
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_STENCIL_TEST);
+        glDisable(GL_CULL_FACE);
         glDisable(GL_SCISSOR_TEST);
         glDisable(GL_BLEND);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        glViewport(0, 0, width() * m_fboPixelRatio, height() * m_fboPixelRatio);
+
+        m_program->bind();
+        m_vao->bind();
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, m_fbo->texture());
@@ -190,23 +208,47 @@ void Q3DSPlayerWidget::paintGL()
 
         m_vao->release();
         m_program->release();
+
+        QOpenGLPaintDevice device;
+        device.setSize(size() * m_fboPixelRatio);
+        QPainter painter(&device);
+
+        renderer.drawGuides(&painter);
     }
 }
 
 void Q3DSPlayerWidget::resizeGL(int w, int h)
 {
-    QSize fboSize;
     const qreal pixelRatio = StudioUtils::devicePixelRatio(window()->windowHandle());
-    fboSize.setWidth(int(pixelRatio * w));
-    fboSize.setHeight(int(pixelRatio * h));
+    QSize fboSize;
+    if (m_fboSize.isValid()) {
+        fboSize = m_fboSize;
+    } else {
+        fboSize.setWidth(int(pixelRatio * w));
+        fboSize.setHeight(int(pixelRatio * h));
+    }
 
     if (!m_fbo || m_fbo->size() != fboSize) {
         delete m_fbo;
         m_fbo = new QOpenGLFramebufferObject(fboSize,
                                              QOpenGLFramebufferObject::CombinedDepthStencil);
-        m_fboPixelRatio = StudioUtils::devicePixelRatio(window()->windowHandle());
+        m_fboPixelRatio = pixelRatio;
         m_invalidateFbo = false;
     }
+
+    QVector2D geometryOffset = defaultGeometryOffset;
+    int wScaled = w * pixelRatio;
+    int hScaled = h * pixelRatio;
+    if (m_fbo->size() != QSize(wScaled, hScaled)) {
+        qreal diffX = qreal(wScaled - m_fbo->size().width()) / qreal(wScaled);
+        qreal diffY = qreal(hScaled - m_fbo->size().height()) / qreal(hScaled);
+        geometryOffset.setX(float(1.0 - diffX));
+        geometryOffset.setY(float(1.0 - diffY));
+    }
+
+    m_program->bind();
+    m_program->setUniformValueArray(m_uniformGeometryOffset, &geometryOffset, 1);
+    m_program->release();
 }
 
 void Q3DSPlayerWidget::cleanup()
@@ -224,6 +266,7 @@ void Q3DSPlayerWidget::cleanup()
     m_vao = nullptr;
     m_fbo = nullptr;
     m_fboPixelRatio = 0;
+    m_uniformGeometryOffset = 0;
 
     doneCurrent();
 }

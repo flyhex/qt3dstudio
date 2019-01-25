@@ -40,6 +40,7 @@
 QT_BEGIN_NAMESPACE
 class QOpenGLWidget;
 class QWindow;
+class QPainter;
 QT_END_NAMESPACE
 
 namespace Q3DStudio {
@@ -67,6 +68,7 @@ public:
     virtual void SetGuidesEnabled(bool val) = 0;
     virtual bool AreGuidesEditable() const = 0;
     virtual void SetGuidesEditable(bool val) = 0;
+    virtual void drawGuides(QPainter *painter) = 0;
     // Setting the camera to -1 disables the edit cameras
     // So setting the camera to 0- (numcameras - 1) will set change the active
     // edit camera.

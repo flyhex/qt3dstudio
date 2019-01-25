@@ -58,6 +58,7 @@ QT_BEGIN_NAMESPACE
 namespace Qt3DRender {
 class QRenderAspect;
 }
+class QPainter;
 QT_END_NAMESPACE
 
 namespace Q3DStudio {
@@ -105,6 +106,7 @@ public:
     void getPreviewFbo(QSize &outFboDim, qt3ds::QT3DSU32 &outFboTexture) override;
     void RegisterSubpresentations(
             const QVector<SubPresentationRecord> &subpresentations) override;
+    void drawGuides(QPainter *painter) override;
 
     QSharedPointer<Q3DSEngine> &engine();
 
@@ -150,7 +152,6 @@ private:
     void initEngineAndTranslation();
     void createTranslation();
     void sendResizeToQt3D();
-    void drawGuides(QPainter &painter);
 
     void drawTickMarksOnHorizontalRects(QPainter &painter, qreal innerLeft,
                                         qreal innerRight, qreal innerBottom, qreal innerTop,
@@ -208,6 +209,7 @@ private:
     QVector<SubPresentationRecord> m_subpresentations;
     bool m_dirtySetUpdate = false;
     bool m_resizeToQt3DSent = false;
+    qreal m_parentPixelRatio = 1.0;
 };
 
 }
