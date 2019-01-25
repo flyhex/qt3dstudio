@@ -577,6 +577,7 @@ void Q3DStudioRenderer::OnClosingPresentation()
         m_viewportSettings.reset(new Q3DSViewportSettings);
     }
     m_hasPresentation = false;
+    m_resizeToQt3DSent = false;
 }
 
 PickTargetAreas Q3DStudioRenderer::getPickArea(const QPoint &point)
