@@ -52,7 +52,6 @@
 #include "StudioPreferences.h"
 #include "Qt3DSDMAnimation.h"
 #include "Dialogs.h"
-#include "TimeEditDlg.h"
 #include "TimeEnums.h"
 #include "Bindings/PasteKeyframesCommandHelper.h"
 
@@ -371,6 +370,31 @@ void KeyframeManager::pasteKeyframes()
     }
 }
 
+void KeyframeManager::moveSelectedKeyframesTo(Keyframe *pressedKeyframe, double newX)
+{
+    long t = m_scene->ruler()->distanceToTime(newX);
+
+    // make sure the min-time keyframe doesn't go below zero
+    long minTime = LONG_MAX;
+    for (auto keyframe : qAsConst(m_selectedKeyframes)) {
+        if (keyframe->time < minTime)
+            minTime = keyframe->time;
+    }
+
+    if (pressedKeyframe->time - minTime > t)
+        t = pressedKeyframe->time - minTime;
+
+    for (auto keyframe : qAsConst(m_selectedKeyframes)) {
+        if (keyframe != pressedKeyframe)
+            keyframe->time = t - (pressedKeyframe->time - keyframe->time);
+    }
+    pressedKeyframe->time = t;
+
+    for (auto row : qAsConst(m_selectedKeyframesMasterRows))
+        row->updateKeyframes();
+}
+
+// TODO: update TimeEditDlg.cpp to use the method above and remove this one
 void KeyframeManager::moveSelectedKeyframes(double dx)
 {
     long dt = m_scene->ruler()->distanceToTime(dx);

@@ -52,7 +52,6 @@
 #include "Bindings/Qt3DSDMTimelineItemBinding.h"
 #include "Bindings/Qt3DSDMTimelineItemProperty.h"
 #include "Bindings/TimelineBreadCrumbProvider.h"
-#include "TimeEditDlg.h"
 #include "IDocumentEditor.h"
 #include "Control.h"
 #include "TimelineDropTarget.h"

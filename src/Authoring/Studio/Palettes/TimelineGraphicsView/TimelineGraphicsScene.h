@@ -146,7 +146,7 @@ private:
                                                         // rowtree
 
     bool m_rulerPressed = false;
-    bool m_keyframePressed = false;
+    Keyframe *m_pressedKeyframe = nullptr;
     bool m_dragging = false;
     bool m_startRowMoverOnNextDrag = false;
     bool m_timelineZooming = false;

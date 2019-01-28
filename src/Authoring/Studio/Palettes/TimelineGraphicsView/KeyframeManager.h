@@ -64,6 +64,7 @@ public:
     void copySelectedKeyframes();
     void pasteKeyframes();
     void moveSelectedKeyframes(double dx);
+    void moveSelectedKeyframesTo(Keyframe *pressedKeyframe, double newX);
     void commitMoveSelectedKeyframes();
     bool deleteSelectedKeyframes();
     bool oneMasterRowSelected() const;

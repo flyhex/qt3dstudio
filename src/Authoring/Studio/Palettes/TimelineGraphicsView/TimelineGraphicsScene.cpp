@@ -50,7 +50,6 @@
 #include "RowTreeContextMenu.h"
 #include "RowTimelineContextMenu.h"
 #include "StudioPreferences.h"
-#include "TimeEditDlg.h"
 #include "TimeEnums.h"
 #include "StudioClipboard.h"
 #include "Dialogs.h"
@@ -548,7 +547,7 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                         m_pressPosInKeyframe = (m_pressPos.x() - m_ruler->x())
                                 - (TimelineConstants::RULER_EDGE_OFFSET
                                    + m_ruler->timeToDistance(keyframe->time));
-                        m_keyframePressed = true;
+                        m_pressedKeyframe = keyframe;
                     }
                 } else {
                     m_keyframeManager->deselectAllKeyframes();
@@ -632,16 +631,16 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                 m_rowMover->updateTargetRow(event->scenePos());
                 updateAutoScrolling(event->scenePos().y());
             }
-        } else if (m_keyframePressed) { // moving selected keyframes
-            double newX = event->scenePos().x() - m_ruler->x() - m_pressPosInKeyframe;
+        } else if (m_pressedKeyframe) { // moving selected keyframes
+            double newX = event->scenePos().x() - m_ruler->x()
+                          - TimelineConstants::RULER_EDGE_OFFSET - m_pressPosInKeyframe;
 
-            if (newX < TimelineConstants::RULER_EDGE_OFFSET)
-                newX = TimelineConstants::RULER_EDGE_OFFSET;
+            if (newX < 0)
+                newX = 0;
             if (shift)
                 snap(newX);
-            newX += m_ruler->x() + m_pressPosInKeyframe;
-            double dx = newX - m_pressPos.x();
-            m_keyframeManager->moveSelectedKeyframes(dx);
+
+            m_keyframeManager->moveSelectedKeyframesTo(m_pressedKeyframe, newX);
 
             m_pressPos.setX(newX);
         }
@@ -696,18 +695,20 @@ void TimelineGraphicsScene::updateSnapSteps()
         RowTree *rowTree = static_cast<RowTree *>
                 (m_layoutTree->itemAt(i)->graphicsItem());
         if (rowTree->hasDurationBar() && rowTree->isVisible()) {
-            if (!m_snapSteps.contains(rowTree->rowTimeline()->getStartX()))
-                m_snapSteps.push_back(rowTree->rowTimeline()->getStartX());
+            auto startX = rowTree->rowTimeline()->getStartX()
+                          - TimelineConstants::RULER_EDGE_OFFSET;
+            if (!m_snapSteps.contains(startX))
+                m_snapSteps.push_back(startX);
 
-            if (!m_snapSteps.contains(rowTree->rowTimeline()->getEndX()))
-                m_snapSteps.push_back(rowTree->rowTimeline()->getEndX());
+            auto endX = rowTree->rowTimeline()->getEndX() - TimelineConstants::RULER_EDGE_OFFSET;
+            if (!m_snapSteps.contains(endX))
+                m_snapSteps.push_back(endX);
 
             // add keyframes times
             if (rowTree->hasPropertyChildren()) {
                 const QList<Keyframe *> keyframes = rowTree->rowTimeline()->keyframes();
                 for (Keyframe *k : keyframes) {
-                    double kX = m_ruler->timeToDistance(k->time)
-                            + TimelineConstants::RULER_EDGE_OFFSET;
+                    double kX = m_ruler->timeToDistance(k->time);
                     if (!m_snapSteps.contains(kX))
                         m_snapSteps.push_back(kX);
                 }
@@ -731,7 +732,7 @@ void TimelineGraphicsScene::resetMousePressParams()
     m_timelinePanning = false;
     m_startRowMoverOnNextDrag = false;
     m_rulerPressed = false;
-    m_keyframePressed = false;
+    m_pressedKeyframe = nullptr;
     m_clickedTimelineControlType = TimelineControlType::None;
     m_editedTimelineRow.clear();
     m_releaseSelectRow.clear();
@@ -776,8 +777,7 @@ void TimelineGraphicsScene::snap(double &value, bool snapToPlayHead)
         else if (CStudioPreferences::GetTimelineSnappingGridResolution() == SNAPGRID_TICKMARKS)
             snapStep *= .1;
 
-        double snapValue = TimelineConstants::RULER_EDGE_OFFSET
-            + round((value - TimelineConstants::RULER_EDGE_OFFSET) / snapStep) * snapStep;
+        double snapValue = round(value / snapStep) * snapStep;
         if (abs(value - snapValue) < CStudioPreferences::GetSnapRange())
             value = snapValue;
     }
@@ -789,7 +789,7 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         if (m_dragging) {
             if (m_rowMover->isActive()) { // moving rows (reorder/reparent)
                 commitMoveRows();
-            } else if (m_keyframePressed) {
+            } else if (m_pressedKeyframe) {
                 // update keyframe movement (time) to binding
                 m_keyframeManager->commitMoveSelectedKeyframes();
             } else if (m_clickedTimelineControlType == TimelineControlType::StartHandle) {
