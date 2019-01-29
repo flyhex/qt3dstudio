@@ -38,6 +38,11 @@
 #include "TreeHeader.h"
 #include "StudioPreferences.h"
 #include "KeyframeManager.h"
+#include "StudioApp.h"
+#include "Core.h"
+#include "Doc.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "Qt3DSDMSlides.h"
 
 #include <QtGui/qpainter.h>
 #include "QtGui/qtextcursor.h"
@@ -53,6 +58,9 @@ RowTree::RowTree(TimelineGraphicsScene *timelineScene, EStudioObjectType rowType
     m_scene = timelineScene;
     m_rowType = rowType;
     m_label = label;
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    m_onMasterSlide = doc->GetStudioSystem()->GetSlideSystem()->IsMasterSlide(
+                doc->GetActiveSlide());
 
     initialize();
 }
@@ -222,17 +230,21 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     static const QPixmap pixEmpty = QPixmap(":/images/Toggle-Empty.png");
     static const QPixmap pixShy = QPixmap(":/images/Toggle-Shy.png");
     static const QPixmap pixHide = QPixmap(":/images/Toggle-HideShow.png");
+    static const QPixmap pixHideDisabled = QPixmap(":/images/Toggle-HideShow-disabled.png");
     static const QPixmap pixHideCtrld = QPixmap(":/images/Toggle-HideShowControlled.png");
     static const QPixmap pixLock = QPixmap(":/images/Toggle-Lock.png");
     if (hasActionButtons()) {
-        painter->drawPixmap(m_rectShy    , m_shy     ? pixShy  : pixEmpty);
+        painter->drawPixmap(m_rectShy, m_shy ? pixShy : pixEmpty);
         // Eyeball visibility follows the visibility setting for the object even if it has
         // datainput controller
-        if (m_visibilityCtrld)
+        // Disable eyeball from master slide
+        if (m_onMasterSlide)
+            painter->drawPixmap(m_rectVisible, pixHideDisabled);
+        else if (m_visibilityCtrld)
             painter->drawPixmap(m_rectVisible, m_visible ? pixHideCtrld : pixEmpty);
         else
             painter->drawPixmap(m_rectVisible, m_visible ? pixHide : pixEmpty);
-        painter->drawPixmap(m_rectLocked , m_locked  ? pixLock : pixEmpty);
+        painter->drawPixmap(m_rectLocked, m_locked ? pixLock : pixEmpty);
     }
 
     static const QPixmap pixInsertLeft = QPixmap(":/images/Insert-Left.png");
@@ -795,7 +807,8 @@ TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
         if (m_rectShy.contains(p.x(), p.y())) {
             toggleShy();
             return TreeControlType::Shy;
-        } else if (m_rectVisible.contains(p.x(), p.y())) {
+        } else if (!m_onMasterSlide && m_rectVisible.contains(p.x(), p.y())) {
+            // Prevent toggling hide on master slide
             toggleVisible();
             return TreeControlType::Hide;
         } else if (m_rectLocked.contains(p.x(), p.y())) {

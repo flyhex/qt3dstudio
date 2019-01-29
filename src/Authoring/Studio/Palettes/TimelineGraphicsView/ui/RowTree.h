@@ -181,6 +181,7 @@ private:
     bool m_arrowVisible = false;
     bool m_dndHover = false;
     bool m_visibilityCtrld = false;
+    bool m_onMasterSlide = false;
     DnDState m_dndState = DnDState::None;
     ActionStates m_actionStates = ActionState::None;
     bool m_hasSubpresentation = false;

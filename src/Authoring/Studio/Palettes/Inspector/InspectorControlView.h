@@ -84,6 +84,7 @@ public:
     Q_INVOKABLE QString convertPathToProjectRoot(const QString &presentationPath);
     Q_INVOKABLE bool isRefMaterial(int instance) const;
     Q_INVOKABLE QString noneString() const;
+    Q_INVOKABLE bool isEditable(int handle) const;
 
     // IDataModelListener
     void OnBeginDataModelNotifications() override;

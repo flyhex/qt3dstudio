@@ -57,6 +57,7 @@
 #include "ProjectFile.h"
 #include "MaterialRefView.h"
 #include "BasicObjectsModel.h"
+#include "Qt3DSDMSlides.h"
 
 #include <QtCore/qtimer.h>
 #include <QtQml/qqmlcontext.h>
@@ -293,6 +294,8 @@ bool InspectorControlView::canLinkProperty(int instance, int handle) const
         && (type & (OBJTYPE_CUSTOMMATERIAL | OBJTYPE_MATERIAL | OBJTYPE_REFERENCEDMATERIAL))) {
         return false;
     }
+    if (doc->GetStudioSystem()->GetPropertySystem()->GetName(handle) == L"eyeball")
+        return false;
 
     return doc->GetDocumentReader().CanPropertyBeLinked(instance, handle);
 }
@@ -375,6 +378,16 @@ QString InspectorControlView::titleIcon() const
     if (m_inspectableBase)
         return CStudioObjectTypes::GetNormalIconName(m_inspectableBase->GetObjectType());
     return {};
+}
+
+bool InspectorControlView::isEditable(int handle) const
+{
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    if (doc->GetStudioSystem()->GetSlideSystem()->IsMasterSlide(doc->GetActiveSlide())
+            && doc->GetStudioSystem()->GetPropertySystem()->GetName(handle) == L"eyeball") {
+        return false;
+    }
+    return true;
 }
 
 void InspectorControlView::OnSelectionSet(Q3DStudio::SSelectedValue inSelectable)

@@ -237,6 +237,7 @@ Rectangle {
                             RowLayout {
                                 id: groupDelegateItem
                                 spacing: 0
+                                enabled: _parentView.isEditable(modelData.handle)
 
                                 property alias loadedItem: loader.item
 
