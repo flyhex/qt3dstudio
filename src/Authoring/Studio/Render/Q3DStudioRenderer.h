@@ -202,6 +202,7 @@ private:
     SEditCameraPersistentInformation m_mouseDownCameraInformation;
     int m_lastToolMode = 0;
     QScopedPointer<Q3DSScenePicker> m_scenePicker;
+    QSet<Q3DSScenePicker *> m_discardedPickers;
     bool m_objectPicking = false;
     QVector<SFontEntry> m_fonts;
     QVector<QString> m_systemFonts;

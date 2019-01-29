@@ -618,7 +618,7 @@ SStudioPickValue Q3DStudioRenderer::pick(const QPoint &inMouseCoords, SelectMode
 {
     QPoint renderPoint = scenePoint(inMouseCoords);
 
-    if (m_doc.GetDocumentReader().AreGuidesEditable()) {
+    if (!objectPick && m_doc.GetDocumentReader().AreGuidesEditable()) {
         qt3dsdm::TGuideHandleList theGuides = m_doc.GetDocumentReader().GetGuides();
         for (size_t guideIdx = 0, guideEnd = theGuides.size(); guideIdx < guideEnd; ++guideIdx) {
             qt3dsdm::SGuideInfo theGuideInfo =
@@ -642,11 +642,11 @@ SStudioPickValue Q3DStudioRenderer::pick(const QPoint &inMouseCoords, SelectMode
     // Pick against the widget first if possible.
     // TODO:: widgets
 #if RUNTIME_SPLIT_TEMPORARILY_REMOVED
-    if (m_LastRenderedWidget && (m_LastRenderedWidget->GetNode().m_Flags.IsActive()
-                                 || m_LastRenderedWidget->GetNode().m_Type
-                                 == GraphObjectTypes::Light
-                                 || m_LastRenderedWidget->GetNode().m_Type
-                                 == GraphObjectTypes::Camera)) {
+    if (!objectPick && m_LastRenderedWidget && (m_LastRenderedWidget->GetNode().m_Flags.IsActive()
+                                                || m_LastRenderedWidget->GetNode().m_Type
+                                                == GraphObjectTypes::Light
+                                                || m_LastRenderedWidget->GetNode().m_Type
+                                                == GraphObjectTypes::Camera)) {
         Option<QT3DSU32> picked = PickWidget(inMouseCoords, inSelectMode, *m_LastRenderedWidget);
         if (picked.hasValue()) {
             RequestRender();
@@ -674,15 +674,26 @@ SStudioPickValue Q3DStudioRenderer::pick(const QPoint &inMouseCoords, SelectMode
 #endif
 
     if (!m_translation.isNull()) {
-        ensurePicker();
-        if (m_scenePicker->state() == Q3DSScenePicker::Unqueued) {
-            m_objectPicking = objectPick;
-            m_scenePicker->pick(renderPoint);
-            if (m_scenePicker->state() == Q3DSScenePicker::Failed) {
-                m_scenePicker->reset();
-                return SStudioPickValue();
-            } else {
-                return SStudioPickValue(StudioPickValueTypes::Pending);
+        bool retry = true;
+        while (retry) {
+            ensurePicker();
+            retry = false;
+            if (m_scenePicker->state() == Q3DSScenePicker::Unqueued) {
+                m_objectPicking = objectPick;
+                m_scenePicker->pick(renderPoint);
+                if (m_scenePicker->state() == Q3DSScenePicker::Failed) {
+                    m_scenePicker->reset();
+                    return SStudioPickValue();
+                } else {
+                    return SStudioPickValue(StudioPickValueTypes::Pending);
+                }
+            } else if (!objectPick) {
+                // When picking for drag directly from the scene and there is a pick pending,
+                // we need to create a new scene picker and make sure the previous pick result is
+                // ignored, as a pending picker cannot be reused until pick is finalized.
+                // We can't delete a pending picker yet, as runtime still holds a pointer to it
+                m_discardedPickers.insert(m_scenePicker.take());
+                retry = true;
             }
         }
     }
@@ -708,8 +719,15 @@ void Q3DStudioRenderer::ensurePicker()
 
 void Q3DStudioRenderer::onScenePick()
 {
-    if (m_scenePicker->state() == Q3DSScenePicker::Ready
-            && (m_objectPicking || m_dragPickResult.getType() == StudioPickValueTypes::Pending)) {
+    // Ignore results on obsolete picks
+    auto picker = qobject_cast<Q3DSScenePicker *>(sender());
+    if (picker != m_scenePicker.data()) {
+        m_discardedPickers.remove(picker);
+        picker->deleteLater();
+        return;
+    }
+
+    if (m_scenePicker->state() == Q3DSScenePicker::Ready) {
         SStudioPickValue pickResult;
         if (m_scenePicker->isHit())
             pickResult = postScenePick(m_objectPicking);
@@ -1106,6 +1124,7 @@ void Q3DStudioRenderer::OnSceneMouseUp(SceneDragSenderType::Enum)
     if (m_lastDragToolMode != MovementTypes::Unknown)
         m_translation->endDrag(false, m_updatableEditor);
     m_updatableEditor.CommitEditor();
+
     m_dragPickResult = SStudioPickValue();
 
     if (theSelectedGuide.GetHandleValue()) {
@@ -1210,6 +1229,9 @@ void Q3DStudioRenderer::initEngineAndTranslation()
 
     if (m_editCameraIndex != m_pendingEditCameraIndex)
         SetEditCamera(m_pendingEditCameraIndex);
+
+    qDeleteAll(m_discardedPickers);
+    m_discardedPickers.clear();
 }
 
 void Q3DStudioRenderer::createTranslation()
