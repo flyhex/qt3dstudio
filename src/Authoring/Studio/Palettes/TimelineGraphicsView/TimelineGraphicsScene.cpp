@@ -640,7 +640,7 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
             if (shift)
                 snap(newX);
 
-            m_keyframeManager->moveSelectedKeyframesTo(m_pressedKeyframe, newX);
+            m_keyframeManager->moveSelectedKeyframes(ruler()->distanceToTime(newX));
 
             m_pressPos.setX(newX);
         }
@@ -743,6 +743,11 @@ void TimelineGraphicsScene::resetMousePressParams()
     m_pressScreenPos = invalidPoint;
     m_lastAutoScrollX = -1.0;
     m_lastAutoScrollY = -1.0;
+}
+
+void TimelineGraphicsScene::resetPressedKeyframe()
+{
+    m_pressedKeyframe = nullptr;
 }
 
 QLabel *TimelineGraphicsScene::timebarTooltip()
@@ -877,6 +882,7 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
                     RowTimeline *rowTimeline = static_cast<RowTimeline *>(item);
                     Keyframe *clickedKeyframe = rowTimeline->getClickedKeyframe(scenePos);
                     if (clickedKeyframe) {
+                        m_pressedKeyframe = clickedKeyframe;
                         g_StudioApp.GetDialogs()->asyncDisplayTimeEditDialog(
                                     clickedKeyframe->time, g_StudioApp.GetCore()->GetDoc(),
                                     ASSETKEYFRAME, m_keyframeManager);
@@ -1117,3 +1123,4 @@ KeyframeManager       *TimelineGraphicsScene::keyframeManager() const { return m
 QGraphicsLinearLayout *TimelineGraphicsScene::layoutTree()      const { return m_layoutTree;      }
 QGraphicsLinearLayout *TimelineGraphicsScene::layoutTimeline()  const { return m_layoutTimeline;  }
 TimelineWidget        *TimelineGraphicsScene::widgetTimeline()  const { return m_widgetTimeline;  }
+Keyframe              *TimelineGraphicsScene::pressedKeyframe() const { return m_pressedKeyframe; }

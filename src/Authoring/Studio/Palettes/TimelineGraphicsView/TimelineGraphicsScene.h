@@ -95,6 +95,8 @@ public:
     QPoint getScrollbarOffsets() const;
     void handleShowDISelector(const QString &propertyname, qt3dsdm::Qt3DSDMInstanceHandle inInst,
                               const QPoint &pos);
+    void resetPressedKeyframe();
+    Keyframe *pressedKeyframe() const;
 
 protected:
     bool event(QEvent *event) override;

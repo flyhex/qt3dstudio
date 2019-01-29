@@ -48,7 +48,6 @@ public:
 
     virtual void SetKeyframeTime(long inTime) = 0;
     virtual void SetKeyframesDynamic(bool inDynamic) = 0;
-    virtual long OffsetSelectedKeyframes(long inOffset) = 0;
     virtual void CommitChangedKeyframes() = 0;
     virtual void RollbackChangedKeyframes() = 0;
 };

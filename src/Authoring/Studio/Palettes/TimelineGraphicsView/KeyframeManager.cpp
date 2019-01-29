@@ -370,51 +370,45 @@ void KeyframeManager::pasteKeyframes()
     }
 }
 
-void KeyframeManager::moveSelectedKeyframesTo(Keyframe *pressedKeyframe, double newX)
+void KeyframeManager::moveSelectedKeyframes(long newTime)
 {
-    long t = m_scene->ruler()->distanceToTime(newX);
+    Keyframe *pressedKeyframe = m_scene->pressedKeyframe();
+
+    Q_ASSERT(pressedKeyframe);
 
     // make sure the min-time keyframe doesn't go below zero
+    long minTime = getMinSelectedKeyframesTime();
+    if (pressedKeyframe->time - minTime > newTime)
+        newTime = pressedKeyframe->time - minTime;
+
+    for (auto keyframe : qAsConst(m_selectedKeyframes)) {
+        if (keyframe != pressedKeyframe)
+            keyframe->time = newTime - (pressedKeyframe->time - keyframe->time);
+    }
+    pressedKeyframe->time = newTime;
+
+    for (auto row : qAsConst(m_selectedKeyframesMasterRows))
+        row->updateKeyframes();
+}
+
+long KeyframeManager::getMinSelectedKeyframesTime() const
+{
     long minTime = LONG_MAX;
     for (auto keyframe : qAsConst(m_selectedKeyframes)) {
         if (keyframe->time < minTime)
             minTime = keyframe->time;
     }
 
-    if (pressedKeyframe->time - minTime > t)
-        t = pressedKeyframe->time - minTime;
-
-    for (auto keyframe : qAsConst(m_selectedKeyframes)) {
-        if (keyframe != pressedKeyframe)
-            keyframe->time = t - (pressedKeyframe->time - keyframe->time);
-    }
-    pressedKeyframe->time = t;
-
-    for (auto row : qAsConst(m_selectedKeyframesMasterRows))
-        row->updateKeyframes();
+    return minTime;
 }
 
-// TODO: update TimeEditDlg.cpp to use the method above and remove this one
-void KeyframeManager::moveSelectedKeyframes(double dx)
+// returns the distance between the pressed keyframe and the min-time keyframe in a multiselection
+long KeyframeManager::getPressedKeyframeOffset() const
 {
-    long dt = m_scene->ruler()->distanceToTime(dx);
+    if (m_scene->pressedKeyframe())
+        return m_scene->pressedKeyframe()->time - getMinSelectedKeyframesTime();
 
-    if (dt < 0) { // check min limit
-        long minTime = LONG_MAX;
-        for (auto keyframe : qAsConst(m_selectedKeyframes)) {
-            if (keyframe->time < minTime)
-                minTime = keyframe->time;
-        }
-
-        if (minTime + dt < 0)
-            dt = -minTime;
-    }
-
-    for (auto keyframe : qAsConst(m_selectedKeyframes))
-        keyframe->time += dt;
-
-    for (auto row : qAsConst(m_selectedKeyframesMasterRows))
-        row->updateKeyframes();
+    return 0;
 }
 
 // selected keyframes belong to only one master row
@@ -479,20 +473,16 @@ void KeyframeManager::SetKeyframesDynamic(bool inDynamic)
         g_StudioApp.GetCore()->ExecuteCommand(cmd);
 }
 
-long KeyframeManager::OffsetSelectedKeyframes(long inOffset)
-{
-    double dx = m_scene->ruler()->timeToDistance(inOffset);
-    moveSelectedKeyframes(dx);
-    return 0;
-}
-
 void KeyframeManager::CommitChangedKeyframes()
 {
+    m_scene->resetPressedKeyframe();
     commitMoveSelectedKeyframes();
 }
 
 void KeyframeManager::RollbackChangedKeyframes()
 {
+    m_scene->resetPressedKeyframe();
+
     for (Keyframe *keyframe : qAsConst(m_selectedKeyframes))
         keyframe->time = keyframe->binding->GetTime();
 

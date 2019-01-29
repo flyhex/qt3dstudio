@@ -276,6 +276,14 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                     pixmap = pixKeyframeMasterNormal;
             }
             painter->drawPixmap(QPointF(timeToX(keyframe->time) - 8.5, keyFrameY), pixmap);
+
+            // highlight the pressed keyframe in a multi-selection (the keyframe that is affected
+            // by snapping, and setting time dialog)
+            if (m_rowTree->m_scene->keyframeManager()->selectedKeyframes().size() > 1
+                && m_rowTree->m_scene->pressedKeyframe() == keyframe) {
+                painter->setPen(QPen(CStudioPreferences::timelinePressedKeyframeColor(), 1));
+                painter->drawArc(timeToX(keyframe->time) - 4, keyFrameY + 4, 9, 9, 0, 5760);
+            }
         }
     } else if (m_rowTree->isProperty()) {
         static const QPixmap pixKeyframePropertyDisabled

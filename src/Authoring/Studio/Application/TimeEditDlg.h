@@ -34,7 +34,7 @@
 
 class CTimebarControl;
 class IDoc;
-class IKeyframesManager;
+class KeyframeManager;
 
 #ifdef QT_NAMESPACE
 using namespace QT_NAMESPACE;
@@ -51,7 +51,7 @@ class CTimeEditDlg : public QDialog
     Q_OBJECT
 
 public:
-    CTimeEditDlg(IKeyframesManager *keyframeManager);
+    CTimeEditDlg(KeyframeManager *keyframeManager);
     virtual ~CTimeEditDlg() override;
     void showDialog(long inTime, IDoc *inDoc, long inObjectAssociation);
 
@@ -67,17 +67,13 @@ private:
     void onTimeChanged();
 
     void formatTime(long inTime);
-    int numberOfDigits(long number);
-    long timeConversion(long inTime, long inOperationCode);
     void updateObjectTime(long inTime);
 
     Ui::TimeEditDlg *m_ui = nullptr;
     IDoc *m_Doc = nullptr;
-    IKeyframesManager *m_KeyframesManager = nullptr;
-    long m_InitialTime = 0;
-    long m_ObjectAssociation = 0;
-    long m_OffsetFromInitialTime = 0;
-    int m_min = -1;
-    int m_sec = -1;
+    KeyframeManager *m_keyframeManager = nullptr;
+    long m_initialTime = 0;
+    long m_endTime = 0;
+    long m_objectAssociation = 0;
 };
 #endif // TIME_EDIT_DIALOG_H

@@ -29,14 +29,14 @@
 
 #include "ui_TimeEditDlg.h"
 #include "TimeEditDlg.h"
-#include "IKeyframesManager.h"
+#include "KeyframeManager.h"
 #include "IDoc.h"
 #include "TimeEnums.h"
 #include <QtGui/qvalidator.h>
 
-CTimeEditDlg::CTimeEditDlg(IKeyframesManager *keyframeManager)
+CTimeEditDlg::CTimeEditDlg(KeyframeManager *keyframeManager)
     : m_ui(new Ui::TimeEditDlg)
-    , m_KeyframesManager(keyframeManager)
+    , m_keyframeManager(keyframeManager)
 {
     m_ui->setupUi(this);
     setAutoFillBackground(true);
@@ -63,54 +63,48 @@ CTimeEditDlg::~CTimeEditDlg()
     delete m_ui;
 }
 
-//=============================================================================
 /**
- *  showDialog: Initializes and shows the Time Edit Dialog Box.
- *  @param inTime is the initial time, which will be shown when the time edit
- *                dialog box pops up
+ *  Initializes and shows the dialog
+ *  @param inTime the initial time which will be shown when the dialog pops up
  *  @param inDoc this can be nullptr where its not applicable
- *  @param inObjectAssociation is the identifier for that identifies the object
- *                             associated with the time edit dialog
- *                             (e.g. playhead, keyframe)
+ *  @param inObjectAssociation the identifier for the object associated with the dialog (playhead
+ *                             or keyframe)
  */
 void CTimeEditDlg::showDialog(long inTime, IDoc *inDoc, long inObjectAssociation)
 {
-    m_InitialTime = inTime;
-    m_ObjectAssociation = inObjectAssociation;
+    m_initialTime = inTime;
+    m_objectAssociation = inObjectAssociation;
     m_Doc = inDoc;
 
     // Set initial values to dialog
-    formatTime(m_InitialTime);
+    formatTime(m_initialTime);
 
     exec();
 }
 
 void CTimeEditDlg::formatTime(long inTime)
 {
-    long theTime = inTime;
-    long min = 0;
-    long sec = 0;
-    long msec = 0;
+    long mins = 0;
+    long secs = 0;
+    long mils = 0;
 
-    // Translates the m_initialTime (in milliseconds) into Minutes, Seconds and Milliseconds
     if (inTime != 0) {
-        min = timeConversion(theTime, CONVERT_MSEC_TO_MIN);
-        theTime = theTime - timeConversion(min, CONVERT_MIN_TO_MSEC);
-        sec = timeConversion(theTime, CONVERT_MSEC_TO_SEC);
-        theTime = theTime - timeConversion(sec, CONVERT_SEC_TO_MSEC);
-        msec = theTime;
+        mins = inTime % 3600000 / 60000;
+        secs = inTime % 60000 / 1000;
+        mils = inTime % 1000;
     }
-    // Default to 3 digits, e.g. "5" -> "005"
-    QString msecString = QString("%1").arg(msec, 3, 10, QChar('0'));
-    m_ui->lineEditMinutes->setText(QString::number(min));
-    m_ui->lineEditSeconds->setText(QString::number(sec));
-    m_ui->lineEditMilliseconds->setText(msecString);
+
+    // display milliseconds in 3 digits (5 -> 005)
+    QString milsStr = QString("%1").arg(mils, 3, 10, QChar('0'));
+    m_ui->lineEditMinutes->setText(QString::number(mins));
+    m_ui->lineEditSeconds->setText(QString::number(secs));
+    m_ui->lineEditMilliseconds->setText(milsStr);
 
     // Select the biggest non-zero unit
-    if (min > 0) {
+    if (mins > 0) {
         m_ui->lineEditMinutes->setFocus();
         m_ui->lineEditMinutes->selectAll();
-    } else if (sec > 0) {
+    } else if (secs > 0) {
         m_ui->lineEditSeconds->setFocus();
         m_ui->lineEditSeconds->selectAll();
     } else {
@@ -119,23 +113,23 @@ void CTimeEditDlg::formatTime(long inTime)
     }
 }
 
-void CTimeEditDlg::showEvent(QShowEvent *ev)
+void CTimeEditDlg::showEvent(QShowEvent *e)
 {
     onInitDialog();
-    QDialog::showEvent(ev);
+    QDialog::showEvent(e);
 }
 
 void CTimeEditDlg::onInitDialog()
 {
     QString title;
     // Display the window captions for the correct object type
-    switch (m_ObjectAssociation) {
+    switch (m_objectAssociation) {
     case PLAYHEAD:
         title = QObject::tr("Go To Time");
         break;
     case ASSETKEYFRAME:
         title = QObject::tr("Set Keyframe Time");
-        Q_ASSERT(m_KeyframesManager != nullptr);
+        Q_ASSERT(m_keyframeManager != nullptr);
         break;
     }
     setWindowTitle(title);
@@ -145,11 +139,11 @@ void CTimeEditDlg::onInitDialog()
 void CTimeEditDlg::accept()
 {
     // Only commit here, cos dup keyframes will be deleted.
-    if (m_ObjectAssociation == ASSETKEYFRAME && m_Doc) {
-        if (m_OffsetFromInitialTime == 0)
-            m_KeyframesManager->RollbackChangedKeyframes();
+    if (m_objectAssociation == ASSETKEYFRAME && m_Doc) {
+        if (m_endTime == m_initialTime)
+            m_keyframeManager->RollbackChangedKeyframes();
         else
-            m_KeyframesManager->CommitChangedKeyframes();
+            m_keyframeManager->CommitChangedKeyframes();
     }
 
     QDialog::accept();
@@ -158,68 +152,26 @@ void CTimeEditDlg::accept()
 void CTimeEditDlg::reject()
 {
     // Only commit here, cos dup keyframes will be deleted.
-    if (m_ObjectAssociation == ASSETKEYFRAME && m_Doc)
-        m_KeyframesManager->RollbackChangedKeyframes();
+    if (m_objectAssociation == ASSETKEYFRAME && m_Doc)
+        m_keyframeManager->RollbackChangedKeyframes();
     QDialog::reject();
 }
 
-int CTimeEditDlg::numberOfDigits(long number)
-{
-    long n = 0;
-    for (long i = number; i >= 1; i /= 10)
-        ++n;
-
-    return n;
-}
-
-//==============================================================================
 /**
- *  timeConversion:         Converts inTime to the format specified by inFlags.
- *                          For example:
- *                          inTime = 5 sec inFlags = CONVERT_SEC_TO_MSEC
- *                          The method will convert 5 sec into 5000 msec and
- *                          returns the result.
- *  @param  inTime          stores the time to be converted.
- *          inOperationCode determines the type of time conversion to be done on the
- *                          inTime.
- *  @return theResult       stores the result of the time conversion.
- */
-long CTimeEditDlg::timeConversion(long inTime, long inOperationCode)
-{
-    switch (inOperationCode) {
-    case CONVERT_MIN_TO_MSEC:
-        return inTime * 60000;
-    case CONVERT_SEC_TO_MSEC:
-        return inTime * 1000;
-    case CONVERT_MSEC_TO_MIN:
-        return inTime / 60000;
-    case CONVERT_MSEC_TO_SEC:
-        return inTime / 1000;
-    }
-
-    return 0;
-}
-
-//==============================================================================
-/**
- *  updateObjectTime: It updates the playhead or keyframe time according
- *                    to the time displayed in the time edit dialogue.
- *  @param  inTime is the time that will be updated.
+ *  Updates the playhead or keyframe time according to the time displayed in the time edit dialogue.
+ *  @param  inTime  the time that will be updated.
  */
 void CTimeEditDlg::updateObjectTime(long inTime)
 {
-    long theDiff = 0;
-    switch (m_ObjectAssociation) {
+    switch (m_objectAssociation) {
     case PLAYHEAD: // Update the playhead time
         if (m_Doc)
             m_Doc->NotifyTimeChanged(inTime);
         break;
     case ASSETKEYFRAME: // Update the keyframe time
         if (m_Doc) {
-            theDiff = inTime - m_OffsetFromInitialTime - m_InitialTime;
-            m_OffsetFromInitialTime = m_OffsetFromInitialTime + theDiff;
-            if (theDiff != 0)
-                m_KeyframesManager->OffsetSelectedKeyframes(theDiff);
+            m_endTime = inTime;
+            m_keyframeManager->moveSelectedKeyframes(inTime);
         }
         break;
     }
@@ -231,21 +183,23 @@ void CTimeEditDlg::onTimeChanged()
     long sec = m_ui->lineEditSeconds->text().toInt();
     long msec = m_ui->lineEditMilliseconds->text().toInt();
 
-    long theGoToTime = timeConversion(min, CONVERT_MIN_TO_MSEC)
-            + timeConversion(sec, CONVERT_SEC_TO_MSEC) + msec;
+    long theGoToTime = min * 60000 + sec * 1000 + msec;
 
+    // make sure min keyframe time doesn't go below zero
+    long offset = m_keyframeManager->getPressedKeyframeOffset();
+    if (theGoToTime - offset < 0) {
+        theGoToTime = offset;
+        formatTime(theGoToTime);
+    }
     // Go to the time specified in the time edit display
     updateObjectTime(theGoToTime);
 
     // If max number of digits reached in a number field, select the next
-    if (m_min != min && numberOfDigits(min) == 4) {
+    if (min > 999) {
         m_ui->lineEditSeconds->setFocus();
         m_ui->lineEditSeconds->selectAll();
-    } else if (m_sec != sec && numberOfDigits(sec) == 2) {
+    } else if (sec > 9) {
         m_ui->lineEditMilliseconds->setFocus();
         m_ui->lineEditMilliseconds->selectAll();
     }
-
-    m_min = min;
-    m_sec = sec;
 }

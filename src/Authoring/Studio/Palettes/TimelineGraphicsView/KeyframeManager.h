@@ -63,8 +63,7 @@ public:
     void deleteKeyframes(RowTimeline *row, bool repaint = true);
     void copySelectedKeyframes();
     void pasteKeyframes();
-    void moveSelectedKeyframes(double dx);
-    void moveSelectedKeyframesTo(Keyframe *pressedKeyframe, double newX);
+    void moveSelectedKeyframes(long newTime);
     void commitMoveSelectedKeyframes();
     bool deleteSelectedKeyframes();
     bool oneMasterRowSelected() const;
@@ -75,7 +74,6 @@ public:
     // IKeyframesManager interface
     void SetKeyframeTime(long inTime) override;
     void SetKeyframesDynamic(bool inDynamic) override;
-    long OffsetSelectedKeyframes(long inOffset) override;
     void CommitChangedKeyframes() override;
     void RollbackChangedKeyframes() override;
     bool HasSelectedKeyframes() override;
@@ -88,10 +86,13 @@ public:
     void SetKeyframeInterpolation() override;
     void DeselectAllKeyframes() override;
     void SetChangedKeyframes() override;
+    long getPressedKeyframeOffset() const;
 
 private:
     qt3dsdm::SGetOrSetKeyframeInfo setKeyframeInfo(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
                                                    qt3dsdm::IAnimationCore &inCore);
+    long getMinSelectedKeyframesTime() const;
+
     CPasteKeyframeCommandHelper *m_pasteKeyframeCommandHelper = nullptr;
     TimelineGraphicsScene *m_scene;
     QList<Keyframe *> m_selectedKeyframes;
