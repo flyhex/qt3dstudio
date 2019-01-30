@@ -69,6 +69,16 @@ namespace render {
         };
     };
 
+    struct TextElide
+    {
+        enum Enum {
+            ElideNone = 0,
+            ElideLeft,
+            ElideMiddle,
+            ElideRight,
+        };
+    };
+
     struct STextDimensions
     {
         QT3DSU32 m_TextWidth;
@@ -170,7 +180,7 @@ namespace render {
         TextVerticalAlignment::Enum m_DropShadowVerticalAlignment; // To be removed in 2.x (when UIP version is next updated)
         TextWordWrap::Enum m_WordWrap;
         QT3DSVec2 m_BoundingBox;
-        bool m_Elide;
+        TextElide::Enum m_Elide;
 
         QT3DSF32 m_ScaleX; // Pixel scale in X
         QT3DSF32 m_ScaleY; // Pixel scale in Y

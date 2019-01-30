@@ -60,7 +60,7 @@ struct hash<STextRenderInfo>
         retval = retval ^ hash<float>()(inInfo.m_DropShadowOffsetY);
         retval = retval ^ hash<float>()(inInfo.m_BoundingBox.x);
         retval = retval ^ hash<float>()(inInfo.m_BoundingBox.y);
-        retval = retval ^ hash<bool>()(inInfo.m_Elide);
+        retval = retval ^ hash<int>()(static_cast<int>(inInfo.m_Elide));
         retval = retval ^ hash<int>()(static_cast<int>(inInfo.m_DropShadowHorizontalAlignment)); // To be removed in 2.x (when UIP version is next updated)
         retval = retval ^ hash<int>()(static_cast<int>(inInfo.m_DropShadowVerticalAlignment)); // To be removed in 2.x (when UIP version is next updated)
         retval = retval ^ hash<int>()(static_cast<int>(inInfo.m_WordWrap));

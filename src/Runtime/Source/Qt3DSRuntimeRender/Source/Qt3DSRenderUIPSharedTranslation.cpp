@@ -58,6 +58,10 @@ namespace render {
 #define WCHAR_T_Top L"Top"
 #define WCHAR_T_Middle L"Middle"
 #define WCHAR_T_Bottom L"Bottom"
+#define WCHAR_T_ElideNone L"ElideNone"
+#define WCHAR_T_ElideLeft L"ElideLeft"
+#define WCHAR_T_ElideMiddle L"ElideMiddle"
+#define WCHAR_T_ElideRight L"ElideRight"
 #define WCHAR_T_2x L"2x"
 #define WCHAR_T_4x L"4x"
 #define WCHAR_T_8x L"8x"
@@ -137,6 +141,10 @@ namespace render {
 #define CHAR_T_Top "Top"
 #define CHAR_T_Middle "Middle"
 #define CHAR_T_Bottom "Bottom"
+#define CHAR_T_ElideNone "ElideNone"
+#define CHAR_T_ElideLeft "ElideLeft"
+#define CHAR_T_ElideMiddle "ElideMiddle"
+#define CHAR_T_ElideRight "ElideRight"
 #define CHAR_T_2x "2x"
 #define CHAR_T_4x "4x"
 #define CHAR_T_8x "8x"
@@ -250,6 +258,14 @@ namespace render {
         DEFINE_NAME_MAP_ENTRY(TextWordWrap::Clip, Clip),
         DEFINE_NAME_MAP_ENTRY(TextWordWrap::WrapWord, WrapWord),
         DEFINE_NAME_MAP_ENTRY(TextWordWrap::WrapAnywhere, WrapAnywhere),
+        { (QT3DSU32)-1, NULL },
+    };
+
+    SEnumNameMap g_TextElideMap[] = {
+        DEFINE_NAME_MAP_ENTRY(TextElide::ElideNone, ElideNone),
+        DEFINE_NAME_MAP_ENTRY(TextElide::ElideLeft, ElideLeft),
+        DEFINE_NAME_MAP_ENTRY(TextElide::ElideMiddle, ElideMiddle),
+        DEFINE_NAME_MAP_ENTRY(TextElide::ElideRight, ElideRight),
         { (QT3DSU32)-1, NULL },
     };
 
@@ -395,6 +411,11 @@ namespace render {
     SEnumNameMap *SEnumParseMap<TextWordWrap::Enum>::GetMap()
     {
         return g_TextWordWrapMap;
+    }
+
+    SEnumNameMap *SEnumParseMap<TextElide::Enum>::GetMap()
+    {
+        return g_TextElideMap;
     }
 
     SEnumNameMap *SEnumParseMap<AAModeValues::Enum>::GetMap() { return g_ProgressiveAAValuesMap; }
