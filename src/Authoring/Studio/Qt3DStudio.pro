@@ -266,7 +266,9 @@ HEADERS += \
     Palettes/scenecamera/scenecamerascrollarea.h \
     Palettes/scenecamera/scenecameraglwidget.h \
     Palettes/TimelineGraphicsView/ui/RowTimelineCommentItem.h \
-    Render/Q3DSSelectionWidget.h
+    Render/Q3DSSelectionWidget.h \
+    Render/Q3DSVisualAidWidget.h \
+    Render/Q3DSWidgetUtils.h
 
 FORMS += \
     MainFrm.ui \
@@ -436,7 +438,9 @@ SOURCES += \
     Palettes/scenecamera/scenecamerascrollarea.cpp \
     Palettes/scenecamera/scenecameraglwidget.cpp \
     Palettes/TimelineGraphicsView/ui/RowTimelineCommentItem.cpp \
-    Render/Q3DSSelectionWidget.cpp
+    Render/Q3DSSelectionWidget.cpp \
+    Render/Q3DSVisualAidWidget.cpp \
+    Render/Q3DSWidgetUtils.cpp
 
 RESOURCES += \
     MainFrm.qrc \

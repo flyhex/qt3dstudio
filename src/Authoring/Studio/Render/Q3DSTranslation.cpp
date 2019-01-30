@@ -33,6 +33,7 @@
 #include "Q3DSEditCamera.h"
 #include "Q3DSInputStreamFactory.h"
 #include "Q3DSTranslators.h"
+#include "Q3DSWidgetUtils.h"
 
 #include "StudioApp.h"
 #include "Core.h"
@@ -869,8 +870,10 @@ Q3DSGraphObjectTranslator *Q3DSTranslation::createTranslator(
         break;
     }
     case qt3dsdm::ComposerObjectTypes::Light: {
-        translator = new Q3DSLightTranslator(instance,
-                                             *m_presentation->newObject<Q3DSLightNode>(id));
+        Q3DSLightTranslator *t = new Q3DSLightTranslator(
+                    instance, *m_presentation->newObject<Q3DSLightNode>(id));
+        m_lightTranslators.push_back(t);
+        translator = t;
         break;
     }
     case qt3dsdm::ComposerObjectTypes::Model: {
@@ -1010,8 +1013,9 @@ void Q3DSTranslation::clearDirtySet()
     m_releaseSet.clear();
     m_dirtySet.clear();
 
-    updateForegroundCameraProperties();
+    updateForegroundLayerProperties();
     updateSelectionWidgetProperties();
+    updateVisualAids();
 }
 
 void Q3DSTranslation::prepareRender(const QRect &rect, const QSize &size, qreal pixelRatio)
@@ -1082,7 +1086,7 @@ void Q3DSTranslation::enableEditCamera(const SEditCameraPersistentInformation &i
     }
     enableSceneCameras(false);
     m_editCameraEnabled = true;
-    updateForegroundCameraProperties();
+    updateForegroundLayerProperties();
 }
 
 void Q3DSTranslation::disableEditCamera()
@@ -1096,7 +1100,7 @@ void Q3DSTranslation::disableEditCamera()
     enableSceneCameras(true);
     m_editCameraEnabled = false;
     m_oldCameraType = EditCameraTypes::SceneCamera;
-    updateForegroundCameraProperties();
+    updateForegroundLayerProperties();
 }
 
 SEditCameraPersistentInformation Q3DSTranslation::editCameraInfo() const
@@ -1121,15 +1125,32 @@ void Q3DSTranslation::enableBackgroundLayer()
         m_backgroundLayer = m_presentation->newObject<Q3DSLayerNode>("StudioBackgroundLayer_");
         m_scene->appendChildNode(m_backgroundLayer);
         m_presentation->masterSlide()->addObject(m_backgroundLayer);
+        m_backgroundLayer->notifyPropertyChanges({
+            m_backgroundLayer->setDepthPrePassDisabled(true)
+        });
     }
 }
 
 void Q3DSTranslation::enableForegroundLayer()
 {
-    if (!m_foregroundLayer) {
+    if (!m_foregroundLayer && !m_foregroundPickingLayer) {
         m_foregroundLayer = m_presentation->newObject<Q3DSLayerNode>("StudioForegroundLayer_");
         m_scene->prependChildNode(m_foregroundLayer);
         m_presentation->masterSlide()->addObject(m_foregroundLayer);
+
+        m_foregroundLayer->notifyPropertyChanges({
+            m_foregroundLayer->setDepthPrePassDisabled(true),
+            m_foregroundLayer->setDepthTestDisabled(true)
+        });
+
+        m_foregroundPickingLayer = m_presentation->newObject<Q3DSLayerNode>(
+                    "StudioForegroundPickingLayer_");
+        m_scene->prependChildNode(m_foregroundPickingLayer);
+        m_presentation->masterSlide()->addObject(m_foregroundPickingLayer);
+
+        m_foregroundPickingLayer->notifyPropertyChanges({
+            m_foregroundPickingLayer->setDepthPrePassDisabled(true),
+        });
     }
 }
 
@@ -1256,52 +1277,189 @@ void Q3DSTranslation::enableSelectionWidget(Qt3DSDMInstanceHandle instance)
         m_selectionWidget.setEyeballEnabled(false);
     }
 
-    if (m_foregroundLayer && !m_foregroundCamera) {
-        m_foregroundCamera = m_presentation->newObject<Q3DSCameraNode>("StudioForegroundCamera_");
-        m_foregroundLayer->appendChildNode(m_foregroundCamera);
-        m_presentation->masterSlide()->addObject(m_foregroundCamera);
-
-        Q3DSLayerAttached *attached = m_foregroundLayer->attached<Q3DSLayerAttached>();
-        if (attached && !attached->layerRayCaster)
-            attached->createRayCaster();
-    }
-
-    updateForegroundCameraProperties();
+    updateForegroundLayerProperties();
     updateSelectionWidgetProperties();
 }
 
-Q3DSCameraNode *Q3DSTranslation::cameraForNode(Q3DSGraphObject *node)
+void Q3DSTranslation::disableVisualAids()
 {
-    if (node->type() == Q3DSGraphObject::Camera)
-        return static_cast<Q3DSCameraNode *>(node);
+    if (!m_visualAids.empty()) {
+        for (int i = 0; i < m_visualAids.size(); ++i)
+            m_visualAids[i].destroy();
+        m_visualAids.clear();
+    }
+}
 
+void Q3DSTranslation::enableVisualAids()
+{
+    m_visualAids.reserve(m_cameraTranslators.size() + m_lightTranslators.size());
+    for (auto &camera : qAsConst(m_cameraTranslators)) {
+        if (m_selectedLayer != nullptr
+                && layerForNode(&camera->graphObject()) == m_selectedLayer) {
+            bool alreadyCreated = false;
+            for (auto &visualAid : qAsConst(m_visualAids)) {
+                if (visualAid.hasGraphObject(&camera->graphObject())) {
+                    alreadyCreated = true;
+                    break;
+                }
+            }
+            if (alreadyCreated)
+                continue;
+
+            m_visualAids.append(Q3DSVisualAidWidget(m_presentation.data(), m_foregroundLayer,
+                                                    m_foregroundPickingLayer,
+                                                    VisualAidType::Camera, &camera->graphObject(),
+                                                    m_visualAidIndex++));
+        } else {
+            for (int i = m_visualAids.size() - 1; i >= 0; --i) {
+                if (m_visualAids[i].hasGraphObject(&camera->graphObject())) {
+                    m_visualAids[i].destroy();
+                    m_visualAids.remove(i);
+                }
+            }
+        }
+    }
+
+    for (auto &light : qAsConst(m_lightTranslators)) {
+        if (m_selectedLayer != nullptr
+                && layerForNode(&light->graphObject()) == m_selectedLayer) {
+            VisualAidType newVisualAidType = VisualAidType::DirectionalLight;
+
+            Q3DSLightNode::LightType lightType
+                    = static_cast<Q3DSLightNode *>(&light->graphObject())->lightType();
+            if (lightType == Q3DSLightNode::LightType::Point)
+                newVisualAidType = VisualAidType::PointLight;
+            else if (lightType == Q3DSLightNode::LightType::Area)
+                newVisualAidType = VisualAidType::AreaLight;
+
+            bool alreadyCreated = false;
+            for (int i = m_visualAids.size() - 1; i >= 0; --i) {
+                if (m_visualAids[i].hasGraphObject(&light->graphObject())) {
+                    if (m_visualAids[i].type() == newVisualAidType) {
+                        alreadyCreated = true;
+                    } else {
+                        m_visualAids[i].destroy();
+                        m_visualAids.remove(i);
+                    }
+                    break;
+                }
+            }
+
+            if (alreadyCreated)
+                continue;
+
+            m_visualAids.append(Q3DSVisualAidWidget(m_presentation.data(), m_foregroundLayer,
+                                                    m_foregroundPickingLayer, newVisualAidType,
+                                                    &light->graphObject(), m_visualAidIndex++));
+        } else {
+            for (int i = m_visualAids.size() - 1; i >= 0; --i) {
+                if (m_visualAids[i].hasGraphObject(&light->graphObject())) {
+                    m_visualAids[i].destroy();
+                    m_visualAids.remove(i);
+                }
+            }
+        }
+    }
+}
+
+Q3DSLayerNode *Q3DSTranslation::layerForNode(Q3DSGraphObject *node)
+{
     while (node && node->parent() && node->type() != Q3DSGraphObject::Layer)
         node = node->parent();
-    Q3DSLayerNode *layer = static_cast<Q3DSLayerNode *>(node);
-    Q3DSGraphObject *child = layer->firstChild();
-    while (child) {
-        if (child->type() == Q3DSGraphObject::Camera
-                && static_cast<Q3DSNode *>(child)->eyeballEnabled()) {
-            break;
+    if (node && node->type() != Q3DSGraphObject::Layer)
+        return nullptr;
+    return static_cast<Q3DSLayerNode *>(node);
+}
+
+Q3DSCameraNode *Q3DSTranslation::cameraForNode(Q3DSGraphObject *node, bool ignoreSelfCamera)
+{
+    if (!ignoreSelfCamera && node->type() == Q3DSGraphObject::Camera)
+        return static_cast<Q3DSCameraNode *>(node);
+
+    Q3DSLayerNode *layer = layerForNode(node);
+    if (layer) {
+        Q3DSGraphObject *child = layer->firstChild();
+        while (child) {
+            if (child->type() == Q3DSGraphObject::Camera
+                    && static_cast<Q3DSNode *>(child)->eyeballEnabled()) {
+                break;
+            }
+            child = child->nextSibling();
         }
-        child = child->nextSibling();
+        if (child)
+            return static_cast<Q3DSCameraNode *>(child);
     }
-    if (child)
-        return static_cast<Q3DSCameraNode *>(child);
 
     return nullptr;
 }
 
-void Q3DSTranslation::updateForegroundCameraProperties()
+void Q3DSTranslation::updateVisualAids()
 {
-    if (m_selectedObject)
-        m_selectedCamera = cameraForNode(m_selectedObject);
-    if (m_selectedCamera && m_foregroundCamera) {
+    if (!m_gradient) {
+        disableVisualAids();
+        return;
+    }
+
+    enableVisualAids();
+
+    if (m_foregroundCamera) {
+        for (auto &visualAid : qAsConst(m_visualAids))
+            visualAid.update(m_foregroundCamera);
+    }
+}
+
+void Q3DSTranslation::updateForegroundLayerProperties()
+{
+    if (m_foregroundLayer && m_foregroundPickingLayer && !m_foregroundCamera
+            && !m_foregroundPickingCamera) {
+        m_foregroundCamera = m_presentation->newObject<Q3DSCameraNode>("StudioForegroundCamera_");
+        m_foregroundLayer->appendChildNode(m_foregroundCamera);
+        m_presentation->masterSlide()->addObject(m_foregroundCamera);
+
+        m_foregroundCamera->notifyPropertyChanges({
+            m_foregroundCamera->setClipNear(10),
+            m_foregroundCamera->setClipFar(50000)
+        });
+
+        m_foregroundPickingCamera = m_presentation->newObject<Q3DSCameraNode>(
+                    "StudioForegroundPickingCamera_");
+        m_foregroundPickingLayer->appendChildNode(m_foregroundPickingCamera);
+        m_presentation->masterSlide()->addObject(m_foregroundPickingCamera);
+
+        m_foregroundPickingCamera->notifyPropertyChanges({
+            m_foregroundPickingCamera->setClipNear(10),
+            m_foregroundPickingCamera->setClipFar(50000)
+        });
+
+        Q3DSLayerAttached *pickingAttached = m_foregroundPickingLayer
+                ->attached<Q3DSLayerAttached>();
+        if (pickingAttached && !pickingAttached->layerRayCaster)
+            pickingAttached->createRayCaster();
+    }
+
+    auto layer = layerForNode(m_selectedObject);
+    if (m_selectedObject && layer) {
+        m_selectedCamera = cameraForNode(m_selectedObject, true);
+        m_selectedLayer = layerForNode(m_selectedObject);
+    } else {
+        Q3DSGraphObject *object = m_scene->firstChild();
+        while (object) {
+            if (object->type() == Q3DSGraphObject::Type::Layer && object != m_foregroundLayer
+                    && object != m_foregroundPickingLayer && object != m_backgroundLayer) {
+                break;
+            }
+            object = object->nextSibling();
+        }
+        if (object) {
+            m_selectedCamera = cameraForNode(object, true);
+            m_selectedLayer = layerForNode(object);
+        }
+    }
+
+    if (m_selectedCamera && m_foregroundCamera && m_foregroundPickingCamera) {
         Q3DSPropertyChangeList list;
         list.append(m_foregroundCamera->setFov(m_selectedCamera->fov()));
         list.append(m_foregroundCamera->setZoom(m_selectedCamera->zoom()));
-        list.append(m_foregroundCamera->setClipFar(m_selectedCamera->clipFar()));
-        list.append(m_foregroundCamera->setClipNear(m_selectedCamera->clipNear()));
         list.append(m_foregroundCamera->setScaleMode(m_selectedCamera->scaleMode()));
         list.append(m_foregroundCamera->setScaleAnchor(m_selectedCamera->scaleAnchor()));
         list.append(m_foregroundCamera->setOrthographic(m_selectedCamera->orthographic()));
@@ -1311,6 +1469,57 @@ void Q3DSTranslation::updateForegroundCameraProperties()
         list.append(m_foregroundCamera->setPosition(m_selectedCamera->position()));
         list.append(m_foregroundCamera->setRotation(m_selectedCamera->rotation()));
         m_foregroundCamera->notifyPropertyChanges(list);
+
+        list.clear();
+        list.append(m_foregroundPickingCamera->setFov(m_selectedCamera->fov()));
+        list.append(m_foregroundPickingCamera->setZoom(m_selectedCamera->zoom()));
+        list.append(m_foregroundPickingCamera->setScaleMode(m_selectedCamera->scaleMode()));
+        list.append(m_foregroundPickingCamera->setScaleAnchor(m_selectedCamera->scaleAnchor()));
+        list.append(m_foregroundPickingCamera->setOrthographic(m_selectedCamera->orthographic()));
+        list.append(m_foregroundPickingCamera->setFovHorizontal(m_selectedCamera->fovHorizontal()));
+        list.append(m_foregroundPickingCamera->setPivot(m_selectedCamera->pivot()));
+        list.append(m_foregroundPickingCamera->setScale(m_selectedCamera->scale()));
+        list.append(m_foregroundPickingCamera->setPosition(m_selectedCamera->position()));
+        list.append(m_foregroundPickingCamera->setRotation(m_selectedCamera->rotation()));
+        m_foregroundPickingCamera->notifyPropertyChanges(list);
+    }
+
+    if (m_selectedLayer && m_foregroundLayer && m_foregroundPickingLayer) {
+        Q3DSPropertyChangeList list;
+        list.append(m_foregroundLayer->setHorizontalFields(m_selectedLayer->horizontalFields()));
+        list.append(m_foregroundLayer->setVerticalFields(m_selectedLayer->verticalFields()));
+        list.append(m_foregroundLayer->setTopUnits(m_selectedLayer->topUnits()));
+        list.append(m_foregroundLayer->setLeftUnits(m_selectedLayer->leftUnits()));
+        list.append(m_foregroundLayer->setRightUnits(m_selectedLayer->rightUnits()));
+        list.append(m_foregroundLayer->setBottomUnits(m_selectedLayer->bottomUnits()));
+        list.append(m_foregroundLayer->setWidthUnits(m_selectedLayer->widthUnits()));
+        list.append(m_foregroundLayer->setHeightUnits(m_selectedLayer->heightUnits()));
+        list.append(m_foregroundLayer->setTop(m_selectedLayer->top()));
+        list.append(m_foregroundLayer->setLeft(m_selectedLayer->left()));
+        list.append(m_foregroundLayer->setRight(m_selectedLayer->right()));
+        list.append(m_foregroundLayer->setBottom(m_selectedLayer->bottom()));
+        list.append(m_foregroundLayer->setWidth(m_selectedLayer->width()));
+        list.append(m_foregroundLayer->setHeight(m_selectedLayer->height()));
+        m_foregroundLayer->notifyPropertyChanges(list);
+
+        list.clear();
+        list.append(m_foregroundPickingLayer->setHorizontalFields(
+                        m_selectedLayer->horizontalFields()));
+        list.append(m_foregroundPickingLayer->setVerticalFields(
+                        m_selectedLayer->verticalFields()));
+        list.append(m_foregroundPickingLayer->setTopUnits(m_selectedLayer->topUnits()));
+        list.append(m_foregroundPickingLayer->setLeftUnits(m_selectedLayer->leftUnits()));
+        list.append(m_foregroundPickingLayer->setRightUnits(m_selectedLayer->rightUnits()));
+        list.append(m_foregroundPickingLayer->setBottomUnits(m_selectedLayer->bottomUnits()));
+        list.append(m_foregroundPickingLayer->setWidthUnits(m_selectedLayer->widthUnits()));
+        list.append(m_foregroundPickingLayer->setHeightUnits(m_selectedLayer->heightUnits()));
+        list.append(m_foregroundPickingLayer->setTop(m_selectedLayer->top()));
+        list.append(m_foregroundPickingLayer->setLeft(m_selectedLayer->left()));
+        list.append(m_foregroundPickingLayer->setRight(m_selectedLayer->right()));
+        list.append(m_foregroundPickingLayer->setBottom(m_selectedLayer->bottom()));
+        list.append(m_foregroundPickingLayer->setWidth(m_selectedLayer->width()));
+        list.append(m_foregroundPickingLayer->setHeight(m_selectedLayer->height()));
+        m_foregroundPickingLayer->notifyPropertyChanges(list);
     }
 }
 
@@ -1325,8 +1534,10 @@ void Q3DSTranslation::updateSelectionWidgetProperties()
         }
         m_selectionWidget.setEyeballEnabled(false);
 
-        if (m_foregroundCamera)
-            m_selectionWidget.applyProperties(m_selectedObject, m_foregroundCamera);
+        if (m_foregroundPickingCamera) {
+            m_selectionWidget.applyProperties(m_selectedObject, m_foregroundPickingCamera,
+                                              m_foregroundLayer, m_size);
+        }
     }
 }
 
@@ -1334,13 +1545,13 @@ void Q3DSTranslation::createSelectionWidget()
 {
     m_toolMode = g_StudioApp.GetToolMode();
     if (m_toolMode == STUDIO_TOOLMODE_MOVE) {
-        m_selectionWidget.create(m_presentation.data(), m_foregroundLayer,
+        m_selectionWidget.create(m_presentation.data(), m_foregroundPickingLayer,
                                  SelectionWidgetType::Translation);
     } else if (m_toolMode == STUDIO_TOOLMODE_ROTATE) {
-        m_selectionWidget.create(m_presentation.data(), m_foregroundLayer,
+        m_selectionWidget.create(m_presentation.data(), m_foregroundPickingLayer,
                                  SelectionWidgetType::Rotation);
     } else if (m_toolMode == STUDIO_TOOLMODE_SCALE) {
-        m_selectionWidget.create(m_presentation.data(), m_foregroundLayer,
+        m_selectionWidget.create(m_presentation.data(), m_foregroundPickingLayer,
                                  SelectionWidgetType::Scale);
     }
 }
@@ -1360,7 +1571,7 @@ void Q3DSTranslation::prepareDrag(const QPoint &mousePos, Q3DSGraphObjectTransla
     m_beginDragState.s = node.scale();
     m_beginDragState.r = node.rotation();
     m_currentDragState = m_beginDragState;
-    m_dragCamera = cameraForNode(&node);
+    m_dragCamera = cameraForNode(&node, true);
     m_dragStartMousePos = mousePos;
 
     // Find out the diff between node position and initial mouse click to avoid having the dragged
@@ -1372,7 +1583,17 @@ void Q3DSTranslation::prepareDrag(const QPoint &mousePos, Q3DSGraphObjectTransla
 
 void Q3DSTranslation::prepareWidgetDrag(const QPoint &mousePos, Q3DSGraphObject *obj)
 {
+    for (auto &visualAid : qAsConst(m_visualAids)) {
+        if (visualAid.hasCollisionBox(obj)) {
+            auto visualAidTranslator = Q3DSGraphObjectTranslator::translatorForObject(
+                        visualAid.graphObject());
+            m_doc.SelectDataModelObject(visualAidTranslator->instanceHandle());
+            prepareDrag(mousePos, visualAidTranslator);
+            return;
+        }
+    }
     prepareDrag(mousePos);
+
     m_pickedWidget = obj;
     m_selectionWidget.setColor(m_pickedWidget, Qt::yellow);
 }
@@ -1491,12 +1712,12 @@ void Q3DSTranslation::translateAlongWidget(const QPoint &inOriginalCoords,
     Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
     Q3DSNodeAttached *widgetAttached = m_pickedWidget->attached<Q3DSNodeAttached>();
     QMatrix4x4 widgetMatrix = widgetAttached->globalTransform;
-    Q3DSSelectionWidget::adjustRotationLeftToRight(&widgetMatrix);
+    adjustRotationLeftToRight(&widgetMatrix);
 
     Q3DSNode *parentNode = static_cast<Q3DSNode *>(node->parent());
     Q3DSNodeAttached *parentAttached = parentNode->attached<Q3DSNodeAttached>();
     QMatrix4x4 parentMatrix = parentAttached->globalTransform;
-    Q3DSSelectionWidget::adjustRotationLeftToRight(&parentMatrix);
+    adjustRotationLeftToRight(&parentMatrix);
 
     QVector4D direction1;
     QVector4D direction2;
@@ -1664,8 +1885,8 @@ void Q3DSTranslation::rotateAboutCameraDirectionVector(const QPoint &inOriginalC
     QMatrix4x4 cameraMatrix = cameraAttached->globalTransform;
     QMatrix4x4 parentMatrix = parentAttached->globalTransform;
 
-    Q3DSSelectionWidget::adjustRotationLeftToRight(&cameraMatrix);
-    Q3DSSelectionWidget::adjustRotationLeftToRight(&parentMatrix);
+    adjustRotationLeftToRight(&cameraMatrix);
+    adjustRotationLeftToRight(&parentMatrix);
 
     QVector3D cameraDirection = getDirection(cameraMatrix);
     QQuaternion origRotation = QQuaternion::fromEulerAngles(m_beginDragState.r);
@@ -1717,8 +1938,8 @@ void Q3DSTranslation::rotate(const QPoint &inOriginalCoords, const QPoint &inMou
     QMatrix4x4 cameraMatrix = cameraAttached->globalTransform;
     QMatrix4x4 parentMatrix = parentAttached->globalTransform;
 
-    Q3DSSelectionWidget::adjustRotationLeftToRight(&cameraMatrix);
-    Q3DSSelectionWidget::adjustRotationLeftToRight(&parentMatrix);
+    adjustRotationLeftToRight(&cameraMatrix);
+    adjustRotationLeftToRight(&parentMatrix);
 
     QVector3D xAxis = getXAxis(cameraMatrix);
     QVector3D yAxis = getYAxis(cameraMatrix);

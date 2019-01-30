@@ -29,7 +29,6 @@
 #ifndef Q3DSSELECTIONWIDGET_H
 #define Q3DSSELECTIONWIDGET_H
 
-#include <QtCore/qmath.h>
 #include "q3dsruntime2api_p.h"
 
 namespace Q3DStudio {
@@ -64,16 +63,8 @@ public:
 
     void create(Q3DSUipPresentation *presentation, Q3DSLayerNode *layer, SelectionWidgetType type);
     void destroy(Q3DSUipPresentation *presentation);
-    void applyProperties(Q3DSGraphObject *node, Q3DSCameraNode *camera);
-
-    static void adjustRotationLeftToRight(QMatrix4x4 *m)
-    {
-        float *p = m->data();
-        p[2] *= -1;
-        p[6] *= -1;
-        p[8] *= -1;
-        p[9] *= -1;
-    }
+    void applyProperties(Q3DSGraphObject *node, Q3DSCameraNode *camera, Q3DSLayerNode *layer,
+                         const QSize &size);
 
 private:
     SelectionWidgetType m_type = SelectionWidgetType::Translation;

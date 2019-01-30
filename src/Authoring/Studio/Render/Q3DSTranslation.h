@@ -52,6 +52,7 @@
 #include "foundation/Qt3DSOption.h"
 #include "Q3DSEditCamera.h"
 #include "Q3DSSelectionWidget.h"
+#include "Q3DSVisualAidWidget.h"
 #include "StudioEnums.h"
 
 namespace Q3DStudio
@@ -60,6 +61,7 @@ namespace Q3DStudio
 class CUpdateableDocumentEditor;
 class Q3DStudioRenderer;
 class Q3DSGraphObjectTranslator;
+class Q3DSLightTranslator;
 class Q3DSCameraTranslator;
 class Q3DSReferencedMaterialTranslator;
 class Q3DSTranslation
@@ -79,8 +81,10 @@ protected:
 private:
     void setPresentationData();
     QByteArray getInstanceObjectId(qt3dsdm::Qt3DSDMInstanceHandle instance);
-    Q3DSCameraNode *cameraForNode(Q3DSGraphObject *node);
-    void updateForegroundCameraProperties();
+    Q3DSLayerNode *layerForNode(Q3DSGraphObject *node);
+    Q3DSCameraNode *cameraForNode(Q3DSGraphObject *node, bool ignoreSelfCamera = false);
+    void updateVisualAids();
+    void updateForegroundLayerProperties();
     void updateSelectionWidgetProperties();
     void createSelectionWidget();
 
@@ -174,6 +178,7 @@ private:
     QVector<Q3DSReferencedMaterialTranslator *> m_refMatTranslators;
     QMap<qt3dsdm::Qt3DSDMInstanceHandle, Q3DSGraphObjectTranslator *> m_masterSlideMap;
     QHash<qt3dsdm::Qt3DSDMInstanceHandle, QByteArray> m_instanceIdHash;
+    QVector<Q3DSLightTranslator *> m_lightTranslators;
     QVector<Q3DSCameraTranslator *> m_cameraTranslators;
     QRect m_rect;
     QSize m_size;
@@ -189,8 +194,11 @@ private:
 
     Q3DSLayerNode *m_backgroundLayer = nullptr;
     Q3DSLayerNode *m_foregroundLayer = nullptr;
+    Q3DSLayerNode *m_foregroundPickingLayer = nullptr;
     Q3DSCameraNode *m_foregroundCamera = nullptr;
+    Q3DSCameraNode *m_foregroundPickingCamera = nullptr;
     Q3DSCameraNode *m_selectedCamera = nullptr;
+    Q3DSLayerNode *m_selectedLayer = nullptr;
     Q3DSGraphObject *m_selectedObject = nullptr;
     Q3DSModelNode *m_gradient = nullptr;
     Q3DSCustomMaterialInstance *m_gradientMaterial = nullptr;
@@ -199,6 +207,9 @@ private:
     QColor m_pickedWidgetColor;
     Q3DSSelectionWidget m_selectionWidget;
     EditCameraTypes m_oldCameraType = EditCameraTypes::SceneCamera;
+
+    QVector<Q3DSVisualAidWidget> m_visualAids;
+    quint64 m_visualAidIndex = 0;
 
     struct DragState
     {
@@ -244,6 +255,8 @@ public:
     void enableGradient();
     void disableSelectionWidget();
     void enableSelectionWidget(qt3dsdm::Qt3DSDMInstanceHandle instance);
+    void disableVisualAids();
+    void enableVisualAids();
     void releaseTranslator(Q3DSGraphObjectTranslator *translator);
     void clearDirtySet();
     void markDirty(qt3dsdm::Qt3DSDMInstanceHandle instance);

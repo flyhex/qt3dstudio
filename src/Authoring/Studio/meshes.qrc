@@ -13,5 +13,10 @@
         <file alias="res/GreenRotation.mesh">../../../res/GreenRotation.mesh</file>
         <file alias="res/BlueRotation.mesh">../../../res/BlueRotation.mesh</file>
         <file alias="res/RedRotation.mesh">../../../res/RedRotation.mesh</file>
+        <file alias="res/Frustum.mesh">../../../res/Frustum.mesh</file>
+        <file alias="res/DirLight.mesh">../../../res/DirLight.mesh</file>
+        <file alias="res/PointLight.mesh">../../../res/PointLight.mesh</file>
+        <file alias="res/AreaLight.mesh">../../../res/AreaLight.mesh</file>
+        <file alias="res/Icon.mesh">../../../res/Icon.mesh</file>
     </qresource>
 </RCC>

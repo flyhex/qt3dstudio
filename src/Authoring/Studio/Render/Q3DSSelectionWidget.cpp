@@ -27,6 +27,8 @@
 ****************************************************************************/
 
 #include "Q3DSSelectionWidget.h"
+#include "Q3DSWidgetUtils.h"
+#include <QtCore/qmath.h>
 #include <Qt3DCore/qtransform.h>
 
 namespace Q3DStudio {
@@ -165,61 +167,33 @@ void Q3DSSelectionWidget::createModel(Q3DSUipPresentation *presentation, Q3DSLay
                                       const QString &name, const QString &mesh,
                                       const QColor &color, const QVector3D &scale)
 {
-    const QByteArray matName = (name + QLatin1String("Material_")).toUtf8();
-    const QByteArray matId = '#' + matName;
-    QString matData =
-            "<Material name=\""
-            + matName +
-            "\" version=\"1.0\">\n"
-            "<MetaData>\n"
-            "<Property name=\"color\" type=\"Color\" default=\"1.0 0.0 0.0\" stage=\"fragment\" />"
-            "</MetaData>\n"
-            "<Shaders type=\"GLSL\" version=\"330\">\n"
-            "<Shader>\n"
-            "<VertexShader>\n"
-            "attribute vec3 attr_pos;\n"
-            "uniform mat4 modelViewProjection;\n"
-            "void main() {\n"
-            "gl_Position = modelViewProjection * vec4(attr_pos, 1.0);\n"
-            "</VertexShader>\n"
-            "<FragmentShader>\n"
-            "void main() {\n"
-            "fragOutput = vec4(color, 1.0);\n"
-            "</FragmentShader>\n"
-            "</Shader>\n"
-            "</Shaders>\n"
-            "<Passes><Pass></Pass></Passes>\n"
-            "</Material>\n";
+    const QString widgetMaterial = QStringLiteral(
+        "<MetaData>\n"
+        "<Property name=\"color\" type=\"Color\" default=\"1.0 0.0 0.0\" stage=\"fragment\" />\n"
+        "</MetaData>\n"
+        "<Shaders type=\"GLSL\" version=\"330\">\n"
+        "<Shader>\n"
+        "<VertexShader>\n"
+        "attribute vec3 attr_pos;\n"
+        "uniform mat4 modelViewProjection;\n"
+        "void main() {\n"
+        "gl_Position = modelViewProjection * vec4(attr_pos, 1.0);\n"
+        "</VertexShader>\n"
+        "<FragmentShader>\n"
+        "void main() {\n"
+        "fragOutput = vec4(color, 1.0);\n"
+        "</FragmentShader>\n"
+        "</Shader>\n"
+        "</Shaders>\n"
+        "<Passes><Pass></Pass></Passes>\n");
 
-    Q3DSCustomMaterial material = presentation->customMaterial(matId, matData.toUtf8());
-    if (!material.isNull()) {
-        Q3DSModelNode *model;
-        model = presentation->newObject<Q3DSModelNode>(
-                    (name + QLatin1Char('_')).toUtf8().constData());
-        layer->appendChildNode(model);
-        presentation->masterSlide()->addObject(model);
-
-        model->setMesh(mesh);
-        model->resolveReferences(*presentation);
-
-        Q3DSPropertyChangeList list;
-        list.append(model->setScale(scale));
-        model->notifyPropertyChanges(list);
-
-        Q3DSCustomMaterialInstance *customMat
-                = presentation->newObject<Q3DSCustomMaterialInstance>(matId);
-        customMat->setSourcePath(matId);
-        customMat->resolveReferences(*presentation);
-        model->appendChildNode(customMat);
-
-        Q3DSPropertyChangeList colorChange = { Q3DSPropertyChange::fromVariant(
-                                               QStringLiteral("color"), color) };
-        customMat->applyPropertyChanges(colorChange);
-        customMat->notifyPropertyChanges(colorChange);
-        m_materials.push_back(customMat);
-        m_colors.push_back(color);
-        m_scales.push_back(QVector3D(1, 1, 1));
-        m_models.push_back(model);
+    auto material = createWidgetCustomMaterial(presentation, name, widgetMaterial, color);
+    if (material) {
+        m_materials.append(material);
+        m_models.append(createWidgetModel(presentation, layer, name, mesh, scale));
+        m_models.back()->appendChildNode(material);
+        m_colors.append(color);
+        m_scales.append(QVector3D(1, 1, 1));
     }
 }
 
@@ -313,15 +287,15 @@ void Q3DSSelectionWidget::destroy(Q3DSUipPresentation *presentation)
     m_colors.clear();
 }
 
-void applyNodeProperties(Q3DSGraphObject *node, Q3DSCameraNode *camera,
-                         Q3DSModelNode *model, const QVector3D &modelScale) {
+void applyNodeProperties(Q3DSGraphObject *node, Q3DSCameraNode *camera, Q3DSLayerNode *layer,
+                         const QSize &size, Q3DSModelNode *model, const QVector3D &modelScale) {
     Q3DSNodeAttached *attached = node->attached<Q3DSNodeAttached>();
     if (!attached)
         return;
 
     Qt3DCore::QTransform transform;
     QMatrix4x4 globalMatrix = attached->globalTransform;
-    Q3DSSelectionWidget::adjustRotationLeftToRight(&globalMatrix);
+    adjustRotationLeftToRight(&globalMatrix);
     transform.setMatrix(globalMatrix);
 
     QVector3D position = transform.translation();
@@ -331,19 +305,31 @@ void applyNodeProperties(Q3DSGraphObject *node, Q3DSCameraNode *camera,
     list.append(model->setPosition(position));
     list.append(model->setRotation(transform.rotation().toEulerAngles()));
 
-    float distance = 600.0f;
+    float distance = 400.0f;
     float fovScale = 2.0f;
     if (!camera->orthographic()) {
         distance = camera->position().distanceToPoint(position);
         fovScale = 2.0f * float(qTan(qDegreesToRadians(qreal(camera->fov())) / 2.0));
     }
-    const float scale = 0.1f * camera->zoom() * fovScale;
+    float scale = 125.0f * camera->zoom() * fovScale;
+    float width = size.width();
+    float height = size.height();
+    if (layer->widthUnits() == Q3DSLayerNode::Units::Percent) {
+        width *= layer->width() * 0.01f;
+        height *= layer->height() * 0.01f;
+    } else {
+        width = layer->width();
+        height = layer->height();
+    }
+    float length = qSqrt(width * width + height * height);
+    scale /= length;
     list.append(model->setScale(modelScale * scale * distance));
     list.append(model->setEyeballEnabled(true));
     model->notifyPropertyChanges(list);
 }
 
-void Q3DSSelectionWidget::applyProperties(Q3DSGraphObject *node, Q3DSCameraNode *camera)
+void Q3DSSelectionWidget::applyProperties(Q3DSGraphObject *node, Q3DSCameraNode *camera,
+                                          Q3DSLayerNode *layer, const QSize &size)
 {
     for (int i = 0; i < m_models.size(); ++i) {
         if (node->type() == Q3DSGraphObject::Model
@@ -353,7 +339,7 @@ void Q3DSSelectionWidget::applyProperties(Q3DSGraphObject *node, Q3DSCameraNode 
                 || node->type() == Q3DSGraphObject::Camera
                 || node->type() == Q3DSGraphObject::Text
                 || node->type() == Q3DSGraphObject::Component) {
-            applyNodeProperties(node, camera, m_models[i], m_scales[i]);
+            applyNodeProperties(node, camera, layer, size, m_models[i], m_scales[i]);
         }
     }
 
