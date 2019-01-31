@@ -623,6 +623,31 @@ QString InspectorControlModel::getDefaultMaterialString() const
     return QObject::tr("Default");
 }
 
+bool InspectorControlModel::isGroupCollapsed(int groupIdx) const
+{
+    const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase);
+    if (inspectable && groupIdx > -1 && groupIdx < m_groupElements.size()) {
+        auto instance = inspectable->GetGroupInstance(0);
+
+        if (m_collapseMap.contains(instance))
+            return m_collapseMap[instance].contains(groupIdx);
+    }
+
+    return false;
+}
+
+void InspectorControlModel::updateGroupCollapseState(int groupIdx, bool isCollapsed)
+{
+    const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase);
+    if (inspectable && groupIdx > -1 && groupIdx < m_groupElements.size()) {
+        auto instance = inspectable->GetGroupInstance(0);
+        if (isCollapsed)
+            m_collapseMap[instance][groupIdx] = true;
+        else
+            m_collapseMap[instance].remove(groupIdx);
+    }
+}
+
 void InspectorControlModel::updateFontValues(InspectorControlBase *element) const
 {
     // Find if there are any font items and update the values of those

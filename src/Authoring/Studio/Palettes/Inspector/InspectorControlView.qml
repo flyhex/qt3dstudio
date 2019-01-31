@@ -205,12 +205,45 @@ Rectangle {
                     width: parent.width - x
                     spacing: 4
 
-                    StyledLabel {
-                        text: model.title
+                    Rectangle { // group header
+                        x: -10
+                        width: delegateItem.width
+                        height: 25
+                        color: "#111111"
+
+                        StyledLabel {
+                            x: 30
+                            text: model.title
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+
+                        Image {
+                            id: collapseButton
+                            x: 10
+                            anchors.verticalCenter: parent.verticalCenter
+                            source: {
+                                _resDir + (groupItems.visible ? "arrow_down.png" : "arrow.png")
+                            }
+                        }
+
+                        MouseArea {
+                            id: collapseButtonMouseArea
+                            anchors.fill: parent
+                            onClicked: {
+                                if (mouse.button === Qt.LeftButton) {
+                                    groupItems.visible = !groupItems.visible;
+                                    _inspectorModel.updateGroupCollapseState(indexOfThisDelegate,
+                                                                             !groupItems.visible)
+                                }
+                            }
+                        }
                     }
 
                     Column {
                         spacing: 4
+                        id: groupItems
+
+                        visible: !_inspectorModel.isGroupCollapsed(indexOfThisDelegate)
 
                         Repeater {
                             model: delegateItem.values

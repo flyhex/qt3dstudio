@@ -153,6 +153,8 @@ public:
     Q_INVOKABLE bool isDefaultMaterial() const;
     Q_INVOKABLE void addMaterial();
     Q_INVOKABLE void duplicateMaterial();
+    Q_INVOKABLE bool isGroupCollapsed(int groupIdx) const;
+    Q_INVOKABLE void updateGroupCollapseState(int groupIdx, bool state);
 
 private:
     void onSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inOldIndex,
@@ -196,6 +198,8 @@ private:
     QPair<long, int> m_modifiedProperty;
 
     qt3dsdm::SValue m_previouslyCommittedValue;
+
+    QHash<int, QHash<int, bool> > m_collapseMap;
 
     QString getBasicMaterialString() const;
     QString getAnimatableMaterialString() const;
