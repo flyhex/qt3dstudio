@@ -1272,6 +1272,8 @@ void Q3DSTranslation::scale(const QPoint &inOriginalCoords, const QPoint &inMous
 
     Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
     float theScaleMultiplier = 1.0f + theYDistance * (1.0f / 40.0f);
+    if (qFuzzyIsNull(theScaleMultiplier))
+        return;
     m_currentDragState.s = m_beginDragState.s * theScaleMultiplier;
 
     Q3DSPropertyChangeList list;
