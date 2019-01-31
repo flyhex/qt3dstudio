@@ -106,7 +106,7 @@ public:
     void getPreviewFbo(QSize &outFboDim, qt3ds::QT3DSU32 &outFboTexture) override;
     void RegisterSubpresentations(
             const QVector<SubPresentationRecord> &subpresentations) override;
-    void drawGuides(QPainter *painter) override;
+    void drawRulersAndGuides(QPainter *painter) override;
 
     QSharedPointer<Q3DSEngine> &engine();
 
@@ -115,6 +115,7 @@ public:
         return m_viewRect;
     }
     QPoint scenePoint(const QPoint &viewPoint);
+    QPoint presentationPoint(const QPoint &viewPoint);
 
 Q_SIGNALS:
     void objectPicked(int instance);
@@ -153,16 +154,16 @@ private:
     void createTranslation();
     void sendResizeToQt3D();
 
-    void drawTickMarksOnHorizontalRects(QPainter &painter, qreal innerLeft,
-                                        qreal innerRight, qreal innerBottom, qreal innerTop,
-                                        qreal outerBottom, qreal outerTop);
-    void drawTickMarksOnVerticalRects(QPainter &painter, qreal innerLeft,
-                                      qreal innerRight, qreal innerBottom, qreal innerTop,
-                                      qreal outerLeft, qreal outerRight);
+    void drawTickMarksOnHorizontalRects(QPainter &painter, int innerLeft,
+                                        int innerRight, int innerBottom, int innerTop);
+    void drawTickMarksOnVerticalRects(QPainter &painter, int innerLeft,
+                                      int innerRight, int innerBottom, int innerTop);
+    void performGuideDrag(qt3dsdm::Qt3DSDMGuideHandle guide, const QPoint &mousePoint);
+    void checkGuideInPresentationRect(qt3dsdm::Qt3DSDMGuideHandle guide);
 
     PickTargetAreas getPickArea(const QPoint &point);
 
-    qt3ds::foundation::Option<qt3dsdm::SGuideInfo> pickRulers(CPt inMouseCoords);
+    qt3ds::foundation::Option<qt3dsdm::SGuideInfo> pickRulers(const QPoint &inMouseCoords);
     SStudioPickValue pick(const QPoint &inMouseCoords, SelectMode inSelectMode, bool objectPick);
     void ensurePicker();
     void handlePickResult(const SStudioPickValue &pickResult, bool objectPick);
@@ -182,10 +183,12 @@ private:
     QVector<SEditCameraPersistentInformation> m_editCameraInformation;
     QRect m_viewRect;
     QSize m_size;
-    QRect m_innerRect;
-    QRect m_outerRect;
-    QColor m_rectColor;
-    QColor m_lineColor;
+    QColor m_rulerColor;
+    QColor m_rulerTickColor;
+    QColor m_guideColor;
+    QColor m_guideSelectedColor;
+    QColor m_guideFillColor;
+    QColor m_guideSelectedFillColor;
     bool m_guidesEnabled = true;
     bool m_hasPresentation = false;
     bool m_renderRequested = false;

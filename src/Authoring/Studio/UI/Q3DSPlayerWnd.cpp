@@ -432,7 +432,7 @@ void Q3DSPlayerWnd::recenterClient()
     if (!shouldHideScrollBars()) {
         theClientSize = effectivePresentationSize();
         if (g_StudioApp.getRenderer().AreGuidesEnabled())
-            rulerOffset = CStudioPreferences::guideSize() / 2;
+            rulerOffset = CStudioPreferences::rulerSize() / 2;
 
         if (theClientSize.width() < theViewRect.width()) {
             m_ClientRect.setLeft(
@@ -519,7 +519,7 @@ QSize Q3DSPlayerWnd::effectivePresentationSize() const
     // This is a very dirty hack because we are of course hardcoding the size of the guides.
     // If the size of the guides never changes, the bet paid off.
     if (g_StudioApp.getRenderer().AreGuidesEnabled())
-        theSize += QSize(CStudioPreferences::guideSize(), CStudioPreferences::guideSize());
+        theSize += QSize(CStudioPreferences::rulerSize(), CStudioPreferences::rulerSize());
     return theSize;
 }
 

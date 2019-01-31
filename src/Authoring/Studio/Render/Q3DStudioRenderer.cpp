@@ -61,7 +61,8 @@
 
 namespace Q3DStudio {
 
-const int g_wheelFactor = 10; // the wheel zoom factor
+static const int rulerTickInterval = 10;
+static const int wheelZoomFactor = 10;
 
 struct SEditCameraDefinition
 {
@@ -98,10 +99,12 @@ Q3DStudioRenderer::Q3DStudioRenderer()
     m_dispatch.AddSceneDragListener(this);
     m_dispatch.AddToolbarChangeListener(this);
 
-    // Rectangles under tick marks
-    m_rectColor = CStudioPreferences::GetRulerBackgroundColor();
-    // Tick marks
-    m_lineColor = CStudioPreferences::GetRulerTickColor();
+    m_rulerColor = CStudioPreferences::GetRulerBackgroundColor();
+    m_rulerTickColor = CStudioPreferences::GetRulerTickColor();
+    m_guideColor = CStudioPreferences::GetGuideColor();
+    m_guideSelectedColor = CStudioPreferences::GetGuideSelectedColor();
+    m_guideFillColor = CStudioPreferences::GetGuideFillColor();
+    m_guideSelectedFillColor = CStudioPreferences::GetGuideFillSelectedColor();
 
     m_editCameraInformation.resize(g_numEditCameras);
 
@@ -143,8 +146,8 @@ Q3DSRenderBufferManager *Q3DStudioRenderer::GetBufferManager()
 bool Q3DStudioRenderer::requestObjectAt(const QPoint &pt)
 {
     QPoint point;
-    point.setX(int(pt.x() * StudioUtils::devicePixelRatio()));
-    point.setY(int(pt.y() * StudioUtils::devicePixelRatio()));
+    point.setX(int(pt.x() * m_parentPixelRatio));
+    point.setY(int(pt.y() * m_parentPixelRatio));
     PickTargetAreas pickArea = getPickArea(point);
     if (pickArea == PickTargetAreas::Presentation) {
         SStudioPickValue pickValue = pick(point, SelectMode::Single, true);
@@ -329,135 +332,240 @@ void Q3DStudioRenderer::Close()
     m_widget = nullptr;
 }
 
-static void drawTopBottomTickMarks(QPainter &painter, qreal posX, qreal innerBottom,
-                                   qreal innerTop, qreal outerBottom, qreal outerTop,
-                                   qreal lineHeight)
+static void drawTopBottomTickMarks(QPainter &painter, int posX, int innerBottom,
+                                   int innerTop, int lineHeight)
 {
-    painter.drawLine(QLineF(posX, innerBottom - lineHeight, posX, innerBottom));
-    painter.drawLine(QLineF(posX, innerTop, posX, innerTop + lineHeight));
+    painter.drawLine(QLine(posX, innerBottom - lineHeight, posX, innerBottom));
+    painter.drawLine(QLine(posX, innerTop, posX, innerTop + lineHeight));
 }
 
-static void drawLeftRightTickMarks(QPainter &painter, qreal inYPos, qreal innerLeft,
-                                   qreal innerRight, qreal outerLeft, qreal outerRight,
-                                   qreal lineLength)
+static void drawLeftRightTickMarks(QPainter &painter, int inYPos, int innerLeft,
+                                   int innerRight, int lineLength)
 {
-    painter.drawLine(QLineF(innerLeft - lineLength, inYPos, innerLeft, inYPos));
-    painter.drawLine(QLineF(innerRight, inYPos, innerRight + lineLength, inYPos));
+    painter.drawLine(QLine(innerLeft - lineLength, inYPos, innerLeft, inYPos));
+    painter.drawLine(QLine(innerRight, inYPos, innerRight + lineLength, inYPos));
 }
 
-void Q3DStudioRenderer::drawTickMarksOnHorizontalRects(QPainter &painter, qreal innerLeft,
-                                                       qreal innerRight, qreal innerBottom,
-                                                       qreal innerTop, qreal outerBottom,
-                                                       qreal outerTop)
+void Q3DStudioRenderer::drawTickMarksOnHorizontalRects(QPainter &painter, int innerLeft,
+                                                       int innerRight, int innerBottom,
+                                                       int innerTop)
 {
-    qreal length = m_parentPixelRatio * CStudioPreferences::guideSize() / 32.;
-    qreal centerPosX = floor(innerLeft + (innerRight - innerLeft) / 2.0 + .5);
-    drawTopBottomTickMarks(painter, centerPosX, innerBottom, innerTop, outerBottom,
-                           outerTop, 15. * length);
-    int tickInterval = 10 * m_parentPixelRatio;
+    int length = m_parentPixelRatio * CStudioPreferences::rulerSize() / 32;
+    int centerPosX = innerLeft + (innerRight - innerLeft) / 2;
+    drawTopBottomTickMarks(painter, centerPosX, innerBottom, innerTop, 15 * length);
+    int tickInterval = rulerTickInterval * m_parentPixelRatio;
     int largeTickInterval = 10 * tickInterval;
     int mediumTickInterval = 2 * tickInterval;
-    for (unsigned int incrementor = tickInterval;
+    for (int incrementor = tickInterval;
          (centerPosX + incrementor) < innerRight && (centerPosX - incrementor) > innerLeft;
          incrementor += tickInterval) {
-        qreal rightEdge = centerPosX + incrementor;
-        qreal leftEdge = centerPosX - incrementor;
-        qreal lineHeight = 0;
+        int rightEdge = centerPosX + incrementor;
+        int leftEdge = centerPosX - incrementor;
+        int lineHeight = 0;
         if (incrementor % largeTickInterval == 0)
-            lineHeight = 11. * length;
+            lineHeight = 11 * length;
         else if (incrementor % mediumTickInterval)
-            lineHeight = 4. * length;
+            lineHeight = 4 * length;
         else
-            lineHeight = 2. * length;
+            lineHeight = 2 * length;
 
-        if (rightEdge < innerRight) {
-            drawTopBottomTickMarks(painter, rightEdge, innerBottom, innerTop, outerBottom,
-                                   outerTop, lineHeight);
-        }
-        if (leftEdge > innerLeft) {
-            drawTopBottomTickMarks(painter, leftEdge, innerBottom, innerTop, outerBottom,
-                                   outerTop, lineHeight);
-        }
+        if (rightEdge < innerRight)
+            drawTopBottomTickMarks(painter, rightEdge, innerBottom, innerTop, lineHeight);
+        if (leftEdge > innerLeft)
+            drawTopBottomTickMarks(painter, leftEdge, innerBottom, innerTop, lineHeight);
     }
 }
 
-void Q3DStudioRenderer::drawTickMarksOnVerticalRects(QPainter &painter, qreal innerLeft,
-                                                     qreal innerRight, qreal innerBottom,
-                                                     qreal innerTop, qreal outerLeft,
-                                                     qreal outerRight)
+void Q3DStudioRenderer::drawTickMarksOnVerticalRects(QPainter &painter, int innerLeft,
+                                                     int innerRight, int innerBottom,
+                                                     int innerTop)
 {
-    qreal length = m_parentPixelRatio * CStudioPreferences::guideSize() / 32.;
-    qreal centerPosY = floor(innerBottom + (innerTop - innerBottom) / 2.0 + .5);
-    drawLeftRightTickMarks(painter, centerPosY, innerLeft, innerRight, outerLeft,
-                           outerRight, 15. * length);
-    int tickInterval = 10 * m_parentPixelRatio;
+    int length = m_parentPixelRatio * CStudioPreferences::rulerSize() / 32;
+    qreal centerPosY = innerBottom + (innerTop - innerBottom) / 2;
+    drawLeftRightTickMarks(painter, centerPosY, innerLeft, innerRight, 15 * length);
+    int tickInterval = rulerTickInterval * m_parentPixelRatio;
     int largeTickInterval = 10 * tickInterval;
     int mediumTickInterval = 2 * tickInterval;
-    for (unsigned int incrementor = tickInterval;
+    for (int incrementor = tickInterval;
          (centerPosY + incrementor) < innerTop && (centerPosY - incrementor) > innerBottom;
          incrementor += tickInterval) {
-        qreal topEdge = centerPosY + incrementor;
-        qreal bottomEdge = centerPosY - incrementor;
-        qreal lineHeight = 0;
+        int topEdge = centerPosY + incrementor;
+        int bottomEdge = centerPosY - incrementor;
+        int lineHeight = 0;
         if (incrementor % largeTickInterval == 0)
-            lineHeight = 11. * length;
+            lineHeight = 11 * length;
         else if (incrementor % mediumTickInterval)
-            lineHeight = 4. * length;
+            lineHeight = 4 * length;
         else
-            lineHeight = 2. * length;
+            lineHeight = 2 * length;
 
-        if (topEdge < innerTop) {
-            drawLeftRightTickMarks(painter, topEdge, innerLeft, innerRight, outerLeft,
-                                   outerRight, lineHeight);
-        }
-        if (bottomEdge > innerBottom) {
-            drawLeftRightTickMarks(painter, bottomEdge, innerLeft, innerRight, outerLeft,
-                                   outerRight, lineHeight);
-        }
+        if (topEdge < innerTop)
+            drawLeftRightTickMarks(painter, topEdge, innerLeft, innerRight, lineHeight);
+        if (bottomEdge > innerBottom)
+            drawLeftRightTickMarks(painter, bottomEdge, innerLeft, innerRight, lineHeight);
     }
 }
 
-void Q3DStudioRenderer::drawGuides(QPainter *painter)
+void Q3DStudioRenderer::performGuideDrag(qt3dsdm::Qt3DSDMGuideHandle guide,
+                                         const QPoint &mousePoint)
+{
+    auto snapToTicks = [this](int presPoint, int max) -> int {
+        // Guides snap to ruler ticks. Ruler ticks flow from center of presentation to the edges.
+        int half = max / 2;
+        int value = presPoint - half;
+        value = rulerTickInterval * (value / rulerTickInterval);
+        value += half;
+        return value;
+    };
+
+    // We need the guide position in presentation coordinates
+    QPoint presPoint = presentationPoint(mousePoint);
+
+    qt3dsdm::SGuideInfo info = m_doc.GetDocumentReader().GetGuideInfo(guide);
+    switch (info.m_Direction) {
+    case qt3dsdm::GuideDirections::Horizontal:
+        info.m_Position = snapToTicks(presPoint.y(), m_size.height() / m_parentPixelRatio);
+        break;
+    case qt3dsdm::GuideDirections::Vertical:
+        info.m_Position = snapToTicks(presPoint.x(), m_size.width() / m_parentPixelRatio);
+        break;
+    default:
+        break;
+    }
+    m_updatableEditor.EnsureEditor(QObject::tr("Drag Guide"), __FILE__, __LINE__)
+            .UpdateGuide(guide, info);
+    m_updatableEditor.FireImmediateRefresh(qt3dsdm::Qt3DSDMInstanceHandle());
+}
+
+void Q3DStudioRenderer::checkGuideInPresentationRect(qt3dsdm::Qt3DSDMGuideHandle guide)
+{
+    qt3dsdm::SGuideInfo info = m_doc.GetDocumentReader().GetGuideInfo(guide);
+    bool inPresentation = false;
+    switch (info.m_Direction) {
+    case qt3dsdm::GuideDirections::Horizontal:
+        inPresentation = 0.0f <= info.m_Position
+                && float(m_size.height() / m_parentPixelRatio) >= info.m_Position;
+        break;
+    case qt3dsdm::GuideDirections::Vertical:
+        inPresentation = 0.0f <= info.m_Position
+                && float(m_size.width() / m_parentPixelRatio) >= info.m_Position;
+        break;
+    default:
+        break;
+    }
+
+    if (!inPresentation) {
+        m_updatableEditor.EnsureEditor(QObject::tr("Delete Guide"), __FILE__, __LINE__)
+                .DeleteGuide(guide);
+    }
+}
+
+void Q3DStudioRenderer::drawRulersAndGuides(QPainter *painter)
 {
     if (!m_guidesEnabled || editCameraEnabled())
         return;
 
-    int offset = m_parentPixelRatio * (CStudioPreferences::guideSize() / 2);
+    const int pixelRatio = int(m_parentPixelRatio);
+    const int offset = pixelRatio * (CStudioPreferences::rulerSize() / 2);
 
-    int innerLeft = offset;
-    int innerRight = m_viewRect.width() + offset;
-    int innerBottom = m_viewRect.height() + offset;
-    int innerTop = offset;
+    const int innerLeft = offset;
+    const int innerRight = m_viewRect.width() + offset;
+    const int innerBottom = m_viewRect.height() + offset;
+    const int innerTop = offset;
 
-    int outerLeft = innerLeft - offset;
-    int outerRight = innerRight + offset;
-    int outerBottom = innerBottom + offset;
-    int outerTop = innerTop - offset;
+    const int outerLeft = innerLeft - offset;
+    const int outerRight = innerRight + offset;
+    const int outerBottom = innerBottom + offset;
+    const int outerTop = innerTop - offset;
 
-    // Retain the rects for picking purposes.
-    m_innerRect = QRect(innerLeft, innerTop, innerRight - innerLeft, innerBottom - innerTop);
-    m_outerRect = QRect(outerLeft, outerTop, outerRight - outerLeft, outerBottom - outerTop);
-
-    // Draw tick marks around the presentation
+    // Draw rulers around the presentation
     painter->fillRect(QRect(outerLeft, outerTop,
                            innerLeft - outerLeft, outerBottom - outerTop),
-                     m_rectColor);
+                     m_rulerColor);
     painter->fillRect(QRect(innerRight, outerTop,
                            outerRight - innerRight, outerBottom - outerTop),
-                     m_rectColor);
+                     m_rulerColor);
     painter->fillRect(QRect(innerLeft, innerBottom,
                            innerRight - innerLeft, outerBottom - innerBottom),
-                     m_rectColor);
+                     m_rulerColor);
     painter->fillRect(QRect(innerLeft, outerTop,
                            innerRight - innerLeft, innerTop - outerTop),
-                     m_rectColor);
+                     m_rulerColor);
 
-    painter->setPen(m_lineColor);
-    drawTickMarksOnHorizontalRects(*painter, innerLeft, innerRight + 1, innerTop - 1, innerBottom,
-                                   outerTop, outerBottom);
+    // Draw tick marks on rulers
+    painter->setPen(QPen(m_rulerTickColor, pixelRatio, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
+    drawTickMarksOnHorizontalRects(*painter, innerLeft, innerRight, innerTop, innerBottom);
+    drawTickMarksOnVerticalRects(*painter, innerLeft, innerRight, innerTop, innerBottom);
 
-    drawTickMarksOnVerticalRects(*painter, innerLeft, innerRight + 1, innerTop - 1, innerBottom,
-                                 outerLeft, outerRight);
+    // Draw guides
+    if (m_hasPresentation) {
+        qt3dsdm::TGuideHandleList guides = m_doc.GetDocumentReader().GetGuides();
+        qt3dsdm::Qt3DSDMGuideHandle selectedGuide;
+        Q3DStudio::SSelectedValue selection = m_doc.GetSelectedValue();
+        if (selection.getType() == Q3DStudio::SelectedValueTypes::Guide)
+            selectedGuide = selection.getData<qt3dsdm::Qt3DSDMGuideHandle>();
+
+        const QRect presRect(offset, offset, m_size.width(), m_size.height());
+
+        // Depending on presentation dimensions and screen pixel ratio, guides may draw one pixel
+        // off in some direction. Define some offsets to get pixel perfect line drawing with
+        // every combination of odd/even presentation dimensions and 1x/2x pixel ratios.
+        const int pixelRatioOffset = pixelRatio / 2;
+        const int guideLineBottomOffset = 1;
+        const int guideLineRightOffset = 1;
+        const int guideLineHorizontalOffset = 1 - ((m_size.height() / pixelRatio) % 2);
+        const int guideLineVerticalOffset = pixelRatioOffset * ((m_size.height() / pixelRatio) % 2);
+
+        QPen guideSelectedPen(m_guideSelectedColor, pixelRatio, Qt::SolidLine, Qt::FlatCap,
+                              Qt::MiterJoin);
+        QPen guidePen(m_guideColor, pixelRatio, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
+
+        for (size_t guideIdx = 0, guideEnd = guides.size(); guideIdx < guideEnd; ++guideIdx) {
+            qt3dsdm::SGuideInfo info = m_doc.GetDocumentReader().GetGuideInfo(guides[guideIdx]);
+            bool isGuideSelected = guides[guideIdx] == selectedGuide;
+            int halfWidth = pixelRatio * ((info.m_Width + 1) / 2);
+            QRect guideRect = presRect;
+            guideRect.adjust(1, pixelRatioOffset, -pixelRatioOffset, -1);
+            painter->setPen(isGuideSelected ? guideSelectedPen : guidePen);
+            switch (info.m_Direction) {
+            case qt3dsdm::GuideDirections::Horizontal: {
+                const int guidePos = presRect.bottom() - info.m_Position * pixelRatio
+                        + guideLineHorizontalOffset;
+                if (info.m_Width <= 1) {
+                    painter->drawLine(presRect.left(), guidePos,
+                                      presRect.right() + guideLineRightOffset,
+                                      guidePos);
+                } else {
+                    guideRect.setTop(guidePos + halfWidth);
+                    guideRect.setBottom(guidePos - halfWidth);
+                }
+                break;
+            }
+            case qt3dsdm::GuideDirections::Vertical: {
+                const int guidePos = offset + info.m_Position * pixelRatio
+                        + guideLineVerticalOffset;
+                if (info.m_Width <= 1) {
+                    painter->drawLine(guidePos, presRect.top(),
+                                      guidePos, presRect.bottom() + guideLineBottomOffset);
+                } else {
+                    guideRect.setLeft(guidePos + halfWidth);
+                    guideRect.setRight(guidePos - halfWidth);
+                }
+                break;
+            }
+            default:
+                break;
+            }
+
+            // Guides with width one have already been drawn as lines
+            if (info.m_Width > 1) {
+                // Only fill guide rects if they need filling (on hdpi width 2 already needs fill)
+                painter->fillRect(guideRect, isGuideSelected ? m_guideSelectedFillColor
+                                                             : m_guideFillColor);
+                painter->drawRect(guideRect);
+            }
+        }
+    }
 }
 
 void Q3DStudioRenderer::renderNow()
@@ -592,24 +700,36 @@ QPoint Q3DStudioRenderer::scenePoint(const QPoint &viewPoint)
                   viewPoint.y() - m_viewRect.top());
 }
 
-qt3ds::foundation::Option<qt3dsdm::SGuideInfo> Q3DStudioRenderer::pickRulers(CPt inMouseCoords)
+QPoint Q3DStudioRenderer::presentationPoint(const QPoint &viewPoint)
 {
-    CPt renderSpacePt(inMouseCoords.x, long(m_viewRect.y()) - inMouseCoords.y);
-    // If mouse is inside outer rect but outside inner rect.
-    if (m_outerRect.contains(renderSpacePt.x, renderSpacePt.y)
-        && !m_innerRect.contains(renderSpacePt.x, renderSpacePt.y)) {
-        std::shared_ptr<qt3dsdm::IGuideSystem> theGuideSystem =
-            g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetFullSystem()
-                ->GetCoreSystem()->GetGuideSystem();
-        if (renderSpacePt.x >= m_innerRect.left() && renderSpacePt.x <= m_innerRect.right()) {
-            return qt3dsdm::SGuideInfo(renderSpacePt.y - m_innerRect.bottom(),
-                                     qt3dsdm::GuideDirections::Horizontal);
-        } else if (renderSpacePt.y >= m_innerRect.bottom()
-                   && renderSpacePt.y <= m_innerRect.top()) {
-            return qt3dsdm::SGuideInfo(renderSpacePt.x - m_innerRect.left(),
-                                     qt3dsdm::GuideDirections::Vertical);
+    QPoint presPoint = scenePoint(viewPoint);
+    presPoint.setY(m_size.height() - presPoint.y());
+    return presPoint / m_parentPixelRatio;
+}
+
+qt3ds::foundation::Option<qt3dsdm::SGuideInfo> Q3DStudioRenderer::pickRulers(
+        const QPoint &inMouseCoords)
+{
+    if (m_guidesEnabled && !editCameraEnabled()) {
+        // Rulers are drawn around the m_viewRect at constant thickness
+        int thickness = m_parentPixelRatio * (CStudioPreferences::rulerSize() / 2);
+        QRect outerRect = m_viewRect.adjusted(-thickness, -thickness, thickness, thickness);
+        if (outerRect.contains(inMouseCoords)
+                && !m_viewRect.contains(inMouseCoords)) {
+            std::shared_ptr<qt3dsdm::IGuideSystem> theGuideSystem =
+                    g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetFullSystem()
+                    ->GetCoreSystem()->GetGuideSystem();
+            if (inMouseCoords.x() >= m_viewRect.left() && inMouseCoords.x() <= m_viewRect.right()) {
+                return qt3dsdm::SGuideInfo(inMouseCoords.y() - m_viewRect.top(),
+                                           qt3dsdm::GuideDirections::Horizontal);
+            } else if (inMouseCoords.y() <= m_viewRect.bottom()
+                       && inMouseCoords.y() >= m_viewRect.top()) {
+                return qt3dsdm::SGuideInfo(inMouseCoords.x() - m_viewRect.left(),
+                                           qt3dsdm::GuideDirections::Vertical);
+            }
         }
     }
+
     return qt3ds::foundation::Option<qt3dsdm::SGuideInfo>();
 }
 
@@ -620,17 +740,18 @@ SStudioPickValue Q3DStudioRenderer::pick(const QPoint &inMouseCoords, SelectMode
 
     if (!objectPick && m_doc.GetDocumentReader().AreGuidesEditable()) {
         qt3dsdm::TGuideHandleList theGuides = m_doc.GetDocumentReader().GetGuides();
+        QPoint presPoint = presentationPoint(inMouseCoords);
         for (size_t guideIdx = 0, guideEnd = theGuides.size(); guideIdx < guideEnd; ++guideIdx) {
             qt3dsdm::SGuideInfo theGuideInfo =
                 m_doc.GetDocumentReader().GetGuideInfo(theGuides[guideIdx]);
-            float width = (theGuideInfo.m_Width / 2.0f) + 2.0f;
+            float width = (theGuideInfo.m_Width / 2.0f) + (2.0f * m_parentPixelRatio);
             switch (theGuideInfo.m_Direction) {
             case qt3dsdm::GuideDirections::Horizontal:
-                if (qAbs(float(renderPoint.y()) - theGuideInfo.m_Position) <= width)
+                if (qAbs(float(presPoint.y()) - theGuideInfo.m_Position) <= width)
                     return theGuides[guideIdx];
                 break;
             case qt3dsdm::GuideDirections::Vertical:
-                if (qAbs(float(renderPoint.x()) - theGuideInfo.m_Position) <= width)
+                if (qAbs(float(presPoint.x()) - theGuideInfo.m_Position) <= width)
                     return theGuides[guideIdx];
                 break;
             default:
@@ -870,8 +991,8 @@ void Q3DStudioRenderer::OnSceneMouseDown(SceneDragSenderType::Enum inSenderType,
 
     m_mouseDown = true;
 
-    inPoint.setX(int(inPoint.x() * StudioUtils::devicePixelRatio()));
-    inPoint.setY(int(inPoint.y() * StudioUtils::devicePixelRatio()));
+    inPoint.setX(int(inPoint.x() * m_parentPixelRatio));
+    inPoint.setY(int(inPoint.y() * m_parentPixelRatio));
 
     m_dragPickResult = SStudioPickValue();
     if (inSenderType == SceneDragSenderType::SceneWindow) {
@@ -958,8 +1079,8 @@ void Q3DStudioRenderer::OnSceneMouseDrag(SceneDragSenderType::Enum, QPoint inPoi
     if (m_translation.isNull() || m_dragPickResult.getType() == StudioPickValueTypes::Pending)
         return;
 
-    inPoint.setX(int(inPoint.x() * StudioUtils::devicePixelRatio()));
-    inPoint.setY(int(inPoint.y() * StudioUtils::devicePixelRatio()));
+    inPoint.setX(int(inPoint.x() * m_parentPixelRatio));
+    inPoint.setY(int(inPoint.y() * m_parentPixelRatio));
 
     if (m_maybeDragStart) {
         QPoint theDragDistance = inPoint - m_mouseDownPoint;
@@ -1101,15 +1222,17 @@ void Q3DStudioRenderer::OnSceneMouseDrag(SceneDragSenderType::Enum, QPoint inPoi
                 break;
             }
         }
-    } // if ( m_PickResult.m_WidgetId.hasValue() == false )
+    }
+
+    if (m_dragPickResult.getType() == StudioPickValueTypes::Guide)
+        performGuideDrag(m_dragPickResult.getData<qt3dsdm::Qt3DSDMGuideHandle>(), inPoint);
+
+    // if ( m_PickResult.m_WidgetId.hasValue() == false )
 #if RUNTIME_SPLIT_TEMPORARILY_REMOVED
     // We need to do widget-specific dragging.
     else if (m_pickResult.getType() == StudioPickValueTypes::Widget) {
         m_Translation->PerformWidgetDrag(m_PickResult.GetWidgetId(), m_MouseDownPoint,
                                          m_PreviousMousePoint, inPoint, m_UpdatableEditor);
-    } else if (m_PickResult.getType() == StudioPickValueTypes::Guide) {
-        m_Translation->PerformGuideDrag(m_PickResult.getData<Qt3DSDMGuideHandle>(), inPoint,
-                                        m_UpdatableEditor);
     } else if (m_PickResult.getType() == StudioPickValueTypes::Path) {
         SPathPick thePick = m_PickResult.getData<SPathPick>();
         m_Translation->PerformPathDrag(thePick, m_MouseDownPoint, m_PreviousMousePoint, inPoint,
@@ -1126,8 +1249,7 @@ void Q3DStudioRenderer::OnSceneMouseUp(SceneDragSenderType::Enum)
     qt3dsdm::Qt3DSDMGuideHandle theSelectedGuide;
     if (m_dragPickResult.getType() == StudioPickValueTypes::Guide) {
         theSelectedGuide = m_dragPickResult.getData<qt3dsdm::Qt3DSDMGuideHandle>();
-        // TODO:
-        //m_Translation->CheckGuideInPresentationRect(theSelectedGuide, m_UpdatableEditor);
+        checkGuideInPresentationRect(theSelectedGuide);
     }
     if (m_lastDragToolMode != MovementTypes::Unknown)
         m_translation->endDrag(false, m_updatableEditor);
@@ -1157,7 +1279,7 @@ void Q3DStudioRenderer::OnSceneMouseWheel(SceneDragSenderType::Enum inSenderType
 {
     Q_ASSERT(inSenderType == SceneDragSenderType::Matte);
     if (inToolMode == STUDIO_TOOLMODE_CAMERA_ZOOM && m_translation.data()) {
-        qreal theMultiplier = 1.0 - inDelta / qreal(120 * g_wheelFactor);
+        qreal theMultiplier = 1.0 - inDelta / qreal(120 * wheelZoomFactor);
         m_translation->wheelZoom(theMultiplier);
         RequestRender();
     }

@@ -213,7 +213,7 @@ void Q3DSPlayerWidget::paintGL()
         device.setSize(size() * m_fboPixelRatio);
         QPainter painter(&device);
 
-        renderer.drawGuides(&painter);
+        renderer.drawRulersAndGuides(&painter);
     }
 }
 

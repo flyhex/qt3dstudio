@@ -206,7 +206,7 @@ public:
     static int idWidth();
     static int valueWidth();
     static QSize browserPopupSize();
-    static int guideSize();
+    static int rulerSize();
 
     // Default values that Studio will start out with or to restore
     static const long GUTTER_SIZE = 10;
