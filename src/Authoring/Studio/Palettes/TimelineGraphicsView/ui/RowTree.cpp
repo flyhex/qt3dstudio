@@ -43,6 +43,7 @@
 #include "Doc.h"
 #include "Qt3DSDMStudioSystem.h"
 #include "Qt3DSDMSlides.h"
+#include "StudioUtils.h"
 
 #include <QtGui/qpainter.h>
 #include "QtGui/qtextcursor.h"
@@ -183,6 +184,8 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     Q_UNUSED(option)
     Q_UNUSED(widget)
 
+    bool hiResIcons = StudioUtils::devicePixelRatio(widget->window()->windowHandle()) > 1.0;
+
     if (!y()) // prevents flickering when the row is just inserted to the layout
         return;
 
@@ -233,25 +236,42 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     static const QPixmap pixHideDisabled = QPixmap(":/images/Toggle-HideShow-disabled.png");
     static const QPixmap pixHideCtrld = QPixmap(":/images/Toggle-HideShowControlled.png");
     static const QPixmap pixLock = QPixmap(":/images/Toggle-Lock.png");
+    static const QPixmap pixEmpty2x = QPixmap(":/images/Toggle-Empty@2x.png");
+    static const QPixmap pixShy2x = QPixmap(":/images/Toggle-Shy@2x.png");
+    static const QPixmap pixHide2x = QPixmap(":/images/Toggle-HideShow@2x.png");
+    static const QPixmap pixHideDisabled2x = QPixmap(":/images/Toggle-HideShow-disabled@2x.png");
+    static const QPixmap pixHideCtrld2x = QPixmap(":/images/Toggle-HideShowControlled@2x.png");
+    static const QPixmap pixLock2x = QPixmap(":/images/Toggle-Lock@2x.png");
     if (hasActionButtons()) {
-        painter->drawPixmap(m_rectShy, m_shy ? pixShy : pixEmpty);
+        painter->drawPixmap(m_rectShy, hiResIcons ? (m_shy ? pixShy2x : pixEmpty2x)
+                                                  : (m_shy ? pixShy : pixEmpty));
         // Eyeball visibility follows the visibility setting for the object even if it has
         // datainput controller
         // Disable eyeball from master slide
-        if (m_onMasterSlide)
-            painter->drawPixmap(m_rectVisible, pixHideDisabled);
-        else if (m_visibilityCtrld)
-            painter->drawPixmap(m_rectVisible, m_visible ? pixHideCtrld : pixEmpty);
-        else
-            painter->drawPixmap(m_rectVisible, m_visible ? pixHide : pixEmpty);
-        painter->drawPixmap(m_rectLocked, m_locked ? pixLock : pixEmpty);
+        if (m_onMasterSlide) {
+            painter->drawPixmap(m_rectVisible, hiResIcons ? pixHideDisabled2x
+                                                          : pixHideDisabled);
+        } else if (m_visibilityCtrld) {
+            painter->drawPixmap(m_rectVisible, hiResIcons
+                                ? (m_visible ? pixHideCtrld2x : pixEmpty2x)
+                                : (m_visible ? pixHideCtrld : pixEmpty));
+        } else {
+            painter->drawPixmap(m_rectVisible, hiResIcons
+                                ? (m_visible ? pixHide2x : pixEmpty2x)
+                                : (m_visible ? pixHide : pixEmpty));
+        }
+        painter->drawPixmap(m_rectLocked, hiResIcons ? (m_locked ? pixLock2x : pixEmpty2x)
+                                                     : (m_locked ? pixLock : pixEmpty));
     }
 
     static const QPixmap pixInsertLeft = QPixmap(":/images/Insert-Left.png");
     static const QPixmap pixInsertRight = QPixmap(":/images/Insert-Right.png");
+    static const QPixmap pixInsertLeft2x = QPixmap(":/images/Insert-Left@2x.png");
+    static const QPixmap pixInsertRight2x = QPixmap(":/images/Insert-Right@2x.png");
     if (m_dndState == DnDState::SP_TARGET) { // Candidate target of a subpresentation drop
-        painter->drawPixmap(19, 2, pixInsertLeft);
-        painter->drawPixmap(treeWidth() - TimelineConstants::TREE_ICONS_W - 8, 2, pixInsertRight);
+        painter->drawPixmap(19, 2, hiResIcons ? pixInsertLeft2x : pixInsertLeft);
+        painter->drawPixmap(treeWidth() - TimelineConstants::TREE_ICONS_W - 8, 2, hiResIcons
+                            ? pixInsertRight2x : pixInsertRight);
     } else if (m_dndState == DnDState::Parent) { // Candidate parent of a dragged row
         painter->setPen(QPen(CStudioPreferences::timelineRowMoverColor(), 1));
         painter->drawRect(QRect(1, 1, treeWidth() - 2, size().height() - 3));
@@ -264,6 +284,14 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     static const QPixmap pixChildAction = QPixmap(":/images/Action-ChildAction.png");
     static const QPixmap pixCompMasterAction = QPixmap(":/images/Action-ComponentMasterAction.png");
     static const QPixmap pixCompAction = QPixmap(":/images/Action-ComponentAction.png");
+    static const QPixmap pixMasterAction2x = QPixmap(":/images/Action-MasterAction@2x.png");
+    static const QPixmap pixAction2x = QPixmap(":/images/Action-Action@2x.png");
+    static const QPixmap pixChildMasterAction2x
+            = QPixmap(":/images/Action-ChildMasterAction@2x.png");
+    static const QPixmap pixChildAction2x = QPixmap(":/images/Action-ChildAction@2x.png");
+    static const QPixmap pixCompMasterAction2x
+            = QPixmap(":/images/Action-ComponentMasterAction@2x.png");
+    static const QPixmap pixCompAction2x = QPixmap(":/images/Action-ComponentAction@2x.png");
 
     if (!isProperty()) {
         // subpresentation indicators
@@ -276,21 +304,25 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
         }
 
         if (m_actionStates & ActionState::MasterAction) // has master action
-            painter->drawPixmap(0, 0, pixMasterAction);
+            painter->drawPixmap(0, 0, hiResIcons ? pixMasterAction2x : pixMasterAction);
         else if (m_actionStates & ActionState::Action) // has action
-            painter->drawPixmap(0, 0, pixAction);
+            painter->drawPixmap(0, 0, hiResIcons ? pixAction2x : pixAction);
 
         if (!expanded()) {
-            if (m_actionStates & ActionState::MasterChildAction) // children have master action
-                painter->drawPixmap(0, 0, pixChildMasterAction);
-            else if (m_actionStates & ActionState::ChildAction) // children have action
-                painter->drawPixmap(0, 0, pixChildAction);
+            if (m_actionStates & ActionState::MasterChildAction) {
+                // children have master action
+                painter->drawPixmap(0, 0, hiResIcons ? pixChildMasterAction2x
+                                                     : pixChildMasterAction);
+            } else if (m_actionStates & ActionState::ChildAction)  {
+                // children have action
+                painter->drawPixmap(0, 0, hiResIcons ? pixChildAction2x : pixChildAction);
+            }
         }
 
         if (m_actionStates & ActionState::MasterComponentAction) // component has master action
-            painter->drawPixmap(0, 0, pixCompMasterAction);
+            painter->drawPixmap(0, 0, hiResIcons ? pixCompMasterAction2x : pixCompMasterAction);
         else if (m_actionStates & ActionState::ComponentAction) // component has action
-            painter->drawPixmap(0, 0, pixCompAction);
+            painter->drawPixmap(0, 0, hiResIcons ? pixCompAction2x : pixCompAction);
     }
 
     // The following items need to be clipped so that they do not draw overlapping shy etc. buttons
@@ -301,87 +333,138 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     // expand/collapse arrow
     static const QPixmap pixArrow = QPixmap(":/images/arrow.png");
     static const QPixmap pixArrowDown = QPixmap(":/images/arrow_down.png");
-    if (m_arrowVisible)
-        painter->drawPixmap(m_rectArrow, expanded() ? pixArrowDown : pixArrow);
-
-    // Row type icon
-    static const QPixmap pixSceneNormal     = QPixmap(":/images/Objects-Scene-Normal.png");
-    static const QPixmap pixLayerNormal     = QPixmap(":/images/Objects-Layer-Normal.png");
-    static const QPixmap pixObjectNormal    = QPixmap(":/images/Objects-Model-Normal.png");
-    static const QPixmap pixLightNormal     = QPixmap(":/images/Objects-Light-Normal.png");
-    static const QPixmap pixCameraNormal    = QPixmap(":/images/Objects-Camera-Normal.png");
-    static const QPixmap pixTextNormal      = QPixmap(":/images/Objects-Text-Normal.png");
-    static const QPixmap pixAliasNormal     = QPixmap(":/images/Objects-Alias-Normal.png");
-    static const QPixmap pixGroupNormal     = QPixmap(":/images/Objects-Group-Normal.png");
-    static const QPixmap pixComponentNormal = QPixmap(":/images/Objects-Component-Normal.png");
-    static const QPixmap pixMaterialNormal  = QPixmap(":/images/Objects-Material-Normal.png");
-    static const QPixmap pixPropertyNormal  = QPixmap(":/images/Objects-Property-Normal.png");
-    static const QPixmap pixImageNormal     = QPixmap(":/images/Objects-Image-Normal.png");
-    static const QPixmap pixBehaviorNormal  = QPixmap(":/images/Objects-Behavior-Normal.png");
-    static const QPixmap pixEffectNormal    = QPixmap(":/images/Objects-Effect-Normal.png");
-
-    static const QPixmap pixSceneDisabled     = QPixmap(":/images/Objects-Scene-Disabled.png");
-    static const QPixmap pixLayerDisabled     = QPixmap(":/images/Objects-Layer-Disabled.png");
-    static const QPixmap pixObjectDisabled    = QPixmap(":/images/Objects-Model-Disabled.png");
-    static const QPixmap pixLightDisabled     = QPixmap(":/images/Objects-Light-Disabled.png");
-    static const QPixmap pixCameraDisabled    = QPixmap(":/images/Objects-Camera-Disabled.png");
-    static const QPixmap pixTextDisabled      = QPixmap(":/images/Objects-Text-Disabled.png");
-    static const QPixmap pixAliasDisabled     = QPixmap(":/images/Objects-Alias-Disabled.png");
-    static const QPixmap pixGroupDisabled     = QPixmap(":/images/Objects-Group-Disabled.png");
-    static const QPixmap pixComponentDisabled = QPixmap(":/images/Objects-Component-Disabled.png");
-    static const QPixmap pixMaterialDisabled  = QPixmap(":/images/Objects-Material-Disabled.png");
-    static const QPixmap pixPropertyDisabled  = QPixmap(":/images/Objects-Property-Disabled.png");
-    static const QPixmap pixImageDisabled     = QPixmap(":/images/Objects-Image-Disabled.png");
-    static const QPixmap pixBehaviorDisabled  = QPixmap(":/images/Objects-Behavior-Disabled.png");
-    static const QPixmap pixEffectDisabled    = QPixmap(":/images/Objects-Effect-Disabled.png");
-
-    QPixmap pixRowType;
-    switch (m_rowType) {
-    case OBJTYPE_SCENE:
-        pixRowType = m_locked ? pixSceneDisabled : pixSceneNormal;
-        break;
-    case OBJTYPE_LAYER:
-        pixRowType = m_locked ? pixLayerDisabled : pixLayerNormal;
-        break;
-    case OBJTYPE_MODEL:
-        pixRowType = m_locked ? pixObjectDisabled : pixObjectNormal;
-        break;
-    case OBJTYPE_LIGHT:
-        pixRowType = m_locked ? pixLightDisabled : pixLightNormal;
-        break;
-    case OBJTYPE_CAMERA:
-        pixRowType = m_locked ? pixCameraDisabled : pixCameraNormal;
-        break;
-    case OBJTYPE_TEXT:
-        pixRowType = m_locked ? pixTextDisabled : pixTextNormal;
-        break;
-    case OBJTYPE_ALIAS:
-        pixRowType = m_locked ? pixAliasDisabled : pixAliasNormal;
-        break;
-    case OBJTYPE_GROUP:
-        pixRowType = m_locked ? pixGroupDisabled : pixGroupNormal;
-        break;
-    case OBJTYPE_COMPONENT:
-        pixRowType = m_locked ? pixComponentDisabled : pixComponentNormal;
-        break;
-    case OBJTYPE_MATERIAL:
-        pixRowType = m_locked ? pixMaterialDisabled : pixMaterialNormal;
-        break;
-    case OBJTYPE_IMAGE:
-        pixRowType = m_locked ? pixImageDisabled : pixImageNormal;
-        break;
-    case OBJTYPE_BEHAVIOR:
-        pixRowType = m_locked ? pixBehaviorDisabled : pixBehaviorNormal;
-        break;
-    case OBJTYPE_EFFECT:
-        pixRowType = m_locked ? pixEffectDisabled : pixEffectNormal;
-        break;
-    default:
-        break;
+    static const QPixmap pixArrow2x = QPixmap(":/images/arrow@2x.png");
+    static const QPixmap pixArrowDown2x = QPixmap(":/images/arrow_down@2x.png");
+    if (m_arrowVisible) {
+        painter->drawPixmap(m_rectArrow, hiResIcons ? (expanded() ? pixArrowDown2x : pixArrow2x)
+                                                    : (expanded() ? pixArrowDown : pixArrow));
     }
 
-    if (m_isProperty)
-        pixRowType = m_locked ? pixPropertyDisabled : pixPropertyNormal;
+    // Row type icon
+    static const QPixmap pixSceneNormal = QPixmap(":/images/Objects-Scene-Normal.png");
+    static const QPixmap pixLayerNormal = QPixmap(":/images/Objects-Layer-Normal.png");
+    static const QPixmap pixObjectNormal = QPixmap(":/images/Objects-Model-Normal.png");
+    static const QPixmap pixLightNormal = QPixmap(":/images/Objects-Light-Normal.png");
+    static const QPixmap pixCameraNormal = QPixmap(":/images/Objects-Camera-Normal.png");
+    static const QPixmap pixTextNormal = QPixmap(":/images/Objects-Text-Normal.png");
+    static const QPixmap pixAliasNormal = QPixmap(":/images/Objects-Alias-Normal.png");
+    static const QPixmap pixGroupNormal = QPixmap(":/images/Objects-Group-Normal.png");
+    static const QPixmap pixComponentNormal = QPixmap(":/images/Objects-Component-Normal.png");
+    static const QPixmap pixMaterialNormal = QPixmap(":/images/Objects-Material-Normal.png");
+    static const QPixmap pixPropertyNormal = QPixmap(":/images/Objects-Property-Normal.png");
+    static const QPixmap pixImageNormal = QPixmap(":/images/Objects-Image-Normal.png");
+    static const QPixmap pixBehaviorNormal = QPixmap(":/images/Objects-Behavior-Normal.png");
+    static const QPixmap pixEffectNormal= QPixmap(":/images/Objects-Effect-Normal.png");
+    static const QPixmap pixSceneNormal2x = QPixmap(":/images/Objects-Scene-Normal@2x.png");
+    static const QPixmap pixLayerNormal2x = QPixmap(":/images/Objects-Layer-Normal@2x.png");
+    static const QPixmap pixObjectNormal2x = QPixmap(":/images/Objects-Model-Normal@2x.png");
+    static const QPixmap pixLightNormal2x = QPixmap(":/images/Objects-Light-Normal@2x.png");
+    static const QPixmap pixCameraNormal2x = QPixmap(":/images/Objects-Camera-Normal@2x.png");
+    static const QPixmap pixTextNormal2x = QPixmap(":/images/Objects-Text-Normal@2x.png");
+    static const QPixmap pixAliasNormal2x = QPixmap(":/images/Objects-Alias-Normal@2x.png");
+    static const QPixmap pixGroupNormal2x = QPixmap(":/images/Objects-Group-Normal@2x.png");
+    static const QPixmap pixComponentNormal2x = QPixmap(":/images/Objects-Component-Normal@2x.png");
+    static const QPixmap pixMaterialNormal2x = QPixmap(":/images/Objects-Material-Normal@2x.png");
+    static const QPixmap pixPropertyNormal2x = QPixmap(":/images/Objects-Property-Normal@2x.png");
+    static const QPixmap pixImageNormal2x = QPixmap(":/images/Objects-Image-Normal@2x.png");
+    static const QPixmap pixBehaviorNormal2x = QPixmap(":/images/Objects-Behavior-Normal@2x.png");
+    static const QPixmap pixEffectNormal2x = QPixmap(":/images/Objects-Effect-Normal@2x.png");
+
+    static const QPixmap pixSceneDisabled = QPixmap(":/images/Objects-Scene-Disabled.png");
+    static const QPixmap pixLayerDisabled = QPixmap(":/images/Objects-Layer-Disabled.png");
+    static const QPixmap pixObjectDisabled = QPixmap(":/images/Objects-Model-Disabled.png");
+    static const QPixmap pixLightDisabled = QPixmap(":/images/Objects-Light-Disabled.png");
+    static const QPixmap pixCameraDisabled = QPixmap(":/images/Objects-Camera-Disabled.png");
+    static const QPixmap pixTextDisabled = QPixmap(":/images/Objects-Text-Disabled.png");
+    static const QPixmap pixAliasDisabled = QPixmap(":/images/Objects-Alias-Disabled.png");
+    static const QPixmap pixGroupDisabled = QPixmap(":/images/Objects-Group-Disabled.png");
+    static const QPixmap pixComponentDisabled = QPixmap(":/images/Objects-Component-Disabled.png");
+    static const QPixmap pixMaterialDisabled = QPixmap(":/images/Objects-Material-Disabled.png");
+    static const QPixmap pixPropertyDisabled = QPixmap(":/images/Objects-Property-Disabled.png");
+    static const QPixmap pixImageDisabled = QPixmap(":/images/Objects-Image-Disabled.png");
+    static const QPixmap pixBehaviorDisabled = QPixmap(":/images/Objects-Behavior-Disabled.png");
+    static const QPixmap pixEffectDisabled = QPixmap(":/images/Objects-Effect-Disabled.png");
+    static const QPixmap pixSceneDisabled2x = QPixmap(":/images/Objects-Scene-Disabled@2x.png");
+    static const QPixmap pixLayerDisabled2x = QPixmap(":/images/Objects-Layer-Disabled@2x.png");
+    static const QPixmap pixObjectDisabled2x = QPixmap(":/images/Objects-Model-Disabled@2x.png");
+    static const QPixmap pixLightDisabled2x = QPixmap(":/images/Objects-Light-Disabled@2x.png");
+    static const QPixmap pixCameraDisabled2x = QPixmap(":/images/Objects-Camera-Disabled@2x.png");
+    static const QPixmap pixTextDisabled2x = QPixmap(":/images/Objects-Text-Disabled@2x.png");
+    static const QPixmap pixAliasDisabled2x = QPixmap(":/images/Objects-Alias-Disabled@2x.png");
+    static const QPixmap pixGroupDisabled2x = QPixmap(":/images/Objects-Group-Disabled@2x.png");
+    static const QPixmap pixComponentDisabled2x
+            = QPixmap(":/images/Objects-Component-Disabled@2x.png");
+    static const QPixmap pixMaterialDisabled2x
+            = QPixmap(":/images/Objects-Material-Disabled@2x.png");
+    static const QPixmap pixPropertyDisabled2x
+            = QPixmap(":/images/Objects-Property-Disabled@2x.png");
+    static const QPixmap pixImageDisabled2x = QPixmap(":/images/Objects-Image-Disabled@2x.png");
+    static const QPixmap pixBehaviorDisabled2x
+            = QPixmap(":/images/Objects-Behavior-Disabled@2x.png");
+    static const QPixmap pixEffectDisabled2x = QPixmap(":/images/Objects-Effect-Disabled@2x.png");
+
+    QPixmap pixRowType;
+    if (m_isProperty) {
+        pixRowType = hiResIcons ? (m_locked ? pixPropertyDisabled2x : pixPropertyNormal2x)
+                                : (m_locked ? pixPropertyDisabled : pixPropertyNormal);
+    } else {
+        switch (m_rowType) {
+        case OBJTYPE_SCENE:
+            pixRowType = hiResIcons ? (m_locked ? pixSceneDisabled2x : pixSceneNormal2x)
+                                    : (m_locked ? pixSceneDisabled : pixSceneNormal);
+            break;
+        case OBJTYPE_LAYER:
+            pixRowType = hiResIcons ? (m_locked ? pixLayerDisabled2x : pixLayerNormal2x)
+                                    : (m_locked ? pixLayerDisabled : pixLayerNormal);
+            break;
+        case OBJTYPE_MODEL:
+            pixRowType = hiResIcons ? (m_locked ? pixObjectDisabled2x : pixObjectNormal2x)
+                                    : (m_locked ? pixObjectDisabled : pixObjectNormal);
+            break;
+        case OBJTYPE_LIGHT:
+            pixRowType = hiResIcons ? (m_locked ? pixLightDisabled2x : pixLightNormal2x)
+                                    : (m_locked ? pixLightDisabled : pixLightNormal);
+            break;
+        case OBJTYPE_CAMERA:
+            pixRowType = hiResIcons ? (m_locked ? pixCameraDisabled2x : pixCameraNormal2x)
+                                    : (m_locked ? pixCameraDisabled : pixCameraNormal);
+            break;
+        case OBJTYPE_TEXT:
+            pixRowType = hiResIcons ? (m_locked ? pixTextDisabled2x : pixTextNormal2x)
+                                    : (m_locked ? pixTextDisabled : pixTextNormal);
+            break;
+        case OBJTYPE_ALIAS:
+            pixRowType = hiResIcons ? (m_locked ? pixAliasDisabled2x : pixAliasNormal2x)
+                                    : (m_locked ? pixAliasDisabled : pixAliasNormal);
+            break;
+        case OBJTYPE_GROUP:
+            pixRowType = hiResIcons ? (m_locked ? pixGroupDisabled2x : pixGroupNormal2x)
+                                    : (m_locked ? pixGroupDisabled : pixGroupNormal);
+            break;
+        case OBJTYPE_COMPONENT:
+            pixRowType = hiResIcons ? (m_locked ? pixComponentDisabled2x : pixComponentNormal2x)
+                                    : (m_locked ? pixComponentDisabled : pixComponentNormal);
+            break;
+        case OBJTYPE_MATERIAL:
+            pixRowType = hiResIcons ? (m_locked ? pixMaterialDisabled2x : pixMaterialNormal2x)
+                                    : (m_locked ? pixMaterialDisabled : pixMaterialNormal);
+            break;
+        case OBJTYPE_IMAGE:
+            pixRowType = hiResIcons ? (m_locked ? pixImageDisabled2x : pixImageNormal2x)
+                                    : (m_locked ? pixImageDisabled : pixImageNormal);
+            break;
+        case OBJTYPE_BEHAVIOR:
+            pixRowType = hiResIcons ? (m_locked ? pixBehaviorDisabled2x : pixBehaviorNormal2x)
+                                    : (m_locked ? pixBehaviorDisabled : pixBehaviorNormal);
+            break;
+        case OBJTYPE_EFFECT:
+            pixRowType = hiResIcons ? (m_locked ? pixEffectDisabled2x : pixEffectNormal2x)
+                                    : (m_locked ? pixEffectDisabled : pixEffectNormal);
+            break;
+        default:
+            break;
+        }
+    }
 
     painter->drawPixmap(m_rectType, pixRowType);
 }

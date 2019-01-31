@@ -33,6 +33,7 @@
 #include <QtXml/qdom.h>
 #include <QtCore/qsavefile.h>
 #include <QtCore/qxmlstream.h>
+#include <QtGui/qwindow.h>
 
 class StudioUtils {
 public:
@@ -41,7 +42,7 @@ public:
     static QString resourcePath();
     static QString qmlImportPath();
 
-    static qreal devicePixelRatio();
+    static qreal devicePixelRatio(QWindow *window = nullptr);
 
     static bool readFileToDomDocument(const QString &filePath, QDomDocument &domDoc);
     static bool openDomDocumentSave(QSaveFile &file, QDomDocument &domDoc);

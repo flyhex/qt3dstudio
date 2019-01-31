@@ -41,6 +41,7 @@
 #include "AppFonts.h"
 #include "StudioPreferences.h"
 #include "TimelineToolbar.h"
+#include "StudioUtils.h"
 
 #include <QtGui/qpainter.h>
 #include <QtGui/qbrush.h>
@@ -100,6 +101,8 @@ void RowTimeline::initialize()
 void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     Q_UNUSED(option)
+
+    bool hiResIcons = StudioUtils::devicePixelRatio(widget->window()->windowHandle()) > 1.0;
 
     if (!y()) // prevents flickering when the row is just inserted to the layout
         return;
@@ -161,8 +164,9 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
             }
 
             if (m_controllerDataInput.size()) {
-                static const QPixmap pixDataInput
-                        = QPixmap(":/images/Objects-DataInput-White.png");
+                static const QPixmap pixDataInput = QPixmap(":/images/Objects-DataInput-White.png");
+                static const QPixmap pixDataInput2x
+                        = QPixmap(":/images/Objects-DataInput-White@2x.png");
                 static const QFontMetrics fm(painter->font());
 
                 // need clip region to limit datainput icon visibility to the same rect as we use
@@ -178,8 +182,7 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                 int iconx = x + (w - textwidth) / 2;
                 if (iconx < x)
                     iconx = x;
-                painter->drawPixmap(iconx, marginY, pixDataInput.width(), pixDataInput.height(),
-                                    pixDataInput);
+                painter->drawPixmap(iconx, marginY, hiResIcons ? pixDataInput2x : pixDataInput);
                 painter->setPen(Qt::NoPen);
                 painter->setClipping(false);
             }
@@ -228,10 +231,13 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     const qreal keyFrameHalfH = keyFrameH / 2.0;
     const qreal keyFrameY = (qMin(currentHeight, TimelineConstants::ROW_H) / 2.0) - keyFrameHalfH;
     const qreal hiddenKeyFrameY = keyFrameY + (keyFrameH * 2.0 / 3.0) + 2.0;
+    const qreal keyFrameOffset = hiResIcons ? 8 : 7.5;
 
     // Hidden descendant keyframe indicators
     if (!m_rowTree->expanded()) {
         static const QPixmap pixKeyframeHidden = QPixmap(":/images/keyframe-hidden-normal.png");
+        static const QPixmap pixKeyframeHidden2x
+                = QPixmap(":/images/keyframe-hidden-normal@2x.png");
         QVector<long> childKeyframeTimes;
         collectChildKeyframeTimes(childKeyframeTimes);
 
@@ -239,7 +245,8 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
         painter->setOpacity(0.75);
         for (const auto time : qAsConst(childKeyframeTimes)) {
             const qreal xCoord = timeToX(time) - 2.5;
-            painter->drawPixmap(QPointF(xCoord, hiddenKeyFrameY), pixKeyframeHidden);
+            painter->drawPixmap(QPointF(xCoord, hiddenKeyFrameY), hiResIcons
+                                ? pixKeyframeHidden2x : pixKeyframeHidden);
         }
         painter->setOpacity(oldOpacity);
     }
@@ -257,25 +264,47 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                 = QPixmap(":/images/Keyframe-MasterDynamic-Normal.png");
         static const QPixmap pixKeyframeMasterDynamicSelected
                 = QPixmap(":/images/Keyframe-MasterDynamic-Selected.png");
+        static const QPixmap pixKeyframeMasterDisabled2x
+                = QPixmap(":/images/Keyframe-Master-Disabled@2x.png");
+        static const QPixmap pixKeyframeMasterNormal2x
+                = QPixmap(":/images/Keyframe-Master-Normal@2x.png");
+        static const QPixmap pixKeyframeMasterSelected2x
+                = QPixmap(":/images/Keyframe-Master-Selected@2x.png");
+        static const QPixmap pixKeyframeMasterDynamicDisabled2x
+                = QPixmap(":/images/Keyframe-MasterDynamic-Disabled@2x.png");
+        static const QPixmap pixKeyframeMasterDynamicNormal2x
+                = QPixmap(":/images/Keyframe-MasterDynamic-Normal@2x.png");
+        static const QPixmap pixKeyframeMasterDynamicSelected2x
+                = QPixmap(":/images/Keyframe-MasterDynamic-Selected@2x.png");
         for (auto keyframe : qAsConst(m_keyframes)) {
             QPixmap pixmap;
             if (m_rowTree->locked()) {
-                if (keyframe->dynamic)
-                    pixmap = pixKeyframeMasterDynamicDisabled;
-                else
-                    pixmap = pixKeyframeMasterDisabled;
+                if (keyframe->dynamic) {
+                    pixmap = hiResIcons ? pixKeyframeMasterDynamicDisabled2x
+                                        : pixKeyframeMasterDynamicDisabled;
+                } else {
+                    pixmap = hiResIcons ? pixKeyframeMasterDisabled2x
+                                       : pixKeyframeMasterDisabled;
+                }
             } else if (keyframe->selected()) {
-                if (keyframe->dynamic)
-                    pixmap = pixKeyframeMasterDynamicSelected;
-                else
-                    pixmap = pixKeyframeMasterSelected;
+                if (keyframe->dynamic) {
+                    pixmap = hiResIcons ? pixKeyframeMasterDynamicSelected2x
+                                        : pixKeyframeMasterDynamicSelected;
+                } else {
+                    pixmap = hiResIcons ? pixKeyframeMasterSelected2x
+                                        : pixKeyframeMasterSelected;
+                }
             } else {
-                if (keyframe->dynamic)
-                    pixmap = pixKeyframeMasterDynamicNormal;
-                else
-                    pixmap = pixKeyframeMasterNormal;
+                if (keyframe->dynamic) {
+                    pixmap = hiResIcons ? pixKeyframeMasterDynamicNormal2x
+                                        : pixKeyframeMasterDynamicNormal;
+                } else {
+                    pixmap = hiResIcons ? pixKeyframeMasterNormal2x
+                                        : pixKeyframeMasterNormal;
+                }
             }
-            painter->drawPixmap(QPointF(timeToX(keyframe->time) - 8.5, keyFrameY), pixmap);
+            painter->drawPixmap(QPointF(timeToX(keyframe->time) - keyFrameOffset, keyFrameY),
+                                pixmap);
 
             // highlight the pressed keyframe in a multi-selection (the keyframe that is affected
             // by snapping, and setting time dialog)
@@ -298,26 +327,50 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                 = QPixmap(":/images/Keyframe-PropertyDynamic-Normal.png");
         static const QPixmap pixKeyframePropertyDynamicSelected
                 = QPixmap(":/images/Keyframe-PropertyDynamic-Selected.png");
+        static const QPixmap pixKeyframePropertyDisabled2x
+                = QPixmap(":/images/Keyframe-Property-Disabled@2x.png");
+        static const QPixmap pixKeyframePropertyNormal2x
+                = QPixmap(":/images/Keyframe-Property-Normal@2x.png");
+        static const QPixmap pixKeyframePropertySelected2x
+                = QPixmap(":/images/Keyframe-Property-Selected@2x.png");
+        static const QPixmap pixKeyframePropertyDynamicDisabled2x
+                = QPixmap(":/images/Keyframe-PropertyDynamic-Disabled@2x.png");
+        static const QPixmap pixKeyframePropertyDynamicNormal2x
+                = QPixmap(":/images/Keyframe-PropertyDynamic-Normal@2x.png");
+        static const QPixmap pixKeyframePropertyDynamicSelected2x
+                = QPixmap(":/images/Keyframe-PropertyDynamic-Selected@2x.png");
         for (auto keyframe : qAsConst(m_keyframes)) {
             QPixmap pixmap;
             if (m_rowTree->locked()) {
-                if (keyframe->dynamic)
-                    pixmap = pixKeyframePropertyDynamicDisabled;
-                else
-                    pixmap = pixKeyframePropertyDisabled;
+                if (keyframe->dynamic) {
+                    pixmap = hiResIcons ? pixKeyframePropertyDynamicDisabled2x
+                                        : pixKeyframePropertyDynamicDisabled;
+
+                } else {
+                    pixmap = hiResIcons ? pixKeyframePropertyDisabled2x
+                                        : pixKeyframePropertyDisabled;
+                }
             } else if (keyframe->selected()) {
-                if (keyframe->dynamic)
-                    pixmap = pixKeyframePropertyDynamicSelected;
-                else
-                    pixmap = pixKeyframePropertySelected;
+                if (keyframe->dynamic) {
+                    pixmap = hiResIcons ? pixKeyframePropertyDynamicSelected2x
+                                        : pixKeyframePropertyDynamicSelected;
+
+                } else {
+                    pixmap = hiResIcons ? pixKeyframePropertySelected2x
+                                        : pixKeyframePropertySelected;
+                }
             } else {
-                if (keyframe->dynamic)
-                    pixmap = pixKeyframePropertyDynamicNormal;
-                else
-                    pixmap = pixKeyframePropertyNormal;
+                if (keyframe->dynamic) {
+                    pixmap = hiResIcons ? pixKeyframePropertyDynamicNormal2x
+                                        : pixKeyframePropertyDynamicNormal;
+
+                } else {
+                    pixmap = hiResIcons ? pixKeyframePropertyNormal2x
+                                        : pixKeyframePropertyNormal;
+                }
             }
-            painter->drawPixmap(QPointF(timeToX(keyframe->time) - (keyframe->selected() ? 7.5 : 5.5),
-                                keyFrameY), pixmap);
+            painter->drawPixmap(QPointF(timeToX(keyframe->time) - keyFrameOffset, keyFrameY),
+                                pixmap);
         }
     }
 }

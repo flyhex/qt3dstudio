@@ -33,6 +33,8 @@
 #include "StudioClipboard.h"
 #include "Pt.h"
 #include "StudioUtils.h"
+#include "StudioApp.h"
+#include "MainFrm.h"
 
 #include <QtWidgets/qapplication.h>
 #include <QtWidgets/qdesktopwidget.h>
@@ -63,13 +65,19 @@ QString StudioUtils::qmlImportPath()
     return extraImportPath.arg(QApplication::applicationDirPath());
 }
 
-qreal StudioUtils::devicePixelRatio()
+qreal StudioUtils::devicePixelRatio(QWindow *window)
 {
     qreal pixelRatio = 1.0;
 
-    const QWindowList list = QGuiApplication::topLevelWindows();
-    if (list.size() > 0)
-        pixelRatio = list[0]->devicePixelRatio();
+    QWindow *w = window ? window
+                        : g_StudioApp.m_pMainWnd
+                          ? g_StudioApp.m_pMainWnd->windowHandle() : nullptr;
+
+    if (w) {
+        QScreen *s = w->screen();
+        if (s)
+            pixelRatio = s->devicePixelRatio();
+    }
 
     return pixelRatio;
 }

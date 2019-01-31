@@ -30,9 +30,11 @@
 #include "Ruler.h"
 #include "TimelineConstants.h"
 #include "StudioPreferences.h"
+#include "StudioUtils.h"
 
 #include <QtGui/qpainter.h>
 #include <QtGui/qcursor.h>
+#include <QtWidgets/qwidget.h>
 
 PlayHead::PlayHead(Ruler *ruler)
     : QGraphicsRectItem()
@@ -47,10 +49,12 @@ void PlayHead::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     Q_UNUSED(option)
     Q_UNUSED(widget)
 
+    bool hiResIcons = StudioUtils::devicePixelRatio(widget->window()->windowHandle()) > 1.0;
     static const QPixmap pixHead = QPixmap(":/images/PlaybackHead.png");
+    static const QPixmap pixHead2x = QPixmap(":/images/PlaybackHead@2x.png");
 
     static const int PLAY_HEAD_H = 999999; // theoretically big enough height
-    painter->drawPixmap(-TimelineConstants::PLAYHEAD_W * .5, 0, pixHead);
+    painter->drawPixmap(-TimelineConstants::PLAYHEAD_W * .5, 0, hiResIcons ? pixHead2x : pixHead);
     painter->setPen(CStudioPreferences::timelinePlayheadLineColor());
     painter->drawLine(0, 0, 0, PLAY_HEAD_H);
 }
