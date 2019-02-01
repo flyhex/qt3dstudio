@@ -171,6 +171,9 @@ cause an element to not appear on only certain slides, place your
 element on the master slide and then eyeball it off on slides where it
 should not be present.
 
+\note The visible property is disabled on the master slide, it can only be controlled
+on a per-slide basis.
+
 The active state of an element controls more than just visibility.
 Elements that are not active do not receive update notifications each
 frame. which is particularly important for presentation behaviors.
