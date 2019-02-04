@@ -875,7 +875,7 @@ SStudioPickValue Q3DStudioRenderer::postScenePick(bool objectPick)
     if (!translator) {
         if (objectPick)
             return SStudioPickValue();
-        m_translation->prepareWidgetDrag(object);
+        m_translation->prepareWidgetDrag(scenePoint(m_mouseDownPoint), object);
         return SWidgetPick(0);
     }
 
@@ -934,7 +934,7 @@ SStudioPickValue Q3DStudioRenderer::postScenePick(bool objectPick)
     if (translator) {
         Q_ASSERT(translator->graphObject().isNode());
         if (!objectPick)
-            m_translation->prepareDrag(translator);
+            m_translation->prepareDrag(scenePoint(m_mouseDownPoint), translator);
         return translator->instanceHandle();
     }
     return SStudioPickValue();
@@ -1153,29 +1153,33 @@ void Q3DStudioRenderer::OnSceneMouseDrag(SceneDragSenderType::Enum, QPoint inPoi
                         }
 
                         m_lastDragToolMode = theMovement;
+                        const QPoint renderPoint = scenePoint(inPoint);
+                        const QPoint mouseDownRenderPoint = scenePoint(m_mouseDownPoint);
 
                         switch (theMovement) {
                         case MovementTypes::TranslateAlongCameraDirection:
-                            m_translation->translateAlongCameraDirection(m_mouseDownPoint, inPoint,
-                                                                         m_updatableEditor);
+                            m_translation->translateAlongCameraDirection(
+                                        mouseDownRenderPoint, renderPoint, m_updatableEditor);
                             break;
                         case MovementTypes::Translate:
-                            m_translation->translate(m_mouseDownPoint, inPoint, m_updatableEditor,
-                                                     theLockToAxis);
+                            m_translation->translate(mouseDownRenderPoint, renderPoint,
+                                                     m_updatableEditor, theLockToAxis);
                             break;
                         case MovementTypes::ScaleZ:
-                            m_translation->scaleZ(m_mouseDownPoint, inPoint, m_updatableEditor);
+                            m_translation->scaleZ(mouseDownRenderPoint, renderPoint,
+                                                  m_updatableEditor);
                             break;
                         case MovementTypes::Scale:
-                            m_translation->scale(m_mouseDownPoint, inPoint, m_updatableEditor);
+                            m_translation->scale(mouseDownRenderPoint, renderPoint,
+                                                 m_updatableEditor);
                             break;
                         case MovementTypes::Rotation:
-                            m_translation->rotate(m_mouseDownPoint, inPoint,
+                            m_translation->rotate(mouseDownRenderPoint, renderPoint,
                                                   m_updatableEditor, theLockToAxis);
                             break;
                         case MovementTypes::RotationAboutCameraDirection:
-                            m_translation->rotateAboutCameraDirectionVector(m_mouseDownPoint,
-                                                inPoint, m_updatableEditor);
+                            m_translation->rotateAboutCameraDirectionVector(mouseDownRenderPoint,
+                                                renderPoint, m_updatableEditor);
                             break;
                         default:
                             Q_ASSERT_X(false, __FUNCTION__, "invalid movement mode");

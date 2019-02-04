@@ -183,6 +183,8 @@ private:
     bool m_editCameraEnabled = false;
     Q3DSGraphObjectTranslator *m_dragTranslator = nullptr;
     Q3DSCameraNode *m_dragCamera = nullptr;
+    QPoint m_dragStartMousePos;
+    QPoint m_dragPosDiff;
     bool m_presentationInit = false;
 
     Q3DSLayerNode *m_backgroundLayer = nullptr;
@@ -259,8 +261,8 @@ public:
                                                      Q3DSGraphObjectTranslator *aliasTranslator
                                                         = nullptr);
 
-    void prepareDrag(Q3DSGraphObjectTranslator *selected = nullptr);
-    void prepareWidgetDrag(Q3DSGraphObject *obj);
+    void prepareDrag(const QPoint &mousePos, Q3DSGraphObjectTranslator *selected = nullptr);
+    void prepareWidgetDrag(const QPoint &mousePos, Q3DSGraphObject *obj);
     void endDrag(bool dragReset, CUpdateableDocumentEditor &inEditor);
     void endPickWidget();
 

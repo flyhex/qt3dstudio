@@ -43,8 +43,179 @@
 #include "SlideSystem.h"
 
 #include <QtCore/qmath.h>
+#include <Qt3DRender/qcamera.h>
+#include <Qt3DCore/qtransform.h>
 
 namespace Q3DStudio {
+
+// Need custom calculation for camera view matrix to properly handle top/bottom edit cameras,
+// where default upvector doesn't work.
+static QMatrix4x4 calculateCameraViewMatrix(const QMatrix4x4 &cameraWorldTransform)
+{
+    const QVector4D position = cameraWorldTransform * QVector4D(0.0f, 0.0f, 0.0f, 1.0f);
+    const QVector4D viewDirection = cameraWorldTransform * QVector4D(0.0f, 0.0f, -1.0f, 0.0f);
+    const QVector4D upVector = cameraWorldTransform * QVector4D(0.0f, 1.0f, 0.0f, 0.0f);
+
+    QMatrix4x4 m;
+    m.lookAt(QVector3D(position),
+             QVector3D(position + viewDirection),
+             QVector3D(upVector));
+    return QMatrix4x4(m);
+}
+
+static QPointF normalizePointToRect(const QPoint &inPoint, const QRectF &rect)
+{
+    qreal x = qreal(inPoint.x() - rect.x());
+    qreal y = qreal(inPoint.y() - rect.y());
+    x = x / rect.width() * 2 - 1;
+    y = y / rect.height() * 2 - 1;
+    // OpenGL has inverted Y
+    y = -y;
+
+    return QPointF(x, y);
+}
+
+static QVector3D calcRay(const QPointF &point, const QMatrix4x4 &viewMatrix,
+                         const QMatrix4x4 &projectionMatrix, QVector3D &outNearPos)
+{
+    QRect viewPort(-1, -1, 2, 2);
+    outNearPos = QVector3D(float(point.x()), float(point.y()), 0.0f);
+    outNearPos = outNearPos.unproject(viewMatrix, projectionMatrix, viewPort);
+    QVector3D farPos(float(point.x()), float(point.y()), 1.0f);
+    farPos = farPos.unproject(viewMatrix, projectionMatrix, viewPort);
+
+    QVector3D ray = (farPos - outNearPos).normalized();
+
+    return ray;
+}
+
+// Returns the intersection point of a plane and a ray.
+// Parameter t returns the distance in ray lengths. If t is negative, intersection
+// is behind rayOrigin.
+// If there is no intersection, i.e. plane and the ray are paraller, t is set to -1 and
+// rayOrigin is returned.
+static QVector3D findIntersection(const QVector3D &rayOrigin, const QVector3D &ray,
+                                  float planeOffset, const QVector3D &planeNormal, float &t)
+{
+    float divisor = QVector3D::dotProduct(ray, planeNormal);
+    if (qFuzzyCompare(1.0f, 1.0f + divisor)) {
+        t = -1.0f;
+        return rayOrigin;
+    }
+
+    t = -(QVector3D::dotProduct(rayOrigin, planeNormal) - planeOffset) / divisor;
+
+    return rayOrigin + ray * t;
+
+}
+
+// Qt3D and editor have mirrored Z-axes. This function can be used to convert coordinates
+// between the two systems.
+static void flipZTranslation(QVector3D &vec)
+{
+    vec.setZ(-vec.z());
+}
+
+// Calculates the intersection of a ray through camera position and mouse point with a plane
+// that is paraller to the camera plane and goes through the given node if it has
+// the given local position (which can be different than node's actual position).
+static QVector3D mousePointToCameraPlaneIntersection(const QPoint &mousePos,
+                                                     Q3DSCameraNode *cameraNode,
+                                                     Q3DSNode *node,
+                                                     const QVector3D &nodePosition)
+{
+    Q3DSNode *parentNode = static_cast<Q3DSNode *>(node->parent());
+    Q3DSCameraAttached *cameraAttached = cameraNode->attached<Q3DSCameraAttached>();
+    Q3DSNodeAttached *nodeAttached = node->attached<Q3DSNodeAttached>();
+    Q3DSNodeAttached *parentAttached = parentNode->attached<Q3DSNodeAttached>();
+    Q3DSLayerAttached *layerAttached = nodeAttached->layer3DS->attached<Q3DSLayerAttached>();
+
+    QMatrix4x4 parentMatrix = parentAttached->globalTransform;
+    QMatrix4x4 cameraMatrix = cameraAttached->globalTransform;
+
+    QRectF layerRect = QRectF(layerAttached->layerPos, layerAttached->layerSize);
+    QPointF newPoint = normalizePointToRect(mousePos, layerRect);
+
+    auto viewMatrix = calculateCameraViewMatrix(cameraMatrix);
+    auto projectionMatrix = cameraAttached->camera->projectionMatrix();
+
+    QVector3D cameraPos = cameraNode->position();
+    flipZTranslation(cameraPos);
+
+    // zeroRay is effectively the camera plane normal.
+    QVector3D nearPos;
+    QVector3D zeroRay = calcRay(QPointF(0., 0.), viewMatrix, projectionMatrix, nearPos);
+    QVector3D newRay = calcRay(newPoint, viewMatrix, projectionMatrix, nearPos);
+
+    // Find intersections of newRay and oldRay on camera plane that goes through oldPos
+    // Operations are done in Qt3D space, i.e. Z-axis flipped
+    QVector3D beginPos = nodePosition;
+    flipZTranslation(beginPos);
+    QVector3D nodeWorldPos = parentMatrix * beginPos;
+    float distance = -1.f;
+    float cosAngle = QVector3D::dotProduct(nodeWorldPos.normalized(), zeroRay);
+    float planeOffset = nodeWorldPos.length() * cosAngle;
+
+    QVector3D newIntersect = findIntersection(nearPos, newRay, planeOffset, zeroRay, distance);
+    QVector3D endPos = parentMatrix.inverted() * newIntersect;
+    flipZTranslation(endPos); // Flip back to editor coords
+
+    return endPos;
+}
+
+// Projects a local node position to the scene view coordinate
+static QPoint localPositionToMousePoint(Q3DSCameraNode *cameraNode,
+                                        Q3DSNode *node,
+                                        const QVector3D &position,
+                                        const QSize &presSize)
+{
+    Q3DSNode *parentNode = static_cast<Q3DSNode *>(node->parent());
+    Q3DSNodeAttached *parentAttached = parentNode->attached<Q3DSNodeAttached>();
+    Q3DSCameraAttached *cameraAttached = cameraNode->attached<Q3DSCameraAttached>();
+    Q3DSNodeAttached *nodeAttached = node->attached<Q3DSNodeAttached>();
+    Q3DSLayerAttached *layerAttached = nodeAttached->layer3DS->attached<Q3DSLayerAttached>();
+    QMatrix4x4 parentMatrix = parentAttached->globalTransform;
+    QMatrix4x4 cameraMatrix = cameraAttached->globalTransform;
+
+    QVector3D pos = position;
+    flipZTranslation(pos);
+    QVector3D worldPos = parentMatrix * pos;
+
+    auto viewMatrix = calculateCameraViewMatrix(cameraMatrix);
+    auto projectionMatrix = cameraAttached->camera->projectionMatrix();
+
+    QRect layerRect = QRect(layerAttached->layerPos.toPoint(), layerAttached->layerSize);
+    QVector3D layerPoint = worldPos.project(viewMatrix, projectionMatrix, layerRect);
+
+    // Convert layer coordinates to screen coordinates. X is already good, but Y needs bit of
+    // mangling to get correct as OpenGL and mouse Y are flipped
+    QPoint screenPoint(int(layerPoint.x()),
+                       2 * layerRect.y() + layerRect.height() - int(layerPoint.y()));
+
+    return screenPoint;
+}
+
+static QPoint getAxisLockedMousePos(const QPoint &currentMousePos, const QPoint &dragStartMousePos)
+{
+    // Lock to axis that is closest
+    QPoint mousePos = currentMousePos;
+    int xDiff = qAbs(mousePos.x() - dragStartMousePos.x());
+    int yDiff = qAbs(mousePos.y() - dragStartMousePos.y());
+    if (xDiff > yDiff)
+        mousePos.setY(dragStartMousePos.y());
+    else
+        mousePos.setX(dragStartMousePos.x());
+    return mousePos;
+}
+
+// Pulls the 3rd column out of the global transform.
+static QVector3D getDirection(const QMatrix4x4 &matrix)
+{
+    const float *data = matrix.data();
+    QVector3D retval(data[8], data[9], data[10]);
+    retval.normalize();
+    return retval;
+}
 
 Q3DSTranslation::Q3DSTranslation(Q3DStudioRenderer &inRenderer,
                                  const QSharedPointer<Q3DSUipPresentation> &presentation)
@@ -1034,7 +1205,7 @@ void Q3DSTranslation::createSelectionWidget()
     }
 }
 
-void Q3DSTranslation::prepareDrag(Q3DSGraphObjectTranslator *selected)
+void Q3DSTranslation::prepareDrag(const QPoint &mousePos, Q3DSGraphObjectTranslator *selected)
 {
     if (!selected) {
         if (m_selectedObject)
@@ -1050,11 +1221,18 @@ void Q3DSTranslation::prepareDrag(Q3DSGraphObjectTranslator *selected)
     m_beginDragState.r = node.rotation();
     m_currentDragState = m_beginDragState;
     m_dragCamera = cameraForNode(&node);
+    m_dragStartMousePos = mousePos;
+
+    // Find out the diff between node position and initial mouse click to avoid having the dragged
+    // object initially jump a bit
+    QPoint nodeScreenPos = localPositionToMousePoint(m_dragCamera, &node, m_beginDragState.t,
+                                                     m_size);
+    m_dragPosDiff = m_dragStartMousePos - nodeScreenPos;
 }
 
-void Q3DSTranslation::prepareWidgetDrag(Q3DSGraphObject *obj)
+void Q3DSTranslation::prepareWidgetDrag(const QPoint &mousePos, Q3DSGraphObject *obj)
 {
-    prepareDrag();
+    prepareDrag(mousePos);
     m_pickedWidget = obj;
     m_selectionWidget.setColor(m_pickedWidget, Qt::yellow);
 }
@@ -1105,20 +1283,25 @@ void Q3DSTranslation::translateAlongCameraDirection(const QPoint &inOriginalCoor
     float theYDistance = float(inMouseCoords.y() - inOriginalCoords.y());
     if (qFuzzyIsNull(theYDistance))
         return;
+    float distanceMultiplier = theYDistance * 0.5f + 1.f;
 
     Q3DSCameraNode *cameraNode = m_dragCamera;
+    Q3DSCameraAttached *cameraAttached = cameraNode->attached<Q3DSCameraAttached>();
     Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
     Q3DSNode *parentNode = static_cast<Q3DSNode *>(node->parent());
-    Q3DSNodeAttached *cameraAttached = cameraNode->attached<Q3DSNodeAttached>();
     Q3DSNodeAttached *parentAttached = parentNode->attached<Q3DSNodeAttached>();
     QMatrix4x4 cameraMatrix = cameraAttached->globalTransform;
     QMatrix4x4 parentMatrix = parentAttached->globalTransform;
 
-    float distanceMultiplier = theYDistance * 0.5f + 1.f;
-    QVector3D cameraDirection = (cameraMatrix * QVector4D(0.f, 0.f, 1.f, 0.f)).toVector3D();
+    QVector3D cameraDirection = getDirection(cameraMatrix);
     QVector3D diff = cameraDirection * distanceMultiplier;
-    diff = (parentMatrix.inverted() * QVector4D(diff.x(), diff.y(), -diff.z(), 0.f)).toVector3D();
-    m_currentDragState.t = m_beginDragState.t + diff;
+    QVector3D nodePos = m_beginDragState.t;
+    flipZTranslation(nodePos);
+    QVector3D globalNodePos = parentMatrix * nodePos;
+    globalNodePos += diff;
+    m_currentDragState.t = parentMatrix.inverted() * globalNodePos;
+    flipZTranslation(m_currentDragState.t);
+
     Q3DSPropertyChangeList list;
     list.append(node->setPosition(m_currentDragState.t));
     node->notifyPropertyChanges(list);
@@ -1137,37 +1320,14 @@ void Q3DSTranslation::translate(const QPoint &inOriginalCoords, const QPoint &in
         return;
     }
 
-    float theXDistance = float(inMouseCoords.x() - inOriginalCoords.x());
-    float theYDistance = float(inMouseCoords.y() - inOriginalCoords.y());
-    if (qFuzzyIsNull(theXDistance) && qFuzzyIsNull(theYDistance))
-        return;
+    QPoint mousePos = inLockToAxis ? getAxisLockedMousePos(inMouseCoords, m_dragStartMousePos)
+                                   : inMouseCoords;
+    mousePos -= m_dragPosDiff;
 
-    if (inLockToAxis) {
-        if (qAbs(theXDistance) > qAbs(theYDistance))
-            theYDistance = 0;
-        else
-            theXDistance = 0;
-    }
-
-    Q3DSCameraNode *cameraNode = m_dragCamera;
     Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
-    Q3DSNode *parentNode = static_cast<Q3DSNode *>(node->parent());
-    Q3DSNodeAttached *cameraAttached = cameraNode->attached<Q3DSNodeAttached>();
-    Q3DSNodeAttached *parentAttached = parentNode->attached<Q3DSNodeAttached>();
-    QMatrix4x4 cameraMatrix = cameraAttached->globalTransform;
-    Q3DSSelectionWidget::adjustRotationLeftToRight(&cameraMatrix);
-    QMatrix4x4 parentMatrix = parentAttached->globalTransform;
-    Q3DSSelectionWidget::adjustRotationLeftToRight(&parentMatrix);
+    m_currentDragState.t = mousePointToCameraPlaneIntersection(
+                mousePos, m_dragCamera, node, m_beginDragState.t);
 
-    float xMultiplier = theXDistance * 0.5f + 1.f;
-    float yMultiplier = theYDistance * 0.5f + 1.f;
-
-    QVector3D cameraLeft = (cameraMatrix * QVector4D(1.f, 0.f, 0.f, 0.f)).toVector3D();
-    QVector3D cameraUp = (cameraMatrix * QVector4D(0.f, -1.f, 0.f, 0.f)).toVector3D();
-
-    QVector3D diff = cameraLeft * xMultiplier + cameraUp * yMultiplier;
-    diff = (parentMatrix.inverted() * QVector4D(diff, 0.f)).toVector3D();
-    m_currentDragState.t = m_beginDragState.t + diff;
     Q3DSPropertyChangeList list;
     list.append(node->setPosition(m_currentDragState.t));
     node->notifyPropertyChanges(list);
@@ -1244,6 +1404,10 @@ void Q3DSTranslation::scaleZ(const QPoint &inOriginalCoords, const QPoint &inMou
 
     Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
     float theScaleMultiplier = 1.0f + theYDistance * (1.0f / 40.0f);
+
+    if (qFuzzyIsNull(theScaleMultiplier))
+        return;
+
     m_currentDragState.s = QVector3D(m_beginDragState.s.x(), m_beginDragState.s.y(),
                                      m_beginDragState.s.z() * theScaleMultiplier);
 
