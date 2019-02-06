@@ -61,6 +61,7 @@ interactive presentations, UIs and applications.
       \endlist
     \li \b {\l{Graphics}}
       \list
+        \li \l{2D Assets}
         \li \l{Working with 3D Content}{3D Assets}
         \li \l{Layers}
         \li \l{Materials and Shaders}

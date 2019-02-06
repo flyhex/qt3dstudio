@@ -1,0 +1,121 @@
+/****************************************************************************
+**
+** Copyright (C) 2019 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+\page 2d-assets.html
+\title 2D Assets
+
+In Studio, you can import images to use as textures. The following image file formats
+are supported:
+
+\table
+  \header
+    \li File format
+    \li Extensions
+  \row
+    \li PNG
+    \li \c{.png}
+  \row
+    \li JPEG
+    \li \c{.jpg}, \c{.jpeg}
+  \row
+    \li DirectDraw Surface
+    \li \c{.dds}
+  \row
+    \li BMP
+    \li \c{.bmp}
+  \row
+    \li GIF
+    \li \c{.gif}
+  \row
+    \li HDRI (High Dynamic Range Imaging)
+    \li \c{.hdr}
+  \row
+    \li Khronos texture container
+    \li \c{.ktx}
+\endtable
+
+\section1 Using Textures on Materials
+Images can be used as the following textures on materials:
+
+\list
+  \li
+    Diffuse Map
+  \li
+    Roughness Map
+  \li
+    Opacity Map
+  \li
+    Emissive Map
+  \li
+    Bump Map
+  \li
+    Normal Map
+  \li
+    Displacement Map
+  \li
+    Translucency Map
+  \li
+    Specular Map
+  \li
+    Specular Reflection
+  \li
+    Indirect Lightmap
+  \li
+    Shadow Lightmap
+  \li
+    IBL Override
+\endlist
+
+Read more about working with \l Materials.
+
+\section1 Compressed Textures
+
+Qt 3D Studio supports the Khronos texture container file format \e ktx. You can apply \e ktx files
+as texture maps just as any other file format. However, if your system does not support the \e ktx
+format, the textures will not be visible in Qt 3D Studio.
+
+If you enable the \uicontrol {Use ktx textures if available} feature, you can use \e png
+images in Studio, and then use \e ktx images in their place in the Viewer.
+
+\list 1
+  \li In the Studio menu, click \uicontrol{Edit > Presentation Settings}
+  \li Check the \uicontrol {Use ktx textures if available} check box.
+\endlist
+
+\section1 Optimizing Images
+
+Optimizing the images in your presentation can substantially improve both the startup and runtime
+performance of your application, as well as the visual quality in certain situations. Read more
+about \l{Optimizing Images}.
+
+\section1 Image-Based Lighting
+
+HDR images can be used as light probes for environment lighting in Studio. Read more about
+\l{Image-Based Lighting}.
+
+*/
