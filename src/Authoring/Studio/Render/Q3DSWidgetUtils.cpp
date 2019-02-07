@@ -41,7 +41,7 @@ void adjustRotationLeftToRight(QMatrix4x4 *m)
 
 Q3DSModelNode *createWidgetModel(Q3DSUipPresentation *presentation, Q3DSLayerNode *layer,
                                  const QString &name, const QString &mesh,
-                                 const QVector3D &scale, bool wireframe = false)
+                                 const QVector3D &scale, bool wireframe)
 {
     Q3DSModelNode *model = presentation->newObject<Q3DSModelNode>(
                 (name + QLatin1Char('_')).toUtf8().constData());
@@ -101,12 +101,14 @@ Q3DSDefaultMaterial *createWidgetDefaultMaterial(Q3DSUipPresentation *presentati
                                                  const QColor &color,
                                                  float opacity)
 {
-    const QByteArray matName = (name + QLatin1String("Material_")).toUtf8();
-    const QByteArray matId = '#' + matName;
+    const QByteArray matId = (name + QLatin1String("Material_")).toUtf8();
 
+    Q3DSPropertyChangeList list;
     Q3DSDefaultMaterial *defMat = presentation->newObject<Q3DSDefaultMaterial>(matId);
-    defMat->setDiffuse(color);
-    defMat->setOpacity(opacity);
+    list.append(defMat->setDiffuse(color));
+    list.append(defMat->setOpacity(opacity * 100.0f));
+    list.append(defMat->setShaderLighting(Q3DSDefaultMaterial::ShaderLighting::NoShaderLighting));
+    defMat->notifyPropertyChanges(list);
     return defMat;
 }
 

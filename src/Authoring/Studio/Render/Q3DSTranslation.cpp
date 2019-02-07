@@ -393,7 +393,6 @@ static inline float makeNiceRotation(float inAngle)
     return retval;
 }
 
-
 Q3DSTranslation::Q3DSTranslation(Q3DStudioRenderer &inRenderer,
                                  const QSharedPointer<Q3DSUipPresentation> &presentation)
     : m_studioRenderer(inRenderer)
@@ -620,17 +619,17 @@ QVector4D Q3DSTranslation::calculateWidgetArrowDrag(const QPoint &mousePos,
 
         // Find the direction of the drag and the best plane to map against that is parallel
         // to the direction vector
-        if (m_selectionWidget.isXAxis(m_pickedWidget)) {
+        if (m_manipulationWidget.isXAxis(m_pickedWidget)) {
             direction = getXAxis(m_dragNodeGlobalTransform);
             plane1 = getYAxis(m_dragNodeGlobalTransform);
             plane2 = getZAxis(m_dragNodeGlobalTransform);
             distanceMultiplier = -1.f;
-        } else if (m_selectionWidget.isYAxis(m_pickedWidget)) {
+        } else if (m_manipulationWidget.isYAxis(m_pickedWidget)) {
             plane1 = getXAxis(m_dragNodeGlobalTransform);
             direction = getYAxis(m_dragNodeGlobalTransform);
             plane2 = getZAxis(m_dragNodeGlobalTransform);
             distanceMultiplier = -1.f;
-        } else if (m_selectionWidget.isZAxis(m_pickedWidget)) {
+        } else if (m_manipulationWidget.isZAxis(m_pickedWidget)) {
             plane1 = getXAxis(m_dragNodeGlobalTransform);
             plane2 = getYAxis(m_dragNodeGlobalTransform);
             direction = getZAxis(m_dragNodeGlobalTransform);
@@ -1359,13 +1358,7 @@ void Q3DSTranslation::enableGradient()
     }
 }
 
-void Q3DSTranslation::disableSelectionWidget()
-{
-    m_selectionWidget.destroy(m_presentation.data());
-    m_selectedObject = nullptr;
-}
-
-void Q3DSTranslation::enableSelectionWidget(Qt3DSDMInstanceHandle instance)
+void Q3DSTranslation::selectObject(Qt3DSDMInstanceHandle instance)
 {
     Q3DSGraphObjectTranslator *translator = getOrCreateTranslator(instance);
     if (!translator)
@@ -1373,6 +1366,23 @@ void Q3DSTranslation::enableSelectionWidget(Qt3DSDMInstanceHandle instance)
 
     m_selectedObject = &translator->graphObject();
 
+    enableManipulationWidget();
+
+    const auto layer = layerForNode(m_selectedObject);
+    if (layer) {
+        m_selectionWidget.select(m_presentation.data(), layer,
+                                 static_cast<Q3DSNode *>(m_selectedObject));
+    }
+}
+
+void Q3DSTranslation::unselectObject()
+{
+    m_selectedObject = nullptr;
+    m_manipulationWidget.destroyManipulators();
+}
+
+void Q3DSTranslation::enableManipulationWidget()
+{
     if (!m_selectedObject || (m_selectedObject->type() != Q3DSGraphObject::Model
                               && m_selectedObject->type() != Q3DSGraphObject::Alias
                               && m_selectedObject->type() != Q3DSGraphObject::Group
@@ -1380,7 +1390,7 @@ void Q3DSTranslation::enableSelectionWidget(Qt3DSDMInstanceHandle instance)
                               && m_selectedObject->type() != Q3DSGraphObject::Camera
                               && m_selectedObject->type() != Q3DSGraphObject::Text
                               && m_selectedObject->type() != Q3DSGraphObject::Component)) {
-        m_selectionWidget.setEyeballEnabled(false);
+        m_manipulationWidget.setEyeballEnabled(false);
     }
 
     updateForegroundLayerProperties();
@@ -1632,33 +1642,35 @@ void Q3DSTranslation::updateForegroundLayerProperties()
 void Q3DSTranslation::updateSelectionWidgetProperties()
 {
     if (m_selectedObject) {
-        if (!m_selectionWidget.isCreated()) {
+        if (!m_manipulationWidget.hasManipulators()) {
             createSelectionWidget();
         } else if (g_StudioApp.GetToolMode() != m_toolMode) {
-            m_selectionWidget.destroy(m_presentation.data());
+            m_manipulationWidget.destroyManipulators();
             createSelectionWidget();
         }
-        m_selectionWidget.setEyeballEnabled(false);
+        m_manipulationWidget.setEyeballEnabled(false);
 
         if (m_foregroundPickingCamera) {
-            m_selectionWidget.applyProperties(m_selectedObject, m_foregroundPickingCamera,
-                                              m_foregroundLayer, m_size);
+            m_manipulationWidget.applyProperties(m_selectedObject, m_foregroundPickingCamera,
+                                                 m_foregroundLayer, m_size);
         }
     }
+
+    m_selectionWidget.update();
 }
 
 void Q3DSTranslation::createSelectionWidget()
 {
     m_toolMode = g_StudioApp.GetToolMode();
     if (m_toolMode == STUDIO_TOOLMODE_MOVE) {
-        m_selectionWidget.create(m_presentation.data(), m_foregroundPickingLayer,
-                                 SelectionWidgetType::Translation);
+        m_manipulationWidget.createManipulators(m_presentation.data(), m_foregroundPickingLayer,
+                                                ManipulationWidgetType::Translation);
     } else if (m_toolMode == STUDIO_TOOLMODE_ROTATE) {
-        m_selectionWidget.create(m_presentation.data(), m_foregroundPickingLayer,
-                                 SelectionWidgetType::Rotation);
+        m_manipulationWidget.createManipulators(m_presentation.data(), m_foregroundPickingLayer,
+                                                ManipulationWidgetType::Rotation);
     } else if (m_toolMode == STUDIO_TOOLMODE_SCALE) {
-        m_selectionWidget.create(m_presentation.data(), m_foregroundPickingLayer,
-                                 SelectionWidgetType::Scale);
+        m_manipulationWidget.createManipulators(m_presentation.data(), m_foregroundPickingLayer,
+                                                ManipulationWidgetType::Scale);
     }
 }
 
@@ -1703,7 +1715,7 @@ void Q3DSTranslation::prepareWidgetDrag(const QPoint &mousePos, Q3DSGraphObject 
     prepareDrag(mousePos);
 
     m_pickedWidget = obj;
-    m_selectionWidget.setColor(m_pickedWidget, Qt::yellow);
+    m_manipulationWidget.setColor(m_pickedWidget, Qt::yellow);
 }
 
 void Q3DSTranslation::endDrag(bool dragReset, CUpdateableDocumentEditor &inEditor)
@@ -1739,8 +1751,8 @@ void Q3DSTranslation::endDrag(bool dragReset, CUpdateableDocumentEditor &inEdito
 void Q3DSTranslation::endPickWidget()
 {
     if (m_pickedWidget) {
-        m_selectionWidget.resetColor(m_pickedWidget);
-        m_selectionWidget.resetScale(m_pickedWidget);
+        m_manipulationWidget.resetColor(m_pickedWidget);
+        m_manipulationWidget.resetScale(m_pickedWidget);
     }
     m_pickedWidget = nullptr;
 }
@@ -1817,16 +1829,17 @@ void Q3DSTranslation::translateAlongWidget(const QPoint &inMouseCoords,
 
     Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
 
-    if (m_selectionWidget.isXAxis(m_pickedWidget) || m_selectionWidget.isYAxis(m_pickedWidget)
-            || m_selectionWidget.isZAxis(m_pickedWidget)) {
+    if (m_manipulationWidget.isXAxis(m_pickedWidget)
+            || m_manipulationWidget.isYAxis(m_pickedWidget)
+            || m_manipulationWidget.isZAxis(m_pickedWidget)) {
         m_currentDragState.t = calculateWidgetArrowDrag(mousePos).toVector3D();
     } else {
         QVector3D planeNormal;
-        if (m_selectionWidget.isXYPlane(m_pickedWidget))
+        if (m_manipulationWidget.isXYPlane(m_pickedWidget))
             planeNormal = getZAxis(m_dragNodeGlobalTransform);
-        else if (m_selectionWidget.isYZPlane(m_pickedWidget))
+        else if (m_manipulationWidget.isYZPlane(m_pickedWidget))
             planeNormal = getXAxis(m_dragNodeGlobalTransform);
-        else if (m_selectionWidget.isZXPlane(m_pickedWidget))
+        else if (m_manipulationWidget.isZXPlane(m_pickedWidget))
             planeNormal = getYAxis(m_dragNodeGlobalTransform);
         m_currentDragState.t = mousePointToPlaneIntersection(
                     mousePos, m_dragCamera, node, m_beginDragState.t, planeNormal, false);
@@ -1907,16 +1920,17 @@ void Q3DSTranslation::scaleAlongWidget(const QPoint &inOriginalCoords, const QPo
     Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
 
     QVector3D scaleVec(1.f, 1.f, 1.f);
-    if (m_selectionWidget.isXAxis(m_pickedWidget) || m_selectionWidget.isYAxis(m_pickedWidget)
-            || m_selectionWidget.isZAxis(m_pickedWidget)) {
+    if (m_manipulationWidget.isXAxis(m_pickedWidget)
+            || m_manipulationWidget.isYAxis(m_pickedWidget)
+            || m_manipulationWidget.isZAxis(m_pickedWidget)) {
         float distance = calculateWidgetArrowDrag(mousePos).w();
         float scaleAmount = distance / scaleRatio;
         float magnitude = 1.f + scaleAmount;
-        if (m_selectionWidget.isXAxis(m_pickedWidget))
+        if (m_manipulationWidget.isXAxis(m_pickedWidget))
             scaleVec = QVector3D(magnitude, 1.f, 1.f);
-        else if (m_selectionWidget.isYAxis(m_pickedWidget))
+        else if (m_manipulationWidget.isYAxis(m_pickedWidget))
             scaleVec = QVector3D(1.f, magnitude, 1.f);
-        else if (m_selectionWidget.isZAxis(m_pickedWidget))
+        else if (m_manipulationWidget.isZAxis(m_pickedWidget))
             scaleVec = QVector3D(1.f, 1.f, magnitude);
     } else {
         float xScale = 1.f;
@@ -1924,7 +1938,7 @@ void Q3DSTranslation::scaleAlongWidget(const QPoint &inOriginalCoords, const QPo
         float zScale = 1.f;
         QVector3D planeNormal;
 
-        if (m_selectionWidget.isXYPlane(m_pickedWidget)) {
+        if (m_manipulationWidget.isXYPlane(m_pickedWidget)) {
             planeNormal = getZAxis(m_dragNodeGlobalTransform);
             xScale = 1.f + calculateWidgetArrowDrag(
                         mousePos, planeNormal, getXAxis(m_dragNodeGlobalTransform)).w()
@@ -1933,7 +1947,7 @@ void Q3DSTranslation::scaleAlongWidget(const QPoint &inOriginalCoords, const QPo
                         mousePos, planeNormal, getYAxis(m_dragNodeGlobalTransform)).w()
                     / -scaleRatio;
             scaleVec = QVector3D(xScale, yScale, 1.f);
-        } else if (m_selectionWidget.isYZPlane(m_pickedWidget)) {
+        } else if (m_manipulationWidget.isYZPlane(m_pickedWidget)) {
             planeNormal = getXAxis(m_dragNodeGlobalTransform);
             yScale = 1.f + calculateWidgetArrowDrag(
                         mousePos, planeNormal, getYAxis(m_dragNodeGlobalTransform)).w()
@@ -1942,7 +1956,7 @@ void Q3DSTranslation::scaleAlongWidget(const QPoint &inOriginalCoords, const QPo
                         mousePos, planeNormal, getZAxis(m_dragNodeGlobalTransform)).w()
                     / scaleRatio;
             scaleVec = QVector3D(1.f, yScale, zScale);
-        } else if (m_selectionWidget.isZXPlane(m_pickedWidget)) {
+        } else if (m_manipulationWidget.isZXPlane(m_pickedWidget)) {
             planeNormal = getYAxis(m_dragNodeGlobalTransform);
             xScale = 1.f + calculateWidgetArrowDrag(
                         mousePos, planeNormal, getXAxis(m_dragNodeGlobalTransform)).w()
@@ -2110,13 +2124,13 @@ void Q3DSTranslation::rotateAlongWidget(const QPoint &inOriginalCoords,
     flipZTranslation(origRay);
 
     QVector3D planeNormal;
-    if (m_selectionWidget.isXYCircle(m_pickedWidget))
+    if (m_manipulationWidget.isXYCircle(m_pickedWidget))
         planeNormal = getZAxis(m_dragNodeGlobalTransform);
-    else if (m_selectionWidget.isYZCircle(m_pickedWidget))
+    else if (m_manipulationWidget.isYZCircle(m_pickedWidget))
         planeNormal = getXAxis(m_dragNodeGlobalTransform);
-    else if (m_selectionWidget.isZXCircle(m_pickedWidget))
+    else if (m_manipulationWidget.isZXCircle(m_pickedWidget))
         planeNormal = getYAxis(m_dragNodeGlobalTransform);
-    else if (m_selectionWidget.isCameraCircle(m_pickedWidget))
+    else if (m_manipulationWidget.isCameraCircle(m_pickedWidget))
         planeNormal = getZAxis(cameraMatrix);
     flipZTranslation(planeNormal);
 

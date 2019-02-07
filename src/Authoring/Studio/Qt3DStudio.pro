@@ -268,7 +268,8 @@ HEADERS += \
     Palettes/TimelineGraphicsView/ui/RowTimelineCommentItem.h \
     Render/Q3DSSelectionWidget.h \
     Render/Q3DSVisualAidWidget.h \
-    Render/Q3DSWidgetUtils.h
+    Render/Q3DSWidgetUtils.h \
+    Render/Q3DSManipulationWidget.h
 
 FORMS += \
     MainFrm.ui \
@@ -440,7 +441,8 @@ SOURCES += \
     Palettes/TimelineGraphicsView/ui/RowTimelineCommentItem.cpp \
     Render/Q3DSSelectionWidget.cpp \
     Render/Q3DSVisualAidWidget.cpp \
-    Render/Q3DSWidgetUtils.cpp
+    Render/Q3DSWidgetUtils.cpp \
+    Render/Q3DSManipulationWidget.cpp
 
 RESOURCES += \
     MainFrm.qrc \

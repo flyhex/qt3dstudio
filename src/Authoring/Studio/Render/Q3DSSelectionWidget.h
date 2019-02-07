@@ -33,49 +33,40 @@
 
 namespace Q3DStudio {
 
-enum class SelectionWidgetType
-{
-    Translation,
-    Rotation,
-    Scale
-};
-
 class Q3DSSelectionWidget
 {
 public:
-    bool isCreated() const;
-    bool isXAxis(Q3DSGraphObject *obj) const;
-    bool isYAxis(Q3DSGraphObject *obj) const;
-    bool isZAxis(Q3DSGraphObject *obj) const;
-    bool isXYPlane(Q3DSGraphObject *obj) const;
-    bool isYZPlane(Q3DSGraphObject *obj) const;
-    bool isZXPlane(Q3DSGraphObject *obj) const;
-    bool isXYCircle(Q3DSGraphObject *obj) const;
-    bool isYZCircle(Q3DSGraphObject *obj) const;
-    bool isZXCircle(Q3DSGraphObject *obj) const;
-    bool isCameraCircle(Q3DSGraphObject *obj) const;
-
-    void setScale(Q3DSGraphObject *obj, const QVector3D &scale);
-    void resetScale(Q3DSGraphObject *obj);
-    void setColor(Q3DSGraphObject *obj, const QColor &color);
-    void resetColor(Q3DSGraphObject *obj);
-    void setEyeballEnabled(bool value);
-
-    void create(Q3DSUipPresentation *presentation, Q3DSLayerNode *layer, SelectionWidgetType type);
-    void destroy(Q3DSUipPresentation *presentation);
-    void applyProperties(Q3DSGraphObject *node, Q3DSCameraNode *camera, Q3DSLayerNode *layer,
-                         const QSize &size);
+    void select(Q3DSUipPresentation *presentation, Q3DSLayerNode *layer, Q3DSNode *node);
+    void update();
 
 private:
-    SelectionWidgetType m_type = SelectionWidgetType::Translation;
-    QVector<Q3DSModelNode *> m_models;
-    QVector<Q3DSCustomMaterialInstance *> m_materials;
-    QVector<QColor> m_colors;
-    QVector<QVector3D> m_scales;
+    Q3DSUipPresentation *m_presentation = nullptr;
 
-    void createModel(Q3DSUipPresentation *presentation, Q3DSLayerNode *layer,
-                     const QString &name, const QString &mesh,
-                     const QColor &color, const QVector3D &scale);
+    struct BoundingBox
+    {
+        QVector3D min = QVector3D(std::numeric_limits<float>::max(),
+                                  std::numeric_limits<float>::max(),
+                                  std::numeric_limits<float>::max());
+        QVector3D max = QVector3D(-std::numeric_limits<float>::max(),
+                                  -std::numeric_limits<float>::max(),
+                                  -std::numeric_limits<float>::max());
+    };
+
+    struct Selection
+    {
+        QVector<Q3DSNode *> nodes;
+        QVector<Q3DSModelNode *> models;
+        QVector<BoundingBox> boundingBoxes;
+    };
+
+    QHash<QString, BoundingBox> m_boundingBoxCache;
+    QHash<Q3DSLayerNode *, Selection> m_selections;
+
+    BoundingBox calculateLocalBoundingBox(Q3DSModelNode *model);
+    BoundingBox calculateBoundingBox(Q3DSGraphObject *graphObject);
+    void rotateBoundingBox(BoundingBox &box, const QQuaternion &rotation);
+    void selectRecursive(Q3DSUipPresentation *presentation, Q3DSLayerNode *layer, Q3DSNode *node,
+                         int &index, int depth);
 };
 
 }

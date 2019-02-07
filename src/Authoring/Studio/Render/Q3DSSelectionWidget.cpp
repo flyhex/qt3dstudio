@@ -30,328 +30,245 @@
 #include "Q3DSWidgetUtils.h"
 #include <QtCore/qmath.h>
 #include <Qt3DCore/qtransform.h>
+#include <Qt3DRender/qattribute.h>
+#include <Qt3DRender/qbuffer.h>
 
 namespace Q3DStudio {
 
-bool Q3DSSelectionWidget::isCreated() const
+Q3DSSelectionWidget::BoundingBox Q3DSSelectionWidget::calculateLocalBoundingBox(
+        Q3DSModelNode *model)
 {
-    return m_models.size() > 0;
+    // TODO: Pre-calculate bounding boxes to prevent lag upon first selection
+    const QString srcPath = model->sourcePath();
+    if (m_boundingBoxCache.contains(srcPath))
+        return m_boundingBoxCache[srcPath];
+
+    BoundingBox box;
+
+    const MeshList meshList = model->mesh();
+    if (meshList.empty())
+        return box;
+
+    const auto boundingAttribute = meshList[0]->geometry()->boundingVolumePositionAttribute();
+    const auto data = boundingAttribute->buffer()->data();
+    const uint stride = boundingAttribute->byteStride();
+    const uint offset = boundingAttribute->byteOffset();
+    const uint size = boundingAttribute->vertexSize();
+    const Qt3DRender::QAttribute::VertexBaseType type = boundingAttribute->vertexBaseType();
+
+    if (type != Qt3DRender::QAttribute::VertexBaseType::Float || size != 3) {
+        // Other types and sizes are not handled at the moment
+        Q_ASSERT(false);
+        return box;
+    }
+
+    for (uint i = 0; i < data.size(); i += stride) {
+        uint index = i + offset;
+        const float x = *reinterpret_cast<float *>(data.mid(index, 4).data());
+        const float y = *reinterpret_cast<float *>(data.mid(index + 4, 4).data());
+        const float z = *reinterpret_cast<float *>(data.mid(index + 8, 4).data());
+        if (box.min.x() > x)
+            box.min.setX(x);
+        if (box.min.y() > y)
+            box.min.setY(y);
+        if (box.min.z() > z)
+            box.min.setZ(z);
+
+        if (box.max.x() < x)
+            box.max.setX(x);
+        if (box.max.y() < y)
+            box.max.setY(y);
+        if (box.max.z() < z)
+            box.max.setZ(z);
+    }
+
+    m_boundingBoxCache[srcPath] = box;
+    return box;
 }
 
-bool Q3DSSelectionWidget::isXAxis(Q3DSGraphObject *obj) const
+Q3DSSelectionWidget::BoundingBox Q3DSSelectionWidget::calculateBoundingBox(
+        Q3DSGraphObject *graphObject)
 {
-    if (m_type == SelectionWidgetType::Rotation || m_models.size() < 6)
-        return false;
-    return obj == m_models[2];
-}
+    BoundingBox boundingBox;
+    if (graphObject->type() == Q3DSNode::Type::Model) {
+        boundingBox = calculateLocalBoundingBox(static_cast<Q3DSModelNode *>(graphObject));
+    } else if (graphObject->childCount() == 0
+               || graphObject->type() != Q3DSGraphObject::Type::Group) {
+        boundingBox.min = QVector3D(0, 0, 0);
+        boundingBox.max = QVector3D(0, 0, 0);
+    }
 
-bool Q3DSSelectionWidget::isYAxis(Q3DSGraphObject *obj) const
-{
-    if (m_type == SelectionWidgetType::Rotation || m_models.size() < 6)
-        return false;
-    return obj == m_models[0];
-}
+    for (Q3DSGraphObject *child = graphObject->firstChild(); child != nullptr;
+         child = child->nextSibling()) {
+        Q3DSNode *childNode = static_cast<Q3DSNode *>(child);
+        BoundingBox childBB = calculateBoundingBox(child);
+        if ((childBB.max - childBB.min).length() > 0) {
+            QVector3D rotation = childNode->rotation();
+            QQuaternion quat;
+            if (childNode->orientation() == Q3DSNode::Orientation::LeftHanded) {
+                auto rotX = QQuaternion::fromAxisAndAngle(QVector3D(-1, 0, 0), rotation.x());
+                auto rotY = QQuaternion::fromAxisAndAngle(QVector3D(0, -1, 0), rotation.y());
+                auto rotZ = QQuaternion::fromAxisAndAngle(QVector3D(0, 0, 1), rotation.z());
+                quat = rotY * rotX * rotZ;
+            } else {
+                auto rotX = QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), rotation.x());
+                auto rotY = QQuaternion::fromAxisAndAngle(QVector3D(0, 1, 0), rotation.y());
+                auto rotZ = QQuaternion::fromAxisAndAngle(QVector3D(0, 0, 1), rotation.z());
+                quat = rotZ * rotY * rotX;
+            }
 
-bool Q3DSSelectionWidget::isZAxis(Q3DSGraphObject *obj) const
-{
-    if (m_type == SelectionWidgetType::Rotation || m_models.size() < 6)
-        return false;
-    return obj == m_models[1];
-}
+            rotateBoundingBox(childBB, quat);
 
-bool Q3DSSelectionWidget::isXYPlane(Q3DSGraphObject *obj) const
-{
-    if (m_type == SelectionWidgetType::Rotation || m_models.size() < 6)
-        return false;
-    return obj == m_models[4];
-}
+            const QVector3D scale = childNode->scale();
+            childBB.min *= scale;
+            childBB.max *= scale;
 
-bool Q3DSSelectionWidget::isYZPlane(Q3DSGraphObject *obj) const
-{
-    if (m_type == SelectionWidgetType::Rotation || m_models.size() < 6)
-        return false;
-    return obj == m_models[5];
-}
+            QVector3D position = childNode->position();
+            position.setZ(-position.z());
+            childBB.min += position;
+            childBB.max += position;
 
-bool Q3DSSelectionWidget::isZXPlane(Q3DSGraphObject *obj) const
-{
-    if (m_type == SelectionWidgetType::Rotation || m_models.size() < 6)
-        return false;
-    return obj == m_models[3];
-}
+            if (childBB.min.x() < boundingBox.min.x())
+                boundingBox.min.setX(childBB.min.x());
+            if (childBB.min.y() < boundingBox.min.y())
+                boundingBox.min.setY(childBB.min.y());
+            if (childBB.min.z() < boundingBox.min.z())
+                boundingBox.min.setZ(childBB.min.z());
 
-bool Q3DSSelectionWidget::isXYCircle(Q3DSGraphObject *obj) const
-{
-    if (m_type != SelectionWidgetType::Rotation || m_models.size() < 4)
-        return false;
-    return obj == m_models[1];
-}
-
-bool Q3DSSelectionWidget::isYZCircle(Q3DSGraphObject *obj) const
-{
-    if (m_type != SelectionWidgetType::Rotation || m_models.size() < 4)
-        return false;
-    return obj == m_models[2];
-}
-
-bool Q3DSSelectionWidget::isZXCircle(Q3DSGraphObject *obj) const
-{
-    if (m_type != SelectionWidgetType::Rotation || m_models.size() < 4)
-        return false;
-    return obj == m_models[0];
-}
-
-bool Q3DSSelectionWidget::isCameraCircle(Q3DSGraphObject *obj) const
-{
-    if (m_type != SelectionWidgetType::Rotation || m_models.size() < 4)
-        return false;
-    return obj == m_models[3];
-}
-
-void Q3DSSelectionWidget::setScale(Q3DSGraphObject *obj, const QVector3D &scale)
-{
-    for (int i = 0; i < m_models.size(); ++i) {
-        if (m_models[i] == obj) {
-            m_scales[i] = scale;
-            break;
+            if (childBB.max.x() > boundingBox.max.x())
+                boundingBox.max.setX(childBB.max.x());
+            if (childBB.max.y() > boundingBox.max.y())
+                boundingBox.max.setY(childBB.max.y());
+            if (childBB.max.z() > boundingBox.max.z())
+                boundingBox.max.setZ(childBB.max.z());
         }
     }
+
+    return boundingBox;
 }
 
-void Q3DSSelectionWidget::resetScale(Q3DSGraphObject *obj)
+void Q3DSSelectionWidget::rotateBoundingBox(BoundingBox &box, const QQuaternion &rotation)
 {
-    for (int i = 0; i < m_models.size(); ++i) {
-        if (m_models[i] == obj) {
-            m_scales[i] = QVector3D(1, 1, 1);
-            break;
-        }
+    QVector3D points[8];
+    points[0] = QVector3D(box.min.x(), box.min.y(), box.min.z());
+    points[1] = QVector3D(box.max.x(), box.min.y(), box.min.z());
+    points[2] = QVector3D(box.max.x(), box.max.y(), box.min.z());
+    points[3] = QVector3D(box.min.x(), box.max.y(), box.min.z());
+    points[4] = QVector3D(box.max.x(), box.max.y(), box.max.z());
+    points[5] = QVector3D(box.min.x(), box.max.y(), box.max.z());
+    points[6] = QVector3D(box.min.x(), box.min.y(), box.max.z());
+    points[7] = QVector3D(box.max.x(), box.min.y(), box.max.z());
+    box.min = QVector3D(std::numeric_limits<float>::max(),
+                            std::numeric_limits<float>::max(),
+                            std::numeric_limits<float>::max());
+    box.max = QVector3D(-std::numeric_limits<float>::max(),
+                            -std::numeric_limits<float>::max(),
+                            -std::numeric_limits<float>::max());
+    for (auto &point : points) {
+        point = rotation * point;
+
+        if (point.x() < box.min.x())
+            box.min.setX(point.x());
+        if (point.y() < box.min.y())
+            box.min.setY(point.y());
+        if (point.z() < box.min.z())
+            box.min.setZ(point.z());
+
+        if (point.x() > box.max.x())
+            box.max.setX(point.x());
+        if (point.y() > box.max.y())
+            box.max.setY(point.y());
+        if (point.z() > box.max.z())
+            box.max.setZ(point.z());
     }
 }
 
-void Q3DSSelectionWidget::setColor(Q3DSGraphObject *obj, const QColor &color)
+
+void Q3DSSelectionWidget::select(Q3DSUipPresentation *presentation, Q3DSLayerNode *layer,
+                                 Q3DSNode *node)
 {
-    for (int i = 0; i < m_models.size(); ++i) {
-        if (m_models[i] == obj) {
-            Q3DSPropertyChangeList colorChange = { Q3DSPropertyChange::fromVariant(
-                                                   QStringLiteral("color"), color) };
-            m_materials[i]->applyPropertyChanges(colorChange);
-            m_materials[i]->notifyPropertyChanges(colorChange);
-            break;
-        }
+    for (auto &selection : qAsConst(m_selections)) {
+        for (auto &model : qAsConst(selection.models))
+            model->notifyPropertyChanges({ model->setEyeballEnabled(false) });
     }
+    int index = 0;
+    selectRecursive(presentation, layer, node, index, 0);
 }
 
-void Q3DSSelectionWidget::resetColor(Q3DSGraphObject *obj)
+void Q3DSSelectionWidget::selectRecursive(Q3DSUipPresentation *presentation, Q3DSLayerNode *layer,
+                                          Q3DSNode *node, int &index, int depth)
 {
-    for (int i = 0; i < m_models.size(); ++i) {
-        if (m_models[i] == obj) {
-            Q3DSPropertyChangeList colorChange = { Q3DSPropertyChange::fromVariant(
-                                                   QStringLiteral("color"), m_colors[i]) };
-            m_materials[i]->applyPropertyChanges(colorChange);
-            m_materials[i]->notifyPropertyChanges(colorChange);
-            break;
-        }
-    }
-}
-
-void Q3DSSelectionWidget::setEyeballEnabled(bool value)
-{
-    for (auto &model : qAsConst(m_models)) {
-        Q3DSPropertyChangeList list;
-        list.append(model->setEyeballEnabled(value));
-        model->notifyPropertyChanges(list);
-    }
-}
-
-void Q3DSSelectionWidget::createModel(Q3DSUipPresentation *presentation, Q3DSLayerNode *layer,
-                                      const QString &name, const QString &mesh,
-                                      const QColor &color, const QVector3D &scale)
-{
-    const QString widgetMaterial = QStringLiteral(
-        "<MetaData>\n"
-        "<Property name=\"color\" type=\"Color\" default=\"1.0 0.0 0.0\" stage=\"fragment\" />\n"
-        "</MetaData>\n"
-        "<Shaders type=\"GLSL\" version=\"330\">\n"
-        "<Shader>\n"
-        "<VertexShader>\n"
-        "attribute vec3 attr_pos;\n"
-        "uniform mat4 modelViewProjection;\n"
-        "void main() {\n"
-        "gl_Position = modelViewProjection * vec4(attr_pos, 1.0);\n"
-        "</VertexShader>\n"
-        "<FragmentShader>\n"
-        "void main() {\n"
-        "fragOutput = vec4(color, 1.0);\n"
-        "</FragmentShader>\n"
-        "</Shader>\n"
-        "</Shaders>\n"
-        "<Passes><Pass></Pass></Passes>\n");
-
-    auto material = createWidgetCustomMaterial(presentation, name, widgetMaterial, color);
-    if (material) {
-        m_materials.append(material);
-        m_models.append(createWidgetModel(presentation, layer, name, mesh, scale));
-        m_models.back()->appendChildNode(material);
-        m_colors.append(color);
-        m_scales.append(QVector3D(1, 1, 1));
-    }
-}
-
-void Q3DSSelectionWidget::create(Q3DSUipPresentation *presentation, Q3DSLayerNode *layer,
-                                 SelectionWidgetType type)
-{
-    if (isCreated())
+    if (depth > 1)
         return;
 
-    m_type = type;
-    if (m_type == SelectionWidgetType::Translation) {
-        createModel(presentation, layer,
-                    QStringLiteral("StudioTranslationWidgetGreenPointer"),
-                    QStringLiteral(":/res/GreenArrow.mesh"),
-                    QColor(Qt::green), QVector3D(50, 50, 50));
-        createModel(presentation, layer,
-                    QStringLiteral("StudioTranslationWidgetBluePointer"),
-                    QStringLiteral(":/res/BlueArrow.mesh"),
-                    QColor(Qt::blue), QVector3D(50, 50, 50));
-        createModel(presentation, layer,
-                    QStringLiteral("StudioTranslationWidgetRedPointer"),
-                    QStringLiteral(":/res/RedArrow.mesh"),
-                    QColor(Qt::red), QVector3D(50, 50, 50));
-        createModel(presentation, layer,
-                    QStringLiteral("StudioTranslationWidgetGreenCircle"),
-                    QStringLiteral(":/res/GreenCircle.mesh"),
-                    QColor(Qt::green), QVector3D(50, 50, 50));
-        createModel(presentation, layer,
-                    QStringLiteral("StudioTranslationWidgetBlueCircle"),
-                    QStringLiteral(":/res/BlueCircle.mesh"),
-                    QColor(Qt::blue), QVector3D(50, 50, 50));
-        createModel(presentation, layer,
-                    QStringLiteral("StudioTranslationWidgetRedCircle"),
-                    QStringLiteral(":/res/RedCircle.mesh"),
-                    QColor(Qt::red), QVector3D(50, 50, 50));
-    } else if (m_type == SelectionWidgetType::Rotation) {
-        createModel(presentation, layer,
-                    QStringLiteral("StudioTranslationWidgetGreenCircle"),
-                    QStringLiteral(":/res/GreenRotation.mesh"),
-                    QColor(Qt::green), QVector3D(50, 50, 50));
-        createModel(presentation, layer,
-                    QStringLiteral("StudioTranslationWidgetBlueCircle"),
-                    QStringLiteral(":/res/BlueRotation.mesh"),
-                    QColor(Qt::blue), QVector3D(50, 50, 50));
-        createModel(presentation, layer,
-                    QStringLiteral("StudioTranslationWidgetRedCircle"),
-                    QStringLiteral(":/res/RedRotation.mesh"),
-                    QColor(Qt::red), QVector3D(50, 50, 50));
-        createModel(presentation, layer,
-                    QStringLiteral("StudioTranslationWidgetGrayCircle"),
-                    QStringLiteral(":/res/BlueRotation.mesh"),
-                    QColor(Qt::gray), QVector3D(50, 50, 50));
-    } else if (m_type == SelectionWidgetType::Scale) {
-        createModel(presentation, layer,
-                    QStringLiteral("StudioTranslationWidgetGreenPointer"),
-                    QStringLiteral(":/res/GreenScale.mesh"),
-                    QColor(Qt::green), QVector3D(50, 50, 50));
-        createModel(presentation, layer,
-                    QStringLiteral("StudioTranslationWidgetBluePointer"),
-                    QStringLiteral(":/res/BlueScale.mesh"),
-                    QColor(Qt::blue), QVector3D(50, 50, 50));
-        createModel(presentation, layer,
-                    QStringLiteral("StudioTranslationWidgetRedPointer"),
-                    QStringLiteral(":/res/RedScale.mesh"),
-                    QColor(Qt::red), QVector3D(50, 50, 50));
-        createModel(presentation, layer,
-                    QStringLiteral("StudioTranslationWidgetGreenCircle"),
-                    QStringLiteral(":/res/GreenCircle.mesh"),
-                    QColor(Qt::green), QVector3D(50, 50, 50));
-        createModel(presentation, layer,
-                    QStringLiteral("StudioTranslationWidgetBlueCircle"),
-                    QStringLiteral(":/res/BlueCircle.mesh"),
-                    QColor(Qt::blue), QVector3D(50, 50, 50));
-        createModel(presentation, layer,
-                    QStringLiteral("StudioTranslationWidgetRedCircle"),
-                    QStringLiteral(":/res/RedCircle.mesh"),
-                    QColor(Qt::red), QVector3D(50, 50, 50));
-    }
-}
-
-void Q3DSSelectionWidget::destroy(Q3DSUipPresentation *presentation)
-{
-    for (auto &model : qAsConst(m_models)) {
-        presentation->masterSlide()->removeObject(model);
-        presentation->unlinkObject(model);
-        delete model;
-    }
-
-    m_models.clear();
-    m_materials.clear();
-    m_colors.clear();
-}
-
-void applyNodeProperties(Q3DSGraphObject *node, Q3DSCameraNode *camera, Q3DSLayerNode *layer,
-                         const QSize &size, Q3DSModelNode *model, const QVector3D &modelScale) {
-    Q3DSNodeAttached *attached = node->attached<Q3DSNodeAttached>();
-    if (!attached)
+    if (node->type() != Q3DSGraphObject::Type::Model
+            && node->type() != Q3DSGraphObject::Type::Group) {
         return;
-
-    Qt3DCore::QTransform transform;
-    QMatrix4x4 globalMatrix = attached->globalTransform;
-    adjustRotationLeftToRight(&globalMatrix);
-    transform.setMatrix(globalMatrix);
-
-    QVector3D position = transform.translation();
-    position.setZ(-position.z());
-
-    Q3DSPropertyChangeList list;
-    list.append(model->setPosition(position));
-    list.append(model->setRotation(transform.rotation().toEulerAngles()));
-
-    float distance = 400.0f;
-    float fovScale = 2.0f;
-    if (!camera->orthographic()) {
-        distance = camera->position().distanceToPoint(position);
-        fovScale = 2.0f * float(qTan(qDegreesToRadians(qreal(camera->fov())) / 2.0));
     }
-    float scale = 125.0f * camera->zoom() * fovScale;
-    float width = size.width();
-    float height = size.height();
-    if (layer->widthUnits() == Q3DSLayerNode::Units::Percent) {
-        width *= layer->width() * 0.01f;
-        height *= layer->height() * 0.01f;
-    } else {
-        width = layer->width();
-        height = layer->height();
+
+    if (m_selections[layer].nodes.size() == index)
+        m_selections[layer].nodes.resize(index + 1);
+    m_selections[layer].nodes[index] = node;
+
+    if (m_selections[layer].boundingBoxes.size() == index)
+        m_selections[layer].boundingBoxes.resize(index + 1);
+    m_selections[layer].boundingBoxes[index] = calculateBoundingBox(node);
+
+    if (m_selections[layer].models.size() == index) {
+        const QString name = QStringLiteral("StudioSelectionWidgetBoundingBox") + layer->id()
+                + QString::number(m_selections[layer].nodes.size());
+        auto model = createWidgetModel(presentation, layer, name,
+                                       QStringLiteral(":/res/Selection.mesh"),
+                                       QVector3D(1, 1, 1), true);
+        auto material = createWidgetDefaultMaterial(presentation, name, Qt::red);
+        model->appendChildNode(material);
+        m_selections[layer].models.resize(index + 1);
+        m_selections[layer].models[index] = model;
     }
-    float length = qSqrt(width * width + height * height);
-    scale /= length;
-    list.append(model->setScale(modelScale * scale * distance));
-    list.append(model->setEyeballEnabled(true));
-    model->notifyPropertyChanges(list);
+    const auto model = m_selections[layer].models[index];
+    model->notifyPropertyChanges({ model->setEyeballEnabled(true) });
+
+    index++;
+
+    for (Q3DSGraphObject *child = node->firstChild(); child != nullptr;
+         child = child->nextSibling()) {
+        selectRecursive(presentation, layer, static_cast<Q3DSNode *>(child), index, depth + 1);
+    }
 }
 
-void Q3DSSelectionWidget::applyProperties(Q3DSGraphObject *node, Q3DSCameraNode *camera,
-                                          Q3DSLayerNode *layer, const QSize &size)
+void Q3DSSelectionWidget::update()
 {
-    for (int i = 0; i < m_models.size(); ++i) {
-        if (node->type() == Q3DSGraphObject::Model
-                || node->type() == Q3DSGraphObject::Alias
-                || node->type() == Q3DSGraphObject::Group
-                || node->type() == Q3DSGraphObject::Light
-                || node->type() == Q3DSGraphObject::Camera
-                || node->type() == Q3DSGraphObject::Text
-                || node->type() == Q3DSGraphObject::Component) {
-            applyNodeProperties(node, camera, layer, size, m_models[i], m_scales[i]);
+    for (auto &selection : qAsConst(m_selections)) {
+        for (int i = 0; i < selection.models.size(); ++i) {
+            auto node = selection.nodes[i];
+            auto model = selection.models[i];
+            auto boundingBox = selection.boundingBoxes[i];
+
+            QVector3D bbSize(qAbs(boundingBox.max.x() - boundingBox.min.x()),
+                             qAbs(boundingBox.max.y() - boundingBox.min.y()),
+                             qAbs(boundingBox.max.z() - boundingBox.min.z()));
+
+            if (bbSize.length() > 0) {
+                Q3DSNodeAttached *attached = node->attached<Q3DSNodeAttached>();
+                if (!attached)
+                    continue;
+
+                Qt3DCore::QTransform transform;
+                QMatrix4x4 globalMatrix = attached->globalTransform;
+                globalMatrix.translate(boundingBox.min + bbSize / 2.0f);
+                adjustRotationLeftToRight(&globalMatrix);
+                transform.setMatrix(globalMatrix);
+
+                QVector3D position = transform.translation();
+                position.setZ(-position.z());
+
+                Q3DSPropertyChangeList list;
+                list.append(model->setPosition(position));
+                list.append(model->setRotation(transform.rotation().toEulerAngles()));
+                list.append(model->setScale(transform.scale() * bbSize * 0.5f));
+                model->notifyPropertyChanges(list);
+            }
         }
-    }
-
-    if (m_type == SelectionWidgetType::Rotation && m_models.size() >= 4) {
-        // The fourth model of the rotation widget has to look towards the camera
-        QQuaternion rotation = QQuaternion::fromDirection(
-                    (camera->position() - m_models[3]->position()).normalized(),
-                    QVector3D(0, 1, 0));
-
-        Q3DSPropertyChangeList list;
-        list.append(m_models[3]->setRotation(rotation.toEulerAngles()));
-        m_models[3]->notifyPropertyChanges(list);
     }
 }
 

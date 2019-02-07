@@ -18,5 +18,6 @@
         <file alias="res/PointLight.mesh">../../../res/PointLight.mesh</file>
         <file alias="res/AreaLight.mesh">../../../res/AreaLight.mesh</file>
         <file alias="res/Icon.mesh">../../../res/Icon.mesh</file>
+        <file alias="res/Selection.mesh">../../../res/Selection.mesh</file>
     </qresource>
 </RCC>

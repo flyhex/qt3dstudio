@@ -52,6 +52,7 @@
 #include "foundation/Qt3DSOption.h"
 #include "Q3DSEditCamera.h"
 #include "Q3DSSelectionWidget.h"
+#include "Q3DSManipulationWidget.h"
 #include "Q3DSVisualAidWidget.h"
 #include "StudioEnums.h"
 
@@ -88,6 +89,9 @@ private:
     void updateForegroundLayerProperties();
     void updateSelectionWidgetProperties();
     void createSelectionWidget();
+    void enableManipulationWidget();
+    void disableVisualAids();
+    void enableVisualAids();
 
     struct TranslatorGetDirty
     {
@@ -210,8 +214,9 @@ private:
     long m_toolMode = STUDIO_TOOLMODE_MOVE;
     Q3DSGraphObject *m_pickedWidget = nullptr;
     QColor m_pickedWidgetColor;
-    Q3DSSelectionWidget m_selectionWidget;
     EditCameraTypes m_oldCameraType = EditCameraTypes::SceneCamera;
+    Q3DSManipulationWidget m_manipulationWidget;
+    Q3DSSelectionWidget m_selectionWidget;
 
     QVector<Q3DSVisualAidWidget> m_visualAids;
     quint64 m_visualAidIndex = 0;
@@ -258,10 +263,8 @@ public:
     void enableForegroundLayer();
     void disableGradient();
     void enableGradient();
-    void disableSelectionWidget();
-    void enableSelectionWidget(qt3dsdm::Qt3DSDMInstanceHandle instance);
-    void disableVisualAids();
-    void enableVisualAids();
+    void selectObject(qt3dsdm::Qt3DSDMInstanceHandle instance);
+    void unselectObject();
     void releaseTranslator(Q3DSGraphObjectTranslator *translator);
     void clearDirtySet();
     void markDirty(qt3dsdm::Qt3DSDMInstanceHandle instance);

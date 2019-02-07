@@ -126,7 +126,8 @@ Q3DSVisualAidWidget::Q3DSVisualAidWidget(Q3DSUipPresentation *presentation, Q3DS
             "<Passes><Pass></Pass></Passes>\n");
 
     if (m_type == VisualAidType::Camera) {
-        const QString name = QStringLiteral("StudioFrustum") + QString::number(id);
+        const QString name = QStringLiteral("StudioVisualAidWidgetFrustum")
+                + QString::number(id);
         m_wireframeMaterial = createWidgetCustomMaterial(presentation, name, cameraMaterial,
                                                          Qt::white, 0.25f);
         if (m_wireframeMaterial) {
@@ -136,7 +137,8 @@ Q3DSVisualAidWidget::Q3DSVisualAidWidget(Q3DSUipPresentation *presentation, Q3DS
             m_wireframe->appendChildNode(m_wireframeMaterial);
         }
     } else if (m_type == VisualAidType::DirectionalLight) {
-        const QString name = QStringLiteral("StudioDirectionalLight") + QString::number(id);
+        const QString name = QStringLiteral("StudioVisualAidWidgetDirectionalLight")
+                + QString::number(id);
         m_wireframeMaterial = createWidgetCustomMaterial(presentation, name, basicMaterial,
                                                          Qt::white, 0.25f);
         if (m_wireframeMaterial) {
@@ -146,7 +148,8 @@ Q3DSVisualAidWidget::Q3DSVisualAidWidget(Q3DSUipPresentation *presentation, Q3DS
             m_wireframe->appendChildNode(m_wireframeMaterial);
         }
     } else if (m_type == VisualAidType::PointLight) {
-        const QString name = QStringLiteral("StudioPointLight") + QString::number(id);
+        const QString name = QStringLiteral("StudioVisualAidWidgetPointLight")
+                + QString::number(id);
         m_wireframeMaterial = createWidgetCustomMaterial(presentation, name, basicMaterial,
                                                          Qt::white, 0.25f);
         if (m_wireframeMaterial) {
@@ -156,7 +159,8 @@ Q3DSVisualAidWidget::Q3DSVisualAidWidget(Q3DSUipPresentation *presentation, Q3DS
             m_wireframe->appendChildNode(m_wireframeMaterial);
         }
     } else if (m_type == VisualAidType::AreaLight) {
-        const QString name = QStringLiteral("StudioAreaLight") + QString::number(id);
+        const QString name = QStringLiteral("StudioVisualAidWidgetAreaLight")
+                + QString::number(id);
         m_wireframeMaterial = createWidgetCustomMaterial(presentation, name, basicMaterial,
                                                          Qt::white, 0.25f);
         if (m_wireframeMaterial) {
@@ -167,7 +171,8 @@ Q3DSVisualAidWidget::Q3DSVisualAidWidget(Q3DSUipPresentation *presentation, Q3DS
         }
     }
 
-    const QString iconName = QStringLiteral("StudioIcon") + QString::number(id);
+    const QString iconName = QStringLiteral("StudioVisualAidWidgetIcon")
+            + QString::number(id);
     m_iconMaterial = createWidgetCustomMaterial(presentation, iconName, billboardMaterial,
                                                 Qt::white, 0.25f);
     if (m_iconMaterial) {
@@ -185,10 +190,12 @@ Q3DSVisualAidWidget::Q3DSVisualAidWidget(Q3DSUipPresentation *presentation, Q3DS
         m_iconMaterial->notifyPropertyChanges(imageChange);
     }
 
-    const QString colBoxName = QStringLiteral("StudioCollisionBox") + QString::number(id);
+    const QString colBoxName = QStringLiteral("StudioVisualAidWidgetCollisionBox")
+            + QString::number(id);
     m_collisionBox = createWidgetModel(presentation, pickingLayer, colBoxName,
                                        QStringLiteral("#Cube"), QVector3D(0.5f, 0.5f, 0.5f));
-    m_collisionBox->appendChildNode(createWidgetDefaultMaterial(presentation, colBoxName));
+    m_collisionBox->appendChildNode(createWidgetDefaultMaterial(presentation, colBoxName,
+                                                                Qt::white, 0.0f));
 
     if (!isCreated()) {
         destroy();

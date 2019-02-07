@@ -46,7 +46,6 @@ Q3DSDefaultMaterial *createWidgetDefaultMaterial(Q3DSUipPresentation *presentati
                                                  const QString &name,
                                                  const QColor &color = Qt::white,
                                                  float opacity = 1.0f);
-
 }
 
 #endif // Q3DSWIDGETUTILS_H

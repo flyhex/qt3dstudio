@@ -1301,10 +1301,10 @@ void Q3DStudioRenderer::onSelectionChange(Q3DStudio::SSelectedValue selected)
     if (!instances.empty()) {
         for (auto &instance : instances) {
             if (g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->IsInstance(instance))
-                m_translation->enableSelectionWidget(instance);
+                m_translation->selectObject(instance);
         }
     } else {
-        m_translation->disableSelectionWidget();
+        m_translation->unselectObject();
     }
 }
 
