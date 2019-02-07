@@ -88,6 +88,9 @@ int main(int argc, char *argv[])
 #endif
     SharedTools::QtSingleApplication guiApp(QStringLiteral("Qt3DStudio"), argc, argv);
 
+    // Fix for uia and uip file attribute random ordering (see QTBUG-8158)
+    qSetGlobalQHashSeed(1720419);
+
 #if defined(Q_OS_MACOS)
     QSurfaceFormat openGL33Format;
     openGL33Format.setRenderableType(QSurfaceFormat::OpenGL);
