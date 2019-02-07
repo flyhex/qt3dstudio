@@ -48,6 +48,129 @@
 
 namespace Q3DStudio {
 
+// This function is copied from Qt3D/qmath3d_p.h
+inline void decomposeQMatrix3x3(const QMatrix3x3 &m, QMatrix3x3 &Q, QVector3D &D, QVector3D &U)
+{
+    // Factor M = QR = QDU where Q is orthogonal, D is diagonal,
+    // and U is upper triangular with ones on its diagonal.
+    // Algorithm uses Gram-Schmidt orthogonalization (the QR algorithm).
+    //
+    // If M = [ m0 | m1 | m2 ] and Q = [ q0 | q1 | q2 ], then
+    //   q0 = m0/|m0|
+    //   q1 = (m1-(q0*m1)q0)/|m1-(q0*m1)q0|
+    //   q2 = (m2-(q0*m2)q0-(q1*m2)q1)/|m2-(q0*m2)q0-(q1*m2)q1|
+    //
+    // where |V| indicates length of vector V and A*B indicates dot
+    // product of vectors A and B.  The matrix R has entries
+    //
+    //   r00 = q0*m0  r01 = q0*m1  r02 = q0*m2
+    //   r10 = 0      r11 = q1*m1  r12 = q1*m2
+    //   r20 = 0      r21 = 0      r22 = q2*m2
+    //
+    // so D = diag(r00,r11,r22) and U has entries u01 = r01/r00,
+    // u02 = r02/r00, and u12 = r12/r11.
+
+    // Q = rotation
+    // D = scaling
+    // U = shear
+
+    // D stores the three diagonal entries r00, r11, r22
+    // U stores the entries U[0] = u01, U[1] = u02, U[2] = u12
+
+    // build orthogonal matrix Q
+    float invLen = 1.0f / std::sqrt(m(0, 0) * m(0, 0) + m(1, 0) * m(1, 0) + m(2, 0) * m(2, 0));
+    Q(0, 0) = m(0, 0) * invLen;
+    Q(1, 0) = m(1, 0) * invLen;
+    Q(2, 0) = m(2, 0) * invLen;
+
+    float dot = Q(0, 0) * m(0, 1) + Q(1, 0) * m(1, 1) + Q(2, 0) * m(2, 1);
+    Q(0, 1) = m(0, 1) - dot * Q(0, 0);
+    Q(1, 1) = m(1, 1) - dot * Q(1, 0);
+    Q(2, 1) = m(2, 1) - dot * Q(2, 0);
+    invLen = 1.0f / std::sqrt(Q(0, 1) * Q(0, 1) + Q(1, 1) * Q(1, 1) + Q(2, 1) * Q(2, 1));
+    Q(0, 1) *= invLen;
+    Q(1, 1) *= invLen;
+    Q(2, 1) *= invLen;
+
+    dot = Q(0, 0) * m(0, 2) + Q(1, 0) * m(1, 2) + Q(2, 0) * m(2, 2);
+    Q(0, 2) = m(0, 2) - dot * Q(0, 0);
+    Q(1, 2) = m(1, 2) - dot * Q(1, 0);
+    Q(2, 2) = m(2, 2) - dot * Q(2, 0);
+    dot = Q(0, 1) * m(0, 2) + Q(1, 1) * m(1, 2) + Q(2, 1) * m(2, 2);
+    Q(0, 2) -= dot * Q(0, 1);
+    Q(1, 2) -= dot * Q(1, 1);
+    Q(2, 2) -= dot * Q(2, 1);
+    invLen = 1.0f / std::sqrt(Q(0, 2) * Q(0, 2) + Q(1, 2) * Q(1, 2) + Q(2, 2) * Q(2, 2));
+    Q(0, 2) *= invLen;
+    Q(1, 2) *= invLen;
+    Q(2, 2) *= invLen;
+
+    // guarantee that orthogonal matrix has determinant 1 (no reflections)
+    const float det = Q(0, 0) * Q(1, 1) * Q(2, 2) + Q(0, 1) * Q(1, 2) * Q(2, 0) +
+                      Q(0, 2) * Q(1, 0) * Q(2, 1) - Q(0, 2) * Q(1, 1) * Q(2, 0) -
+                      Q(0, 1) * Q(1, 0) * Q(2, 2) - Q(0, 0) * Q(1, 2) * Q(2, 1);
+    if (det < 0.0f)
+        Q *= -1.0f;
+
+    // build "right" matrix R
+    QMatrix3x3 R(Qt::Uninitialized);
+    R(0, 0) = Q(0, 0) * m(0, 0) + Q(1, 0) * m(1, 0) + Q(2, 0) * m(2, 0);
+    R(0, 1) = Q(0, 0) * m(0, 1) + Q(1, 0) * m(1, 1) + Q(2, 0) * m(2, 1);
+    R(1, 1) = Q(0, 1) * m(0, 1) + Q(1, 1) * m(1, 1) + Q(2, 1) * m(2, 1);
+    R(0, 2) = Q(0, 0) * m(0, 2) + Q(1, 0) * m(1, 2) + Q(2, 0) * m(2, 2);
+    R(1, 2) = Q(0, 1) * m(0, 2) + Q(1, 1) * m(1, 2) + Q(2, 1) * m(2, 2);
+    R(2, 2) = Q(0, 2) * m(0, 2) + Q(1, 2) * m(1, 2) + Q(2, 2) * m(2, 2);
+
+    // the scaling component
+    D[0] = R(0, 0);
+    D[1] = R(1, 1);
+    D[2] = R(2, 2);
+
+    // the shear component
+    U[0] = R(0, 1) / D[0];
+    U[1] = R(0, 2) / D[0];
+    U[2] = R(1, 2) / D[1];
+}
+
+// This function is copied from Qt3D/qmath3d_p.h
+inline bool hasScale(const QMatrix4x4 &m)
+{
+    // If the columns are orthonormal and form a right-handed system, then there is no scale
+    float t(float(m.determinant()));
+    if (!qFuzzyIsNull(t - 1.0f))
+        return true;
+    t = m(0, 0) * m(0, 0) + m(1, 0) * m(1, 0) + m(2, 0) * m(2, 0);
+    if (!qFuzzyIsNull(t - 1.0f))
+        return true;
+    t = m(0, 1) * m(0, 1) + m(1, 1) * m(1, 1) + m(2, 1) * m(2, 1);
+    if (!qFuzzyIsNull(t - 1.0f))
+        return true;
+    t = m(0, 2) * m(0, 2) + m(1, 2) * m(1, 2) + m(2, 2) * m(2, 2);
+    if (!qFuzzyIsNull(t - 1.0f))
+        return true;
+    return false;
+}
+
+// This function is copied from Qt3D/qmath3d_p.h
+inline void decomposeQMatrix4x4(const QMatrix4x4 &m, QVector3D &position, QQuaternion &orientation,
+                                QVector3D &scale)
+{
+    Q_ASSERT(m.isAffine());
+
+    const QMatrix3x3 m3x3(m.toGenericMatrix<3, 3>());
+
+    QMatrix3x3 rot3x3(Qt::Uninitialized);
+    if (hasScale(m)) {
+        decomposeQMatrix3x3(m3x3, rot3x3, scale, position);
+    } else {
+        // we know there is no scaling part; no need for QDU decomposition
+        scale = QVector3D(1.0f, 1.0f, 1.0f);
+        rot3x3 = m3x3;
+    }
+    orientation = QQuaternion::fromRotationMatrix(rot3x3);
+    position = QVector3D(m(0, 3), m(1, 3), m(2, 3));
+}
+
 // Need custom calculation for camera view matrix to properly handle top/bottom edit cameras,
 // where default upvector doesn't work.
 static QMatrix4x4 calculateCameraViewMatrix(const QMatrix4x4 &cameraWorldTransform)
@@ -208,6 +331,24 @@ static QPoint getAxisLockedMousePos(const QPoint &currentMousePos, const QPoint 
     return mousePos;
 }
 
+// Pulls the 1st column out of the global transform.
+static QVector3D getXAxis(const QMatrix4x4 &matrix)
+{
+    const float *data = matrix.data();
+    QVector3D retval(data[0], data[1], data[2]);
+    retval.normalize();
+    return retval;
+}
+
+// Pulls the 2nd column out of the global transform.
+static QVector3D getYAxis(const QMatrix4x4 &matrix)
+{
+    const float *data = matrix.data();
+    QVector3D retval(data[4], data[5], data[6]);
+    retval.normalize();
+    return retval;
+}
+
 // Pulls the 3rd column out of the global transform.
 static QVector3D getDirection(const QMatrix4x4 &matrix)
 {
@@ -216,7 +357,6 @@ static QVector3D getDirection(const QMatrix4x4 &matrix)
     retval.normalize();
     return retval;
 }
-
 Q3DSTranslation::Q3DSTranslation(Q3DStudioRenderer &inRenderer,
                                  const QSharedPointer<Q3DSUipPresentation> &presentation)
     : m_studioRenderer(inRenderer)
@@ -1512,7 +1652,6 @@ void Q3DSTranslation::rotateAboutCameraDirectionVector(const QPoint &inOriginalC
                                                        const QPoint &inMouseCoords,
                                                        CUpdateableDocumentEditor &inEditor)
 {
-    // TODO: Fix this to actually rotate around the camera direction
     float theYDistance = float(inMouseCoords.y() - inOriginalCoords.y());
     if (qFuzzyIsNull(theYDistance))
         return;
@@ -1520,14 +1659,29 @@ void Q3DSTranslation::rotateAboutCameraDirectionVector(const QPoint &inOriginalC
     Q3DSCameraNode *cameraNode = m_dragCamera;
     Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
     Q3DSNodeAttached *cameraAttached = cameraNode->attached<Q3DSNodeAttached>();
+    Q3DSNode *parentNode = static_cast<Q3DSNode *>(node->parent());
+    Q3DSNodeAttached *parentAttached = parentNode->attached<Q3DSNodeAttached>();
     QMatrix4x4 cameraMatrix = cameraAttached->globalTransform;
+    QMatrix4x4 parentMatrix = parentAttached->globalTransform;
 
-    QVector3D cameraDirection = (cameraMatrix * QVector4D(0.f, 0.f, -1.f, 0.f)).toVector3D();
-    QQuaternion yrotation = QQuaternion::fromAxisAndAngle(cameraDirection, .1f * theYDistance
-                                                          * float(g_rotationScaleFactor));
+    Q3DSSelectionWidget::adjustRotationLeftToRight(&cameraMatrix);
+    Q3DSSelectionWidget::adjustRotationLeftToRight(&parentMatrix);
+
+    QVector3D cameraDirection = getDirection(cameraMatrix);
     QQuaternion origRotation = QQuaternion::fromEulerAngles(m_beginDragState.r);
-    yrotation = origRotation * yrotation;
-    m_currentDragState.r = yrotation.toEulerAngles();
+
+    QVector3D position; // Dummy, not used
+    QVector3D scale; // Dummy, not used
+    QQuaternion parentRotation;
+    decomposeQMatrix4x4(parentMatrix, position, parentRotation, scale);
+
+    QQuaternion yRotation = QQuaternion::fromAxisAndAngle(cameraDirection, -.2f * theYDistance
+                                                          * float(g_rotationScaleFactor));
+    origRotation = parentRotation * origRotation;
+    yRotation *= origRotation;
+    yRotation = parentRotation.inverted() * yRotation;
+
+    m_currentDragState.r = yRotation.toEulerAngles();
     Q3DSPropertyChangeList list;
     list.append(node->setRotation(m_currentDragState.r));
     node->notifyPropertyChanges(list);
@@ -1546,37 +1700,45 @@ void Q3DSTranslation::rotate(const QPoint &inOriginalCoords, const QPoint &inMou
         return;
     }
 
-    float theXDistance = float(inMouseCoords.x() - inOriginalCoords.x());
-    float theYDistance = float(inMouseCoords.y() - inOriginalCoords.y());
+    QPoint mousePos = inLockToAxis ? getAxisLockedMousePos(inMouseCoords, inOriginalCoords)
+                                   : inMouseCoords;
+
+    float theXDistance = float(mousePos.x() - inOriginalCoords.x());
+    float theYDistance = float(mousePos.y() - inOriginalCoords.y());
 
     if (qFuzzyIsNull(theXDistance) && qFuzzyIsNull(theYDistance))
         return;
 
-    if (inLockToAxis) {
-        if (inLockToAxis) {
-            if (qAbs(theXDistance) > qAbs(theYDistance))
-                theYDistance = 0;
-            else
-                theXDistance = 0;
-        }
-    }
-
     Q3DSCameraNode *cameraNode = m_dragCamera;
     Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
     Q3DSNodeAttached *cameraAttached = cameraNode->attached<Q3DSNodeAttached>();
+    Q3DSNode *parentNode = static_cast<Q3DSNode *>(node->parent());
+    Q3DSNodeAttached *parentAttached = parentNode->attached<Q3DSNodeAttached>();
     QMatrix4x4 cameraMatrix = cameraAttached->globalTransform;
+    QMatrix4x4 parentMatrix = parentAttached->globalTransform;
 
-    QVector3D cameraLeft = (cameraMatrix * QVector4D(1.f, 0.f, 0.f, 0.f)).toVector3D();
-    QVector3D cameraUp = (cameraMatrix * QVector4D(0.f, -1.f, 0.f, 0.f)).toVector3D();
+    Q3DSSelectionWidget::adjustRotationLeftToRight(&cameraMatrix);
+    Q3DSSelectionWidget::adjustRotationLeftToRight(&parentMatrix);
 
-    QVector3D axis = theXDistance * cameraUp - theYDistance * cameraLeft;
-    float distance = axis.length();
-    axis.normalize();
-    QQuaternion yrotation = QQuaternion::fromAxisAndAngle(axis, .1f * distance
-                                                          * float(g_rotationScaleFactor));
+    QVector3D xAxis = getXAxis(cameraMatrix);
+    QVector3D yAxis = getYAxis(cameraMatrix);
+    QVector3D rotAxis = theXDistance * yAxis + theYDistance * xAxis;
+    float distance = rotAxis.length();
+    rotAxis.normalize();
+    QQuaternion rotation = QQuaternion::fromAxisAndAngle(rotAxis, -.2f * distance
+                                                         * float(g_rotationScaleFactor));
     QQuaternion origRotation = QQuaternion::fromEulerAngles(m_beginDragState.r);
-    yrotation = origRotation * yrotation;
-    m_currentDragState.r = yrotation.toEulerAngles();
+
+    QVector3D position; // Dummy, not used
+    QVector3D scale; // Dummy, not used
+    QQuaternion parentRotation;
+    decomposeQMatrix4x4(parentMatrix, position, parentRotation, scale);
+
+    origRotation = parentRotation * origRotation;
+    rotation *= origRotation;
+    rotation = parentRotation.inverted() * rotation;
+
+    m_currentDragState.r = rotation.toEulerAngles();
 
     Q3DSPropertyChangeList list;
     list.append(node->setRotation(m_currentDragState.r));
