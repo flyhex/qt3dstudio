@@ -64,6 +64,7 @@ class Q3DSGraphObjectTranslator;
 class Q3DSLightTranslator;
 class Q3DSCameraTranslator;
 class Q3DSReferencedMaterialTranslator;
+
 class Q3DSTranslation
 {
 public:
@@ -154,6 +155,9 @@ private:
                                     qt3dsdm::Qt3DSDMInstanceHandle instance,
                                     qt3dsdm::Qt3DSDMPropertyHandle property);
 
+    QVector4D calculateWidgetArrowDrag(const QPoint &mousePos, const QVector3D &dragPlane = {},
+                                       const QVector3D &arrowDir = {});
+
     Q3DStudioRenderer &m_studioRenderer;
 
     CDoc &m_doc;
@@ -190,6 +194,7 @@ private:
     Q3DSCameraNode *m_dragCamera = nullptr;
     QPoint m_dragStartMousePos;
     QPoint m_dragPosDiff;
+    QMatrix4x4 m_dragNodeGlobalTransform;
     bool m_presentationInit = false;
 
     Q3DSLayerNode *m_backgroundLayer = nullptr;
@@ -281,9 +286,9 @@ public:
 
     void translateAlongCameraDirection(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
                                        CUpdateableDocumentEditor &inEditor);
-    void translate(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
-                   CUpdateableDocumentEditor &inEditor, bool inLockToAxis);
-    void translateAlongWidget(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
+    void translate(const QPoint &inMouseCoords, CUpdateableDocumentEditor &inEditor,
+                   bool inLockToAxis);
+    void translateAlongWidget(const QPoint &inMouseCoords,
                               CUpdateableDocumentEditor &inEditor);
     void scaleZ(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
                 CUpdateableDocumentEditor &inEditor);

@@ -240,13 +240,17 @@ static void flipZTranslation(QVector3D &vec)
     vec.setZ(-vec.z());
 }
 
-// Calculates the intersection of a ray through camera position and mouse point with a plane
-// that is paraller to the camera plane and goes through the given node if it has
+// Calculates the intersection of a ray through camera position and mouse point with
+// the defined plane that goes through the given node if it has
 // the given local position (which can be different than node's actual position).
-static QVector3D mousePointToCameraPlaneIntersection(const QPoint &mousePos,
-                                                     Q3DSCameraNode *cameraNode,
-                                                     Q3DSNode *node,
-                                                     const QVector3D &nodePosition)
+// If globalIntersection is true, the value is returned in global 3D space coordinates.
+// Otherwise local coordinates in editor space (i.e. Z flipped) are returned.
+static QVector3D mousePointToPlaneIntersection(const QPoint &mousePos,
+                                               Q3DSCameraNode *cameraNode,
+                                               Q3DSNode *node,
+                                               const QVector3D &nodePosition,
+                                               const QVector3D &planeNormal,
+                                               bool globalIntersection)
 {
     Q3DSNode *parentNode = static_cast<Q3DSNode *>(node->parent());
     Q3DSCameraAttached *cameraAttached = cameraNode->attached<Q3DSCameraAttached>();
@@ -266,9 +270,7 @@ static QVector3D mousePointToCameraPlaneIntersection(const QPoint &mousePos,
     QVector3D cameraPos = cameraNode->position();
     flipZTranslation(cameraPos);
 
-    // zeroRay is effectively the camera plane normal.
     QVector3D nearPos;
-    QVector3D zeroRay = calcRay(QPointF(0., 0.), viewMatrix, projectionMatrix, nearPos);
     QVector3D newRay = calcRay(newPoint, viewMatrix, projectionMatrix, nearPos);
 
     // Find intersections of newRay and oldRay on camera plane that goes through oldPos
@@ -277,14 +279,17 @@ static QVector3D mousePointToCameraPlaneIntersection(const QPoint &mousePos,
     flipZTranslation(beginPos);
     QVector3D nodeWorldPos = parentMatrix * beginPos;
     float distance = -1.f;
-    float cosAngle = QVector3D::dotProduct(nodeWorldPos.normalized(), zeroRay);
+    float cosAngle = QVector3D::dotProduct(nodeWorldPos.normalized(), planeNormal);
     float planeOffset = nodeWorldPos.length() * cosAngle;
 
-    QVector3D newIntersect = findIntersection(nearPos, newRay, planeOffset, zeroRay, distance);
-    QVector3D endPos = parentMatrix.inverted() * newIntersect;
-    flipZTranslation(endPos); // Flip back to editor coords
+    QVector3D intersect = findIntersection(nearPos, newRay, planeOffset, planeNormal, distance);
 
-    return endPos;
+    if (!globalIntersection) {
+        intersect = parentMatrix.inverted() * intersect;
+        flipZTranslation(intersect); // Flip back to editor coords
+    }
+
+    return intersect;
 }
 
 // Projects a local node position to the scene view coordinate
@@ -332,7 +337,7 @@ static QPoint getAxisLockedMousePos(const QPoint &currentMousePos, const QPoint 
     return mousePos;
 }
 
-// Pulls the 1st column out of the global transform.
+// Pulls the normalized 1st column out of the global transform.
 static QVector3D getXAxis(const QMatrix4x4 &matrix)
 {
     const float *data = matrix.data();
@@ -341,7 +346,7 @@ static QVector3D getXAxis(const QMatrix4x4 &matrix)
     return retval;
 }
 
-// Pulls the 2nd column out of the global transform.
+// Pulls the normalized 2nd column out of the global transform.
 static QVector3D getYAxis(const QMatrix4x4 &matrix)
 {
     const float *data = matrix.data();
@@ -350,14 +355,45 @@ static QVector3D getYAxis(const QMatrix4x4 &matrix)
     return retval;
 }
 
-// Pulls the 3rd column out of the global transform.
-static QVector3D getDirection(const QMatrix4x4 &matrix)
+// Pulls the normalized 3rd column out of the global transform.
+static QVector3D getZAxis(const QMatrix4x4 &matrix)
 {
     const float *data = matrix.data();
     QVector3D retval(data[8], data[9], data[10]);
     retval.normalize();
     return retval;
 }
+
+// Pulls the 4th column out of the global transform.
+static QVector3D getPosition(const QMatrix4x4 &matrix)
+{
+    const float *data = matrix.data();
+    QVector3D retval(data[12], data[13], data[14]);
+    return retval;
+}
+
+// Make a nice rotation from the incoming rotation
+static inline float makeNiceRotation(float inAngle)
+{
+    inAngle *= 10.f;
+    float sign = inAngle > 0.f ? 1.f : -1.f;
+    // Attempt to ensure angle is pretty clean
+    int clampedAngle = int(fabs(inAngle) + .5f);
+    int leftover = clampedAngle % 10;
+    clampedAngle -= leftover;
+    if (leftover <= 2)
+        leftover = 0;
+    else if (leftover <= 7)
+        leftover = 5;
+    else
+        leftover = 10;
+    clampedAngle += leftover;
+    float retval = float(clampedAngle);
+    retval = (retval * sign) / 10.f;
+    return retval;
+}
+
+
 Q3DSTranslation::Q3DSTranslation(Q3DStudioRenderer &inRenderer,
                                  const QSharedPointer<Q3DSUipPresentation> &presentation)
     : m_studioRenderer(inRenderer)
@@ -553,6 +589,74 @@ void Q3DSTranslation::recompileShadersIfRequired(Q3DSGraphObjectTranslator *tran
         }
         translator->setGraphObject(newObject);
     }
+}
+
+// Resolves the distance and local position where the translation/scale widget
+// directional arrow is dragged to. The w value of the vector indicates the distance.
+// The dragPlane is the drag plane for projecting the mouse position.
+// The arrowDir is the direction of the arrow.
+// If either dragPlane or arrowDir are null, both are extracted from drag widget.
+QVector4D Q3DSTranslation::calculateWidgetArrowDrag(const QPoint &mousePos,
+                                                    const QVector3D &dragPlane,
+                                                    const QVector3D &arrowDir)
+{
+    Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
+    Q3DSNode *parentNode = static_cast<Q3DSNode *>(node->parent());
+    Q3DSNodeAttached *parentAttached = parentNode->attached<Q3DSNodeAttached>();
+    QMatrix4x4 parentMatrix = parentAttached->globalTransform;
+    QVector3D nodePos = m_beginDragState.t;
+    flipZTranslation(nodePos);
+    QVector3D globalNodePos = parentMatrix * nodePos;
+    Q3DSCameraAttached *cameraAttached = m_dragCamera->attached<Q3DSCameraAttached>();
+    QMatrix4x4 cameraMatrix = cameraAttached->globalTransform;
+    QVector3D cameraPlane = getZAxis(cameraMatrix);
+
+    QVector3D direction = arrowDir;
+    QVector3D planeNormal = dragPlane;
+    float distanceMultiplier = 1.f;
+    if (planeNormal.isNull() || direction.isNull()) {
+        QVector3D plane1;
+        QVector3D plane2;
+
+        // Find the direction of the drag and the best plane to map against that is parallel
+        // to the direction vector
+        if (m_selectionWidget.isXAxis(m_pickedWidget)) {
+            direction = getXAxis(m_dragNodeGlobalTransform);
+            plane1 = getYAxis(m_dragNodeGlobalTransform);
+            plane2 = getZAxis(m_dragNodeGlobalTransform);
+            distanceMultiplier = -1.f;
+        } else if (m_selectionWidget.isYAxis(m_pickedWidget)) {
+            plane1 = getXAxis(m_dragNodeGlobalTransform);
+            direction = getYAxis(m_dragNodeGlobalTransform);
+            plane2 = getZAxis(m_dragNodeGlobalTransform);
+            distanceMultiplier = -1.f;
+        } else if (m_selectionWidget.isZAxis(m_pickedWidget)) {
+            plane1 = getXAxis(m_dragNodeGlobalTransform);
+            plane2 = getYAxis(m_dragNodeGlobalTransform);
+            direction = getZAxis(m_dragNodeGlobalTransform);
+        }
+
+        // Track against plane that is more closely aligned with camera plane. We could rotate
+        // the tracking plane further to improve tracking accuracy, but in practice tracking
+        // against a plane with maximum of 45 degree angle is good enough.
+        planeNormal = plane1;
+        if (qAbs(QVector3D::dotProduct(cameraPlane, plane1))
+                < qAbs(QVector3D::dotProduct(cameraPlane, plane2))) {
+            planeNormal = plane2;
+        }
+    }
+
+    QVector3D globalIntersection = mousePointToPlaneIntersection(
+                mousePos, m_dragCamera, node, m_beginDragState.t, planeNormal, true);
+
+    float distance = globalNodePos.distanceToPlane(globalIntersection, direction);
+    direction *= distance;
+    globalNodePos -= direction;
+
+    QVector3D localNodePos = parentMatrix.inverted() * globalNodePos;
+    flipZTranslation(localNodePos);
+
+    return QVector4D(localNodePos, distance * distanceMultiplier);
 }
 
 void Q3DSTranslation::markPropertyDirty(qt3dsdm::Qt3DSDMInstanceHandle instance,
@@ -1040,7 +1144,9 @@ void Q3DSTranslation::prepareRender(const QRect &rect, const QSize &size, qreal 
             m_editCameraInfo.applyToCamera(*camera, QSizeF(m_size));
     }
     if (rect != m_rect || size != m_size || pixelRatio != m_pixelRatio) {
-        m_engine->sceneManager()->updateSizes(size, pixelRatio, rect, true);
+        // We are always rendering into a fbo with 1x pixel ratio. The scene widget will
+        // display it a proper size.
+        m_engine->sceneManager()->updateSizes(size, 1.0, rect, true);
         m_rect = rect;
         m_size = size;
         m_pixelRatio = pixelRatio;
@@ -1567,6 +1673,8 @@ void Q3DSTranslation::prepareDrag(const QPoint &mousePos, Q3DSGraphObjectTransla
     m_dragTranslator = selected;
     selected->enableAutoUpdates(false);
     Q3DSNode &node = static_cast<Q3DSNode &>(m_dragTranslator->graphObject());
+    Q3DSNodeAttached *nodeAttached = node.attached<Q3DSNodeAttached>();
+    m_dragNodeGlobalTransform = nodeAttached->globalTransform;
     m_beginDragState.t = node.position();
     m_beginDragState.s = node.scale();
     m_beginDragState.r = node.rotation();
@@ -1654,7 +1762,7 @@ void Q3DSTranslation::translateAlongCameraDirection(const QPoint &inOriginalCoor
     QMatrix4x4 cameraMatrix = cameraAttached->globalTransform;
     QMatrix4x4 parentMatrix = parentAttached->globalTransform;
 
-    QVector3D cameraDirection = getDirection(cameraMatrix);
+    QVector3D cameraDirection = getZAxis(cameraMatrix);
     QVector3D diff = cameraDirection * distanceMultiplier;
     QVector3D nodePos = m_beginDragState.t;
     flipZTranslation(nodePos);
@@ -1673,11 +1781,11 @@ void Q3DSTranslation::translateAlongCameraDirection(const QPoint &inOriginalCoor
     inEditor.FireImmediateRefresh(m_doc.GetSelectedInstance());
 }
 
-void Q3DSTranslation::translate(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
-                                CUpdateableDocumentEditor &inEditor, bool inLockToAxis)
+void Q3DSTranslation::translate(const QPoint &inMouseCoords, CUpdateableDocumentEditor &inEditor,
+                                bool inLockToAxis)
 {
     if (m_pickedWidget) {
-        translateAlongWidget(inOriginalCoords, inMouseCoords, inEditor);
+        translateAlongWidget(inMouseCoords, inEditor);
         return;
     }
 
@@ -1686,8 +1794,11 @@ void Q3DSTranslation::translate(const QPoint &inOriginalCoords, const QPoint &in
     mousePos -= m_dragPosDiff;
 
     Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
-    m_currentDragState.t = mousePointToCameraPlaneIntersection(
-                mousePos, m_dragCamera, node, m_beginDragState.t);
+    Q3DSCameraAttached *cameraAttached = m_dragCamera->attached<Q3DSCameraAttached>();
+    QMatrix4x4 cameraMatrix = cameraAttached->globalTransform;
+
+    m_currentDragState.t = mousePointToPlaneIntersection(
+                mousePos, m_dragCamera, node, m_beginDragState.t, getZAxis(cameraMatrix), false);
 
     Q3DSPropertyChangeList list;
     list.append(node->setPosition(m_currentDragState.t));
@@ -1699,51 +1810,27 @@ void Q3DSTranslation::translate(const QPoint &inOriginalCoords, const QPoint &in
     inEditor.FireImmediateRefresh(m_doc.GetSelectedInstance());
 }
 
-void Q3DSTranslation::translateAlongWidget(const QPoint &inOriginalCoords,
-                                           const QPoint &inMouseCoords,
+void Q3DSTranslation::translateAlongWidget(const QPoint &inMouseCoords,
                                            CUpdateableDocumentEditor &inEditor)
 {
-    // TODO: implement proper dragging that follows the mouse
-    float xDistance = float(inMouseCoords.x() - inOriginalCoords.x());
-    float yDistance = float(inMouseCoords.y() - inOriginalCoords.y());
-    float xMultiplier = xDistance * 0.011f;
-    float yMultiplier = yDistance * 0.011f;
+    QPoint mousePos = inMouseCoords - m_dragPosDiff;
 
     Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
-    Q3DSNodeAttached *widgetAttached = m_pickedWidget->attached<Q3DSNodeAttached>();
-    QMatrix4x4 widgetMatrix = widgetAttached->globalTransform;
-    adjustRotationLeftToRight(&widgetMatrix);
 
-    Q3DSNode *parentNode = static_cast<Q3DSNode *>(node->parent());
-    Q3DSNodeAttached *parentAttached = parentNode->attached<Q3DSNodeAttached>();
-    QMatrix4x4 parentMatrix = parentAttached->globalTransform;
-    adjustRotationLeftToRight(&parentMatrix);
-
-    QVector4D direction1;
-    QVector4D direction2;
-    if (m_selectionWidget.isXAxis(m_pickedWidget)) {
-        direction1 = QVector4D(1.f, 0.f, 0.f, 0.f);
-        direction2 = QVector4D(0.f, 0.f, 0.f, 0.f);
-    } else if (m_selectionWidget.isYAxis(m_pickedWidget)) {
-        direction1 = QVector4D(0.f, 1.f, 0.f, 0.f);
-        direction2 = QVector4D(0.f, 0.f, 0.f, 0.f);
-    } else if (m_selectionWidget.isZAxis(m_pickedWidget)) {
-        direction1 = QVector4D(0.f, 0.f, 1.f, 0.f);
-        direction2 = QVector4D(0.f, 0.f, 0.f, 0.f);
-    } else if (m_selectionWidget.isXYPlane(m_pickedWidget)) {
-        direction1 = QVector4D(1.f, 0.f, 0.f, 0.f);
-        direction2 = QVector4D(0.f, 1.f, 0.f, 0.f);
-    } else if (m_selectionWidget.isYZPlane(m_pickedWidget)) {
-        direction1 = QVector4D(0.f, 1.f, 0.f, 0.f);
-        direction2 = QVector4D(0.f, 0.f, 1.f, 0.f);
-    } else if (m_selectionWidget.isZXPlane(m_pickedWidget)) {
-        direction1 = QVector4D(0.f, 0.f, 1.f, 0.f);
-        direction2 = QVector4D(1.f, 0.f, 0.f, 0.f);
+    if (m_selectionWidget.isXAxis(m_pickedWidget) || m_selectionWidget.isYAxis(m_pickedWidget)
+            || m_selectionWidget.isZAxis(m_pickedWidget)) {
+        m_currentDragState.t = calculateWidgetArrowDrag(mousePos).toVector3D();
+    } else {
+        QVector3D planeNormal;
+        if (m_selectionWidget.isXYPlane(m_pickedWidget))
+            planeNormal = getZAxis(m_dragNodeGlobalTransform);
+        else if (m_selectionWidget.isYZPlane(m_pickedWidget))
+            planeNormal = getXAxis(m_dragNodeGlobalTransform);
+        else if (m_selectionWidget.isZXPlane(m_pickedWidget))
+            planeNormal = getYAxis(m_dragNodeGlobalTransform);
+        m_currentDragState.t = mousePointToPlaneIntersection(
+                    mousePos, m_dragCamera, node, m_beginDragState.t, planeNormal, false);
     }
-    QVector3D diff = (widgetMatrix * direction1).toVector3D() * xMultiplier
-            + (widgetMatrix * direction2).toVector3D() * yMultiplier;
-    diff = (parentMatrix.inverted() * QVector4D(diff, 0.f)).toVector3D();
-    m_currentDragState.t = m_beginDragState.t + diff;
 
     Q3DSPropertyChangeList list;
     list.append(node->setPosition(m_currentDragState.t));
@@ -1814,59 +1901,75 @@ void Q3DSTranslation::scale(const QPoint &inOriginalCoords, const QPoint &inMous
 void Q3DSTranslation::scaleAlongWidget(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
                                        CUpdateableDocumentEditor &inEditor)
 {
-    // TODO: implement proper scaling that follows the mouse
-    float xDistance = float(inMouseCoords.x() - inOriginalCoords.x());
-    float yDistance = float(inMouseCoords.y() - inOriginalCoords.y());
-    if (qFuzzyIsNull(yDistance))
-        return;
+    static const float scaleRatio = 40.f;
+    QPoint mousePos = inMouseCoords - m_dragPosDiff;
 
     Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
 
-    QVector4D direction1;
-    QVector4D direction2;
-    if (m_selectionWidget.isXAxis(m_pickedWidget)) {
-        direction1 = QVector4D(1.f, 0.f, 0.f, 0.f);
-        direction2 = QVector4D(0.f, 0.f, 0.f, 0.f);
-    } else if (m_selectionWidget.isYAxis(m_pickedWidget)) {
-        direction1 = QVector4D(0.f, 1.f, 0.f, 0.f);
-        direction2 = QVector4D(0.f, 0.f, 0.f, 0.f);
-    } else if (m_selectionWidget.isZAxis(m_pickedWidget)) {
-        direction1 = QVector4D(0.f, 0.f, 1.f, 0.f);
-        direction2 = QVector4D(0.f, 0.f, 0.f, 0.f);
-    } else if (m_selectionWidget.isXYPlane(m_pickedWidget)) {
-        direction1 = QVector4D(1.f, 0.f, 0.f, 0.f);
-        direction2 = QVector4D(0.f, 1.f, 0.f, 0.f);
-    } else if (m_selectionWidget.isYZPlane(m_pickedWidget)) {
-        direction1 = QVector4D(0.f, 1.f, 0.f, 0.f);
-        direction2 = QVector4D(0.f, 0.f, 1.f, 0.f);
-    } else if (m_selectionWidget.isZXPlane(m_pickedWidget)) {
-        direction1 = QVector4D(0.f, 0.f, 1.f, 0.f);
-        direction2 = QVector4D(1.f, 0.f, 0.f, 0.f);
+    QVector3D scaleVec(1.f, 1.f, 1.f);
+    if (m_selectionWidget.isXAxis(m_pickedWidget) || m_selectionWidget.isYAxis(m_pickedWidget)
+            || m_selectionWidget.isZAxis(m_pickedWidget)) {
+        float distance = calculateWidgetArrowDrag(mousePos).w();
+        float scaleAmount = distance / scaleRatio;
+        float magnitude = 1.f + scaleAmount;
+        if (m_selectionWidget.isXAxis(m_pickedWidget))
+            scaleVec = QVector3D(magnitude, 1.f, 1.f);
+        else if (m_selectionWidget.isYAxis(m_pickedWidget))
+            scaleVec = QVector3D(1.f, magnitude, 1.f);
+        else if (m_selectionWidget.isZAxis(m_pickedWidget))
+            scaleVec = QVector3D(1.f, 1.f, magnitude);
+    } else {
+        float xScale = 1.f;
+        float yScale = 1.f;
+        float zScale = 1.f;
+        QVector3D planeNormal;
+
+        if (m_selectionWidget.isXYPlane(m_pickedWidget)) {
+            planeNormal = getZAxis(m_dragNodeGlobalTransform);
+            xScale = 1.f + calculateWidgetArrowDrag(
+                        mousePos, planeNormal, getXAxis(m_dragNodeGlobalTransform)).w()
+                    / -scaleRatio;
+            yScale = 1.f + calculateWidgetArrowDrag(
+                        mousePos, planeNormal, getYAxis(m_dragNodeGlobalTransform)).w()
+                    / -scaleRatio;
+            scaleVec = QVector3D(xScale, yScale, 1.f);
+        } else if (m_selectionWidget.isYZPlane(m_pickedWidget)) {
+            planeNormal = getXAxis(m_dragNodeGlobalTransform);
+            yScale = 1.f + calculateWidgetArrowDrag(
+                        mousePos, planeNormal, getYAxis(m_dragNodeGlobalTransform)).w()
+                    / -scaleRatio;
+            zScale = 1.f + calculateWidgetArrowDrag(
+                        mousePos, planeNormal, getZAxis(m_dragNodeGlobalTransform)).w()
+                    / scaleRatio;
+            scaleVec = QVector3D(1.f, yScale, zScale);
+        } else if (m_selectionWidget.isZXPlane(m_pickedWidget)) {
+            planeNormal = getYAxis(m_dragNodeGlobalTransform);
+            xScale = 1.f + calculateWidgetArrowDrag(
+                        mousePos, planeNormal, getXAxis(m_dragNodeGlobalTransform)).w()
+                    / -scaleRatio;
+            zScale = 1.f + calculateWidgetArrowDrag(
+                        mousePos, planeNormal, getZAxis(m_dragNodeGlobalTransform)).w()
+                    / scaleRatio;
+            scaleVec = QVector3D(xScale, 1.f, zScale);
+        }
     }
 
-    QVector3D scaleMultiplier(1.0f + xDistance * (1.0f / 40.0f) * direction1.x()
-                              + yDistance * (1.0f / 40.0f) * direction2.x(),
-                              1.0f + xDistance * (1.0f / 40.0f) * direction1.y()
-                              + yDistance * (1.0f / 40.0f) * direction2.y(),
-                              1.0f + xDistance * (1.0f / 40.0f) * direction1.z()
-                              + yDistance * (1.0f / 40.0f) * direction2.z());
+    m_currentDragState.s = m_beginDragState.s * scaleVec;
 
-    if (!qFuzzyIsNull(scaleMultiplier.x()) && !qFuzzyIsNull(scaleMultiplier.y())
-            && !qFuzzyIsNull(scaleMultiplier.z())) {
-        m_selectionWidget.setScale(m_pickedWidget, scaleMultiplier);
-        m_currentDragState.s = QVector3D(m_beginDragState.s.x() * scaleMultiplier.x(),
-                                         m_beginDragState.s.y() * scaleMultiplier.y(),
-                                         m_beginDragState.s.z() * scaleMultiplier.z());
+    // TODO: QT3DS-3012:
+    // TODO: Fix widget scaling. Only the length of the arrow should scale, not the head.
+    // TODO: Also the beginning of the arrow should not move while scaling.
+    // TODO: Also widget shouldn't flip around if scaling goes negative in some direction
+    //m_selectionWidget.setScale(m_pickedWidget, scaleVec);
 
-        Q3DSPropertyChangeList list;
-        list.append(node->setScale(m_currentDragState.s));
-        node->notifyPropertyChanges(list);
-        inEditor.EnsureEditor(QObject::tr("Set Scale"), __FILE__, __LINE__)
-            .SetInstancePropertyValue(m_doc.GetSelectedInstance(),
-                                      objectDefinitions().m_Node.m_Scale,
-                                      qt3dsdm::SValue(QVariant::fromValue(m_currentDragState.s)));
-        inEditor.FireImmediateRefresh(m_doc.GetSelectedInstance());
-    }
+    Q3DSPropertyChangeList list;
+    list.append(node->setScale(m_currentDragState.s));
+    node->notifyPropertyChanges(list);
+    inEditor.EnsureEditor(QObject::tr("Set Scale"), __FILE__, __LINE__)
+        .SetInstancePropertyValue(m_doc.GetSelectedInstance(),
+                                  objectDefinitions().m_Node.m_Scale,
+                                  qt3dsdm::SValue(QVariant::fromValue(m_currentDragState.s)));
+    inEditor.FireImmediateRefresh(m_doc.GetSelectedInstance());
 }
 
 void Q3DSTranslation::rotateAboutCameraDirectionVector(const QPoint &inOriginalCoords,
@@ -1888,7 +1991,7 @@ void Q3DSTranslation::rotateAboutCameraDirectionVector(const QPoint &inOriginalC
     adjustRotationLeftToRight(&cameraMatrix);
     adjustRotationLeftToRight(&parentMatrix);
 
-    QVector3D cameraDirection = getDirection(cameraMatrix);
+    QVector3D cameraDirection = getZAxis(cameraMatrix);
     QQuaternion origRotation = QQuaternion::fromEulerAngles(m_beginDragState.r);
 
     QVector3D position; // Dummy, not used
@@ -1901,6 +2004,9 @@ void Q3DSTranslation::rotateAboutCameraDirectionVector(const QPoint &inOriginalC
     origRotation = parentRotation * origRotation;
     yRotation *= origRotation;
     yRotation = parentRotation.inverted() * yRotation;
+
+    // TODO: Make it so that continuous rotation in one direction will increase angles over the
+    // TODO: standard [-180, 180] degree range like in runtime1 version (QT3DS-3039)
 
     m_currentDragState.r = yRotation.toEulerAngles();
     Q3DSPropertyChangeList list;
@@ -1959,6 +2065,9 @@ void Q3DSTranslation::rotate(const QPoint &inOriginalCoords, const QPoint &inMou
     rotation *= origRotation;
     rotation = parentRotation.inverted() * rotation;
 
+    // TODO: Make it so that continuous rotation in one direction will increase angles over the
+    // TODO: standard [-180, 180] degree range like in runtime1 version (QT3DS-3039)
+
     m_currentDragState.r = rotation.toEulerAngles();
 
     Q3DSPropertyChangeList list;
@@ -1975,27 +2084,138 @@ void Q3DSTranslation::rotateAlongWidget(const QPoint &inOriginalCoords,
                                         const QPoint &inMouseCoords,
                                         CUpdateableDocumentEditor &inEditor)
 {
-    // TODO: implement proper rotation that follows the mouse
-    QVector4D direction;
-    if (m_selectionWidget.isXYCircle(m_pickedWidget)) {
-        direction = QVector4D(1.f, 0.f, 0.f, 0.f);
-    } else if (m_selectionWidget.isYZCircle(m_pickedWidget)) {
-        direction = QVector4D(0.f, 1.f, 0.f, 0.f);
-    } else if (m_selectionWidget.isZXCircle(m_pickedWidget)) {
-        direction = QVector4D(0.f, 0.f, 1.f, 0.f);
-    } else if (m_selectionWidget.isCameraCircle(m_pickedWidget)) {
-        rotateAboutCameraDirectionVector(inOriginalCoords, inMouseCoords, inEditor);
+    if (inMouseCoords.x() == inOriginalCoords.x()
+            && inMouseCoords.y() == inOriginalCoords.y()) {
         return;
     }
 
-    float yDistance = float(inMouseCoords.y() - inOriginalCoords.y());
     Q3DSNode *node = m_dragTranslator->graphObject<Q3DSNode>();
+    Q3DSNodeAttached *nodeAttached = node->attached<Q3DSNodeAttached>();
+    Q3DSCameraNode *cameraNode = m_dragCamera;
+    Q3DSCameraAttached *cameraAttached = cameraNode->attached<Q3DSCameraAttached>();
+    Q3DSNode *parentNode = static_cast<Q3DSNode *>(node->parent());
+    Q3DSNodeAttached *parentAttached = parentNode->attached<Q3DSNodeAttached>();
+    QMatrix4x4 cameraMatrix = cameraAttached->globalTransform;
+    QMatrix4x4 parentMatrix = parentAttached->globalTransform;
+    adjustRotationLeftToRight(&parentMatrix);
 
-    QQuaternion yRotation = QQuaternion::fromAxisAndAngle(direction.toVector3D(), .1f * yDistance
-                                                          * float(g_rotationScaleFactor));
+    Q3DSLayerAttached *layerAttached = nodeAttached->layer3DS->attached<Q3DSLayerAttached>();
+    QRectF layerRect = QRectF(layerAttached->layerPos, layerAttached->layerSize);
+    QPointF origLayerPoint = normalizePointToRect(inOriginalCoords, layerRect);
+
+    auto viewMatrix = calculateCameraViewMatrix(cameraMatrix);
+    auto projectionMatrix = cameraAttached->camera->projectionMatrix();
+    QVector3D nearPos;
+    QVector3D origRay = calcRay(origLayerPoint, viewMatrix, projectionMatrix, nearPos);
+    flipZTranslation(origRay);
+
+    QVector3D planeNormal;
+    if (m_selectionWidget.isXYCircle(m_pickedWidget))
+        planeNormal = getZAxis(m_dragNodeGlobalTransform);
+    else if (m_selectionWidget.isYZCircle(m_pickedWidget))
+        planeNormal = getXAxis(m_dragNodeGlobalTransform);
+    else if (m_selectionWidget.isZXCircle(m_pickedWidget))
+        planeNormal = getYAxis(m_dragNodeGlobalTransform);
+    else if (m_selectionWidget.isCameraCircle(m_pickedWidget))
+        planeNormal = getZAxis(cameraMatrix);
+    flipZTranslation(planeNormal);
+
+    QVector3D cameraNormal = getZAxis(cameraMatrix);
+    flipZTranslation(cameraNormal);
     QQuaternion origRotation = QQuaternion::fromEulerAngles(m_beginDragState.r);
-    yRotation = origRotation * yRotation;
-    m_currentDragState.r = yRotation.toEulerAngles();
+
+    QVector3D position; // Dummy, not used
+    QVector3D scale; // Dummy, not used
+    QQuaternion parentRotation;
+    decomposeQMatrix4x4(parentMatrix, position, parentRotation, scale);
+
+    QVector3D cameraPos = getPosition(cameraMatrix);
+    flipZTranslation(cameraPos);
+
+    QQuaternion rotation;
+
+    // If the plane of the rotation circle is nearly perpendicular to the camera plane,
+    // use trackball rotation where the rotation circle acts as a rotation wheel.
+    float angleCos = QVector3D::dotProduct(origRay, planeNormal);
+    if (qAbs(angleCos) < .08f) {
+        // Setup a plane 600 units away from the camera and have the widget run from there.
+        // This keeps rotation consistent within the same camera.
+        QVector3D planeSpot = cameraNormal * 600.f + cameraPos;
+        planeSpot = parentMatrix.inverted() * planeSpot;
+
+        QVector3D currentPos = mousePointToPlaneIntersection(
+                    inMouseCoords, m_dragCamera, node, planeSpot, cameraNormal, true);
+        QVector3D origPos = mousePointToPlaneIntersection(
+                    inOriginalCoords, m_dragCamera, node, planeSpot, cameraNormal, true);
+        QVector3D changeVec = origPos - currentPos;
+        // Remove any component of the change vector that doesn't lie in the plane.
+        changeVec -= QVector3D::dotProduct(changeVec, planeNormal) * planeNormal;
+        float distance = changeVec.length();
+        changeVec.normalize();
+
+        // Rotate about 90 degrees/rotation circle width (on default camera)
+        // TODO: Make rotation consistent over all cameras (QT3DS-3041)
+        float rotAmount = 0.7f * distance * float(m_pixelRatio);
+
+        QVector3D currentDir = cameraPos - currentPos;
+        QVector3D origDir = cameraPos - origPos;
+        QVector3D cross = QVector3D::crossProduct(currentDir, origDir);
+        float angleSign = QVector3D::dotProduct(cross, planeNormal) > 0.f ? -1.f : 1.f;
+        rotAmount *= angleSign;
+        rotAmount = makeNiceRotation(rotAmount);
+
+        rotation = QQuaternion::fromAxisAndAngle(planeNormal, rotAmount);
+    } else {
+        QVector3D flipPlane = planeNormal;
+        flipZTranslation(flipPlane);
+        QVector3D currentPos = mousePointToPlaneIntersection(
+                    inMouseCoords, m_dragCamera, node, m_beginDragState.t, flipPlane, true);
+        QVector3D origPos = mousePointToPlaneIntersection(
+                    inOriginalCoords, m_dragCamera, node, m_beginDragState.t, flipPlane, true);
+        flipZTranslation(currentPos);
+        flipZTranslation(origPos);
+
+        QVector3D nodePos = m_beginDragState.t;
+        flipZTranslation(nodePos);
+        QVector3D globalNodePos = parentAttached->globalTransform * nodePos;
+        flipZTranslation(globalNodePos);
+
+        QVector3D objToPrevious = globalNodePos - origPos;
+        QVector3D objToCurrent = globalNodePos - currentPos;
+        float lineLen = objToCurrent.length();
+        objToPrevious.normalize();
+        objToCurrent.normalize();
+
+        if (!cameraNode->orthographic()) {
+            // Flip object vector if coords are behind camera to get the correct angle
+            QVector3D camToCurrent = cameraPos - currentPos;
+            if (QVector3D::dotProduct(camToCurrent, cameraNormal) < 0.0f) {
+                objToCurrent = -objToCurrent;
+                // Negative line length seems counterintuitive, but since the end point is
+                // behind the camera, it results in correct line when rendered
+                lineLen = -lineLen;
+            }
+        }
+
+        float cosAngle = QVector3D::dotProduct(objToPrevious, objToCurrent);
+        QVector3D cross = QVector3D::crossProduct(objToPrevious, objToCurrent);
+        float crossPlaneDot = QVector3D::dotProduct(cross, planeNormal);
+        qreal angleSign = crossPlaneDot >= 0.f ? 1. : -1.;
+        float rotAmount = float(qRadiansToDegrees(qAcos(cosAngle) * angleSign));
+        rotAmount = makeNiceRotation(rotAmount);
+        rotation = QQuaternion::fromAxisAndAngle(planeNormal, rotAmount);
+
+        // TODO: Show the current rotation angle and wedge on the widget (QT3DS-3040)
+    }
+
+    origRotation = parentRotation * origRotation;
+    rotation *= origRotation;
+    rotation = parentRotation.inverted() * rotation;
+
+    // TODO: Make it so that continuous rotation in one direction will increase angles over the
+    // TODO: standard [-180, 180] degree range like in runtime1 version (QT3DS-3039)
+
+    m_currentDragState.r = rotation.toEulerAngles();
 
     Q3DSPropertyChangeList list;
     list.append(node->setRotation(m_currentDragState.r));

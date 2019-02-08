@@ -580,9 +580,8 @@ void Q3DStudioRenderer::renderNow()
     QScopedValueRollback<GLuint> defaultFboRedirectRollback(ctxD->defaultFboRedirect, 0);
 
     if (!m_translation.isNull()) {
-        // We are always rendering into a fbo with 1x pixel ratio. The scene widget will
-        // display it a proper size.
-        m_translation->prepareRender(QRect(0, 0, m_size.width(), m_size.height()), m_size, 1.0);
+        m_translation->prepareRender(QRect(0, 0, m_size.width(), m_size.height()), m_size,
+                                     m_parentPixelRatio);
 
         // m_translation->prepareRender clears context, so make sure to activate it again
         if (!QOpenGLContext::currentContext())
@@ -1162,8 +1161,7 @@ void Q3DStudioRenderer::OnSceneMouseDrag(SceneDragSenderType::Enum, QPoint inPoi
                                         mouseDownRenderPoint, renderPoint, m_updatableEditor);
                             break;
                         case MovementTypes::Translate:
-                            m_translation->translate(mouseDownRenderPoint, renderPoint,
-                                                     m_updatableEditor, theLockToAxis);
+                            m_translation->translate(renderPoint, m_updatableEditor, theLockToAxis);
                             break;
                         case MovementTypes::ScaleZ:
                             m_translation->scaleZ(mouseDownRenderPoint, renderPoint,

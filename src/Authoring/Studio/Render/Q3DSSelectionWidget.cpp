@@ -84,21 +84,21 @@ bool Q3DSSelectionWidget::isXYCircle(Q3DSGraphObject *obj) const
 {
     if (m_type != SelectionWidgetType::Rotation || m_models.size() < 4)
         return false;
-    return obj == m_models[2];
+    return obj == m_models[1];
 }
 
 bool Q3DSSelectionWidget::isYZCircle(Q3DSGraphObject *obj) const
 {
     if (m_type != SelectionWidgetType::Rotation || m_models.size() < 4)
         return false;
-    return obj == m_models[0];
+    return obj == m_models[2];
 }
 
 bool Q3DSSelectionWidget::isZXCircle(Q3DSGraphObject *obj) const
 {
     if (m_type != SelectionWidgetType::Rotation || m_models.size() < 4)
         return false;
-    return obj == m_models[1];
+    return obj == m_models[0];
 }
 
 bool Q3DSSelectionWidget::isCameraCircle(Q3DSGraphObject *obj) const
