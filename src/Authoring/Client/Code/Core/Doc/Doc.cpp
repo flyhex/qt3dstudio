@@ -2391,7 +2391,8 @@ std::shared_ptr<Q3DStudio::IComposerSerializer> CDoc::CreateSerializer()
                 *theCoreSystem.GetActionCore(), *m_AssetGraph, *theFullSystem.GetSlideSystem(),
                 *theFullSystem.GetActionSystem(), *theCoreSystem.GetSlideGraphCore(),
                 theClientBridge.GetObjectDefinitions(), m_ImportFailedHandler,
-                *theCoreSystem.GetGuideSystem(), *GetSceneGraph()->GetPathManager());
+                *theCoreSystem.GetGuideSystem(), *GetSceneGraph()->GetPathManager(),
+                *theFullSystem.GetPropertySystem());
 }
 
 std::shared_ptr<Q3DStudio::IComposerSerializer> CDoc::CreateTransactionlessSerializer()
@@ -2407,8 +2408,10 @@ std::shared_ptr<Q3DStudio::IComposerSerializer> CDoc::CreateTransactionlessSeria
                 *theCoreSystem.GetTransactionlessAnimationCore(),
                 *theCoreSystem.GetTransactionlessActionCore(), *m_AssetGraph,
                 *theFullSystem.GetSlideSystem(), *theFullSystem.GetActionSystem(),
-                *theCoreSystem.GetTransactionlessSlideGraphCore(), theClientBridge.GetObjectDefinitions(),
-                m_ImportFailedHandler, *theCoreSystem.GetGuideSystem(), *GetSceneGraph()->GetPathManager());
+                *theCoreSystem.GetTransactionlessSlideGraphCore(),
+                theClientBridge.GetObjectDefinitions(), m_ImportFailedHandler,
+                *theCoreSystem.GetGuideSystem(), *GetSceneGraph()->GetPathManager(),
+                *theFullSystem.GetPropertySystem());
 }
 
 std::shared_ptr<qt3dsdm::IDOMWriter> CDoc::CreateDOMWriter()

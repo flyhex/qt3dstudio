@@ -58,6 +58,8 @@
 #include "MaterialRefView.h"
 #include "BasicObjectsModel.h"
 #include "Qt3DSDMSlides.h"
+#include "VariantsGroupModel.h"
+#include "VariantTagDialog.h"
 
 #include <QtCore/qtimer.h>
 #include <QtQml/qqmlcontext.h>
@@ -69,7 +71,8 @@
 InspectorControlView::InspectorControlView(const QSize &preferredSize, QWidget *parent)
     : QQuickWidget(parent),
       TabNavigable(),
-      m_inspectorControlModel(new InspectorControlModel(this)),
+      m_variantsGroupModel(new VariantsGroupModel(this)),
+      m_inspectorControlModel(new InspectorControlModel(m_variantsGroupModel, this)),
       m_meshChooserView(new MeshChooserView(this)),
       m_instance(0),
       m_handle(0),
@@ -241,6 +244,7 @@ void InspectorControlView::initialize()
     CStudioPreferences::setQmlContextProperties(rootContext());
     rootContext()->setContextProperty(QStringLiteral("_parentView"), this);
     rootContext()->setContextProperty(QStringLiteral("_inspectorModel"), m_inspectorControlModel);
+    rootContext()->setContextProperty(QStringLiteral("_variantsGroupModel"), m_variantsGroupModel);
     rootContext()->setContextProperty(QStringLiteral("_resDir"), StudioUtils::resourceImageUrl());
     rootContext()->setContextProperty(QStringLiteral("_tabOrderHandler"), tabOrderHandler());
     rootContext()->setContextProperty(QStringLiteral("_mouseHelper"), &m_mouseHelper);
@@ -412,6 +416,8 @@ void InspectorControlView::setInspectable(CInspectableBase *inInspectable)
         m_inspectorControlModel->setInspectable(inInspectable);
 
         Q_EMIT titleChanged();
+
+        m_variantsGroupModel->refresh();
     }
 }
 
@@ -450,6 +456,62 @@ void InspectorControlView::showContextMenu(int x, int y, int handle, int instanc
     theContextMenu.exec(mapToGlobal({x, y}));
     m_instance = 0;
     m_handle = 0;
+}
+
+void InspectorControlView::showTagContextMenu(int x, int y, const QString &group,
+                                              const QString &tag)
+{
+    QMenu theContextMenu;
+
+    auto actionRename = theContextMenu.addAction(QObject::tr("Rename Tag"));
+    connect(actionRename, &QAction::triggered, this, [&]() {
+        VariantTagDialog dlg(VariantTagDialog::RenameTag, group, tag);
+        if (dlg.exec() == QDialog::Accepted) {
+            g_StudioApp.GetCore()->getProjectFile().renameVariantTag(group, dlg.getNames().first,
+                                                                     dlg.getNames().second);
+        }
+    });
+
+    auto actionDelete = theContextMenu.addAction(QObject::tr("Delete Tag"));
+    connect(actionDelete, &QAction::triggered, this, [&]() {
+        g_StudioApp.GetCore()->getProjectFile().deleteVariantTag(group, tag);
+    });
+
+    theContextMenu.exec(mapToGlobal({x, y}));
+}
+
+void InspectorControlView::showGroupContextMenu(int x, int y, const QString &group)
+{
+    QMenu theContextMenu;
+
+    ProjectFile &projectFile = g_StudioApp.GetCore()->getProjectFile();
+
+    auto actionRename = theContextMenu.addAction(QObject::tr("Rename Group"));
+    connect(actionRename, &QAction::triggered, this, [&]() {
+        VariantTagDialog dlg(VariantTagDialog::RenameGroup, {}, group);
+        if (dlg.exec() == QDialog::Accepted) {
+            projectFile.renameVariantGroup(dlg.getNames().first, dlg.getNames().second);
+        }
+    });
+
+    auto actionColor = theContextMenu.addAction(QObject::tr("Change Group Color"));
+    connect(actionColor, &QAction::triggered, this, [&]() {
+        const auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
+        for (auto &g : variantsDef) {
+            if (g.m_title == group) {
+                QColor newColor = this->showColorDialog(g.m_color);
+                projectFile.changeVariantGroupColor(group, newColor.name());
+                break;
+            }
+        }
+    });
+
+    auto actionDelete = theContextMenu.addAction(QObject::tr("Delete Group"));
+    connect(actionDelete, &QAction::triggered, this, [&]() {
+        projectFile.deleteVariantGroup(group);
+    });
+
+    theContextMenu.exec(mapToGlobal({x, y}));
 }
 
 void InspectorControlView::toggleMasterLink()

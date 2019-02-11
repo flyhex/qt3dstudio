@@ -42,6 +42,7 @@
 class CInspectableBase;
 class Qt3DSDMInspectable;
 class SGuideInspectableImpl;
+class VariantsGroupModel;
 
 namespace qt3dsdm {
 class ISignalConnection;
@@ -107,7 +108,7 @@ class InspectorControlModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
-    explicit InspectorControlModel(QObject *parent);
+    explicit InspectorControlModel(VariantsGroupModel *variantsModel, QObject *parent);
     ~InspectorControlModel() = default;
 
     enum Roles {
@@ -247,6 +248,8 @@ private:
     bool isGroupRebuildRequired(CInspectableBase *inspectable, int theIndex) const;
 
     static int handleToGuidePropIndex(int handle) { return handle - 1; }
+
+    VariantsGroupModel *m_variantsModel = nullptr;
 };
 
 #endif // INSPECTORCONTROLMODEL_H

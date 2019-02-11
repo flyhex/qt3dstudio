@@ -62,6 +62,7 @@
 #include "foundation/Qt3DSLogging.h"
 #include "Dialogs.h"
 #include "Dispatch.h"
+#include "VariantsGroupModel.h"
 
 static QStringList renderableItems()
 {
@@ -107,8 +108,9 @@ static std::pair<bool, bool> getSlideCharacteristics(qt3dsdm::Qt3DSDMInstanceHan
     return std::make_pair(hasNextSlide, hasPreviousSlide);
 }
 
-InspectorControlModel::InspectorControlModel(QObject *parent)
-    : QAbstractListModel(parent)
+InspectorControlModel::InspectorControlModel(VariantsGroupModel *variantsModel, QObject *parent)
+    : m_variantsModel(variantsModel)
+    , QAbstractListModel(parent)
     , m_UpdatableEditor(*g_StudioApp.GetCore()->GetDoc())
 {
     m_modifiedProperty.first = 0;
@@ -1229,7 +1231,6 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
                     metaDataProvider->GetMetaDataProperty(instance, element->m_property));
     }
 
-
     bool skipEmits = false;
     switch (element->m_dataType) {
     case qt3dsdm::DataModelDataType::String: {
@@ -1239,6 +1240,10 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
             if (index != -1)
                 stringValue = stringValue.mid(index + 1);
         }
+
+        if (bridge->IsLayerInstance(instance))
+            m_variantsModel->refresh();
+
         element->m_value = stringValue;
     } // intentional fall-through for other String-derived datatypes
     case qt3dsdm::DataModelDataType::StringOrInt:

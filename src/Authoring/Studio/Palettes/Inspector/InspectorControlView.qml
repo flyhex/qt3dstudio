@@ -28,6 +28,8 @@
 import QtQuick 2.8
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 2.2
+import QtQuick.Controls.Styles 1.4
+import QtQuick.Extras 1.4
 
 import Qt3DStudio 1.0
 import "../controls"
@@ -286,6 +288,7 @@ Rectangle {
 
                                 ColumnLayout { // Property row and datainput control
                                     Layout.alignment: Qt.AlignTop
+                                    visible: modelData.title !== "variants"
                                     spacing: 0
                                     RowLayout { // Property row
                                         Layout.alignment: Qt.AlignLeft
@@ -315,7 +318,7 @@ Rectangle {
                                                     anchors.fill: parent
                                                     acceptedButtons: Qt.RightButton | Qt.LeftButton
                                                     hoverEnabled: true
-                                                    onClicked:  {
+                                                    onClicked: {
                                                         if (mouse.button === Qt.LeftButton) {
                                                             _inspectorModel.setPropertyAnimated(
                                                                         model.modelData.instance,
@@ -423,6 +426,9 @@ Rectangle {
                                     opacity: enabled ? 1 : .5
                                     Layout.alignment: Qt.AlignTop
                                     sourceComponent: {
+                                        if (modelData.title === "variants")
+                                            return variantTagsComponent;
+
                                         const dataType = modelData.dataType;
                                         switch (dataType) {
                                         case DataModelDataType.Long:
@@ -1095,6 +1101,156 @@ Rectangle {
 
             onValueChanged: {
                 currentIndex = find(value)
+            }
+        }
+    }
+
+    Component {
+        id: variantTagsComponent
+
+        Column {
+            width: root.width - 10
+            spacing: 10
+
+            Row {
+                anchors.right: parent.right
+                anchors.rightMargin: 5
+                spacing: 5
+
+                ToolButton {
+                    id: importButton
+                    text: qsTr("Import...")
+                    width: 70
+                    height: 20
+
+                    onClicked: {
+                        // TODO: implement
+                    }
+                }
+
+                ToolButton {
+                    id: exportButton
+                    text: qsTr("Export...")
+                    width: 70
+                    height: 20
+
+                    onClicked: {
+                        // TODO: implement
+                    }
+                }
+            }
+
+            Text {
+                text: qsTr("There are no variant tags yet. Click [+ Group] to add a new tag group and start adding tags.")
+                color: "#ffffff"
+                visible: _variantsGroupModel.rowCount() === 0
+            }
+
+            Repeater {
+                id: tagsReeater
+                model: _variantsGroupModel
+
+                Row {
+                    id: variantTagsRow
+
+                    readonly property var tagsModel: model.tags
+                    readonly property var groupModel: model
+
+                    Text {
+                        text: model.group
+                        color: model.color
+                        width: 50
+                        anchors.top: parent.top
+                        anchors.topMargin: 5
+
+                        MouseArea {
+                            anchors.fill: parent;
+                            acceptedButtons: Qt.RightButton
+                            onClicked: {
+                                if (mouse.button === Qt.RightButton) {
+                                    const coords = mapToItem(root, mouse.x, mouse.y);
+                                    _parentView.showGroupContextMenu(coords.x, coords.y, model.group);
+                                }
+                            }
+                        }
+                    }
+
+                    Flow {
+                        width: root.width - 110
+                        spacing: 5
+
+                        Repeater {
+                            model: tagsModel
+
+                            Loader {
+                                readonly property var tagsModel: model
+                                readonly property var grpModel: groupModel
+                                sourceComponent: tagComponent
+                            }
+                        }
+
+                        ToolButton {
+                            id: addTagButton
+                            text: qsTr("+ Tag")
+                            height: 25
+
+                            onClicked: {
+                                _variantsGroupModel.addNewTag(groupModel.group)
+                            }
+
+                        }
+                    }
+                }
+            }
+
+            Item { width: 1; height: 5 } // vertical spacer
+
+            ToolButton {
+                id: addGroupButton
+                text: qsTr("+ Group")
+                width: 60
+                height: 25
+                onClicked: {
+                    _variantsGroupModel.addNewGroup()
+                }
+            }
+
+            Item { width: 1; height: 5 } // vertical spacer
+        }
+    }
+
+    Component {
+        id: tagComponent
+
+        Rectangle {
+            property bool toggled: tagsModel.selected
+            property string grpColor: grpModel ? grpModel.color : ""
+
+            width: Math.max(tLabel.width + 10, 60)
+            height: 25
+            color: toggled ? grpColor : "#2e2f30"
+            border.color: "#959596"
+
+            Text {
+                id: tLabel
+                anchors.centerIn: parent
+                text: tagsModel.tag
+                color: toggled ? "#ffffff" : "#959596"
+            }
+
+            MouseArea {
+                anchors.fill: parent;
+                acceptedButtons: Qt.RightButton | Qt.LeftButton
+                onClicked: {
+                    if (mouse.button === Qt.LeftButton) {
+                        toggled = !toggled;
+                        _variantsGroupModel.setTagState(grpModel.group, tagsModel.tag, toggled);
+                    } else if (mouse.button === Qt.RightButton) {
+                        const coords = mapToItem(root, mouse.x, mouse.y);
+                        _parentView.showTagContextMenu(coords.x, coords.y, grpModel.group,
+                                                       tagsModel.tag);
+                    }
+                }
             }
         }
     }

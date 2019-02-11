@@ -226,7 +226,10 @@ HEADERS += \
     Palettes/scenecamera/scenecameraview.h \
     Palettes/scenecamera/scenecamerascrollarea.h \
     Palettes/scenecamera/scenecameraglwidget.h \
-    Palettes/TimelineGraphicsView/ui/RowTimelineCommentItem.h
+    Palettes/TimelineGraphicsView/ui/RowTimelineCommentItem.h \
+    Palettes/Inspector/VariantsGroupModel.h \
+    Palettes/Inspector/VariantsTagModel.h \
+    Palettes/Inspector/VariantTagDialog.h
 
 FORMS += \
     MainFrm.ui \
@@ -246,7 +249,8 @@ FORMS += \
     UI/StartupDlg.ui \
     Palettes/Project/EditPresentationIdDlg.ui \
     Palettes/Project/ChooseImagePropertyDlg.ui \
-    Palettes/scenecamera/scenecameraview.ui
+    Palettes/scenecamera/scenecameraview.ui \
+    Palettes/Inspector/VariantTagDialog.ui
 
 SOURCES += \
     Application/AboutDlg.cpp \
@@ -402,7 +406,10 @@ SOURCES += \
     Palettes/scenecamera/scenecameraview.cpp \
     Palettes/scenecamera/scenecamerascrollarea.cpp \
     Palettes/scenecamera/scenecameraglwidget.cpp \
-    Palettes/TimelineGraphicsView/ui/RowTimelineCommentItem.cpp
+    Palettes/TimelineGraphicsView/ui/RowTimelineCommentItem.cpp \
+    Palettes/Inspector/VariantsGroupModel.cpp \
+    Palettes/Inspector/VariantsTagModel.cpp \
+    Palettes/Inspector/VariantTagDialog.cpp
 
 RESOURCES += \
     MainFrm.qrc \

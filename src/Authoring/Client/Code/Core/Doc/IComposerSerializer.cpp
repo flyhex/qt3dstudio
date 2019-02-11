@@ -321,6 +321,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
     qt3dsdm::IStringTable &m_StringTable;
     std::shared_ptr<Q3DStudio::IImportFailedHandler> m_ImportFailedHandler;
     qt3ds::render::IPathManager &m_PathManager;
+    IPropertySystem &m_propertySystem;
 
     // The instances we have discovered when we are writing
     THandleToIdMap m_HandleToIdMap;
@@ -370,7 +371,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
                             IActionSystem &inActionSystem, ISlideGraphCore &inSlideGraphCore,
                             SComposerObjectDefinitions &inObjectDefinitions,
                             std::shared_ptr<Q3DStudio::IImportFailedHandler> inFailedHandler,
-                            IGuideSystem &inGuideSystem, qt3ds::render::IPathManager &inPathManager)
+                            IGuideSystem &inGuideSystem, qt3ds::render::IPathManager &inPathManager,
+                            IPropertySystem &inPropSystem)
         : m_DataCore(inDataCore)
         , m_MetaData(inMetaData)
         , m_SlideCore(inSlideCore)
@@ -385,6 +387,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         , m_StringTable(inDataCore.GetStringTable())
         , m_ImportFailedHandler(inFailedHandler)
         , m_PathManager(inPathManager)
+        , m_propertySystem(inPropSystem)
         , m_Foundation(Q3DStudio::Foundation::SStudioFoundation::Create())
         , m_InputStreamFactory(qt3ds::render::IInputStreamFactory::Create(*m_Foundation.m_Foundation))
         , m_PreserveFileIds(true)
@@ -923,8 +926,10 @@ struct SComposerSerializerImpl : public IComposerSerializer
             const pair<Qt3DSDMPropertyHandle, SValue> &theValue(inList[idx]);
             TCharStr theName(m_DataCore.GetProperty(theValue.first).m_Name);
             WriteDataModelValue(theValue.second, theValueStr);
-            if (GetValueType(theValue.second) == DataModelDataType::String || theValueStr.size())
-                inWriter.Att(theName.wide_str(), theValueStr.wide_str());
+            if (GetValueType(theValue.second) == DataModelDataType::String || theValueStr.size()) {
+                if (theName != L"variants") // this property is saved under the <Graph> node
+                    inWriter.Att(theName.wide_str(), theValueStr.wide_str());
+            }
         }
     }
 
@@ -1606,6 +1611,15 @@ struct SComposerSerializerImpl : public IComposerSerializer
 
         IDOMWriter::Scope __instanceScope(inWriter, theType->wide_str());
         inWriter.Att(L"id", GetInstanceId(inInstance));
+
+        // for layers, save the variants property under the <Graph>
+        if (theType.getValue() == L"Layer") {
+            auto prop = m_propertySystem.GetAggregateInstancePropertyByName(inInstance,
+                                                                            L"variants");
+            SValue sVal;
+            if (m_propertySystem.GetInstancePropertyValue(inInstance, prop, sVal))
+                inWriter.Att(L"variants", get<TDataStrPtr>(sVal)->GetData());
+        }
 
         m_InstanceSet.insert(inInstance);
 
@@ -2854,10 +2868,10 @@ std::shared_ptr<IComposerSerializer> IComposerSerializer::CreateGraphSlideSerial
         ISlideSystem &inSlideSystem, IActionSystem &inActionSystem, ISlideGraphCore &inSlideGraphCore,
         SComposerObjectDefinitions &inObjectDefinitions,
         std::shared_ptr<Q3DStudio::IImportFailedHandler> inFailedHandler, IGuideSystem &inGuideSystem,
-        qt3ds::render::IPathManager &inPathManager)
+        qt3ds::render::IPathManager &inPathManager, IPropertySystem &inPropSystem)
 {
     return std::shared_ptr<SComposerSerializerImpl>(new SComposerSerializerImpl(
                                                           inDataCore, inMetaData, inSlideCore, inAnimationCore, inActionCore, inAssetGraph,
                                                           inSlideSystem, inActionSystem, inSlideGraphCore, inObjectDefinitions, inFailedHandler,
-                                                          inGuideSystem, inPathManager));
+                                                          inGuideSystem, inPathManager, inPropSystem));
 }

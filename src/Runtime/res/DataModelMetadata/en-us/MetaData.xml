@@ -94,6 +94,9 @@
                 <Property name="blendtype" formalName="Blend Mode" list="Normal:Screen:Multiply:Add:Subtract:*Overlay:*ColorBurn:*ColorDodge" default="Normal" description="Mode of blending between this layer\nand layers below. Modes marked with\n* are available only with HW supporting\nadvanced blending modes." category="Basic Properties" />
                 <Property name="sourcepath" formalName="Sub-Presentation" description="Presentation or QML stream to\nrender for this layer" type="Renderable" controllable="True"  category="Basic Properties" />
 
+                <!-- Variant Tags -->
+                <Property name="variants" type="String" category="Variant Tags" />
+
                 <!-- Antialiasing -->
                 <Property name="progressiveaa" formalName="Progressive AA" description="Improves the visual quality when no\nitems are moving" list="None:2x:4x:8x" default="None" category="Antialiasing" />
                 <Property name="multisampleaa" formalName="Multisample AA" description="Improves geometry quality, e.g.\nsilhouettes." list="None:2x:4x:SSAA" default="None" category="Antialiasing" />

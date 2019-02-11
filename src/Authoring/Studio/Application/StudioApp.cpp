@@ -1729,6 +1729,7 @@ bool CStudioApp::OnLoadDocument(const QString &inDocument, bool inShowStartupDia
         m_core->getProjectFile().updateDocPresentationId();
         m_core->getProjectFile().loadSubpresentationsAndDatainputs(m_subpresentations,
                                                                    m_dataInputDialogItems);
+        m_core->getProjectFile().loadVariants();
         getRenderer().RegisterSubpresentations(m_subpresentations);
 
         m_authorZoom = false;

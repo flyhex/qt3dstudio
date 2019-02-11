@@ -46,6 +46,12 @@ class ProjectFile : public QObject
 public:
     ProjectFile();
 
+    struct VariantGroup {
+        QString m_title;
+        QString m_color;
+        QStringList m_tags;
+    };
+
     void create(const QString &uiaPath);
     void ensureProjectFile();
     void initProjectFile(const QString &presPath);
@@ -81,6 +87,19 @@ public:
     void deletePresentationFile(const QString &filePath);
     void renameMaterial(const QString &oldName, const QString &newName);
     bool duplicatePresentation(const QString &oldPres, const QString &newPres);
+    void loadVariants();
+    void addVariantTag(const QString &group, const QString &newTag);
+    void renameVariantTag(const QString &group, const QString &oldTag, const QString &newTag);
+    void deleteVariantTag(const QString &group, const QString &tag);
+    void addVariantGroup(const QString &newGroup);
+    void renameVariantGroup(const QString &oldGroup, const QString &newGroup);
+    void deleteVariantGroup(const QString &group);
+    void changeVariantGroupColor(const QString &group, const QString &newColor);
+    bool isVariantGroupUnique(const QString &group) const;
+    bool isVariantTagUnique(const QString &group, const QString &tag) const;
+
+    QVector<VariantGroup> variantsDef() const { return m_variantsDef; }
+
 
 Q_SIGNALS:
     void presentationIdChanged(const QString &path, const QString &id);
@@ -88,9 +107,17 @@ Q_SIGNALS:
 
 private:
     QString ensureUniquePresentationId(const QString &id) const;
+    bool tagExistsInUip(const QString &src, const QString &group, const QString &tag) const;
+    bool groupExistsInUip(const QString &src, const QString &group) const;
+    void deleteTagFromUip(const QString &src, const QString &group, const QString &tag);
+    void deleteGroupFromUip(const QString &src, const QString &group);
+    void renameTagInUip(const QString &src, const QString &group, const QString &tag,
+                        const QString &newName);
+    void renameGroupInUip(const QString &src, const QString &group, const QString &newName);
 
     QFileInfo m_fileInfo; // uia file info
     QString m_initialPresentation;
+    QVector<VariantGroup> m_variantsDef; // definition of variants
 };
 
 #endif // PROJECTFILE_H
