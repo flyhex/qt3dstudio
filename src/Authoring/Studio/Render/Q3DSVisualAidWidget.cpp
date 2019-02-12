@@ -258,7 +258,7 @@ void Q3DSVisualAidWidget::destroy()
     m_presentation = nullptr;
 }
 
-void Q3DSVisualAidWidget::update(Q3DSCameraNode *layerCameraNode) const
+void Q3DSVisualAidWidget::update(Q3DSCameraNode *layerCameraNode, Q3DSGraphObject *selectedObject)
 {
     if (!isCreated())
         return;
@@ -328,6 +328,26 @@ void Q3DSVisualAidWidget::update(Q3DSCameraNode *layerCameraNode) const
 
     m_iconMaterial->applyPropertyChanges(billboardChange);
     m_iconMaterial->notifyPropertyChanges(billboardChange);
+
+    if (!m_isSelected && selectedObject == m_graphObject) {
+        m_isSelected = true;
+        Q3DSPropertyChangeList colorChange = {
+            Q3DSPropertyChange::fromVariant(
+            QStringLiteral("color"), QColor(Qt::red))
+        };
+
+        m_wireframeMaterial->applyPropertyChanges(colorChange);
+        m_wireframeMaterial->notifyPropertyChanges(colorChange);
+    } else if (m_isSelected && selectedObject != m_graphObject) {
+        m_isSelected = false;
+        Q3DSPropertyChangeList colorChange = {
+            Q3DSPropertyChange::fromVariant(
+            QStringLiteral("color"), QColor(Qt::white))
+        };
+
+        m_wireframeMaterial->applyPropertyChanges(colorChange);
+        m_wireframeMaterial->notifyPropertyChanges(colorChange);
+    }
 }
 
 }

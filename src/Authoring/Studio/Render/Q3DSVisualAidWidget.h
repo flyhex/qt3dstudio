@@ -57,7 +57,7 @@ public:
     bool hasCollisionBox(Q3DSGraphObject *graphObject) const;
 
     void destroy();
-    void update(Q3DSCameraNode *layerCameraNode) const;
+    void update(Q3DSCameraNode *layerCameraNode, Q3DSGraphObject *selectedObject);
 
 private:
     VisualAidType m_type = VisualAidType::Camera;
@@ -68,6 +68,7 @@ private:
     Q3DSModelNode *m_collisionBox = nullptr;
     Q3DSGraphObject *m_graphObject = nullptr;
     Q3DSUipPresentation *m_presentation = nullptr;
+    bool m_isSelected = false;
 };
 
 }

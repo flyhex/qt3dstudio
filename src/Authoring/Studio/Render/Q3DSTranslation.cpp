@@ -1519,8 +1519,8 @@ void Q3DSTranslation::updateVisualAids()
     enableVisualAids();
 
     if (m_foregroundCamera) {
-        for (auto &visualAid : qAsConst(m_visualAids))
-            visualAid.update(m_foregroundCamera);
+        for (int i = 0; i < m_visualAids.size(); ++i)
+            m_visualAids[i].update(m_foregroundCamera, m_selectedObject);
     }
 }
 
