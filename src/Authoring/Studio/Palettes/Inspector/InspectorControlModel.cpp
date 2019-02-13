@@ -1000,10 +1000,8 @@ bool InspectorControlModel::isTreeRebuildRequired(CInspectableBase* inspectBase)
 
     long theCount = m_inspectableBase->GetGroupCount();
     auto refMaterial = getReferenceMaterial(inspectBase);
-    if (refMaterial != m_refMaterial) {
-        m_refMaterial = refMaterial;
+    if (refMaterial != m_refMaterial)
         return true;
-    }
     long refMaterialGroupCount = 0;
     if (refMaterial.Valid())
         refMaterialGroupCount = 1; // Only the last group of the refMaterial is used
@@ -1196,6 +1194,8 @@ void InspectorControlModel::rebuildTree()
     // Clean the old objects after reset is done so that qml will not freak out about null pointers
     for (int i = 0; i < deleteVector.count(); ++i)
         deleteVector[i]->deleteLater();
+
+    m_refMaterial = getReferenceMaterial(m_inspectableBase);
 }
 
 int InspectorControlModel::rowCount(const QModelIndex &parent) const
