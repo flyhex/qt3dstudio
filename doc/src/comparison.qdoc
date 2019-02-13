@@ -1,0 +1,180 @@
+/****************************************************************************
+**
+** Copyright (C) 2019 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Comparison of Qt 3D and Qt 3D Studio
+\page comparison-qt3d-qt3dstudio.html
+
+In short, Qt 3D Studio is built on top of Qt 3D. The flexible architecture of Qt 3D makes it
+suitable to build 3D runtimes, or engines, such as Qt 3D Studio.
+
+\section1 Qt 3D
+
+Qt 3D is programmer-oriented engine building toolkit and great for both simple and complex scenes.
+Qt 3D simplifies the implementation of advanced rendering techniques.
+
+\section1 Qt 3D Studio
+
+Qt 3D Studio consists of both a 3D editor and a 3D runtime. Qt 3D Studio is designer-oriented
+and makes it easy to build complex 3D scenes with states and transitions that can be used in
+and controlled by Qt applications.
+
+\section1 Use Case Comparison
+
+Whether you should use Qt 3D or Qt 3D Studio for your project depends on your use case.
+Below, we list some common use cases and how they apply to the two:
+
+\section2 Creating 3D Scenes
+
+\table
+  \header
+    \li
+      Use Case
+    \li
+      Qt 3D
+    \li
+      Qt 3D Studio
+  \row
+    \li
+      Graphically editing a 3D scene for use in a Qt application.
+    \li
+      No built-in editor. Support for importing common 3D formats.
+    \li
+      Yes, use the Qt 3D Studio Editor.
+  \row
+    \li
+      Creating a 3D scene programmatically.
+    \li
+      Suitable.
+    \li
+      Not possible.
+  \row
+    \li
+      Using existing materials and effects.
+    \li
+      Some available in Qt3D.Extras.
+    \li
+      Many available in the Qt 3D Studio editor.
+  \row
+    \li
+      Combine existing materials and effects.
+    \li
+      May require rewriting some of the shaders from Qt3D.Extras to form custom
+      combinations.
+    \li
+      Suitable.
+\endtable
+
+\section2 Effects
+
+\table
+  \header
+    \li
+      Use Case
+    \li
+      Qt 3D
+    \li
+      Qt 3D Studio
+  \row
+    \li
+      Creating a simple multi-pass rendering pipeline.
+    \li
+      Suitable.
+    \li
+      Suitable.
+  \row
+    \li
+      Using custom shaders.
+    \li
+      Suitable.
+    \li
+      Suitable.
+  \row
+    \li
+      Layer-based compositing.
+    \li
+      Suitable.
+    \li
+      Suitable.
+  \row
+    \li
+      Implementing custom rendering techniques such as volumetric rendering.
+    \li
+      Suitable.
+    \li
+      Not suitable.
+\endtable
+
+\section2 Formats
+
+\table
+  \header
+    \li
+      Use Case
+    \li
+      Qt 3D
+    \li
+      Qt 3D Studio
+  \row
+    \li
+      Importing external formats.
+    \li
+      All formats supported by plugins such as Assimp. See
+      \l{https://doc.qt.io/qt-5/qml-qt3d-render-sceneloader.html}{SceneLoader} for a full list.
+    \li
+      A number of formats are supported. See \l{2D Assets} and
+      \l{Working with 3D Content}{3D Assets} for details.
+\endtable
+
+\section2 Creating 3D Engines and Editors
+
+\table
+  \header
+    \li
+      Use Case
+    \li
+      Qt 3D
+    \li
+      Qt 3D Studio
+  \row
+    \li
+      Creating a custom graphical 3D editor.
+    \li
+      Suitable.
+    \li
+      Not possible.
+  \row
+    \li
+      Creating a custom 3D engine.
+    \li
+      Suitable.
+    \li
+      Not possible.
+\endtable
+
+*/
