@@ -36,6 +36,11 @@ class VariantsTagModel;
 class VariantsGroupModel : public QAbstractListModel
 {
     Q_OBJECT
+    Q_PROPERTY(bool variantsEmpty MEMBER m_variantsEmpty NOTIFY varaintsEmptyChanged)
+
+public:
+Q_SIGNALS:
+    void varaintsEmptyChanged();
 
 public:
     explicit VariantsGroupModel(QObject *parent = nullptr);
@@ -72,6 +77,7 @@ private:
       QVector<TagGroupData> m_data;
       int m_instance = 0; // selected layer instance
       int m_property = 0; // variant tags property handler
+      bool m_variantsEmpty = true; // no groups (nor tags)
 };
 
 #endif // VARIANTSGROUPMODEL_H

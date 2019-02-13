@@ -272,6 +272,7 @@ bool CCore::OnNewDocument(const QString &inDocument, bool isNewProject, bool sil
     // write a new presentation node to the uia file
     m_projectFile.addPresentationNode(theDocument);
     m_projectFile.updateDocPresentationId();
+    m_projectFile.loadVariants();
     m_projectFile.loadSubpresentationsAndDatainputs(g_StudioApp.m_subpresentations,
                                                     g_StudioApp.m_dataInputDialogItems);
     g_StudioApp.getRenderer().RegisterSubpresentations(g_StudioApp.m_subpresentations);

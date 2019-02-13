@@ -458,6 +458,7 @@ void InspectorControlView::showContextMenu(int x, int y, int handle, int instanc
     m_handle = 0;
 }
 
+// context menu for the variants tags
 void InspectorControlView::showTagContextMenu(int x, int y, const QString &group,
                                               const QString &tag)
 {
@@ -480,6 +481,7 @@ void InspectorControlView::showTagContextMenu(int x, int y, const QString &group
     theContextMenu.exec(mapToGlobal({x, y}));
 }
 
+// context menu for the variants groups
 void InspectorControlView::showGroupContextMenu(int x, int y, const QString &group)
 {
     QMenu theContextMenu;

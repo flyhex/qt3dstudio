@@ -96,6 +96,12 @@ void VariantsGroupModel::refresh()
         }
 
         endResetModel();
+
+        bool isVariantsEmpty = rowCount() == 0;
+        if (m_variantsEmpty != isVariantsEmpty) {
+            m_variantsEmpty = isVariantsEmpty;
+            Q_EMIT varaintsEmptyChanged();
+        }
     }
 }
 

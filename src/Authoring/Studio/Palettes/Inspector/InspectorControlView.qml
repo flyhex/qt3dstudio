@@ -1133,6 +1133,7 @@ Rectangle {
                     text: qsTr("Export...")
                     width: 70
                     height: 20
+                    enabled: !_variantsGroupModel.variantsEmpty
 
                     onClicked: {
                         // TODO: implement
@@ -1141,9 +1142,9 @@ Rectangle {
             }
 
             Text {
-                text: qsTr("There are no variant tags yet. Click [+ Group] to add a new tag group and start adding tags.")
+                text: qsTr("There are no variant tags yet. Click [+ Group] to add a new tags group and start adding tags.")
                 color: "#ffffff"
-                visible: _variantsGroupModel.rowCount() === 0
+                visible: _variantsGroupModel.variantsEmpty
             }
 
             Repeater {
