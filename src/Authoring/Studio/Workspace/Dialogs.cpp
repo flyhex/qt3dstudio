@@ -1151,6 +1151,42 @@ QString CDialogs::GetSaveAsChoice(const QString &inDialogTitle, bool isProject, 
     return theFile;
 }
 
+QString CDialogs::getImportVariantsDlg()
+{
+    QString docDir = QFileInfo(g_StudioApp.GetCore()->GetDoc()->GetDocumentPath()).absolutePath();
+
+    QFileDialog dlg;
+    dlg.setDirectory(docDir);
+    dlg.setWindowTitle(tr("Import variants"));
+    dlg.setDefaultSuffix(QStringLiteral(".variants"));
+    dlg.setNameFilters({tr("All supported files (*.variants *.uia)"),
+                        tr("Variants files (*.variants)"), tr("Project files (*.uia)")});
+    dlg.exec();
+
+    if (!dlg.selectedFiles().empty())
+        return dlg.selectedFiles().front();
+
+    return {};
+}
+
+QString CDialogs::getExportVariantsDlg()
+{
+    QString docDir = QFileInfo(g_StudioApp.GetCore()->GetDoc()->GetDocumentPath()).absolutePath();
+
+    QFileDialog dlg;
+    dlg.setDirectory(docDir);
+    dlg.setAcceptMode(QFileDialog::AcceptSave);
+    dlg.setWindowTitle(tr("Export variants"));
+    dlg.setDefaultSuffix(QStringLiteral(".variants"));
+    dlg.setNameFilters({QObject::tr("Variants files (*.variants)")});
+    dlg.exec();
+
+    if (!dlg.selectedFiles().empty())
+        return dlg.selectedFiles().front();
+
+    return {};
+}
+
 //==============================================================================
 /**
  * Prompt the user for a file to create.

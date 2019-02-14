@@ -931,37 +931,93 @@ ProjectFile::getDiBindingtypesFromSubpresentations() const
     return map;
 }
 
-// load variant data from uia to m_variantsDef
-void ProjectFile::loadVariants()
+/**
+ * Load variants data to m_variantsDef
+ *
+ * @param filePath the file path to load the variants from. If empty, variants are loaded from the
+ *                 project file and replace m_variantsDef. If a filePath is specified, the loaded
+ *                 variants are merged with m_variantsDef
+ */
+void ProjectFile::loadVariants(const QString &filePath)
 {
     if (!m_fileInfo.exists())
         return;
 
-    QFile file(getProjectFilePath());
+    bool isProj = filePath.isEmpty() || filePath == getProjectFilePath();
+    QFile file(isProj ? getProjectFilePath() : filePath);
     if (!file.open(QFile::Text | QFile::ReadOnly)) {
         qWarning() << file.errorString();
         return;
     }
 
-    m_variantsDef.clear();
+    if (isProj)
+        m_variantsDef.clear();
 
     QXmlStreamReader reader(&file);
     reader.setNamespaceProcessing(false);
 
+    VariantGroup *currentGroup = nullptr;
     while (!reader.atEnd()) {
         if (reader.readNextStartElement()) {
             if (reader.name() == QLatin1String("variantgroup")) {
-                VariantGroup g;
-                g.m_title = reader.attributes().value(QLatin1String("id")).toString();
-                g.m_color = reader.attributes().value(QLatin1String("color")).toString();
-                m_variantsDef.append(g);
+                QString groupId = reader.attributes().value(QLatin1String("id")).toString();
+                QString groupColor = reader.attributes().value(QLatin1String("color")).toString();
+                auto it = std::find_if(m_variantsDef.begin(), m_variantsDef.end(),
+                                       [&](const VariantGroup &vg) -> bool {
+                                           return vg.m_title == groupId;
+                                       });
+
+                if (it != m_variantsDef.end()) { // group exists, override it
+                    currentGroup = it;
+                } else {
+                    VariantGroup g;
+                    m_variantsDef.append(g);
+                    currentGroup = &m_variantsDef.last();
+                }
+                currentGroup->m_title = groupId;
+                currentGroup->m_color = groupColor;
             } else if (reader.name() == QLatin1String("variant")) {
-                m_variantsDef.last().m_tags.append(reader.attributes().value(
-                                                       QLatin1String("id")).toString());
-            } else if (m_variantsDef.length() > 0) {
+                if (currentGroup) {
+                    QString tagId = reader.attributes().value(QLatin1String("id")).toString();
+                    if (!currentGroup->m_tags.contains(tagId))
+                        currentGroup->m_tags.append(tagId);
+                } else {
+                    qWarning() << "Error parsing variant tags.";
+                }
+            } else if (currentGroup) {
                 break;
             }
         }
+    }
+
+    if (!isProj) {
+        // if loading variants from a file, update the uia
+        QDomDocument domDoc;
+        QSaveFile fileProj(getProjectFilePath());
+        if (!StudioUtils::openDomDocumentSave(fileProj, domDoc))
+            return;
+
+        QDomElement vElem = domDoc.documentElement().firstChildElement(QStringLiteral("variants"));
+        if (!vElem.isNull())
+            domDoc.documentElement().removeChild(vElem);
+
+        vElem = domDoc.createElement(QStringLiteral("variants"));
+        domDoc.documentElement().appendChild(vElem);
+
+        for (auto &g : qAsConst(m_variantsDef)) {
+            QDomElement gElem = domDoc.createElement(QStringLiteral("variantgroup"));
+            gElem.setAttribute(QStringLiteral("id"), g.m_title);
+            gElem.setAttribute(QStringLiteral("color"), g.m_color);
+            vElem.appendChild(gElem);
+
+            for (auto &t : qAsConst(g.m_tags)) {
+                QDomElement tElem = domDoc.createElement(QStringLiteral("variant"));
+                tElem.setAttribute(QStringLiteral("id"), t);
+                gElem.appendChild(tElem);
+            }
+        }
+
+        StudioUtils::commitDomDocumentSave(fileProj, domDoc);
     }
 }
 
@@ -991,9 +1047,9 @@ void ProjectFile::addVariantTag(const QString &group, const QString &newTag)
     }
 
     // update m_variantsDef
-    for (auto &v : m_variantsDef) {
-        if (v.m_title == group) {
-            v.m_tags.append(newTag);
+    for (auto &g : m_variantsDef) {
+        if (g.m_title == group) {
+            g.m_tags.append(newTag);
             break;
         }
     }
@@ -1192,30 +1248,9 @@ void ProjectFile::deleteVariantGroup(const QString &group)
     for (int i = 0; i < presElems.count(); ++i) {
         QString pPath = m_fileInfo.path() + QLatin1Char('/')
                 + presElems.at(i).toElement().attribute(QStringLiteral("src"));
-        if (groupExistsInUip(pPath, group)) {
+        if (pPath != doc->GetDocumentPath() && groupExistsInUip(pPath, group)) {
             inUseIdx = i;
             break;
-        }
-    }
-
-    // check that the group is in use in the current doc (could be set in the property but not saved)
-    auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
-    auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
-    int instance = doc->GetSelectedInstance();
-    int property = propertySystem->GetAggregateInstancePropertyByName(instance, L"variants");
-    QString propVal;
-    if (inUseIdx == -1) {
-        if (instance != 0 && bridge->IsLayerInstance(instance)) {
-            qt3dsdm::SValue sValue;
-            if (propertySystem->GetInstancePropertyValue(instance, property, sValue)) {
-                propVal = QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)
-                                                  ->GetData());
-                if (propVal.contains(group + QLatin1Char(':'))) {
-                    // this big value will trigger the in-use warning, but will skip updating the
-                    // uips which is not needed.
-                    inUseIdx = 9999;
-                }
-            }
         }
     }
 
@@ -1236,15 +1271,6 @@ void ProjectFile::deleteVariantGroup(const QString &group)
                 if (pPath != doc->GetDocumentPath())
                     deleteGroupFromUip(pPath, group);
             }
-            if (inUseIdx == 9999) {
-                // property has the deleted group, need to update it, else the deleted group
-                // will be saved the uip if the user saves the presentation.
-                QRegExp rgx(group + ":\\w*,|," + group + ":\\w*");
-                propVal.replace(rgx, {});
-                qt3dsdm::SValue sVal = std::make_shared<qt3dsdm::CDataStr>(
-                                       Q3DStudio::CString::fromQString(propVal));
-                propertySystem->SetInstancePropertyValue(instance, property, sVal);
-            }
             break;
 
         default:
@@ -1253,13 +1279,37 @@ void ProjectFile::deleteVariantGroup(const QString &group)
         }
     }
 
-    // delete the group from current doc, if exists
+    // delete the group from current uip, if exists
     deleteGroupFromUip(doc->GetDocumentPath(), group);
 
+    // delete the group from the property (if set)
+    auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
+    auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    int instance = doc->GetSelectedInstance();
+    int property = propertySystem->GetAggregateInstancePropertyByName(instance, L"variants");
+    QString propVal;
+    if (instance != 0 && bridge->IsLayerInstance(instance)) {
+        qt3dsdm::SValue sValue;
+        if (propertySystem->GetInstancePropertyValue(instance, property, sValue)) {
+            propVal = QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)
+                                              ->GetData());
+            if (propVal.contains(group + QLatin1Char(':'))) {
+                // property has the deleted group, need to update it, else the deleted group
+                // will be saved the uip if the user saves the presentation.
+                QRegExp rgx(group + ":\\w*,*|," + group + ":\\w*");
+                propVal.replace(rgx, {});
+                qt3dsdm::SValue sVal = std::make_shared<qt3dsdm::CDataStr>(
+                                       Q3DStudio::CString::fromQString(propVal));
+                propertySystem->SetInstancePropertyValue(instance, property, sVal);
+            }
+        }
+    }
+
+    // update and save the uia
     QDomElement variantsElem = domDoc.documentElement()
                                .firstChildElement(QStringLiteral("variants"));
     QDomNodeList groupsElems = variantsElem.elementsByTagName(QStringLiteral("variantgroup"));
-    // update and save the uia
+
     bool deleted = false;
     for (int i = 0; i < groupsElems.count(); ++i) {
         QDomElement gElem = groupsElems.at(i).toElement();
@@ -1462,7 +1512,7 @@ void ProjectFile::deleteGroupFromUip(const QString &src, const QString &group)
     QDomNodeList layerElems = domDoc.documentElement()
                                     .elementsByTagName(QStringLiteral("Layer"));
     bool needSave = false;
-    QRegExp rgx(group + ":\\w*,|," + group + ":\\w*");
+    QRegExp rgx(group + ":\\w*,*|," + group + ":\\w*");
     for (int i = 0; i < layerElems.count(); ++i) {
         QDomElement lElem = layerElems.at(i).toElement();
         if (lElem.hasAttribute(QStringLiteral("variants"))) {

@@ -87,7 +87,7 @@ public:
     void deletePresentationFile(const QString &filePath);
     void renameMaterial(const QString &oldName, const QString &newName);
     bool duplicatePresentation(const QString &oldPres, const QString &newPres);
-    void loadVariants();
+    void loadVariants(const QString &filePath = {});
     void addVariantTag(const QString &group, const QString &newTag);
     void renameVariantTag(const QString &group, const QString &oldTag, const QString &newTag);
     void deleteVariantTag(const QString &group, const QString &tag);

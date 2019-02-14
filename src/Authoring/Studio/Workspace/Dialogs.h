@@ -137,6 +137,8 @@ public:
                             bool isCopy = false);
     QString GetNewDocumentChoice(const QString &inInitialDirectory = {}, bool isProject = true);
     QString GetFileOpenChoice(const QString &inInitialDirectory = {});
+    QString getExportVariantsDlg();
+    QString getImportVariantsDlg();
 
     void DisplayImportFailed(const QUrl &inURL, const QString &inDescription, bool inWarningsOnly);
     void DisplayLoadingPresentationFailed(const QFileInfo &loadFileInfo,

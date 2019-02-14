@@ -68,6 +68,8 @@ public:
     Q_INVOKABLE void setTagState(const QString &group, const QString &tag, bool selected);
     Q_INVOKABLE void addNewTag(const QString &group);
     Q_INVOKABLE void addNewGroup();
+    Q_INVOKABLE void importVariants();
+    Q_INVOKABLE void exportVariants();
 
 
 protected:

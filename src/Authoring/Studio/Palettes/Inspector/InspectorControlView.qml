@@ -1124,7 +1124,7 @@ Rectangle {
                     height: 20
 
                     onClicked: {
-                        // TODO: implement
+                        _variantsGroupModel.importVariants()
                     }
                 }
 
@@ -1136,7 +1136,7 @@ Rectangle {
                     enabled: !_variantsGroupModel.variantsEmpty
 
                     onClicked: {
-                        // TODO: implement
+                        _variantsGroupModel.exportVariants()
                     }
                 }
             }
