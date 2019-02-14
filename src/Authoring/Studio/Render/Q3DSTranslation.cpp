@@ -1221,7 +1221,9 @@ void Q3DSTranslation::enableSceneCameras(bool enable)
 
 void Q3DSTranslation::wheelZoom(qreal factor)
 {
-    m_editCameraInfo.m_viewRadius = qMax(.0001, m_editCameraInfo.m_viewRadius * factor);
+    // Too large and too small zooms cause artifacts, so use large but sensible bounds
+    m_editCameraInfo.m_viewRadius = qBound(.0001, m_editCameraInfo.m_viewRadius * factor,
+                                           1000000.0);
 }
 
 void Q3DSTranslation::enableBackgroundLayer()

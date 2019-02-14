@@ -67,18 +67,22 @@ void SEditCameraPersistentInformation::applyToCamera(Q3DSCameraNode &camera,
                                                      const QSizeF &viewport)
 {
     Q3DSPropertyChangeList changeList;
-    changeList.append(camera.setClipFar(5000.f));
+    // TODO: Old one had 2000000 for clip far, but needs QT3DS-3062 fixed or picking breaks
+    changeList.append(camera.setClipFar(80000.f));
     changeList.append(camera.setClipNear(1.f));
+
+    QVector3D posAdjust = front() * 600.f;
     if (m_cameraType == EditCameraTypes::Perspective) {
         changeList.append(camera.setFov(g_editCameraFOV));
         changeList.append(camera.setOrthographic(false));
+        // Handle perspective zooming by adjusting the camera position, as scaling projection
+        // matrix after the fact doesn't work correctly for our purposes
+        posAdjust *= zoomFactor(viewport);
     } else {
         changeList.append(camera.setOrthographic(true));
     }
 
-    qreal zoom = zoomFactor(viewport);
-
-    QVector3D pos = m_position - front() * 600.f;
+    QVector3D pos = m_position - posAdjust;
 
     float rx, ry;
     if (m_cameraType == EditCameraTypes::Directional) {
@@ -91,7 +95,10 @@ void SEditCameraPersistentInformation::applyToCamera(Q3DSCameraNode &camera,
     }
 
     changeList.append(camera.setPosition(pos));
-    changeList.append(camera.setZoom(float(zoom)));
+    if (m_cameraType != EditCameraTypes::Perspective) {
+        // Orthogonal views can't zoom by adjusting position
+        changeList.append(camera.setZoom(zoomFactor(viewport)));
+    }
     changeList.append(camera.setRotation(QVector3D(ry, rx, 0)));
 
     if (!changeList.isEmpty())
