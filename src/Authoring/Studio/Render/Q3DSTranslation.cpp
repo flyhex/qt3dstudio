@@ -199,14 +199,39 @@ static QPointF normalizePointToRect(const QPoint &inPoint, const QRectF &rect)
     return QPointF(x, y);
 }
 
+// A copy of QVector3D::unproject with the difference that if obj.w() is nearly zero, we don't
+// set it to one as that is extremely wrong, at least for our purposes.
+// For determining plane intersections, nearly zero values are good enough even if they may not
+// result in completely pixel-accurate positions.
+// This allows much larger far clip values to be used in cameras before things break.
+static QVector3D unproject(const QVector3D &vector,
+                           const QMatrix4x4 &modelView, const QMatrix4x4 &projection,
+                           const QRect &viewport)
+{
+    QMatrix4x4 inverse = QMatrix4x4( projection * modelView ).inverted();
+
+    QVector4D tmp(vector, 1.0f);
+    tmp.setX((tmp.x() - float(viewport.x())) / float(viewport.width()));
+    tmp.setY((tmp.y() - float(viewport.y())) / float(viewport.height()));
+    tmp = tmp * 2.0f - QVector4D(1.0f, 1.0f, 1.0f, 1.0f);
+
+    QVector4D obj = inverse * tmp;
+    // Don't change the w unless it is actually zero
+    if (obj.w() == 0.f)
+        obj.setW(0.000000001f);
+    obj /= obj.w();
+
+    return obj.toVector3D();
+}
+
 static QVector3D calcRay(const QPointF &point, const QMatrix4x4 &viewMatrix,
                          const QMatrix4x4 &projectionMatrix, QVector3D &outNearPos)
 {
     QRect viewPort(-1, -1, 2, 2);
     outNearPos = QVector3D(float(point.x()), float(point.y()), 0.0f);
-    outNearPos = outNearPos.unproject(viewMatrix, projectionMatrix, viewPort);
+    outNearPos = unproject(outNearPos, viewMatrix, projectionMatrix, viewPort);
     QVector3D farPos(float(point.x()), float(point.y()), 1.0f);
-    farPos = farPos.unproject(viewMatrix, projectionMatrix, viewPort);
+    farPos = unproject(farPos, viewMatrix, projectionMatrix, viewPort);
 
     QVector3D ray = (farPos - outNearPos).normalized();
 

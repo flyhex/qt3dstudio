@@ -67,8 +67,7 @@ void SEditCameraPersistentInformation::applyToCamera(Q3DSCameraNode &camera,
                                                      const QSizeF &viewport)
 {
     Q3DSPropertyChangeList changeList;
-    // TODO: Old one had 2000000 for clip far, but needs QT3DS-3062 fixed or picking breaks
-    changeList.append(camera.setClipFar(80000.f));
+    changeList.append(camera.setClipFar(2000000.f));
     changeList.append(camera.setClipNear(1.f));
 
     QVector3D posAdjust = front() * 600.f;
