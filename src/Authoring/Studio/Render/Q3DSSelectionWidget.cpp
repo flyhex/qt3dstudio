@@ -66,7 +66,7 @@ Q3DSSelectionWidget::BoundingBox Q3DSSelectionWidget::calculateLocalBoundingBox(
         uint index = i + offset;
         const float x = *reinterpret_cast<float *>(data.mid(index, 4).data());
         const float y = *reinterpret_cast<float *>(data.mid(index + 4, 4).data());
-        const float z = *reinterpret_cast<float *>(data.mid(index + 8, 4).data());
+        const float z = -*reinterpret_cast<float *>(data.mid(index + 8, 4).data());
         if (box.min.x() > x)
             box.min.setX(x);
         if (box.min.y() > y)
@@ -100,31 +100,20 @@ Q3DSSelectionWidget::BoundingBox Q3DSSelectionWidget::calculateBoundingBox(
 
     for (Q3DSGraphObject *child = graphObject->firstChild(); child != nullptr;
          child = child->nextSibling()) {
+        if (!child->isNode())
+            continue;
+
         Q3DSNode *childNode = static_cast<Q3DSNode *>(child);
         BoundingBox childBB = calculateBoundingBox(child);
         if ((childBB.max - childBB.min).length() > 0) {
-            QVector3D rotation = childNode->rotation();
-            QQuaternion quat;
-            if (childNode->orientation() == Q3DSNode::Orientation::LeftHanded) {
-                auto rotX = QQuaternion::fromAxisAndAngle(QVector3D(-1, 0, 0), rotation.x());
-                auto rotY = QQuaternion::fromAxisAndAngle(QVector3D(0, -1, 0), rotation.y());
-                auto rotZ = QQuaternion::fromAxisAndAngle(QVector3D(0, 0, 1), rotation.z());
-                quat = rotY * rotX * rotZ;
-            } else {
-                auto rotX = QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), rotation.x());
-                auto rotY = QQuaternion::fromAxisAndAngle(QVector3D(0, 1, 0), rotation.y());
-                auto rotZ = QQuaternion::fromAxisAndAngle(QVector3D(0, 0, 1), rotation.z());
-                quat = rotZ * rotY * rotX;
-            }
-
-            rotateBoundingBox(childBB, quat);
-
             const QVector3D scale = childNode->scale();
             childBB.min *= scale;
             childBB.max *= scale;
 
-            QVector3D position = childNode->position();
-            position.setZ(-position.z());
+            rotateBoundingBox(childBB, calculateRotationQuaternion(childNode->rotation(),
+                                                                   childNode->orientation()));
+
+            const QVector3D position = childNode->position();
             childBB.min += position;
             childBB.max += position;
 
@@ -184,19 +173,16 @@ void Q3DSSelectionWidget::rotateBoundingBox(BoundingBox &box, const QQuaternion 
 }
 
 
-void Q3DSSelectionWidget::select(Q3DSUipPresentation *presentation, Q3DSLayerNode *layer,
-                                 Q3DSNode *node)
+void Q3DSSelectionWidget::select(Q3DSUipPresentation *presentation, Q3DSNode *node)
 {
-    for (auto &selection : qAsConst(m_selections)) {
-        for (auto &model : qAsConst(selection.models))
-            model->notifyPropertyChanges({ model->setEyeballEnabled(false) });
-    }
+    m_presentation = presentation;
+    deselect();
     int index = 0;
-    selectRecursive(presentation, layer, node, index, 0);
+    selectRecursive(presentation, node, index, 0);
 }
 
-void Q3DSSelectionWidget::selectRecursive(Q3DSUipPresentation *presentation, Q3DSLayerNode *layer,
-                                          Q3DSNode *node, int &index, int depth)
+void Q3DSSelectionWidget::selectRecursive(Q3DSUipPresentation *presentation, Q3DSNode *node,
+                                          int &index, int depth)
 {
     if (depth > 1)
         return;
@@ -206,68 +192,68 @@ void Q3DSSelectionWidget::selectRecursive(Q3DSUipPresentation *presentation, Q3D
         return;
     }
 
-    if (m_selections[layer].nodes.size() == index)
-        m_selections[layer].nodes.resize(index + 1);
-    m_selections[layer].nodes[index] = node;
+    m_selections[node].node = node;
+    m_selections[node].boundingBox = calculateBoundingBox(node);
 
-    if (m_selections[layer].boundingBoxes.size() == index)
-        m_selections[layer].boundingBoxes.resize(index + 1);
-    m_selections[layer].boundingBoxes[index] = calculateBoundingBox(node);
+    if (!m_selections[node].model) {
+        const QString name = QStringLiteral("StudioSelectionWidgetBoundingBox") + node->id();
 
-    if (m_selections[layer].models.size() == index) {
-        const QString name = QStringLiteral("StudioSelectionWidgetBoundingBox") + layer->id()
-                + QString::number(m_selections[layer].nodes.size());
-        auto model = createWidgetModel(presentation, layer, name,
+        auto model = createWidgetModel(presentation, node->parent(), name,
                                        QStringLiteral(":/res/Selection.mesh"),
                                        QVector3D(1, 1, 1), true);
+
         auto material = createWidgetDefaultMaterial(presentation, name, Qt::red);
         model->appendChildNode(material);
-        m_selections[layer].models.resize(index + 1);
-        m_selections[layer].models[index] = model;
+        m_selections[node].model = model;
     }
-    const auto model = m_selections[layer].models[index];
-    model->notifyPropertyChanges({ model->setEyeballEnabled(true) });
+    m_selections[node].visible = true;
 
     index++;
 
     for (Q3DSGraphObject *child = node->firstChild(); child != nullptr;
          child = child->nextSibling()) {
-        selectRecursive(presentation, layer, static_cast<Q3DSNode *>(child), index, depth + 1);
+        if (!child->id().contains("StudioSelectionWidget"))
+            selectRecursive(presentation, static_cast<Q3DSNode *>(child), index, depth + 1);
     }
+}
+
+void Q3DSSelectionWidget::deselect()
+{
+    for (auto &selection : m_selections)
+        selection.visible = false;
 }
 
 void Q3DSSelectionWidget::update()
 {
     for (auto &selection : qAsConst(m_selections)) {
-        for (int i = 0; i < selection.models.size(); ++i) {
-            auto node = selection.nodes[i];
-            auto model = selection.models[i];
-            auto boundingBox = selection.boundingBoxes[i];
+        const auto node = selection.node;
+        const auto model = selection.model;
+
+        if (selection.visible) {
+            const auto boundingBox = selection.boundingBox;
 
             QVector3D bbSize(qAbs(boundingBox.max.x() - boundingBox.min.x()),
                              qAbs(boundingBox.max.y() - boundingBox.min.y()),
                              qAbs(boundingBox.max.z() - boundingBox.min.z()));
 
             if (bbSize.length() > 0) {
-                Q3DSNodeAttached *attached = node->attached<Q3DSNodeAttached>();
-                if (!attached)
-                    continue;
+                QMatrix4x4 rotMat = generateRotationMatrix(node->rotation(),
+                                                           node->rotationOrder());
+                if (node->orientation() == Q3DSNode::RightHanded)
+                    adjustRotationLeftToRight(&rotMat);
+                QVector3D offset = rotMat * (boundingBox.min + bbSize * 0.5f) * node->scale();
 
-                Qt3DCore::QTransform transform;
-                QMatrix4x4 globalMatrix = attached->globalTransform;
-                globalMatrix.translate(boundingBox.min + bbSize / 2.0f);
-                adjustRotationLeftToRight(&globalMatrix);
-                transform.setMatrix(globalMatrix);
-
-                QVector3D position = transform.translation();
-                position.setZ(-position.z());
-
-                Q3DSPropertyChangeList list;
-                list.append(model->setPosition(position));
-                list.append(model->setRotation(transform.rotation().toEulerAngles()));
-                list.append(model->setScale(transform.scale() * bbSize * 0.5f));
-                model->notifyPropertyChanges(list);
+                model->notifyPropertyChanges({
+                    model->setPosition(node->position() + offset),
+                    model->setRotation(node->rotation()),
+                    model->setScale(node->scale() * bbSize * 0.5f),
+                    model->setRotationOrder(node->rotationOrder()),
+                    model->setOrientation(node->orientation()),
+                    model->setEyeballEnabled(true)
+                });
             }
+        } else if (model->eyeballEnabled()) {
+            model->notifyPropertyChanges({ model->setEyeballEnabled(false) });
         }
     }
 }

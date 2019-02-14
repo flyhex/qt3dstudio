@@ -173,21 +173,6 @@ inline void decomposeQMatrix4x4(const QMatrix4x4 &m, QVector3D &position, QQuate
     position = QVector3D(m(0, 3), m(1, 3), m(2, 3));
 }
 
-// Need custom calculation for camera view matrix to properly handle top/bottom edit cameras,
-// where default upvector doesn't work.
-static QMatrix4x4 calculateCameraViewMatrix(const QMatrix4x4 &cameraWorldTransform)
-{
-    const QVector4D position = cameraWorldTransform * QVector4D(0.0f, 0.0f, 0.0f, 1.0f);
-    const QVector4D viewDirection = cameraWorldTransform * QVector4D(0.0f, 0.0f, -1.0f, 0.0f);
-    const QVector4D upVector = cameraWorldTransform * QVector4D(0.0f, 1.0f, 0.0f, 0.0f);
-
-    QMatrix4x4 m;
-    m.lookAt(QVector3D(position),
-             QVector3D(position + viewDirection),
-             QVector3D(upVector));
-    return QMatrix4x4(m);
-}
-
 static QPointF normalizePointToRect(const QPoint &inPoint, const QRectF &rect)
 {
     qreal x = qreal(inPoint.x() - rect.x());
@@ -1147,8 +1132,7 @@ void Q3DSTranslation::clearDirtySet()
     m_dirtySet.clear();
 
     updateForegroundLayerProperties();
-    updateSelectionWidgetProperties();
-    updateVisualAids();
+    updateWidgetProperties();
 }
 
 void Q3DSTranslation::prepareRender(const QRect &rect, const QSize &size, qreal pixelRatio)
@@ -1283,7 +1267,7 @@ void Q3DSTranslation::disableEditCamera()
     enableSceneLights(true);
     enableSceneCameras(true);
     m_editCameraEnabled = false;
-    m_oldCameraType = EditCameraTypes::SceneCamera;
+    m_cameraType = EditCameraTypes::SceneCamera;
     updateForegroundLayerProperties();
 }
 
@@ -1359,7 +1343,7 @@ void Q3DSTranslation::disableGradient()
 
 void Q3DSTranslation::enableGradient()
 {
-    if (m_oldCameraType != m_editCameraInfo.m_cameraType) {
+    if (m_cameraType != m_editCameraInfo.m_cameraType) {
         disableGradient();
         if (m_backgroundLayer) {
             m_gradient = m_presentation->newObject<Q3DSModelNode>("StudioGradient_");
@@ -1441,7 +1425,7 @@ void Q3DSTranslation::enableGradient()
                 m_gradient->appendChildNode(m_gradientMaterial);
             }
         }
-        m_oldCameraType = m_editCameraInfo.m_cameraType;
+        m_cameraType = m_editCameraInfo.m_cameraType;
     }
 }
 
@@ -1456,16 +1440,15 @@ void Q3DSTranslation::selectObject(Qt3DSDMInstanceHandle instance)
     enableManipulationWidget();
 
     const auto layer = layerForNode(m_selectedObject);
-    if (layer) {
-        m_selectionWidget.select(m_presentation.data(), layer,
-                                 static_cast<Q3DSNode *>(m_selectedObject));
-    }
+    if (layer)
+        m_selectionWidget.select(m_presentation.data(), static_cast<Q3DSNode *>(m_selectedObject));
 }
 
 void Q3DSTranslation::unselectObject()
 {
     m_selectedObject = nullptr;
     m_manipulationWidget.destroyManipulators();
+    m_selectionWidget.deselect();
 }
 
 void Q3DSTranslation::enableManipulationWidget()
@@ -1481,7 +1464,7 @@ void Q3DSTranslation::enableManipulationWidget()
     }
 
     updateForegroundLayerProperties();
-    updateSelectionWidgetProperties();
+    updateWidgetProperties();
 }
 
 void Q3DSTranslation::disableVisualAids()
@@ -1594,21 +1577,6 @@ Q3DSCameraNode *Q3DSTranslation::cameraForNode(Q3DSGraphObject *node, bool ignor
     }
 
     return nullptr;
-}
-
-void Q3DSTranslation::updateVisualAids()
-{
-    if (!m_gradient) {
-        disableVisualAids();
-        return;
-    }
-
-    enableVisualAids();
-
-    if (m_foregroundCamera) {
-        for (int i = 0; i < m_visualAids.size(); ++i)
-            m_visualAids[i].update(m_foregroundCamera, m_selectedObject);
-    }
 }
 
 void Q3DSTranslation::updateForegroundLayerProperties()
@@ -1726,14 +1694,14 @@ void Q3DSTranslation::updateForegroundLayerProperties()
     }
 }
 
-void Q3DSTranslation::updateSelectionWidgetProperties()
+void Q3DSTranslation::updateWidgetProperties()
 {
     if (m_selectedObject) {
         if (!m_manipulationWidget.hasManipulators()) {
-            createSelectionWidget();
+            createManipulationWidget();
         } else if (g_StudioApp.GetToolMode() != m_toolMode) {
             m_manipulationWidget.destroyManipulators();
-            createSelectionWidget();
+            createManipulationWidget();
         }
         m_manipulationWidget.setEyeballEnabled(false);
 
@@ -1744,9 +1712,19 @@ void Q3DSTranslation::updateSelectionWidgetProperties()
     }
 
     m_selectionWidget.update();
+
+    if (m_cameraType == EditCameraTypes::SceneCamera) {
+        disableVisualAids();
+    } else {
+        enableVisualAids();
+        if (m_foregroundCamera) {
+            for (int i = 0; i < m_visualAids.size(); ++i)
+                m_visualAids[i].update(m_foregroundCamera, m_selectedObject);
+        }
+    }
 }
 
-void Q3DSTranslation::createSelectionWidget()
+void Q3DSTranslation::createManipulationWidget()
 {
     m_toolMode = g_StudioApp.GetToolMode();
     if (m_toolMode == STUDIO_TOOLMODE_MOVE) {

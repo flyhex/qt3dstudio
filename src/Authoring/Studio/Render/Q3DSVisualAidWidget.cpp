@@ -263,19 +263,11 @@ void Q3DSVisualAidWidget::update(Q3DSCameraNode *layerCameraNode, Q3DSGraphObjec
     if (!isCreated())
         return;
 
-    Q3DSNodeAttached *attached = m_graphObject->attached<Q3DSNodeAttached>();
-    if (!attached)
-        return;
-
-    Qt3DCore::QTransform transform;
-    QMatrix4x4 globalMatrix = attached->globalTransform;
-    adjustRotationLeftToRight(&globalMatrix);
-    transform.setMatrix(globalMatrix);
-
-    QVector3D position = transform.translation();
-    position.setZ(-position.z());
-
-    QVector3D rotation = transform.rotation().toEulerAngles();
+    Q3DSNode *node = static_cast<Q3DSNode *>(m_graphObject);
+    QVector3D position;
+    QVector3D rotation;
+    QVector3D scale;
+    calculateGlobalProperties(node, position, rotation, scale);
 
     m_collisionBox->notifyPropertyChanges({ m_collisionBox->setPosition(position),
                                             m_collisionBox->setRotation(rotation) });
@@ -307,8 +299,7 @@ void Q3DSVisualAidWidget::update(Q3DSCameraNode *layerCameraNode, Q3DSGraphObjec
         m_wireframeMaterial->applyPropertyChanges(projectionChange);
         m_wireframeMaterial->notifyPropertyChanges(projectionChange);
     } else {
-        Q3DSLightNode *lightNode = static_cast<Q3DSLightNode *>(m_graphObject);
-        list.append(m_wireframe->setScale(lightNode->scale() * 50.0f));
+        list.append(m_wireframe->setScale(scale * 50.0f));
     }
 
     m_wireframe->notifyPropertyChanges(list);
@@ -316,8 +307,12 @@ void Q3DSVisualAidWidget::update(Q3DSCameraNode *layerCameraNode, Q3DSGraphObjec
     Q3DSCameraAttached *layerCameraAttached = layerCameraNode->attached<Q3DSCameraAttached>();
     Qt3DRender::QCamera *layerCamera = layerCameraAttached->camera;
 
+    const QMatrix4x4 globalTransform = composeTransformMatrix(node);
+    const QMatrix4x4 cameraTransform = composeTransformMatrix(layerCameraNode);
+    const QMatrix4x4 cameraViewMatrix = calculateCameraViewMatrix(cameraTransform);
+
     QMatrix4x4 billboardMatrix;
-    billboardMatrix.setColumn(3, (layerCamera->viewMatrix() * attached->globalTransform).column(3));
+    billboardMatrix.setColumn(3, (cameraViewMatrix * globalTransform).column(3));
     billboardMatrix.scale(16, 16, 1);
     billboardMatrix = layerCamera->projectionMatrix() * billboardMatrix;
 

@@ -1205,7 +1205,7 @@ void Q3DStudioRenderer::OnSceneMouseDrag(SceneDragSenderType::Enum, QPoint inPoi
                             Q_ASSERT_X(false, __FUNCTION__, "invalid movement mode");
                             break;
                         }
-
+                        m_translation->updateWidgetProperties();
                     }
                 }
             }

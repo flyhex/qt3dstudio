@@ -34,7 +34,16 @@
 namespace Q3DStudio {
 
 void adjustRotationLeftToRight(QMatrix4x4 *m);
-Q3DSModelNode *createWidgetModel(Q3DSUipPresentation *presentation, Q3DSLayerNode *layer,
+QQuaternion calculateRotationQuaternion(const QVector3D &rotation,
+                                        Q3DSNode::Orientation orientation);
+void calculateGlobalProperties(const Q3DSNode *node, QVector3D &position,
+                               QVector3D &rotation, QVector3D &scale);
+QMatrix4x4 calculateGlobalTransform(const Q3DSNode *node);
+QVector3D calculateLocalPosition(const Q3DSNode *node, const QVector3D &position);
+QMatrix4x4 generateRotationMatrix(const QVector3D &nodeRotation, Q3DSNode::RotationOrder order);
+QMatrix4x4 calculateCameraViewMatrix(const QMatrix4x4 &cameraWorldTransform);
+QMatrix4x4 composeTransformMatrix(const Q3DSNode *node);
+Q3DSModelNode *createWidgetModel(Q3DSUipPresentation *presentation, Q3DSGraphObject *parent,
                                  const QString &name, const QString &mesh,
                                  const QVector3D &scale, bool wireframe = false);
 Q3DSCustomMaterialInstance *createWidgetCustomMaterial(Q3DSUipPresentation *presentation,

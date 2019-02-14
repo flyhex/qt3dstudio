@@ -304,17 +304,14 @@ void applyNodeProperties(Q3DSGraphObject *node, Q3DSCameraNode *camera, Q3DSLaye
     if (!attached)
         return;
 
-    Qt3DCore::QTransform transform;
-    QMatrix4x4 globalMatrix = attached->globalTransform;
-    adjustRotationLeftToRight(&globalMatrix);
-    transform.setMatrix(globalMatrix);
-
-    QVector3D position = transform.translation();
-    position.setZ(-position.z());
+    QVector3D position;
+    QVector3D rotation;
+    QVector3D dummyScale;
+    calculateGlobalProperties(static_cast<Q3DSNode *>(node), position, rotation, dummyScale);
 
     Q3DSPropertyChangeList list;
     list.append(model->setPosition(position));
-    list.append(model->setRotation(transform.rotation().toEulerAngles()));
+    list.append(model->setRotation(rotation));
 
     float distance = 400.0f;
     float fovScale = 2.0f;

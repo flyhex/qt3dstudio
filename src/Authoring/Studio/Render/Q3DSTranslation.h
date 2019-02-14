@@ -85,10 +85,8 @@ private:
     QByteArray getInstanceObjectId(qt3dsdm::Qt3DSDMInstanceHandle instance);
     Q3DSLayerNode *layerForNode(Q3DSGraphObject *node);
     Q3DSCameraNode *cameraForNode(Q3DSGraphObject *node, bool ignoreSelfCamera = false);
-    void updateVisualAids();
     void updateForegroundLayerProperties();
-    void updateSelectionWidgetProperties();
-    void createSelectionWidget();
+    void createManipulationWidget();
     void enableManipulationWidget();
     void disableVisualAids();
     void enableVisualAids();
@@ -216,7 +214,7 @@ private:
     long m_toolMode = STUDIO_TOOLMODE_MOVE;
     Q3DSGraphObject *m_pickedWidget = nullptr;
     QColor m_pickedWidgetColor;
-    EditCameraTypes m_oldCameraType = EditCameraTypes::SceneCamera;
+    EditCameraTypes m_cameraType = EditCameraTypes::SceneCamera;
     Q3DSManipulationWidget m_manipulationWidget;
     Q3DSSelectionWidget m_selectionWidget;
 
@@ -268,6 +266,7 @@ public:
     void enableGradient();
     void selectObject(qt3dsdm::Qt3DSDMInstanceHandle instance);
     void unselectObject();
+    void updateWidgetProperties();
     void releaseTranslator(Q3DSGraphObjectTranslator *translator);
     void clearDirtySet();
     void markDirty(qt3dsdm::Qt3DSDMInstanceHandle instance);

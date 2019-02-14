@@ -36,7 +36,8 @@ namespace Q3DStudio {
 class Q3DSSelectionWidget
 {
 public:
-    void select(Q3DSUipPresentation *presentation, Q3DSLayerNode *layer, Q3DSNode *node);
+    void select(Q3DSUipPresentation *presentation, Q3DSNode *node);
+    void deselect();
     void update();
 
 private:
@@ -54,19 +55,19 @@ private:
 
     struct Selection
     {
-        QVector<Q3DSNode *> nodes;
-        QVector<Q3DSModelNode *> models;
-        QVector<BoundingBox> boundingBoxes;
+        Q3DSNode *node = nullptr;
+        Q3DSModelNode *model = nullptr;
+        BoundingBox boundingBox;
+        bool visible = false;
     };
 
     QHash<QString, BoundingBox> m_boundingBoxCache;
-    QHash<Q3DSLayerNode *, Selection> m_selections;
+    QHash<Q3DSNode *, Selection> m_selections;
 
     BoundingBox calculateLocalBoundingBox(Q3DSModelNode *model);
     BoundingBox calculateBoundingBox(Q3DSGraphObject *graphObject);
     void rotateBoundingBox(BoundingBox &box, const QQuaternion &rotation);
-    void selectRecursive(Q3DSUipPresentation *presentation, Q3DSLayerNode *layer, Q3DSNode *node,
-                         int &index, int depth);
+    void selectRecursive(Q3DSUipPresentation *presentation, Q3DSNode *node, int &index, int depth);
 };
 
 }
