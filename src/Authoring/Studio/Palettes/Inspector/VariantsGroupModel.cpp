@@ -82,15 +82,17 @@ void VariantsGroupModel::refresh()
 
         // build the variants data model
         const auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
-        for (auto &group : variantsDef) {
+        const auto keys = variantsDef.keys();
+        for (auto &group : keys) {
             TagGroupData g;
-            g.m_title = group.m_title;
-            g.m_color = group.m_color;
+            g.m_title = group;
+            g.m_color = variantsDef[group].m_color;
 
             VariantsTagModel *m = new VariantsTagModel(this);
             QVector<std::pair<QString, bool> > tags;
-            for (int i = 0; i < group.m_tags.length(); ++i)
-                tags.append({group.m_tags[i], propTags[group.m_title].contains(group.m_tags[i])});
+            for (int i = 0; i < variantsDef[group].m_tags.length(); ++i)
+                tags.append({variantsDef[group].m_tags[i],
+                             propTags[group].contains(variantsDef[group].m_tags[i])});
 
             m->init(tags);
             g.m_tagsModel = m;
@@ -187,15 +189,17 @@ void VariantsGroupModel::exportVariants()
                                                                          " encoding=\"utf-8\"")));
 
     const auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
+    const auto keys = variantsDef.keys();
     QDomElement vElem = domDoc.createElement(QStringLiteral("variants"));
     domDoc.appendChild(vElem);
-    for (auto &g : variantsDef) {
+    for (auto &g : keys) {
+        const auto group = variantsDef[g];
         QDomElement gElem = domDoc.createElement(QStringLiteral("variantgroup"));
-        gElem.setAttribute(QStringLiteral("id"), g.m_title);
-        gElem.setAttribute(QStringLiteral("color"), g.m_color);
+        gElem.setAttribute(QStringLiteral("id"), g);
+        gElem.setAttribute(QStringLiteral("color"), group.m_color);
         vElem.appendChild(gElem);
 
-        for (auto &t : qAsConst(g.m_tags)) {
+        for (auto &t : qAsConst(group.m_tags)) {
             QDomElement tElem = domDoc.createElement(QStringLiteral("variant"));;
             tElem.setAttribute(QStringLiteral("id"), t);
             gElem.appendChild(tElem);

@@ -499,13 +499,8 @@ void InspectorControlView::showGroupContextMenu(int x, int y, const QString &gro
     auto actionColor = theContextMenu.addAction(QObject::tr("Change Group Color"));
     connect(actionColor, &QAction::triggered, this, [&]() {
         const auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
-        for (auto &g : variantsDef) {
-            if (g.m_title == group) {
-                QColor newColor = this->showColorDialog(g.m_color);
-                projectFile.changeVariantGroupColor(group, newColor.name());
-                break;
-            }
-        }
+        QColor newColor = this->showColorDialog(variantsDef[group].m_color);
+        projectFile.changeVariantGroupColor(group, newColor.name());
     });
 
     auto actionDelete = theContextMenu.addAction(QObject::tr("Delete Group"));

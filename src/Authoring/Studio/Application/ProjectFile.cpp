@@ -962,19 +962,7 @@ void ProjectFile::loadVariants(const QString &filePath)
             if (reader.name() == QLatin1String("variantgroup")) {
                 QString groupId = reader.attributes().value(QLatin1String("id")).toString();
                 QString groupColor = reader.attributes().value(QLatin1String("color")).toString();
-                auto it = std::find_if(m_variantsDef.begin(), m_variantsDef.end(),
-                                       [&](const VariantGroup &vg) -> bool {
-                                           return vg.m_title == groupId;
-                                       });
-
-                if (it != m_variantsDef.end()) { // group exists, override it
-                    currentGroup = it;
-                } else {
-                    VariantGroup g;
-                    m_variantsDef.append(g);
-                    currentGroup = &m_variantsDef.last();
-                }
-                currentGroup->m_title = groupId;
+                currentGroup = &m_variantsDef[groupId];
                 currentGroup->m_color = groupColor;
             } else if (reader.name() == QLatin1String("variant")) {
                 if (currentGroup) {
@@ -1004,13 +992,14 @@ void ProjectFile::loadVariants(const QString &filePath)
         vElem = domDoc.createElement(QStringLiteral("variants"));
         domDoc.documentElement().appendChild(vElem);
 
-        for (auto &g : qAsConst(m_variantsDef)) {
+        const auto keys = m_variantsDef.keys();
+        for (auto &g : keys) {
             QDomElement gElem = domDoc.createElement(QStringLiteral("variantgroup"));
-            gElem.setAttribute(QStringLiteral("id"), g.m_title);
-            gElem.setAttribute(QStringLiteral("color"), g.m_color);
+            gElem.setAttribute(QStringLiteral("id"), g);
+            gElem.setAttribute(QStringLiteral("color"), m_variantsDef[g].m_color);
             vElem.appendChild(gElem);
 
-            for (auto &t : qAsConst(g.m_tags)) {
+            for (auto &t : qAsConst(m_variantsDef[g].m_tags)) {
                 QDomElement tElem = domDoc.createElement(QStringLiteral("variant"));
                 tElem.setAttribute(QStringLiteral("id"), t);
                 gElem.appendChild(tElem);
@@ -1047,12 +1036,7 @@ void ProjectFile::addVariantTag(const QString &group, const QString &newTag)
     }
 
     // update m_variantsDef
-    for (auto &g : m_variantsDef) {
-        if (g.m_title == group) {
-            g.m_tags.append(newTag);
-            break;
-        }
-    }
+    m_variantsDef[group].m_tags.append(newTag);
 }
 
 // Add a new group, it is assumes that the new group name is unique
@@ -1084,9 +1068,8 @@ void ProjectFile::addVariantGroup(const QString &newGroup)
 
     // update m_variantsDef
     VariantGroup g;
-    g.m_title = newGroup;
     g.m_color = newColor;
-    m_variantsDef.append(g);
+    m_variantsDef[newGroup] = g;
 }
 
 void ProjectFile::renameVariantTag(const QString &group, const QString &oldTag,
@@ -1153,18 +1136,11 @@ void ProjectFile::renameVariantTag(const QString &group, const QString &oldTag,
     }
 
     // update m_variantsDef
-     renamed = false;
-    for (auto &g : m_variantsDef) {
-        if (g.m_title == group) {
-            for (auto &t : g.m_tags) {
-                if (t == oldTag) {
-                    t = newTag;
-                    renamed = true;
-                    break;
-                }
-            }
-            if (renamed)
-                break;
+    for (auto &t : m_variantsDef[group].m_tags) {
+        if (t == oldTag) {
+            t = newTag;
+            renamed = true;
+            break;
         }
     }
 }
@@ -1223,12 +1199,8 @@ void ProjectFile::renameVariantGroup(const QString &oldGroup, const QString &new
      }
 
     // update m_variantsDef
-    for (auto &g : m_variantsDef) {
-        if (g.m_title == oldGroup) {
-            g.m_title = newGroup;
-            break;
-        }
-    }
+    m_variantsDef[newGroup] = m_variantsDef[oldGroup];
+    m_variantsDef.remove(oldGroup);
 }
 
 void ProjectFile::deleteVariantGroup(const QString &group)
@@ -1322,12 +1294,7 @@ void ProjectFile::deleteVariantGroup(const QString &group)
     }
 
     // update m_variantsDef
-    for (auto &g : m_variantsDef) {
-        if (g.m_title == group) {
-            m_variantsDef.erase(&g);
-            break;
-        }
-    }
+    m_variantsDef.remove(group);
 }
 
 void ProjectFile::changeVariantGroupColor(const QString &group, const QString &newColor)
@@ -1352,12 +1319,7 @@ void ProjectFile::changeVariantGroupColor(const QString &group, const QString &n
     }
 
     // update m_variantsDef
-    for (auto &g : m_variantsDef) {
-        if (g.m_title == group) {
-            g.m_color = newColor;
-            break;
-        }
-    }
+    m_variantsDef[group].m_color = newColor;
 }
 
 bool ProjectFile::tagExistsInUip(const QString &src, const QString &group, const QString &tag) const
@@ -1531,22 +1493,15 @@ void ProjectFile::deleteGroupFromUip(const QString &src, const QString &group)
 
 bool ProjectFile::isVariantGroupUnique(const QString &group) const
 {
-    for (auto &g : qAsConst(m_variantsDef)) {
-        if (g.m_title == group)
-            return false;
-    }
-
-    return true;
+    return !m_variantsDef.contains(group);
 }
 
 bool ProjectFile::isVariantTagUnique(const QString &group, const QString &tag) const
 {
-    for (auto &g : qAsConst(m_variantsDef)) {
-        if (g.m_title == group)
-            return !g.m_tags.contains(tag);
-    }
+    if (!m_variantsDef.contains(group))
+        return true;
 
-    return true;
+    return !m_variantsDef[group].m_tags.contains(tag);
 }
 
 void ProjectFile::deleteVariantTag(const QString &group, const QString &tag)
@@ -1623,10 +1578,5 @@ void ProjectFile::deleteVariantTag(const QString &group, const QString &tag)
     }
 
     // update m_variantsDef
-    for (auto &g : m_variantsDef) {
-        if (g.m_title == group) {
-            g.m_tags.removeOne(tag);
-            break;
-        }
-    }
+     m_variantsDef[group].m_tags.removeOne(tag);
 }
