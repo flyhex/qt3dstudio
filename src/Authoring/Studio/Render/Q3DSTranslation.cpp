@@ -539,14 +539,18 @@ Q3DSTranslation::THandleTranslatorPairList &Q3DSTranslation::getTranslatorsForIn
 
 void Q3DSTranslation::markDirty(qt3dsdm::Qt3DSDMInstanceHandle instance)
 {
-    // Anchor points are not handled individually.
-    if (m_reader.GetObjectTypeName(instance) == QLatin1String("PathAnchorPoint"))
-        instance = m_assetGraph.GetParent(instance);
+    // TODO: Paths are not currently supported, so no point in checking for it
+//    // Anchor points are not handled individually.
+//    if (m_reader.GetObjectTypeName(instance) == QLatin1String("PathAnchorPoint"))
+//        instance = m_assetGraph.GetParent(instance);
     getOrCreateTranslator(instance);
 
     THandleTranslatorPairList &theTranslators = getTranslatorsForInstance(instance);
-    for (int idx = 0, end = theTranslators.size(); idx < end; ++idx)
-        m_dirtySet.insert(*theTranslators[idx].second);
+    for (int idx = 0, end = theTranslators.size(); idx < end; ++idx) {
+        auto &translator = *theTranslators[idx].second;
+        translator.setDirty(true);
+        m_dirtySet.insert(translator);
+    }
 
     m_studioRenderer.RequestRender();
 }
