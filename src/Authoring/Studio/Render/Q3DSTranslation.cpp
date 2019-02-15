@@ -1747,31 +1747,36 @@ void Q3DSTranslation::prepareWidgetDrag(const QPoint &mousePos, Q3DSGraphObject 
 
 void Q3DSTranslation::endDrag(bool dragReset, CUpdateableDocumentEditor &inEditor)
 {
-    m_dragTranslator->enableAutoUpdates(true);
-    if (!dragReset) {
-        // send drag state to document
-        IDocumentEditor &editor = inEditor.EnsureEditor(QObject::tr("Set Transformation"),
-                                                        __FILE__, __LINE__);
-        editor.SetInstancePropertyValue(m_doc.GetSelectedInstance(),
-                                      objectDefinitions().m_Node.m_Position,
-                                      qt3dsdm::SValue(QVariant::fromValue(m_currentDragState.t)));
-        editor.SetInstancePropertyValue(m_doc.GetSelectedInstance(),
-                                      objectDefinitions().m_Node.m_Rotation,
-                                      qt3dsdm::SValue(QVariant::fromValue(m_currentDragState.r)));
-        editor.SetInstancePropertyValue(m_doc.GetSelectedInstance(),
-                                      objectDefinitions().m_Node.m_Scale,
-                                      qt3dsdm::SValue(QVariant::fromValue(m_currentDragState.s)));
-        inEditor.FireImmediateRefresh(m_doc.GetSelectedInstance());
-    } else {
-        // reset node to beginning
-        Q3DSNode &node = static_cast<Q3DSNode &>(m_dragTranslator->graphObject());
-        Q3DSPropertyChangeList list;
-        list.append(node.setPosition(m_beginDragState.t));
-        list.append(node.setScale(m_beginDragState.s));
-        list.append(node.setRotation(m_beginDragState.r));
-        node.notifyPropertyChanges(list);
+    if (m_dragTranslator) {
+        m_dragTranslator->enableAutoUpdates(true);
+        if (!dragReset) {
+            // send drag state to document
+            IDocumentEditor &editor = inEditor.EnsureEditor(QObject::tr("Set Transformation"),
+                                                            __FILE__, __LINE__);
+            editor.SetInstancePropertyValue(
+                        m_doc.GetSelectedInstance(),
+                        objectDefinitions().m_Node.m_Position,
+                        qt3dsdm::SValue(QVariant::fromValue(m_currentDragState.t)));
+            editor.SetInstancePropertyValue(
+                        m_doc.GetSelectedInstance(),
+                        objectDefinitions().m_Node.m_Rotation,
+                        qt3dsdm::SValue(QVariant::fromValue(m_currentDragState.r)));
+            editor.SetInstancePropertyValue(
+                        m_doc.GetSelectedInstance(),
+                        objectDefinitions().m_Node.m_Scale,
+                        qt3dsdm::SValue(QVariant::fromValue(m_currentDragState.s)));
+            inEditor.FireImmediateRefresh(m_doc.GetSelectedInstance());
+        } else {
+            // reset node to beginning
+            Q3DSNode &node = static_cast<Q3DSNode &>(m_dragTranslator->graphObject());
+            Q3DSPropertyChangeList list;
+            list.append(node.setPosition(m_beginDragState.t));
+            list.append(node.setScale(m_beginDragState.s));
+            list.append(node.setRotation(m_beginDragState.r));
+            node.notifyPropertyChanges(list);
+        }
+        m_dragTranslator = nullptr;
     }
-    m_dragTranslator = nullptr;
     endPickWidget();
 }
 

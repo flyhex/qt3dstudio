@@ -130,9 +130,6 @@ void Q3DSPlayerWnd::mouseMoveEvent(QMouseEvent *event)
         g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDrag(
                     SceneDragSenderType::Matte, event->pos(), g_StudioApp.GetToolMode(),
                     theModifierKeys);
-    } else {
-        g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseMove(
-                    SceneDragSenderType::SceneWindow, event->pos());
     }
 }
 
@@ -145,6 +142,7 @@ void Q3DSPlayerWnd::mousePressEvent(QMouseEvent *event)
         sr.engine()->handleMousePressEvent(&e);
     }
 
+    m_mouseDown = false;
     g_StudioApp.setLastActiveView(this);
 
     long toolMode = g_StudioApp.GetToolMode();
@@ -154,7 +152,6 @@ void Q3DSPlayerWnd::mousePressEvent(QMouseEvent *event)
     if (!isDeploymentView() && (event->modifiers() & Qt::AltModifier)) {
         // We are in edit camera view, so we are in Alt-click camera tool
         // controlling mode
-        m_mouseDown = true;
         if (btn == Qt::MiddleButton) {
             // Alt + Wheel Click
             toolMode = STUDIO_TOOLMODE_CAMERA_PAN;
@@ -173,6 +170,7 @@ void Q3DSPlayerWnd::mousePressEvent(QMouseEvent *event)
         }
 
         if (toolChanged) {
+            m_mouseDown = true;
             g_StudioApp.SetToolMode(toolMode);
             Q_EMIT Q3DSPlayerWnd::toolChanged();
             g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDown(SceneDragSenderType::Matte,
@@ -192,8 +190,6 @@ void Q3DSPlayerWnd::mousePressEvent(QMouseEvent *event)
             g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDown(
                         SceneDragSenderType::SceneWindow, event->pos(), toolMode);
             m_mouseDown = true;
-        } else if (btn == Qt::MiddleButton) {
-            event->ignore();
         }
     }
 }
@@ -209,26 +205,26 @@ void Q3DSPlayerWnd::mouseReleaseEvent(QMouseEvent *event)
 
     const Qt::MouseButton btn = event->button();
 
-    if (!isDeploymentView()) {
-        // We are in edit camera view
-        g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseUp(SceneDragSenderType::Matte);
-        g_StudioApp.GetCore()->CommitCurrentCommand();
-        m_mouseDown = false;
-        // Restore normal tool mode
-        g_StudioApp.SetToolMode(m_previousToolMode);
-        Q_EMIT toolChanged();
-    } else {
-        if (btn == Qt::LeftButton || btn == Qt::RightButton) {
-            g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseUp(
-                        SceneDragSenderType::SceneWindow);
+    if (m_mouseDown) {
+        if (!isDeploymentView()) {
+            // We are in edit camera view
+            g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseUp(SceneDragSenderType::Matte);
             g_StudioApp.GetCore()->CommitCurrentCommand();
             m_mouseDown = false;
-            if (m_resumePlayOnMouseRelease) {
-                m_resumePlayOnMouseRelease = false;
-                g_StudioApp.PlaybackPlay();
+            // Restore normal tool mode
+            g_StudioApp.SetToolMode(m_previousToolMode);
+            Q_EMIT toolChanged();
+        } else {
+            if (btn == Qt::LeftButton || btn == Qt::RightButton) {
+                g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseUp(
+                            SceneDragSenderType::SceneWindow);
+                g_StudioApp.GetCore()->CommitCurrentCommand();
+                m_mouseDown = false;
+                if (m_resumePlayOnMouseRelease) {
+                    m_resumePlayOnMouseRelease = false;
+                    g_StudioApp.PlaybackPlay();
+                }
             }
-        } else if (btn == Qt::MiddleButton) {
-            event->ignore();
         }
     }
 }
