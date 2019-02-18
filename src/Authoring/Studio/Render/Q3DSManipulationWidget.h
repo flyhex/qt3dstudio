@@ -55,8 +55,9 @@ public:
     bool isZXCircle(Q3DSGraphObject *obj) const;
     bool isCameraCircle(Q3DSGraphObject *obj) const;
 
+    void setDefaultScale(const QVector3D &scale);
     void setScale(Q3DSGraphObject *obj, const QVector3D &scale);
-    void resetScale(Q3DSGraphObject *obj);
+    void resetScale(Q3DSGraphObject *obj = nullptr);
     void setColor(Q3DSGraphObject *obj, const QColor &color);
     void resetColor(Q3DSGraphObject *obj);
     void setEyeballEnabled(bool value);
@@ -76,6 +77,7 @@ private:
     QVector<Q3DSCustomMaterialInstance *> m_manipulatorMaterials;
     QVector<QColor> m_manipulatorColors;
     QVector<QVector3D> m_manipulatorScales;
+    QVector3D m_defaultScale;
 
     void createManipulator(Q3DSUipPresentation *presentation, Q3DSLayerNode *layer,
                            const QString &name, const QString &mesh,

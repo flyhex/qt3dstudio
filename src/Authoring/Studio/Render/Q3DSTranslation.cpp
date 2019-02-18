@@ -1178,6 +1178,7 @@ void Q3DSTranslation::prepareRender(const QRect &rect, const QSize &size, qreal 
         m_rect = rect;
         m_size = size;
         m_pixelRatio = pixelRatio;
+        m_manipulationWidget.setDefaultScale(QVector3D(m_pixelRatio, m_pixelRatio, m_pixelRatio));
     }
 }
 

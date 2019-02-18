@@ -109,6 +109,12 @@ bool Q3DSManipulationWidget::isCameraCircle(Q3DSGraphObject *obj) const
     return obj == m_manipulators[3];
 }
 
+void Q3DSManipulationWidget::setDefaultScale(const QVector3D &scale)
+{
+    m_defaultScale = scale;
+    resetScale();
+}
+
 void Q3DSManipulationWidget::setScale(Q3DSGraphObject *obj, const QVector3D &scale)
 {
     for (int i = 0; i < m_manipulators.size(); ++i) {
@@ -122,9 +128,10 @@ void Q3DSManipulationWidget::setScale(Q3DSGraphObject *obj, const QVector3D &sca
 void Q3DSManipulationWidget::resetScale(Q3DSGraphObject *obj)
 {
     for (int i = 0; i < m_manipulators.size(); ++i) {
-        if (m_manipulators[i] == obj) {
-            m_manipulatorScales[i] = QVector3D(1, 1, 1);
-            break;
+        if (!obj || m_manipulators[i] == obj) {
+            m_manipulatorScales[i] = m_defaultScale;
+            if (obj)
+                break;
         }
     }
 }
@@ -196,7 +203,7 @@ void Q3DSManipulationWidget::createManipulator(Q3DSUipPresentation *presentation
         m_manipulators.append(createWidgetModel(presentation, layer, name, mesh, scale));
         m_manipulators.back()->appendChildNode(material);
         m_manipulatorColors.append(color);
-        m_manipulatorScales.append(QVector3D(1, 1, 1));
+        m_manipulatorScales.append(m_defaultScale);
     }
 }
 
