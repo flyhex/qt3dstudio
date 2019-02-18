@@ -70,6 +70,10 @@ The Qt 3D Studio suite includes:
 For software and hardware requirements, see the \l{Requirements} page. For list of third-party
 modules and copyright notices, see the \l{Copyright Notices} page.
 
+\section1 Qt 3D vs. Qt 3D Studio
+See the \l{Comparison of Qt 3D and Qt 3D Studio} section for a full comparison of Qt 3D and
+Qt 3D Studio.
+
 \section1 Concepts
 
 \section2 Project

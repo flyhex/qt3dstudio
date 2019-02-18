@@ -1,0 +1,314 @@
+/****************************************************************************
+**
+** Copyright (C) 2019 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Glossary
+\page glossary.html
+
+This page provides short explanations of terms used in Qt 3D Studio.
+
+\table
+  \header
+    \li
+      Term
+    \li
+      Meaning
+  \row
+    \li
+      \l{Studio: Action Palette}{Action}
+    \li
+      Actions provide a way to create interactivity in a \l presentation without scripting.
+  \row
+    \li
+      \l{Studio: Action Palette}{Action palette}
+    \li
+      The action palette is used to manage \l {action}{actions} for the selected element.
+  \row
+    \li
+      \target {animation portion}
+      \l{Studio: Timeline Palette#Animation portion}{Animation Portion}
+    \li
+      To the right of the \l{scene graph} in the \l{timeline palette} is the actual \l timeline.
+      The \l{time bar}{time bars} for each element control element lifespan.
+      The \l keyframe markers control the timing of the animation. The \l playhead allows the
+      preview of animation effects.
+  \row
+    \li
+      \target application
+      \l{About Qt 3D Studio#Concepts}{Application}
+    \li
+      Your application is the entry point of your \l project. It is represented by a single
+      \l{uia}{.uia file} at the root of your project folder. This file references the
+      \l presentation and \l{sub-presentation}{sub-presentations} in your project.
+      The application is what is displayed by the \l Viewer.
+  \row
+    \li
+      \target asset
+      Asset
+    \li
+      Assets are elements which you can use in your \l presentation. Assets can be images, 3D
+      models, \l{effect}{effects}, fonts, \l{material}{materials}, \l{shader}{shaders},
+      \l {behavior}{scripts} and \l{sub-presentation}{sub-presentations}.
+  \row
+    \li
+      Asset library
+    \li
+      Included in \l studio is a set of \l{asset}{assets} ranging from images to 3d models.
+  \row
+    \li
+      \l{Studio: Basic Objects Palette}{Basic objects palette}
+    \li
+      The Basic objects palette provides a mechanism for creating objects unique to a
+      \l presentation, not represented by a file on disk in your \l {project palette}.
+  \row
+    \li
+      \target behavior
+      \l{Using Behavior Scripts}{Behavior}
+    \li
+      Behavior scripts can be applied to objects to give the specific object a certain behavior.
+  \row
+    \li
+      \l{Studio: Basic Objects Palette#Component}{Component}
+    \li
+      Components are somewhat like mini-scenes. Although they are 3D geometry (not a 2D
+      composition of rendered layers), they have their own \l {slide}{slides} and
+      \l {timeline}{timelines}.
+  \row
+    \li
+      \l{Using Data Inputs}{Data input}
+    \li
+       This makes it possible to control \l timeline animations, object properties and
+       \l{slide}{slides} with data.
+  \row
+    \li
+      \l{Studio: Toolbar#Edit Cameras}{Edit cameras}
+    \li
+      Sometimes you want to move around the 3D space of your scene in the editor without
+      adjusting the final rendered view. \l Studio calls this concept edit cameras.
+  \row
+    \li
+      \target effect
+      \l{Applying Layer Effects}{Effect}
+    \li
+      Each \l layer in a \l presentation may have one or more post-processing effects
+      applied to the visual result
+  \row
+    \li
+      \l{Studio: Basic Objects Palette#Group}{Group}
+    \li
+      A group is an empty transform element. Attaching models to the group
+      (placing them as children of the group in the \l {timeline palette}) allows you to
+      move/rotate/scale/hide the group and have this affect all items within it.
+  \row
+    \li
+      .import file
+    \li
+      When importing 3D models of \e .fbx and \e .dae format to \l studio, they are converted to
+      \e .import files.
+  \row
+    \li
+      \l{Studio: Inspector Palette}{Inspector palette}
+    \li
+      The inspector palette is used to control values and animations of element properties.
+  \row
+    \li
+      \l{Animations#Interpolation}{Interpolation}
+    \li
+      Interpolation defines the easing of \l keyframe animations.
+  \row
+    \li
+      \target keyframe
+      \l{Animations}{Keyframe}
+    \li
+      A keyframe is a a time marker that stores the value of a property.
+      A keyframe can for example define the X position for an element. To create an animation,
+      add another keyframe for the X position of the same element but in another position on the
+      \l timeline. \l Studio will determine the correct X position for all frames between the
+      two keyframes.
+  \row
+    \li
+      \target layer
+      \l{About Qt 3D Studio#Concepts}{Layer}
+    \li
+      A single Studio \l presentation combines one or more layers. The visual result of each
+      layer comes from rendering a 3D scene, 2D scene (via an orthographic camera),
+      or \l{sub-presentation}{sub-presentation}. Layers are then composited with items on upper
+      layers drawing on top of the content on lower layers.
+  \row
+    \li
+      \l{Studio: Slide Palette#The Master Slide}{Master slide}
+    \li
+      Each scene and \l component have one master slide.
+      Elements placed on this \l slide exist on all slides of that scene or \l component.
+  \row
+    \li
+      \l{Materials and Shaders#Materials}{Material}
+    \li
+      Materials define how object surfaces are rendered in \l studio and \l viewer. You can create
+      your own basic materials, save them in your \l project, and assign them to objects.
+  \row
+    \li
+      \l{Studio: Scene View and Matte#Matte}{Matte}
+    \li
+      Surrounding the \l {scene view} is the matte. The matte may not be visible if your
+      \l presentation is larger than the available space.
+  \row
+    \li
+      Mesh
+    \li
+      The actual geometry of a 3D shape.
+  \row
+    \li
+    \target playhead
+      \l{Animations}{Playhead}
+    \li
+      The playhead in the \l timeline is used to set the time for new keyframes, and for previewing
+      animations.
+  \row
+    \li
+      \target presentation
+      \l{About Qt 3D Studio#Concepts}{Presentation}
+    \li
+      Presentations are represented by \l{uip}{.uip files} in your project. A presentation
+      has one or more \l{layer}{layers} composited to the screen, comprised of 2D assets
+      and 3D assets created in other applications.
+
+      Each application can only have one main presentation shown on screen (specified by the
+      \l {uia}{.uia file}) but this presentation may reference other
+      \l{sub-presentation}{sub-presentations}, either on flat layers or as images and textures
+      drawn in a scene.
+  \row
+    \li
+      \target project
+      \l{About Qt 3D Studio#Concepts}{Project}
+    \li
+      A project is simply a folder on your computer holding all the assets needed for your
+      \l application. When you start a new project, a default folder structure will be created.
+  \row
+    \li
+      \target {project palette}
+      \l{Studio: Project Palette}{Project palette}
+    \li
+      The project palette displays the files and folders on disk for your \l project.
+      Only files usable by \l Studio are displayed in the palette.
+  \row
+    \li
+      QML Stream
+    \li
+      A QML stream is a \e .qml file used as a \l{sub-presentation}.
+  \row
+    \li
+      \l{Studio: Scene Camera Palette}{Scene Camera palette}
+    \li
+      The scene camera palette allows you to zoom in to pixel perfect level with the scene camera.
+  \row
+    \li
+      \target {scene graph}
+      \l{Studio: Timeline Palette#Scene Graph}{Scene graph}
+    \li
+      The left half of the \l{timeline palette} shows the scene graph where all elements in your
+      \l presentation for the current \l slide.
+  \row
+    \li
+      \target {scene view}
+      \l{Studio: Scene View and Matte#Scene View}{Scene view}
+    \li
+      The scene view is the center region of \l Studio, showing you the visual result of rendering
+      and compositing the \l{layer}{layers} of your \l presentation, and also allowing you to
+      select and transform elements graphically.
+  \row
+    \li
+      \target shader
+      \l{Materials}{Shader}
+    \li
+      Shaders are arbitrary GLSL Shaders, wrapped in a file format providing an artist-friendly
+      interface for adjusting properties in \l studio.
+  \row
+    \li
+      \l{Studio:Slide Palette}{Slide}
+    \li
+      A Studio \l presentation combines 3D assets with animations and slides.
+      Slides can be thought of as states and provide visual variations within the \l presentation.
+  \row
+    \li
+      \l{Studio:Slide Palette}{Slide palette}
+    \li
+      The slide palette shows all slides in a \l presentation or a \l component.
+  \row
+    \li
+      \target studio
+      \l{About Qt 3D Studio#Concepts}{Studio}
+    \li
+      An authoring tool for creating interactive 3D presentations and applications.
+  \row
+    \li
+      \target {sub-presentation}
+      \l{Using Sub-Presentations}{Sub-presentation}
+    \li
+      Sub-Presentations is a feature which allows a \l studio \l presentation (\l{uia}{.uia file})
+      or a QML file to be embedded in a \l studio \l presentation.
+  \row
+    \li
+      \target {time bar}
+      \l{Studio: Timeline Palette#Adjusting Time Bars}{Time bar}
+    \li
+      Each element has a time bar in the \l timeline. The time bar control the lifespan
+      during which the element is active.
+  \row
+    \li
+      \target {timeline palette}
+      \l{Studio: Timeline Palette}{Timeline palette}
+    \li
+      The timeline palette provides direct access to all elements in your scene,
+  and also gives you control over the animation and timing within a \l slide.
+
+      The timeline palette is comprised of two connected sections: the \l {scene graph} and the
+      \l {animation portion}.
+  \row
+    \li
+      \target uia
+      \l{About Qt 3D Studio#Concepts}{.uia file}
+    \li
+      The \e .uia file is the application file, it is by default located in the root folder of
+      your \l project.
+  \row
+    \li
+      \target uip
+      \l{About Qt 3D Studio#Concepts}{.uip file}
+    \li
+      The \e .iup file is a presentation file. A \l project can have one or more presentation files
+      located in \e presentations folder of your \l project.
+  \row
+    \li
+      \target viewer
+      \l{About Qt 3D Studio#Concepts}{Viewer}
+    \li
+      A runtime player to test and deploy interfaces created in \l Studio.
+\endtable
+
+*/
