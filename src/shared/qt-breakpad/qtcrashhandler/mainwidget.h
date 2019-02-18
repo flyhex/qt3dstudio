@@ -34,7 +34,13 @@
 #include <QtWidgets/qwidget.h>
 #include <QtCore/qpointer.h>
 
+#ifdef QT_NAMESPACE
+using namespace QT_NAMESPACE;
+#endif
+
+QT_BEGIN_NAMESPACE
 namespace Ui { class MainWidget; }
+QT_END_NAMESPACE
 
 class MainWidget : public QWidget
 {
