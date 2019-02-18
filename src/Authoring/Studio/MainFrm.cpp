@@ -186,7 +186,6 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionPivot_Point, &QAction::triggered, this, &CMainFrame::OnViewPivotPoint);
     connect(m_ui->actionWireframe, &QAction::triggered, this, &CMainFrame::OnViewWireframe);
     connect(m_ui->actionTooltips, &QAction::triggered, this, &CMainFrame::OnViewTooltips);
-    connect(m_ui->actionCamera_Preview, &QAction::triggered, this, &CMainFrame::OnShowEditPreview);
     connect(m_ui->actionEdit_Lighting, &QAction::triggered, this,
             &CMainFrame::OnEditViewLightingEnabled);
 //    connect(m_ui->actionFind, &QAction::triggered, this, &CMainFrame::onViewFind); // TODO: Implement
@@ -299,7 +298,6 @@ CMainFrame::CMainFrame()
         OnUpdateViewGuidesRulers();
         OnUpdateClearGuides();
         OnUpdateLockGuides();
-        OnUpdateCameraPreview();
         OnUpdateEditViewLightingEnabled();
     });
 
@@ -1511,12 +1509,6 @@ void CMainFrame::OnUpdateLockGuides()
     m_ui->actionLock_Guides->setChecked(!g_StudioApp.getRenderer().AreGuidesEditable());
 }
 
-void CMainFrame::OnUpdateCameraPreview()
-{
-    m_ui->actionCamera_Preview->setChecked(CStudioPreferences::showEditModePreview());
-    g_StudioApp.getRenderer().RequestRender();
-}
-
 void CMainFrame::OnUpdateEditViewLightingEnabled()
 {
     m_ui->actionEdit_Lighting->setChecked(CStudioPreferences::editModeLightingEnabled());
@@ -1884,12 +1876,6 @@ void CMainFrame::OnShowAction()
 void CMainFrame::OnShowInspector()
 {
     m_paletteManager->ShowControl(CPaletteManager::CONTROLTYPE_INSPECTOR);
-}
-
-void CMainFrame::OnShowEditPreview()
-{
-    bool show = CStudioPreferences::showEditModePreview();
-    CStudioPreferences::setShowEditModePreview(!show);
 }
 
 void CMainFrame::OnEditViewLightingEnabled()

@@ -228,8 +228,6 @@ public:
     void OnShowProject();
     void OnShowAction();
     void OnShowInspector();
-    void OnShowEditPreview();
-    void OnUpdateCameraPreview();
 
     void OnConnectionChanged(bool);
 

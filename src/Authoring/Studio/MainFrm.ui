@@ -128,7 +128,6 @@ Project palette using Import functionality.</string>
     <addaction name="actionRulers_Guides"/>
     <addaction name="actionLock_Guides"/>
     <addaction name="actionClear_Guides"/>
-    <addaction name="actionCamera_Preview"/>
     <addaction name="actionEdit_Lighting"/>
    </widget>
    <widget class="QMenu" name="menu_Timeline">
@@ -992,17 +991,6 @@ Project palette using Import functionality.</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+N</string>
-   </property>
-  </action>
-  <action name="actionCamera_Preview">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Scene Preview</string>
-   </property>
-   <property name="toolTip">
-    <string>Show Scene Camera Preview in Edit Mode</string>
    </property>
   </action>
   <action name="actionEdit_Lighting">
