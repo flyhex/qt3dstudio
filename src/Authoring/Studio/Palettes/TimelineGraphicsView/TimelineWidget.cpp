@@ -751,6 +751,28 @@ void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance
         m_subpresentationChanges.insert(inInstance);
         if (!m_asyncUpdateTimer.isActive())
             m_asyncUpdateTimer.start();
+    } else if (inProperty == m_bridge->GetLayer().m_variants) {
+        qt3dsdm::SValue sValue;
+        if (doc->GetPropertySystem()->GetInstancePropertyValue(inInstance, inProperty, sValue)) {
+            QString propVal = QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)
+                                                      ->GetData());
+            if (!propVal.isEmpty()) {
+                QStringList tagPairs = propVal.split(QLatin1Char(','));
+                QStringList groups;
+                for (int i = 0; i < tagPairs.size(); ++i) {
+                    QString group = tagPairs[i].left(tagPairs[i].indexOf(QLatin1Char(':')));
+                    if (!groups.contains(group))
+                        groups.append(group);
+                }
+
+                m_variantsMap[inInstance] = groups;
+            } else {
+                m_variantsMap[inInstance].clear();
+            }
+
+            if (!m_asyncUpdateTimer.isActive())
+                m_asyncUpdateTimer.start();
+        }
     }
 }
 
@@ -774,11 +796,11 @@ void TimelineWidget::onAsyncUpdate()
         m_graphicsScene->updateController();
         onSelectionChange(doc->GetSelectedValue());
         m_toolbar->setNewLayerEnabled(!m_graphicsScene->rowManager()->isComponentRoot());
+        refreshVariants();
 
         // update suppresentation indicators
-        for (auto *row : m_handlesMap)
+        for (auto *row : qAsConst(m_handlesMap))
             row->updateSubpresentations();
-
     } else {
         if (!m_moveMap.isEmpty()) {
             // Flip the hash around so that we collect moves by parent.
@@ -922,10 +944,22 @@ void TimelineWidget::onAsyncUpdate()
             }
             m_graphicsScene->updateSnapSteps();
         }
+
+        if (!m_variantsMap.isEmpty()) {
+            const auto instances = m_variantsMap.keys();
+            for (int instance : instances) {
+                RowTree *row = m_handlesMap[instance];
+                if (row) {
+                    const auto groups = m_variantsMap.value(instance); // variants groups names
+                    row->updateVariants(groups);
+                }
+            }
+        }
     }
     m_dirtyProperties.clear();
     m_moveMap.clear();
     m_actionChanges.clear();
+    m_variantsMap.clear();
     m_subpresentationChanges.clear();
     m_keyframeChangesMap.clear();
     m_graphicsScene->rowManager()->finalizeRowDeletions();
@@ -1116,7 +1150,7 @@ Qt3DSDMTimelineItemBinding *TimelineWidget::getBindingForHandle(int handle,
         const QList<ITimelineItemBinding *> children = binding->GetChildren();
         for (auto child : children) {
             Qt3DSDMTimelineItemBinding *b = getBindingForHandle(handle,
-                                static_cast<Qt3DSDMTimelineItemBinding *>(child));
+                                            static_cast<Qt3DSDMTimelineItemBinding *>(child));
 
             if (b)
                 return b;
@@ -1140,6 +1174,7 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent *event)
 
 void TimelineWidget::mouseReleaseEvent(QMouseEvent *event)
 {
+    Q_UNUSED(event)
     m_splitterPressed = false;
 }
 
@@ -1198,8 +1233,8 @@ void TimelineWidget::onTimeBarColorChanged(const QColor &color)
 void TimelineWidget::setSelectedTimeBarsColor(const QColor &color, bool preview)
 {
     using namespace Q3DStudio; // Needed for SCOPED_DOCUMENT_EDITOR macro
-    auto rows = selectedRows();
-    for (RowTree *row : qAsConst(rows)) {
+    const auto rows = selectedRows();
+    for (RowTree *row : rows) {
         row->rowTimeline()->setBarColor(color);
         if (!preview) {
             Qt3DSDMTimelineItemBinding *timelineItemBinding =
@@ -1207,6 +1242,36 @@ void TimelineWidget::setSelectedTimeBarsColor(const QColor &color, bool preview)
             SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(),
                                    QObject::tr("Set Timebar Color"))
                 ->SetTimebarColor(timelineItemBinding->GetInstanceHandle(), color);
+        }
+    }
+}
+
+void TimelineWidget::refreshVariants()
+{
+    const auto propertySystem = g_StudioApp.GetCore()->GetDoc()->GetPropertySystem();
+    const auto layers = g_StudioApp.GetCore()->GetDoc()->getLayers();
+    for (auto layer : layers) {
+        if (!m_handlesMap[layer])
+            continue;
+
+        qt3dsdm::SValue sValue;
+        if (propertySystem->GetInstancePropertyValue(layer, m_bridge->GetLayer().m_variants,
+                                                     sValue)) {
+            QString propVal = QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)
+                                                      ->GetData());
+            if (!propVal.isEmpty()) {
+                QStringList tagPairs = propVal.split(QLatin1Char(','));
+                QStringList groups;
+                for (int i = 0; i < tagPairs.size(); ++i) {
+                    QString group = tagPairs[i].left(tagPairs[i].indexOf(QLatin1Char(':')));
+                    if (!groups.contains(group))
+                        groups.append(group);
+                }
+
+                m_handlesMap[layer]->updateVariants(groups);
+            } else {
+                m_handlesMap[layer]->updateVariants({});
+            }
         }
     }
 }

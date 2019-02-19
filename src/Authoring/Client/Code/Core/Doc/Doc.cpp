@@ -729,18 +729,14 @@ qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetFirstSelectableLayer()
 
 QVector<qt3dsdm::Qt3DSDMInstanceHandle> CDoc::getLayers()
 {
-    CClientDataModelBridge *bridge = m_StudioSystem->GetClientDataModelBridge();
-
     Q3DStudio::CGraphIterator layerIterator;
     GetAssetChildren(this, m_SceneInstance, layerIterator, OBJTYPE_LAYER);
 
     QVector<qt3dsdm::Qt3DSDMInstanceHandle> layerList;
 
     for (; !layerIterator.IsDone(); ++layerIterator) {
-        if (m_StudioSystem->IsInstance(layerIterator.GetCurrent())
-                && !bridge->IsLockedAtAll(layerIterator.GetCurrent())) {
+        if (m_StudioSystem->IsInstance(layerIterator.GetCurrent()))
             layerList.append(layerIterator.GetCurrent());
-        }
     }
 
     return layerList;

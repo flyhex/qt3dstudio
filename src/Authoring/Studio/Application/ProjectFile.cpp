@@ -1116,21 +1116,21 @@ void ProjectFile::renameVariantTag(const QString &group, const QString &oldTag,
 
     // update the property
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-    auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
-    int instance = doc->GetSelectedInstance();
-    auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
-
-    if (instance != 0 && bridge->IsLayerInstance(instance)) {
-        int property = propertySystem->GetAggregateInstancePropertyByName(instance, L"variants");
+    const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
+    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    const auto layers = doc->getLayers();
+    auto property = bridge->GetLayer().m_variants;
+    for (auto layer : layers) {
         qt3dsdm::SValue sValue;
-        if (propertySystem->GetInstancePropertyValue(instance, property, sValue)) {
-            QString val = QString::fromWCharArray(
-                          qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->GetData());
-            if (val.contains(group + QLatin1Char(':') + oldTag)) {
-                val.replace(group + QLatin1Char(':') + oldTag, group + QLatin1Char(':') + newTag);
+        if (propertySystem->GetInstancePropertyValue(layer, property, sValue)) {
+            QString propVal = QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)
+                                                      ->GetData());
+            QString oldGroupTagPair = QStringLiteral("%1:%2").arg(group).arg(oldTag);
+            if (propVal.contains(oldGroupTagPair)) {
+                propVal.replace(oldGroupTagPair, QStringLiteral("%1:%2").arg(group).arg(newTag));
                 qt3dsdm::SValue sVal
-                    = std::make_shared<qt3dsdm::CDataStr>(Q3DStudio::CString::fromQString(val));
-                propertySystem->SetInstancePropertyValue(instance, property, sVal);
+                    = std::make_shared<qt3dsdm::CDataStr>(Q3DStudio::CString::fromQString(propVal));
+                propertySystem->SetInstancePropertyValue(layer, property, sVal);
             }
         }
     }
@@ -1179,21 +1179,21 @@ void ProjectFile::renameVariantGroup(const QString &oldGroup, const QString &new
 
      // update the property
      CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-     auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
-     int instance = doc->GetSelectedInstance();
-     auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
-
-     if (instance != 0 && bridge->IsLayerInstance(instance)) {
-         int property = propertySystem->GetAggregateInstancePropertyByName(instance, L"variants");
+     const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
+     const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+     const auto layers = doc->getLayers();
+     auto property = bridge->GetLayer().m_variants;
+     for (auto layer : layers) {
          qt3dsdm::SValue sValue;
-         if (propertySystem->GetInstancePropertyValue(instance, property, sValue)) {
-             QString val = QString::fromWCharArray(
-                           qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->GetData());
-             if (val.contains(oldGroup + QLatin1Char(':'))) {
-                 val.replace(oldGroup + QLatin1Char(':'), newGroup + QLatin1Char(':'));
-                 qt3dsdm::SValue sVal
-                     = std::make_shared<qt3dsdm::CDataStr>(Q3DStudio::CString::fromQString(val));
-                 propertySystem->SetInstancePropertyValue(instance, property, sVal);
+         if (propertySystem->GetInstancePropertyValue(layer, property, sValue)) {
+             QString propVal = QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)
+                                                       ->GetData());
+             QString oldGroupWithColon = QStringLiteral("%1:").arg(oldGroup);
+             if (propVal.contains(oldGroupWithColon)) {
+                 propVal.replace(oldGroupWithColon, QStringLiteral("%1:").arg(newGroup));
+                 qt3dsdm::SValue sVal = std::make_shared<qt3dsdm::CDataStr>(
+                                        Q3DStudio::CString::fromQString(propVal));
+                 propertySystem->SetInstancePropertyValue(layer, property, sVal);
              }
          }
      }
@@ -1255,24 +1255,23 @@ void ProjectFile::deleteVariantGroup(const QString &group)
     deleteGroupFromUip(doc->GetDocumentPath(), group);
 
     // delete the group from the property (if set)
-    auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
-    auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
-    int instance = doc->GetSelectedInstance();
-    int property = propertySystem->GetAggregateInstancePropertyByName(instance, L"variants");
-    QString propVal;
-    if (instance != 0 && bridge->IsLayerInstance(instance)) {
+    const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
+    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    const auto layers = doc->getLayers();
+    auto property = bridge->GetLayer().m_variants;
+    for (auto layer : layers) {
         qt3dsdm::SValue sValue;
-        if (propertySystem->GetInstancePropertyValue(instance, property, sValue)) {
-            propVal = QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)
-                                              ->GetData());
-            if (propVal.contains(group + QLatin1Char(':'))) {
+        if (propertySystem->GetInstancePropertyValue(layer, property, sValue)) {
+            QString propVal = QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)
+                                                      ->GetData());
+            if (propVal.contains(QStringLiteral("%1:").arg(group))) {
                 // property has the deleted group, need to update it, else the deleted group
                 // will be saved the uip if the user saves the presentation.
-                QRegExp rgx(group + ":\\w*,*|," + group + ":\\w*");
+                QRegExp rgx(QStringLiteral("%1:\\w*,*|,%1:\\w*").arg(group));
                 propVal.replace(rgx, {});
                 qt3dsdm::SValue sVal = std::make_shared<qt3dsdm::CDataStr>(
                                        Q3DStudio::CString::fromQString(propVal));
-                propertySystem->SetInstancePropertyValue(instance, property, sVal);
+                propertySystem->SetInstancePropertyValue(layer, property, sVal);
             }
         }
     }
@@ -1506,6 +1505,7 @@ bool ProjectFile::isVariantTagUnique(const QString &group, const QString &tag) c
 
 void ProjectFile::deleteVariantTag(const QString &group, const QString &tag)
 {
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     QDomDocument domDoc;
     QSaveFile file(getProjectFilePath());
     if (!StudioUtils::openDomDocumentSave(file, domDoc))
@@ -1519,7 +1519,7 @@ void ProjectFile::deleteVariantTag(const QString &group, const QString &tag)
     for (int i = 0; i < presElems.count(); ++i) {
         QString pPath = m_fileInfo.path() + QLatin1Char('/')
                 + presElems.at(i).toElement().attribute(QStringLiteral("src"));
-        if (pPath != g_StudioApp.GetCore()->GetDoc()->GetDocumentPath()
+        if (pPath != doc->GetDocumentPath()
                 && tagExistsInUip(pPath, group, tag)) {
             inUseIdx = i;
             break;
@@ -1540,7 +1540,7 @@ void ProjectFile::deleteVariantTag(const QString &group, const QString &tag)
             for (int i = inUseIdx; i < presElems.count(); ++i) {
                 QString pPath = m_fileInfo.path() + QLatin1Char('/')
                         + presElems.at(i).toElement().attribute(QStringLiteral("src"));
-                if (pPath != g_StudioApp.GetCore()->GetDoc()->GetDocumentPath())
+                if (pPath != doc->GetDocumentPath())
                     deleteTagFromUip(pPath, group, tag);
             }
             break;
@@ -1552,11 +1552,34 @@ void ProjectFile::deleteVariantTag(const QString &group, const QString &tag)
     }
 
     // delete the tag from current doc, if exists
-    deleteTagFromUip(g_StudioApp.GetCore()->GetDoc()->GetDocumentPath(), group, tag);
+    deleteTagFromUip(doc->GetDocumentPath(), group, tag);
 
     QDomNodeList groupsElems = domDoc.documentElement()
                                      .firstChildElement(QStringLiteral("variants"))
                                      .elementsByTagName(QStringLiteral("variantgroup"));
+
+    // delete the tag from the property (if set)
+    const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
+    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    const auto layers = doc->getLayers();
+    auto property = bridge->GetLayer().m_variants;
+    for (auto layer : layers) {
+        qt3dsdm::SValue sValue;
+        if (propertySystem->GetInstancePropertyValue(layer, property, sValue)) {
+            QString propVal = QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)
+                                                      ->GetData());
+            if (propVal.contains(QStringLiteral("%1:%2").arg(group).arg(tag))) {
+                // property has the deleted tag, need to update it, else the deleted tag will be
+                // saved in the uip if the user saves the presentation.
+                QRegExp rgx(QStringLiteral("%1:%2,*|,%1:%2").arg(group).arg(tag));
+                propVal.replace(rgx, {});
+                qt3dsdm::SValue sVal = std::make_shared<qt3dsdm::CDataStr>(
+                                       Q3DStudio::CString::fromQString(propVal));
+                propertySystem->SetInstancePropertyValue(layer, property, sVal);
+            }
+        }
+    }
+
     // update and save the uia
     bool deleted = false;
      for (int i = 0; i < groupsElems.count(); ++i) {

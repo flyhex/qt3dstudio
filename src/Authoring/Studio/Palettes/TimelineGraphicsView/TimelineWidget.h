@@ -73,6 +73,7 @@ public:
     void openBarColorDialog();
     void onTimeBarColorChanged(const QColor &color);
     void setSelectedTimeBarsColor(const QColor &color, bool preview);
+    void refreshVariants();
     void enableDnD(bool b = true);
     bool dndActive() const;
     bool blockMousePress() const;
@@ -158,6 +159,7 @@ private:
     QSize m_preferredSize;
     QMultiHash<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle> m_dirtyProperties;
     QHash<int, int> m_moveMap; // key: child handle, value: parent handle
+    QHash<int, QStringList> m_variantsMap; // key: obj handle, value: variant groups
     QSet<int> m_actionChanges; // key: object handle
     QSet<int> m_subpresentationChanges; // key: object handle
     QMultiHash<int, int> m_keyframeChangesMap; // key: object handle, value: property handle

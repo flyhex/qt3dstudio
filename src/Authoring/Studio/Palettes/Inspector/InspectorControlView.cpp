@@ -60,6 +60,9 @@
 #include "Qt3DSDMSlides.h"
 #include "VariantsGroupModel.h"
 #include "VariantTagDialog.h"
+#include "Views.h"
+#include "MainFrm.h"
+#include "TimelineWidget.h"
 
 #include <QtCore/qtimer.h>
 #include <QtQml/qqmlcontext.h>
@@ -476,6 +479,7 @@ void InspectorControlView::showTagContextMenu(int x, int y, const QString &group
     auto actionDelete = theContextMenu.addAction(QObject::tr("Delete Tag"));
     connect(actionDelete, &QAction::triggered, this, [&]() {
         g_StudioApp.GetCore()->getProjectFile().deleteVariantTag(group, tag);
+        g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->refreshVariants();
     });
 
     theContextMenu.exec(mapToGlobal({x, y}));
@@ -493,6 +497,7 @@ void InspectorControlView::showGroupContextMenu(int x, int y, const QString &gro
         VariantTagDialog dlg(VariantTagDialog::RenameGroup, {}, group);
         if (dlg.exec() == QDialog::Accepted) {
             projectFile.renameVariantGroup(dlg.getNames().first, dlg.getNames().second);
+            g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->refreshVariants();
         }
     });
 
@@ -506,6 +511,7 @@ void InspectorControlView::showGroupContextMenu(int x, int y, const QString &gro
     auto actionDelete = theContextMenu.addAction(QObject::tr("Delete Group"));
     connect(actionDelete, &QAction::triggered, this, [&]() {
         projectFile.deleteVariantGroup(group);
+        g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->refreshVariants();
     });
 
     theContextMenu.exec(mapToGlobal({x, y}));

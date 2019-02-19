@@ -30,7 +30,6 @@
 #include "VariantsTagModel.h"
 #include "StudioApp.h"
 #include "Core.h"
-#include "QDebug" // TODO: remove
 #include "Qt3DSDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
 #include "IDocumentEditor.h"
@@ -56,24 +55,20 @@ void VariantsGroupModel::refresh()
         return;
     }
 
-    auto propertySystem = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetPropertySystem();
+    auto propertySystem = g_StudioApp.GetCore()->GetDoc()->GetPropertySystem();
     m_instance = instance;
-    m_property = propertySystem->GetAggregateInstancePropertyByName(instance, L"variants");
+    m_property = bridge->GetLayer().m_variants.m_Property;
 
     qt3dsdm::SValue sValue;
     if (propertySystem->GetInstancePropertyValue(m_instance, m_property, sValue)) {
         beginResetModel();
         m_data.clear();
 
-        QString val = QString::fromWCharArray(
-                      qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->GetData());
-        // TODO: remove qDebug when the variants work is fully done.
-//        qDebug() << "\x1b[42m \x1b[1m" << __FUNCTION__
-//                 << ", val=" << val
-//                 << "\x1b[m";
+        QString propVal = QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)
+                                                  ->GetData());
         QHash<QString, QStringList> propTags;
-        if (!val.isEmpty()) {
-            const QStringList propTagsList = val.split(QChar(','));
+        if (!propVal.isEmpty()) {
+            const QStringList propTagsList = propVal.split(QChar(','));
             for (auto &propTag : propTagsList) {
                 const QStringList propTagPair = propTag.split(QChar(':'));
                 propTags[propTagPair[0]].append(propTagPair[1]);

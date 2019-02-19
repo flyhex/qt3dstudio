@@ -325,10 +325,18 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
             painter->drawPixmap(0, 0, hiResIcons ? pixCompAction2x : pixCompAction);
     }
 
+    // variants indicator
+    if (m_variantsGroups.size() > 0) {
+        const auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
+        for (int i = 0; i < m_variantsGroups.size(); ++i) {
+            painter->fillRect(QRect(clipX() + 2 + i * 9, 6, 6, 6),
+                              variantsDef[m_variantsGroups[i]].m_color);
+        }
+    }
+
     // The following items need to be clipped so that they do not draw overlapping shy etc. buttons
 
-    painter->setClipRect(0, 0, treeWidth() - TimelineConstants::TREE_ICONS_W,
-                         TimelineConstants::ROW_H);
+    painter->setClipRect(0, 0, clipX(), TimelineConstants::ROW_H);
 
     // expand/collapse arrow
     static const QPixmap pixArrow = QPixmap(":/images/arrow.png");
@@ -469,6 +477,12 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     painter->drawPixmap(m_rectType, pixRowType);
 }
 
+void RowTree::updateVariants(const QStringList &groups)
+{
+    m_variantsGroups = groups;
+    update();
+}
+
 int RowTree::treeWidth() const
 {
     return m_scene->treeWidth() - m_scene->getScrollbarOffsets().x();
@@ -510,6 +524,12 @@ void RowTree::setBinding(ITimelineItemBinding *binding)
             || m_expandState == ExpandState::Expanded);
 
     updateFromBinding();
+}
+
+// x value where label should clip
+int RowTree::clipX() const
+{
+    return treeWidth() - TimelineConstants::TREE_ICONS_W - m_variantsGroups.size() * 9 - 2;
 }
 
 ITimelineItemProperty *RowTree::propBinding()
