@@ -247,10 +247,11 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     connect(m_toolbar, &TimelineToolbar::deleteLayerTriggered,
             [=](){ doc->DeleteSelectedObject(); });
 
-    connect(m_toolbar, &TimelineToolbar::gotoTimeTriggered, this, []() {
+    connect(m_toolbar, &TimelineToolbar::gotoTimeTriggered, this, [=]() {
         CDoc *doc = g_StudioApp.GetCore()->GetDoc();
         g_StudioApp.GetDialogs()->asyncDisplayTimeEditDialog(doc->GetCurrentViewTime(),
-                                                             doc, PLAYHEAD);
+                                                             doc, PLAYHEAD,
+                                                             m_graphicsScene->keyframeManager());
     });
 
     connect(m_toolbar, &TimelineToolbar::firstFrameTriggered, this, []() {

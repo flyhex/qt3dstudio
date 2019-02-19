@@ -851,7 +851,8 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
                     || itemBelowPlayhead->type() == TimelineItem::TypeRuler) {
                 CDoc *doc = g_StudioApp.GetCore()->GetDoc();
                 g_StudioApp.GetDialogs()->asyncDisplayTimeEditDialog(doc->GetCurrentViewTime(),
-                                                                     doc, PLAYHEAD);
+                                                                     doc, PLAYHEAD,
+                                                                     m_keyframeManager);
             } else {
                 item = itemBelowPlayhead;
                 if (item->type() == TimelineItem::TypeRowTree) {
