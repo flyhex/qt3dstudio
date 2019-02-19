@@ -53,6 +53,7 @@
 
 #include <q3dsruntime2api_p.h>
 #include <QtWidgets/qopenglwidget.h>
+#include <QtCore/QTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Qt3DRender {
@@ -191,7 +192,7 @@ private:
     QColor m_guideSelectedFillColor;
     bool m_guidesEnabled = true;
     bool m_hasPresentation = false;
-    bool m_renderRequested = false;
+    int m_renderRequested = 0;
     bool m_setSubpresentationsCalled = false;
     int m_editCameraIndex = -1;
     int m_pendingEditCameraIndex = -1;
@@ -214,6 +215,7 @@ private:
     bool m_dirtySetUpdate = false;
     bool m_resizeToQt3DSent = false;
     qreal m_parentPixelRatio = 1.0;
+    QTimer m_asyncRenderTimer;
 };
 
 }

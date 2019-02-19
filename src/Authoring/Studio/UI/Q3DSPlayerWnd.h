@@ -74,7 +74,7 @@ public:
     void OnDragLeave() override;
     void OnReflectMouse(CPt &, Qt::KeyboardModifiers) override {}
 
-    void setToolMode(long toolMode) { m_previousToolMode = toolMode; }
+    void setToolMode(long toolMode);
     void setWindowPosition();
 
     void setScrollRanges();

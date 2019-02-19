@@ -283,6 +283,14 @@ void Q3DSPlayerWnd::OnDragLeave()
     m_objectRequestData.clear();
 }
 
+void Q3DSPlayerWnd::setToolMode(long toolMode)
+{
+    if (m_previousToolMode != toolMode) {
+        m_previousToolMode = toolMode;
+        g_StudioApp.getRenderer().RequestRender();
+    }
+}
+
 void Q3DSPlayerWnd::handleObjectPicked(int instance)
 {
     const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()

@@ -1511,8 +1511,11 @@ void CMainFrame::OnUpdateLockGuides()
 
 void CMainFrame::OnUpdateEditViewLightingEnabled()
 {
-    m_ui->actionEdit_Lighting->setChecked(CStudioPreferences::editModeLightingEnabled());
-    g_StudioApp.getRenderer().RequestRender();
+    bool enabled = CStudioPreferences::editModeLightingEnabled();
+    if (m_ui->actionEdit_Lighting->isChecked() != enabled) {
+        m_ui->actionEdit_Lighting->setChecked(CStudioPreferences::editModeLightingEnabled());
+        g_StudioApp.getRenderer().RequestRender();
+    }
 }
 
 void CMainFrame::onViewResetLayout()
@@ -1625,7 +1628,6 @@ void CMainFrame::onUpdateViewSceneCamera()
                 CPaletteManager::CONTROLTYPE_SCENECAMERA);
     m_ui->actionSceneCamera->setChecked(cameraVisible);
     g_StudioApp.getRenderer().setFullSizePreview(cameraVisible);
-    g_StudioApp.getRenderer().RequestRender();
 }
 
 //==============================================================================

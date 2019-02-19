@@ -112,6 +112,12 @@ Q3DStudioRenderer::Q3DStudioRenderer()
     m_engine.reset(new Q3DSEngine);
     m_presentation.reset(new Q3DSUipPresentation);
     m_viewportSettings.reset(new Q3DSViewportSettings);
+
+    m_asyncRenderTimer.setInterval(20);
+    connect(&m_asyncRenderTimer, &QTimer::timeout, [this]() {
+        if (m_widget)
+            m_widget->update();
+    });
 }
 
 Q3DStudioRenderer::~Q3DStudioRenderer()
@@ -171,9 +177,15 @@ qt3ds::foundation::IStringTable *Q3DStudioRenderer::GetRenderStringTable()
 
 void Q3DStudioRenderer::RequestRender()
 {
-    if (m_widget && !m_renderRequested) {
+    // There is a couple of frames delay after any changes to properties to actually render them on
+    // screen, and there needs to be some time between the frames (possibly due to vsync), so treat
+    // any render request as multiple requests. The renderNow function triggers further updates
+    // asynchronously and with small delay.
+    static const int count = 5;
+    if (m_widget && m_renderRequested < count) {
+        m_asyncRenderTimer.stop();
         m_widget->update();
-        m_renderRequested = true;
+        m_renderRequested = count;
     }
 }
 
@@ -575,7 +587,6 @@ void Q3DStudioRenderer::renderNow()
 
     initialize(m_widget);
 
-    m_renderRequested = false;
     QOpenGLContextPrivate *ctxD = QOpenGLContextPrivate::get(m_widget->context());
     QScopedValueRollback<GLuint> defaultFboRedirectRollback(ctxD->defaultFboRedirect, 0);
 
@@ -590,6 +601,13 @@ void Q3DStudioRenderer::renderNow()
         auto renderAspectD = static_cast<Qt3DRender::QRenderAspectPrivate *>(
                     Qt3DRender::QRenderAspectPrivate::get(m_renderAspect));
         renderAspectD->renderSynchronous(true);
+    }
+
+    if (--m_renderRequested > 0) {
+        if (!m_asyncRenderTimer.isActive())
+            m_asyncRenderTimer.start();
+    } else {
+        m_asyncRenderTimer.stop();
     }
 }
 
@@ -1306,6 +1324,8 @@ void Q3DStudioRenderer::onSelectionChange(Q3DStudio::SSelectedValue selected)
     } else {
         m_translation->unselectObject();
     }
+
+    RequestRender();
 }
 
 void Q3DStudioRenderer::sendResizeToQt3D()
