@@ -181,7 +181,11 @@ void Q3DStudioRenderer::RequestRender()
     // screen, and there needs to be some time between the frames (possibly due to vsync), so treat
     // any render request as multiple requests. The renderNow function triggers further updates
     // asynchronously and with small delay.
-    static const int count = 5;
+    // The async updates continue for a second to ensure all pending Qt3D operations finish.
+    // TODO: This is a hacky way to ensure everything gets drawn, and unnecessary renders further
+    // TODO: slow down the Qt3D processing.
+    // TODO: Runtime should have some signal to notify everything is now ready to be drawn.
+    static const int count = 1000 / m_asyncRenderTimer.interval();
     if (m_widget && m_renderRequested < count) {
         m_asyncRenderTimer.stop();
         m_widget->update();
