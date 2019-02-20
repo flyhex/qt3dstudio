@@ -473,6 +473,7 @@ void TimelineWidget::insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *bin
         return;
 
     insertToHandlesMap(binding);
+
     const QList<ITimelineItemBinding *> children = binding->GetChildren();
     for (auto child : children)
         insertToHandlesMapRecursive(static_cast<Qt3DSDMTimelineItemBinding *>(child));
@@ -798,7 +799,7 @@ void TimelineWidget::onAsyncUpdate()
         m_toolbar->setNewLayerEnabled(!m_graphicsScene->rowManager()->isComponentRoot());
         refreshVariants();
 
-        // update suppresentation indicators
+        // update sub-presentation indicators
         for (auto *row : qAsConst(m_handlesMap))
             row->updateSubpresentations();
     } else {
@@ -948,10 +949,10 @@ void TimelineWidget::onAsyncUpdate()
         if (!m_variantsMap.isEmpty()) {
             const auto instances = m_variantsMap.keys();
             for (int instance : instances) {
-                RowTree *row = m_handlesMap[instance];
-                if (row) {
-                    const auto groups = m_variantsMap.value(instance); // variants groups names
-                    row->updateVariants(groups);
+                if (m_handlesMap.contains(instance)) {
+                    RowTree *row = m_handlesMap[instance];
+                    if (row)
+                        row->updateVariants(m_variantsMap[instance]); // variants groups names
                 }
             }
         }
@@ -1251,7 +1252,7 @@ void TimelineWidget::refreshVariants()
     const auto propertySystem = g_StudioApp.GetCore()->GetDoc()->GetPropertySystem();
     const auto layers = g_StudioApp.GetCore()->GetDoc()->getLayers();
     for (auto layer : layers) {
-        if (!m_handlesMap[layer])
+        if (!m_handlesMap.contains(layer))
             continue;
 
         qt3dsdm::SValue sValue;
