@@ -1008,8 +1008,11 @@ bool Q3DSLightTranslator::updateProperty(Q3DSTranslation &inContext,
                                          qt3dsdm::SValue &value,
                                          const QString &name)
 {
-    if (Q3DSNodeTranslator::updateProperty(inContext, instance, property, value, name))
-        return true;
+    // we'll handle this
+    if (name != QLatin1String("eyeball")) {
+        if (Q3DSNodeTranslator::updateProperty(inContext, instance, property, value, name))
+            return true;
+    }
 
     Q3DSPropertyChangeList list;
     Q3DSLightNode &theItem = static_cast<Q3DSLightNode &>(graphObject());
@@ -1050,12 +1053,26 @@ bool Q3DSLightTranslator::updateProperty(Q3DSTranslation &inContext,
         list.append(theItem.setShadowMapFar(value.getData<float>()));
     } else if (name == QLatin1String("shdwmapfov")) {
         list.append(theItem.setShadowMapFov(value.getData<float>()));
+    } else if (name == QLatin1String("eyeball")) {
+        if (m_editLightEnabled) {
+            m_activeState = value.getData<bool>();
+            return true;
+        } else {
+            return Q3DSNodeTranslator::updateProperty(inContext, instance,
+                                                      property, value, name);
+        }
     }
     if (list.count()) {
         theItem.notifyPropertyChanges(list);
         return true;
     }
     return false;
+}
+
+void Q3DSLightTranslator::setActive(bool inActive)
+{
+    if (m_editLightEnabled)
+        m_activeState = inActive;
 }
 
 void Q3DSLightTranslator::copyProperties(Q3DSGraphObject *target, bool ignoreReferenced)
@@ -1082,6 +1099,22 @@ void Q3DSLightTranslator::copyProperties(Q3DSGraphObject *target, bool ignoreRef
     list.append(targetLight->setShadowMapFar(theItem.shadowMapFar()));
     list.append(targetLight->setShadowMapFov(theItem.shadowMapFov()));
     targetLight->notifyPropertyChanges(list);
+}
+
+void Q3DSLightTranslator::setEditLightEnabled(bool enabled)
+{
+    if (m_editLightEnabled != enabled) {
+        Q3DSLightNode &theItem = static_cast<Q3DSLightNode &>(graphObject());
+        m_editLightEnabled = enabled;
+        Q3DSPropertyChangeList list;
+        if (enabled) {
+            m_activeState = theItem.eyeballEnabled();
+            list.append(theItem.setEyeballEnabled(false));
+        } else {
+            list.append(theItem.setEyeballEnabled(m_activeState));
+        }
+        theItem.notifyPropertyChanges(list);
+    }
 }
 
 

@@ -42,6 +42,7 @@
 #include "IDocumentReader.h"
 #include "StudioProjectSettings.h"
 #include "SlideSystem.h"
+#include "StudioPreferences.h"
 
 #include <QtCore/qmath.h>
 #include <Qt3DRender/qcamera.h>
@@ -1167,9 +1168,20 @@ void Q3DSTranslation::prepareRender(const QRect &rect, const QSize &size, qreal 
         m_presentationInit = true;
     }
     if (m_editCameraEnabled) {
-        const auto values = m_editCameras.values();
-        for (auto camera : values)
+        const auto cameras = m_editCameras.values();
+        for (auto camera : cameras)
             m_editCameraInfo.applyToCamera(*camera, QSizeF(m_size));
+        const bool editLightEnabled = CStudioPreferences::editModeLightingEnabled();
+        if (m_editLightEnabled != editLightEnabled) {
+            m_editLightEnabled = editLightEnabled;
+            enableSceneLights(!m_editLightEnabled);
+            const auto lights = m_editLights.values();
+            for (auto light : lights) {
+                Q3DSPropertyChangeList list;
+                list.append(light->setEyeballEnabled(m_editLightEnabled));
+                light->notifyPropertyChanges(list);
+            }
+        }
     }
     if (rect != m_rect || size != m_size || pixelRatio != m_pixelRatio) {
         // We are always rendering into a fbo with 1x pixel ratio. The scene widget will
@@ -1178,15 +1190,17 @@ void Q3DSTranslation::prepareRender(const QRect &rect, const QSize &size, qreal 
         m_rect = rect;
         m_size = size;
         m_pixelRatio = pixelRatio;
-        m_manipulationWidget.setDefaultScale(QVector3D(m_pixelRatio, m_pixelRatio, m_pixelRatio));
+        m_manipulationWidget.setDefaultScale(
+                    QVector3D(float(m_pixelRatio), float(m_pixelRatio), float(m_pixelRatio)));
     }
 }
 
 void Q3DSTranslation::enableEditCamera(const SEditCameraPersistentInformation &info)
 {
     m_editCameraInfo = info;
-    // loop through layers and create edit camera for each
+    // loop through layers and create edit camera and light for each
     Q3DSGraphObject *object = m_scene->firstChild();
+    m_editLightEnabled = CStudioPreferences::editModeLightingEnabled();
     while (object) {
         if (object->type() != Q3DSGraphObject::Layer) {
             object = object->nextSibling();
@@ -1217,21 +1231,56 @@ void Q3DSTranslation::enableEditCamera(const SEditCameraPersistentInformation &i
         list.append(editCamera->setName(info.m_name));
         editCamera->notifyPropertyChanges(list);
 
+        if (layer != m_backgroundLayer && layer != m_foregroundLayer
+                && layer != m_foregroundPickingLayer) {
+            QByteArray editLightId = QByteArrayLiteral("StudioEditLight_");
+            editLightId.append(layer->id());
+            Q3DSLightNode *editLight = nullptr;
+            if (!m_editLights.contains(editLightId)) {
+                editLight = m_presentation->newObject<Q3DSLightNode>(editLightId);
+                editCamera->appendChildNode(editLight);
+                m_presentation->masterSlide()->addObject(editLight);
+                m_editLights.insert(editLightId, editLight);
+            } else {
+                editLight = m_editLights[editLightId];
+                if (editCamera != editLight->parent()) {
+                    editLight->parent()->removeChildNode(editLight);
+                    editCamera->appendChildNode(editLight);
+                }
+            }
+            list.clear();
+            list.append(editLight->setEyeballEnabled(m_editLightEnabled));
+            list.append(editLight->setCastShadow(false));
+            list.append(editLight->setName(editLightId));
+            list.append(editLight->setLightType(Q3DSLightNode::Point));
+            editLight->notifyPropertyChanges(list);
+        }
+
         object = object->nextSibling();
     }
     enableSceneCameras(false);
+    enableSceneLights(!m_editLightEnabled);
     m_editCameraEnabled = true;
     updateForegroundLayerProperties();
 }
 
 void Q3DSTranslation::disableEditCamera()
 {
-    const auto values = m_editCameras.values();
-    for (auto camera : values) {
+    const auto lights = m_editLights.values();
+    for (auto light : lights) {
+        Q3DSPropertyChangeList list;
+        list.append(light->setEyeballEnabled(false));
+        light->notifyPropertyChanges(list);
+    }
+
+    const auto cameras = m_editCameras.values();
+    for (auto camera : cameras) {
         Q3DSPropertyChangeList list;
         list.append(camera->setEyeballEnabled(false));
         camera->notifyPropertyChanges(list);
     }
+
+    enableSceneLights(true);
     enableSceneCameras(true);
     m_editCameraEnabled = false;
     m_oldCameraType = EditCameraTypes::SceneCamera;
@@ -1247,6 +1296,12 @@ void Q3DSTranslation::enableSceneCameras(bool enable)
 {
     for (auto translator : qAsConst(m_cameraTranslators))
         translator->setEditCameraEnabled(!enable);
+}
+
+void Q3DSTranslation::enableSceneLights(bool enable)
+{
+    for (auto translator : qAsConst(m_lightTranslators))
+        translator->setEditLightEnabled(!enable);
 }
 
 void Q3DSTranslation::wheelZoom(qreal factor)

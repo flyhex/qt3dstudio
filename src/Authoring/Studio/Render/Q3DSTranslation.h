@@ -192,8 +192,10 @@ private:
     QSize m_size;
     qreal m_pixelRatio = 0.0;
     QHash<QByteArray, Q3DSCameraNode *> m_editCameras;
+    QHash<QByteArray, Q3DSLightNode *> m_editLights;
     SEditCameraPersistentInformation m_editCameraInfo;
     bool m_editCameraEnabled = false;
+    bool m_editLightEnabled = false;
     Q3DSGraphObjectTranslator *m_dragTranslator = nullptr;
     Q3DSCameraNode *m_dragCamera = nullptr;
     QPoint m_dragStartMousePos;
@@ -258,6 +260,7 @@ public:
     void disableEditCamera();
     SEditCameraPersistentInformation editCameraInfo() const;
     void enableSceneCameras(bool enable);
+    void enableSceneLights(bool enable);
     void wheelZoom(qreal factor);
     void enableBackgroundLayer();
     void enableForegroundLayer();

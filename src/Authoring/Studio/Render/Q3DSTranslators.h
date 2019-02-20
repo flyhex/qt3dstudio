@@ -118,7 +118,12 @@ public:
                         qt3dsdm::Qt3DSDMPropertyHandle property,
                         qt3dsdm::SValue &value,
                         const QString &name) override;
+    void setActive(bool inActive) override;
     void copyProperties(Q3DSGraphObject *target, bool ignoreReferenced) override;
+    void setEditLightEnabled(bool enabled);
+private:
+    bool m_editLightEnabled = false;
+    bool m_activeState = false;
 };
 
 class Q3DSModelTranslator : public Q3DSNodeTranslator

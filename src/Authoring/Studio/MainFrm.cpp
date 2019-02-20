@@ -1884,6 +1884,7 @@ void CMainFrame::OnEditViewLightingEnabled()
 {
     bool enabled = CStudioPreferences::editModeLightingEnabled();
     CStudioPreferences::setEditModeLightingEnabled(!enabled);
+    g_StudioApp.getRenderer().RequestRender();
 }
 
 void CMainFrame::OnConnectionChanged(bool connected)
