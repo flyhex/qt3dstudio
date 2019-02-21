@@ -52,4 +52,12 @@ replace them with \c{.mesh}.
 
 Opening a project that has a QML stream including a Window element causes the viewer to crash.
 
+\section1 Changes to Material Definitions Saved Separately from the Project
+
+When importing a 3D model to your project, a material definition file is created for each material
+in the model. Material definitions are stored separately from the project, meaning that all
+changes to these materials are saved even if the project is not saved.
+
+Refreshing the 3D model import file resets the material properties.
+
 */
