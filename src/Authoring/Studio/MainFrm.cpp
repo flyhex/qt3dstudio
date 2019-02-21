@@ -60,6 +60,7 @@
 #include "ProjectView.h"
 #include "RowTree.h"
 #include "WidgetControl.h"
+#include "SlideView.h"
 
 #include <QtGui/qevent.h>
 #include <QtGui/qdesktopservices.h>
@@ -1918,6 +1919,12 @@ TimelineWidget *CMainFrame::getTimelineWidget() const
     WidgetControl *control = static_cast<WidgetControl *>
             (m_paletteManager->GetControl(CPaletteManager::CONTROLTYPE_TIMELINE)->widget());
     return static_cast<TimelineWidget *>(control->getControl());
+}
+
+SlideView *CMainFrame::getSlideView() const
+{
+    return static_cast<SlideView *>(m_paletteManager->GetControl(CPaletteManager::CONTROLTYPE_SLIDE)
+                                    ->widget());
 }
 
 CRecentItems *CMainFrame::GetRecentItems()

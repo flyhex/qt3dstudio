@@ -67,6 +67,7 @@ public:
     QSize minimumSizeHint() const override;
     void onDataInputChange(int handle, int instance, const QString &dataInputName);
     void onDockLocationChange(Qt::DockWidgetArea area);
+    void refreshVariants();
 
     Q_INVOKABLE void deselectAll();
     Q_INVOKABLE void addNewSlide(int row);
@@ -120,10 +121,12 @@ private:
     long GetSlideIndex(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle);
     bool isMaster(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle);
     void rebuildSlideList(const qt3dsdm::Qt3DSDMSlideHandle &inActiveSlideHandle);
+    void onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                           qt3dsdm::Qt3DSDMPropertyHandle inProperty);
 
-    SlideModel *m_CurrentModel = nullptr;
     SlideModel *m_MasterSlideModel = nullptr;
     SlideModel *m_SlidesModel = nullptr;
+    SlideModel *m_CurrentModel = nullptr;
     DataInputSelectView *m_dataInputSelector = nullptr;
     QColor m_BaseColor = QColor::fromRgb(75, 75, 75);
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>>

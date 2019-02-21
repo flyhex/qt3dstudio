@@ -27,11 +27,9 @@
 ****************************************************************************/
 
 #include "SlideView.h"
-#include "CColor.h"
 #include "Core.h"
 #include "Dispatch.h"
 #include "Doc.h"
-#include "Literals.h"
 #include "StudioPreferences.h"
 #include "SlideModel.h"
 #include "StudioApp.h"
@@ -45,22 +43,19 @@
 #include "Qt3DSDMSlides.h"
 #include "Dialogs.h"
 
-#include <QtCore/qcoreapplication.h>
 #include <QtCore/qtimer.h>
 #include <QtQml/qqmlcontext.h>
 #include <QtQml/qqmlengine.h>
-#include <QtWidgets/qdesktopwidget.h>
-#include <QtWidgets/qdockwidget.h>
 
 SlideView::SlideView(QWidget *parent) : QQuickWidget(parent)
   , m_MasterSlideModel(new SlideModel(1, this))
   , m_SlidesModel(new SlideModel(0, this))
+  , m_CurrentModel(m_SlidesModel)
   , m_ActiveRoot(0)
   , m_toolTip(tr("No Controller"))
 {
     g_StudioApp.GetCore()->GetDispatch()->AddPresentationChangeListener(this);
     setResizeMode(QQuickWidget::SizeRootObjectToView);
-    m_CurrentModel = m_SlidesModel;
     QTimer::singleShot(0, this, &SlideView::initialize);
 }
 
@@ -82,10 +77,7 @@ void SlideView::setShowMasterSlide(bool show)
     if (show == currentIsMaster)
         return;
 
-    if (show)
-        m_CurrentModel = m_MasterSlideModel;
-    else
-        m_CurrentModel = m_SlidesModel;
+    m_CurrentModel = show ? m_MasterSlideModel : m_SlidesModel;
 
     // We need to get the first slide in the correct master mode
     CDoc *theDoc = GetDoc();
@@ -124,8 +116,6 @@ void SlideView::showControllerDialog(const QPoint &point)
     m_dataInputSelector->setData(dataInputList, currCtr);
     CDialogs::showWidgetBrowser(this, m_dataInputSelector, point,
                                 CDialogs::WidgetBrowserAlign::ToolButton);
-
-    return;
 }
 
 bool SlideView::toolTipsEnabled()
@@ -142,7 +132,7 @@ QSize SlideView::minimumSizeHint() const
 {
     // prevent datainput control indicator from overlapping
     // with slide name too much when panel is minimised
-    return {80, 0};
+    return {100, 0};
 }
 
 void SlideView::deselectAll()
@@ -209,8 +199,9 @@ void SlideView::OnNewPresentation()
 
     // Set up listener for the name changes to slide
     m_Connections.push_back(theSignalProvider->ConnectInstancePropertyValue(
-                std::bind(&SlideModel::refreshSlideLabel, m_SlidesModel,
+                std::bind(&SlideView::onPropertyChanged, this,
                           std::placeholders::_1, std::placeholders::_2)));
+
     // Set up listener for undo/redo changes in order to update
     // slide datainput control
     CDispatch *theDispatch = g_StudioApp.GetCore()->GetDispatch();
@@ -290,18 +281,16 @@ void SlideView::onDataInputChange(int handle, int instance, const QString &dataI
         m_toolTip = tr("No Controller");
     }
     qt3dsdm::Qt3DSDMPropertyHandle ctrldProp;
-    if (bridge->GetObjectType(slideRoot) == EStudioObjectType::OBJTYPE_SCENE) {
+    if (bridge->GetObjectType(slideRoot) == EStudioObjectType::OBJTYPE_SCENE)
         ctrldProp = bridge->GetObjectDefinitions().m_Scene.m_ControlledProperty;
-    } else if (bridge->GetObjectType(slideRoot) ==
-               EStudioObjectType::OBJTYPE_COMPONENT) {
+    else if (bridge->GetObjectType(slideRoot) == EStudioObjectType::OBJTYPE_COMPONENT)
         ctrldProp = bridge->GetObjectDefinitions().m_Component.m_ControlledProperty;
-    } else {
+    else
         Q_ASSERT(false);
-    }
 
     qt3dsdm::SValue controlledPropertyVal;
-    doc->GetStudioSystem()->GetPropertySystem()->GetInstancePropertyValue(
-                slideRoot, ctrldProp, controlledPropertyVal);
+    doc->GetStudioSystem()->GetPropertySystem()->GetInstancePropertyValue(slideRoot, ctrldProp,
+                                                                          controlledPropertyVal);
 
     // To indicate that slide transitions are controlled by data input,
     // we set "controlled property" of this scene to contain the name of
@@ -309,33 +298,44 @@ void SlideView::onDataInputChange(int handle, int instance, const QString &dataI
     // If we have existing slide control in this root element, replace it.
     // Otherwise just append slide control string to controlledproperty
     // (it might already contain timeline control information)
-    auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal);
-    if (existingCtrl.contains("@slide")) {
-        int slideStrPos = existingCtrl.indexOf("@slide");
+    QString existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal);
+    if (existingCtrl.contains(QLatin1String("@slide"))) {
+        int slideStrPos = existingCtrl.indexOf(QLatin1String("@slide"));
         // find the controlling datainput name and build the string to replace
-        int ctrStrPos = existingCtrl.lastIndexOf("$", slideStrPos - 2);
+        int ctrStrPos = existingCtrl.lastIndexOf(QLatin1Char('$'), slideStrPos - 2);
         QString prevCtrler = existingCtrl.mid(ctrStrPos, slideStrPos - ctrStrPos - 1);
-        existingCtrl.replace(prevCtrler + " @slide", fullSlideControlStr);
+        existingCtrl.replace(prevCtrler + QLatin1String(" @slide"), fullSlideControlStr);
     } else {
-        (!existingCtrl.isEmpty() && m_controlled) ? existingCtrl.append(" ") : 0;
+        if (!existingCtrl.isEmpty() && m_controlled)
+            existingCtrl.append(QLatin1Char(' '));
         existingCtrl.append(fullSlideControlStr);
     }
 
-    if (existingCtrl.endsWith(" "))
+    if (existingCtrl.endsWith(QLatin1Char(' ')))
         existingCtrl.chop(1);
 
-    if (existingCtrl.startsWith(" "))
+    if (existingCtrl.startsWith(QLatin1Char(' ')))
         existingCtrl.remove(0, 1);
 
     qt3dsdm::SValue fullCtrlPropVal
-            = std::make_shared<qt3dsdm::CDataStr>(
-                Q3DStudio::CString::fromQString(existingCtrl));
+            = std::make_shared<qt3dsdm::CDataStr>(Q3DStudio::CString::fromQString(existingCtrl));
 
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Slide control"))
         ->SetInstancePropertyValue(slideRoot, ctrldProp, fullCtrlPropVal);
 
     UpdateSlideViewTitleColor();
     Q_EMIT controlledChanged();
+}
+
+void SlideView::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                  qt3dsdm::Qt3DSDMPropertyHandle inProperty)
+{
+    // refresh slide name
+    m_SlidesModel->refreshSlideLabel(inInstance, inProperty);
+
+    // refresh variants
+    if (inProperty == GetBridge()->GetLayer().m_variants)
+        refreshVariants();
 }
 
 void SlideView::onDockLocationChange(Qt::DockWidgetArea area)
@@ -353,24 +353,22 @@ void SlideView::updateDataInputStatus()
     qt3dsdm::Qt3DSDMInstanceHandle slideRoot = doc->GetActiveRootInstance();
 
     qt3dsdm::Qt3DSDMPropertyHandle ctrldProp;
-    if (bridge->GetObjectType(slideRoot) == EStudioObjectType::OBJTYPE_SCENE) {
+    if (bridge->GetObjectType(slideRoot) == EStudioObjectType::OBJTYPE_SCENE)
         ctrldProp = bridge->GetObjectDefinitions().m_Scene.m_ControlledProperty;
-    } else if (bridge->GetObjectType(slideRoot) ==
-               EStudioObjectType::OBJTYPE_COMPONENT) {
+    else if (bridge->GetObjectType(slideRoot) == EStudioObjectType::OBJTYPE_COMPONENT)
         ctrldProp = bridge->GetObjectDefinitions().m_Component.m_ControlledProperty;
-    } else {
+    else
         Q_ASSERT(false);
-    }
 
     qt3dsdm::SValue controlledPropertyVal;
-    doc->GetStudioSystem()->GetPropertySystem()->GetInstancePropertyValue(
-                slideRoot, ctrldProp, controlledPropertyVal);
-    auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal);
+    doc->GetStudioSystem()->GetPropertySystem()->GetInstancePropertyValue(slideRoot, ctrldProp,
+                                                                          controlledPropertyVal);
+    QString existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal);
 
     QString newController;
-    int slideStrPos = existingCtrl.indexOf("@slide");
+    int slideStrPos = existingCtrl.indexOf(QLatin1String("@slide"));
     if (slideStrPos != -1) {
-        int ctrStrPos = existingCtrl.lastIndexOf("$", slideStrPos - 2);
+        int ctrStrPos = existingCtrl.lastIndexOf(QLatin1Char('$'), slideStrPos - 2);
         newController = existingCtrl.mid(ctrStrPos + 1, slideStrPos - ctrStrPos - 2);
     }
     if (newController != m_currentController) {
@@ -503,6 +501,12 @@ long SlideView::GetSlideIndex(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle)
 bool SlideView::isMaster(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle)
 {
     return (0 == GetSlideIndex(inSlideHandle));
+}
+
+void SlideView::refreshVariants()
+{
+    m_SlidesModel->refreshVariants();
+    m_MasterSlideModel->refreshVariants(m_SlidesModel->variants());
 }
 
 void SlideView::OnBeginDataModelNotifications()

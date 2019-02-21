@@ -62,6 +62,7 @@
 #include "VariantTagDialog.h"
 #include "Views.h"
 #include "MainFrm.h"
+#include "SlideView.h"
 #include "TimelineWidget.h"
 
 #include <QtCore/qtimer.h>
@@ -480,6 +481,7 @@ void InspectorControlView::showTagContextMenu(int x, int y, const QString &group
     connect(actionDelete, &QAction::triggered, this, [&]() {
         g_StudioApp.GetCore()->getProjectFile().deleteVariantTag(group, tag);
         g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->refreshVariants();
+        g_StudioApp.GetViews()->getMainFrame()->getSlideView()->refreshVariants();
     });
 
     theContextMenu.exec(mapToGlobal({x, y}));
@@ -506,12 +508,16 @@ void InspectorControlView::showGroupContextMenu(int x, int y, const QString &gro
         const auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
         QColor newColor = this->showColorDialog(variantsDef[group].m_color);
         projectFile.changeVariantGroupColor(group, newColor.name());
+        // no need to refresh variants in the timeline widget as it references the group color in
+        // the project file m_variants, and a redraw is triggered upon color selection dialog close.
+        g_StudioApp.GetViews()->getMainFrame()->getSlideView()->refreshVariants();
     });
 
     auto actionDelete = theContextMenu.addAction(QObject::tr("Delete Group"));
     connect(actionDelete, &QAction::triggered, this, [&]() {
         projectFile.deleteVariantGroup(group);
         g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->refreshVariants();
+        g_StudioApp.GetViews()->getMainFrame()->getSlideView()->refreshVariants();
     });
 
     theContextMenu.exec(mapToGlobal({x, y}));

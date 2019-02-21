@@ -56,6 +56,10 @@ QVariant SlideModel::data(const QModelIndex &index, int role) const
         return slideName(m_slides[row]);
     case SelectedRole:
         return row == m_selectedRow;
+    case VariantsRole:
+        int slideIdx = GetDoc()->GetStudioSystem()->GetSlideSystem()->GetSlideIndex(m_slides[row]);
+        if (slideIdx < m_variants.size())
+            return m_variants.at(slideIdx);
     }
 
     return {};
@@ -91,7 +95,7 @@ bool SlideModel::setData(const QModelIndex &index, const QVariant &value, int ro
         }
 
         Q_EMIT dataChanged(this->index(0, 0), this->index(rowCount() - 1, 0), {role});
-        return true;
+        break;
     }
     default:
         return false;
@@ -112,6 +116,7 @@ QHash<int, QByteArray> SlideModel::roleNames() const
 {
     auto names = QAbstractListModel::roleNames();
     names.insert(NameRole, "name");
+    names.insert(VariantsRole, "variants");
     names.insert(SelectedRole, "selected");
 
     return names;
@@ -347,6 +352,61 @@ void SlideModel::setSlideName(const qt3dsdm::Qt3DSDMSlideHandle &handle, const Q
     }
 }
 
+void SlideModel::refreshVariants(const QStringList &variants)
+{
+    m_variants.clear();
+
+    if (variants.isEmpty()) {
+        const auto *slideSystem = GetDoc()->GetStudioSystem()->GetSlideSystem();
+        int slideCount = slideSystem->GetSlideCount(slideSystem->GetMasterSlide(
+                                                                 GetDoc()->GetActiveSlide()));
+
+        QString vTemplate = QStringLiteral(" <font color='%1'>%2</font>");
+        QVector<QHash<QString, int>> counts(slideCount); // <group, total count tags>
+
+        const auto propertySystem = GetDoc()->GetPropertySystem();
+        const auto layers = GetDoc()->getLayers();
+        for (auto layer : layers) {
+            int slideIdx = slideIndex(slideSystem->GetAssociatedSlide(layer));
+            qt3dsdm::SValue sValue;
+            if (propertySystem->GetInstancePropertyValue(layer, GetBridge()->GetLayer().m_variants,
+                                                         sValue)) {
+                QString propVal = QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)
+                                                          ->GetData());
+                if (!propVal.isEmpty()) {
+                    QStringList tagPairs = propVal.split(QLatin1Char(','));
+                    for (int i = 0; i < tagPairs.size(); ++i) {
+                        QString group = tagPairs[i].left(tagPairs[i].indexOf(QLatin1Char(':')));
+                        ++counts[slideIdx][group];
+                    }
+                }
+            }
+        }
+
+        // add master slide layers counts to other layers
+        const auto keys = counts[0].keys();
+        for (int i = 1; i < slideCount; ++i) {
+            for (auto g : keys)
+                counts[i][g] += counts[0][g];
+        }
+
+        // update the variants counts model (m_variants)
+        auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
+        for (int i = 0; i < counts.size(); ++i) { // slides indexes
+            QString slideVariants;
+            const auto keys = counts[i].keys();
+            for (auto g : keys) // variants groups
+                slideVariants.append(vTemplate.arg(variantsDef[g].m_color).arg(counts[i][g]));
+
+            m_variants << slideVariants;
+        }
+    } else {
+        m_variants = variants;
+    }
+
+    Q_EMIT dataChanged(this->index(0, 0), this->index(rowCount() - 1, 0), {VariantsRole});
+}
+
 CDoc *SlideModel::GetDoc() const
 {
     return g_StudioApp.GetCore()->GetDoc();
@@ -375,10 +435,10 @@ void SlideModel::refreshSlideLabel(qt3dsdm::Qt3DSDMInstanceHandle instanceHandle
             if (m_slides[i] == slideHandle) {
                 setData(index(i, 0), GetBridge()->GetName(instanceHandle).toQString(),
                         SlideModel::NameRole);
+                break;
             }
         }
     }
-
 }
 
 // Set selected slide highlight on UI

@@ -36,6 +36,7 @@
 #include "VariantTagDialog.h"
 #include "StudioUtils.h"
 #include "Dialogs.h"
+
 #include <QtCore/qsavefile.h>
 
 VariantsGroupModel::VariantsGroupModel(QObject *parent)

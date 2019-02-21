@@ -130,7 +130,7 @@ void InspectorControlModel::setInspectable(CInspectableBase *inInspectable)
 
     if (m_notifier.get() == nullptr) {
         m_notifier = signalProvider->ConnectInstancePropertyValue(
-                    std::bind(&InspectorControlModel::notifyInstancePropertyValue,
+                    std::bind(&InspectorControlModel::onPropertyChanged,
                               this, std::placeholders::_1, std::placeholders::_2));
     }
     if (m_slideNotifier.get() == nullptr) {
@@ -173,14 +173,20 @@ CInspectableBase *getReferenceMaterialInspectable(CInspectableBase *inspectBase)
     return nullptr;
 }
 
-void InspectorControlModel::notifyInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle inHandle,
-                                                        qt3dsdm::Qt3DSDMPropertyHandle inProperty)
+void InspectorControlModel::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                              qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
     auto doc = g_StudioApp.GetCore()->GetDoc();
-    const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
-            ->GetClientDataModelBridge();
-    if (!bridge->IsSceneGraphInstance(inHandle))
+    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    if (!bridge->IsSceneGraphInstance(inInstance))
         return;
+
+    if (inProperty == bridge->GetLayer().m_variants) {
+        // only update the variants model if its property changes
+        m_variantsModel->refresh();
+        return;
+    }
+
     bool changed = false;
     for (int row = 0; row < m_groupElements.count(); ++row) {
         auto group = m_groupElements[row];
@@ -193,7 +199,7 @@ void InspectorControlModel::notifyInstancePropertyValue(qt3dsdm::Qt3DSDMInstance
                 imageInstance = doc->GetDocumentReader().GetImageInstanceForProperty(
                                                 property->m_instance, property->m_property);
             }
-            if (property->m_property == inProperty || imageInstance == inHandle) {
+            if (property->m_property == inProperty || imageInstance == inInstance) {
                 updatePropertyValue(property);
                 changed = true;
             }
@@ -1241,9 +1247,6 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
                 stringValue = stringValue.mid(index + 1);
         }
 
-        if (bridge->IsLayerInstance(instance))
-            m_variantsModel->refresh();
-
         element->m_value = stringValue;
     } // intentional fall-through for other String-derived datatypes
     case qt3dsdm::DataModelDataType::StringOrInt:
@@ -1259,7 +1262,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
             }
             auto slideSystem = studioSystem->GetSlideSystem();
 
-            if (element->m_title == QStringLiteral("Play Mode")) {
+            if (element->m_title == QLatin1String("Play Mode")) {
                 std::pair<bool, bool> slideData(
                     getSlideCharacteristics(element->m_instance, *studioSystem->GetSlideCore(),
                                             *slideSystem));
@@ -1267,7 +1270,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
                 bool hasPreviousSlide(slideData.second);
                 if (!hasNextSlide && !hasPreviousSlide)
                     stringlist.removeAll("Play Through To...");
-            } else if (element->m_title == QStringLiteral("Play Through To")) {
+            } else if (element->m_title == QLatin1String("Play Through To")) {
                 // the code duplication is intentional as we may ask for slide characteristics
                 // only if the property refers to slides
                 std::pair<bool, bool> slideData(
@@ -1311,7 +1314,8 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
                 }
 
                 element->m_value = QString(selectedIndex > 0 ? stringlist[selectedIndex]
-                                   : stringlist.first()).replace("|separator", "");
+                                   : stringlist.first()).replace(QLatin1String("|separator"),
+                                                                 QString());
             }
             element->m_values = stringlist;
         } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Import) {
