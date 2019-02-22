@@ -64,6 +64,7 @@ class Q3DStudioRenderer;
 class Q3DSGraphObjectTranslator;
 class Q3DSLightTranslator;
 class Q3DSCameraTranslator;
+class Q3DSLayerTranslator;
 class Q3DSReferencedMaterialTranslator;
 
 class Q3DSTranslation
@@ -186,6 +187,7 @@ private:
     QHash<qt3dsdm::Qt3DSDMInstanceHandle, QByteArray> m_instanceIdHash;
     QVector<Q3DSLightTranslator *> m_lightTranslators;
     QVector<Q3DSCameraTranslator *> m_cameraTranslators;
+    QVector<Q3DSLayerTranslator *> m_layerTranslators;
     QRect m_rect;
     QSize m_size;
     qreal m_pixelRatio = 0.0;
@@ -259,6 +261,7 @@ public:
     SEditCameraPersistentInformation editCameraInfo() const;
     void enableSceneCameras(bool enable);
     void enableSceneLights(bool enable);
+    void enableSceneLayers(bool enable);
     void wheelZoom(qreal factor);
     void enableBackgroundLayer();
     void enableForegroundLayer();

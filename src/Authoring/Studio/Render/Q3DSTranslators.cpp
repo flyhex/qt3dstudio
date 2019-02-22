@@ -371,13 +371,15 @@ struct Q3DSTranslatorDataModelParser
 
 };
 
-
 #define HANDLE_PREFIX(temp_type) \
     { \
         temp_type temp;
-#define HANDLE_SUFFIX(name) \
+#define DEFAULT_HANDLE_SUFFIX(name) \
         list.append(theItem.set##name(temp)); \
     }
+#define HANDLE_SUFFIX(name) \
+    DEFAULT_HANDLE_SUFFIX(name)
+
 #define HANDLE_PROPERTY(type, name) \
     inContext.objectDefinitions().m_##type.m_##name
 #define HANDLE_PARAMS(type, name) \
@@ -464,52 +466,54 @@ struct Q3DSTranslatorDataModelParser
     HANDLE_Q3DS_NAME_PROPERTY   \
     HANDLE_Q3DS_NOTIFY_CHANGES
 
-#define ITERATE_Q3DS_LAYER_PROPERTIES                                                   \
-    HANDLE_Q3DS_BOOL_PROPERTY2(Layer, DisableDepthTest, DepthTestDisabled)              \
-    HANDLE_Q3DS_BOOL_PROPERTY2(Layer, DisableDepthPrepass, DepthPrePassDisabled)        \
-    HANDLE_Q3DS_ENUM_PROPERTY(Layer, ProgressiveAA, Q3DSLayerNode::ProgressiveAA)       \
-    HANDLE_Q3DS_ENUM_PROPERTY(Layer, MultisampleAA, Q3DSLayerNode::MultisampleAA)       \
-    HANDLE_Q3DS_BOOL_PROPERTY2(Layer, TemporalAA, TemporalAAEnabled)                    \
-    HANDLE_Q3DS_COLOR_PROPERTY(Layer, BackgroundColor)                                  \
-    HANDLE_Q3DS_ENUM_PROPERTY(Layer, BlendType, Q3DSLayerNode::BlendType)               \
-    HANDLE_Q3DS_ENUM_PROPERTY2(Layer, Background, LayerBackground,                      \
-        Q3DSLayerNode::LayerBackground)                                                 \
-    HANDLE_Q3DS_SOURCEPATH_PROPERTY(Asset, SourcePath)                                  \
-    HANDLE_Q3DS_ENUM_PROPERTY2(Layer, HorizontalFieldValues, HorizontalFields,          \
-        Q3DSLayerNode::HorizontalFields)                                                \
-    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, Left)                                             \
-    HANDLE_Q3DS_ENUM_PROPERTY(Layer, LeftUnits, Q3DSLayerNode::Units)                   \
-    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, Width)                                            \
-    HANDLE_Q3DS_ENUM_PROPERTY(Layer, WidthUnits, Q3DSLayerNode::Units)                  \
-    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, Right)                                            \
-    HANDLE_Q3DS_ENUM_PROPERTY(Layer, RightUnits, Q3DSLayerNode::Units)                  \
-    HANDLE_Q3DS_ENUM_PROPERTY2(Layer, VerticalFieldValues, VerticalFields,              \
-        Q3DSLayerNode::VerticalFields)                                                  \
-    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, Top)                                              \
-    HANDLE_Q3DS_ENUM_PROPERTY(Layer, TopUnits, Q3DSLayerNode::Units)                    \
-    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, Height)                                           \
-    HANDLE_Q3DS_ENUM_PROPERTY(Layer, HeightUnits, Q3DSLayerNode::Units)                 \
-    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, Bottom)                                           \
-    HANDLE_Q3DS_ENUM_PROPERTY(Layer, BottomUnits, Q3DSLayerNode::Units)                 \
-    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, AoStrength)                                       \
-    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, AoDistance)                                       \
-    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, AoSoftness)                                       \
-    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, AoBias)                                           \
-    HANDLE_Q3DS_BOOL_PROPERTY(Layer, AoDither)                                          \
-    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, ShadowStrength)                                   \
-    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, ShadowDist)                                       \
-    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, ShadowSoftness)                                   \
-    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, ShadowBias)                                       \
-    HANDLE_Q3DS_IMAGE_PROPERTY(Layer, LightProbe)                                       \
-    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, ShadowBias)                                       \
-    HANDLE_Q3DS_BOOL_PROPERTY2(Layer, FastIbl, FastIBLEnabled)                          \
-    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, ProbeHorizon)                                     \
-    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, ProbeFov)                                         \
-    HANDLE_Q3DS_IMAGE_PROPERTY(Layer, LightProbe2)                                      \
-    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, Probe2Fade)                                       \
-    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, Probe2Window)                                     \
-    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, Probe2Pos)                                        \
-    HANDLE_Q3DS_NOTIFY_CHANGES
+#define ITERATE_Q3DS_LAYER_PROPERTIES(editMode)                                   \
+    HANDLE_Q3DS_BOOL_PROPERTY2(Layer, DisableDepthTest, DepthTestDisabled)        \
+    HANDLE_Q3DS_BOOL_PROPERTY2(Layer, DisableDepthPrepass, DepthPrePassDisabled)  \
+    HANDLE_Q3DS_ENUM_PROPERTY(Layer, ProgressiveAA, Q3DSLayerNode::ProgressiveAA) \
+    HANDLE_Q3DS_ENUM_PROPERTY(Layer, MultisampleAA, Q3DSLayerNode::MultisampleAA) \
+    HANDLE_Q3DS_BOOL_PROPERTY2(Layer, TemporalAA, TemporalAAEnabled)              \
+    HANDLE_Q3DS_COLOR_PROPERTY(Layer, BackgroundColor)                            \
+    HANDLE_Q3DS_ENUM_PROPERTY(Layer, BlendType, Q3DSLayerNode::BlendType)         \
+    HANDLE_Q3DS_ENUM_PROPERTY2(Layer, Background, LayerBackground,                \
+        Q3DSLayerNode::LayerBackground)                                           \
+    HANDLE_Q3DS_SOURCEPATH_PROPERTY(Asset, SourcePath)                            \
+    HANDLE_Q3DS_ENUM_PROPERTY2(Layer, HorizontalFieldValues, HorizontalFields,    \
+        Q3DSLayerNode::HorizontalFields)                                          \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, Left)                                       \
+    HANDLE_Q3DS_ENUM_PROPERTY(Layer, LeftUnits, Q3DSLayerNode::Units)             \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, Width)                                      \
+    HANDLE_Q3DS_ENUM_PROPERTY(Layer, WidthUnits, Q3DSLayerNode::Units)            \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, Right)                                      \
+    HANDLE_Q3DS_ENUM_PROPERTY(Layer, RightUnits, Q3DSLayerNode::Units)            \
+    HANDLE_Q3DS_ENUM_PROPERTY2(Layer, VerticalFieldValues, VerticalFields,        \
+        Q3DSLayerNode::VerticalFields)                                            \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, Top)                                        \
+    HANDLE_Q3DS_ENUM_PROPERTY(Layer, TopUnits, Q3DSLayerNode::Units)              \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, Height)                                     \
+    HANDLE_Q3DS_ENUM_PROPERTY(Layer, HeightUnits, Q3DSLayerNode::Units)           \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, Bottom)                                     \
+    HANDLE_Q3DS_ENUM_PROPERTY(Layer, BottomUnits, Q3DSLayerNode::Units)           \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, AoStrength)                                 \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, AoDistance)                                 \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, AoSoftness)                                 \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, AoBias)                                     \
+    HANDLE_Q3DS_INT_PROPERTY2(Layer, AoSamplerate, AoSampleRate)                  \
+    HANDLE_Q3DS_BOOL_PROPERTY(Layer, AoDither)                                    \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, ShadowStrength)                             \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, ShadowDist)                                 \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, ShadowSoftness)                             \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, ShadowBias)                                 \
+    HANDLE_Q3DS_IMAGE_PROPERTY(Layer, LightProbe)                                 \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, ProbeBright)                                \
+    HANDLE_Q3DS_BOOL_PROPERTY2(Layer, FastIbl, FastIBLEnabled)                    \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, ProbeHorizon)                               \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, ProbeFov)                                   \
+    HANDLE_Q3DS_IMAGE_PROPERTY(Layer, LightProbe2)                                \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, Probe2Fade)                                 \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, Probe2Window)                               \
+    HANDLE_Q3DS_FLOAT_PROPERTY(Layer, Probe2Pos)                                  \
+    if (!editMode)                                                                \
+        HANDLE_Q3DS_NOTIFY_CHANGES
 
 #define ITERATE_Q3DS_SLIDE_PROPERTIES \
     HANDLE_Q3DS_ENUM_PROPERTY(Slide, PlayMode, Q3DSSlide::PlayMode)                     \
@@ -1630,7 +1634,16 @@ void Q3DSLayerTranslator::pushTranslation(Q3DSTranslation &inContext)
     Q3DSLayerNode &theItem = static_cast<Q3DSLayerNode &>(graphObject());
     Q3DSTranslatorDataModelParser theParser(inContext, instanceHandle());
     Q3DSPropertyChangeList list;
-    ITERATE_Q3DS_LAYER_PROPERTIES
+#undef HANDLE_SUFFIX
+#define HANDLE_SUFFIX(name)                       \
+        if (m_editLayerEnabled)                   \
+            m_active##name = temp;                \
+        else                                      \
+            list.append(theItem.set##name(temp)); \
+     }
+    ITERATE_Q3DS_LAYER_PROPERTIES(m_editLayerEnabled)
+#undef HANDLE_SUFFIX
+#define HANDLE_SUFFIX(name) DEFAULT_HANDLE_SUFFIX(name)
 
     int childCount = inContext.assetGraph().GetChildCount(instanceHandle());
     for (int i = 0; i < childCount; ++i) {
@@ -1661,6 +1674,21 @@ void Q3DSLayerTranslator::appendChild(Q3DSGraphObject &inChild)
     }*/
 }
 
+#define UPDATE_SIMPLE_PROPERTY(type, name)                     \
+    if (m_editLayerEnabled)                                    \
+        m_active##name = value.getData<type>();                \
+    else                                                       \
+        list.append(theItem.set##name(value.getData<type>()));
+
+#define UPDATE_ENUM_PROPERTY(enumType, name)                      \
+    auto enumValue = Q3DSValueParser::parseEnum<enumType>(value); \
+    if (m_editLayerEnabled) {                                     \
+        m_active##name = enumValue;                               \
+        return true;                                              \
+    } else {                                                      \
+        list.append(theItem.set##name(enumValue));                \
+    }
+
 bool Q3DSLayerTranslator::updateProperty(Q3DSTranslation &inContext,
                                          qt3dsdm::Qt3DSDMInstanceHandle instance,
                                          qt3dsdm::Qt3DSDMPropertyHandle property,
@@ -1673,103 +1701,106 @@ bool Q3DSLayerTranslator::updateProperty(Q3DSTranslation &inContext,
     Q3DSPropertyChangeList list;
     Q3DSLayerNode &theItem = static_cast<Q3DSLayerNode &>(graphObject());
     if (name == QLatin1String("disabledepthtest")) {
-        list.append(theItem.setDepthTestDisabled(value.getData<bool>()));
+        UPDATE_SIMPLE_PROPERTY(bool, DepthTestDisabled)
     } else if (name == QLatin1String("disabledepthprepass")) {
-        list.append(theItem.setDepthPrePassDisabled(value.getData<bool>()));
+        UPDATE_SIMPLE_PROPERTY(bool, DepthPrePassDisabled)
     } else if (name == QLatin1String("progressiveaa")) {
-        list.append(theItem.setProgressiveAA(Q3DSValueParser::parseEnum
-                                 <Q3DSLayerNode::ProgressiveAA>(value)));
+        UPDATE_ENUM_PROPERTY(Q3DSLayerNode::ProgressiveAA, ProgressiveAA)
     } else if (name == QLatin1String("multisampleaa")) {
-        list.append(theItem.setMultisampleAA(Q3DSValueParser::parseEnum
-                                 <Q3DSLayerNode::MultisampleAA>(value)));
+        UPDATE_ENUM_PROPERTY(Q3DSLayerNode::MultisampleAA, MultisampleAA)
     } else if (name == QLatin1String("temporalaa")) {
-        list.append(theItem.setTemporalAAEnabled(value.getData<bool>()));
+        UPDATE_SIMPLE_PROPERTY(bool, TemporalAAEnabled)
     } else if (name == QLatin1String("background")) {
-        list.append(theItem.setLayerBackground(Q3DSValueParser::parseEnum
-                                   <Q3DSLayerNode::LayerBackground>(value)));
+        UPDATE_ENUM_PROPERTY(Q3DSLayerNode::LayerBackground, LayerBackground)
     } else if (name == QLatin1String("backgroundcolor")) {
-        list.append(theItem.setBackgroundColor(Q3DSValueParser::parseColor(value)));
+        QColor color = Q3DSValueParser::parseColor(value);
+        if (m_editLayerEnabled)
+            m_activeBackgroundColor = color;
+        else
+            list.append(theItem.setBackgroundColor(color));
     } else if (name == QLatin1String("blendtype")) {
-        list.append(theItem.setBlendType(Q3DSValueParser::parseEnum
-                                   <Q3DSLayerNode::BlendType>(value)));
+        UPDATE_ENUM_PROPERTY(Q3DSLayerNode::BlendType, BlendType)
     } else if (name == QLatin1String("horzfields")) {
-        list.append(theItem.setHorizontalFields(Q3DSValueParser::parseEnum
-                                    <Q3DSLayerNode::HorizontalFields>(value)));
+        UPDATE_ENUM_PROPERTY(Q3DSLayerNode::HorizontalFields, HorizontalFields)
     } else if (name == QLatin1String("left")) {
-        list.append(theItem.setLeft(value.getData<float>()));
+        UPDATE_SIMPLE_PROPERTY(float, Left)
     } else if (name == QLatin1String("leftunits")) {
-        list.append(theItem.setLeftUnits(Q3DSValueParser::parseEnum
-                                    <Q3DSLayerNode::Units>(value)));
+        UPDATE_ENUM_PROPERTY(Q3DSLayerNode::Units, LeftUnits)
     } else if (name == QLatin1String("width")) {
-        list.append(theItem.setWidth(value.getData<float>()));
+        UPDATE_SIMPLE_PROPERTY(float, Width)
     } else if (name == QLatin1String("widthunits")) {
-        list.append(theItem.setLeftUnits(Q3DSValueParser::parseEnum
-                                    <Q3DSLayerNode::Units>(value)));
+        UPDATE_ENUM_PROPERTY(Q3DSLayerNode::Units, WidthUnits)
     } else if (name == QLatin1String("right")) {
-        list.append(theItem.setRight(value.getData<float>()));
+        UPDATE_SIMPLE_PROPERTY(float, Right)
     } else if (name == QLatin1String("rightunits")) {
-        list.append(theItem.setRightUnits(Q3DSValueParser::parseEnum
-                                    <Q3DSLayerNode::Units>(value)));
+        UPDATE_ENUM_PROPERTY(Q3DSLayerNode::Units, RightUnits)
     } else if (name == QLatin1String("vertfields")) {
-        list.append(theItem.setVerticalFields(Q3DSValueParser::parseEnum
-                                    <Q3DSLayerNode::VerticalFields>(value)));
+        UPDATE_ENUM_PROPERTY(Q3DSLayerNode::VerticalFields, VerticalFields)
     } else if (name == QLatin1String("top")) {
-        list.append(theItem.setTop(value.getData<float>()));
+        UPDATE_SIMPLE_PROPERTY(float, Top)
     } else if (name == QLatin1String("topunits")) {
-        list.append(theItem.setTopUnits(Q3DSValueParser::parseEnum
-                                    <Q3DSLayerNode::Units>(value)));
+        UPDATE_ENUM_PROPERTY(Q3DSLayerNode::Units, TopUnits)
     } else if (name == QLatin1String("height")) {
-        list.append(theItem.setHeight(value.getData<float>()));
+        UPDATE_SIMPLE_PROPERTY(float, Height)
     } else if (name == QLatin1String("heightunits")) {
-        list.append(theItem.setHeightUnits(Q3DSValueParser::parseEnum
-                                    <Q3DSLayerNode::Units>(value)));
+        UPDATE_ENUM_PROPERTY(Q3DSLayerNode::Units, HeightUnits)
     } else if (name == QLatin1String("bottom")) {
-        list.append(theItem.setBottom(value.getData<float>()));
+        UPDATE_SIMPLE_PROPERTY(float, Bottom)
     } else if (name == QLatin1String("bottomunits")) {
-        list.append(theItem.setBottomUnits(Q3DSValueParser::parseEnum
-                                    <Q3DSLayerNode::Units>(value)));
+        UPDATE_ENUM_PROPERTY(Q3DSLayerNode::Units, BottomUnits)
     } else if (name == QLatin1String("sourcepath")) {
-        list.append(theItem.setSourcePath(value.toQVariant().toString()));
-        theItem.resolveReferences(*inContext.presentation());
+        if (m_editLayerEnabled) {
+            m_activeSourcePath = value.toQVariant().toString();
+        } else {
+            list.append(theItem.setSourcePath(value.toQVariant().toString()));
+            theItem.resolveReferences(*inContext.presentation());
+        }
     } else if (name == QLatin1String("aostrength")) {
-        list.append(theItem.setAoStrength(value.getData<float>()));
+        UPDATE_SIMPLE_PROPERTY(float, AoStrength)
     } else if (name == QLatin1String("aodistance")) {
-        list.append(theItem.setAoDistance(value.getData<float>()));
+        UPDATE_SIMPLE_PROPERTY(float, AoDistance)
     } else if (name == QLatin1String("aosoftness")) {
-        list.append(theItem.setAoSoftness(value.getData<float>()));
+        UPDATE_SIMPLE_PROPERTY(float, AoSoftness)
     } else if (name == QLatin1String("aobias")) {
-        list.append(theItem.setAoBias(value.getData<float>()));
+        UPDATE_SIMPLE_PROPERTY(float, AoBias)
     } else if (name == QLatin1String("aosamplerate")) {
-        list.append(theItem.setAoSampleRate(value.getData<int>()));
+        UPDATE_SIMPLE_PROPERTY(int, AoSampleRate)
     } else if (name == QLatin1String("aodither")) {
-        list.append(theItem.setAoDither(value.getData<bool>()));
+        UPDATE_SIMPLE_PROPERTY(bool, AoDither)
     } else if (name == QLatin1String("shadowstrength")) {
-        list.append(theItem.setShadowStrength(value.getData<float>()));
+        UPDATE_SIMPLE_PROPERTY(float, ShadowStrength)
     } else if (name == QLatin1String("shadowdist")) {
-        list.append(theItem.setShadowDist(value.getData<float>()));
+        UPDATE_SIMPLE_PROPERTY(float, ShadowDist)
     } else if (name == QLatin1String("shadowsoftness")) {
-        list.append(theItem.setShadowSoftness(value.getData<float>()));
+        UPDATE_SIMPLE_PROPERTY(float, ShadowSoftness)
     } else if (name == QLatin1String("shadowbias")) {
-        list.append(theItem.setShadowBias(value.getData<float>()));
+        UPDATE_SIMPLE_PROPERTY(float, ShadowBias)
     } else if (name == QLatin1String("lightprobe")) {
-        list.append(theItem.setLightProbe(
-                          Q3DSValueParser::parseImage(&inContext, value, &graphObject())));
+        Q3DSImage *image = Q3DSValueParser::parseImage(&inContext, value, &graphObject());
+        if (m_editLayerEnabled)
+            m_activeLightProbe = image;
+        else
+            list.append(theItem.setLightProbe(image));
     } else if (name == QLatin1String("probebright")) {
-        list.append(theItem.setBottom(value.getData<float>()));
+        UPDATE_SIMPLE_PROPERTY(float, ProbeBright)
     } else if (name == QLatin1String("fastibl")) {
-        list.append(theItem.setBottom(value.getData<float>()));
+        UPDATE_SIMPLE_PROPERTY(bool, FastIBLEnabled)
     } else if (name == QLatin1String("probehorizon")) {
-        list.append(theItem.setBottom(value.getData<float>()));
+        UPDATE_SIMPLE_PROPERTY(float, ProbeHorizon)
     } else if (name == QLatin1String("probefov")) {
-        list.append(theItem.setBottom(value.getData<float>()));
+        UPDATE_SIMPLE_PROPERTY(float, ProbeFov)
     } else if (name == QLatin1String("lightprobe2")) {
-        list.append(theItem.setBottom(value.getData<float>()));
+        Q3DSImage *image = Q3DSValueParser::parseImage(&inContext, value, &graphObject());
+        if (m_editLayerEnabled)
+            m_activeLightProbe2 = image;
+        else
+            list.append(theItem.setLightProbe2(image));
     } else if (name == QLatin1String("probe2fade")) {
-        list.append(theItem.setBottom(value.getData<float>()));
+        UPDATE_SIMPLE_PROPERTY(float, Probe2Fade)
     } else if (name == QLatin1String("probe2window")) {
-        list.append(theItem.setBottom(value.getData<float>()));
+        UPDATE_SIMPLE_PROPERTY(float, Probe2Window)
     } else if (name == QLatin1String("probe2pos")) {
-        list.append(theItem.setBottom(value.getData<float>()));
+        UPDATE_SIMPLE_PROPERTY(float, Probe2Pos)
     }
     if (list.count()) {
         theItem.notifyPropertyChanges(list);
@@ -1827,6 +1858,69 @@ void Q3DSLayerTranslator::copyProperties(Q3DSGraphObject *target, bool ignoreRef
     list.append(targetLayer->setProbe2Window(theItem.probe2Window()));
     list.append(targetLayer->setProbe2Pos(theItem.probe2Window()));
     targetLayer->notifyPropertyChanges(list);
+}
+
+#define SWAP_PROPERTY_FOR_EDIT(name, getFunc, editValue) \
+    if (m_editLayerEnabled) {                            \
+        m_active##name = theItem.getFunc();              \
+        list.append(theItem.set##name(editValue));       \
+    } else {                                             \
+        list.append(theItem.set##name(m_active##name));  \
+    }
+
+void Q3DSLayerTranslator::setEditLayerEnabled(Q3DSTranslation &inContext, bool enabled)
+{
+    if (m_editLayerEnabled != enabled) {
+        Q3DSLayerNode &theItem = static_cast<Q3DSLayerNode &>(graphObject());
+        m_editLayerEnabled = enabled;
+        Q3DSPropertyChangeList list;
+
+        SWAP_PROPERTY_FOR_EDIT(DepthTestDisabled, depthTestDisabled, false)
+        SWAP_PROPERTY_FOR_EDIT(DepthPrePassDisabled, depthPrePassDisabled, false)
+        SWAP_PROPERTY_FOR_EDIT(ProgressiveAA, progressiveAA, Q3DSLayerNode::NoPAA)
+        SWAP_PROPERTY_FOR_EDIT(MultisampleAA, multisampleAA, Q3DSLayerNode::NoMSAA)
+        SWAP_PROPERTY_FOR_EDIT(TemporalAAEnabled, temporalAAEnabled, false)
+        SWAP_PROPERTY_FOR_EDIT(LayerBackground, layerBackground, Q3DSLayerNode::Transparent)
+        SWAP_PROPERTY_FOR_EDIT(BackgroundColor, backgroundColor, QColor(Qt::black))
+        SWAP_PROPERTY_FOR_EDIT(BlendType, blendType, Q3DSLayerNode::Normal)
+        SWAP_PROPERTY_FOR_EDIT(HorizontalFields, horizontalFields, Q3DSLayerNode::LeftWidth)
+        SWAP_PROPERTY_FOR_EDIT(Left, left, 0.f)
+        SWAP_PROPERTY_FOR_EDIT(LeftUnits, leftUnits, Q3DSLayerNode::Percent)
+        SWAP_PROPERTY_FOR_EDIT(Width, width, 100.f)
+        SWAP_PROPERTY_FOR_EDIT(WidthUnits, widthUnits, Q3DSLayerNode::Percent)
+        SWAP_PROPERTY_FOR_EDIT(Right, right, 0.f)
+        SWAP_PROPERTY_FOR_EDIT(RightUnits, rightUnits, Q3DSLayerNode::Percent)
+        SWAP_PROPERTY_FOR_EDIT(VerticalFields, verticalFields, Q3DSLayerNode::TopHeight)
+        SWAP_PROPERTY_FOR_EDIT(Top, top, 0.f)
+        SWAP_PROPERTY_FOR_EDIT(TopUnits, topUnits, Q3DSLayerNode::Percent)
+        SWAP_PROPERTY_FOR_EDIT(Height, height, 100.f)
+        SWAP_PROPERTY_FOR_EDIT(HeightUnits, heightUnits, Q3DSLayerNode::Percent)
+        SWAP_PROPERTY_FOR_EDIT(Bottom, bottom, 0.f)
+        SWAP_PROPERTY_FOR_EDIT(BottomUnits, bottomUnits, Q3DSLayerNode::Percent)
+        SWAP_PROPERTY_FOR_EDIT(SourcePath, sourcePath, {})
+        SWAP_PROPERTY_FOR_EDIT(AoStrength, aoStrength, 0.f)
+        SWAP_PROPERTY_FOR_EDIT(AoDistance, aoDistance, 5.f)
+        SWAP_PROPERTY_FOR_EDIT(AoSoftness, aoSoftness, 50.f)
+        SWAP_PROPERTY_FOR_EDIT(AoBias, aoBias, 0.f)
+        SWAP_PROPERTY_FOR_EDIT(AoSampleRate, aoSampleRate, 2)
+        SWAP_PROPERTY_FOR_EDIT(AoDither, aoDither, true)
+        SWAP_PROPERTY_FOR_EDIT(ShadowStrength, shadowStrength, 0.f)
+        SWAP_PROPERTY_FOR_EDIT(ShadowDist, shadowDist, 10.f)
+        SWAP_PROPERTY_FOR_EDIT(ShadowSoftness, shadowSoftness, 100.f)
+        SWAP_PROPERTY_FOR_EDIT(ShadowBias, shadowBias, 0.f)
+        SWAP_PROPERTY_FOR_EDIT(LightProbe, lightProbe, nullptr)
+        SWAP_PROPERTY_FOR_EDIT(ProbeBright, probeBright, 0.f)
+        SWAP_PROPERTY_FOR_EDIT(FastIBLEnabled, fastIBLEnabled, true)
+        SWAP_PROPERTY_FOR_EDIT(ProbeHorizon, probeHorizon, -1.f)
+        SWAP_PROPERTY_FOR_EDIT(ProbeFov, probeFov, 180.f)
+        SWAP_PROPERTY_FOR_EDIT(LightProbe2, lightProbe2, nullptr)
+        SWAP_PROPERTY_FOR_EDIT(Probe2Fade, probe2Fade, 1.f)
+        SWAP_PROPERTY_FOR_EDIT(Probe2Window, probe2Window, 1.f)
+        SWAP_PROPERTY_FOR_EDIT(Probe2Pos, probe2Pos, 0.5f)
+
+        theItem.resolveReferences(*inContext.presentation());
+        theItem.notifyPropertyChanges(list);
+    }
 }
 
 

@@ -815,8 +815,10 @@ Q3DSGraphObjectTranslator *Q3DSTranslation::createTranslator(
         break;
     }
     case qt3dsdm::ComposerObjectTypes::Layer: {
-        translator = new Q3DSLayerTranslator(instance,
-                                             *m_presentation->newObject<Q3DSLayerNode>(id));
+        Q3DSLayerTranslator *t
+                = new Q3DSLayerTranslator(instance, *m_presentation->newObject<Q3DSLayerNode>(id));
+        m_layerTranslators.push_back(t);
+        translator = t;
         break;
     }
     case qt3dsdm::ComposerObjectTypes::Slide: {
@@ -1087,6 +1089,7 @@ void Q3DSTranslation::enableEditCamera(const SEditCameraPersistentInformation &i
     }
     enableSceneCameras(false);
     enableSceneLights(!m_editLightEnabled);
+    enableSceneLayers(false);
     m_editCameraEnabled = true;
     updateForegroundLayerProperties();
 }
@@ -1109,6 +1112,7 @@ void Q3DSTranslation::disableEditCamera()
 
     enableSceneLights(true);
     enableSceneCameras(true);
+    enableSceneLayers(true);
     m_editCameraEnabled = false;
     m_cameraType = EditCameraTypes::SceneCamera;
     updateForegroundLayerProperties();
@@ -1129,6 +1133,13 @@ void Q3DSTranslation::enableSceneLights(bool enable)
 {
     for (auto translator : qAsConst(m_lightTranslators))
         translator->setEditLightEnabled(!enable);
+}
+
+void Q3DSTranslation::enableSceneLayers(bool enable)
+{
+    // In edit camera modes, all layers should remain full view size
+    for (auto translator : qAsConst(m_layerTranslators))
+        translator->setEditLayerEnabled(*this, !enable);
 }
 
 void Q3DSTranslation::wheelZoom(qreal factor)
