@@ -474,6 +474,7 @@ void InspectorControlView::showTagContextMenu(int x, int y, const QString &group
         if (dlg.exec() == QDialog::Accepted) {
             g_StudioApp.GetCore()->getProjectFile().renameVariantTag(group, dlg.getNames().first,
                                                                      dlg.getNames().second);
+            m_variantsGroupModel->refresh();
         }
     });
 
@@ -482,6 +483,7 @@ void InspectorControlView::showTagContextMenu(int x, int y, const QString &group
         g_StudioApp.GetCore()->getProjectFile().deleteVariantTag(group, tag);
         g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->refreshVariants();
         g_StudioApp.GetViews()->getMainFrame()->getSlideView()->refreshVariants();
+        m_variantsGroupModel->refresh();
     });
 
     theContextMenu.exec(mapToGlobal({x, y}));
@@ -500,6 +502,7 @@ void InspectorControlView::showGroupContextMenu(int x, int y, const QString &gro
         if (dlg.exec() == QDialog::Accepted) {
             projectFile.renameVariantGroup(dlg.getNames().first, dlg.getNames().second);
             g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->refreshVariants();
+            m_variantsGroupModel->refresh();
         }
     });
 
@@ -511,6 +514,7 @@ void InspectorControlView::showGroupContextMenu(int x, int y, const QString &gro
         // no need to refresh variants in the timeline widget as it references the group color in
         // the project file m_variants, and a redraw is triggered upon color selection dialog close.
         g_StudioApp.GetViews()->getMainFrame()->getSlideView()->refreshVariants();
+        m_variantsGroupModel->refresh();
     });
 
     auto actionDelete = theContextMenu.addAction(QObject::tr("Delete Group"));
@@ -518,6 +522,7 @@ void InspectorControlView::showGroupContextMenu(int x, int y, const QString &gro
         projectFile.deleteVariantGroup(group);
         g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->refreshVariants();
         g_StudioApp.GetViews()->getMainFrame()->getSlideView()->refreshVariants();
+        m_variantsGroupModel->refresh();
     });
 
     theContextMenu.exec(mapToGlobal({x, y}));

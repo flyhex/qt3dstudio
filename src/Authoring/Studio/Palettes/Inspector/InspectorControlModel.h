@@ -171,7 +171,7 @@ private:
         }
     };
 
-    mutable QVector<GroupInspectorControl> m_groupElements;
+    QVector<GroupInspectorControl> m_groupElements;
     CInspectableBase *m_inspectableBase = nullptr;
     SGuideInspectableImpl *m_guideInspectable = nullptr;
 

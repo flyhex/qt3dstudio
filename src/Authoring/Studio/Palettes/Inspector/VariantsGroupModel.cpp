@@ -158,8 +158,10 @@ void VariantsGroupModel::addNewTag(const QString &group)
 {
     VariantTagDialog dlg(VariantTagDialog::AddTag, group);
 
-    if (dlg.exec() == QDialog::Accepted)
+    if (dlg.exec() == QDialog::Accepted) {
         g_StudioApp.GetCore()->getProjectFile().addVariantTag(group, dlg.getNames().second);
+        refresh();
+    }
 }
 
 void VariantsGroupModel::importVariants()
@@ -211,8 +213,10 @@ void VariantsGroupModel::addNewGroup()
 {
     VariantTagDialog dlg(VariantTagDialog::AddGroup);
 
-    if (dlg.exec() == QDialog::Accepted)
+    if (dlg.exec() == QDialog::Accepted) {
         g_StudioApp.GetCore()->getProjectFile().addVariantGroup(dlg.getNames().second);
+        refresh();
+    }
 }
 
 QHash<int, QByteArray> VariantsGroupModel::roleNames() const
