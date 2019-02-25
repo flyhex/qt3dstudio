@@ -1383,12 +1383,12 @@ void CDialogs::asyncDisplayTimeEditDialog(long time, IDoc *doc, long objectAssoc
     });
 }
 
-void CDialogs::asyncDisplayDurationEditDialog(long startTime, long endTime, IDoc *doc,
+void CDialogs::asyncDisplayDurationEditDialog(long startTime, long endTime,
                                               ITimeChangeCallback *callback) const
 {
-    QTimer::singleShot(0, [startTime, endTime, doc, callback]() {
+    QTimer::singleShot(0, [startTime, endTime, callback]() {
         CDurationEditDlg durationEditDlg;
-        durationEditDlg.showDialog(startTime, endTime, doc, callback);
+        durationEditDlg.showDialog(startTime, endTime, callback);
     });
 }
 

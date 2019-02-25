@@ -39,7 +39,7 @@ CTimeEditDlg::CTimeEditDlg(KeyframeManager *keyframeManager)
     , m_keyframeManager(keyframeManager)
 {
     m_ui->setupUi(this);
-    setAutoFillBackground(true);
+    setWindowFlag(Qt::WindowContextHelpButtonHint, false); // remove '?' from the dialog title bar
 
     QIntValidator *minValidator = new QIntValidator(this);
     minValidator->setRange(0, 9999);
@@ -54,8 +54,6 @@ CTimeEditDlg::CTimeEditDlg(KeyframeManager *keyframeManager)
     connect(m_ui->lineEditMinutes, &QLineEdit::textEdited, this, &CTimeEditDlg::onTimeChanged);
     connect(m_ui->lineEditSeconds, &QLineEdit::textEdited, this, &CTimeEditDlg::onTimeChanged);
     connect(m_ui->lineEditMilliseconds, &QLineEdit::textEdited, this, &CTimeEditDlg::onTimeChanged);
-
-    window()->setFixedSize(size());
 }
 
 CTimeEditDlg::~CTimeEditDlg()
@@ -195,10 +193,10 @@ void CTimeEditDlg::onTimeChanged()
     updateObjectTime(theGoToTime);
 
     // If max number of digits reached in a number field, select the next
-    if (min > 999) {
+    if (m_ui->lineEditMinutes->hasFocus() && min > 999) {
         m_ui->lineEditSeconds->setFocus();
         m_ui->lineEditSeconds->selectAll();
-    } else if (sec > 9) {
+    } else if (m_ui->lineEditSeconds->hasFocus() && sec > 9) {
         m_ui->lineEditMilliseconds->setFocus();
         m_ui->lineEditMilliseconds->selectAll();
     }

@@ -37,7 +37,7 @@ CDurationEditDlg::CDurationEditDlg(QWidget *parent)
     , m_ui(new Ui::DurationEditDlg)
 {
     m_ui->setupUi(this);
-    setAutoFillBackground(true);
+    setWindowFlag(Qt::WindowContextHelpButtonHint, false); // remove '?' from the dialog title bar
 
     QIntValidator *minValidator = new QIntValidator(this);
     minValidator->setRange(0, 9999);
@@ -65,8 +65,6 @@ CDurationEditDlg::CDurationEditDlg(QWidget *parent)
             this, &CDurationEditDlg::onEndTimeChanged);
     connect(m_ui->lineEditEndMilliseconds, &QLineEdit::textEdited,
             this, &CDurationEditDlg::onEndTimeChanged);
-
-    window()->setFixedSize(size());
 }
 
 CDurationEditDlg::~CDurationEditDlg()
@@ -74,69 +72,50 @@ CDurationEditDlg::~CDurationEditDlg()
     delete m_ui;
 }
 
-//=============================================================================
 /**
- *  showDialog: Initializes and shows the Duration Edit Dialog Box.
+ *  Initializes and shows the Duration Edit Dialog Box.
  *  @param startTime is the initial start time, which will be shown when the time edit
  *                   dialog box pops up
  *  @param endTime is the initial end time, which will be shown when the time edit
  *                 dialog box pops up
- *  @param inDoc this can be nullptr where its not applicable
  *  @param inCallback is the target object for the callbacks
  */
-void CDurationEditDlg::showDialog(long startTime, long endTime, IDoc *inDoc,
-                                  ITimeChangeCallback *inCallback)
+void CDurationEditDlg::showDialog(long startTime, long endTime, ITimeChangeCallback *inCallback)
 {
-    m_InitialTimeStart = startTime;
-    m_InitialTimeEnd = endTime;
-    m_Doc = inDoc;
     m_Callback = inCallback;
 
-    m_MinTimeDisplay = 0;
-    // if it is a Timebar, this will be adjusted, else this should be initialized to some value at
-    // least, for OverflowHandling to work correctly
-    m_MaxTimeDisplay = LONG_MAX;
-
-    // 9999:59:999 converted to milliseconds
-    m_MaxTime = 599999999; // 9999 * 60,000 + 59 * 1000 + 999
-
     // Set initial values to dialog
-    formatTime(m_InitialTimeStart, true);
-    formatTime(m_InitialTimeEnd, false);
+    formatTime(startTime, true);
+    formatTime(endTime, false);
 
-    // Present the dialog
     exec();
 }
 
 void CDurationEditDlg::formatTime(long inTime, bool startTime)
 {
-    long theTime = inTime;
-    long min = 0;
-    long sec = 0;
-    long msec = 0;
+    long mins = 0;
+    long secs = 0;
+    long mils = 0;
 
-    // Translates the m_initialTime (in milliseconds) into Minutes, Seconds and Milliseconds
     if (inTime != 0) {
-        min = timeConversion(theTime, CONVERT_MSEC_TO_MIN);
-        theTime = theTime - timeConversion(min, CONVERT_MIN_TO_MSEC);
-        sec = timeConversion(theTime, CONVERT_MSEC_TO_SEC);
-        theTime = theTime - timeConversion(sec, CONVERT_SEC_TO_MSEC);
-        msec = theTime;
+        mins = inTime % 3600000 / 60000;
+        secs = inTime % 60000 / 1000;
+        mils = inTime % 1000;
     }
 
-    // Default to 3 digits, e.g. "5" -> "005"
-    QString msecString = QString("%1").arg(msec, 3, 10, QChar('0'));
+    // display milliseconds in 3 digits (5 -> 005)
+    QString milsStr = QString("%1").arg(mils, 3, 10, QChar('0'));
 
     if (startTime) {
-        m_ui->lineEditMinutes->setText(QString::number(min));
-        m_ui->lineEditSeconds->setText(QString::number(sec));
-        m_ui->lineEditMilliseconds->setText(msecString);
+        m_ui->lineEditMinutes->setText(QString::number(mins));
+        m_ui->lineEditSeconds->setText(QString::number(secs));
+        m_ui->lineEditMilliseconds->setText(milsStr);
 
         // Select the biggest non-zero unit
-        if (min > 0) {
+        if (mins > 0) {
             m_ui->lineEditMinutes->setFocus();
             m_ui->lineEditMinutes->selectAll();
-        } else if (sec > 0) {
+        } else if (secs > 0) {
             m_ui->lineEditSeconds->setFocus();
             m_ui->lineEditSeconds->selectAll();
         } else {
@@ -144,9 +123,9 @@ void CDurationEditDlg::formatTime(long inTime, bool startTime)
             m_ui->lineEditMilliseconds->selectAll();
         }
     } else {
-        m_ui->lineEditEndMinutes->setText(QString::number(min));
-        m_ui->lineEditEndSeconds->setText(QString::number(sec));
-        m_ui->lineEditEndMilliseconds->setText(msecString);
+        m_ui->lineEditEndMinutes->setText(QString::number(mins));
+        m_ui->lineEditEndSeconds->setText(QString::number(secs));
+        m_ui->lineEditEndMilliseconds->setText(milsStr);
     }
 }
 
@@ -162,43 +141,6 @@ void CDurationEditDlg::reject()
     QDialog::reject();
 }
 
-long CDurationEditDlg::numberOfDigits(long number)
-{
-    long n = 0;
-    for (long i = number; i >= 1; i /= 10)
-        ++n;
-
-    return n;
-}
-
-//==============================================================================
-/**
- *  timeConversion:         Converts inTime to the format specified by inFlags.
- *                          For example:
- *                          inTime = 5 sec inFlags = CONVERT_SEC_TO_MSEC
- *                          The method will convert 5 sec into 5000 msec and
- *                          returns the result.
- *  @param  inTime          stores the time to be converted.
- *          inOperationCode determines the type of time conversion to be done on the
- *                          inTime.
- *  @return theResult       stores the result of the time conversion.
- */
-long CDurationEditDlg::timeConversion(long inTime, long inOperationCode)
-{
-    switch (inOperationCode) {
-    case CONVERT_MIN_TO_MSEC:
-        return inTime * 60000;
-    case CONVERT_SEC_TO_MSEC:
-        return inTime * 1000;
-    case CONVERT_MSEC_TO_MIN:
-        return inTime / 60000;
-    case CONVERT_MSEC_TO_SEC:
-        return inTime / 1000;
-    }
-
-    return 0;
-}
-
 void CDurationEditDlg::updateObjectTime(long inTime, bool startTime)
 {
     if (m_Callback) {
@@ -211,59 +153,42 @@ void CDurationEditDlg::updateObjectTime(long inTime, bool startTime)
 
 void CDurationEditDlg::onStartTimeChanged()
 {
-    // Making sure that the start time is not greater than the end time, when
-    // the user modifies the start time of the timebar
-    m_MaxTimeDisplay = m_InitialTimeEnd; // the initial end time
-    m_MinTimeDisplay = 0;
-
     long min = m_ui->lineEditMinutes->text().toInt();
     long sec = m_ui->lineEditSeconds->text().toInt();
     long msec = m_ui->lineEditMilliseconds->text().toInt();
 
-    long theGoToTime = timeConversion(min, CONVERT_MIN_TO_MSEC)
-            + timeConversion(sec, CONVERT_SEC_TO_MSEC) + msec;
+    long theGoToTime = min * 60000 + sec * 1000 + msec;
 
     // Go to the time specified in the start time edit display
     updateObjectTime(theGoToTime, true);
 
     // If max number of digits reached in a number field, select the next
-    if (m_minStart != min && numberOfDigits(min) == 4) {
+    if (m_ui->lineEditMinutes->hasFocus() && min > 999) {
         m_ui->lineEditSeconds->setFocus();
         m_ui->lineEditSeconds->selectAll();
-    } else if (m_secStart != sec && numberOfDigits(sec) == 2) {
+    } else if (m_ui->lineEditSeconds->hasFocus() && sec > 9) {
         m_ui->lineEditMilliseconds->setFocus();
         m_ui->lineEditMilliseconds->selectAll();
     }
-
-    m_minStart = min;
-    m_secStart = sec;
 }
 
 void CDurationEditDlg::onEndTimeChanged()
 {
-    // Let the end time of the time bar go as far as possible
-    m_MaxTimeDisplay = m_MaxTime;
-    m_MinTimeDisplay = m_InitialTimeStart; // the initial start time
-
     long min = m_ui->lineEditEndMinutes->text().toInt();
     long sec = m_ui->lineEditEndSeconds->text().toInt();
     long msec = m_ui->lineEditEndMilliseconds->text().toInt();
 
-    long theGoToTime = timeConversion(min, CONVERT_MIN_TO_MSEC)
-            + timeConversion(sec, CONVERT_SEC_TO_MSEC) + msec;
+    long theGoToTime = min * 60000 + sec * 1000 + msec;
 
     // Go to the time specified in the end time edit display
     updateObjectTime(theGoToTime, false);
 
     // If max number of digits reached in a number field, select the next
-    if (m_minEnd != min && numberOfDigits(min) == 4) {
+    if (m_ui->lineEditEndMinutes->hasFocus() && min > 999) {
         m_ui->lineEditEndSeconds->setFocus();
         m_ui->lineEditEndSeconds->selectAll();
-    } else if (m_secEnd != sec && numberOfDigits(sec) == 2) {
+    } else if (m_ui->lineEditEndSeconds->hasFocus() && sec > 9) {
         m_ui->lineEditEndMilliseconds->setFocus();
         m_ui->lineEditEndMilliseconds->selectAll();
     }
-
-    m_minEnd = min;
-    m_secEnd = sec;
 }

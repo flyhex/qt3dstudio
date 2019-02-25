@@ -62,8 +62,7 @@ public:
     CDurationEditDlg(QWidget *parent = nullptr);
     ~CDurationEditDlg() override;
 
-    void showDialog(long startTime, long endTime, IDoc *inDoc,
-                    ITimeChangeCallback *inCallback = nullptr);
+    void showDialog(long startTime, long endTime, ITimeChangeCallback *inCallback = nullptr);
 
 public Q_SLOTS:
     void accept() override;
@@ -74,21 +73,9 @@ private:
     void onEndTimeChanged();
 
     void formatTime(long inTime, bool startTime);
-    long numberOfDigits(long number);
-    long timeConversion(long inTime, long inOperationCode);
     void updateObjectTime(long inTime, bool startTime);
 
     Ui::DurationEditDlg *m_ui;
-    IDoc *m_Doc = nullptr;
     ITimeChangeCallback *m_Callback = nullptr;
-    long m_MaxTime = 0;
-    long m_MaxTimeDisplay = 0;
-    long m_MinTimeDisplay = 0;
-    long m_InitialTimeStart = 0;
-    long m_InitialTimeEnd = 0;
-    int m_minStart = -1;
-    int m_secStart = -1;
-    int m_minEnd = -1;
-    int m_secEnd = -1;
 };
 #endif // DURATION_EDIT_DIALOG_H

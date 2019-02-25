@@ -186,7 +186,7 @@ public:
 
     void asyncDisplayTimeEditDialog(long time, IDoc *doc, long objectAssociation,
                                     KeyframeManager *keyframesManager = nullptr) const;
-    void asyncDisplayDurationEditDialog(long startTime, long endTime, IDoc *doc,
+    void asyncDisplayDurationEditDialog(long startTime, long endTime,
                                         ITimeChangeCallback *callback) const;
 
     enum class WidgetBrowserAlign {
