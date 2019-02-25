@@ -53,62 +53,6 @@ QQuaternion calculateRotationQuaternion(const QVector3D &rotation,
     return rotZ * rotY * rotX;
 }
 
-// Copied from qquaternion.cpp
-// Replaced fuzzy zero checking with exact zero checking
-QVector3D getEulerAngles(const QQuaternion &quat)
-{
-    const float xp = quat.x();
-    const float yp = quat.y();
-    const float zp = quat.z();
-    const float wp = quat.scalar();
-
-    float pitch, yaw, roll;
-
-    // Algorithm from:
-    // http://www.j3d.org/matrix_faq/matrfaq_latest.html#Q37
-    float xx = xp * xp;
-    float xy = xp * yp;
-    float xz = xp * zp;
-    float xw = xp * wp;
-    float yy = yp * yp;
-    float yz = yp * zp;
-    float yw = yp * wp;
-    float zz = zp * zp;
-    float zw = zp * wp;
-    const float lengthSquared = xx + yy + zz + wp * wp;
-    if (lengthSquared - 1.0f != 0.0f && lengthSquared != 0.0f) {
-        xx /= lengthSquared;
-        xy /= lengthSquared; // same as (xp / length) * (yp / length)
-        xz /= lengthSquared;
-        xw /= lengthSquared;
-        yy /= lengthSquared;
-        yz /= lengthSquared;
-        yw /= lengthSquared;
-        zz /= lengthSquared;
-        zw /= lengthSquared;
-    }
-    pitch = std::asin(-2.0f * (yz - xw));
-    if (pitch < M_PI_2) {
-        if (pitch > -M_PI_2) {
-            yaw = std::atan2(2.0f * (xz + yw), 1.0f - 2.0f * (xx + yy));
-            roll = std::atan2(2.0f * (xy + zw), 1.0f - 2.0f * (xx + zz));
-        } else {
-            // not a unique solution
-            roll = 0.0f;
-            yaw = -std::atan2(-2.0f * (xy - zw), 1.0f - 2.0f * (yy + zz));
-        }
-    } else {
-        // not a unique solution
-        roll = 0.0f;
-        yaw = std::atan2(-2.0f * (xy - zw), 1.0f - 2.0f * (yy + zz));
-    }
-    pitch = qRadiansToDegrees(pitch);
-    yaw = qRadiansToDegrees(yaw);
-    roll = qRadiansToDegrees(roll);
-
-    return QVector3D(pitch, yaw, roll);
-}
-
 // Copied from q3dsscenemanager.cpp
 QMatrix4x4 generateRotationMatrix(const QVector3D &nodeRotation, Q3DSNode::RotationOrder order)
 {
@@ -223,45 +167,6 @@ void calculateGlobalProperties(const Q3DSNode *node, QVector3D &position,
     rotation = QVector3D(-transform.rotationX(), -transform.rotationY(), transform.rotationZ());
     scale = transform.scale3D();
 }
-
-QMatrix4x4 calculateGlobalTransform(const Q3DSNode *node)
-{
-    QMatrix4x4 matrix = composeTransformMatrix(node);
-    auto parent = static_cast<Q3DSNode *>(node->parent());
-    while (parent) {
-        if (!parent->isNode())
-            break;
-        QMatrix4x4 parentMatrix = composeTransformMatrix(parent);
-        matrix = parentMatrix * matrix;
-        parent = static_cast<Q3DSNode *>(parent->parent());
-    }
-
-    return matrix;
-}
-
-QVector3D calculateLocalPosition(const Q3DSNode *node, const QVector3D &position)
-{
-    QMatrix4x4 matrix = composeTransformMatrix(node);
-    QVector3D result = position;
-    result.setZ(-result.z());
-    matrix.translate(result);
-
-    auto parent = static_cast<Q3DSNode *>(node->parent());
-    while (parent) {
-        if (!parent->isNode())
-            break;
-        QMatrix4x4 parentMatrix = composeTransformMatrix(parent);
-        matrix = parentMatrix * matrix;
-        parent = static_cast<Q3DSNode *>(parent->parent());
-    }
-
-    Qt3DCore::QTransform transform;
-    transform.setMatrix(matrix);
-    result = transform.translation();
-    result.setZ(-result.z());
-    return result;
-}
-
 
 Q3DSModelNode *createWidgetModel(Q3DSUipPresentation *presentation, Q3DSGraphObject *parent,
                                  const QString &name, const QString &mesh,
