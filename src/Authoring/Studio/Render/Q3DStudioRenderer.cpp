@@ -77,8 +77,8 @@ static SEditCameraDefinition g_editCameraDefinitions[] = {
     { EditCameraTypes::Orthographic, QVector3D(1, -1, -1), QObject::tr("Orthographic View") },
     { EditCameraTypes::Directional, QVector3D(0, -1, 0), QObject::tr("Top View") },
     { EditCameraTypes::Directional, QVector3D(0, 1, 0), QObject::tr("Bottom View") },
-    { EditCameraTypes::Directional, QVector3D(1, 0, 0), QObject::tr("Left View") },
-    { EditCameraTypes::Directional, QVector3D(-1, 0, 0), QObject::tr("Right View") },
+    { EditCameraTypes::Directional, QVector3D(-1, 0, 0), QObject::tr("Left View") },
+    { EditCameraTypes::Directional, QVector3D(1, 0, 0), QObject::tr("Right View") },
     { EditCameraTypes::Directional, QVector3D(0, 0, 1), QObject::tr("Front View") },
     { EditCameraTypes::Directional, QVector3D(0, 0, -1), QObject::tr("Back View") },
 };
@@ -326,7 +326,12 @@ QT3DSI32 Q3DStudioRenderer::GetEditCamera() const
 
 void Q3DStudioRenderer::EditCameraZoomToFit()
 {
+    if (!m_translation || !editCameraEnabled())
+        return;
 
+    m_translation->editCameraZoomToFit();
+
+    RequestRender();
 }
 
 bool Q3DStudioRenderer::isMouseDown() const
@@ -478,7 +483,7 @@ void Q3DStudioRenderer::checkGuideInPresentationRect(qt3dsdm::Qt3DSDMGuideHandle
 
 void Q3DStudioRenderer::drawRulersAndGuides(QPainter *painter)
 {
-    if (!m_guidesEnabled || editCameraEnabled())
+    if (!m_guidesEnabled || editCameraEnabled() || g_StudioApp.IsAuthorZoom())
         return;
 
     const int pixelRatio = int(m_parentPixelRatio);

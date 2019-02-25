@@ -55,6 +55,7 @@
 #include "Q3DSManipulationWidget.h"
 #include "Q3DSVisualAidWidget.h"
 #include "StudioEnums.h"
+#include "Q3DSWidgetUtils.h"
 
 namespace Q3DStudio
 {
@@ -311,6 +312,7 @@ public:
                 CUpdateableDocumentEditor &inEditor, bool inLockToAxis);
     void rotateAlongWidget(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
                            CUpdateableDocumentEditor &inEditor);
+    void editCameraZoomToFit();
 };
 
 }

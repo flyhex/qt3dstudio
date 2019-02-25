@@ -33,6 +33,23 @@
 
 namespace Q3DStudio {
 
+struct BoundingBox
+{
+    QVector3D min = QVector3D(std::numeric_limits<float>::max(),
+                              std::numeric_limits<float>::max(),
+                              std::numeric_limits<float>::max());
+    QVector3D max = QVector3D(-std::numeric_limits<float>::max(),
+                              -std::numeric_limits<float>::max(),
+                              -std::numeric_limits<float>::max());
+    bool isEmpty() { return min == max; }
+    void setEmpty() {
+        min = QVector3D(0, 0, 0);
+        max = QVector3D(0, 0, 0);
+    }
+    QVector3D center() { return min + (max - min) / 2.f; }
+    QVector3D extents() { return max - min; }
+};
+
 void adjustRotationLeftToRight(QMatrix4x4 *m);
 QQuaternion calculateRotationQuaternion(const QVector3D &rotation,
                                         Q3DSNode::Orientation orientation);
@@ -65,6 +82,11 @@ Q3DSDefaultMaterial *createWidgetDefaultMaterial(Q3DSUipPresentation *presentati
                                                  const QString &name,
                                                  const QColor &color = Qt::white,
                                                  float opacity = 1.0f);
+BoundingBox calculateLocalBoundingBox(Q3DSModelNode *model);
+BoundingBox calculateBoundingBox(Q3DSGraphObject *graphObject);
+void rotateBoundingBox(BoundingBox &box, const QQuaternion &rotation);
+void calculateBoundingBoxOffsetAndSize(const Q3DSNode *node, const BoundingBox &boundingBox,
+                                       QVector3D &outOffset, QVector3D &outSize);
 }
 
 #endif // Q3DSWIDGETUTILS_H

@@ -69,10 +69,11 @@ T even(const T val)
 Q3DSPlayerWnd::Q3DSPlayerWnd(QWidget *parent)
     : QScrollArea(parent)
     , m_mouseDown(false)
-    , m_glWidget(new Q3DSPlayerWidget())
+    , m_clientWidget(new QWidget())
+    , m_glWidget(new Q3DSPlayerWidget(m_clientWidget))
     , m_ViewMode(VIEW_SCENE)
 {
-    setWidget(m_glWidget);
+    setWidget(m_clientWidget);
 
     setAcceptDrops(true);
     RegisterForDnd(this);
@@ -128,8 +129,8 @@ void Q3DSPlayerWnd::mouseMoveEvent(QMouseEvent *event)
             theModifierKeys = CHotKeys::MOUSE_MBUTTON | CHotKeys::GetCurrentKeyModifiers();
         }
         g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDrag(
-                    SceneDragSenderType::Matte, event->pos(), g_StudioApp.GetToolMode(),
-                    theModifierKeys);
+                    SceneDragSenderType::Matte, mousePosToScenePos(event->pos()),
+                    g_StudioApp.GetToolMode(), theModifierKeys);
     }
 }
 
@@ -173,8 +174,8 @@ void Q3DSPlayerWnd::mousePressEvent(QMouseEvent *event)
             m_mouseDown = true;
             g_StudioApp.SetToolMode(toolMode);
             Q_EMIT Q3DSPlayerWnd::toolChanged();
-            g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDown(SceneDragSenderType::Matte,
-                                                                     event->pos(), toolMode);
+            g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDown(
+                        SceneDragSenderType::Matte, mousePosToScenePos(event->pos()), toolMode);
         }
     } else {
         if (btn == Qt::LeftButton || btn == Qt::RightButton) {
@@ -188,7 +189,8 @@ void Q3DSPlayerWnd::mousePressEvent(QMouseEvent *event)
 
             toolMode = g_StudioApp.GetToolMode();
             g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDown(
-                        SceneDragSenderType::SceneWindow, event->pos(), toolMode);
+                        SceneDragSenderType::SceneWindow, mousePosToScenePos(event->pos()),
+                        toolMode);
             m_mouseDown = true;
         }
     }
@@ -239,7 +241,7 @@ void Q3DSPlayerWnd::mouseDoubleClickEvent(QMouseEvent *event)
     }
 
     g_StudioApp.GetCore()->GetDispatch()->FireSceneMouseDblClick(
-                SceneDragSenderType::SceneWindow, event->pos());
+                SceneDragSenderType::SceneWindow, mousePosToScenePos(event->pos()));
 }
 
 bool Q3DSPlayerWnd::OnDragWithin(CDropSource &inSource)
@@ -368,24 +370,9 @@ void Q3DSPlayerWnd::onDragEnter()
     m_objectRequestData.clear();
 }
 
-//==============================================================================
-/**
- * SetPlayerWndPosition: Sets the position of the child player window
- *
- * Called when the view is scrolled to position the child player window
- *
- */
-//==============================================================================
-void Q3DSPlayerWnd::setWindowPosition()
-{
-    recenterClient();
-}
-
-//==============================================================================
 /**
  *  SetScrollRanges: Sets the scroll ranges when the view is being resized
  */
-//==============================================================================
 void Q3DSPlayerWnd::setScrollRanges()
 {
     long theScrollWidth = 0;
@@ -411,44 +398,40 @@ void Q3DSPlayerWnd::setScrollRanges()
         verticalScrollBar()->setVisible(true);
     }
 
-    // Setting scroll ranges will do some async geometry adjustments, so do the
-    // recentering asynchronously as well
-    QTimer::singleShot(0, [this]() {
-        recenterClient();
-    });
+    recenterClient();
 }
 
-
-//==============================================================================
 /**
  *  RecenterClient: Recenters the Client rect in the View's client area.
  */
-//==============================================================================
 void Q3DSPlayerWnd::recenterClient()
 {
     QRect theViewRect = rect();
     QSize theClientSize;
-    QSize viewSize;
+    const QSize viewSize = theViewRect.size();
     m_ClientRect = theViewRect;
-    viewSize = theViewRect.size();
     int rulerOffset = 0;
 
-    if (!shouldHideScrollBars()) {
+    if (m_ViewMode != VIEW_EDIT) {
         theClientSize = effectivePresentationSize();
-        if (g_StudioApp.getRenderer().AreGuidesEnabled())
+        if (shouldDrawGuides())
             rulerOffset = CStudioPreferences::rulerSize() / 2;
 
-        if (theClientSize.width() < theViewRect.width()) {
+        if (g_StudioApp.IsAuthorZoom() && (theClientSize.height() > viewSize.height()
+                || theClientSize.width() > viewSize.width())) {
+            theClientSize.scale(viewSize, Qt::KeepAspectRatio);
+        }
+        if (theClientSize.width() < viewSize.width()) {
             m_ClientRect.setLeft(
-                    even((theViewRect.width() / 2) - (theClientSize.width() / 2)));
+                    even((viewSize.width() / 2) - (theClientSize.width() / 2)));
         } else {
             m_ClientRect.setLeft(-horizontalScrollBar()->value());
         }
         m_ClientRect.setWidth(theClientSize.width());
 
-        if (theClientSize.height() < theViewRect.height()) {
+        if (theClientSize.height() < viewSize.height()) {
             m_ClientRect.setTop(
-                    even((theViewRect.height() / 2) - (theClientSize.height() / 2)));
+                    even((viewSize.height() / 2) - (theClientSize.height() / 2)));
         } else {
             m_ClientRect.setTop(-verticalScrollBar()->value());
         }
@@ -467,6 +450,7 @@ void Q3DSPlayerWnd::recenterClient()
     // Need explicit invalidate as changing editor to different ratio screen doesn't trigger
     // resizeGL call.
     m_glWidget->maybeInvalidateFbo(glRect.size());
+    m_clientWidget->resize(m_ClientRect.size() + QSize(m_ClientRect.x(), m_ClientRect.y()));
     m_glWidget->setGeometry(m_ClientRect);
 }
 
@@ -478,7 +462,8 @@ void Q3DSPlayerWnd::recenterClient()
 //==============================================================================
 void Q3DSPlayerWnd::onRulerGuideToggled()
 {
-    int scrollAmount = g_StudioApp.getRenderer().AreGuidesEnabled() ? 16 : -16;
+    int scrollAmount = (shouldDrawGuides() ? CStudioPreferences::rulerSize()
+                                           : -CStudioPreferences::rulerSize()) / 2;
     bool hasHorz = horizontalScrollBar()->isVisible();
     bool hasVert = verticalScrollBar()->isVisible();
     int hscrollPos = 0, vscrollPos = 0;
@@ -522,7 +507,7 @@ QSize Q3DSPlayerWnd::effectivePresentationSize() const
     // presentation
     // This is a very dirty hack because we are of course hardcoding the size of the guides.
     // If the size of the guides never changes, the bet paid off.
-    if (g_StudioApp.getRenderer().AreGuidesEnabled())
+    if (shouldDrawGuides())
         theSize += QSize(CStudioPreferences::rulerSize(), CStudioPreferences::rulerSize());
     return theSize;
 }
@@ -543,12 +528,25 @@ void Q3DSPlayerWnd::wheelEvent(QWheelEvent* event)
 
 void Q3DSPlayerWnd::scrollContentsBy(int, int)
 {
-    setWindowPosition();
+    recenterClient();
 }
 
-bool Q3DSPlayerWnd::shouldHideScrollBars()
+bool Q3DSPlayerWnd::shouldHideScrollBars() const
 {
     return m_ViewMode == VIEW_EDIT || g_StudioApp.IsAuthorZoom();
+}
+
+bool Q3DSPlayerWnd::shouldDrawGuides() const
+{
+    return m_ViewMode != VIEW_EDIT && g_StudioApp.getRenderer().AreGuidesEnabled()
+            && !g_StudioApp.IsAuthorZoom();
+}
+
+QPoint Q3DSPlayerWnd::mousePosToScenePos(const QPoint &mousePos) const
+{
+    QPoint scenePos = mousePos
+            + QPoint(horizontalScrollBar()->value(), verticalScrollBar()->value());
+    return scenePos;
 }
 
 }

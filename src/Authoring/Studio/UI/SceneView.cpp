@@ -225,60 +225,27 @@ void CSceneView::setViewCursor()
     }
 }
 
-//==============================================================================
-/**
- *	RecalcMatte: Recalculates the matte around the Client based on the settings.
- *
- *	This will recalculate the matting around the Client based on the Client's
- *	current size. If the Client is a "Fit To Window" mode, then the matte region
- *	is cleared.
- */
-//==============================================================================
-void CSceneView::recalcMatte()
-{
-    long theXOffset = 0;
-    long theYOffset = 0;
-    QRect theClientRect = rect();
-
-    // Adjust the client area based if rulers are visible
-    if (m_playerWnd) {
-        m_playerWnd->setGeometry(theXOffset, theYOffset,
-                                          theClientRect.width() - theXOffset,
-                                          theClientRect.height() - theYOffset);
-
-        // Recenter the Client rect
-        m_playerWnd->recenterClient();
-    }
-}
-
 void CSceneView::resizeEvent(QResizeEvent* event)
 {
     QWidget::resizeEvent(event);
     if (m_playerWnd) {
-        recalcMatte();
         setPlayerWndPosition();
         g_StudioApp.GetCore()->GetDoc( )->GetSceneGraph()->RequestRender();
     }
 }
 
-//==============================================================================
 /**
- *	SetPlayerWndPosition: Sets the position of the child player window
- *
- *  Called when the view is scrolled to position the child player window
- *
+ *  Sets the position of the child player window
  */
-//==============================================================================
 void CSceneView::setPlayerWndPosition()
 {
     // Move the child player window to coincide with the scrollbars
     if (m_playerWnd) {
-        m_playerWnd->setWindowPosition();
+        m_playerWnd->setGeometry(0, 0, width(), height());
         m_playerWnd->update();
     }
 }
 
-//==============================================================================
 /**
  *	Resets its scroll ranges and recenters client in the window. This is called when
  *  an outside source needs to tell the scene view that size ranges have changed such
@@ -337,7 +304,6 @@ void CSceneView::onEditCameraChanged()
     // Reset any scrolling and recalculate the window position.
     if (m_playerWnd) {
         m_playerWnd->setScrollRanges();
-        recalcMatte();
         setPlayerWndPosition();
     }
 

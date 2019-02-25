@@ -96,7 +96,6 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
 
 private:
-    void recalcMatte();
     void onDropReceived();
 };
 

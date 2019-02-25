@@ -27,9 +27,14 @@
 ****************************************************************************/
 
 #include "q3dsruntime2api_p.h"
+#include "Q3DSWidgetUtils.h"
+
 #include "qmath.h"
 #include "Qt3DCore/qtransform.h"
 #include <Qt3DRender/qcamera.h>
+#include <Qt3DRender/qattribute.h>
+#include <Qt3DRender/qbuffer.h>
+#include <Qt3DCore/qtransform.h>
 
 namespace Q3DStudio {
 
@@ -397,6 +402,169 @@ Q3DSDefaultMaterial *createWidgetDefaultMaterial(Q3DSUipPresentation *presentati
     list.append(defMat->setShaderLighting(Q3DSDefaultMaterial::ShaderLighting::NoShaderLighting));
     defMat->notifyPropertyChanges(list);
     return defMat;
+}
+
+void rotateBoundingBox(Q3DStudio::BoundingBox &box, const QQuaternion &rotation)
+{
+    QVector3D points[8];
+    points[0] = QVector3D(box.min.x(), box.min.y(), box.min.z());
+    points[1] = QVector3D(box.max.x(), box.min.y(), box.min.z());
+    points[2] = QVector3D(box.max.x(), box.max.y(), box.min.z());
+    points[3] = QVector3D(box.min.x(), box.max.y(), box.min.z());
+    points[4] = QVector3D(box.max.x(), box.max.y(), box.max.z());
+    points[5] = QVector3D(box.min.x(), box.max.y(), box.max.z());
+    points[6] = QVector3D(box.min.x(), box.min.y(), box.max.z());
+    points[7] = QVector3D(box.max.x(), box.min.y(), box.max.z());
+    box.min = QVector3D(std::numeric_limits<float>::max(),
+                            std::numeric_limits<float>::max(),
+                            std::numeric_limits<float>::max());
+    box.max = QVector3D(-std::numeric_limits<float>::max(),
+                            -std::numeric_limits<float>::max(),
+                            -std::numeric_limits<float>::max());
+    for (auto &point : points) {
+        point = rotation * point;
+
+        if (point.x() < box.min.x())
+            box.min.setX(point.x());
+        if (point.y() < box.min.y())
+            box.min.setY(point.y());
+        if (point.z() < box.min.z())
+            box.min.setZ(point.z());
+
+        if (point.x() > box.max.x())
+            box.max.setX(point.x());
+        if (point.y() > box.max.y())
+            box.max.setY(point.y());
+        if (point.z() > box.max.z())
+            box.max.setZ(point.z());
+    }}
+
+BoundingBox calculateLocalBoundingBox(Q3DSModelNode *model)
+{
+    static QHash<QString, BoundingBox> boundingBoxCache;
+
+    // TODO: Pre-calculate bounding boxes to prevent lag upon first selection
+    const QString srcPath = model->sourcePath();
+    if (boundingBoxCache.contains(srcPath))
+        return boundingBoxCache[srcPath];
+
+    BoundingBox box;
+
+    const MeshList meshList = model->mesh();
+    if (meshList.empty()) {
+        box.setEmpty();
+        return box;
+    }
+
+    const auto boundingAttribute = meshList[0]->geometry()->boundingVolumePositionAttribute();
+    const auto data = boundingAttribute->buffer()->data();
+    const uint stride = boundingAttribute->byteStride();
+    const uint offset = boundingAttribute->byteOffset();
+    const uint size = boundingAttribute->vertexSize();
+    const Qt3DRender::QAttribute::VertexBaseType type = boundingAttribute->vertexBaseType();
+
+    if (type != Qt3DRender::QAttribute::VertexBaseType::Float || size != 3) {
+        // Other types and sizes are not handled at the moment
+        Q_ASSERT(false);
+        box.setEmpty();
+        return box;
+    }
+
+    for (uint i = 0; i < data.size(); i += stride) {
+        uint index = i + offset;
+        const float x = *reinterpret_cast<float *>(data.mid(index, 4).data());
+        const float y = *reinterpret_cast<float *>(data.mid(index + 4, 4).data());
+        const float z = -*reinterpret_cast<float *>(data.mid(index + 8, 4).data());
+        if (box.min.x() > x)
+            box.min.setX(x);
+        if (box.min.y() > y)
+            box.min.setY(y);
+        if (box.min.z() > z)
+            box.min.setZ(z);
+
+        if (box.max.x() < x)
+            box.max.setX(x);
+        if (box.max.y() < y)
+            box.max.setY(y);
+        if (box.max.z() < z)
+            box.max.setZ(z);
+    }
+
+    boundingBoxCache[srcPath] = box;
+    return box;
+}
+
+BoundingBox calculateBoundingBox(Q3DSGraphObject *graphObject)
+{
+    BoundingBox boundingBox;
+    if (graphObject->type() == Q3DSNode::Type::Model) {
+        boundingBox = calculateLocalBoundingBox(static_cast<Q3DSModelNode *>(graphObject));
+    } else if (graphObject->type() == Q3DSGraphObject::Type::Camera
+               || graphObject->type() == Q3DSGraphObject::Type::Light) {
+        float dim = 50.f;
+        boundingBox.min = QVector3D(-dim, -dim, -dim);
+        boundingBox.max = QVector3D(dim, dim, dim);
+    } else if (graphObject->childCount() == 0
+               || (graphObject->type() < Q3DSGraphObject::FirstNodeType)) {
+        boundingBox.setEmpty();
+        return boundingBox;
+    }
+
+    for (Q3DSGraphObject *child = graphObject->firstChild(); child != nullptr;
+         child = child->nextSibling()) {
+        if (!child->isNode() || child->type() == Q3DSGraphObject::Type::Camera
+                || child->type() == Q3DSGraphObject::Type::Light
+                || child->name().isEmpty()) {
+            continue;
+        }
+
+        Q3DSNode *childNode = static_cast<Q3DSNode *>(child);
+        BoundingBox childBB = calculateBoundingBox(child);
+        if (!childBB.isEmpty()) {
+            const QVector3D scale = childNode->scale();
+            childBB.min *= scale;
+            childBB.max *= scale;
+
+            rotateBoundingBox(childBB, calculateRotationQuaternion(childNode->rotation(),
+                                                                   childNode->orientation()));
+
+            const QVector3D position = childNode->position();
+            childBB.min += position;
+            childBB.max += position;
+
+            if (childBB.min.x() < boundingBox.min.x())
+                boundingBox.min.setX(childBB.min.x());
+            if (childBB.min.y() < boundingBox.min.y())
+                boundingBox.min.setY(childBB.min.y());
+            if (childBB.min.z() < boundingBox.min.z())
+                boundingBox.min.setZ(childBB.min.z());
+
+            if (childBB.max.x() > boundingBox.max.x())
+                boundingBox.max.setX(childBB.max.x());
+            if (childBB.max.y() > boundingBox.max.y())
+                boundingBox.max.setY(childBB.max.y());
+            if (childBB.max.z() > boundingBox.max.z())
+                boundingBox.max.setZ(childBB.max.z());
+        }
+    }
+
+    return boundingBox;
+}
+
+void calculateBoundingBoxOffsetAndSize(const Q3DSNode *node, const BoundingBox &boundingBox,
+                                       QVector3D &outOffset, QVector3D &outSize)
+{
+    outSize = QVector3D(qAbs(boundingBox.max.x() - boundingBox.min.x()),
+                        qAbs(boundingBox.max.y() - boundingBox.min.y()),
+                        qAbs(boundingBox.max.z() - boundingBox.min.z())) * 0.5f;
+
+    if (node->type() != Q3DSGraphObject::Layer) {
+        QMatrix4x4 rotMat = generateRotationMatrix(node->rotation(),
+                                                   node->rotationOrder());
+        if (node->orientation() == Q3DSNode::RightHanded)
+            adjustRotationLeftToRight(&rotMat);
+        outOffset = rotMat * ((boundingBox.min + outSize) * node->scale());
+    }
 }
 
 }

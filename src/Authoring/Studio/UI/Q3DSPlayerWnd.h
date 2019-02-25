@@ -75,7 +75,6 @@ public:
     void OnReflectMouse(CPt &, Qt::KeyboardModifiers) override {}
 
     void setToolMode(long toolMode);
-    void setWindowPosition();
 
     void setScrollRanges();
     void recenterClient();
@@ -108,7 +107,9 @@ protected:
     void wheelEvent(QWheelEvent *) override;
     void scrollContentsBy(int, int) override;
 
-    bool shouldHideScrollBars();
+    bool shouldHideScrollBars() const;
+    bool shouldDrawGuides() const;
+    QPoint mousePosToScenePos(const QPoint &mousePos) const;
 
     class ObjectRequestData {
     public:
@@ -123,6 +124,7 @@ protected:
         }
     };
 
+    QWidget *m_clientWidget = nullptr;
     Q3DSPlayerWidget *m_glWidget = nullptr;
     bool m_mouseDown;
     bool m_resumePlayOnMouseRelease = false;

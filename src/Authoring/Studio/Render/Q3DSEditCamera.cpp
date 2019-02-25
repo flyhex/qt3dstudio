@@ -30,7 +30,7 @@
 
 namespace Q3DStudio {
 
-static const qreal g_defaultRadius = qSin(qDegreesToRadians(g_editCameraFOV) / 2.) * 600.;
+static const qreal defaultEditCameraRadius = qSin(qDegreesToRadians(g_editCameraFOV) / 2.) * 600.;
 
 QMatrix4x4 SEditCameraPersistentInformation::rotationMatrix() const
 {
@@ -74,11 +74,18 @@ void SEditCameraPersistentInformation::applyToCamera(Q3DSCameraNode &camera,
     if (m_cameraType == EditCameraTypes::Perspective) {
         changeList.append(camera.setFov(g_editCameraFOV));
         changeList.append(camera.setOrthographic(false));
+        changeList.append(camera.setZoom(1.f));
         // Handle perspective zooming by adjusting the camera position, as scaling projection
         // matrix after the fact doesn't work correctly for our purposes
-        posAdjust *= zoomFactor(viewport);
+        qreal factor = zoomFactor(viewport);
+        if (factor > 1)
+            posAdjust *= float(factor);
+        else
+            posAdjust *= -1.f + (2.f * factor);
     } else {
         changeList.append(camera.setOrthographic(true));
+        // Orthogonal views can't zoom by adjusting position
+        changeList.append(camera.setZoom(zoomFactor(viewport)));
     }
 
     QVector3D pos = m_position - posAdjust;
@@ -94,10 +101,6 @@ void SEditCameraPersistentInformation::applyToCamera(Q3DSCameraNode &camera,
     }
 
     changeList.append(camera.setPosition(pos));
-    if (m_cameraType != EditCameraTypes::Perspective) {
-        // Orthogonal views can't zoom by adjusting position
-        changeList.append(camera.setZoom(zoomFactor(viewport)));
-    }
     changeList.append(camera.setRotation(QVector3D(ry, rx, 0)));
 
     if (!changeList.isEmpty())
@@ -111,7 +114,7 @@ qreal SEditCameraPersistentInformation::zoomFactor(const QSizeF &viewport) const
         qreal theViewport = qMin(viewport.width(), viewport.height());
         zoom = 2. * m_viewRadius / theViewport;
     } else {
-        zoom = m_viewRadius / g_defaultRadius;
+        zoom = m_viewRadius / defaultEditCameraRadius;
     }
     return zoom;
 }

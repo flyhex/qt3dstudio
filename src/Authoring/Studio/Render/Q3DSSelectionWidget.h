@@ -30,6 +30,7 @@
 #define Q3DSSELECTIONWIDGET_H
 
 #include "q3dsruntime2api_p.h"
+#include "Q3DSWidgetUtils.h"
 
 namespace Q3DStudio {
 
@@ -43,16 +44,6 @@ public:
 private:
     Q3DSUipPresentation *m_presentation = nullptr;
 
-    struct BoundingBox
-    {
-        QVector3D min = QVector3D(std::numeric_limits<float>::max(),
-                                  std::numeric_limits<float>::max(),
-                                  std::numeric_limits<float>::max());
-        QVector3D max = QVector3D(-std::numeric_limits<float>::max(),
-                                  -std::numeric_limits<float>::max(),
-                                  -std::numeric_limits<float>::max());
-    };
-
     struct Selection
     {
         Q3DSNode *node = nullptr;
@@ -61,12 +52,8 @@ private:
         bool visible = false;
     };
 
-    QHash<QString, BoundingBox> m_boundingBoxCache;
     QHash<Q3DSNode *, Selection> m_selections;
 
-    BoundingBox calculateLocalBoundingBox(Q3DSModelNode *model);
-    BoundingBox calculateBoundingBox(Q3DSGraphObject *graphObject);
-    void rotateBoundingBox(BoundingBox &box, const QQuaternion &rotation);
     void selectRecursive(Q3DSUipPresentation *presentation, Q3DSNode *node, int &index, int depth);
 };
 

@@ -33,7 +33,6 @@
 #include "Q3DSEditCamera.h"
 #include "Q3DSInputStreamFactory.h"
 #include "Q3DSTranslators.h"
-#include "Q3DSWidgetUtils.h"
 
 #include "StudioApp.h"
 #include "Core.h"
@@ -2165,6 +2164,69 @@ void Q3DSTranslation::rotateAlongWidget(const QPoint &inOriginalCoords,
                                   objectDefinitions().m_Node.m_Rotation,
                                   qt3dsdm::SValue(QVariant::fromValue(m_currentDragState.r)));
     inEditor.FireImmediateRefresh(m_doc.GetSelectedInstance());
+}
+
+void Q3DSTranslation::editCameraZoomToFit()
+{
+    qt3dsdm::Qt3DSDMInstanceHandle instance = m_doc.GetSelectedInstance();
+
+    // If we aren't pointed at a node then bounce up the asset graph until we are
+    auto translator = getOrCreateTranslator(instance);
+    while (instance.Valid() && translator && !translator->graphObject().isNode()) {
+        instance = m_assetGraph.GetParent(instance);
+        translator = getOrCreateTranslator(instance);
+    }
+    // If we still aren't pointed at a node then use the active layer
+    if (!instance.Valid() || !translator || !translator->graphObject().isNode()) {
+        instance = m_doc.GetActiveLayer();
+        translator = getOrCreateTranslator(instance);
+    }
+    // If we *still* aren't pointed at a node then bail
+    if (!translator || !translator->graphObject().isNode())
+        return;
+
+    Q3DSNode &node = static_cast<Q3DSNode &>(translator->graphObject());
+    Q3DSNode *parent = static_cast<Q3DSNode *>(node.parent());
+    Q3DSNodeAttached *parentAttached = parent->attached<Q3DSNodeAttached>();
+
+    QVector3D nodePos;
+    QVector3D nodeScale;
+    if (node.type() != Q3DSGraphObject::Layer) {
+        nodePos = node.position();
+        nodeScale = node.scale();
+    } else {
+        // Layers do not have meaningful transforms
+        nodeScale = QVector3D(1.f, 1.f, 1.f);
+    }
+
+    BoundingBox box = calculateBoundingBox(&node);
+    QVector3D bbOffset;
+    QVector3D bbSize;
+    calculateBoundingBoxOffsetAndSize(&node, box, bbOffset, bbSize);
+    float bbExtent = (bbSize * nodeScale).length();
+    if (bbExtent <= 0) {
+        // Fake extent, about suitable for default box
+        bbExtent = 150.f;
+    }
+
+    // This provides good fit with our zoom handling
+    if (m_editCameraInfo.m_cameraType != EditCameraTypes::Perspective) {
+        float viewportDim = float(qMax(m_size.width(), m_size.height())
+                                  / qMin(m_size.width(), m_size.height()));
+        m_editCameraInfo.m_viewRadius = bbExtent * 2.f / viewportDim;
+    } else {
+        m_editCameraInfo.m_viewRadius = bbExtent / 2.f;
+        if (m_editCameraInfo.m_viewRadius > 200.f)
+            m_editCameraInfo.m_viewRadius = 200.f + 2.0f * (m_editCameraInfo.m_viewRadius - 200.f);
+    }
+
+    QVector3D center = nodePos + bbOffset;
+    flipZTranslation(center);
+    center = parentAttached->globalTransform * center;
+    flipZTranslation(center);
+
+    // Center the edit camera so that it points directly at the bounds center point
+    m_editCameraInfo.m_position = center - m_editCameraInfo.front() * 600.f;
 }
 
 }
