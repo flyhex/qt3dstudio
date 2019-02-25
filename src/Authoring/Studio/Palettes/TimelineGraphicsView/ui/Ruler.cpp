@@ -32,7 +32,6 @@
 
 #include <QtGui/qpainter.h>
 #include <QtWidgets/qwidget.h>
-#include <QtCore/qdebug.h>
 
 Ruler::Ruler(TimelineItem *parent) : TimelineItem(parent)
 {
@@ -132,18 +131,6 @@ long Ruler::distanceToTime(double distance) const
 double Ruler::timeToDistance(long time) const
 {
     return time * TimelineConstants::RULER_MILLI_W * m_timeScale;
-}
-
-// x position of ruler value 0
-double Ruler::durationStartX() const
-{
-    return x() + TimelineConstants::RULER_EDGE_OFFSET;
-}
-
-// x position of ruler max value (duration)
-double Ruler::durationEndX() const
-{
-    return durationStartX() + timeToDistance(m_duration);
 }
 
 double Ruler::timelineScale() const

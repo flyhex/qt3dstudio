@@ -142,7 +142,7 @@ private:
     QPointF m_pressPos;
     QPointF m_pressScreenPos;
     QList<double> m_snapSteps;
-    CMouseCursor::Qt3DSMouseCursor m_currentCursor;
+    CMouseCursor::Qt3DSMouseCursor m_currentCursor = -1;
     TimelineControl *m_timelineControl = nullptr;
     DataInputSelectView *m_dataInputSelector = nullptr; // triggered by context menu but owned by
                                                         // rowtree

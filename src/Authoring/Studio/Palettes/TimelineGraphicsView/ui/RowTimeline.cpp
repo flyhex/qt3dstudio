@@ -125,6 +125,8 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
         painter->fillRect(0, 0, size().width(), currentHeight, bgColor);
     }
 
+    const double edgeOffset = TimelineConstants::RULER_EDGE_OFFSET;
+
     // Duration. Draw duration bar (for scene/component root) also if it has
     // datainput controller
     if (m_rowTree->hasDurationBar() || m_controllerDataInput.size()) {
@@ -135,17 +137,17 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
             painter->setBrush(QBrush(CStudioPreferences::timelineRowColorDurationOff1(),
                                      Qt::BDiagPattern));
             painter->setPen(Qt::NoPen);
-            painter->fillRect(QRect(m_startX, 0, m_endX - m_startX, currentHeight),
+            painter->fillRect(QRect(edgeOffset + m_startX, 0, m_endX - m_startX, currentHeight),
                               CStudioPreferences::timelineRowColorDurationOff2());
-            painter->drawRect(QRect(m_startX, 0, m_endX - m_startX, currentHeight));
+            painter->drawRect(QRect(edgeOffset + m_startX, 0, m_endX - m_startX, currentHeight));
 
             painter->setPen(QPen(CStudioPreferences::timelineRowColorDurationEdge(), 2));
-            painter->drawLine(m_startX, 0, m_startX, currentHeight);
-            painter->drawLine(m_endX, 0, m_endX, currentHeight);
+            painter->drawLine(edgeOffset + m_startX, 0, edgeOffset + m_startX, currentHeight);
+            painter->drawLine(edgeOffset + m_endX, 0, edgeOffset + m_endX, currentHeight);
         } else {
             // draw main duration part
-            double x = qMax(m_startX, m_minStartX);
-            double w = qMin(m_endX, m_maxEndX) - x;
+            double x = edgeOffset + qMax(m_startX, m_minStartX);
+            double w = edgeOffset + qMin(m_endX, m_maxEndX) - x;
             static const int marginY = 3;
 
             painter->setPen(Qt::NoPen);
@@ -192,37 +194,40 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                                      Qt::BDiagPattern));
             if (m_startX < m_minStartX) {
                 painter->setPen(Qt::NoPen);
-                painter->fillRect(QRect(m_startX, 0, m_minStartX - m_startX, currentHeight),
+                painter->fillRect(QRect(edgeOffset + m_startX, 0, m_minStartX - m_startX,
+                                        currentHeight),
                                   CStudioPreferences::timelineRowColorDurationOff2());
-                painter->drawRect(QRect(m_startX, 0, m_minStartX - m_startX, currentHeight));
+                painter->drawRect(QRect(edgeOffset + m_startX, 0, m_minStartX - m_startX,
+                                        currentHeight));
                 painter->setPen(CStudioPreferences::timelineRowColorDurationEdge());
-                painter->drawLine(m_minStartX, 0, m_minStartX, currentHeight);
+                painter->drawLine(edgeOffset + m_minStartX, 0, edgeOffset + m_minStartX,
+                                  currentHeight);
             }
 
             // draw hashed part after
             if (m_endX > m_maxEndX) {
                 painter->setPen(Qt::NoPen);
-                painter->fillRect(QRect(m_maxEndX, 0, m_endX - m_maxEndX, currentHeight),
+                painter->fillRect(QRect(edgeOffset + m_maxEndX, 0, m_endX - m_maxEndX,
+                                        currentHeight),
                                   CStudioPreferences::timelineRowColorDurationOff2());
-                painter->drawRect(QRect(m_maxEndX, 0, m_endX - m_maxEndX, currentHeight));
+                painter->drawRect(QRect(edgeOffset + m_maxEndX, 0, m_endX - m_maxEndX,
+                                        currentHeight));
                 painter->setPen(CStudioPreferences::timelineRowColorDurationEdge());
-                painter->drawLine(m_maxEndX, 0, m_maxEndX, currentHeight);
+                painter->drawLine(edgeOffset + m_maxEndX, 0, edgeOffset + m_maxEndX, currentHeight);
             }
 
             if (m_rowTree->indexInLayout() != 1) {
                 painter->setPen(QPen(CStudioPreferences::timelineRowColorDurationEdge(), 2));
-                painter->drawLine(m_startX, 0, m_startX, currentHeight);
-                painter->drawLine(m_endX, 0, m_endX, currentHeight);
+                painter->drawLine(edgeOffset + m_startX, 0, edgeOffset + m_startX, currentHeight);
+                painter->drawLine(edgeOffset + m_endX, 0, edgeOffset + m_endX, currentHeight);
             }
         }
 
         painter->restore();
     }
 
-    if (m_propertyGraph) {
-        // Property graph
-        QRectF graphRect(TimelineConstants::RULER_EDGE_OFFSET, 0,
-                         widget->width(), currentHeight);
+    if (m_propertyGraph) { // Property graph
+        QRectF graphRect(edgeOffset, 0, widget->width(), currentHeight);
         m_propertyGraph->paintGraphs(painter, graphRect);
     }
 
@@ -244,14 +249,15 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
         const qreal oldOpacity = painter->opacity();
         painter->setOpacity(0.75);
         for (const auto time : qAsConst(childKeyframeTimes)) {
-            const qreal xCoord = timeToX(time) - 2.5;
-            painter->drawPixmap(QPointF(xCoord, hiddenKeyFrameY), hiResIcons
-                                ? pixKeyframeHidden2x : pixKeyframeHidden);
+            const qreal xCoord = edgeOffset + m_rowTree->m_scene->ruler()->timeToDistance(time)
+                                 - 2.5;
+            painter->drawPixmap(QPointF(xCoord, hiddenKeyFrameY), hiResIcons ? pixKeyframeHidden2x
+                                                                             : pixKeyframeHidden);
         }
         painter->setOpacity(oldOpacity);
     }
 
-    if (m_rowTree->hasPropertyChildren()) { // master keyframes
+    if (m_rowTree->hasPropertyChildren()) { // object row keyframes
         static const QPixmap pixKeyframeMasterDisabled
                 = QPixmap(":/images/Keyframe-Master-Disabled.png");
         static const QPixmap pixKeyframeMasterNormal
@@ -303,18 +309,21 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                                         : pixKeyframeMasterNormal;
                 }
             }
-            painter->drawPixmap(QPointF(timeToX(keyframe->time) - keyFrameOffset, keyFrameY),
-                                pixmap);
+            painter->drawPixmap(QPointF(edgeOffset + m_rowTree->m_scene->ruler()
+                                        ->timeToDistance(keyframe->time) - keyFrameOffset,
+                                        keyFrameY), pixmap);
 
             // highlight the pressed keyframe in a multi-selection (the keyframe that is affected
             // by snapping, and setting time dialog)
             if (m_rowTree->m_scene->keyframeManager()->selectedKeyframes().size() > 1
                 && m_rowTree->m_scene->pressedKeyframe() == keyframe) {
                 painter->setPen(QPen(CStudioPreferences::timelinePressedKeyframeColor(), 1));
-                painter->drawArc(timeToX(keyframe->time) - 4, keyFrameY + 4, 9, 9, 0, 5760);
+                painter->drawArc(edgeOffset + m_rowTree->m_scene->ruler()
+                                 ->timeToDistance(keyframe->time) - 4, keyFrameY + 4, 9, 9, 0,
+                                 5760);
             }
         }
-    } else if (m_rowTree->isProperty()) {
+    } else if (m_rowTree->isProperty()) { // property row keyframes
         static const QPixmap pixKeyframePropertyDisabled
                 = QPixmap(":/images/Keyframe-Property-Disabled.png");
         static const QPixmap pixKeyframePropertyNormal
@@ -369,8 +378,9 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                                         : pixKeyframePropertyNormal;
                 }
             }
-            painter->drawPixmap(QPointF(timeToX(keyframe->time) - keyFrameOffset, keyFrameY),
-                                pixmap);
+            painter->drawPixmap(QPointF(edgeOffset + m_rowTree->m_scene->ruler()
+                                        ->timeToDistance(keyframe->time) - keyFrameOffset,
+                                        keyFrameY), pixmap);
         }
     }
 }
@@ -401,7 +411,7 @@ void RowTimeline::drawColorPropertyGradient(QPainter *painter, int width)
     QLinearGradient bgGradient(0, 0, width, 0);
 
     for (auto keyframe : qAsConst(m_keyframes)) {
-        double xPos = timeToX(keyframe->time);
+        double xPos = m_rowTree->m_scene->ruler()->timeToDistance(keyframe->time);
         double gradPos = xPos / width;
         gradPos = qBound(0.0, gradPos, 1.0);
         QColor currentColor;
@@ -433,7 +443,8 @@ Keyframe *RowTimeline::getClickedKeyframe(const QPointF &scenePos)
     }
 
     for (const auto keyframe : qAsConst(keyframes)) {
-        x = timeToX(keyframe->time);
+        x = TimelineConstants::RULER_EDGE_OFFSET
+            + m_rowTree->m_scene->ruler()->timeToDistance(keyframe->time);
 
         if (p.x() > x - 5 && p.x() < x + 5 && p.y() > 3 && p.y() < 16)
             return keyframe;
@@ -451,7 +462,8 @@ QList<Keyframe *> RowTimeline::getKeyframesInRange(const QRectF &rect) const
 
     static const int KF_CENTER_Y = 10;
     for (auto keyframe : qAsConst(m_keyframes)) {
-        x = timeToX(keyframe->time);
+        x = TimelineConstants::RULER_EDGE_OFFSET
+            + m_rowTree->m_scene->ruler()->timeToDistance(keyframe->time);
 
         if (localRect.left() < x && localRect.right() > x
                 && localRect.top() < KF_CENTER_Y && localRect.bottom() > KF_CENTER_Y) {
@@ -563,6 +575,8 @@ TimelineControlType RowTimeline::getClickedControl(const QPointF &scenePos) cons
 
     if (!m_rowTree->locked()) {
         QPointF p = mapFromScene(scenePos.x(), scenePos.y());
+        p.setX(p.x() - TimelineConstants::RULER_EDGE_OFFSET);
+
         const int halfHandle = TimelineConstants::DURATION_HANDLE_W * .5;
         // Never choose start handle if end time is zero, as you cannot adjust it in that case
         bool startHandle = p.x() > m_startX - halfHandle && p.x() < m_startX + halfHandle
@@ -625,8 +639,8 @@ void RowTimeline::clearBoundChildren()
 // move the duration area (start/end x)
 void RowTimeline::moveDurationBy(double dx)
 {
-    if (m_startX + dx < TimelineConstants::RULER_EDGE_OFFSET)
-        dx = TimelineConstants::RULER_EDGE_OFFSET - m_startX;
+    if (m_startX + dx < 0)
+        dx = -m_startX;
 
     m_startX += dx;
     m_endX += dx;
@@ -637,8 +651,9 @@ void RowTimeline::moveDurationBy(double dx)
         m_maxEndX = m_endX;
     }
 
-    m_startTime = xToTime(m_startX);
-    m_endTime = xToTime(m_endX);
+    Ruler *ruler = m_rowTree->m_scene->ruler();
+    m_startTime = ruler->distanceToTime(m_startX);
+    m_endTime = ruler->distanceToTime(m_endX);
 
     // move keyframes with the row
     if (!m_rowTree->isProperty()) { // make sure we don't move the keyframes twice
@@ -661,8 +676,8 @@ void RowTimeline::moveDurationBy(double dx)
 
 void RowTimeline::moveDurationTo(double newX)
 {
-    if (newX < TimelineConstants::RULER_EDGE_OFFSET)
-        newX = TimelineConstants::RULER_EDGE_OFFSET;
+    if (newX < 0)
+        newX = 0;
 
     double dx = newX - m_startX;
     double durationX = m_endX - m_startX;
@@ -676,13 +691,14 @@ void RowTimeline::moveDurationTo(double newX)
         m_maxEndX = m_endX;
     }
 
-    m_startTime = xToTime(m_startX);
-    m_endTime = xToTime(m_endX);
+    Ruler *ruler = m_rowTree->m_scene->ruler();
+    m_startTime = ruler->distanceToTime(m_startX);
+    m_endTime = ruler->distanceToTime(m_endX);
 
     // move keyframes with the row
     if (!m_rowTree->isProperty()) { // make sure we don't move the keyframes twice
         for (Keyframe *keyframe : qAsConst(m_keyframes))
-            keyframe->time += rowTree()->m_scene->ruler()->distanceToTime(dx);
+            keyframe->time += ruler->distanceToTime(dx);
     }
 
     update();
@@ -713,20 +729,6 @@ long RowTimeline::getDuration() const
     return m_endTime - m_startTime;
 }
 
-// convert time (seconds) values to x
-double RowTimeline::timeToX(long time) const
-{
-    return TimelineConstants::RULER_EDGE_OFFSET + time * TimelineConstants::RULER_MILLI_W
-           * rowTree()->m_scene->ruler()->timelineScale();
-}
-
-// convert x values to time (seconds)
-long RowTimeline::xToTime(double xPos) const
-{
-    return (xPos - TimelineConstants::RULER_EDGE_OFFSET)
-            / (TimelineConstants::RULER_MILLI_W * rowTree()->m_scene->ruler()->timelineScale());
-}
-
 void RowTimeline::collectChildKeyframeTimes(QVector<long> &childKeyframeTimes)
 {
     const auto childRows = m_rowTree->childRows();
@@ -749,13 +751,13 @@ void RowTimeline::updatePosition()
 // Set the position of the start of the row duration
 void RowTimeline::setStartX(double startX)
 {
-    if (startX < TimelineConstants::RULER_EDGE_OFFSET)
-        startX = TimelineConstants::RULER_EDGE_OFFSET;
+    if (startX < 0)
+        startX = 0;
     else if (startX > m_endX)
         startX = m_endX;
 
     m_startX = startX;
-    m_startTime = xToTime(startX);
+    m_startTime = m_rowTree->m_scene->ruler()->distanceToTime(startX);
 
     if (!m_rowTree->parentRow() || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE
             || m_rowTree->hasComponentAncestor()) {
@@ -774,7 +776,7 @@ void RowTimeline::setEndX(double endX)
         endX = m_startX;
 
     m_endX = endX;
-    m_endTime = xToTime(endX);
+    m_endTime = m_rowTree->m_scene->ruler()->distanceToTime(endX);
 
     if (!m_rowTree->parentRow() || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE
         || m_rowTree->hasComponentAncestor()) {
@@ -894,7 +896,7 @@ void RowTimeline::updateCommentItemPos()
 void RowTimeline::setStartTime(long startTime)
 {
     m_startTime = startTime;
-    m_startX = timeToX(startTime);
+    m_startX = m_rowTree->m_scene->ruler()->timeToDistance(startTime);
 
     if (!m_rowTree->parentRow() || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE
             || m_rowTree->hasComponentAncestor()) {
@@ -909,7 +911,7 @@ void RowTimeline::setStartTime(long startTime)
 void RowTimeline::setEndTime(long endTime)
 {
     m_endTime = endTime;
-    m_endX = timeToX(endTime);
+    m_endX = m_rowTree->m_scene->ruler()->timeToDistance(endTime);
 
     if (!m_rowTree->parentRow() || m_rowTree->parentRow()->rowType() == OBJTYPE_SCENE
             || m_rowTree->hasComponentAncestor()) {
@@ -921,11 +923,13 @@ void RowTimeline::setEndTime(long endTime)
     update();
 }
 
+// duration start x in local space (x=0 at time=0)
 double RowTimeline::getStartX() const
 {
     return m_startX;
 }
 
+// duration end x in local space
 double RowTimeline::getEndX() const
 {
     return m_endX;
