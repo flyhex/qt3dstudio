@@ -41,6 +41,18 @@ void calculateGlobalProperties(const Q3DSNode *node, QVector3D &position,
 QMatrix4x4 generateRotationMatrix(const QVector3D &nodeRotation, Q3DSNode::RotationOrder order);
 QMatrix4x4 calculateCameraViewMatrix(const QMatrix4x4 &cameraWorldTransform);
 QMatrix4x4 composeTransformMatrix(const Q3DSNode *node);
+QPointF normalizePointToRect(const QPoint &inPoint, const QRectF &rect);
+void flipZTranslation(QVector3D &vec);
+QVector3D calcRay(const QPointF &point, const QMatrix4x4 &viewMatrix,
+                  const QMatrix4x4 &projectionMatrix, QVector3D &outNearPos);
+QVector3D mousePointToPlaneIntersection(const QPoint &mousePos, Q3DSCameraNode *cameraNode,
+                                        Q3DSNode *node, const QVector3D &nodePosition,
+                                        const QVector3D &planeNormal,
+                                        bool globalIntersection);
+QVector3D getXAxis(const QMatrix4x4 &matrix);
+QVector3D getYAxis(const QMatrix4x4 &matrix);
+QVector3D getZAxis(const QMatrix4x4 &matrix);
+
 Q3DSModelNode *createWidgetModel(Q3DSUipPresentation *presentation, Q3DSGraphObject *parent,
                                  const QString &name, const QString &mesh,
                                  const QVector3D &scale, bool wireframe = false);

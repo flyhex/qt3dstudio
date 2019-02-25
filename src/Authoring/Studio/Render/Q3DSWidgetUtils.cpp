@@ -29,6 +29,7 @@
 #include "q3dsruntime2api_p.h"
 #include "qmath.h"
 #include "Qt3DCore/qtransform.h"
+#include <Qt3DRender/qcamera.h>
 
 namespace Q3DStudio {
 
@@ -166,6 +167,163 @@ void calculateGlobalProperties(const Q3DSNode *node, QVector3D &position,
     position.setZ(-position.z());
     rotation = QVector3D(-transform.rotationX(), -transform.rotationY(), transform.rotationZ());
     scale = transform.scale3D();
+}
+
+QPointF normalizePointToRect(const QPoint &inPoint, const QRectF &rect)
+{
+    qreal x = qreal(inPoint.x() - rect.x());
+    qreal y = qreal(inPoint.y() - rect.y());
+    x = x / rect.width() * 2 - 1;
+    y = y / rect.height() * 2 - 1;
+    // OpenGL has inverted Y
+    y = -y;
+
+    return QPointF(x, y);
+}
+
+// Qt3D and editor have mirrored Z-axes. This function can be used to convert coordinates
+// between the two systems.
+void flipZTranslation(QVector3D &vec)
+{
+    vec.setZ(-vec.z());
+}
+
+// Returns the intersection point of a plane and a ray.
+// Parameter t returns the distance in ray lengths. If t is negative, intersection
+// is behind rayOrigin.
+// If there is no intersection, i.e. plane and the ray are parallel, t is set to -1 and
+// rayOrigin is returned.
+static QVector3D findIntersection(const QVector3D &rayOrigin, const QVector3D &ray,
+                                  float planeOffset, const QVector3D &planeNormal, float &t)
+{
+    float divisor = QVector3D::dotProduct(ray, planeNormal);
+    if (qFuzzyCompare(1.0f, 1.0f + divisor)) {
+        t = -1.0f;
+        return rayOrigin;
+    }
+
+    t = -(QVector3D::dotProduct(rayOrigin, planeNormal) - planeOffset) / divisor;
+
+    return rayOrigin + ray * t;
+}
+
+// A copy of QVector3D::unproject with the difference that if obj.w() is nearly zero, we don't
+// set it to one as that is extremely wrong, at least for our purposes.
+// For determining plane intersections, nearly zero values are good enough even if they may not
+// result in completely pixel-accurate positions.
+// This allows much larger far clip values to be used in cameras before things break.
+static QVector3D unproject(const QVector3D &vector,
+                           const QMatrix4x4 &modelView, const QMatrix4x4 &projection,
+                           const QRect &viewport)
+{
+    QMatrix4x4 inverse = QMatrix4x4( projection * modelView ).inverted();
+
+    QVector4D tmp(vector, 1.0f);
+    tmp.setX((tmp.x() - float(viewport.x())) / float(viewport.width()));
+    tmp.setY((tmp.y() - float(viewport.y())) / float(viewport.height()));
+    tmp = tmp * 2.0f - QVector4D(1.0f, 1.0f, 1.0f, 1.0f);
+
+    QVector4D obj = inverse * tmp;
+    // Don't change the w unless it is actually zero
+    if (obj.w() == 0.f)
+        obj.setW(0.000000001f);
+    obj /= obj.w();
+
+    return obj.toVector3D();
+}
+
+QVector3D calcRay(const QPointF &point, const QMatrix4x4 &viewMatrix,
+                  const QMatrix4x4 &projectionMatrix, QVector3D &outNearPos)
+{
+    QRect viewPort(-1, -1, 2, 2);
+    outNearPos = QVector3D(float(point.x()), float(point.y()), 0.0f);
+    outNearPos = unproject(outNearPos, viewMatrix, projectionMatrix, viewPort);
+    QVector3D farPos(float(point.x()), float(point.y()), 1.0f);
+    farPos = unproject(farPos, viewMatrix, projectionMatrix, viewPort);
+
+    QVector3D ray = (farPos - outNearPos).normalized();
+
+    return ray;
+}
+
+// Calculates the intersection of a ray through camera position and mouse point with
+// the defined plane that goes through the given node if it has
+// the given local position (which can be different than node's actual position).
+// If globalIntersection is true, the value is returned in global 3D space coordinates.
+// Otherwise local coordinates in editor space (i.e. Z flipped) are returned.
+QVector3D mousePointToPlaneIntersection(const QPoint &mousePos,
+                                        Q3DSCameraNode *cameraNode,
+                                        Q3DSNode *node,
+                                        const QVector3D &nodePosition,
+                                        const QVector3D &planeNormal,
+                                        bool globalIntersection)
+{
+    Q3DSNode *parentNode = static_cast<Q3DSNode *>(node->parent());
+    Q3DSCameraAttached *cameraAttached = cameraNode->attached<Q3DSCameraAttached>();
+    Q3DSNodeAttached *nodeAttached = node->attached<Q3DSNodeAttached>();
+    Q3DSNodeAttached *parentAttached = parentNode->attached<Q3DSNodeAttached>();
+    Q3DSLayerAttached *layerAttached = nodeAttached->layer3DS->attached<Q3DSLayerAttached>();
+
+    QMatrix4x4 parentMatrix = parentAttached->globalTransform;
+    QMatrix4x4 cameraMatrix = cameraAttached->globalTransform;
+
+    QRectF layerRect = QRectF(layerAttached->layerPos, layerAttached->layerSize);
+    QPointF newPoint = normalizePointToRect(mousePos, layerRect);
+
+    auto viewMatrix = calculateCameraViewMatrix(cameraMatrix);
+    auto projectionMatrix = cameraAttached->camera->projectionMatrix();
+
+    QVector3D cameraPos = cameraNode->position();
+    flipZTranslation(cameraPos);
+
+    QVector3D nearPos;
+    QVector3D newRay = calcRay(newPoint, viewMatrix, projectionMatrix, nearPos);
+
+    // Find intersections of newRay and oldRay on camera plane that goes through oldPos
+    // Operations are done in Qt3D space, i.e. Z-axis flipped
+    QVector3D beginPos = nodePosition;
+    flipZTranslation(beginPos);
+    QVector3D nodeWorldPos = parentMatrix * beginPos;
+    float distance = -1.f;
+    float cosAngle = QVector3D::dotProduct(nodeWorldPos.normalized(), planeNormal);
+    float planeOffset = nodeWorldPos.length() * cosAngle;
+
+    QVector3D intersect = findIntersection(nearPos, newRay, planeOffset, planeNormal, distance);
+
+    if (!globalIntersection) {
+        intersect = parentMatrix.inverted() * intersect;
+        flipZTranslation(intersect); // Flip back to editor coords
+    }
+
+    return intersect;
+}
+
+
+// Pulls the normalized 1st column out of the global transform.
+QVector3D getXAxis(const QMatrix4x4 &matrix)
+{
+    const float *data = matrix.data();
+    QVector3D retval(data[0], data[1], data[2]);
+    retval.normalize();
+    return retval;
+}
+
+// Pulls the normalized 2nd column out of the global transform.
+QVector3D getYAxis(const QMatrix4x4 &matrix)
+{
+    const float *data = matrix.data();
+    QVector3D retval(data[4], data[5], data[6]);
+    retval.normalize();
+    return retval;
+}
+
+// Pulls the normalized 3rd column out of the global transform.
+QVector3D getZAxis(const QMatrix4x4 &matrix)
+{
+    const float *data = matrix.data();
+    QVector3D retval(data[8], data[9], data[10]);
+    retval.normalize();
+    return retval;
 }
 
 Q3DSModelNode *createWidgetModel(Q3DSUipPresentation *presentation, Q3DSGraphObject *parent,

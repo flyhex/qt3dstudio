@@ -298,46 +298,49 @@ void Q3DSManipulationWidget::destroyManipulators()
     m_manipulatorColors.clear();
 }
 
-void applyNodeProperties(Q3DSGraphObject *node, Q3DSCameraNode *camera, Q3DSLayerNode *layer,
-                         const QSize &size, Q3DSModelNode *model, const QVector3D &modelScale) {
-    Q3DSNodeAttached *attached = node->attached<Q3DSNodeAttached>();
-    if (!attached)
-        return;
+void applyNodeProperties(Q3DSNode *node, Q3DSCameraNode *camera, Q3DSLayerNode *layer,
+                         Q3DSModelNode *model, const QVector3D &modelScale) {
 
     QVector3D position;
     QVector3D rotation;
     QVector3D dummyScale;
-    calculateGlobalProperties(static_cast<Q3DSNode *>(node), position, rotation, dummyScale);
+    calculateGlobalProperties(node, position, rotation, dummyScale);
 
     Q3DSPropertyChangeList list;
     list.append(model->setPosition(position));
     list.append(model->setRotation(rotation));
 
-    float distance = 400.0f;
-    float fovScale = 2.0f;
-    if (!camera->orthographic()) {
-        distance = camera->position().distanceToPoint(position);
-        fovScale = 2.0f * float(qTan(qDegreesToRadians(qreal(camera->fov())) / 2.0));
-    }
-    float scale = 125.0f * camera->zoom() * fovScale;
-    float width = size.width();
-    float height = size.height();
-    if (layer->widthUnits() == Q3DSLayerNode::Units::Percent) {
-        width *= layer->width() * 0.01f;
-        height *= layer->height() * 0.01f;
-    } else {
-        width = layer->width();
-        height = layer->height();
-    }
-    float length = qSqrt(width * width + height * height);
-    scale /= length;
-    list.append(model->setScale(modelScale * scale * distance));
+    Q3DSCameraAttached *cameraAttached = camera->attached<Q3DSCameraAttached>();
+    QMatrix4x4 cameraMatrix = cameraAttached->globalTransform;
+    QVector3D cameraPlane = getZAxis(cameraMatrix);
+
+    QVector3D originPosition = mousePointToPlaneIntersection(QPoint(0, 0), camera, layer,
+                                                             position, cameraPlane, false);
+    QVector3D vertPosition = mousePointToPlaneIntersection(QPoint(0, 80), camera, layer,
+                                                           position, cameraPlane, false);
+    QVector3D horzPosition = mousePointToPlaneIntersection(QPoint(80, 0), camera, layer,
+                                                           position, cameraPlane, false);
+
+    QMatrix4x4 invCameraRotMat = generateRotationMatrix(camera->rotation(),
+                                                        camera->rotationOrder()).inverted();
+    QVector3D vertScale = invCameraRotMat * (vertPosition - originPosition);
+    QVector3D horzScale = invCameraRotMat * (horzPosition - originPosition);
+
+    QVector3D depthScale = QVector3D::crossProduct(vertScale.normalized(), horzScale.normalized())
+            * (vertScale.length() + horzScale.length()) / 2.0f;
+
+    QVector3D scaleFactor = vertScale + horzScale + depthScale;
+    scaleFactor.setX(qAbs(scaleFactor.x()));
+    scaleFactor.setY(qAbs(scaleFactor.y()));
+    scaleFactor.setZ(qAbs(scaleFactor.z()));
+
+    list.append(model->setScale(modelScale * scaleFactor));
     list.append(model->setEyeballEnabled(true));
     model->notifyPropertyChanges(list);
 }
 
 void Q3DSManipulationWidget::applyProperties(Q3DSGraphObject *node, Q3DSCameraNode *camera,
-                                             Q3DSLayerNode *layer, const QSize &size)
+                                             Q3DSLayerNode *layer)
 {
     for (int i = 0; i < m_manipulators.size(); ++i) {
         if (node->type() == Q3DSGraphObject::Model
@@ -347,7 +350,7 @@ void Q3DSManipulationWidget::applyProperties(Q3DSGraphObject *node, Q3DSCameraNo
                 || node->type() == Q3DSGraphObject::Camera
                 || node->type() == Q3DSGraphObject::Text
                 || node->type() == Q3DSGraphObject::Component) {
-            applyNodeProperties(node, camera, layer, size, m_manipulators[i],
+            applyNodeProperties(static_cast<Q3DSNode *>(node), camera, layer, m_manipulators[i],
                                 m_manipulatorScales[i]);
         }
     }
