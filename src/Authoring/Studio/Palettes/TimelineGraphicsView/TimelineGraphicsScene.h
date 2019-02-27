@@ -104,7 +104,7 @@ protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
-    void wheelEvent(QGraphicsSceneWheelEvent *wheelEvent);
+    void wheelEvent(QGraphicsSceneWheelEvent *wheelEvent) override;
     void keyPressEvent(QKeyEvent *keyEvent) override;
     void keyReleaseEvent(QKeyEvent *keyEvent) override;
 
@@ -167,6 +167,8 @@ private:
     QTimer m_autoScrollTimer;
     QTimer m_autoScrollTriggerTimer; // triggers m_autoScrollTimer
     QLabel *m_timebarToolTip = nullptr;
+    QLabel *m_variantsToolTip = nullptr;
+    RowTree* m_variantsRowTree = nullptr;
 };
 
 #endif // TIMELINEGRAPHICSSCENE_H

@@ -68,7 +68,6 @@
 #include <QtGui/qevent.h>
 #include <QtCore/qtimer.h>
 #include <QtCore/qglobal.h>
-#include <QtCore/qdebug.h>
 #include <QtWidgets/qaction.h>
 
 static const QPointF invalidPoint(-999999.0, -999999.0);
@@ -100,6 +99,14 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     m_timebarToolTip->setWindowModality(Qt::NonModal);
     m_timebarToolTip->setWindowFlags(Qt::FramelessWindowHint | Qt::ToolTip);
     m_timebarToolTip->setContentsMargins(2, 2, 2, 2);
+
+    m_variantsToolTip = new QLabel(m_widgetTimeline);
+    m_variantsToolTip->setObjectName(QStringLiteral("variantsToolTip"));
+    m_variantsToolTip->setWindowModality(Qt::NonModal);
+    m_variantsToolTip->setWindowFlags(Qt::FramelessWindowHint | Qt::ToolTip
+                                      | Qt::WindowTransparentForInput);
+    m_variantsToolTip->setContentsMargins(2, 2, 2, 2);
+
     connect(qApp, &QApplication::focusChanged,
             this, &TimelineGraphicsScene::handleApplicationFocusLoss);
 
@@ -861,9 +868,7 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
                     } else if (!treeLabelItem->isLocked()
                                && treeLabelItem->parentRow()->rowType() != OBJTYPE_SCENE
                                && treeLabelItem->parentRow()->rowType() != OBJTYPE_IMAGE) {
-                        qt3dsdm::Qt3DSDMInstanceHandle instance
-                                = static_cast<Qt3DSDMTimelineItemBinding *>(
-                                    treeLabelItem->parentRow()->getBinding())->GetInstance();
+                        int instance = treeLabelItem->parentRow()->instance();
                         const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
                                 ->GetClientDataModelBridge();
                         if (bridge->GetObjectType(instance) != OBJTYPE_REFERENCEDMATERIAL
@@ -974,9 +979,11 @@ bool TimelineGraphicsScene::event(QEvent *event)
 
 void TimelineGraphicsScene::updateHoverStatus(const QPointF &scenePos)
 {
+    bool variantsAreaHovered = false;
     QGraphicsItem *item = itemAt(scenePos, QTransform());
     if (item) {
         item = getItemBelowType(TimelineItem::TypePlayHead, item, scenePos);
+        // update timeline row cursor
         if (item->type() == TimelineItem::TypeRowTimeline) {
             RowTimeline *timelineItem = static_cast<RowTimeline *>(item);
             TimelineControlType controlType = timelineItem->getClickedControl(scenePos);
@@ -986,7 +993,68 @@ void TimelineGraphicsScene::updateHoverStatus(const QPointF &scenePos)
             } else {
                 resetMouseCursor();
             }
+        } else if (!m_dragging && (item->type() == TimelineItem::TypeRowTree
+                                   || item->type() == TimelineItem::TypeRowTreeLabelItem)) {
+            // update tree row variants tooltip
+            RowTree *rowTree = item->type() == TimelineItem::TypeRowTree
+                               ? static_cast<RowTree *>(item)
+                               : static_cast<RowTreeLabelItem *>(item)->parentRow();
+            int left = rowTree->clipX();
+            int right = (int)rowTree->treeWidth() - TimelineConstants::TREE_ICONS_W;
+            variantsAreaHovered = scenePos.x() > left && scenePos.x() < right;
+            if (variantsAreaHovered && rowTree != m_variantsRowTree) {
+                CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+                const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
+                const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+                auto property = bridge->GetLayer().m_variants;
+
+                using namespace qt3dsdm;
+                SValue sValue;
+                if (propertySystem->GetInstancePropertyValue(rowTree->instance(), property,
+                                                             sValue)) {
+                    QString propVal = QString::fromWCharArray(get<TDataStrPtr>(sValue)
+                                                              ->GetData());
+                    if (!propVal.isEmpty()) {
+                        // parse propVal into variantsHash (group => tags)
+                        const QStringList tagPairs = propVal.split(QLatin1Char(','));
+                        QHash<QString, QStringList> variantsHash;
+                        for (auto &tagPair : tagPairs) {
+                            const QStringList pair = tagPair.split(QLatin1Char(':'));
+                            variantsHash[pair[0]].append(pair[1]);
+                        }
+
+                        // parse variantsHash into tooltipStr
+                        const auto variantsDef
+                                = g_StudioApp.GetCore()->getProjectFile().variantsDef();
+                        QString templ = QStringLiteral("<font color='%1'>%2</font>");
+                        QString tooltipStr("<table>");
+                        const auto keys = variantsHash.keys();
+                        for (auto &g : keys) {
+                            tooltipStr.append("<tr><td>");
+                            tooltipStr.append(templ.arg(variantsDef[g].m_color).arg(g + ": "));
+                            tooltipStr.append("</td><td>");
+                            for (auto &t : qAsConst(variantsHash[g]))
+                                tooltipStr.append(t + ", ");
+                            tooltipStr.chop(2);
+                            tooltipStr.append("</td></tr>");
+                        }
+                        tooltipStr.append("</table>");
+                        m_variantsToolTip->setText(tooltipStr);
+                        m_variantsToolTip->adjustSize();
+                        m_variantsToolTip->move(m_widgetTimeline->mapToGlobal(
+                                                {right, (int)rowTree->y()}));
+                        m_variantsToolTip->raise();
+                        m_variantsToolTip->show();
+                        m_variantsRowTree = rowTree;
+                    }
+                }
+            }
         }
+    }
+
+    if (m_variantsRowTree && !variantsAreaHovered) {
+        m_variantsToolTip->hide();
+        m_variantsRowTree = nullptr;
     }
 }
 
@@ -1065,9 +1133,11 @@ void TimelineGraphicsScene::handleEditComponent()
 
 void TimelineGraphicsScene::handleApplicationFocusLoss()
 {
-    // Hide the timebar tooltip if application loses focus
-    if (!QApplication::focusWidget())
+    // Hide the timebar and variants tooltips if application loses focus
+    if (!QApplication::focusWidget()) {
         m_timebarToolTip->hide();
+        m_variantsToolTip->hide();
+    }
 }
 
 void TimelineGraphicsScene::handleShowDISelector(const QString &propertyname,

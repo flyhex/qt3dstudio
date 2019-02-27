@@ -180,6 +180,11 @@ QToolTip {
     border-radius: 2;
 }
 
+QLabel#variantsToolTip {
+    background: #222222;
+    border: 1px solid #444444;
+}
+
 /* Dialog widgets */
 QComboBox,
 QLineEdit,

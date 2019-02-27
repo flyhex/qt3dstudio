@@ -77,6 +77,12 @@ ITimelineItemBinding *RowTree::getBinding() const
     return m_binding;
 }
 
+// object instance handle
+int RowTree::instance() const
+{
+    return static_cast<Qt3DSDMTimelineItemBinding *>(m_binding)->GetInstance();
+}
+
 // property row constructor
 RowTree::RowTree(TimelineGraphicsScene *timelineScene, const QString &propType)
     : InteractiveTimelineItem()
@@ -493,9 +499,7 @@ void RowTree::setBinding(ITimelineItemBinding *binding)
     m_binding = binding;
 
     // Restore the expansion state of rows
-    m_expandState = m_scene->expandMap().value(
-                static_cast<Qt3DSDMTimelineItemBinding *>(binding)->GetInstance(),
-                ExpandState::Unknown);
+    m_expandState = m_scene->expandMap().value(instance(), ExpandState::Unknown);
 
     if (m_expandState == ExpandState::Unknown) {
         // Everything but scene/component is initially collapsed and hidden
@@ -935,11 +939,8 @@ void RowTree::updateExpandStatus(ExpandState state, bool animate, bool forceChil
         return;
 
     // Store the expanded state of items so we can restore it on slide change
-    if (changed && m_binding) {
-        m_scene->expandMap().insert(
-                    static_cast<Qt3DSDMTimelineItemBinding *>(m_binding)->GetInstance(),
-                    m_expandState);
-    }
+    if (changed && m_binding)
+        m_scene->expandMap().insert(instance(), m_expandState);
 
     if (animate)
         animateExpand(m_expandState);
@@ -1263,9 +1264,6 @@ void RowTree::setPropertyExpanded(bool expand)
 
 void RowTree::showDataInputSelector(const QString &propertyname, const QPoint &pos)
 {
-    m_scene->handleShowDISelector(
-                propertyname, static_cast<Qt3DSDMTimelineItemBinding *>(m_binding)->GetInstance(),
-                pos);
-
+    m_scene->handleShowDISelector(propertyname, instance(), pos);
 }
 

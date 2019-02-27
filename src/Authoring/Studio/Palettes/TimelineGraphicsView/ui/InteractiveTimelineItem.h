@@ -46,7 +46,7 @@ public:
 
     virtual void setState(State state);
 
-    int type() const;
+    int type() const override;
 
 protected:
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;

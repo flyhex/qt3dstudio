@@ -120,7 +120,7 @@ public:
     bool hasDurationBar() const;
     bool propertyExpanded() const;
     int depth() const;
-    int type() const;
+    int type() const override;
     int index() const;
     int indexInLayout() const;
     int treeWidth() const;
@@ -150,6 +150,7 @@ public:
     void updateLock(bool state);
     void updateSubpresentations(int updateParentsOnlyVal = 0);
     int clipX() const;
+    int instance() const;
 
 protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
