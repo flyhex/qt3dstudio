@@ -53,15 +53,28 @@
 // object row constructor
 RowTree::RowTree(TimelineGraphicsScene *timelineScene, EStudioObjectType rowType,
                  const QString &label)
+    : m_rowTimeline(new RowTimeline())
+    , m_scene(timelineScene)
+    , m_rowType(rowType)
+    , m_label(label)
+{
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    m_onMasterSlide = doc->GetStudioSystem()->GetSlideSystem()
+                         ->IsMasterSlide(doc->GetActiveSlide());
+
+    initialize();
+}
+
+// property row constructor
+RowTree::RowTree(TimelineGraphicsScene *timelineScene, const QString &propType)
     : InteractiveTimelineItem()
     , m_rowTimeline(new RowTimeline())
+    , m_isProperty(true)
+    , m_scene(timelineScene)
+    , m_propertyType(propType)
+    , m_label(propType)
 {
-    m_scene = timelineScene;
-    m_rowType = rowType;
-    m_label = label;
-    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-    m_onMasterSlide = doc->GetStudioSystem()->GetSlideSystem()->IsMasterSlide(
-                doc->GetActiveSlide());
+    m_rowTimeline->m_isProperty = true;
 
     initialize();
 }
@@ -81,21 +94,6 @@ ITimelineItemBinding *RowTree::getBinding() const
 int RowTree::instance() const
 {
     return static_cast<Qt3DSDMTimelineItemBinding *>(m_binding)->GetInstance();
-}
-
-// property row constructor
-RowTree::RowTree(TimelineGraphicsScene *timelineScene, const QString &propType)
-    : InteractiveTimelineItem()
-    , m_rowTimeline(new RowTimeline())
-{
-    m_scene = timelineScene;
-    m_label = propType;
-    m_propertyType = propType;
-
-    m_isProperty = true;
-    m_rowTimeline->m_isProperty = true;
-
-    initialize();
 }
 
 void RowTree::initialize()

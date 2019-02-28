@@ -544,6 +544,20 @@ void TimelineWidget::onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
                                    ->createRowFromBinding(binding, bindingParent->getRowTree());
                     row->updateSubpresentations();
                     insertToHandlesMap(binding);
+
+                    // refresh the created object variants if it is a layer with variants property
+                    // set.
+                    if (m_bridge->IsLayerInstance(inInstance)) {
+                        const auto propertySystem = g_StudioApp.GetCore()->GetDoc()
+                                                    ->GetPropertySystem();
+                        qt3dsdm::SValue sValue;
+                        if (propertySystem->GetInstancePropertyValue(inInstance,
+                                                                m_bridge->GetLayer().m_variants,
+                                                                sValue)) {
+                            if (qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->GetLength() != 0)
+                                refreshVariants(inInstance);
+                        }
+                    }
                 } else {
                     qWarning() << "Binding parent was not found.";
                 }
@@ -755,8 +769,7 @@ void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance
     } else if (inProperty == m_bridge->GetLayer().m_variants) {
         qt3dsdm::SValue sValue;
         if (doc->GetPropertySystem()->GetInstancePropertyValue(inInstance, inProperty, sValue)) {
-            QString propVal = QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)
-                                                      ->GetData());
+            QString propVal = qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->toQString();
             if (!propVal.isEmpty()) {
                 QStringList tagPairs = propVal.split(QLatin1Char(','));
                 QStringList groups;
@@ -1247,19 +1260,23 @@ void TimelineWidget::setSelectedTimeBarsColor(const QColor &color, bool preview)
     }
 }
 
-void TimelineWidget::refreshVariants()
+void TimelineWidget::refreshVariants(int instance)
 {
     const auto propertySystem = g_StudioApp.GetCore()->GetDoc()->GetPropertySystem();
-    const auto layers = g_StudioApp.GetCore()->GetDoc()->getLayers();
-    for (auto layer : layers) {
+    QVector<int> layers;
+    if (instance)
+        layers << instance;
+    else
+        layers = g_StudioApp.GetCore()->GetDoc()->getLayers();
+
+    for (auto layer : qAsConst(layers)) {
         if (!m_handlesMap.contains(layer))
             continue;
 
         qt3dsdm::SValue sValue;
         if (propertySystem->GetInstancePropertyValue(layer, m_bridge->GetLayer().m_variants,
                                                      sValue)) {
-            QString propVal = QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)
-                                                      ->GetData());
+            QString propVal = qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->toQString();
             if (!propVal.isEmpty()) {
                 QStringList tagPairs = propVal.split(QLatin1Char(','));
                 QStringList groups;

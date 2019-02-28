@@ -65,8 +65,7 @@ void VariantsGroupModel::refresh()
         beginResetModel();
         m_data.clear();
 
-        QString propVal = QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)
-                                                  ->GetData());
+        QString propVal = qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->toQString();
         QHash<QString, QStringList> propTags;
         if (!propVal.isEmpty()) {
             const QStringList propTagsList = propVal.split(QChar(','));

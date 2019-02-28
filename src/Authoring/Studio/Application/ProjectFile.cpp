@@ -1123,8 +1123,7 @@ void ProjectFile::renameVariantTag(const QString &group, const QString &oldTag,
     for (auto layer : layers) {
         qt3dsdm::SValue sValue;
         if (propertySystem->GetInstancePropertyValue(layer, property, sValue)) {
-            QString propVal = QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)
-                                                      ->GetData());
+            QString propVal = qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->toQString();
             QString oldGroupTagPair = QStringLiteral("%1:%2").arg(group).arg(oldTag);
             if (propVal.contains(oldGroupTagPair)) {
                 propVal.replace(oldGroupTagPair, QStringLiteral("%1:%2").arg(group).arg(newTag));
@@ -1186,8 +1185,7 @@ void ProjectFile::renameVariantGroup(const QString &oldGroup, const QString &new
      for (auto layer : layers) {
          qt3dsdm::SValue sValue;
          if (propertySystem->GetInstancePropertyValue(layer, property, sValue)) {
-             QString propVal = QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)
-                                                       ->GetData());
+             QString propVal = qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->toQString();
              QString oldGroupWithColon = QStringLiteral("%1:").arg(oldGroup);
              if (propVal.contains(oldGroupWithColon)) {
                  propVal.replace(oldGroupWithColon, QStringLiteral("%1:").arg(newGroup));
@@ -1262,8 +1260,7 @@ void ProjectFile::deleteVariantGroup(const QString &group)
     for (auto layer : layers) {
         qt3dsdm::SValue sValue;
         if (propertySystem->GetInstancePropertyValue(layer, property, sValue)) {
-            QString propVal = QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)
-                                                      ->GetData());
+            QString propVal = qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->toQString();
             if (propVal.contains(QStringLiteral("%1:").arg(group))) {
                 // property has the deleted group, need to update it, else the deleted group
                 // will be saved the uip if the user saves the presentation.

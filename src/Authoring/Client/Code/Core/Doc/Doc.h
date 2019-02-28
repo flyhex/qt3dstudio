@@ -465,7 +465,7 @@ public:
     int getSelectedInstancesCount() const;
 
     std::shared_ptr<Q3DStudio::IInternalDocumentEditor> getSceneEditor() { return m_SceneEditor; }
-    QVector<qt3dsdm::Qt3DSDMInstanceHandle> getLayers();
+    QVector<int> getLayers();
 
     void queueMaterialRename(const QString &oldName, const QString &newName);
 

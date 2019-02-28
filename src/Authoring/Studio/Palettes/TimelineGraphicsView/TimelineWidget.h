@@ -73,7 +73,7 @@ public:
     void openBarColorDialog();
     void onTimeBarColorChanged(const QColor &color);
     void setSelectedTimeBarsColor(const QColor &color, bool preview);
-    void refreshVariants();
+    void refreshVariants(int instance = 0);
     void enableDnD(bool b = true);
     bool dndActive() const;
     bool blockMousePress() const;
