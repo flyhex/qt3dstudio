@@ -1295,6 +1295,8 @@ void Q3DSTranslation::selectObject(Qt3DSDMInstanceHandle instance)
     const auto layer = layerForNode(m_selectedObject);
     if (layer)
         m_selectionWidget.select(m_presentation.data(), static_cast<Q3DSNode *>(m_selectedObject));
+    else
+        m_selectionWidget.deselect();
 }
 
 void Q3DSTranslation::unselectObject()
