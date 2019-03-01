@@ -29,6 +29,8 @@
 #ifndef SCENE_CAMERA_GLWIDGET_H
 #define SCENE_CAMERA_GLWIDGET_H
 
+#include "IStudioRenderer.h"
+
 #include <QtWidgets/qopenglwidget.h>
 #include <QtGui/qopenglfunctions.h>
 #include <QtGui/qvector2d.h>
@@ -37,6 +39,7 @@
 QT_FORWARD_DECLARE_CLASS(QOpenGLShaderProgram)
 QT_FORWARD_DECLARE_CLASS(QOpenGLBuffer)
 QT_FORWARD_DECLARE_CLASS(QOpenGLVertexArrayObject)
+QT_FORWARD_DECLARE_CLASS(QOpenGLFramebufferObject)
 
 class SceneCameraGlWidget : public QOpenGLWidget, QOpenGLFunctions
 {
@@ -48,10 +51,13 @@ public:
     void setTextureOffset(const QVector4D &offset) { m_textureOffset = offset; }
     void setGeometryOffset(const QVector4D &offset) { m_geometryOffset = offset; }
 
+    void requestRender();
+    void setPresentationAvailable(bool available) { m_hasPresentation = available; }
+
 protected:
     void initializeGL() override;
     void paintGL() override;
-    void resizeGL(int, int) override;
+    void resizeGL(int w, int h) override;
 
 private:
     void cleanup();
@@ -60,10 +66,15 @@ private:
     QOpenGLBuffer *m_vertexBuffer = nullptr;
     QOpenGLBuffer *m_uvBuffer = nullptr;
     QOpenGLVertexArrayObject *m_vao = nullptr;
+    QOpenGLFramebufferObject *m_fbo = nullptr;
+    QSize m_fboSize;
     GLint m_uniformTextureOffset = 0;
     GLint m_uniformGeometryOffset = 0;
     QVector4D m_textureOffset;
     QVector4D m_geometryOffset;
+    std::shared_ptr<Q3DStudio::IStudioRenderer> m_renderer;
+    qreal m_pixelRatio = 1.;
+    bool m_hasPresentation = false;
 };
 
 #endif

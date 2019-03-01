@@ -72,7 +72,9 @@ class Q3DSTranslation
 {
 public:
     Q3DSTranslation(Q3DStudioRenderer &inRenderer,
-                    const QSharedPointer<Q3DSUipPresentation> &presentation);
+                    const QSharedPointer<Q3DSUipPresentation> &presentation,
+                    bool sceneCameraMode);
+    ~Q3DSTranslation();
 
 protected:
     void markPropertyDirty(qt3dsdm::Qt3DSDMInstanceHandle instance,
@@ -175,6 +177,7 @@ private:
     Q3DStudio::CGraph &m_assetGraph;
     QSharedPointer<Q3DSEngine> m_engine;
     QSharedPointer<Q3DSUipPresentation> m_presentation;
+    bool m_sceneCameraMode = false;
 
     // All translator related containers must come after the allocator
     TInstanceToTranslatorMap m_translatorMap;
@@ -221,10 +224,10 @@ private:
     Q3DSGraphObject *m_pickedWidget = nullptr;
     QColor m_pickedWidgetColor;
     EditCameraTypes m_cameraType = EditCameraTypes::SceneCamera;
-    Q3DSManipulationWidget m_manipulationWidget;
-    Q3DSSelectionWidget m_selectionWidget;
+    Q3DSManipulationWidget *m_manipulationWidget = nullptr;
+    Q3DSSelectionWidget *m_selectionWidget = nullptr;
 
-    QVector<Q3DSVisualAidWidget> m_visualAids;
+    QVector<Q3DSVisualAidWidget *> m_visualAids;
     quint64 m_visualAidIndex = 0;
 
     struct DragState

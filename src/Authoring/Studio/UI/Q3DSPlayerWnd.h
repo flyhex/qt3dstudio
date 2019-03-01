@@ -92,7 +92,6 @@ public:
 
 Q_SIGNALS:
     void dropReceived();
-    void newFrame();
     void toolChanged();
 
 private Q_SLOTS:

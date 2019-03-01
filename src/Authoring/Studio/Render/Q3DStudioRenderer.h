@@ -77,7 +77,7 @@ class Q3DStudioRenderer : public QObject,
     Q_OBJECT
 
 public:
-    Q3DStudioRenderer();
+    Q3DStudioRenderer(bool sceneCameraMode);
     ~Q3DStudioRenderer() override;
     ITextRenderer *GetTextRenderer() override;
     QT3DSVec3 GetIntendedPosition(qt3dsdm::Qt3DSDMInstanceHandle inHandle, CPt inPoint) override;
@@ -88,9 +88,8 @@ public:
     void RequestRender() override;
     void renderNow() override;
     bool IsInitialized() override;
-    void initialize(QOpenGLWidget *widget) override;
+    void initialize(QOpenGLWidget *widget, bool hasPresentation) override;
     void SetViewRect(const QRect &inRect, const QSize &size) override;
-    void setFullSizePreview(bool enabled) override;
     void GetEditCameraList(QStringList &outCameras) override;
     void SetPolygonFillModeEnabled(bool inEnableFillMode) override;
     bool IsPolygonFillModeEnabled() const override;
@@ -104,7 +103,6 @@ public:
     void EditCameraZoomToFit() override;
     bool isMouseDown() const override;
     void Close() override;
-    void getPreviewFbo(QSize &outFboDim, qt3ds::QT3DSU32 &outFboTexture) override;
     void RegisterSubpresentations(
             const QVector<SubPresentationRecord> &subpresentations) override;
     void drawRulersAndGuides(QPainter *painter) override;
@@ -190,7 +188,7 @@ private:
     QColor m_guideSelectedColor;
     QColor m_guideFillColor;
     QColor m_guideSelectedFillColor;
-    bool m_guidesEnabled = true;
+    bool m_guidesEnabled = false;
     bool m_hasPresentation = false;
     int m_renderRequested = 0;
     bool m_setSubpresentationsCalled = false;
@@ -216,6 +214,7 @@ private:
     bool m_resizeToQt3DSent = false;
     qreal m_parentPixelRatio = 1.0;
     QTimer m_asyncRenderTimer;
+    bool m_sceneCameraMode = false;
 };
 
 }

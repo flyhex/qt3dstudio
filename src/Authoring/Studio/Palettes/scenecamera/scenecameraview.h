@@ -29,6 +29,8 @@
 #ifndef SCENECAMERAVIEW_H
 #define SCENECAMERAVIEW_H
 
+#include "DispatchListeners.h"
+
 #include <QtWidgets/qwidget.h>
 #include <QtCore/qtimer.h>
 
@@ -44,13 +46,18 @@ QT_END_NAMESPACE
 
 class CMainFrame;
 
-class SceneCameraView : public QWidget
+class SceneCameraView : public QWidget,
+                        public CPresentationChangeListener
 {
     Q_OBJECT
 
 public:
     explicit SceneCameraView(CMainFrame *mainFrame, QWidget *parent = 0);
     ~SceneCameraView();
+
+    // CPresentationChangeListener
+    void OnNewPresentation() override;
+    void OnClosingPresentation() override;
 
 protected:
     void wheelEvent(QWheelEvent *e) override;

@@ -47,6 +47,7 @@ public:
     void setPresentationSize(const QSize &size);
     void recalculateScrollRanges();
     void recalculateOffsets();
+    void setPresentationAvailable(bool available);
 
 Q_SIGNALS:
     void needUpdate();

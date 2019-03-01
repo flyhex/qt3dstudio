@@ -122,6 +122,13 @@ void SceneCameraScrollArea::recalculateOffsets()
     m_glWidget->setGeometryOffset(geometryOffset);
 }
 
+void SceneCameraScrollArea::setPresentationAvailable(bool available)
+{
+    if (available)
+        setZoom(m_zoom, viewport()->geometry().center());
+    m_glWidget->setPresentationAvailable(available);
+}
+
 void SceneCameraScrollArea::scrollContentsBy(int, int)
 {
     recalculateOffsets();

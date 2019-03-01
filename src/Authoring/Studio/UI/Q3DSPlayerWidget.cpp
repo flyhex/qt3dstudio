@@ -78,7 +78,7 @@ void Q3DSPlayerWidget::initializeGL()
     Q3DStudio::IStudioRenderer &renderer(g_StudioApp.getRenderer());
     if (!renderer.IsInitialized()) {
         try {
-            renderer.initialize(this);
+            renderer.initialize(this, false);
         } catch (...) {
             QMessageBox::critical(this, tr("Fatal Error"),
                                   tr("Unable to initialize OpenGL.\nThis may be because your "

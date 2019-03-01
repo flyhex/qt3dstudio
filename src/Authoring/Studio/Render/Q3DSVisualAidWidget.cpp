@@ -204,6 +204,11 @@ Q3DSVisualAidWidget::Q3DSVisualAidWidget(Q3DSUipPresentation *presentation, Q3DS
     }
 }
 
+Q3DSVisualAidWidget::~Q3DSVisualAidWidget()
+{
+    destroy();
+}
+
 bool Q3DSVisualAidWidget::isCreated() const
 {
     return m_wireframe && m_icon && m_collisionBox;

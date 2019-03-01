@@ -55,10 +55,9 @@ public:
 
     virtual bool IsInitialized() = 0;
 
-    virtual void initialize(QOpenGLWidget *widget) = 0;
+    virtual void initialize(QOpenGLWidget *widget, bool hasPresentation) = 0;
 
     virtual void SetViewRect(const QRect &inRect, const QSize &size) = 0;
-    virtual void setFullSizePreview(bool enabled) = 0;
 
     virtual void GetEditCameraList(QStringList &outCameras) = 0;
     virtual void SetPolygonFillModeEnabled(bool inEnableFillMode) = 0;
@@ -83,12 +82,11 @@ public:
 
     // synchronously render the content
     virtual void renderNow() = 0;
-    virtual void getPreviewFbo(QSize &outFboDim, qt3ds::QT3DSU32 &outFboTexture) = 0;
     virtual void RegisterSubpresentations(
             const QVector<SubPresentationRecord> &subpresentations) = 0;
 
     // Uses the global studio app to get the doc and dispatch.
-    static std::shared_ptr<IStudioRenderer> CreateStudioRenderer();
+    static std::shared_ptr<IStudioRenderer> CreateStudioRenderer(bool sceneCameraMode = false);
 };
 };
 

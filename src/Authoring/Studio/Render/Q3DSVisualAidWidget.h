@@ -49,6 +49,7 @@ public:
     Q3DSVisualAidWidget(Q3DSUipPresentation *presentation, Q3DSLayerNode *layer,
                         Q3DSLayerNode *pickingLayer, VisualAidType type,
                         Q3DSGraphObject *graphObject, quint64 id);
+    ~Q3DSVisualAidWidget();
 
     bool isCreated() const;
     Q3DSGraphObject *graphObject() const;

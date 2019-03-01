@@ -56,6 +56,7 @@
 #include <Qt3DCore/qaspectengine.h>
 #include <Qt3DRender/qrenderaspect.h>
 #include <Qt3DRender/private/qrenderaspect_p.h>
+#include <Qt3DCore/private/qaspectengine_p.h>
 #include <QtGui/private/qopenglcontext_p.h>
 #include <QtGui/qopenglframebufferobject.h>
 
@@ -85,28 +86,32 @@ static SEditCameraDefinition g_editCameraDefinitions[] = {
 static int g_numEditCameras = sizeof(g_editCameraDefinitions)
                                         / sizeof(*g_editCameraDefinitions);
 
-Q3DStudioRenderer::Q3DStudioRenderer()
+Q3DStudioRenderer::Q3DStudioRenderer(bool sceneCameraMode)
     : m_dispatch(*g_StudioApp.GetCore()->GetDispatch())
     , m_doc(*g_StudioApp.GetCore()->GetDoc())
+    , m_guidesEnabled(!sceneCameraMode)
     , m_updatableEditor(m_doc)
+    , m_sceneCameraMode(sceneCameraMode)
 {
     m_dispatch.AddReloadListener(this);
     m_dispatch.AddDataModelListener(this);
     m_dispatch.AddPresentationChangeListener(this);
-    m_selectionSignal
-            = m_dispatch.ConnectSelectionChange(std::bind(&Q3DStudioRenderer::onSelectionChange,
-                                                          this, std::placeholders::_1));
-    m_dispatch.AddSceneDragListener(this);
-    m_dispatch.AddToolbarChangeListener(this);
+    if (!m_sceneCameraMode) {
+        m_selectionSignal
+                = m_dispatch.ConnectSelectionChange(std::bind(&Q3DStudioRenderer::onSelectionChange,
+                                                              this, std::placeholders::_1));
+        m_dispatch.AddSceneDragListener(this);
+        m_dispatch.AddToolbarChangeListener(this);
 
-    m_rulerColor = CStudioPreferences::GetRulerBackgroundColor();
-    m_rulerTickColor = CStudioPreferences::GetRulerTickColor();
-    m_guideColor = CStudioPreferences::GetGuideColor();
-    m_guideSelectedColor = CStudioPreferences::GetGuideSelectedColor();
-    m_guideFillColor = CStudioPreferences::GetGuideFillColor();
-    m_guideSelectedFillColor = CStudioPreferences::GetGuideFillSelectedColor();
+        m_rulerColor = CStudioPreferences::GetRulerBackgroundColor();
+        m_rulerTickColor = CStudioPreferences::GetRulerTickColor();
+        m_guideColor = CStudioPreferences::GetGuideColor();
+        m_guideSelectedColor = CStudioPreferences::GetGuideSelectedColor();
+        m_guideFillColor = CStudioPreferences::GetGuideFillColor();
+        m_guideSelectedFillColor = CStudioPreferences::GetGuideFillSelectedColor();
 
-    m_editCameraInformation.resize(g_numEditCameras);
+        m_editCameraInformation.resize(g_numEditCameras);
+    }
 
     // Create engine and presentation as RenderBufferManager needs them before presentation is set
     m_engine.reset(new Q3DSEngine);
@@ -122,6 +127,12 @@ Q3DStudioRenderer::Q3DStudioRenderer()
 
 Q3DStudioRenderer::~Q3DStudioRenderer()
 {
+    m_dispatch.RemoveDataModelListener(this);
+    m_dispatch.RemovePresentationChangeListener(this);
+    if (!m_sceneCameraMode) {
+        m_dispatch.RemoveSceneDragListener(this);
+        m_dispatch.RemoveToolbarChangeListener(this);
+    }
     Close();
 }
 
@@ -198,9 +209,10 @@ bool Q3DStudioRenderer::IsInitialized()
     return m_widget != nullptr;
 }
 
-void Q3DStudioRenderer::initialize(QOpenGLWidget *widget)
+void Q3DStudioRenderer::initialize(QOpenGLWidget *widget, bool hasPresentation)
 {
     m_widget = widget;
+    m_hasPresentation = hasPresentation;
 
     if (m_widget && m_translation.isNull() && m_hasPresentation)
         initEngineAndTranslation();
@@ -221,11 +233,6 @@ void Q3DStudioRenderer::SetViewRect(const QRect &inRect, const QSize &size)
     m_size = size;
     if (!m_resizeToQt3DSent)
         sendResizeToQt3D();
-}
-
-void Q3DStudioRenderer::setFullSizePreview(bool enabled)
-{
-    // TODO
 }
 
 void Q3DStudioRenderer::SetPolygonFillModeEnabled(bool inEnableFillMode)
@@ -344,12 +351,6 @@ bool Q3DStudioRenderer::isMouseDown() const
 void Q3DStudioRenderer::Close()
 {
     OnClosingPresentation();
-    m_engine.reset();
-    m_presentation.reset();
-    m_dispatch.RemoveDataModelListener(this);
-    m_dispatch.RemovePresentationChangeListener(this);
-    m_dispatch.RemoveSceneDragListener(this);
-    m_dispatch.RemoveToolbarChangeListener(this);
     m_widget = nullptr;
 }
 
@@ -591,10 +592,12 @@ void Q3DStudioRenderer::drawRulersAndGuides(QPainter *painter)
 
 void Q3DStudioRenderer::renderNow()
 {
-    if (m_setSubpresentationsCalled == false)
-        return;
+    // TODO: Not needed until QT3DS-2072 is implemented.
+    // TODO: Subpresentations need to be registered for scene camera preview renderer, too.
+//    if (m_setSubpresentationsCalled == false)
+//        return;
 
-    initialize(m_widget);
+    initialize(m_widget, m_hasPresentation);
 
     QOpenGLContextPrivate *ctxD = QOpenGLContextPrivate::get(m_widget->context());
     QScopedValueRollback<GLuint> defaultFboRedirectRollback(ctxD->defaultFboRedirect, 0);
@@ -618,27 +621,6 @@ void Q3DStudioRenderer::renderNow()
     } else {
         m_asyncRenderTimer.stop();
     }
-}
-
-void Q3DStudioRenderer::getPreviewFbo(QSize &outFboDim, qt3ds::QT3DSU32 &outFboTexture)
-{
-#ifdef RUNTIME_SPLIT_TEMPORARILY_REMOVED
-    if (m_Translation) {
-        outFboDim = QSize(m_Translation->m_previewFboDimensions.x,
-                          m_Translation->m_previewFboDimensions.y);
-        // The handle is a void * so first cast to size_t to avoid truncating pointer warning
-        if (m_Translation->m_previewTexture) {
-            outFboTexture = static_cast<qt3ds::QT3DSU32>(reinterpret_cast<size_t>(
-                        m_Translation->m_previewTexture->GetTextureObjectHandle()));
-        } else {
-            outFboTexture = 0;
-        }
-
-    } else {
-        outFboDim = QSize(0, 0);
-        outFboTexture = 0;
-    }
-#endif
 }
 
 void Q3DStudioRenderer::RegisterSubpresentations(
@@ -691,6 +673,11 @@ void Q3DStudioRenderer::OnClosingPresentation()
 
     if (!m_engine.isNull() && !m_translation.isNull()) {
         m_widget->makeCurrent();
+
+        // Exit the aspect engine loop before shutdown to avoid random crashes
+        if (m_engine->aspectEngine())
+            Qt3DCore::QAspectEnginePrivate::get(m_engine->aspectEngine())->exitSimulationLoop();
+
         auto renderAspectD = static_cast<Qt3DRender::QRenderAspectPrivate *>(
                     Qt3DRender::QRenderAspectPrivate::get(m_renderAspect));
         renderAspectD->renderShutdown();
@@ -698,8 +685,8 @@ void Q3DStudioRenderer::OnClosingPresentation()
         m_renderAspect = nullptr;
 
         // This will destroy render aspect
-        m_engine->setPresentation(nullptr);
         m_translation.reset();
+        m_engine->setPresentation(nullptr);
         m_engine.reset(new Q3DSEngine);
         m_presentation.reset(new Q3DSUipPresentation);
         m_viewportSettings.reset(new Q3DSViewportSettings);
@@ -1401,7 +1388,7 @@ void Q3DStudioRenderer::initEngineAndTranslation()
     createTranslation();
     setupTextRenderer();
 
-    if (m_editCameraIndex != m_pendingEditCameraIndex)
+    if (m_editCameraIndex != m_pendingEditCameraIndex && !m_sceneCameraMode)
         SetEditCamera(m_pendingEditCameraIndex);
 
     qDeleteAll(m_discardedPickers);
@@ -1410,7 +1397,7 @@ void Q3DStudioRenderer::initEngineAndTranslation()
 
 void Q3DStudioRenderer::createTranslation()
 {
-    m_translation.reset(new Q3DSTranslation(*this, m_presentation));
+    m_translation.reset(new Q3DSTranslation(*this, m_presentation, m_sceneCameraMode));
 }
 
 void Q3DStudioRenderer::reloadFonts()
@@ -1453,9 +1440,9 @@ void Q3DStudioRenderer::scheduleDirtySetUpdate()
     }
 }
 
-std::shared_ptr<IStudioRenderer> IStudioRenderer::CreateStudioRenderer()
+std::shared_ptr<IStudioRenderer> IStudioRenderer::CreateStudioRenderer(bool sceneCameraMode)
 {
-    return std::shared_ptr<IStudioRenderer>(new Q3DStudioRenderer());
+    return std::shared_ptr<IStudioRenderer>(new Q3DStudioRenderer(sceneCameraMode));
 }
 
 }

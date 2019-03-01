@@ -43,6 +43,9 @@ enum class ManipulationWidgetType
 class Q3DSManipulationWidget
 {
 public:
+    Q3DSManipulationWidget() {}
+    ~Q3DSManipulationWidget();
+
     bool hasManipulators() const;
     bool isXAxis(Q3DSGraphObject *obj) const;
     bool isYAxis(Q3DSGraphObject *obj) const;

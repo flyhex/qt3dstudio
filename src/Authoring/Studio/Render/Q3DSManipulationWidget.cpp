@@ -34,6 +34,11 @@
 
 namespace Q3DStudio {
 
+Q3DSManipulationWidget::~Q3DSManipulationWidget()
+{
+    destroyManipulators();
+}
+
 bool Q3DSManipulationWidget::hasManipulators() const
 {
     return m_manipulators.size() > 0;

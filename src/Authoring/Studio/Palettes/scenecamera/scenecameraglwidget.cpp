@@ -29,14 +29,19 @@
 #include "Qt3DSCommonPrecompile.h"
 #include "scenecameraglwidget.h"
 #include "StudioApp.h"
-#include "IStudioRenderer.h"
 #include "WGLRenderContext.h"
 #include "StudioPreferences.h"
+#include "Q3DStudioRenderer.h"
+#include "StudioProjectSettings.h"
+#include "StudioUtils.h"
 
 #include <QtGui/qopenglshaderprogram.h>
 #include <QtGui/qopengltexture.h>
 #include <QtGui/qopenglbuffer.h>
 #include <QtGui/qopenglvertexarrayobject.h>
+#include <QtGui/qopenglframebufferobject.h>
+#include <QtGui/qoffscreensurface.h>
+#include <QtWidgets/qmessagebox.h>
 
 const QVector4D defaultTextureOffset = QVector4D(0.0f, 0.0f, 1.0f, 1.0f);
 const QVector2D defaultGeometryOffset = QVector2D(1.0f, 1.0f);
@@ -55,6 +60,13 @@ SceneCameraGlWidget::SceneCameraGlWidget(QWidget *parent)
 SceneCameraGlWidget::~SceneCameraGlWidget()
 {
     cleanup();
+    m_renderer = std::shared_ptr<Q3DStudio::IStudioRenderer>();
+}
+
+void SceneCameraGlWidget::requestRender()
+{
+    if (m_renderer && m_renderer->IsInitialized())
+        m_renderer->RequestRender();
 }
 
 void SceneCameraGlWidget::initializeGL()
@@ -62,6 +74,11 @@ void SceneCameraGlWidget::initializeGL()
     initializeOpenGLFunctions();
     QObject::connect(context(), &QOpenGLContext::aboutToBeDestroyed,
                      this, &SceneCameraGlWidget::cleanup);
+
+    if (!m_renderer)
+        m_renderer = Q3DStudio::IStudioRenderer::CreateStudioRenderer(true);
+    if (!m_renderer->IsInitialized())
+        m_renderer->initialize(this, m_hasPresentation);
 
     m_program = new QOpenGLShaderProgram();
     if (!m_program->addShaderFromSourceCode(
@@ -154,23 +171,36 @@ void SceneCameraGlWidget::initializeGL()
 
 void SceneCameraGlWidget::paintGL()
 {
-    Q3DStudio::IStudioRenderer &renderer(g_StudioApp.getRenderer());
-    if (renderer.IsInitialized()) {
-        m_vao->bind();
+    if (m_renderer && m_renderer->IsInitialized()) {
+        m_fboSize = g_StudioApp.GetCore()->GetStudioProjectSettings()->getPresentationSize();
+        if (!m_fbo || m_fboSize != m_fbo->size()) {
+            delete m_fbo;
+            m_fbo = new QOpenGLFramebufferObject(m_fboSize,
+                                                 QOpenGLFramebufferObject::CombinedDepthStencil);
+            m_renderer->SetViewRect(QRect(0, 0, m_fboSize.width(), m_fboSize.height()), m_fboSize);
+        }
+        m_fbo->bind();
+        m_renderer->renderNow();
+        m_fbo->bindDefault();
 
+        // Clean the OpenGL state
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_STENCIL_TEST);
+        glDisable(GL_CULL_FACE);
         glDisable(GL_SCISSOR_TEST);
         glDisable(GL_BLEND);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        glViewport(0, 0, width() * m_pixelRatio, height() * m_pixelRatio);
+
+        m_program->bind();
+        m_vao->bind();
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        QSize fboSize;
-        qt3ds::QT3DSU32 textureId;
-        renderer.getPreviewFbo(fboSize, textureId);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, GLuint(textureId));
+        glBindTexture(GL_TEXTURE_2D, m_fbo->texture());
 
         m_program->setUniformValueArray(m_uniformTextureOffset, &m_textureOffset, 1);
         m_program->setUniformValueArray(m_uniformGeometryOffset, &m_geometryOffset, 1);
@@ -178,23 +208,36 @@ void SceneCameraGlWidget::paintGL()
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
         m_vao->release();
+        m_program->release();
     }
 }
 
-void SceneCameraGlWidget::resizeGL(int, int)
+void SceneCameraGlWidget::resizeGL(int w, int h)
 {
     // We need to update immediately to avoid flicker
-    update();
+     update();
+
+    const qreal pixelRatio = StudioUtils::devicePixelRatio(window()->windowHandle());
+    if (pixelRatio != m_pixelRatio) {
+        m_pixelRatio = pixelRatio;
+        delete m_fbo;
+        m_fbo = nullptr;
+    }
+
+    if (m_renderer && m_renderer->IsInitialized())
+        m_renderer->RequestRender();
 }
 
 void SceneCameraGlWidget::cleanup()
 {
     makeCurrent();
 
+    delete m_fbo;
     delete m_program;
     delete m_vertexBuffer;
     delete m_uvBuffer;
     delete m_vao;
+    m_fbo = nullptr;
     m_program = nullptr;
     m_vertexBuffer = nullptr;
     m_uvBuffer = nullptr;
@@ -203,6 +246,9 @@ void SceneCameraGlWidget::cleanup()
     m_uniformGeometryOffset = 0;
     m_textureOffset = defaultTextureOffset;
     m_geometryOffset = defaultGeometryOffset;
+
+    if (m_renderer)
+        m_renderer->Close();
 
     doneCurrent();
 }

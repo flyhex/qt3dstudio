@@ -1628,7 +1628,6 @@ void CMainFrame::onUpdateViewSceneCamera()
     const bool cameraVisible = m_paletteManager->IsControlVisible(
                 CPaletteManager::CONTROLTYPE_SCENECAMERA);
     m_ui->actionSceneCamera->setChecked(cameraVisible);
-    g_StudioApp.getRenderer().setFullSizePreview(cameraVisible);
 }
 
 //==============================================================================

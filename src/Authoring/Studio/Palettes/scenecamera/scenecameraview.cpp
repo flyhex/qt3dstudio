@@ -36,6 +36,7 @@
 #include "Q3DSPlayerWnd.h"
 #include "MouseCursor.h"
 #include "ResourceCache.h"
+#include "Dispatch.h"
 
 #include <QtGui/qevent.h>
 #include <QtWidgets/qscrollbar.h>
@@ -50,6 +51,8 @@ SceneCameraView::SceneCameraView(CMainFrame *mainFrame, QWidget *parent) :
 {
     m_ui->setupUi(this);
 
+    g_StudioApp.GetCore()->GetDispatch()->AddPresentationChangeListener(this);
+
     m_cursorPan = CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_EDIT_CAMERA_PAN);
     m_cursorZoom = CResourceCache::GetInstance()->GetCursor(CMouseCursor::CURSOR_EDIT_CAMERA_ZOOM);
 
@@ -59,8 +62,6 @@ SceneCameraView::SceneCameraView(CMainFrame *mainFrame, QWidget *parent) :
 
     connect(m_ui->zoomSlider, &QSlider::valueChanged,
             this, &SceneCameraView::handleSliderValueChange);
-    connect(mainFrame->GetPlayerWnd(), &Q3DStudio::Q3DSPlayerWnd::newFrame,
-            this, &SceneCameraView::requestUpdate);
     connect(m_ui->scrollArea, &SceneCameraScrollArea::needUpdate,
             this, &SceneCameraView::requestUpdate);
     connect(&m_updateTimer, &QTimer::timeout, this, &SceneCameraView::doUpdate);
@@ -68,7 +69,18 @@ SceneCameraView::SceneCameraView(CMainFrame *mainFrame, QWidget *parent) :
 
 SceneCameraView::~SceneCameraView()
 {
+    g_StudioApp.GetCore()->GetDispatch()->RemovePresentationChangeListener(this);
     delete m_ui;
+}
+
+void SceneCameraView::OnNewPresentation()
+{
+    m_ui->scrollArea->setPresentationAvailable(true);
+}
+
+void SceneCameraView::OnClosingPresentation()
+{
+    m_ui->scrollArea->setPresentationAvailable(false);
 }
 
 void SceneCameraView::wheelEvent(QWheelEvent *e)
@@ -151,7 +163,7 @@ void SceneCameraView::doUpdate()
     // There is no event for presentation size change, so update every frame to catch the change
     m_ui->scrollArea->setPresentationSize(
                 g_StudioApp.GetCore()->GetStudioProjectSettings()->getPresentationSize());
-    m_ui->scrollArea->glWidget()->update();
+    m_ui->scrollArea->glWidget()->requestRender();
 }
 
 void SceneCameraView::requestUpdate()
