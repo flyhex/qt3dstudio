@@ -67,7 +67,7 @@ public:
     void destroyManipulators();
 
     void applyProperties(Q3DSGraphObject *node, Q3DSCameraNode *camera,
-                         Q3DSLayerNode *layer);
+                         Q3DSLayerNode *layer, bool globalSpace);
 
 private:
     ManipulationWidgetType m_type = ManipulationWidgetType::Translation;

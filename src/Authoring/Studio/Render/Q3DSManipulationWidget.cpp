@@ -299,12 +299,15 @@ void Q3DSManipulationWidget::destroyManipulators()
 }
 
 void applyNodeProperties(Q3DSNode *node, Q3DSCameraNode *camera, Q3DSLayerNode *layer,
-                         Q3DSModelNode *model, const QVector3D &modelScale) {
+                         Q3DSModelNode *model, const QVector3D &modelScale, bool globalSpace) {
 
     QVector3D position;
     QVector3D rotation;
     QVector3D dummyScale;
     calculateGlobalProperties(node, position, rotation, dummyScale);
+
+    if (globalSpace)
+        rotation = QVector3D(0, 0, 0);
 
     Q3DSPropertyChangeList list;
     list.append(model->setPosition(position));
@@ -340,7 +343,7 @@ void applyNodeProperties(Q3DSNode *node, Q3DSCameraNode *camera, Q3DSLayerNode *
 }
 
 void Q3DSManipulationWidget::applyProperties(Q3DSGraphObject *node, Q3DSCameraNode *camera,
-                                             Q3DSLayerNode *layer)
+                                             Q3DSLayerNode *layer, bool globalSpace)
 {
     for (int i = 0; i < m_manipulators.size(); ++i) {
         if (node->type() == Q3DSGraphObject::Model
@@ -351,7 +354,7 @@ void Q3DSManipulationWidget::applyProperties(Q3DSGraphObject *node, Q3DSCameraNo
                 || node->type() == Q3DSGraphObject::Text
                 || node->type() == Q3DSGraphObject::Component) {
             applyNodeProperties(static_cast<Q3DSNode *>(node), camera, layer, m_manipulators[i],
-                                m_manipulatorScales[i]);
+                                m_manipulatorScales[i], globalSpace);
         }
     }
 

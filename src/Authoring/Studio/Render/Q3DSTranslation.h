@@ -160,7 +160,10 @@ private:
                                     qt3dsdm::Qt3DSDMPropertyHandle property);
 
     QVector4D calculateWidgetArrowDrag(const QPoint &mousePos, const QVector3D &dragPlane = {},
-                                       const QVector3D &arrowDir = {});
+                                       const QVector3D &arrowDir = {}, Q3DSNode *node = nullptr);
+    QVector3D calculateWidgetDragScale(const QPoint &mousePos, const Q3DSNode *node,
+                                       float scaleRatio, const QVector3D &planeNormal = {},
+                                       const QVector3D &axis = {});
 
     Q3DStudioRenderer &m_studioRenderer;
 
@@ -233,6 +236,7 @@ private:
 
     DragState m_beginDragState;
     DragState m_currentDragState;
+    QVector3D m_beginWidgetPos;
 
 public:
     qt3dsdm::SComposerObjectDefinitions &objectDefinitions() const
