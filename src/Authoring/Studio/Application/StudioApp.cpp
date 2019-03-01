@@ -84,10 +84,14 @@ int main(int argc, char *argv[])
     bool isOpenGLES = false;
 
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 #if !defined(Q_OS_MACOS)
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 #endif
     SharedTools::QtSingleApplication guiApp(QStringLiteral("Qt3DStudio"), argc, argv);
+
+    // Fix for uia and uip file attribute random ordering (see QTBUG-8158)
+    qSetGlobalQHashSeed(1720419);
 
 #if defined(Q_OS_MACOS)
     QSurfaceFormat openGL33Format;
@@ -1726,6 +1730,8 @@ bool CStudioApp::OnLoadDocument(const QString &inDocument, bool inShowStartupDia
         m_core->getProjectFile().updateDocPresentationId();
         m_core->getProjectFile().loadSubpresentationsAndDatainputs(m_subpresentations,
                                                                    m_dataInputDialogItems);
+        m_core->getProjectFile().loadVariants();
+        GetViews()->getMainFrame()->getSlideView()->refreshVariants();
         getRenderer().RegisterSubpresentations(m_subpresentations);
 
         m_authorZoom = false;
@@ -1786,6 +1792,13 @@ void CStudioApp::saveDataInputsToProjectFile()
                 diNode.setAttribute(QStringLiteral("evaluator"), item->valueString);
             }
 #endif
+            // Let's allow storing key even if actual metadata is empty, as we
+            // do not know how the user code is going to interpret metadata contents.
+            if (!item->metaDataKey.isEmpty()) {
+                diNode.setAttribute(QStringLiteral("metadatakey"), item->metaDataKey);
+                if (!item->metaData.isEmpty())
+                    diNode.setAttribute(QStringLiteral("metadata"), item->metaData);
+            }
             assetsNode.appendChild(diNode);
         }
         StudioUtils::commitDomDocumentSave(file, doc);

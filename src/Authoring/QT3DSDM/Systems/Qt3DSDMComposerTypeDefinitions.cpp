@@ -316,6 +316,7 @@ struct DataConstructor<SObjectRefType>
 #define QT3DS_PROPNAME_lightmapradiosity "lightmapradiosity"
 #define QT3DS_PROPNAME_lightmapshadow "lightmapshadow"
 #define QT3DS_PROPNAME_controlledproperty "controlledproperty"
+#define QT3DS_PROPNAME_variants "variants"
 
 QString ComposerObjectTypes::Convert(ComposerObjectTypes::Enum inType)
 {
@@ -337,7 +338,7 @@ ComposerObjectTypes::Enum ComposerObjectTypes::Convert(const QString &inType)
 {
 
 #define HANDLE_COMPOSER_OBJECT_TYPE(name, propmacro)                                               \
-    if (inType == QLatin1String(QT3DS_PROPNAME_##name))                                                      \
+    if (inType == QLatin1String(QT3DS_PROPNAME_##name))                                            \
         return ComposerObjectTypes::name;
     ITERATE_COMPOSER_OBJECT_TYPES
 #undef HANDLE_COMPOSER_OBJECT_TYPE
@@ -372,7 +373,7 @@ ComposerPropertyNames::Enum ComposerPropertyNames::Convert(const QString &inType
 {
 #define HANDLE_COMPOSER_PROPERTY_DUPLICATE(name, memberName, type, defaultValue)
 #define HANDLE_COMPOSER_PROPERTY_NO_DEFAULT(name, memberName, type)                                \
-    if (inType == QLatin1String(QT3DS_PROPNAME_##name))                                                      \
+    if (inType == QLatin1String(QT3DS_PROPNAME_##name))                                            \
         return name;
 #define HANDLE_COMPOSER_PROPERTY(name, memberName, type, defaultValue)                             \
     HANDLE_COMPOSER_PROPERTY_NO_DEFAULT(name, memberName, type)
@@ -397,11 +398,11 @@ ComposerPropertyNames::Enum ComposerPropertyNames::Convert(const QString &inType
 
 #define HANDLE_COMPOSER_OBJECT_TYPE(name, propmacro)                                               \
     SComposerTypePropertyDefinition<ComposerObjectTypes::name>::SComposerTypePropertyDefinition(   \
-        IDataCore &inCore, Qt3DSDMInstanceHandle inInstance)                                        \
-        : reserved(false) propmacro                                                  \
-    { \
-        Q_UNUSED(inCore);\
-        Q_UNUSED(inInstance);\
+        IDataCore &inCore, Qt3DSDMInstanceHandle inInstance)                                       \
+        : reserved(false) propmacro                                                                \
+    {                                                                                              \
+        Q_UNUSED(inCore);                                                                          \
+        Q_UNUSED(inInstance);                                                                      \
     }
 ITERATE_COMPOSER_OBJECT_TYPES
 #undef HANDLE_COMPOSER_OBJECT_TYPE

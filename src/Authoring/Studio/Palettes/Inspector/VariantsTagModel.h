@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2008 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2019 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -27,29 +26,37 @@
 **
 ****************************************************************************/
 
-#ifndef INCLUDED_ITIMELINE_KEYFRAMES_MANAGER_H
-#define INCLUDED_ITIMELINE_KEYFRAMES_MANAGER_H 1
+#ifndef VARIANTSTAGMODEL_H
+#define VARIANTSTAGMODEL_H
 
-#pragma once
+#include <QtCore/qabstractitemmodel.h>
 
-#include "IKeyframesManager.h"
-
-//=============================================================================
-/**
- * Interface to manage keyframes related actions in the Timeline
- */
-//=============================================================================
-class ITimelineKeyframesManager : public IKeyframesManager
+class VariantsTagModel : public QAbstractListModel
 {
-public:
-    virtual ~ITimelineKeyframesManager() {}
+    Q_OBJECT
 
-    virtual void SetKeyframeTime(long inTime) = 0;
-    virtual void SetKeyframesDynamic(bool inDynamic) = 0;
-    virtual long OffsetSelectedKeyframes(long inOffset) = 0;
-    virtual bool CanMakeSelectedKeyframesDynamic() = 0;
-    virtual void CommitChangedKeyframes() = 0;
-    virtual void RollbackChangedKeyframes() = 0;
+public:
+    explicit VariantsTagModel(QObject *parent = nullptr);
+
+    enum Roles {
+        TagRole = Qt::UserRole + 1,
+        SelectedRole,
+    };
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = TagRole) const override;
+
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
+
+    void init(const QVector<std::pair<QString, bool> > &data);
+    void updateTagState(const QString &tag, bool selected);
+    QString serialize(const QString &groupName) const;
+
+protected:
+      QHash<int, QByteArray> roleNames() const override;
+
+private:
+      QVector<std::pair<QString, bool> > m_data; // [{tagName, selectedState}, ...]
 };
 
-#endif // INCLUDED_IKEYFRAMES_MANAGER_H
+#endif // VARIANTSTAGMODEL_H

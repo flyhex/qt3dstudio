@@ -55,7 +55,7 @@ class CStudioApp;
 class CControl;
 class CDialogControl;
 class CProgressView;
-class ITimelineKeyframesManager;
+class KeyframeManager;
 class ITimeChangeCallback;
 
 class CDialogs : public QObject
@@ -120,6 +120,8 @@ public:
                             bool isCopy = false);
     QString GetNewDocumentChoice(const QString &inInitialDirectory = {}, bool isProject = true);
     QString GetFileOpenChoice(const QString &inInitialDirectory = {});
+    QString getExportVariantsDlg();
+    QString getImportVariantsDlg();
 
     void DisplayImportFailed(const QUrl &inURL, const QString &inDescription, bool inWarningsOnly);
     void DisplayLoadingPresentationFailed(const QFileInfo &loadFileInfo,
@@ -166,8 +168,8 @@ public:
                                         const Q3DStudio::CString &inRecommendedVersion);
 
     void asyncDisplayTimeEditDialog(long time, IDoc *doc, long objectAssociation,
-                                    ITimelineKeyframesManager *keyframesManager = nullptr) const;
-    void asyncDisplayDurationEditDialog(long startTime, long endTime, IDoc *doc,
+                                    KeyframeManager *keyframesManager = nullptr) const;
+    void asyncDisplayDurationEditDialog(long startTime, long endTime,
                                         ITimeChangeCallback *callback) const;
 
     enum class WidgetBrowserAlign {

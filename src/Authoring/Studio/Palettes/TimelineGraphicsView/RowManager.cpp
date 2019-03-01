@@ -98,8 +98,8 @@ RowTree *RowManager::createRowFromBinding(ITimelineItemBinding *binding, RowTree
     ITimelineTimebar *timebar = binding->GetTimelineItem()->GetTimebar();
     RowTimeline *rowTimeline = newRow->rowTimeline();
     rowTimeline->clearBoundChildren();
-    rowTimeline->setStartTime(timebar->GetStartTime() * .001);
-    rowTimeline->setEndTime(timebar->GetEndTime() * .001);
+    rowTimeline->setStartTime(timebar->GetStartTime());
+    rowTimeline->setEndTime(timebar->GetEndTime());
     rowTimeline->setBarColor(timebar->GetTimebarColor());
 
     // create property rows
@@ -113,12 +113,12 @@ RowTree *RowManager::createRowFromBinding(ITimelineItemBinding *binding, RowTree
 
         // add keyframes
         for (int j = 0; j < prop_i->GetKeyframeCount(); j++) {
-            Qt3DSDMTimelineKeyframe *kf =
-                    static_cast<Qt3DSDMTimelineKeyframe *>(prop_i->GetKeyframeByIndex(j));
+            Qt3DSDMTimelineKeyframe *kf
+                    = static_cast<Qt3DSDMTimelineKeyframe *>(prop_i->GetKeyframeByIndex(j));
 
-            QList<Keyframe *> addedKeyframes =
-                    m_scene->keyframeManager()->insertKeyframe(propRow->rowTimeline(),
-                    static_cast<double>(kf->GetTime()) * .001, false);
+            QList<Keyframe *> addedKeyframes
+                    = m_scene->keyframeManager()->insertKeyframe(propRow->rowTimeline(),
+                    kf->GetTime(), false);
 
             Keyframe *kfUI = addedKeyframes.at(0);
             kf->setUI(kfUI);
@@ -151,7 +151,7 @@ RowTree *RowManager::getOrCreatePropertyRow(RowTree *masterRow, const QString &p
 {
     RowTree *propertyRow = masterRow->getPropertyRow(propType);
     if (!propertyRow)
-        propertyRow = createRow(OBJTYPE_UNKNOWN, masterRow, 0, propType, index);
+        propertyRow = createRow(OBJTYPE_UNKNOWN, masterRow, {}, propType, index);
 
     propertyRow->updateLock(masterRow->locked());
 
@@ -270,14 +270,14 @@ void RowManager::clearSelection()
 // set updateMaxDuration to false.
 void RowManager::updateRulerDuration(bool updateMaxDuration)
 {
-    double duration = 0;
-    double maxDuration = 0; // for setting correct size for the view so scrollbars appear correctly
+    long duration = 0;
+    long maxDuration = 0; // for setting correct size for the view so scrollbars appear correctly
     if (m_layoutTree->count() > 1) {
         auto rootRow = static_cast<RowTree *>(m_layoutTree->itemAt(1)->graphicsItem());
         bool isComponent = rootRow->rowType() == OBJTYPE_COMPONENT;
         for (int i = 1; i < m_layoutTree->count(); ++i) {
             RowTree *row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
-            double dur_i = row_i->rowTimeline()->getEndTime();
+            long dur_i = row_i->rowTimeline()->getEndTime();
 
             if (((isComponent && i != 1) || row_i->rowType() == OBJTYPE_LAYER) && dur_i > duration)
                 duration = dur_i;

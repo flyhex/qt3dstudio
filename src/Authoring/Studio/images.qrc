@@ -286,6 +286,29 @@
         <file>images/matdef-active@2x.png</file>
         <file>images/matdef-disabled.png</file>
         <file>images/matdef-disabled@2x.png</file>
+        <file>images/playback_tools_low-04@2x.png</file>
+        <file>images/Action-Action@2x.png</file>
+        <file>images/Action-ChildAction@2x.png</file>
+        <file>images/Action-ChildMasterAction@2x.png</file>
+        <file>images/Action-ComponentAction@2x.png</file>
+        <file>images/Action-ComponentMasterAction@2x.png</file>
+        <file>images/Action-MasterAction@2x.png</file>
+        <file>images/Insert-Left@2x.png</file>
+        <file>images/Insert-Right@2x.png</file>
+        <file>images/Toggle-Empty@2x.png</file>
+        <file>images/keyframe-hidden-normal@2x.png</file>
+        <file>images/Keyframe-MasterDynamic-Selected@2x.png</file>
+        <file>images/Keyframe-MasterDynamic-Normal@2x.png</file>
+        <file>images/Keyframe-MasterDynamic-Disabled@2x.png</file>
+        <file>images/Keyframe-Master-Selected@2x.png</file>
+        <file>images/Keyframe-Master-Normal@2x.png</file>
+        <file>images/Keyframe-Master-Disabled@2x.png</file>
+        <file>images/Keyframe-PropertyDynamic-Selected@2x.png</file>
+        <file>images/Keyframe-PropertyDynamic-Normal@2x.png</file>
+        <file>images/Keyframe-PropertyDynamic-Disabled@2x.png</file>
+        <file>images/Keyframe-Property-Selected@2x.png</file>
+        <file>images/Keyframe-Property-Normal@2x.png</file>
+        <file>images/Keyframe-Property-Disabled@2x.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="open_dialog.png">images/open_dialog.png</file>

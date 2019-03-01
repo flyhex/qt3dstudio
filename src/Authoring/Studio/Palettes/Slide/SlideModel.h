@@ -44,7 +44,8 @@ public:
     enum Roles {
         NameRole = Qt::DisplayRole,
         HandleRole = Qt::UserRole + 1,
-        SelectedRole
+        SelectedRole,
+        VariantsRole
     };
 
     SlideModel(int slideCount, QObject *parent = nullptr);
@@ -76,6 +77,8 @@ public:
     void refreshSlideLabel(qt3dsdm::Qt3DSDMInstanceHandle instanceHandle,
                            qt3dsdm::Qt3DSDMPropertyHandle propertyHandle);
     void setSelectedSlideIndex(const QModelIndex &index);
+    void refreshVariants(const QStringList &variants = {});
+    QStringList variants() const { return m_variants; }
 
 private:
     bool hasSlideWithName(const QString &name) const;
@@ -89,6 +92,7 @@ private:
     int m_selectedRow = -1;
     int m_rearrangeStartRow = -1;
     int m_rearrangeEndRow = -1;
+    QStringList m_variants; // model for variants tags display
     QHash<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMSlideHandle> m_slideLookupHash;
 };
 

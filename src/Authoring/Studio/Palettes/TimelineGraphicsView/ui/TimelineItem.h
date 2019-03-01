@@ -51,7 +51,7 @@ public:
         TypeRowMover
     };
 
-   int type() const;
+   int type() const override;
 };
 
 #endif // TIMELINEITEM_H

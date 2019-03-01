@@ -73,6 +73,7 @@ public:
     void openBarColorDialog();
     void onTimeBarColorChanged(const QColor &color);
     void setSelectedTimeBarsColor(const QColor &color, bool preview);
+    void refreshVariants();
     void enableDnD(bool b = true);
     bool dndActive() const;
     bool blockMousePress() const;
@@ -87,16 +88,10 @@ public:
     bool hasSelectedKeyframes() const;
 
     // CControl
-    void OnDraw(CRenderer *inRenderer, CRct &inDirtyRect, bool inIgnoreValidation = false) override;
-    void Draw(CRenderer *inRenderer) override;
-    void OnGainFocus() override;
     CDropTarget *FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags,
                                    EStudioObjectType objectType,
                                    Q3DStudio::DocumentEditorFileType::Enum fileType) override;
-    bool OnMouseHover(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
     void OnMouseMove(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
-    void OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
-    void OnMouseUp(CPt inPoint, Qt::KeyboardModifiers inFlags) override;
     CPt GetPreferredSize() override;
     void SetSize(long inX, long inY) override;
     bool isFullReconstructPending() const { return m_fullReconstruct; }
@@ -115,7 +110,7 @@ protected:
     void onKeyframeDeleted(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
                            qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe);
     void onKeyframeUpdated(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe);
-    void onFirstKeyframeDynamicSet(qt3dsdm::Qt3DSDMAnimationHandle inAnimation, bool inDynamic);
+    void onFirstKeyframeDynamicSet(qt3dsdm::Qt3DSDMAnimationHandle inAnimation);
     void onAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle parentInstance,
                             qt3dsdm::Qt3DSDMPropertyHandle property);
     void onActionEvent(qt3dsdm::Qt3DSDMActionHandle inAction, qt3dsdm::Qt3DSDMSlideHandle inSlide,
@@ -164,6 +159,7 @@ private:
     QSize m_preferredSize;
     QMultiHash<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle> m_dirtyProperties;
     QHash<int, int> m_moveMap; // key: child handle, value: parent handle
+    QHash<int, QStringList> m_variantsMap; // key: obj handle, value: variant groups
     QSet<int> m_actionChanges; // key: object handle
     QSet<int> m_subpresentationChanges; // key: object handle
     QMultiHash<int, int> m_keyframeChangesMap; // key: object handle, value: property handle

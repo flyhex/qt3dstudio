@@ -33,6 +33,7 @@
 #include <QtXml/qdom.h>
 #include <QtCore/qsavefile.h>
 #include <QtCore/qxmlstream.h>
+#include <QtGui/qwindow.h>
 
 QT_FORWARD_DECLARE_CLASS(QWindow)
 

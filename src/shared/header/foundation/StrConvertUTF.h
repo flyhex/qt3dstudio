@@ -91,7 +91,7 @@ namespace foundation {
                                         UTF16 **targetStart, UTF16 *targetEnd,
                                         ConversionFlags flags)
         {
-            return ConvertUTF8toUTF16(sourceStart, sourceEnd, targetStart, targetEnd, flags);
+            return Unicode_ConvertUTF8toUTF16(sourceStart, sourceEnd, targetStart, targetEnd, flags);
         }
     };
 
@@ -102,7 +102,7 @@ namespace foundation {
                                         UTF32 **targetStart, UTF32 *targetEnd,
                                         ConversionFlags flags)
         {
-            return ConvertUTF8toUTF32(sourceStart, sourceEnd, targetStart, targetEnd, flags);
+            return Unicode_ConvertUTF8toUTF32(sourceStart, sourceEnd, targetStart, targetEnd, flags);
         }
     };
     template <>
@@ -111,7 +111,7 @@ namespace foundation {
         static ConversionResult Convert(const UTF16 **sourceStart, const UTF16 *sourceEnd,
                                         UTF8 **targetStart, UTF8 *targetEnd, ConversionFlags flags)
         {
-            return ConvertUTF16toUTF8(sourceStart, sourceEnd, targetStart, targetEnd, flags);
+            return Unicode_ConvertUTF16toUTF8(sourceStart, sourceEnd, targetStart, targetEnd, flags);
         }
     };
     template <>
@@ -121,7 +121,7 @@ namespace foundation {
                                         UTF32 **targetStart, UTF32 *targetEnd,
                                         ConversionFlags flags)
         {
-            return ConvertUTF16toUTF32(sourceStart, sourceEnd, targetStart, targetEnd, flags);
+            return Unicode_ConvertUTF16toUTF32(sourceStart, sourceEnd, targetStart, targetEnd, flags);
         }
     };
     template <>
@@ -130,7 +130,7 @@ namespace foundation {
         static ConversionResult Convert(const UTF32 **sourceStart, const UTF32 *sourceEnd,
                                         UTF8 **targetStart, UTF8 *targetEnd, ConversionFlags flags)
         {
-            return ConvertUTF32toUTF8(sourceStart, sourceEnd, targetStart, targetEnd, flags);
+            return Unicode_ConvertUTF32toUTF8(sourceStart, sourceEnd, targetStart, targetEnd, flags);
         }
     };
     template <>
@@ -140,7 +140,7 @@ namespace foundation {
                                         UTF16 **targetStart, UTF16 *targetEnd,
                                         ConversionFlags flags)
         {
-            return ConvertUTF32toUTF16(sourceStart, sourceEnd, targetStart, targetEnd, flags);
+            return Unicode_ConvertUTF32toUTF16(sourceStart, sourceEnd, targetStart, targetEnd, flags);
         }
     };
 

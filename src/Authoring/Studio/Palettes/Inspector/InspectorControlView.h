@@ -39,6 +39,7 @@
 #include "DataInputSelectView.h"
 
 class InspectorControlModel;
+class VariantsGroupModel;
 class CInspectableBase;
 class ImageChooserView;
 class DataInputSelectView;
@@ -72,6 +73,8 @@ public:
     QString titleIcon() const;
 
     Q_INVOKABLE void showContextMenu(int x, int y, int handle, int instance);
+    Q_INVOKABLE void showTagContextMenu(int x, int y, const QString &group, const QString &tag);
+    Q_INVOKABLE void showGroupContextMenu(int x, int y, const QString &group);
     Q_INVOKABLE QObject *showImageChooser(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QObject *showFilesChooser(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QObject *showMeshChooser(int handle, int instance, const QPoint &point);
@@ -84,6 +87,7 @@ public:
     Q_INVOKABLE QString convertPathToProjectRoot(const QString &presentationPath);
     Q_INVOKABLE bool isRefMaterial(int instance) const;
     Q_INVOKABLE QString noneString() const;
+    Q_INVOKABLE bool isEditable(int handle) const;
 
     // IDataModelListener
     void OnBeginDataModelNotifications() override;
@@ -125,6 +129,7 @@ private:
 
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_connections;
     QColor m_backgroundColor;
+    VariantsGroupModel *m_variantsGroupModel = nullptr;
     InspectorControlModel *m_inspectorControlModel = nullptr;
     CInspectableBase *m_inspectableBase = nullptr;
     QPointer<ImageChooserView> m_imageChooserView;

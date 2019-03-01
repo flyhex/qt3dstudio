@@ -32,7 +32,7 @@
 \page studio-inspector-palette.html
 \ingroup qt3dstudio-studio
 
- The Inspector palette is the most-used
+The Inspector palette is the most-used
 palette in Studio. It is used to control which properties are animated
 or change on a per-slide basis and the values for each of those
 properties.
@@ -116,7 +116,7 @@ shown in the Inspector palette \e{specific to the active slide}:
   over at time 0.
 \li
   \c{PingPong} - Upon reaching the final time the playhead starts
-  playing backwards; upon reaching time 0 the playeah starts playing
+  playing backwards; upon reaching time 0 the playhead starts playing
   forwards again.
 \li
   \c{Ping} - Similar to \e{PingPong}, but when the playhead
@@ -134,6 +134,10 @@ shown in the Inspector palette \e{specific to the active slide}:
   \b{Pause} setting is particularly useful when QML application is going
   to control the time for the context and you don't
   need or want the runtime attempting to do its own work.
+\li
+  \b{Use Background} - Clear the contents to a solid color before each frame.
+\li
+  \b{Background Color} - Color to use for the background.
 \endlist
 
 \target layer-properties
@@ -144,23 +148,6 @@ in the Inspector palette:
 
 \list
 \li
-  \b{Disable Depth Test} - Controls whether depth-testing is used
-  when rendering objects in the layer. For details see the discussion on
-  the
-  \e{\l{best-practices-disable-depth-test.html}{Disable Depth Test}} page.
-\li
-  \b{Progressive AA} - Controls whether progressive anti-aliasing
-  is used when rendering the layer. For details see the discussion on
-  \e{\l{best-practices-antialiasing.html#progressive-aa}{Progressive Anti-Aliasing}}.
-\li
-  \b{Multisample AA} - Controls whether multisample anti-aliasing
-  is used when rendering the layer. For details see the discussion on
-  \e{\l{best-practices-antialiasing.html#multisample-aa}{Multisample Anti-Aliasing}}.
-\li
-  \b{Temporal AA} - Controls whether temporal anti-aliasing is used
-  when rendering the layer. For details see the discussion on
-  \e{\l{best-practices-antialiasing.html#temporal-aa}{Temporal Anti-Aliasing}}.
-\li
   \b{Layer Background} - Controls how the layer clears when it
   starts to render each frame:
 \list
@@ -168,14 +155,14 @@ in the Inspector palette:
   \c{Transparent} - Clear the layer to transparent each frame so
   that content behind it can be seen.
 \li
-  \c{Unspecified} - Do not clear layer each frame. This provides a
-  slight performance boost if the layer is filled with content, and
-  hence will fully overwrite the previous result.
-\li
   \c{Solid Color} - Clear this layer to a non-transparent color.
   This provides a slight performance boost if the layer fills the
   viewport \b{and} if you turn off \"Enable Background Color\" for
   the Scene.
+\li
+  \c{Unspecified} - Do not clear layer each frame. This provides a
+  slight performance boost if the layer is filled with content, and
+  hence will fully overwrite the previous result.
 \endlist
 \li
   \b{Blend Mode} - Controls how colors in the active layer blends with colors in the background
@@ -201,6 +188,23 @@ in the Inspector palette:
   \c{Colordodge} - Colors are blended by inverted division, producing a lighter result. Lighter
   than \c Screen.
 \endlist
+\li
+  \b{Sub-Presentation} - Select a presentation (\.uip) or QML (\c.qml) file to render as a
+  sub-presentation on this layer. Other objects on the layer will not render when a sub-presentation
+  is applied. For more information, see
+  \e{\l{Using Sub-Presentations}}.
+\li
+  \b{Progressive AA} - Controls whether progressive anti-aliasing
+  is used when rendering the layer. For details see the discussion on
+  \e{\l{best-practices-antialiasing.html#progressive-aa}{Progressive Anti-Aliasing}}.
+\li
+  \b{Multisample AA} - Controls whether multisample anti-aliasing
+  is used when rendering the layer. For details see the discussion on
+  \e{\l{best-practices-antialiasing.html#multisample-aa}{Multisample Anti-Aliasing}}.
+\li
+  \b{Temporal AA} - Controls whether temporal anti-aliasing is used
+  when rendering the layer. For details see the discussion on
+  \e{\l{best-practices-antialiasing.html#temporal-aa}{Temporal Anti-Aliasing}}.
 \li
   \b{Horizontal Fields} - Choose which two fields of \c{Left},
   \c{Width}, and \c{Right} are used to control the horizontal
@@ -231,11 +235,6 @@ in the Inspector palette:
   \b{Bottom} - The distance between the bottom edges of the
   presentation and the layer, either in pixels or as a percentage of the
   presentation's height.
-\li
-  \b{Sub-Presentation} - Select a presentation (\.uip) or QML (\c.qml) file to render as a
-  sub-presentation on this layer. Other objects on the layer will not render when a sub-presentation
-  is applied. For more information, see
-  \e{\l{Using Sub-Presentations}}.
 \li
   \b{Ambient Occlusion} - Controls the strength of ambient
   occlusion (AO). AO is a form of approximated global illumination which
@@ -305,35 +304,6 @@ in the Inspector palette:
     to your content.
   \endlist
 \li
-  \b{Shadow Strength} - Controls the strength of directional
-  occlusion (DO). DO is a form of approximated directional shadowing. A
-  value of \c{100} causes full darkness shadows; lower values cause
-  the shadowing to appear lighter. A value of \c{0} disables DO
-  entirely, improving performance at a cost to the visual realism of 3D
-  objects rendered in the layer. All values other than \c{0} have
-  the same impact to the performance.
-  \list
-  \li
-    \note Directional occlusion will only render on \e{Standard Materials}
-    that have the \l{standard-materials}{Lighting property} set to \c{Pixel}.
-  \endlist
-\li
-  \b{Shadow Distance} - Roughly how far (in world units) the faked
-  shadows spread away from objects.
-\li
-  \b{Shadow Softness} - Crossfade amount between sharp shadows and
-  smooth gradations.
-\li
-  \b{Shadow Threshold} - A cutoff distance preventing objects from
-  self-shadowing. Higher values increase the distance required between
-  objects before DO is seen.
-  \list
-  \li
-    \note If you see DO shadowing in regions where there should be
-    no shadowing, increase the Shadow Threshold value slightly to clip
-    away close results.
-  \endlist
-\li
   \b{Light Probe} - Select an image (preferably a high dynamic
   range image (\c{.hdr})) to use to light the scene, either instead of or
   in addition to standard lights. If selected, note that this image will
@@ -352,6 +322,14 @@ in the Inspector palette:
   \b{Secondary Light Probe} - Select an image to use as secondary IBL light source.
 \li
   \b{Probe Crossfade} - The blend amount between the primary and secondary light probes.
+\li
+  \b{Disable Depth Test} - Controls whether depth-testing is used
+  when rendering objects in the layer. For details see the discussion on
+  the
+  \e{\l{best-practices-disable-depth-test.html}{Disable Depth Test}} page.
+\li
+  \b{Disable Depth Prepass} - Controls whether depth prepassing is used when rendering objects
+  in the layer. Can be enabled to optimize render speed on layers with low depth complexity.
 \endlist
 
 \target transform-properties
@@ -547,7 +525,7 @@ in the Inspector palette (in addition to the
  - Simulate
   shadows using this light?
 \li
-  \b{Shadow Darkness} - How dark should the cast shadows be?
+  \b{Shadow Darkness} - Darkness of the shadows.
 \li
   \b{Shadow Softness} - Amount of blur applied to the shadows.
 \li
@@ -750,8 +728,8 @@ about working with materials, see \l {Materials and Shaders}.
   by the Bump Amount property.
 \list
 \li
-  \e{Tip: Bump maps will not affect the silhouette of a model. Use a
-  displacement map if this is required.}
+  \note Bump maps will not affect the silhouette of a model. Use a
+  displacement map if this is required.
 \endlist
 \li
   \b{Normal Map} - An RGB image used to \e{simulate} fine
@@ -760,8 +738,8 @@ about working with materials, see \l {Materials and Shaders}.
   controlled by the Bump Amount property.
 \list
 \li
-  \e{Tip: Normal maps will not affect the silhouette of a model. Use
-  a displacement map if this is required.}
+  \note Normal maps will not affect the silhouette of a model. Use
+  a displacement map if this is required.
 \endlist
 \li
   \b{Bump Amount} - Controls the amount of simulated displacement
@@ -773,14 +751,12 @@ about working with materials, see \l {Materials and Shaders}.
   surface of the material. Brighter pixels indicate raised regions.
 \list
 \li
-  \e{Tip: Displacement maps require vertices to offset. If your model
-  is not high-enough resolution you may need to dynamically generate
-  additional vertices by using the
-  \l{model-properties}{Tessellation properties} on the model.}
+  \note Displacement maps require vertices to offset. I.e. the result will be
+  more accurate on a high poly model than on a low poly model.
 \li
-  \e{Tip: Displacement maps do not affect the normals of your
+  \note Displacement maps do not affect the normals of your
   geometry. To look correct with lighting or reflections you will likely
-  want to also add a matching bump map or normal map to your material.}
+  want to also add a matching bump map or normal map to your material.
 \endlist
 \li
   \b{Displacement Amount} - Controls the offset amount for the displacement map.
@@ -789,7 +765,7 @@ about working with materials, see \l {Materials and Shaders}.
   from the model.
 \list
 \li
-  Note: Setting the opacity of a \e{model} very low (below 1\% or
+  \note Setting the opacity of a \e{model} very low (below 1\% or
   less) will prevent it from receiving touch events, but setting the
   opacity of its \e{material} very low still allows touch events to
   occur.
@@ -829,7 +805,7 @@ about working with materials, see \l {Materials and Shaders}.
   \b{Diffuse Light Wrap} - The amount of light wrap for the translucency map. A value of 0 will not
   wrap the light at all while a value of 1 will wrap the light all around the object.
 \endlist
-Note that the Runtime custom-compiles shaders for each unique
+\note The Runtime custom-compiles shaders for each unique
 combination of material properties used. Each additional material
 feature that you use results in a (slight) additional performance hit.
 
@@ -851,11 +827,13 @@ The Inspector palette shows only a single property:
 \li
   \b{Referenced Material} - a picker for selecting an animatable material
   within the presentation.
-\li
-  \e{Tip: the material you reference does \b{not} have to be
-  visible or even active for this to work. It is valid to have a small
-  pile of models with custom materials on them all eyeballed off, and
-  then reference those materials for rendering on other objects.}
+  \list
+    \li
+      \note The material you reference does \b{not} have to be
+      visible or even active for this to work. It is valid to have a small
+      pile of models with custom materials on them all eyeballed off, and
+      then reference those materials for rendering on other objects.}
+  \endlist
 \endlist
 \section1 Image Properties
 
@@ -927,12 +905,9 @@ properties in the Inspector palette (in addition to the
   \b{Text String} - The text to display for the text element.
 \list
 \li
-  \e{Note: Qt 3D Studio does not (currently) support styled
+  \note Qt 3D Studio does not (currently) support styled
   text. There is no way to make one word in a paragraph bold, larger, or
   a different color.}
-\li
-  \e{Note: Qt 3D Studio also does not (currently) support automatically
-  wrapping text; you must manually inject line breaks to wrap your text.}
 \endlist
 \li
   \b{Text Color} - The color for the text.
@@ -957,7 +932,7 @@ TODO: Only one font for now. More to be added?
   also type a new value for the font.
 \list
 \li
-  \e{Tip: Although the font size is just a number, it is
+  \note Although the font size is just a number, it is
   intentionally not animatable. Each time the font size changes a rather
   expensive rasterization of the text string occurs. You should animate
   the scale of the text element instead.}
@@ -977,6 +952,36 @@ TODO: Only one font for now. More to be added?
 \li
   \b{Tracking} - Controls the amount of extra (or negative)
   horizontal spacing between every character pair.
+\li
+  \b{Text Area} - Define size of fixed text area. If no values are set, the text size will
+  grow with the text.
+\li
+  \b{Word Wrapping} - Define how text will be wrapped when using a fixed text area size.
+  \list
+    \li
+      \c Clip - Cut the text if it doesn't fit in the text area.
+    \li
+      \c WrapWord - Wraps between words, if possible.
+    \li
+      \c WrapAnywhere - Wraps anywhere, also in the middle of words.
+  \endlist
+\li
+  \b{Eliding} - Elide text that does not fit into a fixed size text area.
+  \list
+    \li
+      \note Text eliding does not work with distance field rendering disabled or when
+      drop shadows are used.
+  \endlist
+\li
+  \b{Drop-Shadow} - Add a drop shadow to the text. The drop shadow will be a darker shade of the
+  text color.
+\li
+  \b{Shadow Darkness} - Darkness of the drop shadow. 100 is black and 0 is the same color as the
+  text.
+\li
+  \b{Horizonal Offset} - Horizontal offset of the shadow. The offset is relative to the font size.
+\li
+  \b{Vertical Offset} - Vertical offset of the shadow. The offset is relative to the font size.
 \endlist
 
 

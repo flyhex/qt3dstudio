@@ -231,6 +231,24 @@ void ChooserModelBase::expand(const QModelIndex &modelIndex)
 
 void ChooserModelBase::setRootPath(const QString &path)
 {
+    // Delete the old model. If the new project is in a totally different directory tree, not
+    // doing this will result in unexplicable crashes when trying to parse something that should
+    // not be parsed.
+    disconnect(m_model, &QAbstractItemModel::rowsInserted,
+               this, &ChooserModelBase::modelRowsInserted);
+    disconnect(m_model, &QAbstractItemModel::rowsAboutToBeRemoved,
+               this, &ChooserModelBase::modelRowsRemoved);
+    disconnect(m_model, &QAbstractItemModel::layoutChanged,
+               this, &ChooserModelBase::modelLayoutChanged);
+    delete m_model;
+    m_model = new QFileSystemModel(this);
+    connect(m_model, &QAbstractItemModel::rowsInserted,
+            this, &ChooserModelBase::modelRowsInserted);
+    connect(m_model, &QAbstractItemModel::rowsAboutToBeRemoved,
+            this, &ChooserModelBase::modelRowsRemoved);
+    connect(m_model, &QAbstractItemModel::layoutChanged,
+            this, &ChooserModelBase::modelLayoutChanged);
+
     setRootIndex(m_model->setRootPath(path));
 }
 

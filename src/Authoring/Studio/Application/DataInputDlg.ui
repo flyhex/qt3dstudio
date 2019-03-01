@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>533</width>
-    <height>244</height>
+    <height>300</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -131,6 +131,32 @@
                </size>
               </property>
              </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="labelMetadataKey">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Metadata Key</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="labelMetadata">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Metadata</string>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QLabel" name="labelEvaluation">
@@ -259,6 +285,20 @@
                </size>
               </property>
              </spacer>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEditMetadataKey">
+              <property name="toolTip">
+               <string>Key for accessing the metadata for this Data Input</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEditMetadata">
+              <property name="toolTip">
+               <string>Metadata associated with this Data Input</string>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QLineEdit" name="lineEditEvaluation">

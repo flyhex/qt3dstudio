@@ -140,6 +140,7 @@ public:
     void updateLabel();
     void setRowVisible(bool visible);
     void setDnDHover(bool val);
+    void updateVariants(const QStringList &groups);
     DnDState getDnDState() const;
 
     ITimelineItemBinding *getBinding() const;
@@ -148,6 +149,8 @@ public:
     void updateFilter();
     void updateLock(bool state);
     void updateSubpresentations(int updateParentsOnlyVal = 0);
+    int clipX() const;
+
 protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
 
@@ -181,6 +184,7 @@ private:
     bool m_arrowVisible = false;
     bool m_dndHover = false;
     bool m_visibilityCtrld = false;
+    bool m_onMasterSlide = false;
     DnDState m_dndState = DnDState::None;
     ActionStates m_actionStates = ActionState::None;
     bool m_hasSubpresentation = false;
@@ -193,6 +197,7 @@ private:
     QString m_label;
     QList<RowTree *> m_childRows;
     QList<RowTree *> m_childProps;
+    QStringList m_variantsGroups;
     ITimelineItemBinding *m_binding = nullptr;
     ITimelineItemProperty *m_PropBinding = nullptr; // for property rows
 

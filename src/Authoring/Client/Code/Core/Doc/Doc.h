@@ -182,6 +182,11 @@ public:
     QString name;
     int type;
     QVector<ControlledItem> ctrldElems;
+    // As per QT3DS-2992 we currently need only a single key-value pair per datainput.
+    // For efficiency we use separate QStrings for both, as there is no need for more
+    // elaborate containers.
+    QString metaDataKey;
+    QString metaData;
 
     // Bindings in other subpresentations, of QMap format
     // QMultiMap<subpresentation_id, QPair<datatype, strict>>.

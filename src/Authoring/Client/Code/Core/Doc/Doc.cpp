@@ -719,18 +719,14 @@ qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetFirstSelectableLayer()
 
 QVector<qt3dsdm::Qt3DSDMInstanceHandle> CDoc::getLayers()
 {
-    CClientDataModelBridge *bridge = m_StudioSystem->GetClientDataModelBridge();
-
     Q3DStudio::CGraphIterator layerIterator;
     GetAssetChildren(this, m_SceneInstance, layerIterator, OBJTYPE_LAYER);
 
     QVector<qt3dsdm::Qt3DSDMInstanceHandle> layerList;
 
     for (; !layerIterator.IsDone(); ++layerIterator) {
-        if (m_StudioSystem->IsInstance(layerIterator.GetCurrent())
-                && !bridge->IsLockedAtAll(layerIterator.GetCurrent())) {
+        if (m_StudioSystem->IsInstance(layerIterator.GetCurrent()))
             layerList.append(layerIterator.GetCurrent());
-        }
     }
 
     return layerList;
@@ -2373,7 +2369,7 @@ std::shared_ptr<Q3DStudio::IComposerSerializer> CDoc::CreateSerializer()
                 *theCoreSystem.GetActionCore(), *m_AssetGraph, *theFullSystem.GetSlideSystem(),
                 *theFullSystem.GetActionSystem(), *theCoreSystem.GetSlideGraphCore(),
                 theClientBridge.GetObjectDefinitions(), m_ImportFailedHandler,
-                *theCoreSystem.GetGuideSystem());
+                *theCoreSystem.GetGuideSystem(), *theFullSystem.GetPropertySystem());
 }
 
 std::shared_ptr<Q3DStudio::IComposerSerializer> CDoc::CreateTransactionlessSerializer()
@@ -2390,9 +2386,9 @@ std::shared_ptr<Q3DStudio::IComposerSerializer> CDoc::CreateTransactionlessSeria
                 *theCoreSystem.GetTransactionlessAnimationCore(),
                 *theCoreSystem.GetTransactionlessActionCore(), *m_AssetGraph,
                 *theFullSystem.GetSlideSystem(), *theFullSystem.GetActionSystem(),
-                *theCoreSystem.GetTransactionlessSlideGraphCore(), theClientBridge.GetObjectDefinitions(),
-                m_ImportFailedHandler, *theCoreSystem.GetGuideSystem());
-
+                *theCoreSystem.GetTransactionlessSlideGraphCore(),
+                theClientBridge.GetObjectDefinitions(), m_ImportFailedHandler,
+                *theCoreSystem.GetGuideSystem(), *theFullSystem.GetPropertySystem());
 }
 
 std::shared_ptr<qt3dsdm::IDOMWriter> CDoc::CreateDOMWriter()

@@ -30,6 +30,10 @@
 #include "ObjectListModel.h"
 #include "StudioPreferences.h"
 #include "StudioUtils.h"
+#include "StudioApp.h"
+#include "Core.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "ClientDataModelBridge.h"
 
 #include <QtCore/qtimer.h>
 #include <QtQml/qqmlcontext.h>
@@ -50,10 +54,29 @@ QAbstractItemModel *ObjectBrowserView::model() const
 
 void ObjectBrowserView::setModel(ObjectListModel *model)
 {
-    if (!m_model) {
+    if (!m_model)
         m_model = new FlatObjectListModel(model, this);
-    }
     m_model->setSourceModel(model);
+
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+
+    // Remove "Scene.__Container" and "materials//Default" entries
+    QModelIndexList list = m_model->match(m_model->index(0, 0),
+                                        ObjectListModel::AbsolutePathRole,
+                                        QStringLiteral("Scene.")
+                                          + bridge->getMaterialContainerName(), 1,
+                                        Qt::MatchFlags(Qt::MatchWrap | Qt::MatchExactly
+                                                       | Qt::MatchRecursive));
+    list.append(m_model->match(m_model->index(0, 0),
+                             ObjectListModel::NameRole,
+                             QStringLiteral("materials/") + bridge->getDefaultMaterialName(), 1,
+                             Qt::MatchFlags(Qt::MatchWrap | Qt::MatchExactly
+                                            | Qt::MatchRecursive)));
+
+    for (int i = list.size(); i > 0; i--)
+        m_model->removeRow(list.at(i - 1).row(), m_model->index(0, 0));
+
     m_ownerInstance = 0;
     m_selection = -1;
 

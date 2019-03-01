@@ -335,6 +335,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
     SComposerObjectDefinitions &m_ObjectDefinitions;
     qt3dsdm::IStringTable &m_StringTable;
     std::shared_ptr<Q3DStudio::IImportFailedHandler> m_ImportFailedHandler;
+    IPropertySystem &m_propertySystem;
 
     // The instances we have discovered when we are writing
     THandleToIdMap m_HandleToIdMap;
@@ -390,7 +391,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                             IActionSystem &inActionSystem, ISlideGraphCore &inSlideGraphCore,
                             SComposerObjectDefinitions &inObjectDefinitions,
                             std::shared_ptr<Q3DStudio::IImportFailedHandler> inFailedHandler,
-                            IGuideSystem &inGuideSystem)
+                            IGuideSystem &inGuideSystem, IPropertySystem &inPropSystem)
         : m_DataCore(inDataCore)
         , m_MetaData(inMetaData)
         , m_SlideCore(inSlideCore)
@@ -404,6 +405,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         , m_ObjectDefinitions(inObjectDefinitions)
         , m_StringTable(inDataCore.GetStringTable())
         , m_ImportFailedHandler(inFailedHandler)
+        , m_propertySystem(inPropSystem)
         , m_Foundation(Q3DStudio::Foundation::SStudioFoundation::Create())
         , m_InputStreamFactory(Q3DStudio::IInputStreamFactory::Create())
         , m_PreserveFileIds(true)
@@ -942,8 +944,11 @@ struct SComposerSerializerImpl : public IComposerSerializer
             const pair<Qt3DSDMPropertyHandle, SValue> &theValue(inList[idx]);
             QString theName(m_DataCore.GetProperty(theValue.first).m_Name);
             WriteDataModelValue(theValue.second, theValueStr);
-            if (GetValueType(theValue.second) == DataModelDataType::String || theValueStr.size())
-                inWriter.Att(theName, theValueStr);
+            if (GetValueType(theValue.second) == DataModelDataType::String || theValueStr.size()) {
+                // this property is saved under the <Graph> node
+                if (theName != QStringLiteral("variants"))
+                    inWriter.Att(theName, theValueStr);
+            }
         }
     }
 
@@ -1627,7 +1632,16 @@ struct SComposerSerializerImpl : public IComposerSerializer
         }
 
         IDOMWriter::Scope __instanceScope(inWriter, theType);
-        inWriter.Att(L"id", GetInstanceId(inInstance));
+        inWriter.Att(QStringLiteral("id"), GetInstanceId(inInstance));
+
+        // for layers, save the variants property under the <Graph>
+        if (theType.getValue() == QStringLiteral("Layer")) {
+            auto prop = m_propertySystem.GetAggregateInstancePropertyByName(
+                        inInstance, QStringLiteral("variants"));
+            SValue sVal;
+            if (m_propertySystem.GetInstancePropertyValue(inInstance, prop, sVal))
+                inWriter.Att(QStringLiteral("variants"), get<QString>(sVal));
+        }
 
         m_InstanceSet.insert(inInstance);
 
@@ -2832,12 +2846,15 @@ struct SComposerSerializerImpl : public IComposerSerializer
 std::shared_ptr<IComposerSerializer> IComposerSerializer::CreateGraphSlideSerializer(
         IDataCore &inDataCore, IMetaData &inMetaData, ISlideCore &inSlideCore,
         IAnimationCore &inAnimationCore, IActionCore &inActionCore, CGraph &inAssetGraph,
-        ISlideSystem &inSlideSystem, IActionSystem &inActionSystem, ISlideGraphCore &inSlideGraphCore,
+        ISlideSystem &inSlideSystem, IActionSystem &inActionSystem,
+        ISlideGraphCore &inSlideGraphCore,
         SComposerObjectDefinitions &inObjectDefinitions,
-        std::shared_ptr<Q3DStudio::IImportFailedHandler> inFailedHandler, IGuideSystem &inGuideSystem)
+        std::shared_ptr<Q3DStudio::IImportFailedHandler> inFailedHandler,
+        IGuideSystem &inGuideSystem, IPropertySystem &inPropSystem)
 {
-    return std::shared_ptr<SComposerSerializerImpl>(new SComposerSerializerImpl(
-                                                          inDataCore, inMetaData, inSlideCore, inAnimationCore, inActionCore, inAssetGraph,
-                                                          inSlideSystem, inActionSystem, inSlideGraphCore, inObjectDefinitions, inFailedHandler,
-                                                          inGuideSystem));
+    return std::shared_ptr<SComposerSerializerImpl>(
+                new SComposerSerializerImpl(
+                    inDataCore, inMetaData, inSlideCore, inAnimationCore, inActionCore,
+                    inAssetGraph, inSlideSystem, inActionSystem, inSlideGraphCore,
+                    inObjectDefinitions, inFailedHandler, inGuideSystem, inPropSystem));
 }

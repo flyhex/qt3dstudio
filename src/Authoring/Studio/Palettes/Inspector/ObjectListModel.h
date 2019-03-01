@@ -118,6 +118,7 @@ public:
                   int role = Qt::DisplayRole) const;
     bool setData(const QModelIndex &index, const QVariant &data, int role = Qt::EditRole) override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
 
     void setSourceModel(ObjectListModel *sourceModel);
     ObjectListModel *sourceModel() const { return m_sourceModel; }

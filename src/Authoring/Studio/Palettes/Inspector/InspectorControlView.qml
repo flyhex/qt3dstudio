@@ -28,6 +28,8 @@
 import QtQuick 2.8
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 2.2
+import QtQuick.Controls.Styles 1.4
+import QtQuick.Extras 1.4
 
 import Qt3DStudio 1.0
 import "../controls"
@@ -205,12 +207,45 @@ Rectangle {
                     width: parent.width - x
                     spacing: 4
 
-                    StyledLabel {
-                        text: model.title
+                    Rectangle { // group header
+                        x: -10
+                        width: delegateItem.width
+                        height: 25
+                        color: "#111111"
+
+                        StyledLabel {
+                            x: 30
+                            text: model.title
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+
+                        Image {
+                            id: collapseButton
+                            x: 10
+                            anchors.verticalCenter: parent.verticalCenter
+                            source: {
+                                _resDir + (groupItems.visible ? "arrow_down.png" : "arrow.png")
+                            }
+                        }
+
+                        MouseArea {
+                            id: collapseButtonMouseArea
+                            anchors.fill: parent
+                            onClicked: {
+                                if (mouse.button === Qt.LeftButton) {
+                                    groupItems.visible = !groupItems.visible;
+                                    _inspectorModel.updateGroupCollapseState(indexOfThisDelegate,
+                                                                             !groupItems.visible)
+                                }
+                            }
+                        }
                     }
 
                     Column {
                         spacing: 4
+                        id: groupItems
+
+                        visible: !_inspectorModel.isGroupCollapsed(indexOfThisDelegate)
 
                         Repeater {
                             model: delegateItem.values
@@ -237,6 +272,7 @@ Rectangle {
                             RowLayout {
                                 id: groupDelegateItem
                                 spacing: 0
+                                enabled: _parentView.isEditable(modelData.handle)
 
                                 property alias loadedItem: loader.item
 
@@ -252,6 +288,7 @@ Rectangle {
 
                                 ColumnLayout { // Property row and datainput control
                                     Layout.alignment: Qt.AlignTop
+                                    visible: modelData.title !== "variants"
                                     spacing: 0
                                     RowLayout { // Property row
                                         Layout.alignment: Qt.AlignLeft
@@ -281,7 +318,7 @@ Rectangle {
                                                     anchors.fill: parent
                                                     acceptedButtons: Qt.RightButton | Qt.LeftButton
                                                     hoverEnabled: true
-                                                    onClicked:  {
+                                                    onClicked: {
                                                         if (mouse.button === Qt.LeftButton) {
                                                             _inspectorModel.setPropertyAnimated(
                                                                         model.modelData.instance,
@@ -389,6 +426,9 @@ Rectangle {
                                     opacity: enabled ? 1 : .5
                                     Layout.alignment: Qt.AlignTop
                                     sourceComponent: {
+                                        if (modelData.title === "variants")
+                                            return variantTagsComponent;
+
                                         const dataType = modelData.dataType;
                                         switch (dataType) {
                                         case DataModelDataType.Long:
@@ -1061,6 +1101,175 @@ Rectangle {
 
             onValueChanged: {
                 currentIndex = find(value)
+            }
+        }
+    }
+
+    Component {
+        id: variantTagsComponent
+
+        Column {
+            width: root.width - 10
+            spacing: 10
+
+            Row {
+                anchors.right: parent.right
+                anchors.rightMargin: 5
+                spacing: 5
+
+                ToolButton {
+                    id: importButton
+                    text: qsTr("Import...")
+                    width: 70
+                    height: 20
+
+                    onClicked: {
+                        _variantsGroupModel.importVariants()
+                    }
+                }
+
+                ToolButton {
+                    id: exportButton
+                    text: qsTr("Export...")
+                    width: 70
+                    height: 20
+                    enabled: !_variantsGroupModel.variantsEmpty
+
+                    onClicked: {
+                        _variantsGroupModel.exportVariants()
+                    }
+                }
+            }
+
+            Text {
+                text: qsTr("There are no variant tags yet. Click [+ Group] to add a new tags group and start adding tags.")
+                color: "#ffffff"
+                visible: _variantsGroupModel.variantsEmpty
+            }
+
+            Repeater {
+                id: tagsRepeater
+                model: _variantsGroupModel
+                property int maxGroupLabelWidth;
+
+                onItemAdded: {
+                    // make all group labels have equal width as the widest one
+                    if (index == 0)
+                        maxGroupLabelWidth = 20; // min group label width
+
+                    if (item.groupLabelWidth > maxGroupLabelWidth) {
+                        maxGroupLabelWidth = item.groupLabelWidth;
+
+                        if (maxGroupLabelWidth > 150) // max group label width
+                            maxGroupLabelWidth = 150;
+                    }
+                }
+
+                Row {
+                    id: variantTagsRow
+                    spacing: 5
+
+                    readonly property var tagsModel: model.tags
+                    readonly property var groupModel: model
+                    readonly property int groupLabelWidth: tLabel.implicitWidth
+
+                    Text {
+                        id: tLabel
+                        text: model.group
+                        color: model.color
+                        width: tagsRepeater.maxGroupLabelWidth;
+                        elide: Text.ElideRight
+                        anchors.top: parent.top
+                        anchors.topMargin: 5
+
+                        MouseArea {
+                            anchors.fill: parent;
+                            acceptedButtons: Qt.RightButton
+                            onClicked: {
+                                if (mouse.button === Qt.RightButton) {
+                                    const coords = mapToItem(root, mouse.x, mouse.y);
+                                    _parentView.showGroupContextMenu(coords.x, coords.y, model.group);
+                                }
+                            }
+                        }
+                    }
+
+                    Flow {
+                        width: root.width - 110
+                        spacing: 5
+
+                        Repeater {
+                            model: tagsModel
+
+                            Loader {
+                                readonly property var tagsModel: model
+                                readonly property var grpModel: groupModel
+                                sourceComponent: tagComponent
+                            }
+                        }
+
+                        ToolButton {
+                            id: addTagButton
+                            text: qsTr("+ Tag")
+                            height: 25
+
+                            onClicked: {
+                                _variantsGroupModel.addNewTag(groupModel.group)
+                            }
+
+                        }
+                    }
+                }
+            }
+
+            Item { width: 1; height: 5 } // vertical spacer
+
+            ToolButton {
+                id: addGroupButton
+                text: qsTr("+ Group")
+                width: 60
+                height: 25
+                onClicked: {
+                    _variantsGroupModel.addNewGroup()
+                }
+            }
+
+            Item { width: 1; height: 5 } // vertical spacer
+        }
+    }
+
+    Component {
+        id: tagComponent
+
+        Rectangle {
+            property bool toggled: tagsModel.selected
+            property string grpColor: grpModel ? grpModel.color : ""
+
+            width: Math.max(tLabel.width + 10, 60)
+            height: 25
+            color: toggled ? grpColor : "#2e2f30"
+            border.color: "#959596"
+
+            Text {
+                id: tLabel
+                anchors.centerIn: parent
+                text: tagsModel.tag
+                color: toggled ? "#ffffff" : "#959596"
+            }
+
+            MouseArea {
+                anchors.fill: parent;
+                acceptedButtons: Qt.RightButton | Qt.LeftButton
+                onClicked: {
+                    if (mouse.button === Qt.LeftButton) {
+                        toggled = !toggled;
+                        _variantsGroupModel.setTagState(grpModel.group, tagsModel.tag, toggled);
+                    } else if (mouse.button === Qt.RightButton) {
+                        const coords = mapToItem(root, mouse.x, mouse.y);
+                        _parentView.showTagContextMenu(coords.x, coords.y, grpModel.group,
+                                                       tagsModel.tag);
+                    }
+                }
             }
         }
     }

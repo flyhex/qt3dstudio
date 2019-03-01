@@ -49,6 +49,7 @@ class IActionSystem;
 class ISlideGraphCore;
 class IGuideSystem;
 class SComposerObjectDefinitions;
+class IPropertySystem;
 };
 
 namespace Q3DStudio {
@@ -102,13 +103,14 @@ public:
     friend class std::shared_ptr<IComposerSerializer>;
 
     static std::shared_ptr<IComposerSerializer> CreateGraphSlideSerializer(
-        qt3dsdm::IDataCore &inDataCore, qt3dsdm::IMetaData &inMetaData, qt3dsdm::ISlideCore &inSlideCore,
-        qt3dsdm::IAnimationCore &inAnimationCore, qt3dsdm::IActionCore &inActionCore,
-        CGraph &inAssetGraph, qt3dsdm::ISlideSystem &inSlideSystem,
-        qt3dsdm::IActionSystem &inActionSystem, qt3dsdm::ISlideGraphCore &inSlideGraphCore,
-        qt3dsdm::SComposerObjectDefinitions &inObjectDefinitions,
-        std::shared_ptr<Q3DStudio::IImportFailedHandler> inFailedHandler,
-        qt3dsdm::IGuideSystem &inGuideSystem);
+            qt3dsdm::IDataCore &inDataCore, qt3dsdm::IMetaData &inMetaData,
+            qt3dsdm::ISlideCore &inSlideCore,
+            qt3dsdm::IAnimationCore &inAnimationCore, qt3dsdm::IActionCore &inActionCore,
+            CGraph &inAssetGraph, qt3dsdm::ISlideSystem &inSlideSystem,
+            qt3dsdm::IActionSystem &inActionSystem, qt3dsdm::ISlideGraphCore &inSlideGraphCore,
+            qt3dsdm::SComposerObjectDefinitions &inObjectDefinitions,
+            std::shared_ptr<Q3DStudio::IImportFailedHandler> inFailedHandler,
+            qt3dsdm::IGuideSystem &inGuideSystem, qt3dsdm::IPropertySystem &inPropSystem);
 };
 }
 

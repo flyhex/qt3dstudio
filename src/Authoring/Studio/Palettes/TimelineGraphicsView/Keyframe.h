@@ -35,7 +35,7 @@
 
 struct Keyframe
 {
-    Keyframe(double time, RowTimeline *propRow)
+    Keyframe(long time, RowTimeline *propRow)
         : time(time)
         , rowProperty(propRow)
         , rowMaster(propRow->parentRow())
@@ -47,7 +47,7 @@ struct Keyframe
         return binding && binding->IsSelected();
     }
 
-    double time;
+    long time;
     QString propertyType;
     RowTimeline *rowProperty = nullptr;
     RowTimeline *rowMaster = nullptr;

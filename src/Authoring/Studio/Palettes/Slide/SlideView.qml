@@ -263,6 +263,17 @@ Rectangle {
                             }
                         }
 
+                        Label { // variants
+                            width: slideImage.width
+                            font.pixelSize: _fontSize
+                            padding: 3
+                            verticalAlignment: Text.AlignVCenter
+                            background: Rectangle { color:"#111111" }
+                            wrapMode: Text.WordWrap
+                            visible: model.variants !== ""
+                            text: model.variants
+                        }
+
                         Item {
                             anchors.horizontalCenter: slideImage.horizontalCenter
 

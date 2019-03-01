@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>300</width>
+    <width>343</width>
     <height>152</height>
    </rect>
   </property>
@@ -14,6 +14,9 @@
    <string>Set Timebar Start / End Time</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <property name="sizeConstraint">
+    <enum>QLayout::SetFixedSize</enum>
+   </property>
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -70,7 +73,14 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEditMinutes"/>
+          <widget class="QLineEdit" name="lineEditMinutes">
+           <property name="maximumSize">
+            <size>
+             <width>50</width>
+             <height>16777215</height>
+            </size>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QLabel" name="label_2">
@@ -80,7 +90,14 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEditSeconds"/>
+          <widget class="QLineEdit" name="lineEditSeconds">
+           <property name="maximumSize">
+            <size>
+             <width>50</width>
+             <height>16777215</height>
+            </size>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QLabel" name="label_3">
@@ -90,7 +107,14 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEditMilliseconds"/>
+          <widget class="QLineEdit" name="lineEditMilliseconds">
+           <property name="maximumSize">
+            <size>
+             <width>50</width>
+             <height>16777215</height>
+            </size>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -124,7 +148,14 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEditEndMinutes"/>
+          <widget class="QLineEdit" name="lineEditEndMinutes">
+           <property name="maximumSize">
+            <size>
+             <width>50</width>
+             <height>16777215</height>
+            </size>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QLabel" name="label_7">
@@ -134,7 +165,14 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEditEndSeconds"/>
+          <widget class="QLineEdit" name="lineEditEndSeconds">
+           <property name="maximumSize">
+            <size>
+             <width>50</width>
+             <height>16777215</height>
+            </size>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QLabel" name="label_8">
@@ -144,7 +182,14 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEditEndMilliseconds"/>
+          <widget class="QLineEdit" name="lineEditEndMilliseconds">
+           <property name="maximumSize">
+            <size>
+             <width>50</width>
+             <height>16777215</height>
+            </size>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>

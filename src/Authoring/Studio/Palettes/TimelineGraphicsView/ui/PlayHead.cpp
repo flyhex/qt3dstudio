@@ -30,9 +30,11 @@
 #include "Ruler.h"
 #include "TimelineConstants.h"
 #include "StudioPreferences.h"
+#include "StudioUtils.h"
 
 #include <QtGui/qpainter.h>
 #include <QtGui/qcursor.h>
+#include <QtWidgets/qwidget.h>
 
 PlayHead::PlayHead(Ruler *ruler)
     : QGraphicsRectItem()
@@ -47,24 +49,22 @@ void PlayHead::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     Q_UNUSED(option)
     Q_UNUSED(widget)
 
+    bool hiResIcons = StudioUtils::devicePixelRatio(widget->window()->windowHandle()) > 1.0;
     static const QPixmap pixHead = QPixmap(":/images/PlaybackHead.png");
+    static const QPixmap pixHead2x = QPixmap(":/images/PlaybackHead@2x.png");
 
     static const int PLAY_HEAD_H = 999999; // theoretically big enough height
-    painter->drawPixmap(-TimelineConstants::PLAYHEAD_W * .5, 0, pixHead);
+    painter->drawPixmap(-TimelineConstants::PLAYHEAD_W * .5, 0, hiResIcons ? pixHead2x : pixHead);
     painter->setPen(CStudioPreferences::timelinePlayheadLineColor());
     painter->drawLine(0, 0, 0, PLAY_HEAD_H);
 }
 
 void PlayHead::setHeight(int height)
 {
-    setRect(
-        rect().x(),
-        rect().y(),
-        rect().width(),
-        height);
+    setRect(rect().x(), rect().y(), rect().width(), height);
 }
 
-void PlayHead::setTime(double time)
+void PlayHead::setTime(long time)
 {
     if (time < 0)
         time = 0;
@@ -78,21 +78,21 @@ void PlayHead::setTime(double time)
 void PlayHead::setPosition(double posX)
 {
     posX = qBound(TimelineConstants::RULER_EDGE_OFFSET, posX, m_ruler->duration()
-                  * TimelineConstants::RULER_SEC_W * m_ruler->timelineScale()
+                  * TimelineConstants::RULER_MILLI_W * m_ruler->timelineScale()
                   + TimelineConstants::RULER_EDGE_OFFSET);
 
     setX(m_ruler->x() + posX);
     m_time = (posX - TimelineConstants::RULER_EDGE_OFFSET)
-            / (TimelineConstants::RULER_SEC_W * m_ruler->timelineScale());
+             / (TimelineConstants::RULER_MILLI_W * m_ruler->timelineScale());
 }
 
 void PlayHead::updatePosition()
 {
     setX(m_ruler->x() + TimelineConstants::RULER_EDGE_OFFSET
-         + m_time * TimelineConstants::RULER_SEC_W * m_ruler->timelineScale());
+         + m_time * TimelineConstants::RULER_MILLI_W * m_ruler->timelineScale());
 }
 
-double PlayHead::time() const
+long PlayHead::time() const
 {
     return m_time;
 }

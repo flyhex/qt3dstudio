@@ -43,7 +43,6 @@
 #include "Core.h"
 #include "IStudioRenderer.h"
 
-#include <QtWidgets/qcolordialog.h>
 #include <QtWidgets/qmessagebox.h>
 #include <QtGui/qstandarditemmodel.h>
 #include <QtCore/qdiriterator.h>

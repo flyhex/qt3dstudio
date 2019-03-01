@@ -52,12 +52,12 @@
 #include "Bindings/Qt3DSDMTimelineItemBinding.h"
 #include "Bindings/Qt3DSDMTimelineItemProperty.h"
 #include "Bindings/TimelineBreadCrumbProvider.h"
-#include "TimeEditDlg.h"
 #include "IDocumentEditor.h"
 #include "Control.h"
 #include "TimelineDropTarget.h"
 #include "StudioPreferences.h"
 #include "Dialogs.h"
+#include "TimeEnums.h"
 
 #include <QtGui/qevent.h>
 #include <QtWidgets/qgraphicslinearlayout.h>
@@ -84,7 +84,7 @@ public:
 };
 
 TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
-    : QWidget()
+    : QWidget(parent)
     , m_toolbar(new TimelineToolbar())
     , m_viewTreeHeader(new TreeHeaderView(this))
     , m_viewTreeContent(new QGraphicsView(this))
@@ -247,17 +247,18 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     connect(m_toolbar, &TimelineToolbar::deleteLayerTriggered,
             [=](){ doc->DeleteSelectedObject(); });
 
-    connect(m_toolbar, &TimelineToolbar::gotoTimeTriggered, this, [this]() {
+    connect(m_toolbar, &TimelineToolbar::gotoTimeTriggered, this, [=]() {
         CDoc *doc = g_StudioApp.GetCore()->GetDoc();
         g_StudioApp.GetDialogs()->asyncDisplayTimeEditDialog(doc->GetCurrentViewTime(),
-                                                             doc, PLAYHEAD);
+                                                             doc, PLAYHEAD,
+                                                             m_graphicsScene->keyframeManager());
     });
 
-    connect(m_toolbar, &TimelineToolbar::firstFrameTriggered, this, [this]() {
+    connect(m_toolbar, &TimelineToolbar::firstFrameTriggered, this, []() {
         g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(0);
     });
 
-    connect(m_toolbar, &TimelineToolbar::stopTriggered, this, [this]() {
+    connect(m_toolbar, &TimelineToolbar::stopTriggered, this, []() {
         g_StudioApp.PlaybackStopNoRestore();
     });
 
@@ -270,7 +271,7 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     });
 
     connect(m_toolbar, &TimelineToolbar::lastFrameTriggered, this, [this]() {
-        double dur = m_graphicsScene->ruler()->duration() * 1000;
+        long dur = m_graphicsScene->ruler()->duration();
         g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(dur);
     });
 
@@ -305,15 +306,13 @@ Q3DStudio::CString TimelineWidget::getPlaybackMode()
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     qt3dsdm::Qt3DSDMSlideHandle theActiveSlide(doc->GetActiveSlide());
     // clock has passed the end, check whether needs to switch slide
-    qt3dsdm::Qt3DSDMInstanceHandle theInstanceHandle = doc->GetStudioSystem()->GetSlideSystem()
-        ->GetSlideInstance(theActiveSlide);
+    qt3dsdm::Qt3DSDMInstanceHandle instance = doc->GetStudioSystem()->GetSlideSystem()
+                                              ->GetSlideInstance(theActiveSlide);
 
-    CClientDataModelBridge *clientDataModelBridge = doc->GetStudioSystem()
-            ->GetClientDataModelBridge();
+    CClientDataModelBridge *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
     qt3dsdm::IPropertySystem *propertySystem = doc->GetStudioSystem()->GetPropertySystem();
     qt3dsdm::SValue theValue;
-    propertySystem->GetInstancePropertyValue(theInstanceHandle, clientDataModelBridge->GetSlide()
-                                             .m_PlayMode, theValue);
+    propertySystem->GetInstancePropertyValue(instance, bridge->GetSlide().m_PlayMode, theValue);
     return qt3dsdm::get<qt3dsdm::TDataStrPtr>(theValue)->GetData();
 }
 
@@ -377,7 +376,7 @@ void TimelineWidget::OnNewPresentation()
              std::placeholders::_1, std::placeholders::_2)));
     m_connections.push_back(theSignalProvider->ConnectFirstKeyframeDynamicSet(
         std::bind(&TimelineWidget::onFirstKeyframeDynamicSet, this,
-                  std::placeholders::_1, std::placeholders::_2)));
+                  std::placeholders::_1)));
 
     // action created/deleted
     m_connections.push_back(theSignalProvider->ConnectActionCreated(
@@ -426,7 +425,7 @@ void TimelineWidget::OnClosingPresentation()
 
 void TimelineWidget::OnTimeChanged(long inTime)
 {
-    m_graphicsScene->playHead()->setTime(inTime * .001);
+    m_graphicsScene->playHead()->setTime(inTime);
     m_toolbar->setTime(inTime);
 
     double left = m_viewTimelineHeader->horizontalScrollBar()->value()
@@ -474,6 +473,7 @@ void TimelineWidget::insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *bin
         return;
 
     insertToHandlesMap(binding);
+
     const QList<ITimelineItemBinding *> children = binding->GetChildren();
     for (auto child : children)
         insertToHandlesMapRecursive(static_cast<Qt3DSDMTimelineItemBinding *>(child));
@@ -596,8 +596,7 @@ void TimelineWidget::onAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentIns
             for (int i = 0; i < propBinding->GetKeyframeCount(); i++) {
                 IKeyframe *kf = propBinding->GetKeyframeByIndex(i);
                 Keyframe *kfUI = m_graphicsScene->keyframeManager()->insertKeyframe(
-                            propRow->rowTimeline(), static_cast<double>(kf->GetTime()) * .001, false)
-                            .at(0);
+                                 propRow->rowTimeline(), kf->GetTime(), false).at(0);
 
                 kf->setUI(kfUI);
                 kfUI->binding = static_cast<Qt3DSDMTimelineKeyframe *>(kf);
@@ -685,10 +684,8 @@ void TimelineWidget::refreshKeyframe(qt3dsdm::Qt3DSDMAnimationHandle inAnimation
     }
 }
 
-void TimelineWidget::onFirstKeyframeDynamicSet(qt3dsdm::Qt3DSDMAnimationHandle inAnimation,
-                                               bool inDynamic)
+void TimelineWidget::onFirstKeyframeDynamicSet(qt3dsdm::Qt3DSDMAnimationHandle inAnimation)
 {
-    Q_UNUSED(inDynamic)
     refreshKeyframe(inAnimation, 0, ETimelineKeyframeTransaction_DynamicChanged);
 }
 
@@ -755,6 +752,28 @@ void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance
         m_subpresentationChanges.insert(inInstance);
         if (!m_asyncUpdateTimer.isActive())
             m_asyncUpdateTimer.start();
+    } else if (inProperty == m_bridge->GetLayer().m_variants) {
+        qt3dsdm::SValue sValue;
+        if (doc->GetPropertySystem()->GetInstancePropertyValue(inInstance, inProperty, sValue)) {
+            QString propVal = QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)
+                                                      ->GetData());
+            if (!propVal.isEmpty()) {
+                QStringList tagPairs = propVal.split(QLatin1Char(','));
+                QStringList groups;
+                for (int i = 0; i < tagPairs.size(); ++i) {
+                    QString group = tagPairs[i].left(tagPairs[i].indexOf(QLatin1Char(':')));
+                    if (!groups.contains(group))
+                        groups.append(group);
+                }
+
+                m_variantsMap[inInstance] = groups;
+            } else {
+                m_variantsMap[inInstance].clear();
+            }
+
+            if (!m_asyncUpdateTimer.isActive())
+                m_asyncUpdateTimer.start();
+        }
     }
 }
 
@@ -778,11 +797,11 @@ void TimelineWidget::onAsyncUpdate()
         m_graphicsScene->updateController();
         onSelectionChange(doc->GetSelectedValue());
         m_toolbar->setNewLayerEnabled(!m_graphicsScene->rowManager()->isComponentRoot());
+        refreshVariants();
 
-        // update suppresentation indicators
-        for (auto *row : m_handlesMap)
+        // update sub-presentation indicators
+        for (auto *row : qAsConst(m_handlesMap))
             row->updateSubpresentations();
-
     } else {
         if (!m_moveMap.isEmpty()) {
             // Flip the hash around so that we collect moves by parent.
@@ -926,10 +945,22 @@ void TimelineWidget::onAsyncUpdate()
             }
             m_graphicsScene->updateSnapSteps();
         }
+
+        if (!m_variantsMap.isEmpty()) {
+            const auto instances = m_variantsMap.keys();
+            for (int instance : instances) {
+                if (m_handlesMap.contains(instance)) {
+                    RowTree *row = m_handlesMap[instance];
+                    if (row)
+                        row->updateVariants(m_variantsMap[instance]); // variants groups names
+                }
+            }
+        }
     }
     m_dirtyProperties.clear();
     m_moveMap.clear();
     m_actionChanges.clear();
+    m_variantsMap.clear();
     m_subpresentationChanges.clear();
     m_keyframeChangesMap.clear();
     m_graphicsScene->rowManager()->finalizeRowDeletions();
@@ -977,8 +1008,7 @@ void TimelineWidget::onPropertyLinked(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
             for (int i = 0; i < propBinding->GetKeyframeCount(); i++) {
                 IKeyframe *kf = propBinding->GetKeyframeByIndex(i);
                 Keyframe *kfUI = m_graphicsScene->keyframeManager()->insertKeyframe(
-                            propRow->rowTimeline(), static_cast<double>(kf->GetTime()) * .001,
-                            false).at(0);
+                            propRow->rowTimeline(), kf->GetTime(), false).at(0);
 
                 kf->setUI(kfUI);
                 kfUI->binding = static_cast<Qt3DSDMTimelineKeyframe *>(kf);
@@ -1030,21 +1060,6 @@ void TimelineWidget::onChildMoved(int inParent, int inChild, long inOldIndex,
     onChildAdded(inParent, inChild, inNewIndex);
 }
 
-void TimelineWidget::OnDraw(CRenderer *inRenderer, CRct &inDirtyRect, bool inIgnoreValidation)
-{
-
-}
-
-void TimelineWidget::Draw(CRenderer *inRenderer)
-{
-
-}
-
-void TimelineWidget::OnGainFocus()
-{
-
-}
-
 CDropTarget *TimelineWidget::FindDropCandidate(CPt &inMousePoint, Qt::KeyboardModifiers inFlags,
                                                EStudioObjectType objectType,
                                                Q3DStudio::DocumentEditorFileType::Enum fileType)
@@ -1079,12 +1094,6 @@ CDropTarget *TimelineWidget::FindDropCandidate(CPt &inMousePoint, Qt::KeyboardMo
     return theTarget;
 }
 
-bool TimelineWidget::OnMouseHover(CPt inPoint, Qt::KeyboardModifiers inFlags)
-{
-    return true;
-}
-
-
 void TimelineWidget::OnMouseMove(CPt inPoint, Qt::KeyboardModifiers inFlags)
 {
     Q_UNUSED(inFlags)
@@ -1101,14 +1110,6 @@ void TimelineWidget::OnMouseMove(CPt inPoint, Qt::KeyboardModifiers inFlags)
 bool TimelineWidget::blockMousePress() const
 {
     return m_blockMousePress;
-}
-
-void TimelineWidget::OnMouseOut(CPt inPoint, Qt::KeyboardModifiers inFlags)
-{
-}
-
-void TimelineWidget::OnMouseUp(CPt inPoint, Qt::KeyboardModifiers inFlags)
-{
 }
 
 CPt TimelineWidget::GetPreferredSize()
@@ -1150,7 +1151,7 @@ Qt3DSDMTimelineItemBinding *TimelineWidget::getBindingForHandle(int handle,
         const QList<ITimelineItemBinding *> children = binding->GetChildren();
         for (auto child : children) {
             Qt3DSDMTimelineItemBinding *b = getBindingForHandle(handle,
-                                static_cast<Qt3DSDMTimelineItemBinding *>(child));
+                                            static_cast<Qt3DSDMTimelineItemBinding *>(child));
 
             if (b)
                 return b;
@@ -1174,6 +1175,7 @@ void TimelineWidget::mouseMoveEvent(QMouseEvent *event)
 
 void TimelineWidget::mouseReleaseEvent(QMouseEvent *event)
 {
+    Q_UNUSED(event)
     m_splitterPressed = false;
 }
 
@@ -1232,8 +1234,8 @@ void TimelineWidget::onTimeBarColorChanged(const QColor &color)
 void TimelineWidget::setSelectedTimeBarsColor(const QColor &color, bool preview)
 {
     using namespace Q3DStudio; // Needed for SCOPED_DOCUMENT_EDITOR macro
-    auto rows = selectedRows();
-    for (RowTree *row : qAsConst(rows)) {
+    const auto rows = selectedRows();
+    for (RowTree *row : rows) {
         row->rowTimeline()->setBarColor(color);
         if (!preview) {
             Qt3DSDMTimelineItemBinding *timelineItemBinding =
@@ -1241,6 +1243,36 @@ void TimelineWidget::setSelectedTimeBarsColor(const QColor &color, bool preview)
             SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(),
                                    QObject::tr("Set Timebar Color"))
                 ->SetTimebarColor(timelineItemBinding->GetInstanceHandle(), color);
+        }
+    }
+}
+
+void TimelineWidget::refreshVariants()
+{
+    const auto propertySystem = g_StudioApp.GetCore()->GetDoc()->GetPropertySystem();
+    const auto layers = g_StudioApp.GetCore()->GetDoc()->getLayers();
+    for (auto layer : layers) {
+        if (!m_handlesMap.contains(layer))
+            continue;
+
+        qt3dsdm::SValue sValue;
+        if (propertySystem->GetInstancePropertyValue(layer, m_bridge->GetLayer().m_variants,
+                                                     sValue)) {
+            QString propVal = QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)
+                                                      ->GetData());
+            if (!propVal.isEmpty()) {
+                QStringList tagPairs = propVal.split(QLatin1Char(','));
+                QStringList groups;
+                for (int i = 0; i < tagPairs.size(); ++i) {
+                    QString group = tagPairs[i].left(tagPairs[i].indexOf(QLatin1Char(':')));
+                    if (!groups.contains(group))
+                        groups.append(group);
+                }
+
+                m_handlesMap[layer]->updateVariants(groups);
+            } else {
+                m_handlesMap[layer]->updateVariants({});
+            }
         }
     }
 }

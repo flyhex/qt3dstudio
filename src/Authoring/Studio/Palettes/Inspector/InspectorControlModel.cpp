@@ -62,6 +62,7 @@
 #include "foundation/Qt3DSLogging.h"
 #include "Dialogs.h"
 #include "Dispatch.h"
+#include "VariantsGroupModel.h"
 
 static QStringList renderableItems()
 {
@@ -108,8 +109,9 @@ static std::pair<bool, bool> getSlideCharacteristics(qt3dsdm::Qt3DSDMInstanceHan
     return std::make_pair(hasNextSlide, hasPreviousSlide);
 }
 
-InspectorControlModel::InspectorControlModel(QObject *parent)
-    : QAbstractListModel(parent)
+InspectorControlModel::InspectorControlModel(VariantsGroupModel *variantsModel, QObject *parent)
+    : m_variantsModel(variantsModel)
+    , QAbstractListModel(parent)
     , m_UpdatableEditor(*g_StudioApp.GetCore()->GetDoc())
 {
     m_modifiedProperty.first = 0;
@@ -129,7 +131,7 @@ void InspectorControlModel::setInspectable(CInspectableBase *inInspectable)
 
     if (m_notifier.get() == nullptr) {
         m_notifier = signalProvider->ConnectInstancePropertyValue(
-                    std::bind(&InspectorControlModel::notifyInstancePropertyValue,
+                    std::bind(&InspectorControlModel::onPropertyChanged,
                               this, std::placeholders::_1, std::placeholders::_2));
     }
     if (m_slideNotifier.get() == nullptr) {
@@ -172,14 +174,20 @@ CInspectableBase *getReferenceMaterialInspectable(CInspectableBase *inspectBase)
     return nullptr;
 }
 
-void InspectorControlModel::notifyInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle inHandle,
-                                                        qt3dsdm::Qt3DSDMPropertyHandle inProperty)
+void InspectorControlModel::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                              qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
     auto doc = g_StudioApp.GetCore()->GetDoc();
-    const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
-            ->GetClientDataModelBridge();
-    if (!bridge->IsSceneGraphInstance(inHandle))
+    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    if (!bridge->IsSceneGraphInstance(inInstance))
         return;
+
+    if (inProperty == bridge->GetLayer().m_variants) {
+        // only update the variants model if its property changes
+        m_variantsModel->refresh();
+        return;
+    }
+
     bool changed = false;
     for (int row = 0; row < m_groupElements.count(); ++row) {
         auto group = m_groupElements[row];
@@ -192,7 +200,7 @@ void InspectorControlModel::notifyInstancePropertyValue(qt3dsdm::Qt3DSDMInstance
                 imageInstance = doc->GetDocumentReader().GetImageInstanceForProperty(
                                                 property->m_instance, property->m_property);
             }
-            if (property->m_property == inProperty || imageInstance == inHandle) {
+            if (property->m_property == inProperty || imageInstance == inInstance) {
                 updatePropertyValue(property);
                 changed = true;
             }
@@ -621,6 +629,31 @@ QString InspectorControlModel::getDefaultMaterialString() const
     return QObject::tr("Default");
 }
 
+bool InspectorControlModel::isGroupCollapsed(int groupIdx) const
+{
+    const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase);
+    if (inspectable && groupIdx > -1 && groupIdx < m_groupElements.size()) {
+        auto instance = inspectable->GetGroupInstance(0);
+
+        if (m_collapseMap.contains(instance))
+            return m_collapseMap[instance].contains(groupIdx);
+    }
+
+    return false;
+}
+
+void InspectorControlModel::updateGroupCollapseState(int groupIdx, bool isCollapsed)
+{
+    const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase);
+    if (inspectable && groupIdx > -1 && groupIdx < m_groupElements.size()) {
+        auto instance = inspectable->GetGroupInstance(0);
+        if (isCollapsed)
+            m_collapseMap[instance][groupIdx] = true;
+        else
+            m_collapseMap[instance].remove(groupIdx);
+    }
+}
+
 void InspectorControlModel::updateFontValues(InspectorControlBase *element) const
 {
     // Find if there are any font items and update the values of those
@@ -968,10 +1001,8 @@ bool InspectorControlModel::isTreeRebuildRequired(CInspectableBase* inspectBase)
 
     long theCount = m_inspectableBase->GetGroupCount();
     auto refMaterial = getReferenceMaterial(inspectBase);
-    if (refMaterial != m_refMaterial) {
-        m_refMaterial = refMaterial;
+    if (refMaterial != m_refMaterial)
         return true;
-    }
     long refMaterialGroupCount = 0;
     if (refMaterial.Valid())
         refMaterialGroupCount = 1; // Only the last group of the refMaterial is used
@@ -1163,6 +1194,8 @@ void InspectorControlModel::rebuildTree()
     // Clean the old objects after reset is done so that qml will not freak out about null pointers
     for (int i = 0; i < deleteVector.count(); ++i)
         deleteVector[i]->deleteLater();
+
+    m_refMaterial = getReferenceMaterial(m_inspectableBase);
 }
 
 int InspectorControlModel::rowCount(const QModelIndex &parent) const
@@ -1198,7 +1231,6 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
                     metaDataProvider->GetMetaDataProperty(instance, element->m_property));
     }
 
-
     bool skipEmits = false;
     switch (element->m_dataType) {
     case qt3dsdm::DataModelDataType::String: {
@@ -1208,6 +1240,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
             if (index != -1)
                 stringValue = stringValue.mid(index + 1);
         }
+
         element->m_value = stringValue;
     } // intentional fall-through for other String-derived datatypes
     case qt3dsdm::DataModelDataType::StringOrInt:
@@ -1223,7 +1256,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
             }
             auto slideSystem = studioSystem->GetSlideSystem();
 
-            if (element->m_title == QStringLiteral("Play Mode")) {
+            if (element->m_title == QLatin1String("Play Mode")) {
                 std::pair<bool, bool> slideData(
                     getSlideCharacteristics(element->m_instance, *studioSystem->GetSlideCore(),
                                             *slideSystem));
@@ -1231,7 +1264,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
                 bool hasPreviousSlide(slideData.second);
                 if (!hasNextSlide && !hasPreviousSlide)
                     stringlist.removeAll("Play Through To...");
-            } else if (element->m_title == QStringLiteral("Play Through To")) {
+            } else if (element->m_title == QLatin1String("Play Through To")) {
                 // the code duplication is intentional as we may ask for slide characteristics
                 // only if the property refers to slides
                 std::pair<bool, bool> slideData(
@@ -1274,7 +1307,8 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
                 }
 
                 element->m_value = QString(selectedIndex > 0 ? stringlist[selectedIndex]
-                                   : stringlist.first()).replace("|separator", "");
+                                   : stringlist.first()).replace(QLatin1String("|separator"),
+                                                                 QString());
             }
             element->m_values = stringlist;
         } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Import) {

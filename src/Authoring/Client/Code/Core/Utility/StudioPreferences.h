@@ -197,6 +197,9 @@ public:
     static QColor timelineRowSubpColor();
     static QColor timelineRowSubpDescendantColor();
     static QColor timelineRowCommentBgColor();
+    static QColor timelinePressedKeyframeColor();
+
+    static QColor invalidDataInputIndicatorColor();
 
     static int fontSize();
     static int controlBaseHeight();

@@ -95,6 +95,8 @@ public:
     QPoint getScrollbarOffsets() const;
     void handleShowDISelector(const QString &propertyname, qt3dsdm::Qt3DSDMInstanceHandle inInst,
                               const QPoint &pos);
+    void resetPressedKeyframe();
+    Keyframe *pressedKeyframe() const;
 
 protected:
     bool event(QEvent *event) override;
@@ -140,13 +142,13 @@ private:
     QPointF m_pressPos;
     QPointF m_pressScreenPos;
     QList<double> m_snapSteps;
-    CMouseCursor::Qt3DSMouseCursor m_currentCursor;
+    CMouseCursor::Qt3DSMouseCursor m_currentCursor = -1;
     TimelineControl *m_timelineControl = nullptr;
     DataInputSelectView *m_dataInputSelector = nullptr; // triggered by context menu but owned by
                                                         // rowtree
 
     bool m_rulerPressed = false;
-    bool m_keyframePressed = false;
+    Keyframe *m_pressedKeyframe = nullptr;
     bool m_dragging = false;
     bool m_startRowMoverOnNextDrag = false;
     bool m_timelineZooming = false;

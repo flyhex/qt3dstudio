@@ -37,7 +37,6 @@
 #include "Doc.h"
 #include "Dispatch.h"
 #include "Core.h"
-#include "DurationEditDlg.h"
 #include "IDocumentEditor.h"
 #include "StudioFullSystem.h"
 #include "StudioPreferences.h"
@@ -218,6 +217,5 @@ void Qt3DSDMTimelineTimebar::SetTimebarComment(const Q3DStudio::CString &inComme
 void Qt3DSDMTimelineTimebar::SetTimebarTime(ITimeChangeCallback *inCallback /*= nullptr*/)
 {
     g_StudioApp.GetDialogs()->asyncDisplayDurationEditDialog(GetStartTime(), GetEndTime(),
-                                                             m_TimelineTranslationManager->GetDoc(),
                                                              inCallback);
 }

@@ -70,12 +70,16 @@ qreal StudioUtils::devicePixelRatio(QWindow *window)
 {
     qreal pixelRatio = 1.0;
 
-    QWindow *w = window ? window : g_StudioApp.m_pMainWnd->windowHandle();
+    QWindow *w = window ? window
+                        : g_StudioApp.m_pMainWnd
+                          ? g_StudioApp.m_pMainWnd->windowHandle() : nullptr;
+
     if (w) {
         QScreen *s = w->screen();
         if (s)
             pixelRatio = s->devicePixelRatio();
     }
+
     return pixelRatio;
 }
 
@@ -83,7 +87,8 @@ qreal StudioUtils::devicePixelRatio(QWindow *window)
 bool StudioUtils::readFileToDomDocument(const QString &filePath, QDomDocument &domDoc)
 {
     QFile file(filePath);
-    if (!file.open(QFile::Text | QIODevice::ReadOnly)) {
+    if (!file.open(QIODevice::ReadOnly)) {
+        file.setTextModeEnabled(false);
         qWarning() << __FUNCTION__ << file.errorString() << "'" << filePath << "'";
         return false;
     }
@@ -96,7 +101,8 @@ bool StudioUtils::openDomDocumentSave(QSaveFile &file, QDomDocument &domDoc)
 {
     if (!readFileToDomDocument(file.fileName(), domDoc))
         return false;
-    if (!file.open(QFile::Text | QIODevice::WriteOnly)) {
+    if (!file.open(QIODevice::WriteOnly)) {
+        file.setTextModeEnabled(false);
         qWarning() << __FUNCTION__ << file.errorString();
         return false;
     }
@@ -106,6 +112,8 @@ bool StudioUtils::openDomDocumentSave(QSaveFile &file, QDomDocument &domDoc)
 // Saves contents of a QDomDocument into a previously opened text file
 bool StudioUtils::commitDomDocumentSave(QSaveFile &file, const QDomDocument &domDoc)
 {
+    // Disable end-of-line conversions
+    file.setTextModeEnabled(false);
     // Overwrites entire file
     if (file.resize(0) && file.write(domDoc.toByteArray(4)) != -1 && file.commit())
         return true;
@@ -117,7 +125,8 @@ bool StudioUtils::commitDomDocumentSave(QSaveFile &file, const QDomDocument &dom
 // Opens text file for saving without reading its contents
 bool StudioUtils::openTextSave(QSaveFile &file)
 {
-    if (!file.open(QFile::Text | QIODevice::WriteOnly)) {
+    if (!file.open(QIODevice::WriteOnly)) {
+        file.setTextModeEnabled(false);
         qWarning() << __FUNCTION__ << file.errorString();
         return false;
     }

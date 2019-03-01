@@ -28,6 +28,7 @@
 
 #include "TreeHeader.h"
 #include "StudioPreferences.h"
+#include "StudioUtils.h"
 
 #include <QtGui/qpainter.h>
 
@@ -45,14 +46,19 @@ void TreeHeader::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     Q_UNUSED(option)
     Q_UNUSED(widget)
 
+    bool hiResIcons = StudioUtils::devicePixelRatio(widget->window()->windowHandle()) > 1.0;
+
     double treeWidth = m_scene->treeWidth() - m_scene->getScrollbarOffsets().x();
     m_rectShy    .setRect(treeWidth - 16 * 3.3, size().height() * .5 - 8, 16, 16);
     m_rectVisible.setRect(treeWidth - 16 * 2.2, size().height() * .5 - 8, 16, 16);
     m_rectLock   .setRect(treeWidth - 16 * 1.1, size().height() * .5 - 8, 16, 16);
 
-    static const QPixmap pixShy     = QPixmap(":/images/Toggle-Shy.png");
+    static const QPixmap pixShy = QPixmap(":/images/Toggle-Shy.png");
     static const QPixmap pixVisible = QPixmap(":/images/Toggle-HideShow.png");
-    static const QPixmap pixLock    = QPixmap(":/images/Toggle-Lock.png");
+    static const QPixmap pixLock = QPixmap(":/images/Toggle-Lock.png");
+    static const QPixmap pixShy2x = QPixmap(":/images/Toggle-Shy@2x.png");
+    static const QPixmap pixVisible2x = QPixmap(":/images/Toggle-HideShow@2x.png");
+    static const QPixmap pixLock2x = QPixmap(":/images/Toggle-Lock@2x.png");
 
     const QColor selectedColor = CStudioPreferences::timelineFilterButtonSelectedColor();
     const QColor hoveredColor = CStudioPreferences::timelineFilterButtonHoveredColor();
@@ -74,9 +80,9 @@ void TreeHeader::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     else if (m_hoveredItem == 2)
         painter->fillRect(m_rectLock, hoveredColor);
 
-    painter->drawPixmap(m_rectShy    , pixShy);
-    painter->drawPixmap(m_rectVisible, pixVisible);
-    painter->drawPixmap(m_rectLock   , pixLock);
+    painter->drawPixmap(m_rectShy    , hiResIcons ? pixShy2x : pixShy);
+    painter->drawPixmap(m_rectVisible, hiResIcons ? pixVisible2x : pixVisible);
+    painter->drawPixmap(m_rectLock   , hiResIcons ? pixLock2x : pixLock);
 }
 
 TreeControlType TreeHeader::handleButtonsClick(const QPointF &scenePos)

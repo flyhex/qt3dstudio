@@ -30,12 +30,11 @@
 #ifndef TIME_EDIT_DIALOG_H
 #define TIME_EDIT_DIALOG_H
 
-#include "TimeEnums.h"
 #include <QtWidgets/qdialog.h>
 
 class CTimebarControl;
 class IDoc;
-class ITimelineKeyframesManager;
+class KeyframeManager;
 
 #ifdef QT_NAMESPACE
 using namespace QT_NAMESPACE;
@@ -52,9 +51,8 @@ class CTimeEditDlg : public QDialog
     Q_OBJECT
 
 public:
-    CTimeEditDlg(QWidget *pParent = nullptr); // standard constructor
-    virtual ~CTimeEditDlg();
-    void setKeyframesManager(ITimelineKeyframesManager *inKeyframeManager);
+    CTimeEditDlg(KeyframeManager *keyframeManager);
+    virtual ~CTimeEditDlg() override;
     void showDialog(long inTime, IDoc *inDoc, long inObjectAssociation);
 
 public Q_SLOTS:
@@ -64,25 +62,18 @@ public Q_SLOTS:
 protected:
     void showEvent(QShowEvent *) override;
 
+private:
     void onInitDialog();
     void onTimeChanged();
 
     void formatTime(long inTime);
-    int numberOfDigits(long number);
-    long timeConversion(long inTime, long inOperationCode);
-    long timeConversion(long inMin, long inSec, long inMsec, long inOperationCode);
-    void timeConversion(long inTotalTime, long *ioMin, long *ioSec, long *ioMsec,
-                        long inOperationCode);
     void updateObjectTime(long inTime);
 
-protected:
-    Ui::TimeEditDlg *m_ui;
-    IDoc *m_Doc;
-    ITimelineKeyframesManager *m_KeyframesManager;
-    long m_InitialTime;
-    long m_ObjectAssociation;
-    long m_OffsetFromInitialTime;
-    int m_min;
-    int m_sec;
+    Ui::TimeEditDlg *m_ui = nullptr;
+    IDoc *m_Doc = nullptr;
+    KeyframeManager *m_keyframeManager = nullptr;
+    long m_initialTime = 0;
+    long m_endTime = 0;
+    long m_objectAssociation = 0;
 };
 #endif // TIME_EDIT_DIALOG_H

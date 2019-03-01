@@ -141,7 +141,7 @@ void CDataInputListDlg::initDialog()
     m_ui->elementInfo->setFocusPolicy(Qt::NoFocus);
     m_ui->elementInfo->resizeColumnsToContents();
     m_ui->elementInfo->horizontalHeader()->setStretchLastSection(true);
-    m_ui->elementInfo->horizontalHeader()->setMinimumSectionSize(125);
+    m_ui->elementInfo->horizontalHeader()->setMinimumSectionSize(140);
     m_ui->elementInfo->setModel(m_infoContents);
     m_ui->elementInfo->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 
@@ -190,7 +190,7 @@ void CDataInputListDlg::updateContents()
     for (auto &it : qAsConst(m_dataInputs)) {
         dataInput.clear();
 
-        int dataInputType = it->type;
+        EDataType dataInputType = (EDataType)it->type;
 
         if ((dataInputType == m_typeFilter || m_typeFilter == -1)
             && it->name.contains(m_searchString)){
@@ -235,6 +235,26 @@ void CDataInputListDlg::updateContents()
             // highlight datainputs that are in use
             if (it->ctrldElems.size() || it->externalPresBoundTypes.size())
                 dataInput.first()->setForeground(QBrush(CStudioPreferences::dataInputColor()));
+
+            // warn if any datainputs have mismatching datatype with an icon after datatype
+            // indicator
+            static QString warning(tr("Data Input type is not matching with one "
+                                      "or several bound properties"));
+            for (const auto &ctrlElem : qAsConst(it->ctrldElems)) {
+                if (!CDataInputDlg::getAcceptedTypes(ctrlElem.dataType.first)
+                        .contains(dataInputType)) {
+                    dataInput[1]->setIcon(QIcon(":/images/warning.png"));
+                    dataInput[1]->setToolTip(warning);
+                }
+            }
+
+            for (const auto &extBoundType : qAsConst(it->externalPresBoundTypes)) {
+                if (!CDataInputDlg::getAcceptedTypes(extBoundType.first).contains(dataInputType)) {
+                    dataInput[1]->setIcon(QIcon(":/images/warning.png"));
+                    dataInput[1]->setToolTip(warning);
+                }
+            }
+
             m_tableContents->appendRow(dataInput);
         }
     }
@@ -260,6 +280,7 @@ void CDataInputListDlg::updateInfo()
     if (m_ui->tableView->selectionModel()->selectedRows(0).size() == 1) {
         for (auto allCtrldElemsIt = m_dataInputs[m_currentDataInputName]->ctrldElems.begin();
              allCtrldElemsIt != m_dataInputs[m_currentDataInputName]->ctrldElems.end();) {
+            bool typeNotMatching = false;
             QStandardItem *item = new QStandardItem(
                         g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
                         ->GetClientDataModelBridge()->GetName(
@@ -297,6 +318,13 @@ void CDataInputListDlg::updateInfo()
                     }
 
                     count++;
+
+                    // Check if there is a non-matching datatype binding with one or several
+                    // properties for this element.
+                    if (!CDataInputDlg::getAcceptedTypes(allCtrldElemsIt->dataType.first).contains(
+                                (EDataType)(m_dataInputs[m_currentDataInputName]->type))) {
+                        typeNotMatching = true;
+                    }
                     // Advance main iterator so that after the inner loop we end up
                     // at the start of next instance's batch of controlleditems.
                     allCtrldElemsIt++;
@@ -310,6 +338,15 @@ void CDataInputListDlg::updateInfo()
                 QStandardItem *item3 = new QStandardItem(propNames);
                 item3->setToolTip(propNames);
                 item3->setEditable(false);
+
+                // Highlight the entire property name item if a non-match was found.
+                if (typeNotMatching) {
+                    item3->setForeground(
+                                QBrush(CStudioPreferences::invalidDataInputIndicatorColor()));
+                    static QString warning(tr("\n\nData Input type is not matching with one or "
+                                              "several bound properties"));
+                    item3->setToolTip(propNames + warning);
+                }
                 m_infoContents->appendRow(QList<QStandardItem *>({item, item2, item3}));
             }
         }

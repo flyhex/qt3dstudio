@@ -37,7 +37,6 @@
 
 class RowTree;
 class CControlWindowListener;
-class ITimelineKeyframesManager;
 
 // Data model specific ??
 class CDropTarget;

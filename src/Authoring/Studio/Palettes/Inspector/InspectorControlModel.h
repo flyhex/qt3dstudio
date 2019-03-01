@@ -42,6 +42,7 @@
 class CInspectableBase;
 class Qt3DSDMInspectable;
 class SGuideInspectableImpl;
+class VariantsGroupModel;
 
 namespace qt3dsdm {
 class ISignalConnection;
@@ -107,7 +108,7 @@ class InspectorControlModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
-    explicit InspectorControlModel(QObject *parent);
+    explicit InspectorControlModel(VariantsGroupModel *variantsModel, QObject *parent);
     ~InspectorControlModel() = default;
 
     enum Roles {
@@ -153,6 +154,8 @@ public:
     Q_INVOKABLE bool isDefaultMaterial() const;
     Q_INVOKABLE void addMaterial();
     Q_INVOKABLE void duplicateMaterial();
+    Q_INVOKABLE bool isGroupCollapsed(int groupIdx) const;
+    Q_INVOKABLE void updateGroupCollapseState(int groupIdx, bool state);
 
 private:
     void onSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inOldIndex,
@@ -168,7 +171,7 @@ private:
         }
     };
 
-    mutable QVector<GroupInspectorControl> m_groupElements;
+    QVector<GroupInspectorControl> m_groupElements;
     CInspectableBase *m_inspectableBase = nullptr;
     SGuideInspectableImpl *m_guideInspectable = nullptr;
 
@@ -197,6 +200,8 @@ private:
 
     qt3dsdm::SValue m_previouslyCommittedValue;
 
+    QHash<int, QHash<int, bool> > m_collapseMap;
+
     QString getBasicMaterialString() const;
     QString getAnimatableMaterialString() const;
     QString getReferencedMaterialString() const;
@@ -215,7 +220,8 @@ private:
     void updatePropertyValue(InspectorControlBase *element) const;
     void rebuildTree();
     void refreshTree();
-    void notifyInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle inProperty);
+    void onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                           qt3dsdm::Qt3DSDMPropertyHandle inProperty);
     void updateAnimateToggleState(InspectorControlBase *inItem);
     void updateControlledToggleState(InspectorControlBase *inItem) const;
 
@@ -243,6 +249,8 @@ private:
     bool isGroupRebuildRequired(CInspectableBase *inspectable, int theIndex) const;
 
     static int handleToGuidePropIndex(int handle) { return handle - 1; }
+
+    VariantsGroupModel *m_variantsModel = nullptr;
 };
 
 #endif // INSPECTORCONTROLMODEL_H

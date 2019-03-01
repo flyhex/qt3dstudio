@@ -201,7 +201,6 @@ HEADERS += \
     Palettes/Timeline/Bindings/ITimelineItem.h \
     Palettes/Timeline/Bindings/ITimelineItemBinding.h \
     Palettes/Timeline/Bindings/ITimelineItemProperty.h \
-    Palettes/Timeline/Bindings/ITimelineKeyframesManager.h \
     Palettes/Timeline/Bindings/ITimelineTimebar.h \
     Palettes/Timeline/Bindings/IBreadCrumbProvider.h \
     Palettes/TimelineGraphicsView/Keyframe.h \
@@ -261,15 +260,18 @@ HEADERS += \
     UI/Q3DSPlayerWidget.h \
     Render/StudioEnums.h \
     Render/Q3DSTranslators.h \
-    Palettes/Inspector/MaterialRefView.h \
-    Palettes/scenecamera/scenecameraview.h \
-    Palettes/scenecamera/scenecamerascrollarea.h \
-    Palettes/scenecamera/scenecameraglwidget.h \
-    Palettes/TimelineGraphicsView/ui/RowTimelineCommentItem.h \
     Render/Q3DSSelectionWidget.h \
     Render/Q3DSVisualAidWidget.h \
     Render/Q3DSWidgetUtils.h \
-    Render/Q3DSManipulationWidget.h
+    Render/Q3DSManipulationWidget.h \
+    Palettes/scenecamera/scenecameraview.h \
+    Palettes/scenecamera/scenecamerascrollarea.h \
+    Palettes/scenecamera/scenecameraglwidget.h \
+    Palettes/Inspector/MaterialRefView.h \
+    Palettes/TimelineGraphicsView/ui/RowTimelineCommentItem.h \
+    Palettes/Inspector/VariantsGroupModel.h \
+    Palettes/Inspector/VariantsTagModel.h \
+    Palettes/Inspector/VariantTagDialog.h
 
 FORMS += \
     MainFrm.ui \
@@ -289,7 +291,8 @@ FORMS += \
     UI/StartupDlg.ui \
     Palettes/Project/EditPresentationIdDlg.ui \
     Palettes/Project/ChooseImagePropertyDlg.ui \
-    Palettes/scenecamera/scenecameraview.ui
+    Palettes/scenecamera/scenecameraview.ui \
+    Palettes/Inspector/VariantTagDialog.ui
 
 SOURCES += \
     Application/AboutDlg.cpp \
@@ -434,15 +437,18 @@ SOURCES += \
     UI/Q3DSPlayerWidget.cpp \
     Render/Q3DSEditCamera.cpp \
     Render/Q3DSTranslators.cpp \
+    Render/Q3DSSelectionWidget.cpp \
+    Render/Q3DSVisualAidWidget.cpp \
+    Render/Q3DSWidgetUtils.cpp \
+    Render/Q3DSManipulationWidget.cpp \
     Palettes/Inspector/MaterialRefView.cpp \
     Palettes/scenecamera/scenecameraview.cpp \
     Palettes/scenecamera/scenecamerascrollarea.cpp \
     Palettes/scenecamera/scenecameraglwidget.cpp \
     Palettes/TimelineGraphicsView/ui/RowTimelineCommentItem.cpp \
-    Render/Q3DSSelectionWidget.cpp \
-    Render/Q3DSVisualAidWidget.cpp \
-    Render/Q3DSWidgetUtils.cpp \
-    Render/Q3DSManipulationWidget.cpp
+    Palettes/Inspector/VariantsGroupModel.cpp \
+    Palettes/Inspector/VariantsTagModel.cpp \
+    Palettes/Inspector/VariantTagDialog.cpp
 
 RESOURCES += \
     MainFrm.qrc \
