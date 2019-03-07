@@ -130,8 +130,10 @@ To edit a material, do one of the following:
   Select a material slot in the scene graph, where the material is applied.
 \endlist
 
-Now, edit the desired properties in the inspector palette. Changes to the properties are immediate,
-you do not need to save.
+Now, edit the desired properties in the inspector palette. For a description of all material
+properties, see the
+\l{Studio: Inspector Palette#Material Properties}{inspector palette section}.
+Changes to the properties are immediate, you do not need to save.
 
 \section3 Working with Texture Maps
 
@@ -142,6 +144,14 @@ Additionally, you can apply a texture map by dragging the image from the project
 material in the scene graph. When you drop the image on the material, you can select which type
 of map you want to apply the image as.
 \image set-texture-map.png
+
+To edit a texture map, right-click the map property name in the inspector palette and select
+\uicontrol {Open in Inspector} from the context menu.
+\image material-open-in-inspector.png
+
+For a description of all image map
+properties, see the
+\l{Studio: Inspector Palette#Image Properties}{inspector palette section}.
 
 \section2 Animatable Materials
 You can create keyframe animations to material properties. To do this,
