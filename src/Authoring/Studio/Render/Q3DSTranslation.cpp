@@ -608,8 +608,14 @@ void Q3DSTranslation::markPropertyDirty(qt3dsdm::Qt3DSDMInstanceHandle instance,
 void Q3DSTranslation::releaseTranslation(qt3dsdm::Qt3DSDMInstanceHandle instance)
 {
     THandleTranslatorPairList &theTranslators = getTranslatorsForInstance(instance);
-    for (int idx = 0, end = theTranslators.size(); idx < end; ++idx)
-        m_releaseSet.insert(*theTranslators[idx].second);
+    for (int idx = 0, end = theTranslators.size(); idx < end; ++idx) {
+        // We want to release translators immediately, otherwise it is difficult to ensure
+        // correct order of operations when multiple commands affecting same objects occur
+        // within the same frame.
+        auto translator = theTranslators[idx].second;
+        translator->releaseGraphObjectsRecursive(*this);
+        releaseTranslator(translator);
+    }
 
     m_studioRenderer.RequestRender();
 }
@@ -1025,24 +1031,18 @@ void Q3DSTranslation::releaseTranslator(Q3DSGraphObjectTranslator *translator)
     m_instanceIdHash.remove(instance);
     m_translatorMap.remove(instance);
     m_presentation->unlinkObject(graphObject);
+    m_dirtySet.remove(*translator);
     delete translator;
     delete graphObject;
 }
 
 void Q3DSTranslation::clearDirtySet()
 {
-    for (unsigned int idx = 0; idx < m_releaseSet.size(); ++idx) {
-        Q3DSGraphObjectTranslator *translator = m_releaseSet[idx];
-        translator->releaseGraphObjectsRecursive(*this);
-        releaseTranslator(translator);
-    }
     for (unsigned int idx = 0; idx < m_dirtySet.size(); ++idx) {
-        if (m_reader.IsInstance(m_dirtySet[idx]->instanceHandle())
-                && m_dirtySet[idx]->dirty()) {
-            m_dirtySet[idx]->pushTranslation(*this);
-        }
+        Q3DSGraphObjectTranslator *translator = m_dirtySet[idx];
+        if (m_reader.IsInstance(translator->instanceHandle()) && translator->dirty())
+            translator->pushTranslation(*this);
     }
-    m_releaseSet.clear();
     m_dirtySet.clear();
 
     updateForegroundLayerProperties();
@@ -2358,6 +2358,11 @@ void Q3DSTranslation::editCameraZoomToFit()
 
     // Center the edit camera so that it points directly at the bounds center point
     m_editCameraInfo.m_position = center - m_editCameraInfo.front() * 600.f;
+}
+
+bool Q3DSTranslation::isHelperLayer(const Q3DSGraphObject *obj) const
+{
+    return m_backgroundLayer == obj || m_foregroundLayer == obj || m_foregroundPickingLayer == obj;
 }
 
 }

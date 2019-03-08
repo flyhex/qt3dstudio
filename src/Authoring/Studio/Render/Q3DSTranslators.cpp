@@ -815,16 +815,69 @@ void Q3DSSceneTranslator::pushTranslation(Q3DSTranslation &inContext)
     Q3DSTranslatorDataModelParser theParser(inContext, instanceHandle());
     Q3DSPropertyChangeList list;
     ITERATE_Q3DS_SCENE_PROPERTIES
-    theItem.removeAllChildNodes();
-    int childCount = inContext.assetGraph().GetChildCount(instanceHandle());
-    QVector<Q3DSGraphObjectTranslator *> translators;
-    for (long idx = 0; idx < childCount; ++idx) {
-        qt3dsdm::Qt3DSDMInstanceHandle child =
-            inContext.assetGraph().GetChild(instanceHandle(), idx);
-        Q3DSGraphObjectTranslator *translator = inContext.getOrCreateTranslator(child);
-        theItem.appendChildNode(&translator->graphObject());
-        translators << translator;
+
+    // Check if there are any changes to layer children
+    // First collect a set of existing child objects of the scene, excluding helper layers
+    int oldChildCount = theItem.childCount();
+    QVector<Q3DSGraphObject *> oldChildren;
+    oldChildren.reserve(oldChildCount);
+    for (int i = 0; i < oldChildCount; ++i) {
+        Q3DSGraphObject *obj = theItem.childAtIndex(i);
+        if (!inContext.isHelperLayer(obj))
+            oldChildren << obj;
     }
+    oldChildCount = oldChildren.size();
+
+    // Collect current children in asset graph
+    int newChildCount = inContext.assetGraph().GetChildCount(instanceHandle());
+    QVector<Q3DSGraphObjectTranslator *> translators;
+    translators.reserve(newChildCount);
+    QVector<Q3DSGraphObject *> newChildren;
+    newChildren.reserve(newChildCount);
+    for (long i = 0; i < newChildCount; ++i) {
+        qt3dsdm::Qt3DSDMInstanceHandle child
+            = inContext.assetGraph().GetChild(instanceHandle(), i);
+        Q3DSGraphObjectTranslator *translator = inContext.getOrCreateTranslator(child);
+        if (translator) { // Script items do not get translators
+            translators << translator;
+            newChildren << &translator->graphObject();
+        }
+    }
+
+    // Remove nodes that have been reordered
+    newChildCount = newChildren.size();
+    for (int newIdx = 0, oldIdx = 0; newIdx < newChildCount && oldIdx < oldChildCount;) {
+        auto newChild = newChildren[newIdx];
+        auto oldChild = oldChildren[oldIdx];
+        if (!oldChildren.contains(newChild)) {
+            ++newIdx;
+        } else {
+            if (oldChild != newChild) {
+                theItem.removeChildNode(oldChild);
+                ++oldIdx;
+            } else {
+                ++oldIdx;
+                ++newIdx;
+            }
+        }
+    }
+
+    // Now insert new and moved nodes back to correct positions
+    Q3DSGraphObject *nextChild = theItem.firstChild();
+    while (nextChild && inContext.isHelperLayer(nextChild))
+        nextChild = nextChild->nextSibling();
+    for (int newIdx = 0; newIdx < newChildCount; ++newIdx) {
+        auto child = newChildren[newIdx];
+        if (nextChild != child) {
+            if (!nextChild)
+                theItem.appendChildNode(child);
+            else
+                theItem.insertChildNodeBefore(child, nextChild);
+        } else if (nextChild) {
+            nextChild = nextChild->nextSibling();
+        }
+    }
+
     theItem.resolveReferences(*inContext.presentation());
     for (auto t : qAsConst(translators))
         t->pushTranslationIfDirty(inContext);

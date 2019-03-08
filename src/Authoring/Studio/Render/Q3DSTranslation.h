@@ -182,7 +182,6 @@ private:
     // All translator related containers must come after the allocator
     TInstanceToTranslatorMap m_translatorMap;
     TTranslatorDirtySet m_dirtySet;
-    TTranslatorDirtySet m_releaseSet;
     Q3DSPresentationData m_presentation_data;
     Q3DSScene *m_scene;
     Q3DStudio::CGraphIterator m_graphIterator;
@@ -320,6 +319,7 @@ public:
     void rotateAlongWidget(const QPoint &inOriginalCoords, const QPoint &inMouseCoords,
                            CUpdateableDocumentEditor &inEditor);
     void editCameraZoomToFit();
+    bool isHelperLayer(const Q3DSGraphObject *obj) const;
 };
 
 }
