@@ -150,6 +150,19 @@ QToolButton:checked, QToolButton:hover {
     background-color: #262829;
 }
 
+QToolButton#actionFilterVariants:checked {
+    min-width: 22px;
+    max-width: 22px;
+    min-height: 22px;
+    max-height: 22px;
+    background-color: #2e2f30;
+    border-color: #727476;
+    border-width: 1px;
+    border-top-style: solid;
+    border-right-style: solid;
+    border-left-style: solid;
+}
+
 QToolButton:pressed:!checked {
     min-width: 22px;
     max-width: 22px;

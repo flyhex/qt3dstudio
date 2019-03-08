@@ -229,7 +229,9 @@ HEADERS += \
     Palettes/TimelineGraphicsView/ui/RowTimelineCommentItem.h \
     Palettes/Inspector/VariantsGroupModel.h \
     Palettes/Inspector/VariantsTagModel.h \
-    Palettes/Inspector/VariantTagDialog.h
+    Palettes/Inspector/VariantTagDialog.h \
+    Application/FilterVariantsDlg.h \
+    Application/FilterVariantsModel.h
 
 FORMS += \
     MainFrm.ui \
@@ -409,7 +411,9 @@ SOURCES += \
     Palettes/TimelineGraphicsView/ui/RowTimelineCommentItem.cpp \
     Palettes/Inspector/VariantsGroupModel.cpp \
     Palettes/Inspector/VariantsTagModel.cpp \
-    Palettes/Inspector/VariantTagDialog.cpp
+    Palettes/Inspector/VariantTagDialog.cpp \
+    Application/FilterVariantsDlg.cpp \
+    Application/FilterVariantsModel.cpp
 
 RESOURCES += \
     MainFrm.qrc \

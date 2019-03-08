@@ -235,6 +235,9 @@ Project palette using Import functionality.</string>
    <addaction name="actionWireframe"/>
   </widget>
   <widget class="QToolBar" name="m_PlaybackToolbar">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="windowTitle">
     <string>Playback</string>
    </property>
@@ -252,6 +255,7 @@ Project palette using Import functionality.</string>
    </attribute>
    <addaction name="actionPreview"/>
    <addaction name="actionRemote_Preview"/>
+   <addaction name="actionFilterVariants"/>
   </widget>
   <action name="action_Reference_Manual">
    <property name="text">
@@ -771,6 +775,28 @@ Project palette using Import functionality.</string>
     <string>F5</string>
    </property>
   </action>
+  <action name="actionFilterVariants">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/images/filter.png</normaloff>
+     <disabledoff>:/images/filter-disabled.png</disabledoff>:/images/filter.png</iconset>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="toolTip">
+    <string>Filter variants (F7)</string>
+   </property>
+   <property name="shortcut">
+    <string>F7</string>
+   </property>
+  </action>
   <action name="actionSubpresentations">
    <property name="text">
     <string>Sub-presentations...</string>
@@ -842,6 +868,8 @@ Project palette using Import functionality.</string>
    <property name="icon">
     <iconset>
      <normalon>:/images/remote.png</normalon>
+     <disabledoff>:/images/remote-disabled.png</disabledoff>
+     <disabledon>:/images/remote-disabled.png</disabledon>
     </iconset>
    </property>
    <property name="text">

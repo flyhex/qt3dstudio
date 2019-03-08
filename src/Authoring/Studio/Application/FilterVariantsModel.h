@@ -26,37 +26,52 @@
 **
 ****************************************************************************/
 
-#ifndef VARIANTSTAGMODEL_H
-#define VARIANTSTAGMODEL_H
+#ifndef VARIANTSGROUPMODEL_H
+#define VARIANTSGROUPMODEL_H
 
 #include <QtCore/qabstractitemmodel.h>
 
-class VariantsTagModel : public QAbstractListModel
+class VariantsTagModel;
+
+using VariantsFilterT = QHash<QString, QSet<QString> >;
+
+class FilterVariantsModel : public QAbstractListModel
 {
     Q_OBJECT
 
 public:
-    explicit VariantsTagModel(const QVector<std::pair<QString, bool> > &data,
-                              QObject *parent = nullptr);
+    explicit FilterVariantsModel(VariantsFilterT &variantsFilter, QObject *parent = nullptr);
 
     enum Roles {
-        TagRole = Qt::UserRole + 1,
-        SelectedRole,
+        GroupTitleRole = Qt::UserRole + 1,
+        GroupColorRole,
+        TagsRole
+    };
+
+    struct VariantsGroupData
+    {
+        QString m_title;
+        QString m_color;
+        VariantsTagModel *m_tagsModel = nullptr;
     };
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role = TagRole) const override;
+    QVariant data(const QModelIndex &index, int role = GroupTitleRole) const override;
 
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
-    void updateTagState(const QString &tag, bool selected);
-    QString serialize(const QString &groupName) const;
+    void refresh();
+
+    Q_INVOKABLE void setTagState(const QString &group, const QString &tag, bool selected);
+    Q_INVOKABLE void toggleGroupState(const QString &group);
+    Q_INVOKABLE void clearAll();
 
 protected:
       QHash<int, QByteArray> roleNames() const override;
 
 private:
-      QVector<std::pair<QString, bool> > m_data; // [{tagName, selectedState}, ...]
+      VariantsFilterT &m_variantsFilter;
+      QVector<VariantsGroupData> m_data;
 };
 
-#endif // VARIANTSTAGMODEL_H
+#endif // VARIANTSGROUPMODEL_H

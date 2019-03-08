@@ -57,6 +57,8 @@ class RemoteDeploymentSender;
 class TimelineWidget;
 class CStudioPreferencesPropSheet;
 class SlideView;
+class InspectorControlView;
+class FilterVariantsDlg;
 
 #ifdef QT_NAMESPACE
 using namespace QT_NAMESPACE;
@@ -158,6 +160,7 @@ public:
     void OnPlaybackPreviewRuntime1();
     void OnPlaybackPreviewRuntime2();
     void OnPlaybackPreviewRemote();
+    void onFilterVariants();
     void OnUpdatePlaybackPreview();
     void OnUpdateToolMove();
     void OnUpdateToolRotate();
@@ -237,6 +240,7 @@ public:
 
     TimelineWidget *getTimelineWidget() const;
     SlideView *getSlideView() const;
+    InspectorControlView *getInspectorView() const;
 
     void EditPreferences(short inPageIndex);
 
@@ -250,6 +254,9 @@ public:
 
     void toggleSelectMode();
     void showScene();
+    QString getVariantsFilterStr() const;
+    void updateActionFilterEnableState();
+    void updateActionPreviewVariantsState(bool isFiltered);
 
 Q_SIGNALS:
     void playStateChanged(bool started);
@@ -270,6 +277,9 @@ protected:
 
     bool m_playbackFlag = false;
     bool m_resettingLayout = false;
+
+private:
+    FilterVariantsDlg *m_filterVariantsDlg = nullptr;
 };
 
 #endif // INCLUDED_MAIN_FRAME

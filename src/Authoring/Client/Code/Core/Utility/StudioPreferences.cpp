@@ -49,6 +49,7 @@ static ::CColor s_DisabledTextColor;
 static QColor s_studioColor1;
 static QColor s_studioColor2;
 static QColor s_studioColor3;
+static QColor s_studioColor4;
 static QColor s_backgroundColor;
 static QColor s_guideColor;
 static QColor s_selectionColor;
@@ -61,6 +62,7 @@ static QColor s_projectReferencedColor;
 static QColor s_xAxisColor;
 static QColor s_yAxisColor;
 static QColor s_zAxisColor;
+static QColor s_inspectorGroupHeaderColor;
 static QLinearGradient s_welcomeBackgroundGradient;
 
 static QColor s_timelineRowColorNormal;
@@ -143,18 +145,20 @@ void CStudioPreferences::loadPreferences(const QString &filePath)
     s_studioColor1 = QColor("#262829");
     s_studioColor2 = QColor("#404244");
     s_studioColor3 = QColor("#727476");
+    s_studioColor4 = QColor("#959596");
     s_backgroundColor = QColor("#2e2f30");
     s_guideColor = QColor("#f4be04");
     s_selectionColor = QColor("#23516D");
     s_textColor = QColor("#ffffff");
     s_masterColor = QColor("#5caa15");
-    s_disabledColor = QColor("#727476");
+    s_disabledColor = s_studioColor3;
     s_dataInputColor = QColor("#ff5102");
     s_matteColor = QColor("#222222");
     s_projectReferencedColor = QColor("#aaaa00");
     s_xAxisColor = QColor("#ca2f2e");
     s_yAxisColor = QColor("#64cd35");
     s_zAxisColor = QColor("#1e9fcd");
+    s_inspectorGroupHeaderColor = QColor("#111111");
 
     s_welcomeBackgroundGradient = QLinearGradient(0.0, 0.0, 1.0, 0.0);
     s_welcomeBackgroundGradient.setColorAt(0.0, QColor("#343E55"));
@@ -852,6 +856,7 @@ void CStudioPreferences::setQmlContextProperties(QQmlContext *qml)
     qml->setContextProperty(QStringLiteral("_studioColor1"), s_studioColor1);
     qml->setContextProperty(QStringLiteral("_studioColor2"), s_studioColor2);
     qml->setContextProperty(QStringLiteral("_studioColor3"), s_studioColor3);
+    qml->setContextProperty(QStringLiteral("_studioColor4"), s_studioColor4);
     qml->setContextProperty(QStringLiteral("_backgroundColor"), s_backgroundColor);
     qml->setContextProperty(QStringLiteral("_buttonDownColor"), s_ButtonDownColor.getQColor());
     qml->setContextProperty(QStringLiteral("_guideColor"), s_guideColor);
@@ -868,6 +873,8 @@ void CStudioPreferences::setQmlContextProperties(QQmlContext *qml)
     qml->setContextProperty(QStringLiteral("_controlBaseHeight"), s_controlBaseHeight);
     qml->setContextProperty(QStringLiteral("_idWidth"), s_idWidth);
     qml->setContextProperty(QStringLiteral("_valueWidth"), s_valueWidth);
+    qml->setContextProperty(QStringLiteral("_inspectorGroupHeaderColor"),
+                            s_inspectorGroupHeaderColor);
 }
 
 QColor CStudioPreferences::studioColor1()
@@ -883,6 +890,11 @@ QColor CStudioPreferences::studioColor2()
 QColor CStudioPreferences::studioColor3()
 {
     return s_studioColor3;
+}
+
+QColor CStudioPreferences::studioColor4()
+{
+    return s_studioColor4;
 }
 
 QColor CStudioPreferences::backgroundColor()

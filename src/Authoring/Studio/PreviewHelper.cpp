@@ -36,6 +36,8 @@
 #include "StudioPreferences.h"
 #include "StudioProjectSettings.h"
 #include "Core.h"
+#include "Views.h"
+#include "MainFrm.h"
 #include "Qt3DSFileTools.h"
 
 #include <QtWidgets/qinputdialog.h>
@@ -203,7 +205,13 @@ void CPreviewHelper::DoPreviewViaConfig(Q3DStudio::CBuildConfiguration * /*inSel
             delete connection;
             cleanupProcess(p, pDocStr);
         });
-        p->start(theCommandStr, { *pDocStr });
+
+        QStringList args {*pDocStr};
+        QString variantsArg = g_StudioApp.GetViews()->getMainFrame()->getVariantsFilterStr();
+        if (!variantsArg.isEmpty())
+            args << "-v" << variantsArg;
+
+        p->start(theCommandStr, args);
 
         if (!p->waitForStarted()) {
             QMessageBox::critical(nullptr, QObject::tr("Error Launching Viewer"),

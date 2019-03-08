@@ -211,7 +211,7 @@ Rectangle {
                         x: -10
                         width: delegateItem.width
                         height: 25
-                        color: "#111111"
+                        color: _inspectorGroupHeaderColor
 
                         StyledLabel {
                             x: 30
@@ -1143,7 +1143,7 @@ Rectangle {
 
             Text {
                 text: qsTr("There are no variant tags yet. Click [+ Group] to add a new tags group and start adding tags.")
-                color: "#ffffff"
+                color: _textColor
                 visible: _variantsGroupModel.variantsEmpty
             }
 
@@ -1242,19 +1242,19 @@ Rectangle {
         id: tagComponent
 
         Rectangle {
-            property bool toggled: tagsModel.selected
+            property bool toggled: tagsModel ? tagsModel.selected : false
             property string grpColor: grpModel ? grpModel.color : ""
 
             width: Math.max(tLabel.width + 10, 60)
             height: 25
-            color: toggled ? grpColor : "#2e2f30"
-            border.color: "#959596"
+            color: toggled ? grpColor : _backgroundColor
+            border.color: _studioColor4
 
             Text {
                 id: tLabel
                 anchors.centerIn: parent
-                text: tagsModel.tag
-                color: toggled ? "#ffffff" : "#959596"
+                text: tagsModel ? tagsModel.tag : ""
+                color: toggled ? _textColor : _studioColor4
             }
 
             MouseArea {

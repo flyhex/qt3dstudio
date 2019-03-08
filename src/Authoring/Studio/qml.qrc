@@ -42,5 +42,6 @@
         <file>Palettes/Action/HandlerBaseMultilineText.qml</file>
         <file>Palettes/Action/HandlerGenericFloat.qml</file>
         <file>Palettes/Inspector/MaterialDropDown.qml</file>
+        <file>Application/FilterVariantsDlg.qml</file>
     </qresource>
 </RCC>

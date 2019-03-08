@@ -78,8 +78,6 @@ InspectorControlView::InspectorControlView(const QSize &preferredSize, QWidget *
       m_variantsGroupModel(new VariantsGroupModel(this)),
       m_inspectorControlModel(new InspectorControlModel(m_variantsGroupModel, this)),
       m_meshChooserView(new MeshChooserView(this)),
-      m_instance(0),
-      m_handle(0),
       m_preferredSize(preferredSize)
 {
     setResizeMode(QQuickWidget::SizeRootObjectToView);
@@ -484,6 +482,8 @@ void InspectorControlView::showTagContextMenu(int x, int y, const QString &group
         g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->refreshVariants();
         g_StudioApp.GetViews()->getMainFrame()->getSlideView()->refreshVariants();
         m_variantsGroupModel->refresh();
+        if (g_StudioApp.GetCore()->getProjectFile().variantsDef()[group].m_tags.size() == 0)
+            g_StudioApp.GetViews()->getMainFrame()->updateActionFilterEnableState();
     });
 
     theContextMenu.exec(mapToGlobal({x, y}));
@@ -522,6 +522,7 @@ void InspectorControlView::showGroupContextMenu(int x, int y, const QString &gro
         projectFile.deleteVariantGroup(group);
         g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->refreshVariants();
         g_StudioApp.GetViews()->getMainFrame()->getSlideView()->refreshVariants();
+        g_StudioApp.GetViews()->getMainFrame()->updateActionFilterEnableState();
         m_variantsGroupModel->refresh();
     });
 

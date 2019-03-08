@@ -61,6 +61,7 @@
 #include "RowTree.h"
 #include "WidgetControl.h"
 #include "SlideView.h"
+#include "FilterVariantsDlg.h"
 
 #include <QtGui/qevent.h>
 #include <QtGui/qdesktopservices.h>
@@ -90,6 +91,10 @@ CMainFrame::CMainFrame()
     , m_propSheet(nullptr)
 {
     m_ui->setupUi(this);
+
+    // allow styling this action
+    m_ui->m_PlaybackToolbar->widgetForAction(m_ui->actionFilterVariants)
+                           ->setObjectName("actionFilterVariants");
 
     // Register TitilliumWeb as application font in case user doesn't have it already installed
     QFontDatabase::addApplicationFont(QStringLiteral(":/TitilliumWeb-Light.ttf"));
@@ -219,8 +224,8 @@ CMainFrame::CMainFrame()
             m_sceneView.data(), &CSceneView::onToolGroupSelection);
 
     // Playback toolbar
-    connect(m_ui->actionPreview, &QAction::triggered,
-            this, &CMainFrame::OnPlaybackPreviewRuntime2);
+    connect(m_ui->actionPreview, &QAction::triggered, this, &CMainFrame::OnPlaybackPreviewRuntime2);
+    connect(m_ui->actionFilterVariants, &QAction::triggered, this, &CMainFrame::onFilterVariants);
 
     connect(m_ui->actionRemote_Preview, &QAction::triggered,
             this, &CMainFrame::OnPlaybackPreviewRemote);
@@ -1038,6 +1043,58 @@ void CMainFrame::OnPlaybackPreviewRuntime1()
 void CMainFrame::OnPlaybackPreviewRuntime2()
 {
     OnPlaybackPreview(QStringLiteral("q3dsviewer"));
+}
+
+void CMainFrame::onFilterVariants()
+{
+    if (m_ui->actionFilterVariants->isChecked()) {
+        QTimer::singleShot(0, [&] {
+            QRect actionGeom = m_ui->m_PlaybackToolbar->actionGeometry(m_ui->actionFilterVariants);
+            if (!m_filterVariantsDlg) {
+                m_filterVariantsDlg = new FilterVariantsDlg(this, m_ui->actionFilterVariants,
+                                                            actionGeom.width());
+            }
+
+            m_filterVariantsDlg->activateWindow();
+            m_filterVariantsDlg->raise();
+            m_filterVariantsDlg->move(m_ui->m_PlaybackToolbar->pos()
+                                      + QPoint(actionGeom.x(), actionGeom.bottom()));
+            m_filterVariantsDlg->setFocus();
+            m_filterVariantsDlg->show();
+        });
+    } else {
+        m_filterVariantsDlg->close();
+    }
+}
+
+QString CMainFrame::getVariantsFilterStr() const
+{
+    if (m_filterVariantsDlg)
+        return m_filterVariantsDlg->filterStr();
+
+    return {};
+}
+
+void CMainFrame::updateActionFilterEnableState()
+{
+    bool enable = false;
+    const auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
+    const auto keys = variantsDef.keys();
+    for (auto &group : keys) {
+        if (!variantsDef[group].m_tags.isEmpty()) {
+            enable = true;
+            break;
+        }
+    }
+
+    m_ui->actionFilterVariants->setEnabled(enable);
+}
+
+void CMainFrame::updateActionPreviewVariantsState(bool isFiltered)
+{
+    m_ui->actionPreview->setIcon(QIcon(isFiltered
+                                       ? QStringLiteral(":/images/playplayback-variant.png")
+                                       : QStringLiteral(":/images/playback_tools_low-03.png")));
 }
 
 void CMainFrame::OnPlaybackPreviewRemote()
@@ -1925,6 +1982,13 @@ SlideView *CMainFrame::getSlideView() const
 {
     return static_cast<SlideView *>(m_paletteManager->GetControl(CPaletteManager::CONTROLTYPE_SLIDE)
                                     ->widget());
+}
+
+InspectorControlView *CMainFrame::getInspectorView() const
+{
+    return static_cast<InspectorControlView *>(m_paletteManager
+                                               ->GetControl(CPaletteManager::CONTROLTYPE_INSPECTOR)
+                                               ->widget());
 }
 
 CRecentItems *CMainFrame::GetRecentItems()

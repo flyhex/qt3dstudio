@@ -26,37 +26,37 @@
 **
 ****************************************************************************/
 
-#ifndef VARIANTSTAGMODEL_H
-#define VARIANTSTAGMODEL_H
+#ifndef FILTER_VARIANTS_DLG_H
+#define FILTER_VARIANTS_DLG_H
 
-#include <QtCore/qabstractitemmodel.h>
+#include <QtQuickWidgets/qquickwidget.h>
 
-class VariantsTagModel : public QAbstractListModel
+class FilterVariantsModel;
+
+class FilterVariantsDlg : public QQuickWidget
 {
     Q_OBJECT
 
 public:
-    explicit VariantsTagModel(const QVector<std::pair<QString, bool> > &data,
-                              QObject *parent = nullptr);
+    explicit FilterVariantsDlg(QWidget *parent, QAction *action, int actionSize);
 
-    enum Roles {
-        TagRole = Qt::UserRole + 1,
-        SelectedRole,
-    };
+    Q_INVOKABLE int actionSize() const;
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role = TagRole) const override;
-
-    Qt::ItemFlags flags(const QModelIndex& index) const override;
-
-    void updateTagState(const QString &tag, bool selected);
-    QString serialize(const QString &groupName) const;
+    QString filterStr() const;
 
 protected:
-      QHash<int, QByteArray> roleNames() const override;
+    void focusOutEvent(QFocusEvent *e) override;
+    void keyPressEvent(QKeyEvent *e) override;
 
 private:
-      QVector<std::pair<QString, bool> > m_data; // [{tagName, selectedState}, ...]
+    void showEvent(QShowEvent *event) override;
+
+    void initialize();
+
+    QHash<QString, QSet<QString> > m_variantsFilter; // key: group, value: tags
+    FilterVariantsModel *m_model = nullptr;
+    QAction *m_action = nullptr;
+    int m_actionSize = 0; // width/height of the action icon
 };
 
-#endif // VARIANTSTAGMODEL_H
+#endif // FILTER_VARIANTS_DLG_H

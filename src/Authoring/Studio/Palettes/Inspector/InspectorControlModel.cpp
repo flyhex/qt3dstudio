@@ -109,9 +109,9 @@ static std::pair<bool, bool> getSlideCharacteristics(qt3dsdm::Qt3DSDMInstanceHan
 }
 
 InspectorControlModel::InspectorControlModel(VariantsGroupModel *variantsModel, QObject *parent)
-    : m_variantsModel(variantsModel)
-    , QAbstractListModel(parent)
+    : QAbstractListModel(parent)
     , m_UpdatableEditor(*g_StudioApp.GetCore()->GetDoc())
+    , m_variantsModel(variantsModel)
 {
     m_modifiedProperty.first = 0;
     m_modifiedProperty.second = 0;

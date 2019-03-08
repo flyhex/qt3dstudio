@@ -309,6 +309,12 @@
         <file>images/Keyframe-Property-Selected@2x.png</file>
         <file>images/Keyframe-Property-Normal@2x.png</file>
         <file>images/Keyframe-Property-Disabled@2x.png</file>
+        <file>images/filter.png</file>
+        <file>images/filter@2x.png</file>
+        <file>images/filter-disabled.png</file>
+        <file>images/filter-disabled@2x.png</file>
+        <file>images/playback-variant@2x.png</file>
+        <file>images/playplayback-variant.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="open_dialog.png">images/open_dialog.png</file>
