@@ -916,7 +916,8 @@ void TimelineGraphicsScene::keyPressEvent(QKeyEvent *keyEvent)
         return;
     } else if (keyEvent->key() == Qt::Key_Escape && m_rowMover->isActive()) {
         m_rowMover->end();
-    } else if (keyEvent->key() == Qt::Key_Delete && !m_rowMover->isActive()) {
+    } else if (keyEvent->key() == Qt::Key_Delete && !m_rowMover->isActive()
+               && !focusItem()) {
         g_StudioApp.DeleteSelectedObject(); // Despite the name, this deletes objects and keyframes
     }
     // Make sure drag states update on keyboard scrolls done during drag
