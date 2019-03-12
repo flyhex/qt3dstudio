@@ -61,12 +61,10 @@ QVariant SlideModel::data(const QModelIndex &index, int role) const
         if (slideIdx < m_variantsModel.size()) {
             const auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
             const auto keys = m_variantsModel[slideIdx].keys();
-            QString templ = QStringLiteral(" <font color='%1'>%2</font>");
+            QString templ = QString::fromWCharArray(L"<font color='%1'>\u25A0</font>");
             QString slideVariants;
-            for (auto g : keys) { // variants groups
-                slideVariants.append(templ.arg(variantsDef[g].m_color)
-                                          .arg(m_variantsModel[slideIdx][g].length()));
-            }
+            for (auto g : keys) // variants groups
+                slideVariants.append(templ.arg(variantsDef[g].m_color));
 
             return slideVariants;
         }

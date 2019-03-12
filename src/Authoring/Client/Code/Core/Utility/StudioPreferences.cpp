@@ -63,6 +63,7 @@ static QColor s_xAxisColor;
 static QColor s_yAxisColor;
 static QColor s_zAxisColor;
 static QColor s_inspectorGroupHeaderColor;
+static QColor s_variantsSlideViewBGColor;
 static QLinearGradient s_welcomeBackgroundGradient;
 
 static QColor s_timelineRowColorNormal;
@@ -159,6 +160,7 @@ void CStudioPreferences::loadPreferences(const QString &filePath)
     s_yAxisColor = QColor("#64cd35");
     s_zAxisColor = QColor("#1e9fcd");
     s_inspectorGroupHeaderColor = QColor("#111111");
+    s_variantsSlideViewBGColor = QColor("#111111");
 
     s_welcomeBackgroundGradient = QLinearGradient(0.0, 0.0, 1.0, 0.0);
     s_welcomeBackgroundGradient.setColorAt(0.0, QColor("#343E55"));
@@ -875,6 +877,8 @@ void CStudioPreferences::setQmlContextProperties(QQmlContext *qml)
     qml->setContextProperty(QStringLiteral("_valueWidth"), s_valueWidth);
     qml->setContextProperty(QStringLiteral("_inspectorGroupHeaderColor"),
                             s_inspectorGroupHeaderColor);
+    qml->setContextProperty(QStringLiteral("_variantsSlideViewBGColor"),
+                            s_variantsSlideViewBGColor);
 }
 
 QColor CStudioPreferences::studioColor1()
