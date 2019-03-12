@@ -250,6 +250,7 @@ void InspectorControlView::initialize()
     rootContext()->setContextProperty(QStringLiteral("_resDir"), StudioUtils::resourceImageUrl());
     rootContext()->setContextProperty(QStringLiteral("_tabOrderHandler"), tabOrderHandler());
     rootContext()->setContextProperty(QStringLiteral("_mouseHelper"), &m_mouseHelper);
+    m_mouseHelper.setWidget(this);
 
     qmlRegisterUncreatableType<qt3dsdm::DataModelDataType>(
                 "Qt3DStudio", 1, 0, "DataModelDataType",
