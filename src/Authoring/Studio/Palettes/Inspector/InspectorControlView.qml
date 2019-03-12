@@ -1124,7 +1124,7 @@ Rectangle {
                     height: 20
 
                     onClicked: {
-                        // TODO: implement
+                        _variantsGroupModel.importVariants()
                     }
                 }
 
@@ -1133,33 +1133,52 @@ Rectangle {
                     text: qsTr("Export...")
                     width: 70
                     height: 20
+                    enabled: !_variantsGroupModel.variantsEmpty
 
                     onClicked: {
-                        // TODO: implement
+                        _variantsGroupModel.exportVariants()
                     }
                 }
             }
 
             Text {
-                text: qsTr("There are no variant tags yet. Click [+ Group] to add a new tag group and start adding tags.")
+                text: qsTr("There are no variant tags yet. Click [+ Group] to add a new tags group and start adding tags.")
                 color: "#ffffff"
-                visible: _variantsGroupModel.rowCount() === 0
+                visible: _variantsGroupModel.variantsEmpty
             }
 
             Repeater {
-                id: tagsReeater
+                id: tagsRepeater
                 model: _variantsGroupModel
+                property int maxGroupLabelWidth;
+
+                onItemAdded: {
+                    // make all group labels have equal width as the widest one
+                    if (index == 0)
+                        maxGroupLabelWidth = 20; // min group label width
+
+                    if (item.groupLabelWidth > maxGroupLabelWidth) {
+                        maxGroupLabelWidth = item.groupLabelWidth;
+
+                        if (maxGroupLabelWidth > 150) // max group label width
+                            maxGroupLabelWidth = 150;
+                    }
+                }
 
                 Row {
                     id: variantTagsRow
+                    spacing: 5
 
                     readonly property var tagsModel: model.tags
                     readonly property var groupModel: model
+                    readonly property int groupLabelWidth: tLabel.implicitWidth
 
                     Text {
+                        id: tLabel
                         text: model.group
                         color: model.color
-                        width: 50
+                        width: tagsRepeater.maxGroupLabelWidth;
+                        elide: Text.ElideRight
                         anchors.top: parent.top
                         anchors.topMargin: 5
 

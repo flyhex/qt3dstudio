@@ -263,6 +263,29 @@ Rectangle {
                             }
                         }
 
+                        Label { // variants
+                            width: slideImage.width
+                            font.pixelSize: _fontSize
+                            padding: 3
+                            verticalAlignment: Text.AlignVCenter
+                            background: Rectangle { color:"#111111" }
+                            wrapMode: Text.WordWrap
+                            visible: model.variants !== undefined && model.variants !== ""
+                            text: model.variants ? model.variants : ""
+
+                            MouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                onEntered: {
+                                    _parentView.showVariantsTooltip(
+                                                model.index, mapToGlobal(x + width + 2, y));
+                                }
+                                onExited : {
+                                    _parentView.hideVariantsTooltip();
+                                }
+                            }
+                        }
+
                         Item {
                             anchors.horizontalCenter: slideImage.horizontalCenter
 

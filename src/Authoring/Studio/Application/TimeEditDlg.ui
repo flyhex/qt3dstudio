@@ -6,14 +6,29 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>300</width>
-    <height>114</height>
+    <width>343</width>
+    <height>119</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>535</width>
+    <height>119</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Set Keyframe Time</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <property name="sizeConstraint">
+    <enum>QLayout::SetFixedSize</enum>
+   </property>
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -70,7 +85,20 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEditMinutes"/>
+          <widget class="QLineEdit" name="lineEditMinutes">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>50</width>
+             <height>16777215</height>
+            </size>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QLabel" name="label_2">
@@ -80,7 +108,20 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEditSeconds"/>
+          <widget class="QLineEdit" name="lineEditSeconds">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>50</width>
+             <height>16777215</height>
+            </size>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QLabel" name="label_3">
@@ -90,7 +131,20 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEditMilliseconds"/>
+          <widget class="QLineEdit" name="lineEditMilliseconds">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>50</width>
+             <height>16777215</height>
+            </size>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -152,7 +206,7 @@
           <widget class="QLabel" name="label_4">
            <property name="minimumSize">
             <size>
-             <width>40</width>
+             <width>0</width>
              <height>0</height>
             </size>
            </property>
@@ -174,7 +228,7 @@
           <widget class="QLabel" name="label">
            <property name="minimumSize">
             <size>
-             <width>40</width>
+             <width>0</width>
              <height>0</height>
             </size>
            </property>

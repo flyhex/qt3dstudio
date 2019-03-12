@@ -112,4 +112,8 @@ the colors of the background layer or object.
 The \l{Disable Depth Test} property can be used to simultaneously override depth testing and
 the order objects are rendered.
 
+\section2 Variant Tags
+\l{Using Variant Tags}{Variant tags} makes it possible to exclude layers during loading to
+optimize performance.
+
 */

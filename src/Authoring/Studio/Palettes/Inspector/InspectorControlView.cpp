@@ -60,6 +60,10 @@
 #include "Qt3DSDMSlides.h"
 #include "VariantsGroupModel.h"
 #include "VariantTagDialog.h"
+#include "Views.h"
+#include "MainFrm.h"
+#include "SlideView.h"
+#include "TimelineWidget.h"
 
 #include <QtCore/qtimer.h>
 #include <QtQml/qqmlcontext.h>
@@ -458,6 +462,7 @@ void InspectorControlView::showContextMenu(int x, int y, int handle, int instanc
     m_handle = 0;
 }
 
+// context menu for the variants tags
 void InspectorControlView::showTagContextMenu(int x, int y, const QString &group,
                                               const QString &tag)
 {
@@ -469,17 +474,22 @@ void InspectorControlView::showTagContextMenu(int x, int y, const QString &group
         if (dlg.exec() == QDialog::Accepted) {
             g_StudioApp.GetCore()->getProjectFile().renameVariantTag(group, dlg.getNames().first,
                                                                      dlg.getNames().second);
+            m_variantsGroupModel->refresh();
         }
     });
 
     auto actionDelete = theContextMenu.addAction(QObject::tr("Delete Tag"));
     connect(actionDelete, &QAction::triggered, this, [&]() {
         g_StudioApp.GetCore()->getProjectFile().deleteVariantTag(group, tag);
+        g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->refreshVariants();
+        g_StudioApp.GetViews()->getMainFrame()->getSlideView()->refreshVariants();
+        m_variantsGroupModel->refresh();
     });
 
     theContextMenu.exec(mapToGlobal({x, y}));
 }
 
+// context menu for the variants groups
 void InspectorControlView::showGroupContextMenu(int x, int y, const QString &group)
 {
     QMenu theContextMenu;
@@ -491,24 +501,28 @@ void InspectorControlView::showGroupContextMenu(int x, int y, const QString &gro
         VariantTagDialog dlg(VariantTagDialog::RenameGroup, {}, group);
         if (dlg.exec() == QDialog::Accepted) {
             projectFile.renameVariantGroup(dlg.getNames().first, dlg.getNames().second);
+            g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->refreshVariants();
+            m_variantsGroupModel->refresh();
         }
     });
 
     auto actionColor = theContextMenu.addAction(QObject::tr("Change Group Color"));
     connect(actionColor, &QAction::triggered, this, [&]() {
         const auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
-        for (auto &g : variantsDef) {
-            if (g.m_title == group) {
-                QColor newColor = this->showColorDialog(g.m_color);
-                projectFile.changeVariantGroupColor(group, newColor.name());
-                break;
-            }
-        }
+        QColor newColor = this->showColorDialog(variantsDef[group].m_color);
+        projectFile.changeVariantGroupColor(group, newColor.name());
+        // no need to refresh variants in the timeline widget as it references the group color in
+        // the project file m_variants, and a redraw is triggered upon color selection dialog close.
+        g_StudioApp.GetViews()->getMainFrame()->getSlideView()->refreshVariants();
+        m_variantsGroupModel->refresh();
     });
 
     auto actionDelete = theContextMenu.addAction(QObject::tr("Delete Group"));
     connect(actionDelete, &QAction::triggered, this, [&]() {
         projectFile.deleteVariantGroup(group);
+        g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->refreshVariants();
+        g_StudioApp.GetViews()->getMainFrame()->getSlideView()->refreshVariants();
+        m_variantsGroupModel->refresh();
     });
 
     theContextMenu.exec(mapToGlobal({x, y}));

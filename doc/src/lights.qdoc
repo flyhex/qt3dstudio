@@ -52,9 +52,19 @@ A directional light has infinite range and does not diminish.
 
 \image directional-light.png
 
-Moving or scaling a directional light does not have any effect. The light will always
+Moving a directional light does not have any effect. The light will always
 be emitted in the direction of the lights Z axis, rotating the light along its X or Y axis will
 change the direction the light is emitted.
+
+Scaling a directional light will only have an effect in the following cases:
+
+\list
+  \li
+    If Z scale is set to a negative number, the light will be emitted in opposite direction.
+  \li
+    If the scale of any axis is set to 0, the light will be emitted along the world's Z axis.
+    Rotating the light will then have no effect.
+\endlist
 
 \image directional-light-scene.png
 

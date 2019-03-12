@@ -44,8 +44,6 @@ public:
     void setTimelineScale(double scl);
     long distanceToTime(double distance) const;
     double timeToDistance(long time) const;
-    double durationStartX() const;
-    double durationEndX() const;
     double timelineScale() const;
     long duration() const;
     long maxDuration() const;

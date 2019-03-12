@@ -52,6 +52,10 @@
   \l {Using Behavior Scripts}
 
   Learn how to use behavior scripts in your project.
+  \li
+  \l {Using Variant Tags}
+
+  Learn how to use variant tags to exclude parts of a presentation during loading.
 \endlist
 
 */

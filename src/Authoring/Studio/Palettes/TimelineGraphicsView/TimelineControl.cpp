@@ -31,11 +31,8 @@
 #include "RowManager.h"
 #include "RowTree.h"
 #include "Bindings/ITimelineItemBinding.h"
-#include "DurationEditDlg.h"
 #include "StudioApp.h"
 #include "Dialogs.h"
-#include "Core.h"
-#include "Doc.h"
 
 TimelineControl::TimelineControl(TimelineGraphicsScene *scene)
     : m_scene(scene)
@@ -54,8 +51,7 @@ void TimelineControl::setRowTimeline(RowTimeline *rowTimeline)
 
 void TimelineControl::showDurationEditDialog()
 {
-    g_StudioApp.GetDialogs()->asyncDisplayDurationEditDialog(m_startTime, m_endTime,
-                                                             g_StudioApp.GetCore()->GetDoc(), this);
+    g_StudioApp.GetDialogs()->asyncDisplayDurationEditDialog(m_startTime, m_endTime, this);
 }
 
 void TimelineControl::ChangeStartTime(long inTime)

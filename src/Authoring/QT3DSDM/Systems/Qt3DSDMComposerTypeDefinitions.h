@@ -70,7 +70,7 @@ class IPropertySystem;
     HANDLE_COMPOSER_OBJECT_TYPE(Model, ITERATE_COMPOSER_MODEL_PROPERTIES)                          \
     HANDLE_COMPOSER_OBJECT_TYPE(Light, ITERATE_COMPOSER_LIGHT_PROPERTIES)                          \
     HANDLE_COMPOSER_OBJECT_TYPE(Camera, ITERATE_COMPOSER_CAMERA_PROPERTIES)                        \
-    HANDLE_COMPOSER_OBJECT_TYPE(Component, ITERATE_COMPOSER_COMPONENT_PROPERTIES)              \
+    HANDLE_COMPOSER_OBJECT_TYPE(Component, ITERATE_COMPOSER_COMPONENT_PROPERTIES)                  \
     HANDLE_COMPOSER_OBJECT_TYPE(Text, ITERATE_COMPOSER_TEXT_PROPERTIES)                            \
     HANDLE_COMPOSER_OBJECT_TYPE(RenderPlugin, ITERATE_COMPOSER_NO_ADDITIONAL_PROPERTIES)           \
     HANDLE_COMPOSER_OBJECT_TYPE(Alias, ITERATE_COMPOSER_ALIAS_PROPERTIES)                          \
@@ -93,8 +93,8 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(importid, m_ImportId, TDataStrPtr, L"")                               \
     HANDLE_COMPOSER_PROPERTY(importfile, m_ImportFile, TDataStrPtr, L"")                           \
     HANDLE_COMPOSER_PROPERTY(fileid, m_FileId, TDataStrPtr, L"")                                   \
-    HANDLE_COMPOSER_PROPERTY(starttime, m_StartTime, qt3ds::QT3DSI32, 0)                                      \
-    HANDLE_COMPOSER_PROPERTY(endtime, m_EndTime, qt3ds::QT3DSI32, 10000)                                      \
+    HANDLE_COMPOSER_PROPERTY(starttime, m_StartTime, qt3ds::QT3DSI32, 0)                           \
+    HANDLE_COMPOSER_PROPERTY(endtime, m_EndTime, qt3ds::QT3DSI32, 10000)                           \
     HANDLE_COMPOSER_PROPERTY(eyeball, m_Eyeball, bool, true)                                       \
     HANDLE_COMPOSER_PROPERTY(shy, m_Shy, bool, false)                                              \
     HANDLE_COMPOSER_PROPERTY(locked, m_Locked, bool, false)                                        \
@@ -118,12 +118,12 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(opacity, m_Opacity, float, 100.f)                                     \
     HANDLE_COMPOSER_PROPERTY(rotationorder, m_RotationOrder, TDataStrPtr, L"YXZ")                  \
     HANDLE_COMPOSER_PROPERTY(orientation, m_Orientation, TDataStrPtr, L"Left Handed")              \
-    HANDLE_COMPOSER_PROPERTY(boneid, m_BoneId, qt3ds::QT3DSI32, 0)                                            \
+    HANDLE_COMPOSER_PROPERTY(boneid, m_BoneId, qt3ds::QT3DSI32, 0)                                 \
     HANDLE_COMPOSER_PROPERTY(ignoresparent, m_IgnoresParent, bool, false)                          \
     HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_MODEL_PROPERTIES                                                          \
-    HANDLE_COMPOSER_PROPERTY(poseroot, m_PoseRoot, qt3ds::QT3DSI32, -1)                                       \
+    HANDLE_COMPOSER_PROPERTY(poseroot, m_PoseRoot, qt3ds::QT3DSI32, -1)                            \
     HANDLE_COMPOSER_PROPERTY(tessellation, m_Tessellation, TDataStrPtr, L"None")                   \
     HANDLE_COMPOSER_PROPERTY(edgetess, m_EdgeTess, float, 1.0)                                     \
     HANDLE_COMPOSER_PROPERTY(innertess, m_InnerTess, float, 1.0)                                   \
@@ -219,7 +219,7 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(aodistance, m_AoDistance, float, 0)                                   \
     HANDLE_COMPOSER_PROPERTY(aosoftness, m_AoSoftness, float, 0)                                   \
     HANDLE_COMPOSER_PROPERTY(aobias, m_AoBias, float, 0)                                           \
-    HANDLE_COMPOSER_PROPERTY(aosamplerate, m_AoSamplerate, qt3ds::QT3DSI32, 1)                                \
+    HANDLE_COMPOSER_PROPERTY(aosamplerate, m_AoSamplerate, qt3ds::QT3DSI32, 1)                     \
     HANDLE_COMPOSER_PROPERTY(aodither, m_AoDither, bool, false)                                    \
     HANDLE_COMPOSER_PROPERTY(shadowstrength, m_ShadowStrength, float, 0)                           \
     HANDLE_COMPOSER_PROPERTY(shadowdist, m_ShadowDist, float, 0)                                   \
@@ -234,6 +234,7 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(probe2fade, m_Probe2Fade, float, 1)                                   \
     HANDLE_COMPOSER_PROPERTY(probe2window, m_Probe2Window, float, 1)                               \
     HANDLE_COMPOSER_PROPERTY(probe2pos, m_Probe2Pos, float, 0.5f)                                  \
+    HANDLE_COMPOSER_PROPERTY(variants, m_variants, TDataStrPtr, L"")                               \
     HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_LIGHT_PROPERTIES                                                          \
@@ -250,7 +251,7 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(castshadow, m_CastShadow, bool, false)                                \
     HANDLE_COMPOSER_PROPERTY(shdwbias, m_ShadowBias, float, 0.0f)                                  \
     HANDLE_COMPOSER_PROPERTY(shdwfactor, m_ShadowFactor, float, 5.0f)                              \
-    HANDLE_COMPOSER_PROPERTY(shdwmapres, m_ShadowMapRes, qt3ds::QT3DSI32, 9)                                  \
+    HANDLE_COMPOSER_PROPERTY(shdwmapres, m_ShadowMapRes, qt3ds::QT3DSI32, 9)                       \
     HANDLE_COMPOSER_PROPERTY(shdwmapfar, m_ShadowMapFar, float, 5000.0f)                           \
     HANDLE_COMPOSER_PROPERTY(shdwmapfov, m_ShadowMapFov, float, 90.0f)                             \
     HANDLE_COMPOSER_PROPERTY(shdwfilter, m_ShadowFilter, float, 35.0f)                             \
@@ -280,10 +281,10 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(dropshadow, m_DropShadow, bool, false)                                \
     HANDLE_COMPOSER_PROPERTY(dropshadowstrength, m_DropShadowStrength, float, 80.f)                \
     HANDLE_COMPOSER_PROPERTY(dropshadowoffset, m_DropShadowOffset, float, 10.f)                    \
-    HANDLE_COMPOSER_PROPERTY(dropshadowoffsetx, m_DropShadowOffsetX, float, 0.f)                  \
-    HANDLE_COMPOSER_PROPERTY(dropshadowoffsety, m_DropShadowOffsetY, float, 0.f)                  \
-    HANDLE_COMPOSER_PROPERTY(dropshadowhorzalign, m_DropShadowHorizontalAlignment, TDataStrPtr, L"Right")  \
-    HANDLE_COMPOSER_PROPERTY(dropshadowvertalign, m_DropShadowVerticalAlignment, TDataStrPtr, L"Bottom")   \
+    HANDLE_COMPOSER_PROPERTY(dropshadowoffsetx, m_DropShadowOffsetX, float, 0.f)                   \
+    HANDLE_COMPOSER_PROPERTY(dropshadowoffsety, m_DropShadowOffsetY, float, 0.f)                   \
+    HANDLE_COMPOSER_PROPERTY(dropshadowhorzalign, m_DropShadowHorizontalAlignment, TDataStrPtr, L"Right") \
+    HANDLE_COMPOSER_PROPERTY(dropshadowvertalign, m_DropShadowVerticalAlignment, TDataStrPtr, L"Bottom")  \
     HANDLE_COMPOSER_PROPERTY(wordwrap, m_WordWrap, TDataStrPtr, L"WrapWord")                       \
     HANDLE_COMPOSER_PROPERTY(boundingbox, m_BoundingBox, SFloat2, SFloat2(0, 0))                   \
     HANDLE_COMPOSER_PROPERTY(elide, m_Elide, TDataStrPtr, L"ElideNone")                            \
@@ -376,14 +377,14 @@ struct DataTypeToTypeMap
     bool force_compile_error;
 };
 
-#define QT3DSDM_DEFINE_TYPE_TO_DATA_TYPE(enumName, type)                                             \
+#define QT3DSDM_DEFINE_TYPE_TO_DATA_TYPE(enumName, type)                                           \
     template <>                                                                                    \
     struct TypeToDataTypeMap<type>                                                                 \
     {                                                                                              \
-        static DataModelDataType::Value GetDataType() { return enumName; }           \
+        static DataModelDataType::Value GetDataType() { return enumName; }                         \
     };                                                                                             \
     template <>                                                                                    \
-    struct DataTypeToTypeMap<enumName>                                         \
+    struct DataTypeToTypeMap<enumName>                                                             \
     {                                                                                              \
         typedef type TDataType;                                                                    \
     };
@@ -452,9 +453,9 @@ struct SComposerTypePropertyDefinition
     template <>                                                                                    \
     struct SComposerTypePropertyDefinition<ComposerObjectTypes::name>                              \
     {                                                                                              \
-        bool reserved;                                                               \
+        bool reserved;                                                                             \
         propmacro SComposerTypePropertyDefinition(IDataCore &inCore,                               \
-                                                  Qt3DSDMInstanceHandle inInstance);                \
+                                                  Qt3DSDMInstanceHandle inInstance);               \
     };
 
 ITERATE_COMPOSER_OBJECT_TYPES
@@ -936,7 +937,7 @@ public:
         IDataCore &inDataCore,
         IMetaData &inMetaData /*, ISlideCore& inSlideCore, IPropertySystem& inPropertySystem */);
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     // RTTI API
     bool IsA(Qt3DSDMInstanceHandle inInstance, ComposerObjectTypes::Enum inType);
     // Could easily return None, meaning we can't identify the object type.

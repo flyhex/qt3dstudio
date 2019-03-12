@@ -28,8 +28,6 @@
 
 #include "InteractiveTimelineItem.h"
 
-#include <QtGui/qpainter.h>
-
 InteractiveTimelineItem::InteractiveTimelineItem(TimelineItem *parent) : TimelineItem(parent)
 {
     setAcceptHoverEvents(true);

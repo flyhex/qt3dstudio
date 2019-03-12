@@ -120,7 +120,7 @@ public:
     bool hasDurationBar() const;
     bool propertyExpanded() const;
     int depth() const;
-    int type() const;
+    int type() const override;
     int index() const;
     int indexInLayout() const;
     int treeWidth() const;
@@ -140,6 +140,7 @@ public:
     void updateLabel();
     void setRowVisible(bool visible);
     void setDnDHover(bool val);
+    void updateVariants(const QStringList &groups);
     DnDState getDnDState() const;
 
     ITimelineItemBinding *getBinding() const;
@@ -148,6 +149,9 @@ public:
     void updateFilter();
     void updateLock(bool state);
     void updateSubpresentations(int updateParentsOnlyVal = 0);
+    int clipX() const;
+    int instance() const;
+
 protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
 
@@ -194,6 +198,7 @@ private:
     QString m_label;
     QList<RowTree *> m_childRows;
     QList<RowTree *> m_childProps;
+    QStringList m_variantsGroups;
     ITimelineItemBinding *m_binding = nullptr;
     ITimelineItemProperty *m_PropBinding = nullptr; // for property rows
 

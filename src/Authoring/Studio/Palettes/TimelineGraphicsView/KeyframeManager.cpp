@@ -30,13 +30,8 @@
 #include "RowTree.h"
 #include "RowTimeline.h"
 #include "Keyframe.h"
-#include "RowTypes.h"
-#include "TimelineConstants.h"
-#include "Ruler.h"
-#include "PlayHead.h"
 #include "RowManager.h"
 #include "TimelineGraphicsScene.h"
-#include "StudioObjectTypes.h"
 #include "StudioApp.h"
 #include "Core.h"
 #include "Doc.h"
@@ -44,20 +39,12 @@
 #include "CmdDataModelRemoveKeyframe.h"
 #include "CmdDataModelInsertKeyframe.h"
 #include "CmdDataModelChangeKeyframe.h"
-#include "Qt3DSDMAnimation.h"
 #include "ClientDataModelBridge.h"
-#include "Bindings/ITimelineItemBinding.h"
 #include "Bindings/OffsetKeyframesCommandHelper.h"
-#include "Bindings/Qt3DSDMTimelineKeyframe.h"
+#include "Bindings/PasteKeyframesCommandHelper.h"
 #include "StudioPreferences.h"
-#include "Qt3DSDMAnimation.h"
 #include "Dialogs.h"
 #include "TimeEnums.h"
-#include "Bindings/PasteKeyframesCommandHelper.h"
-
-#include <qglobal.h>
-#include <QtCore/qhash.h>
-#include <QtCore/qdebug.h>
 
 using namespace qt3dsdm;
 
@@ -86,9 +73,8 @@ QList<Keyframe *> KeyframeManager::insertKeyframe(RowTimeline *row, long time,
     }
 
     if (!propRows.empty()) {
-        Keyframe *keyframe = nullptr;
         for (const auto &r : qAsConst(propRows)) {
-            keyframe = new Keyframe(time, r);
+            Keyframe *keyframe = new Keyframe(time, r);
             r->insertKeyframe(keyframe);
             r->parentRow()->insertKeyframe(keyframe);
             addedKeyframes.append(keyframe);

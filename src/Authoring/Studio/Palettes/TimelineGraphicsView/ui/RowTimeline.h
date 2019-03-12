@@ -100,8 +100,6 @@ private:
     void drawColorPropertyGradient(QPainter *painter, int width);
     bool isColorProperty() const;
     QString formatTime(long millis) const;
-    double timeToX(long time) const;
-    long xToTime(double xPos) const;
     void collectChildKeyframeTimes(QVector<long> &childKeyframeTimes);
 
     RowTree *m_rowTree;

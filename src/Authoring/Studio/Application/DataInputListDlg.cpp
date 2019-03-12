@@ -141,7 +141,7 @@ void CDataInputListDlg::initDialog()
     m_ui->elementInfo->setFocusPolicy(Qt::NoFocus);
     m_ui->elementInfo->resizeColumnsToContents();
     m_ui->elementInfo->horizontalHeader()->setStretchLastSection(true);
-    m_ui->elementInfo->horizontalHeader()->setMinimumSectionSize(125);
+    m_ui->elementInfo->horizontalHeader()->setMinimumSectionSize(140);
     m_ui->elementInfo->setModel(m_infoContents);
     m_ui->elementInfo->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 
@@ -280,6 +280,7 @@ void CDataInputListDlg::updateInfo()
     if (m_ui->tableView->selectionModel()->selectedRows(0).size() == 1) {
         for (auto allCtrldElemsIt = m_dataInputs[m_currentDataInputName]->ctrldElems.begin();
              allCtrldElemsIt != m_dataInputs[m_currentDataInputName]->ctrldElems.end();) {
+            bool typeNotMatching = false;
             QStandardItem *item = new QStandardItem(
                         g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
                         ->GetClientDataModelBridge()->GetName(
@@ -319,6 +320,13 @@ void CDataInputListDlg::updateInfo()
                     }
 
                     count++;
+
+                    // Check if there is a non-matching datatype binding with one or several
+                    // properties for this element.
+                    if (!CDataInputDlg::getAcceptedTypes(allCtrldElemsIt->dataType.first).contains(
+                                (EDataType)(m_dataInputs[m_currentDataInputName]->type))) {
+                        typeNotMatching = true;
+                    }
                     // Advance main iterator so that after the inner loop we end up
                     // at the start of next instance's batch of controlleditems.
                     allCtrldElemsIt++;
@@ -332,10 +340,9 @@ void CDataInputListDlg::updateInfo()
                 QStandardItem *item3 = new QStandardItem(propNames);
                 item3->setToolTip(propNames);
                 item3->setEditable(false);
-                // If we have warning icon set for this datainput, we have something
-                // wrong with the property types in this object. Highlight properties
-                // to provide additional reminder.
-                if (!m_tableContents->item(m_currentDataInputIndex, 1)->icon().isNull()) {
+
+                // Highlight the entire property name item if a non-match was found.
+                if (typeNotMatching) {
                     item3->setForeground(
                                 QBrush(CStudioPreferences::invalidDataInputIndicatorColor()));
                     static QString warning(tr("\n\nData Input type is not matching with one or "

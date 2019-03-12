@@ -51,6 +51,7 @@
 
 #include <QtCore/quuid.h>
 #include <QtCore/qsize.h>
+#include <QtCore/qhash.h>
 
 //==============================================================================
 //	Forwards
@@ -184,11 +185,10 @@ public:
     QString name;
     int type;
     QVector<ControlledItem> ctrldElems;
-    // As per QT3DS-2992 we currently need only a single key-value pair per datainput.
-    // For efficiency we use separate QStrings for both, as there is no need for more
-    // elaborate containers.
-    QString metaDataKey;
-    QString metaData;
+
+    // On editor side we use just QStrings as metadata will be squashed into strings
+    // anyway when storing into UIA file. (Runtime uses QVariants.)
+    QHash<QString, QString> metadata;
 
     // Bindings in other subpresentations, of QMap format
     // QMultiMap<subpresentation_id, QPair<datatype, strict>>.
@@ -465,7 +465,7 @@ public:
     int getSelectedInstancesCount() const;
 
     std::shared_ptr<Q3DStudio::IInternalDocumentEditor> getSceneEditor() { return m_SceneEditor; }
-    QVector<qt3dsdm::Qt3DSDMInstanceHandle> getLayers();
+    QVector<int> getLayers();
 
     void queueMaterialRename(const QString &oldName, const QString &newName);
 

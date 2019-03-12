@@ -1042,10 +1042,10 @@ QString CStudioApp::getDeleteType() const
 
 bool CStudioApp::canGroupSelectedObjects() const
 {
-    // Grouping is never just one row, we always deal with multiple selected items
+    // Grouping is allowed for single and for multiple selected items.
     qt3dsdm::TInstanceHandleList selected = m_core->GetDoc()
             ->GetSelectedValue().GetSelectedInstances();
-    return (selected.size() > 1);
+    return (selected.size() >= 1);
 }
 
 bool CStudioApp::canUngroupSelectedObjects() const
@@ -1730,6 +1730,7 @@ bool CStudioApp::OnLoadDocument(const QString &inDocument, bool inShowStartupDia
         m_core->getProjectFile().loadSubpresentationsAndDatainputs(m_subpresentations,
                                                                    m_dataInputDialogItems);
         m_core->getProjectFile().loadVariants();
+        GetViews()->getMainFrame()->getSlideView()->refreshVariants();
         getRenderer().RegisterSubpresentations(m_subpresentations);
 
         m_authorZoom = false;
@@ -1790,13 +1791,17 @@ void CStudioApp::saveDataInputsToProjectFile()
                 diNode.setAttribute(QStringLiteral("evaluator"), item->valueString);
             }
 #endif
-            // Let's allow storing key even if actual metadata is empty, as we
-            // do not know how the user code is going to interpret metadata contents.
-            if (!item->metaDataKey.isEmpty()) {
-                diNode.setAttribute(QStringLiteral("metadatakey"), item->metaDataKey);
-                if (!item->metaData.isEmpty())
-                    diNode.setAttribute(QStringLiteral("metadata"), item->metaData);
+
+            QHashIterator<QString, QString> it(item->metadata);
+            QString metadataStr;
+            while (it.hasNext()) {
+                it.next();
+                metadataStr.append(it.key() + QLatin1Char('$') + it.value() + QLatin1Char('$'));
             }
+            metadataStr.chop(1);
+
+            diNode.setAttribute(QStringLiteral("metadata"), metadataStr.trimmed());
+
             assetsNode.appendChild(diNode);
         }
         StudioUtils::commitDomDocumentSave(file, doc);

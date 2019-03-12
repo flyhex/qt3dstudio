@@ -1,0 +1,120 @@
+/****************************************************************************
+**
+** Copyright (C) 2019 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Using Variant Tags
+\page using-variant-tags.html
+
+The variant tags feature in 3D Studio enables excluding parts of a presentation during loading.
+With variant tags you can avoid parsing and loading objects that are not needed in the presentation
+for certain variants, saving on loading time and resource usage.
+
+This makes it possible to create multiple variations of a product UI with one single Qt 3D Studio
+presentation.
+
+This page explains how to define and use variant tags in the editor. The variant tags will then
+be loaded from the QML application.
+
+\image variant-tags.png
+
+\section1 Create Variant Groups and Tags
+
+Variant filtering is done on layer level, to add a variant group and tags to that group,
+select a layer in the scene graph and follow the steps below:
+
+\list 1
+  \li In the inspector palette, press \uicontrol {+ Group} in the Variant Tags section.
+  \li Enter a group name, and press \uicontrol {Ok}.
+      \note Group names must be unique to the project.
+\endlist
+
+Once you have created a variant group, you can create variant tags under it. To do so,
+follow the steps below:
+
+\list 1
+  \li In the inspector palette, press the \uicontrol {+ Tag} next to the variant group name.
+  \li Enter a tag name, and press \uicontrol {Ok}.
+      \note Tag names must be unique to the variant group.
+\endlist
+
+\section1 Using Variant Tags
+
+To use a variant tag on a layer, follow the steps below:
+
+\list 1
+  \li In the scene graph, select desired layer
+  \li In the inspector palette, under the variant tag section, click desired variant tags to use
+  them on the layer.
+\endlist
+
+Once you have assigned variant tags to a layer, it is indicated in the scene graph which layers
+are using tags from which variant groups.
+
+\image variant-tags-layer.png
+
+It is also indicated in the slide palette, which slides are using tags from which variant groups.
+Here you can see the number of tags from each variant group used on each slide.
+
+\image variant-tags-slide.png
+
+\section1 Edit Variant Groups and Tags
+
+\section2 Edit a Variant Group
+
+You can edit name and color of a variant group. To do so, right-click the name of it in the
+inspector palette and select desired action from the context menu.
+
+\section2 Edit a Variant Tag
+You can edit the name of a variant tag. To do so, right-click the name of it in the inspector
+palette and select \uicontrol {Rename Tag} from the context menu.
+
+\section2 Delete a Variant Tag or Group
+
+You can delete a variant tag or group by right-clicking the name of it in the inspector palette and
+select \uicontrol {Delete Tag/Group}.
+
+\section1 Importing and Exporting Variant Groups
+
+You can import and export variant groups. Exporting will export all variant groups and tags to a
+\c {.variants} file, default location for the export file is the project's \e presentation folder.
+
+\section2 Export Variant Groups
+
+To export variant groups, select the \uicontrol {Export} button in the variant tags section
+in the inspector palette. Next, browse to the desired location, enter a file name,
+and press \uicontrol {Save}.
+
+\section2 Import Variant Groups
+
+To import variant groups, select the \uicontrol {Import} button in the variant tags section
+in the inspector palette. Next, browse to the desired \c .variants or \c .uia file and select
+\uicontrol{Ok}.
+
+When importing variant tags, imported tags will be merged with already existing tags.
+
+*/

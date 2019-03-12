@@ -33,7 +33,6 @@
 #include "StudioPreferences.h"
 
 #include <QtWidgets/qstyleoption.h>
-#include <QtCore/qdebug.h>
 #include <QtGui/qevent.h>
 #include <QtGui/qtextcursor.h>
 
@@ -146,7 +145,7 @@ QRectF RowTreeLabelItem::boundingRect() const
     if (!m_rowTree)
         return QGraphicsTextItem::boundingRect();
 
-    double w = m_rowTree->treeWidth() - x() - TimelineConstants::TREE_ICONS_W;
+    double w = m_rowTree->clipX() - x();
     // Bounding rect width must be at least 1
     w = std::max(w, 1.0);
     return QRectF(0, 0, w, TimelineConstants::ROW_H);

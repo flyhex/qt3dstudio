@@ -68,7 +68,6 @@
 #include <QtGui/qevent.h>
 #include <QtCore/qtimer.h>
 #include <QtCore/qglobal.h>
-#include <QtCore/qdebug.h>
 #include <QtWidgets/qaction.h>
 
 static const QPointF invalidPoint(-999999.0, -999999.0);
@@ -80,16 +79,15 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     , m_layoutTimeline(new QGraphicsLinearLayout(Qt::Vertical))
     , m_ruler(new Ruler)
     , m_playHead(new PlayHead(m_ruler))
-    , m_selectionRect(new SelectionRect())
-    , m_rowMover(new RowMover(this))
     , m_widgetTimeline(timelineWidget)
     , m_widgetRoot(new QGraphicsWidget)
+    , m_rowMover(new RowMover(this))
+    , m_selectionRect(new SelectionRect())
     , m_rowManager(new RowManager(this, m_layoutTree, m_layoutTimeline))
     , m_keyframeManager(new KeyframeManager(this))
     , m_pressPos(invalidPoint)
     , m_pressScreenPos(invalidPoint)
     , m_timelineControl(new TimelineControl(this))
-    , m_currentCursor(-1)
 {
     addItem(m_playHead);
     addItem(m_selectionRect);
@@ -101,6 +99,14 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     m_timebarToolTip->setWindowModality(Qt::NonModal);
     m_timebarToolTip->setWindowFlags(Qt::FramelessWindowHint | Qt::ToolTip);
     m_timebarToolTip->setContentsMargins(2, 2, 2, 2);
+
+    m_variantsToolTip = new QLabel(m_widgetTimeline);
+    m_variantsToolTip->setObjectName(QStringLiteral("variantsToolTip"));
+    m_variantsToolTip->setWindowModality(Qt::NonModal);
+    m_variantsToolTip->setWindowFlags(Qt::FramelessWindowHint | Qt::ToolTip
+                                      | Qt::WindowTransparentForInput);
+    m_variantsToolTip->setContentsMargins(2, 2, 2, 2);
+
     connect(qApp, &QApplication::focusChanged,
             this, &TimelineGraphicsScene::handleApplicationFocusLoss);
 
@@ -164,8 +170,7 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
         }
 
         if (m_selectionRect->isActive()) {
-            p -= QPoint(0, m_widgetTimeline->navigationBar()->height()
-                        + TimelineConstants::ROW_H);
+            p -= QPoint(0, m_widgetTimeline->navigationBar()->height() + TimelineConstants::ROW_H);
             const double bottom = timelineContent->contentsRect().height() - scrollBarOffsets.y();
             if (m_lastAutoScrollX != p.x() || p.x() <= 0 || p.x() >= right
                     || m_lastAutoScrollY != p.y() || p.y() <= 0 || p.y() >= bottom) {
@@ -200,7 +205,7 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
             if (scroll != 0)
                 scroll -= TimelineConstants::TREE_BOUND_W;
 
-            double distance = p.x() + scroll;
+            double distance = p.x() + scroll - TimelineConstants::RULER_EDGE_OFFSET;
             if (m_clickedTimelineControlType == TimelineControlType::Duration
                     && !m_editedTimelineRow.isNull()) {
                 distance -= m_editedTimelineRow->getDurationMoveOffsetX();
@@ -210,8 +215,7 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
                 snap(distance, !m_rulerPressed);
 
             if (m_rulerPressed) {
-                long time = m_ruler->distanceToTime(
-                            distance - TimelineConstants::RULER_EDGE_OFFSET);
+                long time = m_ruler->distanceToTime(distance);
                 if (time < 0)
                     time = 0;
                 g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(time);
@@ -223,22 +227,21 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
 
                 if (m_dragging) {
                     if (m_clickedTimelineControlType == TimelineControlType::StartHandle) {
-                        double visiblePtX = distance > TimelineConstants::RULER_EDGE_OFFSET
-                                ? m_editedTimelineRow->getStartX() : 0;
+                        double visiblePtX = distance > 0 ? m_editedTimelineRow->getStartX() : 0;
                         if (distance > m_editedTimelineRow->getEndX())
                             visiblePtX += TimelineConstants::RULER_EDGE_OFFSET;
 
                         m_editedTimelineRow->setStartX(distance);
                         m_editedTimelineRow->showToolTip(QCursor::pos());
-                        timelineContent->ensureVisible(TimelineConstants::TREE_BOUND_W + visiblePtX,
+                        timelineContent->ensureVisible(TimelineConstants::TREE_BOUND_W
+                                                       + TimelineConstants::RULER_EDGE_OFFSET
+                                                       + visiblePtX,
                                                        m_editedTimelineRow->y(), 0, 0, 0, 0);
                     } else if (m_clickedTimelineControlType == TimelineControlType::EndHandle) {
-                        long time = m_ruler->distanceToTime(
-                                    distance - TimelineConstants::RULER_EDGE_OFFSET);
+                        long time = m_ruler->distanceToTime(distance);
                         double edgeMargin = 0;
                         if (time > TimelineConstants::MAX_SLIDE_TIME) {
-                            distance = m_ruler->timeToDistance(TimelineConstants::MAX_SLIDE_TIME)
-                                       + TimelineConstants::RULER_EDGE_OFFSET;
+                            distance = m_ruler->timeToDistance(TimelineConstants::MAX_SLIDE_TIME);
                             edgeMargin = TimelineConstants::RULER_EDGE_OFFSET;
                         } else if (time < m_editedTimelineRow->getStartTime()) {
                             edgeMargin = -TimelineConstants::RULER_EDGE_OFFSET;
@@ -248,18 +251,17 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
                         rowManager()->updateRulerDuration(p.x() > right);
                         timelineContent->ensureVisible(
                                     TimelineConstants::TREE_BOUND_W
+                                    + TimelineConstants::RULER_EDGE_OFFSET
                                     + m_editedTimelineRow->getEndX() + edgeMargin,
                                     m_editedTimelineRow->y(), 0, 0, 0, 0);
                     } else if (m_clickedTimelineControlType == TimelineControlType::Duration) {
-                        long time = m_ruler->distanceToTime(
-                                      distance - TimelineConstants::RULER_EDGE_OFFSET)
-                                      + m_editedTimelineRow->getDuration(); // milliseconds
+                        long time = m_ruler->distanceToTime(distance)
+                                    + m_editedTimelineRow->getDuration(); // milliseconds
                         double visiblePtX = distance
                                             + m_editedTimelineRow->getDurationMoveOffsetX();
                         if (time > TimelineConstants::MAX_SLIDE_TIME) {
                             distance = m_ruler->timeToDistance(TimelineConstants::MAX_SLIDE_TIME
-                                                               - m_editedTimelineRow->getDuration())
-                                       + TimelineConstants::RULER_EDGE_OFFSET;
+                                                               - m_editedTimelineRow->getDuration());
                             visiblePtX = m_editedTimelineRow->getEndX()
                                          + TimelineConstants::RULER_EDGE_OFFSET;
                         }
@@ -268,7 +270,8 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
                         m_editedTimelineRow->showToolTip(QCursor::pos());
                         rowManager()->updateRulerDuration(p.x() > right);
                         timelineContent->ensureVisible(
-                                    TimelineConstants::TREE_BOUND_W + visiblePtX,
+                                    TimelineConstants::TREE_BOUND_W
+                                    + TimelineConstants::RULER_EDGE_OFFSET + visiblePtX,
                                     m_editedTimelineRow->y(), 0, 0, 0, 0);
                     }
                 }
@@ -690,17 +693,15 @@ void TimelineGraphicsScene::stopAutoScroll() {
 void TimelineGraphicsScene::updateSnapSteps()
 {
     m_snapSteps.clear();
-    // i = 1 is always the scene row
+    // i = 1 is always the scene row (or component root)
     for (int i = 2; i < m_layoutTimeline->count(); i++) {
-        RowTree *rowTree = static_cast<RowTree *>
-                (m_layoutTree->itemAt(i)->graphicsItem());
+        RowTree *rowTree = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
         if (rowTree->hasDurationBar() && rowTree->isVisible()) {
-            auto startX = rowTree->rowTimeline()->getStartX()
-                          - TimelineConstants::RULER_EDGE_OFFSET;
+            double startX = rowTree->rowTimeline()->getStartX();
             if (!m_snapSteps.contains(startX))
                 m_snapSteps.push_back(startX);
 
-            auto endX = rowTree->rowTimeline()->getEndX() - TimelineConstants::RULER_EDGE_OFFSET;
+            double endX = rowTree->rowTimeline()->getEndX();
             if (!m_snapSteps.contains(endX))
                 m_snapSteps.push_back(endX);
 
@@ -759,7 +760,8 @@ void TimelineGraphicsScene::snap(double &value, bool snapToPlayHead)
 {
     // snap to play head
     if (snapToPlayHead) {
-        double playHeadX = m_playHead->x() - m_ruler->x();
+        double playHeadX = m_playHead->x() - TimelineConstants::TREE_BOUND_W
+                                           - TimelineConstants::RULER_EDGE_OFFSET;
         if (abs(value - playHeadX) < CStudioPreferences::GetSnapRange()) {
             value = playHeadX;
             return;
@@ -851,7 +853,8 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
                     || itemBelowPlayhead->type() == TimelineItem::TypeRuler) {
                 CDoc *doc = g_StudioApp.GetCore()->GetDoc();
                 g_StudioApp.GetDialogs()->asyncDisplayTimeEditDialog(doc->GetCurrentViewTime(),
-                                                                     doc, PLAYHEAD);
+                                                                     doc, PLAYHEAD,
+                                                                     m_keyframeManager);
             } else {
                 item = itemBelowPlayhead;
                 if (item->type() == TimelineItem::TypeRowTree) {
@@ -865,9 +868,7 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
                     } else if (!treeLabelItem->isLocked()
                                && treeLabelItem->parentRow()->rowType() != OBJTYPE_SCENE
                                && treeLabelItem->parentRow()->rowType() != OBJTYPE_IMAGE) {
-                        qt3dsdm::Qt3DSDMInstanceHandle instance
-                                = static_cast<Qt3DSDMTimelineItemBinding *>(
-                                    treeLabelItem->parentRow()->getBinding())->GetInstance();
+                        int instance = treeLabelItem->parentRow()->instance();
                         const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
                                 ->GetClientDataModelBridge();
                         if (bridge->GetObjectType(instance) != OBJTYPE_REFERENCEDMATERIAL
@@ -915,7 +916,8 @@ void TimelineGraphicsScene::keyPressEvent(QKeyEvent *keyEvent)
         return;
     } else if (keyEvent->key() == Qt::Key_Escape && m_rowMover->isActive()) {
         m_rowMover->end();
-    } else if (keyEvent->key() == Qt::Key_Delete && !m_rowMover->isActive()) {
+    } else if (keyEvent->key() == Qt::Key_Delete && !m_rowMover->isActive()
+               && !focusItem()) {
         g_StudioApp.DeleteSelectedObject(); // Despite the name, this deletes objects and keyframes
     }
     // Make sure drag states update on keyboard scrolls done during drag
@@ -978,9 +980,11 @@ bool TimelineGraphicsScene::event(QEvent *event)
 
 void TimelineGraphicsScene::updateHoverStatus(const QPointF &scenePos)
 {
+    bool variantsAreaHovered = false;
     QGraphicsItem *item = itemAt(scenePos, QTransform());
     if (item) {
         item = getItemBelowType(TimelineItem::TypePlayHead, item, scenePos);
+        // update timeline row cursor
         if (item->type() == TimelineItem::TypeRowTimeline) {
             RowTimeline *timelineItem = static_cast<RowTimeline *>(item);
             TimelineControlType controlType = timelineItem->getClickedControl(scenePos);
@@ -990,7 +994,67 @@ void TimelineGraphicsScene::updateHoverStatus(const QPointF &scenePos)
             } else {
                 resetMouseCursor();
             }
+        } else if (!m_dragging && (item->type() == TimelineItem::TypeRowTree
+                                   || item->type() == TimelineItem::TypeRowTreeLabelItem)) {
+            // update tree row variants tooltip
+            RowTree *rowTree = item->type() == TimelineItem::TypeRowTree
+                               ? static_cast<RowTree *>(item)
+                               : static_cast<RowTreeLabelItem *>(item)->parentRow();
+            int left = rowTree->clipX();
+            int right = (int)rowTree->treeWidth() - TimelineConstants::TREE_ICONS_W;
+            variantsAreaHovered = scenePos.x() > left && scenePos.x() < right;
+            if (variantsAreaHovered && rowTree != m_variantsRowTree) {
+                CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+                const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
+                const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+                auto property = bridge->GetLayer().m_variants;
+
+                using namespace qt3dsdm;
+                SValue sValue;
+                if (propertySystem->GetInstancePropertyValue(rowTree->instance(), property,
+                                                             sValue)) {
+                    QString propVal = qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->toQString();
+                    if (!propVal.isEmpty()) {
+                        // parse propVal into variantsHash (group => tags)
+                        const QStringList tagPairs = propVal.split(QLatin1Char(','));
+                        QHash<QString, QStringList> variantsHash;
+                        for (auto &tagPair : tagPairs) {
+                            const QStringList pair = tagPair.split(QLatin1Char(':'));
+                            variantsHash[pair[0]].append(pair[1]);
+                        }
+
+                        // parse variantsHash into tooltipStr
+                        const auto variantsDef
+                                = g_StudioApp.GetCore()->getProjectFile().variantsDef();
+                        QString templ = QStringLiteral("<font color='%1'>%2</font>");
+                        QString tooltipStr("<table>");
+                        const auto keys = variantsHash.keys();
+                        for (auto &g : keys) {
+                            tooltipStr.append("<tr><td>");
+                            tooltipStr.append(templ.arg(variantsDef[g].m_color).arg(g + ": "));
+                            tooltipStr.append("</td><td>");
+                            for (auto &t : qAsConst(variantsHash[g]))
+                                tooltipStr.append(t + ", ");
+                            tooltipStr.chop(2);
+                            tooltipStr.append("</td></tr>");
+                        }
+                        tooltipStr.append("</table>");
+                        m_variantsToolTip->setText(tooltipStr);
+                        m_variantsToolTip->adjustSize();
+                        m_variantsToolTip->move(m_widgetTimeline->mapToGlobal(
+                                                {right, (int)rowTree->y()}));
+                        m_variantsToolTip->raise();
+                        m_variantsToolTip->show();
+                        m_variantsRowTree = rowTree;
+                    }
+                }
+            }
         }
+    }
+
+    if (m_variantsRowTree && !variantsAreaHovered) {
+        m_variantsToolTip->hide();
+        m_variantsRowTree = nullptr;
     }
 }
 
@@ -1069,9 +1133,11 @@ void TimelineGraphicsScene::handleEditComponent()
 
 void TimelineGraphicsScene::handleApplicationFocusLoss()
 {
-    // Hide the timebar tooltip if application loses focus
-    if (!QApplication::focusWidget())
+    // Hide the timebar and variants tooltips if application loses focus
+    if (!QApplication::focusWidget()) {
         m_timebarToolTip->hide();
+        m_variantsToolTip->hide();
+    }
 }
 
 void TimelineGraphicsScene::handleShowDISelector(const QString &propertyname,

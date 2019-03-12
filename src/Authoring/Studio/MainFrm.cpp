@@ -60,6 +60,7 @@
 #include "ProjectView.h"
 #include "RowTree.h"
 #include "WidgetControl.h"
+#include "SlideView.h"
 
 #include <QtGui/qevent.h>
 #include <QtGui/qdesktopservices.h>
@@ -726,8 +727,8 @@ void CMainFrame::onEditDelete()
 
 void CMainFrame::onEditGroup()
 {
-    if (!g_StudioApp.groupSelectedObjects())
-        g_StudioApp.ungroupSelectedObjects();
+    if (!g_StudioApp.ungroupSelectedObjects())
+        g_StudioApp.groupSelectedObjects();
 }
 
 /**
@@ -1918,6 +1919,12 @@ TimelineWidget *CMainFrame::getTimelineWidget() const
     WidgetControl *control = static_cast<WidgetControl *>
             (m_paletteManager->GetControl(CPaletteManager::CONTROLTYPE_TIMELINE)->widget());
     return static_cast<TimelineWidget *>(control->getControl());
+}
+
+SlideView *CMainFrame::getSlideView() const
+{
+    return static_cast<SlideView *>(m_paletteManager->GetControl(CPaletteManager::CONTROLTYPE_SLIDE)
+                                    ->widget());
 }
 
 CRecentItems *CMainFrame::GetRecentItems()

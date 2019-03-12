@@ -47,7 +47,6 @@ public:
     ProjectFile();
 
     struct VariantGroup {
-        QString m_title;
         QString m_color;
         QStringList m_tags;
     };
@@ -87,7 +86,7 @@ public:
     void deletePresentationFile(const QString &filePath);
     void renameMaterial(const QString &oldName, const QString &newName);
     bool duplicatePresentation(const QString &oldPres, const QString &newPres);
-    void loadVariants();
+    void loadVariants(const QString &filePath = {});
     void addVariantTag(const QString &group, const QString &newTag);
     void renameVariantTag(const QString &group, const QString &oldTag, const QString &newTag);
     void deleteVariantTag(const QString &group, const QString &tag);
@@ -98,8 +97,7 @@ public:
     bool isVariantGroupUnique(const QString &group) const;
     bool isVariantTagUnique(const QString &group, const QString &tag) const;
 
-    QVector<VariantGroup> variantsDef() const { return m_variantsDef; }
-
+    QHash<QString, VariantGroup> variantsDef() const { return m_variantsDef; }
 
 Q_SIGNALS:
     void presentationIdChanged(const QString &path, const QString &id);
@@ -117,7 +115,7 @@ private:
 
     QFileInfo m_fileInfo; // uia file info
     QString m_initialPresentation;
-    QVector<VariantGroup> m_variantsDef; // definition of variants
+    QHash<QString, VariantGroup> m_variantsDef; // definition of variants
 };
 
 #endif // PROJECTFILE_H

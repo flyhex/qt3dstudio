@@ -38,8 +38,11 @@
 #include "Qt3DSDMSignals.h"
 #include "DispatchListeners.h"
 #include "Dispatch.h"
+
 class CClientDataModelBridge;
 class CDoc;
+
+QT_FORWARD_DECLARE_CLASS(QLabel);
 
 namespace qt3dsdm {
 class ISlideSystem;
@@ -67,6 +70,7 @@ public:
     QSize minimumSizeHint() const override;
     void onDataInputChange(int handle, int instance, const QString &dataInputName);
     void onDockLocationChange(Qt::DockWidgetArea area);
+    void refreshVariants();
 
     Q_INVOKABLE void deselectAll();
     Q_INVOKABLE void addNewSlide(int row);
@@ -77,6 +81,8 @@ public:
     Q_INVOKABLE void finishSlideRearrange(bool commit);
     Q_INVOKABLE void showContextMenu(int x, int y, int row);
     Q_INVOKABLE void showControllerDialog(const QPoint &point);
+    Q_INVOKABLE void showVariantsTooltip(int row, const QPoint &point);
+    Q_INVOKABLE void hideVariantsTooltip();
     Q_INVOKABLE bool toolTipsEnabled();
 
     // Presentation Change Listener
@@ -120,22 +126,27 @@ private:
     long GetSlideIndex(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle);
     bool isMaster(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle);
     void rebuildSlideList(const qt3dsdm::Qt3DSDMSlideHandle &inActiveSlideHandle);
+    void onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
+    void onAssetDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
+    void onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                           qt3dsdm::Qt3DSDMPropertyHandle inProperty);
 
-    SlideModel *m_CurrentModel = nullptr;
     SlideModel *m_MasterSlideModel = nullptr;
     SlideModel *m_SlidesModel = nullptr;
+    SlideModel *m_CurrentModel = nullptr;
     DataInputSelectView *m_dataInputSelector = nullptr;
+    QLabel *m_variantsToolTip = nullptr;
     QColor m_BaseColor = QColor::fromRgb(75, 75, 75);
-    std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>>
-        m_Connections; /// connections to the DataModel
+    std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_Connections;
     typedef QHash<int, int> TIntIntMap;
     // We need to remember which slide we were on when we entered the master slide.
     // Then, when the users leave the master slide we can go back to roughly the same
     // state.
     TIntIntMap m_MasterSlideReturnPointers;
 
-    qt3dsdm::Qt3DSDMInstanceHandle m_ActiveRoot; ///< the object containing the slides to be inspected.
-    qt3dsdm::Qt3DSDMSlideHandle m_ActiveSlideHandle; ///< the active slide handle
+    // the object containing the slides to be inspected.
+    qt3dsdm::Qt3DSDMInstanceHandle m_ActiveRoot = 0;
+    qt3dsdm::Qt3DSDMSlideHandle m_ActiveSlideHandle; // the active slide handle
     bool m_controlled = false; // Are slides in this slide set controlled by datainput?
     QString m_currentController;
     QString m_toolTip;

@@ -137,6 +137,8 @@ public:
                             bool isCopy = false);
     QString GetNewDocumentChoice(const QString &inInitialDirectory = {}, bool isProject = true);
     QString GetFileOpenChoice(const QString &inInitialDirectory = {});
+    QString getExportVariantsDlg();
+    QString getImportVariantsDlg();
 
     void DisplayImportFailed(const QUrl &inURL, const QString &inDescription, bool inWarningsOnly);
     void DisplayLoadingPresentationFailed(const QFileInfo &loadFileInfo,
@@ -184,7 +186,7 @@ public:
 
     void asyncDisplayTimeEditDialog(long time, IDoc *doc, long objectAssociation,
                                     KeyframeManager *keyframesManager = nullptr) const;
-    void asyncDisplayDurationEditDialog(long startTime, long endTime, IDoc *doc,
+    void asyncDisplayDurationEditDialog(long startTime, long endTime,
                                         ITimeChangeCallback *callback) const;
 
     enum class WidgetBrowserAlign {

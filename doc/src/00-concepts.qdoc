@@ -48,7 +48,6 @@ interactive presentations, UIs and applications.
     \div {align="center"}
     \image animation-index.png
     \enddiv
-
   \row
     \li \b {\l{Getting Started}}
       \list
@@ -100,11 +99,11 @@ interactive presentations, UIs and applications.
       \endlist
     \li \b {\l{Getting Help}}
       \list
+        \li \l{Known Issues}
         \li \l{Glossary}
         \li \l{Studio Keyboard Shortcuts}
         \li \l{Viewer Keyboard Shortcuts}
       \endlist
-
   \row
     \li {3,1} \note To report bugs and suggestions to the Qt Bug
       Tracker, visit \l https://bugreports.qt.io.
