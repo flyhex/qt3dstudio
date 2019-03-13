@@ -487,8 +487,39 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
         return pCB;
     }
 
-    void GenerateVertexShader()
+    bool GenerateVertexShader(SShaderDefaultMaterialKey &, const char8_t *inShaderPathName)
     {
+        qt3ds::render::IDynamicObjectSystem &theDynamicSystem(
+            m_RenderContext.GetDynamicObjectSystem());
+        CRenderString theShaderBuffer;
+        const char8_t *vertSource = theDynamicSystem.GetShaderSource(
+            m_RenderContext.GetStringTable().RegisterStr(inShaderPathName), theShaderBuffer);
+
+        QT3DS_ASSERT(vertSource);
+        eastl::string srcString(vertSource);
+
+        // Check if the vertex shader portion already contains a main function
+        // The same string contains both the vertex and the fragment shader
+        // The last "#ifdef FRAGMENT_SHADER" should mark the start of the fragment shader
+        eastl_size_t fragmentDefStart = srcString.find("#ifdef FRAGMENT_SHADER");
+        eastl_size_t nextIndex = fragmentDefStart;
+        while (nextIndex != eastl::string::npos) {
+            nextIndex = srcString.find("#ifdef FRAGMENT_SHADER", nextIndex + 1);
+            if (nextIndex != eastl::string::npos)
+                fragmentDefStart = nextIndex;
+        }
+        eastl_size_t mainStart = srcString.find("void main()");
+
+        if (mainStart != eastl::string::npos && (fragmentDefStart == eastl::string::npos
+                                                 || mainStart < fragmentDefStart)) {
+            TShaderGeneratorStageFlags stages(IShaderProgramGenerator::DefaultFlags());
+            ProgramGenerator().BeginProgram(stages);
+            IDefaultMaterialVertexPipeline &vertexShader(VertexGenerator());
+            vertexShader << "#define VERTEX_SHADER\n\n";
+            vertexShader << srcString.data() << Endl;
+            return true;
+        }
+
         // vertex displacement
         QT3DSU32 imageIdx = 0;
         SRenderableImage *displacementImage = NULL;
@@ -505,6 +536,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
 
         // the pipeline opens/closes up the shaders stages
         VertexGenerator().BeginVertexGeneration(displacementImageIdx, displacementImage);
+        return false;
     }
 
     SShaderGeneratorGeneratedShader &GetShaderForProgram(NVRenderShaderProgram &inProgram)
@@ -989,7 +1021,8 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
         inFragmentShader << "}\n\n";
     }
 
-    void GenerateFragmentShader(SShaderDefaultMaterialKey &, const char8_t *inShaderPathName)
+    void GenerateFragmentShader(SShaderDefaultMaterialKey &, const char8_t *inShaderPathName,
+                                bool hasCustomVertexShader)
     {
         qt3ds::render::IDynamicObjectSystem &theDynamicSystem(
             m_RenderContext.GetDynamicObjectSystem());
@@ -1017,10 +1050,12 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
             }
         }
 
-        VertexGenerator().GenerateUVCoords(0);
-        // for lightmaps we expect a second set of uv coordinates
-        if (hasLightmaps)
-            VertexGenerator().GenerateUVCoords(1);
+        if (!hasCustomVertexShader) {
+            VertexGenerator().GenerateUVCoords(0);
+            // for lightmaps we expect a second set of uv coordinates
+            if (hasLightmaps)
+                VertexGenerator().GenerateUVCoords(1);
+        }
 
         IDefaultMaterialVertexPipeline &vertexShader(VertexGenerator());
         IShaderStageGenerator &fragmentShader(FragmentGenerator());
@@ -1038,7 +1073,26 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
 
         fragmentShader << "#define FRAGMENT_SHADER\n\n";
 
-        if (srcString.find("void main()") == eastl::string::npos)
+        // Check if the fragment shader portion already contains a main function
+        // The same string contains both the vertex and the fragment shader
+        // The last "#ifdef FRAGMENT_SHADER" should mark the start of the fragment shader
+        eastl_size_t fragmentDefStart = srcString.find("#ifdef FRAGMENT_SHADER");
+        eastl_size_t nextIndex = fragmentDefStart;
+        while (nextIndex != eastl::string::npos) {
+            nextIndex = srcString.find("#ifdef FRAGMENT_SHADER", nextIndex + 1);
+            if (nextIndex != eastl::string::npos)
+                fragmentDefStart = nextIndex;
+        }
+        eastl_size_t mainStart = srcString.find("void main()");
+        if (fragmentDefStart == eastl::string::npos)
+            return;
+
+        if (mainStart != eastl::string::npos && mainStart < fragmentDefStart)
+            mainStart = srcString.find("void main()", mainStart + 1);
+
+        bool hasCustomFragmentShader = mainStart != eastl::string::npos;
+
+        if (!hasCustomFragmentShader)
             fragmentShader.AddInclude("evalLightmaps.glsllib");
 
         // check dielectric materials
@@ -1051,16 +1105,15 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
 
         fragmentShader << srcString.data() << Endl;
 
-        if (srcString.find("void main()") != eastl::string::npos) // If a "main()" is already
-                                                                  // written, we'll assume that the
-                                                                  // shader
-        { // pass is already written out and we don't need to add anything.
-            // Nothing beyond the basics, anyway
-            vertexShader.GenerateWorldNormal();
-            vertexShader.GenerateVarTangentAndBinormal();
-            vertexShader.GenerateWorldPosition();
+        if (hasCustomFragmentShader) {
+            fragmentShader << "#define FRAGMENT_SHADER\n\n";
+            if (!hasCustomVertexShader) {
+                vertexShader.GenerateWorldNormal();
+                vertexShader.GenerateVarTangentAndBinormal();
+                vertexShader.GenerateWorldPosition();
 
-            vertexShader.GenerateViewVector();
+                vertexShader.GenerateViewVector();
+            }
             return;
         }
 
@@ -1153,14 +1206,31 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
         SShaderDefaultMaterialKey theKey(Key());
         theKey.ToString(m_GeneratedShaderString, m_DefaultMaterialShaderKeyProperties);
 
-        GenerateVertexShader();
-        GenerateFragmentShader(theKey, inCustomMaterialName);
+        bool hasCustomVertexShader = GenerateVertexShader(theKey, inCustomMaterialName);
+        GenerateFragmentShader(theKey, inCustomMaterialName, hasCustomVertexShader);
 
         VertexGenerator().EndVertexGeneration();
         VertexGenerator().EndFragmentGeneration();
 
-        return ProgramGenerator().CompileGeneratedShader(m_GeneratedShaderString.c_str(),
-                                                         SShaderCacheProgramFlags(), FeatureSet());
+        NVRenderShaderProgram *program = ProgramGenerator().CompileGeneratedShader(
+                    m_GeneratedShaderString.c_str(), SShaderCacheProgramFlags(), FeatureSet());
+        if (program && hasCustomVertexShader) {
+            // Change uniforms names to match runtime 2.x uniforms
+            SShaderGeneratorGeneratedShader &shader(GetShaderForProgram(*program));
+            shader.m_ModelMatrix = NVRenderCachedShaderProperty<QT3DSMat44>("modelMatrix",
+                                                                            *program);
+            shader.m_ViewProjMatrix = NVRenderCachedShaderProperty<QT3DSMat44>(
+                        "modelViewProjection", *program);
+            shader.m_ViewMatrix = NVRenderCachedShaderProperty<QT3DSMat44>("viewMatrix", *program);
+            shader.m_NormalMatrix = NVRenderCachedShaderProperty<QT3DSMat33>("modelNormalMatrix",
+                                                                             *program);
+            shader.m_ProjMatrix = NVRenderCachedShaderProperty<QT3DSMat44>("viewProjectionMatrix",
+                                                                           *program);
+            shader.m_ViewportMatrix = NVRenderCachedShaderProperty<QT3DSMat44>("viewportMatrix",
+                                                                               *program);
+            shader.m_CameraPos = NVRenderCachedShaderProperty<QT3DSVec3>("eyePosition", *program);
+        }
+        return program;
     }
 
     virtual NVRenderShaderProgram *
