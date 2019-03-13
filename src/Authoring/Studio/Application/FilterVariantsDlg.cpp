@@ -28,13 +28,11 @@
 
 #include "FilterVariantsDlg.h"
 #include "StudioPreferences.h"
-#include "StudioUtils.h"
 #include "FilterVariantsModel.h"
 
-#include <QAction>
+#include <QtWidgets/qaction.h>
 #include <QtCore/qtimer.h>
 #include <QtQml/qqmlcontext.h>
-#include <QtQml/qqmlengine.h>
 
 FilterVariantsDlg::FilterVariantsDlg(QWidget *parent, QAction *action, int actionSize)
     : QQuickWidget(parent)
@@ -94,7 +92,7 @@ void FilterVariantsDlg::keyPressEvent(QKeyEvent *e)
 {
     if (e->key() == Qt::Key_Escape) {
         m_action->setChecked(false);
-        QTimer::singleShot(0, this, &FilterVariantsDlg::close);
+        QTimer::singleShot(0, this, &QQuickWidget::close);
     }
 
     QQuickWidget::keyPressEvent(e);

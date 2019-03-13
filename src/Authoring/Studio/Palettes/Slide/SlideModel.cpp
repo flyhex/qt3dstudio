@@ -60,7 +60,7 @@ QVariant SlideModel::data(const QModelIndex &index, int role) const
         int slideIdx = GetDoc()->GetStudioSystem()->GetSlideSystem()->GetSlideIndex(m_slides[row]);
         if (slideIdx < m_variantsModel.size()) {
             const auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
-            const auto keys = m_variantsModel[slideIdx].keys();
+            const auto keys = m_variantsModelKeys[slideIdx];
             QString templ = QString::fromWCharArray(L"<font color='%1'>\u25A0</font>");
             QString slideVariants;
             for (auto g : keys) // variants groups
@@ -360,15 +360,18 @@ void SlideModel::setSlideName(const qt3dsdm::Qt3DSDMSlideHandle &handle, const Q
     }
 }
 
-void SlideModel::refreshVariants(const QVector<QHash<QString, QStringList>> &vModel)
+void SlideModel::refreshVariants(const QVector<QHash<QString, QStringList>> &vModel,
+                                 const QVector<QStringList> &vModelKeys)
 {
     m_variantsModel.clear();
+    m_variantsModelKeys.clear();
 
     if (vModel.isEmpty()) {
         const auto *slideSystem = GetDoc()->GetStudioSystem()->GetSlideSystem();
         int slideCount = slideSystem->GetSlideCount(slideSystem->GetMasterSlide(
                                                                  GetDoc()->GetActiveSlide()));
         m_variantsModel.resize(slideCount);
+        m_variantsModelKeys.resize(slideCount);
 
         const auto propertySystem = GetDoc()->GetPropertySystem();
         const auto layers = GetDoc()->getLayers();
@@ -384,6 +387,9 @@ void SlideModel::refreshVariants(const QVector<QHash<QString, QStringList>> &vMo
                         QStringList pair = tagPairs[i].split(QLatin1Char(':'));
                         if (!m_variantsModel[slideIdx][pair[0]].contains(pair[1]))
                             m_variantsModel[slideIdx][pair[0]].append(pair[1]);
+
+                        if (!m_variantsModelKeys[slideIdx].contains(pair[0]))
+                            m_variantsModelKeys[slideIdx].append(pair[0]);
                     }
                 }
             }
@@ -397,10 +403,14 @@ void SlideModel::refreshVariants(const QVector<QHash<QString, QStringList>> &vMo
                     if (!m_variantsModel[i][g].contains(m_variantsModel[0][g][j]))
                         m_variantsModel[i][g].append(m_variantsModel[0][g][j]);
                 }
+
+                if (!m_variantsModelKeys[i].contains(g))
+                    m_variantsModelKeys[i].append(g);
             }
         }
     } else {
         m_variantsModel = vModel;
+        m_variantsModelKeys = vModelKeys;
     }
 
     Q_EMIT dataChanged(this->index(0, 0), this->index(rowCount() - 1, 0), {VariantsRole});
@@ -411,9 +421,14 @@ CDoc *SlideModel::GetDoc() const
     return g_StudioApp.GetCore()->GetDoc();
 }
 
-long SlideModel::slideIndex(const qt3dsdm::Qt3DSDMSlideHandle &handle)
+long SlideModel::slideIndex(const qt3dsdm::Qt3DSDMSlideHandle &handle) const
 {
     return GetDoc()->GetStudioSystem()->GetSlideSystem()->GetSlideIndex(handle);
+}
+
+int SlideModel::rowToSlideIndex(int row) const
+{
+    return GetDoc()->GetStudioSystem()->GetSlideSystem()->GetSlideIndex(m_slides[row]);
 }
 
 CClientDataModelBridge *SlideModel::GetBridge() const
@@ -422,17 +437,6 @@ CClientDataModelBridge *SlideModel::GetBridge() const
     if (!doc->IsValid())
         return nullptr;
     return doc->GetStudioSystem()->GetClientDataModelBridge();
-}
-
-QVector<QHash<QString, QStringList> > SlideModel::variantsModel() const
-{
-    return m_variantsModel;
-}
-
-QHash<QString, QStringList> SlideModel::variantsSlideModel(int row) const
-{
-    int slideIdx = GetDoc()->GetStudioSystem()->GetSlideSystem()->GetSlideIndex(m_slides[row]);
-    return m_variantsModel[slideIdx];
 }
 
 void SlideModel::refreshSlideLabel(qt3dsdm::Qt3DSDMInstanceHandle instanceHandle,
@@ -461,6 +465,3 @@ void SlideModel::setSelectedSlideIndex(const QModelIndex &index)
     m_selectedRow = index.row();
     Q_EMIT dataChanged(this->index(0, 0), this->index(rowCount() - 1, 0), {SelectedRole});
 }
-
-
-

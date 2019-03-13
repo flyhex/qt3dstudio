@@ -1145,6 +1145,9 @@ Rectangle {
                 text: qsTr("There are no variant tags yet. Click [+ Group] to add a new tags group and start adding tags.")
                 color: _textColor
                 visible: _variantsGroupModel.variantsEmpty
+                width: parent.width
+                wrapMode: Text.WordWrap
+                rightPadding: 5
             }
 
             Repeater {

@@ -279,7 +279,7 @@ protected:
     bool m_resettingLayout = false;
 
 private:
-    FilterVariantsDlg *m_filterVariantsDlg = nullptr;
+    QScopedPointer<FilterVariantsDlg> m_filterVariantsDlg;
 };
 
 #endif // INCLUDED_MAIN_FRAME

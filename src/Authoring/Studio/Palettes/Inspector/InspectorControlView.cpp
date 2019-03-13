@@ -474,6 +474,11 @@ void InspectorControlView::showTagContextMenu(int x, int y, const QString &group
             g_StudioApp.GetCore()->getProjectFile().renameVariantTag(group, dlg.getNames().first,
                                                                      dlg.getNames().second);
             m_variantsGroupModel->refresh();
+
+            // refresh slide view so the tooltip show the renamed tag immediately, no need to
+            // refresh the timeline because each row gets the tags directly from the property which
+            // is always up to date.
+            g_StudioApp.GetViews()->getMainFrame()->getSlideView()->refreshVariants();
         }
     });
 
@@ -504,6 +509,11 @@ void InspectorControlView::showGroupContextMenu(int x, int y, const QString &gro
             projectFile.renameVariantGroup(dlg.getNames().first, dlg.getNames().second);
             g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->refreshVariants();
             m_variantsGroupModel->refresh();
+
+            // refresh slide view so the tooltip show the renamed group immediately, no need to
+            // refresh the timeline because each row gets the tags directly from the property which
+            // is always up to date.
+            g_StudioApp.GetViews()->getMainFrame()->getSlideView()->refreshVariants();
         }
     });
 

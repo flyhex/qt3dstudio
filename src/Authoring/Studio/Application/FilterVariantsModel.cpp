@@ -53,7 +53,7 @@ void FilterVariantsModel::refresh()
 
     // build the variants data model
     const auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
-    const auto keys = variantsDef.keys();
+    const auto keys = g_StudioApp.GetCore()->getProjectFile().variantsDefKeys();
     for (auto &group : keys) {
         VariantsGroupData g;
         g.m_title = group;

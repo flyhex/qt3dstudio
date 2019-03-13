@@ -270,7 +270,7 @@ Rectangle {
                             leftPadding: 3
                             topPadding: -3
                             bottomPadding: 8
-                            background: Rectangle { color:_variantsSlideViewBGColor }
+                            background: Rectangle { color: _variantsSlideViewBGColor }
                             wrapMode: Text.WrapAnywhere
                             lineHeight: .6
                             visible: model.variants !== undefined && model.variants !== ""

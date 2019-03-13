@@ -77,16 +77,18 @@ public:
     void refreshSlideLabel(qt3dsdm::Qt3DSDMInstanceHandle instanceHandle,
                            qt3dsdm::Qt3DSDMPropertyHandle propertyHandle);
     void setSelectedSlideIndex(const QModelIndex &index);
-    void refreshVariants(const QVector<QHash<QString, QStringList>> &vModel = {});
-    QHash<QString, QStringList> variantsSlideModel(int row) const;
-    QVector<QHash<QString, QStringList> > variantsModel() const;
+    void refreshVariants(const QVector<QHash<QString, QStringList>> &vModel = {},
+                         const QVector<QStringList> &vModelKeys = {});
+    int rowToSlideIndex(int row) const;
+    QVector<QHash<QString, QStringList> > variantsModel() const { return m_variantsModel; }
+    QVector<QStringList> variantsModelKeys() const { return m_variantsModelKeys; }
 
 private:
     bool hasSlideWithName(const QString &name) const;
     QString slideName(const qt3dsdm::Qt3DSDMSlideHandle &handle) const;
     void setSlideName(const qt3dsdm::Qt3DSDMSlideHandle &handle, const QString &name);
     inline CDoc *GetDoc() const;
-    inline long slideIndex(const qt3dsdm::Qt3DSDMSlideHandle &handle);
+    inline long slideIndex(const qt3dsdm::Qt3DSDMSlideHandle &handle) const;
     inline CClientDataModelBridge *GetBridge() const;
 
     QVector<qt3dsdm::Qt3DSDMSlideHandle> m_slides;
@@ -94,6 +96,7 @@ private:
     int m_rearrangeStartRow = -1;
     int m_rearrangeEndRow = -1;
     QVector<QHash<QString, QStringList> > m_variantsModel;
+    QVector<QStringList> m_variantsModelKeys;
     QHash<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMSlideHandle> m_slideLookupHash;
 };
 

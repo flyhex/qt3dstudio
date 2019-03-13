@@ -51,9 +51,9 @@ SlideView::SlideView(QWidget *parent) : QQuickWidget(parent)
   , m_MasterSlideModel(new SlideModel(1, this))
   , m_SlidesModel(new SlideModel(0, this))
   , m_CurrentModel(m_SlidesModel)
+  , m_variantsToolTip(new QLabel(this))
   , m_toolTip(tr("No Controller"))
 {
-    m_variantsToolTip = new QLabel(this);
     m_variantsToolTip->setObjectName(QStringLiteral("variantsToolTip"));
     m_variantsToolTip->setWindowModality(Qt::NonModal);
     m_variantsToolTip->setWindowFlags(Qt::FramelessWindowHint | Qt::ToolTip);
@@ -191,16 +191,18 @@ void SlideView::showContextMenu(int x, int y, int row)
 
 void SlideView::showVariantsTooltip(int row, const QPoint &point)
 {
-    const auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
     QString templ = QStringLiteral("<font color='%1'>%2</font>");
     QString tooltipStr("<table>");
-    const auto slideVariants = m_CurrentModel->variantsSlideModel(row);
-    const auto keys = slideVariants.keys();
-    for (auto &g : keys) {
+    const auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
+    const auto slideIndex = m_CurrentModel->rowToSlideIndex(row);
+    const auto variantsModel = m_CurrentModel->variantsModel()[slideIndex];
+    const auto variantsModelKeys = m_CurrentModel->variantsModelKeys()[slideIndex];
+    for (auto &g : variantsModelKeys) {
         tooltipStr.append("<tr><td>");
         tooltipStr.append(templ.arg(variantsDef[g].m_color).arg(g + ": "));
         tooltipStr.append("</td><td>");
-        for (auto &t : slideVariants[g])
+        const auto tags = variantsModel[g];
+        for (auto &t : tags)
             tooltipStr.append(t + ", ");
         tooltipStr.chop(2);
         tooltipStr.append("</td></tr>");

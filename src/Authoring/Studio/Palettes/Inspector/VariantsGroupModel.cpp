@@ -84,7 +84,7 @@ void VariantsGroupModel::refresh()
 
         // build the variants data model
         const auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
-        const auto keys = variantsDef.keys();
+        const auto keys = g_StudioApp.GetCore()->getProjectFile().variantsDefKeys();
         for (auto &group : keys) {
             TagGroupData g;
             g.m_title = group;
@@ -204,7 +204,7 @@ void VariantsGroupModel::exportVariants()
                                                                          " encoding=\"utf-8\"")));
 
     const auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
-    const auto keys = variantsDef.keys();
+    const auto keys = g_StudioApp.GetCore()->getProjectFile().variantsDefKeys();
     QDomElement vElem = domDoc.createElement(QStringLiteral("variants"));
     domDoc.appendChild(vElem);
     for (auto &g : keys) {

@@ -83,12 +83,8 @@ const long PLAYBACK_TIMER_TIMEOUT = 10; // 10 milliseconds
 CMainFrame::CMainFrame()
     : m_ui(new Ui::MainFrame)
     , m_remoteDeploymentSender(new RemoteDeploymentSender(this))
-    , m_sceneView(nullptr)
-    , m_recentItems(nullptr)
-    , m_paletteManager(nullptr)
     , m_updateUITimer(new QTimer)
     , m_playbackTimer(new QTimer)
-    , m_propSheet(nullptr)
 {
     m_ui->setupUi(this);
 
@@ -376,6 +372,14 @@ void CMainFrame::OnCreate()
 
         theDialogs->ResetSettings(theMostRecentOpen);
     }
+
+    // create the variants filtering dialog, singleShot is used so that actionGeom is calculated
+    // correctly
+    QTimer::singleShot(0, this, [&] {
+        QRect actionGeom = m_ui->m_PlaybackToolbar->actionGeometry(m_ui->actionFilterVariants);
+        m_filterVariantsDlg.reset(new FilterVariantsDlg(this, m_ui->actionFilterVariants,
+                                                        actionGeom.width()));
+    });
 
     // Create the view manager
     m_paletteManager.reset(new CPaletteManager(this));
@@ -1048,20 +1052,13 @@ void CMainFrame::OnPlaybackPreviewRuntime2()
 void CMainFrame::onFilterVariants()
 {
     if (m_ui->actionFilterVariants->isChecked()) {
-        QTimer::singleShot(0, [&] {
-            QRect actionGeom = m_ui->m_PlaybackToolbar->actionGeometry(m_ui->actionFilterVariants);
-            if (!m_filterVariantsDlg) {
-                m_filterVariantsDlg = new FilterVariantsDlg(this, m_ui->actionFilterVariants,
-                                                            actionGeom.width());
-            }
-
-            m_filterVariantsDlg->activateWindow();
-            m_filterVariantsDlg->raise();
-            m_filterVariantsDlg->move(m_ui->m_PlaybackToolbar->pos()
-                                      + QPoint(actionGeom.x(), actionGeom.bottom()));
-            m_filterVariantsDlg->setFocus();
-            m_filterVariantsDlg->show();
-        });
+        QRect actionGeom = m_ui->m_PlaybackToolbar->actionGeometry(m_ui->actionFilterVariants);
+        m_filterVariantsDlg->activateWindow();
+        m_filterVariantsDlg->raise();
+        m_filterVariantsDlg->move(m_ui->m_PlaybackToolbar->pos()
+                                  + QPoint(actionGeom.x(), actionGeom.bottom()));
+        m_filterVariantsDlg->setFocus();
+        m_filterVariantsDlg->show();
     } else {
         m_filterVariantsDlg->close();
     }

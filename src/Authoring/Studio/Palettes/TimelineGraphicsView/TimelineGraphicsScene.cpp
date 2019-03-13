@@ -1018,9 +1018,12 @@ void TimelineGraphicsScene::updateHoverStatus(const QPointF &scenePos)
                         // parse propVal into variantsHash (group => tags)
                         const QStringList tagPairs = propVal.split(QLatin1Char(','));
                         QHash<QString, QStringList> variantsHash;
+                        QStringList variantsHashKeys; // maintain traverse order
                         for (auto &tagPair : tagPairs) {
                             const QStringList pair = tagPair.split(QLatin1Char(':'));
                             variantsHash[pair[0]].append(pair[1]);
+                            if (!variantsHashKeys.contains(pair[0]))
+                                variantsHashKeys.append(pair[0]);
                         }
 
                         // parse variantsHash into tooltipStr
@@ -1028,8 +1031,7 @@ void TimelineGraphicsScene::updateHoverStatus(const QPointF &scenePos)
                                 = g_StudioApp.GetCore()->getProjectFile().variantsDef();
                         QString templ = QStringLiteral("<font color='%1'>%2</font>");
                         QString tooltipStr("<table>");
-                        const auto keys = variantsHash.keys();
-                        for (auto &g : keys) {
+                        for (auto &g : qAsConst(variantsHashKeys)) {
                             tooltipStr.append("<tr><td>");
                             tooltipStr.append(templ.arg(variantsDef[g].m_color).arg(g + ": "));
                             tooltipStr.append("</td><td>");
