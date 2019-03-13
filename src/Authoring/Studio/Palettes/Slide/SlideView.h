@@ -30,6 +30,7 @@
 #define SLIDEVIEW_H
 
 #include <QtQuickWidgets/qquickwidget.h>
+#include <QtCore/qtimer.h>
 
 #include "DispatchListeners.h"
 #include "SlideModel.h"
@@ -151,6 +152,7 @@ private:
     QString m_currentController;
     QString m_toolTip;
     Qt::DockWidgetArea m_dockArea;
+    QTimer m_variantRefreshTimer;
 };
 
 #endif // SLIDEVIEW_H

@@ -43,7 +43,6 @@
 #include "Qt3DSDMSlides.h"
 #include "Dialogs.h"
 
-#include <QtCore/qtimer.h>
 #include "QtWidgets/qlabel.h"
 #include <QtQml/qqmlcontext.h>
 #include <QtQml/qqmlengine.h>
@@ -63,6 +62,13 @@ SlideView::SlideView(QWidget *parent) : QQuickWidget(parent)
     g_StudioApp.GetCore()->GetDispatch()->AddPresentationChangeListener(this);
     setResizeMode(QQuickWidget::SizeRootObjectToView);
     QTimer::singleShot(0, this, &SlideView::initialize);
+
+    m_variantRefreshTimer.setSingleShot(true);
+    m_variantRefreshTimer.setInterval(0);
+    connect(&m_variantRefreshTimer, &QTimer::timeout, [this]() {
+        m_SlidesModel->refreshVariants();
+        m_MasterSlideModel->refreshVariants(m_SlidesModel->variantsModel());
+    });
 }
 
 SlideView::~SlideView()
@@ -568,8 +574,8 @@ bool SlideView::isMaster(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle)
 
 void SlideView::refreshVariants()
 {
-    m_SlidesModel->refreshVariants();
-    m_MasterSlideModel->refreshVariants(m_SlidesModel->variantsModel());
+    if (!m_variantRefreshTimer.isActive())
+        m_variantRefreshTimer.start();
 }
 
 void SlideView::OnBeginDataModelNotifications()
