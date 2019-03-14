@@ -1102,7 +1102,7 @@ QString CStudioPreferences::GetVersionString()
 
 bool CStudioPreferences::showEditModePreview()
 {
-    return m_preferences->GetValue("showEditModePreview", true);
+    return m_preferences->GetValue("showEditModePreview", false);
 }
 
 void CStudioPreferences::setShowEditModePreview(bool show)
