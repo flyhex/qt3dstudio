@@ -257,6 +257,8 @@ void SlideView::OnNewPresentation()
     // slide datainput control
     CDispatch *theDispatch = g_StudioApp.GetCore()->GetDispatch();
     theDispatch->AddDataModelListener(this);
+
+    refreshVariants();
 }
 
 void SlideView::OnClosingPresentation()
