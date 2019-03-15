@@ -1161,7 +1161,7 @@ Rectangle {
                         maxGroupLabelWidth = 20; // min group label width
 
                     if (item.groupLabelWidth > maxGroupLabelWidth) {
-                        maxGroupLabelWidth = item.groupLabelWidth;
+                        maxGroupLabelWidth = item.groupLabelWidth + 5;
 
                         if (maxGroupLabelWidth > 150) // max group label width
                             maxGroupLabelWidth = 150;
@@ -1230,7 +1230,7 @@ Rectangle {
             ToolButton {
                 id: addGroupButton
                 text: qsTr("+ Group")
-                width: 60
+                width: 65
                 height: 25
                 onClicked: {
                     _variantsGroupModel.addNewGroup()
