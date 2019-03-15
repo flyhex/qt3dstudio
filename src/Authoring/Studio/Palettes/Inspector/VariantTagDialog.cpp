@@ -33,6 +33,8 @@
 #include "Core.h"
 #include "ProjectFile.h"
 
+#include <QtGui/qvalidator.h>
+
 VariantTagDialog::VariantTagDialog(DialogType type, const QString &group, const QString &name,
                                    QWidget *parent)
     : QDialog(parent)
@@ -43,6 +45,9 @@ VariantTagDialog::VariantTagDialog(DialogType type, const QString &group, const 
     m_ui->setupUi(this);
 
     m_names.first = name;
+
+    QRegExpValidator *rgx = new QRegExpValidator(QRegExp("[\\w\\s]+"), this);
+    m_ui->lineEditTagName->setValidator(rgx);
 
     if (type == AddGroup) {
         setWindowTitle(tr("Add new Group"));
