@@ -416,6 +416,10 @@ QString ProjectFile::createPreview()
 {
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     QString uipPrvPath = doc->GetDocumentPath();
+
+    // Commit all open transactions
+    doc->IKnowWhatIAmDoingForceCloseTransaction();
+
     // create a preview uip if doc modified
     if (doc->IsModified()) {
         uipPrvPath.replace(QLatin1String(".uip"), QLatin1String("_@preview@.uip"));
