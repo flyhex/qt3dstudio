@@ -36,6 +36,7 @@
 #include "Qt3DSFileTools.h"
 #include "TabOrderHandler.h"
 #include "MouseHelper.h"
+#include "QmlUtils.h"
 #include "DataInputSelectView.h"
 
 class InspectorControlModel;
@@ -144,6 +145,7 @@ private:
     QPointer<DataInputSelectView> m_dataInputChooserView;
     std::vector<Q3DStudio::CFilePath> m_fileList;
     MouseHelper m_mouseHelper;
+    QmlUtils m_qmlUtils;
 
     int m_instance = 0;
     int m_handle = 0;

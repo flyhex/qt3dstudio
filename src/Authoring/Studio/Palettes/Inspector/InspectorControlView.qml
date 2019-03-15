@@ -1246,7 +1246,8 @@ Rectangle {
 
         Rectangle {
             property bool toggled: tagsModel ? tagsModel.selected : false
-            property string grpColor: grpModel ? grpModel.color : ""
+            property color grpColor: grpModel ? grpModel.color : ""
+            property bool isBright: grpModel ? _utils.isBright(grpColor) : false
 
             width: Math.max(tLabel.width + 10, 60)
             height: 25
@@ -1257,7 +1258,8 @@ Rectangle {
                 id: tLabel
                 anchors.centerIn: parent
                 text: tagsModel ? tagsModel.tag : ""
-                color: toggled ? _textColor : _studioColor4
+                color: toggled ? (isBright ? _studioColor1 : _textColor)
+                               : _studioColor4
             }
 
             MouseArea {

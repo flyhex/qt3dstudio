@@ -26,40 +26,21 @@
 **
 ****************************************************************************/
 
-#ifndef FILTER_VARIANTS_DLG_H
-#define FILTER_VARIANTS_DLG_H
-
 #include "QmlUtils.h"
 
-#include <QtQuickWidgets/qquickwidget.h>
+#include <QtGui/qcolor.h>
 
-class FilterVariantsModel;
-
-class FilterVariantsDlg : public QQuickWidget
+QmlUtils::QmlUtils()
 {
-    Q_OBJECT
 
-public:
-    explicit FilterVariantsDlg(QWidget *parent, QAction *action, int actionSize);
+}
 
-    Q_INVOKABLE int actionSize() const;
+double QmlUtils::getLuminance(const QColor &color)
+{
+    return 0.2126 * color.redF() + 0.7152 * color.greenF() + 0.0722 * color.blueF();
+}
 
-    QString filterStr() const;
-
-protected:
-    void focusOutEvent(QFocusEvent *e) override;
-    void keyPressEvent(QKeyEvent *e) override;
-
-private:
-    void showEvent(QShowEvent *event) override;
-
-    void initialize();
-
-    QmlUtils m_qmlUtils;
-    QHash<QString, QSet<QString> > m_variantsFilter; // key: group, value: tags
-    FilterVariantsModel *m_model = nullptr;
-    QAction *m_action = nullptr;
-    int m_actionSize = 0; // width/height of the action icon
-};
-
-#endif // FILTER_VARIANTS_DLG_H
+bool QmlUtils::isBright(const QColor &color)
+{
+    return getLuminance(color) > .7;
+}

@@ -232,7 +232,8 @@ HEADERS += \
     Palettes/Inspector/VariantsTagModel.h \
     Palettes/Inspector/VariantTagDialog.h \
     Application/FilterVariantsDlg.h \
-    Application/FilterVariantsModel.h
+    Application/FilterVariantsModel.h \
+    Utils/QmlUtils.h
 
 FORMS += \
     MainFrm.ui \
@@ -414,7 +415,8 @@ SOURCES += \
     Palettes/Inspector/VariantsTagModel.cpp \
     Palettes/Inspector/VariantTagDialog.cpp \
     Application/FilterVariantsDlg.cpp \
-    Application/FilterVariantsModel.cpp
+    Application/FilterVariantsModel.cpp \
+    Utils/QmlUtils.cpp
 
 RESOURCES += \
     MainFrm.qrc \

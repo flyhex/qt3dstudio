@@ -49,6 +49,7 @@ void FilterVariantsDlg::initialize()
     CStudioPreferences::setQmlContextProperties(rootContext());
     rootContext()->setContextProperty(QStringLiteral("_view"), this);
     rootContext()->setContextProperty(QStringLiteral("_model"), m_model);
+    rootContext()->setContextProperty(QStringLiteral("_utils"), &m_qmlUtils);
     setSource(QUrl(QStringLiteral("qrc:/Application/FilterVariantsDlg.qml")));
 }
 
