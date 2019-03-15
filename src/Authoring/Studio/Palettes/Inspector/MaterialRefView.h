@@ -40,7 +40,7 @@ class MaterialRefView : public QListWidget
 public:
     explicit MaterialRefView(QWidget *parent = nullptr);
 
-    int refreshMaterials(int instance, int handle);
+    QSize refreshMaterials(int instance, int handle);
 
     void updateSelection();
 protected:

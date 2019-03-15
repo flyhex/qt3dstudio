@@ -723,27 +723,26 @@ QObject *InspectorControlView::showMaterialReference(int handle, int instance, c
     disconnect(m_matRefListWidget, &QListWidget::itemClicked, nullptr, nullptr);
     disconnect(m_matRefListWidget, &QListWidget::itemDoubleClicked, nullptr, nullptr);
 
-    const int numMats = m_matRefListWidget->refreshMaterials(instance, handle);
-    const int popupHeight = qMin(numMats, 10) * CStudioPreferences::controlBaseHeight();
-
+    const QSize popupSize = m_matRefListWidget->refreshMaterials(instance, handle);
     CDialogs::showWidgetBrowser(this, m_matRefListWidget, point,
-                                CDialogs::WidgetBrowserAlign::ComboBox,
-                                QSize(CStudioPreferences::valueWidth(), popupHeight));
+                                CDialogs::WidgetBrowserAlign::ComboBox, popupSize);
     m_activeBrowser.setData(m_matRefListWidget, handle, instance);
 
     connect(m_matRefListWidget, &QListWidget::itemClicked, this,
             [instance, handle](QListWidgetItem *item) {
         auto selectedInstance = item->data(Qt::UserRole).toInt();
-        qt3dsdm::SValue value;
-        CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-        const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
-        propertySystem->GetInstancePropertyValue(instance, handle, value);
-        auto refInstance = doc->GetDataModelObjectReferenceHelper()->Resolve(value, instance);
-        if (selectedInstance != refInstance) {
-            auto objRef = doc->GetDataModelObjectReferenceHelper()->GetAssetRefValue(
-                        selectedInstance, instance, CRelativePathTools::EPATHTYPE_GUID);
-            Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Property"))
-                    ->SetInstancePropertyValue(instance, handle, objRef);
+        if (selectedInstance > 0) {
+            qt3dsdm::SValue value;
+            CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+            const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
+            propertySystem->GetInstancePropertyValue(instance, handle, value);
+            auto refInstance = doc->GetDataModelObjectReferenceHelper()->Resolve(value, instance);
+            if (selectedInstance != refInstance) {
+                auto objRef = doc->GetDataModelObjectReferenceHelper()->GetAssetRefValue(
+                            selectedInstance, instance, CRelativePathTools::EPATHTYPE_GUID);
+                Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Property"))
+                        ->SetInstancePropertyValue(instance, handle, objRef);
+            }
         }
     });
     connect(m_matRefListWidget, &QListWidget::itemDoubleClicked, this, [this]() {
