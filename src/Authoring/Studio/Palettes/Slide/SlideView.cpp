@@ -67,7 +67,8 @@ SlideView::SlideView(QWidget *parent) : QQuickWidget(parent)
     m_variantRefreshTimer.setInterval(0);
     connect(&m_variantRefreshTimer, &QTimer::timeout, [this]() {
         m_SlidesModel->refreshVariants();
-        m_MasterSlideModel->refreshVariants(m_SlidesModel->variantsModel());
+        m_MasterSlideModel->refreshVariants(m_SlidesModel->variantsModel(),
+                                            m_SlidesModel->variantsModelKeys());
     });
 }
 
@@ -549,27 +550,27 @@ void SlideView::rebuildSlideList(const qt3dsdm::Qt3DSDMSlideHandle &inActiveSlid
     }
 }
 
-CDoc *SlideView::GetDoc()
+CDoc *SlideView::GetDoc() const
 {
     return g_StudioApp.GetCore()->GetDoc();
 }
 
-CClientDataModelBridge *SlideView::GetBridge()
+CClientDataModelBridge *SlideView::GetBridge() const
 {
     return GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
 }
 
-qt3dsdm::ISlideSystem *SlideView::GetSlideSystem()
+qt3dsdm::ISlideSystem *SlideView::GetSlideSystem() const
 {
     return GetDoc()->GetStudioSystem()->GetSlideSystem();
 }
 
-long SlideView::GetSlideIndex(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle)
+long SlideView::GetSlideIndex(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle) const
 {
     return GetSlideSystem()->GetSlideIndex(inSlideHandle);
 }
 
-bool SlideView::isMaster(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle)
+bool SlideView::isMaster(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle) const
 {
     return (0 == GetSlideIndex(inSlideHandle));
 }
