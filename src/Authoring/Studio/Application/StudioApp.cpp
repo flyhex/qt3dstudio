@@ -2250,7 +2250,7 @@ void CStudioApp::duplicatePresentation(const QString &presFile)
     if (presFile.isEmpty())
         thePresFile = GetCore()->GetDoc()->GetDocumentPath();
 
-    if (PerformSavePrompt()) {
+    if (qmlStream || PerformSavePrompt()) {
         QFileInfo fi(thePresFile);
         QString relativePresPath = QDir(GetCore()->getProjectFile().getProjectPath())
                                    .relativeFilePath(fi.absoluteFilePath());
@@ -2261,7 +2261,7 @@ void CStudioApp::duplicatePresentation(const QString &presFile)
                                   m_pMainWnd);
         dlg.exec();
         const QString newPres = dlg.getDuplicateFile();
-        if (!newPres.isEmpty())
+        if (!qmlStream && !newPres.isEmpty())
             OnLoadDocument(newPres);
     }
 }
