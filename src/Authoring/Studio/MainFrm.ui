@@ -48,6 +48,9 @@ Project palette using Import functionality.</string>
      <height>21</height>
     </rect>
    </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <widget class="QMenu" name="menu_File">
     <property name="title">
      <string>&amp;File</string>
@@ -158,6 +161,9 @@ Project palette using Import functionality.</string>
    <addaction name="menu_Help"/>
   </widget>
   <widget class="QToolBar" name="toolBar">
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="windowTitle">
     <string>Tool Bar</string>
    </property>
@@ -184,6 +190,9 @@ Project palette using Import functionality.</string>
    <addaction name="action_Redo"/>
   </widget>
   <widget class="QToolBar" name="m_ClientToolsBar">
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="windowTitle">
     <string>Client Tools</string>
    </property>
@@ -210,6 +219,9 @@ Project palette using Import functionality.</string>
    <addaction name="actionAutoset_Keyframes"/>
   </widget>
   <widget class="CEditCameraBar" name="m_EditCamerasBar">
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="windowTitle">
     <string>Edit Cameras</string>
    </property>
@@ -237,6 +249,9 @@ Project palette using Import functionality.</string>
   <widget class="QToolBar" name="m_PlaybackToolbar">
    <property name="enabled">
     <bool>true</bool>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
    </property>
    <property name="windowTitle">
     <string>Playback</string>

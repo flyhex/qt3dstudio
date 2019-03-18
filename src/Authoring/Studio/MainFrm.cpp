@@ -334,17 +334,6 @@ void CMainFrame::onPlaybackTimeout()
 }
 
 //==============================================================================
-
-void CMainFrame::showEvent(QShowEvent *event)
-{
-    QMainWindow::showEvent(event);
-}
-
-void CMainFrame::hideEvent(QHideEvent *event)
-{
-    QMainWindow::hideEvent(event);
-}
-
 /**
  * Called when the main frame is actually created.  Sets up tool bars and default
  * views.

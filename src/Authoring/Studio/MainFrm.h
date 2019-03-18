@@ -133,8 +133,6 @@ public:
     void onEditGroup();
 
     void timerEvent(QTimerEvent *event) override;
-    void showEvent(QShowEvent *event) override;
-    void hideEvent(QHideEvent *event) override;
 
     void OnUpdateTimelineSetTimeBarColor();
     void OnTimelineSetTimeBarColor();
