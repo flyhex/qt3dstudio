@@ -384,6 +384,10 @@ void ProjectFileSystemModel::getQmlAssets(const QObject *qmlNode,
         else if (assetSrc.startsWith(QLatin1String("file://")))
             assetSrc = assetSrc.mid(7);
 
+#if !defined(Q_OS_WIN)
+        // Only windows has drive letter in the path, other platforms need to start with /
+        assetSrc.prepend(QLatin1Char('/'));
+#endif
         outAssetPaths.insert(assetSrc);
     }
 
