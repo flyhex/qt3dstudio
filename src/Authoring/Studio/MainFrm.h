@@ -27,26 +27,14 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
 #ifndef INCLUDED_MAIN_FRAME
-#define INCLUDED_MAIN_FRAME 1
+#define INCLUDED_MAIN_FRAME
 
-#pragma once
-
-//==============================================================================
-//	Includes
-//==============================================================================
-#include "PreviewHelper.h"
 #include "DispatchListeners.h"
 
 #include <QtWidgets/qmainwindow.h>
 #include <QtCore/qtimer.h>
 
-//==============================================================================
-//	Forwards
-//==============================================================================
 class CHotKeys;
 class CPaletteManager;
 class CRecentItems;
@@ -59,6 +47,7 @@ class CStudioPreferencesPropSheet;
 class SlideView;
 class InspectorControlView;
 class FilterVariantsDlg;
+class CPlayerWnd;
 
 #ifdef QT_NAMESPACE
 using namespace QT_NAMESPACE;
@@ -71,17 +60,17 @@ namespace Ui
 }
 QT_END_NAMESPACE
 
-class CPlayerWnd;
 
 class CMainFrame : public QMainWindow,
-        public CPresentationChangeListener,
-        public CFileOpenListener,
-        public CClientPlayChangeListener
+                   public CPresentationChangeListener,
+                   public CFileOpenListener,
+                   public CClientPlayChangeListener
 {
     Q_OBJECT
+
 public:
     CMainFrame();
-    virtual ~CMainFrame();
+    virtual ~CMainFrame() override;
 
     void OnNewPresentation() override;
     void OnClosingPresentation() override;
@@ -99,7 +88,7 @@ public:
     void OnPlayStop() override;
     void OnTimeChanged(long inTime) override;
 
-    CRecentItems *GetRecentItems();
+    CRecentItems *GetRecentItems() const;
 
     void OnCreate();
 
@@ -151,9 +140,7 @@ public:
     void OnPlaybackPlay();
     void OnUpdatePlaybackPlay();
     void OnPlaybackRewind();
-    void OnUpdatePlaybackRewind();
     void OnPlaybackStop();
-    void OnUpdatePlaybackStop();
     void OnPlaybackPreview(const QString &viewerExeName, bool remote = false);
     void OnPlaybackPreviewRuntime1();
     void OnPlaybackPreviewRuntime2();
@@ -164,9 +151,7 @@ public:
     void OnUpdateToolRotate();
     void OnUpdateToolScale();
     void OnUpdateToolGlobalManipulators();
-    void OnToolMove();
-    void OnToolRotate();
-    void OnToolScale();
+    void onTransformToolChanged(long toolMode);
     void OnToolGlobalManipulators();
     void OnUpdateToolChange();
     void OnUpdateToolGroupSelection();
@@ -245,7 +230,7 @@ public:
     void HandleEditViewFillModeKey();
     void HandleEditCameraZoomExtent();
 
-    QWidget *GetActiveView();
+    QWidget *GetActiveView() const;
     CPlayerWnd *GetPlayerWnd() const;
 
     void initializeGeometryAndState();
