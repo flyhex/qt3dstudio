@@ -54,16 +54,16 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     // create icons
     static const QIcon iconLayer = QIcon(":/images/Objects-Layer-Normal.png");
     static const QIcon iconDelete = QIcon(":/images/Action-Trash-Normal.png");
-    static const QIcon iconFirst = QIcon(":/images/playback_tools_low-00.png");
-    static const QIcon iconLast = QIcon(":/images/playback_tools_low-04.png");
+    static const QIcon iconFirst = QIcon(":/images/playback_tools_first.png");
+    static const QIcon iconLast = QIcon(":/images/playback_tools_last.png");
     static const QIcon iconZoomIn = QIcon(":/images/zoom_in.png");
     static const QIcon iconZoomOut = QIcon(":/images/zoom_out.png");
     m_iconTimebarTextsActive = QIcon(":/images/timeline_text_shown.png");
     m_iconTimebarTextsInactive = QIcon(":/images/timeline_text_hidden.png");
     m_iconDiActive = QIcon(":/images/Objects-DataInput-Active.png");
     m_iconDiInactive = QIcon(":/images/Objects-DataInput-Inactive.png");
-    m_iconStop = QIcon(":/images/playback_tools_low-01.png");
-    m_iconPlay = QIcon(":/images/playback_tools_low-02.png");
+    m_iconStop = QIcon(":/images/playback_tools_stop.png");
+    m_iconPlay = QIcon(":/images/playback_tools_play.png");
 
     // create actions
     QString ctrlKey(QStringLiteral("Ctrl+"));

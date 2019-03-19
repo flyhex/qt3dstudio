@@ -778,7 +778,9 @@ Project palette using Import functionality.</string>
   <action name="actionPreview">
    <property name="icon">
     <iconset resource="images.qrc">
-     <normaloff>:/images/playback_tools_low-03.png</normaloff>:/images/playback_tools_low-03.png</iconset>
+     <normaloff>:/images/preview.png</normaloff>
+     <disabledoff>:/images/preview-disabled.png</disabledoff>
+     <disabledon>:/images/preview-disabled.png</disabledon>:/images/preview.png</iconset>
    </property>
    <property name="text">
     <string>Preview</string>
@@ -882,9 +884,9 @@ Project palette using Import functionality.</string>
   <action name="actionRemote_Preview">
    <property name="icon">
     <iconset>
-     <normalon>:/images/remote.png</normalon>
-     <disabledoff>:/images/remote-disabled.png</disabledoff>
-     <disabledon>:/images/remote-disabled.png</disabledon>
+     <normalon>:/images/preview-remote.png</normalon>
+     <disabledoff>:/images/preview-remote-disabled.png</disabledoff>
+     <disabledon>:/images/preview-remote-disabled.png</disabledon>
     </iconset>
    </property>
    <property name="text">

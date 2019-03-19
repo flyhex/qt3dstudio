@@ -1020,9 +1020,8 @@ void CMainFrame::updateActionFilterEnableState()
 
 void CMainFrame::updateActionPreviewVariantsState(bool isFiltered)
 {
-    m_ui->actionPreview->setIcon(QIcon(isFiltered
-                                       ? QStringLiteral(":/images/playplayback-variant.png")
-                                       : QStringLiteral(":/images/playback_tools_low-03.png")));
+    m_ui->actionPreview->setIcon(QIcon(isFiltered ? QStringLiteral(":/images/preview-variants.png")
+                                                  : QStringLiteral(":/images/preview.png")));
 }
 
 void CMainFrame::OnPlaybackPreviewRemote()
