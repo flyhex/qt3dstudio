@@ -65,8 +65,8 @@ void RowMover::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     Q_UNUSED(widget)
 
     static const QPolygon polygon({QPoint(0, 0), QPoint(0, 3), QPoint(7, 3), QPoint(7, 1),
-                                   QPoint(TimelineConstants::TREE_BOUND_W, 1),
-                                   QPoint(TimelineConstants::TREE_BOUND_W, 0)});
+                                   QPoint(int(TimelineConstants::TREE_BOUND_W), 1),
+                                   QPoint(int(TimelineConstants::TREE_BOUND_W), 0)});
     painter->setPen(QPen(CStudioPreferences::timelineRowMoverColor(), 1));
     painter->setBrush(CStudioPreferences::timelineRowMoverColor());
     painter->drawConvexPolygon(polygon);
@@ -204,7 +204,8 @@ bool RowMover::isSourceRowsDescendant(RowTree *row) const
 // rowType parameter is used to highlight the target row when RowMover is not active,
 // i.e. when dragging from project or basic objects palettes
 void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowType,
-                               Q3DStudio::DocumentEditorFileType::Enum fileType)
+                               Q3DStudio::DocumentEditorFileType::Enum fileType,
+                               bool firstTry)
 {
     // DnD a presentation / Qml stream from the project panel (to set it as a subpresentation)
     if (rowType == OBJTYPE_PRESENTATION || rowType == OBJTYPE_QML_STREAM
@@ -272,6 +273,14 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
     RowTree *rowInsert2 = m_scene->rowManager()
             ->getRowAtPos(scenePos + QPointF(0, TimelineConstants::ROW_H * .5));
 
+    // If on top half of the top row, adjust half row down, as we can never insert anything
+    // above the top row
+    if (!rowInsert1 && rowInsert2 && rowInsert2->index() == 0) {
+        rowInsert1 = m_scene->rowManager()->getRowAtPos(scenePos);
+        rowInsert2 = m_scene->rowManager()
+                ->getRowAtPos(scenePos + QPointF(0, TimelineConstants::ROW_H));
+    }
+
     bool valid = rowInsert1 && theRowType != OBJTYPE_MATERIAL
                  && theRowType != OBJTYPE_CUSTOMMATERIAL;
 
@@ -319,7 +328,7 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
             depth = 3; // effects can only be moved on depth 3 (layer direct child)
         } else {
             static const int LEFT_MARGIN = 20;
-            depth = (scenePos.x() - LEFT_MARGIN) / TimelineConstants::ROW_DEPTH_STEP;
+            depth = (int(scenePos.x()) - LEFT_MARGIN) / TimelineConstants::ROW_DEPTH_STEP;
             depth = qBound(depthMin, depth, depthMax);
         }
         // calc insertion parent
@@ -402,13 +411,21 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
                     && !rowInsert1->empty() && !isSourceRowsDescendant(rowInsert1)
                     && depth == rowInsert1->depth() + 1) {
                 updateTargetRowLater = std::bind(&RowMover::updateTargetRow, this,
-                                                 scenePos, rowType, fileType);
+                                                 scenePos, rowType, fileType, true);
                 m_rowAutoExpand = rowInsert1;
                 m_autoExpandTimer.start(TimelineConstants::AUTO_EXPAND_TIME);
             } else {
                 m_rowAutoExpand = nullptr;
                 m_autoExpandTimer.stop();
             }
+        } else if (firstTry && rowInsert2
+                   && m_scene->rowManager()->getRowAtPos(scenePos) == rowInsert2) {
+            // If the current drop location turns out to be invalid and we are on the upper half of
+            // a row, we try to resolve target row as if we were half row below. This allows drags
+            // to be accepted over the entire row if inserting above the row is not valid.
+            updateTargetRow(scenePos + QPointF(0, TimelineConstants::ROW_H * .5),
+                            rowType, fileType, false);
+            valid = !m_insertionTarget.isNull();
         }
     }
 
