@@ -574,14 +574,14 @@ public:
     CRegisteredString RegisterStr(const char16_t *str) override
     {
         STRING_TABLE_MULTITHREADED_METHOD;
-        ConvertUTF(str, 0, m_ConvertBuffer);
+        qt3ds::foundation::ConvertUTF(str, 0, m_ConvertBuffer);
         return RegisterStr(m_ConvertBuffer.c_str());
     }
     // utf-32->utf-8
     CRegisteredString RegisterStr(const char32_t *str) override
     {
         STRING_TABLE_MULTITHREADED_METHOD;
-        ConvertUTF(str, 0, m_ConvertBuffer);
+        qt3ds::foundation::ConvertUTF(str, 0, m_ConvertBuffer);
         return RegisterStr(m_ConvertBuffer.c_str());
     }
 
@@ -590,8 +590,9 @@ public:
         STRING_TABLE_MULTITHREADED_METHOD;
         if (isTrivialWide(str))
             return CRegisteredString();
-        ConvertUTF(reinterpret_cast<const TWCharEASTLConverter::TCharType *>(str), 0,
-                   m_ConvertBuffer);
+        qt3ds::foundation::ConvertUTF(
+                    reinterpret_cast<const TWCharEASTLConverter::TCharType *>(str), 0,
+                    m_ConvertBuffer);
         return RegisterStr(m_ConvertBuffer.c_str());
     }
 
@@ -613,7 +614,7 @@ public:
         eastl::pair<TNarrowToWideMapType::iterator, bool> pair_iter = m_StrWideMap.insert(
             eastl::make_pair(theStr, TWideStr(ForwardingAllocator(m_Allocator, "WideString"))));
         if (pair_iter.second)
-            ConvertUTF(theStr.c_str(), 0, pair_iter.first->second);
+            qt3ds::foundation::ConvertUTF(theStr.c_str(), 0, pair_iter.first->second);
         return reinterpret_cast<const wchar_t *>(pair_iter.first->second.c_str());
     }
 
@@ -630,8 +631,9 @@ public:
         STRING_TABLE_MULTITHREADED_METHOD;
         if (isTrivialWide(str))
             return L"";
-        ConvertUTF(reinterpret_cast<const TWCharEASTLConverter::TCharType *>(str), 0,
-                   m_ConvertBuffer);
+        qt3ds::foundation::ConvertUTF(
+                    reinterpret_cast<const TWCharEASTLConverter::TCharType *>(str), 0,
+                    m_ConvertBuffer);
         return GetWideStr(RegisterStr(m_ConvertBuffer.c_str()));
     }
 

@@ -386,7 +386,7 @@ struct SDOMReader : public IDOMReader
             TXMLCharPtr theValue =
                 current->GetAttributeValue(m_StringTable->GetNarrowStr(name), m_Flags);
             if (theValue && *theValue) {
-                ConvertUTF(theValue, 0, m_TempBuffer);
+                qt3ds::foundation::ConvertUTF(theValue, 0, m_TempBuffer);
                 outValue = reinterpret_cast<const wchar_t *>(m_TempBuffer.c_str());
                 return true;
             }
@@ -584,7 +584,7 @@ struct SDOMReader : public IDOMReader
         outValue = L"";
         TXMLCharPtr theValue;
         if (Value(theValue)) {
-            ConvertUTF(theValue, 0, m_TempBuffer);
+            qt3ds::foundation::ConvertUTF(theValue, 0, m_TempBuffer);
             outValue = reinterpret_cast<const wchar_t *>(m_TempBuffer.c_str());
             return true;
         }
@@ -810,8 +810,9 @@ struct SimpleXmlWriter
     void Write(TWideXMLCharPtr data)
     {
         if (!IsTrivial(data)) {
-            ConvertUTF(reinterpret_cast<const TWCharEASTLConverter::TCharType *>(data), 0,
-                       m_ConvertBuf);
+            qt3ds::foundation::ConvertUTF(
+                        reinterpret_cast<const TWCharEASTLConverter::TCharType *>(data), 0,
+                        m_ConvertBuf);
             m_Stream.Write(m_ConvertBuf.begin(), m_ConvertBuf.size());
         }
     }
@@ -1136,7 +1137,7 @@ public:
         if (len && *str) {
             const TWCharEASTLConverter::TCharType *bufPtr =
                 reinterpret_cast<const TWCharEASTLConverter::TCharType *>(str);
-            ConvertUTF(bufPtr, len, m_ConvertBuffer);
+            qt3ds::foundation::ConvertUTF(bufPtr, len, m_ConvertBuffer);
             AppendStrBuf(m_ConvertBuffer.data(), m_ConvertBuffer.size());
         }
     }
