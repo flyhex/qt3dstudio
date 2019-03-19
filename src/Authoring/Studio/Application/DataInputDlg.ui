@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>533</width>
-    <height>307</height>
+    <height>340</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -418,6 +418,16 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>lineEditInputName</tabstop>
+  <tabstop>comboBoxTypeList</tabstop>
+  <tabstop>doubleSpinBoxMin</tabstop>
+  <tabstop>doubleSpinBoxMax</tabstop>
+  <tabstop>lineEditMetadataKey</tabstop>
+  <tabstop>lineEditMetadata</tabstop>
+  <tabstop>pushButtonAddMeta</tabstop>
+  <tabstop>tableEditMetadata</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

@@ -97,6 +97,9 @@ CDataInputListDlg::CDataInputListDlg(QMap<QString, CDataInputDialogItem *> *data
     connect(m_ui->searchField, &QLineEdit::textChanged, this,
             &CDataInputListDlg::onSearchTextChanged);
 
+    setTabOrder(m_ui->searchField, addButton);
+    setTabOrder(addButton, removeButton);
+
     initDialog();
 
     window()->setFixedSize(size());
