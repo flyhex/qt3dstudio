@@ -68,7 +68,7 @@ To import a sub-presentation, do one of the following:
 
 Sub-presentations will be imported to the folder that is selected in the project palette. If
 no folder is selected, sub-presentations will be imported to the \e{presentations} or
-\e{qml streams} folder depending on the type of the sub-presentation. All assets (such as images,
+\e{qml} folder depending on the type of the sub-presentation. All assets (such as images,
 3D models and effects) and folders of the imported sub-presentation will be imported.
 
 \image {subpresentation-project-structure.png}

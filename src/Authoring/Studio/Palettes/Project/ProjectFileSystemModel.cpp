@@ -445,7 +445,7 @@ Q3DStudio::DocumentEditorFileType::Enum ProjectFileSystemModel::assetTypeForRow(
         return Q3DStudio::DocumentEditorFileType::Behavior;
     else if (path == QLatin1String("presentations"))
         return Q3DStudio::DocumentEditorFileType::Presentation;
-    else if (path == QLatin1String("qml streams"))
+    else if (path == QLatin1String("qml"))
         return Q3DStudio::DocumentEditorFileType::QmlStream;
 
     return Q3DStudio::DocumentEditorFileType::Unknown;
@@ -823,7 +823,7 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
             qmlRoot = getQmlStreamRootNode(qmlEngine, sourceFile, isQmlStream);
             if (qmlRoot) {
                 if (isQmlStream && targetDir.path().endsWith(QLatin1String("/scripts"))) {
-                    const QString path(QStringLiteral("../qml streams"));
+                    const QString path(QStringLiteral("../qml"));
                     targetDir.mkpath(path); // create the folder if doesn't exist
                     targetDir.cd(path);
                 }
@@ -1251,7 +1251,7 @@ void ProjectFileSystemModel::updateDefaultDirMap()
         m_defaultDirToAbsPathMap.insert(QStringLiteral("models"), QString());
         m_defaultDirToAbsPathMap.insert(QStringLiteral("scripts"), QString());
         m_defaultDirToAbsPathMap.insert(QStringLiteral("presentations"), QString());
-        m_defaultDirToAbsPathMap.insert(QStringLiteral("qml streams"), QString());
+        m_defaultDirToAbsPathMap.insert(QStringLiteral("qml"), QString());
     }
 
     const QString rootPath = m_items[0].index.data(QFileSystemModel::FilePathRole).toString();
