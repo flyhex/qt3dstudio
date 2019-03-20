@@ -61,6 +61,8 @@ VariantTagDialog::VariantTagDialog(DialogType type, const QString &group, const 
         m_ui->lineEditTagName->setText(name);
         m_ui->lineEditTagName->selectAll();
     }
+
+    window()->setFixedSize(size());
 }
 
 void VariantTagDialog::accept()
