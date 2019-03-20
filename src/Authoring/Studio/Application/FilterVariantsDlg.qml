@@ -53,30 +53,19 @@ Rectangle {
         anchors.margins: 10
 
         Text {
-            text: qsTr("Select filtering")
+            text: qsTr("Select variant filtering")
             color: _studioColor4
             font.pointSize: 10
             anchors.verticalCenter: parent.verticalCenter
         }
 
-        Rectangle { // clear button
+        ToolButton { // clear button
             width: 60
             height: 25
-            color: _backgroundColor
-            border.color: _studioColor4
             anchors.right: parent.right
+            text: qsTr("Clear")
 
-            Text {
-                anchors.centerIn: parent
-                text: qsTr("Clear")
-                font.pointSize: 10
-                color: _studioColor4
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                onClicked: _model.clearAll();
-            }
+            onClicked: _model.clearAll();
         }
     }
 
@@ -124,20 +113,22 @@ Rectangle {
                     Rectangle { // group button
                         width: tagsRepeater.maxGroupLabelWidth;
                         height: 25
-                        color: _backgroundColor
+                        color: groupMouseArea.pressed ? model.color : _backgroundColor
                         border.color: model.color
 
                         Text {
                             id: tLabel
                             text: model.group
-                            color: model.color
+                            color: groupMouseArea.pressed ? _backgroundColor : model.color
                             elide: Text.ElideRight
                             anchors.centerIn: parent
                         }
 
                         MouseArea {
+                            id: groupMouseArea
                             anchors.fill: parent;
                             onClicked: _model.toggleGroupState(model.group);
+                            enabled: tagsModel && tagsModel.rowCount() > 0
                         }
                     }
 
@@ -170,18 +161,20 @@ Rectangle {
 
             width: Math.max(tLabel.width + 10, 60)
             height: 25
-            color: toggled ? grpColor : _backgroundColor
+            color: tagMouseArea.pressed ? Qt.lighter(grpColor, 1.2)
+                                        : toggled ? grpColor : _backgroundColor
             border.color: toggled ? _studioColor4 : grpColor;
 
             Text {
                 id: tLabel
                 anchors.centerIn: parent
                 text: tagsModel ? tagsModel.tag : ""
-                color: toggled ? (isBright ? _studioColor1 : _textColor)
-                               : _studioColor4
+                color: (toggled || tagMouseArea.pressed)
+                       ? (isBright ? _studioColor1 : _textColor) : _studioColor4
             }
 
             MouseArea {
+                id: tagMouseArea
                 anchors.fill: parent
                 onClicked: {
                     toggled = !toggled;
