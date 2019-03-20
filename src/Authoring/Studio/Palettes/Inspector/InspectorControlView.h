@@ -119,14 +119,14 @@ private:
     void onFilesChanged(const Q3DStudio::TFileModificationList &inFileModificationList);
     void OnNewPresentation() override;
     void OnClosingPresentation() override;
-    void OnTimeChanged();
     void filterMaterials(std::vector<Q3DStudio::CFilePath> &materials);
     void filterMatDatas(std::vector<Q3DStudio::CFilePath> &matDatas);
     void setPropertyValueFromFilename(long instance, int handle, const QString &name);
     bool canLinkProperty(int instance, int handle) const;
     bool canOpenInInspector(int instance, int handle) const;
     void openInInspector();
-    void onInstancePropertyValueChanged(qt3dsdm::Qt3DSDMPropertyHandle propertyHandle);
+    void onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                           qt3dsdm::Qt3DSDMPropertyHandle inProperty);
     void onChildAdded(int inChild);
     void onChildRemoved();
 
