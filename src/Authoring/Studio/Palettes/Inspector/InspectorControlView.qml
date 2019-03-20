@@ -1161,7 +1161,7 @@ Rectangle {
                         maxGroupLabelWidth = 20; // min group label width
 
                     if (item.groupLabelWidth > maxGroupLabelWidth) {
-                        maxGroupLabelWidth = item.groupLabelWidth + 5;
+                        maxGroupLabelWidth = item.groupLabelWidth;
 
                         if (maxGroupLabelWidth > 150) // max group label width
                             maxGroupLabelWidth = 150;
@@ -1174,7 +1174,7 @@ Rectangle {
 
                     readonly property var tagsModel: model.tags
                     readonly property var groupModel: model
-                    readonly property int groupLabelWidth: tLabel.implicitWidth
+                    readonly property int groupLabelWidth: tLabel.implicitWidth + 10
 
                     Text {
                         id: tLabel
