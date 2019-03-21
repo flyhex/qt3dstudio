@@ -91,11 +91,12 @@ public:
     static QVector<EDataType> getAcceptedTypes(qt3dsdm::DataModelDataType::Value dmType,
                                                bool strict = false);
 
+    bool eventFilter(QObject *obj, QEvent *ev) override;
+
 protected:
     void initDialog();
     QString getUniqueId(const QString &id);
     void updateVisibility(int type);
-    void keyPressEvent(QKeyEvent *e) override;
 
 private Q_SLOTS:
     void accept() override;
@@ -103,10 +104,12 @@ private Q_SLOTS:
     void onMinChanged(float min);
     void onMaxChanged(float max);
     void onNameChanged(const QString &name);
-    void onMetadataAdded();
 
 private:
-    void populateMetadata();
+    void populateMetadata(int rows);
+    void updateMetadataFromTable();
+    void addMetadataRow(const QString &key, const QString &metadata, int row);
+    bool checkDuplicateKeys() const;
 
     Ui::DataInputDlg *m_ui;
     CDataInputDialogItem *m_dataInput;
@@ -115,10 +118,9 @@ private:
     float m_max;
     float m_min;
     int m_type;
-    QHash<QString, QString> m_metadata;
+    QList<QPair<QString, QString>> m_orderedMetadata;
     QVector<EDataType> m_acceptedTypes;
-    bool m_metadataEdit = false; // are we editing existing metadata?
-    QString m_editMetadataKey; // original metadata key now being edited
+
 };
 
 #endif

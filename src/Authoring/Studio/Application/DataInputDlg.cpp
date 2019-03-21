@@ -29,8 +29,11 @@
 #include "DataInputDlg.h"
 #include "ui_DataInputDlg.h"
 #include "Qt3DSMessageBox.h"
+#include "StudioApp.h"
+#include "Dialogs.h"
 
 #include <QtWidgets/qabstractbutton.h>
+#include <QtWidgets/qpushbutton.h>
 #include <QtGui/qstandarditemmodel.h>
 #include <QtWidgets/qstyleditemdelegate.h>
 
@@ -44,7 +47,6 @@ CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemMode
     , m_type(0)
     , m_min(0.0)
     , m_max(10.0)
-    , m_metadata(m_dataInput->metadata)
     , m_acceptedTypes(acceptedTypes)
 {
     m_ui->setupUi(this);
@@ -66,13 +68,17 @@ CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemMode
 
     QStandardItemModel *model
             = qobject_cast<QStandardItemModel *>(m_ui->comboBoxTypeList->model());
-    const QBrush transparent(Qt::transparent);
+
     for (int i = 0; i < m_ui->comboBoxTypeList->model()->rowCount(); ++i)
     {
         QStandardItem *item = model->item(i, 0);
         if (!acceptedTypes.contains((EDataType)i))
             item->setEnabled(false);
     }
+
+    const auto keys = m_dataInput->metadata.keys();
+    for (auto &k : keys)
+        m_orderedMetadata.append({k, m_dataInput->metadata.value(k)});
 
     initDialog();
 
@@ -88,14 +94,18 @@ CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemMode
             static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
             this, &CDataInputDlg::onMaxChanged);
     connect(m_ui->lineEditInputName, &QLineEdit::textChanged, this, &CDataInputDlg::onNameChanged);
-    connect(m_ui->pushButtonAddMeta, &QPushButton::clicked, this, &CDataInputDlg::onMetadataAdded);
-    connect(m_ui->tableEditMetadata, &QTableWidget::itemDoubleClicked, this,
-            [this](QTableWidgetItem *item) {
-        m_ui->lineEditMetadataKey->setText(m_ui->tableEditMetadata->item(item->row(), 0)->text());
-        m_ui->lineEditMetadata->setText(m_ui->tableEditMetadata->item(item->row(), 1)->text());
-        m_metadataEdit = true;
-        m_editMetadataKey = m_ui->tableEditMetadata->item(item->row(), 0)->text();
-        m_ui->lineEditMetadataKey->setFocus();
+    // Clunky way of making TAB jump over the delete button column, as setting focusPolicy
+    // does not seem to work with cellWidget.
+    connect(m_ui->tableEditMetadata, &QTableWidget::currentCellChanged,
+            this, [this](int currentRow, int currentColumn, int previousRow, int previousColumn) {
+        Q_UNUSED(previousRow);
+        Q_UNUSED(previousColumn);
+        if (currentColumn == 2) {
+            if (currentRow < (m_ui->tableEditMetadata->rowCount() - 1))
+                m_ui->tableEditMetadata->setCurrentCell(currentRow + 1, 0);
+            else
+                m_ui->tableEditMetadata->setCurrentCell(0, 0);
+        }
     });
 }
 
@@ -108,10 +118,7 @@ void CDataInputDlg::initDialog()
 {
     // Disallow special characters and whitespaces
     QRegExpValidator *rxp = new QRegExpValidator(QRegExp("[A-Za-z0-9_]+"), this);
-    QRegExpValidator *rxpWsOk = new QRegExpValidator(QRegExp("[A-Za-z0-9_ ]+"), this);
     m_ui->lineEditInputName->setValidator(rxp);
-    m_ui->lineEditMetadataKey->setValidator(rxp);
-    m_ui->lineEditMetadata->setValidator(rxpWsOk);
 
     if (!m_dataInput->name.isEmpty()) {
         m_name = m_dataInput->name;
@@ -140,23 +147,40 @@ void CDataInputDlg::initDialog()
         m_ui->doubleSpinBoxMax->setValue(m_dataInput->maxValue);
     }
 
-    m_metadata = m_dataInput->metadata;
-    // Removes focus dotted border, does not disable double-click
-    // to start editing an entry.
-    m_ui->tableEditMetadata->setFocusPolicy(Qt::NoFocus);
-    m_ui->tableEditMetadata->setRowCount(m_metadata.size());
     m_ui->tableEditMetadata->setColumnCount(3);
     m_ui->tableEditMetadata->setColumnWidth(0, 150);
     m_ui->tableEditMetadata->setColumnWidth(1, 280);
-    m_ui->tableEditMetadata->setColumnWidth(2, 30);
-    m_ui->tableEditMetadata->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    m_ui->tableEditMetadata->setColumnWidth(2, 10);
+    m_ui->tableEditMetadata->setHorizontalHeaderLabels({tr("Key"), tr("Metadata"), {}});
 
-    populateMetadata();
+    populateMetadata(m_orderedMetadata.size() + 1);
+
+    m_ui->tableEditMetadata->installEventFilter(this);
     updateVisibility(m_dataInput->type);
 }
 
 void CDataInputDlg::accept()
 {
+    if (checkDuplicateKeys()) {
+        QString title(QObject::tr("Warning"));
+        QString text(QObject::tr("Metadata keys must be unique."));
+        g_StudioApp.GetDialogs()->DisplayMessageBox(title, text,
+                                                    Qt3DSMessageBox::ICON_WARNING, false,
+                                                    this);
+        return;
+    }
+
+    for (const auto &it : qAsConst(m_orderedMetadata)) {
+        if (it.first.trimmed().isEmpty()) {
+            QString title(QObject::tr("Warning"));
+            QString text(QObject::tr("Metadata keys cannot be empty."));
+            g_StudioApp.GetDialogs()->DisplayMessageBox(title, text,
+                                                        Qt3DSMessageBox::ICON_WARNING, false,
+                                                        this);
+            return;
+        }
+    }
+
     if (m_dataInput->name != m_name)
         m_dataInput->name = getUniqueId(m_name);
 
@@ -170,7 +194,10 @@ void CDataInputDlg::accept()
         m_dataInput->valueString = m_text;
     }
 #endif
-    m_dataInput->metadata = m_metadata;
+
+    m_dataInput->metadata.clear();
+    for (auto const &it : qAsConst(m_orderedMetadata))
+        m_dataInput->metadata.insert(it.first, it.second);
 
     QDialog::accept();
 }
@@ -201,35 +228,6 @@ void CDataInputDlg::onNameChanged(const QString &name)
     m_name = name;
     m_ui->lineEditInputName->setText(m_name);
     m_ui->lineEditInputName->setCursorPosition(cursorPos);
-}
-
-void CDataInputDlg::onMetadataAdded()
-{
-    auto key = m_ui->lineEditMetadataKey->text();
-    auto metadata = m_ui->lineEditMetadata->text();
-    // Let's allow empty metadata because it might have significance to
-    // metadata user
-    if (key.isEmpty()) {
-        Qt3DSMessageBox::Show(tr("Metadata Error"), tr("Metadata key cannot be empty."),
-                              Qt3DSMessageBox::ICON_WARNING, false, this);
-        return;
-    }
-
-    // We are editing an existing key - value, remove old entry
-    if (m_metadataEdit) {
-        m_metadata.remove(m_editMetadataKey);
-        m_metadataEdit = false;
-        m_editMetadataKey.clear();
-    }
-
-    m_metadata.insert(key, metadata);
-    m_ui->tableEditMetadata->setRowCount(m_metadata.size());
-    m_ui->lineEditMetadata->clear();
-    m_ui->lineEditMetadataKey->clear();
-
-    // Let's update all entries since we do not know if QHash::insert() replaced an existing
-    // entry of just appended a new one.
-    populateMetadata();
 }
 
 QString CDataInputDlg::getUniqueId(const QString &id)
@@ -276,23 +274,6 @@ void CDataInputDlg::updateVisibility(int type)
     }
 }
 
-void CDataInputDlg::keyPressEvent(QKeyEvent *e)
-{
-    // If we are editing metadata entry, grab ESC event and clear text fields.
-    // Also get out of editing existing metadata entry -mode without saving changes.
-    if (e->key() == Qt::Key_Escape) {
-        if (m_ui->lineEditMetadata->hasFocus() || m_ui->lineEditMetadataKey->hasFocus()) {
-            m_ui->lineEditMetadata->clear();
-            m_ui->lineEditMetadataKey->clear();
-            m_metadataEdit = false;
-            // Return focus to main dialog to allow it to receive ESC events.
-            this->setFocus();
-            return;
-        }
-    }
-    QDialog::keyPressEvent(e);
-}
-
 const bool CDataInputDlg::isEquivalentDataType(int dlgType,
                                                qt3dsdm::DataModelDataType::Value dmType,
                                                bool strict)
@@ -337,25 +318,121 @@ QVector<EDataType> CDataInputDlg::getAcceptedTypes(qt3dsdm::DataModelDataType::V
     return acceptedTypes;
 }
 
-void CDataInputDlg::populateMetadata()
+bool CDataInputDlg::eventFilter(QObject *obj, QEvent *ev)
 {
-    static const QIcon trashIcon = QIcon(":/images/Action-Trash-Normal.png");
-    m_ui->tableEditMetadata->clearContents();
-    QHashIterator<QString, QString> i(m_metadata);
-    int currRow = 0;
-    while (i.hasNext()) {
-        i.next();
-        QTableWidgetItem *key = new QTableWidgetItem(i.key());
-        QTableWidgetItem *metadata = new QTableWidgetItem(i.value());
-        m_ui->tableEditMetadata->setItem(currRow, 0, key);
-        m_ui->tableEditMetadata->setItem(currRow, 1, metadata);
-        QPushButton *delButton = new QPushButton(trashIcon, {}, nullptr);
-
-        m_ui->tableEditMetadata->setCellWidget(currRow, 2, delButton);
-        connect(delButton, &QPushButton::clicked, this, [this, i]{
-            m_metadata.remove(i.key());
-            populateMetadata();
-        });
-        ++currRow;
+    // Eat Enter if the user is editing metadata, to avoid inadvertent accept of
+    // the entire dialog.
+    if (obj == m_ui->tableEditMetadata && ev->type() == QEvent::KeyPress) {
+        if (static_cast<QKeyEvent *>(ev)->key() == Qt::Key_Return
+            || static_cast<QKeyEvent *>(ev)->key() == Qt::Key_Enter) {
+            QKeyEvent *tabEv = new QKeyEvent(QEvent::KeyPress, Qt::Key_Tab, Qt::NoModifier);
+            QApplication::sendEvent(m_ui->tableEditMetadata, tabEv);
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        return false;
     }
+}
+
+void CDataInputDlg::populateMetadata(int rows)
+{
+    m_ui->tableEditMetadata->clearContents();
+    m_ui->tableEditMetadata->setRowCount(rows);
+
+    QList<QPair<QString, QString>>::iterator it = m_orderedMetadata.begin();
+    for (int i = 0; i < rows; ++i) {
+        if (it != m_orderedMetadata.end()) {
+            addMetadataRow(it->first, it->second, i);
+            it++;
+        } else {
+            addMetadataRow({}, {}, i);
+        }
+    }
+}
+
+void CDataInputDlg::addMetadataRow(const QString &key, const QString &metadata, int row)
+{
+    // Grow table if required
+    if (row > m_ui->tableEditMetadata->rowCount() - 1)
+        m_ui->tableEditMetadata->setRowCount(row + 1);
+
+    static const QIcon trashIcon = QIcon(":/images/Action-Trash-Normal.png");
+    QLineEdit *keyEdit = new QLineEdit();
+    QLineEdit *metadataEdit = new QLineEdit();
+
+    keyEdit->installEventFilter(this);
+    metadataEdit->installEventFilter(this);
+
+    keyEdit->setText(key);
+    metadataEdit->setText(metadata);
+    // '$' is used as a delimiter character in .UIP
+    const QRegExpValidator *rxpNoDollar = new QRegExpValidator(QRegExp("[^\\$]+"), this);
+    keyEdit->setValidator(rxpNoDollar);
+    metadataEdit->setValidator(rxpNoDollar);
+
+    QPushButton *delButton = new QPushButton(trashIcon, {});
+
+    m_ui->tableEditMetadata->setCellWidget(row, 0, keyEdit);
+    m_ui->tableEditMetadata->setCellWidget(row, 1, metadataEdit);
+    m_ui->tableEditMetadata->setCellWidget(row, 2, delButton);
+
+    // Check whether the user is editing an existing pair or inserting a new one.
+    // In the latter case append a new blank row.
+    connect(keyEdit, &QLineEdit::editingFinished, this, [&, keyEdit, metadataEdit] {
+        auto currRow = m_ui->tableEditMetadata->currentRow();
+
+        if (currRow < m_orderedMetadata.size())
+            m_orderedMetadata.replace(currRow, {keyEdit->text(), metadataEdit->text()});
+        else
+            m_orderedMetadata.append({keyEdit->text(), metadataEdit->text()});
+
+        // Require both key and metadata to be non-empty before appending a new
+        // blank row.
+        if (currRow == (m_ui->tableEditMetadata->rowCount() - 1)
+            && !static_cast<QLineEdit *>(m_ui->tableEditMetadata->cellWidget(currRow, 1))
+                ->text().isEmpty()) {
+            addMetadataRow({}, {}, currRow + 1);
+            m_ui->tableEditMetadata->scrollToBottom();
+        }
+    });
+
+    connect(metadataEdit, &QLineEdit::editingFinished, this, [&, keyEdit, metadataEdit] {
+        auto currRow = m_ui->tableEditMetadata->currentRow();
+        if (currRow < m_orderedMetadata.size())
+            m_orderedMetadata.replace(currRow, {keyEdit->text(), metadataEdit->text()});
+        else
+            m_orderedMetadata.append({keyEdit->text(), metadataEdit->text()});
+
+        // Require both key and metadata to be non-empty before appending a new
+        // blank row.
+        if (currRow == (m_ui->tableEditMetadata->rowCount() - 1)
+            && !static_cast<QLineEdit *>(m_ui->tableEditMetadata->cellWidget(currRow, 0))
+                ->text().isEmpty()) {
+            addMetadataRow({}, {}, currRow + 1);
+            m_ui->tableEditMetadata->scrollToBottom();
+        }
+    });
+
+    connect(delButton, &QPushButton::clicked, this, [&, delButton] {
+        auto currRow = m_ui->tableEditMetadata->indexAt(delButton->pos()).row();
+        // Never delete last row as it is a placeholder for new items.
+        if (currRow < m_ui->tableEditMetadata->rowCount() - 1) {
+            m_orderedMetadata.removeAt(currRow);
+            m_ui->tableEditMetadata->removeRow(currRow);
+        }
+    });
+}
+
+bool CDataInputDlg::checkDuplicateKeys() const
+{
+    for (int i = 0; i < m_orderedMetadata.size() - 1; ++i) {
+        auto key = m_orderedMetadata[i].first;
+        for (int j = i + 1; j < m_orderedMetadata.size(); ++j) {
+            if (key == m_orderedMetadata[j].first)
+                return true;
+        }
+    }
+    return false;
 }
