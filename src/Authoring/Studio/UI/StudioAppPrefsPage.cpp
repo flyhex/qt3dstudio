@@ -400,8 +400,10 @@ void CStudioAppPrefsPage::checkRestartCondition()
                                               "restart of the Qt 3D Studio to take effect.\n"
                                               "Restart now?"));
 
-        if (retval == QMessageBox::Yes)
+        if (retval == QMessageBox::Yes) {
+            CStudioPreferences::savePreferences();
             CStudioPreferencesPropPage::endDialog(PREFS_SETTINGS_RESTART);
+        }
 
         // Just show the dialog once (unless the values are changed again)
         m_restartNeeded = false;
