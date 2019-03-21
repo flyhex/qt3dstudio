@@ -290,9 +290,15 @@ namespace studio {
             , m_Bottom(b)
         {
         }
+
         bool Contains(QT3DSI32 x, QT3DSI32 y) const
         {
             return x >= m_Left && x <= m_Right && y >= m_Bottom && y <= m_Top;
+        }
+
+        bool isNull() const
+        {
+            return m_Left == 0 && m_Top == 0 && m_Right == 0 && m_Bottom == 0;
         }
     };
 

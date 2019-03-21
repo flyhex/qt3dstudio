@@ -2641,6 +2641,17 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
                 }
 
                 if (object.m_Type == GraphObjectTypes::Camera) {
+                    if (m_InnerRect.isNull()) {
+                        // this happens when the initial view is not the camera view
+                        NVRenderRect thePresentationViewport = m_Context.GetPresentationViewport();
+                        m_InnerRect.m_Left = thePresentationViewport.m_X;
+                        m_InnerRect.m_Right = thePresentationViewport.m_X
+                                              + thePresentationViewport.m_Width;
+                        m_InnerRect.m_Bottom = thePresentationViewport.m_Y;
+                        m_InnerRect.m_Top = thePresentationViewport.m_Y
+                                            + thePresentationViewport.m_Height;
+                    }
+
                     QT3DSVec2 dim = QT3DSVec2(m_InnerRect.m_Right - m_InnerRect.m_Left,
                                               m_InnerRect.m_Top - m_InnerRect.m_Bottom);
                     NVRenderRectF theViewport(0, 0, dim.x, dim.y);
