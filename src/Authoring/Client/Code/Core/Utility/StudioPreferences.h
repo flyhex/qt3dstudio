@@ -53,6 +53,9 @@ public:
     static bool IsTimelineSnappingGridActive();
     static void SetTimelineSnappingGridActive(bool inActive);
 
+    static bool IsLegacyViewerActive();
+    static void SetLegacyViewerActive(bool inActive);
+
     static ESnapGridResolution GetTimelineSnappingGridResolution();
     static void SetTimelineSnappingGridResolution(ESnapGridResolution inResolution);
 

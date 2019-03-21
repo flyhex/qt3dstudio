@@ -110,6 +110,10 @@
     \li
       \uicontrol{Timeline Snapping Grid} - When using snapping in the
       timeline, controls which ticks to snap to.
+    \li
+      \uicontrol{Legacy Viewer} - Enables the legacy viewer preview button in the toolbar. Legacy
+      viewer uses Runtime from Qt 3D Studio 1.1, whereas the default viewer uses Runtime from
+      Qt 3D Studio 2.0. Requires a restart.
     \endlist
   \li
     \uicontrol{Editing View}

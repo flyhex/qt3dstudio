@@ -210,6 +210,16 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionRemote_Preview, &QAction::triggered,
             this, &CMainFrame::OnPlaybackPreviewRemote);
 
+    // Only show runtime1 preview if we have appropriate viewer and it's enabled
+    if (CStudioPreferences::IsLegacyViewerActive()
+            && QFileInfo(CPreviewHelper::getViewerFilePath(QStringLiteral("Qt3DViewer"))).exists()) {
+        connect(m_ui->actionPreviewRuntime1, &QAction::triggered,
+                this, &CMainFrame::OnPlaybackPreviewRuntime1);
+        m_ui->actionPreviewRuntime1->setVisible(true);
+    } else {
+        m_ui->actionPreviewRuntime1->setVisible(false);
+    }
+
     // Tool mode toolbar
     connect(m_ui->actionPosition_Tool, &QAction::triggered, this,
             std::bind(&CMainFrame::onTransformToolChanged, this, STUDIO_TOOLMODE_MOVE));
@@ -839,6 +849,7 @@ void CMainFrame::EditPreferences(short inPageIndex)
         CStudioPreferences::SetBigTimeAdvanceAmount(CStudioPreferences::DEFAULT_BIG_TIME_ADVANCE);
         CStudioPreferences::SetTimelineSnappingGridActive(true);
         CStudioPreferences::SetTimelineSnappingGridResolution(SNAPGRID_SECONDS);
+        CStudioPreferences::SetLegacyViewerActive(true);
         CStudioPreferences::SetEditViewFillMode(true);
         CStudioPreferences::SetPreferredStartupView(
                     CStudioPreferences::PREFERREDSTARTUP_DEFAULTINDEX);

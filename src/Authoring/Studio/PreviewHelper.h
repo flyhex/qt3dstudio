@@ -72,9 +72,9 @@ public:
                                    const QString &inDocumentFile,
                                    EExecMode inMode, const QString &viewerExeName,
                                    RemoteDeploymentSender *project = 0);
+    static QString getViewerFilePath(const QString &exeName);
 
 protected:
-    static QString getViewerFilePath(const QString &exeName);
     static void cleanupProcess(QProcess *p, QString *docPath);
     static void previewClosed();
 
