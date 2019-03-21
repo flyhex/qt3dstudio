@@ -56,16 +56,17 @@ public:
     explicit Q3DSDataInputPrivate(Q3DSDataInput *parent);
     virtual ~Q3DSDataInputPrivate();
 
-    void setValue(const QVariant &value);
+    void setValue(const QVariant &value,
+                  Q3DSDataInput::ValueRole valueRole = Q3DSDataInput::ValueRole::Value);
     void setViewerApp(Q3DSViewer::Q3DSViewerApp *app);
     void setCommandQueue(CommandQueue *queue);
-    void setPresentation(Q3DSPresentationPrivate *presentation);
+    void setPresentation(Q3DSPresentation *presentation);
 
 protected:
     Q3DSDataInput *q_ptr;
     Q3DSViewer::Q3DSViewerApp *m_viewerApp = nullptr; // Not owned
     CommandQueue *m_commandQueue = nullptr; // Not owned
-    Q3DSPresentationPrivate *m_presentation = nullptr; // Not owned
+    Q3DSPresentation *m_presentation = nullptr; // Not owned
     QString m_name;
     QVariant m_value;
 };

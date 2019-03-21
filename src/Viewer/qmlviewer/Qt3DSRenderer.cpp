@@ -31,6 +31,7 @@
 #include "Qt3DSRenderer.h"
 #include "Qt3DSViewerApp.h"
 #include "Qt3DSAudioPlayerImpl.h"
+#include "q3dspresentationitem.h"
 
 #include <QtStudio3D/private/q3dscommandqueue_p.h>
 #include <QtStudio3D/private/q3dsviewersettings_p.h>
@@ -319,7 +320,8 @@ void Q3DSRenderer::processCommands()
             m_runtime->HandleKeyInput(Q3DStudio::EKeyCode(cmd.m_intValues[0]), false);
             break;
         case CommandType_SetDataInputValue:
-            m_runtime->SetDataInputValue(cmd.m_stringValue, cmd.m_variantValue);
+            m_runtime->SetDataInputValue(cmd.m_stringValue, cmd.m_variantValue,
+                                         static_cast<Q3DSDataInput::ValueRole>(cmd.m_intValues[0]));
             break;
         case CommandType_RequestSlideInfo: {
             int current = 0;
@@ -336,6 +338,18 @@ void Q3DSRenderer::processCommands()
 
             Q_EMIT requestResponse(cmd.m_elementPath, cmd.m_commandType, requestData);
 
+            break;
+        }
+        case CommandType_RequestDataInputs: {
+            QVariantList *requestData = new QVariantList();
+            if (m_presentation) {
+                const auto diList = m_presentation->dataInputs();
+
+                for (const auto &it : diList)
+                    requestData->append(QVariant::fromValue(it->name()));
+            }
+
+            Q_EMIT requestResponse(cmd.m_elementPath, cmd.m_commandType, requestData);
             break;
         }
         default:

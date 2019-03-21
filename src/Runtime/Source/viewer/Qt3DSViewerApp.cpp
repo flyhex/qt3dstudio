@@ -745,12 +745,37 @@ void Q3DSViewerApp::SetGlobalAnimationTime(qint64 inMilliSecs)
     m_Impl.m_tegraApp->SetGlobalAnimationTime(inMilliSecs);
 }
 
-void Q3DSViewerApp::SetDataInputValue(const QString &name, const QVariant &value)
+void Q3DSViewerApp::SetDataInputValue(
+        const QString &name, const QVariant &value, Q3DSDataInput::ValueRole valueRole)
 {
     if (!m_Impl.m_tegraApp)
         return;
 
-    m_Impl.m_tegraApp->SetDataInputValue(name, value);
+    m_Impl.m_tegraApp->SetDataInputValue(name, value, valueRole);
+}
+
+QList<QString> Q3DSViewerApp::dataInputs() const
+{
+    if (!m_Impl.m_tegraApp)
+        return {};
+
+    return m_Impl.m_tegraApp->dataInputs();
+}
+
+float Q3DSViewerApp::dataInputMax(const QString &name) const
+{
+    if (!m_Impl.m_tegraApp)
+        return 0.0f;
+
+    return m_Impl.m_tegraApp->datainputMax(name);
+}
+
+float Q3DSViewerApp::dataInputMin(const QString &name) const
+{
+    if (!m_Impl.m_tegraApp)
+        return 0.0f;
+
+    return m_Impl.m_tegraApp->datainputMin(name);
 }
 
 Q3DSViewerApp &Q3DSViewerApp::Create(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer)

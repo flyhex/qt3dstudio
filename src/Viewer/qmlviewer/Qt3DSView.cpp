@@ -120,7 +120,6 @@ void Q3DSView::componentComplete()
                 m_presentation = presentation;
         }
     }
-
     if (!m_viewerSettings)
         m_viewerSettings = new Q3DSViewerSettings(this);
     if (!m_presentation)
@@ -176,6 +175,16 @@ void Q3DSView::requestResponseHandler(const QString &elementPath, CommandType co
             handler->d_ptr->requestResponseHandler(commandType, requestData);
         else
             qWarning() << __FUNCTION__ << "RequestSlideInfo response got for unregistered scene.";
+        break;
+    }
+    case CommandType_RequestDataInputs: {
+        Q3DSPresentation *handler = qobject_cast<Q3DSPresentation *>(m_presentation);
+        if (handler) {
+            handler->d_ptr->requestResponseHandler(commandType, requestData);
+        } else {
+            qWarning() << __FUNCTION__
+                       << "RequestDataInputs response got for invalid presentation.";
+        }
         break;
     }
     default:

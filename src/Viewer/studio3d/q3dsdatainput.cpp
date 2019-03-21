@@ -53,6 +53,7 @@ Q3DSDataInput::Q3DSDataInput(Q3DSPresentation *presentation, const QString &name
     , d_ptr(new Q3DSDataInputPrivate(this))
 {
     d_ptr->m_name = name;
+    d_ptr->m_presentation = presentation;
     if (presentation)
         presentation->registerDataInput(this);
 }
@@ -63,6 +64,7 @@ Q3DSDataInput::Q3DSDataInput(Q3DSDataInputPrivate *d, Q3DSPresentation *presenta
     , d_ptr(d)
 {
     d_ptr->m_name = name;
+    d_ptr->m_presentation = presentation;
     if (presentation)
         presentation->registerDataInput(this);
 }
@@ -92,15 +94,58 @@ QVariant Q3DSDataInput::value() const
     return d_ptr->m_value;
 }
 
+// TODO: Min and Max are not currently exposed to QML, as implementation requires
+// cumbersome traversal over command queue from QML viewer to renderer.
+float Q3DSDataInput::min() const
+{
+    if (d_ptr->m_presentation)
+        return 0.0f;
+
+    return d_ptr->m_presentation->d_ptr->dataInputMin(d_ptr->m_name);
+}
+
+float Q3DSDataInput::max() const
+{
+    if (d_ptr->m_presentation)
+        return 0.0f;
+
+    return d_ptr->m_presentation->d_ptr->dataInputMax(d_ptr->m_name);
+}
+
+bool Q3DSDataInput::isValid() const
+{
+    if (d_ptr->m_presentation)
+        return d_ptr->m_presentation->d_ptr->isValidDataInput(this);
+    else
+        return false;
+}
+
+void Q3DSDataInput::setMin(float min)
+{
+    d_ptr->m_presentation->setDataInputValue(d_ptr->m_name, min, ValueRole::Min);
+    emit minChanged();
+}
+
+void Q3DSDataInput::setMax(float max)
+{
+    d_ptr->m_presentation->setDataInputValue(d_ptr->m_name, max, ValueRole::Max);
+    emit maxChanged();
+}
+
 void Q3DSDataInput::setValue(const QVariant &value)
 {
-    // Since properties controlled by data inputs can change without the currect value being
+    // Since properties controlled by data inputs can change without the current value being
     // reflected on the value of the DataInput element, we allow setting the value to the
     // same one it was previously and still consider it a change.
     // For example, when controlling timeline, the value set to DataInput will only be
     // the current value for one frame if presentation has a running animation.
-    d_ptr->setValue(value);
+    d_ptr->setValue(value, ValueRole::Value);
     Q_EMIT valueChanged();
+}
+
+void Q3DSDataInputPrivate::setPresentation(Q3DSPresentation *presentation)
+{
+    m_presentation = presentation;
 }
 
 Q3DSDataInputPrivate::Q3DSDataInputPrivate(Q3DSDataInput *parent)
@@ -114,11 +159,11 @@ Q3DSDataInputPrivate::~Q3DSDataInputPrivate()
         m_presentation->unregisterDataInput(q_ptr);
 }
 
-void Q3DSDataInputPrivate::setValue(const QVariant &value)
+void Q3DSDataInputPrivate::setValue(const QVariant &value, Q3DSDataInput::ValueRole valueRole)
 {
     m_value = value;
     if (m_presentation)
-        m_presentation->q_ptr->setDataInputValue(m_name, m_value);
+        m_presentation->setDataInputValue(m_name, m_value, valueRole);
 }
 
 void Q3DSDataInputPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app)
@@ -135,11 +180,6 @@ void Q3DSDataInputPrivate::setCommandQueue(CommandQueue *queue)
 
     if (m_commandQueue && m_value.isValid())
         setValue(m_value);
-}
-
-void Q3DSDataInputPrivate::setPresentation(Q3DSPresentationPrivate *presentation)
-{
-    m_presentation = presentation;
 }
 
 QT_END_NAMESPACE

@@ -202,7 +202,13 @@ public:
     void SetPresentationAttribute(const char *presId, const char *, const char *value) override;
     void GoToTime(const char *elementPath, const float time) override;
     void SetGlobalAnimationTime(qint64 inMilliSecs) override;
-    void SetDataInputValue(const QString &name, const QVariant &value);
+    void SetDataInputValue(const QString &name, const QVariant &value,
+                           Q3DSDataInput::ValueRole property) override;
+
+    QList<QString> dataInputs() const override;
+    float dataInputMax(const QString &name) const override;
+    float dataInputMin(const QString &name) const override;
+
     void SetAttribute(const char *elementPath, const char *attributeName, const char *value) override;
     bool GetAttribute(const char *elementPath, const char *attributeName, void *value) override;
     void FireEvent(const char *element, const char *evtName) override;
@@ -543,11 +549,31 @@ void CNDDView::SetGlobalAnimationTime(qint64 inMilliSecs)
         m_Application->SetTimeMilliSecs(inMilliSecs);
 }
 
-void CNDDView::SetDataInputValue(const QString &name, const QVariant &value)
+void CNDDView::SetDataInputValue(
+        const QString &name, const QVariant &value,
+        Q3DSDataInput::ValueRole property = Q3DSDataInput::ValueRole::Value)
 {
     Q3DStudio::CQmlEngine &theBridgeEngine
             = static_cast<Q3DStudio::CQmlEngine &>(m_RuntimeFactoryCore->GetScriptEngineQml());
-    theBridgeEngine.SetDataInputValue(name, value);
+    theBridgeEngine.SetDataInputValue(name, value, property);
+}
+
+QList<QString> CNDDView::dataInputs() const
+{
+    if (m_Application)
+        return m_Application->dataInputs();
+
+    return {};
+}
+
+float CNDDView::dataInputMax(const QString &name) const
+{
+    return m_Application->dataInputMax(name);
+}
+
+float CNDDView::dataInputMin(const QString &name) const
+{
+    return m_Application->dataInputMin(name);
 }
 
 void CNDDView::SetAttribute(const char *elementPath, const char *attributeName, const char *value)

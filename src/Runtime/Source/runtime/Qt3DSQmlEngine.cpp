@@ -413,7 +413,8 @@ public:
     void SetAttribute(const char *element, const char *attName, const char *value) override;
     bool GetAttribute(const char *element, const char *attName, char *value) override;
     void FireEvent(const char *element, const char *evtName) override;
-    void SetDataInputValue(const QString &name, const QVariant &value) override;
+    void SetDataInputValue(const QString &name, const QVariant &value,
+                           Q3DSDataInput::ValueRole valueRole) override;
 
     void GotoSlide(const char *component, const char *slideName,
                            const SScriptEngineGotoSlideArgs &inArgs) override;
@@ -606,186 +607,200 @@ void CQmlEngineImpl::FireEvent(const char *element, const char *evtName)
     }
 }
 
-void CQmlEngineImpl::SetDataInputValue(const QString &name, const QVariant &value)
+void CQmlEngineImpl::SetDataInputValue(
+        const QString &name, const QVariant &value,
+        Q3DSDataInput::ValueRole valueRole = Q3DSDataInput::ValueRole::Value)
 {
     qt3ds::runtime::DataInputMap &diMap = m_Application->dataInputMap();
     if (diMap.contains(name)) {
         qt3ds::runtime::DataInputDef &diDef = diMap[name];
-        diDef.value = value;
-        const QVector<qt3ds::runtime::DataInputControlledAttribute> &ctrlAtt
-                = diDef.controlledAttributes;
-        for (const qt3ds::runtime::DataInputControlledAttribute &ctrlElem : ctrlAtt) {
-            switch (ctrlElem.propertyType) {
-            case ATTRIBUTETYPE_DATAINPUT_TIMELINE: {
-                // Quietly ignore other than number type data inputs when adjusting timeline
-                if (diDef.type == qt3ds::runtime::DataInputTypeRangedNumber) {
-                    TTimeUnit endTime = 0;
-                    TElement *element = getTarget(ctrlElem.elementPath.constData());
-                    TComponent *component = static_cast<TComponent *>(element);
-                    endTime = component->GetTimePolicy().GetLoopingDuration();
+        switch (valueRole) {
+        case Q3DSDataInput::ValueRole::Value: { // switch (valueRole)
+            diDef.value = value;
+            const QVector<qt3ds::runtime::DataInputControlledAttribute> &ctrlAtt
+                    = diDef.controlledAttributes;
+            for (const qt3ds::runtime::DataInputControlledAttribute &ctrlElem : ctrlAtt) {
+                switch (ctrlElem.propertyType) {
+                case ATTRIBUTETYPE_DATAINPUT_TIMELINE: {
+                    // Quietly ignore other than number type data inputs when adjusting timeline
+                    if (diDef.type == qt3ds::runtime::DataInputTypeRangedNumber) {
+                        TTimeUnit endTime = 0;
+                        TElement *element = getTarget(ctrlElem.elementPath.constData());
+                        TComponent *component = static_cast<TComponent *>(element);
+                        endTime = component->GetTimePolicy().GetLoopingDuration();
 
-                    // Normalize the value to dataInput range
-                    qreal newTime = qreal(endTime) * (qreal(value.toFloat() - diDef.min)
-                                                      / qreal(diDef.max - diDef.min));
-                    GotoTime(ctrlElem.elementPath.constData(), float(newTime / 1000.0));
-                }
-                break;
-            }
-            case ATTRIBUTETYPE_DATAINPUT_SLIDE: {
-                // Quietly ignore other than string type when adjusting slide
-                if (diDef.type == qt3ds::runtime::DataInputTypeString) {
-                    const QByteArray valueStr = value.toString().toUtf8();
-                    GotoSlide(ctrlElem.elementPath.constData(), valueStr.constData(),
-                              SScriptEngineGotoSlideArgs());
-                }
-                break;
-            }
-                // Silently ignore invalid incoming type if it does not
-                // match with the datainput type except with type Variant, for which
-                // the incoming value is cast to target property type without checking.
-                // Caveat emptor.
-
-                // For Evaluator, typecheck the JS evaluation result to see if it
-                // matches with the target property.
-
-                // Handle ranged number similarly to generic float
-                // if it is bound to properties other
-                // than timeline animation i.e. disregard range min and max
-
-            case ATTRIBUTETYPE_FLOAT: {
-                float valueFloat;
-                if (diDef.type == qt3ds::runtime::DataInputTypeFloat
-                    || diDef.type == qt3ds::runtime::DataInputTypeRangedNumber
-                    || diDef.type == qt3ds::runtime::DataInputTypeVariant) {
-                    valueFloat = value.toFloat();
-                } else if (diDef.type == qt3ds::runtime::DataInputTypeEvaluator) {
-                    valueFloat = callJSFunc(name, diDef, QVariant::Type::Double).toFloat();
-                } else {
-                    qWarning() << __FUNCTION__ << "Property type "
-                               << ctrlElem.propertyType
-                               << " not matching with Datainput " << name
-                               << " data type "
-                               << diDef.type;
+                        // Normalize the value to dataInput range
+                        qreal newTime = qreal(endTime) * (qreal(value.toFloat() - diDef.min)
+                                                          / qreal(diDef.max - diDef.min));
+                        GotoTime(ctrlElem.elementPath.constData(), float(newTime / 1000.0));
+                    }
                     break;
                 }
-
-                SetAttribute(ctrlElem.elementPath.constData(),
-                             ctrlElem.attributeName.first().constData(),
-                             reinterpret_cast<const char *>(&valueFloat));
-                break;
-            }
-            case ATTRIBUTETYPE_FLOAT3: {
-                QVector3D valueVec;
-                if (diDef.type == qt3ds::runtime::DataInputTypeVector3
-                    || diDef.type == qt3ds::runtime::DataInputTypeVariant) {
-                    valueVec = value.value<QVector3D>();
-                } else if (diDef.type == qt3ds::runtime::DataInputTypeEvaluator) {
-                    const QVariant res = callJSFunc(name, diDef, QVariant::Type::Vector3D);
-                    valueVec = res.value<QVector3D>();
-                } else {
-                    qWarning() << __FUNCTION__ << "Property type "
-                               << ctrlElem.propertyType
-                               << " not matching with Datainput " << name
-                               << " data type "
-                               << diDef.type;
+                case ATTRIBUTETYPE_DATAINPUT_SLIDE: {
+                    // Quietly ignore other than string type when adjusting slide
+                    if (diDef.type == qt3ds::runtime::DataInputTypeString) {
+                        const QByteArray valueStr = value.toString().toUtf8();
+                        GotoSlide(ctrlElem.elementPath.constData(), valueStr.constData(),
+                                  SScriptEngineGotoSlideArgs());
+                    }
                     break;
                 }
-                // Set the values of vector attribute components separately
-                for (int i = 0; i < 3; i++) {
-                    const float val = valueVec[i];
+                    // Silently ignore invalid incoming type if it does not
+                    // match with the datainput type except with type Variant, for which
+                    // the incoming value is cast to target property type without checking.
+                    // Caveat emptor.
+
+                    // For Evaluator, typecheck the JS evaluation result to see if it
+                    // matches with the target property.
+
+                    // Handle ranged number similarly to generic float
+                    // if it is bound to properties other
+                    // than timeline animation i.e. disregard range min and max
+                case ATTRIBUTETYPE_FLOAT: {
+                    float valueFloat;
+                    if (diDef.type == qt3ds::runtime::DataInputTypeFloat
+                            || diDef.type == qt3ds::runtime::DataInputTypeRangedNumber
+                            || diDef.type == qt3ds::runtime::DataInputTypeVariant) {
+                        valueFloat = value.toFloat();
+                    } else if (diDef.type == qt3ds::runtime::DataInputTypeEvaluator) {
+                        valueFloat = callJSFunc(name, diDef, QVariant::Type::Double).toFloat();
+                    } else {
+                        qWarning() << __FUNCTION__ << "Property type "
+                                   << ctrlElem.propertyType
+                                   << " not matching with Datainput " << name
+                                   << " data type "
+                                   << diDef.type;
+                        break;
+                    }
+
                     SetAttribute(ctrlElem.elementPath.constData(),
-                                 ctrlElem.attributeName[i].constData(),
-                                 reinterpret_cast<const char *>(&val));
-                }
-                break;
-            }
-            case ATTRIBUTETYPE_FLOAT2:
-            {
-                QVector2D valueVec;
-                if (diDef.type == qt3ds::runtime::DataInputTypeVector2
-                    || diDef.type == qt3ds::runtime::DataInputTypeVariant) {
-                    valueVec = value.value<QVector2D>();
-                } else if (diDef.type == qt3ds::runtime::DataInputTypeEvaluator) {
-                    const QVariant res = callJSFunc(name, diDef, QVariant::Type::Vector2D);
-                    valueVec = res.value<QVector2D>();
-                } else {
-                    qWarning() << __FUNCTION__ << "Property type "
-                        << ctrlElem.propertyType
-                        << " not matching with Datainput " << name
-                        << " data type "
-                        << diDef.type;
+                                 ctrlElem.attributeName.first().constData(),
+                                 reinterpret_cast<const char *>(&valueFloat));
                     break;
                 }
-                // Set the values of vector attribute components separately
-                for (int i = 0; i < 2; i++) {
-                    const float val = valueVec[i];
+                case ATTRIBUTETYPE_FLOAT3: {
+                    QVector3D valueVec;
+                    if (diDef.type == qt3ds::runtime::DataInputTypeVector3
+                            || diDef.type == qt3ds::runtime::DataInputTypeVariant) {
+                        valueVec = value.value<QVector3D>();
+                    } else if (diDef.type == qt3ds::runtime::DataInputTypeEvaluator) {
+                        const QVariant res = callJSFunc(name, diDef, QVariant::Type::Vector3D);
+                        valueVec = res.value<QVector3D>();
+                    } else {
+                        qWarning() << __FUNCTION__ << "Property type "
+                                   << ctrlElem.propertyType
+                                   << " not matching with Datainput " << name
+                                   << " data type "
+                                   << diDef.type;
+                        break;
+                    }
+                    // Set the values of vector attribute components separately
+                    for (int i = 0; i < 3; i++) {
+                        const float val = valueVec[i];
+                        SetAttribute(ctrlElem.elementPath.constData(),
+                                     ctrlElem.attributeName[i].constData(),
+                                     reinterpret_cast<const char *>(&val));
+                    }
+                    break;
+                }
+                case ATTRIBUTETYPE_FLOAT2:
+                {
+                    QVector2D valueVec;
+                    if (diDef.type == qt3ds::runtime::DataInputTypeVector2
+                            || diDef.type == qt3ds::runtime::DataInputTypeVariant) {
+                        valueVec = value.value<QVector2D>();
+                    } else if (diDef.type == qt3ds::runtime::DataInputTypeEvaluator) {
+                        const QVariant res = callJSFunc(name, diDef, QVariant::Type::Vector2D);
+                        valueVec = res.value<QVector2D>();
+                    } else {
+                        qWarning() << __FUNCTION__ << "Property type "
+                                   << ctrlElem.propertyType
+                                   << " not matching with Datainput " << name
+                                   << " data type "
+                                   << diDef.type;
+                        break;
+                    }
+                    // Set the values of vector attribute components separately
+                    for (int i = 0; i < 2; i++) {
+                        const float val = valueVec[i];
+                        SetAttribute(ctrlElem.elementPath.constData(),
+                                     ctrlElem.attributeName[i].constData(),
+                                     reinterpret_cast<const char *>(&val));
+                    }
+                    break;
+                }
+                case ATTRIBUTETYPE_BOOL: {
+                    bool valueBool;
+                    if (diDef.type == qt3ds::runtime::DataInputTypeBoolean
+                            || diDef.type == qt3ds::runtime::DataInputTypeVariant) {
+                        valueBool = value.toBool();
+                    } else if (diDef.type == qt3ds::runtime::DataInputTypeEvaluator) {
+                        valueBool = callJSFunc(name, diDef, QVariant::Type::Bool).toBool();
+                    } else {
+                        qWarning() << __FUNCTION__ << "Property type "
+                                   << ctrlElem.propertyType
+                                   << " not matching with Datainput " << name
+                                   << " data type "
+                                   << diDef.type;
+                        break;
+                    }
+
                     SetAttribute(ctrlElem.elementPath.constData(),
-                                 ctrlElem.attributeName[i].constData(),
-                                 reinterpret_cast<const char *>(&val));
-                }
-                break;
-            }
-            case ATTRIBUTETYPE_BOOL: {
-                bool valueBool;
-                if (diDef.type == qt3ds::runtime::DataInputTypeBoolean
-                    || diDef.type == qt3ds::runtime::DataInputTypeVariant) {
-                    valueBool = value.toBool();
-                } else if (diDef.type == qt3ds::runtime::DataInputTypeEvaluator) {
-                    valueBool = callJSFunc(name, diDef, QVariant::Type::Bool).toBool();
-                } else {
-                    qWarning() << __FUNCTION__ << "Property type "
-                               << ctrlElem.propertyType
-                               << " not matching with Datainput " << name
-                               << " data type "
-                               << diDef.type;
+                                 ctrlElem.attributeName.first().constData(),
+                                 reinterpret_cast<const char *>(&valueBool));
                     break;
                 }
+                case ATTRIBUTETYPE_STRING: {
+                    QByteArray valueStr;
+                    // Allow scalar number types also as inputs to string attribute
+                    if (diDef.type == qt3ds::runtime::DataInputTypeString
+                            || diDef.type == qt3ds::runtime::DataInputTypeRangedNumber
+                            || diDef.type == qt3ds::runtime::DataInputTypeFloat
+                            || diDef.type == qt3ds::runtime::DataInputTypeVariant) {
+                        valueStr = value.toString().toUtf8();
+                    } else if (diDef.type == qt3ds::runtime::DataInputTypeEvaluator) {
+                        valueStr = callJSFunc(name, diDef, QVariant::Type::String)
+                                .toString().toUtf8();
+                    } else {
+                        qWarning() << __FUNCTION__ << "Property type "
+                                   << ctrlElem.propertyType
+                                   << " not matching with Datainput " << name
+                                   << " data type "
+                                   << diDef.type;
+                        break;
+                    }
 
-                SetAttribute(ctrlElem.elementPath.constData(),
-                             ctrlElem.attributeName.first().constData(),
-                             reinterpret_cast<const char *>(&valueBool));
-                break;
-            }
-            case ATTRIBUTETYPE_STRING: {
-                QByteArray valueStr;
-                // Allow scalar number types also as inputs to string attribute
-                if (diDef.type == qt3ds::runtime::DataInputTypeString
-                    || diDef.type == qt3ds::runtime::DataInputTypeRangedNumber
-                    || diDef.type == qt3ds::runtime::DataInputTypeFloat
-                    || diDef.type == qt3ds::runtime::DataInputTypeVariant) {
-                    valueStr = value.toString().toUtf8();
-                } else if (diDef.type == qt3ds::runtime::DataInputTypeEvaluator) {
-                    valueStr = callJSFunc(name, diDef, QVariant::Type::String)
-                               .toString().toUtf8();
-                } else {
-                    qWarning() << __FUNCTION__ << "Property type "
-                               << ctrlElem.propertyType
-                               << " not matching with Datainput " << name
-                               << " data type "
-                               << diDef.type;
+                    SetAttribute(ctrlElem.elementPath.constData(),
+                                 ctrlElem.attributeName.first().constData(),
+                                 valueStr.constData());
                     break;
                 }
+                default:
+                    QT3DS_ALWAYS_ASSERT_MESSAGE("Unexpected data input type");
+                    break;
+                }
+            }
 
-                SetAttribute(ctrlElem.elementPath.constData(),
-                             ctrlElem.attributeName.first().constData(),
-                             valueStr.constData());
-                break;
+            // Trigger re-evaluation of Evaluator datainputs that use this datainput
+            // as source data. Do this by calling setDataInputValue for evaluator
+            // with the current set value of the Evaluator (_not_ the evaluator result)
+            for (auto dependent : diDef.dependents) {
+                // Dependent list also contains the name of this datainput if
+                // the value of this datainput is used as source data. In this case
+                // obviously do not cause infinite recursion.
+                if (dependent != name)
+                    SetDataInputValue(dependent, diMap[dependent].value);
             }
-            default:
-                QT3DS_ALWAYS_ASSERT_MESSAGE("Unexpected data input type");
-                break;
-            }
+            break;
         }
-
-        // Trigger re-evaluation of Evaluator datainputs that use this datainput
-        // as source data. Do this by calling setDataInputValue for evaluator
-        // with the current set value of the Evaluator (_not_ the evaluator result)
-        for (auto dependent : diDef.dependents) {
-            // Dependent list also contains the name of this datainput if
-            // the value of this datainput is used as source data. In this case
-            // obviously do not cause infinite recursion.
-            if (dependent != name)
-                SetDataInputValue(dependent, diMap[dependent].value);
+        case Q3DSDataInput::ValueRole::Max: { // switch (valueRole)
+            diDef.max = value.toFloat();
+            break;
+        }
+        case Q3DSDataInput::ValueRole::Min: { // switch (valueRole)
+            diDef.min = value.toFloat();
+            break;
+        }
         }
     }
 }

@@ -75,6 +75,23 @@ ElementCommand &CommandQueue::queueCommand(const QString &elementPath,
     return cmd;
 }
 
+ElementCommand &CommandQueue::queueCommand(const QString &elementPath,
+                                           CommandType commandType,
+                                           const QString &attributeName,
+                                           const QVariant &value,
+                                           int intValue)
+{
+    ElementCommand &cmd = nextFreeCommand();
+
+    cmd.m_commandType = commandType;
+    cmd.m_elementPath = elementPath;
+    cmd.m_stringValue = attributeName;
+    cmd.m_variantValue = value;
+    cmd.m_intValues[0] = intValue;
+
+    return cmd;
+}
+
 ElementCommand &CommandQueue::queueCommand(const QString &elementPath, CommandType commandType,
                                            const QString &value)
 {
@@ -172,6 +189,9 @@ void CommandQueue::copyCommands(const CommandQueue &fromQueue)
         const ElementCommand &source = fromQueue.commandAt(i);
         switch (source.m_commandType) {
         case CommandType_SetDataInputValue:
+            queueCommand(source.m_elementPath, source.m_commandType, source.m_stringValue,
+                         source.m_variantValue, source.m_intValues[0]);
+            break;
         case CommandType_SetAttribute:
             queueCommand(source.m_elementPath, source.m_commandType, source.m_stringValue,
                          source.m_variantValue);
@@ -201,6 +221,9 @@ void CommandQueue::copyCommands(const CommandQueue &fromQueue)
                          source.m_intValues[2], source.m_intValues[3]);
             break;
         case CommandType_RequestSlideInfo:
+            queueRequest(source.m_elementPath, source.m_commandType);
+            break;
+        case CommandType_RequestDataInputs:
             queueRequest(source.m_elementPath, source.m_commandType);
             break;
         default:

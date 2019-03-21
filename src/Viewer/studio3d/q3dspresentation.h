@@ -33,6 +33,7 @@
 #include <QtStudio3D/qstudio3dglobal.h>
 #include <QtCore/qobject.h>
 #include <QtCore/qurl.h>
+#include "q3dsdatainput.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -41,7 +42,6 @@ class Q3DSElement;
 class QMouseEvent;
 class QWheelEvent;
 class QKeyEvent;
-class Q3DSDataInput;
 
 class Q_STUDIO3D_EXPORT Q3DSPresentation : public QObject
 {
@@ -65,6 +65,9 @@ public:
     void unregisterDataInput(Q3DSDataInput *dataInput);
     Q3DSDataInput *registeredDataInput(const QString &name) const;
 
+    Q_INVOKABLE QVariantList getDataInputs() const;
+    QVector<Q3DSDataInput *> dataInputs() const;
+
     // Input event handlers
     void mousePressEvent(QMouseEvent *e);
     void mouseReleaseEvent(QMouseEvent *e);
@@ -85,13 +88,17 @@ public Q_SLOTS:
     void setPresentationActive(const QString &id, bool active);
     void fireEvent(const QString &elementPath, const QString &eventName);
     void setGlobalAnimationTime(qint64 milliseconds);
-    void setDataInputValue(const QString &name, const QVariant &value);
+    void setDataInputValue(const QString &name, const QVariant &value,
+                           Q3DSDataInput::ValueRole valueRole = Q3DSDataInput::ValueRole::Value);
 
 Q_SIGNALS:
     void variantListChanged(const QStringList &variantList);
     void sourceChanged(const QUrl &source);
     void slideEntered(const QString &elementPath, unsigned int index, const QString &name);
     void slideExited(const QString &elementPath, unsigned int index, const QString &name);
+    // Indicates that data input definitions in the Studio project have been parsed
+    // and datainputs are available through dataInputs() / getDataInputs().
+    void dataInputsReady();
 
 private:
     Q_DISABLE_COPY(Q3DSPresentation)
@@ -102,6 +109,7 @@ private:
     friend class Q3DSWidgetPrivate;
     friend class Q3DSRenderer;
     friend class Q3DSView;
+    friend class Q3DSDataInput;
 };
 
 QT_END_NAMESPACE

@@ -92,6 +92,27 @@ Q3DSDataInput *Q3DSPresentation::registeredDataInput(const QString &name) const
     return d_ptr->m_dataInputs.value(name, nullptr);
 }
 
+QVector<Q3DSDataInput *> Q3DSPresentation::dataInputs() const
+{
+    QVector<Q3DSDataInput *> ret;
+    const auto datainputs = d_ptr->m_dataInputs;
+    for (const auto &it : datainputs)
+        ret.append(it);
+
+    return ret;
+}
+
+QVariantList Q3DSPresentation::getDataInputs() const
+{
+    QVariantList ret;
+    const auto datainputs = dataInputs();
+
+    for (const auto &it : datainputs)
+        ret.append(QVariant::fromValue(it));
+
+    return ret;
+}
+
 void Q3DSPresentation::setSource(const QUrl &source)
 {
     if (d_ptr->m_source != source) {
@@ -213,13 +234,14 @@ void Q3DSPresentation::setGlobalAnimationTime(qint64 milliseconds)
     }
 }
 
-void Q3DSPresentation::setDataInputValue(const QString &name, const QVariant &value)
+void Q3DSPresentation::setDataInputValue(const QString &name, const QVariant &value,
+                                         Q3DSDataInput::ValueRole valueRole)
 {
     if (d_ptr->m_viewerApp) {
-        d_ptr->m_viewerApp->SetDataInputValue(name, value);
+        d_ptr->m_viewerApp->SetDataInputValue(name, value, valueRole);
     } else if (d_ptr->m_commandQueue) {
         d_ptr->m_commandQueue->queueCommand(QString(), CommandType_SetDataInputValue,
-                                            name, value);
+                                            name, value, static_cast<int>(valueRole));
     }
 }
 
@@ -342,11 +364,19 @@ void Q3DSPresentationPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool 
     m_viewerApp = app;
 
     const auto elements = m_elements.values();
-    const auto dataInputs = m_dataInputs.values();
     for (Q3DSElement *element : elements)
         element->d_ptr->setViewerApp(app);
-    for (Q3DSDataInput *di : dataInputs)
-        di->d_ptr->setViewerApp(app);
+
+    if (m_viewerApp) {
+        const auto dataInputs = m_viewerApp->dataInputs();
+        for (const auto &name : dataInputs) {
+            if (!m_dataInputs.contains(name)) {
+                auto *di = new Q3DSDataInput(name, nullptr);
+                registerDataInput(di);
+            }
+        }
+        Q_EMIT q_ptr->dataInputsReady();
+    }
 
     if (connectApp) {
         if (app) {
@@ -378,9 +408,33 @@ void Q3DSPresentationPrivate::setCommandQueue(CommandQueue *queue)
     if (m_commandQueue) {
         setSource(m_source);
         setVariantList(m_variantList);
+        // Queue a request ASAP for datainputs defined in UIA file so that
+        // getDataInputs has up-to-date info at the earliest.
+        m_commandQueue->queueRequest({}, CommandType_RequestDataInputs);
     }
 }
 
+void Q3DSPresentationPrivate::requestResponseHandler(CommandType commandType, void *requestData)
+{
+    switch (commandType) {
+    case CommandType_RequestDataInputs: {
+        QVariantList *response = reinterpret_cast<QVariantList *>(requestData);
+
+        for (int i = 0; i < response->size(); ++i) {
+            // Check and append to QML-side list if the (UIA) presentation has additional datainputs
+            // that are not explicitly defined in QML code.
+            if (!m_dataInputs.contains(response->at(i).value<QString>()))
+                registerDataInput(new Q3DSDataInput(response->at(i).value<QString>(), nullptr));
+        }
+        delete response;
+        Q_EMIT q_ptr->dataInputsReady();
+        break;
+    }
+    default:
+        Q_ASSERT(false);
+        break;
+    }
+}
 // Doc note: The ownership of the registered scenes remains with the caller, who needs to
 // ensure that registered scenes are alive as long as the presentation is alive.
 void Q3DSPresentationPrivate::registerElement(Q3DSElement *element)
@@ -455,7 +509,7 @@ void Q3DSPresentationPrivate::registerDataInput(Q3DSDataInput *dataInput)
         }
     }
 
-    dataInput->d_ptr->setPresentation(this);
+    dataInput->d_ptr->setPresentation(q_ptr);
     dataInput->d_ptr->setViewerApp(m_viewerApp);
     dataInput->d_ptr->setCommandQueue(m_commandQueue);
 
@@ -481,6 +535,29 @@ void Q3DSPresentationPrivate::unregisterAllDataInputs()
         di->d_ptr->setPresentation(nullptr);
     }
     m_dataInputs.clear();
+}
+bool Q3DSPresentationPrivate::isValidDataInput(const Q3DSDataInput *dataInput) const
+{
+    if (!m_viewerApp)
+        return false;
+
+    return m_viewerApp->dataInputs().contains(dataInput->name());
+}
+
+float Q3DSPresentationPrivate::dataInputMin(const QString &name) const
+{
+    if (!m_viewerApp)
+        return 0.0f;
+
+    return m_viewerApp->dataInputMin(name);
+}
+
+float Q3DSPresentationPrivate::dataInputMax(const QString &name) const
+{
+    if (!m_viewerApp)
+        return 0.0f;
+
+    return m_viewerApp->dataInputMax(name);
 }
 
 Q3DStudio::EKeyCode Q3DSPresentationPrivate::getScanCode(QKeyEvent *e)

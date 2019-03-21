@@ -33,6 +33,8 @@
 #include "EASTL/vector.h"
 #include "EASTL/string.h"
 #include "foundation/Qt3DSRefCounted.h"
+#include "q3dsdatainput.h"
+
 //==============================================================================
 //	Namespace
 //==============================================================================
@@ -160,7 +162,9 @@ public: // Elements
     virtual void SetTableForElement(TElement &inElement, IScriptTableProvider &inProvider) = 0;
     virtual void SetAttribute(const char *element, const char *attName, const char *value) = 0;
     virtual void FireEvent(const char *element, const char *evtName) = 0;
-    virtual void SetDataInputValue(const QString &name, const QVariant &value) = 0;
+    virtual void SetDataInputValue(
+            const QString &name, const QVariant &value,
+            Q3DSDataInput::ValueRole property = Q3DSDataInput::ValueRole::Value) = 0;
 
 public: // Components
     virtual void GotoSlide(const char *component, const char *slideName,

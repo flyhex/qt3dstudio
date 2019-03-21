@@ -38,6 +38,7 @@
 #include "render/Qt3DSRenderBaseTypes.h"
 #include "EASTL/string.h"
 #include "foundation/Qt3DSRefCounted.h"
+#include "q3dsdatainput.h"
 #include "Qt3DSWindowSystem.h"
 #include "Qt3DSTimer.h"
 #include "Qt3DSPresentation.h"
@@ -187,7 +188,11 @@ public:
     virtual void SetPresentationAttribute(const char *presId, const char *, const char *value) = 0;
     virtual void GoToTime(const char *elementPath, const float time) = 0;
     virtual void SetGlobalAnimationTime(qint64 inMilliSecs) = 0;
-    virtual void SetDataInputValue(const QString &name, const QVariant &value) = 0;
+    virtual void SetDataInputValue(const QString &name, const QVariant &value,
+                                   Q3DSDataInput::ValueRole property) = 0;
+    virtual QList<QString> dataInputs() const = 0;
+    virtual float dataInputMax(const QString &name) const = 0;
+    virtual float dataInputMin(const QString &name) const = 0;
     virtual void SetAttribute(const char *elementPath, const char *attributeName,
                               const char *value) = 0;
     virtual bool GetAttribute(const char *elementPath, const char *attributeName, void *value) = 0;
@@ -280,9 +285,22 @@ public:
     {
         m_NDDView->SetGlobalAnimationTime(inMilliSecs);
     }
-    void SetDataInputValue(const QString &name, const QVariant &value)
+    void SetDataInputValue(const QString &name, const QVariant &value,
+                           Q3DSDataInput::ValueRole property = Q3DSDataInput::ValueRole::Value)
     {
-        m_NDDView->SetDataInputValue(name, value);
+        m_NDDView->SetDataInputValue(name, value, property);
+    }
+    QList<QString> dataInputs() const
+    {
+        return m_NDDView->dataInputs();
+    }
+    float datainputMax(const QString &name) const
+    {
+        return m_NDDView->dataInputMax(name);
+    }
+    float datainputMin(const QString &name) const
+    {
+        return m_NDDView->dataInputMin(name);
     }
     void SetAttribute(const char *elementPath, const char *attributeName, const char *value)
     {

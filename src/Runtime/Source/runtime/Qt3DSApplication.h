@@ -37,6 +37,7 @@
 #include "Qt3DSKernelTypes.h"
 #include "Qt3DSMetadata.h"
 #include "QtQml/qjsengine.h"
+#include "q3dsdatainput.h"
 
 namespace Q3DStudio {
 class IRuntimeFactory;
@@ -233,6 +234,13 @@ public:
     virtual bool createSuccessful() = 0;
 
     virtual DataInputMap &dataInputMap() = 0;
+
+    virtual QList<QString> dataInputs() const = 0;
+
+    virtual float dataInputMax(const QString &name) const = 0;
+
+    virtual float dataInputMin(const QString &name) const = 0;
+
 };
 }
 }

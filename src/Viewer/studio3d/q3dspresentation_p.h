@@ -42,6 +42,7 @@
 //
 
 #include "q3dspresentation.h"
+#include "q3dscommandqueue_p.h"
 #include "Qt3DSViewerApp.h"
 #include <QtCore/QHash>
 #include <QtCore/QUrl>
@@ -77,8 +78,14 @@ public:
     void unregisterDataInput(Q3DSDataInput *dataInput);
     void unregisterAllDataInputs();
 
+    bool isValidDataInput(const Q3DSDataInput *dataInput) const;
+    float dataInputMin(const QString &name) const;
+    float dataInputMax(const QString &name) const;
+
     ViewerQmlStreamProxy *streamProxy();
     Q3DStudio::EKeyCode getScanCode(QKeyEvent *e);
+
+    void requestResponseHandler(CommandType commandType, void *requestData);
 
 public Q_SLOTS:
     void handleSlideEntered(const QString &elementPath, unsigned int index, const QString &name);

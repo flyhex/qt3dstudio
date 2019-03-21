@@ -484,7 +484,7 @@ struct SApp : public IApplication
 
     bool m_createSuccessful;
 
-    DataInputMap m_dataInputs;
+    DataInputMap m_dataInputDefs;
 
     QT3DSI32 mRefCount;
     SApp(Q3DStudio::IRuntimeFactoryCore &inFactory, const char8_t *inAppDir)
@@ -1175,7 +1175,7 @@ struct SApp : public IApplication
                         diDef.evaluator = QString::fromUtf8(evaluator);
                     }
 
-                    m_dataInputs.insert(QString::fromUtf8(name), diDef);
+                    m_dataInputDefs.insert(QString::fromUtf8(name), diDef);
                 } else if (AreEqual(assetName, "renderplugin")) {
                     const char8_t *pluginArgs = "";
                     inReader.UnregisteredAtt("args", pluginArgs);
@@ -1217,7 +1217,22 @@ struct SApp : public IApplication
 
     DataInputMap &dataInputMap() override
     {
-        return m_dataInputs;
+        return m_dataInputDefs;
+    }
+
+    QList<QString> dataInputs() const override
+    {
+        return m_dataInputDefs.keys();
+    }
+
+    float dataInputMax(const QString &name) const override
+    {
+        return m_dataInputDefs[name].max;
+    }
+
+    float dataInputMin(const QString &name) const override
+    {
+        return m_dataInputDefs[name].min;
     }
 
     struct SAppXMLErrorHandler : public qt3ds::foundation::CXmlErrorHandler

@@ -27,10 +27,10 @@
 **
 ****************************************************************************/
 
-#ifndef Q3DSDATAINPUT_P_H
-#define Q3DSDATAINPUT_P_H
+#ifndef Q3DSDATAINPUT_H
+#define Q3DSDATAINPUT_H
 
-#include <QtStudio3D/qstudio3dglobal.h>
+#include "qstudio3dglobal.h"
 #include <QtCore/qobject.h>
 #include <QtCore/qvariant.h>
 
@@ -46,7 +46,9 @@ class Q_STUDIO3D_EXPORT Q3DSDataInput : public QObject
 
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     Q_PROPERTY(QVariant value READ value WRITE setValue NOTIFY valueChanged)
-
+    // TODO: QML-side getter/setter for min and max
+    // Q_PROPERTY(float max READ max WRITE setMax NOTIFY maxChanged)
+    // Q_PROPERTY(float min READ min WRITE setMin NOTIFY minChanged)
 public:
     explicit Q3DSDataInput(QObject *parent = nullptr);
     explicit Q3DSDataInput(const QString &name, QObject *parent = nullptr);
@@ -55,16 +57,29 @@ public:
 
     virtual ~Q3DSDataInput();
 
+    enum class ValueRole {
+        Value,
+        Min,
+        Max
+    };
+
     QString name() const;
     QVariant value() const;
+    float min() const;
+    float max() const;
+    bool isValid() const;
 
 public Q_SLOTS:
     void setName(const QString &name);
     void setValue(const QVariant &value);
+    void setMin(float min);
+    void setMax(float max);
 
 Q_SIGNALS:
     void nameChanged();
     void valueChanged();
+    void minChanged();
+    void maxChanged();
 
 protected:
     explicit Q3DSDataInput(Q3DSDataInputPrivate *d, Q3DSPresentation *presentation,
@@ -73,10 +88,11 @@ protected:
 
 private:
     Q_DISABLE_COPY(Q3DSDataInput)
-
     friend class Q3DSPresentationPrivate;
 };
 
 QT_END_NAMESPACE
 
-#endif // Q3DSDATAINPUT_P_H
+Q_DECLARE_METATYPE(Q3DSDataInput*)
+
+#endif // Q3DSDATAINPUT_H

@@ -68,7 +68,8 @@ enum CommandType {
     CommandType_KeyRelease,
     CommandType_SetGlobalAnimationTime,
     CommandType_SetDataInputValue,
-    CommandType_RequestSlideInfo
+    CommandType_RequestSlideInfo,
+    CommandType_RequestDataInputs
 };
 
 class Q_STUDIO3D_EXPORT ElementCommand
@@ -99,6 +100,9 @@ public:
 
     ElementCommand &queueCommand(const QString &elementPath, CommandType commandType,
                                  const QString &attributeName, const QVariant &value);
+    ElementCommand &queueCommand(const QString &elementPath, CommandType commandType,
+                                 const QString &attributeName, const QVariant &value,
+                                 int intValue);
     ElementCommand &queueCommand(const QString &elementPath, CommandType commandType,
                                  const QString &value);
     ElementCommand &queueCommand(const QString &elementPath, CommandType commandType,

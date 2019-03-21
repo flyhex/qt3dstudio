@@ -38,7 +38,7 @@
 #include <QObject>
 
 #include "Qt3DSInputDefs.h"
-
+#include "q3dsdatainput.h"
 #include <QtGui/qsurfaceformat.h>
 
 namespace Q3DStudio {
@@ -348,7 +348,13 @@ public:
 
     void SetGlobalAnimationTime(qint64 inMilliSecs);
 
-    void SetDataInputValue(const QString &name, const QVariant &value);
+    void SetDataInputValue(const QString &name, const QVariant &value,
+                           Q3DSDataInput::ValueRole valueRole = Q3DSDataInput::ValueRole::Value);
+
+    QList<QString> dataInputs() const;
+
+    float dataInputMax(const QString &name) const;
+    float dataInputMin(const QString &name) const;
 
     QString error();
 
