@@ -65,6 +65,7 @@ public:
     ~Q3DSPresentationPrivate();
 
     void setSource(const QUrl &source);
+    void setVariantList(const QStringList &variantList);
     void setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool connectApp = true);
     void setCommandQueue(CommandQueue *queue);
 
@@ -91,6 +92,7 @@ private:
     ElementMap m_elements;
     DataInputMap m_dataInputs;
     QUrl m_source;
+    QStringList m_variantList;
     ViewerQmlStreamProxy *m_streamProxy;
 };
 

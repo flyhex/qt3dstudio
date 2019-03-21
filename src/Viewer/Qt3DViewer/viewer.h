@@ -47,6 +47,7 @@ class Viewer : public QObject
     Q_PROPERTY(int connectPort READ connectPort WRITE setConnectPort NOTIFY connectPortChanged)
     Q_PROPERTY(QString connectText READ connectText NOTIFY connectTextChanged)
     Q_PROPERTY(bool connected READ isConnected NOTIFY connectedChanged)
+    Q_PROPERTY(QStringList variantList READ variantList WRITE setVariantList NOTIFY variantListChanged)
 
 public:
     enum ContentView {
@@ -72,6 +73,8 @@ public:
     Q_INVOKABLE void handleMouseRelease(int x, int y, int button, int buttons, int modifiers);
     Q_INVOKABLE void handleMouseMove(int x, int y, int button, int buttons, int modifiers);
 
+    void setVariantList(const QStringList &variantList);
+    QStringList variantList() const;
     void setContentView(ContentView view);
     ContentView contentView() const;
     void setOpenFolder(const QUrl &folder);
@@ -104,12 +107,14 @@ Q_SIGNALS:
     void connectPortChanged();
     void connectTextChanged();
     void connectedChanged();
+    void variantListChanged();
     void showInfoOverlay(const QString &infoStr);
 
 private:
     Q3DSView *qmlStudio();
 
     QString m_openFileDir;
+    QStringList m_variantList;
     RemoteDeploymentReceiver *m_remoteDeploymentReceiver = nullptr;
     bool m_generatorMode = false;
     ContentView m_contentView = DefaultView;

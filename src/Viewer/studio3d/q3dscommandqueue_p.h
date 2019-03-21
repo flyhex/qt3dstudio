@@ -118,6 +118,7 @@ public:
     bool m_showRenderStatsChanged;
     bool m_matteColorChanged;
     bool m_sourceChanged;
+    bool m_variantListChanged;
     bool m_globalAnimationTimeChanged;
 
     bool m_visible;
@@ -126,6 +127,7 @@ public:
     bool m_showRenderStats;
     QColor m_matteColor;
     QUrl m_source;
+    QStringList m_variantList;
     qint64 m_globalAnimationTime;
 
     void clear();

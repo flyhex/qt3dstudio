@@ -95,6 +95,19 @@ void Viewer::disconnectRemote()
     m_remoteDeploymentReceiver->disconnectRemote();
 }
 
+void Viewer::setVariantList(const QStringList &variantList)
+{
+    if (m_variantList != variantList) {
+        m_variantList = variantList;
+        Q_EMIT variantListChanged();
+    }
+}
+
+QStringList Viewer::variantList() const
+{
+    return m_variantList;
+}
+
 // Used to load files via command line and when using remote deployment
 void Viewer::loadFile(const QString &filename)
 {
@@ -122,8 +135,10 @@ void Viewer::loadFile(const QString &filename)
 
     setContentView(StudioView);
 
-    if (qmlStudio())
+    if (qmlStudio()) {
+        qmlStudio()->presentation()->setVariantList(m_variantList);
         qmlStudio()->presentation()->setSource(sourceUrl);
+    }
 }
 
 QString Viewer::convertUrlListToFilename(const QList<QUrl> &list)

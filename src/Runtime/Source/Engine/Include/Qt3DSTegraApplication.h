@@ -153,7 +153,7 @@ public:
     virtual ~INDDView(){}
 
 public: // loading
-    virtual bool BeginLoad(const QString &sourcePath) = 0;
+    virtual bool BeginLoad(const QString &sourcePath, const QStringList &variantList) = 0;
     virtual bool HasOfflineLoadingCompleted() = 0;
     virtual bool InitializeGraphics(const QSurfaceFormat &format) = 0;
 
@@ -222,7 +222,7 @@ public:
                       IAudioPlayer *inAudioPlayer = 0);
     virtual ~CTegraApplication();
     // loading
-    bool BeginLoad(const QString &sourcePath);
+    bool BeginLoad(const QString &sourcePath, const QStringList &variantList);
     // asynchronous BeginLoad completed? That only valid for binary presentation, for text
     // presentation, always true
     bool HasOfflineLoadingCompleted() { return m_NDDView->HasOfflineLoadingCompleted(); }

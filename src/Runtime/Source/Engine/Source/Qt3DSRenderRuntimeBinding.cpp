@@ -958,7 +958,8 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
 
     Q3DStudio::IScene *LoadScene(Q3DStudio::IPresentation *inPresentation,
                                          Q3DStudio::IUIPParser *inParser,
-                                         Q3DStudio::IScriptBridge &inBridge) override
+                                         Q3DStudio::IScriptBridge &inBridge,
+                                         const qt3ds::Q3DSVariantConfig &variantConfig) override
     {
         // We have to initialize the tags late so that we can load flow data before adding anything
         // to the string table.
@@ -985,7 +986,8 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
                 m_Context->m_Context->GetRenderPluginManager(),
                 m_Context->m_Context->GetCustomMaterialSystem(),
                 m_Context->m_Context->GetDynamicObjectSystem(),
-                m_Context->m_Context->GetPathManager(), &theResolver, false);
+                m_Context->m_Context->GetPathManager(), &theResolver,
+                variantConfig, false);
             if (!theScene->m_Presentation) {
                 QT3DS_ASSERT(false);
                 return NULL;

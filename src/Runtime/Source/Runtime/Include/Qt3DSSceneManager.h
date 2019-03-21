@@ -48,6 +48,7 @@ namespace foundation {
 }
 
 namespace qt3ds {
+class Q3DSVariantConfig;
 namespace render {
     class IQt3DSRenderContextCore;
     class ILoadedBuffer;
@@ -109,7 +110,7 @@ struct FacePositionPlanes
 class ISceneManager : public qt3ds::foundation::NVRefCounted
 {
 protected:
-    virtual ~ISceneManager(){};
+    virtual ~ISceneManager(){}
 
 public: // Presentations
     //==============================================================================
@@ -121,7 +122,8 @@ public: // Presentations
      *	@param inPresentation		the current presentation loaded
      */
     virtual IScene *LoadScene(IPresentation *inPresentation, IUIPParser *inParser,
-                              IScriptBridge &inBridge) = 0;
+                              IScriptBridge &inBridge,
+                              const qt3ds::Q3DSVariantConfig &variantConfig) = 0;
     virtual void LoadRenderPlugin(const CHAR *inAssetIDString, const CHAR *inPath,
                                   const CHAR *inArgs) = 0;
 

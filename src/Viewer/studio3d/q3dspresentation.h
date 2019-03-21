@@ -48,12 +48,14 @@ class Q_STUDIO3D_EXPORT Q3DSPresentation : public QObject
     Q_OBJECT
     Q_DECLARE_PRIVATE(Q3DSPresentation)
     Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged)
+    Q_PROPERTY(QStringList variantList READ variantList WRITE setVariantList NOTIFY variantListChanged)
 
 public:
     explicit Q3DSPresentation(QObject *parent = nullptr);
     ~Q3DSPresentation();
 
     QUrl source() const;
+    QStringList variantList() const;
 
     void registerElement(Q3DSElement *scene);
     void unregisterElement(Q3DSElement *scene);
@@ -73,6 +75,7 @@ public:
 
 public Q_SLOTS:
     void setSource(const QUrl &source);
+    void setVariantList(const QStringList &variantList);
     void goToSlide(const QString &elementPath, unsigned int index);
     void goToSlide(const QString &elementPath, const QString &name);
     void goToSlide(const QString &elementPath, bool next, bool wrap);
@@ -85,6 +88,7 @@ public Q_SLOTS:
     void setDataInputValue(const QString &name, const QVariant &value);
 
 Q_SIGNALS:
+    void variantListChanged(const QStringList &variantList);
     void sourceChanged(const QUrl &source);
     void slideEntered(const QString &elementPath, unsigned int index, const QString &name);
     void slideExited(const QString &elementPath, unsigned int index, const QString &name);

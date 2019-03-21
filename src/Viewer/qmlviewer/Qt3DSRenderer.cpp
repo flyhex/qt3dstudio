@@ -88,9 +88,11 @@ void Q3DSRenderer::synchronize(QQuickFramebufferObject *inView)
     if (m_initializationFailure)
         static_cast<Q3DSView *>(inView)->setError(m_error);
 
-    if (m_commands.m_sourceChanged) {
+    if (m_commands.m_sourceChanged || m_commands.m_variantListChanged) {
         releaseRuntime();
-        // Need to update source here rather than processCommands, as source is needed for init
+        // Need to update source and variant list here rather than
+        // processCommands, as both are needed for init
+        m_presentation->setVariantList(m_commands.m_variantList);
         m_presentation->setSource(m_commands.m_source);
         m_initialized = false;
         m_initializationFailure = false;
@@ -176,8 +178,11 @@ bool Q3DSRenderer::initializeRuntime(QOpenGLFramebufferObject *inFbo)
 
     const QString localSource = Q3DSUtils::urlToLocalFileOrQrc(m_presentation->source());
 
-    if (!m_runtime->InitializeApp(theWidth, theHeight, QOpenGLContext::currentContext()->format(),
-                                  inFbo->handle(), localSource, m_visitor)) {
+    if (!m_runtime->InitializeApp(theWidth, theHeight,
+                                  QOpenGLContext::currentContext()->format(),
+                                  inFbo->handle(), localSource,
+                                  m_presentation->variantList(),
+                                  m_visitor)) {
         m_error = m_runtime->error();
         releaseRuntime();
         return false;

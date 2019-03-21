@@ -57,6 +57,11 @@ QUrl Q3DSPresentation::source() const
     return d_ptr->m_source;
 }
 
+QStringList Q3DSPresentation::variantList() const
+{
+    return d_ptr->m_variantList;
+}
+
 void Q3DSPresentation::registerElement(Q3DSElement *element)
 {
     d_ptr->registerElement(element);
@@ -92,6 +97,14 @@ void Q3DSPresentation::setSource(const QUrl &source)
     if (d_ptr->m_source != source) {
         d_ptr->setSource(source);
         Q_EMIT sourceChanged(source);
+    }
+}
+
+void Q3DSPresentation::setVariantList(const QStringList &variantList)
+{
+    if (d_ptr->m_variantList != variantList) {
+        d_ptr->setVariantList(variantList);
+        Q_EMIT variantListChanged(variantList);
     }
 }
 
@@ -314,6 +327,15 @@ void Q3DSPresentationPrivate::setSource(const QUrl &source)
     }
 }
 
+void Q3DSPresentationPrivate::setVariantList(const QStringList &variantList)
+{
+    m_variantList = variantList;
+    if (m_commandQueue) {
+        m_commandQueue->m_variantListChanged = true;
+        m_commandQueue->m_variantList = variantList;
+    }
+}
+
 void Q3DSPresentationPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool connectApp)
 {
     Q3DSViewer::Q3DSViewerApp *oldApp = m_viewerApp;
@@ -353,8 +375,10 @@ void Q3DSPresentationPrivate::setCommandQueue(CommandQueue *queue)
     for (Q3DSDataInput *di : dataInputs)
         di->d_ptr->setCommandQueue(queue);
 
-    if (m_commandQueue)
+    if (m_commandQueue) {
         setSource(m_source);
+        setVariantList(m_variantList);
+    }
 }
 
 // Doc note: The ownership of the registered scenes remains with the caller, who needs to

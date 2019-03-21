@@ -170,7 +170,7 @@ public:
 
     QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE_OVERRIDE(qt3ds::render::g_BaseAllocator);
 
-    bool BeginLoad(const QString &sourcePath) override;
+    bool BeginLoad(const QString &sourcePath, const QStringList &variantList) override;
     bool HasOfflineLoadingCompleted() override;
     bool InitializeGraphics(const QSurfaceFormat &format) override;
 
@@ -233,7 +233,7 @@ CNDDView::~CNDDView()
 {
 }
 
-bool CNDDView::BeginLoad(const QString &sourcePath)
+bool CNDDView::BeginLoad(const QString &sourcePath, const QStringList &variantList)
 {
     bool theResult = false;
 
@@ -241,7 +241,7 @@ bool CNDDView::BeginLoad(const QString &sourcePath)
     BootupPreGraphicsInitObjects();
 
     // If there was a presentation file then we have to load it or something failed.
-    if (m_ApplicationCore->BeginLoad(sourcePath.toUtf8()))
+    if (m_ApplicationCore->BeginLoad(sourcePath.toUtf8(), variantList))
         theResult = true;
     else
         theResult = false;
@@ -692,7 +692,7 @@ CTegraApplication::~CTegraApplication()
 {
 }
 
-bool CTegraApplication::BeginLoad(const QString &sourcePath)
+bool CTegraApplication::BeginLoad(const QString &sourcePath, const QStringList &variantList)
 {
 #ifndef QT3DS_NO_SEARCH_PATH
     // We need these later on in case we try to load any files
@@ -708,7 +708,7 @@ bool CTegraApplication::BeginLoad(const QString &sourcePath)
 
     if (!sourcePath.isEmpty()) {
         // If there was a presentation file then we have to load it or something failed.
-        if (m_NDDView->BeginLoad(sourcePath)) {
+        if (m_NDDView->BeginLoad(sourcePath, variantList)) {
             qCInfo(TRACE_INFO)
                     << "CTegraApplication::BeginLoad: Successfully begin loading presentation: "
                     << sourcePath;

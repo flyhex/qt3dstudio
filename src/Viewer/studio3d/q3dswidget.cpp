@@ -34,6 +34,7 @@
 #include "q3dsviewersettings_p.h"
 #include "q3dspresentation_p.h"
 #include "studioutils_p.h"
+#include "q3dsvariantconfig_p.h"
 
 #include <QtGui/qevent.h>
 #include <QtGui/qopenglcontext.h>
@@ -282,6 +283,7 @@ bool Q3DSWidgetPrivate::initializeRuntime()
                                     int(q_ptr->height() * m_pixelRatio),
                                     q_ptr->context()->format(),
                                     q_ptr->defaultFramebufferObject(), localSource,
+                                    m_presentation->variantList(),
                                     m_presentation->d_ptr->streamProxy())) {
         releaseRuntime();
         qWarning("Failed to initialize runtime");

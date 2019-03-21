@@ -302,6 +302,7 @@ void Q3DSViewerApp::setOffscreenId(int offscreenID)
 
 bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFormat &format,
                                  int offscreenID, const QString &source,
+                                 const QStringList &variantList,
                                  qt3ds::Qt3DSAssetVisitor *assetVisitor)
 {
     bool hasValidPresentationFile = !source.isEmpty();
@@ -332,7 +333,7 @@ bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFor
         if (assetVisitor)
             m_Impl.m_tegraApp->getNDDView()->setAssetVisitor(assetVisitor);
 
-        m_Impl.m_appInitSuccessful = m_Impl.m_tegraApp->BeginLoad(source) ? true : false;
+        m_Impl.m_appInitSuccessful = m_Impl.m_tegraApp->BeginLoad(source, variantList);
 
         // Simulate killing the application during loading.  Useful for finding serious issues with
         // loading.

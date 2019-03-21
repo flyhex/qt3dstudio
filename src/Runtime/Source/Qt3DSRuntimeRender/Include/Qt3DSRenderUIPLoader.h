@@ -38,6 +38,7 @@
 #include <EASTL/utility.h>
 #include "foundation/Qt3DSContainers.h"
 #include "Qt3DSRenderGraphObject.h"
+#include <QtCore/qstring.h>
 
 namespace Q3DStudio {
 class IRuntimeMetaData;
@@ -50,6 +51,8 @@ struct SMetaDataCustomMaterial;
 }
 
 namespace qt3ds {
+class Q3DSVariantConfig;
+
 namespace render {
 
     class IBufferManager;
@@ -102,6 +105,10 @@ namespace render {
                     // its normal mode of operation so we try to reuse that code.
                     ,
                     IUIPReferenceResolver *inResolver
+                    // Variant config defines variant groups and tags to be used to filter out
+                    // unneeded parts of the presentation
+                    ,
+                    const Q3DSVariantConfig &variantConfig
                     // Set some initial values by going to the master slide then slide 1
                     // Useful for quick testing, sort of equivalent to showing the first frame
                     // of a given presentation

@@ -134,7 +134,8 @@ public:
     virtual void DisableStateMachine() = 0;
 
     // nonblocking call to begin loading, loads uia file alone and returns.
-    virtual bool BeginLoad(const char8_t *inFilePath) = 0;
+    virtual bool BeginLoad(const QString &sourcePath, const QStringList &variantList) = 0;
+
     // blocking call to end all loading threads and such/wait till finished
     virtual void EndLoad() = 0;
     // Will EndLoad cause nontrivial blocking.

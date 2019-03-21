@@ -115,6 +115,7 @@ public:
      */
     bool InitializeApp(int winWidth, int winHeight, const QSurfaceFormat& format,
                        int offscreenID, const QString &source,
+                       const QStringList &variantList,
                        qt3ds::Qt3DSAssetVisitor *assetVisitor = nullptr);
 
     bool IsInitialised(void);

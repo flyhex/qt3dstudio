@@ -161,6 +161,8 @@ void Q3DSView::reset()
     // Fake a source change to trigger a reloading of the presentation
     m_pendingCommands.m_sourceChanged = true;
     m_pendingCommands.m_source = m_presentation->source();
+    m_pendingCommands.m_variantListChanged = true;
+    m_pendingCommands.m_variantList = m_presentation->variantList();
 }
 
 void Q3DSView::requestResponseHandler(const QString &elementPath, CommandType commandType,

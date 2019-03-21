@@ -48,6 +48,7 @@ CommandQueue::CommandQueue()
     , m_showRenderStatsChanged(false)
     , m_matteColorChanged(false)
     , m_sourceChanged(false)
+    , m_variantListChanged(false)
     , m_globalAnimationTimeChanged(false)
     , m_visible(false)
     , m_scaleMode(Q3DSViewerSettings::ScaleModeCenter)
@@ -144,6 +145,7 @@ void CommandQueue::copyCommands(const CommandQueue &fromQueue)
     m_showRenderStatsChanged = m_showRenderStatsChanged || fromQueue.m_showRenderStatsChanged;
     m_matteColorChanged = m_matteColorChanged || fromQueue.m_matteColorChanged;
     m_sourceChanged = m_sourceChanged || fromQueue.m_sourceChanged;
+    m_variantListChanged = m_variantListChanged || fromQueue.m_variantListChanged;
     m_globalAnimationTimeChanged
             = m_globalAnimationTimeChanged || fromQueue.m_globalAnimationTimeChanged;
 
@@ -159,6 +161,8 @@ void CommandQueue::copyCommands(const CommandQueue &fromQueue)
        m_matteColor = fromQueue.m_matteColor;
     if (fromQueue.m_sourceChanged)
        m_source = fromQueue.m_source;
+    if (fromQueue.m_variantListChanged)
+       m_variantList = fromQueue.m_variantList;
     if (fromQueue.m_globalAnimationTimeChanged)
         m_globalAnimationTime = fromQueue.m_globalAnimationTime;
 
@@ -215,6 +219,7 @@ void CommandQueue::clear()
     m_showRenderStatsChanged = false;
     m_matteColorChanged = false;
     m_sourceChanged = false;
+    m_variantListChanged = false;
     m_globalAnimationTimeChanged = false;
 
     // We do not clear the actual queued commands, those will be reused the next frame

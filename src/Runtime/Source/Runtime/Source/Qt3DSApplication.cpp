@@ -82,6 +82,7 @@
 #include <QtCore/qlibraryinfo.h>
 #include <QtCore/qpair.h>
 #include <QtCore/qdir.h>
+#include "q3dsvariantconfig_p.h"
 
 using namespace qt3ds;
 using namespace qt3ds::runtime;
@@ -444,6 +445,7 @@ struct SApp : public IApplication
     Q3DStudio::INT32 m_FrameCount;
     // the name of the file without extension.
     eastl::string m_Filename;
+    Q3DSVariantConfig m_variantConfig;
 
     qt3ds::foundation::NVScopedReleasable<IRuntimeMetaData> m_MetaData;
     nvvector<eastl::pair<SBehaviorAsset, bool>> m_Behaviors;
@@ -1069,7 +1071,8 @@ struct SApp : public IApplication
                 // Load the scene graph portion of the scene.
                 newScene = m_RuntimeFactory->GetSceneManager().LoadScene(
                             thePresentation, theUIPParser.mPtr,
-                            m_CoreFactory->GetScriptEngineQml());
+                            m_CoreFactory->GetScriptEngineQml(),
+                            m_variantConfig);
             }
 
             if (newScene == NULL) {
@@ -1288,13 +1291,13 @@ struct SApp : public IApplication
         }
     }
 
-    bool BeginLoad(const char8_t *inFilePath) override
+    virtual bool BeginLoad(const QString &sourcePath, const QStringList &variantList) override
     {
         SStackPerfTimer __loadTimer(m_CoreFactory->GetPerfTimer(), "Application: Begin Load");
         eastl::string directory;
         eastl::string filename;
         eastl::string extension;
-        CFileTools::Split(inFilePath, directory, filename, extension);
+        CFileTools::Split(sourcePath.toUtf8().constData(), directory, filename, extension);
         eastl::string projectDirectory(directory);
 
         m_ProjectDir.assign(projectDirectory.c_str());
@@ -1319,6 +1322,7 @@ struct SApp : public IApplication
                         m_CoreFactory->GetRenderContextCore().GetPerfTimer());
         }
         m_Filename = filename;
+        m_variantConfig.setVariantList(variantList);
         bool retval = false;
         if (extension.comparei("uip") == 0) {
 #if !defined(_LINUXPLATFORM) && !defined(_INTEGRITYPLATFORM)
@@ -1339,27 +1343,28 @@ struct SApp : public IApplication
 #if !defined(_LINUXPLATFORM) && !defined(_INTEGRITYPLATFORM)
             ConnectDebugger();
 #endif
-            CFileSeekableIOStream inputStream(inFilePath, FileReadFlags());
+            CFileSeekableIOStream inputStream(sourcePath, FileReadFlags());
             if (inputStream.IsOpen()) {
                 NVScopedRefCounted<IStringTable> strTable(
                             IStringTable::CreateStringTable(fnd.getAllocator()));
                 NVScopedRefCounted<IDOMFactory> domFactory(
                             IDOMFactory::CreateDOMFactory(fnd.getAllocator(), strTable));
-                SAppXMLErrorHandler errorHandler(fnd, inFilePath);
+                SAppXMLErrorHandler errorHandler(fnd, sourcePath.toUtf8().constData());
                 eastl::pair<SNamespacePairNode *, SDOMElement *> readResult =
                         CDOMSerializer::Read(*domFactory, inputStream, &errorHandler);
                 if (!readResult.second) {
                     qCCritical(INVALID_PARAMETER, "%s doesn't appear to be valid xml",
-                               inFilePath);
+                               sourcePath.toUtf8().constData());
                 } else {
                     NVScopedRefCounted<IDOMReader> domReader = IDOMReader::CreateDOMReader(
                                 fnd.getAllocator(), *readResult.second, strTable, domFactory);
                     if (m_visitor)
-                        m_visitor->visit(inFilePath);
+                        m_visitor->visit(sourcePath.toUtf8().constData());
                     retval = LoadUIA(*domReader, fnd);
                 }
             } else {
-                qCCritical(INVALID_PARAMETER, "Unable to open input file %s", inFilePath);
+                qCCritical(INVALID_PARAMETER, "Unable to open input file %s",
+                           sourcePath.toUtf8().constData());
             }
         } else {
             QT3DS_ASSERT(false);
@@ -1717,8 +1722,8 @@ struct SXMLLoader : public IAppLoadContext
                 if (!m_App.LoadUIP(thePresentationAsset,
                                    toConstDataRef(theUIPReferences.data(),
                                                   (QT3DSU32)theUIPReferences.size()))) {
-                    qCWarning(INVALID_OPERATION, "Unable to load presentation %s",
-                              thePathStr.c_str());
+                    qCCritical(INVALID_OPERATION, "Unable to load presentation %s",
+                               thePathStr.c_str());
                 }
             } break;
             case AssetValueTypes::Behavior: {

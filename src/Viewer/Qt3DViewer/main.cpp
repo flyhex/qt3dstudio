@@ -208,6 +208,14 @@ int main(int argc, char *argv[])
                       "The default value is 'center'."),
                       QCoreApplication::translate("main", "center|fit|fill"),
                       QStringLiteral("center")});
+    QCommandLineOption variantListOption({QStringLiteral("v"),
+                                          QStringLiteral("variants")},
+                                          QObject::tr("Gives list of variant groups and variants\n"
+                                                      "to be loaded from the presentation.\n"
+                                                      "For example VarGroupA:var1,VarGroupB:var4"),
+                                         QStringLiteral("variants"));
+    parser.addOption(variantListOption);
+
     parser.process(a);
 
     const QStringList files = parser.positionalArguments();
@@ -221,6 +229,13 @@ int main(int argc, char *argv[])
             || parser.isSet("seq-interval") || parser.isSet("seq-width")
             || parser.isSet("seq-height") || parser.isSet("seq-outpath")
             || parser.isSet("seq-outfile");
+
+    QStringList variantList;
+    if (parser.isSet(variantListOption)) {
+        QString variantOption = parser.value(variantListOption);
+        variantList = variantOption.split(QLatin1Char(','),
+                                          QString::SkipEmptyParts);
+    }
 
 #ifndef Q_OS_ANDROID
     Q3DSImageSequenceGenerator *generator = nullptr;
@@ -319,6 +334,8 @@ int main(int argc, char *argv[])
         else
             appWindow->setProperty("scaleMode", Q3DSViewerSettings::ScaleModeCenter);
     }
+
+    viewer.setVariantList(variantList);
 
 #ifndef Q_OS_ANDROID
     if (generateSequence) {

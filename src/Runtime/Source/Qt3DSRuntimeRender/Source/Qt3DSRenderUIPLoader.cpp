@@ -76,6 +76,7 @@
 #include "Qt3DSRenderPath.h"
 #include "Qt3DSRenderPathSubPath.h"
 #include "Qt3DSRenderPathManager.h"
+#include "q3dsvariantconfig_p.h"
 
 using qt3ds::foundation::Option;
 using qt3ds::foundation::Empty;
@@ -471,6 +472,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
     MemoryBuffer<RawAllocator> m_TempBuffer;
     MemoryBuffer<RawAllocator> m_ValueBuffer;
     TIdPathAnchorIndexMap m_AnchorIdToPathAndAnchorIndexMap;
+    const Q3DSVariantConfig &m_variantConfig;
 
     SRenderUIPLoader(qt3dsdm::IDOMReader &inReader, const char8_t *inFullPathToPresentationFile,
                      Q3DStudio::IRuntimeMetaData &inMetaData, IStringTable &inStrTable
@@ -487,7 +489,8 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                      qt3ds::render::IRenderPluginManager &inRPM,
                      qt3ds::render::ICustomMaterialSystem &inCMS,
                      qt3ds::render::IDynamicObjectSystem &inDynamicSystem,
-                     qt3ds::render::IPathManager &inPathManager, IUIPReferenceResolver *inResolver)
+                     qt3ds::render::IPathManager &inPathManager, IUIPReferenceResolver *inResolver,
+                     const Q3DSVariantConfig &variantConfig)
         : m_Reader(inReader)
         , m_MetaData(inMetaData)
         , m_StrTable(inStrTable)
@@ -504,6 +507,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
         , m_DynamicObjectSystem(inDynamicSystem)
         , m_PathManager(inPathManager)
         , m_ReferenceResolver(inResolver)
+        , m_variantConfig(variantConfig)
     {
         std::string presentationFile = inFullPathToPresentationFile;
         std::string::size_type pos = presentationFile.find_last_of("\\/");
@@ -668,6 +672,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
 #define Node_LocalOpacity "opacity"
 #define Node_RotationOrder "rotationorder"
 #define Node_LeftHanded "orientation"
+#define Layer_Variants "variants"
 #define Layer_TemporalAAEnabled "temporalaa"
 #define Layer_LayerEnableDepthTest "disabledepthtest"
 #define Layer_LayerEnableDepthPrePass "disabledepthprepass"
@@ -1175,103 +1180,111 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
             qt3dsdm::ComposerObjectTypes::Convert(m_Reader.GetElementName());
         SGraphObject *theNewObject(NULL);
         const char8_t *theId;
+        const char8_t *theVariants;
         m_Reader.Att("id", theId);
+        m_Reader.Att("variants", theVariants);
 
-        switch (theObjType) {
-        case qt3dsdm::ComposerObjectTypes::Scene: {
-            SScene *theScene = QT3DS_NEW(m_PresentationAllocator, SScene)();
-            theNewObject = theScene;
-            m_Presentation->m_Scene = theScene;
-            theScene->m_Presentation = m_Presentation;
-        } break;
-        case qt3dsdm::ComposerObjectTypes::Layer:
-            theNewObject = QT3DS_NEW(m_PresentationAllocator, SLayer)();
-            break;
-        case qt3dsdm::ComposerObjectTypes::Group:
-            theNewObject = QT3DS_NEW(m_PresentationAllocator, SNode)();
-            break;
-        case qt3dsdm::ComposerObjectTypes::Component:
-            theNewObject = QT3DS_NEW(m_PresentationAllocator, SNode)();
-            break;
-        case qt3dsdm::ComposerObjectTypes::Camera:
-            theNewObject = QT3DS_NEW(m_PresentationAllocator, SCamera)();
-            break;
-        case qt3dsdm::ComposerObjectTypes::Light:
-            theNewObject = QT3DS_NEW(m_PresentationAllocator, SLight)();
-            break;
-        case qt3dsdm::ComposerObjectTypes::Model:
-            theNewObject = QT3DS_NEW(m_PresentationAllocator, SModel)();
-            break;
-        case qt3dsdm::ComposerObjectTypes::Material:
-            theNewObject = QT3DS_NEW(m_PresentationAllocator, SDefaultMaterial)();
-            break;
-        case qt3dsdm::ComposerObjectTypes::ReferencedMaterial:
-            theNewObject = QT3DS_NEW(m_PresentationAllocator, SReferencedMaterial)();
-            break;
-        case qt3dsdm::ComposerObjectTypes::Image:
-            theNewObject = QT3DS_NEW(m_PresentationAllocator, SImage)();
-            break;
-        case qt3dsdm::ComposerObjectTypes::Text:
-            theNewObject = QT3DS_NEW(m_PresentationAllocator, SText)();
-            break;
-        case qt3dsdm::ComposerObjectTypes::Path:
-            theNewObject = QT3DS_NEW(m_PresentationAllocator, SPath)();
-            break;
-        case qt3dsdm::ComposerObjectTypes::SubPath: {
-            SPathSubPath *thePath = QT3DS_NEW(m_PresentationAllocator, SPathSubPath)();
-            theNewObject = thePath;
-            QT3DSU32 anchorCount = 0;
-            TScope _childScope(m_Reader);
-            for (bool success = m_Reader.MoveToFirstChild("PathAnchorPoint"); success;
-                 success = m_Reader.MoveToNextSibling("PathAnchorPoint")) {
-                const char8_t *theId;
-                m_Reader.Att("id", theId);
-                CRegisteredString theIdStr = m_StrTable.RegisterStr(theId);
-                m_AnchorIdToPathAndAnchorIndexMap.insert(
-                    eastl::make_pair(theIdStr, SPathAndAnchorIndex(thePath, anchorCount)));
-                ++anchorCount;
-            }
-            m_PathManager.ResizePathSubPathBuffer(*thePath, anchorCount);
-        } break;
-        case qt3dsdm::ComposerObjectTypes::Effect: {
-            const char8_t *effectClassId;
-            m_Reader.Att("class", effectClassId);
-            CRegisteredString theStr = m_StrTable.RegisterStr(effectClassId + 1);
-            if (m_EffectSystem.IsEffectRegistered(theStr))
-                theNewObject = m_EffectSystem.CreateEffectInstance(theStr, m_PresentationAllocator);
-        } break;
-        case qt3dsdm::ComposerObjectTypes::RenderPlugin: {
-            const char8_t *classId;
-            m_Reader.Att("class", classId);
-            if (!qt3ds::foundation::isTrivial(classId)) {
-                ++classId;
-                TIdStringMap::iterator iter =
-                    m_RenderPluginSourcePaths.find(m_StrTable.RegisterStr(classId));
-                if (iter != m_RenderPluginSourcePaths.end()) {
-                    CRegisteredString thePluginPath = m_StrTable.RegisterStr(iter->second.c_str());
-                    qt3ds::render::IRenderPluginClass *theClass =
-                        m_RenderPluginManager.GetRenderPlugin(thePluginPath);
-                    if (theClass) {
-                        qt3ds::render::SRenderPlugin *thePlugin =
-                            QT3DS_NEW(m_PresentationAllocator, qt3ds::render::SRenderPlugin)();
-                        thePlugin->m_PluginPath = thePluginPath;
-                        thePlugin->m_Flags.SetActive(true);
-                        theNewObject = thePlugin;
+        QString theString(theVariants);
+        QStringRef theStringRef(&theString);
+        bool isPartOfConfig = m_variantConfig.isPartOfConfig(theStringRef);
+        if (isPartOfConfig) {
+            switch (theObjType) {
+            case qt3dsdm::ComposerObjectTypes::Scene: {
+                SScene *theScene = QT3DS_NEW(m_PresentationAllocator, SScene)();
+                theNewObject = theScene;
+                m_Presentation->m_Scene = theScene;
+                theScene->m_Presentation = m_Presentation;
+            } break;
+            case qt3dsdm::ComposerObjectTypes::Layer:
+                theNewObject = QT3DS_NEW(m_PresentationAllocator, SLayer)();
+                break;
+            case qt3dsdm::ComposerObjectTypes::Group:
+                theNewObject = QT3DS_NEW(m_PresentationAllocator, SNode)();
+                break;
+            case qt3dsdm::ComposerObjectTypes::Component:
+                theNewObject = QT3DS_NEW(m_PresentationAllocator, SNode)();
+                break;
+            case qt3dsdm::ComposerObjectTypes::Camera:
+                theNewObject = QT3DS_NEW(m_PresentationAllocator, SCamera)();
+                break;
+            case qt3dsdm::ComposerObjectTypes::Light:
+                theNewObject = QT3DS_NEW(m_PresentationAllocator, SLight)();
+                break;
+            case qt3dsdm::ComposerObjectTypes::Model:
+                theNewObject = QT3DS_NEW(m_PresentationAllocator, SModel)();
+                break;
+            case qt3dsdm::ComposerObjectTypes::Material:
+                theNewObject = QT3DS_NEW(m_PresentationAllocator, SDefaultMaterial)();
+                break;
+            case qt3dsdm::ComposerObjectTypes::ReferencedMaterial:
+                theNewObject = QT3DS_NEW(m_PresentationAllocator, SReferencedMaterial)();
+                break;
+            case qt3dsdm::ComposerObjectTypes::Image:
+                theNewObject = QT3DS_NEW(m_PresentationAllocator, SImage)();
+                break;
+            case qt3dsdm::ComposerObjectTypes::Text:
+                theNewObject = QT3DS_NEW(m_PresentationAllocator, SText)();
+                break;
+            case qt3dsdm::ComposerObjectTypes::Path:
+                theNewObject = QT3DS_NEW(m_PresentationAllocator, SPath)();
+                break;
+            case qt3dsdm::ComposerObjectTypes::SubPath: {
+                SPathSubPath *thePath = QT3DS_NEW(m_PresentationAllocator, SPathSubPath)();
+                theNewObject = thePath;
+                QT3DSU32 anchorCount = 0;
+                TScope _childScope(m_Reader);
+                for (bool success = m_Reader.MoveToFirstChild("PathAnchorPoint"); success;
+                     success = m_Reader.MoveToNextSibling("PathAnchorPoint")) {
+                    const char8_t *theId;
+                    m_Reader.Att("id", theId);
+                    CRegisteredString theIdStr = m_StrTable.RegisterStr(theId);
+                    m_AnchorIdToPathAndAnchorIndexMap.insert(
+                        eastl::make_pair(theIdStr, SPathAndAnchorIndex(thePath, anchorCount)));
+                    ++anchorCount;
+                }
+                m_PathManager.ResizePathSubPathBuffer(*thePath, anchorCount);
+            } break;
+            case qt3dsdm::ComposerObjectTypes::Effect: {
+                const char8_t *effectClassId;
+                m_Reader.Att("class", effectClassId);
+                CRegisteredString theStr = m_StrTable.RegisterStr(effectClassId + 1);
+                if (m_EffectSystem.IsEffectRegistered(theStr))
+                    theNewObject = m_EffectSystem.CreateEffectInstance(theStr, m_PresentationAllocator);
+            } break;
+            case qt3dsdm::ComposerObjectTypes::RenderPlugin: {
+                const char8_t *classId;
+                m_Reader.Att("class", classId);
+                if (!qt3ds::foundation::isTrivial(classId)) {
+                    ++classId;
+                    TIdStringMap::iterator iter =
+                        m_RenderPluginSourcePaths.find(m_StrTable.RegisterStr(classId));
+                    if (iter != m_RenderPluginSourcePaths.end()) {
+                        CRegisteredString thePluginPath = m_StrTable.RegisterStr(iter->second.c_str());
+                        qt3ds::render::IRenderPluginClass *theClass =
+                            m_RenderPluginManager.GetRenderPlugin(thePluginPath);
+                        if (theClass) {
+                            qt3ds::render::SRenderPlugin *thePlugin =
+                                QT3DS_NEW(m_PresentationAllocator, qt3ds::render::SRenderPlugin)();
+                            thePlugin->m_PluginPath = thePluginPath;
+                            thePlugin->m_Flags.SetActive(true);
+                            theNewObject = thePlugin;
+                        }
                     }
                 }
+            } break;
+            case qt3dsdm::ComposerObjectTypes::CustomMaterial: {
+                const char8_t *materialClassId;
+                m_Reader.Att("class", materialClassId);
+                CRegisteredString theStr = m_StrTable.RegisterStr(materialClassId + 1);
+                if (m_CustomMaterialSystem.IsMaterialRegistered(theStr)) {
+                    theNewObject =
+                        m_CustomMaterialSystem.CreateCustomMaterial(theStr, m_PresentationAllocator);
+                }
+            } break;
+            default:
+                // Ignoring unknown objects entirely at this point
+                break;
             }
-        } break;
-        case qt3dsdm::ComposerObjectTypes::CustomMaterial: {
-            const char8_t *materialClassId;
-            m_Reader.Att("class", materialClassId);
-            CRegisteredString theStr = m_StrTable.RegisterStr(materialClassId + 1);
-            if (m_CustomMaterialSystem.IsMaterialRegistered(theStr))
-                theNewObject =
-                    m_CustomMaterialSystem.CreateCustomMaterial(theStr, m_PresentationAllocator);
-        } break;
-        default:
-            // Ignoring unknown objects entirely at this point
-            break;
         }
         if (theNewObject) {
             CRegisteredString theObjectId(m_StrTable.RegisterStr(theId));
@@ -1385,9 +1398,15 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                  valid = m_Reader.MoveToNextSibling())
                 ParseGraphPass1(theNewObject);
         } else {
-            for (bool valid = m_Reader.MoveToFirstChild(); valid;
-                 valid = m_Reader.MoveToNextSibling())
-                ParseGraphPass1(NULL);
+            if (isPartOfConfig) {
+                // Object was of unknown type -> parse children with NULL parent
+                for (bool valid = m_Reader.MoveToFirstChild(); valid;
+                     valid = m_Reader.MoveToNextSibling()) {
+                    ParseGraphPass1(NULL);
+                }
+            }
+            // If object wasn't part of variant config -> skip children.
+            // Continue parsing from next sibling with same parent.
         }
     }
 
@@ -1411,64 +1430,76 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
         const char8_t *theId;
         m_Reader.Att("id", theId);
         const char8_t *theClass = "";
+        const char8_t *theVariants = "";
         m_Reader.Att("class", theClass);
-        TIdObjectMap::iterator theObject = m_ObjectMap.find(m_StrTable.RegisterStr(theId));
-        if (theObject != m_ObjectMap.end()) {
-            switch (theObject->second->m_Type) {
-            case GraphObjectTypes::Scene:
-                ParsePass2Properties(*static_cast<SScene *>(theObject->second), theClass);
-                break;
-            case GraphObjectTypes::Node:
-                ParsePass2Properties(*static_cast<SNode *>(theObject->second), theClass);
-                break;
-            case GraphObjectTypes::Layer:
-                ParsePass2Properties(*static_cast<SLayer *>(theObject->second), theClass);
-                break;
-            case GraphObjectTypes::Camera:
-                ParsePass2Properties(*static_cast<SCamera *>(theObject->second), theClass);
-                break;
-            case GraphObjectTypes::Light:
-                ParsePass2Properties(*static_cast<SLight *>(theObject->second), theClass);
-                break;
-            case GraphObjectTypes::Model:
-                ParsePass2Properties(*static_cast<SModel *>(theObject->second), theClass);
-                break;
-            case GraphObjectTypes::DefaultMaterial:
-                ParsePass2Properties(*static_cast<SDefaultMaterial *>(theObject->second), theClass);
-                break;
-            case GraphObjectTypes::ReferencedMaterial:
-                ParsePass2Properties(*static_cast<SReferencedMaterial *>(theObject->second),
-                                     theClass);
-                break;
-            case GraphObjectTypes::Image:
-                ParsePass2Properties(*static_cast<SImage *>(theObject->second), theClass);
-                break;
-            case GraphObjectTypes::Text:
-                ParsePass2Properties(*static_cast<SText *>(theObject->second), theClass);
-                break;
-            case GraphObjectTypes::Effect:
-                ParsePass2Properties(*static_cast<SEffect *>(theObject->second), theClass);
-                break;
-            case GraphObjectTypes::RenderPlugin:
-                ParsePass2Properties(*static_cast<qt3ds::render::SRenderPlugin *>(theObject->second),
-                                     theClass);
-                break;
-            case GraphObjectTypes::CustomMaterial:
-                ParsePass2Properties(*static_cast<SCustomMaterial *>(theObject->second), theClass);
-                break;
-            case GraphObjectTypes::Path:
-                ParsePass2Properties(*static_cast<SPath *>(theObject->second), theClass);
-                break;
-            case GraphObjectTypes::PathSubPath:
-                ParsePass2Properties(*static_cast<SPathSubPath *>(theObject->second), theClass);
-                break;
-            default:
-                QT3DS_ASSERT(false);
-                break;
+        m_Reader.Att("variants", theVariants);
+
+        QString theString(theVariants);
+        QStringRef theStringRef(&theString);
+        bool isPartOfConfig = m_variantConfig.isPartOfConfig(theStringRef);
+        if (isPartOfConfig) {
+            TIdObjectMap::iterator theObject = m_ObjectMap.find(m_StrTable.RegisterStr(theId));
+            if (theObject != m_ObjectMap.end()) {
+                switch (theObject->second->m_Type) {
+                case GraphObjectTypes::Scene:
+                    ParsePass2Properties(*static_cast<SScene *>(theObject->second), theClass);
+                    break;
+                case GraphObjectTypes::Node:
+                    ParsePass2Properties(*static_cast<SNode *>(theObject->second), theClass);
+                    break;
+                case GraphObjectTypes::Layer:
+                    ParsePass2Properties(*static_cast<SLayer *>(theObject->second), theClass);
+                    break;
+                case GraphObjectTypes::Camera:
+                    ParsePass2Properties(*static_cast<SCamera *>(theObject->second), theClass);
+                    break;
+                case GraphObjectTypes::Light:
+                    ParsePass2Properties(*static_cast<SLight *>(theObject->second), theClass);
+                    break;
+                case GraphObjectTypes::Model:
+                    ParsePass2Properties(*static_cast<SModel *>(theObject->second), theClass);
+                    break;
+                case GraphObjectTypes::DefaultMaterial:
+                    ParsePass2Properties(*static_cast<SDefaultMaterial *>(theObject->second), theClass);
+                    break;
+                case GraphObjectTypes::ReferencedMaterial:
+                    ParsePass2Properties(*static_cast<SReferencedMaterial *>(theObject->second),
+                                         theClass);
+                    break;
+                case GraphObjectTypes::Image:
+                    ParsePass2Properties(*static_cast<SImage *>(theObject->second), theClass);
+                    break;
+                case GraphObjectTypes::Text:
+                    ParsePass2Properties(*static_cast<SText *>(theObject->second), theClass);
+                    break;
+                case GraphObjectTypes::Effect:
+                    ParsePass2Properties(*static_cast<SEffect *>(theObject->second), theClass);
+                    break;
+                case GraphObjectTypes::RenderPlugin:
+                    ParsePass2Properties(*static_cast<qt3ds::render::SRenderPlugin *>(theObject->second),
+                                         theClass);
+                    break;
+                case GraphObjectTypes::CustomMaterial:
+                    ParsePass2Properties(*static_cast<SCustomMaterial *>(theObject->second), theClass);
+                    break;
+                case GraphObjectTypes::Path:
+                    ParsePass2Properties(*static_cast<SPath *>(theObject->second), theClass);
+                    break;
+                case GraphObjectTypes::PathSubPath:
+                    ParsePass2Properties(*static_cast<SPathSubPath *>(theObject->second), theClass);
+                    break;
+                default:
+                    QT3DS_ASSERT(false);
+                    break;
+                }
             }
         }
-        for (bool valid = m_Reader.MoveToFirstChild(); valid; valid = m_Reader.MoveToNextSibling())
-            ParseGraphPass2();
+
+        // If not part of variant config -> ignore children
+        if (isPartOfConfig) {
+            for (bool valid = m_Reader.MoveToFirstChild(); valid; valid = m_Reader.MoveToNextSibling())
+                ParseGraphPass2();
+        }
     }
 
     static bool ParseVec2(SDomReaderPropertyParser &inParser, const char *inName, QT3DSVec2 &outValue)
@@ -1499,83 +1530,85 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                 const char8_t *theId;
                 m_Reader.Att("ref", theId);
                 CRegisteredString theIdStr(m_StrTable.RegisterStr(theId + 1));
-                TIdObjectMap::iterator theObject = m_ObjectMap.find(theIdStr);
-                if (theObject != m_ObjectMap.end()) {
-                    SDomReaderPropertyParser parser(m_Reader, m_TempBuf, *this, *theObject->second);
-                    switch (theObject->second->m_Type) {
-                    case GraphObjectTypes::Scene:
-                        ParseProperties(*reinterpret_cast<SScene *>(theObject->second), parser);
-                        break;
-                    case GraphObjectTypes::Node:
-                        ParseProperties(*reinterpret_cast<SNode *>(theObject->second), parser);
-                        break;
-                    case GraphObjectTypes::Layer:
-                        ParseProperties(*reinterpret_cast<SLayer *>(theObject->second), parser);
-                        break;
-                    case GraphObjectTypes::Camera:
-                        ParseProperties(*reinterpret_cast<SCamera *>(theObject->second), parser);
-                        break;
-                    case GraphObjectTypes::Light:
-                        ParseProperties(*reinterpret_cast<SLight *>(theObject->second), parser);
-                        break;
-                    case GraphObjectTypes::Model:
-                        ParseProperties(*reinterpret_cast<SModel *>(theObject->second), parser);
-                        break;
-                    case GraphObjectTypes::DefaultMaterial:
-                        ParseProperties(*reinterpret_cast<SDefaultMaterial *>(theObject->second),
-                                        parser);
-                        break;
-                    case GraphObjectTypes::ReferencedMaterial:
-                        ParseProperties(*static_cast<SReferencedMaterial *>(theObject->second),
-                                        parser);
-                        break;
-                    case GraphObjectTypes::Image:
-                        ParseProperties(*reinterpret_cast<SImage *>(theObject->second), parser);
-                        break;
-                    case GraphObjectTypes::Text:
-                        ParseProperties(*static_cast<SText *>(theObject->second), parser);
-                        break;
-                    case GraphObjectTypes::Effect:
-                        ParseProperties(*static_cast<SEffect *>(theObject->second), parser);
-                        break;
-                    case GraphObjectTypes::RenderPlugin:
-                        ParseProperties(
-                            *static_cast<qt3ds::render::SRenderPlugin *>(theObject->second), parser);
-                        break;
-                    case GraphObjectTypes::CustomMaterial:
-                        ParseProperties(
-                            *static_cast<qt3ds::render::SCustomMaterial *>(theObject->second),
-                            parser);
-                        break;
-                    case GraphObjectTypes::Path:
-                        ParseProperties(*static_cast<qt3ds::render::SPath *>(theObject->second),
-                                        parser);
-                        break;
-                    case GraphObjectTypes::PathSubPath:
-                        ParseProperties(
-                            *static_cast<qt3ds::render::SPathSubPath *>(theObject->second), parser);
-                        break;
-                    default:
-                        QT3DS_ASSERT(false);
-                        break;
-                    }
-                } else {
-                    TIdPathAnchorIndexMap::iterator iter =
-                        m_AnchorIdToPathAndAnchorIndexMap.find(theIdStr);
-                    if (iter != m_AnchorIdToPathAndAnchorIndexMap.end()) {
-                        SDomReaderPropertyParser parser(m_Reader, m_TempBuf, *this,
-                                                        *iter->second.m_Segment);
-                        NVDataRef<qt3ds::render::SPathAnchorPoint> thePathBuffer =
-                            m_PathManager.GetPathSubPathBuffer(*iter->second.m_Segment);
-                        QT3DSU32 anchorIndex = iter->second.m_AnchorIndex;
-                        QT3DSU32 numAnchors = thePathBuffer.size();
-                        if (anchorIndex < numAnchors) {
-                            qt3ds::render::SPathAnchorPoint &thePoint(thePathBuffer[anchorIndex]);
-                            ParseVec2(parser, "position", thePoint.m_Position);
-                            ParseFloat(parser, "incomingangle", thePoint.m_IncomingAngle);
-                            thePoint.m_OutgoingAngle = thePoint.m_IncomingAngle + 180.0f;
-                            ParseFloat(parser, "incomingdistance", thePoint.m_IncomingDistance);
-                            ParseFloat(parser, "outgoingdistance", thePoint.m_OutgoingDistance);
+                if (m_ObjectMap.contains(theIdStr)) {
+                    TIdObjectMap::iterator theObject = m_ObjectMap.find(theIdStr);
+                    if (theObject != m_ObjectMap.end()) {
+                        SDomReaderPropertyParser parser(m_Reader, m_TempBuf, *this, *theObject->second);
+                        switch (theObject->second->m_Type) {
+                        case GraphObjectTypes::Scene:
+                            ParseProperties(*reinterpret_cast<SScene *>(theObject->second), parser);
+                            break;
+                        case GraphObjectTypes::Node:
+                            ParseProperties(*reinterpret_cast<SNode *>(theObject->second), parser);
+                            break;
+                        case GraphObjectTypes::Layer:
+                            ParseProperties(*reinterpret_cast<SLayer *>(theObject->second), parser);
+                            break;
+                        case GraphObjectTypes::Camera:
+                            ParseProperties(*reinterpret_cast<SCamera *>(theObject->second), parser);
+                            break;
+                        case GraphObjectTypes::Light:
+                            ParseProperties(*reinterpret_cast<SLight *>(theObject->second), parser);
+                            break;
+                        case GraphObjectTypes::Model:
+                            ParseProperties(*reinterpret_cast<SModel *>(theObject->second), parser);
+                            break;
+                        case GraphObjectTypes::DefaultMaterial:
+                            ParseProperties(*reinterpret_cast<SDefaultMaterial *>(theObject->second),
+                                            parser);
+                            break;
+                        case GraphObjectTypes::ReferencedMaterial:
+                            ParseProperties(*static_cast<SReferencedMaterial *>(theObject->second),
+                                            parser);
+                            break;
+                        case GraphObjectTypes::Image:
+                            ParseProperties(*reinterpret_cast<SImage *>(theObject->second), parser);
+                            break;
+                        case GraphObjectTypes::Text:
+                            ParseProperties(*static_cast<SText *>(theObject->second), parser);
+                            break;
+                        case GraphObjectTypes::Effect:
+                            ParseProperties(*static_cast<SEffect *>(theObject->second), parser);
+                            break;
+                        case GraphObjectTypes::RenderPlugin:
+                            ParseProperties(
+                                *static_cast<qt3ds::render::SRenderPlugin *>(theObject->second), parser);
+                            break;
+                        case GraphObjectTypes::CustomMaterial:
+                            ParseProperties(
+                                *static_cast<qt3ds::render::SCustomMaterial *>(theObject->second),
+                                parser);
+                            break;
+                        case GraphObjectTypes::Path:
+                            ParseProperties(*static_cast<qt3ds::render::SPath *>(theObject->second),
+                                            parser);
+                            break;
+                        case GraphObjectTypes::PathSubPath:
+                            ParseProperties(
+                                *static_cast<qt3ds::render::SPathSubPath *>(theObject->second), parser);
+                            break;
+                        default:
+                            QT3DS_ASSERT(false);
+                            break;
+                        }
+                    } else {
+                        TIdPathAnchorIndexMap::iterator iter =
+                            m_AnchorIdToPathAndAnchorIndexMap.find(theIdStr);
+                        if (iter != m_AnchorIdToPathAndAnchorIndexMap.end()) {
+                            SDomReaderPropertyParser parser(m_Reader, m_TempBuf, *this,
+                                                            *iter->second.m_Segment);
+                            NVDataRef<qt3ds::render::SPathAnchorPoint> thePathBuffer =
+                                m_PathManager.GetPathSubPathBuffer(*iter->second.m_Segment);
+                            QT3DSU32 anchorIndex = iter->second.m_AnchorIndex;
+                            QT3DSU32 numAnchors = thePathBuffer.size();
+                            if (anchorIndex < numAnchors) {
+                                qt3ds::render::SPathAnchorPoint &thePoint(thePathBuffer[anchorIndex]);
+                                ParseVec2(parser, "position", thePoint.m_Position);
+                                ParseFloat(parser, "incomingangle", thePoint.m_IncomingAngle);
+                                thePoint.m_OutgoingAngle = thePoint.m_IncomingAngle + 180.0f;
+                                ParseFloat(parser, "incomingdistance", thePoint.m_IncomingDistance);
+                                ParseFloat(parser, "outgoingdistance", thePoint.m_OutgoingDistance);
+                            }
                         }
                     }
                 }
@@ -1811,12 +1844,12 @@ SPresentation *qt3ds::render::IUIPLoader::LoadUIPFile(
     const char8_t *inPresentationDir, IRenderPluginManager &inPluginManager,
     ICustomMaterialSystem &inCMS, IDynamicObjectSystem &inDynamicSystem,
     qt3ds::render::IPathManager &inPathManager, IUIPReferenceResolver *inResolver,
-    bool inSetValuesFromSlides)
+    const Q3DSVariantConfig &variantConfig, bool inSetValuesFromSlides)
 {
     SRenderUIPLoader theLoader(inReader, inFullPathToPresentationFile, inMetaData, inStrTable,
                                inFoundation, inPresentationAllocator, ioObjectMap, inBufferManager,
                                inEffectSystem, inPresentationDir, inPluginManager, inCMS,
-                               inDynamicSystem, inPathManager, inResolver);
+                               inDynamicSystem, inPathManager, inResolver, variantConfig);
     return theLoader.Load(inSetValuesFromSlides);
 }
 using namespace qt3dsdm;
