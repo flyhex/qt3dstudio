@@ -41,7 +41,7 @@
 #include "Qt3DSKernelTypes.h"
 #include "Qt3DSEvent.h"
 #include "q3dsqmlbehavior.h"
-#include "q3dsdatainput.h"
+#include "Qt3DSApplication.h"
 
 namespace Q3DStudio {
 class CQmlEngine;
@@ -75,7 +75,8 @@ public:
     QVector3D matrixToEuler(const QMatrix4x4 &matrix);
     QString getParent(const QString &handle);
     void setDataInputValue(const QString &name, const QVariant &value,
-                           Q3DSDataInput::ValueRole valueRole = Q3DSDataInput::ValueRole::Value);
+                           qt3ds::runtime::DataInputValueRole valueRole
+                           = qt3ds::runtime::DataInputValueRole::Value);
 
     struct EventData {
         QJSValue function;

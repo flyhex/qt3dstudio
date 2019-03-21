@@ -37,7 +37,6 @@
 #include "Qt3DSKernelTypes.h"
 #include "Qt3DSMetadata.h"
 #include "QtQml/qjsengine.h"
-#include "q3dsdatainput.h"
 
 namespace Q3DStudio {
 class IRuntimeFactory;
@@ -102,6 +101,13 @@ enum DataInputType {
     DataInputTypeVector3,
     DataInputTypeVector2,
     DataInputTypeVariant
+};
+
+// Duplicated from Q3DSDataInput class on viewer side
+enum class DataInputValueRole {
+    Value = 0,
+    Min = 1,
+    Max = 2
 };
 
 struct DataInputDef

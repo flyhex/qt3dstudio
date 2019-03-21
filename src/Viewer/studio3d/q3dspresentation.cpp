@@ -267,7 +267,8 @@ void Q3DSPresentation::setDataInputValue(const QString &name, const QVariant &va
                                          Q3DSDataInput::ValueRole valueRole)
 {
     if (d_ptr->m_viewerApp) {
-        d_ptr->m_viewerApp->SetDataInputValue(name, value, valueRole);
+        d_ptr->m_viewerApp->SetDataInputValue(name, value,
+                                              (qt3ds::runtime::DataInputValueRole)valueRole);
     } else if (d_ptr->m_commandQueue) {
         d_ptr->m_commandQueue->queueCommand(QString(), CommandType_SetDataInputValue,
                                             name, value, static_cast<int>(valueRole));

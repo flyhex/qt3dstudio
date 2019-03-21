@@ -325,8 +325,9 @@ void Q3DSRenderer::processCommands()
             m_runtime->HandleKeyInput(Q3DStudio::EKeyCode(cmd.m_intValues[0]), false);
             break;
         case CommandType_SetDataInputValue:
-            m_runtime->SetDataInputValue(cmd.m_stringValue, cmd.m_variantValue,
-                                         static_cast<Q3DSDataInput::ValueRole>(cmd.m_intValues[0]));
+            m_runtime->SetDataInputValue(
+                        cmd.m_stringValue, cmd.m_variantValue,
+                        static_cast<qt3ds::runtime::DataInputValueRole>(cmd.m_intValues[0]));
             break;
         case CommandType_CreateElement: {
             m_runtime->createElement(cmd.m_elementPath, cmd.m_stringValue,

@@ -30,7 +30,7 @@
 #ifndef Q3DSDATAINPUT_H
 #define Q3DSDATAINPUT_H
 
-#include "qstudio3dglobal.h"
+#include <QtStudio3D/qstudio3dglobal.h>
 #include <QtCore/qobject.h>
 #include <QtCore/qvariant.h>
 
@@ -58,9 +58,9 @@ public:
     virtual ~Q3DSDataInput();
 
     enum class ValueRole {
-        Value,
-        Min,
-        Max
+        Value = 0,
+        Min = 1,
+        Max = 2
     };
 
     QString name() const;

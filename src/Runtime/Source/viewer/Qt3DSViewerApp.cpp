@@ -754,12 +754,12 @@ void Q3DSViewerApp::SetGlobalAnimationTime(qint64 inMilliSecs)
 }
 
 void Q3DSViewerApp::SetDataInputValue(
-        const QString &name, const QVariant &value, Q3DSDataInput::ValueRole valueRole)
+        const QString &name, const QVariant &value, qt3ds::runtime::DataInputValueRole valueRole)
 {
     if (!m_Impl.m_view)
         return;
 
-    m_Impl.m_view->SetDataInputValue(name, value, valueRole);
+    m_Impl.m_view->SetDataInputValue(name, value, int(valueRole));
 }
 
 void Q3DSViewerApp::setPresentationId(const QString &id)

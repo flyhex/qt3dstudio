@@ -416,7 +416,7 @@ public:
     bool GetAttribute(const char *element, const char *attName, char *value) override;
     void FireEvent(const char *element, const char *evtName) override;
     void SetDataInputValue(const QString &name, const QVariant &value,
-                           Q3DSDataInput::ValueRole valueRole) override;
+                           qt3ds::runtime::DataInputValueRole valueRole) override;
     void createElement(const QString &parentElementPath, const QString &slideName,
                        const QHash<QString, QVariant> &properties,
                        qt3ds::render::IQt3DSRenderer *renderer) override;
@@ -632,13 +632,13 @@ void CQmlEngineImpl::FireEvent(const char *element, const char *evtName)
 
 void CQmlEngineImpl::SetDataInputValue(
         const QString &name, const QVariant &value,
-        Q3DSDataInput::ValueRole valueRole = Q3DSDataInput::ValueRole::Value)
+        qt3ds::runtime::DataInputValueRole valueRole = qt3ds::runtime::DataInputValueRole::Value)
 {
     qt3ds::runtime::DataInputMap &diMap = m_Application->dataInputMap();
     if (diMap.contains(name)) {
         qt3ds::runtime::DataInputDef &diDef = diMap[name];
         switch (valueRole) {
-        case Q3DSDataInput::ValueRole::Value: { // switch (valueRole)
+        case qt3ds::runtime::DataInputValueRole::Value: { // switch (valueRole)
             diDef.value = value;
             const QVector<qt3ds::runtime::DataInputControlledAttribute> &ctrlAtt
                     = diDef.controlledAttributes;
@@ -816,11 +816,11 @@ void CQmlEngineImpl::SetDataInputValue(
             }
             break;
         }
-        case Q3DSDataInput::ValueRole::Max: { // switch (valueRole)
+        case qt3ds::runtime::DataInputValueRole::Max: { // switch (valueRole)
             diDef.max = value.toFloat();
             break;
         }
-        case Q3DSDataInput::ValueRole::Min: { // switch (valueRole)
+        case qt3ds::runtime::DataInputValueRole::Min: { // switch (valueRole)
             diDef.min = value.toFloat();
             break;
         }

@@ -204,7 +204,7 @@ public:
     void GoToTime(const char *elementPath, const float time) override;
     void SetGlobalAnimationTime(qint64 inMilliSecs) override;
     void SetDataInputValue(const QString &name, const QVariant &value,
-                           Q3DSDataInput::ValueRole property) override;
+                           int property) override;
 
     void setPresentationId(const QString &id) override
     {
@@ -582,12 +582,12 @@ void CRuntimeView::SetGlobalAnimationTime(qint64 inMilliSecs)
 
 void CRuntimeView::SetDataInputValue(
         const QString &name, const QVariant &value,
-        Q3DSDataInput::ValueRole property = Q3DSDataInput::ValueRole::Value)
+        int property = 0)
 {
     if (m_Application) {
         Q3DStudio::CQmlEngine &theBridgeEngine
                 = static_cast<Q3DStudio::CQmlEngine &>(m_RuntimeFactoryCore->GetScriptEngineQml());
-        theBridgeEngine.SetDataInputValue(name, value, property);
+    theBridgeEngine.SetDataInputValue(name, value, (qt3ds::runtime::DataInputValueRole)property);
     }
 }
 

@@ -37,9 +37,8 @@
 #include <vector>
 #include <QObject>
 #include <QtCore/qelapsedtimer.h>
-
+#include "Qt3DSApplication.h"
 #include "Qt3DSInputDefs.h"
-#include "q3dsdatainput.h"
 #include <QtGui/qsurfaceformat.h>
 
 namespace Q3DStudio {
@@ -352,7 +351,8 @@ public:
     void SetGlobalAnimationTime(qint64 inMilliSecs);
 
     void SetDataInputValue(const QString &name, const QVariant &value,
-                           Q3DSDataInput::ValueRole valueRole = Q3DSDataInput::ValueRole::Value);
+                           qt3ds::runtime::DataInputValueRole valueRole
+                           = qt3ds::runtime::DataInputValueRole::Value);
 
     QList<QString> dataInputs() const;
 

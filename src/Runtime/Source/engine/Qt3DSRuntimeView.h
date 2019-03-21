@@ -38,7 +38,7 @@
 #include "render/Qt3DSRenderBaseTypes.h"
 #include "EASTL/string.h"
 #include "foundation/Qt3DSRefCounted.h"
-#include "q3dsdatainput.h"
+#include "Qt3DSApplication.h"
 #include "Qt3DSWindowSystem.h"
 #include "Qt3DSTimer.h"
 #include "Qt3DSPresentation.h"
@@ -185,7 +185,7 @@ public:
     virtual void GoToTime(const char *elementPath, const float time) = 0;
     virtual void SetGlobalAnimationTime(qint64 inMilliSecs) = 0;
     virtual void SetDataInputValue(const QString &name, const QVariant &value,
-                                   Q3DSDataInput::ValueRole property) = 0;
+                                   int property) = 0;
     virtual QList<QString> dataInputs() const = 0;
     virtual float dataInputMax(const QString &name) const = 0;
     virtual float dataInputMin(const QString &name) const = 0;

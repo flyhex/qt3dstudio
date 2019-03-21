@@ -33,7 +33,7 @@
 #include "EASTL/vector.h"
 #include "EASTL/string.h"
 #include "foundation/Qt3DSRefCounted.h"
-#include "q3dsdatainput.h"
+#include "Qt3DSApplication.h"
 
 #include <QtCore/qvariant.h>
 
@@ -157,7 +157,8 @@ public: // Elements
     virtual void FireEvent(const char *element, const char *evtName) = 0;
     virtual void SetDataInputValue(
             const QString &name, const QVariant &value,
-            Q3DSDataInput::ValueRole property = Q3DSDataInput::ValueRole::Value) = 0;
+            qt3ds::runtime::DataInputValueRole property
+            = qt3ds::runtime::DataInputValueRole::Value) = 0;
     virtual void createElement(const QString &parentElementPath, const QString &slideName,
                                const QHash<QString, QVariant> &properties,
                                qt3ds::render::IQt3DSRenderer *renderer) = 0;

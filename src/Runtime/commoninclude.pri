@@ -39,7 +39,6 @@ INCLUDEPATH += \
     $$PWD/Source/runtimerender \
     $$PWD/Source/runtimerender/graphobjects \
     $$PWD/Source/runtimerender/resourcemanager \
-    $$PWD/../Viewer/studio3d
 
 # TODO: Investigate whether these can be moved to commonplatform
 win32-msvc {

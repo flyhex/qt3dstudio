@@ -383,7 +383,7 @@ QString Q3DSQmlScript::getParent(const QString &handle)
 }
 
 void Q3DSQmlScript::setDataInputValue(const QString &name, const QVariant &value,
-                                      Q3DSDataInput::ValueRole valueRole)
+                                      qt3ds::runtime::DataInputValueRole valueRole)
 {
     m_api.SetDataInputValue(name, value, valueRole);
 }
