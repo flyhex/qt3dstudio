@@ -956,7 +956,7 @@ ProjectFile::getDiBindingtypesFromSubpresentations() const
  *
  * @param filePath the file path to load the variants from. If empty, variants are loaded from the
  *                 project file and replace m_variantsDef. If a filePath is specified, the loaded
- *                 variants are merged with m_variantsDef
+ *                 variants are merged with m_variantsDef.
  */
 void ProjectFile::loadVariants(const QString &filePath)
 {
@@ -983,10 +983,13 @@ void ProjectFile::loadVariants(const QString &filePath)
         if (reader.readNextStartElement()) {
             if (reader.name() == QLatin1String("variantgroup")) {
                 QString groupId = reader.attributes().value(QLatin1String("id")).toString();
-                QString groupColor = reader.attributes().value(QLatin1String("color")).toString();
                 currentGroup = &m_variantsDef[groupId];
-                currentGroup->m_color = groupColor;
-                m_variantsDefKeys.append(groupId);
+                if (!m_variantsDefKeys.contains(groupId)) {
+                    // Only update colors for new groups
+                    currentGroup->m_color = reader.attributes().value(
+                                QLatin1String("color")).toString();
+                    m_variantsDefKeys.append(groupId);
+                }
             } else if (reader.name() == QLatin1String("variant")) {
                 if (currentGroup) {
                     QString tagId = reader.attributes().value(QLatin1String("id")).toString();
