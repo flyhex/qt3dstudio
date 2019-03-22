@@ -12,7 +12,7 @@
         <Property name="referencednode" formalName="Reference" description="Original element (e.g. group, component, model)\nto clone" type="ObjectRef" />
     </Alias>
     <Asset>
-    <Property name="name" formalName="Name" type="String" description="Object name" hidden="False" category="Basic Properties" />
+        <Property name="name" formalName="Name" type="String" description="Object name" hidden="False" category="Basic Properties" />
         <Property name="eyeball" formalName="Visible" description="Item visibility" type="Boolean" default="True" hidden="False" controllable="True" category="Basic Properties" />
         <Property name="starttime" formalName="Start Time" type="Long" hidden="True" category="Basic Properties" />
         <Property name="endtime" formalName="End Time" type="Long" default="10000" hidden="True" category="Basic Properties" />
@@ -21,14 +21,14 @@
         <Property name="importfile" type="String" hidden="True" category="Basic Properties" />
 
         <Handler name="Set Property" category="Asset" description="Set a property to a new value.">
-                <Argument name="Property Name" formalName="Property" description="Property to change" type="Slide" argumentType="Property" />
-                <Argument name="Property Value" formalName="New Value" description="New value for the property" type="None" argumentType="Dependent" />
+            <Argument name="Property Name" formalName="Property" description="Property to change" type="Slide" argumentType="Property" />
+            <Argument name="Property Value" formalName="New Value" description="New value for the property" type="None" argumentType="Dependent" />
         </Handler>
         <Handler name="Fire Event" category="Asset" description="Fire an event on the target.">
-                <Argument name="Event" description="The event to fire" type="None" argumentType="Event" />
+            <Argument name="Event" description="The event to fire" type="None" argumentType="Event" />
         </Handler>
         <Handler name="Emit Signal" category="Asset" description="Emit a Signal.">
-                <Argument name="Signal Name" description="The signal to emit" type="String" argumentType="Signal" />
+            <Argument name="Signal Name" description="The signal to emit" type="String" argumentType="Signal" />
         </Handler>
     </Asset>
     <Behavior>
@@ -220,7 +220,7 @@
         <Property name="lightspecular" formalName="Specular Color" description="Color of specular lighting highlights" type="Color" default="1 1 1" category="Light Properties" />
         <Property name="lightambient" formalName="Ambient Color" description="Color of unlit areas (black for none)" type="Color" category="Light Properties" />
         <Property name="brightness" formalName="Brightness" description="Strength of the light" default="100" category="Light Properties" />
-        <Property name="linearfade" formalName="Linear Fade" description="Falloff of the point light" min="0" max="1000">
+        <Property name="linearfade" formalName="Linear Fade" description="Falloff of the point light" min="0" max="1000" category="Light Properties">
             <ShowIfEqual property="lighttype" value="Point"/>
         </Property>
         <Property name="expfade" formalName="Exponential Fade" description="Additional falloff" min="0" max="1000" category="Light Properties">
@@ -396,11 +396,11 @@
         <Property name="maxparticles" formalName="MaxParticle" description="Max count of particles" type="Long" min="0" max="1000000"  default="100" />
         <Property name="particlesize" formalName="ParticleSize" description="Render size of particle" min="0" default="1" />
         <Property name="lifetime" formalName="Lifetime" description="Particle lifetime before it dies" min="-1" default="5">
-                <HideIfEqual property='particletype' value='Cloud'/>
+            <HideIfEqual property='particletype' value='Cloud'/>
         </Property>
     </Particle>
     <RenderPlugin>
-            <Property name="name" formalName="Name" description="Object name" type="String" default="RenderPlugin" hidden="True" />
+        <Property name="name" formalName="Name" description="Object name" type="String" default="RenderPlugin" hidden="True" />
     </RenderPlugin>
     <Scene>
         <Property name="name" formalName="Name" type="String" default="Scene" hidden="True" />
@@ -465,18 +465,18 @@
         <!-- Format -->
         <Property name="textstring" formalName="Text String" description="Text String" type="MultiLineString" default="Text" controllable="True" category="Format" />
         <Property name="textcolor" formalName="Text Color" description="Text Color" type="Color" default="1 1 1" controllable="True" category="Format" />
-        <Property name="font" formalName="Font" description="Font" type="Font" default="TitilliumWeb-Regular" group="Format" />
+        <Property name="font" formalName="Font" description="Font" type="Font" default="TitilliumWeb-Regular" category="Format" />
         <!-- HW accelerated fonts not supported
             <Property name="enableacceleratedfont" formalName="Hardware accelerated font" description="Enabled hardware acclerated font" type="Boolean" default="false" category="Format" />
         -->
-        <Property name="size" formalName="Font Size" description="Font Size" type="FontSize" default="36" animatable="False" group="Format" />
+        <Property name="size" formalName="Font Size" description="Font Size" type="FontSize" default="36" animatable="False" category="Format" />
         <Property name="horzalign" formalName="Horizontal Alignment" description="Horizontal Alignment" list="Left:Center:Right" default="Center" category="Format" />
         <Property name="vertalign" formalName="Vertical Alignment" description="Vertical Alignment" list="Top:Middle:Bottom" default="Middle" category="Format" />
         <Property name="leading" formalName="Leading" description="Leading" category="Format" />
         <Property name="tracking" formalName="Tracking" description="Tracking" category="Format" />
         <Property name="boundingbox" formalName="Text Area" description="Fixed size text area. If not set,\ntext area grows with text." type="Float2" default="0 0" category="Format" />
         <Property name="wordwrap" formalName="Word Wrapping" description="Word wrapping. Has effect only if fixed size\ntext area is used.\nClip: Cut text if it does not fit.\nWrapWord: Wrap between words, if possible.\nWrapAnywhere: Wrap even in the middle\nof words." list="Clip:WrapWord:WrapAnywhere" default="WrapWord" category="Format" />
-        <Property name="elide" formalName="Eliding" description="Elide text that does not fit the\ntext area. Has effect only if\nfixed text area is defined." list="ElideNone:ElideLeft:ElideMiddle:ElideRight" default="ElideNone" group="Format" />
+        <Property name="elide" formalName="Eliding" description="Elide text that does not fit the\ntext area. Has effect only if\nfixed text area is defined." list="ElideNone:ElideLeft:ElideMiddle:ElideRight" default="ElideNone" category="Format" />
 
         <!-- Shadow -->
         <Property name="dropshadow" formalName="Drop-Shadow" description="Add a drop-shadow to the text.\nThe shadow is a darker shade of the given color." type="Boolean" default="False" category="Shadow" />
