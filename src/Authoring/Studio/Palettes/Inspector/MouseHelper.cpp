@@ -30,10 +30,11 @@
 #include "MainFrm.h"
 #include "StudioApp.h"
 #include <QtWidgets/qapplication.h>
+#include <QtWidgets/qmainwindow.h>
+#include <QtWidgets/qwidget.h>
 #include <QtGui/qcursor.h>
 #include <QtGui/qwindow.h>
 #include <QtGui/qscreen.h>
-#include <QtWidgets/qmainwindow.h>
 #include <QtCore/qtimer.h>
 #include <QtGui/qevent.h>
 #include <QtGui/qbitmap.h>
@@ -52,6 +53,7 @@ static void setBlankCursor()
 MouseHelper::MouseHelper(QObject *parent)
     : QObject(parent)
     , m_dragState(StateNotDragging)
+    , m_maxDelta(50, 50)
 {
     // All cursor position modifications are done asynchronously, so we don't get position
     // changes in middle of mouse event handling.
@@ -67,13 +69,35 @@ void MouseHelper::startUnboundedDrag()
     m_startPos = QCursor::pos();
 
     QWindow *window = g_StudioApp.m_pMainWnd->windowHandle();
-    if (window) {
-        window->installEventFilter(this);
-        QSize screenSize = window->screen()->size() / window->screen()->devicePixelRatio();
-        m_referencePoint = QPoint(screenSize.width() / 2, screenSize.height() / 2);
+    if (window)
+        window->installEventFilter(this); // Always install event filter to main window
+
+    if (m_widget) {
+        // Use the center of the on-screen portion of the parent widget as reference point.
+        // This ensures cursor restores properly, as the cursor stays on the widget.
+        m_window = m_widget->window()->windowHandle();
+        const QRect screenGeometry = m_window->screen()->geometry();
+        const QPoint bottomRight = screenGeometry.bottomRight();
+        QSize widgetSize = m_widget->size();
+        QPoint widgetPos = m_widget->mapToGlobal(QPoint(0, 0));
+        if (widgetPos.x() < 0) {
+            widgetSize.setWidth(widgetSize.width() + widgetPos.x());
+            widgetPos.setX(0);
+        }
+        if (widgetPos.y() < 0) {
+            widgetSize.setHeight(widgetSize.height() + widgetPos.y());
+            widgetPos.setY(0);
+        }
+        if (widgetPos.x() + widgetSize.width() > bottomRight.x())
+            widgetSize.setWidth(bottomRight.x() - widgetPos.x());
+        if (widgetPos.y() + widgetSize.height() > bottomRight.y())
+            widgetSize.setHeight(bottomRight.y() - widgetPos.y());
+        m_maxDelta = QPoint(widgetSize.width() / 2, widgetSize.height() / 2);
+        m_referencePoint = widgetPos + m_maxDelta;
     } else {
-        // Just assume the screen of the app is at least 400x400 if we can't resolve window
+        // Just assume the screen of the app is at least 400x400 if we don't have widget
         m_referencePoint = QPoint(200, 200);
+        m_window = nullptr;
     }
     m_previousPoint = m_startPos;
 
@@ -97,17 +121,16 @@ QPoint MouseHelper::delta()
         delta = currentPoint - m_previousPoint;
         m_previousPoint = currentPoint;
 
-        // Limit delta to m_referencePoint size, so maximum delta to all directions is the same
-        // even with multi-screen virtual desktops
-        if (delta.x() > m_referencePoint.x())
-            delta.setX(m_referencePoint.x());
-        else if (delta.x() < -m_referencePoint.x())
-            delta.setX(-m_referencePoint.x());
+        // Limit delta to even out the maximum possible change rate regardless of widget position
+        if (delta.x() > m_maxDelta.x())
+            delta.setX(m_maxDelta.x());
+        else if (delta.x() < -m_maxDelta.x())
+            delta.setX(-m_maxDelta.x());
 
-        if (delta.y() > m_referencePoint.y())
-            delta.setY(m_referencePoint.y());
-        else if (delta.y() < -m_referencePoint.y())
-            delta.setY(-m_referencePoint.y());
+        if (delta.y() > m_maxDelta.y())
+            delta.setY(m_maxDelta.y());
+        else if (delta.y() < -m_maxDelta.y())
+            delta.setY(-m_maxDelta.y());
 
         if (!m_cursorResetTimer.isActive())
             m_cursorResetTimer.start();
@@ -115,18 +138,34 @@ QPoint MouseHelper::delta()
     return delta;
 }
 
+void MouseHelper::setWidget(QWidget *widget)
+{
+     m_widget = widget;
+}
+
 void MouseHelper::resetCursor()
 {
     switch (m_dragState) {
     case StateDragging:
-        QCursor::setPos(m_referencePoint);
+        if (m_window)
+            QCursor::setPos(m_window->screen(), m_referencePoint);
+        else
+            QCursor::setPos(m_referencePoint);
         m_previousPoint = m_referencePoint;
         break;
     case StateEndingDrag:
-        QCursor::setPos(m_startPos);
+        if (m_window)
+            QCursor::setPos(m_window->screen(), m_startPos);
+        else
+            QCursor::setPos(m_startPos);
+        m_dragState = StateFinalCursorReset;
+        m_cursorResetTimer.start();
+        break;
+    case StateFinalCursorReset:
         // First change to default cursor to avoid any flicker of cursor
         qApp->changeOverrideCursor(Qt::ArrowCursor);
         qApp->restoreOverrideCursor();
+        m_dragState = StateNotDragging;
         break;
     case StateNotDragging:
     default:

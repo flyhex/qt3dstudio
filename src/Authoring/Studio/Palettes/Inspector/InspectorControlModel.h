@@ -29,15 +29,14 @@
 #ifndef INSPECTORCONTROLMODEL_H
 #define INSPECTORCONTROLMODEL_H
 
-#include <QtCore/qabstractitemmodel.h>
-#include <QtCore/qvector.h>
-
 #include "Qt3DSDMValue.h"
 #include "Qt3DSDMMetaDataValue.h"
 #include "Qt3DSDMMetaDataTypes.h"
 #include "Qt3DSFileTools.h"
-
 #include "IDocumentEditor.h"
+
+#include <QtCore/qabstractitemmodel.h>
+#include <QtCore/qvector.h>
 
 class CInspectableBase;
 class Qt3DSDMInspectable;
@@ -109,7 +108,7 @@ class InspectorControlModel : public QAbstractListModel
     Q_OBJECT
 public:
     explicit InspectorControlModel(VariantsGroupModel *variantsModel, QObject *parent);
-    ~InspectorControlModel() = default;
+    ~InspectorControlModel() override = default;
 
     enum Roles {
         GroupValuesRole = Qt::UserRole + 1,
@@ -138,6 +137,8 @@ public:
     void setPropertyControllerInstance(long instance,int handle,
                                        Q3DStudio::CString controllerInstance,
                                        bool controlled);
+    void notifyPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                               qt3dsdm::Qt3DSDMPropertyHandle inProperty);
 
     Q_INVOKABLE void setMaterialTypeValue(long instance, int handle, const QVariant &value);
     Q_INVOKABLE void setShaderValue(long instance, int handle, const QVariant &value);
@@ -220,13 +221,8 @@ private:
     void updatePropertyValue(InspectorControlBase *element) const;
     void rebuildTree();
     void refreshTree();
-    void onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                           qt3dsdm::Qt3DSDMPropertyHandle inProperty);
     void updateAnimateToggleState(InspectorControlBase *inItem);
     void updateControlledToggleState(InspectorControlBase *inItem) const;
-
-    std::shared_ptr<qt3dsdm::ISignalConnection> m_notifier;
-    std::shared_ptr<qt3dsdm::ISignalConnection> m_slideNotifier;
 
     QStringList materialTypeValues() const;
     QStringList shaderValues() const;

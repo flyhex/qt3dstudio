@@ -32,6 +32,9 @@
 #include <QtCore/qpoint.h>
 #include <QtCore/qtimer.h>
 
+QT_FORWARD_DECLARE_CLASS(QWidget)
+QT_FORWARD_DECLARE_CLASS(QWindow)
+
 class MouseHelper : public QObject
 {
     Q_OBJECT
@@ -43,6 +46,8 @@ public:
     Q_INVOKABLE void startUnboundedDrag();
     Q_INVOKABLE void endUnboundedDrag();
     Q_INVOKABLE QPoint delta();
+
+    void setWidget(QWidget *widget);
 
 private Q_SLOTS:
     void resetCursor();
@@ -59,9 +64,13 @@ private:
     enum DragState {
         StateNotDragging,
         StateDragging,
-        StateEndingDrag
+        StateEndingDrag,
+        StateFinalCursorReset
     };
     DragState m_dragState;
+    QWidget *m_widget = nullptr; // Not owned
+    QWindow *m_window = nullptr; // Not owned
+    QPoint m_maxDelta;
 };
 
 #endif // MOUSEHELPER_H

@@ -25,15 +25,10 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include <QFileInfo>
-#include <QtCore/qurl.h>
-
-#include <functional>
 
 #include "InspectorControlModel.h"
 #include "Core.h"
 #include "Doc.h"
-#include "ControlGraphIterators.h"
 #include "InspectorGroup.h"
 #include "Qt3DSDMInspectorGroup.h"
 #include "Qt3DSDMInspectorRow.h"
@@ -42,8 +37,6 @@
 #include "Qt3DSDMDataCore.h"
 #include "StudioApp.h"
 #include "IDocumentEditor.h"
-#include "Control.h"
-#include "ControlData.h"
 #include "Qt3DSDMMetaData.h"
 #include "Qt3DSDMSignals.h"
 #include "CmdDataModelDeanimate.h"
@@ -63,6 +56,8 @@
 #include "Dialogs.h"
 #include "Dispatch.h"
 #include "VariantsGroupModel.h"
+
+#include <QtCore/qfileinfo.h>
 
 static QStringList renderableItems()
 {
@@ -109,9 +104,9 @@ static std::pair<bool, bool> getSlideCharacteristics(qt3dsdm::Qt3DSDMInstanceHan
 }
 
 InspectorControlModel::InspectorControlModel(VariantsGroupModel *variantsModel, QObject *parent)
-    : m_variantsModel(variantsModel)
-    , QAbstractListModel(parent)
+    : QAbstractListModel(parent)
     , m_UpdatableEditor(*g_StudioApp.GetCore()->GetDoc())
+    , m_variantsModel(variantsModel)
 {
     m_modifiedProperty.first = 0;
     m_modifiedProperty.second = 0;
@@ -124,21 +119,6 @@ void InspectorControlModel::setInspectable(CInspectableBase *inInspectable)
     m_modifiedProperty.first = 0;
     m_modifiedProperty.second = 0;
     m_previouslyCommittedValue = {};
-
-    const auto signalProvider
-            = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetFullSystemSignalProvider();
-
-    if (m_notifier.get() == nullptr) {
-        m_notifier = signalProvider->ConnectInstancePropertyValue(
-                    std::bind(&InspectorControlModel::onPropertyChanged,
-                              this, std::placeholders::_1, std::placeholders::_2));
-    }
-    if (m_slideNotifier.get() == nullptr) {
-        m_slideNotifier = signalProvider->ConnectSlideRearranged(
-                    std::bind(&InspectorControlModel::onSlideRearranged, this,
-                              std::placeholders::_1, std::placeholders::_2,
-                              std::placeholders::_3));
-    }
 
     if (m_inspectableBase != inInspectable) {
         m_inspectableBase = inInspectable;
@@ -173,19 +153,16 @@ CInspectableBase *getReferenceMaterialInspectable(CInspectableBase *inspectBase)
     return nullptr;
 }
 
-void InspectorControlModel::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                                              qt3dsdm::Qt3DSDMPropertyHandle inProperty)
+void InspectorControlModel::notifyPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                                  qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
     auto doc = g_StudioApp.GetCore()->GetDoc();
     const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
     if (!bridge->IsSceneGraphInstance(inInstance))
         return;
 
-    if (inProperty == bridge->GetLayer().m_variants) {
-        // only update the variants model if its property changes
-        m_variantsModel->refresh();
+    if (inProperty == bridge->GetLayer().m_variants) // variants model is updated upon edit
         return;
-    }
 
     bool changed = false;
     for (int row = 0; row < m_groupElements.count(); ++row) {
@@ -689,7 +666,6 @@ void InspectorControlModel::updateFontValues(InspectorControlBase *element) cons
     }
 }
 
-
 QStringList InspectorControlModel::materialTypeValues() const
 {
     QStringList values;
@@ -876,7 +852,7 @@ InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *insp
     item->m_tooltip = Q3DStudio::CString(metaProperty.m_Description.c_str()).toQString();
     // \n is parsed as \\n from the material and effect files. Replace them to fix multi-line
     // tooltips
-    item->m_tooltip.replace(QStringLiteral("\\n"), QStringLiteral("\n"));
+    item->m_tooltip.replace(QLatin1String("\\n"), QLatin1String("\n"));
 
     item->m_animatable = metaProperty.m_Animatable &&
             studio->GetAnimationSystem()->IsPropertyAnimatable(item->m_instance,
@@ -1570,8 +1546,7 @@ void InspectorControlModel::saveIfMaterial(qt3dsdm::Qt3DSDMInstanceHandle instan
             }
         }
 
-        sceneEditor->writeMaterialFile(material, materialName,
-                                       sourcePath.isEmpty(), sourcePath);
+        sceneEditor->writeMaterialFile(material, materialName, sourcePath.isEmpty(), sourcePath);
     }
 }
 
@@ -2033,15 +2008,6 @@ void InspectorControlModel::setPropertyAnimated(long instance, int handle, bool 
         cmd = new CCmdDataModelDeanimate(doc, instance, handle);
 
     g_StudioApp.GetCore()->ExecuteCommand(cmd);
-}
-
-void InspectorControlModel::onSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster,
-                                              int inOldIndex, int inNewIndex)
-{
-    Q_UNUSED(inMaster);
-    Q_UNUSED(inOldIndex);
-    Q_UNUSED(inNewIndex);
-    rebuildTree();
 }
 
 QVariant InspectorControlModel::data(const QModelIndex &index, int role) const

@@ -36,6 +36,7 @@
 #include "Qt3DSFileTools.h"
 #include "TabOrderHandler.h"
 #include "MouseHelper.h"
+#include "QmlUtils.h"
 #include "DataInputSelectView.h"
 
 class InspectorControlModel;
@@ -61,6 +62,7 @@ class InspectorControlView : public QQuickWidget,
     Q_OBJECT
     Q_PROPERTY(QString titleText READ titleText NOTIFY titleChanged FINAL)
     Q_PROPERTY(QString titleIcon READ titleIcon NOTIFY titleChanged FINAL)
+
 public:
     explicit InspectorControlView(const QSize &preferredSize, QWidget *parent = nullptr);
     ~InspectorControlView() override;
@@ -69,11 +71,14 @@ public:
     QAbstractItemModel *inspectorControlModel() const;
 
     QString titleText() const;
-    Q_INVOKABLE QColor titleColor(int instance = 0, int handle = 0) const;
     QString titleIcon() const;
+    VariantsGroupModel *variantsModel() const { return m_variantsGroupModel; }
 
+    Q_INVOKABLE QColor titleColor(int instance = 0, int handle = 0) const;
+    Q_INVOKABLE QColor showColorDialog(const QColor &color);
     Q_INVOKABLE void showContextMenu(int x, int y, int handle, int instance);
     Q_INVOKABLE void showTagContextMenu(int x, int y, const QString &group, const QString &tag);
+    Q_INVOKABLE void showDataInputChooser(int handle, int instance, const QPoint &point);
     Q_INVOKABLE void showGroupContextMenu(int x, int y, const QString &group);
     Q_INVOKABLE QObject *showImageChooser(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QObject *showFilesChooser(int handle, int instance, const QPoint &point);
@@ -81,20 +86,18 @@ public:
     Q_INVOKABLE QObject *showObjectReference(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QObject *showMaterialReference(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QObject *showTextureChooser(int handle, int instance, const QPoint &point);
-    Q_INVOKABLE void showDataInputChooser(int handle, int instance, const QPoint &point);
-    Q_INVOKABLE QColor showColorDialog(const QColor &color);
     Q_INVOKABLE bool toolTipsEnabled();
-    Q_INVOKABLE QString convertPathToProjectRoot(const QString &presentationPath);
     Q_INVOKABLE bool isRefMaterial(int instance) const;
-    Q_INVOKABLE QString noneString() const;
     Q_INVOKABLE bool isEditable(int handle) const;
+    Q_INVOKABLE QString convertPathToProjectRoot(const QString &presentationPath);
+    Q_INVOKABLE QString noneString() const;
 
     // IDataModelListener
     void OnBeginDataModelNotifications() override;
     void OnEndDataModelNotifications() override;
     void OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override;
     void OnImmediateRefreshInstanceMultiple(qt3dsdm::Qt3DSDMInstanceHandle *inInstance,
-                                                    long inInstanceCount) override;
+                                            long inInstanceCount) override;
 
 Q_SIGNALS:
     void titleChanged();
@@ -116,14 +119,14 @@ private:
     void onFilesChanged(const Q3DStudio::TFileModificationList &inFileModificationList);
     void OnNewPresentation() override;
     void OnClosingPresentation() override;
-    void OnTimeChanged();
     void filterMaterials(std::vector<Q3DStudio::CFilePath> &materials);
     void filterMatDatas(std::vector<Q3DStudio::CFilePath> &matDatas);
     void setPropertyValueFromFilename(long instance, int handle, const QString &name);
     bool canLinkProperty(int instance, int handle) const;
     bool canOpenInInspector(int instance, int handle) const;
     void openInInspector();
-    void onInstancePropertyValueChanged(qt3dsdm::Qt3DSDMPropertyHandle propertyHandle);
+    void onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                           qt3dsdm::Qt3DSDMPropertyHandle inProperty);
     void onChildAdded(int inChild);
     void onChildRemoved();
 
@@ -142,9 +145,10 @@ private:
     QPointer<DataInputSelectView> m_dataInputChooserView;
     std::vector<Q3DStudio::CFilePath> m_fileList;
     MouseHelper m_mouseHelper;
+    QmlUtils m_qmlUtils;
 
-    int m_instance;
-    int m_handle;
+    int m_instance = 0;
+    int m_handle = 0;
 
     QSize m_preferredSize;
     QColor m_currentColor;

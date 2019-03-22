@@ -48,9 +48,10 @@ Viewer.
 You need to find all occurrences of \c{.mesh#<revision_number>} from your \e .uip files and
 replace them with \c{.mesh}.
 
-\section1 QML Stream with Window Element Causes Viewer Crash
+\section1 QML Streams with non-QQuickItem Derived Root Items Are Not Supported
 
-Opening a project that has a QML stream including a Window element causes the viewer to crash.
+QML streams with non-QQuickItem derived root items are not supported and will show up as black
+textures.
 
 \section1 Changes to Material Definitions Saved Separately from the Project
 

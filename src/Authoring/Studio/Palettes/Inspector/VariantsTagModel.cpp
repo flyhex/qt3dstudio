@@ -28,15 +28,11 @@
 
 #include "VariantsTagModel.h"
 
-VariantsTagModel::VariantsTagModel(QObject *parent)
+VariantsTagModel::VariantsTagModel(const QVector<std::pair<QString, bool> > &data, QObject *parent)
     : QAbstractListModel(parent)
+    , m_data(data)
 {
 
-}
-
-void VariantsTagModel::init(const QVector<std::pair<QString, bool> > &data)
-{
-    m_data = data;
 }
 
 void VariantsTagModel::updateTagState(const QString &tag, bool selected)

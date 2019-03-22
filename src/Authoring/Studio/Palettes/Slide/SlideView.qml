@@ -265,11 +265,14 @@ Rectangle {
 
                         Label { // variants
                             width: slideImage.width
-                            font.pixelSize: _fontSize
-                            padding: 3
-                            verticalAlignment: Text.AlignVCenter
-                            background: Rectangle { color:"#111111" }
-                            wrapMode: Text.WordWrap
+                            font.pixelSize: 14
+                            font.letterSpacing: 2
+                            leftPadding: 3
+                            topPadding: -3
+                            bottomPadding: 8
+                            background: Rectangle { color: _variantsSlideViewBGColor }
+                            wrapMode: Text.WrapAnywhere
+                            lineHeight: .6
                             visible: model.variants !== undefined && model.variants !== ""
                             text: model.variants ? model.variants : ""
 

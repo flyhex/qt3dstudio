@@ -203,6 +203,12 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>easeInSlider</tabstop>
+  <tabstop>easeInSpinBox</tabstop>
+  <tabstop>easeOutSlider</tabstop>
+  <tabstop>easeOutSpinBox</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

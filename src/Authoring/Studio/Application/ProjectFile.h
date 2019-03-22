@@ -98,6 +98,7 @@ public:
     bool isVariantTagUnique(const QString &group, const QString &tag) const;
 
     QHash<QString, VariantGroup> variantsDef() const { return m_variantsDef; }
+    QStringList variantsDefKeys() const { return m_variantsDefKeys; }
 
 Q_SIGNALS:
     void presentationIdChanged(const QString &path, const QString &id);
@@ -116,6 +117,8 @@ private:
     QFileInfo m_fileInfo; // uia file info
     QString m_initialPresentation;
     QHash<QString, VariantGroup> m_variantsDef; // definition of variants
+    QStringList m_variantsDefKeys; // maintains insertion order
+    int m_variantColorsIter = -1; // tracks the next default color to assign to newly created group
 };
 
 #endif // PROJECTFILE_H

@@ -27,26 +27,14 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
 #ifndef INCLUDED_MAIN_FRAME
-#define INCLUDED_MAIN_FRAME 1
+#define INCLUDED_MAIN_FRAME
 
-#pragma once
-
-//==============================================================================
-//	Includes
-//==============================================================================
-#include "PreviewHelper.h"
 #include "DispatchListeners.h"
 
 #include <QtWidgets/qmainwindow.h>
 #include <QtCore/qtimer.h>
 
-//==============================================================================
-//	Forwards
-//==============================================================================
 class CHotKeys;
 class CPaletteManager;
 class CRecentItems;
@@ -57,6 +45,9 @@ class RemoteDeploymentSender;
 class TimelineWidget;
 class CStudioPreferencesPropSheet;
 class SlideView;
+class InspectorControlView;
+class FilterVariantsDlg;
+class CPlayerWnd;
 
 #ifdef QT_NAMESPACE
 using namespace QT_NAMESPACE;
@@ -69,17 +60,17 @@ namespace Ui
 }
 QT_END_NAMESPACE
 
-class CPlayerWnd;
 
 class CMainFrame : public QMainWindow,
-        public CPresentationChangeListener,
-        public CFileOpenListener,
-        public CClientPlayChangeListener
+                   public CPresentationChangeListener,
+                   public CFileOpenListener,
+                   public CClientPlayChangeListener
 {
     Q_OBJECT
+
 public:
     CMainFrame();
-    virtual ~CMainFrame();
+    virtual ~CMainFrame() override;
 
     void OnNewPresentation() override;
     void OnClosingPresentation() override;
@@ -97,7 +88,7 @@ public:
     void OnPlayStop() override;
     void OnTimeChanged(long inTime) override;
 
-    CRecentItems *GetRecentItems();
+    CRecentItems *GetRecentItems() const;
 
     void OnCreate();
 
@@ -131,8 +122,6 @@ public:
     void onEditGroup();
 
     void timerEvent(QTimerEvent *event) override;
-    void showEvent(QShowEvent *event) override;
-    void hideEvent(QHideEvent *event) override;
 
     void OnUpdateTimelineSetTimeBarColor();
     void OnTimelineSetTimeBarColor();
@@ -151,21 +140,18 @@ public:
     void OnPlaybackPlay();
     void OnUpdatePlaybackPlay();
     void OnPlaybackRewind();
-    void OnUpdatePlaybackRewind();
     void OnPlaybackStop();
-    void OnUpdatePlaybackStop();
     void OnPlaybackPreview(const QString &viewerExeName, bool remote = false);
     void OnPlaybackPreviewRuntime1();
     void OnPlaybackPreviewRuntime2();
     void OnPlaybackPreviewRemote();
+    void onFilterVariants();
     void OnUpdatePlaybackPreview();
     void OnUpdateToolMove();
     void OnUpdateToolRotate();
     void OnUpdateToolScale();
     void OnUpdateToolGlobalManipulators();
-    void OnToolMove();
-    void OnToolRotate();
-    void OnToolScale();
+    void onTransformToolChanged(long toolMode);
     void OnToolGlobalManipulators();
     void OnUpdateToolChange();
     void OnUpdateToolGroupSelection();
@@ -237,19 +223,23 @@ public:
 
     TimelineWidget *getTimelineWidget() const;
     SlideView *getSlideView() const;
+    InspectorControlView *getInspectorView() const;
 
     void EditPreferences(short inPageIndex);
 
     void HandleEditViewFillModeKey();
     void HandleEditCameraZoomExtent();
 
-    QWidget *GetActiveView();
+    QWidget *GetActiveView() const;
     CPlayerWnd *GetPlayerWnd() const;
 
     void initializeGeometryAndState();
 
     void toggleSelectMode();
     void showScene();
+    QString getVariantsFilterStr() const;
+    void updateActionFilterEnableState();
+    void updateActionPreviewVariantsState(bool isFiltered);
 
 Q_SIGNALS:
     void playStateChanged(bool started);
@@ -270,6 +260,9 @@ protected:
 
     bool m_playbackFlag = false;
     bool m_resettingLayout = false;
+
+private:
+    QScopedPointer<FilterVariantsDlg> m_filterVariantsDlg;
 };
 
 #endif // INCLUDED_MAIN_FRAME

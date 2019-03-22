@@ -36,7 +36,8 @@ class VariantsTagModel : public QAbstractListModel
     Q_OBJECT
 
 public:
-    explicit VariantsTagModel(QObject *parent = nullptr);
+    explicit VariantsTagModel(const QVector<std::pair<QString, bool> > &data,
+                              QObject *parent = nullptr);
 
     enum Roles {
         TagRole = Qt::UserRole + 1,
@@ -48,7 +49,6 @@ public:
 
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
-    void init(const QVector<std::pair<QString, bool> > &data);
     void updateTagState(const QString &tag, bool selected);
     QString serialize(const QString &groupName) const;
 

@@ -30,17 +30,15 @@
 #define SLIDEVIEW_H
 
 #include <QtQuickWidgets/qquickwidget.h>
+#include <QtCore/qtimer.h>
 
-#include "DispatchListeners.h"
 #include "SlideModel.h"
-#include "DataInputSelectView.h"
-#include "Qt3DSDMHandles.h"
 #include "Qt3DSDMSignals.h"
 #include "DispatchListeners.h"
-#include "Dispatch.h"
 
 class CClientDataModelBridge;
 class CDoc;
+class DataInputSelectView;
 
 QT_FORWARD_DECLARE_CLASS(QLabel);
 
@@ -53,6 +51,7 @@ class SlideView : public QQuickWidget,
                   public IDataModelListener
 {
     Q_OBJECT
+
     Q_PROPERTY(QAbstractItemModel *currentModel READ currentModel NOTIFY currentModelChanged FINAL)
     Q_PROPERTY(bool showMasterSlide READ showMasterSlide WRITE setShowMasterSlide NOTIFY showMasterSlideChanged FINAL)
     Q_PROPERTY(bool controlled MEMBER m_controlled NOTIFY controlledChanged)
@@ -120,11 +119,11 @@ private:
     void initialize();
     void clearSlideList();
     void setActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inActiveSlideHandle);
-    inline CDoc *GetDoc();
-    inline CClientDataModelBridge *GetBridge();
-    inline qt3dsdm::ISlideSystem *GetSlideSystem();
-    long GetSlideIndex(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle);
-    bool isMaster(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle);
+    inline CDoc *GetDoc() const;
+    inline CClientDataModelBridge *GetBridge() const;
+    inline qt3dsdm::ISlideSystem *GetSlideSystem() const;
+    long GetSlideIndex(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle) const;
+    bool isMaster(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle) const;
     void rebuildSlideList(const qt3dsdm::Qt3DSDMSlideHandle &inActiveSlideHandle);
     void onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     void onAssetDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
@@ -136,13 +135,11 @@ private:
     SlideModel *m_CurrentModel = nullptr;
     DataInputSelectView *m_dataInputSelector = nullptr;
     QLabel *m_variantsToolTip = nullptr;
-    QColor m_BaseColor = QColor::fromRgb(75, 75, 75);
     std::vector<std::shared_ptr<qt3dsdm::ISignalConnection>> m_Connections;
-    typedef QHash<int, int> TIntIntMap;
     // We need to remember which slide we were on when we entered the master slide.
     // Then, when the users leave the master slide we can go back to roughly the same
     // state.
-    TIntIntMap m_MasterSlideReturnPointers;
+    QHash<int, int> m_MasterSlideReturnPointers;
 
     // the object containing the slides to be inspected.
     qt3dsdm::Qt3DSDMInstanceHandle m_ActiveRoot = 0;
@@ -151,6 +148,7 @@ private:
     QString m_currentController;
     QString m_toolTip;
     Qt::DockWidgetArea m_dockArea;
+    QTimer m_variantRefreshTimer;
 };
 
 #endif // SLIDEVIEW_H

@@ -1109,6 +1109,8 @@ void ActionView::initialize()
     rootContext()->setContextProperty(QStringLiteral("_resDir"), StudioUtils::resourceImageUrl());
     rootContext()->setContextProperty(QStringLiteral("_tabOrderHandler"), tabOrderHandler());
     rootContext()->setContextProperty(QStringLiteral("_mouseHelper"), &m_mouseHelper);
+    m_mouseHelper.setWidget(this);
+
     QString shiftKey(QStringLiteral("Shift+"));
 #ifdef Q_OS_MACOS
     shiftKey = "⇧";

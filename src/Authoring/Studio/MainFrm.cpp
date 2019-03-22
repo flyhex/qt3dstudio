@@ -27,19 +27,9 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
 #include "MainFrm.h"
 #include "ui_MainFrm.h"
-
 #include "StudioConst.h"
-
-//==============================================================================
-//	Includes
-//==============================================================================
-#include "Bindings/TimelineTranslationManager.h"
-#include "Bindings/Qt3DSDMTimelineItemBinding.h"
 #include "SceneView.h"
 #include "StudioApp.h"
 #include "IKeyframesManager.h"
@@ -61,35 +51,30 @@
 #include "RowTree.h"
 #include "WidgetControl.h"
 #include "SlideView.h"
+#include "FilterVariantsDlg.h"
+#include "PreviewHelper.h"
 
 #include <QtGui/qevent.h>
 #include <QtGui/qdesktopservices.h>
-#include <QtWidgets/qdockwidget.h>
 #include <QtCore/qsettings.h>
-#include <QtCore/qtimer.h>
 #include <QtCore/qurl.h>
-#include <QtCore/qdir.h>
 #include <QtCore/qprocess.h>
 #include <QtGui/qfontdatabase.h>
 
 // Constants
-const long PLAYBACK_TIMER_TIMEOUT = 10; // 10 milliseconds
+const long PLAYBACK_TIMER_TIMEOUT = 10; // milliseconds
 
-//==============================================================================
-/**
- * Constructor
- */
 CMainFrame::CMainFrame()
     : m_ui(new Ui::MainFrame)
     , m_remoteDeploymentSender(new RemoteDeploymentSender(this))
-    , m_sceneView(nullptr)
-    , m_recentItems(nullptr)
-    , m_paletteManager(nullptr)
     , m_updateUITimer(new QTimer)
     , m_playbackTimer(new QTimer)
-    , m_propSheet(nullptr)
 {
     m_ui->setupUi(this);
+
+    // allow styling this action
+    m_ui->m_PlaybackToolbar->widgetForAction(m_ui->actionFilterVariants)
+                           ->setObjectName("actionFilterVariants");
 
     // Register TitilliumWeb as application font in case user doesn't have it already installed
     QFontDatabase::addApplicationFont(QStringLiteral(":/TitilliumWeb-Light.ttf"));
@@ -219,16 +204,19 @@ CMainFrame::CMainFrame()
             m_sceneView.data(), &CSceneView::onToolGroupSelection);
 
     // Playback toolbar
-    connect(m_ui->actionPreview, &QAction::triggered,
-            this, &CMainFrame::OnPlaybackPreviewRuntime2);
+    connect(m_ui->actionPreview, &QAction::triggered, this, &CMainFrame::OnPlaybackPreviewRuntime2);
+    connect(m_ui->actionFilterVariants, &QAction::triggered, this, &CMainFrame::onFilterVariants);
 
     connect(m_ui->actionRemote_Preview, &QAction::triggered,
             this, &CMainFrame::OnPlaybackPreviewRemote);
 
     // Tool mode toolbar
-    connect(m_ui->actionPosition_Tool, &QAction::triggered, this, &CMainFrame::OnToolMove);
-    connect(m_ui->actionRotation_Tool, &QAction::triggered, this, &CMainFrame::OnToolRotate);
-    connect(m_ui->actionScale_Tool, &QAction::triggered, this, &CMainFrame::OnToolScale);
+    connect(m_ui->actionPosition_Tool, &QAction::triggered, this,
+            std::bind(&CMainFrame::onTransformToolChanged, this, STUDIO_TOOLMODE_MOVE));
+    connect(m_ui->actionRotation_Tool, &QAction::triggered, this,
+            std::bind(&CMainFrame::onTransformToolChanged, this, STUDIO_TOOLMODE_ROTATE));
+    connect(m_ui->actionScale_Tool, &QAction::triggered, this,
+            std::bind(&CMainFrame::onTransformToolChanged, this, STUDIO_TOOLMODE_SCALE));
     connect(m_ui->actionLocal_Global_Manipulators, &QAction::triggered,
             this, &CMainFrame::OnToolGlobalManipulators);
 
@@ -284,12 +272,7 @@ CMainFrame::CMainFrame()
         OnUpdateViewSlide();
         OnUpdateHelpIndex();
         OnUpdatePlaybackPlay();
-        OnUpdatePlaybackRewind();
-        OnUpdatePlaybackStop();
         OnUpdatePlaybackPreview();
-        OnUpdateToolMove();
-        OnUpdateToolRotate();
-        OnUpdateToolScale();
         OnUpdateToolGlobalManipulators();
         OnUpdateToolGroupSelection();
         OnUpdateToolItemSelection();
@@ -310,10 +293,6 @@ CMainFrame::CMainFrame()
     qApp->installEventFilter(this);
 }
 
-//==============================================================================
-/**
- * Destructor
- */
 CMainFrame::~CMainFrame()
 {
     qApp->removeEventFilter(this);
@@ -321,27 +300,12 @@ CMainFrame::~CMainFrame()
     m_updateUITimer->stop();
 }
 
-//==============================================================================
-/**
- *	Timer callback
- */
+// Timer callback
 void CMainFrame::onPlaybackTimeout()
 {
     // Timer callback that drives playback
     Q_ASSERT(&g_StudioApp);
     g_StudioApp.GetCore()->GetDoc()->ClientStep();
-}
-
-//==============================================================================
-
-void CMainFrame::showEvent(QShowEvent *event)
-{
-    QMainWindow::showEvent(event);
-}
-
-void CMainFrame::hideEvent(QHideEvent *event)
-{
-    QMainWindow::hideEvent(event);
 }
 
 /**
@@ -371,6 +335,14 @@ void CMainFrame::OnCreate()
 
         theDialogs->ResetSettings(theMostRecentOpen);
     }
+
+    // create the variants filtering dialog, singleShot is used so that actionGeom is calculated
+    // correctly
+    QTimer::singleShot(0, this, [&] {
+        QRect actionGeom = m_ui->m_PlaybackToolbar->actionGeometry(m_ui->actionFilterVariants);
+        m_filterVariantsDlg.reset(new FilterVariantsDlg(this, m_ui->actionFilterVariants,
+                                                        actionGeom.width()));
+    });
 
     // Create the view manager
     m_paletteManager.reset(new CPaletteManager(this));
@@ -406,7 +378,6 @@ void CMainFrame::OnCreate()
     setCentralWidget(m_ui->infoText);
 }
 
-//==============================================================================
 /**
  * Called when a new presenation is created.  We have to wait to associate the
  * scene object with the scene view until this point, because the scene object
@@ -440,7 +411,6 @@ void CMainFrame::OnNewPresentation()
     g_StudioApp.m_dataInputDialogItems.clear();
 }
 
-//==============================================================================
 /**
  * Called when the current presentation is being closed.
  * This will close all the editor windows that are open.
@@ -449,7 +419,6 @@ void CMainFrame::OnClosingPresentation()
 {
 }
 
-//==============================================================================
 /**
  * Handles the Timeline | Set Interpolation menu item
  *	This is a temporary method that will display the Set Interpolation dialog.
@@ -459,27 +428,22 @@ void CMainFrame::OnTimelineSetInterpolation()
     g_StudioApp.GetCore()->GetDoc()->SetKeyframeInterpolation();
 }
 
-//==============================================================================
 /**
  *	OnEditRedo: calls handleRedoOperation
  */
-//==============================================================================
 void CMainFrame::OnEditRedo()
 {
     g_StudioApp.GetCore()->GetCmdStack()->Redo();
 }
 
-//==============================================================================
 /**
  *	OnEditUndo: calls HandleUndoOperation
  */
-//==============================================================================
 void CMainFrame::OnEditUndo()
 {
     g_StudioApp.GetCore()->GetCmdStack()->Undo();
 }
 
-//==============================================================================
 /**
  *	OnUpdateEditUndo: Handler for ID_EDIT_UNDO message
  *
@@ -493,7 +457,6 @@ void CMainFrame::OnUpdateEditUndo()
     m_ui->action_Undo->setText(undoDescription);
 }
 
-//==============================================================================
 /**
  *	OnUpdateEditRedo: handles the message ID_EDIT_REDO
  *
@@ -507,7 +470,6 @@ void CMainFrame::OnUpdateEditRedo()
     m_ui->action_Redo->setText(redoDescription);
 }
 
-//==============================================================================
 /**
  *	OnEditCopy: Handles the Copy message
  *
@@ -518,7 +480,6 @@ void CMainFrame::OnEditCopy()
     g_StudioApp.OnCopy();
 }
 
-//==============================================================================
 /**
  *	OnUpdateEditCopy: Handle the update UI command for the copy button and menu item
  *
@@ -541,7 +502,6 @@ void CMainFrame::OnUpdateEditCopy()
     }
 }
 
-//==============================================================================
 /**
  *	OnEditCut: Handles the Cut message
  *
@@ -552,7 +512,6 @@ void CMainFrame::OnEditCut()
     g_StudioApp.OnCut();
 }
 
-//==============================================================================
 /**
  *	OnUpdateEditCut: Handle the update UI command for the cut button and menu item
  *
@@ -573,7 +532,6 @@ void CMainFrame::OnUpdateEditCut()
     }
 }
 
-//==============================================================================
 /**
  *	OnEditPaste: Handles the Paste command
  *
@@ -590,7 +548,6 @@ void CMainFrame::onEditPasteToMaster()
     g_StudioApp.GetCore()->GetDoc()->HandleMasterPaste();
 }
 
-//==============================================================================
 /**
  *	OnUpdateEditPaste: Handle the update UI command for the paste button and menu item
  *
@@ -614,7 +571,6 @@ void CMainFrame::OnUpdateEditPaste()
     }
 }
 
-//=============================================================================
 /**
  * Called when a tool mode changes from a modifier key
  */
@@ -639,7 +595,6 @@ void CMainFrame::OnUpdateToolChange()
 #endif
 }
 
-//==============================================================================
 /**
  *	OnTimelineSettimebarcolor: Handles the ID_TIMELINE_SETTIMEBARCOLOR message.
  *
@@ -651,7 +606,6 @@ void CMainFrame::OnTimelineSetTimeBarColor()
     getTimelineWidget()->openBarColorDialog();
 }
 
-//==============================================================================
 /**
  *	OnUpdateTimelineSetTimeBarColor: Handles the update UI message for the
  *	"Change Time Bar Color" menu item.
@@ -666,7 +620,6 @@ void CMainFrame::OnUpdateTimelineSetTimeBarColor()
     m_ui->actionChange_Time_Bar_Color->setEnabled(g_StudioApp.CanChangeTimebarColor());
 }
 
-//==============================================================================
 /**
  *	OnTimelineSetChangedKeyframe: Handles the ID_TIMELINE_SETCHANGEDKEYFRAME message.
  *
@@ -678,7 +631,6 @@ void CMainFrame::OnTimelineSetChangedKeyframe()
     g_StudioApp.HandleSetChangedKeys();
 }
 
-//==============================================================================
 /**
  *	OnUpdateTimelineDeleteSelectedKeyframes: Handles the update UI message for
  *	the "Delete Selected Keyframe(s)" message.
@@ -693,7 +645,6 @@ void CMainFrame::OnUpdateTimelineDeleteSelectedKeyframes()
     m_ui->actionDelete_Selected_Keyframe_s->setEnabled(getTimelineWidget()->hasSelectedKeyframes());
 }
 
-//==============================================================================
 /**
  *	OnUpdateTimelineSetInterpolation: Handles the update UI message for
  *	the "Set Interpolation" message.
@@ -709,7 +660,6 @@ void CMainFrame::OnUpdateTimelineSetInterpolation()
                 g_StudioApp.GetCore()->GetDoc()->GetKeyframesManager()->HasSelectedKeyframes());
 }
 
-//==============================================================================
 /**
  *	OnEditDuplicate: Handles the ID_EDIT_DUPLICATE message.
  *
@@ -741,7 +691,6 @@ void CMainFrame::OnFileOpen()
     g_StudioApp.OnFileOpen();
 }
 
-//=============================================================================
 /**
  * Command handler for the File Save menu and toolbar options.
  * This will save the file, if the file has not been saved before this will
@@ -811,7 +760,6 @@ void CMainFrame::onCtrlNPressed()
     }
 }
 
-//==============================================================================
 /**
  * Overrides the close method to prompt if the document is modified.
  */
@@ -837,7 +785,6 @@ void CMainFrame::closeEvent(QCloseEvent *event)
     QTimer::singleShot(0, &g_StudioApp, &CStudioApp::performShutdown);
 }
 
-//==============================================================================
 /**
  *	Displays the preferences dialog and can change program settings.
  */
@@ -846,7 +793,6 @@ void CMainFrame::OnEditApplicationPreferences()
     EditPreferences(PAGE_STUDIOAPPPREFERENCES);
 }
 
-//==============================================================================
 /**
  *	Displays the preferences dialog and can change program settings.
  */
@@ -855,7 +801,6 @@ void CMainFrame::OnEditPresentationPreferences()
     EditPreferences(PAGE_STUDIOPROJECTSETTINGS);
 }
 
-//==============================================================================
 /**
  *  Displays the data input dialog.
  */
@@ -868,7 +813,6 @@ void CMainFrame::OnFileDataInputs()
         g_StudioApp.saveDataInputsToProjectFile();
 }
 
-//==============================================================================
 /**
  *	EditPreferences: Displays the presentation settings property sheet with
  *					 the specified active page.
@@ -932,7 +876,6 @@ void CMainFrame::EditPreferences(short inPageIndex)
     }
 }
 
-//==============================================================================
 /**
  *	OnToolAutosetkeys: Called when the Autoset Keyframe button is pressed.
  *	Calls the doc to turn off or on the Autoset Keyframe preference.
@@ -946,7 +889,6 @@ void CMainFrame::OnToolAutosetkeys()
     m_ui->actionAutoset_Keyframes->setChecked(CStudioPreferences::IsAutosetKeyframesOn());
 }
 
-//==============================================================================
 /**
  *	OnUpdateToolAutosetkeys: Updates the UI associated with this button.
  *	Checks or unchecks this button on the toolbar, depending on the current
@@ -959,7 +901,6 @@ void CMainFrame::OnUpdateToolAutosetkeys()
     m_ui->actionAutoset_Keyframes->setChecked(CStudioPreferences::IsAutosetKeyframesOn());
 }
 
-//==========================================================================
 /**
  *	Called when the presentation is being played in Studio.  Updates the play
  *	button on the main frame.
@@ -975,7 +916,6 @@ void CMainFrame::OnPlayStart()
     }
 }
 
-//==========================================================================
 /**
  *	Called when the presentation stops being played in Studio.  Updates the play
  *	button on the main frame.
@@ -1040,6 +980,50 @@ void CMainFrame::OnPlaybackPreviewRuntime2()
     OnPlaybackPreview(QStringLiteral("q3dsviewer"));
 }
 
+void CMainFrame::onFilterVariants()
+{
+    if (m_ui->actionFilterVariants->isChecked()) {
+        QRect actionGeom = m_ui->m_PlaybackToolbar->actionGeometry(m_ui->actionFilterVariants);
+        m_filterVariantsDlg->activateWindow();
+        m_filterVariantsDlg->raise();
+        m_filterVariantsDlg->move(m_ui->m_PlaybackToolbar->pos()
+                                  + QPoint(actionGeom.x(), actionGeom.bottom()));
+        m_filterVariantsDlg->setFocus();
+        m_filterVariantsDlg->show();
+    } else {
+        m_filterVariantsDlg->close();
+    }
+}
+
+QString CMainFrame::getVariantsFilterStr() const
+{
+    if (m_filterVariantsDlg)
+        return m_filterVariantsDlg->filterStr();
+
+    return {};
+}
+
+void CMainFrame::updateActionFilterEnableState()
+{
+    bool enable = false;
+    const auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
+    const auto keys = variantsDef.keys();
+    for (auto &group : keys) {
+        if (!variantsDef[group].m_tags.isEmpty()) {
+            enable = true;
+            break;
+        }
+    }
+
+    m_ui->actionFilterVariants->setEnabled(enable);
+}
+
+void CMainFrame::updateActionPreviewVariantsState(bool isFiltered)
+{
+    m_ui->actionPreview->setIcon(QIcon(isFiltered ? QStringLiteral(":/images/preview-variants.png")
+                                                  : QStringLiteral(":/images/preview.png")));
+}
+
 void CMainFrame::OnPlaybackPreviewRemote()
 {
     OnPlaybackPreview(QStringLiteral("q3dsviewer"), true);
@@ -1077,26 +1061,6 @@ void CMainFrame::OnPlaybackRewind()
 
 //==============================================================================
 /**
- *	Handles the update ui message for the rewind button.  Does nothing because
- *	no additional ui handling is necessary for this button.
- *	@param inCmdUI Pointer to the UI element that needs updating
- */
-void CMainFrame::OnUpdatePlaybackRewind()
-{
-}
-
-//==============================================================================
-/**
- *	Handles the update ui message for the stop button.  Doesn't do anything
- *	because no special ui handling is necessary for the stop button.
- *	@param inCmdUI Pointer to the UI element that needs updating
- */
-void CMainFrame::OnUpdatePlaybackStop()
-{
-}
-
-//==============================================================================
-/**
  *	Registers all the keys it will need for shortcuts, also telsl children to register theirs
  *  @param inHotKeys the hotkeys to with which to register
  */
@@ -1121,64 +1085,6 @@ void CMainFrame::RegisterGlobalKeyboardShortcuts(CHotKeys *inHotKeys, QWidget *a
 
 //==============================================================================
 /**
- *	OnUpdateToolMove: Updates the UI associated with this button.
- *
- *	Checks or unchecks this button on the toolbar, depending on the current
- *	tool mode, and whether or not the button is enabled.
- *
- *	@param pCmdUI Pointer to the button that generated the message.
- */
-//==============================================================================
-void CMainFrame::OnUpdateToolMove()
-{
-    long theCurrentToolSettings = g_StudioApp.GetToolMode();
-
-    // If the current tool mode matches this button
-    // If the button is currently enabled
-    m_ui->actionPosition_Tool->setChecked(theCurrentToolSettings == STUDIO_TOOLMODE_MOVE
-                                          && m_ui->actionPosition_Tool->isEnabled());
-}
-
-//==============================================================================
-/**
- *	OnUpdateToolRotate: Updates the UI associated with this button.
- *
- *	Checks or unchecks this button on the toolbar, depending on the current
- *	tool mode, and whether or not the button is enabled.
- *
- *	@param pCmdUI Pointer to the button that generated the message.
- */
-void CMainFrame::OnUpdateToolRotate()
-{
-    long theCurrentToolSettings = g_StudioApp.GetToolMode();
-
-    // If the current tool mode matches this button
-    // If the button is currently enabled
-    m_ui->actionRotation_Tool->setChecked(theCurrentToolSettings == STUDIO_TOOLMODE_ROTATE
-                                          && m_ui->actionRotation_Tool->isEnabled());
-}
-
-//==============================================================================
-/**
- *	OnUpdateToolScale: Updates the UI associated with this button.
- *
- *	Checks or unchecks this button on the toolbar, depending on the current
- *	tool mode, and whether or not the button is enabled.
- *
- *	@param pCmdUI Pointer to the button that generated the message.
- */
-void CMainFrame::OnUpdateToolScale()
-{
-    long theCurrentToolSettings = g_StudioApp.GetToolMode();
-
-    // If the current tool mode matches this button
-    // If the button is currently enabled
-    m_ui->actionScale_Tool->setChecked(theCurrentToolSettings == STUDIO_TOOLMODE_SCALE
-                                       && m_ui->actionScale_Tool->isEnabled());
-}
-
-//==============================================================================
-/**
  *	OnUpdateToolScale: Updates the UI associated with this button.
  *
  *	Checks or unchecks this button on the toolbar, depending on the current
@@ -1199,35 +1105,18 @@ void CMainFrame::OnUpdateToolGlobalManipulators()
 
 //==============================================================================
 /**
- *	OnToolMove: Called when the Move button is pressed.
- *	Sets the current tool mode and changes the cursor.
+ * Move, Rotate, or Scale button clicked. Sets the current tool mode and changes the cursor.
+ *
+ * @param toolMode the selected tool (move, rotate, or scale)
  */
-void CMainFrame::OnToolMove()
+void CMainFrame::onTransformToolChanged(long toolMode)
 {
-    g_StudioApp.SetToolMode(STUDIO_TOOLMODE_MOVE);
-    m_sceneView->setToolMode(STUDIO_TOOLMODE_MOVE);
-}
+    g_StudioApp.SetToolMode(toolMode);
+    m_sceneView->setToolMode(toolMode);
 
-//==============================================================================
-/**
- *	OnToolRotate: Called when the Rotate button is pressed.
- *	Sets the current tool mode and changes the cursor.
- */
-void CMainFrame::OnToolRotate()
-{
-    g_StudioApp.SetToolMode(STUDIO_TOOLMODE_ROTATE);
-    m_sceneView->setToolMode(STUDIO_TOOLMODE_ROTATE);
-}
-
-//==============================================================================
-/**
- *	OnToolScale: Called when the Scale button is pressed.
- *	Sets the current tool mode and changes the cursor.
- */
-void CMainFrame::OnToolScale()
-{
-    g_StudioApp.SetToolMode(STUDIO_TOOLMODE_SCALE);
-    m_sceneView->setToolMode(STUDIO_TOOLMODE_SCALE);
+    m_ui->actionPosition_Tool->setChecked(toolMode == STUDIO_TOOLMODE_MOVE);
+    m_ui->actionRotation_Tool->setChecked(toolMode == STUDIO_TOOLMODE_ROTATE);
+    m_ui->actionScale_Tool->setChecked(toolMode == STUDIO_TOOLMODE_SCALE);
 }
 
 void CMainFrame::OnToolGlobalManipulators()
@@ -1927,12 +1816,19 @@ SlideView *CMainFrame::getSlideView() const
                                     ->widget());
 }
 
-CRecentItems *CMainFrame::GetRecentItems()
+InspectorControlView *CMainFrame::getInspectorView() const
+{
+    return static_cast<InspectorControlView *>(m_paletteManager
+                                               ->GetControl(CPaletteManager::CONTROLTYPE_INSPECTOR)
+                                               ->widget());
+}
+
+CRecentItems *CMainFrame::GetRecentItems() const
 {
     return m_recentItems.data();
 }
 
-QWidget *CMainFrame::GetActiveView()
+QWidget *CMainFrame::GetActiveView() const
 {
     return centralWidget();
 }

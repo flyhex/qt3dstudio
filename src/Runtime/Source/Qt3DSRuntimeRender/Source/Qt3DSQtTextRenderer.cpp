@@ -500,6 +500,7 @@ struct Qt3DSQtTextRenderer : public ITextRenderer
         FontInfo &fi = fontInfoForName(inSrcText.m_Font);
         updateFontInfo(fi, inSrcText);
         QFontMetricsF fm(fi.font);
+        int horizontalAlignmentFlag = Qt::AlignLeft;
 
         int shadowRgb = int(2.55f * (100 - int(inSrcText.m_DropShadowStrength)));
         QStringList lineList;
@@ -534,9 +535,11 @@ struct Qt3DSQtTextRenderer : public ITextRenderer
         qreal tracking = 0.0;
         switch (inSrcText.m_HorizontalAlignment) {
         case TextHorizontalAlignment::Center:
+            horizontalAlignmentFlag = Qt::AlignHCenter;
             tracking += qreal(inSrcText.m_Tracking / 2.0f);
             break;
         case TextHorizontalAlignment::Right:
+            horizontalAlignmentFlag = Qt::AlignRight;
             tracking += qreal(inSrcText.m_Tracking);
             break;
         default:
@@ -611,12 +614,12 @@ struct Qt3DSQtTextRenderer : public ITextRenderer
                 painter.setPen(QColor(shadowRgb, shadowRgb, shadowRgb));
                 painter.drawText(boundShadow,
                                  alignToQtAlign(inSrcText.m_VerticalAlignment) | wordWrapFlags
-                                 | Qt::AlignLeft, line, &actualBound);
+                                 | horizontalAlignmentFlag, line, &actualBound);
                 painter.setPen(Qt::white); // coloring is done in the shader
             }
             painter.drawText(bound,
                              alignToQtAlign(inSrcText.m_VerticalAlignment) | wordWrapFlags
-                             | Qt::AlignLeft, line, &actualBound);
+                             | horizontalAlignmentFlag, line, &actualBound);
 
             nextHeight += QT3DSF32(lineHeight) + inSrcText.m_Leading;
         }

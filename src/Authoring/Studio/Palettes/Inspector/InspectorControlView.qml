@@ -211,7 +211,7 @@ Rectangle {
                         x: -10
                         width: delegateItem.width
                         height: 25
-                        color: "#111111"
+                        color: _inspectorGroupHeaderColor
 
                         StyledLabel {
                             x: 30
@@ -1143,8 +1143,11 @@ Rectangle {
 
             Text {
                 text: qsTr("There are no variant tags yet. Click [+ Group] to add a new tags group and start adding tags.")
-                color: "#ffffff"
+                color: _textColor
                 visible: _variantsGroupModel.variantsEmpty
+                width: parent.width
+                wrapMode: Text.WordWrap
+                rightPadding: 5
             }
 
             Repeater {
@@ -1171,7 +1174,7 @@ Rectangle {
 
                     readonly property var tagsModel: model.tags
                     readonly property var groupModel: model
-                    readonly property int groupLabelWidth: tLabel.implicitWidth
+                    readonly property int groupLabelWidth: tLabel.implicitWidth + 10
 
                     Text {
                         id: tLabel
@@ -1227,7 +1230,7 @@ Rectangle {
             ToolButton {
                 id: addGroupButton
                 text: qsTr("+ Group")
-                width: 60
+                width: 65
                 height: 25
                 onClicked: {
                     _variantsGroupModel.addNewGroup()
@@ -1242,19 +1245,21 @@ Rectangle {
         id: tagComponent
 
         Rectangle {
-            property bool toggled: tagsModel.selected
-            property string grpColor: grpModel ? grpModel.color : ""
+            property bool toggled: tagsModel ? tagsModel.selected : false
+            property color grpColor: grpModel ? grpModel.color : ""
+            property bool isBright: grpModel ? _utils.isBright(grpColor) : false
 
             width: Math.max(tLabel.width + 10, 60)
             height: 25
-            color: toggled ? grpColor : "#2e2f30"
-            border.color: "#959596"
+            color: toggled ? grpColor : _backgroundColor
+            border.color: _studioColor4
 
             Text {
                 id: tLabel
                 anchors.centerIn: parent
-                text: tagsModel.tag
-                color: toggled ? "#ffffff" : "#959596"
+                text: tagsModel ? tagsModel.tag : ""
+                color: toggled ? (isBright ? _studioColor1 : _textColor)
+                               : _studioColor4
             }
 
             MouseArea {

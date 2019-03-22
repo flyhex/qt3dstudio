@@ -333,8 +333,10 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     if (m_variantsGroups.size() > 0) {
         const auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
         for (int i = 0; i < m_variantsGroups.size(); ++i) {
-            painter->fillRect(QRect(clipX() + 2 + i * 9, 6, 6, 6),
+            painter->fillRect(QRect(clipX() + 2 + i * 8, 6, 6, 6),
                               variantsDef[m_variantsGroups[i]].m_color);
+            painter->setPen(CStudioPreferences::timelineWidgetBgColor());
+            painter->drawRect(QRect(clipX() + 2 + i * 8, 6, 6, 6));
         }
     }
 
@@ -531,7 +533,7 @@ void RowTree::setBinding(ITimelineItemBinding *binding)
 // x value where label should clip
 int RowTree::clipX() const
 {
-    return treeWidth() - TimelineConstants::TREE_ICONS_W - m_variantsGroups.size() * 9 - 2;
+    return treeWidth() - TimelineConstants::TREE_ICONS_W - m_variantsGroups.size() * 8 - 2;
 }
 
 ITimelineItemProperty *RowTree::propBinding()

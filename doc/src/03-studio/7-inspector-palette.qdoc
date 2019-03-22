@@ -969,8 +969,7 @@ TODO: Only one font for now. More to be added?
   \b{Eliding} - Elide text that does not fit into a fixed size text area.
   \list
     \li
-      \note Text eliding does not work with distance field rendering disabled or when
-      drop shadows are used.
+      \note Text eliding does not work with distance field rendering disabled.
   \endlist
 \li
   \b{Drop-Shadow} - Add a drop shadow to the text. The drop shadow will be a darker shade of the

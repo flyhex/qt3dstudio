@@ -27,18 +27,11 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-// Prefix
-//==============================================================================
 #ifndef STUDIO_DEFINITIONS_H
 #define STUDIO_DEFINITIONS_H 1
 // NOTE: no #pragma once otherwise Mac will not compile
 
-//==============================================================================
-// Definitions
-//==============================================================================
-
 // Copyright date (year only) used through out the Studio program; must be a quoted string.
-#define STUDIO_COPYRIGHT_YEAR "2017-2018"
+#define STUDIO_COPYRIGHT_YEAR "2017-2019"
 
 #endif // STUDIO_DEFINITIONS_H

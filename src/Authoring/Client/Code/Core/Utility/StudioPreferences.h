@@ -165,6 +165,7 @@ public:
     static QColor studioColor1();
     static QColor studioColor2();
     static QColor studioColor3();
+    static QColor studioColor4();
     static QColor backgroundColor();
     static QColor guideColor();
     static QColor selectionColor();

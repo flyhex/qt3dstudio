@@ -43,7 +43,6 @@
 #include "Qt3DSDMSlides.h"
 #include "Dialogs.h"
 
-#include <QtCore/qtimer.h>
 #include "QtWidgets/qlabel.h"
 #include <QtQml/qqmlcontext.h>
 #include <QtQml/qqmlengine.h>
@@ -52,9 +51,9 @@ SlideView::SlideView(QWidget *parent) : QQuickWidget(parent)
   , m_MasterSlideModel(new SlideModel(1, this))
   , m_SlidesModel(new SlideModel(0, this))
   , m_CurrentModel(m_SlidesModel)
+  , m_variantsToolTip(new QLabel(this))
   , m_toolTip(tr("No Controller"))
 {
-    m_variantsToolTip = new QLabel(this);
     m_variantsToolTip->setObjectName(QStringLiteral("variantsToolTip"));
     m_variantsToolTip->setWindowModality(Qt::NonModal);
     m_variantsToolTip->setWindowFlags(Qt::FramelessWindowHint | Qt::ToolTip);
@@ -63,6 +62,14 @@ SlideView::SlideView(QWidget *parent) : QQuickWidget(parent)
     g_StudioApp.GetCore()->GetDispatch()->AddPresentationChangeListener(this);
     setResizeMode(QQuickWidget::SizeRootObjectToView);
     QTimer::singleShot(0, this, &SlideView::initialize);
+
+    m_variantRefreshTimer.setSingleShot(true);
+    m_variantRefreshTimer.setInterval(0);
+    connect(&m_variantRefreshTimer, &QTimer::timeout, [this]() {
+        m_SlidesModel->refreshVariants();
+        m_MasterSlideModel->refreshVariants(m_SlidesModel->variantsModel(),
+                                            m_SlidesModel->variantsModelKeys());
+    });
 }
 
 SlideView::~SlideView()
@@ -185,16 +192,18 @@ void SlideView::showContextMenu(int x, int y, int row)
 
 void SlideView::showVariantsTooltip(int row, const QPoint &point)
 {
-    const auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
     QString templ = QStringLiteral("<font color='%1'>%2</font>");
     QString tooltipStr("<table>");
-    const auto slideVariants = m_CurrentModel->variantsSlideModel(row);
-    const auto keys = slideVariants.keys();
-    for (auto &g : keys) {
+    const auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
+    const auto slideIndex = m_CurrentModel->rowToSlideIndex(row);
+    const auto variantsModel = m_CurrentModel->variantsModel()[slideIndex];
+    const auto variantsModelKeys = m_CurrentModel->variantsModelKeys()[slideIndex];
+    for (auto &g : variantsModelKeys) {
         tooltipStr.append("<tr><td>");
         tooltipStr.append(templ.arg(variantsDef[g].m_color).arg(g + ": "));
         tooltipStr.append("</td><td>");
-        for (auto &t : slideVariants[g])
+        const auto tags = variantsModel[g];
+        for (auto &t : tags)
             tooltipStr.append(t + ", ");
         tooltipStr.chop(2);
         tooltipStr.append("</td></tr>");
@@ -248,6 +257,8 @@ void SlideView::OnNewPresentation()
     // slide datainput control
     CDispatch *theDispatch = g_StudioApp.GetCore()->GetDispatch();
     theDispatch->AddDataModelListener(this);
+
+    refreshVariants();
 }
 
 void SlideView::OnClosingPresentation()
@@ -541,35 +552,35 @@ void SlideView::rebuildSlideList(const qt3dsdm::Qt3DSDMSlideHandle &inActiveSlid
     }
 }
 
-CDoc *SlideView::GetDoc()
+CDoc *SlideView::GetDoc() const
 {
     return g_StudioApp.GetCore()->GetDoc();
 }
 
-CClientDataModelBridge *SlideView::GetBridge()
+CClientDataModelBridge *SlideView::GetBridge() const
 {
     return GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
 }
 
-qt3dsdm::ISlideSystem *SlideView::GetSlideSystem()
+qt3dsdm::ISlideSystem *SlideView::GetSlideSystem() const
 {
     return GetDoc()->GetStudioSystem()->GetSlideSystem();
 }
 
-long SlideView::GetSlideIndex(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle)
+long SlideView::GetSlideIndex(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle) const
 {
     return GetSlideSystem()->GetSlideIndex(inSlideHandle);
 }
 
-bool SlideView::isMaster(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle)
+bool SlideView::isMaster(const qt3dsdm::Qt3DSDMSlideHandle &inSlideHandle) const
 {
     return (0 == GetSlideIndex(inSlideHandle));
 }
 
 void SlideView::refreshVariants()
 {
-    m_SlidesModel->refreshVariants();
-    m_MasterSlideModel->refreshVariants(m_SlidesModel->variantsModel());
+    if (!m_variantRefreshTimer.isActive())
+        m_variantRefreshTimer.start();
 }
 
 void SlideView::OnBeginDataModelNotifications()

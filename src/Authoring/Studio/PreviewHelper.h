@@ -76,6 +76,11 @@ public:
 protected:
     static QString getViewerFilePath(const QString &exeName);
     static void cleanupProcess(QProcess *p, QString *docPath);
+    static void previewClosed();
+
+private:
+    static int s_previewViewerCount;
+
 };
 
 #endif

@@ -2,7 +2,7 @@
 <application>
     <assets initial="SampleProject">
         <presentation id="SampleProject" src="presentations/SampleProject.uip"/>
-        <presentation-qml id="mapView" args="qml streams/Navigation.qml"/>
+        <presentation-qml id="mapView" args="qml/Navigation.qml"/>
         <dataInput max="260" min="0" name="speed" type="Ranged Number"/>
         <dataInput max="7" min="0" name="rpm" type="Ranged Number"/>
         <dataInput name="slide" type="String"/>

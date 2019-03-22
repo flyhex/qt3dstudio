@@ -30,6 +30,8 @@
 #include "VariantsTagModel.h"
 #include "StudioApp.h"
 #include "Core.h"
+#include "Views.h"
+#include "MainFrm.h"
 #include "Qt3DSDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
 #include "IDocumentEditor.h"
@@ -63,6 +65,11 @@ void VariantsGroupModel::refresh()
     qt3dsdm::SValue sValue;
     if (propertySystem->GetInstancePropertyValue(m_instance, m_property, sValue)) {
         beginResetModel();
+
+        // delete tag models
+        for (auto &g : qAsConst(m_data))
+            delete g.m_tagsModel;
+
         m_data.clear();
 
         QString propVal = qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->toQString();
@@ -77,21 +84,19 @@ void VariantsGroupModel::refresh()
 
         // build the variants data model
         const auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
-        const auto keys = variantsDef.keys();
+        const auto keys = g_StudioApp.GetCore()->getProjectFile().variantsDefKeys();
         for (auto &group : keys) {
             TagGroupData g;
             g.m_title = group;
             g.m_color = variantsDef[group].m_color;
 
-            VariantsTagModel *m = new VariantsTagModel(this);
             QVector<std::pair<QString, bool> > tags;
-            for (int i = 0; i < variantsDef[group].m_tags.length(); ++i)
+            for (int i = 0; i < variantsDef[group].m_tags.length(); ++i) {
                 tags.append({variantsDef[group].m_tags[i],
                              propTags[group].contains(variantsDef[group].m_tags[i])});
+            }
 
-            m->init(tags);
-            g.m_tagsModel = m;
-
+            g.m_tagsModel = new VariantsTagModel(tags);
             m_data.push_back(g);
         }
 
@@ -160,6 +165,19 @@ void VariantsGroupModel::addNewTag(const QString &group)
     if (dlg.exec() == QDialog::Accepted) {
         g_StudioApp.GetCore()->getProjectFile().addVariantTag(group, dlg.getNames().second);
         refresh();
+
+        if (g_StudioApp.GetCore()->getProjectFile().variantsDef()[group].m_tags.size() == 1)
+            g_StudioApp.GetViews()->getMainFrame()->updateActionFilterEnableState();
+    }
+}
+
+void VariantsGroupModel::addNewGroup()
+{
+    VariantTagDialog dlg(VariantTagDialog::AddGroup);
+
+    if (dlg.exec() == QDialog::Accepted) {
+        g_StudioApp.GetCore()->getProjectFile().addVariantGroup(dlg.getNames().second);
+        refresh();
     }
 }
 
@@ -186,7 +204,7 @@ void VariantsGroupModel::exportVariants()
                                                                          " encoding=\"utf-8\"")));
 
     const auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
-    const auto keys = variantsDef.keys();
+    const auto keys = g_StudioApp.GetCore()->getProjectFile().variantsDefKeys();
     QDomElement vElem = domDoc.createElement(QStringLiteral("variants"));
     domDoc.appendChild(vElem);
     for (auto &g : keys) {
@@ -206,16 +224,6 @@ void VariantsGroupModel::exportVariants()
     QSaveFile file(exportFilePath);
     if (StudioUtils::openTextSave(file))
         StudioUtils::commitDomDocumentSave(file, domDoc);
-}
-
-void VariantsGroupModel::addNewGroup()
-{
-    VariantTagDialog dlg(VariantTagDialog::AddGroup);
-
-    if (dlg.exec() == QDialog::Accepted) {
-        g_StudioApp.GetCore()->getProjectFile().addVariantGroup(dlg.getNames().second);
-        refresh();
-    }
 }
 
 QHash<int, QByteArray> VariantsGroupModel::roleNames() const

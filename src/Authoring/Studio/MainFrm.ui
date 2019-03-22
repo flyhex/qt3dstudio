@@ -48,6 +48,9 @@ Project palette using Import functionality.</string>
      <height>21</height>
     </rect>
    </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <widget class="QMenu" name="menu_File">
     <property name="title">
      <string>&amp;File</string>
@@ -158,6 +161,9 @@ Project palette using Import functionality.</string>
    <addaction name="menu_Help"/>
   </widget>
   <widget class="QToolBar" name="toolBar">
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="windowTitle">
     <string>Tool Bar</string>
    </property>
@@ -184,6 +190,9 @@ Project palette using Import functionality.</string>
    <addaction name="action_Redo"/>
   </widget>
   <widget class="QToolBar" name="m_ClientToolsBar">
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="windowTitle">
     <string>Client Tools</string>
    </property>
@@ -210,6 +219,9 @@ Project palette using Import functionality.</string>
    <addaction name="actionAutoset_Keyframes"/>
   </widget>
   <widget class="CEditCameraBar" name="m_EditCamerasBar">
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="windowTitle">
     <string>Edit Cameras</string>
    </property>
@@ -235,6 +247,12 @@ Project palette using Import functionality.</string>
    <addaction name="actionWireframe"/>
   </widget>
   <widget class="QToolBar" name="m_PlaybackToolbar">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
    <property name="windowTitle">
     <string>Playback</string>
    </property>
@@ -252,6 +270,7 @@ Project palette using Import functionality.</string>
    </attribute>
    <addaction name="actionPreview"/>
    <addaction name="actionRemote_Preview"/>
+   <addaction name="actionFilterVariants"/>
   </widget>
   <action name="action_Reference_Manual">
    <property name="text">
@@ -759,7 +778,9 @@ Project palette using Import functionality.</string>
   <action name="actionPreview">
    <property name="icon">
     <iconset resource="images.qrc">
-     <normaloff>:/images/playback_tools_low-03.png</normaloff>:/images/playback_tools_low-03.png</iconset>
+     <normaloff>:/images/preview.png</normaloff>
+     <disabledoff>:/images/preview-disabled.png</disabledoff>
+     <disabledon>:/images/preview-disabled.png</disabledon>:/images/preview.png</iconset>
    </property>
    <property name="text">
     <string>Preview</string>
@@ -769,6 +790,28 @@ Project palette using Import functionality.</string>
    </property>
    <property name="shortcut">
     <string>F5</string>
+   </property>
+  </action>
+  <action name="actionFilterVariants">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/images/filter.png</normaloff>
+     <disabledoff>:/images/filter-disabled.png</disabledoff>:/images/filter.png</iconset>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="toolTip">
+    <string>Filter variants (F7)</string>
+   </property>
+   <property name="shortcut">
+    <string>F7</string>
    </property>
   </action>
   <action name="actionSubpresentations">
@@ -841,7 +884,9 @@ Project palette using Import functionality.</string>
   <action name="actionRemote_Preview">
    <property name="icon">
     <iconset>
-     <normalon>:/images/remote.png</normalon>
+     <normalon>:/images/preview-remote.png</normalon>
+     <disabledoff>:/images/preview-remote-disabled.png</disabledoff>
+     <disabledon>:/images/preview-remote-disabled.png</disabledon>
     </iconset>
    </property>
    <property name="text">

@@ -78,8 +78,6 @@ InspectorControlView::InspectorControlView(const QSize &preferredSize, QWidget *
       m_variantsGroupModel(new VariantsGroupModel(this)),
       m_inspectorControlModel(new InspectorControlModel(m_variantsGroupModel, this)),
       m_meshChooserView(new MeshChooserView(this)),
-      m_instance(0),
-      m_handle(0),
       m_preferredSize(preferredSize)
 {
     setResizeMode(QQuickWidget::SizeRootObjectToView);
@@ -145,10 +143,8 @@ void InspectorControlView::OnNewPresentation()
                 g_StudioApp.GetCore()->getProjectFile().getProjectPath(),
                 std::bind(&InspectorControlView::onFilesChanged, this, std::placeholders::_1)));
     m_connections.push_back(sp->ConnectInstancePropertyValue(
-                std::bind(&InspectorControlView::onInstancePropertyValueChanged, this,
+                std::bind(&InspectorControlView::onPropertyChanged, this, std::placeholders::_1,
                           std::placeholders::_2)));
-    m_connections.push_back(sp->ConnectComponentSeconds(
-                std::bind(&InspectorControlView::OnTimeChanged, this)));
     m_connections.push_back(assetGraph->ConnectChildAdded(
                 std::bind(&InspectorControlView::onChildAdded, this, std::placeholders::_2)));
     m_connections.push_back(assetGraph->ConnectChildRemoved(
@@ -163,11 +159,6 @@ void InspectorControlView::OnClosingPresentation()
     delete m_imageChooserView;
     m_fileList.clear();
     m_connections.clear();
-}
-
-void InspectorControlView::OnTimeChanged()
-{
-    m_inspectorControlModel->refresh();
 }
 
 void InspectorControlView::onFilesChanged(
@@ -252,6 +243,8 @@ void InspectorControlView::initialize()
     rootContext()->setContextProperty(QStringLiteral("_resDir"), StudioUtils::resourceImageUrl());
     rootContext()->setContextProperty(QStringLiteral("_tabOrderHandler"), tabOrderHandler());
     rootContext()->setContextProperty(QStringLiteral("_mouseHelper"), &m_mouseHelper);
+    rootContext()->setContextProperty(QStringLiteral("_utils"), &m_qmlUtils);
+    m_mouseHelper.setWidget(this);
 
     qmlRegisterUncreatableType<qt3dsdm::DataModelDataType>(
                 "Qt3DStudio", 1, 0, "DataModelDataType",
@@ -295,14 +288,14 @@ bool InspectorControlView::canLinkProperty(int instance, int handle) const
 {
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+
     if (bridge->isInsideMaterialContainer(instance))
         return false;
-    EStudioObjectType type = bridge->GetObjectType(instance);
-    if (!qt3dsdm::Qt3DSDMPropertyHandle(handle).Valid()
-        && (type & (OBJTYPE_CUSTOMMATERIAL | OBJTYPE_MATERIAL | OBJTYPE_REFERENCEDMATERIAL))) {
+
+    if (bridge->IsMaterialBaseInstance(instance)) // all material types are unlinkable
         return false;
-    }
-    if (doc->GetStudioSystem()->GetPropertySystem()->GetName(handle) == L"eyeball")
+
+    if (handle == bridge->GetSceneAsset().m_Eyeball.m_Property) // eyeball is unlinkable
         return false;
 
     return doc->GetDocumentReader().CanPropertyBeLinked(instance, handle);
@@ -331,15 +324,17 @@ void InspectorControlView::openInInspector()
     doc->SelectDataModelObject(instance);
 }
 
-void InspectorControlView::onInstancePropertyValueChanged(
-        qt3dsdm::Qt3DSDMPropertyHandle propertyHandle)
+void InspectorControlView::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                             qt3dsdm::Qt3DSDMPropertyHandle inProperty)
 {
+    m_inspectorControlModel->notifyPropertyChanged(inInstance, inProperty);
+
     auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
     // titleChanged implies icon change too, but that will only occur if inspectable type changes,
     // which will invalidate the inspectable anyway, so in reality we are only interested in name
     // property here
-    if (propertyHandle == bridge->GetNameProperty()
-            && m_inspectableBase && m_inspectableBase->IsValid()) {
+    if (inProperty == bridge->GetNameProperty() && m_inspectableBase
+        && m_inspectableBase->IsValid()) {
         Q_EMIT titleChanged();
     }
 }
@@ -435,28 +430,20 @@ void InspectorControlView::showContextMenu(int x, int y, int handle, int instanc
     auto doc = g_StudioApp.GetCore()->GetDoc();
 
     if (canOpenInInspector(instance, handle)) {
-        auto action = theContextMenu.addAction(QObject::tr("Open in Inspector"));
+        auto action = theContextMenu.addAction(tr("Open in Inspector"));
         connect(action, &QAction::triggered, this, &InspectorControlView::openInInspector);
     }
 
-    bool canBeLinkedFlag = canLinkProperty(instance, handle);
-    if (canBeLinkedFlag) {
-        const bool isLinkedFlag = doc->GetDocumentReader().IsPropertyLinked(instance, handle);
-
-        if (isLinkedFlag) {
-            auto action = theContextMenu.addAction(QObject::tr("Unlink Property from Master Slide"));
-            action->setEnabled(canBeLinkedFlag);
-            connect(action, &QAction::triggered, this, &InspectorControlView::toggleMasterLink);
-        } else {
-            auto action = theContextMenu.addAction(QObject::tr("Link Property from Master Slide"));
-            action->setEnabled(canBeLinkedFlag);
-            connect(action, &QAction::triggered, this, &InspectorControlView::toggleMasterLink);
-        }
-
+    if (canLinkProperty(instance, handle)) {
+        bool isLinked = doc->GetDocumentReader().IsPropertyLinked(instance, handle);
+        auto action = theContextMenu.addAction(isLinked ? tr("Unlink Property from Master Slide")
+                                                        : tr("Link Property from Master Slide"));
+        connect(action, &QAction::triggered, this, &InspectorControlView::toggleMasterLink);
     } else {
-        auto action = theContextMenu.addAction(QObject::tr("Unable to link from Master Slide"));
+        auto action = theContextMenu.addAction(tr("Unable to link from Master Slide"));
         action->setEnabled(false);
     }
+
     theContextMenu.exec(mapToGlobal({x, y}));
     m_instance = 0;
     m_handle = 0;
@@ -475,6 +462,11 @@ void InspectorControlView::showTagContextMenu(int x, int y, const QString &group
             g_StudioApp.GetCore()->getProjectFile().renameVariantTag(group, dlg.getNames().first,
                                                                      dlg.getNames().second);
             m_variantsGroupModel->refresh();
+
+            // refresh slide view so the tooltip show the renamed tag immediately, no need to
+            // refresh the timeline because each row gets the tags directly from the property which
+            // is always up to date.
+            g_StudioApp.GetViews()->getMainFrame()->getSlideView()->refreshVariants();
         }
     });
 
@@ -484,6 +476,8 @@ void InspectorControlView::showTagContextMenu(int x, int y, const QString &group
         g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->refreshVariants();
         g_StudioApp.GetViews()->getMainFrame()->getSlideView()->refreshVariants();
         m_variantsGroupModel->refresh();
+        if (g_StudioApp.GetCore()->getProjectFile().variantsDef()[group].m_tags.size() == 0)
+            g_StudioApp.GetViews()->getMainFrame()->updateActionFilterEnableState();
     });
 
     theContextMenu.exec(mapToGlobal({x, y}));
@@ -503,6 +497,11 @@ void InspectorControlView::showGroupContextMenu(int x, int y, const QString &gro
             projectFile.renameVariantGroup(dlg.getNames().first, dlg.getNames().second);
             g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->refreshVariants();
             m_variantsGroupModel->refresh();
+
+            // refresh slide view so the tooltip show the renamed group immediately, no need to
+            // refresh the timeline because each row gets the tags directly from the property which
+            // is always up to date.
+            g_StudioApp.GetViews()->getMainFrame()->getSlideView()->refreshVariants();
         }
     });
 
@@ -522,6 +521,7 @@ void InspectorControlView::showGroupContextMenu(int x, int y, const QString &gro
         projectFile.deleteVariantGroup(group);
         g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->refreshVariants();
         g_StudioApp.GetViews()->getMainFrame()->getSlideView()->refreshVariants();
+        g_StudioApp.GetViews()->getMainFrame()->updateActionFilterEnableState();
         m_variantsGroupModel->refresh();
     });
 
@@ -711,27 +711,26 @@ QObject *InspectorControlView::showMaterialReference(int handle, int instance, c
     disconnect(m_matRefListWidget, &QListWidget::itemClicked, nullptr, nullptr);
     disconnect(m_matRefListWidget, &QListWidget::itemDoubleClicked, nullptr, nullptr);
 
-    const int numMats = m_matRefListWidget->refreshMaterials(instance, handle);
-    const int popupHeight = qMin(numMats, 10) * CStudioPreferences::controlBaseHeight();
-
+    const QSize popupSize = m_matRefListWidget->refreshMaterials(instance, handle);
     CDialogs::showWidgetBrowser(this, m_matRefListWidget, point,
-                                CDialogs::WidgetBrowserAlign::ComboBox,
-                                QSize(CStudioPreferences::valueWidth(), popupHeight));
+                                CDialogs::WidgetBrowserAlign::ComboBox, popupSize);
     m_activeBrowser.setData(m_matRefListWidget, handle, instance);
 
     connect(m_matRefListWidget, &QListWidget::itemClicked, this,
             [instance, handle](QListWidgetItem *item) {
         auto selectedInstance = item->data(Qt::UserRole).toInt();
-        qt3dsdm::SValue value;
-        CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-        const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
-        propertySystem->GetInstancePropertyValue(instance, handle, value);
-        auto refInstance = doc->GetDataModelObjectReferenceHelper()->Resolve(value, instance);
-        if (selectedInstance != refInstance) {
-            auto objRef = doc->GetDataModelObjectReferenceHelper()->GetAssetRefValue(
-                        selectedInstance, instance, CRelativePathTools::EPATHTYPE_GUID);
-            Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Property"))
-                    ->SetInstancePropertyValue(instance, handle, objRef);
+        if (selectedInstance > 0) {
+            qt3dsdm::SValue value;
+            CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+            const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
+            propertySystem->GetInstancePropertyValue(instance, handle, value);
+            auto refInstance = doc->GetDataModelObjectReferenceHelper()->Resolve(value, instance);
+            if (selectedInstance != refInstance) {
+                auto objRef = doc->GetDataModelObjectReferenceHelper()->GetAssetRefValue(
+                            selectedInstance, instance, CRelativePathTools::EPATHTYPE_GUID);
+                Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Property"))
+                        ->SetInstancePropertyValue(instance, handle, objRef);
+            }
         }
     });
     connect(m_matRefListWidget, &QListWidget::itemDoubleClicked, this, [this]() {

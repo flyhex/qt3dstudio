@@ -51,9 +51,9 @@ MaterialRefView::MaterialRefView(QWidget *parent)
  * @param instance The instance that owns the property handle
  * @param handle The property handle this materials list is for
  *
- * @return number of items in the list
+ * @return necessary size for the dialog
  */
-int MaterialRefView::refreshMaterials(int instance, int handle)
+QSize MaterialRefView::refreshMaterials(int instance, int handle)
 {
     clear(); // clear old material list
 
@@ -93,7 +93,22 @@ int MaterialRefView::refreshMaterials(int instance, int handle)
             setCurrentItem(matItem);
     }
 
-    return (int)mats.size();
+    if (count() == 0) {
+        // Show an unselectable dummy item
+        static const QPixmap pixWarning = QPixmap(":/images/warning.png");
+        QListWidgetItem *matItem = new QListWidgetItem(this);
+        matItem->setData(Qt::DisplayRole, tr("No animatable materials found"));
+        matItem->setData(Qt::DecorationRole, pixWarning);
+        matItem->setData(Qt::UserRole, -1);
+        setSelectionMode(QAbstractItemView::NoSelection);
+    } else {
+        setSelectionMode(QAbstractItemView::SingleSelection);
+    }
+
+    QSize widgetSize(CStudioPreferences::valueWidth(),
+                     qMin(10, count()) * CStudioPreferences::controlBaseHeight());
+
+    return widgetSize;
 }
 
 void MaterialRefView::updateSelection()

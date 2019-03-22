@@ -36,6 +36,8 @@
 #include "StudioPreferences.h"
 #include "StudioProjectSettings.h"
 #include "Core.h"
+#include "Views.h"
+#include "MainFrm.h"
 #include "Qt3DSFileTools.h"
 
 #include <QtWidgets/qinputdialog.h>
@@ -44,6 +46,9 @@
 #include <ProjectFile.h>
 
 #include "remotedeploymentsender.h"
+
+// Amount of open preview viewer processes
+int CPreviewHelper::s_previewViewerCount = 0;
 
 //=============================================================================
 /**
@@ -153,16 +158,26 @@ QString CPreviewHelper::getViewerFilePath(const QString &exeName)
     return viewer;
 }
 
+void CPreviewHelper::previewClosed()
+{
+    if (CPreviewHelper::s_previewViewerCount > 0)
+        CPreviewHelper::s_previewViewerCount--;
+}
+
 void CPreviewHelper::cleanupProcess(QProcess *p, QString *docPath)
 {
+    previewClosed();
     p->disconnect();
-    if (docPath->endsWith(QLatin1String("_@preview@.uia"))) {
-        QString uipPreviewPath = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath()
-                                 .replace(QLatin1String(".uip"), QLatin1String("_@preview@.uip"));
-        QFile(uipPreviewPath).remove(); // remove uip preview (if exists)
-        QFile(*docPath).remove(); // remove uia preview
-    } else if (docPath->endsWith(QLatin1String("_@preview@.uip"))) {
-        QFile(*docPath).remove();  // remove uip preview (if exists)
+    if (CPreviewHelper::s_previewViewerCount == 0) {
+        // Delete preview files when no viewers are open
+        if (docPath->endsWith(QLatin1String("_@preview@.uia"))) {
+            QString uipPreviewPath = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath()
+                    .replace(QLatin1String(".uip"), QLatin1String("_@preview@.uip"));
+            QFile(uipPreviewPath).remove(); // remove uip preview (if exists)
+            QFile(*docPath).remove(); // remove uia preview
+        } else if (docPath->endsWith(QLatin1String("_@preview@.uip"))) {
+            QFile(*docPath).remove();  // remove uip preview (if exists)
+        }
     }
     if (p->state() == QProcess::Running) {
         p->terminate();
@@ -188,6 +203,7 @@ void CPreviewHelper::DoPreviewViaConfig(Q3DStudio::CBuildConfiguration * /*inSel
         QString theCommandStr = getViewerFilePath(viewerExeName);
         QString *pDocStr = new QString(inDocumentFile);
 
+        CPreviewHelper::s_previewViewerCount++;
         QProcess *p = new QProcess;
         QMetaObject::Connection *connection = new QMetaObject::Connection(
                     QObject::connect(qApp, &QApplication::aboutToQuit, [p, pDocStr](){
@@ -203,9 +219,16 @@ void CPreviewHelper::DoPreviewViaConfig(Q3DStudio::CBuildConfiguration * /*inSel
             delete connection;
             cleanupProcess(p, pDocStr);
         });
-        p->start(theCommandStr, { *pDocStr });
+
+        QStringList args {*pDocStr};
+        QString variantsArg = g_StudioApp.GetViews()->getMainFrame()->getVariantsFilterStr();
+        if (!variantsArg.isEmpty())
+            args << "-v" << variantsArg;
+
+        p->start(theCommandStr, args);
 
         if (!p->waitForStarted()) {
+            previewClosed();
             QMessageBox::critical(nullptr, QObject::tr("Error Launching Viewer"),
                                   QObject::tr("'%1' failed with error: '%2'")
                                   .arg(theCommandStr).arg(p->errorString()));

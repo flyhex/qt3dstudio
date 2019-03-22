@@ -181,11 +181,24 @@
         <file>images/editcamera_tools_hi-03.png</file>
         <file>images/editcamera_tools_hi-04.png</file>
         <file>images/editcamera_tools_hi-05.png</file>
-        <file>images/playback_tools_low-00.png</file>
-        <file>images/playback_tools_low-01.png</file>
-        <file>images/playback_tools_low-02.png</file>
-        <file>images/playback_tools_low-03.png</file>
-        <file>images/playback_tools_low-04.png</file>
+        <file>images/playback_tools_first.png</file>
+        <file>images/playback_tools_first@2x.png</file>
+        <file>images/playback_tools_last.png</file>
+        <file>images/playback_tools_last@2x.png</file>
+        <file>images/playback_tools_play.png</file>
+        <file>images/playback_tools_play@2x.png</file>
+        <file>images/playback_tools_stop.png</file>
+        <file>images/playback_tools_stop@2x.png</file>
+        <file>images/preview.png</file>
+        <file>images/preview@2x.png</file>
+        <file>images/preview-disabled.png</file>
+        <file>images/preview-disabled@2x.png</file>
+        <file>images/preview-variants.png</file>
+        <file>images/preview-variants@2x.png</file>
+        <file>images/preview-remote.png</file>
+        <file>images/preview-remote@2x.png</file>
+        <file>images/preview-remote-disabled.png</file>
+        <file>images/preview-remote-disabled@2x.png</file>
         <file>images/Toolbar-00.png</file>
         <file>images/Toolbar-01.png</file>
         <file>images/Toolbar-02.png</file>
@@ -216,9 +229,6 @@
         <file>images/editcamera_tools_hi-04_disabled@2x.png</file>
         <file>images/editcamera_tools_hi-05@2x.png</file>
         <file>images/editcamera_tools_hi-05_disabled@2x.png</file>
-        <file>images/playback_tools_low-00@2x.png</file>
-        <file>images/playback_tools_low-01@2x.png</file>
-        <file>images/playback_tools_low-02@2x.png</file>
         <file>images/prefstab-01@2x.png</file>
         <file>images/separator@2x.png</file>
         <file>images/client_tools_hi_color-00@2x.png</file>
@@ -229,7 +239,6 @@
         <file>images/client_tools_hi_color-05@2x.png</file>
         <file>images/client_tools_hi_color-06@2x.png</file>
         <file>images/prefstab-00@2x.png</file>
-        <file>images/playback_tools_low-03@2x.png</file>
         <file>images/Objects-edit-disabled.png</file>
         <file>images/Objects-edit-disabled@2x.png</file>
         <file>images/Objects-edit-normal.png</file>
@@ -253,10 +262,6 @@
         <file>images/zoom_out@2x.png</file>
         <file>images/zoom_in.png</file>
         <file>images/zoom_in@2x.png</file>
-        <file>images/remote.png</file>
-        <file>images/remote@2x.png</file>
-        <file>images/remote-disabled.png</file>
-        <file>images/remote-disabled@2x.png</file>
         <file>images/Assets-Model.png</file>
         <file>images/Assets-Model@2x.png</file>
         <file>images/presentation_edit.png</file>
@@ -286,7 +291,6 @@
         <file>images/matdef-active@2x.png</file>
         <file>images/matdef-disabled.png</file>
         <file>images/matdef-disabled@2x.png</file>
-        <file>images/playback_tools_low-04@2x.png</file>
         <file>images/Action-Action@2x.png</file>
         <file>images/Action-ChildAction@2x.png</file>
         <file>images/Action-ChildMasterAction@2x.png</file>
@@ -309,6 +313,10 @@
         <file>images/Keyframe-Property-Selected@2x.png</file>
         <file>images/Keyframe-Property-Normal@2x.png</file>
         <file>images/Keyframe-Property-Disabled@2x.png</file>
+        <file>images/filter.png</file>
+        <file>images/filter@2x.png</file>
+        <file>images/filter-disabled.png</file>
+        <file>images/filter-disabled@2x.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="open_dialog.png">images/open_dialog.png</file>

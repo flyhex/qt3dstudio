@@ -247,7 +247,7 @@ bool CCore::OnNewDocument(const QString &inDocument, bool isNewProject, bool sil
         dir.mkdir(QStringLiteral("materials"));
         dir.mkdir(QStringLiteral("models"));
         dir.mkdir(QStringLiteral("presentations"));
-        dir.mkdir(QStringLiteral("qml streams"));
+        dir.mkdir(QStringLiteral("qml"));
         dir.mkdir(QStringLiteral("scripts"));
 
         // create the project .uia file

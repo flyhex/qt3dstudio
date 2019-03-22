@@ -43,7 +43,6 @@
 #include <QtCore/qdiriterator.h>
 #include <QtCore/qsavefile.h>
 #include <QtCore/qtimer.h>
-#include <QtCore/qrandom.h>
 #include <QtWidgets/qmessagebox.h>
 
 ProjectFile::ProjectFile()
@@ -417,6 +416,10 @@ QString ProjectFile::createPreview()
 {
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     QString uipPrvPath = doc->GetDocumentPath();
+
+    // Commit all open transactions
+    doc->IKnowWhatIAmDoingForceCloseTransaction();
+
     // create a preview uip if doc modified
     if (doc->IsModified()) {
         uipPrvPath.replace(QLatin1String(".uip"), QLatin1String("_@preview@.uip"));
@@ -953,7 +956,7 @@ ProjectFile::getDiBindingtypesFromSubpresentations() const
  *
  * @param filePath the file path to load the variants from. If empty, variants are loaded from the
  *                 project file and replace m_variantsDef. If a filePath is specified, the loaded
- *                 variants are merged with m_variantsDef
+ *                 variants are merged with m_variantsDef.
  */
 void ProjectFile::loadVariants(const QString &filePath)
 {
@@ -967,8 +970,10 @@ void ProjectFile::loadVariants(const QString &filePath)
         return;
     }
 
-    if (isProj)
+    if (isProj) {
         m_variantsDef.clear();
+        m_variantsDefKeys.clear();
+    }
 
     QXmlStreamReader reader(&file);
     reader.setNamespaceProcessing(false);
@@ -978,9 +983,13 @@ void ProjectFile::loadVariants(const QString &filePath)
         if (reader.readNextStartElement()) {
             if (reader.name() == QLatin1String("variantgroup")) {
                 QString groupId = reader.attributes().value(QLatin1String("id")).toString();
-                QString groupColor = reader.attributes().value(QLatin1String("color")).toString();
                 currentGroup = &m_variantsDef[groupId];
-                currentGroup->m_color = groupColor;
+                if (!m_variantsDefKeys.contains(groupId)) {
+                    // Only update colors for new groups
+                    currentGroup->m_color = reader.attributes().value(
+                                QLatin1String("color")).toString();
+                    m_variantsDefKeys.append(groupId);
+                }
             } else if (reader.name() == QLatin1String("variant")) {
                 if (currentGroup) {
                     QString tagId = reader.attributes().value(QLatin1String("id")).toString();
@@ -1009,8 +1018,7 @@ void ProjectFile::loadVariants(const QString &filePath)
         vElem = domDoc.createElement(QStringLiteral("variants"));
         domDoc.documentElement().appendChild(vElem);
 
-        const auto keys = m_variantsDef.keys();
-        for (auto &g : keys) {
+        for (auto &g : qAsConst(m_variantsDefKeys)) {
             QDomElement gElem = domDoc.createElement(QStringLiteral("variantgroup"));
             gElem.setAttribute(QStringLiteral("id"), g);
             gElem.setAttribute(QStringLiteral("color"), m_variantsDef[g].m_color);
@@ -1073,10 +1081,35 @@ void ProjectFile::addVariantGroup(const QString &newGroup)
         variantsElem = newVariantsElem;
     }
 
-    // generate random semi-bright color
-    int r = 0x555555 + QRandomGenerator::global()->generate() % 0x555555; // 0x555555 = 0xffffff / 3
-    QString newColor = QLatin1Char('#') + QString::number(r, 16);
+    // a set of predefined variant colors to assign to newly created groups
+    static const QStringList VARIANT_COLORS {
+        QStringLiteral("#06c4f4"), QStringLiteral("#f7752a"),
+        QStringLiteral("#d6c605"), QStringLiteral("#ff00ff"),
+        QStringLiteral("#725de8"), QStringLiteral("#8cc63f"),
+        QStringLiteral("#0071bc"), QStringLiteral("#ed1e79"),
+        QStringLiteral("#f9b406"), QStringLiteral("#74c905"),
+        QStringLiteral("#93278f"), QStringLiteral("#d9e021"),
+        QStringLiteral("#00a99d"), QStringLiteral("#c1272d"),
+        QStringLiteral("#f7931e"), QStringLiteral("#f45d85"),
+        QStringLiteral("#682e7a"), QStringLiteral("#05e2d6"),
+        QStringLiteral("#0000ff"), QStringLiteral("#ff0000")
+    };
 
+    if (m_variantColorsIter == -1) { // initialize m_variantColorsIter
+        m_variantColorsIter = 0;
+        if (!m_variantsDefKeys.isEmpty()) {
+            QString lastGroup = m_variantsDefKeys[m_variantsDefKeys.size() - 1];
+            QString lastGroupColor = m_variantsDef[lastGroup].m_color;
+            for (int i = VARIANT_COLORS.length() - 1; i >= 0; --i) {
+                if (VARIANT_COLORS[i] == lastGroupColor) {
+                    m_variantColorsIter = i + 1;
+                    break;
+                }
+            }
+        }
+    }
+
+    QString newColor = VARIANT_COLORS[m_variantColorsIter++ % VARIANT_COLORS.size()];
     QDomElement newGroupElem = domDoc.createElement(QStringLiteral("variantgroup"));
     newGroupElem.setAttribute(QStringLiteral("id"), newGroup);
     newGroupElem.setAttribute(QStringLiteral("color"), newColor);
@@ -1087,6 +1120,7 @@ void ProjectFile::addVariantGroup(const QString &newGroup)
     VariantGroup g;
     g.m_color = newColor;
     m_variantsDef[newGroup] = g;
+    m_variantsDefKeys.append(newGroup);
 }
 
 void ProjectFile::renameVariantTag(const QString &group, const QString &oldTag,
@@ -1216,6 +1250,12 @@ void ProjectFile::renameVariantGroup(const QString &oldGroup, const QString &new
     // update m_variantsDef
     m_variantsDef[newGroup] = m_variantsDef[oldGroup];
     m_variantsDef.remove(oldGroup);
+    for (auto &g : m_variantsDefKeys) {
+        if (g == oldGroup) {
+            g = newGroup;
+            break;
+        }
+    }
 }
 
 void ProjectFile::deleteVariantGroup(const QString &group)
@@ -1308,6 +1348,7 @@ void ProjectFile::deleteVariantGroup(const QString &group)
 
     // update m_variantsDef
     m_variantsDef.remove(group);
+    m_variantsDefKeys.removeOne(group);
 }
 
 void ProjectFile::changeVariantGroupColor(const QString &group, const QString &newColor)

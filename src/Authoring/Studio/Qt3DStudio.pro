@@ -4,7 +4,8 @@ include(../commoninclude.pri)
 include($$OUT_PWD/../qtAuthoring-config.pri)
 include(../../shared/qtsingleapplication/qtsingleapplication.pri)
 
-exists ($$(BREAKPAD_SOURCE_DIR)) {
+# Disable breakpad on macOS and Linux until QT3DS-3164 is resolved
+win32: exists ($$(BREAKPAD_SOURCE_DIR)) {
     include(../../shared/qt-breakpad/qtbreakpad.pri)
 }
 
@@ -229,7 +230,10 @@ HEADERS += \
     Palettes/TimelineGraphicsView/ui/RowTimelineCommentItem.h \
     Palettes/Inspector/VariantsGroupModel.h \
     Palettes/Inspector/VariantsTagModel.h \
-    Palettes/Inspector/VariantTagDialog.h
+    Palettes/Inspector/VariantTagDialog.h \
+    Application/FilterVariantsDlg.h \
+    Application/FilterVariantsModel.h \
+    Utils/QmlUtils.h
 
 FORMS += \
     MainFrm.ui \
@@ -409,7 +413,10 @@ SOURCES += \
     Palettes/TimelineGraphicsView/ui/RowTimelineCommentItem.cpp \
     Palettes/Inspector/VariantsGroupModel.cpp \
     Palettes/Inspector/VariantsTagModel.cpp \
-    Palettes/Inspector/VariantTagDialog.cpp
+    Palettes/Inspector/VariantTagDialog.cpp \
+    Application/FilterVariantsDlg.cpp \
+    Application/FilterVariantsModel.cpp \
+    Utils/QmlUtils.cpp
 
 RESOURCES += \
     MainFrm.qrc \
