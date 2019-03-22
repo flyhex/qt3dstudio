@@ -67,13 +67,14 @@
 #include "Qt3DSActivationManager.h"
 #include "Qt3DSParametersSystem.h"
 #include "Qt3DSQmlElementHelper.h"
+#include "q3dsqmlscript.h"
 
 #include <QtQml/qqmlengine.h>
 #include <QtQml/qqmlcontext.h>
 #include <QtQml/qqmlcomponent.h>
-#include "q3dsqmlscript.h"
-#include "QtQml/qjsengine.h"
-#include "QtCore/QtNumeric"
+#include <QtQml/qjsengine.h>
+#include <QtCore/qnumeric.h>
+#include <QtCore/qfileinfo.h>
 
 //==============================================================================
 //	Namespace
@@ -555,9 +556,10 @@ bool CQmlEngineImpl::GetAttribute(const char *element, const char *attName, char
 
 void CQmlEngineImpl::LoadScript(IPresentation *presentation, TElement *element, const CHAR *path)
 {
-    QString projectPath(presentation->GetApplication().GetProjectDirectory().c_str());
-    QString sourcePath(projectPath + "/" + path);
-    sourcePath.replace('\\', '/');
+    QString presPath = QFileInfo(presentation->GetFilePath()).absolutePath();
+
+    QString sourcePath(presPath + QLatin1Char('/') + path);
+    sourcePath.replace(QLatin1Char('\\'), QLatin1Char('/'));
 
     TElement *parent = element->GetParent();
     if (!parent)

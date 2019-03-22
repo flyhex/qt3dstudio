@@ -81,6 +81,7 @@
 #include "Qt3DSElementSystem.h"
 #include <QtCore/qlibraryinfo.h>
 #include <QtCore/qpair.h>
+#include <QtCore/qdir.h>
 
 using namespace qt3ds;
 using namespace qt3ds::runtime;
@@ -1690,9 +1691,11 @@ struct SXMLLoader : public IAppLoadContext
 
             CFileTools::CombineBaseAndRelative(m_App.GetProjectDirectory().c_str(),
                                                theAsset.GetSource(), thePathStr);
-
             switch (theAsset.getType()) {
             case AssetValueTypes::Presentation: {
+                QDir::addSearchPath(QStringLiteral("qt3dstudio"),
+                                    QFileInfo(QString(thePathStr.c_str()))
+                                    .absoluteDir().absolutePath());
                 SPresentationAsset &thePresentationAsset
                         = *theAsset.getDataPtr<SPresentationAsset>();
                 theUIPReferences.clear();

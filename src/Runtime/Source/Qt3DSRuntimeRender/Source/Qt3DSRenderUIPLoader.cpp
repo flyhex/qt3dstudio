@@ -1285,18 +1285,11 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                     if (theNewObject->m_Type == GraphObjectTypes::Layer) {
                         static_cast<SScene *>(inParent)->AddChild(
                             *static_cast<SLayer *>(theNewObject));
-                    } else {
-                        // Something added to a scene that was not a layer.
-                        QT3DS_ASSERT(false);
                     }
                     break;
 
                 case GraphObjectTypes::DefaultMaterial:
-                    if (theNewObject->m_Type != GraphObjectTypes::Image) {
-                        // Something added to a material that is not an image...
-                        // how odd.
-                        QT3DS_ASSERT(false);
-                    } else {
+                    if (theNewObject->m_Type == GraphObjectTypes::Image) {
                         static_cast<SImage *>(theNewObject)->m_Parent =
                             static_cast<SDefaultMaterial *>(inParent);
                         eastl::string thePath = eastl::string(theNewObject->m_Id.c_str());
