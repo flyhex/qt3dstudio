@@ -4,9 +4,9 @@ include(../commoninclude.pri)
 include($$OUT_PWD/../qtAuthoring-config.pri)
 include(../../shared/qtsingleapplication/qtsingleapplication.pri)
 
-# Disable breakpad on macOS and Linux until QT3DS-3164 is resolved
-win32: exists ($$(BREAKPAD_SOURCE_DIR)) {
-    include(../../shared/qt-breakpad/qtbreakpad.pri)
+BREAKPAD_SOURCE_DIR = $$(BREAKPAD_SOURCE_DIR)
+!isEmpty(BREAKPAD_SOURCE_DIR):exists($$BREAKPAD_SOURCE_DIR) {
+   include(../../shared/qt-breakpad/qtbreakpad.pri)
 }
 
 INCLUDEPATH += $$OUT_PWD/..
