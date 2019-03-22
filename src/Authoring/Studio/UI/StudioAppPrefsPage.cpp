@@ -44,6 +44,7 @@
 #include "IStudioRenderer.h"
 
 #include <QtWidgets/qmessagebox.h>
+#include <QtWidgets/qlistview.h>
 #include <QtGui/qstandarditemmodel.h>
 #include <QtCore/qdiriterator.h>
 
@@ -203,10 +204,7 @@ void CStudioAppPrefsPage::saveSettings()
     CStudioPreferences::SetTimelineSnappingGridResolution((ESnapGridResolution)theCurrentSelection);
 
     // Preferred Startup View
-    long theSel = m_ui->m_EditViewStartupView->currentIndex();
-    long theNumItems = m_ui->m_EditViewStartupView->count();
-    CStudioPreferences::SetPreferredStartupView(
-                (theSel == theNumItems - 1) ? -1 : theSel); // -1 for deployment view
+    CStudioPreferences::SetPreferredStartupView(m_ui->m_EditViewStartupView->currentIndex());
 
     // Tool handles
     CStudioPreferences::setSelectorLineWidth(m_ui->selectorWidth->value());
@@ -294,29 +292,18 @@ void CStudioAppPrefsPage::onitEditStartViewCombo()
     Q3DStudio::IStudioRenderer &theRenderer = g_StudioApp.getRenderer();
     QStringList theCameraNames;
     theRenderer.GetEditCameraList(theCameraNames);
-    for (int idx = 0, end = theCameraNames.size(); idx < end; ++idx) {
-        m_ui->m_EditViewStartupView->addItem(
-                    theCameraNames.at(idx));
-        m_ui->m_EditViewStartupView->setItemData(m_ui->m_EditViewStartupView->count() - 1,
-                                                 QVariant((int)idx + 1));
-    }
-
-    m_ui->m_EditViewStartupView->addItem("--------------------------");
-    m_ui->m_EditViewStartupView->setItemData(m_ui->m_EditViewStartupView->count() - 1, -1); // set to an invalid pointer
-    // make item non-selectable
-    QStandardItemModel *model =
-            qobject_cast<QStandardItemModel *>(m_ui->m_EditViewStartupView->model());
-    QStandardItem *item = model->item(theCameraNames.size());
-    item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
-
-    // add the deployment view as the last selection
+    m_ui->m_EditViewStartupView->addItems(theCameraNames);
     m_ui->m_EditViewStartupView->addItem(tr("Scene Camera View"));
-    m_ui->m_EditViewStartupView->setItemData(m_ui->m_EditViewStartupView->count() - 1, 0);
+
+    m_ui->m_EditViewStartupView->insertSeparator(m_ui->m_EditViewStartupView->count() - 1);
+
+    // adding a 1px spacing, else the separator will disappear sometimes (QComboBox bug)
+    qobject_cast<QListView *>(m_ui->m_EditViewStartupView->view())->setSpacing(1);
 
     long thePreferredView = CStudioPreferences::GetPreferredStartupView();
     long theNumItems = m_ui->m_EditViewStartupView->count();
-    if (thePreferredView == -1) // deployment view
-        m_ui->m_EditViewStartupView->setCurrentIndex(theNumItems - 1); // set to the last one
+    if (thePreferredView == -1) // if not set, set to scene camera view
+        m_ui->m_EditViewStartupView->setCurrentIndex(theNumItems - 1);
     else if (thePreferredView < theNumItems - 1)
         m_ui->m_EditViewStartupView->setCurrentIndex(thePreferredView);
     else // possibly from old content where cameras are removed

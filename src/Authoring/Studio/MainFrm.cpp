@@ -320,7 +320,7 @@ void CMainFrame::OnCreate()
     m_sceneView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     // tell the edit camera bar about this scene view
-    m_ui->m_EditCamerasBar->SetSceneView(m_sceneView.data());
+    m_ui->m_EditCamerasBar->setSceneView(m_sceneView.data());
 
     // Newly launched, the file dialog for open and import should default to more recent
     // opened/imported
@@ -389,7 +389,7 @@ void CMainFrame::OnNewPresentation()
     showScene();
 
     // Associate the scene object with the scene view
-    m_ui->m_EditCamerasBar->SetupCameras();
+    m_ui->m_EditCamerasBar->setupCameras();
     // Enable dockables, toolbars, and menus
     m_paletteManager->EnablePalettes();
     m_ui->m_ClientToolsBar->setEnabled(true);
@@ -736,28 +736,15 @@ void CMainFrame::OnFileNew()
     g_StudioApp.OnFileNew();
 }
 
+// Ctrl+<1..9> handler, change view
 void CMainFrame::onCtrlNPressed()
 {
-    static QMap<int, int> key2index {
-        {1, 9},         // Scene Camera View
-        {2, 0}, {3, 1}, // Perspective & Orthographic
-        {4, 2}, {5, 3}, // Top & Bottom
-        {6, 4}, {7, 5}, // Left & Right
-        {8, 6}, {9, 7}, // Front & Back
-    };
-
     QAction *action = qobject_cast<QAction *>(sender());
     Q_ASSERT(action);
     QKeySequence shortcut = action->shortcut();
-    QMapIterator<int, int> i(key2index);
-    while (i.hasNext()) {
-        i.next();
-        QKeySequence keySequence(Qt::CTRL | static_cast<Qt::Key>(Qt::Key_0 + i.key()));
-        if (shortcut.matches(keySequence) == QKeySequence::ExactMatch) {
-            m_ui->m_EditCamerasBar->setCameraIndex(i.value());
-            break;
-        }
-    }
+    QChar c = shortcut.toString().back();
+    if (shortcut.matches(Qt::CTRL | static_cast<Qt::Key>(c.unicode())) == QKeySequence::ExactMatch)
+        m_ui->m_EditCamerasBar->setCameraIndex(c.digitValue() == 1 ? 9 : c.digitValue() - 2);
 }
 
 /**

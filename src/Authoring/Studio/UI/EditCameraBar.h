@@ -27,68 +27,35 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
 #ifndef INCLUDED_EDIT_CAMERA_BAR
-#define INCLUDED_EDIT_CAMERA_BAR 1
-
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
-
-//==============================================================================
-//	Includes
-//==============================================================================
-#include "DispatchListeners.h"
-#include <vector>
+#define INCLUDED_EDIT_CAMERA_BAR
 
 #include <QtWidgets/qtoolbar.h>
 
 QT_BEGIN_NAMESPACE
 class QComboBox;
-class QLabel;
 QT_END_NAMESPACE
 
-//==============================================================================
-//	Forwards
-//==============================================================================
 class CSceneView;
 
-//==============================================================================
-/**
- *	@class CEditCameraBar
- */
-class CEditCameraBar : public QToolBar, public CEditCameraChangeListener
+class CEditCameraBar : public QToolBar
 {
     Q_OBJECT
-public:
-    CEditCameraBar(QWidget* parent = nullptr); // standard constructor
-    virtual ~CEditCameraBar();
-
-    // Implementation
-    // Generated message map functions
-    void OnCameraChanged();
-    void OnCustomizeToolbar();
 
 public:
-    void SetupCameras();
-    void SetSceneView(CSceneView *inSceneView);
-    void Enable(bool inFlag);
+    CEditCameraBar(QWidget *parent = nullptr);
+    virtual ~CEditCameraBar() override;
+
+    void setupCameras();
+    void setSceneView(CSceneView *inSceneView);
     void setCameraIndex(int inIndex);
-    void HandleCameraChanged(int inIndex);
 
-    // CEditCameraChangeListener
-    void onEditCameraChanged() override;
-    void onEditCamerasTransformed() override {}
-    void onAuthorZoomChanged() override {}
+private:
+    void initialize();
+    void handleCameraChanged(int inIndex);
 
-protected:
-    CSceneView *m_SceneView; ///< The scene view object
-    long m_ActiveCameraIndex; ///< The index of the active camera in the list
-
-    // UI Controls definition
-    QComboBox* m_CameraSelector; ///< Combo box for selecting edit camera
+    CSceneView *m_SceneView = nullptr;
+    QComboBox *m_CameraSelector = nullptr;
 };
 
 #endif
