@@ -318,15 +318,15 @@
         <Event name="onTwoPointSwipeDown" category="Gesture" />
         -->
 
-        <Property name="position" formalName="Position" description="Location in local space" type="Vector" category="Basic Properties" />
-        <Property name="rotation" formalName="Rotation" description="Rotation around local axes" type="Rotation" category="Basic Properties" />
-        <Property name="scale" formalName="Scale" description="Size adjustments along local axes" type="Vector" default="1 1 1" category="Basic Properties" />
-        <Property name="pivot" formalName="Pivot" description="Offset of the contents away from the\nlocal center" type="Vector" category="Basic Properties" />
-        <Property name="opacity" formalName="Opacity" description="How much the element (and its children)\nocclude items behind them" min="0" max="100" default="100" category="Basic Properties" />
-        <Property name="rotationorder" formalName="Rotation Order" description="Rotation Order" list="XYZ:YZX:ZXY:XZY:YXZ:ZYX:XYZr:YZXr:ZXYr:XZYr:YXZr:ZYXr" default="YXZ" hidden="True" category="Basic Properties"/>
-        <Property name="orientation" formalName="Orientation" description="Orientation" list="Left Handed:Right Handed" default="Left Handed" hidden="True" category="Basic Properties"/>
-        <Property name="boneid" type="Long" hidden="True" default="-1" category="Basic Properties"  />
-        <Property name="ignoresparent" type="Boolean" hidden="True" default="False" category="Basic Properties" />
+        <Property name="position" formalName="Position" description="Location in local space" type="Vector" />
+        <Property name="rotation" formalName="Rotation" description="Rotation around local axes" type="Rotation" />
+        <Property name="scale" formalName="Scale" description="Size adjustments along local axes" type="Vector" default="1 1 1" />
+        <Property name="pivot" formalName="Pivot" description="Offset of the contents away from the\nlocal center" type="Vector" />
+        <Property name="opacity" formalName="Opacity" description="How much the element (and its children)\nocclude items behind them" min="0" max="100" default="100" />
+        <Property name="rotationorder" formalName="Rotation Order" description="Rotation Order" list="XYZ:YZX:ZXY:XZY:YXZ:ZYX:XYZr:YZXr:ZXYr:XZYr:YXZr:ZYXr" default="YXZ" hidden="True"/>
+        <Property name="orientation" formalName="Orientation" description="Orientation" list="Left Handed:Right Handed" default="Left Handed" hidden="True"/>
+        <Property name="boneid" type="Long" hidden="True" default="-1"  />
+        <Property name="ignoresparent" type="Boolean" hidden="True" default="False" />
     </Node>
     <Path>
         <Property name="name" formalName="Name" description="Object name" type="String" default="Path" hidden="False" />
@@ -453,6 +453,15 @@
         <Handler name="Preceding Slide" category="Slide" description="Activate the slide that was previously active." />
     </SlideOwner>
     <Text>
+        <!-- Basic Properties -->
+        <Property name="name" formalName="Name" description="Object name" type="String" default="Light" hidden="False" category="Basic Properties" />
+        <Property name="eyeball" formalName="Visible" description="Item visibility" type="Boolean" default="True" hidden="False" controllable="True" category="Basic Properties" />
+        <Property name="opacity" formalName="Opacity" min="0" max="100" default="100" hidden="True" category="Basic Properties" />
+        <Property name="position" formalName="Position" description="Location in local space" type="Vector" category="Basic Properties" />
+        <Property name="rotation" formalName="Rotation" description="Rotation around local axes" type="Rotation" category="Basic Properties" />
+        <Property name="scale" formalName="Scale" description="Size adjustments along local axes" type="Vector" default="1 1 1" category="Basic Properties" />
+        <Property name="pivot" formalName="Pivot" description="Offset of the contents away from the local center" type="Vector" category="Basic Properties" />
+
         <!-- Format -->
         <Property name="textstring" formalName="Text String" description="Text String" type="MultiLineString" default="Text" controllable="True" category="Format" />
         <Property name="textcolor" formalName="Text Color" description="Text Color" type="Color" default="1 1 1" controllable="True" category="Format" />
