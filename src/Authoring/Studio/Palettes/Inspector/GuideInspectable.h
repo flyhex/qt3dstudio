@@ -76,6 +76,9 @@ public:
     void Commit();
     void Rollback();
     void FireRefresh();
+    void Destroy();
+
+    bool isHorizontal() const;
 
     const std::vector<std::shared_ptr<IInspectableAttributeItem>> &properties() const;
 private:

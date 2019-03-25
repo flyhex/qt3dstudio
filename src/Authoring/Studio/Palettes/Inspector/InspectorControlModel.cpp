@@ -56,6 +56,7 @@
 #include "Dialogs.h"
 #include "Dispatch.h"
 #include "VariantsGroupModel.h"
+#include "StudioProjectSettings.h"
 
 #include <QtCore/qfileinfo.h>
 
@@ -1913,10 +1914,24 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
             else
                 m_UpdatableEditor.RollbackEditor();
         } else {
-            if (m_guideInspectable)
-                m_guideInspectable->Commit();
-            else
+            if (m_guideInspectable) {
+                // If the guide ends up over the matte, destroy it
+                QSize presSize = g_StudioApp.GetCore()->GetStudioProjectSettings()
+                        ->getPresentationSize();
+                bool isInPres = true;
+                qt3dsdm::SValue posValue = m_guideInspectable->GetPosition();
+                float position = qt3dsdm::get<float>(posValue);
+                if (m_guideInspectable->isHorizontal())
+                    isInPres = 0.f <= position && float(presSize.height()) >= position;
+                else
+                    isInPres = 0.f <= position && float(presSize.width()) >= position;
+                if (isInPres)
+                    m_guideInspectable->Commit();
+                else
+                    m_guideInspectable->Destroy();
+            } else {
                 m_UpdatableEditor.CommitEditor();
+            }
         }
 
         m_previouslyCommittedValue = {};
