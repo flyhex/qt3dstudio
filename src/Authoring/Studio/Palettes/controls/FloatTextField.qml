@@ -160,6 +160,10 @@ TextField {
                 if (draggingActive) {
                     var delta = _mouseHelper.delta().x;
                     if (delta !== 0) {
+                        if (mouse.modifiers & Qt.ControlModifier)
+                            delta *= 0.1;
+                        else if (mouse.modifiers & Qt.ShiftModifier)
+                            delta *= 10.0;
                         if (floatTextFieldId.text !== "") {
                             floatTextFieldId.text = Number(parseFloat(floatTextFieldId.text)
                                                            + delta).toFixed(validator.decimals);
