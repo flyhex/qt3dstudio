@@ -1053,8 +1053,8 @@ bool CStudioApp::canGroupSelectedObjects() const
         // cannot be multiselected, we treat it as ungroupable.
         qt3dsdm::Qt3DSDMInstanceHandle first = selected[0];
         if (first.Valid()) {
-            EStudioObjectType type = m_core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge()
-                    ->GetObjectType(first);
+            auto bridge = m_core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
+            EStudioObjectType type = bridge->GetObjectType(first);
 
             const int ungroupableTypes = OBJTYPE_SCENE | OBJTYPE_LAYER | OBJTYPE_MATERIAL
                     | OBJTYPE_CUSTOMMATERIAL | OBJTYPE_REFERENCEDMATERIAL | OBJTYPE_BEHAVIOR
@@ -1065,10 +1065,17 @@ bool CStudioApp::canGroupSelectedObjects() const
 
             if (type == OBJTYPE_COMPONENT) {
                 // Components can't be grouped if they are the root of currently active time context
-                auto bridge = m_core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
                 if (bridge->IsActiveComponent(first))
                     return false;
             }
+
+            // All items must either be on master slide or not be on master slide
+            bool isMaster = bridge->IsMaster(first);
+            for (size_t i = 1, end = selected.size(); i < end; ++i) {
+                if (isMaster != bridge->IsMaster(selected[i]))
+                    return false;
+            }
+
             return true;
         }
     }
