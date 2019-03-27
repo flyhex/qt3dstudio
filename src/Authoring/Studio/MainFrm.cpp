@@ -409,6 +409,10 @@ void CMainFrame::OnNewPresentation()
     // Clear data input list and sub-presentation list
     g_StudioApp.m_subpresentations.clear();
     g_StudioApp.m_dataInputDialogItems.clear();
+
+    // reset the variants filter and preview button's icon
+    m_filterVariantsDlg->clearFilter();
+    updateActionPreviewVariantsState(false);
 }
 
 /**

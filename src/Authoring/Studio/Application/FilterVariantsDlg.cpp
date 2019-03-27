@@ -71,6 +71,11 @@ QString FilterVariantsDlg::filterStr() const
     return ret;
 }
 
+void FilterVariantsDlg::clearFilter()
+{
+    m_variantsFilter.clear();
+}
+
 int FilterVariantsDlg::actionSize() const
 {
     return m_actionSize;

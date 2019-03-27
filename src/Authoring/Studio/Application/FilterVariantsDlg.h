@@ -45,6 +45,7 @@ public:
     Q_INVOKABLE int actionSize() const;
 
     QString filterStr() const;
+    void clearFilter();
 
 protected:
     void focusOutEvent(QFocusEvent *e) override;
