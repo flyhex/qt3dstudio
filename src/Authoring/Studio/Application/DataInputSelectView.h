@@ -53,7 +53,7 @@ public:
                  const QString &currentController,
                  int handle = 0, int instance = 0);
     void setMatchingTypes(const QVector<EDataType> &matchingTypes);
-    QString getAddNewDataInputString() { return tr("[Add New Datainput]"); }
+    QString getAddNewDataInputString() { return tr("[Add New Data Input]"); }
     QString getNoneString() { return tr("[None]"); }
     DataInputSelectModel *getModel() const { return m_model; }
     int instance() const { return m_instance; }
