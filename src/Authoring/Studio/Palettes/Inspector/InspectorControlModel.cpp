@@ -162,8 +162,11 @@ void InspectorControlModel::notifyPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle
     if (!bridge->IsSceneGraphInstance(inInstance))
         return;
 
-    if (inProperty == bridge->GetLayer().m_variants) // variants model is updated upon edit
+    if (inProperty == bridge->GetLayer().m_variants) {
+        // variants model is updated upon edit but this is needed to handle undoing
+        m_variantsModel->refresh();
         return;
+    }
 
     bool changed = false;
     for (int row = 0; row < m_groupElements.count(); ++row) {
