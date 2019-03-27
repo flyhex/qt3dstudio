@@ -166,6 +166,7 @@ private:
     void updateIndices(bool isInsertion, int startIndex, int startIndexInLayout, bool isProperty);
     bool hasActionButtons() const;
     bool hasComponentAncestor() const;
+    bool isInVariantsFilter() const;
     int removeChildFromLayout(RowTree *child) const;
     int getCountDecendentsRecursive() const;
     int addToLayout(int indexInLayout);

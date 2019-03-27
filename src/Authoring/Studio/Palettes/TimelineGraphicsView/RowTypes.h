@@ -32,7 +32,7 @@
 #include <qglobal.h>
 
 enum class TimelineControlType {
-    None = 300,
+    None,
     KeyFrame,
     Duration,
     StartHandle,
@@ -40,7 +40,7 @@ enum class TimelineControlType {
 };
 
 enum class TreeControlType {
-    None = 400,
+    None,
     Arrow,
     Shy,
     Hide,

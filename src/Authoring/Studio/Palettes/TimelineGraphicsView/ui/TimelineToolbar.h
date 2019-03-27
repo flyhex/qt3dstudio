@@ -57,14 +57,16 @@ signals:
     void timelineScaleChanged(int scale);
     void setDurationTriggered();
     void showRowTextsToggled(bool toggled);
+    void variantsFilterToggled(bool toggled);
 
 public:
     TimelineToolbar();
-    virtual ~TimelineToolbar();
+    virtual ~TimelineToolbar() override;
     void setTime(long totalMillis);
     QString getCurrentController() const;
     void setNewLayerEnabled(bool enable);
     QAction *actionShowRowTexts() const;
+    bool isVariantsFilterOn() const;
 
     // IDataModelListener
     void OnBeginDataModelNotifications() override;
@@ -82,7 +84,6 @@ private Q_SLOTS:
     void onPlayButtonClicked();
     void onZoomLevelChanged(int scale);
     void onDiButtonClicked();
-    void onShowRowTextsToggled();
 
 private:
     void addSpacing(int width);
@@ -92,23 +93,22 @@ private:
     void updateDataInputStatus();
     void updateTimelineTitleColor(bool controlled);
 
-    QPushButton *m_timeLabel;
-    QLabel *m_diLabel;
-    QAction *m_actionDeleteRow;
-    QAction *m_actionPlayStop;
-    QAction *m_actionZoomIn;
-    QAction *m_actionZoomOut;
-    QAction *m_actionDataInput;
-    QAction *m_actionNewLayer;
-    QAction *m_actionShowRowTexts;
+    QPushButton *m_timeLabel = nullptr;
+    QLabel *m_diLabel = nullptr;
+    QAction *m_actionDeleteRow = nullptr;
+    QAction *m_actionPlayStop = nullptr;
+    QAction *m_actionZoomIn = nullptr;
+    QAction *m_actionZoomOut = nullptr;
+    QAction *m_actionDataInput = nullptr;
+    QAction *m_actionNewLayer = nullptr;
+    QAction *m_actionShowRowTexts = nullptr;
+    QAction *m_actionFilter = nullptr;
+    QSlider *m_scaleSlider = nullptr;
     qt3dsdm::TSignalConnectionPtr m_connectSelectionChange;
-    QSlider *m_scaleSlider;
     QIcon m_iconStop;
     QIcon m_iconPlay;
     QIcon m_iconDiActive;
     QIcon m_iconDiInactive;
-    QIcon m_iconTimebarTextsActive;
-    QIcon m_iconTimebarTextsInactive;
 
     QString m_currController;
 

@@ -74,6 +74,7 @@ public:
     void onTimeBarColorChanged(const QColor &color);
     void setSelectedTimeBarsColor(const QColor &color, bool preview);
     void refreshVariants(int instance = 0);
+    void updateVariantsFiltering(RowTree *row = nullptr, bool force = false);
     void enableDnD(bool b = true);
     bool dndActive() const;
     bool blockMousePress() const;

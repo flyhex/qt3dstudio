@@ -39,11 +39,14 @@
 #include "StudioPreferences.h"
 #include "KeyframeManager.h"
 #include "StudioApp.h"
+#include "MainFrm.h"
 #include "Core.h"
 #include "Doc.h"
+#include "ClientDataModelBridge.h"
 #include "Qt3DSDMStudioSystem.h"
 #include "Qt3DSDMSlides.h"
 #include "StudioUtils.h"
+#include "TimelineToolbar.h"
 
 #include <QtGui/qpainter.h>
 #include "QtGui/qtextcursor.h"
@@ -658,6 +661,45 @@ void RowTree::updateArrowVisibility()
         update();
 }
 
+bool RowTree::isInVariantsFilter() const
+{
+    const QString filterStr = g_StudioApp.m_pMainWnd->getVariantsFilterStr();
+
+    if (m_rowType != OBJTYPE_LAYER || filterStr.isEmpty()
+        || !m_scene->widgetTimeline()->toolbar()->isVariantsFilterOn()) {
+        return true;
+    }
+
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
+    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+    auto property = bridge->GetLayer().m_variants;
+
+    using namespace qt3dsdm;
+    SValue sValue;
+    if (propertySystem->GetInstancePropertyValue(instance(), property, sValue)) {
+        QString propVal = get<TDataStrPtr>(sValue)->toQString();
+        const QStringList filterPairs = filterStr.split(QLatin1Char(','));
+        QHash<QString, bool> matches;
+        for (auto &filterPair : filterPairs) {
+            QString group = filterPair.left(filterPair.indexOf(QLatin1Char(':')) + 1);
+            if (propVal.contains(group)) { // the layer has 1 or more tags from this filter group
+                if (propVal.contains(filterPair))
+                    matches[group] = true; // filter tag exists in the property variant group
+                else if (!matches.contains(group))
+                    matches[group] = false;
+            }
+        }
+
+        for (auto m : qAsConst(matches)) {
+            if (!m)
+                return false;
+        }
+    }
+
+    return true;
+}
+
 void RowTree::updateFilter()
 {
     bool parentOk = !m_parentRow || m_parentRow->isVisible();
@@ -665,9 +707,10 @@ void RowTree::updateFilter()
     bool visibleOk = m_visible   || !m_scene->treeHeader()->filterHidden();
     bool lockOk    = !m_locked   || !m_scene->treeHeader()->filterLocked();
     bool expandOk  = !expandHidden();
+    bool variantsOk = isInVariantsFilter();
 
-    m_filtered = !(shyOk && visibleOk && lockOk);
-    const bool visible = parentOk && shyOk && visibleOk && lockOk && expandOk;
+    m_filtered = !(shyOk && visibleOk && lockOk && variantsOk);
+    const bool visible = parentOk && expandOk && !m_filtered;
     setVisible(visible);
     m_rowTimeline->setVisible(visible);
     for (auto propRow : qAsConst(m_childProps)) {

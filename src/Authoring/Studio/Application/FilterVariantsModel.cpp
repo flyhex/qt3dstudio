@@ -33,6 +33,7 @@
 #include "MainFrm.h"
 #include "Core.h"
 #include "VariantTagDialog.h"
+#include "TimelineWidget.h"
 
 FilterVariantsModel::FilterVariantsModel(VariantsFilterT &variantsFilter, QObject *parent)
     : QAbstractListModel(parent)
@@ -111,7 +112,8 @@ void FilterVariantsModel::setTagState(const QString &group, const QString &tag, 
         }
     }
 
-    g_StudioApp.GetViews()->getMainFrame()->updateActionPreviewVariantsState(filtered);
+    g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->updateVariantsFiltering();
+    g_StudioApp.GetViews()->getMainFrame()->updateToolbarVariantsIcons(filtered);
 }
 
 void FilterVariantsModel::toggleGroupState(const QString &group)
@@ -137,14 +139,16 @@ void FilterVariantsModel::toggleGroupState(const QString &group)
         }
     }
 
-    g_StudioApp.GetViews()->getMainFrame()->updateActionPreviewVariantsState(filtered);
+    g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->updateVariantsFiltering();
+    g_StudioApp.GetViews()->getMainFrame()->updateToolbarVariantsIcons(filtered);
 }
 
 void FilterVariantsModel::clearAll()
 {
     m_variantsFilter.clear();
     refresh();
-    g_StudioApp.GetViews()->getMainFrame()->updateActionPreviewVariantsState(false);
+    g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->updateVariantsFiltering();
+    g_StudioApp.GetViews()->getMainFrame()->updateToolbarVariantsIcons(false);
 }
 
 QHash<int, QByteArray> FilterVariantsModel::roleNames() const

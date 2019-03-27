@@ -423,7 +423,7 @@ void CMainFrame::OnNewPresentation()
 
     // reset the variants filter and preview button's icon
     m_filterVariantsDlg->clearFilter();
-    updateActionPreviewVariantsState(false);
+    updateToolbarVariantsIcons(false);
 }
 
 /**
@@ -1021,10 +1021,15 @@ void CMainFrame::updateActionFilterEnableState()
     m_ui->actionFilterVariants->setEnabled(enable);
 }
 
-void CMainFrame::updateActionPreviewVariantsState(bool isFiltered)
+void CMainFrame::updateToolbarVariantsIcons(bool isFiltered)
 {
-    m_ui->actionPreview->setIcon(QIcon(isFiltered ? QStringLiteral(":/images/preview-variants.png")
-                                                  : QStringLiteral(":/images/preview.png")));
+    if (isFiltered) {
+        m_ui->actionPreview->setIcon(QIcon(QStringLiteral(":/images/preview-variants.png")));
+        m_ui->actionFilterVariants->setIcon(QIcon(QStringLiteral(":/images/filter-colored.png")));
+    } else {
+        m_ui->actionPreview->setIcon(QIcon(QStringLiteral(":/images/preview.png")));
+        m_ui->actionFilterVariants->setIcon(QIcon(QStringLiteral(":/images/filter.png")));
+    }
 }
 
 void CMainFrame::OnPlaybackPreviewRemote()

@@ -239,7 +239,7 @@ public:
     void showScene();
     QString getVariantsFilterStr() const;
     void updateActionFilterEnableState();
-    void updateActionPreviewVariantsState(bool isFiltered);
+    void updateToolbarVariantsIcons(bool isFiltered);
 
 Q_SIGNALS:
     void playStateChanged(bool started);

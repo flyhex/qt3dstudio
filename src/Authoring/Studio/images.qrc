@@ -317,6 +317,8 @@
         <file>images/filter@2x.png</file>
         <file>images/filter-disabled.png</file>
         <file>images/filter-disabled@2x.png</file>
+        <file>images/filter-colored.png</file>
+        <file>images/filter-colored@2x.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="open_dialog.png">images/open_dialog.png</file>

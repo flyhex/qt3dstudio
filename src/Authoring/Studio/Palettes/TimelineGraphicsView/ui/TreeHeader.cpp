@@ -54,10 +54,10 @@ void TreeHeader::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     m_rectLock   .setRect(treeWidth - 16 * 1.1, size().height() * .5 - 8, 16, 16);
 
     static const QPixmap pixShy = QPixmap(":/images/Toggle-Shy.png");
-    static const QPixmap pixVisible = QPixmap(":/images/Toggle-HideShow.png");
-    static const QPixmap pixLock = QPixmap(":/images/Toggle-Lock.png");
     static const QPixmap pixShy2x = QPixmap(":/images/Toggle-Shy@2x.png");
+    static const QPixmap pixVisible = QPixmap(":/images/Toggle-HideShow.png");
     static const QPixmap pixVisible2x = QPixmap(":/images/Toggle-HideShow@2x.png");
+    static const QPixmap pixLock = QPixmap(":/images/Toggle-Lock.png");
     static const QPixmap pixLock2x = QPixmap(":/images/Toggle-Lock@2x.png");
 
     const QColor selectedColor = CStudioPreferences::timelineFilterButtonSelectedColor();
@@ -73,16 +73,16 @@ void TreeHeader::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
         painter->fillRect(m_rectLock, selectedColor);
 
     // Paint hovering as semi-transparent overlay
-    if (m_hoveredItem == 0)
+    if (m_hoveredItem == TreeControlType::Shy)
         painter->fillRect(m_rectShy, hoveredColor);
-    else if (m_hoveredItem == 1)
+    else if (m_hoveredItem == TreeControlType::Hide)
         painter->fillRect(m_rectVisible, hoveredColor);
-    else if (m_hoveredItem == 2)
+    else if (m_hoveredItem == TreeControlType::Lock)
         painter->fillRect(m_rectLock, hoveredColor);
 
-    painter->drawPixmap(m_rectShy    , hiResIcons ? pixShy2x : pixShy);
-    painter->drawPixmap(m_rectVisible, hiResIcons ? pixVisible2x : pixVisible);
-    painter->drawPixmap(m_rectLock   , hiResIcons ? pixLock2x : pixLock);
+    painter->drawPixmap(m_rectShy     , hiResIcons ? pixShy2x     : pixShy);
+    painter->drawPixmap(m_rectVisible , hiResIcons ? pixVisible2x : pixVisible);
+    painter->drawPixmap(m_rectLock    , hiResIcons ? pixLock2x    : pixLock);
 }
 
 TreeControlType TreeHeader::handleButtonsClick(const QPointF &scenePos)
@@ -145,19 +145,19 @@ void TreeHeader::toggleFilterLocked()
 void TreeHeader::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
     QPointF p = event->scenePos();
-    int hoveredItem = -1;
+    TreeControlType hoveredItem = TreeControlType::None;
     if (m_rectShy.contains(p.x(), p.y())) {
         QString action = m_shy ? tr("Show") : tr("Hide");
         setToolTip(tr("%1 shy objects").arg(action));
-        hoveredItem = 0;
+        hoveredItem = TreeControlType::Shy;
     } else if (m_rectVisible.contains(p.x(), p.y())) {
         QString action = m_visible ? tr("Show") : tr("Hide");
         setToolTip(tr("%1 inactive objects").arg(action));
-        hoveredItem = 1;
+        hoveredItem = TreeControlType::Hide;
     } else if (m_rectLock.contains(p.x(), p.y())) {
         QString action = m_lock ? tr("Show") : tr("Hide");
         setToolTip(tr("%1 locked objects").arg(action));
-        hoveredItem = 2;
+        hoveredItem = TreeControlType::Lock;
     } else {
         setToolTip("");
     }
@@ -171,6 +171,6 @@ void TreeHeader::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 
 void TreeHeader::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
-    m_hoveredItem = -1;
+    m_hoveredItem = TreeControlType::None;
     update();
 }

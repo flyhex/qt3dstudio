@@ -58,8 +58,6 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     static const QIcon iconLast = QIcon(":/images/playback_tools_last.png");
     static const QIcon iconZoomIn = QIcon(":/images/zoom_in.png");
     static const QIcon iconZoomOut = QIcon(":/images/zoom_out.png");
-    m_iconTimebarTextsActive = QIcon(":/images/timeline_text_shown.png");
-    m_iconTimebarTextsInactive = QIcon(":/images/timeline_text_hidden.png");
     m_iconDiActive = QIcon(":/images/Objects-DataInput-Active.png");
     m_iconDiInactive = QIcon(":/images/Objects-DataInput-Inactive.png");
     m_iconStop = QIcon(":/images/playback_tools_stop.png");
@@ -79,8 +77,8 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     m_actionDataInput = new QAction(m_iconDiInactive, tr("No Controller"), this);
     m_actionDeleteRow = new QAction(iconDelete, tr("Delete Selected Object (Del)"), this);
     m_actionPlayStop = new QAction(this);
-    m_timeLabel = new QPushButton({}, this);
-    m_diLabel = new QLabel();
+    m_timeLabel = new QPushButton(this);
+    m_diLabel = new QLabel(this);
     m_actionZoomIn = new QAction(iconZoomIn, tr("Zoom In"), this);
     m_actionZoomOut = new QAction(iconZoomOut, tr("Zoom Out"), this);
 
@@ -100,12 +98,20 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     m_diLabel->setMinimumWidth(100);
     m_diLabel->setAlignment(Qt::AlignCenter);
     QString styleString = "QLabel { background: transparent; color: "
-            + QString(CStudioPreferences::dataInputColor().name()) + "; }";
+                          + QString(CStudioPreferences::dataInputColor().name()) + "; }";
     m_diLabel->setStyleSheet(styleString);
 
-    m_actionShowRowTexts = new QAction(m_iconTimebarTextsInactive,
-                                       tr("Show All Time Bar Texts"), this);
+    m_actionShowRowTexts = new QAction(tr("Toggle Timebars Text Visibility"), this);
+    QIcon rowTextIcon { QPixmap(":/images/timeline_text_hidden.png") };
+    rowTextIcon.addPixmap(QPixmap(":/images/timeline_text_shown.png"), QIcon::Normal, QIcon::On);
+    m_actionShowRowTexts->setIcon(rowTextIcon);
     m_actionShowRowTexts->setCheckable(true);
+    m_actionFilter = new QAction(tr("Filter Timeline Rows Visibility According to Variants Filter"),
+                                 this);
+    m_actionFilter->setCheckable(true);
+    QIcon filterIcon { QPixmap(":/images/filter.png") };
+    filterIcon.addPixmap(QPixmap(":/images/filter-colored.png"), QIcon::Normal, QIcon::On);
+    m_actionFilter->setIcon(filterIcon);
 
     updatePlayButtonState(false);
 
@@ -120,7 +126,8 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     connect(m_actionZoomIn, &QAction::triggered, this, &TimelineToolbar::onZoomInButtonClicked);
     connect(m_actionZoomOut, &QAction::triggered, this, &TimelineToolbar::onZoomOutButtonClicked);
     connect(m_actionDataInput, &QAction::triggered, this, &TimelineToolbar::onDiButtonClicked);
-    connect(m_actionShowRowTexts, &QAction::toggled, this, &TimelineToolbar::onShowRowTextsToggled);
+    connect(m_actionShowRowTexts, &QAction::toggled, this, &TimelineToolbar::showRowTextsToggled);
+    connect(m_actionFilter, &QAction::toggled, this, &TimelineToolbar::variantsFilterToggled);
 
     // add actions
     addAction(m_actionNewLayer);
@@ -128,6 +135,7 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     addAction(m_actionDataInput);
     addSpacing(2);
     addAction(m_actionShowRowTexts);
+    addAction(m_actionFilter);
     addWidget(m_diLabel);
     addSpacing(20);
     addWidget(m_timeLabel);
@@ -189,7 +197,7 @@ void TimelineToolbar::onSelectionChange(Q3DStudio::SSelectedValue inNewSelectabl
 void TimelineToolbar::addSpacing(int width)
 {
     auto *widget = new QWidget;
-    widget->setStyleSheet("background-color:0,0,0,0;"); // make the widget transparent
+    widget->setStyleSheet("background:transparent;");
     widget->setFixedWidth(width);
     addWidget(widget);
 }
@@ -266,14 +274,9 @@ void TimelineToolbar::onDiButtonClicked()
     }
 }
 
-void TimelineToolbar::onShowRowTextsToggled()
+bool TimelineToolbar::isVariantsFilterOn() const
 {
-    bool isChecked = m_actionShowRowTexts->isChecked();
-    m_actionShowRowTexts->setIcon(isChecked ? m_iconTimebarTextsActive
-                                            : m_iconTimebarTextsInactive);
-    QString text = tr("%1 All Time Bar Texts").arg(isChecked ? tr("Hide") : tr("Show"));
-    m_actionShowRowTexts->setText(text);
-    emit showRowTextsToggled(isChecked);
+    return m_actionFilter->isChecked();
 }
 
 // Update datainput button state according to this timecontext control state.

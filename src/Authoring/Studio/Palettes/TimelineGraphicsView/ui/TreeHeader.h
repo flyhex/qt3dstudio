@@ -49,22 +49,21 @@ public:
     bool filterShy() const;
     bool filterHidden() const;
     bool filterLocked() const;
-    int type() const;
-
-    void toggleFilterShy();
-    void toggleFilterHidden();
-    void toggleFilterLocked();
+    int type() const override;
 
 protected:
     void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
 
 private:
+    void toggleFilterShy();
+    void toggleFilterHidden();
+    void toggleFilterLocked();
     TimelineGraphicsScene *m_scene;
     bool m_shy = false;
     bool m_visible = false;
     bool m_lock = false;
-    int m_hoveredItem = -1;
+    TreeControlType m_hoveredItem = TreeControlType::None;
     QRect m_rectShy;
     QRect m_rectVisible;
     QRect m_rectLock;

@@ -85,11 +85,11 @@ public:
 
 TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     : QWidget(parent)
-    , m_toolbar(new TimelineToolbar())
     , m_viewTreeHeader(new TreeHeaderView(this))
     , m_viewTreeContent(new QGraphicsView(this))
     , m_viewTimelineHeader(new QGraphicsView(this))
     , m_viewTimelineContent(new QGraphicsView(this))
+    , m_toolbar(new TimelineToolbar())
     , m_graphicsScene(new TimelineGraphicsScene(this))
     , m_preferredSize(preferredSize)
 {
@@ -283,6 +283,9 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
             [this](const QString &controller) {
         m_graphicsScene->setControllerText(controller);
     });
+
+    connect(m_toolbar, &TimelineToolbar::variantsFilterToggled, this,
+            std::bind(&TimelineWidget::updateVariantsFiltering, this, nullptr, true));
 
     connect(m_graphicsScene->ruler(), &Ruler::maxDurationChanged, this, [this]() {
         m_graphicsScene->updateTimelineLayoutWidth();
@@ -807,11 +810,11 @@ void TimelineWidget::onAsyncUpdate()
         m_navigationBar->updateNavigationItems(m_BreadCrumbProvider);
         m_graphicsScene->updateSnapSteps();
         m_fullReconstruct = false;
-        m_graphicsScene->rowManager()->updateFiltering();
         m_graphicsScene->updateController();
         onSelectionChange(doc->GetSelectedValue());
         m_toolbar->setNewLayerEnabled(!m_graphicsScene->rowManager()->isComponentRoot());
         refreshVariants();
+        updateVariantsFiltering();
 
         // update sub-presentation indicators
         for (auto *row : qAsConst(m_handlesMap))
@@ -965,8 +968,10 @@ void TimelineWidget::onAsyncUpdate()
             for (int instance : instances) {
                 if (m_handlesMap.contains(instance)) {
                     RowTree *row = m_handlesMap[instance];
-                    if (row)
+                    if (row) {
                         row->updateVariants(m_variantsMap[instance]); // variants groups names
+                        updateVariantsFiltering(row);
+                    }
                 }
             }
         }
@@ -1293,4 +1298,10 @@ void TimelineWidget::refreshVariants(int instance)
             }
         }
     }
+}
+
+void TimelineWidget::updateVariantsFiltering(RowTree *row, bool force)
+{
+    if (force || m_toolbar->isVariantsFilterOn())
+        m_graphicsScene->rowManager()->updateFiltering(row);
 }

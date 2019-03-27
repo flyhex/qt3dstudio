@@ -1013,7 +1013,7 @@ void TimelineGraphicsScene::updateHoverStatus(const QPointF &scenePos)
                 SValue sValue;
                 if (propertySystem->GetInstancePropertyValue(rowTree->instance(), property,
                                                              sValue)) {
-                    QString propVal = qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->toQString();
+                    QString propVal = get<TDataStrPtr>(sValue)->toQString();
                     if (!propVal.isEmpty()) {
                         // parse propVal into variantsHash (group => tags)
                         const QStringList tagPairs = propVal.split(QLatin1Char(','));

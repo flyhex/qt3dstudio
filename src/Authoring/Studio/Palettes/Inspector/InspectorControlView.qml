@@ -169,9 +169,8 @@ Rectangle {
 
             Layout.fillWidth: true
             Layout.fillHeight: true
-
+            Layout.bottomMargin: 10
             spacing: 4
-
             clip: true
 
             ScrollBar.vertical: ScrollBar {
@@ -241,7 +240,7 @@ Rectangle {
                         }
                     }
 
-                    Column {
+                    Column { // properties in a group
                         spacing: 4
                         id: groupItems
 
@@ -269,7 +268,7 @@ Rectangle {
                                 }
                             }
 
-                            RowLayout {
+                            RowLayout { // a property row
                                 id: groupDelegateItem
                                 spacing: 0
                                 enabled: _parentView.isEditable(modelData.handle)

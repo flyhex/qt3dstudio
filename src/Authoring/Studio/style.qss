@@ -134,45 +134,29 @@ QToolBar::separator:vertical {
     margin: 3px;
 }
 
-QToolButton:!checked {
+QToolButton {
     min-width: 22px;
     max-width: 22px;
     min-height: 22px;
     max-height: 22px;
-    background-color: #404244;
+    background: #404244;
 }
 
 QToolButton:checked, QToolButton:hover {
-    min-width: 22px;
-    max-width: 22px;
-    min-height: 22px;
-    max-height: 22px;
-    background-color: #262829;
+    background: #262829;
+}
+
+QToolButton:pressed:!checked {
+    background: #666666;
 }
 
 QToolButton#actionFilterVariants:checked {
-    min-width: 22px;
-    max-width: 22px;
-    min-height: 22px;
-    max-height: 22px;
     background-color: #2e2f30;
     border-color: #727476;
     border-width: 1px;
     border-top-style: solid;
     border-right-style: solid;
     border-left-style: solid;
-}
-
-QToolButton:pressed:!checked {
-    min-width: 22px;
-    max-width: 22px;
-    min-height: 22px;
-    max-height: 22px;
-    background-color: #46a2da;
-}
-
-QToolButton#qt_toolbar_ext_button {
-    image: url(:/images/toolbutton-arrow.png);
 }
 
 QComboBox#cameraSelector {
