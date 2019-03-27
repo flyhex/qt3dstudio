@@ -279,6 +279,9 @@ The preview toolbar buttons are used to preview your presentation.
   The \b{Remote Preview} button will launch the presentation on the connected remote device
   Qt 3D Studio Viewer application. This button is only enabled if you are connected to a
   remote device.
+  \li
+  The \b{Filter Variants} button will open the variant tags panel. Read more in the
+  \l{Using Variant Tags} section.
 \endlist
 
 \note If there is no \c{.uia} file in the folder for the presentation, then the

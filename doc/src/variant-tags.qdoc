@@ -78,7 +78,6 @@ are using tags from which variant groups.
 \image variant-tags-layer.png
 
 It is also indicated in the slide palette, which slides are using tags from which variant groups.
-Here you can see the number of tags from each variant group used on each slide.
 
 \image variant-tags-slide.png
 
@@ -116,5 +115,34 @@ in the inspector palette. Next, browse to the desired \c .variants or \c .uia fi
 \uicontrol{Ok}.
 
 When importing variant tags, imported tags will be merged with already existing tags.
+
+\section1 Previewing with Variant Filtering
+
+You can filter content by variant tags when previewing your presentation in the Viewer.
+To do this, open the \uicontrol {Filter Variant} panel by clicking
+\inlineimage variant-tags-icon.png
+in the toolbar or by pressing the \c F7 key.
+
+\image variant-tags-panel.png
+
+In this panel, you can select the variant filtering tags you wish to render when previewing in the
+Viewer. Only the layers satisfying the selection will be rendered.
+
+Variant filtering works the following way:
+
+\list
+  \li
+    With no tags selected, all layers will render.
+  \li
+    With tags selected in one variant group, criteria for a layer to be rendered is that is should
+    have one of the selected tags or no tag in the selected group.
+  \li
+    With tags selected in more than one variant group, the layers will need to fulfill criteria
+    for each of the variant groups to be rendered.
+\endlist
+
+If any tags are selected, it is indicated by the appearance of the play button
+\inlineimage variant-play-button.png
+.
 
 */
