@@ -340,8 +340,9 @@ void CMainFrame::OnCreate()
     // correctly
     QTimer::singleShot(0, this, [&] {
         QRect actionGeom = m_ui->m_PlaybackToolbar->actionGeometry(m_ui->actionFilterVariants);
+        auto *actionWidget = m_ui->m_PlaybackToolbar->widgetForAction(m_ui->actionFilterVariants);
         m_filterVariantsDlg.reset(new FilterVariantsDlg(this, m_ui->actionFilterVariants,
-                                                        actionGeom.width()));
+                                                        actionGeom.width(), actionWidget));
     });
 
     // Create the view manager
