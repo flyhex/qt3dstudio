@@ -346,9 +346,11 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
         // i.e. user is dragging a row within timeline (not from object/project panel)
         // AND drop depth is larger than for the component (user is dropping items _in_
         // the component, not at the same depth as the component itself)
-        if (insertParent->isComponent() && depth > insertParent->depth() && m_active) {
+        if (insertParent->isComponent() && !insertParent->isComponentRoot()
+                && depth > insertParent->depth() && m_active) {
             m_deleteAfterMove = true;
         } else {
+            m_deleteAfterMove = false;
             for (int i = rowInsert1->depth(); i >= depth; --i)
                 insertParent = insertParent->parentRow();
         }
