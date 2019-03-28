@@ -198,12 +198,16 @@ bool Q3DSQmlStreamProxy::event(QEvent *event)
         }
 
         if (m_settings) {
+            bool streamFound = false;
             for (Q3DSQmlStream *s : m_settings->qmlStreamsList()) {
                 if (s->presentationId() == e->presentationId) {
                     producer->setPresentationItem(s->item());
+                    streamFound = true;
                     break;
                 }
             }
+            if (!streamFound && !e->presentationArgs.isNull())
+                loadPresentationItem(e->presentationId, e->presentationArgs);
         } else if (!e->presentationArgs.isNull()){
             loadPresentationItem(e->presentationId, e->presentationArgs);
         }
