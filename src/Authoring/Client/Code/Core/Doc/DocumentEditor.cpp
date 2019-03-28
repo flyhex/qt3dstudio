@@ -5220,8 +5220,11 @@ public:
                 if (theImportPtr.m_Value) {
                     CFilePath theDestDir = theImportPtr.m_Value->GetDestDir();
                     CFilePath theSrcFile = theImportPtr.m_Value->GetSrcFile();
-                    CFilePath theFullSrcPath =
-                        CFilePath::CombineBaseAndRelative(theDestDir, theSrcFile);
+                    CFilePath theFullSrcPath;
+                    if (theSrcFile.isRelative())
+                        theFullSrcPath = CFilePath::CombineBaseAndRelative(theDestDir, theSrcFile);
+                    else
+                        theFullSrcPath = theSrcFile;
                     TCharPtr theDAERelativePath =
                         m_StringTable.RegisterStr(m_Doc.GetRelativePathToDoc(theFullSrcPath));
                     pair<unordered_map<TCharPtr, TCharPtr>::iterator, bool> theInsertResult =

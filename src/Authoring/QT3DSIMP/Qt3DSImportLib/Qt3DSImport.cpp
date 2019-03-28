@@ -1547,8 +1547,12 @@ public:
                 // because it may be different.
                 m_SrcFile = CString(srcFile);
                 m_SrcDirectory = m_SrcFile.GetDirectory();
-                m_FullSrcDirectory =
-                    CFilePath::CombineBaseAndRelative(m_DestDirectory, m_SrcDirectory);
+                if (m_SrcDirectory.isRelative()) {
+                    m_FullSrcDirectory =
+                        CFilePath::CombineBaseAndRelative(m_DestDirectory, m_SrcDirectory);
+                } else {
+                    m_FullSrcDirectory = m_SrcDirectory;
+                }
                 m_ImageDir = CFilePath::CombineBaseAndRelative(m_DestDirectory, CString(imagesDir));
                 m_MeshDir = CFilePath::CombineBaseAndRelative(m_DestDirectory, CString(meshDir));
                 Serialize(reader, L"Image", m_Images);
