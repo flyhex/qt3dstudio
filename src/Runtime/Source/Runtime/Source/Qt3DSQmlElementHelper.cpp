@@ -34,6 +34,7 @@
 #include "Qt3DSAttributeHashes.h"
 #include "Qt3DSElementSystem.h"
 #include "Qt3DSRuntimeFactory.h"
+#include "qmath.h"
 
 using namespace Q3DStudio;
 using namespace qt3ds;
@@ -182,6 +183,7 @@ bool CQmlElementHelper::SetAttribute(TElement *theElement, const char *theAttNam
 
     if (thePropertyInfo.hasValue()) {
         UVariant theNewValue;
+        QString name(thePropertyInfo->first.m_Name.c_str());
         EAttributeType theAttributeType = thePropertyInfo->first.m_Type;
         switch (theAttributeType) {
         case ATTRIBUTETYPE_INT32:
@@ -191,6 +193,8 @@ bool CQmlElementHelper::SetAttribute(TElement *theElement, const char *theAttNam
 
         case ATTRIBUTETYPE_FLOAT:
             theNewValue.m_FLOAT = *(FLOAT *)value;
+            if (name.startsWith(QLatin1String("rotation.")))
+                theNewValue.m_FLOAT = qDegreesToRadians(theNewValue.m_FLOAT);
             break;
 
         case ATTRIBUTETYPE_BOOL:
@@ -218,6 +222,11 @@ bool CQmlElementHelper::SetAttribute(TElement *theElement, const char *theAttNam
             theNewValue.m_FLOAT3[0] = vec3[0];
             theNewValue.m_FLOAT3[1] = vec3[1];
             theNewValue.m_FLOAT3[2] = vec3[2];
+            if (name == QLatin1String("rotation")) {
+                theNewValue.m_FLOAT3[0]= qDegreesToRadians(theNewValue.m_FLOAT3[0]);
+                theNewValue.m_FLOAT3[1]= qDegreesToRadians(theNewValue.m_FLOAT3[1]);
+                theNewValue.m_FLOAT3[2]= qDegreesToRadians(theNewValue.m_FLOAT3[2]);
+            }
         } break;
 
         case ATTRIBUTETYPE_NONE:
