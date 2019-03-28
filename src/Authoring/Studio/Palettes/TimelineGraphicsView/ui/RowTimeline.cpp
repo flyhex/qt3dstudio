@@ -514,7 +514,6 @@ void RowTimeline::updateKeyframesFromBinding(const QList<int> &properties)
 
             if (isVisible()) {
                 child->rowTimeline()->update();
-                update();
             } else {
                 // Find the first visible parent and update that to show hidden keyframes
                 RowTree *updateRow = m_rowTree->parentRow();
@@ -525,6 +524,7 @@ void RowTimeline::updateKeyframesFromBinding(const QList<int> &properties)
             }
         }
     }
+    update();
 }
 
 void RowTimeline::insertKeyframe(Keyframe *keyframe)
