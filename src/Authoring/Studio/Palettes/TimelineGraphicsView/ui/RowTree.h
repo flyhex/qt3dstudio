@@ -114,6 +114,7 @@ public:
     bool isComponent() const;
     bool isComponentRoot() const;
     bool isMaster() const;
+    bool isDefaultMaterial() const;
     bool hasPropertyChildren() const;
     bool empty() const; // has zero child rows (and zero properties)
     bool selected() const;

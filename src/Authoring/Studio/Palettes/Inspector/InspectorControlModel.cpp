@@ -233,12 +233,7 @@ bool InspectorControlModel::isDefaultMaterial() const
     if (const auto inspectable = dynamic_cast<Qt3DSDMInspectable *>(m_inspectableBase))
         instance = inspectable->GetGroupInstance(0);
 
-    if (!instance.Valid() || !bridge->IsSceneGraphInstance(instance))
-        return false;
-
-    return bridge->GetObjectType(instance) == OBJTYPE_REFERENCEDMATERIAL
-            && bridge->GetSourcePath(instance) == Q3DStudio::CString::fromQString(
-                bridge->getDefaultMaterialName());
+    return bridge->isDefaultMaterial(instance);
 }
 
 bool InspectorControlModel::isAnimatableMaterial() const

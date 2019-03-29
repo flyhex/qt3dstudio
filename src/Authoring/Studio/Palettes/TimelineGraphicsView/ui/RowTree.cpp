@@ -1197,6 +1197,14 @@ bool RowTree::isMaster() const
     return m_master;
 }
 
+bool RowTree::isDefaultMaterial() const
+{
+    if (m_binding)
+        return static_cast<Qt3DSDMTimelineItemBinding *>(m_binding)->isDefaultMaterial();
+
+    return false;
+}
+
 bool RowTree::empty() const
 {
     return m_childRows.empty() && m_childProps.empty();

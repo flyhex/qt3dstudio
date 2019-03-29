@@ -50,10 +50,14 @@ bool CFileDropSource::ValidateTarget(CDropTarget *inTarget)
 {
     using namespace Q3DStudio;
 
+    const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+            ->GetClientDataModelBridge();
     EStudioObjectType targetType = (EStudioObjectType)inTarget->GetObjectType();
     if (m_ObjectType & (OBJTYPE_PRESENTATION | OBJTYPE_QML_STREAM)) {
-        SetHasValidTarget(targetType & (OBJTYPE_LAYER | OBJTYPE_MATERIAL | OBJTYPE_CUSTOMMATERIAL
-                                        | OBJTYPE_REFERENCEDMATERIAL | OBJTYPE_IMAGE));
+        SetHasValidTarget(!bridge->isDefaultMaterial(inTarget->GetInstance())
+                          && (targetType & (OBJTYPE_LAYER | OBJTYPE_MATERIAL
+                                            | OBJTYPE_CUSTOMMATERIAL | OBJTYPE_REFERENCEDMATERIAL
+                                            | OBJTYPE_IMAGE)));
         return m_HasValidTarget;
     }
 
@@ -71,11 +75,8 @@ bool CFileDropSource::ValidateTarget(CDropTarget *inTarget)
     if (!targetIsValid && m_FileType == DocumentEditorFileType::Image) {
         if (targetType & (OBJTYPE_MATERIAL | OBJTYPE_CUSTOMMATERIAL | OBJTYPE_REFERENCEDMATERIAL
                           | OBJTYPE_IMAGE)) {
-            const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
-                    ->GetClientDataModelBridge();
             // Default material shouldn't be targeatable
-            targetIsValid = bridge->GetSourcePath(inTarget->GetInstance()).toQString()
-                    != bridge->getDefaultMaterialName();
+            targetIsValid = !bridge->isDefaultMaterial(inTarget->GetInstance());
         } else {
             // Image isn't normally acceptable child of a scene, but dropping image on scene
             // will create a rect with image as texture on active layer

@@ -863,6 +863,12 @@ bool Qt3DSDMTimelineItemBinding::isRootComponent() const
     return bridge->IsActiveComponent(m_DataHandle);
 }
 
+bool Qt3DSDMTimelineItemBinding::isDefaultMaterial() const
+{
+    auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
+    return bridge->isDefaultMaterial(m_DataHandle);
+}
+
 ITimelineItemProperty *
 Qt3DSDMTimelineItemBinding::GetOrCreatePropertyBinding(Qt3DSDMPropertyHandle inPropertyHandle)
 {

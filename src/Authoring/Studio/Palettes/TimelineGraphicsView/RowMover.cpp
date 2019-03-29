@@ -227,9 +227,10 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
                     m_insertionTarget->setDnDState(RowTree::DnDState::SP_TARGET);
                 }
             } else {
-                if (rowAtMouse->rowType() == OBJTYPE_LAYER
-                        || rowAtMouse->rowType() == OBJTYPE_MATERIAL
-                        || rowAtMouse->rowType() == OBJTYPE_IMAGE) {
+                if ((rowAtMouse->rowType() == OBJTYPE_LAYER
+                     || rowAtMouse->rowType() == OBJTYPE_MATERIAL
+                     || rowAtMouse->rowType() == OBJTYPE_IMAGE)
+                        && !rowAtMouse->isDefaultMaterial()) {
                     m_insertionTarget->setDnDState(RowTree::DnDState::SP_TARGET);
                 }
             }
@@ -248,7 +249,8 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
         if (rowAtMouse) {
             double y = rowAtMouse->mapFromScene(scenePos).y();
             if (y > TimelineConstants::ROW_H * .25 && y < TimelineConstants::ROW_H * .75) {
-                if (rowAtMouse->rowType() & (OBJTYPE_LAYER | OBJTYPE_MATERIAL | OBJTYPE_IMAGE)) {
+                if (rowAtMouse->rowType() & (OBJTYPE_LAYER | OBJTYPE_MATERIAL | OBJTYPE_IMAGE)
+                        && !rowAtMouse->isDefaultMaterial()) {
                     m_rowAutoExpand = nullptr;
                     m_autoExpandTimer.stop();
                     setVisible(false);

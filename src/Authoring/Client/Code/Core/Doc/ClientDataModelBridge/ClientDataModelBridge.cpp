@@ -1187,6 +1187,15 @@ QString CClientDataModelBridge::getMaterialContainerPath() const
     return getMaterialContainerParentPath() + QStringLiteral(".") + getMaterialContainerName();
 }
 
+bool CClientDataModelBridge::isDefaultMaterial(Qt3DSDMInstanceHandle instance) const
+{
+    if (!instance.Valid() || !m_DataCore->IsInstance(instance))
+        return false;
+
+    return GetObjectType(instance) == OBJTYPE_REFERENCEDMATERIAL
+            && GetSourcePath(instance) == Q3DStudio::CString::fromQString(getDefaultMaterialName());
+}
+
 Qt3DSDMInstanceHandle CClientDataModelBridge::getMaterialContainer() const
 {
     IObjectReferenceHelper *objRefHelper = m_Doc->GetDataModelObjectReferenceHelper();

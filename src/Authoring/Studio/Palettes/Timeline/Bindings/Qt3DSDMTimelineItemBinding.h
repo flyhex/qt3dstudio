@@ -185,6 +185,7 @@ public:
     ITimelineItemProperty *GetPropertyBinding(qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle);
 
     bool isRootComponent() const;
+    bool isDefaultMaterial() const;
 
 protected:
     virtual ITimelineTimebar *CreateTimelineTimebar();
