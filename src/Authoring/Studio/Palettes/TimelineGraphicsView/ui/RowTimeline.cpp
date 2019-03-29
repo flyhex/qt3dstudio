@@ -87,15 +87,12 @@ void RowTimeline::initialize()
     connect(m_commentItem, &RowTimelineCommentItem::labelChanged, this,
             [this](const QString &label) {
         // Update label on timeline and on model
-        // TODO: Get rid of CString APIs
-        auto ccomment = Q3DStudio::CString::fromQString(label);
         ITimelineTimebar *timebar = m_rowTree->m_binding->GetTimelineItem()->GetTimebar();
-        timebar->SetTimebarComment(ccomment);
+        timebar->SetTimebarComment(label);
     });
 
-    connect(m_rowTree->m_scene->ruler(), &Ruler::viewportXChanged, this, [this]() {
-        updateCommentItemPos();
-    });
+    connect(m_rowTree->m_scene->ruler(), &Ruler::viewportXChanged, this,
+            &RowTimeline::updateCommentItemPos);
 }
 
 void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -880,7 +877,7 @@ void RowTimeline::updateCommentItem()
     m_commentItem->setVisible(showComments);
     if (showComments && m_rowTree->m_binding) {
         ITimelineTimebar *timebar = m_rowTree->m_binding->GetTimelineItem()->GetTimebar();
-        m_commentItem->setLabel(timebar->GetTimebarComment().toQString());
+        m_commentItem->setLabel(timebar->GetTimebarComment());
     }
 }
 
@@ -888,6 +885,7 @@ void RowTimeline::updateCommentItemPos()
 {
     if (!m_commentItem)
         return;
+
     Ruler *ruler = m_rowTree->m_scene->ruler();
     m_commentItem->setPos(TimelineConstants::RULER_EDGE_OFFSET + ruler->viewportX(),
                          -TimelineConstants::ROW_TEXT_OFFSET_Y);

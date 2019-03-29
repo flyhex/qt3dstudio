@@ -67,7 +67,7 @@ protected:
     qt3dsdm::Qt3DSDMPropertyHandle m_EndTime;
     ::CColor m_Color; // Timebar color
 
-    Q3DStudio::CString m_Comment; // Timebar comment text
+    QString m_Comment; // Timebar comment text
     std::shared_ptr<qt3dsdm::ISignalConnection> m_PropertyChangedSignal;
     void OnPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                            qt3dsdm::Qt3DSDMPropertyHandle inProperty);
@@ -84,7 +84,7 @@ public:
     void CommitTimeChange() override;
     void RollbackTimeChange() override;
     ::CColor GetTimebarColor() override { return m_Color; }
-    Q3DStudio::CString GetTimebarComment() override { return m_Comment; }
-    void SetTimebarComment(const Q3DStudio::CString &inComment) override;
+    QString GetTimebarComment() const override { return m_Comment; }
+    void SetTimebarComment(const QString &inComment) override;
     void SetTimebarTime(ITimeChangeCallback *inCallback = nullptr) override;
 };

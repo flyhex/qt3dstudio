@@ -110,10 +110,9 @@ void Qt3DSDMTimelineTimebar::OnPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle in
             if (m_PropertySystem->GetInstancePropertyValue(
                     m_DataHandle, theClientDataModelBridge->GetSceneAsset().m_TimebarText,
                     theValue)) {
-                qt3dsdm::SStringRef theTimebarComment = qt3dsdm::get<qt3dsdm::SStringRef>(theValue);
-                m_Comment.Assign(static_cast<const wchar_t *>(theTimebarComment));
+                m_Comment = qt3dsdm::get<qt3dsdm::TDataStrPtr>(theValue)->toQString();
             } else {
-                m_Comment.Assign(L"");
+                m_Comment.clear();
             }
             needsInvalidate = true;
         }
@@ -205,7 +204,7 @@ void Qt3DSDMTimelineTimebar::RollbackTimeChange()
     RollbackEditor();
 }
 
-void Qt3DSDMTimelineTimebar::SetTimebarComment(const Q3DStudio::CString &inComment)
+void Qt3DSDMTimelineTimebar::SetTimebarComment(const QString &inComment)
 {
     using namespace Q3DStudio;
     if (inComment != m_Comment) {

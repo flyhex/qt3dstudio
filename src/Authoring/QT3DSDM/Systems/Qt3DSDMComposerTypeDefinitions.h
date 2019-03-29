@@ -99,7 +99,7 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(shy, m_Shy, bool, false)                                              \
     HANDLE_COMPOSER_PROPERTY(locked, m_Locked, bool, false)                                        \
     HANDLE_COMPOSER_PROPERTY_NO_DEFAULT(timebarcolor, m_TimebarColor, SFloat3)                     \
-    HANDLE_COMPOSER_PROPERTY(timebartext, m_TimebarText, SStringRef, L"")                          \
+    HANDLE_COMPOSER_PROPERTY(timebartext, m_TimebarText, TDataStrPtr, L"")                         \
     HANDLE_COMPOSER_PROPERTY(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_SCENE_PROPERTIES                                                          \

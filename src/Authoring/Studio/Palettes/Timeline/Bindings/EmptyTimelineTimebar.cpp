@@ -87,12 +87,12 @@ void CEmptyTimelineTimebar::RollbackTimeChange()
     return CStudioPreferences::GetObjectTimebarColor();
 }
 
-Q3DStudio::CString CEmptyTimelineTimebar::GetTimebarComment()
+QString CEmptyTimelineTimebar::GetTimebarComment() const
 {
-    return "";
+    return {};
 }
 
-void CEmptyTimelineTimebar::SetTimebarComment(const Q3DStudio::CString &inComment)
+void CEmptyTimelineTimebar::SetTimebarComment(const QString &inComment)
 {
     Q_UNUSED(inComment);
 }

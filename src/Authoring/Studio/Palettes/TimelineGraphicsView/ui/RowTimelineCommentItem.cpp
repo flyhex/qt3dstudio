@@ -33,7 +33,6 @@
 #include "StudioPreferences.h"
 
 #include <QtWidgets/qstyleoption.h>
-#include <QtCore/qdebug.h>
 #include <QtGui/qevent.h>
 #include <QtGui/qtextcursor.h>
 #include <QtGui/qpainter.h>

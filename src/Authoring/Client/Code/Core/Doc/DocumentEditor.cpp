@@ -2847,11 +2847,11 @@ public:
                            inColor.GetBlue() / 255.0f));
     }
 
-    void SetTimebarText(TInstanceHandle inInstance, const Q3DStudio::CString &inComment) override
+    void SetTimebarText(TInstanceHandle inInstance, const QString &inComment) override
     {
         m_PropertySystem.SetInstancePropertyValue(inInstance,
                                                   m_Bridge.GetSceneAsset().m_TimebarText,
-                                                  qt3dsdm::SStringRef(inComment.c_str()));
+                                                  QVariant(inComment));
     }
 
     void AddChild(Qt3DSDMInstanceHandle parent, Qt3DSDMInstanceHandle child,

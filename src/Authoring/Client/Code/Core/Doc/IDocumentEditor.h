@@ -288,8 +288,7 @@ public:
     virtual void TruncateTimeRange(TInstanceHandle inInstance, bool inSetStart, long inTime) = 0;
 
     virtual void SetTimebarColor(TInstanceHandle inInstance, ::CColor inColor) = 0;
-    virtual void SetTimebarText(TInstanceHandle inInstance,
-                                const Q3DStudio::CString &inComment) = 0;
+    virtual void SetTimebarText(TInstanceHandle inInstance, const QString &inComment) = 0;
 
     // Scene graph management.
     virtual void AddChild(TInstanceHandle parent, TInstanceHandle child,
