@@ -1000,54 +1000,56 @@ void TimelineGraphicsScene::updateHoverStatus(const QPointF &scenePos)
             RowTree *rowTree = item->type() == TimelineItem::TypeRowTree
                                ? static_cast<RowTree *>(item)
                                : static_cast<RowTreeLabelItem *>(item)->parentRow();
-            int left = rowTree->clipX();
-            int right = (int)rowTree->treeWidth() - TimelineConstants::TREE_ICONS_W;
-            variantsAreaHovered = scenePos.x() > left && scenePos.x() < right;
-            if (variantsAreaHovered && rowTree != m_variantsRowTree) {
-                CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-                const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
-                const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
-                auto property = bridge->GetLayer().m_variants;
+            if (!rowTree->isProperty()) {
+                int left = rowTree->clipX();
+                int right = (int)rowTree->treeWidth() - TimelineConstants::TREE_ICONS_W;
+                variantsAreaHovered = scenePos.x() > left && scenePos.x() < right;
+                if (variantsAreaHovered && rowTree != m_variantsRowTree) {
+                    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+                    const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
+                    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+                    auto property = bridge->GetLayer().m_variants;
 
-                using namespace qt3dsdm;
-                SValue sValue;
-                if (propertySystem->GetInstancePropertyValue(rowTree->instance(), property,
-                                                             sValue)) {
-                    QString propVal = qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->toQString();
-                    if (!propVal.isEmpty()) {
-                        // parse propVal into variantsHash (group => tags)
-                        const QStringList tagPairs = propVal.split(QLatin1Char(','));
-                        QHash<QString, QStringList> variantsHash;
-                        QStringList variantsHashKeys; // maintain traverse order
-                        for (auto &tagPair : tagPairs) {
-                            const QStringList pair = tagPair.split(QLatin1Char(':'));
-                            variantsHash[pair[0]].append(pair[1]);
-                            if (!variantsHashKeys.contains(pair[0]))
-                                variantsHashKeys.append(pair[0]);
-                        }
+                    using namespace qt3dsdm;
+                    SValue sValue;
+                    if (propertySystem->GetInstancePropertyValue(rowTree->instance(), property,
+                                                                 sValue)) {
+                        QString propVal = qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->toQString();
+                        if (!propVal.isEmpty()) {
+                            // parse propVal into variantsHash (group => tags)
+                            const QStringList tagPairs = propVal.split(QLatin1Char(','));
+                            QHash<QString, QStringList> variantsHash;
+                            QStringList variantsHashKeys; // maintain traverse order
+                            for (auto &tagPair : tagPairs) {
+                                const QStringList pair = tagPair.split(QLatin1Char(':'));
+                                variantsHash[pair[0]].append(pair[1]);
+                                if (!variantsHashKeys.contains(pair[0]))
+                                    variantsHashKeys.append(pair[0]);
+                            }
 
-                        // parse variantsHash into tooltipStr
-                        const auto variantsDef
-                                = g_StudioApp.GetCore()->getProjectFile().variantsDef();
-                        QString templ = QStringLiteral("<font color='%1'>%2</font>");
-                        QString tooltipStr("<table>");
-                        for (auto &g : qAsConst(variantsHashKeys)) {
-                            tooltipStr.append("<tr><td>");
-                            tooltipStr.append(templ.arg(variantsDef[g].m_color).arg(g + ": "));
-                            tooltipStr.append("</td><td>");
-                            for (auto &t : qAsConst(variantsHash[g]))
-                                tooltipStr.append(t + ", ");
-                            tooltipStr.chop(2);
-                            tooltipStr.append("</td></tr>");
+                            // parse variantsHash into tooltipStr
+                            const auto variantsDef
+                                    = g_StudioApp.GetCore()->getProjectFile().variantsDef();
+                            QString templ = QStringLiteral("<font color='%1'>%2</font>");
+                            QString tooltipStr("<table>");
+                            for (auto &g : qAsConst(variantsHashKeys)) {
+                                tooltipStr.append("<tr><td>");
+                                tooltipStr.append(templ.arg(variantsDef[g].m_color).arg(g + ": "));
+                                tooltipStr.append("</td><td>");
+                                for (auto &t : qAsConst(variantsHash[g]))
+                                    tooltipStr.append(t + ", ");
+                                tooltipStr.chop(2);
+                                tooltipStr.append("</td></tr>");
+                            }
+                            tooltipStr.append("</table>");
+                            m_variantsToolTip->setText(tooltipStr);
+                            m_variantsToolTip->adjustSize();
+                            m_variantsToolTip->move(m_widgetTimeline->mapToGlobal(
+                                                    {right, (int)rowTree->y()}));
+                            m_variantsToolTip->raise();
+                            m_variantsToolTip->show();
+                            m_variantsRowTree = rowTree;
                         }
-                        tooltipStr.append("</table>");
-                        m_variantsToolTip->setText(tooltipStr);
-                        m_variantsToolTip->adjustSize();
-                        m_variantsToolTip->move(m_widgetTimeline->mapToGlobal(
-                                                {right, (int)rowTree->y()}));
-                        m_variantsToolTip->raise();
-                        m_variantsToolTip->show();
-                        m_variantsRowTree = rowTree;
                     }
                 }
             }
