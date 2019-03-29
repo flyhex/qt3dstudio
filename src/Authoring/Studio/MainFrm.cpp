@@ -350,8 +350,9 @@ void CMainFrame::OnCreate()
     // correctly
     QTimer::singleShot(0, this, [&] {
         QRect actionGeom = m_ui->m_PlaybackToolbar->actionGeometry(m_ui->actionFilterVariants);
+        auto *actionWidget = m_ui->m_PlaybackToolbar->widgetForAction(m_ui->actionFilterVariants);
         m_filterVariantsDlg.reset(new FilterVariantsDlg(this, m_ui->actionFilterVariants,
-                                                        actionGeom.width()));
+                                                        actionGeom.width(), actionWidget));
     });
 
     // Create the view manager
@@ -419,6 +420,10 @@ void CMainFrame::OnNewPresentation()
     // Clear data input list and sub-presentation list
     g_StudioApp.m_subpresentations.clear();
     g_StudioApp.m_dataInputDialogItems.clear();
+
+    // reset the variants filter and preview button's icon
+    m_filterVariantsDlg->clearFilter();
+    updateActionPreviewVariantsState(false);
 }
 
 /**

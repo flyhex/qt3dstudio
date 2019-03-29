@@ -637,6 +637,7 @@ void TimelineWidget::onAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle parentIns
         if (propBinding && !propAnimated) {
             m_graphicsScene->rowManager()->deleteRow(propBinding->getRowTree());
             binding->RemovePropertyRow(property);
+            m_keyframeChangesMap.insert(parentInstance, property);
             // Ensure row deletions are finalized
             if (!m_asyncUpdateTimer.isActive())
                 m_asyncUpdateTimer.start();

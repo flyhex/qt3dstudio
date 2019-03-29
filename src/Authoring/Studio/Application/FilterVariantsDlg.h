@@ -40,11 +40,13 @@ class FilterVariantsDlg : public QQuickWidget
     Q_OBJECT
 
 public:
-    explicit FilterVariantsDlg(QWidget *parent, QAction *action, int actionSize);
+    explicit FilterVariantsDlg(QWidget *parent, QAction *action, int actionSize,
+                               QWidget *actionWidget);
 
     Q_INVOKABLE int actionSize() const;
 
     QString filterStr() const;
+    void clearFilter();
 
 protected:
     void focusOutEvent(QFocusEvent *e) override;
@@ -60,6 +62,7 @@ private:
     FilterVariantsModel *m_model = nullptr;
     QAction *m_action = nullptr;
     int m_actionSize = 0; // width/height of the action icon
+    QWidget *m_actionWidget = nullptr;
 };
 
 #endif // FILTER_VARIANTS_DLG_H

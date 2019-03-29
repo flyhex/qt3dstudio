@@ -336,6 +336,17 @@ void SGuideInspectableImpl::FireRefresh()
     m_Editor.FireImmediateRefresh(qt3dsdm::Qt3DSDMInstanceHandle());
 }
 
+void SGuideInspectableImpl::Destroy()
+{
+    m_Editor.EnsureEditor(QObject::tr("Delete Guide"), __FILE__, __LINE__).DeleteGuide(m_Guide);
+    m_Editor.CommitEditor();
+}
+
+bool SGuideInspectableImpl::isHorizontal() const
+{
+    return Reader().GetGuideInfo(m_Guide).m_Direction == qt3dsdm::GuideDirections::Horizontal;
+}
+
 const std::vector<std::shared_ptr<IInspectableAttributeItem>> &
 SGuideInspectableImpl::properties() const
 {

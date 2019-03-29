@@ -69,17 +69,34 @@ Q3DSPresentation in the C++ API.
 
 \section1 Manage Data Inputs
 
-\target add data input
 \section2 Add a Data Input
-To add a new data input, follow the steps below.
+
+There are two ways to open the \uicontrol{Add Data Input} dialog:
 
 \list 1
-  \li Select \uicontrol{File > Data Inputs} from the menu bar in Studio.
-  \li Click the \inlineimage add-data-input-icon.png
-  icon.
+  \li
+    \list 1
+      \li Select \uicontrol{File > Data Inputs} from the menu bar in Studio.
+      \li Select \uicontrol{Add Data Input}.
+    \endlist
+  \li
+    \list 1
+      \li Click
+      \inlineimage datainput-to-timeline-icon-inactive.png
+      next to the desired slide, timeline or property.
+      \li Select \uicontrol{Add New Data Input}.
+    \endlist
+    \note Adding a data input this way will automatically connect it to the slide, timeline or
+    property where it was created.
+\endlist
+
+Once the dialog is open, follow the steps below to add the data input:
+
+\list 1
   \li Enter \uicontrol{Name} for the data input.
   \li Enter \uicontrol{Input Type} for the data input. If \e{Ranged Number} is selected,
   it is required to specify \e{Minimum Range} and \e{Maximum Range}.
+  \li If desired, add \l{metadata keys} for the data input.
   \li Click \uicontrol{OK}.
 \endlist
 
@@ -91,13 +108,7 @@ To edit a data input, follow the steps below.
 
 \list 1
   \li Select \uicontrol{File > Data Inputs} from the menu bar in Studio.
-  \li Select the data input you want to edit by clicking on it.
-    \raw HTML
-    <p>Or</p>
-    \endraw
-    Double-click the data input you want to edit (then skip to step 4).
-  \li Click the \inlineimage edit-data-input-icon.png
-  icon.
+  \li Double-click the data input you want to edit.
   \li Make desired changes.
   \li Click \uicontrol{OK}.
 \endlist
@@ -111,9 +122,47 @@ To delete a data input, follow the steps below.
 \list 1
   \li Select \uicontrol{File > Data Inputs} from the menu bar in Studio.
   \li Select the data input you want to delete by clicking on it.
-  \li Click the \inlineimage delete-data-input-icon.png
-  icon.
+  \li Select \uicontrol{Remove existing data input}.
 \endlist
+
+\section2 Metadata Keys
+
+It is possible to add metadata keys to your data inputs. You can add multiple single-value keys
+to each data input.
+
+You can manage the metadata keys when you create or edit a data input.
+
+\image datainput-meta.png
+
+\section3 Add a Metadata Key
+
+To add a metadata key, follow the steps below:
+
+\list 1
+  \li
+    Enter a \uicontrol{Metadata key} and a \uicontrol{Metadata value} (optional).
+  \li
+    Press \uicontrol{OK}.
+\endlist
+
+\section3 Edit a Metadata Key
+
+To edit a metadata key, follow the steps below:
+
+\list 1
+  \li
+    Double-click the desired metadata key in the list.
+  \li
+    Edit desired values.
+  \li
+    Press \uicontrol{OK}.
+\endlist
+
+\section3 Delete a Metadata Key
+
+To delete a metadata key, click
+\inlineimage delete-data-input-icon.png
+next to it in the list.
 
 \section1 Control the Timeline with Data Input
 
@@ -123,7 +172,7 @@ To add a data input to control the timeline animation, follow the instructions b
 
 \list 1
   \li Add the data input according to
-  \l {add data input}{instructions above}.
+  \l {add a data input}{instructions above}.
   \li Click the \inlineimage datainput-to-timeline-icon-inactive.png
   icon located in the bottom of the scene graph.
   \li Select the desired data input from the list by clicking it.
@@ -145,7 +194,7 @@ To remove the data input, repeat step 2 above. Then select \uicontrol{[No contro
 
 \list 1
   \li Add the data input according to
-  \l {add data input}{instructions above}.
+  \l {add a data input}{instructions above}.
   \li In the slide palette, click the \inlineimage datainput-to-timeline-icon-inactive.png
   icon located below the slides.
   \li Select the desired data input from the list by clicking it.
@@ -196,7 +245,7 @@ The following data input types can be used to control object properties:
 
 \list 1
   \li Add the data input according to
-  \l {add data input}{instructions above}.
+  \l {add a data input}{instructions above}.
   \li Select the desired object in the scene graph.
   \li In the inspector palette, click the \inlineimage datainput-to-timeline-icon-inactive.png
   icon next to the object property you wish to control.

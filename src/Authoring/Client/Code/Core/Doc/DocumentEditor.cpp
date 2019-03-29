@@ -3268,16 +3268,20 @@ public:
     // Creates a new group object and moves the specified objects as its children
     void groupObjects(const TInstanceHandleList &inInstances) override
     {
-        TInstanceHandleList sortedList(ToGraphOrdering(inInstances));
-
-        // Create a new group next to the topmost item in the graph
-        TInstanceHandle sibling = sortedList.front();
-        Qt3DSDMSlideHandle slide = GetActiveSlide(sibling);
-        TInstanceHandle group = CreateSceneGraphInstance(ComposerObjectTypes::Group, sibling, slide,
-                                                         DocumentEditorInsertType::PreviousSibling,
-                                                         CPt(), PRIMITIVETYPE_UNKNOWN, -1);
-        // Move items into the group
-        RearrangeObjects(sortedList, group, DocumentEditorInsertType::LastChild, true);
+        if (inInstances.size() > 0) {
+            TInstanceHandleList sortedList(ToGraphOrdering(inInstances));
+            // Create a new group next to the topmost item in the graph
+            TInstanceHandle sibling = sortedList.front();
+            Qt3DSDMSlideHandle slide = GetActiveSlide(sibling);
+            if (m_Bridge.IsMaster(sibling))
+                slide = m_SlideSystem.GetMasterSlide(slide);
+            TInstanceHandle group = CreateSceneGraphInstance(
+                        ComposerObjectTypes::Group, sibling, slide,
+                        DocumentEditorInsertType::PreviousSibling, CPt(),
+                        PRIMITIVETYPE_UNKNOWN, -1);
+            // Move items into the group
+            RearrangeObjects(sortedList, group, DocumentEditorInsertType::LastChild, true);
+        }
     }
 
     Qt3DSDMInstanceHandle MakeComponent(const qt3dsdm::TInstanceHandleList &inInstances) override

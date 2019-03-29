@@ -310,15 +310,20 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
         bool srcHasMaster = sourceRowsHasMaster();
         if (!rowInsert1->locked() && rowInsert1->isContainer() && !m_sourceRows.contains(rowInsert1)
             // prevent insertion a master row under a non-master unless under a component root
-            && (!(srcHasMaster && !rowInsert1->isMaster()) || rowInsert1->isComponent())) {
+            && (!(srcHasMaster && !rowInsert1->isMaster()) || rowInsert1->isComponentRoot())) {
             depthMax++; // Container: allow insertion as a child
-        } else if (rowInsert1->isPropertyOrMaterial() && !rowInsert1->parentRow()->isContainer()) {
-            depthMax--; // non-container with properties and/or a material
-        } else if (srcHasMaster) {
+        } else {
             RowTree *row = rowInsert1->parentRow();
-            while (row && !row->isMaster() && !row->isComponent()) {
-                depthMax--;
-                row = row->parentRow();
+            if (rowInsert1->isPropertyOrMaterial() && !rowInsert1->parentRow()->isContainer()) {
+                depthMax--; // non-container with properties and/or a material
+                if (row)
+                    row = row->parentRow();
+            }
+            if (srcHasMaster) {
+                while (row && !row->isMaster() && !row->isComponent()) {
+                    depthMax--;
+                    row = row->parentRow();
+                }
             }
         }
 
@@ -341,9 +346,11 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
         // i.e. user is dragging a row within timeline (not from object/project panel)
         // AND drop depth is larger than for the component (user is dropping items _in_
         // the component, not at the same depth as the component itself)
-        if (insertParent->isComponent() && depth > insertParent->depth() && m_active) {
+        if (insertParent->isComponent() && !insertParent->isComponentRoot()
+                && depth > insertParent->depth() && m_active) {
             m_deleteAfterMove = true;
         } else {
+            m_deleteAfterMove = false;
             for (int i = rowInsert1->depth(); i >= depth; --i)
                 insertParent = insertParent->parentRow();
         }

@@ -34,11 +34,13 @@
 #include <QtCore/qtimer.h>
 #include <QtQml/qqmlcontext.h>
 
-FilterVariantsDlg::FilterVariantsDlg(QWidget *parent, QAction *action, int actionSize)
+FilterVariantsDlg::FilterVariantsDlg(QWidget *parent, QAction *action, int actionSize,
+                                     QWidget *actionWidget)
     : QQuickWidget(parent)
     , m_model(new FilterVariantsModel(m_variantsFilter, this))
     , m_action(action)
     , m_actionSize(actionSize)
+    , m_actionWidget(actionWidget)
 {
     setWindowTitle(tr("Filter variants"));
     QTimer::singleShot(0, this, &FilterVariantsDlg::initialize);
@@ -71,6 +73,11 @@ QString FilterVariantsDlg::filterStr() const
     return ret;
 }
 
+void FilterVariantsDlg::clearFilter()
+{
+    m_variantsFilter.clear();
+}
+
 int FilterVariantsDlg::actionSize() const
 {
     return m_actionSize;
@@ -85,8 +92,11 @@ void FilterVariantsDlg::showEvent(QShowEvent *event)
 void FilterVariantsDlg::focusOutEvent(QFocusEvent *e)
 {
     QQuickWidget::focusOutEvent(e);
-    m_action->setChecked(false);
-    QTimer::singleShot(0, this, &QQuickWidget::close);
+
+    if (!m_actionWidget->underMouse()) {
+        m_action->setChecked(false);
+        QTimer::singleShot(0, this, &QQuickWidget::close);
+    }
 }
 
 void FilterVariantsDlg::keyPressEvent(QKeyEvent *e)

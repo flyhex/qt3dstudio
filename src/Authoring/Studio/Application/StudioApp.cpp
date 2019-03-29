@@ -1045,7 +1045,41 @@ bool CStudioApp::canGroupSelectedObjects() const
     // Grouping is allowed for single and for multiple selected items.
     qt3dsdm::TInstanceHandleList selected = m_core->GetDoc()
             ->GetSelectedValue().GetSelectedInstances();
-    return (selected.size() >= 1);
+    if (selected.size() >= 1) {
+        // Scene objects, any direct children of scene objects (layers and behaviors), effects,
+        // root components, images, and materials are not groupable. Anything that can be
+        // multiselected can be grouped, so its enough to check the first selected object's type.
+        // Behavior that is not direct child of scene could technically be grouped, but since it
+        // cannot be multiselected, we treat it as ungroupable.
+        qt3dsdm::Qt3DSDMInstanceHandle first = selected[0];
+        if (first.Valid()) {
+            auto bridge = m_core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
+            EStudioObjectType type = bridge->GetObjectType(first);
+
+            const int ungroupableTypes = OBJTYPE_SCENE | OBJTYPE_LAYER | OBJTYPE_MATERIAL
+                    | OBJTYPE_CUSTOMMATERIAL | OBJTYPE_REFERENCEDMATERIAL | OBJTYPE_BEHAVIOR
+                    | OBJTYPE_EFFECT | OBJTYPE_IMAGE;
+
+            if (type & ungroupableTypes)
+                return false;
+
+            if (type == OBJTYPE_COMPONENT) {
+                // Components can't be grouped if they are the root of currently active time context
+                if (bridge->IsActiveComponent(first))
+                    return false;
+            }
+
+            // All items must either be on master slide or not be on master slide
+            bool isMaster = bridge->IsMaster(first);
+            for (size_t i = 1, end = selected.size(); i < end; ++i) {
+                if (isMaster != bridge->IsMaster(selected[i]))
+                    return false;
+            }
+
+            return true;
+        }
+    }
+    return false;
 }
 
 bool CStudioApp::canUngroupSelectedObjects() const

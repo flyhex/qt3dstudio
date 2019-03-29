@@ -1138,6 +1138,14 @@ bool RowTree::isComponent() const
     return m_rowType == OBJTYPE_COMPONENT;
 }
 
+bool RowTree::isComponentRoot() const
+{
+    if (m_rowType == OBJTYPE_COMPONENT && m_binding)
+        return static_cast<Qt3DSDMTimelineItemBinding *>(m_binding)->isRootComponent();
+
+    return false;
+}
+
 bool RowTree::isMaster() const
 {
     return m_master;
