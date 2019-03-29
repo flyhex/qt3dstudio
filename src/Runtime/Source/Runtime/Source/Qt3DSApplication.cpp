@@ -1074,7 +1074,7 @@ struct SApp : public IApplication
 
             if (newScene == NULL) {
                 Q3DStudio_delete(thePresentation, CPresentation);
-                qCCritical(qt3ds::INVALID_OPERATION)
+                qCWarning(qt3ds::INVALID_OPERATION)
                         << "Unable to load presentation " << theFile.c_str();
                 inAsset.m_Presentation = NULL;
                 return false;
@@ -1087,8 +1087,7 @@ struct SApp : public IApplication
                 return true;
             }
         }
-        qCCritical(qt3ds::INVALID_OPERATION)
-                << "Unable to load presentation " << theFile.c_str();
+        qCWarning(qt3ds::INVALID_OPERATION) << "Unable to load presentation " << theFile.c_str();
         return false;
     }
 
@@ -1547,10 +1546,12 @@ struct SApp : public IApplication
             if (iter->second->getType() == AssetValueTypes::Presentation) {
                 Q3DStudio::CPresentation *presentation
                         = iter->second->getData<SPresentationAsset>().m_Presentation;
-                if (iter->first == m_InitialPresentationId)
-                    list.prepend(presentation);
-                else
-                    list.append(presentation);
+                if (presentation) {
+                    if (iter->first == m_InitialPresentationId)
+                        list.prepend(presentation);
+                    else
+                        list.append(presentation);
+                }
             }
         }
         return list;
@@ -1716,9 +1717,8 @@ struct SXMLLoader : public IAppLoadContext
                 if (!m_App.LoadUIP(thePresentationAsset,
                                    toConstDataRef(theUIPReferences.data(),
                                                   (QT3DSU32)theUIPReferences.size()))) {
-                    qCCritical(INVALID_OPERATION, "Unable to load presentation %s",
-                               thePathStr.c_str());
-                    return false;
+                    qCWarning(INVALID_OPERATION, "Unable to load presentation %s",
+                              thePathStr.c_str());
                 }
             } break;
             case AssetValueTypes::Behavior: {
