@@ -494,7 +494,7 @@ namespace studio {
 
         void drawPivot(SGraphObjectTranslator &inTranslator);
 
-        void SetViewport(QT3DSF32 inWidth, QT3DSF32 inHeight) { m_Viewport = QT3DSVec2(inWidth, inHeight); }
+        void SetViewport(QT3DSF32 inWidth, QT3DSF32 inHeight);
 
         QT3DSVec2 GetViewportDimensions() const { return m_Viewport; }
         QT3DSVec2 GetPreviewViewportDimensions() const;

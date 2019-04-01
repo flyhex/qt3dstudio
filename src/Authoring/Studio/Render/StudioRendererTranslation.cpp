@@ -2914,6 +2914,19 @@ void STranslation::drawPivot(SGraphObjectTranslator &inTranslator)
     }
 }
 
+void STranslation::SetViewport(qt3ds::QT3DSF32 inWidth, qt3ds::QT3DSF32 inHeight)
+{
+     m_Viewport = QT3DSVec2(inWidth, inHeight);
+     if (m_EditCameraEnabled) {
+         // Update inner rect as it is used to calculate camera frustrum for visual aid widget
+         QSize theSize = g_StudioApp.GetCore()->GetStudioProjectSettings()->getPresentationSize();
+         m_InnerRect.m_Top = 0;
+         m_InnerRect.m_Bottom = theSize.height();
+         m_InnerRect.m_Left = 0;
+         m_InnerRect.m_Right = theSize.width();
+     }
+}
+
 Option<QT3DSU32> STranslation::PickWidget(CPt inMouseCoords, TranslationSelectMode::Enum,
                                        qt3ds::widgets::IStudioWidgetBase &inWidget)
 {
