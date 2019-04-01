@@ -96,6 +96,9 @@ ITimelineItemBinding *RowTree::getBinding() const
 // object instance handle
 int RowTree::instance() const
 {
+    if (m_isProperty || !m_binding)
+        return 0;
+
     return static_cast<Qt3DSDMTimelineItemBinding *>(m_binding)->GetInstance();
 }
 
