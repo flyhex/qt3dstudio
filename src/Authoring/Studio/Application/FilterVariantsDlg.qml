@@ -55,7 +55,7 @@ Rectangle {
         Text {
             text: qsTr("Select variant filtering")
             color: _studioColor4
-            font.pointSize: 10
+            font.pixelSize: _fontSize
             anchors.verticalCenter: parent.verticalCenter
         }
 
@@ -64,6 +64,7 @@ Rectangle {
             height: 25
             anchors.right: parent.right
             text: qsTr("Clear")
+            font.pixelSize: _fontSize
 
             onClicked: _model.clearAll();
         }
@@ -119,6 +120,7 @@ Rectangle {
                         Text {
                             id: tLabel
                             text: model.group
+                            font.pixelSize: _fontSize
                             color: groupMouseArea.pressed ? _backgroundColor : model.color
                             elide: Text.ElideRight
                             anchors.centerIn: parent
@@ -169,6 +171,7 @@ Rectangle {
                 id: tLabel
                 anchors.centerIn: parent
                 text: tagsModel ? tagsModel.tag : ""
+                font.pixelSize: _fontSize
                 color: (toggled || tagMouseArea.pressed)
                        ? (isBright ? _studioColor1 : _textColor) : _studioColor4
             }

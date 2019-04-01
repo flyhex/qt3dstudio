@@ -1119,6 +1119,7 @@ Rectangle {
                 ToolButton {
                     id: importButton
                     text: qsTr("Import...")
+                    font.pixelSize: _fontSize
                     width: 70
                     height: 20
 
@@ -1130,6 +1131,7 @@ Rectangle {
                 ToolButton {
                     id: exportButton
                     text: qsTr("Export...")
+                    font.pixelSize: _fontSize
                     width: 70
                     height: 20
                     enabled: !_variantsGroupModel.variantsEmpty
@@ -1142,6 +1144,7 @@ Rectangle {
 
             Text {
                 text: qsTr("There are no variant tags yet. Click [+ Group] to add a new tags group and start adding tags.")
+                font.pixelSize: _fontSize
                 color: _textColor
                 visible: _variantsGroupModel.variantsEmpty
                 width: parent.width
@@ -1179,6 +1182,7 @@ Rectangle {
                         id: tLabel
                         text: model.group
                         color: model.color
+                        font.pixelSize: _fontSize
                         width: tagsRepeater.maxGroupLabelWidth;
                         elide: Text.ElideRight
                         anchors.top: parent.top
@@ -1213,6 +1217,7 @@ Rectangle {
                         ToolButton {
                             id: addTagButton
                             text: qsTr("+ Tag")
+                            font.pixelSize: _fontSize
                             height: 25
 
                             onClicked: {
@@ -1229,6 +1234,7 @@ Rectangle {
             ToolButton {
                 id: addGroupButton
                 text: qsTr("+ Group")
+                font.pixelSize: _fontSize
                 width: 65
                 height: 25
                 onClicked: {
@@ -1257,8 +1263,8 @@ Rectangle {
                 id: tLabel
                 anchors.centerIn: parent
                 text: tagsModel ? tagsModel.tag : ""
-                color: toggled ? (isBright ? _studioColor1 : _textColor)
-                               : _studioColor4
+                font.pixelSize: _fontSize
+                color: toggled ? (isBright ? _studioColor1 : _textColor) : _studioColor4
             }
 
             MouseArea {
