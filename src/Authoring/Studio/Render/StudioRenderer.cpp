@@ -318,6 +318,13 @@ struct SRendererImpl : public IStudioRenderer,
                             m_RenderContext->GetRenderContext().GetStringTable()));
             theCore->SetTextRendererCore(theTextRenderer);
 
+#if QT_VERSION >= QT_VERSION_CHECK(5,12,2)
+            ITextRendererCore &distanceFieldRenderer(
+                        ITextRendererCore::createDistanceFieldRenderer(
+                            m_RenderContext->GetRenderContext().GetFoundation()));
+            theCore->setDistanceFieldRenderer(distanceFieldRenderer);
+#endif
+
             m_Context = theCore->CreateRenderContext(
                 m_RenderContext->GetRenderContext(),
                 m_RenderContext->GetRenderContext().GetStringTable().RegisterStr(
@@ -704,6 +711,8 @@ struct SRendererImpl : public IStudioRenderer,
     void SetupTextRenderer()
     {
         if (m_Context.mPtr && m_Context->GetTextRenderer()) {
+            if (m_Context->getDistanceFieldRenderer())
+                m_Context->getDistanceFieldRenderer()->ClearProjectFontDirectories();
             m_Context->GetTextRenderer()->ClearProjectFontDirectories();
             QString projectPath = g_StudioApp.GetCore()->getProjectFile().getProjectPath();
             if (!projectPath.isEmpty()) {
@@ -715,6 +724,13 @@ struct SRendererImpl : public IStudioRenderer,
                     m_Context->GetStringTable().RegisterStr(thePath.c_str()));
                 m_Context->GetTextRenderer()->AddProjectFontDirectory(
                     m_Context->GetStringTable().RegisterStr(projectPath.toLatin1().data()));
+                if (m_Context->getDistanceFieldRenderer()) {
+                    m_Context->getDistanceFieldRenderer()->AddSystemFontDirectory(
+                                m_Context->GetStringTable().RegisterStr(thePath.c_str()));
+                    m_Context->getDistanceFieldRenderer()->AddProjectFontDirectory(
+                                m_Context->GetStringTable().RegisterStr(
+                                    projectPath.toLatin1().data()));
+                }
             }
         }
     }

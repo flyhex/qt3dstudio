@@ -42,6 +42,7 @@
 #include "Qt3DSRenderShaderCache.h"
 #include "foundation/Qt3DSInvasiveLinkedList.h"
 #include "Qt3DSRenderableImage.h"
+#include "Qt3DSDistanceFieldRenderer.h"
 
 namespace qt3ds {
 namespace render {
@@ -59,7 +60,8 @@ namespace render {
             CustomMaterialMeshSubset = 1 << 7,
             HasRefraction = 1 << 8,
             Path = 1 << 9,
-            ShadowCaster = 1 << 10
+            ShadowCaster = 1 << 10,
+            DistanceField = 1 << 11,
         };
     };
 
@@ -128,6 +130,16 @@ namespace render {
 
         void SetText(bool inText) { ClearOrSet(inText, RenderPreparationResultFlagValues::Text); }
         bool IsText() const { return this->operator&(RenderPreparationResultFlagValues::Text); }
+
+        void setDistanceField(bool inText)
+        {
+            ClearOrSet(inText, RenderPreparationResultFlagValues::DistanceField);
+        }
+
+        bool isDistanceField() const
+        {
+            return this->operator&(RenderPreparationResultFlagValues::DistanceField);
+        }
 
         void SetCustom(bool inCustom)
         {
@@ -296,6 +308,7 @@ namespace render {
             m_RenderableFlags.SetDefaultMaterialMeshSubset(true);
             m_RenderableFlags.SetCustom(false);
             m_RenderableFlags.SetText(false);
+            m_RenderableFlags.setDistanceField(false);
         }
 
         void Render(const QT3DSVec2 &inCameraVec, TShaderFeatureSet inFeatureSet);
@@ -374,11 +387,41 @@ namespace render {
             m_RenderableFlags.SetDefaultMaterialMeshSubset(false);
             m_RenderableFlags.SetCustom(false);
             m_RenderableFlags.SetText(true);
+            m_RenderableFlags.setDistanceField(false);
         }
 
         void Render(const QT3DSVec2 &inCameraVec);
         void RenderDepthPass(const QT3DSVec2 &inCameraVec);
     };
+
+#if QT_VERSION >= QT_VERSION_CHECK(5,12,2)
+    struct SDistanceFieldRenderable : public SRenderableObject
+    {
+        Q3DSDistanceFieldRenderer &m_distanceFieldText;
+        QT3DSMat44 m_mvp;
+        QT3DSMat44 m_modelView;
+        SText &m_text;
+
+        SDistanceFieldRenderable(SRenderableObjectFlags flags, QT3DSVec3 worldCenterPt,
+                                 SText &text, const NVBounds3 &bounds,
+                                 const QT3DSMat44 &mvp, const QT3DSMat44 &modelView,
+                                 Q3DSDistanceFieldRenderer &distanceFieldText)
+            : SRenderableObject(flags, worldCenterPt, text.m_GlobalTransform, bounds)
+            , m_distanceFieldText(distanceFieldText)
+            , m_mvp(mvp)
+            , m_modelView(modelView)
+            , m_text(text)
+        {
+            m_RenderableFlags.SetDefaultMaterialMeshSubset(false);
+            m_RenderableFlags.SetCustom(false);
+            m_RenderableFlags.SetText(false);
+            m_RenderableFlags.setDistanceField(true);
+        }
+
+        void Render(const QT3DSVec2 &inCameraVec);
+        void RenderDepthPass(const QT3DSVec2 &inCameraVec);
+    };
+#endif
 
     struct SPathRenderable : public SRenderableObject
     {

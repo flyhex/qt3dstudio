@@ -1,8 +1,7 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2012 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
+** Copyright (C) 2019 The Qt Company Ltd.
+** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
 **
@@ -27,45 +26,57 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "Qt3DSRenderText.h"
 
-using namespace qt3ds::render;
+#ifndef Q3DSFONTDATABASE_P_H
+#define Q3DSFONTDATABASE_P_H
 
-STextRenderInfo::STextRenderInfo()
-    : m_FontSize(24)
-    , m_HorizontalAlignment(TextHorizontalAlignment::Center)
-    , m_VerticalAlignment(TextVerticalAlignment::Middle)
-    , m_Leading(0)
-    , m_Tracking(0)
-    , m_DropShadow(false)
-    , m_DropShadowStrength(80)
-    , m_DropShadowOffset(10)
-    , m_DropShadowOffsetX(0)
-    , m_DropShadowOffsetY(0)
-    , m_DropShadowHorizontalAlignment(TextHorizontalAlignment::Right)
-    , m_DropShadowVerticalAlignment(TextVerticalAlignment::Bottom)
-    , m_WordWrap(TextWordWrap::WrapWord)
-    , m_BoundingBox(QT3DSVec2(0 ,0))
-    , m_Elide(TextElide::ElideNone)
-    , m_ScaleX(0)
-    , m_ScaleY(0)
-    , m_EnableAcceleratedFont(false)
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the Qt API.  It exists for the convenience
+// of a number of Qt sources files.  This header file may change from
+// version to version without notice, or even be removed.
+//
+// We mean it.
+//
+
+#include <QtCore/qvector.h>
+#include <QtGui/qrawfont.h>
+
+#if QT_VERSION >= QT_VERSION_CHECK(5,12,2)
+
+QT_BEGIN_NAMESPACE
+
+class Q3DSSceneManager;
+class Q3DSFontDatabase
 {
-}
+public:
+    Q3DSFontDatabase();
 
-STextRenderInfo::~STextRenderInfo()
-{
-}
+    void registerFonts(const QStringList &directories);
+    void unregisterFonts(const QStringList &directories);
 
-SText::SText()
-    : SNode(GraphObjectTypes::Text)
-    , m_TextColor(1, 1, 1)
-    , m_TextTexture(NULL)
-{
-    m_Bounds.setEmpty();
-}
+    QRawFont findFont(const QString &fontId);
 
-NVBounds3 SText::GetTextBounds() const
-{
-    return m_Bounds;
-}
+private:
+    struct Font {
+        Font() = default;
+        Font(const QString &id, const QString &path)
+            : fontId(id)
+            , filePath(path)
+        {}
+
+        QString fontId;
+        QString filePath;
+        QRawFont rawFont;
+    };
+
+    QVector<Font> m_fonts;
+};
+
+QT_END_NAMESPACE
+
+#endif // QT_VERSION >= QT_VERSION_CHECK(5,12,2)
+
+#endif // Q3DSFONTDATABASE_P_H

@@ -70,6 +70,8 @@ namespace render {
         // Text renderers may be provided by clients at runtime.
         virtual void SetTextRendererCore(ITextRendererCore &inRenderer) = 0;
         virtual ITextRendererCore *GetTextRendererCore() = 0;
+        virtual void setDistanceFieldRenderer(ITextRendererCore &inRenderer) = 0;
+        virtual ITextRendererCore *getDistanceFieldRenderer() = 0;
         // this is our default 2D text onscreen renderer
         virtual void SetOnscreenTextRendererCore(ITextRendererCore &inRenderer) = 0;
         virtual ITextRendererCore *GetOnscreenTextRendererCore() = 0;
@@ -106,6 +108,7 @@ namespace render {
         virtual IPerfTimer &GetPerfTimer() = 0;
         virtual ITextTextureCache *GetTextureCache() = 0;
         virtual ITextRenderer *GetTextRenderer() = 0;
+        virtual ITextRenderer *getDistanceFieldRenderer() = 0;
         virtual IRenderList &GetRenderList() = 0;
         virtual IPathManager &GetPathManager() = 0;
         virtual IShaderProgramGenerator &GetShaderProgramGenerator() = 0;

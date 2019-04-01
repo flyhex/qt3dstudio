@@ -787,11 +787,15 @@ namespace render {
                                           const QT3DSVec2 &inCameraProps, TShaderFeatureSet, QT3DSU32,
                                           const SCamera &inCamera)
     {
-        if (inObject.m_RenderableFlags.IsDefaultMaterialMeshSubset())
+        if (inObject.m_RenderableFlags.IsDefaultMaterialMeshSubset()) {
             static_cast<SSubsetRenderable &>(inObject).RenderDepthPass(inCameraProps);
-        else if (inObject.m_RenderableFlags.IsText())
+        } else if (inObject.m_RenderableFlags.IsText()) {
             static_cast<STextRenderable &>(inObject).RenderDepthPass(inCameraProps);
-        else if (inObject.m_RenderableFlags.IsCustomMaterialMeshSubset()) {
+#if QT_VERSION >= QT_VERSION_CHECK(5,12,2)
+        } else if (inObject.m_RenderableFlags.isDistanceField()) {
+            static_cast<SDistanceFieldRenderable &>(inObject).RenderDepthPass(inCameraProps);
+#endif
+        } else if (inObject.m_RenderableFlags.IsCustomMaterialMeshSubset()) {
             static_cast<SCustomMaterialRenderable &>(inObject).RenderDepthPass(
                 inCameraProps, inData.m_Layer, inData.m_Lights, inCamera, NULL);
         } else if (inObject.m_RenderableFlags.IsPath()) {
@@ -845,6 +849,10 @@ namespace render {
             static_cast<SSubsetRenderable &>(inObject).Render(inCameraProps, inFeatureSet);
         else if (inObject.m_RenderableFlags.IsText())
             static_cast<STextRenderable &>(inObject).Render(inCameraProps);
+#if QT_VERSION >= QT_VERSION_CHECK(5,12,2)
+        else if (inObject.m_RenderableFlags.isDistanceField())
+            static_cast<SDistanceFieldRenderable &>(inObject).Render(inCameraProps);
+#endif
         else if (inObject.m_RenderableFlags.IsCustomMaterialMeshSubset()) {
             // PKC : Need a better place to do this.
             SCustomMaterialRenderable &theObject =
@@ -1419,6 +1427,15 @@ namespace render {
                                 static_cast<STextRenderable &>(*m_TransparentObjects[idx]);
                             OffsetProjectionMatrix(theRenderable.m_ModelViewProjection,
                                                    theVertexOffsets);
+#if QT_VERSION >= QT_VERSION_CHECK(5,12,2)
+                        } else if (m_TransparentObjects[idx]->m_RenderableFlags
+                                   .isDistanceField()) {
+                            SDistanceFieldRenderable &theRenderable
+                                    = static_cast<SDistanceFieldRenderable &>(
+                                        *m_TransparentObjects[idx]);
+                            OffsetProjectionMatrix(theRenderable.m_mvp,
+                                                   theVertexOffsets);
+#endif
                         } else if (m_TransparentObjects[idx]->m_RenderableFlags.IsPath()) {
                             SPathRenderable &theRenderable =
                                 static_cast<SPathRenderable &>(*m_TransparentObjects[idx]);
@@ -2140,7 +2157,8 @@ namespace render {
         m_BoundingRectColor.setEmpty();
     }
 
-    void SLayerRenderData::PrepareAndRender(const QT3DSMat44 &inViewProjection)
+    void SLayerRenderData::PrepareAndRender(const QT3DSMat44 &inProjection,
+                                            const QT3DSMat44 &inViewProjection)
     {
         TRenderableObjectList theTransparentObjects(m_TransparentObjects);
         TRenderableObjectList theOpaqueObjects(m_OpaqueObjects);
@@ -2148,7 +2166,7 @@ namespace render {
         theOpaqueObjects.clear();
         m_ModelContexts.clear();
         SLayerRenderPreparationResultFlags theFlags;
-        PrepareRenderablesForRender(inViewProjection, Empty(), 1.0, theFlags);
+        PrepareRenderablesForRender(inProjection, inViewProjection, Empty(), 1.0, theFlags);
         RenderDepthPass(false);
         Render();
     }

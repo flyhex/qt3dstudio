@@ -696,9 +696,19 @@ namespace render {
     {
         if (inRenderableObject.m_RenderableFlags.IsText()) {
             STextRenderable &theRenderable = static_cast<STextRenderable &>(inRenderableObject);
-            if (&theRenderable.m_Text == &inNode)
+            if (&theRenderable.m_Text == &inNode) {
                 return inPickRay.GetRelativeXY(inRenderableObject.m_GlobalTransform,
                                                inRenderableObject.m_Bounds);
+            }
+#if QT_VERSION >= QT_VERSION_CHECK(5,12,2)
+        } else if (inRenderableObject.m_RenderableFlags.isDistanceField()) {
+            SDistanceFieldRenderable &theRenderable = static_cast<SDistanceFieldRenderable &>(
+                        inRenderableObject);
+            if (&theRenderable.m_text == &inNode) {
+                return inPickRay.GetRelativeXY(inRenderableObject.m_GlobalTransform,
+                                               inRenderableObject.m_Bounds);
+            }
+#endif
         } else if (inRenderableObject.m_RenderableFlags.IsDefaultMaterialMeshSubset()) {
             SSubsetRenderable &theRenderable = static_cast<SSubsetRenderable &>(inRenderableObject);
             if (&theRenderable.m_ModelContext.m_Model == &inNode)
@@ -964,14 +974,15 @@ namespace render {
     }
 
     // This doesn't have to be cheap.
-    void Qt3DSRendererImpl::RunLayerRender(SLayer &inLayer, const QT3DSMat44 &inViewProjection)
+    void Qt3DSRendererImpl::RunLayerRender(SLayer &inLayer, const QT3DSMat44 &inProjection,
+                                           const QT3DSMat44 &inViewProjection)
     {
         SLayerRenderData *theData = GetOrCreateLayerRenderDataForNode(inLayer);
         if (theData == NULL || theData->m_Camera == NULL) {
             QT3DS_ASSERT(false);
             return;
         }
-        theData->PrepareAndRender(inViewProjection);
+        theData->PrepareAndRender(inProjection, inViewProjection);
     }
 
     void Qt3DSRendererImpl::AddRenderWidget(IRenderWidget &inWidget)
@@ -1356,6 +1367,10 @@ namespace render {
                 &static_cast<SSubsetRenderable *>(&inRenderableObject)->m_ModelContext.m_Model;
         else if (inRenderableObject.m_RenderableFlags.IsText())
             thePickObject = &static_cast<STextRenderable *>(&inRenderableObject)->m_Text;
+#if QT_VERSION >= QT_VERSION_CHECK(5,12,2)
+        else if (inRenderableObject.m_RenderableFlags.isDistanceField())
+            thePickObject = &static_cast<SDistanceFieldRenderable *>(&inRenderableObject)->m_text;
+#endif
         else if (inRenderableObject.m_RenderableFlags.IsCustomMaterialMeshSubset())
             thePickObject = &static_cast<SCustomMaterialRenderable *>(&inRenderableObject)
                                  ->m_ModelContext.m_Model;

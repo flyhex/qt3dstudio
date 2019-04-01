@@ -21,6 +21,7 @@ win: QMAKE_LFLAGS += /MANIFEST /ENTRY:"wWinMainCRTStartup"
 
 QT += core gui xml openglextensions
 QT += qml quick widgets quickwidgets network
+QT += quick-private
 
 # Configuration for RT1/RT2 preview. RT2 doesn't work yet so uset RT1.
 QT += studio3d-private

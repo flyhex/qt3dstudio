@@ -153,7 +153,7 @@ struct AdvancedBlendModes
         // layer setup system.  This assumes the client has setup the viewport, scissor, and render
         // target
         // the way they want them.
-        void PrepareAndRender(const QT3DSMat44 &inViewProjection);
+        void PrepareAndRender(const QT3DSMat44 &inProjection, const QT3DSMat44 &inViewProjection);
 
         SOffscreenRendererEnvironment CreateOffscreenRenderEnvironment() override;
         IRenderTask &CreateRenderToTextureRunnable() override;

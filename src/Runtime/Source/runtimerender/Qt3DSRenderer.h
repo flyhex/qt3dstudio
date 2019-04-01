@@ -182,7 +182,8 @@ namespace render {
         // Testing function to allow clients to render a layer using a custom view project instead
         // of the one that would be setup
         // using the layer's camera in conjunction with the layer's position,scale.
-        virtual void RunLayerRender(SLayer &inLayer, const QT3DSMat44 &inViewProjection) = 0;
+        virtual void RunLayerRender(SLayer &inLayer, const QT3DSMat44 &inProjection,
+                                    const QT3DSMat44 &inViewProjection) = 0;
 
         // This allocator is cleared every frame on BeginFrame.  Objects constructed using this
         // allocator

@@ -894,9 +894,14 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
         inPresentation.SetScene(&inScene);
         if (m_ProjectInitialized == false) {
             m_ProjectInitialized = true;
-            if (m_Context->m_Context->GetTextRenderer())
+            if (m_Context->m_Context->GetTextRenderer()) {
                 m_Context->m_Context->GetTextRenderer()->AddProjectFontDirectory(
                     inScene.m_Presentation->m_PresentationDirectory);
+            }
+            if (m_Context->m_Context->getDistanceFieldRenderer()) {
+                m_Context->m_Context->getDistanceFieldRenderer()->AddProjectFontDirectory(
+                    inScene.m_Presentation->m_PresentationDirectory);
+            }
             eastl::string theBinaryPath(inPresentation.GetFilePath().toLatin1().constData());
             qt3ds::foundation::CFileTools::AppendDirectoryInPathToFile(theBinaryPath, "binary");
             eastl::string theBinaryDir(theBinaryPath);

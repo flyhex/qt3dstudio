@@ -1,8 +1,7 @@
 /****************************************************************************
 **
-** Copyright (C) 2008-2012 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
+** Copyright (C) 2019 The Qt Company Ltd.
+** Contact: http://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
 **
@@ -27,45 +26,50 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "Qt3DSRenderText.h"
 
-using namespace qt3ds::render;
+#include "Qt3DSDistanceFieldGlyphCacheManager_p.h"
+#include "Qt3DSDistanceFieldGlyphCache_p.h"
 
-STextRenderInfo::STextRenderInfo()
-    : m_FontSize(24)
-    , m_HorizontalAlignment(TextHorizontalAlignment::Center)
-    , m_VerticalAlignment(TextVerticalAlignment::Middle)
-    , m_Leading(0)
-    , m_Tracking(0)
-    , m_DropShadow(false)
-    , m_DropShadowStrength(80)
-    , m_DropShadowOffset(10)
-    , m_DropShadowOffsetX(0)
-    , m_DropShadowOffsetY(0)
-    , m_DropShadowHorizontalAlignment(TextHorizontalAlignment::Right)
-    , m_DropShadowVerticalAlignment(TextVerticalAlignment::Bottom)
-    , m_WordWrap(TextWordWrap::WrapWord)
-    , m_BoundingBox(QT3DSVec2(0 ,0))
-    , m_Elide(TextElide::ElideNone)
-    , m_ScaleX(0)
-    , m_ScaleY(0)
-    , m_EnableAcceleratedFont(false)
-{
+#include <QtQuick/private/qsgdefaultrendercontext_p.h>
+
+#if QT_VERSION >= QT_VERSION_CHECK(5,12,2)
+
+QT_BEGIN_NAMESPACE
+
+namespace {
+    class FontKeyAccessor : public QSGDefaultRenderContext
+    {
+    public:
+        static QString fontKey(const QRawFont &font)
+        {
+            return QSGDefaultRenderContext::fontKey(font);
+        }
+    };
 }
 
-STextRenderInfo::~STextRenderInfo()
+Q3DSDistanceFieldGlyphCacheManager::~Q3DSDistanceFieldGlyphCacheManager()
 {
+    for (auto &cache : qAsConst(m_glyphCaches))
+        delete cache;
 }
 
-SText::SText()
-    : SNode(GraphObjectTypes::Text)
-    , m_TextColor(1, 1, 1)
-    , m_TextTexture(NULL)
+Q3DSDistanceFieldGlyphCache *Q3DSDistanceFieldGlyphCacheManager::glyphCache(const QRawFont &font)
 {
-    m_Bounds.setEmpty();
+    QString key = FontKeyAccessor::fontKey(font);
+    Q3DSDistanceFieldGlyphCache *cache = m_glyphCaches.value(key);
+    if (cache == nullptr) {
+        cache = new Q3DSDistanceFieldGlyphCache(font, *m_context);
+        m_glyphCaches.insert(key, cache);
+    }
+
+    return cache;
 }
 
-NVBounds3 SText::GetTextBounds() const
+void Q3DSDistanceFieldGlyphCacheManager::setContext(qt3ds::render::IQt3DSRenderContext &context)
 {
-    return m_Bounds;
+    m_context = &context;
 }
+
+QT_END_NAMESPACE
+
+#endif // QT_VERSION >= QT_VERSION_CHECK(5,12,2)

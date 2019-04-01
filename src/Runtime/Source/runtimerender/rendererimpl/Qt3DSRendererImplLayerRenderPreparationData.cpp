@@ -362,8 +362,8 @@ namespace render {
     }
 
     bool SLayerRenderPreparationData::PrepareTextForRender(
-        SText &inText, const QT3DSMat44 &inViewProjection, QT3DSF32 inTextScaleFactor,
-        SLayerRenderPreparationResultFlags &ioFlags)
+            SText &inText, const QT3DSMat44 &inProjection, const QT3DSMat44 &inViewProjection,
+            QT3DSF32 inTextScaleFactor, SLayerRenderPreparationResultFlags &ioFlags)
     {
         ITextTextureCache *theTextRenderer = m_Renderer.GetQt3DSContext().GetTextureCache();
         if (theTextRenderer == NULL)
@@ -378,31 +378,49 @@ namespace render {
         if (theFlags.IsCompletelyTransparent() == false) {
             retval = inText.m_Flags.IsDirty() || inText.m_Flags.IsTextDirty();
             inText.m_Flags.SetTextDirty(false);
-            TTPathObjectAndTexture theResult =
-                theTextRenderer->RenderText(inText, inTextScaleFactor);
-            inText.m_TextTexture = theResult.second.second.mPtr;
-            inText.m_TextTextureDetails = theResult.second.first;
-            inText.m_PathFontItem = theResult.first.second;
-            inText.m_PathFontDetails = theResult.first.first;
-            STextScaleAndOffset theScaleAndOffset(*inText.m_TextTexture,
-                                                  inText.m_TextTextureDetails, inText);
-            QT3DSVec2 theTextScale(theScaleAndOffset.m_TextScale);
-            QT3DSVec2 theTextOffset(theScaleAndOffset.m_TextOffset);
-            QT3DSVec3 minimum(theTextOffset[0] - theTextScale[0], theTextOffset[1] - theTextScale[1],
-                           0);
-            QT3DSVec3 maximum(theTextOffset[0] + theTextScale[0], theTextOffset[1] + theTextScale[1],
-                           0);
-            inText.m_Bounds = NVBounds3(minimum, maximum);
             QT3DSMat44 theMVP;
             QT3DSMat33 theNormalMatrix;
             inText.CalculateMVPAndNormalMatrix(inViewProjection, theMVP, theNormalMatrix);
 
-            if (inText.m_PathFontDetails)
-                ioFlags.SetRequiresStencilBuffer(true);
+            SRenderableObject *theRenderable = nullptr;
+#if QT_VERSION >= QT_VERSION_CHECK(5,12,2)
+            // TODO: Implement clipping for the distance field renderer
+            if (inText.m_WordWrap != TextWordWrap::Clip || (inText.m_BoundingBox.x == 0.0f
+                                                            && inText.m_BoundingBox.y == 0.0f)) {
+                QT3DSMat44 modelView = (inProjection.getInverse() * inViewProjection)
+                        * inText.m_GlobalTransform;
+                Q3DSDistanceFieldRenderer *distanceFieldText
+                        = static_cast<Q3DSDistanceFieldRenderer *>(
+                            m_Renderer.GetQt3DSContext().getDistanceFieldRenderer());
+                theRenderable = RENDER_FRAME_NEW(SDistanceFieldRenderable)(
+                    theFlags, inText.GetGlobalPos(), inText, inText.m_Bounds, theMVP,
+                    modelView, *distanceFieldText);
+            } else
+#endif
+            {
+                TTPathObjectAndTexture theResult
+                        = theTextRenderer->RenderText(inText, inTextScaleFactor);
+                inText.m_TextTexture = theResult.second.second.mPtr;
+                inText.m_TextTextureDetails = theResult.second.first;
+                inText.m_PathFontItem = theResult.first.second;
+                inText.m_PathFontDetails = theResult.first.first;
+                STextScaleAndOffset theScaleAndOffset(*inText.m_TextTexture,
+                                                      inText.m_TextTextureDetails, inText);
+                QT3DSVec2 theTextScale(theScaleAndOffset.m_TextScale);
+                QT3DSVec2 theTextOffset(theScaleAndOffset.m_TextOffset);
+                QT3DSVec3 minimum(theTextOffset[0] - theTextScale[0],
+                        theTextOffset[1] - theTextScale[1], 0);
+                QT3DSVec3 maximum(theTextOffset[0] + theTextScale[0],
+                        theTextOffset[1] + theTextScale[1], 0);
+                inText.m_Bounds = NVBounds3(minimum, maximum);
 
-            STextRenderable *theRenderable = RENDER_FRAME_NEW(STextRenderable)(
-                theFlags, inText.GetGlobalPos(), m_Renderer, inText, inText.m_Bounds, theMVP,
-                inViewProjection, *inText.m_TextTexture, theTextOffset, theTextScale);
+                if (inText.m_PathFontDetails)
+                    ioFlags.SetRequiresStencilBuffer(true);
+
+                theRenderable = RENDER_FRAME_NEW(STextRenderable)(
+                    theFlags, inText.GetGlobalPos(), m_Renderer, inText, inText.m_Bounds, theMVP,
+                    inViewProjection, *inText.m_TextTexture, theTextOffset, theTextScale);
+            }
             m_TransparentObjects.push_back(theRenderable);
         }
         return retval;
@@ -997,11 +1015,13 @@ namespace render {
     }
 
     bool SLayerRenderPreparationData::PrepareRenderablesForRender(
-        const QT3DSMat44 &inViewProjection, const Option<SClippingFrustum> &inClipFrustum,
-        QT3DSF32 inTextScaleFactor, SLayerRenderPreparationResultFlags &ioFlags)
+            const QT3DSMat44 &inProjection, const QT3DSMat44 &inViewProjection,
+            const Option<SClippingFrustum> &inClipFrustum,
+            QT3DSF32 inTextScaleFactor, SLayerRenderPreparationResultFlags &ioFlags)
     {
         SStackPerfTimer __timer(m_Renderer.GetQt3DSContext().GetPerfTimer(),
                                 "SLayerRenderData::PrepareRenderablesForRender");
+        m_projection = inProjection;
         m_ViewProjection = inViewProjection;
         QT3DSF32 theTextScaleFactor = inTextScaleFactor;
         bool wasDataDirty = false;
@@ -1025,7 +1045,8 @@ namespace render {
                     SText *theText = static_cast<SText *>(theNode);
                     theText->CalculateGlobalVariables();
                     if (theText->m_Flags.IsGloballyActive()) {
-                        bool wasTextDirty = PrepareTextForRender(*theText, inViewProjection,
+                        bool wasTextDirty = PrepareTextForRender(*theText, inProjection,
+                                                                 inViewProjection,
                                                                  theTextScaleFactor, ioFlags);
                         wasDataDirty = wasDataDirty || wasTextDirty;
                     }
@@ -1344,6 +1365,7 @@ namespace render {
 
                 QT3DSF32 theTextScaleFactor = 1.0f;
                 if (m_Camera) {
+                    m_projection = m_Camera->m_Projection;
                     m_Camera->CalculateViewProjectionMatrix(m_ViewProjection);
                     theTextScaleFactor = m_Camera->GetTextScaleFactor(
                         thePrepResult.GetLayerToPresentationViewport(),
@@ -1359,8 +1381,10 @@ namespace render {
                     // the near plane's bbox edges are calculated in the clipping frustum's
                     // constructor.
                     m_ClippingFrustum = SClippingFrustum(m_ViewProjection, nearPlane);
-                } else
+                } else {
+                    m_projection = QT3DSMat44::createIdentity();
                     m_ViewProjection = QT3DSMat44::createIdentity();
+                }
 
                 // Setup the light directions here.
 
@@ -1372,7 +1396,8 @@ namespace render {
                 m_ModelContexts.clear();
                 if (GetOffscreenRenderer() == false) {
                     bool renderablesDirty =
-                        PrepareRenderablesForRender(m_ViewProjection, m_ClippingFrustum,
+                        PrepareRenderablesForRender(m_projection, m_ViewProjection,
+                                                    m_ClippingFrustum,
                                                     theTextScaleFactor, thePrepResult.m_Flags);
                     wasDataDirty = wasDataDirty || renderablesDirty;
                     if (thePrepResult.m_Flags.RequiresStencilBuffer())

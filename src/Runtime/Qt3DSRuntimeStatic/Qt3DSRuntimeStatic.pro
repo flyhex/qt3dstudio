@@ -15,6 +15,7 @@ linux {
 DEFINES += QT3DS_BUILDING_LIBRARY
 
 QT += qml
+QT += quick-private
 
 # Foundation
 SOURCES += \
@@ -162,7 +163,11 @@ SOURCES += \
     ../Source/uipparser/Qt3DSUIPParserImpl.cpp \
     ../Source/uipparser/Qt3DSUIPParserObjectRefHelper.cpp \
     ../Source/runtimerender/Qt3DSRenderContextCore.cpp \
-    ../Source/runtimerender/resourcemanager/Qt3DSRenderLoadedTextureKTX.cpp
+    ../Source/runtimerender/resourcemanager/Qt3DSRenderLoadedTextureKTX.cpp \
+    ../Source/runtimerender/Qt3DSDistanceFieldRenderer.cpp \
+    ../Source/runtimerender/Qt3DSFontDatabase.cpp \
+    ../Source/runtimerender/Qt3DSDistanceFieldGlyphCacheManager.cpp \
+    ../Source/runtimerender/Qt3DSDistanceFieldGlyphCache.cpp
 
 HEADERS += \
     ../Source/foundation/ConvertUTF.h \
@@ -448,7 +453,11 @@ HEADERS += \
     ../Source/engine/Qt3DSWindowSystem.h \
     ../Source/runtimerender/Qt3DSRenderContextCore.h \
     ../Source/runtimerender/Qt3DSRenderLightConstantProperties.h \
-    ../Source/runtimerender/resourcemanager/Qt3DSRenderLoadedTextureKTX.h
+    ../Source/runtimerender/resourcemanager/Qt3DSRenderLoadedTextureKTX.h \
+    ../Source/runtimerender/Include/Qt3DSDistanceFieldRenderer.h \
+    ../Source/runtimerender/Include/Qt3DSFontDatabase_p.h \
+    ../Source/runtimerender/Include/Qt3DSDistanceFieldGlyphCacheManager_p.h \
+    ../Source/runtimerender/Include/Qt3DSDistanceFieldGlyphCache_p.h
 
 win32 {
 SOURCES += \

@@ -1314,6 +1314,11 @@ struct SApp : public IApplication
 
         NVFoundationBase &fnd(m_CoreFactory->GetFoundation());
 
+        if (m_CoreFactory->GetRenderContextCore().getDistanceFieldRenderer()) {
+            m_CoreFactory->GetRenderContextCore().getDistanceFieldRenderer()
+                    ->AddProjectFontDirectory(projectDirectory.c_str());
+        }
+
         if (m_CoreFactory->GetRenderContextCore().GetTextRendererCore()) {
             m_CoreFactory->GetRenderContextCore().GetTextRendererCore()->AddProjectFontDirectory(
                         projectDirectory.c_str());

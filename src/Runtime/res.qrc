@@ -105,5 +105,13 @@
         <file>res/primitives/Rectangle.mesh</file>
         <file>res/primitives/Sphere.mesh</file>
         <file>res/Font/TitilliumWeb-Regular.ttf</file>
+        <file>res/effectlib/distancefieldtext.frag</file>
+        <file>res/effectlib/distancefieldtext.vert</file>
+        <file>res/effectlib/distancefieldtext_core.frag</file>
+        <file>res/effectlib/distancefieldtext_core.vert</file>
+        <file>res/effectlib/distancefieldtext_dropshadow.frag</file>
+        <file>res/effectlib/distancefieldtext_dropshadow.vert</file>
+        <file>res/effectlib/distancefieldtext_dropshadow_core.frag</file>
+        <file>res/effectlib/distancefieldtext_dropshadow_core.vert</file>
     </qresource>
 </RCC>

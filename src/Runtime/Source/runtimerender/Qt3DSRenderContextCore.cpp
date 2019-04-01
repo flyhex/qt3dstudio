@@ -65,6 +65,7 @@
 #include "Qt3DSRenderShaderCodeGeneratorV2.h"
 #include "Qt3DSRenderDefaultMaterialShaderGenerator.h"
 #include "Qt3DSRenderCustomMaterialShaderGenerator.h"
+#include "Qt3DSDistanceFieldRenderer.h"
 
 using namespace qt3ds::render;
 
@@ -85,6 +86,7 @@ struct SRenderContextCore : public IQt3DSRenderContextCore
     NVScopedRefCounted<ITextRendererCore> m_TextRenderer;
     NVScopedRefCounted<ITextRendererCore> m_OnscreenTexRenderer;
     NVScopedRefCounted<IPathManagerCore> m_PathManagerCore;
+    NVScopedRefCounted<ITextRendererCore> m_distanceFieldRenderer;
 
     QT3DSI32 mRefCount;
     SRenderContextCore(NVFoundationBase &fnd, IStringTable &strTable)
@@ -127,6 +129,11 @@ struct SRenderContextCore : public IQt3DSRenderContextCore
                                                    const char8_t *inPrimitivesDirectory) override;
     void SetTextRendererCore(ITextRendererCore &inRenderer) override { m_TextRenderer = inRenderer; }
     ITextRendererCore *GetTextRendererCore() override { return m_TextRenderer.mPtr; }
+    void setDistanceFieldRenderer(ITextRendererCore &inRenderer) override
+    {
+        m_distanceFieldRenderer = inRenderer;
+    }
+    ITextRendererCore *getDistanceFieldRenderer() override { return m_distanceFieldRenderer.mPtr; }
     void SetOnscreenTextRendererCore(ITextRendererCore &inRenderer) override
     {
         m_OnscreenTexRenderer = inRenderer;
@@ -213,6 +220,7 @@ struct SRenderContext : public IQt3DSRenderContext
     NVScopedRefCounted<IOffscreenRenderManager> m_OffscreenRenderManager;
     NVScopedRefCounted<IQt3DSRenderer> m_Renderer;
     NVScopedRefCounted<ITextRenderer> m_TextRenderer;
+    NVScopedRefCounted<ITextRenderer> m_distanceFieldRenderer;
     NVScopedRefCounted<ITextRenderer> m_OnscreenTextRenderer;
     NVScopedRefCounted<ITextTextureCache> m_TextTextureCache;
     NVScopedRefCounted<ITextTextureAtlas> m_TextTextureAtlas;
@@ -307,6 +315,15 @@ struct SRenderContext : public IQt3DSRenderContext
                 m_RenderContext->GetFoundation(), *m_TextRenderer, *m_RenderContext);
         }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5,12,2)
+        ITextRendererCore *distanceFieldRenderer = inCore.getDistanceFieldRenderer();
+        if (distanceFieldRenderer) {
+            m_distanceFieldRenderer = distanceFieldRenderer->GetTextRenderer(ctx);
+            static_cast<Q3DSDistanceFieldRenderer *>(m_distanceFieldRenderer.mPtr)
+                    ->setContext(*this);
+        }
+#endif
+
         ITextRendererCore *theOnscreenTextCore = inCore.GetOnscreenTextRendererCore();
         if (theOnscreenTextCore) {
             m_OnscreenTextRenderer = theOnscreenTextCore->GetTextRenderer(ctx);
@@ -380,6 +397,8 @@ struct SRenderContext : public IQt3DSRenderContext
     void SetInSubPresentation(bool inValue) override { m_IsInSubPresentation = inValue; }
 
     ITextRenderer *GetTextRenderer() override { return m_TextRenderer; }
+
+    ITextRenderer *getDistanceFieldRenderer() override { return m_distanceFieldRenderer; }
 
     ITextRenderer *GetOnscreenTextRenderer() override { return m_OnscreenTextRenderer; }
 
@@ -797,6 +816,8 @@ struct SRenderContext : public IQt3DSRenderContext
             m_TextTextureCache->EndFrame();
         if (m_TextRenderer)
             m_TextRenderer->EndFrame();
+        if (m_distanceFieldRenderer)
+            m_distanceFieldRenderer->EndFrame();
         m_OffscreenRenderManager->EndFrame();
         m_Renderer->EndFrame();
         m_CustomMaterialSystem->EndFrame();

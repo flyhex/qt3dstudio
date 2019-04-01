@@ -118,6 +118,11 @@ namespace render {
             m_CoreContext->SetTextRendererCore(
                         ITextRendererCore::CreateQtTextRenderer(*m_Foundation, *m_StringTable));
 
+#if QT_VERSION >= QT_VERSION_CHECK(5,12,2)
+            m_CoreContext->setDistanceFieldRenderer(
+                        ITextRendererCore::createDistanceFieldRenderer(*m_Foundation));
+#endif
+
             m_CoreContext->SetOnscreenTextRendererCore(
                 ITextRendererCore::CreateOnscreenTextRenderer(*m_Foundation));
         }

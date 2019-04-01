@@ -430,6 +430,18 @@ namespace render {
         }
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5,12,2)
+    void SDistanceFieldRenderable::Render(const QT3DSVec2 &inCameraVec)
+    {
+        m_distanceFieldText.renderText(m_text, m_mvp, m_modelView);
+    }
+
+    void SDistanceFieldRenderable::RenderDepthPass(const QT3DSVec2 &inCameraVec)
+    {
+        m_distanceFieldText.renderTextDepth(m_text, m_mvp, m_modelView);
+    }
+#endif
+
     void SCustomMaterialRenderable::Render(const QT3DSVec2 & /*inCameraVec*/,
                                            const SLayerRenderData &inLayerData,
                                            const SLayer &inLayer, NVDataRef<SLight *> inLights,

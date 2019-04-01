@@ -79,6 +79,10 @@ namespace render {
         static ITextRendererCore &CreateQtTextRenderer(NVFoundationBase &inFoundation,
                                                        IStringTable &inStrTable);
 
+#if QT_VERSION >= QT_VERSION_CHECK(5,12,2)
+        static ITextRendererCore &createDistanceFieldRenderer(NVFoundationBase &inFnd);
+#endif
+
         // call this to create onscreen text renderer
         // it needs true type fonts
         static ITextRendererCore &CreateOnscreenTextRenderer(NVFoundationBase &inFoundation);
