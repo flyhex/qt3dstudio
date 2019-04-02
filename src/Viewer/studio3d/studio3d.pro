@@ -8,10 +8,9 @@ DEFINES += PLATFORM_HAS_QT_MULTIMEDIA_LIB
 QT += multimedia
 }
 CONFIG += console
-DEFINES += QTSTUDIO3D_EXPORTS
 
 LIBS += \
-    -lqt3dsruntime$$qtPlatformTargetSuffix() \
+    -lqt3dsopengl$$qtPlatformTargetSuffix() \
     -lqt3dsqmlstreamer$$qtPlatformTargetSuffix()
 
 include(studio3d.pri)

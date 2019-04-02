@@ -1,5 +1,6 @@
 TEMPLATE = lib
 TARGET = qt3dsqmlstreamer
+VERSION = $$MODULE_VERSION
 include($$PWD/../../commonplatform.pri)
 
 CONFIG += installed

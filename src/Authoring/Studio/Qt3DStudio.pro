@@ -444,10 +444,10 @@ macos: {
     qtstudio3d.files = $$absolute_path($$LIBDIR)/QtStudio3D.framework
     qtstudio3d.path = Contents/Frameworks
 
-    studioruntime.files = $$absolute_path($$LIBDIR)/libqt3dsruntime.1.dylib
+    studioruntime.files = $$absolute_path($$LIBDIR)/libqt3dsopengl.$$section(MODULE_VERSION, '.', 0, 0).dylib
     studioruntime.path = Contents/Frameworks
 
-    qmlstreamer.files = $$absolute_path($$LIBDIR)/libqt3dsqmlstreamer.1.dylib
+    qmlstreamer.files = $$absolute_path($$LIBDIR)/libqt3dsqmlstreamer.$$section(MODULE_VERSION, '.', 0, 0).dylib
     qmlstreamer.path = Contents/Frameworks
 
     QMAKE_BUNDLE_DATA += qtstudio3d studioruntime qmlstreamer

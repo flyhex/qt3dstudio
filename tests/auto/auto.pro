@@ -1,7 +1,7 @@
 TEMPLATE = subdirs
 CONFIG += ordered
 
-!macos: SUBDIRS += \
+!macos:!win32: SUBDIRS += \
     qtextras
 
 # TODO: Re-enable these tests after fixing them

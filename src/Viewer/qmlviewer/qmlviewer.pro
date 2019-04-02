@@ -8,9 +8,9 @@ DEFINES += PLATFORM_HAS_QT_MULTIMEDIA_LIB
 QT += multimedia
 }
 
-TARGET = qtstudio3d
-TARGETPATH = QtStudio3D
-IMPORT_VERSION = 1.0
+TARGET = qtstudio3dopengl
+TARGETPATH = QtStudio3D/OpenGL
+IMPORT_VERSION = 2.4
 
 SOURCES += \
     Qt3DSViewPlugin.cpp \
@@ -25,7 +25,7 @@ HEADERS += \
     q3dspresentationitem.h
 
 LIBS += \
-    -lqt3dsruntime$$qtPlatformTargetSuffix() \
+    -lqt3dsopengl$$qtPlatformTargetSuffix() \
     -lqt3dsqmlstreamer$$qtPlatformTargetSuffix()
 
 OTHER_FILES += \

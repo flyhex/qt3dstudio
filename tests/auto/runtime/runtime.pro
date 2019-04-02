@@ -64,7 +64,7 @@ linux {
 }
 
 LIBS += \
-    -lqt3dsruntime$$qtPlatformTargetSuffix() \
+    -lqt3dsopengl$$qtPlatformTargetSuffix() \
     -lqt3dsqmlstreamer$$qtPlatformTargetSuffix()
 
 ANDROID_EXTRA_LIBS = \

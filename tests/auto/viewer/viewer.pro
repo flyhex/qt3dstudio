@@ -13,9 +13,9 @@ SOURCES += \
     tst_qt3dsviewer.cpp
 
 LIBS += \
-    -lqt3dsruntime$$qtPlatformTargetSuffix() \
+    -lqt3dsopengl$$qtPlatformTargetSuffix() \
     -lqt3dsqmlstreamer$$qtPlatformTargetSuffix()
 
 ANDROID_EXTRA_LIBS = \
-  libqt3dsruntime.so \
+  libqt3dsopengl.so \
   libqt3dsqmlstreamer.so

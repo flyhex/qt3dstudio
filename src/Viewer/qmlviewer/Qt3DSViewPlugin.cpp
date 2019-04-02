@@ -43,39 +43,19 @@
 
 QT_BEGIN_NAMESPACE
 
-//TODO: remove if works with X
-/*
-#if defined _LINUX || defined linux
-extern "C" {
-bool InitializeGL();
-}
-#endif
-*/
-
 void Q3DSViewPlugin::registerTypes(const char *uri)
 {
-    Q_ASSERT(uri == QLatin1String("QtStudio3D"));
-//TODO: remove if works with X
-/*
-#if defined _LINUX || defined linux
-    // To initialize GL functions for Qt3DS GL bindings
-    InitializeGL();
-#endif
-*/
-    // @uri Studio3D
-    // Version 1.0
-    qmlRegisterType<Q3DSView>(uri, 1, 0, "Studio3D");
-    qmlRegisterType<Q3DSViewerSettings>(uri, 1, 0, "ViewerSettings");
-    qmlRegisterType<Q3DSPresentationItem>(uri, 1, 0, "Presentation");
-    qmlRegisterType<Q3DSSceneElement>(uri, 1, 0, "SceneElement");
-    qmlRegisterType<Q3DSElement>(uri, 1, 0, "Element");
-    qmlRegisterType<Q3DSQmlStream>(uri, 1, 0, "QmlStream");
-    qmlRegisterType<Q3DSSubPresentationSettings>(uri, 1, 0, "SubPresentationSettings");
+    Q_ASSERT(uri == QLatin1String("QtStudio3D.OpenGL"));
 
-    // Version 1.1
-    qmlRegisterType<Q3DSView, 1>(uri, 1, 1, "Studio3D");
-    qmlRegisterType<Q3DSDataInput>(uri, 1, 1, "DataInput");
-    qmlRegisterType<Q3DSPresentationItem, 1>(uri, 1, 1, "Presentation");
+    // @uri QtStudio3D.OpenGL
+    qmlRegisterType<Q3DSView>(uri, 2, 4, "Studio3D");
+    qmlRegisterType<Q3DSViewerSettings>(uri, 2, 4, "ViewerSettings");
+    qmlRegisterType<Q3DSPresentationItem>(uri, 2, 4, "Presentation");
+    qmlRegisterType<Q3DSSceneElement>(uri, 2, 4, "SceneElement");
+    qmlRegisterType<Q3DSElement>(uri, 2, 4, "Element");
+    qmlRegisterType<Q3DSQmlStream>(uri, 2, 4, "QmlStream");
+    qmlRegisterType<Q3DSSubPresentationSettings>(uri, 2, 4, "SubPresentationSettings");
+    qmlRegisterType<Q3DSDataInput>(uri, 2, 4, "DataInput");
 }
 
 QT_END_NAMESPACE

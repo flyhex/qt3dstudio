@@ -82,7 +82,7 @@ public Q_SLOTS:
     void setPresentationActive(const QString &id, bool active);
     void fireEvent(const QString &elementPath, const QString &eventName);
     void setGlobalAnimationTime(qint64 milliseconds);
-    Q_REVISION(1) void setDataInputValue(const QString &name, const QVariant &value);
+    void setDataInputValue(const QString &name, const QVariant &value);
 
 Q_SIGNALS:
     void sourceChanged(const QUrl &source);

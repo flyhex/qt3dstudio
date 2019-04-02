@@ -39,7 +39,7 @@ HEADERS += \
 }
 
 LIBS += \
-    -lqt3dsruntime$$qtPlatformTargetSuffix() \
+    -lqt3dsopengl$$qtPlatformTargetSuffix() \
     -lqt3dsqmlstreamer$$qtPlatformTargetSuffix()
 
 macos:QMAKE_RPATHDIR += @executable_path/../../../../lib

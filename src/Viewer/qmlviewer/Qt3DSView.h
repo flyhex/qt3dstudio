@@ -79,7 +79,7 @@ Q_SIGNALS:
     void frameUpdate();
     void runningChanged(bool initialized);
     void errorChanged(const QString &error);
-    Q_REVISION(1) void presentationReady();
+    void presentationReady();
 
 public Q_SLOTS:
     void reset();
