@@ -1,7 +1,9 @@
 <RCC>
     <qresource prefix="/">
-        <file>simple_cube_animation/simple_cube_animation.uia</file>
-        <file>simple_cube_animation/simple_cube_animation.uip</file>
+        <file>../../scenes/simple_cube_animation/simple_cube_animation.uia</file>
+        <file>../../scenes/simple_cube_animation/presentations/simple_cube_animation.uip</file>
+        <file>../../scenes/simple_cube_animation/materials/Basic Green.materialdef</file>
+        <file>../../scenes/simple_cube_animation/materials/Basic Red.materialdef</file>
         <file>tst_qt3dsviewer.qml</file>
     </qresource>
 </RCC>

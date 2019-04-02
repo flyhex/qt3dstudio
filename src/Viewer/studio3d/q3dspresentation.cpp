@@ -274,6 +274,26 @@ void Q3DSPresentation::setDataInputValue(const QString &name, const QVariant &va
     }
 }
 
+/**
+ Adds a new child element for the element specified by parentElementPath to the slide specified with
+ slideName. Only model element creation is currently supported.
+ A referenced material element is also created for the new model element. The source material name
+ can be specified with custom "material" property in the properties hash.
+ The source material must exist in the material container of the presentation.
+*/
+void Q3DSPresentation::createElement(const QString &parentElementPath, const QString &slideName,
+                                     const QHash<QString, QVariant> &properties)
+{
+    if (d_ptr->m_viewerApp) {
+        d_ptr->m_viewerApp->createElement(parentElementPath, slideName, properties);
+    } else if (d_ptr->m_commandQueue) {
+        // We need to copy the properties map as queue takes ownership of it
+        QHash<QString, QVariant> *theProperties = new QHash<QString, QVariant>(properties);
+        d_ptr->m_commandQueue->queueCommand(parentElementPath, CommandType_CreateElement,
+                                            slideName, theProperties);
+    }
+}
+
 void Q3DSPresentation::mousePressEvent(QMouseEvent *e)
 {
     if (d_ptr->m_viewerApp) {

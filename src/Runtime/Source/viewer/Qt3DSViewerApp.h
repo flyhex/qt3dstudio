@@ -359,6 +359,9 @@ public:
     float dataInputMax(const QString &name) const;
     float dataInputMin(const QString &name) const;
 
+    void createElement(const QString &parentElementPath, const QString &slideName,
+                       const QHash<QString, QVariant> &properties);
+
     QString error();
 
     void setPresentationId(const QString &id);

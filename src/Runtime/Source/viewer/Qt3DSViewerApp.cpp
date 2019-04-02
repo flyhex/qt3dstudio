@@ -794,6 +794,15 @@ float Q3DSViewerApp::dataInputMin(const QString &name) const
     return m_Impl.m_view->dataInputMin(name);
 }
 
+void Q3DSViewerApp::createElement(const QString &parentElementPath, const QString &slideName,
+                                  const QHash<QString, QVariant> &properties)
+{
+    if (!m_Impl.m_view)
+        return;
+
+    m_Impl.m_view->createElement(parentElementPath, slideName, properties);
+}
+
 Q3DSViewerApp &Q3DSViewerApp::Create(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer,
                                      QElapsedTimer *startupTimer)
 {

@@ -138,7 +138,7 @@ void Q3DSRenderer::render()
         m_initialized = initializeRuntime(this->framebufferObject());
         m_initializationFailure = !m_initialized;
         if (m_initializationFailure)
-            m_commands.clear();
+            m_commands.clear(true);
     }
 
     // Don't render if the plugin is hidden; however, if hidden, but sure
@@ -249,7 +249,7 @@ void Q3DSRenderer::onUpdateHandler(void *userData)
 void Q3DSRenderer::processCommands()
 {
     if (!m_runtime) {
-        m_commands.clear();
+        m_commands.clear(true);
         return;
     }
 
@@ -279,7 +279,7 @@ void Q3DSRenderer::processCommands()
 
     // Send scene graph changes over to Q3DS
     for (int i = 0; i < m_commands.size(); i++) {
-        const ElementCommand &cmd = m_commands.commandAt(i);
+        const ElementCommand &cmd = m_commands.constCommandAt(i);
         switch (cmd.m_commandType) {
         case CommandType_SetAttribute:
             m_presentation->setAttribute(cmd.m_elementPath, cmd.m_stringValue, cmd.m_variantValue);
@@ -328,6 +328,15 @@ void Q3DSRenderer::processCommands()
             m_runtime->SetDataInputValue(cmd.m_stringValue, cmd.m_variantValue,
                                          static_cast<Q3DSDataInput::ValueRole>(cmd.m_intValues[0]));
             break;
+        case CommandType_CreateElement: {
+            m_runtime->createElement(cmd.m_elementPath, cmd.m_stringValue,
+                                     *static_cast<QHash<QString, QVariant> *>(cmd.m_data));
+            // Runtime makes copy of the data in its own format, so we can delete it now
+            auto &command = m_commands.commandAt(i);
+            delete reinterpret_cast<QHash<QString, QVariant> *>(command.m_data);
+            command.m_data = nullptr;
+            break;
+        }
         case CommandType_RequestSlideInfo: {
             int current = 0;
             int previous = 0;
@@ -368,7 +377,7 @@ void Q3DSRenderer::processCommands()
         }
     }
 
-    m_commands.clear();
+    m_commands.clear(false);
 }
 
 QT_END_NAMESPACE

@@ -52,10 +52,10 @@ import QtStudio3D.OpenGL 2.4
 
 Studio3D {
     id: studio3D
-    width: 640
-    height: 480
+    width: 800
+    height: 800
     Presentation {
-        source: "qrc:/simple_cube_animation/simple_cube_animation.uia"
+        source: "qrc:/../../scenes/simple_cube_animation/simple_cube_animation.uia"
     }
     ViewerSettings {
     }

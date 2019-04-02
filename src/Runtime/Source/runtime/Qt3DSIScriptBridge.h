@@ -35,9 +35,8 @@
 #include "foundation/Qt3DSRefCounted.h"
 #include "q3dsdatainput.h"
 
-//==============================================================================
-//	Namespace
-//==============================================================================
+#include <QtCore/qvariant.h>
+
 namespace qt3ds {
 namespace runtime {
     class IApplication;
@@ -53,6 +52,7 @@ namespace state {
 namespace qt3ds {
 namespace render {
     class IThreadPool;
+    class IQt3DSRenderer;
 }
 }
 
@@ -60,13 +60,9 @@ struct script_State;
 
 namespace Q3DStudio {
 
-//==============================================================================
-//	Forwards
-//==============================================================================
 struct SEventCommand;
 class IPresentation;
 
-//==============================================================================
 /**
  *	@interface	IScriptBridge
  *	@brief		Callback and load interface for a script engine.
@@ -116,10 +112,7 @@ protected:
 
 class IScriptBridge : public qt3ds::foundation::NVRefCounted
 {
-    //==============================================================================
-    //	Methods
-    //==============================================================================
-public: // Construction
+public:
     virtual ~IScriptBridge() {}
 
 public: // thread
@@ -165,6 +158,9 @@ public: // Elements
     virtual void SetDataInputValue(
             const QString &name, const QVariant &value,
             Q3DSDataInput::ValueRole property = Q3DSDataInput::ValueRole::Value) = 0;
+    virtual void createElement(const QString &parentElementPath, const QString &slideName,
+                               const QHash<QString, QVariant> &properties,
+                               qt3ds::render::IQt3DSRenderer *renderer) = 0;
 
 public: // Components
     virtual void GotoSlide(const char *component, const char *slideName,

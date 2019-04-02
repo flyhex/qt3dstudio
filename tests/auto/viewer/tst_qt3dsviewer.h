@@ -55,13 +55,13 @@ private Q_SLOTS:
     void testSlides();
     void testFrameUpdates();
     void testSettings();
+    void testCreateElement();
 
 private:
     QQuickView m_viewer;
     QObject *m_studio3DItem = nullptr;
     Q3DSPresentation *m_presentation = nullptr;
     Q3DSViewerSettings *m_settings = nullptr;
-
 };
 
 #endif // TST_QT3DSVIEWER

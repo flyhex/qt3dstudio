@@ -48,10 +48,9 @@ using namespace qt3ds::runtime::element;
 namespace {
 struct SSlideAttribute
 {
-    QT3DSU32 m_Index;
+    QT3DSU32 m_Index = 0;
     Q3DStudio::UVariant m_Value;
     SSlideAttribute()
-        : m_Index(0)
     {
         m_Value.m_INT32 = 0;
     }
@@ -69,12 +68,7 @@ struct SSlideAttributeNode
     };
 
     SSlideAttribute m_Data[AttributeCount];
-    SSlideAttributeNode *m_NextNode;
-
-    SSlideAttributeNode()
-        : m_NextNode(nullptr)
-    {
-    }
+    SSlideAttributeNode *m_NextNode = nullptr;
 };
 
 typedef IndexableLinkedList<SSlideAttributeNode, SSlideAttribute,
@@ -83,18 +77,15 @@ typedef IndexableLinkedList<SSlideAttributeNode, SSlideAttribute,
 
 struct SSlideElement
 {
-    QT3DSU32 m_ElementHandle;
+    QT3DSU32 m_ElementHandle = 0;
     QT3DSU32 m_AttributeCount : 31;
     QT3DSU32 m_Active : 1;
-    SSlideElement *m_NextElement;
-    SSlideAttributeNode *m_AttributeNodes;
+    SSlideElement *m_NextElement = nullptr;
+    SSlideAttributeNode *m_AttributeNodes = nullptr;
 
     SSlideElement()
-        : m_ElementHandle(0)
-        , m_AttributeCount(0)
+        : m_AttributeCount(0)
         , m_Active(false)
-        , m_NextElement(nullptr)
-        , m_AttributeNodes(nullptr)
     {
     }
 };
@@ -105,11 +96,7 @@ struct SSlideAnimActionNode
         AnimActionCount = 8,
     };
     SSlideAnimAction m_Data[AnimActionCount];
-    SSlideAnimActionNode *m_NextNode;
-    SSlideAnimActionNode()
-        : m_NextNode(nullptr)
-    {
-    }
+    SSlideAnimActionNode *m_NextNode = nullptr;
 };
 
 typedef IndexableLinkedList<SSlideAnimActionNode, SSlideAnimAction,
@@ -118,32 +105,25 @@ typedef IndexableLinkedList<SSlideAnimActionNode, SSlideAnimAction,
 
 struct SSlide
 {
-    SSlide *m_NextSlide;
+    SSlide *m_NextSlide = nullptr;
     CRegisteredString m_Name;
     QT3DSU32 m_PlayMode : 3;
     QT3DSU32 m_PlayThroughTo : 8; // OXFF means no playthrough
     QT3DSU32 m_Paused : 1;
-    QT3DSU32 m_StartTime;
-    QT3DSU32 m_EndTime;
-    QT3DSU32 m_AnimActionCount;
-    SSlideElement *m_FirstElement;
-    SSlideAnimActionNode *m_FirstAnimActionNode;
+    QT3DSU32 m_StartTime = 0;
+    QT3DSU32 m_EndTime = 0;
+    QT3DSU32 m_AnimActionCount = 0;
+    SSlideElement *m_FirstElement = nullptr;
+    SSlideElement *m_lastElement = nullptr;
+    SSlideAnimActionNode *m_FirstAnimActionNode = nullptr;
+    bool m_activeSlide = false;
+    bool m_unloadSlide = false;
     QVector<QString> m_sourcePaths;
-    bool m_activeSlide;
-    bool m_unloadSlide;
 
     SSlide()
-        : m_NextSlide(nullptr)
-        , m_PlayMode(PlayMode::StopAtEnd)
+        : m_PlayMode(PlayMode::StopAtEnd)
         , m_PlayThroughTo(0xFF)
         , m_Paused(false)
-        , m_StartTime(0)
-        , m_EndTime(0)
-        , m_AnimActionCount(0)
-        , m_FirstElement(nullptr)
-        , m_FirstAnimActionNode(nullptr)
-        , m_activeSlide(false)
-        , m_unloadSlide(false)
     {
     }
 
@@ -172,12 +152,12 @@ struct SSlideSystem : public ISlideSystem
     IElementAllocator &m_ElementSystem;
     TAttributeNodePool m_AttributeNodePool;
     TSlideAnimActionPool m_AnimActionPool;
-    TSlideElementPool m_SlideElements;
     TSlidePool m_SlidePool;
+    TSlideElementPool m_SlideElements;
     TComponentSlideHash m_Slides;
 
-    SSlide *m_CurrentSlide;
-    SSlideElement *m_CurrentSlideElement;
+    SSlide *m_CurrentSlide = nullptr;
+    SSlideElement *m_CurrentSlideElement = nullptr;
 
     NVDataRef<QT3DSU8> m_LoadData;
 
@@ -192,8 +172,6 @@ struct SSlideSystem : public ISlideSystem
         , m_SlidePool(ForwardingAllocator(inFnd.getAllocator(), "m_SlidePool"))
         , m_SlideElements(ForwardingAllocator(inFnd.getAllocator(), "m_SlideElements"))
         , m_Slides(inFnd.getAllocator(), "m_Slides")
-        , m_CurrentSlide(nullptr)
-        , m_CurrentSlideElement(nullptr)
         , m_RefCount(0)
     {
     }
@@ -214,14 +192,14 @@ struct SSlideSystem : public ISlideSystem
                            QT3DSU32 inMinTime, QT3DSU32 inMaxTime) override
     {
         eastl::pair<TComponentSlideHash::iterator, bool> inserter =
-            m_Slides.insert(eastl::make_pair(&inComponent, (SSlide *)nullptr));
+            m_Slides.insert(eastl::make_pair(&inComponent, static_cast<SSlide *>(nullptr)));
         SSlide *newSlide = m_SlidePool.construct(__FILE__, __LINE__);
         QT3DSU32 slideIndex = 0;
-        if (inserter.first->second == nullptr) {
+        if (!inserter.first->second) {
             inserter.first->second = newSlide;
         } else {
             SSlide *theSlide = nullptr;
-            for (theSlide = inserter.first->second; theSlide->m_NextSlide != nullptr;
+            for (theSlide = inserter.first->second; theSlide->m_NextSlide;
                  theSlide = theSlide->m_NextSlide) {
                 ++slideIndex;
             }
@@ -254,32 +232,91 @@ struct SSlideSystem : public ISlideSystem
 
     void SetSlideMaxTime(QT3DSU32 inMaxTime) override
     {
-        if (m_CurrentSlide != nullptr)
+        if (m_CurrentSlide)
             m_CurrentSlide->m_EndTime = inMaxTime;
     }
 
     void AddSlideElement(element::SElement &inElement, bool inActive) override
     {
-        if (m_CurrentSlide != nullptr) {
+        if (m_CurrentSlide) {
             SSlideElement *lastSlideElement = m_CurrentSlideElement;
             m_CurrentSlideElement = m_SlideElements.construct(__FILE__, __LINE__);
             m_CurrentSlideElement->m_Active = inActive;
             m_CurrentSlideElement->m_ElementHandle = inElement.GetHandle();
-            if (lastSlideElement == nullptr) {
-                QT3DS_ASSERT(m_CurrentSlide->m_FirstElement == nullptr);
+            if (!lastSlideElement) {
+                QT3DS_ASSERT(!m_CurrentSlide->m_FirstElement);
                 m_CurrentSlide->m_FirstElement = m_CurrentSlideElement;
             } else {
                 lastSlideElement->m_NextElement = m_CurrentSlideElement;
             }
-            m_CurrentSlideElement->m_Active = inActive;
+            m_CurrentSlide->m_lastElement = m_CurrentSlideElement;
         } else {
             QT3DS_ASSERT(false);
         }
     }
+
+
+    // The parent element must be found from target slide.
+    // Elements cannot be added to the master slide.
+    bool addSlideElement(element::SElement &inComponent, int slideIndex,
+                         element::SElement &inElement, bool eyeBall) override
+    {
+        // Note: Slide 0 contains all loaded items in the graph with m_active set to false.
+        // Other slides contain all master slide items and slide specific items with m_active
+        // set to eyeball. We shouldn't need to care about slide 0 here as it won't be
+        // executed/rolled back after initial loading of the scene.
+
+        Q_ASSERT(slideIndex > 0);
+
+        TComponentSlideHash::const_iterator theFindResult = m_Slides.find(&inComponent);
+        element::SElement *parentElement = inElement.GetParent();
+        if (theFindResult == m_Slides.end()) {
+            qWarning() << __FUNCTION__ << "Could not find slides for component";
+            return false;
+        }
+        if (!parentElement) {
+            qWarning() << __FUNCTION__ << "Element has no parent";
+            return false;
+        }
+
+        int parentFound = false;
+        SSlide *slide = theFindResult->second;
+        SSlide *targetSlide = nullptr;
+        for (int idx = 0; slide && !targetSlide; slide = slide->m_NextSlide, ++idx) {
+            if (slideIndex == idx) {
+                targetSlide = slide;
+                SSlideElement *slideElement = slide->m_FirstElement;
+                while (slideElement) {
+                    if (slideElement->m_ElementHandle == parentElement->m_Handle) {
+                        parentFound = true;
+                        break;
+                    }
+                    slideElement = slideElement->m_NextElement;
+                }
+            }
+        }
+
+        if (!parentFound) {
+            qWarning() << __FUNCTION__ << "Parent element could not be found from target slide";
+            return false;
+        }
+
+        m_CurrentSlide = targetSlide;
+        m_CurrentSlideElement = m_CurrentSlide->m_lastElement;
+
+        // Explicit active state is based solely on the slide and eyeball
+        int activeSlideIndex = static_cast<SComponent &>(inComponent).GetCurrentSlide();
+        bool isActive = activeSlideIndex == slideIndex && eyeBall;
+        inElement.Flags().SetExplicitActive(isActive);
+
+        AddSlideElement(inElement, eyeBall);
+
+        return true;
+    }
+
     void AddSlideAttribute(Q3DStudio::SAttributeKey inKey, Q3DStudio::UVariant inValue) override
     {
-        if (m_CurrentSlideElement != nullptr) {
-
+        if (m_CurrentSlideElement) {
             SElement *theElement =
                 m_ElementSystem.FindElementByHandle(m_CurrentSlideElement->m_ElementHandle);
             Option<QT3DSU32> theIdx = theElement->FindPropertyIndex(inKey.m_Hash);
@@ -297,12 +334,12 @@ struct SSlideSystem : public ISlideSystem
 
     SSlideAnimAction *AddSlideAnimAction(bool inAnimation, QT3DSI32 inId, bool inActive) override
     {
-        if (m_CurrentSlide != nullptr) {
+        if (m_CurrentSlide) {
             SSlideAnimAction &theAnimAction = TSlideAnimActionNodeList::Create(
                 m_CurrentSlide->m_FirstAnimActionNode, m_CurrentSlide->m_AnimActionCount,
                 m_AnimActionPool);
-            theAnimAction = SSlideAnimAction((QT3DSI32)inId, inActive, inAnimation);
-            &theAnimAction;
+            theAnimAction = SSlideAnimAction(QT3DSI32(inId), inActive, inAnimation);
+            return &theAnimAction;
         }
 
         return nullptr;
@@ -451,17 +488,16 @@ struct SSlideSystem : public ISlideSystem
     void InitializeDynamicKeys(SSlideKey inKey, IAnimationSystem &inAnimationSystem) const override
     {
         const SSlide *theSlide = FindSlide(inKey);
-        if (theSlide != nullptr) {
+        if (theSlide) {
             IterateSlideAnimActions(*theSlide, SDynamicKeyOperator(inAnimationSystem));
         }
     }
 
     void ExecuteSlide(SSlideKey inKey, IAnimationSystem &inAnimationSystem,
-                              ILogicSystem &inLogicManager) override
+                      ILogicSystem &inLogicManager) override
     {
         SSlide *theSlide = FindSlide(inKey);
-
-        if (theSlide == nullptr) {
+        if (!theSlide) {
             QT3DS_ASSERT(false);
             return;
         }
@@ -503,7 +539,7 @@ struct SSlideSystem : public ISlideSystem
     {
         SSlide *theSlide = FindSlide(inKey);
 
-        if (theSlide == nullptr) {
+        if (!theSlide) {
             QT3DS_ASSERT(false);
             return;
         }

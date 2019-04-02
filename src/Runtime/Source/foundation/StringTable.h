@@ -49,6 +49,8 @@
 #include "foundation/Qt3DSDataRef.h"
 #include "foundation/Qt3DSOption.h"
 
+#include <QtCore/qstring.h>
+
 namespace qt3ds {
 namespace foundation {
     typedef char8_t Qt3DSBChar;

@@ -46,6 +46,7 @@
 #include "Qt3DSRenderContextCore.h"
 #include "Qt3DSRenderer.h"
 #include "Qt3DSRenderBufferManager.h"
+#include "Qt3DSRenderRuntimeBindingImpl.h"
 
 #include "Qt3DSDLLManager.h"
 #include "foundation/Qt3DSSimpleTypes.h"
@@ -214,7 +215,10 @@ public:
     float dataInputMax(const QString &name) const override;
     float dataInputMin(const QString &name) const override;
 
-    void SetAttribute(const char *elementPath, const char *attributeName, const char *value) override;
+    void createElement(const QString &parentElementPath, const QString &slideName,
+                       const QHash<QString, QVariant> &properties) override;
+    void SetAttribute(const char *elementPath, const char *attributeName,
+                      const char *value) override;
     bool GetAttribute(const char *elementPath, const char *attributeName, void *value) override;
     void FireEvent(const char *element, const char *evtName) override;
     bool PeekCustomAction(char *&outElementPath, char *&outActionName) override;
@@ -579,9 +583,11 @@ void CRuntimeView::SetDataInputValue(
         const QString &name, const QVariant &value,
         Q3DSDataInput::ValueRole property = Q3DSDataInput::ValueRole::Value)
 {
-    Q3DStudio::CQmlEngine &theBridgeEngine
-            = static_cast<Q3DStudio::CQmlEngine &>(m_RuntimeFactoryCore->GetScriptEngineQml());
-    theBridgeEngine.SetDataInputValue(name, value, property);
+    if (m_Application) {
+        Q3DStudio::CQmlEngine &theBridgeEngine
+                = static_cast<Q3DStudio::CQmlEngine &>(m_RuntimeFactoryCore->GetScriptEngineQml());
+        theBridgeEngine.SetDataInputValue(name, value, property);
+    }
 }
 
 QList<QString> CRuntimeView::dataInputs() const
@@ -594,12 +600,29 @@ QList<QString> CRuntimeView::dataInputs() const
 
 float CRuntimeView::dataInputMax(const QString &name) const
 {
-    return m_Application->dataInputMax(name);
+    if (m_Application)
+        return m_Application->dataInputMax(name);
+
+    return 0;
 }
 
 float CRuntimeView::dataInputMin(const QString &name) const
 {
-    return m_Application->dataInputMin(name);
+    if (m_Application)
+        return m_Application->dataInputMin(name);
+
+    return 0;
+}
+
+void CRuntimeView::createElement(const QString &parentElementPath, const QString &slideName,
+                             const QHash<QString, QVariant> &properties)
+{
+    if (m_Application) {
+        Q3DStudio::CQmlEngine &theBridgeEngine
+                = static_cast<Q3DStudio::CQmlEngine &>(m_RuntimeFactoryCore->GetScriptEngineQml());
+        theBridgeEngine.createElement(parentElementPath, slideName, properties,
+                                      &m_RuntimeFactory->GetQt3DSRenderContext().GetRenderer());
+    }
 }
 
 void CRuntimeView::SetAttribute(const char *elementPath, const char *attributeName, const char *value)

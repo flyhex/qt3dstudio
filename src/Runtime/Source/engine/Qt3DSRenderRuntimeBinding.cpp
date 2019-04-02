@@ -197,6 +197,7 @@ struct Qt3DSRenderScene : public Q3DStudio::IScene
         }
     }
 
+    qt3ds::NVAllocatorCallback &allocator() override { return m_LoadData->m_AutoAllocator; }
     Q3DStudio::IPresentation &GetPresentation() override { return *m_RuntimePresentation; }
 
     // Update really just adds objects to the dirty set

@@ -46,10 +46,6 @@
 #include <QtCore/qobject.h>
 #include <QtGui/qsurfaceformat.h>
 
-//==============================================================================
-//	Namespace
-//==============================================================================
-
 typedef void (*qml_Function)(void *inUserData);
 
 class QRuntimeViewSignalProxy : public QObject
@@ -73,9 +69,6 @@ class NVRenderContext;
 
 namespace Q3DStudio {
 
-//==============================================================================
-//	Forwards
-//==============================================================================
 class CTegraInputEngine;
 class CTegraRenderEngine;
 class IScene;
@@ -196,6 +189,8 @@ public:
     virtual QList<QString> dataInputs() const = 0;
     virtual float dataInputMax(const QString &name) const = 0;
     virtual float dataInputMin(const QString &name) const = 0;
+    virtual void createElement(const QString &parentElementPath, const QString &slideName,
+                               const QHash<QString, QVariant> &properties) = 0;
     virtual void SetAttribute(const char *elementPath, const char *attributeName,
                               const char *value) = 0;
     virtual bool GetAttribute(const char *elementPath, const char *attributeName, void *value) = 0;

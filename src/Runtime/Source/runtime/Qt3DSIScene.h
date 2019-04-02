@@ -38,21 +38,15 @@ namespace qt3ds {
 namespace render {
     class IImageLoadListener;
 }
+    class NVAllocatorCallback;
 }
 
-//==============================================================================
-//	Namespace
-//==============================================================================
 namespace Q3DStudio {
 
-//==============================================================================
-//	Forwards
-//==============================================================================
 class IPresentation;
 class RuntimeMatrix;
 struct SPickFrame;
 
-//==============================================================================
 /**
 *	@interface	IScene
 *
@@ -110,9 +104,6 @@ struct SCameraRect
 
 class IScene
 {
-    //==============================================================================
-    //	Methods
-    //==============================================================================
 protected:
     virtual ~IScene() {}
 
@@ -122,8 +113,6 @@ public: // Base Interface
     virtual void SetUserData(void *inUserData) = 0;
     virtual void *GetUserData() = 0;
 
-    // virtual void			Clone( TElementList& inElements, TElementList& inElementClones, TElement*
-    // inNewParent = NULL ) = 0;
     virtual void CalculateGlobalTransform(TElement *inElement, RuntimeMatrix &outTransform) = 0;
     virtual void SetLocalTransformMatrix(TElement *inElement, const RuntimeMatrix &inTransform) = 0;
     // Get bounding box in global space
@@ -147,8 +136,7 @@ public: // Base Interface
 
     virtual STextSizes GetPresentationDesignDimensions() = 0;
     // If the rect's right - left == 0.0, this method failed.  Possibly because the layer is just
-    // direct-rendering
-    // a sub-presentation.
+    // direct-rendering a sub-presentation.
     virtual SCameraRect GetCameraBounds(TElement &inElement) = 0;
 
     virtual void PositionToScreen(TElement &inElement, qt3ds::QT3DSVec3 &inPos,
@@ -161,13 +149,15 @@ public: // Base Interface
     virtual Q3DStudio::INT32
     LoadImageBatch(qt3ds::foundation::CRegisteredString *inFullPaths, INT32 inNumPaths,
                    qt3ds::foundation::CRegisteredString inDefaultImage,
-                   qt3ds::render::IImageLoadListener *inLoadCallback = NULL) = 0;
+                   qt3ds::render::IImageLoadListener *inLoadCallback = nullptr) = 0;
 
     virtual SMousePosition WindowToPresentation(const SMousePosition &inWindowPos) = 0;
 
     virtual void RegisterOffscreenRenderer(const char *inKey) = 0;
 
     virtual void Release() = 0;
+
+    virtual qt3ds::NVAllocatorCallback &allocator() = 0;
 };
 
 } // namespace Q3DStudio

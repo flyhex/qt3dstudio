@@ -252,7 +252,7 @@ void Q3DSView::getCommands(bool emitInitialize, CommandQueue &renderQueue)
         m_emitRunningChange = true;
 
     renderQueue.copyCommands(m_pendingCommands);
-    m_pendingCommands.clear();
+    m_pendingCommands.clear(false);
 }
 
 void Q3DSView::mousePressEvent(QMouseEvent *event)

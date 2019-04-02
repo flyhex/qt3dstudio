@@ -68,6 +68,9 @@ enum CommandType {
     CommandType_KeyRelease,
     CommandType_SetGlobalAnimationTime,
     CommandType_SetDataInputValue,
+    CommandType_CreateElement,
+
+    // Requests
     CommandType_RequestSlideInfo,
     CommandType_RequestDataInputs,
     CommandType_PreloadSlide,
@@ -83,6 +86,7 @@ public:
     QString m_elementPath;
     QString m_stringValue;
     QVariant m_variantValue;
+    void *m_data = nullptr; // Data is owned by the queue and is deleted once command is handled
     union {
         bool m_boolValue;
         float m_floatValue;
@@ -114,9 +118,11 @@ public:
     ElementCommand &queueCommand(const QString &elementPath, CommandType commandType,
                                  int value0, int value1 = 0,
                                  int value2 = 0, int value3 = 0);
+    ElementCommand &queueCommand(const QString &elementPath, CommandType commandType,
+                                 const QString &stringValue, void *commandData);
     ElementCommand &queueRequest(const QString &elementPath, CommandType commandType);
 
-    void copyCommands(const CommandQueue &fromQueue);
+    void copyCommands(CommandQueue &fromQueue);
 
     bool m_visibleChanged;
     bool m_scaleModeChanged;
@@ -138,9 +144,10 @@ public:
     qint64 m_globalAnimationTime;
     bool m_delayedLoading;
 
-    void clear();
+    void clear(bool deleteCommandData);
     int size() const { return m_size; }
-    const ElementCommand &commandAt(int index) const { return m_elementCommands.at(index); }
+    const ElementCommand &constCommandAt(int index) const { return m_elementCommands.at(index); }
+    ElementCommand &commandAt(int index) { return m_elementCommands[index]; }
 
 private:
     ElementCommand &nextFreeCommand();

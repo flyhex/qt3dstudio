@@ -28,6 +28,7 @@
 ****************************************************************************/
 
 #include "q3dscommandqueue_p.h"
+#include "q3dspresentation.h"
 
 ElementCommand::ElementCommand()
     : m_commandType(CommandType_Invalid)
@@ -146,6 +147,19 @@ ElementCommand &CommandQueue::queueCommand(const QString &elementPath,
     return cmd;
 }
 
+ElementCommand &CommandQueue::queueCommand(const QString &elementPath, CommandType commandType,
+                                           const QString &stringValue, void *commandData)
+{
+    ElementCommand &cmd = nextFreeCommand();
+
+    cmd.m_commandType = commandType;
+    cmd.m_elementPath = elementPath;
+    cmd.m_stringValue = stringValue;
+    cmd.m_data = commandData;
+
+    return cmd;
+}
+
 ElementCommand &CommandQueue::queueRequest(const QString &elementPath, CommandType commandType)
 {
     ElementCommand &cmd = nextFreeCommand();
@@ -156,7 +170,7 @@ ElementCommand &CommandQueue::queueRequest(const QString &elementPath, CommandTy
     return cmd;
 }
 
-void CommandQueue::copyCommands(const CommandQueue &fromQueue)
+void CommandQueue::copyCommands(CommandQueue &fromQueue)
 {
     m_visibleChanged = m_visibleChanged || fromQueue.m_visibleChanged;
     m_scaleModeChanged = m_scaleModeChanged || fromQueue.m_scaleModeChanged;
@@ -191,7 +205,7 @@ void CommandQueue::copyCommands(const CommandQueue &fromQueue)
     // Pending queue may be synchronized multiple times between queue processing, so let's append
     // to the existing queue rather than clearing it.
     for (int i = 0; i < fromQueue.m_size; i++) {
-        const ElementCommand &source = fromQueue.commandAt(i);
+        const ElementCommand &source = fromQueue.constCommandAt(i);
         switch (source.m_commandType) {
         case CommandType_SetDataInputValue:
             queueCommand(source.m_elementPath, source.m_commandType, source.m_stringValue,
@@ -225,6 +239,11 @@ void CommandQueue::copyCommands(const CommandQueue &fromQueue)
                          source.m_intValues[0], source.m_intValues[1],
                          source.m_intValues[2], source.m_intValues[3]);
             break;
+        case CommandType_CreateElement:
+            queueCommand(source.m_elementPath, source.m_commandType, source.m_stringValue,
+                         source.m_data);
+            fromQueue.commandAt(i).m_data = nullptr; // This queue takes ownership of data
+            break;
         case CommandType_RequestSlideInfo:
         case CommandType_UnloadSlide:
         case CommandType_PreloadSlide:
@@ -241,7 +260,7 @@ void CommandQueue::copyCommands(const CommandQueue &fromQueue)
 }
 
 // Clears changed states and empties the queue
-void CommandQueue::clear()
+void CommandQueue::clear(bool deleteCommandData)
 {
     m_visibleChanged = false;
     m_scaleModeChanged = false;
@@ -252,6 +271,23 @@ void CommandQueue::clear()
     m_variantListChanged = false;
     m_globalAnimationTimeChanged = false;
     m_delayedLoadingChanged = false;
+
+    if (deleteCommandData) {
+        for (int i = 0; i < m_size; ++i) {
+            ElementCommand &cmd = m_elementCommands[i];
+            if (cmd.m_data) {
+                switch (cmd.m_commandType) {
+                case CommandType_CreateElement:
+                    delete static_cast<QHash<QString, QVariant> *>(cmd.m_data);
+                    break;
+                default:
+                    Q_ASSERT(false); // Should never come here
+                    break;
+                }
+                cmd.m_data = nullptr;
+            }
+        }
+    }
 
     // We do not clear the actual queued commands, those will be reused the next frame
     // To avoid a lot of unnecessary reallocations.

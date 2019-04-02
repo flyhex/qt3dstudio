@@ -126,6 +126,8 @@ namespace runtime {
 
         virtual void SetSlideMaxTime(QT3DSU32 inMaxTime) = 0;
         virtual void AddSlideElement(element::SElement &inElement, bool inActive) = 0;
+        virtual bool addSlideElement(element::SElement &inComponent, int slideIndex,
+                                     element::SElement &inElement, bool eyeBall) = 0;
         virtual void AddSlideAttribute(Q3DStudio::SAttributeKey inKey,
                                        Q3DStudio::UVariant inValue) = 0;
         virtual SSlideAnimAction *AddSlideAnimAction(bool inAnimation, QT3DSI32 inIndex,
