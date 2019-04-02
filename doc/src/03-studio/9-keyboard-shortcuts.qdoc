@@ -203,6 +203,10 @@
     \li \c{Ctrl + Shift + K}
     \li \c{Cmd + Shift + K}
   \row
+    \li Delete selected keyframes
+    \li \c{Del}
+    \li \c{Del}
+  \row
     \li Set interpolation
     \li \c{I}
     \li \c{I}
@@ -371,6 +375,10 @@ only in \e{Perspective View} and \e{Orthographic View}.
     \li Preview on remote device
     \li \c{F6}
     \li \c{F6}
+  \row
+    \li Filter variants
+    \li \c{F7}
+    \li \c{F7}
 \endtable
 
 \section1 Palettes
