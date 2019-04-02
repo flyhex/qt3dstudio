@@ -3,6 +3,7 @@ description             = Qt 3D Studio Reference Manual
 version                 = $QT_VERSION
 url                     = https://doc.qt.io/qt3dstudio
 
+moduleheader            =
 sources.fileextensions  = "*.qdoc *.html"
 sourcedirs              = . \
                           ../src/Viewer

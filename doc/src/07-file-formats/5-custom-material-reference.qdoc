@@ -55,52 +55,70 @@ custom materials.
 
 These are the functions each fragment shader must implement.
 
-\badcode bool evalTwoSided() \endcode
+\badcode
+bool evalTwoSided()
+\endcode
 
 This function controls two-sided lighting. Return true to enable two-sided
 lighting and false to disable it. When two-sided lighting is disabled, only
 the front-facing material functions are called.
 
-\badcode float computeIOR() \endcode
+\badcode
+float computeIOR()
+\endcode
 
 This function is called to compute the index of refraction for the material.
 Return material index of refraction.
 
-\badcode float evalCutout() \endcode
+\badcode
+float evalCutout()
+\endcode
 
 This function is called when evaluating fragment cutoff(masking) value.
 The fragment will be discarded if the value
 returned by this function is less or equal to zero.
 
-\badcode vec3 computeNormal() \endcode
+\badcode
+vec3 computeNormal()
+\endcode
 
 This function is used to calculate the normal for the fragment. Return the
 normal of the fragment.
 
-\badcode void computeTemporaries() \endcode
+\badcode
+void computeTemporaries()
+\endcode
 
 This function is called to allow the material to calculate any temporary values
 it needs. It gets called before any other function.
 
-\badcode void initializeLayerVariables() \endcode
+\badcode
+void initializeLayerVariables()
+\endcode
 
 This function is called to allow the material to initialize layer parameters.
 User should initialize variables to store the lighting values to be computed
 in the \e computeFrontLayerColor, \e computeFrontAreaColor, \e computeFrontLayerEnvironment,
 \e computeBackLayerColor, \e computeBackAreaColor and \e computeBackLayerEnvironment.
 
-\badcode void initializeLayerVariablesWithLightmap() \endcode
+\badcode
+void initializeLayerVariablesWithLightmap()
+\endcode
 
 This function is called to allow the material to initialize layer parameters.
 \note This function is optional and gets called only if the material uses lightmaps.
 
-\badcode vec3 computeFrontMaterialEmissive() \endcode
+\badcode
+vec3 computeFrontMaterialEmissive()
+\endcode
 
 This function is called when the material calculates the Emissive component
 of the material for the front-facing polygon.
 Return vec3 RGB emissive value.
 
-\badcode vec3 computeBackMaterialEmissive() \endcode
+\badcode
+vec3 computeBackMaterialEmissive()
+\endcode
 
 This function is called when the material calculates the Emissive component
 of the material for the back-facing polygon.
@@ -154,7 +172,9 @@ void computeBackLayerEnvironment( in vec3 normal, in vec3 viewDir, in float aoFa
 
 This function gets called once to calculate the environmental light for the back-facing polygon.
 
-\badcode vec4 computeLayerWeights( in float alpha ) \endcode
+\badcode
+vec4 computeLayerWeights( in float alpha )
+\endcode
 
 This function gets called after all lighting have been processed to calculate
 the final lighting value for the fragment.
@@ -168,7 +188,9 @@ after \e computeLayerWeights has been called.
 \note This function is optional and gets called only if the material
 is transparent and non-transmissive.
 
-\badcode vec4 computeOpacity( in vec4 color ) \endcode
+\badcode
+vec4 computeOpacity( in vec4 color )
+\endcode
 
 This function gets called only if the material is transmissive after
 \e computeLayerWeights has been called.
