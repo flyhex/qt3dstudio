@@ -50,6 +50,11 @@
     \li \c{F5}
     \li \c{Ctrl + R}
     \li \c{F5}
+  \row
+    \li Exit
+    \li \c{Ctrl + Q}
+    \li \c{Ctrl + Q}
+    \li \c{Cmd + Q}
 \endtable
 
 \section1 View Menu
