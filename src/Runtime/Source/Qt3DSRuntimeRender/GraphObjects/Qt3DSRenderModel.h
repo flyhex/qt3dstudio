@@ -52,6 +52,7 @@ namespace render {
         QT3DSF32 m_EdgeTess;
         QT3DSF32 m_InnerTess;
         bool m_WireframeMode;
+        bool m_ShadowCaster;
 
         SModel();
 

@@ -848,6 +848,7 @@ namespace render {
                 SRenderSubset &theSubset(theOuterSubset);
                 SRenderableObjectFlags renderableFlags;
                 renderableFlags.SetPickable(false);
+                renderableFlags.SetShadowCaster(inModel.m_ShadowCaster);
                 QT3DSF32 subsetOpacity = inModel.m_GlobalOpacity;
                 QT3DSVec3 theModelCenter(theSubset.m_Bounds.getCenter());
                 theModelCenter = inModel.m_GlobalTransform.transform(theModelCenter);

@@ -287,10 +287,17 @@
         <Property name="referencedmaterial" formalName="Referenced Material" description="Material to use all settings from" type="ObjectRef" category="Material" />
     </ReferencedMaterial>
     <Model>
-        <!--<Property name="name" formalName="Name" description="Object name" type="String" default="Model" hidden="False" />
-        <Property name="eyeball" formalName="Visible" description="Item visibility" type="Boolean" default="True" hidden="False" />-->
-        <Property name="sourcepath" formalName="Mesh" description="Geometry to use for this model" type="Mesh" />
-        <Property name="poseroot" hidden="True" type="Long" default="-1" />
+        <!-- Basic Properties -->
+        <Property name="name" formalName="Name" description="Object name" type="String" default="Light" hidden="False" category="Basic Properties" />
+        <Property name="eyeball" formalName="Visible" description="Item visibility" type="Boolean" default="True" hidden="False" controllable="True" category="Basic Properties" />
+        <Property name="opacity" formalName="Opacity" min="0" max="100" default="100" hidden="True" category="Basic Properties" />
+        <Property name="position" formalName="Position" description="Location in local space" type="Vector" category="Basic Properties" />
+        <Property name="rotation" formalName="Rotation" description="Rotation around local axes" type="Rotation" category="Basic Properties" />
+        <Property name="scale" formalName="Scale" description="Size adjustments along local axes" type="Vector" default="1 1 1" category="Basic Properties" />
+        <Property name="pivot" formalName="Pivot" description="Offset of the contents away from the local center" type="Vector" category="Basic Properties" />
+        <Property name="sourcepath" formalName="Mesh" description="Geometry to use for this model" type="Mesh" category="Model"/>
+        <Property name="shadowcaster" formalName="Cast Shadows" description="Whether the model is a shadow caster or not" type="Boolean" default="True" category="Model"/>
+        <Property name="poseroot" hidden="True" type="Long" default="-1" category="Model"/>
         <!--<Property name="tessellation" formalName="Tessellation Mode" description="Type of tessellation to subdivide\nthe geometry" list="None:Linear:Phong:NPatch" default="None" />
         <Property name="edgetess" formalName="Edge Tessellation" description="Max Tessellation amount" min="1" max="64" default="4" />
         <Property name="innertess" formalName="Inner Tessellation" description="Min Tessellation amount" min="1" max="64" default="4" />-->

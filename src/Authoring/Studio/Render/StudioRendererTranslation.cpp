@@ -404,6 +404,7 @@ struct STranslatorDataModelParser
 #define Light_ShadowMapFov m_Light.m_ShadowMapFov
 #define Light_ShadowFilter m_Light.m_ShadowFilter
 #define Model_MeshPath m_Asset.m_SourcePath
+#define Model_ShadowCaster m_Model.m_ShadowCaster
 #define Model_TessellationMode m_Model.m_Tessellation
 #define Model_EdgeTess m_Model.m_EdgeTess
 #define Model_InnerTess m_Model.m_InnerTess

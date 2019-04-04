@@ -42,6 +42,7 @@ SModel::SModel()
     , m_EdgeTess(1.0)
     , m_InnerTess(1.0)
     , m_WireframeMode(false)
+    , m_ShadowCaster(true)
 {
 }
 

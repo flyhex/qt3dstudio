@@ -76,6 +76,7 @@ const char *GetAttributeString(const EAttribute inAttribute)
         case ATTRIBUTE_PIVOT_Z: return "pivot.z";
         case ATTRIBUTE_ROTATIONORDER: return "rotationorder";
         case ATTRIBUTE_ORIENTATION: return "orientation";
+        case ATTRIBUTE_SHADOWCASTER: return "shadowcaster";
         case ATTRIBUTE_TESSELLATION: return "tessellation";
         case ATTRIBUTE_EDGETESS: return "edgetess";
         case ATTRIBUTE_INNERTESS: return "innertess";

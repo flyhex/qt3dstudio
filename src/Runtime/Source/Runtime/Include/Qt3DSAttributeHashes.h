@@ -67,6 +67,7 @@ enum EAttribute {
     ATTRIBUTE_PIVOT_Z =              0x038318B2, // pivot.z
     ATTRIBUTE_ROTATIONORDER =        0x03CE5F70, // rotationorder
     ATTRIBUTE_ORIENTATION =          0x001A90B0, // orientation
+    ATTRIBUTE_SHADOWCASTER =         0x0363F874, // shadowcaster
     ATTRIBUTE_TESSELLATION =         0x0335861F, // tessellation
     ATTRIBUTE_EDGETESS =             0x023933D2, // edgetess
     ATTRIBUTE_INNERTESS =            0x01529259, // innertess

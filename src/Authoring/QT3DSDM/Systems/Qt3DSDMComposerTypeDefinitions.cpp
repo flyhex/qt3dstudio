@@ -239,6 +239,7 @@ struct DataConstructor<SObjectRefType>
 #define QT3DS_WCHAR_T_boneid L"boneid"
 #define QT3DS_WCHAR_T_poseroot L"poseroot"
 #define QT3DS_WCHAR_T_ignoresparent L"ignoresparent"
+#define QT3DS_WCHAR_T_shadowcaster L"shadowcaster"
 #define QT3DS_WCHAR_T_tessellation L"tessellation"
 #define QT3DS_WCHAR_T_edgetess L"edgetess"
 #define QT3DS_WCHAR_T_innertess L"innertess"

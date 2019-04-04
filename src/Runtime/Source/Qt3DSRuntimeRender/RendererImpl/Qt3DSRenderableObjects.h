@@ -59,6 +59,7 @@ namespace render {
             CustomMaterialMeshSubset = 1 << 7,
             HasRefraction = 1 << 8,
             Path = 1 << 9,
+            ShadowCaster = 1 << 10
         };
     };
 
@@ -136,6 +137,15 @@ namespace render {
 
         void SetPath(bool inPath) { ClearOrSet(inPath, RenderPreparationResultFlagValues::Path); }
         bool IsPath() const { return this->operator&(RenderPreparationResultFlagValues::Path); }
+
+        void SetShadowCaster(bool inCaster)
+        {
+            ClearOrSet(inCaster, RenderPreparationResultFlagValues::ShadowCaster);
+        }
+        bool IsShadowCaster() const
+        {
+            return this->operator&(RenderPreparationResultFlagValues::ShadowCaster);
+        }
     };
 
     struct SNodeLightEntry
@@ -174,13 +184,14 @@ namespace render {
         QT3DSVec3 m_WorldCenterPoint;
         QT3DSF32 m_CameraDistanceSq;
         TessModeValues::Enum m_TessellationMode;
+        bool m_ShadowCaster;
         // For custom renderable objects the render function must be defined
         TRenderFunction m_RenderFunction;
         TNodeLightEntryList m_ScopedLights;
         SRenderableObject(SRenderableObjectFlags inFlags, QT3DSVec3 inWorldCenterPt,
                           const QT3DSMat44 &inGlobalTransform, const NVBounds3 &inBounds,
                           TessModeValues::Enum inTessMode = TessModeValues::NoTess,
-                          TRenderFunction inFunction = NULL)
+                          bool inShadowCaster = true, TRenderFunction inFunction = nullptr)
 
             : m_GlobalTransform(inGlobalTransform)
             , m_Bounds(inBounds)
@@ -188,6 +199,7 @@ namespace render {
             , m_WorldCenterPoint(inWorldCenterPt)
             , m_CameraDistanceSq(0)
             , m_TessellationMode(inTessMode)
+            , m_ShadowCaster(inShadowCaster)
             , m_RenderFunction(inFunction)
         {
         }

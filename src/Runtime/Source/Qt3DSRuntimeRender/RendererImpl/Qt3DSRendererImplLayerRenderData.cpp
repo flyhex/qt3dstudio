@@ -498,6 +498,9 @@ namespace render {
                                               const QT3DSVec2 &inCameraProps, TShaderFeatureSet,
                                               QT3DSU32 lightIndex, const SCamera &inCamera)
     {
+        if (!inObject.m_RenderableFlags.IsShadowCaster())
+            return;
+
         SShadowMapEntry *pEntry = inData.m_ShadowMapManager->GetShadowMapEntry(lightIndex);
 
         if (inObject.m_RenderableFlags.IsDefaultMaterialMeshSubset())

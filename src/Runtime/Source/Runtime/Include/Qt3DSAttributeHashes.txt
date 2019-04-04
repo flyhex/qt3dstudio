@@ -26,6 +26,7 @@ pivot.y
 pivot.z
 rotationorder
 orientation
+shadowcaster
 tessellation
 edgetess
 innertess

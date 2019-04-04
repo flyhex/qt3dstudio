@@ -558,6 +558,7 @@ struct SRuntimePropertyParser
 #define Light_ShadowMapFov ATTRIBUTE_SHDWMAPFOV
 #define Light_ShadowFilter ATTRIBUTE_SHDWFILTER
 #define Model_MeshPath ATTRIBUTE_SOURCEPATH
+#define Model_ShadowCaster ATTRIBUTE_SHADOWCASTER
 #define Model_TessellationMode ATTRIBUTE_TESSELLATION
 #define Model_EdgeTess ATTRIBUTE_EDGETESS
 #define Model_InnerTess ATTRIBUTE_INNERTESS

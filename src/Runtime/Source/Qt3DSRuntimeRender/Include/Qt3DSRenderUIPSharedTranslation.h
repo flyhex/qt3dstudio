@@ -379,6 +379,7 @@ namespace render {
 
 #define ITERATE_QT3DS_RENDER_MODEL_PROPERTIES                                                        \
     HANDLE_QT3DS_RENDER_SOURCEPATH_PROPERTY(Model, MeshPath, Dirty)                                  \
+    HANDLE_QT3DS_RENDER_PROPERTY(Model, ShadowCaster, Dirty)                                         \
     HANDLE_QT3DS_RENDER_ENUM_PROPERTY(Model, TessellationMode, Dirty)                                \
     HANDLE_QT3DS_RENDER_PROPERTY(Model, EdgeTess, Dirty)                                             \
     HANDLE_QT3DS_RENDER_PROPERTY(Model, InnerTess, Dirty)
