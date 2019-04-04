@@ -324,7 +324,6 @@ public:
     qt3dsdm::Qt3DSDMInstanceHandle GetActiveLayer();
     void SetActiveLayer(qt3dsdm::Qt3DSDMInstanceHandle inLayerInstance);
     qt3dsdm::Qt3DSDMSlideHandle GetActiveSlide();
-    void OnLayerDeleted(qt3dsdm::Qt3DSDMInstanceHandle inLayerInstance);
 
     void SetPlayMode(EPlayMode inPlayMode, long inRestoreTime = -1);
     bool IsPlaying();
@@ -465,7 +464,7 @@ public:
     int getSelectedInstancesCount() const;
 
     std::shared_ptr<Q3DStudio::IInternalDocumentEditor> getSceneEditor() { return m_SceneEditor; }
-    QVector<int> getLayers();
+    QVector<int> getVariantInstances(int instance = 0);
 
     void queueMaterialRename(const QString &oldName, const QString &newName);
 

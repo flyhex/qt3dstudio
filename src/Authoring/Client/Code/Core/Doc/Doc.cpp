@@ -727,19 +727,27 @@ qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetFirstSelectableLayer()
     return theFoundLayer;
 }
 
-QVector<int> CDoc::getLayers()
+// returns all instances that has a 'variants' property
+QVector<int> CDoc::getVariantInstances(int instance)
 {
-    Q3DStudio::CGraphIterator layerIterator;
-    GetAssetChildren(this, m_SceneInstance, layerIterator, OBJTYPE_LAYER);
+    auto bridge = m_StudioSystem->GetClientDataModelBridge();
+    if (!instance)
+        instance = int(m_SceneInstance);
+    Q3DStudio::CGraphIterator it;
+    GetAssetChildren(this, instance, it);
 
-    QVector<int> layerList;
+    QVector<int> list;
 
-    for (; !layerIterator.IsDone(); ++layerIterator) {
-        if (m_StudioSystem->IsInstance(layerIterator.GetCurrent()))
-            layerList.append(layerIterator.GetCurrent());
+    for (; !it.IsDone(); ++it) {
+        if (m_StudioSystem->IsInstance(it.GetCurrent())) {
+            if (bridge->GetObjectType(it.GetCurrent()) & OBJTYPE_IS_VARIANT)
+                list.append(it.GetCurrent());
+
+            list.append(getVariantInstances(it.GetCurrent()));
+        }
     }
 
-    return layerList;
+    return list;
 }
 
 qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetActiveRootInstance()
@@ -789,17 +797,6 @@ qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetActiveLayer()
 void CDoc::SetActiveLayer(qt3dsdm::Qt3DSDMInstanceHandle inLayerInstance)
 {
     m_ActiveLayer = inLayerInstance;
-}
-
-//=============================================================================
-/**
- * Informs that a layer has been deleted. If this is the active one, try to promote another.
- */
-
-void CDoc::OnLayerDeleted(qt3dsdm::Qt3DSDMInstanceHandle inLayerInstance)
-{
-    if (m_ActiveLayer == inLayerInstance)
-        m_ActiveLayer = 0;
 }
 
 //=============================================================================
@@ -1225,6 +1222,7 @@ void CDoc::OnSlideDeleted(qt3dsdm::Qt3DSDMSlideHandle inSlide)
         SetActiveSlideWithTransaction(theNewSlide);
     }
 }
+
 void CDoc::OnInstanceDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
     if (GetSelectedInstance() == inInstance)
@@ -2356,7 +2354,8 @@ void CDoc::SetupDataCoreSignals()
 
     if (theProvider)
         m_Connections.push_back(theProvider->ConnectBeforeInstanceDeleted(
-                                    std::bind(&CDoc::OnInstanceDeleted, this, std::placeholders::_1)));
+                                std::bind(&CDoc::OnInstanceDeleted, this, std::placeholders::_1)));
+
     if (theSlideProvider)
         m_Connections.push_back(theSlideProvider->ConnectBeforeSlideDeleted(
                                     std::bind(&CDoc::OnSlideDeleted, this, std::placeholders::_1)));

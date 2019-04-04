@@ -153,27 +153,19 @@ struct SMetaDataPropertyInfo : SMetaPropertyBase
 {
     Qt3DSDMInstanceHandle m_Instance;
     Qt3DSDMPropertyHandle m_Property;
-    bool m_Controllable; // Can this property be controlled
-    bool m_IsHidden; // Is this property visible in the UI
-    bool m_Animatable; // Is this property visible in the UI
+    bool m_Controllable = false; // Can this property be controlled via data input (default no)
+    bool m_IsHidden = false;     // Is this property hidden in the inspector (default no)
+    bool m_Animatable = true;    // Is this property animatable (default yes)
+    // Note: all animatables are controllable
 
     TCharStr m_GroupName; // Name of the group this property belongs to or "default"
 
     SMetaDataPropertyInfo(Qt3DSDMInstanceHandle inInstance)
         : m_Instance(inInstance)
     {
-        init();
     }
-    SMetaDataPropertyInfo() { init(); }
-    void init()
-    {
-        m_IsHidden = false;
-        // We default to being animatable
-        m_Animatable = true;
-        // Default to not being explicitly controllable.
-        // (Note that all animables are controllable.)
-        m_Controllable = false;
-    }
+    SMetaDataPropertyInfo() {}
+
     bool operator==(const SMetaDataPropertyInfo &inOther) const
     {
         return m_Instance == inOther.m_Instance && m_Property == inOther.m_Property

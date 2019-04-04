@@ -105,14 +105,13 @@ Q_SIGNALS:
     void assetNameChanged();
 
 private:
+    enum class VariantsUpdateMode { Rename, Delete };
+
     QString ensureUniquePresentationId(const QString &id) const;
-    bool tagExistsInUip(const QString &src, const QString &group, const QString &tag) const;
-    bool groupExistsInUip(const QString &src, const QString &group) const;
-    void deleteTagFromUip(const QString &src, const QString &group, const QString &tag);
-    void deleteGroupFromUip(const QString &src, const QString &group);
-    void renameTagInUip(const QString &src, const QString &group, const QString &tag,
-                        const QString &newName);
-    void renameGroupInUip(const QString &src, const QString &group, const QString &newName);
+    bool tagExistsInUip(const QString &src, const QString &group, const QString &tag = {}) const;
+    void updateVariantsInUip(const QString &src, const VariantsUpdateMode &updateType,
+                             const QString &group, const QString &tag = {},
+                             const QString &newName = {});
 
     QFileInfo m_fileInfo; // uia file info
     QString m_initialPresentation;

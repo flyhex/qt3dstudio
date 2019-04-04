@@ -668,7 +668,7 @@ bool RowTree::isInVariantsFilter() const
 {
     const QString filterStr = g_StudioApp.m_pMainWnd->getVariantsFilterStr();
 
-    if (m_rowType != OBJTYPE_LAYER || filterStr.isEmpty()
+    if (m_rowType & ~OBJTYPE_IS_VARIANT || filterStr.isEmpty()
         || !m_scene->widgetTimeline()->toolbar()->isVariantsFilterOn()) {
         return true;
     }
@@ -676,7 +676,7 @@ bool RowTree::isInVariantsFilter() const
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
     const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
-    auto property = bridge->GetLayer().m_variants;
+    auto property = bridge->getVariantsProperty(instance());
 
     using namespace qt3dsdm;
     SValue sValue;

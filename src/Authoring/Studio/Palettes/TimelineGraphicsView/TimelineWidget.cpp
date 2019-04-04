@@ -548,15 +548,14 @@ void TimelineWidget::onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
                     row->updateSubpresentations();
                     insertToHandlesMap(binding);
 
-                    // refresh the created object variants if it is a layer with variants property
-                    // set.
-                    if (m_bridge->IsLayerInstance(inInstance)) {
+                    // refresh the created object variants if it has a variants property set.
+                    if (m_bridge->GetObjectType(inInstance) & OBJTYPE_IS_VARIANT) {
                         const auto propertySystem = g_StudioApp.GetCore()->GetDoc()
                                                     ->GetPropertySystem();
                         qt3dsdm::SValue sValue;
                         if (propertySystem->GetInstancePropertyValue(inInstance,
-                                                                m_bridge->GetLayer().m_variants,
-                                                                sValue)) {
+                                                        m_bridge->getVariantsProperty(inInstance),
+                                                        sValue)) {
                             if (qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->GetLength() != 0)
                                 refreshVariants(inInstance);
                         }
@@ -770,7 +769,7 @@ void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance
         m_subpresentationChanges.insert(inInstance);
         if (!m_asyncUpdateTimer.isActive())
             m_asyncUpdateTimer.start();
-    } else if (inProperty == m_bridge->GetLayer().m_variants) {
+    } else if (inProperty == m_bridge->getVariantsProperty(inInstance)) {
         qt3dsdm::SValue sValue;
         if (doc->GetPropertySystem()->GetInstancePropertyValue(inInstance, inProperty, sValue)) {
             QString propVal = qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->toQString();
@@ -1269,18 +1268,19 @@ void TimelineWidget::setSelectedTimeBarsColor(const QColor &color, bool preview)
 void TimelineWidget::refreshVariants(int instance)
 {
     const auto propertySystem = g_StudioApp.GetCore()->GetDoc()->GetPropertySystem();
-    QVector<int> layers;
+    QVector<int> instances;
     if (instance)
-        layers << instance;
+        instances << instance;
     else
-        layers = g_StudioApp.GetCore()->GetDoc()->getLayers();
+        instances = g_StudioApp.GetCore()->GetDoc()->getVariantInstances();
 
-    for (auto layer : qAsConst(layers)) {
-        if (!m_handlesMap.contains(layer))
+    for (auto instance : qAsConst(instances)) {
+        if (!m_handlesMap.contains(instance))
             continue;
 
         qt3dsdm::SValue sValue;
-        if (propertySystem->GetInstancePropertyValue(layer, m_bridge->GetLayer().m_variants,
+        if (propertySystem->GetInstancePropertyValue(instance,
+                                                     m_bridge->getVariantsProperty(instance),
                                                      sValue)) {
             QString propVal = qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->toQString();
             if (!propVal.isEmpty()) {
@@ -1292,9 +1292,9 @@ void TimelineWidget::refreshVariants(int instance)
                         groups.append(group);
                 }
 
-                m_handlesMap[layer]->updateVariants(groups);
+                m_handlesMap[instance]->updateVariants(groups);
             } else {
-                m_handlesMap[layer]->updateVariants({});
+                m_handlesMap[instance]->updateVariants({});
             }
         }
     }

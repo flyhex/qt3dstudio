@@ -382,11 +382,12 @@ void SlideView::onDataInputChange(int handle, int instance, const QString &dataI
 
 void SlideView::onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
-    // refresh the variants model if the created asset is a layer with variants property set.
-    if (GetBridge()->IsLayerInstance(inInstance)) {
+    // refresh the variants model if the created asset has a variants property set.
+    if (GetBridge()->GetObjectType(inInstance) & OBJTYPE_IS_VARIANT) {
         const auto propertySystem = GetDoc()->GetPropertySystem();
         qt3dsdm::SValue sValue;
-        if (propertySystem->GetInstancePropertyValue(inInstance, GetBridge()->GetLayer().m_variants,
+        if (propertySystem->GetInstancePropertyValue(inInstance,
+                                                     GetBridge()->getVariantsProperty(inInstance),
                                                      sValue)) {
             if (qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->GetLength() != 0)
                 refreshVariants();
@@ -408,7 +409,7 @@ void SlideView::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
     m_SlidesModel->refreshSlideLabel(inInstance, inProperty);
 
     // refresh variants
-    if (inProperty == GetBridge()->GetLayer().m_variants)
+    if (inProperty == GetBridge()->getVariantsProperty(inInstance))
         refreshVariants();
 }
 

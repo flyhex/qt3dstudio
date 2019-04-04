@@ -30,7 +30,6 @@
 #include "VariantsTagModel.h"
 #include "StudioApp.h"
 #include "Core.h"
-#include "Views.h"
 #include "MainFrm.h"
 #include "Qt3DSDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
@@ -52,7 +51,7 @@ void VariantsGroupModel::refresh()
     int instance = g_StudioApp.GetCore()->GetDoc()->GetSelectedInstance();
     auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
 
-    if (instance == 0 || !bridge->IsLayerInstance(instance)) {
+    if (instance == 0 || bridge->GetObjectType(instance) & ~OBJTYPE_IS_VARIANT) {
         m_instance = 0;
         m_property = 0;
         return;
@@ -60,7 +59,7 @@ void VariantsGroupModel::refresh()
 
     auto propertySystem = g_StudioApp.GetCore()->GetDoc()->GetPropertySystem();
     m_instance = instance;
-    m_property = bridge->GetLayer().m_variants.m_Property;
+    m_property = bridge->getVariantsProperty(instance);
 
     qt3dsdm::SValue sValue;
     if (propertySystem->GetInstancePropertyValue(m_instance, m_property, sValue)) {
@@ -153,9 +152,8 @@ void VariantsGroupModel::setTagState(const QString &group, const QString &tag, b
         }
     }
 
-    auto sVal = std::make_shared<qt3dsdm::CDataStr>(Q3DStudio::CString::fromQString(val));
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(), QObject::tr("Set Property"))
-            ->SetInstancePropertyValue(m_instance, m_property, sVal);
+            ->SetInstancePropertyValue(m_instance, m_property, QVariant(val));
 }
 
 void VariantsGroupModel::addNewTag(const QString &group)
@@ -167,7 +165,7 @@ void VariantsGroupModel::addNewTag(const QString &group)
         refresh();
 
         if (g_StudioApp.GetCore()->getProjectFile().variantsDef()[group].m_tags.size() == 1)
-            g_StudioApp.GetViews()->getMainFrame()->updateActionFilterEnableState();
+            g_StudioApp.m_pMainWnd->updateActionFilterEnableState();
     }
 }
 

@@ -4566,24 +4566,6 @@ public:
         }
     }
 
-    void SetUniqueName(TInstanceHandle inItem, const char8_t *inNameBase,
-                       eastl::vector<Q3DStudio::CString> &inExistingNames)
-    {
-        Q3DStudio::CString theName(inNameBase);
-        QT3DSU32 idx = 1;
-        while (eastl::find(inExistingNames.begin(), inExistingNames.end(), theName)
-               != inExistingNames.end()) {
-            char8_t nameBuffer[64];
-            sprintf(nameBuffer, "%d", idx);
-            ++idx;
-            theName.assign(inNameBase);
-            theName.append("_");
-            theName.append(nameBuffer);
-        }
-        SetName(inItem, theName, false);
-        inExistingNames.push_back(theName);
-    }
-
     virtual TInstanceHandle LoadPathBuffer(const Q3DStudio::CString &inFullPathToDocument,
                                            TInstanceHandle inParent, TSlideHandle inSlide,
                                            DocumentEditorInsertType::Enum inDropType,

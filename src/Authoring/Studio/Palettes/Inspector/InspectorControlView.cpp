@@ -60,8 +60,6 @@
 #include "Qt3DSDMSlides.h"
 #include "VariantsGroupModel.h"
 #include "VariantTagDialog.h"
-#include "Views.h"
-#include "MainFrm.h"
 #include "SlideView.h"
 #include "TimelineWidget.h"
 
@@ -466,18 +464,18 @@ void InspectorControlView::showTagContextMenu(int x, int y, const QString &group
             // refresh slide view so the tooltip show the renamed tag immediately, no need to
             // refresh the timeline because each row gets the tags directly from the property which
             // is always up to date.
-            g_StudioApp.GetViews()->getMainFrame()->getSlideView()->refreshVariants();
+            g_StudioApp.m_pMainWnd->getSlideView()->refreshVariants();
         }
     });
 
     auto actionDelete = theContextMenu.addAction(QObject::tr("Delete Tag"));
     connect(actionDelete, &QAction::triggered, this, [&]() {
         g_StudioApp.GetCore()->getProjectFile().deleteVariantTag(group, tag);
-        g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->refreshVariants();
-        g_StudioApp.GetViews()->getMainFrame()->getSlideView()->refreshVariants();
+        g_StudioApp.m_pMainWnd->getTimelineWidget()->refreshVariants();
+        g_StudioApp.m_pMainWnd->getSlideView()->refreshVariants();
         m_variantsGroupModel->refresh();
         if (g_StudioApp.GetCore()->getProjectFile().variantsDef()[group].m_tags.size() == 0)
-            g_StudioApp.GetViews()->getMainFrame()->updateActionFilterEnableState();
+            g_StudioApp.m_pMainWnd->updateActionFilterEnableState();
     });
 
     theContextMenu.exec(mapToGlobal({x, y}));
@@ -495,33 +493,33 @@ void InspectorControlView::showGroupContextMenu(int x, int y, const QString &gro
         VariantTagDialog dlg(VariantTagDialog::RenameGroup, {}, group);
         if (dlg.exec() == QDialog::Accepted) {
             projectFile.renameVariantGroup(dlg.getNames().first, dlg.getNames().second);
-            g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->refreshVariants();
+            g_StudioApp.m_pMainWnd->getTimelineWidget()->refreshVariants();
             m_variantsGroupModel->refresh();
 
             // refresh slide view so the tooltip show the renamed group immediately, no need to
             // refresh the timeline because each row gets the tags directly from the property which
             // is always up to date.
-            g_StudioApp.GetViews()->getMainFrame()->getSlideView()->refreshVariants();
+            g_StudioApp.m_pMainWnd->getSlideView()->refreshVariants();
         }
     });
 
     auto actionColor = theContextMenu.addAction(QObject::tr("Change Group Color"));
     connect(actionColor, &QAction::triggered, this, [&]() {
-        const auto variantsDef = g_StudioApp.GetCore()->getProjectFile().variantsDef();
+        const auto variantsDef = projectFile.variantsDef();
         QColor newColor = this->showColorDialog(variantsDef[group].m_color);
         projectFile.changeVariantGroupColor(group, newColor.name());
         // no need to refresh variants in the timeline widget as it references the group color in
         // the project file m_variants, and a redraw is triggered upon color selection dialog close.
-        g_StudioApp.GetViews()->getMainFrame()->getSlideView()->refreshVariants();
+        g_StudioApp.m_pMainWnd->getSlideView()->refreshVariants();
         m_variantsGroupModel->refresh();
     });
 
     auto actionDelete = theContextMenu.addAction(QObject::tr("Delete Group"));
     connect(actionDelete, &QAction::triggered, this, [&]() {
         projectFile.deleteVariantGroup(group);
-        g_StudioApp.GetViews()->getMainFrame()->getTimelineWidget()->refreshVariants();
-        g_StudioApp.GetViews()->getMainFrame()->getSlideView()->refreshVariants();
-        g_StudioApp.GetViews()->getMainFrame()->updateActionFilterEnableState();
+        g_StudioApp.m_pMainWnd->getTimelineWidget()->refreshVariants();
+        g_StudioApp.m_pMainWnd->getSlideView()->refreshVariants();
+        g_StudioApp.m_pMainWnd->updateActionFilterEnableState();
         m_variantsGroupModel->refresh();
     });
 

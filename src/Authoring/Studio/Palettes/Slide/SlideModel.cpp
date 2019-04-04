@@ -374,11 +374,12 @@ void SlideModel::refreshVariants(const QVector<QHash<QString, QStringList>> &vMo
         m_variantsModelKeys.resize(slideCount);
 
         const auto propertySystem = GetDoc()->GetPropertySystem();
-        const auto layers = GetDoc()->getLayers();
-        for (auto layer : layers) {
-            int slideIdx = slideIndex(slideSystem->GetAssociatedSlide(layer));
+        const QVector<int> instances = GetDoc()->getVariantInstances();
+        for (auto instance : instances) {
+            int slideIdx = slideIndex(slideSystem->GetAssociatedSlide(instance));
             qt3dsdm::SValue sValue;
-            if (propertySystem->GetInstancePropertyValue(layer, GetBridge()->GetLayer().m_variants,
+            if (propertySystem->GetInstancePropertyValue(instance,
+                                                         GetBridge()->getVariantsProperty(instance),
                                                          sValue)) {
                 QString propVal = qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->toQString();
                 if (!propVal.isEmpty()) {

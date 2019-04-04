@@ -1138,7 +1138,7 @@ void ProjectFile::renameVariantTag(const QString &group, const QString &oldTag,
     for (int i = 0; i < presElems.count(); ++i) {
         QString pPath = m_fileInfo.path() + QLatin1Char('/')
                 + presElems.at(i).toElement().attribute(QStringLiteral("src"));
-        renameTagInUip(pPath, group, oldTag, newTag);
+        updateVariantsInUip(pPath, VariantsUpdateMode::Rename, group, oldTag, newTag);
     }
 
     // update and save the uia
@@ -1169,18 +1169,16 @@ void ProjectFile::renameVariantTag(const QString &group, const QString &oldTag,
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
     const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
-    const auto layers = doc->getLayers();
-    auto property = bridge->GetLayer().m_variants;
-    for (auto layer : layers) {
+    const QVector<int> instances = doc->getVariantInstances();
+    for (auto instance : instances) {
+        auto property = bridge->getVariantsProperty(instance);
         qt3dsdm::SValue sValue;
-        if (propertySystem->GetInstancePropertyValue(layer, property, sValue)) {
+        if (propertySystem->GetInstancePropertyValue(instance, property, sValue)) {
             QString propVal = qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->toQString();
             QString oldGroupTagPair = QStringLiteral("%1:%2").arg(group).arg(oldTag);
             if (propVal.contains(oldGroupTagPair)) {
                 propVal.replace(oldGroupTagPair, QStringLiteral("%1:%2").arg(group).arg(newTag));
-                qt3dsdm::SValue sVal
-                    = std::make_shared<qt3dsdm::CDataStr>(Q3DStudio::CString::fromQString(propVal));
-                propertySystem->SetInstancePropertyValue(layer, property, sVal);
+                propertySystem->SetInstancePropertyValue(instance, property, QVariant(propVal));
             }
         }
     }
@@ -1210,7 +1208,7 @@ void ProjectFile::renameVariantGroup(const QString &oldGroup, const QString &new
     for (int i = 0; i < presElems.count(); ++i) {
         QString pPath = m_fileInfo.path() + QLatin1Char('/')
                 + presElems.at(i).toElement().attribute(QStringLiteral("src"));
-        renameGroupInUip(pPath, oldGroup, newGroup);
+        updateVariantsInUip(pPath, VariantsUpdateMode::Rename, oldGroup, {}, newGroup);
     }
 
     // update and save the uia
@@ -1231,18 +1229,16 @@ void ProjectFile::renameVariantGroup(const QString &oldGroup, const QString &new
      CDoc *doc = g_StudioApp.GetCore()->GetDoc();
      const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
      const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
-     const auto layers = doc->getLayers();
-     auto property = bridge->GetLayer().m_variants;
-     for (auto layer : layers) {
+     const QVector<int> instances = doc->getVariantInstances();
+     for (auto instance : instances) {
+         auto property = bridge->getVariantsProperty(instance);
          qt3dsdm::SValue sValue;
-         if (propertySystem->GetInstancePropertyValue(layer, property, sValue)) {
+         if (propertySystem->GetInstancePropertyValue(instance, property, sValue)) {
              QString propVal = qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->toQString();
              QString oldGroupWithColon = QStringLiteral("%1:").arg(oldGroup);
              if (propVal.contains(oldGroupWithColon)) {
                  propVal.replace(oldGroupWithColon, QStringLiteral("%1:").arg(newGroup));
-                 qt3dsdm::SValue sVal = std::make_shared<qt3dsdm::CDataStr>(
-                                        Q3DStudio::CString::fromQString(propVal));
-                 propertySystem->SetInstancePropertyValue(layer, property, sVal);
+                 propertySystem->SetInstancePropertyValue(instance, property, QVariant(propVal));
              }
          }
      }
@@ -1275,7 +1271,7 @@ void ProjectFile::deleteVariantGroup(const QString &group)
     for (int i = 0; i < presElems.count(); ++i) {
         QString pPath = m_fileInfo.path() + QLatin1Char('/')
                 + presElems.at(i).toElement().attribute(QStringLiteral("src"));
-        if (pPath != doc->GetDocumentPath() && groupExistsInUip(pPath, group)) {
+        if (pPath != doc->GetDocumentPath() && tagExistsInUip(pPath, group)) {
             inUseIdx = i;
             break;
         }
@@ -1288,15 +1284,15 @@ void ProjectFile::deleteVariantGroup(const QString &group)
                        " want to delete the group?").arg(group));
         box.setIcon(QMessageBox::Warning);
         box.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
-        box.setButtonText(QMessageBox::Yes, QStringLiteral("Delete"));
+        box.setButtonText(QMessageBox::Yes, tr("Delete"));
         switch (box.exec()) {
         case QMessageBox::Yes:
             // delete the group from all uips that use it
             for (int i = inUseIdx; i < presElems.count(); ++i) {
                 QString pPath = m_fileInfo.path() + QLatin1Char('/')
-                        + presElems.at(i).toElement().attribute(QStringLiteral("src"));
+                                + presElems.at(i).toElement().attribute(QStringLiteral("src"));
                 if (pPath != doc->GetDocumentPath())
-                    deleteGroupFromUip(pPath, group);
+                    updateVariantsInUip(pPath, VariantsUpdateMode::Delete, group);
             }
             break;
 
@@ -1307,25 +1303,23 @@ void ProjectFile::deleteVariantGroup(const QString &group)
     }
 
     // delete the group from current uip, if exists
-    deleteGroupFromUip(doc->GetDocumentPath(), group);
+    updateVariantsInUip(doc->GetDocumentPath(), VariantsUpdateMode::Delete, group);
 
     // delete the group from the property (if set)
     const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
     const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
-    const auto layers = doc->getLayers();
-    auto property = bridge->GetLayer().m_variants;
-    for (auto layer : layers) {
+    const QVector<int> instances = doc->getVariantInstances();
+    for (auto instance : instances) {
+        auto property = bridge->getVariantsProperty(instance);
         qt3dsdm::SValue sValue;
-        if (propertySystem->GetInstancePropertyValue(layer, property, sValue)) {
+        if (propertySystem->GetInstancePropertyValue(instance, property, sValue)) {
             QString propVal = qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->toQString();
             if (propVal.contains(QStringLiteral("%1:").arg(group))) {
                 // property has the deleted group, need to update it, else the deleted group
                 // will be saved the uip if the user saves the presentation.
                 QRegExp rgx(QStringLiteral("%1:\\w*,*|,%1:\\w*").arg(group));
                 propVal.replace(rgx, {});
-                qt3dsdm::SValue sVal = std::make_shared<qt3dsdm::CDataStr>(
-                                       Q3DStudio::CString::fromQString(propVal));
-                propertySystem->SetInstancePropertyValue(layer, property, sVal);
+                propertySystem->SetInstancePropertyValue(instance, property, QVariant(propVal));
             }
         }
     }
@@ -1335,13 +1329,11 @@ void ProjectFile::deleteVariantGroup(const QString &group)
                                .firstChildElement(QStringLiteral("variants"));
     QDomNodeList groupsElems = variantsElem.elementsByTagName(QStringLiteral("variantgroup"));
 
-    bool deleted = false;
     for (int i = 0; i < groupsElems.count(); ++i) {
         QDomElement gElem = groupsElems.at(i).toElement();
         if (gElem.attribute(QStringLiteral("id")) == group) {
             variantsElem.removeChild(gElem);
             StudioUtils::commitDomDocumentSave(file, domDoc);
-            deleted = true;
             break;
         }
     }
@@ -1376,188 +1368,6 @@ void ProjectFile::changeVariantGroupColor(const QString &group, const QString &n
     m_variantsDef[group].m_color = newColor;
 }
 
-bool ProjectFile::tagExistsInUip(const QString &src, const QString &group, const QString &tag) const
-{
-    QFile file(src);
-    if (!file.open(QFile::Text | QFile::ReadOnly)) {
-        qWarning() << file.errorString();
-        return false;
-    }
-
-    QXmlStreamReader reader(&file);
-    reader.setNamespaceProcessing(false);
-
-    while (!reader.atEnd()) {
-        if (reader.readNextStartElement()) {
-            if (reader.name() == QLatin1String("Layer")
-                && reader.attributes().hasAttribute(QLatin1String("variants"))) {
-                QStringRef v = reader.attributes().value(QLatin1String("variants"));
-                if (v.contains(group + QLatin1Char(':') + tag))
-                    return true;
-            } else if (reader.name() == QLatin1String("Logic")) {
-                break;
-            }
-        }
-    }
-
-    return false;
-}
-
-bool ProjectFile::groupExistsInUip(const QString &src, const QString &group) const
-{
-    QFile file(src);
-    if (!file.open(QFile::Text | QFile::ReadOnly)) {
-        qWarning() << file.errorString();
-        return false;
-    }
-
-    QXmlStreamReader reader(&file);
-    reader.setNamespaceProcessing(false);
-
-    while (!reader.atEnd()) {
-        if (reader.readNextStartElement()) {
-            if (reader.name() == QLatin1String("Layer")
-                && reader.attributes().hasAttribute(QLatin1String("variants"))) {
-                QStringRef v = reader.attributes().value(QLatin1String("variants"));
-                if (v.contains(group + QLatin1Char(':')))
-                    return true;
-            } else if (reader.name() == QLatin1String("Logic")) {
-                break;
-            }
-        }
-    }
-
-    return false;
-}
-
-// renames a tag (if exists) in all layers in a uip file
-void ProjectFile::renameTagInUip(const QString &src, const QString &group, const QString &tag,
-                                 const QString &newName)
-{
-    QDomDocument domDoc;
-    QSaveFile file(src);
-    if (!StudioUtils::openDomDocumentSave(file, domDoc))
-        return;
-
-    QDomNodeList layerElems = domDoc.documentElement()
-                                    .elementsByTagName(QStringLiteral("Layer"));
-    bool needSave = false;
-    for (int i = 0; i < layerElems.count(); ++i) {
-        QDomElement lElem = layerElems.at(i).toElement();
-        if (lElem.hasAttribute(QStringLiteral("variants"))) {
-            QStringList tagPairs = lElem.attribute(QStringLiteral("variants"))
-                                   .split(QLatin1Char(','));
-            QString tagFrom = group + QLatin1Char(':') + tag;
-            QString tagTo = group + QLatin1Char(':') + newName;
-
-            if (tagPairs.contains(tagFrom)) {
-                tagPairs.replaceInStrings(tagFrom, tagTo);
-                lElem.setAttribute(QStringLiteral("variants"), tagPairs.join(QLatin1Char(',')));
-                needSave = true;
-            }
-        }
-    }
-
-    if (needSave)
-        StudioUtils::commitDomDocumentSave(file, domDoc);
-}
-
-void ProjectFile::renameGroupInUip(const QString &src, const QString &group, const QString &newName)
-{
-    QDomDocument domDoc;
-    QSaveFile file(src);
-    if (!StudioUtils::openDomDocumentSave(file, domDoc))
-        return;
-
-    QDomNodeList layerElems = domDoc.documentElement()
-                                    .elementsByTagName(QStringLiteral("Layer"));
-    bool needSave = false;
-    for (int i = 0; i < layerElems.count(); ++i) {
-        QDomElement lElem = layerElems.at(i).toElement();
-        if (lElem.hasAttribute(QStringLiteral("variants"))) {
-            QString variants = lElem.attribute(QStringLiteral("variants"));
-            if (variants.contains(group + QLatin1Char(':'))) {
-                variants.replace(group + QLatin1Char(':'), newName + QLatin1Char(':'));
-                lElem.setAttribute(QStringLiteral("variants"), variants);
-                needSave = true;
-            }
-        }
-    }
-
-    if (needSave)
-        StudioUtils::commitDomDocumentSave(file, domDoc);
-}
-
-// deletes a tag (if exists) from all layers in a uip file
-void ProjectFile::deleteTagFromUip(const QString &src, const QString &group, const QString &tag)
-{
-    QDomDocument domDoc;
-    QSaveFile file(src);
-    if (!StudioUtils::openDomDocumentSave(file, domDoc))
-        return;
-
-    QDomNodeList layerElems = domDoc.documentElement()
-                                    .elementsByTagName(QStringLiteral("Layer"));
-    bool needSave = false;
-    for (int i = 0; i < layerElems.count(); ++i) {
-        QDomElement lElem = layerElems.at(i).toElement();
-        if (lElem.hasAttribute(QStringLiteral("variants"))) {
-            QStringList tagPairs = lElem.attribute(QStringLiteral("variants"))
-                                                                        .split(QLatin1Char(','));
-            QString tagPair = group + QLatin1Char(':') + tag;
-            if (tagPairs.contains(tagPair)) {
-                tagPairs.removeOne(tagPair);
-                lElem.setAttribute(QStringLiteral("variants"), tagPairs.join(QLatin1Char(',')));
-                needSave = true;
-            }
-        }
-    }
-
-    if (needSave)
-        StudioUtils::commitDomDocumentSave(file, domDoc);
-}
-
-// deletes a group (if exists) from all layers in a uip file
-void ProjectFile::deleteGroupFromUip(const QString &src, const QString &group)
-{
-    QDomDocument domDoc;
-    QSaveFile file(src);
-    if (!StudioUtils::openDomDocumentSave(file, domDoc))
-        return;
-
-    QDomNodeList layerElems = domDoc.documentElement()
-                                    .elementsByTagName(QStringLiteral("Layer"));
-    bool needSave = false;
-    QRegExp rgx(group + ":\\w*,*|," + group + ":\\w*");
-    for (int i = 0; i < layerElems.count(); ++i) {
-        QDomElement lElem = layerElems.at(i).toElement();
-        if (lElem.hasAttribute(QStringLiteral("variants"))) {
-            QString val = lElem.attribute(QStringLiteral("variants"));
-            if (rgx.indexIn(val) != -1) {
-                val.replace(rgx, "");
-                lElem.setAttribute(QStringLiteral("variants"), val);
-                needSave = true;
-            }
-        }
-    }
-
-    if (needSave)
-        StudioUtils::commitDomDocumentSave(file, domDoc);
-}
-
-bool ProjectFile::isVariantGroupUnique(const QString &group) const
-{
-    return !m_variantsDef.contains(group);
-}
-
-bool ProjectFile::isVariantTagUnique(const QString &group, const QString &tag) const
-{
-    if (!m_variantsDef.contains(group))
-        return true;
-
-    return !m_variantsDef[group].m_tags.contains(tag);
-}
-
 void ProjectFile::deleteVariantTag(const QString &group, const QString &tag)
 {
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
@@ -1588,7 +1398,7 @@ void ProjectFile::deleteVariantTag(const QString &group, const QString &tag)
                        " delete it?").arg(tag));
         box.setIcon(QMessageBox::Warning);
         box.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
-        box.setButtonText(QMessageBox::Yes, QStringLiteral("Delete"));
+        box.setButtonText(QMessageBox::Yes, tr("Delete"));
         switch (box.exec()) {
         case QMessageBox::Yes:
             // delete the tag from all uips that use it
@@ -1596,7 +1406,7 @@ void ProjectFile::deleteVariantTag(const QString &group, const QString &tag)
                 QString pPath = m_fileInfo.path() + QLatin1Char('/')
                         + presElems.at(i).toElement().attribute(QStringLiteral("src"));
                 if (pPath != doc->GetDocumentPath())
-                    deleteTagFromUip(pPath, group, tag);
+                    updateVariantsInUip(pPath, VariantsUpdateMode::Delete, group, tag);
             }
             break;
 
@@ -1607,7 +1417,7 @@ void ProjectFile::deleteVariantTag(const QString &group, const QString &tag)
     }
 
     // delete the tag from current doc, if exists
-    deleteTagFromUip(doc->GetDocumentPath(), group, tag);
+    updateVariantsInUip(doc->GetDocumentPath(), VariantsUpdateMode::Delete, group, tag);
 
     QDomNodeList groupsElems = domDoc.documentElement()
                                      .firstChildElement(QStringLiteral("variants"))
@@ -1616,21 +1426,18 @@ void ProjectFile::deleteVariantTag(const QString &group, const QString &tag)
     // delete the tag from the property (if set)
     const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
     const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
-    const auto layers = doc->getLayers();
-    auto property = bridge->GetLayer().m_variants;
-    for (auto layer : layers) {
+    const QVector<int> instances = doc->getVariantInstances();
+    for (auto instance : instances) {
+        auto property = bridge->getVariantsProperty(instance);
         qt3dsdm::SValue sValue;
-        if (propertySystem->GetInstancePropertyValue(layer, property, sValue)) {
-            QString propVal = QString::fromWCharArray(qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)
-                                                      ->GetData());
+        if (propertySystem->GetInstancePropertyValue(instance, property, sValue)) {
+            QString propVal = qt3dsdm::get<qt3dsdm::TDataStrPtr>(sValue)->toQString();
             if (propVal.contains(QStringLiteral("%1:%2").arg(group).arg(tag))) {
                 // property has the deleted tag, need to update it, else the deleted tag will be
                 // saved in the uip if the user saves the presentation.
                 QRegExp rgx(QStringLiteral("%1:%2,*|,%1:%2").arg(group).arg(tag));
                 propVal.replace(rgx, {});
-                qt3dsdm::SValue sVal = std::make_shared<qt3dsdm::CDataStr>(
-                                       Q3DStudio::CString::fromQString(propVal));
-                propertySystem->SetInstancePropertyValue(layer, property, sVal);
+                propertySystem->SetInstancePropertyValue(instance, property, QVariant(propVal));
             }
         }
     }
@@ -1657,4 +1464,90 @@ void ProjectFile::deleteVariantTag(const QString &group, const QString &tag)
 
     // update m_variantsDef
      m_variantsDef[group].m_tags.removeOne(tag);
+}
+
+// rename or delete a tag or group in a uip file
+void ProjectFile::updateVariantsInUip(const QString &src, const VariantsUpdateMode &updateType,
+                                      const QString &group, const QString &tag,
+                                      const QString &newName)
+{
+    QDomDocument domDoc;
+    QSaveFile file(src);
+    if (!StudioUtils::openDomDocumentSave(file, domDoc))
+        return;
+
+    QDomElement graphElem = domDoc.documentElement().firstChild()
+                                                    .firstChildElement(QStringLiteral("Graph"));
+    QDomElement sceneElem = graphElem.firstChildElement(QStringLiteral("Scene"));
+
+    bool needsSave = false;
+    QString sceneStr;
+    QTextStream stream(&sceneStr);
+    sceneElem.save(stream, 4);
+
+    // if tag isEmpty() update group, else update tag
+
+    if (updateType == VariantsUpdateMode::Rename) { // rename a tag or a group
+        QString oldPair = group + QLatin1Char(':') + tag;
+        QString newPair = QStringLiteral("%1:%2").arg(tag.isEmpty() ? newName : group)
+                                                 .arg(tag.isEmpty() ? tag     : newName);
+        if (sceneStr.contains(oldPair)) {
+            sceneStr.replace(oldPair, newPair);
+            needsSave = true;
+        }
+    } else if (updateType == VariantsUpdateMode::Delete) { // delete a tag or a group
+        QRegExp rgx(tag.isEmpty() ? QStringLiteral("%1:\\w*,*|,%1:\\w*").arg(group)
+                                  : QStringLiteral("%1:%2,*|,%1:%2").arg(group).arg(tag));
+        if (rgx.indexIn(sceneStr) != -1) {
+            sceneStr.replace(rgx, "");
+            needsSave = true;
+        }
+    }
+
+    if (needsSave) {
+        QDomDocument sceneDom;
+        sceneDom.setContent(sceneStr);
+        graphElem.replaceChild(sceneDom, sceneElem);
+        StudioUtils::commitDomDocumentSave(file, domDoc);
+    }
+}
+
+// if tag param is empty, the method checks if a group exists
+bool ProjectFile::tagExistsInUip(const QString &src, const QString &group, const QString &tag) const
+{
+    QFile file(src);
+    if (!file.open(QFile::Text | QFile::ReadOnly)) {
+        qWarning() << file.errorString();
+        return false;
+    }
+
+    QXmlStreamReader reader(&file);
+    reader.setNamespaceProcessing(false);
+
+    while (!reader.atEnd()) {
+        if (reader.readNextStartElement()) {
+            if (reader.attributes().hasAttribute(QLatin1String("variants"))) {
+                QStringRef v = reader.attributes().value(QLatin1String("variants"));
+                if (v.contains(group + QLatin1Char(':') + tag))
+                    return true;
+            } else if (reader.name() == QLatin1String("Logic")) {
+                break;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool ProjectFile::isVariantGroupUnique(const QString &group) const
+{
+    return !m_variantsDef.contains(group);
+}
+
+bool ProjectFile::isVariantTagUnique(const QString &group, const QString &tag) const
+{
+    if (!m_variantsDef.contains(group))
+        return true;
+
+    return !m_variantsDef[group].m_tags.contains(tag);
 }

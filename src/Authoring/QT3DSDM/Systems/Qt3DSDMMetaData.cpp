@@ -2252,7 +2252,7 @@ public:
         if (inItem.m_FormalName.empty())
             inItem.m_FormalName = inItem.m_Name;
         if (inItem.m_Description.empty())
-            inItem.m_Description = inItem.m_Name;
+            inItem.m_Description = inItem.m_FormalName;
 
         // Ensure that users can use a float type and make minimal decisions
         SerializeMetaDataData(inArchive, inItem.m_MetaDataData, inItem.m_CompleteType);

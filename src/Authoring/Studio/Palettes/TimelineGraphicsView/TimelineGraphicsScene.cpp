@@ -1008,7 +1008,7 @@ void TimelineGraphicsScene::updateHoverStatus(const QPointF &scenePos)
                     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
                     const auto propertySystem = doc->GetStudioSystem()->GetPropertySystem();
                     const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
-                    auto property = bridge->GetLayer().m_variants;
+                    auto property = bridge->getVariantsProperty(rowTree->instance());
 
                     using namespace qt3dsdm;
                     SValue sValue;

@@ -311,6 +311,19 @@ qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::getSubpresentationPropert
     return m_SceneImage.m_SubPresentation;
 }
 
+qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::getVariantsProperty(int instance) const
+{
+    EStudioObjectType instanceType = GetObjectType(instance);
+
+    if (instanceType == OBJTYPE_LAYER)
+        return m_Layer.m_variants;
+
+    if (instanceType == OBJTYPE_MODEL)
+        return m_Model.m_variants;
+
+    return 0;
+}
+
 bool CClientDataModelBridge::IsInternalProperty(const TCharStr &inPropertyName) const
 {
     return (inPropertyName == L"name" || inPropertyName == L"importid" || inPropertyName == L"type"
@@ -378,7 +391,7 @@ CClientDataModelBridge::GetOwningComponentInstance(qt3dsdm::Qt3DSDMSlideHandle i
 }
 
 // Find the component Guid of the Slide Handle
-SLong4 CClientDataModelBridge::GetComponentGuid(qt3dsdm::Qt3DSDMSlideHandle inSlideHandle)
+SLong4 CClientDataModelBridge::GetComponentGuid(qt3dsdm::Qt3DSDMSlideHandle inSlideHandle) const
 {
     qt3dsdm::SLong4 theComponentGuid;
 
@@ -497,7 +510,7 @@ Q3DStudio::CString CClientDataModelBridge::GetName(
     return (theString) ? Q3DStudio::CString(theString->GetData()) : "";
 }
 
-bool CClientDataModelBridge::IsActiveComponent(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
+bool CClientDataModelBridge::IsActiveComponent(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     using namespace qt3dsdm;
     using namespace Q3DStudio;

@@ -128,6 +128,7 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(tessellation, m_Tessellation, TDataStrPtr, L"None")                   \
     HANDLE_COMPOSER_PROPERTY(edgetess, m_EdgeTess, float, 1.0)                                     \
     HANDLE_COMPOSER_PROPERTY(innertess, m_InnerTess, float, 1.0)                                   \
+    HANDLE_COMPOSER_PROPERTY_DUPLICATE(variants, m_variants, TDataStrPtr, L"")                     \
     HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_IMAGE_PROPERTIES                                                          \
