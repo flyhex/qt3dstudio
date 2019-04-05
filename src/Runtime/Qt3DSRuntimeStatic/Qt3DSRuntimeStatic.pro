@@ -160,7 +160,8 @@ SOURCES += \
     ../Source/UIPParser/Source/Qt3DSUIPParserActionHelper.cpp \
     ../Source/UIPParser/Source/Qt3DSUIPParserImpl.cpp \
     ../Source/UIPParser/Source/Qt3DSUIPParserObjectRefHelper.cpp \
-    ../Source/Qt3DSRuntimeRender/Source/Qt3DSRenderContextCore.cpp
+    ../Source/Qt3DSRuntimeRender/Source/Qt3DSRenderContextCore.cpp \
+    ../Source/Qt3DSRuntimeRender/ResourceManager/Qt3DSRenderLoadedTextureKTX.cpp
 
 HEADERS += \
     ../Source/Qt3DSFoundation/Include/foundation/ConvertUTF.h \
@@ -444,7 +445,8 @@ HEADERS += \
     ../Source/Engine/Include/Qt3DSPluginDLL.h \
     ../Source/Engine/Include/Qt3DSWindowSystem.h \
     ../Source/Qt3DSRuntimeRender/Include/Qt3DSRenderContextCore.h \
-    ../Source/Qt3DSRuntimeRender/Include/Qt3DSRenderLightConstantProperties.h
+    ../Source/Qt3DSRuntimeRender/Include/Qt3DSRenderLightConstantProperties.h \
+    ../Source/Qt3DSRuntimeRender/ResourceManager/Qt3DSRenderLoadedTextureKTX.h
 
 win32 {
 SOURCES += \

@@ -116,6 +116,82 @@ namespace render {
 #define GL_TESS_EVALUATION_SHADER_BIT 0x00000010
 #endif
 
+#ifndef GL_ETC1_RGB8_OES
+#define GL_ETC1_RGB8_OES 0x8D64
+#endif
+
+#ifndef GL_COMPRESSED_RED_RGTC1
+#define GL_COMPRESSED_RED_RGTC1 0x8DBB
+#endif
+
+#ifndef GL_COMPRESSED_SIGNED_RED_RGTC1
+#define GL_COMPRESSED_SIGNED_RED_RGTC1 0x8DBC
+#endif
+
+#ifndef GL_COMPRESSED_RG_RGTC2
+#define GL_COMPRESSED_RG_RGTC2 0x8DBD
+#endif
+
+#ifndef GL_COMPRESSED_SIGNED_RG_RGTC2
+#define GL_COMPRESSED_SIGNED_RG_RGTC2 0x8DBE
+#endif
+
+#ifndef GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_ARB
+#define GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_ARB 0x8E8F
+#endif
+
+#ifndef GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT_ARB
+#define GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT_ARB 0x8E8E
+#endif
+
+#ifndef GL_COMPRESSED_RGBA_BPTC_UNORM_ARB
+#define GL_COMPRESSED_RGBA_BPTC_UNORM_ARB 0x8E8C
+#endif
+
+#ifndef GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM_ARB
+#define GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM_ARB 0x8E8D
+#endif
+
+#ifndef GL_COMPRESSED_RGB8_ETC2
+#define GL_COMPRESSED_RGB8_ETC2 0x9274
+#endif
+
+#ifndef GL_COMPRESSED_SRGB8_ETC2
+#define GL_COMPRESSED_SRGB8_ETC2 0x9275
+#endif
+
+#ifndef GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2
+#define GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2 0x9276
+#endif
+
+#ifndef GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2
+#define GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2 0x9277
+#endif
+
+#ifndef GL_COMPRESSED_RGBA8_ETC2_EAC
+#define GL_COMPRESSED_RGBA8_ETC2_EAC 0x9278
+#endif
+
+#ifndef GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC
+#define GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC 0x9279
+#endif
+
+#ifndef GL_COMPRESSED_R11_EAC
+#define GL_COMPRESSED_R11_EAC 0x9270
+#endif
+
+#ifndef GL_COMPRESSED_SIGNED_R11_EAC
+#define GL_COMPRESSED_SIGNED_R11_EAC 0x9271
+#endif
+
+#ifndef GL_COMPRESSED_RG11_EAC
+#define GL_COMPRESSED_RG11_EAC 0x9272
+#endif
+
+#ifndef GL_COMPRESSED_SIGNED_RG11_EAC
+#define GL_COMPRESSED_SIGNED_RG11_EAC 0x9273
+#endif
+
 #define QT3DS_RENDER_ITERATE_QT3DS_GL_COLOR_FUNC                                                         \
     QT3DS_RENDER_HANDLE_GL_COLOR_FUNC(GL_ZERO, Zero)                                                  \
     QT3DS_RENDER_HANDLE_GL_COLOR_FUNC(GL_ONE, One)                                                    \
@@ -1040,6 +1116,100 @@ namespace render {
                 return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
             case NVRenderTextureFormats::RGBA_DXT5:
                 return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+            case NVRenderTextureFormats::R_ATI1N_UNorm:
+                return GL_COMPRESSED_RED_RGTC1;
+            case NVRenderTextureFormats::R_ATI1N_SNorm:
+                return GL_COMPRESSED_SIGNED_RED_RGTC1;
+            case NVRenderTextureFormats::RG_ATI2N_UNorm:
+                return GL_COMPRESSED_RG_RGTC2;
+            case NVRenderTextureFormats::RG_ATI2N_SNorm:
+                return GL_COMPRESSED_SIGNED_RG_RGTC2;
+            case NVRenderTextureFormats::RGB_BP_UNSIGNED_FLOAT:
+                return GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT_ARB;
+            case NVRenderTextureFormats::RGB_BP_SIGNED_FLOAT:
+                return GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT_ARB;
+            case NVRenderTextureFormats::RGB_BP_UNorm:
+                return GL_COMPRESSED_RGBA_BPTC_UNORM_ARB;
+            case NVRenderTextureFormats::R11_EAC_UNorm:
+                return GL_COMPRESSED_R11_EAC;
+            case NVRenderTextureFormats::R11_EAC_SNorm:
+                return GL_COMPRESSED_SIGNED_R11_EAC;
+            case NVRenderTextureFormats::RG11_EAC_UNorm:
+                return GL_COMPRESSED_RG11_EAC;
+            case NVRenderTextureFormats::RG11_EAC_SNorm:
+                return GL_COMPRESSED_SIGNED_RG11_EAC;
+            case NVRenderTextureFormats::RGB8_ETC2:
+                return GL_COMPRESSED_RGB8_ETC2;
+            case NVRenderTextureFormats::SRGB8_ETC2:
+                return GL_COMPRESSED_SRGB8_ETC2;
+            case NVRenderTextureFormats::RGB8_PunchThrough_Alpha1_ETC2:
+                return GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2;
+            case NVRenderTextureFormats::SRGB8_PunchThrough_Alpha1_ETC2:
+                return GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2;
+            case NVRenderTextureFormats::RGBA8_ETC2_EAC:
+                return GL_COMPRESSED_RGBA8_ETC2_EAC;
+            case NVRenderTextureFormats::SRGB8_Alpha8_ETC2_EAC:
+                return GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
+            case NVRenderTextureFormats::RGB8_ETC1:
+                return GL_ETC1_RGB8_OES;
+#ifdef GL_KHR_texture_compression_astc_hdr
+            case NVRenderTextureFormats::RGBA_ASTC_4x4:
+                return GL_COMPRESSED_RGBA_ASTC_4x4_KHR;
+            case NVRenderTextureFormats::RGBA_ASTC_5x4:
+                return GL_COMPRESSED_RGBA_ASTC_5x4_KHR;
+            case NVRenderTextureFormats::RGBA_ASTC_5x5:
+                return GL_COMPRESSED_RGBA_ASTC_5x5_KHR;
+            case NVRenderTextureFormats::RGBA_ASTC_6x5:
+                return GL_COMPRESSED_RGBA_ASTC_6x5_KHR;
+            case NVRenderTextureFormats::RGBA_ASTC_6x6:
+                return GL_COMPRESSED_RGBA_ASTC_6x6_KHR;
+            case NVRenderTextureFormats::RGBA_ASTC_8x5:
+                return GL_COMPRESSED_RGBA_ASTC_8x5_KHR;
+            case NVRenderTextureFormats::RGBA_ASTC_8x6:
+                return GL_COMPRESSED_RGBA_ASTC_8x6_KHR;
+            case NVRenderTextureFormats::RGBA_ASTC_8x8:
+                return  GL_COMPRESSED_RGBA_ASTC_8x8_KHR;
+            case NVRenderTextureFormats::RGBA_ASTC_10x5:
+                return GL_COMPRESSED_RGBA_ASTC_10x5_KHR;
+            case NVRenderTextureFormats::RGBA_ASTC_10x6:
+                return GL_COMPRESSED_RGBA_ASTC_10x6_KHR;
+            case NVRenderTextureFormats::RGBA_ASTC_10x8:
+                return GL_COMPRESSED_RGBA_ASTC_10x8_KHR;
+            case NVRenderTextureFormats::RGBA_ASTC_10x10:
+                return GL_COMPRESSED_RGBA_ASTC_10x10_KHR;
+            case NVRenderTextureFormats::RGBA_ASTC_12x10:
+                return GL_COMPRESSED_RGBA_ASTC_12x10_KHR;
+            case NVRenderTextureFormats::RGBA_ASTC_12x12:
+                return GL_COMPRESSED_RGBA_ASTC_12x12_KHR;
+            case NVRenderTextureFormats::SRGB8_Alpha8_ASTC_4x4:
+                return GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR;
+            case NVRenderTextureFormats::SRGB8_Alpha8_ASTC_5x4:
+                return GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR;
+            case NVRenderTextureFormats::SRGB8_Alpha8_ASTC_5x5:
+                return GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR;
+            case NVRenderTextureFormats::SRGB8_Alpha8_ASTC_6x5:
+                return GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR;
+            case NVRenderTextureFormats::SRGB8_Alpha8_ASTC_6x6:
+                return GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR;
+            case NVRenderTextureFormats::SRGB8_Alpha8_ASTC_8x5:
+                return GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR;
+            case NVRenderTextureFormats::SRGB8_Alpha8_ASTC_8x6:
+                return GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR;
+            case NVRenderTextureFormats::SRGB8_Alpha8_ASTC_8x8:
+                return GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR;
+            case NVRenderTextureFormats::SRGB8_Alpha8_ASTC_10x5:
+                return GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR;
+            case NVRenderTextureFormats::SRGB8_Alpha8_ASTC_10x6:
+                return GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR;
+            case NVRenderTextureFormats::SRGB8_Alpha8_ASTC_10x8:
+                return GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR;
+            case NVRenderTextureFormats::SRGB8_Alpha8_ASTC_10x10:
+                return GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR;
+            case NVRenderTextureFormats::SRGB8_Alpha8_ASTC_12x10:
+                return GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR;
+            case NVRenderTextureFormats::SRGB8_Alpha8_ASTC_12x12:
+                return GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR;
+#endif // GL_KHR_texture_compression_astc_hdr
             default:
                 break;
             }

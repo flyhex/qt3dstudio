@@ -233,8 +233,8 @@ struct SBufferManager : public IBufferManager
     }
 
     SImageTextureData LoadRenderImage(CRegisteredString inImagePath,
-                                              SLoadedTexture &inLoadedImage,
-                                              bool inForceScanForTransparency, bool inBsdfMipmaps) override
+                                      SLoadedTexture &inLoadedImage,
+                                      bool inForceScanForTransparency, bool inBsdfMipmaps) override
     {
         SStackPerfTimer __perfTimer(m_PerfTimer, "Image Upload");
         {

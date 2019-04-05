@@ -154,8 +154,11 @@ namespace render {
         static SLoadedTexture *Load(const QString &inPath, NVFoundationBase &inAllocator,
                                     IInputStreamFactory &inFactory, bool inFlipY = true,
                                     NVRenderContextType renderContextType
-                                        = NVRenderContextValues::NullContext);
+                                        = NVRenderContextValues::NullContext, bool preferKTX = false);
         static SLoadedTexture *LoadDDS(IInStream &inStream, QT3DSI32 flipVertical,
+                                       NVFoundationBase &fnd,
+                                       NVRenderContextType renderContextType);
+        static SLoadedTexture *LoadKTX(IInStream &inStream, QT3DSI32 flipVertical,
                                        NVFoundationBase &fnd,
                                        NVRenderContextType renderContextType);
         static SLoadedTexture *LoadBMP(ISeekableIOStream &inStream, bool inFlipY,

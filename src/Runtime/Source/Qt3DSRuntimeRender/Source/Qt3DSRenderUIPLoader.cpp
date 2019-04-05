@@ -1614,6 +1614,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                     (void)success;
                     QT3DS_ASSERT(success);
                 }
+                m_Reader.Att("preferKTX", m_Presentation->m_preferKTX);
             }
         }
         {

@@ -652,31 +652,49 @@ void SLoadedTexture::ReleaseDecompressedTexture(STextureData inImage)
 
 SLoadedTexture *SLoadedTexture::Load(const QString &inPath, NVFoundationBase &inFoundation,
                                      IInputStreamFactory &inFactory, bool inFlipY,
-                                     NVRenderContextType renderContextType)
+                                     NVRenderContextType renderContextType, bool preferKTX)
 {
     if (inPath.isEmpty())
         return nullptr;
 
+    // Check KTX path first
+    QString path = inPath;
+    QString ktxSource = inPath;
+    if (preferKTX) {
+        ktxSource = ktxSource.left(ktxSource.lastIndexOf(QLatin1Char('.')));
+        ktxSource.append(QLatin1String(".ktx"));
+    }
+
     SLoadedTexture *theLoadedImage = nullptr;
     // We will get invalid error logs of files not found if we don't force quiet mode
     // If the file is actually missing, it will be logged later (loaded image is null)
-    NVScopedRefCounted<IRefCountedInputStream> theStream(inFactory.GetStreamForFile(inPath, true));
+    NVScopedRefCounted<IRefCountedInputStream> theStream(
+                inFactory.GetStreamForFile(preferKTX ? ktxSource : inPath, true));
+    if (!theStream.mPtr) {
+        if (!preferKTX)
+            theStream = inFactory.GetStreamForFile(inPath, true);
+        else
+            return nullptr;
+    } else {
+        path = ktxSource;
+    }
     QString fileName;
-    inFactory.GetPathForFile(inPath, fileName, true);
-    if (theStream.mPtr && inPath.size() > 3) {
-        if (inPath.endsWith("png", Qt::CaseInsensitive)
-                || inPath.endsWith("jpg", Qt::CaseInsensitive)
-                || inPath.endsWith("peg", Qt::CaseInsensitive)
-                || inPath.endsWith("ktx", Qt::CaseInsensitive)) {
+    inFactory.GetPathForFile(path, fileName, true);
+    if (theStream.mPtr && path.size() > 3) {
+        if (path.endsWith(QLatin1String("png"), Qt::CaseInsensitive)
+                || path.endsWith(QLatin1String("jpg"), Qt::CaseInsensitive)
+                || path.endsWith(QLatin1String("peg"), Qt::CaseInsensitive)) {
             theLoadedImage = LoadQImage(fileName, inFlipY, inFoundation, renderContextType);
-        } else if (inPath.endsWith("dds", Qt::CaseInsensitive)) {
+        } else if (path.endsWith(QLatin1String("dds"), Qt::CaseInsensitive)) {
             theLoadedImage = LoadDDS(*theStream, inFlipY, inFoundation, renderContextType);
-        } else if (inPath.endsWith("gif", Qt::CaseInsensitive)) {
+        } else if (path.endsWith(QLatin1String("gif"), Qt::CaseInsensitive)) {
             theLoadedImage = LoadGIF(*theStream, !inFlipY, inFoundation, renderContextType);
-        } else if (inPath.endsWith("bmp", Qt::CaseInsensitive)) {
+        } else if (path.endsWith(QLatin1String("bmp"), Qt::CaseInsensitive)) {
             theLoadedImage = LoadBMP(*theStream, !inFlipY, inFoundation, renderContextType);
-        } else if (inPath.endsWith("hdr", Qt::CaseInsensitive)) {
+        } else if (path.endsWith(QLatin1String("hdr"), Qt::CaseInsensitive)) {
             theLoadedImage = LoadHDR(*theStream, inFoundation, renderContextType);
+        } else if (path.endsWith(QLatin1String("ktx"), Qt::CaseInsensitive)) {
+            theLoadedImage = LoadKTX(*theStream, inFlipY, inFoundation, renderContextType);
         } else {
             qCWarning(INTERNAL_ERROR, "Unrecognized image extension: %s", qPrintable(inPath));
         }

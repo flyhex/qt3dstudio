@@ -53,6 +53,7 @@ namespace render {
     {
         QT3DSVec2 m_PresentationDimensions;
         RenderRotationValues::Enum m_PresentationRotation;
+        bool m_preferKTX;
         SScene *m_Scene;
 
         CRegisteredString m_PresentationDirectory;
@@ -61,14 +62,16 @@ namespace render {
             : SGraphObject(GraphObjectTypes::Presentation)
             , m_PresentationDimensions(800, 400)
             , m_PresentationRotation(RenderRotationValues::NoRotation)
+            , m_preferKTX(false)
             , m_Scene(NULL)
         {
         }
 
-        SPresentation(QT3DSF32 w, QT3DSF32 h, CRegisteredString presDir)
+        SPresentation(QT3DSF32 w, QT3DSF32 h, bool preferKTX, CRegisteredString presDir)
             : SGraphObject(GraphObjectTypes::Presentation)
             , m_PresentationDimensions(w, h)
             , m_PresentationRotation(RenderRotationValues::NoRotation)
+            , m_preferKTX(preferKTX)
             , m_Scene(NULL)
             , m_PresentationDirectory(presDir)
         {

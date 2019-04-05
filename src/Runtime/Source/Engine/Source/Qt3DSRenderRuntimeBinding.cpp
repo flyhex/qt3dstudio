@@ -769,7 +769,7 @@ struct Qt3DSRenderScene : public Q3DStudio::IScene
     {
         return static_cast<Q3DStudio::INT32>(m_Context->GetImageBatchLoader().LoadImageBatch(
             toConstDataRef(inFullPaths, (QT3DSU32)inNumPaths), inDefaultImage, inLoadCallback,
-            m_Context->GetRenderContext().GetRenderContextType()));
+            m_Context->GetRenderContext().GetRenderContextType(), m_Presentation->m_preferKTX));
     }
 
     void RegisterOffscreenRenderer(const char *inKey) override
@@ -1018,8 +1018,9 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
             // Fire off parallel loading of the source paths
             QT3DSU64 imageBatchId = m_Context->m_Context->GetImageBatchLoader().LoadImageBatch(
                 toConstDataRef(theSourcePathList.data(), theSourcePathList.size()),
-                CRegisteredString(), NULL, m_Context->m_Context->GetRenderContext()
-                                                .GetRenderContextType());
+                CRegisteredString(), nullptr, m_Context->m_Context->GetRenderContext()
+                                                .GetRenderContextType(),
+                        theScene->m_Presentation->m_preferKTX);
             m_Context->m_Context->GetImageBatchLoader().BlockUntilLoaded(
                 static_cast<TImageBatchId>(imageBatchId));
 
@@ -1182,14 +1183,22 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
             }
         }
 
+        bool pktx = false;
+        for (int i = 0; i < m_Scenes.size(); ++i) {
+            if (m_Scenes[i].second->m_Presentation->m_preferKTX) {
+                pktx = true;
+                break;
+            }
+        }
+
         {
             SStackPerfTimer __perfTimer(m_Context->m_CoreContext->GetPerfTimer(),
                                         "Initial Batch Image Load");
 
             m_Context->m_Context->GetImageBatchLoader().LoadImageBatch(
                 toConstDataRef(theSourcePathList.data(), theSourcePathList.size()),
-                CRegisteredString(), NULL, m_Context->m_Context->GetRenderContext()
-                        .GetRenderContextType());
+                CRegisteredString(), nullptr, m_Context->m_Context->GetRenderContext()
+                        .GetRenderContextType(), pktx);
         }
 
         {

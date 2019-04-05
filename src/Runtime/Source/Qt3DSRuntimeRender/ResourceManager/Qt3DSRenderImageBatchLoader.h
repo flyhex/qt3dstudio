@@ -72,7 +72,8 @@ namespace render {
         virtual TImageBatchId LoadImageBatch(NVConstDataRef<CRegisteredString> inSourcePaths,
                                              CRegisteredString inImageTillLoaded,
                                              IImageLoadListener *inListener,
-                                             NVRenderContextType type) = 0;
+                                             NVRenderContextType type,
+                                             bool preferKTX) = 0;
         // Blocks if any of the images in the batch are in flight
         virtual void CancelImageBatchLoading(TImageBatchId inBatchId) = 0;
         // Blocks if the image is currently in-flight

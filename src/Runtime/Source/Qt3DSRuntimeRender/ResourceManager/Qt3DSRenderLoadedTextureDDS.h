@@ -65,8 +65,10 @@ namespace render {
         int numMipmaps;
         /** If nonzero, then the file contains 6 cubemap faces */
         int cubemap;
-        /** The GL format of the loaded texture data */
+        /** The format of the loaded texture data */
         int format;
+        /** The GL internal format of the loaded texture data(compressed textures only) */
+        int internalFormat;
         /** Nonzero if the texture data includes alpha */
         int alpha;
         /** Base of the allocated block of all texel data */
