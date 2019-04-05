@@ -66,7 +66,7 @@ class IPropertySystem;
     HANDLE_COMPOSER_OBJECT_TYPE(Effect, ITERATE_COMPOSER_NO_ADDITIONAL_PROPERTIES)                 \
     HANDLE_COMPOSER_OBJECT_TYPE(Node, ITERATE_COMPOSER_NODE_PROPERTIES)                            \
     HANDLE_COMPOSER_OBJECT_TYPE(Layer, ITERATE_COMPOSER_LAYER_PROPERTIES)                          \
-    HANDLE_COMPOSER_OBJECT_TYPE(Group, ITERATE_COMPOSER_NO_ADDITIONAL_PROPERTIES)                  \
+    HANDLE_COMPOSER_OBJECT_TYPE(Group, ITERATE_COMPOSER_GROUP_PROPERTIES)                          \
     HANDLE_COMPOSER_OBJECT_TYPE(Model, ITERATE_COMPOSER_MODEL_PROPERTIES)                          \
     HANDLE_COMPOSER_OBJECT_TYPE(Light, ITERATE_COMPOSER_LIGHT_PROPERTIES)                          \
     HANDLE_COMPOSER_OBJECT_TYPE(Camera, ITERATE_COMPOSER_CAMERA_PROPERTIES)                        \
@@ -238,6 +238,9 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(probe2pos, m_Probe2Pos, float, 0.5f)                                  \
     HANDLE_COMPOSER_PROPERTY(variants, m_variants, TDataStrPtr, L"")                               \
     HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
+
+#define ITERATE_COMPOSER_GROUP_PROPERTIES                                                          \
+    HANDLE_COMPOSER_PROPERTY_DUPLICATE(variants, m_variants, TDataStrPtr, L"")                     \
 
 #define ITERATE_COMPOSER_LIGHT_PROPERTIES                                                          \
     HANDLE_COMPOSER_PROPERTY(lighttype, m_LightType, TDataStrPtr, L"Directional")                  \
@@ -927,19 +930,15 @@ struct SComposerObjectDefinition<ComposerObjectTypes::SubPath>
 class SComposerObjectDefinitions
 {
 public:
-    IDataCore &m_DataCore;
-    IMetaData &m_MetaData;
-
 #define HANDLE_COMPOSER_OBJECT_TYPE(name, propmacro)                                               \
     SComposerObjectDefinition<ComposerObjectTypes::name> m_##name;
     ITERATE_COMPOSER_OBJECT_TYPES
 #undef HANDLE_COMPOSER_OBJECT_TYPE
 
-    SComposerObjectDefinitions(
-        IDataCore &inDataCore,
-        IMetaData &inMetaData /*, ISlideCore& inSlideCore, IPropertySystem& inPropertySystem */);
+    SComposerObjectDefinitions(IDataCore &inDataCore, IMetaData &inMetaData);
+    SComposerObjectDefinitions() = default;
+    ~SComposerObjectDefinitions() = default;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     // RTTI API
     bool IsA(Qt3DSDMInstanceHandle inInstance, ComposerObjectTypes::Enum inType);
     // Could easily return None, meaning we can't identify the object type.
@@ -948,9 +947,8 @@ public:
     ComposerObjectTypes::Enum GetType(Qt3DSDMInstanceHandle inInstance);
 
     Qt3DSDMInstanceHandle GetInstanceForType(ComposerObjectTypes::Enum inType);
-    SComposerObjectDefinitions() = default;
-    ~SComposerObjectDefinitions() = default;
 private:
+    IDataCore &m_DataCore;
     SComposerObjectDefinitions(const SComposerObjectDefinitions&) = delete;
     SComposerObjectDefinitions& operator=(const SComposerObjectDefinitions&) = delete;
 };

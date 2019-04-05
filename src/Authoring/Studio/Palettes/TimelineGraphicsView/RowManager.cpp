@@ -219,16 +219,13 @@ void RowManager::selectRow(RowTree *row, bool multiSelect)
         row = row->parentRow();
 
     if (multiSelect && m_selectedRows.size() > 0) {
-        // Do not allow certain object types into multiselection
-        const EStudioObjectType rowType = row->rowType();
-        const int singularType = OBJTYPE_SCENE | OBJTYPE_MATERIAL | OBJTYPE_LAYER
-                | OBJTYPE_BEHAVIOR | OBJTYPE_EFFECT;
-        if (singularType & rowType || singularType & m_selectedRows[0]->rowType())
+        // Do not allow singular object types into multiselection
+        if ((row->rowType() | m_selectedRows[0]->rowType()) & OBJTYPE_IS_SINGULAR)
             return;
     }
 
-    Qt3DSDMTimelineItemBinding *binding =
-            static_cast<Qt3DSDMTimelineItemBinding *>(row->getBinding());
+    Qt3DSDMTimelineItemBinding *binding
+            = static_cast<Qt3DSDMTimelineItemBinding *>(row->getBinding());
     if (binding)
         binding->SetSelected(multiSelect);
 }

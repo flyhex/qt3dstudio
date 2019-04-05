@@ -55,15 +55,12 @@ bool CFileDropSource::ValidateTarget(CDropTarget *inTarget)
     EStudioObjectType targetType = (EStudioObjectType)inTarget->GetObjectType();
     if (m_ObjectType & (OBJTYPE_PRESENTATION | OBJTYPE_QML_STREAM)) {
         SetHasValidTarget(!bridge->isDefaultMaterial(inTarget->GetInstance())
-                          && (targetType & (OBJTYPE_LAYER | OBJTYPE_MATERIAL
-                                            | OBJTYPE_CUSTOMMATERIAL | OBJTYPE_REFERENCEDMATERIAL
-                                            | OBJTYPE_IMAGE)));
+                          && (targetType & (OBJTYPE_LAYER | OBJTYPE_IS_MATERIAL | OBJTYPE_IMAGE)));
         return m_HasValidTarget;
     }
 
     if (m_ObjectType == OBJTYPE_MATERIALDATA) {
-        SetHasValidTarget(targetType & (OBJTYPE_MATERIAL | OBJTYPE_CUSTOMMATERIAL
-                                        | OBJTYPE_REFERENCEDMATERIAL));
+        SetHasValidTarget(targetType & OBJTYPE_IS_MATERIAL);
         return m_HasValidTarget;
     }
 
@@ -73,8 +70,7 @@ bool CFileDropSource::ValidateTarget(CDropTarget *inTarget)
 
     // allow material, image, and scene as valid targets for image drops
     if (!targetIsValid && m_FileType == DocumentEditorFileType::Image) {
-        if (targetType & (OBJTYPE_MATERIAL | OBJTYPE_CUSTOMMATERIAL | OBJTYPE_REFERENCEDMATERIAL
-                          | OBJTYPE_IMAGE)) {
+        if (targetType & (OBJTYPE_IS_MATERIAL | OBJTYPE_IMAGE)) {
             // Default material shouldn't be targeatable
             targetIsValid = !bridge->isDefaultMaterial(inTarget->GetInstance());
         } else {
@@ -233,8 +229,7 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
                             ->SetInstancePropertyValueAsRenderable(inTarget, propHandle, src);
                     }
                 }
-            } else if (rowType & (OBJTYPE_MATERIAL | OBJTYPE_CUSTOMMATERIAL
-                                  | OBJTYPE_REFERENCEDMATERIAL)) { // Drop on a Material
+            } else if (rowType & OBJTYPE_IS_MATERIAL) { // Drop on a Material
                 // if this is a ref material, update the material it references
                 qt3dsdm::Qt3DSDMInstanceHandle refInstance = 0;
                 if (rowType == OBJTYPE_REFERENCEDMATERIAL) {
@@ -277,13 +272,12 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
                        ->addRectFromSource(src, inSlide, isPres, thePoint, theStartTime);
             }
         } else if (isMatData) {
-            if (rowType == OBJTYPE_REFERENCEDMATERIAL || rowType == OBJTYPE_MATERIAL
-                    || rowType == OBJTYPE_CUSTOMMATERIAL) {
+            if (rowType & OBJTYPE_IS_MATERIAL) {
                 if (!QFileInfo(m_FilePath).completeBaseName().contains(QLatin1Char('#'))) {
                     const auto doc = g_StudioApp.GetCore()->GetDoc();
                     { // Scope for the ScopedDocumentEditor
                         Q3DStudio::ScopedDocumentEditor sceneEditor(
-                                    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QString()));
+                                    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, {}));
                         QString name;
                         QMap<QString, QString> values;
                         QMap<QString, QMap<QString, QString>> textureValues;

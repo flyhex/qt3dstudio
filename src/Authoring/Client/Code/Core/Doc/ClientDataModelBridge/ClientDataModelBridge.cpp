@@ -94,7 +94,6 @@ CClientDataModelBridge::CClientDataModelBridge(
     , m_Alias(inDefinitions->m_Alias)
     , m_Path(inDefinitions->m_Path)
     , m_Lightmaps(inDefinitions->m_Lightmaps)
-    , m_CacheEnabled(false)
 {
 }
 
@@ -320,6 +319,9 @@ qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::getVariantsProperty(int i
 
     if (instanceType == OBJTYPE_MODEL)
         return m_Model.m_variants;
+
+    if (instanceType == OBJTYPE_GROUP)
+        return m_Group.m_variants;
 
     return 0;
 }

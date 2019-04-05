@@ -487,14 +487,8 @@ void ComposerTypeDefinitionsHelper::DeriveInstance(IDataCore &inDataCore,
 }
 
 // Container object for all of the object definitions
-SComposerObjectDefinitions::SComposerObjectDefinitions(
-    IDataCore &inCore,
-    IMetaData &inMetaData /*, ISlideCore& inSlideCore, IPropertySystem& inPropertySystem*/)
-    : m_DataCore(inCore)
-    , m_MetaData(inMetaData)
-    //, m_SlideCore( inSlideCore )
-    //, m_PropertySystem( inPropertySystem )
-    , m_Typed(inCore, inMetaData, inCore.CreateInstance())
+SComposerObjectDefinitions::SComposerObjectDefinitions(IDataCore &inCore, IMetaData &inMetaData)
+    : m_Typed(inCore, inMetaData, inCore.CreateInstance())
     , m_Guided(inCore, inMetaData, inCore.CreateInstance())
     , m_Named(inCore, inMetaData, inCore.CreateInstance())
     , m_SlideOwner(inCore, inMetaData, inCore.CreateInstance())
@@ -523,6 +517,7 @@ SComposerObjectDefinitions::SComposerObjectDefinitions(
     , m_Path(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Node)
     , m_PathAnchorPoint(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Asset)
     , m_SubPath(inCore, inMetaData, inCore.CreateInstance(), m_Typed, m_Asset)
+    , m_DataCore(inCore)
 {
 }
 

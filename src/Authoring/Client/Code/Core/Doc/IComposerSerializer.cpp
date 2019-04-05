@@ -1612,9 +1612,10 @@ struct SComposerSerializerImpl : public IComposerSerializer
         IDOMWriter::Scope __instanceScope(inWriter, theType->wide_str());
         inWriter.Att(L"id", GetInstanceId(inInstance));
 
-        // for objects with a 'variants' property (layers and models) save the variants property
-        // under the <Graph> node
-        if (theType.getValue() == L"Layer" || theType.getValue() == L"Model") {
+        // For objects with a 'variants' property (layers, models and groups) save the variants
+        // property under the <Graph> node.
+        if (theType.getValue() == L"Layer" || theType.getValue() == L"Model"
+            || theType.getValue() == L"Group") {
             auto prop = m_propertySystem.GetAggregateInstancePropertyByName(inInstance,
                                                                             L"variants");
             SValue sVal;

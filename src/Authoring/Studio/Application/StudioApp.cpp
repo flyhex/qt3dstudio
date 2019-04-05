@@ -1056,18 +1056,12 @@ bool CStudioApp::canGroupSelectedObjects() const
             auto bridge = m_core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
             EStudioObjectType type = bridge->GetObjectType(first);
 
-            const int ungroupableTypes = OBJTYPE_SCENE | OBJTYPE_LAYER | OBJTYPE_MATERIAL
-                    | OBJTYPE_CUSTOMMATERIAL | OBJTYPE_REFERENCEDMATERIAL | OBJTYPE_BEHAVIOR
-                    | OBJTYPE_EFFECT | OBJTYPE_IMAGE;
-
-            if (type & ungroupableTypes)
+            if (type & OBJTYPE_IS_UNGROUPABLE)
                 return false;
 
-            if (type == OBJTYPE_COMPONENT) {
-                // Components can't be grouped if they are the root of currently active time context
-                if (bridge->IsActiveComponent(first))
-                    return false;
-            }
+            // Components can't be grouped if they are the root of currently active time context
+            if (type == OBJTYPE_COMPONENT && bridge->IsActiveComponent(first))
+                return false;
 
             // All items must either be on master slide or not be on master slide
             bool isMaster = bridge->IsMaster(first);
