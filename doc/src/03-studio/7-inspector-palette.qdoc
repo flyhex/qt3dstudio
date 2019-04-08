@@ -903,12 +903,9 @@ properties in the Inspector palette (in addition to the
 \list
 \li
   \b{Text String} - The text to display for the text element.
-\list
-\li
   \note Qt 3D Studio does not (currently) support styled
   text. There is no way to make one word in a paragraph bold, larger, or
-  a different color.}
-\endlist
+  a different color.
 \li
   \b{Text Color} - The color for the text.
 \li
@@ -930,22 +927,19 @@ TODO: Only one font for now. More to be added?
   \b{Font Size} - Changes the size of the font. In addition to
   clicking the drop-down to pick from predefined font sizes, you can
   also type a new value for the font.
-\list
-\li
   \note Although the font size is just a number, it is
   intentionally not animatable. Each time the font size changes a rather
   expensive rasterization of the text string occurs. You should animate
-  the scale of the text element instead.}
-\endlist
+  the scale of the text element instead.
 \li
   \b{Horizontal/Vertical Alignment} - Controls the placement of the
-  text with respect to the text element's origin. Note that this is for
-  the entire text box, and as such may include padding reserved for
-  characters not present in your text string. \e{(For example, using
+  text with respect to the text element's origin.
+  \note This is for the entire text box, and as such may include padding reserved for
+  characters not present in your text string. For example, using
   the Text String \"Text\" with Vertical Alignment of \b{Bottom}
   will cause the baseline of the letters to appear above the origin for
   the element. Adding characters with descenders, such as \"y\",
-  illustrates why this occurs.)}
+  illustrates why this occurs.
 \li
   \b{Leading} - Controls the amount of extra (or negative) vertical
   spacing between lines of text.
@@ -967,10 +961,7 @@ TODO: Only one font for now. More to be added?
   \endlist
 \li
   \b{Eliding} - Elide text that does not fit into a fixed size text area.
-  \list
-    \li
-      \note Text eliding does not work with distance field rendering disabled.
-  \endlist
+  \note Text eliding does not work with distance field rendering disabled.
 \li
   \b{Drop-Shadow} - Add a drop shadow to the text. The drop shadow will be a darker shade of the
   text color.
@@ -982,7 +973,6 @@ TODO: Only one font for now. More to be added?
 \li
   \b{Vertical Offset} - Vertical offset of the shadow. The offset is relative to the font size.
 \endlist
-
 
 \section1 Guide Properties
 

@@ -227,46 +227,6 @@ powers of two texture maps include 32X32, 64X64, 128X128, 512X512,
 128X1024. Dimensions do not have to be square but they should be powers
 of two.
 
-\section3 Adding Fonts and Using Text in Studio
-
-In order to use text in Studio, fonts need to be added to the fonts
-folder within the user's project directory. Before adding fonts to your
-project, be sure that you have the rights to distribute the fonts or use
-open source fonts from www.google.com/webfonts
-
-Studio comes packaged with a default library of open source webfonts.
-These fonts can be found in the project palette font library directory.
-
-\image 3D_Content/text01.png
-
-Select the font in file explorer and click \e{Open}. A copy of the font will be generated and
-added to the project.
-
-\image 3D_Content/text02.png
-
-Next, drag the font from the fonts folder in the project palette to the
-scene.
-
-\image 3D_Content/text03.png
-
-If there are multiple fonts in the font folder, the user can change the
-font in the scene by first selecting the text, then choosing a different
-font in the font property found in the inspector palette.
-
-Replacing missing fonts is as easy as locating the missing font and
-adding it to the fonts folder.
-
-\note To replace a specific font in your presentation without having
-to tediously locate each font in the presentation, open your
-\c{.uip} file in a text editor and perform a find/replace
-operation. For example, if you wish to replace all 100 instances of
-\"TitilliumWeb\" with \"Michroma\", you simply need to find all
-instances of \"TitilliumWeb\" in a text editor and replace with
-\"Michroma\". Be sure to correctly identify the font names or this
-operation will not work. Save the \c{.uip} file after find/replace
-is complete and reopen the .uip in Studio. Voila! All specified fonts
-will be replaced with the desired font.
-
 \section3 Animation
 
 Animations can be brought into Studio using COLLADA. Animation is

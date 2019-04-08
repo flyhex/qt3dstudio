@@ -29,6 +29,8 @@
 \page 2d-assets.html
 \title 2D Assets
 
+\section1 Working with Images
+
 In Studio, you can import images to use as textures. The following image file formats
 are supported:
 
@@ -59,7 +61,7 @@ are supported:
     \li \c{.ktx}
 \endtable
 
-\section1 Using Textures on Materials
+\section2 Using Textures on Materials
 Images can be used as the following textures on materials:
 
 \list
@@ -93,7 +95,7 @@ Images can be used as the following textures on materials:
 
 Read more about working with \l Materials.
 
-\section1 Compressed Textures
+\section2 Compressed Textures
 
 Qt 3D Studio supports the Khronos texture container file format \e ktx. You can apply \e ktx files
 as texture maps just as any other file format. However, if your system does not support the \e ktx
@@ -107,15 +109,72 @@ images in Studio, and then use \e ktx images in their place in the Viewer.
   \li Check the \uicontrol {Use ktx textures if available} check box.
 \endlist
 
-\section1 Optimizing Images
+\section2 Optimizing Images
 
 Optimizing the images in your presentation can substantially improve both the startup and runtime
 performance of your application, as well as the visual quality in certain situations. Read more
 about \l{Optimizing Images}.
 
-\section1 Image-Based Lighting
+\section2 Image-Based Lighting
 
 HDR images can be used as light probes for environment lighting in Studio. Read more about
 \l{Image-Based Lighting}.
+
+\section1 Working with Text
+
+In Studio, you can add 2D text to your presentations using the text object. Studio comes with a
+set of fonts available in the asset library. You can also import fonts to use in your projects.
+The following file formats are supported:
+
+\table
+  \header
+    \li File format
+    \li Extensions
+  \row
+    \li TrueType Font
+    \li \c{.ttf}
+  \row
+    \li OpenType Font
+    \li \c{.otf}
+\endtable
+
+Studio supports distance field rendering of fonts which makes font look smooth even when
+scaled, rotated or animated. Below you can see a comparison of a regular font and a distance
+field font when scaled up.
+
+\table
+  \header
+    \li Regular font
+    \li Distance field font
+  \row
+    \li \inlineimage regular-font-render.png
+    \li \inlineimage df-font-render.png
+\endtable
+
+\section2 Add a Text Object
+
+To add a text object to your scene, do one of the following:
+
+\list
+  \li
+    From the basic objects palette, drag and drop a text object to the scene view or scene graph.
+    \note If you do not have any fonts in your project, \c TitilliumWeb-Regular.ttf will be imported
+    and used for the text object.
+  \li
+    From the project palette, drag and drop a font asset to the scene view or scene graph. A text
+    object with the selected font will be created.
+\endlist
+
+\section2 Edit a Text Object
+
+To edit the text and other properties of a text object, follow the steps below:
+
+\list 1
+  \li
+    Select the desired text object in the scene graph or scene view.
+  \li
+    Now, edit the desired properties in the inspector palette. For a description of all text
+    properties, see the \l{Text Properties}{inspector palette} section.
+\endlist
 
 */
