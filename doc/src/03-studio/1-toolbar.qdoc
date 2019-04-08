@@ -36,25 +36,24 @@
 
 \image Studio-Toolbar-Selection.png
 
-The Selection Mode buttons control what item is selected in the Timeline
-palette when you click on items within the rendered scene.
+The Selection Mode buttons control what item is selected in the timeline
+palette when you click on items in the scene view. You can toggle mode with shortcut key
+\c{Q}.
 
 \list
 \li
-  Clicking on an item using \b{Group Select} mode (dark arrow;
-  keyboard shortcut: \c{A}) will select the highest group or
+  Clicking on an item using \b{Group Select} mode will select the highest group or
   component owning the item you clicked on. This mode is useful when you
   want to move a group of items at once.
 \li
-  Clicking on an item using \b{Item Select} mode (white arrow;
-  keyboard shortcut: \c{V}) will select the item you clicked on. If
+  Clicking on an item using \b{Item Select} mode will select the item you clicked on. If
   the item is not present in the Timeline palette (if it is inside a
   component) then the component is selected instead.
 \endlist
 
 With either tool, if you \b{double-click} on an item in the
-rendered scene then the item itself will be selected (changing which
-component is displayed in the Timeline palette as necessary).
+scene view then the item itself will be selected (changing which
+component is displayed in the timeline palette as necessary).
 
 \section1 Manipulator Modes
 
@@ -62,26 +61,25 @@ component is displayed in the Timeline palette as necessary).
 
 The Manipulator Mode buttons control what manipulator is shown in the
 rendered scene when an item is selected, and what happens when you drag
-on the selected item (or on the matte area surrounding the rendered
-scene).
+on the selected item.
 
 \list
 \li
   The \b{Position} mode (keyboard shortcut: \c{W}) adjusts the
-  Position of the selected item. Left-dragging on the item/matte will
+  position of the selected item. Left-dragging on the item will
   adjust the selected item's position in the plane of the render camera;
   right-dragging will adjust the selected item's position along the view
   axis of the camera.
 \li
-  The \b{Scale} mode (keyboard shortcut: \c{E}) adjusts the
-  Scale of the selected item. Left-dragging on the item/matte will
-  uniformly scale the selected item; right-dragging will adjust only the
-  local Z scale of the item.
-\li
-  The \b{Rotation} mode (keyboard shortcut: \c{R}) adjusts the
-  Rotation of the selected item. Left-dragging on the item/matte will
+  The \b{Rotation} mode (keyboard shortcut: \c{E}) adjusts the
+  rotation of the selected item. Left-dragging on the item will
   tumble the selected item; right-dragging rotate the item around the
   view axis of the camera.
+\li
+  The \b{Scale} mode (keyboard shortcut: \c{R}) adjusts the
+  scale of the selected item. Left-dragging on the item will
+  uniformly scale the selected item; right-dragging will adjust only the
+  local Z scale of the item.
 \endlist
 By default the manipulators affect the local transformation of the item.
 For example, selecting an unrotated cube inside a rotated group with the
@@ -89,10 +87,10 @@ Position manipulator mode active will show rotated axes. Dragging on the
 red arrow of the manipulator will affect only the X position of the
 item.
 
-The \b{Local/Global Manipulators} mode (last icon above) changes
+The \b{Local/Global Manipulators} mode (right-most icon above) changes
 this behavior to affect the global transform of the selected item
-instead. In Global mode, the manipulators always transform with respect
-to the global space. In the example above, turning on Global mode will
+instead. In global mode, the manipulators always transform with respect
+to the global space. In the example above, turning on global mode will
 show the red arrow for the position manipulator aligned with the screen
 (assuming an unrotated camera). Dragging on the red arrow may affect two
 or three of the position values for the selected item in order to move
@@ -109,62 +107,34 @@ has its value changed.
 
 The following example illustrates the use of this toggle:
 
-\list
+\list 1
 \li
   Create an object positioned at 0,0,0
 \li
   Move the playhead to time 0.
 \li
   Turn on the animation toggle for the Position property in the
-  Inspector palette.
-\endlist
-
-\list
+  Inspector palette. A keyframe is created at time 0.
 \li
-  \e{A keyframe is created at time 0 by default.}
-\endlist
-
-\list
-\li
-  Move the playhead to a new time (e.g.~1 second).
+  Move the playhead to a new time (e.g. 1 second).
 \li
   Turn off the \c{Autoset Keyframes} toggle.
 \li
-  Adjust the position to 100,200,0.
-\endlist
-
-\list
+  Adjust the object position to 100,200,0. The object moves in the scene view, but no keyframe is
+  created.
 \li
-  \e{The object moves in the rendered scene, but no keyframe is
-  created.}
-\endlist
-
-\list
-\li
-  Drag the playhead to a new time (e.g.~2 seconds).
-\endlist
-\list
-\li
-  \e{The object snaps back to position 0,0,0, since no new keyframe
-  was created for the new position.}
-\endlist
-
-\list
+  Move the playhead to a new time (e.g.2 seconds). The object snaps back to position 0,0,0,
+  since no new keyframe was created for the new position.
 \li
   Turn on the \c{Autoset Keyframes} toggle.
 \li
-  Adjust the position to 100,200,0.
+  Adjust the position to 100,200,0. As soon as you stop editing one of the position values a new
+  keyframe is created. Each time you change a value at this time the keyframe is updated.
 \endlist
 
-\list
-\li
-  \e{As soon as you stop editing one of the position values a new
-  keyframe is created. Each time you change a value at this time the
-  keyframe is updated.}
-\endlist
-Without the \c{Autoset Keyframes} mode you must use the Set Changed
-Keyframes command from the Timeline menu to create a new keyframe, such
-as after the second-last example above.
+Without the \c{Autoset Keyframes} mode on, you must set change keyframes manually by selecting
+\uicontrol {Timeline > Set Changed Keyframes} from the menu (Shortcut key: \c {Ctrl + Shift + K}).
+to create a new keyframe.
 
 \section1 Edit Cameras
 
@@ -210,9 +180,9 @@ You can navigate in \e{Edit Camera Mode} by zooming, panning and orbiting:
   predefined, axis-aligned orthographic views.)
 \endtable
 
-Note that when \e{Edit Camera} is in use it only makes sense to show the
+\note When \e{Edit Camera} is in use it only makes sense to show the
 contents of one layer at a time. To control which layer's items you are
-viewing, select any item inside the desired layer in the Timeline
+viewing, select any item inside the desired layer in the timeline
 palette.
 
 \list
@@ -239,16 +209,14 @@ palette.
   view of the active edit camera. If no item is selected, this command
   ensures that the contents of the active layer are all visible in the
   edit camera.
-
   \list
   \li
-  \b Tip: if you want to drop your selection, but cannot find
+  \note If you want to drop your selection, but cannot find
      any empty space in the view to click on, you can click on empty
      space in the Slides palette to cause no items to be selected.
      This may seem a little weird, but it is effective.)
   \li
-    When not using an Edit Camera - when using the default
-    \c{Scene Camera View} mode- this command will instead
+    When using the default \c{Scene Camera View} mode, this command will instead
     downscale the appearance of the presentation to fit within the
     available space in Studio.
   \endlist
@@ -276,12 +244,12 @@ The preview toolbar buttons are used to preview your presentation.
   will launch the Qt 3D Studio Viewer application and preview the
   application for the presentation.
   \li
-  The \b{Remote Preview} button will launch the presentation on the connected remote device
-  Qt 3D Studio Viewer application. This button is only enabled if you are connected to a
-  remote device.
+  The \b{Remote Preview} button (keyboard shortcut: \c{F6})will launch the presentation on the
+  connected remote device Qt 3D Studio Viewer application. This button is only enabled if you are
+  connected to a remote device.
   \li
-  The \b{Filter Variants} button will open the variant tags panel. Read more in the
-  \l{Using Variant Tags} section.
+  The \b{Filter Variants} button (keyboard shortcut: \c{F7}) will open the variant tags panel.
+  Read more in the \l{Using Variant Tags} section.
 \endlist
 
 \note If there is no \c{.uia} file in the folder for the presentation, then the
