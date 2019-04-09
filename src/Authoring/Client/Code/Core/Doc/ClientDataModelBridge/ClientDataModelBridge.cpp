@@ -1737,6 +1737,8 @@ CClientDataModelBridge::GetObjectType(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         return OBJTYPE_SUBPATH;
     else if (theType == L"Lightmaps")
         return OBJTYPE_LIGHTMAPS;
+    else if (theType == L"Action")
+        return OBJTYPE_UNKNOWN;
     else {
         ASSERT(0);
         return OBJTYPE_UNKNOWN;
