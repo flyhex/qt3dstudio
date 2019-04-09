@@ -42,6 +42,13 @@ void* gpEmptyBucketArray[2] = { nullptr, (void*)uintptr_t(~0) };
 }
 
 namespace qt3ds {
+
+void Qt3DSAssert(const char *exp, const char *file, int line, bool *ignore)
+{
+    Q_UNUSED(ignore)
+    qFatal("Assertion thrown %s(%d): %s", file, line, exp);
+}
+
 namespace render {
 SEndlType Endl;
 }
@@ -74,32 +81,6 @@ bool NVRenderTestBase::initializeQt3DSRenderer(QSurfaceFormat format)
     m_factory = m_coreFactory->CreateRenderFactory(format);
     m_rc = m_factory->GetQt3DSRenderContext();
     m_renderImpl = new qt3ds::render::Qt3DSRendererImpl(*m_rc);
-
-    QString versionString;
-    switch ((QT3DSU32)m_rc->GetRenderContext().GetRenderContextType()) {
-    case NVRenderContextValues::GLES2:
-        versionString = QLatin1Literal("gles2");
-        break;
-    case NVRenderContextValues::GL2:
-        versionString = QLatin1Literal("gl2");
-        break;
-    case NVRenderContextValues::GLES3:
-        versionString = QLatin1Literal("gles3");
-        break;
-    case NVRenderContextValues::GL3:
-        versionString = QLatin1Literal("gl3");
-        break;
-    case NVRenderContextValues::GLES3PLUS:
-        versionString = QLatin1Literal("gles3x");
-        break;
-    case NVRenderContextValues::GL4:
-        versionString = QLatin1Literal("gl4");
-        break;
-    default:
-        break;
-    }
-
-    m_rc->GetDynamicObjectSystem().setShaderCodeLibraryVersion(versionString);
 
     return true;
 }
