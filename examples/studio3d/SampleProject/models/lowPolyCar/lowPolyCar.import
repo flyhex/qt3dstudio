@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<UIP Version="1" >
+	<Project Revision="1" >
+		<Graph >
+			<Group id="__import__root__" >
+				<Model id="polySurface3" name="polySurface3" orientation="Right Handed" position="0 0 -0" rotation="0 -0 0" rotationorder="XYZr" scale="1 1 1" sourcepath="meshes/polySurface3.mesh" >
+					<Material id="lowpolyCoupe" name="lowpolyCoupe" blendmode="Normal" diffuse="1 1 1" diffusemap="lowpolyCoupe_diffusemap" emissivepower="0" opacity="100" specularamount="0" >
+						<Image id="lowpolyCoupe_diffusemap" name="lowpolyCoupe_diffusemap" pivotu="0.5" pivotv="0.5" positionu="-0.5" positionv="-0.5" scaleu="1" scalev="1" sourcepath="maps/Low_lowpolyCoupe_Diffuse.psd" tilingmodehorz="Tiled" tilingmodevert="Tiled" />
+					</Material>
+				</Model>
+			</Group>
+		</Graph>
+		<Import SrcFile="../../../../../../Desktop/LowEnd/lowPolyCar.fbx" ImageDir="Images" MeshDir="Meshes" >
+			<Image >
+				<Source >lowPolyCar.fbm/Low_lowpolyCoupe_Diffuse.psd</Source>
+				<Dest >maps/Low_lowpolyCoupe_Diffuse.psd</Dest>
+			</Image>
+			<Mesh >
+				<Source >polySurface3</Source>
+				<Dest >meshes/polySurface3.mesh</Dest>
+			</Mesh>
+		</Import>
+	</Project>
+</UIP>

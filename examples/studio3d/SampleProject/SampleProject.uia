@@ -1,18 +1,14 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<application>
+<?xml version='1.0' encoding='utf-8'?>
+<application xmlns="http://qt.io/qt3dstudio/uia">
     <assets initial="SampleProject">
         <presentation id="SampleProject" src="presentations/SampleProject.uip"/>
-        <presentation-qml id="mapView" args="qml/Navigation.qml"/>
-        <dataInput max="260" min="0" name="speed" type="Ranged Number"/>
-        <dataInput max="7" min="0" name="rpm" type="Ranged Number"/>
-        <dataInput name="slide" type="String"/>
-        <dataInput name="dateAndTime" type="String"/>
+        <presentation-qml id="Navigation" args="qml/Navigation.qml"/>
     </assets>
     <statemachine ref="#logic">
         <visual-states>
             <state ref="Initial">
                 <enter>
-                    <goto-slide element="main:Scene" rel="next"/>
+                    <goto-slide rel="next" element="main:Scene"/>
                 </enter>
             </state>
         </visual-states>
