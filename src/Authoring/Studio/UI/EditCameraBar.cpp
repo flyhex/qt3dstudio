@@ -71,7 +71,7 @@ void CEditCameraBar::setupCameras()
     // set initial view
     int viewIndex = CStudioPreferences::GetPreferredStartupView();
       // if not set or invalid index, use the scene camera view (last index)
-    if (viewIndex == -1 || viewIndex > m_CameraSelector->count() - 1)
+    if (viewIndex == -1 || viewIndex > m_CameraSelector->count() - 3)
         viewIndex = m_CameraSelector->count() - 1;
 
     m_CameraSelector->setCurrentIndex(viewIndex);

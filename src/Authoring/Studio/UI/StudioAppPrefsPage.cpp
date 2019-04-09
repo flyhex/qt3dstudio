@@ -182,7 +182,7 @@ void CStudioAppPrefsPage::loadSettings()
     m_ui->autosaveEnabled->setChecked(CStudioPreferences::GetAutoSavePreference());
     m_ui->autosaveInterval->setValue(CStudioPreferences::GetAutoSaveDelay());
 
-    onitEditStartViewCombo();
+    initEditStartViewCombo();
 
     enableOptions();
 
@@ -296,7 +296,7 @@ void CStudioAppPrefsPage::enableOptions()
  *	Set the initial selection to that saved to the preferences
  */
 //==============================================================================
-void CStudioAppPrefsPage::onitEditStartViewCombo()
+void CStudioAppPrefsPage::initEditStartViewCombo()
 {
     Q3DStudio::IStudioRenderer &theRenderer = g_StudioApp.getRenderer();
     QStringList theCameraNames;
@@ -311,12 +311,11 @@ void CStudioAppPrefsPage::onitEditStartViewCombo()
 
     long thePreferredView = CStudioPreferences::GetPreferredStartupView();
     long theNumItems = m_ui->m_EditViewStartupView->count();
-    if (thePreferredView == -1) // if not set, set to scene camera view
-        m_ui->m_EditViewStartupView->setCurrentIndex(theNumItems - 1);
-    else if (thePreferredView < theNumItems - 1)
+
+    if (thePreferredView >= 0 && thePreferredView < theNumItems - 2)
         m_ui->m_EditViewStartupView->setCurrentIndex(thePreferredView);
-    else // possibly from old content where cameras are removed
-        m_ui->m_EditViewStartupView->setCurrentIndex(0);
+    else // default to scene camera view
+        m_ui->m_EditViewStartupView->setCurrentIndex(theNumItems - 1);
 }
 
 #if 0 // Removed until we have some other Preview configurations than just Viewer
