@@ -323,6 +323,9 @@ qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::getVariantsProperty(int i
     if (instanceType == OBJTYPE_GROUP)
         return m_Group.m_variants;
 
+    if (instanceType == OBJTYPE_COMPONENT)
+        return m_Component.m_variants;
+
     return 0;
 }
 
@@ -1737,12 +1740,8 @@ CClientDataModelBridge::GetObjectType(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         return OBJTYPE_SUBPATH;
     else if (theType == L"Lightmaps")
         return OBJTYPE_LIGHTMAPS;
-    else if (theType == L"Action")
-        return OBJTYPE_UNKNOWN;
-    else {
-        ASSERT(0);
-        return OBJTYPE_UNKNOWN;
-    }
+
+    return OBJTYPE_UNKNOWN;
 }
 
 bool CClientDataModelBridge::IsBehaviorInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const

@@ -26,50 +26,37 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#pragma once
-#ifndef __GUIDEINSPECTABLE_H__
-#define __GUIDEINSPECTABLE_H__
+#ifndef GUIDEINSPECTABLE_H
+#define GUIDEINSPECTABLE_H
+
 #include "Qt3DSDMHandles.h"
-#include "Core.h"
 #include "InspectableBase.h"
-#include "Doc.h"
 #include "IDocumentEditor.h"
 #include "IInspectableItem.h"
 
-class CInspectableBase;
-
-class CGuideInspectable
+class GuideInspectable : public CInspectableBase
 {
 public:
-    static CInspectableBase *CreateInspectable(CCore &inCore, qt3dsdm::Qt3DSDMGuideHandle inGuide);
-};
-
-class SGuideInspectableImpl : public CInspectableBase
-{
-public:
-    SGuideInspectableImpl(CCore &inCore, qt3dsdm::Qt3DSDMGuideHandle inGuide);
+    GuideInspectable(qt3dsdm::Qt3DSDMGuideHandle inGuide);
 
     Q3DStudio::IDocumentReader &Reader() const;
     // Interface
-    EStudioObjectType GetObjectType() override;
-    Q3DStudio::CString GetName() override;
-    long GetGroupCount() override;
-    CInspectorGroup *GetGroup(long) override;
-    bool IsValid() const override;
-    bool IsMaster() override;
+    EStudioObjectType getObjectType() const override;
+    Q3DStudio::CString getName() override;
+    long getGroupCount() const override;
+    CInspectorGroup *getGroup(long) override;
+    bool isValid() const override;
+    bool isMaster() const override;
+    qt3dsdm::Qt3DSDMInstanceHandle getInstance() const override;
 
     // Implementation to get/set properties
 
     void SetDirection(const qt3dsdm::SValue &inValue);
-
-    qt3dsdm::SValue GetDirection();
-
     void SetPosition(const qt3dsdm::SValue &inValue);
-
-    qt3dsdm::SValue GetPosition();
-
     void SetWidth(const qt3dsdm::SValue &inValue);
 
+    qt3dsdm::SValue GetDirection();
+    qt3dsdm::SValue GetPosition();
     qt3dsdm::SValue GetWidth();
 
     Q3DStudio::IDocumentEditor &Editor();
@@ -81,11 +68,11 @@ public:
     bool isHorizontal() const;
 
     const std::vector<std::shared_ptr<IInspectableAttributeItem>> &properties() const;
+
 private:
     qt3dsdm::Qt3DSDMGuideHandle m_Guide;
     Q3DStudio::CUpdateableDocumentEditor m_Editor;
     std::vector<std::shared_ptr<IInspectableAttributeItem>> m_Properties;
 };
-
 
 #endif

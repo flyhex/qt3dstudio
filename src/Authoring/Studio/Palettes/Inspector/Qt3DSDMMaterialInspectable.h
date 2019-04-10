@@ -27,11 +27,8 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
 #ifndef INCLUDED_QT3DSDM_MATERIAL_INSPECTABLE_H
-#define INCLUDED_QT3DSDM_MATERIAL_INSPECTABLE_H 1
+#define INCLUDED_QT3DSDM_MATERIAL_INSPECTABLE_H
 
 #include "Qt3DSDMInspectable.h"
 #include "Qt3DSDMInspectorGroup.h"
@@ -39,22 +36,23 @@
 class Qt3DSDMMaterialInspectorGroup : public Qt3DSDMInspectorGroup
 {
 public:
-    Qt3DSDMMaterialInspectorGroup(CStudioApp &inApp, const QString &inName,
-                                  Qt3DSDMInspectable &inInspectable, long inIndex);
+    Qt3DSDMMaterialInspectorGroup(const QString &inName);
 
-    virtual bool isMaterialGroup() const = 0;
+    bool isMaterialGroup() const { return m_isMaterialGroup; }
+
+private:
+    bool m_isMaterialGroup = false;
 };
 
 class Qt3DSDMMaterialInspectable : public Qt3DSDMInspectable
 {
 public:
-    Qt3DSDMMaterialInspectable(CStudioApp &inApp, CCore *inCore,
-                               qt3dsdm::Qt3DSDMInstanceHandle inInstance)
-        : Qt3DSDMInspectable(inApp, inCore, inInstance)
+    Qt3DSDMMaterialInspectable(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
+        : Qt3DSDMInspectable(inInstance)
     {
     }
 
-    CInspectorGroup *GetGroup(long) override;
+    CInspectorGroup *getGroup(long) override;
 };
 
 #endif

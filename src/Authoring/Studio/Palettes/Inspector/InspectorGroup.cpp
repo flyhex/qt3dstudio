@@ -29,29 +29,13 @@
 
 #include "InspectorGroup.h"
 
-//==============================================================================
-/**
- * Constructor
- */
-CInspectorGroup::CInspectorGroup()
-{
-}
-
-//==============================================================================
-/**
- *	Destructor
- */
-CInspectorGroup::~CInspectorGroup()
-{
-}
-
-//==============================================================================
-/**
- *	Set the name to show up in the title bar
- */
-void CInspectorGroup::SetName(const QString &inName)
+CInspectorGroup::CInspectorGroup(const QString &inName)
 {
     m_name = inName;
+}
+
+CInspectorGroup::~CInspectorGroup()
+{
 }
 
 QString CInspectorGroup::GetName() const

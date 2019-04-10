@@ -28,63 +28,30 @@
 ****************************************************************************/
 #pragma once
 
-//==============================================================================
-//	Includes
-//==============================================================================
 #include "Qt3DSDMHandles.h"
-#include "DispatchListeners.h"
 #include "Qt3DSDMMetaDataTypes.h"
-#include "CmdBatch.h"
 
-//==============================================================================
-//	Forwards
-//==============================================================================
 class CDoc;
-class CEasyInspectorRow;
 
-// DataModel
-namespace qt3dsdm {
-class ISignalConnection;
-}
-
-class CGenericEdit;
-//==============================================================================
-//	Namespace
-//==============================================================================
 namespace Q3DStudio {
 
-//==============================================================================
-/**
- * This is a binding between a DataModelInspectable and an EasyInspectorRow
- */
+// This is a binding between a DataModelInspectable and an InspectorRow
 class Qt3DSDMInspectorRow
 {
-    //==============================================================================
-    //	Members
-    //==============================================================================
-protected:
-    qt3dsdm::Qt3DSDMMetaDataPropertyHandle m_MetaProperty;
-    qt3dsdm::SMetaDataPropertyInfo m_MetaDataPropertyInfo;
-
-    //==============================================================================
-    //	Methods
-    //==============================================================================
-public: // Construction
-    Qt3DSDMInspectorRow(CDoc *inDoc, qt3dsdm::Qt3DSDMMetaDataPropertyHandle inProperty);
+public:
+    explicit Qt3DSDMInspectorRow(CDoc *inDoc, qt3dsdm::Qt3DSDMMetaDataPropertyHandle inProperty);
     virtual ~Qt3DSDMInspectorRow();
 
-private: // Disabled parameterless construction
-    Qt3DSDMInspectorRow();
+    qt3dsdm::Qt3DSDMMetaDataPropertyHandle GetMetaDataProperty() const { return m_MetaProperty; }
 
-public: // Use
-    qt3dsdm::Qt3DSDMMetaDataPropertyHandle GetMetaDataProperty() const
-    {
-      return m_MetaProperty;
-    }
     const qt3dsdm::SMetaDataPropertyInfo &GetMetaDataPropertyInfo() const
     {
       return m_MetaDataPropertyInfo;
     }
+
+protected:
+    qt3dsdm::Qt3DSDMMetaDataPropertyHandle m_MetaProperty;
+    qt3dsdm::SMetaDataPropertyInfo m_MetaDataPropertyInfo;
 };
 
 } // namespace Q3DStudio

@@ -27,7 +27,6 @@
 **
 ****************************************************************************/
 
-#include "Qt3DSCommonPrecompile.h"
 #include "StudioObjectTypes.h"
 
 bool CStudioObjectTypes::AcceptableParent(EStudioObjectType inChild, EStudioObjectType inParent)

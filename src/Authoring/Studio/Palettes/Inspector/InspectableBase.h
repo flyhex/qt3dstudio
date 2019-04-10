@@ -26,42 +26,29 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#pragma once
-#ifndef __INSPECTABLEBASE_H__
-#define __INSPECTABLEBASE_H__
+#ifndef INSPECTABLEBASE_H
+#define INSPECTABLEBASE_H
 
-//==============================================================================
-//	Forwards
-//==============================================================================
 class CInspectorGroup;
 
-#include "Core.h"
 #include "StudioObjectTypes.h"
+#include "Qt3DSString.h"
+#include "Qt3DSDMHandles.h"
 
-//==============================================================================
-/**
- *	Parent class of Inspectable types that will appear in the Inspector Palette.
- */
+ // Parent class of Inspectable types that will appear in the Inspector Palette.
 class CInspectableBase
 {
-protected:
-    CCore *m_Core; ///<
-
 public:
-    CInspectableBase(CCore *inCore)
-        : m_Core(inCore)
-    {
-    }
+    CInspectableBase() {}
     virtual ~CInspectableBase() {}
 
-    // Interface
-    virtual EStudioObjectType GetObjectType() = 0;
-    // virtual std::wstring		GetTypeString() const { return L""; }
-    virtual Q3DStudio::CString GetName() = 0;
-    virtual long GetGroupCount() = 0;
-    virtual CInspectorGroup *GetGroup(long inIndex) = 0;
-    virtual bool IsValid() const = 0;
-    virtual bool IsMaster() = 0;
+    virtual EStudioObjectType getObjectType() const = 0;
+    virtual Q3DStudio::CString getName() = 0;
+    virtual long getGroupCount() const = 0;
+    virtual CInspectorGroup *getGroup(long inIndex) = 0;
+    virtual bool isValid() const = 0;
+    virtual bool isMaster() const = 0;
+    virtual qt3dsdm::Qt3DSDMInstanceHandle getInstance() const = 0;
 };
 
-#endif // #ifndef __INSPECTABLEBASE_H__
+#endif // INSPECTABLEBASE_H

@@ -32,7 +32,6 @@
 #include "Qt3DSDMValue.h"
 #include "Qt3DSDMMetaDataValue.h"
 #include "Qt3DSDMMetaDataTypes.h"
-#include "Qt3DSFileTools.h"
 #include "IDocumentEditor.h"
 
 #include <QtCore/qabstractitemmodel.h>
@@ -40,8 +39,9 @@
 
 class CInspectableBase;
 class Qt3DSDMInspectable;
-class SGuideInspectableImpl;
+class GuideInspectable;
 class VariantsGroupModel;
+class CClientDataModelBridge;
 
 namespace qt3dsdm {
 class ISignalConnection;
@@ -174,7 +174,7 @@ private:
 
     QVector<GroupInspectorControl> m_groupElements;
     CInspectableBase *m_inspectableBase = nullptr;
-    SGuideInspectableImpl *m_guideInspectable = nullptr;
+    GuideInspectable *m_guideInspectable = nullptr;
 
     struct MaterialEntry
     {
@@ -209,11 +209,11 @@ private:
     QString getStandardMaterialString() const;
     QString getDefaultMaterialString() const;
     bool isInsideMaterialContainer() const;
-    bool isInsideMaterialContainer(Qt3DSDMInspectable *inspectable) const;
+    bool isInsideMaterialContainer(CInspectableBase *inspectable) const;
     bool isAnimatableMaterial() const;
-    bool isAnimatableMaterial(Qt3DSDMInspectable *inspectable) const;
+    bool isAnimatableMaterial(CInspectableBase *inspectable) const;
     bool isBasicMaterial() const;
-    bool isBasicMaterial(Qt3DSDMInspectable *inspectable) const;
+    bool isBasicMaterial(CInspectableBase *inspectable) const;
     void updateMaterialValues(const QStringList &values, int elementIndex,
                               bool updatingShaders = false);
     void updateShaderValues();
@@ -243,6 +243,8 @@ private:
                                        int theIndex, bool disableAnimation = false,
                                        bool isReference = false);
     bool isGroupRebuildRequired(CInspectableBase *inspectable, int theIndex) const;
+
+    CClientDataModelBridge *getBridge() const;
 
     static int handleToGuidePropIndex(int handle) { return handle - 1; }
 

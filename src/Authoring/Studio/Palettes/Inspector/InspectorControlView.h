@@ -114,7 +114,6 @@ protected:
 
 private:
     void setInspectable(CInspectableBase *inInspectable);
-    void updateInspectable(CInspectableBase *inInspectable);
     void initialize();
     void onFilesChanged(const Q3DStudio::TFileModificationList &inFileModificationList);
     void OnNewPresentation() override;
@@ -122,6 +121,7 @@ private:
     void filterMaterials(std::vector<Q3DStudio::CFilePath> &materials);
     void filterMatDatas(std::vector<Q3DStudio::CFilePath> &matDatas);
     void setPropertyValueFromFilename(long instance, int handle, const QString &name);
+    CInspectableBase *createInspectableFromSelectable(Q3DStudio::SSelectedValue selectable);
     bool canLinkProperty(int instance, int handle) const;
     bool canOpenInInspector(int instance, int handle) const;
     void openInInspector();

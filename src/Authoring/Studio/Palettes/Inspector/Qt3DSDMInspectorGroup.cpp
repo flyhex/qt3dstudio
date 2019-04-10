@@ -27,50 +27,26 @@
 **
 ****************************************************************************/
 
-#include "Qt3DSCommonPrecompile.h"
 #include "Qt3DSDMInspectorGroup.h"
 #include "Qt3DSDMInspectorRow.h"
 #include "Qt3DSDMInspectable.h"
-#include "StudioApp.h"
-#include "Core.h"
 #include "Qt3DSDMMetaData.h"
-#include "Doc.h"
-#include "Qt3DSDMStudioSystem.h"
 
-//==============================================================================
-/**
- * Constructor
- */
-Qt3DSDMInspectorGroup::Qt3DSDMInspectorGroup(CStudioApp &inApp, const QString &inName,
-                                           Qt3DSDMInspectable &inInspectable, long inIndex)
-    : CEasyInspectorGroup(inName)
-    , m_App(inApp)
-    , m_Inspectable(inInspectable)
-    , m_Index(inIndex)
+Qt3DSDMInspectorGroup::Qt3DSDMInspectorGroup(const QString &inName)
+    : CInspectorGroup(inName)
 {
 }
 
-//==============================================================================
-/**
- *	clean up
- */
 Qt3DSDMInspectorGroup::~Qt3DSDMInspectorGroup()
 {
-    std::vector<Q3DStudio::Qt3DSDMInspectorRow *>::iterator theIterator =
-        m_DMInspectorRows.begin();
-    for (; theIterator != m_DMInspectorRows.end(); ++theIterator)
-        delete (*theIterator);
+    for (auto it = m_inspectorRows.begin(); it != m_inspectorRows.end(); ++it)
+        delete (*it);
 }
 
-//==============================================================================
-/**
- * Method to create a new InspectorRowBase.
- */
-void Qt3DSDMInspectorGroup::CreateRow(CDoc *inDoc, qt3dsdm::Qt3DSDMMetaDataPropertyHandle inProperty)
+// Create a new InspectorRowBase.
+void Qt3DSDMInspectorGroup::CreateRow(CDoc *inDoc,
+                                      qt3dsdm::Qt3DSDMMetaDataPropertyHandle inProperty)
 {
-    Q3DStudio::Qt3DSDMInspectorRow *theRow =
-        new Q3DStudio::Qt3DSDMInspectorRow(inDoc, inProperty);
-    m_DMInspectorRows.push_back(
-        theRow); // this Qt3DSDMInspectorRow is now owned by this class
-
+    Q3DStudio::Qt3DSDMInspectorRow *theRow = new Q3DStudio::Qt3DSDMInspectorRow(inDoc, inProperty);
+    m_inspectorRows.push_back(theRow); // this Qt3DSDMInspectorRow is now owned by this class
 }

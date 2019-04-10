@@ -26,66 +26,25 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "Qt3DSCommonPrecompile.h"
+
 #include "Qt3DSDMMaterialInspectable.h"
-#include "Qt3DSDMInspectorGroup.h"
-#include "Qt3DSDMInspectorRow.h"
-#include "Core.h"
-#include "IDocumentEditor.h"
-#include "Qt3DSDMHandles.h"
-#include "Doc.h"
-#include "GenericFunctor.h"
-#include "StudioApp.h"
-#include "Qt3DSDMStudioSystem.h"
-#include "ClientDataModelBridge.h"
-#include "IDocumentReader.h"
-#include "Dispatch.h"
-#include "IDirectoryWatchingSystem.h"
-#include "Qt3DSDMSignals.h"
-#include "Qt3DSString.h"
 
 using namespace qt3dsdm;
 
-Qt3DSDMMaterialInspectorGroup::Qt3DSDMMaterialInspectorGroup(
-        CStudioApp &inApp,
-        const QString &inName,
-        Qt3DSDMInspectable &inInspectable,
-        long inIndex)
-    : Qt3DSDMInspectorGroup(inApp, inName, inInspectable, inIndex)
+Qt3DSDMMaterialInspectorGroup::Qt3DSDMMaterialInspectorGroup(const QString &inName)
+    : Qt3DSDMInspectorGroup(inName)
+    , m_isMaterialGroup(inName == QLatin1String("Material"))
 {
 }
 
-struct SQt3DSDMMaterialInspectorGroup : public Qt3DSDMMaterialInspectorGroup
+CInspectorGroup *Qt3DSDMMaterialInspectable::getGroup(long inIndex)
 {
-    SQt3DSDMMaterialInspectorGroup(CStudioApp &inApp, const QString &inName,
-                                   Qt3DSDMInspectable &inInspectable, long inIndex)
-        : Qt3DSDMMaterialInspectorGroup(inApp, inName, inInspectable, inIndex)
-    {
-        QString theMaterialGroupName = QStringLiteral("Material");
-        m_isMaterialGroup = (inName == theMaterialGroupName);
-    }
+    Qt3DSDMInspectorGroup *group = new Qt3DSDMMaterialInspectorGroup(GetGroupName(inIndex));
 
-    bool isMaterialGroup() const override
-    {
-        return m_isMaterialGroup;
-    }
+    TMetaDataPropertyHandleList properties = GetGroupProperties(inIndex);
 
-private:
-    bool m_isMaterialGroup;
-};
+    for (auto &prop : properties)
+        group->CreateRow(getDoc(), prop);
 
-CInspectorGroup *Qt3DSDMMaterialInspectable::GetGroup(long inIndex)
-{
-    QString theGroupName = GetGroupName(inIndex);
-
-    Qt3DSDMInspectorGroup *theGroup =
-            new SQt3DSDMMaterialInspectorGroup(m_App, theGroupName, *this, inIndex);
-
-    TMetaDataPropertyHandleList theProperties = GetGroupProperties(inIndex);
-    size_t thePropertyCount = theProperties.size();
-
-    for (size_t thePropertyIndex = 0; thePropertyIndex < thePropertyCount; ++thePropertyIndex)
-        theGroup->CreateRow(m_Core->GetDoc(), theProperties[thePropertyIndex]);
-
-    return theGroup;
+    return group;
 }

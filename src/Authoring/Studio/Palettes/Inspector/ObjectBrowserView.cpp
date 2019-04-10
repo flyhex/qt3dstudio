@@ -75,7 +75,7 @@ void ObjectBrowserView::setModel(ObjectListModel *model)
                                             | Qt::MatchRecursive)));
 
     for (int i = list.size(); i > 0; i--)
-        m_model->removeRow(list.at(i - 1).row(), m_model->index(0, 0));
+        m_model->removeRow(list.at(i - 1).row());
 
     m_ownerInstance = 0;
     m_selection = -1;

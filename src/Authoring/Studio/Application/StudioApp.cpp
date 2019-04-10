@@ -208,12 +208,10 @@ int main(int argc, char *argv[])
 #include "Core.h"
 #include "HotKeys.h"
 #include "StudioTutorialWidget.h"
-#include "GuideInspectable.h"
 #include "Qt3DSDMStudioSystem.h"
 #include "Qt3DSDMInspectable.h"
 #include "Qt3DSDMSlides.h"
 #include "Qt3DSDMMaterialInspectable.h"
-#include "Qt3DSDMSceneInspectable.h"
 #include "Qt3DSDMAnimation.h"
 #include "Qt3DSDMDataCore.h"
 #include "IDirectoryWatchingSystem.h"
@@ -1417,116 +1415,32 @@ void CStudioApp::PlaybackToggle()
         PlaybackPlay();
 }
 
-CInspectableBase *CStudioApp::GetInspectableFromSelectable(Q3DStudio::SSelectedValue inSelectable)
-{
-    CInspectableBase *theInspectableBase = nullptr;
-    if (inSelectable.empty() == false) {
-        switch (inSelectable.getType()) {
-        case Q3DStudio::SelectedValueTypes::Slide:
-            theInspectableBase = new Qt3DSDMInspectable(
-                        *this, m_core,
-                        inSelectable.getData<Q3DStudio::SSlideInstanceWrapper>().m_Instance);
-            break;
-        case Q3DStudio::SelectedValueTypes::MultipleInstances:
-        case Q3DStudio::SelectedValueTypes::Instance: {
-
-            // We need to decide whether to display SlideInspectable or UICDMInspectable
-            // We display SlideInspectable if user selects a Scene or Component where the current
-            // active slide belongs,
-            // for example when user selects the Root in Timeline Palette
-            CDoc *theDoc = m_core->GetDoc();
-            qt3dsdm::TInstanceHandleList theSelectedInstances =
-                    theDoc->GetSelectedValue().GetSelectedInstances();
-            qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance;
-            if (theSelectedInstances.size() == 1)
-                theSelectedInstance = theSelectedInstances[0];
-
-            if (m_core->GetDoc()->GetDocumentReader().IsInstance(theSelectedInstance)) {
-                CClientDataModelBridge *theBridge =
-                        theDoc->GetStudioSystem()->GetClientDataModelBridge();
-                qt3dsdm::Qt3DSDMSlideHandle theCurrentActiveSlide = theDoc->GetActiveSlide();
-
-                // Slide, scene or component
-                if (theSelectedInstance
-                        == theBridge->GetOwningComponentInstance(theCurrentActiveSlide)) {
-                    Qt3DSDMInstanceHandle theCurrentActiveSlideInstance =
-                            theDoc->GetStudioSystem()->GetSlideSystem()->GetSlideInstance(
-                                theCurrentActiveSlide);
-
-                    if (theBridge->IsSceneInstance(theSelectedInstance))
-                        theInspectableBase = new Qt3DSDMSceneInspectable(
-                                    *this, m_core, theSelectedInstance,
-                                    theCurrentActiveSlideInstance);
-                    else if (theBridge->IsComponentInstance(theSelectedInstance))
-                        theInspectableBase = new Qt3DSDMInspectable(
-                                    *this, m_core, theSelectedInstance,
-                                    theCurrentActiveSlideInstance);
-                }
-                if (theInspectableBase == nullptr) {
-                    if (theBridge->IsMaterialBaseInstance(theSelectedInstance))
-                        theInspectableBase =
-                                new Qt3DSDMMaterialInspectable(*this, m_core, theSelectedInstance);
-                    else
-                        theInspectableBase =
-                                new Qt3DSDMInspectable(*this, m_core, theSelectedInstance);
-                }
-            }
-        }
-            break;
-        case Q3DStudio::SelectedValueTypes::Guide: {
-            qt3dsdm::Qt3DSDMGuideHandle theGuide
-                    = inSelectable.getData<qt3dsdm::Qt3DSDMGuideHandle>();
-            theInspectableBase = CGuideInspectable::CreateInspectable(*m_core, theGuide);
-        }
-            break;
-        default:
-            // Ignore slide insertion and unknown selectable types
-            break;
-        };
-    }
-
-    return theInspectableBase;
-}
-
+// TODO: move to more appropriate place (InspectorControlModel.cpp)
 CInspectableBase *CStudioApp::getInspectableFromInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
-    CInspectableBase *theInspectableBase = nullptr;
-    CDoc *theDoc = m_core->GetDoc();
+    CInspectableBase *inspectableBase = nullptr;
+    CDoc *doc = m_core->GetDoc();
 
     if (m_core->GetDoc()->GetDocumentReader().IsInstance(inInstance)) {
-        CClientDataModelBridge *theBridge =
-                theDoc->GetStudioSystem()->GetClientDataModelBridge();
-        qt3dsdm::Qt3DSDMSlideHandle theCurrentActiveSlide = theDoc->GetActiveSlide();
+        CClientDataModelBridge *theBridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+        qt3dsdm::Qt3DSDMSlideHandle activeSlide = doc->GetActiveSlide();
 
         // Slide, scene or component
-        if (inInstance
-                == theBridge->GetOwningComponentInstance(theCurrentActiveSlide)) {
-            Qt3DSDMInstanceHandle theCurrentActiveSlideInstance =
-                    theDoc->GetStudioSystem()->GetSlideSystem()->GetSlideInstance(
-                        theCurrentActiveSlide);
+        if (inInstance == theBridge->GetOwningComponentInstance(activeSlide)) {
+            Qt3DSDMInstanceHandle activeSlideInstance = doc->GetStudioSystem()->GetSlideSystem()
+                                                           ->GetSlideInstance(activeSlide);
 
-            if (theBridge->IsSceneInstance(inInstance)) {
-                theInspectableBase = new Qt3DSDMSceneInspectable(
-                            *this, m_core, inInstance,
-                            theCurrentActiveSlideInstance);
-            } else if (theBridge->IsComponentInstance(inInstance)) {
-                theInspectableBase = new Qt3DSDMInspectable(
-                            *this, m_core, inInstance,
-                            theCurrentActiveSlideInstance);
-            }
+            inspectableBase = new Qt3DSDMInspectable(inInstance, activeSlideInstance);
         }
-        if (theInspectableBase == nullptr) {
-            if (theBridge->IsMaterialBaseInstance(inInstance)) {
-                theInspectableBase =
-                        new Qt3DSDMMaterialInspectable(*this, m_core, inInstance);
-            } else {
-                theInspectableBase =
-                        new Qt3DSDMInspectable(*this, m_core, inInstance);
-            }
+        if (inspectableBase) {
+            if (theBridge->IsMaterialBaseInstance(inInstance))
+                inspectableBase = new Qt3DSDMMaterialInspectable(inInstance);
+            else
+                inspectableBase = new Qt3DSDMInspectable(inInstance);
         }
     }
 
-    return theInspectableBase;
+    return inspectableBase;
 }
 
 void CStudioApp::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler,

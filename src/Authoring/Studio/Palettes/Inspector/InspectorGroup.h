@@ -27,37 +27,22 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
 #ifndef INCLUDED_INSPECTOR_GROUP_H
-#define INCLUDED_INSPECTOR_GROUP_H 1
-
-#pragma once
+#define INCLUDED_INSPECTOR_GROUP_H
 
 #include <QString>
 
-//==============================================================================
 /**
- *	@class	CInspectorGroup
- *	@brief	This is the base class for inspector groups.
+ * This is the base class for inspector groups.
  *
- *	Derive from this class in order to create a new group for the inspector
- *	palette.
+ * Derive from this class in order to create a new group for the inspector palette.
  */
 class CInspectorGroup
 {
 public:
-    enum EGroupCommand {
-        EGroupCommandNone = 0,
-        EGroupCommandToggle,
-    };
-
-public:
-    CInspectorGroup();
+    CInspectorGroup(const QString &inName = {});
     virtual ~CInspectorGroup();
 
-    void SetName(const QString &inName);
     QString GetName() const;
 
 protected:

@@ -108,6 +108,7 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_COMPONENT_PROPERTIES                                                      \
+    HANDLE_COMPOSER_PROPERTY_DUPLICATE(variants, m_variants, TDataStrPtr, L"")                     \
     HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_NODE_PROPERTIES                                                           \

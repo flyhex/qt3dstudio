@@ -26,33 +26,17 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "Qt3DSCommonPrecompile.h"
+
 #include "Qt3DSDMInspectorRow.h"
 #include "Qt3DSDMMetaData.h"
 #include "Doc.h"
-#include "StudioApp.h"
-#include "Qt3DSDMSlides.h"
 #include "Qt3DSDMStudioSystem.h"
-#include "Qt3DSDMAnimation.h"
-#include "Qt3DSDMSignals.h"
-#include "CmdDataModelDeanimate.h"
-#include "Qt3DSDMDataCore.h"
-#include "Core.h"
-#include "ClientDataModelBridge.h"
-#include "IDocumentEditor.h"
 
-//==============================================================================
-//	Namespace
-//==============================================================================
 using namespace qt3dsdm;
+
 namespace Q3DStudio {
 
-//==============================================================================
-/**
- *	Constructor
- */
-Qt3DSDMInspectorRow::Qt3DSDMInspectorRow(CDoc *inDoc,
-                                       Qt3DSDMMetaDataPropertyHandle inProperty)
+Qt3DSDMInspectorRow::Qt3DSDMInspectorRow(CDoc *inDoc, Qt3DSDMMetaDataPropertyHandle inProperty)
     : m_MetaProperty(inProperty)
 {
     IMetaData *theMetaData = inDoc->GetStudioSystem()->GetActionMetaData();
@@ -60,10 +44,6 @@ Qt3DSDMInspectorRow::Qt3DSDMInspectorRow(CDoc *inDoc,
     m_MetaDataPropertyInfo = theInfo;
 }
 
-//==============================================================================
-/**
- *	Destructor
- */
 Qt3DSDMInspectorRow::~Qt3DSDMInspectorRow()
 {
 }

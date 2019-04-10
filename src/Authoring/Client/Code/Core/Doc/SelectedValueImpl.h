@@ -80,41 +80,41 @@ struct SSelectedValueTypeMap
 template <>
 struct SSelectedValueTypeMap<qt3dsdm::Qt3DSDMInstanceHandle>
 {
-    static SelectedValueTypes::Enum GetType() { return SelectedValueTypes::Instance; }
+    static SelectedValueTypes GetType() { return SelectedValueTypes::Instance; }
 };
 
 template <>
 struct SSelectedValueTypeMap<SSlideInstanceWrapper>
 {
-    static SelectedValueTypes::Enum GetType() { return SelectedValueTypes::Slide; }
+    static SelectedValueTypes GetType() { return SelectedValueTypes::Slide; }
 };
 
 template <>
 struct SSelectedValueTypeMap<qt3dsdm::Qt3DSDMGuideHandle>
 {
-    static SelectedValueTypes::Enum GetType() { return SelectedValueTypes::Guide; }
+    static SelectedValueTypes GetType() { return SelectedValueTypes::Guide; }
 };
 
 template <>
 struct SSelectedValueTypeMap<SSlideInsertionWrapper>
 {
-    static SelectedValueTypes::Enum GetType() { return SelectedValueTypes::SlideInsertion; }
+    static SelectedValueTypes GetType() { return SelectedValueTypes::SlideInsertion; }
 };
 
 template <>
 struct SSelectedValueTypeMap<qt3dsdm::TInstanceHandleList>
 {
-    static SelectedValueTypes::Enum GetType() { return SelectedValueTypes::MultipleInstances; }
+    static SelectedValueTypes GetType() { return SelectedValueTypes::MultipleInstances; }
 };
 
 struct SSelectedValueTraits
 {
-    typedef SelectedValueTypes::Enum TIdType;
+    typedef SelectedValueTypes TIdType;
     enum {
         TBufferSize = sizeof(SSlideInstanceWrapper),
     };
 
-    static TIdType getNoDataId() { return SelectedValueTypes::UnknownSelectedValueType; }
+    static TIdType getNoDataId() { return SelectedValueTypes::Unknown; }
 
     template <typename TDataType>
     static TIdType getType()
@@ -138,7 +138,7 @@ struct SSelectedValueTraits
             return inVisitor(*qt3ds::NVUnionCast<qt3dsdm::TInstanceHandleList *>(inData));
         default:
             QT3DS_ASSERT(false);
-        case SelectedValueTypes::UnknownSelectedValueType:
+        case SelectedValueTypes::Unknown:
             return inVisitor();
         }
     }
@@ -159,7 +159,7 @@ struct SSelectedValueTraits
             return inVisitor(*qt3ds::NVUnionCast<const qt3dsdm::TInstanceHandleList *>(inData));
         default:
             QT3DS_ASSERT(false);
-        case SelectedValueTypes::UnknownSelectedValueType:
+        case SelectedValueTypes::Unknown:
             return inVisitor();
         }
     }
@@ -207,7 +207,7 @@ struct SSelectedValue : public TSelectedValueUnionType
         return *this;
     }
 
-    bool empty() const { return getType() == SelectedValueTypes::UnknownSelectedValueType; }
+    bool empty() const { return getType() == SelectedValueTypes::Unknown; }
 
     operator bool() const { return !empty(); }
 

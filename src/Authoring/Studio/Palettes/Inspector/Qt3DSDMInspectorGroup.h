@@ -27,52 +27,31 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
 #ifndef INCLUDED_QT3DSDM_INSPECTORGROUP_H
-#define INCLUDED_QT3DSDM_INSPECTORGROUP_H 1
+#define INCLUDED_QT3DSDM_INSPECTORGROUP_H
 
-#pragma once
-
-//==============================================================================
-//	Includes
-//==============================================================================
-#include "EasyInspectorGroup.h"
+#include "InspectorGroup.h"
 #include "Qt3DSDMHandles.h"
-#include "StudioApp.h"
 
+class Qt3DSDMInspectable;
 class CDoc;
+
 namespace Q3DStudio {
 class Qt3DSDMInspectorRow;
 };
 
-class Qt3DSDMInspectable;
-
-//==============================================================================
-/**
- *
- */
-class Qt3DSDMInspectorGroup: public CEasyInspectorGroup
+class Qt3DSDMInspectorGroup : public CInspectorGroup
 {
-protected: // Members
-    CStudioApp &m_App;
-    std::vector<Q3DStudio::Qt3DSDMInspectorRow *> m_DMInspectorRows;
-    Qt3DSDMInspectable &m_Inspectable;
-    long m_Index;
-
-public: // Construction
-    Qt3DSDMInspectorGroup(CStudioApp &inApp, const QString &inName,
-                         Qt3DSDMInspectable &inInspectable, long inIndex);
+public:
+    Qt3DSDMInspectorGroup(const QString &inName);
     ~Qt3DSDMInspectorGroup();
 
-    const std::vector<Q3DStudio::Qt3DSDMInspectorRow *> &GetRows() const
-    {
-        return m_DMInspectorRows;
-    }
-
-public: // Use
     void CreateRow(CDoc *inDoc, qt3dsdm::Qt3DSDMMetaDataPropertyHandle inProperty);
+
+    const std::vector<Q3DStudio::Qt3DSDMInspectorRow *> &GetRows() const { return m_inspectorRows; }
+
+protected:
+    std::vector<Q3DStudio::Qt3DSDMInspectorRow *> m_inspectorRows;
 };
 
 #endif

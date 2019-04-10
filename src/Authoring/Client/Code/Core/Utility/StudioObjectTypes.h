@@ -29,9 +29,6 @@
 #ifndef INCLUDED_STUDIO_OBJECTTYPES_H
 #define INCLUDED_STUDIO_OBJECTTYPES_H
 
-#pragma once
-
-#include "PropertyPublishLevels.h"
 #include "Qt3DSString.h"
 //
 //	*******************************************************************
@@ -72,7 +69,7 @@ enum EStudioObjectType {
     OBJTYPE_MATERIALDATA       = 0x08000000,
 
     // filters
-    OBJTYPE_IS_VARIANT = OBJTYPE_LAYER | OBJTYPE_MODEL | OBJTYPE_GROUP,
+    OBJTYPE_IS_VARIANT = OBJTYPE_LAYER | OBJTYPE_MODEL | OBJTYPE_GROUP | OBJTYPE_COMPONENT,
     OBJTYPE_IS_MATERIAL = OBJTYPE_MATERIAL | OBJTYPE_CUSTOMMATERIAL | OBJTYPE_REFERENCEDMATERIAL,
     OBJTYPE_IS_SINGULAR = OBJTYPE_SCENE | OBJTYPE_LAYER | OBJTYPE_BEHAVIOR | OBJTYPE_EFFECT
                           | OBJTYPE_IS_MATERIAL, // Singular: cannot be multiselected

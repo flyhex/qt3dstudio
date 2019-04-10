@@ -1042,10 +1042,13 @@ void TimelineGraphicsScene::updateHoverStatus(const QPointF &scenePos)
                                 tooltipStr.append("</td></tr>");
                             }
                             tooltipStr.append("</table>");
+
+                            int ttY = int(rowTree->y())
+                                      + widgetTimeline()->navigationBar()->height();
+
                             m_variantsToolTip->setText(tooltipStr);
                             m_variantsToolTip->adjustSize();
-                            m_variantsToolTip->move(m_widgetTimeline->mapToGlobal(
-                                                    {right, (int)rowTree->y()}));
+                            m_variantsToolTip->move(m_widgetTimeline->mapToGlobal({right, ttY}));
                             m_variantsToolTip->raise();
                             m_variantsToolTip->show();
                             m_variantsRowTree = rowTree;

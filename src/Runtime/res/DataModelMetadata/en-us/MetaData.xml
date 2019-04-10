@@ -55,7 +55,17 @@
         <Property name="scaleanchor" formalName="Scale Anchor" description="Corner of the content to pin as the\nlayer size changes" list="Center:N:NE:E:SE:S:SW:W:NW" default="Center"/>
     </Camera>
     <Component>
-        <!--<Property name="name" formalName="Name" description="Object name" type="String" default="Component" hidden="False" />-->
+        <!-- Basic Properties -->
+        <Property name="name"     formalName="Name"     type="String"     default="Model" category="Basic Properties" description="Object name" />
+        <Property name="eyeball"  formalName="Visible"  type="Boolean"    default="True"  category="Basic Properties" description="Item visibility" />
+        <Property name="position" formalName="Position" type="Vector"                     category="Basic Properties" description="Location in local space" />
+        <Property name="rotation" formalName="Rotation" type="Rotation"                   category="Basic Properties" description="Rotation around local axes" />
+        <Property name="scale"    formalName="Scale"    type="Vector"     default="1 1 1" category="Basic Properties" description="Size adjustments along local axes" />
+        <Property name="pivot"    formalName="Pivot"    type="Vector"                     category="Basic Properties" description="Offset of the contents away from the local center" />
+        <Property name="opacity"  formalName="Opacity"  min="0" max="100" default="100"   category="Basic Properties" />
+
+        <!-- Variant Tags -->
+        <Property name="variants" type="String" animatable="False" category="Variant Tags" />
     </Component>
     <Effect>
         <Property name="name" formalName="Name" type="String" default="Effect" hidden="False" />
@@ -432,13 +442,17 @@
         <Property name="name" formalName="Name" description="Object name" type="String" default="RenderPlugin" hidden="True" />
     </RenderPlugin>
     <Scene>
-        <Property name="name" formalName="Name" type="String" default="Scene" hidden="True" />
-        <Property name="eyeball" formalName="Visible" description="Item visibility" type="Boolean" default="True" hidden="True" />
-        <Property name="bgcolorenable" formalName="Use Background" description="Clear the contents to a solid color\nbefore each frame?" type="Boolean" default="True" />
-        <Property name="backgroundcolor" formalName="Background Color" description="Color to use for the background" type="Color" animatable="False" />
+        <!-- Background -->
+        <Property name="bgcolorenable"   formalName="Use Background"   category="Background" type="Boolean" default="True"   description="Clear the contents to a solid color\nbefore each frame?" />
+        <Property name="backgroundcolor" formalName="Background Color" category="Background" type="Color"   animatable="False" description="Color to use for the background" />
+
         <Event name="onPressureDown" category="Gesture" />
-        <Event name="onPressureUp" category="Gesture" />
-        <Event name="onTap" category="Gesture" />
+        <Event name="onPressureUp"   category="Gesture" />
+        <Event name="onTap"          category="Gesture" />
+
+        <!-- Hidden and commented out props -->
+        <Property name="name"    formalName="Name"    category="Basic Properties" type="String"  default="Scene" hidden="True" />
+        <Property name="eyeball" formalName="Visible" category="Basic Properties" type="Boolean" default="True"  hidden="True" description="Item visibility" />
         <!--
         <Event name="onDoubleTap" category="Gesture" />
         <Event name="onSingleTap" category="Gesture" />
@@ -459,11 +473,12 @@
         -->
     </Scene>
     <Slide>
-        <Property name="playmode" formalName="Play Mode" description="Action to take when reaching the end of\nall timebars on this slide" list="Stop at end:Looping:PingPong:Ping:Play Through To..." default="Stop at end" animatable="False" />
-        <Property name="playthroughto" formalName="Play Through To" description="Slide to go to after this one" type="StringListOrInt" list="Next:Previous" default="Next" animatable="False">
+        <!-- Play Mode -->
+        <Property name="playmode"      formalName="Play Mode"       category="Play Mode" default="Stop at end" animatable="False" list="Stop at end:Looping:PingPong:Ping:Play Through To..." description="Action to take when reaching the end of\nall timebars on this slide" />
+        <Property name="playthroughto" formalName="Play Through To" category="Play Mode" default="Next"        animatable="False" type="StringListOrInt" list="Next:Previous"                                        description="Slide to go to after this one">
             <ShowIfEqual property="playmode" value="Play Through To..."/>
         </Property>
-        <Property name="initialplaystate" formalName="Initial Play State" description="Do animations start when coming to\nthis slide?" list="Play:Pause" default="Play" animatable="False" />
+        <Property name="initialplaystate" formalName="Initial Play State" category="Play Mode" default="Play" animatable="False" list="Play:Pause" description="Do animations start when coming to\nthis slide?" />
     </Slide>
     <SlideOwner>
         <Event name="onSlideEnter" category="Slide" description="Fired when the slide is changing" />

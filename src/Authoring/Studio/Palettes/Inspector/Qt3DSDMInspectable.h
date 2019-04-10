@@ -27,46 +27,38 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
 #ifndef INCLUDED_QT3DSDM_INSPECTABLE_H
-#define INCLUDED_QT3DSDM_INSPECTABLE_H 1
+#define INCLUDED_QT3DSDM_INSPECTABLE_H
 
-//==============================================================================
-//	Includes
-//==============================================================================
 #include "InspectableBase.h"
 #include "Qt3DSDMHandles.h"
-#include "StudioApp.h"
 
-//==============================================================================
-/**
-*	For inspecting data model instances
-*/
+class CDoc;
+
+// For inspecting data model instances
 class Qt3DSDMInspectable : public CInspectableBase
 {
-protected: // Fields
-    qt3dsdm::Qt3DSDMInstanceHandle m_Instance;
-    qt3dsdm::Qt3DSDMInstanceHandle m_DualPersonalityInstance;
-    CStudioApp &m_App;
+public:
+    Qt3DSDMInspectable(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                       qt3dsdm::Qt3DSDMInstanceHandle activeSlideInstance = 0);
 
-public: // Constructor
-    Qt3DSDMInspectable(CStudioApp &inApp, CCore *inCore, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                       qt3dsdm::Qt3DSDMInstanceHandle inDualPersonalityInstance = 0);
-
-public: // CInspectableBase
-    Q3DStudio::CString GetName() override;
-    long GetGroupCount() override;
-    CInspectorGroup *GetGroup(long) override;
-    EStudioObjectType GetObjectType() override;
-    bool IsValid() const override;
-    bool IsMaster() override;
+    Q3DStudio::CString getName() override;
+    long getGroupCount() const override;
+    CInspectorGroup *getGroup(long) override;
+    EStudioObjectType getObjectType() const override;
+    bool isValid() const override { return true; } // asserted in the constructor
+    bool isMaster() const override;
+    qt3dsdm::Qt3DSDMInstanceHandle getInstance() const override { return m_instance; }
     virtual qt3dsdm::TMetaDataPropertyHandleList GetGroupProperties(long inGroupIndex);
     virtual qt3dsdm::Qt3DSDMInstanceHandle GetGroupInstance(long inGroupIndex);
 
 protected:
+    qt3dsdm::Qt3DSDMInstanceHandle m_instance;
+    qt3dsdm::Qt3DSDMInstanceHandle m_activeSlideInstance;
+
     virtual QString GetGroupName(long inGroupIndex);
+    CDoc *getDoc() const;
+    long activeGroupIndex(long groupIndex) const;
 };
 
 #endif

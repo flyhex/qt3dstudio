@@ -297,13 +297,11 @@ SOURCES += \
     Palettes/BasicObjects/BasicObjectsModel.cpp \
     Palettes/BasicObjects/BasicObjectsView.cpp \
     Palettes/Inspector/ChooserModelBase.cpp \
-    Palettes/Inspector/EasyInspectorGroup.cpp \
     Palettes/Inspector/FileChooserModel.cpp \
     Palettes/Inspector/FileChooserView.cpp \
     Palettes/Inspector/GuideInspectable.cpp \
     Palettes/Inspector/ImageChooserModel.cpp \
     Palettes/Inspector/ImageChooserView.cpp \
-    Palettes/Inspector/InspectableBase.cpp \
     Palettes/Inspector/InspectorControlModel.cpp \
     Palettes/Inspector/InspectorControlView.cpp \
     Palettes/Inspector/InspectorGroup.cpp \
@@ -316,7 +314,6 @@ SOURCES += \
     Palettes/Inspector/Qt3DSDMInspectorGroup.cpp \
     Palettes/Inspector/Qt3DSDMInspectorRow.cpp \
     Palettes/Inspector/Qt3DSDMMaterialInspectable.cpp \
-    Palettes/Inspector/Qt3DSDMSceneInspectable.cpp \
     Palettes/Inspector/TabOrderHandler.cpp \
     Palettes/Inspector/TextureChooserView.cpp \
     Palettes/PaletteManager.cpp \

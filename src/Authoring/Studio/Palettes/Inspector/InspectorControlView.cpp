@@ -62,6 +62,11 @@
 #include "VariantTagDialog.h"
 #include "SlideView.h"
 #include "TimelineWidget.h"
+#include "SelectedValue.h"
+#include "Qt3DSDMInspectable.h"
+#include "Qt3DSDMSlides.h"
+#include "Qt3DSDMMaterialInspectable.h"
+#include "GuideInspectable.h"
 
 #include <QtCore/qtimer.h>
 #include <QtQml/qqmlcontext.h>
@@ -262,7 +267,7 @@ QAbstractItemModel *InspectorControlView::inspectorControlModel() const
 QString InspectorControlView::titleText() const
 {
     if (m_inspectableBase) {
-        Q3DStudio::CString theName = m_inspectableBase->GetName();
+        Q3DStudio::CString theName = m_inspectableBase->getName();
         if (theName == L"PathAnchorPoint")
             return tr("Anchor Point");
         else
@@ -332,7 +337,7 @@ void InspectorControlView::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inIn
     // which will invalidate the inspectable anyway, so in reality we are only interested in name
     // property here
     if (inProperty == bridge->GetNameProperty() && m_inspectableBase
-        && m_inspectableBase->IsValid()) {
+        && m_inspectableBase->isValid()) {
         Q_EMIT titleChanged();
     }
 }
@@ -377,7 +382,7 @@ QColor InspectorControlView::titleColor(int instance, int handle) const
 QString InspectorControlView::titleIcon() const
 {
     if (m_inspectableBase)
-        return CStudioObjectTypes::GetNormalIconName(m_inspectableBase->GetObjectType());
+        return CStudioObjectTypes::GetNormalIconName(m_inspectableBase->getObjectType());
     return {};
 }
 
@@ -391,18 +396,65 @@ bool InspectorControlView::isEditable(int handle) const
     return true;
 }
 
-void InspectorControlView::OnSelectionSet(Q3DStudio::SSelectedValue inSelectable)
+void InspectorControlView::OnSelectionSet(Q3DStudio::SSelectedValue selectable)
 {
-    updateInspectable(g_StudioApp.GetInspectableFromSelectable(inSelectable));
+    CInspectableBase *inspectable = createInspectableFromSelectable(selectable);
+
+    if (inspectable && !inspectable->isValid())
+        inspectable = nullptr;
+
+    setInspectable(inspectable);
 }
 
-void InspectorControlView::updateInspectable(CInspectableBase *inInspectable)
+CInspectableBase *InspectorControlView::createInspectableFromSelectable(
+                                                        Q3DStudio::SSelectedValue selectable)
 {
-    if (inInspectable != nullptr) {
-        if (inInspectable->IsValid() == false)
-            inInspectable = nullptr;
+    using namespace Q3DStudio;
+
+    CInspectableBase *inspectableBase = nullptr;
+    if (!selectable.empty()) {
+        switch (selectable.getType()) {
+        case SelectedValueTypes::Slide: {
+            // TODO: seems like slides are not directly selectable, this should be removed.
+            auto selectableInstance = selectable.getData<SSlideInstanceWrapper>().m_Instance;
+            inspectableBase = new Qt3DSDMInspectable(selectableInstance);
+        } break;
+
+        case SelectedValueTypes::MultipleInstances:
+        case SelectedValueTypes::Instance: {
+            CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+            // Note: Inspector doesn't support multiple selection
+            qt3dsdm::TInstanceHandleList selectedsInstances = selectable.GetSelectedInstances();
+            Qt3DSDMInstanceHandle selectedInstance = selectedsInstances[0];
+            if (selectedsInstances.size() == 1
+                && doc->GetDocumentReader().IsInstance(selectedInstance)) {
+                CClientDataModelBridge *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+                qt3dsdm::Qt3DSDMSlideHandle activeSlide = doc->GetActiveSlide();
+
+                // Scene or Component (when being edited)
+                if (selectedInstance == bridge->GetOwningComponentInstance(activeSlide)) {
+                    Qt3DSDMInstanceHandle activeSlideInstance = doc->GetStudioSystem()
+                                          ->GetSlideSystem()->GetSlideInstance(activeSlide);
+                    inspectableBase = new Qt3DSDMInspectable(selectedInstance, activeSlideInstance);
+                } else if (bridge->IsMaterialBaseInstance(selectedInstance)) {
+                    inspectableBase = new Qt3DSDMMaterialInspectable(selectedInstance);
+                } else {
+                    inspectableBase = new Qt3DSDMInspectable(selectedInstance);
+                }
+            }
+        } break;
+
+        case SelectedValueTypes::Guide: {
+            qt3dsdm::Qt3DSDMGuideHandle guide = selectable.getData<qt3dsdm::Qt3DSDMGuideHandle>();
+            inspectableBase = new GuideInspectable(guide);
+        } break;
+
+        default:
+            break; // Ignore slide insertion and unknown selectable types
+        };
     }
-    setInspectable(inInspectable);
+
+    return inspectableBase;
 }
 
 void InspectorControlView::setInspectable(CInspectableBase *inInspectable)
@@ -810,7 +862,7 @@ void InspectorControlView::OnBeginDataModelNotifications()
 void InspectorControlView::OnEndDataModelNotifications()
 {
     CInspectableBase *inspectable = m_inspectorControlModel->inspectable();
-    if (inspectable && !inspectable->IsValid())
+    if (inspectable && !inspectable->isValid())
         OnSelectionSet(Q3DStudio::SSelectedValue());
     m_inspectorControlModel->refresh();
 

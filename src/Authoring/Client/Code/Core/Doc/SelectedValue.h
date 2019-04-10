@@ -31,16 +31,13 @@
 #include "foundation/Qt3DSOption.h"
 
 namespace Q3DStudio {
-struct SelectedValueTypes
-{
-    enum Enum {
-        UnknownSelectedValueType = 0,
-        Instance, // Qt3DSDMInstanceHandle
-        Slide, // Qt3DSDMSlideHandle
-        SlideInsertion, // void*
-        Guide, // Qt3DSDMGuideHandle
-        MultipleInstances, // std::vector<Qt3DSDMInstanceHandle>
-    };
+enum class SelectedValueTypes {
+    Instance,          // Qt3DSDMInstanceHandle
+    Slide,             // Qt3DSDMSlideHandle
+    SlideInsertion,    // void*
+    Guide,             // Qt3DSDMGuideHandle
+    MultipleInstances, // std::vector<Qt3DSDMInstanceHandle>
+    Unknown
 };
 
 // Defined in SelectedValueImpl.h

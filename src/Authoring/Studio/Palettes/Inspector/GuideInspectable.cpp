@@ -26,13 +26,13 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "Qt3DSCommonPrecompile.h"
 #include "GuideInspectable.h"
 #include "InspectableBase.h"
+#include "StudioApp.h"
 #include "Core.h"
 #include "Doc.h"
 #include "Qt3DSDMGuides.h"
-#include "EasyInspectorGroup.h"
+#include "InspectorGroup.h"
 #include "IDocumentEditor.h"
 #include "Qt3DSDMDataTypes.h"
 #include "IInspectableItem.h"
@@ -173,50 +173,42 @@ struct SFloatIntItem : public IInspectableAttributeItem
     }
 };
 
-
-CInspectableBase *CGuideInspectable::CreateInspectable(CCore &inCore,
-                                                       qt3dsdm::Qt3DSDMGuideHandle inGuide)
-{
-    return new SGuideInspectableImpl(inCore, inGuide);
-}
-
-SGuideInspectableImpl::SGuideInspectableImpl(CCore &inCore, qt3dsdm::Qt3DSDMGuideHandle inGuide)
-    : CInspectableBase(&inCore)
-    , m_Guide(inGuide)
-    , m_Editor(*inCore.GetDoc())
+GuideInspectable::GuideInspectable(qt3dsdm::Qt3DSDMGuideHandle inGuide)
+    : m_Guide(inGuide)
+    , m_Editor(*g_StudioApp.GetCore()->GetDoc())
 {
 }
 
-Q3DStudio::IDocumentReader &SGuideInspectableImpl::Reader() const
+Q3DStudio::IDocumentReader &GuideInspectable::Reader() const
 {
-    return m_Core->GetDoc()->GetDocumentReader();
+    return g_StudioApp.GetCore()->GetDoc()->GetDocumentReader();
 }
 
-EStudioObjectType SGuideInspectableImpl::GetObjectType()
+EStudioObjectType GuideInspectable::getObjectType() const
 {
     return OBJTYPE_GUIDE;
 }
 
-Q3DStudio::CString SGuideInspectableImpl::GetName()
+Q3DStudio::CString GuideInspectable::getName()
 {
     return L"Guide";
 }
 
-long SGuideInspectableImpl::GetGroupCount()
+long GuideInspectable::getGroupCount() const
 {
     return 1;
 }
 
-CInspectorGroup *SGuideInspectableImpl::GetGroup(long)
+CInspectorGroup *GuideInspectable::getGroup(long)
 {
-    TCommitFunc theCommiter = std::bind(&SGuideInspectableImpl::Commit, this);
-    TCancelFunc theCanceler = std::bind(&SGuideInspectableImpl::Rollback, this);
+    TCommitFunc theCommiter = std::bind(&GuideInspectable::Commit, this);
+    TCancelFunc theCanceler = std::bind(&GuideInspectable::Rollback, this);
     m_Properties.push_back(
                 std::make_shared<SFloatIntItem>(
                     SInspectableDataInfo(QStringLiteral("Position"), QObject::tr("Position"),
                                          QObject::tr("Position of the guide"),
-                                         std::bind(&SGuideInspectableImpl::GetPosition, this),
-                                         std::bind(&SGuideInspectableImpl::SetPosition, this,
+                                         std::bind(&GuideInspectable::GetPosition, this),
+                                         std::bind(&GuideInspectable::SetPosition, this,
                                                    std::placeholders::_1),
                                          theCommiter, theCanceler),
                     qt3dsdm::DataModelDataType::Float));
@@ -228,8 +220,8 @@ CInspectorGroup *SGuideInspectableImpl::GetGroup(long)
                 std::make_shared<SComboAttItem>(
                     SInspectableDataInfo(QStringLiteral("Orientation"), QObject::tr("Orientation"),
                                          QObject::tr("Orientation of the guide"),
-                                         std::bind(&SGuideInspectableImpl::GetDirection, this),
-                                         std::bind(&SGuideInspectableImpl::SetDirection, this,
+                                         std::bind(&GuideInspectable::GetDirection, this),
+                                         std::bind(&GuideInspectable::SetDirection, this,
                                                    std::placeholders::_1),
                                          theCommiter, theCanceler),
                     theComboItems));
@@ -238,27 +230,32 @@ CInspectorGroup *SGuideInspectableImpl::GetGroup(long)
                 std::make_shared<SFloatIntItem>(
                     SInspectableDataInfo(QStringLiteral("Width"), QObject::tr("Width"),
                                          QObject::tr("Width of the guide"),
-                                         std::bind(&SGuideInspectableImpl::GetWidth, this),
-                                         std::bind(&SGuideInspectableImpl::SetWidth, this,
+                                         std::bind(&GuideInspectable::GetWidth, this),
+                                         std::bind(&GuideInspectable::SetWidth, this,
                                                    std::placeholders::_1),
                                          theCommiter, theCanceler),
                     qt3dsdm::DataModelDataType::Long, 1.0f, 50.0f));
 
-    CEasyInspectorGroup *theNewGroup = new CEasyInspectorGroup(QObject::tr("Basic"));
+    CInspectorGroup *theNewGroup = new CInspectorGroup(QObject::tr("Basic"));
     return theNewGroup;
 }
 
-bool SGuideInspectableImpl::IsValid() const
+bool GuideInspectable::isValid() const
 {
     return Reader().IsGuideValid(m_Guide);
 }
 
-bool SGuideInspectableImpl::IsMaster()
+bool GuideInspectable::isMaster() const
 {
     return true;
 }
 
-void SGuideInspectableImpl::SetDirection(const qt3dsdm::SValue &inValue)
+qt3dsdm::Qt3DSDMInstanceHandle GuideInspectable::getInstance() const
+{
+    return 0; // guide has no instance
+}
+
+void GuideInspectable::SetDirection(const qt3dsdm::SValue &inValue)
 {
     qt3dsdm::TDataStrPtr theData = inValue.getData<qt3dsdm::TDataStrPtr>();
     qt3dsdm::SGuideInfo theSetter(Reader().GetGuideInfo(m_Guide));
@@ -272,7 +269,7 @@ void SGuideInspectableImpl::SetDirection(const qt3dsdm::SValue &inValue)
     FireRefresh();
 }
 
-qt3dsdm::SValue SGuideInspectableImpl::GetDirection()
+qt3dsdm::SValue GuideInspectable::GetDirection()
 {
     switch (Reader().GetGuideInfo(m_Guide).m_Direction) {
     case qt3dsdm::GuideDirections::Horizontal:
@@ -284,7 +281,7 @@ qt3dsdm::SValue SGuideInspectableImpl::GetDirection()
     }
 }
 
-void SGuideInspectableImpl::SetPosition(const qt3dsdm::SValue &inValue)
+void GuideInspectable::SetPosition(const qt3dsdm::SValue &inValue)
 {
     float thePos = inValue.getData<float>();
     qt3dsdm::SGuideInfo theSetter(Reader().GetGuideInfo(m_Guide));
@@ -293,13 +290,13 @@ void SGuideInspectableImpl::SetPosition(const qt3dsdm::SValue &inValue)
     FireRefresh();
 }
 
-qt3dsdm::SValue SGuideInspectableImpl::GetPosition()
+qt3dsdm::SValue GuideInspectable::GetPosition()
 {
     qt3dsdm::SGuideInfo theSetter(Reader().GetGuideInfo(m_Guide));
     return theSetter.m_Position;
 }
 
-void SGuideInspectableImpl::SetWidth(const qt3dsdm::SValue &inValue)
+void GuideInspectable::SetWidth(const qt3dsdm::SValue &inValue)
 {
     auto theData = inValue.getData<qt3ds::QT3DSI32>();
 
@@ -310,45 +307,45 @@ void SGuideInspectableImpl::SetWidth(const qt3dsdm::SValue &inValue)
 
 }
 
-qt3dsdm::SValue SGuideInspectableImpl::GetWidth()
+qt3dsdm::SValue GuideInspectable::GetWidth()
 {
     qt3dsdm::SGuideInfo theSetter(Reader().GetGuideInfo(m_Guide));
     return theSetter.m_Width;
 }
 
-Q3DStudio::IDocumentEditor &SGuideInspectableImpl::Editor()
+Q3DStudio::IDocumentEditor &GuideInspectable::Editor()
 {
     return m_Editor.EnsureEditor(QObject::tr("Set Property"), __FILE__, __LINE__);
 }
 
-void SGuideInspectableImpl::Commit()
+void GuideInspectable::Commit()
 {
     m_Editor.CommitEditor();
 }
 
-void SGuideInspectableImpl::Rollback()
+void GuideInspectable::Rollback()
 {
     m_Editor.RollbackEditor();
 }
 
-void SGuideInspectableImpl::FireRefresh()
+void GuideInspectable::FireRefresh()
 {
     m_Editor.FireImmediateRefresh(qt3dsdm::Qt3DSDMInstanceHandle());
 }
 
-void SGuideInspectableImpl::Destroy()
+void GuideInspectable::Destroy()
 {
     m_Editor.EnsureEditor(QObject::tr("Delete Guide"), __FILE__, __LINE__).DeleteGuide(m_Guide);
     m_Editor.CommitEditor();
 }
 
-bool SGuideInspectableImpl::isHorizontal() const
+bool GuideInspectable::isHorizontal() const
 {
     return Reader().GetGuideInfo(m_Guide).m_Direction == qt3dsdm::GuideDirections::Horizontal;
 }
 
 const std::vector<std::shared_ptr<IInspectableAttributeItem>> &
-SGuideInspectableImpl::properties() const
+GuideInspectable::properties() const
 {
     return m_Properties;
 }
