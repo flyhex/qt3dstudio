@@ -1696,6 +1696,10 @@ CClientDataModelBridge::GetObjectType(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     SValue theTypeValue;
     IPropertySystem *thePropertySystem = m_Doc->GetStudioSystem()->GetPropertySystem();
     thePropertySystem->GetInstancePropertyValue(inInstance, GetTypeProperty(), theTypeValue);
+
+    if (theTypeValue.empty())
+        return OBJTYPE_UNKNOWN;
+
     std::wstring theType(qt3dsdm::get<TDataStrPtr>(theTypeValue)->GetData());
 
     if (theType == L"Behavior")

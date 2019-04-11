@@ -83,7 +83,8 @@ class IPropertySystem;
 #define ITERATE_COMPOSER_TYPED_PROPERTIES                                                          \
     HANDLE_COMPOSER_PROPERTY(type, m_TypeProp, TDataStrPtr, L"Typed")
 
-#define ITERATE_COMPOSER_GUIDED_PROPERTIES HANDLE_COMPOSER_PROPERTY(id, m_GuidProp, SLong4, 0)
+#define ITERATE_COMPOSER_GUIDED_PROPERTIES                                                         \
+    HANDLE_COMPOSER_PROPERTY(id, m_GuidProp, SLong4, 0)
 
 #define ITERATE_COMPOSER_NAMED_PROPERTIES                                                          \
     HANDLE_COMPOSER_PROPERTY(name, m_NameProp, TDataStrPtr, L"Unnamed")
