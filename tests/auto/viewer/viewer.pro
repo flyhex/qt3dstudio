@@ -3,7 +3,7 @@ CONFIG += testcase
 include($$PWD/../../../src/Runtime/commoninclude.pri)
 
 TARGET = tst_qt3dsviewer
-QT += testlib gui quick
+QT += testlib gui quick studio3d
 RESOURCES += viewer.qrc
 
 HEADERS += \

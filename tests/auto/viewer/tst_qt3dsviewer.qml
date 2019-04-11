@@ -48,7 +48,7 @@
 **
 ****************************************************************************/
 
-import QtStudio3D 1.0
+import QtStudio3D.OpenGL 2.4
 
 Studio3D {
     id: studio3D
@@ -56,5 +56,7 @@ Studio3D {
     height: 480
     Presentation {
         source: "qrc:/simple_cube_animation/simple_cube_animation.uia"
+    }
+    ViewerSettings {
     }
 }

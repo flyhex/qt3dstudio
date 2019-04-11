@@ -32,6 +32,9 @@
 
 #include <QtTest/QtTest>
 #include <QtTest/QSignalSpy>
+#include <QtQuick/QQuickView>
+#include <QtStudio3D/q3dspresentation.h>
+#include <QtStudio3D/q3dsviewersettings.h>
 
 class tst_qt3dsviewer : public QObject
 {
@@ -43,9 +46,22 @@ public:
 
 private Q_SLOTS:
     void initTestCase();
+    void cleanupTestCase();
     void init();
+    void cleanup();
 
-    void testQml();
+    void testEmpty();
+    void testLoading();
+    void testSlides();
+    void testFrameUpdates();
+    void testSettings();
+
+private:
+    QQuickView m_viewer;
+    QObject *m_studio3DItem = nullptr;
+    Q3DSPresentation *m_presentation = nullptr;
+    Q3DSViewerSettings *m_settings = nullptr;
+
 };
 
 #endif // TST_QT3DSVIEWER
