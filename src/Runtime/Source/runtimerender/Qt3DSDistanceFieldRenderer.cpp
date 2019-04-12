@@ -115,6 +115,9 @@ Q3DSDistanceFieldRenderer::buildGlyphsPerTexture(const SText &textInfo)
         return QHash<Q3DSDistanceFieldGlyphCache::TextureInfo *, GlyphInfo>();
 
     QVector2D boundingBox = QVector2D(textInfo.m_BoundingBox.x, textInfo.m_BoundingBox.y);
+    const float halfWidth = boundingBox.x() / 2.0f;
+    const float halfHeight = boundingBox.y() / 2.0f;
+    bool hasValidBoundingBox = boundingBox.x() > 0 || boundingBox.y() > 0;
 
     QRawFont font = m_fontDatabase.findFont(textInfo.m_Font.c_str());
     font.setPixelSize(qreal(textInfo.m_FontSize));
@@ -391,6 +394,43 @@ Q3DSDistanceFieldRenderer::buildGlyphsPerTexture(const SText &textInfo)
                         cy2 += float(shadowOffsetY * fontScale);
                 }
 
+                float x1Clip = 1.0f;
+                float x2Clip = 1.0f;
+                float y1Clip = 1.0f;
+                float y2Clip = 1.0f;
+
+                if (hasValidBoundingBox) {
+                    if ((cx1 < -halfWidth && cx2 < -halfWidth)
+                            || (cx1 > halfWidth && cx2 > halfWidth)
+                            || (cy1 < -halfHeight && cy2 < -halfHeight)
+                            || (cy1 > halfHeight && cy2 > halfHeight)) {
+                        continue;
+                    }
+
+                    float xDiff = qAbs(cx1 - cx2);
+                    float yDiff = qAbs(cy1 - cy2);
+
+                    if (cx1 < -halfWidth) {
+                        x1Clip = 1.0f - qAbs(cx1 - (-halfWidth)) / xDiff;
+                        cx1 = -halfWidth;
+                    }
+
+                    if (cx2 > halfWidth) {
+                        x2Clip = 1.0f - qAbs(cx2 - halfWidth) / xDiff;
+                        cx2 = halfWidth;
+                    }
+
+                    if (cy1 < -halfHeight) {
+                        y1Clip = 1.0f - qAbs(cy1 - (-halfHeight)) / yDiff;
+                        cy1 = -halfHeight;
+                    }
+
+                    if (cy2 > halfHeight) {
+                        y2Clip = 1.0f - qAbs(cy2 - halfHeight) / yDiff;
+                        cy2 = halfHeight;
+                    }
+                }
+
                 cy1 = -cy1;
                 cy2 = -cy2;
 
@@ -414,9 +454,7 @@ Q3DSDistanceFieldRenderer::buildGlyphsPerTexture(const SText &textInfo)
                 else if (cy2 > maximum.y)
                     maximum.y = cy2;
 
-                if (boundingBox.x() > 0 || boundingBox.y() > 0) {
-                    const float halfWidth = boundingBox.x() / 2.0f;
-                    const float halfHeight = boundingBox.y() / 2.0f;
+                if (hasValidBoundingBox) {
                     if (maximum.x < halfWidth)
                         maximum.x = halfWidth;
                     if (minimum.x > -halfWidth)
@@ -448,6 +486,21 @@ Q3DSDistanceFieldRenderer::buildGlyphsPerTexture(const SText &textInfo)
                         ty1 += float(c.height * shadowOffsetY * fontScale) / float(metrics.height);
                     else
                         ty2 += float(c.height * shadowOffsetY * fontScale) / float(metrics.height);
+                }
+
+                if (hasValidBoundingBox) {
+                    float tx1Orig = tx1;
+                    float tx2Orig = tx2;
+                    float ty1Orig = ty1;
+                    float ty2Orig = ty2;
+
+                    float xDiff = qAbs(tx1 - tx2);
+                    tx1 = tx2Orig - xDiff * x1Clip;
+                    tx2 = tx1Orig + xDiff * x2Clip;
+
+                    float yDiff = qAbs(ty1 - ty2);
+                    ty1 = ty2Orig - yDiff * y1Clip;
+                    ty2 = ty1Orig + yDiff * y2Clip;
                 }
 
                 const QSGDistanceFieldGlyphCache::Texture *texture

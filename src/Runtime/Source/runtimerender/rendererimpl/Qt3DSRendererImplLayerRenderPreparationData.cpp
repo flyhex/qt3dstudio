@@ -383,44 +383,41 @@ namespace render {
             inText.CalculateMVPAndNormalMatrix(inViewProjection, theMVP, theNormalMatrix);
 
             SRenderableObject *theRenderable = nullptr;
+
 #if QT_VERSION >= QT_VERSION_CHECK(5,12,2)
-            // TODO: Implement clipping for the distance field renderer
-            if (inText.m_WordWrap != TextWordWrap::Clip || (inText.m_BoundingBox.x == 0.0f
-                                                            && inText.m_BoundingBox.y == 0.0f)) {
-                QT3DSMat44 modelView = (inProjection.getInverse() * inViewProjection)
-                        * inText.m_GlobalTransform;
-                Q3DSDistanceFieldRenderer *distanceFieldText
-                        = static_cast<Q3DSDistanceFieldRenderer *>(
-                            m_Renderer.GetQt3DSContext().getDistanceFieldRenderer());
-                theRenderable = RENDER_FRAME_NEW(SDistanceFieldRenderable)(
-                    theFlags, inText.GetGlobalPos(), inText, inText.m_Bounds, theMVP,
-                    modelView, *distanceFieldText);
-            } else
+            QT3DSMat44 modelView = (inProjection.getInverse() * inViewProjection)
+                    * inText.m_GlobalTransform;
+            Q3DSDistanceFieldRenderer *distanceFieldText
+                    = static_cast<Q3DSDistanceFieldRenderer *>(
+                        m_Renderer.GetQt3DSContext().getDistanceFieldRenderer());
+            theRenderable = RENDER_FRAME_NEW(SDistanceFieldRenderable)(
+                        theFlags, inText.GetGlobalPos(), inText, inText.m_Bounds, theMVP,
+                        modelView, *distanceFieldText);
+#else
+            TTPathObjectAndTexture theResult
+                    = theTextRenderer->RenderText(inText, inTextScaleFactor);
+            inText.m_TextTexture = theResult.second.second.mPtr;
+            inText.m_TextTextureDetails = theResult.second.first;
+            inText.m_PathFontItem = theResult.first.second;
+            inText.m_PathFontDetails = theResult.first.first;
+            STextScaleAndOffset theScaleAndOffset(*inText.m_TextTexture,
+                                                  inText.m_TextTextureDetails, inText);
+            QT3DSVec2 theTextScale(theScaleAndOffset.m_TextScale);
+            QT3DSVec2 theTextOffset(theScaleAndOffset.m_TextOffset);
+            QT3DSVec3 minimum(theTextOffset[0] - theTextScale[0],
+                    theTextOffset[1] - theTextScale[1], 0);
+            QT3DSVec3 maximum(theTextOffset[0] + theTextScale[0],
+                    theTextOffset[1] + theTextScale[1], 0);
+            inText.m_Bounds = NVBounds3(minimum, maximum);
+
+            if (inText.m_PathFontDetails)
+                ioFlags.SetRequiresStencilBuffer(true);
+
+            theRenderable = RENDER_FRAME_NEW(STextRenderable)(
+                theFlags, inText.GetGlobalPos(), m_Renderer, inText, inText.m_Bounds, theMVP,
+                inViewProjection, *inText.m_TextTexture, theTextOffset, theTextScale);
 #endif
-            {
-                TTPathObjectAndTexture theResult
-                        = theTextRenderer->RenderText(inText, inTextScaleFactor);
-                inText.m_TextTexture = theResult.second.second.mPtr;
-                inText.m_TextTextureDetails = theResult.second.first;
-                inText.m_PathFontItem = theResult.first.second;
-                inText.m_PathFontDetails = theResult.first.first;
-                STextScaleAndOffset theScaleAndOffset(*inText.m_TextTexture,
-                                                      inText.m_TextTextureDetails, inText);
-                QT3DSVec2 theTextScale(theScaleAndOffset.m_TextScale);
-                QT3DSVec2 theTextOffset(theScaleAndOffset.m_TextOffset);
-                QT3DSVec3 minimum(theTextOffset[0] - theTextScale[0],
-                        theTextOffset[1] - theTextScale[1], 0);
-                QT3DSVec3 maximum(theTextOffset[0] + theTextScale[0],
-                        theTextOffset[1] + theTextScale[1], 0);
-                inText.m_Bounds = NVBounds3(minimum, maximum);
 
-                if (inText.m_PathFontDetails)
-                    ioFlags.SetRequiresStencilBuffer(true);
-
-                theRenderable = RENDER_FRAME_NEW(STextRenderable)(
-                    theFlags, inText.GetGlobalPos(), m_Renderer, inText, inText.m_Bounds, theMVP,
-                    inViewProjection, *inText.m_TextTexture, theTextOffset, theTextScale);
-            }
             m_TransparentObjects.push_back(theRenderable);
         }
         return retval;
