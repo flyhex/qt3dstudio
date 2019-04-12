@@ -116,6 +116,7 @@ public:
     bool InitializeApp(int winWidth, int winHeight, const QSurfaceFormat& format,
                        int offscreenID, const QString &source,
                        const QStringList &variantList,
+                       bool delayedLoading,
                        qt3ds::Qt3DSAssetVisitor *assetVisitor = nullptr);
 
     bool IsInitialised(void);
@@ -359,6 +360,9 @@ public:
     QString error();
 
     void setPresentationId(const QString &id);
+    void preloadSlide(const QString &slide);
+    void unloadSlide(const QString &slide);
+    void setDelayedLoading(bool enable);
 
 private:
     /*

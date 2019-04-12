@@ -77,7 +77,8 @@ namespace render {
         virtual ITextRendererCore *GetOnscreenTextRendererCore() = 0;
         // The render context maintains a reference to this object.
         virtual IQt3DSRenderContext &CreateRenderContext(NVRenderContext &inContext,
-                                                       const char8_t *inPrimitivesDirectory) = 0;
+                                                         const char8_t *inPrimitivesDirectory,
+                                                         bool delayedLoading) = 0;
 
         static IQt3DSRenderContextCore &Create(NVFoundationBase &fnd, IStringTable &strt);
     };

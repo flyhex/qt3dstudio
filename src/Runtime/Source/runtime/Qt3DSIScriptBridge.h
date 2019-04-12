@@ -41,7 +41,6 @@
 namespace qt3ds {
 namespace runtime {
     class IApplication;
-    class IApplicationCore;
 }
 }
 namespace qt3ds {
@@ -130,7 +129,7 @@ public: // thread
     virtual void DisableMultithreadedAccess() = 0;
 
 public: // Settings
-    virtual void SetApplicationCore(qt3ds::runtime::IApplicationCore &inApplication) = 0;
+    virtual void SetApplicationCore(qt3ds::runtime::IApplication &inApplication) = 0;
     virtual void SetApplication(qt3ds::runtime::IApplication &inApplication) = 0;
 
 public: // Scripts

@@ -69,6 +69,7 @@ public:
     void setVariantList(const QStringList &variantList);
     void setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool connectApp = true);
     void setCommandQueue(CommandQueue *queue);
+    void setDelayedLoading(bool enable);
 
     void registerElement(Q3DSElement *element);
     void unregisterElement(Q3DSElement *element);
@@ -101,6 +102,7 @@ private:
     QUrl m_source;
     QStringList m_variantList;
     ViewerQmlStreamProxy *m_streamProxy;
+    bool m_delayedLoading;
 };
 
 QT_END_NAMESPACE

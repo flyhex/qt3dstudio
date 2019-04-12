@@ -130,14 +130,20 @@ namespace runtime {
                                        Q3DStudio::UVariant inValue) = 0;
         virtual SSlideAnimAction *AddSlideAnimAction(bool inAnimation, QT3DSI32 inIndex,
                                                      bool inActive) = 0;
+        virtual void AddSourcePath(const char8_t *path) = 0;
+        virtual QVector<QString> GetSourcePaths(SSlideKey inKey) = 0;
+        virtual void setIsActiveSlide(SSlideKey inKey, bool active) = 0;
+        virtual bool isActiveSlide(SSlideKey inKey) const = 0;
+        virtual void setUnloadSlide(SSlideKey inKey, bool unload) = 0;
+        virtual bool isUnloadSlideSet(SSlideKey inKey) const = 0;
 
         // Using the dataset
         virtual void InitializeDynamicKeys(SSlideKey inKey,
                                            IAnimationSystem &inAnimationSystem) const = 0;
         virtual void ExecuteSlide(SSlideKey inKey, IAnimationSystem &inAnimationSystem,
-                                  ILogicSystem &inLogicManager) const = 0;
+                                  ILogicSystem &inLogicManager) = 0;
         virtual void RollbackSlide(SSlideKey inKey, IAnimationSystem &inAnimationSystem,
-                                   ILogicSystem &inLogicManager) const = 0;
+                                   ILogicSystem &inLogicManager) = 0;
         virtual QT3DSU8 FindSlide(element::SElement &inComponent,
                                const char8_t *inSlideName) const = 0;
         virtual QT3DSU8 FindSlide(element::SElement &inComponent, QT3DSU32 inSlideHashName) const = 0;

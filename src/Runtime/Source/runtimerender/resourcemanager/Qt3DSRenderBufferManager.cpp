@@ -45,6 +45,7 @@
 #include "foundation/Qt3DSFoundation.h"
 #include "Qt3DSRenderInputStreamFactory.h"
 #include "Qt3DSRenderImageScaler.h"
+#include "Qt3DSRenderImage.h"
 #include "Qt3DSTextRenderer.h"
 #include "foundation/Qt3DSPerfTimer.h"
 #include "foundation/Qt3DSMutex.h"
@@ -76,13 +77,13 @@ struct SImageEntry : public SImageTextureData
 {
     bool m_Loaded;
     SImageEntry()
-        : m_Loaded(false)
+        : SImageTextureData(), m_Loaded(false)
     {
     }
-    ~SImageEntry()
+    SImageEntry(const SImageEntry &entry)
+        : SImageTextureData(entry), m_Loaded(entry.m_Loaded)
     {
-        if (m_BSDFMipMap)
-            m_BSDFMipMap->release();
+
     }
 };
 
@@ -117,6 +118,10 @@ struct SBufferManager : public IBufferManager
     SPrimitiveEntry m_PrimitiveNames[5];
     nvvector<qt3ds::render::NVRenderVertexBufferEntry> m_EntryBuffer;
     bool m_GPUSupportsDXT;
+    bool m_reloadableResources;
+
+    QHash<QString, ReloadableTexturePtr> m_reloadableTextures;
+
     static const char8_t *GetPrimitivesDirectory() { return "res//primitives"; }
 
     SBufferManager(NVRenderContext &ctx, IStringTable &strTable,
@@ -135,6 +140,7 @@ struct SBufferManager : public IBufferManager
         , m_MeshMap(ctx.GetAllocator(), "SBufferManager::m_MeshMap")
         , m_EntryBuffer(ctx.GetAllocator(), "SBufferManager::m_EntryBuffer")
         , m_GPUSupportsDXT(ctx.AreDXTImagesSupported())
+        , m_reloadableResources(false)
     {
     }
     virtual ~SBufferManager() { Clear(); }
@@ -210,6 +216,15 @@ struct SBufferManager : public IBufferManager
         return inSourcePath;
     }
 
+    CRegisteredString getImagePath(const QString &path)
+    {
+        TAliasImageMap::iterator theAliasIter
+                = m_AliasImageMap.find(m_StrTable->RegisterStr(qPrintable(path)));
+        if (theAliasIter != m_AliasImageMap.end())
+            return theAliasIter->second;
+        return m_StrTable->RegisterStr(qPrintable(path));
+    }
+
     static inline int wrapMod(int a, int base)
     {
         int ret = a % base;
@@ -230,6 +245,177 @@ struct SBufferManager : public IBufferManager
         }
         sX = wrapMod(sX, width);
         sY = wrapMod(sY, height);
+    }
+
+    template <typename V, typename C>
+    void iterateAll(const V &vv, C c)
+    {
+        for (const auto x : vv)
+            c(x);
+    }
+
+    void loadTextureImage(SReloadableImageTextureData &data)
+    {
+        CRegisteredString imagePath = getImagePath(data.m_path);
+        TImageMap::iterator theIter = m_ImageMap.find(imagePath);
+        if ((theIter == m_ImageMap.end() || theIter->second.m_Loaded == false)
+                && imagePath.IsValid()) {
+            NVScopedReleasable<SLoadedTexture> theLoadedImage;
+            SImageTextureData textureData;
+
+            doImageLoad(imagePath, theLoadedImage);
+
+            if (theLoadedImage) {
+                textureData = LoadRenderImage(imagePath, *theLoadedImage, data.m_scanTransparency,
+                                              data.m_bsdfMipmap);
+                data.m_Texture = textureData.m_Texture;
+                data.m_TextureFlags = textureData.m_TextureFlags;
+                data.m_BSDFMipMap = textureData.m_BSDFMipMap;
+                data.m_loaded = true;
+                iterateAll(data.m_callbacks, [](SImage *img){ img->m_Flags.SetDirty(true); });
+            } else {
+                // We want to make sure that bad path fails once and doesn't fail over and over
+                // again which could slow down the system quite a bit.
+                pair<TImageMap::iterator, bool> theImage =
+                        m_ImageMap.insert(make_pair(imagePath, SImageEntry()));
+                theImage.first->second.m_Loaded = true;
+                qCWarning(WARNING, "Failed to load image: %s", imagePath.c_str());
+                theIter = theImage.first;
+            }
+        } else {
+            SImageEntry textureData = theIter->second;
+            if (textureData.m_Loaded) {
+                data.m_Texture = textureData.m_Texture;
+                data.m_TextureFlags = textureData.m_TextureFlags;
+                data.m_BSDFMipMap = textureData.m_BSDFMipMap;
+                data.m_loaded = true;
+                iterateAll(data.m_callbacks, [](SImage *img){ img->m_Flags.SetDirty(true); });
+            }
+        }
+    }
+
+    void unloadTextureImage(SReloadableImageTextureData &data)
+    {
+        CRegisteredString r = m_StrTable->RegisterStr(qPrintable(data.m_path));
+        data.m_loaded = false;
+        data.m_Texture = nullptr;
+        data.m_BSDFMipMap = nullptr;
+        data.m_TextureFlags = {};
+        iterateAll(data.m_callbacks, [](SImage *img){ img->m_Flags.SetDirty(true); });
+        InvalidateBuffer(r);
+    }
+
+    void loadSet(const QSet<QString> &imageSet) override
+    {
+        for (const auto &x : imageSet) {
+            if (!m_reloadableTextures.contains(x)) {
+                auto img = CreateReloadableImage(m_StrTable->RegisterStr(qPrintable(x)), false,
+                                                 false);
+                img->m_initialized = false;
+                loadTextureImage(*m_reloadableTextures[x]);
+            } else if (!m_reloadableTextures[x]->m_loaded) {
+                loadTextureImage(*m_reloadableTextures[x]);
+            }
+        }
+    }
+
+    void unloadSet(const QSet<QString> &imageSet) override
+    {
+        for (const auto &x : imageSet) {
+            if (m_reloadableTextures.contains(x)) {
+                if (m_reloadableTextures[x]->m_loaded)
+                    unloadTextureImage(*m_reloadableTextures[x]);
+            }
+        }
+    }
+
+    virtual ReloadableTexturePtr CreateReloadableImage(CRegisteredString inSourcePath,
+                                                       bool inForceScanForTransparency,
+                                                       bool inBsdfMipmaps) override
+    {
+        QString path = QString::fromLatin1(inSourcePath.c_str());
+        const bool inserted = m_reloadableTextures.contains(path);
+        if (!inserted || (inserted && m_reloadableTextures[path]->m_initialized == false)) {
+            if (!inserted)
+                m_reloadableTextures.insert(path, ReloadableTexturePtr::create());
+            m_reloadableTextures[path]->m_path = path;
+            m_reloadableTextures[path]->m_scanTransparency = inForceScanForTransparency;
+            m_reloadableTextures[path]->m_bsdfMipmap = inBsdfMipmaps;
+            m_reloadableTextures[path]->m_initialized = true;
+
+            if (!m_reloadableResources)
+                loadTextureImage(*m_reloadableTextures[path]);
+
+            CRegisteredString imagePath = getImagePath(path);
+            TImageMap::iterator theIter = m_ImageMap.find(imagePath);
+            if (theIter != m_ImageMap.end()) {
+                SImageEntry textureData = theIter->second;
+                if (textureData.m_Loaded) {
+                    m_reloadableTextures[path]->m_Texture = textureData.m_Texture;
+                    m_reloadableTextures[path]->m_TextureFlags = textureData.m_TextureFlags;
+                    m_reloadableTextures[path]->m_BSDFMipMap = textureData.m_BSDFMipMap;
+                    m_reloadableTextures[path]->m_loaded = true;
+                }
+            }
+        }
+        return m_reloadableTextures[path];
+    }
+
+    void doImageLoad(CRegisteredString inImagePath,
+                     NVScopedReleasable<SLoadedTexture> &theLoadedImage)
+    {
+        SStackPerfTimer __perfTimer(m_PerfTimer, "Image Decompression");
+        theLoadedImage = SLoadedTexture::Load(
+                    inImagePath.c_str(), m_Context->GetFoundation(), *m_InputStreamFactory,
+                    true, m_Context->GetRenderContextType());
+        // Hackish solution to custom materials not finding their textures if they are used
+        // in sub-presentations.
+        if (!theLoadedImage) {
+            if (QDir(inImagePath.c_str()).isRelative()) {
+                QString searchPath = inImagePath.c_str();
+                if (searchPath.startsWith(QLatin1String("./")))
+                    searchPath.prepend(QLatin1Char('.'));
+                int loops = 0;
+                while (!theLoadedImage && ++loops <= 3) {
+                    theLoadedImage = SLoadedTexture::Load(
+                                searchPath.toUtf8(), m_Context->GetFoundation(),
+                                *m_InputStreamFactory, true,
+                                m_Context->GetRenderContextType());
+                    searchPath.prepend(QLatin1String("../"));
+                }
+            } else {
+                // Some textures, for example environment maps for custom materials,
+                // have absolute path at this point. It points to the wrong place with
+                // the new project structure, so we need to split it up and construct
+                // the new absolute path here.
+                QString wholePath = inImagePath.c_str();
+                QStringList splitPath = wholePath.split(QLatin1String("../"));
+                if (splitPath.size() > 1) {
+                    QString searchPath = splitPath.at(0) + splitPath.at(1);
+                    int loops = 0;
+                    while (!theLoadedImage && ++loops <= 3) {
+                        theLoadedImage = SLoadedTexture::Load(
+                                    searchPath.toUtf8(), m_Context->GetFoundation(),
+                                    *m_InputStreamFactory, true,
+                                    m_Context->GetRenderContextType());
+                        searchPath = splitPath.at(0);
+                        for (int i = 0; i < loops; i++)
+                            searchPath.append(QLatin1String("../"));
+                        searchPath.append(splitPath.at(1));
+                    }
+                }
+            }
+        }
+    }
+
+    void enableReloadableResources(bool enable) override
+    {
+        m_reloadableResources = enable;
+    }
+
+    bool isReloadableResourcesEnabled() const override
+    {
+        return m_reloadableResources;
     }
 
     SImageTextureData LoadRenderImage(CRegisteredString inImagePath,
@@ -336,51 +522,8 @@ struct SBufferManager : public IBufferManager
         TImageMap::iterator theIter = m_ImageMap.find(inImagePath);
         if (theIter == m_ImageMap.end() && inImagePath.IsValid()) {
             NVScopedReleasable<SLoadedTexture> theLoadedImage;
-            {
-                SStackPerfTimer __perfTimer(m_PerfTimer, "Image Decompression");
-                theLoadedImage = SLoadedTexture::Load(
-                            inImagePath.c_str(), m_Context->GetFoundation(), *m_InputStreamFactory,
-                            true, m_Context->GetRenderContextType());
-                // Hackish solution to custom materials not finding their textures if they are used
-                // in sub-presentations. Note: Runtime 1 is going to be removed in Qt 3D Studio 2.x,
-                // so this should be ok.
-                if (!theLoadedImage) {
-                    if (QDir(inImagePath.c_str()).isRelative()) {
-                        QString searchPath = inImagePath.c_str();
-                        if (searchPath.startsWith(QLatin1String("./")))
-                            searchPath.prepend(QLatin1String("."));
-                        int loops = 0;
-                        while (!theLoadedImage && ++loops <= 3) {
-                            theLoadedImage = SLoadedTexture::Load(
-                                        searchPath.toUtf8(), m_Context->GetFoundation(),
-                                        *m_InputStreamFactory, true,
-                                        m_Context->GetRenderContextType());
-                            searchPath.prepend(QLatin1String("../"));
-                        }
-                    } else {
-                        // Some textures, for example environment maps for custom materials,
-                        // have absolute path at this point. It points to the wrong place with
-                        // the new project structure, so we need to split it up and construct
-                        // the new absolute path here.
-                        QString wholePath = inImagePath.c_str();
-                        QStringList splitPath = wholePath.split(QLatin1String("../"));
-                        if (splitPath.size() > 1) {
-                            QString searchPath = splitPath.at(0) + splitPath.at(1);
-                            int loops = 0;
-                            while (!theLoadedImage && ++loops <= 3) {
-                                theLoadedImage = SLoadedTexture::Load(
-                                            searchPath.toUtf8(), m_Context->GetFoundation(),
-                                            *m_InputStreamFactory, true,
-                                            m_Context->GetRenderContextType());
-                                searchPath = splitPath.at(0);
-                                for (int i = 0; i < loops; i++)
-                                    searchPath.append(QLatin1String("../"));
-                                searchPath.append(splitPath.at(1));
-                            }
-                        }
-                    }
-                }
-            }
+
+            doImageLoad(inImagePath, theLoadedImage);
 
             if (theLoadedImage) {
                 return LoadRenderImage(inImagePath, *theLoadedImage, inForceScanForTransparency,
@@ -862,6 +1005,8 @@ struct SBufferManager : public IBufferManager
     {
         if (inEntry.m_Texture)
             inEntry.m_Texture->release();
+        if (inEntry.m_BSDFMipMap)
+            inEntry.m_BSDFMipMap->release();
     }
     void Clear() override
     {
@@ -916,5 +1061,5 @@ IBufferManager &IBufferManager::Create(NVRenderContext &inRenderContext, IString
                                        IInputStreamFactory &inFactory, IPerfTimer &inPerfTimer)
 {
     return *QT3DS_NEW(inRenderContext.GetAllocator(), SBufferManager)(inRenderContext, inStrTable,
-                                                                   inFactory, inPerfTimer);
+                                                                      inFactory, inPerfTimer);
 }

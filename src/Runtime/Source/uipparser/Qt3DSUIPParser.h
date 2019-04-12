@@ -143,6 +143,8 @@ public: // Parse UIP file
     // mesh files (and possibly font files).
     virtual NVConstDataRef<eastl::string> GetSourcePaths() const = 0;
 
+    virtual QVector<QString> GetSlideSourcePaths() const = 0;
+
     // Creation function
     static IUIPParser &Create(const QString &inFileName, IRuntimeMetaData &inMetaData,
                               qt3ds::render::IInputStreamFactory &inStreamFactory,

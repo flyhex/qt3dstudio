@@ -75,6 +75,10 @@
 #include "Qt3DSRenderInputStreamFactory.h"
 #include "Qt3DSAudioPlayer.h"
 #include "Qt3DSElementSystem.h"
+#include "Qt3DSSlideSystem.h"
+#include "Qt3DSQmlElementHelper.h"
+#include "Qt3DSRenderBufferManager.h"
+#include "Qt3DSRenderRenderList.h"
 #include <QtCore/qlibraryinfo.h>
 #include <QtCore/qpair.h>
 #include <QtCore/qdir.h>
@@ -82,6 +86,7 @@
 
 using namespace qt3ds;
 using namespace qt3ds::runtime;
+using namespace qt3ds::render;
 using namespace Q3DStudio;
 
 namespace qt3ds {
@@ -198,6 +203,139 @@ struct SHandleElementPairComparator
     bool operator()(const THandleElementPair &lhs, const THandleElementPair &rhs) const
     {
         return lhs.first < rhs.first;
+    }
+};
+
+struct SSlideResourceCounter
+{
+    QHash<QString, int> counters;
+    QSet<QString> createSet;
+    QSet<QString> deleteSet;
+
+    QVector<QString> loadedSlides;
+
+    void increment(const QSet<QString> &set)
+    {
+        for (auto &r : set) {
+            if (counters.value(r, 0) == 0)
+                createSet.insert(r);
+            counters[r]++;
+        }
+    }
+    void decrement(const QSet<QString> &set)
+    {
+        for (auto &r : set) {
+            if (counters.contains(r)) {
+                int count = qMax(counters[r] - 1, 0);
+                if (count == 0)
+                    deleteSet.insert(r);
+                counters[r] = count;
+            }
+        }
+    }
+    void begin()
+    {
+        createSet.clear();
+        deleteSet.clear();
+    }
+    void reset()
+    {
+        loadedSlides.clear();
+        counters.clear();
+        begin();
+    }
+    bool isImage(const QString &path)
+    {
+        int index = path.lastIndexOf(".");
+        if (index < 0)
+            return false;
+        const QString ext = path.right(path.length() - index - 1);
+        return (ext == QLatin1String("jpg") || ext == QLatin1String("jpeg")
+                || ext == QLatin1String("png") || ext == QLatin1String("hdr")
+                || ext == QLatin1String("dds") || ext == QLatin1String("ktx"));
+    }
+    QSet<QString> toImageSet(const QVector<QString> &vec)
+    {
+        QSet<QString> s;
+        for (const auto &x : vec) {
+            if (isImage(x))
+                s.insert(x);
+        }
+        return s;
+    }
+    void handleLoadSlide(const QString &slide, SSlideKey key, ISlideSystem &slideSystem)
+    {
+        if (loadedSlides.contains(slide))
+            return;
+        loadedSlides.push_back(slide);
+        begin();
+        increment(toImageSet(slideSystem.GetSourcePaths(key)));
+        print();
+    }
+    void handleUnloadSlide(const QString &slide, SSlideKey key, ISlideSystem &slideSystem)
+    {
+        if (!loadedSlides.contains(slide))
+            return;
+        loadedSlides.removeOne(slide);
+        begin();
+        decrement(toImageSet(slideSystem.GetSourcePaths(key)));
+        print();
+    }
+    void print()
+    {
+        static const bool debugging = qEnvironmentVariableIntValue("QT3DS_DEBUG") >= 1;
+        if (debugging) {
+            qDebug() << "SlideResourceCounter resources:";
+            const auto keys = counters.keys();
+            for (auto &x : keys)
+                qDebug() << x << ": " << counters[x];
+            if (createSet.size()) {
+                qDebug() << "New resources: ";
+                for (auto y : qAsConst(createSet))
+                    qDebug() << y;
+            }
+            if (deleteSet.size()) {
+                qDebug() << "Deleted resources: ";
+                for (auto y : qAsConst(deleteSet))
+                    qDebug() << y;
+            }
+        }
+    }
+};
+
+struct STextureUploadRenderTask : public IRenderTask
+{
+    IBufferManager &m_bufferManager;
+    QSet<QString> m_uploadSet;
+    QSet<QString> m_deleteSet;
+    QMutex m_updateMutex;
+
+    STextureUploadRenderTask(IBufferManager &mgr)
+        : m_bufferManager(mgr)
+    {
+
+    }
+    void Run() override
+    {
+        QMutexLocker loc(&m_updateMutex);
+        m_bufferManager.loadSet(m_uploadSet);
+        m_bufferManager.unloadSet(m_deleteSet);
+    }
+    void add(const QSet<QString> &set)
+    {
+        QMutexLocker loc(&m_updateMutex);
+        m_uploadSet.unite(set);
+        m_deleteSet.subtract(set);
+    }
+    void remove(const QSet<QString> &set)
+    {
+        QMutexLocker loc(&m_updateMutex);
+        m_uploadSet.subtract(set);
+        m_deleteSet.unite(set);
+    }
+    bool persistent() const override
+    {
+        return true;
     }
 };
 
@@ -402,7 +540,6 @@ public:
 
 struct SApp : public IApplication
 {
-
     NVScopedRefCounted<Q3DStudio::IRuntimeFactoryCore> m_CoreFactory;
     NVScopedRefCounted<Q3DStudio::IRuntimeFactory> m_RuntimeFactory;
 
@@ -425,6 +562,7 @@ struct SApp : public IApplication
     // the name of the file without extension.
     eastl::string m_Filename;
     Q3DSVariantConfig m_variantConfig;
+    QScopedPointer<STextureUploadRenderTask> m_uploadRenderTask;
 
     qt3ds::foundation::NVScopedReleasable<IRuntimeMetaData> m_MetaData;
     nvvector<eastl::pair<SBehaviorAsset, bool>> m_Behaviors;
@@ -461,6 +599,9 @@ struct SApp : public IApplication
 
     DataInputMap m_dataInputDefs;
 
+    SSlideResourceCounter m_resourceCounter;
+    QSet<QString> m_createSet;
+
     QT3DSI32 mRefCount;
     SApp(Q3DStudio::IRuntimeFactoryCore &inFactory, const char8_t *inAppDir)
         : m_CoreFactory(inFactory)
@@ -495,9 +636,9 @@ struct SApp : public IApplication
         , m_ThisFrameStartTime(0)
         , m_MillisecondsSinceLastFrame(0)
         , m_DirtyCountdown(5)
+        , m_visitor(nullptr)
         , m_createSuccessful(false)
         , mRefCount(0)
-        , m_visitor(nullptr)
     {
         m_AudioPlayer.SetApplication(*this);
         eastl::string tempStr(inAppDir);
@@ -562,6 +703,21 @@ struct SApp : public IApplication
             }
         }
         return m_PresentationBuffer;
+    }
+    QVector<CPresentation *> getPresentations()
+    {
+        QVector<CPresentation *> presentations;
+        if (m_PresentationBuffer.empty()) {
+            for (QT3DSU32 idx = 0, end = m_OrderedAssets.size(); idx < end; ++idx) {
+                SAssetValue &theAsset = *m_OrderedAssets[idx].second;
+                if (theAsset.getType() == AssetValueTypes::Presentation) {
+                    SPresentationAsset &thePresAsset = *theAsset.getDataPtr<SPresentationAsset>();
+                    if (thePresAsset.m_Presentation)
+                        presentations.push_back(thePresAsset.m_Presentation);
+                }
+            }
+        }
+        return presentations;
     }
 
     void addRef() override { atomicIncrement(&mRefCount); }
@@ -895,6 +1051,49 @@ struct SApp : public IApplication
     // Generalized save/load
     ////////////////////////////////////////////////////////////////////////////////
 
+    void loadComponentSlideResources(TElement *component, CPresentation *presentation, int index,
+                                     const QString slideName)
+    {
+        if (m_RuntimeFactory->GetQt3DSRenderContext().GetBufferManager()
+                .isReloadableResourcesEnabled()) {
+            auto &slidesystem = presentation->GetSlideSystem();
+            SSlideKey key;
+            key.m_Component = component;
+            key.m_Index = index;
+            slidesystem.setUnloadSlide(key, false);
+            const QString completeName = presentation->GetName() + QLatin1Char(':')
+                    + QString::fromUtf8(key.m_Component->m_Name) + QLatin1Char(':') + slideName;
+            qCInfo(PERF_INFO) << "Load component slide resources: " << completeName;
+            m_resourceCounter.handleLoadSlide(completeName, key, slidesystem);
+            if (m_uploadRenderTask)
+                m_uploadRenderTask->add(m_resourceCounter.createSet);
+            else
+                m_createSet.unite(m_resourceCounter.createSet);
+        }
+    }
+
+    void unloadComponentSlideResources(TElement *component, CPresentation *presentation, int index,
+                                       const QString slideName)
+    {
+        if (m_RuntimeFactory->GetQt3DSRenderContext().GetBufferManager()
+                .isReloadableResourcesEnabled()) {
+            auto &slidesystem = presentation->GetSlideSystem();
+            SSlideKey key;
+            key.m_Component = component;
+            key.m_Index = index;
+            slidesystem.setUnloadSlide(key, true);
+            if (!slidesystem.isActiveSlide(key)) {
+                const QString completeName = presentation->GetName() + QLatin1Char(':')
+                        + QString::fromUtf8(key.m_Component->m_Name) + QLatin1Char(':') + slideName;
+                qCInfo(PERF_INFO) << "Unload component slide resources: " << completeName;
+                m_resourceCounter.handleUnloadSlide(completeName, key, slidesystem);
+
+                if (m_uploadRenderTask)
+                    m_uploadRenderTask->remove(m_resourceCounter.deleteSet);
+            }
+        }
+    }
+
     bool LoadUIP(SPresentationAsset &inAsset,
                  NVConstDataRef<SElementAttributeReference> inExternalReferences)
     {
@@ -939,6 +1138,12 @@ struct SApp : public IApplication
 
                 if (inAsset.m_Id.IsValid())
                     newScene->RegisterOffscreenRenderer(inAsset.m_Id);
+
+                QVector<TElement *> components;
+                thePresentation->GetRoot()->findComponents(components);
+                for (auto &component : qAsConst(components))
+                    loadComponentSlideResources(component, thePresentation, 0, "Master");
+
                 return true;
             }
         }
@@ -1087,7 +1292,7 @@ struct SApp : public IApplication
         }
     };
 
-    virtual bool BeginLoad(const QString &sourcePath, const QStringList &variantList) override
+    bool BeginLoad(const QString &sourcePath, const QStringList &variantList) override
     {
         SStackPerfTimer __loadTimer(m_CoreFactory->GetPerfTimer(), "Application: Begin Load");
         eastl::string directory;
@@ -1198,6 +1403,82 @@ struct SApp : public IApplication
         return m_createSuccessful;
     }
 
+    bool presentationComponentSlide(const QString &elementPath,
+                                    Q3DStudio::CPresentation *&presentation,
+                                    TElement *&component,
+                                    QString &slideName,
+                                    int &index)
+    {
+        presentation = GetPrimaryPresentation();
+        slideName = elementPath;
+        QString componentName;
+        if (elementPath.contains(QLatin1Char(':'))) {
+            // presentation : component : slide
+            QStringList splits = elementPath.split(QLatin1Char(':'));
+            if (splits.size() == 3) {
+                presentation = GetPresentationById(qPrintable(splits[0]));
+                componentName = splits[1];
+                slideName = splits[2];
+            } else {
+                componentName = splits[0];
+                slideName = splits[1];
+            }
+            // else assume main presentation and component:slide
+        }
+        component = presentation->GetRoot();
+        if (!componentName.isNull() && componentName != component->m_Name)
+            component = component->FindChild(CHash::HashString(qPrintable(componentName)));
+        if (!component) {
+            qCWarning(WARNING) << "Could not find slide: " << elementPath;
+            return false;
+        }
+        ISlideSystem &s = presentation->GetSlideSystem();
+        index = s.FindSlide(*component, qPrintable(slideName));
+        return true;
+    }
+
+    void preloadSlide(const QString &slide) override
+    {
+        CPresentation *pres = nullptr;
+        TElement *component = nullptr;
+        QString slideName;
+        int index;
+        if (presentationComponentSlide(slide, pres, component, slideName, index))
+            loadComponentSlideResources(component, pres, index, slideName);
+    }
+
+    void unloadSlide(const QString &slide) override
+    {
+        CPresentation *pres = nullptr;
+        TElement *component = nullptr;
+        QString slideName;
+        int index;
+        if (presentationComponentSlide(slide, pres, component, slideName, index))
+            unloadComponentSlideResources(component, pres, index, slideName);
+    }
+
+    void setDelayedLoading(bool enable)
+    {
+        m_RuntimeFactory->GetQt3DSRenderContext().GetBufferManager()
+                .enableReloadableResources(enable);
+    }
+
+    void ComponentSlideEntered(Q3DStudio::CPresentation *presentation,
+                               Q3DStudio::TElement *component,
+                               const QString &elementPath, int slideIndex,
+                               const QString &slideName) override
+    {
+        loadComponentSlideResources(component, presentation, slideIndex, slideName);
+    }
+
+    void ComponentSlideExited(Q3DStudio::CPresentation *presentation,
+                              Q3DStudio::TElement *component,
+                              const QString &elementPath, int slideIndex,
+                              const QString &slideName) override
+    {
+        unloadComponentSlideResources(component, presentation, slideIndex, slideName);
+    }
+
     // will force loading to end if endLoad hasn't been called yet.  Will fire off loading
     // of resources that need to be uploaded to opengl.  Maintains reference to runtime factory
     IApplication &CreateApplication(Q3DStudio::CInputEngine &inInputEngine,
@@ -1275,6 +1556,12 @@ struct SApp : public IApplication
 
         m_AudioPlayer.SetPlayer(inAudioPlayer);
 
+        m_uploadRenderTask.reset(new STextureUploadRenderTask(
+                                     m_RuntimeFactory->GetQt3DSRenderContext().GetBufferManager()));
+        m_uploadRenderTask->add(m_createSet);
+        m_RuntimeFactory->GetQt3DSRenderContext().GetRenderList()
+                                                                .AddRenderTask(*m_uploadRenderTask);
+        m_createSet.clear();
         return *this;
     }
 
@@ -1567,7 +1854,7 @@ CAppStr &CAppStr::operator=(const CAppStr &inOther)
     return *this;
 }
 
-IApplicationCore &IApplicationCore::CreateApplicationCore(Q3DStudio::IRuntimeFactoryCore &inFactory,
+IApplication &IApplication::CreateApplicationCore(Q3DStudio::IRuntimeFactoryCore &inFactory,
                                                           const char8_t *inApplicationDirectory)
 {
     return *QT3DS_NEW(inFactory.GetFoundation().getAllocator(), SApp)(inFactory,
@@ -1575,7 +1862,7 @@ IApplicationCore &IApplicationCore::CreateApplicationCore(Q3DStudio::IRuntimeFac
 }
 
 // Checks if the event is one that can cause picking
-bool IApplicationCore::isPickingEvent(TEventCommandHash event)
+bool IApplication::isPickingEvent(TEventCommandHash event)
 {
     return (event == ON_MOUSEDOWN
             || event == ON_MOUSEUP

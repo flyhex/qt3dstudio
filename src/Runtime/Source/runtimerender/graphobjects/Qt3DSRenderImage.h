@@ -67,6 +67,7 @@ namespace render {
         SGraphObject *m_Parent;
 
         SImageTextureData m_TextureData;
+        ReloadableTexturePtr m_LoadedTextureData;
 
         NodeFlags m_Flags; // only dirty, transform dirty, and active apply
 

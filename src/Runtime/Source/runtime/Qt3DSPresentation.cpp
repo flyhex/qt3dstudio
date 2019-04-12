@@ -125,7 +125,7 @@ void CPresentation::RegisterEventCallback(TElement *inElement, const TEventComma
     m_EventCallbacks.RegisterCallback(inElement, inEventHash, inCallback, inContextData);
     inElement->SetFlag(ELEMENTFLAG_REGISTEREDFOREVENTCALLBACK, true);
 
-    if (qt3ds::runtime::IApplicationCore::isPickingEvent(inEventHash))
+    if (qt3ds::runtime::IApplication::isPickingEvent(inEventHash))
         inElement->SetFlag(ELEMENTFLAG_PICKENABLED, true);
 }
 
@@ -149,7 +149,7 @@ BOOL CPresentation::UnregisterEventCallback(TElement *inElement,
     if (theLast)
         inElement->SetFlag(ELEMENTFLAG_REGISTEREDFOREVENTCALLBACK, false);
 
-    if (qt3ds::runtime::IApplicationCore::isPickingEvent(inEventHash))
+    if (qt3ds::runtime::IApplication::isPickingEvent(inEventHash))
         inElement->SetFlag(ELEMENTFLAG_PICKENABLED, false);
 
     return theResult;

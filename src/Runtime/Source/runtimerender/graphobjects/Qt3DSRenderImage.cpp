@@ -38,9 +38,9 @@ using namespace qt3ds::render;
 
 SImage::SImage()
     : SGraphObject(GraphObjectTypes::Image)
-    , m_RenderPlugin(NULL)
-    , m_LastFrameOffscreenRenderer(NULL)
-    , m_Parent(NULL)
+    , m_RenderPlugin(nullptr)
+    , m_LastFrameOffscreenRenderer(nullptr)
+    , m_Parent(nullptr)
     , m_Scale(1, 1)
     , m_Pivot(0, 0)
     , m_Rotation(0)
@@ -84,7 +84,7 @@ bool SImage::ClearDirty(IBufferManager &inBufferManager, IOffscreenRenderManager
         }
     }
 
-    if (newImage.m_Texture == NULL) {
+    if (newImage.m_Texture == nullptr) {
         if (m_OffscreenRendererId.IsValid()) {
             SOffscreenRenderResult theResult =
                 inRenderManager.GetRenderedItem(m_OffscreenRendererId);
@@ -92,10 +92,26 @@ bool SImage::ClearDirty(IBufferManager &inBufferManager, IOffscreenRenderManager
         }
     }
 
-    if (newImage.m_Texture == NULL) {
-        m_LastFrameOffscreenRenderer = NULL;
-        newImage = inBufferManager.LoadRenderImage(m_ImagePath, false, forIbl);
-        replaceTexture = newImage.m_Texture != m_TextureData.m_Texture;
+    if (newImage.m_Texture == nullptr) {
+        m_LastFrameOffscreenRenderer = nullptr;
+        if (m_ImagePath.IsValid()) {
+            if (!m_LoadedTextureData
+                    || m_LoadedTextureData->m_path != QString::fromUtf8(m_ImagePath.c_str())) {
+                if (m_LoadedTextureData)
+                    m_LoadedTextureData->m_callbacks.removeOne(this);
+                m_LoadedTextureData = inBufferManager.CreateReloadableImage(m_ImagePath, false,
+                                                                            forIbl);
+                m_LoadedTextureData->m_callbacks.push_back(this);
+            }
+            if (m_LoadedTextureData) {
+                if (m_LoadedTextureData->m_loaded) {
+                    newImage.m_Texture = m_LoadedTextureData->m_Texture;
+                    newImage.m_TextureFlags = m_LoadedTextureData->m_TextureFlags;
+                    newImage.m_BSDFMipMap = m_LoadedTextureData->m_BSDFMipMap;
+                }
+                replaceTexture = m_TextureData.m_Texture != newImage.m_Texture;
+            }
+        }
     }
 
     if (replaceTexture) {

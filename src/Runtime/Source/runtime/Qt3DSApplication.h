@@ -85,61 +85,6 @@ public:
     virtual void Run() = 0;
 };
 
-class QT3DS_AUTOTEST_EXPORT IApplicationCore : public NVRefCounted
-{
-public:
-    // threadsafe call.
-    virtual void QueueForMainThread(IAppRunnable &inRunnable) = 0;
-
-    // The directory that contains the executable and the root resource path
-    virtual CRegisteredString GetApplicationDirectory() const = 0;
-    // Directory that contained the UIA file.
-    virtual CRegisteredString GetProjectDirectory() const = 0;
-    // Directory where we will copy shared object files to before we load them.
-    // This is specifically for android and the case where the place where the project exists
-    // is not always the place where we can load the project.
-    virtual CRegisteredString GetDllDir() const = 0;
-    virtual void SetDllDir(const char *inDllDir) = 0;
-    virtual Q3DStudio::THashValue HashString(const char *inStr) = 0;
-    virtual const char *ReverseHash(Q3DStudio::THashValue theValue) = 0;
-
-    virtual Q3DStudio::IRuntimeMetaData &GetMetaData() = 0;
-    // Element handles are unique across all presentations.
-    virtual Q3DStudio::TElement *GetElementByHandle(Q3DStudio::UINT32 inHandle) = 0;
-    // Passing in NULL gets you zero as the return handle.
-    virtual Q3DStudio::UINT32 GetHandleForElement(Q3DStudio::TElement *inElement) = 0;
-
-    virtual Q3DStudio::IRuntimeFactoryCore &GetRuntimeFactoryCore() = 0;
-    virtual void HideFPS(bool flag) = 0;
-
-    virtual IActivityZoneManager &GetActivityZoneManager() = 0;
-    virtual IElementAllocator &GetElementAllocator() = 0;
-
-    // nonblocking call to begin loading, loads uia file alone and returns.
-    virtual bool BeginLoad(const QString &sourcePath, const QStringList &variantList) = 0;
-
-    // blocking call to end all loading threads and such/wait till finished
-    virtual void EndLoad() = 0;
-    // Will EndLoad cause nontrivial blocking.
-    // Runs any queued runnables.
-    virtual bool HasCompletedLoading() = 0;
-
-    virtual void setAssetVisitor(qt3ds::Qt3DSAssetVisitor *) = 0;
-
-    // will force loading to end if endLoad hasn't been called yet.  Will fire off loading
-    // of resources that need to be uploaded to opengl.  Maintains reference to runtime factory
-    virtual IApplication &CreateApplication(Q3DStudio::CInputEngine &inInputEngine,
-                                            Q3DStudio::IAudioPlayer *inAudioPlayer,
-                                            Q3DStudio::IRuntimeFactory &inFactory) = 0;
-
-    // maintains reference to runtime factory core.  AppDir is where the executable is located;
-    // the system will expect res directory
-    // next to executable.
-    static IApplicationCore &CreateApplicationCore(Q3DStudio::IRuntimeFactoryCore &inFactory,
-                                                   const char8_t *inApplicationDirectory);
-    static bool isPickingEvent(Q3DStudio::TEventCommandHash event);
-};
-
 struct DataInputControlledAttribute
 {
     QByteArray elementPath;
@@ -176,7 +121,7 @@ struct DataInputDef
 
 typedef QMap<QString, DataInputDef> DataInputMap;
 
-class IApplication : public IApplicationCore
+class QT3DS_AUTOTEST_EXPORT IApplication : public NVRefCounted
 {
 public:
     virtual Q3DStudio::IRuntimeFactory &GetRuntimeFactory() const = 0;
@@ -223,6 +168,69 @@ public:
     virtual float dataInputMin(const QString &name) const = 0;
 
     virtual void setPresentationId(const QString &id) = 0;
+
+    virtual void preloadSlide(const QString &slide) = 0;
+    virtual void unloadSlide(const QString &slide) = 0;
+    virtual void setDelayedLoading(bool enable) = 0;
+
+    // threadsafe call.
+    virtual void QueueForMainThread(IAppRunnable &inRunnable) = 0;
+
+    // The directory that contains the executable and the root resource path
+    virtual CRegisteredString GetApplicationDirectory() const = 0;
+    // Directory that contained the UIA file.
+    virtual CRegisteredString GetProjectDirectory() const = 0;
+    // Directory where we will copy shared object files to before we load them.
+    // This is specifically for android and the case where the place where the project exists
+    // is not always the place where we can load the project.
+    virtual CRegisteredString GetDllDir() const = 0;
+    virtual void SetDllDir(const char *inDllDir) = 0;
+    virtual Q3DStudio::THashValue HashString(const char *inStr) = 0;
+    virtual const char *ReverseHash(Q3DStudio::THashValue theValue) = 0;
+
+    virtual Q3DStudio::IRuntimeMetaData &GetMetaData() = 0;
+    // Element handles are unique across all presentations.
+    virtual Q3DStudio::TElement *GetElementByHandle(Q3DStudio::UINT32 inHandle) = 0;
+    // Passing in NULL gets you zero as the return handle.
+    virtual Q3DStudio::UINT32 GetHandleForElement(Q3DStudio::TElement *inElement) = 0;
+
+    virtual Q3DStudio::IRuntimeFactoryCore &GetRuntimeFactoryCore() = 0;
+    virtual void HideFPS(bool flag) = 0;
+
+    virtual IActivityZoneManager &GetActivityZoneManager() = 0;
+    virtual IElementAllocator &GetElementAllocator() = 0;
+
+    // nonblocking call to begin loading, loads uia file alone and returns.
+    virtual bool BeginLoad(const QString &sourcePath, const QStringList &variantList) = 0;
+    // blocking call to end all loading threads and such/wait till finished
+    virtual void EndLoad() = 0;
+    // Will EndLoad cause nontrivial blocking.
+    // Runs any queued runnables.
+    virtual bool HasCompletedLoading() = 0;
+
+    virtual void setAssetVisitor(qt3ds::Qt3DSAssetVisitor *) = 0;
+
+    virtual void ComponentSlideEntered(Q3DStudio::CPresentation *presentation,
+                                       Q3DStudio::TElement *component,
+                                       const QString &elementPath, int slideIndex,
+                                       const QString &slideName) = 0;
+    virtual void ComponentSlideExited(Q3DStudio::CPresentation *presentation,
+                                      Q3DStudio::TElement *component,
+                                      const QString &elementPath, int slideIndex,
+                                      const QString &slideName) = 0;
+
+    // will force loading to end if endLoad hasn't been called yet.  Will fire off loading
+    // of resources that need to be uploaded to opengl.  Maintains reference to runtime factory
+    virtual IApplication &CreateApplication(Q3DStudio::CInputEngine &inInputEngine,
+                                            Q3DStudio::IAudioPlayer *inAudioPlayer,
+                                            Q3DStudio::IRuntimeFactory &inFactory) = 0;
+
+    // maintains reference to runtime factory core.  AppDir is where the executable is located;
+    // the system will expect res directory
+    // next to executable.
+    static IApplication &CreateApplicationCore(Q3DStudio::IRuntimeFactoryCore &inFactory,
+                                               const char8_t *inApplicationDirectory);
+    static bool isPickingEvent(Q3DStudio::TEventCommandHash event);
 };
 }
 }

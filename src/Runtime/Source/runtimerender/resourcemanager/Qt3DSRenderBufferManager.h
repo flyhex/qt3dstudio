@@ -83,6 +83,16 @@ namespace render {
         virtual SImageTextureData LoadRenderImage(CRegisteredString inSourcePath,
                                                   bool inForceScanForTransparency = false,
                                                   bool inBsdfMipmaps = false) = 0;
+
+        virtual ReloadableTexturePtr CreateReloadableImage(CRegisteredString inSourcePath,
+                                                           bool inForceScanForTransparency = false,
+                                                           bool inBsdfMipmaps = false) = 0;
+        virtual void enableReloadableResources(bool enable) = 0;
+        virtual bool isReloadableResourcesEnabled() const = 0;
+
+        virtual void loadSet(const QSet<QString> &imageSet) = 0;
+        virtual void unloadSet(const QSet<QString> &imageSet) = 0;
+
         virtual SRenderMesh *LoadMesh(CRegisteredString inSourcePath) = 0;
 
         virtual SRenderMesh *CreateMesh(const char *inSourcePath, QT3DSU8 *inVertData,

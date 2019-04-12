@@ -42,6 +42,10 @@ namespace render {
     public:
         virtual ~IRenderTask() {}
         virtual void Run() = 0;
+        virtual bool persistent() const
+        {
+            return false;
+        }
     };
 
     /**

@@ -126,7 +126,8 @@ struct SRenderContextCore : public IQt3DSRenderContextCore
     IRenderPluginManagerCore &GetRenderPluginCore() override { return *m_RenderPluginManagerCore; }
     IPathManagerCore &GetPathManagerCore() override { return *m_PathManagerCore; }
     IQt3DSRenderContext &CreateRenderContext(NVRenderContext &inContext,
-                                                   const char8_t *inPrimitivesDirectory) override;
+                                             const char8_t *inPrimitivesDirectory,
+                                             bool delayedLoading) override;
     void SetTextRendererCore(ITextRendererCore &inRenderer) override { m_TextRenderer = inRenderer; }
     ITextRendererCore *GetTextRendererCore() override { return m_TextRenderer.mPtr; }
     void setDistanceFieldRenderer(ITextRendererCore &inRenderer) override
@@ -263,7 +264,7 @@ struct SRenderContext : public IQt3DSRenderContext
     bool m_AuthoringMode;
 
     SRenderContext(NVRenderContext &ctx, IQt3DSRenderContextCore &inCore,
-                   const char8_t *inApplicationDirectory)
+                   const char8_t *inApplicationDirectory, bool delayedLoading)
         : m_RenderContext(ctx)
         , m_CoreContext(inCore)
         , m_StringTable(ctx.GetStringTable())
@@ -288,6 +289,7 @@ struct SRenderContext : public IQt3DSRenderContext
         , m_FPS(qMakePair(0.0, 0))
         , m_AuthoringMode(false)
     {
+        m_BufferManager->enableReloadableResources(delayedLoading);
         m_OffscreenRenderManager = IOffscreenRenderManager::CreateOffscreenRenderManager(
             ctx.GetAllocator(), *m_StringTable, *m_ResourceManager, *this);
         m_Renderer = IQt3DSRenderer::CreateRenderer(*this);
@@ -827,10 +829,12 @@ struct SRenderContext : public IQt3DSRenderContext
 };
 
 IQt3DSRenderContext &SRenderContextCore::CreateRenderContext(NVRenderContext &inContext,
-                                                           const char8_t *inPrimitivesDirectory)
+                                                             const char8_t *inPrimitivesDirectory,
+                                                             bool delayedLoading)
 {
     return *QT3DS_NEW(m_Foundation.getAllocator(), SRenderContext)(inContext, *this,
-                                                                inPrimitivesDirectory);
+                                                                   inPrimitivesDirectory,
+                                                                   delayedLoading);
 }
 }
 

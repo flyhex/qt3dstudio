@@ -221,7 +221,7 @@ struct SLogicSystem : public ILogicSystem
                      listIter != listEnd; ++listIter)
                     if (listIter->m_Id == inActionIndex) {
                         listIter->m_Active = inActive;
-                        if (IApplicationCore::isPickingEvent(logicIter->first.m_CommandHash)) {
+                        if (IApplication::isPickingEvent(logicIter->first.m_CommandHash)) {
                             SElement *theElement = inElemAllocator.FindElementByHandle(
                                 logicIter->first.m_ElementHandle);
                             if (theElement && inActive)

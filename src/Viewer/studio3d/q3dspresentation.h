@@ -49,6 +49,7 @@ class Q_STUDIO3D_EXPORT Q3DSPresentation : public QObject
     Q_DECLARE_PRIVATE(Q3DSPresentation)
     Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged)
     Q_PROPERTY(QStringList variantList READ variantList WRITE setVariantList NOTIFY variantListChanged)
+    Q_PROPERTY(bool delayedLoading READ delayedLoading WRITE setDelayedLoading NOTIFY delayedLoadingChanged)
 
 public:
     explicit Q3DSPresentation(QObject *parent = nullptr);
@@ -67,6 +68,12 @@ public:
 
     Q_INVOKABLE QVariantList getDataInputs() const;
     QVector<Q3DSDataInput *> dataInputs() const;
+
+    bool delayedLoading() const;
+    void setDelayedLoading(bool enable);
+
+    Q_INVOKABLE void preloadSlide(const QString &elementPath);
+    Q_INVOKABLE void unloadSlide(const QString &elementPath);
 
     // Input event handlers
     void mousePressEvent(QMouseEvent *e);
@@ -100,6 +107,7 @@ Q_SIGNALS:
     // and datainputs are available through dataInputs() / getDataInputs().
     void dataInputsReady();
     void customSignalEmitted(const QString &elementPath, const QString &name);
+    void delayedLoadingChanged(bool enable);
 
 private:
     Q_DISABLE_COPY(Q3DSPresentation)

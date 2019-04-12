@@ -508,6 +508,16 @@ namespace runtime {
 
                 return ta && ua && inParentActive;
             }
+            void findComponents(QVector<SElement *> &components)
+            {
+                if (IsComponent())
+                    components.push_back(this);
+                SElement *child = m_Child;
+                while (child) {
+                    child->findComponents(components);
+                    child = child->m_Sibling;
+                }
+            }
         };
 
         struct SGetElementNodeDirtyIndex

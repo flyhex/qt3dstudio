@@ -95,6 +95,7 @@ void Q3DSRenderer::synchronize(QQuickFramebufferObject *inView)
         // processCommands, as both are needed for init
         m_presentation->setVariantList(m_commands.m_variantList);
         m_presentation->setSource(m_commands.m_source);
+        m_presentation->setDelayedLoading(m_commands.m_delayedLoading);
         m_initialized = false;
         m_initializationFailure = false;
         m_error.clear();
@@ -183,6 +184,7 @@ bool Q3DSRenderer::initializeRuntime(QOpenGLFramebufferObject *inFbo)
                                   QOpenGLContext::currentContext()->format(),
                                   inFbo->handle(), localSource,
                                   m_presentation->variantList(),
+                                  m_presentation->delayedLoading(),
                                   m_visitor)) {
         m_error = m_runtime->error();
         releaseRuntime();
@@ -268,6 +270,8 @@ void Q3DSRenderer::processCommands()
         m_settings->setMatteColor(m_commands.m_matteColor);
     if (m_commands.m_showRenderStatsChanged)
         m_settings->setShowRenderStats(m_commands.m_showRenderStats);
+    if (m_commands.m_delayedLoadingChanged)
+        this->m_runtime->setDelayedLoading(m_commands.m_delayedLoading);
 
     if (m_commands.m_globalAnimationTimeChanged)
         m_presentation->setGlobalAnimationTime(m_commands.m_globalAnimationTime);
@@ -352,6 +356,12 @@ void Q3DSRenderer::processCommands()
             Q_EMIT requestResponse(cmd.m_elementPath, cmd.m_commandType, requestData);
             break;
         }
+        case CommandType_PreloadSlide:
+            m_runtime->preloadSlide(cmd.m_elementPath);
+            break;
+        case CommandType_UnloadSlide:
+            m_runtime->unloadSlide(cmd.m_elementPath);
+            break;
         default:
             qWarning() << __FUNCTION__ << "Unrecognized CommandType in command list!";
         }

@@ -429,6 +429,8 @@ protected:
     TStringSet m_SourcePathSet;
     TStringVector m_SourcePathList;
 
+    QVector<QString> m_slideSourcePaths;
+
     struct SElementRefCache
     {
         SElementData *m_Element;
@@ -533,6 +535,10 @@ public: // Parse UIP file
     NVConstDataRef<eastl::string> GetSourcePaths() const override
     {
         return NVConstDataRef<eastl::string>(m_SourcePathList.data(), m_SourcePathList.size());
+    }
+    QVector<QString> GetSlideSourcePaths() const override
+    {
+        return m_slideSourcePaths;
     }
 
 protected: // Operation

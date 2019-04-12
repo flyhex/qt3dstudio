@@ -69,7 +69,9 @@ enum CommandType {
     CommandType_SetGlobalAnimationTime,
     CommandType_SetDataInputValue,
     CommandType_RequestSlideInfo,
-    CommandType_RequestDataInputs
+    CommandType_RequestDataInputs,
+    CommandType_PreloadSlide,
+    CommandType_UnloadSlide
 };
 
 class Q_STUDIO3D_EXPORT ElementCommand
@@ -124,6 +126,7 @@ public:
     bool m_sourceChanged;
     bool m_variantListChanged;
     bool m_globalAnimationTimeChanged;
+    bool m_delayedLoadingChanged;
 
     bool m_visible;
     Q3DSViewerSettings::ScaleMode m_scaleMode;
@@ -133,6 +136,7 @@ public:
     QUrl m_source;
     QStringList m_variantList;
     qint64 m_globalAnimationTime;
+    bool m_delayedLoading;
 
     void clear();
     int size() const { return m_size; }

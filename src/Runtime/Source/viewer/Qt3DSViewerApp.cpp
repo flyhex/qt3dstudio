@@ -301,9 +301,10 @@ void Q3DSViewerApp::setOffscreenId(int offscreenID)
 }
 
 bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFormat &format,
-                                 int offscreenID, const QString &source,
-                                 const QStringList &variantList,
-                                 qt3ds::Qt3DSAssetVisitor *assetVisitor)
+                                  int offscreenID, const QString &source,
+                                  const QStringList &variantList,
+                                  bool delayedLoading,
+                                  qt3ds::Qt3DSAssetVisitor *assetVisitor)
 {
     bool hasValidPresentationFile = !source.isEmpty();
 
@@ -339,7 +340,7 @@ bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFor
             return false;
         }
 
-        bool success = m_Impl.m_view->InitializeGraphics(format);
+        bool success = m_Impl.m_view->InitializeGraphics(format, delayedLoading);
         if (!success) {
             m_Impl.m_error = QObject::tr("Viewer launch failure! Failed to load: '%1'").arg(source);
             m_Impl.m_error.append("\n");
@@ -456,6 +457,27 @@ QString Q3DSViewerApp::error()
     QString error = m_Impl.m_error;
     m_Impl.m_error.clear();
     return error;
+}
+
+void Q3DSViewerApp::setDelayedLoading(bool enable)
+{
+    if (!m_Impl.m_view)
+        return;
+    m_Impl.m_view->setDelayedLoading(enable);
+}
+
+void Q3DSViewerApp::preloadSlide(const QString &slide)
+{
+    if (!m_Impl.m_view)
+        return;
+    m_Impl.m_view->preloadSlide(slide);
+}
+
+void Q3DSViewerApp::unloadSlide(const QString &slide)
+{
+    if (!m_Impl.m_view)
+        return;
+    m_Impl.m_view->unloadSlide(slide);
 }
 
 void Q3DSViewerApp::Resize(int width, int height)

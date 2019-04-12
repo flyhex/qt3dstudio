@@ -106,6 +106,10 @@ void CComponentManager::GotoSlideIndex(TElement *inComponent,
         theEvent.m_IsEvent = true;
         m_Presentation.ProcessEvent(theEvent);
 
+        m_Presentation.GetApplication().ComponentSlideExited(&m_Presentation, inComponent,
+                                                             elementPath, theCurrentSlideIndex,
+                                                             GetCurrentSlideName(inComponent));
+
         // Signal previous slide change
         m_Presentation.signalProxy()->SigSlideExited(elementPath, theCurrentSlideIndex,
                                                      GetCurrentSlideName(inComponent));
@@ -182,6 +186,9 @@ void CComponentManager::GotoSlideIndex(TElement *inComponent,
     if (theZone)
         theZone->OnSlideChange(*inComponent);
 
+     m_Presentation.GetApplication().ComponentSlideEntered(&m_Presentation, inComponent,
+                                                           elementPath, theGotoSlideData.m_Slide,
+                                                           GetCurrentSlideName(inComponent));
     // Signal current slide change
     m_Presentation.signalProxy()->SigSlideEntered(elementPath, GetCurrentSlide(inComponent),
                                                   GetCurrentSlideName(inComponent));

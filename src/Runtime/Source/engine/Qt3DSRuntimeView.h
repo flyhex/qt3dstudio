@@ -157,7 +157,7 @@ public:
 public: // loading
     virtual bool BeginLoad(const QString &sourcePath, const QStringList &variantList) = 0;
     virtual bool HasOfflineLoadingCompleted() = 0;
-    virtual bool InitializeGraphics(const QSurfaceFormat &format) = 0;
+    virtual bool InitializeGraphics(const QSurfaceFormat &format, bool delayedLoading) = 0;
 
     virtual void Cleanup() = 0;
 
@@ -204,8 +204,10 @@ public:
     virtual bool RegisterScriptCallback(int callbackType, qml_Function func, void *inUserData) = 0;
     virtual void FireEvent(const TEventCommandHash inEventType, eastl::string inArgument) = 0;
     virtual qt3ds::foundation::Option<SPresentationSize> GetPresentationSize() = 0;
-
     virtual void setAssetVisitor(qt3ds::Qt3DSAssetVisitor *) = 0;
+    virtual void preloadSlide(const QString &slide) = 0;
+    virtual void unloadSlide(const QString &slide) = 0;
+    virtual void setDelayedLoading(bool enable) = 0;
 
 public:
     static IRuntimeView &Create(ITimeProvider &inProvider, IWindowSystem &inWindowSystem,

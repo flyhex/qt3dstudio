@@ -136,12 +136,15 @@ namespace render {
             m_FlowData = NULL;
         }
 
-        void CreateRenderContext(qt3ds::render::IRuntimeFactoryRenderFactory &inContextFactory)
+        void CreateRenderContext(qt3ds::render::IRuntimeFactoryRenderFactory &inContextFactory,
+                                 bool delayedLoading)
         {
             m_RenderContext = inContextFactory.CreateRenderContext(*m_Foundation, *m_StringTable);
-            if (m_RenderContext)
+            if (m_RenderContext) {
                 m_Context =
-                    m_CoreContext->CreateRenderContext(*m_RenderContext, m_PrimitivePath.c_str());
+                    m_CoreContext->CreateRenderContext(*m_RenderContext, m_PrimitivePath.c_str(),
+                                                       delayedLoading);
+            }
         }
 
         QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(g_BaseAllocator)

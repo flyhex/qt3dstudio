@@ -144,7 +144,7 @@ private:
     // Pre graphics init objects
     NVScopedRefCounted<qt3ds::render::IQt3DSRenderFactoryCore> m_RuntimeFactoryCore;
     ///< Base application before graphics
-    NVScopedRefCounted<qt3ds::runtime::IApplicationCore> m_ApplicationCore;
+    NVScopedRefCounted<qt3ds::runtime::IApplication> m_ApplicationCore;
 
     // Post graphics init objects
     NVScopedRefCounted<qt3ds::render::IQt3DSRenderFactory> m_RuntimeFactory;
@@ -170,7 +170,7 @@ public:
 
     bool BeginLoad(const QString &sourcePath, const QStringList &variantList) override;
     bool HasOfflineLoadingCompleted() override;
-    bool InitializeGraphics(const QSurfaceFormat &format) override;
+    bool InitializeGraphics(const QSurfaceFormat &format, bool delayedLoading) override;
 
     void Cleanup() override;
 
@@ -219,6 +219,9 @@ public:
     bool RegisterScriptCallback(int callbackType, qml_Function func, void *inUserData) override;
     void FireEvent(const TEventCommandHash inEventType, eastl::string inArgument) override;
     qt3ds::foundation::Option<SPresentationSize> GetPresentationSize() override;
+    void preloadSlide(const QString &slide) override;
+    void unloadSlide(const QString &slide) override;
+    void setDelayedLoading(bool enable) override;
     void BootupPreGraphicsInitObjects();
 };
 
@@ -275,12 +278,12 @@ bool CRuntimeView::HasOfflineLoadingCompleted()
     return true;
 }
 
-bool CRuntimeView::InitializeGraphics(const QSurfaceFormat &format)
+bool CRuntimeView::InitializeGraphics(const QSurfaceFormat &format, bool delayedLoading)
 {
     m_ApplicationCore->EndLoad();
     // Next call will initialize the render portion of the scenes.  This *must* have a loaded
     // application to go further as it will bind scene graph data to application data.
-    m_RuntimeFactory = m_RuntimeFactoryCore->CreateRenderFactory(format);
+    m_RuntimeFactory = m_RuntimeFactoryCore->CreateRenderFactory(format, delayedLoading);
     m_Application
             = m_ApplicationCore->CreateApplication(*m_InputEngine, m_AudioPlayer,
                                                    *m_RuntimeFactory);
@@ -655,6 +658,24 @@ void CRuntimeView::FireEvent(const TEventCommandHash inEventType, eastl::string 
     }
 }
 
+void CRuntimeView::preloadSlide(const QString &slide)
+{
+    if (m_Application)
+        m_Application->preloadSlide(slide);
+}
+
+void CRuntimeView::unloadSlide(const QString &slide)
+{
+    if (m_Application)
+        m_Application->unloadSlide(slide);
+}
+
+void CRuntimeView::setDelayedLoading(bool enable)
+{
+    if (m_Application)
+        m_Application->setDelayedLoading(enable);
+}
+
 qt3ds::foundation::Option<SPresentationSize> CRuntimeView::GetPresentationSize()
 {
     if (m_Application) {
@@ -678,7 +699,7 @@ void CRuntimeView::BootupPreGraphicsInitObjects()
     m_RuntimeFactoryCore = qt3ds::render::IQt3DSRenderFactoryCore::CreateRenderFactoryCore(
                 theAppDir.c_str(), m_WindowSystem, m_TimeProvider);
     m_ApplicationCore = qt3ds::runtime::IApplication::CreateApplicationCore(*m_RuntimeFactoryCore,
-                                                                              theAppDir.c_str());
+                                                                            theAppDir.c_str());
 
     if (m_ApplicationCore && m_visitor)
         m_ApplicationCore->setAssetVisitor(m_visitor);
@@ -697,10 +718,10 @@ void CRuntimeView::setAssetVisitor(qt3ds::Qt3DSAssetVisitor *v)
 }
 
 IRuntimeView &IRuntimeView::Create(ITimeProvider &inProvider, IWindowSystem &inWindowSystem,
-                           IAudioPlayer *inAudioPlayer)
+                                   IAudioPlayer *inAudioPlayer)
 {
     return *QT3DS_NEW(qt3ds::render::g_BaseAllocator, CRuntimeView)(inProvider, inWindowSystem,
-                                                              inAudioPlayer);
+                                                                    inAudioPlayer);
 }
 
 QRuntimeViewSignalProxy *IRuntimeView::signalProxy()

@@ -2089,8 +2089,11 @@ BOOL CUIPParserImpl::LoadSlideElementAttrs(IPresentation &inPresentation, bool,
         ++theRef;
     bool isSet = AreEqual(inReader.GetNarrowElementName(), "Set");
     const char8_t *sourcepath;
-    if (inReader.UnregisteredAtt("sourcepath", sourcepath))
+    if (inReader.UnregisteredAtt("sourcepath", sourcepath)) {
         AddSourcePath(sourcepath);
+        theBuilder.AddSourcePath(sourcepath);
+        m_slideSourcePaths.push_back(QString::fromLatin1(sourcepath));
+    }
 
     // We don't force set attributes when a given component has a set command within one of its
     // child states.  This happens in the case of actions (but nothing else).

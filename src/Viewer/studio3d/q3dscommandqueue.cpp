@@ -50,11 +50,13 @@ CommandQueue::CommandQueue()
     , m_sourceChanged(false)
     , m_variantListChanged(false)
     , m_globalAnimationTimeChanged(false)
+    , m_delayedLoadingChanged(false)
     , m_visible(false)
     , m_scaleMode(Q3DSViewerSettings::ScaleModeCenter)
     , m_shadeMode(Q3DSViewerSettings::ShadeModeShaded)
     , m_showRenderStats(false)
     , m_matteColor(Qt::black)
+    , m_delayedLoading(false)
     , m_size(0)
 {
     qRegisterMetaType<CommandType>();
@@ -165,6 +167,7 @@ void CommandQueue::copyCommands(const CommandQueue &fromQueue)
     m_variantListChanged = m_variantListChanged || fromQueue.m_variantListChanged;
     m_globalAnimationTimeChanged
             = m_globalAnimationTimeChanged || fromQueue.m_globalAnimationTimeChanged;
+    m_delayedLoadingChanged = m_delayedLoadingChanged || fromQueue.m_delayedLoadingChanged;
 
     if (fromQueue.m_visibleChanged)
        m_visible = fromQueue.m_visible;
@@ -182,6 +185,8 @@ void CommandQueue::copyCommands(const CommandQueue &fromQueue)
        m_variantList = fromQueue.m_variantList;
     if (fromQueue.m_globalAnimationTimeChanged)
         m_globalAnimationTime = fromQueue.m_globalAnimationTime;
+    if (fromQueue.m_delayedLoadingChanged)
+        m_delayedLoading = fromQueue.m_delayedLoading;
 
     // Pending queue may be synchronized multiple times between queue processing, so let's append
     // to the existing queue rather than clearing it.
@@ -221,6 +226,8 @@ void CommandQueue::copyCommands(const CommandQueue &fromQueue)
                          source.m_intValues[2], source.m_intValues[3]);
             break;
         case CommandType_RequestSlideInfo:
+        case CommandType_UnloadSlide:
+        case CommandType_PreloadSlide:
             queueRequest(source.m_elementPath, source.m_commandType);
             break;
         case CommandType_RequestDataInputs:
@@ -244,6 +251,7 @@ void CommandQueue::clear()
     m_sourceChanged = false;
     m_variantListChanged = false;
     m_globalAnimationTimeChanged = false;
+    m_delayedLoadingChanged = false;
 
     // We do not clear the actual queued commands, those will be reused the next frame
     // To avoid a lot of unnecessary reallocations.

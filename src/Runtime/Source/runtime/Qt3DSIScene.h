@@ -156,10 +156,6 @@ public: // Base Interface
     virtual void ScreenToPosition(TElement &inElement, qt3ds::QT3DSVec3 &inScreen,
                                   qt3ds::QT3DSVec3 &outPos) = 0;
 
-    // This is the best place for now...
-    virtual void GetImageInfoFromRenderEngine(TElement *inElement, INT32 &ioWidth,
-                                              INT32 &ioHeight) = 0;
-
     virtual qt3ds::foundation::CRegisteredString RegisterStr(const char *inStr) = 0;
 
     virtual Q3DStudio::INT32

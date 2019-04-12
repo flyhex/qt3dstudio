@@ -44,7 +44,6 @@ namespace render {
 namespace qt3ds {
 namespace runtime {
     class IApplication;
-    class IApplicationCore;
 }
 }
 
@@ -90,8 +89,8 @@ public:
     virtual qt3ds::foundation::IStringTable &GetStringTable() = 0;
     virtual void AddSearchPath(const char8_t *inFile) = 0;
     virtual void SetDllDir(const char *inDir) = 0;
-    virtual qt3ds::runtime::IApplicationCore *GetApplicationCore() = 0;
-    virtual void SetApplicationCore(qt3ds::runtime::IApplicationCore *app) = 0;
+    virtual qt3ds::runtime::IApplication *GetApplicationCore() = 0;
+    virtual void SetApplicationCore(qt3ds::runtime::IApplication *app) = 0;
 };
 
 class IRuntimeFactory : public IRuntimeFactoryCore

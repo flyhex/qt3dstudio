@@ -328,7 +328,7 @@ struct SRendererImpl : public IStudioRenderer,
             m_Context = theCore->CreateRenderContext(
                 m_RenderContext->GetRenderContext(),
                 m_RenderContext->GetRenderContext().GetStringTable().RegisterStr(
-                    theResourcePath.c_str()));
+                    theResourcePath.c_str()), false);
 
             // Allow the artist to interact with the top level objects alone.
             m_Context->GetRenderer().PickRenderPlugins(false);

@@ -85,7 +85,6 @@ namespace Q3DStudio {
 #define Q3DStudio_LOG_EVENT(S)
 #endif
 
-using qt3ds::runtime::IApplicationCore;
 using qt3ds::runtime::IApplication;
 using namespace qt3ds;
 
@@ -362,7 +361,7 @@ class CQmlEngineImpl : public CQmlEngine
 private:
     qt3ds::NVFoundationBase &m_Foundation;
     IApplication *m_Application;
-    IApplicationCore *m_ApplicationCore;
+    IApplication *m_ApplicationCore;
     qt3ds::foundation::Mutex m_PreloadMutex;
     qt3ds::foundation::Mutex *m_MultithreadedMutex;
 
@@ -385,7 +384,7 @@ public:
     void EnableMultithreadedAccess() override;
     void DisableMultithreadedAccess() override;
 
-    void SetApplicationCore(qt3ds::runtime::IApplicationCore &inApplication) override;
+    void SetApplicationCore(qt3ds::runtime::IApplication &inApplication) override;
     void SetApplication(qt3ds::runtime::IApplication &inApplication) override;
     qt3ds::runtime::IApplication *GetApplication() override;
     void Initialize() override;
@@ -492,7 +491,7 @@ void CQmlEngineImpl::DisableMultithreadedAccess()
     m_MultithreadedMutex = NULL;
 }
 
-void CQmlEngineImpl::SetApplicationCore(qt3ds::runtime::IApplicationCore &inApplication)
+void CQmlEngineImpl::SetApplicationCore(runtime::IApplication &inApplication)
 {
     QML_ENGINE_MULTITHREAD_PROTECT_METHOD;
     m_ApplicationCore = &inApplication;

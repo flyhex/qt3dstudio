@@ -129,6 +129,35 @@ void Q3DSPresentation::setVariantList(const QStringList &variantList)
     }
 }
 
+bool Q3DSPresentation::delayedLoading() const
+{
+    return d_ptr->m_delayedLoading;
+}
+
+void Q3DSPresentation::setDelayedLoading(bool enable)
+{
+    if (d_ptr->m_delayedLoading != enable) {
+        d_ptr->setDelayedLoading(enable);
+        Q_EMIT delayedLoadingChanged(enable);
+    }
+}
+
+void Q3DSPresentation::preloadSlide(const QString &elementPath)
+{
+    if (d_ptr->m_viewerApp)
+        d_ptr->m_viewerApp->preloadSlide(elementPath);
+    else if (d_ptr->m_commandQueue)
+        d_ptr->m_commandQueue->queueRequest(elementPath, CommandType_PreloadSlide);
+}
+
+void Q3DSPresentation::unloadSlide(const QString &elementPath)
+{
+    if (d_ptr->m_viewerApp)
+        d_ptr->m_viewerApp->unloadSlide(elementPath);
+    else if (d_ptr->m_commandQueue)
+        d_ptr->m_commandQueue->queueRequest(elementPath, CommandType_UnloadSlide);
+}
+
 void Q3DSPresentation::goToSlide(const QString &elementPath, unsigned int index)
 {
     if (d_ptr->m_viewerApp) {
@@ -330,6 +359,7 @@ Q3DSPresentationPrivate::Q3DSPresentationPrivate(Q3DSPresentation *q)
     , m_viewerApp(nullptr)
     , m_commandQueue(nullptr)
     , m_streamProxy(nullptr)
+    , m_delayedLoading(false)
 {
 }
 
@@ -410,11 +440,21 @@ void Q3DSPresentationPrivate::setCommandQueue(CommandQueue *queue)
         di->d_ptr->setCommandQueue(queue);
 
     if (m_commandQueue) {
-        setSource(m_source);
+        setDelayedLoading(m_delayedLoading);
         setVariantList(m_variantList);
         // Queue a request ASAP for datainputs defined in UIA file so that
         // getDataInputs has up-to-date info at the earliest.
         m_commandQueue->queueRequest({}, CommandType_RequestDataInputs);
+        setSource(m_source);
+    }
+}
+
+void Q3DSPresentationPrivate::setDelayedLoading(bool enable)
+{
+    m_delayedLoading = enable;
+    if (m_commandQueue) {
+        m_commandQueue->m_delayedLoading = enable;
+        m_commandQueue->m_delayedLoadingChanged = true;
     }
 }
 

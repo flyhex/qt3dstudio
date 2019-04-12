@@ -33,6 +33,9 @@
 #include "Qt3DSRender.h"
 #include "foundation/Qt3DSFlags.h"
 
+#include <QtCore/qsharedpointer.h>
+#include <QtCore/qvector.h>
+
 namespace qt3ds {
 namespace render {
 
@@ -85,9 +88,16 @@ namespace render {
         Qt3DSRenderPrefilterTexture *m_BSDFMipMap;
 
         SImageTextureData()
-            : m_Texture(NULL)
-            , m_BSDFMipMap(NULL)
+            : m_Texture(nullptr)
+            , m_BSDFMipMap(nullptr)
         {
+        }
+
+        SImageTextureData(const SImageTextureData& data)
+            : m_Texture(data.m_Texture), m_TextureFlags(data.m_TextureFlags)
+            , m_BSDFMipMap(data.m_BSDFMipMap)
+        {
+
         }
 
         bool operator!=(const SImageTextureData &inOther)
@@ -96,6 +106,32 @@ namespace render {
                 || m_BSDFMipMap != inOther.m_BSDFMipMap;
         }
     };
+
+    struct IReloadableCallback
+    {
+        virtual ~IReloadableCallback() {}
+        virtual void onLoad() = 0;
+        virtual void onUnload() = 0;
+    };
+
+    struct SImage;
+    struct SReloadableImageTextureData : public SImageTextureData
+    {
+        QString m_path;
+        bool m_loaded;
+        bool m_scanTransparency;
+        bool m_bsdfMipmap;
+        bool m_initialized;
+        QVector<SImage *> m_callbacks;
+
+        SReloadableImageTextureData()
+            : SImageTextureData()
+            , m_loaded(false), m_scanTransparency(false), m_bsdfMipmap(false), m_initialized(false)
+        {
+        }
+    };
+
+    typedef QSharedPointer<SReloadableImageTextureData> ReloadableTexturePtr;
 }
 }
 

@@ -63,7 +63,7 @@ namespace render {
     {
     public:
         virtual IQt3DSRenderFactory &
-        CreateRenderFactory(const QSurfaceFormat &format) = 0;
+        CreateRenderFactory(const QSurfaceFormat &format, bool delayedLoading) = 0;
 
         static IQt3DSRenderFactoryCore &
         CreateRenderFactoryCore(const char8_t *inApplicationDirectory,

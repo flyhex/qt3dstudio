@@ -45,6 +45,7 @@ struct SRenderList : public IRenderList
 
     NVFoundationBase &m_Foundation;
     TTaskList m_Tasks;
+    TTaskList m_PersistentTasks;
     QT3DSU32 m_NextTaskId;
     QT3DSI32 mRefCount;
     bool m_ScissorEnabled;
@@ -54,6 +55,7 @@ struct SRenderList : public IRenderList
     SRenderList(NVFoundationBase &fnd)
         : m_Foundation(fnd)
         , m_Tasks(fnd.getAllocator(), "m_Tasks")
+        , m_PersistentTasks(fnd.getAllocator(), "m_PersistentTasks")
         , m_NextTaskId(1)
         , mRefCount(0)
         , m_ScissorEnabled(false)
@@ -71,8 +73,14 @@ struct SRenderList : public IRenderList
     QT3DSU32 AddRenderTask(IRenderTask &inTask) override
     {
         QT3DSU32 taskId = m_NextTaskId;
-        ++m_NextTaskId;
-        m_Tasks.push_back(eastl::make_pair(taskId, &inTask));
+        if (inTask.persistent()) {
+            m_PersistentTasks.push_back(eastl::make_pair(0, &inTask));
+            taskId = 0;
+        } else {
+            QT3DSU32 taskId = m_NextTaskId;
+            ++m_NextTaskId;
+            m_Tasks.push_back(eastl::make_pair(taskId, &inTask));
+        }
         return taskId;
     }
 
@@ -89,9 +97,15 @@ struct SRenderList : public IRenderList
     // before rendering to the main render target.
     void RunRenderTasks() override
     {
-        for (TTaskList::reverse_iterator iter = m_Tasks.rbegin(), end = m_Tasks.rend(); iter != end;
-             ++iter)
+        for (TTaskList::reverse_iterator iter = m_PersistentTasks.rbegin(),
+             end = m_PersistentTasks.rend(); iter != end;
+             ++iter) {
             iter->second->Run();
+        }
+        for (TTaskList::reverse_iterator iter = m_Tasks.rbegin(), end = m_Tasks.rend(); iter != end;
+             ++iter) {
+            iter->second->Run();
+        }
         BeginFrame();
     }
 
