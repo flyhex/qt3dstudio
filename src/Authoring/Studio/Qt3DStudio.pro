@@ -72,14 +72,13 @@ INCLUDEPATH += \
     ../Client/Code/Core/Doc/ClientDataModelBridge \
     ../Client/Code/Shared \
     ../Client/Code/Shared/Log \
-    ../../Runtime/Source/Qt3DSRender/Include \
-    ../../Runtime/Source/Qt3DSFoundation/Include \
-    ../../Runtime/Source/Qt3DSFoundation/Include/foundation \
-    ../../Runtime/Source/Qt3DSRuntimeRender/Include \
-    ../../Runtime/Source/Qt3DSRuntimeRender/GraphObjects \
-    ../../Runtime/Source/Qt3DSRuntimeRender/ResourceManager \
-    ../../Runtime/Source/Qt3DSStateApplication/Application \
-    ../../Runtime/Source/Qt3DSEvent/InternalInclude \
+    ../../Runtime/Source/render \
+    ../../Runtime/Source/foundation \
+    ../../Runtime/Source/runtimerender \
+    ../../Runtime/Source/runtimerender/graphobjects \
+    ../../Runtime/Source/runtimerender/resourcemanager \
+    ../../Runtime/Source/stateapplication \
+    ../../Runtime/Source/event \
     ../../3rdparty/EASTL/UnknownVersion/include \
     ../../3rdparty/color \
     ../../QtExtras/qmlstreamer

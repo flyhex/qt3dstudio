@@ -18,17 +18,17 @@ DEFINES += \
     _UNICODE \
     NO_BOOST
 
-win32: PlatformSpecificDir = Windows
-macos: PlatformSpecificDir = Macos
-linux|integrity|qnx: PlatformSpecificDir = Linux
-android: PlatformSpecificDir = Android/jni
+win32: PlatformSpecificDir = windows
+macos: PlatformSpecificDir = macos
+linux|integrity|qnx: PlatformSpecificDir = linux
+android: PlatformSpecificDir = android/jni
 
 integrity: {
     DEFINES += _LINUX
     DEFINES += _INTEGRITYPLATFORM
 }
 
-INCLUDEPATH += $$PWD/Runtime/Source/PlatformSpecific/$$PlatformSpecificDir
+INCLUDEPATH += $$PWD/Runtime/Source/platformspecific/$$PlatformSpecificDir
 
 THIRDPARTY_DIR = $$(QT3DSTUDIO_3RDPARTY_DIR)
 isEmpty(THIRDPARTY_DIR) {

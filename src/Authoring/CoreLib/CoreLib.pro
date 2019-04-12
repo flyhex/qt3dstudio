@@ -53,14 +53,13 @@ INCLUDEPATH += \
     ../Common/Code/Graph \
     ../Common/Code/EulerAngles \
     ../Common/Code/Serialize \
-    ../../Runtime/Source/DataModel/Include \
-    ../../Runtime/Source/Qt3DSRender/Include \
-    ../../Runtime/Source/Qt3DSFoundation/Include \
-    ../../Runtime/Source/Qt3DSFoundation/Include/foundation \
-    ../../Runtime/Source/Qt3DSRuntimeRender/Include \
-    ../../Runtime/Source/Qt3DSRuntimeRender/GraphObjects \
-    ../../Runtime/Source/Qt3DSRuntimeRender/ResourceManager \
-    ../../Runtime/Source/Qt3DSStateApplication/Application \
+    ../../Runtime/Source/datamodel \
+    ../../Runtime/Source/render \
+    ../../Runtime/Source/foundation \
+    ../../Runtime/Source/runtimerender \
+    ../../Runtime/Source/runtimerender/graphobjects \
+    ../../Runtime/Source/runtimerender/resourcemanager \
+    ../../Runtime/Source/stateapplication \
     ../../3rdparty/EASTL/UnknownVersion/include \
     $$QMAKE_INCDIR_FBX \
     ../../3rdparty/ColladaDOM/2.4.0/dom/include \

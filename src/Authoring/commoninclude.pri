@@ -21,30 +21,27 @@ INCLUDEPATH += $$PWD/../Runtime/Source
 
 win32 {
 INCLUDEPATH += \
-    $$PWD/../Runtime/Source/PlatformSpecific/Windows/PlatformLibs \
+    $$PWD/../Runtime/Source/platformspecific/windows/libs \
     $$PWD/../3rdparty/RuntimePlatformSpecific/Windows/PlatformLibs \
-    $$PWD/../Runtime/Source/PlatformSpecific/Windows/Qt3DSLibs \
     $$PWD/../3rdparty/RuntimePlatformSpecific/Windows/Qt3DSLibs
 }
 
 linux {
 INCLUDEPATH += \
-    $$PWD/../Runtime/Source/PlatformSpecific/Linux/PlatformLibs \
     $$PWD/../3rdparty/RuntimePlatformSpecific/Linux/PlatformLibs \
-    $$PWD/../Runtime/Source/PlatformSpecific/Linux/Qt3DSLibs \
+    $$PWD/../Runtime/Source/platformspecific/Linux/libs \
     $$PWD/../3rdparty/RuntimePlatformSpecific/Linux/Qt3DSLibs
 }
 
 macos {
 INCLUDEPATH += \
-    $$PWD/../Runtime/Source/PlatformSpecific/Macos/PlatformLibs \
     $$PWD/../3rdparty/RuntimePlatformSpecific/Macos/PlatformLibs \
-    $$PWD/../Runtime/Source/PlatformSpecific/Macos/Qt3DSLibs \
+    $$PWD/../Runtime/Source/platformspecific/macos/libs \
     $$PWD/../3rdparty/RuntimePlatformSpecific/Macos/Qt3DSLibs
 
 }
 android {
 INCLUDEPATH += \
-    $$PWD/../Runtime/Source/PlatformSpecific/Android/jni/Qt3DSLibs
-    $$PWD/../Runtime/Source/PlatformSpecific/Android/jni/Qt3DSLibs/nv_thread
+    $$PWD/../Runtime/Source/platformspecific/Android/jni/libs
+    $$PWD/../Runtime/Source/platformspecific/Android/jni/libs/nv_thread
 }

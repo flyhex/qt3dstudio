@@ -10,8 +10,8 @@ DEFINES += _UNICODE QT3DS_AUTHORING _AFXDLL PCRE_STATIC
 
 INCLUDEPATH += \
     ../QT3DSIMP/Qt3DSImportLib \
-    ../../Runtime/Source/Qt3DSRender/Include \
-    ../../Runtime/Source/Qt3DSFoundation/Include \
+    ../../Runtime/Source/render \
+    ../../Runtime/Source/foundation \
     ../../3rdparty/EASTL/UnknownVersion/include
 
 LIBS += \

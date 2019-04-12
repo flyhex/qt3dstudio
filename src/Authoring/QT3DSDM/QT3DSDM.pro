@@ -13,11 +13,11 @@ INCLUDEPATH += \
     \
     Systems \
     Systems/Cores \
-    ../../Runtime/Source/System/Include \
-    ../../Runtime/Source/Qt3DSFoundation/Include \
-    ../../Runtime/Source/Qt3DSRuntimeRender/Include \
-    ../../Runtime/Source/DataModel/Include \
-    ../../Runtime/Source/Qt3DSRender/Include \
+    ../../Runtime/Source/system \
+    ../../Runtime/Source/foundation \
+    ../../Runtime/Source/runtimerender \
+    ../../Runtime/Source/datamodel \
+    ../../Runtime/Source/render \
     ../../3rdparty/EASTL/UnknownVersion/include \
     ../../3rdparty/utf8cpp/2.3.2/source \
     ../../3rdparty/color \

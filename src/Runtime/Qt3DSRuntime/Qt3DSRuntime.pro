@@ -18,14 +18,14 @@ integrity|ios {
 }
 
 SOURCES += \
-    ../Source/Viewer/Qt3DSAudioPlayerImpl.cpp \
-    ../Source/Viewer/Qt3DSViewerApp.cpp
+    ../Source/viewer/Qt3DSAudioPlayerImpl.cpp \
+    ../Source/viewer/Qt3DSViewerApp.cpp
 
 HEADERS += \
-    ../Source/Viewer/qt3dsruntimeglobal.h \
-    ../Source/Viewer/Qt3DSAudioPlayerImpl.h \
-    ../Source/Viewer/Qt3DSViewerApp.h \
-    ../Source/Viewer/Qt3DSViewerTimer.h
+    ../Source/viewer/qt3dsruntimeglobal.h \
+    ../Source/viewer/Qt3DSAudioPlayerImpl.h \
+    ../Source/viewer/Qt3DSViewerApp.h \
+    ../Source/viewer/Qt3DSViewerTimer.h
 
 linux|qnx|mingw {
     BEGIN_ARCHIVE = -Wl,--whole-archive

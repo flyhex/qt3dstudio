@@ -85,7 +85,7 @@
 #include <QtQml/qqmlcomponent.h>
 #include <QtCore/qdir.h>
 #include <unordered_set>
-#include "Runtime/Include/q3dsqmlbehavior.h"
+#include "runtime/q3dsqmlbehavior.h"
 #include "Qt3DSFileToolsSeekableMeshBufIOStream.h"
 #include "IObjectReferenceHelper.h"
 #include "StudioProjectSettings.h"
