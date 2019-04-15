@@ -307,7 +307,7 @@
                  <string>studioTutorialNew</string>
                 </property>
                 <property name="text">
-                 <string>Quick Start Guide</string>
+                 <string>Getting Started Guide</string>
                 </property>
                </widget>
               </item>
