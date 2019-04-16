@@ -40,7 +40,7 @@
 #include "Qt3DSRenderRuntimeBinding.h"
 #include "Qt3DSRenderRuntimeBindingImpl.h"
 #include "Qt3DSRenderContextCore.h"
-#include "Qt3DSRendererImpl.h"
+#include "rendererimpl/Qt3DSRendererImpl.h"
 #include "Qt3DSMetadata.h"
 
 namespace qt3ds {

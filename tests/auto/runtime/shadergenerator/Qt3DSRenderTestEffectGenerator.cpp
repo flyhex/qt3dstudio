@@ -44,7 +44,7 @@
 #include "foundation/FileTools.h"
 #include "Qt3DSWindowSystem.h"
 #include "Qt3DSRenderShaderCache.h"
-#include "Qt3DSRendererImpl.h"
+#include "rendererimpl/Qt3DSRendererImpl.h"
 #include "Qt3DSRenderLight.h"
 #include "Qt3DSRenderUIPLoader.h"
 #include "Qt3DSDMMetaDataTypes.h"
