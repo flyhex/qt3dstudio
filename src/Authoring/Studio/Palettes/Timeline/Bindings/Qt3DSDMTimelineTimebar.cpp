@@ -61,7 +61,7 @@ Qt3DSDMTimelineTimebar::Qt3DSDMTimelineTimebar(
     qt3dsdm::SValue theValue;
     if (m_PropertySystem->GetInstancePropertyValue(
             m_DataHandle, theClientDataModelBridge->GetSceneAsset().m_TimebarColor, theValue)) {
-        qt3dsdm::SFloat3 theTimebarColor = qt3dsdm::get<qt3dsdm::SFloat3>(theValue);
+        qt3dsdm::SFloat4 theTimebarColor = qt3dsdm::get<qt3dsdm::SFloat4>(theValue);
 
         m_Color.SetRGB(static_cast<int>(theTimebarColor.m_Floats[0] * 255.0f),
                        static_cast<int>(theTimebarColor.m_Floats[1] * 255.0f),
@@ -90,7 +90,7 @@ void Qt3DSDMTimelineTimebar::OnPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle in
             if (m_PropertySystem->GetInstancePropertyValue(
                     m_DataHandle, theClientDataModelBridge->GetSceneAsset().m_TimebarColor,
                     theValue)) {
-                qt3dsdm::SFloat3 theTimebarColor = qt3dsdm::get<qt3dsdm::SFloat3>(theValue);
+                qt3dsdm::SFloat4 theTimebarColor = qt3dsdm::get<qt3dsdm::SFloat4>(theValue);
 
                 m_Color.SetRGB(static_cast<int>(theTimebarColor.m_Floats[0] * 255.0f),
                                static_cast<int>(theTimebarColor.m_Floats[1] * 255.0f),

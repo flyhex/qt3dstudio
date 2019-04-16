@@ -484,7 +484,8 @@ void FbxDomWalker::ProcessLight(FbxNode *inFbxNode)
     ProcessTransform(inFbxNode, true);
     FbxLight *light = inFbxNode->GetLight();
     FbxDouble3 color = light->Color.Get();
-    m_Translator->SetLightProperties(light->LightType.Get(), SFloat3(color[0], color[1], color[2]),
+    m_Translator->SetLightProperties(light->LightType.Get(),
+                                     SFloat4(color[0], color[1], color[2], 1.0f),
             light->Intensity.Get(), 0, 0, light->CastShadows.Get());
     ProcessNodeChildren(inFbxNode);
     m_Translator->PopLight();

@@ -474,6 +474,17 @@ public:
         return Empty();
     }
 
+    Option<qt3ds::QT3DSVec4> GetPropertyValueVector4(TStrTableStr inType, TStrTableStr inProperty,
+                                                       TStrTableStr inId) override
+    {
+        SRuntimeMetaDataPropertyInfo &theInfo(FindProperty(inType, inProperty, inId));
+        if (theInfo.m_Value.hasValue()) {
+            SFloat4 theFloat4 = qt3dsdm::get<SFloat4>(*theInfo.m_Value);
+            return qt3ds::QT3DSVec4(theFloat4[0], theFloat4[1], theFloat4[2], theFloat4[3]);
+        }
+        return Empty();
+    }
+
     virtual Option<qt3ds::QT3DSI32> GetPropertyValueLong(TStrTableStr inType, TStrTableStr inProperty,
                                               TStrTableStr inId) override
     {

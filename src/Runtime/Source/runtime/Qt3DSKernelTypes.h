@@ -86,6 +86,7 @@ enum EAttributeType {
     ATTRIBUTETYPE_ELEMENTREF,
     ATTRIBUTETYPE_DATADRIVEN_PARENT,
     ATTRIBUTETYPE_DATADRIVEN_CHILD,
+    ATTRIBUTETYPE_FLOAT4,
     ATTRIBUTETYPE_FLOAT3,
     ATTRIBUTETYPE_FLOAT2,
     ATTRIBUTETYPE_DATAINPUT_TIMELINE,
@@ -211,13 +212,14 @@ struct SClone
 
 /// Each element has a number of attributes associated with it - This is the value.
 union UVariant {
-    INT32 m_INT32; ///< Integer representation
-    FLOAT m_FLOAT; ///< Float representation
-    THashValue m_Hash; ///< Explicit hash representation
-    UINT32 m_StringHandle; ///< Handle into the IStringTable member of the presentation
-    void *m_VoidPointer; ///< Generic data Pointer
-    UINT32 m_ElementHandle; ///< Element handle.  Resolve using IApplication object.
-    FLOAT m_FLOAT3[3]; ///< Vector 3 representation
+    INT32 m_INT32;          // Integer representation
+    FLOAT m_FLOAT;          // Float representation
+    THashValue m_Hash;      // Explicit hash representation
+    UINT32 m_StringHandle;  // Handle into the IStringTable member of the presentation
+    void *m_VoidPointer;    // Generic data Pointer
+    UINT32 m_ElementHandle; // Element handle.  Resolve using IApplication object.
+    FLOAT m_FLOAT3[3];      // Vector 3 representation
+    FLOAT m_FLOAT4[4];      // Vector 4 representation
 };
 
 } // namespace Q3DStudio

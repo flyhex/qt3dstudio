@@ -388,7 +388,7 @@ bool RowTimeline::isColorProperty() const
     if (propBinding) {
         qt3dsdm::TDataTypePair type = propBinding->GetType();
         if (m_rowTree->isProperty()
-                && type.first == qt3dsdm::DataModelDataType::Float3
+                && type.first == qt3dsdm::DataModelDataType::Float4
                 && type.second == qt3dsdm::AdditionalMetaDataType::Color) {
             return true;
         }

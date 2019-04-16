@@ -329,6 +329,19 @@ qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::getVariantsProperty(int i
     return 0;
 }
 
+qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::getBGColorProperty(int instance) const
+{
+    EStudioObjectType instanceType = GetObjectType(instance);
+
+    if (instanceType == OBJTYPE_SCENE)
+        return m_Scene.m_BackgroundColor;
+
+    if (instanceType == OBJTYPE_LAYER)
+        return m_Layer.m_BackgroundColor;
+
+    return 0;
+}
+
 bool CClientDataModelBridge::IsInternalProperty(const TCharStr &inPropertyName) const
 {
     return (inPropertyName == L"name" || inPropertyName == L"importid" || inPropertyName == L"type"

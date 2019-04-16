@@ -103,7 +103,7 @@ struct SShaderTextureProperties
 struct SShaderLightProperties
 {
     // Color of the light
-    QT3DSVec3 m_LightColor;
+    QT3DSVec4 m_LightColor;
     SLightSourceShader m_LightData;
 
     SShaderLightProperties() {}
@@ -1583,7 +1583,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
         // update the constant buffer
         shader.m_AoShadowParams.Set();
         // We can't cache light properties because they can change per object.
-        QT3DSVec3 theLightAmbientTotal = QT3DSVec3(0, 0, 0);
+        QT3DSVec4 theLightAmbientTotal = QT3DSVec4(0, 0, 0, 1);
         size_t numShaderLights = shader.m_Lights.size();
         size_t numShadowLights = shader.m_ShadowMaps.size();
         for (QT3DSU32 lightIdx = 0, shadowMapIdx = 0, lightEnd = inLights.size();
@@ -1609,9 +1609,10 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
             float brightness = TranslateConstantAttenuation(theLight->m_Brightness);
 
             // setup light data
-            theLightProperties.m_LightColor = theLight->m_DiffuseColor * brightness;
+            theLightProperties.m_LightColor =
+                QT3DSVec4(theLight->m_DiffuseColor.getXYZ() * brightness, 1.0);
             theLightProperties.m_LightData.m_specular =
-                QT3DSVec4(theLight->m_SpecularColor * brightness, 1.0);
+                QT3DSVec4(theLight->m_SpecularColor.getXYZ() * brightness, 1.0);
             theLightProperties.m_LightData.m_direction = QT3DSVec4(inLightDirections[lightIdx], 1.0);
 
             // TODO : This does potentially mean that we can create more shadow map entries than
@@ -1659,7 +1660,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
             }
             theLightAmbientTotal += theLight->m_AmbientColor;
         }
-        shader.m_LightAmbientTotal = theLightAmbientTotal;
+        shader.m_LightAmbientTotal = theLightAmbientTotal.getXYZ();
     }
 
     // Also sets the blend function on the render context.
@@ -1768,7 +1769,7 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
                                          inMaterial.m_EmissiveColor[1] * emissivePower,
                                          inMaterial.m_EmissiveColor[2] * emissivePower, inOpacity);
         shader.m_MaterialDiffuse.Set(material_diffuse);
-        shader.m_DiffuseColor.Set(inMaterial.m_DiffuseColor);
+        shader.m_DiffuseColor.Set(inMaterial.m_DiffuseColor.getXYZ());
         QT3DSVec4 material_specular =
             QT3DSVec4(inMaterial.m_SpecularTint[0], inMaterial.m_SpecularTint[1],
                    inMaterial.m_SpecularTint[2], inMaterial.m_IOR);

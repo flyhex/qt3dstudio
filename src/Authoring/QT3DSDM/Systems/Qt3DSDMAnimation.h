@@ -519,6 +519,10 @@ struct SAnimatableArityVisitor
     {
         return std::tuple<bool, size_t>(true, 3);
     }
+    std::tuple<bool, size_t> operator()(const SFloat4 &) const
+    {
+        return std::tuple<bool, size_t>(true, 4);
+    }
     template <typename TDataType>
     std::tuple<bool, size_t> operator()(const TDataType &) const
     {
@@ -548,6 +552,8 @@ inline std::tuple<bool, size_t> GetDatatypeAnimatableAndArity(DataModelDataType:
         return std::make_tuple(true, 2);
     case DataModelDataType::Float3:
         return std::make_tuple(true, 3);
+    case DataModelDataType::Float4:
+        return std::make_tuple(true, 4);
     }
 }
 

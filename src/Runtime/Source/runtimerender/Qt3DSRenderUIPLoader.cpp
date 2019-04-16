@@ -151,6 +151,21 @@ struct WStrOps<SFloat3>
         reader.ReadRef(NVDataRef<QT3DSF32>(item.m_Floats, 3));
     }
 };
+
+template <>
+struct WStrOps<SFloat4>
+{
+    void StrTo(const char8_t *buffer, SFloat4 &item, nvvector<char8_t> &ioTempBuf)
+    {
+        QT3DSU32 len = (QT3DSU32)strlen(buffer);
+        ioTempBuf.resize(len + 1);
+        memCopy(ioTempBuf.data(), buffer, (len + 1) * sizeof(char8_t));
+        MemoryBuffer<RawAllocator> unused;
+        qt3dsdm::IStringTable *theTable(NULL);
+        WCharTReader reader(ioTempBuf.begin(), unused, *theTable);
+        reader.ReadRef(NVDataRef<QT3DSF32>(item.m_Floats, 4));
+    }
+};
 }
 
 namespace {
@@ -163,6 +178,7 @@ struct IPropertyParser
     virtual Option<QT3DSF32> ParseFloat(const char8_t *inName) = 0;
     virtual Option<QT3DSVec2> ParseVec2(const char8_t *inName) = 0;
     virtual Option<QT3DSVec3> ParseVec3(const char8_t *inName) = 0;
+    virtual Option<QT3DSVec4> ParseVec4(const char8_t *inName) = 0;
     virtual Option<bool> ParseBool(const char8_t *inName) = 0;
     virtual Option<QT3DSU32> ParseU32(const char8_t *inName) = 0;
     virtual Option<QT3DSI32> ParseI32(const char8_t *inName) = 0;
@@ -217,6 +233,15 @@ struct SMetaPropertyParser : public IPropertyParser
     {
         Option<qt3ds::QT3DSVec3> theProperty =
             m_MetaData.GetPropertyValueVector3(m_Type, Register(inName), m_ClassId);
+        if (theProperty.hasValue()) {
+            return *theProperty;
+        }
+        return Empty();
+    }
+    Option<QT3DSVec4> ParseVec4(const char8_t *inName) override
+    {
+        Option<qt3ds::QT3DSVec4> theProperty =
+            m_MetaData.GetPropertyValueVector4(m_Type, Register(inName), m_ClassId);
         if (theProperty.hasValue()) {
             return *theProperty;
         }
@@ -304,6 +329,17 @@ struct SDomReaderPropertyParser : public IPropertyParser
         }
         return Empty();
     }
+    Option<QT3DSVec4> ParseVec4(const char8_t *inName) override
+    {
+        qt3dsdm::SFloat4 retval;
+        const char8_t *tempData;
+        if (m_Reader.UnregisteredAtt(inName, tempData)) {
+            qt3dsdm::WStrOps<qt3dsdm::SFloat4>().StrTo(tempData, retval, m_TempBuf);
+            return QT3DSVec4(retval.m_Floats[0], retval.m_Floats[1], retval.m_Floats[2],
+                             retval.m_Floats[3]);
+        }
+        return Empty();
+    }
     Option<bool> ParseBool(const char8_t *inName) override
     {
         bool retval;
@@ -386,6 +422,14 @@ struct SParserHelper<QT3DSVec3>
     static Option<QT3DSVec3> Parse(const char8_t *inName, IPropertyParser &inParser)
     {
         return inParser.ParseVec3(inName);
+    }
+};
+template <>
+struct SParserHelper<QT3DSVec4>
+{
+    static Option<QT3DSVec4> Parse(const char8_t *inName, IPropertyParser &inParser)
+    {
+        return inParser.ParseVec4(inName);
     }
 };
 template <>

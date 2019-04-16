@@ -359,7 +359,7 @@ public:
                                   long inAuthoringToolVersion) = 0;
 
     virtual void PushLight(const char *inName) = 0;
-    virtual void SetLightProperties(int type, const SFloat3 &color, double intensity,
+    virtual void SetLightProperties(int type, const SFloat4 &color, double intensity,
                                     double linearfade, double quadfade, bool shadows) = 0;
     virtual void PopLight() = 0;
     virtual void PushCamera(const char *inName) = 0;

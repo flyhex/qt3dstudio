@@ -156,7 +156,7 @@ protected:
     std::function<void(long inMapType, const STextureParameters &inTextureParameters)> SetTexture;
     std::function<void(double clipstart, double clipend, bool ortho,
                        double fov)> SetCameraProperties;
-    std::function<void(int type, const SFloat3 &color, double intensity,
+    std::function<void(int type, const SFloat4 &color, double intensity,
                        double linearfade, double quadfade, bool shadows)> SetLightProperties;
 
     std::function<void(const char *, const char *)> SetAnimationTrack;
@@ -624,7 +624,8 @@ void ColladaDOMWalker::ProcessNode(const domNodeRef inNode)
                 }
                 // Collada does not seem to have info about casting shadows or light intensity.
                 // We'll use the defaults (intensity 100, no shadows)
-                SetLightProperties(type, SFloat3(color.get(0), color.get(1), color.get(2)),
+                SetLightProperties(type,
+                                   SFloat4(color.get(0), color.get(1), color.get(2), color.get(3)),
                                    100, linearFade, quadFade, false);
             }
         }

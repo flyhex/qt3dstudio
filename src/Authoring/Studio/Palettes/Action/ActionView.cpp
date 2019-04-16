@@ -1164,16 +1164,6 @@ bool ActionView::toolTipsEnabled()
     return CStudioPreferences::ShouldShowTooltips();
 }
 
-QColor ActionView::showColorDialog(const QColor &color)
-{
-    m_currentColor = color;
-    CDialogs *dialogs = g_StudioApp.GetDialogs();
-    connect(dialogs, &CDialogs::onColorChanged, this, &ActionView::dialogCurrentColorChanged);
-    QColor currentColor = dialogs->displayColorDialog(color);
-    disconnect(dialogs, &CDialogs::onColorChanged, this, &ActionView::dialogCurrentColorChanged);
-    return currentColor;
-}
-
 void ActionView::updateActionStates()
 {
     bool hasValidAction = (m_currentActionIndex != -1) && m_itemHandle.Valid();

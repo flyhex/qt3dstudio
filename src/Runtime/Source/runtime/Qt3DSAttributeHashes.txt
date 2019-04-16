@@ -48,14 +48,17 @@ lightdiffuse
 lightdiffuse.r
 lightdiffuse.g
 lightdiffuse.b
-lightambient.r
+lightdiffuse.a
 lightambient
+lightambient.r
 lightambient.g
 lightambient.b
+lightambient.a
 lightspecular
 lightspecular.r
 lightspecular.g
 lightspecular.b
+lightspecular.a
 areawidth
 areaheight
 castshadow
@@ -78,16 +81,19 @@ emissivecolor
 emissivecolor.r
 emissivecolor.g
 emissivecolor.b
+emissivecolor.a
 diffuse
 diffuse.r
 diffuse.g
 diffuse.b
+diffuse.a
 specularmap
 specularmodel
 speculartint
 speculartint.r
 speculartint.g
 speculartint.b
+speculartint.a
 ior
 fresnelPower
 specularamount
@@ -173,6 +179,7 @@ textcolor
 textcolor.r
 textcolor.g
 textcolor.b
+textcolor.a
 size
 font
 dropshadow
@@ -193,6 +200,7 @@ textstring
 backcolor.r
 backcolor.g
 backcolor.b
+backcolor.a
 texttype
 usebackcolor
 wordwrap
@@ -214,6 +222,7 @@ background
 backgroundcolor.r
 backgroundcolor.g
 backgroundcolor.b
+backgroundcolor.a
 
 pathtype
 linearerror

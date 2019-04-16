@@ -291,6 +291,49 @@ struct SFloat3
     }
 };
 
+struct SFloat4
+{
+    float m_Floats[4];
+
+    SFloat4(float f1 = 0, float f2 = 0, float f3 = 0, float f4 = 1)
+    {
+        m_Floats[0] = f1;
+        m_Floats[1] = f2;
+        m_Floats[2] = f3;
+        m_Floats[3] = f4;
+    }
+    SFloat4(const SFloat4 &inOther) { operator=(inOther); }
+    SFloat4 &operator=(const SFloat4 &inOther)
+    {
+        m_Floats[0] = inOther.m_Floats[0];
+        m_Floats[1] = inOther.m_Floats[1];
+        m_Floats[2] = inOther.m_Floats[2];
+        m_Floats[3] = inOther.m_Floats[3];
+        return *this;
+    }
+
+    bool operator==(const SFloat4 &other) const
+    {
+        return m_Floats[0] == other.m_Floats[0] && m_Floats[1] == other.m_Floats[1]
+               && m_Floats[2] == other.m_Floats[2] && m_Floats[3] == other.m_Floats[3];
+    }
+
+    float &operator[](size_t inIndex)
+    {
+        if (inIndex < 4)
+            return m_Floats[inIndex];
+
+        throw std::out_of_range("");
+    }
+    const float &operator[](size_t inIndex) const
+    {
+        if (inIndex < 4)
+            return m_Floats[inIndex];
+
+        throw std::out_of_range("");
+    }
+};
+
 struct SLong4
 {
     qt3ds::QT3DSU32 m_Longs[4];
@@ -469,6 +512,11 @@ namespace foundation {
     struct DestructTraits<qt3dsdm::SFloat3>
     {
         void destruct(qt3dsdm::SFloat3 &) {}
+    };
+    template <>
+    struct DestructTraits<qt3dsdm::SFloat4>
+    {
+        void destruct(qt3dsdm::SFloat4 &) {}
     };
     template <>
     struct DestructTraits<qt3dsdm::SLong4>
@@ -774,6 +822,7 @@ struct DataModelDataType {
       Float,
       Float2,
       Float3,
+      Float4,
       Long,
       String,
       Bool,

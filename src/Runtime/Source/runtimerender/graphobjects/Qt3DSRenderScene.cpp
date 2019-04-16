@@ -39,7 +39,7 @@ SScene::SScene()
     : SGraphObject(GraphObjectTypes::Scene)
     , m_Presentation(NULL)
     , m_FirstChild(NULL)
-    , m_ClearColor(0, 0, 0)
+    , m_ClearColor(0.0f)
     , m_UseClearColor(true)
     , m_Dirty(true)
 {
@@ -91,6 +91,7 @@ void SScene::Render(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &
             clearColor.x = m_ClearColor.x;
             clearColor.y = m_ClearColor.y;
             clearColor.z = m_ClearColor.z;
+            clearColor.w = m_ClearColor.w;
         }
         // Maybe clear and reset to previous clear color after we leave.
         qt3ds::render::NVRenderContextScopedProperty<QT3DSVec4> __clearColor(
@@ -106,7 +107,7 @@ void SScene::Render(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &
 void SScene::RenderWithClear(const QT3DSVec2 &inViewportDimensions,
                              IQt3DSRenderContext &inContext,
                              RenderClearCommand inClearColorBuffer,
-                             QT3DSVec3 inClearColor,
+                             QT3DSVec4 inClearColor,
                              const SRenderInstanceId id)
 {
     // If this scene is not using clear color, we set the color

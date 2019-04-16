@@ -321,10 +321,10 @@ void StudioSubpresentationRenderer::RenderWithClear(
                     const SOffscreenRendererEnvironment &inEnvironment,
                     NVRenderContext &inRenderContext, QT3DSVec2 inPresentationScaleFactor,
                     SScene::RenderClearCommand inColorBufferNeedsClear,
-                    QT3DSVec3 inclearColor,
+                    QT3DSVec4 inclearColor,
                     const SRenderInstanceId instanceId)
 {
-    inRenderContext.SetClearColor(QT3DSVec4(inclearColor, 1.0));
+    inRenderContext.SetClearColor(inclearColor);
     Render(inEnvironment, inRenderContext, inPresentationScaleFactor,
            inColorBufferNeedsClear, instanceId);
 }

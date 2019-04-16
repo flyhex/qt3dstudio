@@ -125,7 +125,7 @@ namespace render {
         AAModeValues::Enum m_ProgressiveAAMode;
         AAModeValues::Enum m_MultisampleAAMode;
         LayerBackground::Enum m_Background;
-        QT3DSVec3 m_ClearColor;
+        QT3DSVec4 m_ClearColor;
 
         LayerBlendTypes::Enum m_BlendType;
 

@@ -285,6 +285,23 @@ struct SRuntimePropertyParser
         }
         return false;
     }
+    template <Qt3DSRenderDirtyFlags::Enum TDirtyType>
+    bool ParseProperty(QT3DSVec4 &outValue)
+    {
+        if (m_Type == Q3DStudio::ATTRIBUTETYPE_FLOAT4) {
+            QT3DSVec4 newValue(m_Value.m_FLOAT4[0], m_Value.m_FLOAT4[1], m_Value.m_FLOAT4[2],
+                               m_Value.m_FLOAT4[3]);
+            if (outValue != newValue) {
+                outValue = newValue;
+                SetDirty<TDirtyType>();
+                return true;
+            }
+        } else {
+            QT3DS_ASSERT(false);
+        }
+        return false;
+    }
+
 
     template <Qt3DSRenderDirtyFlags::Enum TDirtyType>
     bool ParseProperty(CRegisteredString &outValue)
@@ -453,6 +470,7 @@ struct SRuntimePropertyParser
 #define Scene_ClearColor_R ATTRIBUTE_BACKGROUNDCOLOR_R
 #define Scene_ClearColor_G ATTRIBUTE_BACKGROUNDCOLOR_G
 #define Scene_ClearColor_B ATTRIBUTE_BACKGROUNDCOLOR_B
+#define Scene_ClearColor_A ATTRIBUTE_BACKGROUNDCOLOR_A
 #define Scene_UseClearColor ATTRIBUTE_BGCOLORENABLE
 #define Node_Rotation ATTRIBUTE_ROTATION
 #define Node_Rotation_X ATTRIBUTE_ROTATION_X
@@ -479,6 +497,7 @@ struct SRuntimePropertyParser
 #define Layer_ClearColor_R ATTRIBUTE_BACKGROUNDCOLOR_R
 #define Layer_ClearColor_G ATTRIBUTE_BACKGROUNDCOLOR_G
 #define Layer_ClearColor_B ATTRIBUTE_BACKGROUNDCOLOR_B
+#define Layer_ClearColor_A ATTRIBUTE_BACKGROUNDCOLOR_A
 #define Layer_Background ATTRIBUTE_BACKGROUND
 #define Layer_BlendType ATTRIBUTE_BLENDTYPE
 #define Layer_ProgressiveAAMode ATTRIBUTE_PROGRESSIVEAA
@@ -537,14 +556,17 @@ struct SRuntimePropertyParser
 #define Light_DiffuseColor_R ATTRIBUTE_LIGHTDIFFUSE_R
 #define Light_DiffuseColor_G ATTRIBUTE_LIGHTDIFFUSE_G
 #define Light_DiffuseColor_B ATTRIBUTE_LIGHTDIFFUSE_B
+#define Light_DiffuseColor_A ATTRIBUTE_LIGHTDIFFUSE_A
 #define Light_SpecularColor ATTRIBUTE_LIGHTSPECULAR
 #define Light_SpecularColor_R ATTRIBUTE_LIGHTSPECULAR_R
 #define Light_SpecularColor_G ATTRIBUTE_LIGHTSPECULAR_G
 #define Light_SpecularColor_B ATTRIBUTE_LIGHTSPECULAR_B
+#define Light_SpecularColor_A ATTRIBUTE_LIGHTSPECULAR_A
 #define Light_AmbientColor ATTRIBUTE_LIGHTAMBIENT
 #define Light_AmbientColor_R ATTRIBUTE_LIGHTAMBIENT_R
 #define Light_AmbientColor_G ATTRIBUTE_LIGHTAMBIENT_G
 #define Light_AmbientColor_B ATTRIBUTE_LIGHTAMBIENT_B
+#define Light_AmbientColor_A ATTRIBUTE_LIGHTAMBIENT_A
 #define Light_Brightness ATTRIBUTE_BRIGHTNESS
 #define Light_LinearFade ATTRIBUTE_LINEARFADE
 #define Light_ExponentialFade ATTRIBUTE_EXPFADE
@@ -572,6 +594,7 @@ struct SRuntimePropertyParser
 #define Material_DiffuseColor_R ATTRIBUTE_DIFFUSE_R
 #define Material_DiffuseColor_G ATTRIBUTE_DIFFUSE_G
 #define Material_DiffuseColor_B ATTRIBUTE_DIFFUSE_B
+#define Material_DiffuseColor_A ATTRIBUTE_DIFFUSE_A
 #define Material_DiffuseMaps_0 ATTRIBUTE_DIFFUSEMAP
 #define Material_DiffuseMaps_1 ATTRIBUTE_DIFFUSEMAP2
 #define Material_DiffuseMaps_2 ATTRIBUTE_DIFFUSEMAP3
@@ -580,6 +603,7 @@ struct SRuntimePropertyParser
 #define Material_EmissiveColor_R ATTRIBUTE_EMISSIVECOLOR_R
 #define Material_EmissiveColor_G ATTRIBUTE_EMISSIVECOLOR_G
 #define Material_EmissiveColor_B ATTRIBUTE_EMISSIVECOLOR_B
+#define Material_EmissiveColor_A ATTRIBUTE_EMISSIVECOLOR_A
 #define Material_EmissiveMap ATTRIBUTE_EMISSIVEMAP
 #define Material_EmissiveMap2 ATTRIBUTE_EMISSIVEMAP2
 #define Material_SpecularReflection ATTRIBUTE_SPECULARREFLECTION
@@ -589,6 +613,7 @@ struct SRuntimePropertyParser
 #define Material_SpecularTint_R ATTRIBUTE_SPECULARTINT_R
 #define Material_SpecularTint_G ATTRIBUTE_SPECULARTINT_G
 #define Material_SpecularTint_B ATTRIBUTE_SPECULARTINT_B
+#define Material_SpecularTint_A ATTRIBUTE_SPECULARTINT_A
 #define Material_IOR ATTRIBUTE_IOR
 #define Material_FresnelPower ATTRIBUTE_FRESNELPOWER
 #define Material_SpecularAmount ATTRIBUTE_SPECULARAMOUNT
@@ -641,9 +666,11 @@ struct SRuntimePropertyParser
 #define Text_TextColor_R ATTRIBUTE_TEXTCOLOR_R
 #define Text_TextColor_G ATTRIBUTE_TEXTCOLOR_G
 #define Text_TextColor_B ATTRIBUTE_TEXTCOLOR_B
+#define Text_TextColor_A ATTRIBUTE_TEXTCOLOR_A
 #define Text_BackColor_R ATTRIBUTE_BACKCOLOR_R
 #define Text_BackColor_G ATTRIBUTE_BACKCOLOR_G
 #define Text_BackColor_B ATTRIBUTE_BACKCOLOR_B
+#define Text_BackColor_A ATTRIBUTE_BACKCOLOR_A
 #define Text_UseBackColor ATTRIBUTE_USEBACKCOLOR
 #define Text_EnableAcceleratedFont ATTRIBUTE_ENABLEACCELERATEDFONT
 #define Path_PathType ATTRIBUTE_PATHTYPE
@@ -664,121 +691,124 @@ struct SRuntimePropertyParser
 #define SubPath_Closed ATTRIBUTE_CLOSED
 
 // Fill in implementations for the actual parse tables.
-#define HANDLE_QT3DS_RENDER_PROPERTY(type, name, dirty)                                              \
+#define HANDLE_QT3DS_RENDER_PROPERTY(type, name, dirty)                                            \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);                      \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);                    \
         break;
 
-#define HANDLE_QT3DS_RENDER_VEC3_PROPERTY(type, name, dirty)                                         \
+#define HANDLE_QT3DS_RENDER_VEC3_PROPERTY(type, name, dirty)                                       \
     case Q3DStudio::type##_##name##_X:                                                             \
-        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.x);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.x);                  \
         break;                                                                                     \
     case Q3DStudio::type##_##name##_Y:                                                             \
-        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.y);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.y);                  \
         break;                                                                                     \
     case Q3DStudio::type##_##name##_Z:                                                             \
-        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.z);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.z);                  \
         break;
 
-#define HANDLE_QT3DS_RENDER_REAL_VEC2_PROPERTY(type, name, dirty)                                    \
+#define HANDLE_QT3DS_RENDER_REAL_VEC2_PROPERTY(type, name, dirty)                                  \
     case Q3DStudio::type##_##name##_X:                                                             \
-        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.x);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.x);                  \
         break;                                                                                     \
     case Q3DStudio::type##_##name##_Y:                                                             \
-        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.y);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.y);                  \
         break;
 
-#define HANDLE_QT3DS_RENDER_COLOR_PROPERTY(type, name, dirty)                                        \
+#define HANDLE_QT3DS_RENDER_COLOR_PROPERTY(type, name, dirty)                                      \
     case Q3DStudio::type##_##name##_R:                                                             \
-        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.x);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.x);                  \
         break;                                                                                     \
     case Q3DStudio::type##_##name##_G:                                                             \
-        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.y);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.y);                  \
         break;                                                                                     \
     case Q3DStudio::type##_##name##_B:                                                             \
-        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.z);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.z);                  \
+        break;                                                                                     \
+    case Q3DStudio::type##_##name##_A:                                                             \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.w);                  \
         break;
 
-#define HANDLE_QT3DS_RENDER_COLOR_VEC3_PROPERTY(type, name, dirty)                                   \
+#define HANDLE_QT3DS_RENDER_COLOR_VEC3_PROPERTY(type, name, dirty)                                 \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);                      \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);                    \
         break;
 
-#define HANDLE_QT3DS_RENDER_TRANSFORM_VEC3_PROPERTY(type, name, dirty)                               \
+#define HANDLE_QT3DS_RENDER_TRANSFORM_VEC3_PROPERTY(type, name, dirty)                             \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);                      \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);                    \
         break;
 
-#define HANDLE_QT3DS_RENDER_RADIAN_PROPERTY(type, name, dirty)                                       \
+#define HANDLE_QT3DS_RENDER_RADIAN_PROPERTY(type, name, dirty)                                     \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseRadianProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);                \
+        inParser.ParseRadianProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);              \
         break;
 
 // The runtime converts rotations for us.
-#define HANDLE_QT3DS_RENDER_VEC3_RADIAN_PROPERTY(type, name, dirty)                                  \
+#define HANDLE_QT3DS_RENDER_VEC3_RADIAN_PROPERTY(type, name, dirty)                                \
     case Q3DStudio::type##_##name##_X:                                                             \
-        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.x);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.x);                  \
         break;                                                                                     \
     case Q3DStudio::type##_##name##_Y:                                                             \
-        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.y);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.y);                  \
         break;                                                                                     \
     case Q3DStudio::type##_##name##_Z:                                                             \
-        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.z);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.z);                  \
         break;
 
-#define HANDLE_QT3DS_RENDER_OPACITY_PROPERTY(type, name, dirty)                                      \
+#define HANDLE_QT3DS_RENDER_OPACITY_PROPERTY(type, name, dirty)                                    \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseOpacityProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);               \
+        inParser.ParseOpacityProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);             \
         break;
 
-#define HANDLE_QT3DS_ROTATION_ORDER_PROPERTY(type, name, dirty)                                      \
+#define HANDLE_QT3DS_ROTATION_ORDER_PROPERTY(type, name, dirty)                                    \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseRotationOrder<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);                 \
+        inParser.ParseRotationOrder<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);               \
         break;
 
-#define HANDLE_QT3DS_NODE_ORIENTATION_PROPERTY(type, name, dirty)                                    \
+#define HANDLE_QT3DS_NODE_ORIENTATION_PROPERTY(type, name, dirty)                                  \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseOrientation<Qt3DSRenderDirtyFlags::dirty>(theItem.m_Flags);                    \
+        inParser.ParseOrientation<Qt3DSRenderDirtyFlags::dirty>(theItem.m_Flags);                  \
         break;
 
-#define HANDLE_QT3DS_RENDER_DEPTH_TEST_PROPERTY(type, name, dirty)                                   \
+#define HANDLE_QT3DS_RENDER_DEPTH_TEST_PROPERTY(type, name, dirty)                                 \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseInverseBoolean<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);                \
+        inParser.ParseInverseBoolean<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);              \
         break;
 
-#define HANDLE_QT3DS_NODE_FLAGS_PROPERTY(type, name, dirty)                                          \
+#define HANDLE_QT3DS_NODE_FLAGS_PROPERTY(type, name, dirty)                                        \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseNodeFlagsProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_Flags,               \
+        inParser.ParseNodeFlagsProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_Flags,             \
                                                                     NodeFlagValues::name);         \
         break;
 
-#define HANDLE_QT3DS_NODE_FLAGS_INVERSE_PROPERTY(type, name, dirty)                                  \
+#define HANDLE_QT3DS_NODE_FLAGS_INVERSE_PROPERTY(type, name, dirty)                                \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseNodeFlagsInverseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_Flags,        \
+        inParser.ParseNodeFlagsInverseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_Flags,      \
                                                                            NodeFlagValues::name);  \
         break;
 
-#define HANDLE_QT3DS_RENDER_ENUM_PROPERTY(type, name, dirty)                                         \
+#define HANDLE_QT3DS_RENDER_ENUM_PROPERTY(type, name, dirty)                                       \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseEnumProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);                  \
+        inParser.ParseEnumProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);                \
         break;
 
-#define HANDLE_QT3DS_RENDER_SOURCEPATH_PROPERTY(type, name, dirty)                                   \
+#define HANDLE_QT3DS_RENDER_SOURCEPATH_PROPERTY(type, name, dirty)                                 \
     case Q3DStudio::type##_##name:                                                                 \
-        inParser.ParseAndResolveSourcePath<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);          \
+        inParser.ParseAndResolveSourcePath<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name);        \
         break;
 
-#define HANDLE_QT3DS_RENDER_ARRAY_PROPERTY(type, name, index, dirty)                                 \
+#define HANDLE_QT3DS_RENDER_ARRAY_PROPERTY(type, name, index, dirty)                               \
     case Q3DStudio::type##_##name##_##index:                                                       \
-        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name[index]);               \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name[index]);             \
         break;
 
-#define HANDLE_QT3DS_RENDER_VEC2_PROPERTY(type, name, dirty)                                         \
+#define HANDLE_QT3DS_RENDER_VEC2_PROPERTY(type, name, dirty)                                       \
     case Q3DStudio::type##_##name##_X:                                                             \
-        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.x);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.x);                  \
         break;                                                                                     \
     case Q3DStudio::type##_##name##_Y:                                                             \
-        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.y);                    \
+        inParser.ParseProperty<Qt3DSRenderDirtyFlags::dirty>(theItem.m_##name.y);                  \
         break;
 
 struct SSceneTranslator : public Qt3DSTranslator

@@ -154,12 +154,12 @@
         <Property name="shaderlighting"     formalName="Lighting"                               default="Pixel"   category="Material" description="Light model" list="Pixel:None" />
         <Property name="blendmode"          formalName="Blending Mode"                          default="Normal"  category="Material" description="How this material blends with content\nbehind it. Modes marked with * are\navailable only with HW supporting\nadvanced blending modes." list="Normal:Screen:Multiply:*Overlay:*ColorBurn:*ColorDodge" />
         <Property name="vertexcolors"       formalName="Enable Vertex Colors" type="Boolean"    default="False"   category="Material" description="Use vertex colors from the mesh" animatable="False" />
-        <Property name="diffuse"            formalName="Diffuse Color"        type="Color"      default="1 1 1"   category="Material" description="Color when lit from any direction" />
+        <Property name="diffuse"            formalName="Diffuse Color"        type="Color"      default="1 1 1 1" category="Material" description="Color when lit from any direction" />
         <Property name="diffusemap"         formalName="Diffuse Map"          type="Image"                        category="Material" description="Image to multiply with diffuse color" />
         <Property name="diffusemap2"        formalName="Diffuse Map 2"        type="Image"                        category="Material" description="Image to multiply with diffuse color" />
         <Property name="diffusemap3"        formalName="Diffuse Map 3"        type="Image"                        category="Material" description="Image to multiply with diffuse color" />
         <Property name="specularreflection" formalName="Specular Reflection"  type="Image"                        category="Material" description="Image to use as a faked reflection" />
-        <Property name="speculartint"       formalName="Specular Tint"        type="Color"      default="1 1 1"   category="Material" description="Coloration applied to specular reflections" />
+        <Property name="speculartint"       formalName="Specular Tint"        type="Color"      default="1 1 1 1" category="Material" description="Coloration applied to specular reflections" />
         <Property name="specularamount"     formalName="Specular Amount"                                          category="Material" description="Amount of shine/gloss" />
         <Property name="specularmap"        formalName="Specular Map"         type="Image"                        category="Material" description="Image to vary the specular amount across\nthe material" />
         <Property name="specularmodel"      formalName="Specular Model"                         default="Default" category="Material" description="Equation to use when calculating specular\nhighlights for CG lights" list="Default:KGGX:KWard" />
@@ -174,7 +174,7 @@
         <Property name="displaceamount"     formalName="Displacement Amount"  type="float"      default="20"      category="Material" description="Distance to offset vertices" />
         <Property name="opacity"            formalName="Opacity"              min="0" max="100" default="100"     category="Material" description="Visibility of the geometry for this material." />
         <Property name="opacitymap"         formalName="Opacity Map"          type="Image"                        category="Material" description="Image to vary the opacity across the material" />
-        <Property name="emissivecolor"      formalName="Emissive Color"       type="Color"      default="1 1 1"   category="Material" description="Color of self-illumination for this material" />
+        <Property name="emissivecolor"      formalName="Emissive Color"       type="Color"      default="1 1 1 1" category="Material" description="Color of self-illumination for this material" />
         <Property name="emissivepower"      formalName="Emissive Power"                                           category="Material" description="Amount of self-illumination for this material\n(will not light other objects)" />
         <Property name="emissivemap"        formalName="Emissive Map"         type="Image"                        category="Material" description="Image to vary the emissive power across\nthe material" />
         <Property name="emissivemap2"       formalName="Emissive Map 2"       type="Image"                        category="Material" description="Second image to modulate the emissive power\nacross the material" />
@@ -372,8 +372,8 @@
         <!-- Light Properties -->
         <Property name='scope' formalName="Scope" description="Portion of the scene graph lit by this\nlight; no value results in entire layer\nbeing affected." type='ObjectRef' category="Light Properties" />
         <Property name="lighttype" formalName="Light Type" description="Type of illumination to use" list="Directional:Point:Area" default="Directional" category="Light Properties" />
-        <Property name="lightdiffuse" formalName="Light Color" description="Color of diffuse lighting effect" type="Color" default="1 1 1" category="Light Properties" />
-        <Property name="lightspecular" formalName="Specular Color" description="Color of specular lighting highlights" type="Color" default="1 1 1" category="Light Properties" />
+        <Property name="lightdiffuse" formalName="Light Color" description="Color of diffuse lighting effect" type="Color" default="1 1 1 1" category="Light Properties" />
+        <Property name="lightspecular" formalName="Specular Color" description="Color of specular lighting highlights" type="Color" default="1 1 1 1" category="Light Properties" />
         <Property name="lightambient" formalName="Ambient Color" description="Color of unlit areas (black for none)" type="Color" category="Light Properties" />
         <Property name="brightness" formalName="Brightness" description="Strength of the light" default="100" category="Light Properties" />
         <Property name="linearfade" formalName="Linear Fade" description="Falloff of the point light" min="0" max="1000" category="Light Properties">
@@ -439,19 +439,19 @@
 
         <!-- Format -->
         <Property name="textstring" formalName="Text String" type="MultiLineString" default="Text"                 category="Format" description="Text String" controllable="True" />
-        <Property name="textcolor"  formalName="Text Color"  type="Color"           default="1 1 1"                category="Format" description="Text Color"  controllable="True" />
+        <Property name="textcolor"  formalName="Text Color"  type="Color"           default="1 1 1 1"              category="Format" description="Text Color"  controllable="True" />
         <Property name="font"       formalName="Font"        type="Font"            default="TitilliumWeb-Regular" category="Format" description="Font" />
         <!-- HW accelerated fonts not supported
             <Property name="enableacceleratedfont" formalName="Hardware accelerated font" description="Enabled hardware acclerated font" type="Boolean" default="false" category="Format" />
         -->
-        <Property name="size" formalName="Font Size" description="Font Size" type="FontSize" default="36" animatable="False" category="Format" />
-        <Property name="horzalign" formalName="Horizontal Alignment" description="Horizontal Alignment" list="Left:Center:Right" default="Center" category="Format" />
-        <Property name="vertalign" formalName="Vertical Alignment" description="Vertical Alignment" list="Top:Middle:Bottom" default="Middle" category="Format" />
-        <Property name="leading" formalName="Leading" description="Leading" category="Format" />
-        <Property name="tracking" formalName="Tracking" description="Tracking" category="Format" />
-        <Property name="boundingbox" formalName="Text Area" description="Fixed size text area. If not set,\ntext area grows with text." type="Float2" default="0 0" category="Format" />
-        <Property name="wordwrap" formalName="Word Wrapping" description="Word wrapping. Has effect only if fixed size\ntext area is used.\nClip: Cut text if it does not fit.\nWrapWord: Wrap between words, if possible.\nWrapAnywhere: Wrap even in the middle\nof words." list="Clip:WrapWord:WrapAnywhere" default="WrapWord" category="Format" />
-        <Property name="elide" formalName="Eliding" description="Elide text that does not fit the\ntext area. Has effect only if\nfixed text area is defined." list="ElideNone:ElideLeft:ElideMiddle:ElideRight" default="ElideNone" category="Format" />
+        <Property name="size"        formalName="Font Size"            description="Font Size" type="FontSize" default="36" animatable="False" category="Format" />
+        <Property name="horzalign"   formalName="Horizontal Alignment" description="Horizontal Alignment" list="Left:Center:Right" default="Center" category="Format" />
+        <Property name="vertalign"   formalName="Vertical Alignment"   description="Vertical Alignment" list="Top:Middle:Bottom" default="Middle" category="Format" />
+        <Property name="leading"     formalName="Leading"              description="Leading" category="Format" />
+        <Property name="tracking"    formalName="Tracking"             description="Tracking" category="Format" />
+        <Property name="boundingbox" formalName="Text Area"            description="Fixed size text area. If not set,\ntext area grows with text." type="Float2" default="0 0" category="Format" />
+        <Property name="wordwrap"    formalName="Word Wrapping"        description="Word wrapping. Has effect only if fixed size\ntext area is used.\nClip: Cut text if it does not fit.\nWrapWord: Wrap between words, if possible.\nWrapAnywhere: Wrap even in the middle\nof words." list="Clip:WrapWord:WrapAnywhere" default="WrapWord" category="Format" />
+        <Property name="elide"       formalName="Eliding"              description="Elide text that does not fit the\ntext area. Has effect only if\nfixed text area is defined." list="ElideNone:ElideLeft:ElideMiddle:ElideRight" default="ElideNone" category="Format" />
 
         <!-- Shadow -->
         <Property name="dropshadow" formalName="Drop-Shadow" description="Add a drop-shadow to the text.\nThe shadow is a darker shade of the given color." type="Boolean" default="False" category="Shadow" />

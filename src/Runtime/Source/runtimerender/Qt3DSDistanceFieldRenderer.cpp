@@ -938,13 +938,11 @@ void Q3DSDistanceFieldRenderer::renderText(SText &text, const QT3DSMat44 &mvp,
                                      int(textureDetails.m_Width), int(textureDetails.m_Height),
                                      glyphInfo.fontScale * float(m_pixelRatio),
                                      QT3DSVec2(glyphInfo.shadowOffsetX, glyphInfo.shadowOffsetY),
-                                     QT3DSVec4(text.m_TextColor, 1),
-                                     shadowColor);
+                                     text.m_TextColor, shadowColor);
         } else {
             renderMesh(mesh.inputAssembler, it.key()->texture, mvp, modelView,
                        int(textureDetails.m_Width), int(textureDetails.m_Height),
-                       glyphInfo.fontScale * float(m_pixelRatio),
-                       QT3DSVec4(text.m_TextColor, 1));
+                       glyphInfo.fontScale * float(m_pixelRatio), text.m_TextColor);
         }
 
         m_renderedGlyphs += glyphHashValue;

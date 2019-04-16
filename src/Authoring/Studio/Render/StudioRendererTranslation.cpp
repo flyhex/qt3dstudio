@@ -200,6 +200,16 @@ struct STranslatorDataModelParser
         }
         return false;
     }
+    bool ParseProperty(Qt3DSDMPropertyHandle inProperty, QT3DSVec4 &outValue)
+    {
+        Option<SFloat4> theValue = GetPropertyValue<SFloat4>(inProperty);
+        if (theValue.hasValue()) {
+            outValue = QT3DSVec4(theValue->m_Floats[0], theValue->m_Floats[1],
+                                 theValue->m_Floats[2], theValue->m_Floats[3]);
+            return true;
+        }
+        return false;
+    }
     bool ParseProperty(Qt3DSDMPropertyHandle inProperty, qt3ds::render::CRegisteredString &outValue)
     {
         Option<qt3dsdm::TDataStrPtr> theValue = GetPropertyValue<qt3dsdm::TDataStrPtr>(inProperty);
@@ -1001,6 +1011,11 @@ inline qt3ds::QT3DSVec3 ToRenderType(const qt3dsdm::SFloat3 &inType)
 {
     return qt3ds::QT3DSVec3(inType.m_Floats[0], inType.m_Floats[1], inType.m_Floats[2]);
 }
+inline qt3ds::QT3DSVec4 ToRenderType(const qt3dsdm::SFloat4 &inType)
+{
+    return qt3ds::QT3DSVec4(inType.m_Floats[0], inType.m_Floats[1], inType.m_Floats[2],
+                            inType.m_Floats[3]);
+}
 
 struct SDynamicObjectTranslator : public SGraphObjectTranslator
 {
@@ -1088,6 +1103,15 @@ struct SDynamicObjectTranslator : public SGraphObjectTranslator
                                 == qt3ds::render::NVRenderShaderDataTypes::QT3DSVec3) {
                             theItem.SetPropertyValue(
                                 theDefinition, ToRenderType(qt3dsdm::get<qt3dsdm::SFloat3>(theValue)));
+                        } else {
+                            QT3DS_ASSERT(false);
+                        }
+                        break;
+                    case qt3dsdm::DataModelDataType::Float4:
+                        if (theDefinition.m_DataType
+                                == qt3ds::render::NVRenderShaderDataTypes::QT3DSVec4) {
+                            theItem.SetPropertyValue(
+                                theDefinition, ToRenderType(qt3dsdm::get<qt3dsdm::SFloat4>(theValue)));
                         } else {
                             QT3DS_ASSERT(false);
                         }
@@ -1293,6 +1317,20 @@ struct SRenderPluginPropertyUpdateFactory
         ioUpdates.push_back(SRenderPropertyValueUpdate(
             inClass.GetPropertyValueInfo(theDec.m_StartOffset + 2).first, value.m_Floats[2]));
     }
+
+    static void Add(eastl::vector<SRenderPropertyValueUpdate> &ioUpdates,
+                    const qt3dsdm::SFloat4 &value, const SRenderPluginPropertyDeclaration &theDec,
+                    IRenderPluginClass &inClass)
+    {
+        ioUpdates.push_back(SRenderPropertyValueUpdate(
+            inClass.GetPropertyValueInfo(theDec.m_StartOffset).first, value.m_Floats[0]));
+        ioUpdates.push_back(SRenderPropertyValueUpdate(
+            inClass.GetPropertyValueInfo(theDec.m_StartOffset + 1).first, value.m_Floats[1]));
+        ioUpdates.push_back(SRenderPropertyValueUpdate(
+            inClass.GetPropertyValueInfo(theDec.m_StartOffset + 2).first, value.m_Floats[2]));
+        ioUpdates.push_back(SRenderPropertyValueUpdate(
+            inClass.GetPropertyValueInfo(theDec.m_StartOffset + 3).first, value.m_Floats[3]));
+    }
 };
 struct SRenderPluginTranslator : public SGraphObjectTranslator
 {
@@ -1367,6 +1405,12 @@ struct SRenderPluginTranslator : public SGraphObjectTranslator
                             thePropName, qt3ds::render::SRenderPluginPropertyTypes::Color));
                     }
                     break;
+                case DataModelDataType::Float4:
+                    if (theMetaType == AdditionalMetaDataType::Color) {
+                        theClass.RegisterProperty(SRenderPluginPropertyDeclaration(
+                            thePropName, qt3ds::render::SRenderPluginPropertyTypes::Color));
+                    }
+                    break;
                 case DataModelDataType::Long:
                     theClass.RegisterProperty(SRenderPluginPropertyDeclaration(
                         thePropName, qt3ds::render::SRenderPluginPropertyTypes::Long));
@@ -1413,6 +1457,11 @@ struct SRenderPluginTranslator : public SGraphObjectTranslator
                 case DataModelDataType::Float3:
                     SRenderPluginPropertyUpdateFactory::Add(m_PropertyUpdates,
                                                             thePropValue.getData<SFloat3>(),
+                                                            theDeclaration, theClass);
+                    break;
+                case DataModelDataType::Float4:
+                    SRenderPluginPropertyUpdateFactory::Add(m_PropertyUpdates,
+                                                            thePropValue.getData<SFloat4>(),
                                                             theDeclaration, theClass);
                     break;
                 case DataModelDataType::Long:
@@ -2156,12 +2205,12 @@ void STranslation::PreRender(bool scenePreviewPass)
                 SScene &theScene = static_cast<SScene &>(theSceneTranslator->GetGraphObject());
                 if (scenePreviewPass) {
                     if (theScene.m_UseClearColor)
-                        m_Context.SetMatteColor(QT3DSVec4(theScene.m_ClearColor, 1.0f));
+                        m_Context.SetMatteColor(theScene.m_ClearColor);
                     else
                         m_Context.SetMatteColor(QT3DSVec4(0.0f, 0.0f, 0.0f, 1.0f));
                 } else {
                     if (theScene.m_UseClearColor)
-                        m_Context.SetSceneColor(QT3DSVec4(theScene.m_ClearColor, 1.0f));
+                        m_Context.SetSceneColor(theScene.m_ClearColor);
                     else
                         m_Context.SetSceneColor(QT3DSVec4(QT3DSVec3(0.0f), 1.0f));
                 }

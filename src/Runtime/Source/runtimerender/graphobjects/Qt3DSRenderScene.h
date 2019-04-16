@@ -31,7 +31,7 @@
 #ifndef QT3DS_RENDER_SCENE_H
 #define QT3DS_RENDER_SCENE_H
 #include "Qt3DSRender.h"
-#include "foundation/Qt3DSVec3.h"
+#include "foundation/Qt3DSVec4.h"
 #include "Qt3DSRenderGraphObject.h"
 
 namespace qt3ds {
@@ -44,7 +44,7 @@ namespace render {
     {
         SPresentation *m_Presentation;
         SLayer *m_FirstChild;
-        QT3DSVec3 m_ClearColor;
+        QT3DSVec4 m_ClearColor;
         bool m_UseClearColor;
         bool m_Dirty;
 
@@ -76,7 +76,7 @@ namespace render {
                     const SRenderInstanceId id = nullptr);
         void RenderWithClear(const QT3DSVec2 &inViewportDimensions, IQt3DSRenderContext &inContext,
                              RenderClearCommand inClearColorBuffer,
-                             QT3DSVec3 inclearColor, const SRenderInstanceId id = nullptr);
+                             QT3DSVec4 inclearColor, const SRenderInstanceId id = nullptr);
     };
 }
 }

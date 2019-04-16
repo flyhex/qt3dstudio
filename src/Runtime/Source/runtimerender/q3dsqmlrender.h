@@ -65,7 +65,7 @@ public:
                          NVRenderContext &/*inRenderContext*/,
                          QT3DSVec2 /*inPresentationScaleFactor*/,
                          SScene::RenderClearCommand /*inColorBufferNeedsClear*/,
-                         QT3DSVec3 /*inclearColor*/,
+                         QT3DSVec4 /*inclearColor*/,
                          const SRenderInstanceId /*instanceId*/) override {}
 
     IGraphObjectPickQuery *GetGraphObjectPickQuery(const SRenderInstanceId instanceId) override

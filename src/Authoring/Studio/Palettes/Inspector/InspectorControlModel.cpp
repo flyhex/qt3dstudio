@@ -1309,6 +1309,11 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
             element->m_values = QVariant::fromValue<QList<double> >(float3Values);
         }
         break;
+    case qt3dsdm::DataModelDataType::Float4:
+        if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Color) {
+            element->m_value = qt3dsdm::get<QColor>(value);
+        }
+        break;
     case qt3dsdm::DataModelDataType::Float2:
         if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::None) {
             const QVector2D theFloat2 = qt3dsdm::get<QVector2D>(value);
@@ -1813,7 +1818,6 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
         // initialize vertex buffers), so the renderer's OpenGL context must be current
         Q3DStudio::IStudioRenderer &theRenderer(g_StudioApp.getRenderer());
         theRenderer.MakeContextCurrent();
-
         m_UpdatableEditor.EnsureEditor(QObject::tr("Set Property"), __FILE__, __LINE__)
                 .SetInstancePropertyValue(instance, handle, v);
 

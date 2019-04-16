@@ -249,13 +249,16 @@ ColumnLayout {
                 case AdditionalMetaDataType.None:
                 case AdditionalMetaDataType.Rotation:
                     return xyzPropertyComponent;
-                case AdditionalMetaDataType.Color:
-                    return colorBox;
                 default:
                     console.warn("KDAB_TODO implement property handler for additional " +
                                  "typeDataModelDataType.Float3: ", actionProperty.additionalType);
                     return xyzPropertyComponent;
                 }
+            case DataModelDataType.Float4:
+                if (actionProperty.additionalType === AdditionalMetaDataType.Color)
+                    return colorBox;
+                break;
+
             case DataModelDataType.String:
                 switch (actionProperty.additionalType) {
                 case AdditionalMetaDataType.StringList:

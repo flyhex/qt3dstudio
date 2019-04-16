@@ -78,7 +78,7 @@ public:
                          qt3ds::render::NVRenderContext &inRenderContext,
                          qt3ds::render::QT3DSVec2 inPresentationScaleFactor,
                          qt3ds::render::SScene::RenderClearCommand inColorBufferNeedsClear,
-                         qt3ds::render::QT3DSVec3 inclearColor,
+                         qt3ds::render::QT3DSVec4 inclearColor,
                          const qt3ds::render::SRenderInstanceId instanceId) override;
 
     qt3ds::render::IGraphObjectPickQuery *GetGraphObjectPickQuery(

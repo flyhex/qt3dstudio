@@ -33,6 +33,7 @@
 #include "foundation/Qt3DSRefCounted.h"
 #include "foundation/Qt3DSOption.h"
 #include "foundation/Qt3DSVec3.h"
+#include "foundation/Qt3DSVec4.h"
 #include <EASTL/string.h>
 #include <EASTL/vector.h>
 #include "foundation/StringTable.h"
@@ -225,6 +226,9 @@ public:
      */
     virtual Option<qt3ds::QT3DSVec3> GetPropertyValueVector3(TStrTableStr inType, TStrTableStr inProperty,
                                                        TStrTableStr inId = TStrTableStr()) = 0;
+
+    virtual Option<qt3ds::QT3DSVec4> GetPropertyValueVector4(TStrTableStr inType,
+                                TStrTableStr inProperty, TStrTableStr inId = TStrTableStr()) = 0;
 
     //==============================================================================
     /**

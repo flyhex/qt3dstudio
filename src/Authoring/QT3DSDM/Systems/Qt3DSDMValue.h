@@ -66,6 +66,7 @@ struct SEnumToDataTypeMap
     HANDLE_QT3DSDM_DATA_TYPE(float, DataModelDataType::Float);                                        \
     HANDLE_QT3DSDM_DATA_TYPE(SFloat2, DataModelDataType::Float2);                                     \
     HANDLE_QT3DSDM_DATA_TYPE(SFloat3, DataModelDataType::Float3);                                     \
+    HANDLE_QT3DSDM_DATA_TYPE(SFloat4, DataModelDataType::Float4);                                     \
     HANDLE_QT3DSDM_DATA_TYPE(qt3ds::QT3DSI32, DataModelDataType::Long);                                          \
     HANDLE_QT3DSDM_DATA_TYPE(TDataStrPtr, DataModelDataType::String);                                 \
     HANDLE_QT3DSDM_DATA_TYPE(bool, DataModelDataType::Bool);                                          \
@@ -237,6 +238,9 @@ struct SDefaulter<SValue>
         case DataModelDataType::Float3:
             outValue = SValue(SFloat3());
             break;
+        case DataModelDataType::Float4:
+            outValue = SValue(SFloat4());
+            break;
         case DataModelDataType::Long:
             outValue = SValue(0);
             break;
@@ -289,11 +293,12 @@ inline SObjectRefType ConvertToObjectRef(const SValue &inValue)
 template <>
 inline QColor get<QColor>(const SValue &inType)
 {
-    auto f = get<qt3dsdm::SFloat3>(inType);
+    auto f = get<qt3dsdm::SFloat4>(inType);
     qreal r = qBound<qreal>(0.0, f.m_Floats[0], 1.0);
     qreal g = qBound<qreal>(0.0, f.m_Floats[1], 1.0);
     qreal b = qBound<qreal>(0.0, f.m_Floats[2], 1.0);
-    return QColor::fromRgbF(r, g, b);
+    qreal a = qBound<qreal>(0.0, f.m_Floats[3], 1.0);
+    return QColor::fromRgbF(r, g, b, a);
 }
 
 template <>
@@ -314,6 +319,13 @@ inline QVector3D get<QVector3D>(const qt3dsdm::SValue &inType)
 {
     auto f = get<qt3dsdm::SFloat3>(inType);
     return QVector3D(f.m_Floats[0], f.m_Floats[1], f.m_Floats[2]);
+}
+
+template <>
+inline QVector<float> get<QVector<float> >(const qt3dsdm::SValue &inType)
+{
+    auto f = get<qt3dsdm::SFloat4>(inType);
+    return {f.m_Floats[0], f.m_Floats[1], f.m_Floats[2], f.m_Floats[3]};
 }
 
 // KDAB_TODO Shortcut to not define our own 4 member long structure

@@ -68,7 +68,7 @@ RowLayout {
             anchors.fill: parent
             onClicked: {
                 root.listenToColorChanges = true;
-                root.selectedColor = _parentView.showColorDialog(rect.color);
+                root.selectedColor = _parentView.showColorDialog(rect.color, instance, handle);
                 root.listenToColorChanges = false;
                 root.colorSelected();
             }

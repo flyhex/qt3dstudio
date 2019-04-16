@@ -27,33 +27,18 @@
 **
 ****************************************************************************/
 
-//=============================================================================
-// Prefix
-//=============================================================================
 #ifndef INCLUDED_DIALOGS_H
-#define INCLUDED_DIALOGS_H 1
+#define INCLUDED_DIALOGS_H
 
-#pragma once
-
-//=============================================================================
-// Includes
-//=============================================================================
 #include "Qt3DSFile.h"
 #include "StudioObjectTypes.h"
 #include "Qt3DSMessageBox.h"
 #include "Qt3DSFileTools.h"
-#include "CColor.h"
 #include "DocumentEditorEnumerations.h"
 
 #include <QtWidgets/qmessagebox.h>
 
-//=============================================================================
-// Forwards
-//=============================================================================
 class IDoc;
-class CStudioApp;
-class CControl;
-class CDialogControl;
 class CProgressView;
 class KeyframeManager;
 class ITimeChangeCallback;
@@ -61,6 +46,7 @@ class ITimeChangeCallback;
 class CDialogs : public QObject
 {
     Q_OBJECT
+
 public:
     enum ESavePromptResult {
         CANCEL_OPERATION,
@@ -156,7 +142,7 @@ public:
     int displayOverrideAssetBox(const QString &assetPath);
     int DisplayChoiceBox(const QString &inTitle, const QString &inText, int inIcon);
     void DisplayKnownErrorDialog(const QString &inErrorText);
-    QColor displayColorDialog(const QColor &color) const;
+    QColor displayColorDialog(const QColor &color, bool showAlpha = false) const;
 
     ESavePromptResult PromptForSave();
     bool PromptForKeyframeInterpolation(float &ioEaseIn, float &ioEaseOut);
@@ -208,11 +194,9 @@ protected:
                                        const Q3DStudio::CString &inRecommendedVersion,
                                        bool inError);
 
-    CProgressView *m_ProgressPalette;
-    bool m_ShowGUI;
-
-    QString m_LastSaveFile; ///< Path to the file was previously saved
-
+    CProgressView *m_ProgressPalette = nullptr;
+    bool m_ShowGUI = true;
+    QString m_LastSaveFile; // Path to the file was previously saved
     QHash<QString, QString> m_defaultDirForSuffixMap;
 };
 #endif // INCLUDED_DIALOGS_H

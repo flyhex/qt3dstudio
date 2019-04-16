@@ -75,7 +75,7 @@ public:
     VariantsGroupModel *variantsModel() const { return m_variantsGroupModel; }
 
     Q_INVOKABLE QColor titleColor(int instance = 0, int handle = 0) const;
-    Q_INVOKABLE QColor showColorDialog(const QColor &color);
+    Q_INVOKABLE QColor showColorDialog(const QColor &color, int instance = 0, int handle = 0);
     Q_INVOKABLE void showContextMenu(int x, int y, int handle, int instance);
     Q_INVOKABLE void showTagContextMenu(int x, int y, const QString &group, const QString &tag);
     Q_INVOKABLE void showDataInputChooser(int handle, int instance, const QPoint &point);
@@ -147,8 +147,8 @@ private:
     MouseHelper m_mouseHelper;
     QmlUtils m_qmlUtils;
 
-    int m_instance = 0;
-    int m_handle = 0;
+    int m_contextMenuInstance = 0;
+    int m_contextMenuHandle = 0;
 
     QSize m_preferredSize;
     QColor m_currentColor;

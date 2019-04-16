@@ -318,7 +318,8 @@ namespace render {
 
             context.SetBlendFunction(blendFunc);
             context.SetBlendEquation(blendEqu);
-            QT3DSVec4 theColor(m_Text.m_TextColor, m_Text.m_GlobalOpacity);
+            QT3DSVec4 theColor(m_Text.m_TextColor.x, m_Text.m_TextColor.y, m_Text.m_TextColor.z,
+                               m_Text.m_GlobalOpacity);
 
             STextShader &shader(*theInfo.m_Shader);
             shader.Render(*m_Text.m_TextTexture, *this, theColor, m_ModelViewProjection,
@@ -342,8 +343,8 @@ namespace render {
 
             context.SetBlendFunction(blendFunc);
             context.SetBlendEquation(blendEqu);
-            QT3DSVec4 theColor(m_Text.m_TextColor, m_Text.m_GlobalOpacity);
-
+            QT3DSVec4 theColor(m_Text.m_TextColor.x, m_Text.m_TextColor.y, m_Text.m_TextColor.z,
+                               m_Text.m_GlobalOpacity);
             STextShader &shader(*theInfo.m_Shader);
 
             shader.RenderPath(*m_Text.m_PathFontItem, *m_Text.m_PathFontDetails, *this, theColor,

@@ -131,7 +131,7 @@ namespace render {
                                            bool inRenderSiblings = true,
                                            const SRenderInstanceId id = nullptr) = 0;
         virtual void RenderLayer(SLayer &inLayer, const QT3DSVec2 &inViewportDimensions, bool clear,
-                                 QT3DSVec3 clearColor, bool inRenderSiblings = true,
+                                 QT3DSVec4 clearColor, bool inRenderSiblings = true,
                                  const SRenderInstanceId id = nullptr) = 0;
 
         // Studio option to disable picking against sub renderers.  This allows better interaction

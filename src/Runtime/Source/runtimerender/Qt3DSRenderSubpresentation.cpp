@@ -99,7 +99,7 @@ namespace render {
     void CSubPresentationRenderer::RenderWithClear(
         const SOffscreenRendererEnvironment &inEnvironment,
         NVRenderContext &inRenderContext, QT3DSVec2 inPresScale,
-        SScene::RenderClearCommand inClearBuffer, QT3DSVec3 inClearColor,
+        SScene::RenderClearCommand inClearBuffer, QT3DSVec4 inClearColor,
         const SRenderInstanceId id)
     {
         Q_UNUSED(inEnvironment);

@@ -123,8 +123,8 @@ struct WStrOps<AdditionalMetaDataType::Value>
     {
         switch (item) {
 #define HANDLE_ADDITIONAL_META_DATA_TYPE(name)                                                     \
-        case AdditionalMetaDataType::name:                                                             \
-    wcscpy_s(buffer.begin(), buffer.size(), QT3DS_WCHAR_T_##name);                               \
+        case AdditionalMetaDataType::name:                                                         \
+    wcscpy_s(buffer.begin(), buffer.size(), QT3DS_WCHAR_T_##name);                                 \
     return 1;
         ITERATE_ADDITIONAL_META_DATA_TYPES
         #undef HANDLE_ADDITIONAL_META_DATA_TYPE
@@ -134,9 +134,9 @@ struct WStrOps<AdditionalMetaDataType::Value>
     bool StrTo(const wchar_t *buffer, AdditionalMetaDataType::Value &item)
     {
 #define HANDLE_ADDITIONAL_META_DATA_TYPE(name)                                                     \
-    if (AreEqual(buffer, QT3DS_WCHAR_T_##name)) {                                                    \
-    item = AdditionalMetaDataType::name;                                                       \
-    return true;                                                                               \
+    if (AreEqual(buffer, QT3DS_WCHAR_T_##name)) {                                                  \
+    item = AdditionalMetaDataType::name;                                                           \
+    return true;                                                                                   \
     }
         ITERATE_ADDITIONAL_META_DATA_TYPES
         #undef HANDLE_ADDITIONAL_META_DATA_TYPE
@@ -159,8 +159,8 @@ QT3DSU32 WStrOps<HandlerArgumentType::Value>::ToStr(HandlerArgumentType::Value i
 {
     switch (item) {
 #define HANDLE_HANDLER_ARG_TYPE(name)                                                              \
-    case HandlerArgumentType::name:                                                               \
-    wcscpy_s(buffer.begin(), buffer.size(), QT3DS_WCHAR_T_##name);                               \
+    case HandlerArgumentType::name:                                                                \
+    wcscpy_s(buffer.begin(), buffer.size(), QT3DS_WCHAR_T_##name);                                 \
     return 1;
     ITERATE_HANDLER_ARG_TYPES
         #undef HANDLE_HANDLER_ARG_TYPE
@@ -171,9 +171,9 @@ QT3DSU32 WStrOps<HandlerArgumentType::Value>::ToStr(HandlerArgumentType::Value i
 bool WStrOps<HandlerArgumentType::Value>::StrTo(const wchar_t *buffer, HandlerArgumentType::Value &item)
 {
 #define HANDLE_HANDLER_ARG_TYPE(name)                                                              \
-    if (AreEqual(buffer, QT3DS_WCHAR_T_##name)) {                                                    \
+    if (AreEqual(buffer, QT3DS_WCHAR_T_##name)) {                                                  \
     item = HandlerArgumentType::name;                                                              \
-    return true;                                                                               \
+    return true;                                                                                   \
 }
     ITERATE_HANDLER_ARG_TYPES
         #undef HANDLE_HANDLER_ARG_TYPE
@@ -189,35 +189,35 @@ bool WStrOps<HandlerArgumentType::Value>::StrTo(const wchar_t *buffer, HandlerAr
 #define QT3DS_WCHAR_T_StringListOrInt L"StringListOrInt"
 #define QT3DS_WCHAR_T_Scale L"Scale"
 
-#define ITERATE_QT3DSDM_COMPLETE_TYPES                                                               \
-    HANDLE_QT3DSDM_COMPLETE_NONE_TYPE                                                                 \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(StringList, StringList, DataModelDataType::String)                                      \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(FloatRange, Range, DataModelDataType::Float)                                            \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(LongRange, Range, DataModelDataType::Long)                                              \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(Float, None, DataModelDataType::Float)                                                  \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(Long, None, DataModelDataType::Long)                                                    \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(Float2, None, DataModelDataType::Float2)                                                \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(Vector, None, DataModelDataType::Float3)                                                \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(Scale, None, DataModelDataType::Float3)                                                 \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(Rotation, Rotation, DataModelDataType::Float3)                                          \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(Color, Color, DataModelDataType::Float3)                                                \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(Boolean, None, DataModelDataType::Bool)                                                 \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(Slide, None, DataModelDataType::String)                                                 \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(Font, Font, DataModelDataType::String)                                                  \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(FontSize, FontSize, DataModelDataType::Float)                                           \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(String, String, DataModelDataType::String)                                              \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(MultiLineString, MultiLine, DataModelDataType::String)                                  \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(ObjectRef, ObjectRef, DataModelDataType::ObjectRef)                                     \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(Image, Image, DataModelDataType::Long4)                                                 \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(Mesh, Mesh, DataModelDataType::String)                                                  \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(Import, Import, DataModelDataType::String)                                              \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(Texture, Texture, DataModelDataType::String)                                            \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(Image2D, Texture, DataModelDataType::String)                                            \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(Buffer, Texture, DataModelDataType::String)                                             \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(Guid, None, DataModelDataType::Long4)                                                   \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(StringListOrInt, StringList, DataModelDataType::StringOrInt)                            \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(Renderable, Renderable, DataModelDataType::String)                                      \
-    HANDLE_QT3DSDM_COMPLETE_TYPE(PathBuffer, PathBuffer, DataModelDataType::String)                                      \
+#define ITERATE_QT3DSDM_COMPLETE_TYPES                                                             \
+    HANDLE_QT3DSDM_COMPLETE_NONE_TYPE                                                              \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(StringList, StringList, DataModelDataType::String)                \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(FloatRange, Range, DataModelDataType::Float)                      \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(LongRange, Range, DataModelDataType::Long)                        \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Float, None, DataModelDataType::Float)                            \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Long, None, DataModelDataType::Long)                              \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Float2, None, DataModelDataType::Float2)                          \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Vector, None, DataModelDataType::Float3)                          \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Scale, None, DataModelDataType::Float3)                           \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Rotation, Rotation, DataModelDataType::Float3)                    \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Color, Color, DataModelDataType::Float4)                          \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Boolean, None, DataModelDataType::Bool)                           \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Slide, None, DataModelDataType::String)                           \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Font, Font, DataModelDataType::String)                            \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(FontSize, FontSize, DataModelDataType::Float)                     \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(String, String, DataModelDataType::String)                        \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(MultiLineString, MultiLine, DataModelDataType::String)            \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(ObjectRef, ObjectRef, DataModelDataType::ObjectRef)               \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Image, Image, DataModelDataType::Long4)                           \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Mesh, Mesh, DataModelDataType::String)                            \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Import, Import, DataModelDataType::String)                        \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Texture, Texture, DataModelDataType::String)                      \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Image2D, Texture, DataModelDataType::String)                      \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Buffer, Texture, DataModelDataType::String)                       \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Guid, None, DataModelDataType::Long4)                             \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(StringListOrInt, StringList, DataModelDataType::StringOrInt)      \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(Renderable, Renderable, DataModelDataType::String)                \
+    HANDLE_QT3DSDM_COMPLETE_TYPE(PathBuffer, PathBuffer, DataModelDataType::String)                \
     HANDLE_QT3DSDM_COMPLETE_TYPE(ShadowMapResolution, ShadowMapResolution, DataModelDataType::Long)
 
 DataModelDataType::Value CompleteMetaDataType::ToDataType(CompleteMetaDataType::Enum inCompleteType)
@@ -3144,6 +3144,11 @@ public:
                         theNewDefinition.m_DataType
                                 = qt3ds::render::NVRenderShaderDataTypes::QT3DSVec3;
                         AppendShaderUniform("vec3", theNewDefinition.m_Name.c_str(), uniforms);
+                        break;
+                    case DataModelDataType::Float4:
+                        theNewDefinition.m_DataType
+                                = qt3ds::render::NVRenderShaderDataTypes::QT3DSVec4;
+                        AppendShaderUniform("vec4", theNewDefinition.m_Name.c_str(), uniforms);
                         break;
                     case DataModelDataType::String:
                         if (theInfo.m_CompleteType == CompleteMetaDataType::Texture) {

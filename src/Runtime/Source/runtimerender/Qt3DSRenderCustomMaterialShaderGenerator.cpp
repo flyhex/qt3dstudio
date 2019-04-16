@@ -83,8 +83,10 @@ struct SShaderLightProperties
         m_LightData.m_direction = QT3DSVec4(dir, 0.0);
 
         float normalizedBrightness = inLight->m_Brightness / 100.0f;
-        m_LightData.m_diffuse = QT3DSVec4(inLight->m_DiffuseColor * normalizedBrightness, 1.0);
-        m_LightData.m_specular = QT3DSVec4(inLight->m_SpecularColor * normalizedBrightness, 1.0);
+        m_LightData.m_diffuse = QT3DSVec4(inLight->m_DiffuseColor.getXYZ() * normalizedBrightness,
+                                          inLight->m_DiffuseColor.w);
+        m_LightData.m_specular = QT3DSVec4(inLight->m_SpecularColor.getXYZ() * normalizedBrightness,
+                                           inLight->m_DiffuseColor.w);
 
         if (inLight->m_LightType == RenderLightTypes::Area) {
             m_LightData.m_width = inLight->m_AreaWidth;
@@ -102,7 +104,7 @@ struct SShaderLightProperties
             m_LightData.m_up = QT3DSVec4(0.0f);
 
             // These components only apply to CG lights
-            m_LightData.m_ambient = QT3DSVec4(inLight->m_AmbientColor, 1.0);
+            m_LightData.m_ambient = inLight->m_AmbientColor;
 
             m_LightData.m_constantAttenuation = 1.0;
             m_LightData.m_linearAttenuation = inLight->m_LinearFade;

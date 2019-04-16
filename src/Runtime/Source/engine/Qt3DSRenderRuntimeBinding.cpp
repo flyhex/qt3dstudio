@@ -115,7 +115,7 @@ struct Qt3DSRenderSceneSubPresRenderer : public CSubPresentationRenderer
                 const SRenderInstanceId instanceId) override;
     void RenderWithClear(const SOffscreenRendererEnvironment &inEnvironment,
                          NVRenderContext &inRenderContext, QT3DSVec2 inPresScale,
-                         SScene::RenderClearCommand inClearBuffer, QT3DSVec3 inClearColor,
+                         SScene::RenderClearCommand inClearBuffer, QT3DSVec4 inClearColor,
                          const SRenderInstanceId instanceId) override;
 };
 
@@ -805,7 +805,7 @@ void Qt3DSRenderSceneSubPresRenderer::Render(const SOffscreenRendererEnvironment
 void Qt3DSRenderSceneSubPresRenderer::RenderWithClear(
         const SOffscreenRendererEnvironment &inEnvironment,
         NVRenderContext &inRenderContext, QT3DSVec2 inPresScale,
-        SScene::RenderClearCommand inClearBuffer, QT3DSVec3 inClearColor,
+        SScene::RenderClearCommand inClearBuffer, QT3DSVec4 inClearColor,
         const SRenderInstanceId id)
 {
     CSubPresentationRenderer::RenderWithClear(inEnvironment, inRenderContext,
@@ -1554,7 +1554,7 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
             if (theFirstScene->m_Presentation->m_Scene
                 && theFirstScene->m_Presentation->m_Scene->m_UseClearColor) {
                 m_Context->m_Context->SetSceneColor(
-                    QT3DSVec4(theFirstScene->m_Presentation->m_Scene->m_ClearColor, 1.0f));
+                    theFirstScene->m_Presentation->m_Scene->m_ClearColor);
             } else
                 m_Context->m_Context->SetSceneColor(QT3DSVec4(0.0f, 0.0f, 0.0f, 0.0f));
 

@@ -321,7 +321,8 @@ void InspectorControlView::openInInspector()
     const auto doc = g_StudioApp.GetCore()->GetDoc();
     const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
     qt3dsdm::SValue value;
-    doc->GetPropertySystem()->GetInstancePropertyValue(m_instance, m_handle, value);
+    doc->GetPropertySystem()->GetInstancePropertyValue(m_contextMenuInstance, m_contextMenuHandle,
+                                                       value);
     qt3dsdm::SLong4 guid = qt3dsdm::get<qt3dsdm::SLong4>(value);
     const auto instance = bridge->GetInstanceByGUID(guid);
     doc->SelectDataModelObject(instance);
@@ -474,8 +475,8 @@ void InspectorControlView::setInspectable(CInspectableBase *inInspectable)
 
 void InspectorControlView::showContextMenu(int x, int y, int handle, int instance)
 {
-    m_instance = instance;
-    m_handle = handle;
+    m_contextMenuInstance = instance;
+    m_contextMenuHandle = handle;
 
     QMenu theContextMenu;
 
@@ -497,8 +498,8 @@ void InspectorControlView::showContextMenu(int x, int y, int handle, int instanc
     }
 
     theContextMenu.exec(mapToGlobal({x, y}));
-    m_instance = 0;
-    m_handle = 0;
+    m_contextMenuInstance = 0;
+    m_contextMenuHandle = 0;
 }
 
 // context menu for the variants tags
@@ -584,12 +585,12 @@ void InspectorControlView::toggleMasterLink()
 {
     Q3DStudio::ScopedDocumentEditor editor(*g_StudioApp.GetCore()->GetDoc(),
                                            QObject::tr("Link Property"), __FILE__, __LINE__);
-    bool wasLinked = editor->IsPropertyLinked(m_instance, m_handle);
+    bool wasLinked = editor->IsPropertyLinked(m_contextMenuInstance, m_contextMenuHandle);
 
     if (wasLinked)
-        editor->UnlinkProperty(m_instance, m_handle);
+        editor->UnlinkProperty(m_contextMenuInstance, m_contextMenuHandle);
     else
-        editor->LinkProperty(m_instance, m_handle);
+        editor->LinkProperty(m_contextMenuInstance, m_contextMenuHandle);
 }
 
 void InspectorControlView::setPropertyValueFromFilename(long instance, int handle,
@@ -828,13 +829,20 @@ void InspectorControlView::showDataInputChooser(int handle, int instance, const 
     m_activeBrowser.setData(m_dataInputChooserView, handle, instance);
 }
 
-QColor InspectorControlView::showColorDialog(const QColor &color)
+QColor InspectorControlView::showColorDialog(const QColor &color, int instance, int handle)
 {
+    bool showAlpha = false;
+    if (instance && handle) {
+        auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+                                                     ->GetClientDataModelBridge();
+        showAlpha = bridge->getBGColorProperty(instance).GetHandleValue() == handle;
+    }
+
     m_currentColor = color;
     CDialogs *dialogs = g_StudioApp.GetDialogs();
     connect(dialogs, &CDialogs::onColorChanged,
             this, &InspectorControlView::dialogCurrentColorChanged);
-    QColor currentColor = dialogs->displayColorDialog(color);
+    QColor currentColor = dialogs->displayColorDialog(color, showAlpha);
     disconnect(dialogs, &CDialogs::onColorChanged,
                this, &InspectorControlView::dialogCurrentColorChanged);
     return currentColor;

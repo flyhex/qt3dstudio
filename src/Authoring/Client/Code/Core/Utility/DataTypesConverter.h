@@ -75,6 +75,11 @@ inline qt3dsdm::SValue ConvertToSValue(float inX, float inY, float inZ)
     return (qt3dsdm::SValue(qt3dsdm::SFloat3(inX, inY, inZ)));
 }
 
+inline qt3dsdm::SValue ConvertToSValue(float f1, float f2, float f3, float f4)
+{
+    return qt3dsdm::SValue(qt3dsdm::SFloat4(f1, f2, f3, f4));
+}
+
 inline qt3dsdm::SValue ConvertToSValue(const qt3ds::QT3DSVec2 &inValue)
 {
     qt3dsdm::SFloat2 theFloat2;

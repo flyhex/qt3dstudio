@@ -26,32 +26,22 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#include "Qt3DSCommonPrecompile.h"
-#include "qtAuthoring-config.h"
 
 #include "Dialogs.h"
 #include "StudioApp.h"
+#include "Core.h"
 #include "Doc.h"
-
+#include "MainFrm.h"
 #include "InterpolationDlg.h"
-
 #include "Qt3DSMessageBox.h"
-#include "StringTokenizer.h"
-#include "Preferences.h"
 #include "ProgressView.h"
-#include "Views.h"
-#include "MasterP.h"
 #include "TimeEditDlg.h"
 #include "DurationEditDlg.h"
 #include "StudioPreferences.h"
 #include "ResetKeyframeValuesDlg.h"
 #include "GLVersionDlg.h"
-#include "Core.h"
 #include "Qt3DSMacros.h"
-#include "IDocumentEditor.h"
-#include "Qt3DSFileTools.h"
 #include "ImportUtils.h"
-#include "MainFrm.h"
 
 #include <QtWidgets/qcolordialog.h>
 #include <QtWidgets/qfiledialog.h>
@@ -65,7 +55,6 @@
 #include <QtWidgets/qdialogbuttonbox.h>
 #include <QtWidgets/qlabel.h>
 #include <QtWidgets/qstyle.h>
-#include <iostream>
 
 namespace {
 
@@ -199,8 +188,7 @@ int g_NumAllowedFileReferencesTypes =
 }
 
 /**
- *	Constructor
- *	@param	inShowGUI	true if dialogs should be displayed or piped to std:cout instead
+ * @param inShowGUI true if dialogs should be displayed or piped to std:cout instead
  */
 CDialogs::CDialogs(bool inShowGUI /*= true*/)
     : m_ProgressPalette(nullptr)
@@ -231,15 +219,10 @@ CDialogs::CDialogs(bool inShowGUI /*= true*/)
         m_defaultDirForSuffixMap.insert(ext, QStringLiteral("presentations"));
 }
 
-//=============================================================================
-/**
- *	Destructor
- */
 CDialogs::~CDialogs()
 {
 }
 
-//=============================================================================
 /**
  * Displays a dialog asking the user to choose the keyframe interpolation.
  *
@@ -268,7 +251,6 @@ bool CDialogs::PromptForKeyframeInterpolation(float &ioEaseIn, float &ioEaseOut)
     return theReturnValue;
 }
 
-//=============================================================================
 /**
  *	Notify the user that the deletion of an asset has failed.
  */
@@ -286,17 +268,13 @@ void CDialogs::DisplayAssetDeleteFailed()
     }
 }
 
-//=============================================================================
-/**
- *	Get the export choice.
- */
+// Get the export choice.
 Qt3DSFile CDialogs::GetExportChoice(const Q3DStudio::CString &, const Q3DStudio::CString &)
 {
     // Need to fix this for windows if we decide to use it
     return Qt3DSFile("", false, false);
 }
 
-//==============================================================================
 /**
  *	Notify that we are unable to refresh the resource.
  */
@@ -318,7 +296,6 @@ void CDialogs::DisplayRefreshResourceFailed(const QString &inResourceName,
     }
 }
 
-//=============================================================================
 /**
  *	Notify the user that the loading of the requested resource failed.
  *
@@ -553,7 +530,6 @@ void CDialogs::DisplayLoadingPresentationFailed(const QFileInfo &loadFileInfo,
     }
 }
 
-//==============================================================================
 /**
  *	Notify the user that the presentation we tried to save has failed.
  *
@@ -573,7 +549,6 @@ void CDialogs::DisplaySavingPresentationFailed()
     }
 }
 
-//==============================================================================
 /**
  *	Display a message box to indicate failure to overwrite a read-only file
  *
@@ -612,7 +587,6 @@ void CDialogs::DisplayObjectRenamed(const QString &origName, const QString &newN
     }
 }
 
-//==============================================================================
 /**
  *	Displays a Qt3DSMessageBox using the specified parameters.  The message box
  *	is modal to the main frame.  This provides an easy way to place modal dialogs
@@ -931,7 +905,6 @@ bool CDialogs::isProjectFileExtension(const wchar_t *inExt)
     return IsFileExtension(inExt, wideProjectExts);
 }
 
-//==============================================================================
 /**
  *  CreateAllowedTypesString: Creates the string used to determine allowable types
  *  for import or for filereferences
@@ -972,7 +945,6 @@ QString CDialogs::CreateAllowedTypesString(Q3DStudio::DocumentEditorFileType::En
     return theReturnString;
 }
 
-//==============================================================================
 /**
  *	Display a error dialog box with the given text string that describes the error.
  */
@@ -990,7 +962,6 @@ void CDialogs::DisplayKnownErrorDialog(const QString &inErrorText)
     }
 }
 
-//==============================================================================
 /**
  *	Prompt the user to save the document before losing their changes.
  *	This is used when closing, loading or newing up a document when the current
@@ -1187,7 +1158,6 @@ QString CDialogs::getExportVariantsDlg()
     return {};
 }
 
-//==============================================================================
 /**
  * Prompt the user for a file to create.
  * @param  isProject   true: new project, false: new presentation
@@ -1202,7 +1172,6 @@ QString CDialogs::GetNewDocumentChoice(const QString &inInitialDirectory, bool i
     return GetSaveAsChoice(title, isProject);
 }
 
-//==============================================================================
 /**
  * Prompt the user for a file to open.
  * This will return an invalid file if the user cancels the save dialog.
@@ -1227,7 +1196,6 @@ QString CDialogs::GetFileOpenChoice(const QString &inInitialDirectory)
     return theFile.absoluteFilePath();
 }
 
-//==============================================================================
 /**
  *	Prompt the user to make sure they want to revert the current project.
  *	@return true if they do want to continue with the revert.
@@ -1256,7 +1224,6 @@ bool CDialogs::ConfirmRevert()
     return theConfirmation;
 }
 
-//==============================================================================
 /**
  * Displays a progress screen, if there is not one aleady being shown.  The
  * progress screen doesn't get dismissed until you call
@@ -1276,7 +1243,6 @@ void CDialogs::DisplayProgressScreen(const QString &inActionText,
     }
 }
 
-//==============================================================================
 /**
  * If a loading screen is currently being shown, this function destroys it.  You
  * can show the loading screen again with another call to
@@ -1290,7 +1256,6 @@ void CDialogs::DestroyProgressScreen()
     }
 }
 
-//==============================================================================
 /**
  *	Inform the user that the environment variables entered does not match the format
  *	expected, listing down all those settings that are wrong.
@@ -1311,7 +1276,6 @@ void CDialogs::DisplayEnvironmentVariablesError(const Q3DStudio::CString &inErro
     }
 }
 
-//==============================================================================
 /**
  *	Reset settings.
  *	Typically inCurrentDocPath is only set when Studio is first launched.
@@ -1332,7 +1296,6 @@ bool CDialogs::DisplayResetKeyframeValuesDlg()
     return theDialog.exec() == QDialog::Accepted;
 }
 
-//==============================================================================
 /**
  *	User trying to do a pathological paste, such as pasting a component copied from a different
  *instance
@@ -1354,7 +1317,6 @@ void CDialogs::DisplayPasteFailed()
     }
 }
 
-//==============================================================================
 /**
  *	Video card OpenGL version is too low to be supported.
  */
@@ -1364,7 +1326,6 @@ void CDialogs::DisplayGLVersionError(const Q3DStudio::CString &inGLVersion,
     DisplayGLVersionDialog(inGLVersion, inMinVersion, true);
 }
 
-//==============================================================================
 /**
  *	Video card OpenGL version is outdated, but could be usable.
  */
@@ -1454,7 +1415,6 @@ void CDialogs::showWidgetBrowser(QWidget *screenWidget, QWidget *browser, const 
     });
 }
 
-//==============================================================================
 /**
  *	Display the error dialog or warning dialog that OpenGL version is lower than what is
  *expected
@@ -1582,10 +1542,14 @@ QStringList CDialogs::qmlStreamExtensions()
     return exts;
 }
 
-QColor CDialogs::displayColorDialog(const QColor &color) const
+QColor CDialogs::displayColorDialog(const QColor &color, bool showAlpha) const
 {
     QColorDialog theColorDlg;
-    theColorDlg.setOption(QColorDialog::DontUseNativeDialog, true);
+    theColorDlg.setOption(QColorDialog::DontUseNativeDialog);
+
+    if (showAlpha)
+        theColorDlg.setOption(QColorDialog::ShowAlphaChannel);
+
     theColorDlg.setCurrentColor(color);
     connect(&theColorDlg, &QColorDialog::currentColorChanged, this, &CDialogs::onColorChanged);
     int result = theColorDlg.exec();

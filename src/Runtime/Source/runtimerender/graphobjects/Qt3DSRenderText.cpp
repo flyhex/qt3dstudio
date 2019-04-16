@@ -59,7 +59,7 @@ STextRenderInfo::~STextRenderInfo()
 
 SText::SText()
     : SNode(GraphObjectTypes::Text)
-    , m_TextColor(1, 1, 1)
+    , m_TextColor(1, 1, 1, 1)
     , m_TextTexture(NULL)
 {
     m_Bounds.setEmpty();

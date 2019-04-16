@@ -504,8 +504,6 @@ Rectangle {
                                                          model.modelData.title);
                                             return null;
                                         case DataModelDataType.Float3:
-                                            if (modelData.propertyType === AdditionalMetaDataType.Color)
-                                                return colorBox;
                                             if (modelData.propertyType === AdditionalMetaDataType.Rotation)
                                                 return xyzPropertyComponent;
                                             if (modelData.propertyType === AdditionalMetaDataType.None)
@@ -513,6 +511,10 @@ Rectangle {
                                             console.warn("KDAB_TODO: implement handler for type:\"float3\" property:",
                                                          modelData.propertyType, "text ",
                                                          model.modelData.title);
+                                            return null;
+                                        case DataModelDataType.Float4:
+                                            if (modelData.propertyType === AdditionalMetaDataType.Color)
+                                                return colorBox;
                                             return null;
                                         case DataModelDataType.StringRef:
                                             if (modelData.propertyType === AdditionalMetaDataType.None)

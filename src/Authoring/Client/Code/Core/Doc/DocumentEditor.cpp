@@ -2439,7 +2439,7 @@ public:
             }
             case DataModelDataType::Float2:
             {
-                QStringList floats = i.value().split(QStringLiteral(" "));
+                QStringList floats = i.value().split(QLatin1Char(' '));
                 if (floats.length() == 2) {
                     SFloat2 value(floats[0].toFloat(), floats[1].toFloat());
                     setInstanceValueIfChanged(instance, prop, value);
@@ -2448,9 +2448,19 @@ public:
             }
             case DataModelDataType::Float3:
             {
-                QStringList floats = i.value().split(QStringLiteral(" "));
+                QStringList floats = i.value().split(QLatin1Char(' '));
                 if (floats.length() == 3) {
                     SFloat3 value(floats[0].toFloat(), floats[1].toFloat(), floats[2].toFloat());
+                    setInstanceValueIfChanged(instance, prop, value);
+                }
+                break;
+            }
+            case DataModelDataType::Float4:
+            {
+                QStringList floats = i.value().split(QLatin1Char(' '));
+                if (floats.length() == 4) {
+                    SFloat4 value(floats[0].toFloat(), floats[1].toFloat(), floats[2].toFloat(),
+                                  floats[3].toFloat());
                     setInstanceValueIfChanged(instance, prop, value);
                 }
                 break;
@@ -2843,8 +2853,8 @@ public:
     {
         m_PropertySystem.SetInstancePropertyValue(
             inInstance, m_Bridge.GetSceneAsset().m_TimebarColor,
-            qt3dsdm::SFloat3(inColor.GetRed() / 255.0f, inColor.GetGreen() / 255.0f,
-                           inColor.GetBlue() / 255.0f));
+            qt3dsdm::SFloat4(inColor.GetRed() / 255.0f, inColor.GetGreen() / 255.0f,
+                             inColor.GetBlue() / 255.0f, 1.0f));
     }
 
     void SetTimebarText(TInstanceHandle inInstance, const QString &inComment) override

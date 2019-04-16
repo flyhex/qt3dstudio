@@ -51,9 +51,9 @@ namespace render {
     {
         RenderLightTypes::Enum m_LightType; // Directional
         SNode *m_Scope;
-        QT3DSVec3 m_DiffuseColor; // colors are 0-1 normalized
-        QT3DSVec3 m_SpecularColor; // colors are 0-1 normalized
-        QT3DSVec3 m_AmbientColor; // colors are 0-1 normalized
+        QT3DSVec4 m_DiffuseColor; // colors are 0-1 normalized
+        QT3DSVec4 m_SpecularColor; // colors are 0-1 normalized
+        QT3DSVec4 m_AmbientColor; // colors are 0-1 normalized
 
         // The variables below are in the same range as Studio
         // Only valid if node is a point light

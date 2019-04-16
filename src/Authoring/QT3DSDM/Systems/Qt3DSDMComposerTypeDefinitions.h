@@ -99,13 +99,13 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(eyeball, m_Eyeball, bool, true)                                       \
     HANDLE_COMPOSER_PROPERTY(shy, m_Shy, bool, false)                                              \
     HANDLE_COMPOSER_PROPERTY(locked, m_Locked, bool, false)                                        \
-    HANDLE_COMPOSER_PROPERTY_NO_DEFAULT(timebarcolor, m_TimebarColor, SFloat3)                     \
+    HANDLE_COMPOSER_PROPERTY_NO_DEFAULT(timebarcolor, m_TimebarColor, SFloat4)                     \
     HANDLE_COMPOSER_PROPERTY(timebartext, m_TimebarText, TDataStrPtr, L"")                         \
     HANDLE_COMPOSER_PROPERTY(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_SCENE_PROPERTIES                                                          \
     HANDLE_COMPOSER_PROPERTY(bgcolorenable, m_BgColorEnable, bool, true)                           \
-    HANDLE_COMPOSER_PROPERTY(backgroundcolor, m_BackgroundColor, SFloat3, SFloat3(0, 0, 0))        \
+    HANDLE_COMPOSER_PROPERTY(backgroundcolor, m_BackgroundColor, SFloat4, SFloat4(0, 0, 0, 1))     \
     HANDLE_COMPOSER_PROPERTY_DUPLICATE(controlledproperty, m_ControlledProperty, TDataStrPtr, L"")
 
 #define ITERATE_COMPOSER_COMPONENT_PROPERTIES                                                      \
@@ -162,7 +162,7 @@ class IPropertySystem;
 #define ITERATE_COMPOSER_MATERIAL_PROPERTIES                                                       \
     HANDLE_COMPOSER_PROPERTY(shaderlighting, m_ShaderLighting, TDataStrPtr, L"Vertex")             \
     HANDLE_COMPOSER_PROPERTY(blendmode, m_BlendMode, TDataStrPtr, L"Normal")                       \
-    HANDLE_COMPOSER_PROPERTY(diffuse, m_DiffuseColor, SFloat3, SFloat3(1, 1, 1))                   \
+    HANDLE_COMPOSER_PROPERTY(diffuse, m_DiffuseColor, SFloat4, SFloat4(1, 1, 1, 1))                \
     HANDLE_COMPOSER_PROPERTY(diffusemap, m_DiffuseMap1, SLong4, 0)                                 \
     HANDLE_COMPOSER_PROPERTY(diffusemap2, m_DiffuseMap2, SLong4, 0)                                \
     HANDLE_COMPOSER_PROPERTY(diffusemap3, m_DiffuseMap3, SLong4, 0)                                \
@@ -172,7 +172,7 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(roughnessmap, m_RoughnessMap, SLong4, 0)                              \
     HANDLE_COMPOSER_PROPERTY_DUPLICATE(opacity, m_Opacity, float, 100.f)                           \
     HANDLE_COMPOSER_PROPERTY(opacitymap, m_OpacityMap, SLong4, 0)                                  \
-    HANDLE_COMPOSER_PROPERTY(emissivecolor, m_EmissiveColor, SFloat3, 0.f)                         \
+    HANDLE_COMPOSER_PROPERTY(emissivecolor, m_EmissiveColor, SFloat4, SFloat4(1, 1, 1, 1))         \
     HANDLE_COMPOSER_PROPERTY(emissivepower, m_EmissivePower, float, 0.f)                           \
     HANDLE_COMPOSER_PROPERTY(emissivemap, m_EmissiveMap, SLong4, 0)                                \
     HANDLE_COMPOSER_PROPERTY(emissivemap2, m_EmissiveMap2, SLong4, 0)                              \
@@ -186,7 +186,7 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(diffuselightwrap, m_DiffuseLightWrap, float, 0.f)                     \
     HANDLE_COMPOSER_PROPERTY(specularmap, m_SpecularMap, SLong4, 0)                                \
     HANDLE_COMPOSER_PROPERTY(specularmodel, m_SpecularModel, TDataStrPtr, L"Default")              \
-    HANDLE_COMPOSER_PROPERTY(speculartint, m_SpecularTint, SFloat3, SFloat3(1, 1, 1))              \
+    HANDLE_COMPOSER_PROPERTY(speculartint, m_SpecularTint, SFloat4, SFloat4(1, 1, 1, 1))           \
     HANDLE_COMPOSER_PROPERTY(ior, m_IOR, float, 0)                                                 \
     HANDLE_COMPOSER_PROPERTY(fresnelPower, m_FresnelPower, float, 0)                               \
     HANDLE_COMPOSER_PROPERTY(vertexcolors, m_VertexColors, bool, false)                            \
@@ -202,8 +202,8 @@ class IPropertySystem;
     HANDLE_COMPOSER_PROPERTY(disabledepthtest, m_DisableDepthTest, bool, false)                    \
     HANDLE_COMPOSER_PROPERTY(disabledepthprepass, m_DisableDepthPrepass, bool, false)              \
     HANDLE_COMPOSER_PROPERTY(background, m_Background, TDataStrPtr, L"Transparent")                \
-    HANDLE_COMPOSER_PROPERTY_DUPLICATE(backgroundcolor, m_BackgroundColor, SFloat3,                \
-                                       SFloat3(0, 0, 0))                                           \
+    HANDLE_COMPOSER_PROPERTY_DUPLICATE(backgroundcolor, m_BackgroundColor, SFloat4,                \
+                                       SFloat4(0, 0, 0, 1))                                        \
     HANDLE_COMPOSER_PROPERTY(blendtype, m_BlendType, TDataStrPtr, L"Normal")                       \
     HANDLE_COMPOSER_PROPERTY(horzfields, m_HorizontalFieldValues, TDataStrPtr, L"Left/Width")      \
     HANDLE_COMPOSER_PROPERTY(left, m_Left, float, 0)                                               \
@@ -247,9 +247,9 @@ class IPropertySystem;
 #define ITERATE_COMPOSER_LIGHT_PROPERTIES                                                          \
     HANDLE_COMPOSER_PROPERTY(lighttype, m_LightType, TDataStrPtr, L"Directional")                  \
     HANDLE_COMPOSER_PROPERTY(scope, m_Scope, SObjectRefType, L"")                                  \
-    HANDLE_COMPOSER_PROPERTY(lightdiffuse, m_LightColor, SFloat3, SFloat3(1, 1, 1))                \
-    HANDLE_COMPOSER_PROPERTY(lightspecular, m_SpecularColor, SFloat3, SFloat3(1, 1, 1))            \
-    HANDLE_COMPOSER_PROPERTY(lightambient, m_AmbientColor, SFloat3, SFloat3(0, 0, 0))              \
+    HANDLE_COMPOSER_PROPERTY(lightdiffuse, m_LightColor, SFloat4, SFloat4(1, 1, 1, 1))             \
+    HANDLE_COMPOSER_PROPERTY(lightspecular, m_SpecularColor, SFloat4, SFloat4(1, 1, 1, 1))         \
+    HANDLE_COMPOSER_PROPERTY(lightambient, m_AmbientColor, SFloat4, SFloat4(0, 0, 0, 1))           \
     HANDLE_COMPOSER_PROPERTY(brightness, m_Brightness, float, 100.0f)                              \
     HANDLE_COMPOSER_PROPERTY(linearfade, m_LinearFade, float, 0.0f)                                \
     HANDLE_COMPOSER_PROPERTY(expfade, m_ExpFade, float, 0.0f)                                      \
@@ -278,7 +278,7 @@ class IPropertySystem;
 
 #define ITERATE_COMPOSER_TEXT_PROPERTIES                                                           \
     HANDLE_COMPOSER_PROPERTY(textstring, m_TextString, TDataStrPtr, L"Text")                       \
-    HANDLE_COMPOSER_PROPERTY(textcolor, m_TextColor, SFloat3, SFloat3(1, 1, 1))                    \
+    HANDLE_COMPOSER_PROPERTY(textcolor, m_TextColor, SFloat4, SFloat4(1, 1, 1, 1))                 \
     HANDLE_COMPOSER_PROPERTY(font, m_Font, TDataStrPtr, L"arial")                                  \
     HANDLE_COMPOSER_PROPERTY(size, m_Size, float, 24.f)                                            \
     HANDLE_COMPOSER_PROPERTY(horzalign, m_HorzAlign, TDataStrPtr, L"Center")                       \
@@ -399,6 +399,7 @@ struct DataTypeToTypeMap
 QT3DSDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::Float, float)
 QT3DSDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::Float2, SFloat2)
 QT3DSDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::Float3, SFloat3)
+QT3DSDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::Float4, SFloat4)
 QT3DSDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::Long, qt3ds::QT3DSI32)
 QT3DSDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::String, TDataStrPtr)
 QT3DSDM_DEFINE_TYPE_TO_DATA_TYPE(DataModelDataType::Bool, bool)

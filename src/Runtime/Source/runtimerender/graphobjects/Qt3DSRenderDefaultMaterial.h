@@ -80,16 +80,16 @@ namespace render {
         SImage *m_IblProbe;
         DefaultMaterialLighting::Enum m_Lighting; // defaults to vertex
         DefaultMaterialBlendMode::Enum m_BlendMode; // defaults to normal
-        QT3DSVec3 m_DiffuseColor; // colors are 0-1 normalized
+        QT3DSVec4 m_DiffuseColor; // colors are 0-1 normalized
         SImage *m_DiffuseMaps[3];
         QT3DSF32 m_EmissivePower; // 0-100, defaults to 0
-        QT3DSVec3 m_EmissiveColor;
+        QT3DSVec4 m_EmissiveColor;
         SImage *m_EmissiveMap;
         SImage *m_EmissiveMap2;
         SImage *m_SpecularReflection;
         SImage *m_SpecularMap;
         DefaultMaterialSpecularModel::Enum m_SpecularModel;
-        QT3DSVec3 m_SpecularTint;
+        QT3DSVec4 m_SpecularTint;
         QT3DSF32 m_IOR;
         QT3DSF32 m_FresnelPower;
         QT3DSF32 m_SpecularAmount; // 0-??, defaults to 0

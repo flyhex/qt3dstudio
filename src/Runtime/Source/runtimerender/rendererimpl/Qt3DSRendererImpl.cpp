@@ -221,7 +221,7 @@ namespace render {
     }
 
     void Qt3DSRendererImpl::RenderLayer(SLayer &inLayer, const QT3DSVec2 &inViewportDimensions,
-                                        bool clear, QT3DSVec3 clearColor, bool inRenderSiblings,
+                                        bool clear, QT3DSVec4 clearColor, bool inRenderSiblings,
                                         const SRenderInstanceId id)
     {
         (void)inViewportDimensions;
@@ -256,13 +256,10 @@ namespace render {
                 m_BlendFB->Attach(NVRenderFrameBufferAttachments::Color0, *m_LayerBlendTexture);
                 theRenderContext.SetRenderTarget(m_BlendFB);
                 theRenderContext.SetScissorTestEnabled(false);
-                QT3DSVec4 color(0.0f, 0.0f, 0.0f, 0.0f);
-                if (clear) {
-                    color.x = clearColor.x;
-                    color.y = clearColor.y;
-                    color.z = clearColor.z;
-                    color.w = 1.0f;
-                }
+                QT3DSVec4 color(0.0f);
+                if (clear)
+                    color = clearColor;
+
                 QT3DSVec4 origColor = theRenderContext.GetClearColor();
                 theRenderContext.SetClearColor(color);
                 theRenderContext.Clear(qt3ds::render::NVRenderClearValues::Color);

@@ -44,7 +44,7 @@ namespace render {
         // For these you need to set TextDirty.
 
         // These properties can change every frame with no additional cost.
-        QT3DSVec3 m_TextColor;
+        QT3DSVec4 m_TextColor;
         // Setup and utilized by the rendering system
         NVRenderTexture2D *m_TextTexture;
         STextTextureDetails m_TextTextureDetails;

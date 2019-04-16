@@ -195,7 +195,7 @@ float Qt3DSDMTimelineItemProperty::GetMaximumValue() const
 {
     float theRetVal = FLT_MIN;
     do_all(m_Keyframes, std::bind(CompareAndSet, std::placeholders::_1, std::ref(theRetVal), true));
-    if (m_Type.first == DataModelDataType::Float3 && m_Type.second == AdditionalMetaDataType::Color)
+    if (m_Type.first == DataModelDataType::Float4 && m_Type.second == AdditionalMetaDataType::Color)
         theRetVal = DataModelToColor(theRetVal);
     return theRetVal;
 }
@@ -205,7 +205,7 @@ float Qt3DSDMTimelineItemProperty::GetMinimumValue() const
 {
     float theRetVal = FLT_MAX;
     do_all(m_Keyframes, std::bind(CompareAndSet, std::placeholders::_1, std::ref(theRetVal), false));
-    if (m_Type.first == DataModelDataType::Float3 && m_Type.second == AdditionalMetaDataType::Color)
+    if (m_Type.first == DataModelDataType::Float4 && m_Type.second == AdditionalMetaDataType::Color)
         theRetVal = DataModelToColor(theRetVal);
     return theRetVal;
 }
@@ -286,16 +286,19 @@ float Qt3DSDMTimelineItemProperty::GetChannelValueAtTime(long inChannelIndex, lo
             thePropertySystem->GetInstancePropertyValue(theParentBinding->GetInstanceHandle(),
                                                         m_PropertyHandle, theValue);
             switch (m_Type.first) {
-            case DataModelDataType::Float3: {
+            case DataModelDataType::Float4: {
                 if (m_Type.second == AdditionalMetaDataType::Color) {
-                    SFloat3 theFloat3 = qt3dsdm::get<SFloat3>(theValue);
-                    if (inChannelIndex >= 0 && inChannelIndex < 3)
-                        return DataModelToColor(theFloat3[inChannelIndex]);
-                } else {
-                    SFloat3 theFloat3 = qt3dsdm::get<SFloat3>(theValue);
-                    if (inChannelIndex >= 0 && inChannelIndex < 3)
-                        return theFloat3[inChannelIndex];
+                    SFloat4 theFloat4 = qt3dsdm::get<SFloat4>(theValue);
+                    if (inChannelIndex >= 0 && inChannelIndex < 4)
+                        return DataModelToColor(theFloat4[inChannelIndex]);
                 }
+                break;
+            }
+            case DataModelDataType::Float3: {
+
+                SFloat3 theFloat3 = qt3dsdm::get<SFloat3>(theValue);
+                if (inChannelIndex >= 0 && inChannelIndex < 3)
+                    return theFloat3[inChannelIndex];
                 break;
             }
             case DataModelDataType::Float2: {
@@ -317,7 +320,7 @@ float Qt3DSDMTimelineItemProperty::GetChannelValueAtTime(long inChannelIndex, lo
         && inChannelIndex < (long)m_AnimationHandles.size()) {
         float theValue = theAnimationCore->EvaluateAnimation(
             m_AnimationHandles[inChannelIndex], Qt3DSDMTimelineKeyframe::GetTimeInSecs(inTime));
-        if (m_Type.first == DataModelDataType::Float3
+        if (m_Type.first == DataModelDataType::Float4
             && m_Type.second == AdditionalMetaDataType::Color)
             theValue = DataModelToColor(theValue);
 

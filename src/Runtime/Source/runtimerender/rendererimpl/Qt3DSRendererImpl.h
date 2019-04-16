@@ -318,7 +318,7 @@ namespace render {
         bool PrepareLayerForRender(SLayer &inLayer, const QT3DSVec2 &inViewportDimensions,
                                    bool inRenderSiblings, const SRenderInstanceId id) override;
         void RenderLayer(SLayer &inLayer, const QT3DSVec2 &inViewportDimensions,
-                         bool clear, QT3DSVec3 clearColor, bool inRenderSiblings,
+                         bool clear, QT3DSVec4 clearColor, bool inRenderSiblings,
                          const SRenderInstanceId id) override;
         void ChildrenUpdated(SNode &inParent) override;
         QT3DSF32 GetTextScale(const SText &inText) override;

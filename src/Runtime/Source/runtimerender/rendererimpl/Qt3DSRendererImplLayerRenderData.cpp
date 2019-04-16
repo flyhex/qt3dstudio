@@ -1489,9 +1489,9 @@ namespace render {
             NVRenderContextScopedProperty<NVRenderRect> __viewport(
                 theRenderContext, &NVRenderContext::GetViewport, &NVRenderContext::SetViewport,
                 theNewViewport);
-            QT3DSVec4 clearColor(0.0);
+            QT3DSVec4 clearColor(0.0f);
             if (m_Layer.m_Background == LayerBackground::Color)
-                clearColor = QT3DSVec4(m_Layer.m_ClearColor, 1.0);
+                clearColor = m_Layer.m_ClearColor;
 
             NVRenderContextScopedProperty<QT3DSVec4> __clearColor(
                 theRenderContext, &NVRenderContext::GetClearColor, &NVRenderContext::SetClearColor,
@@ -1768,7 +1768,7 @@ namespace render {
         SLayerRenderPreparationResult &thePrepResult(*m_LayerPrepResult);
         NVRenderRectF theScreenRect(thePrepResult.GetLayerToPresentationViewport());
 
-        bool blendingEnabled = m_Layer.m_Background == LayerBackground::Transparent;
+        bool blendingEnabled = m_Layer.m_Background != LayerBackground::Unspecified;
         if (!thePrepResult.m_Flags.ShouldRenderToTexture()) {
             theContext.SetViewport(
                 m_LayerPrepResult->GetLayerToPresentationViewport().ToIntegerRect());
@@ -1778,7 +1778,7 @@ namespace render {
             if (m_Layer.m_Background == LayerBackground::Color) {
                 NVRenderContextScopedProperty<QT3DSVec4> __clearColor(
                     theContext, &NVRenderContext::GetClearColor, &NVRenderContext::SetClearColor,
-                    QT3DSVec4(m_Layer.m_ClearColor, 0.0f));
+                    m_Layer.m_ClearColor);
                 theContext.Clear(NVRenderClearValues::Color);
             }
             RenderToViewport();

@@ -133,11 +133,11 @@ struct SGAnimation
 
 static inline qt3dsdm::SValue ToColor(const float p[])
 {
-    return qt3dsdm::SFloat3(p[0], p[1], p[2]);
+    return qt3dsdm::SFloat4(p[0], p[1], p[2], p[3]);
 }
 static inline qt3dsdm::SValue ToColor(const float p[], float inMult)
 {
-    return qt3dsdm::SFloat3(p[0] * inMult, p[1] * inMult, p[2] * inMult);
+    return qt3dsdm::SFloat4(p[0] * inMult, p[1] * inMult, p[2] * inMult, p[3] * inMult);
 }
 template <typename TDataType>
 static inline TDataType GetMin(TDataType a, TDataType b)
@@ -488,7 +488,7 @@ public:
     }
 
     void PushLight(const char *inName) override { PushObject(inName, ComposerObjectTypes::Light); }
-    void SetLightProperties(int type, const SFloat3 &color, double intensity, double linearfade,
+    void SetLightProperties(int type, const SFloat4 &color, double intensity, double linearfade,
                             double quadfade, bool shadows) override
     {
         Q_UNUSED(linearfade)
@@ -707,12 +707,13 @@ public:
             // Set diffuse color to 1.0 if there is diffuse texture because I think diffuse color is
             // multiplied with diffuse texture to get the final color
             SetInstancePropertyValue(theMaterial, m_Material.m_DiffuseColor,
-                                     qt3dsdm::SFloat3(1.0f, 1.0f, 1.0f));
+                                     qt3dsdm::SFloat4(1.0f, 1.0f, 1.0f, 1.0f));
         else
             SetInstancePropertyValue(theMaterial, m_Material.m_DiffuseColor,
-                                     qt3dsdm::SFloat3(inMaterialParameters.m_Diffuse.m_Color[0],
-                                                    inMaterialParameters.m_Diffuse.m_Color[1],
-                                                    inMaterialParameters.m_Diffuse.m_Color[2]));
+                                     qt3dsdm::SFloat4(inMaterialParameters.m_Diffuse.m_Color[0],
+                                                      inMaterialParameters.m_Diffuse.m_Color[1],
+                                                      inMaterialParameters.m_Diffuse.m_Color[2],
+                                                      inMaterialParameters.m_Diffuse.m_Color[3]));
 
         if (inMaterialParameters.m_Extra.m_EmissionLevel.m_Flag) {
             SetInstancePropertyValue(theMaterial, m_Material.m_EmissivePower,

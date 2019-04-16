@@ -363,6 +363,7 @@ SOURCES += \
     Palettes/TimelineGraphicsView/ui/TimelineToolbar.cpp \
     Palettes/TimelineGraphicsView/ui/TreeHeader.cpp \
     Palettes/TimelineGraphicsView/ui/TreeHeaderView.cpp \
+    Palettes/TimelineGraphicsView/ui/RowTimelineCommentItem.cpp \
     PreviewHelper.cpp \
     remotedeploymentsender.cpp \
     Render/PathWidget.cpp \
@@ -393,7 +394,6 @@ SOURCES += \
     Utils/MouseCursor.cpp \
     Utils/ResourceCache.cpp \
     Utils/StudioUtils.cpp \
-    Utils/SystemPreferences.cpp \
     Utils/TickTock.cpp \
     Workspace/Dialogs.cpp \
     Workspace/Views.cpp \
@@ -406,7 +406,6 @@ SOURCES += \
     Palettes/scenecamera/scenecameraview.cpp \
     Palettes/scenecamera/scenecamerascrollarea.cpp \
     Palettes/scenecamera/scenecameraglwidget.cpp \
-    Palettes/TimelineGraphicsView/ui/RowTimelineCommentItem.cpp \
     Palettes/Inspector/VariantsGroupModel.cpp \
     Palettes/Inspector/VariantsTagModel.cpp \
     Palettes/Inspector/VariantTagDialog.cpp \

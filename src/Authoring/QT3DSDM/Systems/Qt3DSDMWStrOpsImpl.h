@@ -209,6 +209,7 @@ struct WStrOps<QT3DSF64>
 #define QT3DS_WCHAR_T_Float L"Float"
 #define QT3DS_WCHAR_T_Float2 L"Float2"
 #define QT3DS_WCHAR_T_Float3 L"Float3"
+#define QT3DS_WCHAR_T_Float4 L"Float4"
 #define QT3DS_WCHAR_T_Long L"Long"
 #define QT3DS_WCHAR_T_String L"String"
 #define QT3DS_WCHAR_T_Bool L"Bool"
@@ -218,18 +219,19 @@ struct WStrOps<QT3DSF64>
 #define QT3DS_WCHAR_T_StringOrInt L"StringOrInt"
 #define QT3DS_WCHAR_T_FloatList L"FloatList"
 
-#define QT3DS_IMPORT_ITERATE_DMTYPE                                                                  \
-    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::None, None, QT3DSF32)                                  \
-    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::Float, Float, QT3DSF32)                                \
-    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::Float2, Float2, SFloat2)                            \
-    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::Float3, Float3, SFloat3)                            \
-    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::Long, Long, QT3DSI32)                                   \
-    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::String, String, TDataStrPtr)                        \
-    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::Bool, Bool, bool)                                   \
-    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::Long4, Long4, SLong4)                               \
-    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::StringRef, StringRef, SStringRef)                   \
-    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::ObjectRef, ObjectRef, SObjectRefType)               \
-    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::StringOrInt, StringOrInt, SStringOrInt)             \
+#define QT3DS_IMPORT_ITERATE_DMTYPE                                                                \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::None, None, QT3DSF32)                            \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::Float, Float, QT3DSF32)                          \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::Float2, Float2, SFloat2)                         \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::Float3, Float3, SFloat3)                         \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::Float4, Float4, SFloat4)                         \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::Long, Long, QT3DSI32)                            \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::String, String, TDataStrPtr)                     \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::Bool, Bool, bool)                                \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::Long4, Long4, SLong4)                            \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::StringRef, StringRef, SStringRef)                \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::ObjectRef, ObjectRef, SObjectRefType)            \
+    QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::StringOrInt, StringOrInt, SStringOrInt)          \
     QT3DS_IMPORT_HANDLE_DMTYPE(DataModelDataType::FloatList, FloatList, TFloatList)
 
 template <>
@@ -239,9 +241,9 @@ struct WStrOps<DataModelDataType::Value>
     {
         const wchar_t *data = NULL;
         switch (item) {
-#define QT3DS_IMPORT_HANDLE_DMTYPE(x, y, z)                                                          \
+#define QT3DS_IMPORT_HANDLE_DMTYPE(x, y, z)                                                        \
     case x:                                                                                        \
-        data = QT3DS_WCHAR_T_##y;                                                                    \
+        data = QT3DS_WCHAR_T_##y;                                                                  \
         break;
             QT3DS_IMPORT_ITERATE_DMTYPE
 #undef QT3DS_IMPORT_HANDLE_DMTYPE
@@ -256,9 +258,8 @@ struct WStrOps<DataModelDataType::Value>
     }
     bool StrTo(const wchar_t *buffer, DataModelDataType::Value &item)
     {
-
-#define QT3DS_IMPORT_HANDLE_DMTYPE(x, y, z)                                                          \
-    if (AreEqual(buffer, QT3DS_WCHAR_T_##y)) {                                                       \
+#define QT3DS_IMPORT_HANDLE_DMTYPE(x, y, z)                                                        \
+    if (AreEqual(buffer, QT3DS_WCHAR_T_##y)) {                                                     \
         item = x;                                                                                  \
         return true;                                                                               \
     }
@@ -280,6 +281,7 @@ struct WStrOpsDMWriter
     void operator()(float val) { buf.Write(val); }
     void operator()(const SFloat2 &val) { buf.Write(NVConstDataRef<QT3DSF32>(&val[0], 2)); }
     void operator()(const SFloat3 &val) { buf.Write(NVConstDataRef<QT3DSF32>(&val[0], 3)); }
+    void operator()(const SFloat4 &val) { buf.Write(NVConstDataRef<QT3DSF32>(&val[0], 4)); }
     void operator()(QT3DSI32 val) { buf.Write(val); }
     void operator()(bool val) { buf.Write(val); }
     void operator()(const TDataStrPtr &val)
@@ -314,7 +316,7 @@ struct WStrOps<SValue>
     SValue BufTo(DataModelDataType::Value type, TBufferType &inReader)
     {
         switch (type) {
-#define QT3DS_IMPORT_HANDLE_DMTYPE(x, y, z)                                                          \
+#define QT3DS_IMPORT_HANDLE_DMTYPE(x, y, z)                                                        \
     case x: {                                                                                      \
         z retval;                                                                                  \
         Read(inReader, retval);                                                                    \
@@ -342,6 +344,11 @@ struct WStrOps<SValue>
     void Read(TBufferType &reader, SFloat3 &val)
     {
         reader.ReadRef(NVDataRef<QT3DSF32>(&val[0], 3));
+    }
+    template <typename TBufferType>
+    void Read(TBufferType &reader, SFloat4 &val)
+    {
+        reader.ReadRef(NVDataRef<QT3DSF32>(&val[0], 4));
     }
     template <typename TBufferType>
     void Read(TBufferType &reader, QT3DSI32 &val)
@@ -566,7 +573,6 @@ struct WCharTReader
             if (m_StartPtr)
                 m_StartPtr = FindNextNonWhitespace(m_StartPtr + 1);
         }
-        QT3DS_ASSERT(idx == data.size());
     }
 
     void ReadBuffer(NVConstDataRef<char8_t> &outBuffer)

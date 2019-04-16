@@ -130,7 +130,6 @@ public:
     Q_INVOKABLE QStringList slideNames();
     Q_INVOKABLE int slideNameToIndex(const QString &name);
     Q_INVOKABLE bool toolTipsEnabled();
-    Q_INVOKABLE QColor showColorDialog(const QColor &color);
 
     // CPresentationChangeListener
     void OnNewPresentation() override;

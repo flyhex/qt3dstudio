@@ -46,7 +46,7 @@ SValue::SValue(const QVariant &inData)
     case QVariant::Color:
     {
         const QColor c = inData.value<QColor>();
-        *this = qt3dsdm::SFloat3(c.redF(), c.greenF(), c.blueF());
+        *this = qt3dsdm::SFloat4(c.redF(), c.greenF(), c.blueF(), c.alphaF());
         break;
     }
     case QVariant::String:
@@ -109,6 +109,9 @@ QVariant SValue::toQVariant() const
     }
     case DataModelDataType::Float3: {
         return QVariant::fromValue(get<QVector3D>(*this));
+    }
+    case DataModelDataType::Float4: {
+        return QVariant::fromValue(get<QVector<float> >(*this));
     }
     case DataModelDataType::Long: {
         return QVariant::fromValue(get<qt3ds::QT3DSI32>(*this));
