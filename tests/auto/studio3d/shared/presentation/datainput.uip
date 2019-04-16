@@ -5,7 +5,7 @@
 			<CustomColors count="16" >#ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff</CustomColors>
 		</ProjectSettings>
 		<Graph >
-            <Scene id="Scene" backgroundcolor="0 1 0" controlledproperty="animationInput @timeline slideInput @slide" >
+            <Scene id="Scene" backgroundcolor="0 1 0" controlledproperty="$animationInput @timeline $slideInput @slide" >
 				<Layer id="Layer" >
 					<Camera id="Camera" />
 					<Light id="Light" />
@@ -37,7 +37,7 @@
 				<Add ref="#Default" diffusemap="#Default_diffusemap" />
 				<Add ref="#Default_diffusemap" sourcepath="maps/QT-symbol.png" subpresentation="subpres" />
 				<State id="Scene-Slide1" name="Slide1" initialplaystate="Pause" >
-					<Add ref="#Component" name="Component" controlledproperty="animationInput @timeline" />
+                                        <Add ref="#Component" name="Component" controlledproperty="$animationInput @timeline" />
 					<Add ref="#Rectangle2" name="Rectangle2" position="0 0 100" scale="9999 9999 99999" sourcepath="#Rectangle" />
 					<Add ref="#Default_001" >
 						<AnimationTrack property="diffuse.x" type="EaseInOut" >0 1 100 100 4.487 1 100 100 5.5 0 100 100 10 0 100 100</AnimationTrack>
@@ -51,7 +51,7 @@
 			</State>
 			<State name="Master Slide" component="#Component" >
 				<State id="Component-Slide1" name="Slide1" initialplaystate="Pause" >
-					<Add ref="#Text" name="Text" controlledproperty="animationInput textstring" font="TitilliumWeb-Regular" position="-5.132 137.281 0" >
+                                        <Add ref="#Text" name="Text" controlledproperty="$animationInput textstring" font="TitilliumWeb-Regular" position="-5.132 137.281 0" >
 						<AnimationTrack property="rotation.x" type="EaseInOut" >0 0 100 100 10 0 100 100</AnimationTrack>
 						<AnimationTrack property="rotation.y" type="EaseInOut" >0 0 100 100 10 0 100 100</AnimationTrack>
 						<AnimationTrack property="rotation.z" type="EaseInOut" >0 0 100 100 10 -360 100 100</AnimationTrack>

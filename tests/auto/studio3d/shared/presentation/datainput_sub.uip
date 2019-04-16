@@ -5,11 +5,11 @@
 			<CustomColors count="16" >#ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff</CustomColors>
 		</ProjectSettings>
 		<Graph >
-            <Scene id="Scene" controlledproperty="animationInput @timeline" >
+            <Scene id="Scene" controlledproperty="$animationInput @timeline" >
 				<Layer id="Layer" >
 					<Camera id="Camera" />
 					<Light id="Light" />
-                    <Text id="Text" controlledproperty="slideInput textstring" />
+                    <Text id="Text" controlledproperty="$slideInput textstring" />
 				</Layer>
 			</Scene>
 		</Graph>
