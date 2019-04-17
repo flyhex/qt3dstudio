@@ -59,7 +59,6 @@ INCLUDEPATH += \
     ../../Runtime/Source/runtimerender \
     ../../Runtime/Source/runtimerender/graphobjects \
     ../../Runtime/Source/runtimerender/resourcemanager \
-    ../../Runtime/Source/stateapplication \
     ../../3rdparty/EASTL/UnknownVersion/include \
     $$QMAKE_INCDIR_FBX \
     ../../3rdparty/ColladaDOM/2.4.0/dom/include \

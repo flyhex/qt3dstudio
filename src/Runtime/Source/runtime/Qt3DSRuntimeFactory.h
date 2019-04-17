@@ -49,12 +49,6 @@ namespace runtime {
 }
 
 namespace qt3ds {
-namespace state {
-    class IVisualStateContext;
-}
-}
-
-namespace qt3ds {
 namespace evt {
     class IEventSystem;
 }
@@ -89,7 +83,6 @@ public:
     virtual IScriptBridge &GetScriptEngineQml() = 0;
     virtual qt3ds::render::IQt3DSRenderContextCore &GetRenderContextCore() = 0;
     virtual qt3ds::render::IInputStreamFactory &GetInputStreamFactory() = 0;
-    virtual qt3ds::state::IVisualStateContext &GetVisualStateContext() = 0;
     virtual qt3ds::evt::IEventSystem &GetEventSystem() = 0;
     virtual ITimeProvider &GetTimeProvider() = 0;
     virtual qt3ds::NVFoundationBase &GetFoundation() = 0;

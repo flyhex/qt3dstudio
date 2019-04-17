@@ -47,7 +47,6 @@
 #include "Qt3DSUIPParserObjectRefHelper.h"
 #include "Qt3DSApplication.h"
 #include "Qt3DSRuntimeFactory.h"
-#include "Qt3DSSceneGraphDebugger.h"
 #include "foundation/Qt3DSFoundation.h"
 #include "Qt3DSElementSystem.h"
 #include "Qt3DSAnimationSystem.h"
@@ -499,8 +498,7 @@ CUIPParserImpl::~CUIPParserImpl()
  *	@return a flag indicating whether or not we successfully loaded the file
  */
 BOOL CUIPParserImpl::Load(IPresentation &inPresentation,
-                          NVConstDataRef<SElementAttributeReference> inStateReferences,
-                          qt3ds::state::debugger::ISceneGraphRuntimeDebugger &debugger)
+                          NVConstDataRef<SElementAttributeReference> inStateReferences)
 {
     m_CurrentPresentation = &inPresentation;
     if (!m_DOMReader) {
@@ -571,24 +569,6 @@ BOOL CUIPParserImpl::Load(IPresentation &inPresentation,
         theLoadResult &= LoadGraph(inPresentation, *m_DOMReader);
     if (theLoadResult)
         theLoadResult &= LoadLogic(inPresentation, *m_DOMReader);
-
-    if (theLoadResult) {
-        // Register all element ids with the debugger
-        eastl::vector<qt3ds::state::debugger::SGElemIdMap> elemMapBuffer;
-        for (TIdElementMap::iterator iter = m_ParseElementManager.m_ElementMap.begin(),
-                                     end = m_ParseElementManager.m_ElementMap.end();
-             iter != end; ++iter) {
-            const SElementData &theData = iter->second;
-            if (theData.m_Element) {
-                qt3ds::state::debugger::SGElemIdMap mapEntry;
-                mapEntry.m_Elem = theData.m_Element;
-                mapEntry.m_Id = iter->first.c_str();
-                elemMapBuffer.push_back(mapEntry);
-            }
-        }
-        debugger.MapElementIds(&inPresentation,
-                               toDataRef(elemMapBuffer.data(), (QT3DSU32)elemMapBuffer.size()));
-    }
 
     return theLoadResult;
 }

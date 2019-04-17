@@ -147,18 +147,6 @@ SOURCES += \
     ../Source/system/Qt3DSTimer.cpp \
     ../Source/system/Qt3DSTypes.cpp \
     ../Source/system/Qt3DSVector3.cpp \
-    ../Source/stateapplication/Qt3DSStateApplication.cpp \
-    ../Source/stateapplication/debugger/Qt3DSSceneGraphRuntimeDebugger.cpp \
-    ../Source/stateapplication/debugger/Qt3DSStateDataTest.cpp \
-    ../Source/stateapplication/debugger/Qt3DSStateDebuggedInterpreter.cpp \
-    ../Source/stateapplication/debugger/Qt3DSStateDebugger.cpp \
-    ../Source/stateapplication/debugger/Qt3DSStateDebuggerListener.cpp \
-    ../Source/stateapplication/debugger/Qt3DSStateDebugStreams.cpp \
-    ../Source/stateapplication/Qt3DSStateContext.cpp \
-    ../Source/stateapplication/Qt3DSStateExecutionContext.cpp \
-    ../Source/stateapplication/Qt3DSStateInterpreter.cpp \
-    ../Source/stateapplication/Qt3DSStateVisualBindingContext.cpp \
-    ../Source/stateapplication/Qt3DSStateXMLIO.cpp \
     ../Source/uipparser/Qt3DSUIPParserActionHelper.cpp \
     ../Source/uipparser/Qt3DSUIPParserImpl.cpp \
     ../Source/uipparser/Qt3DSUIPParserObjectRefHelper.cpp \
@@ -410,29 +398,10 @@ HEADERS += \
     ../Source/system/Qt3DSArray.inl \
     ../Source/system/Qt3DSCircularArray.inl \
     ../Source/system/Qt3DSFixedArray.inl \
-    ../Source/stateapplication/Qt3DSStateApplication.h \
-    ../Source/stateapplication/debugger/Qt3DSSceneGraphDebugger.h \
-    ../Source/stateapplication/debugger/Qt3DSSceneGraphDebuggerProtocol.h \
-    ../Source/stateapplication/debugger/Qt3DSSceneGraphDebuggerValue.h \
-    ../Source/stateapplication/debugger/Qt3DSStateDebugger.h \
-    ../Source/stateapplication/debugger/Qt3DSStateDebuggerProtocol.h \
-    ../Source/stateapplication/debugger/Qt3DSStateDebuggerValues.h \
-    ../Source/stateapplication/debugger/Qt3DSStateDebugStreams.h \
-    ../Source/stateapplication/debugger/Qt3DSStateTest.h \
-    ../Source/stateapplication/Qt3DSState.h \
-    ../Source/stateapplication/Qt3DSStateContext.h \
-    ../Source/stateapplication/Qt3DSStateExecutionContext.h \
-    ../Source/stateapplication/Qt3DSStateExecutionTypes.h \
-    ../Source/stateapplication/Qt3DSStateIdValue.h \
-    ../Source/stateapplication/Qt3DSStateInterpreter.h \
-    ../Source/stateapplication/Qt3DSStateScriptContext.h \
-    ../Source/stateapplication/Qt3DSStateSharedImpl.h \
-    ../Source/stateapplication/Qt3DSStateSignalConnection.h \
-    ../Source/stateapplication/Qt3DSStateTypes.h \
-    ../Source/stateapplication/Qt3DSStateVisualBindingContext.h \
-    ../Source/stateapplication/Qt3DSStateVisualBindingContextCommands.h \
-    ../Source/stateapplication/Qt3DSStateVisualBindingContextValues.h \
-    ../Source/stateapplication/Qt3DSStateXMLIO.h \
+    ../Source/state/Qt3DSState.h \
+    ../Source/state/Qt3DSStateTypes.h \
+    ../Source/state/Qt3DSStateScriptContext.h \
+    ../Source/state/Qt3DSStateVisualBindingContextCommands.h \
     ../Source/uipparser/Qt3DSIPresentation.h \
     ../Source/uipparser/Qt3DSUIPParser.h \
     ../Source/uipparser/Qt3DSUIPParserActionHelper.h \
@@ -454,10 +423,10 @@ HEADERS += \
     ../Source/runtimerender/Qt3DSRenderContextCore.h \
     ../Source/runtimerender/Qt3DSRenderLightConstantProperties.h \
     ../Source/runtimerender/resourcemanager/Qt3DSRenderLoadedTextureKTX.h \
-    ../Source/runtimerender/Include/Qt3DSDistanceFieldRenderer.h \
-    ../Source/runtimerender/Include/Qt3DSFontDatabase_p.h \
-    ../Source/runtimerender/Include/Qt3DSDistanceFieldGlyphCacheManager_p.h \
-    ../Source/runtimerender/Include/Qt3DSDistanceFieldGlyphCache_p.h
+    ../Source/runtimerender/Qt3DSDistanceFieldRenderer.h \
+    ../Source/runtimerender/Qt3DSFontDatabase_p.h \
+    ../Source/runtimerender/Qt3DSDistanceFieldGlyphCacheManager_p.h \
+    ../Source/runtimerender/Qt3DSDistanceFieldGlyphCache_p.h
 
 win32 {
 SOURCES += \

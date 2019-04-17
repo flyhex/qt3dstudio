@@ -38,7 +38,6 @@
 #include "Cmd.h"
 #include "StudioConst.h"
 #include "StudioPreferences.h"
-#include "Qt3DSStateApplication.h"
 #include "StudioApp.h"
 #include "Views/Views.h"
 #include "MainFrm.h"

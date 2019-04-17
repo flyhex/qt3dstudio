@@ -112,27 +112,8 @@ public:
     virtual Q3DStudio::IRuntimeFactoryCore &GetRuntimeFactoryCore() = 0;
     virtual void HideFPS(bool flag) = 0;
 
-    virtual qt3ds::state::debugger::ISceneGraphRuntimeDebugger &GetSceneGraphDebugger() = 0;
-    virtual qt3ds::state::debugger::IDebugger &GetStateDebugger() = 0;
     virtual IActivityZoneManager &GetActivityZoneManager() = 0;
     virtual IElementAllocator &GetElementAllocator() = 0;
-
-    // Debugging is disabled by default.
-    // This is expected be be called before load and will not immediately connect.
-    // until we have a valid presentation directory (which is required for the debug system
-    // at the other end of the connection).
-    // listen - either list for a connection else actively connect to a server.
-    // inServer - if listen is false, then the server addr to connect to.  Ignored if server is
-    // true
-    // inPort - If listen is false, the port on server to connect to, else port to open up
-    // socket on.
-    virtual void EnableDebugging(bool inListen = false, const char8_t *inServer = NULL,
-                                 int inPort = 0) = 0;
-
-    // State machine is enabled by default
-    // Disable state machine is meant to disable internal statemachine, but may plug in an
-    // external statemachine
-    virtual void DisableStateMachine() = 0;
 
     // nonblocking call to begin loading, loads uia file alone and returns.
     virtual bool BeginLoad(const QString &sourcePath, const QStringList &variantList) = 0;

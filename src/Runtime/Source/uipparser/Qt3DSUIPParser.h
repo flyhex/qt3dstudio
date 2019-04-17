@@ -130,8 +130,7 @@ protected:
     virtual ~IUIPParser() {}
 public: // Parse UIP file
     virtual BOOL Load(IPresentation &inPresentation,
-                      NVConstDataRef<SElementAttributeReference> inStateReferences,
-                      qt3ds::state::debugger::ISceneGraphRuntimeDebugger &inDebugger) = 0;
+                      NVConstDataRef<SElementAttributeReference> inStateReferences) = 0;
     virtual qt3dsdm::IDOMReader &GetDOMReader() = 0;
     virtual IRuntimeMetaData &GetMetaData() = 0;
     // Mapping back from file id to element id, needed to hook elements up to their respective

@@ -53,13 +53,9 @@
 #include "Qt3DSSceneManager.h"
 #include "Qt3DSIScene.h"
 #include "Qt3DSInputEngine.h"
-#include "Qt3DSStateVisualBindingContext.h"
 #include "Qt3DSMetadata.h"
 #include "Qt3DSUIPParser.h"
 #include "foundation/Socket.h"
-#include "Qt3DSStateDebugStreams.h"
-#include "Qt3DSSceneGraphDebugger.h"
-#include "Qt3DSSceneGraphDebuggerValue.h"
 #include "EventPollingSystem.h"
 #include "Qt3DSRenderContextCore.h"
 #include "foundation/Qt3DSPerfTimer.h"
@@ -87,8 +83,6 @@
 using namespace qt3ds;
 using namespace qt3ds::runtime;
 using namespace Q3DStudio;
-using qt3ds::state::debugger::ISceneGraphRuntimeDebugger;
-using qt3ds::state::debugger::SSGPropertyChange;
 
 namespace qt3ds {
 namespace foundation {
@@ -105,19 +99,6 @@ struct StringConversion<QT3DSVec2>
 };
 }
 }
-
-namespace {
-struct SDebugSettings
-{
-    eastl::string m_Server;
-    int m_Port;
-    bool m_Listen;
-    SDebugSettings()
-        : m_Port(0)
-        , m_Listen(false)
-    {
-    }
-};
 
 struct SFrameTimer
 {
@@ -229,8 +210,7 @@ public:
     virtual bool OnGraphicsInitialized(IRuntimeFactory &inFactory) = 0;
     virtual bool HasCompletedLoading() = 0;
     static IAppLoadContext &CreateXMLLoadContext(
-            SApp &inApp, NVConstDataRef<qt3ds::state::SElementReference> inStateReferences,
-            const char8_t *inScaleMode);
+            SApp &inApp, const char8_t *inScaleMode);
 };
 
 inline float Clamp(float val, float inMin = 0.0f, float inMax = 1.0f)
@@ -429,7 +409,6 @@ struct SApp : public IApplication
     Q3DStudio::CInputEngine *m_InputEnginePtr;
     CAppStr m_ApplicationDir;
     CAppStr m_ProjectDir;
-    Option<SDebugSettings> m_DebugSettings;
     CAppStr m_InitialPresentationId;
     CAppStr m_DLLDirectory;
     TIdAssetMap m_AssetMap;
@@ -451,12 +430,8 @@ struct SApp : public IApplication
     nvvector<eastl::pair<SBehaviorAsset, bool>> m_Behaviors;
     NVScopedRefCounted<SocketSystem> m_SocketSystem;
     NVScopedRefCounted<SocketStream> m_ServerStream;
-    NVScopedRefCounted<qt3ds::state::debugger::IMultiProtocolSocket> m_ProtocolSocket;
-    NVScopedRefCounted<qt3ds::state::debugger::IDebugger> m_StateDebugger;
-    NVScopedRefCounted<ISceneGraphRuntimeDebugger> m_SceneGraphDebugger;
     NVScopedRefCounted<IActivityZoneManager> m_ActivityZoneManager;
     NVScopedRefCounted<IElementAllocator> m_ElementAllocator;
-    nvvector<SSGPropertyChange> m_ChangeBuffer;
 
     // Handles are loaded sorted but only added to the handle map when needed.
     nvvector<char8_t> m_LoadBuffer;
@@ -505,7 +480,6 @@ struct SApp : public IApplication
                                     inFactory.GetFoundation(), inFactory.GetStringTable()))
         , m_ElementAllocator(IElementAllocator::CreateElementAllocator(inFactory.GetFoundation(),
                                                                        inFactory.GetStringTable()))
-        , m_ChangeBuffer(inFactory.GetFoundation().getAllocator(), "SApp::m_ChangeBuffer")
         , m_LoadBuffer(inFactory.GetFoundation().getAllocator(), "SApp::m_LoadBuffer")
         , m_PresentationBuffer(inFactory.GetFoundation().getAllocator(),
                                "SApp::m_PresentationBuffer")
@@ -514,7 +488,7 @@ struct SApp : public IApplication
         , m_MainThreadRunnables(inFactory.GetFoundation().getAllocator(),
                                 "SApp::m_MainThreadRunnables")
         , m_HideFPS(true)
-        , m_DisableState(false)
+        , m_DisableState(true)
         , m_ProfileLogging(false)
         , m_LastRenderWasDirty(true)
         , m_LastFrameStartTime(0)
@@ -604,24 +578,6 @@ struct SApp : public IApplication
         Mutex::ScopedLock __locker(m_RunnableMutex);
         m_ThreadRunnables.push_back(inRunnable);
     }
-
-    // Debugging is disabled by default.
-    void EnableDebugging(bool inListen, const char8_t *inServer = NULL, int inPort = 0) override
-    {
-        SDebugSettings theSettings;
-        theSettings.m_Server.assign(nonNull(inServer));
-        if (theSettings.m_Server.size() == 0)
-            theSettings.m_Server = "localhost";
-        theSettings.m_Port = inPort;
-        if (!inPort)
-            theSettings.m_Port = 8172;
-        theSettings.m_Listen = inListen;
-        m_DebugSettings = theSettings;
-        // Done at load time only.
-    }
-
-    // state machine is enabled by default
-    void DisableStateMachine() override { m_DisableState = true; }
 
     virtual void EnableProfileLogging()
     {
@@ -854,13 +810,7 @@ struct SApp : public IApplication
             m_MillisecondsSinceLastFrame = 0;
         }
 
-        if (m_ProtocolSocket)
-            m_ProtocolSocket->MessagePump();
         ++m_FrameCount;
-
-        // Update any state systems
-        if (!m_DisableState)
-            m_CoreFactory->GetVisualStateContext().Initialize();
 
         // First off, update any application level behaviors.
         IScriptBridge &theScriptEngine = m_CoreFactory->GetScriptEngineQml();
@@ -875,117 +825,19 @@ struct SApp : public IApplication
 
         // TODO: Initialize presentations
 
-        // Start any state systems
-        if (!m_DisableState)
-            m_CoreFactory->GetVisualStateContext().Start();
-
         for (QT3DSU32 idx = 0, end = m_Behaviors.size(); idx < end; ++idx) {
             eastl::pair<SBehaviorAsset, bool> &entry(m_Behaviors[idx]);
             theScriptEngine.ExecuteApplicationScriptFunction(entry.first.m_Handle, "onUpdate");
         }
 
-        if (!m_DisableState)
-            m_CoreFactory->GetVisualStateContext().Update();
-
         UpdatePresentations();
-
-        if (m_ProtocolSocket) {
-            m_ProtocolSocket->MessagePump();
-            if (m_ProtocolSocket->Connected() == false)
-                exit(0);
-        }
 
         UpdateScenes();
 
         Render();
 
-        GetSceneGraphDebugger();
-
-        if (m_SceneGraphDebugger->IsConnected()) {
-            NVDataRef<CPresentation *> thePresentations(GetPresentations());
-            size_t thePresentationCount = thePresentations.size();
-            for (QT3DSU32 thePresentationIndex = 0; thePresentationIndex < thePresentationCount;
-                 thePresentationIndex++) {
-                CPresentation *thePresentation = thePresentations[thePresentationIndex];
-                Q3DStudio::TElementList &theDirtyList =
-                        thePresentation->GetFrameData().GetDirtyList();
-                for (QT3DSU32 idx = 0, end = theDirtyList.GetCount(); idx < end; ++idx) {
-                    Q3DStudio::TElement &theElement = *theDirtyList[idx];
-                    // Set active
-                    m_ChangeBuffer.push_back(SSGPropertyChange());
-                    QT3DSI32 active = theElement.GetActive() ? 1 : 0;
-                    m_ChangeBuffer.back().m_Hash = CHash::HashAttribute("active");
-                    m_ChangeBuffer.back().m_Value = qt3ds::state::debugger::SSGValue(active);
-                    for (long attIdx = 0, attEnd = theElement.GetAttributeCount(); attIdx < attEnd;
-                         ++attIdx) {
-                        Option<qt3ds::runtime::element::TPropertyDescAndValuePtr> theValue =
-                                theElement.GetPropertyByIndex(attIdx);
-                        m_ChangeBuffer.push_back(SSGPropertyChange());
-                        SSGPropertyChange &theChange(m_ChangeBuffer.back());
-                        theChange.m_Hash = theValue->first.GetNameHash();
-                        Q3DStudio::EAttributeType theAttType = theValue->first.m_Type;
-                        switch (theAttType) {
-                        case ATTRIBUTETYPE_HASH:
-                        case ATTRIBUTETYPE_BOOL:
-                        case ATTRIBUTETYPE_INT32:
-                            theChange.m_Value =
-                                    qt3ds::state::debugger::SSGValue(
-                                        (QT3DSI32)theValue->second->m_INT32);
-                            break;
-                        case ATTRIBUTETYPE_FLOAT:
-                            theChange.m_Value =
-                                    qt3ds::state::debugger::SSGValue(theValue->second->m_FLOAT);
-                            break;
-                        case ATTRIBUTETYPE_STRING: {
-                            CRegisteredString data = m_CoreFactory->GetStringTable().HandleToStr(
-                                        theValue->second->m_StringHandle);
-                            theChange.m_Value = qt3ds::state::debugger::SSGValue(data);
-                        } break;
-                        case ATTRIBUTETYPE_POINTER: {
-                            void *ptrVal = theValue->second->m_VoidPointer;
-                            QT3DSU64 coercedVal = (QT3DSU64)ptrVal;
-                            theChange.m_Value = qt3ds::state::debugger::SSGValue(coercedVal);
-                        } break;
-                        case ATTRIBUTETYPE_ELEMENTREF: {
-                            void *ptrVal = GetElementByHandle(theValue->second->m_ElementHandle);
-                            QT3DSU64 coercedVal = (QT3DSU64)ptrVal;
-                            theChange.m_Value = qt3ds::state::debugger::SSGValue(coercedVal);
-                        } break;
-                        default:
-                            QT3DS_ASSERT(false);
-                            break;
-                        }
-                    }
-                    // If this is a component element, we have a few more properties we need to
-                    // grab.
-                    if (theElement.IsComponent()) {
-                        TComponent &theComponent = static_cast<TComponent &>(theElement);
-                        QT3DSI32 slide = theComponent.GetCurrentSlide();
-                        QT3DSI32 isPaused = theComponent.GetPaused() ? 1 : 0;
-                        QT3DSI32 time
-                                =(QT3DSI32)thePresentation->GetActivityZone()->GetItemComponentTime(
-                                    theComponent);
-                        m_ChangeBuffer.push_back(
-                                    SSGPropertyChange(CHash::HashAttribute("slide"), slide));
-                        m_ChangeBuffer.push_back(
-                                    SSGPropertyChange(CHash::HashAttribute("paused"), isPaused));
-                        m_ChangeBuffer.push_back(
-                                    SSGPropertyChange(CHash::HashAttribute("time"), time));
-                    }
-                    if (m_ChangeBuffer.size()) {
-                        m_SceneGraphDebugger->OnPropertyChanged(&theElement, m_ChangeBuffer);
-                        m_ChangeBuffer.clear();
-                    }
-                }
-            }
-            m_SceneGraphDebugger->EndFrame();
-        }
-
         m_InputEnginePtr->ClearInputFrame();
         ClearPresentationDirtyLists();
-
-        if (m_ProtocolSocket)
-            m_ProtocolSocket->MessagePump();
 
         if (!m_CoreFactory->GetEventSystem().GetAndClearEventFetchedFlag())
             m_CoreFactory->GetEventSystem().PurgeEvents(); // GetNextEvents of event system has not
@@ -1066,13 +918,8 @@ struct SApp : public IApplication
                                                             m_CoreFactory->GetInputStreamFactory(),
                                                             m_CoreFactory->GetStringTable()));
             Q3DStudio::IScene *newScene = NULL;
-            ISceneGraphRuntimeDebugger &theDebugger = GetSceneGraphDebugger();
             m_PresentationBuffer.clear();
-            // Map presentation id has to be called before load so that when we send the element
-            // id updates the system can also send the presentationid->id mapping.
-            theDebugger.MapPresentationId(thePresentation, inAsset.m_Id.c_str());
-            if (theUIPParser->Load(*thePresentation, inExternalReferences,
-                                   GetSceneGraphDebugger())) {
+            if (theUIPParser->Load(*thePresentation, inExternalReferences)) {
                 // Load the scene graph portion of the scene.
                 newScene = m_RuntimeFactory->GetSceneManager().LoadScene(
                             thePresentation, theUIPParser.mPtr,
@@ -1101,11 +948,7 @@ struct SApp : public IApplication
 
     bool LoadUIA(IDOMReader &inReader, NVFoundationBase &fnd)
     {
-        NVConstDataRef<qt3ds::state::SElementReference> theStateReferences;
-        {
             IDOMReader::Scope __preparseScope(inReader);
-            theStateReferences = m_CoreFactory->GetVisualStateContext().PreParseDocument(inReader);
-        }
         {
             m_UIAFileSettings.Parse(inReader);
         }
@@ -1186,14 +1029,6 @@ struct SApp : public IApplication
                     inReader.UnregisteredAtt("args", pluginArgs);
                     RegisterAsset(SRenderPluginAsset(RegisterStr(itemId), RegisterStr(src),
                                                      RegisterStr(pluginArgs)));
-                } else if (AreEqual(assetName, "statemachine")) {
-                    const char8_t *dm = "";
-                    inReader.UnregisteredAtt("datamodel", dm);
-                    m_CoreFactory->GetVisualStateContext().LoadStateMachine(itemId, src,
-                                                                            nonNull(dm));
-                    RegisterAsset(
-                                SSCXMLAsset(RegisterStr(itemId), RegisterStr(src), RegisterStr(dm)));
-
                 } else if (AreEqual(assetName, "behavior")) {
                     SBehaviorAsset theAsset(RegisterStr(itemId), RegisterStr(src), 0);
                     RegisterAsset(theAsset);
@@ -1210,12 +1045,8 @@ struct SApp : public IApplication
         const char8_t *initialScaleMode = "";
         inReader.UnregisteredAtt("scalemode", initialScaleMode);
 
-        {
-            IDOMReader::Scope __machineScope(inReader);
-            m_CoreFactory->GetVisualStateContext().LoadVisualStateMapping(inReader);
-        }
         m_AppLoadContext
-                = IAppLoadContext::CreateXMLLoadContext(*this, theStateReferences,
+                = IAppLoadContext::CreateXMLLoadContext(*this,
                                                         initialScaleMode);
         return true;
     }
@@ -1256,61 +1087,6 @@ struct SApp : public IApplication
         }
     };
 
-    void ConnectDebugger()
-    {
-        NVFoundationBase &fnd(m_CoreFactory->GetFoundation());
-        Q3DStudio::IScriptBridge &theBridge = m_CoreFactory->GetScriptEngineQml();
-        if (m_DebugSettings.hasValue()) {
-            m_SocketSystem = SocketSystem::createSocketSystem(fnd);
-            if (m_DebugSettings->m_Listen) {
-                // Wait for connection request from debug server
-                qCInfo(TRACE_INFO, "Listening for debug connection on port %d",
-                       m_DebugSettings->m_Port);
-                NVScopedRefCounted<SocketServer> theServer
-                        = m_SocketSystem->createServer(m_DebugSettings->m_Port);
-                theServer->setTimeout(1000);
-                m_ServerStream = theServer->nextClient();
-            } else {
-                // Attempt to connect to the debug server
-                qCInfo(TRACE_INFO, "Attempt to connect to debug server %s:%d",
-                       m_DebugSettings->m_Server.c_str(), m_DebugSettings->m_Port);
-                m_ServerStream = m_SocketSystem->createStream(m_DebugSettings->m_Server.c_str(),
-                                                              m_DebugSettings->m_Port, 1000);
-            }
-            if (m_ServerStream) {
-                m_ServerStream->setTimeout(QT3DS_MAX_U32);
-                // This system declares protocols, we don't listen for new ones.
-                m_ProtocolSocket = qt3ds::state::debugger::IMultiProtocolSocket::CreateProtocolSocket(
-                            fnd, *m_ServerStream, m_CoreFactory->GetStringTable(), NULL);
-                if (!m_ProtocolSocket->Initialize()) {
-                    m_ProtocolSocket = NULL;
-                    m_ServerStream = NULL;
-                    m_SocketSystem = NULL;
-                    qCWarning(WARNING,
-                              "Initialization failed after connection to server, debug server %s:%d",
-                              m_DebugSettings->m_Server.c_str(), m_DebugSettings->m_Port);
-
-                } else {
-                    using namespace qt3ds::state::debugger;
-                    theBridge.EnableDebugging(*m_ProtocolSocket);
-                    NVScopedRefCounted<IMultiProtocolSocketStream> socketStream
-                            = m_ProtocolSocket->CreateProtocol(
-                                CProtocolNames::getSCXMLProtocolName(), NULL);
-                    GetStateDebugger().OnServerConnected(*socketStream);
-
-                    NVScopedRefCounted<IMultiProtocolSocketStream> theSGStream
-                            = m_ProtocolSocket->CreateProtocol(
-                                ISceneGraphRuntimeDebugger::GetProtocolName(), NULL);
-                    GetSceneGraphDebugger().OnConnection(*theSGStream);
-                    theSGStream->SetListener(&GetSceneGraphDebugger());
-                }
-            } else {
-                qCWarning(WARNING, "Failed to connect to debug server %s:%d",
-                          m_DebugSettings->m_Server.c_str(), m_DebugSettings->m_Port);
-            }
-        }
-    }
-
     virtual bool BeginLoad(const QString &sourcePath, const QStringList &variantList) override
     {
         SStackPerfTimer __loadTimer(m_CoreFactory->GetPerfTimer(), "Application: Begin Load");
@@ -1350,25 +1126,17 @@ struct SApp : public IApplication
         m_variantConfig.setVariantList(variantList);
         bool retval = false;
         if (extension.comparei("uip") == 0) {
-#if !defined(_LINUXPLATFORM) && !defined(_INTEGRITYPLATFORM)
-            ConnectDebugger();
-#endif
-            if (m_InitialPresentationId.empty())
-                m_InitialPresentationId.assign(filename.c_str());
+            m_InitialPresentationId.assign(filename.c_str());
             eastl::string relativePath = "./";
             relativePath.append(filename);
             relativePath.append(".");
             relativePath.append("uip");
             RegisterAsset(SPresentationAsset(RegisterStr(filename.c_str()),
                                              RegisterStr(relativePath.c_str())));
-            m_AppLoadContext = IAppLoadContext::CreateXMLLoadContext(
-                        *this, NVDataRef<qt3ds::state::SElementReference>(), "");
+            m_AppLoadContext = IAppLoadContext::CreateXMLLoadContext(*this, "");
 
             retval = true;
         } else if (extension.comparei("uia") == 0) {
-#if !defined(_LINUXPLATFORM) && !defined(_INTEGRITYPLATFORM)
-            ConnectDebugger();
-#endif
             CFileSeekableIOStream inputStream(sourcePath, FileReadFlags());
             if (inputStream.IsOpen()) {
                 NVScopedRefCounted<IStringTable> strTable(
@@ -1662,21 +1430,6 @@ struct SApp : public IApplication
         return *m_MetaData;
     }
 
-    qt3ds::state::debugger::IDebugger &GetStateDebugger() override
-    {
-        if (!m_StateDebugger)
-            m_StateDebugger = qt3ds::state::debugger::IDebugger::CreateDebugger();
-        return *m_StateDebugger;
-    }
-
-    qt3ds::state::debugger::ISceneGraphRuntimeDebugger &GetSceneGraphDebugger() override
-    {
-        if (!m_SceneGraphDebugger)
-            m_SceneGraphDebugger = qt3ds::state::debugger::ISceneGraphRuntimeDebugger::Create(
-                        m_CoreFactory->GetFoundation(), m_CoreFactory->GetStringTable());
-        return *m_SceneGraphDebugger;
-    }
-
     IActivityZoneManager &GetActivityZoneManager() override { return *m_ActivityZoneManager; }
 
     IElementAllocator &GetElementAllocator() override { return *m_ElementAllocator; }
@@ -1696,15 +1449,13 @@ struct SXMLLoader : public IAppLoadContext
 {
     SApp &m_App;
     eastl::string m_ScaleMode;
-    eastl::vector<qt3ds::state::SElementReference> m_References;
     QT3DSI32 mRefCount;
 
-    SXMLLoader(SApp &inApp, const char8_t *sc, NVConstDataRef<qt3ds::state::SElementReference> refs)
+    SXMLLoader(SApp &inApp, const char8_t *sc)
         : m_App(inApp)
         , m_ScaleMode(nonNull(sc))
         , mRefCount(0)
     {
-        m_References.assign(refs.begin(), refs.end());
     }
 
     QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE(m_App.m_CoreFactory->GetFoundation().getAllocator())
@@ -1731,19 +1482,6 @@ struct SXMLLoader : public IAppLoadContext
                 SPresentationAsset &thePresentationAsset
                         = *theAsset.getDataPtr<SPresentationAsset>();
                 theUIPReferences.clear();
-                for (QT3DSU32 refIdx = 0, refEnd = m_References.size(); refIdx < refEnd; ++refIdx) {
-                    tempString.assign(m_References[refIdx].m_ElementPath.c_str());
-                    eastl::string::size_type colonPos = tempString.find_first_of(':');
-                    if (colonPos != eastl::string::npos) {
-                        tempString = tempString.substr(0, colonPos);
-                        if (tempString.compare(thePresentationAsset.m_Id.c_str()) == 0) {
-                            SElementAttributeReference newReference(
-                                        m_References[refIdx].m_ElementPath.c_str() + colonPos + 1,
-                                        m_References[refIdx].m_Attribute.c_str());
-                            theUIPReferences.push_back(newReference);
-                        }
-                    }
-                }
 
                 if (!m_App.LoadUIP(thePresentationAsset,
                                    toConstDataRef(theUIPReferences.data(),
@@ -1802,12 +1540,10 @@ struct SXMLLoader : public IAppLoadContext
 };
 
 IAppLoadContext &IAppLoadContext::CreateXMLLoadContext(
-        SApp &inApp, NVConstDataRef<qt3ds::state::SElementReference> inStateReferences,
-        const char8_t *inScaleMode)
+        SApp &inApp, const char8_t *inScaleMode)
 {
     return *QT3DS_NEW(inApp.m_CoreFactory->GetFoundation().getAllocator(),
-                      SXMLLoader)(inApp, inScaleMode, inStateReferences);
-}
+                      SXMLLoader)(inApp, inScaleMode);
 }
 
 CAppStr::CAppStr(NVAllocatorCallback &alloc, const char8_t *inStr)

@@ -525,8 +525,7 @@ public: // Construction
 
 public: // Parse UIP file
     BOOL Load(IPresentation &inPresentation,
-                      NVConstDataRef<SElementAttributeReference> inStateReferences,
-                      qt3ds::state::debugger::ISceneGraphRuntimeDebugger &debugger) override;
+                      NVConstDataRef<SElementAttributeReference> inStateReferences) override;
     qt3dsdm::IDOMReader &GetDOMReader() override;
     IRuntimeMetaData &GetMetaData() override;
     SElementAndType GetElementForID(const char *inStringId) override;

@@ -78,7 +78,6 @@ INCLUDEPATH += \
     ../../Runtime/Source/runtimerender \
     ../../Runtime/Source/runtimerender/graphobjects \
     ../../Runtime/Source/runtimerender/resourcemanager \
-    ../../Runtime/Source/stateapplication \
     ../../Runtime/Source/event \
     ../../3rdparty/EASTL/UnknownVersion/include \
     ../../3rdparty/color \

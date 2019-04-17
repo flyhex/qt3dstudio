@@ -46,7 +46,6 @@
 #include "foundation/FileTools.h"
 #include "foundation/Qt3DSSystem.h"
 #include "foundation/Qt3DSBroadcastingAllocator.h"
-#include "Qt3DSStateDebugger.h"
 #include "Qt3DSRenderInputStreamFactory.h"
 #include "Qt3DSSlideSystem.h"
 
@@ -56,7 +55,6 @@
 #include "Qt3DSCommandEventTypes.h"
 #include "Qt3DSApplication.h"
 #include "Qt3DSRuntimeFactory.h"
-#include "Qt3DSStateDebugStreams.h"
 #include "Qt3DSRenderContextCore.h"
 #include "Qt3DSRenderInputStreamFactory.h"
 #include "foundation/Qt3DSPerfTimer.h"

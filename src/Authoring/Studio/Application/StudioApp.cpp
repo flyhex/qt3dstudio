@@ -33,7 +33,6 @@
 #pragma warning(disable : 4100) // unreferenced formal parameter
 #endif
 #include "StudioApp.h"
-#include "Qt3DSStateApplication.h"
 #include "PlayerWnd.h"
 #include "DataInputDlg.h"
 #include "qtsingleapplication.h"

@@ -24,9 +24,6 @@ INCLUDEPATH += \
     $$PWD/Source/render/glg \
     $$PWD/Source/uipparser \
     $$PWD/Source/state \
-    $$PWD/Source/stateapplication \
-    $$PWD/Source/stateapplication/editor \
-    $$PWD/Source/stateapplication/debugger \
     $$PWD/Source/event \
     $$PWD/Source/viewer \
     $$PWD/Source/viewer/perflog \

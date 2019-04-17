@@ -56,8 +56,7 @@
 #include "Qt3DSPluginDLL.h"
 #include "Qt3DSRenderPlugin.h"
 #include "foundation/FileTools.h"
-#include "Qt3DSStateVisualBindingContext.h"
-#include "Qt3DSStateVisualBindingContextValues.h"
+#include "Qt3DSStateVisualBindingContextCommands.h"
 #include "Qt3DSStateScriptContext.h"
 #include "EventPollingSystem.h"
 #include "EventSystem.h"
@@ -1681,33 +1680,12 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
 
 struct SRenderFactory;
 
-struct SVisualStateHandler : public qt3ds::state::IVisualStateInterpreterFactory,
-                             public qt3ds::state::IVisualStateCommandHandler
-{
-    NVAllocatorCallback &m_Allocator;
-    QT3DSI32 mRefCount;
-    SRenderFactory &m_Factory;
-
-public:
-    SVisualStateHandler(NVAllocatorCallback &alloc, SRenderFactory &inFactory)
-        : m_Allocator(alloc)
-        , mRefCount(0)
-        , m_Factory(inFactory)
-    {
-    }
-    QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE_OVERRIDE(m_Allocator)
-
-    void Handle(const qt3ds::state::SVisualStateCommand &inCommand,
-                        qt3ds::state::IScriptContext &inScriptContext) override;
-};
-
 struct SRenderFactory : public IQt3DSRenderFactoryCore, public IQt3DSRenderFactory
 {
     NVScopedRefCounted<SBindingCore> m_Context;
 
     NVScopedRefCounted<Q3DStudio::CQmlEngine> m_ScriptBridgeQml;
     NVScopedRefCounted<Qt3DSRenderSceneManager> m_SceneManager;
-    NVScopedRefCounted<qt3ds::state::IVisualStateContext> m_VisualStateContext;
     NVScopedRefCounted<qt3ds::evt::IEventSystem> m_EventSystem;
     qt3ds::runtime::IApplicationCore *m_ApplicationCore;
     qt3ds::runtime::IApplication *m_Application;
@@ -1726,8 +1704,6 @@ struct SRenderFactory : public IQt3DSRenderFactoryCore, public IQt3DSRenderFacto
     ~SRenderFactory()
     {
         using namespace Q3DStudio;
-        // Release the visual state context.
-        m_VisualStateContext = NULL;
         // Release the event system, it must be released before script engine
         m_EventSystem = NULL;
         m_ScriptBridgeQml->Shutdown(*m_Context->m_Foundation);
@@ -1792,19 +1768,7 @@ struct SRenderFactory : public IQt3DSRenderFactoryCore, public IQt3DSRenderFacto
     {
         return *m_Context->m_Context;
     }
-    qt3ds::state::IVisualStateContext &GetVisualStateContext() override
-    {
-        if (!m_VisualStateContext) {
-            m_VisualStateContext = qt3ds::state::IVisualStateContext::Create(
-                *m_Context->m_Foundation, m_Context->m_CoreContext->GetStringTable());
-            SVisualStateHandler *newHandle =
-                QT3DS_NEW(m_Context->m_Foundation->getAllocator(),
-                       SVisualStateHandler)(m_Context->m_Foundation->getAllocator(), *this);
-            m_VisualStateContext->SetCommandHandler(newHandle);
-            m_VisualStateContext->SetInterpreterFactory(newHandle);
-        }
-        return *m_VisualStateContext;
-    }
+
     qt3ds::evt::IEventSystem &GetEventSystem() override
     {
         if (!m_EventSystem) {
@@ -1933,55 +1897,6 @@ public:
 private:
     qt3ds::state::IScriptContext &m_ScriptContext;
 };
-
-void SVisualStateHandler::Handle(const qt3ds::state::SVisualStateCommand &inCommand,
-                                 qt3ds::state::IScriptContext &inScriptContext)
-{
-    using namespace qt3ds::state;
-    switch (inCommand.getType()) {
-    case VisualStateCommandTypes::GotoSlide: {
-        const SGotoSlide &theInfo(inCommand.getData<SGotoSlide>());
-        m_Factory.m_ScriptBridgeQml->GotoSlide(theInfo.m_Component.c_str(),
-                                               theInfo.m_Slide.c_str(),
-                                               ToEngine(theInfo.m_GotoSlideData));
-    } break;
-    case VisualStateCommandTypes::SetAttribute: {
-        const SSetAttribute &theInfo(inCommand.getData<SSetAttribute>());
-        m_Factory.m_ScriptBridgeQml->SetAttribute(
-                    theInfo.m_Element.c_str(), theInfo.m_Attribute.c_str(),
-                    theInfo.m_Value.c_str());
-    } break;
-    case VisualStateCommandTypes::GotoSlideRelative: {
-        const SGotoSlideRelative &theInfo(inCommand.getData<SGotoSlideRelative>());
-        if (theInfo.m_Direction == SGotoSlideRelative::Error) {
-            qCCritical(INVALID_OPERATION,
-                       "Goto slide relative has invalid attribute (neither 'next' nor 'previous')");
-        } else {
-            m_Factory.m_ScriptBridgeQml->GotoSlideRelative(
-                        theInfo.m_Component.c_str(),
-                        theInfo.m_Direction == SGotoSlideRelative::Next,
-                        theInfo.m_Wrap, ToEngine(theInfo.m_GotoSlideData));
-        }
-    } break;
-    case VisualStateCommandTypes::FireEvent: {
-        const SFireEvent &theInfo(inCommand.getData<SFireEvent>());
-        m_Factory.m_ScriptBridgeQml->FireEvent(theInfo.m_Element, theInfo.m_Event);
-    } break;
-    case VisualStateCommandTypes::PresentationAttribute: {
-        const SPresentationAttribute &theInfo(inCommand.getData<SPresentationAttribute>());
-        m_Factory.m_ScriptBridgeQml->SetPresentationAttribute(theInfo.m_Presentation,
-                                                              theInfo.m_Attribute,
-                                                              theInfo.m_Value);
-    } break;
-    case VisualStateCommandTypes::PlaySound: {
-        const SPlaySound &theInfo(inCommand.getData<SPlaySound>());
-        m_Factory.m_ScriptBridgeQml->PlaySoundFile(theInfo.m_SoundFilePath);
-    } break;
-    default:
-        QT3DS_ASSERT(false);
-        break;
-    }
-}
 }
 
 IQt3DSRenderFactoryCore &IQt3DSRenderFactoryCore::CreateRenderFactoryCore(
