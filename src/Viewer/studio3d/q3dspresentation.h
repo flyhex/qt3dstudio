@@ -33,7 +33,7 @@
 #include <QtStudio3D/qstudio3dglobal.h>
 #include <QtCore/qobject.h>
 #include <QtCore/qurl.h>
-#include "q3dsdatainput.h"
+#include <QtStudio3D/q3dsdatainput.h>
 
 QT_BEGIN_NAMESPACE
 
