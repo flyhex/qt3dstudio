@@ -3122,30 +3122,28 @@ public:
                 inStream.Att("name", xmlName);
                 const char8_t *stage;
                 inStream.Att("stage", stage);
-                eastl::string *uniforms = &fragmentUniforms;
-                if (AreEqual(stage, "vertex"))
-                    uniforms = &vertexUniforms;
+                eastl::string uniforms;
                 if (AreEqual(xmlName, theNewDefinition.m_Name.c_str())) {
                     switch (theInfo.GetDataType()) {
                     case DataModelDataType::Bool:
                         theNewDefinition.m_DataType =
                                 qt3ds::render::NVRenderShaderDataTypes::QT3DSRenderBool;
-                        AppendShaderUniform("bool", theNewDefinition.m_Name.c_str(), *uniforms);
+                        AppendShaderUniform("bool", theNewDefinition.m_Name.c_str(), uniforms);
                         break;
                     case DataModelDataType::Long:
                         theNewDefinition.m_DataType
                                 = qt3ds::render::NVRenderShaderDataTypes::QT3DSI32;
-                        AppendShaderUniform("int", theNewDefinition.m_Name.c_str(), *uniforms);
+                        AppendShaderUniform("int", theNewDefinition.m_Name.c_str(), uniforms);
                         break;
                     case DataModelDataType::Float2:
                         theNewDefinition.m_DataType
                                 = qt3ds::render::NVRenderShaderDataTypes::QT3DSVec2;
-                        AppendShaderUniform("vec2", theNewDefinition.m_Name.c_str(), *uniforms);
+                        AppendShaderUniform("vec2", theNewDefinition.m_Name.c_str(), uniforms);
                         break;
                     case DataModelDataType::Float3:
                         theNewDefinition.m_DataType
                                 = qt3ds::render::NVRenderShaderDataTypes::QT3DSVec3;
-                        AppendShaderUniform("vec3", theNewDefinition.m_Name.c_str(), *uniforms);
+                        AppendShaderUniform("vec3", theNewDefinition.m_Name.c_str(), uniforms);
                         break;
                     case DataModelDataType::String:
                         if (theInfo.m_CompleteType == CompleteMetaDataType::Texture) {
@@ -3172,16 +3170,16 @@ public:
                             // Output macro so we can change the set of variables used for this
                             // independent of the
                             // meta data system.
-                            uniforms->append("SNAPPER_SAMPLER2D(");
-                            uniforms->append(theNewDefinition.m_Name.c_str());
-                            uniforms->append(", ");
-                            uniforms->append(theNewDefinition.m_Name.c_str());
-                            uniforms->append(", ");
-                            uniforms->append(filter);
-                            uniforms->append(", ");
-                            uniforms->append(clamp);
-                            uniforms->append(", ");
-                            uniforms->append("false )\n");
+                            uniforms.append("SNAPPER_SAMPLER2D(");
+                            uniforms.append(theNewDefinition.m_Name.c_str());
+                            uniforms.append(", ");
+                            uniforms.append(theNewDefinition.m_Name.c_str());
+                            uniforms.append(", ");
+                            uniforms.append(filter);
+                            uniforms.append(", ");
+                            uniforms.append(clamp);
+                            uniforms.append(", ");
+                            uniforms.append("false )\n");
                         } else if (theInfo.m_CompleteType == CompleteMetaDataType::StringList) {
                             theNewDefinition.m_DataType =
                                     qt3ds::render::NVRenderShaderDataTypes::QT3DSI32;
@@ -3197,54 +3195,54 @@ public:
                             theNewDefinition.m_EnumValueNames = VecToCRef(theBack);
                             theNewDefinition.m_IsEnumProperty = true;
                             AppendShaderUniform("int", theNewDefinition.m_Name.c_str(),
-                                                *uniforms);
+                                                uniforms);
                         } else if (theInfo.m_CompleteType == CompleteMetaDataType::Image2D) {
                             theNewDefinition.m_DataType =
                                     qt3ds::render::NVRenderShaderDataTypes::NVRenderImage2DPtr;
                             const char8_t *format = "", *binding = "", *access = "readonly";
-                            uniforms->append("layout(");
+                            uniforms.append("layout(");
                             inStream.Att("format", format);
-                            uniforms->append(format);
+                            uniforms.append(format);
                             if (inStream.Att("binding", binding)) {
-                                uniforms->append(", binding = ");
-                                uniforms->append(binding);
+                                uniforms.append(", binding = ");
+                                uniforms.append(binding);
                             }
-                            uniforms->append(") ");
+                            uniforms.append(") ");
 
                             // if we have format layout we cannot set an additional access qualifier
                             if (inStream.Att("access", access) && !AreEqual(format, ""))
-                                uniforms->append(access);
+                                uniforms.append(access);
 
-                            uniforms->append(" uniform image2D ");
-                            uniforms->append(theNewDefinition.m_Name.c_str());
-                            uniforms->append(";\n");
+                            uniforms.append(" uniform image2D ");
+                            uniforms.append(theNewDefinition.m_Name.c_str());
+                            uniforms.append(";\n");
                         } else if (theInfo.m_CompleteType == CompleteMetaDataType::Buffer) {
                             theNewDefinition.m_DataType =
                                     qt3ds::render::NVRenderShaderDataTypes::NVRenderDataBufferPtr;
                             const char8_t *align = "std140", *usage = "storage", *binding = "",
                                     *format = "float";
-                            uniforms->append("layout(");
+                            uniforms.append("layout(");
 
                             inStream.Att("format", format);
                             inStream.Att("usage", usage);
                             if (AreEqual(usage, "storage")) {
                                 inStream.Att("align", align);
-                                uniforms->append(align);
+                                uniforms.append(align);
 
                                 if (inStream.Att("binding", binding)) {
-                                    uniforms->append(", binding = ");
-                                    uniforms->append(binding);
+                                    uniforms.append(", binding = ");
+                                    uniforms.append(binding);
                                 }
 
-                                uniforms->append(") ");
+                                uniforms.append(") ");
 
-                                uniforms->append("buffer ");
-                                uniforms->append(theNewDefinition.m_Name.c_str());
-                                uniforms->append("\n{ \n");
-                                uniforms->append(format);
-                                uniforms->append(" ");
-                                uniforms->append(theNewDefinition.m_Name.c_str());
-                                uniforms->append("_data[]; \n};\n");
+                                uniforms.append("buffer ");
+                                uniforms.append(theNewDefinition.m_Name.c_str());
+                                uniforms.append("\n{ \n");
+                                uniforms.append(format);
+                                uniforms.append(" ");
+                                uniforms.append(theNewDefinition.m_Name.c_str());
+                                uniforms.append("_data[]; \n};\n");
                             } else {
                                 // currently we only handle storage counters
                                 QT3DS_ASSERT(false);
@@ -3256,7 +3254,7 @@ public:
                         // Fallthrough intentional
                     case DataModelDataType::Float:
                         theNewDefinition.m_DataType = qt3ds::render::NVRenderShaderDataTypes::QT3DSF32;
-                        AppendShaderUniform("float", theNewDefinition.m_Name.c_str(), *uniforms);
+                        AppendShaderUniform("float", theNewDefinition.m_Name.c_str(), uniforms);
                         break;
                     }
                 } else {
@@ -3264,6 +3262,15 @@ public:
                     QT3DS_ASSERT(false);
                     // So we will bump to the next item and try again.
                     --propIdx;
+                }
+
+                if (AreEqual(stage, "vertex")) {
+                    vertexUniforms += uniforms;
+                } else if (AreEqual(stage, "fragment")) {
+                    fragmentUniforms += uniforms;
+                } else {
+                    vertexUniforms += uniforms;
+                    fragmentUniforms += uniforms;
                 }
             }
         }
