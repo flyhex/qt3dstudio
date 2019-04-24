@@ -121,6 +121,11 @@ bool Q3DSSurfaceViewer::isRunning() const
     return d_ptr->m_viewerApp != nullptr;
 }
 
+QString Q3DSSurfaceViewer::presentationId() const
+{
+    return d_ptr->m_id;
+}
+
 int Q3DSSurfaceViewer::fboId() const
 {
     return d_ptr->m_fboId;
@@ -146,6 +151,16 @@ Q3DSPresentation *Q3DSSurfaceViewer::presentation() const
     return d_ptr->m_presentation;
 }
 
+void Q3DSSurfaceViewer::setPresentationId(const QString &id)
+{
+    if (d_ptr->m_id != id) {
+        d_ptr->m_id = id;
+        Q_EMIT presentationIdChanged(id);
+        if (d_ptr->m_viewerApp)
+            d_ptr->m_viewerApp->setPresentationId(id);
+    }
+}
+
 Q3DSSurfaceViewerPrivate::Q3DSSurfaceViewerPrivate(Q3DSSurfaceViewer *q)
     : QObject(q)
     , q_ptr(q)
@@ -159,6 +174,7 @@ Q3DSSurfaceViewerPrivate::Q3DSSurfaceViewerPrivate(Q3DSSurfaceViewer *q)
     , m_autoSize(true)
     , m_settings(new Q3DSViewerSettings(this))
     , m_presentation(new Q3DSPresentation(this))
+    , m_id(QStringLiteral("initial"))
 {
     connect(m_presentation, &Q3DSPresentation::sourceChanged,
             this, &Q3DSSurfaceViewerPrivate::reset);
@@ -362,6 +378,7 @@ bool Q3DSSurfaceViewerPrivate::initializeRuntime()
         return false;
     }
 
+    m_viewerApp->setPresentationId(m_id);
     m_settings->d_ptr->setViewerApp(m_viewerApp);
     m_presentation->d_ptr->setViewerApp(m_viewerApp);
 

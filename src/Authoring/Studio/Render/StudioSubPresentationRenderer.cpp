@@ -73,12 +73,13 @@ public:
         return QSize();
     }
 
-    void initialize(const QString &presentation, const QString &path)
+    void initialize(const QString &id, const QString &presentation, const QString &path)
     {
         m_path = path;
         m_presentation = presentation;
 
         m_surfaceViewer.reset(new Q3DSSurfaceViewer);
+        m_surfaceViewer->setPresentationId(id);
         m_context.reset(new QT_PREPEND_NAMESPACE(QOpenGLContext));
         m_surface.reset(new QOffscreenSurface);
 
@@ -247,7 +248,7 @@ SOffscreenRenderFlags StudioSubpresentationRenderer::NeedsRender(
 
 void StudioSubpresentationRenderer::initialize()
 {
-    m_thread->initialize(m_presentation, m_path);
+    m_thread->initialize(m_id, m_presentation, m_path);
     m_thread->start();
     m_thread->m_semaphore.acquire();
     if (m_callback)

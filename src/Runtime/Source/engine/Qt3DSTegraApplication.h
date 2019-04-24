@@ -174,6 +174,8 @@ public: // loading
     virtual INT32 GetFrameCount() = 0;
     virtual void showOnScreenStats(bool) = 0;
 
+    virtual void setPresentationId(const QString &id) = 0;
+
 public: // Input engine access
     virtual CInputEngine *GetInputEngine() = 0;
     // Only valid after InitializeGraphics
@@ -333,6 +335,10 @@ public:
     qt3ds::foundation::NVScopedRefCounted<INDDView> getNDDView()
     {
         return m_NDDView;
+    }
+    void setPresentationId(const QString &id)
+    {
+        m_NDDView->setPresentationId(id);
     }
 };
 } // namespace Q3DStudio

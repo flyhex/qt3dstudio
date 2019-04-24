@@ -358,6 +358,8 @@ public:
 
     QString error();
 
+    void setPresentationId(const QString &id);
+
 private:
     /*
      * @brief parse command line arguments this fills in our

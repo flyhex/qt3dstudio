@@ -241,6 +241,7 @@ public:
 
     virtual float dataInputMin(const QString &name) const = 0;
 
+    virtual void setPresentationId(const QString &id) = 0;
 };
 }
 }

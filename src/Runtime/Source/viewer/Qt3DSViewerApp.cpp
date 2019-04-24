@@ -754,6 +754,14 @@ void Q3DSViewerApp::SetDataInputValue(
     m_Impl.m_tegraApp->SetDataInputValue(name, value, valueRole);
 }
 
+void Q3DSViewerApp::setPresentationId(const QString &id)
+{
+    if (!m_Impl.m_tegraApp)
+        return;
+
+    m_Impl.m_tegraApp->setPresentationId(id);
+}
+
 QList<QString> Q3DSViewerApp::dataInputs() const
 {
     if (!m_Impl.m_tegraApp)

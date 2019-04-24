@@ -205,6 +205,11 @@ public:
     void SetDataInputValue(const QString &name, const QVariant &value,
                            Q3DSDataInput::ValueRole property) override;
 
+    void setPresentationId(const QString &id) override
+    {
+        m_Application->setPresentationId(id);
+    }
+
     QList<QString> dataInputs() const override;
     float dataInputMax(const QString &name) const override;
     float dataInputMin(const QString &name) const override;

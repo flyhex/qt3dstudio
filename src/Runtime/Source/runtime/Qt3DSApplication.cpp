@@ -565,6 +565,11 @@ struct SApp : public IApplication
         }
     }
 
+    void setPresentationId(const QString &id) override
+    {
+        m_InitialPresentationId.assign(qPrintable(id));
+    }
+
     void setAssetVisitor(qt3ds::Qt3DSAssetVisitor *v) override
     {
         m_visitor = v;
@@ -1348,7 +1353,8 @@ struct SApp : public IApplication
 #if !defined(_LINUXPLATFORM) && !defined(_INTEGRITYPLATFORM)
             ConnectDebugger();
 #endif
-            m_InitialPresentationId.assign(filename.c_str());
+            if (m_InitialPresentationId.empty())
+                m_InitialPresentationId.assign(filename.c_str());
             eastl::string relativePath = "./";
             relativePath.append(filename);
             relativePath.append(".");

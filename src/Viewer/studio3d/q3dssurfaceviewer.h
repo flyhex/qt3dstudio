@@ -53,6 +53,7 @@ class Q_STUDIO3D_EXPORT Q3DSSurfaceViewer : public QObject
     Q_PROPERTY(bool autoSize READ autoSize WRITE setAutoSize NOTIFY autoSizeChanged)
     Q_PROPERTY(int updateInterval READ updateInterval WRITE setUpdateInterval NOTIFY updateIntervalChanged)
     Q_PROPERTY(bool running READ isRunning NOTIFY runningChanged)
+    Q_PROPERTY(QString presentationId READ presentationId WRITE setPresentationId NOTIFY presentationIdChanged)
 
 public:
     explicit Q3DSSurfaceViewer(QObject *parent = nullptr);
@@ -67,6 +68,7 @@ public:
     bool autoSize() const;
     int updateInterval() const;
     bool isRunning() const;
+    QString presentationId() const;
 
     int fboId() const;
     QSurface *surface() const;
@@ -82,6 +84,7 @@ public Q_SLOTS:
     void update();
     void shutdown();
     void reset();
+    void setPresentationId(const QString &id);
 
 Q_SIGNALS:
     void sizeChanged(const QSize &size);
@@ -89,6 +92,7 @@ Q_SIGNALS:
     void updateIntervalChanged(bool autoUpdate);
     void runningChanged(bool initialized);
     void frameUpdated();
+    void presentationIdChanged(const QString &id);
 
 private:
     Q_DISABLE_COPY(Q3DSSurfaceViewer)

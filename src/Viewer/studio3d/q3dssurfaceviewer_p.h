@@ -94,6 +94,7 @@ private:
     bool m_autoSize;
     Q3DSViewerSettings *m_settings;
     Q3DSPresentation *m_presentation;
+    QString m_id;
 };
 
 QT_END_NAMESPACE
