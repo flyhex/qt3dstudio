@@ -517,6 +517,7 @@ SOURCES += \
 SOURCES += \
     ../Source/render/Qt3DSRenderAtomicCounterBuffer.cpp \
     ../Source/render/Qt3DSRenderAttribLayout.cpp \
+    ../Source/render/Qt3DSRenderBaseTypes.cpp \
     ../Source/render/Qt3DSRenderComputeShader.cpp \
     ../Source/render/Qt3DSRenderConstantBuffer.cpp \
     ../Source/render/Qt3DSRenderContext.cpp \

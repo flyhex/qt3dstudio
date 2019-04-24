@@ -64,7 +64,7 @@ struct NVRenderComponentTypes
         QT3DS_RENDER_ITERATE_COMPONENT_TYPES
 #undef QT3DS_RENDER_HANDLE_COMPONENT_TYPE
     };
-    static const char *toString(Enum value)
+    static const char *toString(const Enum value)
     {
         switch (value) {
 #define QT3DS_RENDER_HANDLE_COMPONENT_TYPE(x)                                                         \
@@ -310,7 +310,7 @@ struct NVRenderRenderBufferFormats
         QT3DS_RENDER_ITERATE_RENDERBUFFER_FORMATS
 #undef QT3DS_RENDER_HANDLE_RENDERBUFFER_FORMAT
     };
-    static const char *toString(Enum value)
+    static const char *toString(const Enum value)
     {
         switch (value) {
 #define QT3DS_RENDER_HANDLE_RENDERBUFFER_FORMAT(x)                                                    \
@@ -475,7 +475,7 @@ struct NVRenderTextureFormats
         return false;
     }
 
-    static const char *toString(Enum value)
+    static const char *toString(const Enum value)
     {
         switch (value) {
 #define QT3DS_RENDER_HANDLE_TEXTURE_FORMAT(x)                                                         \
@@ -897,7 +897,8 @@ struct NVRenderTextureMinifyingOp
 #undef QT3DS_RENDER_HANDLE_TEXTURE_MINIFYING_OP
 #undef QT3DS_RENDER_HANDLE_TEXTURE_FILTER_OP
     };
-    const char *toString(NVRenderTextureMinifyingOp::Enum value)
+
+    static const char *toString(const NVRenderTextureMinifyingOp::Enum value)
     {
         switch (value) {
 #define QT3DS_RENDER_HANDLE_TEXTURE_FILTER_OP(x)                                                      \
@@ -926,7 +927,7 @@ struct NVRenderTextureMagnifyingOp
 #undef QT3DS_RENDER_HANDLE_TEXTURE_MINIFYING_OP
 #undef QT3DS_RENDER_HANDLE_TEXTURE_FILTER_OP
     };
-    const char *toString(NVRenderTextureMinifyingOp::Enum value)
+    static const char *toString(const NVRenderTextureMagnifyingOp::Enum value)
     {
         switch (value) {
 #define QT3DS_RENDER_HANDLE_TEXTURE_FILTER_OP(x)                                                      \
@@ -956,7 +957,8 @@ struct NVRenderTextureCoordOp
         QT3DS_RENDER_ITERATE_TEXTURE_WRAP_OP
 #undef QT3DS_RENDER_HANDLE_TEXTURE_WRAP_OP
     };
-    const char *toString(Enum value)
+
+    static const char *toString(const Enum value)
     {
         switch (value) {
 #define QT3DS_RENDER_HANDLE_TEXTURE_WRAP_OP(x)                                                        \
@@ -984,7 +986,8 @@ struct NVRenderHint
         QT3DS_RENDER_ITERATE_HINT
 #undef QT3DS_RENDER_HANDLE_HINT
     };
-    static const char *toString(Enum value)
+
+    static const char *toString(const Enum value)
     {
         switch (value) {
 #define QT3DS_RENDER_HANDLE_HINT(x)                                                                   \
@@ -1291,7 +1294,7 @@ struct NVRenderWinding
         QT3DS_RENDER_ITERATE_WINDING
 #undef QT3DS_RENDER_HANDLE_WINDING
     };
-    static const char *toString(Enum value)
+    static const char *toString(const Enum value)
     {
         switch (value) {
 #define QT3DS_RENDER_HANDLE_WINDING(x)                                                                \
@@ -1323,7 +1326,7 @@ struct NVRenderState
         QT3DS_RENDER_ITERATE_RENDER_STATE
 #undef QT3DS_RENDER_HANDLE_RENDER_STATE
     };
-    static const char *toString(Enum value)
+    static const char *toString(const Enum value)
     {
         switch (value) {
 #define QT3DS_RENDER_HANDLE_RENDER_STATE(x)                                                           \
@@ -1366,7 +1369,7 @@ struct NVRenderSrcBlendFunc
 #undef QT3DS_RENDER_HANDLE_SRC_BLEND_FUNC
     };
 
-    static const char *toString(Enum value)
+    static const char *toString(const Enum value)
     {
         switch (value) {
 #define QT3DS_RENDER_HANDLE_BLEND_FUNC(x)                                                             \
@@ -1396,7 +1399,7 @@ struct NVRenderDstBlendFunc
 #undef QT3DS_RENDER_HANDLE_SRC_BLEND_FUNC
     };
 
-    static const char *toString(Enum value)
+    static const char *toString(const Enum value)
     {
         return NVRenderSrcBlendFunc::toString((NVRenderSrcBlendFunc::Enum)value);
     }
@@ -1418,7 +1421,7 @@ struct NVRenderBlendEquation
         QT3DS_RENDER_ITERATE_BLEND_EQUATION
 #undef QT3DS_RENDER_HANDLE_BLEND_EQUATION
     };
-    static const char *toString(Enum value)
+    static const char *toString(const Enum value)
     {
         switch (value) {
 #define QT3DS_RENDER_HANDLE_BLEND_EQUATION(x)                                                         \
@@ -1446,7 +1449,7 @@ struct NVRenderFaces
         QT3DS_RENDER_ITERATE_FACES
 #undef QT3DS_RENDER_HANDLE_FACES
     };
-    static const char *toString(Enum value)
+    static const char *toString(const Enum value)
     {
         switch (value) {
 #define QT3DS_RENDER_HANDLE_FACES(x)                                                                  \
@@ -1481,7 +1484,7 @@ struct NVReadFaces
         QT3DS_RENDER_ITERATE_READ_FACES
 #undef QT3DS_RENDER_HANDLE_READ_FACES
     };
-    static const char *toString(Enum value)
+    static const char *toString(const Enum value)
     {
         switch (value) {
 #define QT3DS_RENDER_HANDLE_READ_FACES(x)                                                             \
@@ -1505,7 +1508,7 @@ struct NVRenderBoolOp
 #undef QT3DS_RENDER_HANDLE_BOOL_OP
     };
 
-    static const char *toString(Enum value)
+    static const char *toString(const Enum value)
     {
         switch (value) {
 #define QT3DS_RENDER_HANDLE_BOOL_OP(x)                                                                \
@@ -1538,7 +1541,7 @@ struct NVRenderStencilOp
         QT3DS_RENDER_ITERATE_STENCIL_OP
 #undef QT3DS_RENDER_HANDLE_STENCIL_OP
     };
-    static const char *toString(Enum value)
+    static const char *toString(const Enum value)
     {
         switch (value) {
 #define QT3DS_RENDER_HANDLE_STENCIL_OP(x)                                                             \
@@ -2013,7 +2016,7 @@ struct NVRenderTextureTypeValue
         LightmapShadow
     };
 
-    static const char *toString(NVRenderTextureTypeValue::Enum value)
+    static const char *toString(const NVRenderTextureTypeValue::Enum value)
     {
         switch (value) {
         case Unknown:
