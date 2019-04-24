@@ -3193,7 +3193,9 @@ public:
             || inInsertType == DocumentEditorInsertType::NextSibling)
             theParent = GetParent(inDest);
 
+        // Moving object into into non-root component
         if (m_Bridge.IsComponentInstance(theParent)
+                && !m_Bridge.IsActiveComponent(theParent)
                 && moveIntoComponent(inInstances, theParent, checkUniqueName, notifyRename)) {
             return;
         }
@@ -4428,9 +4430,11 @@ public:
             return 0;
         }
 
-        // Create text instance
+        // Create text instance. Don't set timerange, matching to other
+        // objects creation in CBasicObjectDropSource::GenerateAssetCommand()
         qt3dsdm::Qt3DSDMInstanceHandle theTextInstance =
-            CreateSceneGraphInstance(ComposerObjectTypes::Text, inParent, inSlide);
+            CreateSceneGraphInstance(ComposerObjectTypes::Text, inParent, inSlide,
+                                     TInstanceHandle(), false);
 
         // Set the Font property to the font file
         m_PropertySystem.SetInstancePropertyValue(theTextInstance, m_Bridge.GetText().m_Font,
