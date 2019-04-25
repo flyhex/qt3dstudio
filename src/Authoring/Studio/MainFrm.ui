@@ -784,10 +784,10 @@ Project palette using Import functionality.</string>
      <disabledon>:/images/preview-disabled.png</disabledon>:/images/preview.png</iconset>
    </property>
    <property name="text">
-    <string>Preview</string>
+    <string>Preview with Qt3D Runtime Viewer</string>
    </property>
    <property name="toolTip">
-    <string>Preview (F5)</string>
+    <string>Preview with Qt3D Runtime Viewer (F5)</string>
    </property>
    <property name="shortcut">
     <string>F5</string>
@@ -872,13 +872,13 @@ Project palette using Import functionality.</string>
      <normaloff>:/images/playback_tools_play.png</normaloff>:/images/playback_tools_play.png</iconset>
    </property>
    <property name="text">
-    <string>Preview with Legacy Qt 3D Viewer 1.1</string>
+    <string>Preview with OpenGL Runtime Viewer</string>
    </property>
    <property name="iconText">
-    <string>Preview with Legacy Qt 3D Viewer 1.1</string>
+    <string>Preview with OpenGL Runtime Viewer</string>
    </property>
    <property name="toolTip">
-    <string>Preview with Legacy Qt 3D Viewer 1.1</string>
+    <string>Preview with OpenGL Runtime Viewer</string>
    </property>
   </action>
   <action name="actionImportAssets">
