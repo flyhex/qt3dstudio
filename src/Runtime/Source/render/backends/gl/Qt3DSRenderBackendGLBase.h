@@ -523,6 +523,7 @@ namespace render {
 #endif
         QOpenGLFunctions *m_glFunctions;
         QOpenGLExtraFunctions *m_glExtraFunctions;
+        GLfloat m_maxAnisotropy;
     };
 }
 }

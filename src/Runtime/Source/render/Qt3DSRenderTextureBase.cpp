@@ -136,6 +136,12 @@ namespace render {
         }
     }
 
+    static GLfloat getMaxAnisotropy()
+    {
+        static GLfloat val = (GLfloat)qEnvironmentVariableIntValue("QT3DS_ANISOTROPIC_VALUE");
+        return val > 0 ? val : 1.0f;
+    }
+
     void NVRenderTextureBase::applyTexParams()
     {
         if (m_SamplerParamsDirty) {
@@ -143,7 +149,8 @@ namespace render {
                                      m_Sampler->m_MinFilter, m_Sampler->m_MagFilter,
                                      m_Sampler->m_WrapS, m_Sampler->m_WrapT, m_Sampler->m_WrapR,
                                      m_Sampler->m_MinLod, m_Sampler->m_MaxLod, m_Sampler->m_LodBias,
-                                     m_Sampler->m_CompareMode, m_Sampler->m_CompareOp);
+                                     m_Sampler->m_CompareMode, m_Sampler->m_CompareOp,
+                                     getMaxAnisotropy());
 
             m_SamplerParamsDirty = false;
         }

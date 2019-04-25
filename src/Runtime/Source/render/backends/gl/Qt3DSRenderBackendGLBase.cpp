@@ -81,6 +81,8 @@ namespace render {
             QT3DS_NEW(m_Foundation.getAllocator(), NVRenderBackendRasterizerStateGL)();
         m_pCurrentDepthStencilState =
             QT3DS_NEW(m_Foundation.getAllocator(), NVRenderBackendDepthStencilStateGL)();
+
+        m_glFunctions->glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &m_maxAnisotropy);
     }
     /// destructor
     NVRenderBackendGLBase::~NVRenderBackendGLBase()
@@ -1167,7 +1169,8 @@ namespace render {
         GL_CALL_FUNCTION(glTexParameteri(glTarget, GL_TEXTURE_WRAP_T,
                                    m_Conversion.fromTextureCoordOpToGL(wrapT)));
         if (m_backendSupport.caps.bits.bAnistropySupported) {
-            GL_CALL_FUNCTION(glTexParameterf(glTarget, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy));
+            GL_CALL_FUNCTION(glTexParameterf(glTarget, GL_TEXTURE_MAX_ANISOTROPY_EXT,
+                                             qMin(m_maxAnisotropy, anisotropy)));
         }
     }
 

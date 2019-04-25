@@ -300,7 +300,8 @@ namespace render {
                                    m_Conversion.fromTextureCompareFuncToGL(compareFunc)));
 
         if (m_backendSupport.caps.bits.bAnistropySupported) {
-            GL_CALL_EXTRA_FUNCTION(glTexParameterf(glTarget, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy));
+            GL_CALL_EXTRA_FUNCTION(glTexParameterf(glTarget, GL_TEXTURE_MAX_ANISOTROPY_EXT,
+                                                   qMin(anisotropy, m_maxAnisotropy)));
         }
     }
 

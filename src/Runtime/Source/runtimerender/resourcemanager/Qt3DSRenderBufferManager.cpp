@@ -446,6 +446,14 @@ struct SBufferManager : public IBufferManager
                 theTexture->SetTextureData(
                     NVDataRef<QT3DSU8>((QT3DSU8 *)inLoadedImage.data, inLoadedImage.dataSizeInBytes), 0,
                     inLoadedImage.width, inLoadedImage.height, inLoadedImage.format, destFormat);
+                {
+                    static int enable = qEnvironmentVariableIntValue("QT3DS_GENERATE_MIPMAPS");
+                    if (enable) {
+                        theTexture->SetMinFilter(NVRenderTextureMinifyingOp::LinearMipmapLinear);
+                        theTexture->SetMagFilter(NVRenderTextureMagnifyingOp::Linear);
+                        theTexture->GenerateMipmaps();
+                    }
+                }
             }
 
             if (inBsdfMipmaps
