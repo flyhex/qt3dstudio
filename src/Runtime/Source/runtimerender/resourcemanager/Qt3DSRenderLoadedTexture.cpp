@@ -50,6 +50,17 @@ SLoadedTexture *SLoadedTexture::LoadQImage(const QString &inPath, QT3DSI32 flipV
     SLoadedTexture *retval(NULL);
     NVAllocatorCallback &alloc(fnd.getAllocator());
     QImage image(inPath);
+    const QImage::Format format = image.format();
+    switch (format) {
+    case QImage::Format_RGBA64:
+        image = image.convertToFormat(QImage::Format_RGBA8888);
+        break;
+    case QImage::Format_RGBX64:
+        image = image.convertToFormat(QImage::Format_RGBX8888);
+        break;
+    default:
+        break;
+    }
     image = image.mirrored();
     image = image.rgbSwapped();
     retval = QT3DS_NEW(alloc, SLoadedTexture)(alloc);
