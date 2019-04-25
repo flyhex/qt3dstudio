@@ -44,7 +44,7 @@ void main()
      float scale = fontScale * sqrt(abs(determinant(modelView)));
      alphas = alphaRange(scale);
 
-     vec2 textureSizeMultiplier = vec2(1.0 / textureWidth, 1.0 / textureHeight);
+     vec2 textureSizeMultiplier = vec2(1.0 / float(textureWidth), 1.0 / float(textureHeight));
 
      sampleCoord = tCoord * textureSizeMultiplier;
      shadowSampleCoord = (tCoord - shadowOffset) * textureSizeMultiplier;

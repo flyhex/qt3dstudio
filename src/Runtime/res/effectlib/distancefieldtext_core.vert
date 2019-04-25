@@ -39,6 +39,6 @@ void main()
 {
      float scale = fontScale * sqrt(abs(determinant(modelView)));
      alphas = alphaRange(scale);
-     sampleCoord = tCoord * vec2(1.0 / textureWidth, 1.0 / textureHeight);
+     sampleCoord = tCoord * vec2(1.0 / float(textureWidth), 1.0 / float(textureHeight));
      gl_Position = mvp * vec4(vCoord, 1.0);
 }
