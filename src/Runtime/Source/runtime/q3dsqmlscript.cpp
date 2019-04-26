@@ -132,7 +132,7 @@ void Q3DSQmlScript::updateProperties()
     using namespace qt3ds::foundation;
     using namespace qt3ds::runtime::element;
 
-    if (!m_behavior.GetActive())
+    if (!m_behavior.GetActive() || !m_behavior.IsDirty())
         return;
 
     unsigned int numProperties = m_behavior.GetNumProperties();
