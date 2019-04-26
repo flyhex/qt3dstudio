@@ -160,6 +160,7 @@ public: // Elements
     // Use inProvider to create a new table and associate with inElement: currently a render plugin
     // element this mimics render plugin as an behavior element
     virtual void SetTableForElement(TElement &inElement, IScriptTableProvider &inProvider) = 0;
+    virtual void SetAttribute(TElement *element, const char *attName, const char *value) = 0;
     virtual void SetAttribute(const char *element, const char *attName, const char *value) = 0;
     virtual void FireEvent(const char *element, const char *evtName) = 0;
     virtual void SetDataInputValue(

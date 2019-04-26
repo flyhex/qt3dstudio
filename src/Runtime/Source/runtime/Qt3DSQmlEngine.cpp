@@ -408,6 +408,7 @@ public:
     void ProcessCustomCallback(IPresentation *, const SEventCommand &) override {}
 
     void SetTableForElement(TElement &, IScriptTableProvider &) override {}
+    void SetAttribute(TElement *target, const char *attName, const char *value) override;
     void SetAttribute(const char *element, const char *attName, const char *value) override;
     bool GetAttribute(const char *element, const char *attName, char *value) override;
     void FireEvent(const char *element, const char *evtName) override;
@@ -516,6 +517,20 @@ void CQmlEngineImpl::Initialize()
 
     for (int i = 0; i < presentations.size(); ++i)
         initializeDataInputsInPresentation(*presentations[i], i == 0);
+}
+
+void CQmlEngineImpl::SetAttribute(TElement *target, const char *attName, const char *value)
+{
+    QML_ENGINE_MULTITHREAD_PROTECT_METHOD;
+    if (target) {
+        bool success = CQmlElementHelper::SetAttribute(target, attName, value, false);
+        if (!success) {
+            qCCritical(qt3ds::INVALID_OPERATION)
+                    << "CQmlEngineImpl::SetAttribute: "
+                    << "failed to set attribute on element"
+                    << target << ":" << attName << ":" << value;
+        }
+    }
 }
 
 void CQmlEngineImpl::SetAttribute(const char *element, const char *attName, const char *value)

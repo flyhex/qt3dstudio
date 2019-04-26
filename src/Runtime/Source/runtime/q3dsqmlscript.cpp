@@ -227,7 +227,7 @@ void Q3DSQmlScript::setAttribute(const QString &handle, const QString &attribute
         break;
     }
 
-    m_api.SetAttribute(element->m_Path,
+    m_api.SetAttribute(element,
                        attribute.toUtf8().constData(),
                        valuePtr);
 }
