@@ -46,7 +46,7 @@ public:
     long getGroupCount() const override;
     CInspectorGroup *getGroup(long) override;
     EStudioObjectType getObjectType() const override;
-    bool isValid() const override { return true; } // asserted in the constructor
+    bool isValid() const override;
     bool isMaster() const override;
     qt3dsdm::Qt3DSDMInstanceHandle getInstance() const override { return m_instance; }
     virtual qt3dsdm::TMetaDataPropertyHandleList GetGroupProperties(long inGroupIndex);

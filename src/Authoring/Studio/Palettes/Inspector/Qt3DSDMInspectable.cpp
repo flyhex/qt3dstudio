@@ -188,6 +188,15 @@ EStudioObjectType Qt3DSDMInspectable::getObjectType() const
     return getDoc()->GetStudioSystem()->GetClientDataModelBridge()->GetObjectType(m_instance);
 }
 
+bool Qt3DSDMInspectable::isValid() const
+{
+    if (m_activeSlideInstance) {
+        return getDoc()->GetStudioSystem()->IsInstance(m_instance)
+                && getDoc()->GetStudioSystem()->IsInstance(m_activeSlideInstance);
+    }
+    return getDoc()->GetStudioSystem()->IsInstance(m_instance);
+}
+
 bool Qt3DSDMInspectable::isMaster() const
 {
     ISlideSystem *slideSystem = getDoc()->GetStudioSystem()->GetSlideSystem();

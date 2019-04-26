@@ -1421,7 +1421,7 @@ CInspectableBase *CStudioApp::getInspectableFromInstance(qt3dsdm::Qt3DSDMInstanc
     CInspectableBase *inspectableBase = nullptr;
     CDoc *doc = m_core->GetDoc();
 
-    if (m_core->GetDoc()->GetDocumentReader().IsInstance(inInstance)) {
+    if (doc->GetDocumentReader().IsInstance(inInstance)) {
         CClientDataModelBridge *theBridge = doc->GetStudioSystem()->GetClientDataModelBridge();
         qt3dsdm::Qt3DSDMSlideHandle activeSlide = doc->GetActiveSlide();
 
@@ -1432,7 +1432,7 @@ CInspectableBase *CStudioApp::getInspectableFromInstance(qt3dsdm::Qt3DSDMInstanc
 
             inspectableBase = new Qt3DSDMInspectable(inInstance, activeSlideInstance);
         }
-        if (inspectableBase) {
+        if (!inspectableBase) {
             if (theBridge->IsMaterialBaseInstance(inInstance))
                 inspectableBase = new Qt3DSDMMaterialInspectable(inInstance);
             else
