@@ -388,7 +388,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
     {
         // convert to NVRenderTextureTypeValue
         NVRenderTextureTypeValue::Enum texType = (NVRenderTextureTypeValue::Enum)imageIdx;
-        m_ImageStem = NVRenderTextureTypeValue::toString(texType);
+        m_ImageStem.assign(NVRenderTextureTypeValue::toString(texType));
         m_ImageStem.append("_");
         m_ImageSampler = m_ImageStem;
         m_ImageSampler.append("sampler");
@@ -494,11 +494,10 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
         qt3ds::render::IDynamicObjectSystem &theDynamicSystem(
             m_RenderContext.GetDynamicObjectSystem());
         CRenderString theShaderBuffer;
-        const char8_t *vertSource = theDynamicSystem.GetShaderSource(
+        theDynamicSystem.GetShaderSource(
             m_RenderContext.GetStringTable().RegisterStr(inShaderPathName), theShaderBuffer);
 
-        QT3DS_ASSERT(vertSource);
-        eastl::string srcString(vertSource);
+        eastl::string srcString(theShaderBuffer.c_str());
 
         // Check if the vertex shader portion already contains a main function
         // The same string contains both the vertex and the fragment shader
@@ -1029,10 +1028,10 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
         qt3ds::render::IDynamicObjectSystem &theDynamicSystem(
             m_RenderContext.GetDynamicObjectSystem());
         CRenderString theShaderBuffer;
-        const char8_t *fragSource = theDynamicSystem.GetShaderSource(
+        theDynamicSystem.GetShaderSource(
             m_RenderContext.GetStringTable().RegisterStr(inShaderPathName), theShaderBuffer);
 
-        QT3DS_ASSERT(fragSource);
+        QT3DS_ASSERT(theShaderBuffer.size() > 0);
 
         // light maps
         bool hasLightmaps = false;
@@ -1062,7 +1061,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
         IDefaultMaterialVertexPipeline &vertexShader(VertexGenerator());
         IShaderStageGenerator &fragmentShader(FragmentGenerator());
 
-        eastl::string srcString(fragSource);
+        eastl::string srcString(theShaderBuffer.c_str());
 
         if (m_RenderContext.GetRenderContext().GetRenderContextType()
                 == NVRenderContextValues::GLES2) {

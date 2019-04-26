@@ -339,6 +339,10 @@ namespace render {
         {
             AddIncoming(name.c_str(), type);
         }
+        void AddIncoming(const QString &name, const char8_t *type) override
+        {
+            AddIncoming(name.toUtf8().constData(), type);
+        }
 
         void AddOutgoing(const char8_t *name, const char8_t *type) override
         {
@@ -347,6 +351,14 @@ namespace render {
         void AddOutgoing(const TStrType &name, const char8_t *type) override
         {
             AddOutgoing(name.c_str(), type);
+        }
+        void AddOutgoing(const QString &name, const char8_t *type) override
+        {
+            AddOutgoing(name.toUtf8().constData(), type);
+        }
+        void AddUniform(const QString &name, const char8_t *type) override
+        {
+            AddUniform(name.toUtf8().constData(), type);
         }
 
         void AddUniform(const char8_t *name, const char8_t *type) override
@@ -381,10 +393,21 @@ namespace render {
         {
             ActiveStage().AddConstantBuffer(name, layout);
         }
+        void AddConstantBuffer(const QString &name, const char *layout) override
+        {
+            AddConstantBuffer(name.toUtf8().constData(), layout);
+        }
+
         void AddConstantBufferParam(const char *cbName, const char *paramName,
                                             const char *type) override
         {
             ActiveStage().AddConstantBufferParam(cbName, paramName, type);
+        }
+        void AddConstantBufferParam(const QString &cbName, const QString &paramName,
+                                    const char *type) override
+        {
+            AddConstantBufferParam(cbName.toUtf8().constData(),
+                                   paramName.toUtf8().constData(), type);
         }
 
         IShaderStageGenerator &operator<<(const char *data) override
@@ -393,6 +416,11 @@ namespace render {
             return *this;
         }
         IShaderStageGenerator &operator<<(const TStrType &data) override
+        {
+            ActiveStage() << data;
+            return *this;
+        }
+        IShaderStageGenerator &operator<<(const QString &data) override
         {
             ActiveStage() << data;
             return *this;

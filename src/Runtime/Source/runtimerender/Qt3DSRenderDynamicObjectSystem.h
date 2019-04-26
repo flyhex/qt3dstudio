@@ -267,7 +267,7 @@ namespace render {
                          const dynamic::SDynamicShaderProgramFlags &inFlags,
                          bool inForceCompilation = false) = 0;
 
-        virtual const char8_t *GetShaderSource(CRegisteredString inPath, CRenderString &source) = 0;
+        virtual void GetShaderSource(CRegisteredString inPath, CRenderString &outSource) = 0;
 
         // Will return null in the case where a custom prepass shader isn't needed for this object
         // If no geom shader, then no depth prepass shader.

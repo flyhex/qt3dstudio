@@ -37,8 +37,13 @@
 #define WIDE_IS_DIFFERENT_TYPE_THAN_CHAR16_T
 #endif
 #endif
+
+#include <QtCore/qstring.h>
+#include <QtCore/qbytearray.h>
+
 #include "foundation/Qt3DSRefCounted.h"
 #include "foundation/Qt3DSAllocator.h"
+#include "EASTL/string.h"
 #include "EASTL/functional.h"
 #include "EABase/eabase.h" //char16_t definition
 #include "foundation/Qt3DSDataRef.h"
@@ -220,6 +225,10 @@ namespace foundation {
         // remember to implement in CNullStringManager in UICTestPresentation.hxx
         virtual void EnableMultithreadedAccess() = 0;
         virtual void DisableMultithreadedAccess() = 0;
+
+        virtual CRegisteredString RegisterStr(const QByteArray &str) = 0;
+        virtual CRegisteredString RegisterStr(const QString &str) = 0;
+        virtual CRegisteredString RegisterStr(const eastl::string &string) = 0;
 
         virtual CRegisteredString RegisterStr(Qt3DSBCharPtr str) = 0;
         // utf-16->utf-8

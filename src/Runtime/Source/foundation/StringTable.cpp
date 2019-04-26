@@ -54,7 +54,7 @@ struct SCharAndHash
     {
     }
     SCharAndHash()
-        : m_Data(NULL)
+        : m_Data(nullptr)
         , m_Hash(0)
     {
     }
@@ -90,7 +90,7 @@ void CRegisteredString::Remap(const SStrRemapMap &inMap)
         else {
             QT3DS_ASSERT(false);
             // Ensure a failure here doesn't *guarantee* a crash somewhere else.
-            m_String = NULL;
+            m_String = nullptr;
         }
     } else {
         // Indicates an invalid string.
@@ -123,7 +123,7 @@ typedef eastl::basic_string<TWCharEASTLConverter::TCharType, ForwardingAllocator
 
 inline bool isTrivialWide(const wchar_t *str)
 {
-    return str == NULL || *str == 0;
+    return str == nullptr || *str == 0;
 }
 
 QT3DSU8 *AlignPointer(QT3DSU8 *inStart, QT3DSU8 *inPtr)
@@ -165,13 +165,13 @@ struct SStringFileData
         : m_StartOffset(0)
         , m_StrLen(0)
         , m_Handle(0)
-        , m_Str(NULL)
+        , m_Str(nullptr)
     {
     }
     void Deallocate(NVAllocatorCallback &inAlloc)
     {
         inAlloc.deallocate(m_Str);
-        m_Str = NULL;
+        m_Str = nullptr;
     }
     const char8_t *GetNarrow() { return m_Str; }
     operator CRegisteredString() const
@@ -192,7 +192,7 @@ struct SCharAndHandle
     const char8_t *m_Data;
     QT3DSU32 m_Handle;
     SCharAndHandle()
-        : m_Data(NULL)
+        : m_Data(nullptr)
         , m_Handle(0)
     {
     }
@@ -445,7 +445,7 @@ protected:
         if (iter != m_HandleDataBlockOffset.end() && iter->first == handle
             && m_DataBlock[iter->second].m_Handle == handle)
             return m_DataBlock[iter->second].m_Str;
-        return NULL;
+        return nullptr;
     }
 
     void WriteStringBlockData(const SStringFileData *begin, const SStringFileData *end,
@@ -550,17 +550,45 @@ public:
         , m_ConvertBuffer(ForwardingAllocator(alloc, "StringTable::m_ConvertBuffer"))
         , m_WideConvertBuffer(ForwardingAllocator(alloc, "StringTable::m_WideConvertBuffer"))
         , m_MultithreadMutexBacker(alloc)
-        , m_MultithreadMutex(NULL)
+        , m_MultithreadMutex(nullptr)
     {
     }
 
-    virtual ~StringTable() {}
+    virtual ~StringTable() override {}
 
     QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE_OVERRIDE(m_FileData.m_Allocator.m_Allocator)
 
-    void EnableMultithreadedAccess() override { m_MultithreadMutex = &m_MultithreadMutexBacker; }
+    void EnableMultithreadedAccess() override
+    {
+        m_MultithreadMutex = &m_MultithreadMutexBacker;
+    }
 
-    void DisableMultithreadedAccess() override { m_MultithreadMutex = NULL; }
+    void DisableMultithreadedAccess() override
+    {
+        m_MultithreadMutex = nullptr;
+    }
+
+    CRegisteredString RegisterStr(const QString &str) override
+    {
+        STRING_TABLE_MULTITHREADED_METHOD;
+        if (str.isEmpty())
+            return CRegisteredString();
+        return RegisterStr(str.toUtf8());
+    }
+
+    CRegisteredString RegisterStr(const QByteArray &str) override
+    {
+        STRING_TABLE_MULTITHREADED_METHOD;
+        if (str.isEmpty())
+            return CRegisteredString();
+        return RegisterStr(str.constData());
+    }
+
+    CRegisteredString RegisterStr(const eastl::string &string) override
+    {
+        STRING_TABLE_MULTITHREADED_METHOD;
+        return RegisterStr(string.c_str());
+    }
 
     CRegisteredString RegisterStr(Qt3DSBCharPtr str) override
     {

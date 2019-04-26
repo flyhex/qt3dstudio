@@ -301,7 +301,7 @@ const char *SShaderCodeGeneratorBase::BuildShaderSource()
     AddShaderConstantBufferItemMap("uniform", m_ConstantBuffers, m_ConstantBufferParams);
     AddShaderItemMap("varying", GetVaryings());
     m_FinalShaderBuilder.append("\n");
-    m_FinalShaderBuilder.append(m_CodeBuilder);
+    m_FinalShaderBuilder.append(m_CodeBuilder.c_str());
     return m_FinalShaderBuilder.c_str();
 }
 SShaderCodeGeneratorBase &SShaderCodeGeneratorBase::operator<<(const char *data)

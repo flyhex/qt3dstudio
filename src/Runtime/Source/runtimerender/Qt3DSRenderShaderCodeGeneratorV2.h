@@ -61,12 +61,15 @@ namespace render {
     public:
         virtual void AddIncoming(const char8_t *name, const char8_t *type) = 0;
         virtual void AddIncoming(const TStrType &name, const char8_t *type) = 0;
+        virtual void AddIncoming(const QString &name, const char8_t *type) = 0;
 
         virtual void AddOutgoing(const char8_t *name, const char8_t *type) = 0;
         virtual void AddOutgoing(const TStrType &name, const char8_t *type) = 0;
+        virtual void AddOutgoing(const QString &name, const char8_t *type) = 0;
 
         virtual void AddUniform(const char8_t *name, const char8_t *type) = 0;
         virtual void AddUniform(const TStrType &name, const char8_t *type) = 0;
+        virtual void AddUniform(const QString &name, const char8_t *type) = 0;
 
         virtual void AddInclude(const char8_t *name) = 0;
         virtual void AddInclude(const TStrType &name) = 0;
@@ -75,9 +78,14 @@ namespace render {
         virtual void AddFunction(const QString &functionName) = 0;
 
         virtual void AddConstantBuffer(const char *name, const char *layout) = 0;
+        virtual void AddConstantBuffer(const QString &name, const char *layout) = 0;
+        virtual void AddConstantBufferParam(const QString &cbName,
+                                            const QString &paramName,
+                                            const char *type) = 0;
         virtual void AddConstantBufferParam(const char *cbName, const char *paramName,
                                             const char *type) = 0;
 
+        virtual IShaderStageGenerator &operator<<(const QString &data) = 0;
         virtual IShaderStageGenerator &operator<<(const char *data) = 0;
         virtual IShaderStageGenerator &operator<<(const TStrType &data) = 0;
         virtual IShaderStageGenerator &operator<<(const SEndlType & /*data*/) = 0;

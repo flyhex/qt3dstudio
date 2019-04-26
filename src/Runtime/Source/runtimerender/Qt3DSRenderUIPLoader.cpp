@@ -1954,27 +1954,6 @@ ConvertTextureCoordOp(const char8_t *inWrap, NVFoundationBase &inFoundation)
     }
 }
 
-template <typename TCharStr>
-QString ConvertUTFtoQString(const TCharStr *string);
-
-template <>
-QString ConvertUTFtoQString(const char16_t *string)
-{
-    return QString::fromUtf16(string);
-}
-
-template <>
-QString ConvertUTFtoQString(const char32_t *string)
-{
-    return QString::fromUcs4(string);
-}
-
-template <>
-QString ConvertUTFtoQString(const wchar_t *string)
-{
-    return QString::fromWCharArray(string);
-}
-
 // Re-register all strings because we can't be sure that the meta data system and the effect
 // system are sharing the same string table.
 void qt3ds::render::IUIPLoader::CreateEffectClassFromMetaEffect(
@@ -2021,12 +2000,12 @@ void qt3ds::render::IUIPLoader::CreateEffectClassFromMetaEffect(
     for (QT3DSU32 idx = 0, end = inMetaDataEffect.m_Shaders.size(); idx < end; ++idx) {
         const qt3dsdm::SMetaDataShader &theShader = inMetaDataEffect.m_Shaders[idx];
         theConvertStr.clear();
-        theConvertStr = ConvertUTFtoQString(
-            theShader.m_Code.c_str()).toStdString();
-        theConvertShaderTypeStr = ConvertUTFtoQString(
-            theShader.m_Type.c_str()).toStdString();
-        theConvertShaderVersionStr = ConvertUTFtoQString(
-            theShader.m_Version.c_str()).toStdString();
+        theConvertStr = Qt3DSStringUtils::ConvertUTFtoQString(
+            theShader.m_Code.c_str());
+        theConvertShaderTypeStr = Qt3DSStringUtils::ConvertUTFtoQString(
+            theShader.m_Type.c_str());
+        theConvertShaderVersionStr = Qt3DSStringUtils::ConvertUTFtoQString(
+            theShader.m_Version.c_str());
 
         inEffectSystem.SetShaderData(inStrTable.RegisterStr(theShader.m_Name.c_str()),
                                      theConvertStr.c_str(), theConvertShaderVersionStr.c_str(),
@@ -2083,12 +2062,12 @@ void qt3ds::render::IUIPLoader::CreateMaterialClassFromMetaMaterial(
     if (inMetaDataMaterial.m_Shaders.size()) {
         for (QT3DSU32 idx = 0, end = (QT3DSU32)inMetaDataMaterial.m_Shaders.size(); idx < end; ++idx) {
             const qt3dsdm::SMetaDataShader &theShader = inMetaDataMaterial.m_Shaders[idx];
-            theConvertStr = ConvertUTFtoQString(
-                theShader.m_Code.c_str()).toStdString();
-            theConvertShaderTypeStr = ConvertUTFtoQString(
-                theShader.m_Type.c_str()).toStdString();
-            theConvertShaderVersionStr = ConvertUTFtoQString(
-                theShader.m_Version.c_str()).toStdString();
+            theConvertStr = Qt3DSStringUtils::ConvertUTFtoQString(
+                theShader.m_Code.c_str());
+            theConvertShaderTypeStr = Qt3DSStringUtils::ConvertUTFtoQString(
+                theShader.m_Type.c_str());
+            theConvertShaderVersionStr = Qt3DSStringUtils::ConvertUTFtoQString(
+                theShader.m_Version.c_str());
             inMaterialSystem.SetMaterialClassShader(
                 inStrTable.RegisterStr(theShader.m_Name.c_str()), theConvertShaderTypeStr.c_str(),
                 theConvertShaderVersionStr.c_str(), theConvertStr.c_str(),

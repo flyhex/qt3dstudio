@@ -1241,9 +1241,10 @@ struct SDynamicObjectTranslatorContext : public STranslatorContext
                                    const char *inExtension, Q3DStudio::EAttributeType inType,
                                    CRenderString &ioStringBuilder, QT3DSU32 inOffset, QT3DSU32 dataOffset)
     {
-        ioStringBuilder.assign(thePropDef.m_Name.c_str());
+        ioStringBuilder.fromUtf8(thePropDef.m_Name.c_str());
         ioStringBuilder.append(inExtension);
-        Q3DStudio::INT32 theHash = Q3DStudio::CHash::HashAttribute(ioStringBuilder.c_str());
+        Q3DStudio::INT32 theHash = Q3DStudio::CHash::HashAttribute(
+                    ioStringBuilder.toUtf8().constData());
         m_PropertyHashes.insert(
             eastl::make_pair(theHash, SEffectPropertyEntry(inType, inOffset, dataOffset)));
     }

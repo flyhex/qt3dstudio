@@ -30,40 +30,584 @@
 #pragma once
 #ifndef QT3DS_RENDER_STRING_H
 #define QT3DS_RENDER_STRING_H
-#include "Qt3DSRender.h"
+#include <QtCore/qstring.h>
+#include <QtCore/qbytearray.h>
+#include <QtCore/qhash.h>
 #include <string>
+
+#include "Qt3DSRender.h"
+#include "EASTL/string.h"
 
 namespace qt3ds {
 namespace render {
-    // can't name this CString else we will conflict a
-    class CRenderString : public std::basic_string<char8_t>
-    {
-    public:
-        typedef std::basic_string<char8_t> TStrType;
 
-        CRenderString()
-            : TStrType()
-        {
+class Qt3DSStringUtils {
+public:
+    static inline QString ConvertUTFtoQString(const char16_t *string)
+    {
+        return QString::fromUtf16(string);
+    }
+
+    static inline QString ConvertUTFtoQString(const char32_t *string)
+    {
+        return QString::fromUcs4(string);
+    }
+
+    static inline QString ConvertUTFtoQString(const wchar_t *string)
+    {
+        return QString::fromWCharArray(string);
+    }
+
+    static inline QString &append(QString &target, QString::iterator begin,
+                                  QString::iterator end)
+    {
+        for (QString::iterator iter = begin;iter != end;++iter)
+            target.append(*iter);
+        return target;
+    }
+
+    static inline QString &append(QString &target, QString::const_iterator begin,
+                                  QString::const_iterator end)
+    {
+        for (QString::const_iterator iter = begin;iter != end;++iter)
+            target.append(*iter);
+        return target;
+    }
+
+    /**
+     * @brief replace Replaces specified portion of a string.
+     * @param source Source text that will be used. Note: This is const and will
+     * not be directly modified.
+     * @param first First character in the range that will be replaced.
+     * @param last Last character in the range that will be replaced.
+     * @param replaceText Pointer to the character string to use for replacement.
+     * @param len Length of the replacement character string.
+     * @return Returns a new QString containing the modified result.
+     */
+    static inline QString replace(const QString &source,
+                                   QString::const_iterator first,
+                                   QString::const_iterator last,
+                                   const char *replaceText, int len)
+    {
+        return replace(source, first, last, QString::fromUtf8(replaceText, len));
+    }
+
+    /**
+     * @brief replace Replaces specified portion of a string.
+     * @param source Source text that will be used. Note: This is const and will
+     * not be directly modified.
+     * @param first First character in the range that will be replaced.
+     * @param last Last character in the range that will be replaced.
+     * @param replaceText String to use for replacement.
+     * @return Returns a new QString containing the modified result.
+     */
+    static inline QString replace(const QString &source,
+                                   QString::const_iterator first,
+                                   QString::const_iterator last,
+                                   const QString &replaceText)
+    {
+        QString newStr;
+        for (QString::const_iterator iter = source.constBegin(); iter != first;
+             iter++)
+            newStr.append(*iter);
+
+        newStr.append(replaceText);
+
+        for (QString::const_iterator iter = last; iter != source.constEnd();
+             iter++)
+            newStr.append(*iter);
+        return newStr;
+    }
+
+    /**
+     * @brief replace Replaces specified portion of a string.
+     * @param source Source text that will be used. Note: This is const and
+     * will not be directly modified.
+     * @param first First character in the range that will be replaced.
+     * @param last Last character in the range that will be replaced.
+     * @param replaceText Pointer to the character string to use for replacement.
+     * @param len Length of the replacement character string.
+     * @return Returns a temporary object allocated on the stack containing
+     * the modified result.
+     */
+    static inline QString &replace(QString &target,
+                                   QString::iterator first,
+                                   QString::iterator last,
+                                   const char *replaceText, int len)
+    {
+        return replace(target, first, last, QString::fromUtf8(replaceText, len));
+    }
+
+    /**
+     * @brief replace Replaces specified portion of a string.
+     * @param target Target QString that will be modified.
+     * @param first First character in the range that will be replaced.
+     * @param last Last character in the range that will be replaced.
+     * @param replaceText String to use for replacement.
+     * @return Returns the string given in target, containing the modified result.
+     */
+    static inline QString &replace(QString &target,
+                                   QString::iterator first,
+                                   QString::iterator last,
+                                   const QString &replaceText)
+    {
+        QString newStr;
+        for (QString::iterator iter = target.begin(); iter != first; iter++)
+            newStr.append(*iter);
+
+        newStr.append(replaceText);
+
+        for (QString::iterator iter = last; iter != target.end(); iter++)
+            newStr.append(*iter);
+
+        target = newStr;
+        return target;
+    }
+};
+
+class CRenderString {
+public:
+    inline CRenderString() {}
+
+    CRenderString(QChar c) : m_string(QString(c)) {}
+
+    CRenderString(int size, QChar c) : m_string(size, c) {}
+
+    inline CRenderString(QLatin1String latin1)
+        : m_string(latin1) {}
+
+    explicit CRenderString(const QChar *unicode, int size = -1)
+        : m_string(unicode,size) {}
+
+    inline CRenderString(const QString &str) Q_DECL_NOTHROW
+        : m_string(str) {}
+
+    inline CRenderString(const CRenderString &str) Q_DECL_NOTHROW
+        : m_string(str.m_string) {}
+
+    ~CRenderString() {}
+
+    inline operator QString() const
+    {
+        return m_string;
+    }
+
+    inline void operator=(const CRenderString &text)
+    {
+        m_string = text.m_string;
+        m_isDirty = true;
+    }
+
+    inline void operator=(const QString &text)
+    {
+        m_string = text;
+        m_isDirty = true;
+    }
+
+    // QString method wrappers
+    static inline CRenderString fromUtf8(const char *str, int size = -1)
+    {
+        return CRenderString(QString::fromUtf8(str, size));
+    }
+
+    typedef int size_type;
+    typedef qptrdiff difference_type;
+    typedef const QChar & const_reference;
+    typedef QChar & reference;
+    typedef QChar *pointer;
+    typedef const QChar *const_pointer;
+    typedef QChar value_type;
+    typedef QChar *iterator;
+    typedef const QChar *const_iterator;
+    typedef iterator Iterator;
+    typedef const_iterator ConstIterator;
+    typedef std::reverse_iterator<iterator> reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+    inline iterator begin() { return m_string.begin(); }
+    inline const_iterator begin() const { return m_string.begin(); }
+    inline const_iterator cbegin() const { return m_string.cbegin(); }
+    inline const_iterator constBegin() const  { return m_string.constBegin(); }
+    inline iterator end()  { return m_string.end(); }
+    inline const_iterator end() const  { return m_string.end(); }
+    inline const_iterator cend() const  { return m_string.cend(); }
+    inline const_iterator constEnd() const  { return m_string.constEnd(); }
+    reverse_iterator rbegin() { return reverse_iterator(end()); }
+    reverse_iterator rend() { return reverse_iterator(begin()); }
+    const_reverse_iterator rbegin() const { return const_reverse_iterator(end()); }
+    const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
+    const_reverse_iterator crbegin() const { return const_reverse_iterator(end()); }
+    const_reverse_iterator crend() const { return const_reverse_iterator(begin()); }
+
+    inline void push_back(QChar c)
+    {
+        m_string.push_back(c);
+        m_isDirty = true;
+    }
+
+    inline void push_back(const QString &s)
+    {
+        m_string.push_back(s);
+        m_isDirty = true;
+    }
+
+    inline void push_front(QChar c)
+    {
+        m_string.push_front(c);
+        m_isDirty = true;
+    }
+
+    inline void push_front(const QString &s)
+    {
+        m_string.push_front(s);
+        m_isDirty = true;
+    }
+
+    inline bool operator==(const QString &rhs)
+    {
+        return rhs == m_string;
+    }
+
+    inline bool operator<(const QString &rhs)
+    {
+        return m_string < rhs;
+    }
+
+    inline bool operator!=(const QString &rhs)
+    {
+        return !(*this == rhs);
+    }
+
+    inline bool operator>(const QString& rhs)
+    {
+        return (rhs < m_string);
+    }
+
+    inline bool operator<=(const QString& rhs)
+    {
+        return !operator> (rhs);
+    }
+
+    inline bool operator>=(const QString& rhs)
+    {
+        return !operator< (rhs);
+    }
+
+    inline  CRenderString& operator+=(const QString &rhs)
+    {
+        m_string += rhs;
+        m_isDirty = true;
+        return *this;
+    }
+
+    inline  CRenderString& operator+=(const char *s)
+    {
+        m_string += s;
+        m_isDirty = true;
+        return *this;
+    }
+
+    inline bool isEmpty() const
+    {
+        return m_string.isEmpty();
+    }
+
+    int indexOf(const QString &str, int from = 0,
+                Qt::CaseSensitivity cs = Qt::CaseSensitive) const
+    {
+        return m_string.indexOf(str, from, cs);
+    }
+
+    int indexOf(QChar ch, int from = 0,
+                Qt::CaseSensitivity cs = Qt::CaseSensitive) const
+    {
+        return m_string.indexOf(ch, from, cs);
+    }
+
+    int indexOf(QLatin1String str, int from = 0,
+                Qt::CaseSensitivity cs = Qt::CaseSensitive) const
+    {
+        return m_string.indexOf(str, from, cs);
+    }
+
+    int indexOf(const QStringRef &str, int from = 0,
+                Qt::CaseSensitivity cs = Qt::CaseSensitive) const
+    {
+        return m_string.indexOf(str, from, cs);
+    }
+
+    int lastIndexOf(const QString &str, int from = -1,
+                    Qt::CaseSensitivity cs = Qt::CaseSensitive) const
+    {
+        return m_string.lastIndexOf(str, from, cs);
+    }
+
+    int lastIndexOf(QChar ch, int from = -1,
+                    Qt::CaseSensitivity cs = Qt::CaseSensitive) const
+    {
+        return m_string.lastIndexOf(ch, from, cs);
+    }
+
+    int lastIndexOf(QLatin1String str, int from = -1,
+                    Qt::CaseSensitivity cs = Qt::CaseSensitive) const
+    {
+        return m_string.lastIndexOf(str, from, cs);
+    }
+
+    int lastIndexOf(const QStringRef &str, int from = -1,
+                    Qt::CaseSensitivity cs = Qt::CaseSensitive) const
+    {
+        return m_string.lastIndexOf(str, from, cs);
+    }
+
+    inline void clear()
+    {
+        m_string.clear();
+        m_isDirty = true;
+    }
+
+    inline CRenderString &insert(int i, QChar c)
+    {
+        m_string.insert(i,c);
+        m_isDirty = true;
+        return *this;
+    }
+    inline CRenderString &insert(int i, const QChar *uc, int len)
+    {
+        m_string.insert(i,uc, len);
+        m_isDirty = true;
+        return *this;
+    }
+    inline CRenderString &insert(int i, const QString &s)
+    {
+        m_string.insert(i,s);
+        m_isDirty = true;
+        return *this;
+    }
+    inline CRenderString &insert(int i, const QStringRef &s)
+    {
+        m_string.insert(i,s);
+        m_isDirty = true;
+        return *this;
+    }
+
+    inline CRenderString &insert(int i, QLatin1String s)
+    {
+        m_string.insert(i,s);
+        m_isDirty = true;
+        return *this;
+    }
+
+    inline int size() const
+    {
+        return m_string.size();
+    }
+
+    inline int length() const {
+        return m_string.length();
+    }
+
+    inline CRenderString &append(QChar c)
+    {
+        m_string.append(c);
+        m_isDirty = true;
+        return *this;
+    }
+
+    inline CRenderString &append(const QChar *uc, int len)
+    {
+        m_string.append(uc, len);
+        m_isDirty = true;
+        return *this;
+    }
+
+    inline CRenderString &append(const QString &s)
+    {
+        m_string.append(s);
+        m_isDirty = true;
+        return *this;
+    }
+
+    inline CRenderString &append(const QStringRef &s)
+    {
+        m_string.append(s);
+        m_isDirty = true;
+        return *this;
+    }
+
+    inline CRenderString &append(QLatin1String s)
+    {
+        m_string.append(s);
+        m_isDirty = true;
+        return *this;
+    }
+
+    inline int compare(const QString &s,
+                       Qt::CaseSensitivity cs = Qt::CaseSensitive) const
+    {
+        return m_string.compare(s, cs);
+    }
+
+    // Compatibility wrappers for std::basic_string and eastl::basic_string
+    // Required for now for the Qt 3D Studio's template classes.
+    static const int npos = -1;
+
+    inline char operator[](int idx) const
+    {
+        return m_string[idx].toLatin1();
+    }
+
+    inline void assign(const char *text)
+    {
+        m_string = QString::fromUtf8(text);
+        m_isDirty = true;
+    }
+
+    inline void assign(const char16_t *text)
+    {
+        m_string = QString::fromUtf16(text);
+        m_isDirty = true;
+    }
+
+    inline void assign(const char32_t *text)
+    {
+        m_string = QString::fromUcs4(text);
+        m_isDirty = true;
+    }
+
+    inline void assign(const wchar_t *text)
+    {
+        m_string = QString::fromWCharArray(text);
+        m_isDirty = true;
+    }
+
+    inline void assign(const eastl::string &text)
+    {
+        m_string = QString::fromUtf8(text.c_str());
+        m_isDirty = true;
+    }
+
+    inline void operator=(const char *text)
+    {
+        assign(text);
+    }
+
+    inline void operator=(const char16_t *text)
+    {
+        assign(text);
+    }
+
+    inline void operator=(const char32_t *text)
+    {
+        assign(text);
+    }
+
+    inline void operator=(const wchar_t *text)
+    {
+        assign(text);
+    }
+
+    inline void operator=(const eastl::string &text)
+    {
+        assign(text);
+    }
+
+    inline void operator=(const eastl::basic_string<char*> &text)
+    {
+        assign(*text.c_str());
+    }
+
+    inline CRenderString &append(QString::iterator first,
+                                 QString::iterator last)
+    {
+        Qt3DSStringUtils::append(m_string, first, last);
+        m_isDirty = true;
+        return *this;
+    }
+
+    inline CRenderString &append(QString::const_iterator first,
+                                 QString::const_iterator last)
+    {
+        Qt3DSStringUtils::append(m_string, first, last);
+        m_isDirty = true;
+        return *this;
+    }
+
+    inline CRenderString &append(const char *text, int size)
+    {
+        m_string.append(QString::fromUtf8(text, size));
+        m_isDirty = true;
+        return *this;
+    }
+
+    inline CRenderString &append(const char *text)
+    {
+        m_string.append(QString::fromUtf8(text));
+        m_isDirty = true;
+        return *this;
+    }
+
+    inline CRenderString &replace(QString::iterator replaceBegin,
+                                  QString::iterator replaceEnd,
+                                  const char *replaceText, int len)
+    {
+        return replace(replaceBegin, replaceEnd,
+                       QString::fromUtf8(replaceText, len));
+    }
+
+    inline CRenderString &replace(QString::iterator replaceBegin,
+                                  QString::iterator replaceEnd,
+                                  const QString &replaceText)
+    {
+        m_string = Qt3DSStringUtils::replace(this->m_string,
+                                             replaceBegin, replaceEnd,
+                                             replaceText);
+        m_isDirty = true;
+        return *this;
+    }
+
+    inline CRenderString &replace(QString::const_iterator replaceBegin,
+                                  QString::const_iterator replaceEnd,
+                                  const QString &replaceText)
+    {
+        m_string = Qt3DSStringUtils::replace(this->m_string,
+                                             replaceBegin, replaceEnd,
+                                             replaceText);
+        m_isDirty = true;
+        return *this;
+    }
+
+    inline QByteArray toUtf8() const
+    {
+        updateCache();
+        return m_array;
+    }
+
+    inline const char *c_str() const
+    {
+        updateCache();
+        return m_array.constData();
+    }
+
+    inline const char *c_str()
+    {
+        updateCache();
+        return m_array.constData();
+    }
+
+private:
+    inline void updateCache() const
+    {
+        if (m_isDirty) {
+            m_array = m_string.toUtf8();
+            m_isDirty = false;
         }
-        CRenderString(const CRenderString &inOther)
-            : TStrType(inOther)
-        {
-        }
-        CRenderString(const TStrType &inOther)
-            : TStrType(inOther)
-        {
-        }
-        CRenderString &operator=(const CRenderString &inOther)
-        {
-            TStrType::operator=(inOther);
-            return *this;
-        }
-        CRenderString &operator=(const char8_t *inOther)
-        {
-            TStrType::operator=(inOther);
-            return *this;
-        }
-    };
+    }
+
+    QString m_string;
+    mutable bool m_isDirty = true;
+    mutable QByteArray m_array;
+};
+
 }
 }
 

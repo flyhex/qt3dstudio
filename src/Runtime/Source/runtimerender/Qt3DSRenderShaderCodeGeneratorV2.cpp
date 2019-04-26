@@ -94,6 +94,7 @@ struct SStageGeneratorBase : public IShaderStageGenerator
     {
         m_Incoming.insert(eastl::make_pair(Str(name), Str(type)));
     }
+
     virtual const char8_t *GetIncomingVariableName()
     {
         return "in";
@@ -103,6 +104,12 @@ struct SStageGeneratorBase : public IShaderStageGenerator
     {
         AddIncoming(name.c_str(), type);
     }
+
+    void AddIncoming(const QString &name, const char8_t *type) override
+    {
+        AddIncoming(name.toUtf8().constData(), type);
+    }
+
     void AddOutgoing(const char8_t *name, const char8_t *type) override
     {
         if (m_Outgoing == NULL) {
@@ -111,25 +118,44 @@ struct SStageGeneratorBase : public IShaderStageGenerator
         }
         m_Outgoing->insert(eastl::make_pair(Str(name), Str(type)));
     }
+
     void AddOutgoing(const TStrType &name, const char8_t *type) override
     {
         AddOutgoing(name.c_str(), type);
+    }
+
+    void AddOutgoing(const QString &name, const char8_t *type) override
+    {
+        AddOutgoing(name.toUtf8().constData(), type);
     }
 
     void AddUniform(const char8_t *name, const char8_t *type) override
     {
         m_Uniforms.insert(eastl::make_pair(Str(name), Str(type)));
     }
+
     void AddUniform(const TStrType &name, const char8_t *type) override
     {
         AddUniform(name.c_str(), type);
+    }
+
+    void AddUniform(const QString &name, const char8_t *type) override
+    {
+        AddUniform(name.toUtf8().constData(), type);
     }
 
     void AddConstantBuffer(const char *name, const char *layout) override
     {
         m_ConstantBuffers.insert(eastl::make_pair(Str(name), Str(layout)));
     }
-    void AddConstantBufferParam(const char *cbName, const char *paramName, const char *type) override
+
+    void AddConstantBuffer(const QString &name, const char *layout) override
+    {
+        AddConstantBuffer(name.toUtf8().constData(), layout);
+    }
+
+    void AddConstantBufferParam(const char *cbName, const char *paramName,
+                                const char *type) override
     {
         TParamPair theParamPair(m_StringTable.RegisterStr(paramName),
                                 m_StringTable.RegisterStr(type));
@@ -138,12 +164,25 @@ struct SStageGeneratorBase : public IShaderStageGenerator
         m_ConstantBufferParams.push_back(theBufferParamPair);
     }
 
+    void AddConstantBufferParam(const QString &cbName, const QString &paramName,
+                                const char *type) override
+    {
+        AddConstantBufferParam(cbName.toUtf8().constData(), paramName.toUtf8().constData(), type);
+    }
+
     IShaderStageGenerator &operator<<(const char *data) override
     {
         m_CodeBuilder.append(nonNull(data));
         return *this;
     }
+
     IShaderStageGenerator &operator<<(const TStrType &data) override
+    {
+        m_CodeBuilder.append(data.c_str());
+        return *this;
+    }
+
+    IShaderStageGenerator &operator<<(const QString &data) override
     {
         m_CodeBuilder.append(data);
         return *this;

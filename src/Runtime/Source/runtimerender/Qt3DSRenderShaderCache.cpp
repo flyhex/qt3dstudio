@@ -56,7 +56,7 @@ const char *GeometryEnabledStr = "GeometryStageEnabled";
 inline void AppendFlagValue(CRenderString &inStr, const char *flag)
 {
     if (inStr.length())
-        inStr.append(1, ',');
+        inStr.append(QLatin1Char(','));
     inStr.append(flag);
 }
 inline void CacheFlagsToStr(const SShaderCacheProgramFlags &inFlags, CRenderString &inString)
@@ -99,9 +99,9 @@ inline ShaderType::Enum StringToShaderType(CRenderString &inShaderType)
 inline SShaderCacheProgramFlags CacheFlagsToStr(const CRenderString &inString)
 {
     SShaderCacheProgramFlags retval;
-    if (inString.find(TessellationEnabledStr) != CRenderString::npos)
+    if (inString.indexOf(TessellationEnabledStr) != CRenderString::npos)
         retval.SetTessellationEnabled(true);
-    if (inString.find(GeometryEnabledStr) != CRenderString::npos)
+    if (inString.indexOf(GeometryEnabledStr) != CRenderString::npos)
         retval.SetGeometryShaderEnabled(true);
     return retval;
 }
@@ -134,7 +134,7 @@ inline void ContextTypeToString(qt3ds::render::NVRenderContextType inType,
     for (size_t idx = 0, end = g_NumStringToContextValueEntries; idx < end; ++idx) {
         if (inType & g_StringToContextTypeValue[idx].second) {
             if (outContextType.size())
-                outContextType.append(1, '|');
+                outContextType.append('|');
             outContextType.append(g_StringToContextTypeValue[idx].first);
         }
     }
@@ -145,19 +145,20 @@ inline qt3ds::render::NVRenderContextType StringToContextType(const CRenderStrin
     qt3ds::render::NVRenderContextType retval;
     char tempBuffer[128];
     memZero(tempBuffer, 128);
-    const eastl::string::size_type lastTempBufIdx = 127;
-    eastl::string::size_type pos = 0, lastpos = 0;
+    const QString::size_type lastTempBufIdx = 127;
+    QString::size_type pos = 0, lastpos = 0;
     if (inContextType.size() == 0)
         return retval;
 
     do {
-        pos = int(inContextType.find('|', lastpos));
-        if (pos == eastl::string::npos)
+        pos = int(inContextType.indexOf(QLatin1Char('|'), lastpos));
+        if (pos == CRenderString::npos)
             pos = int(inContextType.size());
         {
 
-            eastl::string::size_type sectionLen = NVMin(pos - lastpos, lastTempBufIdx);
-            qt3ds::intrinsics::memCopy(tempBuffer, inContextType.c_str() + lastpos, sectionLen);
+            QString::size_type sectionLen = NVMin(pos - lastpos, lastTempBufIdx);
+            qt3ds::intrinsics::memCopy(tempBuffer, inContextType.toUtf8().constData() + lastpos,
+                                       sectionLen);
             tempBuffer[lastTempBufIdx] = 0;
             for (size_t idx = 0, end = g_NumStringToContextValueEntries; idx < end; ++idx) {
                 if (strcmp(g_StringToContextTypeValue[idx].first, tempBuffer) == 0)
@@ -167,7 +168,7 @@ inline qt3ds::render::NVRenderContextType StringToContextType(const CRenderStrin
         // iterate past the bar
         ++pos;
         lastpos = pos;
-    } while (pos < inContextType.size() && pos != eastl::string::npos);
+    } while (pos < inContextType.size() && pos != CRenderString::npos);
 
     return retval;
 }
@@ -492,9 +493,9 @@ struct ShaderCache : public IShaderCache
         m_FragmentCode.assign(inFrag);
         // Add defines and such so we can write unified shaders that work across platforms.
         // vertex and fragment shaders are optional for separable shaders
-        if (!separableProgram || !m_VertexCode.empty())
+        if (!separableProgram || !m_VertexCode.isEmpty())
             AddShaderPreprocessor(m_VertexCode, inKey, ShaderType::Vertex, inFeatures);
-        if (!separableProgram || !m_FragmentCode.empty())
+        if (!separableProgram || !m_FragmentCode.isEmpty())
             AddShaderPreprocessor(m_FragmentCode, inKey, ShaderType::Fragment, inFeatures);
         // optional shaders
         if (inFlags.IsTessellationEnabled()) {
@@ -602,7 +603,7 @@ struct ShaderCache : public IShaderCache
             return;
         }
         BootupDOMWriter();
-        m_CacheFilePath = QDir(inDirectory).filePath(GetShaderCacheFileName()).toStdString();
+        m_CacheFilePath = QDir(inDirectory).filePath(GetShaderCacheFileName());
 
         NVScopedRefCounted<IRefCountedInputStream> theInStream =
             m_InputStreamFactory.GetStreamForFile(m_CacheFilePath.c_str());
