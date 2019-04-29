@@ -53,6 +53,7 @@
 #include "rendererimpl/Qt3DSRendererImplLayerRenderData.h"
 #include "Qt3DSRenderCustomMaterialShaderGenerator.h"
 #include "Qt3DSRenderModel.h"
+#include "Qt3DSOffscreenRenderKey.h"
 
 using namespace qt3ds::render;
 using namespace qt3ds::render::dynamic;
@@ -1023,6 +1024,17 @@ struct SMaterialSystem : public ICustomMaterialSystem
         theTextureEntry->Set(inPropDec);
     }
 
+    void SetSubpresentation(NVRenderShaderProgram &inShader, CRegisteredString inPropName,
+                            NVRenderTexture2D *inTexture,
+                            const SPropertyDefinition *inPropDec)
+    {
+        SPropertyDefinition propDef = *inPropDec;
+        propDef.m_MinFilterOp = NVRenderTextureMinifyingOp::Linear;
+        propDef.m_MagFilterOp = NVRenderTextureMagnifyingOp::Linear;
+        SCustomMaterialTextureData::CreateTextureEntry(inShader, inTexture, inPropName, false)
+                .Set(&propDef);
+    }
+
     void SetPropertyEnumNames(CRegisteredString inName, CRegisteredString inPropName,
                                       NVConstDataRef<CRegisteredString> inNames) override
     {
@@ -1248,15 +1260,27 @@ struct SMaterialSystem : public ICustomMaterialSystem
                                  == sizeof(NVRenderTexture2DPtr)>::valid_expression();
                     CRegisteredString *theStrPtr = reinterpret_cast<CRegisteredString *>(inDataPtr);
                     IBufferManager &theBufferManager(m_Context->GetBufferManager());
-                    NVRenderTexture2D *theTexture = NULL;
+                    IOffscreenRenderManager &theOffscreenRenderer(
+                        m_Context->GetOffscreenRenderManager());
+                    NVRenderTexture2D *theTexture = nullptr;
 
                     if (theStrPtr->IsValid()) {
-                        SImageTextureData theTextureData =
-                            theBufferManager.LoadRenderImage(*theStrPtr);
-                        if (theTextureData.m_Texture) {
+                        if (theOffscreenRenderer.HasOffscreenRenderer(*theStrPtr)) {
+                            SOffscreenRenderResult theResult
+                                    = theOffscreenRenderer.GetRenderedItem(*theStrPtr);
+                            theTexture = theResult.m_Texture;
+                            if (theTexture) {
+                                SetSubpresentation(inShader, inPropertyName, theTexture,
+                                                   &inDefinition);
+                            }
+                        } else {
+                            SImageTextureData theTextureData
+                                    = theBufferManager.LoadRenderImage(*theStrPtr);
                             theTexture = theTextureData.m_Texture;
-                            SetTexture(inShader, inPropertyName, theTexture, &inDefinition,
-                                       TextureNeedsMips(&inDefinition, theTexture));
+                            if (theTexture) {
+                                SetTexture(inShader, inPropertyName, theTexture, &inDefinition,
+                                           TextureNeedsMips(&inDefinition, theTexture));
+                            }
                         }
                     }
                 } else {
@@ -1617,6 +1641,15 @@ struct SMaterialSystem : public ICustomMaterialSystem
                     NVRenderFrameBuffer *inFrameBuffer, bool inRenderTargetNeedsClear,
                     NVRenderInputAssembler &inAssembler, QT3DSU32 inCount, QT3DSU32 inOffset)
     {
+        ICustomMaterialShaderGenerator &theMaterialGenerator(
+            m_Context->GetCustomMaterialShaderGenerator());
+
+        theMaterialGenerator.SetMaterialProperties(
+            *inShader.m_Shader, inRenderContext.m_Material, QT3DSVec2(1.0, 1.0),
+            inRenderContext.m_ModelViewProjection, inRenderContext.m_NormalMatrix,
+            inRenderContext.m_ModelMatrix, inRenderContext.m_FirstImage, inRenderContext.m_Opacity,
+            GetLayerGlobalRenderProperties(inRenderContext));
+
         NVRenderContext &theContext(m_Context->GetRenderContext());
         theContext.SetRenderTarget(inFrameBuffer);
 
@@ -1627,15 +1660,6 @@ struct SMaterialSystem : public ICustomMaterialSystem
         if (inRenderTargetNeedsClear) {
             theContext.Clear(qt3ds::render::NVRenderClearValues::Color);
         }
-
-        ICustomMaterialShaderGenerator &theMaterialGenerator(
-            m_Context->GetCustomMaterialShaderGenerator());
-
-        theMaterialGenerator.SetMaterialProperties(
-            *inShader.m_Shader, inRenderContext.m_Material, QT3DSVec2(1.0, 1.0),
-            inRenderContext.m_ModelViewProjection, inRenderContext.m_NormalMatrix,
-            inRenderContext.m_ModelMatrix, inRenderContext.m_FirstImage, inRenderContext.m_Opacity,
-            GetLayerGlobalRenderProperties(inRenderContext));
 
         // I think the prim type should always be fetched from the
         // current mesh subset setup because there you get the actual draw mode
@@ -1807,6 +1831,31 @@ struct SMaterialSystem : public ICustomMaterialSystem
         SApplyInstanceValue applier;
         ApplyInstanceValue(const_cast<SCustomMaterial &>(inMaterial), *theClass, inProgram,
                            applier);
+    }
+
+    void renderSubpresentations(SCustomMaterial &inMaterial) override
+    {
+        SMaterialClass *theClass = GetMaterialClass(inMaterial.m_ClassName);
+        if (!theClass)
+            return;
+
+        NVConstDataRef<SPropertyDefinition> theDefs = theClass->m_Class->GetProperties();
+        for (QT3DSU32 idx = 0, end = theDefs.size(); idx < end; ++idx) {
+            const SPropertyDefinition &theDefinition(theDefs[idx]);
+            if (theDefinition.m_DataType == NVRenderShaderDataTypes::NVRenderTexture2DPtr) {
+                QT3DSU8 *dataPtr = inMaterial.GetDataSectionBegin() + theDefinition.m_Offset;
+                StaticAssert<sizeof(CRegisteredString)
+                             == sizeof(NVRenderTexture2DPtr)>::valid_expression();
+                CRegisteredString *theStrPtr = reinterpret_cast<CRegisteredString *>(dataPtr);
+                IOffscreenRenderManager &theOffscreenRenderer(
+                    m_Context->GetOffscreenRenderManager());
+
+                if (theStrPtr->IsValid()) {
+                    if (theOffscreenRenderer.HasOffscreenRenderer(*theStrPtr))
+                        theOffscreenRenderer.GetRenderedItem(*theStrPtr);
+                }
+            }
+        }
     }
 
     virtual void PrepareTextureForRender(SMaterialClass &inClass, SCustomMaterial &inMaterial)

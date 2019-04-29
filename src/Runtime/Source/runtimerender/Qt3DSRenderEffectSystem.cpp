@@ -1047,16 +1047,16 @@ struct SEffectSystem : public IEffectSystem
                     IOffscreenRenderManager &theOffscreenRenderer(
                         m_Context->GetOffscreenRenderManager());
                     bool needsAlphaMultiply = true;
-                    NVRenderTexture2D *theTexture = NULL;
+                    NVRenderTexture2D *theTexture = nullptr;
                     if (theStrPtr->IsValid()) {
                         if (theOffscreenRenderer.HasOffscreenRenderer(*theStrPtr)) {
-                            SOffscreenRenderResult theResult =
-                                theOffscreenRenderer.GetRenderedItem(*theStrPtr);
+                            SOffscreenRenderResult theResult
+                                    = theOffscreenRenderer.GetRenderedItem(*theStrPtr);
                             needsAlphaMultiply = false;
                             theTexture = theResult.m_Texture;
                         } else {
-                            SImageTextureData theTextureData =
-                                theBufferManager.LoadRenderImage(*theStrPtr);
+                            SImageTextureData theTextureData
+                                    = theBufferManager.LoadRenderImage(*theStrPtr);
                             needsAlphaMultiply = true;
                             theTexture = theTextureData.m_Texture;
                         }
@@ -1837,6 +1837,31 @@ struct SEffectSystem : public IEffectSystem
     IResourceManager &GetResourceManager() override
     {
         return *m_ResourceManager;
+    }
+
+    void renderSubpresentations(SEffect &inEffect) override
+    {
+        SEffectClass *theClass = GetEffectClass(inEffect.m_ClassName);
+        if (!theClass)
+            return;
+
+        NVConstDataRef<SPropertyDefinition> theDefs = theClass->m_DynamicClass->GetProperties();
+        for (QT3DSU32 idx = 0, end = theDefs.size(); idx < end; ++idx) {
+            const SPropertyDefinition &theDefinition(theDefs[idx]);
+            if (theDefinition.m_DataType == NVRenderShaderDataTypes::NVRenderTexture2DPtr) {
+                QT3DSU8 *dataPtr = inEffect.GetDataSectionBegin() + theDefinition.m_Offset;
+                StaticAssert<sizeof(CRegisteredString)
+                             == sizeof(NVRenderTexture2DPtr)>::valid_expression();
+                CRegisteredString *theStrPtr = reinterpret_cast<CRegisteredString *>(dataPtr);
+                IOffscreenRenderManager &theOffscreenRenderer(
+                    m_Context->GetOffscreenRenderManager());
+
+                if (theStrPtr->IsValid()) {
+                    if (theOffscreenRenderer.HasOffscreenRenderer(*theStrPtr))
+                        theOffscreenRenderer.GetRenderedItem(*theStrPtr);
+                }
+            }
+        }
     }
 };
 }

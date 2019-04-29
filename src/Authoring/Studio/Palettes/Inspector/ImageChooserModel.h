@@ -36,7 +36,7 @@ class ImageChooserModel : public ChooserModelBase
     Q_OBJECT
 
 public:
-    explicit ImageChooserModel(bool showRenderables, QObject *parent = nullptr);
+    explicit ImageChooserModel(bool showQmls, QObject *parent = nullptr);
     virtual ~ImageChooserModel();
 
 private:
@@ -45,7 +45,7 @@ private:
     QString specialDisplayName(const TreeItem &item) const override;
     void handlePresentationIdChange(const QString &path, const QString &id);
 
-    bool m_showRenderables = false;
+    bool m_showQmls = false;
 };
 
 #endif // IMAGECHOOSERMODEL_H

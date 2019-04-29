@@ -31,9 +31,9 @@
 #include "ProjectFile.h"
 #include "Core.h"
 
-ImageChooserModel::ImageChooserModel(bool showRenderables, QObject *parent)
+ImageChooserModel::ImageChooserModel(bool showQmls, QObject *parent)
     : ChooserModelBase(parent)
-    , m_showRenderables(showRenderables)
+    , m_showQmls(showQmls)
 {
     connect(&g_StudioApp.GetCore()->getProjectFile(), &ProjectFile::presentationIdChanged,
             this, &ImageChooserModel::handlePresentationIdChange);
@@ -46,7 +46,8 @@ ImageChooserModel::~ImageChooserModel()
 bool ImageChooserModel::isVisible(const QString &path) const
 {
     return getIconType(path) == OBJTYPE_IMAGE
-            || (m_showRenderables && !g_StudioApp.getRenderableId(path).isEmpty());
+            || !g_StudioApp.getPresentationId(path).isEmpty()
+            || (m_showQmls && !g_StudioApp.getQmlId(path).isEmpty());
 }
 
 const QVector<ChooserModelBase::FixedItem> ImageChooserModel::getFixedItems() const

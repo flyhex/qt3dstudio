@@ -1969,9 +1969,9 @@ void CStudioApp::OnPresentationModifiedExternally()
     }
 }
 
-// Get the renderable id for a file path.
+// Converts a renderable path to the format used in the SubPresentationRecord struct
 // filePath can be absolute or relative to either presentation or project
-QString CStudioApp::getRenderableId(const QString &filePath) const
+QString CStudioApp::getRenderablePath(const QString &filePath) const
 {
     QString renderablePath;
     QDir projectDir(m_core->getProjectFile().getProjectPath());
@@ -1991,6 +1991,38 @@ QString CStudioApp::getRenderableId(const QString &filePath) const
         }
         renderablePath = checkFile.mid(index);
     }
+    return renderablePath;
+}
+
+// Get the presentation id, returns an empty string for qml streams
+// filePath can be absolute or relative to either presentation or project
+QString CStudioApp::getPresentationId(const QString &filePath) const
+{
+    QString renderablePath = getRenderablePath(filePath);
+    for (SubPresentationRecord r : qAsConst(m_subpresentations)) {
+        if (r.m_type == QLatin1String("presentation") && r.m_argsOrSrc == renderablePath)
+            return r.m_id;
+    }
+    return {};
+}
+
+// Get the qml stream id, returns an empty string for presentations
+// filePath can be absolute or relative to either presentation or project
+QString CStudioApp::getQmlId(const QString &filePath) const
+{
+    QString renderablePath = getRenderablePath(filePath);
+    for (SubPresentationRecord r : qAsConst(m_subpresentations)) {
+        if (r.m_type == QLatin1String("presentation-qml") && r.m_argsOrSrc == renderablePath)
+            return r.m_id;
+    }
+    return {};
+}
+
+// Get the renderable id for a file path.
+// filePath can be absolute or relative to either presentation or project
+QString CStudioApp::getRenderableId(const QString &filePath) const
+{
+    QString renderablePath = getRenderablePath(filePath);
     for (SubPresentationRecord r : qAsConst(m_subpresentations)) {
         if (r.m_argsOrSrc == renderablePath)
             return r.m_id;

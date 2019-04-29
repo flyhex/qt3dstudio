@@ -201,6 +201,8 @@ namespace render {
         // enabling blending when rendering to the target
         virtual bool RenderEffect(SEffectRenderArgument inRenderArgument, QT3DSMat44 &inMVP,
                                   bool inEnableBlendWhenRenderToTarget) = 0;
+
+        virtual void renderSubpresentations(SEffect &inEffect) = 0;
     };
 }
 }

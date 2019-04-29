@@ -686,8 +686,13 @@ QObject *InspectorControlView::showTextureChooser(int handle, int instance, cons
         m_textureChooserView = new TextureChooserView(this);
         connect(m_textureChooserView, &TextureChooserView::textureSelected, this,
                 [this] (int handle, int instance, const QString &fileName) {
-            if (m_textureChooserView->currentDataModelPath() != fileName)
-                setPropertyValueFromFilename(instance, handle, fileName);
+            if (m_textureChooserView->currentDataModelPath() != fileName) {
+                QString renderableId = g_StudioApp.getRenderableId(fileName);
+                if (renderableId.isEmpty())
+                    setPropertyValueFromFilename(instance, handle, fileName);
+                else
+                    m_inspectorControlModel->setPropertyValue(instance, handle, renderableId);
+            }
         });
     }
 

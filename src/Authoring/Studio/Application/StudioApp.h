@@ -131,6 +131,7 @@ protected:
 private:
     void playbackPreviewStart();
     void playbackPreviewEnd();
+    QString getRenderablePath(const QString &filePath) const;
 
     bool m_welcomeShownThisSession;
     // are we are launching welcome screen again due to user canceling file dialog?
@@ -255,6 +256,8 @@ public:
     QVector<SubPresentationRecord> m_subpresentations;
     QMap<QString, CDataInputDialogItem *> m_dataInputDialogItems;
 
+    QString getPresentationId(const QString &filePath) const;
+    QString getQmlId(const QString &filePath) const;
     QString getRenderableId(const QString &filePath) const;
     QString getRenderableAbsolutePath(const QString &renderableId) const;
     QSize getRenderableSize(const QString &renderableId);

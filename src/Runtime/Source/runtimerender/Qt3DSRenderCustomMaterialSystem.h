@@ -125,6 +125,7 @@ namespace render {
         // apply property values
         virtual void ApplyShaderPropertyValues(const SCustomMaterial &inMaterial,
                                                NVRenderShaderProgram &inProgram) = 0;
+        virtual void renderSubpresentations(SCustomMaterial &inMaterial) = 0;
         // Called by the uiccontext so this system can clear any per-frame render information.
         virtual void EndFrame() = 0;
     };

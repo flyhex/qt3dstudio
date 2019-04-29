@@ -795,6 +795,10 @@ namespace render {
         retval.m_Opacity = inOpacity;
         QT3DSF32 &subsetOpacity(retval.m_Opacity);
 
+        // If the custom material uses subpresentations, those have to be rendered before
+        // the custom material itself
+        m_Renderer.GetQt3DSContext().GetCustomMaterialSystem().renderSubpresentations(inMaterial);
+
         // set wireframe mode
         m_Renderer.DefaultMaterialShaderKeyProperties().m_WireframeMode.SetValue(
             theGeneratedKey, m_Renderer.GetQt3DSContext().GetWireframeMode());
@@ -1170,6 +1174,9 @@ namespace render {
                     theEffect->m_Flags.SetDirty(false);
                 }
                 if (theEffect->m_Flags.IsActive()) {
+                    // If the effect uses subpresentations, those have to be rendered before
+                    // the effect itself
+                    theEffectSystem.renderSubpresentations(*theEffect);
                     theLastEffect = theEffect;
                     if (hasOffscreenRenderer == false
                         && theEffectSystem.DoesEffectRequireDepthTexture(theEffect->m_ClassName))
