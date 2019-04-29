@@ -99,6 +99,7 @@ Q_SIGNALS:
     // Indicates that data input definitions in the Studio project have been parsed
     // and datainputs are available through dataInputs() / getDataInputs().
     void dataInputsReady();
+    void customSignalEmitted(const QString &elementPath, const QString &name);
 
 private:
     Q_DISABLE_COPY(Q3DSPresentation)

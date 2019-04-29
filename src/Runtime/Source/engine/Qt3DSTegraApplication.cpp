@@ -298,6 +298,8 @@ bool CNDDView::InitializeGraphics(const QSurfaceFormat &format)
                      signalProxy(), &QINDDViewSignalProxy::SigSlideEntered);
     QObject::connect(m_Presentation->signalProxy(), &QPresentationSignalProxy::SigSlideExited,
                      signalProxy(), &QINDDViewSignalProxy::SigSlideExited);
+    QObject::connect(m_Presentation->signalProxy(), &QPresentationSignalProxy::SigCustomSignal,
+                     signalProxy(), &QINDDViewSignalProxy::SigCustomSignal);
 
     m_TimeProvider.Reset();
     return true;

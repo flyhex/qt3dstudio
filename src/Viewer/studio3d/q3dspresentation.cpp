@@ -384,12 +384,16 @@ void Q3DSPresentationPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool 
                     this, &Q3DSPresentationPrivate::handleSlideEntered);
             connect(app, &Q3DSViewer::Q3DSViewerApp::SigSlideExited,
                     q_ptr, &Q3DSPresentation::slideExited);
+            connect(app, &Q3DSViewer::Q3DSViewerApp::SigCustomSignal,
+                    q_ptr, &Q3DSPresentation::customSignalEmitted);
         }
         if (oldApp) {
             disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigSlideEntered,
                        this, &Q3DSPresentationPrivate::handleSlideEntered);
             disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigSlideExited,
                        q_ptr, &Q3DSPresentation::slideExited);
+            disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigCustomSignal,
+                       q_ptr, &Q3DSPresentation::customSignalEmitted);
         }
     }
 }

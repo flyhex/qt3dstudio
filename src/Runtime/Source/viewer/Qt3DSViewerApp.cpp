@@ -370,6 +370,8 @@ bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFor
                 &QINDDViewSignalProxy::SigSlideEntered, this, &Q3DSViewerApp::SigSlideEntered);
         connect(m_Impl.m_tegraApp->getNDDView()->signalProxy(),
                 &QINDDViewSignalProxy::SigSlideExited, this, &Q3DSViewerApp::SigSlideExited);
+        connect(m_Impl.m_tegraApp->getNDDView()->signalProxy(),
+                &QINDDViewSignalProxy::SigCustomSignal, this, &Q3DSViewerApp::SigCustomSignal);
 
         Resize(winWidth, winHeight);
 

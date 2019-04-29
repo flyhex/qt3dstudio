@@ -444,7 +444,11 @@ void CPresentation::ProcessCommand(const SEventCommand &inCommand)
             }
         }
     } else if (inCommand.m_Type == COMMAND_EMITSIGNAL) {
+        CRegisteredString nameStr = GetStringTable().HandleToStr(inCommand.m_Arg1.m_INT32);
         m_Application->GetRuntimeFactoryCore().GetScriptEngineQml().ProcessSignal(this, inCommand);
+        QString path = QString::fromLatin1(inCommand.m_Target->m_Path.c_str());
+        QString name = QString::fromLatin1(nameStr.c_str());
+        signalProxy()->SigCustomSignal(path, name);
     } else {
         qCCritical(qt3ds::INVALID_OPERATION) << "Command not implemented: " << inCommand.m_Type;
     }

@@ -390,6 +390,7 @@ public:
 Q_SIGNALS:
     void SigSlideEntered(const QString &elementPath, unsigned int index, const QString &name);
     void SigSlideExited(const QString &elementPath, unsigned int index, const QString &name);
+    void SigCustomSignal(const QString &elementPath, const QString &name);
     void SigPresentationReady();
 };
 
