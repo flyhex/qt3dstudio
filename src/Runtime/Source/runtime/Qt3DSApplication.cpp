@@ -579,7 +579,6 @@ struct SApp : public IApplication
     nvvector<NVScopedRefCounted<IAppRunnable>> m_MainThreadRunnables;
     NVScopedRefCounted<IAppLoadContext> m_AppLoadContext;
     bool m_HideFPS;
-    bool m_DisableState;
     bool m_ProfileLogging;
     bool m_LastRenderWasDirty;
     QT3DSU64 m_LastFrameStartTime;
@@ -629,7 +628,6 @@ struct SApp : public IApplication
         , m_MainThreadRunnables(inFactory.GetFoundation().getAllocator(),
                                 "SApp::m_MainThreadRunnables")
         , m_HideFPS(true)
-        , m_DisableState(true)
         , m_ProfileLogging(false)
         , m_LastRenderWasDirty(true)
         , m_LastFrameStartTime(0)

@@ -117,11 +117,6 @@ namespace state {
         virtual void SetInterpreter(IStateInterpreter &inInterpreter) = 0;
 
         virtual CRegisteredString GetContextType() { return CRegisteredString(); }
-
-        // Dumps a differential state from the last time someone asked.  This is a debug interface;
-        // not meant to be used
-        // by multiple listeners concurrently.
-        virtual void DumpState(debugger::IScriptStateListener &inListener) = 0;
     };
 }
 }

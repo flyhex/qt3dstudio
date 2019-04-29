@@ -88,20 +88,6 @@ namespace state {
         class IEditor;
         class IEditorObject;
     }
-
-    namespace debugger {
-        class IDebugOutStream;
-        struct STransitionId;
-        class IStateMachineListener;
-        class IStateMachineDebugInterface;
-        class IDebugger;
-        struct SDebugPropertyDeclaration;
-        class IDebuggedInterpreter;
-        class IDebuggerMasterListener;
-        class IDebuggedInterpreter;
-        struct SMicrostep;
-        class IScriptStateListener;
-    }
 }
 }
 

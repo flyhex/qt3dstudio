@@ -387,15 +387,6 @@ void ProjectFile::create(const QString &uiaPath)
     QDomDocument domDoc;
     domDoc.setContent(QStringLiteral("<?xml version=\"1.0\" encoding=\"utf-8\"?>"
                                   "<application xmlns=\"http://qt.io/qt3dstudio/uia\">"
-                                    "<statemachine ref=\"#logic\">"
-                                      "<visual-states>"
-                                        "<state ref=\"Initial\">"
-                                          "<enter>"
-                                            "<goto-slide element=\"main:Scene\" rel=\"next\"/>"
-                                          "</enter>"
-                                        "</state>"
-                                      "</visual-states>"
-                                    "</statemachine>"
                                   "</application>"));
 
     QSaveFile file(uiaPath);
