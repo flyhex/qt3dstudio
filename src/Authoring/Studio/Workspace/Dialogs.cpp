@@ -1161,9 +1161,9 @@ QString CDialogs::getImportVariantsDlg()
     dlg.setDefaultSuffix(QStringLiteral(".variants"));
     dlg.setNameFilters({tr("All supported files (*.variants *.uia)"),
                         tr("Variants files (*.variants)"), tr("Project files (*.uia)")});
-    dlg.exec();
+    auto result = dlg.exec();
 
-    if (!dlg.selectedFiles().empty())
+    if (result == QDialog::Accepted && !dlg.selectedFiles().empty())
         return dlg.selectedFiles().front();
 
     return {};
