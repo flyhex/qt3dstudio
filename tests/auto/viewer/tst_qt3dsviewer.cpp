@@ -233,11 +233,28 @@ void tst_qt3dsviewer::testCreateElement()
         m_presentation->createElement(QStringLiteral("Scene.Layer.Cube2"),
                                       QStringLiteral("Slide2"), data);
 
+        data.clear();
+        data.insert(QStringLiteral("name"), QStringLiteral("Sphere To Delete"));
+        data.insert(QStringLiteral("sourcepath"), QStringLiteral("#Sphere"));
+        data.insert(QStringLiteral("material"), QStringLiteral("Basic Red"));
+        data.insert(QStringLiteral("starttime"), 0);
+        data.insert(QStringLiteral("endtime"), 10000);
+        data.insert(QStringLiteral("position"),
+                    QVariant::fromValue<QVector3D>(QVector3D(-100, -100, 0)));
+
+        m_presentation->createElement(QStringLiteral("Scene.Layer"),
+                                      QStringLiteral("Slide2"), data);
+
         animationTimer.start();
     });
 
     // Switch to slide 2
     QVERIFY(spyExited.wait(20000));
+
+    // Remove dynamically added object
+    QTimer::singleShot(3000, [&]() {
+        m_presentation->deleteElement(QStringLiteral("Scene.Layer.Sphere To Delete"));
+    });
 
     // Create objects to slides 1 and 2 while slide 2 is executing
     QTimer::singleShot(2000, [&]() {
@@ -273,13 +290,16 @@ void tst_qt3dsviewer::testCreateElement()
     createTimer.setInterval(0);
     static int elemCounter = 0;
     QRandomGenerator rnd;
+    QStringList massModels;
 
-    QObject::connect(&createTimer, &QTimer::timeout, [&]() {
-        // Create a bunch of cubes to slide 2 in small batches to avoid slowdown
+    auto createModelsConnection = QObject::connect(&createTimer, &QTimer::timeout, [&]() {
+        // Create a bunch of models to slide 2 in small batches to avoid slowdown
         for (int i = 0; i < 5; ++i) {
             ++elemCounter;
             data.clear();
-            data.insert(QStringLiteral("name"), QStringLiteral("MassCube_%1").arg(elemCounter));
+            QString modelName = QStringLiteral("MassModel_%1").arg(elemCounter);
+            massModels << QStringLiteral("Scene.Layer.") + modelName;
+            data.insert(QStringLiteral("name"), modelName);
             data.insert(QStringLiteral("sourcepath"),
                         elemCounter % 2 ? QStringLiteral("#Cube") : QStringLiteral("#Cone"));
             data.insert(QStringLiteral("material"),
@@ -294,15 +314,32 @@ void tst_qt3dsviewer::testCreateElement()
                                           data);
         }
         if (elemCounter >= 1000) {
-            qDebug() << "Extra cubes created:" << elemCounter;
+            qDebug() << "Extra models created:" << elemCounter;
             createTimer.stop();
         }
     });
-    qDebug() << "Start creating extra cubes!";
+    qDebug() << "Start creating extra models";
     createTimer.start();
 
     // Switch to slide 2
     QVERIFY(spyExited.wait(20000));
+    QObject::disconnect(createModelsConnection);
+
+    QTest::qWait(500);
+    elemCounter = massModels.size() - 1;
+    QObject::connect(&createTimer, &QTimer::timeout, [&]() {
+        // Delete all models we created previously
+        if (elemCounter >= 0) {
+            m_presentation->deleteElement(massModels[elemCounter]);
+            --elemCounter;
+        } else {
+            qDebug() << "Extra models deleted";
+            createTimer.stop();
+        }
+    });
+    qDebug() << "Start deleting extra models";
+    createTimer.setInterval(1);
+    createTimer.start();
 
     // Switch to slide 1
     QVERIFY(spyExited.wait(20000));

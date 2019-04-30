@@ -190,8 +190,8 @@ namespace render {
 
         static Qt3DSTranslator *GetTranslatorFromGraphNode(SGraphObject &inObject);
         static Qt3DSTranslator *CreateTranslatorForElement(Q3DStudio::TElement &inElement,
-                                                          SGraphObject &inGraphObject,
-                                                          NVAllocatorCallback &inAlloc);
+                                                           SGraphObject &inGraphObject,
+                                                           NVAllocatorCallback &inAlloc);
         static Q3DStudio::IPresentation *
         GetPresentationFromPresentation(SPresentation &inPresentation);
         static void InitializePointerTags(IStringTable &inTable);

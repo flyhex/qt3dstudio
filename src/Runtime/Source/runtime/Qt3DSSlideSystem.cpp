@@ -255,7 +255,6 @@ struct SSlideSystem : public ISlideSystem
         }
     }
 
-
     // The parent element must be found from target slide.
     // Elements cannot be added to the master slide.
     bool addSlideElement(element::SElement &inComponent, int slideIndex,
@@ -312,6 +311,46 @@ struct SSlideSystem : public ISlideSystem
         AddSlideElement(inElement, eyeBall);
 
         return true;
+    }
+
+    void removeElementRecursive(SSlide *slide, element::SElement &inElement)
+    {
+        element::SElement *child = inElement.m_Child;
+        while (child) {
+            removeElementRecursive(slide, *child);
+            child = child->m_Sibling;
+        }
+
+        SSlideElement *slideElement = slide->m_FirstElement;
+        SSlideElement *previousElement = nullptr;
+        while (slideElement) {
+            if (slideElement->m_ElementHandle == inElement.m_Handle) {
+                if (slide->m_FirstElement == slideElement)
+                    slide->m_FirstElement = slideElement->m_NextElement;
+                if (slide->m_lastElement == slideElement)
+                    slide->m_lastElement = previousElement;
+                if (previousElement)
+                    previousElement->m_NextElement = slideElement->m_NextElement;
+                m_SlideElements.deallocate(slideElement);
+                break;
+            }
+            previousElement = slideElement;
+            slideElement = slideElement->m_NextElement;
+        }
+    }
+
+    // Removes element and its children from all slides
+    void removeElement(element::SElement &inComponent, element::SElement &inElement) override
+    {
+        TComponentSlideHash::const_iterator theFindResult = m_Slides.find(&inComponent);
+        if (theFindResult == m_Slides.end()) {
+            qWarning() << __FUNCTION__ << "Could not find slides for component";
+            return;
+        }
+
+        SSlide *slide = theFindResult->second;
+        for (; slide; slide = slide->m_NextSlide)
+            removeElementRecursive(slide, inElement);
     }
 
     void AddSlideAttribute(Q3DStudio::SAttributeKey inKey, Q3DStudio::UVariant inValue) override

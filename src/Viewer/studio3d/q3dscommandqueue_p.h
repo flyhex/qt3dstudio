@@ -69,6 +69,7 @@ enum CommandType {
     CommandType_SetGlobalAnimationTime,
     CommandType_SetDataInputValue,
     CommandType_CreateElement,
+    CommandType_DeleteElement,
 
     // Requests
     CommandType_RequestSlideInfo,
@@ -120,7 +121,7 @@ public:
                                  int value2 = 0, int value3 = 0);
     ElementCommand &queueCommand(const QString &elementPath, CommandType commandType,
                                  const QString &stringValue, void *commandData);
-    ElementCommand &queueRequest(const QString &elementPath, CommandType commandType);
+    ElementCommand &queueCommand(const QString &elementPath, CommandType commandType);
 
     void copyCommands(CommandQueue &fromQueue);
 

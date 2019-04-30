@@ -803,6 +803,14 @@ void Q3DSViewerApp::createElement(const QString &parentElementPath, const QStrin
     m_Impl.m_view->createElement(parentElementPath, slideName, properties);
 }
 
+void Q3DSViewerApp::deleteElement(const QString &elementPath)
+{
+    if (!m_Impl.m_view)
+        return;
+
+    m_Impl.m_view->deleteElement(elementPath);
+}
+
 Q3DSViewerApp &Q3DSViewerApp::Create(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer,
                                      QElapsedTimer *startupTimer)
 {

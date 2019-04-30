@@ -361,6 +361,7 @@ public:
 
     void createElement(const QString &parentElementPath, const QString &slideName,
                        const QHash<QString, QVariant> &properties);
+    void deleteElement(const QString &elementPath);
 
     QString error();
 

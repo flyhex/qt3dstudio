@@ -234,7 +234,7 @@ void Q3DSSceneElementPrivate::setCommandQueue(CommandQueue *queue)
     Q3DSElementPrivate::setCommandQueue(queue);
 
     if (m_commandQueue) {
-        m_commandQueue->queueRequest(m_elementPath, CommandType_RequestSlideInfo);
+        m_commandQueue->queueCommand(m_elementPath, CommandType_RequestSlideInfo);
         m_slideInfoRequestPending = true;
         // If user has set current slide before the queue has been set for the first time,
         // we will switch to the desired slide after we initialize.

@@ -337,6 +337,10 @@ void Q3DSRenderer::processCommands()
             command.m_data = nullptr;
             break;
         }
+        case CommandType_DeleteElement: {
+            m_runtime->deleteElement(cmd.m_elementPath);
+            break;
+        }
         case CommandType_RequestSlideInfo: {
             int current = 0;
             int previous = 0;

@@ -217,6 +217,7 @@ public:
 
     void createElement(const QString &parentElementPath, const QString &slideName,
                        const QHash<QString, QVariant> &properties) override;
+    void deleteElement(const QString &elementPath) override;
     void SetAttribute(const char *elementPath, const char *attributeName,
                       const char *value) override;
     bool GetAttribute(const char *elementPath, const char *attributeName, void *value) override;
@@ -615,7 +616,7 @@ float CRuntimeView::dataInputMin(const QString &name) const
 }
 
 void CRuntimeView::createElement(const QString &parentElementPath, const QString &slideName,
-                             const QHash<QString, QVariant> &properties)
+                                 const QHash<QString, QVariant> &properties)
 {
     if (m_Application) {
         Q3DStudio::CQmlEngine &theBridgeEngine
@@ -625,7 +626,18 @@ void CRuntimeView::createElement(const QString &parentElementPath, const QString
     }
 }
 
-void CRuntimeView::SetAttribute(const char *elementPath, const char *attributeName, const char *value)
+void CRuntimeView::deleteElement(const QString &elementPath)
+{
+    if (m_Application) {
+        Q3DStudio::CQmlEngine &theBridgeEngine
+                = static_cast<Q3DStudio::CQmlEngine &>(m_RuntimeFactoryCore->GetScriptEngineQml());
+        theBridgeEngine.deleteElement(elementPath,
+                                      &m_RuntimeFactory->GetQt3DSRenderContext().GetRenderer());
+    }
+}
+
+void CRuntimeView::SetAttribute(const char *elementPath, const char *attributeName,
+                                const char *value)
 {
     if (m_Application) {
         if (!elementPath || !attributeName || !value)

@@ -85,6 +85,8 @@ public:
 
     void createElement(const QString &parentElementPath, const QString &slideName,
                        const QHash<QString, QVariant> &properties);
+    void deleteElement(const QString &elementPath);
+
 public Q_SLOTS:
     void setSource(const QUrl &source);
     void setVariantList(const QStringList &variantList);

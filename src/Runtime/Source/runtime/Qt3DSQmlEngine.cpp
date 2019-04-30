@@ -420,6 +420,8 @@ public:
     void createElement(const QString &parentElementPath, const QString &slideName,
                        const QHash<QString, QVariant> &properties,
                        qt3ds::render::IQt3DSRenderer *renderer) override;
+    void deleteElement(const QString &elementPath,
+                       qt3ds::render::IQt3DSRenderer *renderer) override;
     //void createMaterial() override; // TODO (QT3DS-3377)
     //void createMesh() override; // TODO (QT3DS-3378)
 
@@ -1042,7 +1044,6 @@ void CQmlEngineImpl::createElement(const QString &parentElementPath, const QStri
         return;
     }
 
-
     // First check if we can resolve the referenced material before creating any graph objects
     // Find a match in material container
     // If the specified material is not available in original presentation, or was not specified,
@@ -1086,7 +1087,7 @@ void CQmlEngineImpl::createElement(const QString &parentElementPath, const QStri
         }
     }
 
-    // Create new SGraphObject (SNode)
+    // Create model SGraphObject
     NVAllocatorCallback &allocator = presentation->GetScene()->allocator();
     qt3ds::render::SModel *newObject = QT3DS_NEW(allocator, qt3ds::render::SModel)();
     newObject->m_Id = strTable.RegisterStr((QByteArrayLiteral("_newObject_")
@@ -1122,6 +1123,77 @@ void CQmlEngineImpl::createElement(const QString &parentElementPath, const QStri
         newElem.GetActivityZone().UpdateItemInfo(newElem);
 
     renderer->ChildrenUpdated(parentObject);
+}
+
+// Only supports deleting element types that can be added via createElement.
+void CQmlEngineImpl::deleteElement(const QString &elementPath,
+                                   qt3ds::render::IQt3DSRenderer *renderer)
+{
+    // Resolve element
+    QByteArray thePath = elementPath.toUtf8();
+    TElement *element = getTarget(thePath.constData());
+
+    if (!element) {
+        qWarning() << __FUNCTION__ <<  "Invalid element:" << elementPath;
+        return;
+    }
+
+    // Remove element recursively from slide system
+    IPresentation *presentation = element->GetBelongedPresentation();
+    TElement &component = element->GetComponentParent();
+    ISlideSystem &slideSystem = presentation->GetSlideSystem();
+    slideSystem.removeElement(component, *element);
+
+    TElement *parentElement = element->GetParent();
+    Q_ASSERT(parentElement);
+
+    NVAllocatorCallback &allocator = presentation->GetScene()->allocator();
+
+    // Recursive deleter for translators and graph objects
+    std::function<void(TElement *)> deleteRenderObjects;
+    deleteRenderObjects = [&](TElement *elem)  {
+        TElement *child = elem->m_Child;
+        while (child) {
+            TElement *sibling = child->m_Sibling;
+            deleteRenderObjects(child);
+            child = sibling;
+        }
+
+        auto translator = static_cast<qt3ds::render::Qt3DSTranslator *>(elem->GetAssociation());
+        if (translator) {
+            if (translator->GetUIPType() == qt3ds::render::GraphObjectTypes::Model) {
+                auto model = static_cast<qt3ds::render::SModel *>(&translator->RenderObject());
+                // Delete material
+                if (model->m_FirstMaterial) {
+                    auto material = static_cast<qt3ds::render::SReferencedMaterial *>(
+                                model->m_FirstMaterial);
+                    QT3DS_FREE(allocator, material);
+                }
+                QT3DS_FREE(allocator, model);
+            }
+            QT3DS_FREE(allocator, translator);
+        }
+    };
+
+    qt3ds::render::SNode *node = nullptr;
+    qt3ds::render::SNode *parentNode = nullptr;
+    auto translator = static_cast<qt3ds::render::Qt3DSTranslator *>(element->GetAssociation());
+
+    if (translator) {
+        node = &static_cast<qt3ds::render::SNode &>(translator->RenderObject());
+        auto parentTranslator = static_cast<qt3ds::render::Qt3DSTranslator *>(
+                    parentElement->GetAssociation());
+        if (parentTranslator) {
+            parentNode = &static_cast<qt3ds::render::SNode &>(parentTranslator->RenderObject());
+            parentNode->RemoveChild(*node);
+            renderer->ChildrenUpdated(*parentNode);
+        }
+        // Release child element graph objects/translators
+        deleteRenderObjects(element);
+    }
+
+    // Remove element recursively
+    m_Application->GetElementAllocator().ReleaseElement(*element, true);
 }
 
 void CQmlEngineImpl::GotoSlide(const char *component, const char *slideName,

@@ -161,6 +161,8 @@ public: // Elements
     virtual void createElement(const QString &parentElementPath, const QString &slideName,
                                const QHash<QString, QVariant> &properties,
                                qt3ds::render::IQt3DSRenderer *renderer) = 0;
+    virtual void deleteElement(const QString &elementPath,
+                               qt3ds::render::IQt3DSRenderer *renderer) = 0;
 
 public: // Components
     virtual void GotoSlide(const char *component, const char *slideName,

@@ -147,7 +147,7 @@ void Q3DSPresentation::preloadSlide(const QString &elementPath)
     if (d_ptr->m_viewerApp)
         d_ptr->m_viewerApp->preloadSlide(elementPath);
     else if (d_ptr->m_commandQueue)
-        d_ptr->m_commandQueue->queueRequest(elementPath, CommandType_PreloadSlide);
+        d_ptr->m_commandQueue->queueCommand(elementPath, CommandType_PreloadSlide);
 }
 
 void Q3DSPresentation::unloadSlide(const QString &elementPath)
@@ -155,7 +155,7 @@ void Q3DSPresentation::unloadSlide(const QString &elementPath)
     if (d_ptr->m_viewerApp)
         d_ptr->m_viewerApp->unloadSlide(elementPath);
     else if (d_ptr->m_commandQueue)
-        d_ptr->m_commandQueue->queueRequest(elementPath, CommandType_UnloadSlide);
+        d_ptr->m_commandQueue->queueCommand(elementPath, CommandType_UnloadSlide);
 }
 
 void Q3DSPresentation::goToSlide(const QString &elementPath, unsigned int index)
@@ -292,6 +292,17 @@ void Q3DSPresentation::createElement(const QString &parentElementPath, const QSt
         d_ptr->m_commandQueue->queueCommand(parentElementPath, CommandType_CreateElement,
                                             slideName, theProperties);
     }
+}
+
+/**
+ Removes an element added by createElement and all its child elements.
+ */
+void Q3DSPresentation::deleteElement(const QString &elementPath)
+{
+    if (d_ptr->m_viewerApp)
+        d_ptr->m_viewerApp->deleteElement(elementPath);
+    else if (d_ptr->m_commandQueue)
+        d_ptr->m_commandQueue->queueCommand(elementPath, CommandType_DeleteElement);
 }
 
 void Q3DSPresentation::mousePressEvent(QMouseEvent *e)
@@ -464,7 +475,7 @@ void Q3DSPresentationPrivate::setCommandQueue(CommandQueue *queue)
         setVariantList(m_variantList);
         // Queue a request ASAP for datainputs defined in UIA file so that
         // getDataInputs has up-to-date info at the earliest.
-        m_commandQueue->queueRequest({}, CommandType_RequestDataInputs);
+        m_commandQueue->queueCommand({}, CommandType_RequestDataInputs);
         setSource(m_source);
     }
 }

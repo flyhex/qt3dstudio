@@ -191,6 +191,7 @@ public:
     virtual float dataInputMin(const QString &name) const = 0;
     virtual void createElement(const QString &parentElementPath, const QString &slideName,
                                const QHash<QString, QVariant> &properties) = 0;
+    virtual void deleteElement(const QString &elementPath) = 0;
     virtual void SetAttribute(const char *elementPath, const char *attributeName,
                               const char *value) = 0;
     virtual bool GetAttribute(const char *elementPath, const char *attributeName, void *value) = 0;

@@ -160,7 +160,7 @@ ElementCommand &CommandQueue::queueCommand(const QString &elementPath, CommandTy
     return cmd;
 }
 
-ElementCommand &CommandQueue::queueRequest(const QString &elementPath, CommandType commandType)
+ElementCommand &CommandQueue::queueCommand(const QString &elementPath, CommandType commandType)
 {
     ElementCommand &cmd = nextFreeCommand();
 
@@ -244,13 +244,12 @@ void CommandQueue::copyCommands(CommandQueue &fromQueue)
                          source.m_data);
             fromQueue.commandAt(i).m_data = nullptr; // This queue takes ownership of data
             break;
+        case CommandType_DeleteElement:
         case CommandType_RequestSlideInfo:
         case CommandType_UnloadSlide:
         case CommandType_PreloadSlide:
-            queueRequest(source.m_elementPath, source.m_commandType);
-            break;
         case CommandType_RequestDataInputs:
-            queueRequest(source.m_elementPath, source.m_commandType);
+            queueCommand(source.m_elementPath, source.m_commandType);
             break;
         default:
             queueCommand(QString(), CommandType_Invalid, false);
