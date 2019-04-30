@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 
-#ifndef QT3DS_TEGRA_APPLICATION_H
-#define QT3DS_TEGRA_APPLICATION_H
+#ifndef QT3DS_RUNTIME_VIEW_H
+#define QT3DS_RUNTIME_VIEW_H
 
 #include "EnginePrefix.h"
 #include "Qt3DSIStateful.h"
@@ -52,7 +52,7 @@
 
 typedef void (*qml_Function)(void *inUserData);
 
-class QINDDViewSignalProxy : public QObject
+class QRuntimeViewSignalProxy : public QObject
 {
     Q_OBJECT
 Q_SIGNALS:
@@ -149,10 +149,10 @@ public:
                                         qt3ds::foundation::Option<qt3ds::QT3DSVec3> inColor) = 0;
 };
 
-class INDDView : public qt3ds::foundation::NVRefCounted
+class IRuntimeView : public qt3ds::foundation::NVRefCounted
 {
 public:
-    virtual ~INDDView(){}
+    virtual ~IRuntimeView(){}
 
 public: // loading
     virtual bool BeginLoad(const QString &sourcePath, const QStringList &variantList) = 0;
@@ -208,140 +208,15 @@ public:
     virtual void setAssetVisitor(qt3ds::Qt3DSAssetVisitor *) = 0;
 
 public:
-    static INDDView &Create(ITimeProvider &inProvider, IWindowSystem &inWindowSystem,
-                            IAudioPlayer *inAudioPlayer = NULL);
+    static IRuntimeView &Create(ITimeProvider &inProvider, IWindowSystem &inWindowSystem,
+                                IAudioPlayer *inAudioPlayer = nullptr);
 
 public:
-    QINDDViewSignalProxy *signalProxy();
+    QRuntimeViewSignalProxy *signalProxy();
 private:
-    QINDDViewSignalProxy m_SignalProxy;
+    QRuntimeViewSignalProxy m_SignalProxy;
 };
 
-class CTegraApplication
-{
-    //==============================================================================
-    //	Fields
-    //==============================================================================
-private:
-    qt3ds::foundation::NVScopedRefCounted<INDDView> m_NDDView;
-
-public:
-    CTegraApplication(ITimeProvider &inProvider, IWindowSystem &inWindowSystem,
-                      IAudioPlayer *inAudioPlayer = 0);
-    virtual ~CTegraApplication();
-    // loading
-    bool BeginLoad(const QString &sourcePath, const QStringList &variantList);
-    // asynchronous BeginLoad completed? That only valid for binary presentation, for text
-    // presentation, always true
-    bool HasOfflineLoadingCompleted() { return m_NDDView->HasOfflineLoadingCompleted(); }
-    // Invokes m_ApplicationCore->CreateApplication(), a blocking function ensures binary loading
-    // completed
-    bool InitializeGraphics(const QSurfaceFormat& format);
-
-    void Cleanup() { m_NDDView->Cleanup(); }
-    bool CanRender() { return m_NDDView->CanRender(); }
-    void Render();
-    bool WasLastFrameDirty() { return m_NDDView->WasLastFrameDirty(); }
-
-    bool HandleMessage(const QEvent *inEvent);
-    void Pause() { m_NDDView->Pause(); }
-    void UnPause() { m_NDDView->UnPause(); }
-    bool IsPaused() { return m_NDDView->IsPaused(); }
-    INT32 GetFrameCount() { return m_NDDView->GetFrameCount(); }
-
-public:
-    CInputEngine *GetInputEngine() { return m_NDDView->GetInputEngine(); }
-    // Only valid after InitializeGraphics
-    ITegraApplicationRenderEngine *GetTegraRenderEngine()
-    {
-        return m_NDDView->GetTegraRenderEngine();
-    }
-
-public:
-    void GoToSlideByName(const char *elementPath, const char *slideName)
-    {
-        m_NDDView->GoToSlideByName(elementPath, slideName);
-    }
-    void GoToSlideByIndex(const char *elementPath, const int slideIndex)
-    {
-        m_NDDView->GoToSlideByIndex(elementPath, slideIndex);
-    }
-    void GoToSlideRelative(const char *elementPath, const bool next, const bool wrap)
-    {
-        m_NDDView->GoToSlideRelative(elementPath, next, wrap);
-    }
-    bool GetSlideInfo(const char *elementPath, int &currentIndex, int &previousIndex,
-                      QString &currentName, QString &previousName)
-    {
-        return m_NDDView->GetSlideInfo(elementPath, currentIndex, previousIndex,
-                                       currentName, previousName);
-    }
-    void SetPresentationAttribute(const char *presId, const char *, const char *value)
-    {
-        m_NDDView->SetPresentationAttribute(presId, nullptr, value);
-    }
-    void GoToTime(const char *elementPath, const float time)
-    {
-        m_NDDView->GoToTime(elementPath, time);
-    }
-    void SetGlobalAnimationTime(qint64 inMilliSecs)
-    {
-        m_NDDView->SetGlobalAnimationTime(inMilliSecs);
-    }
-    void SetDataInputValue(const QString &name, const QVariant &value,
-                           Q3DSDataInput::ValueRole property = Q3DSDataInput::ValueRole::Value)
-    {
-        m_NDDView->SetDataInputValue(name, value, property);
-    }
-    QList<QString> dataInputs() const
-    {
-        return m_NDDView->dataInputs();
-    }
-    float datainputMax(const QString &name) const
-    {
-        return m_NDDView->dataInputMax(name);
-    }
-    float datainputMin(const QString &name) const
-    {
-        return m_NDDView->dataInputMin(name);
-    }
-    void SetAttribute(const char *elementPath, const char *attributeName, const char *value)
-    {
-        m_NDDView->SetAttribute(elementPath, attributeName, value);
-    }
-    bool GetAttribute(const char *elementPath, const char *attributeName, void *value)
-    {
-        return m_NDDView->GetAttribute(elementPath, attributeName, value);
-    }
-    void FireEvent(const char *element, const char *evtName)
-    {
-        m_NDDView->FireEvent(element, evtName);
-    }
-    bool PeekCustomAction(char *&outElementPath, char *&outActionName)
-    {
-        return m_NDDView->PeekCustomAction(outElementPath, outActionName);
-    }
-    bool RegisterScriptCallback(int callbackType, qml_Function func, void *inUserData)
-    {
-        return m_NDDView->RegisterScriptCallback(callbackType, func, inUserData);
-    };
-    void FireEvent(const TEventCommandHash inEventType, eastl::string inArgument)
-    {
-        m_NDDView->FireEvent(inEventType, inArgument);
-    }
-    qt3ds::foundation::Option<SPresentationSize> GetPrimaryPresentationSize()
-    {
-        return m_NDDView->GetPresentationSize();
-    }
-    qt3ds::foundation::NVScopedRefCounted<INDDView> getNDDView()
-    {
-        return m_NDDView;
-    }
-    void setPresentationId(const QString &id)
-    {
-        m_NDDView->setPresentationId(id);
-    }
-};
 } // namespace Q3DStudio
 
-#endif // QT3DS_TEGRA_APPLICATION_H
+#endif // QT3DS_RUNTIME_VIEW_H

@@ -32,7 +32,7 @@
 #include "Qt3DSRenderRuntimeBindingImpl.h"
 #include "Qt3DSSceneManager.h"
 #include "Qt3DSIScene.h"
-#include "Qt3DSTegraApplication.h"
+#include "Qt3DSRuntimeView.h"
 #include "Qt3DSQmlEngine.h"
 #include "Qt3DSRenderUIPLoader.h"
 #include "Qt3DSPresentationFrameData.h"

@@ -31,7 +31,7 @@
 #include <algorithm>
 
 #include "EnginePrefix.h"
-#include "Qt3DSTegraApplication.h"
+#include "Qt3DSRuntimeView.h"
 #include "Qt3DSViewerApp.h"
 #include "Qt3DSTegraInputEngine.h"
 #include "Qt3DSInputFrame.h" // keyboard mapping
@@ -68,7 +68,7 @@ void EASTL_DEBUG_BREAK()
 #include <ShellAPI.h>
 #include "Qt3DSInputFrame.h"
 
-void HandleController(Q3DStudio::CTegraApplication &inApplication)
+void HandleController(Q3DStudio::IRuntimeView &inView)
 {
     static const class XInputLibrary
     {
@@ -122,7 +122,7 @@ void HandleController(Q3DStudio::CTegraApplication &inApplication)
     static DWORD userLastPacketNumber[MAX_USERS] = { 0 };
     static WORD userLastButtons[MAX_USERS] = { 0 };
 
-    Q3DStudio::CInputEngine *input = inApplication.GetInputEngine();
+    Q3DStudio::CInputEngine *input = inView.GetInputEngine();
     if (input != NULL && library.GetState) {
         // for each controller
         for (DWORD userIndex = 0; userIndex < MAX_USERS; ++userIndex) {
@@ -222,7 +222,7 @@ struct SWindowSystemImpl : public Q3DStudio::IWindowSystem
     }
     // For platforms that support it, we get the egl info for render plugins
     // Feel free to return NULL.
-    SEGLInfo *GetEGLInfo() override { return NULL; }
+    SEGLInfo *GetEGLInfo() override { return nullptr; }
     // on some systems we allow our default render target to be a offscreen buffer
     // otherwise return 0;
     int GetDefaultRenderTargetID() override { return m_OffscreenID; }
@@ -234,7 +234,7 @@ class Q3DSViewerAppImpl
 {
 public:
     Q3DSViewerAppImpl(Q3DStudio::IAudioPlayer *inAudioPlayer)
-        : m_tegraApp(0)
+        : m_view(nullptr)
         , m_appInitSuccessful(false)
         , m_AudioPlayer(inAudioPlayer)
     {
@@ -242,8 +242,8 @@ public:
         initResource();
 #endif
     }
-    Q3DStudio::CTegraApplication *m_tegraApp; ///< pointer to internal "tegra appliction"
-    bool m_appInitSuccessful; ///< true if m_tegraApp is initialized successful
+    Q3DStudio::IRuntimeView *m_view;
+    bool m_appInitSuccessful; ///< true if m_view is initialized successful
 
     std::vector<int> m_mouseButtons;
     Q3DStudio::IWindowSystem *m_WindowSystem;
@@ -278,11 +278,11 @@ Q3DSViewerApp::~Q3DSViewerApp()
 
     delete m_Impl.m_AudioPlayer;
 
-    if (m_Impl.m_tegraApp) {
-        disconnect(m_Impl.m_tegraApp->getNDDView()->signalProxy(), 0);
+    if (m_Impl.m_view) {
+        disconnect(m_Impl.m_view->signalProxy(), nullptr);
 
-        m_Impl.m_tegraApp->Cleanup();
-        Q3DStudio_virtual_delete(m_Impl.m_tegraApp, CTegraApplication);
+        m_Impl.m_view->Cleanup();
+        m_Impl.m_view->release();
 
         if (GetMemoryManager().GetLineTracker())
             GetMemoryManager().GetLineTracker()->Report();
@@ -296,8 +296,8 @@ void Q3DSViewerApp::setOffscreenId(int offscreenID)
 {
     static_cast<SWindowSystemImpl *>(m_Impl.m_WindowSystem)->m_OffscreenID
             = offscreenID;
-    if (m_Impl.m_tegraApp && m_Impl.m_tegraApp->GetTegraRenderEngine())
-        m_Impl.m_tegraApp->GetTegraRenderEngine()->ensureRenderTarget();
+    if (m_Impl.m_view && m_Impl.m_view->GetTegraRenderEngine())
+        m_Impl.m_view->GetTegraRenderEngine()->ensureRenderTarget();
 }
 
 bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFormat &format,
@@ -318,37 +318,19 @@ bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFor
     m_Impl.m_WindowSystem->SetWindowDimensions(QSize(winWidth, winHeight));
 
     // create our internal application
-    if (hasValidPresentationFile && !m_Impl.m_tegraApp) {
+    if (hasValidPresentationFile && !m_Impl.m_view) {
         static_cast<SWindowSystemImpl *>(m_Impl.m_WindowSystem)->m_OffscreenID = offscreenID;
         static_cast<SWindowSystemImpl *>(m_Impl.m_WindowSystem)->m_DepthBitCount
                 = format.depthBufferSize();
 
-        // create memory manager
-        // GetMemoryManager( ).Initialize( "GlobalManager", g_ChunkSize, g_ChunkCount );
         // create internal app
-        m_Impl.m_tegraApp = Q3DStudio_virtual_new(CTegraApplication)
-                CTegraApplication(g_GlobalTimeProvider, *m_Impl.m_WindowSystem,
-                                  m_Impl.m_AudioPlayer);
+        m_Impl.m_view = &IRuntimeView::Create(g_GlobalTimeProvider, *m_Impl.m_WindowSystem,
+                                          m_Impl.m_AudioPlayer);
 
         if (assetVisitor)
-            m_Impl.m_tegraApp->getNDDView()->setAssetVisitor(assetVisitor);
+            m_Impl.m_view->setAssetVisitor(assetVisitor);
 
-        m_Impl.m_appInitSuccessful = m_Impl.m_tegraApp->BeginLoad(source, variantList);
-
-        // Simulate killing the application during loading.  Useful for finding serious issues with
-        // loading.
-        /*for ( unsigned idx = 0; idx < 100; ++idx )
-        {
-                Sleep( 10*idx );
-                m_Impl.m_tegraApp->Cleanup();
-                Q3DStudio_virtual_delete( m_Impl.m_tegraApp, CTegraApplication );
-
-                m_Impl.m_tegraApp =
-        Q3DStudio_virtual_new(CTegraApplication)CTegraApplication(g_GlobalTimeProvider,
-        *m_Impl.m_WindowSystem);
-                m_Impl.m_appInitSuccessful = m_Impl.m_tegraApp->BeginLoad( viewerArgs ) ? true :
-        false;
-        }*/
+        m_Impl.m_appInitSuccessful = m_Impl.m_view->BeginLoad(source, variantList);
 
         if (m_Impl.m_appInitSuccessful == false) {
             m_Impl.m_error = QObject::tr("Viewer launch failure! Failed to load: '%1'").arg(source);
@@ -357,7 +339,7 @@ bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFor
             return false;
         }
 
-        bool success = m_Impl.m_tegraApp->InitializeGraphics(format);
+        bool success = m_Impl.m_view->InitializeGraphics(format);
         if (!success) {
             m_Impl.m_error = QObject::tr("Viewer launch failure! Failed to load: '%1'").arg(source);
             m_Impl.m_error.append("\n");
@@ -366,12 +348,12 @@ bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFor
         }
 
         // Connect signals
-        connect(m_Impl.m_tegraApp->getNDDView()->signalProxy(),
-                &QINDDViewSignalProxy::SigSlideEntered, this, &Q3DSViewerApp::SigSlideEntered);
-        connect(m_Impl.m_tegraApp->getNDDView()->signalProxy(),
-                &QINDDViewSignalProxy::SigSlideExited, this, &Q3DSViewerApp::SigSlideExited);
-        connect(m_Impl.m_tegraApp->getNDDView()->signalProxy(),
-                &QINDDViewSignalProxy::SigCustomSignal, this, &Q3DSViewerApp::SigCustomSignal);
+        connect(m_Impl.m_view->signalProxy(),
+                &QRuntimeViewSignalProxy::SigSlideEntered, this, &Q3DSViewerApp::SigSlideEntered);
+        connect(m_Impl.m_view->signalProxy(),
+                &QRuntimeViewSignalProxy::SigSlideExited, this, &Q3DSViewerApp::SigSlideExited);
+        connect(m_Impl.m_view->signalProxy(),
+                &QRuntimeViewSignalProxy::SigCustomSignal, this, &Q3DSViewerApp::SigCustomSignal);
 
         Resize(winWidth, winHeight);
 
@@ -382,7 +364,7 @@ bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFor
 
 bool Q3DSViewerApp::IsInitialised(void)
 {
-    return m_Impl.m_tegraApp != NULL && m_Impl.m_appInitSuccessful == true;
+    return m_Impl.m_view != nullptr && m_Impl.m_appInitSuccessful;
 }
 
 int Q3DSViewerApp::GetWindowHeight()
@@ -420,30 +402,30 @@ void Q3DSViewerApp::setupSearchPath(std::vector<std::string> &cmdLineArgs)
 
 void Q3DSViewerApp::Render()
 {
-    if (m_Impl.m_tegraApp && m_Impl.m_tegraApp->GetTegraRenderEngine()) {
+    if (m_Impl.m_view && m_Impl.m_view->GetTegraRenderEngine()) {
         if (m_Impl.m_appInitSuccessful) {
             for (QEvent *e : m_Impl.m_pendingEvents) {
-                m_Impl.m_tegraApp->HandleMessage(e);
+                m_Impl.m_view->HandleMessage(e);
                 delete e;
             }
             m_Impl.m_pendingEvents.clear();
 #ifdef WIN32
-            HandleController(*m_Impl.m_tegraApp);
+            HandleController(*m_Impl.m_view);
 #endif
 
-            m_Impl.m_tegraApp->Render();
+            m_Impl.m_view->Render();
         }
     }
 }
 
 void Q3DSViewerApp::SaveState()
 {
-    if (!m_Impl.m_tegraApp)
+    if (!m_Impl.m_view)
         return;
 
-    if (m_Impl.m_tegraApp->GetTegraRenderEngine()) {
+    if (m_Impl.m_view->GetTegraRenderEngine()) {
         ITegraRenderStateManager &manager =
-                m_Impl.m_tegraApp->GetTegraRenderEngine()->GetTegraRenderStateManager();
+                m_Impl.m_view->GetTegraRenderEngine()->GetTegraRenderStateManager();
 
         manager.SaveAllState();
     }
@@ -451,12 +433,12 @@ void Q3DSViewerApp::SaveState()
 
 void Q3DSViewerApp::RestoreState()
 {
-    if (!m_Impl.m_tegraApp)
+    if (!m_Impl.m_view)
         return;
 
-    if (m_Impl.m_tegraApp->GetTegraRenderEngine()) {
+    if (m_Impl.m_view->GetTegraRenderEngine()) {
         ITegraRenderStateManager &manager =
-                m_Impl.m_tegraApp->GetTegraRenderEngine()->GetTegraRenderStateManager();
+                m_Impl.m_view->GetTegraRenderEngine()->GetTegraRenderStateManager();
 
         manager.RestoreAllState();
     }
@@ -464,8 +446,8 @@ void Q3DSViewerApp::RestoreState()
 
 bool Q3DSViewerApp::WasLastFrameDirty()
 {
-    if (m_Impl.m_tegraApp)
-        return m_Impl.m_tegraApp->WasLastFrameDirty();
+    if (m_Impl.m_view)
+        return m_Impl.m_view->WasLastFrameDirty();
     return false;
 }
 
@@ -482,29 +464,29 @@ void Q3DSViewerApp::Resize(int width, int height)
     QSize newSize(width, height);
     m_Impl.m_WindowSystem->SetWindowDimensions(newSize);
 
-    if (m_Impl.m_appInitSuccessful && m_Impl.m_tegraApp
-            && m_Impl.m_tegraApp->GetTegraRenderEngine()) {
+    if (m_Impl.m_appInitSuccessful && m_Impl.m_view
+            && m_Impl.m_view->GetTegraRenderEngine()) {
         QResizeEvent event = QResizeEvent(newSize, oldSize);
-        m_Impl.m_tegraApp->HandleMessage(&event);
+        m_Impl.m_view->HandleMessage(&event);
     }
 }
 
 void Q3DSViewerApp::HandleKeyInput(Q3DStudio::EKeyCode inKeyCode, bool isPressed)
 {
-    if (!m_Impl.m_tegraApp || inKeyCode == Q3DStudio::KEY_NOKEY)
+    if (!m_Impl.m_view || inKeyCode == Q3DStudio::KEY_NOKEY)
         return;
 
-    CInputEngine *input = m_Impl.m_tegraApp->GetInputEngine();
+    CInputEngine *input = m_Impl.m_view->GetInputEngine();
     if (input)
         input->HandleKeyboard(inKeyCode, isPressed);
 }
 
 void Q3DSViewerApp::HandleMouseMove(int x, int y, bool isPressed)
 {
-    if (!m_Impl.m_tegraApp)
+    if (!m_Impl.m_view)
         return;
 
-    CInputEngine *input = m_Impl.m_tegraApp->GetInputEngine();
+    CInputEngine *input = m_Impl.m_view->GetInputEngine();
     if (input) {
         input->BeginPickInput();
         input->EndPickInput();
@@ -516,7 +498,7 @@ void Q3DSViewerApp::HandleMouseMove(int x, int y, bool isPressed)
 
 void Q3DSViewerApp::HandleMousePress(int x, int y, int mouseButton, bool isPressed)
 {
-    if (!m_Impl.m_tegraApp)
+    if (!m_Impl.m_view)
         return;
 
     bool hasButton
@@ -539,14 +521,14 @@ void Q3DSViewerApp::HandleMousePress(int x, int y, int mouseButton, bool isPress
                 m_Impl.m_mouseButtons.push_back(mouseButton);
                 qCInfo(qt3ds::TRACE_INFO)
                         << "ViewerApp: Mouse down of frame "
-                        << m_Impl.m_tegraApp->GetFrameCount();
+                        << m_Impl.m_view->GetFrameCount();
             } else {
                 m_Impl.m_mouseButtons.erase(std::remove(m_Impl.m_mouseButtons.begin(),
                                                         m_Impl.m_mouseButtons.end(), mouseButton),
                                             m_Impl.m_mouseButtons.end());
             }
 
-            CInputEngine *input = m_Impl.m_tegraApp->GetInputEngine();
+            CInputEngine *input = m_Impl.m_view->GetInputEngine();
 
             if (input) {
                 input->BeginPickInput();
@@ -562,10 +544,10 @@ void Q3DSViewerApp::HandleMousePress(int x, int y, int mouseButton, bool isPress
 
 void Q3DSViewerApp::HandleMouseWheel(int x, int y, int orientation, int numSteps)
 {
-    if (!m_Impl.m_tegraApp)
+    if (!m_Impl.m_view)
         return;
 
-    CInputEngine *input = m_Impl.m_tegraApp->GetInputEngine();
+    CInputEngine *input = m_Impl.m_view->GetInputEngine();
     if (input) {
         input->SetPickInput(static_cast<Q3DStudio::FLOAT>(x), static_cast<Q3DStudio::FLOAT>(y), 0);
         input->SetScrollValue(orientation == 0 ? VSCROLLWHEEL : HSCROLLWHEEL, numSteps);
@@ -574,52 +556,52 @@ void Q3DSViewerApp::HandleMouseWheel(int x, int y, int orientation, int numSteps
 
 void Q3DSViewerApp::GoToSlideByName(const char *elementPath, const char *slideName)
 {
-    if (!m_Impl.m_tegraApp)
+    if (!m_Impl.m_view)
         return;
 
-    m_Impl.m_tegraApp->GoToSlideByName(elementPath, slideName);
+    m_Impl.m_view->GoToSlideByName(elementPath, slideName);
 }
 
 void Q3DSViewerApp::GoToSlideByIndex(const char *elementPath, const int slideIndex)
 {
-    if (!m_Impl.m_tegraApp)
+    if (!m_Impl.m_view)
         return;
 
-    m_Impl.m_tegraApp->GoToSlideByIndex(elementPath, slideIndex);
+    m_Impl.m_view->GoToSlideByIndex(elementPath, slideIndex);
 }
 
 void Q3DSViewerApp::GoToSlideRelative(const char *elementPath, const bool next, const bool wrap)
 {
-    if (!m_Impl.m_tegraApp)
+    if (!m_Impl.m_view)
         return;
 
-    m_Impl.m_tegraApp->GoToSlideRelative(elementPath, next, wrap);
+    m_Impl.m_view->GoToSlideRelative(elementPath, next, wrap);
 }
 
 bool Q3DSViewerApp::GetSlideInfo(const char *elementPath, int &currentIndex, int &previousIndex,
                                 QString &currentName, QString &previousName)
 {
-    if (!m_Impl.m_tegraApp)
+    if (!m_Impl.m_view)
         return false;
 
-    return m_Impl.m_tegraApp->GetSlideInfo(elementPath, currentIndex, previousIndex,
+    return m_Impl.m_view->GetSlideInfo(elementPath, currentIndex, previousIndex,
                                            currentName, previousName);
 }
 
 void Q3DSViewerApp::SetPresentationActive(const char *presId, const bool active)
 {
-    if (!m_Impl.m_tegraApp)
+    if (!m_Impl.m_view)
         return;
 
-    m_Impl.m_tegraApp->SetPresentationAttribute(presId, nullptr, active ? "True" : "False");
+    m_Impl.m_view->SetPresentationAttribute(presId, nullptr, active ? "True" : "False");
 }
 
 void Q3DSViewerApp::GoToTime(const char *elementPath, const float time)
 {
-    if (!m_Impl.m_tegraApp)
+    if (!m_Impl.m_view)
         return;
 
-    m_Impl.m_tegraApp->GoToTime(elementPath, time);
+    m_Impl.m_view->GoToTime(elementPath, time);
 }
 
 void Q3DSViewerApp::PlaySoundFile(const char *soundPath)
@@ -633,36 +615,36 @@ void Q3DSViewerApp::PlaySoundFile(const char *soundPath)
 void Q3DSViewerApp::SetAttribute(const char *elementPath, const char *attributeName,
                                 const char *value)
 {
-    if (!m_Impl.m_tegraApp)
+    if (!m_Impl.m_view)
         return;
 
-    m_Impl.m_tegraApp->SetAttribute(elementPath, attributeName, value);
+    m_Impl.m_view->SetAttribute(elementPath, attributeName, value);
 }
 
 bool Q3DSViewerApp::GetAttribute(const char *elementPath, const char *attributeName, void *value)
 {
-    if (!m_Impl.m_tegraApp)
+    if (!m_Impl.m_view)
         return false;
 
-    return m_Impl.m_tegraApp->GetAttribute(elementPath, attributeName, value);
+    return m_Impl.m_view->GetAttribute(elementPath, attributeName, value);
 }
 
 void Q3DSViewerApp::FireEvent(const char *elementPath, const char *evtName)
 {
-    if (!m_Impl.m_tegraApp)
+    if (!m_Impl.m_view)
         return;
 
-    m_Impl.m_tegraApp->FireEvent(elementPath, evtName);
+    m_Impl.m_view->FireEvent(elementPath, evtName);
 }
 
 bool Q3DSViewerApp::PeekCustomAction(std::string &outElementPath, std::string &outActionName)
 {
-    if (!m_Impl.m_tegraApp)
+    if (!m_Impl.m_view)
         return false;
 
-    char *theElementPath = NULL;
-    char *theActioName = NULL;
-    bool retVal = m_Impl.m_tegraApp->PeekCustomAction(theElementPath, theActioName);
+    char *theElementPath = nullptr;
+    char *theActioName = nullptr;
+    bool retVal = m_Impl.m_view->PeekCustomAction(theElementPath, theActioName);
 
     if (theElementPath)
         outElementPath = theElementPath;
@@ -675,7 +657,7 @@ bool Q3DSViewerApp::PeekCustomAction(std::string &outElementPath, std::string &o
 bool Q3DSViewerApp::RegisterScriptCallback(ViewerCallbackType::Enum inCallbackType,
                                           const qml_Function inCallback, void *inUserData)
 {
-    if (!m_Impl.m_tegraApp)
+    if (!m_Impl.m_view)
         return false;
 
     // convert to int
@@ -687,24 +669,24 @@ bool Q3DSViewerApp::RegisterScriptCallback(ViewerCallbackType::Enum inCallbackTy
     else
         return false;
 
-    bool retVal = m_Impl.m_tegraApp->RegisterScriptCallback(callbackType, inCallback, inUserData);
+    bool retVal = m_Impl.m_view->RegisterScriptCallback(callbackType, inCallback, inUserData);
 
     return retVal;
 }
 
 void Q3DSViewerApp::SetScaleMode(ViewerScaleModes::Enum inScale)
 {
-    if (m_Impl.m_tegraApp && m_Impl.m_tegraApp->GetTegraRenderEngine()) {
-        m_Impl.m_tegraApp->GetTegraRenderEngine()->SetScaleMode(
+    if (m_Impl.m_view && m_Impl.m_view->GetTegraRenderEngine()) {
+        m_Impl.m_view->GetTegraRenderEngine()->SetScaleMode(
                     static_cast<TegraRenderScaleModes::Enum>(inScale));
     }
 }
 
 ViewerScaleModes::Enum Q3DSViewerApp::GetScaleMode()
 {
-    if (m_Impl.m_tegraApp && m_Impl.m_tegraApp->GetTegraRenderEngine()) {
+    if (m_Impl.m_view && m_Impl.m_view->GetTegraRenderEngine()) {
         return static_cast<ViewerScaleModes::Enum>(
-                    m_Impl.m_tegraApp->GetTegraRenderEngine()->GetScaleMode());
+                    m_Impl.m_view->GetTegraRenderEngine()->GetScaleMode());
     }
 
     return ViewerScaleModes::ExactSize;
@@ -712,8 +694,8 @@ ViewerScaleModes::Enum Q3DSViewerApp::GetScaleMode()
 
 void Q3DSViewerApp::setMatteColor(const QColor &color)
 {
-    if (m_Impl.m_tegraApp && m_Impl.m_tegraApp->GetTegraRenderEngine()) {
-        m_Impl.m_tegraApp->GetTegraRenderEngine()->SetMatteColor(
+    if (m_Impl.m_view && m_Impl.m_view->GetTegraRenderEngine()) {
+        m_Impl.m_view->GetTegraRenderEngine()->SetMatteColor(
                     qt3ds::QT3DSVec4(color.redF(), color.greenF(),
                                      color.blueF(), color.alphaF()));
     }
@@ -721,71 +703,71 @@ void Q3DSViewerApp::setMatteColor(const QColor &color)
 
 void Q3DSViewerApp::setShowOnScreenStats(bool inShow)
 {
-    if (m_Impl.m_tegraApp && m_Impl.m_tegraApp->GetTegraRenderEngine())
-        m_Impl.m_tegraApp->getNDDView()->showOnScreenStats(inShow);
+    if (m_Impl.m_view && m_Impl.m_view->GetTegraRenderEngine())
+        m_Impl.m_view->showOnScreenStats(inShow);
 }
 
 void Q3DSViewerApp::SetShadeMode(ViewerShadeModes::Enum inShadeMode)
 {
-    if (m_Impl.m_tegraApp && m_Impl.m_tegraApp->GetTegraRenderEngine()) {
+    if (m_Impl.m_view && m_Impl.m_view->GetTegraRenderEngine()) {
         StaticAssert<ViewerShadeModes::Shaded == TegraRenderShadeModes::Shaded>::valid_expression();
         StaticAssert<ViewerShadeModes::ShadedWireframe
                 == TegraRenderShadeModes::ShadedWireframe>::valid_expression();
         StaticAssert<ViewerShadeModes::Wireframe
                 == TegraRenderShadeModes::Wireframe>::valid_expression();
 
-        m_Impl.m_tegraApp->GetTegraRenderEngine()->SetShadeMode(
+        m_Impl.m_view->GetTegraRenderEngine()->SetShadeMode(
                     static_cast<TegraRenderShadeModes::Enum>(inShadeMode));
     }
 }
 
 void Q3DSViewerApp::SetGlobalAnimationTime(qint64 inMilliSecs)
 {
-    if (!m_Impl.m_tegraApp)
+    if (!m_Impl.m_view)
         return;
 
-    m_Impl.m_tegraApp->SetGlobalAnimationTime(inMilliSecs);
+    m_Impl.m_view->SetGlobalAnimationTime(inMilliSecs);
 }
 
 void Q3DSViewerApp::SetDataInputValue(
         const QString &name, const QVariant &value, Q3DSDataInput::ValueRole valueRole)
 {
-    if (!m_Impl.m_tegraApp)
+    if (!m_Impl.m_view)
         return;
 
-    m_Impl.m_tegraApp->SetDataInputValue(name, value, valueRole);
+    m_Impl.m_view->SetDataInputValue(name, value, valueRole);
 }
 
 void Q3DSViewerApp::setPresentationId(const QString &id)
 {
-    if (!m_Impl.m_tegraApp)
+    if (!m_Impl.m_view)
         return;
 
-    m_Impl.m_tegraApp->setPresentationId(id);
+    m_Impl.m_view->setPresentationId(id);
 }
 
 QList<QString> Q3DSViewerApp::dataInputs() const
 {
-    if (!m_Impl.m_tegraApp)
+    if (!m_Impl.m_view)
         return {};
 
-    return m_Impl.m_tegraApp->dataInputs();
+    return m_Impl.m_view->dataInputs();
 }
 
 float Q3DSViewerApp::dataInputMax(const QString &name) const
 {
-    if (!m_Impl.m_tegraApp)
+    if (!m_Impl.m_view)
         return 0.0f;
 
-    return m_Impl.m_tegraApp->datainputMax(name);
+    return m_Impl.m_view->dataInputMax(name);
 }
 
 float Q3DSViewerApp::dataInputMin(const QString &name) const
 {
-    if (!m_Impl.m_tegraApp)
+    if (!m_Impl.m_view)
         return 0.0f;
 
-    return m_Impl.m_tegraApp->datainputMin(name);
+    return m_Impl.m_view->dataInputMin(name);
 }
 
 Q3DSViewerApp &Q3DSViewerApp::Create(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer)

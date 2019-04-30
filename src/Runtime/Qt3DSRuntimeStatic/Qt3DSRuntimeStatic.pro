@@ -36,7 +36,6 @@ SOURCES += \
     ../Source/engine/Qt3DSRenderRuntimeBinding.cpp \
     ../Source/engine/Qt3DSRenderRuntimeBindingImplRenderer.cpp \
     ../Source/engine/Qt3DSRenderRuntimeBindingImplTranslation.cpp \
-    ../Source/engine/Qt3DSTegraApplication.cpp \
     ../Source/engine/Qt3DSTegraInputEngine.cpp \
     ../Source/runtime/Qt3DSActivationManager.cpp \
     ../Source/runtime/Qt3DSAnimationSystem.cpp \
@@ -155,7 +154,8 @@ SOURCES += \
     ../Source/runtimerender/Qt3DSDistanceFieldRenderer.cpp \
     ../Source/runtimerender/Qt3DSFontDatabase.cpp \
     ../Source/runtimerender/Qt3DSDistanceFieldGlyphCacheManager.cpp \
-    ../Source/runtimerender/Qt3DSDistanceFieldGlyphCache.cpp
+    ../Source/runtimerender/Qt3DSDistanceFieldGlyphCache.cpp \
+    ../Source/engine/Qt3DSRuntimeView.cpp
 
 HEADERS += \
     ../Source/foundation/ConvertUTF.h \
@@ -228,7 +228,6 @@ HEADERS += \
     ../Source/runtimerender/q3dsqmlrender.h \
     ../Source/engine/Qt3DSRenderRuntimeBinding.h \
     ../Source/engine/Qt3DSRenderRuntimeBindingImpl.h \
-    ../Source/engine/Qt3DSTegraApplication.h \
     ../Source/engine/Qt3DSTegraInputEngine.h \
     ../Source/runtime/Qt3DSActivationManager.h \
     ../Source/runtime/Qt3DSAnimationSystem.h \
@@ -426,7 +425,8 @@ HEADERS += \
     ../Source/runtimerender/Qt3DSDistanceFieldRenderer.h \
     ../Source/runtimerender/Qt3DSFontDatabase_p.h \
     ../Source/runtimerender/Qt3DSDistanceFieldGlyphCacheManager_p.h \
-    ../Source/runtimerender/Qt3DSDistanceFieldGlyphCache_p.h
+    ../Source/runtimerender/Qt3DSDistanceFieldGlyphCache_p.h \
+    ../Source/engine/Qt3DSRuntimeView.h
 
 win32 {
 SOURCES += \

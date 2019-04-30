@@ -35,7 +35,7 @@
 //	Includes
 //==============================================================================
 #include "Qt3DSInputEngine.h"
-#include "Qt3DSTegraApplication.h"
+#include "Qt3DSRuntimeView.h"
 #include "Qt3DSInputEventTypes.h"
 #include "Qt3DSPresentation.h"
 

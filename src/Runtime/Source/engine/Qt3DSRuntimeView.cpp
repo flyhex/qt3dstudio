@@ -31,7 +31,7 @@
 //==============================================================================
 //	Includes
 //==============================================================================
-#include "Qt3DSTegraApplication.h"
+#include "Qt3DSRuntimeView.h"
 #include "Qt3DSTegraInputEngine.h"
 #include "Qt3DSDataLogger.h"
 #include "Qt3DSFileStream.h"
@@ -45,6 +45,7 @@
 #include "Qt3DSKernelTypes.h"
 #include "Qt3DSRenderContextCore.h"
 #include "Qt3DSRenderer.h"
+#include "Qt3DSRenderBufferManager.h"
 
 #include "Qt3DSDLLManager.h"
 #include "foundation/Qt3DSSimpleTypes.h"
@@ -86,9 +87,9 @@ namespace {
 
 bool CaselessEqual(const char *lhs, const char *rhs)
 {
-    if (lhs == NULL)
+    if (lhs == nullptr)
         lhs = "";
-    if (rhs == NULL)
+    if (rhs == nullptr)
         rhs = "";
     return Q3DStudio_stricmp(lhs, rhs) == 0;
 }
@@ -114,7 +115,7 @@ const eastl::string &GetAppDir(const eastl::string &inAppExe)
 #ifdef Qt3DS_OS_QNX
     char theBuf[1024] = { 0 };
     FILE *exefile = fopen("/proc/self/exefile", "r");
-    if (exefile != NULL) {
+    if (exefile != nullptr) {
         fgets(theBuf, sizeof(theBuf), exefile);
         fclose(exefile);
         theAppDir->assign(theBuf);
@@ -132,11 +133,7 @@ const eastl::string &GetAppDir(const eastl::string &inAppExe)
 using namespace qt3ds;
 using namespace qt3ds::foundation;
 
-//==============================================================================
-/**
- *	CNDDView
- */
-class CNDDView : public INDDView
+class CRuntimeView : public IRuntimeView
 {
     //==============================================================================
     //	Fields
@@ -146,13 +143,14 @@ private:
     CTegraInputEngine *m_InputEngine; ///< Handles all user input events
     // Pre graphics init objects
     NVScopedRefCounted<qt3ds::render::IQt3DSRenderFactoryCore> m_RuntimeFactoryCore;
-    NVScopedRefCounted<qt3ds::runtime::IApplicationCore>
-    m_ApplicationCore; ///< Base application before graphis
+    ///< Base application before graphics
+    NVScopedRefCounted<qt3ds::runtime::IApplicationCore> m_ApplicationCore;
 
     // Post graphics init objects
     NVScopedRefCounted<qt3ds::render::IQt3DSRenderFactory> m_RuntimeFactory;
     NVScopedRefCounted<qt3ds::runtime::IApplication> m_Application; ///< Application after graphics
-    CPresentation *m_Presentation; ///< Currently loaded presentation, this should be removed in the future
+    ///< Currently loaded presentation, this should be removed in the future
+    CPresentation *m_Presentation;
 
     CPausingTimeProvider m_TimeProvider;
     IWindowSystem &m_WindowSystem;
@@ -164,11 +162,11 @@ private:
     bool m_showOnScreenStats;
 
 public:
-    CNDDView(ITimeProvider &inTimeProvider, IWindowSystem &inWindowSystem,
-             IAudioPlayer *inAudioPlayer);
-    ~CNDDView();
+    CRuntimeView(ITimeProvider &inTimeProvider, IWindowSystem &inWindowSystem,
+                 IAudioPlayer *inAudioPlayer);
+    ~CRuntimeView() override;
 
-    QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE_OVERRIDE(qt3ds::render::g_BaseAllocator);
+    QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE_OVERRIDE(qt3ds::render::g_BaseAllocator)
 
     bool BeginLoad(const QString &sourcePath, const QStringList &variantList) override;
     bool HasOfflineLoadingCompleted() override;
@@ -221,16 +219,15 @@ public:
     bool RegisterScriptCallback(int callbackType, qml_Function func, void *inUserData) override;
     void FireEvent(const TEventCommandHash inEventType, eastl::string inArgument) override;
     qt3ds::foundation::Option<SPresentationSize> GetPresentationSize() override;
-
     void BootupPreGraphicsInitObjects();
 };
 
-CNDDView::CNDDView(ITimeProvider &inTimeProvider, IWindowSystem &inWindowSystem,
-                   IAudioPlayer *inAudioPlayer)
-    : m_RenderEngine(NULL)
-    , m_InputEngine(NULL)
-    , m_Application(NULL)
-    , m_Presentation(NULL)
+CRuntimeView::CRuntimeView(ITimeProvider &inTimeProvider, IWindowSystem &inWindowSystem,
+                           IAudioPlayer *inAudioPlayer)
+    : m_RenderEngine(nullptr)
+    , m_InputEngine(nullptr)
+    , m_Application(nullptr)
+    , m_Presentation(nullptr)
     , m_TimeProvider(inTimeProvider)
     , m_WindowSystem(inWindowSystem)
     , m_AudioPlayer(inAudioPlayer)
@@ -240,11 +237,11 @@ CNDDView::CNDDView(ITimeProvider &inTimeProvider, IWindowSystem &inWindowSystem,
 {
 }
 
-CNDDView::~CNDDView()
+CRuntimeView::~CRuntimeView()
 {
 }
 
-bool CNDDView::BeginLoad(const QString &sourcePath, const QStringList &variantList)
+bool CRuntimeView::BeginLoad(const QString &sourcePath, const QStringList &variantList)
 {
     bool theResult = false;
 
@@ -267,9 +264,9 @@ bool CNDDView::BeginLoad(const QString &sourcePath, const QStringList &variantLi
     return theResult;
 }
 
-bool CNDDView::HasOfflineLoadingCompleted()
+bool CRuntimeView::HasOfflineLoadingCompleted()
 {
-    if (m_Application.mPtr == NULL) {
+    if (m_Application.mPtr == nullptr) {
         if (m_ApplicationCore)
             return m_ApplicationCore->HasCompletedLoading();
         else
@@ -278,7 +275,7 @@ bool CNDDView::HasOfflineLoadingCompleted()
     return true;
 }
 
-bool CNDDView::InitializeGraphics(const QSurfaceFormat &format)
+bool CRuntimeView::InitializeGraphics(const QSurfaceFormat &format)
 {
     m_ApplicationCore->EndLoad();
     // Next call will initialize the render portion of the scenes.  This *must* have a loaded
@@ -295,25 +292,25 @@ bool CNDDView::InitializeGraphics(const QSurfaceFormat &format)
     m_Presentation = m_Application->GetPrimaryPresentation();
 
     QObject::connect(m_Presentation->signalProxy(), &QPresentationSignalProxy::SigSlideEntered,
-                     signalProxy(), &QINDDViewSignalProxy::SigSlideEntered);
+                     signalProxy(), &QRuntimeViewSignalProxy::SigSlideEntered);
     QObject::connect(m_Presentation->signalProxy(), &QPresentationSignalProxy::SigSlideExited,
-                     signalProxy(), &QINDDViewSignalProxy::SigSlideExited);
+                     signalProxy(), &QRuntimeViewSignalProxy::SigSlideExited);
     QObject::connect(m_Presentation->signalProxy(), &QPresentationSignalProxy::SigCustomSignal,
-                     signalProxy(), &QINDDViewSignalProxy::SigCustomSignal);
+                     signalProxy(), &QRuntimeViewSignalProxy::SigCustomSignal);
 
     m_TimeProvider.Reset();
     return true;
 }
 
-void CNDDView::Cleanup()
+void CRuntimeView::Cleanup()
 {
     // Q3DStudio_virtual_delete( m_Timer, CTimer );
     // Q3DStudio_virtual_delete( m_PerfFileStream, CFileStream );
-    m_Application = NULL;
+    m_Application = nullptr;
     Q3DStudio_virtual_delete(m_InputEngine, CTegraInputEngine);
     if (m_RenderEngine) {
         m_RenderEngine->Release();
-        m_RenderEngine = NULL;
+        m_RenderEngine = nullptr;
     }
 
     CDLLManager &theDLLManager = CDLLManager::GetDLLManager();
@@ -321,14 +318,14 @@ void CNDDView::Cleanup()
     if (m_Presentation)
         QObject::disconnect(m_Presentation->signalProxy(), 0, signalProxy(), 0);
 
-    m_InputEngine = NULL;
-    m_RenderEngine = NULL;
-    m_Presentation = NULL;
+    m_InputEngine = nullptr;
+    m_RenderEngine = nullptr;
+    m_Presentation = nullptr;
 }
 
-bool CNDDView::CanRender()
+bool CRuntimeView::CanRender()
 {
-    return m_Application.mPtr != NULL;
+    return m_Application.mPtr != nullptr;
 }
 
 //==============================================================================
@@ -337,9 +334,9 @@ bool CNDDView::CanRender()
  *  returns KD_TRUE to call egl_render and swap properly, KD_FALSE if there has been no scene update
  *or redraw.
  */
-void CNDDView::Render()
+void CRuntimeView::Render()
 {
-    if (m_Application.mPtr == NULL) {
+    if (m_Application.mPtr == nullptr) {
         // InitializeGraphics has not been called
         QT3DS_ASSERT(false);
     }
@@ -378,7 +375,7 @@ void CNDDView::Render()
     }
 }
 
-bool CNDDView::WasLastFrameDirty()
+bool CRuntimeView::WasLastFrameDirty()
 {
     if (m_Application)
         return m_Application->IsApplicationDirty();
@@ -390,9 +387,9 @@ bool CNDDView::WasLastFrameDirty()
  *	nv_main APP-SPECIFIC message call
  *	HandleMessage
  */
-bool CNDDView::HandleMessage(const QEvent *inEvent)
+bool CRuntimeView::HandleMessage(const QEvent *inEvent)
 {
-    if (m_Application.mPtr == NULL || m_RenderEngine == NULL)
+    if (m_Application.mPtr == nullptr || m_RenderEngine == nullptr)
         return 0;
 
     bool ret = false;
@@ -423,32 +420,32 @@ bool CNDDView::HandleMessage(const QEvent *inEvent)
     return ret ? 1 : 0;
 }
 
-void CNDDView::Pause()
+void CRuntimeView::Pause()
 {
     m_TimeProvider.Pause();
 }
 
-void CNDDView::UnPause()
+void CRuntimeView::UnPause()
 {
     m_TimeProvider.UnPause();
 }
 
-bool CNDDView::IsPaused()
+bool CRuntimeView::IsPaused()
 {
     return m_TimeProvider.IsPaused();
 }
 
-INT32 CNDDView::GetFrameCount()
+INT32 CRuntimeView::GetFrameCount()
 {
     return m_Application->GetFrameCount();
 }
 
-void CNDDView::showOnScreenStats(bool show)
+void CRuntimeView::showOnScreenStats(bool show)
 {
     m_showOnScreenStats = show;
 }
 
-CInputEngine *CNDDView::GetInputEngine()
+CInputEngine *CRuntimeView::GetInputEngine()
 {
     return m_InputEngine;
 }
@@ -457,7 +454,7 @@ CInputEngine *CNDDView::GetInputEngine()
 /**
  *	Generates an event in the presentation.
  */
-void CNDDView::GoToSlideByName(const char *elementPath, const char *slideName)
+void CRuntimeView::GoToSlideByName(const char *elementPath, const char *slideName)
 {
     if (m_Application) {
         if (!elementPath || !slideName)
@@ -473,7 +470,7 @@ void CNDDView::GoToSlideByName(const char *elementPath, const char *slideName)
     }
 }
 
-void CNDDView::GoToSlideByIndex(const char *elementPath, const int slideIndex)
+void CRuntimeView::GoToSlideByIndex(const char *elementPath, const int slideIndex)
 {
     if (m_Application) {
         if (!elementPath || slideIndex < 0)
@@ -486,7 +483,7 @@ void CNDDView::GoToSlideByIndex(const char *elementPath, const int slideIndex)
     }
 }
 
-void CNDDView::GoToSlideRelative(const char *elementPath, const bool next, const bool wrap)
+void CRuntimeView::GoToSlideRelative(const char *elementPath, const bool next, const bool wrap)
 {
     if (m_Application) {
         if (!elementPath)
@@ -499,7 +496,7 @@ void CNDDView::GoToSlideRelative(const char *elementPath, const bool next, const
     }
 }
 
-bool CNDDView::GetSlideInfo(const char *elementPath, int &currentIndex, int &previousIndex,
+bool CRuntimeView::GetSlideInfo(const char *elementPath, int &currentIndex, int &previousIndex,
                             QString &currentName, QString &previousName)
 {
     if (m_Application && elementPath) {
@@ -512,7 +509,7 @@ bool CNDDView::GetSlideInfo(const char *elementPath, int &currentIndex, int &pre
     return false;
 }
 
-void CNDDView::SetPresentationAttribute(const char *presId, const char *, const char *value)
+void CRuntimeView::SetPresentationAttribute(const char *presId, const char *, const char *value)
 {
     if (m_Application) {
         if (!presId || !value)
@@ -525,7 +522,7 @@ void CNDDView::SetPresentationAttribute(const char *presId, const char *, const 
     }
 }
 
-bool CNDDView::RegisterScriptCallback(int callbackType, qml_Function func, void *inUserData)
+bool CRuntimeView::RegisterScriptCallback(int callbackType, qml_Function func, void *inUserData)
 {
     if (m_Application) {
         Q3DStudio::CQmlEngine &theBridgeEngine
@@ -537,7 +534,7 @@ bool CNDDView::RegisterScriptCallback(int callbackType, qml_Function func, void 
     return false;
 }
 
-void CNDDView::GoToTime(const char *elementPath, const float time)
+void CRuntimeView::GoToTime(const char *elementPath, const float time)
 {
     if (m_Application) {
         if (!elementPath || time < 0.0)
@@ -550,13 +547,13 @@ void CNDDView::GoToTime(const char *elementPath, const float time)
     }
 }
 
-void CNDDView::SetGlobalAnimationTime(qint64 inMilliSecs)
+void CRuntimeView::SetGlobalAnimationTime(qint64 inMilliSecs)
 {
     if (m_Application)
         m_Application->SetTimeMilliSecs(inMilliSecs);
 }
 
-void CNDDView::SetDataInputValue(
+void CRuntimeView::SetDataInputValue(
         const QString &name, const QVariant &value,
         Q3DSDataInput::ValueRole property = Q3DSDataInput::ValueRole::Value)
 {
@@ -565,7 +562,7 @@ void CNDDView::SetDataInputValue(
     theBridgeEngine.SetDataInputValue(name, value, property);
 }
 
-QList<QString> CNDDView::dataInputs() const
+QList<QString> CRuntimeView::dataInputs() const
 {
     if (m_Application)
         return m_Application->dataInputs();
@@ -573,17 +570,17 @@ QList<QString> CNDDView::dataInputs() const
     return {};
 }
 
-float CNDDView::dataInputMax(const QString &name) const
+float CRuntimeView::dataInputMax(const QString &name) const
 {
     return m_Application->dataInputMax(name);
 }
 
-float CNDDView::dataInputMin(const QString &name) const
+float CRuntimeView::dataInputMin(const QString &name) const
 {
     return m_Application->dataInputMin(name);
 }
 
-void CNDDView::SetAttribute(const char *elementPath, const char *attributeName, const char *value)
+void CRuntimeView::SetAttribute(const char *elementPath, const char *attributeName, const char *value)
 {
     if (m_Application) {
         if (!elementPath || !attributeName || !value)
@@ -596,7 +593,7 @@ void CNDDView::SetAttribute(const char *elementPath, const char *attributeName, 
     }
 }
 
-bool CNDDView::GetAttribute(const char *elementPath, const char *attributeName, void *value)
+bool CRuntimeView::GetAttribute(const char *elementPath, const char *attributeName, void *value)
 {
     if (m_Application) {
         if (!elementPath || !attributeName || !value)
@@ -611,7 +608,7 @@ bool CNDDView::GetAttribute(const char *elementPath, const char *attributeName, 
     return false;
 }
 
-void CNDDView::FireEvent(const char *element, const char *evtName)
+void CRuntimeView::FireEvent(const char *element, const char *evtName)
 {
     if (m_Application) {
         if (!element || !evtName)
@@ -624,7 +621,7 @@ void CNDDView::FireEvent(const char *element, const char *evtName)
     }
 }
 
-bool CNDDView::PeekCustomAction(char *&outElementPath, char *&outActionName)
+bool CRuntimeView::PeekCustomAction(char *&outElementPath, char *&outActionName)
 {
     bool actionAvailable = true;
 
@@ -632,7 +629,7 @@ bool CNDDView::PeekCustomAction(char *&outElementPath, char *&outActionName)
         Q3DStudio::CQmlEngine &theBridgeEngine
                 = static_cast<Q3DStudio::CQmlEngine &>(m_RuntimeFactoryCore->GetScriptEngineQml());
 
-        Q3DStudio::TElement *theElement = NULL;
+        Q3DStudio::TElement *theElement = nullptr;
         actionAvailable = theBridgeEngine.PeekSignal(theElement, outActionName);
         if (actionAvailable && theElement)
             outElementPath = (char *)theElement->m_Path.c_str();
@@ -641,24 +638,24 @@ bool CNDDView::PeekCustomAction(char *&outElementPath, char *&outActionName)
     return actionAvailable;
 }
 
-void CNDDView::FireEvent(const TEventCommandHash inEventType, eastl::string inArgument)
+void CRuntimeView::FireEvent(const TEventCommandHash inEventType, eastl::string inArgument)
 {
     if (m_Application) {
         CPresentation *thePresentation = m_Application->GetPrimaryPresentation();
         TElement *theScene = thePresentation->GetRoot();
         if (inArgument.empty()) {
-            thePresentation->FireEvent(inEventType, theScene, NULL, NULL, ATTRIBUTETYPE_NONE,
+            thePresentation->FireEvent(inEventType, theScene, nullptr, nullptr, ATTRIBUTETYPE_NONE,
                                        ATTRIBUTETYPE_NONE);
         } else {
             UVariant inArg;
             inArg.m_StringHandle = thePresentation->GetStringTable().GetHandle(inArgument.c_str());
-            thePresentation->FireEvent(inEventType, theScene, &inArg, NULL, ATTRIBUTETYPE_STRING,
+            thePresentation->FireEvent(inEventType, theScene, &inArg, nullptr, ATTRIBUTETYPE_STRING,
                                        ATTRIBUTETYPE_NONE);
         }
     }
 }
 
-qt3ds::foundation::Option<SPresentationSize> CNDDView::GetPresentationSize()
+qt3ds::foundation::Option<SPresentationSize> CRuntimeView::GetPresentationSize()
 {
     if (m_Application) {
         CPresentation *thePresentation = m_Application->GetPrimaryPresentation();
@@ -672,7 +669,7 @@ qt3ds::foundation::Option<SPresentationSize> CNDDView::GetPresentationSize()
 /**
  *	Perform the initialization steps prior to loading any presentation.
  */
-void CNDDView::BootupPreGraphicsInitObjects()
+void CRuntimeView::BootupPreGraphicsInitObjects()
 {
     qCInfo(TRACE_INFO) << "CNDDView::BootupPreGraphicsInitObjects: DoInitialize";
     // Create engines and runtime
@@ -680,100 +677,36 @@ void CNDDView::BootupPreGraphicsInitObjects()
 
     m_RuntimeFactoryCore = qt3ds::render::IQt3DSRenderFactoryCore::CreateRenderFactoryCore(
                 theAppDir.c_str(), m_WindowSystem, m_TimeProvider);
-    m_ApplicationCore = qt3ds::runtime::IApplicationCore::CreateApplicationCore(*m_RuntimeFactoryCore,
+    m_ApplicationCore = qt3ds::runtime::IApplication::CreateApplicationCore(*m_RuntimeFactoryCore,
                                                                               theAppDir.c_str());
 
     if (m_ApplicationCore && m_visitor)
         m_ApplicationCore->setAssetVisitor(m_visitor);
 
     m_InputEngine = static_cast<CTegraInputEngine *>(CreateInputEngine());
-    Q3DStudio_ASSERT(m_InputEngine != NULL);
+    Q3DStudio_ASSERT(m_InputEngine != nullptr);
 
     qCInfo(TRACE_INFO) << "CNDDView::DoInitialize: Successfully initialized!";
 }
 
-void CNDDView::setAssetVisitor(qt3ds::Qt3DSAssetVisitor *v)
+void CRuntimeView::setAssetVisitor(qt3ds::Qt3DSAssetVisitor *v)
 {
     m_visitor = v;
     if (m_ApplicationCore)
         m_ApplicationCore->setAssetVisitor(v);
 }
 
-INDDView &INDDView::Create(ITimeProvider &inProvider, IWindowSystem &inWindowSystem,
+IRuntimeView &IRuntimeView::Create(ITimeProvider &inProvider, IWindowSystem &inWindowSystem,
                            IAudioPlayer *inAudioPlayer)
 {
-    return *QT3DS_NEW(qt3ds::render::g_BaseAllocator, CNDDView)(inProvider, inWindowSystem,
+    return *QT3DS_NEW(qt3ds::render::g_BaseAllocator, CRuntimeView)(inProvider, inWindowSystem,
                                                               inAudioPlayer);
 }
 
-QINDDViewSignalProxy *INDDView::signalProxy()
+QRuntimeViewSignalProxy *IRuntimeView::signalProxy()
 {
     return &m_SignalProxy;
 }
 
-//==============================================================================
-/**
- *	CTegraApplication
- */
-CTegraApplication::CTegraApplication(ITimeProvider &inProvider, IWindowSystem &inWindowSystem,
-                                     IAudioPlayer *inAudioPlayer)
-{
-    m_NDDView = INDDView::Create(inProvider, inWindowSystem, inAudioPlayer);
-}
-
-CTegraApplication::~CTegraApplication()
-{
-}
-
-bool CTegraApplication::BeginLoad(const QString &sourcePath, const QStringList &variantList)
-{
-#ifndef QT3DS_NO_SEARCH_PATH
-    // We need these later on in case we try to load any files
-    // such as images
-    NvFSAppendSearchPath("/res");
-    NvFSAppendSearchPath("/res/..");
-    NvFSAppendSearchPath("/data");
-#endif
-
-    bool theResult = false;
-
-    qCInfo(TRACE_INFO) << "CTegraApplication::BeginLoad: Attempting presentation beginload";
-
-    if (!sourcePath.isEmpty()) {
-        // If there was a presentation file then we have to load it or something failed.
-        if (m_NDDView->BeginLoad(sourcePath, variantList)) {
-            qCInfo(TRACE_INFO)
-                    << "CTegraApplication::BeginLoad: Successfully begin loading presentation: "
-                    << sourcePath;
-            theResult = true;
-        } else {
-            qCInfo(TRACE_INFO) << "CTegraApplication::BeginLoad: Failed to load presentation: "
-                               << sourcePath;
-            theResult = false;
-        }
-    } else {
-        // If there wasn't, then we are still in an OK state.
-        qCInfo(TRACE_INFO) << "CTegraApplication::BeginLoad: Presentation file not provided";
-        theResult = true;
-    }
-
-    qCInfo(TRACE_INFO) << "CTegraApplication::BeginLoad: End beginload";
-    return theResult;
-}
-
-bool CTegraApplication::InitializeGraphics(const QSurfaceFormat &format)
-{
-    return m_NDDView->InitializeGraphics(format);
-}
-
-void CTegraApplication::Render()
-{
-    m_NDDView->Render();
-}
-
-bool CTegraApplication::HandleMessage(const QEvent *inEvent)
-{
-    return m_NDDView->HandleMessage(inEvent);
-}
 } // namespace Q3DStudio
 

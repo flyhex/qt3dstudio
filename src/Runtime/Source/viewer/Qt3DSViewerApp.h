@@ -42,7 +42,7 @@
 #include <QtGui/qsurfaceformat.h>
 
 namespace Q3DStudio {
-class CTegraApplication;
+class IRuntimeView;
 class IWindowSystem;
 class IAudioPlayer;
 }

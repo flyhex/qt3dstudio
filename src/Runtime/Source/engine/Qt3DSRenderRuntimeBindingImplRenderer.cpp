@@ -29,7 +29,7 @@
 ****************************************************************************/
 #include "EnginePrefix.h"
 #include "Qt3DSRenderRuntimeBindingImpl.h"
-#include "Qt3DSTegraApplication.h"
+#include "Qt3DSRuntimeView.h"
 #include "Qt3DSWindowSystem.h"
 #include "Qt3DSRenderLoadedTexture.h"
 
