@@ -425,21 +425,23 @@ CInspectableBase *InspectorControlView::createInspectableFromSelectable(
             CDoc *doc = g_StudioApp.GetCore()->GetDoc();
             // Note: Inspector doesn't support multiple selection
             qt3dsdm::TInstanceHandleList selectedsInstances = selectable.GetSelectedInstances();
-            Qt3DSDMInstanceHandle selectedInstance = selectedsInstances[0];
-            if (selectedsInstances.size() == 1
-                && doc->GetDocumentReader().IsInstance(selectedInstance)) {
-                CClientDataModelBridge *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
-                qt3dsdm::Qt3DSDMSlideHandle activeSlide = doc->GetActiveSlide();
+            if (selectedsInstances.size() == 1) {
+                Qt3DSDMInstanceHandle selectedInstance = selectedsInstances[0];
+                if (doc->GetDocumentReader().IsInstance(selectedInstance)) {
+                    auto *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+                    qt3dsdm::Qt3DSDMSlideHandle activeSlide = doc->GetActiveSlide();
 
-                // Scene or Component (when being edited)
-                if (selectedInstance == bridge->GetOwningComponentInstance(activeSlide)) {
-                    Qt3DSDMInstanceHandle activeSlideInstance = doc->GetStudioSystem()
-                                          ->GetSlideSystem()->GetSlideInstance(activeSlide);
-                    inspectableBase = new Qt3DSDMInspectable(selectedInstance, activeSlideInstance);
-                } else if (bridge->IsMaterialBaseInstance(selectedInstance)) {
-                    inspectableBase = new Qt3DSDMMaterialInspectable(selectedInstance);
-                } else {
-                    inspectableBase = new Qt3DSDMInspectable(selectedInstance);
+                    // Scene or Component (when being edited)
+                    if (selectedInstance == bridge->GetOwningComponentInstance(activeSlide)) {
+                        Qt3DSDMInstanceHandle activeSlideInstance = doc->GetStudioSystem()
+                                              ->GetSlideSystem()->GetSlideInstance(activeSlide);
+                        inspectableBase = new Qt3DSDMInspectable(selectedInstance,
+                                                                 activeSlideInstance);
+                    } else if (bridge->IsMaterialBaseInstance(selectedInstance)) {
+                        inspectableBase = new Qt3DSDMMaterialInspectable(selectedInstance);
+                    } else {
+                        inspectableBase = new Qt3DSDMInspectable(selectedInstance);
+                    }
                 }
             }
         } break;

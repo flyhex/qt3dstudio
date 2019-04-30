@@ -1535,19 +1535,14 @@ bool CClientDataModelBridge::IsMultiSelectable(qt3dsdm::Qt3DSDMInstanceHandle in
 {
     if (!m_DataCore->IsInstance(inInstance))
         return false;
-    EStudioObjectType theObjectType = GetObjectType(inInstance);
 
-    bool isPotentiallySelectable = theObjectType == OBJTYPE_LIGHT || theObjectType == OBJTYPE_CAMERA
-        || theObjectType == OBJTYPE_MODEL || theObjectType == OBJTYPE_GROUP
-        || theObjectType == OBJTYPE_COMPONENT || theObjectType == OBJTYPE_TEXT
-        || theObjectType == OBJTYPE_ALIAS || theObjectType == OBJTYPE_PATH;
+    EStudioObjectType objType = GetObjectType(inInstance);
 
-    if (!isPotentiallySelectable)
+    if (objType & OBJTYPE_IS_SINGULAR)
         return false;
 
-    // If we are delving inside component and selecting the component itself (the component is root
-    // in timeline palette)
-    if (theObjectType == OBJTYPE_COMPONENT && IsActiveComponent(inInstance))
+    // active root components are not multi-selectable
+    if (objType == OBJTYPE_COMPONENT && IsActiveComponent(inInstance))
         return false;
 
     return !IsLockedAtAll(inInstance);

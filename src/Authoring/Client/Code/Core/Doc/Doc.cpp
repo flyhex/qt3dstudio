@@ -1391,11 +1391,11 @@ void CDoc::ToggleDataModelObjectToSelection(qt3dsdm::Qt3DSDMInstanceHandle inIns
                             theCurrentlySelectedInstance))
                     theNewHandles.push_back(theCurrentlySelectedInstance);
             }
-        } else
+        } else {
             theNewHandles = m_SelectedValue.getData<qt3dsdm::TInstanceHandleList>();
+        }
 
-        qt3dsdm::TInstanceHandleList::iterator iter =
-                std::find(theNewHandles.begin(), theNewHandles.end(), inInstance);
+        auto iter = std::find(theNewHandles.begin(), theNewHandles.end(), inInstance);
         if (iter == theNewHandles.end())
             theNewHandles.push_back(inInstance);
         else
