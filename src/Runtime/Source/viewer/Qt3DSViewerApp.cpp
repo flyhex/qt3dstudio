@@ -264,8 +264,10 @@ public:
 };
 
 ///< @brief contructor
-Q3DSViewerApp::Q3DSViewerApp(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer)
+Q3DSViewerApp::Q3DSViewerApp(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer,
+                             QElapsedTimer *startupTimer)
     : m_Impl(*new Q3DSViewerAppImpl(inAudioPlayer))
+    , m_startupTimer(startupTimer)
 {
     Q_UNUSED(glContext)
     m_Impl.m_WindowSystem = new SWindowSystemImpl();
@@ -326,7 +328,7 @@ bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFor
 
         // create internal app
         m_Impl.m_view = &IRuntimeView::Create(g_GlobalTimeProvider, *m_Impl.m_WindowSystem,
-                                          m_Impl.m_AudioPlayer);
+                                          m_Impl.m_AudioPlayer, m_startupTimer);
 
         if (assetVisitor)
             m_Impl.m_view->setAssetVisitor(assetVisitor);
@@ -792,9 +794,11 @@ float Q3DSViewerApp::dataInputMin(const QString &name) const
     return m_Impl.m_view->dataInputMin(name);
 }
 
-Q3DSViewerApp &Q3DSViewerApp::Create(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer)
+Q3DSViewerApp &Q3DSViewerApp::Create(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer,
+                                     QElapsedTimer *startupTimer)
 {
-    return *Q3DStudio_virtual_new(Q3DSViewerApp) Q3DSViewerApp(glContext, inAudioPlayer);
+    return *Q3DStudio_virtual_new(Q3DSViewerApp) Q3DSViewerApp(glContext, inAudioPlayer,
+                                                               startupTimer);
 }
 
 void Q3DSViewerApp::Release()

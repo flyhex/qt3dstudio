@@ -58,6 +58,7 @@ Q3DSRenderer::Q3DSRenderer(bool visibleFlag, qt3ds::Qt3DSAssetVisitor *assetVisi
     , m_settings(new Q3DSViewerSettings(this))
     , m_presentation(new Q3DSPresentation(this))
 {
+    m_startupTimer.start();
 }
 
 Q3DSRenderer::~Q3DSRenderer()
@@ -168,7 +169,7 @@ void Q3DSRenderer::draw()
 
 bool Q3DSRenderer::initializeRuntime(QOpenGLFramebufferObject *inFbo)
 {
-    m_runtime = &Q3DSViewerApp::Create(nullptr, new Qt3DSAudioPlayerImpl());
+    m_runtime = &Q3DSViewerApp::Create(nullptr, new Qt3DSAudioPlayerImpl(), &m_startupTimer);
     Q_ASSERT(m_runtime);
 
     // Connect presentation ready signal before initializing the app

@@ -125,6 +125,8 @@ namespace render {
         virtual QPair<QT3DSF32, int> GetFPS() = 0;
         // Set fps by higher level, etc application
         virtual void SetFPS(QPair<QT3DSF32, int> inFPS) = 0;
+        virtual void SetFrameTime(QT3DSF32 time) = 0;
+        virtual QVector<QT3DSF32> GetFrameTimes() const = 0;
 
         // Currently there are a few things that need to work differently
         // in authoring mode vs. runtime.  The particle effects, for instance

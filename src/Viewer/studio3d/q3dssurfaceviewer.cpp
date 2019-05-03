@@ -175,6 +175,7 @@ Q3DSSurfaceViewerPrivate::Q3DSSurfaceViewerPrivate(Q3DSSurfaceViewer *q)
     , m_settings(new Q3DSViewerSettings(this))
     , m_presentation(new Q3DSPresentation(this))
 {
+    m_startupTimer.start();
     connect(m_presentation, &Q3DSPresentation::sourceChanged,
             this, &Q3DSSurfaceViewerPrivate::reset);
 }
@@ -358,7 +359,7 @@ bool Q3DSSurfaceViewerPrivate::initializeRuntime()
 
     m_context->makeCurrent(m_surface);
 
-    m_viewerApp = &Q3DSViewerApp::Create(m_context, new Qt3DSAudioPlayerImpl());
+    m_viewerApp = &Q3DSViewerApp::Create(m_context, new Qt3DSAudioPlayerImpl(), &m_startupTimer);
 
     Q_ASSERT(m_viewerApp);
 

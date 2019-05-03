@@ -307,10 +307,7 @@ namespace render {
         void EnableLayerCaching(bool inEnabled) override { m_LayerCachingEnabled = inEnabled; }
         bool IsLayerCachingEnabled() const override { return m_LayerCachingEnabled; }
 
-        void EnableLayerGpuProfiling(bool inEnabled) override
-        {
-            m_LayerGPuProfilingEnabled = inEnabled;
-        }
+        void EnableLayerGpuProfiling(bool inEnabled) override;
         bool IsLayerGpuProfilingEnabled() const override { return m_LayerGPuProfilingEnabled; }
 
         // Calls prepare layer for render

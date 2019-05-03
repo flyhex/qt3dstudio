@@ -36,6 +36,7 @@
 #include <string>
 #include <vector>
 #include <QObject>
+#include <QtCore/qelapsedtimer.h>
 
 #include "Qt3DSInputDefs.h"
 #include "q3dsdatainput.h"
@@ -98,7 +99,8 @@ class QT3DS_RUNTIME_API Q3DSViewerApp : public QObject
 {
     Q_OBJECT
 private:
-    Q3DSViewerApp(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer);
+    Q3DSViewerApp(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer,
+                  QElapsedTimer *startupTimer);
     ~Q3DSViewerApp();
 
 public:
@@ -386,9 +388,11 @@ private:
 
 private:
     Q3DSViewerAppImpl &m_Impl;
+    QElapsedTimer *m_startupTimer;
 
 public:
-    static Q3DSViewerApp &Create(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer = 0);
+    static Q3DSViewerApp &Create(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer = nullptr,
+                                 QElapsedTimer *startupTimer = nullptr);
     void Release();
 
 Q_SIGNALS:

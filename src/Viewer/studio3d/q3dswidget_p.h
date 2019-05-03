@@ -82,6 +82,7 @@ private:
     QTimer *m_timer;
     int m_updateInterval;
     qreal m_pixelRatio;
+    QElapsedTimer m_startupTimer;
 
     Q3DSViewerSettings *m_settings;
     Q3DSPresentation *m_presentation;

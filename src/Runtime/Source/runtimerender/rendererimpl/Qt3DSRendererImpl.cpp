@@ -188,6 +188,22 @@ namespace render {
         }
     }
 
+    void Qt3DSRendererImpl::EnableLayerGpuProfiling(bool inEnabled)
+    {
+        if (m_LayerGPuProfilingEnabled != inEnabled) {
+            TInstanceRenderMap::iterator theIter;
+            for (theIter = m_InstanceRenderMap.begin(); theIter != m_InstanceRenderMap.end();
+                 theIter++) {
+                SLayerRenderData *data = theIter->second;
+                if (!inEnabled)
+                    data->m_LayerProfilerGpu = nullptr;
+                else
+                    data->CreateGpuProfiler();
+            }
+        }
+        m_LayerGPuProfilingEnabled = inEnabled;
+    }
+
     bool Qt3DSRendererImpl::PrepareLayerForRender(SLayer &inLayer,
                                                   const QT3DSVec2 &inViewportDimensions,
                                                   bool inRenderSiblings,

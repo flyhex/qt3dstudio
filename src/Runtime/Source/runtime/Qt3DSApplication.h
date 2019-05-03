@@ -195,7 +195,6 @@ public:
     virtual Q3DStudio::UINT32 GetHandleForElement(Q3DStudio::TElement *inElement) = 0;
 
     virtual Q3DStudio::IRuntimeFactoryCore &GetRuntimeFactoryCore() = 0;
-    virtual void HideFPS(bool flag) = 0;
 
     virtual IActivityZoneManager &GetActivityZoneManager() = 0;
     virtual IElementAllocator &GetElementAllocator() = 0;

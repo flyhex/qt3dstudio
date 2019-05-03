@@ -160,10 +160,12 @@ private:
 
     qt3ds::Qt3DSAssetVisitor *m_visitor;
     bool m_showOnScreenStats;
+    QElapsedTimer *m_startupTimer;
+    qint64 m_startupTime;
 
 public:
     CRuntimeView(ITimeProvider &inTimeProvider, IWindowSystem &inWindowSystem,
-                 IAudioPlayer *inAudioPlayer);
+                 IAudioPlayer *inAudioPlayer, QElapsedTimer *startupTimer);
     ~CRuntimeView() override;
 
     QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE_OVERRIDE(qt3ds::render::g_BaseAllocator)
@@ -226,7 +228,7 @@ public:
 };
 
 CRuntimeView::CRuntimeView(ITimeProvider &inTimeProvider, IWindowSystem &inWindowSystem,
-                           IAudioPlayer *inAudioPlayer)
+                           IAudioPlayer *inAudioPlayer, QElapsedTimer *startupTimer)
     : m_RenderEngine(nullptr)
     , m_InputEngine(nullptr)
     , m_Application(nullptr)
@@ -237,6 +239,8 @@ CRuntimeView::CRuntimeView(ITimeProvider &inTimeProvider, IWindowSystem &inWindo
     , mRefCount(0)
     , m_visitor(nullptr)
     , m_showOnScreenStats(false)
+    , m_startupTimer(startupTimer)
+    , m_startupTime(-1)
 {
 }
 
@@ -348,6 +352,11 @@ void CRuntimeView::Render()
 
     m_Application->UpdateAndRender();
 
+    if (m_startupTime < 0 && m_startupTimer) {
+        m_startupTime = m_startupTimer->elapsed();
+        m_startupTimer->invalidate();
+    }
+
     if (m_showOnScreenStats) {
         ITegraRenderStateManager &manager
                 = GetTegraRenderEngine()->GetTegraRenderStateManager();
@@ -359,6 +368,7 @@ void CRuntimeView::Render()
 
         QPair<QT3DSF32, QT3DSF32> fps
                 = m_RuntimeFactory->GetQt3DSRenderContext().GetFPS();
+        const QVector<QT3DSF32> times = m_RuntimeFactory->GetQt3DSRenderContext().GetFrameTimes();
 
         QString text;
         QTextStream stream(&text);
@@ -366,6 +376,14 @@ void CRuntimeView::Render()
         stream << QString::number(fps.first, 'f', 2);
         stream << " fps, frame count ";
         stream << QString::number(fps.second);
+        stream << ", frame time ";
+        stream << QString::number(times[0], 'f', 2);
+        stream << " ms";
+        if (m_startupTime) {
+            stream << ", Init time: ";
+            stream << QString::number(m_startupTime);
+            stream << " ms";
+        }
 
         // bottom left coordinates
         GetTegraRenderEngine()->RenderText2D(
@@ -446,6 +464,7 @@ INT32 CRuntimeView::GetFrameCount()
 void CRuntimeView::showOnScreenStats(bool show)
 {
     m_showOnScreenStats = show;
+    m_RuntimeFactory->GetQt3DSRenderContext().GetRenderer().EnableLayerGpuProfiling(show);
 }
 
 CInputEngine *CRuntimeView::GetInputEngine()
@@ -718,10 +737,10 @@ void CRuntimeView::setAssetVisitor(qt3ds::Qt3DSAssetVisitor *v)
 }
 
 IRuntimeView &IRuntimeView::Create(ITimeProvider &inProvider, IWindowSystem &inWindowSystem,
-                                   IAudioPlayer *inAudioPlayer)
+                                   IAudioPlayer *inAudioPlayer, QElapsedTimer *startupTimer)
 {
     return *QT3DS_NEW(qt3ds::render::g_BaseAllocator, CRuntimeView)(inProvider, inWindowSystem,
-                                                                    inAudioPlayer);
+                                                                    inAudioPlayer, startupTimer);
 }
 
 QRuntimeViewSignalProxy *IRuntimeView::signalProxy()

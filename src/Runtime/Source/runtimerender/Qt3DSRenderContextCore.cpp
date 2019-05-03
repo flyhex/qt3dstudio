@@ -262,6 +262,7 @@ struct SRenderContext : public IQt3DSRenderContext
     NVRenderRect m_VirtualViewport;
     QPair<QT3DSF32, int> m_FPS;
     bool m_AuthoringMode;
+    QVector<QT3DSF32> m_frameTimes;
 
     SRenderContext(NVRenderContext &ctx, IQt3DSRenderContextCore &inCore,
                    const char8_t *inApplicationDirectory, bool delayedLoading)
@@ -391,6 +392,19 @@ struct SRenderContext : public IQt3DSRenderContext
     QT3DSU32 GetFrameCount() override { return m_FrameCount; }
     void SetFPS(QPair<QT3DSF32, int> inFPS) override { m_FPS = inFPS; }
     QPair<QT3DSF32, int> GetFPS(void) override { return m_FPS; }
+
+    void SetFrameTime(QT3DSF32 time) override
+    {
+        m_frameTimes.push_front(time);
+        // Store only one value for now. This can be increased once we have proper graph for
+        // the frame times.
+        if (m_frameTimes.size() > 1)
+            m_frameTimes.pop_back();
+    }
+    QVector<QT3DSF32> GetFrameTimes() const override
+    {
+        return m_frameTimes;
+    }
 
     bool IsAuthoringMode() override { return m_AuthoringMode; }
     void SetAuthoringMode(bool inMode) override { m_AuthoringMode = inMode; }

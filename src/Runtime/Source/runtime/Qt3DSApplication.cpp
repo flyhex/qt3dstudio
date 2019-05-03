@@ -578,7 +578,7 @@ struct SApp : public IApplication
     nvvector<NVScopedRefCounted<IAppRunnable>> m_ThreadRunnables;
     nvvector<NVScopedRefCounted<IAppRunnable>> m_MainThreadRunnables;
     NVScopedRefCounted<IAppLoadContext> m_AppLoadContext;
-    bool m_HideFPS;
+    bool m_DisableState;
     bool m_ProfileLogging;
     bool m_LastRenderWasDirty;
     QT3DSU64 m_LastFrameStartTime;
@@ -627,7 +627,7 @@ struct SApp : public IApplication
         , m_ThreadRunnables(inFactory.GetFoundation().getAllocator(), "SApp::m_ThreadRunnables")
         , m_MainThreadRunnables(inFactory.GetFoundation().getAllocator(),
                                 "SApp::m_MainThreadRunnables")
-        , m_HideFPS(true)
+        , m_DisableState(true)
         , m_ProfileLogging(false)
         , m_LastRenderWasDirty(true)
         , m_LastFrameStartTime(0)
@@ -998,31 +998,16 @@ struct SApp : public IApplication
                                                            // been called in this round, so clear
                                                            // events to avoid events to be piled up
 
-        QT3DSU64 updateEndTime = qt3ds::foundation::Time::getCurrentCounterValue();
-        QT3DSU64 updateDuration = updateEndTime - m_ThisFrameStartTime;
-        double millis
-                = qt3ds::foundation::Time::sCounterFreq.toTensOfNanos(updateDuration)
-                * (1.0 / 100000);
+        m_RuntimeFactory->GetQt3DSRenderContext().SetFrameTime(m_MillisecondsSinceLastFrame);
         if (floor(m_FrameTimer.GetElapsedSeconds()) > 0.0f) {
             QPair<QT3DSF32, int> fps = m_FrameTimer.GetFPS(m_FrameCount);
             m_RuntimeFactory->GetQt3DSRenderContext().SetFPS(fps);
-            if (m_ProfileLogging || !m_HideFPS) {
+            if (m_ProfileLogging) {
                 qCInfo(PERF_INFO, "Render Statistics: %3.2ffps, frame count %d",
                        fps.first, fps.second);
             }
         }
 
-        (void)millis;
-
-        /*if ( millis > 30.0 )
-        {
-                m_CoreFactory->GetFoundation().error( NVErrorCode::eDEBUG_INFO, __FILE__, __LINE__,
-        "Qt3DS Long Frame: %3.2fms", millis );
-                //Useful for figuring out where the frame time comes from.
-                m_CoreFactory->GetPerfTimer().OutputTimerData();
-
-        }
-        else*/
         m_CoreFactory->GetPerfTimer().ResetTimerData();
 
         fflush(stdout);
@@ -1545,10 +1530,6 @@ struct SApp : public IApplication
             inFactory.GetQt3DSRenderContext().GetRenderer().EnableLayerCaching(
                         *finalSettings.m_LayerCacheEnabled);
         }
-        if (finalSettings.m_LayerGpuProfilingEnabled.hasValue()) {
-            inFactory.GetQt3DSRenderContext().GetRenderer().EnableLayerGpuProfiling(
-                        *finalSettings.m_LayerGpuProfilingEnabled);
-        }
 
         m_CoreFactory->GetPerfTimer().OutputTimerData();
 
@@ -1694,8 +1675,6 @@ struct SApp : public IApplication
         m_Timer.Reset();
         m_ManualTime = 0;
     }
-
-    void HideFPS(bool flag) override { m_HideFPS = flag; }
 
     Q3DStudio::CInputEngine &GetInputEngine() override
     {

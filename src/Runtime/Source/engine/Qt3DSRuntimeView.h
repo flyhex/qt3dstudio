@@ -211,7 +211,8 @@ public:
 
 public:
     static IRuntimeView &Create(ITimeProvider &inProvider, IWindowSystem &inWindowSystem,
-                                IAudioPlayer *inAudioPlayer = nullptr);
+                                IAudioPlayer *inAudioPlayer = nullptr,
+                                QElapsedTimer *startupTimer = nullptr);
 
 public:
     QRuntimeViewSignalProxy *signalProxy();

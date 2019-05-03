@@ -85,6 +85,7 @@ protected:
     Q3DSViewerSettings *m_settings;
     Q3DSPresentation *m_presentation;
     QString m_error;
+    QElapsedTimer m_startupTimer;
 };
 
 QT_END_NAMESPACE
