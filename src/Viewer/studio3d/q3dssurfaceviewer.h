@@ -87,6 +87,7 @@ public Q_SLOTS:
     void setPresentationId(const QString &id);
 
 Q_SIGNALS:
+    void presentationLoaded();
     void sizeChanged(const QSize &size);
     void autoSizeChanged(bool autoSize);
     void updateIntervalChanged(bool autoUpdate);
