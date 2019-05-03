@@ -6,7 +6,6 @@ out vec2 sampleCoord;
 out vec2 alphas;
 
 uniform mat4 mvp;
-uniform mat4 modelView;
 uniform int textureWidth;
 uniform int textureHeight;
 uniform float fontScale;
@@ -37,7 +36,7 @@ vec2 alphaRange(float scale)
 
 void main()
 {
-     float scale = fontScale * sqrt(abs(determinant(modelView)));
+     float scale = fontScale * sqrt(abs(determinant(mvp)));
      alphas = alphaRange(scale);
      sampleCoord = tCoord * vec2(1.0 / float(textureWidth), 1.0 / float(textureHeight));
      gl_Position = mvp * vec4(vCoord, 1.0);

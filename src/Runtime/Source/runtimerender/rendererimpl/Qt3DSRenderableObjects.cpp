@@ -434,12 +434,12 @@ namespace render {
 #if QT_VERSION >= QT_VERSION_CHECK(5,12,2)
     void SDistanceFieldRenderable::Render(const QT3DSVec2 &inCameraVec)
     {
-        m_distanceFieldText.renderText(m_text, m_mvp, m_modelView);
+        m_distanceFieldText.renderText(m_text, m_mvp);
     }
 
     void SDistanceFieldRenderable::RenderDepthPass(const QT3DSVec2 &inCameraVec)
     {
-        m_distanceFieldText.renderTextDepth(m_text, m_mvp, m_modelView);
+        m_distanceFieldText.renderTextDepth(m_text, m_mvp);
     }
 #endif
 

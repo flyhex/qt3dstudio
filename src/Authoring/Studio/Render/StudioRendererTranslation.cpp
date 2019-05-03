@@ -2937,8 +2937,7 @@ void STranslation::RenderZoomRender(SZoomRender &inRender)
             theRenderContext.SetClearColor(QT3DSVec4(.2f, .2f, .2f, 0.0f));
             theRenderContext.Clear(qt3ds::render::NVRenderClearFlags(
                 qt3ds::render::NVRenderClearValues::Color | qt3ds::render::NVRenderClearValues::Depth));
-            theRenderer.RunLayerRender(*theLayer, thePickSetup->m_ProjectionPreMultiply,
-                                       thePickSetup->m_ViewProjection);
+            theRenderer.RunLayerRender(*theLayer, thePickSetup->m_ViewProjection);
             theRenderContext.SetScissorTestEnabled(false);
         }
     }

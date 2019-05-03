@@ -399,17 +399,14 @@ namespace render {
     {
         Q3DSDistanceFieldRenderer &m_distanceFieldText;
         QT3DSMat44 m_mvp;
-        QT3DSMat44 m_modelView;
         SText &m_text;
 
         SDistanceFieldRenderable(SRenderableObjectFlags flags, QT3DSVec3 worldCenterPt,
-                                 SText &text, const NVBounds3 &bounds,
-                                 const QT3DSMat44 &mvp, const QT3DSMat44 &modelView,
+                                 SText &text, const NVBounds3 &bounds, const QT3DSMat44 &mvp,
                                  Q3DSDistanceFieldRenderer &distanceFieldText)
             : SRenderableObject(flags, worldCenterPt, text.m_GlobalTransform, bounds)
             , m_distanceFieldText(distanceFieldText)
             , m_mvp(mvp)
-            , m_modelView(modelView)
             , m_text(text)
         {
             m_RenderableFlags.SetDefaultMaterialMeshSubset(false);

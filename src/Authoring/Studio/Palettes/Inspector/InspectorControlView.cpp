@@ -840,7 +840,8 @@ QColor InspectorControlView::showColorDialog(const QColor &color, int instance, 
     if (instance && handle) {
         auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
                                                      ->GetClientDataModelBridge();
-        showAlpha = bridge->getBGColorProperty(instance).GetHandleValue() == handle;
+        showAlpha = bridge->getBGColorProperty(instance).GetHandleValue() == handle
+                || bridge->getTextColorProperty(instance).GetHandleValue() == handle;
     }
 
     m_currentColor = color;

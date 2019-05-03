@@ -362,7 +362,7 @@ namespace render {
     }
 
     bool SLayerRenderPreparationData::PrepareTextForRender(
-            SText &inText, const QT3DSMat44 &inProjection, const QT3DSMat44 &inViewProjection,
+            SText &inText, const QT3DSMat44 &inViewProjection,
             QT3DSF32 inTextScaleFactor, SLayerRenderPreparationResultFlags &ioFlags)
     {
         ITextTextureCache *theTextRenderer = m_Renderer.GetQt3DSContext().GetTextureCache();
@@ -385,14 +385,12 @@ namespace render {
             SRenderableObject *theRenderable = nullptr;
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,12,2)
-            QT3DSMat44 modelView = (inProjection.getInverse() * inViewProjection)
-                    * inText.m_GlobalTransform;
             Q3DSDistanceFieldRenderer *distanceFieldText
                     = static_cast<Q3DSDistanceFieldRenderer *>(
                         m_Renderer.GetQt3DSContext().getDistanceFieldRenderer());
             theRenderable = RENDER_FRAME_NEW(SDistanceFieldRenderable)(
                         theFlags, inText.GetGlobalPos(), inText, inText.m_Bounds, theMVP,
-                        modelView, *distanceFieldText);
+                        *distanceFieldText);
 #else
             TTPathObjectAndTexture theResult
                     = theTextRenderer->RenderText(inText, inTextScaleFactor);
@@ -1016,13 +1014,11 @@ namespace render {
     }
 
     bool SLayerRenderPreparationData::PrepareRenderablesForRender(
-            const QT3DSMat44 &inProjection, const QT3DSMat44 &inViewProjection,
-            const Option<SClippingFrustum> &inClipFrustum,
+            const QT3DSMat44 &inViewProjection, const Option<SClippingFrustum> &inClipFrustum,
             QT3DSF32 inTextScaleFactor, SLayerRenderPreparationResultFlags &ioFlags)
     {
         SStackPerfTimer __timer(m_Renderer.GetQt3DSContext().GetPerfTimer(),
                                 "SLayerRenderData::PrepareRenderablesForRender");
-        m_projection = inProjection;
         m_ViewProjection = inViewProjection;
         QT3DSF32 theTextScaleFactor = inTextScaleFactor;
         bool wasDataDirty = false;
@@ -1046,8 +1042,7 @@ namespace render {
                     SText *theText = static_cast<SText *>(theNode);
                     theText->CalculateGlobalVariables();
                     if (theText->m_Flags.IsGloballyActive()) {
-                        bool wasTextDirty = PrepareTextForRender(*theText, inProjection,
-                                                                 inViewProjection,
+                        bool wasTextDirty = PrepareTextForRender(*theText, inViewProjection,
                                                                  theTextScaleFactor, ioFlags);
                         wasDataDirty = wasDataDirty || wasTextDirty;
                     }
@@ -1369,7 +1364,6 @@ namespace render {
 
                 QT3DSF32 theTextScaleFactor = 1.0f;
                 if (m_Camera) {
-                    m_projection = m_Camera->m_Projection;
                     m_Camera->CalculateViewProjectionMatrix(m_ViewProjection);
                     theTextScaleFactor = m_Camera->GetTextScaleFactor(
                         thePrepResult.GetLayerToPresentationViewport(),
@@ -1386,7 +1380,6 @@ namespace render {
                     // constructor.
                     m_ClippingFrustum = SClippingFrustum(m_ViewProjection, nearPlane);
                 } else {
-                    m_projection = QT3DSMat44::createIdentity();
                     m_ViewProjection = QT3DSMat44::createIdentity();
                 }
 
@@ -1400,7 +1393,7 @@ namespace render {
                 m_ModelContexts.clear();
                 if (GetOffscreenRenderer() == false) {
                     bool renderablesDirty =
-                        PrepareRenderablesForRender(m_projection, m_ViewProjection,
+                        PrepareRenderablesForRender(m_ViewProjection,
                                                     m_ClippingFrustum,
                                                     theTextScaleFactor, thePrepResult.m_Flags);
                     wasDataDirty = wasDataDirty || renderablesDirty;

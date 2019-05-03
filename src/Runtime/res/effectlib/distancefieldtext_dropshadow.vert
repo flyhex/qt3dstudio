@@ -1,5 +1,4 @@
 uniform highp mat4 mvp;
-uniform highp mat4 modelView;
 uniform highp float fontScale;
 uniform int textureWidth;
 uniform int textureHeight;
@@ -63,7 +62,7 @@ highp float determinant(highp mat4 m)
 
 void main()
 {
-    highp float scale = fontScale * sqrt(abs(determinant(modelView)));
+    highp float scale = fontScale * sqrt(abs(determinant(mvp)));
     alphas = alphaRange(scale);
 
     highp vec2 textureSizeMultiplier = vec2(1.0 / highp float(textureWidth),

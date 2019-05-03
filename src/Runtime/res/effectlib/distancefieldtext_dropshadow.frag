@@ -15,7 +15,7 @@ void main()
                                                    clamp(shadowSampleCoord,
                                                          normalizedTextureBounds.xy,
                                                          normalizedTextureBounds.zw)).a);
-    highp vec4 shadowPixel = shadowColor * shadowAlpha;
+    highp vec4 shadowPixel = color * shadowColor * shadowAlpha;
 
     highp float textAlpha = smoothstep(alphas.x,
                                        alphas.y,

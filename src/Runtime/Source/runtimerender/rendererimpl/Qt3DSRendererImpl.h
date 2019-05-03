@@ -365,8 +365,7 @@ namespace render {
 
         Option<NVRenderRectF> GetLayerRect(SLayer &inLayer) override;
 
-        void RunLayerRender(SLayer &inLayer, const QT3DSMat44 &inProjection,
-                            const QT3DSMat44 &inViewProjection) override;
+        void RunLayerRender(SLayer &inLayer, const QT3DSMat44 &inViewProjection) override;
 
         // Note that this allocator is completely reset on BeginFrame.
         NVAllocatorCallback &GetPerFrameAllocator() override

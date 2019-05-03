@@ -2157,8 +2157,7 @@ namespace render {
         m_BoundingRectColor.setEmpty();
     }
 
-    void SLayerRenderData::PrepareAndRender(const QT3DSMat44 &inProjection,
-                                            const QT3DSMat44 &inViewProjection)
+    void SLayerRenderData::PrepareAndRender(const QT3DSMat44 &inViewProjection)
     {
         TRenderableObjectList theTransparentObjects(m_TransparentObjects);
         TRenderableObjectList theOpaqueObjects(m_OpaqueObjects);
@@ -2166,7 +2165,7 @@ namespace render {
         theOpaqueObjects.clear();
         m_ModelContexts.clear();
         SLayerRenderPreparationResultFlags theFlags;
-        PrepareRenderablesForRender(inProjection, inViewProjection, Empty(), 1.0, theFlags);
+        PrepareRenderablesForRender(inViewProjection, Empty(), 1.0, theFlags);
         RenderDepthPass(false);
         Render();
     }

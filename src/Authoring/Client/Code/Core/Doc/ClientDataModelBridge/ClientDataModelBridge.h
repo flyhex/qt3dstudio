@@ -185,6 +185,7 @@ public:
     qt3dsdm::Qt3DSDMPropertyHandle getSubpresentationProperty() const;
     qt3dsdm::Qt3DSDMPropertyHandle getVariantsProperty(int instance) const;
     qt3dsdm::Qt3DSDMPropertyHandle getBGColorProperty(int instance) const;
+    qt3dsdm::Qt3DSDMPropertyHandle getTextColorProperty(int instance) const;
     qt3dsdm::Qt3DSDMInstanceHandle GetActionInstance();
     qt3dsdm::Qt3DSDMPropertyHandle GetActionEyeball();
     qt3dsdm::Qt3DSDMPropertyHandle GetImportId();

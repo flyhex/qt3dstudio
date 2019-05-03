@@ -971,15 +971,14 @@ namespace render {
     }
 
     // This doesn't have to be cheap.
-    void Qt3DSRendererImpl::RunLayerRender(SLayer &inLayer, const QT3DSMat44 &inProjection,
-                                           const QT3DSMat44 &inViewProjection)
+    void Qt3DSRendererImpl::RunLayerRender(SLayer &inLayer, const QT3DSMat44 &inViewProjection)
     {
         SLayerRenderData *theData = GetOrCreateLayerRenderDataForNode(inLayer);
         if (theData == NULL || theData->m_Camera == NULL) {
             QT3DS_ASSERT(false);
             return;
         }
-        theData->PrepareAndRender(inProjection, inViewProjection);
+        theData->PrepareAndRender(inViewProjection);
     }
 
     void Qt3DSRendererImpl::AddRenderWidget(IRenderWidget &inWidget)

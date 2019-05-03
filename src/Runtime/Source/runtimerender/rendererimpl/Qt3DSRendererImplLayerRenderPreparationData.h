@@ -270,7 +270,6 @@ namespace render {
         TRenderableObjectList m_RenderedOpaqueObjects;
         TRenderableObjectList m_RenderedTransparentObjects;
         QT3DSMat44 m_ViewProjection;
-        QT3DSMat44 m_projection;
         SClippingFrustum m_ClippingFrustum;
         Option<SLayerRenderPreparationResult> m_LayerPrepResult;
         // Widgets drawn at particular times during the rendering process
@@ -325,16 +324,14 @@ namespace render {
                                    const Option<SClippingFrustum> &inClipFrustum,
                                    TNodeLightEntryList &inScopedLights);
 
-        bool PrepareTextForRender(SText &inText, const QT3DSMat44 &inProjection,
-                                  const QT3DSMat44 &inViewProjection,
+        bool PrepareTextForRender(SText &inText, const QT3DSMat44 &inViewProjection,
                                   QT3DSF32 inTextScaleFactor,
                                   SLayerRenderPreparationResultFlags &ioFlags);
         bool PreparePathForRender(SPath &inPath, const QT3DSMat44 &inViewProjection,
                                   const Option<SClippingFrustum> &inClipFrustum,
                                   SLayerRenderPreparationResultFlags &ioFlags);
         // Helper function used during PRepareForRender and PrepareAndRender
-        bool PrepareRenderablesForRender(const QT3DSMat44 &inProjection,
-                                         const QT3DSMat44 &inViewProjection,
+        bool PrepareRenderablesForRender(const QT3DSMat44 &inViewProjection,
                                          const Option<SClippingFrustum> &inClipFrustum,
                                          QT3DSF32 inTextScaleFactor,
                                          SLayerRenderPreparationResultFlags &ioFlags);

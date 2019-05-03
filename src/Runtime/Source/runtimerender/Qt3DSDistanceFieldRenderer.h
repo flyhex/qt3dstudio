@@ -57,7 +57,6 @@ struct GlyphInfo {
 struct Q3DSDistanceFieldShader {
     NVRenderShaderProgram *program = nullptr;
     NVRenderCachedShaderProperty<QT3DSMat44> mvp;
-    NVRenderCachedShaderProperty<QT3DSMat44> modelView;
     NVRenderCachedShaderProperty<QT3DSI32> textureWidth;
     NVRenderCachedShaderProperty<QT3DSI32> textureHeight;
     NVRenderCachedShaderProperty<QT3DSF32> fontScale;
@@ -68,7 +67,6 @@ struct Q3DSDistanceFieldShader {
 struct Q3DSDistanceFieldDropShadowShader {
     NVRenderShaderProgram *program = nullptr;
     NVRenderCachedShaderProperty<QT3DSMat44> mvp;
-    NVRenderCachedShaderProperty<QT3DSMat44> modelView;
     NVRenderCachedShaderProperty<QT3DSI32> textureWidth;
     NVRenderCachedShaderProperty<QT3DSI32> textureHeight;
     NVRenderCachedShaderProperty<QT3DSF32> fontScale;
@@ -95,17 +93,16 @@ public:
             const SText &textInfo);
     void buildShaders();
     Q3DSDistanceFieldMesh buildMesh(const GlyphInfo &glyphInfo, bool shadow);
-    void renderMesh(NVRenderInputAssembler *inputAssembler,
-                    NVRenderTexture2D *texture, const QT3DSMat44 &mvp,
-                    const QT3DSMat44 &modelView, QT3DSI32 textureWidth,
-                    QT3DSI32 textureHeight, QT3DSF32 fontScale, QT3DSVec4 color);
+    void renderMesh(NVRenderInputAssembler *inputAssembler, NVRenderTexture2D *texture,
+                    const QT3DSMat44 &mvp, QT3DSI32 textureWidth, QT3DSI32 textureHeight,
+                    QT3DSF32 fontScale, QT3DSVec4 color);
     void renderMeshWithDropShadow(NVRenderInputAssembler *inputAssembler,
                                   NVRenderTexture2D *texture, const QT3DSMat44 &mvp,
-                                  const QT3DSMat44 &modelView, QT3DSI32 textureWidth,
-                                  QT3DSI32 textureHeight, QT3DSF32 fontScale,
-                                  QT3DSVec2 shadowOffset, QT3DSVec4 color, QT3DSVec4 shadowColor);
-    void renderText(SText &text, const QT3DSMat44 &mvp, const QT3DSMat44 &modelView);
-    void renderTextDepth(SText &text, const QT3DSMat44 &mvp, const QT3DSMat44 &modelView);
+                                  QT3DSI32 textureWidth, QT3DSI32 textureHeight,
+                                  QT3DSF32 fontScale, QT3DSVec2 shadowOffset,
+                                  QT3DSVec4 color, QT3DSVec4 shadowColor);
+    void renderText(SText &text, const QT3DSMat44 &mvp);
+    void renderTextDepth(SText &text, const QT3DSMat44 &mvp);
     void setContext(IQt3DSRenderContext &context);
 
     QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE_OVERRIDE(m_foundation.getAllocator())

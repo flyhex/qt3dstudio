@@ -625,8 +625,6 @@ void Q3DSDistanceFieldRenderer::buildShaders()
     if (m_shader.program) {
         m_shader.mvp = NVRenderCachedShaderProperty<QT3DSMat44>(
                     "mvp", *m_shader.program);
-        m_shader.modelView = NVRenderCachedShaderProperty<QT3DSMat44>(
-                    "modelView", *m_shader.program);
         m_shader.textureWidth = NVRenderCachedShaderProperty<QT3DSI32>(
                     "textureWidth", *m_shader.program);
         m_shader.textureHeight = NVRenderCachedShaderProperty<QT3DSI32>(
@@ -658,8 +656,6 @@ void Q3DSDistanceFieldRenderer::buildShaders()
     if (m_dropShadowShader.program) {
         m_dropShadowShader.mvp = NVRenderCachedShaderProperty<QT3DSMat44>(
                     "mvp", *m_dropShadowShader.program);
-        m_dropShadowShader.modelView = NVRenderCachedShaderProperty<QT3DSMat44>(
-                    "modelView", *m_dropShadowShader.program);
         m_dropShadowShader.textureWidth = NVRenderCachedShaderProperty<QT3DSI32>(
                     "textureWidth", *m_dropShadowShader.program);
         m_dropShadowShader.textureHeight = NVRenderCachedShaderProperty<QT3DSI32>(
@@ -737,8 +733,7 @@ Q3DSDistanceFieldMesh Q3DSDistanceFieldRenderer::buildMesh(const GlyphInfo &glyp
 
 void Q3DSDistanceFieldRenderer::renderMesh(
         NVRenderInputAssembler *inputAssembler, NVRenderTexture2D *texture, const QT3DSMat44 &mvp,
-        const QT3DSMat44 &modelView, QT3DSI32 textureWidth, QT3DSI32 textureHeight,
-        QT3DSF32 fontScale, QT3DSVec4 color)
+        QT3DSI32 textureWidth, QT3DSI32 textureHeight, QT3DSF32 fontScale, QT3DSVec4 color)
 {
     NVRenderContext &renderContext = m_context->GetRenderContext();
     renderContext.SetCullingEnabled(false);
@@ -753,7 +748,6 @@ void Q3DSDistanceFieldRenderer::renderMesh(
 
     renderContext.SetActiveShader(m_shader.program);
     m_shader.mvp.Set(mvp);
-    m_shader.modelView.Set(modelView);
     m_shader.textureWidth.Set(textureWidth);
     m_shader.textureHeight.Set(textureHeight);
     m_shader.fontScale.Set(fontScale);
@@ -766,8 +760,8 @@ void Q3DSDistanceFieldRenderer::renderMesh(
 
 void Q3DSDistanceFieldRenderer::renderMeshWithDropShadow(
         NVRenderInputAssembler *inputAssembler, NVRenderTexture2D *texture, const QT3DSMat44 &mvp,
-        const QT3DSMat44 &modelView, QT3DSI32 textureWidth, QT3DSI32 textureHeight,
-        QT3DSF32 fontScale, QT3DSVec2 shadowOffset, QT3DSVec4 color, QT3DSVec4 shadowColor)
+        QT3DSI32 textureWidth, QT3DSI32 textureHeight, QT3DSF32 fontScale, QT3DSVec2 shadowOffset,
+        QT3DSVec4 color, QT3DSVec4 shadowColor)
 {
     NVRenderContext &renderContext = m_context->GetRenderContext();
     renderContext.SetCullingEnabled(false);
@@ -782,7 +776,6 @@ void Q3DSDistanceFieldRenderer::renderMeshWithDropShadow(
 
     renderContext.SetActiveShader(m_dropShadowShader.program);
     m_dropShadowShader.mvp.Set(mvp);
-    m_dropShadowShader.modelView.Set(modelView);
     m_dropShadowShader.textureWidth.Set(textureWidth);
     m_dropShadowShader.textureHeight.Set(textureHeight);
     m_dropShadowShader.fontScale.Set(fontScale);
@@ -856,6 +849,7 @@ size_t getTextHashValue(const SText &text)
     hashCombine(hashValue, text.m_TextColor.x);
     hashCombine(hashValue, text.m_TextColor.y);
     hashCombine(hashValue, text.m_TextColor.z);
+    hashCombine(hashValue, text.m_TextColor.w);
     hashCombine(hashValue, std::string(text.m_Font.c_str()));
     hashCombine(hashValue, std::string(text.m_Text.c_str()));
     hashCombine(hashValue, text.m_Elide);
@@ -887,14 +881,16 @@ size_t getGlyphHashValue(const GlyphInfo &glyph)
     return hashValue;
 }
 
-void Q3DSDistanceFieldRenderer::renderText(SText &text, const QT3DSMat44 &mvp,
-                                           const QT3DSMat44 &modelView)
+void Q3DSDistanceFieldRenderer::renderText(SText &text, const QT3DSMat44 &mvp)
 {
     if (!m_shader.program)
         buildShaders();
 
+    float alpha = text.m_GlobalOpacity * text.m_TextColor.w;
+    QT3DSVec4 textColor = QT3DSVec4(text.m_TextColor.getXYZ() * alpha, alpha);
     int shadowRgb = int(100 - int(text.m_DropShadowStrength));
-    QT3DSVec4 shadowColor(shadowRgb * 0.01f, shadowRgb * 0.01f, shadowRgb * 0.01f, 1);
+    QT3DSVec4 shadowColor(shadowRgb * 0.01f * alpha, shadowRgb * 0.01f * alpha,
+                          shadowRgb * 0.01f * alpha, alpha);
 
     size_t textHashValue = getTextHashValue(text);
     if (!m_glyphCache.contains(textHashValue))
@@ -934,15 +930,15 @@ void Q3DSDistanceFieldRenderer::renderText(SText &text, const QT3DSMat44 &mvp,
         STextureDetails textureDetails = it.key()->texture->GetTextureDetails();
 
         if (text.m_DropShadow) {
-            renderMeshWithDropShadow(mesh.inputAssembler, it.key()->texture, mvp, modelView,
+            renderMeshWithDropShadow(mesh.inputAssembler, it.key()->texture, mvp,
                                      int(textureDetails.m_Width), int(textureDetails.m_Height),
                                      glyphInfo.fontScale * float(m_pixelRatio),
                                      QT3DSVec2(glyphInfo.shadowOffsetX, glyphInfo.shadowOffsetY),
-                                     text.m_TextColor, shadowColor);
+                                     textColor, shadowColor);
         } else {
-            renderMesh(mesh.inputAssembler, it.key()->texture, mvp, modelView,
+            renderMesh(mesh.inputAssembler, it.key()->texture, mvp,
                        int(textureDetails.m_Width), int(textureDetails.m_Height),
-                       glyphInfo.fontScale * float(m_pixelRatio), text.m_TextColor);
+                       glyphInfo.fontScale * float(m_pixelRatio), textColor);
         }
 
         m_renderedGlyphs += glyphHashValue;
@@ -951,11 +947,10 @@ void Q3DSDistanceFieldRenderer::renderText(SText &text, const QT3DSMat44 &mvp,
     text.m_Bounds = NVBounds3(minimum, maximum);
 }
 
-void Q3DSDistanceFieldRenderer::renderTextDepth(SText &text, const QT3DSMat44 &mvp,
-                                                const QT3DSMat44 &modelView)
+void Q3DSDistanceFieldRenderer::renderTextDepth(SText &text, const QT3DSMat44 &mvp)
 {
     // TODO: Create a depth pass shader for distance field text
-    renderText(text, mvp, modelView);
+    renderText(text, mvp);
 }
 
 void Q3DSDistanceFieldRenderer::setContext(IQt3DSRenderContext &context)

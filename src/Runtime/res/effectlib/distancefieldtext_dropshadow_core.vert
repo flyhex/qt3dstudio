@@ -9,7 +9,6 @@ out vec2 alphas;
 out vec4 normalizedTextureBounds;
 
 uniform mat4 mvp;
-uniform mat4 modelView;
 uniform int textureWidth;
 uniform int textureHeight;
 uniform float fontScale;
@@ -41,7 +40,7 @@ vec2 alphaRange(float scale)
 
 void main()
 {
-     float scale = fontScale * sqrt(abs(determinant(modelView)));
+     float scale = fontScale * sqrt(abs(determinant(mvp)));
      alphas = alphaRange(scale);
 
      vec2 textureSizeMultiplier = vec2(1.0 / float(textureWidth), 1.0 / float(textureHeight));
