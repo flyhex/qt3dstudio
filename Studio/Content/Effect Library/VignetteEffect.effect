@@ -15,20 +15,18 @@
 
 void frag()
 {
-    float radius = vig_radius;
     vec4 origColor = texture2D_0(TexCoord);
     vec2 uv = TexCoord.xy;
     vec2 center = vec2(0.5);
 
     vec4 bg = origColor;
 
-    uv *=  1.0 - uv.yx;
-    float vig = uv.x*uv.y * vig_strength;
+    uv *= 1.0 - uv.yx;
+    float vig = uv.x * uv.y * vig_strength;
     vig = pow(vig, vig_radius);
 
-    vec4 vigmixcolor = vec4(vig_color,vig) * vec4(vig);
-    gl_FragColor = vec4(mix(origColor,vigmixcolor,1.0-vig));
-
+    vec4 vigColor = vec4(vig_color.rgb, vig) * vig;
+    gl_FragColor = mix(origColor, vigColor, 1.0 - vig);
 }
     ]]></FragmentShader>
         </Shader>
