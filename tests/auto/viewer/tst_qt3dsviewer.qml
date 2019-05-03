@@ -55,7 +55,7 @@ Studio3D {
     width: 800
     height: 800
     Presentation {
-        source: "qrc:/../../scenes/simple_cube_animation/simple_cube_animation.uia"
+        source: "qrc:/scenes/simple_cube_animation/simple_cube_animation.uia"
     }
     ViewerSettings {
     }

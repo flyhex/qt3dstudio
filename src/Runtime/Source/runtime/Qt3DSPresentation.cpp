@@ -28,9 +28,6 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Includes
-//==============================================================================
 #include "Qt3DSPresentation.h"
 #include "Qt3DSCommandEventTypes.h"
 #include "Qt3DSIScriptBridge.h"
@@ -47,34 +44,28 @@
 #include "Qt3DSLogicSystem.h"
 #include "Qt3DSParametersSystem.h"
 
-//==============================================================================
-// Namespace
-//==============================================================================
+#include <QtCore/qfileinfo.h>
+
 namespace Q3DStudio {
 
-//==============================================================================
-// Constants
-//==============================================================================
-/// Maximum number of Event/Command that can be queued in an Update cycle
+// Maximum number of Event/Command that can be queued in an Update cycle
 const INT32 Q3DStudio_EVENTCOMMANDQUEUECAPACITY = 512;
 
-/// Limit to prevent infinite loop during queue processing
+// Limit to prevent infinite loop during queue processing
 const INT32 Q3DStudio_MAXEVENTCOMMANDLOOPCOUNT = Q3DStudio_EVENTCOMMANDQUEUECAPACITY * 10;
 
 #ifdef WIN32
 #pragma warning(push)
 #pragma warning(disable : 4355)
 #endif
-//==============================================================================
-/**
- *	Constructor
- */
-CPresentation::CPresentation(const CHAR *inName, qt3ds::runtime::IApplication *inApplication)
+
+CPresentation::CPresentation(const QString &inName, const QString &projectPath,
+                             qt3ds::runtime::IApplication *inApplication)
     : m_Name(inName)
     , m_Application(inApplication)
-    , m_Scene(NULL)
-    , m_ActivityZone(NULL)
-    , m_RootElement(NULL)
+    , m_Scene(nullptr)
+    , m_ActivityZone(nullptr)
+    , m_RootElement(nullptr)
     , m_EventCommandQueue(Q3DStudio_EVENTCOMMANDQUEUECAPACITY, "EventCommandQueue")
     , m_IsProcessingEventCommandQueue(false)
     , m_ComponentManager(*this)
@@ -85,6 +76,7 @@ CPresentation::CPresentation(const CHAR *inName, qt3ds::runtime::IApplication *i
     , m_OffsetInvalid(true)
     , m_Active(true)
 {
+    m_projectPath = QFileInfo(projectPath).absoluteFilePath();
     m_Size.m_Width = 0;
     m_Size.m_Height = 0;
     m_Size.m_ScaleMode = SCALEMODE_UNKNOWN;
@@ -103,15 +95,10 @@ CPresentation::CPresentation(const CHAR *inName, qt3ds::runtime::IApplication *i
 #pragma warning(pop)
 #endif
 
-//==============================================================================
-/**
- *	Destructor
- */
 CPresentation::~CPresentation()
 {
 }
 
-//==============================================================================
 /**
  *	Registers an element for notification when events fired on it.
  *	@param inElement		target element to monitor
@@ -129,7 +116,6 @@ void CPresentation::RegisterEventCallback(TElement *inElement, const TEventComma
         inElement->SetFlag(ELEMENTFLAG_PICKENABLED, true);
 }
 
-//==============================================================================
 /**
  *	Unregisters a previously registered event callback.
  *	@param inElement		target element to monitor
@@ -183,7 +169,6 @@ void CPresentation::PreUpdate(const TTimeUnit inGlobalTime)
     ProcessEventCommandQueue();
 }
 
-//==============================================================================
 /**
  *	Update the presentation to the current time. This will start triggering the
  *	various stages of the presentation frame rhythm
@@ -230,7 +215,6 @@ void CPresentation::PostUpdate(const TTimeUnit inGlobalTime)
     m_PreviousGlobalTime = inGlobalTime;
 }
 
-//==============================================================================
 /**
  *	Process the Event/Command queue completely
  *	PostEventCommand is the method that will add new Event/Command to the queue.
@@ -288,7 +272,6 @@ BOOL CPresentation::ProcessEventCommandQueue()
     return theResult;
 }
 
-//==============================================================================
 /**
  *	Pass incoming event to event consumers immediately
  *	@param ioEvent		the incoming event
@@ -318,7 +301,6 @@ void CPresentation::ProcessEvent(SEventCommand &ioEvent, INT32 &ioEventCount)
     }
 }
 
-//==============================================================================
 /**
  *	Handle event bubbling
  *	@param ioEvent		the incoming event
@@ -330,7 +312,7 @@ void CPresentation::ProcessEventBubbling(SEventCommand &ioEvent, INT32 &ioEventC
     // Check for onGroupedMouseOver/Out
     // arg1 = the original onMouseOut model and arg2 = the original onMouseOver model
     if (ioEvent.m_Type == ON_MOUSEOUT) {
-        // If original onMouseOver model is NULL or not a descendent, fire onGroupedMouseOut
+        // If original onMouseOver model is nullptr or not a descendent, fire onGroupedMouseOut
         TElement *theMouseOverModel = static_cast<TElement *>(ioEvent.m_Arg2.m_VoidPointer);
         if (!theMouseOverModel || !ioEvent.m_Target->IsDescendent(*theMouseOverModel)) {
             SEventCommand theEvent = ioEvent;
@@ -345,7 +327,7 @@ void CPresentation::ProcessEventBubbling(SEventCommand &ioEvent, INT32 &ioEventC
             ioEvent.m_Arg2.m_VoidPointer = ioEvent.m_Target;
         }
     } else if (ioEvent.m_Type == ON_MOUSEOVER) {
-        // If original onMouseOut model is NULL or not a descendent, fire onGroupedMouseOver
+        // If original onMouseOut model is nullptr or not a descendent, fire onGroupedMouseOver
         TElement *theMouseOutModel = static_cast<TElement *>(ioEvent.m_Arg1.m_VoidPointer);
         if (!theMouseOutModel || !ioEvent.m_Target->IsDescendent(*theMouseOutModel)) {
             SEventCommand theEvent = ioEvent;
@@ -379,7 +361,6 @@ void CPresentation::ProcessEventBubbling(SEventCommand &ioEvent, INT32 &ioEventC
     }
 }
 
-//==============================================================================
 /**
  *	Execute command immediately
  *	@param inCommand		incoming command structure
@@ -454,7 +435,6 @@ void CPresentation::ProcessCommand(const SEventCommand &inCommand)
     }
 }
 
-//==============================================================================
 /**
  *	Put an Event in the queue to be processed later during the Event/Command
  *	processing stage in Update
@@ -472,7 +452,6 @@ void CPresentation::FireEvent(const SEventCommand &inEvent)
     theEventCommand.m_IsEvent = true;
 }
 
-//==============================================================================
 /**
  *	Put an Event in the queue to be processed later during the Event/Command
  *	processing stage in Update See ProcessEventCommandQueue for more
@@ -508,7 +487,6 @@ void CPresentation::FireEvent(const TEventCommandHash inEventType, TElement *inT
     m_EventCommandQueue.NewEntry() = theEvent;
 }
 
-//==============================================================================
 /**
  *	Put a Command in the queue to be processed later during the Event/Command
  *	processing stage in Update. See ProcessEventCommandQueue for more information
@@ -564,7 +542,7 @@ void CPresentation::ProcessEvent(SEventCommand &inEvent)
     INT32 theEventProcessedCount = 0;
     ProcessEvent(inEvent, theEventProcessedCount);
 }
-//==============================================================================
+
 /**
  *	This method is triggered after the presentation is streamed in. At this point,
  *	all the stores will be loaded up.
@@ -574,7 +552,6 @@ void CPresentation::OnPresentationLoaded()
     m_FrameData.Reserve(1000 /*m_ElementManager.GetElementCount( )*/);
 }
 
-//==============================================================================
 /**
  *	Set the full path for this presentation. This can be used by anyone who
  *	knows the presentation to form relative paths.
@@ -582,20 +559,26 @@ void CPresentation::OnPresentationLoaded()
  */
 void CPresentation::SetFilePath(const CHAR *inPath)
 {
-    m_FilePath = inPath;
+    m_FilePath = QFileInfo(inPath).absoluteFilePath();
 }
 
-//==============================================================================
 /**
  *	Gets the full file path for this presentation. This can be used by anyone who
  *	knows the presentation to form relative correct paths.
  */
-QString CPresentation::GetFilePath()
+QString CPresentation::GetFilePath() const
 {
     return m_FilePath;
 }
 
-//==============================================================================
+/**
+ *  Gets the absolute file path for the project that owns this presentation.
+ */
+QString CPresentation::getProjectPath() const
+{
+    return m_projectPath;
+}
+
 /**
  *	Gets the pause state
  *	@return true if the presentation is paused, false if otherwise
@@ -605,7 +588,6 @@ BOOL CPresentation::GetPause() const
     return m_Paused;
 }
 
-//==============================================================================
 /**
  *	Sets the pause state
  *	@param inPause		set true to pause, set false if otherwise
@@ -615,7 +597,6 @@ void CPresentation::SetPause(const BOOL inPause)
     m_Paused = inPause ? true : false;
 }
 
-//==============================================================================
 /**
  *	Simple manager access: Scene
  */
@@ -645,7 +626,6 @@ bool CPresentation::GetActive() const
     return m_Active;
 }
 
-//==============================================================================
 /**
  *	Simple manager access: Scene
  */
@@ -654,7 +634,6 @@ IScene *CPresentation::GetScene() const
     return m_Scene;
 }
 
-//==============================================================================
 /**
 *	Simple manager access: Script Bridge Qml
 */
@@ -663,10 +642,9 @@ IScriptBridge *CPresentation::GetScriptBridgeQml()
     if (m_Application)
         return &m_Application->GetRuntimeFactoryCore().GetScriptEngineQml();
 
-    return NULL;
+    return nullptr;
 }
 
-//==============================================================================
 /**
  *	Simple manager access: Component Manager
  */
@@ -675,7 +653,6 @@ IComponentManager &CPresentation::GetComponentManager()
     return m_ComponentManager;
 }
 
-//==============================================================================
 /**
  *	Simple manager access: Slide Manager
  */
@@ -684,7 +661,6 @@ ISlideSystem &CPresentation::GetSlideSystem()
     return *m_SlideSystem;
 }
 
-//==============================================================================
 /**
  *	Simple manager access: Animation Manager
  */
@@ -693,7 +669,6 @@ qt3ds::runtime::IAnimationSystem &CPresentation::GetAnimationSystem()
     return *m_AnimationSystem;
 }
 
-//==============================================================================
 /**
  *	Simple manager access: Logic Manager
  */
@@ -702,7 +677,6 @@ ILogicSystem &CPresentation::GetLogicSystem()
     return *m_LogicSystem;
 }
 
-//==============================================================================
 /**
  *	Simple manager access: Params Manager
  */
@@ -736,7 +710,6 @@ qt3ds::foundation::IStringTable &CPresentation::GetStringTable()
     return GetApplication().GetRuntimeFactoryCore().GetStringTable();
 }
 
-//==============================================================================
 /**
  *	Current frame data stores traversal lists for use later
  */
@@ -750,7 +723,6 @@ void CPresentation::SetLoadedBuffer(qt3ds::render::ILoadedBuffer &inBuffer)
     m_LoadedBuffer = inBuffer;
 }
 
-//==============================================================================
 /**
  *	Retrieve the name of the presentation. This is actually the file path.
  *	@return the name of this presentation
@@ -760,7 +732,6 @@ const QByteArray CPresentation::GetName() const
     return m_Name.toLatin1();
 }
 
-//==============================================================================
 /**
  *	Retrieve the size of the presentation in Studio
  *	@return the size of this presentation
@@ -770,7 +741,6 @@ SPresentationSize CPresentation::GetSize() const
     return m_Size;
 }
 
-//==============================================================================
 /**
  *	Set the size of the presentation as reflected in Studio
  *	@param inSize		size of presentation ( width, height, scale mode ) in Studio

@@ -86,6 +86,7 @@
 #include <QtCore/qdir.h>
 #include <unordered_set>
 #include "runtime/q3dsqmlbehavior.h"
+#include "runtime/q3dsmaterialdefinitionparser.h"
 #include "Qt3DSFileToolsSeekableMeshBufIOStream.h"
 #include "IObjectReferenceHelper.h"
 #include "StudioProjectSettings.h"
@@ -917,93 +918,13 @@ public:
                          QString &outName, QMap<QString, QString> &outValues,
                          QMap<QString, QMap<QString, QString>> &outTextureValues) override
     {
-        if (!QFileInfo(inAbsoluteFilePath).exists())
-            return;
+        Q3DStudio::Q3DSMaterialDefinitionParser::getMaterialInfo(
+                    inAbsoluteFilePath, g_StudioApp.GetCore()->getProjectFile().getProjectPath(),
+                    m_Doc.GetDocumentDirectory().toQString(), outName, outValues, outTextureValues);
 
-        qt3ds::foundation::CFileSeekableIOStream theStream(inAbsoluteFilePath,
-                                                           qt3ds::foundation::FileReadFlags());
-        if (theStream.IsOpen()) {
-            const QDir docDir(m_Doc.GetDocumentDirectory().toQString());
-            const QDir projDir = g_StudioApp.GetCore()->getProjectFile().getProjectPath();
-
-            std::shared_ptr<IDOMFactory> theFactory =
-                IDOMFactory::CreateDOMFactory(m_DataCore.GetStringTablePtr());
-            SImportXmlErrorHandler theImportHandler(m_Doc.GetImportFailedHandler(),
-                                                    Q3DStudio::CString::fromQString(
-                                                        inAbsoluteFilePath));
-            qt3dsdm::SDOMElement *theElem =
-                CDOMSerializer::Read(*theFactory, theStream, &theImportHandler);
-            if (theElem) {
-                outName = getMaterialNameFromFilePath(inAbsoluteFilePath);
-                std::shared_ptr<IDOMReader> theReader = IDOMReader::CreateDOMReader(
-                    *theElem, m_DataCore.GetStringTablePtr(), theFactory);
-
-                const QString sourcePath = QStringLiteral("sourcepath");
-                QStringList convertPaths;
-                for (bool success = theReader->MoveToFirstChild("Property"); success;
-                     success = theReader->MoveToNextSibling("Property")) {
-                    const char8_t *name = "";
-                    const char8_t *value = "";
-                    const char8_t *type = "";
-                    theReader->Att("name", name);
-                    theReader->Att("type", type);
-                    theReader->Value(value);
-                    const QString nameStr = QString::fromUtf8(name);
-                    const QString valueStr = QString::fromUtf8(value);
-                    if (nameStr == sourcePath) {
-                        // Check if the custom material still exists
-                        const auto absSourcePath = projDir.absoluteFilePath(valueStr);
-                        if (!QFileInfo(absSourcePath).exists()) {
-                            outValues.clear();
-                            outTextureValues.clear();
-                            return;
-                        }
-                    }
-                    if (!valueStr.isEmpty() && (QString::fromUtf8(type) == QLatin1String("Texture")
-                            || nameStr == sourcePath)) {
-                        convertPaths.append(nameStr);
-                    }
-                    outValues[nameStr] = valueStr;
-                }
-
-                for (const auto &prop : qAsConst(convertPaths)) {
-                    // Change paths to be relative to the presentation
-                    const QString origPath = outValues[prop];
-                    outValues[prop] = docDir.relativeFilePath(projDir.absoluteFilePath(origPath));
-                }
-
-                if (AreEqual(theReader->GetElementName(), L"Property"))
-                    theReader->Leave();
-
-                for (bool texSuccess = theReader->MoveToFirstChild("TextureData"); texSuccess;
-                     texSuccess = theReader->MoveToNextSibling("TextureData")) {
-                    QMap<QString, QString> texValues;
-                    const char8_t *texName = "";
-                    theReader->Att("name", texName);
-                    for (bool success = theReader->MoveToFirstChild("Property"); success;
-                         success = theReader->MoveToNextSibling("Property")) {
-                        const char8_t *name = "";
-                        const char8_t *value = "";
-                        theReader->Att("name", name);
-                        theReader->Value(value);
-                        texValues[name] = value;
-                    }
-
-                    if (texValues.contains(sourcePath) && !texValues[sourcePath].isEmpty()) {
-                        // Change path to be relative to the presentation
-                        texValues[sourcePath] = docDir.relativeFilePath(
-                                    projDir.absoluteFilePath(texValues[sourcePath]));
-                    }
-
-                    outTextureValues[texName] = texValues;
-
-                    if (AreEqual(theReader->GetElementName(), L"Property"))
-                        theReader->Leave();
-                }
-
-                outValues[QStringLiteral("name")] = outName;
-            }
-        }
+        // Fix the outName to follow the file name (in case it has changed)
+        outName = getMaterialNameFromFilePath(inAbsoluteFilePath);
+        outValues[QStringLiteral("name")] = outName;
     }
 
     ///////////////////////////////////////////////////////////////////

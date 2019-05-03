@@ -53,6 +53,8 @@ namespace qt3ds {
 namespace render {
     class IThreadPool;
     class IQt3DSRenderer;
+    class ICustomMaterialSystem;
+    class IDynamicObjectSystem;
 }
 }
 
@@ -164,6 +166,10 @@ public: // Elements
                                qt3ds::render::IQt3DSRenderer *renderer) = 0;
     virtual void deleteElement(const QString &elementPath,
                                qt3ds::render::IQt3DSRenderer *renderer) = 0;
+    virtual void createMaterial(const QString &elementPath, const QString &materialDefinition,
+                                qt3ds::render::ICustomMaterialSystem *customMaterialSystem,
+                                qt3ds::render::IDynamicObjectSystem *dynamicObjectSystem,
+                                qt3ds::render::IQt3DSRenderer *renderer) = 0;
 
 public: // Components
     virtual void GotoSlide(const char *component, const char *slideName,

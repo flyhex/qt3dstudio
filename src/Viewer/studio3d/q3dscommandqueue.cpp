@@ -217,6 +217,7 @@ void CommandQueue::copyCommands(CommandQueue &fromQueue)
             break;
         case CommandType_GoToSlideByName:
         case CommandType_FireEvent:
+        case CommandType_CreateMaterial:
             queueCommand(source.m_elementPath, source.m_commandType, source.m_stringValue);
             break;
         case CommandType_SetPresentationActive:

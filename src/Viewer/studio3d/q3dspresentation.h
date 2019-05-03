@@ -86,6 +86,7 @@ public:
     void createElement(const QString &parentElementPath, const QString &slideName,
                        const QHash<QString, QVariant> &properties);
     void deleteElement(const QString &elementPath);
+    void createMaterial(const QString &elementPath, const QString &materialDefinition);
 
 public Q_SLOTS:
     void setSource(const QUrl &source);
@@ -112,6 +113,7 @@ Q_SIGNALS:
     void dataInputsReady();
     void customSignalEmitted(const QString &elementPath, const QString &name);
     void delayedLoadingChanged(bool enable);
+    void materialCreated(const QString &name);
 
 private:
     Q_DISABLE_COPY(Q3DSPresentation)

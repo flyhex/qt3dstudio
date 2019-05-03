@@ -357,6 +357,8 @@ bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFor
                 &QRuntimeViewSignalProxy::SigSlideExited, this, &Q3DSViewerApp::SigSlideExited);
         connect(m_Impl.m_view->signalProxy(),
                 &QRuntimeViewSignalProxy::SigCustomSignal, this, &Q3DSViewerApp::SigCustomSignal);
+        connect(m_Impl.m_view->signalProxy(), &QRuntimeViewSignalProxy::SigMaterialCreated, this,
+                &Q3DSViewerApp::SigMaterialCreated);
 
         Resize(winWidth, winHeight);
 
@@ -809,6 +811,14 @@ void Q3DSViewerApp::deleteElement(const QString &elementPath)
         return;
 
     m_Impl.m_view->deleteElement(elementPath);
+}
+
+void Q3DSViewerApp::createMaterial(const QString &elementPath, const QString &materialDefinition)
+{
+    if (!m_Impl.m_view)
+        return;
+
+    m_Impl.m_view->createMaterial(elementPath, materialDefinition);
 }
 
 Q3DSViewerApp &Q3DSViewerApp::Create(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer,

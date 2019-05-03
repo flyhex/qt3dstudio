@@ -30,9 +30,6 @@
 
 #pragma once
 
-//==============================================================================
-//	Includes
-//==============================================================================
 #include "RuntimePrefix.h"
 #include "Qt3DSIPresentation.h"
 #include "Qt3DSPresentationFrameData.h"
@@ -53,6 +50,7 @@ Q_SIGNALS:
     void SigSlideEntered(const QString &elementPath, unsigned int index, const QString &name);
     void SigSlideExited(const QString &elementPath, unsigned int index, const QString &name);
     void SigCustomSignal(const QString &elementPath, const QString &name);
+    void SigMaterialCreated(const QString &name);
 };
 
 namespace qt3ds {
@@ -68,45 +66,40 @@ namespace render {
 }
 }
 
-//==============================================================================
-//	Namespace
-//==============================================================================
 namespace Q3DStudio {
-//==============================================================================
+
 /**
  *	Intelligent representation of a Studio presentation.
  */
 class CPresentation : public IPresentation
 {
-    //==============================================================================
-    //	Fields
-    //==============================================================================
 protected:
-    QString m_Name; ///< Name of ths presentation
-    QString m_FilePath; ///< The full path from which this presentation was loaded
-    qt3ds::runtime::IApplication *m_Application; ///< Runtime object
-    IScene *m_Scene; ///< Connection to the associated scene (render) for this presentation
-    qt3ds::runtime::IActivityZone *m_ActivityZone; ///< Controls element active status.
+    QString m_Name; // Name of this presentation
+    QString m_FilePath; // Absolute path to this presentation
+    QString m_projectPath; // Absolute path to the project root
+    qt3ds::runtime::IApplication *m_Application; // Runtime object
+    IScene *m_Scene; // Connection to the associated scene (render) for this presentation
+    qt3ds::runtime::IActivityZone *m_ActivityZone; // Controls element active status
     TElement *m_RootElement;
 
-    CPresentationFrameData m_FrameData; ///< Storage of data of the current frame
-    CCircularArray<SEventCommand> m_EventCommandQueue; ///< The Event/Command integrated queue
+    CPresentationFrameData m_FrameData; // Storage of data of the current frame
+    CCircularArray<SEventCommand> m_EventCommandQueue; // The Event/Command integrated queue
     bool m_IsProcessingEventCommandQueue;
-    CEventCallbacks m_EventCallbacks; ///< Handles event callbacks on registered elements
-    SPresentationSize m_Size; ///< Native width, height and mode exported from Studio
+    CEventCallbacks m_EventCallbacks; // Handles event callbacks on registered elements
+    SPresentationSize m_Size; // Native width, height and mode exported from Studio
 
     qt3ds::foundation::NVScopedRefCounted<qt3ds::render::ILoadedBuffer>
-        m_LoadedBuffer; ///< Reference to loaded data when loading from binary.
+        m_LoadedBuffer; // Reference to loaded data when loading from binary
 
     CComponentManager m_ComponentManager;
     qt3ds::foundation::NVScopedRefCounted<ISlideSystem>
-        m_SlideSystem; ///< Container and factory of all logics
+        m_SlideSystem; // Container and factory of all slides
     qt3ds::foundation::NVScopedRefCounted<ILogicSystem>
-        m_LogicSystem; ///< Container and factory of all logics
+        m_LogicSystem; // Container and factory of all logics
     qt3ds::foundation::NVScopedRefCounted<IAnimationSystem>
-        m_AnimationSystem; ///< Container and factory of all animation tracks
+        m_AnimationSystem; // Container and factory of all animation tracks
     qt3ds::foundation::NVScopedRefCounted<IParametersSystem>
-        m_ParametersSystem; ///< Container and factory of all custom actions
+        m_ParametersSystem; // Container and factory of all custom actions
 
     TTimeUnit m_Offset;
     TTimeUnit m_LocalTime;
@@ -118,12 +111,10 @@ protected:
     typedef eastl::hash_map<TElement *, qt3ds::foundation::CRegisteredString> TElemStringMap;
     TElemStringMap m_ElementPathMap;
 
-    //==============================================================================
-    //	Methods
-    //==============================================================================
 public: // Construction
-    CPresentation(const CHAR *inName, qt3ds::runtime::IApplication *inRuntime);
-    virtual ~CPresentation();
+    CPresentation(const QString &inName, const QString &projectPath,
+                  qt3ds::runtime::IApplication *inRuntime);
+    virtual ~CPresentation() override;
 
 public: // Execution
     void Initialize();
@@ -153,11 +144,11 @@ public: // Bridge Control
 public: // Commands and Events
     void FireEvent(const SEventCommand &inEvent);
     void FireEvent(const TEventCommandHash inEventType, TElement *inTarget,
-                   const UVariant *inArg1 = NULL, const UVariant *inArg2 = NULL,
+                   const UVariant *inArg1 = nullptr, const UVariant *inArg2 = nullptr,
                    const EAttributeType inType1 = ATTRIBUTETYPE_NONE,
                    const EAttributeType inType2 = ATTRIBUTETYPE_NONE) override;
     void FireCommand(const TEventCommandHash inCommandType, TElement *inTarget,
-                     const UVariant *inArg1 = NULL, const UVariant *inArg2 = NULL,
+                     const UVariant *inArg1 = nullptr, const UVariant *inArg2 = nullptr,
                      const EAttributeType inType1 = ATTRIBUTETYPE_NONE,
                      const EAttributeType inType2 = ATTRIBUTETYPE_NONE) override;
     void FlushEventCommandQueue(void) override;
@@ -213,9 +204,10 @@ public: // Configuration access
     void SetUpdateLock(const BOOL inLockUpdate);
     void SetVCAA(const BOOL inVCAA);
 
-public: // Full file path
+public: // Full file paths
     void SetFilePath(const CHAR *inPath) override;
-    QString GetFilePath() override;
+    QString GetFilePath() const override;
+    QString getProjectPath() const override;
 
 private: // Disabled Copy Construction
     CPresentation(CPresentation &);

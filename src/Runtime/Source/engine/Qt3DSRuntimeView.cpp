@@ -218,6 +218,7 @@ public:
     void createElement(const QString &parentElementPath, const QString &slideName,
                        const QHash<QString, QVariant> &properties) override;
     void deleteElement(const QString &elementPath) override;
+    void createMaterial(const QString &elementPath, const QString &materialDefinition) override;
     void SetAttribute(const char *elementPath, const char *attributeName,
                       const char *value) override;
     bool GetAttribute(const char *elementPath, const char *attributeName, void *value) override;
@@ -309,6 +310,8 @@ bool CRuntimeView::InitializeGraphics(const QSurfaceFormat &format, bool delayed
                      signalProxy(), &QRuntimeViewSignalProxy::SigSlideExited);
     QObject::connect(m_Presentation->signalProxy(), &QPresentationSignalProxy::SigCustomSignal,
                      signalProxy(), &QRuntimeViewSignalProxy::SigCustomSignal);
+    QObject::connect(m_Presentation->signalProxy(), &QPresentationSignalProxy::SigMaterialCreated,
+                     signalProxy(), &QRuntimeViewSignalProxy::SigMaterialCreated);
 
     m_TimeProvider.Reset();
     return true;
@@ -633,6 +636,19 @@ void CRuntimeView::deleteElement(const QString &elementPath)
                 = static_cast<Q3DStudio::CQmlEngine &>(m_RuntimeFactoryCore->GetScriptEngineQml());
         theBridgeEngine.deleteElement(elementPath,
                                       &m_RuntimeFactory->GetQt3DSRenderContext().GetRenderer());
+    }
+}
+
+void CRuntimeView::createMaterial(const QString &elementPath, const QString &materialDefinition)
+{
+    if (m_Application) {
+        Q3DStudio::CQmlEngine &theBridgeEngine
+                = static_cast<Q3DStudio::CQmlEngine &>(m_RuntimeFactoryCore->GetScriptEngineQml());
+        theBridgeEngine.createMaterial(
+                    elementPath, materialDefinition,
+                    &m_RuntimeFactory->GetQt3DSRenderContext().GetCustomMaterialSystem(),
+                    &m_RuntimeFactory->GetQt3DSRenderContext().GetDynamicObjectSystem(),
+                    &m_RuntimeFactory->GetQt3DSRenderContext().GetRenderer());
     }
 }
 

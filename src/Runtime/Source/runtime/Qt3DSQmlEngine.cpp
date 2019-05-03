@@ -70,6 +70,13 @@
 #include "Qt3DSRenderRuntimeBindingImpl.h"
 #include "Qt3DSRenderBufferManager.h" // TODO: Needed for adding meshes dynamically (QT3DS-3378)
 #include "Qt3DSRenderer.h"
+#include "q3dsmaterialdefinitionparser.h"
+#include "Qt3DSRenderCustomMaterialSystem.h"
+#include "Qt3DSRenderDynamicObjectSystem.h"
+#include "Qt3DSRenderMaterialHelpers.h"
+#include "Qt3DSRenderUIPLoader.h"
+#include "Qt3DSDMMetaData.h"
+#include "Qt3DSRenderUIPSharedTranslation.h"
 
 #include <QtQml/qqmlengine.h>
 #include <QtQml/qqmlcontext.h>
@@ -357,8 +364,10 @@ struct SEmitSignalData : public NVRefCounted
 
 class CQmlEngineImpl : public CQmlEngine
 {
-    typedef NVScopedRefCounted<SEmitSignalData> TEmitSignalPtr;
-    typedef eastl::list<TEmitSignalPtr, ForwardingAllocator> TEmitSignalQueue;
+    using TEmitSignalPtr = NVScopedRefCounted<SEmitSignalData>;
+    using TEmitSignalQueue = eastl::list<TEmitSignalPtr, ForwardingAllocator>;
+    using TPropertyDescAndValueList = eastl::vector<qt3ds::runtime::element::TPropertyDescAndValue>;
+    using TPropertyDesc = qt3ds::runtime::element::SPropertyDesc;
 
     static const int MAX_ACTION_QUEUE_SIZE = 100;
 
@@ -423,7 +432,10 @@ public:
                        qt3ds::render::IQt3DSRenderer *renderer) override;
     void deleteElement(const QString &elementPath,
                        qt3ds::render::IQt3DSRenderer *renderer) override;
-    //void createMaterial() override; // TODO (QT3DS-3377)
+    void createMaterial(const QString &elementPath, const QString &materialDefinition,
+                        qt3ds::render::ICustomMaterialSystem *customMaterialSystem,
+                        IDynamicObjectSystem *dynamicObjectSystem,
+                        qt3ds::render::IQt3DSRenderer *renderer) override;
     //void createMesh() override; // TODO (QT3DS-3378)
 
     void GotoSlide(const char *component, const char *slideName,
@@ -473,6 +485,39 @@ private:
     // find out which datainputs are used in the expression
     QVector<QString> resolveDependentDatainputs(const QString &expression,
                                                 const QString &controllerName);
+
+    // Methods to add element attributes to list for element creation
+    void addStringAttribute(qt3ds::foundation::IStringTable &strTable,
+                            TPropertyDescAndValueList &list,
+                            const QString &inAttName, const QString &inValue);
+    void addIntAttribute(qt3ds::foundation::IStringTable &strTable,
+                         TPropertyDescAndValueList &list,
+                         const QString &inAttName, int inValue);
+    void addBoolAttribute(qt3ds::foundation::IStringTable &strTable,
+                          TPropertyDescAndValueList &list,
+                          const QString &inAttName, bool inValue);
+    void addFloatAttribute(qt3ds::foundation::IStringTable &strTable,
+                           TPropertyDescAndValueList &list,
+                           const QString &inAttName, float inValue);
+    void addFloat2Attribute(qt3ds::foundation::IStringTable &strTable,
+                            TPropertyDescAndValueList &list,
+                            const QStringList &inAttNames, const QVector2D &inValue);
+    void addFloat3Attribute(qt3ds::foundation::IStringTable &strTable,
+                            TPropertyDescAndValueList &list,
+                            const QStringList &inAttNames, const QVector3D &inValue);
+    void addFloat4Attribute(qt3ds::foundation::IStringTable &strTable,
+                            TPropertyDescAndValueList &list,
+                            const QStringList &inAttNames, const QVector4D &inValue);
+    void addElementRefAttribute(qt3ds::foundation::IStringTable &strTable,
+                                TPropertyDescAndValueList &list,
+                                const QString &inAttName, TElement *element);
+    template <typename TDataType>
+    void setDynamicObjectProperty(qt3ds::render::SDynamicObject &material,
+                                  const qt3ds::render::dynamic::SPropertyDefinition &propDesc,
+                                  const TDataType &propValue);
+    QVector2D parseFloat2Property(const QString &propValue);
+    QVector3D parseFloat3Property(const QString &propValue);
+    QVector4D parseFloat4Property(const QString &propValue);
 };
 
 CQmlEngineImpl::CQmlEngineImpl(NVFoundationBase &fnd, ITimeProvider &)
@@ -868,8 +913,7 @@ void CQmlEngineImpl::SetDataInputValue(
     }
 }
 
-using TPropertyDescAndValueList = eastl::vector<qt3ds::runtime::element::TPropertyDescAndValue>;
-using TPropertyDesc = qt3ds::runtime::element::SPropertyDesc;
+static int _idCounter = 0;
 
 void CQmlEngineImpl::createElement(const QString &parentElementPath, const QString &slideName,
                                    const QHash<QString, QVariant> &properties,
@@ -898,8 +942,7 @@ void CQmlEngineImpl::createElement(const QString &parentElementPath, const QStri
 
     IPresentation *presentation = parentElement->GetBelongedPresentation();
 
-    static int idCounter = 0;
-    ++idCounter;
+    ++_idCounter;
 
     // Resolve slide
     QByteArray theSlideName = slideName.toUtf8();
@@ -921,7 +964,7 @@ void CQmlEngineImpl::createElement(const QString &parentElementPath, const QStri
         refMatName = QStringLiteral("/") + refMatName;
 
     if (newElementName.isEmpty())
-        newElementName = QStringLiteral("NewElement_%1").arg(idCounter);
+        newElementName = QStringLiteral("NewElement_%1").arg(_idCounter);
     QByteArray newElementNameBa = newElementName.toUtf8();
 
     // Make sure the name is not duplicate
@@ -941,52 +984,6 @@ void CQmlEngineImpl::createElement(const QString &parentElementPath, const QStri
     const CRegisteredString elementSubType;
     TPropertyDescAndValueList elementProperties;
 
-    // Set properties
-    auto addStringAttribute = [&strTable](TPropertyDescAndValueList &list,
-            const QString &inAttName, const QString &inValue) {
-        QByteArray valueBa = inValue.toUtf8();
-        qt3ds::foundation::CStringHandle strHandle = strTable.GetHandle(valueBa.constData());
-        UVariant theValue;
-        theValue.m_StringHandle = strHandle.handle();
-        const CRegisteredString attStr = strTable.RegisterStr(inAttName);
-        list.push_back(
-            eastl::make_pair(TPropertyDesc(attStr, ATTRIBUTETYPE_STRING), theValue));
-    };
-    auto addIntAttribute = [&strTable](TPropertyDescAndValueList &list, const QString &inAttName,
-            int inValue) {
-        UVariant theValue;
-        theValue.m_INT32 = inValue;
-        const CRegisteredString attStr = strTable.RegisterStr(inAttName);
-        list.push_back(
-            eastl::make_pair(TPropertyDesc(attStr, ATTRIBUTETYPE_INT32), theValue));
-    };
-    auto addBoolAttribute = [&strTable](TPropertyDescAndValueList &list,
-            const QString &inAttName, bool inValue) {
-        UVariant theValue;
-        theValue.m_INT32 = int(inValue);
-        const CRegisteredString attStr = strTable.RegisterStr(inAttName);
-        list.push_back(
-            eastl::make_pair(TPropertyDesc(attStr, ATTRIBUTETYPE_BOOL), theValue));
-    };
-    auto addFloatAttribute = [&strTable](TPropertyDescAndValueList &list, const QString &inAttName,
-            float inValue) {
-        UVariant theValue;
-        theValue.m_FLOAT = inValue;
-        const CRegisteredString attStr = strTable.RegisterStr(inAttName);
-        list.push_back(
-            eastl::make_pair(TPropertyDesc(attStr, ATTRIBUTETYPE_FLOAT), theValue));
-    };
-    auto addFloat3Attribute = [&strTable](TPropertyDescAndValueList &list,
-            const QStringList &inAttNames, const QVector3D &inValue) {
-        for (int i = 0; i < 3; ++i) {
-            UVariant theValue;
-            theValue.m_FLOAT = inValue[i];
-            const CRegisteredString attStr = strTable.RegisterStr(inAttNames.at(i));
-            list.push_back(
-                eastl::make_pair(TPropertyDesc(attStr, ATTRIBUTETYPE_FLOAT), theValue));
-        }
-    };
-
     // Set default values for missing mandatory properties
     const QString sourcePathPropName = QStringLiteral("sourcepath");
     const QString startTimePropName = QStringLiteral("starttime");
@@ -995,18 +992,20 @@ void CQmlEngineImpl::createElement(const QString &parentElementPath, const QStri
     Q3DStudio::UVariant attValue;
     bool eyeBall = true;
     theProperties.value(QStringLiteral("eyeball"), true).toBool();
-    if (!theProperties.contains(sourcePathPropName))
-        addStringAttribute(elementProperties, sourcePathPropName, QStringLiteral("#Cube"));
+    if (!theProperties.contains(sourcePathPropName)) {
+        addStringAttribute(strTable, elementProperties, sourcePathPropName,
+                           QStringLiteral("#Cube"));
+    }
     if (!theProperties.contains(startTimePropName)) {
         parentElement->GetAttribute(Q3DStudio::ATTRIBUTE_STARTTIME, attValue);
-        addIntAttribute(elementProperties, startTimePropName, int(attValue.m_INT32));
+        addIntAttribute(strTable, elementProperties, startTimePropName, int(attValue.m_INT32));
     }
     if (!theProperties.contains(endTimePropName)) {
         parentElement->GetAttribute(Q3DStudio::ATTRIBUTE_ENDTIME, attValue);
-        addIntAttribute(elementProperties, endTimePropName, int(attValue.m_INT32));
+        addIntAttribute(strTable, elementProperties, endTimePropName, int(attValue.m_INT32));
     }
     if (!theProperties.contains(eyeBallPropName))
-        addBoolAttribute(elementProperties, eyeBallPropName, true);
+        addBoolAttribute(strTable, elementProperties, eyeBallPropName, true);
     else
         eyeBall = theProperties.value(QStringLiteral("eyeball")).toBool();
 
@@ -1015,16 +1014,16 @@ void CQmlEngineImpl::createElement(const QString &parentElementPath, const QStri
         it.next();
         switch (it.value().type()) {
         case QVariant::Double:
-            addFloatAttribute(elementProperties, it.key(), it.value().toFloat());
+            addFloatAttribute(strTable, elementProperties, it.key(), it.value().toFloat());
             break;
         case QVariant::Bool:
-            addBoolAttribute(elementProperties, it.key(), it.value().toBool());
+            addBoolAttribute(strTable, elementProperties, it.key(), it.value().toBool());
             break;
         case QVariant::Int:
-            addIntAttribute(elementProperties, it.key(), it.value().toInt());
+            addIntAttribute(strTable, elementProperties, it.key(), it.value().toInt());
             break;
         case QVariant::String:
-            addStringAttribute(elementProperties, it.key(), it.value().toString());
+            addStringAttribute(strTable, elementProperties, it.key(), it.value().toString());
             break;
         case QVariant::Vector3D: {
             QVector3D vec = it.value().value<QVector3D>();
@@ -1039,7 +1038,7 @@ void CQmlEngineImpl::createElement(const QString &parentElementPath, const QStri
             atts << (it.key() + QLatin1String(".x"))
                  << (it.key() + QLatin1String(".y"))
                  << (it.key() + QLatin1String(".z"));
-            addFloat3Attribute(elementProperties, atts, vec);
+            addFloat3Attribute(strTable, elementProperties, atts, vec);
             break;
         }
         default:
@@ -1131,7 +1130,7 @@ void CQmlEngineImpl::createElement(const QString &parentElementPath, const QStri
     NVAllocatorCallback &allocator = presentation->GetScene()->allocator();
     qt3ds::render::SModel *newObject = QT3DS_NEW(allocator, qt3ds::render::SModel)();
     newObject->m_Id = strTable.RegisterStr((QByteArrayLiteral("_newObject_")
-                                            + QByteArray::number(idCounter)).constData());
+                                            + QByteArray::number(_idCounter)).constData());
     parentObject.AddChild(*newObject);
 
     qt3ds::render::Qt3DSTranslator::CreateTranslatorForElement(newElem, *newObject, allocator);
@@ -1140,7 +1139,7 @@ void CQmlEngineImpl::createElement(const QString &parentElementPath, const QStri
     qt3ds::render::SReferencedMaterial *newMaterial
             = QT3DS_NEW(allocator, qt3ds::render::SReferencedMaterial)();
     newMaterial->m_Id = strTable.RegisterStr((QByteArrayLiteral("_newMaterial_")
-                                              + QByteArray::number(idCounter)).constData());
+                                              + QByteArray::number(_idCounter)).constData());
     newMaterial->m_ReferencedMaterial = referencedMaterial;
 
     newObject->AddMaterial(*newMaterial);
@@ -1234,6 +1233,336 @@ void CQmlEngineImpl::deleteElement(const QString &elementPath,
 
     // Remove element recursively
     m_Application->GetElementAllocator().ReleaseElement(*element, true);
+}
+
+/**
+    Creates material into material container of the presentation that owns the specified element.
+    The materialDefinition parameter can contain a .materialdef file path or
+    the entire material definition in the .materialdef format.
+*/
+void CQmlEngineImpl::createMaterial(const QString &elementPath,
+                                    const QString &materialDefinition,
+                                    ICustomMaterialSystem *customMaterialSystem,
+                                    IDynamicObjectSystem *dynamicObjectSystem,
+                                    qt3ds::render::IQt3DSRenderer *renderer)
+{
+    QByteArray thePath = elementPath.toUtf8();
+    TElement *element = getTarget(thePath.constData());
+
+    if (!element) {
+        qWarning() << __FUNCTION__ <<  "Invalid element:" << elementPath;
+        return;
+    }
+
+    CPresentation *presentation = static_cast<CPresentation *>(element->GetBelongedPresentation());
+    QString presPath = QFileInfo(presentation->GetFilePath()).absolutePath();
+    QString projPath = presentation->getProjectPath();
+
+    QString materialName;
+    QMap<QString, QString> materialProps;
+    QMap<QString, QMap<QString, QString>> textureProps;
+
+    Q3DSMaterialDefinitionParser::getMaterialInfo(materialDefinition,
+                                                  projPath, presPath,
+                                                  materialName, materialProps, textureProps);
+
+    // We don't care about the path parameter
+    const QString pathStr = QStringLiteral("path");
+    if (materialProps.contains(pathStr))
+        materialProps.remove(pathStr);
+
+    // Find material container
+    auto &strTable = presentation->GetStringTable();
+    NVAllocatorCallback &allocator = presentation->GetScene()->allocator();
+    TElement *rootElement = presentation->GetRoot();
+    const auto containerName = strTable.RegisterStr("__Container");
+    TElement *container = rootElement->FindChild(CHash::HashString(containerName.c_str()));
+    if (container) {
+        // Check that the material doesn't already exist in container
+        TElement *firstChild = nullptr;
+        TElement *nextChild = container->GetChild();
+        firstChild = nextChild;
+        while (nextChild) {
+            QString childName = QString::fromUtf8(nextChild->m_Name);
+            if (childName == materialName) {
+                qWarning() << __FUNCTION__ << "Material already exists in material container";
+                return;
+            }
+            nextChild = nextChild->GetSibling();
+        }
+    } else {
+        // TODO: Create a material container if it doesn't exist (QT3DS-3412)
+        qWarning() << __FUNCTION__ << "Presentation has no material container";
+        return;
+    }
+
+    // Create material element in the container based on the material definition
+    auto &metaData = m_Application->GetMetaData();
+    const auto matName = strTable.RegisterStr(materialName);
+    const bool isCustomMaterial
+            = materialProps.value(QStringLiteral("type")) == QLatin1String("CustomMaterial");
+    CRegisteredString matType;
+    CRegisteredString matClass;
+    QHash<QString, qt3ds::render::dynamic::SPropertyDefinition> dynPropDefs;
+
+    if (isCustomMaterial) {
+        CRegisteredString sourcePath
+                = strTable.RegisterStr(materialProps.value(QStringLiteral("sourcepath")).toUtf8());
+        matType = strTable.RegisterStr("CustomMaterial");
+        matClass = sourcePath; // Create just one class per shader
+        if (sourcePath.IsValid()) {
+            Option<qt3dsdm::SMetaDataCustomMaterial> matMetaData =
+                metaData.GetMaterialMetaDataBySourcePath(sourcePath.c_str());
+            if (!matMetaData.hasValue()) {
+                metaData.LoadMaterialXMLFile(matType.c_str(), matClass.c_str(), matName.c_str(),
+                                             sourcePath.c_str());
+                matMetaData = metaData.GetMaterialMetaDataBySourcePath(sourcePath.c_str());
+            }
+            if (matMetaData.hasValue()) {
+                qt3ds::render::IUIPLoader::CreateMaterialClassFromMetaMaterial(
+                            matClass, m_Foundation, *customMaterialSystem, matMetaData,
+                            strTable);
+                NVConstDataRef<qt3ds::render::dynamic::SPropertyDefinition> customProperties;
+                customProperties = dynamicObjectSystem->GetProperties(matClass);
+                for (QT3DSU32 i = 0, end = customProperties.size(); i < end; ++i) {
+                    QString propName = QString::fromUtf8(customProperties[i].m_Name.c_str());
+                    if (materialProps.contains(propName))
+                        dynPropDefs.insert(propName, customProperties[i]);
+                }
+            } else {
+                qWarning() << __FUNCTION__
+                           << "Could not resolve material properties for CustomMaterial:"
+                           << materialName;
+            }
+        } else {
+            qWarning() << __FUNCTION__
+                       << "Missing sourcepath from material definition of a CustomMaterial:"
+                       << materialName;
+        }
+    } else {
+        matType = strTable.RegisterStr("Material");
+    }
+
+    auto createElementPropsFromDefProps = [&](const QMap<QString, QString> &defProps,
+                                              TPropertyDescAndValueList &elementProps,
+                                              const CRegisteredString &elementType) -> bool {
+        QMapIterator<QString, QString> propIter(defProps);
+        while (propIter.hasNext()) {
+            propIter.next();
+            if (dynPropDefs.contains(propIter.key()))
+                continue; // Dynamic properties are added directly to graph objects later
+
+            auto propName = strTable.RegisterStr(propIter.key());
+            ERuntimeDataModelDataType dataType;
+            ERuntimeAdditionalMetaDataType additionalType;
+            dataType = metaData.GetPropertyType(elementType, propName);
+            additionalType = metaData.GetAdditionalType(elementType, propName);
+
+            switch (dataType) {
+            case ERuntimeDataModelDataTypeLong: {
+                addIntAttribute(strTable, elementProps, propIter.key(),
+                                propIter.value().toInt());
+                break;
+            }
+            case ERuntimeDataModelDataTypeFloat: {
+                addFloatAttribute(strTable, elementProps, propIter.key(),
+                                  propIter.value().toFloat());
+                break;
+            }
+            case ERuntimeDataModelDataTypeFloat2: {
+                QVector2D vec = parseFloat2Property(propIter.value());
+                QStringList atts;
+                atts << (propIter.key() + QLatin1String(".x"))
+                     << (propIter.key() + QLatin1String(".y"));
+                addFloat2Attribute(strTable, elementProps, atts, vec);
+                break;
+            }
+            case ERuntimeDataModelDataTypeFloat3: {
+                QVector3D vec = parseFloat3Property(propIter.value());
+                if (additionalType == ERuntimeAdditionalMetaDataTypeRotation) {
+                    vec.setX(qDegreesToRadians(vec.x()));
+                    vec.setY(qDegreesToRadians(vec.y()));
+                    vec.setZ(qDegreesToRadians(vec.z()));
+                }
+                QStringList atts;
+                atts << (propIter.key() + QLatin1String(".x"))
+                     << (propIter.key() + QLatin1String(".y"))
+                     << (propIter.key() + QLatin1String(".z"));
+                addFloat3Attribute(strTable, elementProps, atts, vec);
+                break;
+            }
+            case ERuntimeDataModelDataTypeFloat4: {
+                QVector4D vec = parseFloat4Property(propIter.value());
+                QStringList atts;
+                if (additionalType == ERuntimeAdditionalMetaDataTypeColor) {
+                    atts << (propIter.key() + QLatin1String(".r"))
+                         << (propIter.key() + QLatin1String(".g"))
+                         << (propIter.key() + QLatin1String(".b"))
+                         << (propIter.key() + QLatin1String(".a"));
+                } else {
+                    atts << (propIter.key() + QLatin1String(".x"))
+                         << (propIter.key() + QLatin1String(".y"))
+                         << (propIter.key() + QLatin1String(".z"))
+                         << (propIter.key() + QLatin1String(".w"));
+                }
+                addFloat4Attribute(strTable, elementProps, atts, vec);
+                break;
+            }
+            case ERuntimeDataModelDataTypeBool: {
+                bool boolValue = propIter.value().compare(QLatin1String("true"),
+                                                          Qt::CaseInsensitive) == 0;
+                addBoolAttribute(strTable, elementProps, propIter.key(), boolValue);
+                break;
+            }
+            case ERuntimeDataModelDataTypeStringRef:
+            case ERuntimeDataModelDataTypeString: {
+                addStringAttribute(strTable, elementProps, propIter.key(), propIter.value());
+                break;
+            }
+            case ERuntimeDataModelDataTypeLong4: {
+                if (additionalType == ERuntimeAdditionalMetaDataTypeImage) {
+                    // Insert placeholder for now, will be patched later
+                    addElementRefAttribute(strTable, elementProps, propIter.key(), nullptr);
+                }
+                break;
+            }
+            default:
+                qWarning() << __FUNCTION__
+                           << "Unsupported material property type for property:"
+                           << propIter.key();
+                QT3DS_ASSERT(false);
+                break;
+            }
+        }
+        return true;
+    };
+
+    TPropertyDescAndValueList elementProps;
+    bool success = createElementPropsFromDefProps(materialProps, elementProps, matType);
+    if (!success)
+        return; // createElementPropsFromDefProps already prints a warning
+
+    TElement &newMatElem = m_Application->GetElementAllocator().CreateElement(
+                matName, matType, matClass,
+                toConstDataRef(elementProps.data(), QT3DSU32(elementProps.size())),
+                presentation, container, false);
+    newMatElem.SetActive(true);
+
+    // Create image elements
+    CRegisteredString imageType = strTable.RegisterStr("Image");
+    QMapIterator<QString, QMap<QString, QString>> texIter(textureProps);
+    QHash<QString, TElement *> imageElementMap;
+    while (texIter.hasNext()) {
+        texIter.next();
+        elementProps.clear();
+        success = createElementPropsFromDefProps(texIter.value(), elementProps, imageType);
+        if (!success) {
+            m_Application->GetElementAllocator().ReleaseElement(newMatElem, true);
+            return; // createElementPropsFromDefProps already prints a warning
+        }
+        CRegisteredString imageName = strTable.RegisterStr(texIter.key());
+
+        TElement &newImageElem = m_Application->GetElementAllocator().CreateElement(
+                    imageName, imageType, CRegisteredString(),
+                    toConstDataRef(elementProps.data(), QT3DSU32(elementProps.size())),
+                    presentation, &newMatElem, false);
+        imageElementMap.insert(texIter.key(), &newImageElem);
+        newImageElem.SetActive(true);
+    }
+
+    // Create render object for the material
+    qt3ds::render::SGraphObject *newMaterial = nullptr;
+    CRegisteredString newMatId = strTable.RegisterStr(
+                (QByteArrayLiteral("_newMaterial_") + QByteArray::number(++_idCounter))
+                .constData());
+    if (isCustomMaterial) {
+        newMaterial = customMaterialSystem->CreateCustomMaterial(matClass, allocator);
+        newMaterial->m_Id = newMatId;
+        auto dynObj = static_cast<qt3ds::render::SDynamicObject *>(newMaterial);
+
+        QHashIterator<QString, qt3ds::render::dynamic::SPropertyDefinition>
+                dynPropIter(dynPropDefs);
+        while (dynPropIter.hasNext()) {
+            dynPropIter.next();
+            QByteArray propValStr = materialProps.value(dynPropIter.key()).toUtf8();
+            const auto propDesc = dynPropIter.value();
+            switch (propDesc.m_DataType) {
+            case qt3ds::render::NVRenderShaderDataTypes::QT3DSRenderBool: {
+                bool boolValue = propValStr.compare(QByteArrayLiteral("true"),
+                                                    Qt::CaseInsensitive) == 0;
+                setDynamicObjectProperty(*dynObj, propDesc, boolValue);
+                break;
+            }
+            case qt3ds::render::NVRenderShaderDataTypes::QT3DSF32:
+                setDynamicObjectProperty(*dynObj, propDesc, propValStr.toFloat());
+                break;
+            case qt3ds::render::NVRenderShaderDataTypes::QT3DSI32:
+                if (!propDesc.m_IsEnumProperty) {
+                    setDynamicObjectProperty(*dynObj, propDesc, propValStr.toInt());
+                } else {
+                    const NVConstDataRef<CRegisteredString> &enumNames = propDesc.m_EnumValueNames;
+                    for (QT3DSU32 i = 0, end = enumNames.size(); i < end; ++i) {
+                        if (propValStr.compare(enumNames[i].c_str()) == 0) {
+                            setDynamicObjectProperty(*dynObj, propDesc, i);
+                            break;
+                        }
+                    }
+                }
+                break;
+            case qt3ds::render::NVRenderShaderDataTypes::QT3DSVec2:
+                setDynamicObjectProperty(*dynObj, propDesc, parseFloat2Property(propValStr));
+                break;
+            case qt3ds::render::NVRenderShaderDataTypes::QT3DSVec3:
+                setDynamicObjectProperty(*dynObj, propDesc, parseFloat3Property(propValStr));
+                break;
+            case qt3ds::render::NVRenderShaderDataTypes::QT3DSVec4:
+                setDynamicObjectProperty(*dynObj, propDesc, parseFloat4Property(propValStr));
+                break;
+            case qt3ds::render::NVRenderShaderDataTypes::NVRenderTexture2DPtr:
+            case qt3ds::render::NVRenderShaderDataTypes::NVRenderImage2DPtr: {
+                CRegisteredString regStr;
+                regStr = strTable.RegisterStr(propValStr);
+                setDynamicObjectProperty(*dynObj, propDesc, regStr);
+                break;
+            }
+            default:
+                qWarning() << __FUNCTION__
+                           << "Unsupported custom material property type '" << propDesc.m_DataType
+                           << "' for property:"
+                           << dynPropIter.key();
+                QT3DS_ASSERT(false);
+                break;
+            }
+        }
+    } else {
+        newMaterial = QT3DS_NEW(allocator, qt3ds::render::SDefaultMaterial)();
+        newMaterial->m_Id = newMatId;
+
+        // Update element refs for image elements and create graph objects & translators
+        QHashIterator<QString, TElement *> imageIter(imageElementMap);
+        while (imageIter.hasNext()) {
+            imageIter.next();
+            TElement *imageElem = imageIter.value();
+            UVariant *propValue = newMatElem.FindPropertyValue(imageElem->m_Name);
+            if (propValue) {
+                propValue->m_ElementHandle = imageIter.value()->GetHandle();
+
+                qt3ds::render::SImage *newImageObj = QT3DS_NEW(allocator, qt3ds::render::SImage)();
+                newImageObj->m_Id
+                        = strTable.RegisterStr((QByteArrayLiteral("_newImage_")
+                                                + QByteArray::number(++_idCounter)).constData());
+                qt3ds::render::Qt3DSTranslator::CreateTranslatorForElement(*imageElem,
+                                                                           *newImageObj, allocator);
+            }
+        }
+    }
+
+    qt3ds::render::Qt3DSTranslator::CreateTranslatorForElement(newMatElem, *newMaterial, allocator);
+
+    // Notify presentation asynchronously to give renderer time to initialize the materials properly
+    QTimer::singleShot(0, [materialName, presentation]() {
+        presentation->signalProxy()->SigMaterialCreated(materialName);
+    });
 }
 
 void CQmlEngineImpl::GotoSlide(const char *component, const char *slideName,
@@ -1777,6 +2106,134 @@ QVector<QString> CQmlEngineImpl::resolveDependentDatainputs(const QString &expre
     return ret;
 }
 
+void CQmlEngineImpl::addStringAttribute(IStringTable &strTable,
+                                        CQmlEngineImpl::TPropertyDescAndValueList &list,
+                                        const QString &inAttName, const QString &inValue)
+{
+    QByteArray valueBa = inValue.toUtf8();
+    qt3ds::foundation::CStringHandle strHandle = strTable.GetHandle(valueBa.constData());
+    UVariant theValue;
+    theValue.m_StringHandle = strHandle.handle();
+    const CRegisteredString attStr = strTable.RegisterStr(inAttName);
+    list.push_back(eastl::make_pair(TPropertyDesc(attStr, ATTRIBUTETYPE_STRING), theValue));
+}
+
+void CQmlEngineImpl::addIntAttribute(IStringTable &strTable,
+                                     CQmlEngineImpl::TPropertyDescAndValueList &list,
+                                     const QString &inAttName, int inValue)
+{
+    UVariant theValue;
+    theValue.m_INT32 = inValue;
+    const CRegisteredString attStr = strTable.RegisterStr(inAttName);
+    list.push_back(eastl::make_pair(TPropertyDesc(attStr, ATTRIBUTETYPE_INT32), theValue));
+}
+
+void CQmlEngineImpl::addBoolAttribute(IStringTable &strTable,
+                                      CQmlEngineImpl::TPropertyDescAndValueList &list,
+                                      const QString &inAttName, bool inValue)
+{
+    UVariant theValue;
+    theValue.m_INT32 = int(inValue);
+    const CRegisteredString attStr = strTable.RegisterStr(inAttName);
+    list.push_back(eastl::make_pair(TPropertyDesc(attStr, ATTRIBUTETYPE_BOOL), theValue));
+}
+
+void CQmlEngineImpl::addFloatAttribute(IStringTable &strTable,
+                                       CQmlEngineImpl::TPropertyDescAndValueList &list,
+                                       const QString &inAttName, float inValue)
+{
+    UVariant theValue;
+    theValue.m_FLOAT = inValue;
+    const CRegisteredString attStr = strTable.RegisterStr(inAttName);
+    list.push_back(eastl::make_pair(TPropertyDesc(attStr, ATTRIBUTETYPE_FLOAT), theValue));
+}
+
+void CQmlEngineImpl::addFloat2Attribute(IStringTable &strTable,
+                                        CQmlEngineImpl::TPropertyDescAndValueList &list,
+                                        const QStringList &inAttNames, const QVector2D &inValue)
+{
+    for (int i = 0; i < 2; ++i) {
+        UVariant theValue;
+        theValue.m_FLOAT = inValue[i];
+        const CRegisteredString attStr = strTable.RegisterStr(inAttNames.at(i));
+        list.push_back(eastl::make_pair(TPropertyDesc(attStr, ATTRIBUTETYPE_FLOAT), theValue));
+    }
+}
+
+void CQmlEngineImpl::addFloat3Attribute(IStringTable &strTable,
+                                        CQmlEngineImpl::TPropertyDescAndValueList &list,
+                                        const QStringList &inAttNames, const QVector3D &inValue)
+{
+    for (int i = 0; i < 3; ++i) {
+        UVariant theValue;
+        theValue.m_FLOAT = inValue[i];
+        const CRegisteredString attStr = strTable.RegisterStr(inAttNames.at(i));
+        list.push_back(eastl::make_pair(TPropertyDesc(attStr, ATTRIBUTETYPE_FLOAT), theValue));
+    }
+}
+
+void CQmlEngineImpl::addFloat4Attribute(IStringTable &strTable,
+                                        CQmlEngineImpl::TPropertyDescAndValueList &list,
+                                        const QStringList &inAttNames, const QVector4D &inValue)
+{
+    for (int i = 0; i < 4; ++i) {
+        UVariant theValue;
+        theValue.m_FLOAT = inValue[i];
+        const CRegisteredString attStr = strTable.RegisterStr(inAttNames.at(i));
+        list.push_back(eastl::make_pair(TPropertyDesc(attStr, ATTRIBUTETYPE_FLOAT), theValue));
+    }
+}
+
+void CQmlEngineImpl::addElementRefAttribute(IStringTable &strTable,
+                                            CQmlEngineImpl::TPropertyDescAndValueList &list,
+                                            const QString &inAttName, TElement *element)
+{
+    UVariant theValue;
+    if (element) {
+        theValue.m_ElementHandle = element->GetHandle();
+        QT3DS_ASSERT(theValue.m_ElementHandle);
+    } else {
+        theValue.m_ElementHandle = 0;
+    }
+    const CRegisteredString attStr = strTable.RegisterStr(inAttName);
+    list.push_back(eastl::make_pair(TPropertyDesc(attStr, ATTRIBUTETYPE_ELEMENTREF), theValue));
+}
+
+QVector2D CQmlEngineImpl::parseFloat2Property(const QString &propValue)
+{
+    QVector<QStringRef> values = propValue.splitRef(QLatin1Char(' '));
+    QVector2D retVal;
+    for (int i = 0; i < values.size() && i < 2; ++i)
+        retVal[i] = values[i].toFloat();
+    return retVal;
+}
+
+QVector3D CQmlEngineImpl::parseFloat3Property(const QString &propValue)
+{
+    QVector<QStringRef> values = propValue.splitRef(QLatin1Char(' '));
+    QVector3D retVal;
+    for (int i = 0; i < values.size() && i < 3; ++i)
+        retVal[i] = values[i].toFloat();
+    return retVal;
+}
+
+QVector4D CQmlEngineImpl::parseFloat4Property(const QString &propValue)
+{
+    QVector<QStringRef> values = propValue.splitRef(QLatin1Char(' '));
+    QVector4D retVal;
+    for (int i = 0; i < values.size() && i < 4; ++i)
+        retVal[i] = values[i].toFloat();
+    return retVal;
+}
+
+template<typename TDataType>
+void CQmlEngineImpl::setDynamicObjectProperty(qt3ds::render::SDynamicObject &material,
+                                              const dynamic::SPropertyDefinition &propDesc,
+                                              const TDataType &propValue)
+{
+    memCopy(material.GetDataSectionBegin() + propDesc.m_Offset, &propValue, sizeof(TDataType));
+}
+
 /**
 * @brief Create QML engine
 *
@@ -1789,4 +2246,5 @@ CQmlEngine *CQmlEngine::Create(qt3ds::NVFoundationBase &inFoundation, ITimeProvi
 {
     return QT3DS_NEW(inFoundation.getAllocator(), CQmlEngineImpl)(inFoundation, inTimeProvider);
 }
+
 }

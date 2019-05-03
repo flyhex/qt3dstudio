@@ -34,6 +34,9 @@
 #include <QtStudio3D/Q3DSElement>
 #include <QtStudio3D/Q3DSViewerSettings>
 #include <QtCore/QRandomGenerator>
+#include <QtCore/QFile>
+#include <QtCore/QTextStream>
+#include <QtCore/QRegularExpression>
 
 void messageOutput(QtMsgType type, const QMessageLogContext &context,
     const QString &msg)
@@ -98,6 +101,7 @@ void tst_qt3dsviewer::init()
 
 void tst_qt3dsviewer::cleanup()
 {
+    deleteCreatedElements(0);
     m_viewer.hide();
 }
 
@@ -165,7 +169,8 @@ void tst_qt3dsviewer::testSettings()
 
 void tst_qt3dsviewer::testCreateElement()
 {
-    // Currently this method is very bare bones on actual testing.
+    // Currently this method is very bare bones on actual testing due to lack of programmatic
+    // feedback on dynamic object creation.
     // It can be used to visually check if items are getting created.
     m_viewer.show();
 
@@ -187,7 +192,7 @@ void tst_qt3dsviewer::testCreateElement()
                 QVariant::fromValue<QVector3D>(QVector3D(200, 300, 200)));
     data.insert(QStringLiteral("opacity"), 20.0);
 
-    m_presentation->createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide1"), data);
+    createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide1"), data);
 
     // Elements can be registered before they are created
     Q3DSElement newCylinder(m_presentation, QStringLiteral("Scene.Layer.New Cylinder"));
@@ -218,8 +223,8 @@ void tst_qt3dsviewer::testCreateElement()
         data.insert(QStringLiteral("position"),
                     QVariant::fromValue<QVector3D>(QVector3D(50, animValue, 50)));
 
-        m_presentation->createElement(QStringLiteral("Scene.Layer.New Cylinder"),
-                                      QStringLiteral("Slide1"), data);
+        createElement(QStringLiteral("Scene.Layer.New Cylinder"),
+                      QStringLiteral("Slide1"), data);
 
         data.clear();
         data.insert(QStringLiteral("name"), QStringLiteral("New Sphere"));
@@ -230,8 +235,7 @@ void tst_qt3dsviewer::testCreateElement()
         data.insert(QStringLiteral("position"),
                     QVariant::fromValue<QVector3D>(QVector3D(animValue, 75, 0)));
 
-        m_presentation->createElement(QStringLiteral("Scene.Layer.Cube2"),
-                                      QStringLiteral("Slide2"), data);
+        createElement(QStringLiteral("Scene.Layer.Cube2"), QStringLiteral("Slide2"), data);
 
         data.clear();
         data.insert(QStringLiteral("name"), QStringLiteral("Sphere To Delete"));
@@ -242,8 +246,7 @@ void tst_qt3dsviewer::testCreateElement()
         data.insert(QStringLiteral("position"),
                     QVariant::fromValue<QVector3D>(QVector3D(-100, -100, 0)));
 
-        m_presentation->createElement(QStringLiteral("Scene.Layer"),
-                                      QStringLiteral("Slide2"), data);
+        createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide2"), data);
 
         animationTimer.start();
     });
@@ -254,6 +257,8 @@ void tst_qt3dsviewer::testCreateElement()
     // Remove dynamically added object
     QTimer::singleShot(3000, [&]() {
         m_presentation->deleteElement(QStringLiteral("Scene.Layer.Sphere To Delete"));
+        // Don't remove the deleted element from createdElements to test removing already deleted
+        // element later when everything is cleaned up.
     });
 
     // Create objects to slides 1 and 2 while slide 2 is executing
@@ -267,8 +272,7 @@ void tst_qt3dsviewer::testCreateElement()
         data.insert(QStringLiteral("position"),
                     QVariant::fromValue<QVector3D>(QVector3D(-100, -100, 0)));
 
-        m_presentation->createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide1"),
-                                      data);
+        createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide1"), data);
 
         data.clear();
         data.insert(QStringLiteral("name"), QStringLiteral("New Sphere 2"));
@@ -279,8 +283,7 @@ void tst_qt3dsviewer::testCreateElement()
         data.insert(QStringLiteral("position"),
                     QVariant::fromValue<QVector3D>(QVector3D(-100, 100, 0)));
 
-        m_presentation->createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide2"),
-                                      data);
+        createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide2"), data);
     });
 
     // Switch to slide 1
@@ -290,16 +293,14 @@ void tst_qt3dsviewer::testCreateElement()
     createTimer.setInterval(0);
     static int elemCounter = 0;
     QRandomGenerator rnd;
-    QStringList massModels;
 
-    auto createModelsConnection = QObject::connect(&createTimer, &QTimer::timeout, [&]() {
-        // Create a bunch of models to slide 2 in small batches to avoid slowdown
+    auto createElementsConnection = QObject::connect(&createTimer, &QTimer::timeout, [&]() {
+        // Create a bunch of elements to slide 2 in small batches to avoid slowdown
         for (int i = 0; i < 5; ++i) {
             ++elemCounter;
             data.clear();
-            QString modelName = QStringLiteral("MassModel_%1").arg(elemCounter);
-            massModels << QStringLiteral("Scene.Layer.") + modelName;
-            data.insert(QStringLiteral("name"), modelName);
+            QString elementName = QStringLiteral("MassElement_%1").arg(elemCounter);
+            data.insert(QStringLiteral("name"), elementName);
             data.insert(QStringLiteral("sourcepath"),
                         elemCounter % 2 ? QStringLiteral("#Cube") : QStringLiteral("#Cone"));
             data.insert(QStringLiteral("material"),
@@ -310,39 +311,152 @@ void tst_qt3dsviewer::testCreateElement()
                                                                  rnd.bounded(-600, 600),
                                                                  rnd.bounded(800, 1200))));
 
-            m_presentation->createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide2"),
-                                          data);
+            createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide2"), data);
         }
         if (elemCounter >= 1000) {
-            qDebug() << "Extra models created:" << elemCounter;
+            qDebug() << "Extra elements created:" << elemCounter;
             createTimer.stop();
         }
     });
-    qDebug() << "Start creating extra models";
+    qDebug() << "Start creating extra elements";
     createTimer.start();
 
     // Switch to slide 2
     QVERIFY(spyExited.wait(20000));
-    QObject::disconnect(createModelsConnection);
+    QObject::disconnect(createElementsConnection);
 
     QTest::qWait(500);
-    elemCounter = massModels.size() - 1;
-    QObject::connect(&createTimer, &QTimer::timeout, [&]() {
-        // Delete all models we created previously
-        if (elemCounter >= 0) {
-            m_presentation->deleteElement(massModels[elemCounter]);
-            --elemCounter;
-        } else {
-            qDebug() << "Extra models deleted";
-            createTimer.stop();
-        }
-    });
-    qDebug() << "Start deleting extra models";
-    createTimer.setInterval(1);
-    createTimer.start();
+    deleteCreatedElements(1);
 
     // Switch to slide 1
     QVERIFY(spyExited.wait(20000));
+    QTest::qWait(1000);
+}
+
+void tst_qt3dsviewer::testCreateMaterial()
+{
+    m_viewer.show();
+
+    m_settings->setShowRenderStats(true);
+    m_settings->setScaleMode(Q3DSViewerSettings::ScaleModeFill);
+
+    QSignalSpy spyExited(m_presentation,
+                         SIGNAL(slideExited(const QString &, unsigned int, const QString &)));
+    QSignalSpy spyMatCreated(m_presentation, SIGNAL(materialCreated(const QString &)));
+
+    // Create material via .materialdef file in resources
+    m_presentation->createMaterial(
+                QStringLiteral("Scene"),
+                QStringLiteral(
+                    ":/scenes/simple_cube_animation/materials/Basic Blue.materialdef"));
+    m_presentation->createMaterial(
+                QStringLiteral("Scene"),
+                QStringLiteral(
+                    ":/scenes/simple_cube_animation/materials/Basic Texture.materialdef"));
+
+    // Create material directly from materialdef content
+    auto loadMatDefFile = [&](const QString &fileName) -> QString {
+        QFile matDefFile(fileName);
+        if (!matDefFile.open(QIODevice::ReadOnly | QIODevice::Text))
+            return {};
+
+        QTextStream in(&matDefFile);
+        return in.readAll();
+    };
+    QString matDef = loadMatDefFile(
+                QStringLiteral(":/scenes/simple_cube_animation/materials/Copper.materialdef"));
+    QVERIFY(!matDef.isEmpty());
+
+    m_presentation->createMaterial(QStringLiteral("Scene"), matDef);
+
+    QObject::connect(m_presentation, &Q3DSPresentation::materialCreated,
+                     [this](const QString &name) {
+        QHash<QString, QVariant> data;
+
+        if (name == QStringLiteral("materials/Basic Blue")) {
+            data.insert(QStringLiteral("name"), QStringLiteral("Blue Cylinder"));
+            data.insert(QStringLiteral("sourcepath"), QStringLiteral("#Cylinder"));
+            data.insert(QStringLiteral("material"), name);
+            data.insert(QStringLiteral("position"),
+                        QVariant::fromValue<QVector3D>(QVector3D(200, 300, 200)));
+            createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide1"), data);
+        }
+
+        if (name == QStringLiteral("materials/Basic Texture")) {
+            data.insert(QStringLiteral("name"), QStringLiteral("Textured Cone"));
+            data.insert(QStringLiteral("sourcepath"), QStringLiteral("#Cone"));
+            data.insert(QStringLiteral("material"), name);
+            data.insert(QStringLiteral("position"),
+                        QVariant::fromValue<QVector3D>(QVector3D(-200, -300, 200)));
+            createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide1"), data);
+        }
+
+        if (name == QStringLiteral("materials/Copper")) {
+            data.insert(QStringLiteral("name"), QStringLiteral("Copper Sphere"));
+            data.insert(QStringLiteral("sourcepath"), QStringLiteral("#Sphere"));
+            data.insert(QStringLiteral("material"), name);
+            data.insert(QStringLiteral("position"),
+                        QVariant::fromValue<QVector3D>(QVector3D(-200, 300, 200)));
+            createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide1"), data);
+        }
+
+        if (name == QStringLiteral("materials/Just Yellow")) {
+            QHash<QString, QVariant> data;
+            data.insert(QStringLiteral("name"), QStringLiteral("Yellow Cube"));
+            data.insert(QStringLiteral("sourcepath"), QStringLiteral("#Cube"));
+            data.insert(QStringLiteral("material"), name);
+            data.insert(QStringLiteral("position"),
+                        QVariant::fromValue<QVector3D>(QVector3D(200, -300, 200)));
+            createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide1"), data);
+        }
+    });
+
+    // Create material after start
+    QTimer::singleShot(1000, [&]() {
+        QString md = loadMatDefFile(QStringLiteral(
+                        ":/scenes/simple_cube_animation/materials/Basic Blue.materialdef"));
+        // Modify the diffuse color and material name so that we can be sure it is a new one
+        md.replace(QStringLiteral("Basic Blue"), QStringLiteral("Just Yellow"));
+        md.replace(QRegularExpression(QStringLiteral("\"diffuse\">.*<")),
+                   QStringLiteral("\"diffuse\">1 1 0 1<"));
+        m_presentation->createMaterial(QStringLiteral("Scene"), md);
+    });
+
+    QVERIFY(spyExited.wait(20000));
+    QCOMPARE(spyMatCreated.count(), 4);
+    QTest::qWait(200); // Extra wait to verify slide change visually
+}
+
+void tst_qt3dsviewer::deleteCreatedElements(int interval)
+{
+    QTimer deleteTimer;
+    deleteTimer.setInterval(interval);
+    int elemCounter = m_createdElements.size() - 1;
+    QObject::connect(&deleteTimer, &QTimer::timeout, [&]() {
+        // Delete all elements we created previously
+        if (elemCounter >= 0) {
+            m_presentation->deleteElement(m_createdElements[elemCounter]);
+            --elemCounter;
+        } else {
+            qDebug() << "Extra elements deleted";
+            deleteTimer.stop();
+        }
+    });
+    qDebug() << "Start deleting extra elements";
+    deleteTimer.start();
+
+    while (deleteTimer.isActive())
+        QTest::qWait(20);
+
+    m_createdElements.clear();
+}
+
+void tst_qt3dsviewer::createElement(const QString &parentElementPath, const QString &slideName,
+                                    const QHash<QString, QVariant> &properties)
+{
+    m_createdElements << parentElementPath + QLatin1Char('.')
+                         + properties[QStringLiteral("name")].toString();
+    m_presentation->createElement(parentElementPath, slideName, properties);
 }
 
 QTEST_MAIN(tst_qt3dsviewer)

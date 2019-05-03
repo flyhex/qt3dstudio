@@ -207,6 +207,10 @@ bool Q3DSRenderer::initializeRuntime(QOpenGLFramebufferObject *inFbo)
             this, &Q3DSRenderer::enterSlide);
     connect(m_runtime, &Q3DSViewer::Q3DSViewerApp::SigSlideExited,
             this, &Q3DSRenderer::exitSlide);
+    connect(m_runtime, &Q3DSViewer::Q3DSViewerApp::SigCustomSignal,
+            this, &Q3DSRenderer::customSignalEmitted);
+    connect(m_runtime, &Q3DSViewer::Q3DSViewerApp::SigMaterialCreated,
+            this, &Q3DSRenderer::materialCreated);
 
     return true;
 }
@@ -340,6 +344,10 @@ void Q3DSRenderer::processCommands()
         }
         case CommandType_DeleteElement: {
             m_runtime->deleteElement(cmd.m_elementPath);
+            break;
+        }
+        case CommandType_CreateMaterial: {
+            m_runtime->createMaterial(cmd.m_elementPath, cmd.m_stringValue);
             break;
         }
         case CommandType_RequestSlideInfo: {

@@ -57,6 +57,7 @@ SOURCES += \
     ../Source/runtime/Qt3DSSlideSystem.cpp \
     ../Source/runtime/Qt3DSTimePolicy.cpp \
     ../Source/runtime/q3dsvariantconfig.cpp \
+    ../Source/runtime/q3dsmaterialdefinitionparser.cpp \
     ../Source/runtimerender/graphobjects/Qt3DSRenderCamera.cpp \
     ../Source/runtimerender/graphobjects/Qt3DSRenderDefaultMaterial.cpp \
     ../Source/runtimerender/graphobjects/Qt3DSRenderDynamicObject.cpp \
@@ -258,6 +259,7 @@ HEADERS += \
     ../Source/runtime/Qt3DSIText.h \
     ../Source/runtime/Qt3DSKernelTypes.h \
     ../Source/runtime/q3dsvariantconfig_p.h \
+    ../Source/runtime/q3dsmaterialdefinitionparser.h \
     ../Source/runtimerender/graphobjects/Qt3DSRenderCamera.h \
     ../Source/runtimerender/graphobjects/Qt3DSRenderCustomMaterial.h \
     ../Source/runtimerender/graphobjects/Qt3DSRenderDefaultMaterial.h \

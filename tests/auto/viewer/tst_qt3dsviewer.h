@@ -56,12 +56,19 @@ private Q_SLOTS:
     void testFrameUpdates();
     void testSettings();
     void testCreateElement();
+    void testCreateMaterial();
 
 private:
+    void deleteCreatedElements(int interval);
+    void createElement(const QString &parentElementPath, const QString &slideName,
+                       const QHash<QString, QVariant> &properties);
+
     QQuickView m_viewer;
     QObject *m_studio3DItem = nullptr;
     Q3DSPresentation *m_presentation = nullptr;
     Q3DSViewerSettings *m_settings = nullptr;
+    QStringList m_createdElements;
+
 };
 
 #endif // TST_QT3DSVIEWER

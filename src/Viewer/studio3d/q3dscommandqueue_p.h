@@ -70,6 +70,7 @@ enum CommandType {
     CommandType_SetDataInputValue,
     CommandType_CreateElement,
     CommandType_DeleteElement,
+    CommandType_CreateMaterial,
 
     // Requests
     CommandType_RequestSlideInfo,

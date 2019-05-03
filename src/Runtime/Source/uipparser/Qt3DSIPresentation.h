@@ -30,9 +30,6 @@
 
 #pragma once
 
-//==============================================================================
-//	Includes
-//==============================================================================
 #include "Qt3DSEventCallbacks.h"
 
 namespace qt3ds {
@@ -52,14 +49,8 @@ namespace foundation {
 }
 }
 
-//==============================================================================
-//	Namespace
-//==============================================================================
 namespace Q3DStudio {
 
-//==============================================================================
-//	Forwards
-//==============================================================================
 class IComponentManager;
 class IEventManager;
 class IScene;
@@ -71,20 +62,14 @@ using qt3ds::runtime::IAnimationSystem;
 using qt3ds::runtime::ILogicSystem;
 using qt3ds::runtime::IParametersSystem;
 
-//==============================================================================
-//	Enumeration
-//==============================================================================
-/// Method used to translate from presentation size to window size
+// Method used to translate from presentation size to window size
 enum EScaleMode {
-    SCALEMODE_FREE, ///< Free scaling mode
-    SCALEMODE_EXACT, ///< Fixed presentation size
-    SCALEMODE_ASPECT, ///< Maintain aspect ratio
-    SCALEMODE_UNKNOWN, ///< ERROR! - Uninitialized scale mode
+    SCALEMODE_FREE, // Free scaling mode
+    SCALEMODE_EXACT, // Fixed presentation size
+    SCALEMODE_ASPECT, // Maintain aspect ratio
+    SCALEMODE_UNKNOWN, // ERROR! - Uninitialized scale mode
 };
 
-//==============================================================================
-//	Structs
-//==============================================================================
 struct SPresentationSize
 {
     SPresentationSize()
@@ -93,22 +78,18 @@ struct SPresentationSize
         , m_ScaleMode(0)
     {
     }
-    UINT16 m_Width; ///< Native width of the presentation
-    UINT16 m_Height; ///< Native height of the presentation
-    UINT8 m_ScaleMode; ///< Presentation to window scale method
+    UINT16 m_Width; // Native width of the presentation
+    UINT16 m_Height; // Native height of the presentation
+    UINT8 m_ScaleMode; // Presentation to window scale method
     UINT8 m_Padding[3];
 };
 
-//==============================================================================
 /**
  *	@interface	IPresentation
  *	Base interface of the presentation.
  */
 class IPresentation
 {
-    //==============================================================================
-    //	Methods
-    //==============================================================================
 public: // Construction
     IPresentation() {}
     virtual ~IPresentation() {}
@@ -127,11 +108,11 @@ public: // Bridge Control
 
 public: // Commands and Events
     virtual void FireEvent(const TEventCommandHash inEventType, TElement *inTarget,
-                           const UVariant *inArg1 = NULL, const UVariant *inArg2 = NULL,
+                           const UVariant *inArg1 = nullptr, const UVariant *inArg2 = nullptr,
                            const EAttributeType inType1 = ATTRIBUTETYPE_NONE,
                            const EAttributeType inType2 = ATTRIBUTETYPE_NONE) = 0;
     virtual void FireCommand(const TEventCommandHash inEventType, TElement *inTarget,
-                             const UVariant *inArg1 = NULL, const UVariant *inArg2 = NULL,
+                             const UVariant *inArg1 = nullptr, const UVariant *inArg2 = nullptr,
                              const EAttributeType inType1 = ATTRIBUTETYPE_NONE,
                              const EAttributeType inType2 = ATTRIBUTETYPE_NONE) = 0;
     virtual void FlushEventCommandQueue(void) = 0;
@@ -153,7 +134,8 @@ public: // Hooks and callbacks
 
 public: // Full file path
     virtual void SetFilePath(const CHAR *inPath) = 0;
-    virtual QString GetFilePath() = 0;
+    virtual QString GetFilePath() const = 0;
+    virtual QString getProjectPath() const = 0;
     virtual TElement *GetRoot() = 0;
     virtual void SetRoot(TElement &inRoot) = 0;
 

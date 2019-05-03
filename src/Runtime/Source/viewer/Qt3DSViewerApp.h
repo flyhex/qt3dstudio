@@ -362,6 +362,7 @@ public:
     void createElement(const QString &parentElementPath, const QString &slideName,
                        const QHash<QString, QVariant> &properties);
     void deleteElement(const QString &elementPath);
+    void createMaterial(const QString &elementPath, const QString &materialDefinition);
 
     QString error();
 
@@ -403,6 +404,7 @@ Q_SIGNALS:
     void SigSlideEntered(const QString &elementPath, unsigned int index, const QString &name);
     void SigSlideExited(const QString &elementPath, unsigned int index, const QString &name);
     void SigCustomSignal(const QString &elementPath, const QString &name);
+    void SigMaterialCreated(const QString &name);
     void SigPresentationReady();
 };
 

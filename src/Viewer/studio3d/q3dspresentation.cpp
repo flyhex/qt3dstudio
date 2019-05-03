@@ -36,9 +36,7 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/qsettings.h>
 #include <QtCore/qcoreapplication.h>
-#include <QtGui/QKeyEvent>
-#include <QtGui/QMouseEvent>
-#include <QtGui/QWheelEvent>
+#include <QtGui/qevent.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -276,11 +274,11 @@ void Q3DSPresentation::setDataInputValue(const QString &name, const QVariant &va
 }
 
 /**
- Adds a new child element for the element specified by parentElementPath to the slide specified with
- slideName. Only model element creation is currently supported.
- A referenced material element is also created for the new model element. The source material name
- can be specified with custom "material" property in the properties hash.
- The source material must exist in the material container of the presentation.
+    Adds a new child element for the element specified by parentElementPath to the slide specified
+    with slideName. Only model element creation is currently supported.
+    A referenced material element is also created for the new model element. The source material
+    name can be specified with custom "material" property in the properties hash.
+    The source material must exist in the material container of the presentation.
 */
 void Q3DSPresentation::createElement(const QString &parentElementPath, const QString &slideName,
                                      const QHash<QString, QVariant> &properties)
@@ -296,14 +294,32 @@ void Q3DSPresentation::createElement(const QString &parentElementPath, const QSt
 }
 
 /**
- Removes an element added by createElement and all its child elements.
- */
+    Removes an element added by createElement and all its child elements.
+*/
 void Q3DSPresentation::deleteElement(const QString &elementPath)
 {
     if (d_ptr->m_viewerApp)
         d_ptr->m_viewerApp->deleteElement(elementPath);
     else if (d_ptr->m_commandQueue)
         d_ptr->m_commandQueue->queueCommand(elementPath, CommandType_DeleteElement);
+}
+
+/**
+    Creates a material specified by the materialDefinition parameter into the material
+    container of the presentation that owns the element specified by the elementPath parameter.
+    After creation, the material can be used for new elements created via createElement.
+    The materialDefinition parameter can contain either the file path to a material definition
+    file or a material definition in the Qt 3D Studion material data format.
+*/
+void Q3DSPresentation::createMaterial(const QString &elementPath,
+                                      const QString &materialDefinition)
+{
+    if (d_ptr->m_viewerApp) {
+        d_ptr->m_viewerApp->createMaterial(elementPath, materialDefinition);
+    } else if (d_ptr->m_commandQueue) {
+        d_ptr->m_commandQueue->queueCommand(elementPath, CommandType_CreateMaterial,
+                                            materialDefinition);
+    }
 }
 
 void Q3DSPresentation::mousePressEvent(QMouseEvent *e)
@@ -448,6 +464,8 @@ void Q3DSPresentationPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool 
                     q_ptr, &Q3DSPresentation::slideExited);
             connect(app, &Q3DSViewer::Q3DSViewerApp::SigCustomSignal,
                     q_ptr, &Q3DSPresentation::customSignalEmitted);
+            connect(app, &Q3DSViewer::Q3DSViewerApp::SigMaterialCreated,
+                    q_ptr, &Q3DSPresentation::materialCreated);
         }
         if (oldApp) {
             disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigSlideEntered,
@@ -456,6 +474,8 @@ void Q3DSPresentationPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool 
                        q_ptr, &Q3DSPresentation::slideExited);
             disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigCustomSignal,
                        q_ptr, &Q3DSPresentation::customSignalEmitted);
+            disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigMaterialCreated,
+                       q_ptr, &Q3DSPresentation::materialCreated);
         }
     }
 }

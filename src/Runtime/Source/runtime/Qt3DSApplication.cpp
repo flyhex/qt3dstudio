@@ -1092,7 +1092,9 @@ struct SApp : public IApplication
         if (theStream) {
             theStream = NULL;
             CPresentation *thePresentation
-                    = Q3DStudio_new(CPresentation) CPresentation(inAsset.m_Id.c_str(), this);
+                    = Q3DStudio_new(CPresentation) CPresentation(inAsset.m_Id.c_str(),
+                                                                 GetProjectDirectory().c_str(),
+                                                                 this);
             inAsset.m_Presentation = thePresentation;
             thePresentation->SetFilePath(theFile.c_str());
             NVScopedReleasable<IUIPParser> theUIPParser(IUIPParser::Create(

@@ -61,6 +61,8 @@ Q_SIGNALS:
     void exitSlide(const QString &elementPath, unsigned int slide, const QString &slideName);
     void requestResponse(const QString &elementPath, CommandType commandType, void *requestData);
     void presentationReady();
+    void customSignalEmitted(const QString &elementPath, const QString &name);
+    void materialCreated(const QString &name);
 
 protected:
     static void onInitHandler(void *userData);
