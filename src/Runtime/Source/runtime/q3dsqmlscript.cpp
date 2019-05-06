@@ -38,6 +38,7 @@
 #include "Qt3DSQmlElementHelper.h"
 #include "Qt3DSHash.h"
 #include "Qt3DSEulerAngles.h"
+#include "Qt3DSMathUtils.h"
 
 using namespace Q3DStudio;
 
@@ -347,15 +348,11 @@ QMatrix4x4 Q3DSQmlScript::calculateGlobalTransform(const QString &handle)
 
 QVector3D Q3DSQmlScript::lookAt(const QVector3D &target)
 {
-    RuntimeVector3 rotation;
-
     FLOAT theMag = ::sqrtf(target.x() * target.x() + target.z() * target.z());
     FLOAT thePitch = -::atan2f(target.y(), theMag);
     FLOAT theYaw = ::atan2f(target.x(), target.z());
 
-    rotation.Set(thePitch, theYaw, 0.0f);
-
-    return QVector3D(rotation.m_X, rotation.m_Y, rotation.m_Z);
+    return QVector3D(radToDeg(thePitch), radToDeg(theYaw), 0.0f);
 }
 
 QVector3D Q3DSQmlScript::matrixToEuler(const QMatrix4x4 &matrix)
