@@ -153,7 +153,7 @@ void computeTemporaries()
 vec4 computeLayerWeights( in float alpha )
 {
   vec4 color;
-  color = fresnelLayer( normal, vec3( 25.65, 25.65, 25.65 ), 1.000000, vec4( metal_color, 1.0).rgb, layers[0].layer, layers[0].base, alpha );
+  color = fresnelLayer( normal, vec3( 25.65, 25.65, 25.65 ), 1.000000, metal_color.rgb, layers[0].layer, layers[0].base, alpha );
   return color;
 }
 

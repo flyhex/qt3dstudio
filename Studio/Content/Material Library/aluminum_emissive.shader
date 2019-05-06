@@ -112,7 +112,7 @@ bool evalTwoSided()
 
 vec3 computeFrontMaterialEmissive()
 {
-  return( vec3( 1.0, 1.0, 1.0) * vec3( vec3( ( intensity*( emission_color*( fileTexture(emissive_texture, vec3( 0, 0, 0 ), vec3( 1, 1, 1 ), mono_alpha, transformCoordinate( rotationTranslationScale( vec3( 0.000000, 0.000000, 0.000000 ), vec3( 0.000000, 0.000000, 0.000000 ), vec3( 1.000000, 1.000000, 1.000000 ) ), tmp1 ), vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_default ).tint*fileTexture(emissive_mask_texture, vec3( 0, 0, 0 ), vec3( 1, 1, 1 ), mono_alpha, transformCoordinate( rotationTranslationScale( vec3( 0.000000, 0.000000, 0.000000 ), emissive_mask_offset, vec3( 1.000000, 1.000000, 1.000000 ) ), tmp1 ), vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_default ).tint ) ) ) )  ) );
+  return( vec3( 1.0, 1.0, 1.0) * vec3( vec3( ( intensity*( emission_color.rgb *( fileTexture(emissive_texture, vec3( 0, 0, 0 ), vec3( 1, 1, 1 ), mono_alpha, transformCoordinate( rotationTranslationScale( vec3( 0.0, 0.0, 0.0 ), vec3( 0.0, 0.0, 0.0 ), vec3( 1.0, 1.0, 1.0 ) ), tmp1 ), vec2( 0.0, 1.0 ), vec2( 0.0, 1.0 ), wrap_repeat, wrap_repeat, gamma_default ).tint*fileTexture(emissive_mask_texture, vec3( 0, 0, 0 ), vec3( 1, 1, 1 ), mono_alpha, transformCoordinate( rotationTranslationScale( vec3( 0.0, 0.0, 0.0 ), emissive_mask_offset, vec3( 1.0, 1.0, 1.0 ) ), tmp1 ), vec2( 0.0, 1.0 ), vec2( 0.0, 1.0 ), wrap_repeat, wrap_repeat, gamma_default ).tint ) ) ) )  ) );
 }
 
 void computeFrontLayerColor( in vec3 normal, in vec3 lightDir, in vec3 viewDir, in vec3 lightDiffuse, in vec3 lightSpecular, in float materialIOR, float aoFactor )
@@ -185,27 +185,27 @@ float computeIOR()
 
 float evalCutout()
 {
-  return( 1.000000 );
+  return( 1.0 );
 }
 
 vec3 computeNormal()
 {
-  return( fileBumpTexture(bump_texture, bump_amount, mono_average, tmp2, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, normal ) );
+  return( fileBumpTexture(bump_texture, bump_amount, mono_average, tmp2, vec2( 0.0, 1.0 ), vec2( 0.0, 1.0 ), wrap_repeat, wrap_repeat, normal ) );
 }
 
 void computeTemporaries()
 {
-     tmp1 = textureCoordinateInfo( texCoord0, tangent, binormal );
-     tmp2 = transformCoordinate( rotationTranslationScale( vec3( 0.000000, 0.000000, 0.000000 ), vec3( 0.000000, 0.000000, 0.000000 ), tiling ), tmp1 );
-     tmp3 = fileTexture(roughness_texture, vec3( roughness_map_offset ), vec3( roughness_map_scale ), mono_luminance, tmp2, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_default ).mono;
-     ftmp0 = fileTexture(reflection_texture, vec3( reflection_map_offset ), vec3( reflection_map_scale ), mono_luminance, tmp2, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_default ).mono;
-     tmpShadowTerm = evalBakedShadowMap( texCoord0 );
+    tmp1 = textureCoordinateInfo( texCoord0, tangent, binormal );
+    tmp2 = transformCoordinate( rotationTranslationScale( vec3( 0.0, 0.0, 0.0 ), vec3( 0.0, 0.0, 0.0 ), tiling ), tmp1 );
+    tmp3 = fileTexture(roughness_texture, vec3( roughness_map_offset ), vec3( roughness_map_scale ), mono_luminance, tmp2, vec2( 0.0, 1.0 ), vec2( 0.0, 1.0 ), wrap_repeat, wrap_repeat, gamma_default ).mono;
+    ftmp0 = fileTexture(reflection_texture, vec3( reflection_map_offset ), vec3( reflection_map_scale ), mono_luminance, tmp2, vec2( 0.0, 1.0 ), vec2( 0.0, 1.0 ), wrap_repeat, wrap_repeat, gamma_default ).mono;
+    tmpShadowTerm = evalBakedShadowMap( texCoord0 );
 }
 
 vec4 computeLayerWeights( in float alpha )
 {
   vec4 color;
-  color = weightedLayer( ftmp0, vec4( metal_color, 1.0).rgb, layers[0].layer, layers[0].base, alpha );
+  color = weightedLayer( ftmp0, metal_color.rgb, layers[0].layer, layers[0].base, alpha );
   return color;
 }
 

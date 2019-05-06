@@ -114,7 +114,7 @@ bool evalTwoSided()
 
 vec3 computeFrontMaterialEmissive()
 {
-  return( vec3( 1.0, 1.0, 1.0) * vec3( vec3( ( intensity*( emission_color*fileTexture(emissive_texture, vec3( 0, 0, 0 ), vec3( 1, 1, 1 ), mono_alpha, transformCoordinate( rotationTranslationScale( vec3( 0.000000, 0.000000, 0.000000 ), vec3( 0.000000, 0.000000, 0.000000 ), vec3( 1.000000, 1.000000, 1.000000 ) ), textureCoordinateInfo( texCoord0, tangent, binormal ) ), vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_default ).tint ) ) )  ) );
+  return( vec3( 1.0, 1.0, 1.0) * vec3( vec3( ( intensity * ( emission_color.rgb * fileTexture(emissive_texture, vec3( 0, 0, 0 ), vec3( 1, 1, 1 ), mono_alpha, transformCoordinate( rotationTranslationScale( vec3( 0.000000, 0.000000, 0.000000 ), vec3( 0.000000, 0.000000, 0.000000 ), vec3( 1.000000, 1.000000, 1.000000 ) ), textureCoordinateInfo( texCoord0, tangent, binormal ) ), vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_default ).tint ) ) )  ) );
 }
 
 void computeFrontLayerColor( in vec3 normal, in vec3 lightDir, in vec3 viewDir, in vec3 lightDiffuse, in vec3 lightSpecular, in float materialIOR, float aoFactor )
@@ -203,7 +203,7 @@ void computeTemporaries()
 vec4 computeLayerWeights( in float alpha )
 {
   vec4 color;
-  color = fresnelLayer( normal, vec3( material_ior ), 0.350000, vec4( vec3( 1, 1, 1 ), 1.0).rgb, layers[0].layer, layers[0].base * vec4( diffuse_color, 1.0), alpha );
+  color = fresnelLayer( normal, vec3( material_ior ), 0.350000, vec4( vec3( 1, 1, 1 ), 1.0).rgb, layers[0].layer, layers[0].base * vec4( diffuse_color.rgb, 1.0), alpha );
   return color;
 }
 

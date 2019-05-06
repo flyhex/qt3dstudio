@@ -258,7 +258,7 @@ vec3 getRefractUV( in vec2 baseUV, in vec3 normal, in float materialIOR, in floa
 
 vec4 doFakeInnerLight( in vec3 normal, in vec3 absorb_color )
 {
-    vec3 lightColor = intLightCol * intLightBrt;
+    vec3 lightColor = intLightCol.rgb * intLightBrt;
 
     float cosRot = cos(intLightRot * 0.01745329251);
     float sinRot = sin(intLightRot * 0.01745329251);
@@ -284,7 +284,7 @@ vec4 computeGlass(in vec3 normal, in float materialIOR, in float alpha, in vec4 
 {
   vec4 rgba = color;
   float ratio = simpleFresnel( normal, materialIOR, uFresnelPower );
-  vec3 absorb_color = ( log( glass_color ) * -1.000000 );
+  vec3 absorb_color = ( log( glass_color.rgb ) * -1.000000 );
   // prevent log(0) -> inf number issue
   if ( isinf(absorb_color.r) ) absorb_color.r = 1.0;
   if ( isinf(absorb_color.g) ) absorb_color.g = 1.0;
@@ -300,7 +300,7 @@ vec4 computeGlass(in vec3 normal, in float materialIOR, in float alpha, in vec4 
 
   vec3 refractColor = refractValue.a * refractValue.rgb + (1.0 - refractValue.a) * value.rgb;
   refractColor = refractColor * (vec3(1.0) - absorb_color);
-  vec4 internalColor = doFakeInnerLight( normal, glass_color );
+  vec4 internalColor = doFakeInnerLight( normal, glass_color.rgb );
   refractColor += internalColor.rgb * internalColor.a;
 
   rgba = vec4(mix(refractColor, rgba.rgb, ratio), 1.0);

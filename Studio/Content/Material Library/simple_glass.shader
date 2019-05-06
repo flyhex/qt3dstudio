@@ -173,7 +173,7 @@ vec4 computeGlass(in vec3 normal, in float materialIOR, in float alpha, in vec4 
 {
   vec4 rgba = color;
   float ratio = simpleFresnel( normal, materialIOR, uFresnelPower );
-  vec3 absorb_color = ( log( glass_color )/-1.000000 );
+  vec3 absorb_color = ( log( glass_color.rgb )/-1.000000 );
   // prevent log(0) -> inf number issue
   if ( isinf(absorb_color.r) ) absorb_color.r = 1.0;
   if ( isinf(absorb_color.g) ) absorb_color.g = 1.0;

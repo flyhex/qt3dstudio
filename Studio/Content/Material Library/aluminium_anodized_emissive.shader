@@ -99,13 +99,13 @@ bool evalTwoSided()
 
 vec3 computeFrontMaterialEmissive()
 {
-  return( vec3( 1.0, 1.0, 1.0) * vec3( vec3( ( intensity*( emission_color*( fileTexture(emissive_texture, vec3( 0, 0, 0 ), vec3( 1, 1, 1 ), mono_alpha, tmp3, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_default ).tint*fileTexture(emissive_mask_texture, vec3( 0, 0, 0 ), vec3( 1, 1, 1 ), mono_alpha, tmp3, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_default ).tint ) ) ) )  ) );
+  return( vec3(1.0) * vec3( vec3( ( intensity *( emission_color.rgb * ( fileTexture(emissive_texture, vec3(0.0), vec3(1.0), mono_alpha, tmp3, vec2(0.0, 1.0), vec2(0.0, 1.0), wrap_repeat, wrap_repeat, gamma_default ).tint * fileTexture(emissive_mask_texture, vec3(0.0), vec3(1.0), mono_alpha, tmp3, vec2(0.0, 1.0), vec2(0.0, 1.0), wrap_repeat, wrap_repeat, gamma_default ).tint ) ) ) ) ) );
 }
 
 void computeFrontLayerColor( in vec3 normal, in vec3 lightDir, in vec3 viewDir, in vec3 lightDiffuse, in vec3 lightSpecular, in float materialIOR, float aoFactor )
 {
 #if QT3DS_ENABLE_CG_LIGHTING
-  layers[0].base += tmpShadowTerm * vec4( 0.0, 0.0, 0.0, 1.0 );
+  layers[0].base += tmpShadowTerm * vec4(0.0, 0.0, 0.0, 1.0);
   layers[0].layer += tmpShadowTerm * microfacetBSDF( layers[0].tanFrame, lightDir, viewDir, lightSpecular, materialIOR, roughness, roughness, scatter_reflect );
 
 #endif
@@ -189,7 +189,7 @@ void computeTemporaries()
 vec4 computeLayerWeights( in float alpha )
 {
   vec4 color;
-  color = fresnelLayer( normal, vec3( 22, 22, 22 ), 1.000000, vec4( base_color, 1.0).rgb, layers[0].layer, layers[0].base, alpha );
+  color = fresnelLayer( normal, vec3( 22, 22, 22 ), 1.000000, base_color.rgb, layers[0].layer, layers[0].base, alpha );
   return color;
 }
 

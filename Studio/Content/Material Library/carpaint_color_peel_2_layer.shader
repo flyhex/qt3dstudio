@@ -222,9 +222,9 @@ void computeTemporaries()
 vec4 computeLayerWeights( in float alpha )
 {
   vec4 color;
-  color = weightedLayer( ftmp3, vec4( vec3( 1, 0.01, 0.01 ), 1.0).rgb, layers[2].layer, layers[2].base * vec4( base_color, 1.0), alpha );
-  color = weightedLayer( ftmp2, vec4( flake_color, 1.0).rgb, layers[1].layer, color, color.a );
-  color = fresnelLayer( ftmp0, vec3( coating_ior ), coat_weight, vec4( coat_color, 1.0).rgb, layers[0].layer, color, color.a );
+  color = weightedLayer( ftmp3, vec4( vec3( 1, 0.01, 0.01 ), 1.0).rgb, layers[2].layer, layers[2].base * vec4( base_color.rgb, 1.0), alpha );
+  color = weightedLayer( ftmp2, flake_color.rgb, layers[1].layer, color, color.a );
+  color = fresnelLayer( ftmp0, vec3( coating_ior ), coat_weight, coat_color.rgb, layers[0].layer, color, color.a );
   return color;
 }
 

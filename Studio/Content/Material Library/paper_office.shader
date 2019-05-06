@@ -215,14 +215,14 @@ vec3 computeNormal()
 void computeTemporaries()
 {
      tmp1 = transformCoordinate( rotationTranslationScale( vec3( 0.000000, 0.000000, 0.000000 ), vec3( 0.000000, 0.000000, 0.000000 ), vec3( texture_tiling[0], texture_tiling[1], 1.000000 ) ), textureCoordinateInfo( texCoord0, tangent, binormal ) );
-     ftmp0 = blendColorLayers( color_layer[1]( color_layer(blendColorLayers( color_layer[1]( color_layer(fileTexture(transmission_texture, vec3( 0, 0, 0 ), vec3( 1, 1, 1 ), mono_luminance, tmp1, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_default ).tint, 0.700000, color_layer_blend ) ), paper_color, mono_average ).tint, 1.000000, color_layer_multiply ) ), vec3( 1, 1, 1 ), mono_average ).tint;
+     ftmp0 = blendColorLayers( color_layer[1]( color_layer(blendColorLayers( color_layer[1]( color_layer(fileTexture(transmission_texture, vec3( 0, 0, 0 ), vec3( 1, 1, 1 ), mono_luminance, tmp1, vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_default ).tint, 0.700000, color_layer_blend ) ), paper_color.rgb, mono_average ).tint, 1.000000, color_layer_multiply ) ), vec3( 1, 1, 1 ), mono_average ).tint;
      tmpShadowTerm = evalBakedShadowMap( texCoord0 );
 }
 
 vec4 computeLayerWeights( in float alpha )
 {
   vec4 color;
-  color = layers[0].base * vec4( paper_color, 1.0);
+  color = layers[0].base * vec4( paper_color.rgb, 1.0);
   return color;
 }
 

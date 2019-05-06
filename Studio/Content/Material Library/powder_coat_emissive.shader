@@ -110,7 +110,7 @@ bool evalTwoSided()
 
 vec3 computeFrontMaterialEmissive()
 {
-  return( vec3( 1.0, 1.0, 1.0) * vec3( vec3( ( ( fileTexture(emissive_texture, vec3( 0, 0, 0 ), vec3( 1, 1, 1 ), mono_alpha, transformCoordinate( rotationTranslationScale( vec3( 0.000000, 0.000000, 0.000000 ), vec3( 0.000000, 0.000000, 0.000000 ), vec3( 1.000000, 1.000000, 1.000000 ) ), tmp3 ), vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_default ).tint*emission_color )*intensity ) )  ) );
+  return( vec3( 1.0, 1.0, 1.0) * vec3( vec3( ( ( fileTexture(emissive_texture, vec3( 0, 0, 0 ), vec3( 1, 1, 1 ), mono_alpha, transformCoordinate( rotationTranslationScale( vec3( 0.000000, 0.000000, 0.000000 ), vec3( 0.000000, 0.000000, 0.000000 ), vec3( 1.000000, 1.000000, 1.000000 ) ), tmp3 ), vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, gamma_default ).tint * emission_color.rgb ) * intensity ) )  ) );
 }
 
 void computeFrontLayerColor( in vec3 normal, in vec3 lightDir, in vec3 viewDir, in vec3 lightDiffuse, in vec3 lightSpecular, in float materialIOR, float aoFactor )
@@ -227,7 +227,7 @@ void computeTemporaries()
 vec4 computeLayerWeights( in float alpha )
 {
   vec4 color;
-  color = weightedLayer( diffuse_weight, vec4( powdercoat_diffuse_color, 1.0).rgb, layers[1].layer, layers[1].base, alpha );
+  color = weightedLayer( diffuse_weight, powdercoat_diffuse_color.rgb, layers[1].layer, layers[1].base, alpha );
   color = fresnelLayer( normal, vec3( material_ior ), glossy_weight, vec4( ftmp0, 1.0).rgb, layers[0].layer, color, color.a );
   return color;
 }

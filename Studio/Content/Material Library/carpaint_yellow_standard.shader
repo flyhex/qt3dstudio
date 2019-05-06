@@ -110,7 +110,7 @@ void computeFrontLayerColor( in vec3 normal, in vec3 lightDir, in vec3 viewDir, 
 #if QT3DS_ENABLE_CG_LIGHTING
   layers[0].layer += tmpShadowTerm * microfacetBSDF( layers[0].tanFrame, lightDir, viewDir, lightSpecular, materialIOR, 0.000000, 0.000000, scatter_reflect );
 
-  layers[1].base += tmpShadowTerm * directionalFactor( normal, viewDir, normal_base_color, grazing_base_color, 5.000000, diffuseReflectionBSDF( normal, lightDir, viewDir, lightDiffuse, 0.000000 ) );
+  layers[1].base += tmpShadowTerm * directionalFactor( normal, viewDir, normal_base_color.rgb, grazing_base_color.rgb, 5.000000, diffuseReflectionBSDF( normal, lightDir, viewDir, lightDiffuse, 0.000000 ) );
   layers[1].layer += tmpShadowTerm * microfacetBSDF( layers[1].tanFrame, lightDir, viewDir, lightSpecular, materialIOR, 0.200000, 0.200000, scatter_reflect );
 
 #endif
@@ -121,7 +121,7 @@ void computeFrontAreaColor( in int lightIdx, in vec4 lightDiffuse, in vec4 light
 #if QT3DS_ENABLE_CG_LIGHTING
   layers[0].layer += tmpShadowTerm * lightSpecular * sampleAreaGlossy( layers[0].tanFrame, varWorldPos, lightIdx, viewDir, 0.000000, 0.000000 );
 
-  layers[1].base += tmpShadowTerm * directionalFactor( normal, viewDir, normal_base_color, grazing_base_color, 5.000000, lightDiffuse * sampleAreaDiffuse( layers[1].tanFrame, varWorldPos, lightIdx ) );
+  layers[1].base += tmpShadowTerm * directionalFactor( normal, viewDir, normal_base_color.rgb, grazing_base_color.rgb, 5.000000, lightDiffuse * sampleAreaDiffuse( layers[1].tanFrame, varWorldPos, lightIdx ) );
   layers[1].layer += tmpShadowTerm * lightSpecular * sampleAreaGlossy( layers[1].tanFrame, varWorldPos, lightIdx, viewDir, 0.200000, 0.200000 );
 
 #endif
@@ -132,13 +132,13 @@ void computeFrontLayerEnvironment( in vec3 normal, in vec3 viewDir, float aoFact
 #if !QT3DS_ENABLE_LIGHT_PROBE
   layers[0].layer += tmpShadowTerm * microfacetSampledBSDF( layers[0].tanFrame, viewDir, 0.000000, 0.000000, scatter_reflect );
 
-  layers[1].base += tmpShadowTerm * directionalFactor( normal, viewDir, normal_base_color, grazing_base_color, 5.000000, diffuseReflectionBSDFEnvironment( normal, 0.000000 ) * aoFactor );
+  layers[1].base += tmpShadowTerm * directionalFactor( normal, viewDir, normal_base_color.rgb, grazing_base_color.rgb, 5.000000, diffuseReflectionBSDFEnvironment( normal, 0.000000 ) * aoFactor );
   layers[1].layer += tmpShadowTerm * microfacetSampledBSDF( layers[1].tanFrame, viewDir, 0.200000, 0.200000, scatter_reflect );
 
 #else
   layers[0].layer += tmpShadowTerm * sampleGlossyAniso( layers[0].tanFrame, viewDir, 0.000000, 0.000000 );
 
-  layers[1].base += tmpShadowTerm * directionalFactor( normal, viewDir, normal_base_color, grazing_base_color, 5.000000, sampleDiffuse( layers[1].tanFrame ) * aoFactor );
+  layers[1].base += tmpShadowTerm * directionalFactor( normal, viewDir, normal_base_color.rgb, grazing_base_color.rgb, 5.000000, sampleDiffuse( layers[1].tanFrame ) * aoFactor );
   layers[1].layer += tmpShadowTerm * sampleGlossyAniso( layers[1].tanFrame, viewDir, 0.200000, 0.200000 );
 
 #endif

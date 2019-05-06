@@ -183,15 +183,15 @@ vec3 computeNormal()
 
 void computeTemporaries()
 {
-     tmp4 = fileBumpTexture(bump_texture, bump_amount, mono_average, transformCoordinate( rotationTranslationScale( vec3( 0.000000, 0.000000, 0.000000 ), vec3( 0.000000, 0.000000, 0.000000 ), vec3( texture_tiling[0], texture_tiling[1], 1.000000 ) ), textureCoordinateInfo( texCoord0, tangent, binormal ) ), vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, normal );
-     tmpShadowTerm = evalBakedShadowMap( texCoord0 );
+    tmp4 = fileBumpTexture(bump_texture, bump_amount, mono_average, transformCoordinate( rotationTranslationScale( vec3( 0.000000, 0.000000, 0.000000 ), vec3( 0.000000, 0.000000, 0.000000 ), vec3( texture_tiling[0], texture_tiling[1], 1.000000 ) ), textureCoordinateInfo( texCoord0, tangent, binormal ) ), vec2( 0.000000, 1.000000 ), vec2( 0.000000, 1.000000 ), wrap_repeat, wrap_repeat, normal );
+    tmpShadowTerm = evalBakedShadowMap( texCoord0 );
 }
 
 vec4 computeLayerWeights( in float alpha )
 {
   vec4 color;
-  color = weightedLayer( 1.000000, vec4( base_color, 1.0).rgb, layers[1].layer, layers[1].base, alpha );
-  color = fresnelLayer( tmp4, vec3( material_ior ), glossy_weight, vec4( vec3( 1, 1, 1 ), 1.0).rgb, layers[0].layer, color, color.a );
+  color = weightedLayer( 1.0, base_color.rgb, layers[1].layer, layers[1].base, alpha );
+  color = fresnelLayer( tmp4, vec3( material_ior ), glossy_weight, vec3(1.0), layers[0].layer, color, color.a );
   return color;
 }
 

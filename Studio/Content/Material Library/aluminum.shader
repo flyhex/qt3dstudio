@@ -198,7 +198,7 @@ void computeTemporaries()
 vec4 computeLayerWeights( in float alpha )
 {
   vec4 color;
-  color = weightedLayer( ftmp0, vec4( metal_color, 1.0).rgb, layers[0].layer, layers[0].base, alpha );
+  color = weightedLayer( ftmp0, metal_color.rgb, layers[0].layer, layers[0].base, alpha );
   return color;
 }
 

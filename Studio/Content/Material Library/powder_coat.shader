@@ -185,14 +185,14 @@ vec3 computeNormal()
 
 void computeTemporaries()
 {
-     ftmp0 = vec3( reflectivity );
-     tmpShadowTerm = evalBakedShadowMap( texCoord0 );
+    ftmp0 = vec3( reflectivity );
+    tmpShadowTerm = evalBakedShadowMap( texCoord0 );
 }
 
 vec4 computeLayerWeights( in float alpha )
 {
   vec4 color;
-  color = weightedLayer( diffuse_weight, vec4( powdercoat_diffuse_color, 1.0).rgb, layers[1].layer, layers[1].base, alpha );
+  color = weightedLayer( diffuse_weight, powdercoat_diffuse_color.rgb, layers[1].layer, layers[1].base, alpha );
   color = fresnelLayer( normal, vec3( material_ior ), glossy_weight, vec4( ftmp0, 1.0).rgb, layers[0].layer, color, color.a );
   return color;
 }
