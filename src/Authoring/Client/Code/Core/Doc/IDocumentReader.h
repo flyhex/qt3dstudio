@@ -154,7 +154,8 @@ public:
     // link to that source path and under which slide.
     // Pass in true if you want the map keys to include the identifiers (#1, #2).
     virtual void GetSourcePathToInstanceMap(TCharPtrToSlideInstanceMap &outInstanceMap,
-                                            bool inIncludeIdentifiers = true) const = 0;
+                                            bool checkMaterialContainers = true,
+                                            bool includeIdentifiers = true) const = 0;
     // Get a map from string table string to list of slide/instance pairs that indicates, for a
     // given source path,
     // which instances link to that source path under which slide.

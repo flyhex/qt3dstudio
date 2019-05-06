@@ -2560,7 +2560,7 @@ void CDoc::SavePresentationFile(CBufferedOutputStream *inOutputStream)
         CClientDataModelBridge &theBridge = *(m_StudioSystem->GetClientDataModelBridge());
         IPropertySystem &thePropertySystem = *(m_StudioSystem->GetPropertySystem());
         TCharPtrToSlideInstanceMap sourcePathToInstanceMap;
-        m_SceneEditor->GetSourcePathToInstanceMap(sourcePathToInstanceMap);
+        m_SceneEditor->GetSourcePathToInstanceMap(sourcePathToInstanceMap, false, false);
         // Ensure the image is loaded in the image buffer system
         // because this scans the image for alpha bits.
         for (TCharPtrToSlideInstanceMap::iterator theIter = sourcePathToInstanceMap.begin(),

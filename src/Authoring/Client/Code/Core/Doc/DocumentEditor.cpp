@@ -421,8 +421,9 @@ public:
     }
 
     void GetPathToInstanceMap(TCharPtrToSlideInstanceMap &outInstanceMap,
-                              qt3dsdm::Qt3DSDMPropertyHandle inProperty,
-                              bool inIncludeIdentifiers = true) const
+                              qt3dsdm::Qt3DSDMPropertyHandle property,
+                              bool checkMaterialContainers = true,
+                              bool includeIdentifiers = true) const
     {
         SComposerObjectDefinitions &theDefinitions(m_Bridge.GetObjectDefinitions());
         TInstanceHandleList existing;
@@ -432,17 +433,17 @@ public:
         for (size_t idx = 0, end = existing.size(); idx < end; ++idx) {
             Qt3DSDMInstanceHandle theAsset(existing[idx]);
 
-            if (m_Bridge.isInsideMaterialContainer(theAsset))
+            if (checkMaterialContainers && m_Bridge.isInsideMaterialContainer(theAsset))
                 continue;
 
             thePaths.clear();
-            GetAllPaths(theAsset, inProperty, thePaths);
+            GetAllPaths(theAsset, property, thePaths);
 
             for (size_t pathIdx = 0, pathEnd = thePaths.size(); pathIdx < pathEnd; ++pathIdx) {
                 const pair<qt3dsdm::Qt3DSDMSlideHandle, Q3DStudio::CString> &theSlideStr(
                     thePaths[pathIdx]);
                 CFilePath thePath(theSlideStr.second);
-                if (inIncludeIdentifiers == false)
+                if (!includeIdentifiers)
                     thePath = thePath.filePath();
                 const wchar_t *theString = m_DataCore.GetStringTable().RegisterStr(
                     thePath.toCString());
@@ -455,17 +456,18 @@ public:
     }
 
     void GetSourcePathToInstanceMap(TCharPtrToSlideInstanceMap &outInstanceMap,
-                                            bool inIncludeIdentifiers = true) const override
+                                    bool checkMaterialContainers = true,
+                                    bool includeIdentifiers = true) const override
     {
         SComposerObjectDefinitions &theDefinitions(m_Bridge.GetObjectDefinitions());
         GetPathToInstanceMap(outInstanceMap, theDefinitions.m_Asset.m_SourcePath,
-                             inIncludeIdentifiers);
+                             checkMaterialContainers, includeIdentifiers);
     }
 
     void GetImportPathToInstanceMap(TCharPtrToSlideInstanceMap &outInstanceMap) const override
     {
         SComposerObjectDefinitions &theDefinitions(m_Bridge.GetObjectDefinitions());
-        GetPathToInstanceMap(outInstanceMap, theDefinitions.m_Asset.m_ImportFile, false);
+        GetPathToInstanceMap(outInstanceMap, theDefinitions.m_Asset.m_ImportFile, true, false);
     }
 
     bool CanPropertyBeLinked(TInstanceHandle inInstance, TPropertyHandle inProperty) const override
@@ -4839,7 +4841,7 @@ public:
         ScopedBoolean __ignoredDirs(m_IgnoreDirChange);
         try {
             m_SourcePathInstanceMap.clear();
-            GetSourcePathToInstanceMap(m_SourcePathInstanceMap, false);
+            GetSourcePathToInstanceMap(m_SourcePathInstanceMap, true, false);
             DoRefreshImport(inOldFile, inNewFile);
         } catch (...) {
         }
@@ -4856,7 +4858,7 @@ public:
         try {
             vector<CFilePath> importFileList;
             m_SourcePathInstanceMap.clear();
-            GetSourcePathToInstanceMap(m_SourcePathInstanceMap, false);
+            GetSourcePathToInstanceMap(m_SourcePathInstanceMap, true, false);
             for (TCharPtrToSlideInstanceMap::iterator theIter = m_SourcePathInstanceMap.begin(),
                                                       end = m_SourcePathInstanceMap.end();
                  theIter != end; ++theIter) {
