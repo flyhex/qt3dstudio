@@ -13,6 +13,11 @@ requires(qtHaveModule(opengl))
 SUBDIRS += \
     doc
 
+OTHER_FILES += \
+    "Studio/Content/Behavior Library/*" \
+    "Studio/Content/Effect Library/*" \
+    "Studio/Content/Material Library/*"
+
 load(qt_parts)
 
 # 'deployqt' target can be used to automatically copy necessary Qt libraries needed by studio
