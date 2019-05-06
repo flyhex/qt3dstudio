@@ -226,7 +226,7 @@ namespace render {
                                                NVAllocatorCallback &inSceneGraphAllocator) = 0;
 
         // scan shader for #includes and insert any found"
-        virtual void InsertShaderHeaderInformation(CRenderString &inShader,
+        virtual void InsertShaderHeaderInformation(Qt3DSString &inShader,
                                                    const char *inLogPath) = 0;
 
         // Set the shader data for a given path.  Used when a path doesn't correspond to a file but
@@ -267,7 +267,7 @@ namespace render {
                          const dynamic::SDynamicShaderProgramFlags &inFlags,
                          bool inForceCompilation = false) = 0;
 
-        virtual void GetShaderSource(CRegisteredString inPath, CRenderString &outSource) = 0;
+        virtual void GetShaderSource(CRegisteredString inPath, Qt3DSString &outSource) = 0;
 
         // Will return null in the case where a custom prepass shader isn't needed for this object
         // If no geom shader, then no depth prepass shader.

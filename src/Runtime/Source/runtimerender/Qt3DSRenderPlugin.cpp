@@ -36,7 +36,7 @@
 #include "foundation/Qt3DSSystem.h"
 #include "foundation/FileTools.h"
 #include "render/Qt3DSRenderContext.h"
-#include "Qt3DSRenderString.h"
+#include "StringTools.h"
 #include "Qt3DSRenderPluginPropertyValue.h"
 #include "Qt3DSRenderInputStreamFactory.h"
 
@@ -450,7 +450,7 @@ struct PluginClassImpl : public IInternalPluginClass
     TStringIndexMap m_ComponentNameToComponentIndexMap;
     nvvector<TStringTypePair> m_FullPropertyList;
     nvvector<TRenderPluginPropertyUpdate> m_UpdateBuffer;
-    CRenderString m_TempString;
+    Qt3DSString m_TempString;
     QT3DSI32 m_APIVersion;
 
     QT3DSI32 mRefCount;

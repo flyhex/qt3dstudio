@@ -33,7 +33,7 @@
 #include "Qt3DSRenderInputStreamFactory.h"
 #include "foundation/Qt3DSAtomic.h"
 #include "foundation/Qt3DSContainers.h"
-#include "Qt3DSRenderString.h"
+#include "StringTools.h"
 #include "foundation/Qt3DSFoundation.h"
 #include "foundation/Qt3DSBroadcastingAllocator.h"
 #include "Qt3DSRenderEffect.h"
@@ -283,7 +283,7 @@ struct STextureEntry
     }
 
     static STextureEntry CreateTextureEntry(NVRenderShaderProgram &inShader, const char *inStem,
-                                            CRenderString &inBuilder, CRenderString &inBuilder2)
+                                            Qt3DSString &inBuilder, Qt3DSString &inBuilder2)
     {
         inBuilder.assign(inStem);
         inBuilder.append("Info");
@@ -393,7 +393,7 @@ namespace render {
 
         void SetTexture(NVRenderShaderProgram &inShader, CRegisteredString inPropName,
                         NVRenderTexture2D *inTexture, bool inNeedsMultiply,
-                        CRenderString &inStringBuilder, CRenderString &inStringBuilder2,
+                        Qt3DSString &inStringBuilder, Qt3DSString &inStringBuilder2,
                         const SPropertyDefinition *inPropDec = NULL)
         {
             STextureEntry *theTextureEntry(NULL);
@@ -505,8 +505,8 @@ struct SEffectSystem : public IEffectSystem
     TEffectClassMap m_EffectClasses;
     nvvector<CRegisteredString> m_EffectList;
     TContextList m_Contexts;
-    CRenderString m_TextureStringBuilder;
-    CRenderString m_TextureStringBuilder2;
+    Qt3DSString m_TextureStringBuilder;
+    Qt3DSString m_TextureStringBuilder2;
     TShaderMap m_ShaderMap;
     NVScopedRefCounted<NVRenderDepthStencilState> m_DefaultStencilState;
     nvvector<NVScopedRefCounted<NVRenderDepthStencilState>> m_DepthStencilStates;

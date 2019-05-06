@@ -31,7 +31,7 @@
 #include "render/Qt3DSRenderContext.h"
 #include "foundation/Qt3DSContainers.h"
 #include "foundation/Qt3DSAtomic.h"
-#include "Qt3DSRenderString.h"
+#include "StringTools.h"
 #include "foundation/XML.h"
 #include "foundation/IOStreams.h"
 #include "foundation/StringConversionImpl.h"
@@ -53,13 +53,13 @@ namespace {
 using qt3ds::render::NVRenderContextScopedProperty;
 const char *TessellationEnabledStr = "TessellationStageEnabled";
 const char *GeometryEnabledStr = "GeometryStageEnabled";
-inline void AppendFlagValue(CRenderString &inStr, const char *flag)
+inline void AppendFlagValue(Qt3DSString &inStr, const char *flag)
 {
     if (inStr.length())
         inStr.append(QLatin1Char(','));
     inStr.append(flag);
 }
-inline void CacheFlagsToStr(const SShaderCacheProgramFlags &inFlags, CRenderString &inString)
+inline void CacheFlagsToStr(const SShaderCacheProgramFlags &inFlags, Qt3DSString &inString)
 {
     inString.clear();
     if (inFlags.IsTessellationEnabled())
@@ -73,7 +73,7 @@ struct ShaderType
     enum Enum { Vertex, TessControl, TessEval, Fragment, Geometry, Compute };
 };
 
-inline ShaderType::Enum StringToShaderType(CRenderString &inShaderType)
+inline ShaderType::Enum StringToShaderType(Qt3DSString &inShaderType)
 {
     ShaderType::Enum retval = ShaderType::Vertex;
 
@@ -96,12 +96,12 @@ inline ShaderType::Enum StringToShaderType(CRenderString &inShaderType)
     return retval;
 }
 
-inline SShaderCacheProgramFlags CacheFlagsToStr(const CRenderString &inString)
+inline SShaderCacheProgramFlags CacheFlagsToStr(const Qt3DSString &inString)
 {
     SShaderCacheProgramFlags retval;
-    if (inString.indexOf(TessellationEnabledStr) != CRenderString::npos)
+    if (inString.indexOf(TessellationEnabledStr) != Qt3DSString::npos)
         retval.SetTessellationEnabled(true);
-    if (inString.indexOf(GeometryEnabledStr) != CRenderString::npos)
+    if (inString.indexOf(GeometryEnabledStr) != Qt3DSString::npos)
         retval.SetGeometryShaderEnabled(true);
     return retval;
 }
@@ -128,7 +128,7 @@ size_t g_NumStringToContextValueEntries =
     sizeof(g_StringToContextTypeValue) / sizeof(*g_StringToContextTypeValue);
 
 inline void ContextTypeToString(qt3ds::render::NVRenderContextType inType,
-                                CRenderString &outContextType)
+                                Qt3DSString &outContextType)
 {
     outContextType.clear();
     for (size_t idx = 0, end = g_NumStringToContextValueEntries; idx < end; ++idx) {
@@ -140,7 +140,7 @@ inline void ContextTypeToString(qt3ds::render::NVRenderContextType inType,
     }
 }
 
-inline qt3ds::render::NVRenderContextType StringToContextType(const CRenderString &inContextType)
+inline qt3ds::render::NVRenderContextType StringToContextType(const Qt3DSString &inContextType)
 {
     qt3ds::render::NVRenderContextType retval;
     char tempBuffer[128];
@@ -152,7 +152,7 @@ inline qt3ds::render::NVRenderContextType StringToContextType(const CRenderStrin
 
     do {
         pos = int(inContextType.indexOf(QLatin1Char('|'), lastpos));
-        if (pos == CRenderString::npos)
+        if (pos == Qt3DSString::npos)
             pos = int(inContextType.size());
         {
 
@@ -168,7 +168,7 @@ inline qt3ds::render::NVRenderContextType StringToContextType(const CRenderStrin
         // iterate past the bar
         ++pos;
         lastpos = pos;
-    } while (pos < inContextType.size() && pos != CRenderString::npos);
+    } while (pos < inContextType.size() && pos != Qt3DSString::npos);
 
     return retval;
 }
@@ -229,15 +229,15 @@ struct ShaderCache : public IShaderCache
     NVRenderContext &m_RenderContext;
     IPerfTimer &m_PerfTimer;
     TShaderMap m_Shaders;
-    CRenderString m_CacheFilePath;
-    CRenderString m_VertexCode;
-    CRenderString m_TessCtrlCode;
-    CRenderString m_TessEvalCode;
-    CRenderString m_GeometryCode;
-    CRenderString m_FragmentCode;
-    CRenderString m_InsertStr;
-    CRenderString m_FlagString;
-    CRenderString m_ContextTypeString;
+    Qt3DSString m_CacheFilePath;
+    Qt3DSString m_VertexCode;
+    Qt3DSString m_TessCtrlCode;
+    Qt3DSString m_TessEvalCode;
+    Qt3DSString m_GeometryCode;
+    Qt3DSString m_FragmentCode;
+    Qt3DSString m_InsertStr;
+    Qt3DSString m_FlagString;
+    Qt3DSString m_ContextTypeString;
     SShaderCacheKey m_TempKey;
 
     NVScopedRefCounted<IDOMWriter> m_ShaderCache;
@@ -327,7 +327,7 @@ struct ShaderCache : public IShaderCache
         }
     }
 
-    void AddShaderPreprocessor(CRenderString &str, CRegisteredString inKey,
+    void AddShaderPreprocessor(Qt3DSString &str, CRegisteredString inKey,
                                ShaderType::Enum shaderType,
                                NVConstDataRef<SShaderPreprocessorFeature> inFeatures)
     {
@@ -622,12 +622,12 @@ struct ShaderCache : public IShaderCache
                 QT3DSU32 theAttValue = 0;
                 theReader->Att("cache_version", theAttValue);
                 if (theAttValue == IShaderCache::GetShaderVersion()) {
-                    CRenderString loadVertexData;
-                    CRenderString loadFragmentData;
-                    CRenderString loadTessControlData;
-                    CRenderString loadTessEvalData;
-                    CRenderString loadGeometryData;
-                    CRenderString shaderTypeString;
+                    Qt3DSString loadVertexData;
+                    Qt3DSString loadFragmentData;
+                    Qt3DSString loadTessControlData;
+                    Qt3DSString loadTessEvalData;
+                    Qt3DSString loadGeometryData;
+                    Qt3DSString shaderTypeString;
                     IStringTable &theStringTable(m_RenderContext.GetStringTable());
                     for (bool success = theReader->MoveToFirstChild(); success;
                          success = theReader->MoveToNextSibling()) {

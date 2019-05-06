@@ -251,7 +251,7 @@ struct SShaderGeneratorGeneratedShader
 
 struct SShaderGenerator : public IDefaultMaterialShaderGenerator
 {
-    typedef CRenderString TStrType;
+    typedef Qt3DSString TStrType;
     typedef nvhash_map<NVRenderShaderProgram *, NVScopedRefCounted<SShaderGeneratorGeneratedShader>>
         TProgramToShaderMap;
     typedef qt3ds::foundation::nvhash_map<CRegisteredString,

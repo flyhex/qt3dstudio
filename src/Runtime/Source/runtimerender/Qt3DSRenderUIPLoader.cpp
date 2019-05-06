@@ -60,7 +60,7 @@
 #include "EASTL/string.h"
 #include "foundation/StrConvertUTF.h"
 #include "Qt3DSRenderEffectSystem.h"
-#include "Qt3DSRenderString.h"
+#include "StringTools.h"
 #include "foundation/FileTools.h"
 #include "Qt3DSRenderDynamicObjectSystemCommands.h"
 #include "EASTL/map.h"
@@ -113,7 +113,7 @@ using qt3ds::render::SCustomMaterial;
 using qt3ds::render::GraphObjectTypes;
 using qt3ds::render::NodeFlags;
 using qt3ds::foundation::CRegisteredString;
-using qt3ds::render::CRenderString;
+using qt3ds::foundation::Qt3DSString;
 using qt3ds::foundation::CFileTools;
 using qt3ds::render::SReferencedMaterial;
 using qt3ds::render::IUIPReferenceResolver;
@@ -506,7 +506,7 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
     TStrType m_TempParseString;
     IEffectSystem &m_EffectSystem;
     const char8_t *m_PresentationDir;
-    CRenderString m_PathString;
+    Qt3DSString m_PathString;
     qt3ds::render::IRenderPluginManager &m_RenderPluginManager;
     qt3ds::render::ICustomMaterialSystem &m_CustomMaterialSystem;
     qt3ds::render::IDynamicObjectSystem &m_DynamicObjectSystem;
@@ -1971,9 +1971,9 @@ void qt3ds::render::IUIPLoader::CreateEffectClassFromMetaEffect(
         inFoundation.getAllocator(), "qt3ds::render::IUIPLoader::CreateEffectClassFromMetaEffect");
     nvvector<CRegisteredString> theEnumNames(
         inFoundation.getAllocator(), "qt3ds::render::IUIPLoader::CreateEffectClassFromMetaEffect");
-    CRenderString theConvertStr;
-    CRenderString theConvertShaderTypeStr;
-    CRenderString theConvertShaderVersionStr;
+    Qt3DSString theConvertStr;
+    Qt3DSString theConvertShaderTypeStr;
+    Qt3DSString theConvertShaderVersionStr;
 
     for (QT3DSU32 idx = 0, end = inMetaDataEffect.m_Properties.size(); idx < end; ++idx)
         thePropertyDeclarations.push_back(
@@ -2034,9 +2034,9 @@ void qt3ds::render::IUIPLoader::CreateMaterialClassFromMetaMaterial(
     nvvector<CRegisteredString> theEnumNames(
         inFoundation.getAllocator(),
         "qt3ds::render::IUIPLoader::CreateMaterialClassFromMetaMaterial");
-    CRenderString theConvertStr;
-    CRenderString theConvertShaderTypeStr;
-    CRenderString theConvertShaderVersionStr;
+    Qt3DSString theConvertStr;
+    Qt3DSString theConvertShaderTypeStr;
+    Qt3DSString theConvertShaderVersionStr;
     for (QT3DSU32 idx = 0, end = inMetaDataMaterial.m_Properties.size(); idx < end; ++idx)
         thePropertyDeclarations.push_back(
             SPropertyDeclaration(inMetaDataMaterial.m_Properties[idx].m_Name.c_str(),

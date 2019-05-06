@@ -31,12 +31,13 @@
 #include "Qt3DSRenderDynamicObject.h"
 #include "Qt3DSRenderDynamicObjectSystem.h"
 #include "foundation/FileTools.h"
-#include "Qt3DSRenderString.h"
+#include "StringTools.h"
 
 #include <QtCore/qdir.h>
 
 using namespace qt3ds;
 using namespace qt3ds::render;
+using namespace qt3ds::foundation;
 
 SDynamicObject::SDynamicObject(GraphObjectTypes::Enum inType, CRegisteredString inObjName,
                                QT3DSU32 inDSByteSize, QT3DSU32 thisObjSize)
@@ -104,6 +105,7 @@ void SDynamicObject::SetPropertyValue(const dynamic::SPropertyDefinition &inDefi
     QT3DS_ASSERT(inDefinition.m_DataType == NVRenderShaderDataTypes::NVRenderTexture2DPtr);
     SetPropertyValueT(inDefinition, inValue);
 }
+
 template <typename TStrType>
 void SDynamicObject::SetStrPropertyValueT(dynamic::SPropertyDefinition &inDefinition,
                                           const char8_t *inValue, const char8_t *inProjectDir,
@@ -143,7 +145,7 @@ void SDynamicObject::SetStrPropertyValueT(dynamic::SPropertyDefinition &inDefini
 
 void SDynamicObject::SetPropertyValue(const dynamic::SPropertyDefinition &inDefinition,
                                       const char8_t *inValue, const char8_t *inProjectDir,
-                                      CRenderString &ioWorkspace, IStringTable &inStrTable)
+                                      Qt3DSString &ioWorkspace, IStringTable &inStrTable)
 {
     SetStrPropertyValueT(const_cast<dynamic::SPropertyDefinition &>(inDefinition), inValue,
                          inProjectDir, ioWorkspace, inStrTable);

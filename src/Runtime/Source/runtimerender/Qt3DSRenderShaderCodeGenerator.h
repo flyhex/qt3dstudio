@@ -35,7 +35,7 @@
 #include "EASTL/string.h"
 #include "foundation/StringTable.h"
 #include "render/Qt3DSRenderBaseTypes.h"
-#include "Qt3DSRenderString.h"
+#include "StringTools.h"
 
 namespace qt3ds {
 namespace render {
@@ -69,7 +69,7 @@ namespace render {
         TStrTableStrMap m_ConstantBuffers;
         TConstantBufferParamArray m_ConstantBufferParams;
         TStrTableStrMap m_Attributes;
-        CRenderString m_FinalShaderBuilder;
+        Qt3DSString m_FinalShaderBuilder;
         TStrType m_CodeBuilder;
         qt3ds::render::NVRenderContextType m_RenderContextType;
 

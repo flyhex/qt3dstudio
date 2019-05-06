@@ -32,7 +32,7 @@
 #include "Qt3DSRenderUIPSharedTranslation.h"
 #include "Qt3DSRenderBufferManager.h"
 #include "foundation/SerializationTypes.h"
-#include "Qt3DSRenderString.h"
+#include "StringTools.h"
 #include "foundation/FileTools.h"
 #include "Qt3DSHash.h"
 #include "Qt3DSRenderPlugin.h"
@@ -44,6 +44,8 @@
 #include "Qt3DSRenderPath.h"
 #include "Qt3DSRenderPathSubPath.h"
 #include "Qt3DSRenderPathManager.h"
+
+using namespace qt3ds::foundation;
 
 namespace Q3DStudio {
 enum ExtendedAttributes {
@@ -1230,7 +1232,7 @@ struct SDynamicObjectTranslatorContext : public STranslatorContext
     typedef nvhash_map<Q3DStudio::INT32, SEffectPropertyEntry> THashToOffsetMap;
     THashToOffsetMap m_PropertyHashes;
     NVAllocatorCallback &m_Allocator;
-    CRenderString m_Workspace;
+    Qt3DSString m_Workspace;
     SDynamicObjectTranslatorContext(NVAllocatorCallback &inCallback)
         : m_PropertyHashes(inCallback, "SEffectTranslatorContext::PropertyHashes")
         , m_Allocator(inCallback)
@@ -1239,7 +1241,7 @@ struct SDynamicObjectTranslatorContext : public STranslatorContext
     ~SDynamicObjectTranslatorContext() {}
     void AddEffectExtendedProperty(const qt3ds::render::dynamic::SPropertyDefinition &thePropDef,
                                    const char *inExtension, Q3DStudio::EAttributeType inType,
-                                   CRenderString &ioStringBuilder, QT3DSU32 inOffset, QT3DSU32 dataOffset)
+                                   Qt3DSString &ioStringBuilder, QT3DSU32 inOffset, QT3DSU32 dataOffset)
     {
         ioStringBuilder.fromUtf8(thePropDef.m_Name.c_str());
         ioStringBuilder.append(inExtension);
@@ -1251,7 +1253,7 @@ struct SDynamicObjectTranslatorContext : public STranslatorContext
     void BuildPropertyHashes(NVConstDataRef<qt3ds::render::dynamic::SPropertyDefinition> inProperties)
     {
         if (m_PropertyHashes.size() == 0) {
-            qt3ds::render::CRenderString theNameBuilder;
+            qt3ds::foundation::Qt3DSString theNameBuilder;
             for (QT3DSU32 idx = 0, end = inProperties.size(); idx < end; ++idx) {
                 const qt3ds::render::dynamic::SPropertyDefinition &thePropDef = inProperties[idx];
                 switch (thePropDef.m_DataType) {

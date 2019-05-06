@@ -33,7 +33,7 @@
 #include "Qt3DSRender.h"
 #include "foundation/StringTable.h"
 #include "foundation/Qt3DSAllocatorCallback.h"
-#include "Qt3DSRenderString.h"
+#include "StringTools.h"
 
 namespace qt3ds {
 namespace render {
@@ -43,7 +43,7 @@ namespace render {
         {
             CStrTableOrDataRef m_StrData;
             IStringTable &m_StringTable;
-            CRenderString m_PathMapper;
+            Qt3DSString m_PathMapper;
             const char8_t *m_ProjectDir;
             SStringLoadRemapper(NVAllocatorCallback &alloc, CStrTableOrDataRef inData,
                                 const char8_t *inProjectDir, IStringTable &inStrTable)
@@ -59,9 +59,9 @@ namespace render {
         struct SStringSaveRemapper
         {
             const qt3ds::render::SStrRemapMap &m_Map;
-            CRenderString m_RelativeBuffer;
-            CRenderString m_ProjectDir;
-            CRenderString m_FinalBuffer;
+            Qt3DSString m_RelativeBuffer;
+            Qt3DSString m_ProjectDir;
+            Qt3DSString m_FinalBuffer;
             IStringTable &m_StringTable;
             SStringSaveRemapper(NVAllocatorCallback &alloc, const qt3ds::render::SStrRemapMap &map,
                                 const char8_t *inProjectDir, IStringTable &inStrTable)

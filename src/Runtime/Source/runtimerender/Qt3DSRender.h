@@ -43,6 +43,8 @@ namespace foundation {
     struct SDataReader;
     struct SPtrOffsetMap;
     class IPerfTimer;
+    class Qt3DSString;
+    class Qt3DSStringUtils;
 }
 namespace intrinsics {
 }
@@ -160,6 +162,8 @@ namespace render {
     using qt3ds::foundation::SStrRemapMap;
     using qt3ds::foundation::SWriteBuffer;
     using qt3ds::foundation::SDataReader;
+    using qt3ds::foundation::Qt3DSString;
+    using qt3ds::foundation::Qt3DSStringUtils;
     using qt3ds::render::NVRenderPtrPtrMap;
     using qt3ds::foundation::CStrTableOrDataRef;
     using qt3ds::foundation::SPtrOffsetMap;
@@ -197,7 +201,6 @@ namespace render {
     class IRefCountedInputStream;
     class IEffectSystem;
     class IEffectSystemCore;
-    class CRenderString;
     class IShaderCache;
     class IQt3DSRenderNodeFilter;
     class IRenderWidget;

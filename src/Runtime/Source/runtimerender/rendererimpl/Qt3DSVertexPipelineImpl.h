@@ -58,7 +58,7 @@ namespace render {
         IMaterialShaderGenerator &m_MaterialGenerator;
         IShaderProgramGenerator &m_ProgramGenerator;
         IStringTable &m_StringTable;
-        CRenderString m_TempString;
+        Qt3DSString m_TempString;
 
         TGenerationFlags m_GenerationFlags;
         bool m_Wireframe;

@@ -34,6 +34,7 @@
 #include "Qt3DSRenderGraphObject.h"
 #include "Qt3DSRenderNode.h"
 #include "EASTL/string.h"
+#include "StringTools.h"
 
 namespace qt3ds {
 namespace render {
@@ -92,7 +93,7 @@ namespace render {
 
         void SetPropertyValue(const dynamic::SPropertyDefinition &inDefinition,
                               const char8_t *inValue, const char8_t *inProjectDir,
-                              CRenderString &ioWorkspace, IStringTable &inStrTable);
+                              Qt3DSString &ioWorkspace, IStringTable &inStrTable);
 
         void SetPropertyValue(const dynamic::SPropertyDefinition &inDefinition,
                               const char8_t *inValue, const char8_t *inProjectDir,

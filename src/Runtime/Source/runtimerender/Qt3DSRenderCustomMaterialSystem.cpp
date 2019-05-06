@@ -1152,7 +1152,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
         m_CoreContext.GetDynamicObjectSystemCore().SetRenderCommands(inName, inCommands);
     }
 
-    CRegisteredString GetShaderCacheKey(CRenderString &inShaderKeyBuffer, const char8_t *inId,
+    CRegisteredString GetShaderCacheKey(Qt3DSString &inShaderKeyBuffer, const char8_t *inId,
                                         const char8_t *inProgramMacro,
                                         const dynamic::SDynamicShaderProgramFlags &inFlags)
     {
@@ -1182,7 +1182,7 @@ struct SMaterialSystem : public ICustomMaterialSystem
             m_Context->GetCustomMaterialShaderGenerator());
 
         // generate key
-        CRenderString theShaderKeyBuffer;
+        Qt3DSString theShaderKeyBuffer;
         CRegisteredString theKey = GetShaderCacheKey(theShaderKeyBuffer, inCommand.m_ShaderPath,
                                                      inCommand.m_ShaderDefine, inFlags);
 

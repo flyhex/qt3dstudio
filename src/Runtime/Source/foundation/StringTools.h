@@ -39,7 +39,7 @@
 #include "EASTL/string.h"
 
 namespace qt3ds {
-namespace render {
+namespace foundation {
 
 class Qt3DSStringUtils {
 public:
@@ -165,34 +165,34 @@ public:
     }
 };
 
-class CRenderString {
+class Qt3DSString {
 public:
-    inline CRenderString() {}
+    inline Qt3DSString() {}
 
-    CRenderString(QChar c) : m_string(QString(c)) {}
+    Qt3DSString(QChar c) : m_string(QString(c)) {}
 
-    CRenderString(int size, QChar c) : m_string(size, c) {}
+    Qt3DSString(int size, QChar c) : m_string(size, c) {}
 
-    inline CRenderString(QLatin1String latin1)
+    inline Qt3DSString(QLatin1String latin1)
         : m_string(latin1) {}
 
-    explicit CRenderString(const QChar *unicode, int size = -1)
+    explicit Qt3DSString(const QChar *unicode, int size = -1)
         : m_string(unicode,size) {}
 
-    inline CRenderString(const QString &str) Q_DECL_NOTHROW
+    inline Qt3DSString(const QString &str) Q_DECL_NOTHROW
         : m_string(str) {}
 
-    inline CRenderString(const CRenderString &str) Q_DECL_NOTHROW
+    inline Qt3DSString(const Qt3DSString &str) Q_DECL_NOTHROW
         : m_string(str.m_string) {}
 
-    ~CRenderString() {}
+    ~Qt3DSString() {}
 
     inline operator QString() const
     {
         return m_string;
     }
 
-    inline void operator=(const CRenderString &text)
+    inline void operator=(const Qt3DSString &text)
     {
         m_string = text.m_string;
         m_isDirty = true;
@@ -205,9 +205,9 @@ public:
     }
 
     // QString method wrappers
-    static inline CRenderString fromUtf8(const char *str, int size = -1)
+    static inline Qt3DSString fromUtf8(const char *str, int size = -1)
     {
-        return CRenderString(QString::fromUtf8(str, size));
+        return Qt3DSString(QString::fromUtf8(str, size));
     }
 
     typedef int size_type;
@@ -292,14 +292,14 @@ public:
         return !operator< (rhs);
     }
 
-    inline  CRenderString& operator+=(const QString &rhs)
+    inline  Qt3DSString& operator+=(const QString &rhs)
     {
         m_string += rhs;
         m_isDirty = true;
         return *this;
     }
 
-    inline  CRenderString& operator+=(const char *s)
+    inline  Qt3DSString& operator+=(const char *s)
     {
         m_string += s;
         m_isDirty = true;
@@ -365,32 +365,32 @@ public:
         m_isDirty = true;
     }
 
-    inline CRenderString &insert(int i, QChar c)
+    inline Qt3DSString &insert(int i, QChar c)
     {
         m_string.insert(i,c);
         m_isDirty = true;
         return *this;
     }
-    inline CRenderString &insert(int i, const QChar *uc, int len)
+    inline Qt3DSString &insert(int i, const QChar *uc, int len)
     {
         m_string.insert(i,uc, len);
         m_isDirty = true;
         return *this;
     }
-    inline CRenderString &insert(int i, const QString &s)
+    inline Qt3DSString &insert(int i, const QString &s)
     {
         m_string.insert(i,s);
         m_isDirty = true;
         return *this;
     }
-    inline CRenderString &insert(int i, const QStringRef &s)
+    inline Qt3DSString &insert(int i, const QStringRef &s)
     {
         m_string.insert(i,s);
         m_isDirty = true;
         return *this;
     }
 
-    inline CRenderString &insert(int i, QLatin1String s)
+    inline Qt3DSString &insert(int i, QLatin1String s)
     {
         m_string.insert(i,s);
         m_isDirty = true;
@@ -406,35 +406,35 @@ public:
         return m_string.length();
     }
 
-    inline CRenderString &append(QChar c)
+    inline Qt3DSString &append(QChar c)
     {
         m_string.append(c);
         m_isDirty = true;
         return *this;
     }
 
-    inline CRenderString &append(const QChar *uc, int len)
+    inline Qt3DSString &append(const QChar *uc, int len)
     {
         m_string.append(uc, len);
         m_isDirty = true;
         return *this;
     }
 
-    inline CRenderString &append(const QString &s)
+    inline Qt3DSString &append(const QString &s)
     {
         m_string.append(s);
         m_isDirty = true;
         return *this;
     }
 
-    inline CRenderString &append(const QStringRef &s)
+    inline Qt3DSString &append(const QStringRef &s)
     {
         m_string.append(s);
         m_isDirty = true;
         return *this;
     }
 
-    inline CRenderString &append(QLatin1String s)
+    inline Qt3DSString &append(QLatin1String s)
     {
         m_string.append(s);
         m_isDirty = true;
@@ -516,7 +516,7 @@ public:
         assign(*text.c_str());
     }
 
-    inline CRenderString &append(QString::iterator first,
+    inline Qt3DSString &append(QString::iterator first,
                                  QString::iterator last)
     {
         Qt3DSStringUtils::append(m_string, first, last);
@@ -524,7 +524,7 @@ public:
         return *this;
     }
 
-    inline CRenderString &append(QString::const_iterator first,
+    inline Qt3DSString &append(QString::const_iterator first,
                                  QString::const_iterator last)
     {
         Qt3DSStringUtils::append(m_string, first, last);
@@ -532,21 +532,21 @@ public:
         return *this;
     }
 
-    inline CRenderString &append(const char *text, int size)
+    inline Qt3DSString &append(const char *text, int size)
     {
         m_string.append(QString::fromUtf8(text, size));
         m_isDirty = true;
         return *this;
     }
 
-    inline CRenderString &append(const char *text)
+    inline Qt3DSString &append(const char *text)
     {
         m_string.append(QString::fromUtf8(text));
         m_isDirty = true;
         return *this;
     }
 
-    inline CRenderString &replace(QString::iterator replaceBegin,
+    inline Qt3DSString &replace(QString::iterator replaceBegin,
                                   QString::iterator replaceEnd,
                                   const char *replaceText, int len)
     {
@@ -554,7 +554,7 @@ public:
                        QString::fromUtf8(replaceText, len));
     }
 
-    inline CRenderString &replace(QString::iterator replaceBegin,
+    inline Qt3DSString &replace(QString::iterator replaceBegin,
                                   QString::iterator replaceEnd,
                                   const QString &replaceText)
     {
@@ -565,7 +565,7 @@ public:
         return *this;
     }
 
-    inline CRenderString &replace(QString::const_iterator replaceBegin,
+    inline Qt3DSString &replace(QString::const_iterator replaceBegin,
                                   QString::const_iterator replaceEnd,
                                   const QString &replaceText)
     {

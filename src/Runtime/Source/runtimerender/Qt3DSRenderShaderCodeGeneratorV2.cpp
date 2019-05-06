@@ -52,8 +52,8 @@ struct SStageGeneratorBase : public IShaderStageGenerator
     TStrTableStrMap m_Uniforms;
     TStrTableStrMap m_ConstantBuffers;
     TConstantBufferParamArray m_ConstantBufferParams;
-    CRenderString m_CodeBuilder;
-    CRenderString m_FinalBuilder;
+    Qt3DSString m_CodeBuilder;
+    Qt3DSString m_FinalBuilder;
     ShaderGeneratorStages::Enum m_Stage;
     TShaderGeneratorStageFlags m_EnabledStages;
     QStringList m_addedFunctions;

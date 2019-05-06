@@ -39,7 +39,7 @@
 #include "foundation/FileTools.h"
 #include "foundation/PreAllocatedAllocator.h"
 #include "render/Qt3DSRenderShaderProgram.h"
-#include "Qt3DSRenderString.h"
+#include "StringTools.h"
 #include "Qt3DSRenderShaderCache.h"
 #include "Qt3DSRenderInputStreamFactory.h"
 #include "Qt3DSRenderer.h"
@@ -598,14 +598,14 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
     IQt3DSRenderContext *m_Context;
     TStringClassMap m_Classes;
     TPathDataMap m_ExpandedFiles;
-    CRenderString m_ShaderKeyBuilder;
+    Qt3DSString m_ShaderKeyBuilder;
     TShaderMap m_ShaderMap;
     TShaderInfoMap m_ShaderInfoMap;
-    CRenderString m_IncludePath;
-    CRenderString m_IncludeSearch;
-    CRenderString m_VertShader;
-    CRenderString m_FragShader;
-    CRenderString m_GeometryShader;
+    Qt3DSString m_IncludePath;
+    Qt3DSString m_IncludeSearch;
+    Qt3DSString m_VertShader;
+    Qt3DSString m_FragShader;
+    Qt3DSString m_GeometryShader;
     QString m_shaderLibraryVersion;
     QString m_shaderLibraryPlatformDirectory;
     mutable Mutex m_PropertyLoadMutex;
@@ -932,35 +932,35 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
         return m_CoreContext.GetStringTable().RegisterStr(m_ShaderKeyBuilder.c_str());
     }
 
-    void InsertShaderHeaderInformation(CRenderString &theReadBuffer,
+    void InsertShaderHeaderInformation(Qt3DSString &theReadBuffer,
                                                const char8_t *inPathToEffect) override
     {
         DoInsertShaderHeaderInformation(theReadBuffer, inPathToEffect);
     }
 
-    void DoInsertShaderHeaderInformation(CRenderString &theReadBuffer,
+    void DoInsertShaderHeaderInformation(Qt3DSString &theReadBuffer,
                                          const char8_t *inPathToEffect)
     {
         // Now do search and replace for the headers
-        for (CRenderString::size_type thePos = theReadBuffer.indexOf(m_IncludeSearch);
-             thePos != CRenderString::npos;
+        for (Qt3DSString::size_type thePos = theReadBuffer.indexOf(m_IncludeSearch);
+             thePos != Qt3DSString::npos;
              thePos = theReadBuffer.indexOf(m_IncludeSearch, thePos + 1)) {
-            CRenderString::size_type theEndQuote =
+            Qt3DSString::size_type theEndQuote =
                 theReadBuffer.indexOf(QLatin1Char('\"'), thePos + m_IncludeSearch.size() + 1);
 
             // Indicates an unterminated include file.
-            if (theEndQuote == CRenderString::npos) {
+            if (theEndQuote == Qt3DSString::npos) {
                 qCCritical(INVALID_OPERATION, "Unterminated include in file: %s", inPathToEffect);
                 theReadBuffer.clear();
                 break;
             }
-            CRenderString::size_type theActualBegin = thePos + m_IncludeSearch.size();
-            CRenderString::iterator theIncludeBegin = theReadBuffer.begin() + theActualBegin;
-            CRenderString::iterator theIncludeEnd = theReadBuffer.begin() + theEndQuote;
+            Qt3DSString::size_type theActualBegin = thePos + m_IncludeSearch.size();
+            Qt3DSString::iterator theIncludeBegin = theReadBuffer.begin() + theActualBegin;
+            Qt3DSString::iterator theIncludeEnd = theReadBuffer.begin() + theEndQuote;
             m_IncludePath.clear();
             m_IncludePath.append(theIncludeBegin, theIncludeEnd);
             // If we haven't included the file yet this round
-            CRenderString theIncludeBuffer;
+            Qt3DSString theIncludeBuffer;
             DoLoadShader(m_IncludePath.c_str(), theIncludeBuffer);
             theReadBuffer =
                 theReadBuffer.replace(theReadBuffer.begin() + thePos,
@@ -969,7 +969,7 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
         }
     }
 
-    void DoLoadShader(const char8_t *inPathToEffect, CRenderString &outShaderData)
+    void DoLoadShader(const char8_t *inPathToEffect, Qt3DSString &outShaderData)
     {
         eastl::pair<TPathDataMap::iterator, bool> theInsert =
             m_ExpandedFiles.insert(eastl::make_pair(
@@ -1393,12 +1393,12 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
     }
 
     // This just returns the custom material shader source without compiling
-    void GetShaderSource(CRegisteredString inPath, CRenderString &outBuffer) override
+    void GetShaderSource(CRegisteredString inPath, Qt3DSString &outBuffer) override
     {
         outBuffer.clear();
         outBuffer.append("#define FRAGMENT_SHADER\n");
 
-        CRenderString source;
+        Qt3DSString source;
         DoLoadShader(inPath, outBuffer);
     }
 
@@ -1422,14 +1422,14 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
                     m_ShaderInfoMap.insert(eastl::make_pair(inPath, SDynamicObjectShaderInfo()))
                         .first->second;
                 if (theShaderInfo.m_IsComputeShader == false) {
-                    CRenderString theShaderBuffer;
+                    Qt3DSString theShaderBuffer;
                     DoLoadShader(inPath, theShaderBuffer);
                     if (theShaderInfo.m_HasGeomShader)
                         theFlags.SetGeometryShaderEnabled(true);
                     theProgram = CompileShader(inPath, theShaderBuffer.c_str(), NULL, inProgramMacro,
                                                inFeatureSet, theFlags, inForceCompilation);
                 } else {
-                    CRenderString theShaderBuffer;
+                    Qt3DSString theShaderBuffer;
                     const char8_t *shaderVersionStr = "#version 430\n";
                     if ((QT3DSU32)m_Context->GetRenderContext().GetRenderContextType()
                         == NVRenderContextValues::GLES3PLUS)
@@ -1477,7 +1477,7 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
                 GetShaderCacheKey(inPath, theProgramMacro, theFlags), inFeatureSet);
             SDynamicShaderProgramFlags flags(theFlags);
             if (!theProgram) {
-                CRenderString theShaderBuffer;
+                Qt3DSString theShaderBuffer;
                 DoLoadShader(inPath, theShaderBuffer);
                 SShaderVertexCodeGenerator vertexShader(
                     m_Context->GetStringTable(), m_Allocator,
@@ -1497,7 +1497,7 @@ struct SDynamicObjectSystemImpl : public IDynamicObjectSystem
                 const char8_t *vertexSource = vertexShader.BuildShaderSource();
                 const char8_t *fragmentSource = fragmentShader.BuildShaderSource();
 
-                CRenderString programBuffer;
+                Qt3DSString programBuffer;
                 programBuffer.assign("#ifdef VERTEX_SHADER\n");
                 programBuffer.append(vertexSource);
                 programBuffer.append("\n#endif\n");

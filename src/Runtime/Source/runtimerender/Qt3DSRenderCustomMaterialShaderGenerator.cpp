@@ -274,7 +274,7 @@ struct SShaderGeneratorGeneratedShader
 
 struct SShaderGenerator : public ICustomMaterialShaderGenerator
 {
-    typedef CRenderString TStrType;
+    typedef Qt3DSString TStrType;
     typedef nvhash_map<NVRenderShaderProgram *, NVScopedRefCounted<SShaderGeneratorGeneratedShader>>
         TProgramToShaderMap;
     typedef eastl::pair<size_t, NVScopedRefCounted<SShaderLightProperties>>
@@ -493,7 +493,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
     {
         qt3ds::render::IDynamicObjectSystem &theDynamicSystem(
             m_RenderContext.GetDynamicObjectSystem());
-        CRenderString theShaderBuffer;
+        Qt3DSString theShaderBuffer;
         theDynamicSystem.GetShaderSource(
             m_RenderContext.GetStringTable().RegisterStr(inShaderPathName), theShaderBuffer);
 
@@ -1027,7 +1027,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
     {
         qt3ds::render::IDynamicObjectSystem &theDynamicSystem(
             m_RenderContext.GetDynamicObjectSystem());
-        CRenderString theShaderBuffer;
+        Qt3DSString theShaderBuffer;
         theDynamicSystem.GetShaderSource(
             m_RenderContext.GetStringTable().RegisterStr(inShaderPathName), theShaderBuffer);
 

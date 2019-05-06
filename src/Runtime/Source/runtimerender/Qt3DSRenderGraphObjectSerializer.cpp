@@ -46,7 +46,7 @@
 #include "foundation/Qt3DSContainers.h"
 #include "Qt3DSRenderEffectSystem.h"
 #include "foundation/SerializationTypes.h"
-#include "Qt3DSRenderString.h"
+#include "StringTools.h"
 #include "foundation/FileTools.h"
 #include "Qt3DSRenderPluginGraphObject.h"
 #include "Qt3DSRenderReferencedMaterial.h"
@@ -76,9 +76,9 @@ struct SSerializerWriteContext
     IDynamicObjectSystem &m_DynamicObjectSystem;
     IPathManager &m_PathManager;
     TObjectFileStatList &m_FileSizeStats;
-    CRenderString m_PathMapper;
-    CRenderString m_BasePath;
-    CRenderString m_RelativePath;
+    Qt3DSString m_PathMapper;
+    Qt3DSString m_BasePath;
+    Qt3DSString m_RelativePath;
     IStringTable &m_StringTable;
     SSerializerWriteContext(SPtrOffsetMap &inOffsetMap, SWriteBuffer &inWriteBuffer,
                             const SStrRemapMap &inStrMap, QT3DSU32 inDataBlockStart,
@@ -156,7 +156,7 @@ struct SSerializerReadContext : public SDataReader
     IDynamicObjectSystemCore &m_DynamicObjectSystem;
     NVDataRef<QT3DSU8> m_DataBlock;
     NVDataRef<QT3DSU8> m_StrTableBlock;
-    CRenderString m_PathMapper;
+    Qt3DSString m_PathMapper;
     const char8_t *m_ProjectDirectory;
 
     SSerializerReadContext(IPathManagerCore &inPathManager, IDynamicObjectSystemCore &inDynSystem,

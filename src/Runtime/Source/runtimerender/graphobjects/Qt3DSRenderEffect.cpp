@@ -31,7 +31,7 @@
 #include "Qt3DSRenderEffectSystem.h"
 #include "foundation/Qt3DSVec2.h"
 #include "foundation/Qt3DSVec3.h"
-#include "Qt3DSRenderString.h"
+#include "StringTools.h"
 #include "foundation/FileTools.h"
 
 using namespace qt3ds::render;

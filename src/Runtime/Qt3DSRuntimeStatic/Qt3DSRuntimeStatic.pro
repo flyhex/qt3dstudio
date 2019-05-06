@@ -160,6 +160,7 @@ SOURCES += \
 HEADERS += \
     ../Source/foundation/ConvertUTF.h \
     ../Source/foundation/FileTools.h \
+    ../Source/foundation/StringTools.h \
     ../Source/foundation/IOStreams.h \
     ../Source/foundation/Qt3DSLogging.h \
     ../Source/foundation/Qt3DSFoundation.h \
@@ -320,7 +321,6 @@ HEADERS += \
     ../Source/runtimerender/Qt3DSRenderShaderCodeGeneratorV2.h \
     ../Source/runtimerender/Qt3DSRenderShaderKeys.h \
     ../Source/runtimerender/Qt3DSRenderShadowMap.h \
-    ../Source/runtimerender/Qt3DSRenderString.h \
     ../Source/runtimerender/Qt3DSRenderSubpresentation.h \
     ../Source/runtimerender/Qt3DSRenderSubPresentationHelper.h \
     ../Source/runtimerender/Qt3DSRenderTaggedPointer.h \
