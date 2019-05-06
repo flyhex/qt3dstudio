@@ -61,7 +61,7 @@ void vert ()
 void frag() // PS_Blur_Vertical_9tap
 {   
     float OutCol = GaussianAlphaBlur( Texture0, Texture0Info.z );
-    gl_FragColor = OutCol * vec4(GlowCol, 1.0);
+    gl_FragColor = OutCol * vec4(GlowCol.rgb, 1.0);
 }
 			</FragmentShader>
 		</Shader>

@@ -181,7 +181,7 @@ void frag()
 	// We are basically acting as if the objects on the layer are occluders
 	// so the alpha as a result of blurring is like a transparency.
 	// The behavior is that the brighter the light is, the more of a "gap" there is
-	vec3 backlight = LightCol * LightBrt;
+	vec3 backlight = LightCol.rgb * LightBrt;
 	
 	// Assume that the color map I'm using already tells us what N.dot.L is (for now)
 	float translucency = exp2( -overTrn * OverlayTrans );
