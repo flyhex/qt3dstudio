@@ -100,7 +100,7 @@ namespace render {
                                            bool inForceIntersect) const;
 
         Option<SRay> GetPickRay(const QT3DSVec2 &inMouseCoords, const QT3DSVec2 &inWindowDimensions,
-                                bool inForceIntersect) const;
+                                bool inForceIntersect, bool sceneCameraView = false) const;
 
         // Checks the various viewports and determines if the layer is visible or not.
         bool IsLayerVisible() const;

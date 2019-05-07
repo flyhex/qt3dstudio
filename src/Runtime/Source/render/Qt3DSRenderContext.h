@@ -152,9 +152,11 @@ namespace render {
         virtual bool IsAdvancedBlendHwSupportedKHR() const = 0;
         virtual bool IsStandardDerivativesSupported() const = 0;
         virtual bool IsTextureLodSupported() const = 0;
+        virtual bool isSceneCameraView() const = 0;
 
         virtual void SetDefaultRenderTarget(QT3DSU64 targetID) = 0;
         virtual void SetDefaultDepthBufferBitCount(QT3DSI32 depthBits) = 0;
+        virtual void setIsSceneCameraView(bool sceneCameraView) = 0;
 
         virtual NVRenderDepthStencilState *
         CreateDepthStencilState(bool enableDepth, bool depthMask, NVRenderBoolOp::Enum depthFunc,
@@ -481,6 +483,7 @@ namespace render {
                                             ///never render to a window directly (GL only)
         QT3DSI32 m_DephBits; ///< this is the depth bits count of the default window render target
         QT3DSI32 m_StencilBits; ///< this is the stencil bits count of the default window render target
+        bool m_isSceneCameraView = true; ///< true in viewer and in editor when in scene camera view mode
 
     protected:
         volatile QT3DSI32 mRefCount;
@@ -777,6 +780,11 @@ namespace render {
             return GetRenderBackendCap(NVRenderBackend::NVRenderBackendCaps::TextureLod);
         }
 
+        bool isSceneCameraView() const override
+        {
+            return m_isSceneCameraView;
+        }
+
         void SetDefaultRenderTarget(QT3DSU64 targetID) override
         {
             m_DefaultOffscreenRenderTarget =
@@ -784,6 +792,10 @@ namespace render {
         }
 
         void SetDefaultDepthBufferBitCount(QT3DSI32 depthBits) override { m_DephBits = depthBits; }
+
+        void setIsSceneCameraView(bool sceneCameraView) override {
+            m_isSceneCameraView = sceneCameraView;
+        }
 
         virtual NVRenderDepthStencilState *
         CreateDepthStencilState(bool enableDepth, bool depthMask, NVRenderBoolOp::Enum depthFunc,

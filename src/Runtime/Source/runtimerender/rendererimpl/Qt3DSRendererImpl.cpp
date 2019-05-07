@@ -1310,9 +1310,10 @@ namespace render {
         bool wasRenderToTarget(inLayerRenderData.m_Layer.m_Flags.IsLayerRenderToTarget());
         if (wasRenderToTarget && inLayerRenderData.m_Camera != NULL) {
             Option<SRay> theHitRay;
-            if (inLayerRenderData.m_LayerPrepResult.hasValue())
+            if (inLayerRenderData.m_LayerPrepResult.hasValue()) {
                 theHitRay = inLayerRenderData.m_LayerPrepResult->GetPickRay(
-                    inPresCoords, inViewportDimensions, false);
+                    inPresCoords, inViewportDimensions, false, m_Context->isSceneCameraView());
+            }
             if (inLayerRenderData.m_LastFrameOffscreenRenderer.mPtr == NULL) {
                 if (theHitRay.hasValue()) {
                     // Scale the mouse coords to change them into the camera's numerical space.

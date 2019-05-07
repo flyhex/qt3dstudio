@@ -414,7 +414,7 @@ void SCamera::SetupOrthographicCameraForOffscreenRender(NVRenderTexture2D &inTex
 }
 
 SRay SCamera::Unproject(const QT3DSVec2 &inViewportRelativeCoords, const NVRenderRectF &inViewport,
-                        const QT3DSVec2 &inDesignDimensions) const
+                        const QT3DSVec2 &inDesignDimensions, bool sceneCameraView) const
 {
     SRay theRay;
     QT3DSMat44 tempVal(QT3DSMat44::createIdentity());
@@ -448,8 +448,18 @@ SRay SCamera::Unproject(const QT3DSVec2 &inViewportRelativeCoords, const NVRende
     }
 
     outOrigin = m_GlobalTransform.transform(outOrigin);
-    QT3DSMat33 theNormalMatrix;
-    CalculateNormalMatrix(theNormalMatrix);
+
+    // CalculateNormalMatrix(), but 4x4 matrix to have scale() method
+    QT3DSMat44 theNormalMatrix = m_GlobalTransform.getInverse().getTranspose();
+    if (sceneCameraView) {
+        // When in scene camera view mode, camera scale needs to be inverted.
+        // See QT3DS-3393.
+        const float scaleX = m_GlobalTransform[0][0] / theNormalMatrix[0][0];
+        const float scaleY = m_GlobalTransform[1][1] / theNormalMatrix[1][1];
+        const float scaleZ = m_GlobalTransform[2][2] / theNormalMatrix[2][2];
+        QT3DSVec4 scaleVector(scaleX, scaleY, scaleZ, 1.0);
+        theNormalMatrix.scale(scaleVector);
+    }
 
     outDir = theNormalMatrix.transform(outDir);
     outDir.normalize();

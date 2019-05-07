@@ -161,7 +161,7 @@ namespace render {
         // Unproject a point (x,y) in viewport relative coordinates meaning
         // left, bottom is 0,0 and values are increasing right,up respectively.
         SRay Unproject(const QT3DSVec2 &inLayerRelativeMouseCoords, const NVRenderRectF &inViewport,
-                       const QT3DSVec2 &inDesignDimensions) const;
+                       const QT3DSVec2 &inDesignDimensions, bool sceneCameraView = false) const;
 
         // Unproject a given coordinate to a 3d position that lies on the same camera
         // plane as inGlobalPos.

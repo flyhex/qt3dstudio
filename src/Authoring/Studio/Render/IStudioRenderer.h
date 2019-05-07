@@ -57,6 +57,7 @@ public:
 
     virtual void SetViewRect(const QRect &inRect) = 0;
     virtual void setFullSizePreview(bool enabled) = 0;
+    virtual void setIsSceneCameraView(bool sceneCameraView) = 0;
 
     virtual void GetEditCameraList(QStringList &outCameras) = 0;
     virtual void SetPolygonFillModeEnabled(bool inEnableFillMode) = 0;

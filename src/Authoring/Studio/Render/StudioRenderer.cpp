@@ -377,6 +377,11 @@ struct SRendererImpl : public IStudioRenderer,
         m_fullSizePreview = enabled;
     }
 
+    void setIsSceneCameraView(bool sceneCameraView) override
+    {
+        m_RenderContext->GetRenderContext().setIsSceneCameraView(sceneCameraView);
+    }
+
     // Request that this object renders.  May be ignored if a transaction
     // is ongoing so we don't get multiple rendering per transaction.
     void RequestRender() override

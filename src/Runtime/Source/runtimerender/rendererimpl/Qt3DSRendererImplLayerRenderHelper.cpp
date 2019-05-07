@@ -238,7 +238,8 @@ Option<QT3DSVec2> SLayerRenderHelper::GetLayerMouseCoords(const QT3DSVec2 &inMou
 
 Option<SRay> SLayerRenderHelper::GetPickRay(const QT3DSVec2 &inMouseCoords,
                                             const QT3DSVec2 &inWindowDimensions,
-                                            bool inForceIntersect) const
+                                            bool inForceIntersect,
+                                            bool sceneCameraView) const
 {
     if (m_Camera == NULL)
         return Empty();
@@ -248,7 +249,8 @@ Option<SRay> SLayerRenderHelper::GetPickRay(const QT3DSVec2 &inMouseCoords,
         // The cameras projection is different if we are onscreen vs. offscreen.
         // When offscreen, we need to move the mouse coordinates into a local space
         // to the layer.
-        return m_Camera->Unproject(*theCoords, m_Viewport, m_PresentationDesignDimensions);
+        return m_Camera->Unproject(*theCoords, m_Viewport, m_PresentationDesignDimensions,
+                                   sceneCameraView);
     }
     return Empty();
 }

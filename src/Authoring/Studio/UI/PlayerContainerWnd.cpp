@@ -245,6 +245,10 @@ void CPlayerContainerWnd::SetViewMode(EViewMode inViewMode)
 {
     m_ViewMode = inViewMode;
     m_SceneView->recheckSizingMode();
+
+    // When viewmode changes, update scene camera view mode status
+    // into renderer context
+    g_StudioApp.getRenderer().setIsSceneCameraView(IsDeploymentView());
 }
 
 //==============================================================================
