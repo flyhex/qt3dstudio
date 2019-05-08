@@ -32,6 +32,7 @@
 
 #include "foundation/Qt3DSRefCounted.h"
 #include "foundation/Qt3DSOption.h"
+#include "foundation/Qt3DSVec2.h"
 #include "foundation/Qt3DSVec3.h"
 #include "foundation/Qt3DSVec4.h"
 #include <EASTL/string.h>
@@ -71,6 +72,7 @@ enum ERuntimeDataModelDataType {
     ERuntimeDataModelDataTypeFloat,
     ERuntimeDataModelDataTypeFloat2,
     ERuntimeDataModelDataTypeFloat3,
+    ERuntimeDataModelDataTypeFloat4,
     ERuntimeDataModelDataTypeLong,
     ERuntimeDataModelDataTypeString,
     ERuntimeDataModelDataTypeBool,
@@ -205,14 +207,14 @@ public:
 
     //==============================================================================
     /**
-     *	Get property value as QT3DSVec3
+     *	Get property value as QT3DSVec2
      *	@param inType          default object type
      *  @param inProperty      the property to query
      *	@param inId            object id. if this value is not trivial, the query is based on inId
      *instead of inType
      *  @param return property value
      */
-    virtual Option<qt3ds::QT3DSVec3> GetPropertyValueVector2(TStrTableStr inType, TStrTableStr inProperty,
+    virtual Option<qt3ds::QT3DSVec2> GetPropertyValueVector2(TStrTableStr inType, TStrTableStr inProperty,
                                                        TStrTableStr inId = TStrTableStr()) = 0;
 
     //==============================================================================

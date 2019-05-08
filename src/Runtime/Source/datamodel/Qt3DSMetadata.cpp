@@ -292,6 +292,8 @@ public:
             return ERuntimeDataModelDataTypeFloat2;
         case DataModelDataType::Float3:
             return ERuntimeDataModelDataTypeFloat3;
+        case DataModelDataType::Float4:
+            return ERuntimeDataModelDataTypeFloat4;
         case DataModelDataType::Long:
             return ERuntimeDataModelDataTypeLong;
         case DataModelDataType::String:
@@ -452,13 +454,13 @@ public:
         return Empty();
     }
 
-    Option<qt3ds::QT3DSVec3> GetPropertyValueVector2(TStrTableStr inType, TStrTableStr inProperty,
+    Option<qt3ds::QT3DSVec2> GetPropertyValueVector2(TStrTableStr inType, TStrTableStr inProperty,
                                                        TStrTableStr inId) override
     {
         SRuntimeMetaDataPropertyInfo &theInfo(FindProperty(inType, inProperty, inId));
         if (theInfo.m_Value.hasValue()) {
             SFloat2 theFloat2 = qt3dsdm::get<SFloat2>(*theInfo.m_Value);
-            return qt3ds::QT3DSVec3(theFloat2[0], theFloat2[1], 0);
+            return qt3ds::QT3DSVec2(theFloat2[0], theFloat2[1]);
         }
         return Empty();
     }

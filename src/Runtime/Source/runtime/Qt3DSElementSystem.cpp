@@ -379,7 +379,7 @@ struct SElementAllocator : public qt3ds::runtime::IElementAllocator
 
                 theTypeDesc->m_DynamicProperties.push_back(*newProp);
             } else if (thePropertyType == Q3DStudio::ERuntimeDataModelDataTypeFloat2) {
-                qt3ds::QT3DSVec3 value = theMetaData.GetPropertyValueVector2(
+                qt3ds::QT3DSVec2 value = theMetaData.GetPropertyValueVector2(
                     element.m_TypeDescription->m_TypeName, theWorkSpaceString,
                     element.m_TypeDescription->m_SubtypeName);
                 newProp->m_Type = Q3DStudio::ATTRIBUTETYPE_FLOAT;

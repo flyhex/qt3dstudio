@@ -222,11 +222,11 @@ struct SMetaPropertyParser : public IPropertyParser
     }
     Option<QT3DSVec2> ParseVec2(const char8_t *inName) override
     {
-        Option<qt3ds::QT3DSVec3> theProperty =
+        Option<qt3ds::QT3DSVec2> theProperty =
             m_MetaData.GetPropertyValueVector2(m_Type, Register(inName), m_ClassId);
-        if (theProperty.hasValue()) {
-            return QT3DSVec2(theProperty->x, theProperty->y);
-        }
+        if (theProperty.hasValue())
+            return *theProperty;
+
         return Empty();
     }
     Option<QT3DSVec3> ParseVec3(const char8_t *inName) override

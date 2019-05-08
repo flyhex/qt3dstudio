@@ -187,6 +187,9 @@ SElementPropertyInfo *SParseElementManager::GetOrCreateProperty(SElementData &in
             case ERuntimeDataModelDataTypeFloat3:
                 retval.m_Arity = 3;
                 break;
+            case ERuntimeDataModelDataTypeFloat4:
+                retval.m_Arity = 4;
+                break;
             }
             if (retval.m_Arity > 1) {
                 if (retval.m_Arity == 2) {
@@ -194,7 +197,7 @@ SElementPropertyInfo *SParseElementManager::GetOrCreateProperty(SElementData &in
                                          thePropNames, m_StringTable);
                     SetPropertyValueHash(m_Workspace, ".y", thePropHashes, thePeriodPos,
                                          thePropNames, m_StringTable);
-                } else {
+                } else if (retval.m_Arity == 3) {
                     if (m_MetaData.GetAdditionalType(theData.m_Type, theStr, theData.m_Class)
                         == ERuntimeAdditionalMetaDataTypeColor) {
                         SetPropertyValueHash(m_Workspace, ".r", thePropHashes, thePeriodPos,
@@ -209,6 +212,18 @@ SElementPropertyInfo *SParseElementManager::GetOrCreateProperty(SElementData &in
                         SetPropertyValueHash(m_Workspace, ".y", thePropHashes, thePeriodPos,
                                              thePropNames, m_StringTable);
                         SetPropertyValueHash(m_Workspace, ".z", thePropHashes, thePeriodPos,
+                                             thePropNames, m_StringTable);
+                    }
+                } else if (retval.m_Arity == 4) {
+                    if (m_MetaData.GetAdditionalType(theData.m_Type, theStr, theData.m_Class)
+                        == ERuntimeAdditionalMetaDataTypeColor) {
+                        SetPropertyValueHash(m_Workspace, ".r", thePropHashes, thePeriodPos,
+                                             thePropNames, m_StringTable);
+                        SetPropertyValueHash(m_Workspace, ".g", thePropHashes, thePeriodPos,
+                                             thePropNames, m_StringTable);
+                        SetPropertyValueHash(m_Workspace, ".b", thePropHashes, thePeriodPos,
+                                             thePropNames, m_StringTable);
+                        SetPropertyValueHash(m_Workspace, ".a", thePropHashes, thePeriodPos,
                                              thePropNames, m_StringTable);
                     }
                 }
@@ -675,10 +690,6 @@ BOOL CUIPParserImpl::LoadGraph(IPresentation &inPresentation, qt3dsdm::IDOMReade
     return theLoadResult;
 }
 
-inline RuntimeVector3 Convert(const QT3DSVec3 &input)
-{
-    return RuntimeVector3(input.x, input.y, input.z);
-}
 using qt3ds::runtime::element::SPropertyDesc;
 using qt3ds::runtime::element::TPropertyDescAndValue;
 
@@ -697,19 +708,25 @@ void CUIPParserImpl::GetMetaAttribute(IPresentation &inPresentation,
                           m_MetaData.GetPropertyValueFloat(inType, inName, inClassId));
         break;
     case ERuntimeDataModelDataTypeFloat2: {
-        RuntimeVector3 theVector3 =
-            Convert(m_MetaData.GetPropertyValueVector2(inType, inName, inClassId));
-        SFloat2 theValue(theVector3.m_X, theVector3.m_Y);
+        QT3DSVec2 vec2 = m_MetaData.GetPropertyValueVector2(inType, inName, inClassId);
+        SFloat2 theValue(vec2.x, vec2.y);
         AddFloat2Attribute(outDescList, inAttStrNames, theValue);
         break;
     }
     case ERuntimeDataModelDataTypeFloat3: {
-        RuntimeVector3 theVector3 =
-            Convert(m_MetaData.GetPropertyValueVector3(inType, inName, inClassId));
-        SFloat3 theValue(theVector3.m_X, theVector3.m_Y, theVector3.m_Z);
+        QT3DSVec3 vec3 = m_MetaData.GetPropertyValueVector3(inType, inName, inClassId);
+        SFloat3 theValue(vec3.x, vec3.y, vec3.z);
         ERuntimeAdditionalMetaDataType theAdditionalType =
             m_MetaData.GetAdditionalType(inType, inName, inClassId);
         AddFloat3Attribute(outDescList, theAdditionalType, inAttStrNames, theValue);
+        break;
+    }
+    case ERuntimeDataModelDataTypeFloat4: {
+        QT3DSVec4 vec4 = m_MetaData.GetPropertyValueVector4(inType, inName, inClassId);
+        SFloat4 theValue(vec4.x, vec4.y, vec4.z, vec4.w);
+        ERuntimeAdditionalMetaDataType theAdditionalType =
+            m_MetaData.GetAdditionalType(inType, inName, inClassId);
+        AddFloat4Attribute(outDescList, theAdditionalType, inAttStrNames, theValue);
         break;
     }
     case ERuntimeDataModelDataTypeLong:
@@ -798,6 +815,19 @@ void CUIPParserImpl::AddFloat3Attribute(TPropertyDescAndValueList &outDescList,
     }
 }
 
+void CUIPParserImpl::AddFloat4Attribute(TPropertyDescAndValueList &outDescList,
+                                        ERuntimeAdditionalMetaDataType inAdditionalType,
+                                        CRegisteredString *inAttStrNames, SFloat4 &inValue)
+{
+    for (long i = 0; i < 4; ++i) {
+        UVariant varVal;
+        varVal.m_FLOAT = inValue[i];
+        outDescList.push_back(eastl::make_pair(
+            SPropertyDesc(inAttStrNames[i], ATTRIBUTETYPE_FLOAT), varVal));
+    }
+}
+
+
 void CUIPParserImpl::AddStringAttribute(IPresentation &inPresentation,
                                         TPropertyDescAndValueList &outDescList,
                                         CRegisteredString inAttStrName, const char *inValue)
@@ -881,6 +911,13 @@ void CUIPParserImpl::GetAttributeList(IPresentation &inPresentation,
         if (!IsTrivial(inValue))
             theReader.ReadRef(NVDataRef<QT3DSF32>(&theValue[0], 3));
         AddFloat3Attribute(outDescList, inAdditionalType, inPropNameStrs, theValue);
+        break;
+    }
+    case ERuntimeDataModelDataTypeFloat4: {
+        SFloat4 theValue(0);
+        if (!IsTrivial(inValue))
+            theReader.ReadRef(NVDataRef<QT3DSF32>(&theValue[0], 4));
+        AddFloat4Attribute(outDescList, inAdditionalType, inPropNameStrs, theValue);
         break;
     }
     case ERuntimeDataModelDataTypeBool: {

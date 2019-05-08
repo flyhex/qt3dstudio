@@ -644,6 +644,9 @@ protected:
     void AddFloat3Attribute(TPropertyDescAndValueList &outDescList,
                             ERuntimeAdditionalMetaDataType inAdditionalType,
                             CRegisteredString *inAttStrNames, qt3dsdm::SFloat3 &inValue);
+    void AddFloat4Attribute(TPropertyDescAndValueList &outDescList,
+                            ERuntimeAdditionalMetaDataType inAdditionalType,
+                            CRegisteredString *inAttStrNames, qt3dsdm::SFloat4 &inValue);
     void AddStringAttribute(IPresentation &inPresentation, TPropertyDescAndValueList &outDescList,
                             CRegisteredString inAttStrName, const char *inValue);
     void AddElementRefAttribute(TPropertyDescAndValueList &outDescList,
