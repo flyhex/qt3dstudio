@@ -1706,7 +1706,6 @@ void CStudioApp::saveDataInputsToProjectFile()
 
         // add the new dataInputs
         for (CDataInputDialogItem *item : qAsConst(m_dataInputDialogItems)) {
-
             QDomElement diNode = doc.createElement(QStringLiteral("dataInput"));
             diNode.setAttribute(QStringLiteral("name"), item->name);
 
@@ -1720,6 +1719,8 @@ void CStudioApp::saveDataInputsToProjectFile()
                 diNode.setAttribute(QStringLiteral("type"), QStringLiteral("Float"));
             } else if (item->type == EDataType::DataTypeBoolean) {
                 diNode.setAttribute(QStringLiteral("type"), QStringLiteral("Boolean"));
+            } else if (item->type == EDataType::DataTypeVector4) {
+                diNode.setAttribute(QStringLiteral("type"), QStringLiteral("Vector4"));
             } else if (item->type == EDataType::DataTypeVector3) {
                 diNode.setAttribute(QStringLiteral("type"), QStringLiteral("Vector3"));
             } else if (item->type == EDataType::DataTypeVector2) {

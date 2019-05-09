@@ -60,13 +60,15 @@ enum EDataType {
     DataTypeString,
     DataTypeVariant,
     DataTypeVector2,
-    DataTypeVector3
+    DataTypeVector3,
+    DataTypeVector4
 };
 
 // The order also specifies the priority for default type in case of multiple accepted types
 static const QVector<EDataType> allDataTypes {
     EDataType::DataTypeString,
     EDataType::DataTypeFloat,
+    EDataType::DataTypeVector4,
     EDataType::DataTypeVector3,
     EDataType::DataTypeVector2,
     EDataType::DataTypeRangedNumber,
@@ -80,14 +82,15 @@ static const QVector<EDataType> allDataTypes {
 class CDataInputDlg : public QDialog
 {
     Q_OBJECT
+
 public:
     CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemModel *data,
                   QWidget* parent = nullptr, const QVector<EDataType> acceptedTypes = allDataTypes);
-    ~CDataInputDlg();
+    ~CDataInputDlg() override;
 
     // Maps between DataModel datatypes and datainput dialog types
-    static const bool isEquivalentDataType(int dlgType, qt3dsdm::DataModelDataType::Value dmType,
-                                           bool strict = false);
+    static bool isEquivalentDataType(int dlgType, qt3dsdm::DataModelDataType::Value dmType,
+                                     bool strict = false);
     static QVector<EDataType> getAcceptedTypes(qt3dsdm::DataModelDataType::Value dmType,
                                                bool strict = false);
 

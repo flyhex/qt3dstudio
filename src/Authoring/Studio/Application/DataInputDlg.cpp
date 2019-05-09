@@ -65,6 +65,7 @@ CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemMode
     m_ui->comboBoxTypeList->addItem(tr("Variant"), QVariant(DataTypeVariant));
     m_ui->comboBoxTypeList->addItem(tr("Vector2"), QVariant(DataTypeVector2));
     m_ui->comboBoxTypeList->addItem(tr("Vector3"), QVariant(DataTypeVector3));
+    m_ui->comboBoxTypeList->addItem(tr("Vector4"), QVariant(DataTypeVector4));
 
     QStandardItemModel *model
             = qobject_cast<QStandardItemModel *>(m_ui->comboBoxTypeList->model());
@@ -274,29 +275,25 @@ void CDataInputDlg::updateVisibility(int type)
     }
 }
 
-const bool CDataInputDlg::isEquivalentDataType(int dlgType,
-                                               qt3dsdm::DataModelDataType::Value dmType,
-                                               bool strict)
+// static
+bool CDataInputDlg::isEquivalentDataType(int dlgType, qt3dsdm::DataModelDataType::Value dmType,
+                                         bool strict)
 {
-    if ((dlgType == EDataType::DataTypeString
-         && dmType == qt3dsdm::DataModelDataType::String)
-        || (dlgType == EDataType::DataTypeRangedNumber
-            && dmType == qt3dsdm::DataModelDataType::RangedNumber)
+    using namespace qt3dsdm;
+
+    if ((dlgType == EDataType::DataTypeString && dmType == DataModelDataType::String)
+        || (dlgType == EDataType::DataTypeRangedNumber && dmType == DataModelDataType::RangedNumber)
         || (dlgType == EDataType::DataTypeFloat
-            && (dmType == qt3dsdm::DataModelDataType::Float
-                || (dmType == qt3dsdm::DataModelDataType::String && !strict)))
-        || (dlgType == EDataType::DataTypeBoolean
-            && dmType == qt3dsdm::DataModelDataType::Bool)
-        || (dlgType == EDataType::DataTypeVector3
-            && dmType == qt3dsdm::DataModelDataType::Float3)
-        || (dlgType == EDataType::DataTypeVector2
-            && dmType == qt3dsdm::DataModelDataType::Float2)
-        // Variant can be bound to any property type except
-        // as timeline controller because only datainput of type Ranged Number
-        // has additional min/max information. For slide control,
+            && (dmType == DataModelDataType::Float
+                || (dmType == DataModelDataType::String && !strict)))
+        || (dlgType == EDataType::DataTypeBoolean && dmType == DataModelDataType::Bool)
+        || (dlgType == EDataType::DataTypeVector4 && dmType == DataModelDataType::Float4)
+        || (dlgType == EDataType::DataTypeVector3 && dmType == DataModelDataType::Float3)
+        || (dlgType == EDataType::DataTypeVector2 && dmType == DataModelDataType::Float2)
+        // Variant can be bound to any property type except timeline controller because only
+        // datainput of type Ranged Number has additional min/max information. For slide control,
         // we can allow variant type in addition to String type.
-        || (dlgType == EDataType::DataTypeVariant
-            && dmType != qt3dsdm::DataModelDataType::RangedNumber)
+        || (dlgType == EDataType::DataTypeVariant && dmType != DataModelDataType::RangedNumber)
 #ifdef DATAINPUT_EVALUATOR_ENABLED
         || dlgType == EDataType::DataTypeEvaluator
 #endif
@@ -328,12 +325,10 @@ bool CDataInputDlg::eventFilter(QObject *obj, QEvent *ev)
             QKeyEvent *tabEv = new QKeyEvent(QEvent::KeyPress, Qt::Key_Tab, Qt::NoModifier);
             QApplication::sendEvent(m_ui->tableEditMetadata, tabEv);
             return true;
-        } else {
-            return false;
         }
-    } else {
-        return false;
     }
+
+    return false;
 }
 
 void CDataInputDlg::populateMetadata(int rows)

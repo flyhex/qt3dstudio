@@ -55,7 +55,7 @@ CDataInputListDlg::CDataInputListDlg(QMap<QString, CDataInputDialogItem *> *data
     , m_actualDataInputs(datainputs)
     , m_currentDataInputIndex(-1)
     , m_tableContents(new QStandardItemModel(0, columnCount, this))
-    , m_infoContents(new QStandardItemModel(0, 3, this))
+    , m_infoContents(new QStandardItemModel(0, columnCount, this))
     , m_goToAdd(goToAdd)
     , m_sortColumn(-1)
     , m_defaultType(defaultType)
@@ -87,7 +87,7 @@ CDataInputListDlg::CDataInputListDlg(QMap<QString, CDataInputDialogItem *> *data
 
     m_ui->typeFilterCombo->addItems({tr("[All types]"), tr("Boolean"),
                                      tr("Float"), tr("Ranged Number"), tr("String"), tr("Variant"),
-                                     tr("Vector2"), tr("Vector3")});
+                                     tr("Vector2"), tr("Vector3"), tr("Vector4")});
     m_ui->typeFilterCombo->setToolTip(tr("Filter the list by Data Input type"));
 
     m_ui->searchField->setToolTip(tr("Search for Data Input"));
@@ -224,6 +224,9 @@ void CDataInputListDlg::updateContents()
             } else if (dataInputType == DataTypeBoolean
                        && (m_typeFilter == (int)DataTypeBoolean || m_typeFilter == -1)) {
                 dataInput.append(new QStandardItem(tr("Boolean")));
+            } else if (dataInputType == DataTypeVector4
+                       && (m_typeFilter == (int)DataTypeVector4 || m_typeFilter == -1)) {
+                dataInput.append(new QStandardItem(tr("Vector4")));
             } else if (dataInputType == DataTypeVector3
                        && (m_typeFilter == (int)DataTypeVector3 || m_typeFilter == -1)) {
                 dataInput.append(new QStandardItem(tr("Vector3")));

@@ -476,6 +476,8 @@ void ProjectFile::parseDataInputElem(const QDomElement &elem,
             item->type = EDataType::DataTypeFloat;
         } else if (type == QLatin1String("Boolean")) {
             item->type = EDataType::DataTypeBoolean;
+        } else if (type == QLatin1String("Vector4")) {
+            item->type = EDataType::DataTypeVector4;
         } else if (type == QLatin1String("Vector3")) {
             item->type = EDataType::DataTypeVector3;
         } else if (type == QLatin1String("Vector2")) {
