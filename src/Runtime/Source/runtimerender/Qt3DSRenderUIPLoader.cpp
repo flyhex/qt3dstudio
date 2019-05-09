@@ -1045,6 +1045,10 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
                     }
                 }
                 break;
+            case qt3ds::render::NVRenderShaderDataTypes::QT3DSVec4:
+                SetDynamicObjectProperty(inDynamicObject, theDefinition,
+                                         inParser.ParseVec4(theDefinition.m_Name));
+                break;
             case qt3ds::render::NVRenderShaderDataTypes::QT3DSVec3:
                 SetDynamicObjectProperty(inDynamicObject, theDefinition,
                                          inParser.ParseVec3(theDefinition.m_Name));
