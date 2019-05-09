@@ -125,10 +125,7 @@ use the following settings when exporting:
   \b{Animation} - enable or disable as desired; bake or unbake
   animations as desired
 \li
-  \b{Cameras} and \b{Lights} - these objects will only come
-  into Studio as empty nodes (groups). This can be useful if you need to
-  animate these objects and use those animations in Studio (by attaching
-  Studio cameras and lights to the animated groups).
+  \b{Cameras} and \b{Lights}
 \li
   \b{Axis Conversion} - Qt 3D Studio uses a Y-up coordinate
   system, so ensure that \c{Up Axis} is set to \c{Y}.
@@ -169,6 +166,14 @@ We've stress tested different high poly count scenarios. The one caveat
 here is mentioned above, Studio only supports triangulated geometry, so
 be sure to check that option when exporting COLLADA data for use in
 Studio.
+
+\section3 Lights
+Lights can be imported to Studio. Position, rotation, scale, brightness, light color and the
+cast shadows property will be imported.
+
+\section3 Cameras
+Perspective and orthographic cameras can be imported to Studio. Position, rotation and scale
+properties will be imported. For perspective cameras, field of view will also be imported.
 
 \section3 Transformation
 

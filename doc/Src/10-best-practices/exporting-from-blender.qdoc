@@ -31,8 +31,10 @@
 \page exporting-from-blender.html
 \ingroup qt3dstudio-best-practices
 
-It is possible to export meshes, transform animations (scale/rotation/location), UV layouts,
-pivot points, object hierarchy and material slots from Blender to Qt 3D Studio.
+It is possible to export meshes, lights, cameras, transform animations (scale/rotation/location),
+UV layouts, pivot points, object hierarchy and material slots from Blender to Qt 3D Studio.
+
+\section1 Exporting Models
 
 \section2 Create Material Slots
 
@@ -126,6 +128,28 @@ visually change.
 \endlist
 
 \note Applying Location will also reset the object's origin (pivot point).
+
+\section1 Exporting Lights
+
+You can export lights of any light type from Blender to use in Qt 3D Studio.
+
+The following properties will be imported into Qt 3D Studio:
+\list
+  \li Position, rotation, scale
+  \li Brightness
+  \li Light color
+  \li Cast shadows
+\endlist
+
+\section1 Exporting Cameras
+
+You can export perspective and orthographic cameras from Blender to use in Qt 3D Studio.
+
+The following properties will be imported into Qt 3D Studio:
+\list
+  \li Position, rotation, scale
+  \li Focal Length (perspective camera only).
+\endlist
 
 \section1 Exporting COLLADA from Blender
 
