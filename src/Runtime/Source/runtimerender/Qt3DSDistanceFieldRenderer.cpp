@@ -71,7 +71,6 @@ void Q3DSDistanceFieldRenderer::AddSystemFontDirectory(const char8_t *dir)
 void Q3DSDistanceFieldRenderer::AddProjectFontDirectory(const char8_t *dir)
 {
     QString projectDir(dir);
-    projectDir += QLatin1String("/fonts");
     m_projectDirs += projectDir;
     m_fontDatabase.registerFonts({ projectDir });
 }

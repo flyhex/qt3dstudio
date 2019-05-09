@@ -725,16 +725,18 @@ struct SRendererImpl : public IStudioRenderer,
                 Q3DStudio::CString thePath(
                             Q3DStudio::CString::fromQString(
                                 StudioUtils::resourcePath() + QStringLiteral("/Font")));
+                // For QT3DS-3353 assume project fonts are in a subdirectory relative to project.
+                QString projectFontPath = projectPath + QStringLiteral("/fonts");
                 m_Context->GetTextRenderer()->AddSystemFontDirectory(
                     m_Context->GetStringTable().RegisterStr(thePath.c_str()));
                 m_Context->GetTextRenderer()->AddProjectFontDirectory(
-                    m_Context->GetStringTable().RegisterStr(projectPath.toLatin1().data()));
+                    m_Context->GetStringTable().RegisterStr(projectFontPath.toLatin1().data()));
                 if (m_Context->getDistanceFieldRenderer()) {
                     m_Context->getDistanceFieldRenderer()->AddSystemFontDirectory(
                                 m_Context->GetStringTable().RegisterStr(thePath.c_str()));
                     m_Context->getDistanceFieldRenderer()->AddProjectFontDirectory(
                                 m_Context->GetStringTable().RegisterStr(
-                                    projectPath.toLatin1().data()));
+                                    projectFontPath.toLatin1().data()));
                 }
             }
         }

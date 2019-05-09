@@ -199,11 +199,10 @@ struct Qt3DSQtTextRenderer : public ITextRenderer
             QString localDir = CFileTools::NormalizePathForQtUsage(stringToQString(*theIter));
             QDir dir(localDir);
             if (!dir.exists()) {
-                qCCritical(INTERNAL_ERROR) << "Adding font directory:" << localDir;
+                qWarning("Attempted to register invalid font directory: %s",
+                         qPrintable(localDir));
                 continue;
             }
-            if (fontInfos)
-                dir.cd(QStringLiteral("fonts"));
             QStringList entryList = dir.entryList(m_nameFilters);
             for (QString entry : entryList) {
                 entry = dir.absoluteFilePath(entry);
@@ -222,7 +221,7 @@ struct Qt3DSQtTextRenderer : public ITextRenderer
                             fontFamily = families.at(0);
                         FontInfo fi(entry, fontName, fontFamily, fontId);
                         // Detect font style and weight using a dummy QRawFont
-                        QRawFont rawFont(rawData, 1.0);
+                        QRawFont rawFont(rawData, 16);
                         if (rawFont.isValid()) {
                             if (rawFont.style() != QFont::StyleOblique) {
                                 fi.font.setStyle(rawFont.style());

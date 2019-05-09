@@ -1300,16 +1300,19 @@ struct SApp : public IApplication
             m_CoreFactory->AddSearchPath(relativeProjectDir.c_str());
         }
 
+        // For QT3DS-3353 assume project fonts are in a subdirectory relative to project.
+        eastl::string projectFontDirectory = projectDirectory + "/fonts";
+
         NVFoundationBase &fnd(m_CoreFactory->GetFoundation());
 
         if (m_CoreFactory->GetRenderContextCore().getDistanceFieldRenderer()) {
             m_CoreFactory->GetRenderContextCore().getDistanceFieldRenderer()
-                    ->AddProjectFontDirectory(projectDirectory.c_str());
+                    ->AddProjectFontDirectory(projectFontDirectory.c_str());
         }
 
         if (m_CoreFactory->GetRenderContextCore().GetTextRendererCore()) {
             m_CoreFactory->GetRenderContextCore().GetTextRendererCore()->AddProjectFontDirectory(
-                        projectDirectory.c_str());
+                        projectFontDirectory.c_str());
             m_CoreFactory->GetRenderContextCore().GetTextRendererCore()->BeginPreloadFonts(
                         m_CoreFactory->GetRenderContextCore().GetThreadPool(),
                         m_CoreFactory->GetRenderContextCore().GetPerfTimer());

@@ -896,13 +896,15 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
         inPresentation.SetScene(&inScene);
         if (m_ProjectInitialized == false) {
             m_ProjectInitialized = true;
+            // For QT3DS-3353 assume project fonts are in a subdirectory relative to presentation.
+            QString projectFontDir = inPresentation.getProjectPath() + QStringLiteral("/fonts");
             if (m_Context->m_Context->GetTextRenderer()) {
                 m_Context->m_Context->GetTextRenderer()->AddProjectFontDirectory(
-                    inScene.m_Presentation->m_PresentationDirectory);
+                    projectFontDir.toUtf8().data());
             }
             if (m_Context->m_Context->getDistanceFieldRenderer()) {
                 m_Context->m_Context->getDistanceFieldRenderer()->AddProjectFontDirectory(
-                    inScene.m_Presentation->m_PresentationDirectory);
+                    projectFontDir.toUtf8().data());
             }
             eastl::string theBinaryPath(inPresentation.GetFilePath().toLatin1().constData());
             qt3ds::foundation::CFileTools::AppendDirectoryInPathToFile(theBinaryPath, "binary");
