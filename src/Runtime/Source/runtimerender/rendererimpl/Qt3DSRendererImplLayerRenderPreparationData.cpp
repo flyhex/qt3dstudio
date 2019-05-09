@@ -1255,13 +1255,18 @@ namespace render {
                     switch (theNode->m_Type) {
                     case GraphObjectTypes::Camera: {
                         SCamera *theCamera = static_cast<SCamera *>(theNode);
-                        SCameraGlobalCalculationResult theResult =
-                            thePrepResult.SetupCameraForRender(*theCamera);
-                        wasDataDirty = wasDataDirty || theResult.m_WasDirty;
-                        if (theCamera->m_Flags.IsGloballyActive())
-                            m_Camera = theCamera;
-                        if (theResult.m_ComputeFrustumSucceeded == false) {
-                            qCCritical(INTERNAL_ERROR, "Failed to calculate camera frustum");
+                        if (theCamera->m_Flags.IsActive()) {
+                            // Only proceed with camera nodes which are currently active.
+                            // SetupCameraForRender() sets the camera used for picking and
+                            // updates global state e.g. IsGloballyActive()
+                            SCameraGlobalCalculationResult theResult =
+                                    thePrepResult.SetupCameraForRender(*theCamera);
+                            wasDataDirty = wasDataDirty || theResult.m_WasDirty;
+                            if (theCamera->m_Flags.IsGloballyActive())
+                                m_Camera = theCamera;
+                            if (theResult.m_ComputeFrustumSucceeded == false) {
+                                qCCritical(INTERNAL_ERROR, "Failed to calculate camera frustum");
+                            }
                         }
                     } break;
                     case GraphObjectTypes::Light: {
