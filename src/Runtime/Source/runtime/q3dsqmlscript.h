@@ -101,6 +101,7 @@ private:
         EventData *data;
     };
 
+    QVector<std::function<void()>> m_mappedProperties;
     QVector<EventCallbackInfo> m_eventCallbacks;
 };
 }

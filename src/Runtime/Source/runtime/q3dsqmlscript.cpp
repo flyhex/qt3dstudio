@@ -40,7 +40,10 @@
 #include "Qt3DSEulerAngles.h"
 #include "Qt3DSMathUtils.h"
 
+#include <QMetaProperty>
+
 using namespace Q3DStudio;
+using namespace qt3ds::runtime;
 
 QJSValue argToQJSValue(qt3ds::foundation::IStringTable &strTable,
                        Q3DStudio::UINT8 type, const UVariant &value) {
@@ -85,7 +88,313 @@ Q3DSQmlScript::Q3DSQmlScript(CQmlEngine &api, Q3DSQmlBehavior &object,
     , m_deltaTime(0.0f)
     , m_lastTime(0)
 {
-    updateProperties();
+    qt3ds::foundation::IStringTable &strTable
+            = m_behavior.GetBelongedPresentation()->GetStringTable();
+    const QMetaObject *meta = object.metaObject();
+    for (int i = 0; i < meta->propertyCount(); ++i) {
+        QMetaProperty property = meta->property(i);
+        QVariant::Type t = property.type();
+        if (static_cast<QMetaType::Type>(t) == QMetaType::QVariant) {
+            // detect type from behavior property
+            auto nameHash = CHash::HashAttribute(property.name());
+            Option<element::TPropertyDescAndValuePtr> value = behavior.FindProperty(nameHash);
+            if (value.hasValue()) {
+                switch (value->first.m_Type) {
+                case ATTRIBUTETYPE_INT32:
+                case ATTRIBUTETYPE_HASH:
+                    t = QVariant::Int;
+                    break;
+                case ATTRIBUTETYPE_FLOAT:
+                    t = QVariant::Double;
+                    break;
+                case ATTRIBUTETYPE_BOOL:
+                    t = QVariant::Bool;
+                    break;
+                case ATTRIBUTETYPE_STRING:
+                    t = QVariant::String;
+                    break;
+                case ATTRIBUTETYPE_FLOAT4:
+                    t = QVariant::Vector4D;
+                    break;
+                case ATTRIBUTETYPE_FLOAT3:
+                    t = QVariant::Vector3D;
+                    break;
+                case ATTRIBUTETYPE_FLOAT2:
+                    t = QVariant::Vector2D;
+                    break;
+                default:
+                    break;
+                }
+            } else {
+                // detect vectors
+                QByteArray name(property.name());
+                QByteArray xname = name + QByteArrayLiteral(".x");
+                Option<element::TPropertyDescAndValuePtr> xvalue
+                        = behavior.FindProperty(CHash::HashAttribute(xname.data()));
+                QByteArray rname = name + QByteArrayLiteral(".r");
+                Option<element::TPropertyDescAndValuePtr> rvalue
+                        = behavior.FindProperty(CHash::HashAttribute(rname.data()));
+                if (xvalue.hasValue()) {
+                    QByteArray yname = name + QByteArrayLiteral(".y");
+                    QByteArray zname = name + QByteArrayLiteral(".z");
+                    QByteArray wname = name + QByteArrayLiteral(".w");
+
+                    Option<element::TPropertyDescAndValuePtr> yvalue
+                            = behavior.FindProperty(CHash::HashAttribute(yname.data()));
+                    Option<element::TPropertyDescAndValuePtr> zvalue
+                            = behavior.FindProperty(CHash::HashAttribute(zname.data()));
+                    Option<element::TPropertyDescAndValuePtr> wvalue
+                            = behavior.FindProperty(CHash::HashAttribute(wname.data()));
+                    int count = 1;
+                    count += yvalue.hasValue() ? 1 : 0;
+                    count += zvalue.hasValue() ? 1 : 0;
+                    count += wvalue.hasValue() ? 1 : 0;
+                    if (count == 2)
+                        t = QVariant::Vector2D;
+                    else if (count == 3)
+                        t = QVariant::Vector3D;
+                    else if (count == 4)
+                        t = QVariant::Vector4D;
+                } else if (rvalue.hasValue()) {
+                    QByteArray gname = name + QByteArrayLiteral(".g");
+                    QByteArray bname = name + QByteArrayLiteral(".b");
+                    QByteArray aname = name + QByteArrayLiteral(".a");
+                    Option<element::TPropertyDescAndValuePtr> gvalue
+                            = behavior.FindProperty(CHash::HashAttribute(gname.data()));
+                    Option<element::TPropertyDescAndValuePtr> bvalue
+                            = behavior.FindProperty(CHash::HashAttribute(bname.data()));
+                    Option<element::TPropertyDescAndValuePtr> avalue
+                            = behavior.FindProperty(CHash::HashAttribute(aname.data()));
+                    int count = 1;
+                    count += gvalue.hasValue() ? 1 : 0;
+                    count += bvalue.hasValue() ? 1 : 0;
+                    count += avalue.hasValue() ? 1 : 0;
+                    if (count == 2)
+                        t = QVariant::Vector2D;
+                    else if (count == 3)
+                        t = QVariant::Vector3D;
+                    else if (count == 4)
+                        t = QVariant::Vector4D;
+                }
+            }
+        }
+        switch (t) {
+        case QVariant::Bool: {
+            const char *name = property.name();
+            auto nameHash = CHash::HashAttribute(name);
+            Option<element::TPropertyDescAndValuePtr> value = behavior.FindProperty(nameHash);
+            if (value.hasValue()) {
+                std::function<void()> mapper = [&object, property, value]() -> void {
+                    Q3DStudio::UVariant *val = value->second;
+                    property.write(&object, QVariant::fromValue<bool>(val->m_INT32 > 0));
+                };
+                m_mappedProperties.push_back(mapper);
+            }
+        } break;
+        case QVariant::Int:
+        case QVariant::UInt:
+        case QVariant::LongLong:
+        case QVariant::ULongLong: {
+            const char *name = property.name();
+            auto nameHash = CHash::HashAttribute(name);
+            Option<element::TPropertyDescAndValuePtr> value = behavior.FindProperty(nameHash);
+            if (value.hasValue()) {
+                std::function<void()> mapper = [&object, property, value]() {
+                    Q3DStudio::UVariant *val = value->second;
+                    property.write(&object, QVariant::fromValue(val->m_INT32));
+                };
+                m_mappedProperties.push_back(mapper);
+            }
+        } break;
+        case QVariant::Double: {
+            const char *name = property.name();
+            auto nameHash = CHash::HashAttribute(name);
+            Option<element::TPropertyDescAndValuePtr> value = behavior.FindProperty(nameHash);
+            if (value.hasValue()) {
+                std::function<void()> mapper = [&object, property, value]() {
+                    Q3DStudio::UVariant *val = value->second;
+                    property.write(&object, QVariant::fromValue(val->m_FLOAT));
+                };
+                m_mappedProperties.push_back(mapper);
+            }
+        } break;
+        case QVariant::String: {
+            const char *name = property.name();
+            auto nameHash = CHash::HashAttribute(name);
+            Option<element::TPropertyDescAndValuePtr> value = behavior.FindProperty(nameHash);
+            if (value.hasValue()) {
+                std::function<void()> mapper = [&object, property, value, &strTable]() {
+                    Q3DStudio::UVariant *val = value->second;
+                    property.write(&object, QVariant::fromValue(
+                             QString::fromUtf8(strTable.HandleToStr(val->m_StringHandle).c_str())));
+                };
+                m_mappedProperties.push_back(mapper);
+            }
+        } break;
+        case QVariant::Vector2D: {
+            std::function<void()> mapper;
+            auto nameHash = CHash::HashAttribute(property.name());
+            Option<element::TPropertyDescAndValuePtr> prop = behavior.FindProperty(nameHash);
+            if (prop.hasValue() && prop->first.m_Type == Q3DStudio::ATTRIBUTETYPE_FLOAT2) {
+                mapper = [&object, property, prop]() {
+                    QVector2D vec;
+                    Q3DStudio::UVariant *value = prop->second;
+                    vec.setX(value->m_FLOAT3[0]);
+                    vec.setY(value->m_FLOAT3[1]);
+                    property.write(&object, QVariant::fromValue(vec));
+                };
+                m_mappedProperties.push_back(mapper);
+            } else {
+                QByteArray name(property.name());
+                QByteArray cname = name + QByteArrayLiteral(".x");
+                auto nameHash = CHash::HashAttribute(cname.data());
+                Option<element::TPropertyDescAndValuePtr> xvalue = behavior.FindProperty(nameHash);
+                if (xvalue.hasValue()) {
+                    cname = name + QByteArrayLiteral(".y");
+                    nameHash = CHash::HashAttribute(cname.data());
+                    Option<element::TPropertyDescAndValuePtr> yvalue
+                            = behavior.FindProperty(nameHash);
+
+                    if (xvalue.hasValue() && yvalue.hasValue()) {
+                        mapper = [&object, property, xvalue, yvalue]() {
+                            QVector2D vec;
+                            vec.setX(xvalue->second->m_FLOAT);
+                            vec.setY(yvalue->second->m_FLOAT);
+                            property.write(&object, QVariant::fromValue(vec));
+                        };
+                        m_mappedProperties.push_back(mapper);
+                    }
+                }
+            }
+        } break;
+        case QVariant::Vector3D: {
+            std::function<void()> mapper;
+            auto nameHash = CHash::HashAttribute(property.name());
+            Option<element::TPropertyDescAndValuePtr> prop = behavior.FindProperty(nameHash);
+            if (prop.hasValue() && prop->first.m_Type == Q3DStudio::ATTRIBUTETYPE_FLOAT3) {
+                mapper = [&object, property, prop]() {
+                    QVector3D vec;
+                    Q3DStudio::UVariant *value = prop->second;
+                    vec.setX(value->m_FLOAT3[0]);
+                    vec.setY(value->m_FLOAT3[1]);
+                    vec.setZ(value->m_FLOAT3[2]);
+                    property.write(&object, QVariant::fromValue(vec));
+                };
+                m_mappedProperties.push_back(mapper);
+            } else {
+                QByteArray name(property.name());
+                QByteArray cname = name + QByteArrayLiteral(".x");
+                auto nameHash = CHash::HashAttribute(cname.data());
+                Option<element::TPropertyDescAndValuePtr> xvalue = behavior.FindProperty(nameHash);
+                if (xvalue.hasValue()) {
+                    cname = name + QByteArrayLiteral(".y");
+                    nameHash = CHash::HashAttribute(cname.data());
+                    Option<element::TPropertyDescAndValuePtr> yvalue
+                            = behavior.FindProperty(nameHash);
+                    cname = name + QByteArrayLiteral(".z");
+                    nameHash = CHash::HashAttribute(cname.data());
+                    Option<element::TPropertyDescAndValuePtr> zvalue
+                            = behavior.FindProperty(nameHash);
+
+                    if (xvalue.hasValue() && yvalue.hasValue() && zvalue.hasValue()) {
+                        mapper = [&object, property, xvalue, yvalue, zvalue]() {
+                            QVector3D vec;
+                            vec.setX(xvalue->second->m_FLOAT);
+                            vec.setY(yvalue->second->m_FLOAT);
+                            vec.setZ(zvalue->second->m_FLOAT);
+                            property.write(&object, QVariant::fromValue(vec));
+                        };
+                        m_mappedProperties.push_back(mapper);
+                    }
+                }
+            }
+        } break;
+        case QVariant::Color:
+        case QVariant::Vector4D: {
+            std::function<void()> mapper;
+            auto nameHash = CHash::HashAttribute(property.name());
+            Option<element::TPropertyDescAndValuePtr> prop = behavior.FindProperty(nameHash);
+            if (prop.hasValue() && prop->first.m_Type == Q3DStudio::ATTRIBUTETYPE_FLOAT4) {
+                mapper = [&object, property, prop]() {
+                    QVector4D vec;
+                    Q3DStudio::UVariant *value = prop->second;
+                    vec.setX(value->m_FLOAT4[0]);
+                    vec.setY(value->m_FLOAT4[1]);
+                    vec.setZ(value->m_FLOAT4[2]);
+                    vec.setW(value->m_FLOAT4[3]);
+                    property.write(&object, QVariant::fromValue(vec));
+                };
+                m_mappedProperties.push_back(mapper);
+            } else {
+                QByteArray name(property.name());
+                QByteArray cname = name + QByteArrayLiteral(".x");
+                auto nameHash = CHash::HashAttribute(cname.data());
+                Option<element::TPropertyDescAndValuePtr> xvalue = behavior.FindProperty(nameHash);
+                if (xvalue.hasValue()) {
+                    cname = name + QByteArrayLiteral(".y");
+                    nameHash = CHash::HashAttribute(cname.data());
+                    Option<element::TPropertyDescAndValuePtr> yvalue
+                            = behavior.FindProperty(nameHash);
+                    cname = name + QByteArrayLiteral(".z");
+                    nameHash = CHash::HashAttribute(cname.data());
+                    Option<element::TPropertyDescAndValuePtr> zvalue
+                            = behavior.FindProperty(nameHash);
+                    cname = name + QByteArrayLiteral(".w");
+                    nameHash = CHash::HashAttribute(cname.data());
+                    Option<element::TPropertyDescAndValuePtr> wvalue
+                            = behavior.FindProperty(nameHash);
+
+                    if (xvalue.hasValue() && yvalue.hasValue() && zvalue.hasValue()
+                            && wvalue.hasValue()) {
+                        mapper = [&object, property, xvalue, yvalue, zvalue, wvalue]() {
+                            QVector4D vec;
+                            vec.setX(xvalue->second->m_FLOAT);
+                            vec.setY(yvalue->second->m_FLOAT);
+                            vec.setZ(zvalue->second->m_FLOAT);
+                            vec.setW(wvalue->second->m_FLOAT);
+                            property.write(&object, QVariant::fromValue(vec));
+                        };
+                        m_mappedProperties.push_back(mapper);
+                    }
+                } else {
+                    cname = name + QByteArrayLiteral(".r");
+                    auto nameHash = CHash::HashAttribute(cname.data());
+                    Option<element::TPropertyDescAndValuePtr> rvalue
+                            = behavior.FindProperty(nameHash);
+                    if (rvalue.hasValue()) {
+                        cname = name + QByteArrayLiteral(".g");
+                        nameHash = CHash::HashAttribute(cname.data());
+                        Option<element::TPropertyDescAndValuePtr> gvalue
+                                = behavior.FindProperty(nameHash);
+                        cname = name + QByteArrayLiteral(".b");
+                        nameHash = CHash::HashAttribute(cname.data());
+                        Option<element::TPropertyDescAndValuePtr> bvalue
+                                = behavior.FindProperty(nameHash);
+                        cname = name + QByteArrayLiteral(".a");
+                        nameHash = CHash::HashAttribute(cname.data());
+                        Option<element::TPropertyDescAndValuePtr> avalue
+                                = behavior.FindProperty(nameHash);
+
+                        if (rvalue.hasValue() && gvalue.hasValue() && bvalue.hasValue()
+                                && avalue.hasValue()) {
+                            mapper = [&object, property, rvalue, gvalue, bvalue, avalue]() {
+                                QVector4D vec;
+                                vec.setX(rvalue->second->m_FLOAT);
+                                vec.setY(gvalue->second->m_FLOAT);
+                                vec.setZ(bvalue->second->m_FLOAT);
+                                vec.setW(avalue->second->m_FLOAT);
+                                property.write(&object, QVariant::fromValue(vec));
+                            };
+                            m_mappedProperties.push_back(mapper);
+                        }
+                    }
+                }
+            }
+        } break;
+        default:
+            break;
+        }
+    }
 }
 
 Q3DSQmlScript::~Q3DSQmlScript()
@@ -136,38 +445,8 @@ void Q3DSQmlScript::updateProperties()
     if (!m_behavior.GetActive() || !m_behavior.IsDirty())
         return;
 
-    unsigned int numProperties = m_behavior.GetNumProperties();
-    for (unsigned int i = 0; i < numProperties; ++i) {
-        Option<TPropertyDescAndValuePtr> property = m_behavior.GetPropertyByIndex(i);
-        if (!property.hasValue())
-            break;
-
-        TPropertyDescAndValuePtr value = property.getValue();
-        const char *name = value.first.m_Name.c_str();
-
-        UVariant *valuePtr = value.second;
-        switch (value.first.m_Type) {
-        case ATTRIBUTETYPE_INT32:
-        case ATTRIBUTETYPE_HASH:
-            m_object.setProperty(name, valuePtr->m_INT32);
-            break;
-        case ATTRIBUTETYPE_FLOAT:
-            m_object.setProperty(name, valuePtr->m_FLOAT);
-            break;
-        case ATTRIBUTETYPE_BOOL:
-            m_object.setProperty(name, valuePtr->m_INT32 != 0);
-            break;
-        case ATTRIBUTETYPE_STRING:
-            m_object.setProperty(
-                name,
-                m_behavior.GetBelongedPresentation()->GetStringTable()
-                .HandleToStr(valuePtr->m_StringHandle)
-                .c_str());
-            break;
-        default:
-            QT3DS_ASSERT(false);
-        }
-    }
+    for (auto m : qAsConst(m_mappedProperties))
+        m();
 }
 
 bool Q3DSQmlScript::hasBehavior(const TElement *behavior)
@@ -186,7 +465,7 @@ float Q3DSQmlScript::getAttribute(const QString &attribute)
         return 0;
 
     float floatValue = 0;
-    m_api.GetAttribute(m_owner.m_Path,
+    m_api.GetAttribute(&m_owner,
                        attribute.toUtf8().constData(),
                        (char *)&floatValue);
     return floatValue;
@@ -219,8 +498,72 @@ void Q3DSQmlScript::setAttribute(const QString &handle, const QString &attribute
     case QMetaType::Double:
     case QMetaType::Float:
         valueFloat = value.toFloat();
-        valuePtr = (const char *)&valueFloat;
+        valuePtr = reinterpret_cast<const char *>(&valueFloat);
         break;
+    case QMetaType::QVector2D: {
+        QVector2D vec = value.value<QVector2D>();
+        float val[2];
+        val[0] = vec.x();
+        val[1] = vec.y();
+        const QByteArray name = attribute.toUtf8();
+        QByteArray cname = name + QByteArrayLiteral(".x");
+        m_api.SetAttribute(element, cname.constData(), reinterpret_cast<const char *>(val));
+        cname = name + QByteArrayLiteral(".y");
+        m_api.SetAttribute(element, cname.constData(), reinterpret_cast<const char *>(val + 1));
+        return;
+    }
+    case QMetaType::QVector3D: {
+        QVector3D vec = value.value<QVector3D>();
+        float val[3];
+        val[0] = vec.x();
+        val[1] = vec.y();
+        val[2] = vec.z();
+        const QByteArray name = attribute.toUtf8();
+        QByteArray cname = name + QByteArrayLiteral(".x");
+        m_api.SetAttribute(element, cname.constData(), reinterpret_cast<const char *>(val));
+        cname = name + QByteArrayLiteral(".y");
+        m_api.SetAttribute(element, cname.constData(), reinterpret_cast<const char *>(val + 1));
+        cname = name + QByteArrayLiteral(".z");
+        m_api.SetAttribute(element, cname.constData(), reinterpret_cast<const char *>(val + 2));
+        return;
+    }
+    case QMetaType::QColor:
+    case QMetaType::QVector4D: {
+        QVector4D vec = value.value<QVector4D>();
+        float val[4];
+        val[0] = vec.x();
+        val[1] = vec.y();
+        val[2] = vec.z();
+        val[3] = vec.w();
+        const QByteArray name = attribute.toUtf8();
+        QByteArray cname = name + QByteArrayLiteral(".x");
+        if (m_api.GetAttribute(element, cname.constData(), reinterpret_cast<char *>(&valueFloat))) {
+            m_api.SetAttribute(element, cname.constData(), reinterpret_cast<const char *>(val));
+            cname = name + QByteArrayLiteral(".y");
+            m_api.SetAttribute(element, cname.constData(), reinterpret_cast<const char *>(val + 1));
+            cname = name + QByteArrayLiteral(".z");
+            m_api.SetAttribute(element, cname.constData(), reinterpret_cast<const char *>(val + 2));
+            cname = name + QByteArrayLiteral(".w");
+            m_api.SetAttribute(element, cname.constData(), reinterpret_cast<const char *>(val + 3));
+        } else {
+            QByteArray cname = name + QByteArrayLiteral(".r");
+            if (m_api.GetAttribute(element, cname.constData(),
+                                   reinterpret_cast<char *>(&valueFloat))) {
+                m_api.SetAttribute(element, cname.constData(),
+                                   reinterpret_cast<const char *>(val));
+                cname = name + QByteArrayLiteral(".g");
+                m_api.SetAttribute(element, cname.constData(),
+                                   reinterpret_cast<const char *>(val + 1));
+                cname = name + QByteArrayLiteral(".b");
+                m_api.SetAttribute(element, cname.constData(),
+                                   reinterpret_cast<const char *>(val + 2));
+                cname = name + QByteArrayLiteral(".a");
+                m_api.SetAttribute(element, cname.constData(),
+                                   reinterpret_cast<const char *>(val + 3));
+            }
+        }
+        return;
+    }
     case QMetaType::QString:
     default:
         valueStr = value.toString().toUtf8();
@@ -228,9 +571,7 @@ void Q3DSQmlScript::setAttribute(const QString &handle, const QString &attribute
         break;
     }
 
-    m_api.SetAttribute(element,
-                       attribute.toUtf8().constData(),
-                       valuePtr);
+    m_api.SetAttribute(element, attribute.toUtf8().constData(), valuePtr);
 }
 
 void Q3DSQmlScript::fireEvent(const QString &event)

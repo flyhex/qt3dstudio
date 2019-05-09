@@ -182,6 +182,7 @@ public: // Public functions but not functions on the script bridge
     * @return none
     */
     virtual bool GetAttribute(const char *element, const char *attName, char *value) = 0;
+    virtual bool GetAttribute(TElement *target, const char *attName, char *value) = 0;
 
     /**
     * @brief Register a callback

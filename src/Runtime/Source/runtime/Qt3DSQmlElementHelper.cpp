@@ -259,8 +259,12 @@ bool CQmlElementHelper::GetAttribute(TElement *inElement, const char *inAttribut
     SAttributeKey theAttributeKey;
     theAttributeKey.m_Hash = CHash::HashAttribute(inAttribute);
 
+    // first search if it is a static property
     Option<qt3ds::runtime::element::TPropertyDescAndValuePtr> thePropertyInfo =
-        inElement->FindDynamicProperty(theAttributeKey.m_Hash);
+        inElement->FindProperty(theAttributeKey.m_Hash);
+
+    if (!thePropertyInfo.hasValue())
+        thePropertyInfo = inElement->FindDynamicProperty(theAttributeKey.m_Hash);
 
     if (thePropertyInfo.hasValue()) {
         UVariant *theValuePtr = thePropertyInfo->second;

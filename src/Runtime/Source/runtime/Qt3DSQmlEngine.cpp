@@ -413,6 +413,7 @@ public:
     void SetTableForElement(TElement &, IScriptTableProvider &) override {}
     void SetAttribute(TElement *target, const char *attName, const char *value) override;
     void SetAttribute(const char *element, const char *attName, const char *value) override;
+    bool GetAttribute(TElement *target, const char *attName, char *value) override;
     bool GetAttribute(const char *element, const char *attName, char *value) override;
     void FireEvent(const char *element, const char *evtName) override;
     void SetDataInputValue(const QString &name, const QVariant &value,
@@ -559,6 +560,24 @@ void CQmlEngineImpl::SetAttribute(const char *element, const char *attName, cons
     }
 }
 
+bool CQmlEngineImpl::GetAttribute(TElement *target, const char *attName, char *value)
+{
+    QML_ENGINE_MULTITHREAD_PROTECT_METHOD;
+
+    if (target) {
+        bool success = CQmlElementHelper::GetAttribute(target, attName, value);
+        if (!success) {
+            qCCritical(qt3ds::INVALID_OPERATION)
+                    << "CQmlEngineImpl::GetAttribute: "
+                    << "failed to get attribute on element"
+                    << target << ":" << attName << ":" << value;
+        }
+        return success;
+    }
+
+    return false;
+}
+
 bool CQmlEngineImpl::GetAttribute(const char *element, const char *attName, char *value)
 {
     QML_ENGINE_MULTITHREAD_PROTECT_METHOD;
@@ -568,8 +587,8 @@ bool CQmlEngineImpl::GetAttribute(const char *element, const char *attName, char
         bool success = CQmlElementHelper::GetAttribute(theTarget, attName, value);
         if (!success) {
             qCCritical(qt3ds::INVALID_OPERATION)
-                    << "CQmlEngineImpl::SetAttribute: "
-                    << "failed to set attribute on element"
+                    << "CQmlEngineImpl::GetAttribute: "
+                    << "failed to get attribute on element"
                     << element << ":" << attName << ":" << value;
         }
         return success;
