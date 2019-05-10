@@ -80,6 +80,7 @@ protected:
 
 private:
     static int s_previewViewerCount;
+    static QString s_documentPath;
 
 };
 

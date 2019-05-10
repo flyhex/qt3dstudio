@@ -50,6 +50,9 @@
 // Amount of open preview viewer processes
 int CPreviewHelper::s_previewViewerCount = 0;
 
+// Full path to uip document
+QString CPreviewHelper::s_documentPath;
+
 //=============================================================================
 /**
  *	Callback for previewing a presentation.
@@ -93,6 +96,7 @@ void CPreviewHelper::PreviewViaConfig(Q3DStudio::CBuildConfiguration *inSelected
 {
     CCore *theCore = g_StudioApp.GetCore();
     QString prvPath = theCore->getProjectFile().createPreview();
+    s_documentPath = theCore->GetDoc()->GetDocumentPath();
     try {
         DoPreviewViaConfig(inSelectedConfig, prvPath, inMode, viewerExeName, project);
     } catch (...) {
@@ -171,7 +175,7 @@ void CPreviewHelper::cleanupProcess(QProcess *p, QString *docPath)
     if (CPreviewHelper::s_previewViewerCount == 0) {
         // Delete preview files when no viewers are open
         if (docPath->endsWith(QLatin1String("_@preview@.uia"))) {
-            QString uipPreviewPath = g_StudioApp.GetCore()->GetDoc()->GetDocumentPath()
+            QString uipPreviewPath = s_documentPath
                     .replace(QLatin1String(".uip"), QLatin1String("_@preview@.uip"));
             QFile(uipPreviewPath).remove(); // remove uip preview (if exists)
             QFile(*docPath).remove(); // remove uia preview
