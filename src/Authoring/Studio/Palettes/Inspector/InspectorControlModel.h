@@ -147,6 +147,7 @@ public:
     Q_INVOKABLE void setPropertyValue(long instance, int handle, const QVariant &value, bool commit = true);
     Q_INVOKABLE void setSlideSelection(long instance, int handle, int index,
                                        const QStringList &list);
+    Q_INVOKABLE void suspendMaterialRename(bool flag);
     Q_INVOKABLE void setPropertyAnimated(long instance, int handle, bool animated);
     Q_INVOKABLE void setPropertyControlled(long instance, int property);
     Q_INVOKABLE bool isLayer(long instance) const;
@@ -196,6 +197,8 @@ private:
     qt3dsdm::Qt3DSDMInstanceHandle m_refMaterial;
 
     Q3DStudio::CUpdateableDocumentEditor m_UpdatableEditor;
+
+    bool m_suspendMaterialRename = false;
 
     QPair<long, int> m_modifiedProperty;
 

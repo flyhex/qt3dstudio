@@ -1685,9 +1685,10 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
         Q3DStudio::CString newName = Q3DStudio::CString::fromQString(value.toString());
         if (!newName.IsEmpty()) {
             if (getBridge()->isInsideMaterialContainer(instance)
-                && (newName.Find('/') != Q3DStudio::CString::ENDOFSTRING
-                    || newName.Find('#') != Q3DStudio::CString::ENDOFSTRING
-                    || newName.Find(':') != Q3DStudio::CString::ENDOFSTRING)) {
+                && ((newName.Find('/') != Q3DStudio::CString::ENDOFSTRING
+                     || newName.Find('#') != Q3DStudio::CString::ENDOFSTRING
+                     || newName.Find(':') != Q3DStudio::CString::ENDOFSTRING)
+                    || m_suspendMaterialRename)) {
                 return;
             }
             qt3dsdm::Qt3DSDMInstanceHandle parentInstance = getBridge()
@@ -1900,6 +1901,12 @@ void InspectorControlModel::setSlideSelection(long instance, int handle, int ind
 
     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(), QObject::tr("Set Property"))
             ->SetInstancePropertyValue(instance, handle, newSelectedData);
+}
+
+// temporarily prevent material renaming when opening the colors dialog (fix for QT3DS-3407)
+void InspectorControlModel::suspendMaterialRename(bool flag)
+{
+    m_suspendMaterialRename = flag;
 }
 
 void InspectorControlModel::setPropertyControllerInstance(

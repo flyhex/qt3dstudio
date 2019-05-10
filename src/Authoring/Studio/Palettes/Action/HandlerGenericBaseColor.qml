@@ -68,8 +68,10 @@ RowLayout {
             anchors.fill: parent
             onClicked: {
                 root.listenToColorChanges = true;
+                _inspectorModel.suspendMaterialRename(true);
                 root.selectedColor = _parentView.showColorDialog(rect.color, instance, handle);
                 root.listenToColorChanges = false;
+                _inspectorModel.suspendMaterialRename(false);
                 root.colorSelected();
             }
         }
