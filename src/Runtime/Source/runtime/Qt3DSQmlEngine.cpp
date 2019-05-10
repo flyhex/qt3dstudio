@@ -772,7 +772,7 @@ void CQmlEngineImpl::SetDataInputValue(
                     break;
                 }
                 case ATTRIBUTETYPE_BOOL: {
-                    bool valueBool;
+                    uint valueBool; // SetAttribute requires at least 32-bit variable
                     if (diDef.type == qt3ds::runtime::DataInputTypeBoolean
                             || diDef.type == qt3ds::runtime::DataInputTypeVariant) {
                         valueBool = value.toBool();
