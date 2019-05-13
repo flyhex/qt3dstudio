@@ -518,6 +518,10 @@ private:
     QVector2D parseFloat2Property(const QString &propValue);
     QVector3D parseFloat3Property(const QString &propValue);
     QVector4D parseFloat4Property(const QString &propValue);
+
+    void notifyElementCreation(CPresentation *pres, const QString &elementName,
+                               const QString &error);
+    void notifyMaterialCreation(CPresentation *pres, const QString &name, const QString &error);
 };
 
 CQmlEngineImpl::CQmlEngineImpl(NVFoundationBase &fnd, ITimeProvider &)
@@ -919,12 +923,20 @@ void CQmlEngineImpl::createElement(const QString &parentElementPath, const QStri
                                    const QHash<QString, QVariant> &properties,
                                    qt3ds::render::IQt3DSRenderer *renderer)
 {
+    QString error;
+    CPresentation *presentation = nullptr;
+    QString elementPath = parentElementPath + QLatin1Char('.')
+            + properties.value(QStringLiteral("name")).toString();
+
     // Resolve parent element
     QByteArray theParentPath = parentElementPath.toUtf8();
     TElement *parentElement = getTarget(theParentPath.constData());
 
     if (!parentElement) {
-        qWarning() << __FUNCTION__ <<  "Invalid parent element:" << parentElementPath;
+        error = QStringLiteral("Invalid parent element");
+        TElement *sceneElement = getTarget("Scene");
+        presentation = static_cast<CPresentation *>(sceneElement->GetBelongedPresentation());
+        notifyElementCreation(presentation, elementPath, error);
         return;
     }
 
@@ -933,14 +945,14 @@ void CQmlEngineImpl::createElement(const QString &parentElementPath, const QStri
 
     if (!parentTranslator || !qt3ds::render::GraphObjectTypes::IsNodeType(
                 parentTranslator->GetUIPType())) {
-        qWarning() << __FUNCTION__ <<  "Parent element is not a valid node";
+        error = QStringLiteral("Parent element is not a valid node");
+        notifyElementCreation(presentation, elementPath, error);
         return;
     }
 
     TElement &component = parentElement->GetComponentParent();
     auto &parentObject = static_cast<qt3ds::render::SNode &>(parentTranslator->RenderObject());
-
-    IPresentation *presentation = parentElement->GetBelongedPresentation();
+    presentation = static_cast<CPresentation *>(parentElement->GetBelongedPresentation());
 
     ++_idCounter;
 
@@ -950,7 +962,8 @@ void CQmlEngineImpl::createElement(const QString &parentElementPath, const QStri
     int slideIndex = slideSystem.FindSlide(component, theSlideName.constData());
     int currentSlide = static_cast<TComponent &>(component).GetCurrentSlide();
     if (slideIndex == 0xff) {
-        qWarning() << __FUNCTION__ <<  "Invalid slide name for time context:" << slideName;
+        error = QStringLiteral("Invalid slide name for time context: '%1'").arg(slideName);
+        notifyElementCreation(presentation, elementPath, error);
         return;
     }
 
@@ -974,6 +987,8 @@ void CQmlEngineImpl::createElement(const QString &parentElementPath, const QStri
         qWarning() << __FUNCTION__
                    << "The specified parent" << parentElementPath
                    << "already has a child with the same name:" << newElementName;
+        error = QStringLiteral("Element already exists");
+        notifyElementCreation(presentation, elementPath, error);
         return;
     }
 
@@ -1042,8 +1057,9 @@ void CQmlEngineImpl::createElement(const QString &parentElementPath, const QStri
             break;
         }
         default:
-            qWarning() << __FUNCTION__ << "Unsupported property type for" << it.key();
-            break;
+            error = QStringLiteral("Unsupported property type for: '%1'").arg(it.key());
+            notifyElementCreation(presentation, elementPath, error);
+            return;
         }
     }
 
@@ -1052,15 +1068,14 @@ void CQmlEngineImpl::createElement(const QString &parentElementPath, const QStri
                 regName, elementType, elementSubType,
                 toConstDataRef(elementProperties.data(), QT3DSU32(elementProperties.size())),
                 presentation, parentElement, false);
-
-    QString elementPath = parentElementPath + QLatin1Char('.') + newElementName;
     newElem.m_Path = strTable.RegisterStr(elementPath);
 
     // Insert the new element into the correct slide
     if (!slideSystem.addSlideElement(component, slideIndex, newElem, eyeBall)) {
-        qWarning() << __FUNCTION__ << "Failed to add the new element to a slide";
         // Delete created element if adding to slide failed
         m_Application->GetElementAllocator().ReleaseElement(newElem, true);
+        error = QStringLiteral("Failed to add the new element to a slide");
+        notifyElementCreation(presentation, elementPath, error);
         return;
     }
 
@@ -1077,9 +1092,10 @@ void CQmlEngineImpl::createElement(const QString &parentElementPath, const QStri
     newMatElem.m_Path = strTable.RegisterStr(matElemPath);
 
     if (!slideSystem.addSlideElement(component, slideIndex, newMatElem, eyeBall)) {
-        qWarning() << __FUNCTION__ << "Failed to add the new material element to a slide";
         // Delete created element and material element if adding to slide failed
         m_Application->GetElementAllocator().ReleaseElement(newElem, true);
+        error = QStringLiteral("Failed to add the new material element to a slide");
+        notifyElementCreation(presentation, elementPath, error);
         return;
     }
 
@@ -1120,8 +1136,9 @@ void CQmlEngineImpl::createElement(const QString &parentElementPath, const QStri
         if (!referencedMaterial) {
             // We could create default material into the container in case there is no materials
             // in there, but it is unlikely that such a presentation would be used in practice.
-            qWarning() << __FUNCTION__ << "Unable to resolve a fallback material";
             m_Application->GetElementAllocator().ReleaseElement(newElem, true);
+            error = QStringLiteral("Unable to resolve a fallback material");
+            notifyElementCreation(presentation, elementPath, error);
             return;
         }
     }
@@ -1162,6 +1179,8 @@ void CQmlEngineImpl::createElement(const QString &parentElementPath, const QStri
         newElem.GetActivityZone().UpdateItemInfo(newElem);
 
     renderer->ChildrenUpdated(parentObject);
+
+    notifyElementCreation(presentation, elementPath, {});
 }
 
 // Only supports deleting element types that can be added via createElement.
@@ -1246,25 +1265,41 @@ void CQmlEngineImpl::createMaterial(const QString &elementPath,
                                     IDynamicObjectSystem *dynamicObjectSystem,
                                     qt3ds::render::IQt3DSRenderer *renderer)
 {
+    QString materialName;
+    QMap<QString, QString> materialProps;
+    QMap<QString, QMap<QString, QString>> textureProps;
+    CPresentation *presentation = nullptr;
+    QString error;
+
+    auto getMaterialInfo = [&]() {
+        QString presPath = QFileInfo(presentation->GetFilePath()).absolutePath();
+        QString projPath = presentation->getProjectPath();
+
+        Q3DSMaterialDefinitionParser::getMaterialInfo(materialDefinition,
+                                                      projPath, presPath,
+                                                      materialName, materialProps, textureProps);
+    };
+
     QByteArray thePath = elementPath.toUtf8();
     TElement *element = getTarget(thePath.constData());
 
     if (!element) {
-        qWarning() << __FUNCTION__ <<  "Invalid element:" << elementPath;
+        error = QStringLiteral("Invalid element: '%1'").arg(elementPath);
+        TElement *sceneElement = getTarget("Scene");
+        presentation = static_cast<CPresentation *>(sceneElement->GetBelongedPresentation());
+        getMaterialInfo();
+        notifyMaterialCreation(presentation, materialName, error);
         return;
     }
 
-    CPresentation *presentation = static_cast<CPresentation *>(element->GetBelongedPresentation());
-    QString presPath = QFileInfo(presentation->GetFilePath()).absolutePath();
-    QString projPath = presentation->getProjectPath();
+    presentation = static_cast<CPresentation *>(element->GetBelongedPresentation());
+    getMaterialInfo();
 
-    QString materialName;
-    QMap<QString, QString> materialProps;
-    QMap<QString, QMap<QString, QString>> textureProps;
-
-    Q3DSMaterialDefinitionParser::getMaterialInfo(materialDefinition,
-                                                  projPath, presPath,
-                                                  materialName, materialProps, textureProps);
+    if (materialName.isEmpty() || materialProps.isEmpty()) {
+        error = QStringLiteral("Invalid material definition: '%1'").arg(materialDefinition);
+        notifyMaterialCreation(presentation, materialName, error);
+        return;
+    }
 
     // We don't care about the path parameter
     const QString pathStr = QStringLiteral("path");
@@ -1285,14 +1320,16 @@ void CQmlEngineImpl::createMaterial(const QString &elementPath,
         while (nextChild) {
             QString childName = QString::fromUtf8(nextChild->m_Name);
             if (childName == materialName) {
-                qWarning() << __FUNCTION__ << "Material already exists in material container";
+                error = QStringLiteral("Material already exists in material container");
+                notifyMaterialCreation(presentation, materialName, error);
                 return;
             }
             nextChild = nextChild->GetSibling();
         }
     } else {
         // TODO: Create a material container if it doesn't exist (QT3DS-3412)
-        qWarning() << __FUNCTION__ << "Presentation has no material container";
+        error = QStringLiteral("Presentation has no material container");
+        notifyMaterialCreation(presentation, materialName, error);
         return;
     }
 
@@ -1330,14 +1367,14 @@ void CQmlEngineImpl::createMaterial(const QString &elementPath,
                         dynPropDefs.insert(propName, customProperties[i]);
                 }
             } else {
-                qWarning() << __FUNCTION__
-                           << "Could not resolve material properties for CustomMaterial:"
-                           << materialName;
+                error = QStringLiteral("Could not resolve material properties for CustomMaterial");
+                notifyMaterialCreation(presentation, materialName, error);
+                return;
             }
         } else {
-            qWarning() << __FUNCTION__
-                       << "Missing sourcepath from material definition of a CustomMaterial:"
-                       << materialName;
+            error = QStringLiteral("Missing sourcepath in material definition of a CustomMaterial");
+            notifyMaterialCreation(presentation, materialName, error);
+            return;
         }
     } else {
         matType = strTable.RegisterStr("Material");
@@ -1345,7 +1382,7 @@ void CQmlEngineImpl::createMaterial(const QString &elementPath,
 
     auto createElementPropsFromDefProps = [&](const QMap<QString, QString> &defProps,
                                               TPropertyDescAndValueList &elementProps,
-                                              const CRegisteredString &elementType) -> bool {
+                                              const CRegisteredString &elementType) {
         QMapIterator<QString, QString> propIter(defProps);
         while (propIter.hasNext()) {
             propIter.next();
@@ -1427,20 +1464,19 @@ void CQmlEngineImpl::createMaterial(const QString &elementPath,
                 break;
             }
             default:
-                qWarning() << __FUNCTION__
-                           << "Unsupported material property type for property:"
-                           << propIter.key();
-                QT3DS_ASSERT(false);
+                error = QStringLiteral("Unsupported material property type for property: '%1'")
+                        .arg(propIter.key());
                 break;
             }
         }
-        return true;
     };
 
     TPropertyDescAndValueList elementProps;
-    bool success = createElementPropsFromDefProps(materialProps, elementProps, matType);
-    if (!success)
-        return; // createElementPropsFromDefProps already prints a warning
+    createElementPropsFromDefProps(materialProps, elementProps, matType);
+    if (!error.isEmpty()) {
+        notifyMaterialCreation(presentation, materialName, error);
+        return;
+    }
 
     TElement &newMatElem = m_Application->GetElementAllocator().CreateElement(
                 matName, matType, matClass,
@@ -1455,10 +1491,11 @@ void CQmlEngineImpl::createMaterial(const QString &elementPath,
     while (texIter.hasNext()) {
         texIter.next();
         elementProps.clear();
-        success = createElementPropsFromDefProps(texIter.value(), elementProps, imageType);
-        if (!success) {
+        createElementPropsFromDefProps(texIter.value(), elementProps, imageType);
+        if (!error.isEmpty()) {
             m_Application->GetElementAllocator().ReleaseElement(newMatElem, true);
-            return; // createElementPropsFromDefProps already prints a warning
+            notifyMaterialCreation(presentation, materialName, error);
+            return;
         }
         CRegisteredString imageName = strTable.RegisterStr(texIter.key());
 
@@ -1526,12 +1563,10 @@ void CQmlEngineImpl::createMaterial(const QString &elementPath,
                 break;
             }
             default:
-                qWarning() << __FUNCTION__
-                           << "Unsupported custom material property type '" << propDesc.m_DataType
-                           << "' for property:"
-                           << dynPropIter.key();
-                QT3DS_ASSERT(false);
-                break;
+                error = QStringLiteral("Unsupported custom material property type for '%1'")
+                        .arg(dynPropIter.key());
+                notifyMaterialCreation(presentation, materialName, error);
+                return;
             }
         }
     } else {
@@ -1559,10 +1594,7 @@ void CQmlEngineImpl::createMaterial(const QString &elementPath,
 
     qt3ds::render::Qt3DSTranslator::CreateTranslatorForElement(newMatElem, *newMaterial, allocator);
 
-    // Notify presentation asynchronously to give renderer time to initialize the materials properly
-    QTimer::singleShot(0, [materialName, presentation]() {
-        presentation->signalProxy()->SigMaterialCreated(materialName);
-    });
+    notifyMaterialCreation(presentation, materialName, {});
 }
 
 void CQmlEngineImpl::GotoSlide(const char *component, const char *slideName,
@@ -2224,6 +2256,32 @@ QVector4D CQmlEngineImpl::parseFloat4Property(const QString &propValue)
     for (int i = 0; i < values.size() && i < 4; ++i)
         retVal[i] = values[i].toFloat();
     return retVal;
+}
+
+void CQmlEngineImpl::notifyElementCreation(CPresentation *pres, const QString &elementName,
+                                           const QString &error)
+{
+    // Notify presentation asynchronously to give renderer time to initialize the elements properly
+    if (!error.isEmpty()) {
+        qWarning() << "Warning: Element creation failed:" << elementName << error;
+        QT3DS_ASSERT(false);
+    }
+    QTimer::singleShot(0, [pres, elementName, error]() {
+        pres->signalProxy()->SigElementCreated(elementName, error);
+    });
+}
+
+void CQmlEngineImpl::notifyMaterialCreation(CPresentation *pres, const QString &name,
+                                            const QString &error)
+{
+    // Notify presentation asynchronously to give renderer time to initialize the materials properly
+    if (!error.isEmpty()) {
+        qWarning() << "Warning: Material creation failed:" << name << error;
+        QT3DS_ASSERT(false);
+    }
+    QTimer::singleShot(0, [pres, name, error]() {
+        pres->signalProxy()->SigMaterialCreated(name, error);
+    });
 }
 
 template<typename TDataType>

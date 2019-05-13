@@ -113,7 +113,8 @@ Q_SIGNALS:
     void dataInputsReady();
     void customSignalEmitted(const QString &elementPath, const QString &name);
     void delayedLoadingChanged(bool enable);
-    void materialCreated(const QString &name);
+    void elementCreated(const QString &elementPath, const QString &error);
+    void materialCreated(const QString &name, const QString &error);
 
 private:
     Q_DISABLE_COPY(Q3DSPresentation)

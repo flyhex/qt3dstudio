@@ -56,12 +56,10 @@ void messageOutput(QtMsgType type, const QMessageLogContext &context,
 void tst_qt3dsviewer::initTestCase()
 {
     qInstallMessageHandler(messageOutput);
-    m_viewer.setTitle(QStringLiteral("tst_qt3dsviewer"));
 }
 
 void tst_qt3dsviewer::cleanupTestCase()
 {
-    QCOMPARE(m_studio3DItem->property("error").toString(), QString());
 }
 
 void tst_qt3dsviewer::init()
@@ -80,10 +78,13 @@ void tst_qt3dsviewer::init()
     QSurfaceFormat::setDefaultFormat(format);
 #endif
 
-    m_viewer.setSource(QUrl("qrc:/tst_qt3dsviewer.qml"));
-    m_studio3DItem = m_viewer.rootObject();
+    m_viewer = new QQuickView;
+    m_viewer->setTitle(QStringLiteral("tst_qt3dsviewer"));
+    m_viewer->setSource(QUrl("qrc:/tst_qt3dsviewer.qml"));
+    m_studio3DItem = m_viewer->rootObject();
     m_presentation = nullptr;
     m_settings = nullptr;
+    m_ignoreError = false;
 
     QVERIFY(m_studio3DItem);
 
@@ -102,21 +103,28 @@ void tst_qt3dsviewer::init()
 void tst_qt3dsviewer::cleanup()
 {
     deleteCreatedElements(0);
-    m_viewer.hide();
+    if (!m_ignoreError)
+        QCOMPARE(m_studio3DItem->property("error").toString(), {});
+    m_studio3DItem = nullptr;
+    m_viewer->hide();
+    m_viewer->deleteLater();
+    m_viewer = nullptr;
 }
 
 void tst_qt3dsviewer::testEmpty()
 {
     m_presentation->setProperty("source", QUrl());
-    m_viewer.show();
+    m_viewer->show();
     QTest::qWait(1000);
     QCOMPARE(m_studio3DItem->property("running").toBool(), false);
+    QVERIFY(!m_studio3DItem->property("error").toString().isEmpty());
+    m_ignoreError = true; // To avoid triggering cleanup() fail as we are expecting an error
 }
 
 void tst_qt3dsviewer::testLoading()
 {
     QCOMPARE(m_studio3DItem->property("running").toBool(), false);
-    m_viewer.show();
+    m_viewer->show();
     QTest::qWait(1000);
     QCOMPARE(m_studio3DItem->property("running").toBool(), true);
 }
@@ -131,7 +139,7 @@ void tst_qt3dsviewer::testSlides()
     QCOMPARE(spyEntered.count(), 0);
     QCOMPARE(spyExited.count(), 0);
 
-    m_viewer.show();
+    m_viewer->show();
     QTest::qWait(1000);
 
     QCOMPARE(spyEntered.count(), 1);
@@ -147,14 +155,15 @@ void tst_qt3dsviewer::testFrameUpdates()
     QSignalSpy spyFrames(m_studio3DItem, SIGNAL(frameUpdate()));
     QSignalSpy spyExited(m_presentation,
                          SIGNAL(slideExited(const QString &, unsigned int, const QString &)));
-    m_viewer.show();
+    m_viewer->show();
     QVERIFY(spyExited.wait(12000));
-    QVERIFY(spyFrames.count() > 590); // Should be 60 with fudge for startup
+    // Just ensure we get some frames, exact count will vary a lot due to external factors
+    QVERIFY(spyFrames.count() > 10);
 }
 
 void tst_qt3dsviewer::testSettings()
 {
-    m_viewer.show();
+    m_viewer->show();
     m_settings->setMatteColor(QColor("#0000ff"));
     QVERIFY(m_settings->matteColor() == QColor("#0000ff"));
 
@@ -169,16 +178,22 @@ void tst_qt3dsviewer::testSettings()
 
 void tst_qt3dsviewer::testCreateElement()
 {
-    // Currently this method is very bare bones on actual testing due to lack of programmatic
-    // feedback on dynamic object creation.
-    // It can be used to visually check if items are getting created.
-    m_viewer.show();
+    m_viewer->show();
 
     m_settings->setShowRenderStats(true);
     m_settings->setScaleMode(Q3DSViewerSettings::ScaleModeFill);
 
     QSignalSpy spyExited(m_presentation,
                          SIGNAL(slideExited(const QString &, unsigned int, const QString &)));
+    QSignalSpy spyElemCreated(m_presentation, SIGNAL(elementCreated(const QString &,
+                                                                    const QString &)));
+
+    QObject::connect(m_presentation, &Q3DSPresentation::elementCreated,
+                     [this](const QString &elementName, const QString &error) {
+        QVERIFY(error.isEmpty());
+        if (!m_createdElements.contains(elementName))
+            QVERIFY(false);
+    });
 
     int animValue = 0;
 
@@ -326,6 +341,7 @@ void tst_qt3dsviewer::testCreateElement()
     QObject::disconnect(createElementsConnection);
 
     QTest::qWait(500);
+    QCOMPARE(spyElemCreated.count(), m_createdElements.count());
     deleteCreatedElements(1);
 
     // Switch to slide 1
@@ -335,15 +351,17 @@ void tst_qt3dsviewer::testCreateElement()
 
 void tst_qt3dsviewer::testCreateMaterial()
 {
-    m_viewer.show();
+    m_viewer->show();
 
     m_settings->setShowRenderStats(true);
     m_settings->setScaleMode(Q3DSViewerSettings::ScaleModeFill);
 
     QSignalSpy spyExited(m_presentation,
                          SIGNAL(slideExited(const QString &, unsigned int, const QString &)));
-    QSignalSpy spyMatCreated(m_presentation, SIGNAL(materialCreated(const QString &)));
-
+    QSignalSpy spyMatCreated(m_presentation, SIGNAL(materialCreated(const QString &,
+                                                                    const QString &)));
+    QSignalSpy spyElemCreated(m_presentation, SIGNAL(elementCreated(const QString &,
+                                                                    const QString &)));
     // Create material via .materialdef file in resources
     m_presentation->createMaterial(
                 QStringLiteral("Scene"),
@@ -370,37 +388,33 @@ void tst_qt3dsviewer::testCreateMaterial()
     m_presentation->createMaterial(QStringLiteral("Scene"), matDef);
 
     QObject::connect(m_presentation, &Q3DSPresentation::materialCreated,
-                     [this](const QString &name) {
+                     [this](const QString &name, const QString &error) {
         QHash<QString, QVariant> data;
 
-        if (name == QStringLiteral("materials/Basic Blue")) {
+        QVERIFY(error.isEmpty());
+
+        if (name == QLatin1String("materials/Basic Blue")) {
             data.insert(QStringLiteral("name"), QStringLiteral("Blue Cylinder"));
             data.insert(QStringLiteral("sourcepath"), QStringLiteral("#Cylinder"));
             data.insert(QStringLiteral("material"), name);
             data.insert(QStringLiteral("position"),
                         QVariant::fromValue<QVector3D>(QVector3D(200, 300, 200)));
             createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide1"), data);
-        }
-
-        if (name == QStringLiteral("materials/Basic Texture")) {
+        } else if (name == QLatin1String("materials/Basic Texture")) {
             data.insert(QStringLiteral("name"), QStringLiteral("Textured Cone"));
             data.insert(QStringLiteral("sourcepath"), QStringLiteral("#Cone"));
             data.insert(QStringLiteral("material"), name);
             data.insert(QStringLiteral("position"),
                         QVariant::fromValue<QVector3D>(QVector3D(-200, -300, 200)));
             createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide1"), data);
-        }
-
-        if (name == QStringLiteral("materials/Copper")) {
+        } else if (name == QLatin1String("materials/Copper")) {
             data.insert(QStringLiteral("name"), QStringLiteral("Copper Sphere"));
             data.insert(QStringLiteral("sourcepath"), QStringLiteral("#Sphere"));
             data.insert(QStringLiteral("material"), name);
             data.insert(QStringLiteral("position"),
                         QVariant::fromValue<QVector3D>(QVector3D(-200, 300, 200)));
             createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide1"), data);
-        }
-
-        if (name == QStringLiteral("materials/Just Yellow")) {
+        } else if (name == QLatin1String("materials/Just Yellow")) {
             QHash<QString, QVariant> data;
             data.insert(QStringLiteral("name"), QStringLiteral("Yellow Cube"));
             data.insert(QStringLiteral("sourcepath"), QStringLiteral("#Cube"));
@@ -408,6 +422,8 @@ void tst_qt3dsviewer::testCreateMaterial()
             data.insert(QStringLiteral("position"),
                         QVariant::fromValue<QVector3D>(QVector3D(200, -300, 200)));
             createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide1"), data);
+        } else {
+            QVERIFY(false);
         }
     });
 
@@ -424,6 +440,7 @@ void tst_qt3dsviewer::testCreateMaterial()
 
     QVERIFY(spyExited.wait(20000));
     QCOMPARE(spyMatCreated.count(), 4);
+    QCOMPARE(spyElemCreated.count(), 4);
     QTest::qWait(200); // Extra wait to verify slide change visually
 }
 

@@ -310,6 +310,8 @@ bool CRuntimeView::InitializeGraphics(const QSurfaceFormat &format, bool delayed
                      signalProxy(), &QRuntimeViewSignalProxy::SigSlideExited);
     QObject::connect(m_Presentation->signalProxy(), &QPresentationSignalProxy::SigCustomSignal,
                      signalProxy(), &QRuntimeViewSignalProxy::SigCustomSignal);
+    QObject::connect(m_Presentation->signalProxy(), &QPresentationSignalProxy::SigElementCreated,
+                     signalProxy(), &QRuntimeViewSignalProxy::SigElementCreated);
     QObject::connect(m_Presentation->signalProxy(), &QPresentationSignalProxy::SigMaterialCreated,
                      signalProxy(), &QRuntimeViewSignalProxy::SigMaterialCreated);
 

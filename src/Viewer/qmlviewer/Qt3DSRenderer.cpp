@@ -209,6 +209,8 @@ bool Q3DSRenderer::initializeRuntime(QOpenGLFramebufferObject *inFbo)
             this, &Q3DSRenderer::exitSlide);
     connect(m_runtime, &Q3DSViewer::Q3DSViewerApp::SigCustomSignal,
             this, &Q3DSRenderer::customSignalEmitted);
+    connect(m_runtime, &Q3DSViewer::Q3DSViewerApp::SigElementCreated,
+            this, &Q3DSRenderer::elementCreated);
     connect(m_runtime, &Q3DSViewer::Q3DSViewerApp::SigMaterialCreated,
             this, &Q3DSRenderer::materialCreated);
 

@@ -464,6 +464,8 @@ void Q3DSPresentationPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool 
                     q_ptr, &Q3DSPresentation::slideExited);
             connect(app, &Q3DSViewer::Q3DSViewerApp::SigCustomSignal,
                     q_ptr, &Q3DSPresentation::customSignalEmitted);
+            connect(app, &Q3DSViewer::Q3DSViewerApp::SigElementCreated,
+                    q_ptr, &Q3DSPresentation::elementCreated);
             connect(app, &Q3DSViewer::Q3DSViewerApp::SigMaterialCreated,
                     q_ptr, &Q3DSPresentation::materialCreated);
         }
@@ -474,6 +476,8 @@ void Q3DSPresentationPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool 
                        q_ptr, &Q3DSPresentation::slideExited);
             disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigCustomSignal,
                        q_ptr, &Q3DSPresentation::customSignalEmitted);
+            disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigElementCreated,
+                       q_ptr, &Q3DSPresentation::elementCreated);
             disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigMaterialCreated,
                        q_ptr, &Q3DSPresentation::materialCreated);
         }

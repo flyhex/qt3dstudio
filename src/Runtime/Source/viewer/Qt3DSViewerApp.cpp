@@ -357,6 +357,8 @@ bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFor
                 &QRuntimeViewSignalProxy::SigSlideExited, this, &Q3DSViewerApp::SigSlideExited);
         connect(m_Impl.m_view->signalProxy(),
                 &QRuntimeViewSignalProxy::SigCustomSignal, this, &Q3DSViewerApp::SigCustomSignal);
+        connect(m_Impl.m_view->signalProxy(), &QRuntimeViewSignalProxy::SigElementCreated, this,
+                &Q3DSViewerApp::SigElementCreated);
         connect(m_Impl.m_view->signalProxy(), &QRuntimeViewSignalProxy::SigMaterialCreated, this,
                 &Q3DSViewerApp::SigMaterialCreated);
 

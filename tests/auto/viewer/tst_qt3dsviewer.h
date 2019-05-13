@@ -63,11 +63,12 @@ private:
     void createElement(const QString &parentElementPath, const QString &slideName,
                        const QHash<QString, QVariant> &properties);
 
-    QQuickView m_viewer;
+    QQuickView *m_viewer = nullptr;
     QObject *m_studio3DItem = nullptr;
     Q3DSPresentation *m_presentation = nullptr;
     Q3DSViewerSettings *m_settings = nullptr;
     QStringList m_createdElements;
+    bool m_ignoreError = false;
 
 };
 
