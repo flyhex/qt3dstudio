@@ -98,6 +98,7 @@ enum DataInputType {
     DataInputTypeFloat,
     DataInputTypeEvaluator,
     DataInputTypeBoolean,
+    DataInputTypeVector4,
     DataInputTypeVector3,
     DataInputTypeVector2,
     DataInputTypeVariant

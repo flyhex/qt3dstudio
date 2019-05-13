@@ -720,6 +720,27 @@ void CQmlEngineImpl::SetDataInputValue(
                                  reinterpret_cast<const char *>(&valueFloat));
                     break;
                 }
+                case ATTRIBUTETYPE_FLOAT4: {
+                    QVector4D valueVec;
+                    if (diDef.type == qt3ds::runtime::DataInputTypeVector4) {
+                        valueVec = value.value<QVector4D>();
+                    } else {
+                        qWarning() << __FUNCTION__ << "Property type "
+                                   << ctrlElem.propertyType
+                                   << " not matching with Datainput " << name
+                                   << " data type "
+                                   << diDef.type;
+                        break;
+                    }
+                    // Set the values of vector attribute components separately
+                    for (int i = 0; i < 4; i++) {
+                        const float val = valueVec[i];
+                        SetAttribute(ctrlElem.elementPath.constData(),
+                                     ctrlElem.attributeName[i].constData(),
+                                     reinterpret_cast<const char *>(&val));
+                    }
+                    break;
+                }
                 case ATTRIBUTETYPE_FLOAT3: {
                     QVector3D valueVec;
                     if (diDef.type == qt3ds::runtime::DataInputTypeVector3
