@@ -44,7 +44,7 @@
               <color>1.000000 1.000000 1.000000 1.000000</color>
             </transparent>
             <transparency>
-              <float>0</float>
+              <float>1</float>
             </transparency>
             <index_of_refraction>
               <float>0</float>
