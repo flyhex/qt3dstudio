@@ -437,6 +437,9 @@
 
         <Property name="opacity"  formalName="Opacity"  min="0" max="100" default="100" hidden="True" category="Basic Properties" />
 
+        <!-- Variant Tags -->
+        <Property name="variants" type="String" animatable="False" category="Variant Tags" />
+
         <!-- Format -->
         <Property name="textstring" formalName="Text String" type="MultiLineString" default="Text"                 category="Format" description="Text String" controllable="True" />
         <Property name="textcolor"  formalName="Text Color"  type="Color"           default="1 1 1 1"              category="Format" description="Text Color"  controllable="True" />
@@ -454,10 +457,10 @@
         <Property name="elide"       formalName="Eliding"              description="Elide text that does not fit the\ntext area. Has effect only if\nfixed text area is defined." list="ElideNone:ElideLeft:ElideMiddle:ElideRight" default="ElideNone" category="Format" />
 
         <!-- Shadow -->
-        <Property name="dropshadow" formalName="Drop-Shadow" description="Add a drop-shadow to the text.\nThe shadow is a darker shade of the given color." type="Boolean" default="False" category="Shadow" />
-        <Property name="dropshadowstrength" formalName="Shadow Darkness" description="Darkness of the shadow in percents.\n100 is black, 0 is the same color as the text." min="0" max="100" type="Float" default="80" category="Shadow" />
-        <Property name="dropshadowoffsetx" formalName="Horizontal Offset" description="Horizontal offset of the shadow.\nIt is relative to the font size." min="-100" max="100" type="Float" default="0" category="Shadow" />
-        <Property name="dropshadowoffsety" formalName="Vertical Offset" description="Vertical offset of the shadow.\nIt is relative to the font size." min="-100" max="100" type="Float" default="0" category="Shadow" />
+        <Property name="dropshadow"         formalName="Drop-Shadow"       category="Shadow" type="Boolean"                    default="False" description="Add a drop-shadow to the text.\nThe shadow is a darker shade of the given color."    />
+        <Property name="dropshadowstrength" formalName="Shadow Darkness"   category="Shadow" type="Float" min="0"    max="100" default="80"    description="Darkness of the shadow in percents.\n100 is black, 0 is the same color as the text." />
+        <Property name="dropshadowoffsetx"  formalName="Horizontal Offset" category="Shadow" type="Float" min="-100" max="100" default="0"     description="Horizontal offset of the shadow.\nIt is relative to the font size."                  />
+        <Property name="dropshadowoffsety"  formalName="Vertical Offset"   category="Shadow" type="Float" min="-100" max="100" default="0"     description="Vertical offset of the shadow.\nIt is relative to the font size."                    />
         <!--To be removed in 2.x (when UIP version is next updated)
         <Property name="dropshadowoffset" formalName="Shadow Offset" description="Offset of the shadow. It\nis relative to the font size." min="1" max="100" type="Float" default="10" />
         <Property name="dropshadowhorzalign" formalName="Horizontal Position" description="Horizontal position of the shadow" list="Left:Center:Right" default="Right" />

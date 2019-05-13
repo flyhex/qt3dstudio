@@ -317,6 +317,9 @@ qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::getVariantsProperty(int i
     if (instanceType == OBJTYPE_LAYER)
         return m_Layer.m_variants;
 
+    if (instanceType == OBJTYPE_TEXT)
+        return m_Text.m_variants;
+
     if (instanceType == OBJTYPE_MODEL)
         return m_Model.m_variants;
 
