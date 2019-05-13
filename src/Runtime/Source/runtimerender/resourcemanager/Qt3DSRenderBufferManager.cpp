@@ -1010,6 +1010,7 @@ struct SBufferManager : public IBufferManager
     }
     void Clear() override
     {
+        m_reloadableTextures.clear();
         for (TMeshMap::iterator iter = m_MeshMap.begin(), end = m_MeshMap.end(); iter != end;
              ++iter) {
             SRenderMesh *theMesh = iter->second;
