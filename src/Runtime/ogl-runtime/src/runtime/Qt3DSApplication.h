@@ -123,7 +123,7 @@ struct DataInputDef
     QVariant value;     // most recently set value
     // evaluator datainputs that need to re-evaluate when this datainput changes value
     QVector<QString> dependents;
-
+    QHash<QString, QString> metadata;
 };
 
 struct DataOutputDef
@@ -186,8 +186,8 @@ public:
     virtual QList<QString> dataOutputs() const = 0;
 
     virtual float dataInputMax(const QString &name) const = 0;
-
     virtual float dataInputMin(const QString &name) const = 0;
+    virtual QHash<QString, QString> dataInputMetadata(const QString &name) const = 0;
 
     virtual void setPresentationId(const QString &id) = 0;
 

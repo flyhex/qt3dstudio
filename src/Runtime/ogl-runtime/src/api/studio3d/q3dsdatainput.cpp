@@ -257,8 +257,56 @@ bool Q3DSDataInput::isValid() const
 }
 
 /*!
-    \brief Q3DSDataInput::setValue Set value of the data input.
-    \param value New value to be set.
+    Returns the metadata defined for this datainput with metadata \a key.
+
+    Metadata is user-defined key-value table that can be used, for example, to better describe the
+    usage of, or to indicate the external data source that should be bound to this datainput.
+    Metadata has no impact on presentation rendering.
+
+    \note Datainput metadata is read-only.
+ */
+/*!
+    \qmlmethod string DataInput::metadata
+    Returns the metadata defined for this datainput with metadata \a key.
+
+    Metadata is user-defined key-value table that can be used, for example, to better describe the
+    usage of, or to indicate the external data source that should be bound to this datainput.
+    Metadata has no impact on presentation rendering.
+
+    \note Datainput metadata is read-only.
+ */
+QString Q3DSDataInput::metadata(const QString &key) const
+{
+    if (!d_ptr->m_presentation)
+        return {};
+
+    auto metadata = d_ptr->m_presentation->d_ptr->dataInputMetadata(name());
+
+    return metadata[key];
+}
+
+/*!
+    Returns the metadata keys defined for this datainput.
+
+    \sa metadata
+ */
+/*!
+    \qmlmethod var DataInput::metadataKeys
+    Returns the metadata keys defined for this datainput.
+
+    \note Datainput metadata is read-only.
+    \sa metadata
+ */
+QStringList Q3DSDataInput::metadataKeys() const
+{
+    if (!d_ptr->m_presentation)
+        return {};
+
+    return d_ptr->m_presentation->d_ptr->dataInputMetadata(name()).keys();
+}
+
+/*!
+    \brief Q3DSDataInput::setValue Set a new \a value for this data input.
     \note For performance reasons do not call setValue unnecessarily.
  */
 void Q3DSDataInput::setValue(const QVariant &value)

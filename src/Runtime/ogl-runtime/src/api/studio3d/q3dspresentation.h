@@ -76,6 +76,8 @@ public:
 
     Q_INVOKABLE QVariantList getDataInputs() const;
     QVector<Q3DSDataInput *> dataInputs() const;
+    Q_INVOKABLE QVariantList getDataInputs(const QString &metadataKey) const;
+    QVector<Q3DSDataInput *> dataInputs(const QString &metadataKey) const;
     Q_INVOKABLE QVariantList getDataOutputs() const;
     QVector<Q3DSDataOutput *> dataOutputs() const;
 

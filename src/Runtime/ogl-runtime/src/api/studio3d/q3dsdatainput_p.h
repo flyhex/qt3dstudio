@@ -74,6 +74,12 @@ protected:
     float m_max = 0;
     float m_min = 0;
 
+    // Note: Qt3d Runtime allows metadata to be both read and set, therefore requiring
+    // internal representation of both keys and values to be QVariant as per API convention.
+    // OpenGL Runtime, in contrast, only allows metadata to be read. As metadata now can only
+    // come from UIA file where it is stored as string, we use QStrings in API as well.
+    QHash<QString, QString> m_metadata;
+
     friend class Q3DSPresentationPrivate;
     friend class Q3DSRenderer;
 };

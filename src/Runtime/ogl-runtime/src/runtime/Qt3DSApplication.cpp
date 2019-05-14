@@ -1314,6 +1314,7 @@ struct SApp : public IApplication
                     const char8_t *name = "";
                     const char8_t *type = "";
                     const char8_t *evaluator = "";
+                    const char8_t *metadataStr = "";
                     diDef.value = QVariant::Invalid;
                     inReader.UnregisteredAtt("name", name);
                     inReader.UnregisteredAtt("type", type);
@@ -1342,6 +1343,27 @@ struct SApp : public IApplication
                         diDef.evaluator = QString::fromUtf8(evaluator);
                     }
 
+                    inReader.UnregisteredAtt("metadata", metadataStr);
+                    QString metaData = QString(metadataStr);
+                    if (!metaData.isEmpty()) {
+                        auto metadataList = metaData.split(QLatin1Char('$'));
+
+                        if (metadataList.size() & 1) {
+                            qWarning("Malformed datainput metadata for datainput %s, cannot"
+                                     "parse key - value pairs. Stop parsing metadata.",
+                                     qUtf8Printable(name));
+                        } else {
+                            for (int i = 0; i < metadataList.size(); i += 2) {
+                                if (metadataList[i].isEmpty()) {
+                                    qWarning("Malformed datainput metadata for datainput %s "
+                                             "- metadata key empty. Stop parsing metadata.",
+                                             qUtf8Printable(name));
+                                    break;
+                                }
+                                diDef.metadata.insert(metadataList[i], metadataList[i+1]);
+                            }
+                        }
+                    }
                     m_dataInputDefs.insert(QString::fromUtf8(name), diDef);
 // #TODO Remove below once QT3DS-3510 task has been completed.
                     // By default data inputs should not have data outputs, but this is needed
@@ -1437,6 +1459,11 @@ struct SApp : public IApplication
     float dataInputMin(const QString &name) const override
     {
         return m_dataInputDefs[name].min;
+    }
+
+    QHash<QString, QString> dataInputMetadata(const QString &name) const override
+    {
+        return m_dataInputDefs[name].metadata;
     }
 
     struct SAppXMLErrorHandler : public qt3ds::foundation::CXmlErrorHandler
@@ -2117,6 +2144,9 @@ QDebug operator<<(QDebug debug, const DataInputValueRole &value)
     return debug;
 }
 
+// TODO: optionally print out also metadata, but note that it is not
+// relevant for any runtime or editor -side code debugging (strictly user-side
+// information).
 QDebug operator<<(QDebug debug, const DataInputDef &value)
 {
     QDebugStateSaver saver(debug);

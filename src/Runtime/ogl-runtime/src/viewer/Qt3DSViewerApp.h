@@ -461,6 +461,7 @@ public:
 
     float dataInputMax(const QString &name) const;
     float dataInputMin(const QString &name) const;
+    QHash<QString, QString> dataInputMetadata(const QString &name) const;
 
     void createElements(const QString &parentElementPath, const QString &slideName,
                         const QVector<QHash<QString, QVariant>> &properties);

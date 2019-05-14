@@ -421,7 +421,7 @@ void Q3DSRenderer::processCommands()
                     Q3DSDataInput *newIt = new Q3DSDataInput(it, nullptr);
                     newIt->d_ptr->m_max = m_runtime->dataInputMax(it);
                     newIt->d_ptr->m_min = m_runtime->dataInputMin(it);
-
+                    newIt->d_ptr->m_metadata = m_runtime->dataInputMetadata(it);
                     requestData->append(QVariant::fromValue(newIt));
                 }
             }

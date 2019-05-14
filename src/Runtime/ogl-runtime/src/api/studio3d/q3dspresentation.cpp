@@ -305,6 +305,7 @@ Q3DSDataOutput *Q3DSPresentation::registeredDataOutput(const QString &name) cons
 QVector<Q3DSDataInput *> Q3DSPresentation::dataInputs() const
 {
     QVector<Q3DSDataInput *> ret;
+    // Just return local datainput list
     const auto datainputs = d_ptr->m_dataInputs;
     for (const auto &it : datainputs)
         ret.append(it);
@@ -313,7 +314,7 @@ QVector<Q3DSDataInput *> Q3DSPresentation::dataInputs() const
 }
 
 /*!
-    \qmlmethod variant Presentation::getDataInputs
+    \qmlmethod var Presentation::getDataInputs
     Returns a list of datainputs defined for this presentation. Use setDataInputValue()
     interface to set a datainput value using datainput name, or call Q3DSDataInput::setValue
     directly for a specific datainput.
@@ -341,6 +342,46 @@ QVariantList Q3DSPresentation::getDataInputs() const
 }
 
 /*!
+    Returns a list of datainputs defined for this presentation that have the specified
+    \a metadataKey.
+
+    \sa setDataInputValue
+    \sa Q3DSDataInput
+ */
+
+/*!
+    \qmlmethod var Presentation::getDataInputs
+    Returns a list of datainputs defined for this presentation that have the specified
+    \a metadataKey.
+
+    \sa DataInput
+ */
+QVariantList Q3DSPresentation::getDataInputs(const QString &metadataKey) const
+{
+    QVariantList ret;
+    const auto datainputs = dataInputs(metadataKey);
+
+    for (const auto &it : datainputs)
+        ret.append(QVariant::fromValue(it));
+
+    return ret;
+}
+
+/*!
+    Returns a list of datainputs defined for this presentation that have the specified
+    \a metadataKey.
+
+    \sa setDataInputValue
+    \sa Q3DSDataInput
+ */
+QVector<Q3DSDataInput *> Q3DSPresentation::dataInputs(const QString &metadataKey) const
+{
+    // Defer to presentation item as we want to read metadata from viewer app whenever
+    // possible.
+    return d_ptr->dataInputs(metadataKey);
+}
+
+/*!
     Returns a list of dataoutputs defined for this presentation. Use Qt's connect() method
     to connect slots to the valueChanged() signal in the required \l{DataOutput}s to get notified
     when the value tracked by the DataOutput is changed.
@@ -358,7 +399,7 @@ QVector<Q3DSDataOutput *> Q3DSPresentation::dataOutputs() const
 }
 
 /*!
-    \qmlmethod variant Presentation::getDataOutputs
+    \qmlmethod var Presentation::getDataOutputs
 
     Returns a list of dataoutputs defined for this presentation. Connect slots to the
     \c{valueChanged()} signal in the required \l{DataOutput}s to get notified
@@ -1327,17 +1368,19 @@ void Q3DSPresentationPrivate::requestResponseHandler(CommandType commandType, vo
             // Check and append to QML-side list if the (UIA) presentation has additional datainputs
             // that are not explicitly defined in QML code.
             auto receivedDI = response->at(i).value<Q3DSDataInput *>();
-            // For QML behind async command queue, we cache min/max values in addition
+            // For QML behind async command queue, we cache min/max and metadata values in addition
             // to name, in order to be able to return values initially set in UIA file (in QML
             // getters).
             if (!m_dataInputs.contains(receivedDI->name())) {
                 auto newDI = new Q3DSDataInput(receivedDI->name(), nullptr);
                 newDI->d_ptr->m_min = receivedDI->d_ptr->m_min;
                 newDI->d_ptr->m_max = receivedDI->d_ptr->m_max;
+                newDI->d_ptr->m_metadata = receivedDI->d_ptr->m_metadata;
                 registerDataInput(newDI);
             } else {
                 m_dataInputs[receivedDI->name()]->d_ptr->m_min = receivedDI->d_ptr->m_min;
                 m_dataInputs[receivedDI->name()]->d_ptr->m_max = receivedDI->d_ptr->m_max;
+                m_dataInputs[receivedDI->name()]->d_ptr->m_metadata = receivedDI->d_ptr->m_metadata;
             }
         }
         delete response;
@@ -1502,6 +1545,43 @@ float Q3DSPresentationPrivate::dataInputMax(const QString &name) const
             return 0.0f;
     }
     return m_viewerApp->dataInputMax(name);
+}
+
+QHash<QString, QString> Q3DSPresentationPrivate::dataInputMetadata(const QString &name) const
+{
+    // For QML instance separated from runtime engine by command queue,
+    // return locally cached value (initialised at presentation load).
+    if (!m_viewerApp) {
+        if (m_dataInputs.contains(name))
+            return m_dataInputs[name]->d_ptr->m_metadata;
+        else
+            return {};
+    }
+    return m_viewerApp->dataInputMetadata(name);
+}
+
+QVector<Q3DSDataInput *> Q3DSPresentationPrivate::dataInputs(const QString &key) const
+{
+    QVector<Q3DSDataInput *> ret;
+    // For QML instance separated from runtime engine by command queue,
+    // return locally cached value (initialised at presentation load).
+    if (!m_viewerApp) {
+        for (const auto &it : m_dataInputs) {
+            if (it->metadataKeys().contains(key))
+                ret.append(it);
+        }
+    } else {
+        // Otherwise, defer to viewer app.
+        const auto &diList = m_viewerApp->dataInputs();
+        // We fetch the metadata(s) from the source (viewer app) but
+        // return the corresponding datainput object(s) held by presentation item.
+        for (const auto &it : diList) {
+            if (m_viewerApp->dataInputMetadata(it).contains(key))
+                ret.append(m_dataInputs[it]);
+        }
+    }
+
+    return ret;
 }
 
 void Q3DSPresentationPrivate::registerDataOutput(Q3DSDataOutput *dataOutput)

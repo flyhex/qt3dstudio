@@ -86,6 +86,8 @@ public:
     bool isValidDataInput(const Q3DSDataInput *dataInput) const;
     float dataInputMin(const QString &name) const;
     float dataInputMax(const QString &name) const;
+    QHash<QString, QString> dataInputMetadata(const QString &name) const;
+    QVector<Q3DSDataInput *> dataInputs(const QString &key) const;
     bool isValidDataOutput(const Q3DSDataOutput *dataOutput) const;
 
     ViewerQmlStreamProxy *streamProxy();

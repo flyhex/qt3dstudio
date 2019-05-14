@@ -212,6 +212,7 @@ public:
     QList<QString> dataOutputs() const override;
     float dataInputMax(const QString &name) const override;
     float dataInputMin(const QString &name) const override;
+    QHash<QString, QString> dataInputMetadata(const QString &name) const override;
 
     void createElements(const QString &parentElementPath, const QString &slideName,
                         const QVector<QHash<QString, QVariant>> &properties) override;
@@ -635,6 +636,14 @@ float CRuntimeView::dataInputMin(const QString &name) const
         return m_Application->dataInputMin(name);
 
     return 0;
+}
+
+QHash<QString, QString> CRuntimeView::dataInputMetadata(const QString &name) const
+{
+    if (m_Application)
+        return m_Application->dataInputMetadata(name);
+
+    return {};
 }
 
 void CRuntimeView::createElements(const QString &parentElementPath, const QString &slideName,

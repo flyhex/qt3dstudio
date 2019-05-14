@@ -200,6 +200,7 @@ public:
     virtual QList<QString> dataOutputs() const = 0;
     virtual float dataInputMax(const QString &name) const = 0;
     virtual float dataInputMin(const QString &name) const = 0;
+    virtual QHash<QString, QString> dataInputMetadata(const QString &name) const = 0;
     virtual void createElements(const QString &parentElementPath, const QString &slideName,
                                 const QVector<QHash<QString, QVariant>> &properties) = 0;
     virtual void deleteElements(const QStringList &elementPaths) = 0;

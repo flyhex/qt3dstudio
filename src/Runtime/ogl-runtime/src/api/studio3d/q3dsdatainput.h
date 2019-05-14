@@ -68,6 +68,9 @@ public:
     float max() const;
     bool isValid() const;
 
+    Q_INVOKABLE QString metadata(const QString &key) const;
+    Q_INVOKABLE QStringList metadataKeys() const;
+
 public Q_SLOTS:
     void setName(const QString &name);
     void setValue(const QVariant &value);

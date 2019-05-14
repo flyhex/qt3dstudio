@@ -910,6 +910,14 @@ float Q3DSViewerApp::dataInputMin(const QString &name) const
     return m_Impl.m_view->dataInputMin(name);
 }
 
+QHash<QString, QString> Q3DSViewerApp::dataInputMetadata(const QString &name) const
+{
+    if (!m_Impl.m_view)
+        return {};
+
+    return m_Impl.m_view->dataInputMetadata(name);
+}
+
 void Q3DSViewerApp::createElements(const QString &parentElementPath, const QString &slideName,
                                    const QVector<QHash<QString, QVariant>> &properties)
 {
