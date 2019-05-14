@@ -286,6 +286,7 @@ bool Q3DSWidgetPrivate::initializeRuntime()
                                     q_ptr->context()->format(),
                                     q_ptr->defaultFramebufferObject(), localSource,
                                     m_presentation->variantList(),
+                                    m_presentation->delayedLoading(),
                                     m_presentation->d_ptr->streamProxy())) {
         releaseRuntime();
         qWarning("Failed to initialize runtime");

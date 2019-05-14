@@ -375,6 +375,7 @@ bool Q3DSSurfaceViewerPrivate::initializeRuntime()
                                     int(m_size.height() * m_pixelRatio),
                                     m_context->format(), m_fboId, localSource,
                                     m_presentation->variantList(),
+                                    m_presentation->delayedLoading(),
                                     m_presentation->d_ptr->streamProxy())) {
         releaseRuntime();
         qWarning("Failed to initialize runtime");
