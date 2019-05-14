@@ -75,6 +75,7 @@ protected:
     float m_min = 0;
 
     friend class Q3DSPresentationPrivate;
+    friend class Q3DSRenderer;
 };
 
 QT_END_NAMESPACE

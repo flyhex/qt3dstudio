@@ -672,14 +672,17 @@ void Q3DSPresentationPrivate::requestResponseHandler(CommandType commandType, vo
             // Check and append to QML-side list if the (UIA) presentation has additional datainputs
             // that are not explicitly defined in QML code.
             auto receivedDI = response->at(i).value<Q3DSDataInput *>();
+            // For QML behind async command queue, we cache min/max values in addition
+            // to name, in order to be able to return values initially set in UIA file (in QML
+            // getters).
             if (!m_dataInputs.contains(receivedDI->name())) {
-                // For QML behind async command queue, we cache min/max values in addition
-                // to name, in order to be able to return values initially set in UIA file (in QML
-                // setter/getters).
                 auto newDI = new Q3DSDataInput(receivedDI->name(), nullptr);
                 newDI->d_ptr->m_min = receivedDI->d_ptr->m_min;
                 newDI->d_ptr->m_max = receivedDI->d_ptr->m_max;
                 registerDataInput(newDI);
+            } else {
+                m_dataInputs[receivedDI->name()]->d_ptr->m_min = receivedDI->d_ptr->m_min;
+                m_dataInputs[receivedDI->name()]->d_ptr->m_max = receivedDI->d_ptr->m_max;
             }
         }
         delete response;

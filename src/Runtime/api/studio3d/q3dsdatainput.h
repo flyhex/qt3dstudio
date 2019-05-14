@@ -46,8 +46,8 @@ class Q_STUDIO3D_EXPORT Q3DSDataInput : public QObject
 
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     Q_PROPERTY(QVariant value READ value WRITE setValue NOTIFY valueChanged)
-    Q_PROPERTY(float max READ max WRITE setMax NOTIFY maxChanged)
-    Q_PROPERTY(float min READ min WRITE setMin NOTIFY minChanged)
+    Q_PROPERTY(float max READ max CONSTANT)
+    Q_PROPERTY(float min READ min CONSTANT)
 public:
     explicit Q3DSDataInput(QObject *parent = nullptr);
     explicit Q3DSDataInput(const QString &name, QObject *parent = nullptr);
@@ -71,14 +71,10 @@ public:
 public Q_SLOTS:
     void setName(const QString &name);
     void setValue(const QVariant &value);
-    void setMin(float min);
-    void setMax(float max);
 
 Q_SIGNALS:
     void nameChanged();
     void valueChanged();
-    void minChanged();
-    void maxChanged();
 
 protected:
     explicit Q3DSDataInput(Q3DSDataInputPrivate *d, Q3DSPresentation *presentation,
@@ -88,6 +84,7 @@ protected:
 private:
     Q_DISABLE_COPY(Q3DSDataInput)
     friend class Q3DSPresentationPrivate;
+    friend class Q3DSRenderer;
 };
 
 QT_END_NAMESPACE

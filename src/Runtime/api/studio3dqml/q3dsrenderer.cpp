@@ -37,6 +37,7 @@
 #include <QtStudio3D/private/q3dsviewersettings_p.h>
 #include <QtStudio3D/private/q3dspresentation_p.h>
 #include <QtStudio3D/private/studioutils_p.h>
+#include <QtStudio3D/private/q3dsdatainput_p.h>
 
 #include <QtCore/qdebug.h>
 #include <QtGui/qwindow.h>
@@ -413,11 +414,16 @@ void Q3DSRenderer::processCommands()
         }
         case CommandType_RequestDataInputs: {
             QVariantList *requestData = new QVariantList();
-            if (m_presentation) {
-                const auto diList = m_presentation->dataInputs();
+            if (m_runtime) {
+                const auto diList = m_runtime->dataInputs();
 
-                for (const auto &it : diList)
-                    requestData->append(QVariant::fromValue(it));
+                for (const auto &it : diList) {
+                    Q3DSDataInput *newIt = new Q3DSDataInput(it, nullptr);
+                    newIt->d_ptr->m_max = m_runtime->dataInputMax(it);
+                    newIt->d_ptr->m_min = m_runtime->dataInputMin(it);
+
+                    requestData->append(QVariant::fromValue(newIt));
+                }
             }
 
             Q_EMIT requestResponse(cmd.m_elementPath, cmd.m_commandType, requestData);

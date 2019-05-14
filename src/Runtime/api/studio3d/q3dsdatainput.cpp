@@ -118,26 +118,6 @@ bool Q3DSDataInput::isValid() const
         return false;
 }
 
-void Q3DSDataInput::setMin(float min)
-{
-    if (!d_ptr->m_presentation)
-        return;
-
-    d_ptr->m_presentation->setDataInputValue(d_ptr->m_name, min, ValueRole::Min);
-    d_ptr->m_min = min;
-    emit minChanged();
-}
-
-void Q3DSDataInput::setMax(float max)
-{
-    if (!d_ptr->m_presentation)
-        return;
-
-    d_ptr->m_presentation->setDataInputValue(d_ptr->m_name, max, ValueRole::Max);
-    d_ptr->m_max = max;
-    emit maxChanged();
-}
-
 void Q3DSDataInput::setValue(const QVariant &value)
 {
     // Since properties controlled by data inputs can change without the current value being
