@@ -45,7 +45,7 @@ Project palette using Import functionality.</string>
      <x>0</x>
      <y>0</y>
      <width>1800</width>
-     <height>22</height>
+     <height>17</height>
     </rect>
    </property>
    <property name="focusPolicy">
@@ -79,6 +79,7 @@ Project palette using Import functionality.</string>
     <addaction name="separator"/>
     <addaction name="actionImportAssets"/>
     <addaction name="actionData_Inputs"/>
+    <addaction name="actionData_InputsGenerate"/>
     <addaction name="separator"/>
     <addaction name="action_Exit"/>
    </widget>
@@ -1089,6 +1090,14 @@ Project palette using Import functionality.</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+F</string>
+   </property>
+  </action>
+  <action name="actionData_InputsGenerate">
+   <property name="text">
+    <string>Copy QML code for DataInputs/Outputs</string>
+   </property>
+   <property name="toolTip">
+    <string>Copy QML code for DataInput and DataOutput elements to clipboard</string>
    </property>
   </action>
  </widget>

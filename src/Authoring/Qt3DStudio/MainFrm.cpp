@@ -53,6 +53,7 @@
 #include "SlideView.h"
 #include "FilterVariantsDlg.h"
 #include "PreviewHelper.h"
+#include "StudioClipboard.h"
 
 #include <QtGui/qevent.h>
 #include <QtGui/qdesktopservices.h>
@@ -98,6 +99,8 @@ CMainFrame::CMainFrame()
     connect(m_ui->action_Revert, &QAction::triggered, this, &CMainFrame::OnFileRevert);
     connect(m_ui->actionImportAssets, &QAction::triggered, this, &CMainFrame::OnFileImportAssets);
     connect(m_ui->actionData_Inputs, &QAction::triggered, this, &CMainFrame::OnFileDataInputs);
+    connect(m_ui->actionData_InputsGenerate, &QAction::triggered, this,
+            &CMainFrame::OnFileGenerateDataInputCode);
     connect(m_ui->action_Connect_to_Device, &QAction::triggered, this,
             &CMainFrame::OnFileConnectToDevice);
     m_recentItems.reset(new CRecentItems(m_ui->menuRecent_Projects));
@@ -378,7 +381,7 @@ void CMainFrame::OnCreate()
     m_ui->actionRemote_Preview->setEnabled(false);
     m_ui->action_New_Presentation->setEnabled(false);
     m_ui->actionData_Inputs->setEnabled(false);
-
+    m_ui->actionData_InputsGenerate->setEnabled(false);
 #if 1 // TODO: Hidden until UX decision is made if these buttons are needed at all or not
     m_ui->actionPan_Tool->setVisible(false);
     m_ui->actionOrbit_Tool->setVisible(false);
@@ -417,6 +420,7 @@ void CMainFrame::OnNewPresentation()
     m_ui->actionImportAssets->setEnabled(true);
     m_ui->action_New_Presentation->setEnabled(true);
     m_ui->actionData_Inputs->setEnabled(true);
+    m_ui->actionData_InputsGenerate->setEnabled(true);
 
     // Clear data input list and sub-presentation list
     g_StudioApp.m_subpresentations.clear();
@@ -813,6 +817,28 @@ void CMainFrame::OnFileDataInputs()
 
     if (dataInputDlg.result() == QDialog::Accepted)
         g_StudioApp.saveDataInputsToProjectFile();
+}
+
+/**
+ * Generates QML declarations for datainputs and outputs in this
+ * project and copies them to clipboard.
+ */
+void CMainFrame::OnFileGenerateDataInputCode()
+{
+    QString out;
+
+    for (const auto &it : qAsConst(g_StudioApp.m_dataInputDialogItems)) {
+        out.append(QStringLiteral("DataInput {\n"));
+        out.append(QStringLiteral("    name: \"") + it->name + QStringLiteral("\"\n"));
+        out.append(QStringLiteral("}\n"));
+        // TODO QT3DS-3510 - each datainput also generates dataoutput section, as this is how
+        // dataoutputs behave now in runtime.
+        out.append(QStringLiteral("DataOutput {\n"));
+        out.append(QStringLiteral("    name: \"") + it->name + QStringLiteral("\"\n"));
+        out.append(QStringLiteral("}\n"));
+    }
+
+    CStudioClipboard::CopyTextToClipboard(out);
 }
 
 /**

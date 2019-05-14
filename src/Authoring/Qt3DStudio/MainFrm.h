@@ -105,6 +105,8 @@ public:
     void OnFileImportAssets();
     void OnFileConnectToDevice();
     void OnFileOpenRecent(int nID);
+    void OnFileDataInputs();
+    void OnFileGenerateDataInputCode();
 
     void OnEditRedo();
     void OnEditUndo();
@@ -136,7 +138,6 @@ public:
     void OnUpdateToolAutosetkeys();
     void OnEditApplicationPreferences();
     void OnEditPresentationPreferences();
-    void OnFileDataInputs();
     void OnPlaybackPlay();
     void OnUpdatePlaybackPlay();
     void OnPlaybackRewind();
