@@ -61,6 +61,7 @@ Q_SIGNALS:
     void exitSlide(const QString &elementPath, unsigned int slide, const QString &slideName);
     void requestResponse(const QString &elementPath, CommandType commandType, void *requestData);
     void presentationReady();
+    void presentationLoaded();
     void customSignalEmitted(const QString &elNmentPath, const QString &name);
     void elementCreated(const QString &elementName, const QString &error);
     void materialCreated(const QString &name, const QString &error);

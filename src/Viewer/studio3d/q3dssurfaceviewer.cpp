@@ -361,8 +361,9 @@ bool Q3DSSurfaceViewerPrivate::initializeRuntime()
 
     m_viewerApp = &Q3DSViewerApp::Create(m_context, new Qt3DSAudioPlayerImpl(), &m_startupTimer);
     connect(m_viewerApp, &Q3DSViewerApp::SigPresentationReady,
+            this->q_ptr, &Q3DSSurfaceViewer::presentationReady);
+    connect(m_viewerApp, &Q3DSViewerApp::SigPresentationLoaded,
             this->q_ptr, &Q3DSSurfaceViewer::presentationLoaded);
-
     Q_ASSERT(m_viewerApp);
 
     const QString localSource = Q3DSUtils::urlToLocalFileOrQrc(m_presentation->source());

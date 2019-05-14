@@ -202,6 +202,12 @@ void CPresentation::EndUpdate()
         // Animation Track Evaluation Stage
         m_AnimationSystem->Update();
     }
+    // Presentation is considered ready to accept external commands when the first frame property
+    // updates are done.
+    if (!m_presentationReady) {
+        m_SignalProxy.SigPresentationReady();
+        m_presentationReady = true;
+    }
 }
 
 void CPresentation::PostUpdate(const TTimeUnit inGlobalTime)

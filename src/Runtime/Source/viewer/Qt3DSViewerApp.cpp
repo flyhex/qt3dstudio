@@ -361,10 +361,18 @@ bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFor
                 &Q3DSViewerApp::SigElementCreated);
         connect(m_Impl.m_view->signalProxy(), &QRuntimeViewSignalProxy::SigMaterialCreated, this,
                 &Q3DSViewerApp::SigMaterialCreated);
-
+        QMetaObject::Connection *presReadyconn = new QMetaObject::Connection();
+        *presReadyconn = connect(m_Impl.m_view->signalProxy(),
+                                 &QRuntimeViewSignalProxy::SigPresentationReady, [&, presReadyconn]{
+            // We receive presentation ready signal from runtime when animations and properties
+            // have been updated.
+            Q_EMIT SigPresentationReady();
+            disconnect(*presReadyconn);
+            delete presReadyconn;
+        });
         Resize(winWidth, winHeight);
 
-        Q_EMIT SigPresentationReady();
+        Q_EMIT SigPresentationLoaded();
     }
     return true;
 }

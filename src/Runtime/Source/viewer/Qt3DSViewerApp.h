@@ -394,6 +394,7 @@ private:
 private:
     Q3DSViewerAppImpl &m_Impl;
     QElapsedTimer *m_startupTimer;
+    bool m_presentationReady = false;
 
 public:
     static Q3DSViewerApp &Create(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer = nullptr,
@@ -407,6 +408,7 @@ Q_SIGNALS:
     void SigElementCreated(const QString &elementName, const QString &error);
     void SigMaterialCreated(const QString &name, const QString &error);
     void SigPresentationReady();
+    void SigPresentationLoaded();
 };
 
 } // end namespace

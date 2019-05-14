@@ -50,6 +50,7 @@ Q_SIGNALS:
     void SigSlideEntered(const QString &elementPath, unsigned int index, const QString &name);
     void SigSlideExited(const QString &elementPath, unsigned int index, const QString &name);
     void SigCustomSignal(const QString &elementPath, const QString &name);
+    void SigPresentationReady();
     void SigElementCreated(const QString &elementName, const QString &error);
     void SigMaterialCreated(const QString &name, const QString &error);
 };
@@ -108,6 +109,7 @@ protected:
     bool m_Paused;
     bool m_OffsetInvalid;
     bool m_Active;
+    bool m_presentationReady = false;
 
     typedef eastl::hash_map<TElement *, qt3ds::foundation::CRegisteredString> TElemStringMap;
     TElemStringMap m_ElementPathMap;
