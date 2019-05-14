@@ -75,7 +75,7 @@ private:
     Q_DISABLE_COPY(Q3DSSceneElement)
 
     friend class Q3DSPresentationPrivate;
-    friend class Q3DSView;
+    friend class Q3DSStudio3D;
 };
 
 QT_END_NAMESPACE

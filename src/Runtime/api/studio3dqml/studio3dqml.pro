@@ -1,4 +1,4 @@
-include($$PWD/../../Runtime/commoninclude.pri)
+include($$PWD/../../commoninclude.pri)
 
 QT += qml quick opengl studio3d-private
 CONFIG += plugin
@@ -13,15 +13,15 @@ TARGETPATH = QtStudio3D/OpenGL
 IMPORT_VERSION = 2.4
 
 SOURCES += \
-    Qt3DSViewPlugin.cpp \
-    Qt3DSView.cpp \
-    Qt3DSRenderer.cpp \
+    q3dsplugin.cpp \
+    q3dsstudio3d.cpp \
+    q3dsrenderer.cpp \
     q3dspresentationitem.cpp
 
 HEADERS += \
-    Qt3DSViewPlugin.h \
-    Qt3DSView.h \
-    Qt3DSRenderer.h \
+    q3dsplugin.h \
+    q3dsstudio3d.h \
+    q3dsrenderer.h \
     q3dspresentationitem.h
 
 LIBS += \

@@ -124,7 +124,7 @@ private:
     friend class Q3DSSurfaceViewerPrivate;
     friend class Q3DSWidgetPrivate;
     friend class Q3DSRenderer;
-    friend class Q3DSView;
+    friend class Q3DSStudio3D;
     friend class Q3DSDataInput;
 };
 

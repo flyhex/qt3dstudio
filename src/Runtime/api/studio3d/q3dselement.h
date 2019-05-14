@@ -1,6 +1,5 @@
 /****************************************************************************
 **
-** Copyright (c) 2016 NVIDIA CORPORATION.
 ** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
@@ -28,33 +27,53 @@
 **
 ****************************************************************************/
 
-#ifndef Q3DSVIEW_PLUGIN_H
-#define Q3DSVIEW_PLUGIN_H
+#ifndef Q3DSELEMENT_H
+#define Q3DSELEMENT_H
 
-#include <QtQml/qqmlextensionplugin.h>
-
-static void initResources()
-{
-#ifdef QT_STATIC
-    Q_INIT_RESOURCE(qmake_QtStudio3D);
-#endif
-}
+#include <QtStudio3D/qstudio3dglobal.h>
+#include <QtCore/qobject.h>
 
 QT_BEGIN_NAMESPACE
 
-class Q3DSViewPlugin : public QQmlExtensionPlugin
+class Q3DSElementPrivate;
+class Q3DSPresentation;
+
+class Q_STUDIO3D_EXPORT Q3DSElement : public QObject
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
+    Q_DECLARE_PRIVATE(Q3DSElement)
+
+    Q_PROPERTY(QString elementPath READ elementPath WRITE setElementPath NOTIFY elementPathChanged)
 
 public:
-    Q3DSViewPlugin(QObject *parent = 0) : QQmlExtensionPlugin(parent)
-    {
-        initResources();
-    }
-    void registerTypes(const char *uri) override;
+    explicit Q3DSElement(QObject *parent = nullptr);
+    explicit Q3DSElement(const QString &elementPath, QObject *parent = nullptr);
+    explicit Q3DSElement(Q3DSPresentation *presentation, const QString &elementPath,
+                         QObject *parent = nullptr);
+    virtual ~Q3DSElement();
+
+    QString elementPath() const;
+
+public Q_SLOTS:
+    void setElementPath(const QString &elementPath);
+    void setAttribute(const QString &attributeName, const QVariant &value);
+    void fireEvent(const QString &eventName);
+
+Q_SIGNALS:
+    void elementPathChanged(const QString &elementPath);
+
+protected:
+    explicit Q3DSElement(Q3DSElementPrivate *d, Q3DSPresentation *presentation,
+                         const QString &elementPath, QObject *parent = nullptr);
+    Q3DSElementPrivate *d_ptr;
+
+private:
+    Q_DISABLE_COPY(Q3DSElement)
+
+    friend class Q3DSPresentationPrivate;
+    friend class Q3DSStudio3D;
 };
 
 QT_END_NAMESPACE
 
-#endif // Q3DSVIEW_PLUGIN_H
+#endif // Q3DSELEMENT_H

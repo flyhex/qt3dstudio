@@ -28,13 +28,13 @@
 **
 ****************************************************************************/
 
-#include "Qt3DSViewPlugin.h"
+#include "q3dsplugin.h"
 
 #include <QtQml/qqml.h>
 
 #include <QtStudio3D/private/q3dsviewersettings_p.h>
 
-#include "Qt3DSView.h"
+#include "q3dsstudio3d.h"
 #include "q3dspresentationitem.h"
 #include "q3dsqmlstream.h"
 #include "q3dsqmlsubpresentationsettings.h"
@@ -43,12 +43,12 @@
 
 QT_BEGIN_NAMESPACE
 
-void Q3DSViewPlugin::registerTypes(const char *uri)
+void Q3DSPlugin::registerTypes(const char *uri)
 {
     Q_ASSERT(uri == QLatin1String("QtStudio3D.OpenGL"));
 
     // @uri QtStudio3D.OpenGL
-    qmlRegisterType<Q3DSView>(uri, 2, 4, "Studio3D");
+    qmlRegisterType<Q3DSStudio3D>(uri, 2, 4, "Studio3D");
     qmlRegisterType<Q3DSViewerSettings>(uri, 2, 4, "ViewerSettings");
     qmlRegisterType<Q3DSPresentationItem>(uri, 2, 4, "Presentation");
     qmlRegisterType<Q3DSSceneElement>(uri, 2, 4, "SceneElement");

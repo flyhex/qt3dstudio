@@ -28,9 +28,8 @@
 **
 ****************************************************************************/
 
-#ifndef Q3DS_VIEW_H
-#define Q3DS_VIEW_H
-
+#ifndef Q3DS_STUDIO3D_H
+#define Q3DS_STUDIO3D_H
 
 #include <QtStudio3D/private/q3dscommandqueue_p.h>
 #include <QtGui/qopenglframebufferobject.h>
@@ -42,7 +41,7 @@ class Q3DSRenderer;
 class Q3DSViewerSettings;
 class Q3DSPresentationItem;
 
-class Q3DSView : public QQuickFramebufferObject
+class Q3DSStudio3D : public QQuickFramebufferObject
 {
     Q_OBJECT
     Q_PROPERTY(bool running READ isRunning NOTIFY runningChanged)
@@ -51,8 +50,8 @@ class Q3DSView : public QQuickFramebufferObject
     Q_PROPERTY(QString error READ error NOTIFY errorChanged)
 
 public:
-    Q3DSView();
-    virtual ~Q3DSView();
+    Q3DSStudio3D();
+    virtual ~Q3DSStudio3D();
 
     QQuickFramebufferObject::Renderer *createRenderer() const override;
 
@@ -109,4 +108,4 @@ protected:
 
 QT_END_NAMESPACE
 
-#endif // Q3DS_VIEW_H
+#endif // Q3DS_STUDIO3D_H

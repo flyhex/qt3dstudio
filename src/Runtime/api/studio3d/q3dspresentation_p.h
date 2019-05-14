@@ -103,6 +103,8 @@ private:
     QStringList m_variantList;
     ViewerQmlStreamProxy *m_streamProxy;
     bool m_delayedLoading;
+
+    friend class Q3DSStudio3D;
 };
 
 QT_END_NAMESPACE

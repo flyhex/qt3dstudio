@@ -36,7 +36,7 @@
 #include <QtCore/qurl.h>
 #include <QtCore/qtimer.h>
 #include <QtGui/qwindow.h>
-#include "Qt3DSView.h"
+#include "q3dsstudio3d.h"
 
 class Viewer : public QObject
 {
@@ -111,7 +111,7 @@ Q_SIGNALS:
     void showInfoOverlay(const QString &infoStr);
 
 private:
-    Q3DSView *qmlStudio();
+    Q3DSStudio3D *qmlStudio();
 
     QString m_openFileDir;
     QStringList m_variantList;
@@ -121,7 +121,7 @@ private:
     QObject *m_qmlRootObject = nullptr;
     int m_connectPort = -1;
     QString m_connectText;
-    Q3DSView *m_qmlStudio = nullptr;
+    Q3DSStudio3D *m_qmlStudio = nullptr;
     QTimer m_connectTextResetTimer;
 };
 

@@ -67,7 +67,6 @@ macos {
     QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/
 }
 
-
 PREDEPS_LIBS = qt3dsruntimestatic
 
 include(../../utils.pri)

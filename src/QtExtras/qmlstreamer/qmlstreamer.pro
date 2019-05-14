@@ -43,8 +43,8 @@ HEADERS += \
     q3dsqmlsubpresentationsettings.h
 
 INCLUDEPATH += \
-    $$PWD/../Runtime/Source/Engine/Include \
-    $$PWD/../Runtime/Source/System/Include \
+    $$PWD/../Runtime/Source/engine \
+    $$PWD/../Runtime/Source/system \
     $$PWD/../QtExtras/qmlstreamer
 
 macos:QMAKE_LFLAGS_SONAME = -Wl,-install_name,@rpath/

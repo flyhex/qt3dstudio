@@ -28,8 +28,8 @@
 **
 ****************************************************************************/
 
-#include "Qt3DSView.h"
-#include "Qt3DSRenderer.h"
+#include "q3dsstudio3d.h"
+#include "q3dsrenderer.h"
 #include "q3dspresentationitem.h"
 
 #include <QtStudio3D/private/q3dsviewersettings_p.h>
@@ -43,7 +43,7 @@
 
 QT_BEGIN_NAMESPACE
 
-Q3DSView::Q3DSView()
+Q3DSStudio3D::Q3DSStudio3D()
     : m_viewerSettings(nullptr)
     , m_presentation(nullptr)
     , m_emitRunningChange(false)
@@ -54,32 +54,32 @@ Q3DSView::Q3DSView()
     , m_pixelRatio(1.0)
 {
     setMirrorVertically(true);
-    connect(this, &Q3DSView::windowChanged, this, &Q3DSView::handleWindowChanged);
-    connect(this, &Q3DSView::visibleChanged, this, &Q3DSView::handleVisibleChanged);
+    connect(this, &Q3DSStudio3D::windowChanged, this, &Q3DSStudio3D::handleWindowChanged);
+    connect(this, &Q3DSStudio3D::visibleChanged, this, &Q3DSStudio3D::handleVisibleChanged);
 
     setIgnoreEvents(false, false, false);
 }
 
-Q3DSView::~Q3DSView()
+Q3DSStudio3D::~Q3DSStudio3D()
 {
 }
 
-Q3DSPresentationItem *Q3DSView::presentation() const
+Q3DSPresentationItem *Q3DSStudio3D::presentation() const
 {
     return m_presentation;
 }
 
-Q3DSViewerSettings *Q3DSView::viewerSettings() const
+Q3DSViewerSettings *Q3DSStudio3D::viewerSettings() const
 {
     return m_viewerSettings;
 }
 
-QString Q3DSView::error() const
+QString Q3DSStudio3D::error() const
 {
     return m_error;
 }
 
-void Q3DSView::setError(const QString &error)
+void Q3DSStudio3D::setError(const QString &error)
 {
     if (error != m_error) {
         m_error = error;
@@ -87,7 +87,7 @@ void Q3DSView::setError(const QString &error)
     }
 }
 
-void Q3DSView::setIgnoreEvents(bool mouse, bool wheel, bool keyboard)
+void Q3DSStudio3D::setIgnoreEvents(bool mouse, bool wheel, bool keyboard)
 {
     // TODO: It might be beneficial to have these as properties so they could be acceessed from QML
     m_ignoreMouseEvents = mouse;
@@ -101,7 +101,7 @@ void Q3DSView::setIgnoreEvents(bool mouse, bool wheel, bool keyboard)
     setAcceptHoverEvents(!mouse);
 }
 
-void Q3DSView::componentComplete()
+void Q3DSStudio3D::componentComplete()
 {
     const auto childObjs = children();
     for (QObject *child : childObjs) {
@@ -134,7 +134,7 @@ void Q3DSView::componentComplete()
     QQuickFramebufferObject::componentComplete();
 }
 
-void Q3DSView::handleWindowChanged(QQuickWindow *window)
+void Q3DSStudio3D::handleWindowChanged(QQuickWindow *window)
 {
     if (!window)
         return;
@@ -143,19 +143,19 @@ void Q3DSView::handleWindowChanged(QQuickWindow *window)
     m_pixelRatio = window->devicePixelRatio();
 
     // Call tick every frame of the GUI thread to notify QML about new frame via frameUpdate signal
-    connect(window, &QQuickWindow::afterAnimating, this, &Q3DSView::tick);
+    connect(window, &QQuickWindow::afterAnimating, this, &Q3DSStudio3D::tick);
     // Call update after the frame is handled to queue another frame
-    connect(window, &QQuickWindow::afterSynchronizing, this, &Q3DSView::update);
+    connect(window, &QQuickWindow::afterSynchronizing, this, &Q3DSStudio3D::update);
 }
 
 // Queue up a command to inform the renderer of a newly-changed visible/hidden status.
-void Q3DSView::handleVisibleChanged()
+void Q3DSStudio3D::handleVisibleChanged()
 {
     m_pendingCommands.m_visibleChanged = true;
     m_pendingCommands.m_visible = isVisible();
 }
 
-void Q3DSView::reset()
+void Q3DSStudio3D::reset()
 {
     // Fake a source change to trigger a reloading of the presentation
     m_pendingCommands.m_sourceChanged = true;
@@ -164,7 +164,7 @@ void Q3DSView::reset()
     m_pendingCommands.m_variantList = m_presentation->variantList();
 }
 
-void Q3DSView::requestResponseHandler(const QString &elementPath, CommandType commandType,
+void Q3DSStudio3D::requestResponseHandler(const QString &elementPath, CommandType commandType,
                                       void *requestData)
 {
     switch (commandType) {
@@ -194,7 +194,7 @@ void Q3DSView::requestResponseHandler(const QString &elementPath, CommandType co
 }
 
 // Create the Q3DSRenderer. Invoked automatically by the QML scene graph.
-QQuickFramebufferObject::Renderer *Q3DSView::createRenderer() const
+QQuickFramebufferObject::Renderer *Q3DSStudio3D::createRenderer() const
 {
     // It is "illegal" to create a connection between the renderer
     // and the plugin, and vice-versa. The only valid time the two
@@ -212,15 +212,15 @@ QQuickFramebufferObject::Renderer *Q3DSView::createRenderer() const
     connect(renderer, &Q3DSRenderer::materialCreated,
             m_presentation, &Q3DSPresentation::materialCreated);
     connect(renderer, &Q3DSRenderer::requestResponse,
-            this, &Q3DSView::requestResponseHandler);
+            this, &Q3DSStudio3D::requestResponseHandler);
     connect(renderer, &Q3DSRenderer::presentationLoaded,
-            this, &Q3DSView::presentationLoaded);
+            this, &Q3DSStudio3D::presentationLoaded);
     connect(renderer, &Q3DSRenderer::presentationReady,
-            this, &Q3DSView::presentationReady);
+            this, &Q3DSStudio3D::presentationReady);
     return renderer;
 }
 
-bool Q3DSView::isRunning() const
+bool Q3DSStudio3D::isRunning() const
 {
     return m_isRunning;
 }
@@ -238,7 +238,7 @@ bool Q3DSView::isRunning() const
  *          ...
  *      }
  */
-void Q3DSView::tick()
+void Q3DSStudio3D::tick()
 {
     if (m_emitRunningChange) {
         m_isRunning = true;
@@ -254,7 +254,7 @@ void Q3DSView::tick()
 }
 
 // Copies the list of commands previously queued up. Called by Q3DSRenderer::synchronize().
-void Q3DSView::getCommands(bool emitInitialize, CommandQueue &renderQueue)
+void Q3DSStudio3D::getCommands(bool emitInitialize, CommandQueue &renderQueue)
 {
     if (emitInitialize)
         m_emitRunningChange = true;
@@ -263,7 +263,7 @@ void Q3DSView::getCommands(bool emitInitialize, CommandQueue &renderQueue)
     m_pendingCommands.clear(false);
 }
 
-void Q3DSView::mousePressEvent(QMouseEvent *event)
+void Q3DSStudio3D::mousePressEvent(QMouseEvent *event)
 {
     if (!m_ignoreMouseEvents) {
         if (m_pixelRatio != 1.0) {
@@ -276,7 +276,7 @@ void Q3DSView::mousePressEvent(QMouseEvent *event)
     }
 }
 
-void Q3DSView::mouseReleaseEvent(QMouseEvent *event)
+void Q3DSStudio3D::mouseReleaseEvent(QMouseEvent *event)
 {
     if (!m_ignoreMouseEvents) {
         if (m_pixelRatio != 1.0) {
@@ -289,7 +289,7 @@ void Q3DSView::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-void Q3DSView::mouseMoveEvent(QMouseEvent *event)
+void Q3DSStudio3D::mouseMoveEvent(QMouseEvent *event)
 {
     if (!m_ignoreMouseEvents) {
         if (m_pixelRatio != 1.0) {
@@ -302,20 +302,20 @@ void Q3DSView::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
-void Q3DSView::wheelEvent(QWheelEvent *event)
+void Q3DSStudio3D::wheelEvent(QWheelEvent *event)
 {
     if (!m_ignoreWheelEvents)
         m_presentation->wheelEvent(event);
 }
 
-void Q3DSView::keyPressEvent(QKeyEvent *event)
+void Q3DSStudio3D::keyPressEvent(QKeyEvent *event)
 {
     if (m_ignoreKeyboardEvents)
         return;
     m_presentation->keyPressEvent(event);
 }
 
-void Q3DSView::keyReleaseEvent(QKeyEvent *event)
+void Q3DSStudio3D::keyReleaseEvent(QKeyEvent *event)
 {
     if (m_ignoreKeyboardEvents)
         return;

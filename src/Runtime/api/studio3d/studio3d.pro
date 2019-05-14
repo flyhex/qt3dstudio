@@ -1,3 +1,18 @@
+TARGET = QtStudio3D
+
+include($$PWD/../../commoninclude.pri)
+QT += opengl widgets qml
+
+qtHaveModule(multimedia) {
+DEFINES += PLATFORM_HAS_QT_MULTIMEDIA_LIB
+QT += multimedia
+}
+CONFIG += console
+
+LIBS += \
+    -lqt3dsopengl$$qtPlatformTargetSuffix() \
+    -lqt3dsqmlstreamer$$qtPlatformTargetSuffix()
+
 HEADERS += \
     q3dswidget.h \
     q3dswidget_p.h \
@@ -33,6 +48,6 @@ SOURCES += q3dswidget.cpp \
            q3dsimagesequencegeneratorthread.cpp \
            q3dsdatainput.cpp
 
-macos {
-INCLUDEPATH += $$PWD/../../Runtime/SDKsAndTools/nvap_sdk/libs/inc
-}
+load(qt_module)
+
+OTHER_FILES += $$PWD/../../../doc/src/12-cpp-reference/*

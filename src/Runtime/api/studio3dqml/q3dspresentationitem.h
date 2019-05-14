@@ -57,6 +57,8 @@ public Q_SLOTS:
 
 private:
     Q3DSSubPresentationSettings *m_subPresentationSettings;
+
+    friend class Q3DSStudio3D;
 };
 
 QT_END_NAMESPACE

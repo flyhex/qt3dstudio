@@ -28,7 +28,7 @@
 **
 ****************************************************************************/
 
-#include "Qt3DSRenderer.h"
+#include "q3dsrenderer.h"
 #include "Qt3DSViewerApp.h"
 #include "Qt3DSAudioPlayerImpl.h"
 #include "q3dspresentationitem.h"
@@ -80,15 +80,15 @@ QOpenGLFramebufferObject *Q3DSRenderer::createFramebufferObject(const QSize &siz
 /** Pull pending commands from the plugin.
  *  Invoked automatically by the QML scene graph.
  *
- *  This is the only place where it is valid for the Q3DSView plugin and render to communicate.
+ *  This is the only place where it is valid for the Q3DSStudio3D plugin and render to communicate.
  */
 void Q3DSRenderer::synchronize(QQuickFramebufferObject *inView)
 {
     // Passing m_InitElements here is a bit of a hack to easily set the flag on the plugin.
-    static_cast<Q3DSView *>(inView)->getCommands(m_initElements, m_commands);
+    static_cast<Q3DSStudio3D *>(inView)->getCommands(m_initElements, m_commands);
 
     if (m_initializationFailure)
-        static_cast<Q3DSView *>(inView)->setError(m_error);
+        static_cast<Q3DSStudio3D *>(inView)->setError(m_error);
 
     if (m_commands.m_sourceChanged || m_commands.m_variantListChanged) {
         releaseRuntime();
@@ -100,7 +100,7 @@ void Q3DSRenderer::synchronize(QQuickFramebufferObject *inView)
         m_initialized = false;
         m_initializationFailure = false;
         m_error.clear();
-        static_cast<Q3DSView *>(inView)->setError(QString());
+        static_cast<Q3DSStudio3D *>(inView)->setError(QString());
     }
 
     m_initElements = false;

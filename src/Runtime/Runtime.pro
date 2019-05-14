@@ -2,7 +2,8 @@ TEMPLATE = subdirs
 CONFIG += ordered
 SUBDIRS += \
     Qt3DSRuntimeStatic \
-    Qt3DSRuntime
+    Qt3DSRuntime \
+    api
 
 win32 {
 SUBDIRS += \

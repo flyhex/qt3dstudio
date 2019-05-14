@@ -356,12 +356,12 @@ void Viewer::resetConnectionInfoText()
     Q_EMIT connectTextChanged();
 }
 
-Q3DSView *Viewer::qmlStudio()
+Q3DSStudio3D *Viewer::qmlStudio()
 {
     if (m_contentView == StudioView) {
         if (!m_qmlStudio) {
             QObject *loadedContent = m_qmlRootObject->property("loadedContent").value<QObject *>();
-            m_qmlStudio = static_cast<Q3DSView *>(loadedContent);
+            m_qmlStudio = static_cast<Q3DSStudio3D *>(loadedContent);
         }
     } else {
         m_qmlStudio = nullptr;

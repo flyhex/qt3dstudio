@@ -35,7 +35,7 @@
 #include <QtQuick/qquickframebufferobject.h>
 
 #include "Qt3DSViewerApp.h"
-#include "Qt3DSView.h"
+#include "q3dsstudio3d.h"
 
 QT_BEGIN_NAMESPACE
 

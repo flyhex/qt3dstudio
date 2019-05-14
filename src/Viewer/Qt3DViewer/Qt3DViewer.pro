@@ -4,7 +4,8 @@ TEMPLATE = app
 TARGET = Qt3DViewer
 QT += qml quickcontrols2 studio3d-private
 
-INCLUDEPATH += $$PWD/../qmlviewer
+INCLUDEPATH += $$PWD/../../Runtime/api/studio3dqml
+INCLUDEPATH += $$PWD/../../Runtime/api/studio3d
 
 RESOURCES += Viewer.qrc
 RC_ICONS = resources/images/3D-studio-viewer.ico
@@ -12,30 +13,30 @@ RC_ICONS = resources/images/3D-studio-viewer.ico
 ICON = resources/images/viewer.icns
 
 SOURCES += \
-    $$PWD/../qmlviewer/Qt3DSView.cpp \
-    $$PWD/../qmlviewer/Qt3DSRenderer.cpp \
-    $$PWD/../qmlviewer/q3dspresentationitem.cpp \
+    $$PWD/../../Runtime/api/studio3dqml/q3dsstudio3d.cpp \
+    $$PWD/../../Runtime/api/studio3dqml/q3dsrenderer.cpp \
+    $$PWD/../../Runtime/api/studio3dqml/q3dspresentationitem.cpp \
     main.cpp \
     viewer.cpp \
     remotedeploymentreceiver.cpp
 
 HEADERS += \
-    $$PWD/../qmlviewer/Qt3DSView.h \
-    $$PWD/../qmlviewer/Qt3DSRenderer.h \
-    $$PWD/../qmlviewer/q3dspresentationitem.h \
+    $$PWD/../../Runtime/api/studio3dqml/q3dsstudio3d.h \
+    $$PWD/../../Runtime/api/studio3dqml/q3dsrenderer.h \
+    $$PWD/../../Runtime/api/studio3dqml/q3dspresentationitem.h \
     viewer.h \
     remotedeploymentreceiver.h
 
 android: {
 SOURCES += \
-    $$PWD/../studio3d/q3dsviewersettings.cpp \
-    $$PWD/../studio3d/q3dspresentation.cpp \
-    $$PWD/../studio3d/q3dsdatainput.cpp
+    $$PWD/../../Runtime/api/studio3d/q3dsviewersettings.cpp \
+    $$PWD/../../Runtime/api/studio3d/q3dspresentation.cpp \
+    $$PWD/../../Runtime/api/studio3d/q3dsdatainput.cpp
 
 HEADERS += \
-    $$PWD/../studio3d/q3dsviewersettings.h \
-    $$PWD/../studio3d/q3dspresentation.h \
-    $$PWD/../studio3d/q3dsdatainput.h
+    $$PWD/../../Runtime/api/studio3d/q3dsviewersettings.h \
+    $$PWD/../../Runtime/api/studio3d/q3dspresentation.h \
+    $$PWD/../../Runtime/api/studio3d/q3dsdatainput.h
 }
 
 LIBS += \
