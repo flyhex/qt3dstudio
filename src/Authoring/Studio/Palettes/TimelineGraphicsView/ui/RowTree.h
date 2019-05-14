@@ -34,6 +34,7 @@
 #include "RowTypes.h"
 #include "StudioObjectTypes.h"
 #include "RowTreeLabelItem.h"
+#include "Qt3DSDMHandles.h"
 
 #include <QtCore/qpropertyanimation.h>
 #include <QtCore/qparallelanimationgroup.h>
@@ -152,7 +153,7 @@ public:
     void updateLock(bool state);
     void updateSubpresentations(int updateParentsOnlyVal = 0);
     int clipX() const;
-    int instance() const;
+    qt3dsdm::Qt3DSDMInstanceHandle instance() const;
 
 protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;

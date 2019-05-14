@@ -94,7 +94,7 @@ ITimelineItemBinding *RowTree::getBinding() const
 }
 
 // object instance handle
-int RowTree::instance() const
+ qt3dsdm::Qt3DSDMInstanceHandle RowTree::instance() const
 {
     if (m_isProperty || !m_binding)
         return 0;
@@ -1334,6 +1334,13 @@ void RowTree::setPropertyExpanded(bool expand)
 
 void RowTree::showDataInputSelector(const QString &propertyname, const QPoint &pos)
 {
-    m_scene->handleShowDISelector(propertyname, instance(), pos);
+    auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
+
+    // Set the datainput to control property in referenced object if this
+    // is a referenced material.
+    auto refInstance = bridge->getMaterialReference(instance());
+
+    m_scene->handleShowDISelector(propertyname, refInstance.Valid() ? refInstance : instance(),
+                                  pos);
 }
 

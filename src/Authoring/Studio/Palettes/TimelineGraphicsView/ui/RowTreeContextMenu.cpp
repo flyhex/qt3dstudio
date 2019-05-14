@@ -70,26 +70,36 @@ void RowTreeContextMenu::initialize()
     }
 
     // add datainput controller submenu
-    if (!(m_RowTree->rowType() & (OBJTYPE_GUIDE | OBJTYPE_EFFECT | OBJTYPE_ALIAS
-                                  | OBJTYPE_SCENE))) {
+    if (m_RowTree->rowType() & ~(OBJTYPE_GUIDE | OBJTYPE_EFFECT | OBJTYPE_ALIAS | OBJTYPE_SCENE)
+         && !static_cast<Qt3DSDMTimelineItemBinding *>(m_TimelineItemBinding)
+         ->isDefaultMaterial()) {
         m_diMenu = addMenu(tr("Set datainput controller"));
         connect(m_diMenu, &QMenu::triggered, this, &RowTreeContextMenu::addDiController);
 
-        const QVector<qt3dsdm::Qt3DSDMPropertyHandle> propList
-                = doc.GetStudioSystem()->GetPropertySystem()->GetControllableProperties(instance);
+        QVector<qt3dsdm::Qt3DSDMPropertyHandle> propList;
+
+        // If this is a referenced material instance, we need to get the property list from
+        // the referenced source, and set datainput control to point to the property
+        // in the referenced source.
+        auto refInstance = doc.GetStudioSystem()->GetClientDataModelBridge()
+                ->getMaterialReference(instance);
+        propList = doc.GetStudioSystem()->GetPropertySystem()
+                    ->GetControllableProperties(refInstance ? refInstance : instance);
 
         QMap<int, QAction *> sections;
         for (const auto &prop : propList) {
-            QAction *action = new QAction(QString::fromStdWString(
-                                              doc.GetPropertySystem()
-                                              ->GetFormalName(instance, prop).wide_str()));
+            QAction *action
+                    = new QAction(QString::fromStdWString(doc.GetPropertySystem()
+                                                          ->GetFormalName(
+                                                              refInstance ? refInstance : instance,
+                                                              prop).wide_str()));
             action->setData(QString::fromStdWString(
                                 doc.GetPropertySystem()
                                 ->GetName(prop).wide_str()));
 
             auto metadata = doc.GetStudioSystem()->GetActionMetaData()->GetMetaDataPropertyInfo(
                         doc.GetStudioSystem()->GetActionMetaData()->GetMetaDataProperty(
-                            instance, prop));
+                            refInstance ? refInstance : instance, prop));
 
             if (sections.contains(metadata->m_CompleteType) ) {
                 m_diMenu->insertAction(sections[metadata->m_CompleteType], action);
