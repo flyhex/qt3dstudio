@@ -80,6 +80,7 @@ Q_SIGNALS:
     void runningChanged(bool initialized);
     void errorChanged(const QString &error);
     void presentationReady();
+    void presentationLoaded();
 
 public Q_SLOTS:
     void reset();
