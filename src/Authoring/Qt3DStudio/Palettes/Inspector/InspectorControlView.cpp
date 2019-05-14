@@ -289,16 +289,22 @@ QString InspectorControlView::noneString() const
 
 bool InspectorControlView::canLinkProperty(int instance, int handle) const
 {
+    if (!instance || !handle)
+        return false;
+
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
 
     if (bridge->isInsideMaterialContainer(instance))
         return false;
 
-    if (bridge->IsMaterialBaseInstance(instance)) // all material types are unlinkable
+    if (handle == bridge->GetSceneAsset().m_Eyeball.m_Property) // eyeball is unlinkable
         return false;
 
-    if (handle == bridge->GetSceneAsset().m_Eyeball.m_Property) // eyeball is unlinkable
+    // Disallow linking of properties that refer to images as unlinking them is not trivial at all.
+    qt3dsdm::AdditionalMetaDataType::Value thePropertyMetaData =
+        doc->GetStudioSystem()->GetPropertySystem()->GetAdditionalMetaDataType(instance, handle);
+    if (thePropertyMetaData == qt3dsdm::AdditionalMetaDataType::Image)
         return false;
 
     return doc->GetDocumentReader().CanPropertyBeLinked(instance, handle);
