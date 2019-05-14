@@ -3717,9 +3717,13 @@ public:
         auto parent = getOrCreateMaterialContainer();
         TInstanceList children;
         GetChildren(GetAssociatedSlide(parent), parent, children);
+        const QString defaultMaterialName
+                = getMaterialNameFromFilePath(m_Bridge.getDefaultMaterialName());
 
         for (auto &instance : children) {
             const auto name = GetName(instance).toQString();
+            if (name == defaultMaterialName)
+                continue;
             const QString path = getFilePathFromMaterialName(name);
             writeMaterialFile(getOrCreateMaterial(path), name, false, path);
         }
