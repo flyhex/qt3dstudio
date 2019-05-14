@@ -105,6 +105,8 @@ public:
     void renderTextDepth(SText &text, const QT3DSMat44 &mvp);
     void setContext(IQt3DSRenderContext &context);
 
+    bool checkAndBuildGlyphs(SText &text);
+
     QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE_OVERRIDE(m_foundation.getAllocator())
 
     void AddSystemFontDirectory(const char8_t *dir) override;

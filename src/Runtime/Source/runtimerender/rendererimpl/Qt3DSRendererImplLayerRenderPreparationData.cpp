@@ -415,8 +415,11 @@ namespace render {
                 theFlags, inText.GetGlobalPos(), m_Renderer, inText, inText.m_Bounds, theMVP,
                 inViewProjection, *inText.m_TextTexture, theTextOffset, theTextScale);
 #endif
-
-            m_TransparentObjects.push_back(theRenderable);
+            // After preparation, do not push object back to queue if it is not
+            // active, because we prepare text elements regardless of their
+            // visibility (=active status).
+            if (inText.m_Flags.IsGloballyActive())
+                m_TransparentObjects.push_back(theRenderable);
         }
         return retval;
     }
@@ -1041,11 +1044,14 @@ namespace render {
                 if (hasTextRenderer) {
                     SText *theText = static_cast<SText *>(theNode);
                     theText->CalculateGlobalVariables();
-                    if (theText->m_Flags.IsGloballyActive()) {
-                        bool wasTextDirty = PrepareTextForRender(*theText, inViewProjection,
-                                                                 theTextScaleFactor, ioFlags);
-                        wasDataDirty = wasDataDirty || wasTextDirty;
-                    }
+                    // Omit check for global active flag intentionally and force
+                    // render preparation for all Text items. This eliminates
+                    // large delay for distance field text items becoming active
+                    // mid-animation.
+                    bool wasTextDirty = PrepareTextForRender(*theText, inViewProjection,
+                                                             theTextScaleFactor, ioFlags);
+                    wasDataDirty = wasDataDirty || wasTextDirty;
+
                 }
             } break;
             case GraphObjectTypes::Path: {

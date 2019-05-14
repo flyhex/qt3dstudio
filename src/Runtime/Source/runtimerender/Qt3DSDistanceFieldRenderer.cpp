@@ -954,6 +954,7 @@ void Q3DSDistanceFieldRenderer::setContext(IQt3DSRenderContext &context)
 {
     m_context = &context;
     m_glyphCacheManager.setContext(context);
+    buildShaders();
 }
 
 ITextRendererCore &ITextRendererCore::createDistanceFieldRenderer(NVFoundationBase &fnd)
@@ -1046,4 +1047,14 @@ STextTextureAtlasEntryDetails Q3DSDistanceFieldRenderer::RenderAtlasEntry(QT3DSU
     return STextTextureAtlasEntryDetails();
 }
 
+bool Q3DSDistanceFieldRenderer::checkAndBuildGlyphs(SText &text)
+{
+    auto hashVal = getTextHashValue(text);
+    if (!m_glyphCache.contains(hashVal)) {
+        m_glyphCache[hashVal] = buildGlyphsPerTexture(text);
+        return true;
+    }
+
+    return false;
+}
 #endif
