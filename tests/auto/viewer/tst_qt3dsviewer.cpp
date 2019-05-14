@@ -226,6 +226,7 @@ void tst_qt3dsviewer::testCreateElement()
     data.insert(QStringLiteral("position"),
                 QVariant::fromValue<QVector3D>(QVector3D(200, 300, 200)));
     data.insert(QStringLiteral("opacity"), 20.0);
+    data.insert(QStringLiteral("controlledproperty"), QStringLiteral("@newDataInput opacity"));
 
     createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide1"), data);
 
@@ -247,6 +248,7 @@ void tst_qt3dsviewer::testCreateElement()
         newCylinder2.setAttribute(QStringLiteral("position.y"), animValue * 3);
         newSphere.setAttribute(QStringLiteral("position.x"), 50 + animValue * 2);
         newGroup.setAttribute(QStringLiteral("opacity"), qAbs(animValue));
+        m_presentation->setDataInputValue(QStringLiteral("newDataInput"), qAbs(animValue / 2));
     });
 
     // Create objects to slides 1 & 2 while slide 1 is executing

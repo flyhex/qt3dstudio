@@ -763,12 +763,18 @@ void Q3DSPresentation::setDataInputValue(const QString &name, const QVariant &va
     element. The property names are the same the setAttribute() recognizes.
 
     A referenced material element is also created for the new model element. The source material
-    name can be specified with custom "material" attribute in the \a attributes hash.
+    name can be specified with custom "material" attribute in the \a properties hash.
     The source material must exist in the same presentation where the element is created.
 
     The mesh for a model is specified with the \c sourcepath property. This can be a local file
     path to \c .mesh file, a studio mesh primitive (e.g. \c{#Cube}), or the name of a mesh created
     dynamically with createMesh().
+
+    A property/properties of the element can be bound to be controlled by an existing datainput.
+    Control bindings can be indicated with custom "controlledproperty" attribute in the
+    \a properties hash. The format for attribute value is "$<datainputname> <attributename>", i.e.
+    "$Datainput_1 rotation $Datainput_2 diffusecolor". If datainput name does not match with
+    any of the datainputs defined in UIA file, binding has no impact.
 
     The element is ready for use once elementsCreated() signal is received for it.
 
@@ -777,6 +783,7 @@ void Q3DSPresentation::setDataInputValue(const QString &name, const QVariant &va
     \sa createMesh
     \sa elementsCreated
     \sa setAttribute
+    \sa dataInputs
  */
 void Q3DSPresentation::createElement(const QString &parentElementPath, const QString &slideName,
                                      const QHash<QString, QVariant> &properties)

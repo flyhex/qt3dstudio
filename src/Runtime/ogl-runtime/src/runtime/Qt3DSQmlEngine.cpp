@@ -473,7 +473,8 @@ private:
     void createComponent(QQmlComponent *component, TElement *element);
     TElement *getTarget(const char *component);
     void listAllElements(TElement *root, QList<TElement *> &elements);
-    void initializeDataInputsInPresentation(CPresentation &presentation, bool isPrimary);
+    void initializeDataInputsInPresentation(CPresentation &presentation, bool isPrimary,
+                                            QList<TElement *> inElements = QList<TElement *>());
     void initializeDataOutputsInPresentation(CPresentation &presentation, bool isPrimary);
     // Splits down vector attributes to components as Runtime does not really
     // handle vectors at this level anymore
@@ -1233,6 +1234,9 @@ void CQmlEngineImpl::createElements(const QString &parentElementPath, const QStr
 
         createdElements << &newElem;
     }
+
+    bool isPrimary = presentation == m_Application->GetPrimaryPresentation() ? true : false;
+    initializeDataInputsInPresentation(*presentation, isPrimary, createdElements.toList());
 
     renderer->ChildrenUpdated(parentObject);
 
@@ -2023,12 +2027,19 @@ void CQmlEngineImpl::listAllElements(TElement *root, QList<TElement *> &elements
     }
 }
 
+// Initializes datainput bindings in the presentation starting by default from the root element.
+// If inElements is specified, only parses the specified elements.
 void CQmlEngineImpl::initializeDataInputsInPresentation(CPresentation &presentation,
-                                                        bool isPrimary)
+                                                        bool isPrimary,
+                                                        QList<TElement *> inElements)
 {
-    TElement *parent = presentation.GetRoot();
     QList<TElement *> elements;
-    listAllElements(parent, elements);
+    if (!inElements.empty()) {
+        elements = inElements;
+    } else {
+        TElement *parent = presentation.GetRoot();
+        listAllElements(parent, elements);
+    }
     qt3ds::runtime::DataInputMap &diMap = m_Application->dataInputMap();
 
 // #TODO: Remove below once QT3DS-3510 has been implemented in the editor
