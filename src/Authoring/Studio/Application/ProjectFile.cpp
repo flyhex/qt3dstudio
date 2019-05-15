@@ -40,6 +40,7 @@
 #include "IStudioRenderer.h"
 #include "StudioUtils.h"
 #include "Dispatch.h"
+#include "MainFrm.h"
 #include <QtCore/qdiriterator.h>
 #include <QtCore/qsavefile.h>
 #include <QtCore/qtimer.h>
@@ -1026,6 +1027,8 @@ void ProjectFile::loadVariants(const QString &filePath)
 
         StudioUtils::commitDomDocumentSave(fileProj, domDoc);
     }
+
+    g_StudioApp.m_pMainWnd->updateActionFilterEnableState();
 }
 
 // Add a new tag to a variants group
