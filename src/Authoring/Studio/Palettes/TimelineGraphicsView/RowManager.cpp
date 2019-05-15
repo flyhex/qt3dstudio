@@ -41,6 +41,7 @@
 #include "StudioApp.h"
 #include "Core.h"
 #include "Doc.h"
+#include "StudioObjectTypes.h"
 #include "Qt3DSDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
 
@@ -90,6 +91,14 @@ RowTree *RowManager::createRowFromBinding(ITimelineItemBinding *binding, RowTree
                                 binding->GetTimelineItem()->GetName().toQString(),
                                 QString(), index);
 
+    // hide if material container
+    const QString matContainerName = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+                                     ->GetClientDataModelBridge()->getMaterialContainerName();
+    if (newRow->rowType() == OBJTYPE_MATERIAL && newRow->label() == matContainerName) {
+        newRow->setVisible(false);
+        newRow->rowTimeline()->setVisible(false);
+    }
+
     // connect the new row and its binding
     binding->setRowTree(newRow);
     newRow->setBinding(binding);
@@ -135,10 +144,6 @@ RowTree *RowManager::createRowFromBinding(ITimelineItemBinding *binding, RowTree
 void RowManager::createRowsFromBindingRecursive(ITimelineItemBinding *binding, RowTree *parentRow)
 {
     auto instance = static_cast<Qt3DSDMTimelineItemBinding *>(binding)->GetInstance();
-    if (g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
-            ->GetClientDataModelBridge()->isMaterialContainer(instance)) {
-        return;
-    }
 
     RowTree *newRow = createRowFromBinding(binding, parentRow);
     // create child rows recursively
@@ -402,81 +407,7 @@ void RowManager::ensureRowExpandedAndVisible(RowTree *row, bool forceChildUpdate
     }
 }
 
-int RowManager::getRowIndex(RowTree *row, int startAt)
-{
-    if (row) {
-        for (int i = startAt; i < m_layoutTree->count(); ++i) {
-          if (row == m_layoutTree->itemAt(i)->graphicsItem())
-             return i;
-        }
-    }
-
-    return -1;
-}
-
-// Return the index of a direct child (not grand children) of a parent
-int RowManager::getChildIndex(RowTree *parentRow, RowTree *childRow)
-{
-    int index = getRowIndex(parentRow);
-
-    if (index != -1 && index < m_layoutTimeline->count() - 1) {
-        // make sure it is a direct child, not a grand child.
-        while (childRow->depth() > parentRow->depth() + 1)
-            childRow = childRow->parentRow();
-
-        int childIndex = -1;
-        for (int i = index + 1; i < m_layoutTree->count(); ++i) {
-            RowTree *childRow_i =
-                    static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
-
-            if (childRow_i->depth() == parentRow->depth() + 1)
-                childIndex++;
-            else if (childRow_i->depth() <= parentRow->depth())
-                break;
-
-            if (childRow_i == childRow)
-                return childIndex;
-        }
-    }
-
-    return -1;
-}
-
-bool RowManager::isFirstChild(RowTree *parentRow, RowTree *childRow)
-{
-    int index = getRowIndex(parentRow);
-
-    if (index != -1 && index < m_layoutTimeline->count() - 1) {
-        RowTree *firstChild =
-                static_cast<RowTree *>(m_layoutTree->itemAt(index + 1)->graphicsItem());
-
-        if (firstChild == childRow && childRow->depth() == parentRow->depth() + 1)
-            return true;
-    }
-
-    return false;
-}
-
 bool RowManager::isSingleSelected() const
 {
     return m_selectedRows.size() == 1;
-}
-
-int RowManager::getLastChildIndex(RowTree *row, int index)
-{
-    if (index == -1)
-        index = getRowIndex(row);
-
-    if (index != -1) {
-        for (int i = index + 1; i < m_layoutTree->count(); ++i) {
-            if (static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem())->depth()
-                <= row->depth()) {
-                return i - 1;
-            }
-        }
-
-        return m_layoutTree->count() - 1; // last row
-    }
-
-    return -1;
 }

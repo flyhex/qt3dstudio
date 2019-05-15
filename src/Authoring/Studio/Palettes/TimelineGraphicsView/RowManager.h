@@ -56,9 +56,6 @@ public:
     void updateFiltering(RowTree *rowTree = nullptr);
     void recreateRowsFromBinding(ITimelineItemBinding *rootBinding);
     void updateRulerDuration(bool updateMaxDuration = true);
-    int getChildIndex(RowTree *parentRow, RowTree *childRow);
-    int getRowIndex(RowTree *row, int startAt = 1);
-    bool isFirstChild(RowTree *parent, RowTree *child);
     bool isSingleSelected() const;
     RowTree *createRowFromBinding(ITimelineItemBinding *binding, RowTree *parentRow = nullptr,
                                   int index = -1);
@@ -74,7 +71,6 @@ public:
     void ensureRowExpandedAndVisible(RowTree *row, bool forceChildUpdate) const;
 
 private:
-    int getLastChildIndex(RowTree *row, int index = -1);
     void deleteRowRecursive(RowTree *row, bool deferChildRows);
     void updateRowFilterRecursive(RowTree *row);
     void createRowsFromBindingRecursive(ITimelineItemBinding *binding,

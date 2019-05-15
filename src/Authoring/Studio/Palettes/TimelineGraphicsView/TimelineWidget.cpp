@@ -472,9 +472,6 @@ void TimelineWidget::onActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, 
 
 void TimelineWidget::insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *binding)
 {
-    if (m_bridge->isMaterialContainer(binding->GetInstance()))
-        return;
-
     insertToHandlesMap(binding);
 
     const QList<ITimelineItemBinding *> children = binding->GetChildren();
@@ -484,12 +481,6 @@ void TimelineWidget::insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *bin
 
 void TimelineWidget::insertToHandlesMap(Qt3DSDMTimelineItemBinding *binding)
 {
-    if (m_bridge->isMaterialContainer(binding->GetInstance()))
-        return;
-
-    if (m_bridge->isInsideMaterialContainer(binding->GetInstance()))
-        return;
-
     m_handlesMap.insert(binding->GetInstance(), binding->getRowTree());
 }
 
@@ -523,12 +514,6 @@ void TimelineWidget::onAssetCreated(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         return;
 
     if (m_bridge->IsSceneGraphInstance(inInstance)) {
-        if (m_bridge->isMaterialContainer(inInstance))
-            return;
-
-        if (m_bridge->isInsideMaterialContainer(inInstance))
-            return;
-
         Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(inInstance, m_binding);
 
         if (!binding) {
@@ -1049,7 +1034,7 @@ void TimelineWidget::onChildAdded(int inParent, int inChild, long inIndex)
     if (m_fullReconstruct)
         return;
 
-    // Handle row moves asynch, as we won't be able to get the final order correct otherwise
+    // Handle row moves async, as we won't be able to get the final order correct otherwise
     m_moveMap.insert(inChild, inParent);
     m_actionChanges.insert(inParent);
     if (!m_asyncUpdateTimer.isActive())

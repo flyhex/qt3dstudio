@@ -27,7 +27,6 @@
 **
 ****************************************************************************/
 
-#include "Qt3DSCommonPrecompile.h"
 #include "TimelineTranslationManager.h"
 #include "SlideTimelineItemBinding.h"
 #include "GroupTimelineItemBinding.h"
@@ -37,16 +36,12 @@
 #include "PathAnchorPointTimelineItemBinding.h"
 #include "PathTimelineItemBinding.h"
 #include "LayerTimelineItemBinding.h"
-#include "IDoc.h"
 #include "Qt3DSDMStudioSystem.h"
-#include "Qt3DSDMSlides.h"
-
-// Link to Data model
-#include "ClientDataModelBridge.h"
-#include "Qt3DSDMDataCore.h"
-#include "Doc.h" //Because we need to access Client Data Model Bridge
+#include "StudioObjectTypes.h"
 #include "StudioApp.h"
 #include "Core.h"
+#include "Doc.h"
+#include "ClientDataModelBridge.h"
 
 using namespace qt3dsdm;
 
@@ -65,58 +60,49 @@ ITimelineItemBinding *CTimelineTranslationManager::GetOrCreate(Qt3DSDMInstanceHa
     ITimelineItemBinding *theBinding = GetBinding(inInstance);
     if (!theBinding) {
         Qt3DSDMTimelineItemBinding *theReturn = nullptr;
-        qt3dsdm::IPropertySystem *thePropertySystem = GetStudioSystem()->GetPropertySystem();
-        Qt3DSDMPropertyHandle theTypeProperty =
-            thePropertySystem->GetAggregateInstancePropertyByName(inInstance, L"type");
 
-        SValue theTypeValue;
-        thePropertySystem->GetInstancePropertyValue(inInstance, theTypeProperty, theTypeValue);
+        EStudioObjectType objType = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+                                    ->GetClientDataModelBridge()->GetObjectType(inInstance);
 
-        std::wstring theWideTypeString(qt3dsdm::get<TDataStrPtr>(theTypeValue)->GetData());
-
-        if (theWideTypeString == L"Material" || theWideTypeString == L"CustomMaterial"
-            || theWideTypeString == L"ReferencedMaterial")
+        if (objType & OBJTYPE_IS_MATERIAL) {
             theReturn = new CMaterialTimelineItemBinding(this, inInstance);
-        else if (theWideTypeString == L"Image")
+        } else if (objType == OBJTYPE_IMAGE) {
             theReturn = new CImageTimelineItemBinding(this, inInstance);
-        else if (theWideTypeString == L"Group" || theWideTypeString == L"Component")
+        } else if (objType & (OBJTYPE_GROUP | OBJTYPE_COMPONENT)) {
             theReturn = new CGroupTimelineItemBinding(this, inInstance);
-        else if (theWideTypeString == L"Behavior")
+        } else if (objType == OBJTYPE_BEHAVIOR) {
             theReturn = new CBehaviorTimelineItemBinding(this, inInstance);
-        else if (theWideTypeString == L"Slide")
+        } else if (objType == OBJTYPE_SLIDE) {
             theReturn = new CSlideTimelineItemBinding(this, inInstance);
-        else if (theWideTypeString == L"PathAnchorPoint")
+        } else if (objType == OBJTYPE_PATHANCHORPOINT) {
             theReturn = new CPathAnchorPointTimelineItemBinding(this, inInstance);
-        else if (theWideTypeString == L"Path")
+        } else if (objType == OBJTYPE_PATH) {
             theReturn = new CPathTimelineItemBinding(this, inInstance);
-        else if (theWideTypeString == L"Layer")
+        } else if (objType == OBJTYPE_LAYER) {
             theReturn = new CLayerTimelineItemBinding(this, inInstance);
-        else if (theWideTypeString == L"Model" || theWideTypeString == L"Text"
-                 || theWideTypeString == L"Camera" || theWideTypeString == L"Effect"
-                 || theWideTypeString == L"Light" || theWideTypeString == L"RenderPlugin"
-                 || theWideTypeString == L"Alias" || theWideTypeString == L"SubPath")
+        } else if (objType & (OBJTYPE_MODEL | OBJTYPE_TEXT | OBJTYPE_CAMERA | OBJTYPE_EFFECT
+                              | OBJTYPE_LIGHT | OBJTYPE_RENDERPLUGIN | OBJTYPE_ALIAS
+                              | OBJTYPE_SUBPATH))
             theReturn = new Qt3DSDMTimelineItemBinding(this, inInstance);
         else {
             // Add support for additional DataModel types here.
             Q_ASSERT(0);
         }
 
-        m_InstanceHandleBindingMap.insert(
-            std::make_pair(theReturn->GetInstanceHandle(), theReturn));
+        m_InstanceBindingMap.insert({theReturn->GetInstanceHandle(), theReturn});
         theBinding = theReturn;
     }
 
     return theBinding;
 }
 
-//==============================================================================
 /**
  * Clear all bindings, typically when a presentation is closed.
  */
 void CTimelineTranslationManager::Clear()
 {
     // clean up all bindings
-    m_InstanceHandleBindingMap.clear();
+    m_InstanceBindingMap.clear();
 }
 
 /**
@@ -125,9 +111,10 @@ void CTimelineTranslationManager::Clear()
 Qt3DSDMTimelineItemBinding *
 CTimelineTranslationManager::GetBinding(Qt3DSDMInstanceHandle inHandle) const
 {
-    TInstanceHandleBindingMap::const_iterator theIter = m_InstanceHandleBindingMap.find(inHandle);
-    if (theIter != m_InstanceHandleBindingMap.end())
-        return theIter->second;
+    auto it = m_InstanceBindingMap.find(inHandle);
+    if (it != m_InstanceBindingMap.end())
+        return it->second;
+
     return nullptr;
 }
 
@@ -138,7 +125,6 @@ CDoc *CTimelineTranslationManager::GetDoc() const
 
 CStudioSystem *CTimelineTranslationManager::GetStudioSystem() const
 {
-    // TODO: figure if we can just deal with IDoc instead of CDoc
-    return g_StudioApp.GetCore()->GetDoc()->GetStudioSystem();
+    return GetDoc()->GetStudioSystem();
 }
 

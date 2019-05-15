@@ -705,6 +705,10 @@ bool RowTree::isInVariantsFilter() const
 
 void RowTree::updateFilter()
 {
+    auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
+    if (m_rowType == OBJTYPE_MATERIAL && m_label == bridge->getMaterialContainerName())
+        return;
+
     bool parentOk = !m_parentRow || m_parentRow->isVisible();
     bool shyOk     = !m_shy      || !m_scene->treeHeader()->filterShy();
     bool visibleOk = m_visible   || !m_scene->treeHeader()->filterHidden();
@@ -915,6 +919,10 @@ void RowTree::updateLabel()
 
 void RowTree::setRowVisible(bool visible)
 {
+    auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
+    if (m_rowType == OBJTYPE_MATERIAL && m_label == bridge->getMaterialContainerName())
+        return;
+
     if (visible) {
         setMaximumHeight(TimelineConstants::ROW_H);
         setOpacity(1.0);

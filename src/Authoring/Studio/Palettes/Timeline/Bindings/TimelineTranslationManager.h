@@ -26,56 +26,36 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#ifndef INCLUDED_TIMELINE_TRANSLATIONMANAGER_H
-#define INCLUDED_TIMELINE_TRANSLATIONMANAGER_H 1
 
-#pragma once
+#ifndef TIMELINE_TRANSLATIONMANAGER_H
+#define TIMELINE_TRANSLATIONMANAGER_H
 
 #include "Qt3DSDMHandles.h"
-#include "Qt3DSDMTimeline.h"
-
-#include "Doc.h"
 
 class ITimelineItemBinding;
 class Qt3DSDMTimelineItemBinding;
+class CDoc;
 
-// DataModel
 namespace qt3dsdm {
 class CStudioSystem;
 }
 
-class CDoc;
-
-/**
- * There is a TranslationManager per presentation (project)
- */
 class CTimelineTranslationManager
 {
-protected: // Typedefs
-    // DataModel support
-    typedef std::map<qt3dsdm::Qt3DSDMInstanceHandle, Qt3DSDMTimelineItemBinding *>
-        TInstanceHandleBindingMap;
-
-    // Store expanded state
-    typedef std::map<qt3dsdm::Qt3DSDMInstanceHandle, bool> TInstanceHandleExpandedMap; // DataModel support
-
-protected: // Properties
-    // DataModel support
-    TInstanceHandleBindingMap m_InstanceHandleBindingMap;
-
 public:
     CTimelineTranslationManager();
     ~CTimelineTranslationManager();
 
-public:
     ITimelineItemBinding *GetOrCreate(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     void Clear();
 
     Qt3DSDMTimelineItemBinding *GetBinding(qt3dsdm::Qt3DSDMInstanceHandle inHandle) const;
 
     qt3dsdm::CStudioSystem *GetStudioSystem() const;
-
     CDoc *GetDoc() const;
+
+private:
+    std::map<qt3dsdm::Qt3DSDMInstanceHandle, Qt3DSDMTimelineItemBinding *> m_InstanceBindingMap;
 };
 
 #endif // INCLUDED_TIMELINE_TRANSLATIONMANAGER_H

@@ -3019,10 +3019,10 @@ public:
     }
 
     TInstanceHandleList PasteSceneGraphObject(const CFilePath &inFilePath,
-                                                      TInstanceHandle inNewRoot,
-                                                      bool inGenerateUniqueName,
-                                                      DocumentEditorInsertType::Enum inInsertType,
-                                                      const CPt &inPosition) override
+                                              TInstanceHandle inNewRoot,
+                                              bool inGenerateUniqueName,
+                                              DocumentEditorInsertType::Enum inInsertType,
+                                              const CPt &inPosition) override
     {
         qt3ds::QT3DSI32 theVersion = 0;
         std::shared_ptr<IDOMReader> theReader = m_Doc.CreateDOMReader(
@@ -3116,9 +3116,9 @@ public:
     }
 
     void RearrangeObjects(const qt3dsdm::TInstanceHandleList &inInstances,
-                                  TInstanceHandle inDest,
-                                  DocumentEditorInsertType::Enum inInsertType,
-                                  bool checkUniqueName, bool notifyRename = true) override
+                          TInstanceHandle inDest,
+                          DocumentEditorInsertType::Enum inInsertType,
+                          bool checkUniqueName, bool notifyRename = true) override
     {
         qt3dsdm::TInstanceHandleList sortableList(ToGraphOrdering(inInstances));
         TInstanceHandle theParent(inDest);
@@ -3126,7 +3126,7 @@ public:
             || inInsertType == DocumentEditorInsertType::NextSibling)
             theParent = GetParent(inDest);
 
-        // Moving object into into non-root component
+        // Moving object into non-root component
         if (m_Bridge.IsComponentInstance(theParent)
                 && !m_Bridge.IsActiveComponent(theParent)
                 && moveIntoComponent(inInstances, theParent, checkUniqueName, notifyRename)) {
