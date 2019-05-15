@@ -57,10 +57,6 @@
 // For perf log timestamp
 #include <time.h>
 
-#if Q_OS_WINDOWS
-#include "qt3ds_launcher_defs.h"
-#endif
-
 #ifdef _LINUXPLATFORM
 #include <sys/types.h>
 #include <unistd.h>
