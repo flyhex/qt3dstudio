@@ -44,8 +44,9 @@ be loaded from the QML application.
 
 \section1 Create Variant Groups and Tags
 
-Variant filtering is done on layer level, to add a variant group and tags to that group,
-select a layer in the scene graph and follow the steps below:
+Variant filtering can be applied to layers, component, groups, models, and text objects. To add a
+variant group and tags to that group, select the desired element in the scene graph and follow the
+steps below:
 
 \list 1
   \li In the inspector palette, press \uicontrol {+ Group} in the Variant Tags section.
@@ -64,15 +65,15 @@ follow the steps below:
 
 \section1 Using Variant Tags
 
-To use a variant tag on a layer, follow the steps below:
+To use a variant tag on an element, follow the steps below:
 
 \list 1
-  \li In the scene graph, select desired layer
+  \li In the scene graph, select desired element.
   \li In the inspector palette, under the variant tag section, click desired variant tags to use
-  them on the layer.
+  them on the element.
 \endlist
 
-Once you have assigned variant tags to a layer, it is indicated in the scene graph which layers
+Once you have assigned variant tags to an element, it is indicated in the scene graph which elements
 are using tags from which variant groups.
 
 \image variant-tags-layer.png
@@ -126,18 +127,18 @@ in the toolbar or by pressing the \c F7 key.
 \image variant-tags-panel.png
 
 In this panel, you can select the variant filtering tags you wish to render when previewing in the
-Viewer. Only the layers satisfying the selection will be rendered.
+Viewer. Only the elements satisfying the selection will be rendered.
 
 Variant filtering works the following way:
 
 \list
   \li
-    With no tags selected, all layers will render.
+    With no tags selected, all elements will render.
   \li
-    With tags selected in one variant group, criteria for a layer to be rendered is that is should
-    have one of the selected tags or no tag in the selected group.
+    With tags selected in one variant group, criteria for an element to be rendered is that it
+    should have one of the selected tags or no tag in the selected group.
   \li
-    With tags selected in more than one variant group, the layers will need to fulfill criteria
+    With tags selected in more than one variant group, the elements will need to fulfill criteria
     for each of the variant groups to be rendered.
 \endlist
 
