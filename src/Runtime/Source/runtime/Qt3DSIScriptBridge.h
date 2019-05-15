@@ -36,6 +36,8 @@
 #include "Qt3DSApplication.h"
 
 #include <QtCore/qvariant.h>
+#include <QtCore/qvector.h>
+#include <QtCore/qstringlist.h>
 
 namespace qt3ds {
 namespace runtime {
@@ -161,15 +163,15 @@ public: // Elements
             const QString &name, const QVariant &value,
             qt3ds::runtime::DataInputValueRole property
             = qt3ds::runtime::DataInputValueRole::Value) = 0;
-    virtual void createElement(const QString &parentElementPath, const QString &slideName,
-                               const QHash<QString, QVariant> &properties,
-                               qt3ds::render::IQt3DSRenderer *renderer) = 0;
-    virtual void deleteElement(const QString &elementPath,
-                               qt3ds::render::IQt3DSRenderer *renderer) = 0;
-    virtual void createMaterial(const QString &elementPath, const QString &materialDefinition,
-                                qt3ds::render::ICustomMaterialSystem *customMaterialSystem,
-                                qt3ds::render::IDynamicObjectSystem *dynamicObjectSystem,
+    virtual void createElements(const QString &parentElementPath, const QString &slideName,
+                                const QVector<QHash<QString, QVariant>> &properties,
                                 qt3ds::render::IQt3DSRenderer *renderer) = 0;
+    virtual void deleteElements(const QStringList &elementPath,
+                                qt3ds::render::IQt3DSRenderer *renderer) = 0;
+    virtual void createMaterials(const QString &elementPath, const QStringList &materialDefinitions,
+                                 qt3ds::render::ICustomMaterialSystem *customMaterialSystem,
+                                 qt3ds::render::IDynamicObjectSystem *dynamicObjectSystem,
+                                 qt3ds::render::IQt3DSRenderer *renderer) = 0;
 
 public: // Components
     virtual void GotoSlide(const char *component, const char *slideName,

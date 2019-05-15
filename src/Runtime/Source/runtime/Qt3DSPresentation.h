@@ -51,8 +51,8 @@ Q_SIGNALS:
     void SigSlideExited(const QString &elementPath, unsigned int index, const QString &name);
     void SigCustomSignal(const QString &elementPath, const QString &name);
     void SigPresentationReady();
-    void SigElementCreated(const QString &elementName, const QString &error);
-    void SigMaterialCreated(const QString &name, const QString &error);
+    void SigElementsCreated(const QStringList &elementPaths, const QString &error);
+    void SigMaterialsCreated(const QStringList &materialNames, const QString &error);
 };
 
 namespace qt3ds {

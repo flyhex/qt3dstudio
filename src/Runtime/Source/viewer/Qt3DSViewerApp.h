@@ -32,13 +32,15 @@
 #define QT3DS_VIEWER_H
 
 #include "qt3dsruntimeglobal.h"
+#include "Qt3DSApplication.h"
+#include "Qt3DSInputDefs.h"
 
 #include <string>
 #include <vector>
 #include <QObject>
 #include <QtCore/qelapsedtimer.h>
-#include "Qt3DSApplication.h"
-#include "Qt3DSInputDefs.h"
+#include <QtCore/qvector.h>
+#include <QtCore/qstringlist.h>
 #include <QtGui/qsurfaceformat.h>
 
 namespace Q3DStudio {
@@ -359,10 +361,10 @@ public:
     float dataInputMax(const QString &name) const;
     float dataInputMin(const QString &name) const;
 
-    void createElement(const QString &parentElementPath, const QString &slideName,
-                       const QHash<QString, QVariant> &properties);
-    void deleteElement(const QString &elementPath);
-    void createMaterial(const QString &elementPath, const QString &materialDefinition);
+    void createElements(const QString &parentElementPath, const QString &slideName,
+                        const QVector<QHash<QString, QVariant>> &properties);
+    void deleteElements(const QStringList &elementPaths);
+    void createMaterials(const QString &elementPath, const QStringList &materialDefinitions);
 
     QString error();
 
@@ -405,8 +407,8 @@ Q_SIGNALS:
     void SigSlideEntered(const QString &elementPath, unsigned int index, const QString &name);
     void SigSlideExited(const QString &elementPath, unsigned int index, const QString &name);
     void SigCustomSignal(const QString &elementPath, const QString &name);
-    void SigElementCreated(const QString &elementName, const QString &error);
-    void SigMaterialCreated(const QString &name, const QString &error);
+    void SigElementsCreated(const QStringList &elementPaths, const QString &error);
+    void SigMaterialsCreated(const QStringList &materialNames, const QString &error);
     void SigPresentationReady();
     void SigPresentationLoaded();
 };

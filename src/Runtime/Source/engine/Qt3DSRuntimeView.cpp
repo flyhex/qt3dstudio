@@ -211,10 +211,11 @@ public:
     float dataInputMax(const QString &name) const override;
     float dataInputMin(const QString &name) const override;
 
-    void createElement(const QString &parentElementPath, const QString &slideName,
-                       const QHash<QString, QVariant> &properties) override;
-    void deleteElement(const QString &elementPath) override;
-    void createMaterial(const QString &elementPath, const QString &materialDefinition) override;
+    void createElements(const QString &parentElementPath, const QString &slideName,
+                        const QVector<QHash<QString, QVariant>> &properties) override;
+    void deleteElements(const QStringList &elementPaths) override;
+    void createMaterials(const QString &elementPath,
+                         const QStringList &materialDefinitions) override;
     void SetAttribute(const char *elementPath, const char *attributeName,
                       const char *value) override;
     bool GetAttribute(const char *elementPath, const char *attributeName, void *value) override;
@@ -309,10 +310,10 @@ bool CRuntimeView::InitializeGraphics(const QSurfaceFormat &format, bool delayed
     QObject::connect(m_Presentation->signalProxy(),
                      &QPresentationSignalProxy::SigPresentationReady,
                      signalProxy(), &QRuntimeViewSignalProxy::SigPresentationReady);
-    QObject::connect(m_Presentation->signalProxy(), &QPresentationSignalProxy::SigElementCreated,
-                     signalProxy(), &QRuntimeViewSignalProxy::SigElementCreated);
-    QObject::connect(m_Presentation->signalProxy(), &QPresentationSignalProxy::SigMaterialCreated,
-                     signalProxy(), &QRuntimeViewSignalProxy::SigMaterialCreated);
+    QObject::connect(m_Presentation->signalProxy(), &QPresentationSignalProxy::SigElementsCreated,
+                     signalProxy(), &QRuntimeViewSignalProxy::SigElementsCreated);
+    QObject::connect(m_Presentation->signalProxy(), &QPresentationSignalProxy::SigMaterialsCreated,
+                     signalProxy(), &QRuntimeViewSignalProxy::SigMaterialsCreated);
 
     m_TimeProvider.Reset();
     return true;
@@ -619,34 +620,35 @@ float CRuntimeView::dataInputMin(const QString &name) const
     return 0;
 }
 
-void CRuntimeView::createElement(const QString &parentElementPath, const QString &slideName,
-                                 const QHash<QString, QVariant> &properties)
+void CRuntimeView::createElements(const QString &parentElementPath, const QString &slideName,
+                                  const QVector<QHash<QString, QVariant>> &properties)
 {
     if (m_Application) {
         Q3DStudio::CQmlEngine &theBridgeEngine
                 = static_cast<Q3DStudio::CQmlEngine &>(m_RuntimeFactoryCore->GetScriptEngineQml());
-        theBridgeEngine.createElement(parentElementPath, slideName, properties,
-                                      &m_RuntimeFactory->GetQt3DSRenderContext().GetRenderer());
+        theBridgeEngine.createElements(parentElementPath, slideName, properties,
+                                       &m_RuntimeFactory->GetQt3DSRenderContext().GetRenderer());
     }
 }
 
-void CRuntimeView::deleteElement(const QString &elementPath)
+void CRuntimeView::deleteElements(const QStringList &elementPaths)
 {
     if (m_Application) {
         Q3DStudio::CQmlEngine &theBridgeEngine
                 = static_cast<Q3DStudio::CQmlEngine &>(m_RuntimeFactoryCore->GetScriptEngineQml());
-        theBridgeEngine.deleteElement(elementPath,
-                                      &m_RuntimeFactory->GetQt3DSRenderContext().GetRenderer());
+        theBridgeEngine.deleteElements(elementPaths,
+                                       &m_RuntimeFactory->GetQt3DSRenderContext().GetRenderer());
     }
 }
 
-void CRuntimeView::createMaterial(const QString &elementPath, const QString &materialDefinition)
+void CRuntimeView::createMaterials(const QString &elementPath,
+                                   const QStringList &materialDefinitions)
 {
     if (m_Application) {
         Q3DStudio::CQmlEngine &theBridgeEngine
                 = static_cast<Q3DStudio::CQmlEngine &>(m_RuntimeFactoryCore->GetScriptEngineQml());
-        theBridgeEngine.createMaterial(
-                    elementPath, materialDefinition,
+        theBridgeEngine.createMaterials(
+                    elementPath, materialDefinitions,
                     &m_RuntimeFactory->GetQt3DSRenderContext().GetCustomMaterialSystem(),
                     &m_RuntimeFactory->GetQt3DSRenderContext().GetDynamicObjectSystem(),
                     &m_RuntimeFactory->GetQt3DSRenderContext().GetRenderer());

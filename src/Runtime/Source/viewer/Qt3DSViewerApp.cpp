@@ -357,10 +357,6 @@ bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFor
                 &QRuntimeViewSignalProxy::SigSlideExited, this, &Q3DSViewerApp::SigSlideExited);
         connect(m_Impl.m_view->signalProxy(),
                 &QRuntimeViewSignalProxy::SigCustomSignal, this, &Q3DSViewerApp::SigCustomSignal);
-        connect(m_Impl.m_view->signalProxy(), &QRuntimeViewSignalProxy::SigElementCreated, this,
-                &Q3DSViewerApp::SigElementCreated);
-        connect(m_Impl.m_view->signalProxy(), &QRuntimeViewSignalProxy::SigMaterialCreated, this,
-                &Q3DSViewerApp::SigMaterialCreated);
         QMetaObject::Connection *presReadyconn = new QMetaObject::Connection();
         *presReadyconn = connect(m_Impl.m_view->signalProxy(),
                                  &QRuntimeViewSignalProxy::SigPresentationReady, [&, presReadyconn]{
@@ -370,6 +366,11 @@ bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFor
             disconnect(*presReadyconn);
             delete presReadyconn;
         });
+        connect(m_Impl.m_view->signalProxy(), &QRuntimeViewSignalProxy::SigElementsCreated, this,
+                &Q3DSViewerApp::SigElementsCreated);
+        connect(m_Impl.m_view->signalProxy(), &QRuntimeViewSignalProxy::SigMaterialsCreated, this,
+                &Q3DSViewerApp::SigMaterialsCreated);
+
         Resize(winWidth, winHeight);
 
         Q_EMIT SigPresentationLoaded();
@@ -806,29 +807,30 @@ float Q3DSViewerApp::dataInputMin(const QString &name) const
     return m_Impl.m_view->dataInputMin(name);
 }
 
-void Q3DSViewerApp::createElement(const QString &parentElementPath, const QString &slideName,
-                                  const QHash<QString, QVariant> &properties)
+void Q3DSViewerApp::createElements(const QString &parentElementPath, const QString &slideName,
+                                   const QVector<QHash<QString, QVariant>> &properties)
 {
     if (!m_Impl.m_view)
         return;
 
-    m_Impl.m_view->createElement(parentElementPath, slideName, properties);
+    m_Impl.m_view->createElements(parentElementPath, slideName, properties);
 }
 
-void Q3DSViewerApp::deleteElement(const QString &elementPath)
+void Q3DSViewerApp::deleteElements(const QStringList &elementPaths)
 {
     if (!m_Impl.m_view)
         return;
 
-    m_Impl.m_view->deleteElement(elementPath);
+    m_Impl.m_view->deleteElements(elementPaths);
 }
 
-void Q3DSViewerApp::createMaterial(const QString &elementPath, const QString &materialDefinition)
+void Q3DSViewerApp::createMaterials(const QString &elementPath,
+                                    const QStringList &materialDefinitions)
 {
     if (!m_Impl.m_view)
         return;
 
-    m_Impl.m_view->createMaterial(elementPath, materialDefinition);
+    m_Impl.m_view->createMaterials(elementPath, materialDefinitions);
 }
 
 Q3DSViewerApp &Q3DSViewerApp::Create(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer,

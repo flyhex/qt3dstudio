@@ -211,10 +211,10 @@ bool Q3DSRenderer::initializeRuntime(QOpenGLFramebufferObject *inFbo)
             this, &Q3DSRenderer::exitSlide);
     connect(m_runtime, &Q3DSViewer::Q3DSViewerApp::SigCustomSignal,
             this, &Q3DSRenderer::customSignalEmitted);
-    connect(m_runtime, &Q3DSViewer::Q3DSViewerApp::SigElementCreated,
-            this, &Q3DSRenderer::elementCreated);
-    connect(m_runtime, &Q3DSViewer::Q3DSViewerApp::SigMaterialCreated,
-            this, &Q3DSRenderer::materialCreated);
+    connect(m_runtime, &Q3DSViewer::Q3DSViewerApp::SigElementsCreated,
+            this, &Q3DSRenderer::elementsCreated);
+    connect(m_runtime, &Q3DSViewer::Q3DSViewerApp::SigMaterialsCreated,
+            this, &Q3DSRenderer::materialsCreated);
 
     return true;
 }
@@ -337,21 +337,30 @@ void Q3DSRenderer::processCommands()
                         cmd.m_stringValue, cmd.m_variantValue,
                         static_cast<qt3ds::runtime::DataInputValueRole>(cmd.m_intValues[0]));
             break;
-        case CommandType_CreateElement: {
-            m_runtime->createElement(cmd.m_elementPath, cmd.m_stringValue,
-                                     *static_cast<QHash<QString, QVariant> *>(cmd.m_data));
+        case CommandType_CreateElements: {
+            m_runtime->createElements(
+                        cmd.m_elementPath, cmd.m_stringValue,
+                        *static_cast<QVector<QHash<QString, QVariant>> *>(cmd.m_data));
             // Runtime makes copy of the data in its own format, so we can delete it now
             auto &command = m_commands.commandAt(i);
-            delete reinterpret_cast<QHash<QString, QVariant> *>(command.m_data);
+            delete reinterpret_cast<QVector<QHash<QString, QVariant>> *>(command.m_data);
             command.m_data = nullptr;
             break;
         }
-        case CommandType_DeleteElement: {
-            m_runtime->deleteElement(cmd.m_elementPath);
+        case CommandType_DeleteElements: {
+            m_runtime->deleteElements(*static_cast<QStringList *>(cmd.m_data));
+            // Runtime makes copy of the data in its own format, so we can delete it now
+            auto &command = m_commands.commandAt(i);
+            delete reinterpret_cast<QStringList *>(command.m_data);
+            command.m_data = nullptr;
             break;
         }
-        case CommandType_CreateMaterial: {
-            m_runtime->createMaterial(cmd.m_elementPath, cmd.m_stringValue);
+        case CommandType_CreateMaterials: {
+            m_runtime->createMaterials(cmd.m_elementPath, *static_cast<QStringList *>(cmd.m_data));
+            // Runtime makes copy of the data in its own format, so we can delete it now
+            auto &command = m_commands.commandAt(i);
+            delete reinterpret_cast<QStringList *>(command.m_data);
+            command.m_data = nullptr;
             break;
         }
         case CommandType_RequestSlideInfo: {

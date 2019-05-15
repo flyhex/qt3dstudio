@@ -59,7 +59,7 @@ private Q_SLOTS:
     void testCreateMaterial();
 
 private:
-    void deleteCreatedElements(int interval);
+    void deleteCreatedElements();
     void createElement(const QString &parentElementPath, const QString &slideName,
                        const QHash<QString, QVariant> &properties);
 

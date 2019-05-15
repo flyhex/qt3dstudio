@@ -31,9 +31,11 @@
 #define Q3DSPRESENTATION_H
 
 #include <QtStudio3D/qstudio3dglobal.h>
+#include <QtStudio3D/q3dsdatainput.h>
 #include <QtCore/qobject.h>
 #include <QtCore/qurl.h>
-#include <QtStudio3D/q3dsdatainput.h>
+#include <QtCore/qvector.h>
+#include <QtCore/qstringlist.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -85,8 +87,12 @@ public:
 
     void createElement(const QString &parentElementPath, const QString &slideName,
                        const QHash<QString, QVariant> &properties);
+    void createElements(const QString &parentElementPath, const QString &slideName,
+                        const QVector<QHash<QString, QVariant>> &properties);
     void deleteElement(const QString &elementPath);
+    void deleteElements(const QStringList &elementPaths);
     void createMaterial(const QString &elementPath, const QString &materialDefinition);
+    void createMaterials(const QString &elementPath, const QStringList &materialDefinitions);
 
 public Q_SLOTS:
     void setSource(const QUrl &source);
@@ -113,8 +119,8 @@ Q_SIGNALS:
     void dataInputsReady();
     void customSignalEmitted(const QString &elementPath, const QString &name);
     void delayedLoadingChanged(bool enable);
-    void elementCreated(const QString &elementPath, const QString &error);
-    void materialCreated(const QString &name, const QString &error);
+    void elementsCreated(const QStringList &elementPaths, const QString &error);
+    void materialsCreated(const QStringList &materialNames, const QString &error);
 
 private:
     Q_DISABLE_COPY(Q3DSPresentation)

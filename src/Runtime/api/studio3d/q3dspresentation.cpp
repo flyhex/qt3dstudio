@@ -283,12 +283,21 @@ void Q3DSPresentation::setDataInputValue(const QString &name, const QVariant &va
 void Q3DSPresentation::createElement(const QString &parentElementPath, const QString &slideName,
                                      const QHash<QString, QVariant> &properties)
 {
+    QVector<QHash<QString, QVariant>> theProperties;
+    theProperties << properties;
+    createElements(parentElementPath, slideName, theProperties);
+}
+
+void Q3DSPresentation::createElements(const QString &parentElementPath, const QString &slideName,
+                                      const QVector<QHash<QString, QVariant>> &properties)
+{
     if (d_ptr->m_viewerApp) {
-        d_ptr->m_viewerApp->createElement(parentElementPath, slideName, properties);
+        d_ptr->m_viewerApp->createElements(parentElementPath, slideName, properties);
     } else if (d_ptr->m_commandQueue) {
         // We need to copy the properties map as queue takes ownership of it
-        QHash<QString, QVariant> *theProperties = new QHash<QString, QVariant>(properties);
-        d_ptr->m_commandQueue->queueCommand(parentElementPath, CommandType_CreateElement,
+        QVector<QHash<QString, QVariant>> *theProperties
+                = new QVector<QHash<QString, QVariant>>(properties);
+        d_ptr->m_commandQueue->queueCommand(parentElementPath, CommandType_CreateElements,
                                             slideName, theProperties);
     }
 }
@@ -298,10 +307,20 @@ void Q3DSPresentation::createElement(const QString &parentElementPath, const QSt
 */
 void Q3DSPresentation::deleteElement(const QString &elementPath)
 {
-    if (d_ptr->m_viewerApp)
-        d_ptr->m_viewerApp->deleteElement(elementPath);
-    else if (d_ptr->m_commandQueue)
-        d_ptr->m_commandQueue->queueCommand(elementPath, CommandType_DeleteElement);
+    QStringList elementPaths;
+    elementPaths << elementPath;
+    deleteElements(elementPaths);
+}
+
+void Q3DSPresentation::deleteElements(const QStringList &elementPaths)
+{
+    if (d_ptr->m_viewerApp) {
+        d_ptr->m_viewerApp->deleteElements(elementPaths);
+    } else if (d_ptr->m_commandQueue) {
+        // We need to copy the list as queue takes ownership of it
+        QStringList *theElementPaths = new QStringList(elementPaths);
+        d_ptr->m_commandQueue->queueCommand(CommandType_DeleteElements, theElementPaths);
+    }
 }
 
 /**
@@ -314,11 +333,21 @@ void Q3DSPresentation::deleteElement(const QString &elementPath)
 void Q3DSPresentation::createMaterial(const QString &elementPath,
                                       const QString &materialDefinition)
 {
+    QStringList materialDefinitions;
+    materialDefinitions << materialDefinition;
+    createMaterials(elementPath, materialDefinitions);
+}
+
+void Q3DSPresentation::createMaterials(const QString &elementPath,
+                                       const QStringList &materialDefinitions)
+{
     if (d_ptr->m_viewerApp) {
-        d_ptr->m_viewerApp->createMaterial(elementPath, materialDefinition);
+        d_ptr->m_viewerApp->createMaterials(elementPath, materialDefinitions);
     } else if (d_ptr->m_commandQueue) {
-        d_ptr->m_commandQueue->queueCommand(elementPath, CommandType_CreateMaterial,
-                                            materialDefinition);
+        // We need to copy the list as queue takes ownership of it
+        QStringList *theMaterialDefinitions = new QStringList(materialDefinitions);
+        d_ptr->m_commandQueue->queueCommand(elementPath, CommandType_CreateMaterials,
+                                            theMaterialDefinitions);
     }
 }
 
@@ -464,10 +493,10 @@ void Q3DSPresentationPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool 
                     q_ptr, &Q3DSPresentation::slideExited);
             connect(app, &Q3DSViewer::Q3DSViewerApp::SigCustomSignal,
                     q_ptr, &Q3DSPresentation::customSignalEmitted);
-            connect(app, &Q3DSViewer::Q3DSViewerApp::SigElementCreated,
-                    q_ptr, &Q3DSPresentation::elementCreated);
-            connect(app, &Q3DSViewer::Q3DSViewerApp::SigMaterialCreated,
-                    q_ptr, &Q3DSPresentation::materialCreated);
+            connect(app, &Q3DSViewer::Q3DSViewerApp::SigElementsCreated,
+                    q_ptr, &Q3DSPresentation::elementsCreated);
+            connect(app, &Q3DSViewer::Q3DSViewerApp::SigMaterialsCreated,
+                    q_ptr, &Q3DSPresentation::materialsCreated);
         }
         if (oldApp) {
             disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigSlideEntered,
@@ -476,10 +505,10 @@ void Q3DSPresentationPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool 
                        q_ptr, &Q3DSPresentation::slideExited);
             disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigCustomSignal,
                        q_ptr, &Q3DSPresentation::customSignalEmitted);
-            disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigElementCreated,
-                       q_ptr, &Q3DSPresentation::elementCreated);
-            disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigMaterialCreated,
-                       q_ptr, &Q3DSPresentation::materialCreated);
+            disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigElementsCreated,
+                       q_ptr, &Q3DSPresentation::elementsCreated);
+            disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigMaterialsCreated,
+                       q_ptr, &Q3DSPresentation::materialsCreated);
         }
     }
 }

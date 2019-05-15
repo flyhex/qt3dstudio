@@ -427,16 +427,15 @@ public:
     void FireEvent(const char *element, const char *evtName) override;
     void SetDataInputValue(const QString &name, const QVariant &value,
                            qt3ds::runtime::DataInputValueRole valueRole) override;
-    void createElement(const QString &parentElementPath, const QString &slideName,
-                       const QHash<QString, QVariant> &properties,
-                       qt3ds::render::IQt3DSRenderer *renderer) override;
-    void deleteElement(const QString &elementPath,
-                       qt3ds::render::IQt3DSRenderer *renderer) override;
-    void createMaterial(const QString &elementPath, const QString &materialDefinition,
-                        qt3ds::render::ICustomMaterialSystem *customMaterialSystem,
-                        IDynamicObjectSystem *dynamicObjectSystem,
+    void createElements(const QString &parentElementPath, const QString &slideName,
+                        const QVector<QHash<QString, QVariant>> &properties,
                         qt3ds::render::IQt3DSRenderer *renderer) override;
-    //void createMesh() override; // TODO (QT3DS-3378)
+    void deleteElements(const QStringList &elementPaths,
+                        qt3ds::render::IQt3DSRenderer *renderer) override;
+    void createMaterials(const QString &elementPath, const QStringList &materialDefinitions,
+                         qt3ds::render::ICustomMaterialSystem *customMaterialSystem,
+                         IDynamicObjectSystem *dynamicObjectSystem,
+                         qt3ds::render::IQt3DSRenderer *renderer) override;
 
     void GotoSlide(const char *component, const char *slideName,
                            const SScriptEngineGotoSlideArgs &inArgs) override;
@@ -519,9 +518,12 @@ private:
     QVector3D parseFloat3Property(const QString &propValue);
     QVector4D parseFloat4Property(const QString &propValue);
 
-    void notifyElementCreation(CPresentation *pres, const QString &elementName,
+    void notifyElementCreation(CPresentation *pres, const QStringList &elementNames,
                                const QString &error);
-    void notifyMaterialCreation(CPresentation *pres, const QString &name, const QString &error);
+    void notifyMaterialCreation(CPresentation *pres, const QStringList &materialNames,
+                                const QString &error);
+    void deleteElements(const QVector<TElement *> &elements,
+                        qt3ds::render::IQt3DSRenderer *renderer);
 };
 
 CQmlEngineImpl::CQmlEngineImpl(NVFoundationBase &fnd, ITimeProvider &)
@@ -919,24 +921,37 @@ void CQmlEngineImpl::SetDataInputValue(
 
 static int _idCounter = 0;
 
-void CQmlEngineImpl::createElement(const QString &parentElementPath, const QString &slideName,
-                                   const QHash<QString, QVariant> &properties,
-                                   qt3ds::render::IQt3DSRenderer *renderer)
+void CQmlEngineImpl::createElements(const QString &parentElementPath, const QString &slideName,
+                                    const QVector<QHash<QString, QVariant>> &properties,
+                                    qt3ds::render::IQt3DSRenderer *renderer)
 {
+    int elementIndex = -1;
     QString error;
     CPresentation *presentation = nullptr;
-    QString elementPath = parentElementPath + QLatin1Char('.')
-            + properties.value(QStringLiteral("name")).toString();
+    QStringList elementPaths;
+    elementPaths.reserve(properties.size());
+    for (auto &props : properties) {
+        elementPaths << parentElementPath + QLatin1Char('.')
+                        + props.value(QStringLiteral("name")).toString();
+    }
+    QVector<TElement *> createdElements;
+    TElement *parentElement = nullptr;
+
+    auto handleError = [&]() {
+        if (!error.isEmpty())
+            deleteElements(createdElements, renderer);
+        notifyElementCreation(presentation, elementPaths, error);
+    };
 
     // Resolve parent element
     QByteArray theParentPath = parentElementPath.toUtf8();
-    TElement *parentElement = getTarget(theParentPath.constData());
+    parentElement = getTarget(theParentPath.constData());
 
     if (!parentElement) {
-        error = QStringLiteral("Invalid parent element");
+        error = QObject::tr("Invalid parent element: '%1'").arg(parentElementPath);
         TElement *sceneElement = getTarget("Scene");
         presentation = static_cast<CPresentation *>(sceneElement->GetBelongedPresentation());
-        notifyElementCreation(presentation, elementPath, error);
+        handleError();
         return;
     }
 
@@ -945,8 +960,8 @@ void CQmlEngineImpl::createElement(const QString &parentElementPath, const QStri
 
     if (!parentTranslator || !qt3ds::render::GraphObjectTypes::IsNodeType(
                 parentTranslator->GetUIPType())) {
-        error = QStringLiteral("Parent element is not a valid node");
-        notifyElementCreation(presentation, elementPath, error);
+        error = QObject::tr("Parent element is not a valid node: '%1'").arg(parentElementPath);
+        handleError();
         return;
     }
 
@@ -954,304 +969,271 @@ void CQmlEngineImpl::createElement(const QString &parentElementPath, const QStri
     auto &parentObject = static_cast<qt3ds::render::SNode &>(parentTranslator->RenderObject());
     presentation = static_cast<CPresentation *>(parentElement->GetBelongedPresentation());
 
-    ++_idCounter;
-
     // Resolve slide
     QByteArray theSlideName = slideName.toUtf8();
     ISlideSystem &slideSystem = presentation->GetSlideSystem();
     int slideIndex = slideSystem.FindSlide(component, theSlideName.constData());
     int currentSlide = static_cast<TComponent &>(component).GetCurrentSlide();
     if (slideIndex == 0xff) {
-        error = QStringLiteral("Invalid slide name for time context: '%1'").arg(slideName);
-        notifyElementCreation(presentation, elementPath, error);
-        return;
-    }
-
-    // Remove properties requiring custom handling
-    QHash<QString, QVariant> theProperties = properties;
-    QString newElementName = theProperties.take(QStringLiteral("name")).toString();
-    QString refMatName = theProperties.take(QStringLiteral("material")).toString();
-    if (refMatName.startsWith(QLatin1Char('#'))) // Absolute reference
-        refMatName = refMatName.mid(1);
-    else if (!refMatName.isEmpty() && !refMatName.contains(QLatin1Char('/')))
-        refMatName = QStringLiteral("/") + refMatName;
-
-    if (newElementName.isEmpty())
-        newElementName = QStringLiteral("NewElement_%1").arg(_idCounter);
-    QByteArray newElementNameBa = newElementName.toUtf8();
-
-    // Make sure the name is not duplicate
-    TElement *existingChild
-            = parentElement->FindChild(CHash::HashString(newElementNameBa.constData()));
-    if (existingChild) {
-        qWarning() << __FUNCTION__
-                   << "The specified parent" << parentElementPath
-                   << "already has a child with the same name:" << newElementName;
-        error = QStringLiteral("Element already exists");
-        notifyElementCreation(presentation, elementPath, error);
+        error = QObject::tr("Invalid slide name for time context: '%1'").arg(slideName);
+        handleError();
         return;
     }
 
     auto &strTable = presentation->GetStringTable();
-    const CRegisteredString regName = strTable.RegisterStr(newElementNameBa);
-    // TODO: Support also some non-model element types, like group and text elements (QT3DS-3381)
-    const CRegisteredString elementType = strTable.RegisterStr("Model");
-    const CRegisteredString elementSubType;
-    TPropertyDescAndValueList elementProperties;
 
-    // Set default values for missing mandatory properties
     const QString sourcePathPropName = QStringLiteral("sourcepath");
     const QString startTimePropName = QStringLiteral("starttime");
     const QString endTimePropName = QStringLiteral("endtime");
     const QString eyeBallPropName = QStringLiteral("eyeball");
-    Q3DStudio::UVariant attValue;
-    bool eyeBall = true;
-    theProperties.value(QStringLiteral("eyeball"), true).toBool();
-    if (!theProperties.contains(sourcePathPropName)) {
-        addStringAttribute(strTable, elementProperties, sourcePathPropName,
-                           QStringLiteral("#Cube"));
-    }
-    if (!theProperties.contains(startTimePropName)) {
-        parentElement->GetAttribute(Q3DStudio::ATTRIBUTE_STARTTIME, attValue);
-        addIntAttribute(strTable, elementProperties, startTimePropName, int(attValue.m_INT32));
-    }
-    if (!theProperties.contains(endTimePropName)) {
-        parentElement->GetAttribute(Q3DStudio::ATTRIBUTE_ENDTIME, attValue);
-        addIntAttribute(strTable, elementProperties, endTimePropName, int(attValue.m_INT32));
-    }
-    if (!theProperties.contains(eyeBallPropName))
-        addBoolAttribute(strTable, elementProperties, eyeBallPropName, true);
-    else
-        eyeBall = theProperties.value(QStringLiteral("eyeball")).toBool();
 
-    QHashIterator<QString, QVariant> it(theProperties);
-    while (it.hasNext()) {
-        it.next();
-        switch (it.value().type()) {
-        case QVariant::Double:
-            addFloatAttribute(strTable, elementProperties, it.key(), it.value().toFloat());
-            break;
-        case QVariant::Bool:
-            addBoolAttribute(strTable, elementProperties, it.key(), it.value().toBool());
-            break;
-        case QVariant::Int:
-            addIntAttribute(strTable, elementProperties, it.key(), it.value().toInt());
-            break;
-        case QVariant::String:
-            addStringAttribute(strTable, elementProperties, it.key(), it.value().toString());
-            break;
-        case QVariant::Vector3D: {
-            QVector3D vec = it.value().value<QVector3D>();
-            if (it.key() == QLatin1String("rotation")) {
-                vec.setX(qDegreesToRadians(vec.x()));
-                vec.setY(qDegreesToRadians(vec.y()));
-                vec.setZ(qDegreesToRadians(vec.z()));
-            }
-            // TODO: Need to support also colors if non-model elements what need colors are
-            // TODO: supported (QT3DS-3381)
-            QStringList atts;
-            atts << (it.key() + QLatin1String(".x"))
-                 << (it.key() + QLatin1String(".y"))
-                 << (it.key() + QLatin1String(".z"));
-            addFloat3Attribute(strTable, elementProperties, atts, vec);
-            break;
-        }
-        default:
-            error = QStringLiteral("Unsupported property type for: '%1'").arg(it.key());
-            notifyElementCreation(presentation, elementPath, error);
+    Q3DStudio::UVariant attValue;
+    parentElement->GetAttribute(Q3DStudio::ATTRIBUTE_STARTTIME, attValue);
+    const int parentStartTime = int(attValue.m_INT32);
+    parentElement->GetAttribute(Q3DStudio::ATTRIBUTE_ENDTIME, attValue);
+    const int parentEndTime = int(attValue.m_INT32);
+
+    for (const auto &currentProperties : properties) {
+        ++_idCounter;
+        ++elementIndex;
+
+        // Remove properties requiring custom handling
+        QHash<QString, QVariant> theProperties = currentProperties;
+        QString newElementName = theProperties.take(QStringLiteral("name")).toString();
+        QString refMatName = theProperties.take(QStringLiteral("material")).toString();
+        if (refMatName.startsWith(QLatin1Char('#'))) // Absolute reference
+            refMatName = refMatName.mid(1);
+        else if (!refMatName.isEmpty() && !refMatName.contains(QLatin1Char('/')))
+            refMatName = QStringLiteral("/") + refMatName;
+
+        if (newElementName.isEmpty())
+            newElementName = QStringLiteral("NewElement_%1").arg(_idCounter);
+        QByteArray newElementNameBa = newElementName.toUtf8();
+
+        // Make sure the name is not duplicate
+        TElement *existingChild
+                = parentElement->FindChild(CHash::HashString(newElementNameBa.constData()));
+        if (existingChild) {
+            error = QObject::tr("Element already exists: '%1'").arg(elementPaths[elementIndex]);
+            handleError();
             return;
         }
-    }
 
-    // Create new element
-    TElement &newElem = m_Application->GetElementAllocator().CreateElement(
-                regName, elementType, elementSubType,
-                toConstDataRef(elementProperties.data(), QT3DSU32(elementProperties.size())),
-                presentation, parentElement, false);
-    newElem.m_Path = strTable.RegisterStr(elementPath);
+        const CRegisteredString regName = strTable.RegisterStr(newElementNameBa);
+        // TODO: Support also some non-model elements, like group and text elements (QT3DS-3381)
+        const CRegisteredString elementType = strTable.RegisterStr("Model");
+        const CRegisteredString elementSubType;
+        TPropertyDescAndValueList elementProperties;
 
-    // Insert the new element into the correct slide
-    if (!slideSystem.addSlideElement(component, slideIndex, newElem, eyeBall)) {
-        // Delete created element if adding to slide failed
-        m_Application->GetElementAllocator().ReleaseElement(newElem, true);
-        error = QStringLiteral("Failed to add the new element to a slide");
-        notifyElementCreation(presentation, elementPath, error);
-        return;
-    }
+        // Set default values for missing mandatory properties
+        bool eyeBall = true;
+        theProperties.value(eyeBallPropName, true).toBool();
+        if (!theProperties.contains(sourcePathPropName)) {
+            addStringAttribute(strTable, elementProperties, sourcePathPropName,
+                               QStringLiteral("#Cube"));
+        }
+        if (!theProperties.contains(startTimePropName))
+            addIntAttribute(strTable, elementProperties, startTimePropName, parentStartTime);
+        if (!theProperties.contains(endTimePropName))
+            addIntAttribute(strTable, elementProperties, endTimePropName, parentEndTime);
+        if (!theProperties.contains(eyeBallPropName))
+            addBoolAttribute(strTable, elementProperties, eyeBallPropName, true);
+        else
+            eyeBall = theProperties.value(eyeBallPropName).toBool();
 
-    // Create material element
-    const CRegisteredString matName = strTable.RegisterStr("refmat");
-    const CRegisteredString matType = strTable.RegisterStr("ReferencedMaterial");
-    TPropertyDescAndValueList matProperties;
-    TElement &newMatElem = m_Application->GetElementAllocator().CreateElement(
-                matName, matType, elementSubType,
-                toConstDataRef(matProperties.data(), QT3DSU32(matProperties.size())),
-                presentation, &newElem, false);
-
-    QString matElemPath = elementPath + QLatin1String(".refmat");
-    newMatElem.m_Path = strTable.RegisterStr(matElemPath);
-
-    if (!slideSystem.addSlideElement(component, slideIndex, newMatElem, eyeBall)) {
-        // Delete created element and material element if adding to slide failed
-        m_Application->GetElementAllocator().ReleaseElement(newElem, true);
-        error = QStringLiteral("Failed to add the new material element to a slide");
-        notifyElementCreation(presentation, elementPath, error);
-        return;
-    }
-
-    // First check if we can resolve the referenced material before creating any graph objects
-    // Find a match in material container
-    // If the specified material is not available in original presentation, or was not specified,
-    // use the first material found as placeholder
-    TElement *rootElement = presentation->GetRoot();
-    TElement *container = rootElement->FindChild(CHash::HashString("__Container"));
-    TElement *firstChild = nullptr;
-    SGraphObject *referencedMaterial = nullptr;
-    if (container) {
-        TElement *nextChild = container->GetChild();
-        firstChild = nextChild;
-        while (nextChild) {
-            QString childName = QString::fromUtf8(nextChild->m_Name);
-            if (childName.endsWith(refMatName)) {
-                auto tr = static_cast<qt3ds::render::Qt3DSTranslator *>(
-                            nextChild->GetAssociation());
-                referencedMaterial = static_cast<qt3ds::render::SGraphObject *>(
-                            &tr->RenderObject());
+        QHashIterator<QString, QVariant> it(theProperties);
+        while (it.hasNext()) {
+            it.next();
+            switch (it.value().type()) {
+            case QVariant::Double:
+                addFloatAttribute(strTable, elementProperties, it.key(), it.value().toFloat());
+                break;
+            case QVariant::Bool:
+                addBoolAttribute(strTable, elementProperties, it.key(), it.value().toBool());
+                break;
+            case QVariant::Int:
+                addIntAttribute(strTable, elementProperties, it.key(), it.value().toInt());
+                break;
+            case QVariant::String:
+                addStringAttribute(strTable, elementProperties, it.key(), it.value().toString());
+                break;
+            case QVariant::Vector3D: {
+                QVector3D vec = it.value().value<QVector3D>();
+                if (it.key() == QLatin1String("rotation")) {
+                    vec.setX(qDegreesToRadians(vec.x()));
+                    vec.setY(qDegreesToRadians(vec.y()));
+                    vec.setZ(qDegreesToRadians(vec.z()));
+                }
+                // TODO: Need to support also colors if non-model elements what need colors are
+                // TODO: supported (QT3DS-3381)
+                QStringList atts;
+                atts << (it.key() + QLatin1String(".x"))
+                     << (it.key() + QLatin1String(".y"))
+                     << (it.key() + QLatin1String(".z"));
+                addFloat3Attribute(strTable, elementProperties, atts, vec);
                 break;
             }
-            nextChild = nextChild->GetSibling();
+            default:
+                error = QObject::tr("Unsupported property type for: '%1'").arg(it.key());
+                handleError();
+                return;
+            }
         }
-    }
 
-    if (!referencedMaterial) {
-        // Empty material is assumed to be deliberate, so don't warn in that case
-        if (!refMatName.isEmpty()) {
-            qWarning() << __FUNCTION__ << "Requested material" << refMatName
-                       << "was not found. Trying to find a fallback material.";
-        }
-        if (firstChild) {
-            auto tr = static_cast<qt3ds::render::Qt3DSTranslator *>(firstChild->GetAssociation());
-            referencedMaterial = static_cast<qt3ds::render::SGraphObject *>(&tr->RenderObject());
-        }
-        if (!referencedMaterial) {
-            // We could create default material into the container in case there is no materials
-            // in there, but it is unlikely that such a presentation would be used in practice.
+        // Create new element
+        TElement &newElem = m_Application->GetElementAllocator().CreateElement(
+                    regName, elementType, elementSubType,
+                    toConstDataRef(elementProperties.data(), QT3DSU32(elementProperties.size())),
+                    presentation, parentElement, false);
+        newElem.m_Path = strTable.RegisterStr(elementPaths[elementIndex]);
+
+        // Insert the new element into the correct slide
+        if (!slideSystem.addSlideElement(component, slideIndex, newElem, eyeBall)) {
+            // Delete created element if adding to slide failed
             m_Application->GetElementAllocator().ReleaseElement(newElem, true);
-            error = QStringLiteral("Unable to resolve a fallback material");
-            notifyElementCreation(presentation, elementPath, error);
+            error = QObject::tr("Failed to add the new element to a slide");
+            handleError();
             return;
         }
+
+        // Create material element
+        const CRegisteredString matName = strTable.RegisterStr("refmat");
+        const CRegisteredString matType = strTable.RegisterStr("ReferencedMaterial");
+        TPropertyDescAndValueList matProperties;
+        TElement &newMatElem = m_Application->GetElementAllocator().CreateElement(
+                    matName, matType, elementSubType,
+                    toConstDataRef(matProperties.data(), QT3DSU32(matProperties.size())),
+                    presentation, &newElem, false);
+
+        QString matElemPath = elementPaths[elementIndex] + QLatin1String(".refmat");
+        newMatElem.m_Path = strTable.RegisterStr(matElemPath);
+
+        if (!slideSystem.addSlideElement(component, slideIndex, newMatElem, eyeBall)) {
+            // Delete created element and material element if adding to slide failed
+            m_Application->GetElementAllocator().ReleaseElement(newElem, true);
+            error = QObject::tr("Failed to add the new material element to a slide");
+            handleError();
+            return;
+        }
+
+        // First check if we can resolve the referenced material before creating any graph objects
+        // Find a match in material container
+        // If the specified material is not available in original presentation, or was not
+        // specified, use the first material found as placeholder
+        TElement *rootElement = presentation->GetRoot();
+        TElement *container = rootElement->FindChild(CHash::HashString("__Container"));
+        TElement *firstChild = nullptr;
+        SGraphObject *referencedMaterial = nullptr;
+        if (container) {
+            TElement *nextChild = container->GetChild();
+            firstChild = nextChild;
+            while (nextChild) {
+                QString childName = QString::fromUtf8(nextChild->m_Name);
+                if (childName.endsWith(refMatName)) {
+                    auto tr = static_cast<qt3ds::render::Qt3DSTranslator *>(
+                                nextChild->GetAssociation());
+                    referencedMaterial = static_cast<qt3ds::render::SGraphObject *>(
+                                &tr->RenderObject());
+                    break;
+                }
+                nextChild = nextChild->GetSibling();
+            }
+        }
+
+        if (!referencedMaterial) {
+            // Empty material is assumed to be deliberate, so don't warn in that case
+            if (!refMatName.isEmpty()) {
+                qWarning() << __FUNCTION__ << "Requested material" << refMatName
+                           << "was not found. Trying to find a fallback material.";
+            }
+            if (firstChild) {
+                auto tr = static_cast<qt3ds::render::Qt3DSTranslator *>(
+                            firstChild->GetAssociation());
+                referencedMaterial = static_cast<qt3ds::render::SGraphObject *>(
+                            &tr->RenderObject());
+            }
+            if (!referencedMaterial) {
+                // We could create default material into the container in case there is no materials
+                // in there, but it is unlikely that such a presentation would be used in practice.
+                m_Application->GetElementAllocator().ReleaseElement(newElem, true);
+                error = QObject::tr("Unable to resolve a fallback material");
+                handleError();
+                return;
+            }
+        }
+
+        // Create model SGraphObject
+        NVAllocatorCallback &allocator = presentation->GetScene()->allocator();
+        qt3ds::render::SModel *newObject = QT3DS_NEW(allocator, qt3ds::render::SModel)();
+        newObject->m_Id = strTable.RegisterStr((QByteArrayLiteral("_newObject_")
+                                                + QByteArray::number(_idCounter)).constData());
+        parentObject.AddChild(*newObject);
+
+        qt3ds::render::Qt3DSTranslator::CreateTranslatorForElement(newElem, *newObject, allocator);
+
+        // Create material SGraphObject
+        qt3ds::render::SReferencedMaterial *newMaterial
+                = QT3DS_NEW(allocator, qt3ds::render::SReferencedMaterial)();
+        newMaterial->m_Id = strTable.RegisterStr((QByteArrayLiteral("_newMaterial_")
+                                                  + QByteArray::number(_idCounter)).constData());
+        newMaterial->m_ReferencedMaterial = referencedMaterial;
+
+        newObject->AddMaterial(*newMaterial);
+
+        // Determine if element should be active based on start/end times
+        TTimeUnit startTime = 0;
+        TTimeUnit stopTime = 0;
+        if (newElem.GetAttribute(Q3DStudio::ATTRIBUTE_STARTTIME, attValue))
+            startTime = TTimeUnit(attValue.m_INT32);
+        if (newElem.GetAttribute(Q3DStudio::ATTRIBUTE_ENDTIME, attValue))
+            stopTime = TTimeUnit(attValue.m_INT32);
+        TTimeUnit localTime = newElem.GetActivityZone().GetItemLocalTime(newElem);
+
+        bool isActiveRightNow = eyeBall && localTime >= startTime && localTime <= stopTime
+                && currentSlide == slideIndex;
+
+        newElem.SetActive(isActiveRightNow);
+        newObject->m_Flags.SetActive(isActiveRightNow);
+        if (eyeBall)
+            newElem.GetActivityZone().UpdateItemInfo(newElem);
+
+        createdElements << &newElem;
     }
-
-    // Create model SGraphObject
-    NVAllocatorCallback &allocator = presentation->GetScene()->allocator();
-    qt3ds::render::SModel *newObject = QT3DS_NEW(allocator, qt3ds::render::SModel)();
-    newObject->m_Id = strTable.RegisterStr((QByteArrayLiteral("_newObject_")
-                                            + QByteArray::number(_idCounter)).constData());
-    parentObject.AddChild(*newObject);
-
-    qt3ds::render::Qt3DSTranslator::CreateTranslatorForElement(newElem, *newObject, allocator);
-
-    // Create material SGraphObject
-    qt3ds::render::SReferencedMaterial *newMaterial
-            = QT3DS_NEW(allocator, qt3ds::render::SReferencedMaterial)();
-    newMaterial->m_Id = strTable.RegisterStr((QByteArrayLiteral("_newMaterial_")
-                                              + QByteArray::number(_idCounter)).constData());
-    newMaterial->m_ReferencedMaterial = referencedMaterial;
-
-    newObject->AddMaterial(*newMaterial);
-
-    // Determine if element should be active based on start/end times
-    TTimeUnit startTime = 0;
-    TTimeUnit stopTime = 0;
-    if (newElem.GetAttribute(Q3DStudio::ATTRIBUTE_STARTTIME, attValue))
-        startTime = TTimeUnit(attValue.m_INT32);
-    if (newElem.GetAttribute(Q3DStudio::ATTRIBUTE_ENDTIME, attValue))
-        stopTime = TTimeUnit(attValue.m_INT32);
-    TTimeUnit localTime = newElem.GetActivityZone().GetItemLocalTime(newElem);
-
-    bool isActiveRightNow = eyeBall && localTime >= startTime && localTime <= stopTime
-            && currentSlide == slideIndex;
-
-    newElem.SetActive(isActiveRightNow);
-    newObject->m_Flags.SetActive(isActiveRightNow);
-    if (eyeBall)
-        newElem.GetActivityZone().UpdateItemInfo(newElem);
 
     renderer->ChildrenUpdated(parentObject);
 
-    notifyElementCreation(presentation, elementPath, {});
+    handleError();
 }
 
 // Only supports deleting element types that can be added via createElement.
-void CQmlEngineImpl::deleteElement(const QString &elementPath,
-                                   qt3ds::render::IQt3DSRenderer *renderer)
+void CQmlEngineImpl::deleteElements(const QStringList &elementPaths,
+                                    qt3ds::render::IQt3DSRenderer *renderer)
 {
-    // Resolve element
-    QByteArray thePath = elementPath.toUtf8();
-    TElement *element = getTarget(thePath.constData());
+    QVector<TElement *> elements;
+    // Convert the path list to set for quicker lookups
+    QSet<QString> pathSet = elementPaths.toSet();
 
-    if (!element) {
-        qWarning() << __FUNCTION__ <<  "Invalid element:" << elementPath;
-        return;
-    }
-
-    // Remove element recursively from slide system
-    IPresentation *presentation = element->GetBelongedPresentation();
-    TElement &component = element->GetComponentParent();
-    ISlideSystem &slideSystem = presentation->GetSlideSystem();
-    slideSystem.removeElement(component, *element);
-
-    TElement *parentElement = element->GetParent();
-    Q_ASSERT(parentElement);
-
-    NVAllocatorCallback &allocator = presentation->GetScene()->allocator();
-
-    // Recursive deleter for translators and graph objects
-    std::function<void(TElement *)> deleteRenderObjects;
-    deleteRenderObjects = [&](TElement *elem)  {
-        TElement *child = elem->m_Child;
-        while (child) {
-            TElement *sibling = child->m_Sibling;
-            deleteRenderObjects(child);
-            child = sibling;
-        }
-
-        auto translator = static_cast<qt3ds::render::Qt3DSTranslator *>(elem->GetAssociation());
-        if (translator) {
-            if (translator->GetUIPType() == qt3ds::render::GraphObjectTypes::Model) {
-                auto model = static_cast<qt3ds::render::SModel *>(&translator->RenderObject());
-                // Delete material
-                if (model->m_FirstMaterial) {
-                    auto material = static_cast<qt3ds::render::SReferencedMaterial *>(
-                                model->m_FirstMaterial);
-                    QT3DS_FREE(allocator, material);
-                }
-                QT3DS_FREE(allocator, model);
+    for (auto &elementPath : elementPaths) {
+        // Check that parent is not already included in the deleted elements
+        int idx = elementPath.lastIndexOf(QLatin1Char('.'));
+        bool parentFound = false;
+        while (idx != -1) {
+            QString parentPath = elementPath.left(idx);
+            if (pathSet.contains(parentPath)) {
+                parentFound = true;
+                break;
             }
-            QT3DS_FREE(allocator, translator);
+            idx = parentPath.lastIndexOf(QLatin1Char('.'));
         }
-    };
-
-    qt3ds::render::SNode *node = nullptr;
-    qt3ds::render::SNode *parentNode = nullptr;
-    auto translator = static_cast<qt3ds::render::Qt3DSTranslator *>(element->GetAssociation());
-
-    if (translator) {
-        node = &static_cast<qt3ds::render::SNode &>(translator->RenderObject());
-        auto parentTranslator = static_cast<qt3ds::render::Qt3DSTranslator *>(
-                    parentElement->GetAssociation());
-        if (parentTranslator) {
-            parentNode = &static_cast<qt3ds::render::SNode &>(parentTranslator->RenderObject());
-            parentNode->RemoveChild(*node);
-            renderer->ChildrenUpdated(*parentNode);
+        if (!parentFound) {
+            // Resolve element
+            QByteArray thePath = elementPath.toUtf8();
+            TElement *element = getTarget(thePath.constData());
+            if (element)
+                elements << element;
         }
-        // Release child element graph objects/translators
-        deleteRenderObjects(element);
     }
-
-    // Remove element recursively
-    m_Application->GetElementAllocator().ReleaseElement(*element, true);
+    deleteElements(elements, renderer);
 }
 
 /**
@@ -1259,52 +1241,64 @@ void CQmlEngineImpl::deleteElement(const QString &elementPath,
     The materialDefinition parameter can contain a .materialdef file path or
     the entire material definition in the .materialdef format.
 */
-void CQmlEngineImpl::createMaterial(const QString &elementPath,
-                                    const QString &materialDefinition,
-                                    ICustomMaterialSystem *customMaterialSystem,
-                                    IDynamicObjectSystem *dynamicObjectSystem,
-                                    qt3ds::render::IQt3DSRenderer *renderer)
+void CQmlEngineImpl::createMaterials(const QString &elementPath,
+                                     const QStringList &materialDefinitions,
+                                     ICustomMaterialSystem *customMaterialSystem,
+                                     IDynamicObjectSystem *dynamicObjectSystem,
+                                     qt3ds::render::IQt3DSRenderer *renderer)
 {
-    QString materialName;
-    QMap<QString, QString> materialProps;
-    QMap<QString, QMap<QString, QString>> textureProps;
     CPresentation *presentation = nullptr;
     QString error;
+    QString presPath;
+    QString projPath;
+    struct MaterialInfo {
+        QString materialDefinition;
+        QString materialName;
+        QMap<QString, QString> materialProps;
+        QMap<QString, QMap<QString, QString>> textureProps;
+    };
+    QVector<MaterialInfo *> materialInfos;
+    QVector<TElement *> createdElements;
 
-    auto getMaterialInfo = [&]() {
-        QString presPath = QFileInfo(presentation->GetFilePath()).absolutePath();
-        QString projPath = presentation->getProjectPath();
+    auto handleError = [&]() {
+        if (!error.isEmpty())
+            deleteElements(createdElements, renderer);
+        QStringList materialNames;
+        for (auto &materialInfo : materialInfos)
+            materialNames << materialInfo->materialName;
+        qDeleteAll(materialInfos);
+        notifyMaterialCreation(presentation, materialNames, error);
+    };
 
-        Q3DSMaterialDefinitionParser::getMaterialInfo(materialDefinition,
-                                                      projPath, presPath,
-                                                      materialName, materialProps, textureProps);
+    auto getMaterialInfos = [&]() {
+        for (auto &materialDefinition : materialDefinitions) {
+            MaterialInfo *info = new MaterialInfo;
+            info->materialDefinition = materialDefinition;
+            Q3DSMaterialDefinitionParser::getMaterialInfo(materialDefinition, projPath, presPath,
+                                                          info->materialName, info->materialProps,
+                                                          info->textureProps);
+            materialInfos << info;
+        }
     };
 
     QByteArray thePath = elementPath.toUtf8();
     TElement *element = getTarget(thePath.constData());
 
     if (!element) {
-        error = QStringLiteral("Invalid element: '%1'").arg(elementPath);
+        error = QObject::tr("Invalid element: '%1'").arg(elementPath);
         TElement *sceneElement = getTarget("Scene");
         presentation = static_cast<CPresentation *>(sceneElement->GetBelongedPresentation());
-        getMaterialInfo();
-        notifyMaterialCreation(presentation, materialName, error);
+        presPath = QFileInfo(presentation->GetFilePath()).absolutePath();
+        projPath = presentation->getProjectPath();
+        getMaterialInfos();
+        handleError();
         return;
     }
 
     presentation = static_cast<CPresentation *>(element->GetBelongedPresentation());
-    getMaterialInfo();
-
-    if (materialName.isEmpty() || materialProps.isEmpty()) {
-        error = QStringLiteral("Invalid material definition: '%1'").arg(materialDefinition);
-        notifyMaterialCreation(presentation, materialName, error);
-        return;
-    }
-
-    // We don't care about the path parameter
-    const QString pathStr = QStringLiteral("path");
-    if (materialProps.contains(pathStr))
-        materialProps.remove(pathStr);
+    presPath = QFileInfo(presentation->GetFilePath()).absolutePath();
+    projPath = presentation->getProjectPath();
+    getMaterialInfos();
 
     // Find material container
     auto &strTable = presentation->GetStringTable();
@@ -1312,289 +1306,310 @@ void CQmlEngineImpl::createMaterial(const QString &elementPath,
     TElement *rootElement = presentation->GetRoot();
     const auto containerName = strTable.RegisterStr("__Container");
     TElement *container = rootElement->FindChild(CHash::HashString(containerName.c_str()));
-    if (container) {
+    if (!container) {
+        // TODO: Create a material container if it doesn't exist (QT3DS-3412)
+        error = QObject::tr("Presentation has no material container");
+        handleError();
+        return;
+    }
+
+    for (auto &materialInfo : materialInfos) {
+        if (materialInfo->materialName.isEmpty() || materialInfo->materialProps.isEmpty()) {
+            error = QObject::tr("Invalid material definition: '%1'")
+                    .arg(materialInfo->materialDefinition);
+            handleError();
+            return;
+        }
+
+        // We don't care about the path parameter
+        const QString pathStr = QStringLiteral("path");
+        if (materialInfo->materialProps.contains(pathStr))
+            materialInfo->materialProps.remove(pathStr);
+
         // Check that the material doesn't already exist in container
         TElement *firstChild = nullptr;
         TElement *nextChild = container->GetChild();
         firstChild = nextChild;
         while (nextChild) {
             QString childName = QString::fromUtf8(nextChild->m_Name);
-            if (childName == materialName) {
-                error = QStringLiteral("Material already exists in material container");
-                notifyMaterialCreation(presentation, materialName, error);
+            if (childName == materialInfo->materialName) {
+                error = QObject::tr("Material already exists in material container");
+                handleError();
                 return;
             }
             nextChild = nextChild->GetSibling();
         }
-    } else {
-        // TODO: Create a material container if it doesn't exist (QT3DS-3412)
-        error = QStringLiteral("Presentation has no material container");
-        notifyMaterialCreation(presentation, materialName, error);
-        return;
-    }
 
-    // Create material element in the container based on the material definition
-    auto &metaData = m_Application->GetMetaData();
-    const auto matName = strTable.RegisterStr(materialName);
-    const bool isCustomMaterial
-            = materialProps.value(QStringLiteral("type")) == QLatin1String("CustomMaterial");
-    CRegisteredString matType;
-    CRegisteredString matClass;
-    QHash<QString, qt3ds::render::dynamic::SPropertyDefinition> dynPropDefs;
+        // Create material element in the container based on the material definition
+        auto &metaData = m_Application->GetMetaData();
+        const auto matName = strTable.RegisterStr(materialInfo->materialName);
+        const bool isCustomMaterial = (materialInfo->materialProps.value(QStringLiteral("type"))
+                                       == QLatin1String("CustomMaterial"));
+        CRegisteredString matType;
+        CRegisteredString matClass;
+        QHash<QString, qt3ds::render::dynamic::SPropertyDefinition> dynPropDefs;
 
-    if (isCustomMaterial) {
-        CRegisteredString sourcePath
-                = strTable.RegisterStr(materialProps.value(QStringLiteral("sourcepath")).toUtf8());
-        matType = strTable.RegisterStr("CustomMaterial");
-        matClass = sourcePath; // Create just one class per shader
-        if (sourcePath.IsValid()) {
-            Option<qt3dsdm::SMetaDataCustomMaterial> matMetaData =
-                metaData.GetMaterialMetaDataBySourcePath(sourcePath.c_str());
-            if (!matMetaData.hasValue()) {
-                metaData.LoadMaterialXMLFile(matType.c_str(), matClass.c_str(), matName.c_str(),
-                                             sourcePath.c_str());
-                matMetaData = metaData.GetMaterialMetaDataBySourcePath(sourcePath.c_str());
-            }
-            if (matMetaData.hasValue()) {
-                qt3ds::render::IUIPLoader::CreateMaterialClassFromMetaMaterial(
-                            matClass, m_Foundation, *customMaterialSystem, matMetaData,
-                            strTable);
-                NVConstDataRef<qt3ds::render::dynamic::SPropertyDefinition> customProperties;
-                customProperties = dynamicObjectSystem->GetProperties(matClass);
-                for (QT3DSU32 i = 0, end = customProperties.size(); i < end; ++i) {
-                    QString propName = QString::fromUtf8(customProperties[i].m_Name.c_str());
-                    if (materialProps.contains(propName))
-                        dynPropDefs.insert(propName, customProperties[i]);
+        if (isCustomMaterial) {
+            CRegisteredString sourcePath
+                    = strTable.RegisterStr(materialInfo->materialProps.value(
+                                               QStringLiteral("sourcepath")).toUtf8());
+            matType = strTable.RegisterStr("CustomMaterial");
+            matClass = sourcePath; // Create just one class per shader
+            if (sourcePath.IsValid()) {
+                Option<qt3dsdm::SMetaDataCustomMaterial> matMetaData =
+                    metaData.GetMaterialMetaDataBySourcePath(sourcePath.c_str());
+                if (!matMetaData.hasValue()) {
+                    metaData.LoadMaterialXMLFile(matType.c_str(), matClass.c_str(), matName.c_str(),
+                                                 sourcePath.c_str());
+                    matMetaData = metaData.GetMaterialMetaDataBySourcePath(sourcePath.c_str());
+                }
+                if (matMetaData.hasValue()) {
+                    qt3ds::render::IUIPLoader::CreateMaterialClassFromMetaMaterial(
+                                matClass, m_Foundation, *customMaterialSystem, matMetaData,
+                                strTable);
+                    NVConstDataRef<qt3ds::render::dynamic::SPropertyDefinition> customProperties;
+                    customProperties = dynamicObjectSystem->GetProperties(matClass);
+                    for (QT3DSU32 i = 0, end = customProperties.size(); i < end; ++i) {
+                        QString propName = QString::fromUtf8(customProperties[i].m_Name.c_str());
+                        if (materialInfo->materialProps.contains(propName))
+                            dynPropDefs.insert(propName, customProperties[i]);
+                    }
+                } else {
+                    error = QObject::tr("Could not resolve properties for CustomMaterial");
+                    handleError();
+                    return;
                 }
             } else {
-                error = QStringLiteral("Could not resolve material properties for CustomMaterial");
-                notifyMaterialCreation(presentation, materialName, error);
+                error = QObject::tr("Missing sourcepath in definition of CustomMaterial");
+                handleError();
                 return;
             }
         } else {
-            error = QStringLiteral("Missing sourcepath in material definition of a CustomMaterial");
-            notifyMaterialCreation(presentation, materialName, error);
-            return;
+            matType = strTable.RegisterStr("Material");
         }
-    } else {
-        matType = strTable.RegisterStr("Material");
-    }
 
-    auto createElementPropsFromDefProps = [&](const QMap<QString, QString> &defProps,
-                                              TPropertyDescAndValueList &elementProps,
-                                              const CRegisteredString &elementType) {
-        QMapIterator<QString, QString> propIter(defProps);
-        while (propIter.hasNext()) {
-            propIter.next();
-            if (dynPropDefs.contains(propIter.key()))
-                continue; // Dynamic properties are added directly to graph objects later
+        auto createElementPropsFromDefProps = [&](const QMap<QString, QString> &defProps,
+                                                  TPropertyDescAndValueList &elementProps,
+                                                  const CRegisteredString &elementType) {
+            QMapIterator<QString, QString> propIter(defProps);
+            while (propIter.hasNext()) {
+                propIter.next();
+                if (dynPropDefs.contains(propIter.key()))
+                    continue; // Dynamic properties are added directly to graph objects later
 
-            auto propName = strTable.RegisterStr(propIter.key());
-            ERuntimeDataModelDataType dataType;
-            ERuntimeAdditionalMetaDataType additionalType;
-            dataType = metaData.GetPropertyType(elementType, propName);
-            additionalType = metaData.GetAdditionalType(elementType, propName);
+                auto propName = strTable.RegisterStr(propIter.key());
+                ERuntimeDataModelDataType dataType;
+                ERuntimeAdditionalMetaDataType additionalType;
+                dataType = metaData.GetPropertyType(elementType, propName);
+                additionalType = metaData.GetAdditionalType(elementType, propName);
 
-            switch (dataType) {
-            case ERuntimeDataModelDataTypeLong: {
-                addIntAttribute(strTable, elementProps, propIter.key(),
-                                propIter.value().toInt());
-                break;
-            }
-            case ERuntimeDataModelDataTypeFloat: {
-                addFloatAttribute(strTable, elementProps, propIter.key(),
-                                  propIter.value().toFloat());
-                break;
-            }
-            case ERuntimeDataModelDataTypeFloat2: {
-                QVector2D vec = parseFloat2Property(propIter.value());
-                QStringList atts;
-                atts << (propIter.key() + QLatin1String(".x"))
-                     << (propIter.key() + QLatin1String(".y"));
-                addFloat2Attribute(strTable, elementProps, atts, vec);
-                break;
-            }
-            case ERuntimeDataModelDataTypeFloat3: {
-                QVector3D vec = parseFloat3Property(propIter.value());
-                if (additionalType == ERuntimeAdditionalMetaDataTypeRotation) {
-                    vec.setX(qDegreesToRadians(vec.x()));
-                    vec.setY(qDegreesToRadians(vec.y()));
-                    vec.setZ(qDegreesToRadians(vec.z()));
+                switch (dataType) {
+                case ERuntimeDataModelDataTypeLong: {
+                    addIntAttribute(strTable, elementProps, propIter.key(),
+                                    propIter.value().toInt());
+                    break;
                 }
-                QStringList atts;
-                atts << (propIter.key() + QLatin1String(".x"))
-                     << (propIter.key() + QLatin1String(".y"))
-                     << (propIter.key() + QLatin1String(".z"));
-                addFloat3Attribute(strTable, elementProps, atts, vec);
-                break;
-            }
-            case ERuntimeDataModelDataTypeFloat4: {
-                QVector4D vec = parseFloat4Property(propIter.value());
-                QStringList atts;
-                if (additionalType == ERuntimeAdditionalMetaDataTypeColor) {
-                    atts << (propIter.key() + QLatin1String(".r"))
-                         << (propIter.key() + QLatin1String(".g"))
-                         << (propIter.key() + QLatin1String(".b"))
-                         << (propIter.key() + QLatin1String(".a"));
-                } else {
+                case ERuntimeDataModelDataTypeFloat: {
+                    addFloatAttribute(strTable, elementProps, propIter.key(),
+                                      propIter.value().toFloat());
+                    break;
+                }
+                case ERuntimeDataModelDataTypeFloat2: {
+                    QVector2D vec = parseFloat2Property(propIter.value());
+                    QStringList atts;
+                    atts << (propIter.key() + QLatin1String(".x"))
+                         << (propIter.key() + QLatin1String(".y"));
+                    addFloat2Attribute(strTable, elementProps, atts, vec);
+                    break;
+                }
+                case ERuntimeDataModelDataTypeFloat3: {
+                    QVector3D vec = parseFloat3Property(propIter.value());
+                    if (additionalType == ERuntimeAdditionalMetaDataTypeRotation) {
+                        vec.setX(qDegreesToRadians(vec.x()));
+                        vec.setY(qDegreesToRadians(vec.y()));
+                        vec.setZ(qDegreesToRadians(vec.z()));
+                    }
+                    QStringList atts;
                     atts << (propIter.key() + QLatin1String(".x"))
                          << (propIter.key() + QLatin1String(".y"))
-                         << (propIter.key() + QLatin1String(".z"))
-                         << (propIter.key() + QLatin1String(".w"));
+                         << (propIter.key() + QLatin1String(".z"));
+                    addFloat3Attribute(strTable, elementProps, atts, vec);
+                    break;
                 }
-                addFloat4Attribute(strTable, elementProps, atts, vec);
-                break;
-            }
-            case ERuntimeDataModelDataTypeBool: {
-                bool boolValue = propIter.value().compare(QLatin1String("true"),
-                                                          Qt::CaseInsensitive) == 0;
-                addBoolAttribute(strTable, elementProps, propIter.key(), boolValue);
-                break;
-            }
-            case ERuntimeDataModelDataTypeStringRef:
-            case ERuntimeDataModelDataTypeString: {
-                addStringAttribute(strTable, elementProps, propIter.key(), propIter.value());
-                break;
-            }
-            case ERuntimeDataModelDataTypeLong4: {
-                if (additionalType == ERuntimeAdditionalMetaDataTypeImage) {
-                    // Insert placeholder for now, will be patched later
-                    addElementRefAttribute(strTable, elementProps, propIter.key(), nullptr);
+                case ERuntimeDataModelDataTypeFloat4: {
+                    QVector4D vec = parseFloat4Property(propIter.value());
+                    QStringList atts;
+                    if (additionalType == ERuntimeAdditionalMetaDataTypeColor) {
+                        atts << (propIter.key() + QLatin1String(".r"))
+                             << (propIter.key() + QLatin1String(".g"))
+                             << (propIter.key() + QLatin1String(".b"))
+                             << (propIter.key() + QLatin1String(".a"));
+                    } else {
+                        atts << (propIter.key() + QLatin1String(".x"))
+                             << (propIter.key() + QLatin1String(".y"))
+                             << (propIter.key() + QLatin1String(".z"))
+                             << (propIter.key() + QLatin1String(".w"));
+                    }
+                    addFloat4Attribute(strTable, elementProps, atts, vec);
+                    break;
                 }
-                break;
+                case ERuntimeDataModelDataTypeBool: {
+                    bool boolValue = propIter.value().compare(QLatin1String("true"),
+                                                              Qt::CaseInsensitive) == 0;
+                    addBoolAttribute(strTable, elementProps, propIter.key(), boolValue);
+                    break;
+                }
+                case ERuntimeDataModelDataTypeStringRef:
+                case ERuntimeDataModelDataTypeString: {
+                    addStringAttribute(strTable, elementProps, propIter.key(), propIter.value());
+                    break;
+                }
+                case ERuntimeDataModelDataTypeLong4: {
+                    if (additionalType == ERuntimeAdditionalMetaDataTypeImage) {
+                        // Insert placeholder for now, will be patched later
+                        addElementRefAttribute(strTable, elementProps, propIter.key(), nullptr);
+                    }
+                    break;
+                }
+                default:
+                    error = QObject::tr("Unsupported material property type for property: '%1'")
+                            .arg(propIter.key());
+                    return;
+                }
             }
-            default:
-                error = QStringLiteral("Unsupported material property type for property: '%1'")
-                        .arg(propIter.key());
-                break;
-            }
-        }
-    };
+        };
 
-    TPropertyDescAndValueList elementProps;
-    createElementPropsFromDefProps(materialProps, elementProps, matType);
-    if (!error.isEmpty()) {
-        notifyMaterialCreation(presentation, materialName, error);
-        return;
-    }
-
-    TElement &newMatElem = m_Application->GetElementAllocator().CreateElement(
-                matName, matType, matClass,
-                toConstDataRef(elementProps.data(), QT3DSU32(elementProps.size())),
-                presentation, container, false);
-    newMatElem.SetActive(true);
-
-    // Create image elements
-    CRegisteredString imageType = strTable.RegisterStr("Image");
-    QMapIterator<QString, QMap<QString, QString>> texIter(textureProps);
-    QHash<QString, TElement *> imageElementMap;
-    while (texIter.hasNext()) {
-        texIter.next();
-        elementProps.clear();
-        createElementPropsFromDefProps(texIter.value(), elementProps, imageType);
+        TPropertyDescAndValueList elementProps;
+        createElementPropsFromDefProps(materialInfo->materialProps, elementProps, matType);
         if (!error.isEmpty()) {
-            m_Application->GetElementAllocator().ReleaseElement(newMatElem, true);
-            notifyMaterialCreation(presentation, materialName, error);
+            handleError();
             return;
         }
-        CRegisteredString imageName = strTable.RegisterStr(texIter.key());
 
-        TElement &newImageElem = m_Application->GetElementAllocator().CreateElement(
-                    imageName, imageType, CRegisteredString(),
+        TElement &newMatElem = m_Application->GetElementAllocator().CreateElement(
+                    matName, matType, matClass,
                     toConstDataRef(elementProps.data(), QT3DSU32(elementProps.size())),
-                    presentation, &newMatElem, false);
-        imageElementMap.insert(texIter.key(), &newImageElem);
-        newImageElem.SetActive(true);
-    }
+                    presentation, container, false);
+        newMatElem.SetActive(true);
 
-    // Create render object for the material
-    qt3ds::render::SGraphObject *newMaterial = nullptr;
-    CRegisteredString newMatId = strTable.RegisterStr(
-                (QByteArrayLiteral("_newMaterial_") + QByteArray::number(++_idCounter))
-                .constData());
-    if (isCustomMaterial) {
-        newMaterial = customMaterialSystem->CreateCustomMaterial(matClass, allocator);
-        newMaterial->m_Id = newMatId;
-        auto dynObj = static_cast<qt3ds::render::SDynamicObject *>(newMaterial);
-
-        QHashIterator<QString, qt3ds::render::dynamic::SPropertyDefinition>
-                dynPropIter(dynPropDefs);
-        while (dynPropIter.hasNext()) {
-            dynPropIter.next();
-            QByteArray propValStr = materialProps.value(dynPropIter.key()).toUtf8();
-            const auto propDesc = dynPropIter.value();
-            switch (propDesc.m_DataType) {
-            case qt3ds::render::NVRenderShaderDataTypes::QT3DSRenderBool: {
-                bool boolValue = propValStr.compare(QByteArrayLiteral("true"),
-                                                    Qt::CaseInsensitive) == 0;
-                setDynamicObjectProperty(*dynObj, propDesc, boolValue);
-                break;
-            }
-            case qt3ds::render::NVRenderShaderDataTypes::QT3DSF32:
-                setDynamicObjectProperty(*dynObj, propDesc, propValStr.toFloat());
-                break;
-            case qt3ds::render::NVRenderShaderDataTypes::QT3DSI32:
-                if (!propDesc.m_IsEnumProperty) {
-                    setDynamicObjectProperty(*dynObj, propDesc, propValStr.toInt());
-                } else {
-                    const NVConstDataRef<CRegisteredString> &enumNames = propDesc.m_EnumValueNames;
-                    for (QT3DSU32 i = 0, end = enumNames.size(); i < end; ++i) {
-                        if (propValStr.compare(enumNames[i].c_str()) == 0) {
-                            setDynamicObjectProperty(*dynObj, propDesc, i);
-                            break;
-                        }
-                    }
-                }
-                break;
-            case qt3ds::render::NVRenderShaderDataTypes::QT3DSVec2:
-                setDynamicObjectProperty(*dynObj, propDesc, parseFloat2Property(propValStr));
-                break;
-            case qt3ds::render::NVRenderShaderDataTypes::QT3DSVec3:
-                setDynamicObjectProperty(*dynObj, propDesc, parseFloat3Property(propValStr));
-                break;
-            case qt3ds::render::NVRenderShaderDataTypes::QT3DSVec4:
-                setDynamicObjectProperty(*dynObj, propDesc, parseFloat4Property(propValStr));
-                break;
-            case qt3ds::render::NVRenderShaderDataTypes::NVRenderTexture2DPtr:
-            case qt3ds::render::NVRenderShaderDataTypes::NVRenderImage2DPtr: {
-                CRegisteredString regStr;
-                regStr = strTable.RegisterStr(propValStr);
-                setDynamicObjectProperty(*dynObj, propDesc, regStr);
-                break;
-            }
-            default:
-                error = QStringLiteral("Unsupported custom material property type for '%1'")
-                        .arg(dynPropIter.key());
-                notifyMaterialCreation(presentation, materialName, error);
+        // Create image elements
+        CRegisteredString imageType = strTable.RegisterStr("Image");
+        QMapIterator<QString, QMap<QString, QString>> texIter(materialInfo->textureProps);
+        QHash<QString, TElement *> imageElementMap;
+        while (texIter.hasNext()) {
+            texIter.next();
+            elementProps.clear();
+            createElementPropsFromDefProps(texIter.value(), elementProps, imageType);
+            if (!error.isEmpty()) {
+                m_Application->GetElementAllocator().ReleaseElement(newMatElem, true);
+                handleError();
                 return;
             }
+            CRegisteredString imageName = strTable.RegisterStr(texIter.key());
+
+            TElement &newImageElem = m_Application->GetElementAllocator().CreateElement(
+                        imageName, imageType, CRegisteredString(),
+                        toConstDataRef(elementProps.data(), QT3DSU32(elementProps.size())),
+                        presentation, &newMatElem, false);
+            imageElementMap.insert(texIter.key(), &newImageElem);
+            newImageElem.SetActive(true);
         }
-    } else {
-        newMaterial = QT3DS_NEW(allocator, qt3ds::render::SDefaultMaterial)();
-        newMaterial->m_Id = newMatId;
 
-        // Update element refs for image elements and create graph objects & translators
-        QHashIterator<QString, TElement *> imageIter(imageElementMap);
-        while (imageIter.hasNext()) {
-            imageIter.next();
-            TElement *imageElem = imageIter.value();
-            UVariant *propValue = newMatElem.FindPropertyValue(imageElem->m_Name);
-            if (propValue) {
-                propValue->m_ElementHandle = imageIter.value()->GetHandle();
+        // Create render object for the material
+        qt3ds::render::SGraphObject *newMaterial = nullptr;
+        CRegisteredString newMatId = strTable.RegisterStr(
+                    (QByteArrayLiteral("_newMaterial_") + QByteArray::number(++_idCounter))
+                    .constData());
+        if (isCustomMaterial) {
+            newMaterial = customMaterialSystem->CreateCustomMaterial(matClass, allocator);
+            newMaterial->m_Id = newMatId;
+            auto dynObj = static_cast<qt3ds::render::SDynamicObject *>(newMaterial);
 
-                qt3ds::render::SImage *newImageObj = QT3DS_NEW(allocator, qt3ds::render::SImage)();
-                newImageObj->m_Id
-                        = strTable.RegisterStr((QByteArrayLiteral("_newImage_")
-                                                + QByteArray::number(++_idCounter)).constData());
-                qt3ds::render::Qt3DSTranslator::CreateTranslatorForElement(*imageElem,
-                                                                           *newImageObj, allocator);
+            QHashIterator<QString, qt3ds::render::dynamic::SPropertyDefinition>
+                    dynPropIter(dynPropDefs);
+            while (dynPropIter.hasNext()) {
+                dynPropIter.next();
+                QByteArray propValStr = materialInfo->materialProps.value(
+                            dynPropIter.key()).toUtf8();
+                const auto propDesc = dynPropIter.value();
+                switch (propDesc.m_DataType) {
+                case qt3ds::render::NVRenderShaderDataTypes::QT3DSRenderBool: {
+                    bool boolValue = propValStr.compare(QByteArrayLiteral("true"),
+                                                        Qt::CaseInsensitive) == 0;
+                    setDynamicObjectProperty(*dynObj, propDesc, boolValue);
+                    break;
+                }
+                case qt3ds::render::NVRenderShaderDataTypes::QT3DSF32:
+                    setDynamicObjectProperty(*dynObj, propDesc, propValStr.toFloat());
+                    break;
+                case qt3ds::render::NVRenderShaderDataTypes::QT3DSI32:
+                    if (!propDesc.m_IsEnumProperty) {
+                        setDynamicObjectProperty(*dynObj, propDesc, propValStr.toInt());
+                    } else {
+                        const NVConstDataRef<CRegisteredString> &enumNames
+                                = propDesc.m_EnumValueNames;
+                        for (QT3DSU32 i = 0, end = enumNames.size(); i < end; ++i) {
+                            if (propValStr.compare(enumNames[i].c_str()) == 0) {
+                                setDynamicObjectProperty(*dynObj, propDesc, i);
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                case qt3ds::render::NVRenderShaderDataTypes::QT3DSVec2:
+                    setDynamicObjectProperty(*dynObj, propDesc, parseFloat2Property(propValStr));
+                    break;
+                case qt3ds::render::NVRenderShaderDataTypes::QT3DSVec3:
+                    setDynamicObjectProperty(*dynObj, propDesc, parseFloat3Property(propValStr));
+                    break;
+                case qt3ds::render::NVRenderShaderDataTypes::QT3DSVec4:
+                    setDynamicObjectProperty(*dynObj, propDesc, parseFloat4Property(propValStr));
+                    break;
+                case qt3ds::render::NVRenderShaderDataTypes::NVRenderTexture2DPtr:
+                case qt3ds::render::NVRenderShaderDataTypes::NVRenderImage2DPtr: {
+                    CRegisteredString regStr;
+                    regStr = strTable.RegisterStr(propValStr);
+                    setDynamicObjectProperty(*dynObj, propDesc, regStr);
+                    break;
+                }
+                default:
+                    error = QObject::tr("Unsupported custom material property type for '%1'")
+                            .arg(dynPropIter.key());
+                    m_Application->GetElementAllocator().ReleaseElement(newMatElem, true);
+                    handleError();
+                    return;
+                }
             }
+        } else {
+            newMaterial = QT3DS_NEW(allocator, qt3ds::render::SDefaultMaterial)();
+            newMaterial->m_Id = newMatId;
+
+            // Update element refs for image elements and create graph objects & translators
+            QHashIterator<QString, TElement *> imageIter(imageElementMap);
+            while (imageIter.hasNext()) {
+                imageIter.next();
+                TElement *imageElem = imageIter.value();
+                UVariant *propValue = newMatElem.FindPropertyValue(imageElem->m_Name);
+                if (propValue) {
+                    propValue->m_ElementHandle = imageIter.value()->GetHandle();
+
+                    qt3ds::render::SImage *newImageObj
+                            = QT3DS_NEW(allocator, qt3ds::render::SImage)();
+                    newImageObj->m_Id = strTable.RegisterStr(
+                                (QByteArrayLiteral("_newImage_")
+                                 + QByteArray::number(++_idCounter)).constData());
+                    qt3ds::render::Qt3DSTranslator::CreateTranslatorForElement(
+                                *imageElem, *newImageObj, allocator);
+                }
+            }
+            createdElements << &newMatElem;
         }
+
+        qt3ds::render::Qt3DSTranslator::CreateTranslatorForElement(newMatElem, *newMaterial,
+                                                                   allocator);
     }
 
-    qt3ds::render::Qt3DSTranslator::CreateTranslatorForElement(newMatElem, *newMaterial, allocator);
-
-    notifyMaterialCreation(presentation, materialName, {});
+    handleError();
 }
 
 void CQmlEngineImpl::GotoSlide(const char *component, const char *slideName,
@@ -2258,30 +2273,108 @@ QVector4D CQmlEngineImpl::parseFloat4Property(const QString &propValue)
     return retVal;
 }
 
-void CQmlEngineImpl::notifyElementCreation(CPresentation *pres, const QString &elementName,
+void CQmlEngineImpl::notifyElementCreation(CPresentation *pres, const QStringList &elementNames,
                                            const QString &error)
 {
     // Notify presentation asynchronously to give renderer time to initialize the elements properly
     if (!error.isEmpty()) {
-        qWarning() << "Warning: Element creation failed:" << elementName << error;
+        qWarning() << "Warning: Element creation failed:" << error;
         QT3DS_ASSERT(false);
     }
-    QTimer::singleShot(0, [pres, elementName, error]() {
-        pres->signalProxy()->SigElementCreated(elementName, error);
+    QTimer::singleShot(0, [pres, elementNames, error]() {
+        pres->signalProxy()->SigElementsCreated(elementNames, error);
     });
 }
 
-void CQmlEngineImpl::notifyMaterialCreation(CPresentation *pres, const QString &name,
+void CQmlEngineImpl::notifyMaterialCreation(CPresentation *pres,
+                                            const QStringList &materialNames,
                                             const QString &error)
 {
     // Notify presentation asynchronously to give renderer time to initialize the materials properly
     if (!error.isEmpty()) {
-        qWarning() << "Warning: Material creation failed:" << name << error;
+        qWarning() << "Warning: Material creation failed:" << materialNames << error;
         QT3DS_ASSERT(false);
     }
-    QTimer::singleShot(0, [pres, name, error]() {
-        pres->signalProxy()->SigMaterialCreated(name, error);
+    QTimer::singleShot(0, [pres, materialNames, error]() {
+        pres->signalProxy()->SigMaterialsCreated(materialNames, error);
     });
+}
+
+void CQmlEngineImpl::deleteElements(const QVector<TElement *> &elements,
+                                    IQt3DSRenderer *renderer)
+{
+    TElement *lastParent = nullptr;
+    IPresentation *presentation = nullptr;
+    TElement *component = nullptr;
+    ISlideSystem *slideSystem = nullptr;
+    QSet<qt3ds::render::SNode *> parentNodes;
+    for (auto element : elements) {
+        TElement *parentElement = element->GetParent();
+        if (parentElement != lastParent) {
+            lastParent = parentElement;
+            presentation = element->GetBelongedPresentation();
+            component = &element->GetComponentParent();
+            slideSystem = &presentation->GetSlideSystem();
+        }
+        // Remove element recursively from slide system
+        slideSystem->removeElement(*component, *element);
+
+        Q_ASSERT(parentElement);
+
+        NVAllocatorCallback &allocator = presentation->GetScene()->allocator();
+
+        // Recursive deleter for translators and graph objects
+        std::function<void(TElement *)> deleteRenderObjects;
+        deleteRenderObjects = [&](TElement *elem)  {
+            TElement *child = elem->m_Child;
+            while (child) {
+                TElement *sibling = child->m_Sibling;
+                deleteRenderObjects(child);
+                child = sibling;
+            }
+
+            auto translator = static_cast<qt3ds::render::Qt3DSTranslator *>(elem->GetAssociation());
+            if (translator) {
+                qt3ds::render::GraphObjectTypes::Enum type = translator->GetUIPType();
+                if (type == qt3ds::render::GraphObjectTypes::Model) {
+                    auto model = static_cast<qt3ds::render::SModel *>(&translator->RenderObject());
+                    // Delete material
+                    if (model->m_FirstMaterial) {
+                        auto material = static_cast<qt3ds::render::SReferencedMaterial *>(
+                                    model->m_FirstMaterial);
+                        QT3DS_FREE(allocator, material);
+                    }
+                }
+                QT3DS_FREE(allocator, &translator->RenderObject());
+                QT3DS_FREE(allocator, translator);
+            }
+        };
+
+        qt3ds::render::SNode *node = nullptr;
+        qt3ds::render::SNode *parentNode = nullptr;
+        auto translator = static_cast<qt3ds::render::Qt3DSTranslator *>(element->GetAssociation());
+
+        if (translator) {
+            if (qt3ds::render::GraphObjectTypes::IsNodeType(translator->GetUIPType())) {
+                node = &static_cast<qt3ds::render::SNode &>(translator->RenderObject());
+                auto parentTranslator = static_cast<qt3ds::render::Qt3DSTranslator *>(
+                            parentElement->GetAssociation());
+                if (parentTranslator) {
+                    parentNode = &static_cast<qt3ds::render::SNode &>(
+                                parentTranslator->RenderObject());
+                    parentNode->RemoveChild(*node);
+                    parentNodes.insert(parentNode);
+                }
+            }
+            // Release child element graph objects/translators
+            deleteRenderObjects(element);
+        }
+
+        // Remove element recursively
+        m_Application->GetElementAllocator().ReleaseElement(*element, true);
+    }
+    for (auto parentNode : qAsConst(parentNodes))
+        renderer->ChildrenUpdated(*parentNode);
 }
 
 template<typename TDataType>

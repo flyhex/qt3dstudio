@@ -30,6 +30,8 @@
 #include "q3dscommandqueue_p.h"
 #include "q3dspresentation.h"
 
+#include <QtCore/qstringlist.h>
+
 ElementCommand::ElementCommand()
     : m_commandType(CommandType_Invalid)
 {
@@ -160,12 +162,34 @@ ElementCommand &CommandQueue::queueCommand(const QString &elementPath, CommandTy
     return cmd;
 }
 
+ElementCommand &CommandQueue::queueCommand(CommandType commandType, void *commandData)
+{
+    ElementCommand &cmd = nextFreeCommand();
+
+    cmd.m_commandType = commandType;
+    cmd.m_data = commandData;
+
+    return cmd;
+}
+
 ElementCommand &CommandQueue::queueCommand(const QString &elementPath, CommandType commandType)
 {
     ElementCommand &cmd = nextFreeCommand();
 
     cmd.m_commandType = commandType;
     cmd.m_elementPath = elementPath;
+
+    return cmd;
+}
+
+ElementCommand &CommandQueue::queueCommand(const QString &elementPath, CommandType commandType,
+                                           void *commandData)
+{
+    ElementCommand &cmd = nextFreeCommand();
+
+    cmd.m_commandType = commandType;
+    cmd.m_elementPath = elementPath;
+    cmd.m_data = commandData;
 
     return cmd;
 }
@@ -217,16 +241,13 @@ void CommandQueue::copyCommands(CommandQueue &fromQueue)
             break;
         case CommandType_GoToSlideByName:
         case CommandType_FireEvent:
-        case CommandType_CreateMaterial:
             queueCommand(source.m_elementPath, source.m_commandType, source.m_stringValue);
             break;
         case CommandType_SetPresentationActive:
-            queueCommand(source.m_elementPath, source.m_commandType,
-                         source.m_boolValue);
+            queueCommand(source.m_elementPath, source.m_commandType, source.m_boolValue);
             break;
         case CommandType_GoToTime:
-            queueCommand(source.m_elementPath, source.m_commandType,
-                         source.m_floatValue);
+            queueCommand(source.m_elementPath, source.m_commandType, source.m_floatValue);
             break;
         case CommandType_GoToSlide:
         case CommandType_GoToSlideRelative:
@@ -240,12 +261,19 @@ void CommandQueue::copyCommands(CommandQueue &fromQueue)
                          source.m_intValues[0], source.m_intValues[1],
                          source.m_intValues[2], source.m_intValues[3]);
             break;
-        case CommandType_CreateElement:
+        case CommandType_CreateElements:
             queueCommand(source.m_elementPath, source.m_commandType, source.m_stringValue,
                          source.m_data);
             fromQueue.commandAt(i).m_data = nullptr; // This queue takes ownership of data
             break;
-        case CommandType_DeleteElement:
+        case CommandType_DeleteElements:
+            queueCommand(source.m_commandType, source.m_data);
+            fromQueue.commandAt(i).m_data = nullptr; // This queue takes ownership of data
+            break;
+        case CommandType_CreateMaterials:
+            queueCommand(source.m_elementPath, source.m_commandType, source.m_data);
+            fromQueue.commandAt(i).m_data = nullptr; // This queue takes ownership of data
+            break;
         case CommandType_RequestSlideInfo:
         case CommandType_UnloadSlide:
         case CommandType_PreloadSlide:
@@ -277,8 +305,14 @@ void CommandQueue::clear(bool deleteCommandData)
             ElementCommand &cmd = m_elementCommands[i];
             if (cmd.m_data) {
                 switch (cmd.m_commandType) {
-                case CommandType_CreateElement:
-                    delete static_cast<QHash<QString, QVariant> *>(cmd.m_data);
+                case CommandType_CreateElements:
+                    delete static_cast<QVector<QHash<QString, QVariant>> *>(cmd.m_data);
+                    break;
+                case CommandType_DeleteElements:
+                    delete static_cast<QStringList *>(cmd.m_data);
+                    break;
+                case CommandType_CreateMaterials:
+                    delete static_cast<QStringList *>(cmd.m_data);
                     break;
                 default:
                     Q_ASSERT(false); // Should never come here

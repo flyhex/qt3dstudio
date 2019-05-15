@@ -63,8 +63,8 @@ Q_SIGNALS:
     void presentationReady();
     void presentationLoaded();
     void customSignalEmitted(const QString &elNmentPath, const QString &name);
-    void elementCreated(const QString &elementName, const QString &error);
-    void materialCreated(const QString &name, const QString &error);
+    void elementsCreated(const QStringList &elementPaths, const QString &error);
+    void materialsCreated(const QStringList &materialNames, const QString &error);
 
 protected:
     static void onInitHandler(void *userData);

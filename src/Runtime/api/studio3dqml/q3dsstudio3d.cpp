@@ -207,10 +207,10 @@ QQuickFramebufferObject::Renderer *Q3DSStudio3D::createRenderer() const
             m_presentation, &Q3DSPresentation::slideExited);
     connect(renderer, &Q3DSRenderer::customSignalEmitted,
             m_presentation, &Q3DSPresentation::customSignalEmitted);
-    connect(renderer, &Q3DSRenderer::elementCreated,
-            m_presentation, &Q3DSPresentation::elementCreated);
-    connect(renderer, &Q3DSRenderer::materialCreated,
-            m_presentation, &Q3DSPresentation::materialCreated);
+    connect(renderer, &Q3DSRenderer::elementsCreated,
+            m_presentation, &Q3DSPresentation::elementsCreated);
+    connect(renderer, &Q3DSRenderer::materialsCreated,
+            m_presentation, &Q3DSPresentation::materialsCreated);
     connect(renderer, &Q3DSRenderer::requestResponse,
             this, &Q3DSStudio3D::requestResponseHandler);
     connect(renderer, &Q3DSRenderer::presentationLoaded,

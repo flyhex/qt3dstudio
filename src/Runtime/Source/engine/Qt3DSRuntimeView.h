@@ -44,6 +44,8 @@
 #include "Qt3DSPresentation.h"
 #include "Qt3DSRenderRuntimeBinding.h"
 #include <QtCore/qobject.h>
+#include <QtCore/qvector.h>
+#include <QtCore/qstringlist.h>
 #include <QtGui/qsurfaceformat.h>
 
 typedef void (*qml_Function)(void *inUserData);
@@ -56,8 +58,8 @@ Q_SIGNALS:
     void SigSlideExited(const QString &elementPath, unsigned int index, const QString &name);
     void SigCustomSignal(const QString &elementPath, const QString &name);
     void SigPresentationReady();
-    void SigElementCreated(const QString &elementName, const QString &error);
-    void SigMaterialCreated(const QString &name, const QString &error);
+    void SigElementsCreated(const QStringList &elementPaths, const QString &error);
+    void SigMaterialsCreated(const QStringList &materialNames, const QString &error);
 };
 
 namespace qt3ds {
@@ -192,10 +194,11 @@ public:
     virtual QList<QString> dataInputs() const = 0;
     virtual float dataInputMax(const QString &name) const = 0;
     virtual float dataInputMin(const QString &name) const = 0;
-    virtual void createElement(const QString &parentElementPath, const QString &slideName,
-                               const QHash<QString, QVariant> &properties) = 0;
-    virtual void deleteElement(const QString &elementPath) = 0;
-    virtual void createMaterial(const QString &elementPath, const QString &materialDefinition) = 0;
+    virtual void createElements(const QString &parentElementPath, const QString &slideName,
+                                const QVector<QHash<QString, QVariant>> &properties) = 0;
+    virtual void deleteElements(const QStringList &elementPaths) = 0;
+    virtual void createMaterials(const QString &elementPath,
+                                 const QStringList &materialDefinitions) = 0;
     virtual void SetAttribute(const char *elementPath, const char *attributeName,
                               const char *value) = 0;
     virtual bool GetAttribute(const char *elementPath, const char *attributeName, void *value) = 0;

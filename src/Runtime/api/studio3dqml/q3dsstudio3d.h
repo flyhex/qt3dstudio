@@ -51,7 +51,7 @@ class Q3DSStudio3D : public QQuickFramebufferObject
 
 public:
     Q3DSStudio3D();
-    virtual ~Q3DSStudio3D();
+    ~Q3DSStudio3D() override;
 
     QQuickFramebufferObject::Renderer *createRenderer() const override;
 
