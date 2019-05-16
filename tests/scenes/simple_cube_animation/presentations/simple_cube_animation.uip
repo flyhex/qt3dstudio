@@ -49,8 +49,11 @@
 					<Add ref="#Basic Green" name="Basic Green" endtime="5000" referencedmaterial="#materials/Basic Green" sourcepath="../materials/Basic Green.materialdef" />
 				</State>
 				<State id="Scene-Slide2" name="Slide2" playmode="Play Through To..." playthroughto="Previous" >
-					<Add ref="#Cube2" name="Cube2" position="-401.836 -18.4752 600" scale="3 3 3" sourcepath="#Cube" />
-					<Add ref="#Basic Red" name="Basic Red" referencedmaterial="#materials/Basic Red" sourcepath="../materials/Basic Red.materialdef" />
+					<Set ref="#Layer" endtime="5000" />
+					<Set ref="#Camera" endtime="5000" />
+					<Set ref="#Light" endtime="5000" />
+					<Add ref="#Cube2" name="Cube2" endtime="5000" position="-401.836 -18.4752 600" scale="3 3 3" sourcepath="#Cube" />
+					<Add ref="#Basic Red" name="Basic Red" endtime="5000" referencedmaterial="#materials/Basic Red" sourcepath="../materials/Basic Red.materialdef" />
 				</State>
 			</State>
 		</Logic>

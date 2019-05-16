@@ -925,6 +925,8 @@ void CQmlEngineImpl::createElements(const QString &parentElementPath, const QStr
                                     const QVector<QHash<QString, QVariant>> &properties,
                                     qt3ds::render::IQt3DSRenderer *renderer)
 {
+    using namespace qt3ds::render;
+
     int elementIndex = -1;
     QString error;
     CPresentation *presentation = nullptr;
@@ -955,10 +957,10 @@ void CQmlEngineImpl::createElements(const QString &parentElementPath, const QStr
         return;
     }
 
-    auto parentTranslator = static_cast<qt3ds::render::Qt3DSTranslator *>(
+    auto parentTranslator = static_cast<Qt3DSTranslator *>(
                 parentElement->GetAssociation());
 
-    if (!parentTranslator || !qt3ds::render::GraphObjectTypes::IsNodeType(
+    if (!parentTranslator || !GraphObjectTypes::IsNodeType(
                 parentTranslator->GetUIPType())) {
         error = QObject::tr("Parent element is not a valid node: '%1'").arg(parentElementPath);
         handleError();
@@ -966,7 +968,7 @@ void CQmlEngineImpl::createElements(const QString &parentElementPath, const QStr
     }
 
     TElement &component = parentElement->GetComponentParent();
-    auto &parentObject = static_cast<qt3ds::render::SNode &>(parentTranslator->RenderObject());
+    auto &parentObject = static_cast<SNode &>(parentTranslator->RenderObject());
     presentation = static_cast<CPresentation *>(parentElement->GetBelongedPresentation());
 
     // Resolve slide
@@ -986,6 +988,7 @@ void CQmlEngineImpl::createElements(const QString &parentElementPath, const QStr
     const QString startTimePropName = QStringLiteral("starttime");
     const QString endTimePropName = QStringLiteral("endtime");
     const QString eyeBallPropName = QStringLiteral("eyeball");
+    const QString typePropName = QStringLiteral("type");
 
     Q3DStudio::UVariant attValue;
     parentElement->GetAttribute(Q3DStudio::ATTRIBUTE_STARTTIME, attValue);
@@ -1020,15 +1023,25 @@ void CQmlEngineImpl::createElements(const QString &parentElementPath, const QStr
         }
 
         const CRegisteredString regName = strTable.RegisterStr(newElementNameBa);
-        // TODO: Support also some non-model elements, like group and text elements (QT3DS-3381)
-        const CRegisteredString elementType = strTable.RegisterStr("Model");
-        const CRegisteredString elementSubType;
         TPropertyDescAndValueList elementProperties;
+        CRegisteredString metaType;
+        const CRegisteredString elementSubType;
+        GraphObjectTypes::Enum objectType = GraphObjectTypes::Unknown;
+
+        QString typeStr = theProperties.take(typePropName).toString();
+        if (typeStr.isEmpty() || typeStr.compare(QLatin1String("model"),
+                                                 Qt::CaseInsensitive) == 0) {
+            metaType = strTable.RegisterStr("Model");
+            objectType = GraphObjectTypes::Model;
+        } else if (typeStr.compare(QLatin1String("group"), Qt::CaseInsensitive) == 0) {
+            metaType = strTable.RegisterStr("Group");
+            objectType = GraphObjectTypes::Node;
+        }
 
         // Set default values for missing mandatory properties
         bool eyeBall = true;
         theProperties.value(eyeBallPropName, true).toBool();
-        if (!theProperties.contains(sourcePathPropName)) {
+        if (objectType == GraphObjectTypes::Model && !theProperties.contains(sourcePathPropName)) {
             addStringAttribute(strTable, elementProperties, sourcePathPropName,
                                QStringLiteral("#Cube"));
         }
@@ -1082,7 +1095,7 @@ void CQmlEngineImpl::createElements(const QString &parentElementPath, const QStr
 
         // Create new element
         TElement &newElem = m_Application->GetElementAllocator().CreateElement(
-                    regName, elementType, elementSubType,
+                    regName, metaType, elementSubType,
                     toConstDataRef(elementProperties.data(), QT3DSU32(elementProperties.size())),
                     presentation, parentElement, false);
         newElem.m_Path = strTable.RegisterStr(elementPaths[elementIndex]);
@@ -1096,89 +1109,92 @@ void CQmlEngineImpl::createElements(const QString &parentElementPath, const QStr
             return;
         }
 
-        // Create material element
-        const CRegisteredString matName = strTable.RegisterStr("refmat");
-        const CRegisteredString matType = strTable.RegisterStr("ReferencedMaterial");
-        TPropertyDescAndValueList matProperties;
-        TElement &newMatElem = m_Application->GetElementAllocator().CreateElement(
-                    matName, matType, elementSubType,
-                    toConstDataRef(matProperties.data(), QT3DSU32(matProperties.size())),
-                    presentation, &newElem, false);
-
-        QString matElemPath = elementPaths[elementIndex] + QLatin1String(".refmat");
-        newMatElem.m_Path = strTable.RegisterStr(matElemPath);
-
-        if (!slideSystem.addSlideElement(component, slideIndex, newMatElem, eyeBall)) {
-            // Delete created element and material element if adding to slide failed
-            m_Application->GetElementAllocator().ReleaseElement(newElem, true);
-            error = QObject::tr("Failed to add the new material element to a slide");
-            handleError();
-            return;
-        }
-
-        // First check if we can resolve the referenced material before creating any graph objects
-        // Find a match in material container
-        // If the specified material is not available in original presentation, or was not
-        // specified, use the first material found as placeholder
-        TElement *rootElement = presentation->GetRoot();
-        TElement *container = rootElement->FindChild(CHash::HashString("__Container"));
-        TElement *firstChild = nullptr;
         SGraphObject *referencedMaterial = nullptr;
-        if (container) {
-            TElement *nextChild = container->GetChild();
-            firstChild = nextChild;
-            while (nextChild) {
-                QString childName = QString::fromUtf8(nextChild->m_Name);
-                if (childName.endsWith(refMatName)) {
-                    auto tr = static_cast<qt3ds::render::Qt3DSTranslator *>(
-                                nextChild->GetAssociation());
-                    referencedMaterial = static_cast<qt3ds::render::SGraphObject *>(
-                                &tr->RenderObject());
-                    break;
-                }
-                nextChild = nextChild->GetSibling();
-            }
-        }
+        if (objectType == GraphObjectTypes::Model) {
+            // Create material element
+            const CRegisteredString matName = strTable.RegisterStr("refmat");
+            const CRegisteredString matType = strTable.RegisterStr("ReferencedMaterial");
+            TPropertyDescAndValueList matProperties;
+            TElement &newMatElem = m_Application->GetElementAllocator().CreateElement(
+                        matName, matType, elementSubType,
+                        toConstDataRef(matProperties.data(), QT3DSU32(matProperties.size())),
+                        presentation, &newElem, false);
 
-        if (!referencedMaterial) {
-            // Empty material is assumed to be deliberate, so don't warn in that case
-            if (!refMatName.isEmpty()) {
-                qWarning() << __FUNCTION__ << "Requested material" << refMatName
-                           << "was not found. Trying to find a fallback material.";
-            }
-            if (firstChild) {
-                auto tr = static_cast<qt3ds::render::Qt3DSTranslator *>(
-                            firstChild->GetAssociation());
-                referencedMaterial = static_cast<qt3ds::render::SGraphObject *>(
-                            &tr->RenderObject());
-            }
-            if (!referencedMaterial) {
-                // We could create default material into the container in case there is no materials
-                // in there, but it is unlikely that such a presentation would be used in practice.
+            QString matElemPath = elementPaths[elementIndex] + QLatin1String(".refmat");
+            newMatElem.m_Path = strTable.RegisterStr(matElemPath);
+
+            if (!slideSystem.addSlideElement(component, slideIndex, newMatElem, eyeBall)) {
+                // Delete created element and material element if adding to slide failed
                 m_Application->GetElementAllocator().ReleaseElement(newElem, true);
-                error = QObject::tr("Unable to resolve a fallback material");
+                error = QObject::tr("Failed to add the new material element to a slide");
                 handleError();
                 return;
+            }
+            // First check if we can resolve the referenced material before creating any objects
+            // Find a match in material container
+            // If the specified material is not available in original presentation, or was not
+            // specified, use the first material found as placeholder
+            TElement *rootElement = presentation->GetRoot();
+            TElement *container = rootElement->FindChild(CHash::HashString("__Container"));
+            TElement *firstChild = nullptr;
+            if (container) {
+                TElement *nextChild = container->GetChild();
+                firstChild = nextChild;
+                while (nextChild) {
+                    QString childName = QString::fromUtf8(nextChild->m_Name);
+                    if (childName.endsWith(refMatName)) {
+                        auto tr = static_cast<Qt3DSTranslator *>(
+                                    nextChild->GetAssociation());
+                        referencedMaterial = static_cast<SGraphObject *>(
+                                    &tr->RenderObject());
+                        break;
+                    }
+                    nextChild = nextChild->GetSibling();
+                }
+            }
+
+            if (!referencedMaterial) {
+                // Empty material is assumed to be deliberate, so don't warn in that case
+                if (!refMatName.isEmpty()) {
+                    qWarning() << __FUNCTION__ << "Requested material" << refMatName
+                               << "was not found. Trying to find a fallback material.";
+                }
+                if (firstChild) {
+                    auto tr = static_cast<Qt3DSTranslator *>(
+                                firstChild->GetAssociation());
+                    referencedMaterial = static_cast<SGraphObject *>(
+                                &tr->RenderObject());
+                }
+                if (!referencedMaterial) {
+                    // We could create default material into the container in case there is
+                    // no materials in there, but it is unlikely that such a presentation would
+                    // be used in practice.
+                    m_Application->GetElementAllocator().ReleaseElement(newElem, true);
+                    error = QObject::tr("Unable to resolve a fallback material");
+                    handleError();
+                    return;
+                }
             }
         }
 
         // Create model SGraphObject
         NVAllocatorCallback &allocator = presentation->GetScene()->allocator();
-        qt3ds::render::SModel *newObject = QT3DS_NEW(allocator, qt3ds::render::SModel)();
-        newObject->m_Id = strTable.RegisterStr((QByteArrayLiteral("_newObject_")
+        SModel *newObject = QT3DS_NEW(allocator, SModel)();
+        newObject->m_Id = strTable.RegisterStr((QByteArrayLiteral("__newObj_")
                                                 + QByteArray::number(_idCounter)).constData());
         parentObject.AddChild(*newObject);
 
-        qt3ds::render::Qt3DSTranslator::CreateTranslatorForElement(newElem, *newObject, allocator);
+        Qt3DSTranslator::CreateTranslatorForElement(newElem, *newObject, allocator);
 
-        // Create material SGraphObject
-        qt3ds::render::SReferencedMaterial *newMaterial
-                = QT3DS_NEW(allocator, qt3ds::render::SReferencedMaterial)();
-        newMaterial->m_Id = strTable.RegisterStr((QByteArrayLiteral("_newMaterial_")
-                                                  + QByteArray::number(_idCounter)).constData());
-        newMaterial->m_ReferencedMaterial = referencedMaterial;
-
-        newObject->AddMaterial(*newMaterial);
+        if (referencedMaterial) {
+            // Create material SGraphObject
+            SReferencedMaterial *newMaterial = QT3DS_NEW(allocator, SReferencedMaterial)();
+            newMaterial->m_Id = strTable.RegisterStr(
+                        (QByteArrayLiteral("__newMat_")
+                         + QByteArray::number(_idCounter)).constData());
+            newMaterial->m_ReferencedMaterial = referencedMaterial;
+            newObject->AddMaterial(*newMaterial);
+        }
 
         // Determine if element should be active based on start/end times
         TTimeUnit startTime = 0;
@@ -1518,7 +1534,7 @@ void CQmlEngineImpl::createMaterials(const QString &elementPath,
         // Create render object for the material
         qt3ds::render::SGraphObject *newMaterial = nullptr;
         CRegisteredString newMatId = strTable.RegisterStr(
-                    (QByteArrayLiteral("_newMaterial_") + QByteArray::number(++_idCounter))
+                    (QByteArrayLiteral("__newMat_") + QByteArray::number(++_idCounter))
                     .constData());
         if (isCustomMaterial) {
             newMaterial = customMaterialSystem->CreateCustomMaterial(matClass, allocator);
@@ -1596,7 +1612,7 @@ void CQmlEngineImpl::createMaterials(const QString &elementPath,
                     qt3ds::render::SImage *newImageObj
                             = QT3DS_NEW(allocator, qt3ds::render::SImage)();
                     newImageObj->m_Id = strTable.RegisterStr(
-                                (QByteArrayLiteral("_newImage_")
+                                (QByteArrayLiteral("__newImage_")
                                  + QByteArray::number(++_idCounter)).constData());
                     qt3ds::render::Qt3DSTranslator::CreateTranslatorForElement(
                                 *imageElem, *newImageObj, allocator);

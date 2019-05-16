@@ -215,6 +215,7 @@ void tst_qt3dsviewer::testCreateElement()
     Q3DSElement newCylinder(m_presentation, QStringLiteral("Scene.Layer.New Cylinder"));
     Q3DSElement newCylinder2(m_presentation,
                              QStringLiteral("Scene.Layer.New Cylinder.New Cylinder 2"));
+    Q3DSElement newGroup(m_presentation, QStringLiteral("Scene.Layer.New Group"));
     Q3DSElement newSphere(m_presentation, QStringLiteral("Scene.Layer.Cube2.New Sphere"));
 
     QTimer animationTimer;
@@ -227,6 +228,7 @@ void tst_qt3dsviewer::testCreateElement()
         newCylinder.setAttribute(QStringLiteral("rotation.x"), animValue * 4);
         newCylinder2.setAttribute(QStringLiteral("position.y"), animValue * 3);
         newSphere.setAttribute(QStringLiteral("position.x"), 50 + animValue * 2);
+        newGroup.setAttribute(QStringLiteral("opacity"), qAbs(animValue));
     });
 
     // Create objects to slides 1 & 2 while slide 1 is executing
@@ -264,6 +266,44 @@ void tst_qt3dsviewer::testCreateElement()
                     QVariant::fromValue<QVector3D>(QVector3D(-100, -100, 0)));
 
         createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide2"), data);
+
+        data.clear();
+        data.insert(QStringLiteral("name"), QStringLiteral("New Group"));
+        data.insert(QStringLiteral("type"), QStringLiteral("group"));
+        data.insert(QStringLiteral("starttime"), 0);
+        data.insert(QStringLiteral("endtime"), 10000);
+        data.insert(QStringLiteral("position"),
+                    QVariant::fromValue<QVector3D>(QVector3D(50, -100, 0)));
+
+        createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide1"), data);
+
+        QVector<QHash<QString, QVariant>> groupElemProps;
+        data.clear();
+        data.insert(QStringLiteral("name"), QStringLiteral("Child 1 of Group"));
+        data.insert(QStringLiteral("type"), QStringLiteral("model"));
+        data.insert(QStringLiteral("sourcepath"), QStringLiteral("#Cylinder"));
+        data.insert(QStringLiteral("material"), QStringLiteral("Basic Green"));
+        data.insert(QStringLiteral("starttime"), 1000);
+        data.insert(QStringLiteral("endtime"), 4000);
+        data.insert(QStringLiteral("position"),
+                    QVariant::fromValue<QVector3D>(QVector3D(0, 0, 0)));
+        groupElemProps << data;
+        data.clear();
+        data.insert(QStringLiteral("name"), QStringLiteral("Child 2 of Group"));
+        data.insert(QStringLiteral("type"), QStringLiteral("model"));
+        data.insert(QStringLiteral("sourcepath"), QStringLiteral("#Cylinder"));
+        data.insert(QStringLiteral("material"), QStringLiteral("Basic Green"));
+        data.insert(QStringLiteral("starttime"), 2000);
+        data.insert(QStringLiteral("endtime"), 4000);
+        data.insert(QStringLiteral("position"),
+                    QVariant::fromValue<QVector3D>(QVector3D(100, 0, 0)));
+        groupElemProps << data;
+
+        m_createdElements << QStringLiteral("Scene.Layer.New Group.Child 1 of Group")
+                          << QStringLiteral("Scene.Layer.New Group.Child 2 of Group");
+
+        m_presentation->createElements(QStringLiteral("Scene.Layer.New Group"),
+                                       QStringLiteral("Slide1"), groupElemProps);
 
         animationTimer.start();
     });
@@ -330,7 +370,7 @@ void tst_qt3dsviewer::testCreateElement()
     QVERIFY(spyExited.wait(20000));
 
     QTest::qWait(500);
-    QCOMPARE(spyElemCreated.count(), 7);
+    QCOMPARE(spyElemCreated.count(), 9);
     deleteCreatedElements();
 
     // Switch to slide 1
