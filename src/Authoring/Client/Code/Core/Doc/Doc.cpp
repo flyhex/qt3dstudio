@@ -90,7 +90,7 @@ using std::shared_ptr;
 //==============================================================================
 //	Constants
 //==============================================================================
-const long STUDIO_FILE_VERSION = 5;
+const long STUDIO_FILE_VERSION = 6;
 const long STUDIO_LAST_SUPPORTED_FILE_VERSION = 1;
 
 IMPLEMENT_OBJECT_COUNTER(CDoc)
@@ -1582,9 +1582,9 @@ void CDoc::SetDirectoryWatchingSystem(
     m_DirectoryWatchingSystem = inSystem;
 }
 
-Q3DStudio::IDirectoryWatchingSystem *CDoc::GetDirectoryWatchingSystem()
+Q3DStudio::IDirectoryWatchingSystem *CDoc::GetDirectoryWatchingSystem() const
 {
-    return m_DirectoryWatchingSystem ? m_DirectoryWatchingSystem.get() : NULL;
+    return m_DirectoryWatchingSystem ? m_DirectoryWatchingSystem.get() : nullptr;
 }
 
 bool CDoc::SetDocumentPath(const QString &inDocumentPath)
@@ -2237,6 +2237,14 @@ void CDoc::LoadPresentationFile(CBufferedInputStream *inInputStream)
     m_StudioSystem->GetFullSystem()->GetSignalSender()->SendActiveSlide(theMasterSlide, 1,
                                                                         theChildSlide);
 
+    if (uipVersion < 6) {
+        // uipVersion 6 introduced vec4 colors
+        g_StudioApp.GetDialogs()->DisplayMessageBox(
+                    tr("Old Presentation Version"),
+                    tr("Some custom materials, effects, and behaviors may not work correctly."),
+                    Qt3DSMessageBox::ICON_WARNING, false);
+    }
+
     if (uipVersion == 3) {
         bool cleaned = m_SceneEditor->CleanUpMeshes();
         QTimer::singleShot(0, [=](){
@@ -2469,7 +2477,7 @@ DoCreateDOMReader(qt3ds::foundation::IInStream &inStream,
     std::shared_ptr<IDOMFactory> theFactory(IDOMFactory::CreateDOMFactory(theStringTable));
     SDOMElement *theElement = CDOMSerializer::Read(*theFactory, inStream);
     outVersion = 0;
-    if (theElement != NULL) {
+    if (theElement) {
         std::shared_ptr<IDOMReader> retval =
                 IDOMReader::CreateDOMReader(*theElement, theStringTable, theFactory);
 
@@ -2587,11 +2595,9 @@ void CDoc::SavePresentationFile(CBufferedOutputStream *inOutputStream)
         m_DocumentBufferCache->GetImageBuffers(theImageBuffers);
 
         // Remove buffers that aren't in the map.
-        erase_if(
-                    theImageBuffers,
-                    SBufferFilter(sourcePathToInstanceMap,
-                                  *m_StudioSystem->GetFullSystem()->GetCoreSystem()->GetStringTablePtr()));
-        if (theImageBuffers.empty() == false) {
+        erase_if(theImageBuffers, SBufferFilter(sourcePathToInstanceMap,
+                 *m_StudioSystem->GetFullSystem()->GetCoreSystem()->GetStringTablePtr()));
+        if (!theImageBuffers.empty()) {
             // Ensure the source paths are always written out in the same order to keep source
             // control reasonable
             std::sort(theImageBuffers.begin(), theImageBuffers.end(),
@@ -2864,7 +2870,7 @@ qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetTopmostGroup(qt3dsdm::Qt3DSDMInstanceHan
 void CDoc::ScheduleRemoveImageInstances(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                         CCmdBatch * /*outBatch*/)
 {
-    IterateImageInstances(inInstance, NULL);
+    IterateImageInstances(inInstance, nullptr);
 }
 
 //==============================================================================

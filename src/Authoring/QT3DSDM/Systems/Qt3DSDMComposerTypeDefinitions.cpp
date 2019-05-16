@@ -223,11 +223,8 @@ struct DataConstructor<SObjectRefType>
 #define QT3DS_WCHAR_T_tracking L"tracking"
 #define QT3DS_WCHAR_T_dropshadow L"dropshadow"
 #define QT3DS_WCHAR_T_dropshadowstrength L"dropshadowstrength"
-#define QT3DS_WCHAR_T_dropshadowoffset L"dropshadowoffset" // To be removed in 2.x (when UIP version is next updated)
 #define QT3DS_WCHAR_T_dropshadowoffsetx L"dropshadowoffsetx"
 #define QT3DS_WCHAR_T_dropshadowoffsety L"dropshadowoffsety"
-#define QT3DS_WCHAR_T_dropshadowhorzalign L"dropshadowhorzalign" // To be removed in 2.x (when UIP version is next updated)
-#define QT3DS_WCHAR_T_dropshadowvertalign L"dropshadowvertalign" // To be removed in 2.x (when UIP version is next updated)
 #define QT3DS_WCHAR_T_wordwrap L"wordwrap"
 #define QT3DS_WCHAR_T_boundingbox L"boundingbox"
 #define QT3DS_WCHAR_T_elide L"elide"

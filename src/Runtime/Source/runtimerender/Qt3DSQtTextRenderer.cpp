@@ -545,33 +545,6 @@ struct Qt3DSQtTextRenderer : public ITextRenderer
             break; // Do nothing
         }
 
-        qreal shadowOffsetX = qreal(inSrcText.m_FontSize * inSrcText.m_DropShadowOffsetX) / 1000.;
-        qreal shadowOffsetY = qreal(inSrcText.m_FontSize * inSrcText.m_DropShadowOffsetY) / 1000.;
-        // To be removed in 2.x (when UIP version is next updated)
-        if (inSrcText.m_DropShadow && shadowOffsetX == 0. && shadowOffsetY == 0.) {
-            const qreal offset = qreal(inSrcText.m_DropShadowOffset) / 10.;
-            switch (inSrcText.m_DropShadowHorizontalAlignment) {
-            case TextHorizontalAlignment::Left:
-                shadowOffsetX = -offset;
-                break;
-            case TextHorizontalAlignment::Right:
-                shadowOffsetX = offset;
-                break;
-            default:
-                break;
-            }
-            switch (inSrcText.m_DropShadowVerticalAlignment) {
-            case TextVerticalAlignment::Top:
-                shadowOffsetY = -offset;
-                break;
-            case TextVerticalAlignment::Bottom:
-                shadowOffsetY = offset;
-                break;
-            default:
-                break;
-            }
-        }
-
         int wordWrapFlags = 0;
         if (dynamicTextArea) {
             wordWrapFlags = Qt::TextDontClip;
@@ -607,6 +580,10 @@ struct Qt3DSQtTextRenderer : public ITextRenderer
             QRectF bound(xTranslation, qreal(nextHeight), lineWidths.at(i), lineHeight);
             QRectF actualBound;
             if (inSrcText.m_DropShadow) {
+                qreal shadowOffsetX = qreal(inSrcText.m_FontSize * inSrcText.m_DropShadowOffsetX)
+                                      / 1000.;
+                qreal shadowOffsetY = qreal(inSrcText.m_FontSize * inSrcText.m_DropShadowOffsetY)
+                                      / 1000.;
                 QRectF boundShadow(xTranslation + shadowOffsetX, nextHeight + shadowOffsetY,
                                    qreal(lineWidths.at(i)), lineHeight);
                 // shadow is a darker shade of the given font color

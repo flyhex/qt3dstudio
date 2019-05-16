@@ -91,17 +91,16 @@ RowTree *RowManager::createRowFromBinding(ITimelineItemBinding *binding, RowTree
                                 binding->GetTimelineItem()->GetName().toQString(),
                                 QString(), index);
 
-    // hide if material container
-    const QString matContainerName = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
-                                     ->GetClientDataModelBridge()->getMaterialContainerName();
-    if (newRow->rowType() == OBJTYPE_MATERIAL && newRow->label() == matContainerName) {
-        newRow->setVisible(false);
-        newRow->rowTimeline()->setVisible(false);
-    }
-
     // connect the new row and its binding
     binding->setRowTree(newRow);
     newRow->setBinding(binding);
+
+    // hide if material container
+    auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
+    if (bridge->isMaterialContainer(newRow->instance())) {
+        newRow->setVisible(false);
+        newRow->rowTimeline()->setVisible(false);
+    }
 
     // set row start/end time & color
     ITimelineTimebar *timebar = binding->GetTimelineItem()->GetTimebar();

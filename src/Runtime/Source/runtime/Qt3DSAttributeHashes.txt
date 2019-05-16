@@ -184,11 +184,8 @@ size
 font
 dropshadow
 dropshadowstrength
-dropshadowoffset
 dropshadowoffsetx
 dropshadowoffsety
-dropshadowhorzalign
-dropshadowvertalign
 boundingbox
 boundingbox.x
 boundingbox.y

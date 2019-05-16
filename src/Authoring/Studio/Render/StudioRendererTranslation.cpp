@@ -474,11 +474,8 @@ struct STranslatorDataModelParser
 #define Text_Tracking m_Text.m_Tracking
 #define Text_DropShadow m_Text.m_DropShadow
 #define Text_DropShadowStrength m_Text.m_DropShadowStrength
-#define Text_DropShadowOffset m_Text.m_DropShadowOffset // To be removed in 2.x (when UIP version is next updated)
 #define Text_DropShadowOffsetX m_Text.m_DropShadowOffsetX
 #define Text_DropShadowOffsetY m_Text.m_DropShadowOffsetY
-#define Text_DropShadowHorizontalAlignment m_Text.m_DropShadowHorizontalAlignment // To be removed in 2.x (when UIP version is next updated)
-#define Text_DropShadowVerticalAlignment m_Text.m_DropShadowVerticalAlignment // To be removed in 2.x (when UIP version is next updated)
 #define Text_WordWrap m_Text.m_WordWrap
 #define Text_BoundingBox m_Text.m_BoundingBox
 #define Text_Elide m_Text.m_Elide

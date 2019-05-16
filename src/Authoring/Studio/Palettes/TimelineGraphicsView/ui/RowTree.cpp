@@ -706,7 +706,7 @@ bool RowTree::isInVariantsFilter() const
 void RowTree::updateFilter()
 {
     auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
-    if (m_rowType == OBJTYPE_MATERIAL && m_label == bridge->getMaterialContainerName())
+    if (bridge->isMaterialContainer(instance()))
         return;
 
     bool parentOk = !m_parentRow || m_parentRow->isVisible();
@@ -920,7 +920,7 @@ void RowTree::updateLabel()
 void RowTree::setRowVisible(bool visible)
 {
     auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
-    if (m_rowType == OBJTYPE_MATERIAL && m_label == bridge->getMaterialContainerName())
+    if (bridge->isMaterialContainer(instance()))
         return;
 
     if (visible) {

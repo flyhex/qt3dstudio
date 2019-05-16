@@ -843,11 +843,8 @@ struct SRenderUIPLoader : public IDOMReferenceResolver
 #define Text_Tracking "tracking"
 #define Text_DropShadow "dropshadow"
 #define Text_DropShadowStrength "dropshadowstrength"
-#define Text_DropShadowOffset "dropshadowoffset" // To be removed in 2.x (when UIP version is next updated)
 #define Text_DropShadowOffsetX "dropshadowoffsetx"
 #define Text_DropShadowOffsetY "dropshadowoffsety"
-#define Text_DropShadowHorizontalAlignment "dropshadowhorzalign" // To be removed in 2.x (when UIP version is next updated)
-#define Text_DropShadowVerticalAlignment "dropshadowvertalign" // To be removed in 2.x (when UIP version is next updated)
 #define Text_WordWrap "wordwrap"
 #define Text_BoundingBox "boundingbox"
 #define Text_Elide "elide"

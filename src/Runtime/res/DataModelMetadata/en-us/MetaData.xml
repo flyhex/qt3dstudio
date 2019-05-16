@@ -461,10 +461,6 @@
         <Property name="dropshadowstrength" formalName="Shadow Darkness"   category="Shadow" type="Float" min="0"    max="100" default="80"    description="Darkness of the shadow in percents.\n100 is black, 0 is the same color as the text." />
         <Property name="dropshadowoffsetx"  formalName="Horizontal Offset" category="Shadow" type="Float" min="-100" max="100" default="0"     description="Horizontal offset of the shadow.\nIt is relative to the font size."                  />
         <Property name="dropshadowoffsety"  formalName="Vertical Offset"   category="Shadow" type="Float" min="-100" max="100" default="0"     description="Vertical offset of the shadow.\nIt is relative to the font size."                    />
-        <!--To be removed in 2.x (when UIP version is next updated)
-        <Property name="dropshadowoffset" formalName="Shadow Offset" description="Offset of the shadow. It\nis relative to the font size." min="1" max="100" type="Float" default="10" />
-        <Property name="dropshadowhorzalign" formalName="Horizontal Position" description="Horizontal position of the shadow" list="Left:Center:Right" default="Right" />
-        <Property name="dropshadowvertalign" formalName="Vertical Position" description="Vertical position of the shadow" list="Top:Middle:Bottom" default="Bottom" />-->
     </Text>
 
     <Path> <!-- (doesn't seem to be in use) -->

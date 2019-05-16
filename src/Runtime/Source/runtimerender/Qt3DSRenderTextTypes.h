@@ -173,11 +173,8 @@ namespace render {
         QT3DSF32 m_Tracking; // space between letters
         bool m_DropShadow;
         QT3DSF32 m_DropShadowStrength;
-        QT3DSF32 m_DropShadowOffset; // To be removed in 2.x (when UIP version is next updated)
         QT3DSF32 m_DropShadowOffsetX;
         QT3DSF32 m_DropShadowOffsetY;
-        TextHorizontalAlignment::Enum m_DropShadowHorizontalAlignment; // To be removed in 2.x (when UIP version is next updated)
-        TextVerticalAlignment::Enum m_DropShadowVerticalAlignment; // To be removed in 2.x (when UIP version is next updated)
         TextWordWrap::Enum m_WordWrap;
         QT3DSVec2 m_BoundingBox;
         TextElide::Enum m_Elide;
@@ -185,7 +182,7 @@ namespace render {
         QT3DSF32 m_ScaleX; // Pixel scale in X
         QT3DSF32 m_ScaleY; // Pixel scale in Y
 
-        bool m_EnableAcceleratedFont; ///< use NV path rendering
+        bool m_EnableAcceleratedFont; // use NV path rendering
 
         STextRenderInfo();
         ~STextRenderInfo();

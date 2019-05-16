@@ -864,8 +864,6 @@ size_t getTextHashValue(const SText &text)
     hashCombine(hashValue, text.m_DropShadowStrength);
     hashCombine(hashValue, text.m_VerticalAlignment);
     hashCombine(hashValue, text.m_HorizontalAlignment);
-    hashCombine(hashValue, text.m_DropShadowVerticalAlignment);
-    hashCombine(hashValue, text.m_DropShadowHorizontalAlignment);
     return hashValue;
 }
 

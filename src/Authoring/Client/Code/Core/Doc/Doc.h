@@ -227,7 +227,7 @@ public:
     std::shared_ptr<Q3DStudio::IMoveRenameHandler> getMoveRenameHandler();
 
     // The system may be null in the case where we are running without a UI.
-    Q3DStudio::IDirectoryWatchingSystem *GetDirectoryWatchingSystem();
+    Q3DStudio::IDirectoryWatchingSystem *GetDirectoryWatchingSystem() const;
     bool SetDocumentPath(const QString &inFile);
     QString GetDocumentPath() const;
     void setPresentationId(const QString &id);

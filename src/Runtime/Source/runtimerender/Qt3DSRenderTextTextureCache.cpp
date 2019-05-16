@@ -55,14 +55,11 @@ struct hash<STextRenderInfo>
         retval = retval ^ hash<float>()(inInfo.m_Tracking);
         retval = retval ^ hash<bool>()(inInfo.m_DropShadow);
         retval = retval ^ hash<float>()(inInfo.m_DropShadowStrength);
-        retval = retval ^ hash<float>()(inInfo.m_DropShadowOffset); // To be removed in 2.x (when UIP version is next updated)
         retval = retval ^ hash<float>()(inInfo.m_DropShadowOffsetX);
         retval = retval ^ hash<float>()(inInfo.m_DropShadowOffsetY);
         retval = retval ^ hash<float>()(inInfo.m_BoundingBox.x);
         retval = retval ^ hash<float>()(inInfo.m_BoundingBox.y);
         retval = retval ^ hash<int>()(static_cast<int>(inInfo.m_Elide));
-        retval = retval ^ hash<int>()(static_cast<int>(inInfo.m_DropShadowHorizontalAlignment)); // To be removed in 2.x (when UIP version is next updated)
-        retval = retval ^ hash<int>()(static_cast<int>(inInfo.m_DropShadowVerticalAlignment)); // To be removed in 2.x (when UIP version is next updated)
         retval = retval ^ hash<int>()(static_cast<int>(inInfo.m_WordWrap));
         retval = retval ^ hash<bool>()(inInfo.m_EnableAcceleratedFont);
         return retval;
@@ -92,10 +89,6 @@ struct STextRenderInfoAndHash
             && m_Info.m_Tracking == inOther.m_Info.m_Tracking
             && m_Info.m_DropShadow == inOther.m_Info.m_DropShadow
             && m_Info.m_DropShadowStrength == inOther.m_Info.m_DropShadowStrength
-            && m_Info.m_DropShadowOffset == inOther.m_Info.m_DropShadowOffset
-            && m_Info.m_DropShadowHorizontalAlignment
-                == inOther.m_Info.m_DropShadowHorizontalAlignment
-            && m_Info.m_DropShadowVerticalAlignment == inOther.m_Info.m_DropShadowVerticalAlignment
             && m_Info.m_BoundingBox == inOther.m_Info.m_BoundingBox
             && m_Info.m_WordWrap == inOther.m_Info.m_WordWrap
             && m_Info.m_EnableAcceleratedFont == inOther.m_Info.m_EnableAcceleratedFont

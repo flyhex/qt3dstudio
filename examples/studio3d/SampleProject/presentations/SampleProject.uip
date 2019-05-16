@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<UIP version="5" >
+<UIP version="6" >
 	<Project >
 		<ProjectSettings author="" company="The Qt Company" presentationWidth="1280" presentationHeight="480" maintainAspect="False" preferKtx="False" >
 			<CustomColors count="16" >#dc0032 #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff #ffffff</CustomColors>
