@@ -132,7 +132,7 @@ bool CCmdStack::ExecuteCommand(CCmd *inCommand)
 void CCmdStack::Undo()
 {
     if (m_CommandStackModifier) {
-        if (m_CommandStackModifier->PreUndo() == false)
+        if (m_CommandStackModifier->preUndo() == false)
             return;
     }
 
@@ -198,7 +198,7 @@ void CCmdStack::Redo()
 //=============================================================================
 bool CCmdStack::CanUndo()
 {
-    if (m_CommandStackModifier && m_CommandStackModifier->CanUndo())
+    if (m_CommandStackModifier && m_CommandStackModifier->canUndo())
         return true;
     return m_UndoList.size() > 0;
 }

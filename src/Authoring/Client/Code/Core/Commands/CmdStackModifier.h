@@ -35,8 +35,8 @@ class ICmdStackModifier
 protected:
     virtual ~ICmdStackModifier() {}
 public:
-    virtual bool CanUndo() = 0;
+    virtual bool canUndo() = 0;
     // false means kill the undo without actually undoing anything
-    virtual bool PreUndo() = 0;
+    virtual bool preUndo() = 0;
 };
 #endif

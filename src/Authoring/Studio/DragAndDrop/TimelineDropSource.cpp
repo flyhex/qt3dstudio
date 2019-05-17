@@ -84,7 +84,7 @@ bool CTimeLineDropSource::CanCopy()
 {
     bool theReturn = false;
     // This is here because some Assets can not be copied ( scene, material )
-    theReturn = m_Copy && g_StudioApp.GetCore()->GetDoc()->CanCopyObject(m_Instances);
+    theReturn = m_Copy && g_StudioApp.GetCore()->GetDoc()->canCopyObjects(m_Instances);
 
     return theReturn;
 }

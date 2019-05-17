@@ -590,7 +590,7 @@ bool Qt3DSDMTimelineItemBinding::IsValidTransaction(EUserTransaction inTransacti
         return g_StudioApp.CanCopy();
 
     case EUserTransaction_Paste:
-        return m_TransMgr->GetDoc()->CanPasteObject();
+        return m_TransMgr->GetDoc()->canPasteObjects();
 
     case EUserTransaction_Delete:
         if (theInstance.Valid())

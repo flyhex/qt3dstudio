@@ -336,7 +336,7 @@ bool SlideModel::hasSlideWithName(const QString &name) const
 QString SlideModel::slideName(const qt3dsdm::Qt3DSDMSlideHandle &handle) const
 {
     auto doc = GetDoc();
-    if (!doc->IsValid())
+    if (!doc->isValid())
         return {};
     const auto instanceHandle = doc->GetStudioSystem()->GetSlideSystem()->GetSlideInstance(handle);
     return GetBridge()->GetName(instanceHandle).toQString();
@@ -435,7 +435,7 @@ int SlideModel::rowToSlideIndex(int row) const
 CClientDataModelBridge *SlideModel::GetBridge() const
 {
     auto doc = GetDoc();
-    if (!doc->IsValid())
+    if (!doc->isValid())
         return nullptr;
     return doc->GetStudioSystem()->GetClientDataModelBridge();
 }

@@ -441,7 +441,7 @@ void InspectorControlModel::setMatDatas(const std::vector<Q3DStudio::CFilePath> 
     m_matDatas.clear();
 
     const auto doc = g_StudioApp.GetCore()->GetDoc();
-    bool isDocModified = doc->IsModified();
+    bool isDocModified = doc->isModified();
     const auto sceneEditor = doc->getSceneEditor();
     if (!sceneEditor)
         return;

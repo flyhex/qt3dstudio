@@ -624,7 +624,7 @@ void ProjectFileSystemModel::showInfo(int row)
 
     if (fi.suffix() == QLatin1String("materialdef")) {
         const auto doc = g_StudioApp.GetCore()->GetDoc();
-        bool isDocModified = doc->IsModified();
+        bool isDocModified = doc->isModified();
         { // Scope for the ScopedDocumentEditor
             Q3DStudio::ScopedDocumentEditor sceneEditor(
                         Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QString()));

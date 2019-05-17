@@ -244,7 +244,7 @@ QAbstractItemModel *ActionView::propertyModel() const
 
 QString ActionView::targetObjectName() const
 {
-    if (!GetDoc()->IsValid() || !m_itemHandle.Valid())
+    if (!GetDoc()->isValid() || !m_itemHandle.Valid())
         return QString();
 
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
@@ -261,7 +261,7 @@ QString ActionView::targetObjectName() const
 
 QString ActionView::triggerObjectName() const
 {
-    if (!GetDoc()->IsValid() || !m_itemHandle.Valid())
+    if (!GetDoc()->isValid() || !m_itemHandle.Valid())
         return QString();
 
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
@@ -278,7 +278,7 @@ QString ActionView::triggerObjectName() const
 
 QString ActionView::eventName() const
 {
-    if (!GetDoc()->IsValid() || !m_itemHandle.Valid())
+    if (!GetDoc()->isValid() || !m_itemHandle.Valid())
         return QString();
 
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
@@ -292,7 +292,7 @@ QString ActionView::eventName() const
 
 QString ActionView::handlerName() const
 {
-    if (!GetDoc()->IsValid() || !m_itemHandle.Valid())
+    if (!GetDoc()->isValid() || !m_itemHandle.Valid())
         return QString();
 
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);
@@ -636,7 +636,7 @@ void ActionView::updateFiredEvent()
     }
 
     const auto doc = GetDoc();
-    if (!doc->IsValid())
+    if (!doc->isValid())
         return;
 
     const auto bridge = GetBridge();
@@ -1035,7 +1035,7 @@ void ActionView::updateHandlerArguments()
     m_currentPropertyNameHandle = 0;
     m_handlerArguments.clear();
     const auto doc = GetDoc();
-    if (!doc->IsValid() || !m_itemHandle.Valid())
+    if (!doc->isValid() || !m_itemHandle.Valid())
         return;
 
     const auto actionInfo = m_actionsModel->actionInfoAt(m_currentActionIndex);

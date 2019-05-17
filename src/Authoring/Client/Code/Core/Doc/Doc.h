@@ -27,62 +27,37 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
 #ifndef INCLUDED_DOC_H
-#define INCLUDED_DOC_H 1
+#define INCLUDED_DOC_H
 
-#pragma once
-
-//==============================================================================
-//	Includes
-//==============================================================================
-#include "Conditional.h"
-#include "Qt3DSFile.h"
 #include "Qt3DSRect.h"
 #include "IDoc.h"
 #include "GUIDUtilities.h"
 #include "GraphUtils.h"
 #include "CmdStackModifier.h"
-#include "Qt3DSColor.h"
-#include "SelectedValueImpl.h"
 #include "Utility/CoreConst.h"
 
 #include <QtCore/quuid.h>
 #include <QtCore/qsize.h>
 #include <QtCore/qhash.h>
 
-//==============================================================================
-//	Forwards
-//==============================================================================
-class CScene;
-class CCamera;
-class CLight;
-class CHotKeys;
 class CCmdBatch;
-class CStudioProjectSettings;
-class CView;
-class ISelectable;
 class CBufferedInputStream;
 class CBufferedOutputStream;
 class CDataManager;
-class CClientDataModelBridge;
 class IKeyframesManager;
 class IObjectReferenceHelper;
 class CCore;
-class CRenderContext;
 class CPlaybackClock;
+struct SDocumentDataModelListener;
 
 namespace Q3DStudio {
 class IInternalDocumentEditor;
 class CFilePath;
-class IInternalDirectoryWatchingSystem;
 class IDirectoryWatchingSystem;
 class IImportFailedHandler;
 class IDeletingReferencedObjectHandler;
 class IMoveRenameHandler;
-class CTransactionCloseListenerSignaller;
 class IDocSceneGraph;
 struct SSelectedValue;
 }
@@ -92,10 +67,6 @@ class CStudioSystem;
 class ISignalConnection;
 class CmdDataModel;
 }
-
-QT_FORWARD_DECLARE_CLASS(QWidget)
-
-struct SDocumentDataModelListener;
 
 namespace std {
 template <>
@@ -113,14 +84,12 @@ struct hash<GUID>
 };
 struct AreGuidsEqual
 {
-
     bool operator()(const GUID &lhs, const GUID &rhs) const
     {
         return memcmp(&lhs, &rhs, sizeof(GUID)) == 0;
     }
 };
 }
-
 
 struct SubPresentationRecord
 {
@@ -203,22 +172,19 @@ public:
     void removeControlFromInstance(const qt3dsdm::Qt3DSDMInstanceHandle handle);
 };
 
-//==============================================================================
-//	CDoc Class
-//==============================================================================
-
 class CDoc : public QObject, public IDoc, public ICmdStackModifier
 {
     Q_OBJECT
+
 public:
     friend struct SDocumentDataModelListener;
+
     CDoc(CCore *inCore);
     virtual ~CDoc();
 
     DEFINE_OBJECT_COUNTER(CDoc)
 
-    void
-    SetDirectoryWatchingSystem(std::shared_ptr<Q3DStudio::IDirectoryWatchingSystem> inSystem);
+    void SetDirectoryWatchingSystem(std::shared_ptr<Q3DStudio::IDirectoryWatchingSystem> inSystem);
     void SetImportFailedHandler(std::shared_ptr<Q3DStudio::IImportFailedHandler> inHandler);
     std::shared_ptr<Q3DStudio::IImportFailedHandler> GetImportFailedHandler();
     void SetDocMessageBoxHandler(
@@ -255,8 +221,8 @@ public:
     QString GetCurrentController(qt3dsdm::Qt3DSDMInstanceHandle instHandle,
                                  qt3dsdm::Qt3DSDMPropertyHandle propHandle) const;
 
-    bool IsModified();
-    bool IsValid() const;
+    bool isModified() const;
+    bool isValid() const;
 
     qt3dsdm::Qt3DSDMInstanceHandle GetInstanceFromSelectable(
             Q3DStudio::SSelectedValue inSelectedItem) const;
@@ -264,8 +230,8 @@ public:
 
     void CutSelectedObject();
     void DeleteSelectedItems(bool slide = false);
-    void DeleteSelectedObject(bool slide = false);
-    bool DeleteSelectedKeys();
+    void deleteSelectedObject(bool slide = false);
+    bool deleteSelectedKeyframes();
     void SetChangedKeyframes();
 
     // Cut object to clipboard
@@ -304,17 +270,17 @@ public:
     void HandleMasterPaste();
     void HandleCut();
 
-    bool CanCopyObject(); // specifically for objects
-    bool CanCopyObject(const qt3dsdm::TInstanceHandleList &inInstances); // specifically for objects
-    bool CanCopyKeyframe(); // specifically for keyframes
-    bool CanCopyAction(); // specifically for actions
-    bool CanPasteObject() const; // specifically for objects
-    bool CanPasteKeyframe(); // specifically for keyframes
-    bool CanPasteAction(); // specifically for actions
+    bool canCopySelectedObjects() const;
+    bool canCopyObjects(const qt3dsdm::TInstanceHandleList &inInstances) const;
+    bool canCopySelectedKeyframes() const;
+    bool canCopySelectedActions() const;
+    bool canPasteObjects() const;
+    bool canPasteKeyframes() const;
+    bool canPasteActions() const;
 
-    bool CanPaste(); // for objects or keyframes or actions
-    bool CanCopy(); // for objects or keyframes or actions
-    bool CanCut(); // for objects or keyframes or actions
+    bool canPaste() const; // objects, keyframes, or actions
+    bool canCopy() const;  // objects, keyframes, or actions
+    bool canCut();         // objects, keyframes, or actions
     void HandleDuplicateCommand(bool slide = false);
 
     bool VerifyCanRename(qt3dsdm::Qt3DSDMInstanceHandle inAsset);
@@ -350,9 +316,8 @@ public:
     void DeselectAllKeyframes() override;
     void SetModifiedFlag(bool inIsModified = true) override;
     void SetKeyframesManager(IKeyframesManager *inManager) override;
-    IKeyframesManager *GetKeyframesManager() override;
-    qt3dsdm::IPropertySystem *GetPropertySystem() override;
-    qt3dsdm::IAnimationCore *GetAnimationCore() override;
+    qt3dsdm::IPropertySystem *GetPropertySystem() const override;
+    qt3dsdm::IAnimationCore *GetAnimationCore() const override;
     void SetInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                   const std::wstring &inPropertyName,
                                   const qt3dsdm::SValue &inValue) override;
@@ -371,12 +336,12 @@ public:
     Q3DStudio::IDocumentReader &GetDocumentReader() override;
     Q3DStudio::IDocumentEditor &OpenTransaction(const QString &inCmdName, const char *inFile,
                                                 int inLine) override;
-    Q3DStudio::IDocumentEditor &MaybeOpenTransaction(const QString &cmdName, const char *inFile,
+    Q3DStudio::IDocumentEditor &maybeOpenTransaction(const QString &cmdName, const char *inFile,
                                                      int inLine) override;
-    bool IsTransactionOpened() const override;
-    void RollbackTransaction() override;
-    void CloseTransaction() override;
-    void IKnowWhatIAmDoingForceCloseTransaction() override;
+    bool isTransactionOpened() const override;
+    void rollbackTransaction() override;
+    void closeTransaction() override;
+    void forceCloseTransaction() override;
 
     std::shared_ptr<Q3DStudio::IComposerSerializer> CreateSerializer() override;
     virtual std::shared_ptr<Q3DStudio::IComposerSerializer> CreateTransactionlessSerializer();
@@ -401,20 +366,7 @@ public:
 
     void TruncateTimebar(bool inSetStart, bool inAffectsChildren);
 
-    // Helper methods for Edit Camera
-    // These need to move to the render system.
-    // They are view specific properties and have nothing to do with
-    // the document.
-    /*
-    CEditCameraContainer*       GetEditCameraContainer( );
-    CCamera*                    GetCurrentEditCamera( );
-    CLight*                     GetEditingLight( );
-    long                        GetEditingFillMode( );
-    bool                        IsInEditMode( );
-    Q3DStudio::CColor           GetEditViewBackgroundColor( );
-    */
-
-    qt3dsdm::CStudioSystem *GetStudioSystem() override { return m_StudioSystem.get(); }
+    qt3dsdm::CStudioSystem *GetStudioSystem() const override { return m_StudioSystem.get(); }
 
     IObjectReferenceHelper *GetDataModelObjectReferenceHelper() const
     {
@@ -439,8 +391,8 @@ public:
                                                          bool inGroupMode);
 
     // ICmdStackModifier
-    bool CanUndo() override;
-    bool PreUndo() override;
+    bool canUndo() override;
+    bool preUndo() override;
 
     void getSceneMaterials(qt3dsdm::Qt3DSDMInstanceHandle inParent,
                            QVector<qt3dsdm::Qt3DSDMInstanceHandle> &outMats) const;
@@ -468,6 +420,9 @@ public:
 
     void queueMaterialRename(const QString &oldName, const QString &newName);
 
+    void OnNewPresentation();
+    void OnPresentationDeactivated();
+
 protected:
     // Set the active slide, return true if delving
     void SetActiveSlideChange(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide);
@@ -482,7 +437,6 @@ protected:
     void SavePresentationFile(CBufferedOutputStream *inOutputStream);
 
     void CleanupData();
-    void ResetData();
     int LoadStudioData(CBufferedInputStream *inInputStream);
     void ResetDataCore();
     void SetupDataCoreSignals();
@@ -495,7 +449,7 @@ protected:
     void GetActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                qt3dsdm::TActionHandleList &ioActionList);
 
-    qt3dsdm::Qt3DSDMInstanceHandle GetFirstSelectableLayer();
+    qt3dsdm::Qt3DSDMInstanceHandle getFirstSelectableLayer();
     qt3dsdm::Qt3DSDMInstanceHandle GetTopmostGroup(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
 
     void GetActionsAffectedByRename(qt3dsdm::Qt3DSDMInstanceHandle inAsset,
@@ -508,30 +462,26 @@ protected:
             QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
                                      qt3dsdm::Qt3DSDMPropertyHandle>> *outMap);
 
-    //==========================================================================
-    //	Protected Fields
-    //==========================================================================
-
-    long m_PlayMode; ///< This tracks whether we're playing a client presentation or not.
+    long m_PlayMode; // This tracks whether we're playing a client presentation or not.
     Q3DStudio::SSelectedValue m_SelectedObject;
-    long m_CurrentViewTime; ///< The current time that is displayed by the playhead, not necessarily
-                            ///the client time.
-    qt3dsdm::Qt3DSDMInstanceHandle m_SceneInstance; ///< Pointer to the root level Scene object.
-    qt3dsdm::Qt3DSDMSlideHandle m_ActiveSlide; ///< The currently active Slide Handle.
-    qt3dsdm::Qt3DSDMInstanceHandle m_ActiveLayer; ///< The currently active layer.
-    CPlaybackClock *m_PlaybackClock; ///< Playback clock. This is used when user clicks "Play"
+    long m_CurrentViewTime; // The current time that is displayed by the playhead, not necessarily
+                            // the client time.
+    qt3dsdm::Qt3DSDMInstanceHandle m_SceneInstance; // Pointer to the root level Scene object.
+    qt3dsdm::Qt3DSDMSlideHandle m_ActiveSlide; // The currently active Slide Handle.
+    qt3dsdm::Qt3DSDMInstanceHandle m_ActiveLayer; // The currently active layer.
+    CPlaybackClock *m_PlaybackClock; // Playback clock. This is used when user clicks "Play"
     CCore *m_Core;
     bool m_IsModified;
     bool m_IsTemporary;
     QString m_DocumentPath;
 
-    CDataManager *m_DataManager; ///< Manager for handling data properties.
+    CDataManager *m_DataManager; // Manager for handling data properties.
 
     std::shared_ptr<qt3dsdm::CStudioSystem> m_StudioSystem;
 
-    IKeyframesManager *m_KeyframesManager; ///< To support menu actions for selected keys
+    IKeyframesManager *m_KeyframesManager; // To support menu actions for selected keys
 
-    IObjectReferenceHelper *m_DataModelObjectRefHelper; ///< To support object reference control
+    IObjectReferenceHelper *m_DataModelObjectRefHelper; // To support object reference control
 
     TAssetGraphPtr m_AssetGraph;
 
@@ -552,15 +502,9 @@ protected:
     QVector<QPair<QString, QString>> m_materialRenames;
     QVector<QPair<QString, QString>> m_materialUndoRenames;
 
-public:
-    void OnNewPresentation();
-    void OnPresentationDeactivated();
-
-protected:
-    CRenderContext *m_RenderContext; ///< The render context attached to this player's window.
-    Qt3DSRenderDevice m_WindowHandle; ///< The window handle to which to render
+    Qt3DSRenderDevice m_WindowHandle; // The window handle to which to render
     Q3DStudio::CRect m_ClientSize;
-    Q3DStudio::CRect m_SceneRect; ///< The dimensions of the active scene view
+    Q3DStudio::CRect m_SceneRect; // The dimensions of the active scene view
 
 private:
     bool m_playbackPreviewOn = false;

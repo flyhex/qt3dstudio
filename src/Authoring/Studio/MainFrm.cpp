@@ -671,8 +671,7 @@ void CMainFrame::OnUpdateTimelineDeleteSelectedKeyframes()
  */
 void CMainFrame::OnUpdateTimelineSetInterpolation()
 {
-    m_ui->actionSet_Interpolation->setEnabled(
-                g_StudioApp.GetCore()->GetDoc()->GetKeyframesManager()->HasSelectedKeyframes());
+    m_ui->actionSet_Interpolation->setEnabled(getTimelineWidget()->hasSelectedKeyframes());
 }
 
 /**
@@ -718,7 +717,7 @@ void CMainFrame::OnFileSave()
 
 void CMainFrame::OnUpdateFileSave()
 {
-    m_ui->action_Save->setEnabled(g_StudioApp.GetCore()->GetDoc()->IsModified());
+    m_ui->action_Save->setEnabled(g_StudioApp.GetCore()->GetDoc()->isModified());
 }
 
 /**
@@ -770,7 +769,7 @@ void CMainFrame::closeEvent(QCloseEvent *event)
     handleGeometryAndState(true);
     QMainWindow::closeEvent(event);
 
-    if (g_StudioApp.GetCore()->GetDoc()->IsModified()) {
+    if (g_StudioApp.GetCore()->GetDoc()->isModified()) {
         CDialogs::ESavePromptResult theResult = g_StudioApp.GetDialogs()->PromptForSave();
         if (theResult == CDialogs::SAVE_FIRST) {
             // If the save was canceled or failed then do not exit.

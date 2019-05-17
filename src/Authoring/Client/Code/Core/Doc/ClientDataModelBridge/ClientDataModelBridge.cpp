@@ -1592,10 +1592,10 @@ bool CClientDataModelBridge::CanDelete(qt3dsdm::Qt3DSDMInstanceHandle inInstance
     case OBJTYPE_SUBPATH:
     case OBJTYPE_EFFECT:
         return !IsLockedAtAll(inInstance);
-        break;
+
     case OBJTYPE_COMPONENT:
         return !IsLockedAtAll(inInstance) && !IsActiveComponent(inInstance);
-        break;
+
     case OBJTYPE_LAYER:
         // We could not delete a layer if
         // 1. if the deleted layer is in master slide, and there is only 1 master layer
@@ -1617,18 +1617,17 @@ bool CClientDataModelBridge::CanDelete(qt3dsdm::Qt3DSDMInstanceHandle inInstance
         }
 
         return !IsLockedAtAll(inInstance);
-        break;
+
     case OBJTYPE_BEHAVIOR:
         return true;
-        break;
+
     case OBJTYPE_MATERIAL:
     case OBJTYPE_LIGHTMAPS:
     case OBJTYPE_SCENE:
         return false;
-        break;
+
     default:
         return false;
-        break;
     }
 }
 

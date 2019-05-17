@@ -489,9 +489,9 @@ struct SRendererImpl : public IStudioRenderer,
 
     void SetGuidesEnabled(bool val) override { m_GuidesEnabled = val; }
 
-    bool AreGuidesEditable() const override { return m_Doc.IsValid() ? m_Doc.GetDocumentReader().AreGuidesEditable() : false; }
+    bool AreGuidesEditable() const override { return m_Doc.isValid() ? m_Doc.GetDocumentReader().AreGuidesEditable() : false; }
 
-    void SetGuidesEditable(bool val) override { if (m_Doc.IsValid()) m_Doc.GetDocumentReader().SetGuidesEditable(val); }
+    void SetGuidesEditable(bool val) override { if (m_Doc.isValid()) m_Doc.GetDocumentReader().SetGuidesEditable(val); }
 
     // Setting the camera to -1 disables the edit cameras
     // So setting the camera to 0- (numcameras - 1) will set change the active

@@ -410,10 +410,10 @@ QString ProjectFile::createPreview()
     QString uipPrvPath = doc->GetDocumentPath();
 
     // Commit all open transactions
-    doc->IKnowWhatIAmDoingForceCloseTransaction();
+    doc->forceCloseTransaction();
 
     // create a preview uip if doc modified
-    if (doc->IsModified()) {
+    if (doc->isModified()) {
         uipPrvPath.replace(QLatin1String(".uip"), QLatin1String("_@preview@.uip"));
         g_StudioApp.GetCore()->OnSaveDocument(uipPrvPath, true);
     }
@@ -437,7 +437,7 @@ QString ProjectFile::createPreview()
                                      .firstChildElement(QStringLiteral("assets"));
             assetsElem.setAttribute(QStringLiteral("initial"), doc->getPresentationId());
 
-            if (doc->IsModified()) {
+            if (doc->isModified()) {
                 // Set the preview uip path in the uia file
                 QDomNodeList pNodes = assetsElem.elementsByTagName(QStringLiteral("presentation"));
                 for (int i = 0; i < pNodes.count(); ++i) {

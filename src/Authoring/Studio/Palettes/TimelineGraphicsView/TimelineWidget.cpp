@@ -245,7 +245,7 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
 
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
     connect(m_toolbar, &TimelineToolbar::deleteLayerTriggered,
-            [=](){ doc->DeleteSelectedObject(); });
+            [=](){ doc->deleteSelectedObject(); });
 
     connect(m_toolbar, &TimelineToolbar::gotoTimeTriggered, this, [=]() {
         CDoc *doc = g_StudioApp.GetCore()->GetDoc();

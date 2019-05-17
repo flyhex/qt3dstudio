@@ -38,7 +38,7 @@
 namespace qt3dsdm {
 void SApplicationState::Store(CDoc &inDoc)
 {
-    m_Dirty = inDoc.IsModified();
+    m_Dirty = inDoc.isModified();
     m_SelectedInstance = inDoc.GetSelectedInstance();
     m_ActiveSlide = inDoc.GetActiveSlide();
     m_ActiveLayer = inDoc.GetActiveLayer();

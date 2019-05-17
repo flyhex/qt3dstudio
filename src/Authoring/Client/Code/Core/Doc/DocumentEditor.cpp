@@ -939,9 +939,9 @@ public:
     {
         m_StudioSystem.GetFullSystem()->EndAggregateOperation();
     }
-    void Rollback() override { m_Doc.RollbackTransaction(); }
+    void Rollback() override { m_Doc.rollbackTransaction(); }
     // Release when finished editing
-    void Release() override { m_Doc.CloseTransaction(); }
+    void Release() override { m_Doc.closeTransaction(); }
 
     bool FilterForNotInSlideAndNotInstance(Q3DStudio::TIdentifier inInstance,
                                            Qt3DSDMSlideHandle inSlide,
@@ -3769,7 +3769,7 @@ public:
             }
         } catch (...) {
             theDispatch.FireOnProgressEnd();
-            m_Doc.RollbackTransaction(); // Run away!!!
+            m_Doc.rollbackTransaction(); // Run away!!!
         }
         return 0;
     }
@@ -5614,12 +5614,12 @@ IDocumentEditor &CUpdateableDocumentEditor::EnsureEditor(const QString &inComman
         m_File = inFile;
         m_Line = inLine;
     }
-    return m_EditorIDocDoc.MaybeOpenTransaction(inCommandName, inFile, inLine);
+    return m_EditorIDocDoc.maybeOpenTransaction(inCommandName, inFile, inLine);
 }
 
 bool CUpdateableDocumentEditor::HasEditor() const
 {
-    return m_EditorIDocDoc.IsTransactionOpened() && m_File != NULL;
+    return m_EditorIDocDoc.isTransactionOpened() && m_File != NULL;
 }
 
 void CUpdateableDocumentEditor::FireImmediateRefresh(qt3dsdm::Qt3DSDMInstanceHandle *inInstances,
@@ -5632,7 +5632,7 @@ void CUpdateableDocumentEditor::FireImmediateRefresh(qt3dsdm::Qt3DSDMInstanceHan
 void CUpdateableDocumentEditor::CommitEditor()
 {
     if (HasEditor()) {
-        m_EditorIDocDoc.CloseTransaction();
+        m_EditorIDocDoc.closeTransaction();
         m_File = NULL;
     }
 }
@@ -5640,8 +5640,8 @@ void CUpdateableDocumentEditor::CommitEditor()
 void CUpdateableDocumentEditor::RollbackEditor()
 {
     if (HasEditor()) {
-        m_EditorIDocDoc.RollbackTransaction();
-        m_EditorIDocDoc.CloseTransaction();
+        m_EditorIDocDoc.rollbackTransaction();
+        m_EditorIDocDoc.closeTransaction();
         m_File = NULL;
     }
 }

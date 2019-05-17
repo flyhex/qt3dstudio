@@ -75,10 +75,6 @@ class CString;
 class IComposerSerializer;
 }
 
-//==============================================================================
-/**
- *	Doc
- */
 class IDoc
 {
 public:
@@ -91,7 +87,7 @@ public:
     virtual void NotifySelectionChanged(
         Q3DStudio::SSelectedValue inNewSelection = Q3DStudio::SSelectedValue()) = 0;
 
-    virtual qt3dsdm::CStudioSystem *GetStudioSystem() = 0;
+    virtual qt3dsdm::CStudioSystem *GetStudioSystem() const = 0;
 
     virtual void SetKeyframeInterpolation() = 0;
     virtual void DeselectAllKeyframes() = 0;
@@ -99,10 +95,9 @@ public:
     virtual void SetModifiedFlag(bool inIsModified = true) = 0;
 
     virtual void SetKeyframesManager(IKeyframesManager *inManager) = 0;
-    virtual IKeyframesManager *GetKeyframesManager() = 0;
 
-    virtual qt3dsdm::IPropertySystem *GetPropertySystem() = 0;
-    virtual qt3dsdm::IAnimationCore *GetAnimationCore() = 0;
+    virtual qt3dsdm::IPropertySystem *GetPropertySystem() const = 0;
+    virtual qt3dsdm::IAnimationCore *GetAnimationCore() const = 0;
     virtual void SetInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                           const std::wstring &inPropertyName,
                                           const qt3dsdm::SValue &inValue) = 0;
@@ -133,13 +128,13 @@ public:
 
     // Get the document editor if a transaction has already been opened.
     // Else open a new transaction.
-    virtual Q3DStudio::IDocumentEditor &MaybeOpenTransaction(const QString &cmdName,
+    virtual Q3DStudio::IDocumentEditor &maybeOpenTransaction(const QString &cmdName,
                                                              const char *inFile, int inLine) = 0;
-    virtual bool IsTransactionOpened() const = 0;
+    virtual bool isTransactionOpened() const = 0;
     // Undo whatever has been done and clear the transaction's
     // internal data.  Leave the transaction open and on the stack, however.
-    virtual void RollbackTransaction() = 0;
-    virtual void CloseTransaction() = 0;
+    virtual void rollbackTransaction() = 0;
+    virtual void closeTransaction() = 0;
 
     // This should only be called from a global exception handler or something like that.
     // This will close the transaction regardless of the open count.
@@ -148,7 +143,7 @@ public:
     // command reconfiguring the UI.  There are cases, however, when you really want the command to
     // be
     // committed right at this very moment (like just before undo).
-    virtual void IKnowWhatIAmDoingForceCloseTransaction() = 0;
+    virtual void forceCloseTransaction() = 0;
 
     virtual std::shared_ptr<Q3DStudio::IComposerSerializer> CreateSerializer() = 0;
     // Create a DOM writer that is opened to the project element.  This is where the serializer

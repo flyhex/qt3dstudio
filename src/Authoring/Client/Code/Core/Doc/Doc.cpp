@@ -27,7 +27,6 @@
 **
 ****************************************************************************/
 
-#include "Qt3DSCommonPrecompile.h"
 #include "Doc.h"
 #include "Core.h"
 #include "Qt3DSDMStudioSystem.h"
@@ -40,8 +39,6 @@
 #include "FileOutputStream.h"
 #include "BufferedInputStream.h"
 #include "BufferedOutputStream.h"
-#include "FormattedInputStream.h"
-#include "FormattedOutputStream.h"
 #include "DataModelObjectReferenceHelper.h"
 #include "MasterP.h"
 #include "Dispatch.h"
@@ -55,13 +52,11 @@
 #include "CmdDataModelDeleteInstance.h"
 #include "PlaybackClock.h"
 #include "ColorConversion.h"
-#include "WGLRenderContext.h"
 #include "IDocumentEditor.h"
 #include "IDocumentBufferCache.h"
 #include "StudioCoreSystem.h"
 #include "Qt3DSDMXML.h"
 #include "foundation/IOStreams.h"
-#include "Qt3DSDMWStrOpsImpl.h"
 #include "IComposerSerializer.h"
 #include "Qt3DSFileTools.h"
 #include "ProjectSettingsSerializer.h"
@@ -72,26 +67,15 @@
 #include "Qt3DSTextRenderer.h"
 #include "SelectedValueImpl.h"
 #include "Qt3DSRenderPathManager.h"
-#include "Studio/Application/DataInputDlg.h"
-#include "EASTL/sort.h"
-#include "foundation/Qt3DSLogging.h"
-#include "Studio/Application/StudioApp.h"
+#include "StudioApp.h"
 #include "Dialogs.h"
 
 #include <QtCore/qfileinfo.h>
-#include <QtWidgets/qaction.h>
-#include <QtWidgets/qwidget.h>
 #include <QtCore/qtimer.h>
 #include <QtGui/qvalidator.h>
 
-using std::ref;
-using std::shared_ptr;
-
-//==============================================================================
-//	Constants
-//==============================================================================
-const long STUDIO_FILE_VERSION = 6;
-const long STUDIO_LAST_SUPPORTED_FILE_VERSION = 1;
+const long UIP_VERSION = 6; // current version (latest supported)
+const long LAST_SUPPORTED_UIP_VERSION = 1;
 
 IMPLEMENT_OBJECT_COUNTER(CDoc)
 
@@ -139,10 +123,6 @@ struct SDocTransactionCommand : public CCmd
     QString ToString() override { return m_CommandName; }
 };
 
-//==============================================================================
-/**
- * Constructor
- */
 CDoc::CDoc(CCore *inCore)
     : m_PlayMode(PLAYMODE_STOP)
     , m_CurrentViewTime(0)
@@ -157,7 +137,6 @@ CDoc::CDoc(CCore *inCore)
     , m_AssetGraph(TAssetGraphPtr())
     , m_TransactionDepth(0)
     , m_nudging(false)
-    , m_RenderContext(nullptr)
     , m_WindowHandle(nullptr)
 {
     ADDTO_OBJECT_COUNTER(CDoc)
@@ -169,10 +148,6 @@ CDoc::CDoc(CCore *inCore)
     m_Core = inCore;
 }
 
-//==============================================================================
-/**
-* Destructor
-*/
 CDoc::~CDoc()
 {
     REMOVEFROM_OBJECT_COUNTER(CDoc)
@@ -180,7 +155,6 @@ CDoc::~CDoc()
     m_SelectedObject = Q3DStudio::SSelectedValue(); // because on shutdown, the selected object ptr
                                                     // cannot be assumed to be valid.
     CleanupData();
-
     ClosePresentation();
 
     if (m_SceneInstance.Valid()) {
@@ -195,7 +169,6 @@ CDoc::~CDoc()
     delete m_PlaybackClock;
 }
 
-//=============================================================================
 /**
  * Set the state of this document as being modified or not.
  * This should affect the closing/saving of the core.
@@ -210,17 +183,12 @@ void CDoc::SetKeyframesManager(IKeyframesManager *inManager)
     m_KeyframesManager = inManager;
 }
 
-IKeyframesManager *CDoc::GetKeyframesManager()
-{
-    return m_KeyframesManager;
-}
-
-qt3dsdm::IAnimationCore *CDoc::GetAnimationCore()
+qt3dsdm::IAnimationCore *CDoc::GetAnimationCore() const
 {
     return GetStudioSystem()->GetAnimationCore();
 }
 
-qt3dsdm::IPropertySystem *CDoc::GetPropertySystem()
+qt3dsdm::IPropertySystem *CDoc::GetPropertySystem() const
 {
     return GetStudioSystem()->GetPropertySystem();
 }
@@ -236,9 +204,8 @@ void CDoc::SetInstancePropertyValue(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
         thePropertySystem->SetInstancePropertyValue(inInstance, theProperty, inValue);
 }
 
-// Utility that either adds or removes control string for the specified
-// property. Does not check if the property already has a controller
-// in the controlledPropStr. Returns true on success.
+// Utility that either adds or removes control string for the specified property. Does not check if
+// the property already has a controller in the controlledPropStr. Returns true on success.
 bool ModifyControlStrForProperty(Q3DStudio::CString &controlledPropStr,
                                  const Q3DStudio::CString &propName,
                                  bool controlled = false,
@@ -278,6 +245,7 @@ bool ModifyControlStrForProperty(Q3DStudio::CString &controlledPropStr,
         cpStr.append(propName);
     }
     controlledPropStr = cpStr;
+
     return true;
 }
 
@@ -290,7 +258,7 @@ void CDoc::RemoveDatainputBindings(
     const auto uniqueKeys = map->uniqueKeys();
     for (const auto &name : uniqueKeys) {
         const auto values = map->values(name);
-        for (const auto pair : values) {
+        for (const auto &pair : values) {
             SetInstancePropertyControlled(pair.first, Q3DStudio::CString(),
                                           pair.second, Q3DStudio::CString::fromQString(name),
                                           false, true);
@@ -298,10 +266,9 @@ void CDoc::RemoveDatainputBindings(
     }
 
     m_SceneEditor->EndAggregateOperation();
-    // if SetInstancePropertyControlled fails for some reason, we might not
-    // have open transaction.
-    if (IsTransactionOpened())
-        CloseTransaction();
+    // if SetInstancePropertyControlled fails for some reason, we might not have open transaction.
+    if (isTransactionOpened())
+        closeTransaction();
 }
 
 // Set a property in an instance to be controlled by datainput.
@@ -313,6 +280,8 @@ void CDoc::SetInstancePropertyControlled(
         qt3dsdm::Qt3DSDMPropertyHandle propName, Q3DStudio::CString newCtrl,
         bool controlled, bool batch)
 {
+    Q_UNUSED(instancepath)
+
     qt3dsdm::IPropertySystem *thePropertySystem = GetStudioSystem()->GetPropertySystem();
     // We might have invalid controller (not found from the global list of datainputs)
     bool newCtrlrValid = false;
@@ -401,7 +370,7 @@ void CDoc::SetInstancePropertyControlled(
         Q3DStudio::ScopedDocumentEditor(*this, QObject::tr("Set controlled"), __FILE__, __LINE__)
                 ->SetInstancePropertyValue(instance, ctrldElemPropHandle, controlledProperty);
     } else {
-        if (!IsTransactionOpened())
+        if (!isTransactionOpened())
             OpenTransaction(QObject::tr("Set multiple controlled"), __FILE__, __LINE__);
         SetInstancePropertyValue(instance, L"controlledproperty", controlledProperty);
     }
@@ -448,7 +417,7 @@ Q3DStudio::IDocumentEditor &CDoc::OpenTransaction(const QString &inCmdName, cons
     return *m_SceneEditor;
 }
 
-Q3DStudio::IDocumentEditor &CDoc::MaybeOpenTransaction(const QString &cmdName,
+Q3DStudio::IDocumentEditor &CDoc::maybeOpenTransaction(const QString &cmdName,
                                                        const char *inFile, int inLine)
 {
     if (!m_OpenTransaction)
@@ -456,29 +425,29 @@ Q3DStudio::IDocumentEditor &CDoc::MaybeOpenTransaction(const QString &cmdName,
     return *m_SceneEditor;
 }
 
-bool CDoc::IsTransactionOpened() const
+bool CDoc::isTransactionOpened() const
 {
-    return m_OpenTransaction ? true : false;
+    return m_OpenTransaction != nullptr;
 }
 
-void CDoc::RollbackTransaction()
+void CDoc::rollbackTransaction()
 {
     if (m_OpenTransaction)
         m_OpenTransaction->DataModelRollback();
 }
 
-void CDoc::CloseTransaction()
+void CDoc::closeTransaction()
 {
     if (m_TransactionDepth) {
         --m_TransactionDepth;
         if (m_TransactionDepth == 0) {
             assert(m_OpenTransaction);
-            IKnowWhatIAmDoingForceCloseTransaction();
+            forceCloseTransaction();
         }
     }
 }
 
-void CDoc::IKnowWhatIAmDoingForceCloseTransaction()
+void CDoc::forceCloseTransaction()
 {
     if (m_OpenTransaction) {
         qCInfo(qt3ds::TRACE_INFO) << "Closing transaction";
@@ -504,38 +473,37 @@ void CDoc::IKnowWhatIAmDoingForceCloseTransaction()
     m_TransactionDepth = 0;
 }
 
-bool CDoc::CanUndo()
+bool CDoc::canUndo()
 {
-    return (m_OpenTransaction != nullptr);
+    return m_OpenTransaction != nullptr;
 }
 
-bool CDoc::PreUndo()
+bool CDoc::preUndo()
 {
     if (m_OpenTransaction && m_OpenTransaction->HasTransactions()) {
         qCInfo(qt3ds::TRACE_INFO) << "PreUndo begin";
         // In this case we want the command to absolutely immediately commit; we don't want it
         // to wait until a further post message else the previous command is the one that will get
         // undone.
-        IKnowWhatIAmDoingForceCloseTransaction();
+        forceCloseTransaction();
         qCInfo(qt3ds::TRACE_INFO) << "PreUndo end";
         return true;
     }
     return false;
 }
 
-/**
- * Check to see if this document has been modified since the last save.
- */
-bool CDoc::IsModified()
+
+// Is document modified since last save?
+bool CDoc::isModified() const
 {
     return m_IsModified;
 }
 
-bool CDoc::IsValid() const
+bool CDoc::isValid() const
 {
     return !m_DocumentPath.isEmpty();
 }
-//=============================================================================
+
 /**
  * Get the Asset from inSelectedItem, if exists
  */
@@ -570,7 +538,6 @@ CCore *CDoc::GetCore() const
     return m_Core;
 }
 
-//=============================================================================
 /**
  *	Calls NotifyActiveSlideChanged( qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide, bool
  *inForceRefresh )
@@ -611,7 +578,6 @@ void CDoc::SetActiveSlideChange(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide)
     }
 }
 
-//=============================================================================
 /**
  * Sets the active slide for the document.
  * The active slide is used for when something other than the Scene is
@@ -701,11 +667,10 @@ void CDoc::NotifyActiveSlideChanged(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide
     }
 }
 
-//=============================================================================
 /**
  * @returns the first enabled layer in the active time context
  */
-qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetFirstSelectableLayer()
+qt3dsdm::Qt3DSDMInstanceHandle CDoc::getFirstSelectableLayer()
 {
     CClientDataModelBridge *theBridge = m_StudioSystem->GetClientDataModelBridge();
 
@@ -714,17 +679,14 @@ qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetFirstSelectableLayer()
                             theBridge->GetComponentActiveSlide(m_SceneInstance), theLayers,
                             OBJTYPE_LAYER);
 
-    qt3dsdm::Qt3DSDMInstanceHandle theFoundLayer = 0;
-
     for (; !theLayers.IsDone(); ++theLayers) {
         if (!theBridge->IsLockedAtAll(theLayers.GetCurrent())
                 && m_StudioSystem->IsInstance(theLayers.GetCurrent())) {
-            theFoundLayer = theLayers.GetCurrent();
-            break;
+            return theLayers.GetCurrent();
         }
     }
 
-    return theFoundLayer;
+    return 0;
 }
 
 // returns all instances that has a 'variants' property
@@ -756,10 +718,10 @@ qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetActiveRootInstance()
         return m_StudioSystem->GetClientDataModelBridge()->GetOwningComponentInstance(
                     m_ActiveSlide);
     }
+
     return m_SceneInstance;
 }
 
-//=============================================================================
 /**
  *	Returns the current active slide
  *	The timeline is always displaying the active root.
@@ -768,12 +730,13 @@ qt3dsdm::Qt3DSDMSlideHandle CDoc::GetActiveSlide()
 {
     if (m_ActiveSlide.Valid())
         return m_ActiveSlide;
+
     if (m_SceneInstance.Valid())
         return m_StudioSystem->GetClientDataModelBridge()->GetComponentSlide(m_SceneInstance, 0);
+
     return 0;
 }
 
-//=============================================================================
 /**
  * Get the currently active layer.
  * The active layer is the layer of the last selected asset or the first enabled layer after
@@ -782,12 +745,12 @@ qt3dsdm::Qt3DSDMSlideHandle CDoc::GetActiveSlide()
  */
 qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetActiveLayer()
 {
-    if (m_ActiveLayer.Valid() == false)
-        m_ActiveLayer = GetFirstSelectableLayer();
+    if (!m_ActiveLayer.Valid())
+        m_ActiveLayer = getFirstSelectableLayer();
+
     return m_ActiveLayer;
 }
 
-//=============================================================================
 /**
  * Set the currently active layer.
  * The active layer is the layer of the last selected asset or the first enabled layer after
@@ -799,7 +762,6 @@ void CDoc::SetActiveLayer(qt3dsdm::Qt3DSDMInstanceHandle inLayerInstance)
     m_ActiveLayer = inLayerInstance;
 }
 
-//=============================================================================
 /**
  * Deselects all the items and keyframes that are currently selected.
  */
@@ -814,7 +776,6 @@ void CDoc::DeselectAllItems(bool inSendEvent)
     DeselectAllKeyframes();
 }
 
-//=============================================================================
 /**
  * Cuts the selected object
  */
@@ -897,11 +858,10 @@ void CDoc::PasteObjectMaster(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     }
 }
 
-//=============================================================================
 /**
  * Deletes the selected object
  */
-void CDoc::DeleteSelectedObject(bool slide)
+void CDoc::deleteSelectedObject(bool slide)
 {
     if (!slide) {
         qt3dsdm::TInstanceHandleList theSelectedHandles = m_SelectedValue.GetSelectedInstances();
@@ -922,10 +882,8 @@ void CDoc::DeleteSelectedObject(bool slide)
 
 void CDoc::DeleteObject(const qt3dsdm::TInstanceHandleList &inInstances)
 {
-
-    // We don't deselect all items because that will happen
-    // automagically because we are listening to the events coming out
-    // of the system around delete.
+    // We don't deselect all items because that will happen automagically because we are listening
+    // to the events coming out of the system around delete.
     DeselectAllKeyframes();
 
     CClientDataModelBridge *theClientBridge = GetStudioSystem()->GetClientDataModelBridge();
@@ -937,24 +895,20 @@ void CDoc::DeleteObject(const qt3dsdm::TInstanceHandleList &inInstances)
             Q3DStudio::CString theListOfTargets;
             GetActionDependencies(inInstances[idx], theListOfTargets);
 
-            if (!theListOfTargets.IsEmpty()) {
-                if (m_DeletingReferencedObjectHandler) {
-                    m_DeletingReferencedObjectHandler->DisplayMessageBox(theListOfTargets
-                                                                         .toQString());
-                }
-            }
+            if (!theListOfTargets.IsEmpty() && m_DeletingReferencedObjectHandler)
+                m_DeletingReferencedObjectHandler->DisplayMessageBox(theListOfTargets.toQString());
 
             deletableInstances.push_back(inInstances[idx]);
         }
     }
 
-    if (deletableInstances.empty() == false) {
+    if (!deletableInstances.empty()) {
         NotifySelectionChanged();
-        Q3DStudio::SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Delete"))->DeleteInstances(deletableInstances);
+        Q3DStudio::SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Delete"))
+                                         ->DeleteInstances(deletableInstances);
     }
 }
 
-//=============================================================================
 /**
  *	Checks and return a string of objects that have actions referencing inAsset.
  *	@inAsset				The asset to check for dependencies.
@@ -998,7 +952,6 @@ void CDoc::GetActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
     }
 }
 
-//=============================================================================
 /**
  *	Checks and return a string of objects that have actions referencing inAsset.
  *	@inAsset				The asset to check for dependencies.
@@ -1018,24 +971,17 @@ void CDoc::GetActionDependencies(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
     }
 }
 
-//=============================================================================
 /**
  * Deletes the selected items, this is the primary handler of the delete key.
  */
 void CDoc::DeleteSelectedItems(bool slide)
 {
-    // If there are keyframes selected, delete them
-    if (!DeleteSelectedKeys()) {
-        // If there are no keyframes selected, delete whatever asset is selected
-        DeleteSelectedObject(slide);
-    }
+    // If there are keyframes selected, delete them, else delete whatever asset is selected
+    if (!deleteSelectedKeyframes())
+        deleteSelectedObject(slide);
 }
 
-//=============================================================================
-/**
- * Only deletes keyframes, this is useful for when you don't wanna chekc objects
- */
-bool CDoc::DeleteSelectedKeys()
+bool CDoc::deleteSelectedKeyframes()
 {
     if (m_KeyframesManager)
         return m_KeyframesManager->RemoveKeyframes(false);
@@ -1043,7 +989,6 @@ bool CDoc::DeleteSelectedKeys()
     return false;
 }
 
-//=============================================================================
 /**
  * Sets keyframes on all the changed properties of the selected object.
  */
@@ -1086,7 +1031,7 @@ bool CDoc::SetSelection(Q3DStudio::SSelectedValue inNewSelection)
                     theActiveLayer = 0;
 
                 if (!theActiveLayer.Valid())
-                    theActiveLayer = GetFirstSelectableLayer();
+                    theActiveLayer = getFirstSelectableLayer();
 
                 if (theActiveLayer.Valid() && theBridge->IsLockedAtAll(theActiveLayer))
                     theActiveLayer = 0;
@@ -1097,6 +1042,7 @@ bool CDoc::SetSelection(Q3DStudio::SSelectedValue inNewSelection)
 
         return true;
     }
+
     return false;
 }
 
@@ -1134,9 +1080,11 @@ void CDoc::SetActiveSlideWithTransaction(qt3dsdm::Qt3DSDMSlideHandle inNewActive
     Qt3DSDMSlideHandle theActiveSlide = m_ActiveSlide;
     m_ActiveSlide = inNewActiveSlide;
     TTransactionConsumerPtr theConsumer = m_StudioSystem->GetFullSystem()->GetConsumer();
-    if (theConsumer)
+    if (theConsumer) {
         theConsumer->OnTransaction(std::make_shared<SReferenceTransaction<Qt3DSDMSlideHandle>>(
-                                       __FILE__, __LINE__, ref(m_ActiveSlide), theActiveSlide, inNewActiveSlide));
+                                       __FILE__, __LINE__, std::ref(m_ActiveSlide), theActiveSlide,
+                                       inNewActiveSlide));
+    }
 }
 
 void CDoc::SetSceneGraph(std::shared_ptr<Q3DStudio::IDocSceneGraph> inGraph)
@@ -1364,7 +1312,6 @@ Q3DStudio::SSelectedValue CDoc::SetupInstanceSelection(qt3dsdm::Qt3DSDMInstanceH
     return Q3DStudio::SSelectedValue();
 }
 
-//==============================================================================
 /**
  *	Select DataModel Object given its instance handle.
  *	@param inInstanceHandle The instance handle of the DataModel Object to be selected
@@ -1406,7 +1353,7 @@ void CDoc::ToggleDataModelObjectToSelection(qt3dsdm::Qt3DSDMInstanceHandle inIns
 
 void CDoc::SelectAndNavigateToDataModelObject(qt3dsdm::Qt3DSDMInstanceHandle inInstanceHandle)
 {
-    if (inInstanceHandle.Valid() == false) {
+    if (!inInstanceHandle.Valid()) {
         QT3DS_ASSERT(false);
         return;
     }
@@ -1424,7 +1371,6 @@ void CDoc::SelectAndNavigateToDataModelObject(qt3dsdm::Qt3DSDMInstanceHandle inI
     NotifySelectionChanged(SetupInstanceSelection(inInstanceHandle));
 }
 
-//=============================================================================
 /**
  *	Get the latest end time of the children of the Active Root.
  */
@@ -1457,7 +1403,7 @@ void CDoc::OnComponentSeconds()
 
     m_Core->GetDispatch()->FireOnTimeChanged(m_CurrentViewTime);
 }
-//==============================================================================
+
 /**
  *	Tell Client that the time has changed and update views accordingly.
  *	Set the current time on the current time context to be inNewTime.
@@ -1491,7 +1437,6 @@ void CDoc::DoNotifyTimeChanged(long inNewTime)
     m_StudioSystem->GetSlideSystem()->SetComponentSeconds(theMasterSlide, (float)inNewTime / 1000);
 }
 
-//==============================================================================
 /**
  * Sets the timebar time range of the currently selected object in the timeline
  * @param inSetStart true to set the Start time, false sets the End time
@@ -1503,13 +1448,13 @@ void CDoc::TruncateTimebar(bool inSetStart, bool inAffectsChildren)
 
     qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = GetSelectedInstance();
     // Cannot change the time bars for a material
-    if (theSelectedInstance.Valid())
+    if (theSelectedInstance.Valid()) {
         Q3DStudio::ScopedDocumentEditor(*this, QObject::tr("Truncate Time Range"),
                                         __FILE__, __LINE__)
                 ->TruncateTimeRange(theSelectedInstance, inSetStart, GetCurrentViewTime());
+    }
 }
 
-//==============================================================================
 /**
  * Tell Client to be in either PLAY or PAUSE mode.
  * This potentially changes the current mode of the Client, whether it should
@@ -1519,15 +1464,13 @@ void CDoc::TruncateTimebar(bool inSetStart, bool inAffectsChildren)
  */
 void CDoc::SetPlayMode(EPlayMode inPlayMode, long inRestoreTime /*= -1*/)
 {
-    if (m_PlayMode != inPlayMode) // if there is a change
+    if (m_PlayMode != inPlayMode)
     {
         m_PlayMode = inPlayMode;
 
-        // Play or stop?
         if (inPlayMode == PLAYMODE_PLAY) {
             // Set Client to PLAY
             m_PlaybackClock->StartPlayback();
-
             m_Core->GetDispatch()->FireOnPlayStart();
         } else {
             // Set Client to STOP
@@ -1539,17 +1482,15 @@ void CDoc::SetPlayMode(EPlayMode inPlayMode, long inRestoreTime /*= -1*/)
     }
 }
 
-//=============================================================================
 /**
  * Determine if Studio is playing the presentation.
  * @return true if Studio is currently in play mode
  */
 bool CDoc::IsPlaying()
 {
-    return (m_PlayMode == PLAYMODE_PLAY);
+    return m_PlayMode == PLAYMODE_PLAY;
 }
 
-//==============================================================================
 /**
  * Returns the time Client believes it to be.
  * This requests the current time from Client. This allows in-place previewing
@@ -1563,7 +1504,6 @@ long CDoc::GetCurrentClientTime()
     return 0;
 }
 
-//==============================================================================
 /**
  * Get the current visible time.
  * This differs by the current client time in that you can move the playhead
@@ -1609,7 +1549,6 @@ bool CDoc::SetDocumentPath(const QString &inDocumentPath)
     return true;
 }
 
-//=============================================================================
 /**
  * Create Untitled document in user directory
  */
@@ -1686,7 +1625,6 @@ Q3DStudio::CString CDoc::GetDocumentDirectory() const
     return thePath.GetDirectory();
 }
 
-//=============================================================================
 /**
  * Given an absolute path, return the relative path to doc if it is in doc's subdirectory.
  * Else, return normalized path so that we can easily do string comparison to compare path.
@@ -1703,7 +1641,6 @@ Q3DStudio::CString CDoc::GetRelativePathToDoc(const Q3DStudio::CFilePath &inPath
     return thePath;
 }
 
-//=============================================================================
 /**
  * Given a path (may be relative or absolute), return the path with respect to doc.
  * If the path is relative, it will be resolved based on document path.
@@ -1722,7 +1659,6 @@ Q3DStudio::CString CDoc::GetResolvedPathToDoc(const Q3DStudio::CFilePath &inPath
     return inPath.toCString();
 }
 
-//=============================================================================
 /**
  * Close the current document.
  * This will remove all the items from the scene, perform all the cleanup.
@@ -1735,19 +1671,15 @@ void CDoc::CloseDocument()
     DeselectAllItems();
 
     m_SceneEditor.reset();
-    if (m_DocumentBufferCache) {
-        // Ensure old buffers aren't picked up for the same relative path.
+    if (m_DocumentBufferCache) // Ensure old buffers aren't picked up for the same relative path.
         m_DocumentBufferCache->Clear();
-    }
 
     CDispatchDataModelNotificationScope __dispatchScope(*GetCore()->GetDispatch());
     SetPlayMode(PLAYMODE_STOP);
 
     m_Core->GetDispatch()->FireOnClosingPresentation();
 
-    // clean up all studio data
-    CleanupData();
-
+    CleanupData(); // clean up all studio data
     ClosePresentation();
 
     if (m_SceneInstance.Valid()) {
@@ -1762,13 +1694,12 @@ void CDoc::CloseDocument()
     SetModifiedFlag(false);
 }
 
-//=============================================================================
 /**
  * Called when the core opens a UIP file.
  */
 void CDoc::LoadDocument(const QString &inDocument)
 {
-    ResetData();
+    ResetDataCore();
 
     CFileInputStream theFileStream(inDocument);
     CBufferedInputStream theBufferedStream(&theFileStream, QFileInfo(inDocument).size());
@@ -1777,10 +1708,6 @@ void CDoc::LoadDocument(const QString &inDocument)
     LoadPresentationFile(&theBufferedStream);
 }
 
-//=============================================================================
-/**
- * Save Document
- */
 void CDoc::SaveDocument(const QString &inDocument)
 {
     // Remove unused materials from the container during saving so that the .uip is not cluttered
@@ -1798,7 +1725,6 @@ void CDoc::SaveDocument(const QString &inDocument)
     updatableEditor.RollbackEditor();
 }
 
-//=============================================================================
 /**
  * This will create and load a new document with all the default resources.
  * This should only be called on an empty document (after CloseDocument) and
@@ -1810,7 +1736,7 @@ void CDoc::CreateNewDocument()
     using namespace Q3DStudio;
 
     CDispatchDataModelNotificationScope __dispatchScope(*m_Core->GetDispatch());
-    ResetData();
+    ResetDataCore();
 
     CreatePresentation();
 
@@ -1841,7 +1767,6 @@ void CDoc::CreateNewDocument()
     SetModifiedFlag(false);
 }
 
-//=============================================================================
 /**
  * Create a new presentation within Client.
  */
@@ -1850,7 +1775,8 @@ void CDoc::CreatePresentation()
     // m_SceneInstance should be invalid
     ASSERT(!m_SceneInstance.Valid());
 
-    // eclee TODO: Move these to ComponentFactory
+    // TODO: Move these to ComponentFactory
+
     // Create the top-level scene object
     Q3DStudio::CId theSceneId(SCENE_GUID);
 
@@ -1867,7 +1793,6 @@ void CDoc::ClosePresentation()
     OnPresentationDeactivated();
 }
 
-//==============================================================================
 /**
  *	Step the client (this is really overridding update in client)
  */
@@ -1876,7 +1801,6 @@ void CDoc::ClientStep()
     m_PlaybackClock->UpdateTime();
 }
 
-//=============================================================================
 /**
  * Removes all StudioObjects from the Map
  * This cleans up all of the CStudioObjects that Studio owns.
@@ -1894,15 +1818,6 @@ void CDoc::CleanupData()
 }
 
 /**
- * Called when we are preparing to load or create a new presentation.
- */
-void CDoc::ResetData()
-{
-    ResetDataCore();
-}
-
-//=============================================================================
-/**
  * Process a copy command.
  * This will copy Actions, Keyframes or objects, depending on what is selected.
  * If the Action Palette is visible, then this will do an Action copy.
@@ -1910,18 +1825,17 @@ void CDoc::ResetData()
  */
 void CDoc::HandleCopy()
 {
-    if (CanCopyAction()) {
+    if (canCopySelectedActions()) {
         ASSERT(0); // Dispatch ... and/or, what?
         // m_StudioApp->GetViews( )->GetActionControl( )->OnCopyAction( );
     } else if (m_KeyframesManager && m_KeyframesManager->HasSelectedKeyframes()) {
-        if (CanCopyKeyframe())
+        if (canCopySelectedKeyframes())
             m_KeyframesManager->CopyKeyframes();
-    } else if (CanCopyObject()) {
+    } else if (canCopySelectedObjects()) {
         CopyObject(m_SelectedValue.GetSelectedInstances());
     }
 }
 
-//=============================================================================
 /**
  * Process a paste command.
  * If there is an action on the clipboard, and the action palette is visible,
@@ -1931,11 +1845,11 @@ void CDoc::HandleCopy()
  */
 void CDoc::HandlePaste()
 {
-    if (CanPasteAction()) {
+    if (canPasteActions()) {
         ASSERT(0); // dispatch
         // m_StudioApp->GetViews( )->GetActionControl( )->OnPasteAction( );
         // m_StudioApp->GetViews( )->OnShowAction( );
-    } else if (CanPasteObject()) {
+    } else if (canPasteObjects()) {
         PasteObject(getPasteTarget(GetSelectedInstance()));
     } else {
         if (m_KeyframesManager)
@@ -1943,7 +1857,6 @@ void CDoc::HandlePaste()
     }
 }
 
-//=============================================================================
 /**
  * Process a paste command for Master Slide.
  * If there is an action on the clipboard, and the action palette is visible,
@@ -1955,11 +1868,11 @@ void CDoc::HandleMasterPaste()
 {
     using namespace Q3DStudio;
 
-    if (CanPasteAction()) {
+    if (canPasteActions()) {
         ASSERT(0); // dispatch
         // m_StudioApp->GetViews( )->GetActionControl( )->OnPasteAction( );
         // m_StudioApp->GetViews( )->OnShowAction( );
-    } else if (CanPasteObject()) {
+    } else if (canPasteObjects()) {
         qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = getPasteTarget(GetSelectedInstance());
         long theTargetObjectType =
                 GetStudioSystem()->GetClientDataModelBridge()->GetObjectType(theSelectedInstance);
@@ -1990,7 +1903,6 @@ void CDoc::HandleMasterPaste()
     }
 }
 
-//=============================================================================
 /**
  * Process a cut command.
  * This will copy/cut Action, if the Action Palette is visible, and an action
@@ -2001,54 +1913,52 @@ void CDoc::HandleMasterPaste()
  */
 void CDoc::HandleCut()
 {
-    // we only need to check if it can be copied.
-    // if it can be copied, then it can be cut.
-    if (CanCopyAction()) {
+    // we only need to check if it can be copied. If it can be copied, then it can be cut.
+    if (canCopySelectedActions()) {
         ASSERT(0); // dispatch
         // m_StudioApp->GetViews( )->GetActionControl( )->OnCutAction( );
     } else if (m_KeyframesManager && m_KeyframesManager->HasSelectedKeyframes()) {
         m_KeyframesManager->CopyKeyframes();
         m_KeyframesManager->RemoveKeyframes(true);
-    } else if (CanCopyObject()) {
+    } else if (canCopySelectedObjects()) {
         CutSelectedObject();
     }
 }
 
-bool CDoc::CanCopyObject(const qt3dsdm::TInstanceHandleList &inInstances)
+bool CDoc::canCopyObjects(const qt3dsdm::TInstanceHandleList &inInstances) const
 {
     if (inInstances.empty())
         return false;
 
     bool retval = true;
-    const qt3dsdm::TInstanceHandleList &theInstances = (inInstances);
+    const qt3dsdm::TInstanceHandleList &theInstances = inInstances;
     for (size_t idx = 0, end = theInstances.size(); idx < end && retval; ++idx)
         retval &= m_StudioSystem->GetClientDataModelBridge()->IsDuplicateable(theInstances[idx]);
+
     return retval;
 }
-//==============================================================================
+
 /**
- * Check to see if an object can be copied into the clipboard
+ * Check to see if selected object can be copied into the clipboard
  */
-bool CDoc::CanCopyObject()
+bool CDoc::canCopySelectedObjects() const
 {
-    return CanCopyObject(m_SelectedValue.GetSelectedInstances());
+    return canCopyObjects(m_SelectedValue.GetSelectedInstances());
 }
 
-//==============================================================================
 /**
  * Check to see if a keyframe can be copied into the clipboard
  */
-bool CDoc::CanCopyKeyframe()
+bool CDoc::canCopySelectedKeyframes() const
 {
-    return (m_KeyframesManager) ? m_KeyframesManager->CanPerformKeyframeCopy() : false;
+    return m_KeyframesManager ? m_KeyframesManager->CanPerformKeyframeCopy() : false;
 }
 
-//==============================================================================
 /**
  * Check to see if an Action can be copied onto the clipboard.
  * @return true if an Action can be copied onto the clipboard.
  */
-bool CDoc::CanCopyAction()
+bool CDoc::canCopySelectedActions() const
 {
     bool theCanCopy = false;
 
@@ -2064,32 +1974,29 @@ bool CDoc::CanCopyAction()
     return theCanCopy;
 }
 
-//==============================================================================
 /**
  * Check to see if an object can be pasted into the Scene.
  */
-bool CDoc::CanPasteObject() const
+bool CDoc::canPasteObjects() const
 {
     return getPasteTarget(GetSelectedInstance()).Valid();
 }
 
-//==============================================================================
 /**
  * Check to see if a keyframe can be pasted from the clipboard
  */
-bool CDoc::CanPasteKeyframe()
+bool CDoc::canPasteKeyframes() const
 {
-    return (m_KeyframesManager) ? m_KeyframesManager->CanPerformKeyframePaste() : false;
+    return m_KeyframesManager ? m_KeyframesManager->CanPerformKeyframePaste() : false;
 }
 
-//==============================================================================
 /**
  * Check to see if an action can be pasted from the clipboard.
  * Paste action is only allowed if there is an Action on the clipboard, an asset
  * is selected, and the Timeline is in focus.
  * @return true if we can paste an action.
  */
-bool CDoc::CanPasteAction()
+bool CDoc::canPasteActions() const
 {
     bool theCanPaste = false;
 
@@ -2109,58 +2016,45 @@ bool CDoc::CanPasteAction()
     return theCanPaste;
 }
 
-//==============================================================================
 /**
- * Check to see if an object or keyframe(s) can be copied into the clipboard
+ * Is there valid selected keyframe(s), object(s), or action(s) to be copied?
  */
-bool CDoc::CanCopy()
+bool CDoc::canCopy() const
 {
-    return CanCopyKeyframe() || CanCopyObject() || CanCopyAction();
+    return canCopySelectedKeyframes() || canCopySelectedObjects() || canCopySelectedActions();
 }
 
-//==============================================================================
 /**
  * Check to see if an object or keyframe(s) can be pasted into the Scene.
  */
-bool CDoc::CanPaste()
+bool CDoc::canPaste() const
 {
-    return CanPasteKeyframe() || CanPasteObject() || CanPasteAction();
+    return canPasteKeyframes() || canPasteObjects() || canPasteActions();
 }
 
-//==============================================================================
 /**
  * Check to see if an object or keyframe(s) can be cut.
  */
-bool CDoc::CanCut()
+bool CDoc::canCut()
 {
-    bool theReturn = false;
+    // copyable keyframes and actions are cuttable (i.e. can be deleted).
+    if (canCopySelectedActions() || canCopySelectedKeyframes())
+        return true;
 
-    if (CanCopy()) {
-        if (CanCopyAction()) {
-            // If you can copy an Action, you jolly well can delete it.
-            // ie. An action is currently selected, and the ActionControl (aka Action Palette) is in
-            // focus.
-            theReturn = true;
-        } else if (CanCopyObject()) {
-            // Check the Object is not the scene
-            // the Object cannot be the last layer as well
-            qt3dsdm::TInstanceHandleList theInstances = m_SelectedValue.GetSelectedInstances();
-            bool canDelete = !theInstances.empty();
-            for (size_t idx = 0, end = theInstances.size() && canDelete; idx < end; ++idx) {
-                canDelete = GetDocumentReader().IsInstance(theInstances[idx])
-                        && GetStudioSystem()->GetClientDataModelBridge()->CanDelete(theInstances[idx]);
-            }
-            theReturn = canDelete;
-        } else // Any keyframe can be cut
-        {
-            theReturn = true;
+    if (canCopySelectedObjects()) {
+        // Check the Object is not the scene. The Object cannot be the last layer as well
+        qt3dsdm::TInstanceHandleList theInstances = m_SelectedValue.GetSelectedInstances();
+        bool canDelete = !theInstances.empty();
+        for (size_t idx = 0, end = theInstances.size() && canDelete; idx < end; ++idx) {
+            canDelete &= GetDocumentReader().IsInstance(theInstances[idx])
+                    && GetStudioSystem()->GetClientDataModelBridge()->CanDelete(theInstances[idx]);
         }
+        return canDelete;
     }
 
-    return theReturn;
+    return false;
 }
 
-//==============================================================================
 /**
  * Handles the duplicate command passed by mainframe.
  * Makes a copy of the currently selected item (if there is one) and attaches
@@ -2182,7 +2076,6 @@ void CDoc::HandleDuplicateCommand(bool slide)
     }
 }
 
-//=============================================================================
 /**
  * Verify that an asset can be renamed. Only actions are affected by rename at this point, so prompt
  * user to proceed if the actions will be hosed.
@@ -2217,7 +2110,6 @@ bool CDoc::VerifyCanRename(qt3dsdm::Qt3DSDMInstanceHandle inAsset)
     return theResult;
 }
 
-//==============================================================================
 /**
  * Load a stream of a UIP file.
  */
@@ -2262,7 +2154,6 @@ void CDoc::LoadPresentationFile(CBufferedInputStream *inInputStream)
     }
 }
 
-//==============================================================================
 /**
  * Loads the Studio object data from an archive
  * Loads Studio object data from a presentation file archive.
@@ -2304,7 +2195,7 @@ int CDoc::LoadStudioData(CBufferedInputStream *inInputStream)
 
             // We definitely don't want a million events firing off during this deserialization.
             std::shared_ptr<IComposerSerializer> theSerializer(CreateTransactionlessSerializer());
-            theSerializer->SerializeScene(theReader, GetDocumentDirectory(), (int)theVersion);
+            theSerializer->SerializeScene(theReader, GetDocumentDirectory(), int(theVersion));
         }
 
         auto bridge = GetStudioSystem()->GetClientDataModelBridge();
@@ -2331,7 +2222,6 @@ int CDoc::LoadStudioData(CBufferedInputStream *inInputStream)
     return theVersion;
 }
 
-//==============================================================================
 /**
  *	Create new data core. Typically in construction or loading a new presentation
  */
@@ -2420,7 +2310,7 @@ std::shared_ptr<Q3DStudio::IComposerSerializer> CDoc::CreateTransactionlessSeria
 std::shared_ptr<qt3dsdm::IDOMWriter> CDoc::CreateDOMWriter()
 {
     using namespace qt3dsdm;
-    qt3ds::QT3DSI32 theFileVersion = STUDIO_FILE_VERSION;
+    qt3ds::QT3DSI32 theFileVersion = UIP_VERSION;
     TStringTablePtr theStringTable(
                 m_StudioSystem->GetFullSystem()->GetCoreSystem()->GetDataCore()->GetStringTablePtr());
     std::shared_ptr<IDOMWriter> theWriterPtr(
@@ -2483,7 +2373,7 @@ DoCreateDOMReader(qt3ds::foundation::IInStream &inStream,
 
         IDOMReader &theReader(*retval);
         theReader.Att("version", outVersion);
-        if (outVersion > STUDIO_FILE_VERSION || outVersion < STUDIO_LAST_SUPPORTED_FILE_VERSION)
+        if (outVersion > UIP_VERSION || outVersion < LAST_SUPPORTED_UIP_VERSION)
             return std::shared_ptr<qt3dsdm::IDOMReader>();
         if (!theReader.MoveToFirstChild(L"Project"))
             return std::shared_ptr<qt3dsdm::IDOMReader>();
@@ -2542,7 +2432,7 @@ struct SBufferFilter
         return m_Map.find(m_StringTable.GetWideStr(inItem.first.c_str())) == m_Map.end();
     }
 };
-//==============================================================================
+
 /**
  *	SavePresentationFile: Saves the presentation file.
  *	@param	inArchive	CArchive for saving data
@@ -2622,10 +2512,6 @@ void CDoc::SavePresentationFile(CBufferedOutputStream *inOutputStream)
     CDOMSerializer::Write(*theWriter.GetTopElement(), theStream);
 }
 
-//=============================================================================
-/**
- *
- */
 void CDoc::SetKeyframeInterpolation()
 {
     if (m_KeyframesManager)
@@ -2638,7 +2524,6 @@ void CDoc::DeselectAllKeyframes()
         m_KeyframesManager->DeselectAllKeyframes();
 }
 
-//==============================================================================
 /**
  *	Recursive function to get all actions affected by renaming the asset with inObjectId.
  *	I think the logic behind this is that once the parent will affect all children's path
@@ -2701,7 +2586,6 @@ qt3dsdm::Qt3DSDMInstanceHandle CDoc::getPasteTarget(qt3dsdm::Qt3DSDMInstanceHand
     return pasteTarget;
 }
 
-//==============================================================================
 /**
  * Image is a property of the material.
  * Recursively iterate the images involved by the object and do either of following:
@@ -2797,7 +2681,6 @@ void CDoc::IterateImageInstances(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
     }
 }
 
-//=============================================================================
 /**
  * @returns the object based on the selection mode
  */
@@ -2823,7 +2706,6 @@ qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetObjectbySelectMode(qt3dsdm::Qt3DSDMInsta
     return theResult;
 }
 
-//=============================================================================
 /**
  * @returns the topmost group object that owns this instance
  */
@@ -2862,7 +2744,6 @@ qt3dsdm::Qt3DSDMInstanceHandle CDoc::GetTopmostGroup(qt3dsdm::Qt3DSDMInstanceHan
     }
 }
 
-//==============================================================================
 /**
  * Image is a property of the material, find out all images involved by the delete
  * object and scehedule a remove instances.
@@ -2873,7 +2754,6 @@ void CDoc::ScheduleRemoveImageInstances(qt3dsdm::Qt3DSDMInstanceHandle inInstanc
     IterateImageInstances(inInstance, nullptr);
 }
 
-//==============================================================================
 /**
  * Remove all DataModel instances and schedule a delete
  */
@@ -2891,7 +2771,6 @@ void CDoc::ScheduleRemoveDataModelInstances(qt3dsdm::Qt3DSDMInstanceHandle inIns
     outBatch->AddCommand(theCmd);
 }
 
-//==============================================================================
 /**
  * inObject may be a Component or it may have children Component, find out all Components involved
  * by the delete
@@ -3224,7 +3103,7 @@ void CDoc::ReplaceDatainput(const QString &oldName, const QString &newName,
 
     // Open a single transaction for all datainput replaces, so that all binding replacements
     // done from within f.ex datainput management dialog can be undone with a single undo.
-    if (!IsTransactionOpened())
+    if (!isTransactionOpened())
         OpenTransaction(QObject::tr("Replace datainput bindings"), __FILE__, __LINE__);
 
     for (auto it : instances) {
@@ -3243,7 +3122,7 @@ void CDoc::ReplaceDatainput(const QString &oldName, const QString &newName,
 
             for (int i = 0; i < splitStr.size() - 1; i += 2) {
                 if (splitStr[i].contains(oldName)) {
-                    splitStr[i] = QLatin1String("$") + newName;
+                    splitStr[i] = QLatin1Char('$') + newName;
                     renamed = true;
                 }
                 newStr.append(QStringLiteral(" ") + splitStr[i] + QStringLiteral(" ")
@@ -3275,8 +3154,7 @@ QString CDoc::GetCurrentController(qt3dsdm::Qt3DSDMInstanceHandle instHandle,
         Q3DStudio::CString currPropValStr
                 = qt3dsdm::get<qt3dsdm::TDataStrPtr>(currPropVal)->GetData();
 
-        Q3DStudio::CString propName
-                = propSys->GetName(propHandle).c_str();
+        Q3DStudio::CString propName = propSys->GetName(propHandle).c_str();
 
         // Datainput controller name is always prepended with "$". Differentiate
         // between datainput and property that has the same name by searching specifically

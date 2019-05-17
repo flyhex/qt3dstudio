@@ -415,8 +415,8 @@ void CDataInputListDlg::accept()
     if (m_deletedDiInUse)
         QTimer::singleShot(0, &g_StudioApp, &CStudioApp::checkDeletedDatainputs);
 
-    if (g_StudioApp.GetCore()->GetDoc()->IsTransactionOpened()) {
-        g_StudioApp.GetCore()->GetDoc()->CloseTransaction();
+    if (g_StudioApp.GetCore()->GetDoc()->isTransactionOpened()) {
+        g_StudioApp.GetCore()->GetDoc()->closeTransaction();
         // If a datainput has been edited (and datainput controller names
         // updated in element "controlledproperty" properties), we need to make all changes
         // non-undoable. This is because datainput definitions in UIA file (and in global
@@ -432,8 +432,8 @@ void CDataInputListDlg::accept()
 void CDataInputListDlg::reject()
 {
     // If the user cancels, also roll back any possible changes to data input bindings.
-    if (g_StudioApp.GetCore()->GetDoc()->IsTransactionOpened())
-        g_StudioApp.GetCore()->GetDoc()->RollbackTransaction();
+    if (g_StudioApp.GetCore()->GetDoc()->isTransactionOpened())
+        g_StudioApp.GetCore()->GetDoc()->rollbackTransaction();
 
     QDialog::reject();
 }

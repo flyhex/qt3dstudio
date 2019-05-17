@@ -276,8 +276,8 @@ void CStudioApp::performShutdown()
         m_core->GetDispatch()->RemoveCoreAsynchronousEventListener(this);
 
         // close transactions before we call destructors
-        if (m_core->GetDoc()->IsTransactionOpened())
-            m_core->GetDoc()->CloseTransaction();
+        if (m_core->GetDoc()->isTransactionOpened())
+            m_core->GetDoc()->closeTransaction();
 
         qCInfo(qt3ds::TRACE_INFO) << "Studio exiting successfully";
     }
@@ -968,7 +968,7 @@ void CStudioApp::OnCopy()
 
 bool CStudioApp::CanCopy()
 {
-    return m_core->GetDoc()->CanCopy();
+    return m_core->GetDoc()->canCopy();
 }
 
 //=============================================================================
@@ -981,9 +981,9 @@ QString CStudioApp::GetCopyType()
     QString theCopyType;
 
     CDoc *theDoc = m_core->GetDoc();
-    if (theDoc->CanCopyAction())
+    if (theDoc->canCopySelectedActions())
         theCopyType = tr("Action");
-    else if (theDoc->CanCopyKeyframe())
+    else if (theDoc->canCopySelectedKeyframes())
         theCopyType = tr("Keyframes");
     else
         theCopyType = tr("Object");
@@ -1013,7 +1013,7 @@ QString CStudioApp::getDeleteType() const
     // Delete priority: keyframes, slides, objects
     const bool slide = qobject_cast<SlideView *>(m_lastActiveView) != nullptr;
     CDoc *doc = m_core->GetDoc();
-    if (doc->GetKeyframesManager()->HasSelectedKeyframes()) {
+    if (m_pMainWnd->getTimelineWidget()->hasSelectedKeyframes()) {
         return tr("Keyframes");
     } else if (slide) {
         // Check if the slide is the last one or the master
@@ -1120,7 +1120,7 @@ void CStudioApp::OnCut()
 
 bool CStudioApp::CanCut()
 {
-    return m_core->GetDoc()->CanCut();
+    return m_core->GetDoc()->canCut();
 }
 
 //=============================================================================
@@ -1134,7 +1134,7 @@ void CStudioApp::OnPaste()
 
 bool CStudioApp::CanPaste()
 {
-    return m_core->GetDoc()->CanPaste();
+    return m_core->GetDoc()->canPaste();
 }
 
 //=============================================================================
@@ -1147,9 +1147,9 @@ QString CStudioApp::GetPasteType()
     QString thePasteType;
 
     CDoc *theDoc = m_core->GetDoc();
-    if (theDoc->CanPasteAction())
+    if (theDoc->canPasteActions())
         thePasteType = tr("Action");
-    else if (theDoc->CanPasteObject())
+    else if (theDoc->canPasteObjects())
         thePasteType = tr("Object");
     else
         thePasteType = tr("Keyframes");
@@ -1185,7 +1185,7 @@ void CStudioApp::HandleSetChangedKeys()
  */
 void CStudioApp::DeleteSelectedKeys()
 {
-    m_core->GetDoc()->DeleteSelectedKeys();
+    m_core->GetDoc()->deleteSelectedKeyframes();
 }
 
 //=============================================================================
@@ -1285,7 +1285,7 @@ bool CStudioApp::IsPlaying()
  */
 void CStudioApp::OnRevert()
 {
-    if (!m_core->GetDoc()->IsModified() || m_dialogs->ConfirmRevert()) {
+    if (!m_core->GetDoc()->isModified() || m_dialogs->ConfirmRevert()) {
         QString theCurrentDoc = m_core->GetDoc()->GetDocumentPath();
         OnLoadDocument(theCurrentDoc);
     }
@@ -1297,7 +1297,7 @@ void CStudioApp::OnRevert()
  */
 bool CStudioApp::CanRevert() const
 {
-    return m_core->GetDoc()->IsModified() && m_core->GetDoc()->IsValid();
+    return m_core->GetDoc()->isModified() && m_core->GetDoc()->isValid();
 }
 
 //==============================================================================
@@ -1319,7 +1319,7 @@ void CStudioApp::OnFileOpenRecent(const QString &inDocument)
  */
 bool CStudioApp::PerformSavePrompt()
 {
-    if (m_core->GetDoc()->IsModified()) {
+    if (m_core->GetDoc()->isModified()) {
         CDialogs::ESavePromptResult theResult = m_dialogs->PromptForSave();
         if (theResult == CDialogs::SAVE_FIRST) {
             bool onSaveResult = OnSave();
