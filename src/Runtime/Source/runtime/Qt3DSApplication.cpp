@@ -546,7 +546,7 @@ struct SApp : public IApplication
     Q3DStudio::CInputEngine *m_InputEnginePtr;
     CAppStr m_ApplicationDir;
     CAppStr m_ProjectDir;
-    CAppStr m_InitialPresentationId;
+    CAppStr m_PresentationId;
     CAppStr m_DLLDirectory;
     TIdAssetMap m_AssetMap;
     // Keep the assets ordered.  This enables the uia order to mean something.
@@ -607,7 +607,7 @@ struct SApp : public IApplication
         , m_InputEnginePtr(NULL)
         , m_ApplicationDir(inFactory.GetFoundation().getAllocator())
         , m_ProjectDir(inFactory.GetFoundation().getAllocator())
-        , m_InitialPresentationId(inFactory.GetFoundation().getAllocator())
+        , m_PresentationId(inFactory.GetFoundation().getAllocator())
         , m_DLLDirectory(inFactory.GetFoundation().getAllocator())
         , m_AssetMap(inFactory.GetFoundation().getAllocator(), "SApp::m_AssetMap")
         , m_OrderedAssets(inFactory.GetFoundation().getAllocator(), "SApp::m_OrderedAssets")
@@ -680,7 +680,21 @@ struct SApp : public IApplication
 
     void setPresentationId(const QString &id) override
     {
-        m_InitialPresentationId.assign(qPrintable(id));
+        QString oldId = QString::fromLocal8Bit(m_PresentationId.c_str());
+        if (oldId == id)
+            return;
+
+        // Update id key in m_AssetMap
+        TIdAssetMap::iterator iter
+                = m_AssetMap.find(m_CoreFactory->GetStringTable().RegisterStr(oldId));
+        if (iter != m_AssetMap.end()
+                && iter->second->getType() == AssetValueTypes::Presentation) {
+            CRegisteredString idStr = m_CoreFactory->GetStringTable().RegisterStr(id);
+            m_AssetMap.insert(eastl::make_pair(idStr, iter->second));
+            m_AssetMap.erase(iter);
+        }
+
+        m_PresentationId.assign(qPrintable(id));
     }
 
     void setAssetVisitor(qt3ds::Qt3DSAssetVisitor *v) override
@@ -1118,8 +1132,8 @@ struct SApp : public IApplication
                 inAsset.m_Presentation = NULL;
                 return false;
             } else {
-                if (inAsset.m_Id.IsValid() && m_InitialPresentationId.empty())
-                    m_InitialPresentationId.assign(inAsset.m_Id);
+                if (inAsset.m_Id.IsValid() && m_PresentationId.empty())
+                    m_PresentationId.assign(inAsset.m_Id);
 
                 if (inAsset.m_Id.IsValid())
                     newScene->RegisterOffscreenRenderer(inAsset.m_Id);
@@ -1154,12 +1168,12 @@ struct SApp : public IApplication
 
             const char8_t *initialItem = "";
             inReader.UnregisteredAtt("initial", initialItem);
-            m_InitialPresentationId.clear();
+            m_PresentationId.clear();
             if (!isTrivial(initialItem)) {
                 if (initialItem[0] == '#')
                     ++initialItem;
 
-                m_InitialPresentationId.assign(initialItem);
+                m_PresentationId.assign(initialItem);
             }
             eastl::vector<SElementAttributeReference> theUIPReferences;
             eastl::string tempString;
@@ -1321,7 +1335,7 @@ struct SApp : public IApplication
         m_variantConfig.setVariantList(variantList);
         bool retval = false;
         if (extension.comparei("uip") == 0) {
-            m_InitialPresentationId.assign(filename.c_str());
+            m_PresentationId.assign(filename.c_str());
             eastl::string relativePath = "./";
             relativePath.append(filename);
             relativePath.append(".");
@@ -1593,7 +1607,7 @@ struct SApp : public IApplication
 
     Q3DStudio::CPresentation *GetPrimaryPresentation() override
     {
-        return GetPresentationById(m_InitialPresentationId.c_str());
+        return GetPresentationById(m_PresentationId.c_str());
     }
 
     Q3DStudio::CPresentation *GetPresentationById(const char8_t *inId) override
@@ -1619,7 +1633,7 @@ struct SApp : public IApplication
                 Q3DStudio::CPresentation *presentation
                         = iter->second->getData<SPresentationAsset>().m_Presentation;
                 if (presentation) {
-                    if (iter->first == m_InitialPresentationId)
+                    if (iter->first == m_PresentationId)
                         list.prepend(presentation);
                     else
                         list.append(presentation);
