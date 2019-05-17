@@ -47,6 +47,7 @@
 #include "Qt3DSRenderer.h"
 #include "Qt3DSRenderBufferManager.h"
 #include "Qt3DSRenderRuntimeBindingImpl.h"
+#include "Qt3DSImportMesh.h"
 
 #include "Qt3DSDLLManager.h"
 #include "foundation/Qt3DSSimpleTypes.h"
@@ -217,6 +218,7 @@ public:
     void deleteElements(const QStringList &elementPaths) override;
     void createMaterials(const QString &elementPath,
                          const QStringList &materialDefinitions) override;
+    void createMesh(const QString &name, qt3dsimp::Mesh *mesh) override;
     void SetAttribute(const char *elementPath, const char *attributeName,
                       const char *value) override;
     bool GetAttribute(const char *elementPath, const char *attributeName, void *value) override;
@@ -665,6 +667,16 @@ void CRuntimeView::createMaterials(const QString &elementPath,
                     &m_RuntimeFactory->GetQt3DSRenderContext().GetCustomMaterialSystem(),
                     &m_RuntimeFactory->GetQt3DSRenderContext().GetDynamicObjectSystem(),
                     &m_RuntimeFactory->GetQt3DSRenderContext().GetRenderer());
+    }
+}
+
+void CRuntimeView::createMesh(const QString &name, qt3dsimp::Mesh *mesh)
+{
+    if (m_Application) {
+        Q3DStudio::CQmlEngine &theBridgeEngine
+                = static_cast<Q3DStudio::CQmlEngine &>(m_RuntimeFactoryCore->GetScriptEngineQml());
+        theBridgeEngine.createMesh(
+                    name, mesh, &m_RuntimeFactory->GetQt3DSRenderContext().GetBufferManager());
     }
 }
 

@@ -29,7 +29,6 @@
 #include "Qt3DSImportLibPrecompile.h"
 #include "Qt3DSImportMesh.h"
 #include "foundation/Qt3DSMemoryBuffer.h"
-#include "Qt3DSFileTools.h"
 #include "Qt3DSImportContainers.h"
 
 using namespace qt3dsimp;

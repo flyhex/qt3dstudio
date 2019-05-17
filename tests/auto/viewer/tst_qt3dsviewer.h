@@ -57,11 +57,13 @@ private Q_SLOTS:
     void testSettings();
     void testCreateElement();
     void testCreateMaterial();
+    void testCreateMesh();
 
 private:
     void deleteCreatedElements();
     void createElement(const QString &parentElementPath, const QString &slideName,
                        const QHash<QString, QVariant> &properties);
+    void createGeometries(Q3DSGeometry &pyramid, Q3DSGeometry &star);
 
     QQuickView *m_viewer = nullptr;
     QObject *m_studio3DItem = nullptr;

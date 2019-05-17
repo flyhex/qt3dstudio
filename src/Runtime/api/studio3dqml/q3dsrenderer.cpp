@@ -215,6 +215,8 @@ bool Q3DSRenderer::initializeRuntime(QOpenGLFramebufferObject *inFbo)
             this, &Q3DSRenderer::elementsCreated);
     connect(m_runtime, &Q3DSViewer::Q3DSViewerApp::SigMaterialsCreated,
             this, &Q3DSRenderer::materialsCreated);
+    connect(m_runtime, &Q3DSViewer::Q3DSViewerApp::SigMeshesCreated,
+            this, &Q3DSRenderer::meshesCreated);
     connect(m_runtime, &Q3DSViewer::Q3DSViewerApp::SigDataOutputValueUpdated,
             this, &Q3DSRenderer::dataOutputValueUpdated);
 
@@ -362,6 +364,17 @@ void Q3DSRenderer::processCommands()
             // Runtime makes copy of the data in its own format, so we can delete it now
             auto &command = m_commands.commandAt(i);
             delete reinterpret_cast<QStringList *>(command.m_data);
+            command.m_data = nullptr;
+            break;
+        }
+        case CommandType_CreateMeshes: {
+            m_runtime->createMeshes(*static_cast<QHash<QString, Q3DSViewer::MeshData> *>(
+                                        cmd.m_data));
+            // Runtime makes copy of the data, so we can delete it now
+            auto &command = m_commands.commandAt(i);
+            auto meshData = reinterpret_cast<QHash<QString, Q3DSViewer::MeshData> *>(
+                        command.m_data);
+            delete meshData;
             command.m_data = nullptr;
             break;
         }

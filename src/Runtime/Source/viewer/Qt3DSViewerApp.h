@@ -95,6 +95,106 @@ struct ViewerShadeModes
     };
 };
 
+// Intermediate struct to transfer mesh data between studio3d module and runtime
+struct MeshData
+{
+    // All enums must match the ones defined by Q3DSGeometry class in studio3d module
+    enum PrimitiveType { // Must match also internal NVRenderDrawMode
+        UnknownType = 0,
+        Points,
+        LineStrip,
+        LineLoop,
+        Lines,
+        TriangleStrip,
+        TriangleFan,
+        Triangles, // Default primitive type
+        Patches
+    };
+
+    struct Attribute {
+        enum Semantic {
+            UnknownSemantic = 0,
+            IndexSemantic,
+            PositionSemantic, // attr_pos
+            NormalSemantic,   // attr_norm
+            TexCoordSemantic, // attr_uv0
+            TangentSemantic,  // attr_textan
+            BinormalSemantic  // attr_binormal
+        };
+        enum ComponentType { // Must match also internal NVRenderComponentTypes
+            DefaultType = 0,
+            U8Type,
+            I8Type,
+            U16Type,
+            I16Type,
+            U32Type, // Default for IndexSemantic
+            I32Type,
+            U64Type,
+            I64Type,
+            F16Type,
+            F32Type, // Default for other semantics
+            F64Type
+        };
+
+        int typeSize() const
+        {
+            switch (componentType) {
+            case U8Type:  return 1;
+            case I8Type:  return 1;
+            case U16Type: return 2;
+            case I16Type: return 2;
+            case U32Type: return 4;
+            case I32Type: return 4;
+            case U64Type: return 8;
+            case I64Type: return 8;
+            case F16Type: return 2;
+            case F32Type: return 4;
+            case F64Type: return 8;
+            default:
+                Q_ASSERT(false);
+                return 0;
+            }
+        }
+
+        int componentCount() const
+        {
+            switch (semantic) {
+            case IndexSemantic:    return 1;
+            case PositionSemantic: return 3;
+            case NormalSemantic:   return 3;
+            case TexCoordSemantic: return 2;
+            case TangentSemantic:  return 3;
+            case BinormalSemantic: return 3;
+            default:
+                Q_ASSERT(false);
+                return 0;
+            }
+        }
+
+        Semantic semantic = PositionSemantic;
+        ComponentType componentType = F32Type;
+        int offset = 0;
+    };
+
+    static const int MAX_ATTRIBUTES = 6;
+
+    void clear()
+    {
+        m_vertexBuffer.clear();
+        m_indexBuffer.clear();
+        m_attributeCount = 0;
+        m_primitiveType = Triangles;
+    }
+
+    QByteArray m_vertexBuffer;
+    QByteArray m_indexBuffer;
+
+    Attribute m_attributes[MAX_ATTRIBUTES];
+    int m_attributeCount = 0;
+    PrimitiveType m_primitiveType = Triangles;
+    int m_stride = 0;
+};
+
 class Q3DSViewerAppImpl;
 class QT3DS_RUNTIME_API Q3DSViewerApp : public QObject
 {
@@ -366,6 +466,7 @@ public:
                         const QVector<QHash<QString, QVariant>> &properties);
     void deleteElements(const QStringList &elementPaths);
     void createMaterials(const QString &elementPath, const QStringList &materialDefinitions);
+    void createMeshes(const QHash<QString, Q3DSViewer::MeshData> &meshData);
 
     QString error();
 
@@ -410,6 +511,7 @@ Q_SIGNALS:
     void SigCustomSignal(const QString &elementPath, const QString &name);
     void SigElementsCreated(const QStringList &elementPaths, const QString &error);
     void SigMaterialsCreated(const QStringList &materialNames, const QString &error);
+    void SigMeshesCreated(const QStringList &meshNames, const QString &error);
     void SigDataOutputValueUpdated(const QString &name, const QVariant &newValue);
     void SigPresentationReady();
     void SigPresentationLoaded();

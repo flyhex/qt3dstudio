@@ -43,6 +43,7 @@ QT_BEGIN_NAMESPACE
 
 class Q3DSPresentationPrivate;
 class Q3DSElement;
+class Q3DSGeometry;
 class QMouseEvent;
 class QWheelEvent;
 class QKeyEvent;
@@ -100,6 +101,8 @@ public:
     void deleteElements(const QStringList &elementPaths);
     void createMaterial(const QString &elementPath, const QString &materialDefinition);
     void createMaterials(const QString &elementPath, const QStringList &materialDefinitions);
+    void createMesh(const QString &meshName, const Q3DSGeometry &geometry);
+    void createMeshes(const QHash<QString, const Q3DSGeometry *> &meshData);
 
 public Q_SLOTS:
     void setSource(const QUrl &source);
@@ -130,6 +133,7 @@ Q_SIGNALS:
     void delayedLoadingChanged(bool enable);
     void elementsCreated(const QStringList &elementPaths, const QString &error);
     void materialsCreated(const QStringList &materialNames, const QString &error);
+    void meshesCreated(const QStringList &meshNames, const QString &error);
 
 private:
     Q_DISABLE_COPY(Q3DSPresentation)

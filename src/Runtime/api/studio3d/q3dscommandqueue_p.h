@@ -71,6 +71,7 @@ enum CommandType {
     CommandType_CreateElements,
     CommandType_DeleteElements,
     CommandType_CreateMaterials,
+    CommandType_CreateMeshes,
 
     // Requests
     CommandType_RequestSlideInfo,

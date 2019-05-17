@@ -223,6 +223,8 @@ QQuickFramebufferObject::Renderer *Q3DSStudio3D::createRenderer() const
             m_presentation, &Q3DSPresentation::elementsCreated);
     connect(renderer, &Q3DSRenderer::materialsCreated,
             m_presentation, &Q3DSPresentation::materialsCreated);
+    connect(renderer, &Q3DSRenderer::meshesCreated,
+            m_presentation, &Q3DSPresentation::meshesCreated);
     connect(renderer, &Q3DSRenderer::requestResponse,
             this, &Q3DSStudio3D::requestResponseHandler);
     connect(renderer, &Q3DSRenderer::presentationLoaded,

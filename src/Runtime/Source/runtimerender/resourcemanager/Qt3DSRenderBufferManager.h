@@ -37,6 +37,10 @@
 #include "Qt3DSRenderImageTextureData.h"
 #include "foundation/Qt3DSBounds3.h"
 
+namespace qt3dsimp {
+    struct Mesh;
+}
+
 namespace qt3ds {
 namespace render {
 
@@ -93,6 +97,7 @@ namespace render {
         virtual void loadSet(const QSet<QString> &imageSet) = 0;
         virtual void unloadSet(const QSet<QString> &imageSet) = 0;
 
+        virtual void loadCustomMesh(const QString &name, qt3dsimp::Mesh *mesh) = 0;
         virtual SRenderMesh *LoadMesh(CRegisteredString inSourcePath) = 0;
 
         virtual SRenderMesh *CreateMesh(const char *inSourcePath, QT3DSU8 *inVertData,

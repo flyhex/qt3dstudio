@@ -585,19 +585,22 @@ struct SBufferManager : public IBufferManager
         return qt3dsimp::SMultiLoadResult();
     }
 
-    virtual NVConstDataRef<QT3DSU8> CreatePackedPositionDataArray(qt3dsimp::SMultiLoadResult *inResult)
+    virtual NVConstDataRef<QT3DSU8> CreatePackedPositionDataArray(
+            const qt3dsimp::SMultiLoadResult &inResult)
     {
         // we assume a position consists of 3 floats
-        QT3DSU32 vertexCount = inResult->m_Mesh->m_VertexBuffer.m_Data.size()
-            / inResult->m_Mesh->m_VertexBuffer.m_Stride;
+        QT3DSU32 vertexCount = inResult.m_Mesh->m_VertexBuffer.m_Data.size()
+            / inResult.m_Mesh->m_VertexBuffer.m_Stride;
         QT3DSU32 dataSize = vertexCount * 3 * sizeof(QT3DSF32);
-        QT3DSF32 *posData = (QT3DSF32 *)QT3DS_ALLOC(m_Context->GetAllocator(), dataSize,
-                                           "SRenderMesh::CreatePackedPositionDataArray");
-        QT3DSU8 *baseOffset = reinterpret_cast<QT3DSU8 *>(inResult->m_Mesh);
+        QT3DSF32 *posData = static_cast<QT3DSF32 *>(
+                    QT3DS_ALLOC(m_Context->GetAllocator(), dataSize,
+                                "SRenderMesh::CreatePackedPositionDataArray"));
+        QT3DSU8 *baseOffset = reinterpret_cast<QT3DSU8 *>(inResult.m_Mesh);
         // copy position data
         if (posData) {
-            QT3DSF32 *srcData = (QT3DSF32 *)inResult->m_Mesh->m_VertexBuffer.m_Data.begin(baseOffset);
-            QT3DSU32 srcStride = inResult->m_Mesh->m_VertexBuffer.m_Stride / sizeof(QT3DSF32);
+            QT3DSF32 *srcData = reinterpret_cast<QT3DSF32 *>(
+                        inResult.m_Mesh->m_VertexBuffer.m_Data.begin(baseOffset));
+            QT3DSU32 srcStride = inResult.m_Mesh->m_VertexBuffer.m_Stride / sizeof(QT3DSF32);
             QT3DSF32 *dstData = posData;
             QT3DSU32 dstStride = 3;
 
@@ -610,257 +613,272 @@ struct SBufferManager : public IBufferManager
                 srcData += srcStride;
             }
 
-            return toConstDataRef((const qt3ds::QT3DSU8 *)posData, dataSize);
+            return toConstDataRef(reinterpret_cast<const qt3ds::QT3DSU8 *>(posData), dataSize);
         }
 
         return NVConstDataRef<QT3DSU8>();
     }
 
+    SRenderMesh *createRenderMesh(const qt3dsimp::SMultiLoadResult &result)
+    {
+        SRenderMesh *theNewMesh = QT3DS_NEW(m_Context->GetAllocator(), SRenderMesh)(
+            qt3ds::render::NVRenderDrawMode::Triangles,
+            qt3ds::render::NVRenderWinding::CounterClockwise, result.m_Id,
+            m_Context->GetAllocator());
+        QT3DSU8 *baseAddress = reinterpret_cast<QT3DSU8 *>(result.m_Mesh);
+        NVConstDataRef<QT3DSU8> theVBufData(
+            result.m_Mesh->m_VertexBuffer.m_Data.begin(baseAddress),
+            result.m_Mesh->m_VertexBuffer.m_Data.size());
+
+        NVRenderVertexBuffer *theVertexBuffer = m_Context->CreateVertexBuffer(
+            qt3ds::render::NVRenderBufferUsageType::Static,
+            result.m_Mesh->m_VertexBuffer.m_Data.m_Size,
+            result.m_Mesh->m_VertexBuffer.m_Stride, theVBufData);
+
+        // create a tight packed position data VBO
+        // this should improve our depth pre pass rendering
+        NVRenderVertexBuffer *thePosVertexBuffer = nullptr;
+        NVConstDataRef<QT3DSU8> posData = CreatePackedPositionDataArray(result);
+        if (posData.size()) {
+            thePosVertexBuffer
+                = m_Context->CreateVertexBuffer(qt3ds::render::NVRenderBufferUsageType::Static,
+                                                posData.size(), 3 * sizeof(QT3DSF32), posData);
+        }
+
+        NVRenderIndexBuffer *theIndexBuffer = nullptr;
+        if (result.m_Mesh->m_IndexBuffer.m_Data.size()) {
+            using qt3ds::render::NVRenderComponentTypes;
+            QT3DSU32 theIndexBufferSize = result.m_Mesh->m_IndexBuffer.m_Data.size();
+            NVRenderComponentTypes::Enum bufComponentType =
+                result.m_Mesh->m_IndexBuffer.m_ComponentType;
+            QT3DSU32 sizeofType
+                = qt3ds::render::NVRenderComponentTypes::getSizeofType(bufComponentType);
+
+            if (sizeofType == 2 || sizeofType == 4) {
+                // Ensure type is unsigned; else things will fail in rendering pipeline.
+                if (bufComponentType == NVRenderComponentTypes::QT3DSI16)
+                    bufComponentType = NVRenderComponentTypes::QT3DSU16;
+                if (bufComponentType == NVRenderComponentTypes::QT3DSI32)
+                    bufComponentType = NVRenderComponentTypes::QT3DSU32;
+
+                NVConstDataRef<QT3DSU8> theIBufData(
+                    result.m_Mesh->m_IndexBuffer.m_Data.begin(baseAddress),
+                    result.m_Mesh->m_IndexBuffer.m_Data.size());
+                theIndexBuffer = m_Context->CreateIndexBuffer(
+                    qt3ds::render::NVRenderBufferUsageType::Static, bufComponentType,
+                    theIndexBufferSize, theIBufData);
+            } else {
+                QT3DS_ASSERT(false);
+            }
+        }
+        nvvector<qt3ds::render::NVRenderVertexBufferEntry> &theEntryBuffer(m_EntryBuffer);
+        theEntryBuffer.resize(result.m_Mesh->m_VertexBuffer.m_Entries.size());
+        for (QT3DSU32 entryIdx = 0,
+             entryEnd = result.m_Mesh->m_VertexBuffer.m_Entries.size();
+             entryIdx < entryEnd; ++entryIdx) {
+            theEntryBuffer[entryIdx]
+                = result.m_Mesh->m_VertexBuffer.m_Entries.index(baseAddress, entryIdx)
+                    .ToVertexBufferEntry(baseAddress);
+        }
+        // create our attribute layout
+        NVRenderAttribLayout *theAttribLayout
+            = m_Context->CreateAttributeLayout(theEntryBuffer);
+        // create our attribute layout for depth pass
+        qt3ds::render::NVRenderVertexBufferEntry theEntries[] = {
+            qt3ds::render::NVRenderVertexBufferEntry(
+                "attr_pos", qt3ds::render::NVRenderComponentTypes::QT3DSF32, 3),
+        };
+        NVRenderAttribLayout *theAttribLayoutDepth
+            = m_Context->CreateAttributeLayout(toConstDataRef(theEntries, 1));
+
+        // create input assembler object
+        QT3DSU32 strides = result.m_Mesh->m_VertexBuffer.m_Stride;
+        QT3DSU32 offsets = 0;
+        NVRenderInputAssembler *theInputAssembler = m_Context->CreateInputAssembler(
+            theAttribLayout, toConstDataRef(&theVertexBuffer, 1), theIndexBuffer,
+            toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1),
+            result.m_Mesh->m_DrawMode);
+
+        // create depth input assembler object
+        QT3DSU32 posStrides = thePosVertexBuffer ? 3 * sizeof(QT3DSF32) : strides;
+        NVRenderInputAssembler *theInputAssemblerDepth = m_Context->CreateInputAssembler(
+            theAttribLayoutDepth,
+            toConstDataRef(thePosVertexBuffer ? &thePosVertexBuffer : &theVertexBuffer, 1),
+                    theIndexBuffer, toConstDataRef(&posStrides, 1), toConstDataRef(&offsets, 1),
+            result.m_Mesh->m_DrawMode);
+
+        NVRenderInputAssembler *theInputAssemblerPoints = m_Context->CreateInputAssembler(
+            theAttribLayoutDepth,
+            toConstDataRef(thePosVertexBuffer ? &thePosVertexBuffer : &theVertexBuffer, 1),
+                    nullptr, toConstDataRef(&posStrides, 1), toConstDataRef(&offsets, 1),
+            NVRenderDrawMode::Points);
+
+        if (!theInputAssembler || !theInputAssemblerDepth || !theInputAssemblerPoints) {
+            QT3DS_ASSERT(false);
+            return nullptr;
+        }
+        theNewMesh->m_Joints.resize(result.m_Mesh->m_Joints.size());
+        for (QT3DSU32 jointIdx = 0, jointEnd = result.m_Mesh->m_Joints.size();
+             jointIdx < jointEnd; ++jointIdx) {
+            const qt3dsimp::Joint &theImportJoint(
+                result.m_Mesh->m_Joints.index(baseAddress, jointIdx));
+            SRenderJoint &theNewJoint(theNewMesh->m_Joints[jointIdx]);
+            theNewJoint.m_JointID = theImportJoint.m_JointID;
+            theNewJoint.m_ParentID = theImportJoint.m_ParentID;
+            memCopy(theNewJoint.m_invBindPose, theImportJoint.m_invBindPose,
+                    16 * sizeof(QT3DSF32));
+            memCopy(theNewJoint.m_localToGlobalBoneSpace,
+                    theImportJoint.m_localToGlobalBoneSpace, 16 * sizeof(QT3DSF32));
+        }
+
+        for (QT3DSU32 subsetIdx = 0, subsetEnd = result.m_Mesh->m_Subsets.size();
+             subsetIdx < subsetEnd; ++subsetIdx) {
+            SRenderSubset theSubset(m_Context->GetAllocator());
+            const qt3dsimp::MeshSubset &source(
+                result.m_Mesh->m_Subsets.index(baseAddress, subsetIdx));
+            theSubset.m_Bounds = source.m_Bounds;
+            theSubset.m_Count = source.m_Count;
+            theSubset.m_Offset = source.m_Offset;
+            theSubset.m_Joints = theNewMesh->m_Joints;
+            theSubset.m_Name = m_StrTable->RegisterStr(source.m_Name.begin(baseAddress));
+            theVertexBuffer->addRef();
+            theSubset.m_VertexBuffer = theVertexBuffer;
+            if (thePosVertexBuffer) {
+                thePosVertexBuffer->addRef();
+                theSubset.m_PosVertexBuffer = thePosVertexBuffer;
+            }
+            if (theIndexBuffer) {
+                theIndexBuffer->addRef();
+                theSubset.m_IndexBuffer = theIndexBuffer;
+            }
+            theSubset.m_InputAssembler = theInputAssembler;
+            theSubset.m_InputAssemblerDepth = theInputAssemblerDepth;
+            theSubset.m_InputAssemblerPoints = theInputAssemblerPoints;
+            theSubset.m_PrimitiveType = result.m_Mesh->m_DrawMode;
+            theInputAssembler->addRef();
+            theInputAssemblerDepth->addRef();
+            theSubset.m_InputAssemblerPoints->addRef();
+            theNewMesh->m_Subsets.push_back(theSubset);
+        }
+        // If we want to, we can break up models into sub-subsets.
+        // These are assumed to use the same material as the outer subset but have fewer triangles
+        // and should have a more exact bounding box. This sort of thing helps with using the
+        // frustum culling system but it is really done incorrectly.
+        // It should be done via some sort of oct-tree mechanism and so that the sub-subsets
+        // are spatially sorted and it should only be done upon save-to-binary with the
+        // results saved out to disk. As you can see, doing it properly requires some real
+        // engineering effort so it is somewhat unlikely it will ever happen.
+        // Or it could be done on import if someone really wants to change the mesh buffer
+        // format. Either way it isn't going to happen here and it isn't going to happen this way
+        // but this is a working example of using the technique.
+#ifdef QT3DS_RENDER_GENERATE_SUB_SUBSETS
+        Option<qt3ds::render::NVRenderVertexBufferEntry> thePosAttrOpt
+            = theVertexBuffer->GetEntryByName("attr_pos");
+        bool hasPosAttr = thePosAttrOpt.hasValue()
+            && thePosAttrOpt->m_ComponentType == qt3ds::render::NVRenderComponentTypes::QT3DSF32
+            && thePosAttrOpt->m_NumComponents == 3;
+
+        for (size_t subsetIdx = 0, subsetEnd = theNewMesh->m_Subsets.size();
+             subsetIdx < subsetEnd; ++subsetIdx) {
+            SRenderSubset &theOuterSubset = theNewMesh->m_Subsets[subsetIdx];
+            if (theOuterSubset.m_Count && theIndexBuffer
+                && theIndexBuffer->GetComponentType()
+                    == qt3ds::render::NVRenderComponentTypes::QT3DSU16
+                && theNewMesh->m_DrawMode == NVRenderDrawMode::Triangles && hasPosAttr) {
+                // Num tris in a sub subset.
+                QT3DSU32 theSubsetSize = 3334 * 3; // divisible by three.
+                size_t theNumSubSubsets = ((theOuterSubset.m_Count - 1) / theSubsetSize) + 1;
+                QT3DSU32 thePosAttrOffset = thePosAttrOpt->m_FirstItemOffset;
+                const QT3DSU8 *theVertData = result.m_Mesh->m_VertexBuffer.m_Data.begin();
+                const QT3DSU8 *theIdxData = result.m_Mesh->m_IndexBuffer.m_Data.begin();
+                QT3DSU32 theVertStride = result.m_Mesh->m_VertexBuffer.m_Stride;
+                QT3DSU32 theOffset = theOuterSubset.m_Offset;
+                QT3DSU32 theCount = theOuterSubset.m_Count;
+                for (size_t subSubsetIdx = 0, subSubsetEnd = theNumSubSubsets;
+                     subSubsetIdx < subSubsetEnd; ++subSubsetIdx) {
+                    SRenderSubsetBase theBase;
+                    theBase.m_Offset = theOffset;
+                    theBase.m_Count = NVMin(theSubsetSize, theCount);
+                    theBase.m_Bounds.setEmpty();
+                    theCount -= theBase.m_Count;
+                    theOffset += theBase.m_Count;
+                    // Create new bounds.
+                    // Offset is in item size, not bytes.
+                    const QT3DSU16 *theSubsetIdxData
+                        = reinterpret_cast<const QT3DSU16 *>(theIdxData + theBase.m_Offset * 2);
+                    for (size_t theIdxIdx = 0, theIdxEnd = theBase.m_Count;
+                         theIdxIdx < theIdxEnd; ++theIdxIdx) {
+                        QT3DSU32 theVertOffset = theSubsetIdxData[theIdxIdx] * theVertStride;
+                        theVertOffset += thePosAttrOffset;
+                        QT3DSVec3 thePos = *(
+                            reinterpret_cast<const QT3DSVec3 *>(theVertData + theVertOffset));
+                        theBase.m_Bounds.include(thePos);
+                    }
+                    theOuterSubset.m_SubSubsets.push_back(theBase);
+                }
+            } else {
+                SRenderSubsetBase theBase;
+                theBase.m_Bounds = theOuterSubset.m_Bounds;
+                theBase.m_Count = theOuterSubset.m_Count;
+                theBase.m_Offset = theOuterSubset.m_Offset;
+                theOuterSubset.m_SubSubsets.push_back(theBase);
+            }
+        }
+#endif
+        if (posData.size()) {
+            m_Context->GetAllocator().deallocate(
+                        static_cast<void *>(const_cast<qt3ds::QT3DSU8 *>(posData.begin())));
+        }
+
+        return theNewMesh;
+    }
+
+    void loadCustomMesh(const QString &name, qt3dsimp::Mesh *mesh) override
+    {
+        if (!name.isEmpty() && mesh) {
+            CRegisteredString meshName = m_StrTable->RegisterStr(name);
+            pair<TMeshMap::iterator, bool> theMesh
+                = m_MeshMap.insert({ meshName, static_cast<SRenderMesh *>(nullptr) });
+            // Only create the mesh if it doesn't yet exist
+            if (theMesh.second) {
+                qt3dsimp::SMultiLoadResult result;
+                result.m_Mesh = mesh;
+                theMesh.first->second = createRenderMesh(result);
+            }
+        }
+    }
+
     SRenderMesh *LoadMesh(CRegisteredString inMeshPath) override
     {
         if (inMeshPath.IsValid() == false)
-            return NULL;
+            return nullptr;
         pair<TMeshMap::iterator, bool> theMesh =
-            m_MeshMap.insert(make_pair(inMeshPath, (SRenderMesh *)NULL));
-        if (theMesh.second == true) {
-            // check to see if this is primitive
-
+            m_MeshMap.insert(make_pair(inMeshPath, static_cast<SRenderMesh *>(nullptr)));
+        if (theMesh.second) {
+            // Check to see if this is primitive
             qt3dsimp::SMultiLoadResult theResult = LoadPrimitive(inMeshPath);
 
             // Attempt a load from the filesystem if this mesh isn't a primitive.
-            if (theResult.m_Mesh == NULL) {
+            if (!theResult.m_Mesh) {
                 m_PathBuilder = inMeshPath;
                 TStr::size_type pound = m_PathBuilder.rfind('#');
                 QT3DSU32 id = 0;
                 if (pound != TStr::npos) {
-                    id = atoi(m_PathBuilder.c_str() + pound + 1);
+                    id = QT3DSU32(atoi(m_PathBuilder.c_str() + pound + 1));
                     m_PathBuilder.erase(m_PathBuilder.begin() + pound, m_PathBuilder.end());
                 }
                 NVScopedRefCounted<IRefCountedInputStream> theStream(
                     m_InputStreamFactory->GetStreamForFile(m_PathBuilder.c_str()));
                 if (theStream) {
-                    theResult = qt3dsimp::Mesh::LoadMulti(m_Context->GetAllocator(), *theStream, id);
+                    theResult = qt3dsimp::Mesh::LoadMulti(
+                                m_Context->GetAllocator(), *theStream, id);
                 }
-                if (theResult.m_Mesh == NULL)
+                if (!theResult.m_Mesh)
                     qCWarning(WARNING, "Failed to load mesh: %s", m_PathBuilder.c_str());
             }
 
             if (theResult.m_Mesh) {
-                SRenderMesh *theNewMesh = QT3DS_NEW(m_Context->GetAllocator(), SRenderMesh)(
-                    qt3ds::render::NVRenderDrawMode::Triangles,
-                    qt3ds::render::NVRenderWinding::CounterClockwise, theResult.m_Id,
-                    m_Context->GetAllocator());
-                QT3DSU8 *baseAddress = reinterpret_cast<QT3DSU8 *>(theResult.m_Mesh);
-                theMesh.first->second = theNewMesh;
-                NVConstDataRef<QT3DSU8> theVBufData(
-                    theResult.m_Mesh->m_VertexBuffer.m_Data.begin(baseAddress),
-                    theResult.m_Mesh->m_VertexBuffer.m_Data.size());
-
-                NVRenderVertexBuffer *theVertexBuffer = m_Context->CreateVertexBuffer(
-                    qt3ds::render::NVRenderBufferUsageType::Static,
-                    theResult.m_Mesh->m_VertexBuffer.m_Data.m_Size,
-                    theResult.m_Mesh->m_VertexBuffer.m_Stride, theVBufData);
-
-                // create a tight packed position data VBO
-                // this should improve our depth pre pass rendering
-                NVRenderVertexBuffer *thePosVertexBuffer = NULL;
-                NVConstDataRef<QT3DSU8> posData = CreatePackedPositionDataArray(&theResult);
-                if (posData.size()) {
-                    thePosVertexBuffer =
-                        m_Context->CreateVertexBuffer(qt3ds::render::NVRenderBufferUsageType::Static,
-                                                      posData.size(), 3 * sizeof(QT3DSF32), posData);
-                }
-
-                NVRenderIndexBuffer *theIndexBuffer = NULL;
-                if (theResult.m_Mesh->m_IndexBuffer.m_Data.size()) {
-                    using qt3ds::render::NVRenderComponentTypes;
-                    QT3DSU32 theIndexBufferSize = theResult.m_Mesh->m_IndexBuffer.m_Data.size();
-                    NVRenderComponentTypes::Enum bufComponentType =
-                        theResult.m_Mesh->m_IndexBuffer.m_ComponentType;
-                    QT3DSU32 sizeofType =
-                        qt3ds::render::NVRenderComponentTypes::getSizeofType(bufComponentType);
-
-                    if (sizeofType == 2 || sizeofType == 4) {
-                        // Ensure type is unsigned; else things will fail in rendering pipeline.
-                        if (bufComponentType == NVRenderComponentTypes::QT3DSI16)
-                            bufComponentType = NVRenderComponentTypes::QT3DSU16;
-                        if (bufComponentType == NVRenderComponentTypes::QT3DSI32)
-                            bufComponentType = NVRenderComponentTypes::QT3DSU32;
-
-                        NVConstDataRef<QT3DSU8> theIBufData(
-                            theResult.m_Mesh->m_IndexBuffer.m_Data.begin(baseAddress),
-                            theResult.m_Mesh->m_IndexBuffer.m_Data.size());
-                        theIndexBuffer = m_Context->CreateIndexBuffer(
-                            qt3ds::render::NVRenderBufferUsageType::Static, bufComponentType,
-                            theIndexBufferSize, theIBufData);
-                    } else {
-                        QT3DS_ASSERT(false);
-                    }
-                }
-                nvvector<qt3ds::render::NVRenderVertexBufferEntry> &theEntryBuffer(m_EntryBuffer);
-                theEntryBuffer.resize(theResult.m_Mesh->m_VertexBuffer.m_Entries.size());
-                for (QT3DSU32 entryIdx = 0,
-                           entryEnd = theResult.m_Mesh->m_VertexBuffer.m_Entries.size();
-                     entryIdx < entryEnd; ++entryIdx) {
-                    theEntryBuffer[entryIdx] =
-                        theResult.m_Mesh->m_VertexBuffer.m_Entries.index(baseAddress, entryIdx)
-                            .ToVertexBufferEntry(baseAddress);
-                }
-                // create our attribute layout
-                NVRenderAttribLayout *theAttribLayout =
-                    m_Context->CreateAttributeLayout(theEntryBuffer);
-                // create our attribute layout for depth pass
-                qt3ds::render::NVRenderVertexBufferEntry theEntries[] = {
-                    qt3ds::render::NVRenderVertexBufferEntry(
-                        "attr_pos", qt3ds::render::NVRenderComponentTypes::QT3DSF32, 3),
-                };
-                NVRenderAttribLayout *theAttribLayoutDepth =
-                    m_Context->CreateAttributeLayout(toConstDataRef(theEntries, 1));
-
-                // create input assembler object
-                QT3DSU32 strides = theResult.m_Mesh->m_VertexBuffer.m_Stride;
-                QT3DSU32 offsets = 0;
-                NVRenderInputAssembler *theInputAssembler = m_Context->CreateInputAssembler(
-                    theAttribLayout, toConstDataRef(&theVertexBuffer, 1), theIndexBuffer,
-                    toConstDataRef(&strides, 1), toConstDataRef(&offsets, 1),
-                    theResult.m_Mesh->m_DrawMode);
-
-                // create depth input assembler object
-                QT3DSU32 posStrides = (thePosVertexBuffer) ? 3 * sizeof(QT3DSF32) : strides;
-                NVRenderInputAssembler *theInputAssemblerDepth = m_Context->CreateInputAssembler(
-                    theAttribLayoutDepth,
-                    toConstDataRef((thePosVertexBuffer) ? &thePosVertexBuffer : &theVertexBuffer,
-                                   1),
-                    theIndexBuffer, toConstDataRef(&posStrides, 1), toConstDataRef(&offsets, 1),
-                    theResult.m_Mesh->m_DrawMode);
-
-                NVRenderInputAssembler *theInputAssemblerPoints = m_Context->CreateInputAssembler(
-                    theAttribLayoutDepth,
-                    toConstDataRef((thePosVertexBuffer) ? &thePosVertexBuffer : &theVertexBuffer,
-                                   1),
-                    NULL, toConstDataRef(&posStrides, 1), toConstDataRef(&offsets, 1),
-                    NVRenderDrawMode::Points);
-
-                if (!theInputAssembler || !theInputAssemblerDepth || !theInputAssemblerPoints) {
-                    QT3DS_ASSERT(false);
-                    return NULL;
-                }
-                theNewMesh->m_Joints.resize(theResult.m_Mesh->m_Joints.size());
-                for (QT3DSU32 jointIdx = 0, jointEnd = theResult.m_Mesh->m_Joints.size();
-                     jointIdx < jointEnd; ++jointIdx) {
-                    const qt3dsimp::Joint &theImportJoint(
-                        theResult.m_Mesh->m_Joints.index(baseAddress, jointIdx));
-                    SRenderJoint &theNewJoint(theNewMesh->m_Joints[jointIdx]);
-                    theNewJoint.m_JointID = theImportJoint.m_JointID;
-                    theNewJoint.m_ParentID = theImportJoint.m_ParentID;
-                    memCopy(theNewJoint.m_invBindPose, theImportJoint.m_invBindPose,
-                            16 * sizeof(QT3DSF32));
-                    memCopy(theNewJoint.m_localToGlobalBoneSpace,
-                            theImportJoint.m_localToGlobalBoneSpace, 16 * sizeof(QT3DSF32));
-                }
-
-                for (QT3DSU32 subsetIdx = 0, subsetEnd = theResult.m_Mesh->m_Subsets.size();
-                     subsetIdx < subsetEnd; ++subsetIdx) {
-                    SRenderSubset theSubset(m_Context->GetAllocator());
-                    const qt3dsimp::MeshSubset &source(
-                        theResult.m_Mesh->m_Subsets.index(baseAddress, subsetIdx));
-                    theSubset.m_Bounds = source.m_Bounds;
-                    theSubset.m_Count = source.m_Count;
-                    theSubset.m_Offset = source.m_Offset;
-                    theSubset.m_Joints = theNewMesh->m_Joints;
-                    theSubset.m_Name = m_StrTable->RegisterStr(source.m_Name.begin(baseAddress));
-                    theVertexBuffer->addRef();
-                    theSubset.m_VertexBuffer = theVertexBuffer;
-                    if (thePosVertexBuffer) {
-                        thePosVertexBuffer->addRef();
-                        theSubset.m_PosVertexBuffer = thePosVertexBuffer;
-                    }
-                    if (theIndexBuffer) {
-                        theIndexBuffer->addRef();
-                        theSubset.m_IndexBuffer = theIndexBuffer;
-                    }
-                    theSubset.m_InputAssembler = theInputAssembler;
-                    theSubset.m_InputAssemblerDepth = theInputAssemblerDepth;
-                    theSubset.m_InputAssemblerPoints = theInputAssemblerPoints;
-                    theSubset.m_PrimitiveType = theResult.m_Mesh->m_DrawMode;
-                    theInputAssembler->addRef();
-                    theInputAssemblerDepth->addRef();
-                    theSubset.m_InputAssemblerPoints->addRef();
-                    theNewMesh->m_Subsets.push_back(theSubset);
-                }
-// If we want to, we can an in a quite stupid way break up modes into sub-subsets.
-// These are assumed to use the same material as the outer subset but have fewer tris
-// and should have a more exact bounding box.  This sort of thing helps with using the frustum
-// culling
-// system but it is really done incorrectly.  It should be done via some sort of oct-tree mechanism
-// and it
-// so that the sub-subsets spatially sorted and it should only be done upon save-to-binary with the
-// results
-// saved out to disk.  As you can see, doing it properly requires some real engineering effort so it
-// is somewhat
-// unlikely it will ever happen.  Or it could be done on import if someone really wants to change
-// the mesh buffer
-// format.  Either way it isn't going to happen here and it isn't going to happen this way but this
-// is a working
-// example of using the technique.
-#ifdef QT3DS_RENDER_GENERATE_SUB_SUBSETS
-                Option<qt3ds::render::NVRenderVertexBufferEntry> thePosAttrOpt =
-                    theVertexBuffer->GetEntryByName("attr_pos");
-                bool hasPosAttr = thePosAttrOpt.hasValue()
-                    && thePosAttrOpt->m_ComponentType == qt3ds::render::NVRenderComponentTypes::QT3DSF32
-                    && thePosAttrOpt->m_NumComponents == 3;
-
-                for (size_t subsetIdx = 0, subsetEnd = theNewMesh->m_Subsets.size();
-                     subsetIdx < subsetEnd; ++subsetIdx) {
-                    SRenderSubset &theOuterSubset = theNewMesh->m_Subsets[subsetIdx];
-                    if (theOuterSubset.m_Count && theIndexBuffer
-                        && theIndexBuffer->GetComponentType()
-                            == qt3ds::render::NVRenderComponentTypes::QT3DSU16
-                        && theNewMesh->m_DrawMode == NVRenderDrawMode::Triangles && hasPosAttr) {
-                        // Num tris in a sub subset.
-                        QT3DSU32 theSubsetSize = 3334 * 3; // divisible by three.
-                        size_t theNumSubSubsets =
-                            ((theOuterSubset.m_Count - 1) / theSubsetSize) + 1;
-                        QT3DSU32 thePosAttrOffset = thePosAttrOpt->m_FirstItemOffset;
-                        const QT3DSU8 *theVertData = theResult.m_Mesh->m_VertexBuffer.m_Data.begin();
-                        const QT3DSU8 *theIdxData = theResult.m_Mesh->m_IndexBuffer.m_Data.begin();
-                        QT3DSU32 theVertStride = theResult.m_Mesh->m_VertexBuffer.m_Stride;
-                        QT3DSU32 theOffset = theOuterSubset.m_Offset;
-                        QT3DSU32 theCount = theOuterSubset.m_Count;
-                        for (size_t subSubsetIdx = 0, subSubsetEnd = theNumSubSubsets;
-                             subSubsetIdx < subSubsetEnd; ++subSubsetIdx) {
-                            SRenderSubsetBase theBase;
-                            theBase.m_Offset = theOffset;
-                            theBase.m_Count = NVMin(theSubsetSize, theCount);
-                            theBase.m_Bounds.setEmpty();
-                            theCount -= theBase.m_Count;
-                            theOffset += theBase.m_Count;
-                            // Create new bounds.
-                            // Offset is in item size, not bytes.
-                            const QT3DSU16 *theSubsetIdxData =
-                                reinterpret_cast<const QT3DSU16 *>(theIdxData + theBase.m_Offset * 2);
-                            for (size_t theIdxIdx = 0, theIdxEnd = theBase.m_Count;
-                                 theIdxIdx < theIdxEnd; ++theIdxIdx) {
-                                QT3DSU32 theVertOffset = theSubsetIdxData[theIdxIdx] * theVertStride;
-                                theVertOffset += thePosAttrOffset;
-                                QT3DSVec3 thePos = *(
-                                    reinterpret_cast<const QT3DSVec3 *>(theVertData + theVertOffset));
-                                theBase.m_Bounds.include(thePos);
-                            }
-                            theOuterSubset.m_SubSubsets.push_back(theBase);
-                        }
-                    } else {
-                        SRenderSubsetBase theBase;
-                        theBase.m_Bounds = theOuterSubset.m_Bounds;
-                        theBase.m_Count = theOuterSubset.m_Count;
-                        theBase.m_Offset = theOuterSubset.m_Offset;
-                        theOuterSubset.m_SubSubsets.push_back(theBase);
-                    }
-                }
-#endif
-                if (posData.size())
-                    m_Context->GetAllocator().deallocate((void *)posData.begin());
-
+                theMesh.first->second = createRenderMesh(theResult);
                 m_Context->GetAllocator().deallocate(theResult.m_Mesh);
             }
         }

@@ -65,6 +65,7 @@ Q_SIGNALS:
     void customSignalEmitted(const QString &elNmentPath, const QString &name);
     void elementsCreated(const QStringList &elementPaths, const QString &error);
     void materialsCreated(const QStringList &materialNames, const QString &error);
+    void meshesCreated(const QStringList &meshNames, const QString &error);
     void dataOutputValueUpdated(const QString &name, const QVariant &newValue);
 
 protected:

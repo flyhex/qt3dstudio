@@ -33,6 +33,7 @@
 #include <QtStudio3D/Q3DSPresentation>
 #include <QtStudio3D/Q3DSElement>
 #include <QtStudio3D/Q3DSViewerSettings>
+#include <QtStudio3D/Q3DSGeometry>
 #include <QtCore/QRandomGenerator>
 #include <QtCore/QFile>
 #include <QtCore/QTextStream>
@@ -487,6 +488,79 @@ void tst_qt3dsviewer::testCreateMaterial()
     QTest::qWait(200); // Extra wait to verify slide change visually
 }
 
+void tst_qt3dsviewer::testCreateMesh()
+{
+    m_viewer->show();
+
+    m_settings->setShowRenderStats(true);
+    m_settings->setScaleMode(Q3DSViewerSettings::ScaleModeFill);
+
+    QSignalSpy spyExited(m_presentation,
+                         SIGNAL(slideExited(const QString &, unsigned int, const QString &)));
+    QSignalSpy spyMeshCreated(m_presentation, SIGNAL(meshesCreated(const QStringList &,
+                                                                   const QString &)));
+    QSignalSpy spyElemCreated(m_presentation, SIGNAL(elementsCreated(const QStringList &,
+                                                                     const QString &)));
+    Q3DSGeometry pyramid;
+    Q3DSGeometry star;
+    createGeometries(pyramid, star);
+
+    Q3DSElement pyramidElem(m_presentation, QStringLiteral("Scene.Layer.Pyramid"));
+    Q3DSElement starElem(m_presentation, QStringLiteral("Scene.Layer.Star"));
+
+    int animValue = 0;
+    QTimer animationTimer;
+    animationTimer.setInterval(10);
+    QObject::connect(&animationTimer, &QTimer::timeout, [&]() {
+        animValue++;
+        pyramidElem.setAttribute(QStringLiteral("rotation.x"), animValue * 2);
+        pyramidElem.setAttribute(QStringLiteral("rotation.y"), animValue);
+        starElem.setAttribute(QStringLiteral("rotation.x"), -animValue * 2);
+        starElem.setAttribute(QStringLiteral("rotation.y"), -animValue);
+    });
+
+    m_presentation->createMaterial(
+            QStringLiteral("Scene"),
+            QStringLiteral(":/scenes/simple_cube_animation/materials/Basic Texture.materialdef"));
+    m_presentation->createMesh(QStringLiteral("Pyramid"), pyramid);
+
+    QObject::connect(m_presentation, &Q3DSPresentation::meshesCreated,
+                     [&](const QStringList &meshNames, const QString &error) {
+        QVERIFY(error.isEmpty());
+        for (auto &name : meshNames) {
+            QHash<QString, QVariant> data;
+            if (name == QLatin1String("Pyramid")) {
+                data.insert(QStringLiteral("name"), QStringLiteral("Pyramid"));
+                data.insert(QStringLiteral("sourcepath"), QStringLiteral("Pyramid"));
+                data.insert(QStringLiteral("material"), QStringLiteral("Basic Texture"));
+                data.insert(QStringLiteral("position"),
+                            QVariant::fromValue<QVector3D>(QVector3D(100, 150, 500)));
+                createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide1"), data);
+                animationTimer.start();
+            } else if (name == QLatin1String("Star")) {
+                data.insert(QStringLiteral("name"), QStringLiteral("Star"));
+                data.insert(QStringLiteral("sourcepath"), QStringLiteral("Star"));
+                data.insert(QStringLiteral("material"), QStringLiteral("Basic Texture"));
+                data.insert(QStringLiteral("position"),
+                            QVariant::fromValue<QVector3D>(QVector3D(100, -150, 500)));
+                createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide1"), data);
+            } else {
+                QVERIFY(false);
+            }
+        }
+    });
+
+    // Create mesh after start
+    QTimer::singleShot(1000, [&]() {
+        m_presentation->createMesh(QStringLiteral("Star"), star);
+    });
+
+    QVERIFY(spyExited.wait(20000));
+    QCOMPARE(spyMeshCreated.count(), 2);
+    QCOMPARE(spyElemCreated.count(), 2);
+    QTest::qWait(200); // Extra wait to verify slide change visually
+}
+
 void tst_qt3dsviewer::deleteCreatedElements()
 {
     m_presentation->deleteElements(m_createdElements);
@@ -499,6 +573,107 @@ void tst_qt3dsviewer::createElement(const QString &parentElementPath, const QStr
     m_createdElements << parentElementPath + QLatin1Char('.')
                          + properties[QStringLiteral("name")].toString();
     m_presentation->createElement(parentElementPath, slideName, properties);
+}
+
+void tst_qt3dsviewer::createGeometries(Q3DSGeometry &pyramid, Q3DSGeometry &star)
+{
+    struct Vertex {
+        QVector3D position;
+        QVector3D normal;
+        QVector2D uv;
+    };
+
+    QVector<Vertex> vertices;
+
+    auto createVertex = [&](const QVector3D &xyz, const QVector3D &n, const QVector2D &uv) {
+        Vertex newVertex;
+        newVertex.position = xyz;
+        if (n.isNull())
+            newVertex.normal = xyz; // This is almost never the correct normal
+        else
+            newVertex.normal = n.normalized();
+        newVertex.uv = uv;
+        vertices.append(newVertex);
+    };
+
+    auto createTriangle = [&](const QVector3D &xyz1, const QVector2D &uv1,
+                              const QVector3D &xyz2, const QVector2D &uv2,
+                              const QVector3D &xyz3, const QVector2D &uv3) {
+        QVector3D n;
+        n = QVector3D::crossProduct(xyz2 - xyz1, xyz3 - xyz1).normalized();
+
+        createVertex(xyz1, n, uv1);
+        createVertex(xyz2, n, uv2);
+        createVertex(xyz3, n, uv3);
+    };
+
+    // Pyramid (no index buffer)
+    {
+        QVector3D xyz[5] = {{0, 0, 50}, {50, 50, -50}, {50, -50, -50}, {-50, -50, -50},
+                            {-50, 50, -50}};
+        QVector2D uv[4] = {{1, 1}, {1, 0}, {0, 0}, {0, 1}};
+        createTriangle(xyz[0], uv[0], xyz[1], uv[1], xyz[2], uv[2]);
+        createTriangle(xyz[0], uv[0], xyz[2], uv[1], xyz[3], uv[2]);
+        createTriangle(xyz[0], uv[0], xyz[3], uv[1], xyz[4], uv[2]);
+        createTriangle(xyz[0], uv[0], xyz[4], uv[1], xyz[1], uv[2]);
+        createTriangle(xyz[1], uv[0], xyz[4], uv[2], xyz[3], uv[1]);
+        createTriangle(xyz[1], uv[0], xyz[3], uv[3], xyz[2], uv[2]);
+
+        QByteArray vertexBuffer(reinterpret_cast<const char *>(vertices.constData()),
+                                vertices.size() * int(sizeof(Vertex)));
+
+        pyramid.clear();
+        pyramid.setVertexData(vertexBuffer);
+        pyramid.addAttribute(Q3DSGeometry::Attribute::PositionSemantic);
+        pyramid.addAttribute(Q3DSGeometry::Attribute::NormalSemantic);
+        pyramid.addAttribute(Q3DSGeometry::Attribute::TexCoordSemantic);
+    }
+
+    vertices.clear();
+
+    // Star (using index buffer)
+    {
+        // Note: Since faces share vertices, the normals on the vertices are not correct
+        // for any face, leading to weird lighting behavior
+        createVertex({0, 150, 0},     {}, {0.5f, 1});
+        createVertex({50, 50, -50},   {}, {0.66f, 0.66f});
+        createVertex({150, 0, 0},     {}, {1, 0.5f});
+        createVertex({50, -50, -50},  {}, {0.66f, 0.33f});
+        createVertex({0, -150, 0},    {}, {0.5f, 0});
+        createVertex({-50, -50, -50}, {}, {0.33f, 0.33f});
+        createVertex({-150, 0, 0},    {}, {0, 0.5f});
+        createVertex({-50, 50, -50},  {}, {0.33f, 0.66f});
+        createVertex({50, 50, 50},    {}, {0.66f, 0.66f});
+        createVertex({50, -50, 50},   {}, {0.66f, 0.33f});
+        createVertex({-50, -50, 50},  {}, {0.33f, 0.33f});
+        createVertex({-50, 50, 50},   {}, {0.33f, 0.66f});
+
+        QVector<quint16> indices = {
+            0, 1, 8, 0, 7, 1, 0, 11, 7, 0, 8, 11,   // Top pyramid
+            2, 1, 3, 2, 3, 9, 2, 9, 8, 2, 8, 1,     // Right pyramid
+            4, 3, 5, 4, 5, 10, 4, 10, 9, 4, 9, 3,   // Bottom pyramid
+            6, 5, 7, 6, 7, 11, 6, 11, 10, 6, 10, 5, // Left pyramid
+            1, 7, 5, 1, 5, 3,                       // Front center rect
+            8, 10, 11, 8, 9, 10                     // Back center rect
+        };
+
+        QByteArray vertexBuffer(reinterpret_cast<const char *>(vertices.constData()),
+                                vertices.size() * int(sizeof(Vertex)));
+        QByteArray indexBuffer(reinterpret_cast<const char *>(indices.constData()),
+                               indices.size() * int(sizeof(quint16)));
+
+        Q3DSGeometry::Attribute indexAtt;
+        indexAtt.semantic = Q3DSGeometry::Attribute::IndexSemantic;
+        indexAtt.componentType = Q3DSGeometry::Attribute::ComponentType::U16Type;
+
+        star.clear();
+        star.setVertexData(vertexBuffer);
+        star.setIndexData(indexBuffer);
+        star.addAttribute(Q3DSGeometry::Attribute::PositionSemantic);
+        star.addAttribute(Q3DSGeometry::Attribute::NormalSemantic);
+        star.addAttribute(Q3DSGeometry::Attribute::TexCoordSemantic);
+        star.addAttribute(indexAtt);
+    }
 }
 
 QTEST_MAIN(tst_qt3dsviewer)

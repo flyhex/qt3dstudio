@@ -33,6 +33,7 @@
 #include "viewerqmlstreamproxy_p.h"
 #include "q3dsdatainput_p.h"
 #include "q3dsdataoutput_p.h"
+#include "q3dsgeometry_p.h"
 
 #include <QtCore/qdebug.h>
 #include <QtCore/qsettings.h>
@@ -388,6 +389,37 @@ void Q3DSPresentation::createMaterials(const QString &elementPath,
     }
 }
 
+/**
+    Creates a mesh specified by given geometry. The given meshName can be used as sourcepath
+    property value for model elements created with future createElement calls.
+*/
+void Q3DSPresentation::createMesh(const QString &meshName, const Q3DSGeometry &geometry)
+{
+    QHash<QString, const Q3DSGeometry *> meshData;
+    meshData.insert(meshName, &geometry);
+    createMeshes(meshData);
+}
+
+// The ownership of supplied geometries stays with the caller
+void Q3DSPresentation::createMeshes(const QHash<QString, const Q3DSGeometry *> &meshData)
+{
+    // We can't refer to API class Q3DSGeometry on the runtime side, so let's grab the meshdata
+    // from Q3DSGeometryPrivate that is in runtime approved format and pass that on instead
+    auto theMeshData = new QHash<QString, Q3DSViewer::MeshData>;
+    QHashIterator<QString, const Q3DSGeometry *> it(meshData);
+    while (it.hasNext()) {
+        it.next();
+        theMeshData->insert(it.key(), it.value()->d_ptr->meshData());
+    }
+
+    if (d_ptr->m_viewerApp) {
+        d_ptr->m_viewerApp->createMeshes(*theMeshData);
+        delete theMeshData;
+    } else if (d_ptr->m_commandQueue) {
+        d_ptr->m_commandQueue->queueCommand(CommandType_CreateMeshes, theMeshData);
+    }
+}
+
 void Q3DSPresentation::mousePressEvent(QMouseEvent *e)
 {
     if (d_ptr->m_viewerApp) {
@@ -537,6 +569,8 @@ void Q3DSPresentationPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool 
                     q_ptr, &Q3DSPresentation::elementsCreated);
             connect(app, &Q3DSViewer::Q3DSViewerApp::SigMaterialsCreated,
                     q_ptr, &Q3DSPresentation::materialsCreated);
+            connect(app, &Q3DSViewer::Q3DSViewerApp::SigMeshesCreated,
+                    q_ptr, &Q3DSPresentation::meshesCreated);
         }
         if (oldApp) {
             disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigSlideEntered,
@@ -551,6 +585,8 @@ void Q3DSPresentationPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool 
                        q_ptr, &Q3DSPresentation::elementsCreated);
             disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigMaterialsCreated,
                        q_ptr, &Q3DSPresentation::materialsCreated);
+            disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigMeshesCreated,
+                       q_ptr, &Q3DSPresentation::meshesCreated);
         }
     }
 }
@@ -621,6 +657,7 @@ void Q3DSPresentationPrivate::requestResponseHandler(CommandType commandType, vo
         break;
     }
 }
+
 // Doc note: The ownership of the registered scenes remains with the caller, who needs to
 // ensure that registered scenes are alive as long as the presentation is alive.
 void Q3DSPresentationPrivate::registerElement(Q3DSElement *element)

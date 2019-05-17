@@ -29,6 +29,7 @@
 
 #include "q3dscommandqueue_p.h"
 #include "q3dspresentation.h"
+#include "Qt3DSViewerApp.h"
 
 #include <QtCore/qstringlist.h>
 
@@ -267,6 +268,7 @@ void CommandQueue::copyCommands(CommandQueue &fromQueue)
             fromQueue.commandAt(i).m_data = nullptr; // This queue takes ownership of data
             break;
         case CommandType_DeleteElements:
+        case CommandType_CreateMeshes:
             queueCommand(source.m_commandType, source.m_data);
             fromQueue.commandAt(i).m_data = nullptr; // This queue takes ownership of data
             break;
@@ -310,11 +312,13 @@ void CommandQueue::clear(bool deleteCommandData)
                     delete static_cast<QVector<QHash<QString, QVariant>> *>(cmd.m_data);
                     break;
                 case CommandType_DeleteElements:
-                    delete static_cast<QStringList *>(cmd.m_data);
-                    break;
                 case CommandType_CreateMaterials:
                     delete static_cast<QStringList *>(cmd.m_data);
                     break;
+                case CommandType_CreateMeshes: {
+                    delete static_cast<QHash<QString, Q3DSViewer::MeshData> *>(cmd.m_data);
+                    break;
+                }
                 default:
                     Q_ASSERT(false); // Should never come here
                     break;

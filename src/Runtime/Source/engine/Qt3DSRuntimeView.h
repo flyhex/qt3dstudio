@@ -50,6 +50,10 @@
 
 typedef void (*qml_Function)(void *inUserData);
 
+namespace qt3dsimp {
+    struct Mesh;
+}
+
 class QRuntimeViewSignalProxy : public QObject
 {
     Q_OBJECT
@@ -201,6 +205,7 @@ public:
     virtual void deleteElements(const QStringList &elementPaths) = 0;
     virtual void createMaterials(const QString &elementPath,
                                  const QStringList &materialDefinitions) = 0;
+    virtual void createMesh(const QString &name, qt3dsimp::Mesh *mesh) = 0;
     virtual void SetAttribute(const char *elementPath, const char *attributeName,
                               const char *value) = 0;
     virtual bool GetAttribute(const char *elementPath, const char *attributeName, void *value) = 0;

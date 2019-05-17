@@ -68,7 +68,8 @@
 #include "Qt3DSQmlElementHelper.h"
 #include "q3dsqmlscript.h"
 #include "Qt3DSRenderRuntimeBindingImpl.h"
-#include "Qt3DSRenderBufferManager.h" // TODO: Needed for adding meshes dynamically (QT3DS-3378)
+#include "Qt3DSRenderBufferManager.h"
+#include "Qt3DSImportMesh.h"
 #include "Qt3DSRenderer.h"
 #include "q3dsmaterialdefinitionparser.h"
 #include "Qt3DSRenderCustomMaterialSystem.h"
@@ -436,6 +437,8 @@ public:
                          qt3ds::render::ICustomMaterialSystem *customMaterialSystem,
                          IDynamicObjectSystem *dynamicObjectSystem,
                          qt3ds::render::IQt3DSRenderer *renderer) override;
+    void createMesh(const QString &name, qt3dsimp::Mesh *mesh,
+                    qt3ds::render::IBufferManager *bufferManager) override;
 
     void GotoSlide(const char *component, const char *slideName,
                            const SScriptEngineGotoSlideArgs &inArgs) override;
@@ -1640,6 +1643,13 @@ void CQmlEngineImpl::createMaterials(const QString &elementPath,
     }
 
     handleError();
+}
+
+void CQmlEngineImpl::createMesh(const QString &name, qt3dsimp::Mesh *mesh,
+                                qt3ds::render::IBufferManager *bufferManager)
+{
+    // Add the custom meshes to buffer manager.
+    bufferManager->loadCustomMesh(name, mesh);
 }
 
 void CQmlEngineImpl::GotoSlide(const char *component, const char *slideName,

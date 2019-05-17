@@ -12,7 +12,7 @@ linux {
     QMAKE_LFLAGS += -lrt
 }
 
-DEFINES += QT3DS_BUILDING_LIBRARY
+DEFINES += QT3DS_BUILDING_LIBRARY DISABLE_MESH_OPTIMIZATION
 
 QT += qml
 QT += quick-private
@@ -593,6 +593,7 @@ HEADERS += \
 SOURCES += \
     ../Source/datamodel/Qt3DSMetadata.cpp \
     ../../Authoring/QT3DSIMP/Qt3DSImportLib/Qt3DSImportMesh.cpp \
+    ../../Authoring/QT3DSIMP/Qt3DSImportLib/Qt3DSImportMeshBuilder.cpp \
     ../../Authoring/QT3DSIMP/Qt3DSImportLib/Qt3DSImportPath.cpp \
     ../../Authoring/QT3DSDM/Systems/Qt3DSDMMetaData.cpp \
     ../../Authoring/QT3DSDM/Systems/Qt3DSDMXML.cpp \

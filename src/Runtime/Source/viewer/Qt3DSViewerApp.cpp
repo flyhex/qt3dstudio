@@ -38,6 +38,7 @@
 #include "foundation/Qt3DSTime.h"
 #include "Qt3DSFNDTimer.h"
 #include "Qt3DSAudioPlayer.h"
+#include "Qt3DSImportMesh.h"
 
 #include <QList>
 #include <QFileInfo>
@@ -252,6 +253,7 @@ public:
     QVector<QMouseEvent *> m_pendingEvents;
 
     QString m_error;
+    qt3dsimp::MeshBuilder *m_meshBuilder = nullptr;
 
     void queueMouseEvent(int button, int pressed, int x, int y)
     {
@@ -260,6 +262,94 @@ public:
                                          (Qt::MouseButtons)button, 0);
         e->setTimestamp(static_cast<ulong>(GetTimeUST()));
         m_pendingEvents.append(e);
+    }
+
+    qt3dsimp::Mesh *buildMesh(const Q3DSViewer::MeshData &meshData, QString &error)
+    {
+        using namespace qt3dsimp;
+        using namespace qt3ds::render;
+
+        // Do some basic validation of the meshData
+        if (meshData.m_vertexBuffer.size() == 0) {
+            error = QObject::tr("Vertex buffer empty");
+            return nullptr;
+        }
+        if (meshData.m_attributeCount == 0) {
+            error = QObject::tr("No attributes defined");
+            return nullptr;
+        }
+
+        if (!m_meshBuilder)
+            m_meshBuilder = &MeshBuilder::CreateMeshBuilder();
+        m_meshBuilder->Reset();
+        m_meshBuilder->SetDrawParameters(
+                    static_cast<NVRenderDrawMode::Enum>(meshData.m_primitiveType),
+                    NVRenderWinding::CounterClockwise);
+
+        // The expectation is that the vertex buffer included in meshData is already properly
+        // formatted and doesn't need further processing.
+
+        // Validate attributes
+        QVector<NVRenderVertexBufferEntry> vBufEntries;
+        NVRenderComponentTypes::Enum indexBufferComponentType = NVRenderComponentTypes::Unknown;
+        int indexBufferTypeSize = 0;
+        for (int i = 0; i < meshData.m_attributeCount; ++i) {
+            const Q3DSViewer::MeshData::Attribute &att = meshData.m_attributes[i];
+            auto componentType = static_cast<NVRenderComponentTypes::Enum>(att.componentType);
+            if (att.semantic == Q3DSViewer::MeshData::Attribute::IndexSemantic) {
+                indexBufferComponentType = componentType;
+                indexBufferTypeSize = att.typeSize();
+            } else {
+                const char *name = nullptr;
+                switch (att.semantic) {
+                case MeshData::Attribute::PositionSemantic:
+                    name = Mesh::GetPositionAttrName();
+                    break;
+                case MeshData::Attribute::NormalSemantic:
+                    name = Mesh::GetNormalAttrName();
+                    break;
+                case MeshData::Attribute::TexCoordSemantic:
+                    name = Mesh::GetUVAttrName();
+                    break;
+                case MeshData::Attribute::TangentSemantic:
+                    name = Mesh::GetTexTanAttrName();
+                    break;
+                case MeshData::Attribute::BinormalSemantic:
+                    name = Mesh::GetTexBinormalAttrName();
+                    break;
+                default:
+                    error = QObject::tr("Warning: Invalid attribute semantic: %1")
+                            .arg(att.semantic);
+                    return nullptr;
+                }
+                vBufEntries << NVRenderVertexBufferEntry(name, componentType,
+                                                         QT3DSU32(att.componentCount()),
+                                                         QT3DSU32(att.offset));
+            }
+        }
+        m_meshBuilder->SetVertexBuffer(
+                    toConstDataRef(reinterpret_cast<const NVRenderVertexBufferEntry *>(
+                                       vBufEntries.constData()), QT3DSU32(vBufEntries.count())),
+                    QT3DSU32(meshData.m_stride),
+                    toConstDataRef(const_cast<QT3DSU8 *>(reinterpret_cast<const QT3DSU8 *>(
+                                       meshData.m_vertexBuffer.constData())),
+                                   QT3DSU32(meshData.m_vertexBuffer.size())));
+
+        int vertexCount = 0;
+        if (indexBufferComponentType != NVRenderComponentTypes::Unknown) {
+            m_meshBuilder->SetIndexBuffer(
+                        toConstDataRef(const_cast<QT3DSU8 *>(reinterpret_cast<const QT3DSU8 *>(
+                                           meshData.m_indexBuffer.constData())),
+                                       QT3DSU32(meshData.m_indexBuffer.size())),
+                        indexBufferComponentType);
+            vertexCount = meshData.m_indexBuffer.size() / indexBufferTypeSize;
+        } else {
+            vertexCount = meshData.m_vertexBuffer.size() / meshData.m_stride;
+        }
+
+        m_meshBuilder->AddMeshSubset(Mesh::s_DefaultName, QT3DSU32(vertexCount));
+
+        return &m_meshBuilder->GetMesh();
     }
 };
 
@@ -277,6 +367,9 @@ Q3DSViewerApp::Q3DSViewerApp(void *glContext, Q3DStudio::IAudioPlayer *inAudioPl
 Q3DSViewerApp::~Q3DSViewerApp()
 {
     qDeleteAll(m_Impl.m_pendingEvents);
+
+    if (m_Impl.m_meshBuilder)
+        m_Impl.m_meshBuilder->Release();
 
     delete m_Impl.m_AudioPlayer;
 
@@ -841,6 +934,32 @@ void Q3DSViewerApp::createMaterials(const QString &elementPath,
         return;
 
     m_Impl.m_view->createMaterials(elementPath, materialDefinitions);
+}
+
+void Q3DSViewerApp::createMeshes(const QHash<QString, Q3DSViewer::MeshData> &meshData)
+{
+    if (!m_Impl.m_view)
+        return;
+
+    QString error;
+    QHashIterator<QString, Q3DSViewer::MeshData> dataIter(meshData);
+    while (dataIter.hasNext()) {
+        dataIter.next();
+        // Mesh creation needs to be done one by one, as Mesh pointers are not valid
+        // after builder is reused
+        qt3dsimp::Mesh *mesh = m_Impl.buildMesh(dataIter.value(), error);
+        if (mesh) {
+            m_Impl.m_view->createMesh(dataIter.key(), mesh);
+        } else {
+            QString errorMsg = QObject::tr("Creating mesh '%1' failed: %2")
+                    .arg(dataIter.key()).arg(error);
+            qWarning() << __FUNCTION__ << errorMsg;
+            SigMeshesCreated(meshData.keys(), error);
+            return;
+        }
+    }
+    m_Impl.m_meshBuilder->Reset();
+    SigMeshesCreated(meshData.keys(), error);
 }
 
 Q3DSViewerApp &Q3DSViewerApp::Create(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer,
