@@ -82,6 +82,7 @@ private:
 
     int maxTextureSize() const;
     void resizeTexture(TextureInfo *info, int width, int height);
+    void setTextureData(qt3ds::render::NVRenderTexture2D *texture, QImage &image);
 
     QSGAreaAllocator *m_areaAllocator = nullptr;
     int m_maxTextureSize              = 0;

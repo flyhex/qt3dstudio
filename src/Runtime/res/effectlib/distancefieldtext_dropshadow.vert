@@ -1,3 +1,9 @@
+#ifdef GL_OES_standard_derivatives
+#  extension GL_OES_standard_derivatives : enable
+#else
+#  define use_fallback
+#endif
+
 uniform highp mat4 mvp;
 uniform highp float fontScale;
 uniform int textureWidth;
@@ -10,8 +16,10 @@ attribute highp vec4 textureBounds;
 
 varying highp vec2 sampleCoord;
 varying highp vec2 shadowSampleCoord;
-varying highp vec2 alphas;
 varying highp vec4 normalizedTextureBounds;
+
+#ifdef use_fallback
+varying highp vec2 alphas;
 
 highp float thresholdFunc(highp float scale)
 {
@@ -59,11 +67,14 @@ highp float determinant(highp mat4 m)
     det            -= m[3][0] * determinantOfSubmatrix(m, 0, 1, 2, 1, 2, 3);
     return det;
 }
+#endif
 
 void main()
 {
-    highp float scale = fontScale * sqrt(abs(determinant(mvp)));
+#ifdef use_fallback
+    highp float scale = fontScale * pow(abs(determinant(mvp)), 1.0 / 3.0);
     alphas = alphaRange(scale);
+#endif
 
     highp vec2 textureSizeMultiplier = vec2(1.0 / highp float(textureWidth),
                                             1.0 / float(textureHeight));

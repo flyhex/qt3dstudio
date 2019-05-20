@@ -92,6 +92,17 @@ void Q3DSDistanceFieldGlyphCache::releaseGlyphs(const QSet<glyph_t> &glyphs)
     m_unusedGlyphs += glyphs;
 }
 
+void Q3DSDistanceFieldGlyphCache::setTextureData(qt3ds::render::NVRenderTexture2D *texture,
+                                                 QImage &image)
+{
+    bool isGLES2 = m_context.GetRenderContext().GetRenderContextType()
+            == qt3ds::render::NVRenderContextValues::GLES2;
+    texture->SetTextureData(qt3ds::render::toU8DataRef(image.bits(), image.byteCount()),
+                            0, image.width(), image.height(),
+                            isGLES2 ? qt3ds::render::NVRenderTextureFormats::Alpha8
+                                    : qt3ds::render::NVRenderTextureFormats::R8);
+}
+
 void Q3DSDistanceFieldGlyphCache::resizeTexture(TextureInfo *info, int width, int height)
 {
     QImage &image = info->copy;
@@ -99,17 +110,12 @@ void Q3DSDistanceFieldGlyphCache::resizeTexture(TextureInfo *info, int width, in
         info->texture = m_context.GetRenderContext().CreateTexture2D();
         info->texture->SetMinFilter(qt3ds::render::NVRenderTextureMinifyingOp::Enum::Linear);
         info->texture->SetMagFilter(qt3ds::render::NVRenderTextureMagnifyingOp::Enum::Linear);
-        info->texture->SetTextureData(qt3ds::render::toU8DataRef(image.bits(), image.byteCount()),
-                                      0, image.width(), image.height(),
-                                      qt3ds::render::NVRenderTextureFormats::R8);
+        setTextureData(info->texture, image);
     }
 
     qt3ds::render::STextureDetails textureDetails = info->texture->GetTextureDetails();
-    if (int(textureDetails.m_Width) != width || int(textureDetails.m_Height) != height) {
-        info->texture->SetTextureData(qt3ds::render::toU8DataRef(image.bits(), image.byteCount()),
-                                      0, image.width(), image.height(),
-                                      qt3ds::render::NVRenderTextureFormats::R8);
-    }
+    if (int(textureDetails.m_Width) != width || int(textureDetails.m_Height) != height)
+        setTextureData(info->texture, image);
 
     if (info->copy.width() != width || info->copy.height() != height) {
         QImage newImage(width, height, QImage::Format_Alpha8);
@@ -122,9 +128,7 @@ void Q3DSDistanceFieldGlyphCache::resizeTexture(TextureInfo *info, int width, in
 
         info->copy = newImage;
 
-        info->texture->SetTextureData(qt3ds::render::toU8DataRef(image.bits(), image.byteCount()),
-                                      0, image.width(), image.height(),
-                                      qt3ds::render::NVRenderTextureFormats::R8);
+        setTextureData(info->texture, image);
     }
 }
 
@@ -168,10 +172,7 @@ void Q3DSDistanceFieldGlyphCache::storeGlyphs(const QList<QDistanceField> &glyph
 
         QImage &image = i.key()->copy;
 
-        i.key()->texture->SetTextureData(qt3ds::render::toU8DataRef(image.bits(),
-                                                                    image.byteCount()),
-                                         0, image.width(), image.height(),
-                                         qt3ds::render::NVRenderTextureFormats::R8);
+        setTextureData(i.key()->texture, image);
     }
 }
 
@@ -496,10 +497,7 @@ bool Q3DSDistanceFieldGlyphCache::loadPregeneratedCache(const QRawFont &font)
             textureData += size;
 
             QImage &image = texInfo->copy;
-            texInfo->texture->SetTextureData(qt3ds::render::toU8DataRef(image.bits(),
-                                                                        image.byteCount()),
-                                             0, image.width(), image.height(),
-                                             qt3ds::render::NVRenderTextureFormats::R8);
+            setTextureData(texInfo->texture, image);
 
             QVector<glyph_t> glyphs = glyphTextures.value(texInfo);
 
