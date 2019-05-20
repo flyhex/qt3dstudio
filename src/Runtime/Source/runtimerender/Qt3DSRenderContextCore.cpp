@@ -623,7 +623,7 @@ struct SRenderContext : public IQt3DSRenderContext
     // Trying to avoid duplicate code as much as possible.
     SBeginFrameResult m_BeginFrameResult;
 
-    void BeginFrame() override
+    void BeginFrame(bool firstFrame) override
     {
         m_PreRenderPresentationDimensions = m_PresentationDimensions;
         QSize thePresentationDimensions(m_PreRenderPresentationDimensions);
@@ -682,7 +682,7 @@ struct SRenderContext : public IQt3DSRenderContext
             m_TextRenderer->BeginFrame();
         if (m_TextTextureCache)
             m_TextTextureCache->BeginFrame();
-        m_ImageBatchLoader->BeginFrame();
+        m_ImageBatchLoader->BeginFrame(firstFrame);
     }
 
     QT3DSVec2 GetPresentationScaleFactor() const override { return m_PresentationScale; }

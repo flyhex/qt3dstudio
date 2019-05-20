@@ -82,7 +82,7 @@ namespace render {
         virtual void BlockUntilLoaded(TImageBatchId inId) = 0;
 
         // These are called by the render context, users don't need to call this.
-        virtual void BeginFrame() = 0;
+        virtual void BeginFrame(bool firstFrame) = 0;
         virtual void EndFrame() = 0;
 
         static IImageBatchLoader &CreateBatchLoader(NVFoundationBase &inFoundation,

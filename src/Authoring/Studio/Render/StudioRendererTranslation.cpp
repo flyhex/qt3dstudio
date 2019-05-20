@@ -2439,7 +2439,7 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
     if (m_Scene) {
         // Note that begin frame is called before we allocate the bounding box and axis widgets so
         // that we can take advantage of the renderer's per-frame-allocator.
-        m_Context.BeginFrame();
+        m_Context.BeginFrame(true);
 
         qt3dsdm::TInstanceHandleList theHandles = m_Doc.GetSelectedValue().GetSelectedInstances();
 

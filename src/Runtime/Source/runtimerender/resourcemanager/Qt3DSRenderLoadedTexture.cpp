@@ -682,7 +682,7 @@ SLoadedTexture *SLoadedTexture::Load(const QString &inPath, NVFoundationBase &in
     NVScopedRefCounted<IRefCountedInputStream> theStream(
                 inFactory.GetStreamForFile(preferKTX ? ktxSource : inPath, true));
     if (!theStream.mPtr) {
-        if (!preferKTX)
+        if (preferKTX)
             theStream = inFactory.GetStreamForFile(inPath, true);
         else
             return nullptr;

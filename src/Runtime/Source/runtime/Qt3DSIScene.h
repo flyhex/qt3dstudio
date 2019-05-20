@@ -157,6 +157,8 @@ public: // Base Interface
 
     virtual void Release() = 0;
 
+    virtual bool preferKtx() const = 0;
+
     virtual qt3ds::NVAllocatorCallback &allocator() = 0;
 };
 

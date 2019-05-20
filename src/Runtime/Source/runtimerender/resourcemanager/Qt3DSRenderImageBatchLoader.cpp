@@ -323,7 +323,7 @@ struct SBatchLoader : public IImageBatchLoader
                 theBatch->m_LoadEvent.wait(200);
                 theBatch->m_LoadEvent.reset();
             }
-            BeginFrame();
+            BeginFrame(true);
         }
     }
     void ImageLoaded(SLoadingImage &inImage, SLoadedTexture *inTexture)
@@ -335,7 +335,7 @@ struct SBatchLoader : public IImageBatchLoader
         inImage.m_Batch->m_LoadEvent.set();
     }
     // These are called by the render context, users don't need to call this.
-    void BeginFrame() override
+    void BeginFrame(bool firstFrame) override
     {
         TScopedLock __loaderLock(m_LoaderMutex);
         // Pass 1 - send out all image loaded signals
@@ -346,8 +346,13 @@ struct SBatchLoader : public IImageBatchLoader
             m_LoadedImages[idx].m_Batch->IncrementFinalizedImageCount();
             if (m_LoadedImages[idx].m_Batch->IsFinalizedFinished())
                 m_FinishedBatches.push_back(m_LoadedImages[idx].m_Batch->m_BatchId);
+            if (!firstFrame)
+                break;
         }
-        m_LoadedImages.clear();
+        if (firstFrame)
+            m_LoadedImages.clear();
+        else if (m_LoadedImages.size())
+            m_LoadedImages.erase(m_LoadedImages.begin());
         // pass 2 - clean up any existing batches.
         for (QT3DSU32 idx = 0, end = m_FinishedBatches.size(); idx < end; ++idx) {
             TImageLoaderBatchMap::iterator theIter = m_Batches.find(m_FinishedBatches[idx]);

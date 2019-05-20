@@ -200,6 +200,11 @@ struct Qt3DSRenderScene : public Q3DStudio::IScene
     qt3ds::NVAllocatorCallback &allocator() override { return m_LoadData->m_AutoAllocator; }
     Q3DStudio::IPresentation &GetPresentation() override { return *m_RuntimePresentation; }
 
+    bool preferKtx() const override
+    {
+        return m_Presentation->m_preferKTX;
+    }
+
     // Update really just adds objects to the dirty set
     bool Update()
     {
@@ -1555,7 +1560,8 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
         return theResult;
     }
 
-    Q3DStudio::BOOL RenderPresentation(Q3DStudio::IPresentation *inPresentation) override
+    Q3DStudio::BOOL RenderPresentation(Q3DStudio::IPresentation *inPresentation,
+                                       bool firstFrame) override
     {
         Qt3DSRenderScene *theFirstScene = nullptr;
         for (QT3DSU32 idx = 0, end = m_Scenes.size(); idx < end && theFirstScene == nullptr; ++idx)
@@ -1584,7 +1590,7 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
                 (QT3DSU32)theFirstScene->m_Presentation->m_PresentationDimensions.y));
         }
 
-        m_Context->m_Context->BeginFrame();
+        m_Context->m_Context->BeginFrame(firstFrame);
         m_Context->m_RenderContext->ResetBlendState();
 
         // How exactly does this work, I have no idea.

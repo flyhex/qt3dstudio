@@ -207,7 +207,7 @@ namespace render {
         // and the topmost presentation dimensions.  Expects there to be exactly one presentation
         // dimension pushed at this point.
         // This also starts a render target in the render graph.
-        virtual void BeginFrame() = 0;
+        virtual void BeginFrame(bool firstFrame) = 0;
 
         // This runs through the added tasks in reverse order.  This is used to render dependencies
         // before rendering to the main render target.

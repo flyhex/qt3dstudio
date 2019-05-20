@@ -143,7 +143,7 @@ public: // Presentations
 
 public: // Update Cycle
     virtual BOOL Update() = 0;
-    virtual BOOL RenderPresentation(IPresentation *inPresentation) = 0;
+    virtual BOOL RenderPresentation(IPresentation *inPresentation, bool firstFrame) = 0;
     virtual void OnViewResize(INT32 inViewWidth, INT32 inViewHeight) = 0;
     virtual void GetViewSize(INT32 &outWidth, INT32 &outHeight) = 0;
 

@@ -79,6 +79,7 @@
 #include "Qt3DSQmlElementHelper.h"
 #include "Qt3DSRenderBufferManager.h"
 #include "Qt3DSRenderRenderList.h"
+#include "Qt3DSRenderImageBatchLoader.h"
 #include <QtCore/qlibraryinfo.h>
 #include <QtCore/qpair.h>
 #include <QtCore/qdir.h>
@@ -303,39 +304,84 @@ struct SSlideResourceCounter
     }
 };
 
-struct STextureUploadRenderTask : public IRenderTask
+struct STextureUploadRenderTask : public IRenderTask, public IImageLoadListener
 {
+    IImageBatchLoader &m_batchLoader;
     IBufferManager &m_bufferManager;
+    NVRenderContextType m_type;
+    bool m_preferKtx;
     QSet<QString> m_uploadSet;
+    QSet<QString> m_uploadWaitSet;
     QSet<QString> m_deleteSet;
     QMutex m_updateMutex;
+    QHash<QT3DSU32, QSet<QString>> m_batches;
+    volatile QT3DSI32 mRefCount;
 
-    STextureUploadRenderTask(IBufferManager &mgr)
-        : m_bufferManager(mgr)
+    QT3DS_IMPLEMENT_REF_COUNT_ADDREF_RELEASE_OVERRIDE(m_bufferManager.GetStringTable()
+                                                      .GetAllocator())
+
+    STextureUploadRenderTask(IImageBatchLoader &loader, IBufferManager &mgr,
+                             NVRenderContextType type, bool preferKtx)
+        : m_batchLoader(loader), m_bufferManager(mgr), m_type(type), m_preferKtx(preferKtx),
+          mRefCount(0)
     {
 
     }
     void Run() override
     {
         QMutexLocker loc(&m_updateMutex);
-        m_bufferManager.loadSet(m_uploadSet);
+        if (!m_uploadSet.isEmpty()) {
+            nvvector<CRegisteredString> sourcePaths(m_bufferManager.GetStringTable().GetAllocator(),
+                                                    "TempSourcePathList");
+            for (auto &s : qAsConst(m_uploadSet))
+                sourcePaths.push_back(m_bufferManager.GetStringTable().RegisterStr(s));
+            QT3DSU32 id = m_batchLoader.LoadImageBatch(sourcePaths, CRegisteredString(),
+                                                       this, m_type, m_preferKtx);
+            if (id)
+                m_batches[id] = m_uploadSet;
+        }
+        if (!m_uploadWaitSet.isEmpty()) {
+            nvvector<CRegisteredString> sourcePaths(m_bufferManager.GetStringTable().GetAllocator(),
+                                                    "TempSourcePathList");
+            for (auto &s : qAsConst(m_uploadWaitSet))
+                sourcePaths.push_back(m_bufferManager.GetStringTable().RegisterStr(s));
+            QT3DSU32 id = m_batchLoader.LoadImageBatch(sourcePaths, CRegisteredString(),
+                                                       this, m_type, m_preferKtx);
+            if (id) {
+                m_batchLoader.BlockUntilLoaded(id);
+                m_bufferManager.loadSet(m_uploadWaitSet);
+            }
+        }
         m_bufferManager.unloadSet(m_deleteSet);
     }
-    void add(const QSet<QString> &set)
+    void add(const QSet<QString> &set, bool wait)
     {
         QMutexLocker loc(&m_updateMutex);
-        m_uploadSet.unite(set);
+        if (wait)
+            m_uploadWaitSet.unite(set);
+        else
+            m_uploadSet.unite(set);
         m_deleteSet.subtract(set);
     }
     void remove(const QSet<QString> &set)
     {
         QMutexLocker loc(&m_updateMutex);
         m_uploadSet.subtract(set);
+        m_uploadWaitSet.subtract(set);
         m_deleteSet.unite(set);
     }
     bool persistent() const override
     {
         return true;
+    }
+    void OnImageLoadComplete(CRegisteredString inPath, ImageLoadResult::Enum inResult) override
+    {
+        Q_UNUSED(inPath);
+        Q_UNUSED(inResult);
+    }
+    void OnImageBatchComplete(QT3DSU64 inBatch) override
+    {
+        m_bufferManager.loadSet(m_batches[inBatch]);
     }
 };
 
@@ -562,7 +608,7 @@ struct SApp : public IApplication
     // the name of the file without extension.
     eastl::string m_Filename;
     Q3DSVariantConfig m_variantConfig;
-    QScopedPointer<STextureUploadRenderTask> m_uploadRenderTask;
+    NVScopedRefCounted<STextureUploadRenderTask> m_uploadRenderTask;
 
     qt3ds::foundation::NVScopedReleasable<IRuntimeMetaData> m_MetaData;
     nvvector<eastl::pair<SBehaviorAsset, bool>> m_Behaviors;
@@ -597,6 +643,8 @@ struct SApp : public IApplication
     bool m_createSuccessful;
 
     DataInputMap m_dataInputDefs;
+
+    bool m_initialFrame = true;
 
     SSlideResourceCounter m_resourceCounter;
     QSet<QString> m_createSet;
@@ -958,8 +1006,11 @@ struct SApp : public IApplication
     {
         SStackPerfTimer __updateTimer(m_RuntimeFactory->GetPerfTimer(), "Render");
         CPresentation *pres = GetPrimaryPresentation();
-        if (pres)
-            m_LastRenderWasDirty = m_RuntimeFactory->GetSceneManager().RenderPresentation(pres);
+        if (pres) {
+            m_LastRenderWasDirty = m_RuntimeFactory->GetSceneManager()
+                    .RenderPresentation(pres, m_initialFrame);
+            m_initialFrame = false;
+        }
     }
 
     void ResetDirtyCounter() { m_DirtyCountdown = 5; }
@@ -1049,7 +1100,7 @@ struct SApp : public IApplication
     ////////////////////////////////////////////////////////////////////////////////
 
     void loadComponentSlideResources(TElement *component, CPresentation *presentation, int index,
-                                     const QString slideName)
+                                     const QString slideName, bool wait)
     {
         if (m_RuntimeFactory->GetQt3DSRenderContext().GetBufferManager()
                 .isReloadableResourcesEnabled()) {
@@ -1063,7 +1114,7 @@ struct SApp : public IApplication
             qCInfo(PERF_INFO) << "Load component slide resources: " << completeName;
             m_resourceCounter.handleLoadSlide(completeName, key, slidesystem);
             if (m_uploadRenderTask)
-                m_uploadRenderTask->add(m_resourceCounter.createSet);
+                m_uploadRenderTask->add(m_resourceCounter.createSet, wait);
             else
                 m_createSet.unite(m_resourceCounter.createSet);
         }
@@ -1141,7 +1192,7 @@ struct SApp : public IApplication
                 QVector<TElement *> components;
                 thePresentation->GetRoot()->findComponents(components);
                 for (auto &component : qAsConst(components))
-                    loadComponentSlideResources(component, thePresentation, 0, "Master");
+                    loadComponentSlideResources(component, thePresentation, 0, "Master", true);
 
                 return true;
             }
@@ -1448,7 +1499,7 @@ struct SApp : public IApplication
         QString slideName;
         int index;
         if (presentationComponentSlide(slide, pres, component, slideName, index))
-            loadComponentSlideResources(component, pres, index, slideName);
+            loadComponentSlideResources(component, pres, index, slideName, false);
     }
 
     void unloadSlide(const QString &slide) override
@@ -1472,7 +1523,7 @@ struct SApp : public IApplication
                                const QString &elementPath, int slideIndex,
                                const QString &slideName) override
     {
-        loadComponentSlideResources(component, presentation, slideIndex, slideName);
+        loadComponentSlideResources(component, presentation, slideIndex, slideName, true);
     }
 
     void ComponentSlideExited(Q3DStudio::CPresentation *presentation,
@@ -1556,9 +1607,13 @@ struct SApp : public IApplication
 
         m_AudioPlayer.SetPlayer(inAudioPlayer);
 
-        m_uploadRenderTask.reset(new STextureUploadRenderTask(
-                                     m_RuntimeFactory->GetQt3DSRenderContext().GetBufferManager()));
-        m_uploadRenderTask->add(m_createSet);
+        auto &rc = m_RuntimeFactory->GetQt3DSRenderContext();
+        m_uploadRenderTask = QT3DS_NEW(m_CoreFactory->GetFoundation().getAllocator(),
+                                       STextureUploadRenderTask(rc.GetImageBatchLoader(),
+                                            rc.GetBufferManager(),
+                                            rc.GetRenderContext().GetRenderContextType(),
+                                            GetPrimaryPresentation()->GetScene()->preferKtx()));
+        m_uploadRenderTask->add(m_createSet, true);
         m_RuntimeFactory->GetQt3DSRenderContext().GetRenderList()
                                                                 .AddRenderTask(*m_uploadRenderTask);
         m_createSet.clear();
