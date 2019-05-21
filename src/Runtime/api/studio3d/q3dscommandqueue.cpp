@@ -278,6 +278,7 @@ void CommandQueue::copyCommands(CommandQueue &fromQueue)
         case CommandType_UnloadSlide:
         case CommandType_PreloadSlide:
         case CommandType_RequestDataInputs:
+        case CommandType_RequestDataOutputs:
             queueCommand(source.m_elementPath, source.m_commandType);
             break;
         default:

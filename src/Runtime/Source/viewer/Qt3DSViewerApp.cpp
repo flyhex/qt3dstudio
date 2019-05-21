@@ -357,6 +357,8 @@ bool Q3DSViewerApp::InitializeApp(int winWidth, int winHeight, const QSurfaceFor
                 &QRuntimeViewSignalProxy::SigSlideExited, this, &Q3DSViewerApp::SigSlideExited);
         connect(m_Impl.m_view->signalProxy(),
                 &QRuntimeViewSignalProxy::SigCustomSignal, this, &Q3DSViewerApp::SigCustomSignal);
+        connect(m_Impl.m_view->signalProxy(), &QRuntimeViewSignalProxy::SigDataOutputValueUpdated,
+                this, &Q3DSViewerApp::SigDataOutputValueUpdated);
         QMetaObject::Connection *presReadyconn = new QMetaObject::Connection();
         *presReadyconn = connect(m_Impl.m_view->signalProxy(),
                                  &QRuntimeViewSignalProxy::SigPresentationReady, [&, presReadyconn]{
@@ -789,6 +791,14 @@ QList<QString> Q3DSViewerApp::dataInputs() const
         return {};
 
     return m_Impl.m_view->dataInputs();
+}
+
+QList<QString> Q3DSViewerApp::dataOutputs() const
+{
+    if (!m_Impl.m_view)
+        return {};
+
+    return m_Impl.m_view->dataOutputs();
 }
 
 float Q3DSViewerApp::dataInputMax(const QString &name) const

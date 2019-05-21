@@ -61,6 +61,7 @@ class Q_STUDIO3D_EXPORT Q3DSPresentationPrivate : public QObject
 public:
     typedef QHash<QString, Q3DSElement *> ElementMap;
     typedef QHash<QString, Q3DSDataInput *> DataInputMap;
+    typedef QHash<QString, Q3DSDataOutput *> DataOutputMap;
 
     explicit Q3DSPresentationPrivate(Q3DSPresentation *parent);
     ~Q3DSPresentationPrivate();
@@ -78,10 +79,14 @@ public:
     void registerDataInput(Q3DSDataInput *dataInput);
     void unregisterDataInput(Q3DSDataInput *dataInput);
     void unregisterAllDataInputs();
+    void registerDataOutput(Q3DSDataOutput *dataOutput);
+    void unregisterDataOutput(Q3DSDataOutput *dataOutput);
+    void unregisterAllDataOutputs();
 
     bool isValidDataInput(const Q3DSDataInput *dataInput) const;
     float dataInputMin(const QString &name) const;
     float dataInputMax(const QString &name) const;
+    bool isValidDataOutput(const Q3DSDataOutput *dataOutput) const;
 
     ViewerQmlStreamProxy *streamProxy();
     Q3DStudio::EKeyCode getScanCode(QKeyEvent *e);
@@ -90,6 +95,7 @@ public:
 
 public Q_SLOTS:
     void handleSlideEntered(const QString &elementPath, unsigned int index, const QString &name);
+    void handleDataOutputValueUpdate(const QString &name, const QVariant &newValue);
 
 public:
     Q3DSPresentation *q_ptr;
@@ -99,6 +105,7 @@ private:
     CommandQueue *m_commandQueue; // Not owned
     ElementMap m_elements;
     DataInputMap m_dataInputs;
+    DataOutputMap m_dataOutputs;
     QUrl m_source;
     QStringList m_variantList;
     ViewerQmlStreamProxy *m_streamProxy;

@@ -319,9 +319,11 @@ void ProjectFileSystemModel::updateProjectReferences()
                             // asset files
                             QString dummyStr;
                             QHash<QString, QString> dummyMap;
-                            QSet<QString> dummySet;
+                            QSet<QString> dummyDataInputSet;
+                            QSet<QString> dummyDataOutputSet;
                             PresentationFile::getSourcePaths(fi, fi, importPathMap,
-                                                             dummyStr, dummyMap, dummySet);
+                                                             dummyStr, dummyMap, dummyDataInputSet,
+                                                             dummyDataOutputSet);
                             addReferencesFromImportMap();
                         } else { // qml-stream
                             QQmlApplicationEngine qmlEngine;
@@ -845,9 +847,12 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
         if (CDialogs::isPresentationFileExtension(extension.toLatin1().data())) {
             presentationPath = doc->GetCore()->getProjectFile().getRelativeFilePathTo(destPath);
             QSet<QString> dataInputs;
+            QSet<QString> dataOutputs;
             importPresentationAssets(fileInfo, QFileInfo(destPath), outPresentationNodes,
-                                     outImportedFiles, dataInputs, outOverrideChoice);
+                                     outImportedFiles, dataInputs, dataOutputs, outOverrideChoice);
             const QString projFile = PresentationFile::findProjectFile(fileInfo.absoluteFilePath());
+
+            // #TODO: Handle DataOutputs QT3DS-3510
             QMap<QString, CDataInputDialogItem *> allDataInputs;
             ProjectFile::loadDataInputs(projFile, allDataInputs);
             for (auto &di : dataInputs) {
@@ -933,12 +938,12 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
 void ProjectFileSystemModel::importPresentationAssets(
         const QFileInfo &uipSrc, const QFileInfo &uipTarget,
         QHash<QString, QString> &outPresentationNodes, QStringList &outImportedFiles,
-        QSet<QString> &outDataInputs, int &outOverrideChoice) const
+        QSet<QString> &outDataInputs, QSet<QString> &outDataOutputs, int &outOverrideChoice) const
 {
     QHash<QString, QString> importPathMap;
     QString projPathSrc; // project absolute path for the source uip
     PresentationFile::getSourcePaths(uipSrc, uipTarget, importPathMap, projPathSrc,
-                                     outPresentationNodes, outDataInputs);
+                                     outPresentationNodes, outDataInputs, outDataOutputs);
     const QDir projDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath());
     const QDir uipSrcDir = uipSrc.dir();
     const QDir uipTargetDir = uipTarget.dir();
@@ -959,7 +964,7 @@ void ProjectFileSystemModel::importPresentationAssets(
             // recursively load any uip asset's assets
             importPresentationAssets(QFileInfo(srcAssetPath), QFileInfo(targetAssetPath),
                                      outPresentationNodes, outImportedFiles, outDataInputs,
-                                     outOverrideChoice);
+                                     outDataOutputs, outOverrideChoice);
 
             // update the path in outPresentationNodes to be correctly relative in target project
             const QString subId = outPresentationNodes.take(path);

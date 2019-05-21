@@ -208,6 +208,7 @@ public:
     }
 
     QList<QString> dataInputs() const override;
+    QList<QString> dataOutputs() const override;
     float dataInputMax(const QString &name) const override;
     float dataInputMin(const QString &name) const override;
 
@@ -314,6 +315,10 @@ bool CRuntimeView::InitializeGraphics(const QSurfaceFormat &format, bool delayed
                      signalProxy(), &QRuntimeViewSignalProxy::SigElementsCreated);
     QObject::connect(m_Presentation->signalProxy(), &QPresentationSignalProxy::SigMaterialsCreated,
                      signalProxy(), &QRuntimeViewSignalProxy::SigMaterialsCreated);
+    QObject::connect(m_Presentation->signalProxy(),
+                     &QPresentationSignalProxy::SigDataOutputValueUpdated,
+                     signalProxy(),
+                     &QRuntimeViewSignalProxy::SigDataOutputValueUpdated);
 
     m_TimeProvider.Reset();
     return true;
@@ -600,6 +605,14 @@ QList<QString> CRuntimeView::dataInputs() const
 {
     if (m_Application)
         return m_Application->dataInputs();
+
+    return {};
+}
+
+QList<QString> CRuntimeView::dataOutputs() const
+{
+    if (m_Application)
+        return m_Application->dataOutputs();
 
     return {};
 }

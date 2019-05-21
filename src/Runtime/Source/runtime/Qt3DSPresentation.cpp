@@ -43,8 +43,12 @@
 #include "Qt3DSSlideSystem.h"
 #include "Qt3DSLogicSystem.h"
 #include "Qt3DSParametersSystem.h"
+#include "Qt3DSApplication.h"
 
 #include <QtCore/qfileinfo.h>
+#include <QtGui/qvector4d.h>
+#include <QtGui/qvector3d.h>
+#include <QtGui/qvector2d.h>
 
 namespace Q3DStudio {
 
@@ -219,6 +223,79 @@ void CPresentation::PostUpdate(const TTimeUnit inGlobalTime)
     }
 
     m_PreviousGlobalTime = inGlobalTime;
+}
+
+void CPresentation::NotifyDataOutputs()
+{
+    if (m_pathToDataOutMap.size() == 0)
+        return;
+
+    // Based on the dirty list, check if we need to fire DataOutput notifications
+    Q3DStudio::TElementList &dirtyList = GetFrameData().GetDirtyList();
+    for (int idx = 0, end = dirtyList.GetCount(); idx < end; ++idx) {
+        Q3DStudio::TElement &element = *dirtyList[idx];
+        if (m_pathToDataOutMap.contains(element.m_Path)) {
+            auto outDefIter = m_pathToDataOutMap.find(element.m_Path);
+
+            while (outDefIter != m_pathToDataOutMap.end() && outDefIter.key() == element.m_Path) {
+                qt3ds::runtime::DataOutputDef &outDef = outDefIter.value();
+
+                // Get current value
+                Q3DStudio::UVariant value;
+                qt3ds::QT3DSU32 attribHash
+                        = CHash::HashAttribute(outDef.observedAttribute.attributeName[0]);
+                element.GetAttribute(attribHash, value);
+                QVariant qvar;
+                switch (outDef.observedAttribute.propertyType) {
+                case ATTRIBUTETYPE_INT32:
+                    qvar.setValue(value.m_INT32);
+                    break;
+                case ATTRIBUTETYPE_FLOAT:
+                    qvar.setValue(value.m_FLOAT);
+                    break;
+                case ATTRIBUTETYPE_BOOL:
+                    qvar.setValue(value.m_INT32);
+                    break;
+                case ATTRIBUTETYPE_STRING:
+                    qvar.setValue(QString::fromUtf8(
+                                      GetStringTable().HandleToStr(value.m_StringHandle).c_str()));
+                    break;
+                case ATTRIBUTETYPE_FLOAT4: {
+                    QVector4D qvalue(value.m_FLOAT4[0], value.m_FLOAT4[1],
+                                     value.m_FLOAT4[2], value.m_FLOAT4[3]);
+                    qvar.setValue(qvalue);
+                }
+                    break;
+                case ATTRIBUTETYPE_FLOAT3: {
+                    QVector3D qvalue(value.m_FLOAT3[0], value.m_FLOAT3[1], value.m_FLOAT3[2]);
+                    qvar.setValue(qvalue);
+                }
+                    break;
+                case ATTRIBUTETYPE_FLOAT2: {
+                    QVector2D qvalue(value.m_FLOAT3[0], value.m_FLOAT3[1]);
+                    qvar.setValue(qvalue);
+                }
+                    break;
+                default:
+                    break;
+                }
+
+                if (qvar.isValid() && (outDef.value != qvar)) {
+                    outDef.value.setValue(qvar);
+                    m_SignalProxy.SigDataOutputValueUpdated(outDef.name, outDef.value);
+                }
+
+                ++outDefIter;
+            }
+        }
+    }
+}
+
+void CPresentation::AddToDataOutputMap(const QHash<qt3ds::foundation::CRegisteredString,
+                                       qt3ds::runtime::DataOutputDef> &doMap)
+{
+    if (doMap.size() > 0)
+        m_pathToDataOutMap.unite(doMap);
 }
 
 /**

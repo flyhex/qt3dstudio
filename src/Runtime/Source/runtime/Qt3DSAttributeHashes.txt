@@ -246,3 +246,4 @@ particlesize
 lifetime
 
 controlledproperty
+observedproperty

@@ -1,7 +1,7 @@
 /****************************************************************************
 **
 ** Copyright (C) 1993-2009 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2019 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -282,6 +282,7 @@ const char *GetAttributeString(const EAttribute inAttribute)
         case ATTRIBUTE_PARTICLESIZE: return "particlesize";
         case ATTRIBUTE_LIFETIME: return "lifetime";
         case ATTRIBUTE_CONTROLLEDPROPERTY: return "controlledproperty";
+        case ATTRIBUTE_OBSERVEDPROPERTY: return "observedproperty";
         case ATTRIBUTE_QT_IO: return "qt.io";
         default: {
             static char s_UnknownHash[16];

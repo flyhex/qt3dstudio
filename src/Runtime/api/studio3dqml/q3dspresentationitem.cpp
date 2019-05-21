@@ -86,17 +86,28 @@ void Q3DSPresentationItem::appendQmlChildren(QQmlListProperty<QObject> *list, QO
                     }
                 } else {
                     auto dataInput = qobject_cast<Q3DSDataInput *>(obj);
-                    if (item->registeredDataInput(dataInput->name())) {
-                        qWarning() << __FUNCTION__
-                                   << "Duplicate DataInput defined for Presentation.";
+                    if (dataInput) {
+                        if (item->registeredDataInput(dataInput->name())) {
+                            qWarning() << __FUNCTION__
+                                       << "Duplicate DataInput defined for Presentation.";
+                        } else {
+                            item->registerDataInput(dataInput);
+                        }
                     } else {
-                        item->registerDataInput(dataInput);
+                        auto dataOutput = qobject_cast<Q3DSDataOutput *>(obj);
+                        if (dataOutput) {
+                            if (item->registeredDataOutput(dataOutput->name())) {
+                                qWarning() << __FUNCTION__
+                                           << "Duplicate DataOutput defined for Presentation.";
+                            } else {
+                                item->registerDataOutput(dataOutput);
+                            }
+                        }
                     }
                 }
             }
         }
     }
 }
-
 
 QT_END_NAMESPACE

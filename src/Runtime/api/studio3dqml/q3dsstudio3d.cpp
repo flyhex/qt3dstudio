@@ -187,6 +187,16 @@ void Q3DSStudio3D::requestResponseHandler(const QString &elementPath, CommandTyp
         }
         break;
     }
+    case CommandType_RequestDataOutputs: {
+        Q3DSPresentation *handler = qobject_cast<Q3DSPresentation *>(m_presentation);
+        if (handler) {
+            handler->d_ptr->requestResponseHandler(commandType, requestData);
+        } else {
+            qWarning() << __FUNCTION__
+                       << "RequestDataOutputs response got for invalid presentation.";
+        }
+        break;
+    }
     default:
         qWarning() << __FUNCTION__ << "Unknown command type.";
         break;
@@ -203,6 +213,8 @@ QQuickFramebufferObject::Renderer *Q3DSStudio3D::createRenderer() const
 
     connect(renderer, &Q3DSRenderer::enterSlide,
             m_presentation->d_ptr, &Q3DSPresentationPrivate::handleSlideEntered);
+    connect(renderer, &Q3DSRenderer::dataOutputValueUpdated,
+            m_presentation->d_ptr, &Q3DSPresentationPrivate::handleDataOutputValueUpdate);
     connect(renderer, &Q3DSRenderer::exitSlide,
             m_presentation, &Q3DSPresentation::slideExited);
     connect(renderer, &Q3DSRenderer::customSignalEmitted,

@@ -1180,6 +1180,7 @@ void CUIPParserImpl::CacheGraphRequiredAttributes(qt3dsdm::IDOMReader &inReader)
         // Probably not the most optimal thing to expose this attribute for all elements that
         // support it, since it is not really needed except during initialization
         m_ParseElementManager.MarkAttributeAsReferenced(theData, "controlledproperty");
+        m_ParseElementManager.MarkAttributeAsReferenced(theData, "observedproperty");
 
         // Behaviors need all attributes possible on the object on them all the time.
         if (AreEqual(theType, "Behavior") || AreEqual(theType, "RenderPlugin")) {
@@ -1232,8 +1233,10 @@ BOOL CUIPParserImpl::CacheLogicRequiredAttributes(qt3dsdm::IDOMReader &inReader,
                     // set only those as referenced. In this case we might have to expand vec3
                     // type attributes to component parts
                     const char *ctrldProp;
+                    const char *observedProp;
                     inReader.Att("controlledproperty", ctrldProp);
-                    if (ctrldProp)
+                    inReader.Att("observedproperty", observedProp);
+                    if (ctrldProp || observedProp)
                         m_ParseElementManager.MarkAllAttributesAsReferenced(*theData, true);
 
                     theCommandInstances.insert(theData->m_Id);

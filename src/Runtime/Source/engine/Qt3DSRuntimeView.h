@@ -60,6 +60,7 @@ Q_SIGNALS:
     void SigPresentationReady();
     void SigElementsCreated(const QStringList &elementPaths, const QString &error);
     void SigMaterialsCreated(const QStringList &materialNames, const QString &error);
+    void SigDataOutputValueUpdated(const QString &name, const QVariant &value);
 };
 
 namespace qt3ds {
@@ -192,6 +193,7 @@ public:
     virtual void SetDataInputValue(const QString &name, const QVariant &value,
                                    int property) = 0;
     virtual QList<QString> dataInputs() const = 0;
+    virtual QList<QString> dataOutputs() const = 0;
     virtual float dataInputMax(const QString &name) const = 0;
     virtual float dataInputMin(const QString &name) const = 0;
     virtual void createElements(const QString &parentElementPath, const QString &slideName,

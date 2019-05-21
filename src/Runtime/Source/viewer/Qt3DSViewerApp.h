@@ -357,6 +357,7 @@ public:
                            = qt3ds::runtime::DataInputValueRole::Value);
 
     QList<QString> dataInputs() const;
+    QList<QString> dataOutputs() const;
 
     float dataInputMax(const QString &name) const;
     float dataInputMin(const QString &name) const;
@@ -409,6 +410,7 @@ Q_SIGNALS:
     void SigCustomSignal(const QString &elementPath, const QString &name);
     void SigElementsCreated(const QStringList &elementPaths, const QString &error);
     void SigMaterialsCreated(const QStringList &materialNames, const QString &error);
+    void SigDataOutputValueUpdated(const QString &name, const QVariant &newValue);
     void SigPresentationReady();
     void SigPresentationLoaded();
 };

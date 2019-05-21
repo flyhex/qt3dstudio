@@ -215,6 +215,8 @@ bool Q3DSRenderer::initializeRuntime(QOpenGLFramebufferObject *inFbo)
             this, &Q3DSRenderer::elementsCreated);
     connect(m_runtime, &Q3DSViewer::Q3DSViewerApp::SigMaterialsCreated,
             this, &Q3DSRenderer::materialsCreated);
+    connect(m_runtime, &Q3DSViewer::Q3DSViewerApp::SigDataOutputValueUpdated,
+            this, &Q3DSRenderer::dataOutputValueUpdated);
 
     return true;
 }
@@ -384,6 +386,18 @@ void Q3DSRenderer::processCommands()
             QVariantList *requestData = new QVariantList();
             if (m_presentation) {
                 const auto diList = m_presentation->dataInputs();
+
+                for (const auto &it : diList)
+                    requestData->append(QVariant::fromValue(it->name()));
+            }
+
+            Q_EMIT requestResponse(cmd.m_elementPath, cmd.m_commandType, requestData);
+            break;
+        }
+        case CommandType_RequestDataOutputs: {
+            QVariantList *requestData = new QVariantList();
+            if (m_presentation) {
+                const auto diList = m_presentation->dataOutputs();
 
                 for (const auto &it : diList)
                     requestData->append(QVariant::fromValue(it->name()));

@@ -32,6 +32,7 @@
 #include "q3dscommandqueue_p.h"
 #include "viewerqmlstreamproxy_p.h"
 #include "q3dsdatainput_p.h"
+#include "q3dsdataoutput_p.h"
 
 #include <QtCore/qdebug.h>
 #include <QtCore/qsettings.h>
@@ -90,10 +91,46 @@ Q3DSDataInput *Q3DSPresentation::registeredDataInput(const QString &name) const
     return d_ptr->m_dataInputs.value(name, nullptr);
 }
 
+void Q3DSPresentation::registerDataOutput(Q3DSDataOutput *dataOutput)
+{
+    d_ptr->registerDataOutput(dataOutput);
+}
+
+void Q3DSPresentation::unregisterDataOutput(Q3DSDataOutput *dataOutput)
+{
+    d_ptr->unregisterDataOutput(dataOutput);
+}
+
+Q3DSDataOutput *Q3DSPresentation::registeredDataOutput(const QString &name) const
+{
+    return d_ptr->m_dataOutputs.value(name, nullptr);
+}
+
 QVector<Q3DSDataInput *> Q3DSPresentation::dataInputs() const
 {
     QVector<Q3DSDataInput *> ret;
     const auto datainputs = d_ptr->m_dataInputs;
+    for (const auto &it : datainputs)
+        ret.append(it);
+
+    return ret;
+}
+
+QVariantList Q3DSPresentation::getDataOutputs() const
+{
+    QVariantList ret;
+    const auto dataoutputs = dataOutputs();
+
+    for (const auto &it : dataoutputs)
+        ret.append(QVariant::fromValue(it));
+
+    return ret;
+}
+
+QVector<Q3DSDataOutput *> Q3DSPresentation::dataOutputs() const
+{
+    QVector<Q3DSDataOutput *> ret;
+    const auto datainputs = d_ptr->m_dataOutputs;
     for (const auto &it : datainputs)
         ret.append(it);
 
@@ -444,6 +481,7 @@ Q3DSPresentationPrivate::~Q3DSPresentationPrivate()
 {
     unregisterAllElements();
     unregisterAllDataInputs();
+    unregisterAllDataOutputs();
     delete m_streamProxy;
 }
 
@@ -493,6 +531,8 @@ void Q3DSPresentationPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool 
                     q_ptr, &Q3DSPresentation::slideExited);
             connect(app, &Q3DSViewer::Q3DSViewerApp::SigCustomSignal,
                     q_ptr, &Q3DSPresentation::customSignalEmitted);
+            connect(app, &Q3DSViewer::Q3DSViewerApp::SigDataOutputValueUpdated,
+                    this, &Q3DSPresentationPrivate::handleDataOutputValueUpdate);
             connect(app, &Q3DSViewer::Q3DSViewerApp::SigElementsCreated,
                     q_ptr, &Q3DSPresentation::elementsCreated);
             connect(app, &Q3DSViewer::Q3DSViewerApp::SigMaterialsCreated,
@@ -505,6 +545,8 @@ void Q3DSPresentationPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool 
                        q_ptr, &Q3DSPresentation::slideExited);
             disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigCustomSignal,
                        q_ptr, &Q3DSPresentation::customSignalEmitted);
+            disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigDataOutputValueUpdated,
+                       this, &Q3DSPresentationPrivate::handleDataOutputValueUpdate);
             disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigElementsCreated,
                        q_ptr, &Q3DSPresentation::elementsCreated);
             disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigMaterialsCreated,
@@ -527,9 +569,11 @@ void Q3DSPresentationPrivate::setCommandQueue(CommandQueue *queue)
     if (m_commandQueue) {
         setDelayedLoading(m_delayedLoading);
         setVariantList(m_variantList);
-        // Queue a request ASAP for datainputs defined in UIA file so that
-        // getDataInputs has up-to-date info at the earliest.
+        // Queue a request ASAP for datainputs and outputs defined in UIA file so that
+        // getDataInputs has up-to-date info at the earliest and that data outputs
+        // connect from source to destination
         m_commandQueue->queueCommand({}, CommandType_RequestDataInputs);
+        m_commandQueue->queueCommand({}, CommandType_RequestDataOutputs);
         setSource(m_source);
     }
 }
@@ -557,6 +601,19 @@ void Q3DSPresentationPrivate::requestResponseHandler(CommandType commandType, vo
         }
         delete response;
         Q_EMIT q_ptr->dataInputsReady();
+        break;
+    }
+    case CommandType_RequestDataOutputs: {
+        QVariantList *response = reinterpret_cast<QVariantList *>(requestData);
+
+        for (int i = 0; i < response->size(); ++i) {
+            // Check and append to QML-side list if the (UIA) presentation has additional
+            // dataoutputs that are not explicitly defined in QML code.
+            if (!m_dataOutputs.contains(response->at(i).value<QString>()))
+                registerDataOutput(new Q3DSDataOutput(response->at(i).value<QString>(), nullptr));
+        }
+        delete response;
+        Q_EMIT q_ptr->dataOutputsReady();
         break;
     }
     default:
@@ -687,6 +744,66 @@ float Q3DSPresentationPrivate::dataInputMax(const QString &name) const
         return 0.0f;
 
     return m_viewerApp->dataInputMax(name);
+}
+
+void Q3DSPresentationPrivate::registerDataOutput(Q3DSDataOutput *dataOutput)
+{
+    Q_ASSERT(!dataOutput->name().isEmpty());
+
+    // Allow only single registration for each DataOutput
+    QMutableHashIterator<QString, Q3DSDataOutput *> i(m_dataOutputs);
+    while (i.hasNext()) {
+        i.next();
+        if (i.value() == dataOutput) {
+            // If the same DataOutput object is already registered with different name,
+            // remove it from the map to avoid duplication.
+            if (i.key() != dataOutput->name())
+                i.remove();
+        } else if (i.key() == dataOutput->name()) {
+            // If the same name is registered by another DataOutput object, the old
+            // DataOutput object is unregistered.
+            i.value()->d_ptr->setViewerApp(nullptr);
+            i.value()->d_ptr->setPresentation(nullptr);
+            i.value()->d_ptr->setCommandQueue(nullptr);
+            i.remove();
+        }
+    }
+
+    dataOutput->d_ptr->setPresentation(q_ptr);
+    dataOutput->d_ptr->setViewerApp(m_viewerApp);
+    dataOutput->d_ptr->setCommandQueue(m_commandQueue);
+
+    m_dataOutputs.insert(dataOutput->name(), dataOutput);
+}
+
+void Q3DSPresentationPrivate::unregisterDataOutput(Q3DSDataOutput *dataOutput)
+{
+    Q3DSDataOutput *oldDout = m_dataOutputs.value(dataOutput->name());
+    if (oldDout == dataOutput) {
+        dataOutput->d_ptr->setCommandQueue(nullptr);
+        dataOutput->d_ptr->setViewerApp(nullptr);
+        dataOutput->d_ptr->setPresentation(nullptr);
+        m_dataOutputs.remove(dataOutput->name());
+    }
+}
+
+void Q3DSPresentationPrivate::unregisterAllDataOutputs()
+{
+    const auto values = m_dataOutputs.values();
+    for (Q3DSDataOutput *dout : values) {
+        dout->d_ptr->setViewerApp(nullptr);
+        dout->d_ptr->setCommandQueue(nullptr);
+        dout->d_ptr->setPresentation(nullptr);
+    }
+    m_dataOutputs.clear();
+}
+
+bool Q3DSPresentationPrivate::isValidDataOutput(const Q3DSDataOutput *dataOutput) const
+{
+    if (!m_viewerApp)
+        return false;
+
+    return m_viewerApp->dataOutputs().contains(dataOutput->name());
 }
 
 Q3DStudio::EKeyCode Q3DSPresentationPrivate::getScanCode(QKeyEvent *e)
@@ -998,6 +1115,16 @@ void Q3DSPresentationPrivate::handleSlideEntered(const QString &elementPath, uns
     if (scene)
         scene->d_func()->handleSlideEntered(index, name);
     Q_EMIT q_ptr->slideEntered(elementPath, index, name);
+}
+
+void Q3DSPresentationPrivate::handleDataOutputValueUpdate(const QString &name,
+                                                          const QVariant &newValue)
+{
+    if (!m_dataOutputs.contains(name))
+        return;
+
+    Q3DSDataOutput *node = m_dataOutputs[name];
+    node->setValue(newValue);
 }
 
 QT_END_NAMESPACE

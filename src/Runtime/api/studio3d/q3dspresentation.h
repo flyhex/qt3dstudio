@@ -36,6 +36,8 @@
 #include <QtCore/qurl.h>
 #include <QtCore/qvector.h>
 #include <QtCore/qstringlist.h>
+#include <QtStudio3D/q3dsdatainput.h>
+#include <QtStudio3D/q3dsdataoutput.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -67,9 +69,14 @@ public:
     void registerDataInput(Q3DSDataInput *dataInput);
     void unregisterDataInput(Q3DSDataInput *dataInput);
     Q3DSDataInput *registeredDataInput(const QString &name) const;
+    void registerDataOutput(Q3DSDataOutput *dataOutput);
+    void unregisterDataOutput(Q3DSDataOutput *dataOutput);
+    Q3DSDataOutput *registeredDataOutput(const QString &name) const;
 
     Q_INVOKABLE QVariantList getDataInputs() const;
     QVector<Q3DSDataInput *> dataInputs() const;
+    Q_INVOKABLE QVariantList getDataOutputs() const;
+    QVector<Q3DSDataOutput *> dataOutputs() const;
 
     bool delayedLoading() const;
     void setDelayedLoading(bool enable);
@@ -114,9 +121,11 @@ Q_SIGNALS:
     void sourceChanged(const QUrl &source);
     void slideEntered(const QString &elementPath, unsigned int index, const QString &name);
     void slideExited(const QString &elementPath, unsigned int index, const QString &name);
-    // Indicates that data input definitions in the Studio project have been parsed
+    // Indicates that data input and output definitions in the Studio project have been parsed
+    // and datainputs/dataoutputs are available through dataInputs() / getDataInputs().
     // and datainputs are available through dataInputs() / getDataInputs().
     void dataInputsReady();
+    void dataOutputsReady();
     void customSignalEmitted(const QString &elementPath, const QString &name);
     void delayedLoadingChanged(bool enable);
     void elementsCreated(const QStringList &elementPaths, const QString &error);

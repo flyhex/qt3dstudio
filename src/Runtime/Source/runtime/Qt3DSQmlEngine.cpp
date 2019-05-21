@@ -467,6 +467,7 @@ private:
     TElement *getTarget(const char *component);
     void listAllElements(TElement *root, QList<TElement *> &elements);
     void initializeDataInputsInPresentation(CPresentation &presentation, bool isPrimary);
+    void initializeDataOutputsInPresentation(CPresentation &presentation, bool isPrimary);
     // Splits down vector attributes to components as Runtime does not really
     // handle vectors at this level anymore
     bool getAttributeVector3(QVector<QByteArray> &outAttVec, const QByteArray &attName,
@@ -578,8 +579,10 @@ void CQmlEngineImpl::Initialize()
     // Gather data input controlled properties
     QList<CPresentation *> presentations = m_Application->GetPresentationList();
 
-    for (int i = 0; i < presentations.size(); ++i)
+    for (int i = 0; i < presentations.size(); ++i) {
         initializeDataInputsInPresentation(*presentations[i], i == 0);
+        initializeDataOutputsInPresentation(*presentations[i], i == 0);
+    }
 }
 
 void CQmlEngineImpl::SetAttribute(TElement *target, const char *attName, const char *value)
@@ -711,13 +714,13 @@ void CQmlEngineImpl::SetDataInputValue(
         switch (valueRole) {
         case qt3ds::runtime::DataInputValueRole::Value: { // switch (valueRole)
             diDef.value = value;
-            const QVector<qt3ds::runtime::DataInputControlledAttribute> &ctrlAtt
+            const QVector<qt3ds::runtime::DataInOutAttribute> &ctrlAtt
                     = diDef.controlledAttributes;
-            for (const qt3ds::runtime::DataInputControlledAttribute &ctrlElem : ctrlAtt) {
+            for (const qt3ds::runtime::DataInOutAttribute &ctrlElem : ctrlAtt) {
                 switch (ctrlElem.propertyType) {
                 case ATTRIBUTETYPE_DATAINPUT_TIMELINE: {
                     // Quietly ignore other than number type data inputs when adjusting timeline
-                    if (diDef.type == qt3ds::runtime::DataInputTypeRangedNumber) {
+                    if (diDef.type == qt3ds::runtime::DataInOutTypeRangedNumber) {
                         TTimeUnit endTime = 0;
                         TElement *element = getTarget(ctrlElem.elementPath.constData());
                         TComponent *component = static_cast<TComponent *>(element);
@@ -732,7 +735,7 @@ void CQmlEngineImpl::SetDataInputValue(
                 }
                 case ATTRIBUTETYPE_DATAINPUT_SLIDE: {
                     // Quietly ignore other than string type when adjusting slide
-                    if (diDef.type == qt3ds::runtime::DataInputTypeString) {
+                    if (diDef.type == qt3ds::runtime::DataInOutTypeString) {
                         const QByteArray valueStr = value.toString().toUtf8();
                         GotoSlide(ctrlElem.elementPath.constData(), valueStr.constData(),
                                   SScriptEngineGotoSlideArgs());
@@ -752,11 +755,11 @@ void CQmlEngineImpl::SetDataInputValue(
                     // than timeline animation i.e. disregard range min and max
                 case ATTRIBUTETYPE_FLOAT: {
                     float valueFloat;
-                    if (diDef.type == qt3ds::runtime::DataInputTypeFloat
-                            || diDef.type == qt3ds::runtime::DataInputTypeRangedNumber
-                            || diDef.type == qt3ds::runtime::DataInputTypeVariant) {
+                    if (diDef.type == qt3ds::runtime::DataInOutTypeFloat
+                            || diDef.type == qt3ds::runtime::DataInOutTypeRangedNumber
+                            || diDef.type == qt3ds::runtime::DataInOutTypeVariant) {
                         valueFloat = value.toFloat();
-                    } else if (diDef.type == qt3ds::runtime::DataInputTypeEvaluator) {
+                    } else if (diDef.type == qt3ds::runtime::DataInOutTypeEvaluator) {
                         valueFloat = callJSFunc(name, diDef, QVariant::Type::Double).toFloat();
                     } else {
                         qWarning() << __FUNCTION__ << "Property type "
@@ -774,7 +777,7 @@ void CQmlEngineImpl::SetDataInputValue(
                 }
                 case ATTRIBUTETYPE_FLOAT4: {
                     QVector4D valueVec;
-                    if (diDef.type == qt3ds::runtime::DataInputTypeVector4) {
+                    if (diDef.type == qt3ds::runtime::DataInOutTypeVector4) {
                         valueVec = value.value<QVector4D>();
                     } else {
                         qWarning() << __FUNCTION__ << "Property type "
@@ -795,10 +798,10 @@ void CQmlEngineImpl::SetDataInputValue(
                 }
                 case ATTRIBUTETYPE_FLOAT3: {
                     QVector3D valueVec;
-                    if (diDef.type == qt3ds::runtime::DataInputTypeVector3
-                            || diDef.type == qt3ds::runtime::DataInputTypeVariant) {
+                    if (diDef.type == qt3ds::runtime::DataInOutTypeVector3
+                            || diDef.type == qt3ds::runtime::DataInOutTypeVariant) {
                         valueVec = value.value<QVector3D>();
-                    } else if (diDef.type == qt3ds::runtime::DataInputTypeEvaluator) {
+                    } else if (diDef.type == qt3ds::runtime::DataInOutTypeEvaluator) {
                         const QVariant res = callJSFunc(name, diDef, QVariant::Type::Vector3D);
                         valueVec = res.value<QVector3D>();
                     } else {
@@ -821,10 +824,10 @@ void CQmlEngineImpl::SetDataInputValue(
                 case ATTRIBUTETYPE_FLOAT2:
                 {
                     QVector2D valueVec;
-                    if (diDef.type == qt3ds::runtime::DataInputTypeVector2
-                            || diDef.type == qt3ds::runtime::DataInputTypeVariant) {
+                    if (diDef.type == qt3ds::runtime::DataInOutTypeVector2
+                            || diDef.type == qt3ds::runtime::DataInOutTypeVariant) {
                         valueVec = value.value<QVector2D>();
-                    } else if (diDef.type == qt3ds::runtime::DataInputTypeEvaluator) {
+                    } else if (diDef.type == qt3ds::runtime::DataInOutTypeEvaluator) {
                         const QVariant res = callJSFunc(name, diDef, QVariant::Type::Vector2D);
                         valueVec = res.value<QVector2D>();
                     } else {
@@ -846,10 +849,10 @@ void CQmlEngineImpl::SetDataInputValue(
                 }
                 case ATTRIBUTETYPE_BOOL: {
                     uint valueBool; // SetAttribute requires at least 32-bit variable
-                    if (diDef.type == qt3ds::runtime::DataInputTypeBoolean
-                            || diDef.type == qt3ds::runtime::DataInputTypeVariant) {
+                    if (diDef.type == qt3ds::runtime::DataInOutTypeBoolean
+                            || diDef.type == qt3ds::runtime::DataInOutTypeVariant) {
                         valueBool = value.toBool();
-                    } else if (diDef.type == qt3ds::runtime::DataInputTypeEvaluator) {
+                    } else if (diDef.type == qt3ds::runtime::DataInOutTypeEvaluator) {
                         valueBool = callJSFunc(name, diDef, QVariant::Type::Bool).toBool();
                     } else {
                         qWarning() << __FUNCTION__ << "Property type "
@@ -868,12 +871,12 @@ void CQmlEngineImpl::SetDataInputValue(
                 case ATTRIBUTETYPE_STRING: {
                     QByteArray valueStr;
                     // Allow scalar number types also as inputs to string attribute
-                    if (diDef.type == qt3ds::runtime::DataInputTypeString
-                            || diDef.type == qt3ds::runtime::DataInputTypeRangedNumber
-                            || diDef.type == qt3ds::runtime::DataInputTypeFloat
-                            || diDef.type == qt3ds::runtime::DataInputTypeVariant) {
+                    if (diDef.type == qt3ds::runtime::DataInOutTypeString
+                            || diDef.type == qt3ds::runtime::DataInOutTypeRangedNumber
+                            || diDef.type == qt3ds::runtime::DataInOutTypeFloat
+                            || diDef.type == qt3ds::runtime::DataInOutTypeVariant) {
                         valueStr = value.toString().toUtf8();
-                    } else if (diDef.type == qt3ds::runtime::DataInputTypeEvaluator) {
+                    } else if (diDef.type == qt3ds::runtime::DataInOutTypeEvaluator) {
                         valueStr = callJSFunc(name, diDef, QVariant::Type::String)
                                 .toString().toUtf8();
                     } else {
@@ -1918,8 +1921,13 @@ void CQmlEngineImpl::initializeDataInputsInPresentation(CPresentation &presentat
     QList<TElement *> elements;
     listAllElements(parent, elements);
     qt3ds::runtime::DataInputMap &diMap = m_Application->dataInputMap();
-    qt3ds::foundation::IStringTable &strTable(presentation.GetStringTable());
 
+// #TODO: Remove below once QT3DS-3510 has been implemented in the editor
+    qt3ds::runtime::DataOutputMap &doMap = m_Application->dataOutputMap();
+// #TODO: Remove above once QT3DS-3510 has been implemented in the editor
+
+    qt3ds::foundation::IStringTable &strTable(presentation.GetStringTable());
+    QHash<CRegisteredString, qt3ds::runtime::DataOutputDef> elementPathToDataOutputDefMap;
     for (TElement *element : qAsConst(elements)) {
         Option<QT3DSU32> ctrlIndex = element->FindPropertyIndex(ATTRIBUTE_CONTROLLEDPROPERTY);
         if (ctrlIndex.hasValue()) {
@@ -1935,7 +1943,7 @@ void CQmlEngineImpl::initializeDataInputsInPresentation(CPresentation &presentat
                     // remove datainput name prefix "$"
                     controllerName.remove(0, 1);
                     if (diMap.contains(controllerName)) {
-                        qt3ds::runtime::DataInputControlledAttribute ctrlElem;
+                        qt3ds::runtime::DataInOutAttribute ctrlElem;
                         if (!isPrimary) {
                             // Prepend presentation id to element path
                             ctrlElem.elementPath = presentation.GetName();
@@ -1951,7 +1959,7 @@ void CQmlEngineImpl::initializeDataInputsInPresentation(CPresentation &presentat
                             TElement *component = &element->GetComponentParent();
                             ctrlElem.elementPath.append(component->m_Path);
                         } else if (diMap[controllerName].type
-                                   == qt3ds::runtime::DataInputTypeVector3) {
+                                   == qt3ds::runtime::DataInOutTypeVector3) {
                             // special handling for vector datatype to handle
                             // expansion from <propertyname> to <propertyname>.x .y .z
                             QVector<QByteArray> attVec;
@@ -1969,7 +1977,7 @@ void CQmlEngineImpl::initializeDataInputsInPresentation(CPresentation &presentat
                                 ctrlElem.propertyType = ATTRIBUTETYPE_NONE;
                             }
                         } else if (diMap[controllerName].type
-                                   == qt3ds::runtime::DataInputTypeVector2) {
+                                   == qt3ds::runtime::DataInOutTypeVector2) {
                             // special handling for vector datatype to handle
                             // expansion from <propertyname> to <propertyname>.x .y
                             QVector<QByteArray> attVec;
@@ -1987,7 +1995,7 @@ void CQmlEngineImpl::initializeDataInputsInPresentation(CPresentation &presentat
                                 ctrlElem.propertyType = ATTRIBUTETYPE_NONE;
                             }
                         } else if (diMap[controllerName].type
-                                   == qt3ds::runtime::DataInputTypeEvaluator) {
+                                   == qt3ds::runtime::DataInOutTypeEvaluator) {
                             diMap[controllerName].evalFunc
                                 = buildJSFunc(diMap[controllerName].evaluator);
                             auto referencedDIs = resolveDependentDatainputs(
@@ -2022,11 +2030,146 @@ void CQmlEngineImpl::initializeDataInputsInPresentation(CPresentation &presentat
                         }
                         qt3ds::runtime::DataInputDef &diDef = diMap[controllerName];
                         diDef.controlledAttributes.append(ctrlElem);
+
+// #TODO: Remove below once QT3DS-3510 has been implemented in the editor
+                        // Note, in this temp implementation only the LAST of multiple attributes
+                        // will be notified from the object under the DataInput name..
+                        qt3ds::runtime::DataInputDef inDef   = diMap[controllerName];
+                        qt3ds::runtime::DataOutputDef &doDef = doMap[controllerName];
+                        doDef.observedAttribute = ctrlElem;
+                        doDef.type = inDef.type;
+                        doDef.min  = inDef.min;
+                        doDef.max  = inDef.max;
+
+                        if (ctrlElem.propertyType == ATTRIBUTETYPE_DATAINPUT_TIMELINE) {
+                            // Find the TElement for the @timeline attrib
+                            TElement *target = nullptr;
+                            QStringList split
+                                    = QString(ctrlElem.elementPath).split(QLatin1Char(':'));
+                            if (split.size() > 1) {
+                                target = CQmlElementHelper::GetElement(
+                                            *m_Application,
+                                            m_Application->GetPresentationById(
+                                                split.at(0).toStdString().c_str()),
+                                            split.at(1).toStdString().c_str(), nullptr);
+                            } else {
+                                target = CQmlElementHelper::GetElement(
+                                            *m_Application,
+                                            m_Application->GetPrimaryPresentation(),
+                                            split.at(0).toStdString().c_str(), nullptr);
+                            }
+
+                            doDef.timelineComponent = static_cast<TComponent *>(target);
+                        } else if (ctrlElem.propertyType == ATTRIBUTETYPE_DATAINPUT_SLIDE) {
+                            // Slide notifications are already done with separate signal
+                            // No need to process
+                        } else {
+                            // Other than slide or timeline attributes are handled by CPresentation
+                            CRegisteredString rString = strTable.RegisterStr(ctrlElem.elementPath);
+                            elementPathToDataOutputDefMap.insertMulti(rString, doDef);
+                        }
+// #TODO: Remove above once QT3DS-3510 has been implemented in the editor
                     }
                 }
             }
         }
     }
+
+// #TODO: Remove below once QT3DS-3510 has been implemented in the editor
+    presentation.AddToDataOutputMap(elementPathToDataOutputDefMap);
+// #TODO: Remove above once QT3DS-3510 has been implemented in the editor
+}
+
+void CQmlEngineImpl::initializeDataOutputsInPresentation(CPresentation &presentation,
+                                                         bool isPrimary)
+{
+    TElement *parent = presentation.GetRoot();
+    QList<TElement *> elements;
+    listAllElements(parent, elements);
+    qt3ds::runtime::DataOutputMap &doMap = m_Application->dataOutputMap();
+
+    qt3ds::foundation::IStringTable &strTable(presentation.GetStringTable());
+    QHash<CRegisteredString, qt3ds::runtime::DataOutputDef> elementPathToDataOutputDefMap;
+    for (TElement *element : qAsConst(elements)) {
+        Option<QT3DSU32> ctrlIndex = element->FindPropertyIndex(ATTRIBUTE_OBSERVEDPROPERTY);
+        if (ctrlIndex.hasValue()) {
+            Option<qt3ds::runtime::element::TPropertyDescAndValuePtr> propertyInfo =
+                    element->GetPropertyByIndex(*ctrlIndex);
+            UVariant *valuePtr = propertyInfo->second;
+            QString valueStr =
+                    QString::fromUtf8(strTable.HandleToStr(valuePtr->m_StringHandle));
+
+            if (!valueStr.isEmpty()) {
+                QStringList splitValues = valueStr.split(QLatin1Char(' '));
+
+                // Single value pair expected for DataOutputs
+                QString observerName = splitValues[0];
+                QString observedAttribute = splitValues[1];
+                // Remove DataOutput name prefix "$"
+                observerName.remove(0, 1);
+                qt3ds::runtime::DataOutputDef &doDef = doMap[observerName];
+
+                if (doMap.contains(observerName)) {
+                    qt3ds::runtime::DataInOutAttribute obsElem;
+                    if (!isPrimary) {
+                        // Prepend presentation id to element path
+                        obsElem.elementPath = presentation.GetName();
+                        obsElem.elementPath.append(QByteArrayLiteral(":"));
+                    }
+
+                    obsElem.attributeName.append(observedAttribute.toUtf8());
+
+                    if (obsElem.attributeName.first() == QByteArrayLiteral("@timeline")) {
+                        // Timeline requires special additional handling
+                        obsElem.propertyType = ATTRIBUTETYPE_DATAINPUT_TIMELINE;
+                        TElement *component = &element->GetComponentParent();
+                        obsElem.elementPath.append(component->m_Path);
+
+                        // Find the TElement for the @timeline attrib
+                        TElement *target = nullptr;
+                        QStringList split = QString(obsElem.elementPath).split(QLatin1Char(':'));
+                        if (split.size() > 1) {
+                            target = CQmlElementHelper::GetElement(
+                                        *m_Application,
+                                        m_Application->GetPresentationById(
+                                            split.at(0).toStdString().c_str()),
+                                        split.at(1).toStdString().c_str(), nullptr);
+                        } else {
+                            target = CQmlElementHelper::GetElement(
+                                        *m_Application,
+                                        m_Application->GetPrimaryPresentation(),
+                                        split.at(0).toStdString().c_str(), nullptr);
+                        }
+                        doDef.timelineComponent = static_cast<TComponent *>(target);
+                    } else if (obsElem.attributeName.first() == QByteArrayLiteral("@slide")) {
+                        // Slides are ignored if set as we have separate signal in the API for
+                        // slide transitions
+                    } else {
+                        // Every other type is handled by CPresentation
+                        obsElem.elementPath.append(element->m_Path);
+                        TStringHash attHash = CHash::HashAttribute(
+                                    obsElem.attributeName.first().constData());
+                        Option<qt3ds::runtime::element::TPropertyDescAndValuePtr> attInfo
+                                = element->FindProperty(attHash);
+                        if (attInfo.hasValue()) {
+                            obsElem.propertyType = attInfo->first.m_Type;
+                        } else {
+                            obsElem.propertyType = ATTRIBUTETYPE_NONE;
+                            qWarning() << __FUNCTION__ << "Property"
+                                       << obsElem.attributeName.first() << "not existing!";
+                        }
+
+                        doDef.observedAttribute = obsElem;
+                        CRegisteredString rString = strTable.RegisterStr(obsElem.elementPath);
+                        elementPathToDataOutputDefMap.insertMulti(rString, doDef);
+                    }
+                }
+            }
+        }
+    }
+
+    // Inform the presentation of the ready data output defs
+    presentation.AddToDataOutputMap(elementPathToDataOutputDefMap);
 }
 
 // Bit clumsy way of getting from "position" to "position .x .y .z" and enabling datainput
@@ -2165,7 +2308,7 @@ QVector<QString> CQmlEngineImpl::resolveDependentDatainputs(const QString &expre
     for (auto di : args) {
         auto diTrim = di.trimmed();
         if (diMap.contains(diTrim)) {
-            if (diMap[diTrim].type == qt3ds::runtime::DataInputTypeEvaluator
+            if (diMap[diTrim].type == qt3ds::runtime::DataInOutTypeEvaluator
                 && diTrim != controllerName) {
                 qWarning() << __FUNCTION__ << "Invalid evaluator function in" << controllerName
                            << ". Another evaluator is used as source data.";

@@ -1,7 +1,7 @@
 /****************************************************************************
 **
 ** Copyright (C) 1993-2009 NVIDIA Corporation.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2019 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -273,6 +273,7 @@ enum EAttribute {
     ATTRIBUTE_PARTICLESIZE =         0x02534279, // particlesize
     ATTRIBUTE_LIFETIME =             0x0033D297, // lifetime
     ATTRIBUTE_CONTROLLEDPROPERTY =   0x022C0A1D, // controlledproperty
+    ATTRIBUTE_OBSERVEDPROPERTY =     0x02D1CE03, // observedproperty
     ATTRIBUTE_QT_IO =                0x010EF2CF, // qt.io
 }; // enum EAttribute
 

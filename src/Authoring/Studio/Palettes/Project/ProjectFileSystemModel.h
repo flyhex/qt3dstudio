@@ -112,7 +112,7 @@ private:
     void importPresentationAssets(const QFileInfo &uipSrc, const QFileInfo &uipTarget,
                                   QHash<QString, QString> &outPresentationNodes,
                                   QStringList &outImportedFiles, QSet<QString> &outDataInputs,
-                                  int &outOverrideChoice) const;
+                                  QSet<QString> &outDataOutputs,int &outOverrideChoice) const;
 
     void modelRowsInserted(const QModelIndex &parent, int start, int end);
     void modelRowsRemoved(const QModelIndex &parent, int start, int end);

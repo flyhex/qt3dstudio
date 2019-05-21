@@ -53,12 +53,14 @@ Q_SIGNALS:
     void SigPresentationReady();
     void SigElementsCreated(const QStringList &elementPaths, const QString &error);
     void SigMaterialsCreated(const QStringList &materialNames, const QString &error);
+    void SigDataOutputValueUpdated(const QString &name, const QVariant &value);
 };
 
 namespace qt3ds {
 namespace runtime {
     class IApplication;
     class IActivityZone;
+    struct DataOutputDef;
 }
 }
 
@@ -131,6 +133,8 @@ public: // Execution
     void EndUpdate() override;
     // Run behaviors.
     void PostUpdate(const TTimeUnit inGlobalTime) override;
+    // Notify DataUpdates if any are registered to this presentation
+    void NotifyDataOutputs();
 
 public: // Bridge Control
     IScene *GetScene() const override;
@@ -158,6 +162,10 @@ public: // Commands and Events
     void ProcessEvent(SEventCommand &inEvent) override;
 
     QPresentationSignalProxy *signalProxy();
+
+public: // Data Output
+    void AddToDataOutputMap(const QHash<qt3ds::foundation::CRegisteredString,
+                            qt3ds::runtime::DataOutputDef> &doMap);
 
 public: // Event Callbacks
     void RegisterEventCallback(TElement *inElement, const TEventCommandHash inEventHash,
@@ -217,6 +225,7 @@ private: // Disabled Copy Construction
     CPresentation &operator=(const CPresentation &);
 private:
     QPresentationSignalProxy m_SignalProxy;
+    QHash<qt3ds::foundation::CRegisteredString, qt3ds::runtime::DataOutputDef> m_pathToDataOutMap;
 };
 
 } // namespace Q3DStudio

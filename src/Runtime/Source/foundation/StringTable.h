@@ -178,6 +178,11 @@ namespace foundation {
         }
     };
 
+    inline uint qHash(const CRegisteredString &rString)
+    {
+        return eastl::hash<uint>()(reinterpret_cast<size_t>(rString.c_str()));
+    }
+
     class IStringTable;
 
     class CStringHandle

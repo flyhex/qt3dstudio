@@ -45,7 +45,7 @@ public:
     static void getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &uipTarget,
                                QHash<QString, QString> &outPathMap, QString &outRootPath,
                                QHash<QString, QString> &outPresentationNodes,
-                               QSet<QString> &outDataInputs);
+                               QSet<QString> &outDataInputs, QSet<QString> &outDataOutputs);
     static void updatePresentationId(const QString &url, const QString &oldId,
                                      const QString &newId);
     static void renameMaterial(const QString &uipPath, const QString &oldName,
@@ -54,6 +54,8 @@ public:
     static QString findProjectFile(const QString &uipPath);
     static bool getDataInputBindings(const SubPresentationRecord &subpresentation,
                                      QMultiMap<QString, QPair<QString, QString>> &outmap);
+    static bool getDataOutputBindings(const SubPresentationRecord &subpresentation,
+                                      QMultiMap<QString, QPair<QString, QString>> &outmap);
 
 private:
     PresentationFile();

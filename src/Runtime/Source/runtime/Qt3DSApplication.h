@@ -84,24 +84,24 @@ public:
     virtual void Run() = 0;
 };
 
-struct DataInputControlledAttribute
+struct DataInOutAttribute
 {
     QByteArray elementPath;
     QVector<QByteArray> attributeName;
     Q3DStudio::EAttributeType propertyType = Q3DStudio::ATTRIBUTETYPE_NONE;
 };
 
-enum DataInputType {
-    DataInputTypeInvalid = 0,
-    DataInputTypeRangedNumber,
-    DataInputTypeString,
-    DataInputTypeFloat,
-    DataInputTypeEvaluator,
-    DataInputTypeBoolean,
-    DataInputTypeVector4,
-    DataInputTypeVector3,
-    DataInputTypeVector2,
-    DataInputTypeVariant
+enum DataInOutType {
+    DataInOutTypeInvalid = 0,
+    DataInOutTypeRangedNumber,
+    DataInOutTypeString,
+    DataInOutTypeFloat,
+    DataInOutTypeEvaluator,
+    DataInOutTypeBoolean,
+    DataInOutTypeVector4,
+    DataInOutTypeVector3,
+    DataInOutTypeVector2,
+    DataInOutTypeVariant
 };
 
 // Duplicated from Q3DSDataInput class on viewer side
@@ -113,8 +113,8 @@ enum class DataInputValueRole {
 
 struct DataInputDef
 {
-    QVector<DataInputControlledAttribute> controlledAttributes;
-    DataInputType type = DataInputTypeInvalid;
+    QVector<DataInOutAttribute> controlledAttributes;
+    DataInOutType type = DataInOutTypeInvalid;
     float min = 0.0f;
     float max = 0.0f;
     QString evaluator;
@@ -126,7 +126,20 @@ struct DataInputDef
 
 };
 
+struct DataOutputDef
+{
+    DataInOutAttribute observedAttribute;
+    DataInOutType type = DataInOutTypeInvalid;
+    QVariant value;     // most recently notified value
+    QString name;
+    QT3DSU32 observedHandle;
+    float min = 0.0f;
+    float max = 0.0f;
+    Q3DStudio::TComponent *timelineComponent;  // Valid only for @timeline
+};
+
 typedef QMap<QString, DataInputDef> DataInputMap;
+typedef QMap<QString, DataOutputDef> DataOutputMap;
 
 class QT3DS_AUTOTEST_EXPORT IApplication : public NVRefCounted
 {
@@ -167,8 +180,10 @@ public:
     virtual bool createSuccessful() = 0;
 
     virtual DataInputMap &dataInputMap() = 0;
+    virtual DataOutputMap &dataOutputMap() = 0;
 
     virtual QList<QString> dataInputs() const = 0;
+    virtual QList<QString> dataOutputs() const = 0;
 
     virtual float dataInputMax(const QString &name) const = 0;
 

@@ -644,6 +644,7 @@ struct SApp : public IApplication
     bool m_createSuccessful;
 
     DataInputMap m_dataInputDefs;
+    DataOutputMap m_dataOutputDefs;
 
     bool m_initialFrame = true;
 
@@ -1001,6 +1002,55 @@ struct SApp : public IApplication
         m_CoreFactory->GetScriptEngineQml().StepGC();
     }
 
+    void NotifyDataOutputs()
+    {
+        {
+            SStackPerfTimer __updateTimer(m_RuntimeFactory->GetPerfTimer(),
+                                          "NotifyDataOutputs");
+
+            // Allow presentations to notify of registered data output changes
+            for (QT3DSU32 idx = 0, end = m_OrderedAssets.size(); idx < end; ++idx) {
+                if (m_OrderedAssets[idx].second->getType() == AssetValueTypes::Presentation) {
+                    SPresentationAsset &asset(
+                                *m_OrderedAssets[idx].second->getDataPtr<SPresentationAsset>());
+                    CPresentation *presentation = asset.m_Presentation;
+                    // allow PostUpdate also for inactive presentations so that we can
+                    // activate it
+                    if (presentation)
+                        presentation->NotifyDataOutputs();
+                }
+            }
+
+            // Notify @timeline attribute changes and store latest value to notified DataOutputDef
+            QMutableMapIterator<QString, DataOutputDef> iter(m_dataOutputDefs);
+            while (iter.hasNext()) {
+                DataOutputDef &outDef = iter.value();
+                if (outDef.observedAttribute.propertyType == ATTRIBUTETYPE_DATAINPUT_TIMELINE
+                        && outDef.timelineComponent) {
+                    qreal newValue = outDef.timelineComponent->GetTimePolicy().GetTime();
+                    qreal timelineEndTime
+                            = outDef.timelineComponent->GetTimePolicy().GetLoopingDuration();
+
+                    // Normalize the value to dataOutput range (if defined)
+                    if (outDef.min < outDef.max && timelineEndTime != 0.0) {
+                        newValue = (newValue/timelineEndTime) * qreal(outDef.max - outDef.min);
+                        newValue += qreal(outDef.min);
+                    } else {
+                        // Normalize to milliseconds
+                        newValue *= 1000.0;
+                    }
+
+                    if (!outDef.value.isValid() || newValue != outDef.value.toReal()) {
+                        outDef.value.setValue(newValue);;
+                        GetPrimaryPresentation()->signalProxy()->SigDataOutputValueUpdated(
+                                    outDef.name, outDef.value);
+                    }
+                }
+                iter.next();
+            }
+        } // End SStackPerfTimer scope
+    }
+
     void UpdateScenes() { m_RuntimeFactory->GetSceneManager().Update(); }
 
     void Render()
@@ -1057,6 +1107,9 @@ struct SApp : public IApplication
         Render();
 
         m_InputEnginePtr->ClearInputFrame();
+
+        NotifyDataOutputs();
+
         ClearPresentationDirtyLists();
 
         if (!m_CoreFactory->GetEventSystem().GetAndClearEventFetchedFlag())
@@ -1260,28 +1313,67 @@ struct SApp : public IApplication
                     inReader.Att("max", diDef.max);
                     inReader.UnregisteredAtt("evaluator", evaluator);
                     if (AreEqual(type, "Ranged Number"))
-                        diDef.type = DataInputTypeRangedNumber;
+                        diDef.type = DataInOutTypeRangedNumber;
                     else if (AreEqual(type, "String"))
-                        diDef.type = DataInputTypeString;
+                        diDef.type = DataInOutTypeString;
                     else if (AreEqual(type, "Float"))
-                        diDef.type = DataInputTypeFloat;
+                        diDef.type = DataInOutTypeFloat;
                     else if (AreEqual(type, "Vector4"))
-                        diDef.type = DataInputTypeVector4;
+                        diDef.type = DataInOutTypeVector4;
                     else if (AreEqual(type, "Vector3"))
-                        diDef.type = DataInputTypeVector3;
+                        diDef.type = DataInOutTypeVector3;
                     else if (AreEqual(type, "Vector2"))
-                        diDef.type = DataInputTypeVector2;
+                        diDef.type = DataInOutTypeVector2;
                     else if (AreEqual(type, "Boolean"))
-                        diDef.type = DataInputTypeBoolean;
+                        diDef.type = DataInOutTypeBoolean;
                     else if (AreEqual(type, "Variant"))
-                        diDef.type = DataInputTypeVariant;
+                        diDef.type = DataInOutTypeVariant;
 
                     if (AreEqual(type, "Evaluator")) {
-                        diDef.type = DataInputTypeEvaluator;
+                        diDef.type = DataInOutTypeEvaluator;
                         diDef.evaluator = QString::fromUtf8(evaluator);
                     }
 
                     m_dataInputDefs.insert(QString::fromUtf8(name), diDef);
+// #TODO Remove below once QT3DS-3510 task has been completed.
+                    // By default data inputs should not have data outputs, but this is needed
+                    // until editor can support configuring data nodes as in/out/in-out types
+                    DataOutputDef outDef;
+                    outDef.type = diDef.type;
+                    outDef.value = diDef.value;
+                    outDef.name = QString::fromUtf8(name);
+                    m_dataOutputDefs.insert(QString::fromUtf8(name), outDef);
+// #TODO Remove above once QT3DS-3510 UI change has been done
+                } else if (AreEqual(assetName, "dataOutput")) {
+                    DataOutputDef outDef;
+                    const char8_t *name = "";
+                    const char8_t *type = "";
+                    outDef.value = QVariant::Invalid;
+                    inReader.UnregisteredAtt("name", name);
+                    inReader.UnregisteredAtt("type", type);
+                    inReader.Att("min", outDef.min);
+                    inReader.Att("max", outDef.max);
+                    if (type) {
+                        if (AreEqual(type, "Ranged Number"))
+                            outDef.type = DataInOutTypeRangedNumber;
+                        else if (AreEqual(type, "String"))
+                            outDef.type = DataInOutTypeString;
+                        else if (AreEqual(type, "Float"))
+                            outDef.type = DataInOutTypeFloat;
+                        else if (AreEqual(type, "Vector4"))
+                            outDef.type = DataInOutTypeVector4;
+                        else if (AreEqual(type, "Vector3"))
+                            outDef.type = DataInOutTypeVector3;
+                        else if (AreEqual(type, "Vector2"))
+                            outDef.type = DataInOutTypeVector2;
+                        else if (AreEqual(type, "Boolean"))
+                            outDef.type = DataInOutTypeBoolean;
+                        else if (AreEqual(type, "Variant"))
+                            outDef.type = DataInOutTypeVariant;
+                    }
+
+                    outDef.name = QString::fromUtf8(name);
+                    m_dataOutputDefs.insert(QString::fromUtf8(name), outDef);
                 } else if (AreEqual(assetName, "renderplugin")) {
                     const char8_t *pluginArgs = "";
                     inReader.UnregisteredAtt("args", pluginArgs);
@@ -1314,9 +1406,19 @@ struct SApp : public IApplication
         return m_dataInputDefs;
     }
 
+    DataOutputMap &dataOutputMap() override
+    {
+        return m_dataOutputDefs;
+    }
+
     QList<QString> dataInputs() const override
     {
         return m_dataInputDefs.keys();
+    }
+
+    QList<QString> dataOutputs() const override
+    {
+        return m_dataOutputDefs.keys();
     }
 
     float dataInputMax(const QString &name) const override

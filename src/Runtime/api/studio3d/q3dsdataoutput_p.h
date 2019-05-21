@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (c) 2016 NVIDIA CORPORATION.
-** Copyright (C) 2017 The Qt Company Ltd.
+** Copyright (C) 2019 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of Qt 3D Studio.
@@ -28,35 +27,49 @@
 **
 ****************************************************************************/
 
-#include "q3dsplugin.h"
+#ifndef Q3DSDATAOUTPUT_P_H
+#define Q3DSDATAOUTPUT_P_H
 
-#include <QtQml/qqml.h>
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the QtStudio3D API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
 
-#include <QtStudio3D/private/q3dsviewersettings_p.h>
-
-#include "q3dsstudio3d.h"
-#include "q3dspresentationitem.h"
-#include "q3dsqmlstream.h"
-#include "q3dsqmlsubpresentationsettings.h"
-#include "q3dssceneelement.h"
-#include "q3dsdatainput.h"
+#include "q3dsdataoutput.h"
+#include "q3dscommandqueue_p.h"
+#include "Qt3DSViewerApp.h"
 
 QT_BEGIN_NAMESPACE
 
-void Q3DSPlugin::registerTypes(const char *uri)
-{
-    Q_ASSERT(uri == QLatin1String("QtStudio3D.OpenGL"));
+class Q3DSPresentationPrivate;
 
-    // @uri QtStudio3D.OpenGL
-    qmlRegisterType<Q3DSStudio3D>(uri, 2, 4, "Studio3D");
-    qmlRegisterType<Q3DSViewerSettings>(uri, 2, 4, "ViewerSettings");
-    qmlRegisterType<Q3DSPresentationItem>(uri, 2, 4, "Presentation");
-    qmlRegisterType<Q3DSSceneElement>(uri, 2, 4, "SceneElement");
-    qmlRegisterType<Q3DSElement>(uri, 2, 4, "Element");
-    qmlRegisterType<Q3DSQmlStream>(uri, 2, 4, "QmlStream");
-    qmlRegisterType<Q3DSSubPresentationSettings>(uri, 2, 4, "SubPresentationSettings");
-    qmlRegisterType<Q3DSDataInput>(uri, 2, 4, "DataInput");
-    qmlRegisterType<Q3DSDataOutput>(uri, 2, 4, "DataOutput");
-}
+class Q_STUDIO3D_EXPORT Q3DSDataOutputPrivate
+{
+    Q_DECLARE_PUBLIC(Q3DSDataOutput)
+public:
+    explicit Q3DSDataOutputPrivate(Q3DSDataOutput *parent);
+    virtual ~Q3DSDataOutputPrivate();
+
+    void setValue(const QVariant &value);
+    void setViewerApp(Q3DSViewer::Q3DSViewerApp *app);
+    void setCommandQueue(CommandQueue *queue);
+    void setPresentation(Q3DSPresentation *presentation);
+
+protected:
+    Q3DSDataOutput *q_ptr;
+    Q3DSViewer::Q3DSViewerApp *m_viewerApp = nullptr; // Not owned
+    CommandQueue *m_commandQueue = nullptr; // Not owned
+    Q3DSPresentation *m_presentation = nullptr; // Not owned
+    QString m_name;
+    QVariant m_value;
+};
 
 QT_END_NAMESPACE
+
+#endif // Q3DSDATAOUTPUT_P_H

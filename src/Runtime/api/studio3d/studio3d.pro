@@ -14,6 +14,8 @@ LIBS += \
     -lqt3dsqmlstreamer$$qtPlatformTargetSuffix()
 
 HEADERS += \
+    q3dsdataoutput.h \
+    q3dsdataoutput_p.h \
     q3dswidget.h \
     q3dswidget_p.h \
     q3dssurfaceviewer.h \
@@ -36,6 +38,7 @@ HEADERS += \
     q3dsdatainput_p.h
 
 SOURCES += q3dswidget.cpp \
+           q3dsdataoutput.cpp \
            q3dssurfaceviewer.cpp \
            viewerqmlstreamproxy.cpp \
            q3dsviewersettings.cpp \

@@ -76,7 +76,8 @@ enum CommandType {
     CommandType_RequestSlideInfo,
     CommandType_RequestDataInputs,
     CommandType_PreloadSlide,
-    CommandType_UnloadSlide
+    CommandType_UnloadSlide,
+    CommandType_RequestDataOutputs
 };
 
 class Q_STUDIO3D_EXPORT ElementCommand
