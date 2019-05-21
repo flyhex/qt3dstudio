@@ -187,8 +187,10 @@ struct WStrOps<QT3DSF32>
     }
     bool StrTo(const char8_t *buffer, QT3DSF32 &item)
     {
-        item = (QT3DSF32)strtod(buffer, NULL);
-        return true;
+        static QLocale c(QLocale::C);
+        bool ok;
+        item = c.toFloat(buffer, &ok);
+        return ok;
     }
 };
 
@@ -201,8 +203,10 @@ struct WStrOps<QT3DSF64>
     }
     bool StrTo(const char8_t *buffer, QT3DSF64 &item)
     {
-        item = strtod(buffer, NULL);
-        return true;
+        static QLocale c(QLocale::C);
+        bool ok;
+        item = c.toDouble(buffer, &ok);
+        return ok;
     }
 };
 #define QT3DS_WCHAR_T_None L"None"
