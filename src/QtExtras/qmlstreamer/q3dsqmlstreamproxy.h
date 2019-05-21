@@ -52,6 +52,7 @@ public:
     void unregisterPresentation(const QString &presentationId);
     void setSettings(Q3DSSubPresentationSettings *settings);
     void setPath(const QString& path);
+    void setEngine(QQmlEngine *engine);
 
 private:
     void loadPresentationItem(const QString& presentationId, const QString& presentationArgs);

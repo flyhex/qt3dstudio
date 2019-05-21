@@ -44,6 +44,7 @@ class QSurface;
 class QOpenGLContext;
 class Q3DSViewerSettings;
 class Q3DSPresentation;
+class QQmlEngine;
 
 class Q_STUDIO3D_EXPORT Q3DSSurfaceViewer : public QObject
 {
@@ -62,6 +63,9 @@ public:
     bool initialize(QSurface *surface, QOpenGLContext *context, GLuint fboId = 0);
 
     QImage grab(const QRect &rect = QRect());
+
+    QQmlEngine *qmlEngine() const;
+    void setQmlEngine(QQmlEngine *qmlEngine);
 
     // Property accessors
     QSize size() const;

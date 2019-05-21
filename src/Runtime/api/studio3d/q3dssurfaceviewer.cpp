@@ -341,6 +341,18 @@ QImage Q3DSSurfaceViewerPrivate::grab(const QRect &rect)
     return image;
 }
 
+QQmlEngine *Q3DSSurfaceViewer::qmlEngine() const
+{
+    Q_D(const Q3DSSurfaceViewer);
+    return d->qmlEngine;
+}
+
+void Q3DSSurfaceViewer::setQmlEngine(QQmlEngine *qmlEngine)
+{
+    Q_D(Q3DSSurfaceViewer);
+    d->qmlEngine = qmlEngine;
+}
+
 bool Q3DSSurfaceViewerPrivate::eventFilter(QObject *obj, QEvent *e)
 {
     if (m_surface && e->type() == QEvent::PlatformSurface) {
@@ -370,6 +382,9 @@ bool Q3DSSurfaceViewerPrivate::initializeRuntime()
 
     if (m_autoSize)
         m_size = m_surface->size();
+
+    if (nullptr != qmlEngine)
+        m_presentation->d_ptr->streamProxy()->setEngine(qmlEngine);
 
     if (!m_viewerApp->InitializeApp(int(m_size.width() * m_pixelRatio),
                                     int(m_size.height() * m_pixelRatio),

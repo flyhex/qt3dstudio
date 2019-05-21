@@ -237,3 +237,17 @@ void Q3DSQmlStreamProxy::setPath(const QString& path)
     QString modPath = QFileInfo(path).path(); // path() strips filename out
     m_path = pathToUrl(modPath);
 }
+
+void Q3DSQmlStreamProxy::setEngine(QQmlEngine *engine)
+{
+    if (m_engine)
+        delete m_engine;
+
+    m_engine = engine;
+
+    // Add extra import path for binary installations
+    QString extraImportPath(QStringLiteral("%1/qml"));
+    m_engine->addImportPath(extraImportPath.arg(QGuiApplication::applicationDirPath()));
+
+    m_engine->setIncubationController(new Q3DSIncubationController(this));
+}

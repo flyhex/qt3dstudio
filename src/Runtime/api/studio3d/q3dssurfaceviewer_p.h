@@ -52,6 +52,7 @@ class QSurface;
 class QOpenGLContext;
 class Q3DSViewerSettings;
 class Q3DSPresentation;
+class QQmlEngine;
 
 class Q_STUDIO3D_EXPORT Q3DSSurfaceViewerPrivate : public QObject
 {
@@ -96,6 +97,7 @@ private:
     Q3DSPresentation *m_presentation;
     QString m_id;
     QElapsedTimer m_startupTimer;
+    QQmlEngine *qmlEngine = nullptr;
 };
 
 QT_END_NAMESPACE
