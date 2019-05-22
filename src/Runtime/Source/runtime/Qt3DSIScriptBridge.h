@@ -177,8 +177,12 @@ public: // Elements
                                  qt3ds::render::ICustomMaterialSystem *customMaterialSystem,
                                  qt3ds::render::IDynamicObjectSystem *dynamicObjectSystem,
                                  qt3ds::render::IQt3DSRenderer *renderer) = 0;
+    virtual void deleteMaterials(const QString &elementPath, const QStringList &materialNames,
+                                 qt3ds::render::IQt3DSRenderer *renderer) = 0;
     virtual void createMesh(const QString &name, qt3dsimp::Mesh *mesh,
                             qt3ds::render::IBufferManager *bufferManager) = 0;
+    virtual void deleteMeshes(const QStringList &elementPath,
+                              qt3ds::render::IBufferManager *bufferManager) = 0;
 
 public: // Components
     virtual void GotoSlide(const char *component, const char *slideName,

@@ -389,6 +389,25 @@ void Q3DSPresentation::createMaterials(const QString &elementPath,
     }
 }
 
+void Q3DSPresentation::deleteMaterial(const QString &elementPath, const QString &materialName)
+{
+    QStringList materialNames;
+    materialNames << materialName;
+    deleteMaterials(elementPath, materialNames);
+}
+
+void Q3DSPresentation::deleteMaterials(const QString &elementPath, const QStringList &materialNames)
+{
+    if (d_ptr->m_viewerApp) {
+        d_ptr->m_viewerApp->deleteMaterials(elementPath, materialNames);
+    } else if (d_ptr->m_commandQueue) {
+        // We need to copy the list as queue takes ownership of it
+        QStringList *theMaterialNames = new QStringList(materialNames);
+        d_ptr->m_commandQueue->queueCommand(elementPath, CommandType_DeleteMaterials,
+                                            theMaterialNames);
+    }
+}
+
 /**
     Creates a mesh specified by given geometry. The given meshName can be used as sourcepath
     property value for model elements created with future createElement calls.
@@ -417,6 +436,24 @@ void Q3DSPresentation::createMeshes(const QHash<QString, const Q3DSGeometry *> &
         delete theMeshData;
     } else if (d_ptr->m_commandQueue) {
         d_ptr->m_commandQueue->queueCommand(CommandType_CreateMeshes, theMeshData);
+    }
+}
+
+void Q3DSPresentation::deleteMesh(const QString &meshName)
+{
+    QStringList meshNames;
+    meshNames << meshName;
+    deleteMeshes(meshNames);
+}
+
+void Q3DSPresentation::deleteMeshes(const QStringList &meshNames)
+{
+    if (d_ptr->m_viewerApp) {
+        d_ptr->m_viewerApp->deleteMeshes(meshNames);
+    } else if (d_ptr->m_commandQueue) {
+        // We need to copy the list as queue takes ownership of it
+        QStringList *theMeshNames = new QStringList(meshNames);
+        d_ptr->m_commandQueue->queueCommand(CommandType_DeleteMeshes, theMeshNames);
     }
 }
 

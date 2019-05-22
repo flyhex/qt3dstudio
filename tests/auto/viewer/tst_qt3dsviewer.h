@@ -60,7 +60,7 @@ private Q_SLOTS:
     void testCreateMesh();
 
 private:
-    void deleteCreatedElements();
+    void deleteCreated();
     void createElement(const QString &parentElementPath, const QString &slideName,
                        const QHash<QString, QVariant> &properties);
     void createGeometries(Q3DSGeometry &pyramid, Q3DSGeometry &star);
@@ -70,6 +70,8 @@ private:
     Q3DSPresentation *m_presentation = nullptr;
     Q3DSViewerSettings *m_settings = nullptr;
     QStringList m_createdElements;
+    QStringList m_createdMaterials;
+    QStringList m_createdMeshes;
     bool m_ignoreError = false;
 
 };

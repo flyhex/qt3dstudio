@@ -367,6 +367,14 @@ void Q3DSRenderer::processCommands()
             command.m_data = nullptr;
             break;
         }
+        case CommandType_DeleteMaterials: {
+            m_runtime->deleteMaterials(cmd.m_elementPath, *static_cast<QStringList *>(cmd.m_data));
+            // Runtime makes copy of the data in its own format, so we can delete it now
+            auto &command = m_commands.commandAt(i);
+            delete reinterpret_cast<QStringList *>(command.m_data);
+            command.m_data = nullptr;
+            break;
+        }
         case CommandType_CreateMeshes: {
             m_runtime->createMeshes(*static_cast<QHash<QString, Q3DSViewer::MeshData> *>(
                                         cmd.m_data));
@@ -375,6 +383,14 @@ void Q3DSRenderer::processCommands()
             auto meshData = reinterpret_cast<QHash<QString, Q3DSViewer::MeshData> *>(
                         command.m_data);
             delete meshData;
+            command.m_data = nullptr;
+            break;
+        }
+        case CommandType_DeleteMeshes: {
+            m_runtime->deleteMeshes(*static_cast<QStringList *>(cmd.m_data));
+            // Runtime makes copy of the data in its own format, so we can delete it now
+            auto &command = m_commands.commandAt(i);
+            delete reinterpret_cast<QStringList *>(command.m_data);
             command.m_data = nullptr;
             break;
         }

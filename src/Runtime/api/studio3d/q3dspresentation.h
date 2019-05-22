@@ -101,8 +101,12 @@ public:
     void deleteElements(const QStringList &elementPaths);
     void createMaterial(const QString &elementPath, const QString &materialDefinition);
     void createMaterials(const QString &elementPath, const QStringList &materialDefinitions);
+    void deleteMaterial(const QString &elementPath, const QString &materialName);
+    void deleteMaterials(const QString &elementPath, const QStringList &materialNames);
     void createMesh(const QString &meshName, const Q3DSGeometry &geometry);
     void createMeshes(const QHash<QString, const Q3DSGeometry *> &meshData);
+    void deleteMesh(const QString &meshName);
+    void deleteMeshes(const QStringList &meshNames);
 
 public Q_SLOTS:
     void setSource(const QUrl &source);

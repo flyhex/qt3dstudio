@@ -936,6 +936,14 @@ void Q3DSViewerApp::createMaterials(const QString &elementPath,
     m_Impl.m_view->createMaterials(elementPath, materialDefinitions);
 }
 
+void Q3DSViewerApp::deleteMaterials(const QString &elementPath, const QStringList &materialNames)
+{
+    if (!m_Impl.m_view)
+        return;
+
+    m_Impl.m_view->deleteMaterials(elementPath, materialNames);
+}
+
 void Q3DSViewerApp::createMeshes(const QHash<QString, Q3DSViewer::MeshData> &meshData)
 {
     if (!m_Impl.m_view)
@@ -960,6 +968,14 @@ void Q3DSViewerApp::createMeshes(const QHash<QString, Q3DSViewer::MeshData> &mes
     }
     m_Impl.m_meshBuilder->Reset();
     SigMeshesCreated(meshData.keys(), error);
+}
+
+void Q3DSViewerApp::deleteMeshes(const QStringList &meshNames)
+{
+    if (!m_Impl.m_view)
+        return;
+
+    m_Impl.m_view->deleteMeshes(meshNames);
 }
 
 Q3DSViewerApp &Q3DSViewerApp::Create(void *glContext, Q3DStudio::IAudioPlayer *inAudioPlayer,

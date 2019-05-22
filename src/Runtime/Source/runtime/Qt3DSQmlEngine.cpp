@@ -437,8 +437,12 @@ public:
                          qt3ds::render::ICustomMaterialSystem *customMaterialSystem,
                          IDynamicObjectSystem *dynamicObjectSystem,
                          qt3ds::render::IQt3DSRenderer *renderer) override;
+    void deleteMaterials(const QString &elementPath, const QStringList &materialNames,
+                         qt3ds::render::IQt3DSRenderer *renderer) override;
     void createMesh(const QString &name, qt3dsimp::Mesh *mesh,
                     qt3ds::render::IBufferManager *bufferManager) override;
+    void deleteMeshes(const QStringList &meshNames,
+                      qt3ds::render::IBufferManager *bufferManager) override;
 
     void GotoSlide(const char *component, const char *slideName,
                            const SScriptEngineGotoSlideArgs &inArgs) override;
@@ -1645,11 +1649,60 @@ void CQmlEngineImpl::createMaterials(const QString &elementPath,
     handleError();
 }
 
+void CQmlEngineImpl::deleteMaterials(const QString &elementPath,
+                                     const QStringList &materialNames,
+                                     IQt3DSRenderer *renderer)
+{
+    // Material class (i.e. the shader) is not deleted as those can be shared between materials,
+    // so we just delete the material elements from the container and the related render objects
+
+    QByteArray thePath = elementPath.toUtf8();
+    TElement *element = getTarget(thePath.constData());
+    Q_ASSERT_X(element, __FUNCTION__, QStringLiteral("Invalid element path: '%1'")
+               .arg(elementPath).toUtf8());
+    CPresentation *presentation = static_cast<CPresentation *>(element->GetBelongedPresentation());
+
+    // Find material container
+    auto &strTable = presentation->GetStringTable();
+    TElement *rootElement = presentation->GetRoot();
+    const auto containerName = strTable.RegisterStr("__Container");
+    TElement *container = rootElement->FindChild(CHash::HashString(containerName.c_str()));
+    Q_ASSERT_X(container, __FUNCTION__,
+               QStringLiteral("No material container found for element: '%1'")
+               .arg(elementPath).toUtf8());
+
+    QVector<TElement *> elementsToDelete;
+    for (const auto &materialName : materialNames) {
+        TElement *firstChild = nullptr;
+        TElement *nextChild = container->GetChild();
+        firstChild = nextChild;
+        while (nextChild) {
+            QString childName = QString::fromUtf8(nextChild->m_Name);
+            if (childName == materialName)
+                elementsToDelete << nextChild;
+            nextChild = nextChild->GetSibling();
+        }
+    }
+
+    deleteElements(elementsToDelete, renderer);
+}
+
 void CQmlEngineImpl::createMesh(const QString &name, qt3dsimp::Mesh *mesh,
                                 qt3ds::render::IBufferManager *bufferManager)
 {
     // Add the custom meshes to buffer manager.
     bufferManager->loadCustomMesh(name, mesh);
+}
+
+void CQmlEngineImpl::deleteMeshes(const QStringList &meshNames,
+                                  qt3ds::render::IBufferManager *bufferManager)
+{
+    for (const auto &meshName : meshNames) {
+        if (!meshName.isEmpty()) {
+            CRegisteredString regName = bufferManager->GetStringTable().RegisterStr(meshName);
+            bufferManager->InvalidateBuffer(regName);
+        }
+    }
 }
 
 void CQmlEngineImpl::GotoSlide(const char *component, const char *slideName,

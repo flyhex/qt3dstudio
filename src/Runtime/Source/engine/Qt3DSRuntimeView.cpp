@@ -218,7 +218,9 @@ public:
     void deleteElements(const QStringList &elementPaths) override;
     void createMaterials(const QString &elementPath,
                          const QStringList &materialDefinitions) override;
+    void deleteMaterials(const QString &elementPath, const QStringList &materialNames) override;
     void createMesh(const QString &name, qt3dsimp::Mesh *mesh) override;
+    void deleteMeshes(const QStringList &meshNames) override;
     void SetAttribute(const char *elementPath, const char *attributeName,
                       const char *value) override;
     bool GetAttribute(const char *elementPath, const char *attributeName, void *value) override;
@@ -670,6 +672,16 @@ void CRuntimeView::createMaterials(const QString &elementPath,
     }
 }
 
+void CRuntimeView::deleteMaterials(const QString &elementPath, const QStringList &materialNames)
+{
+    if (m_Application) {
+        Q3DStudio::CQmlEngine &theBridgeEngine
+                = static_cast<Q3DStudio::CQmlEngine &>(m_RuntimeFactoryCore->GetScriptEngineQml());
+        theBridgeEngine.deleteMaterials(elementPath, materialNames,
+                                        &m_RuntimeFactory->GetQt3DSRenderContext().GetRenderer());
+    }
+}
+
 void CRuntimeView::createMesh(const QString &name, qt3dsimp::Mesh *mesh)
 {
     if (m_Application) {
@@ -677,6 +689,16 @@ void CRuntimeView::createMesh(const QString &name, qt3dsimp::Mesh *mesh)
                 = static_cast<Q3DStudio::CQmlEngine &>(m_RuntimeFactoryCore->GetScriptEngineQml());
         theBridgeEngine.createMesh(
                     name, mesh, &m_RuntimeFactory->GetQt3DSRenderContext().GetBufferManager());
+    }
+}
+
+void CRuntimeView::deleteMeshes(const QStringList &meshNames)
+{
+    if (m_Application) {
+        Q3DStudio::CQmlEngine &theBridgeEngine
+                = static_cast<Q3DStudio::CQmlEngine &>(m_RuntimeFactoryCore->GetScriptEngineQml());
+        theBridgeEngine.deleteMeshes(
+                    meshNames, &m_RuntimeFactory->GetQt3DSRenderContext().GetBufferManager());
     }
 }
 

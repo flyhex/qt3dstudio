@@ -103,7 +103,7 @@ void tst_qt3dsviewer::init()
 
 void tst_qt3dsviewer::cleanup()
 {
-    deleteCreatedElements();
+    deleteCreated();
     if (!m_ignoreError)
         QCOMPARE(m_studio3DItem->property("error").toString(), {});
     m_studio3DItem = nullptr;
@@ -388,7 +388,7 @@ void tst_qt3dsviewer::testCreateElement()
 
     QTest::qWait(500);
     QCOMPARE(spyElemCreated.count(), 9);
-    deleteCreatedElements();
+    deleteCreated();
 
     // Switch to slide 1
     QVERIFY(spyExited.wait(20000));
@@ -430,6 +430,9 @@ void tst_qt3dsviewer::testCreateMaterial()
     materialDefinitions << matDef;
 
     m_presentation->createMaterials(QStringLiteral("Scene"), materialDefinitions);
+    m_createdMaterials << QStringLiteral("materials/Basic Blue")
+                       << QStringLiteral("materials/Basic Texture")
+                       << QStringLiteral("materials/Copper");
 
     QObject::connect(m_presentation, &Q3DSPresentation::materialsCreated,
                      [this](const QStringList &materialNames, const QString &error) {
@@ -480,11 +483,30 @@ void tst_qt3dsviewer::testCreateMaterial()
         md.replace(QRegularExpression(QStringLiteral("\"diffuse\">.*<")),
                    QStringLiteral("\"diffuse\">1 1 0 1<"));
         m_presentation->createMaterial(QStringLiteral("Scene"), md);
+        m_createdMaterials << QStringLiteral("materials/Just Yellow");
+    });
+
+    // Delete material
+    QTimer::singleShot(2500, [&]() {
+        // Material not removed from m_createdMaterials purposefully to ensure deleting already
+        // deleted material is handled properly later
+        m_presentation->deleteElement(QStringLiteral("Scene.Layer.Textured Cone"));
+        m_presentation->deleteMaterial(QStringLiteral("Scene"), "materials/Basic Texture");
+
+        // Try to use the deleted material - should find a fallback material
+        QHash<QString, QVariant> data;
+        data.insert(QStringLiteral("name"), QStringLiteral("Textured Cone 2"));
+        data.insert(QStringLiteral("sourcepath"), QStringLiteral("#Cone"));
+        data.insert(QStringLiteral("material"), QStringLiteral("materials/Basic Texture"));
+        data.insert(QStringLiteral("position"),
+                    QVariant::fromValue<QVector3D>(QVector3D(-100, -300, 200)));
+        createElement(QStringLiteral("Scene.Layer"), QStringLiteral("Slide1"), data);
     });
 
     QVERIFY(spyExited.wait(20000));
     QCOMPARE(spyMatCreated.count(), 2);
-    QCOMPARE(spyElemCreated.count(), 4);
+    QCOMPARE(spyElemCreated.count(), 5);
+    deleteCreated();
     QTest::qWait(200); // Extra wait to verify slide change visually
 }
 
@@ -523,6 +545,7 @@ void tst_qt3dsviewer::testCreateMesh()
             QStringLiteral("Scene"),
             QStringLiteral(":/scenes/simple_cube_animation/materials/Basic Texture.materialdef"));
     m_presentation->createMesh(QStringLiteral("Pyramid"), pyramid);
+    m_createdMeshes << QStringLiteral("Pyramid");
 
     QObject::connect(m_presentation, &Q3DSPresentation::meshesCreated,
                      [&](const QStringList &meshNames, const QString &error) {
@@ -553,18 +576,31 @@ void tst_qt3dsviewer::testCreateMesh()
     // Create mesh after start
     QTimer::singleShot(1000, [&]() {
         m_presentation->createMesh(QStringLiteral("Star"), star);
+        m_createdMeshes << QStringLiteral("Star");
+    });
+
+    QTimer::singleShot(3000, [&]() {
+        m_presentation->deleteElement(QStringLiteral("Scene.Layer.Star"));
+        m_presentation->deleteMesh(QStringLiteral("Star"));
+        // Mesh nor removed from m_createdMeshes purposefully to ensure deleting already deleted
+        // mesh is handled properly later
     });
 
     QVERIFY(spyExited.wait(20000));
     QCOMPARE(spyMeshCreated.count(), 2);
     QCOMPARE(spyElemCreated.count(), 2);
+    deleteCreated();
     QTest::qWait(200); // Extra wait to verify slide change visually
 }
 
-void tst_qt3dsviewer::deleteCreatedElements()
+void tst_qt3dsviewer::deleteCreated()
 {
     m_presentation->deleteElements(m_createdElements);
+    m_presentation->deleteMaterials(QStringLiteral("Scene"), m_createdMaterials);
+    m_presentation->deleteMeshes(m_createdMeshes);
     m_createdElements.clear();
+    m_createdMaterials.clear();
+    m_createdMeshes.clear();
 }
 
 void tst_qt3dsviewer::createElement(const QString &parentElementPath, const QString &slideName,

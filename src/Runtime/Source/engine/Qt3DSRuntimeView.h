@@ -205,7 +205,9 @@ public:
     virtual void deleteElements(const QStringList &elementPaths) = 0;
     virtual void createMaterials(const QString &elementPath,
                                  const QStringList &materialDefinitions) = 0;
+    virtual void deleteMaterials(const QString &elementPath, const QStringList &materialNames) = 0;
     virtual void createMesh(const QString &name, qt3dsimp::Mesh *mesh) = 0;
+    virtual void deleteMeshes(const QStringList &meshNames) = 0;
     virtual void SetAttribute(const char *elementPath, const char *attributeName,
                               const char *value) = 0;
     virtual bool GetAttribute(const char *elementPath, const char *attributeName, void *value) = 0;
