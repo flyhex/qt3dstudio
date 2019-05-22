@@ -37,6 +37,7 @@
 #include "foundation/Utils.h"
 #include "stdlib.h"
 #include "stdio.h" //snprintf
+#include <QLocale>
 
 #if !defined EA_PLATFORM_WINDOWS
 #define _snprintf snprintf
@@ -184,13 +185,15 @@ namespace foundation {
     {
         QT3DSU32 ToStr(QT3DSF32 item, NVDataRef<char8_t> buffer)
         {
-            return static_cast<QT3DSU32>(
-                _snprintf(buffer.begin(), buffer.size(), "%g", static_cast<QT3DSF64>(item)));
+            QString s = QLocale::c().toString(item);
+            strncpy(buffer.begin(), s.toStdString().c_str(), buffer.size());
+            return s.length();
         }
         bool StrTo(const char8_t *buffer, QT3DSF32 &item)
         {
-            item = (QT3DSF32)strtod(buffer, NULL);
-            return true;
+            bool ok;
+            item = QLocale::c().toFloat(buffer, &ok);
+            return ok;
         }
     };
 
@@ -199,12 +202,15 @@ namespace foundation {
     {
         QT3DSU32 ToStr(QT3DSF64 item, NVDataRef<char8_t> buffer)
         {
-            return static_cast<QT3DSU32>(_snprintf(buffer.begin(), buffer.size(), "%g", item));
+            QString s = QLocale::c().toString(item);
+            strncpy(buffer.begin(), s.toStdString().c_str(), buffer.size());
+            return s.length();
         }
         bool StrTo(const char8_t *buffer, QT3DSF64 &item)
         {
-            item = strtod(buffer, NULL);
-            return true;
+            bool ok;
+            item = QLocale::c().toDouble(buffer, &ok);
+            return ok;
         }
     };
 }

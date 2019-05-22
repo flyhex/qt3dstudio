@@ -69,12 +69,6 @@ const QString activePresentationQuery = QStringLiteral("activePresentation:");
 
 int main(int argc, char *argv[])
 {
-    // Note: This will prevent localization from working on Linux, but it will fix QT3DS-1473
-    // TODO: To be removed once the new parser is in use
-#if defined(Q_OS_LINUX)
-    qputenv("LC_ALL", "C");
-#endif
-
     bool isOpenGLES = false;
 
     // init runtime static resources

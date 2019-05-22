@@ -177,13 +177,15 @@ struct WStrOps<QT3DSF32>
 {
     QT3DSU32 ToStr(QT3DSF32 item, NVDataRef<wchar_t> buffer)
     {
-        return static_cast<QT3DSU32>(
-            swprintf(buffer.begin(), buffer.size(), L"%g", static_cast<QT3DSF64>(item)));
+        QString s = QLocale::c().toString(item);
+        wcsncpy(buffer.begin(), s.toStdWString().c_str(), buffer.size());
+        return s.length();
     }
     QT3DSU32 ToStr(QT3DSF32 item, NVDataRef<char8_t> buffer)
     {
-        return static_cast<QT3DSU32>(
-            _snprintf(buffer.begin(), buffer.size(), "%g", static_cast<QT3DSF64>(item)));
+        QString s = QLocale::c().toString(item);
+        strncpy(buffer.begin(), s.toStdString().c_str(), buffer.size());
+        return s.length();
     }
     bool StrTo(const char8_t *buffer, QT3DSF32 &item)
     {
@@ -198,7 +200,9 @@ struct WStrOps<QT3DSF64>
 {
     QT3DSU32 ToStr(QT3DSF64 item, NVDataRef<wchar_t> buffer)
     {
-        return static_cast<QT3DSU32>(swprintf(buffer.begin(), buffer.size(), L"%g", item));
+        QString s = QLocale::c().toString(item);
+        wcsncpy(buffer.begin(), s.toStdWString().c_str(), buffer.size());
+        return s.length();
     }
     bool StrTo(const char8_t *buffer, QT3DSF64 &item)
     {

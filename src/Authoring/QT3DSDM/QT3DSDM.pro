@@ -56,4 +56,5 @@ HEADERS += \
     Systems/Qt3DSDMDataTypes.h \
     Systems/Qt3DSDMMetaDataTypes.h \
     Systems/Qt3DSDMMetaDataValue.h \
-    Systems/Qt3DSDMMetaData.h
+    Systems/Qt3DSDMMetaData.h \
+    Systems/Qt3DSDMWStrOpsImpl.h
