@@ -379,9 +379,9 @@ void CStudioAppPrefsPage::setAutosaveInterval(int interval)
 void CStudioAppPrefsPage::onClearAutosaveFiles()
 {
     // Find all *_autosave.uip files and delete them
-    QDirIterator files(g_StudioApp.GetCore()->GetDoc()->GetDocumentDirectory().toQString());
+    QDirIterator files(g_StudioApp.GetCore()->GetDoc()->GetDocumentDirectory());
     while (files.hasNext()) {
-        if (files.next().endsWith(QStringLiteral("_autosave.uip")))
+        if (files.next().endsWith(QLatin1String("_autosave.uip")))
             QFile::remove(files.filePath());
     }
 }

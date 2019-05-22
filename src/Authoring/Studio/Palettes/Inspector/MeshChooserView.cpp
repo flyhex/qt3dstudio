@@ -107,12 +107,10 @@ void MeshChooserView::updateSelection()
 
     QString currentFile;
     const QString meshValue = qt3dsdm::get<QString>(value);
-    if (meshValue.startsWith(QLatin1Char('#'))) {
+    if (meshValue.startsWith(QLatin1Char('#')))
         currentFile = meshValue.mid(1);
-    } else {
-        currentFile = QDir::cleanPath(QDir(doc->GetDocumentDirectory().toQString())
-                                      .filePath(meshValue));
-    }
+    else
+        currentFile = QDir::cleanPath(QDir(doc->GetDocumentDirectory()).filePath(meshValue));
 
     m_model->setCurrentFile(currentFile);
 }

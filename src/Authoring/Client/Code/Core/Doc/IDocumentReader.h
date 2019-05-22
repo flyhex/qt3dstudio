@@ -234,7 +234,7 @@ public:
                                                  QHash<QString, QString> &outPathMap,
                                                  QSet<QString> &outPropertyMap) = 0;
 
-    virtual Q3DStudio::CString GetCustomMaterialName(const Q3DStudio::CString &inFullPathToFile) const = 0;
+    virtual Q3DStudio::CString GetCustomMaterialName(const QString &inFullPathToFile) const = 0;
     virtual void getMaterialInfo(const QString &inFullPathToFile,
                                  QString &outName, QMap<QString, QString> &outValues,
                                  QMap<QString, QMap<QString, QString>> &outTextureValues) = 0;

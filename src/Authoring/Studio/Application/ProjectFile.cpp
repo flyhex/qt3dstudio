@@ -290,7 +290,7 @@ void ProjectFile::writePresentationId(const QString &id, const QString &src)
                 qt3dsdm::Qt3DSDMInstanceHandle child = iter.GetCurrent();
                 if (bridge->GetObjectType(child) & (OBJTYPE_LAYER | OBJTYPE_IMAGE)) {
                     bool add = false;
-                    if (bridge->GetSourcePath(child).toQString() == oldId) {
+                    if (bridge->GetSourcePath(child) == oldId) {
                         propSystem->SetInstancePropertyValue(child, bridge->GetSourcePathProperty(),
                                                              qt3dsdm::SValue(QVariant(theId)));
                         add = true;

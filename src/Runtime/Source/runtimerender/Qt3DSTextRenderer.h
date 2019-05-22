@@ -41,11 +41,11 @@ namespace render {
 
     struct SRendererFontEntry
     {
-        CRegisteredString m_FontName;
-        CRegisteredString m_FontFile;
+        QString m_FontName;
+        QString m_FontFile;
         SRendererFontEntry() {}
-        SRendererFontEntry(CRegisteredString nm, CRegisteredString file)
-            : m_FontName(nm)
+        SRendererFontEntry(QString name, QString file)
+            : m_FontName(name)
             , m_FontFile(file)
         {
         }

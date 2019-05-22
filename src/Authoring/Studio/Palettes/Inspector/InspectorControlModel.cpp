@@ -60,7 +60,7 @@ static QStringList renderableItems()
     QStringList renderables;
     renderables.push_back(QObject::tr("No renderable item"));
     const CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-    Q3DStudio::CString docDir = doc->GetDocumentDirectory();
+    Q3DStudio::CString docDir = Q3DStudio::CString::fromQString(doc->GetDocumentDirectory());
 
     for (SubPresentationRecord r : qAsConst(g_StudioApp.m_subpresentations))
         renderables.push_back(r.m_id);
@@ -300,8 +300,7 @@ void InspectorControlModel::addMaterial()
     const auto type = getBridge()->GetObjectType(instance);
     if (type == OBJTYPE_REFERENCEDMATERIAL) {
         sceneEditor->setMaterialReferenceByPath(instance, absPath);
-        const auto relPath = QDir(doc->GetDocumentDirectory().toQString())
-                .relativeFilePath(absPath);
+        const auto relPath = doc->GetRelativePathToDoc(absPath);
         sceneEditor->setMaterialSourcePath(instance, Q3DStudio::CString::fromQString(relPath));
         sceneEditor->SetName(instance, getBridge()->GetName(newMaterial, true));
 
@@ -364,8 +363,7 @@ void InspectorControlModel::duplicateMaterial()
 
         if (type == OBJTYPE_REFERENCEDMATERIAL) {
             scopedEditor->setMaterialReferenceByPath(instance, absPath);
-            const auto relPath = QDir(doc->GetDocumentDirectory().toQString())
-                                 .relativeFilePath(absPath);
+            const auto relPath = doc->GetRelativePathToDoc(absPath);
             scopedEditor->setMaterialSourcePath(instance, Q3DStudio::CString::fromQString(relPath));
             scopedEditor->SetName(instance, getBridge()->GetName(duplicate, true));
             doc->GetStudioSystem()->GetFullSystemSignalSender()->SendInstancePropertyValue(
@@ -418,18 +416,12 @@ void InspectorControlModel::updateMatDataValues()
 void InspectorControlModel::setMaterials(std::vector<Q3DStudio::CFilePath> &materials)
 {
     m_materials.clear();
-    const Q3DStudio::CString base = g_StudioApp.GetCore()->GetDoc()->GetDocumentDirectory();
-
-    for (Q3DStudio::CFilePath path : materials) {
-
-        const QString relativePath = path.toQString();
-        const Q3DStudio::CFilePath absolutePath
-            = Q3DStudio::CFilePath::CombineBaseAndRelative(base, path);
-
+    for (Q3DStudio::CFilePath &path : materials) {
+        const QString absolutePath = g_StudioApp.GetCore()->GetDoc()->GetResolvedPathToDoc(path);
         const QString name = g_StudioApp.GetCore()->GetDoc()->GetDocumentReader()
-                                  .GetCustomMaterialName(absolutePath.toCString()).toQString();
+                                  .GetCustomMaterialName(absolutePath).toQString();
 
-        m_materials.push_back({name, relativePath});
+        m_materials.push_back({name, path.toQString()});
     }
 
     if (!isDefaultMaterial())
@@ -595,11 +587,11 @@ void InspectorControlModel::updateFontValues(InspectorControlBase *element) cons
     }
 
     if (fontElements.size()) {
-        std::vector<Q3DStudio::CString> fontNames;
+        std::vector<QString> fontNames;
         g_StudioApp.GetCore()->GetDoc()->GetProjectFonts(fontNames);
         QStringList possibleValues;
         for (const auto &fontName : fontNames)
-            possibleValues.append(fontName.toQString());
+            possibleValues.append(fontName);
         for (auto fontElement : qAsConst(fontElements)) {
             fontElement->m_values = possibleValues;
             Q_EMIT fontElement->valuesChanged();
@@ -663,7 +655,7 @@ InspectorControlBase *InspectorControlModel::createMaterialTypeItem(
     const QStringList values = materialTypeValues();
     item->m_values = values;
 
-    QString sourcePath = getBridge()->GetSourcePath(item->m_instance).toQString();
+    QString sourcePath = getBridge()->GetSourcePath(item->m_instance);
 
     switch (inspectable->getObjectType()) {
     case OBJTYPE_MATERIAL:
@@ -705,7 +697,7 @@ InspectorControlBase *InspectorControlModel::createShaderItem(
     const QStringList values = shaderValues();
     item->m_values = values;
 
-    QString sourcePath = getBridge()->GetSourcePath(item->m_instance).toQString();
+    QString sourcePath = getBridge()->GetSourcePath(item->m_instance);
 
     item->m_value = values[0];
     for (int matIdx = 0, end = int(m_materials.size()); matIdx < end; ++matIdx) {
@@ -731,7 +723,7 @@ InspectorControlBase *InspectorControlModel::createMatDataItem(
     const QStringList values = matDataValues();
     item->m_values = values;
 
-    QString sourcePath = getBridge()->GetSourcePath(item->m_instance).toQString();
+    QString sourcePath = getBridge()->GetSourcePath(item->m_instance);
 
     item->m_value = getDefaultMaterialString();
     for (int matIdx = 0, end = int(m_matDatas.size()); matIdx < end; ++matIdx) {
@@ -995,11 +987,11 @@ auto InspectorControlModel::computeTree(CInspectableBase *inspectBase)
             if (refMaterialInspectable) {
                 QString materialSrcPath;
                 if (instance.Valid())
-                    materialSrcPath = getBridge()->GetSourcePath(instance).toQString();
+                    materialSrcPath = getBridge()->GetSourcePath(instance);
 
                 if (materialSrcPath != getBridge()->getDefaultMaterialName()
-                    && getBridge()->GetSourcePath(refMaterial) != Q3DStudio::CString::fromQString(
-                       getBridge()->getDefaultMaterialName())) {
+                    && getBridge()->GetSourcePath(refMaterial)
+                       != getBridge()->getDefaultMaterialName()) {
                     result.append(computeGroup(refMaterialInspectable,
                                                refMaterialInspectable->getGroupCount() - 1,
                                                true, true));
@@ -1465,7 +1457,7 @@ void InspectorControlModel::saveIfMaterial(qt3dsdm::Qt3DSDMInstanceHandle instan
         QString sourcePath;
         for (int i = 0; i < m_matDatas.size(); ++i) {
             if (QString::compare(m_matDatas[i].m_name, materialName, Qt::CaseInsensitive) == 0) {
-                sourcePath = doc->GetDocumentDirectory().toQString() + QLatin1Char('/')
+                sourcePath = doc->GetDocumentDirectory() + QLatin1Char('/')
                         + m_matDatas[i].m_relativePath;
             }
         }
@@ -1479,7 +1471,7 @@ void InspectorControlModel::setMaterialTypeValue(long instance, int handle, cons
     Q_UNUSED(handle)
 
     const QString typeValue = value.toString();
-    Q3DStudio::CString v;
+    QString v;
 
     const auto doc = g_StudioApp.GetCore()->GetDoc();
     const auto sceneEditor = doc->getSceneEditor();
@@ -1491,22 +1483,22 @@ void InspectorControlModel::setMaterialTypeValue(long instance, int handle, cons
     bool changeMaterialFile = false;
     bool canCopyProperties = false;
     if (typeValue == getAnimatableMaterialString()) {
-        v = Q3DStudio::CString("Standard Material");
+        v = QStringLiteral("Standard Material");
         if (refMaterial.Valid()) {
             const auto refSourcePath = getBridge()->GetSourcePath(refMaterial);
             for (auto &material : m_materials) {
-                if (refSourcePath.toQString() == material.m_relativePath) {
-                    v = Q3DStudio::CString::fromQString(material.m_relativePath);
+                if (refSourcePath == material.m_relativePath) {
+                    v = material.m_relativePath;
                     break;
                 }
             }
         }
         canCopyProperties = true;
     } else if (typeValue == getBasicMaterialString()) {
-        v = Q3DStudio::CString("Referenced Material");
+        v = QStringLiteral("Referenced Material");
         changeMaterialFile = true;
     } else if (typeValue == getReferencedMaterialString()) {
-        v = Q3DStudio::CString("Referenced Material");
+        v = QStringLiteral("Referenced Material");
     }
 
     Q3DStudio::ScopedDocumentEditor scopedEditor(
@@ -1546,10 +1538,10 @@ void InspectorControlModel::setShaderValue(long instance, int handle, const QVar
     Q_UNUSED(handle)
 
     const QString typeValue = value.toString();
-    Q3DStudio::CString v("Standard Material");
+    QString v = QStringLiteral("Standard Material");
     for (size_t matIdx = 0, end = m_materials.size(); matIdx < end; ++matIdx) {
         if (m_materials[matIdx].m_name == typeValue)
-            v = Q3DStudio::CString::fromQString(m_materials[matIdx].m_relativePath);
+            v = m_materials[matIdx].m_relativePath;
     }
 
     const auto doc = g_StudioApp.GetCore()->GetDoc();
@@ -1562,7 +1554,7 @@ void InspectorControlModel::setShaderValue(long instance, int handle, const QVar
     doc->getSceneReferencedMaterials(doc->GetSceneInstance(), refMats);
     for (auto &refMat : qAsConst(refMats)) {
         const auto origMat = getBridge()->getMaterialReference(refMat);
-        if (origMat.Valid() && (long)origMat == instance)
+        if (origMat.Valid() && long(origMat) == instance)
             dispatch->FireImmediateRefreshInstance(refMat);
     }
 
@@ -1574,7 +1566,7 @@ void InspectorControlModel::setMatDataValue(long instance, int handle, const QVa
     Q_UNUSED(handle)
 
     const QString typeValue = value.toString();
-    Q3DStudio::CString v;
+    QString v;
     QString name;
     Q3DStudio::CString srcPath;
     QMap<QString, QString> values;
@@ -1584,7 +1576,7 @@ void InspectorControlModel::setMatDataValue(long instance, int handle, const QVa
 
     bool changeMaterialFile = false;
     if (typeValue == getDefaultMaterialString()) {
-        v = Q3DStudio::CString("Referenced Material");
+        v = QStringLiteral("Referenced Material");
         name = getBridge()->getDefaultMaterialName();
         srcPath = Q3DStudio::CString::fromQString(name);
         changeMaterialFile = true;
@@ -1599,7 +1591,7 @@ void InspectorControlModel::setMatDataValue(long instance, int handle, const QVa
                     + m_matDatas[matIdx].m_relativePath + QLatin1Char(')'),
                                  typeValue, Qt::CaseInsensitive) == 0
                     || QString::compare(shownName, typeValue, Qt::CaseInsensitive) == 0) {
-                v = Q3DStudio::CString("Referenced Material");
+                v = QStringLiteral("Referenced Material");
                 changeMaterialFile = true;
                 name = m_matDatas[matIdx].m_name;
                 srcPath = Q3DStudio::CString::fromQString(m_matDatas[matIdx].m_relativePath);
@@ -1608,7 +1600,7 @@ void InspectorControlModel::setMatDataValue(long instance, int handle, const QVa
                     // Get the correct case source path
                     const auto absPath = sceneEditor->getFilePathFromMaterialName(
                                 sceneEditor->GetName(material).toQString());
-                    const auto relPath = QDir(doc->GetDocumentDirectory().toQString())
+                    const auto relPath = QDir(doc->GetDocumentDirectory())
                             .relativeFilePath(absPath);
                     srcPath = Q3DStudio::CString::fromQString(relPath);
                 }
@@ -1755,7 +1747,7 @@ void InspectorControlModel::setPropertyValue(long instance, int handle, const QV
             if (newName != currentName) {
                 if (getBridge()->isInsideMaterialContainer(instance)) {
                     const auto properOldName = sceneEditor->GetName(instance).toQString();
-                    const auto dirPath = doc->GetDocumentDirectory().toQString();
+                    const QString dirPath = doc->GetDocumentDirectory();
                     for (size_t matIdx = 0, end = m_matDatas.size(); matIdx < end; ++matIdx) {
                         if (m_matDatas[matIdx].m_name == properOldName) {
                             QFileInfo fileInfo(dirPath + QLatin1Char('/')

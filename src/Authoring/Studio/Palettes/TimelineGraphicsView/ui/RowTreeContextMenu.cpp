@@ -267,7 +267,7 @@ void RowTreeContextMenu::addSubPresentation(QAction *action)
                 Q3DStudio::ScopedDocumentEditor editor(Q3DStudio::SCOPED_DOCUMENT_EDITOR(doc,
                                                             tr("Set material sub-presentation")));
                 editor->BeginAggregateOperation();
-                editor->SetMaterialType(instance, "Standard Material");
+                editor->SetMaterialType(instance, QStringLiteral("Standard Material"));
                 editor->setInstanceImagePropertyValue(instance, propHandle, presentationId);
                 editor->EndAggregateOperation();
             } else {

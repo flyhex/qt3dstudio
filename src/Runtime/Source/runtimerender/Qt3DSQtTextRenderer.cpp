@@ -342,10 +342,11 @@ struct Qt3DSQtTextRenderer : public ITextRenderer
         if (m_installedFonts.empty()) {
             m_installedFonts.reserve(m_projectFontInfos.size());
             for (FontInfo &fi : m_projectFontInfos.values()) {
-                m_installedFonts.push_back(SRendererFontEntry(
-                    QStringToRegisteredString(fi.fontName),
-                    QStringToRegisteredString(fi.fontFileName)));
-            }
+               m_installedFonts.push_back(SRendererFontEntry(
+                   fi.fontName,
+                   fi.fontFileName));
+           }
+
         }
         return m_installedFonts;
     }

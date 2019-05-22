@@ -872,7 +872,7 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
                         const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
                                 ->GetClientDataModelBridge();
                         if (bridge->GetObjectType(instance) != OBJTYPE_REFERENCEDMATERIAL
-                                || bridge->GetSourcePath(instance).IsEmpty()) {
+                                || bridge->GetSourcePath(instance).isEmpty()) {
                             // Tree labels text can be edited with double-click,
                             // except for Scene label and basic materials
                             treeLabelItem->setEnabled(true);

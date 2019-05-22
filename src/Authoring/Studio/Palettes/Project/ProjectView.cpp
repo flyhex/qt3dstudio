@@ -333,11 +333,11 @@ void ProjectView::copyPath(int row) const
 {
     if (row == -1)
         return;
-    const auto path = m_ProjectModel->filePath(row);
+
     const auto doc = g_StudioApp.GetCore()->GetDoc();
-    const auto relativePath = doc->GetRelativePathToDoc(
-                Q3DStudio::CFilePath(Q3DStudio::CString::fromQString(path)));
-    CStudioClipboard::CopyTextToClipboard(relativePath.toQString());
+    const QString path = m_ProjectModel->filePath(row);
+    const QString relativePath = doc->GetRelativePathToDoc(path);
+    CStudioClipboard::CopyTextToClipboard(relativePath);
 }
 
 void ProjectView::copyFullPath(int row) const

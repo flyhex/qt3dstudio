@@ -1092,47 +1092,37 @@ void CDoc::SetSceneGraph(std::shared_ptr<Q3DStudio::IDocSceneGraph> inGraph)
     m_SceneGraph = inGraph;
 }
 
-inline Q3DStudio::CString ConvertToWide(const char8_t *inStr)
-{
-    eastl::basic_string<char16_t> theConvertStr;
-    qt3ds::foundation::ConvertUTF(inStr, 0, theConvertStr);
-    return Q3DStudio::CString(theConvertStr.c_str());
-}
-
-void CDoc::GetProjectFonts(
-        std::vector<std::pair<Q3DStudio::CString, Q3DStudio::CString>> &outFontNameFileList)
+void CDoc::GetProjectFonts(std::vector<std::pair<QString, QString>> &outFontNameFileList)
 {
     outFontNameFileList.clear();
     qt3ds::render::ITextRenderer *theRenderer = m_SceneGraph->GetTextRenderer();
     if (theRenderer) {
-        qt3ds::render::NVConstDataRef<qt3ds::render::SRendererFontEntry> theProjectFonts =
-                theRenderer->GetProjectFontList();
-        for (uint32_t idx = 0, end = theProjectFonts.size(); idx < end; ++idx)
-            outFontNameFileList.push_back(
-                        std::make_pair(ConvertToWide(theProjectFonts[idx].m_FontName),
-                                       ConvertToWide(theProjectFonts[idx].m_FontFile)));
+        auto theProjectFonts = theRenderer->GetProjectFontList();
+        for (uint32_t idx = 0, end = theProjectFonts.size(); idx < end; ++idx) {
+            outFontNameFileList.push_back({theProjectFonts[idx].m_FontName,
+                                           theProjectFonts[idx].m_FontFile});
+        }
     }
 }
 
-void CDoc::GetProjectFonts(std::vector<Q3DStudio::CString> &outFonts)
+void CDoc::GetProjectFonts(std::vector<QString> &outFonts)
 {
     outFonts.clear();
     qt3ds::render::ITextRenderer *theRenderer = m_SceneGraph->GetTextRenderer();
     if (theRenderer) {
-        qt3ds::render::NVConstDataRef<qt3ds::render::SRendererFontEntry> theProjectFonts =
-                theRenderer->GetProjectFontList();
+        auto theProjectFonts = theRenderer->GetProjectFontList();
         for (uint32_t idx = 0, end = theProjectFonts.size(); idx < end; ++idx)
-            outFonts.push_back(ConvertToWide(theProjectFonts[idx].m_FontName));
+            outFonts.push_back(theProjectFonts[idx].m_FontName);
     }
 }
 
-Q3DStudio::CString CDoc::GetProjectFontName(const Q3DStudio::CFilePath &inFullPathToFontFile)
+// Given a font path, return the font name
+QString CDoc::GetProjectFontName(const Q3DStudio::CFilePath &inFullPathToFontFile)
 {
     qt3ds::render::ITextRenderer *theRenderer = m_SceneGraph->GetTextRenderer();
-    Q3DStudio::CString theFont;
+    QString theFont;
     if (theRenderer) {
-        qt3ds::render::NVConstDataRef<qt3ds::render::SRendererFontEntry> theProjectFonts =
-                theRenderer->GetProjectFontList();
+        auto theProjectFonts = theRenderer->GetProjectFontList();
         qCInfo(qt3ds::TRACE_INFO) << "Attempting to find font: "
                                   << inFullPathToFontFile.filePath();
         for (uint32_t idx = 0, end = theProjectFonts.size(); idx < end; ++idx) {
@@ -1140,11 +1130,11 @@ Q3DStudio::CString CDoc::GetProjectFontName(const Q3DStudio::CFilePath &inFullPa
             // the data coming from fontconfig.  For example, they always use forward slashes
             // instead of
             // back slashes.
-            Q3DStudio::CFilePath theFontFile(ConvertToWide(theProjectFonts[idx].m_FontFile));
+            Q3DStudio::CFilePath theFontFile(theProjectFonts[idx].m_FontFile);
             if (inFullPathToFontFile == theFontFile) {
                 qCInfo(qt3ds::TRACE_INFO) << "Matching against: " << theFontFile.filePath()
                                           << " SUCCEEDED";
-                theFont = ConvertToWide(theProjectFonts[idx].m_FontName);
+                theFont = theProjectFonts[idx].m_FontName;
                 break;
             } else {
                 qCInfo(qt3ds::TRACE_INFO) << "Matching against: " << theFontFile.filePath()
@@ -1228,7 +1218,7 @@ void CDoc::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
     // and the referenced materials that refer to that renamed material
     if (inProperty == bridge->GetNameProperty() && bridge->isInsideMaterialContainer(inInstance)) {
         const auto sceneEditor = getSceneEditor();
-        const auto dirPath = GetDocumentDirectory().toQString();
+        const QString dirPath = GetDocumentDirectory();
 
         const auto renameMaterial = [&](const QPair<QString, QString> &materialRename) {
             const QString oldFile
@@ -1239,6 +1229,7 @@ void CDoc::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
             // rename the referenced materials regardless
             if (QFileInfo(oldFile).exists())
                 QFile::rename(oldFile, newFile);
+
             if (QFileInfo(newFile).exists()) {
                 const QString newRelPath = QDir(dirPath).relativeFilePath(newFile);
 
@@ -1246,7 +1237,7 @@ void CDoc::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                 getSceneReferencedMaterials(GetSceneInstance(), refMats);
                 for (auto &refMat : qAsConst(refMats)) {
                     const auto origMat = bridge->getMaterialReference(refMat);
-                    if (origMat.Valid() && (long)origMat == inInstance) {
+                    if (origMat.Valid() && long(origMat) == inInstance) {
                         sceneEditor->setMaterialSourcePath(refMat,
                                     Q3DStudio::CString::fromQString(newRelPath));
                         sceneEditor->SetName(refMat, bridge->GetName(inInstance, true));
@@ -1619,44 +1610,37 @@ QString CDoc::getPresentationId() const
     return m_presentationId;
 }
 
-Q3DStudio::CString CDoc::GetDocumentDirectory() const
+QString CDoc::GetDocumentDirectory() const
 {
-    Q3DStudio::CFilePath thePath(m_DocumentPath);
-    return thePath.GetDirectory();
+    return QFileInfo(m_DocumentPath).path();
 }
 
 /**
- * Given an absolute path, return the relative path to doc if it is in doc's subdirectory.
- * Else, return normalized path so that we can easily do string comparison to compare path.
+ * Given an absolute path, return the relative path to doc.
  * This is used when we drag image / behavior / other files to scene.
  * In future we may want to return path to handle importing files from $CommonAssets.
  */
-Q3DStudio::CString CDoc::GetRelativePathToDoc(const Q3DStudio::CFilePath &inPath)
+QString CDoc::GetRelativePathToDoc(const Q3DStudio::CFilePath &inPath)
 {
-    Q3DStudio::CFilePath thePath(inPath);
-    Q3DStudio::CFilePath theDocumentPath(GetDocumentDirectory());
-    if (thePath.IsInSubDirectory(theDocumentPath))
-        thePath.ConvertToRelative(theDocumentPath);
-
-    return thePath;
+    return QDir(GetDocumentDirectory()).relativeFilePath(inPath.toQString());
 }
 
 /**
- * Given a path (may be relative or absolute), return the path with respect to doc.
+ * Given a path (may be relative or absolute), return an absolute path.
  * If the path is relative, it will be resolved based on document path.
- * Else, return normalized path so that we can easily do string comparison to compare path.
  * In future we may want to resolve path based on $CommonAssets.
  */
-Q3DStudio::CString CDoc::GetResolvedPathToDoc(const Q3DStudio::CFilePath &inPath)
+QString CDoc::GetResolvedPathToDoc(const Q3DStudio::CFilePath &inPath)
 {
     // If it is a relative path, resolve it.
     if (!inPath.IsAbsolute()) {
         // Sanity check that document path has been set properly.
         ASSERT(QFileInfo(m_DocumentPath).exists());
 
-        return Q3DStudio::CFilePath::CombineBaseAndRelative(GetDocumentDirectory(), inPath);
+        return QDir::cleanPath(QFileInfo(m_DocumentPath).dir()
+                               .absoluteFilePath(inPath.toQString()));
     }
-    return inPath.toCString();
+    return inPath.toQString();
 }
 
 /**

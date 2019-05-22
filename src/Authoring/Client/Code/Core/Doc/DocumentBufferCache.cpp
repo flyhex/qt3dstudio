@@ -105,10 +105,10 @@ struct SDocBufferCache : public IDocumentBufferCache
 
     IBufferManager *GetBufferManager()
     {
-        if (m_Doc.GetSceneGraph()) {
+        if (m_Doc.GetSceneGraph())
             return m_Doc.GetSceneGraph()->GetBufferManager();
-        }
-        return NULL;
+
+        return nullptr;
     }
 
     void Reset()
@@ -140,7 +140,7 @@ struct SDocBufferCache : public IDocumentBufferCache
     const wchar_t **GetPrimitiveNames() override
     {
         static const wchar_t *retval[] = {
-            L"#Rectangle", L"#Sphere", L"#Cone", L"#Cylinder", L"#Cube", NULL,
+            L"#Rectangle", L"#Sphere", L"#Cone", L"#Cylinder", L"#Cube", nullptr,
         };
         return retval;
     }

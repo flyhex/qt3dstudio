@@ -166,7 +166,7 @@ void ChooserModelBase::setCurrentFile(const QString &path)
     int fixedItemIndex = getFixedItemIndex(path);
 
     const auto doc = g_StudioApp.GetCore()->GetDoc();
-    const QDir documentDir(doc->GetDocumentDirectory().toQString());
+    const QDir documentDir(doc->GetDocumentDirectory());
     const QString fullPath = fixedItemIndex == -1 ? QDir::cleanPath(documentDir.filePath(path))
                                                   : path;
 

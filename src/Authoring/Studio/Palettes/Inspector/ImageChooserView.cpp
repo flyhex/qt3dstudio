@@ -106,8 +106,7 @@ QString ImageChooserView::currentDataModelPath() const
         else
             cleanPath = renderablePath;
 
-        cleanPath = QDir::cleanPath(
-                    QDir(doc->GetDocumentDirectory().toQString()).filePath(cleanPath));
+        cleanPath = QDir::cleanPath(QDir(doc->GetDocumentDirectory()).filePath(cleanPath));
     } else {
         cleanPath = ChooserModelBase::noneString();
     }

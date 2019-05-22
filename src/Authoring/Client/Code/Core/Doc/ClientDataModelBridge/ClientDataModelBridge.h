@@ -341,7 +341,7 @@ public:
     bool CheckNameUnique(qt3dsdm::Qt3DSDMInstanceHandle inParentInstance,
                          qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                          Q3DStudio::CString inDesiredName);
-    Q3DStudio::CString GetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
+    QString GetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
     Q3DStudio::CString getSubpresentation(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const;
     qt3dsdm::Qt3DSDMInstanceHandle getMaterialReference(qt3dsdm::Qt3DSDMInstanceHandle instance);
     bool isMaterialContainer(qt3dsdm::Qt3DSDMInstanceHandle instance) const;
@@ -353,9 +353,9 @@ public:
     QString getMaterialContainerPath() const;
     bool isDefaultMaterial(qt3dsdm::Qt3DSDMInstanceHandle instance) const;
     qt3dsdm::Qt3DSDMInstanceHandle getMaterialContainer() const;
-    std::set<Q3DStudio::CString> GetSourcePathList() const;
-    std::set<Q3DStudio::CString> GetFontFileList() const;
-    std::set<Q3DStudio::CString> GetDynamicObjectTextureList() const;
+    std::set<QString> GetSourcePathList() const;
+    std::set<QString> GetFontFileList() const;
+    std::set<QString> GetDynamicObjectTextureList() const;
     std::set<QString> getRenderableList() const;
     bool IsLockedAtAll(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     bool IsDuplicateable(qt3dsdm::Qt3DSDMInstanceHandle inInstance);

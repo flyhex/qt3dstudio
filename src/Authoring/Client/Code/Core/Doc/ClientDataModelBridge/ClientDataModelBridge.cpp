@@ -445,7 +445,6 @@ SLong4 CClientDataModelBridge::GetComponentGuid(qt3dsdm::Qt3DSDMSlideHandle inSl
     return theComponentGuid;
 }
 
-//==============================================================================
 /**
  *	Helper method to check whether this asset is active.
  *	An asset is active if it meets the following criteria
@@ -477,7 +476,6 @@ bool CClientDataModelBridge::IsActive(qt3dsdm::Qt3DSDMInstanceHandle inInstanceH
     return true;
 }
 
-//==============================================================================
 /**
  *	Get the active slide index of this component (or scene)
  *	@param	inAsset		the controlling component (component or scene)
@@ -743,7 +741,8 @@ Qt3DSDMInstanceHandle CClientDataModelBridge::GetInstanceByGUID(SLong4 inLong4)
 {
     if (inLong4 == SLong4(0, 0, 0, 0))
         return 0;
-    if (m_InstanceCachePropertyChangedConnection == NULL && m_Doc->GetStudioSystem()
+
+    if (!m_InstanceCachePropertyChangedConnection && m_Doc->GetStudioSystem()
         && m_Doc->GetStudioSystem()->GetFullSystem()) {
         IStudioFullSystemSignalProvider *theProvider(
             m_Doc->GetStudioSystem()->GetFullSystem()->GetSignalProvider());
@@ -768,6 +767,7 @@ Qt3DSDMInstanceHandle CClientDataModelBridge::GetInstanceByGUID(SLong4 inLong4)
         GetObjectDefinitions().m_Guided.m_GuidProp);
     m_CachedGUIDToInstancesHash.insert(std::make_pair(inLong4, retval));
     m_CachedInstanceToGUIDHash.insert(std::make_pair(retval, inLong4));
+
     return retval;
 }
 
@@ -1020,7 +1020,6 @@ bool CClientDataModelBridge::IsInComponent(qt3dsdm::Qt3DSDMInstanceHandle inInst
     return (GetOwningComponentInstance(inInstance) == inComponentInstance);
 }
 
-//==============================================================================
 /**
  * Get the component that this instance is a member of.
  * The component is the independent group or the Scene. inIsFirstCall is used
@@ -1042,7 +1041,6 @@ CClientDataModelBridge::GetParentComponent(qt3dsdm::Qt3DSDMInstanceHandle inInst
         return 0;
 }
 
-//=============================================================================
 /**
  *	Get a unique, non-conflicting name for a child.
  *	This will stip off all trailing numbers, find the base name then find a
@@ -1121,21 +1119,20 @@ bool CClientDataModelBridge::CheckNameUnique(qt3dsdm::Qt3DSDMInstanceHandle inPa
     return ((int)theExistingChild == 0 || theExistingChild == inInstance);
 }
 
-//=============================================================================
 /**
  *	Get SourcePath value for this instance
  */
-Q3DStudio::CString
-CClientDataModelBridge::GetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
+QString CClientDataModelBridge::GetSourcePath(qt3dsdm::Qt3DSDMInstanceHandle inInstance) const
 {
     if (inInstance.Valid()) {
         qt3dsdm::SValue theValue;
         IPropertySystem *thePropertySystem = m_Doc->GetStudioSystem()->GetPropertySystem();
         thePropertySystem->GetInstancePropertyValue(inInstance, m_SceneAsset.m_SourcePath,
                                                     theValue);
-        return qt3dsdm::get<TDataStrPtr>(theValue)->GetData();
-    } else
-        return L"";
+        return qt3dsdm::get<QString>(theValue);
+    }
+
+    return {};
 }
 
 /**
@@ -1237,7 +1234,7 @@ bool CClientDataModelBridge::isDefaultMaterial(Qt3DSDMInstanceHandle instance) c
         return false;
 
     return GetObjectType(instance) == OBJTYPE_REFERENCEDMATERIAL
-            && GetSourcePath(instance) == Q3DStudio::CString::fromQString(getDefaultMaterialName());
+           && GetSourcePath(instance) == getDefaultMaterialName();
 }
 
 Qt3DSDMInstanceHandle CClientDataModelBridge::getMaterialContainer() const
@@ -1254,7 +1251,6 @@ Qt3DSDMInstanceHandle CClientDataModelBridge::getMaterialContainer() const
     return Qt3DSDMInstanceHandle();
 }
 
-//=============================================================================
 /**
  *	Get all instances that are derived from ItemBase Instance.
  */
@@ -1265,15 +1261,6 @@ TInstanceHandleList CClientDataModelBridge::GetItemBaseInstances() const
     return theInstances;
 }
 
-inline void AddSourcePathToList(std::set<Q3DStudio::CString> &ioSourcePathList,
-                                const SValue &inValue)
-{
-    Q3DStudio::CFilePath theSourcePath = qt3dsdm::get<TDataStrPtr>(inValue)->GetData();
-    if (!theSourcePath.filePath().isEmpty())
-        ioSourcePathList.insert(theSourcePath.toCString());
-}
-
-//=============================================================================
 /**
  *	Get list of values from all instances derived from inParentInstance
  */
@@ -1305,7 +1292,6 @@ std::vector<SValue> CClientDataModelBridge::GetValueList(Qt3DSDMInstanceHandle i
     return theValueList;
 }
 
-//=============================================================================
 /**
  *	Get list of values from all slides
  */
@@ -1333,16 +1319,16 @@ void CClientDataModelBridge::GetValueListFromAllSlides(Qt3DSDMInstanceHandle inI
                 theSlideSystem->GetSlideByIndex(theSlide, theSlideIndex);
             if (theSlideCore->GetSpecificInstancePropertyValue(theSpecificSlide, inInstance,
                                                                inProperty, theValue)
-                && (inFilter == NULL || inFilter->KeepValue(inInstance, inProperty, theValue)))
+                && (!inFilter || inFilter->KeepValue(inInstance, inProperty, theValue)))
                 outValueList.push_back(theValue);
         }
     } else {
         // Else, we can get the property value
         qt3dsdm::SValue theValue;
         if (thePropertySystem->GetInstancePropertyValue(inInstance, inProperty, theValue)
-            && (inFilter == NULL
-                || inFilter->KeepValue(inInstance, inProperty, theValue.toOldSkool())))
+            && (!inFilter || inFilter->KeepValue(inInstance, inProperty, theValue.toOldSkool()))) {
             outValueList.push_back(theValue.toOldSkool());
+        }
     }
 }
 
@@ -1363,76 +1349,68 @@ struct SValueListFilter : public IValueFilter
     }
 };
 
-//=============================================================================
 /**
  *	Get SourcePath list from all instances
  */
-std::set<Q3DStudio::CString> CClientDataModelBridge::GetSourcePathList() const
+std::set<QString> CClientDataModelBridge::GetSourcePathList() const
 {
     // Get the source path property list
     SValueListFilter theFilter(*this);
     std::vector<SValue> theValueList =
         GetValueList(m_SceneAsset.m_Instance, m_SceneAsset.m_SourcePath, &theFilter);
 
-    // Translate from SValue to Q3DStudio::CString and also remove the identifier
-    std::set<Q3DStudio::CString> theSourcePathList;
-    for (std::vector<SValue>::iterator theIter = theValueList.begin();
-         theIter != theValueList.end(); ++theIter)
-        AddSourcePathToList(theSourcePathList, *theIter);
+    // Translate from SValue to QString and also remove the identifier
+    std::set<QString> theSourcePathList;
+    for (auto &val : theValueList) {
+        Q3DStudio::CFilePath theSourcePath = qt3dsdm::get<QString>(val);
+        if (!theSourcePath.filePath().isEmpty())
+            theSourcePathList.insert(theSourcePath.toQString());
+    }
 
     return theSourcePathList;
 }
 
-inline void AddStringToList(std::set<Q3DStudio::CString> &ioStringList, const SValue &inValue)
-{
-    Q3DStudio::CString theString = qt3dsdm::get<TDataStrPtr>(inValue)->GetData();
-    if (theString != L"")
-        ioStringList.insert(theString);
-}
-
-//=============================================================================
 /**
  *	Get Font file list from all Text instances
  */
-std::set<Q3DStudio::CString> CClientDataModelBridge::GetFontFileList() const
+std::set<QString> CClientDataModelBridge::GetFontFileList() const
 {
     // Get the font name property list
     std::vector<SValue> theValueList = GetValueList(m_Text.m_Instance, m_Text.m_Font);
-    std::set<Q3DStudio::CString> theFontNameList;
-    for (std::vector<SValue>::iterator theIter = theValueList.begin();
-         theIter != theValueList.end(); ++theIter)
-        AddStringToList(theFontNameList, *theIter);
+    std::set<QString> theFontNameList;
+    for (auto &val : theValueList) {
+        QString font = get<QString>(val);
+        if (!font.isEmpty())
+            theFontNameList.insert(font);
+    }
 
-    // early return
     if (theFontNameList.empty())
         return theFontNameList;
 
     // Translate the font name to font file
-    std::set<Q3DStudio::CString> theFontFileList;
-    std::vector<std::pair<Q3DStudio::CString, Q3DStudio::CString>> theFontNameFileList;
+    std::set<QString> theFontFileList;
+    std::vector<std::pair<QString, QString>> theFontNameFileList;
     m_Doc->GetProjectFonts(theFontNameFileList);
-    for (std::set<Q3DStudio::CString>::iterator theFontNameIter = theFontNameList.begin();
-         theFontNameIter != theFontNameList.end(); ++theFontNameIter) {
+    for (auto &font : theFontNameList) {
         // Given the font name, try to get the font file from the list of fonts registered in
         // Studio.
         // If the font is not found, it means that we are using missing font file.
         // Create some non-existing path to inform user that this font is missing.
         bool theFontFound = false;
-        Q3DStudio::CString theFontFile;
-        for (size_t idx = 0, end = theFontNameFileList.size(); idx < end; ++idx) {
-            if (theFontNameFileList[idx].first == *theFontNameIter) {
+        QString theFontFile;
+        for (auto &fontPair : theFontNameFileList) {
+            if (fontPair.first == font) {
                 theFontFound = true;
-                theFontFile = theFontNameFileList[idx].second;
+                theFontFile = fontPair.second;
                 break;
             }
         }
-        if (!theFontFound) {
-            theFontFile = L"fonts\\File with font name [";
-            theFontFile.append(*theFontNameIter);
-            theFontFile.append(" ]");
-        }
-        theFontFileList.insert(Q3DStudio::CFilePath(theFontFile).toCString());
+        if (!theFontFound)
+            theFontFile = QStringLiteral("fonts\\File with font name [%1]").arg(font);
+
+        theFontFileList.insert(theFontFile);
     }
+
     return theFontFileList;
 }
 
@@ -1485,11 +1463,10 @@ static void GetDynamicObjecTextures(IDataCore &inDataCore, IPropertySystem &inPr
     }
 }
 
-//=============================================================================
 /**
  *	Get texture list from all effect instances
  */
-std::set<Q3DStudio::CString> CClientDataModelBridge::GetDynamicObjectTextureList() const
+std::set<QString> CClientDataModelBridge::GetDynamicObjectTextureList() const
 {
     std::vector<SValue> theValueList;
 
@@ -1502,11 +1479,13 @@ std::set<Q3DStudio::CString> CClientDataModelBridge::GetDynamicObjectTextureList
     GetDynamicObjecTextures(*m_DataCore, *thePropertySystem, m_CustomMaterial.m_Instance,
                             theValueList, *this);
 
-    // Translate from SValue to Q3DStudio::CString and also remove the identifier
-    std::set<Q3DStudio::CString> theSourcePathList;
-    for (std::vector<SValue>::iterator theIter = theValueList.begin();
-         theIter != theValueList.end(); ++theIter)
-        AddSourcePathToList(theSourcePathList, *theIter);
+    // Translate from SValue to QString and also remove the identifier
+    std::set<QString> theSourcePathList;
+    for (auto &val : theValueList) {
+        Q3DStudio::CFilePath theSourcePath = qt3dsdm::get<QString>(val);
+        if (!theSourcePath.filePath().isEmpty())
+            theSourcePathList.insert(theSourcePath.toQString());
+    }
 
     return theSourcePathList;
 }
@@ -1520,8 +1499,8 @@ std::set<QString> CClientDataModelBridge::getRenderableList() const
     valueList.insert(valueList.end(), imageList.begin(), imageList.end());
 
     std::set<QString> idList;
-    for (auto it = valueList.begin(); it != valueList.end(); ++it) {
-        QString renderableId = qt3dsdm::get<TDataStrPtr>(*it)->toQString();
+    for (auto &val : valueList) {
+        QString renderableId = qt3dsdm::get<QString>(val);
         if (!renderableId.isEmpty())
             idList.insert(renderableId);
     }
@@ -1642,7 +1621,6 @@ bool CClientDataModelBridge::IsMaster(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
     }
 }
 
-//=============================================================================
 /**
  *	Get the layer that this instance lies in.
  */
@@ -1663,7 +1641,6 @@ CClientDataModelBridge::GetResidingLayer(qt3dsdm::Qt3DSDMInstanceHandle inInstan
     }
 }
 
-//=============================================================================
 /**
  *	Get a child object by it's name in the active Slide.
  *	This is meant to only be used by GetUniqueChildName, names are not Unique

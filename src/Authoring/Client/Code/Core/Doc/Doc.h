@@ -198,9 +198,9 @@ public:
     QString GetDocumentPath() const;
     void setPresentationId(const QString &id);
     QString getPresentationId() const;
-    Q3DStudio::CString GetDocumentDirectory() const;
-    Q3DStudio::CString GetRelativePathToDoc(const Q3DStudio::CFilePath &inPath);
-    Q3DStudio::CString GetResolvedPathToDoc(const Q3DStudio::CFilePath &inPath);
+    QString GetDocumentDirectory() const;
+    QString GetRelativePathToDoc(const Q3DStudio::CFilePath &inPath);
+    QString GetResolvedPathToDoc(const Q3DStudio::CFilePath &inPath);
     QString getRelativePath() const;
 
     QString CreateUntitledDocument() const;
@@ -405,12 +405,10 @@ public:
     void SetSceneGraph(std::shared_ptr<Q3DStudio::IDocSceneGraph> inGraph);
     Q3DStudio::IDocSceneGraph *GetSceneGraph() { return m_SceneGraph.get(); }
 
-    void GetProjectFonts(
-            std::vector<std::pair<Q3DStudio::CString, Q3DStudio::CString>> &outFontNameFileList);
-    void GetProjectFonts(std::vector<Q3DStudio::CString> &outFonts);
-    Q3DStudio::CString
-    GetProjectFontName(const Q3DStudio::CFilePath
-                       &inFullPathToFontFile); // Given a font file, return the font name
+    void GetProjectFonts(std::vector<std::pair<QString, QString>> &outFontNameFileList);
+    void GetProjectFonts(std::vector<QString> &outFonts);
+
+    QString GetProjectFontName(const Q3DStudio::CFilePath &inFullPathToFontFile);
     void setPlayBackPreviewState(bool state);
     bool isPlayBackPreviewOn() const;
     int getSelectedInstancesCount() const;

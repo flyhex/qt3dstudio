@@ -576,7 +576,7 @@ bool Qt3DSDMTimelineItemBinding::IsValidTransaction(EUserTransaction inTransacti
     case EUserTransaction_Rename:
         return (GetObjectType() != OBJTYPE_SCENE && GetObjectType() != OBJTYPE_IMAGE
                 && (bridge->GetObjectType(theInstance) != OBJTYPE_REFERENCEDMATERIAL
-                || bridge->GetSourcePath(theInstance).IsEmpty()));
+                || bridge->GetSourcePath(theInstance).isEmpty()));
 
     case EUserTransaction_Duplicate:
         if (theInstance.Valid())

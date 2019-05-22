@@ -252,7 +252,7 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
                             Q3DStudio::SCOPED_DOCUMENT_EDITOR(theDoc,
                                                               tr("Set material diffuse map")));
                         editor->BeginAggregateOperation();
-                        editor->SetMaterialType(inTarget, "Standard Material");
+                        editor->SetMaterialType(inTarget, QStringLiteral("Standard Material"));
                         editor->setInstanceImagePropertyValue(inTarget, propHandle, src, isPres);
                         editor->EndAggregateOperation();
                     } else {
@@ -295,12 +295,12 @@ CCmd *CFileDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandle inTar
                     Q3DStudio::ScopedDocumentEditor sceneEditor(
                                 Q3DStudio::SCOPED_DOCUMENT_EDITOR(
                                     *doc, tr("Drag and Drop Material")));
-                    Q3DStudio::CString docDir = theDoc.GetDocumentDirectory();
-                    Q3DStudio::CFilePath relPath = Q3DStudio::CFilePath::GetRelativePathFromBase(
-                                docDir, Q3DStudio::CString::fromQString(m_FilePath));
-                    sceneEditor->SetMaterialType(inTarget, "Referenced Material");
-                    sceneEditor->setMaterialSourcePath(inTarget, relPath);
-                    sceneEditor->setMaterialReferenceByPath(inTarget, relPath.toQString());
+                    QString relPath = theDoc.GetRelativePathToDoc(m_FilePath);
+
+                    sceneEditor->SetMaterialType(inTarget, QStringLiteral("Referenced Material"));
+                    sceneEditor->setMaterialSourcePath(inTarget,
+                                                       Q3DStudio::CString::fromQString(relPath));
+                    sceneEditor->setMaterialReferenceByPath(inTarget, relPath);
                     theDoc.SelectDataModelObject(inTarget);
                 } else {
                     g_StudioApp.GetDialogs()->DisplayMessageBox(

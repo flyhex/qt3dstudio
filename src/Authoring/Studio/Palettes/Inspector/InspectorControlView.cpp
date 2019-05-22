@@ -601,7 +601,7 @@ void InspectorControlView::setPropertyValueFromFilename(long instance, int handl
         if (name != ChooserModelBase::noneString()) {
             // Relativize the path to the presentation
             const auto doc = g_StudioApp.GetCore()->GetDoc();
-            const QDir documentDir(doc->GetDocumentDirectory().toQString());
+            const QDir documentDir(doc->GetDocumentDirectory());
             QString relativeName = documentDir.relativeFilePath(name);
             value = relativeName;
         }

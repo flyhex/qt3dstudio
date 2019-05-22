@@ -192,8 +192,8 @@ void ProjectFileSystemModel::updateReferences()
                 SubPresentationRecord({}, doc->getPresentationId(),
                                       projectDir.relativeFilePath(doc->GetDocumentPath())));
 
-    auto addReferencesPresentation = [this, doc, &projectPath](const Q3DStudio::CString &str) {
-        addPathsToReferences(m_references, projectPath, doc->GetResolvedPathToDoc(str).toQString());
+    auto addReferencesPresentation = [this, doc, &projectPath](const QString &str) {
+        addPathsToReferences(m_references, projectPath, doc->GetResolvedPathToDoc(str));
     };
     auto addReferencesRenderable = [this, &projectPath, &projectPathSlash, &subpresentationRecord]
             (const QString &id) {

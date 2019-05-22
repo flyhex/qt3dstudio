@@ -131,9 +131,9 @@ struct SImportXmlErrorHandler : public CXmlErrorHandler
     std::shared_ptr<IImportFailedHandler> m_handler;
     QString m_fullPathToDocument;
     SImportXmlErrorHandler(std::shared_ptr<IImportFailedHandler> hdl,
-                           const Q3DStudio::CString &inFullPathToDocument)
+                           const QString &inFullPathToDocument)
         : m_handler(hdl)
-        , m_fullPathToDocument(inFullPathToDocument.toQString())
+        , m_fullPathToDocument(inFullPathToDocument)
     {
     }
     void OnXmlError(const QString &errorName, int line, int) override
@@ -887,7 +887,7 @@ public:
         }
     }
 
-    Q3DStudio::CString GetCustomMaterialName(const Q3DStudio::CString &inFullPathToFile) const override
+    Q3DStudio::CString GetCustomMaterialName(const QString &inFullPathToFile) const override
     {
         Q3DStudio::CString retval;
         qt3ds::foundation::CFileSeekableIOStream theStream(inFullPathToFile,
@@ -920,7 +920,7 @@ public:
     {
         Q3DStudio::Q3DSMaterialDefinitionParser::getMaterialInfo(
                     inAbsoluteFilePath, g_StudioApp.GetCore()->getProjectFile().getProjectPath(),
-                    m_Doc.GetDocumentDirectory().toQString(), outName, outValues, outTextureValues);
+                    m_Doc.GetDocumentDirectory(), outName, outValues, outTextureValues);
 
         // Fix the outName to follow the file name (in case it has changed)
         outName = getMaterialNameFromFilePath(inAbsoluteFilePath);
@@ -1645,8 +1645,8 @@ public:
     }
 
     TInstanceHandle SetInstancePropertyValueAsImage(TInstanceHandle instance,
-                                                            TPropertyHandle propName,
-                                                            const Q3DStudio::CString &inSourcePath) override
+                                                    TPropertyHandle propName,
+                                                    const Q3DStudio::CString &inSourcePath) override
     {
         CFilePath thePath = m_Doc.GetResolvedPathToDoc(inSourcePath);
         assert(thePath.IsFile());
@@ -1841,7 +1841,7 @@ public:
     }
 
     void SetMaterialType(TInstanceHandle instance,
-                         const Q3DStudio::CString &inRelativePathToMaterialFile) override
+                         const QString &inRelativePathToMaterialFile) override
     {
         if (m_Bridge.GetSourcePath(instance) == inRelativePathToMaterialFile)
             return;
@@ -1882,13 +1882,13 @@ public:
             instance, m_Bridge.GetObjectDefinitions().m_Lightmaps.m_LightmapShadow);
 
         DeleteInstance(instance);
-        if (inRelativePathToMaterialFile == "Standard Material")
-            newMaterial =
-                CreateSceneGraphInstance(ComposerObjectTypes::Material, model, theSlide, instance);
-        else if (inRelativePathToMaterialFile == "Referenced Material")
+        if (inRelativePathToMaterialFile == QLatin1String("Standard Material")) {
+            newMaterial = CreateSceneGraphInstance(ComposerObjectTypes::Material, model, theSlide,
+                                                   instance);
+        } else if (inRelativePathToMaterialFile == QLatin1String("Referenced Material")) {
             newMaterial = CreateSceneGraphInstance(ComposerObjectTypes::ReferencedMaterial, model,
                                                    theSlide, instance);
-        else {
+        } else {
             CFilePath thePath = m_Doc.GetResolvedPathToDoc(inRelativePathToMaterialFile);
             newMaterial = LoadCustomMaterial(thePath, model, theSlide,
                                              DocumentEditorInsertType::LastChild, 0, instance);
@@ -1977,7 +1977,7 @@ public:
             QFile file(actualSourcePath);
             if ((createNewFile && !file.exists()) || (!createNewFile && file.exists()))
                 saveMaterial(instance, file);
-            return m_Doc.GetRelativePathToDoc(actualSourcePath);
+            return Q3DStudio::CString::fromQString(m_Doc.GetRelativePathToDoc(actualSourcePath));
         }
 
         return "";
@@ -2058,7 +2058,7 @@ public:
         QMap<QString, Qt3DSDMInstanceHandle> textureHandles;
         qt3dsdm::TPropertyHandleList propList;
 
-        const QDir docDir(m_Doc.GetDocumentDirectory().toQString());
+        const QDir docDir = m_Doc.GetDocumentDirectory();
         const QDir projDir = g_StudioApp.GetCore()->getProjectFile().getProjectPath();
         auto sourcePathProp = m_Bridge.GetSourcePathProperty();
         // Importing interprets "./" prefix to mean project dir relative
@@ -2086,7 +2086,7 @@ public:
                     if (guid.Valid()) {
                         auto ref = m_Bridge.GetInstanceByGUID(guid);
                         textureHandles[name] = ref;
-                        strValue = m_Bridge.GetSourcePath(ref).toQString();
+                        strValue = m_Bridge.GetSourcePath(ref);
                         if (strValue.isEmpty()) {
                             strValue = m_Bridge.getSubpresentation(ref).toQString();
                             isPath = false;
@@ -2200,9 +2200,10 @@ public:
         if (path.contains(QLatin1String(".materialdef"))) {
             QDir dir(path);
             if (dir.isAbsolute())
-                dirPath = QDir(m_Doc.GetDocumentDirectory().toQString()).relativeFilePath(path);
+                dirPath = m_Doc.GetRelativePathToDoc(path);
             else
                 dirPath = dir.path();
+
             QFileInfo fi = QFileInfo(dirPath);
             materialName = fi.completeBaseName();
             dirPath = fi.path();
@@ -2254,7 +2255,7 @@ public:
                                const QMap<QString, QString> &values,
                                const QMap<QString, QMap<QString, QString>> &textureValues) override
     {
-        SetMaterialType(instance, "Referenced Material");
+        SetMaterialType(instance, QStringLiteral("Referenced Material"));
         setMaterialSourcePath(instance, materialSourcePath);
         setMaterialValues(materialSourcePath.toQString(), values, textureValues);
         setMaterialReferenceByPath(instance, materialSourcePath.toQString());
@@ -2414,8 +2415,7 @@ public:
         if (values.contains(QStringLiteral("type"))) {
             if (values[QStringLiteral("type")] == QLatin1String("CustomMaterial")
                     && values.contains(QStringLiteral("sourcepath"))) {
-                SetMaterialType(instance, Q3DStudio::CString::fromQString(
-                                    values[QStringLiteral("sourcepath")]));
+                SetMaterialType(instance, values[QStringLiteral("sourcepath")]);
                 if (values.contains(QStringLiteral("name"))) {
                     SetName(instance, Q3DStudio::CString::fromQString(
                                 values[QStringLiteral("name")]));
@@ -2515,7 +2515,8 @@ public:
                 SLong4 guid = get<qt3dsdm::SLong4>(value);
                 if (guid.Valid()) {
                     srcChild = m_Bridge.GetInstanceByGUID(guid);
-                    const auto path = std::make_shared<CDataStr>(m_Bridge.GetSourcePath(srcChild));
+                    const auto path = std::make_shared<CDataStr>(CString::fromQString(
+                                                                 m_Bridge.GetSourcePath(srcChild)));
                     SetInstancePropertyValue(dst, prop, path);
                 }
             } else {
@@ -3279,16 +3280,16 @@ public:
 
                 if (refMaterial.Valid()) {
                     const Q3DStudio::CString refType = GetObjectTypeName(refMaterial);
-                    Q3DStudio::CString v;
+                    QString v;
                     if (refType == "CustomMaterial")
                         v = m_Bridge.GetSourcePath(refMaterial);
                     else
-                        v = "Standard Material";
+                        v = QStringLiteral("Standard Material");
 
                     SetMaterialType(instance, v);
                     copyMaterialProperties(refMaterial, instance);
                 } else {
-                    SetMaterialType(instance, "Standard Material");
+                    SetMaterialType(instance, QStringLiteral("Standard Material"));
                 }
 
                 const auto name = GetName(instance);
@@ -3888,7 +3889,7 @@ public:
             setInstanceImagePropertyValue(imageMaterial, prop, absSrc, true);
         } else {
             CFilePath absPath(absSrc);
-            relPath = m_Doc.GetRelativePathToDoc(absPath);
+            relPath = CString::fromQString(m_Doc.GetRelativePathToDoc(absPath));
             materialName = findUniqueMaterialName(absPath.GetFileStem().toQString(),
                                                   relPath.toQString());
             imageMaterial = getOrCreateMaterial(materialName);
@@ -3922,9 +3923,9 @@ public:
             return 0;
         }
         CFilePath relativePath = m_Doc.GetRelativePathToDoc(imageSrc);
-        SImageTextureData theImageBuffer =
-            m_Doc.GetBufferCache().GetOrCreateImageBuffer(relativePath);
-        if (theImageBuffer.m_Texture == NULL) {
+        SImageTextureData theImageBuffer = m_Doc.GetBufferCache()
+                                           .GetOrCreateImageBuffer(relativePath);
+        if (!theImageBuffer.m_Texture) {
             if (theHandler)
                 theHandler->DisplayImportFailed(imageSrc.toQString(),
                                                 QObject::tr("Can't Load Image File"), false);
@@ -3976,17 +3977,19 @@ public:
                                                 QObject::tr("Source File Doesn't Exist"), false);
             return 0;
         }
-        Q3DStudio::CString theRelativePath(m_Doc.GetRelativePathToDoc(inFullPathToDocument));
+        Q3DStudio::CString theRelativePath = Q3DStudio::CString::fromQString(
+                                             m_Doc.GetRelativePathToDoc(inFullPathToDocument));
         SModelBufferAndPath theModelBuffer =
             m_Doc.GetBufferCache().GetOrCreateModelBuffer(theRelativePath);
-        if (theModelBuffer.m_ModelBuffer == NULL) {
+        if (!theModelBuffer.m_ModelBuffer) {
             if (theHandler)
                 theHandler->DisplayImportFailed(imageSrc.toQString(),
                                                 QObject::tr("Could Not Load Model Buffer"), false);
             return 0;
         }
         // Ensure we include the model buffer version in the relative path
-        theRelativePath = m_Doc.GetRelativePathToDoc(theModelBuffer.m_FilePath);
+        theRelativePath = Q3DStudio::CString::fromQString(
+                          m_Doc.GetRelativePathToDoc(theModelBuffer.m_FilePath));
 
         qt3dsdm::Qt3DSDMInstanceHandle theModelInstance =
             CreateSceneGraphInstance(ComposerObjectTypes::Model, inParent, inSlide);
@@ -4008,11 +4011,12 @@ public:
 
     static void *l_alloc(void *ud, void *ptr, size_t osize, size_t nsize)
     {
-        (void)ud;
-        (void)osize; /* not used */
+        Q_UNUSED(ud)
+        Q_UNUSED(osize)
+
         if (nsize == 0) {
             free(ptr);
-            return NULL;
+            return nullptr;
         } else
             return realloc(ptr, nsize);
     }
@@ -4023,7 +4027,7 @@ public:
 
         QQmlEngine engine;
         QString path = inFile.filePath();
-        path.replace('\\', '/');
+        path.replace(QLatin1Char('\\'), QLatin1Char('/'));
         QQmlComponent component(&engine, QUrl::fromLocalFile(path),
                                 QQmlComponent::CompilationMode::PreferSynchronous);
         if (component.status() == QQmlComponent::Error)
@@ -4359,8 +4363,8 @@ public:
         }
 
         // Get the font name of the font file
-        CString theFontName = m_Doc.GetProjectFontName(theFontFile);
-        if (theFontName.size() == 0) {
+        QString theFontName = m_Doc.GetProjectFontName(theFontFile);
+        if (theFontName.isEmpty()) {
             if (theHandler)
                 theHandler->DisplayImportFailed(theFontFile.toQString(),
                                                 QObject::tr("Unable to load Font File"), false);
@@ -4375,7 +4379,8 @@ public:
 
         // Set the Font property to the font file
         m_PropertySystem.SetInstancePropertyValue(theTextInstance, m_Bridge.GetText().m_Font,
-                                                  std::make_shared<qt3dsdm::CDataStr>(theFontName));
+                                                  std::make_shared<qt3dsdm::CDataStr>(
+                                                  Q3DStudio::CString::fromQString(theFontName)));
 
         if (inStartTime != -1)
             SetStartTime(theTextInstance, inStartTime);
@@ -4513,7 +4518,7 @@ public:
                                            long inStartTime)
     {
         std::shared_ptr<IImportFailedHandler> theHandler(m_Doc.GetImportFailedHandler());
-        Q3DStudio::CString relPath = m_Doc.GetRelativePathToDoc(inFullPathToDocument);
+        QString relPath = m_Doc.GetRelativePathToDoc(inFullPathToDocument);
         TInstanceHandle retval =
             CreateSceneGraphInstance(ComposerObjectTypes::Path, inParent, inSlide);
         Q3DStudio::CFilePath theFilePath(relPath);
@@ -4531,7 +4536,7 @@ public:
             inSlide, retval, m_Bridge.GetObjectDefinitions().m_Path.m_PathType,
             TDataStrPtr(new CDataStr(L"Painted")));
         SetInstancePropertyValue(retval, m_Bridge.GetObjectDefinitions().m_Asset.m_SourcePath,
-                                 TDataStrPtr(new CDataStr(relPath.c_str())));
+                                 TDataStrPtr(new CDataStr(CString::fromQString(relPath))));
         FinalizeAddOrDrop(retval, inParent, inDropType, CPt(), inStartTime == -1, false);
         return retval;
     }
@@ -4703,12 +4708,12 @@ public:
             // of this asset.  We now need to attempt to run the refresh algorithm.
 
             qt3dsimp::ImportPtrOrError theImportPtr = qt3dsimp::Import::Load(theImportFilePath.toCString());
-            if (theImportPtr.m_Value == NULL) {
+            if (!theImportPtr.m_Value) {
                 QT3DS_ASSERT(false);
                 continue;
             }
 
-            if (inNewFile.Exists() == false) {
+            if (!inNewFile.Exists()) {
                 QT3DS_ASSERT(false);
                 continue;
             }
@@ -5149,13 +5154,14 @@ public:
                     else
                         theFullSrcPath = theSrcFile;
                     TCharPtr theDAERelativePath =
-                        m_StringTable.RegisterStr(m_Doc.GetRelativePathToDoc(theFullSrcPath));
+                        m_StringTable.RegisterStr(CString::fromQString(
+                                                  m_Doc.GetRelativePathToDoc(theFullSrcPath)));
                     pair<unordered_map<TCharPtr, TCharPtr>::iterator, bool> theInsertResult =
                         m_ImportFileToDAEMap.insert(
                             make_pair(m_StringTable.RegisterStr(theRelativePath.toCString()),
                                       theDAERelativePath));
                     theImportPtr.m_Value->Release();
-                    if (theInsertResult.second == false)
+                    if (!theInsertResult.second)
                         theInsertResult.first->second = theDAERelativePath;
                 }
             }
@@ -5270,7 +5276,8 @@ public:
                     CFilePath theFullSrcPath =
                         CFilePath::CombineBaseAndRelative(theDestDir, theSrcFile);
                     TCharPtr theDAERelativePath =
-                        m_StringTable.RegisterStr(m_Doc.GetRelativePathToDoc(theFullSrcPath));
+                        m_StringTable.RegisterStr(CString::fromQString(
+                                                  m_Doc.GetRelativePathToDoc(theFullSrcPath)));
                     pair<unordered_map<TCharPtr, TCharPtr>::iterator, bool> theInsertResult =
                         m_ImportFileToDAEMap.insert(
                             make_pair(m_StringTable.RegisterStr(theRelativePath.toCString()),
@@ -5427,7 +5434,7 @@ IDocumentEditor::GetAlwaysUnlinkedProperties(qt3dsdm::SComposerObjectDefinitions
 void IDocumentEditor::fixDefaultTexturePaths(Qt3DSDMInstanceHandle instance)
 {
     const auto core = g_StudioApp.GetCore();
-    const QDir docDir(core->GetDoc()->GetDocumentDirectory().toQString());
+    const QDir docDir(core->GetDoc()->GetDocumentDirectory());
     const QDir projDir = core->getProjectFile().getProjectPath();
     const auto propertySystem = core->GetDoc()->GetStudioSystem()->GetPropertySystem();
     qt3dsdm::TPropertyHandleList propList;
@@ -5524,8 +5531,7 @@ IDocumentEditor::ParseScriptFile(const CFilePath &inFullPathToDocument,
     using namespace ScriptParser;
     std::shared_ptr<qt3dsdm::IStringTable> theStringTable(inStringTable);
     std::shared_ptr<IDOMFactory> theFactory(IDOMFactory::CreateDOMFactory(theStringTable));
-    SImportXmlErrorHandler theXmlErrorHandler(inHandler,
-        inFullPathToDocument.toCString());
+    SImportXmlErrorHandler theXmlErrorHandler(inHandler, inFullPathToDocument.toQString());
     std::shared_ptr<IDOMReader> theReaderPtr(
         SScriptParser::ParseScriptFile(theFactory, inStringTable,
                                        inFullPathToDocument.toQString(),
@@ -5550,8 +5556,7 @@ IDocumentEditor::ParsePluginFile(const Q3DStudio::CFilePath &inFullPathToDocumen
 {
     std::shared_ptr<qt3dsdm::IStringTable> theStringTable(inStringTable);
     std::shared_ptr<IDOMFactory> theFactory(IDOMFactory::CreateDOMFactory(theStringTable));
-    SImportXmlErrorHandler theXmlErrorHandler(inHandler,
-        inFullPathToDocument.toCString());
+    SImportXmlErrorHandler theXmlErrorHandler(inHandler, inFullPathToDocument.toQString());
 
     std::shared_ptr<IDOMReader> theReaderPtr = CRenderPluginParser::ParseFile(
         theFactory, theStringTable, theStringTable->GetNarrowStr(inFullPathToDocument.toCString()),
@@ -5575,8 +5580,7 @@ IDocumentEditor::ParseCustomMaterialFile(const Q3DStudio::CFilePath &inFullPathT
 {
     std::shared_ptr<qt3dsdm::IStringTable> theStringTable(inStringTable);
     std::shared_ptr<IDOMFactory> theFactory(IDOMFactory::CreateDOMFactory(theStringTable));
-    SImportXmlErrorHandler theXmlErrorHandler(inHandler,
-        inFullPathToDocument.toCString());
+    SImportXmlErrorHandler theXmlErrorHandler(inHandler, inFullPathToDocument.toQString());
 
     std::shared_ptr<IDOMReader> theReaderPtr = CRenderPluginParser::ParseFile(
         theFactory, theStringTable, theStringTable->GetNarrowStr(inFullPathToDocument.toCString()),

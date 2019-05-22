@@ -241,7 +241,7 @@ public:
                                          const Q3DStudio::CString &inSourcePath) = 0;
 
     virtual void SetMaterialType(TInstanceHandle instance,
-                                 const Q3DStudio::CString &inRelativePathToMaterialFile) = 0;
+                                 const QString &inRelativePathToMaterialFile) = 0;
 
     virtual void setMaterialProperties(TInstanceHandle instance,
                                        const Q3DStudio::CString &materialSourcePath,
