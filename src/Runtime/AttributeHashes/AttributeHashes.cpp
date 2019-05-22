@@ -64,7 +64,7 @@ typedef std::vector<std::string> TStringList;
 //==============================================================================
 const char g_Text[] = "Qt3DSAttributeHashes.txt";
 const char g_Include[] = "Qt3DSAttributeHashes.h";
-const char g_Source[] = "..\\Source\\Qt3DSAttributeHashes.cpp";
+const char g_Source[] = "Qt3DSAttributeHashes.cpp";
 const char g_TestString[] = "qt.io";
 
 //==============================================================================
@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
     std::ifstream theText(g_Text);
     if (!theText) {
         fprintf(stderr, "Failed: Could not input text file, set working directory to "
-                        "Runtime\\Source\\Include and try again.\n");
+                        "src\\Runtime\\Source\\runtime and try again.\n");
         return -1;
     }
 
@@ -242,7 +242,7 @@ int main(int argc, char *argv[])
         "/****************************************************************************\n"
         "**\n"
         "** Copyright (C) 1993-2009 NVIDIA Corporation.\n"
-        "** Copyright (C) 2017 The Qt Company Ltd.\n"
+        "** Copyright (C) 2019 The Qt Company Ltd.\n"
         "** Contact: https://www.qt.io/licensing/\n"
         "**\n"
         "** This file is part of Qt 3D Studio.\n"
