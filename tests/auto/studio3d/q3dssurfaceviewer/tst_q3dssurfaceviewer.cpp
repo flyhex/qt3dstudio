@@ -688,6 +688,12 @@ void tst_Q3DSSurfaceViewer::testSettings()
     QImage image2 = m_viewer->grab();
     QVERIFY(image1 != image2);
 
+    s->setShowRenderStats(false);
+    QCOMPARE(spy1.count(), 1);
+    QCOMPARE(spy2.count(), 2);
+    QCOMPARE(spy3.count(), 0);
+    QCOMPARE(spy4.count(), 0);
+
     // ShadeMode
     image1 = m_viewer->grab();
 
@@ -695,7 +701,7 @@ void tst_Q3DSSurfaceViewer::testSettings()
     QCOMPARE(s->shadeMode(), Q3DSViewerSettings::ShadeModeShadedWireframe);
 
     QCOMPARE(spy1.count(), 1);
-    QCOMPARE(spy2.count(), 1);
+    QCOMPARE(spy2.count(), 2);
     QCOMPARE(spy3.count(), 1);
     QCOMPARE(spy4.count(), 0);
 
@@ -712,7 +718,7 @@ void tst_Q3DSSurfaceViewer::testSettings()
     QCOMPARE(s->scaleMode(), Q3DSViewerSettings::ScaleModeFit);
 
     QCOMPARE(spy1.count(), 1);
-    QCOMPARE(spy2.count(), 1);
+    QCOMPARE(spy2.count(), 2);
     QCOMPARE(spy3.count(), 2);
     QCOMPARE(spy4.count(), 1);
 
@@ -723,7 +729,7 @@ void tst_Q3DSSurfaceViewer::testSettings()
     QCOMPARE(s->scaleMode(), Q3DSViewerSettings::ScaleModeFill);
 
     QCOMPARE(spy1.count(), 1);
-    QCOMPARE(spy2.count(), 1);
+    QCOMPARE(spy2.count(), 2);
     QCOMPARE(spy3.count(), 2);
     QCOMPARE(spy4.count(), 2);
 
@@ -737,17 +743,17 @@ void tst_Q3DSSurfaceViewer::testSettings()
     image1 = m_viewer->grab();
 
     s->setMatteColor(Qt::yellow);
-    s->setShowRenderStats(false);
+    s->setShowRenderStats(true);
     s->setShadeMode(Q3DSViewerSettings::ShadeModeShadedWireframe);
     s->setScaleMode(Q3DSViewerSettings::ScaleModeFit);
 
     QCOMPARE(s->matteColor(), QColor(Qt::yellow));
-    QCOMPARE(s->isShowRenderStats(), false);
+    QCOMPARE(s->isShowRenderStats(), true);
     QCOMPARE(s->shadeMode(), Q3DSViewerSettings::ShadeModeShadedWireframe);
     QCOMPARE(s->scaleMode(), Q3DSViewerSettings::ScaleModeFit);
 
     QCOMPARE(spy1.count(), 2);
-    QCOMPARE(spy2.count(), 2);
+    QCOMPARE(spy2.count(), 3);
     QCOMPARE(spy3.count(), 3);
     QCOMPARE(spy4.count(), 3);
 
@@ -757,12 +763,12 @@ void tst_Q3DSSurfaceViewer::testSettings()
             QStringLiteral("tst_q3dsurfaceviewer"));
 
     QCOMPARE(s->matteColor(), QColor(Qt::cyan));
-    QCOMPARE(s->isShowRenderStats(), true);
+    QCOMPARE(s->isShowRenderStats(), false);
     QCOMPARE(s->shadeMode(), Q3DSViewerSettings::ShadeModeShaded);
     QCOMPARE(s->scaleMode(), Q3DSViewerSettings::ScaleModeFill);
 
     QCOMPARE(spy1.count(), 3);
-    QCOMPARE(spy2.count(), 3);
+    QCOMPARE(spy2.count(), 4);
     QCOMPARE(spy3.count(), 4);
     QCOMPARE(spy4.count(), 4);
 

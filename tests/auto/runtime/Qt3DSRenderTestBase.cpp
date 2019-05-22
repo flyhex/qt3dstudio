@@ -78,7 +78,7 @@ bool NVRenderTestBase::initializeQt3DSRenderer(QSurfaceFormat format)
 {
     m_coreFactory = qt3ds::render::IQt3DSRenderFactoryCore::CreateRenderFactoryCore("", m_windowSystem,
                                                                                 m_timeProvider);
-    m_factory = m_coreFactory->CreateRenderFactory(format);
+    m_factory = m_coreFactory->CreateRenderFactory(format, false);
     m_rc = m_factory->GetQt3DSRenderContext();
     m_renderImpl = new qt3ds::render::Qt3DSRendererImpl(*m_rc);
 
