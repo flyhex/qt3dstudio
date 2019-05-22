@@ -780,7 +780,8 @@ struct Qt3DSRenderScene : public Q3DStudio::IScene
     {
         IBufferManager &mgr = m_Context->GetBufferManager();
         forAllObjects<SImage>(m_GraphObjectList, GraphObjectTypes::Image, [&mgr](SImage *image){
-            if (image->m_ImagePath.IsValid()) {
+            if (image->m_ImagePath.IsValid() && qt3ds::runtime::isImagePath(
+                        image->m_ImagePath.c_str())) {
                 image->m_LoadedTextureData = mgr.CreateReloadableImage(image->m_ImagePath,
                                                                        false, false);
                 image->m_LoadedTextureData->m_callbacks.push_back(image);
@@ -881,14 +882,6 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
         return *theTagPtr;
     }
 
-    static bool IsImage(const char *ending)
-    {
-        if (!ending)
-            return false;
-        return stricmp(ending, "jpg") == 0 || stricmp(ending, "peg") == 0
-            || stricmp(ending, "png") == 0 || stricmp(ending, "dds") == 0
-            || stricmp(ending, "hdr") == 0 || stricmp(ending, "ktx") == 0;
-    }
     static bool IsMesh(const char *ending)
     {
         if (!ending)
@@ -1018,9 +1011,8 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
                     m_Context->m_CoreContext->GetStringTable().RegisterStr(theValue.c_str());
                 size_t theValueSize = theValue.size();
                 if (theValueSize > 3) {
-                    const char *ending = theValue.c_str() + theValueSize - 3;
                     CRegisteredString theObjectPath = theSourcePath;
-                    if (IsImage(ending)) {
+                    if (qt3ds::runtime::isImagePath(theValue.c_str())) {
                         // load only images not on any slide
                         if (!theManager.isReloadableResourcesEnabled() ||
                                 !slideSourcePaths.contains(QString::fromLatin1(theValue.c_str()))) {
@@ -1195,8 +1187,7 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
             bool hasTransparency = m_SourcePaths[idx].second;
             if (theSourcePathStr.size() > 4) {
                 CRegisteredString theObjectPath = m_SourcePaths[idx].first;
-                const char *theEnding = theSourcePathStr.c_str() + theSourcePathStr.size() - 3;
-                if (IsImage(theEnding)) {
+                if (qt3ds::runtime::isImagePath(theSourcePathStr.c_str())) {
                     theManager.SetImageHasTransparency(theObjectPath, hasTransparency);
                     theSourcePathList.push_back(theObjectPath);
                 } else {

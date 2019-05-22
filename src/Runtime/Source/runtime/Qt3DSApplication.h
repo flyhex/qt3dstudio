@@ -238,6 +238,8 @@ public:
                                                const char8_t *inApplicationDirectory);
     static bool isPickingEvent(Q3DStudio::TEventCommandHash event);
 };
+
+bool isImagePath(const QString &path);
 }
 }
 

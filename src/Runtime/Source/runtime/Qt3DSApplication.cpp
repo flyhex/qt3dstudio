@@ -106,6 +106,17 @@ struct StringConversion<QT3DSVec2>
 }
 }
 
+bool qt3ds::runtime::isImagePath(const QString &path)
+{
+    int index = path.lastIndexOf(QLatin1Char('.'));
+    if (index < 0)
+        return false;
+    const QString ext = path.right(path.length() - index - 1);
+    return (ext == QLatin1String("jpg") || ext == QLatin1String("jpeg")
+            || ext == QLatin1String("png") || ext == QLatin1String("hdr")
+            || ext == QLatin1String("dds") || ext == QLatin1String("ktx"));
+}
+
 struct SFrameTimer
 {
     int m_FrameCount;
@@ -245,21 +256,11 @@ struct SSlideResourceCounter
         counters.clear();
         begin();
     }
-    bool isImage(const QString &path)
-    {
-        int index = path.lastIndexOf(".");
-        if (index < 0)
-            return false;
-        const QString ext = path.right(path.length() - index - 1);
-        return (ext == QLatin1String("jpg") || ext == QLatin1String("jpeg")
-                || ext == QLatin1String("png") || ext == QLatin1String("hdr")
-                || ext == QLatin1String("dds") || ext == QLatin1String("ktx"));
-    }
     QSet<QString> toImageSet(const QVector<QString> &vec)
     {
         QSet<QString> s;
         for (const auto &x : vec) {
-            if (isImage(x))
+            if (isImagePath(x))
                 s.insert(x);
         }
         return s;
