@@ -162,6 +162,28 @@ The following properties will be imported into Qt 3D Studio:
 
 \section1 Exporting FBX from Blender
 
+In order to export as FBX, you will need to have an FBX export add-on installed and enabled
+in Blender. With the default installation of Blender, the \c {Import-Export: FBX format} should be
+installed. If you do not have the option to export as FBX avaialble, ensure that the add-on is
+enabled by following the steps below:
+
+\list 1
+  \li
+  From the file menu, select \uicontrol {File > User Preferences}.
+  \li
+  Select \uicontrol{Add-ons} from the top menu bar.
+  \li
+  Search for \e{fbx}.
+  \li
+  The add-on should now be visible, enable it by clicking the check box next to its name.
+\endlist
+
+\image enable-fbx-addon-blender.png
+
+\endlist
+
+Next, to export as FBX, follow the steps below:
+
 \list 1
   \li From the file menu, select \uicontrol {File > Export > FBX (.fbx)}.
   \li For animations, ensure that \uicontrol {Baked Animation} under the \uicontrol Animation
