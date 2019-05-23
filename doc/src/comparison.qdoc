@@ -148,7 +148,7 @@ Below, we list some common use cases and how they apply to the two:
       \l{https://doc.qt.io/qt-5/qml-qt3d-render-sceneloader.html}{SceneLoader} for a full list.
     \li
       A number of formats are supported. See \l{2D Assets} and
-      \l{Working with 3D Content}{3D Assets} for details.
+      \l{3D Assets} for details.
 \endtable
 
 \section2 Creating 3D Engines and Editors
