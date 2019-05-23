@@ -27,6 +27,7 @@
 **
 ****************************************************************************/
 
+#include "qtAuthoring-config.h"
 #include "Dialogs.h"
 #include "StudioApp.h"
 #include "Core.h"
