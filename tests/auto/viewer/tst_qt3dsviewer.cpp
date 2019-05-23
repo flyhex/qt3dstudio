@@ -197,7 +197,23 @@ void tst_qt3dsviewer::testCreateElement()
         }
     });
 
+    auto loadMatDefFile = [&](const QString &fileName) -> QString {
+        QFile matDefFile(fileName);
+        if (!matDefFile.open(QIODevice::ReadOnly | QIODevice::Text))
+            return {};
+
+        QTextStream in(&matDefFile);
+        return in.readAll();
+    };
+
     int animValue = 0;
+
+    QString md = loadMatDefFile(QStringLiteral(
+                            ":/scenes/simple_cube_animation/materials/Basic Red.materialdef"));
+    m_presentation->createMaterial(QStringLiteral("Scene"), md);
+    md = loadMatDefFile(QStringLiteral(
+                            ":/scenes/simple_cube_animation/materials/Basic Green.materialdef"));
+    m_presentation->createMaterial(QStringLiteral("Scene"), md);
 
     QHash<QString, QVariant> data;
     data.insert(QStringLiteral("name"), QStringLiteral("New Cylinder"));

@@ -462,6 +462,7 @@ public:
     void Shutdown(qt3ds::NVFoundationBase &inFoundation) override;
 
 private:
+    TElement *createMaterialContainer(TElement *parent, CPresentation *presentation);
     void createComponent(QQmlComponent *component, TElement *element);
     TElement *getTarget(const char *component);
     void listAllElements(TElement *root, QList<TElement *> &elements);
@@ -1252,6 +1253,20 @@ void CQmlEngineImpl::deleteElements(const QStringList &elementPaths,
     deleteElements(elements, renderer);
 }
 
+TElement *CQmlEngineImpl::createMaterialContainer(TElement *parent, CPresentation *presentation)
+{
+    TPropertyDescAndValueList prop;
+    auto &strTable = presentation->GetStringTable();
+    const auto matName = strTable.RegisterStr(QStringLiteral("__Container"));
+    const auto matType = strTable.RegisterStr(QStringLiteral("Material"));
+    const auto matClass = CRegisteredString();
+    TElement &element = m_Application->GetElementAllocator().CreateElement(
+                        matName, matType, matClass,
+                        toConstDataRef(prop.data(), prop.size()),
+                        presentation, parent, false);
+    return &element;
+}
+
 /**
     Creates material into material container of the presentation that owns the specified element.
     The materialDefinition parameter can contain a .materialdef file path or
@@ -1322,12 +1337,8 @@ void CQmlEngineImpl::createMaterials(const QString &elementPath,
     TElement *rootElement = presentation->GetRoot();
     const auto containerName = strTable.RegisterStr("__Container");
     TElement *container = rootElement->FindChild(CHash::HashString(containerName.c_str()));
-    if (!container) {
-        // TODO: Create a material container if it doesn't exist (QT3DS-3412)
-        error = QObject::tr("Presentation has no material container");
-        handleError();
-        return;
-    }
+    if (!container)
+        container = createMaterialContainer(rootElement, presentation);
 
     for (auto &materialInfo : materialInfos) {
         if (materialInfo->materialName.isEmpty() || materialInfo->materialProps.isEmpty()) {

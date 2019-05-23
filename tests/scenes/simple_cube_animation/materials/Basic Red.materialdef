@@ -21,5 +21,5 @@
 	<Property name="importfile"></Property>
 	<Property name="type">Material</Property>
 	<Property name="name"><![CDATA[materials/Basic Red]]></Property>
-	<Property name="path"><![CDATA[C:/dev/qt/NDD/qt3ds2/tests/scenes/simple_cube_animation/materials/Basic Red.materialdef]]></Property>
+	<Property name="path"><![CDATA[C:/dev/q3dstudio/qt3dstudio/tests/scenes/simple_cube_animation/materials/Basic Red.materialdef]]></Property>
 </MaterialData>
