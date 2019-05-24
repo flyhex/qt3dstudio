@@ -38,14 +38,58 @@ namespace render {
 
     typedef void (*TTaskFunction)(void *inUserData);
 
-    struct TaskStates
-    {
-        enum Enum {
-            UnknownTask = 0,
-            Queued,
-            Running,
-        };
+struct TaskStates
+{
+    enum Enum {
+        UnknownTask = 0,
+        Queued,
+        Running,
     };
+};
+
+
+struct STask
+{
+    void *m_UserData;
+    TTaskFunction m_Function;
+    TTaskFunction m_CancelFunction;
+    QT3DSU64 m_Id;
+    TaskStates::Enum m_TaskState;
+    STask *m_NextTask;
+    STask *m_PreviousTask;
+
+    STask(void *ud, TTaskFunction func, TTaskFunction cancelFunc, QT3DSU64 inId)
+        : m_UserData(ud)
+        , m_Function(func)
+        , m_CancelFunction(cancelFunc)
+        , m_Id(inId)
+        , m_TaskState(TaskStates::Queued)
+        , m_NextTask(NULL)
+        , m_PreviousTask(NULL)
+    {
+    }
+    STask()
+        : m_UserData(NULL)
+        , m_Function(NULL)
+        , m_CancelFunction(NULL)
+        , m_Id(0)
+        , m_TaskState(TaskStates::UnknownTask)
+        , m_NextTask(NULL)
+        , m_PreviousTask(NULL)
+    {
+    }
+    void CallFunction()
+    {
+        if (m_Function)
+            m_Function(m_UserData);
+    }
+    void Cancel()
+    {
+        if (m_CancelFunction)
+            m_CancelFunction(m_UserData);
+    }
+};
+
 
     struct CancelReturnValues
     {
@@ -71,6 +115,9 @@ namespace render {
                               TTaskFunction inCancelFunction) = 0;
         virtual TaskStates::Enum GetTaskState(QT3DSU64 inTaskId) = 0;
         virtual CancelReturnValues::Enum CancelTask(QT3DSU64 inTaskId) = 0;
+
+        virtual STask GetNextTask() = 0;
+        virtual void TaskFinished(QT3DSU64 inId) = 0;
 
         static IThreadPool &CreateThreadPool(NVFoundationBase &inFoundation,
                                              QT3DSU32 inNumThreads = 4);

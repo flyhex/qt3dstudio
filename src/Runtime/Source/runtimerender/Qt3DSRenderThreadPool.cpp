@@ -43,47 +43,6 @@
 using namespace qt3ds::render;
 
 namespace {
-struct STask
-{
-    void *m_UserData;
-    TTaskFunction m_Function;
-    TTaskFunction m_CancelFunction;
-    QT3DSU64 m_Id;
-    TaskStates::Enum m_TaskState;
-    STask *m_NextTask;
-    STask *m_PreviousTask;
-
-    STask(void *ud, TTaskFunction func, TTaskFunction cancelFunc, QT3DSU64 inId)
-        : m_UserData(ud)
-        , m_Function(func)
-        , m_CancelFunction(cancelFunc)
-        , m_Id(inId)
-        , m_TaskState(TaskStates::Queued)
-        , m_NextTask(NULL)
-        , m_PreviousTask(NULL)
-    {
-    }
-    STask()
-        : m_UserData(NULL)
-        , m_Function(NULL)
-        , m_CancelFunction(NULL)
-        , m_Id(0)
-        , m_TaskState(TaskStates::UnknownTask)
-        , m_NextTask(NULL)
-        , m_PreviousTask(NULL)
-    {
-    }
-    void CallFunction()
-    {
-        if (m_Function)
-            m_Function(m_UserData);
-    }
-    void Cancel()
-    {
-        if (m_CancelFunction)
-            m_CancelFunction(m_UserData);
-    }
-};
 
 struct STaskHeadOp
 {
@@ -99,19 +58,10 @@ struct STaskTailOp
 
 typedef InvasiveLinkedList<STask, STaskHeadOp, STaskTailOp> TTaskList;
 
-class IInternalTaskManager
-{
-protected:
-    virtual ~IInternalTaskManager() {}
-public:
-    virtual STask GetNextTask() = 0;
-    virtual void TaskFinished(QT3DSU64 inId) = 0;
-};
-
 struct SThreadPoolThread : public Thread
 {
-    IInternalTaskManager *m_Mgr;
-    SThreadPoolThread(NVFoundationBase &foundation, IInternalTaskManager *inMgr)
+    IThreadPool *m_Mgr;
+    SThreadPoolThread(NVFoundationBase &foundation, IThreadPool *inMgr)
         : Thread(foundation)
         , m_Mgr(inMgr)
     {
@@ -130,7 +80,7 @@ struct SThreadPoolThread : public Thread
     }
 };
 
-struct SThreadPool : public IThreadPool, public IInternalTaskManager
+struct SThreadPool : public IThreadPool
 {
     typedef nvhash_map<QT3DSU64, STask *> TIdTaskMap;
     typedef Mutex::ScopedLock TLockType;
