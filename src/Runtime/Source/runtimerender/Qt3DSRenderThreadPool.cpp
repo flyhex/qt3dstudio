@@ -110,8 +110,8 @@ public:
 
 struct SThreadPoolThread : public Thread
 {
-    IInternalTaskManager &m_Mgr;
-    SThreadPoolThread(NVFoundationBase &foundation, IInternalTaskManager &inMgr)
+    IInternalTaskManager *m_Mgr;
+    SThreadPoolThread(NVFoundationBase &foundation, IInternalTaskManager *inMgr)
         : Thread(foundation)
         , m_Mgr(inMgr)
     {
@@ -120,10 +120,10 @@ struct SThreadPoolThread : public Thread
     {
         setName("Qt3DSRender Thread manager thread");
         while (!quitIsSignalled()) {
-            STask task = m_Mgr.GetNextTask();
+            STask task = m_Mgr->GetNextTask();
             if (task.m_Function) {
                 task.CallFunction();
-                m_Mgr.TaskFinished(task.m_Id);
+                m_Mgr->TaskFinished(task.m_Id);
             }
         }
         quit();
@@ -162,7 +162,7 @@ struct SThreadPool : public IThreadPool, public IInternalTaskManager
         // Fire up our little pools of chaos.
         for (QT3DSU32 idx = 0; idx < inMaxThreads; ++idx) {
             m_Threads.push_back(
-                QT3DS_NEW(m_Foundation.getAllocator(), SThreadPoolThread)(m_Foundation, *this));
+                QT3DS_NEW(m_Foundation.getAllocator(), SThreadPoolThread)(m_Foundation, this));
             m_Threads.back()->start(Thread::DEFAULT_STACK_SIZE);
         }
     }
