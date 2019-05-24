@@ -94,13 +94,9 @@ public:
         m_context->moveToThread(this);
         m_surface->moveToThread(this);
         m_surfaceViewer->moveToThread(this);
-#ifdef Q3DS_PREVIEW_SUBPRESENTATION_RT2
+
         QObject::connect(m_surfaceViewer.data(), &Q3DSSurfaceViewer::frameUpdate,
                          this, &RendererThread::frameRendered);
-#else
-        QObject::connect(m_surfaceViewer.data(), &Q3DSSurfaceViewer::frameUpdated,
-                         this, &RendererThread::frameRendered);
-#endif
         m_initialized = true;
     }
 

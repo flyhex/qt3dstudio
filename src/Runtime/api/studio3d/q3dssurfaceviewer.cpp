@@ -294,7 +294,7 @@ void Q3DSSurfaceViewerPrivate::update()
             if (m_fboId == 0)
                 m_context->swapBuffers(m_surface);
 
-            Q_EMIT q_ptr->frameUpdated();
+            Q_EMIT q_ptr->frameUpdate();
         }
     }
 }

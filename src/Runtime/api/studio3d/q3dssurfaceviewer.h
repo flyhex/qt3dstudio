@@ -97,7 +97,7 @@ Q_SIGNALS:
     void autoSizeChanged(bool autoSize);
     void updateIntervalChanged(bool autoUpdate);
     void runningChanged(bool initialized);
-    void frameUpdated();
+    void frameUpdate();
     void presentationIdChanged(const QString &id);
 
 private:
