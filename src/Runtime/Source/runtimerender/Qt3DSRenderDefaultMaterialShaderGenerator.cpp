@@ -1516,8 +1516,8 @@ struct SShaderGenerator : public IDefaultMaterialShaderGenerator
         GenerateVertexShader();
         GenerateFragmentShader(theKey);
 
-        VertexGenerator().EndVertexGeneration();
-        VertexGenerator().EndFragmentGeneration();
+        VertexGenerator().EndVertexGeneration(false);
+        VertexGenerator().EndFragmentGeneration(false);
 
         return ProgramGenerator().CompileGeneratedShader(m_GeneratedShaderString.c_str(),
                                                          SShaderCacheProgramFlags(), FeatureSet());

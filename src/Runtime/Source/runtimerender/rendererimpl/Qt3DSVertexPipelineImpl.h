@@ -441,10 +441,10 @@ namespace render {
         void BeginVertexGeneration(QT3DSU32 displacementImageIdx,
                                            SRenderableImage *displacementImage) override = 0;
         void AssignOutput(const char8_t *inVarName, const char8_t *inVarValueExpr) override = 0;
-        void EndVertexGeneration() override = 0;
+        void EndVertexGeneration(bool customShader) override = 0;
 
         void BeginFragmentGeneration() override = 0;
-        void EndFragmentGeneration() override = 0;
+        void EndFragmentGeneration(bool customShader) override = 0;
 
         virtual IShaderStageGenerator &ActiveStage() = 0;
         virtual void AddInterpolationParameter(const char8_t *inParamName,

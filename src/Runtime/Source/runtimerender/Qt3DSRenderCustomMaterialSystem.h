@@ -158,8 +158,8 @@ namespace render {
         virtual void GenerateVarTangentAndBinormal() override;
         virtual void GenerateWorldPosition() override;
         // responsible for closing all vertex and fragment generation
-        virtual void EndVertexGeneration() override;
-        virtual void EndFragmentGeneration() override;
+        virtual void EndVertexGeneration(bool customShader) override;
+        virtual void EndFragmentGeneration(bool customShader) override;
         virtual IShaderStageGenerator &ActiveStage() override;
         virtual void AddInterpolationParameter(const char8_t *inName, const char8_t *inType) override;
         virtual void DoGenerateUVCoords(QT3DSU32 inUVSet) override;

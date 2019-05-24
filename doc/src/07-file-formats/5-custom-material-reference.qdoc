@@ -479,13 +479,15 @@ In this case it is not necessary to write all the functions described above. Eac
 contain main function.
 
 \badcode
+out vec4 fragColor;
 void main()
 {
-
-// No closing parenthesis because the generator adds it for us.
+    fragColor = ...
+}
 \endcode
 
-The only requirement is to leave the closing parenthesis out since the material system adds it.
+\note Previous versions stated that the closing parenthesis should not be added to the main function.
+This is no longer the case and the main function should add the closing parenthesis.
 
 \section2 Simple Custom Material Example
 
@@ -522,8 +524,7 @@ out vec4 fragColor;
         vec4 c = texture(basecolor, varTexCoord0.xy);
         c.rgb *= vec3(red_weight, green_weight, blue_weight);
         fragColor = c;
-
-        // No closing parenthesis because the generator adds it for us.
+    }
         </FragmentShader>
     </Shader>
     </Shaders>

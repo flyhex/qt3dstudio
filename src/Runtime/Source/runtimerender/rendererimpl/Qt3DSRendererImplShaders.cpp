@@ -509,7 +509,7 @@ namespace render {
             Vertex().Append("\tvarColor = attr_color;");
         }
 
-        void EndVertexGeneration() override
+        void EndVertexGeneration(bool) override
         {
 
             if (HasTessellation()) {
@@ -529,7 +529,7 @@ namespace render {
             Vertex().Append("}");
         }
 
-        void EndFragmentGeneration() override { Fragment().Append("}"); }
+        void EndFragmentGeneration(bool) override { Fragment().Append("}"); }
 
         void AddInterpolationParameter(const char8_t *inName, const char8_t *inType) override
         {

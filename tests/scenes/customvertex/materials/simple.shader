@@ -11,10 +11,13 @@
 
                 void main() {
                     gl_Position = modelViewProjection * vec4(attr_pos * scale, 1.0);
+                }
             </VertexShader>
             <FragmentShader>
+                out vec4 fragColor;
                 void main() {
-                    fragOutput = vec4(color, 1.0);
+                    fragColor = vec4(color.rgb, 1.0);
+                }
             </FragmentShader>
         </Shader>
     </Shaders>

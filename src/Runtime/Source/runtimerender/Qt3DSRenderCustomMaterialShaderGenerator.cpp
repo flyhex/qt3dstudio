@@ -1022,7 +1022,8 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
         inFragmentShader << "}\n\n";
     }
 
-    void GenerateFragmentShader(SShaderDefaultMaterialKey &, const char8_t *inShaderPathName,
+    // Returns true if custom shader provides main function
+    bool GenerateFragmentShader(SShaderDefaultMaterialKey &, const char8_t *inShaderPathName,
                                 bool hasCustomVertexShader)
     {
         qt3ds::render::IDynamicObjectSystem &theDynamicSystem(
@@ -1084,10 +1085,10 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
             if (nextIndex != eastl::string::npos)
                 fragmentDefStart = nextIndex;
         }
-        eastl_size_t mainStart = srcString.find("void main()");
         if (fragmentDefStart == eastl::string::npos)
-            return;
+            return false;
 
+        eastl_size_t mainStart = srcString.find("void main()");
         if (mainStart != eastl::string::npos && mainStart < fragmentDefStart)
             mainStart = srcString.find("void main()", mainStart + 1);
 
@@ -1115,7 +1116,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
 
                 vertexShader.GenerateViewVector();
             }
-            return;
+            return true;
         }
 
         if (Material().HasLighting() && lightmapIndirectImage) {
@@ -1192,6 +1193,7 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
             fragmentShader << "  gl_FragColor = rgba;" << Endl;
         else
             fragmentShader << "  fragColor = rgba;" << Endl;
+        return false;
     }
 
     NVRenderShaderProgram *GenerateCustomMaterialShader(const char8_t *inShaderPrefix,
@@ -1208,10 +1210,11 @@ struct SShaderGenerator : public ICustomMaterialShaderGenerator
         theKey.ToString(m_GeneratedShaderString, m_DefaultMaterialShaderKeyProperties);
 
         bool hasCustomVertexShader = GenerateVertexShader(theKey, inCustomMaterialName);
-        GenerateFragmentShader(theKey, inCustomMaterialName, hasCustomVertexShader);
+        bool hasCustomFragmentShader = GenerateFragmentShader(theKey, inCustomMaterialName,
+                                                              hasCustomVertexShader);
 
-        VertexGenerator().EndVertexGeneration();
-        VertexGenerator().EndFragmentGeneration();
+        VertexGenerator().EndVertexGeneration(hasCustomVertexShader);
+        VertexGenerator().EndFragmentGeneration(hasCustomFragmentShader);
 
         NVRenderShaderProgram *program = ProgramGenerator().CompileGeneratedShader(
                     m_GeneratedShaderString.c_str(), SShaderCacheProgramFlags(), FeatureSet());

@@ -281,8 +281,11 @@ struct ShaderCache : public IShaderCache
             m_InsertStr += "#define gl_FragColor fragOutput\n";
 
             if (m_RenderContext.IsAdvancedBlendHwSupportedKHR())
-                m_InsertStr += "layout(blend_support_all_equations) out;\n ";
+                m_InsertStr += "layout(blend_support_all_equations) out;\n";
+
+            m_InsertStr += "#ifndef NO_FRAG_OUTPUT\n";
             m_InsertStr += "out vec4 fragOutput;\n";
+            m_InsertStr += "#endif\n";
         }
     }
 

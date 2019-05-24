@@ -551,7 +551,7 @@ struct SPathVertexPipeline : public SVertexPipelineImpl
         Vertex() << "\tvarColor = attr_color;" << Endl;
     }
 
-    void EndVertexGeneration() override
+    void EndVertexGeneration(bool) override
     {
 
         if (HasTessellation()) {
@@ -570,7 +570,7 @@ struct SPathVertexPipeline : public SVertexPipelineImpl
         }
     }
 
-    void EndFragmentGeneration() override { Fragment().Append("}"); }
+    void EndFragmentGeneration(bool) override { Fragment().Append("}"); }
 
     void AddInterpolationParameter(const char8_t *inName, const char8_t *inType) override
     {
@@ -770,9 +770,9 @@ struct SXYRectVertexPipeline : public SVertexPipelineImpl
         Vertex() << "\tvarColor = attr_color;" << Endl;
     }
 
-    void EndVertexGeneration() override { Vertex().Append("}"); }
+    void EndVertexGeneration(bool) override { Vertex().Append("}"); }
 
-    void EndFragmentGeneration() override { Fragment().Append("}"); }
+    void EndFragmentGeneration(bool) override { Fragment().Append("}"); }
 
     void AddInterpolationParameter(const char8_t *inName, const char8_t *inType) override
     {
@@ -1677,8 +1677,8 @@ struct SPathManager : public IPathManager
                 thePipeline.BeginVertexGeneration(displacementIdx, displacementImage);
                 thePipeline.BeginFragmentGeneration();
                 thePipeline.Fragment().Append("\tfragOutput = vec4(1.0, 1.0, 1.0, 1.0);");
-                thePipeline.EndVertexGeneration();
-                thePipeline.EndFragmentGeneration();
+                thePipeline.EndVertexGeneration(false);
+                thePipeline.EndFragmentGeneration(false);
                 const char8_t *shaderName = "path depth";
                 if (displacementImage)
                     shaderName = "path depth displacement";
@@ -1708,8 +1708,8 @@ struct SPathManager : public IPathManager
                 thePipeline.BeginVertexGeneration(0, NULL);
                 thePipeline.BeginFragmentGeneration();
                 thePipeline.Fragment().Append("\tfragOutput = vec4(1.0, 1.0, 1.0, 1.0);");
-                thePipeline.EndVertexGeneration();
-                thePipeline.EndFragmentGeneration();
+                thePipeline.EndVertexGeneration(false);
+                thePipeline.EndFragmentGeneration(false);
                 const char8_t *shaderName = "path painted depth";
                 SShaderCacheProgramFlags theFlags;
                 NVRenderShaderProgram *theProgram =

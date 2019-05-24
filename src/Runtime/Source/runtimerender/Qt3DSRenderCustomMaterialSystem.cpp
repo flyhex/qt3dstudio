@@ -399,7 +399,7 @@ void SCustomMaterialVertexPipeline::GenerateWorldPosition()
 }
 
 // responsible for closing all vertex and fragment generation
-void SCustomMaterialVertexPipeline::EndVertexGeneration()
+void SCustomMaterialVertexPipeline::EndVertexGeneration(bool customShader)
 {
     if (HasTessellation()) {
         // finalize tess control shader
@@ -417,12 +417,14 @@ void SCustomMaterialVertexPipeline::EndVertexGeneration()
         }
     }
 
-    Vertex().Append("}");
+    if (!customShader)
+        Vertex().Append("}");
 }
 
-void SCustomMaterialVertexPipeline::EndFragmentGeneration()
+void SCustomMaterialVertexPipeline::EndFragmentGeneration(bool customShader)
 {
-    Fragment().Append("}");
+    if (!customShader)
+        Fragment().Append("}");
 }
 
 IShaderStageGenerator &SCustomMaterialVertexPipeline::ActiveStage()
@@ -1204,6 +1206,12 @@ struct SMaterialSystem : public ICustomMaterialSystem
                                         TShaderFeatureSet inFeatureSet)
     {
         NVRenderShaderProgram *theProgram = NULL;
+        eastl::vector<SShaderPreprocessorFeature> features;
+        for (int i = 0; i < inFeatureSet.size(); ++i)
+            features.push_back(inFeatureSet.mData[i]);
+        features.push_back(SShaderPreprocessorFeature(m_Context->GetStringTable()
+                                                      .RegisterStr("NO_FRAG_OUTPUT"), true));
+        TShaderFeatureSet featureSet(features.data(), features.size());
 
         SDynamicShaderProgramFlags theFlags(inRenderContext.m_Model.m_TessellationMode,
                                             inRenderContext.m_Subset.m_WireframeMode);
@@ -1212,13 +1220,13 @@ struct SMaterialSystem : public ICustomMaterialSystem
         theFlags.SetGeometryShaderEnabled(inRenderContext.m_Subset.m_WireframeMode);
 
         SShaderMapKey skey = SShaderMapKey(
-            TStrStrPair(inCommand.m_ShaderPath, inCommand.m_ShaderDefine), inFeatureSet,
+            TStrStrPair(inCommand.m_ShaderPath, inCommand.m_ShaderDefine), featureSet,
             theFlags.m_TessMode, theFlags.m_WireframeMode, inRenderContext.m_MaterialKey);
         eastl::pair<TShaderMap::iterator, bool> theInsertResult(m_ShaderMap.insert(
             eastl::make_pair(skey, NVScopedRefCounted<SCustomMaterialShader>(NULL))));
 
         if (theInsertResult.second) {
-            theProgram = GetShader(inRenderContext, inMaterial, inCommand, inFeatureSet, theFlags);
+            theProgram = GetShader(inRenderContext, inMaterial, inCommand, featureSet, theFlags);
 
             if (theProgram) {
                 theInsertResult.first->second =

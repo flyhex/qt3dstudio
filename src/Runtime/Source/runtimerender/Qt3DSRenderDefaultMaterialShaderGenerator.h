@@ -79,8 +79,8 @@ namespace render {
         virtual bool HasActiveWireframe() = 0; // varEdgeDistance is a valid entity
 
         // responsible for closing all vertex and fragment generation
-        virtual void EndVertexGeneration() = 0;
-        virtual void EndFragmentGeneration() = 0;
+        virtual void EndVertexGeneration(bool customShader) = 0;
+        virtual void EndFragmentGeneration(bool customShader) = 0;
     };
 
     class IDefaultMaterialShaderGenerator : public IMaterialShaderGenerator
