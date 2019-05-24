@@ -327,7 +327,13 @@ void CUIPParserObjectRefHelper::CacheStateGraph(IDOMReader &inReader)
                 if (theNode) {
                     // Overwrite the name. This assumes that "name" property is always linked.
                     if (inReader.Att("name", theName)) {
-                        theNode->m_Name = m_MetaData.Register(theName);
+                        // Do not touch the name of an image instance that was renamed in the code
+                        // below. i.e. an image that is referred to from a material.
+                        if (!(theNode->m_Type == m_MetaData.Register("Image")
+                              && m_ImageNamePropertyList.find(theNode->m_Name)
+                                 != m_ImageNamePropertyList.end())) {
+                            theNode->m_Name = m_MetaData.Register(theName);
+                        }
                     }
 
                     // Special case for material. Image properties refer to instances.
