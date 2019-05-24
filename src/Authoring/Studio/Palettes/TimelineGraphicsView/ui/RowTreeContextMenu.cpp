@@ -54,11 +54,10 @@ RowTreeContextMenu::~RowTreeContextMenu()
 void RowTreeContextMenu::initialize()
 {
     CDoc &doc(*g_StudioApp.GetCore()->GetDoc());
-    qt3dsdm::Qt3DSDMInstanceHandle instance
-            = static_cast<Qt3DSDMTimelineItemBinding *>(m_TimelineItemBinding)->GetInstance();
+    qt3dsdm::Qt3DSDMInstanceHandle instance = m_RowTree->instance();
 
     // add sub-presentations submenu
-    if (m_RowTree->rowType() & (OBJTYPE_LAYER | OBJTYPE_MATERIAL | OBJTYPE_IMAGE)) {
+    if (m_RowTree->objectType() & (OBJTYPE_LAYER | OBJTYPE_IS_MATERIAL | OBJTYPE_IMAGE)) {
         m_subpMenu = addMenu(tr("Set sub-presentation"));
         connect(m_subpMenu, &QMenu::triggered, this, &RowTreeContextMenu::addSubPresentation);
 
@@ -70,9 +69,9 @@ void RowTreeContextMenu::initialize()
     }
 
     // add datainput controller submenu
-    if (m_RowTree->rowType() & ~(OBJTYPE_GUIDE | OBJTYPE_EFFECT | OBJTYPE_ALIAS | OBJTYPE_SCENE)
-         && !static_cast<Qt3DSDMTimelineItemBinding *>(m_TimelineItemBinding)
-         ->isDefaultMaterial()) {
+    if (m_RowTree->objectType() & ~(OBJTYPE_GUIDE | OBJTYPE_EFFECT | OBJTYPE_ALIAS | OBJTYPE_SCENE)
+        && !m_RowTree->isDefaultMaterial()) {
+
         m_diMenu = addMenu(tr("Set datainput controller"));
         connect(m_diMenu, &QMenu::triggered, this, &RowTreeContextMenu::addDiController);
 
@@ -82,9 +81,9 @@ void RowTreeContextMenu::initialize()
         // the referenced source, and set datainput control to point to the property
         // in the referenced source.
         auto refInstance = doc.GetStudioSystem()->GetClientDataModelBridge()
-                ->getMaterialReference(instance);
+                           ->getMaterialReference(instance);
         propList = doc.GetStudioSystem()->GetPropertySystem()
-                    ->GetControllableProperties(refInstance ? refInstance : instance);
+                   ->GetControllableProperties(refInstance ? refInstance : instance);
 
         QMap<int, QAction *> sections;
         for (const auto &prop : propList) {
@@ -236,29 +235,21 @@ bool RowTreeContextMenu::canRenameObject() const
 void RowTreeContextMenu::addSubPresentation(QAction *action)
 {
     CDoc &doc(*g_StudioApp.GetCore()->GetDoc());
-    qt3dsdm::Qt3DSDMInstanceHandle instance =
-            static_cast<Qt3DSDMTimelineItemBinding *>(m_TimelineItemBinding)->GetInstance();
+    auto &bridge(*doc.GetStudioSystem()->GetClientDataModelBridge());
+
+    qt3dsdm::Qt3DSDMInstanceHandle instance = m_RowTree->instance();
     Q3DStudio::CString presentationId;
     if (action->text() != tr("[None]"))
         presentationId = Q3DStudio::CString::fromQString(action->text());
 
-    if (m_RowTree->rowType() == OBJTYPE_LAYER) {
-        qt3dsdm::Qt3DSDMPropertyHandle propHandle = doc.GetPropertySystem()
-                ->GetAggregateInstancePropertyByName(instance, L"sourcepath");
+    if (m_RowTree->objectType() == OBJTYPE_LAYER) {
+        qt3dsdm::Qt3DSDMPropertyHandle propHandle = bridge.GetSourcePathProperty();
+
         Q3DStudio::SCOPED_DOCUMENT_EDITOR(doc, tr("Set layer sub-presentation"))
                 ->SetInstancePropertyValueAsRenderable(instance, propHandle, presentationId);
-    } else if (m_RowTree->rowType() == OBJTYPE_MATERIAL) {
-        auto &bridge(*doc.GetStudioSystem()->GetClientDataModelBridge());
+    } else if (m_RowTree->objectType() & OBJTYPE_IS_MATERIAL) {
         // if this is a ref material, update the material it references
-
-        qt3dsdm::Qt3DSDMInstanceHandle refInstance = 0;
-        if (bridge.GetObjectType(instance) == OBJTYPE_REFERENCEDMATERIAL) {
-            auto optValue = doc.getSceneEditor()->GetInstancePropertyValue(instance,
-                            bridge.GetObjectDefinitions().m_ReferencedMaterial
-                            .m_ReferencedMaterial.m_Property);
-            if (optValue.hasValue())
-                refInstance = bridge.GetInstance(doc.GetSceneInstance(), optValue.getValue());
-        }
+        qt3dsdm::Qt3DSDMInstanceHandle refInstance = bridge.getMaterialReference(instance);
 
         ChooseImagePropertyDlg dlg(refInstance ? refInstance : instance, refInstance != 0);
         if (dlg.exec() == QDialog::Accepted) {
@@ -276,9 +267,9 @@ void RowTreeContextMenu::addSubPresentation(QAction *action)
                                                 presentationId);
             }
         }
-    } else if (m_RowTree->rowType() == OBJTYPE_IMAGE) {
-        qt3dsdm::Qt3DSDMPropertyHandle propHandle = doc.GetPropertySystem()
-                ->GetAggregateInstancePropertyByName(instance, L"subpresentation");
+    } else if (m_RowTree->objectType() == OBJTYPE_IMAGE) {
+        qt3dsdm::Qt3DSDMPropertyHandle propHandle = bridge.getSubpresentationProperty();
+
         Q3DStudio::SCOPED_DOCUMENT_EDITOR(doc, tr("Set image sub-presentation"))
                 ->SetInstancePropertyValueAsRenderable(instance, propHandle, presentationId);
     }

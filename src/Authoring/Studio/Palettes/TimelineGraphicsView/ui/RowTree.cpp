@@ -54,11 +54,11 @@
 #include <QtWidgets/qgraphicssceneevent.h>
 
 // object row constructor
-RowTree::RowTree(TimelineGraphicsScene *timelineScene, EStudioObjectType rowType,
+RowTree::RowTree(TimelineGraphicsScene *timelineScene, EStudioObjectType objType,
                  const QString &label)
     : m_rowTimeline(new RowTimeline())
     , m_scene(timelineScene)
-    , m_rowType(rowType)
+    , m_objectType(objType)
     , m_label(label)
 {
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
@@ -428,7 +428,7 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
         pixRowType = hiResIcons ? (m_locked ? pixPropertyDisabled2x : pixPropertyNormal2x)
                                 : (m_locked ? pixPropertyDisabled : pixPropertyNormal);
     } else {
-        switch (m_rowType) {
+        switch (m_objectType) {
         case OBJTYPE_SCENE:
             pixRowType = hiResIcons ? (m_locked ? pixSceneDisabled2x : pixSceneNormal2x)
                                     : (m_locked ? pixSceneDisabled : pixSceneNormal);
@@ -466,6 +466,8 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
                                     : (m_locked ? pixComponentDisabled : pixComponentNormal);
             break;
         case OBJTYPE_MATERIAL:
+        case OBJTYPE_CUSTOMMATERIAL:
+        case OBJTYPE_REFERENCEDMATERIAL:
             pixRowType = hiResIcons ? (m_locked ? pixMaterialDisabled2x : pixMaterialNormal2x)
                                     : (m_locked ? pixMaterialDisabled : pixMaterialNormal);
             break;
@@ -509,7 +511,7 @@ void RowTree::setBinding(ITimelineItemBinding *binding)
 
     if (m_expandState == ExpandState::Unknown) {
         // Everything but scene/component is initially collapsed and hidden
-        if (m_rowType == OBJTYPE_SCENE || m_rowType == OBJTYPE_COMPONENT)
+        if (m_objectType == OBJTYPE_SCENE || m_objectType == OBJTYPE_COMPONENT)
             m_expandState = ExpandState::Expanded;
         else
             m_expandState = ExpandState::HiddenCollapsed;
@@ -597,9 +599,9 @@ int RowTree::depth() const
     return m_depth;
 }
 
-EStudioObjectType RowTree::rowType() const
+EStudioObjectType RowTree::objectType() const
 {
-   return m_rowType;
+   return m_objectType;
 }
 
 QString RowTree::propertyType() const
@@ -668,7 +670,7 @@ bool RowTree::isInVariantsFilter() const
 {
     const QString filterStr = g_StudioApp.m_pMainWnd->getVariantsFilterStr();
 
-    if (m_rowType & ~OBJTYPE_IS_VARIANT || filterStr.isEmpty()
+    if (m_objectType & ~OBJTYPE_IS_VARIANT || filterStr.isEmpty()
         || !m_scene->widgetTimeline()->toolbar()->isVariantsFilterOn()) {
         return true;
     }
@@ -856,9 +858,7 @@ int RowTree::removeChildFromLayout(RowTree *child) const
 bool RowTree::draggable() const
 {
     return !m_locked && !isProperty()
-           && m_rowType != OBJTYPE_IMAGE
-           && m_rowType != OBJTYPE_SCENE
-           && m_rowType != OBJTYPE_MATERIAL;
+           && m_objectType & ~(OBJTYPE_IMAGE | OBJTYPE_SCENE | OBJTYPE_IS_MATERIAL);
 }
 
 void RowTree::updateDepthRecursive()
@@ -1157,13 +1157,7 @@ void RowTree::setActionStates(ActionStates states)
 
 bool RowTree::isContainer() const
 {
-    return !m_isProperty
-            && m_rowType != OBJTYPE_ALIAS
-            && m_rowType != OBJTYPE_MATERIAL
-            && m_rowType != OBJTYPE_IMAGE
-            && m_rowType != OBJTYPE_TEXT
-            && m_rowType != OBJTYPE_BEHAVIOR
-            && m_rowType != OBJTYPE_EFFECT;
+    return !m_isProperty && m_objectType & OBJTYPE_IS_CONTAINER;
 }
 
 bool RowTree::isProperty() const
@@ -1184,17 +1178,17 @@ RowTree *RowTree::getPropertyRow(const QString &type) const
 
 bool RowTree::isPropertyOrMaterial() const
 {
-    return m_isProperty || m_rowType == OBJTYPE_MATERIAL || m_rowType == OBJTYPE_IMAGE;
+    return m_isProperty || m_objectType & (OBJTYPE_IS_MATERIAL | OBJTYPE_IMAGE);
 }
 
 bool RowTree::isComponent() const
 {
-    return m_rowType == OBJTYPE_COMPONENT;
+    return m_objectType == OBJTYPE_COMPONENT;
 }
 
 bool RowTree::isComponentRoot() const
 {
-    if (m_rowType == OBJTYPE_COMPONENT && m_binding)
+    if (m_objectType == OBJTYPE_COMPONENT && m_binding)
         return static_cast<Qt3DSDMTimelineItemBinding *>(m_binding)->isRootComponent();
 
     return false;
@@ -1289,18 +1283,15 @@ bool RowTree::locked() const
 // Returns true for items with shy/visible/lock buttons
 bool RowTree::hasActionButtons() const
 {
-    return (!m_isProperty
-            && m_indexInLayout != 1
-            && m_rowType != OBJTYPE_SCENE
-            && m_rowType != OBJTYPE_MATERIAL
-            && m_rowType != OBJTYPE_IMAGE);
+    return !m_isProperty && m_indexInLayout != 1
+           && m_objectType & ~(OBJTYPE_SCENE | OBJTYPE_IS_MATERIAL | OBJTYPE_IMAGE);
 }
 
 bool RowTree::hasComponentAncestor() const
 {
     RowTree *parentRow = m_parentRow;
     while (parentRow) {
-        if (parentRow->rowType() == OBJTYPE_COMPONENT)
+        if (parentRow->objectType() == OBJTYPE_COMPONENT)
             return true;
         parentRow = parentRow->parentRow();
     }

@@ -78,7 +78,7 @@ public:
     Q_DECLARE_FLAGS(ActionStates, ActionState)
 
     explicit RowTree(TimelineGraphicsScene *timelineScene,
-                     EStudioObjectType rowType = OBJTYPE_UNKNOWN, const QString &label = {});
+                     EStudioObjectType objectType = OBJTYPE_UNKNOWN, const QString &label = {});
     // property row constructor
     explicit RowTree(TimelineGraphicsScene *timelineScene, const QString &propType);
     ~RowTree();
@@ -127,7 +127,7 @@ public:
     int index() const;
     int indexInLayout() const;
     int treeWidth() const;
-    EStudioObjectType rowType() const;
+    EStudioObjectType objectType() const;
     QString propertyType() const;
     RowTree *getChildAt(int index) const;
     RowTree *parentRow() const;
@@ -197,7 +197,7 @@ private:
     ExpandState m_expandState = ExpandState::HiddenCollapsed;
     TimelineGraphicsScene *m_scene;
     RowTreeLabelItem m_labelItem;
-    EStudioObjectType m_rowType = OBJTYPE_UNKNOWN;
+    EStudioObjectType m_objectType = OBJTYPE_UNKNOWN;
     QString m_propertyType; // for property rows
     QString m_label;
     QList<RowTree *> m_childRows;

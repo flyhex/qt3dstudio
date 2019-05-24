@@ -224,7 +224,7 @@ void RowManager::selectRow(RowTree *row, bool multiSelect)
 
     if (multiSelect && m_selectedRows.size() > 0) {
         // Do not allow singular object types into multiselection
-        if ((row->rowType() | m_selectedRows[0]->rowType()) & OBJTYPE_IS_SINGULAR)
+        if ((row->objectType() | m_selectedRows[0]->objectType()) & OBJTYPE_IS_SINGULAR)
             return;
     }
 
@@ -275,13 +275,15 @@ void RowManager::updateRulerDuration(bool updateMaxDuration)
     long maxDuration = 0; // for setting correct size for the view so scrollbars appear correctly
     if (m_layoutTree->count() > 1) {
         auto rootRow = static_cast<RowTree *>(m_layoutTree->itemAt(1)->graphicsItem());
-        bool isComponent = rootRow->rowType() == OBJTYPE_COMPONENT;
+        bool isComponent = rootRow->objectType() == OBJTYPE_COMPONENT;
         for (int i = 1; i < m_layoutTree->count(); ++i) {
             RowTree *row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
             long dur_i = row_i->rowTimeline()->getEndTime();
 
-            if (((isComponent && i != 1) || row_i->rowType() == OBJTYPE_LAYER) && dur_i > duration)
+            if (((isComponent && i != 1) || row_i->objectType() == OBJTYPE_LAYER)
+                    && dur_i > duration) {
                 duration = dur_i;
+            }
 
             if (dur_i > maxDuration)
                 maxDuration = dur_i;
@@ -316,7 +318,7 @@ void RowManager::updateRowFilterRecursive(RowTree *row)
 
 void RowManager::deleteRow(RowTree *row)
 {
-   if (row && row->rowType() != OBJTYPE_SCENE) {
+   if (row && row->objectType() != OBJTYPE_SCENE) {
        if (row->parentRow())
            row->parentRow()->removeChild(row);
 
@@ -379,7 +381,7 @@ bool RowManager::isComponentRoot() const
 {
     if (m_layoutTree->count() > 1) {
         RowTree *root = static_cast<RowTree *>(m_layoutTree->itemAt(1)->graphicsItem());
-        return root->rowType() == OBJTYPE_COMPONENT;
+        return root->objectType() == OBJTYPE_COMPONENT;
     }
     return false;
 }

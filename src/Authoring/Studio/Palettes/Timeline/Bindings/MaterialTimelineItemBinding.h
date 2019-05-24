@@ -63,7 +63,6 @@ public: // Construction
 
 public: // Qt3DSDMTimelineItemBinding
     ITimelineTimebar *GetTimebar() override;
-    EStudioObjectType GetObjectType() const override;
     bool ShowToggleControls() const override;
     // Hierarchy
     long GetChildrenCount() override;

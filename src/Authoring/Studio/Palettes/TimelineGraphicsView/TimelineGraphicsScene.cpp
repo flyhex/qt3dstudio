@@ -866,8 +866,8 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
                     if (treeLabelItem->parentRow()->isProperty()) {
                         treeLabelItem->parentRow()->togglePropertyExpanded();
                     } else if (!treeLabelItem->isLocked()
-                               && treeLabelItem->parentRow()->rowType() != OBJTYPE_SCENE
-                               && treeLabelItem->parentRow()->rowType() != OBJTYPE_IMAGE) {
+                               && treeLabelItem->parentRow()->objectType() != OBJTYPE_SCENE
+                               && treeLabelItem->parentRow()->objectType() != OBJTYPE_IMAGE) {
                         int instance = treeLabelItem->parentRow()->instance();
                         const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
                                 ->GetClientDataModelBridge();

@@ -81,11 +81,6 @@ ITimelineTimebar *CMaterialTimelineItemBinding::GetTimebar()
     return new CEmptyTimelineTimebar();
 }
 
-EStudioObjectType CMaterialTimelineItemBinding::GetObjectType() const
-{
-    return OBJTYPE_MATERIAL;
-}
-
 bool CMaterialTimelineItemBinding::ShowToggleControls() const
 {
     // Materials have no toggle controls, by design

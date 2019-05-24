@@ -182,7 +182,7 @@ bool RowMover::isNextSiblingRow(RowTree *rowMain, RowTree *rowSibling) const
 bool RowMover::sourceRowsHasMaster() const
 {
     for (auto sourceRow : qAsConst(m_sourceRows)) {
-        if (sourceRow->isMaster() && sourceRow->rowType() != OBJTYPE_LAYER)
+        if (sourceRow->isMaster() && sourceRow->objectType() != OBJTYPE_LAYER)
             return true;
     }
 
@@ -208,8 +208,7 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
                                bool firstTry)
 {
     // DnD a presentation / Qml stream from the project panel (to set it as a subpresentation)
-    if (rowType == OBJTYPE_PRESENTATION || rowType == OBJTYPE_QML_STREAM
-            || rowType == OBJTYPE_MATERIALDATA) {
+    if (rowType & (OBJTYPE_PRESENTATION | OBJTYPE_QML_STREAM | OBJTYPE_MATERIALDATA)) {
         if (!m_insertionTarget.isNull())
             m_insertionTarget->setDnDState(RowTree::DnDState::None, RowTree::DnDState::SP_TARGET);
 
@@ -221,16 +220,11 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
             m_insertType = Q3DStudio::DocumentEditorInsertType::LastChild;
 
             if (rowType == OBJTYPE_MATERIALDATA) {
-                if (rowAtMouse->rowType() == OBJTYPE_MATERIAL
-                        || rowAtMouse->rowType() == OBJTYPE_CUSTOMMATERIAL
-                        || rowAtMouse->rowType() == OBJTYPE_REFERENCEDMATERIAL) {
+                if (rowAtMouse->objectType() & OBJTYPE_IS_MATERIAL)
                     m_insertionTarget->setDnDState(RowTree::DnDState::SP_TARGET);
-                }
             } else {
-                if ((rowAtMouse->rowType() == OBJTYPE_LAYER
-                     || rowAtMouse->rowType() == OBJTYPE_MATERIAL
-                     || rowAtMouse->rowType() == OBJTYPE_IMAGE)
-                        && !rowAtMouse->isDefaultMaterial()) {
+                if (rowAtMouse->objectType() & (OBJTYPE_LAYER | OBJTYPE_IS_MATERIAL | OBJTYPE_IMAGE)
+                    && !rowAtMouse->isDefaultMaterial()) {
                     m_insertionTarget->setDnDState(RowTree::DnDState::SP_TARGET);
                 }
             }
@@ -249,7 +243,7 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
         if (rowAtMouse) {
             double y = rowAtMouse->mapFromScene(scenePos).y();
             if (y > TimelineConstants::ROW_H * .25 && y < TimelineConstants::ROW_H * .75) {
-                if (rowAtMouse->rowType() & (OBJTYPE_LAYER | OBJTYPE_MATERIAL | OBJTYPE_IMAGE)
+                if (rowAtMouse->objectType() & (OBJTYPE_LAYER | OBJTYPE_IS_MATERIAL | OBJTYPE_IMAGE)
                         && !rowAtMouse->isDefaultMaterial()) {
                     m_rowAutoExpand = nullptr;
                     m_autoExpandTimer.stop();
@@ -267,7 +261,7 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
 
     EStudioObjectType theRowType = rowType;
     if (theRowType == OBJTYPE_UNKNOWN && m_sourceRows.size() == 1)
-        theRowType = m_sourceRows[0]->rowType();
+        theRowType = m_sourceRows[0]->objectType();
 
     // row will be inserted just below rowInsert1 and just above rowInsert2 (if it exists)
     RowTree *rowInsert1 = m_scene->rowManager()
@@ -283,8 +277,7 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
                 ->getRowAtPos(scenePos + QPointF(0, TimelineConstants::ROW_H));
     }
 
-    bool valid = rowInsert1 && theRowType != OBJTYPE_MATERIAL
-                 && theRowType != OBJTYPE_CUSTOMMATERIAL;
+    bool valid = rowInsert1 != nullptr;
 
     if (valid) {
         // if dragging over a property or a parent of a property, move to the first row
@@ -362,7 +355,7 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
         if (depth < depthMin || depth > depthMax
                 || (theRowType != OBJTYPE_UNKNOWN
                     && !CStudioObjectTypes::AcceptableParent(theRowType,
-                                                             m_insertionParent->rowType()))
+                                                             m_insertionParent->objectType()))
                 || m_insertionParent->locked()) {
             valid = false;
         }
@@ -370,8 +363,8 @@ void RowMover::updateTargetRow(const QPointF &scenePos, EStudioObjectType rowTyp
         for (auto sourceRow : qAsConst(m_sourceRows)) {
             if (m_insertionParent == sourceRow
                 || m_insertionParent->isDecendentOf(sourceRow)
-                || !CStudioObjectTypes::AcceptableParent(sourceRow->rowType(),
-                                                         m_insertionParent->rowType())) {
+                || !CStudioObjectTypes::AcceptableParent(sourceRow->objectType(),
+                                                         m_insertionParent->objectType())) {
                 // prevent insertion under itself, or under unacceptable parent
                 valid = false;
                 break;
