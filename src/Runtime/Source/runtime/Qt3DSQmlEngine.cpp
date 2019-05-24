@@ -527,10 +527,8 @@ private:
     QVector3D parseFloat3Property(const QString &propValue);
     QVector4D parseFloat4Property(const QString &propValue);
 
-    void notifyElementCreation(CPresentation *pres, const QStringList &elementNames,
-                               const QString &error);
-    void notifyMaterialCreation(CPresentation *pres, const QStringList &materialNames,
-                                const QString &error);
+    void notifyElementCreation(const QStringList &elementNames, const QString &error);
+    void notifyMaterialCreation(const QStringList &materialNames, const QString &error);
     void deleteElements(const QVector<TElement *> &elements,
                         qt3ds::render::IQt3DSRenderer *renderer);
 };
@@ -943,9 +941,18 @@ void CQmlEngineImpl::createElements(const QString &parentElementPath, const QStr
     CPresentation *presentation = nullptr;
     QStringList elementPaths;
     elementPaths.reserve(properties.size());
-    for (auto &props : properties) {
-        elementPaths << parentElementPath + QLatin1Char('.')
-                        + props.value(QStringLiteral("name")).toString();
+    QVector<QHash<QString, QVariant>> theProperties = properties;
+    const QString namePropName = QStringLiteral("name");
+
+    for (int i = 0; i < theProperties.size(); ++i) {
+        auto &props = theProperties[i];
+        QString newElementName = props.value(namePropName).toString();
+        if (newElementName.isEmpty()) {
+            // The id number on generated name will match generated graph object identifiers
+            newElementName = QStringLiteral("NewElement_%1").arg(_idCounter + i + 1);
+            props.insert(namePropName, newElementName);
+        }
+        elementPaths << parentElementPath + QLatin1Char('.') + newElementName;
     }
     QVector<TElement *> createdElements;
     TElement *parentElement = nullptr;
@@ -953,7 +960,7 @@ void CQmlEngineImpl::createElements(const QString &parentElementPath, const QStr
     auto handleError = [&]() {
         if (!error.isEmpty())
             deleteElements(createdElements, renderer);
-        notifyElementCreation(presentation, elementPaths, error);
+        notifyElementCreation(elementPaths, error);
     };
 
     // Resolve parent element
@@ -962,14 +969,11 @@ void CQmlEngineImpl::createElements(const QString &parentElementPath, const QStr
 
     if (!parentElement) {
         error = QObject::tr("Invalid parent element: '%1'").arg(parentElementPath);
-        TElement *sceneElement = getTarget("Scene");
-        presentation = static_cast<CPresentation *>(sceneElement->GetBelongedPresentation());
         handleError();
         return;
     }
 
-    auto parentTranslator = static_cast<Qt3DSTranslator *>(
-                parentElement->GetAssociation());
+    auto parentTranslator = static_cast<Qt3DSTranslator *>(parentElement->GetAssociation());
 
     if (!parentTranslator || !GraphObjectTypes::IsNodeType(
                 parentTranslator->GetUIPType())) {
@@ -1007,22 +1011,20 @@ void CQmlEngineImpl::createElements(const QString &parentElementPath, const QStr
     parentElement->GetAttribute(Q3DStudio::ATTRIBUTE_ENDTIME, attValue);
     const int parentEndTime = int(attValue.m_INT32);
 
-    for (const auto &currentProperties : properties) {
+    for (const auto &currentProps : qAsConst(theProperties)) {
         ++_idCounter;
         ++elementIndex;
 
         // Remove properties requiring custom handling
-        QHash<QString, QVariant> theProperties = currentProperties;
-        QString newElementName = theProperties.take(QStringLiteral("name")).toString();
-        QString refMatName = theProperties.take(QStringLiteral("material")).toString();
+        QHash<QString, QVariant> fixedProps = currentProps;
+        QString newElementName = fixedProps.take(namePropName).toString();
+        QByteArray newElementNameBa = newElementName.toUtf8();
+
+        QString refMatName = fixedProps.take(QStringLiteral("material")).toString();
         if (refMatName.startsWith(QLatin1Char('#'))) // Absolute reference
             refMatName = refMatName.mid(1);
         else if (!refMatName.isEmpty() && !refMatName.contains(QLatin1Char('/')))
             refMatName = QStringLiteral("/") + refMatName;
-
-        if (newElementName.isEmpty())
-            newElementName = QStringLiteral("NewElement_%1").arg(_idCounter);
-        QByteArray newElementNameBa = newElementName.toUtf8();
 
         // Make sure the name is not duplicate
         TElement *existingChild
@@ -1039,7 +1041,7 @@ void CQmlEngineImpl::createElements(const QString &parentElementPath, const QStr
         const CRegisteredString elementSubType;
         GraphObjectTypes::Enum objectType = GraphObjectTypes::Unknown;
 
-        QString typeStr = theProperties.take(typePropName).toString();
+        QString typeStr = fixedProps.take(typePropName).toString();
         if (typeStr.isEmpty() || typeStr.compare(QLatin1String("model"),
                                                  Qt::CaseInsensitive) == 0) {
             metaType = strTable.RegisterStr("Model");
@@ -1051,21 +1053,21 @@ void CQmlEngineImpl::createElements(const QString &parentElementPath, const QStr
 
         // Set default values for missing mandatory properties
         bool eyeBall = true;
-        theProperties.value(eyeBallPropName, true).toBool();
-        if (objectType == GraphObjectTypes::Model && !theProperties.contains(sourcePathPropName)) {
+        fixedProps.value(eyeBallPropName, true).toBool();
+        if (objectType == GraphObjectTypes::Model && !fixedProps.contains(sourcePathPropName)) {
             addStringAttribute(strTable, elementProperties, sourcePathPropName,
                                QStringLiteral("#Cube"));
         }
-        if (!theProperties.contains(startTimePropName))
+        if (!fixedProps.contains(startTimePropName))
             addIntAttribute(strTable, elementProperties, startTimePropName, parentStartTime);
-        if (!theProperties.contains(endTimePropName))
+        if (!fixedProps.contains(endTimePropName))
             addIntAttribute(strTable, elementProperties, endTimePropName, parentEndTime);
-        if (!theProperties.contains(eyeBallPropName))
+        if (!fixedProps.contains(eyeBallPropName))
             addBoolAttribute(strTable, elementProperties, eyeBallPropName, true);
         else
-            eyeBall = theProperties.value(eyeBallPropName).toBool();
+            eyeBall = fixedProps.value(eyeBallPropName).toBool();
 
-        QHashIterator<QString, QVariant> it(theProperties);
+        QHashIterator<QString, QVariant> it(fixedProps);
         while (it.hasNext()) {
             it.next();
             switch (it.value().type()) {
@@ -1105,11 +1107,15 @@ void CQmlEngineImpl::createElements(const QString &parentElementPath, const QStr
         }
 
         // Create new element
+        QString localElementPath = elementPaths[elementIndex];
+        int colonIndex = localElementPath.indexOf(QLatin1Char(':'));
+        if (colonIndex != -1)
+            localElementPath = localElementPath.mid(colonIndex + 1);
         TElement &newElem = m_Application->GetElementAllocator().CreateElement(
                     regName, metaType, elementSubType,
                     toConstDataRef(elementProperties.data(), QT3DSU32(elementProperties.size())),
                     presentation, parentElement, false);
-        newElem.m_Path = strTable.RegisterStr(elementPaths[elementIndex]);
+        newElem.m_Path = strTable.RegisterStr(localElementPath);
 
         // Insert the new element into the correct slide
         if (!slideSystem.addSlideElement(component, slideIndex, newElem, eyeBall)) {
@@ -1131,7 +1137,7 @@ void CQmlEngineImpl::createElements(const QString &parentElementPath, const QStr
                         toConstDataRef(matProperties.data(), QT3DSU32(matProperties.size())),
                         presentation, &newElem, false);
 
-            QString matElemPath = elementPaths[elementIndex] + QLatin1String(".refmat");
+            QString matElemPath = localElementPath + QLatin1String(".refmat");
             newMatElem.m_Path = strTable.RegisterStr(matElemPath);
 
             if (!slideSystem.addSlideElement(component, slideIndex, newMatElem, eyeBall)) {
@@ -1171,10 +1177,8 @@ void CQmlEngineImpl::createElements(const QString &parentElementPath, const QStr
                                << "was not found. Trying to find a fallback material.";
                 }
                 if (firstChild) {
-                    auto tr = static_cast<Qt3DSTranslator *>(
-                                firstChild->GetAssociation());
-                    referencedMaterial = static_cast<SGraphObject *>(
-                                &tr->RenderObject());
+                    auto tr = static_cast<Qt3DSTranslator *>(firstChild->GetAssociation());
+                    referencedMaterial = static_cast<SGraphObject *>(&tr->RenderObject());
                 }
                 if (!referencedMaterial) {
                     // We could create default material into the container in case there is
@@ -1308,7 +1312,7 @@ void CQmlEngineImpl::createMaterials(const QString &elementPath,
         for (auto &materialInfo : materialInfos)
             materialNames << materialInfo->materialName;
         qDeleteAll(materialInfos);
-        notifyMaterialCreation(presentation, materialNames, error);
+        notifyMaterialCreation(materialNames, error);
     };
 
     auto getMaterialInfos = [&]() {
@@ -1327,8 +1331,7 @@ void CQmlEngineImpl::createMaterials(const QString &elementPath,
 
     if (!element) {
         error = QObject::tr("Invalid element: '%1'").arg(elementPath);
-        TElement *sceneElement = getTarget("Scene");
-        presentation = static_cast<CPresentation *>(sceneElement->GetBelongedPresentation());
+        presentation = m_Application->GetPrimaryPresentation();
         presPath = QFileInfo(presentation->GetFilePath()).absolutePath();
         projPath = presentation->getProjectPath();
         getMaterialInfos();
@@ -2506,30 +2509,29 @@ QVector4D CQmlEngineImpl::parseFloat4Property(const QString &propValue)
     return retVal;
 }
 
-void CQmlEngineImpl::notifyElementCreation(CPresentation *pres, const QStringList &elementNames,
-                                           const QString &error)
+void CQmlEngineImpl::notifyElementCreation(const QStringList &elementNames, const QString &error)
 {
     // Notify presentation asynchronously to give renderer time to initialize the elements properly
     if (!error.isEmpty()) {
         qWarning() << "Warning: Element creation failed:" << error;
         QT3DS_ASSERT(false);
     }
-    QTimer::singleShot(0, [pres, elementNames, error]() {
-        pres->signalProxy()->SigElementsCreated(elementNames, error);
+    QTimer::singleShot(0, [this, elementNames, error]() {
+        m_Application->GetPrimaryPresentation()->signalProxy()
+                ->SigElementsCreated(elementNames, error);
     });
 }
 
-void CQmlEngineImpl::notifyMaterialCreation(CPresentation *pres,
-                                            const QStringList &materialNames,
-                                            const QString &error)
+void CQmlEngineImpl::notifyMaterialCreation(const QStringList &materialNames, const QString &error)
 {
     // Notify presentation asynchronously to give renderer time to initialize the materials properly
     if (!error.isEmpty()) {
         qWarning() << "Warning: Material creation failed:" << materialNames << error;
         QT3DS_ASSERT(false);
     }
-    QTimer::singleShot(0, [pres, materialNames, error]() {
-        pres->signalProxy()->SigMaterialsCreated(materialNames, error);
+    QTimer::singleShot(0, [this, materialNames, error]() {
+        m_Application->GetPrimaryPresentation()->signalProxy()
+                ->SigMaterialsCreated(materialNames, error);
     });
 }
 

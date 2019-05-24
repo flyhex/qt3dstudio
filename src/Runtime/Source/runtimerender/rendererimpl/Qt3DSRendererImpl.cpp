@@ -146,8 +146,17 @@ namespace render {
     void Qt3DSRendererImpl::ChildrenUpdated(SNode &inParent)
     {
         if (inParent.m_Type == GraphObjectTypes::Layer) {
-            TInstanceRenderMap::iterator theIter =
-                m_InstanceRenderMap.find(static_cast<SRenderInstanceId>(&inParent));
+            TInstanceRenderMap::iterator theIter
+                = m_InstanceRenderMap.find(static_cast<SRenderInstanceId>(&inParent));
+            if (theIter == m_InstanceRenderMap.end()) {
+                // The layer is not in main presentation, but it might be in subpresentation
+                theIter = m_InstanceRenderMap.begin();
+                while (theIter != m_InstanceRenderMap.end()) {
+                    if (static_cast<SNode *>(&theIter->second.mPtr->m_Layer) == &inParent)
+                        break;
+                    theIter++;
+                }
+            }
             if (theIter != m_InstanceRenderMap.end()) {
                 theIter->second->m_CamerasAndLights.clear();
                 theIter->second->m_RenderableNodes.clear();
