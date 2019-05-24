@@ -417,7 +417,7 @@ void Q3DSRenderer::processCommands()
                 const auto diList = m_presentation->dataInputs();
 
                 for (const auto &it : diList)
-                    requestData->append(QVariant::fromValue(it->name()));
+                    requestData->append(QVariant::fromValue(it));
             }
 
             Q_EMIT requestResponse(cmd.m_elementPath, cmd.m_commandType, requestData);

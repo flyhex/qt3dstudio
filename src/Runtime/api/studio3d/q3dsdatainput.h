@@ -46,9 +46,8 @@ class Q_STUDIO3D_EXPORT Q3DSDataInput : public QObject
 
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     Q_PROPERTY(QVariant value READ value WRITE setValue NOTIFY valueChanged)
-    // TODO: QML-side getter/setter for min and max
-    // Q_PROPERTY(float max READ max WRITE setMax NOTIFY maxChanged)
-    // Q_PROPERTY(float min READ min WRITE setMin NOTIFY minChanged)
+    Q_PROPERTY(float max READ max WRITE setMax NOTIFY maxChanged)
+    Q_PROPERTY(float min READ min WRITE setMin NOTIFY minChanged)
 public:
     explicit Q3DSDataInput(QObject *parent = nullptr);
     explicit Q3DSDataInput(const QString &name, QObject *parent = nullptr);

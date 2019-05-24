@@ -585,6 +585,8 @@ void Q3DSPresentationPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool 
         const auto dataInputs = m_viewerApp->dataInputs();
         for (const auto &name : dataInputs) {
             if (!m_dataInputs.contains(name)) {
+                // Name is sufficient for C++ side APIs, as other parameters
+                // (max/min) are queried synchronously.
                 auto *di = new Q3DSDataInput(name, nullptr);
                 registerDataInput(di);
             }
@@ -669,8 +671,16 @@ void Q3DSPresentationPrivate::requestResponseHandler(CommandType commandType, vo
         for (int i = 0; i < response->size(); ++i) {
             // Check and append to QML-side list if the (UIA) presentation has additional datainputs
             // that are not explicitly defined in QML code.
-            if (!m_dataInputs.contains(response->at(i).value<QString>()))
-                registerDataInput(new Q3DSDataInput(response->at(i).value<QString>(), nullptr));
+            auto receivedDI = response->at(i).value<Q3DSDataInput *>();
+            if (!m_dataInputs.contains(receivedDI->name())) {
+                // For QML behind async command queue, we cache min/max values in addition
+                // to name, in order to be able to return values initially set in UIA file (in QML
+                // setter/getters).
+                auto newDI = new Q3DSDataInput(receivedDI->name(), nullptr);
+                newDI->d_ptr->m_min = receivedDI->d_ptr->m_min;
+                newDI->d_ptr->m_max = receivedDI->d_ptr->m_max;
+                registerDataInput(newDI);
+            }
         }
         delete response;
         Q_EMIT q_ptr->dataInputsReady();
@@ -798,25 +808,41 @@ void Q3DSPresentationPrivate::unregisterAllDataInputs()
 }
 bool Q3DSPresentationPrivate::isValidDataInput(const Q3DSDataInput *dataInput) const
 {
-    if (!m_viewerApp)
-        return false;
+    // For QML instance separated from runtime engine by command queue,
+    // check locally cached list for this datainput (initialised at presentation load).
+    if (!m_viewerApp) {
+        if (m_dataInputs.contains(dataInput->name()))
+            return true;
+        else
+            return false;
+    }
 
     return m_viewerApp->dataInputs().contains(dataInput->name());
 }
 
 float Q3DSPresentationPrivate::dataInputMin(const QString &name) const
 {
-    if (!m_viewerApp)
-        return 0.0f;
-
+    // For QML instance separated from runtime engine by command queue,
+    // return locally cached value (initialised at presentation load).
+    if (!m_viewerApp) {
+        if (m_dataInputs.contains(name))
+            return m_dataInputs[name]->d_ptr->m_min;
+        else
+            return 0.0f;
+    }
     return m_viewerApp->dataInputMin(name);
 }
 
 float Q3DSPresentationPrivate::dataInputMax(const QString &name) const
 {
-    if (!m_viewerApp)
-        return 0.0f;
-
+    // For QML instance separated from runtime engine by command queue,
+    // return locally cached value (initialised at presentation load).
+    if (!m_viewerApp) {
+        if (m_dataInputs.contains(name))
+            return m_dataInputs[name]->d_ptr->m_max;
+        else
+            return 0.0f;
+    }
     return m_viewerApp->dataInputMax(name);
 }
 

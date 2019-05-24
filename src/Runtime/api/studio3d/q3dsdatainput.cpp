@@ -94,11 +94,9 @@ QVariant Q3DSDataInput::value() const
     return d_ptr->m_value;
 }
 
-// TODO: Min and Max are not currently exposed to QML, as implementation requires
-// cumbersome traversal over command queue from QML viewer to renderer.
 float Q3DSDataInput::min() const
 {
-    if (d_ptr->m_presentation)
+    if (!d_ptr->m_presentation)
         return 0.0f;
 
     return d_ptr->m_presentation->d_ptr->dataInputMin(d_ptr->m_name);
@@ -106,7 +104,7 @@ float Q3DSDataInput::min() const
 
 float Q3DSDataInput::max() const
 {
-    if (d_ptr->m_presentation)
+    if (!d_ptr->m_presentation)
         return 0.0f;
 
     return d_ptr->m_presentation->d_ptr->dataInputMax(d_ptr->m_name);
@@ -122,13 +120,21 @@ bool Q3DSDataInput::isValid() const
 
 void Q3DSDataInput::setMin(float min)
 {
+    if (!d_ptr->m_presentation)
+        return;
+
     d_ptr->m_presentation->setDataInputValue(d_ptr->m_name, min, ValueRole::Min);
+    d_ptr->m_min = min;
     emit minChanged();
 }
 
 void Q3DSDataInput::setMax(float max)
 {
+    if (!d_ptr->m_presentation)
+        return;
+
     d_ptr->m_presentation->setDataInputValue(d_ptr->m_name, max, ValueRole::Max);
+    d_ptr->m_max = max;
     emit maxChanged();
 }
 
@@ -139,6 +145,7 @@ void Q3DSDataInput::setValue(const QVariant &value)
     // same one it was previously and still consider it a change.
     // For example, when controlling timeline, the value set to DataInput will only be
     // the current value for one frame if presentation has a running animation.
+    // In order to track an element property, see DataOutput API.
     d_ptr->setValue(value, ValueRole::Value);
     Q_EMIT valueChanged();
 }

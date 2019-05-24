@@ -68,7 +68,13 @@ protected:
     CommandQueue *m_commandQueue = nullptr; // Not owned
     Q3DSPresentation *m_presentation = nullptr; // Not owned
     QString m_name;
+    // Local cached values, used only when synchronous getter from runtime engine
+    // is not available (for QML -side that is behind command queue).
     QVariant m_value;
+    float m_max = 0;
+    float m_min = 0;
+
+    friend class Q3DSPresentationPrivate;
 };
 
 QT_END_NAMESPACE
