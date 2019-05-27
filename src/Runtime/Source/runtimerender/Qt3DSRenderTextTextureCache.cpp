@@ -89,6 +89,8 @@ struct STextRenderInfoAndHash
             && m_Info.m_Tracking == inOther.m_Info.m_Tracking
             && m_Info.m_DropShadow == inOther.m_Info.m_DropShadow
             && m_Info.m_DropShadowStrength == inOther.m_Info.m_DropShadowStrength
+            && m_Info.m_DropShadowOffsetX == inOther.m_Info.m_DropShadowOffsetX
+            && m_Info.m_DropShadowOffsetY == inOther.m_Info.m_DropShadowOffsetY
             && m_Info.m_BoundingBox == inOther.m_Info.m_BoundingBox
             && m_Info.m_WordWrap == inOther.m_Info.m_WordWrap
             && m_Info.m_EnableAcceleratedFont == inOther.m_Info.m_EnableAcceleratedFont
@@ -203,7 +205,7 @@ struct STextTextureCache : public ITextTextureCache
     {
         STextRenderInfoAndHash theKey(inText, inScaleFactor);
         TTextureInfoHash::iterator theFind(
-            m_TextureCache.find(STextRenderInfoAndHash(inText, inScaleFactor)));
+            m_TextureCache.find(theKey));
         STextCacheNode *retval = NULL;
         if (theFind != m_TextureCache.end()) {
             retval = theFind->second;
@@ -243,7 +245,6 @@ struct STextTextureCache : public ITextTextureCache
                 theDetails.m_ScaleFactor.y =
                     (QT3DSF32)theDetails.m_TextHeight / theCanonicalDetails.second.first.m_TextHeight;
             }
-            theKey = STextRenderInfoAndHash(inText, inScaleFactor);
             retval = m_CacheNodePool.construct(
                 theKey, TTPathObjectAndTexture(
                             TPathFontSpecAndPathObject(nextPathFontObject, nextPathFontItemObject),
