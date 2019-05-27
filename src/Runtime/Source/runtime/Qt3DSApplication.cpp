@@ -2034,3 +2034,109 @@ bool IApplication::isPickingEvent(TEventCommandHash event)
             || event == ON_GROUPEDMOUSEOVER
             || event == ON_GROUPEDMOUSEOUT);
 }
+
+QDebug operator<<(QDebug debug, const DataInOutAttribute &value)
+{
+    QDebugStateSaver saver(debug);
+    debug.nospace() << "DataInOutAttribute(";
+    debug.nospace() << "elementPath:" << value.elementPath;
+    debug.nospace() << ", attributeNames: {";
+    for (auto name : value.attributeName)
+        debug << QString::fromUtf8(name);
+
+    debug.nospace() << "}, propertyType:" << value.propertyType;
+    return debug;
+}
+
+QDebug operator<<(QDebug debug, const DataInOutType &value)
+{
+    QDebugStateSaver saver(debug);
+    debug.nospace() << "DataInOutType::";
+    switch (value) {
+    case DataInOutType::DataInOutTypeInvalid:
+        debug.nospace() << "DataInOutTypeInvalid";
+        break;
+    case DataInOutType::DataInOutTypeRangedNumber:
+        debug.nospace() << "DataInOutTypeRangedNumber";
+        break;
+    case DataInOutType::DataInOutTypeString:
+        debug.nospace() << "DataInOutTypeString";
+        break;
+    case DataInOutType::DataInOutTypeFloat:
+        debug.nospace() << "DataInOutTypeFloat";
+        break;
+    case DataInOutType::DataInOutTypeEvaluator:
+        debug.nospace() << "DataInOutTypeEvaluator";
+        break;
+    case DataInOutType::DataInOutTypeBoolean:
+        debug.nospace() << "DataInOutTypeBoolean";
+        break;
+    case DataInOutType::DataInOutTypeVector4:
+        debug.nospace() << "DataInOutTypeVector4";
+        break;
+    case DataInOutType::DataInOutTypeVector3:
+        debug.nospace() << "DataInOutTypeVector3";
+        break;
+    case DataInOutType::DataInOutTypeVector2:
+        debug.nospace() << "DataInOutTypeVector2";
+        break;
+    case DataInOutType::DataInOutTypeVariant:
+        debug.nospace() << "DataInOutTypeVariant";
+        break;
+    default:
+        debug.nospace() << "UNKNOWN";
+    }
+    return debug;
+}
+
+QDebug operator<<(QDebug debug, const DataInputValueRole &value)
+{
+    QDebugStateSaver saver(debug);
+    debug.nospace() << "DataInputValueRole::";
+    switch (value) {
+    case DataInputValueRole::Value:
+        debug.nospace() << "Value";
+        break;
+    case DataInputValueRole::Min:
+        debug.nospace() << "Min";
+        break;
+    case DataInputValueRole::Max:
+        debug.nospace() << "Max";
+        break;
+    default:
+        debug.nospace() << "UNKNOWN";
+    }
+    return debug;
+}
+
+QDebug operator<<(QDebug debug, const DataInputDef &value)
+{
+    QDebugStateSaver saver(debug);
+    debug.nospace() << "DataInputDef(";
+    debug.nospace() << "type:" << value.type;
+    debug.nospace() << ", controlledAttributes: {";
+    for (auto attr : value.controlledAttributes)
+        debug << attr;
+
+    debug.nospace() << "}, min:" << value.min;
+    debug.nospace() << ", min:" << value.min << ", max:" << value.max;
+    debug.nospace() << ", evaluator:" << value.evaluator;
+    debug.nospace() << ", value:" << value.value;
+    debug.nospace() << ", dependents:{";
+    for (auto dep : value.dependents)
+        debug << dep;
+
+    debug.nospace() << "})";
+    return debug;
+}
+
+QDebug operator<<(QDebug debug, const DataOutputDef &value)
+{
+    QDebugStateSaver saver(debug);
+    debug.nospace() << "DataOutputDef(";
+    debug.nospace() << "name:" << value.name << ", type:" << value.type;
+    debug.nospace() << ", observedHandle:" << value.observedHandle;
+    debug.nospace() << ", min:" << value.min << ", max:" << value.max;
+    debug.nospace() << ", timelineComponent:" << value.timelineComponent << ")";
+    return debug;
+}
