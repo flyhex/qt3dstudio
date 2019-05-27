@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>347</width>
-    <height>511</height>
+    <width>411</width>
+    <height>525</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -46,7 +46,7 @@
       <item row="2" column="0">
        <widget class="QCheckBox" name="m_checkLegacyViewer">
         <property name="text">
-         <string>Legacy Viewer</string>
+         <string>Qt3D Viewer</string>
         </property>
        </widget>
       </item>

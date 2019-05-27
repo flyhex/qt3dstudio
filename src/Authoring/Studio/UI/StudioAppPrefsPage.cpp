@@ -90,7 +90,7 @@ void CStudioAppPrefsPage::onInitDialog()
     // Add tool tips for controls
     m_ui->m_DefaultInterpolation->setToolTip(tr("Set default keyframe interpolation type"));
     m_ui->m_checkTimelineAbsoluteSnapping->setToolTip(tr("Enable timeline snapping grid"));
-    m_ui->m_checkLegacyViewer->setToolTip(tr("Enable preview with legacy Qt 3D Viewer 1.1"));
+    m_ui->m_checkLegacyViewer->setToolTip(tr("Enable preview with Qt3D Runtime Viewer"));
     m_ui->m_SnapRangeCombo->setToolTip(tr("Set resolution of timeline snapping grid"));
     m_ui->m_buttonRestoreDefaults->setToolTip(tr("Click to restore default Studio settings"));
 

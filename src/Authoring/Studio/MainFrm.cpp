@@ -204,20 +204,21 @@ CMainFrame::CMainFrame()
             m_sceneView.data(), &CSceneView::onToolGroupSelection);
 
     // Playback toolbar
-    connect(m_ui->actionPreview, &QAction::triggered, this, &CMainFrame::OnPlaybackPreviewRuntime2);
+    connect(m_ui->actionPreview, &QAction::triggered,
+            this, &CMainFrame::OnPlaybackPreviewOpenGLRuntime);
     connect(m_ui->actionFilterVariants, &QAction::triggered, this, &CMainFrame::onFilterVariants);
 
     connect(m_ui->actionRemote_Preview, &QAction::triggered,
             this, &CMainFrame::OnPlaybackPreviewRemote);
 
-    // Only show runtime1 preview if we have appropriate viewer and it's enabled
+    // Only show Qt3D runtime preview if we have appropriate viewer and it's enabled
     if (CStudioPreferences::IsLegacyViewerActive()
-            && QFileInfo(CPreviewHelper::getViewerFilePath(QStringLiteral("Qt3DViewer"))).exists()) {
-        connect(m_ui->actionPreviewRuntime1, &QAction::triggered,
-                this, &CMainFrame::OnPlaybackPreviewRuntime1);
-        m_ui->actionPreviewRuntime1->setVisible(true);
+            && QFileInfo(CPreviewHelper::getViewerFilePath(QStringLiteral("q3dsviewer"))).exists()) {
+        connect(m_ui->actionPreviewQt3DRuntime, &QAction::triggered,
+                this, &CMainFrame::OnPlaybackPreviewQt3DRuntime);
+        m_ui->actionPreviewQt3DRuntime->setVisible(true);
     } else {
-        m_ui->actionPreviewRuntime1->setVisible(false);
+        m_ui->actionPreviewQt3DRuntime->setVisible(false);
     }
 
     // Tool mode toolbar
@@ -972,14 +973,14 @@ void CMainFrame::OnPlaybackPreview(const QString &viewerExeName, bool remote)
     }
 }
 
-void CMainFrame::OnPlaybackPreviewRuntime1()
-{
-    OnPlaybackPreview(QStringLiteral("Qt3DViewer"));
-}
-
-void CMainFrame::OnPlaybackPreviewRuntime2()
+void CMainFrame::OnPlaybackPreviewQt3DRuntime()
 {
     OnPlaybackPreview(QStringLiteral("q3dsviewer"));
+}
+
+void CMainFrame::OnPlaybackPreviewOpenGLRuntime()
+{
+    OnPlaybackPreview(QStringLiteral("Qt3DViewer"));
 }
 
 void CMainFrame::onFilterVariants()
