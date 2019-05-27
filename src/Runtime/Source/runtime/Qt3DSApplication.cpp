@@ -1024,6 +1024,7 @@ struct SApp : public IApplication
             // Notify @timeline attribute changes and store latest value to notified DataOutputDef
             QMutableMapIterator<QString, DataOutputDef> iter(m_dataOutputDefs);
             while (iter.hasNext()) {
+                iter.next();
                 DataOutputDef &outDef = iter.value();
                 if (outDef.observedAttribute.propertyType == ATTRIBUTETYPE_DATAINPUT_TIMELINE
                         && outDef.timelineComponent) {
@@ -1046,7 +1047,6 @@ struct SApp : public IApplication
                                     outDef.name, outDef.value);
                     }
                 }
-                iter.next();
             }
         } // End SStackPerfTimer scope
     }
