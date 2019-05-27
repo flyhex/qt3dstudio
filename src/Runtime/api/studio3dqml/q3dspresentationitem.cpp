@@ -27,7 +27,7 @@
 **
 ****************************************************************************/
 
-#include "q3dspresentationitem.h"
+#include "q3dspresentationitem_p.h"
 
 #include <QtStudio3D/q3dssceneelement.h>
 #include <QtStudio3D/q3dsdatainput.h>

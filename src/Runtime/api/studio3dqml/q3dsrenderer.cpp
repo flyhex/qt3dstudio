@@ -28,10 +28,10 @@
 **
 ****************************************************************************/
 
-#include "q3dsrenderer.h"
+#include "q3dsrenderer_p.h"
 #include "Qt3DSViewerApp.h"
 #include "Qt3DSAudioPlayerImpl.h"
-#include "q3dspresentationitem.h"
+#include "q3dspresentationitem_p.h"
 
 #include <QtStudio3D/private/q3dscommandqueue_p.h>
 #include <QtStudio3D/private/q3dsviewersettings_p.h>

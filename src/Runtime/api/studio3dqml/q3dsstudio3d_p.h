@@ -31,6 +31,17 @@
 #ifndef Q3DS_STUDIO3D_H
 #define Q3DS_STUDIO3D_H
 
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the QtStudio3D API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
 #include <QtStudio3D/private/q3dscommandqueue_p.h>
 #include <QtGui/qopenglframebufferobject.h>
 #include <QtQuick/qquickframebufferobject.h>

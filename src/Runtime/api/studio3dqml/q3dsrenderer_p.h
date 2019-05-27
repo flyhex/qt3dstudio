@@ -31,11 +31,22 @@
 #ifndef Q3DS_RENDERER_H
 #define Q3DS_RENDERER_H
 
+//
+//  W A R N I N G
+//  -------------
+//
+// This file is not part of the QtStudio3D API.  It exists purely as an
+// implementation detail.  This header file may change from version to
+// version without notice, or even be removed.
+//
+// We mean it.
+//
+
 #include <QtGui/qopenglframebufferobject.h>
 #include <QtQuick/qquickframebufferobject.h>
 
 #include "Qt3DSViewerApp.h"
-#include "q3dsstudio3d.h"
+#include "q3dsstudio3d_p.h"
 
 QT_BEGIN_NAMESPACE
 

@@ -34,8 +34,8 @@
 
 #include <QtStudio3D/private/q3dsviewersettings_p.h>
 
-#include "q3dsstudio3d.h"
-#include "q3dspresentationitem.h"
+#include "q3dsstudio3d_p.h"
+#include "q3dspresentationitem_p.h"
 #include "q3dsqmlstream.h"
 #include "q3dsqmlsubpresentationsettings.h"
 #include "q3dssceneelement.h"

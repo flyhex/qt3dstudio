@@ -21,9 +21,9 @@ SOURCES += \
     remotedeploymentreceiver.cpp
 
 HEADERS += \
-    $$PWD/../../Runtime/api/studio3dqml/q3dsstudio3d.h \
-    $$PWD/../../Runtime/api/studio3dqml/q3dsrenderer.h \
-    $$PWD/../../Runtime/api/studio3dqml/q3dspresentationitem.h \
+    $$PWD/../../Runtime/api/studio3dqml/q3dsstudio3d_p.h \
+    $$PWD/../../Runtime/api/studio3dqml/q3dsrenderer_p.h \
+    $$PWD/../../Runtime/api/studio3dqml/q3dspresentationitem_p.h \
     viewer.h \
     remotedeploymentreceiver.h
 

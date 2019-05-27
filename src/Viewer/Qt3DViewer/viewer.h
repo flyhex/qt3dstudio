@@ -36,7 +36,7 @@
 #include <QtCore/qurl.h>
 #include <QtCore/qtimer.h>
 #include <QtGui/qwindow.h>
-#include "q3dsstudio3d.h"
+#include "q3dsstudio3d_p.h"
 
 class Viewer : public QObject
 {

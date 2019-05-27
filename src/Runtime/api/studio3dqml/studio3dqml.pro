@@ -20,9 +20,9 @@ SOURCES += \
 
 HEADERS += \
     q3dsplugin.h \
-    q3dsstudio3d.h \
-    q3dsrenderer.h \
-    q3dspresentationitem.h
+    q3dsrenderer_p.h \
+    q3dsstudio3d_p.h \
+    q3dspresentationitem_p.h
 
 LIBS += \
     -lqt3dsopengl$$qtPlatformTargetSuffix() \

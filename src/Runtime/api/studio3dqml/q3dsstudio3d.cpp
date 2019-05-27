@@ -28,9 +28,9 @@
 **
 ****************************************************************************/
 
-#include "q3dsstudio3d.h"
-#include "q3dsrenderer.h"
-#include "q3dspresentationitem.h"
+#include "q3dsstudio3d_p.h"
+#include "q3dsrenderer_p.h"
+#include "q3dspresentationitem_p.h"
 
 #include <QtStudio3D/private/q3dsviewersettings_p.h>
 #include <QtStudio3D/private/q3dspresentation_p.h>

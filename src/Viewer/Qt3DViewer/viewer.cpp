@@ -37,7 +37,7 @@
 #include <QtQuick/qquickwindow.h>
 
 #include "viewer.h"
-#include "q3dspresentationitem.h"
+#include "q3dspresentationitem_p.h"
 
 Viewer::Viewer(bool generatorMode, QObject *parent)
     : QObject(parent)
