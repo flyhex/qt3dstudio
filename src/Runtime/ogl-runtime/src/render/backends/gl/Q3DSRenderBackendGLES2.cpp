@@ -32,6 +32,8 @@
 #include "render/backends/gl/Qt3DSRenderBackendRenderStatesGL.h"
 #include "render/backends/gl/Qt3DSRenderBackendShaderProgramGL.h"
 
+#include <QtGui/qopenglcontext.h>
+
 #ifdef RENDER_BACKEND_LOG_GL_ERRORS
 #define RENDER_LOG_ERROR_PARAMS(x) checkGLError(#x, __FILE__, __LINE__)
 #else
@@ -605,6 +607,8 @@ void NVRenderBackendGLES2Impl::RenderTargetAttach(NVRenderBackendRenderTargetObj
 void NVRenderBackendGLES2Impl::SetRenderTarget(NVRenderBackendRenderTargetObject rto)
 {
     GLuint fboID = HandleToID_cast(GLuint, size_t, rto);
+    if (!fboID)
+        fboID = QT_PREPEND_NAMESPACE(QOpenGLContext)::currentContext()->defaultFramebufferObject();
 
     GL_CALL_EXTRA_FUNCTION(glBindFramebuffer(GL_FRAMEBUFFER, fboID));
 }
@@ -612,6 +616,8 @@ void NVRenderBackendGLES2Impl::SetRenderTarget(NVRenderBackendRenderTargetObject
 void NVRenderBackendGLES2Impl::SetReadTarget(NVRenderBackendRenderTargetObject rto)
 {
     GLuint fboID = HandleToID_cast(GLuint, size_t, rto);
+    if (!fboID)
+        fboID = QT_PREPEND_NAMESPACE(QOpenGLContext)::currentContext()->defaultFramebufferObject();
 
     GL_CALL_EXTRA_FUNCTION(glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID));
 }

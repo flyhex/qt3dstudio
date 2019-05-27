@@ -128,8 +128,7 @@ Q3DSSurfaceViewer::~Q3DSSurfaceViewer()
 */
 bool Q3DSSurfaceViewer::create(QSurface *surface, QOpenGLContext *context)
 {
-    // #TODO: QT3DS-3531 Fix this to behave as in RT2
-    return create(surface, context, 0);
+    return d_ptr->initialize(surface, context, 0, false);
 }
 
 
@@ -147,7 +146,7 @@ bool Q3DSSurfaceViewer::create(QSurface *surface, QOpenGLContext *context)
 */
 bool Q3DSSurfaceViewer::create(QSurface *surface, QOpenGLContext *context, GLuint fboId)
 {
-    return d_ptr->initialize(surface, context, fboId);
+    return d_ptr->initialize(surface, context, fboId, true);
 }
 
 /*!
@@ -444,7 +443,8 @@ void Q3DSSurfaceViewerPrivate::setUpdateInterval(int interval)
 /*!
  * \internal
  */
-bool Q3DSSurfaceViewerPrivate::initialize(QSurface *surface, QOpenGLContext *context, GLuint fboId)
+bool Q3DSSurfaceViewerPrivate::initialize(QSurface *surface, QOpenGLContext *context, GLuint fboId,
+                                          bool idValid)
 {
     Q_ASSERT(context);
     Q_ASSERT(surface);
@@ -466,8 +466,8 @@ bool Q3DSSurfaceViewerPrivate::initialize(QSurface *surface, QOpenGLContext *con
 
     m_surface = surface;
     m_context = context;
-    m_fboId = fboId;
-    if (m_surface->surfaceClass() == QSurface::Window && fboId == 0)
+    m_fboId = idValid ? fboId : m_context->defaultFramebufferObject();
+    if (m_surface->surfaceClass() == QSurface::Window)
         m_pixelRatio = static_cast<QWindow *>(m_surface)->devicePixelRatio();
 
     surfaceObject()->installEventFilter(this);
@@ -528,7 +528,9 @@ void Q3DSSurfaceViewerPrivate::update()
                 setSize(m_surface->size());
             m_viewerApp->Render();
 
-            if (m_fboId == 0)
+            const uint defaultFbo = m_context->defaultFramebufferObject();
+
+            if (m_surface->surfaceClass() == QSurface::Window && m_fboId == defaultFbo)
                 m_context->swapBuffers(m_surface);
 
             Q_EMIT q_ptr->frameUpdate();
@@ -569,8 +571,10 @@ QImage Q3DSSurfaceViewerPrivate::grab(const QRect &rect)
         QImage fullGrab = qt_gl_read_framebuffer(fullSize, false, false);
 
         // Also update the screen to match the grab, since we just rendered
-        if (m_fboId == 0)
+        if (m_surface->surfaceClass() == QSurface::Window
+                && m_fboId == m_context->defaultFramebufferObject()) {
             m_context->swapBuffers(m_surface);
+        }
 
         if (captureRect.size() == fullSize)
             image = fullGrab;

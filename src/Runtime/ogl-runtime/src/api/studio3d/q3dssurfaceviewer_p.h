@@ -64,7 +64,7 @@ public:
 
     void setSize(const QSize &size);
     void setUpdateInterval(int interval);
-    bool initialize(QSurface *surface, QOpenGLContext *context, GLuint fboId);
+    bool initialize(QSurface *surface, QOpenGLContext *context, GLuint fboId, bool idValid);
     void update();
 
     QImage grab(const QRect &rect);

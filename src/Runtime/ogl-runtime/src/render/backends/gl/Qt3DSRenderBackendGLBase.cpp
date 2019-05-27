@@ -790,6 +790,8 @@ namespace render {
     void NVRenderBackendGLBase::SetRenderTarget(NVRenderBackendRenderTargetObject rto)
     {
         GLuint fboID = HandleToID_cast(GLuint, size_t, rto);
+        if (!fboID)
+            fboID = QT_PREPEND_NAMESPACE(QOpenGLContext)::currentContext()->defaultFramebufferObject();
 
         GL_CALL_FUNCTION(glBindFramebuffer(GL_FRAMEBUFFER, fboID));
     }

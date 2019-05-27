@@ -547,6 +547,8 @@ namespace render {
     void NVRenderBackendGL3Impl::SetReadTarget(NVRenderBackendRenderTargetObject rto)
     {
         GLuint fboID = HandleToID_cast(GLuint, size_t, rto);
+        if (!fboID)
+            fboID = QT_PREPEND_NAMESPACE(QOpenGLContext)::currentContext()->defaultFramebufferObject();
 
         GL_CALL_EXTRA_FUNCTION(glBindFramebuffer(GL_READ_FRAMEBUFFER, fboID));
     }
