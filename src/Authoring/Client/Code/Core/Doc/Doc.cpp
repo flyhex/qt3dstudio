@@ -2114,11 +2114,13 @@ void CDoc::LoadPresentationFile(CBufferedInputStream *inInputStream)
                                                                         theChildSlide);
 
     if (uipVersion < 6) {
-        // uipVersion 6 introduced vec4 colors
-        g_StudioApp.GetDialogs()->DisplayMessageBox(
-                    tr("Old Presentation Version"),
-                    tr("Some custom materials, effects, and behaviors may not work correctly."),
-                    Qt3DSMessageBox::ICON_WARNING, false);
+        QTimer::singleShot(0, [=](){
+            // uipVersion 6 introduced vec4 colors
+            g_StudioApp.GetDialogs()->DisplayMessageBox(
+                        tr("Old Presentation Version"),
+                        tr("Some custom materials, effects, and behaviors may not work correctly."),
+                        Qt3DSMessageBox::ICON_WARNING, false);
+        });
     }
 
     if (uipVersion == 3) {
