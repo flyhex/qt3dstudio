@@ -91,11 +91,8 @@ public:
     void setQmlEngine(QQmlEngine *qmlEngine);
     QString presentationId() const;
 
-
-
 public Q_SLOTS:
     void update();
-    void reset();
     void setPresentationId(const QString &id);
 
 Q_SIGNALS:

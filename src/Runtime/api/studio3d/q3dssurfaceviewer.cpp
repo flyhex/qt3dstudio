@@ -156,15 +156,7 @@ bool Q3DSSurfaceViewer::create(QSurface *surface, QOpenGLContext *context, GLuin
  */
 void Q3DSSurfaceViewer::destroy()
 {
-    d_ptr->shutdown();
-}
-
-/*!
-    \brief Q3DSSurfaceViewer::reset
- */
-void Q3DSSurfaceViewer::reset()
-{
-    d_ptr->reset();
+    d_ptr->destroy();
 }
 
 /*!
@@ -414,17 +406,6 @@ Q3DSSurfaceViewerPrivate::~Q3DSSurfaceViewerPrivate()
 /*!
  * \internal
  */
-void Q3DSSurfaceViewerPrivate::reset()
-{
-    if (m_viewerApp) {
-        releaseRuntime();
-        initializeRuntime();
-    }
-}
-
-/*!
- * \internal
- */
 void Q3DSSurfaceViewerPrivate::setSize(const QSize &size)
 {
     if (m_size != size) {
@@ -473,7 +454,7 @@ bool Q3DSSurfaceViewerPrivate::initialize(QSurface *surface, QOpenGLContext *con
         return false;
     }
 
-    shutdown();
+    destroy();
 
     m_surface = surface;
     m_context = context;
@@ -483,7 +464,7 @@ bool Q3DSSurfaceViewerPrivate::initialize(QSurface *surface, QOpenGLContext *con
 
     surfaceObject()->installEventFilter(this);
 
-    connect(context, &QOpenGLContext::aboutToBeDestroyed, this, &Q3DSSurfaceViewerPrivate::shutdown);
+    connect(context, &QOpenGLContext::aboutToBeDestroyed, this, &Q3DSSurfaceViewerPrivate::destroy);
 
     bool success = initializeRuntime();
 
@@ -496,13 +477,13 @@ bool Q3DSSurfaceViewerPrivate::initialize(QSurface *surface, QOpenGLContext *con
 /*!
  * \internal
  */
-void Q3DSSurfaceViewerPrivate::shutdown()
+void Q3DSSurfaceViewerPrivate::destroy()
 {
     bool oldInitialized = (m_viewerApp != nullptr);
 
     if (m_context) {
         disconnect(m_context, &QOpenGLContext::aboutToBeDestroyed,
-                   this, &Q3DSSurfaceViewerPrivate::shutdown);
+                   this, &Q3DSSurfaceViewerPrivate::destroy);
     }
 
     if (m_surface)
@@ -593,10 +574,21 @@ bool Q3DSSurfaceViewerPrivate::eventFilter(QObject *obj, QEvent *e)
         if (surfaceObject() == obj) {
             QPlatformSurfaceEvent *ev = static_cast<QPlatformSurfaceEvent *>(e);
             if (ev->surfaceEventType() == QPlatformSurfaceEvent::SurfaceAboutToBeDestroyed)
-                shutdown();
+                destroy();
         }
     }
     return QObject::eventFilter(obj, e);
+}
+
+/*!
+ * \internal
+ */
+void Q3DSSurfaceViewerPrivate::reset()
+{
+    if (m_viewerApp) {
+        releaseRuntime();
+        initializeRuntime();
+    }
 }
 
 /*!

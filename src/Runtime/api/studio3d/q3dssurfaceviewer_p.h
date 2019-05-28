@@ -62,7 +62,6 @@ public:
     explicit Q3DSSurfaceViewerPrivate(Q3DSSurfaceViewer *parent = nullptr);
     ~Q3DSSurfaceViewerPrivate();
 
-    void reset();
     void setSize(const QSize &size);
     void setUpdateInterval(int interval);
     bool initialize(QSurface *surface, QOpenGLContext *context, GLuint fboId);
@@ -71,12 +70,13 @@ public:
     QImage grab(const QRect &rect);
 
 private Q_SLOTS:
-    void shutdown();
+    void destroy();
 
 protected:
     bool eventFilter(QObject *obj, QEvent *e) override;
 
 private:
+    void reset();
     bool initializeRuntime();
     void releaseRuntime();
     void resetUpdateTimer();
