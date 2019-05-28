@@ -119,17 +119,8 @@ public:
         m_running = true;
         m_semaphore.release();
 
-#ifdef Q_OS_LINUX
-        // TODO: Updating the subpresentation on loop crashes or hangs on Linux, this hack fixes
-        // it for now
-        m_surfaceViewer->update();
-#endif
-
         m_context->doneCurrent();
 
-#ifndef Q_OS_LINUX
-        // TODO: Updating the subpresentation on loop crashes or hangs on Linux, this hack fixes
-        // it for now
         while (true) {
             QMutexLocker lock(&m_mutex);
             if (!m_running)
@@ -152,7 +143,6 @@ public:
         m_fbo.reset();
         m_context->doneCurrent();
         m_context.reset();
-#endif
         m_surfaceViewer->destroy();
         m_surfaceViewer.reset();
         m_surface->moveToThread(m_mainThread);
