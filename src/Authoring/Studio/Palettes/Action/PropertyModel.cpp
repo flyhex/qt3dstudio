@@ -89,8 +89,8 @@ void PropertyModel::setAction(const qt3dsdm::Qt3DSDMActionHandle &action)
                                                                           property.m_handle);
                         qt3dsdm::SMetaDataRange minMax =
                                 qt3dsdm::get<qt3dsdm::SMetaDataRange>(metaDataData);
-                        property.m_min = minMax.m_Min;
-                        property.m_max = minMax.m_Max;
+                        property.m_min = minMax.m_min;
+                        property.m_max = minMax.m_max;
                         break;
                     }
                     case qt3dsdm::AdditionalMetaDataType::StringList: {

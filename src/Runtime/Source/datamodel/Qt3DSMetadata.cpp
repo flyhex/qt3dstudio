@@ -608,7 +608,7 @@ public:
         } break;
         case qt3dsdm::AdditionalMetaDataType::Range: {
             const SMetaDataRange &range = argInfo.m_MetaDataData.getData<SMetaDataRange>();
-            arg.m_MetaDataRange = eastl::make_pair(range.m_Min, range.m_Max);
+            arg.m_MetaDataRange = eastl::make_pair(range.m_min, range.m_max);
         } break;
         default:
             break;

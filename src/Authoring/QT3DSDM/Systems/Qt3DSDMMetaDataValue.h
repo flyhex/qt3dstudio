@@ -71,25 +71,24 @@ typedef eastl::vector<TCharStr> TMetaDataStringList;
 // Float type metadata
 struct SMetaDataRange
 {
-    SMetaDataRange()
-        : m_Min(0.0f)
-        , m_Max(0.0f)
-    {
-    }
+    SMetaDataRange() {}
 
-    SMetaDataRange(float inMin, float inMax)
-        : m_Min(inMin)
-        , m_Max(inMax)
+    SMetaDataRange(float min, float max, int decimals = -1)
+        : m_min(min)
+        , m_max(max)
+        , m_decimals(decimals)
     {
     }
 
     bool operator==(const SMetaDataRange &other) const
     {
-        return m_Min == other.m_Min && m_Max == other.m_Max;
+        // no need to check m_decimals for quality as it is not significant to the range value
+        return m_min == other.m_min && m_max == other.m_max;
     }
 
-    float m_Min;
-    float m_Max;
+    float m_min = 0.0f;
+    float m_max = 0.0f;
+    int m_decimals = -1; // num decimals to show, -1: dynamically calculated
 };
 }
 

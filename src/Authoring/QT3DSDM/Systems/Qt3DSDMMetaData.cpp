@@ -2103,8 +2103,9 @@ public:
         if (!inItem.empty()) {
             if (inType == AdditionalMetaDataType::Range) {
                 SMetaDataRange theRange(get<SMetaDataRange>(inItem));
-                inWriter.Att(L"min", theRange.m_Min);
-                inWriter.Att(L"max", theRange.m_Max);
+                inWriter.Att(L"min", theRange.m_min);
+                inWriter.Att(L"max", theRange.m_max);
+                inWriter.Att(L"decimals", theRange.m_decimals);
             } else if (inType == AdditionalMetaDataType::StringList) {
                 const TMetaDataStringList &theList(get<TMetaDataStringList>(inItem));
                 TCharStr theBuffer;
@@ -2170,7 +2171,8 @@ public:
         // Use the meta data extra information to force the type
         // to something that works correctly.
         SMetaDataRange theRange;
-        if (inReader.Att("min", theRange.m_Min) && inReader.Att("max", theRange.m_Max)) {
+        if (inReader.Att("min", theRange.m_min) && inReader.Att("max", theRange.m_max)) {
+            inReader.Att("decimals", theRange.m_decimals);
             ioItem = theRange;
             if (ioType == CompleteMetaDataType::Long)
                 ioType = CompleteMetaDataType::LongRange;
