@@ -43,6 +43,101 @@
 
 QT_BEGIN_NAMESPACE
 
+/*!
+    \qmltype Studio3D
+    \instantiates Q3DSStudio3D
+    \inqmlmodule QtStudio3D
+    \ingroup OpenGLRuntime
+    \inherits Item
+    \keyword Studio3D
+
+    \brief Qt 3D Studio presentation viewer.
+
+    This type enables developers to embed Qt 3D Studio presentations in Qt
+    Quick.
+
+    \section2 Example Usage
+
+    \qml
+    Studio3D {
+        id: studio3D
+        anchors.fill: parent
+
+        Presentation {
+            source: "qrc:///presentation.uia"
+            SceneElement {
+                id: scene
+                elementPath: "Scene"
+                currentSlideIndex: 2
+            }
+            Element {
+                id: textLabel
+                elementPath: "Scene.Layer.myLabel"
+            }
+        }
+        ViewerSettings {
+            showRenderStats: true
+        }
+        onRunningChanged: {
+            console.log("Presentation ready!");
+        }
+    }
+    \endqml
+
+    \section2 Controlling the presentation
+
+    Like the example above suggests, Studio3D and the other types under the
+    QtStudio3D import offer more than simply rendering the animated Qt 3D
+    Studio presentation. They also offer scene manipulation, including
+
+    \list
+
+    \li querying and changing scene object properties (for example, the
+    transform of a model, colors and other settings of a material, etc.) via
+    Presentation::getAttribute(), Presentation::setAttribute(), \l Element, and
+    \l DataInput,
+
+    \li changing slides (and thus starting the relevant animations and applying
+    the scene object property changes associated with the new slide) via
+    Presentation::goToSlide(), \l SceneElement, and \l DataInput,
+
+    \li and controlling the timeline (the current playback position for the
+    key-frame based animations) both on the main scene and on individual
+    Component nodes via Presentation::goToTime(), \l SceneElement, and \l DataInput.
+
+    \endlist
+
+    \sa Presentation
+*/
+
+/*!
+    \qmlsignal Studio3D::frameUpdate()
+
+    This signal is emitted each time a frame has been rendered.
+*/
+
+/*!
+    \qmlsignal Studio3D::presentationLoaded()
+
+    This signal is emitted when the presentation has been loaded and is ready
+    to be shown.
+*/
+
+/*!
+    \qmlsignal Studio3D::presentationReady()
+
+    This signal is emitted when the presentation has fully initialized its 3D
+    scene for the first frame.
+
+    The difference to presentationLoaded() is that this signal is emitted only
+    when the asynchronous operations needed to build to 3D scene and the first
+    frame have completed.
+
+    When implementing splash screens via Loader items and the Item::visible
+    property, this is the signal that should be used to trigger hiding the
+    splash screen.
+*/
+
 Q3DSStudio3D::Q3DSStudio3D()
     : m_viewerSettings(nullptr)
     , m_presentation(nullptr)
@@ -64,16 +159,40 @@ Q3DSStudio3D::~Q3DSStudio3D()
 {
 }
 
+/*!
+    \qmlproperty Presentation Studio3D::presentation
+
+    Accessor for the presentation. Applications are expected to create a single
+    Presentation child object for Studio3D. If this is omitted, a presentation
+    is created automatically.
+
+    This property is read-only.
+*/
 Q3DSPresentationItem *Q3DSStudio3D::presentation() const
 {
     return m_presentation;
 }
 
+// #TODO: QT3DS-3566 viewerSettings is missing documentation
+/*!
+    \qmlproperty ViewerSettings Studio3D::viewerSettings
+
+    This property is read-only.
+*/
 Q3DSViewerSettings *Q3DSStudio3D::viewerSettings() const
 {
     return m_viewerSettings;
 }
 
+/*!
+    \qmlproperty string Studio3D::error
+
+    Contains the text for the error message that was generated during the
+    loading of the presentation. When no error occurred or there is no
+    presentation loaded, the value is an empty string.
+
+    This property is read-only.
+*/
 QString Q3DSStudio3D::error() const
 {
     return m_error;
@@ -87,9 +206,12 @@ void Q3DSStudio3D::setError(const QString &error)
     }
 }
 
+/*!
+    \internal
+    It might be beneficial to have these as properties so they could be accessed from QML?
+ */
 void Q3DSStudio3D::setIgnoreEvents(bool mouse, bool wheel, bool keyboard)
 {
-    // TODO: It might be beneficial to have these as properties so they could be acceessed from QML
     m_ignoreMouseEvents = mouse;
     m_ignoreWheelEvents = wheel;
     m_ignoreKeyboardEvents = keyboard;
@@ -101,6 +223,9 @@ void Q3DSStudio3D::setIgnoreEvents(bool mouse, bool wheel, bool keyboard)
     setAcceptHoverEvents(!mouse);
 }
 
+/*!
+    \internal
+ */
 void Q3DSStudio3D::componentComplete()
 {
     const auto childObjs = children();
@@ -134,6 +259,9 @@ void Q3DSStudio3D::componentComplete()
     QQuickFramebufferObject::componentComplete();
 }
 
+/*!
+    \internal
+ */
 void Q3DSStudio3D::handleWindowChanged(QQuickWindow *window)
 {
     if (!window)
@@ -148,13 +276,19 @@ void Q3DSStudio3D::handleWindowChanged(QQuickWindow *window)
     connect(window, &QQuickWindow::afterSynchronizing, this, &Q3DSStudio3D::update);
 }
 
-// Queue up a command to inform the renderer of a newly-changed visible/hidden status.
+/*!
+    \internal
+    Queue up a command to inform the renderer of a newly-changed visible/hidden status.
+ */
 void Q3DSStudio3D::handleVisibleChanged()
 {
     m_pendingCommands.m_visibleChanged = true;
     m_pendingCommands.m_visible = isVisible();
 }
 
+/*!
+    \brief internal
+ */
 void Q3DSStudio3D::reset()
 {
     // Fake a source change to trigger a reloading of the presentation
@@ -164,6 +298,9 @@ void Q3DSStudio3D::reset()
     m_pendingCommands.m_variantList = m_presentation->variantList();
 }
 
+/*!
+    \internal
+ */
 void Q3DSStudio3D::requestResponseHandler(const QString &elementPath, CommandType commandType,
                                       void *requestData)
 {
@@ -203,7 +340,10 @@ void Q3DSStudio3D::requestResponseHandler(const QString &elementPath, CommandTyp
     }
 }
 
-// Create the Q3DSRenderer. Invoked automatically by the QML scene graph.
+/*!
+    \internal
+    Create the Q3DSRenderer. Invoked automatically by the QML scene graph.
+ */
 QQuickFramebufferObject::Renderer *Q3DSStudio3D::createRenderer() const
 {
     // It is "illegal" to create a connection between the renderer
@@ -234,23 +374,33 @@ QQuickFramebufferObject::Renderer *Q3DSStudio3D::createRenderer() const
     return renderer;
 }
 
+/*!
+    \qmlproperty bool Studio3D::running
+
+    The value of this property is \c true when the presentation has been loaded
+    and is ready to be shown.
+
+    This property is read-only.
+*/
 bool Q3DSStudio3D::isRunning() const
 {
     return m_isRunning;
 }
 
-/** Emit QML `runningChanged` and `frameUpdate` and signals.
- *  This method is called every frame, and emits the `frameUpdate` signal every frame,
- *  regardless of plugin visibility. This allows a hidden Qt3DSView to still process
- *  information every frame, even though the Renderer is not rendering.
- *
- *  To prevent expensive onFrameUpdate handlers from being processed when hidden,
- *  add an early return to the top like:
- *
- *      onFrameUpdate: {
- *          if (!visible) return;
- *          ...
- *      }
+/*!
+    \internal
+    Emit QML `runningChanged` and `frameUpdate` and signals.
+    This method is called every frame, and emits the `frameUpdate` signal every frame,
+    regardless of plugin visibility. This allows a hidden Qt3DSView to still process
+    information every frame, even though the Renderer is not rendering.
+
+    To prevent expensive onFrameUpdate handlers from being processed when hidden,
+    add an early return to the top like:
+
+        onFrameUpdate: {
+            if (!visible) return;
+            ...
+        }
  */
 void Q3DSStudio3D::tick()
 {
@@ -267,7 +417,10 @@ void Q3DSStudio3D::tick()
     }
 }
 
-// Copies the list of commands previously queued up. Called by Q3DSRenderer::synchronize().
+/*!
+    \internal
+    Copies the list of commands previously queued up. Called by Q3DSRenderer::synchronize().
+  */
 void Q3DSStudio3D::getCommands(bool emitInitialize, CommandQueue &renderQueue)
 {
     if (emitInitialize)
@@ -277,6 +430,9 @@ void Q3DSStudio3D::getCommands(bool emitInitialize, CommandQueue &renderQueue)
     m_pendingCommands.clear(false);
 }
 
+/*!
+    \internal
+ */
 void Q3DSStudio3D::mousePressEvent(QMouseEvent *event)
 {
     if (!m_ignoreMouseEvents) {
@@ -290,6 +446,9 @@ void Q3DSStudio3D::mousePressEvent(QMouseEvent *event)
     }
 }
 
+/*!
+    \internal
+ */
 void Q3DSStudio3D::mouseReleaseEvent(QMouseEvent *event)
 {
     if (!m_ignoreMouseEvents) {
@@ -303,6 +462,9 @@ void Q3DSStudio3D::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
+/*!
+    \internal
+ */
 void Q3DSStudio3D::mouseMoveEvent(QMouseEvent *event)
 {
     if (!m_ignoreMouseEvents) {
@@ -316,12 +478,18 @@ void Q3DSStudio3D::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
+/*!
+    \internal
+ */
 void Q3DSStudio3D::wheelEvent(QWheelEvent *event)
 {
     if (!m_ignoreWheelEvents)
         m_presentation->wheelEvent(event);
 }
 
+/*!
+    \internal
+ */
 void Q3DSStudio3D::keyPressEvent(QKeyEvent *event)
 {
     if (m_ignoreKeyboardEvents)
@@ -329,6 +497,9 @@ void Q3DSStudio3D::keyPressEvent(QKeyEvent *event)
     m_presentation->keyPressEvent(event);
 }
 
+/*!
+    \internal
+ */
 void Q3DSStudio3D::keyReleaseEvent(QKeyEvent *event)
 {
     if (m_ignoreKeyboardEvents)

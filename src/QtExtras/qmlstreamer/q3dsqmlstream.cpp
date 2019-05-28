@@ -29,23 +29,61 @@
 
 #include "q3dsqmlstream.h"
 
+/*!
+    \qmltype QmlStream
+    \instantiates Q3DSQmlStream
+    \inqmlmodule Qt3DStudio
+    \ingroup OpenGLRuntime
+    \brief Allows streaming of QML as subpresentation.
+
+    \sa Studio3D, Presentation, SubPresentation
+*/
+/*!
+    \class Q3DSQmlStream
+    \inmodule OpenGLRuntime
+    \since Qt 3D Studio 2.0
+    \brief Allows streaming of QML as subpresentation.
+    \param parent
+ */
+
+/*!
+ * \brief Q3DSQmlStream::Q3DSQmlStream Constructor
+ * \param parent Optional parent object.
+ */
 Q3DSQmlStream::Q3DSQmlStream(QObject *parent)
     : QObject(parent)
     , m_item(nullptr)
 {
-
 }
 
+/*!
+ * \brief Q3DSQmlStream::~Q3DSQmlStream Destructor.
+ */
 Q3DSQmlStream::~Q3DSQmlStream()
 {
-
 }
 
+/*!
+ * \qmlproperty string QmlStream::presentationId
+ * Contains the presentation id of this subpresentation.
+ */
+/*!
+ * \property Q3DSQmlStream::presentationId
+ * Contains the presentation id of this subpresentation.
+ */
 QString Q3DSQmlStream::presentationId() const
 {
     return m_presentationId;
 }
 
+/*!
+ * \qmlproperty Item QmlStream::item
+ * Contains the Item to be streamed as subpresentation.
+ */
+/*!
+ * \property Q3DSQmlStream::item
+ * Contains the QQuickItem to be streamed as subpresentation.
+ */
 QQuickItem *Q3DSQmlStream::item() const
 {
     return m_item;

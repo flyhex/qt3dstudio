@@ -37,16 +37,63 @@
 
 QT_BEGIN_NAMESPACE
 
+/*!
+    \qmltype SceneElement
+    \instantiates Q3DSSceneElement
+    \inqmlmodule Qt3DStudio
+    \ingroup OpenGLRuntime
+    \brief Controls the special Scene or Component scene objects in a Qt 3D
+    Studio presentation.
+
+    This class is a convenience class for controlling the properties of Scene
+    and Component objects in the scene. These are special since they have a
+    time context, meaning they control a timeline and a set of associated
+    slides.
+
+    \sa Studio3D, Element, Presentation
+*/
+
+/*!
+    \class Q3DSSceneElement
+    \inherits Q3DSElement
+    \inmodule OpenGLRuntime
+    \since Qt 3D Studio 2.0
+
+    \brief Controls the special Scene or Component scene objects in a Qt 3D
+    Studio presentation.
+
+    This class is a convenience class for controlling the properties of Scene
+    and Component objects in the scene. These are special since they have a
+    time context, meaning they control a timline and a set of associated
+    slides.
+
+    \note The functionality of Q3DSSceneElement is equivalent to
+    Q3DSPresentation::goToTime() and Q3DSPresentation::goToSlide().
+
+    \sa Q3DSPresentation, Q3DSWidget, Q3DSSurfaceViewer, Q3DSElement
+ */
+
+/*!
+    \internal
+ */
 Q3DSSceneElement::Q3DSSceneElement(QObject *parent)
     : Q3DSElement(new Q3DSSceneElementPrivate(this), nullptr, QString(), parent)
 {
 }
 
+/*!
+    \internal
+ */
 Q3DSSceneElement::Q3DSSceneElement(const QString &elementPath, QObject *parent)
     : Q3DSElement(new Q3DSSceneElementPrivate(this), nullptr, elementPath, parent)
 {
 }
 
+/*!
+    Constructs a Q3DSSceneElement instance and associated it with the object
+    specified by \a elementPath and the given \a presentation. An optional \a
+    parent object can be specified.
+ */
 Q3DSSceneElement::Q3DSSceneElement(Q3DSPresentation *presentation, const QString &elementPath,
                                    QObject *parent)
     : Q3DSElement(new Q3DSSceneElementPrivate(this), presentation, elementPath, parent)
@@ -54,32 +101,42 @@ Q3DSSceneElement::Q3DSSceneElement(Q3DSPresentation *presentation, const QString
 
 }
 
+/*!
+   Destructor.
+ */
 Q3DSSceneElement::~Q3DSSceneElement()
 {
 }
 
+/*!
+    \qmlproperty int SceneElement::currentSlideIndex
+
+    Holds the index of the currently active slide of the tracked time context.
+
+    \note If this property is set to something else than the default slide for
+    the scene at the initial declaration of SceneElement, a changed signal for
+    the default slide may still be emitted before the slide changes to the
+    desired one. This happens in order to ensure we end up with the index of
+    the slide that is actually shown even if the slide specified in the initial
+    declaration is invalid.
+*/
+
+/*!
+    \property Q3DSSceneElement::currentSlideIndex
+
+    Holds the index of the currently active slide of the tracked time context.
+
+    \note If this property is set to something else than the default slide for
+    the scene at the initial declaration of SceneElement, a changed signal for
+    the default slide may still be emitted before the slide changes to the
+    desired one. This happens in order to ensure we end up with the index of
+    the slide that is actually shown even if the slide specified in the initial
+    declaration is invalid.
+*/
 int Q3DSSceneElement::currentSlideIndex() const
 {
     Q_D(const Q3DSSceneElement);
     return d->m_currentSlideIndex;
-}
-
-int Q3DSSceneElement::previousSlideIndex() const
-{
-    Q_D(const Q3DSSceneElement);
-    return d->m_previousSlideIndex;
-}
-
-QString Q3DSSceneElement::currentSlideName() const
-{
-    Q_D(const Q3DSSceneElement);
-    return d->m_currentSlideName;
-}
-
-QString Q3DSSceneElement::previousSlideName() const
-{
-    Q_D(const Q3DSSceneElement);
-    return d->m_previousSlideName;
 }
 
 void Q3DSSceneElement::setCurrentSlideIndex(int currentSlideIndex)
@@ -96,6 +153,57 @@ void Q3DSSceneElement::setCurrentSlideIndex(int currentSlideIndex)
         d->m_initialSlideIndex = currentSlideIndex + 1;
         d->m_initialSlideName.clear();
     }
+}
+
+/*!
+    \property int SceneElement::previousSlideIndex
+
+    Holds the index of the previously active slide of the tracked time context.
+
+    Note: This property is read-only.
+*/
+/*!
+    \property Q3DSSceneElement::previousSlideIndex
+
+    Holds the index of the previously active slide of the tracked time context.
+
+    This property is read-only.
+*/
+int Q3DSSceneElement::previousSlideIndex() const
+{
+    Q_D(const Q3DSSceneElement);
+    return d->m_previousSlideIndex;
+}
+
+/*!
+    \qmlproperty string SceneElement::currentSlideName
+
+    Holds the name of the currently active slide of the tracked time context.
+
+    \note If this property is set to something else than the default slide for
+    the scene at the initial declaration of SceneElement, a changed signal for
+    the default slide may still be emitted before the slide changes to the
+    desired one. This happens in order to ensure we end up with the index of
+    the slide that is actually shown even if the slide specified in the initial
+    declaration is invalid.
+*/
+
+/*!
+    \property Q3DSSceneElement::currentSlideName
+
+    Holds the name of the currently active slide of the tracked time context.
+
+    \note If this property is set to something else than the default slide for
+    the scene at the initial declaration of SceneElement, a changed signal for
+    the default slide may still be emitted before the slide changes to the
+    desired one. This happens in order to ensure we end up with the index of
+    the slide that is actually shown even if the slide specified in the initial
+    declaration is invalid.
+*/
+QString Q3DSSceneElement::currentSlideName() const
+{
+    Q_D(const Q3DSSceneElement);
+    return d->m_currentSlideName;
 }
 
 void Q3DSSceneElement::setCurrentSlideName(const QString &currentSlideName)
@@ -115,18 +223,52 @@ void Q3DSSceneElement::setCurrentSlideName(const QString &currentSlideName)
     }
 }
 
+/*!
+    \qmlmproperty string SceneElement::previousSlideName
+
+    Holds the name of the previously active slide of the tracked time context.
+
+    Note: This property is read-only.
+*/
+/*!
+    \property Q3DSSceneElement::previousSlideName
+
+    Holds the name of the previously active slide of the tracked time context.
+
+    This property is read-only.
+*/
+QString Q3DSSceneElement::previousSlideName() const
+{
+    Q_D(const Q3DSSceneElement);
+    return d->m_previousSlideName;
+}
+
+/*!
+    Requests a time context (a Scene or a Component object) to change to the
+    next or previous slide, depending on the value of \a next. If the context
+    is already at the last or first slide, \a wrap defines if wrapping over to
+    the first or last slide, respectively, occurs.
+ */
 void Q3DSSceneElement::goToSlide(bool next, bool wrap)
 {
     Q_D(Q3DSSceneElement);
     d->goToSlide(next, wrap);
 }
 
+/*!
+    Moves the timeline for a time context (a Scene or a Component element) to a
+    specific position. The position is given in seconds in \a timeSeconds.
+ */
 void Q3DSSceneElement::goToTime(float time)
 {
     Q_D(Q3DSSceneElement);
     d->goToTime(time);
 }
 
+
+/*!
+    \internal
+ */
 Q3DSSceneElementPrivate::Q3DSSceneElementPrivate(Q3DSSceneElement *parent)
     : Q3DSElementPrivate(parent)
     , m_currentSlideIndex(0)
@@ -136,10 +278,16 @@ Q3DSSceneElementPrivate::Q3DSSceneElementPrivate(Q3DSSceneElement *parent)
 {
 }
 
+/*!
+    \internal
+ */
 Q3DSSceneElementPrivate::~Q3DSSceneElementPrivate()
 {
 }
 
+/*!
+    \internal
+ */
 void Q3DSSceneElementPrivate::handleSlideEntered(int index, const QString &name)
 {
     Q_Q(Q3DSSceneElement);
@@ -175,6 +323,9 @@ void Q3DSSceneElementPrivate::handleSlideEntered(int index, const QString &name)
     }
 }
 
+/*!
+    \internal
+ */
 void Q3DSSceneElementPrivate::goToSlide(bool next, bool wrap)
 {
     if (m_presentation)
@@ -183,6 +334,9 @@ void Q3DSSceneElementPrivate::goToSlide(bool next, bool wrap)
         qWarning() << __FUNCTION__ << "Element is not registered to any presentation!";
 }
 
+/*!
+    \internal
+ */
 void Q3DSSceneElementPrivate::goToTime(float time)
 {
     if (m_presentation)
@@ -191,6 +345,9 @@ void Q3DSSceneElementPrivate::goToTime(float time)
         qWarning() << __FUNCTION__ << "Element is not registered to any presentation!";
 }
 
+/*!
+    \internal
+ */
 void Q3DSSceneElementPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app)
 {
     Q_Q(Q3DSSceneElement);
@@ -221,6 +378,9 @@ void Q3DSSceneElementPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app)
     }
 }
 
+/*!
+    \internal
+ */
 void Q3DSSceneElementPrivate::setCommandQueue(CommandQueue *queue)
 {
     Q_Q(Q3DSSceneElement);
@@ -248,6 +408,9 @@ void Q3DSSceneElementPrivate::setCommandQueue(CommandQueue *queue)
     }
 }
 
+/*!
+    \internal
+ */
 void Q3DSSceneElementPrivate::requestResponseHandler(CommandType commandType, void *requestData)
 {
     switch (commandType) {

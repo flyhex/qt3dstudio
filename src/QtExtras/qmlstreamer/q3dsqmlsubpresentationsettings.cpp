@@ -30,10 +30,27 @@
 #include "q3dsqmlsubpresentationsettings.h"
 #include "q3dsqmlstream.h"
 
+/*!
+    \qmltype SubPresentationSettings
+    \instantiates Q3DSSubPresentationSettings
+    \inqmlmodule Qt3DStudio
+    \ingroup OpenGLRuntime
+    \brief
+
+    \sa Studio3D, Presentation, QmlStream
+*/
+/*!
+    \class Q3DSSubPresentationSettings
+    \inmodule OpenGLRuntime
+    \since Qt 3D Studio 2.0
+    \brief Settings for subpresentations.
+    \param parent
+
+    \sa Q3DSPresentation, Q3DSQmlStream
+ */
 Q3DSSubPresentationSettings::Q3DSSubPresentationSettings(QObject *parent)
     : QObject(parent)
 {
-
 }
 
 Q3DSSubPresentationSettings::~Q3DSSubPresentationSettings()
@@ -41,6 +58,14 @@ Q3DSSubPresentationSettings::~Q3DSSubPresentationSettings()
     qDeleteAll(m_list);
 }
 
+/*!
+ * \qmlproperty variant SubPresentationSettings::qmlStream
+ * Contains the QML streams to be used as subpresentations.
+ */
+/*!
+ * \property Q3DSSubPresentationSettings::qmlStreams
+ * Contains the QML streams to be used as subpresentations.
+ */
 QQmlListProperty<Q3DSQmlStream> Q3DSSubPresentationSettings::qmlStreams()
 {
     return QQmlListProperty<Q3DSQmlStream>(this, m_list);

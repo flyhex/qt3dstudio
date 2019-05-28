@@ -42,71 +42,266 @@
 
 QT_BEGIN_NAMESPACE
 
+/*!
+    \class Q3DSPresentation
+    \inmodule OpenGLRuntime
+    \since Qt 3D Studio 2.0
+
+    \brief Represents a Qt 3D Studio presentation.
+
+    This class provides properties and methods for controlling a
+    presentation.
+
+    Qt 3D Studio supports multiple presentations in one project. There
+    is always a main presentation and zero or more
+    subpresentations. The subpresentations are composed into the
+    main presentations either as contents of Qt 3D Studio layers or as
+    texture maps.
+
+    In the filesystem each presentation corresponds to one \c{.uip}
+    presentation file. When present, the \c{.uia} project file ties
+    these together by specifying a name for each of the
+    (sub-)presentations and specifies which one is the main one.
+
+    The \c{.uia} project also defines \l{DataInput}s and
+    \l{DataOutput}s that are exported by the presentations.
+    \l{DataInput}s provide a way to provide input to the presentation
+    to e.g. control a timeline of a subpresentation from code.
+    \c{DataOutput}s provide a way to get notified when an attribute
+    is changed in the presentation by animation timeline,
+    by behavior scripts or by a \l{DataInput}.
+
+    From the API point of view Q3DSPresentation corresponds to the
+    main presentation. The source property can refer either to a
+    \c{.uia} or \c{.uip} file. When specifying a file with \c{.uip}
+    extension and a \c{.uia} is present with the same name, the
+    \c{.uia} is loaded automatically and thus sub-presentation
+    information is available regardless.
+
+    \note This class should not be instantiated directly when working with the
+    C++ APIs. Q3DSSurfaceViewer and Q3DSWidget create a Q3DSPresentation
+    instance implicitly. This can be queried via
+    Q3DSSurfaceViewer::presentation() or Q3DSWidget::presentation().
+ */
+
+/*!
+    Constructs a new Q3DSPresentation with the given \a parent.
+ */
 Q3DSPresentation::Q3DSPresentation(QObject *parent)
     : QObject(parent)
     , d_ptr(new Q3DSPresentationPrivate(this))
 {
 }
 
+/*!
+    Destructor.
+ */
 Q3DSPresentation::~Q3DSPresentation()
 {
 }
 
+/*!
+    \qmlproperty string Presentation::source
+
+    Holds the name of the main presentation file (\c{*.uia} or
+    \c{*.uip}). This may be either a local file or qrc URL.
+
+    The names of all further assets (image files for texture maps, qml
+    behavior scripts, mesh files) will be resolved relative to the
+    location of the presentation, unless they use absolute paths. This
+    allows bundling all assets next to the presentation in the Qt
+    resource system.
+
+    Currently set \c{variantList} property will modify which variant groups
+    and tags are loaded from the presentations. See
+    Q3DSPresentation::variantList property.
+*/
+
+/*!
+    \property Q3DSPresentation::source
+
+    Holds the name of the main presentation file (\c{*.uia} or
+    \c{*.uip}). This may be either a local file or qrc URL.
+
+    The names of all further assets (image files for texture maps, qml
+    behavior scripts, mesh files) will be resolved relative to the
+    location of the presentation, unless they use absolute paths. This
+    allows bundling all assets next to the presentation in the Qt
+    resource system.
+
+    Currently set variantList will modify which variant groups
+    and tags are loaded from the presentations. See
+    Q3DSPresentation::variantList property.
+*/
 QUrl Q3DSPresentation::source() const
 {
     return d_ptr->m_source;
 }
 
+void Q3DSPresentation::setSource(const QUrl &source)
+{
+    if (d_ptr->m_source != source) {
+        d_ptr->setSource(source);
+        Q_EMIT sourceChanged(source);
+    }
+}
+
+/*!
+    \qmlproperty variant Presentation::variantList
+
+    Holds a list of (variant group):(variant) tags that are loaded when the
+    \c{source} property is set. If this list is left empty (default), no variant
+    filtering is applied and all items are loaded regardless of variant tags in
+    the presentation. Variant mechanism allows one presentation project to
+    contain multiple variants of the presentation and the decision which variant
+    set is loaded is determined during runtime based on the \c{variantList}.
+
+    Variants are divided to variant groups, e.g. one variant group could be
+    \c{region} and the variants within that group could be e.g. \c{US, EU, CH}.
+    Another variant group could be e.g. \c{power} and variants within that could
+    be e.g. \c{gas, electric, diesel}. To filter in this example an electric
+    variant for the EU region, the variantList needs to contain two strings
+    "region:EU" and "power:electric". Also of course the presentation project
+    needs to contain these variant groups and tags applied appropriately to the
+    presentation content.
+
+    When variant filters are used, the decision what gets loaded and what is not
+    loaded is based on checking every item in the presentation:
+    \list
+    \li If the item has no variant tags, it will be loaded.
+    \li If the item has no tags defined for the checked variant group(s),
+        it will be loaded.
+    \li If the item has tag(s) for the variant group, any of those tags must
+        match any of the variants defined in the filter for that group.
+    \endlist
+
+    If the item doesn't fulfill the above rules it will not be loaded.
+*/
+
+/*!
+    \property Q3DSPresentation::variantList
+
+    Holds a list of (variant group):(variant) tags that are loaded when the
+    \c{source} property is set. If this list is left empty (default), no variant
+    filtering is applied and all items are loaded regardless of variant tags in
+    the presentation. Variant mechanism allows one presentation project to
+    contain multiple variants of the presentation and the decision which variant
+    set is loaded is determined during runtime based on the \c{variantList}.
+
+    Variants are divided to variant groups, e.g. one variant group could be
+    \c{region} and the variants within that group could be e.g. \c{US, EU, CH}.
+    Another variant group could be e.g. \c{power} and variants within that could
+    be e.g. \c{gas, electric, diesel}. To filter in this example an electric
+    variant for the EU region, the variantList needs to contain two strings
+    "region:EU" and "power:electric". Also of course the presentation project
+    needs to contain these variant groups and tags applied appropriately to the
+    presentation content.
+
+    When variant filters are used, the decision what gets loaded and what is not
+    loaded is based on checking every item in the presentation:
+    \list
+    \li If the item has no variant tags, it will be loaded.
+    \li If the item has no tags defined for the checked variant group(s),
+        it will be loaded.
+    \li If the item has tag(s) for the variant group, any of those tags must
+        match any of the variants defined in the filter for that group.
+    \endlist
+
+    If the item doesn't fulfill the above rules it will not be loaded.
+*/
 QStringList Q3DSPresentation::variantList() const
 {
     return d_ptr->m_variantList;
 }
 
+void Q3DSPresentation::setVariantList(const QStringList &variantList)
+{
+    if (d_ptr->m_variantList != variantList) {
+        d_ptr->setVariantList(variantList);
+        Q_EMIT variantListChanged(variantList);
+    }
+}
+
+/*!
+    \internal
+ */
 void Q3DSPresentation::registerElement(Q3DSElement *element)
 {
     d_ptr->registerElement(element);
 }
 
+/*!
+    \internal
+ */
 void Q3DSPresentation::unregisterElement(Q3DSElement *element)
 {
     d_ptr->unregisterElement(element);
 }
 
+/*!
+    \internal
+ */
 Q3DSElement *Q3DSPresentation::registeredElement(const QString &elementPath) const
 {
     return d_ptr->m_elements.value(elementPath, nullptr);
 }
 
+/*!
+    \internal
+ */
 void Q3DSPresentation::registerDataInput(Q3DSDataInput *dataInput)
 {
     d_ptr->registerDataInput(dataInput);
 }
 
+/*!
+    \internal
+ */
 void Q3DSPresentation::unregisterDataInput(Q3DSDataInput *dataInput)
 {
     d_ptr->unregisterDataInput(dataInput);
 }
 
+/*!
+    \internal
+ */
 Q3DSDataInput *Q3DSPresentation::registeredDataInput(const QString &name) const
 {
     return d_ptr->m_dataInputs.value(name, nullptr);
 }
 
+/*!
+    \internal
+ */
 void Q3DSPresentation::registerDataOutput(Q3DSDataOutput *dataOutput)
 {
     d_ptr->registerDataOutput(dataOutput);
 }
 
+/*!
+    \internal
+ */
 void Q3DSPresentation::unregisterDataOutput(Q3DSDataOutput *dataOutput)
 {
     d_ptr->unregisterDataOutput(dataOutput);
 }
 
+/*!
+    \internal
+ */
 Q3DSDataOutput *Q3DSPresentation::registeredDataOutput(const QString &name) const
 {
     return d_ptr->m_dataOutputs.value(name, nullptr);
 }
 
+/*!
+    Returns a list of datainputs defined for this presentation. Use setDataInputValue()
+    interface to set a datainput value using datainput name, or call Q3DSDataInput::setValue
+    directly for a specific datainput.
+
+    \sa setDataInputValue
+    \sa Q3DSDataInput
+ */
 QVector<Q3DSDataInput *> Q3DSPresentation::dataInputs() const
 {
     QVector<Q3DSDataInput *> ret;
@@ -117,27 +312,23 @@ QVector<Q3DSDataInput *> Q3DSPresentation::dataInputs() const
     return ret;
 }
 
-QVariantList Q3DSPresentation::getDataOutputs() const
-{
-    QVariantList ret;
-    const auto dataoutputs = dataOutputs();
+/*!
+    \qmlmethod variant Presentation::getDataInputs
+    Returns a list of datainputs defined for this presentation. Use setDataInputValue()
+    interface to set a datainput value using datainput name, or call Q3DSDataInput::setValue
+    directly for a specific datainput.
 
-    for (const auto &it : dataoutputs)
-        ret.append(QVariant::fromValue(it));
+    \sa DataInput
+ */
 
-    return ret;
-}
+/*!
+    Returns a list of datainputs defined for this presentation. Use setDataInputValue()
+    interface to set a datainput value using datainput name, or call Q3DSDataInput::setValue
+    directly for a specific datainput.
 
-QVector<Q3DSDataOutput *> Q3DSPresentation::dataOutputs() const
-{
-    QVector<Q3DSDataOutput *> ret;
-    const auto datainputs = d_ptr->m_dataOutputs;
-    for (const auto &it : datainputs)
-        ret.append(it);
-
-    return ret;
-}
-
+    \sa setDataInputValue
+    \sa Q3DSDataInput
+ */
 QVariantList Q3DSPresentation::getDataInputs() const
 {
     QVariantList ret;
@@ -149,22 +340,76 @@ QVariantList Q3DSPresentation::getDataInputs() const
     return ret;
 }
 
-void Q3DSPresentation::setSource(const QUrl &source)
+/*!
+    Returns a list of dataoutputs defined for this presentation. Use Qt's connect() method
+    to connect slots to the valueChanged() signal in the required \l{DataOutput}s to get notified
+    when the value tracked by the DataOutput is changed.
+
+    \sa Q3DSDataOutput
+ */
+QVector<Q3DSDataOutput *> Q3DSPresentation::dataOutputs() const
 {
-    if (d_ptr->m_source != source) {
-        d_ptr->setSource(source);
-        Q_EMIT sourceChanged(source);
-    }
+    QVector<Q3DSDataOutput *> ret;
+    const auto datainputs = d_ptr->m_dataOutputs;
+    for (const auto &it : datainputs)
+        ret.append(it);
+
+    return ret;
 }
 
-void Q3DSPresentation::setVariantList(const QStringList &variantList)
+/*!
+    \qmlmethod variant Presentation::getDataOutputs
+
+    Returns a list of dataoutputs defined for this presentation. Connect slots to the
+    \c{valueChanged()} signal in the required \l{DataOutput}s to get notified
+    when the value tracked by the DataOutput is changed.
+
+    \sa SDataOutput
+ */
+/*!
+ * \brief Q3DSPresentation::getDataOutputs Returns \l{DataOutput}s.
+    Returns a list of dataoutputs defined for this presentation. Use Qt's connect() method
+    to connect slots to the valueChanged() signal in the required \l{DataOutput}s to get notified
+    when the value tracked by the DataOutput is changed.
+
+    \sa Q3DSDataOutput
+ */
+QVariantList Q3DSPresentation::getDataOutputs() const
 {
-    if (d_ptr->m_variantList != variantList) {
-        d_ptr->setVariantList(variantList);
-        Q_EMIT variantListChanged(variantList);
-    }
+    QVariantList ret;
+    const auto dataoutputs = dataOutputs();
+
+    for (const auto &it : dataoutputs)
+        ret.append(QVariant::fromValue(it));
+
+    return ret;
 }
 
+/*!
+    \qmlproperty bool Presentation::delayedLoading
+
+    This property controls whether the presentation resources are loaded while loading
+    the presentation(false) or afterwards when they are actually used in the presentation(true).
+    The resources are loaded per slide basis so that all resources required by a slide will be
+    loaded at once.
+
+    The resources can be images, subpresentations, materials, effects and meshes.
+
+    Default is \c{false}.
+  */
+
+/*!
+    \property Q3DSPresentation::delayedLoading
+
+    This property controls whether the presentation resources are loaded while loading
+    the presentation(false) or afterwards when they are actually used in the presentation(true).
+    The resources are loaded per slide basis so that all resources required by a slide will be
+    loaded at once.
+
+    The resources can be images, subpresentations, materials, effects and meshes.
+
+    Default is \c{false}.
+  */
 bool Q3DSPresentation::delayedLoading() const
 {
     return d_ptr->m_delayedLoading;
@@ -178,6 +423,18 @@ void Q3DSPresentation::setDelayedLoading(bool enable)
     }
 }
 
+/*!
+    \qmlmethod Presentation::preloadSlide
+    Preloads slide resources to memory. All resources required by the given slide will be
+    loaded in the background. This function has effect only when delayed loading is enabled.
+    \param elementPath
+ */
+/*!
+    \brief Q3DSPresentation::preloadSlide
+    Preloads slide resources to memory. All resources required by the given slide will be
+    loaded in the background. This function has effect only when delayed loading is enabled.
+    \param elementPath
+ */
 void Q3DSPresentation::preloadSlide(const QString &elementPath)
 {
     if (d_ptr->m_viewerApp)
@@ -186,6 +443,19 @@ void Q3DSPresentation::preloadSlide(const QString &elementPath)
         d_ptr->m_commandQueue->queueCommand(elementPath, CommandType_PreloadSlide);
 }
 
+/*!
+    \qmlmethod Presentation::unloadSlide
+    Unloads slide resources from memory. If the slide is current, then the resources are unloaded
+    when the slide is changed. This function has effect only when delayed loading is enabled.
+    \param elementPath
+ */
+
+/*!
+    \brief Q3DSPresentation::unloadSlide
+    Unloads slide resources from memory. If the slide is current, then the resources are unloaded
+    when the slide is changed. This function has effect only when delayed loading is enabled.
+    \param elementPath
+ */
 void Q3DSPresentation::unloadSlide(const QString &elementPath)
 {
     if (d_ptr->m_viewerApp)
@@ -194,6 +464,21 @@ void Q3DSPresentation::unloadSlide(const QString &elementPath)
         d_ptr->m_commandQueue->queueCommand(elementPath, CommandType_UnloadSlide);
 }
 
+/*!
+    This API is for backwards compatibility. We recommend using \l{DataInput}s to control
+    slide changes. \l{DataInput} provides stronger contract between the design and
+    code as it avoids use of elementPath (a reference to design's internal structure).
+
+    Requests a time context (a Scene or a Component object) to change
+    to a specific slide by \a index. If the context is already on that
+    slide, playback will start over.
+
+    If \a elementPath points to a time context, that element is
+    controlled. For all other element types the time context owning
+    that element is controlled instead.  You can target the command to
+    a specific sub-presentation by adding "SubPresentationId:" in
+    front of the element path, for example \c{"SubPresentationOne:Scene"}.
+ */
 void Q3DSPresentation::goToSlide(const QString &elementPath, unsigned int index)
 {
     if (d_ptr->m_viewerApp) {
@@ -204,6 +489,21 @@ void Q3DSPresentation::goToSlide(const QString &elementPath, unsigned int index)
     }
 }
 
+/*!
+    This API is for backwards compatibility. We recommend using \l{DataInput}s to control
+    slide changes. \l{DataInput} provides stronger contract between the design and
+    code as it avoids use of elementPath (a reference to design's internal structure).
+
+    Requests a time context (a Scene or a Component object) to change
+    to a specific slide by \a name. If the context is already on that
+    slide, playback will start over.
+
+    If \a elementPath points to a time context, that element is
+    controlled. For all other element types the time context owning
+    that element is controlled instead.  You can target the command to
+    a specific sub-presentation by adding "SubPresentationId:" in
+    front of the element path, for example \c{"SubPresentationOne:Scene"}.
+ */
 void Q3DSPresentation::goToSlide(const QString &elementPath, const QString &name)
 {
     if (d_ptr->m_viewerApp) {
@@ -215,6 +515,22 @@ void Q3DSPresentation::goToSlide(const QString &elementPath, const QString &name
     }
 }
 
+/*!
+    This API is for backwards compatibility. We recommend using \l{DataInput}s to control
+    slide changes. \l{DataInput} provides stronger contract between the design and
+    code as it avoids use of elementPath (a reference to design's internal structure).
+
+    Requests a time context (a Scene or a Component object) to change to the
+    next or previous slide, depending on the value of \a next. If the context
+    is already at the last or first slide, \a wrap defines if wrapping over to
+    the first or last slide, respectively, occurs.
+
+    If \a elementPath points to a time context, that element is controlled. For
+    all other element types the time context owning that element is controlled
+    instead. You can target the command to a specific sub-presentation by
+    adding "SubPresentationId:" in front of the element path, for example
+    \c{"SubPresentationOne:Scene"}.
+ */
 void Q3DSPresentation::goToSlide(const QString &elementPath, bool next, bool wrap)
 {
     if (d_ptr->m_viewerApp) {
@@ -226,6 +542,36 @@ void Q3DSPresentation::goToSlide(const QString &elementPath, bool next, bool wra
     }
 }
 
+/*!
+    This API is for backwards compatibility. We recommend using \l{DataInput}s to control
+    slide changes. \l{DataInput} provides stronger contract between the design and
+    code as it avoids use of elementPath (a reference to design's internal structure).
+
+    Moves the timeline for a time context (a Scene or a Component element) to a
+    specific position. The position is given in seconds in \a timeSeconds.
+
+    If \a elementPath points to a time context, that element is
+    controlled. For all other element types the time context owning
+    that element is controlled instead.  You can target the command to
+    a specific sub-presentation by adding "SubPresentationId:" in
+    front of the element path, for example
+    \c{"SubPresentationOne:Scene"}.
+
+    The behavior when specifying a time before 0 or after the end time
+    for the current slide depends on the play mode of the slide:
+
+    \list
+    \li \c{Stop at End} - values outside the valid time range instead clamp to the boundaries.
+    For example, going to time -5 is the same as going to time 0.
+    \li \c{Looping} - values outside the valid time range mod into the valid range. For example,
+    going to time -4 on a 10 second slide is the same as going to time 6.
+    \li \c{Ping Pong} - values outside the valid time range bounce off the ends. For example,
+    going to time -4 is the same as going to time 4 (assuming the time context is at least 4 seconds
+    long), while going to time 12 on a 10 second slide is the same as going to time 8.
+    \li \c{Ping} - values less than 0 are treated as time 0, while values greater than the endtime
+    bounce off the end (eventually hitting 0.)
+    \endlist
+ */
 void Q3DSPresentation::goToTime(const QString &elementPath, float time)
 {
     if (d_ptr->m_viewerApp) {
@@ -236,6 +582,30 @@ void Q3DSPresentation::goToTime(const QString &elementPath, float time)
     }
 }
 
+/*!
+    This API is for backwards compatibility. We recommend using \l{DataInput}s to control
+    attributes in the presentation. \l{DataInput} provides stronger contract between the
+    design and code as it avoids use of elementPath (a reference to design's
+    internal structure).
+
+    Sets the \a value of an attribute (property) on the object specified by
+    \a elementPath. The \a attributeName is the \l{Attribute Names}{scripting
+    name} of the attribute.
+
+    An element path refers to an object in the scene by name, for example,
+    \c{Scene.Layer.Camera}. Here the right camera object gets chosen even if
+    the scene contains other layers with the default camera names (for instance
+    \c{Scene.Layer2.Camera}).
+
+    To reference an object stored in a property of another object, the dot
+    syntax can be used. The most typical example of this is changing the source
+    of a texture map by changing the \c sourcepath property on the object
+    selected by \c{SomeMaterial.diffusemap}.
+
+    To access an object in a sub-presentation, prepend the name of the
+    sub-presentation followed by a colon, for example,
+    \c{SubPresentationOne:Scene.Layer.Camera}.
+ */
 void Q3DSPresentation::setAttribute(const QString &elementPath, const QString &attributeName,
                                     const QVariant &value)
 {
@@ -268,6 +638,12 @@ void Q3DSPresentation::setAttribute(const QString &elementPath, const QString &a
     }
 }
 
+// #TODO: QT3DS-3558
+/*!
+    \brief Q3DSPresentation::setPresentationActive
+    \param id
+    \param active
+ */
 void Q3DSPresentation::setPresentationActive(const QString &id, bool active)
 {
     if (d_ptr->m_viewerApp) {
@@ -278,6 +654,15 @@ void Q3DSPresentation::setPresentationActive(const QString &id, bool active)
     }
 }
 
+/*!
+    Dispatches a Qt 3D Studio presentation event with \a eventName on
+    scene object specified by \a elementPath. These events provide a
+    way to communicate with the \c .qml based \c{behavior scripts}
+    attached to scene objects since they can register to be notified
+    via Behavior::registerForEvent().
+
+    See setAttribute() for a description of \a elementPath.
+ */
 void Q3DSPresentation::fireEvent(const QString &elementPath, const QString &eventName)
 {
     if (d_ptr->m_viewerApp) {
@@ -289,6 +674,11 @@ void Q3DSPresentation::fireEvent(const QString &elementPath, const QString &even
     }
 }
 
+// #TODO: QT3DS-3559
+/*!
+    \brief Q3DSPresentation::setGlobalAnimationTime
+    \param milliseconds
+ */
 void Q3DSPresentation::setGlobalAnimationTime(qint64 milliseconds)
 {
     if (d_ptr->m_viewerApp) {
@@ -299,6 +689,23 @@ void Q3DSPresentation::setGlobalAnimationTime(qint64 milliseconds)
     }
 }
 
+/*!
+    Sets the \a value of a data input element \a name in the presentation.
+
+    Data input provides a higher level, designer-driven alternative to
+    Q3DSElement and setAttribute(). Instead of exposing a large set of
+    properties with their internal engine names, data input allows designers to
+    decide which properties should be writable by the application, and can
+    assign custom names to these data input entries, thus forming a
+    well-defined contract between the designer and the developer.
+
+    In addition, data input also allows controlling the time line and the
+    current slide for time context objects (Scene or Component). Therefore it
+    is also an alternative to the goToSlide() and goToTime() family of APIs and
+    to Q3DSSceneElement.
+
+    \sa DataInput
+ */
 void Q3DSPresentation::setDataInputValue(const QString &name, const QVariant &value,
                                          Q3DSDataInput::ValueRole valueRole)
 {
@@ -311,13 +718,14 @@ void Q3DSPresentation::setDataInputValue(const QString &name, const QVariant &va
     }
 }
 
-/**
-    Adds a new child element for the element specified by parentElementPath to the slide specified
-    with slideName. Only model element creation is currently supported.
+/*!
+ * \brief Q3DSPresentation::createElement Adds a new child element for the specified element.
+    Adds a new child element for the element specified by parentElementPath to the slide
+    specified with slideName. Only model element creation is currently supported.
     A referenced material element is also created for the new model element. The source material
     name can be specified with custom "material" property in the properties hash.
     The source material must exist in the material container of the presentation.
-*/
+ */
 void Q3DSPresentation::createElement(const QString &parentElementPath, const QString &slideName,
                                      const QHash<QString, QVariant> &properties)
 {
@@ -326,6 +734,13 @@ void Q3DSPresentation::createElement(const QString &parentElementPath, const QSt
     createElements(parentElementPath, slideName, theProperties);
 }
 
+// #TODO: QT3DS-3560
+/*!
+    \brief Q3DSPresentation::createElements
+    \param parentElementPath
+    \param slideName
+    \param properties
+ */
 void Q3DSPresentation::createElements(const QString &parentElementPath, const QString &slideName,
                                       const QVector<QHash<QString, QVariant>> &properties)
 {
@@ -340,9 +755,11 @@ void Q3DSPresentation::createElements(const QString &parentElementPath, const QS
     }
 }
 
-/**
+/*!
+    \brief Q3DSPresentation::deleteElement
     Removes an element added by createElement and all its child elements.
-*/
+    \param elementPath
+ */
 void Q3DSPresentation::deleteElement(const QString &elementPath)
 {
     QStringList elementPaths;
@@ -350,6 +767,11 @@ void Q3DSPresentation::deleteElement(const QString &elementPath)
     deleteElements(elementPaths);
 }
 
+/*!
+    \brief Q3DSPresentation::deleteElements
+    Removes the given list of elements added by createElement and all their child elements.
+    \param elementPaths QStringList containing the elementPaths of dynamically created objects.
+ */
 void Q3DSPresentation::deleteElements(const QStringList &elementPaths)
 {
     if (d_ptr->m_viewerApp) {
@@ -361,13 +783,16 @@ void Q3DSPresentation::deleteElements(const QStringList &elementPaths)
     }
 }
 
-/**
+/*!
+    \brief Q3DSPresentation::createMaterial
     Creates a material specified by the materialDefinition parameter into the material
     container of the presentation that owns the element specified by the elementPath parameter.
     After creation, the material can be used for new elements created via createElement.
     The materialDefinition parameter can contain either the file path to a material definition
     file or a material definition in the Qt 3D Studion material data format.
-*/
+    \param elementPath
+    \param materialDefinition
+ */
 void Q3DSPresentation::createMaterial(const QString &elementPath,
                                       const QString &materialDefinition)
 {
@@ -376,6 +801,12 @@ void Q3DSPresentation::createMaterial(const QString &elementPath,
     createMaterials(elementPath, materialDefinitions);
 }
 
+/*!
+    \brief Q3DSPresentation::createMaterials
+    Same as createMaterial, but creates multiple materials.
+    \param elementPath
+    \param materialDefinitions
+ */
 void Q3DSPresentation::createMaterials(const QString &elementPath,
                                        const QStringList &materialDefinitions)
 {
@@ -467,6 +898,9 @@ void Q3DSPresentation::mousePressEvent(QMouseEvent *e)
     }
 }
 
+/*!
+ * \internal
+ */
 void Q3DSPresentation::mouseReleaseEvent(QMouseEvent *e)
 {
     if (d_ptr->m_viewerApp) {
@@ -477,6 +911,9 @@ void Q3DSPresentation::mouseReleaseEvent(QMouseEvent *e)
     }
 }
 
+/*!
+ * \internal
+ */
 void Q3DSPresentation::mouseMoveEvent(QMouseEvent *e)
 {
     if (d_ptr->m_viewerApp) {
@@ -487,6 +924,9 @@ void Q3DSPresentation::mouseMoveEvent(QMouseEvent *e)
     }
 }
 
+/*!
+ * \internal
+ */
 void Q3DSPresentation::wheelEvent(QWheelEvent *e)
 {
     QPoint pixelData = e->pixelDelta();
@@ -516,6 +956,9 @@ void Q3DSPresentation::wheelEvent(QWheelEvent *e)
     }
 }
 
+/*!
+ * \internal
+ */
 void Q3DSPresentation::keyPressEvent(QKeyEvent *e)
 {
     if (d_ptr->m_viewerApp) {
@@ -526,6 +969,9 @@ void Q3DSPresentation::keyPressEvent(QKeyEvent *e)
     }
 }
 
+/*!
+ * \internal
+ */
 void Q3DSPresentation::keyReleaseEvent(QKeyEvent *e)
 {
     if (d_ptr->m_viewerApp) {
@@ -536,6 +982,97 @@ void Q3DSPresentation::keyReleaseEvent(QKeyEvent *e)
     }
 }
 
+// #TODO: QT3DS-3562 Most Presentation signals missing documentation
+/*!
+ * \qmlsignal Presentation::slideEntered
+ * Emitted when
+ * \param elementPath
+ * \param index
+ * \param name
+ */
+
+/*!
+ * \fn Q3DSPresentation::slideEntered
+ * Emitted when
+ * \param elementPath
+ * \param index
+ * \param name
+ */
+
+/*!
+ * \qmlsignal Presentation::slideExited
+ * Emitted when
+ * \param elementPath
+ * \param index
+ * \param name
+ */
+
+/*!
+ * \fn Q3DSPresentation::slideExited
+ * Emitted when
+ * \param elementPath
+ * \param index
+ * \param name
+ */
+
+/*!
+ * \fn Q3DSPresentation::dataInputsReady
+ * Emitted when \l{DataInput}s in the Studio project have been parsed and data inputs are available
+ * through dataInputs() and getDataInputs() methods.
+ */
+
+/*!
+ * \fn Q3DSPresentation::dataOutputsReady
+ * Emitted when \l{DataOutput}s in the Studio project have been parsed and data outputs are available
+ * through dataOutputs() and getDataOutputs() methods.
+ */
+
+/*!
+ * \qmlsignal Presentation::customSignalEmitted
+ * Emitted when
+ * \param elementPath
+ * \param name
+ */
+
+/*!
+ * \fn Q3DSPresentation::customSignalEmitted
+ * Emitted when
+ * \param elementPath
+ * \param name
+ */
+
+/*!
+ * \qmlsignal Presentation::elementsCreated
+ * Emitted when
+ * \param elementPaths
+ * \param error
+ */
+
+/*!
+ * \fn Q3DSPresentation::elementsCreated
+ * Emitted when
+ * \param elementPaths
+ * \param error
+ */
+
+/*!
+ * \qmlsignal Presentation::materialsCreated
+ * Emitted when
+ * \param materialNames
+ * \param error
+ */
+
+/*!
+ * \fn Q3DSPresentation::materialsCreated
+ * Emitted when
+ * \param materialNames
+ * \param error
+ */
+
+
+/*!
+ * \internal
+ */
 Q3DSPresentationPrivate::Q3DSPresentationPrivate(Q3DSPresentation *q)
     : QObject(q)
     , q_ptr(q)

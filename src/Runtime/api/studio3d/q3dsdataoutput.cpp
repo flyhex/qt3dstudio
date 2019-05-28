@@ -31,6 +31,55 @@
 #include "q3dspresentation_p.h"
 #include "q3dscommandqueue_p.h"
 
+/*!
+    \qmltype DataOutput
+    \instantiates Q3DSDataOutput
+    \inqmlmodule Qt3DStudio
+    \ingroup OpenGLRuntime
+    \brief Provides notifications from data output entries in Qt 3D Studio presentation.
+    This class is a convenience class for listening for changes in the Qt 3D Studio
+    presentation attributes. DataOutput provides a clean contract between the presentation
+    design and the code. It hides the presentation details from the code while providing a
+    contractual access point to code to be notified when aspects of the presentation change
+    (e.g. movement of an element in the presentation due to timeline animation).
+
+    DataOutput can be attached to same attributes in the design as DataInput is, including
+    presentation timeline. Only exception is slide changes. Slide changes are already notified
+    through \c{Presentation::slideEntered} and \c{Presentation::slideExited} signals.
+
+    \note There is a performance cost for each registered DataOutput, so try to avoid
+    creating unnecessary DataOutputs.
+
+    \sa Presentation, DataInput, Presentation::slideExited, Presentation::slideEntered
+    \sa Presentation::customSignalEmitted
+*/
+
+/*!
+    \class Q3DSDataOutput
+    \inmodule OpenGLRuntime
+    \since Qt 3D Studio 2.4
+    \brief Provides notifications from data output entries in Qt 3D Studio presentation.
+    This class is a convenience class for listening for changes in the Qt 3D Studio
+    presentation attributes. DataOutput provides a clean contract between the presentation
+    design and the code. It hides the presentation details from the code while providing a
+    contractual access point to code to be notified when aspects of the presentation change
+    (e.g. movement of an element in the presentation due to timeline animation).
+
+    DataOutput can be attached to same attributes in the design as DataInput is, including
+    presentation timeline. Only excaption is slide changes Slide changes are already notified
+    through \c{Q3DSPresentation::slideEntered} and \c{Q3DSPresentation::slideExited} signals.
+
+    \note There is a performance cost for each registered DataOutput, so try to avoid
+    creating unnecessary DataOutputs.
+
+    For other integration points between code and presentation see:
+    \sa Q3DSPresentation::customSignalEmitted
+    \sa Q3DSPresentation::slideEntered
+    \sa Q3DSPresentation::slideExited
+    \sa Q3DSDataInput
+
+    \sa Q3DSPresentation
+*/
 Q3DSDataOutput::Q3DSDataOutput(QObject *parent)
   : QObject(parent)
   , d_ptr(new Q3DSDataOutputPrivate(this))
@@ -50,6 +99,26 @@ Q3DSDataOutput::~Q3DSDataOutput()
     delete d_ptr;
 }
 
+/*!
+    \qmlproperty string DataOutput::name
+
+    Specifies the name of the observed data output element in the
+    presentation. The name must match a name of a data output defined
+    in the presentation. This property must be set before setting the value
+    property.
+ */
+
+/*!
+    \property Q3DSDataOutput::name
+
+    Specifies the name of the observed data output element in the
+    presentation. The name must match a name of a data output defined
+    in the presentation.
+
+    This property must be set before setting the value property.
+    The initial value is provided via the constructor, but the name
+    can also be changed later on.
+ */
 QString Q3DSDataOutput::name() const
 {
     return d_ptr->m_name;
@@ -65,11 +134,49 @@ void Q3DSDataOutput::setName(const QString &name)
     }
 }
 
+/*!
+    \qmlproperty DataOutput::value
+
+    Contains the read-only value of the controlled data output element in the
+    presentation.
+
+    The value of this property accounts for actual value in the last processed
+    frame of the presentation. This includes animation timeline driven changes,
+    changes done via DataInput and changes done via Behavior scripts.
+*/
+
+/*!
+    \property Q3DSDataOutput::value
+
+    Contains the read-only value of the controlled data output element in the
+    presentation.
+
+    The value of this property accounts for actual value in the last processed
+    frame of the presentation. This includes animation timeline driven changes,
+    changes done via DataInput and changes done via Behavior scripts.
+*/
 QVariant Q3DSDataOutput::value() const
 {
     return d_ptr->m_value;
 }
 
+/*!
+ * \qmlsignal DataOutput::valueChanged
+    Emitted when the value of the observed DataOutput has changed in the
+    presentation.
+    \param newValue The new value of the observed DataOutput.
+ */
+
+/*!
+    \fn Q3DSDataOutput::valueChanged
+    Emitted when the value of the observed DataOutput has changed in the
+    presentation.
+    \param newValue The new value of the observed DataOutput.
+ */
+
+/*!
+ * \internal
+ */
 void Q3DSDataOutput::setValue(const QVariant &value)
 {
     if (d_ptr->m_value == value)

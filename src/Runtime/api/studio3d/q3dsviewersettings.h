@@ -44,9 +44,12 @@ class Q_STUDIO3D_EXPORT Q3DSViewerSettings : public QObject
     Q_DECLARE_PRIVATE(Q3DSViewerSettings)
     Q_ENUMS(ShadeMode)
     Q_ENUMS(ScaleMode)
+
+// #TODO: QT3DS-3542 Q3DSViewerSettings API is missing property matteEnabled compared to 2.3
+//    Q_PROPERTY(bool matteEnabled READ matteEnabled WRITE setMatteEnabled NOTIFY matteEnabledChanged)
+
     Q_PROPERTY(QColor matteColor READ matteColor WRITE setMatteColor NOTIFY matteColorChanged)
     Q_PROPERTY(bool showRenderStats READ isShowRenderStats WRITE setShowRenderStats NOTIFY showRenderStatsChanged)
-    Q_PROPERTY(ShadeMode shadeMode READ shadeMode WRITE setShadeMode NOTIFY shadeModeChanged)
     Q_PROPERTY(ScaleMode scaleMode READ scaleMode WRITE setScaleMode NOTIFY scaleModeChanged)
 
 public:
@@ -66,7 +69,6 @@ public:
 
     QColor matteColor() const;
     bool isShowRenderStats() const;
-    ShadeMode shadeMode() const;
     ScaleMode scaleMode() const;
 
     Q_INVOKABLE void save(const QString &group, const QString &organization = QString(),
@@ -77,7 +79,6 @@ public:
 public Q_SLOTS:
     void setMatteColor(const QColor &color);
     void setShowRenderStats(bool show);
-    void setShadeMode(ShadeMode mode);
     void setScaleMode(ScaleMode mode);
 
 Q_SIGNALS:
@@ -89,6 +90,9 @@ Q_SIGNALS:
 private:
     Q_DISABLE_COPY(Q3DSViewerSettings)
     Q3DSViewerSettingsPrivate *d_ptr;
+
+    ShadeMode shadeMode() const;
+    void setShadeMode(ShadeMode mode);
 
     friend class Q3DSSurfaceViewerPrivate;
     friend class Q3DSRenderer;

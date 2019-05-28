@@ -50,55 +50,64 @@ class Q_STUDIO3D_EXPORT Q3DSSurfaceViewer : public QObject
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(Q3DSSurfaceViewer)
+
+    // #TODO: QT3DS-3532 SurfaceViewer API missing error string
+    //Q_PROPERTY(QString error READ error NOTIFY errorChanged)
+    Q_PROPERTY(bool running READ isRunning NOTIFY runningChanged)
     Q_PROPERTY(QSize size READ size WRITE setSize NOTIFY sizeChanged)
     Q_PROPERTY(bool autoSize READ autoSize WRITE setAutoSize NOTIFY autoSizeChanged)
     Q_PROPERTY(int updateInterval READ updateInterval WRITE setUpdateInterval NOTIFY updateIntervalChanged)
-    Q_PROPERTY(bool running READ isRunning NOTIFY runningChanged)
     Q_PROPERTY(QString presentationId READ presentationId WRITE setPresentationId NOTIFY presentationIdChanged)
 
 public:
     explicit Q3DSSurfaceViewer(QObject *parent = nullptr);
     ~Q3DSSurfaceViewer();
 
-    bool initialize(QSurface *surface, QOpenGLContext *context, GLuint fboId = 0);
+    bool create(QSurface *surface, QOpenGLContext *context);
+    bool create(QSurface *surface, QOpenGLContext *context, GLuint fboId);
+    void destroy();
 
-    QImage grab(const QRect &rect = QRect());
+    Q3DSPresentation *presentation() const;
+    Q3DSViewerSettings *settings() const;
 
-    QQmlEngine *qmlEngine() const;
-    void setQmlEngine(QQmlEngine *qmlEngine);
-
-    // Property accessors
-    QSize size() const;
-    bool autoSize() const;
-    int updateInterval() const;
     bool isRunning() const;
-    QString presentationId() const;
+
+    QSize size() const;
+    void setSize(const QSize &size);
+
+    bool autoSize() const;
+    void setAutoSize(bool autoSize);
+
+    int updateInterval() const;
+    void setUpdateInterval(int interval);
 
     int fboId() const;
     QSurface *surface() const;
     QOpenGLContext *context() const;
 
-    Q3DSViewerSettings *settings() const;
-    Q3DSPresentation *presentation() const;
+    QImage grab(const QRect &rect = QRect());
+
+    QQmlEngine *qmlEngine() const;
+    void setQmlEngine(QQmlEngine *qmlEngine);
+    QString presentationId() const;
+
+
 
 public Q_SLOTS:
-    void setSize(const QSize &size);
-    void setAutoSize(bool autoSize);
-    void setUpdateInterval(int interval);
     void update();
-    void shutdown();
     void reset();
     void setPresentationId(const QString &id);
 
 Q_SIGNALS:
     void presentationLoaded();
     void presentationReady();
+    void frameUpdate();
+
+    void presentationIdChanged(const QString &id);
     void sizeChanged(const QSize &size);
     void autoSizeChanged(bool autoSize);
     void updateIntervalChanged(bool autoUpdate);
     void runningChanged(bool initialized);
-    void frameUpdate();
-    void presentationIdChanged(const QString &id);
 
 private:
     Q_DISABLE_COPY(Q3DSSurfaceViewer)

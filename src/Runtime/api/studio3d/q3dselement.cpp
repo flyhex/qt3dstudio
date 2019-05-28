@@ -37,12 +37,58 @@
 
 QT_BEGIN_NAMESPACE
 
+/*!
+    \qmltype Element
+    \instantiates Q3DSElement
+    \inqmlmodule Qt3DStudio
+    \ingroup OpenGLRuntime
+    \brief Control type for elements in a Qt 3D Studio presentation.
+
+    This class is provided for backwards compatibility. We recommend using
+    DataInput and DataOutput APIs for contractual and clean API between
+    the design and the code.
+
+    \sa DataInput, DataOutput
+
+    This type is a convenience for controlling the properties of a scene object
+    (such as, model, material, camera, layer) in a Qt 3D Studio presentation.
+
+    \note The functionality of Element is equivalent to
+    Presentation::setAttribute() and Presentation::fireEvent().
+
+    \sa Studio3D, SceneElement, Presentation, DataInput, DataOutput
+*/
+
+/*!
+    \class Q3DSElement
+    \inmodule OpenGLRuntime
+    \since Qt 3D Studio 2.0
+
+    \brief Controls a scene object (node) in a Qt 3D Studio presentation.
+
+    This class is provided for backwards compatibility. We recommend using
+    DataInput and DataOutput APIs for contractual and clean API between
+    the design and the code.
+
+    This class is a convenience class for controlling the properties of a scene
+    object (such as, model, material, camera, layer) in a Qt 3D Studio
+    presentation.
+
+    \sa Q3DSWidget, Q3DSSurfaceViewer, Q3DSSceneElement
+ */
+
+/*!
+    \internal
+ */
 Q3DSElement::Q3DSElement(QObject *parent)
     : QObject(parent)
     , d_ptr(new Q3DSElementPrivate(this))
 {
 }
 
+/*!
+    \internal
+ */
 Q3DSElement::Q3DSElement(const QString &elementPath, QObject *parent)
     : QObject(parent)
     , d_ptr(new Q3DSElementPrivate(this))
@@ -50,6 +96,12 @@ Q3DSElement::Q3DSElement(const QString &elementPath, QObject *parent)
     d_ptr->m_elementPath = elementPath;
 }
 
+/*!
+    Constructs a Q3DSElement instance controlling the scene object specified by
+    \a elementPath. An optional \a parent object can be specified. The
+    constructed instance is automatically associated with the specified \a
+    presentation. An optional \a parent object can be specified.
+ */
 Q3DSElement::Q3DSElement(Q3DSPresentation *presentation, const QString &elementPath,
                          QObject *parent)
     : QObject(parent)
@@ -60,6 +112,9 @@ Q3DSElement::Q3DSElement(Q3DSPresentation *presentation, const QString &elementP
         presentation->registerElement(this);
 }
 
+/*!
+    \internal
+ */
 Q3DSElement::Q3DSElement(Q3DSElementPrivate *d, Q3DSPresentation *presentation,
                          const QString &elementPath, QObject *parent)
     : QObject(parent)
@@ -70,12 +125,54 @@ Q3DSElement::Q3DSElement(Q3DSElementPrivate *d, Q3DSPresentation *presentation,
         presentation->registerElement(this);
 }
 
+/*!
+    Destructor.
+ */
 Q3DSElement::~Q3DSElement()
 {
     // Private class isn't QObject, so we need to delete it explicitly
     delete d_ptr;
 }
 
+/*!
+    \qmlproperty string Element::elementPath
+
+    Holds the element path of the presentation element.
+
+    An element path refers to an object in the scene by name, for example,
+    \c{Scene.Layer.Camera}. Here the right camera object gets chosen even if
+    the scene contains other layers with the default camera names (for instance
+    \c{Scene.Layer2.Camera}).
+
+    To reference an object stored in a property of another object, the dot
+    syntax can be used. The most typical example of this is changing the source
+    of a texture map by changing the \c sourcepath property on the object
+    selected by \c{SomeMaterial.diffusemap}.
+
+    To access an object in a sub-presentation, prepend the name of the
+    sub-presentation followed by a colon, for example,
+    \c{SubPresentationOne:Scene.Layer.Camera}.
+ */
+
+/*!
+    \property Q3DSElement::elementPath
+
+    Holds the element path of the presentation element.
+
+    An element path refers to an object in the scene by name, for example,
+    \c{Scene.Layer.Camera}. Here the right camera object gets chosen even if
+    the scene contains other layers with the default camera names (for instance
+    \c{Scene.Layer2.Camera}).
+
+    To reference an object stored in a property of another object, the dot
+    syntax can be used. The most typical example of this is changing the source
+    of a texture map by changing the \c sourcepath property on the object
+    selected by \c{SomeMaterial.diffusemap}.
+
+    To access an object in a sub-presentation, prepend the name of the
+    sub-presentation followed by a colon, for example,
+    \c{SubPresentationOne:Scene.Layer.Camera}.
+ */
 QString Q3DSElement::elementPath() const
 {
     return d_ptr->m_elementPath;
@@ -89,6 +186,20 @@ void Q3DSElement::setElementPath(const QString &elementPath)
     }
 }
 
+/*!
+    \qmlmethod void Element::setAttribute(string attributeName, variant value)
+
+    Sets the \a value of an attribute (property) of the scene object specified
+    by this Element instance. The \a attributeName is the \l{Attribute
+    Names}{scripting name} of the attribute.
+*/
+
+/*!
+    Sets the \a value of an attribute (property) of the scene object
+    specified by elementPath.
+
+    The \a attributeName is the \l{Attribute Names}{scripting name} of the attribute.
+ */
 void Q3DSElement::setAttribute(const QString &attributeName, const QVariant &value)
 {
     if (d_ptr->m_presentation)
@@ -97,6 +208,25 @@ void Q3DSElement::setAttribute(const QString &attributeName, const QVariant &val
         qWarning() << __FUNCTION__ << "Element is not registered to any presentation!";
 }
 
+/*!
+    \qmlmethod void Element::fireEvent(string eventName)
+
+    Dispatches an event with \a eventName on the scene object
+    specified by elementPath.
+
+    Appropriate actions created in Qt 3D Studio or callbacks registered using
+    the registerForEvent() method in attached \c{behavior scripts} will be
+    executed in response to the event.
+*/
+
+/*!
+    Dispatches an event with \a eventName on the scene object
+    specified by elementPath.
+
+    Appropriate actions created in Qt 3D Studio or callbacks registered using
+    the registerForEvent() method in attached (behavior) scripts will be
+    executed in response to the event.
+ */
 void Q3DSElement::fireEvent(const QString &eventName)
 {
     if (d_ptr->m_presentation)

@@ -35,12 +35,64 @@
 
 QT_BEGIN_NAMESPACE
 
+/*!
+    \qmltype DataInput
+    \instantiates Q3DSDataInput
+    \inqmlmodule Qt3DStudio
+    \ingroup OpenGLRuntime
+    \brief Controls a data input entry in a Qt 3D Studio presentation.
+    This class is a convenience class for controlling a data input in a presentation.
+    DataInput provides a clean contract between the presentation design and the code.
+    It hides the presentation details from the code while providing a contractual access
+    point to code for controlling aspects of the presentation (e.g. timeline of a
+    subpresentation). It also allows the design to use a single DataInput to drive
+    multiple aspects of the design (e.g. DataInput for speed can change the color of
+    the speedometer, angle of the needle).
+
+    \note There is a performance cost for each registered DataInput, so try to avoid
+    creating unnecessary DataInputs.
+
+    \sa Presentation, DataOutput, Presentation::slideExited, Presentation::slideEntered
+    \sa Presentation::customSignalEmitted
+*/
+
+/*!
+    \class Q3DSDataInput
+    \inmodule OpenGLRuntime
+    \since Qt 3D Studio 2.0
+    \brief Controls a data input entry in a Qt 3D Studio presentation.
+    This class is a convenience class for controlling a data input in a presentation.
+    DataInput provides a clean contract between the presentation design and the code.
+    It hides the presentation details from the code while providing a contractual access
+    point to code for controlling aspects of the presentation (e.g. timeline of a
+    subpresentation). It also allows the design to use a single DataInput to drive
+    multiple aspects of the design (e.g. DataInput for speed can change the color of
+    the speedometer, angle of the needle).
+
+    \note There is a performance cost for each registered DataInput, so try to avoid
+    creating unnecessary DataInputs.
+
+    For other integration points between code and presentation see:
+    \sa Q3DSPresentation::customSignalEmitted
+    \sa Q3DSPresentation::slideEntered
+    \sa Q3DSPresentation::slideExited
+    \sa Q3DSDataOutput
+
+    \sa Q3DSPresentation
+*/
+
+/*!
+    \internal
+ */
 Q3DSDataInput::Q3DSDataInput(QObject *parent)
     : QObject(parent)
     , d_ptr(new Q3DSDataInputPrivate(this))
 {
 }
 
+/*!
+    \internal
+ */
 Q3DSDataInput::Q3DSDataInput(const QString &name, QObject *parent)
     : QObject(parent)
     , d_ptr(new Q3DSDataInputPrivate(this))
@@ -48,6 +100,11 @@ Q3DSDataInput::Q3DSDataInput(const QString &name, QObject *parent)
     d_ptr->m_name = name;
 }
 
+/*!
+    Constructs a Q3DSDataInput instance and initializes the \a name. The
+    constructed instance is automatically associated with the specified \a
+    presentation. An optional \a parent object can be specified.
+ */
 Q3DSDataInput::Q3DSDataInput(Q3DSPresentation *presentation, const QString &name, QObject *parent)
     : QObject(parent)
     , d_ptr(new Q3DSDataInputPrivate(this))
@@ -58,6 +115,9 @@ Q3DSDataInput::Q3DSDataInput(Q3DSPresentation *presentation, const QString &name
         presentation->registerDataInput(this);
 }
 
+/*!
+    \internal
+ */
 Q3DSDataInput::Q3DSDataInput(Q3DSDataInputPrivate *d, Q3DSPresentation *presentation,
                              const QString &name, QObject *parent)
     : QObject(parent)
@@ -69,11 +129,34 @@ Q3DSDataInput::Q3DSDataInput(Q3DSDataInputPrivate *d, Q3DSPresentation *presenta
         presentation->registerDataInput(this);
 }
 
+/*!
+    Destructor.
+ */
 Q3DSDataInput::~Q3DSDataInput()
 {
     delete d_ptr;
 }
 
+/*!
+    \qmlproperty string DataInput::name
+
+    Specifies the name of the controlled data input element in the
+    presentation. The name must match a name of a data input defined
+    in the presentation. This property must be set before setting the
+    value property.
+ */
+
+/*!
+    \property Q3DSDataInput::name
+
+    Specifies the name of the controlled data input element in the
+    presentation. The name must match a name of a data input defined
+    in the presentation.
+
+    This property must be set before setting the value property.
+    The initial value is provided via the constructor, but the name
+    can also be changed later on.
+ */
 QString Q3DSDataInput::name() const
 {
     return d_ptr->m_name;
@@ -89,11 +172,53 @@ void Q3DSDataInput::setName(const QString &name)
     }
 }
 
+/*!
+    \qmlproperty variant DataInput::value
+
+    Specifies the value of the controlled data input element in the
+    presentation.
+
+    The value of this property only accounts for changes done via the same
+    Q3DSDataInput instance. If the value of the same data input in the
+    presentation is changed elsewhere, for example via animations or
+    Q3DSPresentation::setAttribute(), those changes are not reflected in the
+    value of this property. Due to this uncertainty, this property treats all
+    value sets as changes even if the newly set value is the same value as the
+    previous value.
+
+    To get actual values from the presentation, use DataOutput.
+    \sa DataOutput
+*/
+/*!
+    \property Q3DSDataInput::value
+
+    Specifies the value of the controlled data input element in the
+    presentation.
+
+    The value of this property only accounts for changes done via the same
+    Q3DSDataInput instance. If the value of the same data input in the
+    presentation is changed elsewhere, for example via animations or
+    Q3DSPresentation::setAttribute(), those changes are not reflected in the
+    value of this property. Due to this uncertainty, this property treats all
+    value sets as changes even if the newly set value is the same value as the
+    previous value.
+
+    To get actual values from the presentation, use DataOutput.
+    \sa DataOutput
+*/
 QVariant Q3DSDataInput::value() const
 {
     return d_ptr->m_value;
 }
 
+/*!
+   \property Q3DSDataInput::min
+
+    Contains the minimum range value for datainput. Returned value is zero
+    for datainput types other than \e {Ranged Number}.
+
+    \note This value is read-only.
+ */
 float Q3DSDataInput::min() const
 {
     if (!d_ptr->m_presentation)
@@ -102,6 +227,14 @@ float Q3DSDataInput::min() const
     return d_ptr->m_presentation->d_ptr->dataInputMin(d_ptr->m_name);
 }
 
+/*!
+    \property Q3DSDataInput::max
+
+    Contains the maximum range value for datainput. Returned value is zero
+    for datainput types other than \e {Ranged Number}.
+
+    \note This value is read-only.
+ */
 float Q3DSDataInput::max() const
 {
     if (!d_ptr->m_presentation)
@@ -110,6 +243,11 @@ float Q3DSDataInput::max() const
     return d_ptr->m_presentation->d_ptr->dataInputMax(d_ptr->m_name);
 }
 
+/*!
+    Returns true if presentation (or its subpresentation) associated with
+    this datainput has a datainput definition with a matching name. Returns
+    false if the datainput has no associated presentation, or if a match is not found.
+ */
 bool Q3DSDataInput::isValid() const
 {
     if (d_ptr->m_presentation)
@@ -118,6 +256,11 @@ bool Q3DSDataInput::isValid() const
         return false;
 }
 
+/*!
+    \brief Q3DSDataInput::setValue Set value of the data input.
+    \param value New value to be set.
+    \note For performance reasons do not call setValue unnecessarily.
+ */
 void Q3DSDataInput::setValue(const QVariant &value)
 {
     // Since properties controlled by data inputs can change without the current value being
@@ -168,5 +311,93 @@ void Q3DSDataInputPrivate::setCommandQueue(CommandQueue *queue)
     if (m_commandQueue && m_value.isValid())
         setValue(m_value);
 }
+
+
+/*!
+    \qmltype DataInput
+    \instantiates Q3DSDataInput
+    \inqmlmodule QtStudio3D
+    \ingroup OpenGLRuntime
+
+    \brief Controls a data input entry in a Qt 3D Studio presentation.
+
+    This type is a convenience for controlling a data in a presentation. Its functionality is
+    equivalent to \c{Presentation::setDataInputValue()}, however it has a big advantage
+    of being able to use QML property bindings, thus avoiding the need to having to resort
+    to a JavaScript function call for every value change.
+
+    As an example:
+
+    \qml
+        Studio3D {
+            ...
+            Presentation {
+                id: presentation
+                ...
+                property string text: ""
+                DataInput {
+                    name: "inputForSomeTextNode"
+                    value: presentation.text
+                }
+            }
+        }
+
+        Button {
+            onClicked: presentation.text = "Hello World"
+        }
+    \endqml
+
+    The example assumes that a data input connection was made in Qt 3D Studio
+    presentation using Qt 3D Studio editor between the \c textstring property of
+    target property and a data input name \c inputForSomeTextNode. As the value
+    is now set via a property, the full set of QML property bindings techniques
+    are available.
+
+    \sa Studio3D, Presentation
+*/
+
+/*!
+    \qmlproperty string DataInput::name
+
+    Specifies the name of the controlled data input element in the
+    presentation. This property must be set as part of DataInput declaration,
+    although it is changeable afterwards, if desired.
+*/
+
+/*!
+    \qmlproperty variant DataInput::value
+
+    Specifies the value of the controlled data input element in the presentation.
+
+    The value of this property only accounts for changes done via the same
+    DataInput instance. If the value of the underlying attribute in the
+    presentation is changed elsewhere, for example via animations or
+    Presentation::setAttribute(), those changes are not reflected in the value
+    of this property. Due to this uncertainty, this property treats all value
+    sets as changes even if the newly set value is the same value as the
+    previous value.
+*/
+
+/*!
+    \qmlproperty real DataInput::min
+
+    Contains the minimum value of the controlled data input element range.
+
+    This property is applicable only to data input type \e {Ranged Number}. For other
+    types, value returned is zero.
+
+    \note This value is read-only.
+*/
+
+/*!
+    \qmlproperty real DataInput::max
+
+    Contains the maximum value of the controlled data input element range.
+
+    This property is applicable only to data input type \e {Ranged Number}. For other
+    types, value returned is zero.
+
+    \note This value is read-only.
+*/
 
 QT_END_NAMESPACE

@@ -37,46 +37,79 @@
 
 QT_BEGIN_NAMESPACE
 
+/*!
+    \qmltype ViewerSettings
+    \instantiates Q3DSViewerSettings
+    \inqmlmodule Qt3DStudio
+    \ingroup OpenGLRuntime
+    \brief Qt 3D Studio presentation viewer settings.
+
+    This type provides properties to define presentation independent viewer settings.
+
+    \note ViewerSettings are only applicable when \l Studio3D is used in the
+    default mode, showing the final, composed image from the Qt 3D Studio
+    renderer.
+
+    \sa Studio3D
+*/
+
+/*!
+    \class Q3DSViewerSettings
+    \inmodule OpenGLRuntime
+    \since Qt 3D Studio 2.0
+
+    \brief Qt 3D Studio presentation viewer settings.
+
+    Q3DSViewerSettings provides properties to define presentation independent
+    viewer settings.
+
+    \note This class should not be instantiated directly when working with the
+    C++ APIs. Q3DSSurfaceViewer and Q3DSWidget create a Q3DSViewerSettings
+    instance implicitly. This can be queried via Q3DSSurfaceViewer::settings()
+    or Q3DSWidget::settings().
+ */
+
+/*!
+ * \internal
+ */
 Q3DSViewerSettings::Q3DSViewerSettings(QObject *parent)
     : QObject(parent)
     , d_ptr(new Q3DSViewerSettingsPrivate(this))
 {
 }
 
+/*!
+ * \internal
+ */
 Q3DSViewerSettings::~Q3DSViewerSettings()
 {
 }
 
+/*!
+    \enum Q3DSViewerSettings::ScaleMode
+
+    This enumeration specifies the possible scaling modes.
+
+    \value ScaleModeFit Scales the presentation to fit the output area.
+    \value ScaleModeFill Scales the presentation to completely fill the output area.
+    This is the default.
+    \value ScaleModeCenter Centers the presentation in the output area without scaling it.
+*/
+
+/*!
+    \qmlproperty QColor ViewerSettings::matteColor
+
+    Specifies the matte color.
+ */
+
+/*!
+    \property Q3DSViewerSettings::matteColor
+
+    Specifies the matte color.
+ */
 QColor Q3DSViewerSettings::matteColor() const
 {
     return d_ptr->m_matteColor;
-}
-
-bool Q3DSViewerSettings::isShowRenderStats() const
-{
-    return d_ptr->m_showRenderStats;
-}
-
-Q3DSViewerSettings::ShadeMode Q3DSViewerSettings::shadeMode() const
-{
-    return d_ptr->m_shadeMode;
-}
-
-Q3DSViewerSettings::ScaleMode Q3DSViewerSettings::scaleMode() const
-{
-    return d_ptr->m_scaleMode;
-}
-
-void Q3DSViewerSettings::save(const QString &group, const QString &organization,
-                                      const QString &application)
-{
-    d_ptr->save(group, organization, application);
-}
-
-void Q3DSViewerSettings::load(const QString &group, const QString &organization,
-                                      const QString &application)
-{
-    d_ptr->load(group, organization, application);
 }
 
 void Q3DSViewerSettings::setMatteColor(const QColor &color)
@@ -87,6 +120,34 @@ void Q3DSViewerSettings::setMatteColor(const QColor &color)
     }
 }
 
+/*!
+    \qmlproperty bool ViewerSettings::showRenderStats
+
+    If this property is set to \c true, the simple profile
+    view is displayed in-scene, on top of the 3D content.
+
+    \note this feature can be disabled at build time, in which case this
+    property has no effect.
+
+    The default value is \c{false}.
+*/
+
+/*!
+    \property Q3DSViewerSettings::showRenderStats
+
+    When this property is \c{true}, the simple profile
+    view is displayed in-scene, on top of the 3D content.
+
+    \note This feature can be disabled at build time, in which case this
+    property has no effect.
+
+    Default value is \c{false}.
+*/
+bool Q3DSViewerSettings::isShowRenderStats() const
+{
+    return d_ptr->m_showRenderStats;
+}
+
 void Q3DSViewerSettings::setShowRenderStats(bool show)
 {
     if (d_ptr->m_showRenderStats != show) {
@@ -95,13 +156,65 @@ void Q3DSViewerSettings::setShowRenderStats(bool show)
     }
 }
 
+/*!
+    \qmlproperty ViewerSettings::shadeMode
+ */
+
+/*!
+    \property Q3DSViewerSettings::shadeMode
+ */
+Q3DSViewerSettings::ShadeMode Q3DSViewerSettings::shadeMode() const
+{
+    return d_ptr->m_shadeMode;
+}
+
 void Q3DSViewerSettings::setShadeMode(Q3DSViewerSettings::ShadeMode mode)
 {
     if (d_ptr->m_shadeMode != mode) {
         d_ptr->setShadeMode(mode);
         Q_EMIT shadeModeChanged(mode);
     }
+}
 
+/*!
+    \qmlproperty enumeration ViewerSettings::scaleMode
+
+    Specifies the scaling mode. The default value \c is ScaleModeFill where the
+    size of the presentation on-screen follows and fills the size of the output
+    area (the window, the screen, or the area occupied by the Studio3D
+    element).
+
+    During the design phase it can be valuable to see the presentation with
+    some other scaling approach. For example, the Qt 3D Studio Viewer
+    application uses ScaleModeCenter by default.
+
+    \value ScaleModeFit Scales the presentation to fit the output area.
+    \value ScaleModeFill Scales the presentation to completely fill the output area.
+    \value ScaleModeCenter Centers the presentation in the output area without scaling it.
+
+    The default value is \c{ScaleModeFill}.
+*/
+/*!
+    \property Q3DSViewerSettings::scaleMode
+
+    Specifies the scaling mode. The default value \c is ScaleModeFill where the
+    size of the presentation on-screen follows and fills the size of the output
+    area (the window, the screen, or the area occupied by the \l Studio3D
+    element).
+
+    During the design phase it can be valuable to see the presentation with
+    some other scaling approach. For example, the Qt 3D Studio Viewer
+    application uses ScaleModeCenter by default.
+
+    \value ScaleModeFit Scales the presentation to fit the output area.
+    \value ScaleModeFill Scales the presentation to completely fill the output area.
+    \value ScaleModeCenter Centers the presentation in the output area without scaling it.
+
+    The default value is \c{ScaleModeFill}.
+ */
+Q3DSViewerSettings::ScaleMode Q3DSViewerSettings::scaleMode() const
+{
+    return d_ptr->m_scaleMode;
 }
 
 void Q3DSViewerSettings::setScaleMode(Q3DSViewerSettings::ScaleMode mode)
@@ -110,6 +223,50 @@ void Q3DSViewerSettings::setScaleMode(Q3DSViewerSettings::ScaleMode mode)
         d_ptr->setScaleMode(mode);
         Q_EMIT scaleModeChanged(mode);
     }
+}
+
+/*!
+    \qmmlmethod ViewerSettings::save
+    Persistently saves the viewer \l{QSettings}{settings} using \a group, \a organization and
+    \a application.
+    \param group
+    \param organization
+    \param application
+ */
+/*!
+ * \brief Q3DSViewerSettings::save  Persistently saves the viewer \l{QSettings}{settings}
+    Persistently saves the viewer \l{QSettings}{settings} using \a group, \a organization and
+    \a application.
+    \param group
+    \param organization
+    \param application
+ */
+void Q3DSViewerSettings::save(const QString &group, const QString &organization,
+                                      const QString &application)
+{
+    d_ptr->save(group, organization, application);
+}
+
+/*!
+    \qmlmethod ViewerSettings::load
+    Loads previously saved viewer \l{QSettings}{settings} using \a group, \a organization and
+    \a application.
+    \param group
+    \param organization
+    \param application
+ */
+/*!
+ * \brief Q3DSViewerSettings::load Loads previously saved viewer \l{QSettings}{settings}
+    Loads previously saved viewer \l{QSettings}{settings} using \a group, \a organization and
+    \a application.
+    \param group
+    \param organization
+    \param application
+ */
+void Q3DSViewerSettings::load(const QString &group, const QString &organization,
+                                      const QString &application)
+{
+    d_ptr->load(group, organization, application);
 }
 
 Q3DSViewerSettingsPrivate::Q3DSViewerSettingsPrivate(Q3DSViewerSettings *q)

@@ -131,7 +131,7 @@ void Q3DSImageSequenceGeneratorThread::run() {
     viewer.setAutoSize(false);
     viewer.setSize(size);
 
-    if (!viewer.initialize(m_surface, m_context, fbo.handle())) {
+    if (!viewer.create(m_surface, m_context, fbo.handle())) {
         QString error = QObject::tr("Viewer initialization failed.");
         qWarning() << "Generating image sequence failed -" << error;
         Q_EMIT generationFinished(false, error);

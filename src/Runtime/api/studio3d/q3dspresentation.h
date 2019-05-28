@@ -128,8 +128,6 @@ Q_SIGNALS:
     void sourceChanged(const QUrl &source);
     void slideEntered(const QString &elementPath, unsigned int index, const QString &name);
     void slideExited(const QString &elementPath, unsigned int index, const QString &name);
-    // Indicates that data input and output definitions in the Studio project have been parsed
-    // and datainputs/dataoutputs are available through dataInputs() / getDataInputs().
     void dataInputsReady();
     void dataOutputsReady();
     void customSignalEmitted(const QString &elementPath, const QString &name);
