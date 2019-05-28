@@ -282,10 +282,6 @@ struct ShaderCache : public IShaderCache
 
             if (m_RenderContext.IsAdvancedBlendHwSupportedKHR())
                 m_InsertStr += "layout(blend_support_all_equations) out;\n";
-
-            m_InsertStr += "#ifndef NO_FRAG_OUTPUT\n";
-            m_InsertStr += "out vec4 fragOutput;\n";
-            m_InsertStr += "#endif\n";
         }
     }
 
@@ -439,6 +435,7 @@ struct ShaderCache : public IShaderCache
             m_InsertStr += "#define TESSELLATION_EVALUATION_SHADER 1\n";
         }
 
+        int fragOutputIndex = int(m_InsertStr.size());
         str.insert(0, m_InsertStr);
         if (inFeatures.size()) {
             eastl::string::size_type insertPos = int(m_InsertStr.size());
@@ -452,6 +449,16 @@ struct ShaderCache : public IShaderCache
                 m_InsertStr.append("\n");
             }
             str.insert(insertPos, m_InsertStr);
+            fragOutputIndex = insertPos + int(m_InsertStr.size());
+        }
+
+        // Add fragOutput for desktop OpenGL and OpenGL ES 3.x after feature defines
+        if (!isGlES || IQt3DSRenderer::IsGlEs3Context(m_RenderContext.GetRenderContextType())) {
+            m_InsertStr.clear();
+            m_InsertStr += "#ifndef NO_FRAG_OUTPUT\n";
+            m_InsertStr += "out vec4 fragOutput;\n";
+            m_InsertStr += "#endif\n";
+            str.insert(fragOutputIndex, m_InsertStr);
         }
     }
     // Compile this program overwriting any existing ones.

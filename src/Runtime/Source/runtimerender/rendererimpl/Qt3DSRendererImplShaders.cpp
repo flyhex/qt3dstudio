@@ -2569,8 +2569,12 @@ namespace render {
 
         fragmentGenerator.Append("}");
 
+        CRegisteredString featureName(m_StringTable->RegisterStr("NO_FRAG_OUTPUT"));
+        SShaderPreprocessorFeature noFragOutputFeature(featureName, true);
+
         NVRenderShaderProgram *theShader = GetProgramGenerator().CompileGeneratedShader(
-            "cubemap shadow blur X shader", SShaderCacheProgramFlags(), TShaderFeatureSet());
+            "cubemap shadow blur X shader", SShaderCacheProgramFlags(),
+                    TShaderFeatureSet(&noFragOutputFeature, 1));
         NVScopedRefCounted<SShadowmapPreblurShader> retval;
         if (theShader)
             retval = QT3DS_NEW(m_Context->GetAllocator(), SShadowmapPreblurShader)(*theShader);
@@ -2700,8 +2704,12 @@ namespace render {
 
         fragmentGenerator.Append("}");
 
+        CRegisteredString featureName(m_StringTable->RegisterStr("NO_FRAG_OUTPUT"));
+        SShaderPreprocessorFeature noFragOutputFeature(featureName, true);
+
         NVRenderShaderProgram *theShader = GetProgramGenerator().CompileGeneratedShader(
-            "cubemap shadow blur Y shader", SShaderCacheProgramFlags(), TShaderFeatureSet());
+            "cubemap shadow blur Y shader", SShaderCacheProgramFlags(),
+                    TShaderFeatureSet(&noFragOutputFeature, 1));
         NVScopedRefCounted<SShadowmapPreblurShader> retval;
         if (theShader)
             retval = QT3DS_NEW(m_Context->GetAllocator(), SShadowmapPreblurShader)(*theShader);
