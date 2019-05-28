@@ -30,6 +30,8 @@
 
 #pragma once
 
+#include <QtCore/qglobal.h>
+
 //==============================================================================
 //	Namespace
 //==============================================================================
@@ -39,14 +41,16 @@ namespace Q3DStudio {
 //	Typedefs
 //==============================================================================
 typedef bool BOOL; ///< true or false, usually 8 bits
-typedef signed char INT8; ///< A signed 8-bit integer, not a character
-typedef unsigned char UINT8; ///< An unsigned 8-bit integer 0-255, not a character
-typedef signed short INT16; ///< A signed 16-bit integer
-typedef unsigned short UINT16; ///< An unsigned 16-bit integer
-typedef int INT32; ///< A signed 32-bit integer
-typedef unsigned int UINT32; ///< An unsigned 32-bit integer
+typedef qint8 INT8; ///< A signed 8-bit integer, not a character
+typedef quint8 UINT8; ///< An unsigned 8-bit integer 0-255, not a character
+typedef qint16 INT16; ///< A signed 16-bit integer
+typedef quint16 UINT16; ///< An unsigned 16-bit integer
+typedef qint32 INT32; ///< A signed 32-bit integer
+typedef quint32 UINT32; ///< An unsigned 32-bit integer
 typedef float FLOAT; ///< A 32-bit floating point number
 typedef char CHAR; ///< String character, not a number
+typedef qint64 INT64;
+typedef quint64 UINT64;
 
 #ifndef TRUE
 #define TRUE 1
@@ -67,19 +71,11 @@ INT32 Q3DStudio_maxbits(const INT32 inBitCount, const BOOL inUnsigned);
 #define AKMAX_INT32 0x7FFFFFFFL
 #define AKMAX_UINT32 0xFFFFFFFFUL
 
-//==============================================================================
-//	Platform specific vectors and matrices
-//==============================================================================
-#if defined(_PCPLATFORM)
-
-typedef FILE TFile;
-typedef size_t TFileSize;
-
 #define Q3DStudio_INT64_C(x) x
 #define Q3DStudio_UINT64_C(x) x
 
-typedef __int64 INT64;
-typedef unsigned __int64 UINT64;
+typedef FILE TFile;
+typedef size_t TFileSize;
 
 struct VECTOR4
 {
@@ -119,118 +115,7 @@ struct MATRIX16
     FLOAT &_43() { return f[14]; }
     FLOAT &_44() { return f[15]; }
 };
-
-#elif defined(_TEGRAPLATFORM)
-
-// TODO: sk - We used both WinCE and OpenKode file system utilities. Using non-OpenKode restores
-// functionality in a hacky way
-//			 but ultimately sticking to just 1 system would definitely be cleaner.
-typedef FILE TFile;
-typedef size_t TFileSize;
-// typedef KDFile 				TFile;
-// typedef KDsize 				TFileSize;
-
-#define Q3DStudio_INT64_C(x) x
-#define Q3DStudio_UINT64_C(x) x
-
-typedef __int64 INT64;
-typedef unsigned __int64 UINT64;
-
-struct VECTOR4
-{
-    union {
-        FLOAT v[4];
-        UINT32 u[4];
-    };
-    FLOAT &x() { return v[0]; }
-    FLOAT &y() { return v[1]; }
-    FLOAT &z() { return v[2]; }
-    FLOAT &w() { return v[3]; }
-};
-
-struct MATRIX16
-{
-    union {
-        VECTOR4 v[4];
-        FLOAT m[4][4];
-        FLOAT f[16];
-    };
-
-    FLOAT &_11() { return f[0]; }
-    FLOAT &_12() { return f[1]; }
-    FLOAT &_13() { return f[2]; }
-    FLOAT &_14() { return f[3]; }
-    FLOAT &_21() { return f[4]; }
-    FLOAT &_22() { return f[5]; }
-    FLOAT &_23() { return f[6]; }
-    FLOAT &_24() { return f[7]; }
-    FLOAT &_31() { return f[8]; }
-    FLOAT &_32() { return f[9]; }
-    FLOAT &_33() { return f[10]; }
-    FLOAT &_34() { return f[11]; }
-    FLOAT &_41() { return f[12]; }
-    FLOAT &_42() { return f[13]; }
-    FLOAT &_43() { return f[14]; }
-    FLOAT &_44() { return f[15]; }
-};
-
-#elif defined(_LINUXPLATFORM) || defined(_INTEGRITYPLATFORM)
-
-typedef FILE TFile;
-typedef size_t TFileSize;
-
-#define Q3DStudio_INT64_C(x) x
-#define Q3DStudio_UINT64_C(x) x
-
-typedef int64_t INT64;
-typedef uint64_t UINT64;
-
-struct VECTOR4
-{
-    union {
-        FLOAT v[4];
-        UINT32 u[4];
-    };
-
-    FLOAT &x() { return v[0]; }
-    FLOAT &y() { return v[1]; }
-    FLOAT &z() { return v[2]; }
-    FLOAT &w() { return v[3]; }
-};
-
-struct MATRIX16
-{
-    union {
-        VECTOR4 v[4];
-        FLOAT m[4][4];
-        FLOAT f[16];
-    };
-
-    FLOAT &_11() { return f[0]; }
-    FLOAT &_12() { return f[1]; }
-    FLOAT &_13() { return f[2]; }
-    FLOAT &_14() { return f[3]; }
-    FLOAT &_21() { return f[4]; }
-    FLOAT &_22() { return f[5]; }
-    FLOAT &_23() { return f[6]; }
-    FLOAT &_24() { return f[7]; }
-    FLOAT &_31() { return f[8]; }
-    FLOAT &_32() { return f[9]; }
-    FLOAT &_33() { return f[10]; }
-    FLOAT &_34() { return f[11]; }
-    FLOAT &_41() { return f[12]; }
-    FLOAT &_42() { return f[13]; }
-    FLOAT &_43() { return f[14]; }
-    FLOAT &_44() { return f[15]; }
-};
-
-#else
-
-#error "A platform must be defined"
-
-#endif
 
 typedef INT64 TMicroSeconds; ///< Time in microseconds
 typedef INT64 TTimeUnit; ///< Time in milliseconds
-
 } // namespace Q3DStudio

@@ -38,6 +38,7 @@
 // Platform specific types:
 // Design note: Its OK to use int for general loop variables and temps.
 
+#include <QtCore/qglobal.h>
 #include "foundation/Qt3DS.h"
 #include "foundation/Qt3DSPreprocessor.h"
 #include "EABase/eabase.h"
@@ -45,14 +46,21 @@
 namespace qt3ds {
 #endif //#ifndef QT3DS_DOXYGEN
 
-typedef uint8_t QT3DSU8;
-typedef int8_t QT3DSI8;
-typedef uint16_t QT3DSU16;
-typedef int16_t QT3DSI16;
-typedef uint32_t QT3DSU32;
-typedef int32_t QT3DSI32;
-typedef uint64_t QT3DSU64;
-typedef int64_t QT3DSI64;
+typedef quint8 QT3DSU8;
+typedef qint8 QT3DSI8;
+typedef quint16 QT3DSU16;
+typedef qint16 QT3DSI16;
+typedef quint32 QT3DSU32;
+typedef qint32 QT3DSI32;
+
+// Android's definition of GLuint64 as unsigned long (64-bits) requires this workaround
+#if Q_PROCESSOR_WORDSIZE == 8 && defined(Q_OS_ANDROID)
+typedef unsigned long QT3DSU64;
+#else
+typedef quint64 QT3DSU64;
+#endif
+
+typedef qint64 QT3DSI64;
 typedef float QT3DSF32;
 typedef double QT3DSF64;
 typedef QT3DSI32 IntBool;
