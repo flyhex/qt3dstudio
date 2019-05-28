@@ -91,7 +91,6 @@ private:
     Q3DSViewerSettingsPrivate *d_ptr;
 
     friend class Q3DSSurfaceViewerPrivate;
-    friend class Q3DSWidgetPrivate;
     friend class Q3DSRenderer;
     friend class Q3DSStudio3D;
 };

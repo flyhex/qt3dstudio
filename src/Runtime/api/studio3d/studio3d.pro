@@ -16,8 +16,6 @@ LIBS += \
 HEADERS += \
     q3dsdataoutput.h \
     q3dsdataoutput_p.h \
-    q3dswidget.h \
-    q3dswidget_p.h \
     q3dssurfaceviewer.h \
     q3dssurfaceviewer_p.h \
     qstudio3dglobal.h \
@@ -39,8 +37,7 @@ HEADERS += \
     q3dsgeometry.h \
     q3dsgeometry_p.h
 
-SOURCES += q3dswidget.cpp \
-           q3dsdataoutput.cpp \
+SOURCES += q3dsdataoutput.cpp \
            q3dssurfaceviewer.cpp \
            viewerqmlstreamproxy.cpp \
            q3dsviewersettings.cpp \
