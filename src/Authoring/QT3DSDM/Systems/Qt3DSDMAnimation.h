@@ -26,9 +26,9 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#pragma once
 #ifndef QT3DSDM_ANIMATION_H
 #define QT3DSDM_ANIMATION_H
+
 #include "Qt3DSDMHandles.h"
 #include "Qt3DSDMDataTypes.h"
 #include "Qt3DSDMValue.h"
@@ -63,7 +63,8 @@ struct SEaseInEaseOutKeyframe : public SLinearKeyframe
     float m_EaseIn;
     float m_EaseOut;
 };
-}
+
+} // namespace qt3dsdm
 
 namespace qt3ds {
 namespace foundation {
@@ -292,10 +293,11 @@ typedef std::shared_ptr<IAnimationCore> TAnimationCorePtr;
 
 struct SGetOrSetKeyframeInfo
 {
-    float m_Value;
-    float m_EaseIn;
-    float m_EaseOut;
-    bool m_AnimationTrackIsDynamic;
+    float m_Value = 0.0;
+    float m_EaseIn = -1.f;
+    float m_EaseOut = -1.f;
+    bool m_AnimationTrackIsDynamic = false;
+
     SGetOrSetKeyframeInfo(float inValue, float inEaseIn = -1.f, float inEaseOut = -1.f,
                           bool inDynamic = false)
         : m_Value(inValue)
@@ -304,13 +306,8 @@ struct SGetOrSetKeyframeInfo
         , m_AnimationTrackIsDynamic(inDynamic)
     {
     }
-    SGetOrSetKeyframeInfo()
-        : m_Value(0)
-        , m_EaseIn(-1.f)
-        , m_EaseOut(-1.f)
-        , m_AnimationTrackIsDynamic(false)
-    {
-    }
+    SGetOrSetKeyframeInfo() = default;
+
 };
 /**
  *	Interface from studio into the animation system that speaks
@@ -543,17 +540,21 @@ inline std::tuple<bool, size_t> GetVariantAnimatableAndArity(const SValue &inVal
 inline std::tuple<bool, size_t> GetDatatypeAnimatableAndArity(DataModelDataType::Value inDataType)
 {
     switch (inDataType) {
-    default:
-        return std::make_tuple(false, 0);
     case DataModelDataType::Long:
     case DataModelDataType::Float:
         return std::make_tuple(true, 1);
+
     case DataModelDataType::Float2:
         return std::make_tuple(true, 2);
+
     case DataModelDataType::Float3:
         return std::make_tuple(true, 3);
+
     case DataModelDataType::Float4:
         return std::make_tuple(true, 4);
+
+    default:
+        return std::make_tuple(false, 0);
     }
 }
 
@@ -569,11 +570,12 @@ struct SAnimationApplier
 {
     float m_Value;
     size_t m_Index;
-    SValue operator()(const bool &) { return m_Value > 0.5f ? true : false; }
+    SValue operator()(const bool &) { return m_Value > 0.5f; }
     SValue operator()(const qt3ds::QT3DSI32 &) { return static_cast<qt3ds::QT3DSI32>(m_Value + .5f); }
     SValue operator()(const float &) { return m_Value; }
     SValue operator()(const SFloat2 &inValue) { return SetFloatValue(m_Value, m_Index, inValue); }
     SValue operator()(const SFloat3 &inValue) { return SetFloatValue(m_Value, m_Index, inValue); }
+    SValue operator()(const SFloat4 &inValue) { return SetFloatValue(m_Value, m_Index, inValue); }
     template <typename TDataType>
     SValue operator()(const TDataType &inValue)
     {
@@ -609,6 +611,7 @@ struct SAnimationGetter
     float operator()(const float &inValue) const { return inValue; }
     float operator()(const SFloat2 &inValue) const { return GetFloatValue(inValue, m_Index); }
     float operator()(const SFloat3 &inValue) const { return GetFloatValue(inValue, m_Index); }
+    float operator()(const SFloat4 &inValue) const { return GetFloatValue(inValue, m_Index); }
     template <typename TDataType>
     float operator()(const TDataType & /*inValue*/) const
     {
@@ -750,9 +753,10 @@ void CopyKeyframes(const IAnimationCore &inSourceAnimationCore, IAnimationCore &
                    Qt3DSDMAnimationHandle inDestAnimation, const TKeyframeHandleList &inKeyframes);
 
 Qt3DSDMAnimationHandle CopyAnimation(TAnimationCorePtr inSourceAnimationCore,
-                                    Qt3DSDMAnimationHandle inAnimation, Qt3DSDMSlideHandle inNewSlide,
-                                    Qt3DSDMInstanceHandle inNewInstance,
-                                    Qt3DSDMPropertyHandle inNewProperty, size_t inNewIndex);
+                                     Qt3DSDMAnimationHandle inAnimation,
+                                     Qt3DSDMSlideHandle inNewSlide,
+                                     Qt3DSDMInstanceHandle inNewInstance,
+                                     Qt3DSDMPropertyHandle inNewProperty, size_t inNewIndex);
 
 struct SEaseInGetter
 {
