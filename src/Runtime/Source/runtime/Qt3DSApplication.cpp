@@ -688,6 +688,7 @@ struct SApp : public IApplication
         , m_createSuccessful(false)
         , mRefCount(0)
     {
+        m_PresentationId.append("__initial");
         m_AudioPlayer.SetApplication(*this);
         eastl::string tempStr(inAppDir);
         CFileTools::NormalizePath(tempStr);
@@ -734,14 +735,21 @@ struct SApp : public IApplication
         if (oldId == id)
             return;
 
+        CRegisteredString idStr = m_CoreFactory->GetStringTable().RegisterStr(id);
         // Update id key in m_AssetMap
         TIdAssetMap::iterator iter
                 = m_AssetMap.find(m_CoreFactory->GetStringTable().RegisterStr(oldId));
         if (iter != m_AssetMap.end()
                 && iter->second->getType() == AssetValueTypes::Presentation) {
-            CRegisteredString idStr = m_CoreFactory->GetStringTable().RegisterStr(id);
             m_AssetMap.insert(eastl::make_pair(idStr, iter->second));
             m_AssetMap.erase(iter);
+        }
+        for (unsigned i = 0; i < m_OrderedAssets.size(); i++) {
+            auto &asset = m_OrderedAssets[i];
+            if (oldId == asset.first.c_str()) {
+                asset.first = idStr;
+                break;
+            }
         }
 
         m_PresentationId.assign(qPrintable(id));
@@ -1489,12 +1497,12 @@ struct SApp : public IApplication
         m_variantConfig.setVariantList(variantList);
         bool retval = false;
         if (extension.comparei("uip") == 0) {
-            m_PresentationId.assign(filename.c_str());
+            m_PresentationId.assign("__initial");
             eastl::string relativePath = "./";
             relativePath.append(filename);
             relativePath.append(".");
             relativePath.append("uip");
-            RegisterAsset(SPresentationAsset(RegisterStr(filename.c_str()),
+            RegisterAsset(SPresentationAsset(RegisterStr(m_PresentationId.c_str()),
                                              RegisterStr(relativePath.c_str())));
             m_AppLoadContext = IAppLoadContext::CreateXMLLoadContext(*this, "");
 
