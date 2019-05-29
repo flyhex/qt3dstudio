@@ -39,7 +39,6 @@
 #include "foundation/Utils.h"
 #include "foundation/Qt3DSAtomic.h"
 #include "EASTL/hash_map.h"
-#include "utf8.h"
 
 #ifdef QT3DS_VC
 #include <windows.h> //output debug string
@@ -435,45 +434,9 @@ struct SimpleXmlWriter
         Write(SNameNS(name, ns));
 
         Write("=\"");
-        size_t valueLen = strlen(nonNull(value));
-        TXMLCharPtr start = value;
-        TXMLCharPtr end = value + valueLen;
-        TXMLCharPtr last = start;
-        uint32_t item = 0;
-        // Write out the data escaping unicode values where necessary
-        // I am using utf8::internal because it returns an error code and does not through
-        // exceptions; we don't always know the system we are running on will support or handle
-        // exceptions gracefully.
-        for (utf8::internal::utf_error err_code = utf8::internal::validate_next(start, end, item);
-             last != end && err_code == utf8::internal::UTF8_OK;
-             err_code = utf8::internal::validate_next(start, end, item)) {
-            switch (item) {
-            case '\r':
-                break;
-            case '\n':
-                Write("&#10;");
-                break;
-            case '\t':
-                Write("&#09;");
-                break;
-            case '<':
-                Write("&lt;");
-                break;
-            case '>':
-                Write("&gt;");
-                break;
-            case '"':
-                Write("&quot;");
-                break;
-            case '&':
-                Write("&amp;");
-                break;
-            default:
-                m_Stream.Write(NVConstDataRef<QT3DSU8>((const QT3DSU8 *)last, (QT3DSU32)(start - last)));
-                break;
-            }
-            last = start;
-        }
+
+        QString str = QString::fromUtf8(nonNull(value)).toHtmlEscaped();
+        Write(str.toUtf8().constData());
         Write("\"");
     }
     template <typename TData>
@@ -486,32 +449,9 @@ struct SimpleXmlWriter
     {
         if (!isTrivial(value)) {
             Close(false);
-            size_t valueLen = strlen(nonNull(value));
-            TXMLCharPtr start = value;
-            TXMLCharPtr end = value + valueLen;
-            TXMLCharPtr last = start;
-            uint32_t item = 0;
-            // Write out the data escaping unicode values where necessary
-            for (utf8::internal::utf_error err_code =
-                     utf8::internal::validate_next(start, end, item);
-                 last != end && err_code == utf8::internal::UTF8_OK;
-                 err_code = utf8::internal::validate_next(start, end, item)) {
-                switch (item) {
-                case '<':
-                    Write("&lt;");
-                    break;
-                case '>':
-                    Write("&gt;");
-                    break;
-                case '&':
-                    Write("&amp;");
-                    break;
-                default:
-                    m_Stream.Write(NVConstDataRef<QT3DSU8>((const QT3DSU8 *)last, (QT3DSU32)(start - last)));
-                    break;
-                }
-                last = start;
-            }
+
+            QString str = QString::fromUtf8(nonNull(value)).toHtmlEscaped();
+            Write(str.toUtf8().constData());
             m_OpenElements.back().second = true;
         }
     }

@@ -32,8 +32,6 @@ INCLUDEPATH += \
     $$PWD/../Authoring/QT3DSDM/Systems \
     $$PWD/../Authoring/QT3DSDM/Systems/Cores \
     $$PWD/../3rdparty/EASTL/UnknownVersion/include \
-    $$PWD/../3rdparty/utf8cpp/2.3.2/source \
-    $$PWD/../3rdparty/color \
     $$PWD/../3rdparty/RuntimePlatformSpecific/$$PlatformSpecificDir/PlatformLibs \
     $$PWD/../QtExtras/qmlstreamer \
     $$PWD/Source/runtimerender \

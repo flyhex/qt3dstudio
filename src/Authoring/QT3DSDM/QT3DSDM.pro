@@ -19,7 +19,6 @@ INCLUDEPATH += \
     ../../Runtime/Source/datamodel \
     ../../Runtime/Source/render \
     ../../3rdparty/EASTL/UnknownVersion/include \
-    ../../3rdparty/utf8cpp/2.3.2/source \
     ../../3rdparty/color \
     ..
 
