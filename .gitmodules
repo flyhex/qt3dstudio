@@ -1,8 +1,8 @@
 [submodule "src/3rdparty/ColladaDOM"]
 	path = src/3rdparty/ColladaDOM
 	url = ../qt3dstudio-collada-dom.git
-[submodule "src/3rdparty/EASTL"]
-	path = src/3rdparty/EASTL
+[submodule "src/Runtime/ogl-runtime/src/3rdparty/EASTL"]
+	path = src/Runtime/ogl-runtime/src/3rdparty/EASTL
 	url = ../qt3dstudio-eastl.git
 [submodule "src/3rdparty/pcre"]
 	path = src/3rdparty/pcre

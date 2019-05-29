@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
     std::ifstream theText(g_Text);
     if (!theText) {
         fprintf(stderr, "Failed: Could not input text file, set working directory to "
-                        "src\\Runtime\\Source\\runtime and try again.\n");
+                        "src\\Runtime\\ogl-runtime\\src\\runtime and try again.\n");
         return -1;
     }
 

@@ -1,7 +1,5 @@
 TEMPLATE = subdirs
 CONFIG += ordered
-SUBDIRS += \
-    EASTL
 
 !cross_compile:!qnx {
     SUBDIRS += \

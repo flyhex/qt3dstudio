@@ -54,7 +54,6 @@ INCLUDEPATH += \
     .. \
     ../QT3DSIMP/Qt3DSImportLib \
     ../QT3DSIMP/Qt3DSImportSGTranslation \
-    ../QT3DSDM/Systems \
     ../Common/Code/Thread \
     ../Common/Code/IO \
     ../Common/Code \
@@ -73,15 +72,17 @@ INCLUDEPATH += \
     ../Client/Code/Core/Doc/ClientDataModelBridge \
     ../Client/Code/Shared \
     ../Client/Code/Shared/Log \
-    ../../Runtime/Source/render \
-    ../../Runtime/Source/foundation \
-    ../../Runtime/Source/runtimerender \
-    ../../Runtime/Source/runtimerender/graphobjects \
-    ../../Runtime/Source/runtimerender/resourcemanager \
-    ../../Runtime/Source/event \
-    ../../3rdparty/EASTL/UnknownVersion/include \
-    ../../3rdparty/color \
-    ../../QtExtras/qmlstreamer
+    ../../Runtime/ogl-runtime/src/importlib \
+    ../../Runtime/ogl-runtime/src/dm/systems \
+    ../../Runtime/ogl-runtime/src/render \
+    ../../Runtime/ogl-runtime/src/foundation \
+    ../../Runtime/ogl-runtime/src/runtimerender \
+    ../../Runtime/ogl-runtime/src/runtimerender/graphobjects \
+    ../../Runtime/ogl-runtime/src/runtimerender/resourcemanager \
+    ../../Runtime/ogl-runtime/src/event \
+    ../../Runtime/ogl-runtime/src/3rdparty/EASTL/UnknownVersion/include \
+    ../../Runtime/ogl-runtime/src/3rdparty/color \
+    ../../Runtime/ogl-runtime/src/qmlstreamer
 
 linux {
     BEGIN_ARCHIVE = -Wl,--whole-archive

@@ -33,10 +33,11 @@ INCLUDEPATH += \
     ../Client/Code/Shared/Log \
     ../Client/Code/Core/Timer \
     ../Client/Code/Core/VirtualAssets \
+    ../../Runtime/ogl-runtime/src/importlib \
     ../QT3DSIMP/Qt3DSImportLib \
-    ../QT3DSDM/Systems \
-    ../QT3DSDM/Systems/Cores \
     ../QT3DSIMP/Qt3DSImportSGTranslation \
+    ../../Runtime/ogl-runtime/src/dm/systems \
+    ../../Runtime/ogl-runtime/src/dm/systems/cores \
     ../Studio \
     ../Studio/DragAndDrop \
     ../Studio/Render \
@@ -53,17 +54,17 @@ INCLUDEPATH += \
     ../Common/Code/Graph \
     ../Common/Code/EulerAngles \
     ../Common/Code/Serialize \
-    ../../Runtime/Source/datamodel \
-    ../../Runtime/Source/render \
-    ../../Runtime/Source/foundation \
-    ../../Runtime/Source/runtimerender \
-    ../../Runtime/Source/runtimerender/graphobjects \
-    ../../Runtime/Source/runtimerender/resourcemanager \
-    ../../3rdparty/EASTL/UnknownVersion/include \
+    ../../Runtime/ogl-runtime/src/datamodel \
+    ../../Runtime/ogl-runtime/src/render \
+    ../../Runtime/ogl-runtime/src/foundation \
+    ../../Runtime/ogl-runtime/src/runtimerender \
+    ../../Runtime/ogl-runtime/src/runtimerender/graphobjects \
+    ../../Runtime/ogl-runtime/src/runtimerender/resourcemanager \
+    ../../Runtime/ogl-runtime/src/3rdparty/EASTL/UnknownVersion/include \
     $$QMAKE_INCDIR_FBX \
     ../../3rdparty/ColladaDOM/2.4.0/dom/include \
     ../../3rdparty/ColladaDOM/2.4.0/dom/include/1.4 \
-    ../../3rdparty/color \
+    ../../Runtime/ogl-runtime/src/3rdparty/color \
     ..
 
 PRECOMPILED_HEADER = ../Common/Code/Qt3DSCommonPrecompile.h
@@ -113,12 +114,12 @@ SOURCES += \
     ../Client/Code/Core/Timer/Timer.cpp \
     ../Client/Code/Core/VirtualAssets/PlaybackClock.cpp \
     ../Client/Code/Core/VirtualAssets/VClockPolicy.cpp \
+    ../../Runtime/ogl-runtime/src/importlib/Qt3DSImportMesh.cpp \
+    ../../Runtime/ogl-runtime/src/importlib/Qt3DSImportMeshBuilder.cpp \
+    ../../Runtime/ogl-runtime/src/importlib/Qt3DSImportPath.cpp \
     ../QT3DSIMP/Qt3DSImportLib/Qt3DSImport.cpp \
     ../QT3DSIMP/Qt3DSImportLib/Qt3DSImportComposerTypes.cpp \
-    ../QT3DSIMP/Qt3DSImportLib/Qt3DSImportMesh.cpp \
-    ../QT3DSIMP/Qt3DSImportLib/Qt3DSImportMeshBuilder.cpp \
     ../QT3DSIMP/Qt3DSImportLib/Qt3DSImportMeshStudioOnly.cpp \
-    ../QT3DSIMP/Qt3DSImportLib/Qt3DSImportPath.cpp \
     ../QT3DSIMP/Qt3DSImportLib/Qt3DSImportPerformImport.cpp \
     ../QT3DSIMP/Qt3DSImportSGTranslation/Qt3DSImportColladaSGTranslation.cpp \
     ../QT3DSIMP/Qt3DSImportSGTranslation/Qt3DSImportFbxSGTranslation.cpp \

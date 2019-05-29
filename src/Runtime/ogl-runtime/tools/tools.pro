@@ -2,5 +2,9 @@ TEMPLATE = subdirs
 CONFIG += ordered
 
 !boot2qt:!integrity:!qnx {
-    SUBDIRS += Qt3DViewer
+    SUBDIRS += viewer
+}
+
+win32 {
+    SUBDIRS += attributehashes
 }

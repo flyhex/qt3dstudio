@@ -9,23 +9,23 @@ include(../commoninclude.pri)
 QT += qml
 
 boot2qt: {
-    RESOURCES += ../res.qrc
+    RESOURCES += ../../res.qrc
     DEFINES += EMBEDDED_LINUX # TODO: Is there a compile-time flag for boot2qt?
 }
 
 integrity|ios {
-    RESOURCES += ../res.qrc
+    RESOURCES += ../../res.qrc
 }
 
 SOURCES += \
-    ../Source/viewer/Qt3DSAudioPlayerImpl.cpp \
-    ../Source/viewer/Qt3DSViewerApp.cpp
+    ../viewer/Qt3DSAudioPlayerImpl.cpp \
+    ../viewer/Qt3DSViewerApp.cpp
 
 HEADERS += \
-    ../Source/viewer/qt3dsruntimeglobal.h \
-    ../Source/viewer/Qt3DSAudioPlayerImpl.h \
-    ../Source/viewer/Qt3DSViewerApp.h \
-    ../Source/viewer/Qt3DSViewerTimer.h
+    ../viewer/qt3dsruntimeglobal.h \
+    ../viewer/Qt3DSAudioPlayerImpl.h \
+    ../viewer/Qt3DSViewerApp.h \
+    ../viewer/Qt3DSViewerTimer.h
 
 linux|qnx|mingw {
     BEGIN_ARCHIVE = -Wl,--whole-archive
@@ -54,7 +54,7 @@ win32 {
     LIBS += \
         -lws2_32
 
-    RESOURCES += ../platformres.qrc
+    RESOURCES += ../../platformres.qrc
 }
 
 linux {

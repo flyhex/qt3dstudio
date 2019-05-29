@@ -28,7 +28,7 @@ integrity: {
     DEFINES += _INTEGRITYPLATFORM
 }
 
-INCLUDEPATH += $$PWD/Runtime/ogl-runtime/src/platformspecific/$$PlatformSpecificDir
+INCLUDEPATH += $$PWD/src/platformspecific/$$PlatformSpecificDir
 
 THIRDPARTY_DIR = $$(QT3DSTUDIO_3RDPARTY_DIR)
 isEmpty(THIRDPARTY_DIR) {
