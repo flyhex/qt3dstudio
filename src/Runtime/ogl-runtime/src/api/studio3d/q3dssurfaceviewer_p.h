@@ -77,6 +77,7 @@ protected:
 
 private:
     void reset();
+    void setError(const QString &error);
     bool initializeRuntime();
     void releaseRuntime();
     void resetUpdateTimer();
@@ -98,6 +99,7 @@ private:
     QString m_id;
     QElapsedTimer m_startupTimer;
     QQmlEngine *qmlEngine = nullptr;
+    QString m_error;
 };
 
 QT_END_NAMESPACE

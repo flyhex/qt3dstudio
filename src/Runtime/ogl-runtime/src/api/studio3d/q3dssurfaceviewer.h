@@ -51,8 +51,7 @@ class Q_STUDIO3D_EXPORT Q3DSSurfaceViewer : public QObject
     Q_OBJECT
     Q_DECLARE_PRIVATE(Q3DSSurfaceViewer)
 
-    // #TODO: QT3DS-3532 SurfaceViewer API missing error string
-    //Q_PROPERTY(QString error READ error NOTIFY errorChanged)
+    Q_PROPERTY(QString error READ error NOTIFY errorChanged)
     Q_PROPERTY(bool running READ isRunning NOTIFY runningChanged)
     Q_PROPERTY(QSize size READ size WRITE setSize NOTIFY sizeChanged)
     Q_PROPERTY(bool autoSize READ autoSize WRITE setAutoSize NOTIFY autoSizeChanged)
@@ -91,6 +90,8 @@ public:
     void setQmlEngine(QQmlEngine *qmlEngine);
     QString presentationId() const;
 
+    QString error() const;
+
 public Q_SLOTS:
     void update();
     void setPresentationId(const QString &id);
@@ -99,6 +100,7 @@ Q_SIGNALS:
     void presentationLoaded();
     void presentationReady();
     void frameUpdate();
+    void errorChanged();
 
     void presentationIdChanged(const QString &id);
     void sizeChanged(const QSize &size);

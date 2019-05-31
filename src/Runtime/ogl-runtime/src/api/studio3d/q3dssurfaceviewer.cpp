@@ -281,6 +281,14 @@ int Q3DSSurfaceViewer::fboId() const
 }
 
 /*!
+    Returns the error string.
+*/
+QString Q3DSSurfaceViewer::error() const
+{
+    return d_ptr->m_error;
+}
+
+/*!
     Returns the surface given in initialization.
 
     \sa create()
@@ -442,15 +450,15 @@ bool Q3DSSurfaceViewerPrivate::initialize(QSurface *surface, QOpenGLContext *con
     Q_ASSERT(surface);
 
     if (m_presentation->source().isEmpty()) {
-        qWarning("Failed to initialize Q3DSSurfaceViewer,"
-                 " presentation source must be set before calling initialize()");
+        setError(QStringLiteral("Failed to initialize Q3DSSurfaceViewer,"
+                                 " presentation source must be set before calling initialize()"));
         return false;
     }
 
     QFileInfo info(Q3DSUtils::urlToLocalFileOrQrc(m_presentation->source()));
     if (!info.exists()) {
-        qWarning() << "Failed to initialize Q3DSSurfaceViewer, the presentation doesn't exist:"
-                   << m_presentation->source().toString();
+        setError(QStringLiteral("Failed to initialize Q3DSSurfaceViewer, the presentation doesn't exist: %1")
+                .arg(m_presentation->source().toString()));
         return false;
     }
 
@@ -594,6 +602,18 @@ void Q3DSSurfaceViewerPrivate::reset()
 /*!
  * \internal
  */
+void Q3DSSurfaceViewerPrivate::setError(const QString &error)
+{
+    if (m_error != error) {
+        m_error = error;
+        qWarning() << error;
+        Q_EMIT q_ptr->errorChanged();
+    }
+}
+
+/*!
+ * \internal
+ */
 bool Q3DSSurfaceViewerPrivate::initializeRuntime()
 {
     Q_ASSERT(!m_viewerApp);
@@ -621,6 +641,7 @@ bool Q3DSSurfaceViewerPrivate::initializeRuntime()
                                     m_presentation->variantList(),
                                     m_presentation->delayedLoading(),
                                     m_presentation->d_ptr->streamProxy())) {
+        setError(m_viewerApp->error());
         releaseRuntime();
         qWarning("Failed to initialize runtime");
         return false;
