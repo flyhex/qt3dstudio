@@ -32,7 +32,9 @@
 					<AnimationTrack property="position.z" type="EaseInOut" >0 0 100 100 5 0 100 100</AnimationTrack>
 				</Add>
 				<State id="Scene-Slide1" name="Slide1" playmode="Play Through To..." >
-					<Set ref="#Layer" endtime="5000" />
+					<Set ref="#Layer" endtime="5000" >
+						<Action id="Layer-Action" eyeball="True" triggerObject="#Scene" event="onPressureDown" targetObject="#Scene" handler="Next Slide" />
+					</Set>
 					<Set ref="#Camera" endtime="5000" />
 					<Set ref="#Light" endtime="5000" />
 					<Add ref="#Sphere" name="Sphere" endtime="5000" scale="0.1 0.1 0.1" sourcepath="#Sphere" />

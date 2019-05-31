@@ -593,6 +593,36 @@ void tst_qt3dsviewer::testCreateMesh()
     QTest::qWait(200); // Extra wait to verify slide change visually
 }
 
+void tst_qt3dsviewer::testMouseEvents()
+{
+    m_viewer->show();
+    QTest::qWait(1000);
+
+    QSignalSpy spyEvents(m_studio3DItem,
+                         SIGNAL(ignoredEventsChanged()));
+    QSignalSpy spyExited(m_presentation,
+                         SIGNAL(slideExited(const QString &, unsigned int, const QString &)));
+
+    QCOMPARE(spyEvents.count(), 0);
+    QCOMPARE(spyExited.count(), 0);
+
+    // Ignore mouse, so slide doesn't change
+    m_studio3DItem->setProperty("ignoredEvents", 1);
+    QTest::mousePress(m_viewer, Qt::LeftButton);
+    QTest::qWait(1000);
+    QTest::mouseRelease(m_viewer, Qt::LeftButton);
+    QCOMPARE(spyEvents.count(), 1);
+    QCOMPARE(spyExited.count(), 0);
+
+    // Enable mouse, clicking switches slide
+    m_studio3DItem->setProperty("ignoredEvents", 0);
+    QTest::mousePress(m_viewer, Qt::LeftButton);
+    QTest::qWait(1000);
+    QTest::mouseRelease(m_viewer, Qt::LeftButton);
+    QCOMPARE(spyEvents.count(), 2);
+    QCOMPARE(spyExited.count(), 1);
+}
+
 void tst_qt3dsviewer::deleteCreated()
 {
     m_presentation->deleteElements(m_createdElements);

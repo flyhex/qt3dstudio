@@ -1,6 +1,6 @@
 TEMPLATE = app
 CONFIG += testcase
-include($$PWD/../../../src/Runtime/commoninclude.pri)
+include($$PWD/../../../src/Runtime/ogl-runtime/commoninclude.pri)
 
 TARGET = tst_qt3dsruntime
 QT += testlib gui

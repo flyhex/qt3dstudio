@@ -58,6 +58,7 @@ private Q_SLOTS:
     void testCreateElement();
     void testCreateMaterial();
     void testCreateMesh();
+    void testMouseEvents();
 
 private:
     void deleteCreated();

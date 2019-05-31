@@ -143,16 +143,14 @@ Q3DSStudio3D::Q3DSStudio3D()
     , m_presentation(nullptr)
     , m_emitRunningChange(false)
     , m_isRunning(false)
-    , m_ignoreMouseEvents(false)
-    , m_ignoreWheelEvents(false)
-    , m_ignoreKeyboardEvents(false)
+    , m_eventIgnoreFlags(EnableAllEvents)
     , m_pixelRatio(1.0)
 {
     setMirrorVertically(true);
     connect(this, &Q3DSStudio3D::windowChanged, this, &Q3DSStudio3D::handleWindowChanged);
     connect(this, &Q3DSStudio3D::visibleChanged, this, &Q3DSStudio3D::handleVisibleChanged);
 
-    setIgnoreEvents(false, false, false);
+    updateEventMasks();
 }
 
 Q3DSStudio3D::~Q3DSStudio3D()
@@ -207,20 +205,39 @@ void Q3DSStudio3D::setError(const QString &error)
 }
 
 /*!
-    \internal
-    It might be beneficial to have these as properties so they could be accessed from QML?
- */
-void Q3DSStudio3D::setIgnoreEvents(bool mouse, bool wheel, bool keyboard)
-{
-    m_ignoreMouseEvents = mouse;
-    m_ignoreWheelEvents = wheel;
-    m_ignoreKeyboardEvents = keyboard;
+    \qmlproperty EventIgnoreFlags Studio3D::ignoredEvents
 
-    if (mouse)
+    This property can be used to ignore mouse/wheel/keyboard events.
+    By default all events are enabled.
+*/
+
+Q3DSStudio3D::EventIgnoreFlags Q3DSStudio3D::ignoredEvents() const
+{
+    return m_eventIgnoreFlags;
+}
+
+void Q3DSStudio3D::setIgnoredEvents(EventIgnoreFlags flags)
+{
+    if (m_eventIgnoreFlags == flags)
+        return;
+
+    m_eventIgnoreFlags = flags;
+    updateEventMasks();
+    Q_EMIT ignoredEventsChanged();
+}
+
+/*!
+    \internal
+ */
+void Q3DSStudio3D::updateEventMasks()
+{
+    if (m_eventIgnoreFlags.testFlag(IgnoreMouseEvents)) {
         setAcceptedMouseButtons(Qt::NoButton);
-    else
-        setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton | Qt::MiddleButton);
-    setAcceptHoverEvents(!mouse);
+        setAcceptHoverEvents(false);
+    } else {
+        setAcceptedMouseButtons(Qt::MouseButtonMask);
+        setAcceptHoverEvents(true);
+    }
 }
 
 /*!
@@ -435,14 +452,15 @@ void Q3DSStudio3D::getCommands(bool emitInitialize, CommandQueue &renderQueue)
  */
 void Q3DSStudio3D::mousePressEvent(QMouseEvent *event)
 {
-    if (!m_ignoreMouseEvents) {
-        if (m_pixelRatio != 1.0) {
-            QMouseEvent scaledEvent(event->type(), event->pos() * m_pixelRatio,
-                                    event->button(), event->buttons(), event->modifiers());
-            m_presentation->mousePressEvent(&scaledEvent);
-        } else {
-            m_presentation->mousePressEvent(event);
-        }
+    if (m_eventIgnoreFlags.testFlag(IgnoreMouseEvents))
+        return;
+
+    if (m_pixelRatio != 1.0) {
+        QMouseEvent scaledEvent(event->type(), event->pos() * m_pixelRatio,
+                                event->button(), event->buttons(), event->modifiers());
+        m_presentation->mousePressEvent(&scaledEvent);
+    } else {
+        m_presentation->mousePressEvent(event);
     }
 }
 
@@ -451,14 +469,15 @@ void Q3DSStudio3D::mousePressEvent(QMouseEvent *event)
  */
 void Q3DSStudio3D::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (!m_ignoreMouseEvents) {
-        if (m_pixelRatio != 1.0) {
-            QMouseEvent scaledEvent(event->type(), event->pos() * m_pixelRatio,
-                                    event->button(), event->buttons(), event->modifiers());
-            m_presentation->mouseReleaseEvent(&scaledEvent);
-        } else {
-            m_presentation->mouseReleaseEvent(event);
-        }
+    if (m_eventIgnoreFlags.testFlag(IgnoreMouseEvents))
+        return;
+
+    if (m_pixelRatio != 1.0) {
+        QMouseEvent scaledEvent(event->type(), event->pos() * m_pixelRatio,
+                                event->button(), event->buttons(), event->modifiers());
+        m_presentation->mouseReleaseEvent(&scaledEvent);
+    } else {
+        m_presentation->mouseReleaseEvent(event);
     }
 }
 
@@ -467,14 +486,15 @@ void Q3DSStudio3D::mouseReleaseEvent(QMouseEvent *event)
  */
 void Q3DSStudio3D::mouseMoveEvent(QMouseEvent *event)
 {
-    if (!m_ignoreMouseEvents) {
-        if (m_pixelRatio != 1.0) {
-            QMouseEvent scaledEvent(event->type(), event->pos() * m_pixelRatio,
-                                    event->button(), event->buttons(), event->modifiers());
-            m_presentation->mouseMoveEvent(&scaledEvent);
-        } else {
-            m_presentation->mouseMoveEvent(event);
-        }
+    if (m_eventIgnoreFlags.testFlag(IgnoreMouseEvents))
+        return;
+
+    if (m_pixelRatio != 1.0) {
+        QMouseEvent scaledEvent(event->type(), event->pos() * m_pixelRatio,
+                                event->button(), event->buttons(), event->modifiers());
+        m_presentation->mouseMoveEvent(&scaledEvent);
+    } else {
+        m_presentation->mouseMoveEvent(event);
     }
 }
 
@@ -483,8 +503,10 @@ void Q3DSStudio3D::mouseMoveEvent(QMouseEvent *event)
  */
 void Q3DSStudio3D::wheelEvent(QWheelEvent *event)
 {
-    if (!m_ignoreWheelEvents)
-        m_presentation->wheelEvent(event);
+    if (m_eventIgnoreFlags.testFlag(IgnoreWheelEvents))
+        return;
+
+    m_presentation->wheelEvent(event);
 }
 
 /*!
@@ -492,8 +514,9 @@ void Q3DSStudio3D::wheelEvent(QWheelEvent *event)
  */
 void Q3DSStudio3D::keyPressEvent(QKeyEvent *event)
 {
-    if (m_ignoreKeyboardEvents)
+    if (m_eventIgnoreFlags.testFlag(IgnoreKeyboardEvents))
         return;
+
     m_presentation->keyPressEvent(event);
 }
 
@@ -502,8 +525,9 @@ void Q3DSStudio3D::keyPressEvent(QKeyEvent *event)
  */
 void Q3DSStudio3D::keyReleaseEvent(QKeyEvent *event)
 {
-    if (m_ignoreKeyboardEvents)
+    if (m_eventIgnoreFlags.testFlag(IgnoreKeyboardEvents))
         return;
+
     if (!event->isAutoRepeat())
         m_presentation->keyReleaseEvent(event);
 }

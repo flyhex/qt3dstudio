@@ -59,8 +59,19 @@ class Q3DSStudio3D : public QQuickFramebufferObject
     Q_PROPERTY(Q3DSPresentationItem *presentation READ presentation CONSTANT)
     Q_PROPERTY(Q3DSViewerSettings *viewerSettings READ viewerSettings CONSTANT)
     Q_PROPERTY(QString error READ error NOTIFY errorChanged)
+    Q_PROPERTY(EventIgnoreFlags ignoredEvents READ ignoredEvents WRITE setIgnoredEvents NOTIFY ignoredEventsChanged)
 
 public:
+    enum EventIgnoreFlag {
+        EnableAllEvents = 0,
+        IgnoreMouseEvents = 0x01,
+        IgnoreWheelEvents = 0x02,
+        IgnoreKeyboardEvents = 0x04,
+        IgnoreAllInputEvents = IgnoreMouseEvents | IgnoreWheelEvents | IgnoreKeyboardEvents
+    };
+    Q_DECLARE_FLAGS(EventIgnoreFlags, EventIgnoreFlag)
+    Q_FLAG(EventIgnoreFlags)
+
     Q3DSStudio3D();
     ~Q3DSStudio3D() override;
 
@@ -81,7 +92,8 @@ public:
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
 
-    void setIgnoreEvents(bool mouse, bool wheel, bool keyboard);
+    EventIgnoreFlags ignoredEvents() const;
+    void setIgnoredEvents(EventIgnoreFlags flags);
 
     void componentComplete() override;
 
@@ -89,6 +101,7 @@ Q_SIGNALS:
     void frameUpdate();
     void runningChanged(bool initialized);
     void errorChanged(const QString &error);
+    void ignoredEventsChanged();
     void presentationReady();
     void presentationLoaded();
 
@@ -101,6 +114,8 @@ protected Q_SLOTS:
     void tick();
     void requestResponseHandler(const QString &elementPath, CommandType commandType,
                                 void *requestData);
+private:
+    void updateEventMasks();
 
 protected:
     Q3DSViewerSettings *m_viewerSettings;
@@ -108,14 +123,14 @@ protected:
 
     bool m_emitRunningChange;
     bool m_isRunning;
-    bool m_ignoreMouseEvents;
-    bool m_ignoreWheelEvents;
-    bool m_ignoreKeyboardEvents;
+    EventIgnoreFlags m_eventIgnoreFlags;
 
     CommandQueue m_pendingCommands;
     qreal m_pixelRatio;
     QString m_error;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(Q3DSStudio3D::EventIgnoreFlags)
 
 QT_END_NAMESPACE
 
