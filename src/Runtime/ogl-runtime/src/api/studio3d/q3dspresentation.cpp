@@ -638,11 +638,9 @@ void Q3DSPresentation::setAttribute(const QString &elementPath, const QString &a
     }
 }
 
-// #TODO: QT3DS-3558
 /*!
-    \brief Q3DSPresentation::setPresentationActive
-    \param id
-    \param active
+    Activate or deactivate the presentation identified by \a id depending
+    on the value of \a active.
  */
 void Q3DSPresentation::setPresentationActive(const QString &id, bool active)
 {
@@ -674,10 +672,9 @@ void Q3DSPresentation::fireEvent(const QString &elementPath, const QString &even
     }
 }
 
-// #TODO: QT3DS-3559
 /*!
-    \brief Q3DSPresentation::setGlobalAnimationTime
-    \param milliseconds
+    Set global animation time to manual value specified by \a milliseconds
+    (if non-zero) or resume normal timer (if zero).
  */
 void Q3DSPresentation::setGlobalAnimationTime(qint64 milliseconds)
 {
