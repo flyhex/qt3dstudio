@@ -52,6 +52,7 @@
 #include "Dispatch.h"
 #include "VariantsGroupModel.h"
 #include "StudioProjectSettings.h"
+#include "Literals.h"
 
 #include <QtCore/qfileinfo.h>
 
@@ -92,8 +93,8 @@ static std::pair<bool, bool> getSlideCharacteristics(qt3dsdm::Qt3DSDMInstanceHan
     // Get the slide from the instance.
     qt3dsdm::Qt3DSDMSlideHandle slide = slideCore.GetSlideByInstance(instance);
     qt3dsdm::Qt3DSDMSlideHandle master = slideSystem.GetMasterSlide(slide);
-    int index = (int)slideSystem.GetSlideIndex(slide);
-    int count = (int)slideSystem.GetSlideCount(master);
+    int index = int(slideSystem.GetSlideIndex(slide));
+    int count = int(slideSystem.GetSlideCount(master));
     bool hasNextSlide = index > 0 && index < count - 1;
     bool hasPreviousSlide = index > 1;
     return std::make_pair(hasNextSlide, hasPreviousSlide);
@@ -127,25 +128,13 @@ CInspectableBase *InspectorControlModel::inspectable() const
     return m_inspectableBase;
 }
 
-qt3dsdm::Qt3DSDMInstanceHandle getReferenceMaterial(CInspectableBase *inspectable)
+qt3dsdm::Qt3DSDMInstanceHandle InspectorControlModel::getReferenceMaterial(
+                                                                CInspectableBase *inspectable) const
 {
-    const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
-                        ->GetClientDataModelBridge();
-
     if (inspectable)
-        return bridge->getMaterialReference(inspectable->getInstance());
+        return getBridge()->getMaterialReference(inspectable->getInstance());
 
     return 0;
-}
-
-CInspectableBase *getReferenceMaterialInspectable(CInspectableBase *inspectable)
-{
-    auto refMaterial = getReferenceMaterial(inspectable);
-
-    if (refMaterial.Valid())
-        return g_StudioApp.getInspectableFromInstance(refMaterial);
-
-    return nullptr;
 }
 
 void InspectorControlModel::notifyPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
@@ -1136,7 +1125,9 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
         }
 
         element->m_value = stringValue;
-    } // intentional fall-through for other String-derived datatypes
+    }
+    Q_FALLTHROUGH(); // fall-through for other String-derived datatypes
+
     case qt3dsdm::DataModelDataType::StringOrInt:
         if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::StringList) {
             QStringList stringlist;
@@ -1186,7 +1177,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
                 // Add the slide names (exclude the master slide)
                 auto slideHandle = slideSystem->GetSlideByInstance(instance);
                 auto masterSlide = slideSystem->GetMasterSlide(slideHandle);
-                long slideCount = (long)slideSystem->GetSlideCount(masterSlide);
+                long slideCount = long(slideSystem->GetSlideCount(masterSlide));
                 for (long slideIndex = 1; slideIndex < slideCount; ++slideIndex) {
                     auto currentSlide = slideSystem->GetSlideByIndex(masterSlide, slideIndex);
                     auto currentInstance = slideSystem->GetSlideInstance(currentSlide);
@@ -1219,14 +1210,8 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
             updateFontValues(element);
             skipEmits = true; // updateFontValues handles emits in correct order
         } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Mesh) {
-            QString meshValue = qt3dsdm::get<QString>(value);
-            Q3DStudio::CFilePath theSelectionItem(Q3DStudio::CString::fromQString(meshValue));
-            Q3DStudio::CFilePath theSelectionWithoutId(theSelectionItem.filePath());
-            QString theSelectionWithoutIdName = theSelectionWithoutId.GetFileName().toQString();
-            if (theSelectionWithoutIdName.size())
-                element->m_value = theSelectionWithoutIdName;
-            else
-                element->m_value = theSelectionItem.GetIdentifier().toQString();
+            QString meshValue = QFileInfo(qt3dsdm::get<QString>(value)).fileName();
+            element->m_value = meshValue.startsWith('#'_L1) ? meshValue.mid(1) : meshValue;
         } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Texture) {
             QFileInfo fileInfo(qt3dsdm::get<QString>(value));
             element->m_value = fileInfo.fileName();
@@ -1241,14 +1226,17 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
                        << element->m_propertyType;
         }
         break;
+
     case qt3dsdm::DataModelDataType::StringRef:
         if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::None) {
             element->m_value = qt3dsdm::get<QString>(value);
         }
         break;
+
     case qt3dsdm::DataModelDataType::Bool:
         element->m_value = qt3dsdm::get<bool>(value);
         break;
+
     case qt3dsdm::DataModelDataType::Long4:
         if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Image) {
             qt3dsdm::Option<qt3dsdm::SLong4> guid = qt3dsdm::get<qt3dsdm::SLong4>(value);
@@ -1266,6 +1254,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
                        << element->m_dataType << " " << element->m_title;
         }
         break;
+
     case qt3dsdm::DataModelDataType::Long:
         if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Range) {
             element->m_value = qt3dsdm::get<int>(value);
@@ -1273,12 +1262,12 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
             if (m_guideInspectable) {
                 const auto prop = m_guideInspectable->properties()
                         [handleToGuidePropIndex(element->m_property)];
-                ranges.m_Min = prop->GetInspectableMin();
-                ranges.m_Max = prop->GetInspectableMax();
+                ranges.m_min = prop->GetInspectableMin();
+                ranges.m_max = prop->GetInspectableMax();
             } else {
                 ranges = qt3dsdm::get<qt3dsdm::SMetaDataRange>(info->m_MetaDataData);
             }
-            const QList<double> rangesValues{ranges.m_Min, ranges.m_Max};
+            const QList<double> rangesValues{ranges.m_min, ranges.m_max, double(ranges.m_decimals)};
             element->m_values = QVariant::fromValue<QList<double> >(rangesValues);
         }
         else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::ShadowMapResolution) {
@@ -1288,6 +1277,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
                        << element->m_dataType;
         }
         break;
+
     case qt3dsdm::DataModelDataType::Float3:
         if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Color) {
             element->m_value = qt3dsdm::get<QColor>(value);
@@ -1301,11 +1291,13 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
             element->m_values = QVariant::fromValue<QList<double> >(float3Values);
         }
         break;
+
     case qt3dsdm::DataModelDataType::Float4:
         if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Color) {
             element->m_value = qt3dsdm::get<QColor>(value);
         }
         break;
+
     case qt3dsdm::DataModelDataType::Float2:
         if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::None) {
             const QVector2D theFloat2 = qt3dsdm::get<QVector2D>(value);
@@ -1316,18 +1308,20 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
                        << element->m_dataType << element->m_propertyType;
         }
         break;
+
     case qt3dsdm::DataModelDataType::Float:
         if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::None) {
             element->m_value = qt3dsdm::get<float>(value);
         } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Range) {
             element->m_value = qt3dsdm::get<float>(value);
             const qt3dsdm::SMetaDataRange ranges = qt3dsdm::get<qt3dsdm::SMetaDataRange>(info->m_MetaDataData);
-            const QList<double> rangesValues{ranges.m_Min, ranges.m_Max};
+            const QList<double> rangesValues{ranges.m_min, ranges.m_max, double(ranges.m_decimals)};
             element->m_values = QVariant::fromValue<QList<double> >(rangesValues);
         } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::FontSize) {
             element->m_value = qt3dsdm::get<float>(value);
         }
         break;
+
     case qt3dsdm::DataModelDataType::ObjectRef:
         if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::ObjectRef) {
             IObjectReferenceHelper *objRefHelper = doc->GetDataModelObjectReferenceHelper();
@@ -1347,6 +1341,7 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
             }
         }
         break;
+
     default:
         qWarning() << "TODO: InspectorControlModel::updatePropertyValue: I've no idea how to handle this datatype"
                    << element->m_dataType;

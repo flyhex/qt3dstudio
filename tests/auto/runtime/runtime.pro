@@ -1,6 +1,6 @@
 TEMPLATE = app
 CONFIG += testcase
-include($$PWD/../../../src/Runtime/commoninclude.pri)
+include($$PWD/../../../src/Runtime/ogl-runtime/commoninclude.pri)
 
 TARGET = tst_qt3dsruntime
 QT += testlib gui
@@ -10,7 +10,7 @@ RESOURCES += \
     $$PWD/../../../src/Runtime/platformres.qrc
 
 INCLUDEPATH += \
-    $$PWD/../../../src/Runtime/Source/Qt3DSRuntimeRender/RendererImpl
+    $$PWD/../../../src/Runtime/ogl-runtime/src/Qt3DSRuntimeRender/RendererImpl
 
 HEADERS += \
     base/Qt3DSRenderTestAtomicCounterBuffer.h \

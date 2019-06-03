@@ -54,7 +54,6 @@ INCLUDEPATH += \
     .. \
     ../QT3DSIMP/Qt3DSImportLib \
     ../QT3DSIMP/Qt3DSImportSGTranslation \
-    ../QT3DSDM/Systems \
     ../Common/Code/Thread \
     ../Common/Code/IO \
     ../Common/Code \
@@ -73,15 +72,17 @@ INCLUDEPATH += \
     ../Client/Code/Core/Doc/ClientDataModelBridge \
     ../Client/Code/Shared \
     ../Client/Code/Shared/Log \
-    ../../Runtime/Source/render \
-    ../../Runtime/Source/foundation \
-    ../../Runtime/Source/runtimerender \
-    ../../Runtime/Source/runtimerender/graphobjects \
-    ../../Runtime/Source/runtimerender/resourcemanager \
-    ../../Runtime/Source/event \
-    ../../3rdparty/EASTL/UnknownVersion/include \
-    ../../3rdparty/color \
-    ../../QtExtras/qmlstreamer
+    ../../Runtime/ogl-runtime/src/importlib \
+    ../../Runtime/ogl-runtime/src/dm/systems \
+    ../../Runtime/ogl-runtime/src/render \
+    ../../Runtime/ogl-runtime/src/foundation \
+    ../../Runtime/ogl-runtime/src/runtimerender \
+    ../../Runtime/ogl-runtime/src/runtimerender/graphobjects \
+    ../../Runtime/ogl-runtime/src/runtimerender/resourcemanager \
+    ../../Runtime/ogl-runtime/src/event \
+    ../../Runtime/ogl-runtime/src/3rdparty/EASTL/UnknownVersion/include \
+    ../../Runtime/ogl-runtime/src/3rdparty/color \
+    ../../Runtime/ogl-runtime/src/qmlstreamer
 
 linux {
     BEGIN_ARCHIVE = -Wl,--whole-archive
@@ -176,7 +177,6 @@ HEADERS += \
     Palettes/TimelineGraphicsView/KeyframeManager.h \
     Palettes/TimelineGraphicsView/RowManager.h \
     Palettes/TimelineGraphicsView/RowMover.h \
-    Palettes/TimelineGraphicsView/rowtypes.h \
     Palettes/TimelineGraphicsView/SelectionRect.h \
     Palettes/TimelineGraphicsView/TimelineConstants.h \
     Palettes/TimelineGraphicsView/TimelineControl.h \
@@ -469,6 +469,13 @@ CONFIG += exceptions
 
 target.path = $$[QT_INSTALL_BINS]
 INSTALLS += target
+
+# Install FBX SDK library for Linux
+linux:!isEmpty(QMAKE_LIBS_FBX) {
+    fbxsdk.files = $$str_member($$last(QMAKE_LIBS_FBX), 2, -1)/libfbxsdk.so
+    fbxsdk.path = $$[QT_INSTALL_LIBS]
+    INSTALLS += fbxsdk
+}
 
 RC_ICONS = images/3D-studio.ico
 ICON = images/studio.icns

@@ -115,11 +115,7 @@ public:
         m_surfaceViewer->setUpdateInterval(-1);
         m_surfaceViewer->presentation()->setSource(QUrl::fromLocalFile(info.absoluteFilePath()));
         m_surfaceViewer->settings()->setMatteColor(Qt::transparent);
-#ifdef Q3DS_PREVIEW_SUBPRESENTATION_RT2
         m_surfaceViewer->create(m_surface.data(), m_context.data(), m_fbo->handle());
-#else
-        m_surfaceViewer->initialize(m_surface.data(), m_context.data(), m_fbo->handle());
-#endif
         m_running = true;
         m_semaphore.release();
 
@@ -157,11 +153,7 @@ public:
         m_context->doneCurrent();
         m_context.reset();
 #endif
-#ifdef Q3DS_PREVIEW_SUBPRESENTATION_RT2
         m_surfaceViewer->destroy();
-#else
-        m_surfaceViewer->shutdown();
-#endif
         m_surfaceViewer.reset();
         m_surface->moveToThread(m_mainThread);
         m_semaphore.release();

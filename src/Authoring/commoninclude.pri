@@ -17,31 +17,31 @@ mingw:win32 {
     DEFINES += WIN32
 }
 
-INCLUDEPATH += $$PWD/../Runtime/Source
+INCLUDEPATH += $$PWD/../Runtime/ogl-runtime/src
 
 win32 {
 INCLUDEPATH += \
-    $$PWD/../Runtime/Source/platformspecific/windows/libs \
-    $$PWD/../3rdparty/RuntimePlatformSpecific/Windows/PlatformLibs \
-    $$PWD/../3rdparty/RuntimePlatformSpecific/Windows/Qt3DSLibs
+    $$PWD/../Runtime/ogl-runtime/src/platformspecific/windows/libs \
+    $$PWD/../Runtime/ogl-runtime/src/3rdparty/platformspecific/Windows/PlatformLibs \
+    $$PWD/../Runtime/ogl-runtime/src/3rdparty/platformspecific/Windows/Qt3DSLibs
 }
 
 linux {
 INCLUDEPATH += \
-    $$PWD/../3rdparty/RuntimePlatformSpecific/Linux/PlatformLibs \
-    $$PWD/../Runtime/Source/platformspecific/Linux/libs \
-    $$PWD/../3rdparty/RuntimePlatformSpecific/Linux/Qt3DSLibs
+    $$PWD/../Runtime/ogl-runtime/src/3rdparty/platformspecific/Linux/PlatformLibs \
+    $$PWD/../Runtime/ogl-runtime/src/platformspecific/Linux/libs \
+    $$PWD/../Runtime/ogl-runtime/src/3rdparty/platformspecific/Linux/Qt3DSLibs
 }
 
 macos {
 INCLUDEPATH += \
-    $$PWD/../3rdparty/RuntimePlatformSpecific/Macos/PlatformLibs \
-    $$PWD/../Runtime/Source/platformspecific/macos/libs \
-    $$PWD/../3rdparty/RuntimePlatformSpecific/Macos/Qt3DSLibs
+    $$PWD/../Runtime/ogl-runtime/src/3rdparty/platformspecific/Macos/PlatformLibs \
+    $$PWD/../Runtime/ogl-runtime/src/platformspecific/macos/libs \
+    $$PWD/../Runtime/ogl-runtime/src/3rdparty/platformspecific/Macos/Qt3DSLibs
 
 }
 android {
 INCLUDEPATH += \
-    $$PWD/../Runtime/Source/platformspecific/Android/jni/libs
-    $$PWD/../Runtime/Source/platformspecific/Android/jni/libs/nv_thread
+    $$PWD/../Runtime/ogl-runtime/src/platformspecific/Android/jni/libs
+    $$PWD/../Runtime/ogl-runtime/src/platformspecific/Android/jni/libs/nv_thread
 }

@@ -9,9 +9,9 @@ QT -= gui
 DEFINES += _UNICODE QT3DS_AUTHORING _AFXDLL PCRE_STATIC
 
 INCLUDEPATH += \
-    ../../Runtime/Source/foundation \
+    ../../Runtime/ogl-runtime/src/foundation \
     $$QMAKE_INCDIR_FBX \
-    ../../3rdparty/EASTL/UnknownVersion/include
+    ../../Runtime/ogl-runtime/src/3rdparty/EASTL/UnknownVersion/include
 
 LIBS += \
     $$QMAKE_LIBS_FBX \
