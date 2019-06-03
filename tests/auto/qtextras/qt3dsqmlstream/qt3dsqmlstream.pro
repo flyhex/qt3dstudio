@@ -9,7 +9,7 @@ QT += testlib quick
 SOURCES += tst_qt3dsqmlstream.cpp
 
 INCLUDEPATH += \
-    $$PWD/../../../../src/QtExtras/qmlstreamer
+    $$PWD/../../../../src/Runtime/ogl-runtime/src/qmlstreamer
 
 LIBS += \
     -lqt3dsqmlstreamer$$qtPlatformTargetSuffix()

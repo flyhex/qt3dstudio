@@ -777,6 +777,7 @@ Rectangle {
             value: parent.modelData.value
             sliderMin: values[0]
             sliderMax: values[1]
+            sliderDecimals: values[2]
 
             onCommitValue: _inspectorModel.setPropertyValue(instance, handle, desiredValue, true)
             onPreviewValue: _inspectorModel.setPropertyValue(instance, handle, desiredValue, false)

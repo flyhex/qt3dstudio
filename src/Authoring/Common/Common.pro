@@ -24,18 +24,18 @@ INCLUDEPATH += \
     Code/Serialize \
     ../Client/Code/Shared \
     ../Client/Code/Core/Utility \
-    ../QT3DSDM \
-    ../QT3DSDM/Systems \
+    ../../Runtime/ogl-runtime/src/dm \
+    ../../Runtime/ogl-runtime/src/dm/systems \
     ../Studio/Utils \
-    ../../Runtime/Source/foundation \
-    ../../3rdparty/EASTL/UnknownVersion/include \
-    ../../3rdparty/color \
+    ../../Runtime/ogl-runtime/src/foundation \
+    ../../Runtime/ogl-runtime/src/3rdparty/EASTL/UnknownVersion/include \
+    ../../Runtime/ogl-runtime/src/3rdparty/color \
     ..
 
 PRECOMPILED_HEADER += Code/Qt3DSCommonPrecompile.h
 
 SOURCES += \
-    ../../3rdparty/color/CColor.cpp \
+    ../../Runtime/ogl-runtime/src/3rdparty/color/CColor.cpp \
     Code/HiResTimer.cpp \
     Code/MasterP.cpp \
     Code/MethProf.cpp \

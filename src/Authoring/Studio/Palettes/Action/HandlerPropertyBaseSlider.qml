@@ -43,8 +43,10 @@ Row {
     property alias desiredValue: slider.value // This is value adjusted by user
     property alias sliderMin: slider.from
     property alias sliderMax: slider.to
+    property real sliderDecimals: -1
     property bool intSlider: false
-    property int decimalSlider: Math.min(precision(slider.stepSize), 3)
+    property int decimalSlider: sliderDecimals >= 0 ? sliderDecimals
+                                                    : Math.min(precision(slider.stepSize), 3)
     property Item tabItem1: textField
 
     signal previewValue // Indicates desiredValue contains a preview value
@@ -226,7 +228,6 @@ Row {
                 text = sliderMin
             slider.value = text
             root.doCommitValue();
-
         }
 
         function setTextFieldValue() {
