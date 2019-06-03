@@ -647,9 +647,7 @@ namespace render {
             else
                 ioNextImage->m_NextImage = theImage;
 
-            // assume offscreen renderer produces non-premultiplied image
-            if (inImage.m_LastFrameOffscreenRenderer == nullptr
-                    && inImage.m_TextureData.m_TextureFlags.IsPreMultiplied())
+            if (inImage.m_TextureData.m_TextureFlags.IsPreMultiplied())
                 theKeyProp.SetPremultiplied(inShaderKey, true);
 
             SShaderKeyTextureSwizzle &theSwizzleKeyProp =
