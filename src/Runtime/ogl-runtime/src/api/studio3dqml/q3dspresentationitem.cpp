@@ -69,6 +69,11 @@ QT_BEGIN_NAMESPACE
     is changed in the presentation by animation timeline,
     by behavior scripts or by a \l{DataInput}.
 
+    The Presentation type handles child objects of the types \l Element, \l
+    SceneElement, \l DataInput, and \l SubPresentationSettings specially. These
+    will get automatically associated with the presentation and can control
+    certain aspects of it from that point on.
+
     From the API point of view Presentation corresponds to the
     main presentation. The source property can refer either to a
     \c{.uia} or \c{.uip} file. When specifying a file with \c{.uip}
@@ -86,12 +91,9 @@ Q3DSPresentationItem::~Q3DSPresentationItem()
 {
 }
 
-// #TODO: QT3DS-3565 subPresentationSettings is missing documentation
 /*!
-    \qmlproperty SubPresentationSettings Presentation::subPresentationSettings
-
-    Note: This property is read-only.
- */
+    Returns the \l SubPresentationSettings associated with this presentation.
+*/
 Q3DSSubPresentationSettings *Q3DSPresentationItem::subPresentationSettings() const
 {
     return m_subPresentationSettings;

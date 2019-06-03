@@ -52,7 +52,6 @@ class Q3DSPresentationItem : public Q3DSPresentation
 {
     Q_OBJECT
     Q_PROPERTY(QQmlListProperty<QObject> qmlChildren READ qmlChildren DESIGNABLE false)
-    Q_PROPERTY(Q3DSSubPresentationSettings *subPresentationSettings READ subPresentationSettings CONSTANT)
     Q_CLASSINFO("DefaultProperty", "qmlChildren")
 
 public:
