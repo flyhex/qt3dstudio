@@ -719,12 +719,26 @@ void Q3DSPresentation::setDataInputValue(const QString &name, const QVariant &va
 }
 
 /*!
- * \brief Q3DSPresentation::createElement Adds a new child element for the specified element.
-    Adds a new child element for the element specified by parentElementPath to the slide
-    specified with slideName. Only model element creation is currently supported.
+    Adds a new child element for the element specified by \a parentElementPath to the slide
+    specified with \a slideName. Only model and group element creation is currently supported.
+    The \a properties hash table specifies the name-value pairs of the properties of the new
+    element. The property names are the same the setAttribute() recognizes.
+
     A referenced material element is also created for the new model element. The source material
-    name can be specified with custom "material" property in the properties hash.
-    The source material must exist in the material container of the presentation.
+    name can be specified with custom "material" attribute in the \a attributes hash.
+    The source material must exist in the presentation.
+
+    The mesh for a model is specified with the \c sourcepath property. This can be a local file
+    path to \c .mesh file, a studio mesh primitive (e.g. \c{#Cube}), or the name of a mesh created
+    dynamically with createMesh().
+
+    The element is ready for use once elementsCreated() signal is received for it.
+
+    \sa createElements
+    \sa createMaterial
+    \sa createMesh
+    \sa elementsCreated
+    \sa setAttribute
  */
 void Q3DSPresentation::createElement(const QString &parentElementPath, const QString &slideName,
                                      const QHash<QString, QVariant> &properties)
@@ -734,12 +748,13 @@ void Q3DSPresentation::createElement(const QString &parentElementPath, const QSt
     createElements(parentElementPath, slideName, theProperties);
 }
 
-// #TODO: QT3DS-3560
 /*!
-    \brief Q3DSPresentation::createElements
-    \param parentElementPath
-    \param slideName
-    \param properties
+    Adds multiple new child elements for the element specified by \a parentElementPath to the slide
+    specified with \a slideName. Element properties are specified in \a properties.
+    For more details, see createElement().
+
+    \sa createElement
+    \sa elementsCreated
  */
 void Q3DSPresentation::createElements(const QString &parentElementPath, const QString &slideName,
                                       const QVector<QHash<QString, QVariant>> &properties)
@@ -756,9 +771,12 @@ void Q3DSPresentation::createElements(const QString &parentElementPath, const QS
 }
 
 /*!
-    \brief Q3DSPresentation::deleteElement
-    Removes an element added by createElement and all its child elements.
-    \param elementPath
+    Deletes the element specified by \a elementPath and all its child elements.
+    Deleting elements is supported only for elements that have been dynamically created with
+    createElement() or createElements().
+
+    \sa deleteElements
+    \sa createElement
  */
 void Q3DSPresentation::deleteElement(const QString &elementPath)
 {
@@ -768,9 +786,11 @@ void Q3DSPresentation::deleteElement(const QString &elementPath)
 }
 
 /*!
-    \brief Q3DSPresentation::deleteElements
-    Removes the given list of elements added by createElement and all their child elements.
-    \param elementPaths QStringList containing the elementPaths of dynamically created objects.
+    Deletes multiple elements specified by \a elementPaths and all their child elements.
+    Deleting elements is supported only for elements that have been dynamically created with
+    createElement() or createElements().
+
+    \sa deleteElement
  */
 void Q3DSPresentation::deleteElements(const QStringList &elementPaths)
 {
@@ -784,14 +804,33 @@ void Q3DSPresentation::deleteElements(const QStringList &elementPaths)
 }
 
 /*!
-    \brief Q3DSPresentation::createMaterial
-    Creates a material specified by the materialDefinition parameter into the material
-    container of the presentation that owns the element specified by the elementPath parameter.
-    After creation, the material can be used for new elements created via createElement.
-    The materialDefinition parameter can contain either the file path to a material definition
-    file or a material definition in the Qt 3D Studion material data format.
-    \param elementPath
-    \param materialDefinition
+    Creates a material specified by the \a materialDefinition parameter into the presentation
+    that owns the element specified by the \a elementPath parameter.
+
+    The \a materialDefinition parameter can contain either the file path to a Qt 3D Studio
+    material definition file or the actual material definition in the
+    Qt 3D Studio material definition format. The material definition is a XML file that specifies
+    the material properties. They are not meant to be hand crafted - to create one, simply create
+    a new basic material in the Qt 3D Studio editor and edit the material properties in the
+    inspector. The properties are stored into \c{materialName.materialdef} file in \c materials
+    folder of the project, which you can include into the resources of you application and
+    use with this method.
+
+    After creation, the material can be used for new elements created via createElement() by
+    setting \c material property of the new element to the name of the created material.
+    The material name is specified by the \c name property of the material definition.
+
+    The material is ready for use once materialsCreated() signal is received for it.
+
+    \note Creating materials that utilise custom shaders with mipmapped textures can in some cases
+    corrupt the textures on other elements if the same textures are already used by existing basic
+    materials in the scene, as basic materials do not create mipmaps for their textures.
+    Typical symptom of this is black texture on another element after creating a new element using
+    the custom material.
+
+    \sa createMaterials
+    \sa createElement
+    \sa materialsCreated
  */
 void Q3DSPresentation::createMaterial(const QString &elementPath,
                                       const QString &materialDefinition)
@@ -802,10 +841,12 @@ void Q3DSPresentation::createMaterial(const QString &elementPath,
 }
 
 /*!
-    \brief Q3DSPresentation::createMaterials
-    Same as createMaterial, but creates multiple materials.
-    \param elementPath
-    \param materialDefinitions
+    Creates multiple materials specified by the \a materialDefinitions parameter into the
+    presentation that owns the element specified by the \a elementPath parameter.
+    For more details, see createMaterial().
+
+    \sa createMaterial
+    \sa materialsCreated
  */
 void Q3DSPresentation::createMaterials(const QString &elementPath,
                                        const QStringList &materialDefinitions)
@@ -820,6 +861,15 @@ void Q3DSPresentation::createMaterials(const QString &elementPath,
     }
 }
 
+/*!
+    Deletes the material specified by \a materialName from the
+    presentation that owns the element specified by the \a elementPath parameter.
+    Deleting materials is supported only for materials that have been dynamically created with
+    createMaterial() or createMaterials().
+
+    \sa deleteMaterials
+    \sa createMaterial
+ */
 void Q3DSPresentation::deleteMaterial(const QString &elementPath, const QString &materialName)
 {
     QStringList materialNames;
@@ -827,6 +877,14 @@ void Q3DSPresentation::deleteMaterial(const QString &elementPath, const QString 
     deleteMaterials(elementPath, materialNames);
 }
 
+/*!
+    Deletes materials specified by \a materialNames from the
+    presentation that owns the element specified by the \a elementPath parameter.
+    Deleting materials is supported only for materials that have been dynamically created with
+    createMaterial() or createMaterials().
+
+    \sa deleteMaterial
+ */
 void Q3DSPresentation::deleteMaterials(const QString &elementPath, const QStringList &materialNames)
 {
     if (d_ptr->m_viewerApp) {
@@ -839,9 +897,15 @@ void Q3DSPresentation::deleteMaterials(const QString &elementPath, const QString
     }
 }
 
-/**
-    Creates a mesh specified by given geometry. The given meshName can be used as sourcepath
-    property value for model elements created with future createElement calls.
+/*!
+    Creates a mesh specified by given \a geometry. The given \a meshName can be used as
+    \c sourcepath property value for model elements created with future createElement() calls.
+
+    The mesh is ready for use once meshesCreated() signal is received for it.
+
+    \sa createElement
+    \sa createMeshes
+    \sa meshesCreated
 */
 void Q3DSPresentation::createMesh(const QString &meshName, const Q3DSGeometry &geometry)
 {
@@ -850,7 +914,15 @@ void Q3DSPresentation::createMesh(const QString &meshName, const Q3DSGeometry &g
     createMeshes(meshData);
 }
 
-// The ownership of supplied geometries stays with the caller
+/*!
+    Creates multiple meshes specified by given \a meshData. The data is mesh name and geometry
+    pairs. For more details, see createMesh().
+
+    The ownership of supplied geometries stays with the caller.
+
+    \sa createMesh
+    \sa meshesCreated
+*/
 void Q3DSPresentation::createMeshes(const QHash<QString, const Q3DSGeometry *> &meshData)
 {
     // We can't refer to API class Q3DSGeometry on the runtime side, so let's grab the meshdata
@@ -870,6 +942,14 @@ void Q3DSPresentation::createMeshes(const QHash<QString, const Q3DSGeometry *> &
     }
 }
 
+/*!
+    Deletes the mesh specified by \a meshName.
+    Deleting meshes is supported only for meshes that have been dynamically created with
+    createMesh() or createMeshes().
+
+    \sa deleteMeshes
+    \sa createMesh
+ */
 void Q3DSPresentation::deleteMesh(const QString &meshName)
 {
     QStringList meshNames;
@@ -877,6 +957,13 @@ void Q3DSPresentation::deleteMesh(const QString &meshName)
     deleteMeshes(meshNames);
 }
 
+/*!
+    Deletes meshes specified by \a meshNames.
+    Deleting meshes is supported only for meshes that have been dynamically created with
+    createMesh() or createMeshes().
+
+    \sa deleteMesh
+ */
 void Q3DSPresentation::deleteMeshes(const QStringList &meshNames)
 {
     if (d_ptr->m_viewerApp) {
@@ -888,6 +975,9 @@ void Q3DSPresentation::deleteMeshes(const QStringList &meshNames)
     }
 }
 
+/*!
+ * \internal
+ */
 void Q3DSPresentation::mousePressEvent(QMouseEvent *e)
 {
     if (d_ptr->m_viewerApp) {
@@ -1042,33 +1132,64 @@ void Q3DSPresentation::keyReleaseEvent(QKeyEvent *e)
  */
 
 /*!
- * \qmlsignal Presentation::elementsCreated
- * Emitted when
- * \param elementPaths
- * \param error
+    \qmlsignal Presentation::elementsCreated
+    Emitted when one or more elements have been created in response to createElement()
+    or createElements() calls. The \a elementPaths list contains the element paths of the created
+    elements. If creation failed, \a error string indicates the reason.
+
+    \sa createElement
+    \sa createElements
  */
 
 /*!
- * \fn Q3DSPresentation::elementsCreated
- * Emitted when
- * \param elementPaths
- * \param error
+    \fn Q3DSPresentation::elementsCreated
+    Emitted when one or more elements have been created in response to createElement()
+    or createElements() calls. The \a elementPaths list contains the element paths of the created
+    elements. If creation failed, \a error string indicates the reason.
+
+    \sa createElement
+    \sa createElements
  */
 
 /*!
- * \qmlsignal Presentation::materialsCreated
- * Emitted when
- * \param materialNames
- * \param error
+    \qmlsignal Presentation::materialsCreated
+    Emitted when one or more materials have been created in response to createMaterial()
+    or createMaterials() calls. The \a materialNames list contains the names of the created
+    materials. If creation failed, \a error string indicates the reason.
+
+    \sa createMaterial
+    \sa createMaterials
  */
 
 /*!
- * \fn Q3DSPresentation::materialsCreated
- * Emitted when
- * \param materialNames
- * \param error
+    \fn Q3DSPresentation::materialsCreated
+    Emitted when one or more materials have been created in response to createMaterial()
+    or createMaterials() calls. The \a materialNames list contains the names of the created
+    materials. If creation failed, \a error string indicates the reason.
+
+    \sa createMaterial
+    \sa createMaterials
  */
 
+/*!
+    \qmlsignal Presentation::meshesCreated
+    Emitted when one or more meshes have been created in response to createMesh()
+    or createMeshes() calls. The \a meshNames list contains the names of the created
+    meshes. If creation failed, \a error string indicates the reason.
+
+    \sa createMesh
+    \sa createMeshes
+ */
+
+/*!
+    \fn Q3DSPresentation::meshesCreated
+    Emitted when one or more meshes have been created in response to createMesh()
+    or createMeshes() calls. The \a meshNames list contains the names of the created
+    meshes. If creation failed, \a error string indicates the reason.
+
+    \sa createMesh
+    \sa createMeshes
+ */
 
 /*!
  * \internal
