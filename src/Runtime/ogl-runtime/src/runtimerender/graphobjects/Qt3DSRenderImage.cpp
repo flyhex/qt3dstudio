@@ -99,6 +99,7 @@ bool SImage::ClearDirty(IBufferManager &inBufferManager, IOffscreenRenderManager
                     || m_LoadedTextureData->m_path != QString::fromUtf8(m_ImagePath.c_str())) {
                 if (m_LoadedTextureData)
                     m_LoadedTextureData->m_callbacks.removeOne(this);
+                forIbl = forIbl || m_MappingMode == ImageMappingModes::LightProbe;
                 m_LoadedTextureData = inBufferManager.CreateReloadableImage(m_ImagePath, false,
                                                                             forIbl);
                 m_LoadedTextureData->m_callbacks.push_back(this);

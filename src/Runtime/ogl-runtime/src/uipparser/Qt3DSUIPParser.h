@@ -142,6 +142,7 @@ public: // Parse UIP file
     // so that it can do things like register images as opaque/transparent as well as preload
     // mesh files (and possibly font files).
     virtual NVConstDataRef<eastl::string> GetSourcePaths() const = 0;
+    virtual bool isIblImage(const eastl::string &sourcepath) const = 0;
 
     virtual QVector<QString> GetSlideSourcePaths() const = 0;
 

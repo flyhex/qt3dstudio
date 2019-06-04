@@ -146,11 +146,6 @@ public: // Base Interface
 
     virtual qt3ds::foundation::CRegisteredString RegisterStr(const char *inStr) = 0;
 
-    virtual Q3DStudio::INT32
-    LoadImageBatch(qt3ds::foundation::CRegisteredString *inFullPaths, INT32 inNumPaths,
-                   qt3ds::foundation::CRegisteredString inDefaultImage,
-                   qt3ds::render::IImageLoadListener *inLoadCallback = nullptr) = 0;
-
     virtual SMousePosition WindowToPresentation(const SMousePosition &inWindowPos) = 0;
 
     virtual void RegisterOffscreenRenderer(const char *inKey) = 0;

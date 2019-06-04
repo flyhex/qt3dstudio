@@ -337,7 +337,7 @@ struct STextureUploadRenderTask : public IRenderTask, public IImageLoadListener
             for (auto &s : qAsConst(m_uploadSet))
                 sourcePaths.push_back(m_bufferManager.GetStringTable().RegisterStr(s));
             QT3DSU32 id = m_batchLoader.LoadImageBatch(sourcePaths, CRegisteredString(),
-                                                       this, m_type, m_preferKtx);
+                                                       this, m_type, m_preferKtx, false);
             if (id)
                 m_batches[id] = m_uploadSet;
         }
@@ -347,7 +347,7 @@ struct STextureUploadRenderTask : public IRenderTask, public IImageLoadListener
             for (auto &s : qAsConst(m_uploadWaitSet))
                 sourcePaths.push_back(m_bufferManager.GetStringTable().RegisterStr(s));
             QT3DSU32 id = m_batchLoader.LoadImageBatch(sourcePaths, CRegisteredString(),
-                                                       this, m_type, m_preferKtx);
+                                                       this, m_type, m_preferKtx, false);
             if (id) {
                 m_batchLoader.BlockUntilLoaded(id);
                 m_bufferManager.loadSet(m_uploadWaitSet);

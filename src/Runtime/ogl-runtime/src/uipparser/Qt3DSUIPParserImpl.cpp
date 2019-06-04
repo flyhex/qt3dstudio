@@ -839,7 +839,7 @@ void CUIPParserImpl::AddStringAttribute(IPresentation &inPresentation,
         eastl::make_pair(SPropertyDesc(inAttStrName, ATTRIBUTETYPE_STRING), theValue));
     if (CHash::HashAttribute(inAttStrName.c_str()) == Q3DStudio::ATTRIBUTE_SOURCEPATH && inValue
         && *inValue)
-        AddSourcePath(inValue);
+        AddSourcePath(inValue, false);
 }
 
 void CUIPParserImpl::AddElementRefAttribute(TPropertyDescAndValueList &outDescList,
@@ -1076,8 +1076,15 @@ BOOL CUIPParserImpl::LoadSceneGraph(IPresentation &inPresentation, IDOMReader &i
             m_ParseElementManager.GetOrCreateElementData(theId, theType, theClass);
 
         const char8_t *theSourcePath;
-        if (inReader.UnregisteredAtt("sourcepath", theSourcePath))
-            AddSourcePath(theSourcePath);
+        if (inReader.UnregisteredAtt("sourcepath", theSourcePath)) {
+            const char8_t *mapping;
+            bool ibl = false;
+            if (inReader.UnregisteredAtt("mappingmode", mapping)) {
+                if (QString::fromUtf8(mapping) == QLatin1String("Light Probe"))
+                    ibl = true;
+            }
+            AddSourcePath(theSourcePath, ibl);
+        }
 
         TAttrMap &theList = theElementData.m_PropertyMap;
 
@@ -2130,7 +2137,13 @@ BOOL CUIPParserImpl::LoadSlideElementAttrs(IPresentation &inPresentation, bool,
     bool isSet = AreEqual(inReader.GetNarrowElementName(), "Set");
     const char8_t *sourcepath;
     if (inReader.UnregisteredAtt("sourcepath", sourcepath)) {
-        AddSourcePath(sourcepath);
+        const char8_t *mapping;
+        bool ibl = false;
+        if (inReader.UnregisteredAtt("mappingmode", mapping)) {
+            if (QString::fromUtf8(mapping) == QLatin1String("Light Probe"))
+                ibl = true;
+        }
+        AddSourcePath(sourcepath, ibl);
         theBuilder.AddSourcePath(sourcepath);
         m_slideSourcePaths.push_back(QString::fromLatin1(sourcepath));
     }

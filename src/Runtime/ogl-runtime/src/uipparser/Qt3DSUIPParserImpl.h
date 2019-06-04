@@ -428,7 +428,7 @@ protected:
 
     TStringSet m_SourcePathSet;
     TStringVector m_SourcePathList;
-
+    TStringSet m_iblSources;
     QVector<QString> m_slideSourcePaths;
 
     struct SElementRefCache
@@ -539,6 +539,11 @@ public: // Parse UIP file
     QVector<QString> GetSlideSourcePaths() const override
     {
         return m_slideSourcePaths;
+    }
+
+    bool isIblImage(const eastl::string &sourcepath) const override
+    {
+        return m_iblSources.find(sourcepath) != m_iblSources.end();
     }
 
 protected: // Operation
@@ -652,12 +657,14 @@ protected:
     void AddElementRefAttribute(TPropertyDescAndValueList &outDescList,
                                 CRegisteredString inAttStrName, SElement *inElement);
 
-    void AddSourcePath(const char *inValue)
+    void AddSourcePath(const char *inValue, bool ibl)
     {
         if (m_SourcePathSet.find(inValue) == m_SourcePathSet.end()) {
             m_SourcePathSet.insert(inValue);
             m_SourcePathList.push_back(eastl::string(inValue));
         }
+        if (ibl && m_iblSources.find(inValue) == m_iblSources.end())
+            m_iblSources.insert(inValue);
     }
 
 public: //

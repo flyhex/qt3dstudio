@@ -184,7 +184,7 @@ struct Qt3DSRenderScene : public Q3DStudio::IScene
         m_PathSubPathType = inContext.GetStringTable().RegisterStr("PathAnchorPoint");
     }
 
-    virtual ~Qt3DSRenderScene()
+    virtual ~Qt3DSRenderScene() override
     {
         if (m_OffscreenRenderer)
             m_Context->GetOffscreenRenderManager().ReleaseOffscreenRenderer(m_OffscreenRendererId);
@@ -210,7 +210,7 @@ struct Qt3DSRenderScene : public Q3DStudio::IScene
     {
         Q3DStudio::TElementList &theDirtyList =
             m_RuntimePresentation->GetFrameData().GetDirtyList();
-        for (QT3DSU32 idx = 0, end = theDirtyList.GetCount(); idx < end; ++idx) {
+        for (int idx = 0, end = theDirtyList.GetCount(); idx < end; ++idx) {
             Q3DStudio::TElement &theElement = *theDirtyList[idx];
             Qt3DSTranslator *theTranslator =
                 reinterpret_cast<Qt3DSTranslator *>(theElement.GetAssociation());
@@ -250,7 +250,7 @@ struct Qt3DSRenderScene : public Q3DStudio::IScene
         if (m_Presentation && m_Presentation->m_Scene) {
             NVRenderRect theViewportSize(m_LastRenderViewport);
             return m_Presentation->m_Scene->PrepareForRender(
-                QT3DSVec2((QT3DSF32)theViewportSize.m_Width, (QT3DSF32)theViewportSize.m_Height),
+                QT3DSVec2(QT3DSF32(theViewportSize.m_Width), QT3DSF32(theViewportSize.m_Height)),
                 *m_Context);
         }
         return false;
@@ -261,8 +261,8 @@ struct Qt3DSRenderScene : public Q3DStudio::IScene
         if (m_Presentation && m_Presentation->m_Scene) {
             NVRenderRect theViewportSize(m_LastRenderViewport);
             m_Presentation->m_Scene->Render(
-                QT3DSVec2((QT3DSF32)theViewportSize.m_Width, (QT3DSF32)theViewportSize.m_Height), *m_Context,
-                SScene::DoNotClear);
+                QT3DSVec2(QT3DSF32(theViewportSize.m_Width), QT3DSF32(theViewportSize.m_Height)),
+                        *m_Context, SScene::DoNotClear);
         }
     }
 
@@ -342,12 +342,12 @@ struct Qt3DSRenderScene : public Q3DStudio::IScene
             thePlane = qt3ds::render::SBasisPlanes::XZ;
             break;
         }
-        if (theBounds.isEmpty() == false)
+        if (theBounds.isEmpty() == false) {
             return m_Context->GetRenderer().FacePosition(
                 theNode, theBounds, theNode.m_GlobalTransform, m_Context->GetMousePickViewport(),
-                mousePos,
-                NVDataRef<SGraphObject *>(theMapperObjects.data(), (QT3DSU32)theMapperObjects.size()),
-                thePlane);
+                mousePos, NVDataRef<SGraphObject *>(theMapperObjects.data(),
+                                                    QT3DSU32(theMapperObjects.size())), thePlane);
+        }
         return Empty();
     }
 
@@ -588,24 +588,6 @@ struct Qt3DSRenderScene : public Q3DStudio::IScene
         }
     }
 
-    static inline int wrapMod(int a, int base) { return (a >= 0) ? a % base : (a % base) + base; }
-    static inline float fMin(float a, float b) { return (a < b) ? a : b; }
-    static inline int iMax(int a, int b) { return (a > b) ? a : b; }
-
-    static inline void getWrappedCoords(int &sX, int &sY, int width, int height)
-    {
-        if (sY < 0) {
-            sX -= width >> 1;
-            sY = -sY;
-        }
-        if (sY >= height) {
-            sX += width >> 1;
-            sY = height - sY;
-        }
-        sX = wrapMod(sX, width);
-        sY = wrapMod(sY, height);
-    }
-
     static void GenerateBsdfMipmaps(SImage *theImage, const unsigned char *inBuffer,
                                     Q3DStudio::INT32 inBufferLength, Q3DStudio::INT32 inWidth,
                                     Q3DStudio::INT32 inHeight,
@@ -623,7 +605,7 @@ struct Qt3DSRenderScene : public Q3DStudio::IScene
         }
 
         if (theBSDFMipMap)
-            theBSDFMipMap->Build((void *)inBuffer, inBufferLength, inFormat);
+            theBSDFMipMap->Build((void *)(inBuffer), inBufferLength, inFormat);
     }
 
     // This could cause some significant drama.
@@ -704,8 +686,8 @@ struct Qt3DSRenderScene : public Q3DStudio::IScene
                 STextDimensions theDimensions =
                     m_Context->GetTextRenderer()->MeasureText(*theText, 1.0f, inTextStr);
 
-                retval = Q3DStudio::STextSizes((Q3DStudio::INT32)theDimensions.m_TextWidth,
-                                               (Q3DStudio::INT32)theDimensions.m_TextHeight);
+                retval = Q3DStudio::STextSizes(Q3DStudio::INT32(theDimensions.m_TextWidth),
+                                               Q3DStudio::INT32(theDimensions.m_TextHeight));
             }
         } else {
             qCCritical(INVALID_OPERATION, "MeasureText called on object that is not text");
@@ -732,7 +714,7 @@ struct Qt3DSRenderScene : public Q3DStudio::IScene
         // If there aren't any rotations, then account for the difference in width/height of the
         // presentation and the window
         QT3DSVec2 theCoords = m_Context->GetMousePickMouseCoords(
-            QT3DSVec2((QT3DSF32)inWindowCoords.m_X, (QT3DSF32)inWindowCoords.m_Y));
+            QT3DSVec2(QT3DSF32(inWindowCoords.m_X), QT3DSF32(inWindowCoords.m_Y)));
         theCoords.x -= m_LastRenderViewport.m_X;
         // Note that the mouse Y is reversed.  Thus a positive offset of the viewport will reduce
         // the mouse value.
@@ -743,16 +725,6 @@ struct Qt3DSRenderScene : public Q3DStudio::IScene
     qt3ds::foundation::CRegisteredString RegisterStr(const char *inStr) override
     {
         return m_Context->GetStringTable().RegisterStr(inStr);
-    }
-
-    Q3DStudio::INT32 LoadImageBatch(qt3ds::foundation::CRegisteredString *inFullPaths,
-                                            Q3DStudio::INT32 inNumPaths,
-                                            qt3ds::foundation::CRegisteredString inDefaultImage,
-                                            qt3ds::render::IImageLoadListener *inLoadCallback) override
-    {
-        return static_cast<Q3DStudio::INT32>(m_Context->GetImageBatchLoader().LoadImageBatch(
-            toConstDataRef(inFullPaths, (QT3DSU32)inNumPaths), inDefaultImage, inLoadCallback,
-            m_Context->GetRenderContext().GetRenderContextType(), m_Presentation->m_preferKTX));
     }
 
     void RegisterOffscreenRenderer(const char *inKey) override
@@ -782,8 +754,9 @@ struct Qt3DSRenderScene : public Q3DStudio::IScene
         forAllObjects<SImage>(m_GraphObjectList, GraphObjectTypes::Image, [&mgr](SImage *image){
             if (image->m_ImagePath.IsValid() && qt3ds::runtime::isImagePath(
                         image->m_ImagePath.c_str())) {
+                const bool ibl = image->m_MappingMode == ImageMappingModes::LightProbe;
                 image->m_LoadedTextureData = mgr.CreateReloadableImage(image->m_ImagePath,
-                                                                       false, false);
+                                                                       false, ibl);
                 image->m_LoadedTextureData->m_callbacks.push_back(image);
             }
         });
@@ -838,8 +811,8 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
     Q3DStudio::INT32 m_ViewHeight;
     Q3DStudio::SPickFrame m_PickFrame;
     NVDataRef<QT3DSU8> m_StrTableData;
-    // The boolean is to mark transparent images
-    nvvector<eastl::pair<CRegisteredString, bool>> m_SourcePaths;
+    // The boolean is to mark transparent images and ibl images
+    nvvector<eastl::pair<CRegisteredString, eastl::pair<bool, bool>>> m_SourcePaths;
     eastl::hash_set<CRegisteredString> m_SourcePathSet;
 
     Qt3DSRenderScene *m_LastRenderedScene;
@@ -866,7 +839,7 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
     {
         memZero(&m_PickFrame, sizeof(m_PickFrame));
     }
-    virtual ~Qt3DSRenderSceneManager()
+    virtual ~Qt3DSRenderSceneManager() override
     {
         for (QT3DSU32 idx = 0, end = m_Scenes.size(); idx < end; ++idx)
             m_Scenes[idx].second->Release();
@@ -880,13 +853,6 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
         const char *fileTag = "Qt3DSS";
         const QT3DSU32 *theTagPtr = reinterpret_cast<const QT3DSU32 *>(fileTag);
         return *theTagPtr;
-    }
-
-    static bool IsMesh(const char *ending)
-    {
-        if (!ending)
-            return false;
-        return stricmp(ending, "mesh") == 0;
     }
 
     void FinalizeScene(Q3DStudio::IPresentation &inPresentation, Qt3DSRenderScene &inScene)
@@ -1005,6 +971,7 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
             IBufferManager &theManager(m_Context->m_Context->GetBufferManager());
             // List of image paths to be loaded in parallel at the end.
             eastl::vector<CRegisteredString> theSourcePathList;
+            eastl::vector<CRegisteredString> iblList;
             for (QT3DSU32 idx = 0, end = theSourcePathData.size(); idx < end; ++idx) {
                 const eastl::string &theValue = theSourcePathData[idx];
                 CRegisteredString theSourcePath =
@@ -1017,11 +984,18 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
                         if (!theManager.isReloadableResourcesEnabled() ||
                                 !slideSourcePaths.contains(QString::fromLatin1(theValue.c_str()))) {
                             theManager.SetImageTransparencyToFalseIfNotSet(theObjectPath);
+                            bool ibl = inParser->isIblImage(theObjectPath.c_str());
+                            bool transparent = theManager.GetImageHasTransparency(theObjectPath);
                             if (m_SourcePathSet.insert(theSourcePath).second) {
+
                                 m_SourcePaths.push_back(eastl::make_pair(theSourcePath,
-                                                theManager.GetImageHasTransparency(theObjectPath)));
+                                                        eastl::make_pair(transparent, ibl)));
                             }
-                            theSourcePathList.push_back(theObjectPath);
+                            if (ibl)
+                                iblList.push_back(theObjectPath);
+                            else
+                                theSourcePathList.push_back(theObjectPath);
+
                         }
                     } else if (theValue.find(".mesh") != eastl::string::npos) {
                         theManager.LoadMesh(theObjectPath);
@@ -1034,9 +1008,16 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
                 toConstDataRef(theSourcePathList.data(), theSourcePathList.size()),
                 CRegisteredString(), nullptr, m_Context->m_Context->GetRenderContext()
                                                 .GetRenderContextType(),
-                        theScene->m_Presentation->m_preferKTX);
+                        theScene->m_Presentation->m_preferKTX, false);
+            QT3DSU64 iblImageBatchId = m_Context->m_Context->GetImageBatchLoader().LoadImageBatch(
+                toConstDataRef(iblList.data(), iblList.size()),
+                CRegisteredString(), nullptr, m_Context->m_Context->GetRenderContext()
+                                                .GetRenderContextType(),
+                        theScene->m_Presentation->m_preferKTX, true);
             m_Context->m_Context->GetImageBatchLoader().BlockUntilLoaded(
                 static_cast<TImageBatchId>(imageBatchId));
+            m_Context->m_Context->GetImageBatchLoader().BlockUntilLoaded(
+                static_cast<TImageBatchId>(iblImageBatchId));
 
             theIScene = QT3DS_NEW(m_Context->GetAllocator(),
                                Qt3DSRenderScene)(*m_Context, *m_Context->m_Context, *theScene);
@@ -1093,7 +1074,7 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
 
         QT3DSU32 theFileSig = theReader.LoadRef<QT3DSU32>();
         QT3DSU32 theBinaryVersion = theReader.LoadRef<QT3DSU32>();
-        QT3DSU32 theDataSectionSize = (QT3DSU32)(theReader.m_EndPtr - theReader.m_CurrentPtr);
+        QT3DSU32 theDataSectionSize = QT3DSU32(theReader.m_EndPtr - theReader.m_CurrentPtr);
 
         if (theFileSig != GetFileTag()
             || theBinaryVersion != SGraphObject::GetSceneGraphBinaryVersion()) {
@@ -1104,7 +1085,7 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
         SSceneLoadData *theScene;
         {
             Mutex::ScopedLock __locker(m_LoadingScenesMutex);
-            theLoadingSceneIndex = (QT3DSU32)m_LoadingScenes.size() + 1;
+            theLoadingSceneIndex = QT3DSU32(m_LoadingScenes.size()) + 1;
             m_LoadingScenes.push_back(
                 QT3DS_NEW(m_Context->GetAllocator(), SSceneLoadData)(m_Context->GetAllocator()));
             theScene = m_LoadingScenes.back();
@@ -1150,7 +1131,7 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
         SSceneLoadData *theScene;
         {
             Mutex::ScopedLock __locker(m_LoadingScenesMutex);
-            QT3DSU32 numLoadingScenes = (QT3DSU32)m_LoadingScenes.size();
+            QT3DSU32 numLoadingScenes = QT3DSU32(m_LoadingScenes.size());
             if (inSceneHandle && inSceneHandle <= numLoadingScenes) {
                 theSceneIndex = inSceneHandle - 1;
                 theScene = m_LoadingScenes[theSceneIndex];
@@ -1180,16 +1161,22 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
         // this means graphics have been initialized
         eastl::string theSourcePathStr;
         IBufferManager &theManager(m_Context->m_Context->GetBufferManager());
-        nvvector<CRegisteredString> theSourcePathList(m_Context->GetAllocator(),
-                                                      "TempSourcePathList");
+        nvvector<CRegisteredString> imagePathList(m_Context->GetAllocator(),
+                                                      "imagePathList");
+        nvvector<CRegisteredString> iblImagePathList(m_Context->GetAllocator(),
+                                                      "iblImagePathList");
         for (QT3DSU32 idx = 0, end = m_SourcePaths.size(); idx < end; ++idx) {
             theSourcePathStr.assign(m_SourcePaths[idx].first);
-            bool hasTransparency = m_SourcePaths[idx].second;
+            bool hasTransparency = m_SourcePaths[idx].second.first;
+            bool isIbl = m_SourcePaths[idx].second.second;
             if (theSourcePathStr.size() > 4) {
                 CRegisteredString theObjectPath = m_SourcePaths[idx].first;
                 if (qt3ds::runtime::isImagePath(theSourcePathStr.c_str())) {
                     theManager.SetImageHasTransparency(theObjectPath, hasTransparency);
-                    theSourcePathList.push_back(theObjectPath);
+                    if (isIbl)
+                        iblImagePathList.push_back(theObjectPath);
+                    else
+                        imagePathList.push_back(theObjectPath);
                 } else {
                     if (theSourcePathStr.find(".mesh") != eastl::string::npos)
                         theManager.LoadMesh(theObjectPath);
@@ -1198,7 +1185,7 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
         }
 
         bool pktx = false;
-        for (int i = 0; i < m_Scenes.size(); ++i) {
+        for (unsigned int i = 0; i < m_Scenes.size(); ++i) {
             if (m_Scenes[i].second->m_Presentation->m_preferKTX) {
                 pktx = true;
                 break;
@@ -1210,9 +1197,13 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
                                         "Initial Batch Image Load");
 
             m_Context->m_Context->GetImageBatchLoader().LoadImageBatch(
-                toConstDataRef(theSourcePathList.data(), theSourcePathList.size()),
+                toConstDataRef(imagePathList.data(), imagePathList.size()),
                 CRegisteredString(), nullptr, m_Context->m_Context->GetRenderContext()
-                        .GetRenderContextType(), pktx);
+                        .GetRenderContextType(), pktx, false);
+            m_Context->m_Context->GetImageBatchLoader().LoadImageBatch(
+                toConstDataRef(iblImagePathList.data(), iblImagePathList.size()),
+                CRegisteredString(), nullptr, m_Context->m_Context->GetRenderContext()
+                        .GetRenderContextType(), pktx, true);
         }
 
         {
@@ -1228,7 +1219,7 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
                     FinalizeScene(*theScene.m_RuntimePresentation, *theIScene);
                     theIScene->PostLoadStep();
                 } else {
-                    qCWarning(WARNING, "Failed to finalize scene %d", (int)idx + 1);
+                    qCWarning(WARNING, "Failed to finalize scene %d", int(idx + 1));
                 }
             }
         }
@@ -1397,14 +1388,15 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
             theWriteBuffer, theStrTable.GetRemapMap(), theProjectDir.c_str());
         QT3DSU32 theBinaryPathOffset = theWriteBuffer.size() - theOffsetStart;
 
-        theWriteBuffer.write((QT3DSU32)m_SourcePaths.size());
-        for (nvvector<pair<CRegisteredString, bool>>::iterator iter = m_SourcePaths.begin(),
-                                                               end = m_SourcePaths.end();
+        theWriteBuffer.write(QT3DSU32(m_SourcePaths.size()));
+        for (nvvector<pair<CRegisteredString, eastl::pair<bool, bool>>>::iterator iter
+             = m_SourcePaths.begin(), end = m_SourcePaths.end();
              iter != end; ++iter) {
             CRegisteredString theStr(iter->first);
             theStr.Remap(theStrTable.GetRemapMap());
-            theWriteBuffer.write((size_t)theStr.c_str());
-            QT3DSU32 theSourcePathFlags = iter->second ? 1 : 0;
+            theWriteBuffer.write(size_t(theStr.c_str()));
+            QT3DSU32 theSourcePathFlags = iter->second.first ? 1 : 0;
+            theSourcePathFlags |= iter->second.second ? 2 : 0;
             theWriteBuffer.write(theSourcePathFlags);
         }
 
@@ -1544,7 +1536,7 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
     {
         bool theResult = false;
         long theSceneCount = m_Scenes.size();
-        for (long theSceneIndex = 0; theSceneIndex < theSceneCount; ++theSceneIndex) {
+        for (size_t theSceneIndex = 0; theSceneIndex < theSceneCount; ++theSceneIndex) {
             Qt3DSRenderScene *theScene = m_Scenes[theSceneIndex].second;
             theResult |= theScene->Update();
         }
@@ -1577,8 +1569,8 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
                 m_Context->m_Context->SetRenderRotation(RenderRotationValues::NoRotation);
 
             m_Context->m_Context->SetPresentationDimensions(QSize(
-                (QT3DSU32)theFirstScene->m_Presentation->m_PresentationDimensions.x,
-                (QT3DSU32)theFirstScene->m_Presentation->m_PresentationDimensions.y));
+                int(theFirstScene->m_Presentation->m_PresentationDimensions.x),
+                int(theFirstScene->m_Presentation->m_PresentationDimensions.y)));
         }
 
         m_Context->m_Context->BeginFrame(firstFrame);
@@ -1622,8 +1614,8 @@ struct Qt3DSRenderSceneManager : public Q3DStudio::ISceneManager,
                 theFirstScene = m_Scenes[idx].second;
         if (theFirstScene) {
             m_Context->m_Context->SetPresentationDimensions(QSize(
-                (QT3DSU32)theFirstScene->m_Presentation->m_PresentationDimensions.x,
-                (QT3DSU32)theFirstScene->m_Presentation->m_PresentationDimensions.y));
+                int(theFirstScene->m_Presentation->m_PresentationDimensions.x),
+                int(theFirstScene->m_Presentation->m_PresentationDimensions.y)));
             render::NVRenderRectF theDisplayViewport =
                 m_Context->m_Context->GetDisplayViewport();
             return Q3DStudio::STextSizes(
@@ -1853,59 +1845,6 @@ struct SRenderFactory : public IQt3DSRenderFactoryCore, public IQt3DSRenderFacto
     }
 };
 
-Q3DStudio::SScriptEngineGotoSlideArgs ToEngine(const qt3ds::state::SGotoSlideData &inData)
-{
-    using namespace qt3ds::state;
-    Q3DStudio::SScriptEngineGotoSlideArgs retval;
-    if (inData.m_Mode.hasValue()) {
-        switch (*inData.m_Mode) {
-        case SlidePlaybackModes::StopAtEnd:
-            retval.m_Mode = Q3DStudio::TimePolicyModes::StopAtEnd;
-            break;
-        case SlidePlaybackModes::Looping:
-            retval.m_Mode = Q3DStudio::TimePolicyModes::Looping;
-            break;
-        case SlidePlaybackModes::Ping:
-            retval.m_Mode = Q3DStudio::TimePolicyModes::Ping;
-            break;
-        case SlidePlaybackModes::PingPong:
-            retval.m_Mode = Q3DStudio::TimePolicyModes::PingPong;
-            break;
-        default:
-            QT3DS_ASSERT(false);
-            break;
-        }
-    }
-    if (inData.m_PlaythroughTo.hasValue())
-        retval.m_PlaythroughTo = inData.m_PlaythroughTo->c_str();
-    if (inData.m_Paused.hasValue())
-        retval.m_Paused = inData.m_Paused;
-    retval.m_Rate = inData.m_Rate;
-    retval.m_Reverse = inData.m_Reverse;
-    if (inData.m_StartTime.hasValue())
-        retval.m_StartTime = *inData.m_StartTime;
-    return retval;
-}
-
-class CStateScriptEngineCallFunctionArgRetriever
-    : public Q3DStudio::CScriptEngineCallFunctionArgRetriever
-{
-public:
-    CStateScriptEngineCallFunctionArgRetriever(const char *inArguments,
-                                               qt3ds::state::IScriptContext &inScriptContext)
-        : CScriptEngineCallFunctionArgRetriever(inArguments)
-        , m_ScriptContext(inScriptContext)
-    {
-    }
-    int RetrieveArgument(script_State *inState) override
-    {
-        (void *)inState;
-        return m_ScriptContext.ExecuteStr(m_ArgumentString, true) ? 1 : -1;
-    }
-
-private:
-    qt3ds::state::IScriptContext &m_ScriptContext;
-};
 }
 
 IQt3DSRenderFactoryCore &IQt3DSRenderFactoryCore::CreateRenderFactoryCore(
@@ -1913,7 +1852,7 @@ IQt3DSRenderFactoryCore &IQt3DSRenderFactoryCore::CreateRenderFactoryCore(
         Q3DStudio::IWindowSystem &inWindowSystem,
         Q3DStudio::ITimeProvider &inTimeProvider)
 {
-    SBindingCore *theCore = (SBindingCore *)malloc(sizeof(SBindingCore));
+    SBindingCore *theCore = reinterpret_cast<SBindingCore *>(malloc(sizeof(SBindingCore)));
     new (theCore) SBindingCore(inApplicationDirectory, inWindowSystem, inTimeProvider);
     return *QT3DS_NEW(theCore->GetAllocator(), SRenderFactory)(*theCore);
 }
