@@ -51,6 +51,14 @@ SOURCES += q3dsdataoutput.cpp \
            q3dsdatainput.cpp \
            q3dsgeometry.cpp
 
-load(qt_module)
+# Platform specific surface format discovery functions
+#TODO: QT3DS-3608 Implement OpenGL version discovery for Windows
+#TODO: QT3DS-3609 Implement OpenGL version discovery for Linux
+#TODO: QT3DS-3610 Implement OpenGL version discovery for QNX
+#TODO: QT3DS-3611 Implement OpenGL version discovery for Integrity
+#TODO: QT3DS-3612 Implement OpenGL version discovery for macOS
+#TODO: QT3DS-3613 Implement OpenGL version discovery for Android
+SOURCES += \
+    ../../foundation/qt/formatdiscovery.cpp
 
-OTHER_FILES += $$PWD/../../../doc/src/12-cpp-reference/*
+load(qt_module)

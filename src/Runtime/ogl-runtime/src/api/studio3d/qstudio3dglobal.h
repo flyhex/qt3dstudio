@@ -31,6 +31,7 @@
 #define QSTUDIO3D_GLOBAL_H
 
 #include <QtCore/qglobal.h>
+#include <QtGui/qsurfaceformat.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -43,6 +44,17 @@ QT_BEGIN_NAMESPACE
 #else
 #  define Q_STUDIO3D_EXPORT
 #endif
+
+namespace Q3DS {
+/*!
+ * \brief surfaceFormat Detects highest available OpenGL or OpenGL ES version and pre-configures
+ * \l {QSurfaceFormat} that uses that OpenGL version and has 24-bit depth buffer and 8-bit stencil
+ * buffer attachments.
+ * \return Best fit \l {QSurfaceFormat} for the platform.
+ * \note This method requires that \l {QGuiApplication} has already been created.
+ */
+Q_STUDIO3D_EXPORT QSurfaceFormat surfaceFormat();
+}
 
 QT_END_NAMESPACE
 
