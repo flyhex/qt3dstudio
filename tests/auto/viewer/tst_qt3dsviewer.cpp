@@ -192,10 +192,8 @@ void tst_qt3dsviewer::testCreateElement()
     QObject::connect(m_presentation, &Q3DSPresentation::elementsCreated,
                      [this](const QStringList &elementNames, const QString &error) {
         QCOMPARE(error, QString());
-        for (auto &elementName : elementNames) {
-            if (!m_createdElements.contains(elementName))
-                QVERIFY(false);
-        }
+        for (const auto &elementName : elementNames)
+            QVERIFY(m_createdElements.contains(elementName));
     });
 
     auto loadMatDefFile = [&](const QString &fileName) -> QString {
@@ -212,9 +210,12 @@ void tst_qt3dsviewer::testCreateElement()
     QString md = loadMatDefFile(QStringLiteral(
                             ":/scenes/simple_cube_animation/materials/Basic Red.materialdef"));
     m_presentation->createMaterial(md);
+    m_createdMaterials << QStringLiteral("materials/Basic Red");
     md = loadMatDefFile(QStringLiteral(
                             ":/scenes/simple_cube_animation/materials/Basic Green.materialdef"));
     m_presentation->createMaterial(md);
+    m_createdMaterials << QStringLiteral("materials/Basic Green");
+
 
     QHash<QString, QVariant> data;
     data.insert(QStringLiteral("name"), QStringLiteral("New Cylinder"));
@@ -331,8 +332,7 @@ void tst_qt3dsviewer::testCreateElement()
     // Remove dynamically added object
     QTimer::singleShot(3000, [&]() {
         m_presentation->deleteElement(QStringLiteral("Scene.Layer.Sphere To Delete"));
-        // Don't remove the deleted element from createdElements to test removing already deleted
-        // element later when everything is cleaned up.
+        m_createdElements.removeOne(QStringLiteral("Scene.Layer.Sphere To Delete"));
     });
 
     // Create objects to slides 1 and 2 while slide 2 is executing
@@ -388,6 +388,10 @@ void tst_qt3dsviewer::testCreateElement()
 
     QTest::qWait(500);
     QCOMPARE(spyElemCreated.count(), 9);
+    const QStringList createdElements = m_presentation->createdElements();
+    QCOMPARE(createdElements.size(), m_createdElements.size());
+    for (const auto &elementName : createdElements)
+        QVERIFY(m_createdElements.contains(elementName));
     deleteCreated();
 
     // Switch to slide 1
@@ -436,8 +440,9 @@ void tst_qt3dsviewer::testCreateMaterial()
 
     QObject::connect(m_presentation, &Q3DSPresentation::materialsCreated,
                      [this](const QStringList &materialNames, const QString &error) {
-        QVERIFY(error.isEmpty());
+        QCOMPARE(error, QString());
         for (auto &name : materialNames) {
+            QVERIFY(m_createdMaterials.contains(name));
             QHash<QString, QVariant> data;
             if (name == QLatin1String("materials/Basic Blue")) {
                 data.insert(QStringLiteral("name"), QStringLiteral("Blue Cylinder"));
@@ -488,10 +493,9 @@ void tst_qt3dsviewer::testCreateMaterial()
 
     // Delete material
     QTimer::singleShot(2500, [&]() {
-        // Material not removed from m_createdMaterials purposefully to ensure deleting already
-        // deleted material is handled properly later
         m_presentation->deleteElement(QStringLiteral("Scene.Layer.Textured Cone"));
         m_presentation->deleteMaterial("materials/Basic Texture");
+        m_createdMaterials.removeOne(QStringLiteral("materials/Basic Texture"));
 
         // Try to use the deleted material - should find a fallback material
         QHash<QString, QVariant> data;
@@ -506,6 +510,10 @@ void tst_qt3dsviewer::testCreateMaterial()
     QVERIFY(spyExited.wait(20000));
     QCOMPARE(spyMatCreated.count(), 2);
     QCOMPARE(spyElemCreated.count(), 5);
+    const QStringList createdMaterials = m_presentation->createdMaterials();
+    QCOMPARE(createdMaterials.size(), m_createdMaterials.size());
+    for (const auto &name : createdMaterials)
+        QVERIFY(m_createdMaterials.contains(name));
     deleteCreated();
     QTest::qWait(200); // Extra wait to verify slide change visually
 }
@@ -543,13 +551,15 @@ void tst_qt3dsviewer::testCreateMesh()
 
     m_presentation->createMaterial(
             QStringLiteral(":/scenes/simple_cube_animation/materials/Basic Texture.materialdef"));
+    m_createdMaterials << QStringLiteral("materials/Basic Texture");
     m_presentation->createMesh(QStringLiteral("Pyramid"), pyramid);
     m_createdMeshes << QStringLiteral("Pyramid");
 
     QObject::connect(m_presentation, &Q3DSPresentation::meshesCreated,
                      [&](const QStringList &meshNames, const QString &error) {
-        QVERIFY(error.isEmpty());
+        QCOMPARE(error, QString());
         for (auto &name : meshNames) {
+            QVERIFY(m_createdMeshes.contains(name));
             QHash<QString, QVariant> data;
             if (name == QLatin1String("Pyramid")) {
                 data.insert(QStringLiteral("name"), QStringLiteral("Pyramid"));
@@ -581,13 +591,16 @@ void tst_qt3dsviewer::testCreateMesh()
     QTimer::singleShot(3000, [&]() {
         m_presentation->deleteElement(QStringLiteral("Scene.Layer.Star"));
         m_presentation->deleteMesh(QStringLiteral("Star"));
-        // Mesh nor removed from m_createdMeshes purposefully to ensure deleting already deleted
-        // mesh is handled properly later
+        m_createdMeshes.removeOne(QStringLiteral("Star"));
     });
 
     QVERIFY(spyExited.wait(20000));
     QCOMPARE(spyMeshCreated.count(), 2);
     QCOMPARE(spyElemCreated.count(), 2);
+    const QStringList createdMeshes = m_presentation->createdMeshes();
+    QCOMPARE(createdMeshes.size(), m_createdMeshes.size());
+    for (const auto &name : createdMeshes)
+        QVERIFY(m_createdMeshes.contains(name));
     deleteCreated();
     QTest::qWait(200); // Extra wait to verify slide change visually
 }
@@ -630,6 +643,9 @@ void tst_qt3dsviewer::deleteCreated()
     m_createdElements.clear();
     m_createdMaterials.clear();
     m_createdMeshes.clear();
+    QVERIFY(m_presentation->createdElements().size() == 0);
+    QVERIFY(m_presentation->createdMaterials().size() == 0);
+    QVERIFY(m_presentation->createdMeshes().size() == 0);
 }
 
 void tst_qt3dsviewer::createElement(const QString &parentElementPath, const QString &slideName,

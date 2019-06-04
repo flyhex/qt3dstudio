@@ -98,6 +98,9 @@ public:
 public Q_SLOTS:
     void handleSlideEntered(const QString &elementPath, unsigned int index, const QString &name);
     void handleDataOutputValueUpdate(const QString &name, const QVariant &newValue);
+    void handleElementsCreated(const QStringList &elementPaths, const QString &error);
+    void handleMaterialsCreated(const QStringList &materialNames, const QString &error);
+    void handleMeshesCreated(const QStringList &meshNames, const QString &error);
 
 public:
     Q3DSPresentation *q_ptr;
@@ -112,6 +115,9 @@ private:
     QStringList m_variantList;
     ViewerQmlStreamProxy *m_streamProxy;
     bool m_delayedLoading;
+    QStringList m_createdElements;
+    QStringList m_createdMaterials;
+    QStringList m_createdMeshes;
 
     friend class Q3DSStudio3D;
 };

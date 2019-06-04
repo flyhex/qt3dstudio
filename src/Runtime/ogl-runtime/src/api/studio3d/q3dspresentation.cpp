@@ -147,7 +147,7 @@ void Q3DSPresentation::setSource(const QUrl &source)
 }
 
 /*!
-    \qmlproperty variant Presentation::variantList
+    \qmlproperty list<string> Presentation::variantList
 
     Holds a list of (variant group):(variant) tags that are loaded when the
     \c{source} property is set. If this list is left empty (default), no variant
@@ -839,6 +839,36 @@ void Q3DSPresentation::deleteElements(const QStringList &elementPaths)
         QStringList *theElementPaths = new QStringList(elementPaths);
         d_ptr->m_commandQueue->queueCommand(CommandType_DeleteElements, theElementPaths);
     }
+    for (const auto &elementPath : elementPaths)
+        d_ptr->m_createdElements.removeAll(elementPath);
+}
+
+/*!
+    \qmlproperty list<string> Presentation::createdElements
+
+    This property contains a list of all dynamically created elements on this presentation.
+
+    This property is read-only.
+
+    \note Elements can only be dynamically created via C++ API.
+
+    \sa createElement
+    \sa createElements
+*/
+
+/*!
+    \property Q3DSPresentation::createdElements
+
+    This property contains a list of all dynamically created elements on this presentation.
+
+    This property is read-only.
+
+    \sa createElement
+    \sa createElements
+*/
+QStringList Q3DSPresentation::createdElements() const
+{
+    return d_ptr->m_createdElements;
 }
 
 /*!
@@ -939,6 +969,36 @@ void Q3DSPresentation::deleteMaterials(const QStringList &materialNames)
         QStringList *theMaterialNames = new QStringList(materialNames);
         d_ptr->m_commandQueue->queueCommand(CommandType_DeleteMaterials, theMaterialNames);
     }
+    for (const auto &name : materialNames)
+        d_ptr->m_createdMaterials.removeAll(name);
+}
+
+/*!
+    \qmlproperty list<string> Presentation::createdMaterials
+
+    This property contains a list of all dynamically created materials on this presentation.
+
+    This property is read-only.
+
+    \note Materials can only be dynamically created via C++ API.
+
+    \sa createMaterial
+    \sa createMaterials
+*/
+
+/*!
+    \property Q3DSPresentation::createdMaterials
+
+    This property contains a list of all dynamically created materials on this presentation.
+
+    This property is read-only.
+
+    \sa createMaterial
+    \sa createMaterials
+*/
+QStringList Q3DSPresentation::createdMaterials() const
+{
+    return d_ptr->m_createdMaterials;
 }
 
 /*!
@@ -1017,6 +1077,36 @@ void Q3DSPresentation::deleteMeshes(const QStringList &meshNames)
         QStringList *theMeshNames = new QStringList(meshNames);
         d_ptr->m_commandQueue->queueCommand(CommandType_DeleteMeshes, theMeshNames);
     }
+    for (const auto &name : meshNames)
+        d_ptr->m_createdMeshes.removeAll(name);
+}
+
+/*!
+    \qmlproperty list<string> Presentation::createdMeshes
+
+    This property contains a list of all dynamically created meshes on this presentation.
+
+    This property is read-only.
+
+    \note Meshes can only be dynamically created via C++ API.
+
+    \sa createMesh
+    \sa createMeshes
+*/
+
+/*!
+    \property Q3DSPresentation::createdMeshes
+
+    This property contains a list of all dynamically created meshes on this presentation.
+
+    This property is read-only.
+
+    \sa createMesh
+    \sa createMeshes
+*/
+QStringList Q3DSPresentation::createdMeshes() const
+{
+    return d_ptr->m_createdMeshes;
 }
 
 /*!
@@ -1309,11 +1399,11 @@ void Q3DSPresentationPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool 
             connect(app, &Q3DSViewer::Q3DSViewerApp::SigDataOutputValueUpdated,
                     this, &Q3DSPresentationPrivate::handleDataOutputValueUpdate);
             connect(app, &Q3DSViewer::Q3DSViewerApp::SigElementsCreated,
-                    q_ptr, &Q3DSPresentation::elementsCreated);
+                    this, &Q3DSPresentationPrivate::handleElementsCreated);
             connect(app, &Q3DSViewer::Q3DSViewerApp::SigMaterialsCreated,
-                    q_ptr, &Q3DSPresentation::materialsCreated);
+                    this, &Q3DSPresentationPrivate::handleMaterialsCreated);
             connect(app, &Q3DSViewer::Q3DSViewerApp::SigMeshesCreated,
-                    q_ptr, &Q3DSPresentation::meshesCreated);
+                    this, &Q3DSPresentationPrivate::handleMeshesCreated);
         }
         if (oldApp) {
             disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigSlideEntered,
@@ -1325,11 +1415,11 @@ void Q3DSPresentationPrivate::setViewerApp(Q3DSViewer::Q3DSViewerApp *app, bool 
             disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigDataOutputValueUpdated,
                        this, &Q3DSPresentationPrivate::handleDataOutputValueUpdate);
             disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigElementsCreated,
-                       q_ptr, &Q3DSPresentation::elementsCreated);
+                       this, &Q3DSPresentationPrivate::handleElementsCreated);
             disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigMaterialsCreated,
-                       q_ptr, &Q3DSPresentation::materialsCreated);
+                       this, &Q3DSPresentationPrivate::handleMaterialsCreated);
             disconnect(oldApp, &Q3DSViewer::Q3DSViewerApp::SigMeshesCreated,
-                       q_ptr, &Q3DSPresentation::meshesCreated);
+                       this, &Q3DSPresentationPrivate::handleMeshesCreated);
         }
     }
 }
@@ -1971,6 +2061,33 @@ void Q3DSPresentationPrivate::handleDataOutputValueUpdate(const QString &name,
 
     Q3DSDataOutput *node = m_dataOutputs[name];
     node->setValue(newValue);
+}
+
+void Q3DSPresentationPrivate::handleElementsCreated(const QStringList &elementPaths,
+                                                    const QString &error)
+{
+    if (error.isEmpty())
+        m_createdElements << elementPaths;
+
+    Q_EMIT q_ptr->elementsCreated(elementPaths, error);
+}
+
+void Q3DSPresentationPrivate::handleMaterialsCreated(const QStringList &materialNames,
+                                                     const QString &error)
+{
+    if (error.isEmpty())
+        m_createdMaterials << materialNames;
+
+    Q_EMIT q_ptr->materialsCreated(materialNames, error);
+}
+
+void Q3DSPresentationPrivate::handleMeshesCreated(const QStringList &meshNames,
+                                                  const QString &error)
+{
+    if (error.isEmpty())
+        m_createdMeshes << meshNames;
+
+    Q_EMIT q_ptr->meshesCreated(meshNames, error);
 }
 
 QT_END_NAMESPACE

@@ -372,16 +372,16 @@ QQuickFramebufferObject::Renderer *Q3DSStudio3D::createRenderer() const
             m_presentation->d_ptr, &Q3DSPresentationPrivate::handleSlideEntered);
     connect(renderer, &Q3DSRenderer::dataOutputValueUpdated,
             m_presentation->d_ptr, &Q3DSPresentationPrivate::handleDataOutputValueUpdate);
+    connect(renderer, &Q3DSRenderer::elementsCreated,
+            m_presentation->d_ptr, &Q3DSPresentationPrivate::handleElementsCreated);
+    connect(renderer, &Q3DSRenderer::materialsCreated,
+            m_presentation->d_ptr, &Q3DSPresentationPrivate::handleMaterialsCreated);
+    connect(renderer, &Q3DSRenderer::meshesCreated,
+            m_presentation->d_ptr, &Q3DSPresentationPrivate::handleMeshesCreated);
     connect(renderer, &Q3DSRenderer::exitSlide,
             m_presentation, &Q3DSPresentation::slideExited);
     connect(renderer, &Q3DSRenderer::customSignalEmitted,
             m_presentation, &Q3DSPresentation::customSignalEmitted);
-    connect(renderer, &Q3DSRenderer::elementsCreated,
-            m_presentation, &Q3DSPresentation::elementsCreated);
-    connect(renderer, &Q3DSRenderer::materialsCreated,
-            m_presentation, &Q3DSPresentation::materialsCreated);
-    connect(renderer, &Q3DSRenderer::meshesCreated,
-            m_presentation, &Q3DSPresentation::meshesCreated);
     connect(renderer, &Q3DSRenderer::requestResponse,
             this, &Q3DSStudio3D::requestResponseHandler);
     connect(renderer, &Q3DSRenderer::presentationLoaded,

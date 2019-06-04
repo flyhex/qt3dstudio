@@ -55,6 +55,9 @@ class Q_STUDIO3D_EXPORT Q3DSPresentation : public QObject
     Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged)
     Q_PROPERTY(QStringList variantList READ variantList WRITE setVariantList NOTIFY variantListChanged)
     Q_PROPERTY(bool delayedLoading READ delayedLoading WRITE setDelayedLoading NOTIFY delayedLoadingChanged)
+    Q_PROPERTY(QStringList createdElements READ createdElements NOTIFY elementsCreated)
+    Q_PROPERTY(QStringList createdMaterials READ createdMaterials NOTIFY materialsCreated)
+    Q_PROPERTY(QStringList createdMeshes READ createdMeshes NOTIFY meshesCreated)
 
 public:
     explicit Q3DSPresentation(QObject *parent = nullptr);
@@ -101,14 +104,19 @@ public:
                         const QVector<QHash<QString, QVariant>> &properties);
     void deleteElement(const QString &elementPath);
     void deleteElements(const QStringList &elementPaths);
+    QStringList createdElements() const;
+
     void createMaterial(const QString &materialDefinition, const QString &subPresId = {});
     void createMaterials(const QStringList &materialDefinitions, const QString &subPresId = {});
     void deleteMaterial(const QString &materialName);
     void deleteMaterials(const QStringList &materialNames);
+    QStringList createdMaterials() const;
+
     void createMesh(const QString &meshName, const Q3DSGeometry &geometry);
     void createMeshes(const QHash<QString, const Q3DSGeometry *> &meshData);
     void deleteMesh(const QString &meshName);
     void deleteMeshes(const QStringList &meshNames);
+    QStringList createdMeshes() const;
 
 public Q_SLOTS:
     void setSource(const QUrl &source);
