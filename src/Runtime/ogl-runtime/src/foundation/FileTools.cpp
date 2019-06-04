@@ -272,6 +272,11 @@ QString CFileTools::NormalizePathForQtUsage(const QString &path)
 
     QString filePath = QDir::cleanPath(path);
 
+    filePath.replace(QLatin1Char('\\'), QLatin1Char('/'));
+
+    if (filePath.startsWith(QLatin1String("./")))
+        return filePath.mid(2);
+
     if (filePath.startsWith(QLatin1String("qrc:/")))
         return filePath.mid(3);
     else
