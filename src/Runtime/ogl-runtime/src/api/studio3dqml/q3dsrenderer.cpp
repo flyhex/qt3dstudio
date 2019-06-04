@@ -369,7 +369,7 @@ void Q3DSRenderer::processCommands()
             break;
         }
         case CommandType_DeleteMaterials: {
-            m_runtime->deleteMaterials(cmd.m_elementPath, *static_cast<QStringList *>(cmd.m_data));
+            m_runtime->deleteMaterials(*static_cast<QStringList *>(cmd.m_data));
             // Runtime makes copy of the data in its own format, so we can delete it now
             auto &command = m_commands.commandAt(i);
             delete reinterpret_cast<QStringList *>(command.m_data);

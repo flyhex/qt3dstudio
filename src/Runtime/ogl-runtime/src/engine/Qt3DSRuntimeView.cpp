@@ -217,9 +217,9 @@ public:
     void createElements(const QString &parentElementPath, const QString &slideName,
                         const QVector<QHash<QString, QVariant>> &properties) override;
     void deleteElements(const QStringList &elementPaths) override;
-    void createMaterials(const QString &elementPath,
+    void createMaterials(const QString &subPresId,
                          const QStringList &materialDefinitions) override;
-    void deleteMaterials(const QString &elementPath, const QStringList &materialNames) override;
+    void deleteMaterials(const QStringList &materialNames) override;
     void createMesh(const QString &name, qt3dsimp::Mesh *mesh) override;
     void deleteMeshes(const QStringList &meshNames) override;
     void SetAttribute(const char *elementPath, const char *attributeName,
@@ -667,26 +667,26 @@ void CRuntimeView::deleteElements(const QStringList &elementPaths)
     }
 }
 
-void CRuntimeView::createMaterials(const QString &elementPath,
+void CRuntimeView::createMaterials(const QString &subPresId,
                                    const QStringList &materialDefinitions)
 {
     if (m_Application) {
         Q3DStudio::CQmlEngine &theBridgeEngine
                 = static_cast<Q3DStudio::CQmlEngine &>(m_RuntimeFactoryCore->GetScriptEngineQml());
         theBridgeEngine.createMaterials(
-                    elementPath, materialDefinitions,
+                    subPresId, materialDefinitions,
                     &m_RuntimeFactory->GetQt3DSRenderContext().GetCustomMaterialSystem(),
                     &m_RuntimeFactory->GetQt3DSRenderContext().GetDynamicObjectSystem(),
                     &m_RuntimeFactory->GetQt3DSRenderContext().GetRenderer());
     }
 }
 
-void CRuntimeView::deleteMaterials(const QString &elementPath, const QStringList &materialNames)
+void CRuntimeView::deleteMaterials(const QStringList &materialNames)
 {
     if (m_Application) {
         Q3DStudio::CQmlEngine &theBridgeEngine
                 = static_cast<Q3DStudio::CQmlEngine &>(m_RuntimeFactoryCore->GetScriptEngineQml());
-        theBridgeEngine.deleteMaterials(elementPath, materialNames,
+        theBridgeEngine.deleteMaterials(materialNames,
                                         &m_RuntimeFactory->GetQt3DSRenderContext().GetRenderer());
     }
 }

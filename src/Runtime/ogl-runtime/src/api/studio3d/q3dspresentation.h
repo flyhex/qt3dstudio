@@ -101,10 +101,10 @@ public:
                         const QVector<QHash<QString, QVariant>> &properties);
     void deleteElement(const QString &elementPath);
     void deleteElements(const QStringList &elementPaths);
-    void createMaterial(const QString &elementPath, const QString &materialDefinition);
-    void createMaterials(const QString &elementPath, const QStringList &materialDefinitions);
-    void deleteMaterial(const QString &elementPath, const QString &materialName);
-    void deleteMaterials(const QString &elementPath, const QStringList &materialNames);
+    void createMaterial(const QString &materialDefinition, const QString &subPresId = {});
+    void createMaterials(const QStringList &materialDefinitions, const QString &subPresId = {});
+    void deleteMaterial(const QString &materialName);
+    void deleteMaterials(const QStringList &materialNames);
     void createMesh(const QString &meshName, const Q3DSGeometry &geometry);
     void createMeshes(const QHash<QString, const Q3DSGeometry *> &meshData);
     void deleteMesh(const QString &meshName);

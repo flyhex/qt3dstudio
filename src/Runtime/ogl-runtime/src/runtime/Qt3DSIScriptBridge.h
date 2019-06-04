@@ -173,11 +173,11 @@ public: // Elements
                                 qt3ds::render::IQt3DSRenderer *renderer) = 0;
     virtual void deleteElements(const QStringList &elementPath,
                                 qt3ds::render::IQt3DSRenderer *renderer) = 0;
-    virtual void createMaterials(const QString &elementPath, const QStringList &materialDefinitions,
+    virtual void createMaterials(const QString &subPresId, const QStringList &materialDefinitions,
                                  qt3ds::render::ICustomMaterialSystem *customMaterialSystem,
                                  qt3ds::render::IDynamicObjectSystem *dynamicObjectSystem,
                                  qt3ds::render::IQt3DSRenderer *renderer) = 0;
-    virtual void deleteMaterials(const QString &elementPath, const QStringList &materialNames,
+    virtual void deleteMaterials(const QStringList &materialNames,
                                  qt3ds::render::IQt3DSRenderer *renderer) = 0;
     virtual void createMesh(const QString &name, qt3dsimp::Mesh *mesh,
                             qt3ds::render::IBufferManager *bufferManager) = 0;

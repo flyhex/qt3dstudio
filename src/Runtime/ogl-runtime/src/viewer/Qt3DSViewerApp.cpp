@@ -935,21 +935,21 @@ void Q3DSViewerApp::deleteElements(const QStringList &elementPaths)
     m_Impl.m_view->deleteElements(elementPaths);
 }
 
-void Q3DSViewerApp::createMaterials(const QString &elementPath,
+void Q3DSViewerApp::createMaterials(const QString &subPresId,
                                     const QStringList &materialDefinitions)
 {
     if (!m_Impl.m_view)
         return;
 
-    m_Impl.m_view->createMaterials(elementPath, materialDefinitions);
+    m_Impl.m_view->createMaterials(subPresId, materialDefinitions);
 }
 
-void Q3DSViewerApp::deleteMaterials(const QString &elementPath, const QStringList &materialNames)
+void Q3DSViewerApp::deleteMaterials(const QStringList &materialNames)
 {
     if (!m_Impl.m_view)
         return;
 
-    m_Impl.m_view->deleteMaterials(elementPath, materialNames);
+    m_Impl.m_view->deleteMaterials(materialNames);
 }
 
 void Q3DSViewerApp::createMeshes(const QHash<QString, Q3DSViewer::MeshData> &meshData)

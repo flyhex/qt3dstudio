@@ -211,10 +211,10 @@ void tst_qt3dsviewer::testCreateElement()
 
     QString md = loadMatDefFile(QStringLiteral(
                             ":/scenes/simple_cube_animation/materials/Basic Red.materialdef"));
-    m_presentation->createMaterial(QStringLiteral("Scene"), md);
+    m_presentation->createMaterial(md);
     md = loadMatDefFile(QStringLiteral(
                             ":/scenes/simple_cube_animation/materials/Basic Green.materialdef"));
-    m_presentation->createMaterial(QStringLiteral("Scene"), md);
+    m_presentation->createMaterial(md);
 
     QHash<QString, QVariant> data;
     data.insert(QStringLiteral("name"), QStringLiteral("New Cylinder"));
@@ -429,7 +429,7 @@ void tst_qt3dsviewer::testCreateMaterial()
     QVERIFY(!matDef.isEmpty());
     materialDefinitions << matDef;
 
-    m_presentation->createMaterials(QStringLiteral("Scene"), materialDefinitions);
+    m_presentation->createMaterials(materialDefinitions);
     m_createdMaterials << QStringLiteral("materials/Basic Blue")
                        << QStringLiteral("materials/Basic Texture")
                        << QStringLiteral("materials/Copper");
@@ -482,7 +482,7 @@ void tst_qt3dsviewer::testCreateMaterial()
         md.replace(QStringLiteral("Basic Blue"), QStringLiteral("Just Yellow"));
         md.replace(QRegularExpression(QStringLiteral("\"diffuse\">.*<")),
                    QStringLiteral("\"diffuse\">1 1 0 1<"));
-        m_presentation->createMaterial(QStringLiteral("Scene"), md);
+        m_presentation->createMaterial(md);
         m_createdMaterials << QStringLiteral("materials/Just Yellow");
     });
 
@@ -491,7 +491,7 @@ void tst_qt3dsviewer::testCreateMaterial()
         // Material not removed from m_createdMaterials purposefully to ensure deleting already
         // deleted material is handled properly later
         m_presentation->deleteElement(QStringLiteral("Scene.Layer.Textured Cone"));
-        m_presentation->deleteMaterial(QStringLiteral("Scene"), "materials/Basic Texture");
+        m_presentation->deleteMaterial("materials/Basic Texture");
 
         // Try to use the deleted material - should find a fallback material
         QHash<QString, QVariant> data;
@@ -542,7 +542,6 @@ void tst_qt3dsviewer::testCreateMesh()
     });
 
     m_presentation->createMaterial(
-            QStringLiteral("Scene"),
             QStringLiteral(":/scenes/simple_cube_animation/materials/Basic Texture.materialdef"));
     m_presentation->createMesh(QStringLiteral("Pyramid"), pyramid);
     m_createdMeshes << QStringLiteral("Pyramid");
@@ -626,7 +625,7 @@ void tst_qt3dsviewer::testMouseEvents()
 void tst_qt3dsviewer::deleteCreated()
 {
     m_presentation->deleteElements(m_createdElements);
-    m_presentation->deleteMaterials(QStringLiteral("Scene"), m_createdMaterials);
+    m_presentation->deleteMaterials(m_createdMaterials);
     m_presentation->deleteMeshes(m_createdMeshes);
     m_createdElements.clear();
     m_createdMaterials.clear();

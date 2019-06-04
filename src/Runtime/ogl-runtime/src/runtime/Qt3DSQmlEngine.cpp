@@ -433,11 +433,11 @@ public:
                         qt3ds::render::IQt3DSRenderer *renderer) override;
     void deleteElements(const QStringList &elementPaths,
                         qt3ds::render::IQt3DSRenderer *renderer) override;
-    void createMaterials(const QString &elementPath, const QStringList &materialDefinitions,
+    void createMaterials(const QString &subPresId, const QStringList &materialDefinitions,
                          qt3ds::render::ICustomMaterialSystem *customMaterialSystem,
                          IDynamicObjectSystem *dynamicObjectSystem,
                          qt3ds::render::IQt3DSRenderer *renderer) override;
-    void deleteMaterials(const QString &elementPath, const QStringList &materialNames,
+    void deleteMaterials(const QStringList &materialNames,
                          qt3ds::render::IQt3DSRenderer *renderer) override;
     void createMesh(const QString &name, qt3dsimp::Mesh *mesh,
                     qt3ds::render::IBufferManager *bufferManager) override;
@@ -1021,6 +1021,9 @@ void CQmlEngineImpl::createElements(const QString &parentElementPath, const QStr
         QByteArray newElementNameBa = newElementName.toUtf8();
 
         QString refMatName = fixedProps.take(QStringLiteral("material")).toString();
+        int colonIndex = refMatName.indexOf(QLatin1Char(':'));
+        if (colonIndex != -1)
+            refMatName = refMatName.mid(colonIndex + 1);
         if (refMatName.startsWith(QLatin1Char('#'))) // Absolute reference
             refMatName = refMatName.mid(1);
         else if (!refMatName.isEmpty() && !refMatName.contains(QLatin1Char('/')))
@@ -1108,7 +1111,7 @@ void CQmlEngineImpl::createElements(const QString &parentElementPath, const QStr
 
         // Create new element
         QString localElementPath = elementPaths[elementIndex];
-        int colonIndex = localElementPath.indexOf(QLatin1Char(':'));
+        colonIndex = localElementPath.indexOf(QLatin1Char(':'));
         if (colonIndex != -1)
             localElementPath = localElementPath.mid(colonIndex + 1);
         TElement &newElem = m_Application->GetElementAllocator().CreateElement(
@@ -1282,11 +1285,11 @@ TElement *CQmlEngineImpl::createMaterialContainer(TElement *parent, CPresentatio
 }
 
 /**
-    Creates material into material container of the presentation that owns the specified element.
+    Creates material into material container of the specified subpresentation.
     The materialDefinition parameter can contain a .materialdef file path or
     the entire material definition in the .materialdef format.
 */
-void CQmlEngineImpl::createMaterials(const QString &elementPath,
+void CQmlEngineImpl::createMaterials(const QString &subPresId,
                                      const QStringList &materialDefinitions,
                                      ICustomMaterialSystem *customMaterialSystem,
                                      IDynamicObjectSystem *dynamicObjectSystem,
@@ -1309,8 +1312,11 @@ void CQmlEngineImpl::createMaterials(const QString &elementPath,
         if (!error.isEmpty())
             deleteElements(createdElements, renderer);
         QStringList materialNames;
+        QString prefix;
+        if (!subPresId.isEmpty())
+            prefix = subPresId + QLatin1Char(':');
         for (auto &materialInfo : materialInfos)
-            materialNames << materialInfo->materialName;
+            materialNames << prefix + materialInfo->materialName;
         qDeleteAll(materialInfos);
         notifyMaterialCreation(materialNames, error);
     };
@@ -1326,11 +1332,14 @@ void CQmlEngineImpl::createMaterials(const QString &elementPath,
         }
     };
 
-    QByteArray thePath = elementPath.toUtf8();
-    TElement *element = getTarget(thePath.constData());
+    QByteArray theSubPresId = subPresId.toUtf8();
+    if (theSubPresId.isEmpty())
+        presentation = m_Application->GetPrimaryPresentation();
+    else
+        presentation = m_Application->GetPresentationById(theSubPresId.constData());
 
-    if (!element) {
-        error = QObject::tr("Invalid element: '%1'").arg(elementPath);
+    if (!presentation) {
+        error = QObject::tr("Invalid presentation ID: '%1'").arg(subPresId);
         presentation = m_Application->GetPrimaryPresentation();
         presPath = QFileInfo(presentation->GetFilePath()).absolutePath();
         projPath = presentation->getProjectPath();
@@ -1339,7 +1348,6 @@ void CQmlEngineImpl::createMaterials(const QString &elementPath,
         return;
     }
 
-    presentation = static_cast<CPresentation *>(element->GetBelongedPresentation());
     presPath = QFileInfo(presentation->GetFilePath()).absolutePath();
     projPath = presentation->getProjectPath();
     getMaterialInfos();
@@ -1652,42 +1660,77 @@ void CQmlEngineImpl::createMaterials(const QString &elementPath,
     handleError();
 }
 
-void CQmlEngineImpl::deleteMaterials(const QString &elementPath,
-                                     const QStringList &materialNames,
-                                     IQt3DSRenderer *renderer)
+void CQmlEngineImpl::deleteMaterials(const QStringList &materialNames, IQt3DSRenderer *renderer)
 {
     // Material class (i.e. the shader) is not deleted as those can be shared between materials,
     // so we just delete the material elements from the container and the related render objects
 
-    QByteArray thePath = elementPath.toUtf8();
-    TElement *element = getTarget(thePath.constData());
-    Q_ASSERT_X(element, __FUNCTION__, QStringLiteral("Invalid element path: '%1'")
-               .arg(elementPath).toUtf8());
-    CPresentation *presentation = static_cast<CPresentation *>(element->GetBelongedPresentation());
+    // Sort materials to presentations
+    QMultiHash<QString, QString> presMaterialMap;
+    QSet<QString> presIds;
+    for (const auto &matName : materialNames) {
+        QString presId;
+        QString localName = matName;
+        int index = matName.indexOf(QLatin1Char(':'));
+        if (index != -1) {
+            presId = matName.left(index);
+            localName = matName.mid(index + 1);
+        }
+        presMaterialMap.insert(presId, localName);
+        presIds.insert(presId);
+    }
+    for (const auto &presId : qAsConst(presIds)) {
+        QByteArray theId = presId.toUtf8();
+        CPresentation *presentation = nullptr;
+        if (presId.isEmpty())
+            presentation = m_Application->GetPrimaryPresentation();
+        else
+            presentation = m_Application->GetPresentationById(theId.constData());
 
-    // Find material container
-    auto &strTable = presentation->GetStringTable();
-    TElement *rootElement = presentation->GetRoot();
-    const auto containerName = strTable.RegisterStr("__Container");
-    TElement *container = rootElement->FindChild(CHash::HashString(containerName.c_str()));
-    Q_ASSERT_X(container, __FUNCTION__,
-               QStringLiteral("No material container found for element: '%1'")
-               .arg(elementPath).toUtf8());
+        if (presentation) {
+            // Find material container
+            auto &strTable = presentation->GetStringTable();
+            TElement *rootElement = presentation->GetRoot();
+            const auto containerName = strTable.RegisterStr("__Container");
+            TElement *container = rootElement->FindChild(CHash::HashString(containerName.c_str()));
+            Q_ASSERT_X(container, __FUNCTION__,
+                       QStringLiteral("No material container found for presentation: '%1'")
+                       .arg(presId).toUtf8());
 
-    QVector<TElement *> elementsToDelete;
-    for (const auto &materialName : materialNames) {
-        TElement *firstChild = nullptr;
-        TElement *nextChild = container->GetChild();
-        firstChild = nextChild;
-        while (nextChild) {
-            QString childName = QString::fromUtf8(nextChild->m_Name);
-            if (childName == materialName)
-                elementsToDelete << nextChild;
-            nextChild = nextChild->GetSibling();
+            QVector<TElement *> elementsToDelete;
+            const QList<QString> matNames = presMaterialMap.values(presId);
+            for (const auto &materialName : matNames) {
+                TElement *firstChild = nullptr;
+                TElement *nextChild = container->GetChild();
+                firstChild = nextChild;
+                bool added = false;
+                while (nextChild) {
+                    QString childName = QString::fromUtf8(nextChild->m_Name);
+                    if (childName == materialName) {
+                        elementsToDelete << nextChild;
+                        added = true;
+                        break;
+                    }
+                    nextChild = nextChild->GetSibling();
+                }
+                if (!added) {
+                    if (presId.isEmpty()) {
+                        qWarning() << __FUNCTION__
+                                   << QStringLiteral("Could not find material '%1'")
+                                      .arg(materialName);
+                    } else {
+                        qWarning() << __FUNCTION__
+                                   << QStringLiteral("Could not find material '%1' in '%2'")
+                                      .arg(materialName).arg(presId);
+                    }
+                }
+            }
+            deleteElements(elementsToDelete, renderer);
+        } else {
+            qWarning() << __FUNCTION__ << "Warning: Presentation ID could not be resolved:"
+                       << presId;
         }
     }
-
-    deleteElements(elementsToDelete, renderer);
 }
 
 void CQmlEngineImpl::createMesh(const QString &name, qt3dsimp::Mesh *mesh,

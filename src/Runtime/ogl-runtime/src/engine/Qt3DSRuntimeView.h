@@ -204,9 +204,9 @@ public:
     virtual void createElements(const QString &parentElementPath, const QString &slideName,
                                 const QVector<QHash<QString, QVariant>> &properties) = 0;
     virtual void deleteElements(const QStringList &elementPaths) = 0;
-    virtual void createMaterials(const QString &elementPath,
+    virtual void createMaterials(const QString &subPresId,
                                  const QStringList &materialDefinitions) = 0;
-    virtual void deleteMaterials(const QString &elementPath, const QStringList &materialNames) = 0;
+    virtual void deleteMaterials(const QStringList &materialNames) = 0;
     virtual void createMesh(const QString &name, qt3dsimp::Mesh *mesh) = 0;
     virtual void deleteMeshes(const QStringList &meshNames) = 0;
     virtual void SetAttribute(const char *elementPath, const char *attributeName,

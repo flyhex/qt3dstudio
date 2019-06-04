@@ -466,8 +466,8 @@ public:
     void createElements(const QString &parentElementPath, const QString &slideName,
                         const QVector<QHash<QString, QVariant>> &properties);
     void deleteElements(const QStringList &elementPaths);
-    void createMaterials(const QString &elementPath, const QStringList &materialDefinitions);
-    void deleteMaterials(const QString &elementPath, const QStringList &materialNames);
+    void createMaterials(const QString &subPresId, const QStringList &materialDefinitions);
+    void deleteMaterials(const QStringList &materialNames);
     void createMeshes(const QHash<QString, Q3DSViewer::MeshData> &meshData);
     void deleteMeshes(const QStringList &meshNames);
 

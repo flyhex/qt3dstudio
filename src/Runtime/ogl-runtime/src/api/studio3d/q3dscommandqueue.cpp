@@ -268,13 +268,13 @@ void CommandQueue::copyCommands(CommandQueue &fromQueue)
             fromQueue.commandAt(i).m_data = nullptr; // This queue takes ownership of data
             break;
         case CommandType_DeleteElements:
+        case CommandType_DeleteMaterials:
         case CommandType_DeleteMeshes:
         case CommandType_CreateMeshes:
             queueCommand(source.m_commandType, source.m_data);
             fromQueue.commandAt(i).m_data = nullptr; // This queue takes ownership of data
             break;
         case CommandType_CreateMaterials:
-        case CommandType_DeleteMaterials:
             queueCommand(source.m_elementPath, source.m_commandType, source.m_data);
             fromQueue.commandAt(i).m_data = nullptr; // This queue takes ownership of data
             break;

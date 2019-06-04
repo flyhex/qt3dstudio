@@ -764,7 +764,7 @@ void Q3DSPresentation::setDataInputValue(const QString &name, const QVariant &va
 
     A referenced material element is also created for the new model element. The source material
     name can be specified with custom "material" attribute in the \a attributes hash.
-    The source material must exist in the presentation.
+    The source material must exist in the same presentation where the element is created.
 
     The mesh for a model is specified with the \c sourcepath property. This can be a local file
     path to \c .mesh file, a studio mesh primitive (e.g. \c{#Cube}), or the name of a mesh created
@@ -842,8 +842,9 @@ void Q3DSPresentation::deleteElements(const QStringList &elementPaths)
 }
 
 /*!
-    Creates a material specified by the \a materialDefinition parameter into the presentation
-    that owns the element specified by the \a elementPath parameter.
+    Creates a material specified by the \a materialDefinition parameter into the subpresentation
+    specified by the \a subPresId parameter. If \a subPresId is empty, the material
+    is created into the main presentation.
 
     The \a materialDefinition parameter can contain either the file path to a Qt 3D Studio
     material definition file or the actual material definition in the
@@ -870,68 +871,73 @@ void Q3DSPresentation::deleteElements(const QStringList &elementPaths)
     \sa createElement
     \sa materialsCreated
  */
-void Q3DSPresentation::createMaterial(const QString &elementPath,
-                                      const QString &materialDefinition)
+void Q3DSPresentation::createMaterial(const QString &materialDefinition,
+                                      const QString &subPresId)
 {
     QStringList materialDefinitions;
     materialDefinitions << materialDefinition;
-    createMaterials(elementPath, materialDefinitions);
+    createMaterials(materialDefinitions, subPresId);
 }
 
 /*!
     Creates multiple materials specified by the \a materialDefinitions parameter into the
-    presentation that owns the element specified by the \a elementPath parameter.
+    subpresentation specified by the \a subPresId parameter. If \a subPresId is empty,
+    the materials are created into the main presentation.
+
     For more details, see createMaterial().
 
     \sa createMaterial
     \sa materialsCreated
  */
-void Q3DSPresentation::createMaterials(const QString &elementPath,
-                                       const QStringList &materialDefinitions)
+void Q3DSPresentation::createMaterials(const QStringList &materialDefinitions,
+                                       const QString &subPresId)
 {
     if (d_ptr->m_viewerApp) {
-        d_ptr->m_viewerApp->createMaterials(elementPath, materialDefinitions);
+        d_ptr->m_viewerApp->createMaterials(subPresId, materialDefinitions);
     } else if (d_ptr->m_commandQueue) {
         // We need to copy the list as queue takes ownership of it
         QStringList *theMaterialDefinitions = new QStringList(materialDefinitions);
-        d_ptr->m_commandQueue->queueCommand(elementPath, CommandType_CreateMaterials,
+        d_ptr->m_commandQueue->queueCommand(subPresId, CommandType_CreateMaterials,
                                             theMaterialDefinitions);
     }
 }
 
 /*!
-    Deletes the material specified by \a materialName from the
-    presentation that owns the element specified by the \a elementPath parameter.
+    Deletes the material specified by \a materialName from the presentation.
+    To delete material from a subpresentation, prefix \a materialName with the subpresentation ID
+    similarly to the element paths. For example: \c{"SubPresentationOne:MyMaterial"}.
+
     Deleting materials is supported only for materials that have been dynamically created with
     createMaterial() or createMaterials().
 
     \sa deleteMaterials
     \sa createMaterial
  */
-void Q3DSPresentation::deleteMaterial(const QString &elementPath, const QString &materialName)
+void Q3DSPresentation::deleteMaterial(const QString &materialName)
 {
     QStringList materialNames;
     materialNames << materialName;
-    deleteMaterials(elementPath, materialNames);
+    deleteMaterials(materialNames);
 }
 
 /*!
-    Deletes materials specified by \a materialNames from the
-    presentation that owns the element specified by the \a elementPath parameter.
+    Deletes materials specified by \a materialNames from the presentation.
+    To delete material from a subpresentation, prefix the material name with the subpresentation ID
+    similarly to the element paths. For example: \c{"SubPresentationOne:MyMaterial"}.
+
     Deleting materials is supported only for materials that have been dynamically created with
     createMaterial() or createMaterials().
 
     \sa deleteMaterial
  */
-void Q3DSPresentation::deleteMaterials(const QString &elementPath, const QStringList &materialNames)
+void Q3DSPresentation::deleteMaterials(const QStringList &materialNames)
 {
     if (d_ptr->m_viewerApp) {
-        d_ptr->m_viewerApp->deleteMaterials(elementPath, materialNames);
+        d_ptr->m_viewerApp->deleteMaterials(materialNames);
     } else if (d_ptr->m_commandQueue) {
         // We need to copy the list as queue takes ownership of it
         QStringList *theMaterialNames = new QStringList(materialNames);
-        d_ptr->m_commandQueue->queueCommand(elementPath, CommandType_DeleteMaterials,
-                                            theMaterialNames);
+        d_ptr->m_commandQueue->queueCommand(CommandType_DeleteMaterials, theMaterialNames);
     }
 }
 
@@ -1193,7 +1199,9 @@ void Q3DSPresentation::keyReleaseEvent(QKeyEvent *e)
     \qmlsignal Presentation::materialsCreated
     Emitted when one or more materials have been created in response to createMaterial()
     or createMaterials() calls. The \a materialNames list contains the names of the created
-    materials. If creation failed, \a error string indicates the reason.
+    materials. If the material is created into a subpresentation, the name is prefixed with
+    subpresentation ID followed by a colon.
+    If creation failed, \a error string indicates the reason.
 
     \sa createMaterial
     \sa createMaterials
