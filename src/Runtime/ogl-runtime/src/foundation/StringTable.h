@@ -50,6 +50,7 @@
 #include "foundation/Qt3DSOption.h"
 
 #include <QtCore/qstring.h>
+#include <QtCore/qhashfunctions.h>
 
 namespace qt3ds {
 namespace foundation {
@@ -73,7 +74,7 @@ namespace foundation {
 
     public:
         CStrTableOrDataRef()
-            : m_StrTable(NULL)
+            : m_StrTable(nullptr)
         {
         }
         CStrTableOrDataRef(NVDataRef<QT3DSU8> inData)
@@ -95,7 +96,7 @@ namespace foundation {
             m_StrTable = inOther.m_StrTable;
             return *this;
         }
-        bool HasStrTable() const { return m_StrTable != NULL; }
+        bool HasStrTable() const { return m_StrTable != nullptr; }
         bool HasDataRef() const { return m_DataRef.hasValue(); }
         NVDataRef<QT3DSU8> GetDataRef() const { return *m_DataRef; }
         IStringTable *GetStringTable() const
@@ -180,7 +181,10 @@ namespace foundation {
 
     inline uint qHash(const CRegisteredString &rString)
     {
-        return eastl::hash<uint>()(reinterpret_cast<size_t>(rString.c_str()));
+        // Note that we are intentionally hashing a pointer to the string rather than its content,
+        // as CRegisteredString strings reside in the string table, which guarantees two instances
+        // with same string point to same string table string.
+        return QT_PREPEND_NAMESPACE(qHash(rString.c_str()));
     }
 
     class IStringTable;
