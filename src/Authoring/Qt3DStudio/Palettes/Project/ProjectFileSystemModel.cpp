@@ -172,6 +172,8 @@ void ProjectFileSystemModel::updateReferences()
 {
     m_references.clear();
     const auto doc = g_StudioApp.GetCore()->GetDoc();
+    if (!doc->isValid())
+        return;
     const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
     const auto sourcePathList = bridge->GetSourcePathList();
     const auto fontFileList = bridge->GetFontFileList();

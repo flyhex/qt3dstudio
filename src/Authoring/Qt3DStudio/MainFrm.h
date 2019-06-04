@@ -100,6 +100,7 @@ public:
     void onProjectSaveAs();
     void onDuplicatePresentation();
     void OnProjectNew();
+    void OnProjectClose();
     void OnFileNew();
     void OnFileRevert();
     void OnFileImportAssets();
@@ -241,6 +242,7 @@ public:
     QString getVariantsFilterStr() const;
     void updateActionFilterEnableState();
     void updateToolbarVariantsIcons(bool isFiltered);
+    void setActionsEnabledStatus(bool enabled);
 
 Q_SIGNALS:
     void playStateChanged(bool started);

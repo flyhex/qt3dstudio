@@ -418,12 +418,18 @@ void TimelineWidget::OnNewPresentation()
 
     // Reset timeline time
     OnTimeChanged(0);
+
+    // Show timeline widget when presentation is available
+    setVisible(true);
 }
 
 void TimelineWidget::OnClosingPresentation()
 {
     m_connections.clear();
     m_graphicsScene->expandMap().clear();
+
+    // Hide timeline widget when presentation is closed
+    setVisible(false);
 }
 
 void TimelineWidget::OnTimeChanged(long inTime)

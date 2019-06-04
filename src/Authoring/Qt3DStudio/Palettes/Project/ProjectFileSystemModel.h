@@ -88,6 +88,7 @@ public:
 
     void asyncUpdateReferences();
     void onFilesChanged(const Q3DStudio::TFileModificationList &inFileModificationList);
+    void clearModelData();
 
 Q_SIGNALS:
     void modelChanged(QAbstractItemModel *model);
@@ -95,7 +96,6 @@ Q_SIGNALS:
 
 private:
     void setRootIndex(const QModelIndex &rootIndex);
-    void clearModelData();
     void showModelTopLevelItems();
     void showModelChildItems(const QModelIndex &parentItem, int start, int end);
     int modelIndexRow(const QModelIndex &modelIndex) const;

@@ -101,6 +101,7 @@ public:
 
     // CPresentationChangeListener
     void OnNewPresentation() override;
+    void OnClosingPresentation() override;
     // CFileOpenListener
     void OnOpenDocument(const QString &inFilename, bool inSucceeded) override;
     void OnSaveDocument(const QString &inFilename, bool inSucceeded, bool inSaveCopy) override;

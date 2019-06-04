@@ -206,6 +206,7 @@ public:
     void OnLoadDocumentCatcher(const QString &inLocation);
     void OnFileOpen();
     QString OnProjectNew();
+    void OnProjectClose();
     void OnFileNew();
     bool IsAuthorZoom() const;
     bool isOnProgress() const;

@@ -1676,6 +1676,9 @@ void CDoc::CloseDocument()
 
     // Clear the modified flag - no data loaded
     SetModifiedFlag(false);
+
+    // Invalidate document path, so isValid() returns false
+    m_DocumentPath.clear();
 }
 
 /**

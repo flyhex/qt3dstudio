@@ -214,6 +214,12 @@ void ProjectView::OnNewPresentation()
     rebuild();
 }
 
+void ProjectView::OnClosingPresentation()
+{
+    // Clear project view when closing presentation
+    m_ProjectModel->clearModelData();
+}
+
 void ProjectView::OnOpenDocument(const QString &inFilename, bool inSucceeded)
 {
     Q_UNUSED(inFilename)

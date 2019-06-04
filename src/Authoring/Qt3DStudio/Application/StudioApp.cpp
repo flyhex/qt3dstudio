@@ -1811,6 +1811,23 @@ QString CStudioApp::OnProjectNew()
 }
 
 /**
+ * Closes current project
+ */
+void CStudioApp::OnProjectClose()
+{
+    if (PerformSavePrompt()) {
+        // CloseDocument() clears all the OpenGL buffers so it needs the correct context
+        getRenderer().MakeContextCurrent();
+        m_core->GetDoc()->CloseDocument();
+        getRenderer().ReleaseContext();
+        m_pMainWnd->setActionsEnabledStatus(false);
+        m_pMainWnd->setWindowTitle(QObject::tr("Qt 3D Studio"));
+        showStartupDialog();
+    }
+}
+
+
+/**
  * Create a new presentation
  * this creates a .uip file
  */

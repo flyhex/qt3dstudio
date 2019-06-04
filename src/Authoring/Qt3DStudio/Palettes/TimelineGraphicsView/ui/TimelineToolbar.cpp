@@ -283,6 +283,8 @@ bool TimelineToolbar::isVariantsFilterOn() const
 void TimelineToolbar::updateDataInputStatus()
 {
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    if (!doc->isValid())
+        return;
     qt3dsdm::Qt3DSDMPropertyHandle ctrldProp;
     qt3dsdm::Qt3DSDMInstanceHandle timeCtxRoot = doc->GetActiveRootInstance();
     CClientDataModelBridge *theClientBridge = doc->GetStudioSystem()->GetClientDataModelBridge();

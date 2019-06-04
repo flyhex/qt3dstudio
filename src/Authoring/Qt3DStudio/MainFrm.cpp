@@ -97,6 +97,7 @@ CMainFrame::CMainFrame()
     connect(m_ui->action_Duplicate_Presentation, &QAction::triggered,
             this, &CMainFrame::onDuplicatePresentation);
     connect(m_ui->action_Revert, &QAction::triggered, this, &CMainFrame::OnFileRevert);
+    connect(m_ui->action_Close, &QAction::triggered, this, &CMainFrame::OnProjectClose);
     connect(m_ui->actionImportAssets, &QAction::triggered, this, &CMainFrame::OnFileImportAssets);
     connect(m_ui->actionData_Inputs, &QAction::triggered, this, &CMainFrame::OnFileDataInputs);
     connect(m_ui->actionData_InputsGenerate, &QAction::triggered, this,
@@ -314,6 +315,32 @@ CMainFrame::~CMainFrame()
     m_updateUITimer->stop();
 }
 
+/**
+ * Enable/disable menu and toolbar actions which require project availability.
+ */
+void CMainFrame::setActionsEnabledStatus(bool enabled)
+{
+    m_ui->m_ClientToolsBar->setEnabled(enabled);
+    m_ui->m_EditCamerasBar->setEnabled(enabled);
+    m_ui->m_PlaybackToolbar->setEnabled(enabled);
+    m_ui->menu_Edit->setEnabled(enabled);
+    m_ui->menu_Timeline->setEnabled(enabled);
+    m_ui->menu_View->setEnabled(enabled);
+    m_ui->action_Save_Project_As->setEnabled(enabled);
+    m_ui->action_Duplicate_Presentation->setEnabled(enabled);
+    m_ui->action_Connect_to_Device->setEnabled(enabled);
+    m_ui->action_Revert->setEnabled(enabled);
+    m_ui->action_Close->setEnabled(enabled);
+    m_ui->actionImportAssets->setEnabled(enabled);
+    m_ui->action_New_Presentation->setEnabled(enabled);
+    m_ui->actionData_Inputs->setEnabled(enabled);
+    m_ui->actionData_InputsGenerate->setEnabled(enabled);
+    // Note: actionRemote_Preview is special case, disabled here
+    // while enabled by OnConnectionChanged
+    if (!enabled)
+        m_ui->actionRemote_Preview->setEnabled(false);
+}
+
 // Timer callback
 void CMainFrame::onPlaybackTimeout()
 {
@@ -367,21 +394,8 @@ void CMainFrame::OnCreate()
     delete m_ui->toolBar;
 
     // Disable toolbars and menus until we have a presentation
-    m_ui->m_ClientToolsBar->setEnabled(false);
-    m_ui->m_EditCamerasBar->setEnabled(false);
-    m_ui->m_PlaybackToolbar->setEnabled(false);
-    m_ui->menu_Edit->setEnabled(false);
-    m_ui->menu_Timeline->setEnabled(false);
-    m_ui->menu_View->setEnabled(false);
-    m_ui->action_Save_Project_As->setEnabled(false);
-    m_ui->action_Duplicate_Presentation->setEnabled(false);
-    m_ui->action_Connect_to_Device->setEnabled(false);
-    m_ui->action_Revert->setEnabled(false);
-    m_ui->actionImportAssets->setEnabled(false);
-    m_ui->actionRemote_Preview->setEnabled(false);
-    m_ui->action_New_Presentation->setEnabled(false);
-    m_ui->actionData_Inputs->setEnabled(false);
-    m_ui->actionData_InputsGenerate->setEnabled(false);
+    setActionsEnabledStatus(false);
+
 #if 1 // TODO: Hidden until UX decision is made if these buttons are needed at all or not
     m_ui->actionPan_Tool->setVisible(false);
     m_ui->actionOrbit_Tool->setVisible(false);
@@ -407,20 +421,7 @@ void CMainFrame::OnNewPresentation()
     m_ui->m_EditCamerasBar->setupCameras();
     // Enable dockables, toolbars, and menus
     m_paletteManager->EnablePalettes();
-    m_ui->m_ClientToolsBar->setEnabled(true);
-    m_ui->m_EditCamerasBar->setEnabled(true);
-    m_ui->m_PlaybackToolbar->setEnabled(true);
-    m_ui->menu_Edit->setEnabled(true);
-    m_ui->menu_Timeline->setEnabled(true);
-    m_ui->menu_View->setEnabled(true);
-    m_ui->action_Save_Project_As->setEnabled(true);
-    m_ui->action_Duplicate_Presentation->setEnabled(true);
-    m_ui->action_Connect_to_Device->setEnabled(true);
-    m_ui->action_Revert->setEnabled(true);
-    m_ui->actionImportAssets->setEnabled(true);
-    m_ui->action_New_Presentation->setEnabled(true);
-    m_ui->actionData_Inputs->setEnabled(true);
-    m_ui->actionData_InputsGenerate->setEnabled(true);
+    setActionsEnabledStatus(true);
 
     // Clear data input list and sub-presentation list
     g_StudioApp.m_subpresentations.clear();
@@ -748,6 +749,15 @@ void CMainFrame::onDuplicatePresentation()
 void CMainFrame::OnProjectNew()
 {
     g_StudioApp.OnProjectNew();
+}
+
+/**
+ * Command handler for the Close Project menu option.
+ * This will close the currently open project.
+ */
+void CMainFrame::OnProjectClose()
+{
+    g_StudioApp.OnProjectClose();
 }
 
 void CMainFrame::OnFileNew()

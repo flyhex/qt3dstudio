@@ -74,6 +74,8 @@ Project palette using Import functionality.</string>
     <addaction name="menuRecent_Projects"/>
     <addaction name="action_Revert"/>
     <addaction name="separator"/>
+    <addaction name="action_Close"/>
+    <addaction name="separator"/>
     <addaction name="action_Save"/>
     <addaction name="action_Save_Project_As"/>
     <addaction name="separator"/>
@@ -563,6 +565,11 @@ Project palette using Import functionality.</string>
   <action name="action_Revert">
    <property name="text">
     <string>&amp;Revert to Last Save</string>
+   </property>
+  </action>
+  <action name="action_Close">
+   <property name="text">
+    <string>Close Project</string>
    </property>
   </action>
   <action name="action_Connect_to_Device">

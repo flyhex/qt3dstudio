@@ -424,6 +424,8 @@ void SlideView::onDockLocationChange(Qt::DockWidgetArea area)
 void SlideView::updateDataInputStatus()
 {
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    if (!doc->isValid())
+        return;
     CClientDataModelBridge *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
     qt3dsdm::Qt3DSDMInstanceHandle slideRoot = doc->GetActiveRootInstance();
 
