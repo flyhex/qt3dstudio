@@ -76,13 +76,13 @@ void main()
     alphas = alphaRange(scale);
 #endif
 
-    highp vec2 textureSizeMultiplier = vec2(1.0 / highp float(textureWidth),
+    highp vec2 textureSizeMultiplier = vec2(1.0 / float(textureWidth),
                                             1.0 / float(textureHeight));
 
     sampleCoord = tCoord * textureSizeMultiplier;
     shadowSampleCoord = (tCoord - shadowOffset) * textureSizeMultiplier;
-    normalizedTextureBounds = highp vec4(textureBounds.xy * textureSizeMultiplier,
-                                         textureBounds.zw * textureSizeMultiplier);
+    normalizedTextureBounds = vec4(textureBounds.xy * textureSizeMultiplier,
+                                   textureBounds.zw * textureSizeMultiplier);
 
     gl_Position = mvp * vec4(vCoord, 1.0);
 }

@@ -2,8 +2,6 @@ in vec2 sampleCoord;
 in vec2 shadowSampleCoord;
 in vec4 normalizedTextureBounds;
 
-out vec4 fragColor;
-
 uniform sampler2D _qt_texture;
 uniform vec4 color;
 uniform vec4 shadowColor;
@@ -26,5 +24,5 @@ void main()
     float textAlpha = smoothstep(0.5 - textDistanceD, 0.5, textDistance);
     vec4 textPixel = color * textAlpha;
 
-    fragColor = mix(shadowPixel, textPixel, textPixel.a);
+    fragOutput = mix(shadowPixel, textPixel, textPixel.a);
 }
