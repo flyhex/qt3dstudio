@@ -1,6 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>presentation/datainput.uia</file>
-        <file>presentation/datainput.uip</file>
-    </qresource>
-</RCC>

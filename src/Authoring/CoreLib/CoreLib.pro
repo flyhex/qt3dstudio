@@ -38,13 +38,13 @@ INCLUDEPATH += \
     ../QT3DSIMP/Qt3DSImportSGTranslation \
     ../../Runtime/ogl-runtime/src/dm/systems \
     ../../Runtime/ogl-runtime/src/dm/systems/cores \
-    ../Studio \
-    ../Studio/DragAndDrop \
-    ../Studio/Render \
-    ../Studio/Workspace \
-    ../Studio/DragAndDrop \
-    ../Studio/Application \
-    ../Studio/Utils \
+    ../Qt3DStudio \
+    ../Qt3DStudio/DragAndDrop \
+    ../Qt3DStudio/Render \
+    ../Qt3DStudio/Workspace \
+    ../Qt3DStudio/DragAndDrop \
+    ../Qt3DStudio/Application \
+    ../Qt3DStudio/Utils \
     ../Build \
     ../Common/Code/Thread \
     ../Common/Code/IO \

@@ -18,6 +18,7 @@ mingw:win32 {
 }
 
 INCLUDEPATH += $$PWD/../Runtime/ogl-runtime/src
+INCLUDEPATH += $$PWD/../Runtime/ogl-runtime/src/api/studio3d
 
 win32 {
 INCLUDEPATH += \
