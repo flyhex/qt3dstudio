@@ -105,6 +105,8 @@ namespace render {
         bool SetInputAssembler(NVRenderBackendInputAssemblerObject iao,
                                        NVRenderBackendShaderProgramObject po) override;
 
+        void ReleaseInputAssembler(NVRenderBackendInputAssemblerObject iao) override;
+
         void SetDrawBuffers(NVRenderBackendRenderTargetObject rto,
                                     NVConstDataRef<QT3DSI32> inDrawBufferSet) override;
         void SetReadBuffer(NVRenderBackendRenderTargetObject rto,

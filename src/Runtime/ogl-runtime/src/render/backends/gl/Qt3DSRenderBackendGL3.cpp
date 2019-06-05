@@ -506,6 +506,15 @@ namespace render {
         return true;
     }
 
+    void NVRenderBackendGL3Impl::ReleaseInputAssembler(
+            NVRenderBackend::NVRenderBackendInputAssemblerObject iao)
+    {
+        NVRenderBackendInputAssemblerGL *inputAssembler = (NVRenderBackendInputAssemblerGL *)iao;
+        if (inputAssembler->m_VaoID)
+            GL_CALL_EXTRA_FUNCTION(glDeleteVertexArrays(1, &inputAssembler->m_VaoID));
+        NVDelete(m_Foundation.getAllocator(), inputAssembler);
+    }
+
     void NVRenderBackendGL3Impl::SetDrawBuffers(NVRenderBackendRenderTargetObject rto,
                                                 NVConstDataRef<QT3DSI32> inDrawBufferSet)
     {

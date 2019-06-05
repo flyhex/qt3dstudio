@@ -501,6 +501,15 @@ bool NVRenderBackendGLES2Impl::SetInputAssembler(NVRenderBackendInputAssemblerOb
     return true;
 }
 
+void NVRenderBackendGLES2Impl::ReleaseInputAssembler(
+        NVRenderBackend::NVRenderBackendInputAssemblerObject iao)
+{
+    NVRenderBackendInputAssemblerGL *inputAssembler = (NVRenderBackendInputAssemblerGL *)iao;
+    if (inputAssembler->m_VaoID)
+        GL_CALL_EXTENSION_FUNCTION(glDeleteVertexArraysOES(1, &inputAssembler->m_VaoID));
+    NVDelete(m_Foundation.getAllocator(), inputAssembler);
+}
+
 void NVRenderBackendGLES2Impl::SetDrawBuffers(NVRenderBackendRenderTargetObject rto,
                                               NVConstDataRef<QT3DSI32> inDrawBufferSet)
 {
