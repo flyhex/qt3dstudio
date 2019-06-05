@@ -475,6 +475,7 @@ bool Q3DSSurfaceViewerPrivate::initialize(QSurface *surface, QOpenGLContext *con
     connect(context, &QOpenGLContext::aboutToBeDestroyed, this, &Q3DSSurfaceViewerPrivate::destroy);
 
     bool success = initializeRuntime();
+    resetUpdateTimer();
 
     if (success)
         Q_EMIT q_ptr->runningChanged(true);
@@ -512,10 +513,17 @@ void Q3DSSurfaceViewerPrivate::destroy()
  */
 void Q3DSSurfaceViewerPrivate::update()
 {
-    if (m_viewerApp && m_viewerApp->IsInitialised()) {
+    if (m_viewerApp) {
         if (m_surface->surfaceClass() != QSurface::Window
                 || static_cast<QWindow *>(m_surface)->isExposed()) {
-            m_context->makeCurrent(m_surface);
+            if (!m_context->makeCurrent(m_surface)) {
+                qWarning () << "Q3DSSurfaceViewer: Unable to make context current";
+                return;
+            }
+
+            if (!m_viewerApp->IsInitialised() && !initializeRuntime())
+                return;
+
             if (m_autoSize)
                 setSize(m_surface->size());
             m_viewerApp->Render();
@@ -596,6 +604,7 @@ void Q3DSSurfaceViewerPrivate::reset()
     if (m_viewerApp) {
         releaseRuntime();
         initializeRuntime();
+        resetUpdateTimer();
     }
 }
 
@@ -616,16 +625,19 @@ void Q3DSSurfaceViewerPrivate::setError(const QString &error)
  */
 bool Q3DSSurfaceViewerPrivate::initializeRuntime()
 {
-    Q_ASSERT(!m_viewerApp);
+    if (!m_viewerApp) {
+        m_viewerApp = &Q3DSViewerApp::Create(m_context, new Qt3DSAudioPlayerImpl(), &m_startupTimer);
+        connect(m_viewerApp, &Q3DSViewerApp::SigPresentationReady,
+                this->q_ptr, &Q3DSSurfaceViewer::presentationReady);
+        connect(m_viewerApp, &Q3DSViewerApp::SigPresentationLoaded,
+                this->q_ptr, &Q3DSSurfaceViewer::presentationLoaded);
+        Q_ASSERT(m_viewerApp);
+    }
+    if (!m_context->makeCurrent(m_surface)) {
+        qWarning () << "Q3DSSurfaceViewer: Unable to make context current";
+        return false;
+    }
 
-    m_context->makeCurrent(m_surface);
-
-    m_viewerApp = &Q3DSViewerApp::Create(m_context, new Qt3DSAudioPlayerImpl(), &m_startupTimer);
-    connect(m_viewerApp, &Q3DSViewerApp::SigPresentationReady,
-            this->q_ptr, &Q3DSSurfaceViewer::presentationReady);
-    connect(m_viewerApp, &Q3DSViewerApp::SigPresentationLoaded,
-            this->q_ptr, &Q3DSSurfaceViewer::presentationLoaded);
-    Q_ASSERT(m_viewerApp);
 
     const QString localSource = Q3DSUtils::urlToLocalFileOrQrc(m_presentation->source());
 
@@ -651,9 +663,6 @@ bool Q3DSSurfaceViewerPrivate::initializeRuntime()
         m_viewerApp->setPresentationId(m_id);
     m_settings->d_ptr->setViewerApp(m_viewerApp);
     m_presentation->d_ptr->setViewerApp(m_viewerApp);
-
-    resetUpdateTimer();
-
     return true;
 }
 
