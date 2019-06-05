@@ -54,7 +54,7 @@ typedef quint32 QT3DSU32;
 typedef qint32 QT3DSI32;
 
 // Android's definition of GLuint64 as unsigned long (64-bits) requires this workaround
-#if Q_PROCESSOR_WORDSIZE == 8 && defined(Q_OS_ANDROID)
+#if Q_PROCESSOR_WORDSIZE == 8 && (defined(Q_OS_ANDROID) || defined(Q_OS_INTEGRITY))
 typedef unsigned long QT3DSU64;
 #else
 typedef quint64 QT3DSU64;
