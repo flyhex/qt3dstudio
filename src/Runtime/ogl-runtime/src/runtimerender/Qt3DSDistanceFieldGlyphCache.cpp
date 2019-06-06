@@ -68,6 +68,7 @@ Q3DSDistanceFieldGlyphCache::~Q3DSDistanceFieldGlyphCache()
 {
     for (auto &texture : m_textures)
         qt3ds::foundation::NVDelete(m_context.GetAllocator(), texture.texture);
+    delete m_areaAllocator;
 }
 
 int Q3DSDistanceFieldGlyphCache::maxTextureSize() const

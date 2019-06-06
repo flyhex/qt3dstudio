@@ -119,10 +119,12 @@ Q3DSDistanceFieldRenderer::buildGlyphsPerTexture(const SText &textInfo)
     bool hasValidBoundingBox = boundingBox.x() > 0 || boundingBox.y() > 0;
 
     QRawFont font = m_fontDatabase.findFont(textInfo.m_Font.c_str());
-    font.setPixelSize(qreal(textInfo.m_FontSize));
+    qreal scaleFactor = font.pixelSize() / qreal(textInfo.m_FontSize);
 
-    const qreal maximumWidth = boundingBox.isNull() ? qreal(0x01000000) : qreal(boundingBox.x());
-    const qreal maximumHeight = boundingBox.isNull() ? qreal(0x01000000) : qreal(boundingBox.y());
+    const qreal maximumWidth = boundingBox.isNull() ? qreal(0x01000000)
+                                                    : qreal(boundingBox.x()) * scaleFactor;
+    const qreal maximumHeight = boundingBox.isNull() ? qreal(0x01000000)
+                                                     : qreal(boundingBox.y()) * scaleFactor;
 
     QTextLayout layout;
     QTextOption option = layout.textOption();
@@ -159,9 +161,9 @@ Q3DSDistanceFieldRenderer::buildGlyphsPerTexture(const SText &textInfo)
 
         layout.clearLayout();
 
-        float leading = textInfo.m_Leading;
+        qreal leading = qreal(textInfo.m_Leading) * scaleFactor;
         width = 0.0;
-        height = qreal(-leading);
+        height = -leading;
 
         QVector<QTextLayout::FormatRange> formatRanges;
 
@@ -169,7 +171,7 @@ Q3DSDistanceFieldRenderer::buildGlyphsPerTexture(const SText &textInfo)
         formatRange.start = 0;
         formatRange.length = text.length();
         formatRange.format.setFontLetterSpacingType(QFont::AbsoluteSpacing);
-        formatRange.format.setFontLetterSpacing(qreal(textInfo.m_Tracking));
+        formatRange.format.setFontLetterSpacing(qreal(textInfo.m_Tracking) * scaleFactor);
         formatRanges.append(formatRange);
         layout.setFormats(formatRanges);
 
@@ -183,7 +185,7 @@ Q3DSDistanceFieldRenderer::buildGlyphsPerTexture(const SText &textInfo)
                 break;
 
             line.setLineWidth(maximumWidth);
-            height += qreal(leading);
+            height += leading;
             height = qCeil(height);
 
             qreal textWidth = line.naturalTextWidth();
@@ -380,6 +382,11 @@ Q3DSDistanceFieldRenderer::buildGlyphsPerTexture(const SText &textInfo)
                 float cx2 = cx1 + float(metrics.width);
                 float cy1 = float(position.y() - metrics.baselineY) + offsetY;
                 float cy2 = cy1 + float(metrics.height);
+
+                cx1 /= float(scaleFactor);
+                cy1 /= float(scaleFactor);
+                cx2 /= float(scaleFactor);
+                cy2 /= float(scaleFactor);
 
                 if (textInfo.m_DropShadow) {
                     if (shadowOffsetX < 0.0)
