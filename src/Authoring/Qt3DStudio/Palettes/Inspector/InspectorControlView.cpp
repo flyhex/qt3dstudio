@@ -65,7 +65,6 @@
 #include "SelectedValue.h"
 #include "Qt3DSDMInspectable.h"
 #include "Qt3DSDMSlides.h"
-#include "Qt3DSDMMaterialInspectable.h"
 #include "GuideInspectable.h"
 
 #include <QtCore/qtimer.h>
@@ -407,8 +406,10 @@ void InspectorControlView::OnSelectionSet(Q3DStudio::SSelectedValue selectable)
 {
     CInspectableBase *inspectable = createInspectableFromSelectable(selectable);
 
-    if (inspectable && !inspectable->isValid())
+    if (inspectable && !inspectable->isValid()) {
+        delete inspectable;
         inspectable = nullptr;
+    }
 
     setInspectable(inspectable);
 }
@@ -444,8 +445,6 @@ CInspectableBase *InspectorControlView::createInspectableFromSelectable(
                                               ->GetSlideSystem()->GetSlideInstance(activeSlide);
                         inspectableBase = new Qt3DSDMInspectable(selectedInstance,
                                                                  activeSlideInstance);
-                    } else if (bridge->IsMaterialBaseInstance(selectedInstance)) {
-                        inspectableBase = new Qt3DSDMMaterialInspectable(selectedInstance);
                     } else {
                         inspectableBase = new Qt3DSDMInspectable(selectedInstance);
                     }
@@ -470,6 +469,10 @@ void InspectorControlView::setInspectable(CInspectableBase *inInspectable)
 {
     if (m_inspectableBase != inInspectable) {
         m_activeBrowser.clear();
+
+        if (m_inspectableBase)
+            delete m_inspectableBase;
+
         m_inspectableBase = inInspectable;
         m_inspectorControlModel->setInspectable(inInspectable);
 

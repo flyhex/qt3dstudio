@@ -314,7 +314,6 @@ SOURCES += \
     Palettes/Inspector/Qt3DSDMInspectable.cpp \
     Palettes/Inspector/Qt3DSDMInspectorGroup.cpp \
     Palettes/Inspector/Qt3DSDMInspectorRow.cpp \
-    Palettes/Inspector/Qt3DSDMMaterialInspectable.cpp \
     Palettes/Inspector/TabOrderHandler.cpp \
     Palettes/Inspector/TextureChooserView.cpp \
     Palettes/PaletteManager.cpp \

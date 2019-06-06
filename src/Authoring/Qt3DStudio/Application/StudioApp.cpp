@@ -204,7 +204,6 @@ int main(int argc, char *argv[])
 #include "Qt3DSDMStudioSystem.h"
 #include "Qt3DSDMInspectable.h"
 #include "Qt3DSDMSlides.h"
-#include "Qt3DSDMMaterialInspectable.h"
 #include "Qt3DSDMAnimation.h"
 #include "Qt3DSDMDataCore.h"
 #include "IDirectoryWatchingSystem.h"
@@ -1406,34 +1405,6 @@ void CStudioApp::PlaybackToggle()
     // Otherwise, the presentation is stopped, so start it playing
     else
         PlaybackPlay();
-}
-
-// TODO: move to more appropriate place (InspectorControlModel.cpp)
-CInspectableBase *CStudioApp::getInspectableFromInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
-{
-    CInspectableBase *inspectableBase = nullptr;
-    CDoc *doc = m_core->GetDoc();
-
-    if (doc->GetDocumentReader().IsInstance(inInstance)) {
-        CClientDataModelBridge *theBridge = doc->GetStudioSystem()->GetClientDataModelBridge();
-        qt3dsdm::Qt3DSDMSlideHandle activeSlide = doc->GetActiveSlide();
-
-        // Slide, scene or component
-        if (inInstance == theBridge->GetOwningComponentInstance(activeSlide)) {
-            Qt3DSDMInstanceHandle activeSlideInstance = doc->GetStudioSystem()->GetSlideSystem()
-                                                           ->GetSlideInstance(activeSlide);
-
-            inspectableBase = new Qt3DSDMInspectable(inInstance, activeSlideInstance);
-        }
-        if (!inspectableBase) {
-            if (theBridge->IsMaterialBaseInstance(inInstance))
-                inspectableBase = new Qt3DSDMMaterialInspectable(inInstance);
-            else
-                inspectableBase = new Qt3DSDMInspectable(inInstance);
-        }
-    }
-
-    return inspectableBase;
 }
 
 void CStudioApp::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler,

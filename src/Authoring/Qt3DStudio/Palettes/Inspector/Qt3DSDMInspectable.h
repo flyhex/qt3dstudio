@@ -41,6 +41,7 @@ class Qt3DSDMInspectable : public CInspectableBase
 public:
     Qt3DSDMInspectable(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                        qt3dsdm::Qt3DSDMInstanceHandle activeSlideInstance = 0);
+    ~Qt3DSDMInspectable();
 
     Q3DStudio::CString getName() override;
     long getGroupCount() const override;
@@ -59,6 +60,8 @@ protected:
     virtual QString GetGroupName(long inGroupIndex);
     CDoc *getDoc() const;
     long activeGroupIndex(long groupIndex) const;
+
+    QHash<int, CInspectorGroup *> m_groups;
 };
 
 #endif

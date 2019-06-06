@@ -54,6 +54,13 @@ Qt3DSDMInspectable::Qt3DSDMInspectable(qt3dsdm::Qt3DSDMInstanceHandle instance,
     }
 }
 
+Qt3DSDMInspectable::~Qt3DSDMInspectable()
+{
+    for (auto g : qAsConst(m_groups))
+        delete g;
+    m_groups.clear();
+}
+
 // Returns the name of this inspectable
 Q3DStudio::CString Qt3DSDMInspectable::getName()
 {
@@ -87,11 +94,15 @@ long Qt3DSDMInspectable::getGroupCount() const
 }
 
 // Return the property group for display
-CInspectorGroup *Qt3DSDMInspectable::getGroup(long inIndex)
+CInspectorGroup *Qt3DSDMInspectable::getGroup(long index)
 {
-    Qt3DSDMInspectorGroup *group = new Qt3DSDMInspectorGroup(GetGroupName(inIndex));
+    if (m_groups.contains(index))
+        return m_groups[index];
 
-    TMetaDataPropertyHandleList properties = GetGroupProperties(inIndex);
+    Qt3DSDMInspectorGroup *group = new Qt3DSDMInspectorGroup(GetGroupName(index));
+    m_groups[index] = group;
+
+    TMetaDataPropertyHandleList properties = GetGroupProperties(index);
 
     for (auto &prop : properties)
         group->CreateRow(getDoc(), prop);
@@ -100,16 +111,16 @@ CInspectorGroup *Qt3DSDMInspectable::getGroup(long inIndex)
 }
 
 // Return the property handles for display, given the group index
-TMetaDataPropertyHandleList Qt3DSDMInspectable::GetGroupProperties(long inIndex)
+TMetaDataPropertyHandleList Qt3DSDMInspectable::GetGroupProperties(long index)
 {
-    long activeGroupIdx = activeGroupIndex(inIndex);
+    long activeGroupIdx = activeGroupIndex(index);
     TMetaDataPropertyHandleList retval;
     IMetaData &theMetaData = *getDoc()->GetStudioSystem()->GetActionMetaData();
-    theMetaData.GetMetaDataProperties(GetGroupInstance(inIndex), retval);
+    theMetaData.GetMetaDataProperties(GetGroupInstance(index), retval);
     qt3dsdm::IPropertySystem &thePropertySystem(*getDoc()->GetStudioSystem()->GetPropertySystem());
     // get name of the current group for filtering
     Option<qt3dsdm::TCharStr> theGroupFilterName =
-            theMetaData.GetGroupFilterNameForInstance(GetGroupInstance(inIndex), activeGroupIdx);
+            theMetaData.GetGroupFilterNameForInstance(GetGroupInstance(index), activeGroupIdx);
     long theGroupCount = getGroupCount();
 
     // end is explicitly required
@@ -140,7 +151,7 @@ TMetaDataPropertyHandleList Qt3DSDMInspectable::GetGroupProperties(long inIndex)
 
                     SValue theValue;
                     thePropertySystem.GetInstancePropertyValue(
-                                GetGroupInstance(inIndex), theFilter.m_FilterProperty, theValue);
+                                GetGroupInstance(index), theFilter.m_FilterProperty, theValue);
                     bool resultIfTrue = theFilter.m_FilterType == PropertyFilterTypes::ShowIfEqual;
                     if (Equals(theValue.toOldSkool(), theFilter.m_Value.toOldSkool())) {
                         keepProperty = resultIfTrue;
