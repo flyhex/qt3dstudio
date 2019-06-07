@@ -1810,7 +1810,12 @@ void CStudioApp::OnLoadDocumentCatcher(const QString &inDocument)
 {
     {
         CDispatchDataModelNotificationScope __scope(*m_core->GetDispatch());
+
+        // CloseDocument() clears all the OpenGL buffers so it needs the correct context
+        getRenderer().MakeContextCurrent();
         m_core->GetDoc()->CloseDocument();
+        getRenderer().ReleaseContext();
+
         m_core->GetDoc()->LoadDocument(inDocument);
     }
 
