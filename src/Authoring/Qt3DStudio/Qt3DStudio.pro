@@ -105,8 +105,20 @@ STATICRUNTIME = \
     QMAKE_LFLAGS += $$STATICRUNTIME
 } else {
     DEFINES +=  WIN32_LEAN_AND_MEAN
-    LIBS += $$STATICRUNTIME
-    !mingw: QMAKE_LFLAGS += /NODEFAULTLIB:tinyxml.lib
+    mingw {
+        LIBS += -lEASTL$$qtPlatformTargetSuffix() \
+                -lpcre$$qtPlatformTargetSuffix() \
+                -lTinyXML$$qtPlatformTargetSuffix() \
+                -lColladaDOM$$qtPlatformTargetSuffix() \
+                -lQT3DSDM$$qtPlatformTargetSuffix() \
+                -lCommonLib$$qtPlatformTargetSuffix() \
+                -lCoreLib$$qtPlatformTargetSuffix() \
+                -lqt3dsruntimestatic$$qtPlatformTargetSuffix() \
+    } else {
+        LIBS += $$STATICRUNTIME
+        QMAKE_LFLAGS += /NODEFAULTLIB:tinyxml.lib
+    }
+
 }
 
 if (qtHaveModule(3dstudio)) {

@@ -26,7 +26,7 @@ load(qt_parts)
 # Qt3DStudio and Qt3DViewer executables/application bundles are installed to.
 # The required Qt libraries are copied into that directory/bundles.
 !build_pass|!debug_and_release {
-    !mingw:win32|macos {
+    win32|macos {
         macos {
             deploytool = macdeployqt
             exesuffix = .app

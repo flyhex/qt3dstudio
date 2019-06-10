@@ -266,7 +266,7 @@ android {
 }
 
 win32 {
-    DEFINES += QT3DS_OS_WINDOWS _WIN32 _PCPLATFORM \
+    DEFINES += QT3DS_OS_WINDOWS _PCPLATFORM \
         WIDE_IS_DIFFERENT_TYPE_THAN_CHAR16_T KDWIN NOMINMAX
 
     win32-msvc {
@@ -291,6 +291,8 @@ win32 {
 
     contains(QT_ARCH, x86_64) {
         DEFINES += _WIN64
+    } else {
+        DEFINES += _WIN32
     }
 }
 
