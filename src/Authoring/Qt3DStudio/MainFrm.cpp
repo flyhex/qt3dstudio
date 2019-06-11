@@ -1749,9 +1749,19 @@ void CMainFrame::OnSaveDocument(const QString &inFilename, bool inSucceeded, boo
 void CMainFrame::OnDocumentPathChanged(const QString &inNewPath)
 {
     QFileInfo info(inNewPath);
-    QString theTitle = info.fileName();
-    if (theTitle.isEmpty())
-        theTitle = QObject::tr("Untitled");
+
+    QString theTitle;
+    QFileInfo projectPathInfo(g_StudioApp.GetCore()->getProjectFile().getProjectPath());
+
+    QString projectDir = projectPathInfo.baseName();
+
+    if (!projectDir.isEmpty())
+        theTitle.append(QString("(%1) ").arg(projectDir));
+
+    if (!info.fileName().isEmpty())
+        theTitle.append(info.fileName());
+    else
+        theTitle.append(QObject::tr("Untitled"));
 
     theTitle.append(QStringLiteral(" - ") + QObject::tr("Qt 3D Studio"));
 
