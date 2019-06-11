@@ -28,44 +28,107 @@
 
 /*!
 
-\title Working with 3D Content
-\page best-practices-importing-3d-content.html
+\title 3D Assets
+\page 3d-assets.html
 \ingroup qt3dstudio-best-practices
 
+In Studio, you can import 3D models and scenes created in 3D modeling tools. The following
+file formats are supported:
+
+\section2 COLLADA (.dae)
+
+Depending on the 3D modeling tool, you might need to install a specific COLLADA export plugin to
+be able to export in this format.
+
+\section2 Autodesk FBX (.fbx)
+
+\list
+\li
+  Studio supports either ASCII or Binary FBX files. ASCII files are preferred for any bug reports.
+\li
+  Studio supports FBX version 2013 and later.
+\endlist
+
 \section1 3D Content Overview
+
+In this section, you will find an overview of creating and exporting 3D assets to use in
+Qt 3D Studio. For more detailed information, see the section for the
+\l{Exporting from Different Tools}{specific 3D modeling tool}
+that you are using.
+
+\section2 Geometry
 
 \list
 \li
   \b{Use Triangles} - Qt 3D Studio only supports geometry
-  exported as triangles. When exporting you must ensure that this option
-  is selected. Many of the exporters provide an option for this at
-  export time, and Studio will tell you what went wrong if you forget to
-  export with this option.
+  exported as triangles. Many 3D modeling tools provide an option to
+  triangulate meshes during export, while you will have to do it manually
+  before the export with some tools.
 \li
-  \b{Time-based Animations} - By default in Max or Maya, when you
+  \b{Handling Pivot Points} - DCC packages all handle pivot points
+  differently. In Qt 3D Studio there is only one pivot per object
+  and it is used as the origin for position, scale, and rotation
+  operations. In your DCC package, feel free to adjust the position of a
+  3D model's pivot as needed. However, extreme edits to pivots in 3D modeling tools
+  can cause problems upon import into Studio, especially if
+  animated. This difference is often manifested as a difference in the
+  position or orientation of an object. As an artist, you can prevent
+  these kinds of problems by only making simple edits to your pivot
+  points. Keep your pivot points to the default (world) alignment, don't
+  scale them, and make sure that if you have multiple pivots (Maya) that
+  they are all at the same location in space.
+\li
+  \b{Transformation} - As you would expect you can import full 3D transform
+  information including position, rotation, scale, and pivot. Studio can
+  import left and right-handed coordinate systems, Y-up or Z-up and
+  rotations applied in any order. The principal limitation in this area is
+  pivot points. As discussed above, only simple edits to pivot points are
+  supported.
+
+  Most DCC tools allow artists to freeze transformations and we highly
+  recommend performing this operation before importing mesh data into
+  Studio. This operation ensures that the mesh coming into Studio has
+  clean transformation data and no arbitrary transformation values which
+  can be confusing or an impediment to your work.
+
+ \note After freezing transforms, you may have to reposition the
+ pivot point in some DCC tools.
+
+\endlist
+
+\section2 Animations
+
+Animations can be brought into Studio using COLLADA or FBX. Animations are
+supported on any imported attribute. Position, rotation, scale, and pivot can all be animated.
+An example of our advanced support for animations would be a hierarchy of items, rotated
+simultaneously on arbitrary axes in arbitrary axis order. Studio also
+supports importing bezier tangent value tweaked into animations.
+
+\list
+\li
+  \b{Time-based Animations} - By default, in many 3D modeling tools, when you
   are creating keyframes you are associating them with certain frame
   numbers. This is great in the film industry where frame rates are
   constant, but this technique necessarily has problems in applications
   where the frame rate may or may not be rock solid. Our solution to
   this problem is to express the locations of keyframes in time values
-  instead of frame numbers. That way, if you say \"this logo animation
-  will play for 3 seconds\" we can guarantee that it will play for 3
-  seconds. If you express it in frames, \"this logo animation will play
-  for 180 frames\" it may play for 3 seconds if you're getting 60 fps,
+  instead of frame numbers. That way, if you say \e{"this logo animation
+  will play for 3 seconds\"}, we can guarantee that it will play for 3
+  seconds. If you express it in frames, \e{\"this logo animation will play
+  for 180 frames\"}, it may play for 3 seconds if you're getting 60 fps,
   but if you drop to 30 fps the animation is going to go much slower.
 
-  Luckily, accounting for this is relatively simple. Max and Maya both
+  Luckily, accounting for this is relatively simple. Many 3D modeling tools
   default to a setting of 24 frames per second, so your keyframes will
   be translated at that ratio. If you want a keyframe at one second, put
-  it on frame 24. Two seconds? Frame 48, etc. Both Max and Maya offer
-  configurable frame rates, and the frame rate setting should be
-  respected upon import, if changed. It's also worthwhile to note that
-  Maya, by default, starts at frame 1. If you have a keyframe at frame
-  one, the time for that keyframe will be 1/24 or 0.041 seconds. It may
-  be a good idea to go into your Maya animation settings and start your
+  it on frame 24. Two seconds? Frame 48, etc. Usually, configurable frame rates
+  are offered, and the frame rate setting should be respected upon import.
+  It's also worthwhile to note that i.e. Maya, by default, starts at frame 1.
+  If you have a keyframe at frame one, the time for that keyframe will be 1/24 or 0.041 seconds.
+  It may be a good idea to go into your Maya animation settings and start your
   animations at frame 0, or 0/24 = 0 seconds.
 \li
-  \b{Different Animation Systems} - DCC packages offer highly
+  \b{Different Animation Systems} - 3D modeling tools offer highly
   complex and specialized animation systems. We recommend using Studio's
   animation capabilities whenever practical. This helps keep mesh
   information on import clean and reduces conflicts between imported
@@ -73,173 +136,68 @@
 
   The animation system in Studio is a full implementation of bezier
   keys, and the full complement of bezier animation that you can create
-  with Max or Maya and export with COLLADA will be represented in
+  with 3D modeling tools and export will be represented in
   Studio. The more extreme differences between the various animation
   systems are mitigated by the limitations imposed by the COLLADA and
-  FBX formats, but there could be some animations that you would be able
-  to create in Max or Maya that would not be represented correctly in
-  Studio. If you believe you've found such an animation, and you'd like
-  to use it in your UI, please bring it up with us. We love finding edge
-  cases we haven't covered yet, and look forward to improving our
-  animation support to meet your needs.
+  FBX formats.
 \li
-  \b{Handling Pivot Points} - DCC packages all handle pivot points
-  differently. In Qt 3D Studio there is only one pivot per object
-  and it is used as the origin for position, scale, and rotation
-  operations. In your DCC package, feel free to adjust the position of a
-  3D model's pivot as needed. However, extreme edits to pivots in Modo,
-  Max, or Maya can cause problems upon import into Studio, especially if
-  animated. This difference is often manifested as a difference in the
-  position or orientation of an object. As an artist you can prevent
-  these kinds of problems by only making simple edits to your pivot
-  points. Keep your pivot points to the default (world) alignment, don't
-  scale them, and make sure that if you have multiple pivots (Maya) that
-  they are all at the same location in space.
+  \b{Baking Animations} - You need to bake all animations before exporting.
 \endlist
 
-\section1 3D Content via FBX
+\section2 Materials
 
-\image 3D_Content/FBX-Maya.png
+For materials, material slot IDs and UV layouts will be imported into Studio. You will need to
+UV unwrap and assign material slot IDs to your meshes.
 
-Studio can import 3D geometry and animations exported using FBX. Please
-use the following settings when exporting:
+
+\omit
+\list
+\li
+  \b{Textures} - Images applied to different material IDs will be imported with the
+  COLLADA file and applied inside of Studio. Note that the COLLADA files
+  reference the images on disk, rather than include them in the COLLADA
+  file. This means that a path to the image is stored in the COLLADA
+  file, Studio uses this path to import the image. Studio can import
+  transformed UV sets (e.g.~Tiling, Rotation) as well as multi-textured
+  setups.
+
+  We recommend using .png and .dds image formats. These formats support
+  alpha channels and allow for lossless editing. With .dds, you can set
+  the compression to DXT5 with alpha blending if your image has
+  transparency.
+\li
+  \b{Using Powers of Two Texture Map Pixel Dimensions} - As is the case with most real-time
+  graphics, texture maps run optimally when their pixel dimensions are set to powers of two.
+  An example of powers of two texture maps include 32X32, 64X64, 128X128, 512X512,
+  1024X1024, 2048X2048 and tall or wide images that could be 512X64 or
+  128X1024. Dimensions do not have to be square but they should be powers of two.
+\endlist
+\endomit
+
+\section2 Lights and Cameras
 
 \list
 \li
-  \b{Geometry}
-  \list
-    \li
-      Uncheck all options, except \b{check the following}:
-      \list
-      \li
-        Split per-vertex Normals
-      \li
-        Tangents and Binormals
-      \li
-        Referenced Assets Content
-      \li
-        Triangulate
-      \endlist
-    \endlist
+  \b{Lights} - Lights can be imported to Studio. Position, rotation, scale, brightness,
+  light color, and the cast shadows property will be imported.
 \li
-  \b{Animation} - enable or disable as desired; bake or unbake
-  animations as desired
-\li
-  \b{Cameras} and \b{Lights}
-\li
-  \b{Axis Conversion} - Qt 3D Studio uses a Y-up coordinate
-  system, so ensure that \c{Up Axis} is set to \c{Y}.
-\li
-  \b{FBX File Format}
-  \list
-    \li
-      \b{Type} - Studio supports either ASCII or Binary FBX files.
-      ASCII files are preferred for any bug reports.
-    \li
-      \b{Version} - Studio supports FBX versions from 2013 up to
-      2016.1.2. We recommend 2016.1.2.
-  \endlist
+  \b{Cameras} - Perspective and orthographic cameras can be imported to Studio.
+  Position, rotation and scale properties will be imported. For perspective cameras,
+  field of view will also be imported.
 \endlist
 
-\section1 3D Content via COLLADA
+\section2 Other
 
-Each 3D modeling application uses a specific COLLADA exporter that
-produces a format recognized by Studio. Autodesk's 3D Studio Max 2011
-and Maya 2011 use OpenCOLLADA which can be found by visiting
-www.opencollada.org/download.html
-
-Download the correct version of OpenCOLLADA for 3D Studio Max and Maya.
-Maya and 3D Studio Max need to be installed prior to installing the
-correct OpenCOLLADA version. In addition, be sure that no 3D programs
-are open during the installation of OpenCOLLADA.
-
-\section2 Description of supported features
-
-The following section describes the features supported by COLLADA import
-into Studio. Where appropriate, caveats, limitations, and differences
-between different DCC applications are discussed.
-
-\section3 Geometry
-
-Generally speaking, the geometry import capabilities are very solid.
-We've stress tested different high poly count scenarios. The one caveat
-here is mentioned above, Studio only supports triangulated geometry, so
-be sure to check that option when exporting COLLADA data for use in
-Studio.
-
-\section3 Lights
-Lights can be imported to Studio. Position, rotation, scale, brightness, light color and the
-cast shadows property will be imported.
-
-\section3 Cameras
-Perspective and orthographic cameras can be imported to Studio. Position, rotation and scale
-properties will be imported. For perspective cameras, field of view will also be imported.
-
-\section3 Transformation
-
-As you would expect with COLLADA you can import full 3D transform
-information including position, rotation, scale, and pivot. Studio can
-import left and right handed coordinate systems, Y-up or Z-up and
-rotations applied in any order. The principal limitation in this area is
-pivot points. As discussed above, only simple edits to pivot points are
-supported.
-
-Most DCC tools allow artists to freeze transformations and we highly
-recommend performing this operation before importing mesh data into
-Studio. This operation ensures that the mesh coming into Studio has
-clean transformation data and no arbitrary transformation values which
-can be confusing or an impediment to your work.
-
-Please note: After freezing transforms, you may have to reposition the
-pivot point in some DCC tools.
-
-\section3 Hierarchy
-
-The plug-in supports translating hierarchical information from COLLADA
-into Scene Graph information inside of Studio. Hierarchies of arbitrary
-depth are supported, including grouped nodes. Hierarchical transforms
-are applied as expected.
-
-\section3 Materials
-
-The plug-in supports translating material settings from the DCC
-application into material settings inside of Studio. Specific mappings
-have been made to ensure consistent control of the look inside of NVIDIA
-from within the DCC application. Material settings for diffuse,
-specular, ambient, and opacity are all imported correctly.
-
-\section3 Textures
-
-Images applied to different material IDs will be imported with the
-COLLADA file and applied inside of Studio. Note that the COLLADA files
-reference the images on disk. (Rather than include them in the COLLADA
-file.) This means that a path to the image is stored in the COLLADA
-file, Studio uses this path to import the image. Studio can import
-transformed UV sets (e.g.~Tiling, Rotation) as well as multi-textured
-setups.
-
-We recommend using .png and .dds image formats. These formats support
-alpha channels and allow for lossless editing. With .dds, you can set
-the compression to DXT5 with alpha blending if your image has
-transparency.
-
-\section3 Using Powers of Two Texture Map Pixel Dimensions
-
-As is the case with most real-time graphics, texture maps run optimally
-when their pixel dimensions are set to powers of two. An example of
-powers of two texture maps include 32X32, 64X64, 128X128, 512X512,
-1024X1024, 2048X2048 and tall or wide images that could be 512X64 or
-128X1024. Dimensions do not have to be square but they should be powers
-of two.
-
-\section3 Animation
-
-Animations can be brought into Studio using COLLADA. Animation is
-supported on any imported attribute. Position, rotation, scale, pivot,
-and material attributes can all be animated. An example of our advanced
-support for animations would be a hierarchy of items, rotated
-simultaneously on arbitrary axes in arbitrary axis order. Studio also
-supports importing bezier tangent value tweaked into animations.
+\list
+\li
+  \b{Axis Conversion} - Qt 3D Studio uses a Y-up coordinate system,
+  ensure that \c{Up Axis} is set to \c{Y}.
+\li
+  \b{Hierarchy} - Studio supports importing hierarchical information
+  into Scene Graph information. Hierarchies of arbitrary
+  depth are supported, including grouped nodes. Hierarchical transforms
+  are applied as expected.
+\endlist
 
 \section1 Exporting from Different Tools
 

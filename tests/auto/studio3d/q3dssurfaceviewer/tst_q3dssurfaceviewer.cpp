@@ -236,7 +236,7 @@ void tst_Q3DSSurfaceViewer::createViewer(Q3DSSurfaceViewer *&viewer, QSurface *s
         viewer->setSize(size);
     viewer->setUpdateInterval(updateInterval);
 
-    QVERIFY(viewer->initialize(surface, m_context, fboId));
+    QVERIFY(viewer->create(surface, m_context, fboId));
 
     QCOMPARE(spy.count(), 1);
     QVERIFY(viewer->isRunning());
@@ -318,7 +318,7 @@ void tst_Q3DSSurfaceViewer::testBasics()
 
     checkPixel(m_viewer, Qt::red);
 
-    m_viewer->shutdown();
+    m_viewer->destroy();
 
     QCOMPARE(spy.count(), 1);
     QVERIFY(!m_viewer->isRunning());
@@ -622,7 +622,10 @@ void tst_Q3DSSurfaceViewer::testReset()
                                            QStringLiteral("diffuse.b"), QVariant(1.0));
     checkPixel(m_viewer, Qt::blue);
 
-    m_viewer->reset();
+    // Note: reset() is private method now, instead can reload presentation by switching sources
+    //  m_viewer->reset();
+    m_viewer->presentation()->setSource(ANIMATION);
+    m_viewer->presentation()->setSource(RED);
 
     checkPixel(m_viewer, Qt::red);
 }
@@ -648,17 +651,14 @@ void tst_Q3DSSurfaceViewer::testSettings()
 
     QSignalSpy spy1(s, &Q3DSViewerSettings::matteColorChanged);
     QSignalSpy spy2(s, &Q3DSViewerSettings::showRenderStatsChanged);
-    QSignalSpy spy3(s, &Q3DSViewerSettings::shadeModeChanged);
     QSignalSpy spy4(s, &Q3DSViewerSettings::scaleModeChanged);
     QVERIFY(spy1.isValid());
     QVERIFY(spy2.isValid());
-    QVERIFY(spy3.isValid());
     QVERIFY(spy4.isValid());
 
     // Check defaults
     QCOMPARE(s->matteColor(), QColor(Qt::black));
     QCOMPARE(s->isShowRenderStats(), false);
-    QCOMPARE(s->shadeMode(), Q3DSViewerSettings::ShadeModeShaded);
     QCOMPARE(s->scaleMode(), Q3DSViewerSettings::ScaleModeCenter);
 
     // Matte
@@ -669,7 +669,6 @@ void tst_Q3DSSurfaceViewer::testSettings()
 
     QCOMPARE(spy1.count(), 1);
     QCOMPARE(spy2.count(), 0);
-    QCOMPARE(spy3.count(), 0);
     QCOMPARE(spy4.count(), 0);
 
     checkPixel(m_viewer, Qt::cyan);
@@ -682,7 +681,6 @@ void tst_Q3DSSurfaceViewer::testSettings()
 
     QCOMPARE(spy1.count(), 1);
     QCOMPARE(spy2.count(), 1);
-    QCOMPARE(spy3.count(), 0);
     QCOMPARE(spy4.count(), 0);
 
     QImage image2 = m_viewer->grab();
@@ -691,25 +689,7 @@ void tst_Q3DSSurfaceViewer::testSettings()
     s->setShowRenderStats(false);
     QCOMPARE(spy1.count(), 1);
     QCOMPARE(spy2.count(), 2);
-    QCOMPARE(spy3.count(), 0);
     QCOMPARE(spy4.count(), 0);
-
-    // ShadeMode
-    image1 = m_viewer->grab();
-
-    s->setShadeMode(Q3DSViewerSettings::ShadeModeShadedWireframe);
-    QCOMPARE(s->shadeMode(), Q3DSViewerSettings::ShadeModeShadedWireframe);
-
-    QCOMPARE(spy1.count(), 1);
-    QCOMPARE(spy2.count(), 2);
-    QCOMPARE(spy3.count(), 1);
-    QCOMPARE(spy4.count(), 0);
-
-    image2 = m_viewer->grab();
-    QVERIFY(image1 != image2);
-
-    // Restore shade mode so following tests are not affected by wireframes
-    s->setShadeMode(Q3DSViewerSettings::ShadeModeShaded);
 
     // ScaleMode
     checkPixel(m_viewer, Qt::cyan);
@@ -719,7 +699,6 @@ void tst_Q3DSSurfaceViewer::testSettings()
 
     QCOMPARE(spy1.count(), 1);
     QCOMPARE(spy2.count(), 2);
-    QCOMPARE(spy3.count(), 2);
     QCOMPARE(spy4.count(), 1);
 
     checkPixel(m_viewer, Qt::cyan);
@@ -730,7 +709,6 @@ void tst_Q3DSSurfaceViewer::testSettings()
 
     QCOMPARE(spy1.count(), 1);
     QCOMPARE(spy2.count(), 2);
-    QCOMPARE(spy3.count(), 2);
     QCOMPARE(spy4.count(), 2);
 
     checkPixel(m_viewer, Qt::blue);
@@ -744,17 +722,14 @@ void tst_Q3DSSurfaceViewer::testSettings()
 
     s->setMatteColor(Qt::yellow);
     s->setShowRenderStats(true);
-    s->setShadeMode(Q3DSViewerSettings::ShadeModeShadedWireframe);
     s->setScaleMode(Q3DSViewerSettings::ScaleModeFit);
 
     QCOMPARE(s->matteColor(), QColor(Qt::yellow));
     QCOMPARE(s->isShowRenderStats(), true);
-    QCOMPARE(s->shadeMode(), Q3DSViewerSettings::ShadeModeShadedWireframe);
     QCOMPARE(s->scaleMode(), Q3DSViewerSettings::ScaleModeFit);
 
     QCOMPARE(spy1.count(), 2);
     QCOMPARE(spy2.count(), 3);
-    QCOMPARE(spy3.count(), 3);
     QCOMPARE(spy4.count(), 3);
 
     image2 = m_viewer->grab();
@@ -764,12 +739,10 @@ void tst_Q3DSSurfaceViewer::testSettings()
 
     QCOMPARE(s->matteColor(), QColor(Qt::cyan));
     QCOMPARE(s->isShowRenderStats(), false);
-    QCOMPARE(s->shadeMode(), Q3DSViewerSettings::ShadeModeShaded);
     QCOMPARE(s->scaleMode(), Q3DSViewerSettings::ScaleModeFill);
 
     QCOMPARE(spy1.count(), 3);
     QCOMPARE(spy2.count(), 4);
-    QCOMPARE(spy3.count(), 4);
     QCOMPARE(spy4.count(), 4);
 
     QImage image3 = m_viewer->grab();
@@ -1001,6 +974,8 @@ void tst_Q3DSSurfaceViewer::testPresentationActivation()
     else
         createOffscreenAndViewer(m_viewer, ANIMATION);
 
+    // Note: Presentation filename isn't default ID anymore, need to set manually.
+    m_viewer->setPresentationId(QStringLiteral("animation"));
     m_viewer->settings()->setScaleMode(Q3DSViewerSettings::ScaleModeFill);
 
     {

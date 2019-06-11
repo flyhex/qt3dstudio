@@ -3,20 +3,26 @@ requires(!winrt)
 requires(!tvos)
 requires(!watchos)
 requires(!win32-msvc2013)
-
 requires(qtHaveModule(widgets))
 requires(qtHaveModule(multimedia))
 requires(qtHaveModule(quick))
 requires(qtHaveModule(qml))
 requires(qtHaveModule(opengl))
 
+#TODO: QT3DS-3660 fix developer builds of Qt 3D Studio editor
+linux:{
+requires(!contains(QT_CONFIG,private_tests))
+}
+
 SUBDIRS += \
     doc
 
 OTHER_FILES += \
-    "Studio/Content/Behavior Library/*" \
-    "Studio/Content/Effect Library/*" \
-    "Studio/Content/Material Library/*"
+    "Studio/Build Configurations/*" \
+    "Studio/Build Configurations/Viewer/*" \
+    "src/Runtime/ogl-runtime/Studio/Content/Behavior Library/*" \
+    "src/Runtime/ogl-runtime/Studio/Content/Effect Library/*" \
+    "src/Runtime/ogl-runtime/Studio/Content/Material Library/*"
 
 load(qt_parts)
 
@@ -47,7 +53,7 @@ load(qt_parts)
                 deployTarget.depends += deployReleaseQml
                 deployReleaseQml.depends = mkStudioQmlDir
                 deployReleaseQml.commands = \
-                    $$QMAKE_COPY $$shell_quote($$shell_path($$OUT_PWD/qml/$$QML_FILE_R)) \
+                    $$QMAKE_COPY $$shell_quote($$shell_path($$OUT_PWD/src/Runtime/ogl-runtime/qml/$$QML_FILE_R)) \
                     $$shell_quote($$shell_path(\$(DEPLOY_DIR)/$$QML_FILE_R))
             } else {
                 QML_FILE_D = QtStudio3D/OpenGL/declarative_qtstudio3dopengld.dll
@@ -55,7 +61,7 @@ load(qt_parts)
                 deployTarget.depends += deployDebugQml
                 deployDebugQml.depends += mkStudioQmlDir
                 deployDebugQml.commands = \
-                    $$QMAKE_COPY $$shell_quote($$shell_path($$OUT_PWD/qml/$$QML_FILE_D)) \
+                    $$QMAKE_COPY $$shell_quote($$shell_path($$OUT_PWD/src/Runtime/ogl-runtime/qml/$$QML_FILE_D)) \
                     $$shell_quote($$shell_path(\$(DEPLOY_DIR)/$$QML_FILE_D))
             }
 
@@ -69,7 +75,7 @@ load(qt_parts)
             deployTarget.depends += copyStudio3D
             copyStudio3D.commands = \
                 $$QMAKE_COPY $$shell_quote($$shell_path( \
-                    $$OUT_PWD/bin/$$QTSTUDIO3D_LIB)) \
+                    $$OUT_PWD/src/Runtime/ogl-runtime/bin/$$QTSTUDIO3D_LIB)) \
                 $$shell_quote($$shell_path($$[QT_INSTALL_BINS]/$$QTSTUDIO3D_LIB))
 
             QMLDIR_FILE = QtStudio3D/OpenGL/qmldir
@@ -77,7 +83,7 @@ load(qt_parts)
             deployTarget.depends += deployQmldir
             deployQmldir.depends += mkStudioQmlDir
             deployQmldir.commands = \
-                $$QMAKE_COPY $$shell_quote($$shell_path($$OUT_PWD/qml/$$QMLDIR_FILE)) \
+                $$QMAKE_COPY $$shell_quote($$shell_path($$OUT_PWD/src/Runtime/ogl-runtime/qml/$$QMLDIR_FILE)) \
                 $$shell_quote($$shell_path(\$(DEPLOY_DIR)/$$QMLDIR_FILE))
 
             QMAKE_EXTRA_TARGETS += mkStudioQmlDir
@@ -90,7 +96,7 @@ load(qt_parts)
         EXTRA_DEPLOY_OPTIONS = -qmldir=$$shell_quote($$PWD/src/shared/dummyqml)
         deployTarget.commands = \
             $$DEPLOY_TOOL $$shell_quote(\$(DEPLOY_DIR)/Qt3DStudio$${exesuffix}) \
-                -qmldir=$$shell_quote($$PWD/src/Authoring/Studio/Palettes) $$EXTRA_DEPLOY_OPTIONS
+                -qmldir=$$shell_quote($$PWD/src/Authoring/Qt3DStudio/Palettes) $$EXTRA_DEPLOY_OPTIONS
 
         macos {
             # Viewer 1.0

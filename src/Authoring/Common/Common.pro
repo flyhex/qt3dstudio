@@ -26,7 +26,7 @@ INCLUDEPATH += \
     ../Client/Code/Core/Utility \
     ../../Runtime/ogl-runtime/src/dm \
     ../../Runtime/ogl-runtime/src/dm/systems \
-    ../Studio/Utils \
+    ../Qt3DStudio/Utils \
     ../../Runtime/ogl-runtime/src/foundation \
     ../../Runtime/ogl-runtime/src/3rdparty/EASTL/UnknownVersion/include \
     ../../Runtime/ogl-runtime/src/3rdparty/color \

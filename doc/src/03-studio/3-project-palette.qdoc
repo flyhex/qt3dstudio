@@ -185,7 +185,7 @@ right-click on the \c{.import} file in the project palette and
 choose \uicontrol{Refresh Import}. In the subsequent file dialog,
 select the model file on disk that you wish to re-import. Your model in Studio will
 be updated. For more details, read the section
-\l{best-practices-importing-3d-content.html}{Working with 3D Content}.
+\l{3D Assets}.
 
 \omit
 \section1 Locating Missing Assets

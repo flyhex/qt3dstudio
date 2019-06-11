@@ -4,10 +4,11 @@ include($$PWD/../../../src/Runtime/ogl-runtime/commoninclude.pri)
 
 TARGET = tst_qt3dsruntime
 QT += testlib gui
+QT += quick-private
+
 RESOURCES += \
     runtime.qrc \
-    $$PWD/../../../src/Runtime/testres.qrc \
-    $$PWD/../../../src/Runtime/platformres.qrc
+    $$PWD/../../../src/Runtime/ogl-runtime/testres.qrc
 
 INCLUDEPATH += \
     $$PWD/../../../src/Runtime/ogl-runtime/src/Qt3DSRuntimeRender/RendererImpl
