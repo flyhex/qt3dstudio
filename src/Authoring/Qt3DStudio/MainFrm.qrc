@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>style.qss</file>
+        <file>Palettes/Inspector/DataInputChooser.qml</file>
+        <file alias="TitilliumWeb-Light.ttf">fonts/titilliumweb/TitilliumWeb-Light.ttf</file>
+        <file alias="TitilliumWeb-Regular.ttf">fonts/titilliumweb/TitilliumWeb-Regular.ttf</file>
+    </qresource>
+</RCC>

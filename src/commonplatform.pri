@@ -296,7 +296,22 @@ win32 {
 
 BINDIR = $$MODULE_BASE_OUTDIR/bin
 LIBDIR = $$MODULE_BASE_OUTDIR/lib
+!qtConfig(private_tests): {
+    # Non-developer build
+    RUNTIME_BINDIR = $$MODULE_BASE_OUTDIR/src/Runtime/ogl-runtime/bin
+    RUNTIME_LIBDIR = $$MODULE_BASE_OUTDIR/src/Runtime/ogl-runtime/lib
+    RUNTIME_INCLUDEDIR = $$MODULE_BASE_OUTDIR/src/Runtime/ogl-runtime/include
+    LIBS += -L"$$RUNTIME_LIBDIR"
+
+} else {
+    # Developer build
+    RUNTIME_BINDIR = $$BINDIR
+    RUNTIME_LIBDIR = $$LIBDIR
+    RUNTIME_INCLUDEDIR = $$MODULE_BASE_OUTDIR/include
+}
+
 LIBS += -L"$$LIBDIR"
+
 !testcase {
     contains(TEMPLATE, app) {
         DESTDIR = $$BINDIR

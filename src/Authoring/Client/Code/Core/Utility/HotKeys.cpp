@@ -31,8 +31,8 @@
 #include "HotKeys.h"
 #include "StringTokenizer.h"
 
-#include "Studio/UI/SceneView.h"
-#include "Studio/MainFrm.h"
+#include "Qt3DStudio/UI/SceneView.h"
+#include "Qt3DStudio/MainFrm.h"
 
 #include <QtGui/qguiapplication.h>
 #include <QtGui/qevent.h>
