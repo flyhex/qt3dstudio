@@ -194,10 +194,10 @@ public:
     void FireOnErrorFail(const QString &inText);
     void FireOnRefreshResourceFail(const QString &inResourceName,
                                    const QString &inDescription);
-    void FireOnUndefinedDatainputsFail(
-            const QMultiMap<QString,
-                            QPair<qt3dsdm::Qt3DSDMInstanceHandle,
-                                  qt3dsdm::Qt3DSDMPropertyHandle>> *map);
+    void FireOnUndefinedDatainputsFail(const QMultiMap<QString,
+                                       QPair<qt3dsdm::Qt3DSDMInstanceHandle,
+                                             qt3dsdm::Qt3DSDMPropertyHandle>> *map,
+                                       bool askFromUser);
 
     void AddRendererListener(CRendererListener *inListener);
     void RemoveRendererListener(CRendererListener *inListener);

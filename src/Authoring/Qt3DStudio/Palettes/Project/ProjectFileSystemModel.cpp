@@ -679,7 +679,7 @@ void ProjectFileSystemModel::importUrls(const QList<QUrl> &urls, int row, bool a
     }
     if (addedDi) {
         g_StudioApp.saveDataInputsToProjectFile();
-        g_StudioApp.checkDeletedDatainputs();  // Updates externalPresBoundTypes
+        g_StudioApp.checkDeletedDatainputs(true);  // Updates externalPresBoundTypes
     }
 
     for (const QString &expandPath : qAsConst(expandPaths)) {

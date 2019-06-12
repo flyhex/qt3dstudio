@@ -60,6 +60,7 @@ CDataInputListDlg::CDataInputListDlg(QMap<QString, CDataInputDialogItem *> *data
     , m_sortColumn(-1)
     , m_defaultType(defaultType)
     , m_acceptedTypes(acceptedTypes)
+
 {
     m_ui->setupUi(this);
 
@@ -409,15 +410,9 @@ void CDataInputListDlg::accept()
     for (auto name : keys)
         m_actualDataInputs->insert(name, m_dataInputs.value(name));
 
-    // Only show automatic binding removal choice if user has deleted
-    // in-use datainput during this activation of the dialog, to avoid constant
-    // nagging at closing of this dialog in case we have invalid datainputs.
-    if (m_deletedDiInUse)
-        QTimer::singleShot(0, &g_StudioApp, &CStudioApp::checkDeletedDatainputs);
-
     if (g_StudioApp.GetCore()->GetDoc()->isTransactionOpened()) {
         g_StudioApp.GetCore()->GetDoc()->closeTransaction();
-        // If a datainput has been edited (and datainput controller names
+        // If a datainput has been edited (and datainput controller info has been
         // updated in element "controlledproperty" properties), we need to make all changes
         // non-undoable. This is because datainput definitions in UIA file (and in global
         // datainput map) are not participating in the command stack. Changes there cannot be
@@ -425,6 +420,21 @@ void CDataInputListDlg::accept()
         if (m_diHasBeenEdited)
             g_StudioApp.GetCore()->GetCmdStack()->RemoveLastUndo();
     }
+
+    // Change element controlledproperties directly right now without undo just as we warned
+    // the user earlier about.
+    // Otherwise it is possible to add a similarly named datainput, and fool the control
+    // binding check that is triggered after this dialog, causing the old bindings to be
+    // "inherited" to the new datainput. This makes all bindings go away for the removed
+    // datainputs, even if we have new similarly named DI in the global map (which will have
+    // no bindings as expected).
+    if (!m_toRemove.isEmpty()) {
+        // Opens a transaction.
+        g_StudioApp.GetCore()->GetDoc()->RemoveDatainputBindings(&m_toRemove);
+        g_StudioApp.GetCore()->GetCmdStack()->RemoveLastUndo();
+    }
+
+    QTimer::singleShot(0, &g_StudioApp, [&]{ g_StudioApp.checkDeletedDatainputs(false); });
 
     QDialog::accept();
 }
@@ -484,26 +494,29 @@ void CDataInputListDlg::onRemoveDataInput()
                 if (m_dataInputs[diName]->ctrldElems.size()
                         || m_dataInputs[diName]->externalPresBoundTypes.size() ) {
                     anyDiInUse = true;
+                    for (const auto &remove : qAsConst(m_dataInputs[diName]->ctrldElems))
+                        m_toRemove.insert(diName, {remove.instHandle, remove.propHandle});
                 }
             }
         }
     }
 
-
     QString title(QObject::tr("Warning"));
     QString text;
 
-    if (anyDiInUse)
-        text.append(QObject::tr("One or more datainputs are currently in use. "));
-    text.append(QObject::tr("This operation cannot be undone.\n\nAre you sure?"));
+    if (anyDiInUse) {
+        text.append(QObject::tr("One or more datainputs are currently in use.\n\n"
+                                "Any control bindings in this presentation will be removed.\n"
+                                "Bindings in other presentations will be left intact "
+                                "but will not function anymore.\n\n"));
+    }
+    text.append(QObject::tr("This operation cannot be undone. Are you sure?"));
 
     auto ret = g_StudioApp.GetDialogs()->DisplayMessageBox(title, text,
                                                            Qt3DSMessageBox::ICON_WARNING, true,
                                                            this);
     if (ret != Qt3DSMessageBox::MSGBX_OK)
         return;
-
-    m_deletedDiInUse = anyDiInUse;
 
     if (removedRows.size() > 0) {
         std::sort(removedRows.begin(), removedRows.end());

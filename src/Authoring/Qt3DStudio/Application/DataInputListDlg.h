@@ -110,8 +110,10 @@ private:
     // -1 all types, 0... matches EDataType enum
     int m_typeFilter = -1;
     QString m_searchString;
-    bool m_deletedDiInUse = false;
     bool m_diHasBeenEdited = false;
+    // To be deleted datainput entries that have control bindings
+    QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
+                             qt3dsdm::Qt3DSDMPropertyHandle>> m_toRemove;
 
     QAction *m_replaceSelectedAction;
     QAction *m_replaceAllAction;

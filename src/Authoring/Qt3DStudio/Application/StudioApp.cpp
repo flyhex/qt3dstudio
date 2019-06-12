@@ -1672,7 +1672,7 @@ bool CStudioApp::OnLoadDocument(const QString &inDocument, bool inShowStartupDia
 
         m_core->GetDispatch()->FireAuthorZoomChanged();
         verifyDatainputBindings();
-        checkDeletedDatainputs();
+        checkDeletedDatainputs(true);
     }
 
     return theLoadResult;
@@ -2069,11 +2069,12 @@ QSize CStudioApp::getRenderableSize(const QString &renderableId)
 
 void CStudioApp::OnUndefinedDatainputsFail(
         const QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
-                                       qt3dsdm::Qt3DSDMPropertyHandle>> *map)
+                                       qt3dsdm::Qt3DSDMPropertyHandle>> *map,
+        bool askFromUser)
 {
-    bool res = m_dialogs->DisplayUndefinedDatainputDlg(map);
+    bool res = askFromUser ? m_dialogs->DisplayUndefinedDatainputDlg(map) : true;
 
-    // Delete invalid datainput bindings if user prompted so.
+    // Delete invalid datainput bindings if user prompted so, or silently if not asked.
     if (res) {
         m_core->GetDoc()->RemoveDatainputBindings(map);
         // clear commands as we do not want to create undo point
@@ -2140,7 +2141,7 @@ void CStudioApp::showInvalidFilenameWarning()
                                  Qt3DSMessageBox::ICON_WARNING, false);
 }
 
-void CStudioApp::checkDeletedDatainputs()
+void CStudioApp::checkDeletedDatainputs(bool askFromUser)
 {
     QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMPropertyHandle>> *map;
     map = new QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
@@ -2150,7 +2151,7 @@ void CStudioApp::checkDeletedDatainputs()
     doc->UpdateDatainputMap(map);
 
     if (!map->empty())
-        m_core->GetDispatch()->FireOnUndefinedDatainputsFail(map);
+        m_core->GetDispatch()->FireOnUndefinedDatainputsFail(map, askFromUser);
 
     // Update allowed property types for datainput-controlled properties
     // in subpresentations. It is ok to do this once

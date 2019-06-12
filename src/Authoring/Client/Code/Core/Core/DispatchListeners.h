@@ -277,7 +277,7 @@ public:
     virtual void OnUndefinedDatainputsFail(
             const QMultiMap<QString,
                             QPair<qt3dsdm::Qt3DSDMInstanceHandle,
-                                  qt3dsdm::Qt3DSDMPropertyHandle>> *map) = 0;
+                                  qt3dsdm::Qt3DSDMPropertyHandle>> *map, bool askFromUser) = 0;
 };
 
 class IDataModelListener

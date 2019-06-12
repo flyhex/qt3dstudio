@@ -219,7 +219,7 @@ public:
     void showPresentationIdUniqueWarning();
     void showPresentationIdEmptyWarning();
     void showInvalidFilenameWarning();
-    void checkDeletedDatainputs();
+    void checkDeletedDatainputs(bool askFromUser);
     void saveDataInputsToProjectFile();
     void verifyDatainputBindings();
     void duplicatePresentation(const QString &presFile = {});
@@ -241,10 +241,10 @@ public:
     void OnErrorFail(const QString &inText) override;
     void OnRefreshResourceFail(const QString &inResourceName,
                                const QString &inDescription) override;
-    void OnUndefinedDatainputsFail(
-            const QMultiMap<QString,
-                            QPair<qt3dsdm::Qt3DSDMInstanceHandle,
-                                  qt3dsdm::Qt3DSDMPropertyHandle>> *map) override;
+    void OnUndefinedDatainputsFail(const QMultiMap<QString,
+                                                   QPair<qt3dsdm::Qt3DSDMInstanceHandle,
+                                                         qt3dsdm::Qt3DSDMPropertyHandle>> *map,
+                                   bool askFromUser) override;
 
     // CPresentationChangeListener
     void OnNewPresentation() override;
