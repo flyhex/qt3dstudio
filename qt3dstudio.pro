@@ -9,11 +9,6 @@ requires(qtHaveModule(quick))
 requires(qtHaveModule(qml))
 requires(qtHaveModule(opengl))
 
-#TODO: QT3DS-3660 fix developer builds of Qt 3D Studio editor
-linux:{
-requires(!contains(QT_CONFIG,private_tests))
-}
-
 SUBDIRS += \
     doc
 

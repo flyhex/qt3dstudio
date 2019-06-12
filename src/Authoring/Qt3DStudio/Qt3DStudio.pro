@@ -109,8 +109,15 @@ STATICRUNTIME = \
     !mingw: QMAKE_LFLAGS += /NODEFAULTLIB:tinyxml.lib
 }
 
-!macos {
-    LIBS += -lQt5Studio3D$$qtPlatformTargetSuffix()
+if (qtHaveModule(3dstudio)) {
+    QT += 3dstudio 3dstudio-private
+} else {
+    RUNTIME_LIB = $$qt5LibraryTarget(QtStudio3D$$QT_LIBINFIX)
+    macos {
+        LIBS += -framework QtStudio3D
+    } else {
+        LIBS += -l$$RUNTIME_LIB
+    }
 }
 
 LIBS += \
