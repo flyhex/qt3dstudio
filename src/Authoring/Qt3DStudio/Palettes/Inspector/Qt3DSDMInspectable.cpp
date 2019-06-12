@@ -29,6 +29,7 @@
 
 #include "Qt3DSDMInspectable.h"
 #include "Qt3DSDMInspectorGroup.h"
+#include "Qt3DSDMInspectorRow.h"
 #include "StudioApp.h"
 #include "Core.h"
 #include "Doc.h"
@@ -96,13 +97,29 @@ long Qt3DSDMInspectable::getGroupCount() const
 // Return the property group for display
 CInspectorGroup *Qt3DSDMInspectable::getGroup(long index)
 {
-    if (m_groups.contains(index))
-        return m_groups[index];
+    TMetaDataPropertyHandleList properties = GetGroupProperties(index);
+    if (m_groups.contains(index)) {
+        // Check if the group properties have changed. This can f.ex happen if property
+        // filter status changed and it became visible.
+        std::vector<Q3DStudio::Qt3DSDMInspectorRow *> rows
+                = static_cast<const Qt3DSDMInspectorGroup *>(m_groups[index])->GetRows();
+        TMetaDataPropertyHandleList rowProps;
+
+        for (uint i = 0; i < rows.size(); ++i)
+            rowProps.push_back(rows[i]->GetMetaDataProperty());
+
+        // No need to sort; if ordering has changed for some reason, group also needs to be
+        // reconstructed. (Assume that the default case is that row ordering is derived from
+        // property ordering, so we can use direct == operator to see if properties match the
+        // inspector rows.)
+        if (properties == rowProps)
+            return m_groups[index];
+
+        delete m_groups[index];
+    }
 
     Qt3DSDMInspectorGroup *group = new Qt3DSDMInspectorGroup(GetGroupName(index));
     m_groups[index] = group;
-
-    TMetaDataPropertyHandleList properties = GetGroupProperties(index);
 
     for (auto &prop : properties)
         group->CreateRow(getDoc(), prop);
