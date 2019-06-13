@@ -214,17 +214,6 @@ CStudioApp g_StudioApp;
 
 using namespace Q3DStudio;
 
-namespace qt3ds
-{
-void Qt3DSAssert(const char *exp, const char *file, int line, bool *ignore)
-{
-    Q_UNUSED(ignore)
-    g_StudioApp.GetDialogs()->DestroyProgressScreen();
-    g_StudioApp.GetDialogs()->DisplayKnownErrorDialog(exp);
-    qFatal("Assertion thrown %s(%d): %s", file, line, exp);
-}
-}
-
 //=============================================================================
 /**
  * Constructor
