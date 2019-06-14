@@ -33,8 +33,14 @@ import "../controls"
 
 Rectangle {
     id: root
-
     color: _backgroundColor
+
+    Connections {
+       target: _parentView.projectModel
+       onSelectFileChanged: {
+           projectTree.currentIndex = idx; // auto select a newly created file
+       }
+    }
 
     ColumnLayout {
         anchors.fill: parent

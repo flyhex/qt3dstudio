@@ -103,7 +103,7 @@ ProjectContextMenu::ProjectContextMenu(ProjectView *parent, int index)
         openFileAction->setText(tr("Edit"));
 
         action = new QAction(tr("Duplicate"));
-        connect(action, &QAction::triggered, this, &ProjectContextMenu::handleDuplicate);
+        connect(action, &QAction::triggered, this, &ProjectContextMenu::handleDuplicateMaterial);
         addAction(action);
     }
 
@@ -200,9 +200,9 @@ void ProjectContextMenu::handleAddMaterial()
     m_view->addMaterial(m_index);
 }
 
-void ProjectContextMenu::handleDuplicate()
+void ProjectContextMenu::handleDuplicateMaterial()
 {
-    m_view->duplicate(m_index);
+    m_view->duplicateMaterial(m_index);
 }
 
 void ProjectContextMenu::handleDuplicatePresentation()

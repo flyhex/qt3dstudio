@@ -63,6 +63,7 @@ public:
     };
 
     void setRootPath(const QString &path);
+    void selectFile(const QString &path);
 
     QHash<int, QByteArray> roleNames() const override;
     int rowCount(const QModelIndex &parent = {}) const override;
@@ -84,14 +85,13 @@ public:
 
     Q_INVOKABLE void importUrls(const QList<QUrl> &urls, int row, bool autoSort = true);
     Q_INVOKABLE bool hasValidUrlsForDropping(const QList<QUrl> &urls) const;
-    Q_INVOKABLE void showInfo(int row);
-    Q_INVOKABLE void duplicate(int row);
 
     void asyncUpdateReferences();
     void onFilesChanged(const Q3DStudio::TFileModificationList &inFileModificationList);
 
 Q_SIGNALS:
     void modelChanged(QAbstractItemModel *model);
+    void selectFileChanged(int idx);
 
 private:
     void setRootIndex(const QModelIndex &rootIndex);
@@ -161,6 +161,7 @@ private:
     QHash<QString, bool> m_projectReferencesUpdateMap;
     QTimer m_projectReferencesUpdateTimer;
     std::shared_ptr<qt3dsdm::ISignalConnection> m_directoryConnection;
+    QString m_selectFile; // file to be selected on next layout change
 };
 
 #endif // TREEVIEWADAPTOR_H

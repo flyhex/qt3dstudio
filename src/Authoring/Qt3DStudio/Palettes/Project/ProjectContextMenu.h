@@ -50,7 +50,7 @@ private Q_SLOTS:
     void handleRefreshImport();
     void handleImportAssets();
     void handleAddMaterial();
-    void handleDuplicate();
+    void handleDuplicateMaterial();
     void handleDuplicatePresentation();
     void handleInitialPresentation();
     void handleRenamePresentation();

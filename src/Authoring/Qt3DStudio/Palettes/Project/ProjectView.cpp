@@ -483,23 +483,70 @@ void ProjectView::addMaterial(int row) const
 
     QFile file(path + extension);
     int i = 1;
-    while (file.exists()) {
-        i++;
-        file.setFileName(path + QString::number(i) + extension);
-    }
+    while (file.exists())
+        file.setFileName(path + QString::number(i++) + extension);
 
     file.open(QIODevice::WriteOnly);
     file.write("<MaterialData version=\"1.0\">\n</MaterialData>");
+
+    m_ProjectModel->selectFile(file.fileName()); // select the added material
 }
 
+// show material properties in the inspector
 void ProjectView::editMaterial(int row) const
 {
-    m_ProjectModel->showInfo(row);
+    QString path = m_ProjectModel->filePath(row);
+    QFileInfo fi(path);
+
+    const auto doc = g_StudioApp.GetCore()->GetDoc();
+    bool isDocModified = doc->isModified();
+    { // Scope for the ScopedDocumentEditor
+        Q3DStudio::ScopedDocumentEditor sceneEditor(
+                    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QString()));
+        const auto material = sceneEditor->getOrCreateMaterial(path);
+        QString name;
+        QMap<QString, QString> values;
+        QMap<QString, QMap<QString, QString>> textureValues;
+        sceneEditor->getMaterialInfo(fi.absoluteFilePath(), name, values, textureValues);
+        sceneEditor->setMaterialValues(fi.absoluteFilePath(), values, textureValues);
+        if (material.Valid())
+            doc->SelectDataModelObject(material);
+    }
+    // Several aspects of the editor are not updated correctly if the data core is changed without
+    // a transaction. The above scope completes the transaction for creating a new material. Next
+    // the added undo has to be popped from the stack and the modified flag has to be restored
+    // TODO: Find a way to update the editor fully without a transaction
+    doc->SetModifiedFlag(isDocModified);
+    g_StudioApp.GetCore()->GetCmdStack()->RemoveLastUndo();
 }
 
-void ProjectView::duplicate(int row) const
+void ProjectView::duplicateMaterial(int row)
 {
-    m_ProjectModel->duplicate(row);
+    QString pathSrc = m_ProjectModel->filePath(row);
+    QString pathDest = pathSrc;
+    QRegExp rgxCopy(QLatin1String("Copy\\d*"));
+
+    do {
+        int copyIdx = rgxCopy.lastIndexIn(pathDest);
+        if (copyIdx != -1) { // src mat. name ends in Copy (+ a number >= 0)
+            QString copy = rgxCopy.cap();
+            int n = copy.length();
+            if (n > 4) { // name ends with a number, increment it
+                QString oldNumber = copy.mid(4);
+                QString newNumber = QString::number(oldNumber.toInt() + 1);
+                copy.replace(oldNumber, newNumber);
+            } else { // name ends with Copy, make it Copy2
+                copy += '2';
+            }
+
+            pathDest.replace(copyIdx, n, copy);
+       } else { // name doesn't end with Copy, add it
+            pathDest.replace(QLatin1String(".materialdef"), QLatin1String(" Copy.materialdef"));
+       }
+   } while (QFile::exists(pathDest));
+
+    m_ProjectModel->selectFile(pathDest); // select the duplicated material
+    QFile::copy(pathSrc, pathDest);
 }
 
 void ProjectView::duplicatePresentation(int row) const

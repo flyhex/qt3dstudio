@@ -78,7 +78,7 @@ public:
     void refreshImport(int row) const;
     void addMaterial(int row) const;
     void editMaterial(int row) const;
-    void duplicate(int row) const;
+    void duplicateMaterial(int row);
     void duplicatePresentation(int row) const;
     void deleteFile(int row) const;
 
@@ -86,6 +86,7 @@ public:
 
     Q_INVOKABLE bool isPresentation(int row) const;
     Q_INVOKABLE bool isQmlStream(int row) const;
+
     bool isCurrentPresentation(int row) const;
     bool isMaterialFolder(int row) const;
     bool isInMaterialFolder(int row) const;

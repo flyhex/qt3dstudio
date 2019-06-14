@@ -96,11 +96,10 @@ QVariant ProjectFileSystemModel::data(const QModelIndex &index, int role) const
     }
 
     case IsExpandableRole: {
-        if (item.index == m_rootIndex) {
+        if (item.index == m_rootIndex)
             return false;
-        } else {
-            return hasVisibleChildren(item.index);
-        }
+
+        return hasVisibleChildren(item.index);
     }
 
     case IsDraggableRole:
@@ -124,24 +123,19 @@ QVariant ProjectFileSystemModel::data(const QModelIndex &index, int role) const
 
     case FileIdRole: {
         const QString path = item.index.data(QFileSystemModel::FilePathRole).toString();
-        EStudioObjectType iconType = getIconType(path);
-        if (iconType == OBJTYPE_PRESENTATION || iconType == OBJTYPE_QML_STREAM)
+        if (getIconType(path) & (OBJTYPE_PRESENTATION | OBJTYPE_QML_STREAM))
             return presentationId(path);
-        else
-            return {};
+
+        return {};
     }
 
     case ExtraIconRole: {
         const QString path = item.index.data(QFileSystemModel::FilePathRole).toString();
-        EStudioObjectType iconType = getIconType(path);
-        if (iconType == OBJTYPE_PRESENTATION || iconType == OBJTYPE_QML_STREAM) {
+        if (getIconType(path) & (OBJTYPE_PRESENTATION | OBJTYPE_QML_STREAM)) {
             if (presentationId(path).isEmpty())
                 return QStringLiteral("warning.png");
-            else
-                return {};
-        } else {
-            return {};
         }
+        return {};
     }
 
     default:
@@ -495,6 +489,12 @@ void ProjectFileSystemModel::setRootPath(const QString &path)
     });
 }
 
+// set a file to be selected upon next layout change (used to auto select newly created files)
+void ProjectFileSystemModel::selectFile(const QString &path)
+{
+    m_selectFile = path;
+}
+
 void ProjectFileSystemModel::setRootIndex(const QModelIndex &rootIndex)
 {
     if (rootIndex == m_rootIndex)
@@ -505,7 +505,7 @@ void ProjectFileSystemModel::setRootIndex(const QModelIndex &rootIndex)
     m_rootIndex = rootIndex;
 
     beginInsertRows({}, 0, 0);
-    m_items.append({ m_rootIndex, 0, true, nullptr, 0 });
+    m_items.append({m_rootIndex, 0, true, nullptr, 0});
     endInsertRows();
 
     showModelTopLevelItems();
@@ -558,7 +558,7 @@ void ProjectFileSystemModel::showModelChildItems(const QModelIndex &parentIndex,
     beginInsertRows({}, startRow, startRow + insertCount - 1);
 
     for (auto it = rowsToInsert.rbegin(); it != rowsToInsert.rend(); ++it)
-        m_items.insert(startRow, { *it, depth, false, parent, 0 });
+        m_items.insert(startRow, {*it, depth, false, parent, 0});
 
     for (; parent != nullptr; parent = parent->parent)
         parent->childCount += insertCount;
@@ -612,65 +612,6 @@ bool ProjectFileSystemModel::hasValidUrlsForDropping(const QList<QUrl> &urls) co
     }
 
     return false;
-}
-
-void ProjectFileSystemModel::showInfo(int row)
-{
-    if (row < 0 || row >= m_items.size())
-        row = 0;
-
-    const TreeItem &item = m_items.at(row);
-    QString path = item.index.data(QFileSystemModel::FilePathRole).toString();
-
-    QFileInfo fi(path);
-
-    if (fi.suffix() == QLatin1String("materialdef")) {
-        const auto doc = g_StudioApp.GetCore()->GetDoc();
-        bool isDocModified = doc->isModified();
-        { // Scope for the ScopedDocumentEditor
-            Q3DStudio::ScopedDocumentEditor sceneEditor(
-                        Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QString()));
-            const auto material = sceneEditor->getOrCreateMaterial(path);
-            QString name;
-            QMap<QString, QString> values;
-            QMap<QString, QMap<QString, QString>> textureValues;
-            sceneEditor->getMaterialInfo(fi.absoluteFilePath(), name, values, textureValues);
-            sceneEditor->setMaterialValues(fi.absoluteFilePath(), values, textureValues);
-            if (material.Valid())
-                doc->SelectDataModelObject(material);
-        }
-        // Several aspects of the editor are not updated correctly
-        // if the data core is changed without a transaction
-        // The above scope completes the transaction for creating a new material
-        // Next the added undo has to be popped from the stack
-        // and the modified flag has to be restored
-        // TODO: Find a way to update the editor fully without a transaction
-        doc->SetModifiedFlag(isDocModified);
-        g_StudioApp.GetCore()->GetCmdStack()->RemoveLastUndo();
-    }
-}
-
-void ProjectFileSystemModel::duplicate(int row)
-{
-    if (row < 0 || row >= m_items.size())
-        row = 0;
-
-    const TreeItem &item = m_items.at(row);
-    QString path = item.index.data(QFileSystemModel::FilePathRole).toString();
-
-    QFileInfo srcFile(path);
-    const QString destPathStart = srcFile.dir().absolutePath() + QLatin1Char('/')
-            + srcFile.completeBaseName() + QStringLiteral(" Copy");
-    const QString destPathEnd = QStringLiteral(".") + srcFile.suffix();
-    QString destPath = destPathStart + destPathEnd;
-
-    int i = 1;
-    while (QFile::exists(destPath)) {
-        i++;
-        destPath = destPathStart + QString::number(i) + destPathEnd;
-    }
-
-    QFile::copy(path, destPath);
 }
 
 void ProjectFileSystemModel::importUrls(const QList<QUrl> &urls, int row, bool autoSort)
@@ -1054,11 +995,8 @@ void ProjectFileSystemModel::collapse(int row)
 
 int ProjectFileSystemModel::modelIndexRow(const QModelIndex &modelIndex) const
 {
-    auto it = std::find_if(
-                std::begin(m_items),
-                std::end(m_items),
-                [&modelIndex](const TreeItem &item)
-                {
+    auto it = std::find_if(std::begin(m_items), std::end(m_items),
+                [&modelIndex](const TreeItem &item) {
                     return item.index == modelIndex;
                 });
 
@@ -1204,7 +1142,7 @@ void ProjectFileSystemModel::modelLayoutChanged()
         return;
 
     QSet<QPersistentModelIndex> expandedItems;
-    for (const auto &item : m_items) {
+    for (const auto &item : qAsConst(m_items)) {
         if (item.expanded)
             expandedItems.insert(item.index);
     }
@@ -1222,7 +1160,8 @@ void ProjectFileSystemModel::modelLayoutChanged()
             const auto &childIndex = m_model->index(i, 0, parentIndex);
             if (isVisible(childIndex)) {
                 const bool expanded = expandedItems.contains(childIndex);
-                m_items.append({ childIndex, depth, expanded, parent, 0 });
+                m_items.append({childIndex, depth, expanded, parent, 0});
+
                 auto &item = m_items.last();
                 if (expanded) {
                     item.childCount = insertChildren(childIndex, &item);
@@ -1244,6 +1183,14 @@ void ProjectFileSystemModel::modelLayoutChanged()
     Q_ASSERT(m_items.count() == itemCount);
 
     Q_EMIT dataChanged(index(0), index(itemCount - 1));
+
+    // select m_selectFile (used for auto selecting newly created files)
+    if (!m_selectFile.isEmpty()) {
+        int row = rowForPath(m_selectFile);
+        if (row != -1)
+            Q_EMIT selectFileChanged(row);
+        m_selectFile.clear();
+    }
 }
 
 void ProjectFileSystemModel::updateDefaultDirMap()
