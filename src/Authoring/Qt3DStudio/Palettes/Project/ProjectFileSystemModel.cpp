@@ -34,6 +34,9 @@
 #include "ProjectFileSystemModel.h"
 #include "StudioUtils.h"
 #include "StudioApp.h"
+#include "MainFrm.h"
+#include "InspectorControlView.h"
+#include "VariantsGroupModel.h"
 #include "ClientDataModelBridge.h"
 #include "Core.h"
 #include "Doc.h"
@@ -746,6 +749,9 @@ void ProjectFileSystemModel::importUrls(const QList<QUrl> &urls, int row, bool a
         if (expandRow >= 0 && !m_items[expandRow].expanded)
             expand(expandRow);
     }
+
+    // Refresh the variants model of inspector in case variants were imported
+    g_StudioApp.m_pMainWnd->getInspectorView()->variantsModel()->refresh();
 }
 
 /**
@@ -859,6 +865,8 @@ void ProjectFileSystemModel::importUrl(QDir &targetDir, const QUrl &url,
                 if (allDataInputs.contains(di))
                     outDataInputs.insert(di, allDataInputs[di]);
             }
+            // Merge variant groups and tags from imported presentation's project
+            doc->GetCore()->getProjectFile().loadVariants(projFile);
         } else if (qmlRoot && isQmlStream) { // importing a qml stream
             presentationPath = doc->GetCore()->getProjectFile().getRelativeFilePathTo(destPath);
             importQmlAssets(qmlRoot, fileInfo.dir(), targetDir, outImportedFiles,
