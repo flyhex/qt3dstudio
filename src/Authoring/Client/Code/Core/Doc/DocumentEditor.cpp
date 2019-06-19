@@ -2031,7 +2031,7 @@ public:
                 && name != QLatin1String("timebartext");
     }
 
-    void saveIfMaterial(Qt3DSDMInstanceHandle instance)
+    void saveIfMaterial(Qt3DSDMInstanceHandle instance) override
     {
         Qt3DSDMInstanceHandle material;
         if (m_Bridge.isInsideMaterialContainer(instance)) {

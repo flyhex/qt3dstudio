@@ -172,17 +172,19 @@ void InspectorControlModel::notifyPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle
         Q_EMIT dataChanged(index(0), index(rowCount() - 1));
 }
 
-bool InspectorControlModel::hasInstanceProperty(long instance, int handle)
+bool InspectorControlModel::hasInstanceProperty(qt3dsdm::Qt3DSDMInstanceHandle instance,
+                                                qt3dsdm::Qt3DSDMPropertyHandle handle) const
 {
     for (const auto &group : qAsConst(m_groupElements)) {
         for (const auto &element : qAsConst(group.controlElements)) {
             InspectorControlBase *property = element.value<InspectorControlBase *>();
-            if (property->m_property == qt3dsdm::CDataModelHandle(handle)
-                    && property->m_instance == qt3dsdm::CDataModelHandle(instance)) {
-                return true;
+            if (property->m_property == handle) {
+                auto refInstance = getBridge()->getMaterialReference(property->m_instance);
+                return property->m_instance == instance || refInstance == instance;
             }
         }
     }
+
     return false;
 }
 
@@ -772,9 +774,10 @@ InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *insp
     // properties explicitly set as controllable in metadata
     item->m_controllable = item->m_animatable || metaProperty.m_Controllable;
 
-    // disable IBL Override for reference materials
+    // disable IBL Override for reference and 'default basic' materials
     if (item->m_title == QLatin1String("IBL Override")
-        && getBridge()->GetObjectType(item->m_instance) == OBJTYPE_REFERENCEDMATERIAL) {
+        && getBridge()->GetObjectType(item->m_instance) == OBJTYPE_REFERENCEDMATERIAL
+        && (!isBasicMaterial() || getBridge()->isDefaultMaterial(item->m_instance))) {
         item->m_enabled = false;
     }
     auto signalProvider = studio->GetFullSystemSignalProvider();
@@ -1096,8 +1099,18 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
     auto studioSystem = doc->GetStudioSystem();
     const auto propertySystem = studioSystem->GetPropertySystem();
     qt3dsdm::SValue value;
-    const auto instance = element->m_instance;
+    auto instance = element->m_instance;
     qt3dsdm::Option<qt3dsdm::SMetaDataPropertyInfo> info;
+
+    // For ref materials update IBL Override from the referenced material. This applies only for
+    // basic materials as IBL Override is disabled for referenced (and default basic) materials.
+    if (element->m_property
+            == getBridge()->GetObjectDefinitions().m_MaterialBase.m_IblProbe.m_Property) {
+        int refInstance = getBridge()->getMaterialReference(instance);
+        if (refInstance)
+            instance = refInstance;
+    }
+
     if (m_guideInspectable) {
         value = m_guideInspectable->properties()
                 [handleToGuidePropIndex(element->m_property)]->GetInspectableData();

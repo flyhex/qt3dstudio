@@ -130,7 +130,8 @@ public:
     void refresh();
     void saveIfMaterial(qt3dsdm::Qt3DSDMInstanceHandle instance);
 
-    bool hasInstanceProperty(long instance, int handle);
+    bool hasInstanceProperty(qt3dsdm::Qt3DSDMInstanceHandle instance,
+                             qt3dsdm::Qt3DSDMPropertyHandle handle) const;
 
     qt3dsdm::SValue currentPropertyValue(long instance, int handle) const;
     QString currentControllerValue(long instance, int handle) const;

@@ -36,6 +36,7 @@ class ImageChooserModel;
 class ImageChooserView : public QQuickWidget
 {
     Q_OBJECT
+
     Q_PROPERTY(bool focused READ isFocused NOTIFY focusChanged)
     Q_PROPERTY(int instance READ instance)
     Q_PROPERTY(int handle READ handle)
@@ -59,17 +60,17 @@ protected:
     void focusInEvent(QFocusEvent *event) override;
     void focusOutEvent(QFocusEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
+    void showEvent(QShowEvent *event) override;
 
 Q_SIGNALS:
     void focusChanged();
 
 private:
-    void showEvent(QShowEvent *event) override;
     void initialize();
     bool isFocused() const;
 
-    int m_handle = -1;
-    int m_instance = -1;
+    int m_handle = 0;
+    int m_instance = 0;
     ImageChooserModel *m_model = nullptr;
 };
 

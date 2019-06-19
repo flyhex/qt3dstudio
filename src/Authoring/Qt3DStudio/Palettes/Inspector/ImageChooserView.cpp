@@ -46,7 +46,6 @@ ImageChooserView::ImageChooserView(QWidget *parent)
     : QQuickWidget(parent)
     , m_model(new ImageChooserModel(true, this))
 {
-    setWindowTitle(tr("Images"));
     setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
     setResizeMode(QQuickWidget::SizeRootObjectToView);
     QTimer::singleShot(0, this, &ImageChooserView::initialize);

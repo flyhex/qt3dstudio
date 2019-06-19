@@ -278,8 +278,7 @@ QString InspectorControlView::titleText() const
 
 bool InspectorControlView::isRefMaterial(int instance) const
 {
-    auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
-    return bridge->IsReferencedMaterialInstance(instance);
+    return getBridge()->IsReferencedMaterialInstance(instance);
 }
 
 QString InspectorControlView::noneString() const
@@ -289,24 +288,23 @@ QString InspectorControlView::noneString() const
 
 bool InspectorControlView::canLinkProperty(int instance, int handle) const
 {
+    if (getBridge()->isInsideMaterialContainer(instance))
+        return false;
+
+    if (getBridge()->IsMaterialBaseInstance(instance)) // all material types are unlinkable
+        return false;
+
+    if (handle == getBridge()->GetSceneAsset().m_Eyeball.m_Property) // eyeball is unlinkable
+        return false;
+
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
-
-    if (bridge->isInsideMaterialContainer(instance))
-        return false;
-
-    if (bridge->IsMaterialBaseInstance(instance)) // all material types are unlinkable
-        return false;
-
-    if (handle == bridge->GetSceneAsset().m_Eyeball.m_Property) // eyeball is unlinkable
-        return false;
-
     return doc->GetDocumentReader().CanPropertyBeLinked(instance, handle);
 }
 
 bool InspectorControlView::canOpenInInspector(int instance, int handle) const
 {
     const auto doc = g_StudioApp.GetCore()->GetDoc();
+
     qt3dsdm::SValue value;
     doc->GetPropertySystem()->GetInstancePropertyValue(instance, handle, value);
     if (!value.empty() && value.getType() == qt3dsdm::DataModelDataType::Long4) {
@@ -319,12 +317,12 @@ bool InspectorControlView::canOpenInInspector(int instance, int handle) const
 void InspectorControlView::openInInspector()
 {
     const auto doc = g_StudioApp.GetCore()->GetDoc();
-    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+
     qt3dsdm::SValue value;
     doc->GetPropertySystem()->GetInstancePropertyValue(m_contextMenuInstance, m_contextMenuHandle,
                                                        value);
     qt3dsdm::SLong4 guid = qt3dsdm::get<qt3dsdm::SLong4>(value);
-    const auto instance = bridge->GetInstanceByGUID(guid);
+    const auto instance = getBridge()->GetInstanceByGUID(guid);
     doc->SelectDataModelObject(instance);
 }
 
@@ -333,11 +331,10 @@ void InspectorControlView::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inIn
 {
     m_inspectorControlModel->notifyPropertyChanged(inInstance, inProperty);
 
-    auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
     // titleChanged implies icon change too, but that will only occur if inspectable type changes,
     // which will invalidate the inspectable anyway, so in reality we are only interested in name
     // property here
-    if (inProperty == bridge->GetNameProperty() && m_inspectableBase
+    if (inProperty == getBridge()->GetNameProperty() && m_inspectableBase
         && m_inspectableBase->isValid()) {
         Q_EMIT titleChanged();
     }
@@ -349,13 +346,12 @@ void InspectorControlView::onChildAdded(int inChild)
     if (m_activeBrowser.isActive() && m_activeBrowser.m_browser == m_objectReferenceView)
         m_activeBrowser.clear();
 
-    const auto doc = g_StudioApp.GetCore()->GetDoc();
-    const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
-    if (bridge->IsCustomMaterialInstance(inChild)) {
+    if (getBridge()->IsCustomMaterialInstance(inChild)) {
         QVector<qt3dsdm::Qt3DSDMInstanceHandle> refMats;
+        auto doc = g_StudioApp.GetCore()->GetDoc();
         doc->getSceneReferencedMaterials(doc->GetSceneInstance(), refMats);
         for (auto &refMat : qAsConst(refMats)) {
-            if ((int)bridge->getMaterialReference(refMat) == inChild)
+            if (int(getBridge()->getMaterialReference(refMat)) == inChild)
                 g_StudioApp.GetCore()->GetDispatch()->FireImmediateRefreshInstance(refMat);
         }
     }
@@ -429,16 +425,15 @@ CInspectableBase *InspectorControlView::createInspectableFromSelectable(
             if (selectedsInstances.size() == 1) {
                 Qt3DSDMInstanceHandle selectedInstance = selectedsInstances[0];
                 if (doc->GetDocumentReader().IsInstance(selectedInstance)) {
-                    auto *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
                     qt3dsdm::Qt3DSDMSlideHandle activeSlide = doc->GetActiveSlide();
 
                     // Scene or Component (when being edited)
-                    if (selectedInstance == bridge->GetOwningComponentInstance(activeSlide)) {
+                    if (selectedInstance == getBridge()->GetOwningComponentInstance(activeSlide)) {
                         Qt3DSDMInstanceHandle activeSlideInstance = doc->GetStudioSystem()
                                               ->GetSlideSystem()->GetSlideInstance(activeSlide);
                         inspectableBase = new Qt3DSDMInspectable(selectedInstance,
                                                                  activeSlideInstance);
-                    } else if (bridge->IsMaterialBaseInstance(selectedInstance)) {
+                    } else if (getBridge()->IsMaterialBaseInstance(selectedInstance)) {
                         inspectableBase = new Qt3DSDMMaterialInspectable(selectedInstance);
                     } else {
                         inspectableBase = new Qt3DSDMInspectable(selectedInstance);
@@ -480,7 +475,6 @@ void InspectorControlView::showContextMenu(int x, int y, int handle, int instanc
 
     QMenu theContextMenu;
 
-    auto doc = g_StudioApp.GetCore()->GetDoc();
 
     if (canOpenInInspector(instance, handle)) {
         auto action = theContextMenu.addAction(tr("Open in Inspector"));
@@ -488,6 +482,7 @@ void InspectorControlView::showContextMenu(int x, int y, int handle, int instanc
     }
 
     if (canLinkProperty(instance, handle)) {
+        auto doc = g_StudioApp.GetCore()->GetDoc();
         bool isLinked = doc->GetDocumentReader().IsPropertyLinked(instance, handle);
         auto action = theContextMenu.addAction(isLinked ? tr("Unlink Property from Master Slide")
                                                         : tr("Link Property from Master Slide"));
@@ -632,6 +627,14 @@ QObject *InspectorControlView::showImageChooser(int handle, int instance, const 
                 }
             }
         });
+    }
+
+    // For basic materials edit IBL Override of the referenced material. This applies only for basic
+    // materials as IBL Override is disabled for referenced (and default basic) materials.
+    if (handle == getBridge()->GetObjectDefinitions().m_MaterialBase.m_IblProbe.m_Property) {
+        int refInstance = getBridge()->getMaterialReference(instance);
+        if (refInstance)
+            instance = refInstance;
     }
 
     m_imageChooserView->setHandle(handle);
@@ -838,10 +841,8 @@ QColor InspectorControlView::showColorDialog(const QColor &color, int instance, 
 {
     bool showAlpha = false;
     if (instance && handle) {
-        auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
-                                                     ->GetClientDataModelBridge();
-        showAlpha = bridge->getBGColorProperty(instance).GetHandleValue() == handle
-                || bridge->getTextColorProperty(instance).GetHandleValue() == handle;
+        showAlpha = getBridge()->getBGColorProperty(instance).GetHandleValue() == handle
+                 || getBridge()->getTextColorProperty(instance).GetHandleValue() == handle;
     }
 
     m_currentColor = color;
@@ -854,7 +855,7 @@ QColor InspectorControlView::showColorDialog(const QColor &color, int instance, 
     return currentColor;
 }
 
-bool InspectorControlView::toolTipsEnabled()
+bool InspectorControlView::toolTipsEnabled() const
 {
     return CStudioPreferences::ShouldShowTooltips();
 }
@@ -917,6 +918,11 @@ void InspectorControlView::OnEndDataModelNotifications()
             }
         }
     }
+}
+
+CClientDataModelBridge *InspectorControlView::getBridge() const
+{
+    return g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
 }
 
 void InspectorControlView::OnImmediateRefreshInstanceSingle(qt3dsdm::Qt3DSDMInstanceHandle inInstance)

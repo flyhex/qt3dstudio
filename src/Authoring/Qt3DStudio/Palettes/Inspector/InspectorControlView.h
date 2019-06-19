@@ -51,6 +51,7 @@ class ObjectListModel;
 class FileChooserView;
 class TextureChooserView;
 class MaterialRefView;
+class CClientDataModelBridge;
 
 QT_FORWARD_DECLARE_CLASS(QAbstractItemModel)
 
@@ -86,7 +87,7 @@ public:
     Q_INVOKABLE QObject *showObjectReference(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QObject *showMaterialReference(int handle, int instance, const QPoint &point);
     Q_INVOKABLE QObject *showTextureChooser(int handle, int instance, const QPoint &point);
-    Q_INVOKABLE bool toolTipsEnabled();
+    Q_INVOKABLE bool toolTipsEnabled() const;
     Q_INVOKABLE bool isRefMaterial(int instance) const;
     Q_INVOKABLE bool isEditable(int handle) const;
     Q_INVOKABLE QString convertPathToProjectRoot(const QString &presentationPath);
@@ -143,6 +144,8 @@ private:
     QPointer<MaterialRefView> m_matRefListWidget;
     QPointer<ObjectListModel> m_objectReferenceModel;
     QPointer<DataInputSelectView> m_dataInputChooserView;
+    CClientDataModelBridge *getBridge() const;
+
     std::vector<Q3DStudio::CFilePath> m_fileList;
     MouseHelper m_mouseHelper;
     QmlUtils m_qmlUtils;
@@ -167,8 +170,8 @@ private:
             if (isActive())
                 m_browser->close();
             m_browser.clear();
-            m_handle = -1;
-            m_instance = -1;
+            m_handle = 0;
+            m_instance = 0;
         }
         bool isActive() const
         {
@@ -176,8 +179,8 @@ private:
         }
 
         QPointer<QWidget> m_browser = nullptr;
-        int m_handle = -1;
-        int m_instance = -1;
+        int m_handle = 0;
+        int m_instance = 0;
     };
 
     ActiveBrowserData m_activeBrowser;
