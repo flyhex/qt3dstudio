@@ -359,10 +359,9 @@ public:
     void AddAnimation(TCharPtr instance, const SImportPropertyDefinition<TDataType> &inProperty,
                       QT3DSU32 subPropIndex, EAnimationType type, NVConstDataRef<QT3DSF32> values)
     {
-        std::tuple<bool, size_t> isAnimatableAndArity(
-            GetDatatypeAnimatableAndArity(TypeToDataType<TDataType>()));
-        if (std::get<0>(isAnimatableAndArity)) {
-            if (subPropIndex >= std::get<1>(isAnimatableAndArity)) {
+        size_t arity = GetDatatypeAnimatableArity(TypeToDataType<TDataType>());
+        if (arity) {
+            if (subPropIndex >= arity) {
                 QT3DS_ASSERT(false);
                 subPropIndex = 0;
             }

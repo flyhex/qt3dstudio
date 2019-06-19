@@ -290,7 +290,6 @@ struct SMetaDataPropertyEraser
 };
 using std::unordered_set;
 using std::unordered_map;
-using std::tuple;
 
 // Algorithm to write is to run through the graph, starting at the root instances
 // and write out the instances as we come to them.
@@ -977,7 +976,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
             SMetaDataPropertyInfo thePropertyInfo(
                         m_MetaData.GetMetaDataPropertyInfo(theMetaDataProperty));
             wstring theName = thePropertyInfo.m_Name.wide_str();
-            size_t theArity = get<1>(GetDatatypeAnimatableAndArity(thePropertyInfo.GetDataType()));
+            size_t theArity = GetDatatypeAnimatableArity(thePropertyInfo.GetDataType());
             if (theArity > 1) {
                 theName.append(L".");
                 switch (theInfo.m_Index) {
@@ -1081,12 +1080,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
             return;
         }
         SMetaDataPropertyInfo theInfo(m_MetaData.GetMetaDataPropertyInfo(theProperty));
-        std::tuple<bool, size_t> theAnimAndArity = GetDatatypeAnimatableAndArity(theInfo.GetDataType());
-        if (std::get<0>(theAnimAndArity) == false) {
-            QT3DS_ASSERT(false);
-            return;
-        }
-        if (std::get<1>(theAnimAndArity) <= subIndex) {
+        size_t theArity = GetDatatypeAnimatableArity(theInfo.GetDataType());
+        if (theArity == 0 || theArity <= subIndex) {
             QT3DS_ASSERT(false);
             return;
         }

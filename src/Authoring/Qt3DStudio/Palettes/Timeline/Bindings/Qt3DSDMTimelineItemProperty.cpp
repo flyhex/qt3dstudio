@@ -103,8 +103,8 @@ void Qt3DSDMTimelineItemProperty::CreateKeyframes()
     DataModelDataType::Value theDataType = thePropertySystem->GetDataType(m_PropertyHandle);
     IStudioAnimationSystem *theAnimationSystem =
         m_TransMgr->GetStudioSystem()->GetAnimationSystem();
-    std::tuple<bool, size_t> theArity = GetDatatypeAnimatableAndArity(theDataType);
-    for (size_t i = 0; i < std::get<1>(theArity); ++i) {
+    size_t arity = GetDatatypeAnimatableArity(theDataType);
+    for (size_t i = 0; i < arity; ++i) {
         Qt3DSDMAnimationHandle theAnimationHandle =
             theAnimationSystem->GetControllingAnimation(m_InstanceHandle, m_PropertyHandle, i);
         if (theAnimationHandle.Valid())

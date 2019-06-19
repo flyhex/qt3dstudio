@@ -1153,12 +1153,12 @@ public:
         SImportComposerTypes theTypes;
         SImportAsset &theAsset(theTypes.GetImportAssetForType(inType));
         DataModelDataType::Value theType(theAsset.GetPropertyDataType(thePropName.wide_str()));
-        std::tuple<bool, size_t> animAndArity = GetDatatypeAnimatableAndArity(theType);
-        if (std::get<0>(animAndArity) == false) {
+        size_t arity = GetDatatypeAnimatableArity(theType);
+        if (arity == 0) {
             QT3DS_ASSERT(false);
             return;
         };
-        if (std::get<1>(animAndArity) > 1) {
+        if (arity > 1) {
             thePropName.append(L".");
             switch (inAnimation.m_SubPropertyIndex) {
             case 0:
