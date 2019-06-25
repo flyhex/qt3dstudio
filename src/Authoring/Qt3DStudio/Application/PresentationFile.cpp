@@ -534,66 +534,30 @@ void PresentationFile::getSourcePaths(const QFileInfo &uipSrc, const QFileInfo &
  * @param outmap returned list of datainput - property name pairs
  */
 // static
-bool PresentationFile::getDataInputBindings(const SubPresentationRecord &subpresentation,
-                                            QMultiMap<QString, QPair<QString, QString>> &outmap)
+bool PresentationFile::getDataInputBindings(
+        const SubPresentationRecord &subpresentation,
+        QMultiHash<QString, ProjectFile::DataInputOutputBinding> &outmap)
 {
-    QList<QString> ctrldPropList;
-
-    QString spPath(g_StudioApp.getRenderableAbsolutePath(subpresentation.m_id));
-
-    QDomDocument domDoc;
-    if (!StudioUtils::readFileToDomDocument(spPath, domDoc))
-        return false;
-
-    // search <Graph>
-    QDomElement graphElem = domDoc.documentElement().firstChild()
-            .firstChildElement(QStringLiteral("Graph"));
-    for (QDomElement p = graphElem.firstChild().toElement(); !p.isNull();
-         p = p.nextSibling().toElement()) {
-        QString ctrldPropStr = p.attribute(QStringLiteral("controlledproperty"));
-        if (!ctrldPropStr.isEmpty())
-            ctrldPropList.append(ctrldPropStr);
-    }
-    // Search Logic - State - Add
-    QDomNodeList addElems = domDoc.documentElement().firstChild()
-            .firstChildElement(QStringLiteral("Logic"))
-            .elementsByTagName(QStringLiteral("Add"));
-
-    for (int i = 0; i < addElems.count(); ++i) {
-        QDomElement elem = addElems.at(i).toElement();
-        QString ctrldPropStr = elem.attribute(QStringLiteral("controlledproperty"));
-        if (!ctrldPropStr.isEmpty())
-            ctrldPropList.append(ctrldPropStr);
-    }
-
-    for (auto di : qAsConst(ctrldPropList)) {
-        QStringList split = di.split(QLatin1String(" "));
-        for (int i = 0; i < split.size(); i += 2) {
-            QString diName = split[i];
-            // Datainput names indicated with prefix "$", remove
-            // if found.
-            if (diName.startsWith(QLatin1String("$")))
-                diName = diName.mid(1, diName.size() - 1);
-            QString propName = split[i + 1];
-            // We should find the datainput from the global datainput list
-            // parsed out from UIA file, but check just in case and do not insert
-            // if not found.
-            if (g_StudioApp.m_dataInputDialogItems.contains(diName)) {
-                outmap.insert(subpresentation.m_id, QPair<QString, QString>(diName, propName));
-            } else {
-                qWarning() << "Subpresentation" << subpresentation.m_id
-                           << "is using datainput" << diName << "that is "
-                              "not found from the current UIA file";
-            }
-        }
-    }
-    return true;
+    return getDataInputOutputBindings(subpresentation, outmap,
+                                      QStringLiteral("controlledproperty"));
 }
 
-bool PresentationFile::getDataOutputBindings(const SubPresentationRecord &subpresentation,
-                                             QMultiMap<QString, QPair<QString, QString>> &outmap)
+bool PresentationFile::getDataOutputBindings(
+        const SubPresentationRecord &subpresentation,
+        QMultiHash<QString, ProjectFile::DataInputOutputBinding> &outmap)
 {
-    QList<QString> ctrldPropList;
+    return getDataInputOutputBindings(subpresentation, outmap,
+                                      QStringLiteral("observedproperty"));
+}
+
+bool PresentationFile::getDataInputOutputBindings(
+        const SubPresentationRecord &subpresentation,
+        QMultiHash<QString, ProjectFile::DataInputOutputBinding> &outmap,
+        const QString &dioProperty)
+{
+    QVector<QPair<QString, QString>> ctrldPropList;
+    QHash<QString, QString> sourceClasses; // class id, sourcepath
+    QHash<QString, QString> idToSourceMap; // material/effect/behavior id, sourcepath
 
     QString spPath(g_StudioApp.getRenderableAbsolutePath(subpresentation.m_id));
 
@@ -601,15 +565,45 @@ bool PresentationFile::getDataOutputBindings(const SubPresentationRecord &subpre
     if (!StudioUtils::readFileToDomDocument(spPath, domDoc))
         return false;
 
-    // search <Graph>
-    QDomElement graphElem = domDoc.documentElement().firstChild()
-            .firstChildElement(QStringLiteral("Graph"));
-    for (QDomElement p = graphElem.firstChild().toElement(); !p.isNull();
+    spPath = QFileInfo(spPath).absolutePath() + QLatin1Char('/');
+
+    // Search <Classes> for custom materials
+    QDomElement classesElem = domDoc.documentElement().firstChild()
+            .firstChildElement(QStringLiteral("Classes"));
+    for (QDomElement p = classesElem.firstChild().toElement(); !p.isNull();
          p = p.nextSibling().toElement()) {
-        QString ctrldPropStr = p.attribute(QStringLiteral("observedproperty"));
-        if (!ctrldPropStr.isEmpty())
-            ctrldPropList.append(ctrldPropStr);
+        if (p.tagName() == QLatin1String("CustomMaterial")
+                || p.tagName() == QLatin1String("Effect")
+                || p.tagName() == QLatin1String("Behavior")) {
+            const QString id = p.attribute(QStringLiteral("id"));
+            QString sourcePath = spPath + p.attribute(QStringLiteral("sourcepath"));
+            sourceClasses.insert(id, sourcePath);
+        }
     }
+
+    std::function<void(const QDomElement &parentElem)> searchGraph;
+    searchGraph = [&](const QDomElement &parentElem) {
+        for (QDomElement p = parentElem.firstChild().toElement(); !p.isNull();
+             p = p.nextSibling().toElement()) {
+            searchGraph(p);
+            QString ctrldPropStr = p.attribute(dioProperty);
+            QString sourcePath;
+            if (p.tagName() == QLatin1String("CustomMaterial")
+                    || p.tagName() == QLatin1String("Effect")
+                    || p.tagName() == QLatin1String("Behavior")) {
+                const QString id = p.attribute(QStringLiteral("id"));
+                const QString classId = p.attribute(QStringLiteral("class")).mid(1);
+                sourcePath = sourceClasses.value(classId);
+                idToSourceMap.insert(id, sourcePath);
+            }
+            if (!ctrldPropStr.isEmpty())
+                ctrldPropList.append({ctrldPropStr, sourcePath});
+        }
+    };
+
+    // Search <Graph> recursively for controlled properties
+    searchGraph(domDoc.documentElement().firstChild().firstChildElement(QStringLiteral("Graph")));
+
     // Search Logic - State - Add
     QDomNodeList addElems = domDoc.documentElement().firstChild()
             .firstChildElement(QStringLiteral("Logic"))
@@ -617,27 +611,35 @@ bool PresentationFile::getDataOutputBindings(const SubPresentationRecord &subpre
 
     for (int i = 0; i < addElems.count(); ++i) {
         QDomElement elem = addElems.at(i).toElement();
-        QString ctrldPropStr = elem.attribute(QStringLiteral("observedproperty"));
-        if (!ctrldPropStr.isEmpty())
-            ctrldPropList.append(ctrldPropStr);
+        QString ctrldPropStr = elem.attribute(dioProperty);
+        if (!ctrldPropStr.isEmpty()) {
+            const QString ref = elem.attribute(QStringLiteral("ref")).mid(1);
+            QString sourcePath;
+            if (idToSourceMap.contains(ref))
+                sourcePath = idToSourceMap.value(ref);
+            ctrldPropList.append({ctrldPropStr, sourcePath});
+        }
     }
 
-    for (auto dout : qAsConst(ctrldPropList)) {
-        QStringList split = dout.split(QLatin1Char(' '));
+    for (const auto &dio : qAsConst(ctrldPropList)) {
+        const QString dioStr = dio.first;
+        const QString sourcePath = dio.second;
+        QStringList split = dioStr.split(QLatin1Char(' '));
         for (int i = 0; i < split.size(); i += 2) {
-            QString doName = split[i];
-            // Dataoutput names indicated with prefix "$", remove if found.
-            if (doName.startsWith(QLatin1Char('$')))
-                doName = doName.mid(1, doName.size() - 1);
+            QString dioName = split[i];
+            // Datainput/output names indicated with prefix "$", remove
+            // if found.
+            if (dioName.startsWith(QLatin1Char('$')))
+                dioName = dioName.mid(1, dioName.size() - 1);
             QString propName = split[i + 1];
-            // We should find the dataoutputs from the global dataoutput list
+            // We should find the datainput/output from the global datainput list
             // parsed out from UIA file, but check just in case and do not insert
             // if not found.
-            if (g_StudioApp.m_dataInputDialogItems.contains(doName)) {
-                outmap.insert(subpresentation.m_id, QPair<QString, QString>(doName, propName));
+            if (g_StudioApp.m_dataInputDialogItems.contains(dioName)) {
+                outmap.insert(subpresentation.m_id, {dioName, propName, sourcePath});
             } else {
                 qWarning() << "Subpresentation" << subpresentation.m_id
-                           << "is using dataoutput" << doName << "that is "
+                           << "is using datainput/output" << dioName << "that is "
                               "not found from the current UIA file";
             }
         }

@@ -51,6 +51,12 @@ public:
         QStringList m_tags;
     };
 
+    struct DataInputOutputBinding {
+        QString dioName;
+        QString propertyName;
+        QString propertyDefinitionFile; // E.g. for CustomMaterials, this is the .shader file
+    };
+
     void create(const QString &uiaPath);
     void ensureProjectFile();
     void initProjectFile(const QString &presPath);
@@ -74,7 +80,8 @@ public:
     QString getAbsoluteFilePathTo(const QString &relFilePath) const;
     QString getRelativeFilePathTo(const QString &absFilePath) const;
     QString createPreview();
-    QMultiMap<QString, QPair<QString, QString>> getDiBindingtypesFromSubpresentations() const;
+
+    QMultiHash<QString, DataInputOutputBinding> getDiBindingtypesFromSubpresentations() const;
 
     static QString getInitialPresentationSrc(const QString &uiaPath);
     static void getPresentations(const QString &inUiaPath,

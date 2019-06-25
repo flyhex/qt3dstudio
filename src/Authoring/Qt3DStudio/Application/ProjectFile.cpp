@@ -947,11 +947,11 @@ QString ProjectFile::getRelativeFilePathTo(const QString &absFilePath) const
     return QDir(getProjectPath()).relativeFilePath(absFilePath);
 }
 
-// Return multimap of type subpresentationid - QPair<datainput, propertyname>
-QMultiMap<QString, QPair<QString, QString>>
+// Return multimap of type subpresentationid - DataInputOutputBinding
+QMultiHash<QString, ProjectFile::DataInputOutputBinding>
 ProjectFile::getDiBindingtypesFromSubpresentations() const
 {
-    QMultiMap<QString, QPair<QString, QString>> map;
+    QMultiHash<QString, DataInputOutputBinding> map;
     for (auto sp : qAsConst(g_StudioApp.m_subpresentations))
         PresentationFile::getDataInputBindings(sp, map);
 

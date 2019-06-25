@@ -42,6 +42,7 @@
 #include "IKeyframesManager.h"
 #include "PresentationFile.h"
 #include "EditPresentationIdDlg.h"
+#include "Qt3DSDMWStrOps.h"
 
 #include <QtGui/qsurfaceformat.h>
 #include <QtCore/qfileinfo.h>
@@ -2122,15 +2123,16 @@ void CStudioApp::checkDeletedDatainputs(bool askFromUser)
     for (auto it : qAsConst(m_dataInputDialogItems))
         it->externalPresBoundTypes.clear();
 
-    const QMultiMap<QString, QPair<QString, QString>> spDatainputs
+    const QMultiHash<QString, ProjectFile::DataInputOutputBinding> spDatainputs
             = GetCore()->getProjectFile().getDiBindingtypesFromSubpresentations();
-
+    QHash<QString, QHash<QString, qt3dsdm::DataModelDataType::Value>>
+            customPropertyTypes; // sourcepath, <propname, proptype>
     // For datainput bindings in subpresentations we do not have specific
     // instance and/or property handles. Get the datatype for property using
     // the generic name string and leave instance/property handle empty.
     for (auto sp = spDatainputs.cbegin(); sp != spDatainputs.cend(); ++sp) {
-        const QString propName = sp->second;
-        CDataInputDialogItem *item = m_dataInputDialogItems.find(sp->first).value();
+        const QString propName = sp->propertyName;
+        CDataInputDialogItem *item = m_dataInputDialogItems.find(sp->dioName).value();
         QPair<qt3dsdm::DataModelDataType::Value, bool> spEntry;
         if (propName == QLatin1String("@timeline")) {
             spEntry.first = qt3dsdm::DataModelDataType::Value::RangedNumber;
@@ -2139,15 +2141,70 @@ void CStudioApp::checkDeletedDatainputs(bool askFromUser)
             spEntry.first = qt3dsdm::DataModelDataType::Value::String;
             spEntry.second = true;
         } else {
-            qt3dsimp::SImportComposerTypes theTypes;
-            qt3dsimp::SImportAsset &theAsset(theTypes.GetImportAssetForType(
-                                                 qt3dsdm::ComposerObjectTypes::ControllableObject));
-            qt3dsdm::DataModelDataType::Value theType(
-                        theAsset.GetPropertyDataType(propName.toStdWString().c_str()));
+            qt3dsdm::DataModelDataType::Value theType = qt3dsdm::DataModelDataType::Value::None;
+            if (!sp->propertyDefinitionFile.isEmpty()) {
+                // Check property type from custom property definition file
+                if (!customPropertyTypes.contains(sp->propertyDefinitionFile)) {
+                    QHash<QString, qt3dsdm::DataModelDataType::Value> propTypes;
+                    QFile file(sp->propertyDefinitionFile);
+                    file.open(QFile::Text | QFile::ReadOnly);
+                    if (!file.isOpen()) {
+                        qWarning() << file.errorString();
+                    } else {
+                        QString xmlContent = file.readAll();
+                        if (sp->propertyDefinitionFile.endsWith(QLatin1String("qml"),
+                                                                Qt::CaseInsensitive)) {
+                            // Property defs are in comments in behavior scripts, and not in well
+                            // formed XML format, so skip until start of the property definitions
+                            // and extract properties under a fake root tag to avoid parsing issues
+                            int start = xmlContent.indexOf(QLatin1String("/*[["));
+                            if (start != -1) {
+                                int end = xmlContent.indexOf(QLatin1String("]]*/"), start);
+                                QString tagged = QStringLiteral("<Behavior>\n");
+                                tagged.append(xmlContent.mid(start, end - start).trimmed());
+                                tagged.append(QLatin1String("</Behavior>\n"));
+                                tagged.replace(QLatin1String("\r\n"), QLatin1String("\n"));
+                                xmlContent = tagged;
+                            }
+                        }
+                        QDomDocument domDoc;
+                        domDoc.setContent(xmlContent);
+                        QDomNodeList propElems
+                                = domDoc.elementsByTagName(QStringLiteral("Property"));
+                        for (int i = 0; i < propElems.count(); ++i) {
+                            QDomElement elem = propElems.at(i).toElement();
+                            const QString metaName = elem.attribute(QStringLiteral("name"));
+                            const QString metaType = elem.attribute(QStringLiteral("type"));
+                            qt3dsdm::DataModelDataType::Value dataType;
+                            if (metaType.isEmpty()) {
+                                dataType = qt3dsdm::DataModelDataType::Value::Float;
+                            } else {
+                                QByteArray buf((metaType.size() + 1) * int(sizeof(wchar_t)),'\0');
+                                metaType.toWCharArray(reinterpret_cast<wchar_t *>(buf.data()));
+                                qt3dsdm::CompleteMetaDataType::Enum typeValue;
+                                WStrOps<qt3dsdm::CompleteMetaDataType::Enum> converter;
+                                converter.StrTo(reinterpret_cast<const wchar_t *>(
+                                                    buf.constData()), typeValue);
+                                dataType = qt3dsdm::CompleteMetaDataType::ToDataType(typeValue);
+                            }
+                            propTypes.insert(metaName, dataType);
+                        }
+                        customPropertyTypes.insert(sp->propertyDefinitionFile, propTypes);
+                    }
+                }
+                theType = customPropertyTypes[sp->propertyDefinitionFile].value(
+                            propName, qt3dsdm::DataModelDataType::Value::None);
+            }
+            if (theType == qt3dsdm::DataModelDataType::Value::None) {
+                qt3dsimp::SImportComposerTypes theTypes;
+                qt3dsimp::SImportAsset &theAsset(
+                            theTypes.GetImportAssetForType(
+                                qt3dsdm::ComposerObjectTypes::ControllableObject));
+                theType = theAsset.GetPropertyDataType(propName.toStdWString().c_str());
+            }
             spEntry.first = theType;
             spEntry.second = false;
         }
-
         item->externalPresBoundTypes.insert(sp.key(), spEntry);
     }
 }

@@ -52,12 +52,18 @@ public:
                                const QString &newName);
     static QSize readSize(const QString &uipPath);
     static QString findProjectFile(const QString &uipPath);
-    static bool getDataInputBindings(const SubPresentationRecord &subpresentation,
-                                     QMultiMap<QString, QPair<QString, QString>> &outmap);
-    static bool getDataOutputBindings(const SubPresentationRecord &subpresentation,
-                                      QMultiMap<QString, QPair<QString, QString>> &outmap);
+    static bool getDataInputBindings(
+            const SubPresentationRecord &subpresentation,
+            QMultiHash<QString, ProjectFile::DataInputOutputBinding> &outmap);
+    static bool getDataOutputBindings(
+            const SubPresentationRecord &subpresentation,
+            QMultiHash<QString, ProjectFile::DataInputOutputBinding> &outmap);
 
 private:
+    static bool getDataInputOutputBindings(
+            const SubPresentationRecord &subpresentation,
+            QMultiHash<QString, ProjectFile::DataInputOutputBinding> &outmap,
+            const QString &dioProperty);
     PresentationFile();
 };
 
