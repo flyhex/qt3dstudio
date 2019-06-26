@@ -3725,6 +3725,23 @@ STranslation::PrepareWidgetDrag(qt3ds::widgets::StudioWidgetComponentIds::Enum i
     retval.m_OriginalPlaneCoords = theOriginalRay.Intersect(retval.m_Plane);
     retval.m_CurrentPlaneCoords = theCurrentRay.Intersect(retval.m_Plane);
     retval.m_PreviousPlaneCoords = thePreviousRay.Intersect(retval.m_Plane);
+
+    // Resolve t-value from current ray intersection calculation
+    // Its sign indicates the position relative to the camera
+    float t = 0.f;
+
+    // Ray direction is normalized, so one of the components must be > .1f
+    if (qAbs(theCurrentRay.m_Direction.x) > .1f) {
+        t = (retval.m_CurrentPlaneCoords->x - theCurrentRay.m_Origin.x)
+                / theCurrentRay.m_Direction.x;
+    } else if (qAbs(theCurrentRay.m_Direction.y) > .1f) {
+        t = (retval.m_CurrentPlaneCoords->y - theCurrentRay.m_Origin.y)
+                / theCurrentRay.m_Direction.y;
+    } else if (qAbs(theCurrentRay.m_Direction.z) > .1f) {
+        t = (retval.m_CurrentPlaneCoords->z - theCurrentRay.m_Origin.z)
+                / theCurrentRay.m_Direction.z;
+    }
+    retval.m_isBehindCamera = t < 0;
     return retval;
 }
 
@@ -3747,6 +3764,7 @@ void STranslation::PerformWidgetDrag(int inWidgetSubComponent, CPt inOriginalCoo
     Option<QT3DSVec3> theCurrentPlaneCoords(thePrepResult->m_CurrentPlaneCoords);
     QT3DSVec3 globalPos(thePrepResult->m_GlobalPos);
     bool isPlane(thePrepResult->m_IsPlane);
+    bool isBehindCamera(thePrepResult->m_isBehindCamera);
     QT3DSVec3 theAxis(thePrepResult->m_Axis);
     QT3DSU32 axisIndex(thePrepResult->m_AxisIndex);
     SNode *theNode(thePrepResult->m_Node);
@@ -3761,7 +3779,8 @@ void STranslation::PerformWidgetDrag(int inWidgetSubComponent, CPt inOriginalCoo
         QT3DS_ASSERT(false);
         return;
     case qt3ds::widgets::StudioWidgetTypes::Scale: {
-        if (theOriginalPlaneCoords.hasValue() && theCurrentPlaneCoords.hasValue()) {
+        if (theOriginalPlaneCoords.hasValue() && theCurrentPlaneCoords.hasValue()
+                && !isBehindCamera) {
             QT3DSVec3 objToOriginal = globalPos - *theOriginalPlaneCoords;
             QT3DSVec3 objToCurrent = globalPos - *theCurrentPlaneCoords;
             QT3DSVec3 theScaleMultiplier(1, 1, 1);
@@ -3879,7 +3898,8 @@ void STranslation::PerformWidgetDrag(int inWidgetSubComponent, CPt inOriginalCoo
         }
     } break;
     case qt3ds::widgets::StudioWidgetTypes::Translation: {
-        if (theOriginalPlaneCoords.hasValue() && theCurrentPlaneCoords.hasValue()) {
+        if (theOriginalPlaneCoords.hasValue() && theCurrentPlaneCoords.hasValue()
+                && !isBehindCamera) {
             QT3DSVec3 theDiff = *theCurrentPlaneCoords - *theOriginalPlaneCoords;
             if (isPlane) {
                 ApplyPositionalChange(theDiff, *theNode, inEditor);

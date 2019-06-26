@@ -326,6 +326,7 @@ namespace studio {
         Option<QT3DSVec3> m_CurrentPlaneCoords;
         Option<QT3DSVec3> m_PreviousPlaneCoords;
         bool m_IsPlane;
+        bool m_isBehindCamera;
         SDragPreparationResult() {}
     };
 
