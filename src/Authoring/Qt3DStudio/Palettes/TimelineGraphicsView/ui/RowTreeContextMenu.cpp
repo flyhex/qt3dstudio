@@ -75,40 +75,39 @@ void RowTreeContextMenu::initialize()
         m_diMenu = addMenu(tr("Set datainput controller"));
         connect(m_diMenu, &QMenu::triggered, this, &RowTreeContextMenu::addDiController);
 
-        QVector<qt3dsdm::Qt3DSDMPropertyHandle> propList;
-
         // If this is a referenced material instance, we need to get the property list from
         // the referenced source, and set datainput control to point to the property
         // in the referenced source.
         auto refInstance = doc.GetStudioSystem()->GetClientDataModelBridge()
                            ->getMaterialReference(instance);
-        propList = doc.GetStudioSystem()->GetPropertySystem()
-                   ->GetControllableProperties(refInstance ? refInstance : instance);
+        const QVector<QPair<QString, QVector<qt3dsdm::Qt3DSDMPropertyHandle>>> propGroups
+                = doc.GetStudioSystem()->GetPropertySystem()
+                ->GetControllableProperties(refInstance ? refInstance : instance);
 
-        QMap<int, QAction *> sections;
-        for (const auto &prop : propList) {
-            QAction *action
-                    = new QAction(QString::fromStdWString(doc.GetPropertySystem()
-                                                          ->GetFormalName(
-                                                              refInstance ? refInstance : instance,
-                                                              prop).wide_str()));
-            action->setData(QString::fromStdWString(
-                                doc.GetPropertySystem()
-                                ->GetName(prop).wide_str()));
+        QMap<QString, QAction *> sections;
+        for (const auto &propGroup : propGroups) {
+            const QString group = propGroup.first;
+            const auto &propList = propGroup.second;
+            for (const auto &prop : propList) {
+                QAction *action
+                        = new QAction(QString::fromStdWString(
+                                          doc.GetPropertySystem()->GetFormalName(
+                                              refInstance ? refInstance : instance,
+                                              prop).wide_str()));
+                action->setData(QString::fromStdWString(
+                                    doc.GetPropertySystem()
+                                    ->GetName(prop).wide_str()));
 
-            auto metadata = doc.GetStudioSystem()->GetActionMetaData()->GetMetaDataPropertyInfo(
-                        doc.GetStudioSystem()->GetActionMetaData()->GetMetaDataProperty(
-                            refInstance ? refInstance : instance, prop));
-
-            if (sections.contains(metadata->m_CompleteType) ) {
-                m_diMenu->insertAction(sections[metadata->m_CompleteType], action);
-            } else {
-                // Create a QAction for a section so that we can insert properties above it
-                // to maintain category groupings. Sections are shown as separators in Studio
-                // style i.e. enum text is not shown.
-                QAction *section = m_diMenu->addSection(QString(metadata->m_CompleteType));
-                sections.insert(metadata->m_CompleteType, section);
-                m_diMenu->insertAction(section, action);
+                if (sections.contains(group) ) {
+                    m_diMenu->insertAction(sections[group], action);
+                } else {
+                    // Create a QAction for a section so that we can insert properties above it
+                    // to maintain category groupings. Sections are shown as separators in Studio
+                    // style i.e. enum text is not shown.
+                    QAction *section = m_diMenu->addSection(group);
+                    sections.insert(group, section);
+                    m_diMenu->insertAction(section, action);
+                }
             }
         }
     }
