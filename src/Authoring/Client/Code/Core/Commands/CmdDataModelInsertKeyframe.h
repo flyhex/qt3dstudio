@@ -52,7 +52,7 @@ public:
     {
         qt3dsdm::Qt3DSDMPropertyHandle m_Property;
         float m_KeyframeTime;
-        qt3dsdm::SGetOrSetKeyframeInfo m_Infos[3];
+        qt3dsdm::SGetOrSetKeyframeInfo m_Infos[4];
         size_t m_ValidInfoCount;
 
         STimeKeyframeData(qt3dsdm::Qt3DSDMPropertyHandle inProperty, float inKeyframeTime,
@@ -60,10 +60,9 @@ public:
             : m_Property(inProperty)
             , m_KeyframeTime(inKeyframeTime)
         {
-            m_ValidInfoCount = inInfoCount <= 3 ? inInfoCount : 3;
-            for (size_t idx = 0, end = m_ValidInfoCount; idx < end; ++idx) {
+            m_ValidInfoCount = inInfoCount <= 4 ? inInfoCount : 4;
+            for (size_t idx = 0, end = m_ValidInfoCount; idx < end; ++idx)
                 m_Infos[idx] = inInfos[idx];
-            }
         }
     };
 

@@ -296,7 +296,7 @@ void KeyframeManager::copySelectedKeyframes()
             Qt3DSDMTimelineKeyframe *kf = keyframe->binding;
             Qt3DSDMTimelineKeyframe::TKeyframeHandleList theKeyframeHandles;
             kf->GetKeyframeHandles(theKeyframeHandles);
-            qt3dsdm::SGetOrSetKeyframeInfo info[3];
+            qt3dsdm::SGetOrSetKeyframeInfo info[4];
             size_t infoCount = 0;
             if (!theKeyframeHandles.empty()) {
                 switch (theKeyframeHandles.size()) {
@@ -309,6 +309,13 @@ void KeyframeManager::copySelectedKeyframes()
                     info[1] = setKeyframeInfo(theKeyframeHandles[1], *animationCore);
                     info[2] = setKeyframeInfo(theKeyframeHandles[2], *animationCore);
                     infoCount = 3;
+                    break;
+                case 4:
+                    info[0] = setKeyframeInfo(theKeyframeHandles[0], *animationCore);
+                    info[1] = setKeyframeInfo(theKeyframeHandles[1], *animationCore);
+                    info[2] = setKeyframeInfo(theKeyframeHandles[2], *animationCore);
+                    info[3] = setKeyframeInfo(theKeyframeHandles[3], *animationCore);
+                    infoCount = 4;
                     break;
                 default:
                     break;
