@@ -96,6 +96,8 @@ public:
     // Takes a *relative* path from the document
     virtual void InvalidateBuffer(const CFilePath &inSourcePath) = 0;
 
+    virtual void reloadImageSet(const QSet<QString> &imageSet) = 0;
+
     // Don't send events but just clear everything out.  Used on document::close
     virtual void Clear() = 0;
 

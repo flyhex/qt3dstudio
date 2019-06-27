@@ -434,7 +434,7 @@ public:
         for (size_t idx = 0, end = existing.size(); idx < end; ++idx) {
             Qt3DSDMInstanceHandle theAsset(existing[idx]);
 
-            if (checkMaterialContainers && m_Bridge.isInsideMaterialContainer(theAsset))
+            if (!checkMaterialContainers && m_Bridge.isInsideMaterialContainer(theAsset))
                 continue;
 
             thePaths.clear();
@@ -468,7 +468,7 @@ public:
     void GetImportPathToInstanceMap(TCharPtrToSlideInstanceMap &outInstanceMap) const override
     {
         SComposerObjectDefinitions &theDefinitions(m_Bridge.GetObjectDefinitions());
-        GetPathToInstanceMap(outInstanceMap, theDefinitions.m_Asset.m_ImportFile, true, false);
+        GetPathToInstanceMap(outInstanceMap, theDefinitions.m_Asset.m_ImportFile, false, false);
     }
 
     bool CanPropertyBeLinked(TInstanceHandle inInstance, TPropertyHandle inProperty) const override
@@ -5219,17 +5219,18 @@ public:
         TInstanceHandleList theParents;
         SComposerObjectDefinitions &theDefinitions(m_Bridge.GetObjectDefinitions());
 
+        QSet<QString> imageLoadSet;
+
         for (size_t fileIdx = 0, fileEnd = inList.size(); fileIdx < fileEnd; ++fileIdx) {
             const SFileModificationRecord &theRecord(inList[fileIdx]);
 
-            CString theExtension = theRecord.m_File.GetExtension();
-            bool isImport = theExtension.Compare(L"import", CString::ENDOFSTRING, false);
+            QString theExtension = theRecord.m_File.GetExtension().toQString().toLower();
+            bool isImport = theExtension == QLatin1String("import");
             CFilePath theRelativePath(m_Doc.GetRelativePathToDoc(theRecord.m_File));
             const wchar_t *theString(
                 m_DataCore.GetStringTable().RegisterStr(theRelativePath.toCString()));
 
-            if ((theExtension.CompareNoCase(L"ttf")
-                 || theExtension.CompareNoCase(L"otf")) // should use CDialogs::IsFontFileExtension
+            if (CDialogs::fontExtensions().contains(theExtension)
                 && m_Doc.GetSceneGraph() && m_Doc.GetSceneGraph()->GetTextRenderer()) {
                 m_Doc.GetSceneGraph()->GetTextRenderer()->ReloadFonts();
                 CFilePath thePath = m_Doc.GetDocumentDirectory();
@@ -5286,7 +5287,7 @@ public:
                     if (theInsertResult.second == false)
                         theInsertResult.first->second = theDAERelativePath;
                 }
-            } else if (theExtension.Compare(L"qml", CString::ENDOFSTRING, false)
+            } else if (CDialogs::behaviorExtensions().contains(theExtension)
                        && theRecord.m_ModificationType != FileModificationType::Created
                        && theInstances.empty() == false) {
                 // First, refresh the parent behavior.
@@ -5331,7 +5332,7 @@ public:
                         }
                     }
                 }
-            } else if (theExtension.Compare(L"effect", CString::ENDOFSTRING, false)
+            } else if (CDialogs::effectExtensions().contains(theExtension)
                        && theRecord.m_ModificationType != FileModificationType::Created
                        && theInstances.empty() == false) {
                 CString theNameStr = GetName(theInstances[0].second);
@@ -5350,13 +5351,21 @@ public:
                     theDispatch.FireReloadEffectInstance(theInstances[i].second);
                     theDispatch.FireImmediateRefreshInstance(theInstances[i].second);
                 }
+            } else if (CDialogs::mapExtensions().contains(theExtension)
+                       && theRecord.m_ModificationType != FileModificationType::Created
+                       && theInstances.empty() == false) {
+                imageLoadSet.insert(theRecord.m_File.toQString());
             }
             // There used to be an extension here for meshes
             // but that causes the product to delete materials in some cases which loses work.
-            // so that experiment failed and we will just have to let the users manually updated
-            // their
-            // meshes through the dropdown if they need them updated.
+            // so that experiment failed and we will just have to let the users manually update
+            // their meshes through the dropdown if they need them updated.
         }
+
+
+        if (!imageLoadSet.isEmpty())
+            m_Doc.GetBufferCache().reloadImageSet(imageLoadSet);
+
         if (hasProgressFired)
             theDispatch.FireOnProgressEnd();
         if (requestRender && m_Doc.GetSceneGraph())

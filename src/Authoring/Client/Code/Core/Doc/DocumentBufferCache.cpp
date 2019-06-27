@@ -135,6 +135,15 @@ struct SDocBufferCache : public IDocumentBufferCache
         }
     }
 
+    void reloadImageSet(const QSet<QString> &imageSet) override
+    {
+        auto bufMan = GetBufferManager();
+        if (bufMan) {
+            bufMan->unloadSet(imageSet);
+            bufMan->loadSet(imageSet);
+        }
+    }
+
     // Names are declared in the same order as the primitives
     // offset by the empty primitive
     const wchar_t **GetPrimitiveNames() override
