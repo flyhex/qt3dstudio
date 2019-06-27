@@ -546,9 +546,11 @@ void ProjectFile::loadSubpresentationsAndDatainputs(
     m_initialPresentation = g_StudioApp.GetCore()->GetDoc()->getPresentationId();
 
     QDomDocument doc;
-    if (!StudioUtils::readFileToDomDocument(getProjectFilePath(), doc))
+    QSaveFile projectFile(getProjectFilePath());
+    if (!StudioUtils::openDomDocumentSave(projectFile, doc))
         return;
 
+    QVector<QDomElement> removedElements;
     QDomElement assetsElem = doc.documentElement().firstChildElement(QStringLiteral("assets"));
     if (!assetsElem.isNull()) {
         QString initial = assetsElem.attribute(QStringLiteral("initial"));
@@ -563,13 +565,24 @@ void ProjectFile::loadSubpresentationsAndDatainputs(
                 QString argsOrSrc = p.attribute(QStringLiteral("src"));
                 if (argsOrSrc.isNull())
                     argsOrSrc = p.attribute(QStringLiteral("args"));
-                subpresentations.push_back(
-                            SubPresentationRecord(p.nodeName(), p.attribute("id"), argsOrSrc));
+                // Skip non-existent presentations (they have been manually deleted)
+                if (QFileInfo().exists(getAbsoluteFilePathTo(argsOrSrc))) {
+                    subpresentations.push_back(
+                                SubPresentationRecord(p.nodeName(), p.attribute("id"), argsOrSrc));
+                } else {
+                    removedElements.append(p);
+                }
             } else {
                 parseDataInputElem(p, datainputs);
             }
         }
     }
+    if (removedElements.size()) {
+        for (auto &elem : qAsConst(removedElements))
+            assetsElem.removeChild(elem);
+        StudioUtils::commitDomDocumentSave(projectFile, doc);
+    }
+
     g_StudioApp.GetCore()->GetDoc()->UpdateDatainputMap();
 }
 
