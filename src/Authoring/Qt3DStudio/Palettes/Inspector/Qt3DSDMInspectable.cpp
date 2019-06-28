@@ -196,7 +196,7 @@ QString Qt3DSDMInspectable::GetGroupName(long groupIndex)
 
     long activeGroupIdx = activeGroupIndex(groupIndex);
     if (activeGroupIdx < theGroupNames.size())
-        return Q3DStudio::CString(theGroupNames[activeGroupIdx].wide_str()).toQString();
+        return QString::fromWCharArray(theGroupNames[activeGroupIdx].wide_str());
 
     return QObject::tr("Basic Properties");
 }

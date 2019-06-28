@@ -982,17 +982,24 @@ auto InspectorControlModel::computeTree(CInspectableBase *inspectableBase)
 
     if (inspectableBase) {
         qt3dsdm::Qt3DSDMInstanceHandle instance = inspectableBase->getInstance();
-        bool isMatFromFile = instance.Valid() && getBridge()->isInsideMaterialContainer(instance);
-        long groupCount = inspectableBase->getGroupCount();
-        for (long idx = 0; idx < groupCount; ++idx)
-            result.append(computeGroup(inspectableBase, idx, isMatFromFile, false));
 
-        if (isDefaultMaterial() && result.size() > 0) {
-            result[result.size() - 1].groupInfo = tr("\nDefault material cannot be edited.\n\n"
-                                                     "Create new or import material, then apply.");
+        if (isDefaultMaterial()) {
+            // for default materials skip the first 2 groups (Basic Properties, Lighting) and only
+            // show the Material group
+            result.append(computeGroup(inspectableBase, 2));
+            result[0].groupInfo = tr("\nDefault material cannot be edited. Create new or import "
+                                     "material, then apply.");
+        } else {
+            // disable animation for basic materials, this applies only when editing the basic
+            // material from the project palette.
+            bool disableAnim = instance.Valid()
+                    && getBridge()->isInsideMaterialContainer(instance);
+            long groupCount = inspectableBase->getGroupCount();
+            for (long idx = 0; idx < groupCount; ++idx)
+                result.append(computeGroup(inspectableBase, idx, disableAnim));
         }
 
-        //Show original material properties for referenced materials
+        // show original material properties for referenced materials
         auto refMaterial = getReferenceMaterial(inspectableBase);
         if (refMaterial.Valid()) {
             auto refMaterialInspectable = getInspectableFromInstance(refMaterial);

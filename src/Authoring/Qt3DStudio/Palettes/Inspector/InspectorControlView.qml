@@ -535,13 +535,12 @@ Rectangle {
                         }
                     }
 
-                    Column {
+                    StyledLabel {
                         visible: model.info.length > 0
-                        StyledLabel {
-                            width: groupElements.width
-                            horizontalAlignment: Text.AlignHCenter
-                            text: model.info;
-                        }
+                        x: 42
+                        width: items.width - x - 10
+                        wrapMode: Text.WordWrap
+                        text: model.info;
                     }
                 }
             }
