@@ -43,7 +43,7 @@ extern "C" {
 // register set to 80000001h (only applicable to AMD)
 #define _3DNOW_FEATURE_BIT 0x80000000
 
-#ifndef _WIN32
+#if !defined(_WIN32) || !defined(_MSC_VER)
 void __cpuid(int cpuInfo[4], int function_id)
 {
     asm volatile

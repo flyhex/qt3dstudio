@@ -29,6 +29,7 @@
 
 #include "Qt3DSDMInspectable.h"
 #include "Qt3DSDMInspectorGroup.h"
+#include "Qt3DSDMInspectorRow.h"
 #include "StudioApp.h"
 #include "Core.h"
 #include "Doc.h"
@@ -52,6 +53,13 @@ Qt3DSDMInspectable::Qt3DSDMInspectable(qt3dsdm::Qt3DSDMInstanceHandle instance,
         QT3DS_ASSERT(bridge->IsSceneInstance(instance)
                      || bridge->IsComponentInstance(instance));
     }
+}
+
+Qt3DSDMInspectable::~Qt3DSDMInspectable()
+{
+    for (auto g : qAsConst(m_groups))
+        delete g;
+    m_groups.clear();
 }
 
 // Returns the name of this inspectable
@@ -87,11 +95,31 @@ long Qt3DSDMInspectable::getGroupCount() const
 }
 
 // Return the property group for display
-CInspectorGroup *Qt3DSDMInspectable::getGroup(long inIndex)
+CInspectorGroup *Qt3DSDMInspectable::getGroup(long index)
 {
-    Qt3DSDMInspectorGroup *group = new Qt3DSDMInspectorGroup(GetGroupName(inIndex));
+    TMetaDataPropertyHandleList properties = GetGroupProperties(index);
+    if (m_groups.contains(index)) {
+        // Check if the group properties have changed. This can f.ex happen if property
+        // filter status changed and it became visible.
+        std::vector<Q3DStudio::Qt3DSDMInspectorRow *> rows
+                = static_cast<const Qt3DSDMInspectorGroup *>(m_groups[index])->GetRows();
+        TMetaDataPropertyHandleList rowProps;
 
-    TMetaDataPropertyHandleList properties = GetGroupProperties(inIndex);
+        for (uint i = 0; i < rows.size(); ++i)
+            rowProps.push_back(rows[i]->GetMetaDataProperty());
+
+        // No need to sort; if ordering has changed for some reason, group also needs to be
+        // reconstructed. (Assume that the default case is that row ordering is derived from
+        // property ordering, so we can use direct == operator to see if properties match the
+        // inspector rows.)
+        if (properties == rowProps)
+            return m_groups[index];
+
+        delete m_groups[index];
+    }
+
+    Qt3DSDMInspectorGroup *group = new Qt3DSDMInspectorGroup(GetGroupName(index));
+    m_groups[index] = group;
 
     for (auto &prop : properties)
         group->CreateRow(getDoc(), prop);
@@ -100,16 +128,16 @@ CInspectorGroup *Qt3DSDMInspectable::getGroup(long inIndex)
 }
 
 // Return the property handles for display, given the group index
-TMetaDataPropertyHandleList Qt3DSDMInspectable::GetGroupProperties(long inIndex)
+TMetaDataPropertyHandleList Qt3DSDMInspectable::GetGroupProperties(long index)
 {
-    long activeGroupIdx = activeGroupIndex(inIndex);
+    long activeGroupIdx = activeGroupIndex(index);
     TMetaDataPropertyHandleList retval;
     IMetaData &theMetaData = *getDoc()->GetStudioSystem()->GetActionMetaData();
-    theMetaData.GetMetaDataProperties(GetGroupInstance(inIndex), retval);
+    theMetaData.GetMetaDataProperties(GetGroupInstance(index), retval);
     qt3dsdm::IPropertySystem &thePropertySystem(*getDoc()->GetStudioSystem()->GetPropertySystem());
     // get name of the current group for filtering
     Option<qt3dsdm::TCharStr> theGroupFilterName =
-            theMetaData.GetGroupFilterNameForInstance(GetGroupInstance(inIndex), activeGroupIdx);
+            theMetaData.GetGroupFilterNameForInstance(GetGroupInstance(index), activeGroupIdx);
     long theGroupCount = getGroupCount();
 
     // end is explicitly required
@@ -140,7 +168,7 @@ TMetaDataPropertyHandleList Qt3DSDMInspectable::GetGroupProperties(long inIndex)
 
                     SValue theValue;
                     thePropertySystem.GetInstancePropertyValue(
-                                GetGroupInstance(inIndex), theFilter.m_FilterProperty, theValue);
+                                GetGroupInstance(index), theFilter.m_FilterProperty, theValue);
                     bool resultIfTrue = theFilter.m_FilterType == PropertyFilterTypes::ShowIfEqual;
                     if (Equals(theValue.toOldSkool(), theFilter.m_Value.toOldSkool())) {
                         keepProperty = resultIfTrue;

@@ -65,7 +65,6 @@
 #include "SelectedValue.h"
 #include "Qt3DSDMInspectable.h"
 #include "Qt3DSDMSlides.h"
-#include "Qt3DSDMMaterialInspectable.h"
 #include "GuideInspectable.h"
 
 #include <QtCore/qtimer.h>
@@ -288,16 +287,23 @@ QString InspectorControlView::noneString() const
 
 bool InspectorControlView::canLinkProperty(int instance, int handle) const
 {
-    if (getBridge()->isInsideMaterialContainer(instance))
+    if (!instance || !handle)
         return false;
 
-    if (getBridge()->IsMaterialBaseInstance(instance)) // all material types are unlinkable
+    if (getBridge()->isInsideMaterialContainer(instance))
         return false;
 
     if (handle == getBridge()->GetSceneAsset().m_Eyeball.m_Property) // eyeball is unlinkable
         return false;
 
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+
+    // Disallow linking of properties that refer to images as unlinking them is not trivial at all.
+    qt3dsdm::AdditionalMetaDataType::Value thePropertyMetaData =
+        doc->GetStudioSystem()->GetPropertySystem()->GetAdditionalMetaDataType(instance, handle);
+    if (thePropertyMetaData == qt3dsdm::AdditionalMetaDataType::Image)
+        return false;
+
     return doc->GetDocumentReader().CanPropertyBeLinked(instance, handle);
 }
 
@@ -397,8 +403,10 @@ void InspectorControlView::OnSelectionSet(Q3DStudio::SSelectedValue selectable)
 {
     CInspectableBase *inspectable = createInspectableFromSelectable(selectable);
 
-    if (inspectable && !inspectable->isValid())
+    if (inspectable && !inspectable->isValid()) {
+        delete inspectable;
         inspectable = nullptr;
+    }
 
     setInspectable(inspectable);
 }
@@ -433,8 +441,6 @@ CInspectableBase *InspectorControlView::createInspectableFromSelectable(
                                               ->GetSlideSystem()->GetSlideInstance(activeSlide);
                         inspectableBase = new Qt3DSDMInspectable(selectedInstance,
                                                                  activeSlideInstance);
-                    } else if (getBridge()->IsMaterialBaseInstance(selectedInstance)) {
-                        inspectableBase = new Qt3DSDMMaterialInspectable(selectedInstance);
                     } else {
                         inspectableBase = new Qt3DSDMInspectable(selectedInstance);
                     }
@@ -459,6 +465,10 @@ void InspectorControlView::setInspectable(CInspectableBase *inInspectable)
 {
     if (m_inspectableBase != inInspectable) {
         m_activeBrowser.clear();
+
+        if (m_inspectableBase)
+            delete m_inspectableBase;
+
         m_inspectableBase = inInspectable;
         m_inspectorControlModel->setInspectable(inInspectable);
 

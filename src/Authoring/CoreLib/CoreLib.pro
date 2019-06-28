@@ -17,6 +17,18 @@ contains(QMAKE_TARGET.arch, x86_64) {
 
 QT += widgets
 
+mingw {
+LIBS += \
+    -lqt3dsruntimestatic$$qtPlatformTargetSuffix() \
+    -lqt3dsqmlstreamer$$qtPlatformTargetSuffix() \
+    -lEASTL$$qtPlatformTargetSuffix() \
+    -lpcre$$qtPlatformTargetSuffix() \
+    -lTinyXML$$qtPlatformTargetSuffix() \
+    -lColladaDOM$$qtPlatformTargetSuffix() \
+    -lQT3DSDM$$qtPlatformTargetSuffix() \
+    -lCommonLib$$qtPlatformTargetSuffix()
+}
+
 macos:DEFINES += WIDE_IS_DIFFERENT_TYPE_THAN_CHAR16_T QT3DS_LITTLE_ENDIAN
 
 linux|qnx: DEFINES += WIDE_IS_DIFFERENT_TYPE_THAN_CHAR16_T

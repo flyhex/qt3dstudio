@@ -161,22 +161,12 @@ public:
     Q_INVOKABLE void updateGroupCollapseState(int groupIdx, bool state);
 
 private:
-    void onSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inOldIndex,
-                           int inNewIndex);
-
-
-    struct GroupInspectorControl {
+    struct GroupInspectorControl
+    {
         QString groupTitle;
         QVariantList controlElements;
         QString groupInfo;
-
-        ~GroupInspectorControl() {
-        }
     };
-
-    QVector<GroupInspectorControl> m_groupElements;
-    CInspectableBase *m_inspectableBase = nullptr;
-    GuideInspectable *m_guideInspectable = nullptr;
 
     struct MaterialEntry
     {
@@ -192,20 +182,9 @@ private:
         QMap<QString, QMap<QString, QString>> m_textureValues;
     };
 
-    std::vector<MaterialEntry> m_materials;
-    std::vector<MaterialDataEntry> m_matDatas;
-    std::vector<Q3DStudio::CFilePath> m_cachedMatDatas;
-    qt3dsdm::Qt3DSDMInstanceHandle m_refMaterial;
+    void onSlideRearranged(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, int inOldIndex,
+                           int inNewIndex);
 
-    Q3DStudio::CUpdateableDocumentEditor m_UpdatableEditor;
-
-    bool m_suspendMaterialRename = false;
-
-    QPair<long, int> m_modifiedProperty;
-
-    qt3dsdm::SValue m_previouslyCommittedValue;
-
-    QHash<int, QHash<int, bool> > m_collapseMap;
 
     QString getBasicMaterialString() const;
     QString getAnimatableMaterialString() const;
@@ -248,10 +227,29 @@ private:
                                        int theIndex, bool disableAnimation = false,
                                        bool isReference = false);
     bool isGroupRebuildRequired(CInspectableBase *inspectable, int theIndex) const;
-
+    CInspectableBase *getInspectableFromInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     CClientDataModelBridge *getBridge() const;
 
     static int handleToGuidePropIndex(int handle) { return handle - 1; }
+
+    QVector<GroupInspectorControl> m_groupElements;
+    CInspectableBase *m_inspectableBase = nullptr;
+    GuideInspectable *m_guideInspectable = nullptr;
+
+    std::vector<MaterialEntry> m_materials;
+    std::vector<MaterialDataEntry> m_matDatas;
+    std::vector<Q3DStudio::CFilePath> m_cachedMatDatas;
+    qt3dsdm::Qt3DSDMInstanceHandle m_refMaterial;
+
+    Q3DStudio::CUpdateableDocumentEditor m_UpdatableEditor;
+
+    bool m_suspendMaterialRename = false;
+
+    QPair<long, int> m_modifiedProperty;
+
+    qt3dsdm::SValue m_previouslyCommittedValue;
+
+    QHash<int, QHash<int, bool> > m_collapseMap;
 
     VariantsGroupModel *m_variantsModel = nullptr;
 };
