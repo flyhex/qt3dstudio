@@ -9,11 +9,6 @@ requires(qtHaveModule(quick))
 requires(qtHaveModule(qml))
 requires(qtHaveModule(opengl))
 
-#TODO: QT3DS-3660 fix developer builds of Qt 3D Studio editor
-linux:{
-requires(!contains(QT_CONFIG,private_tests))
-}
-
 SUBDIRS += \
     doc
 
@@ -31,7 +26,7 @@ load(qt_parts)
 # Qt3DStudio and Qt3DViewer executables/application bundles are installed to.
 # The required Qt libraries are copied into that directory/bundles.
 !build_pass|!debug_and_release {
-    !mingw:win32|macos {
+    win32|macos {
         macos {
             deploytool = macdeployqt
             exesuffix = .app
@@ -67,9 +62,9 @@ load(qt_parts)
 
             # copy QtStudio3D.dll
             release {
-                QTSTUDIO3D_LIB = Qt5Studio3D.dll
+                QTSTUDIO3D_LIB = Qt5Studio3D$${QT_LIBINFIX}.dll
             } else {
-                QTSTUDIO3D_LIB = Qt5Studio3Dd.dll
+                QTSTUDIO3D_LIB = Qt5Studio3D$${QT_LIBINFIX}d.dll
             }
             QMAKE_EXTRA_TARGETS += copyStudio3D
             deployTarget.depends += copyStudio3D
@@ -115,9 +110,9 @@ load(qt_parts)
                 # use case for this is gathering installer content in CI after everything is
                 # already built, this shouldn't be a problem.
                 release {
-                    RUNTIME2_LIB = Qt53DStudioRuntime2.dll
+                    RUNTIME2_LIB = Qt53DStudioRuntime2$${QT_LIBINFIX}.dll
                 } else {
-                    RUNTIME2_LIB = Qt53DStudioRuntime2d.dll
+                    RUNTIME2_LIB = Qt53DStudioRuntime2$${QT_LIBINFIX}d.dll
                 }
                 QMAKE_EXTRA_TARGETS += copyRuntime2
                 deployTarget.depends += copyRuntime2

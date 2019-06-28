@@ -2167,6 +2167,7 @@ void STranslation::PreRender(bool scenePreviewPass)
                                       CStudioPreferences::matteColor().greenF(),
                                       CStudioPreferences::matteColor().blueF(), 1.0f);
     m_Context.SetMatteColor(matteColor);
+    m_Context.setMatteEnabled(true);
     // Ensure the camera points where it should
     if (m_EditCameraEnabled && !scenePreviewPass) {
         m_EditCameraInfo.ApplyToCamera(m_EditCamera, theViewportDims);

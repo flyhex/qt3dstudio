@@ -105,12 +105,31 @@ STATICRUNTIME = \
     QMAKE_LFLAGS += $$STATICRUNTIME
 } else {
     DEFINES +=  WIN32_LEAN_AND_MEAN
-    LIBS += $$STATICRUNTIME
-    !mingw: QMAKE_LFLAGS += /NODEFAULTLIB:tinyxml.lib
+    mingw {
+        LIBS += -lEASTL$$qtPlatformTargetSuffix() \
+                -lpcre$$qtPlatformTargetSuffix() \
+                -lTinyXML$$qtPlatformTargetSuffix() \
+                -lColladaDOM$$qtPlatformTargetSuffix() \
+                -lQT3DSDM$$qtPlatformTargetSuffix() \
+                -lCommonLib$$qtPlatformTargetSuffix() \
+                -lCoreLib$$qtPlatformTargetSuffix() \
+                -lqt3dsruntimestatic$$qtPlatformTargetSuffix() \
+    } else {
+        LIBS += $$STATICRUNTIME
+        QMAKE_LFLAGS += /NODEFAULTLIB:tinyxml.lib
+    }
+
 }
 
-!macos {
-    LIBS += -lQt5Studio3D$$qtPlatformTargetSuffix()
+if (qtHaveModule(3dstudio)) {
+    QT += 3dstudio 3dstudio-private
+} else {
+    RUNTIME_LIB = $$qt5LibraryTarget(QtStudio3D$$QT_LIBINFIX)
+    macos {
+        LIBS += -framework QtStudio3D
+    } else {
+        LIBS += -l$$RUNTIME_LIB
+    }
 }
 
 LIBS += \
@@ -314,7 +333,6 @@ SOURCES += \
     Palettes/Inspector/Qt3DSDMInspectable.cpp \
     Palettes/Inspector/Qt3DSDMInspectorGroup.cpp \
     Palettes/Inspector/Qt3DSDMInspectorRow.cpp \
-    Palettes/Inspector/Qt3DSDMMaterialInspectable.cpp \
     Palettes/Inspector/TabOrderHandler.cpp \
     Palettes/Inspector/TextureChooserView.cpp \
     Palettes/PaletteManager.cpp \

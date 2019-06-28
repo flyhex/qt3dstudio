@@ -118,18 +118,22 @@ QString CPreviewHelper::getViewerFilePath(const QString &exeName)
     viewerFile = QStringLiteral("%1.exe").arg(exeName);
 
     QString viewer = viewerDir.filePath() + QStringLiteral("/") + viewerFile;
-    if (!QFileInfo(viewer).exists()
-            && exeName == QLatin1String("q3dsviewer")) {
-        viewer = viewerDir.filePath() + QStringLiteral("/../src/Runtime/qt3d-runtime/bin/")
-                + viewerFile;
+    if (!QFileInfo(viewer).exists()) {
+        if (exeName == QLatin1String("q3dsviewer")) {
+            viewer = viewerDir.filePath() + QStringLiteral("/../src/Runtime/qt3d-runtime/bin/")
+                    + viewerFile;
+        } else if (exeName == QLatin1String("Qt3DViewer")) {
+            viewer = viewerDir.filePath() + QStringLiteral("/../src/Runtime/ogl-runtime/bin/")
+                    + viewerFile;
+        }
     }
 #else
 #ifdef Q_OS_MACOS
-    // Check if we're looking for Viewer 2.x that has a different development
-    // time path for the executable
     QString viewerDevPath;
     if (exeName == QLatin1String("q3dsviewer"))
         viewerDevPath = QStringLiteral("../src/Runtime/qt3d-runtime/bin/");
+    else if (exeName == QLatin1String("Qt3DViewer"))
+        viewerDevPath = QStringLiteral("../src/Runtime/ogl-runtime/bin/");
 
     // Name of the executable file on macOS
     viewerFile = QStringLiteral("%1.app/Contents/MacOS/%1").arg(exeName);
@@ -151,10 +155,14 @@ QString CPreviewHelper::getViewerFilePath(const QString &exeName)
     viewerFile = exeName;
 
     QString viewer = viewerDir.filePath() + QStringLiteral("/") + viewerFile;
-    if (!QFileInfo(viewer).exists()
-            && exeName == QLatin1String("q3dsviewer")) {
-        viewer = viewerDir.filePath() + QStringLiteral("/../src/Runtime/qt3d-runtime/bin/")
-                + viewerFile;
+    if (!QFileInfo(viewer).exists()) {
+        if (exeName == QLatin1String("q3dsviewer")) {
+            viewer = viewerDir.filePath() + QStringLiteral("/../src/Runtime/qt3d-runtime/bin/")
+                    + viewerFile;
+        } else if (exeName == QLatin1String("Qt3DViewer")) {
+            viewer = viewerDir.filePath() + QStringLiteral("/../src/Runtime/ogl-runtime/bin/")
+                    + viewerFile;
+        }
     }
 #endif
 #endif

@@ -280,9 +280,6 @@ Rectangle {
                                                 coords.x, coords.y,
                                                 model.modelData.handle,
                                                 model.modelData.instance);
-                                    // Refresh text; title color is wrong after this
-                                    propertyRow.color = _parentView.titleColor(
-                                                modelData.instance, modelData.handle);
                                 }
 
                                 ColumnLayout { // Property row and datainput control
@@ -372,7 +369,6 @@ Rectangle {
                                                                         + ctrldPropButton.width,
                                                                         ctrldPropButton.y
                                                                         + ctrldPropButton.height));
-
                                                     }
                                                 }
 

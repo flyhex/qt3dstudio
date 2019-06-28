@@ -29,7 +29,6 @@
 
 #include "Qt3DSDMInspectorGroup.h"
 #include "Qt3DSDMInspectorRow.h"
-#include "Qt3DSDMInspectable.h"
 #include "Qt3DSDMMetaData.h"
 
 Qt3DSDMInspectorGroup::Qt3DSDMInspectorGroup(const QString &inName)
@@ -39,11 +38,12 @@ Qt3DSDMInspectorGroup::Qt3DSDMInspectorGroup(const QString &inName)
 
 Qt3DSDMInspectorGroup::~Qt3DSDMInspectorGroup()
 {
-    for (auto it = m_inspectorRows.begin(); it != m_inspectorRows.end(); ++it)
-        delete (*it);
+    for (auto row : m_inspectorRows)
+        delete row;
+
+    m_inspectorRows.clear();
 }
 
-// Create a new InspectorRowBase.
 void Qt3DSDMInspectorGroup::CreateRow(CDoc *inDoc,
                                       qt3dsdm::Qt3DSDMMetaDataPropertyHandle inProperty)
 {

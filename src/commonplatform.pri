@@ -266,7 +266,7 @@ android {
 }
 
 win32 {
-    DEFINES += QT3DS_OS_WINDOWS _WIN32 _PCPLATFORM \
+    DEFINES += QT3DS_OS_WINDOWS _PCPLATFORM \
         WIDE_IS_DIFFERENT_TYPE_THAN_CHAR16_T KDWIN NOMINMAX
 
     win32-msvc {
@@ -291,20 +291,20 @@ win32 {
 
     contains(QT_ARCH, x86_64) {
         DEFINES += _WIN64
+    } else {
+        DEFINES += _WIN32
     }
 }
 
 BINDIR = $$MODULE_BASE_OUTDIR/bin
 LIBDIR = $$MODULE_BASE_OUTDIR/lib
-!qtConfig(private_tests): {
-    # Non-developer build
+
+exists($$MODULE_BASE_OUTDIR/src/Runtime/ogl-runtime/bin) {
     RUNTIME_BINDIR = $$MODULE_BASE_OUTDIR/src/Runtime/ogl-runtime/bin
     RUNTIME_LIBDIR = $$MODULE_BASE_OUTDIR/src/Runtime/ogl-runtime/lib
     RUNTIME_INCLUDEDIR = $$MODULE_BASE_OUTDIR/src/Runtime/ogl-runtime/include
     LIBS += -L"$$RUNTIME_LIBDIR"
-
 } else {
-    # Developer build
     RUNTIME_BINDIR = $$BINDIR
     RUNTIME_LIBDIR = $$LIBDIR
     RUNTIME_INCLUDEDIR = $$MODULE_BASE_OUTDIR/include

@@ -49,8 +49,9 @@ public:
     void CreateRow(CDoc *inDoc, qt3dsdm::Qt3DSDMMetaDataPropertyHandle inProperty);
 
     const std::vector<Q3DStudio::Qt3DSDMInspectorRow *> &GetRows() const { return m_inspectorRows; }
+    bool isMaterial() const { return m_name == QLatin1String("Material"); }
 
-protected:
+private:
     std::vector<Q3DStudio::Qt3DSDMInspectorRow *> m_inspectorRows;
 };
 

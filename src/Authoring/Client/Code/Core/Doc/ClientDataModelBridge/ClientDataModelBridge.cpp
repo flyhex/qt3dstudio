@@ -1173,7 +1173,7 @@ Qt3DSDMInstanceHandle CClientDataModelBridge::getMaterialReference(Qt3DSDMInstan
 
 bool CClientDataModelBridge::isMaterialContainer(Qt3DSDMInstanceHandle instance) const
 {
-    return instance == getMaterialContainer();
+    return instance.Valid() && instance == getMaterialContainer();
 }
 
 bool CClientDataModelBridge::isInsideMaterialContainer(Qt3DSDMInstanceHandle instance) const
