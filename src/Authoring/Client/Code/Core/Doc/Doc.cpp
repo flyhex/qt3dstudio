@@ -2470,12 +2470,13 @@ void CDoc::SavePresentationFile(CBufferedOutputStream *inOutputStream)
                 m_DocumentBufferCache->GetOrCreateImageBuffer(CFilePath(theIter->first));
         }
 
+        auto textureList = theBridge.GetDynamicObjectTextureList();
+        for (auto texture : textureList)
+            m_DocumentBufferCache->GetOrCreateImageBuffer(CFilePath(texture));
+
         std::vector<pair<Q3DStudio::CString, SImageTextureData>> theImageBuffers;
         m_DocumentBufferCache->GetImageBuffers(theImageBuffers);
 
-        // Remove buffers that aren't in the map.
-        erase_if(theImageBuffers, SBufferFilter(sourcePathToInstanceMap,
-                 *m_StudioSystem->GetFullSystem()->GetCoreSystem()->GetStringTablePtr()));
         if (!theImageBuffers.empty()) {
             // Ensure the source paths are always written out in the same order to keep source
             // control reasonable
@@ -2487,7 +2488,7 @@ void CDoc::SavePresentationFile(CBufferedOutputStream *inOutputStream)
                 if (theBuffer.m_TextureFlags.HasTransparency()) {
                     IDOMWriter::Scope __ImageScope(theWriter, L"ImageBuffer");
                     theWriter.Att(L"sourcepath", theImageBuffers[idx].first.c_str());
-                    theWriter.Att("hasTransparency", true);
+                    theWriter.Att(L"hasTransparency", true);
                 }
             }
         }
