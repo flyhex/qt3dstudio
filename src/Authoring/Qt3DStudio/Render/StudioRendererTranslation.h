@@ -658,6 +658,7 @@ namespace studio {
         SNode *GetEditCameraLayer();
 
         void ReleaseEffect(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
+        void releaseMaterial(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
         // Create a new translator for this type.  Do not add to any maps or anything else.
         SGraphObjectTranslator *CreateTranslator(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
         // Returns the canonical translator for a given instance or creates a new translator if none

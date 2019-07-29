@@ -38,6 +38,7 @@
 #include "q3dsqmlrender.h"
 #include "q3dsqmlstreamproxy.h"
 #include "StudioSubPresentationRenderer.h"
+#include "Qt3DSRenderCustomMaterialSystem.h"
 
 #include <QtCore/qdebug.h>
 
@@ -649,10 +650,16 @@ struct SRendererImpl : public IStudioRenderer,
         Render();
     }
 
-    void OnReloadEffectInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override
+    void onReloadEffectInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override
     {
         if (m_Translation)
             m_Translation->ReleaseEffect(inInstance);
+    }
+
+    void onReloadMaterialInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) override
+    {
+        if (m_Translation)
+            m_Translation->releaseMaterial(inInstance);
     }
 
     void ApplyEditCameraIndex()
@@ -767,6 +774,9 @@ struct SRendererImpl : public IStudioRenderer,
      */
     void OnClosingPresentation() override
     {
+        // Clear the shader cache so that shaders are reloaded when loading the next presentation
+        m_Context->GetCustomMaterialSystem().clearShaderCache();
+
         // Destroy translation
         m_Translation = std::shared_ptr<STranslation>();
         m_HasPresentation = false;

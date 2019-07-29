@@ -5301,7 +5301,7 @@ public:
                 }
             } else if (CDialogs::behaviorExtensions().contains(theExtension)
                        && theRecord.m_ModificationType != FileModificationType::Created
-                       && theInstances.empty() == false) {
+                       && !theInstances.empty()) {
                 // First, refresh the parent behavior.
                 if (!hasDispatchNotificationScope) {
                     theDispatch.FireBeginDataModelNotifications();
@@ -5346,7 +5346,7 @@ public:
                 }
             } else if (CDialogs::effectExtensions().contains(theExtension)
                        && theRecord.m_ModificationType != FileModificationType::Created
-                       && theInstances.empty() == false) {
+                       && !theInstances.empty()) {
                 CString theNameStr = GetName(theInstances[0].second);
                 std::vector<SMetaDataLoadWarning> theWarnings;
                 NVScopedRefCounted<qt3ds::render::IRefCountedInputStream> theStream(
@@ -5363,9 +5363,28 @@ public:
                     theDispatch.FireReloadEffectInstance(theInstances[i].second);
                     theDispatch.FireImmediateRefreshInstance(theInstances[i].second);
                 }
+            } else if (CDialogs::materialExtensions().contains(theExtension)
+                       && theRecord.m_ModificationType != FileModificationType::Created
+                       && !theInstances.empty()) {
+                CString theNameStr = GetName(theInstances[0].second);
+                std::vector<SMetaDataLoadWarning> theWarnings;
+                NVScopedRefCounted<qt3ds::render::IRefCountedInputStream> theStream(
+                    m_InputStreamFactory->GetStreamForFile(theRecord.m_File.toQString()));
+                if (theStream) {
+                    m_MetaData.LoadMaterialInstance(m_StringTable.GetNarrowStr(
+                                                        theRelativePath.toCString()),
+                                                    theInstances[0].second,
+                                                    TCharStr(theNameStr),
+                                                    theWarnings,
+                                                    *theStream);
+                    IDocumentEditor::fixDefaultTexturePaths(theInstances[0].second);
+                }
+
+                for (size_t i = 0; i < theInstances.size(); ++i)
+                    theDispatch.fireReloadMaterialInstance(theInstances[i].second);
             } else if (CDialogs::mapExtensions().contains(theExtension)
                        && theRecord.m_ModificationType != FileModificationType::Created
-                       && theInstances.empty() == false) {
+                       && !theInstances.empty()) {
                 imageLoadSet.insert(theRecord.m_File.toQString());
             }
             // There used to be an extension here for meshes

@@ -302,7 +302,8 @@ public:
 class IReloadListener
 {
 public:
-    virtual void OnReloadEffectInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) = 0;
+    virtual void onReloadEffectInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) = 0;
+    virtual void onReloadMaterialInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance) = 0;
 };
 
 class IDocumentBufferCacheListener

@@ -106,6 +106,7 @@ public:
     void AddReloadListener(IReloadListener *inListener);
     void RemoveReloadListener(IReloadListener *inListener);
     void FireReloadEffectInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
+    void fireReloadMaterialInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
 
     void AddDocumentBufferCacheListener(IDocumentBufferCacheListener *inListener);
     void RemoveDocumentBufferCacheListener(IDocumentBufferCacheListener *inListener);

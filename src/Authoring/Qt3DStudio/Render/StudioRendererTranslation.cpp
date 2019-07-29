@@ -1607,28 +1607,57 @@ bool STranslation::IncludeNode(const SNode &inNode)
 
 void STranslation::ReleaseEffect(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
-    if (m_Reader.IsInstance(inInstance) == false)
+    if (!m_Reader.IsInstance(inInstance))
         return;
 
     qt3dsdm::ComposerObjectTypes::Enum theType = m_ObjectDefinitions.GetType(inInstance);
     qt3dsdm::Qt3DSDMInstanceHandle theParentClass = m_Reader.GetFirstBaseClass(inInstance);
 
-    if (theType == NULL && theParentClass.Valid())
+    if (theType == qt3dsdm::ComposerObjectTypes::Unknown && theParentClass.Valid())
         theType = m_ObjectDefinitions.GetType(theParentClass);
 
     if (theType == qt3dsdm::ComposerObjectTypes::Effect) {
         IEffectSystem &theSystem = m_Context.GetEffectSystem();
         if (theParentClass.Valid()) {
             Q3DStudio::CString theInstanceName = m_Reader.GetName(theParentClass);
-            CRegisteredString theNameStr =
-                m_Context.GetStringTable().RegisterStr(theInstanceName);
+            CRegisteredString theNameStr
+                    = m_Context.GetStringTable().RegisterStr(theInstanceName);
 
             if (theSystem.IsEffectRegistered(theNameStr)) {
-                TInstanceToTranslatorMap::iterator theTranslatorList =
-                    m_TranslatorMap.find(inInstance);
+                TInstanceToTranslatorMap::iterator theTranslatorList
+                        = m_TranslatorMap.find(inInstance);
                 if (theTranslatorList != m_TranslatorMap.end())
                    m_TranslatorMap.erase(theTranslatorList);
                 theSystem.SetEffectRequiresCompilation(theNameStr, true);
+            }
+        }
+    }
+}
+
+void STranslation::releaseMaterial(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
+{
+    if (!m_Reader.IsInstance(inInstance))
+        return;
+
+    qt3dsdm::ComposerObjectTypes::Enum theType = m_ObjectDefinitions.GetType(inInstance);
+    qt3dsdm::Qt3DSDMInstanceHandle theParentClass = m_Reader.GetFirstBaseClass(inInstance);
+
+    if (theType == qt3dsdm::ComposerObjectTypes::Unknown && theParentClass.Valid())
+        theType = m_ObjectDefinitions.GetType(theParentClass);
+
+    if (theType == qt3dsdm::ComposerObjectTypes::CustomMaterial) {
+        ICustomMaterialSystem &theSystem = m_Context.GetCustomMaterialSystem();
+        if (theParentClass.Valid()) {
+            Q3DStudio::CString theInstanceName = m_Reader.GetName(theParentClass);
+            CRegisteredString theNameStr
+                    = m_Context.GetStringTable().RegisterStr(theInstanceName);
+
+            if (theSystem.IsMaterialRegistered(theNameStr)) {
+                TInstanceToTranslatorMap::iterator theTranslatorList
+                        = m_TranslatorMap.find(inInstance);
+                if (theTranslatorList != m_TranslatorMap.end())
+                   m_TranslatorMap.erase(theTranslatorList);
+                theSystem.setRequiresCompilation(theNameStr, true);
             }
         }
     }
@@ -1724,30 +1753,38 @@ SGraphObjectTranslator *STranslation::CreateTranslator(qt3dsdm::Qt3DSDMInstanceH
     }
         break;
     case qt3dsdm::ComposerObjectTypes::CustomMaterial: {
-        ICustomMaterialSystem &theSystem = m_Context.GetCustomMaterialSystem();
+        ICustomMaterialSystem &system = m_Context.GetCustomMaterialSystem();
         if (theParentClass.Valid()) {
-            Q3DStudio::CString theInstanceName = m_Reader.GetName(theParentClass);
-            CRegisteredString theNameStr =
-                m_Context.GetStringTable().RegisterStr(theInstanceName);
-            if (!theSystem.IsMaterialRegistered(theNameStr)) {
+            Q3DStudio::CString instanceName = m_Reader.GetName(theParentClass);
+            CRegisteredString name
+                    = m_Context.GetStringTable().RegisterStr(instanceName);
+
+            bool requiresCompilation = false;
+            if (system.IsMaterialRegistered(name) && system.requiresCompilation(name)) {
+                system.unregisterMaterial(name);
+                requiresCompilation = true;
+            }
+
+            if (!system.IsMaterialRegistered(name)) {
                 // We assume the effect has already been registered and such.
-                qt3dsdm::IMetaData &theMetaData(*m_StudioSystem.GetActionMetaData());
-                Q3DStudio::CString theInstancePath = m_Reader.GetSourcePath(theParentClass);
-                Option<qt3dsdm::SMetaDataCustomMaterial> theMaterialData =
-                    theMetaData.GetMaterialBySourcePath(
-                        m_Context.GetStringTable().GetNarrowStr(theInstancePath));
-                if (theMaterialData.hasValue()) {
+                qt3dsdm::IMetaData &metaData(*m_StudioSystem.GetActionMetaData());
+                Q3DStudio::CString instancePath = m_Reader.GetSourcePath(theParentClass);
+                Option<qt3dsdm::SMetaDataCustomMaterial> materialData
+                        = metaData.GetMaterialBySourcePath(m_Context.GetStringTable()
+                                                           .GetNarrowStr(instancePath));
+                if (materialData.hasValue()) {
                     qt3ds::render::IUIPLoader::CreateMaterialClassFromMetaMaterial(
-                        theNameStr, m_Context.GetFoundation(), theSystem, theMaterialData,
+                        name, m_Context.GetFoundation(), system, materialData,
                         m_Context.GetStringTable());
+                    system.setRequiresCompilation(name, requiresCompilation);
                 }
             }
-            if (theSystem.IsMaterialRegistered(theNameStr)) {
+            if (system.IsMaterialRegistered(name)) {
                 theNewTranslator = QT3DS_NEW(m_Allocator, SCustomMaterialTranslator)(
                     inInstance, m_Allocator,
-                    *theSystem.CreateCustomMaterial(theNameStr, m_Allocator));
-                static_cast<SCustomMaterialTranslator *>(theNewTranslator)->m_MaterialSystem =
-                    &theSystem;
+                    *system.CreateCustomMaterial(name, m_Allocator));
+                static_cast<SCustomMaterialTranslator *>(theNewTranslator)
+                        ->m_MaterialSystem = &system;
             }
         }
     }

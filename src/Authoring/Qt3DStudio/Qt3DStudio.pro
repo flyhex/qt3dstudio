@@ -224,6 +224,7 @@ HEADERS += \
     Render/StudioGradientWidget.h \
     Render/StudioVisualAidWidget.h \
     Render/StudioSubPresentationRenderer.h \
+    Render/StudioRendererTranslation.h \
     UI/EditCameraBar.h \
     UI/GLVersionDlg.h \
     UI/InterpolationDlg.h \

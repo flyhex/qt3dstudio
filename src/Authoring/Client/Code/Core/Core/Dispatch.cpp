@@ -121,7 +121,12 @@ void CDispatch::RemoveReloadListener(IReloadListener *inListener)
 
 void CDispatch::FireReloadEffectInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
-    m_ReloadListeners.FireEvent(&IReloadListener::OnReloadEffectInstance, inInstance);
+    m_ReloadListeners.FireEvent(&IReloadListener::onReloadEffectInstance, inInstance);
+}
+
+void CDispatch::fireReloadMaterialInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
+{
+    m_ReloadListeners.FireEvent(&IReloadListener::onReloadMaterialInstance, inInstance);
 }
 
 void CDispatch::AddDocumentBufferCacheListener(IDocumentBufferCacheListener *inListener)
