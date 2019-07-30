@@ -1511,7 +1511,7 @@ public:
                          m_AssetGraph.GetParent(instance), instance, theNewSlide, docDir, log,
                          std::bind(CPerformImport::ImportToComposerFromImportFile,
                                    std::placeholders::_1, std::placeholders::_2),
-                         DocumentEditorInsertType::Unknown, CPt(), times.first);
+                         DocumentEditorInsertType::Unknown, CPt(), times.first, false);
             }
             thePropertySystem.SetInstancePropertyValue(instance, propName, value);
         } else if (propName == m_Bridge.GetObjectDefinitions().m_Path.m_PathType
@@ -3718,7 +3718,8 @@ public:
         Qt3DSDMInstanceHandle inRoot, Qt3DSDMSlideHandle inSlide, Q3DStudio::CString inDocDir,
         STranslationLog &inTranslationLog,
         function<SImportResult(IComposerEditorInterface &, Q3DStudio::CString)> inImportFunction,
-        DocumentEditorInsertType::Enum inInsertType, const CPt &inPosition, long inStartTime)
+        DocumentEditorInsertType::Enum inInsertType, const CPt &inPosition, long inStartTime,
+        bool selectAfterImport)
     {
         CFilePath outputDir(inImportFilePath.GetDirectory());
         bool alwaysKeepDirectory = outputDir.Exists();
@@ -3761,7 +3762,7 @@ public:
                 // Do not check for unique name as we set it anyway after getting new handle
                 Qt3DSDMInstanceHandle retval =
                     FinalizeAddOrDrop(importToComposer->GetRoot(), inParent, inInsertType,
-                                      inPosition, inStartTime == -1, true, false);
+                                      inPosition, inStartTime == -1, selectAfterImport, false);
                 SetName(retval, theRelPath.GetFileStem(), true);
 
                 updateMaterialFiles();
@@ -3821,7 +3822,7 @@ public:
                      inParent, 0, inSlide, docDir, translator.m_TranslationLog,
                      std::bind(CPerformImport::ImportToComposer, translator,
                                std::placeholders::_1, std::placeholders::_2), inDropType,
-                               inPosition, inStartTime);
+                               inPosition, inStartTime, true);
         if (retval.Valid()) {
             CFilePath theRelativeImport = m_Doc.GetRelativePathToDoc(outputFileName);
             m_ImportFileToDAEMap.insert(
@@ -3844,7 +3845,7 @@ public:
         return DoImport(inFullPathToDocument, inFullPathToDocument, inParent, 0, inSlide, docDir,
                         log, std::bind(CPerformImport::ImportToComposerFromImportFile,
                                        std::placeholders::_1, std::placeholders::_2),
-                                       inDropType, inPosition, inStartTime);
+                                       inDropType, inPosition, inStartTime, true);
     }
 
     QString findUniqueMaterialName(const QString &name, const QString &importPath)

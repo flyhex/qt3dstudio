@@ -466,11 +466,14 @@ void InspectorControlView::setInspectable(CInspectableBase *inInspectable)
     if (m_inspectableBase != inInspectable) {
         m_activeBrowser.clear();
 
-        if (m_inspectableBase)
-            delete m_inspectableBase;
+        CInspectableBase *oldInspectableBase = m_inspectableBase;
 
         m_inspectableBase = inInspectable;
         m_inspectorControlModel->setInspectable(inInspectable);
+
+        // Delete old inspectable base only after setting the new inspectable is completed,
+        // as model may still need it to commit pending transaction
+        delete oldInspectableBase;
 
         Q_EMIT titleChanged();
 
