@@ -62,6 +62,9 @@
   way to re-open a presentation that may have changed on disk, for
   example via hand editing or source control updating.
 \li
+  \uicontrol{Close Project} - Closes the current project, resets the user interface, and
+  shows the startup dialog window.
+\li
   \uicontrol{Save Presentation} - Saves changes to the open presentation.
 \li
   \uicontrol{Save Project As} - Saves the open project and all its assets to a new location.
@@ -69,6 +72,9 @@
   \uicontrol{Import} - Opens the assets library folder to import assets to your project.
 \li
   \uicontrol{Data Inputs} - Manage \l{Using Data Inputs}{data inputs}.
+\li
+  \uicontrol{Copy QML Code for Datainputs/Outputs} - Copies data input and data output QML
+  declarations to the clipboard.
 \li
   \uicontrol{Exit} - Quits Studio (prompting to save changes).
 \endlist
