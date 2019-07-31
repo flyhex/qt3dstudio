@@ -54,6 +54,7 @@ public:
     friend class std::shared_ptr<IDocSceneGraph>;
 
     virtual ITextRenderer *GetTextRenderer() = 0;
+    virtual ITextRenderer *GetDistanceFieldRenderer() = 0;
     virtual QT3DSVec3 GetIntendedPosition(qt3dsdm::Qt3DSDMInstanceHandle inHandle, CPt inPoint) = 0;
     virtual qt3dsdm::Qt3DSDMInstanceHandle getObjectAt(const QPoint &pt) = 0;
     virtual IBufferManager *GetBufferManager() = 0;

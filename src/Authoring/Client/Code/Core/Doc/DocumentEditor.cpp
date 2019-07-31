@@ -5245,6 +5245,8 @@ public:
             if (CDialogs::fontExtensions().contains(theExtension)
                 && m_Doc.GetSceneGraph() && m_Doc.GetSceneGraph()->GetTextRenderer()) {
                 m_Doc.GetSceneGraph()->GetTextRenderer()->ReloadFonts();
+                if (m_Doc.GetSceneGraph()->GetDistanceFieldRenderer())
+                    m_Doc.GetSceneGraph()->GetDistanceFieldRenderer()->ReloadFonts();
                 CFilePath thePath = m_Doc.GetDocumentDirectory();
                 CFilePath theFontCache = CFilePath::CombineBaseAndRelative(thePath, L"fontcache");
                 theFontCache.DeleteThisDirectory(true);

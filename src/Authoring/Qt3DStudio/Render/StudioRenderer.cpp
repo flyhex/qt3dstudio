@@ -272,6 +272,14 @@ struct SRendererImpl : public IStudioRenderer,
             return m_Context->GetTextRenderer();
         return nullptr;
     }
+
+    ITextRenderer *GetDistanceFieldRenderer() override
+    {
+        if (m_Context.mPtr)
+            return m_Context->getDistanceFieldRenderer();
+        return nullptr;
+    }
+
     // The buffer manager may not be available
     IBufferManager *GetBufferManager() override
     {
@@ -312,7 +320,10 @@ struct SRendererImpl : public IStudioRenderer,
                     m_RenderContext->GetRenderContext().GetFoundation(),
                     m_RenderContext->GetRenderContext().GetStringTable());
 
-            // Create text renderer
+            // Create legacy text renderer - studio needs this for drag widget text rendering.
+            // Legacy renderer also has better separation between project and system fonts, so
+            // we also want to keep it around for those purposes. Actual rendering of text is done
+            // with distance field renderer if it is enabled.
             qt3ds::render::ITextRendererCore &theTextRenderer(
                         qt3ds::render::ITextRendererCore::CreateQtTextRenderer(
                             m_RenderContext->GetRenderContext().GetFoundation(),
@@ -320,10 +331,12 @@ struct SRendererImpl : public IStudioRenderer,
             theCore->SetTextRendererCore(theTextRenderer);
 
 #if QT_VERSION >= QT_VERSION_CHECK(5,12,2)
-            ITextRendererCore &distanceFieldRenderer(
-                        ITextRendererCore::createDistanceFieldRenderer(
-                            m_RenderContext->GetRenderContext().GetFoundation()));
-            theCore->setDistanceFieldRenderer(distanceFieldRenderer);
+            if (qt3ds::render::IQt3DSRenderContextCore::distanceFieldEnabled()) {
+                ITextRendererCore &distanceFieldRenderer(
+                            ITextRendererCore::createDistanceFieldRenderer(
+                                m_RenderContext->GetRenderContext().GetFoundation()));
+                theCore->setDistanceFieldRenderer(distanceFieldRenderer);
+            }
 #endif
 
             m_Context = theCore->CreateRenderContext(

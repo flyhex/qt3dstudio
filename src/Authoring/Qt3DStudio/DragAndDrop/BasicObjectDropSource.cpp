@@ -239,8 +239,11 @@ CCmd *CBasicObjectDropSource::GenerateAssetCommand(qt3dsdm::Qt3DSDMInstanceHandl
                                  Q3DStudio::FileOpenFlags(Q3DStudio::FileOpenFlagValues::Create),
                                  theResFontFile);
                 // Force the text renderer to refresh
-                if (theDoc->GetSceneGraph() && theDoc->GetSceneGraph()->GetTextRenderer())
+                if (theDoc->GetSceneGraph() && theDoc->GetSceneGraph()->GetTextRenderer()) {
                     theDoc->GetSceneGraph()->GetTextRenderer()->ReloadFonts();
+                    if (theDoc->GetSceneGraph()->GetDistanceFieldRenderer())
+                        theDoc->GetSceneGraph()->GetDistanceFieldRenderer()->ReloadFonts();
+                }
             }
 
             // Lastly, we use the font file to create the Text object. This is similar to drag-drop
