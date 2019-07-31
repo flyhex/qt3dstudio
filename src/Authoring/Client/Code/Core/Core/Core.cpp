@@ -229,7 +229,9 @@ bool CCore::OnNewDocument(const QString &inDocument, bool isNewProject, bool sil
         m_projectFile.ensureProjectFile();
     }
 
+    g_StudioApp.getRenderer().MakeContextCurrent();
     m_Doc->CloseDocument();
+    g_StudioApp.getRenderer().ReleaseContext();
 
     QString theDocument = inDocument;
 
