@@ -307,6 +307,8 @@ public:
     virtual bool RemoveAnimation(TSlideHandle inSlide, TInstanceHandle instance,
                                  const wchar_t *propName, long subIndex) = 0;
     virtual void SetKeyframeTime(TKeyframeHandle inKeyframe, long inTimeInMilliseconds) = 0;
+    virtual void setBezierKeyframeValues(const QVector<std::pair<TKeyframeHandle,
+                                         qt3dsdm::TKeyframe>> &changedKfs) = 0;
     virtual void DeleteAllKeyframes(Qt3DSDMAnimationHandle inAnimation) = 0;
     virtual void KeyframeProperty(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty,
                                   bool inDoDiffValue) = 0;

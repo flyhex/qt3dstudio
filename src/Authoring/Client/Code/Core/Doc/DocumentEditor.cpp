@@ -92,6 +92,7 @@
 #include "StudioProjectSettings.h"
 #include "StudioApp.h"
 #include "StudioUtils.h"
+#include "Qt3DSDMHandles.h"
 
 namespace {
 
@@ -2827,15 +2828,25 @@ public:
 
     void SetKeyframeTime(TKeyframeHandle inKeyframe, long inTime) override
     {
-        float theTimeinSecs = static_cast<float>(inTime) / 1000.f;
+        float timeInSecs = static_cast<float>(inTime) / 1000.f;
         // round off to 4 decimal place to workaround precision issues
         // TODO: fix this, either all talk float OR long. choose one.
-        theTimeinSecs = ceilf(theTimeinSecs * 10000.0f) / 10000.0f;
-        TKeyframe theData = m_AnimationCore.GetKeyframeData(inKeyframe);
-        // Function programming paradigm, returns new value instead of changing
-        // current value.
-        theData = qt3dsdm::SetKeyframeSeconds(theData, theTimeinSecs);
-        m_AnimationCore.SetKeyframeData(inKeyframe, theData);
+        timeInSecs = ceilf(timeInSecs * 10000.0f) / 10000.0f;
+        TKeyframe kfData = m_AnimationCore.GetKeyframeData(inKeyframe);
+
+        // offset control points for bezier keyframes
+        offsetBezier(kfData, timeInSecs - GetKeyframeSeconds(kfData));
+
+        // Functional programming paradigm, returns new value instead of changing current value.
+        kfData = qt3dsdm::SetKeyframeSeconds(kfData, timeInSecs);
+        m_AnimationCore.SetKeyframeData(inKeyframe, kfData);
+    }
+
+    void setBezierKeyframeValues(const QVector<std::pair<qt3dsdm::Qt3DSDMKeyframeHandle,
+                                                         TKeyframe>> &changedKfs) override
+    {
+        for (auto kf : changedKfs)
+            m_AnimationCore.SetKeyframeData(kf.first, kf.second);
     }
 
     void DeleteAllKeyframes(Qt3DSDMAnimationHandle inAnimation) override
@@ -2854,31 +2865,31 @@ public:
                          const wchar_t *propName, long subIndex, EAnimationType animType,
                          const float *keyframeValues, long numValues, bool /*inUserEdited*/) override
     {
-        Qt3DSDMPropertyHandle propHdl =
-            m_DataCore.GetAggregateInstancePropertyByName(instance, propName);
-        if (propHdl.Valid() == false) {
+        Qt3DSDMPropertyHandle property = m_DataCore.GetAggregateInstancePropertyByName(instance,
+                                                                                       propName);
+        if (!property.Valid()) {
             QT3DS_ASSERT(false);
             return 0;
         }
-        if (inSlide.Valid() == false) {
+        if (!inSlide.Valid()) {
             Qt3DSDMSlideHandle theSlide = m_SlideSystem.GetAssociatedSlide(instance);
-            if (theSlide.Valid() == false) {
+            if (!theSlide.Valid()) {
                 assert(0);
                 return 0;
             }
-            if (m_SlideSystem.IsPropertyLinked(instance, propHdl))
+            if (m_SlideSystem.IsPropertyLinked(instance, property))
                 theSlide = m_SlideSystem.GetMasterSlide(theSlide);
             inSlide = theSlide;
         }
 
         Qt3DSDMAnimationHandle animHandle =
-            m_AnimationCore.GetAnimation(inSlide, instance, propHdl, subIndex);
+            m_AnimationCore.GetAnimation(inSlide, instance, property, subIndex);
 
-        if (animHandle.Valid() == true)
+        if (animHandle.Valid())
             m_AnimationCore.DeleteAnimation(animHandle);
 
         animHandle =
-            m_AnimationCore.CreateAnimation(inSlide, instance, propHdl, subIndex, animType, false);
+            m_AnimationCore.CreateAnimation(inSlide, instance, property, subIndex, animType, false);
 
         long theStartTime = GetTimeRange(instance).first;
         long theTimeOffsetInSeconds = long(theStartTime / 1000.f);

@@ -224,7 +224,8 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     }
 
     if (m_propertyGraph) { // Property graph
-        QRectF graphRect(edgeOffset, 0, widget->width(), currentHeight);
+        QRectF graphRect(rowTree()->m_scene->ruler()->viewportX(), 0,
+                         widget->width(), currentHeight);
         m_propertyGraph->paintGraphs(painter, graphRect);
     }
 
@@ -498,7 +499,6 @@ void RowTimeline::updateKeyframesFromBinding(const QList<int> &properties)
             for (int i = 0; i < child->m_PropBinding->GetKeyframeCount(); i++) {
                 Qt3DSDMTimelineKeyframe *kf = static_cast<Qt3DSDMTimelineKeyframe *>
                         (child->m_PropBinding->GetKeyframeByIndex(i));
-
                 Keyframe *kfUI = new Keyframe(kf->GetTime(), child->rowTimeline());
                 kfUI->binding = kf;
                 kfUI->dynamic = kf->IsDynamic();
@@ -567,12 +567,17 @@ void RowTimeline::updateKeyframes()
 
 TimelineControlType RowTimeline::getClickedControl(const QPointF &scenePos) const
 {
-    if (!m_rowTree->hasDurationBar())
+    QPointF p = mapFromScene(scenePos.x(), scenePos.y());
+    p.setX(p.x() - TimelineConstants::RULER_EDGE_OFFSET);
+
+    if (!m_rowTree->hasDurationBar()) {
+        if (m_propertyGraph)
+            return m_propertyGraph->getClickedBezierControl(p);
+
         return TimelineControlType::None;
+    }
 
     if (!m_rowTree->locked()) {
-        QPointF p = mapFromScene(scenePos.x(), scenePos.y());
-        p.setX(p.x() - TimelineConstants::RULER_EDGE_OFFSET);
 
         const int halfHandle = TimelineConstants::DURATION_HANDLE_W * .5;
         // Never choose start handle if end time is zero, as you cannot adjust it in that case
@@ -585,10 +590,10 @@ TimelineControlType RowTimeline::getClickedControl(const QPointF &scenePos) cons
             endHandle = !startHandle;
         }
         if (startHandle)
-            return TimelineControlType::StartHandle;
+            return TimelineControlType::DurationStartHandle;
         else if (endHandle)
-            return TimelineControlType::EndHandle;
-        else if (p.x() > m_startX && p.x() < m_endX && !rowTree()->locked())
+            return TimelineControlType::DurationEndHandle;
+        else if (p.x() > m_startX && p.x() < m_endX)
             return TimelineControlType::Duration;
     }
 

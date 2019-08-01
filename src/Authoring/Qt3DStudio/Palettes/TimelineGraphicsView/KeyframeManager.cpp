@@ -35,6 +35,7 @@
 #include "StudioApp.h"
 #include "Core.h"
 #include "Doc.h"
+#include "SlideSystem.h"
 #include "StudioClipboard.h"
 #include "CmdDataModelRemoveKeyframe.h"
 #include "CmdDataModelInsertKeyframe.h"
@@ -42,6 +43,7 @@
 #include "ClientDataModelBridge.h"
 #include "Bindings/OffsetKeyframesCommandHelper.h"
 #include "Bindings/PasteKeyframesCommandHelper.h"
+#include "Bindings/ITimelineItemBinding.h"
 #include "StudioPreferences.h"
 #include "Dialogs.h"
 #include "TimeEnums.h"
@@ -332,19 +334,14 @@ void KeyframeManager::copySelectedKeyframes()
 }
 
 qt3dsdm::SGetOrSetKeyframeInfo KeyframeManager::setKeyframeInfo(
-        qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe, qt3dsdm::IAnimationCore &inCore)
+        qt3dsdm::Qt3DSDMKeyframeHandle keyframeHandle, qt3dsdm::IAnimationCore &animCore)
 {
-    qt3dsdm::TKeyframe theKeyframeData = inCore.GetKeyframeData(inKeyframe);
-    qt3dsdm::SEaseInEaseOutKeyframe keyframe =
-            qt3dsdm::get<qt3dsdm::SEaseInEaseOutKeyframe>(theKeyframeData);
-    bool isDynamic = false;
-    if (inCore.IsFirstKeyframe(inKeyframe)) {
-        isDynamic = inCore.GetAnimationInfo(inCore.GetAnimationForKeyframe(inKeyframe))
-                .m_DynamicFirstKeyframe;
-    }
+    qt3dsdm::TKeyframe keyframeData = animCore.GetKeyframeData(keyframeHandle);
 
-    return qt3dsdm::SGetOrSetKeyframeInfo(keyframe.m_KeyframeValue, keyframe.m_EaseIn,
-                                          keyframe.m_EaseOut, isDynamic);
+    bool isDynamic = animCore.IsFirstKeyframe(keyframeHandle) && animCore.GetAnimationInfo(
+                        animCore.GetAnimationForKeyframe(keyframeHandle)).m_DynamicFirstKeyframe;
+
+    return qt3dsdm::SGetOrSetKeyframeInfo(keyframeData, isDynamic);
 }
 
 void KeyframeManager::pasteKeyframes()
@@ -483,23 +480,33 @@ void KeyframeManager::RollbackChangedKeyframes()
         row->updateKeyframes();
 }
 
-// IKeyframesManager interface
-bool KeyframeManager::HasSelectedKeyframes()
+bool KeyframeManager::HasSelectedKeyframes() const
 {
     return hasSelectedKeyframes();
 }
 
-bool KeyframeManager::HasDynamicKeyframes()
+bool KeyframeManager::HasDynamicKeyframes() const
 {
     return false; // Mahmoud_TODO: implement
 }
 
-bool KeyframeManager::CanPerformKeyframeCopy()
+bool KeyframeManager::CanPerformKeyframeCopy() const
 {
     return !m_selectedKeyframes.empty() && m_selectedKeyframesMasterRows.count() == 1;
 }
 
-bool KeyframeManager::CanPerformKeyframePaste()
+bool KeyframeManager::canSetKeyframeInterpolation() const
+{
+    for (Keyframe *kf : qAsConst(m_selectedKeyframes)) {
+        auto animType = kf->rowProperty->rowTree()->propBinding()->animationType();
+        if (animType == qt3dsdm::EAnimationTypeEaseInOut)
+            return true;
+    }
+
+    return false;
+}
+
+bool KeyframeManager::CanPerformKeyframePaste() const
 {
     if (m_pasteKeyframeCommandHelper && m_pasteKeyframeCommandHelper->HasCopiedKeyframes()) {
         qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance =
@@ -533,36 +540,36 @@ void KeyframeManager::SetKeyframeInterpolation()
     if (!hasSelectedKeyframes())
         return;
 
-    float theEaseIn = 0;
-    float theEaseOut = 0;
-    if (CStudioPreferences::GetInterpolation())
-        theEaseIn = theEaseOut = 100;
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    IAnimationCore *animCore = doc->GetStudioSystem()->GetAnimationCore();
 
-    CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
-    IAnimationCore *theAnimationCore = theDoc->GetStudioSystem()->GetAnimationCore();
-
-    if (!m_selectedKeyframes.empty()) {
-        Qt3DSDMTimelineKeyframe *theTimelineKeyframe = m_selectedKeyframes.front()->binding;
-        Qt3DSDMTimelineKeyframe::TKeyframeHandleList theKeyframeHandles;
-        theTimelineKeyframe->GetKeyframeHandles(theKeyframeHandles);
-        TKeyframe theKeyframeData = theAnimationCore->GetKeyframeData(theKeyframeHandles[0]);
-        GetEaseInOutValues(theKeyframeData, theEaseIn, theEaseOut);
+    // find the first easing keyframe and use it to get the current easing values
+    auto firstEaseKeyframeIter = m_selectedKeyframes.begin();
+    while ((*firstEaseKeyframeIter)->rowProperty->rowTree()->propBinding()->animationType()
+           != EAnimationTypeEaseInOut) {
+        firstEaseKeyframeIter++;
     }
 
-    if (g_StudioApp.GetDialogs()->PromptForKeyframeInterpolation(theEaseIn, theEaseOut)) {
-        // Note: Having "editor" variable here is important as its destructor
-        // creates proper transaction
-        Q3DStudio::ScopedDocumentEditor editor(*theDoc, QObject::tr("Set Keyframe Interpolation"),
+    Qt3DSDMTimelineKeyframe::TKeyframeHandleList keyframeHandles;
+    (*firstEaseKeyframeIter)->binding->GetKeyframeHandles(keyframeHandles);
+
+    TKeyframe keyframeData = animCore->GetKeyframeData(keyframeHandles[0]);
+
+    float easeIn = CStudioPreferences::GetInterpolation() ? 100 : 0;
+    float easeOut = CStudioPreferences::GetInterpolation() ? 100 : 0;
+    GetEaseInOutValues(keyframeData, easeIn, easeOut);
+
+    if (g_StudioApp.GetDialogs()->displayKeyframeInterpolation(easeIn, easeOut)) {
+        // Having "editor" variable here is important as its destructor creates proper transaction
+        Q3DStudio::ScopedDocumentEditor editor(*doc, QObject::tr("Set Keyframe Interpolation"),
                                         __FILE__, __LINE__);
         for (Keyframe *keyframe : qAsConst(m_selectedKeyframes)) {
-            Qt3DSDMTimelineKeyframe *theTimelineKeyframe = keyframe->binding;
-            Qt3DSDMTimelineKeyframe::TKeyframeHandleList theKeyframeHandles;
-            theTimelineKeyframe->GetKeyframeHandles(theKeyframeHandles);
-            for (size_t i = 0; i < theKeyframeHandles.size(); ++i) {
-                TKeyframe theKeyframeData =
-                    theAnimationCore->GetKeyframeData(theKeyframeHandles[i]);
-                SetEaseInOutValues(theKeyframeData, theEaseIn, theEaseOut);
-                theAnimationCore->SetKeyframeData(theKeyframeHandles[i], theKeyframeData);
+            Qt3DSDMTimelineKeyframe::TKeyframeHandleList keyframeHandles;
+            keyframe->binding->GetKeyframeHandles(keyframeHandles);
+            for (size_t i = 0; i < keyframeHandles.size(); ++i) {
+                TKeyframe keyframeData = animCore->GetKeyframeData(keyframeHandles[i]);
+                SetEaseInOutValues(keyframeData, easeIn, easeOut);
+                animCore->SetKeyframeData(keyframeHandles[i], keyframeData);
             }
         }
     }

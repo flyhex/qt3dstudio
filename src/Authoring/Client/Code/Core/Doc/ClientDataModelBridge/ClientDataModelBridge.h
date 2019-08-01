@@ -37,6 +37,7 @@
 #include "Graph.h"
 #include "Pt.h"
 #include "Qt3DSDMMetaData.h"
+#include "Qt3DSDMAnimation.h"
 #include "Qt3DSDMComposerTypeDefinitions.h"
 
 class CDoc;
@@ -294,6 +295,8 @@ public:
     qt3dsdm::Qt3DSDMPropertyHandle GetAggregateInstancePropertyByName(
                                                         qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                                         const qt3dsdm::TCharStr &inStr);
+    bool hasAggregateInstanceProperty(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
+                                      qt3dsdm::Qt3DSDMPropertyHandle inProperty) const;
 
     // helpers
     void BeginRender(); // enable cache to increase performance

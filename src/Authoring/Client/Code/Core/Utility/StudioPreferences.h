@@ -149,6 +149,7 @@ public:
     static QColor GetXAxisColor();
     static QColor GetYAxisColor();
     static QColor GetZAxisColor();
+    static QColor getBezierControlColor();
 
     static ::CColor GetRulerBackgroundColor();
     static ::CColor GetRulerTickColor();

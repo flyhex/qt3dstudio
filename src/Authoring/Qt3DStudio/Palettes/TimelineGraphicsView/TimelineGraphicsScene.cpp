@@ -32,6 +32,7 @@
 #include "Ruler.h"
 #include "PlayHead.h"
 #include "RowTree.h"
+#include "RowTimelinePropertyGraph.h"
 #include "RowMover.h"
 #include "RowTimeline.h"
 #include "TimelineConstants.h"
@@ -226,7 +227,7 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
                 }
 
                 if (m_dragging) {
-                    if (m_clickedTimelineControlType == TimelineControlType::StartHandle) {
+                    if (m_clickedTimelineControlType == TimelineControlType::DurationStartHandle) {
                         double visiblePtX = distance > 0 ? m_editedTimelineRow->getStartX() : 0;
                         if (distance > m_editedTimelineRow->getEndX())
                             visiblePtX += TimelineConstants::RULER_EDGE_OFFSET;
@@ -237,7 +238,8 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
                                                        + TimelineConstants::RULER_EDGE_OFFSET
                                                        + visiblePtX,
                                                        m_editedTimelineRow->y(), 0, 0, 0, 0);
-                    } else if (m_clickedTimelineControlType == TimelineControlType::EndHandle) {
+                    } else if (m_clickedTimelineControlType
+                               == TimelineControlType::DurationEndHandle) {
                         long time = m_ruler->distanceToTime(distance);
                         double edgeMargin = 0;
                         if (time > TimelineConstants::MAX_SLIDE_TIME) {
@@ -466,19 +468,36 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     g_StudioApp.setLastActiveView(m_widgetTimeline);
 
-    if ((event->modifiers() & Qt::AltModifier) && !m_dragging) {
-        if (event->button() == Qt::RightButton && !m_timelinePanning) {
-            // Start zooming
-            m_timelineZooming = true;
+    if ((event->modifiers() & Qt::AltModifier) && !m_dragging
+            && m_timelineAltModifierMode == TimelineAltModifierMode::None) {
+        if (event->button() == Qt::RightButton) {
+            // Start scaling
+            m_timelineAltModifierMode = TimelineAltModifierMode::ScaleTimeline;
             m_pressScreenPos = event->screenPos();
             event->accept();
             return;
-        } else if (event->button() == Qt::MiddleButton && !m_timelineZooming) {
+        } else if (event->button() == Qt::MiddleButton) {
             // Start panning
-            m_timelinePanning = true;
+            m_timelineAltModifierMode = TimelineAltModifierMode::PanTimeline;
             m_pressPos = event->scenePos();
             event->accept();
             return;
+        }  else if (event->button() == Qt::LeftButton) {
+            // Start property graph panning
+            m_pressPos = event->scenePos();
+            QGraphicsItem *item = getItemBelowType(TimelineItem::TypePlayHead,
+                                                   itemAt(m_pressPos, {}), m_pressPos);
+            if (item && item->type() == TimelineItem::TypeRowTimeline) {
+                RowTimeline *rowTimeline = static_cast<RowTimeline *>(item);
+                if (rowTimeline->propertyGraph()) {
+                    m_timelineAltModifierMode = TimelineAltModifierMode::PanPropertyGraph;
+                    m_panProperyGraph = rowTimeline->propertyGraph();
+                    m_panProperyGraph->startPan();
+                    event->accept();
+                    return;
+                }
+            }
+
         }
     }
 
@@ -570,11 +589,13 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                         m_rowManager->selectRow(m_editedTimelineRow->rowTree(), ctrlKeyDown);
                         // click position in ruler space
                         m_editedTimelineRow->startDurationMove(m_pressPos.x() - m_ruler->x());
-                    } else if (m_clickedTimelineControlType == TimelineControlType::StartHandle
-                               || m_clickedTimelineControlType == TimelineControlType::EndHandle) {
+                    } else if (m_clickedTimelineControlType
+                               == TimelineControlType::DurationStartHandle
+                               || m_clickedTimelineControlType
+                                  == TimelineControlType::DurationEndHandle) {
                         m_editedTimelineRow->updateBoundChildren(
                                     m_clickedTimelineControlType
-                                    == TimelineControlType::StartHandle);
+                                    == TimelineControlType::DurationStartHandle);
                     }
                     m_autoScrollTimelineTimer.start();
                 }
@@ -594,9 +615,9 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (m_timelineZooming) {
-        int deltaY = event->screenPos().y() - m_pressScreenPos.y();
+    if (m_timelineAltModifierMode == TimelineAltModifierMode::ScaleTimeline) {
         int deltaX = event->screenPos().x() - m_pressScreenPos.x();
+        int deltaY = event->screenPos().y() - m_pressScreenPos.y();
         // Zooming in when moving down/right.
         int delta = -deltaX - deltaY;
         const int threshold = 20;
@@ -607,24 +628,32 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
             m_widgetTimeline->toolbar()->onZoomOutButtonClicked();
             m_pressScreenPos = event->screenPos();
         }
-    } else if (m_timelinePanning) {
+    } else if (m_timelineAltModifierMode == TimelineAltModifierMode::PanTimeline) {
         int deltaX = event->scenePos().x() - m_pressPos.x();
         QScrollBar *scrollbar = m_widgetTimeline->viewTimelineContent()->horizontalScrollBar();
         scrollbar->setValue(scrollbar->value() - deltaX);
+    } else if (m_timelineAltModifierMode == TimelineAltModifierMode::PanPropertyGraph) {
+        qreal deltaY = event->scenePos().y() - m_pressPos.y();
+        m_panProperyGraph->pan(deltaY);
     }
 
     if (m_editedTimelineRow.isNull())
         updateHoverStatus(event->scenePos());
 
-    if (!m_dragging && !m_timelineZooming && !m_timelinePanning
-            && m_pressPos != invalidPoint
-            && (event->scenePos() - m_pressPos).manhattanLength() > 10) {
+    if (!m_dragging && m_timelineAltModifierMode == TimelineAltModifierMode::None
+        && m_pressPos != invalidPoint && (event->scenePos() - m_pressPos).manhattanLength() > 10) {
         m_dragging = true;
     }
 
     bool shift = event->modifiers() & Qt::ShiftModifier;
     if (m_dragging) {
-        if (m_startRowMoverOnNextDrag || m_rowMover->isActive()) {
+        if (m_clickedTimelineControlType == TimelineControlType::BezierInHandle
+            || m_clickedTimelineControlType == TimelineControlType::BezierOutHandle) {
+            if (m_editedTimelineRow && m_editedTimelineRow->propertyGraph()) {
+                m_editedTimelineRow->propertyGraph()->updateBezierControlValue(
+                            m_clickedTimelineControlType, event->scenePos());
+            }
+        } else if (m_startRowMoverOnNextDrag || m_rowMover->isActive()) {
             // moving rows vertically (reorder/reparent)
             if (m_startRowMoverOnNextDrag) {
                 m_startRowMoverOnNextDrag = false;
@@ -729,11 +758,11 @@ void TimelineGraphicsScene::resetMousePressParams()
     m_selectionRect->end();
     m_rowMover->end();
     m_dragging = false;
-    m_timelineZooming = false;
-    m_timelinePanning = false;
     m_startRowMoverOnNextDrag = false;
     m_rulerPressed = false;
     m_pressedKeyframe = nullptr;
+    m_panProperyGraph = nullptr;
+    m_timelineAltModifierMode = TimelineAltModifierMode::None;
     m_clickedTimelineControlType = TimelineControlType::None;
     m_editedTimelineRow.clear();
     m_releaseSelectRow.clear();
@@ -797,16 +826,15 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             if (m_rowMover->isActive()) { // moving rows (reorder/reparent)
                 commitMoveRows();
             } else if (m_pressedKeyframe) {
-                // update keyframe movement (time) to binding
                 m_keyframeManager->commitMoveSelectedKeyframes();
-            } else if (m_clickedTimelineControlType == TimelineControlType::StartHandle) {
+            } else if (m_clickedTimelineControlType == TimelineControlType::DurationStartHandle) {
                 if (!m_editedTimelineRow.isNull()) {
                     ITimelineTimebar *timebar = m_editedTimelineRow->rowTree()->getBinding()
                             ->GetTimelineItem()->GetTimebar();
                     timebar->ChangeTime(m_editedTimelineRow->getStartTime(), true);
                     timebar->CommitTimeChange();
                 }
-            } else if (m_clickedTimelineControlType == TimelineControlType::EndHandle) {
+            } else if (m_clickedTimelineControlType == TimelineControlType::DurationEndHandle) {
                 if (!m_editedTimelineRow.isNull()) {
                     ITimelineTimebar *timebar = m_editedTimelineRow->rowTree()->getBinding()
                                                 ->GetTimelineItem()->GetTimebar();
@@ -824,6 +852,9 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
                     if (m_playHead->time() > ruler()->duration())
                         g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(ruler()->duration());
                 }
+            } else if (m_clickedTimelineControlType == TimelineControlType::BezierInHandle
+                       || m_clickedTimelineControlType == TimelineControlType::BezierOutHandle) {
+                m_editedTimelineRow->propertyGraph()->commitBezierEdit();
             }
         } else if (!m_rulerPressed && (!m_releaseSelectRow.isNull() || !itemAt(event->scenePos(),
                                                                                QTransform()))) {
@@ -833,7 +864,7 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         }
     }
 
-    if (m_timelineZooming)
+    if (m_timelineAltModifierMode == TimelineAltModifierMode::ScaleTimeline)
         updateSnapSteps();
 
     resetMousePressParams();
@@ -860,7 +891,7 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
                 if (item->type() == TimelineItem::TypeRowTree) {
                     RowTree *treeItem = static_cast<RowTree *>(item);
                     if (treeItem->isProperty())
-                        treeItem->togglePropertyExpanded();
+                        treeItem->togglePropertyExpanded(scenePos);
                 } else if (item->type() == TimelineItem::TypeRowTreeLabelItem) {
                     RowTreeLabelItem *treeLabelItem = static_cast<RowTreeLabelItem *>(item);
                     if (treeLabelItem->parentRow()->isProperty()) {
@@ -901,6 +932,17 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
 
 void TimelineGraphicsScene::wheelEvent(QGraphicsSceneWheelEvent *wheelEvent)
 {
+    // adjust property graph scale
+    if (wheelEvent->modifiers() & Qt::AltModifier) {
+        const QPointF pos = wheelEvent->scenePos();
+        QGraphicsItem *item = getItemBelowType(TimelineItem::TypePlayHead, itemAt(pos, {}), pos);
+        if (item && item->type() == TimelineItem::TypeRowTimeline) {
+            RowTimeline *rowTimeline = static_cast<RowTimeline *>(item);
+            if (rowTimeline->propertyGraph())
+                rowTimeline->propertyGraph()->adjustScale(wheelEvent->delta() > 0);
+        }
+    }
+
     // Make sure drag states update on wheel scrolls done during drag
     m_lastAutoScrollX = -1.0;
     m_lastAutoScrollY = -1.0;
@@ -988,8 +1030,8 @@ void TimelineGraphicsScene::updateHoverStatus(const QPointF &scenePos)
         if (item->type() == TimelineItem::TypeRowTimeline) {
             RowTimeline *timelineItem = static_cast<RowTimeline *>(item);
             TimelineControlType controlType = timelineItem->getClickedControl(scenePos);
-            if (controlType == TimelineControlType::StartHandle
-                    || controlType == TimelineControlType::EndHandle) {
+            if (controlType == TimelineControlType::DurationStartHandle
+                    || controlType == TimelineControlType::DurationEndHandle) {
                 setMouseCursor(CMouseCursor::CURSOR_RESIZE_LEFTRIGHT);
             } else {
                 resetMouseCursor();
@@ -1071,6 +1113,9 @@ QGraphicsItem *TimelineGraphicsScene::getItemBelowType(TimelineItem::ItemType ty
                                                        QGraphicsItem *item,
                                                        const QPointF &scenePos) const
 {
+    if (!item)
+        return nullptr;
+
     if (item->type() == type) {
         const QList<QGraphicsItem *> hoverItems = items(scenePos);
         if (hoverItems.size() > 1)

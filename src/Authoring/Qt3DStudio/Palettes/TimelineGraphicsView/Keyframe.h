@@ -37,9 +37,9 @@ struct Keyframe
 {
     Keyframe(long time, RowTimeline *propRow)
         : time(time)
+        , propertyType(propRow->rowTree()->propertyType())
         , rowProperty(propRow)
         , rowMaster(propRow->parentRow())
-        , propertyType(propRow->rowTree()->propertyType())
     {}
 
     bool selected() const
@@ -47,7 +47,7 @@ struct Keyframe
         return binding && binding->IsSelected();
     }
 
-    long time;
+    long time; // millis
     QString propertyType;
     RowTimeline *rowProperty = nullptr;
     RowTimeline *rowMaster = nullptr;

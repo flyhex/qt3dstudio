@@ -811,6 +811,11 @@ QColor CStudioPreferences::GetZAxisColor()
     return s_zAxisColor;
 }
 
+QColor CStudioPreferences::getBezierControlColor()
+{
+    return QColor("#f4bd04");
+}
+
 /**
  *  Colors for rulers and guides
  */

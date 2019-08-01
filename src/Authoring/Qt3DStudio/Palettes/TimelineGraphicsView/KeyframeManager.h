@@ -76,10 +76,11 @@ public:
     void SetKeyframesDynamic(bool inDynamic) override;
     void CommitChangedKeyframes() override;
     void RollbackChangedKeyframes() override;
-    bool HasSelectedKeyframes() override;
-    bool HasDynamicKeyframes() override;
-    bool CanPerformKeyframeCopy() override;
-    bool CanPerformKeyframePaste() override;
+    bool HasSelectedKeyframes() const override;
+    bool HasDynamicKeyframes() const override;
+    bool CanPerformKeyframeCopy() const override;
+    bool CanPerformKeyframePaste() const override;
+    bool canSetKeyframeInterpolation() const override;
     void CopyKeyframes() override;
     bool RemoveKeyframes(bool inPerformCopy) override;
     void PasteKeyframes() override;
@@ -89,12 +90,12 @@ public:
     long getPressedKeyframeOffset() const;
 
 private:
-    qt3dsdm::SGetOrSetKeyframeInfo setKeyframeInfo(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
-                                                   qt3dsdm::IAnimationCore &inCore);
+    qt3dsdm::SGetOrSetKeyframeInfo setKeyframeInfo(qt3dsdm::Qt3DSDMKeyframeHandle keyframeHandle,
+                                                   qt3dsdm::IAnimationCore &animCore);
     long getMinSelectedKeyframesTime() const;
 
     CPasteKeyframeCommandHelper *m_pasteKeyframeCommandHelper = nullptr;
-    TimelineGraphicsScene *m_scene;
+    TimelineGraphicsScene *m_scene = nullptr;
     QList<Keyframe *> m_selectedKeyframes;
     QList<RowTimeline *> m_selectedKeyframesMasterRows;
 };

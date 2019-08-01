@@ -277,6 +277,7 @@ public:
     bool canPasteObjects() const;
     bool canPasteKeyframes() const;
     bool canPasteActions() const;
+    bool canSetKeyframeInterpolation() const;
 
     bool canPaste() const; // objects, keyframes, or actions
     bool canCopy() const;  // objects, keyframes, or actions

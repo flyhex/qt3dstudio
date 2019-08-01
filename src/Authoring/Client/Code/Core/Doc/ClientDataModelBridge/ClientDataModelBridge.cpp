@@ -288,6 +288,7 @@ qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::GetImportId()
 {
     return m_SceneAsset.m_ImportId;
 }
+
 qt3dsdm::Qt3DSDMPropertyHandle CClientDataModelBridge::GetNameProperty() const
 {
     return GetObjectDefinitions().m_Named.m_NameProp;
@@ -2245,4 +2246,10 @@ CClientDataModelBridge::GetAggregateInstancePropertyByName(Qt3DSDMInstanceHandle
                                                            const TCharStr &inPropertyName)
 {
     return m_DataCore->GetAggregateInstancePropertyByName(inInstance, inPropertyName);
+}
+
+bool CClientDataModelBridge::hasAggregateInstanceProperty(Qt3DSDMInstanceHandle inInstance,
+                                                          Qt3DSDMPropertyHandle inProperty) const
+{
+    return m_DataCore->HasAggregateInstanceProperty(inInstance, inProperty);
 }

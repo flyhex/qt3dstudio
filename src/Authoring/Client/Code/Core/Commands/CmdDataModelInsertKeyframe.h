@@ -28,13 +28,8 @@
 ****************************************************************************/
 
 #ifndef INCLUDED_CMD_DATAMODEL_INSERTKEYFRAME_H
-#define INCLUDED_CMD_DATAMODEL_INSERTKEYFRAME_H 1
+#define INCLUDED_CMD_DATAMODEL_INSERTKEYFRAME_H
 
-#pragma once
-
-//==============================================================================
-//	Include
-//==============================================================================
 #include "Cmd.h"
 #include "CmdDataModel.h"
 #include "Doc.h"
@@ -51,7 +46,7 @@ public:
     struct STimeKeyframeData
     {
         qt3dsdm::Qt3DSDMPropertyHandle m_Property;
-        float m_KeyframeTime;
+        float m_KeyframeTime; // seconds
         qt3dsdm::SGetOrSetKeyframeInfo m_Infos[4];
         size_t m_ValidInfoCount;
 
@@ -69,22 +64,15 @@ public:
 protected:
     typedef std::vector<STimeKeyframeData> TKeyframeDataList;
 
-protected: // Members
     CDoc *m_Doc;
     qt3dsdm::Qt3DSDMInstanceHandle m_Instance;
     TKeyframeDataList m_KeyframeDataList;
 
-public: // Construction
-    //@param inTime is in secs
-    CCmdDataModelInsertKeyframe(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inInstance,
-                                qt3dsdm::Qt3DSDMPropertyHandle inProperty, float inKeyframeTime,
-                                qt3dsdm::SGetOrSetKeyframeInfo *inInfos, size_t inInfoCount)
+public:
+    CCmdDataModelInsertKeyframe(CDoc *inDoc, qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         : qt3dsdm::CmdDataModel(*inDoc)
         , m_Doc(inDoc)
-        , m_Instance(inInstance)
-    {
-        AddKeyframeData(inProperty, inKeyframeTime, inInfos, inInfoCount);
-    }
+        , m_Instance(inInstance) {}
     ~CCmdDataModelInsertKeyframe() {}
 
     void AddKeyframeData(qt3dsdm::Qt3DSDMPropertyHandle inProperty, float inTime,
@@ -93,31 +81,25 @@ public: // Construction
         m_KeyframeDataList.push_back(STimeKeyframeData(inProperty, inTime, inInfos, inInfoCount));
     }
 
-    //======================================================================
-    //	Do/Redo
-    //======================================================================
     unsigned long Do() override
     {
         if (!ConsumerExists()) {
             qt3dsdm::SScopedDataModelConsumer __scopedConsumer(*this);
             qt3dsdm::IStudioAnimationSystem *theAnimationSystem =
                 m_Doc->GetStudioSystem()->GetAnimationSystem();
-            // if there are existing keyframes exist at the same times, the values are overridden. (
-            // That's how it always work in studio anyways )
-            for (size_t i = 0; i < m_KeyframeDataList.size(); ++i)
+            // Keyframes at same time are overridden (only 1 keyframe allowed at a point in time)
+            for (size_t i = 0; i < m_KeyframeDataList.size(); ++i) {
                 theAnimationSystem->SetOrCreateKeyframe(
                     m_Instance, m_KeyframeDataList[i].m_Property,
                     m_KeyframeDataList[i].m_KeyframeTime, m_KeyframeDataList[i].m_Infos,
                     m_KeyframeDataList[i].m_ValidInfoCount);
+            }
         } else {
             DataModelRedo();
         }
         return 0;
     }
 
-    //======================================================================
-    //	Undo
-    //======================================================================
     unsigned long Undo() override
     {
         if (ConsumerExists()) {
@@ -126,9 +108,6 @@ public: // Construction
         return 0;
     }
 
-    //======================================================================
-    //	ToString
-    //======================================================================
     QString ToString() override
     {
         return QObject::tr("Insert Keyframe");

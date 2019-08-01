@@ -28,13 +28,8 @@
 ****************************************************************************/
 
 #ifndef INCLUDED_PASTE_KEYFRAME_COMMAND_HELPER_H
-#define INCLUDED_PASTE_KEYFRAME_COMMAND_HELPER_H 1
+#define INCLUDED_PASTE_KEYFRAME_COMMAND_HELPER_H
 
-#pragma once
-
-//==============================================================================
-//	Include
-//==============================================================================
 #include "CmdDataModelInsertKeyframe.h"
 #include "Qt3DSDMPropertyDefinition.h"
 #include "Qt3DSDMDataCore.h"
@@ -48,7 +43,7 @@ protected:
     typedef std::vector<CCmdDataModelInsertKeyframe::STimeKeyframeData> TCopiedKeyframeList;
     TCopiedKeyframeList m_CopiedKeyframeList;
 
-public: // Construction
+public:
     CPasteKeyframeCommandHelper() {}
     ~CPasteKeyframeCommandHelper() {}
 
@@ -76,40 +71,24 @@ public: // Construction
     {
         using namespace qt3dsdm;
 
-        CCmdDataModelInsertKeyframe *theInsertKeyframesCommand = nullptr;
-        TCopiedKeyframeList::iterator theIter = m_CopiedKeyframeList.begin();
-        qt3dsdm::IPropertySystem *thePropertySystem = inDoc->GetStudioSystem()->GetPropertySystem();
-        CClientDataModelBridge *theBridge = inDoc->GetStudioSystem()->GetClientDataModelBridge();
+        CCmdDataModelInsertKeyframe *insertKeyframesCmd = nullptr;
+        qt3dsdm::IPropertySystem *propSys = inDoc->GetStudioSystem()->GetPropertySystem();
+        CClientDataModelBridge *bridge = inDoc->GetStudioSystem()->GetClientDataModelBridge();
 
-        for (; theIter != m_CopiedKeyframeList.end(); ++theIter) {
-            TCharStr thePropertyName = thePropertySystem->GetName(theIter->m_Property);
-            DataModelDataType::Value thePropertyType =
-                thePropertySystem->GetDataType(theIter->m_Property);
-            Qt3DSDMPropertyHandle theTargetPropertyHandle =
-                theBridge->GetAggregateInstancePropertyByName(inTargetInstance, thePropertyName);
-            if (theTargetPropertyHandle.Valid()) // property exists on target
-            {
-                // sanity check for type match
-                DataModelDataType::Value theTargetPropertyType =
-                    thePropertySystem->GetDataType(theTargetPropertyHandle);
-                if (theTargetPropertyType == thePropertyType) {
-                    // 2. Offset keyframe time by current view time
-                    double milliseconds = theIter->m_KeyframeTime * 1000.0;
-                    double theTimeInMilliseconds = milliseconds + inTimeOffsetInMilliseconds;
-                    float theTimeInSeconds = static_cast<float>(theTimeInMilliseconds / 1000.0);
+        for (auto &kfData : m_CopiedKeyframeList) {
+             // check property exists on target
+            if (bridge->hasAggregateInstanceProperty(inTargetInstance, kfData.m_Property)) {
+                if (!insertKeyframesCmd)
+                    insertKeyframesCmd = new CCmdDataModelInsertKeyframe(inDoc, inTargetInstance);
 
-                    if (!theInsertKeyframesCommand)
-                        theInsertKeyframesCommand = new CCmdDataModelInsertKeyframe(
-                            inDoc, inTargetInstance, theTargetPropertyHandle, theTimeInSeconds,
-                            theIter->m_Infos, theIter->m_ValidInfoCount);
-                    else
-                        theInsertKeyframesCommand->AddKeyframeData(
-                            theTargetPropertyHandle, theTimeInSeconds, theIter->m_Infos,
-                            theIter->m_ValidInfoCount);
-                }
+                // Offset keyframe time by current view time (time in seconds)
+                float time = kfData.m_KeyframeTime + inTimeOffsetInMilliseconds / 1000.f;
+                insertKeyframesCmd->AddKeyframeData(kfData.m_Property, time, kfData.m_Infos,
+                                                    kfData.m_ValidInfoCount);
             }
         }
-        return theInsertKeyframesCommand;
+
+        return insertKeyframesCmd;
     }
 
     void Clear() { m_CopiedKeyframeList.clear(); }

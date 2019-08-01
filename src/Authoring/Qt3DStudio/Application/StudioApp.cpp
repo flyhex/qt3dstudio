@@ -39,7 +39,6 @@
 #include "qtlocalpeer.h"
 #include "TimelineWidget.h"
 #include "SlideView.h"
-#include "IKeyframesManager.h"
 #include "PresentationFile.h"
 #include "EditPresentationIdDlg.h"
 #include "Qt3DSDMWStrOps.h"

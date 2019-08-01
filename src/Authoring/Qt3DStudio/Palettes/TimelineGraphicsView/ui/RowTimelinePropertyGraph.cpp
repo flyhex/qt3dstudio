@@ -29,72 +29,355 @@
 #include "RowTimelinePropertyGraph.h"
 #include "RowTimeline.h"
 #include "RowTree.h"
+#include "StudioApp.h"
+#include "Core.h"
+#include "Doc.h"
+#include "IDocumentEditor.h"
+#include "Qt3DSDMAnimation.h"
+#include "Keyframe.h"
 #include "Ruler.h"
 #include "TimelineGraphicsScene.h"
+#include "StudioPreferences.h"
+#include "HotKeys.h"
 #include "Bindings/ITimelineItemProperty.h"
+
+using namespace qt3dsdm;
+using namespace TimelineConstants;
 
 RowTimelinePropertyGraph::RowTimelinePropertyGraph(QObject *parent)
     : QObject(parent)
+    , m_rowTimeline(static_cast<RowTimeline *>(parent))
+    , m_animCore(g_StudioApp.GetCore()->GetDoc()->GetAnimationCore())
 {
-    m_rowTimeline = static_cast<RowTimeline *>(parent);
+    m_fitCurveTimer.setInterval(10);
+
+    // smooth animation for when curve height change
+    connect(&m_fitCurveTimer, &QTimer::timeout, [this]() {
+        fitGraph();
+        if (m_rowTimeline->size().height() == m_expandHeight)
+            m_fitCurveTimer.stop();
+    });
 }
 
 void RowTimelinePropertyGraph::paintGraphs(QPainter *painter, const QRectF &rect)
 {
-    m_rect = rect;
     m_propBinding = m_rowTimeline->rowTree()->propBinding();
 
-    // Animate alpha 0..255 while expanding
-    int alpha = 255 * (m_rect.height() - TimelineConstants::ROW_H)
-            / (TimelineConstants::ROW_H_EXPANDED - TimelineConstants::ROW_H);
-    alpha = std::max(0, alpha);
-
-    if (alpha == 0)
+    if (rect.height() < ROW_H) // rect height = row height - 1
         return;
 
-    // Available line colors
-    QColor colors[6] = { QColor(255, 0, 0, alpha), QColor(0, 255, 0, alpha),
-                         QColor(0, 0, 255, alpha), QColor(255, 255, 0, alpha),
-                         QColor(255, 0, 255, alpha), QColor(0, 255, 255, alpha) };
+    painter->setRenderHint(QPainter::Antialiasing);
+    painter->setClipRect(rect);
 
-    long channelCount = m_propBinding->GetChannelCount();
+    const QPointF edgeOffset(RULER_EDGE_OFFSET, 0);
+    double timelineScale = m_rowTimeline->rowTree()->m_scene->ruler()->timelineScale();
 
-    // Don't want to overflow the color array
-    if (channelCount <= 6) {
-        // For each channel graph it.
-        for (long i = 0; i < channelCount; ++i)
-            paintSingleChannel(painter, i, colors[i]);
+    // draw graph base line (graph_Y)
+    painter->setPen(QPen(CStudioPreferences::studioColor3()));
+    painter->drawLine(edgeOffset.x(), m_graphY, rect.right(), m_graphY);
+
+    // draw channel curves
+    auto animHandles = m_propBinding->animationHandles();
+    for (size_t channelIndex = 0; channelIndex < animHandles.size(); ++channelIndex) {
+        // Mahmoud_TODO: this block will draw the channel curves  without sampling which is more
+        // efficient, but it cannot be used till the bezier equation is fixed (check:QT3DS-3777)
+        //-------------------------------draw using cubicTo --------------------------------------
+//        QPainterPath path2;
+//        Qt3DSDMTimelineKeyframe::TKeyframeHandleList keyframeHandles;
+//        m_animCore->GetKeyframes(animHandles[channelIndex], keyframeHandles);
+//        if (!keyframeHandles.empty()) {
+//            TKeyframe kf0 = m_animCore->GetKeyframeData(keyframeHandles[0]);
+//            path2.moveTo(getKeyframePosition(GetKeyframeSeconds(kf0), KeyframeValueValue(kf0))
+//                         + edgeOffset);
+
+//            for (int i = 1; i < keyframeHandles.size(); ++i) {
+//                TKeyframe kf1 = m_animCore->GetKeyframeData(keyframeHandles[i]);
+//                float kf0InTime = -1, kf0InValue, kf0OutTime, kf0OutValue;
+//                float kf1InTime = -1, kf1InValue, kf1OutTime, kf1OutValue;
+//                getBezierValues(kf0, kf0InTime, kf0InValue, kf0OutTime, kf0OutValue);
+//                getBezierValues(kf1, kf1InTime, kf1InValue, kf1OutTime, kf1OutValue);
+//                if (kf0InTime != -1) {
+//                    path2.cubicTo(getKeyframePosition(kf0OutTime, kf0OutValue) + edgeOffset,
+//                                  getKeyframePosition(kf1InTime, kf1InValue) + edgeOffset,
+//                                  getKeyframePosition(GetKeyframeSeconds(kf1),
+//                                                      KeyframeValueValue(kf1))
+//                                  + edgeOffset);
+//                } else {
+//                    path2.lineTo(getKeyframePosition(GetKeyframeSeconds(kf1),
+//                                                     KeyframeValueValue(kf1))
+//                                 + edgeOffset);
+//                }
+//                // Mahmoud_TODO: handle ease in/out curves as well
+//                kf0 = kf1;
+//            }
+//            painter->setPen(QPen(QColor("#ff0000"), 1));
+//            painter->drawPath(path2);
+//        }
+        //-------------------------------draw using cubicTo --------------------------------------
+
+        QPainterPath path;
+        int start_i = qMax(rect.x(), edgeOffset.x());
+        for (int i = start_i; i < rect.right(); i += 5) { // 5 = sampling step in pixels
+            // Value time in ms
+            long time = (i - edgeOffset.x()) / (TimelineConstants::RULER_MILLI_W * timelineScale);
+            qreal value = m_propBinding->GetChannelValueAtTime(channelIndex, time);
+            qreal yPos = m_graphY - value * m_valScale;
+            if (i == start_i)
+                path.moveTo(i, yPos);
+            else
+                path.lineTo(i, yPos);
+        }
+        QColor channelColor;
+        if (channelIndex == 0)
+            channelColor = CStudioPreferences::GetXAxisColor();
+        else if (channelIndex == 1)
+            channelColor = CStudioPreferences::GetYAxisColor();
+        else if (channelIndex == 2)
+            channelColor = CStudioPreferences::GetZAxisColor();
+        painter->setPen(QPen(channelColor, 2));
+        painter->drawPath(path);
+    }
+
+    // draw bezier controls
+    if (m_rowTimeline->rowTree()->propBinding()->animationType() == EAnimationTypeBezier) {
+        static const QPixmap pixBezierHandle = QPixmap("://images/breadcrumb_component_button.png");
+        static const QPixmap pixBezierHandlePressed = QPixmap("://images/breadcrumb_component_grey"
+                                                              "_button.png");
+
+        Qt3DSDMTimelineKeyframe::TKeyframeHandleList keyframeHandles;
+        m_animCore->GetKeyframes(animHandles[0], keyframeHandles);
+
+        size_t kfHandlesSize = keyframeHandles.size();
+        for (size_t i = 0; i < kfHandlesSize; ++i) {
+            SBezierKeyframe kf = get<SBezierKeyframe>(m_animCore->GetKeyframeData(
+                                                          keyframeHandles[i]));
+
+            QPointF centerPos = getBezierControlPosition(kf) + edgeOffset;
+            const QPointF PIX_HALF_W = QPointF(8.0, 8.0);
+
+            // draw vertical keyframe separator line
+            painter->setPen(QPen(CStudioPreferences::studioColor2(), 1));
+            painter->drawLine(centerPos.x(), rect.y(), centerPos.x(), rect.height());
+
+            // draw tangent-in part
+            painter->setPen(CStudioPreferences::getBezierControlColor());
+            if (i > 0) {
+                QPointF cInPos = getBezierControlPosition(kf, BezierControlType::In) + edgeOffset;
+                painter->drawLine(cInPos, centerPos);
+                painter->drawPixmap(cInPos - PIX_HALF_W, pixBezierHandle);
+            }
+
+            // draw tangent-out part
+            if (i < kfHandlesSize - 1) {
+                QPointF cOutPos = getBezierControlPosition(kf, BezierControlType::Out) + edgeOffset;
+                painter->drawLine(cOutPos, centerPos);
+                painter->drawPixmap(cOutPos - PIX_HALF_W, pixBezierHandle);
+            }
+
+            // draw center point
+            painter->setPen(QPen(CStudioPreferences::getBezierControlColor(), 3));
+            painter->drawPoint(centerPos);
+        }
     }
 }
 
-void RowTimelinePropertyGraph::paintSingleChannel(QPainter *painter, long inChannelIndex,
-                                                  const QColor &inColor)
+/**
+ * This method is called when the user mouse-presses the property graph. If the press is on a
+ * bezier keyframe handle, it returns the handle type and saves the list of keyframe channels
+ * handles to be precessed while the user drags the handle (in updateBezierControlValue())
+ *
+ * @param pos press position in local coordinate system
+ * @return the pressed handle type, or None if no handle is pressed
+ */
+TimelineControlType RowTimelinePropertyGraph::getClickedBezierControl(const QPointF &pos)
 {
-    float maxVal = m_propBinding->GetMaximumValue();
-    float minVal = m_propBinding->GetMinimumValue();
+    if (m_rowTimeline->rowTree()->propBinding()->animationType() != EAnimationTypeBezier)
+        return TimelineControlType::None;
 
-    double timelineScale = m_rowTimeline->rowTree()->m_scene->ruler()->timelineScale();
+    m_currKeyframeHandles.clear();
+    m_currKeyframeData.clear();
 
-    // Step in pixels
-    int interval = 5;
-    // Margin at top & bottom of graph
-    float marginY = 10;
-    float graphY = m_rect.y() + marginY;
-    float graphHeight = m_rect.height() - marginY * 2;
+    auto animHandles = m_propBinding->animationHandles();
+    Qt3DSDMTimelineKeyframe::TKeyframeHandleList keyframeHandles;
+    m_animCore->GetKeyframes(animHandles[0], keyframeHandles);
+    const double CONTROL_RADIUS = 8;
+    for (auto kfHandle : keyframeHandles) {
+        SBezierKeyframe kf = get<SBezierKeyframe>(m_animCore->GetKeyframeData(kfHandle));
 
-    QPainterPath path;
-    for (int i = 0; i < m_rect.width(); i += interval) {
-        // Value time in ms
-        long time = i / (TimelineConstants::RULER_MILLI_W * timelineScale);
-        float value = m_propBinding->GetChannelValueAtTime(inChannelIndex, time);
-        float yPos = graphY + (1.0 - (value - minVal) / (maxVal - minVal)) * graphHeight;
+        QPointF cInPos = getBezierControlPosition(kf, BezierControlType::In);
+        QPointF cOutPos = getBezierControlPosition(kf, BezierControlType::Out);
+        bool clickedInHandle = QLineF(cInPos, pos).length() < CONTROL_RADIUS;
+        bool clickedOutHandle = QLineF(cOutPos, pos).length() < CONTROL_RADIUS;
+        if (clickedInHandle || clickedOutHandle) {
+            m_rowTimeline->rowTree()->propBinding()->GetKeyframeByTime(kf.m_KeyframeSeconds * 1000)
+                    ->getUI()->binding->GetKeyframeHandles(m_currKeyframeHandles);
+            for (auto h : m_currKeyframeHandles)
+                m_currKeyframeData.append({h, m_animCore->GetKeyframeData(h)});
 
-        if (i == 0)
-            path.moveTo(m_rect.x() + i, yPos);
-        else
-            path.lineTo(m_rect.x() + i, yPos);
+            return clickedInHandle ? TimelineControlType::BezierInHandle
+                                   : TimelineControlType::BezierOutHandle;
+        }
     }
 
-    painter->setPen(QPen(inColor, 2));
-    painter->drawPath(path);
+    return TimelineControlType::None;
+}
+
+QPointF RowTimelinePropertyGraph::getBezierControlPosition(const SBezierKeyframe &kf,
+                                                           BezierControlType type) const
+{
+    float time = 0; // seconds
+    float value = 0;
+    if (type == BezierControlType::None) {
+        time = kf.m_KeyframeSeconds;
+        value = kf.m_KeyframeValue;
+    } else if (type == BezierControlType::In) {
+        time = kf.m_InTangentTime;
+        value = kf.m_InTangentValue;
+    } else if (type == BezierControlType::Out) {
+        time = kf.m_OutTangentTime;
+        value = kf.m_OutTangentValue;
+    }
+
+    return getKeyframePosition(time, value);
+}
+
+// time is in seconds
+QPointF RowTimelinePropertyGraph::getKeyframePosition(float time, float value) const
+{
+    return QPointF(m_rowTimeline->rowTree()->m_scene->ruler()->timeToDistance(time * 1000),
+                   m_graphY - value * m_valScale);
+}
+
+/**
+ * This method is called when the user drags a bezier handle. It updates the bezier keyframe
+ * tangent value based on the current position of the handle.
+ *
+ * @param controlType which handle is being dragged? (BezierInHandle or BezierOutHandle)
+ * @param scenePos handle position in timeline scene coordinates
+ */
+void RowTimelinePropertyGraph::updateBezierControlValue(TimelineControlType controlType,
+                                                        const QPointF &scenePos)
+{
+    QPointF p = m_rowTimeline->mapFromScene(scenePos.x() - TimelineConstants::RULER_EDGE_OFFSET,
+                                            scenePos.y());
+
+    float time = m_rowTimeline->rowTree()->m_scene->ruler()->distanceToTime(p.x()) / 1000.f; // secs
+    float value = (m_graphY - p.y()) / m_valScale;
+
+    // first channel keyframe
+    SBezierKeyframe kf0 = get<SBezierKeyframe>(m_animCore->GetKeyframeData(
+                                                                m_currKeyframeHandles[0]));
+    bool isBezierIn = controlType == TimelineControlType::BezierInHandle;
+
+    // prevent handles from moving to the other side of the keyframe
+    if ((isBezierIn && time > kf0.m_KeyframeSeconds)
+        || (!isBezierIn && time < kf0.m_KeyframeSeconds)) {
+        time = kf0.m_KeyframeSeconds;
+    }
+
+    // prevent handles from going beyond prev. and next keyframes
+    auto animHandles = m_propBinding->animationHandles();
+    Qt3DSDMTimelineKeyframe::TKeyframeHandleList keyframeHandles;
+    m_animCore->GetKeyframes(animHandles[0], keyframeHandles);
+    for (size_t i = 0; i < keyframeHandles.size(); ++i) {
+        if (keyframeHandles[i] == m_currKeyframeHandles[0]) {
+            float currKfTime = KeyframeTime(m_animCore->GetKeyframeData(keyframeHandles[i]));
+            float prevKfTime = i > 0
+                    ? KeyframeTime(m_animCore->GetKeyframeData(keyframeHandles[i - 1])) : -FLT_MAX;
+            float nextKfTime = i < keyframeHandles.size() - 1
+                    ? KeyframeTime(m_animCore->GetKeyframeData(keyframeHandles[i + 1])) : FLT_MAX;
+            if (isBezierIn) {
+                if (time < prevKfTime)
+                    time = prevKfTime;
+                if (!CHotKeys::IsKeyDown(Qt::ControlModifier)
+                         && time < currKfTime * 2 - nextKfTime) {
+                    time = currKfTime * 2 - nextKfTime;
+                }
+            } else { // bezier out
+                if (time > nextKfTime)
+                    time = nextKfTime;
+                if (!CHotKeys::IsKeyDown(Qt::ControlModifier)
+                         && time > currKfTime * 2 - prevKfTime) {
+                    time = currKfTime * 2 - prevKfTime;
+                }
+            }
+            break;
+        }
+    }
+
+    for (size_t i = 0; i < m_currKeyframeHandles.size(); ++i) {
+        SBezierKeyframe kf = get<SBezierKeyframe>(m_animCore->GetKeyframeData(
+                                                                    m_currKeyframeHandles[i]));
+        float &currHandleTime = isBezierIn ? kf.m_InTangentTime : kf.m_OutTangentTime;
+        float &currHandleValue = isBezierIn ? kf.m_InTangentValue : kf.m_OutTangentValue;
+        float &otherHandleTime = isBezierIn ? kf.m_OutTangentTime : kf.m_InTangentTime;
+        float &otherHandleValue = isBezierIn ? kf.m_OutTangentValue : kf.m_InTangentValue;
+
+        currHandleTime = time;
+        currHandleValue = value + (kf.m_KeyframeValue - kf0.m_KeyframeValue);
+
+        if (!CHotKeys::IsKeyDown(Qt::ControlModifier)) {
+            otherHandleTime = kf.m_KeyframeSeconds + (kf.m_KeyframeSeconds - time);
+            otherHandleValue = kf.m_KeyframeValue + (kf.m_KeyframeValue - currHandleValue);
+        }
+
+        m_animCore->SetKeyframeData(m_currKeyframeHandles[i], kf);
+    }
+
+}
+
+// adjust graph scale and y so that all keyframe and control points are visible
+void RowTimelinePropertyGraph::fitGraph()
+{
+    const qreal MARGIN_Y = 10; // margin at top & bottom of graph
+    m_graphY = m_rowTimeline->size().height() - MARGIN_Y;
+    m_graphH = m_rowTimeline->size().height() - MARGIN_Y * 2;
+
+    m_valScale = m_graphH / (m_propBinding->GetMaximumValue() - m_propBinding->GetMinimumValue());
+    m_graphY += m_propBinding->GetMinimumValue() * m_valScale;
+
+    m_rowTimeline->update();
+}
+
+void RowTimelinePropertyGraph::adjustScale(bool isIncrement)
+{
+    float pitch = m_valScale * .3f;
+    m_valScale += isIncrement ? pitch : -pitch;
+
+    if (m_valScale > 10.f)
+        m_valScale = 10.f;
+    else if (m_valScale < .01f)
+        m_valScale = .01f;
+
+    m_rowTimeline->update();
+}
+
+void RowTimelinePropertyGraph::startPan()
+{
+    m_graphYPanInit = m_graphY;
+}
+
+void RowTimelinePropertyGraph::pan(qreal dy)
+{
+    m_graphY = m_graphYPanInit + dy;
+    m_rowTimeline->update();
+}
+
+void RowTimelinePropertyGraph::commitBezierEdit()
+{
+    // reset the changed keyframes and commit the changes, so the undo/redo works correctly
+    QVector<std::pair<qt3dsdm::Qt3DSDMKeyframeHandle, TKeyframe>> changedKfs;
+    for (auto data : qAsConst(m_currKeyframeData)) {
+        changedKfs.append({data.first, m_animCore->GetKeyframeData(data.first)});
+        m_animCore->SetKeyframeData(data.first, data.second);
+    }
+
+    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(), tr("Edit Bezier curve"))
+            ->setBezierKeyframeValues(changedKfs);
+}
+
+void RowTimelinePropertyGraph::setExpandHeight(int h)
+{
+    m_expandHeight = h;
+    m_fitCurveTimer.start();
 }

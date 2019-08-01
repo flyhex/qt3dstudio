@@ -27,22 +27,18 @@
 **
 ****************************************************************************/
 
-#include "Qt3DSCommonPrecompile.h"
 #include "InterpolationDlg.h"
 #include "ui_InterpolationDlg.h"
 
-/**
- *  Constructor: Creates a CInterpolationDlg.
- *
- *  @param parent Pointer to the parent of this dialog (defaults to NULL)
- */
-//==============================================================================
-CInterpolationDlg::CInterpolationDlg(QWidget *parent)
+CInterpolationDlg::CInterpolationDlg(float easeIn, float easeOut, QWidget *parent)
     : QDialog(parent)
     , m_ui(new Ui::InterpolationDlg)
 {
     m_ui->setupUi(this);
     window()->setFixedSize(size());
+
+    m_ui->easeInSlider->setValue(int(easeIn));
+    m_ui->easeOutSlider->setValue(int(easeOut));
 }
 
 CInterpolationDlg::~CInterpolationDlg()
@@ -51,22 +47,13 @@ CInterpolationDlg::~CInterpolationDlg()
     m_ui = nullptr;
 }
 
-void CInterpolationDlg::setEaseIn(uint value)
-{
-    m_ui->easeInSlider->setValue(value);
-}
 
-void CInterpolationDlg::setEaseOut(uint value)
-{
-    m_ui->easeOutSlider->setValue(value);
-}
-
-int CInterpolationDlg::easeIn() const
+float CInterpolationDlg::easeIn() const
 {
     return m_ui->easeInSlider->value();
 }
 
-int CInterpolationDlg::easeOut() const
+float CInterpolationDlg::easeOut() const
 {
     return m_ui->easeOutSlider->value();
 }

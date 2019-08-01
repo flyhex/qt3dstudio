@@ -194,30 +194,52 @@ void Qt3DSDMTimelineKeyframe::GetKeyframeHandles(TKeyframeHandleList &outList) c
 }
 
 void CompareAndSet(Qt3DSDMKeyframeHandle inKeyframe, IAnimationCore *inAnimationCore,
-                   float &outRetValue, bool inGreaterThan)
+                   float &ioRetValue, bool inGreaterThan)
 {
-    TKeyframe theKeyframeData = inAnimationCore->GetKeyframeData(inKeyframe);
-    float theValue = KeyframeValueValue(theKeyframeData);
-    if ((inGreaterThan && theValue > outRetValue) || (!inGreaterThan && theValue < outRetValue))
-        outRetValue = theValue;
+    TKeyframe keyframeData = inAnimationCore->GetKeyframeData(inKeyframe);
+    float value = KeyframeValueValue(keyframeData);
+    if ((inGreaterThan && value > ioRetValue) || (!inGreaterThan && value < ioRetValue))
+        ioRetValue = value;
+
+    // for bezier keyframes compare tangents in/out also
+    if (keyframeData.getType() == qt3dsdm::EAnimationTypeBezier) {
+        float inTime, inValue, outTime, outValue;
+        getBezierValues(keyframeData, inTime, inValue, outTime, outValue);
+
+        if (!inAnimationCore->IsFirstKeyframe(inKeyframe) // check tangent-in value
+            && ((inGreaterThan && inValue > ioRetValue)
+                || (!inGreaterThan && inValue < ioRetValue))) {
+            ioRetValue = inValue;
+        }
+
+        if (!inAnimationCore->IsLastKeyframe(inKeyframe) // check tangent-out value
+            && ((inGreaterThan && outValue > ioRetValue)
+                || (!inGreaterThan && outValue < ioRetValue))) {
+            ioRetValue = outValue;
+        }
+    }
 }
 
+// returns the max keyframe channel value. For bezier keyframes this includes the control
+// points values as well
 float Qt3DSDMTimelineKeyframe::GetMaxValue() const
 {
-    IAnimationCore *theAnimationCore = m_Doc->GetStudioSystem()->GetAnimationCore();
+    IAnimationCore *animCore = m_Doc->GetStudioSystem()->GetAnimationCore();
     float theRetVal = FLT_MIN;
     do_all(m_KeyframeHandles,
-           std::bind(CompareAndSet, std::placeholders::_1, theAnimationCore,
-                     std::ref(theRetVal), true));
+           std::bind(CompareAndSet, std::placeholders::_1, animCore, std::ref(theRetVal), true));
+
     return theRetVal;
 }
 
+// returns the min keyframe channel value. For bezier keyframes this includes the control
+// points values as well
 float Qt3DSDMTimelineKeyframe::GetMinValue() const
 {
-    IAnimationCore *theAnimationCore = m_Doc->GetStudioSystem()->GetAnimationCore();
+    IAnimationCore *animCore = m_Doc->GetStudioSystem()->GetAnimationCore();
     float theRetVal = FLT_MAX;
     do_all(m_KeyframeHandles,
-           std::bind(CompareAndSet, std::placeholders::_1, theAnimationCore,
-                     std::ref(theRetVal), false));
+           std::bind(CompareAndSet, std::placeholders::_1, animCore, std::ref(theRetVal), false));
+
     return theRetVal;
 }

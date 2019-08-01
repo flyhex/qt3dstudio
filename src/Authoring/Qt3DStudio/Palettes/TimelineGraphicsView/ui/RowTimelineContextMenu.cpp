@@ -32,6 +32,12 @@
 #include "KeyframeManager.h"
 #include "MainFrm.h"
 #include "StudioApp.h"
+#include "Core.h"
+#include "Doc.h"
+#include "IDocumentEditor.h"
+#include "Qt3DSDMStudioSystem.h"
+#include "SlideSystem.h"
+#include "StudioPreferences.h"
 #include "TimelineControl.h"
 #include "Bindings/ITimelineItemBinding.h"
 #include "TimelineGraphicsScene.h"
@@ -140,6 +146,26 @@ void RowTimelineContextMenu::initialize()
                 &RowTimelineContextMenu::setKeyframeTime);
         addAction(m_setKeyframeTimeAction);
     } else {
+        m_animType = addMenu(tr("Animation type"));
+        QAction *actionLinear = m_animType->addAction(tr("Linear"));
+        QAction *actionEase = m_animType->addAction(tr("Ease In/Out"));
+        QAction *actionBezier = m_animType->addAction(tr("Bezier"));
+        actionLinear->setData(qt3dsdm::EAnimationTypeLinear);
+        actionLinear->setCheckable(true);
+        actionEase->setData(qt3dsdm::EAnimationTypeEaseInOut);
+        actionEase->setCheckable(true);
+        actionBezier->setData(qt3dsdm::EAnimationTypeBezier);
+        actionBezier->setCheckable(true);
+        connect(m_animType, &QMenu::triggered, this, &RowTimelineContextMenu::onAnimTypeChange);
+        if (m_rowTree->isProperty()) {
+            qt3dsdm::EAnimationType animaType = m_rowTree->propBinding()->animationType();
+            if (animaType == qt3dsdm::EAnimationTypeLinear)
+                actionLinear->setChecked(true);
+            else if (animaType == qt3dsdm::EAnimationTypeEaseInOut)
+                actionEase->setChecked(true);
+            else if (animaType == qt3dsdm::EAnimationTypeBezier)
+                actionBezier->setChecked(true);
+        }
         m_setTimeBarColorAction = new QAction(tr("Change Time Bar Color..."), this);
         connect(m_setTimeBarColorAction, &QAction::triggered, this,
                 &RowTimelineContextMenu::changeTimeBarColor);
@@ -170,12 +196,92 @@ void RowTimelineContextMenu::showEvent(QShowEvent *event)
     m_pasteKeyframesAction->setEnabled(m_keyframeManager->hasCopiedKeyframes());
     m_deleteSelectedKeyframesAction->setEnabled(m_keyframeManager->hasSelectedKeyframes());
     m_deleteRowKeyframesAction->setEnabled(!m_rowTree->rowTimeline()->keyframes().empty());
-    if (!m_keyframe) {
+    if (m_keyframe) {
+        RowTree *row = propRow ? m_rowTree : m_keyframe->rowProperty->rowTree();
+        qt3dsdm::EAnimationType animaType = row->propBinding()->animationType();
+        m_setInterpolationAction->setEnabled(animaType == qt3dsdm::EAnimationTypeEaseInOut);
+    } else {
+        m_animType->setEnabled(propRow);
         m_setTimeBarColorAction->setEnabled(m_rowTree->hasDurationBar());
         m_setTimeBarTimeAction->setEnabled(m_rowTree->hasDurationBar());
     }
 
     QMenu::showEvent(event);
+}
+
+void RowTimelineContextMenu::onAnimTypeChange(QAction *action)
+{
+    if (!action->isChecked())
+        return;
+
+    using namespace qt3dsdm;
+
+    // m_rowTree in this method is guaranteed to be a property row
+
+    CDoc *doc = g_StudioApp.GetCore()->GetDoc();
+    IAnimationCore *animCore = doc->GetAnimationCore();
+    ISlideSystem *slideSys = doc->GetStudioSystem()->GetSlideSystem();
+
+    Q3DStudio::ScopedDocumentEditor editor(*doc, tr("Set Animation Type"), __FILE__, __LINE__);
+
+    EAnimationType animType = EAnimationType(action->data().toInt());
+    Qt3DSDMInstanceHandle instance = m_rowTree->parentRow()->instance();
+    Qt3DSDMPropertyHandle property = m_rowTree->propBinding()->getPropertyHandle();
+    Qt3DSDMSlideHandle slide = slideSys->GetAssociatedSlide(instance);
+    TCharStr propType = doc->GetStudioSystem()->GetPropertySystem()->GetName(property);
+
+    std::vector<qt3dsdm::Qt3DSDMAnimationHandle> animHandles
+            = m_rowTree->propBinding()->animationHandles();
+    for (size_t i = 0; i < animHandles.size(); ++i) {
+        qt3dsdm::TKeyframeHandleList keyframeHandles;
+        animCore->GetKeyframes(animHandles[i], keyframeHandles);
+        if (animType == EAnimationTypeLinear) {
+            QVector<SLinearKeyframe> keyframes;
+            for (Qt3DSDMKeyframeHandle kfHandle : keyframeHandles) {
+                TKeyframe kfData = animCore->GetKeyframeData(kfHandle);
+                keyframes.append(SLinearKeyframe(KeyframeTime(kfData),
+                                                 KeyframeValueValue(kfData)));
+            }
+            long numFloatsPerKeyframe = sizeof(SLinearKeyframe) / sizeof(float);
+            long numValues = long(keyframeHandles.size()) * numFloatsPerKeyframe;
+            editor->CreateOrSetAnimation(slide, instance, propType.wide_str(), long(i),
+                                         animType,
+                                         reinterpret_cast<float *>(keyframes.begin()),
+                                         numValues);
+        } else if (animType == EAnimationTypeEaseInOut) {
+            float easeIn = CStudioPreferences::GetInterpolation() ? 100 : 0;
+            float easeOut = CStudioPreferences::GetInterpolation() ? 100 : 0;
+            QVector<SEaseInEaseOutKeyframe> keyframes;
+            for (Qt3DSDMKeyframeHandle kfHandle : keyframeHandles) {
+                TKeyframe kfData = animCore->GetKeyframeData(kfHandle);
+                keyframes.append(SEaseInEaseOutKeyframe(KeyframeTime(kfData),
+                                                        KeyframeValueValue(kfData),
+                                                        easeIn, easeOut));
+            }
+            long numFloatsPerKeyframe = sizeof(SEaseInEaseOutKeyframe) / sizeof(float);
+            long numValues = long(keyframeHandles.size()) * numFloatsPerKeyframe;
+            editor->CreateOrSetAnimation(slide, instance, propType.wide_str(), long(i),
+                                         animType,
+                                         reinterpret_cast<float *>(keyframes.begin()),
+                                         numValues);
+        } else if (animType == EAnimationTypeBezier) {
+            QVector<SBezierKeyframe> keyframes;
+            for (Qt3DSDMKeyframeHandle kfHandle : keyframeHandles) {
+                TKeyframe kfData = animCore->GetKeyframeData(kfHandle);
+                float kfTime = KeyframeTime(kfData);
+                float kfValue = KeyframeValueValue(kfData);
+                keyframes.append(SBezierKeyframe(kfTime, kfValue,
+                                                 kfTime - .5f, kfValue,
+                                                 kfTime + .5f, kfValue));
+            }
+            long numFloatsPerKeyframe = sizeof(SBezierKeyframe) / sizeof(float);
+            long numValues = long(keyframeHandles.size()) * numFloatsPerKeyframe;
+            editor->CreateOrSetAnimation(slide, instance, propType.wide_str(), long(i),
+                                         animType,
+                                         reinterpret_cast<float *>(keyframes.begin()),
+                                         numValues);
+        }
+    }
 }
 
 void RowTimelineContextMenu::insertKeyframe()

@@ -85,6 +85,7 @@ public:
     QList<Keyframe *> getKeyframesInRange(const QRectF &rect) const;
     QList<Keyframe *> keyframes() const;
     void showToolTip(const QPointF &pos);
+    RowTimelinePropertyGraph *propertyGraph() const { return m_propertyGraph; }
 
 protected:
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;

@@ -164,8 +164,7 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     layoutRoot->addWidget(m_toolbar);
     setLayout(layoutRoot);
 
-    g_StudioApp.GetCore()->GetDoc()->SetKeyframesManager(
-                static_cast<IKeyframesManager *>(m_graphicsScene->keyframeManager()));
+    g_StudioApp.GetCore()->GetDoc()->SetKeyframesManager(m_graphicsScene->keyframeManager());
 
     // connect graphics scene geometryChanged
     connect(m_graphicsScene->widgetRoot(), &QGraphicsWidget::geometryChanged, this, [this]() {
@@ -585,7 +584,6 @@ void TimelineWidget::onAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentIns
     Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(parentInstance, m_binding);
     if (binding) {
         ITimelineItemProperty *propBinding = binding->GetPropertyBinding(property);
-
         // create the binding if doesn't exist
         if (!propBinding) {
             propBinding = binding->GetOrCreatePropertyBinding(property);
@@ -624,6 +622,8 @@ void TimelineWidget::onAnimationDeleted(qt3dsdm::Qt3DSDMInstanceHandle parentIns
     Qt3DSDMTimelineItemBinding *binding = getBindingForHandle(parentInstance, m_binding);
     if (binding) {
         ITimelineItemProperty *propBinding = binding->GetPropertyBinding(property);
+        // this is needed because onAnimationDeleted can be triggered for unlinked property on
+        // different slide in undo/redo situations
         bool propAnimated = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
                             ->GetAnimationSystem()->IsPropertyAnimated(parentInstance, property);
 

@@ -2501,6 +2501,14 @@ void CDoc::SavePresentationFile(CBufferedOutputStream *inOutputStream)
     CDOMSerializer::Write(*theWriter.GetTopElement(), theStream);
 }
 
+bool CDoc::canSetKeyframeInterpolation() const
+{
+    if (m_KeyframesManager)
+        return m_KeyframesManager->canSetKeyframeInterpolation();
+
+    return false;
+}
+
 void CDoc::SetKeyframeInterpolation()
 {
     if (m_KeyframesManager)

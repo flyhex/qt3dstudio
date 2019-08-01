@@ -35,8 +35,10 @@ enum class TimelineControlType {
     None,
     KeyFrame,
     Duration,
-    StartHandle,
-    EndHandle
+    DurationStartHandle,
+    DurationEndHandle,
+    BezierInHandle,
+    BezierOutHandle
 };
 
 enum class TreeControlType {

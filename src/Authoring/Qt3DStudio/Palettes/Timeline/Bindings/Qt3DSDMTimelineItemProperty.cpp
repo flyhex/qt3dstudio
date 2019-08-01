@@ -131,6 +131,11 @@ qt3dsdm::Qt3DSDMPropertyHandle Qt3DSDMTimelineItemProperty::getPropertyHandle() 
     return m_PropertyHandle;
 }
 
+std::vector<qt3dsdm::Qt3DSDMAnimationHandle> Qt3DSDMTimelineItemProperty::animationHandles() const
+{
+    return m_AnimationHandles;
+}
+
 // Type doesn't change and due to the logic required to figure this out, cache it.
 void Qt3DSDMTimelineItemProperty::InitializeCachedVariables(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
@@ -190,7 +195,8 @@ void CompareAndSet(const Qt3DSDMTimelineKeyframe *inKeyframe, float &outRetValue
         outRetValue = theValue;
 }
 
-// return the max value of the current set of keyframes
+// returns the max keyframe value in a property. For bezier keyframes this includes the control
+// points values as well
 float Qt3DSDMTimelineItemProperty::GetMaximumValue() const
 {
     float theRetVal = FLT_MIN;
@@ -200,7 +206,8 @@ float Qt3DSDMTimelineItemProperty::GetMaximumValue() const
     return theRetVal;
 }
 
-// return the min value of the current set of keyframes
+// returns the min keyframe value in a property. For bezier keyframes this includes the control
+// points values as well
 float Qt3DSDMTimelineItemProperty::GetMinimumValue() const
 {
     float theRetVal = FLT_MAX;
@@ -267,9 +274,9 @@ long Qt3DSDMTimelineItemProperty::GetKeyframeCount() const
     return (long)m_Keyframes.size();
 }
 
-long Qt3DSDMTimelineItemProperty::GetChannelCount() const
+size_t Qt3DSDMTimelineItemProperty::GetChannelCount() const
 {
-    return (long)m_AnimationHandles.size();
+    return m_AnimationHandles.size();
 }
 
 float Qt3DSDMTimelineItemProperty::GetChannelValueAtTime(long inChannelIndex, long inTime)
@@ -357,7 +364,15 @@ bool Qt3DSDMTimelineItemProperty::IsDynamicAnimation()
     return m_Keyframes.size() > 0 && m_Keyframes[0]->IsDynamic();
 }
 
-//=============================================================================
+EAnimationType Qt3DSDMTimelineItemProperty::animationType() const
+{
+    if (m_AnimationHandles.empty())
+        return EAnimationTypeNone;
+
+    IAnimationCore *animCore = m_TransMgr->GetStudioSystem()->GetAnimationCore();
+    return animCore->GetAnimationInfo(m_AnimationHandles[0]).m_AnimationType;
+}
+
 /**
  * For updating the UI when keyframes are added/updated/deleted.
  */

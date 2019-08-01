@@ -29,26 +29,56 @@
 #ifndef ROWTIMELINEPROPERTYGRAPH_H
 #define ROWTIMELINEPROPERTYGRAPH_H
 
+#include "Qt3DSDMAnimation.h"
+#include "RowTypes.h"
+#include "TimelineConstants.h"
+#include "Bindings/Qt3DSDMTimelineKeyframe.h"
+
 #include <QtCore/qobject.h>
+#include <QtCore/qtimer.h>
 #include <QtGui/qpainter.h>
 
 class RowTimeline;
 class ITimelineItemProperty;
+namespace qt3dsdm {
+class IAnimationCore;
+class Qt3DSDMAnimationHandle;
+}
 
 class RowTimelinePropertyGraph : public QObject
 {
     Q_OBJECT
+
 public:
     explicit RowTimelinePropertyGraph(QObject *parent = nullptr);
+    TimelineControlType getClickedBezierControl(const QPointF &pos);
     void paintGraphs(QPainter *painter, const QRectF &rect);
+    void updateBezierControlValue(TimelineControlType controlType, const QPointF &scenePos);
+    void adjustScale(bool isIncrement);
+    void startPan();
+    void pan(qreal dy);
+    void fitGraph();
+    void commitBezierEdit();
+    void setExpandHeight(int h);
 
 private:
-    void paintSingleChannel(QPainter *painter, long inChannelIndex,
-                            const QColor &inColor);
+    enum class BezierControlType {None, In, Out};
 
+    QPointF getBezierControlPosition(const qt3dsdm::SBezierKeyframe &kf,
+                                     BezierControlType type = BezierControlType::None) const;
+    QPointF getKeyframePosition(float time, float value) const;
+
+    Qt3DSDMTimelineKeyframe::TKeyframeHandleList m_currKeyframeHandles;
+    QVector<std::pair<qt3dsdm::Qt3DSDMKeyframeHandle, qt3dsdm::TKeyframe>> m_currKeyframeData;
     RowTimeline *m_rowTimeline = nullptr;
     ITimelineItemProperty *m_propBinding = nullptr;
-    QRectF m_rect;
+    qt3dsdm::IAnimationCore *m_animCore = nullptr;
+    float m_valScale = .5f;
+    qreal m_graphY = 0;
+    qreal m_graphYPanInit = 0; // value of graph_y when panning starts
+    qreal m_graphH = 0;
+    int m_expandHeight = TimelineConstants::ROW_GRAPH_H; // height when expanded
+    QTimer m_fitCurveTimer;
 };
 
 #endif // ROWTIMELINEPROPERTYGRAPH_H

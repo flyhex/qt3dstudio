@@ -121,7 +121,7 @@ template <typename TOperator>
 static void HandleKeyframe(SLinearKeyframe &inKeyframe, TOperator &inOperator)
 {
     inOperator(inKeyframe.m_KeyframeSeconds);
-    inOperator(inKeyframe.m_KeyframeSeconds);
+    inOperator(inKeyframe.m_KeyframeValue);
 }
 
 template <typename TOperator>

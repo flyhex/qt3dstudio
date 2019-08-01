@@ -36,6 +36,7 @@
 #include "Qt3DSDMTimelineKeyframe.h"
 #include "Qt3DSDMTimeline.h"
 #include "Qt3DSDMPropertyDefinition.h"
+#include "Qt3DSDMAnimation.h"
 
 class RowTree;
 class CTimelineTranslationManager;
@@ -52,8 +53,8 @@ class Qt3DSDMTimelineItemProperty : public ITimelineItemProperty
 {
 public:
     Qt3DSDMTimelineItemProperty(CTimelineTranslationManager *inTransMgr,
-                               qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle,
-                               qt3dsdm::Qt3DSDMInstanceHandle inInstance);
+                                qt3dsdm::Qt3DSDMPropertyHandle inPropertyHandle,
+                                qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     virtual ~Qt3DSDMTimelineItemProperty();
 
     // ITimelineProperty
@@ -67,23 +68,25 @@ public:
     IKeyframe *GetKeyframeByTime(long inTime) const override;
     IKeyframe *GetKeyframeByIndex(long inIndex) const override;
     long GetKeyframeCount() const override;
-    long GetChannelCount() const override;
+    size_t GetChannelCount() const override;
     float GetChannelValueAtTime(long inChannelIndex, long inTime) override;
     void SetChannelValueAtTime(long inChannelIndex, long inTime, float inValue) override;
     bool IsDynamicAnimation() override;
-
     void setRowTree(RowTree *rowTree) override;
     RowTree *getRowTree() const override;
+    qt3dsdm::Qt3DSDMPropertyHandle getPropertyHandle() const override;
+    std::vector<qt3dsdm::Qt3DSDMAnimationHandle> animationHandles() const override;
 
     bool RefreshKeyframe(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
                          ETimelineKeyframeTransaction inTransaction);
     IKeyframe *GetKeyframeByHandle(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe);
 
     void RefreshKeyFrames(void);
-
-    qt3dsdm::Qt3DSDMPropertyHandle getPropertyHandle() const;
+    qt3dsdm::EAnimationType animationType() const override;
 
 protected:
+    using TKeyframeList = std::vector<Qt3DSDMTimelineKeyframe *>;
+
     void InitializeCachedVariables(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     bool CreateKeyframeIfNonExistent(qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
                                      qt3dsdm::Qt3DSDMAnimationHandle inOwningAnimation);
@@ -92,9 +95,6 @@ protected:
                                      qt3dsdm::Qt3DSDMPropertyHandle inProperty);
     void CreateKeyframes();
     void ReleaseKeyframes();
-
-protected:
-    typedef std::vector<Qt3DSDMTimelineKeyframe *> TKeyframeList;
 
     qt3dsdm::Qt3DSDMInstanceHandle m_InstanceHandle;
     qt3dsdm::Qt3DSDMPropertyHandle m_PropertyHandle;

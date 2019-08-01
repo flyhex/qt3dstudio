@@ -145,7 +145,7 @@ public:
     QColor displayColorDialog(const QColor &color, bool showAlpha = false) const;
 
     ESavePromptResult PromptForSave();
-    bool PromptForKeyframeInterpolation(float &ioEaseIn, float &ioEaseOut);
+    bool displayKeyframeInterpolation(float &ioEaseIn, float &ioEaseOut);
 
     bool ConfirmRevert();
 

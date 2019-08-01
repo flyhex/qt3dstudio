@@ -33,7 +33,8 @@ namespace TimelineConstants
 {
     // Dimensions
     const int ROW_H             = 20;
-    const int ROW_H_EXPANDED    = 120;   // property rows height when graph is shown
+    const int ROW_GRAPH_H       = 120;   // property row height when graph is shown
+    const int ROW_GRAPH_H_MAX   = 300;   // property row height when graph is shown maximized
     const int ROW_SPACING       = 2;
     const int ROW_DEPTH_STEP    = 15;    // x-distance between 2 consecutive depths
     const double RULER_SEC_W    = 30;    // width of 1 second section (at scale 1)

@@ -229,27 +229,21 @@ CDialogs::~CDialogs()
  *
  * @param ioEaseIn value to be set as the ease in default - passes back the value chosen by the user
  * @param ioEaseOut value to be set as the ease out default - passes back the value chosen by the
- * user
  * @return true if the user clicked OK on the dialog (indicating that the values should be updated
  * on the track)
  */
-bool CDialogs::PromptForKeyframeInterpolation(float &ioEaseIn, float &ioEaseOut)
+bool CDialogs::displayKeyframeInterpolation(float &ioEaseIn, float &ioEaseOut)
 {
-    bool theReturnValue = false;
+    CInterpolationDlg interpolationDialog(ioEaseIn, ioEaseOut);
 
-    CInterpolationDlg theInterpolationDialog;
-    theInterpolationDialog.setEaseIn(ioEaseIn);
-    theInterpolationDialog.setEaseOut(ioEaseOut);
-
-    // If the user presses the OK button
-    if (theInterpolationDialog.exec() ==  QDialog::Accepted) {
+    if (interpolationDialog.exec() == QDialog::Accepted) {
         // Retrieve the new interpolation values
-        ioEaseIn = theInterpolationDialog.easeIn();
-        ioEaseOut = theInterpolationDialog.easeOut();
-        theReturnValue = true;
+        ioEaseIn = interpolationDialog.easeIn();
+        ioEaseOut = interpolationDialog.easeOut();
+        return true;
     }
 
-    return theReturnValue;
+    return false;
 }
 
 /**

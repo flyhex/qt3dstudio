@@ -28,12 +28,11 @@
 ****************************************************************************/
 
 #ifndef INCLUDED_ITIMELINE_ITEM_PROPERTY_H
-#define INCLUDED_ITIMELINE_ITEM_PROPERTY_H 1
-
-#pragma once
+#define INCLUDED_ITIMELINE_ITEM_PROPERTY_H
 
 #include "Qt3DSDMMetaData.h"
 #include "Qt3DSString.h"
+#include "Qt3DSDMAnimation.h"
 
 class RowTree;
 class IKeyframe;
@@ -60,11 +59,15 @@ public:
     virtual void setRowTree(RowTree *row) = 0;
     virtual RowTree *getRowTree() const = 0;
 
+    virtual qt3dsdm::Qt3DSDMPropertyHandle getPropertyHandle() const = 0;
+    virtual std::vector<qt3dsdm::Qt3DSDMAnimationHandle> animationHandles() const = 0;
+    virtual qt3dsdm::EAnimationType animationType() const = 0;
+
     // Keyframes
     virtual IKeyframe *GetKeyframeByTime(long inTime) const = 0;
     virtual IKeyframe *GetKeyframeByIndex(long inIndex) const = 0;
     virtual long GetKeyframeCount() const = 0;
-    virtual long GetChannelCount() const = 0;
+    virtual size_t GetChannelCount() const = 0;
     virtual float GetChannelValueAtTime(long inChannelIndex, long inTime) = 0;
     virtual void SetChannelValueAtTime(long inChannelIndex, long inTime, float inValue) = 0;
     virtual bool IsDynamicAnimation() = 0;

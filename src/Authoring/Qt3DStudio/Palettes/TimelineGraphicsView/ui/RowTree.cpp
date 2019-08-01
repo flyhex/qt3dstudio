@@ -28,6 +28,7 @@
 
 #include "RowTree.h"
 #include "RowTimeline.h"
+#include "RowTimelinePropertyGraph.h"
 #include "RowManager.h"
 #include "TimelineConstants.h"
 #include "StudioObjectTypes.h"
@@ -169,8 +170,7 @@ void RowTree::animateExpand(ExpandState state)
     int endHeight = 0; // hidden states
     float endOpacity = 0;
     if (state == ExpandState::Expanded) {
-        endHeight = m_isPropertyExpanded ? TimelineConstants::ROW_H_EXPANDED
-                                         : TimelineConstants::ROW_H;
+        endHeight = m_propGraphExpanded ? m_propGraphHeight : TimelineConstants::ROW_H;
         endOpacity = 1;
     } else if (state == ExpandState::Collapsed) {
         endHeight = TimelineConstants::ROW_H;
@@ -179,7 +179,6 @@ void RowTree::animateExpand(ExpandState state)
     // Changing end values while animation is running does not affect currently running animation,
     // so let's make sure the animation is stopped first.
     m_expandAnimation.stop();
-
     m_expandHeightAnimation->setEndValue(QSizeF(size().width(), endHeight));
     m_expandTimelineHeightAnimation->setEndValue(QSizeF(m_rowTimeline->size().width(),
                                                         endHeight));
@@ -201,15 +200,15 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
 
     static const int ICON_SIZE = 16;
     static const int LEFT_DIVIDER = 18;
+    static const int ICON_Y = (TimelineConstants::ROW_H - ICON_SIZE) / 2;
     const int offset = 5 + m_depth * TimelineConstants::ROW_DEPTH_STEP;
-    const int iconY = (TimelineConstants::ROW_H / 2) - (ICON_SIZE / 2);
 
     // update button bounds rects
-    m_rectArrow  .setRect(offset, iconY, ICON_SIZE, ICON_SIZE);
-    m_rectType   .setRect(offset + ICON_SIZE, iconY, ICON_SIZE, ICON_SIZE);
-    m_rectShy    .setRect(treeWidth() - 16 * 3.3, iconY, ICON_SIZE, ICON_SIZE);
-    m_rectVisible.setRect(treeWidth() - 16 * 2.2, iconY, ICON_SIZE, ICON_SIZE);
-    m_rectLocked .setRect(treeWidth() - 16 * 1.1, iconY, ICON_SIZE, ICON_SIZE);
+    m_rectArrow  .setRect(offset, ICON_Y, ICON_SIZE, ICON_SIZE);
+    m_rectType   .setRect(offset + ICON_SIZE, ICON_Y, ICON_SIZE, ICON_SIZE);
+    m_rectShy    .setRect(treeWidth() - 16 * 3.3, ICON_Y, ICON_SIZE, ICON_SIZE);
+    m_rectVisible.setRect(treeWidth() - 16 * 2.2, ICON_Y, ICON_SIZE, ICON_SIZE);
+    m_rectLocked .setRect(treeWidth() - 16 * 1.1, ICON_Y, ICON_SIZE, ICON_SIZE);
 
     // Background
     QColor bgColor;
@@ -235,8 +234,7 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     painter->drawLine(LEFT_DIVIDER, 0, LEFT_DIVIDER, size().height() - 1);
 
     // Shy, eye, lock separator
-    painter->fillRect(QRect(treeWidth() - TimelineConstants::TREE_ICONS_W,
-                            0, 1, size().height()),
+    painter->fillRect(QRect(rightDividerX(), 0, 1, size().height()),
                       CStudioPreferences::timelineWidgetBgColor());
 
     // Shy, eye, lock
@@ -280,8 +278,7 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     static const QPixmap pixInsertRight2x = QPixmap(":/images/Insert-Right@2x.png");
     if (m_dndState == DnDState::SP_TARGET) { // Candidate target of a subpresentation drop
         painter->drawPixmap(19, 2, hiResIcons ? pixInsertLeft2x : pixInsertLeft);
-        painter->drawPixmap(treeWidth() - TimelineConstants::TREE_ICONS_W - 8, 2, hiResIcons
-                            ? pixInsertRight2x : pixInsertRight);
+        painter->drawPixmap(rightDividerX() - 8, 2, hiResIcons ? pixInsertRight2x : pixInsertRight);
     } else if (m_dndState == DnDState::Parent) { // Candidate parent of a dragged row
         painter->setPen(QPen(CStudioPreferences::timelineRowMoverColor(), 1));
         painter->drawRect(QRect(1, 1, treeWidth() - 2, size().height() - 3));
@@ -333,6 +330,17 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
             painter->drawPixmap(0, 0, hiResIcons ? pixCompMasterAction2x : pixCompMasterAction);
         else if (m_actionStates & ActionState::ComponentAction) // component has action
             painter->drawPixmap(0, 0, hiResIcons ? pixCompAction2x : pixCompAction);
+    } else { // property row
+        if (m_propGraphExpanded
+                && m_PropBinding->animationType() == qt3dsdm::EAnimationTypeBezier) {
+            const int PROP_GRAPH_CONTROLS_Y = int(TimelineConstants::ROW_H * 1.5);
+            m_rectMaximizePropGraph.setRect(rightDividerX() - 16 * 1.1, PROP_GRAPH_CONTROLS_Y,
+                                            ICON_SIZE, ICON_SIZE);
+            m_rectFitPropGraph.setRect(rightDividerX() - 16 * 2.2, PROP_GRAPH_CONTROLS_Y,
+                                       ICON_SIZE, ICON_SIZE);
+            painter->drawPixmap(m_rectMaximizePropGraph, pixShy);
+            painter->drawPixmap(m_rectFitPropGraph, pixShy);
+        }
     }
 
     // variants indicator
@@ -541,7 +549,12 @@ void RowTree::setBinding(ITimelineItemBinding *binding)
 // x value where label should clip
 int RowTree::clipX() const
 {
-    return treeWidth() - TimelineConstants::TREE_ICONS_W - m_variantsGroups.size() * 8 - 2;
+    return rightDividerX() - m_variantsGroups.size() * 8 - 2;
+}
+
+int RowTree::rightDividerX() const
+{
+    return treeWidth() - TimelineConstants::TREE_ICONS_W;
 }
 
 ITimelineItemProperty *RowTree::propBinding()
@@ -947,8 +960,7 @@ bool RowTree::hasPropertyChildren() const
 
 void RowTree::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
-    QPointF p = event->pos();
-    if (m_rectType.contains(p.x(), p.y()) && !m_locked)
+    if (m_rectType.contains(event->pos().toPoint()) && !m_locked)
         if (m_binding)
             m_binding->OpenAssociatedEditor();
 }
@@ -956,8 +968,8 @@ void RowTree::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 // handle clicked control and return its type
 TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
 {
-    QPointF p = mapFromScene(scenePos.x(), scenePos.y());
-    if (m_arrowVisible && m_rectArrow.contains(p.x(), p.y())) {
+    QPoint p = mapFromScene(scenePos).toPoint();
+    if (m_arrowVisible && m_rectArrow.contains(p)) {
         updateExpandStatus(m_expandState == ExpandState::Expanded ? ExpandState::Collapsed
                                                                   : ExpandState::Expanded, false);
         update();
@@ -965,16 +977,27 @@ TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
     }
 
     if (hasActionButtons()) {
-        if (m_rectShy.contains(p.x(), p.y())) {
+        if (m_rectShy.contains(p)) {
             toggleShy();
             return TreeControlType::Shy;
-        } else if (!m_onMasterSlide && m_rectVisible.contains(p.x(), p.y())) {
+        } else if (!m_onMasterSlide && m_rectVisible.contains(p)) {
             // Prevent toggling hide on master slide
             toggleVisible();
             return TreeControlType::Hide;
-        } else if (m_rectLocked.contains(p.x(), p.y())) {
+        } else if (m_rectLocked.contains(p)) {
             toggleLocked();
             return TreeControlType::Lock;
+        }
+    }
+
+    if (isProperty()) {
+        if (m_rectFitPropGraph.contains(p)) {
+            m_rowTimeline->propertyGraph()->fitGraph();
+        } else if (m_rectMaximizePropGraph.contains(p)) {
+            m_propGraphHeight = m_propGraphHeight == TimelineConstants::ROW_GRAPH_H
+                    ? TimelineConstants::ROW_GRAPH_H_MAX : TimelineConstants::ROW_GRAPH_H;
+            m_rowTimeline->propertyGraph()->setExpandHeight(m_propGraphHeight);
+            animateExpand(ExpandState::Expanded);
         }
     }
 
@@ -1306,21 +1329,33 @@ bool RowTree::hasDurationBar() const
 
 bool RowTree::propertyExpanded() const
 {
-    return m_isPropertyExpanded;
+    return m_propGraphExpanded;
 }
 
-void RowTree::togglePropertyExpanded()
+/**
+ * toggle property graph if the mouse isn't over other buttons
+ *
+ * @param scenePos mouse position in graphics scene coordinates
+ */
+void RowTree::togglePropertyExpanded(const QPointF &scenePos)
 {
-    setPropertyExpanded(!m_isPropertyExpanded);
+    QPoint p = mapFromScene(scenePos).toPoint();
+    if (!m_rectFitPropGraph.contains(p) && !m_rectMaximizePropGraph.contains(p))
+        setPropertyExpanded(!m_propGraphExpanded);
 }
 
 void RowTree::setPropertyExpanded(bool expand)
 {
-    m_isPropertyExpanded = expand;
-    if (m_isPropertyExpanded)
+    m_propGraphExpanded = expand;
+    if (m_propGraphExpanded) {
+        // start graph in normal (not maximized) size
+        m_propGraphHeight = TimelineConstants::ROW_GRAPH_H;
+        m_rowTimeline->propertyGraph()->setExpandHeight(m_propGraphHeight);
+        m_rowTimeline->propertyGraph()->fitGraph();
         animateExpand(ExpandState::Expanded);
-    else
+    } else {
         animateExpand(ExpandState::Collapsed);
+    }
 }
 
 void RowTree::showDataInputSelector(const QString &propertyname, const QPoint &pos)

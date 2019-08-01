@@ -65,6 +65,7 @@ private:
     void changeTimeBarColor();
     void setTimeBarTime();
     void toggleDynamicKeyframes();
+    void onAnimTypeChange(QAction *action);
 
     RowTree *m_rowTree = nullptr;
     Keyframe *m_keyframe = nullptr;
@@ -81,6 +82,7 @@ private:
     QAction *m_setTimeBarColorAction = nullptr;
     QAction *m_setTimeBarTimeAction = nullptr;
     QAction *m_dynamicKeyframesAction = nullptr;
+    QMenu *m_animType = nullptr;
     TimelineControl *m_timelineControl = nullptr;
     bool m_hasDynamicKeyframes = false;
 };

@@ -27,16 +27,10 @@
 **
 ****************************************************************************/
 
-//==============================================================================
-//	Prefix
-//==============================================================================
-
 #ifndef INCLUDED_INTERPOLATION_DLG
-#define INCLUDED_INTERPOLATION_DLG 1
+#define INCLUDED_INTERPOLATION_DLG
 
-#pragma once
-
-#include <QDialog>
+#include <QtWidgets/qdialog.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -44,22 +38,19 @@ class InterpolationDlg;
 }
 QT_END_NAMESPACE
 
-//==============================================================================
 /**
- *	CInterpolationDlg: Dialog class for editing the ease-in/ease-out values of keyframes.
+ * CInterpolationDlg: Dialog class for editing keyframes interpolation
  */
-//==============================================================================
 class CInterpolationDlg : public QDialog
 {
     Q_OBJECT
+
 public:
-    explicit CInterpolationDlg(QWidget *parent = nullptr); // standard constructor
+    explicit CInterpolationDlg(float easeIn, float easeOut, QWidget *parent = nullptr);
     ~CInterpolationDlg();
 
-    void setEaseIn(uint value);
-    void setEaseOut(uint value);
-    int easeIn() const;
-    int easeOut() const;
+    float easeIn() const;
+    float easeOut() const;
 
 protected:
     QT_PREPEND_NAMESPACE(Ui::InterpolationDlg) *m_ui = nullptr;

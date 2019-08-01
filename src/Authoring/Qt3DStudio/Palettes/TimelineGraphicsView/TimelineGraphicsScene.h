@@ -50,7 +50,6 @@ class RowMover;
 class RowManager;
 class KeyframeManager;
 class TimelineControl;
-class IKeyframesManager;
 struct Keyframe;
 
 QT_FORWARD_DECLARE_CLASS(QGraphicsLinearLayout)
@@ -111,6 +110,8 @@ protected:
     void contextMenuEvent(QGraphicsSceneContextMenuEvent *event) override;
 
 private:
+    enum class TimelineAltModifierMode {None, ScaleTimeline, PanTimeline, PanPropertyGraph};
+
     void commitMoveRows();
     void updateHoverStatus(const QPointF &scenePos);
     void snap(double &value, bool snapToPlayHead = true);
@@ -149,10 +150,10 @@ private:
 
     bool m_rulerPressed = false;
     Keyframe *m_pressedKeyframe = nullptr;
+    RowTimelinePropertyGraph *m_panProperyGraph = nullptr;
     bool m_dragging = false;
     bool m_startRowMoverOnNextDrag = false;
-    bool m_timelineZooming = false;
-    bool m_timelinePanning = false;
+    TimelineAltModifierMode m_timelineAltModifierMode = TimelineAltModifierMode::None;
     TimelineControlType m_clickedTimelineControlType = TimelineControlType::None;
     TreeControlType m_clickedTreeControlType = TreeControlType::None;
     double m_pressPosInKeyframe;

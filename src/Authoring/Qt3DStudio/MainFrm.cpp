@@ -32,7 +32,6 @@
 #include "StudioConst.h"
 #include "SceneView.h"
 #include "StudioApp.h"
-#include "IKeyframesManager.h"
 #include "Dialogs.h"
 #include "StudioPreferencesPropSheet.h"
 #include "StudioPreferences.h"
@@ -677,7 +676,8 @@ void CMainFrame::OnUpdateTimelineDeleteSelectedKeyframes()
  */
 void CMainFrame::OnUpdateTimelineSetInterpolation()
 {
-    m_ui->actionSet_Interpolation->setEnabled(getTimelineWidget()->hasSelectedKeyframes());
+    bool enabled = g_StudioApp.GetCore()->GetDoc()->canSetKeyframeInterpolation();
+    m_ui->actionSet_Interpolation->setEnabled(enabled);
 }
 
 /**

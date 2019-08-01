@@ -35,10 +35,11 @@ class IKeyframesManager
 public:
     virtual ~IKeyframesManager() {}
 
-    virtual bool HasSelectedKeyframes() = 0;
-    virtual bool HasDynamicKeyframes() = 0;
-    virtual bool CanPerformKeyframeCopy() = 0;
-    virtual bool CanPerformKeyframePaste() = 0;
+    virtual bool HasSelectedKeyframes() const = 0;
+    virtual bool HasDynamicKeyframes() const = 0;
+    virtual bool CanPerformKeyframeCopy() const = 0;
+    virtual bool CanPerformKeyframePaste() const = 0;
+    virtual bool canSetKeyframeInterpolation() const = 0;
     virtual void CopyKeyframes() = 0;
     virtual bool RemoveKeyframes(bool inPerformCopy) = 0;
     virtual void PasteKeyframes() = 0;

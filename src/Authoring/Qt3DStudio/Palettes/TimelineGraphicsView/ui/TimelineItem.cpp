@@ -33,7 +33,7 @@
 
 TimelineItem::TimelineItem(TimelineItem *parent) : QGraphicsWidget(parent)
 {
-    setPreferredHeight(TimelineConstants::ROW_H_EXPANDED);
+    setPreferredHeight(TimelineConstants::ROW_GRAPH_H_MAX);
     setMaximumHeight(TimelineConstants::ROW_H);
 }
 

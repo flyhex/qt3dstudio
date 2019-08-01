@@ -97,7 +97,7 @@ public:
     void setBinding(ITimelineItemBinding *binding);
     void setPropBinding(ITimelineItemProperty *binding); // for property rows
     void selectLabel();
-    void togglePropertyExpanded();
+    void togglePropertyExpanded(const QPointF &scenePos = {});
     void setPropertyExpanded(bool expand);
     void showDataInputSelector(const QString &propertyname, const QPoint &pos);
     ITimelineItemProperty *propBinding();
@@ -152,6 +152,7 @@ public:
     void updateFilter();
     void updateLock(bool state);
     void updateSubpresentations(int updateParentsOnlyVal = 0);
+    int rightDividerX() const;
     int clipX() const;
     qt3dsdm::Qt3DSDMInstanceHandle instance() const;
 
@@ -183,7 +184,8 @@ private:
     bool m_visible = true;
     bool m_locked = false;
     bool m_isProperty = false;
-    bool m_isPropertyExpanded = false;
+    bool m_propGraphExpanded = false;
+    int m_propGraphHeight = TimelineConstants::ROW_GRAPH_H;
     bool m_master = false;
     bool m_filtered = false;
     bool m_arrowVisible = false;
@@ -211,6 +213,8 @@ private:
     QRect m_rectVisible;
     QRect m_rectLocked;
     QRect m_rectType;
+    QRect m_rectMaximizePropGraph;
+    QRect m_rectFitPropGraph;
 
     QParallelAnimationGroup m_expandAnimation;
     QPropertyAnimation *m_expandHeightAnimation;
