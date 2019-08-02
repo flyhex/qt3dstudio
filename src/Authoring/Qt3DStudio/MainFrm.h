@@ -169,6 +169,8 @@ public:
     void OnUpdateViewHelpPalette();
     void OnUpdateViewTooltips();
     void OnViewTooltips();
+    void onUpdateHelperGrid();
+    void onHelperGrid();
     void OnUpdateHelpIndex();
     void OnHelpIndex();
     void OnHelpVisitQt();

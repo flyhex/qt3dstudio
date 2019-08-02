@@ -45,7 +45,7 @@ Project palette using Import functionality.</string>
      <x>0</x>
      <y>0</y>
      <width>1800</width>
-     <height>17</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="focusPolicy">
@@ -131,6 +131,7 @@ Project palette using Import functionality.</string>
     <addaction name="actionWireframe"/>
     <addaction name="actionTooltips"/>
     <addaction name="actionFind"/>
+    <addaction name="actionHelper_Grid"/>
     <addaction name="actionRulers_Guides"/>
     <addaction name="actionLock_Guides"/>
     <addaction name="actionClear_Guides"/>
@@ -246,6 +247,7 @@ Project palette using Import functionality.</string>
    <addaction name="actionZoom_Tool"/>
    <addaction name="actionOrbit_Tool"/>
    <addaction name="separator"/>
+   <addaction name="actionHelper_Grid"/>
    <addaction name="actionShading_Mode"/>
    <addaction name="actionWireframe"/>
   </widget>
@@ -1105,6 +1107,29 @@ Project palette using Import functionality.</string>
    </property>
    <property name="toolTip">
     <string>Copy QML code for DataInput and DataOutput elements to clipboard</string>
+   </property>
+  </action>
+  <action name="actionHelper_Grid">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/images/helper_grid.png</normaloff>
+     <disabledoff>:/images/helper_grid_disabled.png</disabledoff>
+     <disabledon>:/images/helper_grid_disabled.png</disabledon>:/images/helper_grid.png</iconset>
+   </property>
+   <property name="text">
+    <string>Helper Grid</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle Helper Grid (%1)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+H</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>false</bool>
    </property>
   </action>
  </widget>

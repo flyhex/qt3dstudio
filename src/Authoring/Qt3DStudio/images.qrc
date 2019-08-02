@@ -319,6 +319,10 @@
         <file>images/filter-disabled@2x.png</file>
         <file>images/filter-colored.png</file>
         <file>images/filter-colored@2x.png</file>
+        <file>images/helper_grid.png</file>
+        <file>images/helper_grid@2x.png</file>
+        <file>images/helper_grid_disabled.png</file>
+        <file>images/helper_grid_disabled@2x.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="open_dialog.png">images/open_dialog.png</file>

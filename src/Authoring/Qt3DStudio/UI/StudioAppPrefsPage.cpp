@@ -122,6 +122,12 @@ void CStudioAppPrefsPage::onInitDialog()
     connect(m_ui->m_checkLegacyViewer, &QCheckBox::clicked,
             this, [=](){ setModified(true); m_restartNeeded = true; });
     connect(m_ui->m_EditViewStartupView, activated, this, [=](){ setModified(true); });
+    connect(m_ui->helperGridLinesSpinBox,
+            static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+            this, [=](){ setModified(true); });
+    connect(m_ui->helperGridSpacingSpinBox,
+            static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+            this, [=](){ setModified(true); });
     connect(m_ui->selectorWidth,
             static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
             this, [=](){ setModified(true); m_restartNeeded = true; });
@@ -166,6 +172,10 @@ void CStudioAppPrefsPage::loadSettings()
 
     // Legacy viewer
     m_ui->m_checkLegacyViewer->setChecked(CStudioPreferences::IsLegacyViewerActive());
+
+    // Helper grid
+    m_ui->helperGridLinesSpinBox->setValue(CStudioPreferences::helperGridLines());
+    m_ui->helperGridSpacingSpinBox->setValue(CStudioPreferences::helperGridSpacing());
 
     // Tool handles
     m_ui->selectorWidth->setValue(CStudioPreferences::getSelectorLineWidth());
@@ -215,9 +225,13 @@ void CStudioAppPrefsPage::saveSettings()
     // Preferred Startup View
     CStudioPreferences::SetPreferredStartupView(m_ui->m_EditViewStartupView->currentIndex());
 
+    // Helper grid
+    CStudioPreferences::setHelperGridLines(m_ui->helperGridLinesSpinBox->value());
+    CStudioPreferences::setHelperGridSpacing(m_ui->helperGridSpacingSpinBox->value());
+
     // Tool handles
-    CStudioPreferences::setSelectorLineWidth(m_ui->selectorWidth->value());
-    CStudioPreferences::setSelectorLineLength(m_ui->selectorLength->value());
+    CStudioPreferences::setSelectorLineWidth(float(m_ui->selectorWidth->value()));
+    CStudioPreferences::setSelectorLineLength(float(m_ui->selectorLength->value()));
 
     // Autosave options
     CStudioPreferences::SetAutoSavePreference(m_ui->autosaveEnabled->isChecked());

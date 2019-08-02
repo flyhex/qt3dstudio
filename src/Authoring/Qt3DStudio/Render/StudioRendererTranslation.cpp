@@ -1890,6 +1890,38 @@ qt3dsdm::Qt3DSDMInstanceHandle STranslation::GetAnchorPoint(QT3DSU32 inAnchorInd
     return qt3dsdm::Qt3DSDMInstanceHandle();
 }
 
+void STranslation::updateHelperGridFromSettings()
+{
+    m_helperGridEnabled = CStudioPreferences::shouldShowHelperGrid();
+    if (m_helperGridEnabled && m_helperGridWidget && m_EditCameraEnabled) {
+        if (m_EditCameraInfo.m_CameraType == EditCameraTypes::Directional) {
+            if (m_EditCameraInfo.m_Direction.x != 0.f) {
+                m_helperGridWidget->setColors(CStudioPreferences::helperGridColor(),
+                                              CStudioPreferences::GetYAxisColor(),
+                                              CStudioPreferences::GetZAxisColor());
+                m_helperGridWidget->rotate(float(M_PI) / 2.f, QT3DSVec3(0.f, 0.f, 1.f));
+            } else if (m_EditCameraInfo.m_Direction.y != 0.f) {
+                m_helperGridWidget->setColors(CStudioPreferences::helperGridColor(),
+                                              CStudioPreferences::GetXAxisColor(),
+                                              CStudioPreferences::GetZAxisColor());
+                m_helperGridWidget->rotate(0.f, QT3DSVec3());
+            } else {
+                m_helperGridWidget->setColors(CStudioPreferences::helperGridColor(),
+                                              CStudioPreferences::GetXAxisColor(),
+                                              CStudioPreferences::GetYAxisColor());
+                m_helperGridWidget->rotate(float(M_PI) / 2.f, QT3DSVec3(1.f, 0.f, 0.f));
+            }
+        } else {
+            m_helperGridWidget->setColors(CStudioPreferences::helperGridColor(),
+                                          CStudioPreferences::GetXAxisColor(),
+                                          CStudioPreferences::GetZAxisColor());
+            m_helperGridWidget->rotate(0.f, QT3DSVec3());
+        }
+        m_helperGridWidget->setLines(CStudioPreferences::helperGridLines(),
+                                     float(CStudioPreferences::helperGridSpacing()));
+    }
+}
+
 qt3dsdm::Qt3DSDMInstanceHandle STranslation::GetAnchorPoint(SPathPick &inPick)
 {
     return GetAnchorPoint(inPick.m_AnchorIndex);
@@ -2209,6 +2241,7 @@ void STranslation::PreRender(bool scenePreviewPass)
     if (m_EditCameraEnabled && !scenePreviewPass) {
         m_EditCameraInfo.ApplyToCamera(m_EditCamera, theViewportDims);
         m_EditLight.MarkDirty(qt3ds::render::NodeTransformDirtyFlag::TransformIsDirty);
+        updateHelperGridFromSettings();
     }
 
     if (m_Scene) {
@@ -2306,7 +2339,7 @@ static void DrawTickMarksOnHorizontalRects(STranslation &inTranslation, QT3DSF32
                                            QT3DSF32 innerRight, QT3DSF32 innerBottom, QT3DSF32 innerTop,
                                            QT3DSF32 outerBottom, QT3DSF32 outerTop, QT3DSVec4 lineColor)
 {
-    QT3DSF32 centerPosX = floor(innerLeft + (innerRight - innerLeft) / 2.0f + .5f);
+    QT3DSF32 centerPosX = qFloor(innerLeft + (innerRight - innerLeft) / 2.0f + .5f);
     CreateTopBottomTickMarks(inTranslation, centerPosX, innerBottom, innerTop, outerBottom,
                              outerTop, 15, lineColor);
     for (QT3DSU32 incrementor = 10;
@@ -2343,7 +2376,7 @@ static void DrawTickMarksOnVerticalRects(STranslation &inTranslation, QT3DSF32 i
                                          QT3DSF32 innerRight, QT3DSF32 innerBottom, QT3DSF32 innerTop,
                                          QT3DSF32 outerLeft, QT3DSF32 outerRight, QT3DSVec4 lineColor)
 {
-    QT3DSF32 centerPosY = floor(innerBottom + (innerTop - innerBottom) / 2.0f + .5f);
+    QT3DSF32 centerPosY = qFloor(innerBottom + (innerTop - innerBottom) / 2.0f + .5f);
     CreateLeftRightTickMarks(inTranslation, centerPosY, innerLeft, innerRight, outerLeft,
                              outerRight, 15, lineColor);
     for (QT3DSU32 incrementor = 10;
@@ -2380,7 +2413,7 @@ public:
 static void CreateGuide(IGuideElementFactory &inFactory, QT3DSF32 inPos, QT3DSF32 inWidth)
 {
     QT3DSF32 halfWidth = inWidth / 2.0f;
-    QT3DSF32 leftLine = floor(inPos + 1.0f - halfWidth);
+    QT3DSF32 leftLine = qFloor(inPos + 1.0f - halfWidth);
     inFactory.CreateLine(leftLine);
     // Then we are done if not enough width
     if (inWidth < 2.0f)
@@ -2520,6 +2553,21 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
             // Render the bounding boxes and extra widgets.
             // This is called *before* the render because these sort of appendages need to be added
             // to the layer renderables.
+
+            // The helper grid is drawn when in edit camera mode
+            if (m_EditCameraEnabled && m_helperGridEnabled) {
+                // Helper grid is a child of the currently selected layer
+                if (!m_helperGridWidget) {
+                    m_helperGridWidget = qt3ds::widgets::SHelperGridWidget
+                        ::createHelperGridWidget(m_Context.GetAllocator());
+                    updateHelperGridFromSettings();
+                }
+                SNode *helperGridParent = GetEditCameraLayer();
+                if (helperGridParent) {
+                    m_helperGridWidget->setNode(helperGridParent);
+                    m_Context.GetRenderer().AddRenderWidget(*m_helperGridWidget);
+                }
+            }
 
             // Don't show the bounding box or pivot for the component we are *in* the component
             SGraphObjectTranslator *theTranslator = nullptr;
@@ -3953,7 +4001,7 @@ static float RoundToNearest(float inValue, float inMin, float inMax, float inRou
 {
     float half = (inMin + inMax) / 2.0f;
     inValue -= half;
-    inValue = inRound * floor(inValue / inRound + .5f);
+    inValue = inRound * qFloor(inValue / inRound + .5f);
     inValue += half;
     inValue -= inMin;
     return inValue;

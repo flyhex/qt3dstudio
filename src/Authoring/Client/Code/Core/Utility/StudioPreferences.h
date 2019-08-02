@@ -80,6 +80,15 @@ public:
     static bool ShouldShowTooltips();
     static void SetShowTooltips(bool inShowTooltips);
 
+    static bool shouldShowHelperGrid();
+    static void setShowHelperGrid(bool showGrid);
+
+    static int helperGridLines();
+    static void setHelperGridLines(int lines);
+
+    static int helperGridSpacing();
+    static void setHelperGridSpacing(int spacing);
+
     static long GetTimelineSplitterLocation();
     static void SetTimelineSplitterLocation(long inLocation);
 
@@ -149,6 +158,7 @@ public:
     static QColor GetXAxisColor();
     static QColor GetYAxisColor();
     static QColor GetZAxisColor();
+    static QColor helperGridColor();
     static QColor getBezierControlColor();
 
     static ::CColor GetRulerBackgroundColor();

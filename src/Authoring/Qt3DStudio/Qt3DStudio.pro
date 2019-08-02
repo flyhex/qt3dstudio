@@ -223,6 +223,7 @@ HEADERS += \
     remotedeploymentsender.h \
     Render/StudioGradientWidget.h \
     Render/StudioVisualAidWidget.h \
+    Render/StudioHelperGridWidget.h \
     Render/StudioSubPresentationRenderer.h \
     Render/StudioRendererTranslation.h \
     UI/EditCameraBar.h \
@@ -395,6 +396,7 @@ SOURCES += \
     Render/StudioScaleWidget.cpp \
     Render/StudioTranslationWidget.cpp \
     Render/StudioVisualAidWidget.cpp \
+    Render/StudioHelperGridWidget.cpp \
     Render/StudioWidget.cpp \
     Render/WGLRenderContext.cpp \
     Render/StudioSubPresentationRenderer.cpp \

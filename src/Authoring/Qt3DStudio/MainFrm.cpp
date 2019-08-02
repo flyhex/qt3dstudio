@@ -176,6 +176,12 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionPivot_Point, &QAction::triggered, this, &CMainFrame::OnViewPivotPoint);
     connect(m_ui->actionWireframe, &QAction::triggered, this, &CMainFrame::OnViewWireframe);
     connect(m_ui->actionTooltips, &QAction::triggered, this, &CMainFrame::OnViewTooltips);
+
+    connect(m_ui->actionHelper_Grid, &QAction::triggered, this, &CMainFrame::onHelperGrid);
+    m_ui->actionHelper_Grid->setToolTip(
+                m_ui->actionHelper_Grid->toolTip().arg(
+                    m_ui->actionHelper_Grid->shortcut().toString(QKeySequence::NativeText)));
+
     connect(m_ui->actionCamera_Preview, &QAction::triggered, this, &CMainFrame::OnShowEditPreview);
     connect(m_ui->actionEdit_Lighting, &QAction::triggered, this,
             &CMainFrame::OnEditViewLightingEnabled);
@@ -277,6 +283,7 @@ CMainFrame::CMainFrame()
         OnUpdateViewPivotPoint();
         OnUpdateViewWireframe();
         OnUpdateViewTooltips();
+        onUpdateHelperGrid();
         OnUpdateViewTimeline();
         onUpdateViewSceneCamera();
         OnUpdateViewInspector();
@@ -876,6 +883,9 @@ void CMainFrame::EditPreferences(short inPageIndex)
         CStudioPreferences::SetDisplayPivotPoint(true);
         CStudioPreferences::SetWireframeModeOn(true);
         CStudioPreferences::SetShowTooltips(true);
+        CStudioPreferences::setShowHelperGrid(true);
+        CStudioPreferences::setHelperGridLines(10);
+        CStudioPreferences::setHelperGridSpacing(100);
         CStudioPreferences::SetTimebarDisplayTime(false);
         g_StudioApp.GetCore()->GetDoc()->SetDefaultKeyframeInterpolation(true);
         CStudioPreferences::SetSnapRange(CStudioPreferences::DEFAULT_SNAPRANGE);
@@ -1661,6 +1671,22 @@ void CMainFrame::OnUpdateViewTooltips()
 void CMainFrame::OnViewTooltips()
 {
     CStudioPreferences::SetShowTooltips(!CStudioPreferences::ShouldShowTooltips());
+}
+
+void CMainFrame::onUpdateHelperGrid()
+{
+    if (m_sceneView.data() == GetActiveView() && !m_sceneView->isDeploymentView()) {
+        m_ui->actionHelper_Grid->setEnabled(true);
+        m_ui->actionHelper_Grid->setChecked(CStudioPreferences::shouldShowHelperGrid());
+    } else {
+        m_ui->actionHelper_Grid->setEnabled(false);
+        m_ui->actionHelper_Grid->setChecked(false);
+    }
+}
+
+void CMainFrame::onHelperGrid()
+{
+    CStudioPreferences::setShowHelperGrid(!CStudioPreferences::shouldShowHelperGrid());
 }
 
 //==============================================================================

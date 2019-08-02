@@ -712,6 +712,7 @@ struct SRendererImpl : public IStudioRenderer,
 
             m_Translation->m_EditCameraEnabled = true;
             m_Translation->m_EditCameraInfo = theCameraInfo;
+            m_Translation->updateHelperGridFromSettings();
         }
     }
 

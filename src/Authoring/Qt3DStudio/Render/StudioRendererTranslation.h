@@ -42,6 +42,7 @@
 #include "StudioPreferences.h"
 #include "StudioGradientWidget.h"
 #include "StudioVisualAidWidget.h"
+#include "StudioHelperGridWidget.h"
 
 namespace qt3ds {
 namespace studio {
@@ -376,6 +377,7 @@ namespace studio {
         QT3DSI32 m_KeyRepeat;
         bool m_EditCameraEnabled;
         bool m_EditLightEnabled;
+        bool m_helperGridEnabled = true;
         SEditCameraPersistentInformation m_EditCameraInfo;
         SCamera m_EditCamera;
         SLight m_EditLight;
@@ -388,6 +390,7 @@ namespace studio {
         NVScopedRefCounted<qt3ds::widgets::IStudioWidget> m_LastRenderedWidget;
         NVScopedRefCounted<qt3ds::widgets::SGradientWidget> m_GradientWidget;
         NVScopedRefCounted<qt3ds::widgets::SVisualAidWidget> m_VisualAidWidget;
+        NVScopedRefCounted<qt3ds::widgets::SHelperGridWidget> m_helperGridWidget;
 
         NVScopedRefCounted<qt3ds::widgets::IPathWidget> m_PathWidget;
         NVScopedRefCounted<qt3ds::render::NVRenderTexture2D> m_PickBuffer;
@@ -671,6 +674,8 @@ namespace studio {
         GetTranslatorsForInstance(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
         qt3dsdm::Qt3DSDMInstanceHandle GetAnchorPoint(SPathPick &inPick);
         qt3dsdm::Qt3DSDMInstanceHandle GetAnchorPoint(QT3DSU32 inAnchorIndex);
+
+        void updateHelperGridFromSettings();
     };
 
     struct SDisableUseClearColor

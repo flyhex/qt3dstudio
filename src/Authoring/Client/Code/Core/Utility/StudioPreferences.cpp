@@ -62,6 +62,7 @@ static QColor s_projectReferencedColor;
 static QColor s_xAxisColor;
 static QColor s_yAxisColor;
 static QColor s_zAxisColor;
+static QColor s_helperGridColor;
 static QColor s_inspectorGroupHeaderColor;
 static QColor s_variantsSlideViewBGColor;
 static QLinearGradient s_welcomeBackgroundGradient;
@@ -158,7 +159,8 @@ void CStudioPreferences::loadPreferences(const QString &filePath)
     s_projectReferencedColor = QColor("#aaaa00");
     s_xAxisColor = QColor("#ca2f2e");
     s_yAxisColor = QColor("#64cd35");
-    s_zAxisColor = QColor("#1e9fcd");
+    s_zAxisColor = QColor("#068ac2");
+    s_helperGridColor = QColor("#515151");
     s_inspectorGroupHeaderColor = QColor("#111111");
     s_variantsSlideViewBGColor = QColor("#111111");
 
@@ -415,6 +417,36 @@ bool CStudioPreferences::ShouldShowTooltips()
 void CStudioPreferences::SetShowTooltips(bool inShowTooltips)
 {
     m_preferences->SetValue(QStringLiteral("ShowTooltips"), inShowTooltips);
+}
+
+bool CStudioPreferences::shouldShowHelperGrid()
+{
+    return m_preferences->GetValue(QStringLiteral("ShowHelperGrid"), true);
+}
+
+void CStudioPreferences::setShowHelperGrid(bool showGrid)
+{
+    m_preferences->SetValue(QStringLiteral("ShowHelperGrid"), showGrid);
+}
+
+int CStudioPreferences::helperGridLines()
+{
+    return int(m_preferences->GetLongValue(QStringLiteral("HelperGridLines"), 10));
+}
+
+void CStudioPreferences::setHelperGridLines(int lines)
+{
+    m_preferences->SetLongValue(QStringLiteral("HelperGridLines"), long(lines));
+}
+
+int CStudioPreferences::helperGridSpacing()
+{
+    return int(m_preferences->GetLongValue(QStringLiteral("HelperGridSpacing"), 100));
+}
+
+void CStudioPreferences::setHelperGridSpacing(int spacing)
+{
+    m_preferences->SetLongValue(QStringLiteral("HelperGridSpacing"), long(spacing));
 }
 
 //==============================================================================
@@ -809,6 +841,11 @@ QColor CStudioPreferences::GetYAxisColor()
 QColor CStudioPreferences::GetZAxisColor()
 {
     return s_zAxisColor;
+}
+
+QColor CStudioPreferences::helperGridColor()
+{
+    return s_helperGridColor;
 }
 
 QColor CStudioPreferences::getBezierControlColor()
