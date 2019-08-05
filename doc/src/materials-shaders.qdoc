@@ -82,7 +82,7 @@ To create a new basic material, do one of the following:
   \li
     \list 1
       \li
-      Anywhere in the project palette, right-click and select
+      Right-click the \uicontrol materials folder in the project palette and select
       \uicontrol {Create > Basic Material} from the context menu.
       \li
       A new material is now created in the \uicontrol materials folder. In the inspector palette
@@ -113,7 +113,7 @@ To apply a material to an object, do one of the following:
   material to the top-most material slot.
   \image assign-material.png
   \li
-  First, select the material in the scene graph. Then, in the inspector palette, set desired
+  First, select the material slot in the scene graph. Then, in the inspector palette, set desired
   material as the \uicontrol{Source Material} property.
   \image assign-material-inspector.png
 \endlist
