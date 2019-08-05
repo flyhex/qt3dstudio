@@ -429,12 +429,14 @@ struct SRendererImpl : public IStudioRenderer,
 
     void MakeContextCurrent() override
     {
-        m_RenderContext->BeginRender();
+        if (m_RenderContext)
+            m_RenderContext->BeginRender();
     }
 
     void ReleaseContext() override
     {
-        m_RenderContext->EndRender();
+        if (m_RenderContext)
+            m_RenderContext->EndRender();
     }
 
     void Render()
@@ -775,7 +777,8 @@ struct SRendererImpl : public IStudioRenderer,
     void OnClosingPresentation() override
     {
         // Clear the shader cache so that shaders are reloaded when loading the next presentation
-        m_Context->GetCustomMaterialSystem().clearShaderCache();
+        if (m_Context)
+            m_Context->GetCustomMaterialSystem().clearShaderCache();
 
         // Destroy translation
         m_Translation = std::shared_ptr<STranslation>();
