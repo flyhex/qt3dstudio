@@ -179,6 +179,15 @@ void CPreferences::setValue(const QString &key, const QString &value,
     if (m_domDoc.isNull())
         return;
 
+    // If group is used, make sure it exists
+    if (!group.isEmpty()) {
+        QDomElement groupElement = m_domDoc.documentElement().firstChildElement(group);
+        if (groupElement.isNull()) {
+            groupElement = m_domDoc.createElement(group);
+            m_domDoc.documentElement().appendChild(groupElement);
+        }
+    }
+
     QDomElement parentElem = group.isEmpty() ? m_domDoc.documentElement()
                                              : m_domDoc.documentElement().firstChildElement(group);
     if (!parentElem.isNull()) {

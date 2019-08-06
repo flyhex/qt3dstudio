@@ -321,6 +321,7 @@ Q3DStudio::CString TimelineWidget::getPlaybackMode()
 TimelineWidget::~TimelineWidget()
 {
     CStudioPreferences::SetTimelineSplitterLocation(m_graphicsScene->treeWidth());
+    CStudioPreferences::savePreferences();
     m_graphicsScene->keyframeManager()->deselectAllKeyframes();
     delete m_BreadCrumbProvider;
 }

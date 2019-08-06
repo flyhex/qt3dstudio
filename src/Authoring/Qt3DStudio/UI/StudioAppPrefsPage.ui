@@ -161,8 +161,7 @@ manipulator tool handles</string>
       <item row="0" column="2">
        <widget class="QSpinBox" name="autosaveInterval">
         <property name="toolTip">
-         <string>The length of the 3D view
-manipulator tool handles.</string>
+         <string>The amount of time between autosaving.</string>
         </property>
         <property name="minimum">
          <number>30</number>
