@@ -282,6 +282,8 @@ void RowTimelineContextMenu::onAnimTypeChange(QAction *action)
                                          numValues);
         }
     }
+
+    m_rowTree->refreshPropBinding();
 }
 
 void RowTimelineContextMenu::insertKeyframe()

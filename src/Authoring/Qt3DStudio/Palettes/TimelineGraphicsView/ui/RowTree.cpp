@@ -562,6 +562,12 @@ ITimelineItemProperty *RowTree::propBinding()
     return m_PropBinding;
 }
 
+void RowTree::refreshPropBinding()
+{
+    // Mahmoud_TODO: update only the changed property binding
+    m_scene->widgetTimeline()->runFullReconstruct();
+}
+
 void RowTree::setPropBinding(ITimelineItemProperty *binding)
 {
     m_PropBinding = binding;
