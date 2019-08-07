@@ -539,7 +539,7 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                     // Prepare to change selection to single selection at release if a multiselected
                     // row is clicked without ctrl.
                     if (!ctrlKeyDown && m_rowManager->isRowSelected(rowTree)
-                            && !m_rowManager->isSingleSelected() ) {
+                            && !m_rowManager->isSingleSelected()) {
                         m_releaseSelectRow = rowTree;
                     }
                     m_rowManager->selectRow(rowTree, ctrlKeyDown);

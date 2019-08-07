@@ -238,6 +238,8 @@ public:
     void ReleaseHotKeys();
 
     static bool IsKeyDown(Qt::KeyboardModifier inKeyCode);
+    static bool isCtrlDown();
+    static bool isAltDown();
     static Qt::KeyboardModifiers GetCurrentKeyModifiers();
     static bool isFocusOnControlThatWantsKeys();
 

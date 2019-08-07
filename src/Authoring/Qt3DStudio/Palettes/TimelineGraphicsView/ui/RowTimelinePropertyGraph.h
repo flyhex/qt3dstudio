@@ -68,8 +68,7 @@ private:
                                      BezierControlType type = BezierControlType::None) const;
     QPointF getKeyframePosition(float time, float value) const;
 
-    Qt3DSDMTimelineKeyframe::TKeyframeHandleList m_currKeyframeHandles;
-    QVector<std::pair<qt3dsdm::Qt3DSDMKeyframeHandle, qt3dsdm::TKeyframe>> m_currKeyframeData;
+    std::pair<qt3dsdm::Qt3DSDMKeyframeHandle, qt3dsdm::TKeyframe> m_currKeyframeData;
     RowTimeline *m_rowTimeline = nullptr;
     ITimelineItemProperty *m_propBinding = nullptr;
     qt3dsdm::IAnimationCore *m_animCore = nullptr;

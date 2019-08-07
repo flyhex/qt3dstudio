@@ -48,6 +48,7 @@
 #include "Qt3DSDMSlides.h"
 #include "StudioUtils.h"
 #include "TimelineToolbar.h"
+#include "HotKeys.h"
 
 #include <QtGui/qpainter.h>
 #include "QtGui/qtextcursor.h"
@@ -331,15 +332,31 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
         else if (m_actionStates & ActionState::ComponentAction) // component has action
             painter->drawPixmap(0, 0, hiResIcons ? pixCompAction2x : pixCompAction);
     } else { // property row
-        if (m_propGraphExpanded
-                && m_PropBinding->animationType() == qt3dsdm::EAnimationTypeBezier) {
-            const int PROP_GRAPH_CONTROLS_Y = int(TimelineConstants::ROW_H * 1.5);
-            m_rectMaximizePropGraph.setRect(rightDividerX() - 16 * 1.1, PROP_GRAPH_CONTROLS_Y,
-                                            ICON_SIZE, ICON_SIZE);
-            m_rectFitPropGraph.setRect(rightDividerX() - 16 * 2.2, PROP_GRAPH_CONTROLS_Y,
-                                       ICON_SIZE, ICON_SIZE);
-            painter->drawPixmap(m_rectMaximizePropGraph, pixShy);
-            painter->drawPixmap(m_rectFitPropGraph, pixShy);
+        if (m_propGraphExpanded) {
+            // draw maximize, fit graph buttons
+            if (m_PropBinding->animationType() == qt3dsdm::EAnimationTypeBezier) {
+                const int PROP_GRAPH_CONTROLS_Y = int(TimelineConstants::ROW_H * 1.5);
+                m_rectMaximizePropGraph.setRect(rightDividerX() - 16 * 1.1, PROP_GRAPH_CONTROLS_Y,
+                                                ICON_SIZE, ICON_SIZE);
+                m_rectFitPropGraph.setRect(rightDividerX() - 16 * 2.2, PROP_GRAPH_CONTROLS_Y,
+                                           ICON_SIZE, ICON_SIZE);
+                painter->drawPixmap(m_rectMaximizePropGraph, pixShy);
+                painter->drawPixmap(m_rectFitPropGraph, pixShy);
+            }
+
+            // draw channel selection buttons
+            const QString channelNames = m_rowTimeline->isColorProperty() ? QStringLiteral("rgba")
+                                                                          : QStringLiteral("xyzw");
+            for (int i = 0; i < m_rectChannels.size(); ++i) {
+                if (m_activeChannels[i])
+                    painter->fillRect(m_rectChannels[i], CStudioPreferences::selectionColor());
+
+                painter->setPen(CStudioPreferences::studioColor3());
+                painter->drawRect(m_rectChannels[i]);
+
+                painter->setPen(CStudioPreferences::textColor());
+                painter->drawText(m_rectChannels[i].topLeft() + QPointF(5, 12), channelNames.at(i));
+            }
         }
     }
 
@@ -571,6 +588,18 @@ void RowTree::refreshPropBinding()
 void RowTree::setPropBinding(ITimelineItemProperty *binding)
 {
     m_PropBinding = binding;
+
+    m_rectChannels.resize(m_PropBinding->GetChannelCount());
+    m_activeChannels.resize(m_PropBinding->GetChannelCount());
+
+    // For bezier animation select first channel (ie x) only by default, else select all channels
+    if (m_PropBinding->animationType() == qt3dsdm::EAnimationTypeBezier)
+        m_activeChannels[0] = true;
+    else
+        std::fill(m_activeChannels.begin(), m_activeChannels.end(), true);
+
+    for (int i = 0; i < m_rectChannels.size(); ++i)
+        m_rectChannels[i].setRect(22, TimelineConstants::ROW_H * (i+1), 16, 16);
 
     if (parentRow()->expanded())
         setRowVisible(true);
@@ -997,13 +1026,36 @@ TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
     }
 
     if (isProperty()) {
-        if (m_rectFitPropGraph.contains(p)) {
+        if (m_rectFitPropGraph.contains(p)) { // toggle fit graph
             m_rowTimeline->propertyGraph()->fitGraph();
-        } else if (m_rectMaximizePropGraph.contains(p)) {
+        } else if (m_rectMaximizePropGraph.contains(p)) { // toggle maximize graph
             m_propGraphHeight = m_propGraphHeight == TimelineConstants::ROW_GRAPH_H
                     ? TimelineConstants::ROW_GRAPH_H_MAX : TimelineConstants::ROW_GRAPH_H;
             m_rowTimeline->propertyGraph()->setExpandHeight(m_propGraphHeight);
             animateExpand(ExpandState::Expanded);
+        } else {
+            auto it = std::find_if(m_rectChannels.begin(), m_rectChannels.end(),
+                                   [&p](const QRect &r){ return r.contains(p); });
+
+            if (it != m_rectChannels.end()) { // clicked a channel button
+                bool ctrlDown = CHotKeys::isCtrlDown();
+                int chIdx = int(it->y() / TimelineConstants::ROW_H) - 1;
+                int numSelectedChannel = std::count(m_activeChannels.begin(),
+                                                    m_activeChannels.end(), true);
+                bool isSingleSelected = numSelectedChannel == 1 && m_activeChannels[chIdx];
+                bool isMultiSelected = numSelectedChannel > 1 && m_activeChannels[chIdx];
+                if (!isSingleSelected && !(isMultiSelected && !ctrlDown))
+                    m_activeChannels[chIdx] ^= 1;
+
+                if (!ctrlDown) {
+                    for (int i = 0; i < m_activeChannels.size(); ++i) {
+                        if (i != chIdx)
+                            m_activeChannels[i] = false;
+                    }
+                }
+                m_rowTimeline->propertyGraph()->fitGraph();
+                update();
+            }
         }
     }
 
@@ -1346,6 +1398,12 @@ bool RowTree::propertyExpanded() const
 void RowTree::togglePropertyExpanded(const QPointF &scenePos)
 {
     QPoint p = mapFromScene(scenePos).toPoint();
+
+    for (int i = 0; i < m_rectChannels.size(); ++i) {
+        if (m_rectChannels[i].contains(p))
+            return; // mouse over a channel button
+    }
+
     if (!m_rectFitPropGraph.contains(p) && !m_rectMaximizePropGraph.contains(p))
         setPropertyExpanded(!m_propGraphExpanded);
 }
@@ -1376,3 +1434,7 @@ void RowTree::showDataInputSelector(const QString &propertyname, const QPoint &p
                                   pos);
 }
 
+bool RowTree::channelActive(int channelIndex) const
+{
+    return m_activeChannels[channelIndex];
+}

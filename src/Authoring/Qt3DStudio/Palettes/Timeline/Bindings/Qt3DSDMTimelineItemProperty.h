@@ -61,8 +61,6 @@ public:
     Q3DStudio::CString GetName() const override;
     bool IsMaster() const override;
     qt3dsdm::TDataTypePair GetType() const override;
-    float GetMaximumValue() const override;
-    float GetMinimumValue() const override;
     void SetSelected() override;
     void DeleteAllKeys() override;
     IKeyframe *GetKeyframeByTime(long inTime) const override;

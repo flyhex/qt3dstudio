@@ -219,6 +219,9 @@ void RowManager::selectRow(RowTree *row, bool multiSelect)
     if (row->locked())
         return;
 
+    if (multiSelect && row->propertyExpanded())
+        return;
+
     if (row->isProperty())
         row = row->parentRow();
 

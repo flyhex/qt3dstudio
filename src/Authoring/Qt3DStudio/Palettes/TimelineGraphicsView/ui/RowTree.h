@@ -156,6 +156,7 @@ public:
     int rightDividerX() const;
     int clipX() const;
     qt3dsdm::Qt3DSDMInstanceHandle instance() const;
+    bool channelActive(int channelIndex) const;
 
 protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
@@ -216,6 +217,9 @@ private:
     QRect m_rectType;
     QRect m_rectMaximizePropGraph;
     QRect m_rectFitPropGraph;
+    QVector<QRect> m_rectChannels;
+    QVector<bool> m_activeChannels;
+
 
     QParallelAnimationGroup m_expandAnimation;
     QPropertyAnimation *m_expandHeightAnimation;

@@ -188,35 +188,6 @@ qt3dsdm::TDataTypePair Qt3DSDMTimelineItemProperty::GetType() const
     return m_Type;
 }
 
-void CompareAndSet(const Qt3DSDMTimelineKeyframe *inKeyframe, float &outRetValue, bool inGreaterThan)
-{
-    float theValue = (inGreaterThan) ? inKeyframe->GetMaxValue() : inKeyframe->GetMinValue();
-    if ((inGreaterThan && theValue > outRetValue) || (!inGreaterThan && theValue < outRetValue))
-        outRetValue = theValue;
-}
-
-// returns the max keyframe value in a property. For bezier keyframes this includes the control
-// points values as well
-float Qt3DSDMTimelineItemProperty::GetMaximumValue() const
-{
-    float theRetVal = FLT_MIN;
-    do_all(m_Keyframes, std::bind(CompareAndSet, std::placeholders::_1, std::ref(theRetVal), true));
-    if (m_Type.first == DataModelDataType::Float4 && m_Type.second == AdditionalMetaDataType::Color)
-        theRetVal = DataModelToColor(theRetVal);
-    return theRetVal;
-}
-
-// returns the min keyframe value in a property. For bezier keyframes this includes the control
-// points values as well
-float Qt3DSDMTimelineItemProperty::GetMinimumValue() const
-{
-    float theRetVal = FLT_MAX;
-    do_all(m_Keyframes, std::bind(CompareAndSet, std::placeholders::_1, std::ref(theRetVal), false));
-    if (m_Type.first == DataModelDataType::Float4 && m_Type.second == AdditionalMetaDataType::Color)
-        theRetVal = DataModelToColor(theRetVal);
-    return theRetVal;
-}
-
 RowTree *Qt3DSDMTimelineItemProperty::getRowTree() const
 {
     return m_rowTree;

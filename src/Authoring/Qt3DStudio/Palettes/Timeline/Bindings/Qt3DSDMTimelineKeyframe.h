@@ -78,10 +78,6 @@ public:
     void UpdateKeyframesTime(COffsetKeyframesCommandHelper *inCommandHelper, long inTime);
     void GetKeyframeHandles(TKeyframeHandleList &outList) const;
 
-    // support drawing graphs
-    float GetMaxValue() const;
-    float GetMinValue() const;
-
     static float GetTimeInSecs(long inTime);
 };
 

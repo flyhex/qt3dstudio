@@ -2842,11 +2842,9 @@ public:
         m_AnimationCore.SetKeyframeData(inKeyframe, kfData);
     }
 
-    void setBezierKeyframeValues(const QVector<std::pair<qt3dsdm::Qt3DSDMKeyframeHandle,
-                                                         TKeyframe>> &changedKfs) override
+    void setBezierKeyframeValue(TKeyframeHandle kfHandle, const TKeyframe &kfData) override
     {
-        for (auto kf : changedKfs)
-            m_AnimationCore.SetKeyframeData(kf.first, kf.second);
+        m_AnimationCore.SetKeyframeData(kfHandle, kfData);
     }
 
     void DeleteAllKeyframes(Qt3DSDMAnimationHandle inAnimation) override

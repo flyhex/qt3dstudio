@@ -566,6 +566,16 @@ bool CHotKeys::IsKeyDown(Qt::KeyboardModifier inKeyCode)
     return qApp->keyboardModifiers() & inKeyCode;
 }
 
+bool CHotKeys::isCtrlDown()
+{
+    return qApp->keyboardModifiers() & Qt::ControlModifier;
+}
+
+bool CHotKeys::isAltDown()
+{
+    return qApp->keyboardModifiers() & Qt::AltModifier;
+}
+
 //=============================================================================
 /**
  * Retrieves the current status of the various modifier keys.
