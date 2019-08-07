@@ -41,7 +41,7 @@ class MouseHelper : public QObject
 
 public:
     explicit MouseHelper(QObject *parent = nullptr);
-    ~MouseHelper() {};
+    ~MouseHelper() override {}
 
     Q_INVOKABLE void startUnboundedDrag();
     Q_INVOKABLE void endUnboundedDrag();

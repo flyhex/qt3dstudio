@@ -118,23 +118,31 @@ QPoint MouseHelper::delta()
     QPoint delta(0, 0);
     if (m_dragState == StateDragging) {
         QPoint currentPoint = QCursor::pos();
-        delta = currentPoint - m_previousPoint;
+        // In macOS we come here after QCursor::setPos has been called from resetCursor(), but
+        // before the actual position has changed. This results in hude delta values, which makes
+        // mouse drag adjustment on macOS unusable (QT3DS-3763).
+        // This also breaks the cursor position resetting on macOS, but that's due to a bug in
+        // Qt (QTBUG-33959)
+        if (m_previousPoint != m_referencePoint) {
+            delta = currentPoint - m_previousPoint;
+
+            // Limit delta to even out the maximum possible change rate regardless of widget position
+            if (delta.x() > m_maxDelta.x())
+                delta.setX(m_maxDelta.x());
+            else if (delta.x() < -m_maxDelta.x())
+                delta.setX(-m_maxDelta.x());
+
+            if (delta.y() > m_maxDelta.y())
+                delta.setY(m_maxDelta.y());
+            else if (delta.y() < -m_maxDelta.y())
+                delta.setY(-m_maxDelta.y());
+
+            if (!m_cursorResetTimer.isActive())
+                m_cursorResetTimer.start();
+        }
         m_previousPoint = currentPoint;
-
-        // Limit delta to even out the maximum possible change rate regardless of widget position
-        if (delta.x() > m_maxDelta.x())
-            delta.setX(m_maxDelta.x());
-        else if (delta.x() < -m_maxDelta.x())
-            delta.setX(-m_maxDelta.x());
-
-        if (delta.y() > m_maxDelta.y())
-            delta.setY(m_maxDelta.y());
-        else if (delta.y() < -m_maxDelta.y())
-            delta.setY(-m_maxDelta.y());
-
-        if (!m_cursorResetTimer.isActive())
-            m_cursorResetTimer.start();
     }
+
     return delta;
 }
 
@@ -168,7 +176,6 @@ void MouseHelper::resetCursor()
         m_dragState = StateNotDragging;
         break;
     case StateNotDragging:
-    default:
         break;
     }
 }
