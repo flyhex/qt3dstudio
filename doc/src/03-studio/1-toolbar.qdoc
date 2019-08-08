@@ -221,6 +221,9 @@ palette.
     available space in Studio.
   \endlist
 \li
+  The \b{Helper Grid} toggle (shortcut: \c{Ctrl + Shift + H}) toggles the visibility of the
+  helper grid.
+\li
   The \b{Shading Mode} toggle (shortcut: \c{L}) toggles a
   `headlamp' attached to your edit camera. When enabled (the default)
   items are lit by the edit camera such that they are always easy to

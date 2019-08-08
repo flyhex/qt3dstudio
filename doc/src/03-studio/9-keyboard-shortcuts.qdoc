@@ -352,6 +352,10 @@ only in \e{Perspective View} and \e{Orthographic View}.
     \li Shading
     \li \c{L}
     \li \c{L}
+  \row
+    \li Helper grid
+    \li \c{Ctrl + Shift + H}
+    \li \c{Cmd + Shift + H}
 \omit
   \row
     \li Wireframes

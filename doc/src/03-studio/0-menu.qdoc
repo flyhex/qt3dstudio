@@ -127,6 +127,9 @@
     \li
       \uicontrol{Preferred Startup View} - Sets default camera view
       when starting Studio.
+    \li
+      \uicontrol{Helper Grid} - Sets number of lines and space between the lines of the
+      helper grid in edit camera views.
     \endlist
   \li
     \uicontrol{Manipulator Tool Handles} - Sets the size of the manipulator tool handles.
