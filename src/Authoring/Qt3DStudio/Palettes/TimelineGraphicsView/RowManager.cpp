@@ -75,9 +75,8 @@ void RowManager::removeAllRows()
     clearSelection();
 
     // delete rows
-    RowTree *row_i;
     for (int i = m_layoutTree->count() - 1; i >= 1; --i) {
-        row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
+        RowTree *row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
         m_layoutTree->removeAt(i);
         m_layoutTimeline->removeAt(i);
         delete row_i; // this will also delete the timeline row
@@ -235,6 +234,20 @@ void RowManager::selectRow(RowTree *row, bool multiSelect)
             = static_cast<Qt3DSDMTimelineItemBinding *>(row->getBinding());
     if (binding)
         binding->SetSelected(multiSelect);
+}
+
+QVector<RowTimelinePropertyGraph *> RowManager::getExpandedPropertyGraphs() const
+{
+    QVector<RowTimelinePropertyGraph *> graphs;
+
+    // the earliest possible property row index in the layout is 4
+    for (int i = 4; i < m_layoutTree->count(); ++i) {
+        RowTree *row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
+        if (row_i->propertyExpanded())
+            graphs.append(row_i->rowTimeline()->propertyGraph());
+    }
+
+    return graphs;
 }
 
 // Call this to update row selection UI status

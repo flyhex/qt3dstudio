@@ -69,7 +69,7 @@ public:
     void removeKeyframe(Keyframe *keyframe);
     void updateKeyframesFromBinding(const QList<int> &properties);
     void updateDurationFromBinding();
-    TimelineControlType getClickedControl(const QPointF &scenePos) const;
+    TimelineControlType getClickedControl(const QPointF &scenePos, bool isHover = false) const;
     double getStartX() const;
     double getEndX() const;
     long getStartTime() const;

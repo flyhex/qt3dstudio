@@ -36,7 +36,9 @@
 
 #include <QtCore/qobject.h>
 #include <QtCore/qtimer.h>
-#include <QtGui/qpainter.h>
+#include <QtCore/qset.h>
+
+QT_FORWARD_DECLARE_CLASS(QPainter);
 
 class RowTimeline;
 class ITimelineItemProperty;
@@ -51,7 +53,7 @@ class RowTimelinePropertyGraph : public QObject
 
 public:
     explicit RowTimelinePropertyGraph(QObject *parent = nullptr);
-    TimelineControlType getClickedBezierControl(const QPointF &pos);
+    TimelineControlType getClickedBezierControl(const QPointF &pos, bool isHover = false);
     void paintGraphs(QPainter *painter, const QRectF &rect);
     void updateBezierControlValue(TimelineControlType controlType, const QPointF &scenePos);
     void adjustScale(bool isIncrement);
@@ -60,6 +62,8 @@ public:
     void fitGraph();
     void commitBezierEdit();
     void setExpandHeight(int h);
+    void selectBezierKeyframesInRange(const QRectF &rect);
+    void deselectAllBezierKeyframes();
 
 private:
     enum class BezierControlType {None, In, Out};
@@ -77,6 +81,8 @@ private:
     qreal m_graphYPanInit = 0; // value of graph_y when panning starts
     qreal m_graphH = 0;
     int m_expandHeight = TimelineConstants::ROW_GRAPH_H; // height when expanded
+    qt3dsdm::Qt3DSDMKeyframeHandle m_hoveredBezierKeyframe;
+    QSet<qt3dsdm::Qt3DSDMKeyframeHandle> m_selectedBezierKeyframes;
     QTimer m_fitCurveTimer;
 };
 

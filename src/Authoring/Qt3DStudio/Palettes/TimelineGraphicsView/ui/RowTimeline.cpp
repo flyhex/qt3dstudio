@@ -565,14 +565,20 @@ void RowTimeline::updateKeyframes()
     }
 }
 
-TimelineControlType RowTimeline::getClickedControl(const QPointF &scenePos) const
+/**
+ * Get the clicked control in a timeline row.
+ * @param scenePos click position in scene coordinates space
+ * @param isHover when true this is a hover, else a click
+ * @return
+ */
+TimelineControlType RowTimeline::getClickedControl(const QPointF &scenePos, bool isHover) const
 {
     QPointF p = mapFromScene(scenePos.x(), scenePos.y());
     p.setX(p.x() - TimelineConstants::RULER_EDGE_OFFSET);
 
     if (!m_rowTree->hasDurationBar()) {
         if (m_propertyGraph)
-            return m_propertyGraph->getClickedBezierControl(p);
+            return m_propertyGraph->getClickedBezierControl(p, isHover);
 
         return TimelineControlType::None;
     }

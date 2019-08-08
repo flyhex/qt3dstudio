@@ -36,6 +36,7 @@
 class TimelineGraphicsScene;
 class RowTree;
 class RowTimeline;
+class RowTimelinePropertyGraph;
 class ITimelineItemBinding;
 class Qt3DSDMTimelineItemBinding;
 
@@ -69,6 +70,7 @@ public:
     bool isRowSelected(RowTree *row) const;
     QVector<RowTree *> selectedRows() const;
     void ensureRowExpandedAndVisible(RowTree *row, bool forceChildUpdate) const;
+    QVector<RowTimelinePropertyGraph *> getExpandedPropertyGraphs() const;
 
 private:
     void deleteRowRecursive(RowTree *row, bool deferChildRows);

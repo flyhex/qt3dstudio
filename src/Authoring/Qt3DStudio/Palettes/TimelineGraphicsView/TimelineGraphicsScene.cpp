@@ -189,8 +189,7 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
 
                 // Resize keyframe selection rect
                 const QPointF scenePoint = timelineContent->mapToScene(p);
-                timelineContent->ensureVisible(scenePoint.x(), scenePoint.y(),
-                                               0, 0, 0, 0);
+                timelineContent->ensureVisible(scenePoint.x(), scenePoint.y(), 0, 0, 0, 0);
                 QRectF visibleScene(
                             timelineContent->mapToScene(contentRect.topLeft()),
                             timelineContent->mapToScene(contentRect.bottomRight()
@@ -1029,7 +1028,7 @@ void TimelineGraphicsScene::updateHoverStatus(const QPointF &scenePos)
         // update timeline row cursor
         if (item->type() == TimelineItem::TypeRowTimeline) {
             RowTimeline *timelineItem = static_cast<RowTimeline *>(item);
-            TimelineControlType controlType = timelineItem->getClickedControl(scenePos);
+            TimelineControlType controlType = timelineItem->getClickedControl(scenePos, true);
             if (controlType == TimelineControlType::DurationStartHandle
                     || controlType == TimelineControlType::DurationEndHandle) {
                 setMouseCursor(CMouseCursor::CURSOR_RESIZE_LEFTRIGHT);

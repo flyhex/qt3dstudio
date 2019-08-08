@@ -37,6 +37,7 @@ enum class TimelineControlType {
     Duration,
     DurationStartHandle,
     DurationEndHandle,
+    BezierKeyframe,
     BezierInHandle,
     BezierOutHandle
 };

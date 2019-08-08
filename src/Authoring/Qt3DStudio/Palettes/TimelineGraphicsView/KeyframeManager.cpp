@@ -47,6 +47,7 @@
 #include "StudioPreferences.h"
 #include "Dialogs.h"
 #include "TimeEnums.h"
+#include "RowTimelinePropertyGraph.h"
 
 using namespace qt3dsdm;
 
@@ -166,6 +167,11 @@ void KeyframeManager::selectKeyframesInRect(const QRectF &rect)
                         m_selectedKeyframesMasterRows.append(keyframe->rowMaster);
                 }
             }
+
+            if (row->propertyExpanded()
+                && row->propBinding()->animationType() == EAnimationTypeBezier) {
+                row->rowTimeline()->propertyGraph()->selectBezierKeyframesInRange(rect);
+            }
         }
         row = m_scene->rowManager()->getRowAtPos(QPointF(0, row->y() + row->size().height()));
     }
@@ -211,6 +217,11 @@ void KeyframeManager::deselectAllKeyframes()
 
     m_selectedKeyframes.clear();
     m_selectedKeyframesMasterRows.clear();
+    
+    // deselect bezier keyframes
+    const auto expandedPropGraphs = m_scene->rowManager()->getExpandedPropertyGraphs();
+    for (auto g : expandedPropGraphs)
+        g->deselectAllBezierKeyframes();
 }
 
 void KeyframeManager::deselectRowKeyframes(RowTree *row)
