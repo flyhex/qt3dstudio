@@ -31,7 +31,14 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QComboBox" name="m_DefaultInterpolation"/>
+       <widget class="QComboBox" name="m_DefaultInterpolation">
+        <property name="maximumSize">
+         <size>
+          <width>185</width>
+          <height>16777215</height>
+         </size>
+        </property>
+       </widget>
       </item>
       <item row="1" column="1">
        <widget class="QComboBox" name="m_SnapRangeCombo"/>
@@ -59,7 +66,7 @@
       <string>Editing View</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="1" column="1">
+      <item row="1" column="2">
        <widget class="QLabel" name="helperGridLineCountLabel">
         <property name="text">
          <string>Lines</string>
@@ -69,60 +76,14 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="3">
-       <widget class="QLabel" name="helperGridSpacingLabel">
-        <property name="text">
-         <string>Spacing</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="3" colspan="2">
-       <widget class="QComboBox" name="m_EditViewStartupView"/>
-      </item>
-      <item row="0" column="0" colspan="2">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Preferred Startup View</string>
-        </property>
-        <property name="buddy">
-         <cstring>m_EditViewStartupView</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="helperGridLabel">
-        <property name="text">
-         <string>Helper Grid</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QSpinBox" name="helperGridLinesSpinBox">
-        <property name="toolTip">
-         <string>Lines in helper grid</string>
-        </property>
-        <property name="inputMethodHints">
-         <set>Qt::ImhDigitsOnly</set>
-        </property>
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>1000</number>
-        </property>
-        <property name="stepType">
-         <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-        </property>
-        <property name="value">
-         <number>10</number>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="4">
+      <item row="1" column="6">
        <widget class="QSpinBox" name="helperGridSpacingSpinBox">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Helper grid spacing</string>
         </property>
@@ -146,6 +107,90 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="4">
+       <widget class="QSpinBox" name="helperGridLinesSpinBox">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Lines in helper grid</string>
+        </property>
+        <property name="inputMethodHints">
+         <set>Qt::ImhDigitsOnly</set>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>1000</number>
+        </property>
+        <property name="stepType">
+         <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+        </property>
+        <property name="value">
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="5">
+       <widget class="QLabel" name="helperGridSpacingLabel">
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Spacing</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Preferred Startup View</string>
+        </property>
+        <property name="buddy">
+         <cstring>m_EditViewStartupView</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="helperGridLabel">
+        <property name="text">
+         <string>Helper Grid</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="4" colspan="3">
+       <widget class="QComboBox" name="m_EditViewStartupView">
+        <property name="maximumSize">
+         <size>
+          <width>185</width>
+          <height>16777215</height>
+         </size>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -156,24 +201,39 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="0" column="3">
-       <widget class="QDoubleSpinBox" name="selectorLength">
-        <property name="toolTip">
-         <string>The length of the 3D view
-manipulator tool handles</string>
+       <widget class="QLabel" name="label_6">
+        <property name="minimumSize">
+         <size>
+          <width>50</width>
+          <height>0</height>
+         </size>
         </property>
-        <property name="decimals">
-         <number>0</number>
+        <property name="text">
+         <string>Length</string>
         </property>
-        <property name="minimum">
-         <double>10.000000000000000</double>
-        </property>
-        <property name="value">
-         <double>50.000000000000000</double>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Width</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
        <widget class="QDoubleSpinBox" name="selectorWidth">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>The width of the 3D view
 manipulator tool handles</string>
@@ -195,22 +255,41 @@ manipulator tool handles</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>Width</string>
+      <item row="0" column="4">
+       <widget class="QDoubleSpinBox" name="selectorLength">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
         </property>
-        <property name="alignment">
-         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+        <property name="toolTip">
+         <string>The length of the 3D view
+manipulator tool handles</string>
+        </property>
+        <property name="decimals">
+         <number>0</number>
+        </property>
+        <property name="minimum">
+         <double>10.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>50.000000000000000</double>
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>Length</string>
+      <item row="0" column="0">
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-       </widget>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </widget>
@@ -228,7 +307,7 @@ manipulator tool handles</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
+      <item row="0" column="2">
        <widget class="QLabel" name="intervalLabel">
         <property name="text">
          <string>Interval (seconds)</string>
@@ -238,8 +317,14 @@ manipulator tool handles</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
+      <item row="0" column="3">
        <widget class="QSpinBox" name="autosaveInterval">
+        <property name="minimumSize">
+         <size>
+          <width>60</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>The amount of time between autosaving.</string>
         </property>
@@ -257,7 +342,33 @@ manipulator tool handles</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="0" column="1">
+       <spacer name="horizontalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <spacer name="horizontalSpacer_6">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="1" column="2" colspan="2">
        <widget class="QPushButton" name="clearAutosaveFiles">
         <property name="toolTip">
          <string>Clear all autosave files from project folder</string>
