@@ -159,6 +159,8 @@ public:
 
 protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
+    void hoverMoveEvent(QGraphicsSceneHoverEvent *event) override;
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
 
 private:
     void initialize();
@@ -208,6 +210,7 @@ private:
     QStringList m_variantsGroups;
     ITimelineItemBinding *m_binding = nullptr;
     ITimelineItemProperty *m_PropBinding = nullptr; // for property rows
+    QRect *m_hoveredRect = nullptr;
 
     QRect m_rectArrow;
     QRect m_rectShy;

@@ -144,22 +144,22 @@ void TreeHeader::toggleFilterLocked()
 
 void TreeHeader::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
-    QPointF p = event->scenePos();
+    QPoint p = event->scenePos().toPoint();
     TreeControlType hoveredItem = TreeControlType::None;
-    if (m_rectShy.contains(p.x(), p.y())) {
+    if (m_rectShy.contains(p)) {
         QString action = m_shy ? tr("Show") : tr("Hide");
         setToolTip(tr("%1 shy objects").arg(action));
         hoveredItem = TreeControlType::Shy;
-    } else if (m_rectVisible.contains(p.x(), p.y())) {
+    } else if (m_rectVisible.contains(p)) {
         QString action = m_visible ? tr("Show") : tr("Hide");
         setToolTip(tr("%1 inactive objects").arg(action));
         hoveredItem = TreeControlType::Hide;
-    } else if (m_rectLock.contains(p.x(), p.y())) {
+    } else if (m_rectLock.contains(p)) {
         QString action = m_lock ? tr("Show") : tr("Hide");
         setToolTip(tr("%1 locked objects").arg(action));
         hoveredItem = TreeControlType::Lock;
     } else {
-        setToolTip("");
+        setToolTip({});
     }
 
     if (m_hoveredItem != hoveredItem) {

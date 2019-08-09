@@ -72,6 +72,7 @@ private:
     QPointF getBezierControlPosition(const qt3dsdm::SBezierKeyframe &kf,
                                      BezierControlType type = BezierControlType::None) const;
     QPointF getKeyframePosition(float time, float value) const;
+    void checkValScaleLimits();
 
     std::pair<qt3dsdm::Qt3DSDMKeyframeHandle, qt3dsdm::TKeyframe> m_currKeyframeData;
     RowTimeline *m_rowTimeline = nullptr;

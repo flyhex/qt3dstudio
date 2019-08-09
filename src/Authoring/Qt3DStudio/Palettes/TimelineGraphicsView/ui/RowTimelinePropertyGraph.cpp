@@ -69,21 +69,49 @@ void RowTimelinePropertyGraph::paintGraphs(QPainter *painter, const QRectF &rect
     painter->setRenderHint(QPainter::Antialiasing);
     painter->setClipRect(rect);
 
-    const QPointF edgeOffset(RULER_EDGE_OFFSET, 0);
+    static const QPointF edgeOffset(RULER_EDGE_OFFSET, 0);
     double timelineScale = m_rowTimeline->rowTree()->m_scene->ruler()->timelineScale();
 
     // draw graph base line (graph_Y)
     painter->setPen(QPen(CStudioPreferences::studioColor3()));
     painter->drawLine(edgeOffset.x(), m_graphY, rect.right(), m_graphY);
 
-    // draw vertical keyframe separator line
+    // draw value ruler
+    static const int STEP_MIN = 20;
+    static const int STEP_MAX = 40;
+    static const QVector<qreal> RULER_VALS {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000};
+
+    int rulerValIdx = 5; // start at val 100
+    qreal step = RULER_VALS[rulerValIdx] * m_valScale;
+
+    while (step < STEP_MIN && rulerValIdx < RULER_VALS.size() - 1)
+        step = RULER_VALS[++rulerValIdx] * m_valScale;
+    while (step > STEP_MAX && rulerValIdx > 0)
+        step = RULER_VALS[--rulerValIdx] * m_valScale;
+
+    qreal dy = rect.bottom() - m_graphY;
+    qreal d_start = dy > 0 ? std::fmod(dy, step) : step - std::fmod(-dy, step); // start delta
+    qreal start_y = rect.bottom() - d_start;
+    painter->setFont(QFont(CStudioPreferences::GetFontFaceName(), 7));
+    for (qreal i = start_y; i > rect.y(); i -= step) {
+        // draw ruler line
+        painter->setPen(QPen(CStudioPreferences::studioColor2(), 1));
+        painter->drawLine(rect.x(), rect.y() + i, rect.right(), rect.y() + i);
+
+        // draw ruler value text
+        painter->setPen(QPen(CStudioPreferences::studioColor3(), 1));
+        qreal val_i = (m_graphY - i) / m_valScale;
+        painter->drawText(rect.x() + edgeOffset.x() + 3, i - 2, QString::number(qRound(val_i)));
+    }
+
+    // draw vertical keyframe separator lines
+    painter->setPen(QPen(CStudioPreferences::studioColor2(), 1));
     Qt3DSDMTimelineKeyframe::TKeyframeHandleList keyframeHandles;
     m_animCore->GetKeyframes(m_activeChannels[0], keyframeHandles);
     for (size_t i = 0; i < keyframeHandles.size(); ++i) {
         TKeyframe kf = m_animCore->GetKeyframeData(keyframeHandles[i]);
         QPointF centerPos = getKeyframePosition(GetKeyframeSeconds(kf), KeyframeValueValue(kf))
                             + edgeOffset;
-        painter->setPen(QPen(CStudioPreferences::studioColor2(), 1));
         painter->drawLine(centerPos.x(), rect.y(), centerPos.x(), rect.height());
     }
 
@@ -95,6 +123,7 @@ void RowTimelinePropertyGraph::paintGraphs(QPainter *painter, const QRectF &rect
             long time = (j - edgeOffset.x()) / (RULER_MILLI_W * timelineScale); // millis
             qreal value = m_propBinding->GetChannelValueAtTime(m_activeChannelsIndex[i], time);
             qreal yPos = m_graphY - value * m_valScale;
+
             if (j == start_j)
                 path.moveTo(j, yPos);
             else
@@ -117,8 +146,6 @@ void RowTimelinePropertyGraph::paintGraphs(QPainter *painter, const QRectF &rect
         for (size_t i = 0; i < m_activeChannels.size(); ++i) {
             // draw bezier control points
             static const QPixmap pixBezierHandle("://images/breadcrumb_component_button.png");
-            static const QPixmap pixBezierHandlePressed("://images/breadcrumb_component_grey"
-                                                        "_button.png");
 
             Qt3DSDMTimelineKeyframe::TKeyframeHandleList keyframeHandles;
             m_animCore->GetKeyframes(m_activeChannels[i], keyframeHandles);
@@ -155,7 +182,7 @@ void RowTimelinePropertyGraph::paintGraphs(QPainter *painter, const QRectF &rect
 
                 // draw center point
                 painter->setPen(QPen(CStudioPreferences::getBezierControlColor(), kfSelected
-                                                                                  ? 6: 3));
+                                                                                  ? 6 : 3));
                 painter->drawPoint(centerPos);
             }
         }
@@ -342,7 +369,6 @@ void RowTimelinePropertyGraph::updateChannelFiltering(const QVector<bool> &activ
 void RowTimelinePropertyGraph::fitGraph()
 {
     const qreal MARGIN_Y = 10; // margin at top & bottom of graph
-    m_graphY = m_rowTimeline->size().height() - MARGIN_Y;
     m_graphH = m_rowTimeline->size().height() - MARGIN_Y * 2;
 
     // get min/max keyframes values in the active channels
@@ -382,9 +408,20 @@ void RowTimelinePropertyGraph::fitGraph()
     }
 
     m_valScale = m_graphH / (maxVal - minVal);
-    m_graphY += minVal * m_valScale;
+    checkValScaleLimits();
+
+    m_graphY = (m_rowTimeline->size().height() + (maxVal + minVal) * m_valScale) / 2;
 
     m_rowTimeline->update();
+}
+
+void RowTimelinePropertyGraph::checkValScaleLimits()
+{
+    // m_valScale can be NaN if maxVal and minVal are same (i.e. horizontal line curve)
+    if (isnan(m_valScale) || m_valScale > 10.f)
+        m_valScale = 10.f;
+    else if (m_valScale < .01f)
+        m_valScale = .01f;
 }
 
 void RowTimelinePropertyGraph::selectBezierKeyframesInRange(const QRectF &rect)
@@ -417,12 +454,7 @@ void RowTimelinePropertyGraph::adjustScale(bool isIncrement)
 {
     float pitch = m_valScale * .3f;
     m_valScale += isIncrement ? pitch : -pitch;
-
-    if (m_valScale > 10.f)
-        m_valScale = 10.f;
-    else if (m_valScale < .01f)
-        m_valScale = .01f;
-
+    checkValScaleLimits();
     m_rowTimeline->update();
 }
 

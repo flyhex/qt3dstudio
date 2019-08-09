@@ -323,6 +323,10 @@
         <file>images/helper_grid@2x.png</file>
         <file>images/helper_grid_disabled.png</file>
         <file>images/helper_grid_disabled@2x.png</file>
+        <file>images/maximize.png</file>
+        <file>images/maximize@2x.png</file>
+        <file>images/maximize_disabled.png</file>
+        <file>images/maximize_disabled@2x.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="open_dialog.png">images/open_dialog.png</file>
