@@ -1053,7 +1053,7 @@ TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
                             m_activeChannels[i] = false;
                     }
                 }
-                m_rowTimeline->propertyGraph()->fitGraph();
+                m_rowTimeline->propertyGraph()->updateChannelFiltering(m_activeChannels);
                 update();
             }
         }
@@ -1415,7 +1415,7 @@ void RowTree::setPropertyExpanded(bool expand)
         // start graph in normal (not maximized) size
         m_propGraphHeight = TimelineConstants::ROW_GRAPH_H;
         m_rowTimeline->propertyGraph()->setExpandHeight(m_propGraphHeight);
-        m_rowTimeline->propertyGraph()->fitGraph();
+        m_rowTimeline->propertyGraph()->updateChannelFiltering(m_activeChannels);
         animateExpand(ExpandState::Expanded);
     } else {
         animateExpand(ExpandState::Collapsed);
@@ -1432,9 +1432,4 @@ void RowTree::showDataInputSelector(const QString &propertyname, const QPoint &p
 
     m_scene->handleShowDISelector(propertyname, refInstance.Valid() ? refInstance : instance(),
                                   pos);
-}
-
-bool RowTree::channelActive(int channelIndex) const
-{
-    return m_activeChannels[channelIndex];
 }

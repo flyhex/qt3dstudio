@@ -217,7 +217,7 @@ void KeyframeManager::deselectAllKeyframes()
 
     m_selectedKeyframes.clear();
     m_selectedKeyframesMasterRows.clear();
-    
+
     // deselect bezier keyframes
     const auto expandedPropGraphs = m_scene->rowManager()->getExpandedPropertyGraphs();
     for (auto g : expandedPropGraphs)

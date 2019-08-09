@@ -62,6 +62,7 @@ static QColor s_projectReferencedColor;
 static QColor s_xAxisColor;
 static QColor s_yAxisColor;
 static QColor s_zAxisColor;
+static QColor s_wAxisColor;
 static QColor s_helperGridColor;
 static QColor s_inspectorGroupHeaderColor;
 static QColor s_variantsSlideViewBGColor;
@@ -160,6 +161,7 @@ void CStudioPreferences::loadPreferences(const QString &filePath)
     s_xAxisColor = QColor("#ca2f2e");
     s_yAxisColor = QColor("#64cd35");
     s_zAxisColor = QColor("#068ac2");
+    s_wAxisColor = QColor("#fc0388");
     s_helperGridColor = QColor("#515151");
     s_inspectorGroupHeaderColor = QColor("#111111");
     s_variantsSlideViewBGColor = QColor("#111111");
@@ -841,6 +843,11 @@ QColor CStudioPreferences::GetYAxisColor()
 QColor CStudioPreferences::GetZAxisColor()
 {
     return s_zAxisColor;
+}
+
+QColor CStudioPreferences::GetWAxisColor()
+{
+    return s_wAxisColor;
 }
 
 QColor CStudioPreferences::helperGridColor()

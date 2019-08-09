@@ -156,7 +156,6 @@ public:
     int rightDividerX() const;
     int clipX() const;
     qt3dsdm::Qt3DSDMInstanceHandle instance() const;
-    bool channelActive(int channelIndex) const;
 
 protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;

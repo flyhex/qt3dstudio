@@ -584,7 +584,6 @@ TimelineControlType RowTimeline::getClickedControl(const QPointF &scenePos, bool
     }
 
     if (!m_rowTree->locked()) {
-
         const int halfHandle = TimelineConstants::DURATION_HANDLE_W * .5;
         // Never choose start handle if end time is zero, as you cannot adjust it in that case
         bool startHandle = p.x() > m_startX - halfHandle && p.x() < m_startX + halfHandle

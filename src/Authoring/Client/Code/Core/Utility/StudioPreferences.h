@@ -158,6 +158,7 @@ public:
     static QColor GetXAxisColor();
     static QColor GetYAxisColor();
     static QColor GetZAxisColor();
+    static QColor GetWAxisColor();
     static QColor helperGridColor();
     static QColor getBezierControlColor();
 

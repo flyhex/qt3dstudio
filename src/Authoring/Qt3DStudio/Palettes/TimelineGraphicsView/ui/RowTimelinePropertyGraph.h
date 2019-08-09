@@ -64,6 +64,7 @@ public:
     void setExpandHeight(int h);
     void selectBezierKeyframesInRange(const QRectF &rect);
     void deselectAllBezierKeyframes();
+    void updateChannelFiltering(const QVector<bool> &activeChannels);
 
 private:
     enum class BezierControlType {None, In, Out};
@@ -83,6 +84,8 @@ private:
     int m_expandHeight = TimelineConstants::ROW_GRAPH_H; // height when expanded
     qt3dsdm::Qt3DSDMKeyframeHandle m_hoveredBezierKeyframe;
     QSet<qt3dsdm::Qt3DSDMKeyframeHandle> m_selectedBezierKeyframes;
+    QVector<qt3dsdm::Qt3DSDMAnimationHandle> m_activeChannels; // active channels anim. handles
+    QVector<int> m_activeChannelsIndex;
     QTimer m_fitCurveTimer;
 };
 
