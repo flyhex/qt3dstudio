@@ -444,6 +444,8 @@ void CMainFrame::OnNewPresentation()
  */
 void CMainFrame::OnClosingPresentation()
 {
+    m_paletteManager->EnablePalettes(false);
+    setActionsEnabledStatus(false);
 }
 
 /**

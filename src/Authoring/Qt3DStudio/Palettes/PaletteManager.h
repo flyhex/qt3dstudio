@@ -107,7 +107,7 @@ public:
     ProjectView *projectView() const;
 
     // Commands
-    void EnablePalettes();
+    void EnablePalettes(bool enable = true);
 };
 
 #endif // INCLUDED_VIEW_MANAGER_H

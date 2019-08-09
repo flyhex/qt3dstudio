@@ -165,13 +165,7 @@ CPaletteManager::CPaletteManager(CMainFrame *inMainFrame, QObject *parent)
 
     m_inspectorDock->raise();
 
-    m_basicObjectsDock->setEnabled(false);
-    m_projectDock->setEnabled(false);
-    m_slideDock->setEnabled(false);
-    m_actionDock->setEnabled(false);
-    m_inspectorDock->setEnabled(false);
-    m_timelineDock->setEnabled(false);
-    m_cameraDock->setEnabled(false);
+    EnablePalettes(false);
 }
 
 //==============================================================================
@@ -281,14 +275,14 @@ ProjectView *CPaletteManager::projectView() const
     return m_projectView;
 }
 
-void CPaletteManager::EnablePalettes()
+void CPaletteManager::EnablePalettes(bool enable)
 {
-    m_basicObjectsDock->setEnabled(true);
-    m_projectDock->setEnabled(true);
-    m_slideDock->setEnabled(true);
-    m_timelineDock->setEnabled(true);
-    m_actionDock->setEnabled(true);
-    m_inspectorDock->setEnabled(true);
-    m_cameraDock->setEnabled(true);
+    m_basicObjectsDock->setEnabled(enable);
+    m_projectDock->setEnabled(enable);
+    m_slideDock->setEnabled(enable);
+    m_timelineDock->setEnabled(enable);
+    m_actionDock->setEnabled(enable);
+    m_inspectorDock->setEnabled(enable);
+    m_cameraDock->setEnabled(enable);
 }
 
