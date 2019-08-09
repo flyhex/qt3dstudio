@@ -421,8 +421,11 @@ Rectangle {
                                     _tabOrderHandler.addItem(0, item.tabItem1)
                                     if (item.tabItem2 !== undefined) {
                                             _tabOrderHandler.addItem(0, item.tabItem2)
-                                        if (item.tabItem3 !== undefined)
+                                        if (item.tabItem3 !== undefined) {
                                             _tabOrderHandler.addItem(0, item.tabItem3)
+                                            if (item.tabItem4 !== undefined)
+                                                _tabOrderHandler.addItem(0, item.tabItem4)
+                                        }
                                     }
                                 }
                             }

@@ -119,6 +119,38 @@ ColumnLayout {
     }
 
     Component {
+        id: xyzwPropertyComponent
+
+        HandlerPropertyXYZW {
+            readonly property var propValue: propertyModel && !_parentView.propertyValueInvalid
+                                             && propertyModel.value !== undefined
+                                             ? propertyModel.value : undefined
+            label: parent ? parent.label : ""
+            valueX: propValue !== undefined ? Number(propValue.x).toFixed(numberOfDecimal) : "0.000"
+            valueY: propValue !== undefined ? Number(propValue.y).toFixed(numberOfDecimal) : "0.000"
+            valueZ: propValue !== undefined ? Number(propValue.z).toFixed(numberOfDecimal) : "0.000"
+            valueW: propValue !== undefined ? Number(propValue.w).toFixed(numberOfDecimal) : "0.000"
+
+            onPropValueChanged: {
+                // FloatTextField can set its text internally, thus breaking the binding, so
+                // let's set the text value explicitly each time value changes
+                if (propValue !== undefined) {
+                    valueX = Number(propValue.x).toFixed(numberOfDecimal);
+                    valueY = Number(propValue.y).toFixed(numberOfDecimal);
+                    valueZ = Number(propValue.z).toFixed(numberOfDecimal);
+                    valueW = Number(propValue.w).toFixed(numberOfDecimal);
+                }
+            }
+
+            onEditingFinished: {
+                _parentView.setArgumentValue(propertyModel.valueHandle,
+                                             Qt.vector4d(valueX, valueY, valueZ, valueW), true);
+            }
+        }
+    }
+
+
+    Component {
         id: sliderPropertyComponent
 
         HandlerPropertySlider {
@@ -224,8 +256,11 @@ ColumnLayout {
                 _tabOrderHandler.addItem(0, item.tabItem1)
                 if (item.tabItem2 !== undefined) {
                     _tabOrderHandler.addItem(0, item.tabItem2)
-                    if (item.tabItem3 !== undefined)
+                    if (item.tabItem3 !== undefined) {
                         _tabOrderHandler.addItem(0, item.tabItem3)
+                        if (item.tabItem4 !== undefined)
+                            _tabOrderHandler.addItem(0, item.tabItem4)
+                    }
                 }
             }
         }
@@ -257,6 +292,8 @@ ColumnLayout {
             case DataModelDataType.Float4:
                 if (actionProperty.additionalType === AdditionalMetaDataType.Color)
                     return colorBox;
+                if (actionProperty.additionalType === AdditionalMetaDataType.None)
+                    return xyzwPropertyComponent;
                 break;
 
             case DataModelDataType.String:

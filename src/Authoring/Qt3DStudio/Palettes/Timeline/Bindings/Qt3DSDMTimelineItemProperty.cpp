@@ -269,11 +269,14 @@ float Qt3DSDMTimelineItemProperty::GetChannelValueAtTime(long inChannelIndex, lo
                     SFloat4 theFloat4 = qt3dsdm::get<SFloat4>(theValue);
                     if (inChannelIndex >= 0 && inChannelIndex < 4)
                         return DataModelToColor(theFloat4[inChannelIndex]);
+                } else {
+                    SFloat4 theFloat4 = qt3dsdm::get<SFloat4>(theValue);
+                    if (inChannelIndex >= 0 && inChannelIndex < 4)
+                        return theFloat4[inChannelIndex];
                 }
                 break;
             }
             case DataModelDataType::Float3: {
-
                 SFloat3 theFloat3 = qt3dsdm::get<SFloat3>(theValue);
                 if (inChannelIndex >= 0 && inChannelIndex < 3)
                     return theFloat3[inChannelIndex];

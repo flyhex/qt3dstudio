@@ -855,7 +855,8 @@ QColor InspectorControlView::showColorDialog(const QColor &color, int instance, 
     bool showAlpha = false;
     if (instance && handle) {
         showAlpha = getBridge()->getBGColorProperty(instance).GetHandleValue() == handle
-                 || getBridge()->getTextColorProperty(instance).GetHandleValue() == handle;
+                 || getBridge()->getTextColorProperty(instance).GetHandleValue() == handle
+                 || getBridge()->IsCustomMaterialInstance(instance);
     }
 
     m_currentColor = color;

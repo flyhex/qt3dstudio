@@ -940,6 +940,7 @@ void CStudioPreferences::setQmlContextProperties(QQmlContext *qml)
     qml->setContextProperty(QStringLiteral("_xAxisColor"), s_xAxisColor);
     qml->setContextProperty(QStringLiteral("_yAxisColor"), s_yAxisColor);
     qml->setContextProperty(QStringLiteral("_zAxisColor"), s_zAxisColor);
+    qml->setContextProperty(QStringLiteral("_wAxisColor"), s_wAxisColor);
     qml->setContextProperty(QStringLiteral("_fontSize"), s_fontSize);
     qml->setContextProperty(QStringLiteral("_controlBaseHeight"), s_controlBaseHeight);
     qml->setContextProperty(QStringLiteral("_idWidth"), s_idWidth);

@@ -263,6 +263,11 @@ Rectangle {
                                             _tabOrderHandler.addItem(
                                                         indexOfThisDelegate,
                                                         item.loadedItem.tabItem3)
+                                            if (item.loadedItem.tabItem4 !== undefined) {
+                                                _tabOrderHandler.addItem(
+                                                            indexOfThisDelegate,
+                                                            item.loadedItem.tabItem4)
+                                            }
                                         }
                                     }
                                 }
@@ -511,6 +516,8 @@ Rectangle {
                                         case DataModelDataType.Float4:
                                             if (modelData.propertyType === AdditionalMetaDataType.Color)
                                                 return colorBox;
+                                            if (modelData.propertyType === AdditionalMetaDataType.None)
+                                                return xyzwPropertyComponent;
                                             return null;
                                         case DataModelDataType.StringRef:
                                             if (modelData.propertyType === AdditionalMetaDataType.None)
@@ -650,6 +657,48 @@ Rectangle {
             onShowBrowser: {
                 activeBrowser = _parentView.showTextureChooser(handle, instance,
                                                                mapToGlobal(width, 0))
+            }
+        }
+    }
+
+    Component {
+        id: xyzwPropertyComponent
+
+        RowLayout {
+            property int instance: parent.modelData.instance
+            property int handle: parent.modelData.handle
+            property variant values: parent.modelData.values
+            property alias tabItem1: xyzwHandler.tabItem1
+            property alias tabItem2: xyzwHandler.tabItem2
+            property alias tabItem3: xyzwHandler.tabItem3
+            property alias tabItem4: xyzwHandler.tabItem4
+            spacing: 0
+
+            onValuesChanged: {
+                // FloatTextField can set its text internally, thus breaking the binding, so
+                // let's set the text value explicitly each time value changes
+                xyzwHandler.valueX = Number(values[0]).toFixed(xyzwHandler.numberOfDecimal);
+                xyzwHandler.valueY = Number(values[1]).toFixed(xyzwHandler.numberOfDecimal);
+                xyzwHandler.valueZ = Number(values[2]).toFixed(xyzwHandler.numberOfDecimal);
+                xyzwHandler.valueW = Number(values[3]).toFixed(xyzwHandler.numberOfDecimal);
+            }
+
+            HandlerPropertyBaseXYZW {
+                id: xyzwHandler
+                valueX: Number(values[0]).toFixed(numberOfDecimal)
+                valueY: Number(values[1]).toFixed(numberOfDecimal)
+                valueZ: Number(values[2]).toFixed(numberOfDecimal)
+                valueW: Number(values[3]).toFixed(numberOfDecimal)
+                onEditingFinished: {
+                    _inspectorModel.setPropertyValue(parent.instance, parent.handle,
+                                                     Qt.vector4d(valueX, valueY, valueZ, valueW),
+                                                     true);
+                }
+                onPreviewValueChanged: {
+                    _inspectorModel.setPropertyValue(parent.instance, parent.handle,
+                                                     Qt.vector4d(valueX, valueY, valueZ, valueW),
+                                                     false);
+                }
             }
         }
     }

@@ -43,5 +43,7 @@
         <file>Palettes/Action/HandlerGenericFloat.qml</file>
         <file>Palettes/Inspector/MaterialDropDown.qml</file>
         <file>Application/FilterVariantsDlg.qml</file>
+        <file>Palettes/Action/HandlerPropertyXYZW.qml</file>
+        <file>Palettes/Action/HandlerPropertyBaseXYZW.qml</file>
     </qresource>
 </RCC>
