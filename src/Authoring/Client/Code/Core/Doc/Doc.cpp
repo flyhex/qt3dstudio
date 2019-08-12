@@ -2488,7 +2488,8 @@ void CDoc::SavePresentationFile(CBufferedOutputStream *inOutputStream)
                 if (theBuffer.m_TextureFlags.HasTransparency()) {
                     IDOMWriter::Scope __ImageScope(theWriter, L"ImageBuffer");
                     theWriter.Att(L"sourcepath", theImageBuffers[idx].first.c_str());
-                    theWriter.Att(L"hasTransparency", true);
+                    // Writing boolean in wide text results just in "T" or "F" on Linux
+                    theWriter.Att("hasTransparency", true);
                 }
             }
         }
