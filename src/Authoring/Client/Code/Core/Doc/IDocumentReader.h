@@ -152,9 +152,11 @@ public:
     // Get a map from string table string (datacore.GetStringTable().RegisterStr()) to
     // a list of slide/instance pairs that indicate, for a given source path, which instances
     // link to that source path and under which slide.
-    // Pass in true if you want the map keys to include the identifiers (#1, #2).
+    // Set skipMaterialContainers true if you are not interested in source paths for materials
+    // inside material container.
+    // Set includeIdentifiers true if you want the map keys to include the identifiers (#1, #2).
     virtual void GetSourcePathToInstanceMap(TCharPtrToSlideInstanceMap &outInstanceMap,
-                                            bool checkMaterialContainers = true,
+                                            bool skipMaterialContainers = true,
                                             bool includeIdentifiers = true) const = 0;
     // Get a map from string table string to list of slide/instance pairs that indicates, for a
     // given source path,

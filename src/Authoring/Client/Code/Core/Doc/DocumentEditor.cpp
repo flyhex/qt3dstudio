@@ -424,7 +424,7 @@ public:
 
     void GetPathToInstanceMap(TCharPtrToSlideInstanceMap &outInstanceMap,
                               qt3dsdm::Qt3DSDMPropertyHandle property,
-                              bool checkMaterialContainers = true,
+                              bool skipMaterialContainers = true,
                               bool includeIdentifiers = true) const
     {
         SComposerObjectDefinitions &theDefinitions(m_Bridge.GetObjectDefinitions());
@@ -435,7 +435,7 @@ public:
         for (size_t idx = 0, end = existing.size(); idx < end; ++idx) {
             Qt3DSDMInstanceHandle theAsset(existing[idx]);
 
-            if (!checkMaterialContainers && m_Bridge.isInsideMaterialContainer(theAsset))
+            if (skipMaterialContainers && m_Bridge.isInsideMaterialContainer(theAsset))
                 continue;
 
             thePaths.clear();
@@ -458,18 +458,18 @@ public:
     }
 
     void GetSourcePathToInstanceMap(TCharPtrToSlideInstanceMap &outInstanceMap,
-                                    bool checkMaterialContainers = true,
+                                    bool skipMaterialContainers = true,
                                     bool includeIdentifiers = true) const override
     {
         SComposerObjectDefinitions &theDefinitions(m_Bridge.GetObjectDefinitions());
         GetPathToInstanceMap(outInstanceMap, theDefinitions.m_Asset.m_SourcePath,
-                             checkMaterialContainers, includeIdentifiers);
+                             skipMaterialContainers, includeIdentifiers);
     }
 
     void GetImportPathToInstanceMap(TCharPtrToSlideInstanceMap &outInstanceMap) const override
     {
         SComposerObjectDefinitions &theDefinitions(m_Bridge.GetObjectDefinitions());
-        GetPathToInstanceMap(outInstanceMap, theDefinitions.m_Asset.m_ImportFile, false, false);
+        GetPathToInstanceMap(outInstanceMap, theDefinitions.m_Asset.m_ImportFile, true, false);
     }
 
     bool CanPropertyBeLinked(TInstanceHandle inInstance, TPropertyHandle inProperty) const override
@@ -5225,7 +5225,7 @@ public:
     }
 
         m_SourcePathInstanceMap.clear();
-        GetSourcePathToInstanceMap(m_SourcePathInstanceMap);
+        GetSourcePathToInstanceMap(m_SourcePathInstanceMap, false);
         TInstanceHandleList theParents;
         SComposerObjectDefinitions &theDefinitions(m_Bridge.GetObjectDefinitions());
 
