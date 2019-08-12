@@ -87,8 +87,11 @@ void CEditCameraBar::setupCameras()
 
 void CEditCameraBar::setCameraIndex(int inIndex)
 {
-    m_CameraSelector->setCurrentIndex(inIndex);
-    handleCameraChanged(inIndex);
+    // Only handle camera shortcuts if toolbar is enabled
+    if (isEnabled()) {
+        m_CameraSelector->setCurrentIndex(inIndex);
+        handleCameraChanged(inIndex);
+    }
 }
 
 /**

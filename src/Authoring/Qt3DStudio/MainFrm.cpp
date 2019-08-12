@@ -341,6 +341,8 @@ void CMainFrame::setActionsEnabledStatus(bool enabled)
     m_ui->action_New_Presentation->setEnabled(enabled);
     m_ui->actionData_Inputs->setEnabled(enabled);
     m_ui->actionData_InputsGenerate->setEnabled(enabled);
+    m_ui->actionAutoset_Keyframes->setEnabled(enabled);
+    m_ui->action_Duplicate_Object->setEnabled(enabled);
     // Note: actionRemote_Preview is special case, disabled here
     // while enabled by OnConnectionChanged
     if (!enabled)
@@ -444,6 +446,7 @@ void CMainFrame::OnNewPresentation()
  */
 void CMainFrame::OnClosingPresentation()
 {
+    g_StudioApp.GetCore()->GetDoc()->setPresentationId({});
     m_paletteManager->EnablePalettes(false);
     setActionsEnabledStatus(false);
 }

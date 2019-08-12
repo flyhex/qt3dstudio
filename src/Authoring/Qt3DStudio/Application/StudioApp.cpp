@@ -391,7 +391,7 @@ bool CStudioApp::run(const QCommandLineParser &parser)
 
         performShutdown();
     } catch (qt3dsdm::Qt3DSDMError &uicdmError) {
-        Q_UNUSED(uicdmError);
+        Q_UNUSED(uicdmError)
         exit(1);
     } catch (...) {
         throw;
@@ -1013,7 +1013,7 @@ QString CStudioApp::getDeleteType() const
             if (bridge->CanDelete(selected[idx]))
                 deletableCount++;
         }
-        if (deletableCount && deletableCount == selected.size())
+        if (deletableCount && deletableCount == int(selected.size()))
             return tr("Object");
     }
     return {};
@@ -1218,15 +1218,17 @@ void CStudioApp::SetAutosetKeyframes(bool inFlag)
  */
 void CStudioApp::PlaybackPlay()
 {
-    // Do not start playback if user is currently interacting with scene
-    if (getRenderer().isMouseDown())
-        return;
+    if (!m_core->GetDoc()->getPresentationId().isEmpty()) {
+        // Do not start playback if user is currently interacting with scene
+        if (getRenderer().isMouseDown())
+            return;
 
-    CDoc *theDoc = m_core->GetDoc();
-    if (!theDoc->IsPlaying()) {
-        m_playbackTime = theDoc->GetCurrentViewTime();
-        m_playbackOriginalSlide = theDoc->GetActiveSlide();
-        theDoc->SetPlayMode(PLAYMODE_PLAY);
+        CDoc *theDoc = m_core->GetDoc();
+        if (!theDoc->IsPlaying()) {
+            m_playbackTime = theDoc->GetCurrentViewTime();
+            m_playbackOriginalSlide = theDoc->GetActiveSlide();
+            theDoc->SetPlayMode(PLAYMODE_PLAY);
+        }
     }
 }
 
@@ -1340,10 +1342,13 @@ void CStudioApp::PlaybackStop()
  */
 void CStudioApp::AdvanceTime()
 {
-    long theDeltaTime = CStudioPreferences::GetTimeAdvanceAmount();
-    long theTime =
-            (m_core->GetDoc()->GetCurrentViewTime() + theDeltaTime) / theDeltaTime * theDeltaTime;
-    m_core->GetDoc()->NotifyTimeChanged(theTime);
+    if (!m_core->GetDoc()->getPresentationId().isEmpty()) {
+        long theDeltaTime = CStudioPreferences::GetTimeAdvanceAmount();
+        long theTime
+                = (m_core->GetDoc()->GetCurrentViewTime() + theDeltaTime)
+                / theDeltaTime * theDeltaTime;
+        m_core->GetDoc()->NotifyTimeChanged(theTime);
+    }
 }
 
 //=============================================================================
@@ -1352,9 +1357,11 @@ void CStudioApp::AdvanceTime()
  */
 void CStudioApp::ReduceTime()
 {
-    long theDeltaTime = CStudioPreferences::GetTimeAdvanceAmount();
-    long theTime = (m_core->GetDoc()->GetCurrentViewTime() - 1) / theDeltaTime * theDeltaTime;
-    m_core->GetDoc()->NotifyTimeChanged(theTime);
+    if (!m_core->GetDoc()->getPresentationId().isEmpty()) {
+        long theDeltaTime = CStudioPreferences::GetTimeAdvanceAmount();
+        long theTime = (m_core->GetDoc()->GetCurrentViewTime() - 1) / theDeltaTime * theDeltaTime;
+        m_core->GetDoc()->NotifyTimeChanged(theTime);
+    }
 }
 
 //=============================================================================
@@ -1363,10 +1370,13 @@ void CStudioApp::ReduceTime()
  */
 void CStudioApp::AdvanceUltraBigTime()
 {
-    long theDeltaTime = CStudioPreferences::GetBigTimeAdvanceAmount();
-    long theTime =
-            (m_core->GetDoc()->GetCurrentViewTime() + theDeltaTime) / theDeltaTime * theDeltaTime;
-    m_core->GetDoc()->NotifyTimeChanged(theTime);
+    if (!m_core->GetDoc()->getPresentationId().isEmpty()) {
+        long theDeltaTime = CStudioPreferences::GetBigTimeAdvanceAmount();
+        long theTime
+                = (m_core->GetDoc()->GetCurrentViewTime() + theDeltaTime)
+                / theDeltaTime * theDeltaTime;
+        m_core->GetDoc()->NotifyTimeChanged(theTime);
+    }
 }
 
 //=============================================================================
@@ -1375,9 +1385,11 @@ void CStudioApp::AdvanceUltraBigTime()
  */
 void CStudioApp::ReduceUltraBigTime()
 {
-    long theDeltaTime = CStudioPreferences::GetBigTimeAdvanceAmount();
-    long theTime = (m_core->GetDoc()->GetCurrentViewTime() - 1) / theDeltaTime * theDeltaTime;
-    m_core->GetDoc()->NotifyTimeChanged(theTime);
+    if (!m_core->GetDoc()->getPresentationId().isEmpty()) {
+        long theDeltaTime = CStudioPreferences::GetBigTimeAdvanceAmount();
+        long theTime = (m_core->GetDoc()->GetCurrentViewTime() - 1) / theDeltaTime * theDeltaTime;
+        m_core->GetDoc()->NotifyTimeChanged(theTime);
+    }
 }
 
 //==============================================================================
@@ -1388,12 +1400,14 @@ void CStudioApp::ReduceUltraBigTime()
  */
 void CStudioApp::PlaybackToggle()
 {
-    // If the presentation is playing, stop it and leave the playhead where it is
-    if (m_core->GetDoc()->IsPlaying())
-        PlaybackStopNoRestore();
-    // Otherwise, the presentation is stopped, so start it playing
-    else
-        PlaybackPlay();
+    if (!m_core->GetDoc()->getPresentationId().isEmpty()) {
+        // If the presentation is playing, stop it and leave the playhead where it is
+        if (m_core->GetDoc()->IsPlaying())
+            PlaybackStopNoRestore();
+        // Otherwise, the presentation is stopped, so start it playing
+        else
+            PlaybackPlay();
+    }
 }
 
 void CStudioApp::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler,
@@ -1403,26 +1417,26 @@ void CStudioApp::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler,
 
     ADD_GLOBAL_SHORTCUT(actionParent,
                         QKeySequence(Qt::Key_Period),
-                        CStudioApp::AdvanceTime);
+                        CStudioApp::AdvanceTime)
     ADD_GLOBAL_SHORTCUT(actionParent,
                         QKeySequence(Qt::Key_Comma),
-                        CStudioApp::ReduceTime);
+                        CStudioApp::ReduceTime)
     ADD_GLOBAL_SHORTCUT(actionParent,
                         QKeySequence(Qt::ShiftModifier | Qt::Key_Period),
-                        CStudioApp::AdvanceUltraBigTime);
+                        CStudioApp::AdvanceUltraBigTime)
     ADD_GLOBAL_SHORTCUT(actionParent,
                         QKeySequence(Qt::ShiftModifier | Qt::Key_Comma),
-                        CStudioApp::ReduceUltraBigTime);
+                        CStudioApp::ReduceUltraBigTime)
     ADD_GLOBAL_SHORTCUT(actionParent,
                         QKeySequence(Qt::Key_Return),
-                        CStudioApp::PlaybackToggle);
+                        CStudioApp::PlaybackToggle)
 
     inShortcutHandler->RegisterKeyUpEvent(
-                new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::playbackPreviewEnd), 0,
+                new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::playbackPreviewEnd), nullptr,
                 Qt::Key_Space);
     inShortcutHandler->RegisterKeyDownEvent(
-                new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::playbackPreviewStart), 0,
-                Qt::Key_Space);
+                new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::playbackPreviewStart),
+                nullptr, Qt::Key_Space);
 
     if (m_views)
         m_views->registerGlobalKeyboardShortcuts(inShortcutHandler, actionParent);
@@ -1867,6 +1881,7 @@ void CStudioApp::OnAsynchronousCommand(CCmd *inCmd)
 
 void CStudioApp::OnDisplayAppStatus(const QString &inStatusMsg)
 {
+    Q_UNUSED(inStatusMsg)
     // Do nothing, it was used to show this in the status bar
 }
 
