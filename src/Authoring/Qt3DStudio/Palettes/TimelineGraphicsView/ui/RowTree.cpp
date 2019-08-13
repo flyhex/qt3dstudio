@@ -343,10 +343,14 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
             if (m_PropBinding->animationType() == qt3dsdm::EAnimationTypeBezier) {
                 m_rectMaximizePropGraph.setRect(rightDividerX() - 16 * 1.2,
                                                 TimelineConstants::ROW_H, ICON_SIZE, ICON_SIZE);
+                painter->setPen(m_propGraphHeight != TimelineConstants::ROW_GRAPH_H && !m_locked
+                                ? CStudioPreferences::getBezierControlColor()
+                                : CStudioPreferences::studioColor3());
+                painter->drawRect(m_rectMaximizePropGraph);
+
                 m_rectFitPropGraph.setRect(rightDividerX() - 16 * 2.4, TimelineConstants::ROW_H,
                                            ICON_SIZE, ICON_SIZE);
                 painter->setPen(CStudioPreferences::studioColor3());
-                painter->drawRect(m_rectMaximizePropGraph);
                 painter->drawRect(m_rectFitPropGraph);
                 painter->drawPixmap(m_rectMaximizePropGraph, m_locked ? pixMaximizeDisabled
                                                                       : pixMaximize);
@@ -355,6 +359,9 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
                 if (m_rowTimeline->isColorProperty()) {
                     m_rectColorGradient.setRect(rightDividerX() - 16 * 3.6,
                                                 TimelineConstants::ROW_H, ICON_SIZE, ICON_SIZE);
+                    painter->setPen(m_rowTimeline->m_drawColorGradient && !m_locked
+                                    ? CStudioPreferences::getBezierControlColor()
+                                    : CStudioPreferences::studioColor3());
                     painter->drawRect(m_rectColorGradient);
                     painter->drawPixmap(m_rectColorGradient, m_locked ? pixGradientDisabled
                                                                       : pixGradient);
