@@ -327,6 +327,10 @@
         <file>images/maximize@2x.png</file>
         <file>images/maximize_disabled.png</file>
         <file>images/maximize_disabled@2x.png</file>
+        <file>images/gradient.png</file>
+        <file>images/gradient@2x.png</file>
+        <file>images/gradient_disabled.png</file>
+        <file>images/gradient_disabled@2x.png</file>
     </qresource>
     <qresource prefix="/startup">
         <file alias="open_dialog.png">images/open_dialog.png</file>

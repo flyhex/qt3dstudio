@@ -73,6 +73,7 @@ private:
                                      BezierControlType type = BezierControlType::None) const;
     QPointF getKeyframePosition(float time, float value) const;
     void checkValScaleLimits();
+    void adjustColorProperty(float &val, bool scaleUp = true) const;
 
     std::pair<qt3dsdm::Qt3DSDMKeyframeHandle, qt3dsdm::TKeyframe> m_currKeyframeData;
     RowTimeline *m_rowTimeline = nullptr;

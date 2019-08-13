@@ -27,9 +27,7 @@
 **
 ****************************************************************************/
 #ifndef QT3DSDM_KEYFRAME_H
-#define QT3DSDM_KEYFRAME_H 1
-
-#pragma once
+#define QT3DSDM_KEYFRAME_H
 
 #include "IKeyframe.h"
 
@@ -42,26 +40,13 @@ class CCmdBatch;
 class COffsetKeyframesCommandHelper;
 struct Keyframe;
 
-//==============================================================================
-/**
- *	Wrapper for a keyframe in DataModel.
- */
-//==============================================================================
 class Qt3DSDMTimelineKeyframe : public IKeyframe
 {
 public:
     typedef std::vector<qt3dsdm::Qt3DSDMKeyframeHandle> TKeyframeHandleList;
 
-protected:
-    TKeyframeHandleList
-        m_KeyframeHandles; ///< no. corresponds to the channels the animated property has.
-    CDoc *m_Doc;
-    bool m_Selected;
-    Keyframe *m_ui = nullptr;
-
-public:
     Qt3DSDMTimelineKeyframe(IDoc *inDoc);
-    virtual ~Qt3DSDMTimelineKeyframe();
+    virtual ~Qt3DSDMTimelineKeyframe() override;
 
     // IKeyframe
     bool IsSelected() const override;
@@ -79,6 +64,12 @@ public:
     void GetKeyframeHandles(TKeyframeHandleList &outList) const;
 
     static float GetTimeInSecs(long inTime);
+
+private:
+    TKeyframeHandleList m_KeyframeHandles; // channels handles of the animated property
+    CDoc *m_Doc = nullptr;
+    bool m_Selected = false;
+    Keyframe *m_ui = nullptr;
 };
 
 #endif // QT3DSDM_KEYFRAME_H

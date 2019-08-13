@@ -43,8 +43,7 @@ using namespace qt3dsdm;
 
 // TODO: figure out if we can just use IDoc instead of CDoc
 Qt3DSDMTimelineKeyframe::Qt3DSDMTimelineKeyframe(IDoc *inDoc)
-    : m_Doc(dynamic_cast<CDoc *>(inDoc))
-    , m_Selected(false)
+    : m_Doc(static_cast<CDoc *>(inDoc))
 {
 }
 

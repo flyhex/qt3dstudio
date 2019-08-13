@@ -66,8 +66,7 @@ public:
     virtual IKeyframe *GetKeyframeByIndex(long inIndex) const = 0;
     virtual long GetKeyframeCount() const = 0;
     virtual size_t GetChannelCount() const = 0;
-    virtual float GetChannelValueAtTime(long inChannelIndex, long inTime) = 0;
-    virtual void SetChannelValueAtTime(long inChannelIndex, long inTime, float inValue) = 0;
+    virtual float GetChannelValueAtTime(size_t chIndex, long time) = 0;
     virtual bool IsDynamicAnimation() = 0;
 };
 

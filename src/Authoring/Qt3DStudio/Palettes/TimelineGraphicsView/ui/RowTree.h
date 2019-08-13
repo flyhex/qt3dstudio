@@ -203,7 +203,6 @@ private:
     TimelineGraphicsScene *m_scene;
     RowTreeLabelItem m_labelItem;
     EStudioObjectType m_objectType = OBJTYPE_UNKNOWN;
-    QString m_propertyType; // for property rows
     QString m_label;
     QList<RowTree *> m_childRows;
     QList<RowTree *> m_childProps;
@@ -219,6 +218,7 @@ private:
     QRect m_rectType;
     QRect m_rectMaximizePropGraph;
     QRect m_rectFitPropGraph;
+    QRect m_rectColorGradient;
     QVector<QRect> m_rectChannels;
     QVector<bool> m_activeChannels;
 

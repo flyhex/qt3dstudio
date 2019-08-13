@@ -181,6 +181,7 @@ void Ruler::setViewportX(int viewportX)
     }
 }
 
+// x position at the left edge of the timeline (0 when no scrolling)
 int Ruler::viewportX() const
 {
     return m_viewportX;

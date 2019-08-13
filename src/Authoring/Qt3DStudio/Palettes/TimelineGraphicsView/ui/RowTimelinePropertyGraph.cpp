@@ -121,7 +121,9 @@ void RowTimelinePropertyGraph::paintGraphs(QPainter *painter, const QRectF &rect
         int start_j = qMax(rect.x(), edgeOffset.x());
         for (int j = start_j; j < rect.right(); j += 5) { // 5 = sampling step in pixels
             long time = (j - edgeOffset.x()) / (RULER_MILLI_W * timelineScale); // millis
-            qreal value = m_propBinding->GetChannelValueAtTime(m_activeChannelsIndex[i], time);
+            float value = m_propBinding->GetChannelValueAtTime(m_activeChannelsIndex[i], time);
+            adjustColorProperty(value);
+
             qreal yPos = m_graphY - value * m_valScale;
 
             if (j == start_j)
@@ -278,6 +280,8 @@ QPointF RowTimelinePropertyGraph::getBezierControlPosition(const SBezierKeyframe
 // time is in seconds
 QPointF RowTimelinePropertyGraph::getKeyframePosition(float time, float value) const
 {
+    adjustColorProperty(value);
+
     return QPointF(m_rowTimeline->rowTree()->m_scene->ruler()->timeToDistance(time * 1000),
                    m_graphY - value * m_valScale);
 }
@@ -297,6 +301,7 @@ void RowTimelinePropertyGraph::updateBezierControlValue(TimelineControlType cont
     // time and value at current mouse position
     float time = m_rowTimeline->rowTree()->m_scene->ruler()->distanceToTime(p.x()) / 1000.f; // secs
     float value = (m_graphY - p.y()) / m_valScale;
+    adjustColorProperty(value, false);
 
     SBezierKeyframe kf = get<SBezierKeyframe>(m_currKeyframeData.second);
     bool isBezierIn = controlType == TimelineControlType::BezierInHandle;
@@ -407,12 +412,22 @@ void RowTimelinePropertyGraph::fitGraph()
         }
     }
 
+    adjustColorProperty(maxVal);
+    adjustColorProperty(minVal);
+
     m_valScale = m_graphH / (maxVal - minVal);
     checkValScaleLimits();
 
     m_graphY = (m_rowTimeline->size().height() + (maxVal + minVal) * m_valScale) / 2;
 
     m_rowTimeline->update();
+}
+
+// show color properties values in the range 0-255
+void RowTimelinePropertyGraph::adjustColorProperty(float &val, bool scaleUp) const
+{
+    if (m_rowTimeline->isColorProperty())
+        scaleUp ? val *= 255.f : val /= 255.f;
 }
 
 void RowTimelinePropertyGraph::checkValScaleLimits()

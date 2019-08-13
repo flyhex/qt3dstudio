@@ -37,7 +37,6 @@ struct Keyframe
 {
     Keyframe(long time, RowTimeline *propRow)
         : time(time)
-        , propertyType(propRow->rowTree()->propertyType())
         , rowProperty(propRow)
         , rowMaster(propRow->parentRow())
     {}
@@ -48,7 +47,6 @@ struct Keyframe
     }
 
     long time; // millis
-    QString propertyType;
     RowTimeline *rowProperty = nullptr;
     RowTimeline *rowMaster = nullptr;
     Qt3DSDMTimelineKeyframe *binding = nullptr;

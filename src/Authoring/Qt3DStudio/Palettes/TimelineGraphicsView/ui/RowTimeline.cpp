@@ -52,6 +52,8 @@
 #include <QtWidgets/qlabel.h>
 #include <QtCore/qdatetime.h>
 
+using namespace TimelineConstants;
+
 RowTimeline::RowTimeline()
     : InteractiveTimelineItem()
 {
@@ -104,10 +106,11 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     if (!y()) // prevents flickering when the row is just inserted to the layout
         return;
 
-    const int currentHeight = size().height() - 1;
+    const int currHeight = size().height() - 1;
 
-    if (isColorProperty() && !m_keyframes.empty()) {
-        drawColorPropertyGradient(painter, widget->width());
+    if (m_isColorProperty && m_drawColorGradient && !m_keyframes.empty()) {
+        QRectF gradRect(rowTree()->m_scene->ruler()->viewportX(), 0, widget->width(), currHeight);
+        drawColorPropertyGradient(painter, gradRect);
     } else {
         // Background
         QColor bgColor;
@@ -119,7 +122,7 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
             bgColor = CStudioPreferences::timelineRowColorOver();
         else
             bgColor = CStudioPreferences::timelineRowColorNormal();
-        painter->fillRect(0, 0, size().width(), currentHeight, bgColor);
+        painter->fillRect(0, 0, size().width(), currHeight, bgColor);
     }
 
     const double edgeOffset = TimelineConstants::RULER_EDGE_OFFSET;
@@ -134,13 +137,13 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
             painter->setBrush(QBrush(CStudioPreferences::timelineRowColorDurationOff1(),
                                      Qt::BDiagPattern));
             painter->setPen(Qt::NoPen);
-            painter->fillRect(QRect(edgeOffset + m_startX, 0, m_endX - m_startX, currentHeight),
+            painter->fillRect(QRect(edgeOffset + m_startX, 0, m_endX - m_startX, currHeight),
                               CStudioPreferences::timelineRowColorDurationOff2());
-            painter->drawRect(QRect(edgeOffset + m_startX, 0, m_endX - m_startX, currentHeight));
+            painter->drawRect(QRect(edgeOffset + m_startX, 0, m_endX - m_startX, currHeight));
 
             painter->setPen(QPen(CStudioPreferences::timelineRowColorDurationEdge(), 2));
-            painter->drawLine(edgeOffset + m_startX, 0, edgeOffset + m_startX, currentHeight);
-            painter->drawLine(edgeOffset + m_endX, 0, edgeOffset + m_endX, currentHeight);
+            painter->drawLine(edgeOffset + m_startX, 0, edgeOffset + m_startX, currHeight);
+            painter->drawLine(edgeOffset + m_endX, 0, edgeOffset + m_endX, currHeight);
         } else {
             // draw main duration part
             double x = edgeOffset + qMax(m_startX, m_minStartX);
@@ -150,38 +153,37 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
             painter->setPen(Qt::NoPen);
 
             if (m_controllerDataInput.size()) {
-                painter->fillRect(QRect(x, 0, w, currentHeight),
+                painter->fillRect(QRect(x, 0, w, currHeight),
                                   CStudioPreferences::dataInputColor());
             } else if (m_rowTree->indexInLayout() != 1) {
-                painter->fillRect(QRect(x, 0, w, currentHeight), m_barColor);
+                painter->fillRect(QRect(x, 0, w, currHeight), m_barColor);
             }
 
             if (m_state == Selected) {
                 // draw selection overlay on bar
-                painter->fillRect(QRect(x, marginY, w, currentHeight - marginY * 2),
+                painter->fillRect(QRect(x, marginY, w, currHeight - marginY * 2),
                                   CStudioPreferences::timelineRowColorDurationSelected());
             }
 
             if (m_controllerDataInput.size()) {
-                static const QPixmap pixDataInput = QPixmap(":/images/Objects-DataInput-White.png");
-                static const QPixmap pixDataInput2x
-                        = QPixmap(":/images/Objects-DataInput-White@2x.png");
+                static const QPixmap pixDataInput(":/images/Objects-DataInput-White.png");
+                static const QPixmap pixDataInput2x(":/images/Objects-DataInput-White@2x.png");
                 static const QFontMetrics fm(painter->font());
 
                 // need clip region to limit datainput icon visibility to the same rect as we use
                 // for text
-                painter->setClipRect(x, 0, w, currentHeight);
+                painter->setClipRect(x, 0, w, currHeight);
                 painter->setClipping(true);
                 painter->setPen(QPen(CStudioPreferences::textColor(), 2));
                 // +5 added to text location to make margin comparable to other datainput controls
-                painter->drawText(QRect(x + pixDataInput.width() + 5, 0, w, currentHeight),
+                painter->drawText(QRect(x + pixDataInput.width() + 5, 0, w, currHeight),
                                   m_controllerDataInput, QTextOption(Qt::AlignCenter));
                 // place the icon in front of the text
                 int textwidth = fm.width(m_controllerDataInput);
-                int iconx = x + (w - textwidth) / 2;
-                if (iconx < x)
-                    iconx = x;
-                painter->drawPixmap(iconx, marginY, hiResIcons ? pixDataInput2x : pixDataInput);
+                int iconX = x + (w - textwidth) / 2;
+                if (iconX < x)
+                    iconX = x;
+                painter->drawPixmap(iconX, marginY, hiResIcons ? pixDataInput2x : pixDataInput);
                 painter->setPen(Qt::NoPen);
                 painter->setClipping(false);
             }
@@ -192,31 +194,29 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
             if (m_startX < m_minStartX) {
                 painter->setPen(Qt::NoPen);
                 painter->fillRect(QRect(edgeOffset + m_startX, 0, m_minStartX - m_startX,
-                                        currentHeight),
+                                        currHeight),
                                   CStudioPreferences::timelineRowColorDurationOff2());
                 painter->drawRect(QRect(edgeOffset + m_startX, 0, m_minStartX - m_startX,
-                                        currentHeight));
+                                        currHeight));
                 painter->setPen(CStudioPreferences::timelineRowColorDurationEdge());
                 painter->drawLine(edgeOffset + m_minStartX, 0, edgeOffset + m_minStartX,
-                                  currentHeight);
+                                  currHeight);
             }
 
             // draw hashed part after
             if (m_endX > m_maxEndX) {
                 painter->setPen(Qt::NoPen);
-                painter->fillRect(QRect(edgeOffset + m_maxEndX, 0, m_endX - m_maxEndX,
-                                        currentHeight),
+                painter->fillRect(QRect(edgeOffset + m_maxEndX, 0, m_endX - m_maxEndX, currHeight),
                                   CStudioPreferences::timelineRowColorDurationOff2());
-                painter->drawRect(QRect(edgeOffset + m_maxEndX, 0, m_endX - m_maxEndX,
-                                        currentHeight));
+                painter->drawRect(QRect(edgeOffset + m_maxEndX, 0, m_endX - m_maxEndX, currHeight));
                 painter->setPen(CStudioPreferences::timelineRowColorDurationEdge());
-                painter->drawLine(edgeOffset + m_maxEndX, 0, edgeOffset + m_maxEndX, currentHeight);
+                painter->drawLine(edgeOffset + m_maxEndX, 0, edgeOffset + m_maxEndX, currHeight);
             }
 
             if (m_rowTree->indexInLayout() != 1) {
                 painter->setPen(QPen(CStudioPreferences::timelineRowColorDurationEdge(), 2));
-                painter->drawLine(edgeOffset + m_startX, 0, edgeOffset + m_startX, currentHeight);
-                painter->drawLine(edgeOffset + m_endX, 0, edgeOffset + m_endX, currentHeight);
+                painter->drawLine(edgeOffset + m_startX, 0, edgeOffset + m_startX, currHeight);
+                painter->drawLine(edgeOffset + m_endX, 0, edgeOffset + m_endX, currHeight);
             }
         }
 
@@ -224,23 +224,21 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     }
 
     if (m_propertyGraph) { // Property graph
-        QRectF graphRect(rowTree()->m_scene->ruler()->viewportX(), 0,
-                         widget->width(), currentHeight);
+        QRectF graphRect(rowTree()->m_scene->ruler()->viewportX(), 0, widget->width(), currHeight);
         m_propertyGraph->paintGraphs(painter, graphRect);
     }
 
     // Keyframes
     const qreal keyFrameH = 16.0;
     const qreal keyFrameHalfH = keyFrameH / 2.0;
-    const qreal keyFrameY = (qMin(currentHeight, TimelineConstants::ROW_H) / 2.0) - keyFrameHalfH;
+    const qreal keyFrameY = (qMin(currHeight, TimelineConstants::ROW_H) / 2.0) - keyFrameHalfH;
     const qreal hiddenKeyFrameY = keyFrameY + (keyFrameH * 2.0 / 3.0) + 2.0;
     const qreal keyFrameOffset = hiResIcons ? 8 : 7.5;
 
     // Hidden descendant keyframe indicators
     if (!m_rowTree->expanded()) {
-        static const QPixmap pixKeyframeHidden = QPixmap(":/images/keyframe-hidden-normal.png");
-        static const QPixmap pixKeyframeHidden2x
-                = QPixmap(":/images/keyframe-hidden-normal@2x.png");
+        static const QPixmap pixKeyframeHidden(":/images/keyframe-hidden-normal.png");
+        static const QPixmap pixKeyframeHidden2x(":/images/keyframe-hidden-normal@2x.png");
         QVector<long> childKeyframeTimes;
         collectChildKeyframeTimes(childKeyframeTimes);
 
@@ -256,30 +254,26 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     }
 
     if (m_rowTree->hasPropertyChildren()) { // object row keyframes
-        static const QPixmap pixKeyframeMasterDisabled
-                = QPixmap(":/images/Keyframe-Master-Disabled.png");
-        static const QPixmap pixKeyframeMasterNormal
-                = QPixmap(":/images/Keyframe-Master-Normal.png");
-        static const QPixmap pixKeyframeMasterSelected
-                = QPixmap(":/images/Keyframe-Master-Selected.png");
-        static const QPixmap pixKeyframeMasterDynamicDisabled
-                = QPixmap(":/images/Keyframe-MasterDynamic-Disabled.png");
-        static const QPixmap pixKeyframeMasterDynamicNormal
-                = QPixmap(":/images/Keyframe-MasterDynamic-Normal.png");
-        static const QPixmap pixKeyframeMasterDynamicSelected
-                = QPixmap(":/images/Keyframe-MasterDynamic-Selected.png");
-        static const QPixmap pixKeyframeMasterDisabled2x
-                = QPixmap(":/images/Keyframe-Master-Disabled@2x.png");
-        static const QPixmap pixKeyframeMasterNormal2x
-                = QPixmap(":/images/Keyframe-Master-Normal@2x.png");
-        static const QPixmap pixKeyframeMasterSelected2x
-                = QPixmap(":/images/Keyframe-Master-Selected@2x.png");
-        static const QPixmap pixKeyframeMasterDynamicDisabled2x
-                = QPixmap(":/images/Keyframe-MasterDynamic-Disabled@2x.png");
-        static const QPixmap pixKeyframeMasterDynamicNormal2x
-                = QPixmap(":/images/Keyframe-MasterDynamic-Normal@2x.png");
-        static const QPixmap pixKeyframeMasterDynamicSelected2x
-                = QPixmap(":/images/Keyframe-MasterDynamic-Selected@2x.png");
+        static const QPixmap pixKeyframeMasterDisabled(":/images/Keyframe-Master-Disabled.png");
+        static const QPixmap pixKeyframeMasterNormal(":/images/Keyframe-Master-Normal.png");
+        static const QPixmap pixKeyframeMasterSelected(":/images/Keyframe-Master-Selected.png");
+        static const QPixmap pixKeyframeMasterDynamicDisabled(":/images/Keyframe-MasterDynamic-"
+                                                              "Disabled.png");
+        static const QPixmap pixKeyframeMasterDynamicNormal(":/images/Keyframe-MasterDynamic-Normal"
+                                                            ".png");
+        static const QPixmap pixKeyframeMasterDynamicSelected(":/images/Keyframe-MasterDynamic-"
+                                                              "Selected.png");
+        static const QPixmap pixKeyframeMasterDisabled2x(":/images/Keyframe-Master-Disabled@2x"
+                                                         ".png");
+        static const QPixmap pixKeyframeMasterNormal2x(":/images/Keyframe-Master-Normal@2x.png");
+        static const QPixmap pixKeyframeMasterSelected2x(":/images/Keyframe-Master-Selected@2x"
+                                                         ".png");
+        static const QPixmap pixKeyframeMasterDynamicDisabled2x(":/images/Keyframe-MasterDynamic-"
+                                                                "Disabled@2x.png");
+        static const QPixmap pixKeyframeMasterDynamicNormal2x(":/images/Keyframe-MasterDynamic-"
+                                                              "Normal@2x.png");
+        static const QPixmap pixKeyframeMasterDynamicSelected2x(":/images/Keyframe-MasterDynamic-"
+                                                                "Selected@2x.png");
         for (auto keyframe : qAsConst(m_keyframes)) {
             QPixmap pixmap;
             if (m_rowTree->locked()) {
@@ -288,7 +282,7 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                                         : pixKeyframeMasterDynamicDisabled;
                 } else {
                     pixmap = hiResIcons ? pixKeyframeMasterDisabled2x
-                                       : pixKeyframeMasterDisabled;
+                                        : pixKeyframeMasterDisabled;
                 }
             } else if (keyframe->selected()) {
                 if (keyframe->dynamic) {
@@ -322,30 +316,27 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
             }
         }
     } else if (m_rowTree->isProperty()) { // property row keyframes
-        static const QPixmap pixKeyframePropertyDisabled
-                = QPixmap(":/images/Keyframe-Property-Disabled.png");
-        static const QPixmap pixKeyframePropertyNormal
-                = QPixmap(":/images/Keyframe-Property-Normal.png");
-        static const QPixmap pixKeyframePropertySelected
-                = QPixmap(":/images/Keyframe-Property-Selected.png");
-        static const QPixmap pixKeyframePropertyDynamicDisabled
-                = QPixmap(":/images/Keyframe-PropertyDynamic-Disabled.png");
-        static const QPixmap pixKeyframePropertyDynamicNormal
-                = QPixmap(":/images/Keyframe-PropertyDynamic-Normal.png");
-        static const QPixmap pixKeyframePropertyDynamicSelected
-                = QPixmap(":/images/Keyframe-PropertyDynamic-Selected.png");
-        static const QPixmap pixKeyframePropertyDisabled2x
-                = QPixmap(":/images/Keyframe-Property-Disabled@2x.png");
-        static const QPixmap pixKeyframePropertyNormal2x
-                = QPixmap(":/images/Keyframe-Property-Normal@2x.png");
-        static const QPixmap pixKeyframePropertySelected2x
-                = QPixmap(":/images/Keyframe-Property-Selected@2x.png");
-        static const QPixmap pixKeyframePropertyDynamicDisabled2x
-                = QPixmap(":/images/Keyframe-PropertyDynamic-Disabled@2x.png");
-        static const QPixmap pixKeyframePropertyDynamicNormal2x
-                = QPixmap(":/images/Keyframe-PropertyDynamic-Normal@2x.png");
-        static const QPixmap pixKeyframePropertyDynamicSelected2x
-                = QPixmap(":/images/Keyframe-PropertyDynamic-Selected@2x.png");
+        static const QPixmap pixKeyframePropertyDisabled(":/images/Keyframe-Property-Disabled.png");
+        static const QPixmap pixKeyframePropertyNormal(":/images/Keyframe-Property-Normal.png");
+        static const QPixmap pixKeyframePropertySelected(":/images/Keyframe-Property-Selected.png");
+        static const QPixmap pixKeyframePropertyDynamicDisabled(":/images/Keyframe-PropertyDynamic-"
+                                                                "Disabled.png");
+        static const QPixmap pixKeyframePropertyDynamicNormal(":/images/Keyframe-PropertyDynamic-"
+                                                              "Normal.png");
+        static const QPixmap pixKeyframePropertyDynamicSelected(":/images/Keyframe-PropertyDynamic-"
+                                                                "Selected.png");
+        static const QPixmap pixKeyframePropertyDisabled2x(":/images/Keyframe-Property-Disabled@2x"
+                                                           ".png");
+        static const QPixmap pixKeyframePropertyNormal2x(":/images/Keyframe-Property-Normal@2x"
+                                                         ".png");
+        static const QPixmap pixKeyframePropertySelected2x(":/images/Keyframe-Property-Selected@2x"
+                                                           ".png");
+        static const QPixmap pixKeyframePropertyDynamicDisabled2x(":/images/Keyframe-Property"
+                                                                  "Dynamic-Disabled@2x.png");
+        static const QPixmap pixKeyframePropertyDynamicNormal2x(":/images/Keyframe-PropertyDynamic-"
+                                                                "Normal@2x.png");
+        static const QPixmap pixKeyframePropertyDynamicSelected2x(":/images/Keyframe-Property"
+                                                                  "Dynamic-Selected@2x.png");
         for (auto keyframe : qAsConst(m_keyframes)) {
             QPixmap pixmap;
             if (m_rowTree->locked()) {
@@ -383,44 +374,32 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     }
 }
 
-bool RowTimeline::isColorProperty() const
+void RowTimeline::toggleColorGradient()
 {
-    ITimelineItemProperty *propBinding = m_rowTree->propBinding();
-    if (propBinding) {
-        qt3dsdm::TDataTypePair type = propBinding->GetType();
-        if (m_rowTree->isProperty()
-                && type.first == qt3dsdm::DataModelDataType::Float4
-                && type.second == qt3dsdm::AdditionalMetaDataType::Color) {
-            return true;
-        }
-    }
-    return false;
+    m_drawColorGradient = !m_drawColorGradient;
+    update();
 }
 
-void RowTimeline::drawColorPropertyGradient(QPainter *painter, int width)
+void RowTimeline::drawColorPropertyGradient(QPainter *painter, const QRectF &rect)
 {
-    // Gradient scaled width, or at least widget width
-    double minWidth = width;
-    double timelineScale = m_rowTree->m_scene->ruler()->timelineScale();
-    double scaledWidth = width * (timelineScale / 2);
-    width = qMax(minWidth, scaledWidth);
-
+    static const QPointF edgeOffset(RULER_EDGE_OFFSET, 0);
     ITimelineItemProperty *propBinding = m_rowTree->propBinding();
-    QLinearGradient bgGradient(0, 0, width, 0);
 
-    for (auto keyframe : qAsConst(m_keyframes)) {
-        double xPos = m_rowTree->m_scene->ruler()->timeToDistance(keyframe->time);
-        double gradPos = xPos / width;
-        gradPos = qBound(0.0, gradPos, 1.0);
-        QColor currentColor;
-        // Get the color at the specified time.
-        currentColor.setRed(propBinding->GetChannelValueAtTime(0, keyframe->time));
-        currentColor.setGreen(propBinding->GetChannelValueAtTime(1, keyframe->time));
-        currentColor.setBlue(propBinding->GetChannelValueAtTime(2, keyframe->time));
-        bgGradient.setColorAt(gradPos, currentColor);
+    QLinearGradient bgGradient(rect.topLeft(), rect.topRight());
+    int start_x = int(qMax(rect.x(), edgeOffset.x()));
+
+    for (int x = start_x; x <= rect.right(); x += 20) { // 20 = sampling step in pixels
+        long time = rowTree()->m_scene->ruler()->distanceToTime(x - edgeOffset.x()); // millis
+        double ratio = qBound(0.0, (x - edgeOffset.x()) / rect.width(), 1.0);
+
+        bgGradient.setColorAt(ratio, QColor::fromRgbF(
+                        qBound(0.0, double(propBinding->GetChannelValueAtTime(0, time)), 1.0),
+                        qBound(0.0, double(propBinding->GetChannelValueAtTime(1, time)), 1.0),
+                        qBound(0.0, double(propBinding->GetChannelValueAtTime(2, time)), 1.0),
+                        qBound(0.0, double(propBinding->GetChannelValueAtTime(3, time)), 1.0)));
     }
-    painter->fillRect(TimelineConstants::RULER_EDGE_OFFSET, 0,
-                      width, size().height() - 1, bgGradient);
+
+    painter->fillRect(rect, bgGradient);
 }
 
 Keyframe *RowTimeline::getClickedKeyframe(const QPointF &scenePos)

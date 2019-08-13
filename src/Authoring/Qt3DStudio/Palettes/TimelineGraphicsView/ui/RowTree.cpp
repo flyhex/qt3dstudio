@@ -76,7 +76,6 @@ RowTree::RowTree(TimelineGraphicsScene *timelineScene, const QString &propType)
     , m_rowTimeline(new RowTimeline())
     , m_isProperty(true)
     , m_scene(timelineScene)
-    , m_propertyType(propType)
     , m_label(propType)
 {
     m_rowTimeline->m_isProperty = true;
@@ -337,8 +336,10 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
             // draw maximize, fit graph buttons
             static const QPixmap pixMaximize(":/images/maximize.png");
             static const QPixmap pixFit(":/images/editcamera_tools_hi-00.png");
+            static const QPixmap pixGradient(":/images/gradient.png");
             static const QPixmap pixMaximizeDisabled(":/images/maximize_disabled.png");
             static const QPixmap pixFitDisabled(":/images/editcamera_tools_hi-00_disabled.png");
+            static const QPixmap pixGradientDisabled(":/images/gradient_disabled.png");
             if (m_PropBinding->animationType() == qt3dsdm::EAnimationTypeBezier) {
                 m_rectMaximizePropGraph.setRect(rightDividerX() - 16 * 1.2,
                                                 TimelineConstants::ROW_H, ICON_SIZE, ICON_SIZE);
@@ -350,6 +351,14 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
                 painter->drawPixmap(m_rectMaximizePropGraph, m_locked ? pixMaximizeDisabled
                                                                       : pixMaximize);
                 painter->drawPixmap(m_rectFitPropGraph, m_locked ? pixFitDisabled : pixFit);
+
+                if (m_rowTimeline->isColorProperty()) {
+                    m_rectColorGradient.setRect(rightDividerX() - 16 * 3.6,
+                                                TimelineConstants::ROW_H, ICON_SIZE, ICON_SIZE);
+                    painter->drawRect(m_rectColorGradient);
+                    painter->drawPixmap(m_rectColorGradient, m_locked ? pixGradientDisabled
+                                                                      : pixGradient);
+                }
             }
 
             // draw channel selection buttons
@@ -616,6 +625,13 @@ void RowTree::setPropBinding(ITimelineItemProperty *binding)
 
     // Update label color
     m_labelItem.setMaster(m_PropBinding->IsMaster());
+
+    // update timeline isColorProperty
+    qt3dsdm::TDataTypePair propType = m_PropBinding->GetType();
+    if (m_isProperty && propType.first == qt3dsdm::DataModelDataType::Float4
+                     && propType.second == qt3dsdm::AdditionalMetaDataType::Color) {
+        m_rowTimeline->m_isColorProperty = true;
+    }
 }
 
 void RowTree::setState(State state)
@@ -660,11 +676,6 @@ int RowTree::depth() const
 EStudioObjectType RowTree::objectType() const
 {
    return m_objectType;
-}
-
-QString RowTree::propertyType() const
-{
-    return m_propertyType;
 }
 
 int RowTree::type() const
@@ -1023,6 +1034,9 @@ void RowTree::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
     } else if (m_rectFitPropGraph.contains(p)) {
         setToolTip(tr("Fit curves"));
         hoveredRect = &m_rectFitPropGraph;
+    } else if (m_rectColorGradient.contains(p)) {
+        setToolTip(tr("Toggle color gradient"));
+        hoveredRect = &m_rectColorGradient;
     } else {
         setToolTip({});
 
@@ -1081,6 +1095,8 @@ TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
                     ? TimelineConstants::ROW_GRAPH_H_MAX : TimelineConstants::ROW_GRAPH_H;
             m_rowTimeline->propertyGraph()->setExpandHeight(m_propGraphHeight);
             animateExpand(ExpandState::Expanded);
+        } else if (m_rectColorGradient.contains(p)) { // toggle color gradient
+            m_rowTimeline->toggleColorGradient();
         } else { // toggle channels
             auto it = std::find_if(m_rectChannels.begin(), m_rectChannels.end(),
                                    [&p](const QRect &r){ return r.contains(p); });
@@ -1093,7 +1109,7 @@ TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
                 bool isSingleSelected = numSelectedChannel == 1 && m_activeChannels[chIdx];
                 bool isMultiSelected = numSelectedChannel > 1 && m_activeChannels[chIdx];
                 if (!isSingleSelected && !(isMultiSelected && !ctrlDown))
-                    m_activeChannels[chIdx] ^= 1;
+                    m_activeChannels[chIdx] = !m_activeChannels[chIdx];
 
                 if (!ctrlDown) {
                     for (int i = 0; i < m_activeChannels.size(); ++i) {

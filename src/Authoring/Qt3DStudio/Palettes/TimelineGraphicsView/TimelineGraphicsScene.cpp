@@ -853,7 +853,8 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
                 }
             } else if (m_clickedTimelineControlType == TimelineControlType::BezierInHandle
                        || m_clickedTimelineControlType == TimelineControlType::BezierOutHandle) {
-                m_editedTimelineRow->propertyGraph()->commitBezierEdit();
+                if (m_editedTimelineRow->propertyGraph())
+                    m_editedTimelineRow->propertyGraph()->commitBezierEdit();
             }
         } else if (!m_rulerPressed && (!m_releaseSelectRow.isNull() || !itemAt(event->scenePos(),
                                                                                QTransform()))) {

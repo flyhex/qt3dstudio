@@ -56,12 +56,6 @@ bool SortKeyframeByTime(const Qt3DSDMTimelineKeyframe *inLHS, const Qt3DSDMTimel
     return inLHS->GetTime() < inRHS->GetTime();
 }
 
-// DataModel stores it from 0..1, UI expects 0..255
-inline float DataModelToColor(float inValue)
-{
-    return inValue * 255;
-}
-
 Qt3DSDMTimelineItemProperty::Qt3DSDMTimelineItemProperty(CTimelineTranslationManager *inTransMgr,
                                                        Qt3DSDMPropertyHandle inPropertyHandle,
                                                        Qt3DSDMInstanceHandle inInstance)
@@ -250,14 +244,13 @@ size_t Qt3DSDMTimelineItemProperty::GetChannelCount() const
     return m_AnimationHandles.size();
 }
 
-float Qt3DSDMTimelineItemProperty::GetChannelValueAtTime(long inChannelIndex, long inTime)
+float Qt3DSDMTimelineItemProperty::GetChannelValueAtTime(size_t chIndex, long time)
 {
     // if no keyframes, get current property value.
     if (m_Keyframes.empty()) {
         Qt3DSDMTimelineItemBinding *theParentBinding =
             static_cast<Qt3DSDMTimelineItemBinding *>(GetParentBinding(m_rowTree));
         if (theParentBinding) {
-
             SValue theValue;
             qt3dsdm::IPropertySystem *thePropertySystem =
                 m_TransMgr->GetStudioSystem()->GetPropertySystem();
@@ -265,67 +258,39 @@ float Qt3DSDMTimelineItemProperty::GetChannelValueAtTime(long inChannelIndex, lo
                                                         m_PropertyHandle, theValue);
             switch (m_Type.first) {
             case DataModelDataType::Float4: {
-                if (m_Type.second == AdditionalMetaDataType::Color) {
-                    SFloat4 theFloat4 = qt3dsdm::get<SFloat4>(theValue);
-                    if (inChannelIndex >= 0 && inChannelIndex < 4)
-                        return DataModelToColor(theFloat4[inChannelIndex]);
-                } else {
-                    SFloat4 theFloat4 = qt3dsdm::get<SFloat4>(theValue);
-                    if (inChannelIndex >= 0 && inChannelIndex < 4)
-                        return theFloat4[inChannelIndex];
-                }
+                SFloat4 theFloat4 = qt3dsdm::get<SFloat4>(theValue);
+                if (chIndex < 4)
+                    return theFloat4[chIndex];
                 break;
             }
             case DataModelDataType::Float3: {
                 SFloat3 theFloat3 = qt3dsdm::get<SFloat3>(theValue);
-                if (inChannelIndex >= 0 && inChannelIndex < 3)
-                    return theFloat3[inChannelIndex];
+                if (chIndex < 3)
+                    return theFloat3[chIndex];
                 break;
             }
             case DataModelDataType::Float2: {
                 SFloat2 theFloat2 = qt3dsdm::get<SFloat2>(theValue);
-                if (inChannelIndex >= 0 && inChannelIndex < 2)
-                    return theFloat2[inChannelIndex];
+                if (chIndex < 2)
+                    return theFloat2[chIndex];
                 break;
             }
             case DataModelDataType::Float:
                 return qt3dsdm::get<float>(theValue);
-                break;
+
             default: // TODO: handle other types
                 break;
             }
         }
     }
-    IAnimationCore *theAnimationCore = m_TransMgr->GetStudioSystem()->GetAnimationCore();
-    if (!m_AnimationHandles.empty() && inChannelIndex >= 0
-        && inChannelIndex < (long)m_AnimationHandles.size()) {
-        float theValue = theAnimationCore->EvaluateAnimation(
-            m_AnimationHandles[inChannelIndex], Qt3DSDMTimelineKeyframe::GetTimeInSecs(inTime));
-        if (m_Type.first == DataModelDataType::Float4
-            && m_Type.second == AdditionalMetaDataType::Color)
-            theValue = DataModelToColor(theValue);
 
-        return theValue;
+    IAnimationCore *animCore = m_TransMgr->GetStudioSystem()->GetAnimationCore();
+    if (!m_AnimationHandles.empty() && chIndex < m_AnimationHandles.size()) {
+        return animCore->EvaluateAnimation(m_AnimationHandles[chIndex],
+                                           Qt3DSDMTimelineKeyframe::GetTimeInSecs(time));
     }
+
     return 0.f;
-}
-
-void Qt3DSDMTimelineItemProperty::SetChannelValueAtTime(long inChannelIndex, long inTime,
-                                                       float inValue)
-{
-    Qt3DSDMTimelineKeyframe *theKeyframeWrapper =
-        dynamic_cast<Qt3DSDMTimelineKeyframe *>(GetKeyframeByTime(inTime));
-    if (theKeyframeWrapper) {
-        Qt3DSDMTimelineKeyframe::TKeyframeHandleList theKeyframes;
-        theKeyframeWrapper->GetKeyframeHandles(theKeyframes);
-        if (!theKeyframes.empty() && inChannelIndex < (long)theKeyframes.size()) {
-            inValue /= 255;
-            if (!m_SetKeyframeValueCommand)
-                m_SetKeyframeValueCommand = new CCmdDataModelSetKeyframeValue(
-                    g_StudioApp.GetCore()->GetDoc(), theKeyframes[inChannelIndex], inValue);
-            m_SetKeyframeValueCommand->Update(inValue);
-        }
-    }
 }
 
 void Qt3DSDMTimelineItemProperty::setRowTree(RowTree *rowTree)

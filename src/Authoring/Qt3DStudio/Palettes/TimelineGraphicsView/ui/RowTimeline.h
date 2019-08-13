@@ -85,6 +85,8 @@ public:
     QList<Keyframe *> getKeyframesInRange(const QRectF &rect) const;
     QList<Keyframe *> keyframes() const;
     void showToolTip(const QPointF &pos);
+    void toggleColorGradient();
+    bool isColorProperty() const { return m_isColorProperty; }
     RowTimelinePropertyGraph *propertyGraph() const { return m_propertyGraph; }
 
 protected:
@@ -98,8 +100,7 @@ private:
     void updateChildrenMaxEndXRecursive(RowTree *rowTree);
     void updateCommentItem();
     void updateCommentItemPos();
-    void drawColorPropertyGradient(QPainter *painter, int width);
-    bool isColorProperty() const;
+    void drawColorPropertyGradient(QPainter *painter, const QRectF &rect);
     QString formatTime(long millis) const;
     void collectChildKeyframeTimes(QVector<long> &childKeyframeTimes);
 
@@ -115,6 +116,8 @@ private:
     double m_minStartX = 0;
     double m_maxEndX = 0;
     bool m_isProperty = false; // used in the destructor
+    bool m_isColorProperty = false;
+    bool m_drawColorGradient = true;
     QString m_controllerDataInput;
     QList<Keyframe *> m_keyframes;
     QColor m_barColor;

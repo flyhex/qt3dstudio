@@ -67,8 +67,7 @@ public:
     IKeyframe *GetKeyframeByIndex(long inIndex) const override;
     long GetKeyframeCount() const override;
     size_t GetChannelCount() const override;
-    float GetChannelValueAtTime(long inChannelIndex, long inTime) override;
-    void SetChannelValueAtTime(long inChannelIndex, long inTime, float inValue) override;
+    float GetChannelValueAtTime(size_t chIndex, long time) override;
     bool IsDynamicAnimation() override;
     void setRowTree(RowTree *rowTree) override;
     RowTree *getRowTree() const override;
