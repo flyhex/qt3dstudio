@@ -343,6 +343,8 @@ void CMainFrame::setActionsEnabledStatus(bool enabled)
     m_ui->actionData_InputsGenerate->setEnabled(enabled);
     m_ui->actionAutoset_Keyframes->setEnabled(enabled);
     m_ui->action_Duplicate_Object->setEnabled(enabled);
+    m_ui->actionStudio_Preferences->setEnabled(enabled);
+    m_ui->actionPresentation_Settings->setEnabled(enabled);
     // Note: actionRemote_Preview is special case, disabled here
     // while enabled by OnConnectionChanged
     if (!enabled)
