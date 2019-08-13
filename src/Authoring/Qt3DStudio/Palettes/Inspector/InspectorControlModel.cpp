@@ -1337,9 +1337,9 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
         if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::Color) {
             element->m_value = qt3dsdm::get<QColor>(value);
         } else if (element->m_propertyType == qt3dsdm::AdditionalMetaDataType::None) {
-            const QVector<float> theFloat4 = qt3dsdm::get<QVector<float>>(value);
-            const QList<double> float4Values{theFloat4[0], theFloat4[1], theFloat4[2],
-                        theFloat4[3]};
+            const QVector4D theFloat4 = qt3dsdm::get<QVector4D>(value);
+            const QList<double> float4Values{theFloat4.x(), theFloat4.y(), theFloat4.z(),
+                        theFloat4.w()};
             element->m_values = QVariant::fromValue<QList<double> >(float4Values);
         }
         break;
