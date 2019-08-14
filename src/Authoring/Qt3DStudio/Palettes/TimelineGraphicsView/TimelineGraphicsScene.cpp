@@ -344,6 +344,7 @@ TimelineGraphicsScene::~TimelineGraphicsScene()
     disconnect(qApp, &QApplication::focusChanged,
                this, &TimelineGraphicsScene::handleApplicationFocusLoss);
     delete m_dataInputSelector;
+    delete m_keyframeManager;
 }
 
 void TimelineGraphicsScene::setTimelineScale(int scl)

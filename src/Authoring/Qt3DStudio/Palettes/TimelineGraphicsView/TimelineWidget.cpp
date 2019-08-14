@@ -323,6 +323,7 @@ TimelineWidget::~TimelineWidget()
     CStudioPreferences::SetTimelineSplitterLocation(m_graphicsScene->treeWidth());
     CStudioPreferences::savePreferences();
     m_graphicsScene->keyframeManager()->deselectAllKeyframes();
+    g_StudioApp.GetCore()->GetDoc()->SetKeyframesManager(nullptr);
     delete m_BreadCrumbProvider;
 }
 
