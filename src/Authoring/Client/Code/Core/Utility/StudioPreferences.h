@@ -107,9 +107,6 @@ public:
     static long GetDefaultObjectLifetime();
     static void SetDefaultObjectLifetime(long inLifetime);
 
-    static bool showEditModePreview();
-    static void setShowEditModePreview(bool show);
-
     static bool editModeLightingEnabled();
     static void setEditModeLightingEnabled(bool enabled);
 

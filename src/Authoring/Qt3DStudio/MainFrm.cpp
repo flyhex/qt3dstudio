@@ -182,7 +182,6 @@ CMainFrame::CMainFrame()
                 m_ui->actionHelper_Grid->toolTip().arg(
                     m_ui->actionHelper_Grid->shortcut().toString(QKeySequence::NativeText)));
 
-    connect(m_ui->actionCamera_Preview, &QAction::triggered, this, &CMainFrame::OnShowEditPreview);
     connect(m_ui->actionEdit_Lighting, &QAction::triggered, this,
             &CMainFrame::OnEditViewLightingEnabled);
 //    connect(m_ui->actionFind, &QAction::triggered, this, &CMainFrame::onViewFind); // TODO: Implement
@@ -305,7 +304,6 @@ CMainFrame::CMainFrame()
         OnUpdateViewGuidesRulers();
         OnUpdateClearGuides();
         OnUpdateLockGuides();
-        OnUpdateCameraPreview();
         OnUpdateEditViewLightingEnabled();
     });
 
@@ -914,9 +912,9 @@ void CMainFrame::EditPreferences(short inPageIndex)
         CStudioPreferences::SetAutoSaveDelay(CStudioPreferences::DEFAULT_AUTOSAVE_DELAY);
         CStudioPreferences::SetAutoSavePreference(true);
         CStudioPreferences::setSelectorLineWidth(
-                    (float)CStudioPreferences::DEFAULT_SELECTOR_WIDTH / 10.0f);
+                    float(CStudioPreferences::DEFAULT_SELECTOR_WIDTH / 10.0f));
         CStudioPreferences::setSelectorLineLength(
-                    (float)CStudioPreferences::DEFAULT_SELECTOR_LENGTH);
+                    float(CStudioPreferences::DEFAULT_SELECTOR_LENGTH));
 
         RecheckSizingMode();
 
@@ -993,6 +991,7 @@ void CMainFrame::OnPlayStop()
  */
 void CMainFrame::OnTimeChanged(long inTime)
 {
+    Q_UNUSED(inTime)
 }
 
 /**
@@ -1127,6 +1126,7 @@ void CMainFrame::OnPlaybackRewind()
  */
 void CMainFrame::RegisterGlobalKeyboardShortcuts(CHotKeys *inHotKeys, QWidget *actionParent)
 {
+    Q_UNUSED(inHotKeys)
     // Default undo shortcut is Ctrl-Y, which is specified in main form. Let's add the common
     // alternate shortcut for redo, CTRL-SHIFT-Z
     ADD_GLOBAL_SHORTCUT(actionParent,
@@ -1461,12 +1461,6 @@ void CMainFrame::OnUpdateLockGuides()
     m_ui->actionLock_Guides->setEnabled(enable);
     // Set to the inverse of guides editable.
     m_ui->actionLock_Guides->setChecked(!g_StudioApp.getRenderer().AreGuidesEditable());
-}
-
-void CMainFrame::OnUpdateCameraPreview()
-{
-    m_ui->actionCamera_Preview->setChecked(CStudioPreferences::showEditModePreview());
-    g_StudioApp.getRenderer().RequestRender();
 }
 
 void CMainFrame::OnUpdateEditViewLightingEnabled()
@@ -1869,12 +1863,6 @@ void CMainFrame::OnShowAction()
 void CMainFrame::OnShowInspector()
 {
     m_paletteManager->ShowControl(CPaletteManager::CONTROLTYPE_INSPECTOR);
-}
-
-void CMainFrame::OnShowEditPreview()
-{
-    bool show = CStudioPreferences::showEditModePreview();
-    CStudioPreferences::setShowEditModePreview(!show);
 }
 
 void CMainFrame::OnEditViewLightingEnabled()

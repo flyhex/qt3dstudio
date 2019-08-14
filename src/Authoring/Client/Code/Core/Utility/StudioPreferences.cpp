@@ -1170,16 +1170,6 @@ QString CStudioPreferences::GetVersionString()
     return theVersionNumber;
 }
 
-bool CStudioPreferences::showEditModePreview()
-{
-    return m_preferences->GetValue("showEditModePreview", false);
-}
-
-void CStudioPreferences::setShowEditModePreview(bool show)
-{
-    m_preferences->SetValue("showEditModePreview", show);
-}
-
 bool CStudioPreferences::editModeLightingEnabled()
 {
     return m_preferences->GetValue("editModeLightingEnabled", true);

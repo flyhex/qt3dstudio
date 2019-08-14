@@ -412,8 +412,6 @@ namespace studio {
         QT3DSVec4 m_guideFillColor;
         QT3DSVec4 m_selectedGuideFillColor;
 
-        const float m_overlayPreviewSize = 600.0f;
-
         NVScopedRefCounted<qt3ds::render::NVRenderTexture2D> m_previewTexture;
         NVScopedRefCounted<qt3ds::render::NVRenderFrameBuffer> m_previewFbo;
         NVScopedRefCounted<qt3ds::render::NVRenderRenderBuffer> m_previewRenderBuffer;
@@ -502,10 +500,7 @@ namespace studio {
 
         QT3DSVec2 GetViewportDimensions() const { return m_Viewport; }
         QT3DSVec2 GetPreviewViewportDimensions() const;
-        QT3DSVec2 GetOverlayPreviewDimensions() const;
         qt3ds::render::NVRenderRect GetPreviewViewport() const;
-        qt3ds::render::NVRenderRect GetOverlayPreviewViewport() const;
-        bool hasRoomForOverlayPreview() const;
 
         void ClearDirtySet()
         {
@@ -528,8 +523,7 @@ namespace studio {
         DeactivateScan(SGraphObjectTranslator &inParent,
                        qt3dsdm::Qt3DSDMInstanceHandle inAliasHandle = qt3dsdm::Qt3DSDMInstanceHandle());
         void PreRender(bool scenePreviewPass);
-        void Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPass,
-                    bool overlayPreview);
+        void Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPass);
         void EndRender();
         void DoPrepareForDrag(SNode *inSelectedNode);
         void ResetWidgets();

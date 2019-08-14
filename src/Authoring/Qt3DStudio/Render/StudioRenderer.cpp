@@ -457,26 +457,20 @@ struct SRendererImpl : public IStudioRenderer,
         m_RenderRequested = false;
         if (!m_Closed && IsInitialized()) {
             m_RenderContext->BeginRender();
-            bool overlayPreview = false;
-            if (m_Translation) {
-                overlayPreview = CStudioPreferences::showEditModePreview()
-                        && m_Translation->m_EditCameraEnabled
-                        && m_Translation->hasRoomForOverlayPreview();
-                m_Translation->PreRender(overlayPreview || m_fullSizePreview);
-            }
+            if (m_Translation)
+                m_Translation->PreRender(m_fullSizePreview);
             NVRenderContext &theContext = m_RenderContext->GetRenderContext();
             theContext.SetDepthWriteEnabled(true);
             theContext.Clear(qt3ds::render::NVRenderClearFlags(
                                  qt3ds::render::NVRenderClearValues::Color
                                  | qt3ds::render::NVRenderClearValues::Depth));
             if (m_Translation) {
-                if (overlayPreview || m_fullSizePreview) {
-                    // Full size preview is used for both scene camera tab and overlay preview
-                    m_Translation->Render(0, false, true, false);
+                if (m_fullSizePreview) {
+                    // Full size preview is used for scene camera tab
+                    m_Translation->Render(0, false, true);
                     m_Translation->PreRender(false);
                 }
-                m_Translation->Render(m_PickResult.GetWidgetId(), m_GuidesEnabled, false,
-                                      overlayPreview);
+                m_Translation->Render(m_PickResult.GetWidgetId(), m_GuidesEnabled, false);
             }
 
             m_RenderContext->EndRender();

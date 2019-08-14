@@ -2191,26 +2191,6 @@ QT3DSVec2 STranslation::GetPreviewViewportDimensions() const
     return QT3DSVec2(thePresSize.width(), thePresSize.height());
 }
 
-qt3ds::QT3DSVec2 STranslation::GetOverlayPreviewDimensions() const
-{
-    QT3DSVec2 ret(0.0f);
-    if (hasRoomForOverlayPreview()) {
-        CStudioProjectSettings *theSettings = m_Doc.GetCore()->GetStudioProjectSettings();
-        QSize thePresSize = theSettings->getPresentationSize();
-        ret = QT3DSVec2(thePresSize.width(), thePresSize.height());
-
-        const float aspect = ret.x / ret.y;
-        if (aspect > 1.0) {
-            ret.x = m_overlayPreviewSize > ret.x ? ret.x : m_overlayPreviewSize;
-            ret.y = ret.x / aspect;
-        } else {
-            ret.y = m_overlayPreviewSize > ret.y ? ret.y : m_overlayPreviewSize;
-            ret.x = ret.y * aspect;
-        }
-    }
-    return ret;
-}
-
 void STranslation::PreRender(bool scenePreviewPass)
 {
     // Run through the entire asset graph and mark active or inactive if we have an
@@ -2489,20 +2469,7 @@ qt3ds::render::NVRenderRect STranslation::GetPreviewViewport() const
     return qt3ds::render::NVRenderRect(0, 0, vp.x, vp.y);
 }
 
-qt3ds::render::NVRenderRect STranslation::GetOverlayPreviewViewport() const
-{
-    QT3DSVec2 vp = GetOverlayPreviewDimensions();
-    return qt3ds::render::NVRenderRect(0, 0, vp.x, vp.y);
-}
-
-bool STranslation::hasRoomForOverlayPreview() const
-{
-    QT3DSVec2 vp(GetViewportDimensions());
-    return vp.x > m_overlayPreviewSize && vp.y > m_overlayPreviewSize;
-}
-
-void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPass,
-                          bool overlayPreview)
+void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPass)
 {
     // For now, we just render.
     // Next step will be to get the bounding boxes and such setup.
@@ -2871,30 +2838,11 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
         }
 
         if (!scenePreviewPass && m_previewTexture) {
-            if (overlayPreview) {
-                // Draw the overlay framebuffer
-                qt3ds::render::NVRenderContext &renderContext(m_Context.GetRenderContext());
-                renderContext.SetViewport(GetOverlayPreviewViewport());
-                qt3ds::render::SCamera camera;
-                camera.MarkDirty(qt3ds::render::NodeTransformDirtyFlag::TransformIsDirty);
-                camera.m_Flags.SetOrthographic(true);
-                QT3DSVec2 previewDims(GetOverlayPreviewDimensions());
-                camera.CalculateGlobalVariables(
-                            render::NVRenderRectF(0, 0, previewDims.x, previewDims.y), previewDims);
-                QT3DSMat44 theVP;
-                camera.CalculateViewProjectionMatrix(theVP);
-                renderContext.SetCullingEnabled(false);
-                renderContext.SetBlendingEnabled(false);
-                renderContext.SetDepthTestEnabled(false);
-                renderContext.SetDepthWriteEnabled(false);
-                m_Context.GetRenderer().RenderQuad(previewDims, theVP, *m_previewTexture);
-            } else {
-                // Hack: For some reason, the m_previewTexture is only valid later if it is
-                // actually drawn somewhere during the main render pass, so draw a dummy quad
-                m_Context.GetRenderContext().SetViewport(NVRenderRect(0, 0, 0, 0));
-                m_Context.GetRenderer().RenderQuad(QT3DSVec2(0.0f), QT3DSMat44(),
-                                                   *m_previewTexture);
-            }
+            // Hack: For some reason, the m_previewTexture is only valid later if it is
+            // actually drawn somewhere during the main render pass, so draw a dummy quad
+            m_Context.GetRenderContext().SetViewport(NVRenderRect(0, 0, 0, 0));
+            m_Context.GetRenderer().RenderQuad(QT3DSVec2(0.0f), QT3DSMat44(),
+                                               *m_previewTexture);
         }
 
         if (scenePreviewPass)

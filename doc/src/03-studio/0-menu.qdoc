@@ -223,9 +223,6 @@
 \li
   \uicontrol{Clear Guides} - Deletes all guides in the scene view.
 \li
-  \uicontrol{Scene Preview} - Toggles visibility of scene preview. Scene preview is a preview of
-  the scene camera view available when using any of the edit views.
-\li
   \uicontrol{Disable Scene Lighting} - Disable lighting from scene lights in edit views,
 \endlist
 
