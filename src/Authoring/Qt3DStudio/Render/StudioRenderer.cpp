@@ -896,7 +896,7 @@ struct SRendererImpl : public IStudioRenderer,
     void OnSceneMouseDrag(SceneDragSenderType::Enum, QPoint inPoint, int inToolMode,
                                   int inFlags) override
     {
-        if (m_Translation == nullptr)
+        if (m_Translation == nullptr || !m_mouseDown)
             return;
 
         inPoint.setX(inPoint.x() * m_pixelRatio);
