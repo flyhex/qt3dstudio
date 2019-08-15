@@ -725,14 +725,16 @@ void TimelineGraphicsScene::updateSnapSteps()
     // i = 1 is always the scene row (or component root)
     for (int i = 2; i < m_layoutTimeline->count(); i++) {
         RowTree *rowTree = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
-        if (rowTree->hasDurationBar() && rowTree->isVisible()) {
-            double startX = rowTree->rowTimeline()->getStartX();
-            if (!m_snapSteps.contains(startX))
-                m_snapSteps.push_back(startX);
+        if (rowTree->isVisible()) {
+            if (rowTree->hasDurationBar()) {
+                double startX = rowTree->rowTimeline()->getStartX();
+                if (!m_snapSteps.contains(startX))
+                    m_snapSteps.push_back(startX);
 
-            double endX = rowTree->rowTimeline()->getEndX();
-            if (!m_snapSteps.contains(endX))
-                m_snapSteps.push_back(endX);
+                double endX = rowTree->rowTimeline()->getEndX();
+                if (!m_snapSteps.contains(endX))
+                    m_snapSteps.push_back(endX);
+            }
 
             // add keyframes times
             if (rowTree->hasPropertyChildren()) {
