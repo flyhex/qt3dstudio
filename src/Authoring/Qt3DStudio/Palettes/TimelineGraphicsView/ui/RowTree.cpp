@@ -366,9 +366,11 @@ void RowTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
                                                                           : QStringLiteral("xyzw");
             for (int i = 0; i < m_rectChannels.size(); ++i) {
                 if (m_activeChannels[i])
-                    painter->fillRect(m_rectChannels[i], CStudioPreferences::selectionColor());
+                    painter->fillRect(m_rectChannels[i], CStudioPreferences::studioColor1());
 
-                painter->setPen(CStudioPreferences::studioColor3());
+                painter->setPen(m_activeChannels[i] && !m_locked
+                                ? CStudioPreferences::getBezierControlColor()
+                                : CStudioPreferences::studioColor3());
                 painter->drawRect(m_rectChannels[i]);
 
                 painter->setPen(m_locked ? CStudioPreferences::studioColor3()
@@ -1468,8 +1470,10 @@ void RowTree::togglePropertyExpanded(const QPointF &scenePos)
             return; // mouse over a channel button
     }
 
-    if (!m_rectFitPropGraph.contains(p) && !m_rectMaximizePropGraph.contains(p))
+    if (!m_rectFitPropGraph.contains(p) && !m_rectMaximizePropGraph.contains(p)
+        && !m_rectColorGradient.contains(p)) {
         setPropertyExpanded(!m_propGraphExpanded);
+    }
 }
 
 void RowTree::setPropertyExpanded(bool expand)
