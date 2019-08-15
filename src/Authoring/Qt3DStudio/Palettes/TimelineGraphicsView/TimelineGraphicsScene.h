@@ -115,9 +115,7 @@ private:
     void commitMoveRows();
     void updateHoverStatus(const QPointF &scenePos);
     void snap(double &value, bool snapToPlayHead = true);
-    QGraphicsItem *getItemBelowType(TimelineItem::ItemType type,
-                                    QGraphicsItem *item,
-                                    const QPointF &scenePos) const;
+    QGraphicsItem *getItemAt(const QPointF &scenePos) const;
     void handleInsertKeyframe();
     void handleDeleteChannelKeyframes();
     void handleSetTimeBarTime();

@@ -485,8 +485,7 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         }  else if (event->button() == Qt::LeftButton) {
             // Start property graph panning
             m_pressPos = event->scenePos();
-            QGraphicsItem *item = getItemBelowType(TimelineItem::TypePlayHead,
-                                                   itemAt(m_pressPos, {}), m_pressPos);
+            QGraphicsItem *item = getItemAt(m_pressPos);
             if (item && item->type() == TimelineItem::TypeRowTimeline) {
                 RowTimeline *rowTimeline = static_cast<RowTimeline *>(item);
                 if (rowTimeline->propertyGraph()) {
@@ -497,7 +496,6 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                     return;
                 }
             }
-
         }
     }
 
@@ -513,10 +511,11 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
     if (!m_widgetTimeline->isFullReconstructPending() && event->button() == Qt::LeftButton) {
         resetMousePressParams();
         m_pressPos = event->scenePos();
-        QGraphicsItem *item = itemAt(m_pressPos, QTransform());
+
+        QGraphicsItem *item = getItemAt(m_pressPos);
+
         const bool ctrlKeyDown = event->modifiers() & Qt::ControlModifier;
         if (item) {
-            item = getItemBelowType(TimelineItem::TypePlayHead, item, m_pressPos);
             if (item->type() == TimelineItem::TypeRuler) {
                 m_rulerPressed = true;
                 m_autoScrollTimelineTimer.start();
@@ -525,9 +524,7 @@ void TimelineGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                     m_rowManager->updateFiltering();
                     updateSnapSteps();
                 }
-            } else if (item->type() == TimelineItem::TypeRowTree
-                       || item->type() == TimelineItem::TypeRowTreeLabelItem) {
-                item = getItemBelowType(TimelineItem::TypeRowTreeLabelItem, item, m_pressPos);
+            } else if (item->type() == TimelineItem::TypeRowTree) {
                 RowTree *rowTree = static_cast<RowTree *>(item);
                 m_clickedTreeControlType = rowTree->getClickedControl(m_pressPos);
                 if (m_clickedTreeControlType == TreeControlType::Shy
@@ -879,18 +876,15 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
 {
     if (event->button() == Qt::LeftButton) {
         const QPointF scenePos = event->scenePos();
-        QGraphicsItem *item = itemAt(scenePos, QTransform());
+        QGraphicsItem *item = getItemAt(scenePos);
+
         if (item) {
-            QGraphicsItem *itemBelowPlayhead =
-                    getItemBelowType(TimelineItem::TypePlayHead, item, scenePos);
-            if (item->type() == TimelineItem::TypeRuler
-                    || itemBelowPlayhead->type() == TimelineItem::TypeRuler) {
+            if (item->type() == TimelineItem::TypeRuler) {
                 CDoc *doc = g_StudioApp.GetCore()->GetDoc();
                 g_StudioApp.GetDialogs()->asyncDisplayTimeEditDialog(doc->GetCurrentViewTime(),
                                                                      doc, PLAYHEAD,
                                                                      m_keyframeManager);
             } else {
-                item = itemBelowPlayhead;
                 if (item->type() == TimelineItem::TypeRowTree) {
                     RowTree *treeItem = static_cast<RowTree *>(item);
                     if (treeItem->isProperty())
@@ -938,7 +932,7 @@ void TimelineGraphicsScene::wheelEvent(QGraphicsSceneWheelEvent *wheelEvent)
     // adjust property graph scale
     if (wheelEvent->modifiers() & Qt::AltModifier) {
         const QPointF pos = wheelEvent->scenePos();
-        QGraphicsItem *item = getItemBelowType(TimelineItem::TypePlayHead, itemAt(pos, {}), pos);
+        QGraphicsItem *item = getItemAt(pos);
         if (item && item->type() == TimelineItem::TypeRowTimeline) {
             RowTimeline *rowTimeline = static_cast<RowTimeline *>(item);
             if (rowTimeline->propertyGraph())
@@ -1026,25 +1020,21 @@ bool TimelineGraphicsScene::event(QEvent *event)
 void TimelineGraphicsScene::updateHoverStatus(const QPointF &scenePos)
 {
     bool variantsAreaHovered = false;
-    QGraphicsItem *item = itemAt(scenePos, QTransform());
+    QGraphicsItem *item = getItemAt(scenePos);
     if (item) {
-        item = getItemBelowType(TimelineItem::TypePlayHead, item, scenePos);
         // update timeline row cursor
         if (item->type() == TimelineItem::TypeRowTimeline) {
-            RowTimeline *timelineItem = static_cast<RowTimeline *>(item);
-            TimelineControlType controlType = timelineItem->getClickedControl(scenePos, true);
+            RowTimeline *rowTimeline = static_cast<RowTimeline *>(item);
+            TimelineControlType controlType = rowTimeline->getClickedControl(scenePos, true);
             if (controlType == TimelineControlType::DurationStartHandle
                     || controlType == TimelineControlType::DurationEndHandle) {
                 setMouseCursor(CMouseCursor::CURSOR_RESIZE_LEFTRIGHT);
             } else {
                 resetMouseCursor();
             }
-        } else if (!m_dragging && (item->type() == TimelineItem::TypeRowTree
-                                   || item->type() == TimelineItem::TypeRowTreeLabelItem)) {
+        } else if (!m_dragging && item->type() == TimelineItem::TypeRowTree) {
             // update tree row variants tooltip
-            RowTree *rowTree = item->type() == TimelineItem::TypeRowTree
-                               ? static_cast<RowTree *>(item)
-                               : static_cast<RowTreeLabelItem *>(item)->parentRow();
+            RowTree *rowTree = static_cast<RowTree *>(item);
             if (!rowTree->isProperty()) {
                 int left = rowTree->clipX();
                 int right = (int)rowTree->treeWidth() - TimelineConstants::TREE_ICONS_W;
@@ -1110,21 +1100,23 @@ void TimelineGraphicsScene::updateHoverStatus(const QPointF &scenePos)
     }
 }
 
-// Return next item below [type] item, or item itself
-// Used at least for skipping PlayHead and RowTreeLabelItem
-QGraphicsItem *TimelineGraphicsScene::getItemBelowType(TimelineItem::ItemType type,
-                                                       QGraphicsItem *item,
-                                                       const QPointF &scenePos) const
+// This method is similar to itemAt() but if it finds a playhead or tree label items, it returns
+// what is below them
+QGraphicsItem *TimelineGraphicsScene::getItemAt(const QPointF &scenePos) const
 {
-    if (!item)
-        return nullptr;
+    const QList<QGraphicsItem *> hoverItems = items(scenePos);
 
-    if (item->type() == type) {
-        const QList<QGraphicsItem *> hoverItems = items(scenePos);
-        if (hoverItems.size() > 1)
-            return hoverItems.at(1);
+    if (!hoverItems.empty()) {
+        QGraphicsItem *item = hoverItems.at(0);
+
+        int typeMask = TimelineItem::TypePlayHead | TimelineItem::TypeRowTreeLabelItem;
+        if (item->type() & typeMask && hoverItems.size() > 1)
+            item = hoverItems.at(1);
+
+        return item;
     }
-    return item;
+
+    return nullptr;
 }
 
 QPoint TimelineGraphicsScene::getScrollbarOffsets() const

@@ -39,16 +39,16 @@ public:
     explicit TimelineItem(TimelineItem *parent = nullptr);
 
     enum ItemType {
-        TypeTimelineItem = UserType + 1,
-        TypeInteractiveTimelineItem,
-        TypeTreeHeader,
-        TypeRowTree,
-        TypeRowTreeLabelItem,
-        TypeRowTimeline,
-        TypeRowTimelineCommentItem,
-        TypePlayHead,
-        TypeRuler,
-        TypeRowMover
+        TypeTimelineItem            = UserType << 1,
+        TypeInteractiveTimelineItem = UserType << 2,
+        TypeTreeHeader              = UserType << 3,
+        TypeRowTree                 = UserType << 4,
+        TypeRowTreeLabelItem        = UserType << 5,
+        TypeRowTimeline             = UserType << 6,
+        TypeRowTimelineCommentItem  = UserType << 7,
+        TypePlayHead                = UserType << 8,
+        TypeRuler                   = UserType << 9,
+        TypeRowMover                = UserType << 10
     };
 
    int type() const override;
