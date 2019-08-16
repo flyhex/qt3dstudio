@@ -1153,7 +1153,7 @@ public:
         SImportComposerTypes theTypes;
         SImportAsset &theAsset(theTypes.GetImportAssetForType(inType));
         DataModelDataType::Value theType(theAsset.GetPropertyDataType(thePropName.wide_str()));
-        size_t arity = GetDatatypeAnimatableArity(theType);
+        size_t arity = getDatatypeAnimatableArity(theType);
         if (arity == 0) {
             QT3DS_ASSERT(false);
             return;

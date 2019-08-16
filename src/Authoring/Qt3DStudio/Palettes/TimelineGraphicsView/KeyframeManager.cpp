@@ -568,7 +568,7 @@ void KeyframeManager::SetKeyframeInterpolation()
 
     float easeIn = CStudioPreferences::GetInterpolation() ? 100 : 0;
     float easeOut = CStudioPreferences::GetInterpolation() ? 100 : 0;
-    GetEaseInOutValues(keyframeData, easeIn, easeOut);
+    getEaseInOutValues(keyframeData, easeIn, easeOut);
 
     if (g_StudioApp.GetDialogs()->displayKeyframeInterpolation(easeIn, easeOut)) {
         // Having "editor" variable here is important as its destructor creates proper transaction
@@ -579,7 +579,7 @@ void KeyframeManager::SetKeyframeInterpolation()
             keyframe->binding->GetKeyframeHandles(keyframeHandles);
             for (size_t i = 0; i < keyframeHandles.size(); ++i) {
                 TKeyframe keyframeData = animCore->GetKeyframeData(keyframeHandles[i]);
-                SetEaseInOutValues(keyframeData, easeIn, easeOut);
+                setEaseInOutValues(keyframeData, easeIn, easeOut);
                 animCore->SetKeyframeData(keyframeHandles[i], keyframeData);
             }
         }

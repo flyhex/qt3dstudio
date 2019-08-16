@@ -97,7 +97,7 @@ void Qt3DSDMTimelineItemProperty::CreateKeyframes()
     DataModelDataType::Value theDataType = thePropertySystem->GetDataType(m_PropertyHandle);
     IStudioAnimationSystem *theAnimationSystem =
         m_TransMgr->GetStudioSystem()->GetAnimationSystem();
-    size_t arity = GetDatatypeAnimatableArity(theDataType);
+    size_t arity = getDatatypeAnimatableArity(theDataType);
     for (size_t i = 0; i < arity; ++i) {
         Qt3DSDMAnimationHandle theAnimationHandle =
             theAnimationSystem->GetControllingAnimation(m_InstanceHandle, m_PropertyHandle, i);
@@ -387,16 +387,16 @@ bool Qt3DSDMTimelineItemProperty::CreateKeyframeIfNonExistent(
     if (m_AnimationHandles.size()
         > 1) { // assert assumption that is only called for the first handle
         Q_ASSERT(m_AnimationHandles[0] == inOwningAnimation);
-        IAnimationCore *theAnimationCore = m_TransMgr->GetStudioSystem()->GetAnimationCore();
-        float theKeyframeTime = KeyframeTime(theAnimationCore->GetKeyframeData(inKeyframeHandle));
+        IAnimationCore *animCore = m_TransMgr->GetStudioSystem()->GetAnimationCore();
+        float keyframeTime = getKeyframeTime(animCore->GetKeyframeData(inKeyframeHandle));
         for (size_t i = 1; i < m_AnimationHandles.size(); ++i) {
             TKeyframeHandleList theKeyframes;
-            theAnimationCore->GetKeyframes(m_AnimationHandles[i], theKeyframes);
+            animCore->GetKeyframes(m_AnimationHandles[i], theKeyframes);
             // the data model ensures that there is only 1 keyframe created for a given time
             for (size_t theKeyIndex = 0; theKeyIndex < theKeyframes.size(); ++theKeyIndex) {
                 float theValue =
-                    KeyframeTime(theAnimationCore->GetKeyframeData(theKeyframes[theKeyIndex]));
-                if (theValue == theKeyframeTime) {
+                    getKeyframeTime(animCore->GetKeyframeData(theKeyframes[theKeyIndex]));
+                if (theValue == keyframeTime) {
                     theNewKeyframe->AddKeyframeHandle(theKeyframes[theKeyIndex]);
                     break;
                 }

@@ -239,8 +239,8 @@ void RowTimelineContextMenu::onAnimTypeChange(QAction *action)
             QVector<SLinearKeyframe> keyframes;
             for (Qt3DSDMKeyframeHandle kfHandle : keyframeHandles) {
                 TKeyframe kfData = animCore->GetKeyframeData(kfHandle);
-                keyframes.append(SLinearKeyframe(KeyframeTime(kfData),
-                                                 KeyframeValueValue(kfData)));
+                keyframes.append(SLinearKeyframe(getKeyframeTime(kfData),
+                                                 getKeyframeValue(kfData)));
             }
             long numFloatsPerKeyframe = sizeof(SLinearKeyframe) / sizeof(float);
             long numValues = long(keyframeHandles.size()) * numFloatsPerKeyframe;
@@ -254,8 +254,8 @@ void RowTimelineContextMenu::onAnimTypeChange(QAction *action)
             QVector<SEaseInEaseOutKeyframe> keyframes;
             for (Qt3DSDMKeyframeHandle kfHandle : keyframeHandles) {
                 TKeyframe kfData = animCore->GetKeyframeData(kfHandle);
-                keyframes.append(SEaseInEaseOutKeyframe(KeyframeTime(kfData),
-                                                        KeyframeValueValue(kfData),
+                keyframes.append(SEaseInEaseOutKeyframe(getKeyframeTime(kfData),
+                                                        getKeyframeValue(kfData),
                                                         easeIn, easeOut));
             }
             long numFloatsPerKeyframe = sizeof(SEaseInEaseOutKeyframe) / sizeof(float);
@@ -268,8 +268,8 @@ void RowTimelineContextMenu::onAnimTypeChange(QAction *action)
             QVector<SBezierKeyframe> keyframes;
             for (Qt3DSDMKeyframeHandle kfHandle : keyframeHandles) {
                 TKeyframe kfData = animCore->GetKeyframeData(kfHandle);
-                float kfTime = KeyframeTime(kfData);
-                float kfValue = KeyframeValueValue(kfData);
+                float kfTime = getKeyframeTime(kfData);
+                float kfValue = getKeyframeValue(kfData);
                 keyframes.append(SBezierKeyframe(kfTime, kfValue,
                                                  kfTime - .5f, kfValue,
                                                  kfTime + .5f, kfValue));

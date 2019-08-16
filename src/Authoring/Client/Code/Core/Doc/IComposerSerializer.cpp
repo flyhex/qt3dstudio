@@ -976,7 +976,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
             SMetaDataPropertyInfo thePropertyInfo(
                         m_MetaData.GetMetaDataPropertyInfo(theMetaDataProperty));
             wstring theName = thePropertyInfo.m_Name.wide_str();
-            size_t theArity = GetDatatypeAnimatableArity(thePropertyInfo.GetDataType());
+            size_t theArity = getDatatypeAnimatableArity(thePropertyInfo.GetDataType());
             if (theArity > 1) {
                 theName.append(L".");
                 switch (theInfo.m_Index) {
@@ -1080,7 +1080,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
             return;
         }
         SMetaDataPropertyInfo theInfo(m_MetaData.GetMetaDataPropertyInfo(theProperty));
-        size_t theArity = GetDatatypeAnimatableArity(theInfo.GetDataType());
+        size_t theArity = getDatatypeAnimatableArity(theInfo.GetDataType());
         if (theArity == 0 || theArity <= subIndex) {
             QT3DS_ASSERT(false);
             return;

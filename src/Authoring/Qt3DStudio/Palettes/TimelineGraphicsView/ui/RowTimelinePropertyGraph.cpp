@@ -110,7 +110,7 @@ void RowTimelinePropertyGraph::paintGraphs(QPainter *painter, const QRectF &rect
     m_animCore->GetKeyframes(m_activeChannels[0], keyframeHandles);
     for (size_t i = 0; i < keyframeHandles.size(); ++i) {
         TKeyframe kf = m_animCore->GetKeyframeData(keyframeHandles[i]);
-        QPointF centerPos = getKeyframePosition(GetKeyframeSeconds(kf), KeyframeValueValue(kf))
+        QPointF centerPos = getKeyframePosition(getKeyframeTime(kf), getKeyframeValue(kf))
                             + edgeOffset;
         painter->drawLine(centerPos.x(), rect.y(), centerPos.x(), rect.height());
     }
@@ -318,11 +318,11 @@ void RowTimelinePropertyGraph::updateBezierControlValue(TimelineControlType cont
     m_animCore->GetKeyframes(anim, keyframeHandles);
     for (size_t i = 0; i < keyframeHandles.size(); ++i) {
         if (keyframeHandles[i] == m_currKeyframeData.first) {
-            float currKfTime = KeyframeTime(m_animCore->GetKeyframeData(keyframeHandles[i]));
+            float currKfTime = getKeyframeTime(m_animCore->GetKeyframeData(keyframeHandles[i]));
             float prevKfTime = i > 0
-                    ? KeyframeTime(m_animCore->GetKeyframeData(keyframeHandles[i - 1])) : -FLT_MAX;
+                ? getKeyframeTime(m_animCore->GetKeyframeData(keyframeHandles[i - 1])) : -FLT_MAX;
             float nextKfTime = i < keyframeHandles.size() - 1
-                    ? KeyframeTime(m_animCore->GetKeyframeData(keyframeHandles[i + 1])) : FLT_MAX;
+                ? getKeyframeTime(m_animCore->GetKeyframeData(keyframeHandles[i + 1])) : FLT_MAX;
             if (isBezierIn) {
                 if (time < prevKfTime)
                     time = prevKfTime;
@@ -384,7 +384,7 @@ void RowTimelinePropertyGraph::fitGraph()
         m_animCore->GetKeyframes(m_activeChannels[i], keyframeHandles);
         for (auto kfHandle : keyframeHandles) {
             TKeyframe keyframeData = m_animCore->GetKeyframeData(kfHandle);
-            float value = KeyframeValueValue(keyframeData);
+            float value = getKeyframeValue(keyframeData);
             if (value < minVal)
                 minVal = value;
             if (value > maxVal)
@@ -450,7 +450,7 @@ void RowTimelinePropertyGraph::selectBezierKeyframesInRange(const QRectF &rect)
         for (auto kfHandle : keyframeHandles) {
             SBezierKeyframe kf = get<SBezierKeyframe>(m_animCore->GetKeyframeData(kfHandle));
 
-            QPointF kfPosition = getKeyframePosition(KeyframeTime(kf), KeyframeValueValue(kf));
+            QPointF kfPosition = getKeyframePosition(getKeyframeTime(kf), getKeyframeValue(kf));
             if (localRect.contains(kfPosition))
                 m_selectedBezierKeyframes.insert(kfHandle);
             else

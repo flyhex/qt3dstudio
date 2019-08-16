@@ -61,7 +61,7 @@ public: // Construction
     {
         qt3dsdm::IAnimationCore *theAnimationCore = m_Doc->GetStudioSystem()->GetAnimationCore();
         qt3dsdm::TKeyframe theKeyframe = theAnimationCore->GetKeyframeData(m_Keyframe);
-        theKeyframe = SetKeyframeSeconds(theKeyframe, m_Value);
+        theKeyframe = setKeyframeTime(theKeyframe, m_Value);
         theAnimationCore->SetKeyframeData(m_Keyframe, theKeyframe);
     }
 
@@ -93,7 +93,7 @@ public: // Construction
     {
         qt3dsdm::IAnimationCore *theAnimationCore = m_Doc->GetStudioSystem()->GetAnimationCore();
         qt3dsdm::TKeyframe theKeyframe = theAnimationCore->GetKeyframeData(m_Keyframe);
-        theKeyframe = SetKeyframeValue(theKeyframe, m_Value);
+        theKeyframe = setKeyframeValue(theKeyframe, m_Value);
         theAnimationCore->SetKeyframeData(m_Keyframe, theKeyframe);
     }
 

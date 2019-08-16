@@ -2835,10 +2835,10 @@ public:
         TKeyframe kfData = m_AnimationCore.GetKeyframeData(inKeyframe);
 
         // offset control points for bezier keyframes
-        offsetBezier(kfData, timeInSecs - GetKeyframeSeconds(kfData));
+        offsetBezier(kfData, timeInSecs - getKeyframeTime(kfData));
 
         // Functional programming paradigm, returns new value instead of changing current value.
-        kfData = qt3dsdm::SetKeyframeSeconds(kfData, timeInSecs);
+        kfData = qt3dsdm::setKeyframeTime(kfData, timeInSecs);
         m_AnimationCore.SetKeyframeData(inKeyframe, kfData);
     }
 

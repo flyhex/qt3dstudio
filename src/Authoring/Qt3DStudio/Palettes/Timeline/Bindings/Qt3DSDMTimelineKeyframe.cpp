@@ -64,11 +64,10 @@ float my_roundf(float r)
 long Qt3DSDMTimelineKeyframe::GetTime() const
 {
     if (!m_KeyframeHandles.empty()) {
-        IAnimationCore *theAnimationCore = m_Doc->GetStudioSystem()->GetAnimationCore();
-        Qt3DSDMKeyframeHandle theKeyframeHandle = *m_KeyframeHandles.begin();
-        if (theAnimationCore->KeyframeValid(theKeyframeHandle)) {
-            float theTimeinSecs =
-                KeyframeTime(theAnimationCore->GetKeyframeData(theKeyframeHandle));
+        IAnimationCore *animaCore = m_Doc->GetStudioSystem()->GetAnimationCore();
+        Qt3DSDMKeyframeHandle kfHandle = *m_KeyframeHandles.begin();
+        if (animaCore->KeyframeValid(kfHandle)) {
+            float theTimeinSecs = getKeyframeTime(animaCore->GetKeyframeData(kfHandle));
             // We always convert back and forth between between long and float.
             // This causes especially issues when we do comparisons
             return (long)my_roundf(theTimeinSecs * 1000);
@@ -106,7 +105,7 @@ void Qt3DSDMTimelineKeyframe::SetTime(const long inNewTime)
     // we have a precision issue from converting from long to float..
     IAnimationCore *theAnimationCore = m_Doc->GetStudioSystem()->GetAnimationCore();
     long theTest = static_cast<long>(
-        KeyframeTime(theAnimationCore->GetKeyframeData(*m_KeyframeHandles.begin())) * 1000);
+        getKeyframeTime(theAnimationCore->GetKeyframeData(*m_KeyframeHandles.begin())) * 1000);
     Q_ASSERT(inNewTime == theTest);
 #endif
 }
