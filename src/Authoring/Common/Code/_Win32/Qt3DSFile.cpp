@@ -173,7 +173,7 @@ Q3DStudio::CString Qt3DSFile::GetAbsolutePath() const
 {
     const QFileInfo fi(m_Path.toQString());
     if (fi.isDir())
-        return Q3DStudio::CString::fromQString(fi.absoluteFilePath() + QLatin1Char('/'));
+        return Q3DStudio::CString::fromQString(fi.absoluteFilePath());
     return m_Path;
 }
 
