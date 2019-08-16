@@ -279,6 +279,10 @@ struct SRotationWidget : public SStudioWidgetImpl<StudioWidgetTypes::Rotation>
         QT3DSVec3 theRingColor(QT3DSVec3(.8f, .8f, .8f));
 
         QT3DSMat44 theMVP = TBase::SetupMVP(inWidgetContext);
+
+        if (isNodeBehindCamera())
+            return;
+
         inRenderContext.SetCullingEnabled(false);
         QT3DSMat44 theCameraMVP = m_WidgetInfo.m_LayerProjection * m_CameraTranslationScale;
 

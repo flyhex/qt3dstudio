@@ -189,6 +189,10 @@ struct SScaleWidget : public SStudioWidgetImpl<StudioWidgetTypes::Scale>
         }
 
         QT3DSMat44 theMVP = TBase::SetupMVP(inWidgetContext);
+
+        if (isNodeBehindCamera())
+            return;
+
         inRenderContext.SetBlendingEnabled(false);
         inRenderContext.SetDepthTestEnabled(true);
         inRenderContext.SetDepthWriteEnabled(true);

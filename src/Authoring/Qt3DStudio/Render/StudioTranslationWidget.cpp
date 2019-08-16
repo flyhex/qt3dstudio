@@ -109,6 +109,10 @@ struct STranslationWidget : public SStudioWidgetImpl<StudioWidgetTypes::Translat
                                  0.0f, 1.0f, "TranslationWidgetZPlane");
         }
         QT3DSMat44 theMVP = TBase::SetupMVP(inWidgetContext);
+
+        if (isNodeBehindCamera())
+            return;
+
         inRenderContext.SetBlendingEnabled(false);
         inRenderContext.SetDepthTestEnabled(true);
         inRenderContext.SetDepthWriteEnabled(true);

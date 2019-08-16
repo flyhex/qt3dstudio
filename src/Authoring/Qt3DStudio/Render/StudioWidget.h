@@ -128,6 +128,7 @@ namespace widgets {
         virtual void SetRotationEdges(const QT3DSVec3 &inStartDirection, const QT3DSVec3 &inRotationAxis,
                                       QT3DSF32 inAngleRad, QT3DSF32 inEndLineLen) = 0;
         virtual void ClearRotationEdges() = 0;
+        virtual bool isNodeBehindCamera() const = 0;
 
         static IStudioWidget &CreateTranslationWidget(NVAllocatorCallback &inAlloc);
         static IStudioWidget &CreateRotationWidget(NVAllocatorCallback &inAlloc);

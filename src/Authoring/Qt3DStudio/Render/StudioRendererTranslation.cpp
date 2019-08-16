@@ -3127,7 +3127,8 @@ SStudioPickValue STranslation::Pick(CPt inMouseCoords, TranslationSelectMode::En
                                      || m_LastRenderedWidget->GetNode().m_Type
                                      == GraphObjectTypes::Light
                                      || m_LastRenderedWidget->GetNode().m_Type
-                                     == GraphObjectTypes::Camera)) {
+                                     == GraphObjectTypes::Camera)
+                && !m_LastRenderedWidget->isNodeBehindCamera()) {
             Option<QT3DSU32> picked = PickWidget(inMouseCoords, inSelectMode,
                                                  *m_LastRenderedWidget);
             if (picked.hasValue()) {

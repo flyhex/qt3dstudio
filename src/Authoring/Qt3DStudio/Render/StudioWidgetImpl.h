@@ -36,6 +36,7 @@
 
 #include "Qt3DSRenderNode.h"
 #include "Qt3DSRenderShaderCodeGeneratorV2.h"
+#include "Qt3DSRenderCamera.h"
 #include "StudioPreferences.h"
 
 namespace qt3ds {
@@ -326,6 +327,13 @@ namespace widgets {
         }
 
         void ClearRotationEdges() override { m_RotationWedge = Empty(); }
+
+        bool isNodeBehindCamera() const override
+        {
+            return m_WidgetInfo.m_Camera && m_Node
+                    && m_WidgetInfo.m_Camera->GetDirection().dot(
+                        (m_Node->GetGlobalPos() - m_WidgetInfo.m_Camera->GetGlobalPos())) > 0.f;
+        }
 
         static inline QT3DSVec3 ToGLSLColor(const QColor &c)
         {
