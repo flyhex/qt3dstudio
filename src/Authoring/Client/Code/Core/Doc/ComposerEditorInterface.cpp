@@ -319,6 +319,11 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
         m_Editor.setMaterialReferenceByPath(instance, materialName.toQString());
         m_Editor.SetName(instance, materialName);
         m_Editor.setMaterialSourcePath(instance, sourcePath);
+        m_Editor.SetSpecificInstancePropertyValue(
+                    0, instance, L"importid", std::make_shared<CDataStr>(desc.m_Id));
+        m_Editor.SetSpecificInstancePropertyValue(
+                    0, instance, L"importfile",
+                    std::make_shared<CDataStr>(m_Relativeimportfile.toCString()));
     }
 
     void UpdateInstanceProperties(TImportId inInstance, const PropertyValue *propertBuffer,
@@ -641,6 +646,11 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
             m_Editor.setMaterialReferenceByPath(instance, materialName.toQString());
             m_Editor.SetName(instance, materialName);
             m_Editor.setMaterialSourcePath(instance, sourcePath);
+            m_Editor.SetSpecificInstancePropertyValue(
+                        0, instance, L"importid", std::make_shared<CDataStr>(desc.m_Id));
+            m_Editor.SetSpecificInstancePropertyValue(
+                        0, instance, L"importfile",
+                        std::make_shared<CDataStr>(m_Relativeimportfile.toCString()));
             // Insert the referenced material to the map
             // so that the child structure remains the same
             insert_unique(refInserter.first->second,
@@ -657,6 +667,12 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
                                                      m_StringTable);
              theIterator.IsDone() == false; theIterator.Next()) {
             Qt3DSDMInstanceHandle hdl = theIterator.GetCurrentInstance();
+
+            // Skip property setting for reference materials, as they have the same import id
+            // as the actual materials in the container (required to make parent-child logic work)
+            if (m_Editor.GetObjectTypeName(hdl) == "ReferencedMaterial")
+                continue;
+
             for (QT3DSU32 idx = 0; idx < propertyBufferSize; ++idx) {
                 const PropertyValue &value(propertBuffer[idx]);
                 SValue theValue(value.m_Value);

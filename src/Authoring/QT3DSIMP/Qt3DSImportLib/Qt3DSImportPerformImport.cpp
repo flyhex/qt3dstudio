@@ -58,17 +58,15 @@ void DoUpdateInstances(Import &import, IComposerEditor &composer,
     QT3DSIMP_FOREACH(idx, instances.size())
     {
         // We have to re-lookup instances here because the instance data may have changed since it
-        // was put
-        // into the import report.  For instance, you get an import report, then you add instances.
-        // This adds
-        // user ids.  But the import report is already created so the instance descriptions in the
-        // report's
-        // add list won't reflect the new reality.
+        // was put into the import report. For instance, you get an import report, then you add
+        // instances. This adds user ids. But the import report is already created so the instance
+        // descriptions in the report's add list won't reflect the new reality.
         const InstanceDesc &desc(instances[idx]);
         QT3DSU32 numProps = import.GetNumProperties(desc.m_Handle);
         properties.resize(numProps);
         import.GetProperties(desc.m_Handle, properties);
-        composer.UpdateInstanceProperties(desc.m_Id, properties.data(), (QT3DSU32)properties.size());
+        composer.UpdateInstanceProperties(desc.m_Id, properties.data(),
+                                          (QT3DSU32)properties.size());
     }
 }
 }

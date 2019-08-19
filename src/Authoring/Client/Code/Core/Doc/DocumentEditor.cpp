@@ -4612,10 +4612,13 @@ public:
 
     // Precondition is that our source path to instance map
     // has all of the source-path-to-instance hooks already looked up.
-    void DoRefreshImport(const CFilePath &inOldFile, const CFilePath &inNewFile)
+    void DoRefreshImport(const CFilePath &inOldFile, const CFilePath &inNewFile,
+                         const CFilePath &importFilePath)
     {
         ScopedBoolean __ignoredDirs(m_IgnoreDirChange);
         vector<CFilePath> importFileList;
+        if (importFilePath.Exists() && importFilePath.IsFile())
+            importFileList.push_back(importFilePath.filePath());
 
         // Find which import files use this dae file.
         for (TCharPtrToSlideInstanceMap::iterator theIter = m_SourcePathInstanceMap.begin(),
@@ -4649,75 +4652,73 @@ public:
         // OK, for each import file
         // 1.  Find each group in the system using that import file as its source path.
         // 2.  for each group we find, build a map of import id->item that we will use to
-        //		 communicate the import changes to the item.
-        // 4.  Run the refresh process using a composer editor that runs off of our
-        //		mappings
+        //     communicate the import changes to the item.
+        // 4.  Run the refresh process using a composer editor that runs off of our mappings
         TIdMultiMap theGroupIdMap;
         for (size_t importIdx = 0, end = importFileList.size(); importIdx < end; ++importIdx) {
             theGroupIdMap.clear();
             CFilePath theImportFilePath = importFileList[importIdx];
             CFilePath theImportRelativePath = m_Doc.GetRelativePathToDoc(theImportFilePath);
             TCharPtrToSlideInstanceMap::iterator theIter =
-                m_SourcePathInstanceMap.find(m_StringTable.RegisterStr(theImportRelativePath.toCString()));
-            if (theIter == m_SourcePathInstanceMap.end())
-                continue;
-            // First pass just build the group id entries.  This avoids us copying hashtables which
-            // may
-            // be quite expensive
-            for (TSlideInstanceList::iterator theSlideInst = theIter->second.begin(),
-                                              theSlideInstEnd = theIter->second.end();
-                 theSlideInst != theSlideInstEnd; ++theSlideInst) {
-                TInstanceHandle theRoot = theSlideInst->second;
-                TSlideHandle theSlide = theSlideInst->first;
+                m_SourcePathInstanceMap.find(m_StringTable.RegisterStr(theImportRelativePath
+                                                                       .toCString()));
+            if (theIter != m_SourcePathInstanceMap.end()) {
+                // First pass just build the group id entries. This avoids us copying hashtables
+                // which may be quite expensive
+                for (TSlideInstanceList::iterator theSlideInst = theIter->second.begin(),
+                                                  theSlideInstEnd = theIter->second.end();
+                     theSlideInst != theSlideInstEnd; ++theSlideInst) {
+                    TInstanceHandle theRoot = theSlideInst->second;
+                    TSlideHandle theSlide = theSlideInst->first;
 
-                // For a depth first search of all children of this object *in this slide*,
-                // if they have an import id then add them to the map.
-                DepthFirstAddImportChildren(theSlide, theRoot, theGroupIdMap, theAddedInstances);
-                TIdMultiMap::iterator theGroupId =
-                    theGroupIdMap
-                        .insert(make_pair(m_StringTable.GetWideStr(GetImportId(theRoot)),
-                                          vector<pair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle>>()))
-                        .first;
-                insert_unique(theGroupId->second, make_pair(theSlide, theRoot));
-                theAddedInstances.insert(theRoot);
-            }
-            // Since some objects may be completely free standing, we need to go through *all*
-            // objects.
-            // Unfortunately the first revision of the system didn't put import paths on objects so
-            // we need both the above loop *and* to consider every object who's import path matches
-            // out import document's relative path.
-            theIter = theImportPaths.find(m_StringTable.RegisterStr(theImportRelativePath.toCString()));
-            TSlideHandleList theAssociatedSlides;
-            if (theIter != theImportPaths.end()) {
-                vector<pair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle>> &theInstances =
-                    theIter->second;
-                for (size_t freeInstanceIdx = 0, end = theInstances.size(); freeInstanceIdx < end;
-                     ++freeInstanceIdx) {
-                    if (theAddedInstances.find(theInstances[freeInstanceIdx].second)
-                        != theAddedInstances.end())
-                        continue;
-                    theAssociatedSlides.clear();
-                    Qt3DSDMInstanceHandle theInstance(theInstances[freeInstanceIdx].second);
-                    GetAllAssociatedSlides(theInstance, theAssociatedSlides);
-                    TIdMultiMap::iterator theInstanceId =
-                        theGroupIdMap
-                            .insert(
-                                make_pair(m_StringTable.GetWideStr(GetImportId(theInstance)),
-                                          vector<pair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle>>()))
-                            .first;
-                    for (size_t slideIdx = 0, slideEnd = theAssociatedSlides.size();
-                         slideIdx < slideEnd; ++slideIdx)
-                        insert_unique(theInstanceId->second,
-                                      make_pair(theAssociatedSlides[slideIdx], theInstance));
-                    theAddedInstances.insert(theInstance);
+                    // For a depth first search of all children of this object *in this slide*,
+                    // if they have an import id then add them to the map.
+                    DepthFirstAddImportChildren(theSlide, theRoot, theGroupIdMap,
+                                                theAddedInstances);
+                    TIdMultiMap::iterator theGroupId
+                        = theGroupIdMap.insert({m_StringTable.GetWideStr(GetImportId(theRoot)),
+                                                {}}).first;
+                    insert_unique(theGroupId->second, make_pair(theSlide, theRoot));
+                    theAddedInstances.insert(theRoot);
+                }
+                // Since some objects may be completely free standing, we need to go through *all*
+                // objects.
+                // Unfortunately the first revision of the system didn't put import paths on objects
+                // so we need both the above loop *and* to consider every object who's import path
+                // matches out import document's relative path.
+                theIter = theImportPaths.find(m_StringTable.RegisterStr(theImportRelativePath
+                                                                        .toCString()));
+                TSlideHandleList theAssociatedSlides;
+                if (theIter != theImportPaths.end()) {
+                    vector<pair<Qt3DSDMSlideHandle, Qt3DSDMInstanceHandle>> &theInstances
+                        = theIter->second;
+                    for (size_t i = 0, end = theInstances.size(); i < end; ++i) {
+                        if (theAddedInstances.find(theInstances[i].second)
+                                != theAddedInstances.end()) {
+                            continue;
+                        }
+                        theAssociatedSlides.clear();
+                        Qt3DSDMInstanceHandle theInstance(theInstances[i].second);
+                        GetAllAssociatedSlides(theInstance, theAssociatedSlides);
+                        TIdMultiMap::iterator theInstanceId
+                             = theGroupIdMap
+                                .insert({m_StringTable.GetWideStr(GetImportId(theInstance)),
+                                         {}}).first;
+                        for (size_t slideIdx = 0, slideEnd = theAssociatedSlides.size();
+                             slideIdx < slideEnd; ++slideIdx) {
+                            insert_unique(theInstanceId->second,
+                                          make_pair(theAssociatedSlides[slideIdx], theInstance));
+                        }
+                        theAddedInstances.insert(theInstance);
+                    }
                 }
             }
 
-            //
             // OK, we have distinct maps sorted on a per-slide basis for all trees of children
             // of this asset.  We now need to attempt to run the refresh algorithm.
 
-            qt3dsimp::ImportPtrOrError theImportPtr = qt3dsimp::Import::Load(theImportFilePath.toCString());
+            qt3dsimp::ImportPtrOrError theImportPtr
+                    = qt3dsimp::Import::Load(theImportFilePath.toCString());
             if (!theImportPtr.m_Value) {
                 QT3DS_ASSERT(false);
                 continue;
@@ -4737,7 +4738,8 @@ public:
                 Q3DStudio::CString::ENDOFSTRING, false)
                 && oldExtension.Compare(CDialogs::GetWideDAEFileExtension(),
                     Q3DStudio::CString::ENDOFSTRING, false)) {
-                SColladaTranslator *colladaTranslator = new SColladaTranslator(inNewFile.toQString());
+                SColladaTranslator *colladaTranslator
+                        = new SColladaTranslator(inNewFile.toQString());
                 translationLog = &(colladaTranslator->m_TranslationLog);
                 translator = colladaTranslator;
 #ifdef QT_3DSTUDIO_FBX
@@ -4773,18 +4775,21 @@ public:
         updateMaterialFiles();
     }
 
-    void RefreshImport(const CFilePath &inOldFile, const CFilePath &inNewFile) override
+    void RefreshImport(const CFilePath &inOldFile, const CFilePath &inNewFile,
+                       const CFilePath &importFilePath) override
     {
         CDispatch &theDispatch(*m_Doc.GetCore()->GetDispatch());
+
         theDispatch.FireOnProgressBegin(
             QObject::tr("Refreshing Import "), QFileInfo(inNewFile.toQString()).fileName());
         ScopedBoolean __ignoredDirs(m_IgnoreDirChange);
         try {
             m_SourcePathInstanceMap.clear();
             GetSourcePathToInstanceMap(m_SourcePathInstanceMap, true, false);
-            DoRefreshImport(inOldFile, inNewFile);
+            DoRefreshImport(inOldFile, inNewFile, importFilePath);
         } catch (...) {
         }
+
         theDispatch.FireOnProgressEnd();
     }
 
@@ -5363,7 +5368,7 @@ public:
                     theDispatch.FireReloadEffectInstance(theInstances[i].second);
                     theDispatch.FireImmediateRefreshInstance(theInstances[i].second);
                 }
-            } else if (CDialogs::materialExtensions().contains(theExtension)
+            } else if (CDialogs::shaderExtensions().contains(theExtension)
                        && theRecord.m_ModificationType != FileModificationType::Created
                        && !theInstances.empty()) {
                 CString theNameStr = GetName(theInstances[0].second);

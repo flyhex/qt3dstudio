@@ -460,7 +460,8 @@ public:
 
     // Refresh an import or dae file
     // Absolute path to the file.
-    virtual void RefreshImport(const CFilePath &inOldFile, const CFilePath &inNewFile) = 0;
+    virtual void RefreshImport(const CFilePath &inOldFile, const CFilePath &inNewFile,
+                               const CFilePath &importFilePath) = 0;
 
     virtual bool CleanUpMeshes() = 0;
 

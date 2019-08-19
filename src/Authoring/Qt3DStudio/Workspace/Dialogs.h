@@ -68,6 +68,7 @@ public:
     static QStringList fontExtensions();
     static QStringList mapExtensions();
     static QStringList materialExtensions();
+    static QStringList shaderExtensions();
     static QStringList modelExtensions();
     static QStringList behaviorExtensions();
     static QStringList presentationExtensions();

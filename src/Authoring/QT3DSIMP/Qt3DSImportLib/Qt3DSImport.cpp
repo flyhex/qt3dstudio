@@ -1460,8 +1460,8 @@ public:
 
                 CString src = theSrcFile.toCString();
                 writer.Att(L"SrcFile", src.c_str());
-                writer.Att(L"ImageDir", L"Images");
-                writer.Att(L"MeshDir", L"Meshes");
+                writer.Att(L"ImageDir", L"maps");
+                writer.Att(L"MeshDir", L"meshes");
                 Serialize(writer, L"Image", const_cast<TStrToStrMap &>(m_Images));
                 Serialize(writer, L"Mesh", const_cast<TPathToMeshMap &>(m_Meshes));
             }

@@ -468,9 +468,15 @@ void ProjectView::refreshImport(int row) const
         const QFileInfo newFile(g_StudioApp.GetDialogs()->ConfirmRefreshModelFile(fullSrcPath));
         if (newFile.exists() && newFile.isFile()) {
             // We don't want to create undo point of "Refresh Import", undoing this sort of
-            // thing is supposed to be done in the DCC tool.
-            g_StudioApp.GetCore()->GetDoc()->getSceneEditor()->RefreshImport(
-                        oldFile.canonicalFilePath(), newFile.canonicalFilePath());
+            // thing is supposed to be done in the DCC tool. However, we do want to do the
+            // refresh inside a transaction to make sure signaling works correctly.
+            SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(), QObject::tr("Refresh Import"))
+                    ->RefreshImport(oldFile.canonicalFilePath(), newFile.canonicalFilePath(), path);
+            // Clear undo/redo stack to ensure stack is not corrupted
+            // after refresh (stack may contain additions/deletions with chosen import,
+            // in which case undoing/redoing those actions can result in crashes or wrong meshes)
+            g_StudioApp.GetCore()->GetCmdStack()->Clear();
+            g_StudioApp.GetCore()->GetDoc()->SetModifiedFlag(true);
         }
     }
 }

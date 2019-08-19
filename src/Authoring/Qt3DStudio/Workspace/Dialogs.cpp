@@ -148,6 +148,10 @@ const char *materialExts[] = {
     "material", "shader", "materialdef", nullptr,
 };
 
+const char *shaderExts[] = {
+    "material", "shader", nullptr,
+};
+
 const wchar_t *wideMaterialExts[] = {
     L"material", L"shader", L"materialdef", nullptr,
 };
@@ -441,6 +445,16 @@ bool CDialogs::DisplayUndefinedDatainputDlg(
 
 QString CDialogs::ConfirmRefreshModelFile(const QString &inFile)
 {
+    QString prompt = QObject::tr("Refreshing an import is not undoable and resets the undo stack.\n"
+                                 "Are you sure you want to refresh '%1'?")
+                     .arg(QFileInfo(inFile).fileName());
+
+    int choice = QMessageBox::warning(nullptr, QObject::tr("Refresh import"),
+                                      prompt, QMessageBox::Yes | QMessageBox::Cancel);
+
+    if (choice == QMessageBox::Cancel)
+        return {};
+
     // this produces an extension string which contains all allowed formats specified in
     // g_AllowedImportTypes
     // currently DAE and FBX
@@ -1482,6 +1496,18 @@ QStringList CDialogs::materialExtensions()
     static QStringList exts;
     if (exts.isEmpty()) {
         for (const char *ext : materialExts) {
+            if (ext)
+                exts << QString::fromLatin1(ext);
+        }
+    }
+    return exts;
+}
+
+QStringList CDialogs::shaderExtensions()
+{
+    static QStringList exts;
+    if (exts.isEmpty()) {
+        for (const char *ext : shaderExts) {
             if (ext)
                 exts << QString::fromLatin1(ext);
         }
