@@ -101,7 +101,7 @@ void RowTimelinePropertyGraph::paintGraphs(QPainter *painter, const QRectF &rect
         // draw ruler value text
         painter->setPen(QPen(CStudioPreferences::studioColor3(), 1));
         qreal val_i = (m_graphY - i) / m_valScale;
-        painter->drawText(rect.x() + edgeOffset.x() + 3, i - 2, QString::number(qRound(val_i)));
+        painter->drawText(rect.x() + edgeOffset.x() + 8, i - 2, QString::number(qRound(val_i)));
     }
 
     // draw vertical keyframe separator lines
@@ -373,9 +373,6 @@ void RowTimelinePropertyGraph::updateChannelFiltering(const QVector<bool> &activ
 // adjust graph scale and y so that all keyframe and control points are visible
 void RowTimelinePropertyGraph::fitGraph()
 {
-    const qreal MARGIN_Y = 10; // margin at top & bottom of graph
-    m_graphH = m_rowTimeline->size().height() - MARGIN_Y * 2;
-
     // get min/max keyframes values in the active channels
     float minVal = FLT_MAX;
     float maxVal = -FLT_MAX;
@@ -415,10 +412,13 @@ void RowTimelinePropertyGraph::fitGraph()
     adjustColorProperty(maxVal);
     adjustColorProperty(minVal);
 
-    m_valScale = m_graphH / (maxVal - minVal);
+    const float marginT = 20.f;
+    const float marginB = 10.f;
+    const float graphH = float(m_rowTimeline->size().height()) - (marginT + marginB);
+    m_valScale = graphH / (maxVal - minVal);
     checkValScaleLimits();
 
-    m_graphY = (m_rowTimeline->size().height() + (maxVal + minVal) * m_valScale) / 2;
+    m_graphY = marginT + maxVal * m_valScale;
 
     m_rowTimeline->update();
 }
@@ -465,11 +465,20 @@ void RowTimelinePropertyGraph::deselectAllBezierKeyframes()
         m_selectedBezierKeyframes.clear();
 }
 
-void RowTimelinePropertyGraph::adjustScale(bool isIncrement)
+void RowTimelinePropertyGraph::adjustScale(const QPointF &scenePos, bool isIncrement)
 {
+    QPointF p = m_rowTimeline->mapFromScene(scenePos.x() - RULER_EDGE_OFFSET, scenePos.y());
+
+    float oldScale = m_valScale;
     float pitch = m_valScale * .3f;
     m_valScale += isIncrement ? pitch : -pitch;
     checkValScaleLimits();
+
+    float d1 = m_graphY - p.y();           // dY before scale
+    float d2 = d1 * m_valScale / oldScale; // dY after scale
+
+    m_graphY += d2 - d1;
+
     m_rowTimeline->update();
 }
 

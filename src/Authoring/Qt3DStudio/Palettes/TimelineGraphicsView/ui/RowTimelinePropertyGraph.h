@@ -56,7 +56,7 @@ public:
     TimelineControlType getClickedBezierControl(const QPointF &pos, bool isHover = false);
     void paintGraphs(QPainter *painter, const QRectF &rect);
     void updateBezierControlValue(TimelineControlType controlType, const QPointF &scenePos);
-    void adjustScale(bool isIncrement);
+    void adjustScale(const QPointF &scenePos, bool isIncrement);
     void startPan();
     void pan(qreal dy);
     void fitGraph();
@@ -82,7 +82,6 @@ private:
     float m_valScale = .5f;
     qreal m_graphY = 0;
     qreal m_graphYPanInit = 0; // value of graph_y when panning starts
-    qreal m_graphH = 0;
     int m_expandHeight = TimelineConstants::ROW_GRAPH_H; // height when expanded
     qt3dsdm::Qt3DSDMKeyframeHandle m_hoveredBezierKeyframe;
     QSet<qt3dsdm::Qt3DSDMKeyframeHandle> m_selectedBezierKeyframes;

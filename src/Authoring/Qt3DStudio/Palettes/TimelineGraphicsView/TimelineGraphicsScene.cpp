@@ -936,7 +936,7 @@ void TimelineGraphicsScene::wheelEvent(QGraphicsSceneWheelEvent *wheelEvent)
         if (item && item->type() == TimelineItem::TypeRowTimeline) {
             RowTimeline *rowTimeline = static_cast<RowTimeline *>(item);
             if (rowTimeline->propertyGraph())
-                rowTimeline->propertyGraph()->adjustScale(wheelEvent->delta() > 0);
+                rowTimeline->propertyGraph()->adjustScale(pos, wheelEvent->delta() > 0);
         }
     }
 
