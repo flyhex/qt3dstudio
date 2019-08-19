@@ -482,7 +482,7 @@ void SVisualAidWidget::renderCamera(SNode *node, IRenderWidgetContext &inWidgetC
     inRenderContext.SetDepthWriteEnabled(false);
     inRenderContext.SetCullingEnabled(false);
 
-    SWidgetRenderSetupResult theSetup(inWidgetContext, *node, RenderWidgetModes::Local);
+    SWidgetRenderSetupResult theSetup(inWidgetContext, *node, RenderWidgetModes::Global);
 
     m_renderCameraShader->SetPropertyValue("orthographic",
                                            camera->m_Flags.IsOrthographic() ? 1 : 0);
@@ -554,7 +554,7 @@ void SVisualAidWidget::renderBillboard(SNode *node, IRenderWidgetContext &inWidg
                 qt3ds::render::NVRenderBlendEquationArgument(
                     NVRenderBlendEquation::Add, NVRenderBlendEquation::Add));
 
-    SWidgetRenderSetupResult theSetup(inWidgetContext, *node, RenderWidgetModes::Local);
+    SWidgetRenderSetupResult theSetup(inWidgetContext, *node, RenderWidgetModes::Global);
     QT3DSMat44 billboardMatrix = QT3DSMat44::createIdentity();
     billboardMatrix.setPosition((theSetup.m_WidgetInfo.m_NodeParentToCamera
                                 * node->m_GlobalTransform).getPosition());
@@ -616,7 +616,7 @@ void SVisualAidWidget::renderLight(SNode *node, IRenderWidgetContext &inWidgetCo
         inRenderContext.SetDepthWriteEnabled(false);
         inRenderContext.SetCullingEnabled(false);
 
-        SWidgetRenderSetupResult theSetup(inWidgetContext, *node, RenderWidgetModes::Local);
+        SWidgetRenderSetupResult theSetup(inWidgetContext, *node, RenderWidgetModes::Global);
 
         m_renderShader->SetPropertyValue("mvpMatrix", theSetup.m_PureProjection
                                             * theSetup.m_WidgetInfo.m_NodeParentToCamera
@@ -673,7 +673,7 @@ void SVisualAidWidget::Render(IRenderWidgetContext &inWidgetContext,
 bool SVisualAidWidget::pick(IRenderWidgetContext &inWidgetContext, float &dist, QT3DSVec2 viewport,
                             QT3DSVec2 pos)
 {
-    SWidgetRenderSetupResult theSetup(inWidgetContext, *m_node, RenderWidgetModes::Local);
+    SWidgetRenderSetupResult theSetup(inWidgetContext, *m_node, RenderWidgetModes::Global);
     SCamera *pickCamera = theSetup.m_WidgetInfo.m_Camera;
     QT3DSMat44 pip = pickCamera->m_Projection.getInverse();
     float x = pos.x / viewport.x;
