@@ -113,7 +113,7 @@ void RowTree::initialize()
     initializeAnimations();
 
     m_labelItem.setParentItem(this);
-    m_labelItem.setParentRow(this);
+    m_labelItem.setRowTree(this);
     m_labelItem.setLabel(m_label);
     updateLabelPosition();
 
@@ -121,7 +121,7 @@ void RowTree::initialize()
     setRowVisible(false);
     m_expandState = ExpandState::HiddenCollapsed;
 
-    connect(&m_labelItem, &RowTreeLabelItem::labelChanged, this,
+    connect(&m_labelItem, &RowTreeLabel::labelChanged, this,
             [this](const QString &label) {
         // Update label on timeline and on model
         m_label = label;

@@ -231,17 +231,7 @@ bool InspectorControlModel::isBasicMaterial(CInspectableBase *inspectable) const
     if (!inspectable)
         return false;
 
-    if (inspectable->getObjectType() == OBJTYPE_REFERENCEDMATERIAL) {
-        const auto instance = inspectable->getInstance();
-        if (!instance.Valid())
-            return false;
-
-        const auto refMaterial = getBridge()->getMaterialReference(instance);
-        if (refMaterial.Valid() && getBridge()->isInsideMaterialContainer(refMaterial))
-            return true;
-    }
-
-    return false;
+    return getBridge()->isBasicMaterial(inspectable->getInstance());
 }
 
 bool InspectorControlModel::isMaterial() const

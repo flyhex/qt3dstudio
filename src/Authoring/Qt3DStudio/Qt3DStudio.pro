@@ -213,7 +213,7 @@ HEADERS += \
     Palettes/TimelineGraphicsView/ui/RowTimelinePropertyGraph.h \
     Palettes/TimelineGraphicsView/ui/RowTree.h \
     Palettes/TimelineGraphicsView/ui/RowTreeContextMenu.h \
-    Palettes/TimelineGraphicsView/ui/RowTreeLabelItem.h \
+    Palettes/TimelineGraphicsView/ui/RowTreeLabel.h \
     Palettes/TimelineGraphicsView/ui/Ruler.h \
     Palettes/TimelineGraphicsView/ui/TimelineItem.h \
     Palettes/TimelineGraphicsView/ui/TimelineToolbar.h \
@@ -379,7 +379,7 @@ SOURCES += \
     Palettes/TimelineGraphicsView/ui/RowTimelinePropertyGraph.cpp \
     Palettes/TimelineGraphicsView/ui/RowTree.cpp \
     Palettes/TimelineGraphicsView/ui/RowTreeContextMenu.cpp \
-    Palettes/TimelineGraphicsView/ui/RowTreeLabelItem.cpp \
+    Palettes/TimelineGraphicsView/ui/RowTreeLabel.cpp \
     Palettes/TimelineGraphicsView/ui/Ruler.cpp \
     Palettes/TimelineGraphicsView/ui/TimelineItem.cpp \
     Palettes/TimelineGraphicsView/ui/TimelineToolbar.cpp \

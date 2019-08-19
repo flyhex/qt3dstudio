@@ -37,19 +37,19 @@
 
 class RowTree;
 
-class RowTreeLabelItem : public QGraphicsTextItem
+class RowTreeLabel : public QGraphicsTextItem
 {
     Q_OBJECT
 public:
-    explicit RowTreeLabelItem(QGraphicsItem *parent = nullptr);
+    explicit RowTreeLabel(QGraphicsItem *parent = nullptr);
 
     QString label() const;
     void setLabel(const QString &label);
     void setLocked(bool isLocked);
     void setMaster(bool isMaster);
-    RowTree *parentRow() const;
-    void setParentRow(RowTree *row);
-    int type() const;
+    RowTree *rowTree() const;
+    void setRowTree(RowTree *row);
+    int type() const override;
     bool isLocked() const { return m_locked; }
 
 protected:

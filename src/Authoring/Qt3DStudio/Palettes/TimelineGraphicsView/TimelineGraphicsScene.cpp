@@ -879,32 +879,29 @@ void TimelineGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *even
         QGraphicsItem *item = getItemAt(scenePos);
 
         if (item) {
+            CDoc *doc = g_StudioApp.GetCore()->GetDoc();
             if (item->type() == TimelineItem::TypeRuler) {
-                CDoc *doc = g_StudioApp.GetCore()->GetDoc();
                 g_StudioApp.GetDialogs()->asyncDisplayTimeEditDialog(doc->GetCurrentViewTime(),
                                                                      doc, PLAYHEAD,
                                                                      m_keyframeManager);
             } else {
                 if (item->type() == TimelineItem::TypeRowTree) {
-                    RowTree *treeItem = static_cast<RowTree *>(item);
-                    if (treeItem->isProperty())
-                        treeItem->togglePropertyExpanded(scenePos);
-                } else if (item->type() == TimelineItem::TypeRowTreeLabelItem) {
-                    RowTreeLabelItem *treeLabelItem = static_cast<RowTreeLabelItem *>(item);
-                    if (treeLabelItem->parentRow()->isProperty()) {
-                        treeLabelItem->parentRow()->togglePropertyExpanded();
-                    } else if (!treeLabelItem->isLocked()
-                               && treeLabelItem->parentRow()->objectType() != OBJTYPE_SCENE
-                               && treeLabelItem->parentRow()->objectType() != OBJTYPE_IMAGE) {
-                        int instance = treeLabelItem->parentRow()->instance();
-                        const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
-                                ->GetClientDataModelBridge();
-                        if (bridge->GetObjectType(instance) != OBJTYPE_REFERENCEDMATERIAL
-                                || bridge->GetSourcePath(instance).isEmpty()) {
-                            // Tree labels text can be edited with double-click,
-                            // except for Scene label and basic materials
-                            treeLabelItem->setEnabled(true);
-                            treeLabelItem->setFocus();
+                    RowTree *rowTree = static_cast<RowTree *>(item);
+                    if (rowTree->isProperty()) { // toggle property graph
+                        rowTree->togglePropertyExpanded(scenePos);
+                    } else {
+                        // check label edit
+                        QGraphicsItem *topItem = itemAt(scenePos, {});
+                        if (topItem->type() == TimelineItem::TypeRowTreeLabel) {
+                            RowTreeLabel *rowTreeLabel = static_cast<RowTreeLabel *>(topItem);
+                            const auto bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
+                            EStudioObjectType rowObjType = rowTreeLabel->rowTree()->objectType();
+                            int instance = rowTreeLabel->rowTree()->instance();
+                            if (!rowTreeLabel->isLocked() && !bridge->isBasicMaterial(instance)
+                                && rowObjType & ~(OBJTYPE_SCENE | OBJTYPE_IMAGE)) {
+                                rowTreeLabel->setEnabled(true);
+                                rowTreeLabel->setFocus();
+                            }
                         }
                     }
                 } else if (item->type() == TimelineItem::TypeRowTimeline) {
@@ -1109,7 +1106,7 @@ QGraphicsItem *TimelineGraphicsScene::getItemAt(const QPointF &scenePos) const
     if (!hoverItems.empty()) {
         QGraphicsItem *item = hoverItems.at(0);
 
-        int typeMask = TimelineItem::TypePlayHead | TimelineItem::TypeRowTreeLabelItem;
+        int typeMask = TimelineItem::TypePlayHead | TimelineItem::TypeRowTreeLabel;
         if (item->type() & typeMask && hoverItems.size() > 1)
             item = hoverItems.at(1);
 

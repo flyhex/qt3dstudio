@@ -33,7 +33,7 @@
 #include "TimelineConstants.h"
 #include "RowTypes.h"
 #include "StudioObjectTypes.h"
-#include "RowTreeLabelItem.h"
+#include "RowTreeLabel.h"
 #include "Qt3DSDMHandles.h"
 
 #include <QtCore/qpropertyanimation.h>
@@ -201,7 +201,7 @@ private:
     int m_numDescendantSubpresentations = 0;
     ExpandState m_expandState = ExpandState::HiddenCollapsed;
     TimelineGraphicsScene *m_scene;
-    RowTreeLabelItem m_labelItem;
+    RowTreeLabel m_labelItem;
     EStudioObjectType m_objectType = OBJTYPE_UNKNOWN;
     QString m_label;
     QList<RowTree *> m_childRows;

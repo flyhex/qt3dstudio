@@ -1238,6 +1238,20 @@ bool CClientDataModelBridge::isDefaultMaterial(Qt3DSDMInstanceHandle instance) c
            && GetSourcePath(instance) == getDefaultMaterialName();
 }
 
+bool CClientDataModelBridge::isBasicMaterial(Qt3DSDMInstanceHandle instance)
+{
+    if (!instance.Valid() || !m_DataCore->IsInstance(instance))
+        return false;
+
+    if (GetObjectType(instance) == OBJTYPE_REFERENCEDMATERIAL) {
+        const auto refMaterial = getMaterialReference(instance);
+        if (refMaterial.Valid() && isInsideMaterialContainer(refMaterial))
+            return true;
+    }
+
+    return false;
+}
+
 Qt3DSDMInstanceHandle CClientDataModelBridge::getMaterialContainer() const
 {
     IObjectReferenceHelper *objRefHelper = m_Doc->GetDataModelObjectReferenceHelper();

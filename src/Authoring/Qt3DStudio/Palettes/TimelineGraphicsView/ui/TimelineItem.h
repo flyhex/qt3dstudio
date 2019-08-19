@@ -43,7 +43,7 @@ public:
         TypeInteractiveTimelineItem = UserType << 2,
         TypeTreeHeader              = UserType << 3,
         TypeRowTree                 = UserType << 4,
-        TypeRowTreeLabelItem        = UserType << 5,
+        TypeRowTreeLabel            = UserType << 5,
         TypeRowTimeline             = UserType << 6,
         TypeRowTimelineCommentItem  = UserType << 7,
         TypePlayHead                = UserType << 8,

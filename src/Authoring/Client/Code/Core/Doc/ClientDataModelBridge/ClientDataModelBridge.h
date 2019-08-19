@@ -355,6 +355,7 @@ public:
     QString getMaterialContainerParentPath() const;
     QString getMaterialContainerPath() const;
     bool isDefaultMaterial(qt3dsdm::Qt3DSDMInstanceHandle instance) const;
+    bool isBasicMaterial(qt3dsdm::Qt3DSDMInstanceHandle instance);
     qt3dsdm::Qt3DSDMInstanceHandle getMaterialContainer() const;
     std::set<QString> GetSourcePathList() const;
     std::set<QString> GetFontFileList() const;

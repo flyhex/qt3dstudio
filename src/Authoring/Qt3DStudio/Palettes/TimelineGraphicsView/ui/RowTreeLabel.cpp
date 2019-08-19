@@ -26,7 +26,7 @@
 **
 ****************************************************************************/
 
-#include "RowTreeLabelItem.h"
+#include "RowTreeLabel.h"
 #include "TimelineConstants.h"
 #include "TimelineItem.h"
 #include "RowTree.h"
@@ -36,7 +36,7 @@
 #include <QtGui/qevent.h>
 #include <QtGui/qtextcursor.h>
 
-RowTreeLabelItem::RowTreeLabelItem(QGraphicsItem *parent)
+RowTreeLabel::RowTreeLabel(QGraphicsItem *parent)
     : QGraphicsTextItem(parent)
     , m_locked(false)
     , m_master(false)
@@ -47,12 +47,12 @@ RowTreeLabelItem::RowTreeLabelItem(QGraphicsItem *parent)
     updateLabelColor();
 }
 
-QString RowTreeLabelItem::label() const
+QString RowTreeLabel::label() const
 {
     return m_label;
 }
 
-void RowTreeLabelItem::setLabel(const QString &label)
+void RowTreeLabel::setLabel(const QString &label)
 {
     setPlainText(label);
     if (m_label != label) {
@@ -61,39 +61,37 @@ void RowTreeLabelItem::setLabel(const QString &label)
     }
 }
 
-void RowTreeLabelItem::setMaster(bool isMaster) {
+void RowTreeLabel::setMaster(bool isMaster) {
     if (m_master != isMaster) {
         m_master = isMaster;
         updateLabelColor();
     }
 }
 
-void RowTreeLabelItem::setLocked(bool isLocked) {
+void RowTreeLabel::setLocked(bool isLocked) {
     if (m_locked != isLocked) {
         m_locked = isLocked;
         updateLabelColor();
     }
 }
 
-RowTree *RowTreeLabelItem::parentRow() const
+RowTree *RowTreeLabel::rowTree() const
 {
     return m_rowTree;
 }
 
-void RowTreeLabelItem::setParentRow(RowTree *row)
+void RowTreeLabel::setRowTree(RowTree *row)
 {
     m_rowTree = row;
 }
 
-int RowTreeLabelItem::type() const
+int RowTreeLabel::type() const
 {
     // Enable the use of qgraphicsitem_cast with this item.
-    return TimelineItem::TypeRowTreeLabelItem;
+    return TimelineItem::TypeRowTreeLabel;
 }
 
-void RowTreeLabelItem::paint(QPainter *painter,
-                             const QStyleOptionGraphicsItem *option,
-                             QWidget *widget)
+void RowTreeLabel::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     if (!m_rowTree->y()) // prevents flickering when the row is just inserted to the layout
         return;
@@ -105,7 +103,7 @@ void RowTreeLabelItem::paint(QPainter *painter,
     QGraphicsTextItem::paint(painter, option, widget);
 }
 
-void RowTreeLabelItem::focusOutEvent(QFocusEvent *event)
+void RowTreeLabel::focusOutEvent(QFocusEvent *event)
 {
     if (m_acceptOnFocusOut)
         validateLabel();
@@ -122,7 +120,7 @@ void RowTreeLabelItem::focusOutEvent(QFocusEvent *event)
     m_acceptOnFocusOut = true;
 }
 
-void RowTreeLabelItem::keyPressEvent(QKeyEvent *event)
+void RowTreeLabel::keyPressEvent(QKeyEvent *event)
 {
     int key = event->key();
     if (key == Qt::Key_Return || key == Qt::Key_Enter) {
@@ -140,7 +138,7 @@ void RowTreeLabelItem::keyPressEvent(QKeyEvent *event)
     QGraphicsTextItem::keyPressEvent(event);
 }
 
-QRectF RowTreeLabelItem::boundingRect() const
+QRectF RowTreeLabel::boundingRect() const
 {
     if (!m_rowTree)
         return QGraphicsTextItem::boundingRect();
@@ -151,7 +149,7 @@ QRectF RowTreeLabelItem::boundingRect() const
     return QRectF(0, 0, w, TimelineConstants::ROW_H);
 }
 
-void RowTreeLabelItem::validateLabel()
+void RowTreeLabel::validateLabel()
 {
     QString text = toPlainText().trimmed();
     if (text.isEmpty()) {
@@ -164,7 +162,7 @@ void RowTreeLabelItem::validateLabel()
     setLabel(text);
 }
 
-void RowTreeLabelItem::updateLabelColor()
+void RowTreeLabel::updateLabelColor()
 {
     if (m_locked)
         setDefaultTextColor(CStudioPreferences::GetDisabledTextColor());
