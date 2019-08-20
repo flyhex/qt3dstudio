@@ -556,7 +556,7 @@ TimelineControlType RowTimeline::getClickedControl(const QPointF &scenePos, bool
     p.setX(p.x() - TimelineConstants::RULER_EDGE_OFFSET);
 
     if (!m_rowTree->hasDurationBar()) {
-        if (m_propertyGraph)
+        if (m_propertyGraph && !m_rowTree->locked())
             return m_propertyGraph->getClickedBezierControl(p, isHover);
 
         return TimelineControlType::None;

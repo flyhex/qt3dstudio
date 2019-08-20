@@ -116,6 +116,7 @@ void RowTimelinePropertyGraph::paintGraphs(QPainter *painter, const QRectF &rect
     }
 
     // draw channel curves
+    painter->setPen(CStudioPreferences::studioColor3()); // default to locked color
     for (size_t i = 0; i < m_activeChannels.size(); ++i) {
         QPainterPath path;
         int start_j = qMax(rect.x(), edgeOffset.x());
@@ -139,7 +140,8 @@ void RowTimelinePropertyGraph::paintGraphs(QPainter *painter, const QRectF &rect
             CStudioPreferences::GetWAxisColor()
         };
 
-        painter->setPen(QPen(chColors[m_activeChannelsIndex[i]], 1));
+        if (!m_rowTimeline->rowTree()->locked())
+            painter->setPen(chColors[m_activeChannelsIndex[i]]);
         painter->drawPath(path);
     }
 
@@ -158,7 +160,8 @@ void RowTimelinePropertyGraph::paintGraphs(QPainter *painter, const QRectF &rect
                 QPointF centerPos = getBezierControlPosition(kf) + edgeOffset;
                 const QPointF PIX_HALF_W = QPointF(8.0, 8.0);
 
-                bool kfSelected = m_selectedBezierKeyframes.contains(kfHandle);
+                bool kfSelected = m_selectedBezierKeyframes.contains(kfHandle)
+                                  && !m_rowTimeline->rowTree()->locked();
                 if (kfSelected) {
                     // draw tangent-in part
                     painter->setPen(CStudioPreferences::getBezierControlColor());
@@ -183,8 +186,10 @@ void RowTimelinePropertyGraph::paintGraphs(QPainter *painter, const QRectF &rect
                 }
 
                 // draw center point
-                painter->setPen(QPen(CStudioPreferences::getBezierControlColor(), kfSelected
-                                                                                  ? 6 : 3));
+                painter->setPen(QPen(m_rowTimeline->rowTree()->locked()
+                                     ? CStudioPreferences::studioColor3()
+                                     : CStudioPreferences::getBezierControlColor(), kfSelected
+                                                                                    ? 6 : 3));
                 painter->drawPoint(centerPos);
             }
         }

@@ -619,6 +619,10 @@ void TimelineWidget::onAnimationCreated(qt3dsdm::Qt3DSDMInstanceHandle parentIns
             }
 
             propRow->update();
+        } else {
+            // prop binding exists in the case of undoing changing animation type. Must refresh the
+            // recreated animation handles within the prop binding
+            propBinding->getRowTree()->refreshPropBinding();
         }
     }
 }
