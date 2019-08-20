@@ -227,7 +227,9 @@ void RowTimelineContextMenu::onAnimTypeChange(QAction *action)
     EAnimationType animType = EAnimationType(action->data().toInt());
     Qt3DSDMInstanceHandle instance = m_rowTree->parentRow()->instance();
     Qt3DSDMPropertyHandle property = m_rowTree->propBinding()->getPropertyHandle();
-    Qt3DSDMSlideHandle slide = slideSys->GetAssociatedSlide(instance);
+
+    Qt3DSDMSlideHandle slide = slideSys->IsPropertyLinked(instance, property)
+                               ? slideSys->GetAssociatedSlide(instance) : doc->GetActiveSlide();
     TCharStr propType = doc->GetStudioSystem()->GetPropertySystem()->GetName(property);
 
     std::vector<qt3dsdm::Qt3DSDMAnimationHandle> animHandles
