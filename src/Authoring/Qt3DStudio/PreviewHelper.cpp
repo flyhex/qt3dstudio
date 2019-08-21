@@ -62,7 +62,7 @@ void CPreviewHelper::OnPreview(const QString &viewerExeName)
     Q3DStudio::CBuildConfigurations &theConfigurations =
             g_StudioApp.GetCore()->GetBuildConfigurations();
     Q3DStudio::CBuildConfiguration *theBuildConfiguration =
-            theConfigurations.GetConfiguration(CStudioPreferences::GetPreviewConfig());
+            theConfigurations.GetConfiguration(CStudioPreferences::previewConfig());
     if (theBuildConfiguration)
         PreviewViaConfig(theBuildConfiguration, EXECMODE_PREVIEW, viewerExeName);
 }
@@ -76,7 +76,7 @@ void CPreviewHelper::OnDeploy(RemoteDeploymentSender &project)
     Q3DStudio::CBuildConfigurations &theConfigurations =
             g_StudioApp.GetCore()->GetBuildConfigurations();
     Q3DStudio::CBuildConfiguration *theBuildConfiguration =
-            theConfigurations.GetConfiguration(CStudioPreferences::GetPreviewConfig());
+            theConfigurations.GetConfiguration(CStudioPreferences::previewConfig());
     if (theBuildConfiguration) {
         // ItemDataPtr != nullptr ==> Build configurations specified NANT pipeline exporter
         PreviewViaConfig(theBuildConfiguration, EXECMODE_DEPLOY, QString(), &project);
@@ -210,7 +210,8 @@ void CPreviewHelper::DoPreviewViaConfig(Q3DStudio::CBuildConfiguration * /*inSel
         Q_ASSERT(project);
         project->streamProject(inDocumentFile);
     } else if (inMode == EXECMODE_PREVIEW
-               && CStudioPreferences::GetPreviewProperty("PLATFORM") == "PC") {
+               && CStudioPreferences::previewProperty(QStringLiteral("PLATFORM"))
+               == QLatin1String("PC")) {
         // Quick Preview on PC without going via NANT
         QString theCommandStr = getViewerFilePath(viewerExeName);
         QString *pDocStr = new QString(inDocumentFile);

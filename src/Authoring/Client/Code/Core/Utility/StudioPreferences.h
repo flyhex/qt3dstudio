@@ -36,8 +36,8 @@
 #include <QtGui/qbrush.h>
 
 #include "CoreConst.h"
-#include "Preferences.h"
 #include "Rct.h"
+#include "CColor.h"
 
 QT_FORWARD_DECLARE_CLASS(QQmlContext)
 
@@ -47,41 +47,41 @@ class CStudioPreferences
     virtual ~CStudioPreferences();
 
 public:
-    static void loadPreferences(const QString &filePath);
+    static void loadPreferences();
     static void savePreferences();
 
-    static bool IsTimelineSnappingGridActive();
-    static void SetTimelineSnappingGridActive(bool inActive);
+    static bool isTimelineSnappingGridActive();
+    static void setTimelineSnappingGridActive(bool inActive);
 
-    static bool IsLegacyViewerActive();
-    static void SetLegacyViewerActive(bool inActive);
+    static bool isLegacyViewerActive();
+    static void setLegacyViewerActive(bool inActive);
 
-    static ESnapGridResolution GetTimelineSnappingGridResolution();
-    static void SetTimelineSnappingGridResolution(ESnapGridResolution inResolution);
+    static ESnapGridResolution timelineSnappingGridResolution();
+    static void setTimelineSnappingGridResolution(ESnapGridResolution inResolution);
 
-    static bool GetEditViewFillMode();
-    static void SetEditViewFillMode(bool inRenderAsSolid);
+    static bool isEditViewFillMode();
+    static void setEditViewFillMode(bool inRenderAsSolid);
 
-    static long GetPreferredStartupView();
-    static void SetPreferredStartupView(long inStartupView);
+    static int preferredStartupView();
+    static void setPreferredStartupView(int inStartupView);
 
-    static bool IsAutosetKeyframesOn();
-    static void SetAutosetKeyframesOn(bool inEnable);
+    static bool isAutosetKeyframesOn();
+    static void setAutosetKeyframesOn(bool inEnable);
 
-    static bool IsBoundingBoxesOn();
-    static void SetBoundingBoxesOn(bool inEnable);
+    static bool isBoundingBoxesOn();
+    static void setBoundingBoxesOn(bool inEnable);
 
-    static bool ShouldDisplayPivotPoint();
-    static void SetDisplayPivotPoint(bool inEnable);
+    static bool isPivotPointOn();
+    static void setPivotPointOn(bool inEnable);
 
-    static bool IsWireframeModeOn();
-    static void SetWireframeModeOn(bool inEnable);
+    static bool isWireframeModeOn();
+    static void setWireframeModeOn(bool inEnable);
 
-    static bool ShouldShowTooltips();
-    static void SetShowTooltips(bool inShowTooltips);
+    static bool isTooltipsOn();
+    static void setTooltipsOn(bool inShowTooltips);
 
-    static bool shouldShowHelperGrid();
-    static void setShowHelperGrid(bool showGrid);
+    static bool isHelperGridOn();
+    static void setHelperGridOn(bool showGrid);
 
     static int helperGridLines();
     static void setHelperGridLines(int lines);
@@ -89,89 +89,82 @@ public:
     static int helperGridSpacing();
     static void setHelperGridSpacing(int spacing);
 
-    static long GetTimelineSplitterLocation();
-    static void SetTimelineSplitterLocation(long inLocation);
+    static double timelineSplitterLocation();
+    static void setTimelineSplitterLocation(double inLocation);
 
-    static bool GetInterpolation();
-    static void SetInterpolation(bool inSmooth);
+    static bool isInterpolation();
+    static void setInterpolation(bool inSmooth);
 
-    static long GetSnapRange();
-    static void SetSnapRange(long inSnapRange);
+    static double snapRange();
+    static void setSnapRange(double inSnapRange);
 
-    static long GetAutoSaveDelay();
-    static void SetAutoSaveDelay(long inAutoSaveDelay);
+    static int autoSaveDelay();
+    static void setAutoSaveDelay(int inAutoSaveDelay);
 
-    static bool GetAutoSavePreference();
-    static void SetAutoSavePreference(bool inActive);
+    static bool isAutoSavePreference();
+    static void setAutoSavePreference(bool inActive);
 
-    static long GetDefaultObjectLifetime();
-    static void SetDefaultObjectLifetime(long inLifetime);
-
-    static bool editModeLightingEnabled();
+    static bool isEditModeLightingEnabled();
     static void setEditModeLightingEnabled(bool enabled);
 
-    static bool GetTimebarDisplayTime();
-    static void SetTimebarDisplayTime(bool inDisplayTime);
+    static bool isTimebarDisplayTime();
+    static void setTimebarDisplayTime(bool inDisplayTime);
 
-    static QString GetVersionString();
+    static bool isDontShowGLVersionDialog();
+    static void setDontShowGLVersionDialog(bool inValue);
 
-    static bool GetDontShowGLVersionDialog();
-    static void SetDontShowGLVersionDialog(bool inValue);
+    static double timeAdvanceAmount();
+    static void setTimeAdvanceAmount(double inTime);
+    static double bigTimeAdvanceAmount();
+    static void setBigTimeAdvanceAmount(double inTime);
 
-    static long GetTimeAdvanceAmount();
-    static void SetTimeAdvanceAmount(long inTime);
-    static long GetBigTimeAdvanceAmount();
-    static void SetBigTimeAdvanceAmount(long inTime);
+    static QSize defaultClientSize();
+    static void setDefaultClientSize(int width, int height);
 
-    static QSize GetDefaultClientSize();
-    static void SetDefaultClientSize(int width, int height);
+    static int numRecentItems();
+    static void setNumRecentItems(int numberOfItems);
 
-    static int getNumRecentItems();
-    static void setNumRecentItems(int n);
-
-    static QString getRecentItem(int index);
+    static QString recentItem(int index);
     static void setRecentItem(int index, const QString &path);
 
-    static bool GetAdvancePropertyExpandedFlag();
-    static void SetAdvancePropertyExpandedFlag(bool inAdvancePropertyFlag);
+    static QString previewConfig();
+    static void setPreviewConfig(const QString &inValue);
+    static QString previewProperty(const QString &inName);
+    static void setPreviewProperty(const QString &inName, const QString &inValue);
 
-    static QString GetPreviewConfig();
-    static void SetPreviewConfig(const QString &inValue);
-    static QString GetPreviewProperty(const QString &inName);
-    static void SetPreviewProperty(const QString &inName, const QString &inValue);
-
-    static ::CColor GetNormalColor();
-    static ::CColor GetMasterColor();
-    static ::CColor GetInactiveColor();
-
-    static ::CColor GetMouseOverHighlightColor();
-
-    static ::CColor GetObjectTimebarColor();
-    static ::CColor GetLayerTimebarColor();
-    static ::CColor GetDisabledTextColor();
-
-    static ::CColor GetSingleBoundingBoxColor();
-    static ::CColor GetGroupBoundingBoxColor();
-    static QColor GetXAxisColor();
-    static QColor GetYAxisColor();
-    static QColor GetZAxisColor();
-    static QColor GetWAxisColor();
-    static QColor helperGridColor();
-    static QColor getBezierControlColor();
-
-    static ::CColor GetRulerBackgroundColor();
-    static ::CColor GetRulerTickColor();
-    static ::CColor GetGuideColor();
-    static ::CColor GetGuideSelectedColor();
-    static ::CColor GetGuideFillColor();
-    static ::CColor GetGuideFillSelectedColor();
-
-    static QString GetFontFaceName();
-
-    static float getSelectorLineWidth();
+    static float selectorLineWidth();
     static void setSelectorLineWidth(float width);
-    static float getSelectorLineLength();
+    static float selectorLineLength();
     static void setSelectorLineLength(float length);
+
+    static QString versionString();
+
+    static ::CColor normalColor();
+    static ::CColor inactiveColor();
+
+    static ::CColor mouseOverHighlightColor();
+
+    static ::CColor objectTimebarColor();
+    static ::CColor layerTimebarColor();
+    static ::CColor disabledTextColor();
+
+    static ::CColor singleBoundingBoxColor();
+    static ::CColor groupBoundingBoxColor();
+    static QColor xAxisColor();
+    static QColor yAxisColor();
+    static QColor zAxisColor();
+    static QColor wAxisColor();
+    static QColor helperGridColor();
+    static QColor bezierControlColor();
+
+    static ::CColor rulerBackgroundColor();
+    static ::CColor rulerTickColor();
+    static ::CColor guideNormalColor();
+    static ::CColor guideSelectedColor();
+    static ::CColor guideFillColor();
+    static ::CColor guideFillSelectedColor();
+
+    static QString fontFaceName();
 
     static void setQmlContextProperties(QQmlContext *qml);
     static QColor studioColor1();
@@ -222,20 +215,14 @@ public:
     static QSize browserPopupSize();
 
     // Default values that Studio will start out with or to restore
-    static const long GUTTER_SIZE = 10;
-    static const ::CColor EDITVIEW_DEFAULTBGCOLOR;
-    static const long PREFERREDSTARTUP_DEFAULTINDEX = -1;
-    static const long DEFAULT_SNAPRANGE = 10;
-    static const long DEFAULT_LIFETIME = 10000;
-    static const long DEFAULT_CLIENT_WIDTH = 1920;
-    static const long DEFAULT_CLIENT_HEIGHT = 1080;
-    static const long DEFAULT_TIME_ADVANCE = 100;
-    static const long DEFAULT_BIG_TIME_ADVANCE = 500;
-    static const long DEFAULT_SELECTOR_WIDTH = 30;
-    static const long DEFAULT_SELECTOR_LENGTH = 50;
-    static const long DEFAULT_AUTOSAVE_DELAY = 600;
-
-private:
-    static std::unique_ptr<CPreferences> m_preferences;
+    static const int PREFERREDSTARTUP_DEFAULTINDEX = -1;
+    static constexpr double DEFAULT_SNAPRANGE = 10.;
+    static const int DEFAULT_CLIENT_WIDTH = 1920;
+    static const int DEFAULT_CLIENT_HEIGHT = 1080;
+    static constexpr double DEFAULT_TIME_ADVANCE = 100.;
+    static constexpr double DEFAULT_BIG_TIME_ADVANCE = 500.;
+    static constexpr float DEFAULT_SELECTOR_WIDTH = 30.f;
+    static constexpr float DEFAULT_SELECTOR_LENGTH = 50.f;
+    static const int DEFAULT_AUTOSAVE_DELAY = 600;
 };
 #endif // INCLUDED_STUDIO_PREFERENCES_H

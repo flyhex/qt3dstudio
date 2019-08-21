@@ -92,7 +92,7 @@ void RowTimelinePropertyGraph::paintGraphs(QPainter *painter, const QRectF &rect
     qreal dy = rect.bottom() - m_graphY;
     qreal d_start = dy > 0 ? std::fmod(dy, step) : step - std::fmod(-dy, step); // start delta
     qreal start_y = rect.bottom() - d_start;
-    painter->setFont(QFont(CStudioPreferences::GetFontFaceName(), 7));
+    painter->setFont(QFont(CStudioPreferences::fontFaceName(), 7));
     for (qreal i = start_y; i > rect.y(); i -= step) {
         // draw ruler line
         painter->setPen(QPen(CStudioPreferences::studioColor2(), 1));
@@ -134,10 +134,10 @@ void RowTimelinePropertyGraph::paintGraphs(QPainter *painter, const QRectF &rect
         }
 
         static const QColor chColors[4] {
-            CStudioPreferences::GetXAxisColor(),
-            CStudioPreferences::GetYAxisColor(),
-            CStudioPreferences::GetZAxisColor(),
-            CStudioPreferences::GetWAxisColor()
+            CStudioPreferences::xAxisColor(),
+            CStudioPreferences::yAxisColor(),
+            CStudioPreferences::zAxisColor(),
+            CStudioPreferences::wAxisColor()
         };
 
         if (!m_rowTimeline->rowTree()->locked())
@@ -164,7 +164,7 @@ void RowTimelinePropertyGraph::paintGraphs(QPainter *painter, const QRectF &rect
                                   && !m_rowTimeline->rowTree()->locked();
                 if (kfSelected) {
                     // draw tangent-in part
-                    painter->setPen(CStudioPreferences::getBezierControlColor());
+                    painter->setPen(CStudioPreferences::bezierControlColor());
                     if (kfHandle != *keyframeHandles.begin()) {
                         QPointF cInPos = getBezierControlPosition(kf, BezierControlType::In)
                                          + edgeOffset;
@@ -181,14 +181,14 @@ void RowTimelinePropertyGraph::paintGraphs(QPainter *painter, const QRectF &rect
                     }
                 } else if (kfHandle == m_hoveredBezierKeyframe) {
                     // a bezier keyframe hovered
-                    painter->setPen(QPen(CStudioPreferences::getBezierControlColor()));
+                    painter->setPen(QPen(CStudioPreferences::bezierControlColor()));
                     painter->drawRect(centerPos.x() - 4, centerPos.y() - 4, 8, 8);
                 }
 
                 // draw center point
                 painter->setPen(QPen(m_rowTimeline->rowTree()->locked()
                                      ? CStudioPreferences::studioColor3()
-                                     : CStudioPreferences::getBezierControlColor(), kfSelected
+                                     : CStudioPreferences::bezierControlColor(), kfSelected
                                                                                     ? 6 : 3));
                 painter->drawPoint(centerPos);
             }

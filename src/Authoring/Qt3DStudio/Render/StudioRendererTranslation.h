@@ -449,7 +449,7 @@ namespace studio {
 
         void DrawChildBoundingBoxes(SNode &inNode)
         {
-            ::CColor color = CStudioPreferences::GetGroupBoundingBoxColor();
+            ::CColor color = CStudioPreferences::groupBoundingBoxColor();
             QT3DSVec3 colorVec(color.GetRed() / 255.f,
                                color.GetGreen() / 255.f,
                                color.GetBlue() / 255.f);
@@ -464,7 +464,7 @@ namespace studio {
         {
             SNode &theNode = static_cast<SNode &>(inTranslator.GetGraphObject());
             if (theNode.m_FirstChild) {
-                ::CColor color = CStudioPreferences::GetGroupBoundingBoxColor();
+                ::CColor color = CStudioPreferences::groupBoundingBoxColor();
                 QT3DSVec3 colorVec(color.GetRed() / 255.f,
                                    color.GetGreen() / 255.f,
                                    color.GetBlue() / 255.f);
@@ -478,14 +478,14 @@ namespace studio {
         {
             SNode &theNode = static_cast<SNode &>(inTranslator.GetGraphObject());
             if (inTranslator.GetGraphObject().m_Type != GraphObjectTypes::Layer) {
-                ::CColor color = CStudioPreferences::GetSingleBoundingBoxColor();
+                ::CColor color = CStudioPreferences::singleBoundingBoxColor();
                 QT3DSVec3 colorVec(color.GetRed() / 255.f,
                                    color.GetGreen() / 255.f,
                                    color.GetBlue() / 255.f);
                 DrawBoundingBox(theNode, colorVec);
                 DrawChildBoundingBoxes(theNode);
             } else {
-                ::CColor color = CStudioPreferences::GetSingleBoundingBoxColor();
+                ::CColor color = CStudioPreferences::singleBoundingBoxColor();
                 QT3DSVec3 colorVec(color.GetRed() / 255.f,
                                    color.GetGreen() / 255.f,
                                    color.GetBlue() / 255.f);

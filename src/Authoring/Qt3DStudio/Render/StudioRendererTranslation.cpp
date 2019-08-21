@@ -1892,29 +1892,29 @@ qt3dsdm::Qt3DSDMInstanceHandle STranslation::GetAnchorPoint(QT3DSU32 inAnchorInd
 
 void STranslation::updateHelperGridFromSettings()
 {
-    m_helperGridEnabled = CStudioPreferences::shouldShowHelperGrid();
+    m_helperGridEnabled = CStudioPreferences::isHelperGridOn();
     if (m_helperGridEnabled && m_helperGridWidget && m_EditCameraEnabled) {
         if (m_EditCameraInfo.m_CameraType == EditCameraTypes::Directional) {
             if (m_EditCameraInfo.m_Direction.x != 0.f) {
                 m_helperGridWidget->setColors(CStudioPreferences::helperGridColor(),
-                                              CStudioPreferences::GetYAxisColor(),
-                                              CStudioPreferences::GetZAxisColor());
+                                              CStudioPreferences::yAxisColor(),
+                                              CStudioPreferences::zAxisColor());
                 m_helperGridWidget->rotate(float(M_PI) / 2.f, QT3DSVec3(0.f, 0.f, 1.f));
             } else if (m_EditCameraInfo.m_Direction.y != 0.f) {
                 m_helperGridWidget->setColors(CStudioPreferences::helperGridColor(),
-                                              CStudioPreferences::GetXAxisColor(),
-                                              CStudioPreferences::GetZAxisColor());
+                                              CStudioPreferences::xAxisColor(),
+                                              CStudioPreferences::zAxisColor());
                 m_helperGridWidget->rotate(0.f, QT3DSVec3());
             } else {
                 m_helperGridWidget->setColors(CStudioPreferences::helperGridColor(),
-                                              CStudioPreferences::GetXAxisColor(),
-                                              CStudioPreferences::GetYAxisColor());
+                                              CStudioPreferences::xAxisColor(),
+                                              CStudioPreferences::yAxisColor());
                 m_helperGridWidget->rotate(float(M_PI) / 2.f, QT3DSVec3(1.f, 0.f, 0.f));
             }
         } else {
             m_helperGridWidget->setColors(CStudioPreferences::helperGridColor(),
-                                          CStudioPreferences::GetXAxisColor(),
-                                          CStudioPreferences::GetZAxisColor());
+                                          CStudioPreferences::xAxisColor(),
+                                          CStudioPreferences::zAxisColor());
             m_helperGridWidget->rotate(0.f, QT3DSVec3());
         }
         m_helperGridWidget->setLines(CStudioPreferences::helperGridLines(),
@@ -2009,32 +2009,32 @@ STranslation::STranslation(IStudioRenderer &inRenderer, IQt3DSRenderContext &inC
     m_SignalConnections.push_back(theProvider->ConnectComponentSeconds(
         std::bind(&STranslation::MarkComponentSeconds, this, std::placeholders::_1)));
 
-    ::CColor color = CStudioPreferences::GetRulerBackgroundColor(); // Rectangles under tick marks
+    ::CColor color = CStudioPreferences::rulerBackgroundColor(); // Rectangles under tick marks
     m_rectColor = QT3DSVec4(color.GetRed() / 255.f,
                             color.GetGreen() / 255.f,
                             color.GetBlue() / 255.f,
                             1.f);
-    color = CStudioPreferences::GetRulerTickColor(); // Tick marks
+    color = CStudioPreferences::rulerTickColor(); // Tick marks
     m_lineColor = QT3DSVec4(color.GetRed() / 255.f,
                             color.GetGreen() / 255.f,
                             color.GetBlue() / 255.f,
                             1.f);
-    color = CStudioPreferences::GetGuideColor();
+    color = CStudioPreferences::guideNormalColor();
     m_guideColor = QT3DSVec4(color.GetRed() / 255.f,
                              color.GetGreen() / 255.f,
                              color.GetBlue() / 255.f,
                              1.f);
-    color = CStudioPreferences::GetGuideSelectedColor();
+    color = CStudioPreferences::guideSelectedColor();
     m_selectedGuideColor = QT3DSVec4(color.GetRed() / 255.f,
                                      color.GetGreen() / 255.f,
                                      color.GetBlue() / 255.f,
                                      1.f);
-    color = CStudioPreferences::GetGuideFillColor(); // Not sure what this is used for
+    color = CStudioPreferences::guideFillColor(); // Not sure what this is used for
     m_guideFillColor = QT3DSVec4(color.GetRed() / 255.f,
                                  color.GetGreen() / 255.f,
                                  color.GetBlue() / 255.f,
                                  1.f);
-    color = CStudioPreferences::GetGuideFillSelectedColor(); // Not sure what this is used for
+    color = CStudioPreferences::guideFillSelectedColor(); // Not sure what this is used for
     m_selectedGuideFillColor = QT3DSVec4(color.GetRed() / 255.f,
                                          color.GetGreen() / 255.f,
                                          color.GetBlue() / 255.f,
@@ -2202,7 +2202,7 @@ void STranslation::PreRender(bool scenePreviewPass)
     if (!scenePreviewPass)
         m_editModeCamerasAndLights.clear();
     ClearDirtySet();
-    m_EditLightEnabled = CStudioPreferences::editModeLightingEnabled();
+    m_EditLightEnabled = CStudioPreferences::isEditModeLightingEnabled();
     BuildRenderGraph(theRoot, scenePreviewPass);
     QT3DSVec2 theViewportDims(GetViewportDimensions());
     if (scenePreviewPass) {
@@ -2238,7 +2238,7 @@ void STranslation::PreRender(bool scenePreviewPass)
                                            (QT3DSU32)m_Presentation.m_PresentationDimensions.y));
 
         // set if we draw geometry in wireframe mode
-        m_Context.SetWireframeMode(CStudioPreferences::IsWireframeModeOn());
+        m_Context.SetWireframeMode(CStudioPreferences::isWireframeModeOn());
 
         if (m_EditCameraEnabled && !scenePreviewPass) {
             m_Presentation.m_PresentationDimensions = theViewportDims;
@@ -2570,7 +2570,7 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
                     // Get the tool mode right now.
                     if (theTranslator) {
                         GraphObjectTypes::Enum theType(theTranslator->GetGraphObject().m_Type);
-                        if (CStudioPreferences::IsBoundingBoxesOn()) {
+                        if (CStudioPreferences::isBoundingBoxesOn()) {
                             switch (theType) {
                             case GraphObjectTypes::Node:
                                 DrawGroupBoundingBoxes(*theTranslator);
@@ -2588,7 +2588,7 @@ void STranslation::Render(int inWidgetId, bool inDrawGuides, bool scenePreviewPa
                         }
 
                         // Don't draw the axis if there is a widget.
-                        if (CStudioPreferences::ShouldDisplayPivotPoint()) {
+                        if (CStudioPreferences::isPivotPointOn()) {
                             switch (theTranslator->GetGraphObject().m_Type) {
                             case GraphObjectTypes::Node:
                             case GraphObjectTypes::Text:

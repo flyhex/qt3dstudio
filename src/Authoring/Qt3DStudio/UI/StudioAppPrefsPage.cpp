@@ -36,7 +36,6 @@
 #include "StudioPreferences.h"
 #include "StudioApp.h"
 #include "StudioPreferences.h"
-#include "CommonConstants.h"
 #include "Views.h"
 #include "Qt3DSDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
@@ -61,7 +60,7 @@ CStudioAppPrefsPage::CStudioAppPrefsPage(QWidget *parent)
     , m_autosaveChanged(false)
     , m_ui(new Ui::StudioAppPrefsPage)
 {
-    m_font = QFont(CStudioPreferences::GetFontFaceName());
+    m_font = QFont(CStudioPreferences::fontFaceName());
     m_font.setPixelSize(CStudioPreferences::fontSize());
 
     // Create a bold font for the group box text
@@ -159,8 +158,8 @@ void CStudioAppPrefsPage::loadSettings()
     m_ui->m_DefaultInterpolation->addItem(tr("Smooth"));
     m_ui->m_DefaultInterpolation->addItem(tr("Linear"));
 
-    long theInterpolationPref = 0;
-    if (CStudioPreferences::GetInterpolation())
+    int theInterpolationPref = 0;
+    if (CStudioPreferences::isInterpolation())
         theInterpolationPref = 0;
     else
         theInterpolationPref = 1;
@@ -168,29 +167,29 @@ void CStudioAppPrefsPage::loadSettings()
 
     // Timeline snapping grid
     m_ui->m_checkTimelineAbsoluteSnapping->setChecked(
-                CStudioPreferences::IsTimelineSnappingGridActive());
+                CStudioPreferences::isTimelineSnappingGridActive());
 
     // Legacy viewer
-    m_ui->m_checkLegacyViewer->setChecked(CStudioPreferences::IsLegacyViewerActive());
+    m_ui->m_checkLegacyViewer->setChecked(CStudioPreferences::isLegacyViewerActive());
 
     // Helper grid
     m_ui->helperGridLinesSpinBox->setValue(CStudioPreferences::helperGridLines());
     m_ui->helperGridSpacingSpinBox->setValue(CStudioPreferences::helperGridSpacing());
 
     // Tool handles
-    m_ui->selectorWidth->setValue(CStudioPreferences::getSelectorLineWidth());
-    m_ui->selectorLength->setValue(CStudioPreferences::getSelectorLineLength());
+    m_ui->selectorWidth->setValue(double(CStudioPreferences::selectorLineWidth()));
+    m_ui->selectorLength->setValue(double(CStudioPreferences::selectorLineLength()));
 
     // The scale mode
     m_ui->m_SnapRangeCombo->addItem(tr("1 Second"));
     m_ui->m_SnapRangeCombo->addItem(tr("0.5 Seconds"));
     m_ui->m_SnapRangeCombo->addItem(tr("0.1 Seconds"));
-    long theResolution = (long)CStudioPreferences::GetTimelineSnappingGridResolution();
+    int theResolution = CStudioPreferences::timelineSnappingGridResolution();
     m_ui->m_SnapRangeCombo->setCurrentIndex(theResolution);
 
     // Autosave options
-    m_ui->autosaveEnabled->setChecked(CStudioPreferences::GetAutoSavePreference());
-    m_ui->autosaveInterval->setValue(CStudioPreferences::GetAutoSaveDelay());
+    m_ui->autosaveEnabled->setChecked(CStudioPreferences::isAutoSavePreference());
+    m_ui->autosaveInterval->setValue(CStudioPreferences::autoSaveDelay());
 
     initEditStartViewCombo();
 
@@ -213,29 +212,30 @@ void CStudioAppPrefsPage::saveSettings()
     g_StudioApp.GetCore()->GetDoc()->SetDefaultKeyframeInterpolation(
                 m_ui->m_DefaultInterpolation->currentIndex() == 0);
 
+    // Timeline settings
     // Timeline snapping grid
-    CStudioPreferences::SetTimelineSnappingGridActive(
+    CStudioPreferences::setTimelineSnappingGridActive(
                 m_ui->m_checkTimelineAbsoluteSnapping->isChecked());
-    long theCurrentSelection = m_ui->m_SnapRangeCombo->currentIndex();
-    CStudioPreferences::SetTimelineSnappingGridResolution((ESnapGridResolution)theCurrentSelection);
+    int theCurrentSelection = m_ui->m_SnapRangeCombo->currentIndex();
+    CStudioPreferences::setTimelineSnappingGridResolution(ESnapGridResolution(theCurrentSelection));
 
+    // Viewing settings
     // Legacy viewer
-    CStudioPreferences::SetLegacyViewerActive(m_ui->m_checkLegacyViewer->isChecked());
-
+    CStudioPreferences::setLegacyViewerActive(m_ui->m_checkLegacyViewer->isChecked());
     // Preferred Startup View
-    CStudioPreferences::SetPreferredStartupView(m_ui->m_EditViewStartupView->currentIndex());
+    CStudioPreferences::setPreferredStartupView(m_ui->m_EditViewStartupView->currentIndex());
 
+    // VisualAids settings
     // Helper grid
     CStudioPreferences::setHelperGridLines(m_ui->helperGridLinesSpinBox->value());
     CStudioPreferences::setHelperGridSpacing(m_ui->helperGridSpacingSpinBox->value());
-
     // Tool handles
     CStudioPreferences::setSelectorLineWidth(float(m_ui->selectorWidth->value()));
     CStudioPreferences::setSelectorLineLength(float(m_ui->selectorLength->value()));
 
-    // Autosave options
-    CStudioPreferences::SetAutoSavePreference(m_ui->autosaveEnabled->isChecked());
-    CStudioPreferences::SetAutoSaveDelay(m_ui->autosaveInterval->value());
+    // Autosave settings
+    CStudioPreferences::setAutoSavePreference(m_ui->autosaveEnabled->isChecked());
+    CStudioPreferences::setAutoSaveDelay(m_ui->autosaveInterval->value());
     enableAutosave(m_ui->autosaveEnabled->isChecked());
     setAutosaveInterval(m_ui->autosaveInterval->value());
     m_autosaveChanged = false;
@@ -323,8 +323,8 @@ void CStudioAppPrefsPage::initEditStartViewCombo()
     // adding a 1px spacing, else the separator will disappear sometimes (QComboBox bug)
     qobject_cast<QListView *>(m_ui->m_EditViewStartupView->view())->setSpacing(1);
 
-    long thePreferredView = CStudioPreferences::GetPreferredStartupView();
-    long theNumItems = m_ui->m_EditViewStartupView->count();
+    int thePreferredView = CStudioPreferences::preferredStartupView();
+    int theNumItems = m_ui->m_EditViewStartupView->count();
 
     if (thePreferredView >= 0 && thePreferredView < theNumItems - 2)
         m_ui->m_EditViewStartupView->setCurrentIndex(thePreferredView);
@@ -495,7 +495,7 @@ void CStudioAppPrefsPage::loadBuildProperties()
 void CStudioAppPrefsPage::SavePreviewSettings()
 {
     QString thePreviewApp = m_ui->m_PreviewSelector->currentText();
-    CStudioPreferences::SetPreviewConfig(Q3DStudio::CString::fromQString(thePreviewApp));
+    CStudioPreferences::setPreviewConfig(Q3DStudio::CString::fromQString(thePreviewApp));
 
     std::list<TBuildNameControlPair>::iterator theIter;
     for (theIter = m_BuildProperties.begin(); theIter != m_BuildProperties.end(); ++theIter) {
@@ -504,7 +504,7 @@ void CStudioAppPrefsPage::SavePreviewSettings()
         Q3DStudio::CBuildConfiguration::SConfigPropertyValue *thePropertyValue =
                 theCombo->itemData(theCombo->currentIndex())
                 .value<Q3DStudio::CBuildConfiguration::SConfigPropertyValue *>();
-        CStudioPreferences::SetPreviewProperty(theName, thePropertyValue->GetName());
+        CStudioPreferences::setPreviewProperty(theName, thePropertyValue->GetName());
     }
 }
 

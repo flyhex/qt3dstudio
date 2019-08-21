@@ -1438,7 +1438,7 @@ void CDialogs::DisplayGLVersionDialog(const Q3DStudio::CString &inGLVersion,
     theGLVersionDlg.exec();
 
     if (theGLVersionDlg.GetDontShowAgain())
-        CStudioPreferences::SetDontShowGLVersionDialog(true);
+        CStudioPreferences::setDontShowGLVersionDialog(true);
 }
 
 QStringList CDialogs::effectExtensions()

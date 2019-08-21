@@ -66,7 +66,6 @@ SOURCES += \
     Code/Thread/Mutex.cpp \
     Code/Thread/Thread.cpp \
     Code/Exceptions/XMLException.cpp \
-    Code/_Win32/Preferences.cpp \
     Code/_Win32/Qt3DSFile.cpp \
     Code/Graph/Graph.cpp \
     Code/InfoDump/CoutSink.cpp \

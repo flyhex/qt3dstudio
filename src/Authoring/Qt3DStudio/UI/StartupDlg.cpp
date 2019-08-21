@@ -96,7 +96,7 @@ void CStartupDlg::OnInitDialog()
     connect(m_ui->openDocument, &ClickableLabel::clicked, this, &CStartupDlg::OnOpenDocClicked);
 
     // Load the product version
-    m_ProductVersionStr = QStringLiteral("Qt 3D Studio v") + CStudioPreferences::GetVersionString();
+    m_ProductVersionStr = QStringLiteral("Qt 3D Studio v") + CStudioPreferences::versionString();
     m_ui->versionStr->setText(m_ProductVersionStr);
 
     // Populate the recent document list

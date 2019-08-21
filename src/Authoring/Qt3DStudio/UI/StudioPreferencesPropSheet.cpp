@@ -99,7 +99,7 @@ void CStudioPreferencesPropSheet::onInitDialog()
     m_ui->setupUi(this);
     m_ui->buttonBox->button(QDialogButtonBox::Apply)->setEnabled(false);
 
-    m_Font = QFont(CStudioPreferences::GetFontFaceName(), 8);
+    m_Font = QFont(CStudioPreferences::fontFaceName(), 8);
     setFont(m_Font);
 
     connect(m_ui->buttonBox->button(QDialogButtonBox::Apply), &QPushButton::clicked,

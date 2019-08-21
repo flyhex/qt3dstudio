@@ -53,8 +53,8 @@ public:
     void AddRecentItem(const QString &inItem);
     void RemoveRecentItem(const QString &inItem, bool rebuild = true);
 
-    QString GetItem(long inIndex) const;
-    long GetItemCount() const { return (long)m_RecentItems.size(); }
+    QString GetItem(size_t inIndex) const;
+    size_t GetItemCount() const { return m_RecentItems.size(); }
 
 protected:
     void ReconstructList();

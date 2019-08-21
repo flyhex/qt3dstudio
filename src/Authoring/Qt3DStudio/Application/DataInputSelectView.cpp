@@ -216,7 +216,7 @@ void DataInputSelectView::focusOutEvent(QFocusEvent *event)
 
 bool DataInputSelectView::toolTipsEnabled() const
 {
-    return CStudioPreferences::ShouldShowTooltips();
+    return CStudioPreferences::isTooltipsOn();
 }
 
 void DataInputSelectView::setCurrentController(const QString &currentController)

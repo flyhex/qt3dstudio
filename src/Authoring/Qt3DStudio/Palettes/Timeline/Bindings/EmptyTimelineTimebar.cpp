@@ -84,7 +84,7 @@ void CEmptyTimelineTimebar::RollbackTimeChange()
 
 ::CColor CEmptyTimelineTimebar::GetTimebarColor()
 {
-    return CStudioPreferences::GetObjectTimebarColor();
+    return CStudioPreferences::objectTimebarColor();
 }
 
 QString CEmptyTimelineTimebar::GetTimebarComment() const

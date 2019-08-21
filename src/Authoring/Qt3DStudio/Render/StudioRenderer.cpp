@@ -484,7 +484,7 @@ struct SRendererImpl : public IStudioRenderer,
     }
     void SetPolygonFillModeEnabled(bool inEnableLight) override
     {
-        CStudioPreferences::SetEditViewFillMode(inEnableLight);
+        CStudioPreferences::setEditViewFillMode(inEnableLight);
         RequestRender();
     }
 
@@ -531,7 +531,7 @@ struct SRendererImpl : public IStudioRenderer,
 
     bool IsPolygonFillModeEnabled() const override
     {
-        return GetEditCamera() >= 0 && CStudioPreferences::GetEditViewFillMode();
+        return GetEditCamera() >= 0 && CStudioPreferences::isEditViewFillMode();
     }
 
     void EditCameraZoomToFit() override

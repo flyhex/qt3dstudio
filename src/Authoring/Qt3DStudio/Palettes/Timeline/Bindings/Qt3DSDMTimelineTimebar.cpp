@@ -98,10 +98,10 @@ void Qt3DSDMTimelineTimebar::OnPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle in
             } else {
                 switch (theClientDataModelBridge->GetObjectType(inInstance)) {
                 case OBJTYPE_LAYER:
-                    m_Color = CStudioPreferences::GetLayerTimebarColor();
+                    m_Color = CStudioPreferences::layerTimebarColor();
                     break;
                 default:
-                    m_Color = CStudioPreferences::GetObjectTimebarColor();
+                    m_Color = CStudioPreferences::objectTimebarColor();
                     break;
                 }
             }

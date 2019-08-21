@@ -136,12 +136,12 @@ bool CCore::LoadBuildConfigurations()
 void CCore::InitAndValidateBuildConfiguration()
 {
     Q3DStudio::CBuildConfiguration *theConfig =
-            m_BuildConfigurations.GetConfiguration(CStudioPreferences::GetPreviewConfig());
+            m_BuildConfigurations.GetConfiguration(CStudioPreferences::previewConfig());
     if (!theConfig) {
         Q3DStudio::CBuildConfigurations::TBuildConfigurations &theConfigurations =
                 m_BuildConfigurations.GetConfigurations();
         if (theConfigurations.size()) {
-            CStudioPreferences::SetPreviewConfig(theConfigurations.begin()->first);
+            CStudioPreferences::setPreviewConfig(theConfigurations.begin()->first);
             theConfig = theConfigurations.begin()->second;
         }
     }
@@ -152,12 +152,13 @@ void CCore::InitAndValidateBuildConfiguration()
         for (theConfigPropIter = theConfigProperties.begin();
              theConfigPropIter != theConfigProperties.end(); ++theConfigPropIter) {
             const QString &thePropName = theConfigPropIter->GetName();
-            QString theStoredValue = CStudioPreferences::GetPreviewProperty(thePropName);
+            QString theStoredValue = CStudioPreferences::previewProperty(thePropName);
             if (!theConfigPropIter->HasValue(theStoredValue)) {
                 // add this property in
-                if (theConfigPropIter->GetAcceptableValues().size())
-                    CStudioPreferences::SetPreviewProperty(
+                if (theConfigPropIter->GetAcceptableValues().size()) {
+                    CStudioPreferences::setPreviewProperty(
                                 thePropName, theConfigPropIter->GetValue(0).GetName());
+                }
             }
         }
     }

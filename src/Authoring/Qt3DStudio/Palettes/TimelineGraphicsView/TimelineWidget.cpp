@@ -93,7 +93,7 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
     , m_graphicsScene(new TimelineGraphicsScene(this))
     , m_preferredSize(preferredSize)
 {
-    int treeWidth = CStudioPreferences::GetTimelineSplitterLocation();
+    int treeWidth = CStudioPreferences::timelineSplitterLocation();
 
     // Mahmoud_TODO: CTimelineTranslationManager should be eventually removed or cleaned. Already
     // most of its functionality is implemented in this class
@@ -320,7 +320,7 @@ Q3DStudio::CString TimelineWidget::getPlaybackMode()
 
 TimelineWidget::~TimelineWidget()
 {
-    CStudioPreferences::SetTimelineSplitterLocation(m_graphicsScene->treeWidth());
+    CStudioPreferences::setTimelineSplitterLocation(m_graphicsScene->treeWidth());
     CStudioPreferences::savePreferences();
     m_graphicsScene->keyframeManager()->deselectAllKeyframes();
     g_StudioApp.GetCore()->GetDoc()->SetKeyframesManager(nullptr);

@@ -133,7 +133,7 @@ void SlideView::showControllerDialog(const QPoint &point)
 
 bool SlideView::toolTipsEnabled()
 {
-    return CStudioPreferences::ShouldShowTooltips();
+    return CStudioPreferences::isTooltipsOn();
 }
 
 QSize SlideView::sizeHint() const

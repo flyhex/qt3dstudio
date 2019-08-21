@@ -38,7 +38,6 @@
 #include "foundation/Qt3DSVec3.h"
 #include "foundation/Qt3DSMemoryBuffer.h"
 #include "Qt3DSImportComposerTypes.h"
-#include "CommonConstants.h"
 
 #include <QtCore/qstring.h>
 
@@ -247,7 +246,7 @@ void matrixFromAxisAngle(float inDegreeAngle, float inXAxis, float inYAxis, floa
         return;
     }
 
-    inDegreeAngle *= (float)QT3DS_DEGREES_TO_RADIANS;
+    inDegreeAngle *= float(Q3DStudio::QT3DS_DEGREES_TO_RADIANS);
 
     Q3DStudio::CVector3 theAxis(inXAxis, inYAxis, inZAxis);
     if (theAxis.LengthSquared() != 1.0f)

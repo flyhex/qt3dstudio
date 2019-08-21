@@ -340,9 +340,9 @@ namespace widgets {
             return QT3DSVec3(c.redF(), c.greenF(), c.blueF());
         }
 
-        static QT3DSVec3 GetXAxisColor() { return ToGLSLColor(CStudioPreferences::GetXAxisColor()); }
-        static QT3DSVec3 GetYAxisColor() { return ToGLSLColor(CStudioPreferences::GetYAxisColor()); }
-        static QT3DSVec3 GetZAxisColor() { return ToGLSLColor(CStudioPreferences::GetZAxisColor()); }
+        static QT3DSVec3 GetXAxisColor() { return ToGLSLColor(CStudioPreferences::xAxisColor()); }
+        static QT3DSVec3 GetYAxisColor() { return ToGLSLColor(CStudioPreferences::yAxisColor()); }
+        static QT3DSVec3 GetZAxisColor() { return ToGLSLColor(CStudioPreferences::zAxisColor()); }
 
         static inline QT3DSF32 GetDiscPos() { return 65.0f; }
         static inline QT3DSF32 GetDiscRadius() { return 7.0f; }

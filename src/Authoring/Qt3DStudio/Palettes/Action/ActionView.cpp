@@ -1161,7 +1161,7 @@ int ActionView::slideNameToIndex(const QString &name)
 
 bool ActionView::toolTipsEnabled()
 {
-    return CStudioPreferences::ShouldShowTooltips();
+    return CStudioPreferences::isTooltipsOn();
 }
 
 void ActionView::updateActionStates()

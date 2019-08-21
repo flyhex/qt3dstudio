@@ -81,7 +81,7 @@ CSceneView::~CSceneView()
 
 QSize CSceneView::sizeHint() const
 {
-    return CStudioPreferences::GetDefaultClientSize();
+    return CStudioPreferences::defaultClientSize();
 }
 
 //==============================================================================

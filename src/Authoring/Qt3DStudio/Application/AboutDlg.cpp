@@ -109,7 +109,7 @@ static QString compilerString()
 void CAboutDlg::OnInitDialog()
 {
     // Set the Studio version
-    m_ProductVersionStr = QStringLiteral("Qt 3D Studio v") + CStudioPreferences::GetVersionString();
+    m_ProductVersionStr = QStringLiteral("Qt 3D Studio v") + CStudioPreferences::versionString();
 
     // Set the copyright string
     m_CopyrightStr = QObject::tr("Copyright (C) %1 The Qt Company. All rights reserved.").arg(
@@ -136,9 +136,9 @@ void CAboutDlg::OnInitDialog()
     // Add link to Web site
     QString theURL(QStringLiteral("https://www.qt.io/3d-studio"));
 
-    m_ui->m_WebSite->setText(QString("<a href=\"%1\"><font color=\"#%2\">%3</font></a>").arg(
+    m_ui->m_WebSite->setText(QString("<a href=\"%1\"><font color=\"%2\">%3</font></a>").arg(
                                  theURL,
-                                 CStudioPreferences::GetMasterColor().GetString().toQString(),
+                                 CStudioPreferences::masterColor().name(),
                                  theURL));
     m_ui->m_WebSite->setToolTip(tr("Click to visit Qt web site"));
     m_ui->m_WebSite->setOpenExternalLinks(true);
@@ -146,9 +146,9 @@ void CAboutDlg::OnInitDialog()
     // Add link to support address
     const QString theSupport = QStringLiteral("https://account.qt.io/support");
 
-    m_ui->m_Email->setText(QString("<a href=\"%1\"><font color=\"#%2\">%3</font></a>").arg(
+    m_ui->m_Email->setText(QString("<a href=\"%1\"><font color=\"%2\">%3</font></a>").arg(
                                theSupport,
-                               CStudioPreferences::GetMasterColor().GetString().toQString(),
+                               CStudioPreferences::masterColor().name(),
                                theSupport));
     m_ui->m_Email->setToolTip(tr("Send a Studio support request to the Qt Company"));
     m_ui->m_Email->setOpenExternalLinks(true);

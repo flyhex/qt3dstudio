@@ -184,7 +184,6 @@ int main(int argc, char *argv[])
 #include "StudioUtils.h"
 
 #include "ClientDataModelBridge.h"
-#include "CommonConstants.h"
 #include "IOLibraryException.h"
 
 #include "Qt3DSDMErrors.h"
@@ -299,10 +298,10 @@ bool CStudioApp::initInstance(const QCommandLineParser &parser, bool isOpenGLES)
     QApplication::setOrganizationName("The Qt Company");
     QApplication::setOrganizationDomain("qt.io");
     QApplication::setApplicationName("Qt 3D Studio");
-    QApplication::setApplicationVersion(CStudioPreferences::GetVersionString());
+    QApplication::setApplicationVersion(CStudioPreferences::versionString());
 
     qCInfo(qt3ds::TRACE_INFO) << "Studio: " << QApplication::applicationFilePath();
-    qCInfo(qt3ds::TRACE_INFO) << "Version: " << CStudioPreferences::GetVersionString();
+    qCInfo(qt3ds::TRACE_INFO) << "Version: " << CStudioPreferences::versionString();
 
     // Silent is ignored for everything but create
     m_isSilent = parser.isSet("silent") && parser.isSet("create");
@@ -313,9 +312,7 @@ bool CStudioApp::initInstance(const QCommandLineParser &parser, bool isOpenGLES)
     m_gettingStartedFilePath = Qt3DSFile::GetApplicationDirectory()
                                + QStringLiteral("/../doc/qt3dstudio/getting-started.html");
 
-    QString thePreferencesPath = CFilePath::GetUserApplicationDirectory()
-                                 + QStringLiteral("/Qt3DStudio/Preferences.setting");
-    CStudioPreferences::loadPreferences(thePreferencesPath);
+    CStudioPreferences::loadPreferences();
 
     m_dialogs = new CDialogs(!m_isSilent);
 
@@ -340,8 +337,8 @@ bool CStudioApp::initInstance(const QCommandLineParser &parser, bool isOpenGLES)
     m_core->GetDispatch()->AddFailListener(this);
 
     // Initialize autosave
-    m_autosaveTimer->setInterval(CStudioPreferences::GetAutoSaveDelay() * 1000);
-    if (CStudioPreferences::GetAutoSavePreference())
+    m_autosaveTimer->setInterval(CStudioPreferences::autoSaveDelay() * 1000);
+    if (CStudioPreferences::isAutoSavePreference())
         m_autosaveTimer->start();
 
     return true;
@@ -530,14 +527,14 @@ bool CStudioApp::showStartupDialog()
         bool show = false;
         QSettings settings;
 
-        if (!settings.contains("showWelcomeScreen")) {
-            settings.setValue("showWelcomeScreen", 1);
+        if (!settings.contains(QStringLiteral("Viewing/ShowWelcomeScreen"))) {
+            settings.setValue(QStringLiteral("Viewing/ShowWelcomeScreen"), true);
             show = true;
         } else {
             // if we are returning to welcome dialog page after canceling
             // file dialog, do not care about settings but always show
             // welcome
-            show = settings.value("showWelcomeScreen").toBool()
+            show = settings.value(QStringLiteral("Viewing/ShowWelcomeScreen")).toBool()
                     || m_goStraightToWelcomeFileDialog;
         }
 
@@ -1194,7 +1191,7 @@ void CStudioApp::HandleDuplicateCommand()
  */
 void CStudioApp::OnToggleAutosetKeyframes()
 {
-    SetAutosetKeyframes(!CStudioPreferences::IsAutosetKeyframesOn());
+    SetAutosetKeyframes(!CStudioPreferences::isAutosetKeyframesOn());
 
     m_core->GetDispatch()->FireOnToolbarChange();
 }
@@ -1205,7 +1202,7 @@ void CStudioApp::OnToggleAutosetKeyframes()
  */
 void CStudioApp::SetAutosetKeyframes(bool inFlag)
 {
-    CStudioPreferences::SetAutosetKeyframesOn(inFlag);
+    CStudioPreferences::setAutosetKeyframesOn(inFlag);
 
     m_core->GetDoc()->GetStudioSystem()->GetAnimationSystem()->SetAutoKeyframe(inFlag);
 }
@@ -1343,7 +1340,7 @@ void CStudioApp::PlaybackStop()
 void CStudioApp::AdvanceTime()
 {
     if (!m_core->GetDoc()->getPresentationId().isEmpty()) {
-        long theDeltaTime = CStudioPreferences::GetTimeAdvanceAmount();
+        long theDeltaTime = CStudioPreferences::timeAdvanceAmount();
         long theTime
                 = (m_core->GetDoc()->GetCurrentViewTime() + theDeltaTime)
                 / theDeltaTime * theDeltaTime;
@@ -1358,7 +1355,7 @@ void CStudioApp::AdvanceTime()
 void CStudioApp::ReduceTime()
 {
     if (!m_core->GetDoc()->getPresentationId().isEmpty()) {
-        long theDeltaTime = CStudioPreferences::GetTimeAdvanceAmount();
+        long theDeltaTime = CStudioPreferences::timeAdvanceAmount();
         long theTime = (m_core->GetDoc()->GetCurrentViewTime() - 1) / theDeltaTime * theDeltaTime;
         m_core->GetDoc()->NotifyTimeChanged(theTime);
     }
@@ -1371,7 +1368,7 @@ void CStudioApp::ReduceTime()
 void CStudioApp::AdvanceUltraBigTime()
 {
     if (!m_core->GetDoc()->getPresentationId().isEmpty()) {
-        long theDeltaTime = CStudioPreferences::GetBigTimeAdvanceAmount();
+        long theDeltaTime = CStudioPreferences::bigTimeAdvanceAmount();
         long theTime
                 = (m_core->GetDoc()->GetCurrentViewTime() + theDeltaTime)
                 / theDeltaTime * theDeltaTime;
@@ -1386,7 +1383,7 @@ void CStudioApp::AdvanceUltraBigTime()
 void CStudioApp::ReduceUltraBigTime()
 {
     if (!m_core->GetDoc()->getPresentationId().isEmpty()) {
-        long theDeltaTime = CStudioPreferences::GetBigTimeAdvanceAmount();
+        long theDeltaTime = CStudioPreferences::bigTimeAdvanceAmount();
         long theTime = (m_core->GetDoc()->GetCurrentViewTime() - 1) / theDeltaTime * theDeltaTime;
         m_core->GetDoc()->NotifyTimeChanged(theTime);
     }
@@ -1943,7 +1940,7 @@ void CStudioApp::OnRefreshResourceFail(const QString &inResourceName, const QStr
 void CStudioApp::OnNewPresentation()
 {
     m_core->GetDoc()->GetStudioSystem()->GetAnimationSystem()->SetAutoKeyframe(
-                CStudioPreferences::IsAutosetKeyframesOn());
+                CStudioPreferences::isAutosetKeyframesOn());
     qCInfo(qt3ds::TRACE_INFO) << "New Presentation: "
                               << m_core->GetDoc()->GetDocumentPath();
 }

@@ -790,7 +790,7 @@ void TimelineGraphicsScene::snap(double &value, bool snapToPlayHead)
     if (snapToPlayHead) {
         double playHeadX = m_playHead->x() - TimelineConstants::TREE_BOUND_W
                                            - TimelineConstants::RULER_EDGE_OFFSET;
-        if (abs(value - playHeadX) < CStudioPreferences::GetSnapRange()) {
+        if (abs(value - playHeadX) < CStudioPreferences::snapRange()) {
             value = playHeadX;
             return;
         }
@@ -798,22 +798,22 @@ void TimelineGraphicsScene::snap(double &value, bool snapToPlayHead)
 
     // duration edges snap
     for (double v : qAsConst(m_snapSteps)) {
-        if (abs(value - v) < CStudioPreferences::GetSnapRange()) {
+        if (abs(value - v) < CStudioPreferences::snapRange()) {
             value = v;
             return;
         }
     }
 
     // time steps snap
-    if (CStudioPreferences::IsTimelineSnappingGridActive()) {
+    if (CStudioPreferences::isTimelineSnappingGridActive()) {
         double snapStep = TimelineConstants::RULER_SEC_W * m_ruler->timelineScale();
-        if (CStudioPreferences::GetTimelineSnappingGridResolution() == SNAPGRID_HALFSECONDS)
+        if (CStudioPreferences::timelineSnappingGridResolution() == SNAPGRID_HALFSECONDS)
             snapStep *= .5;
-        else if (CStudioPreferences::GetTimelineSnappingGridResolution() == SNAPGRID_TICKMARKS)
+        else if (CStudioPreferences::timelineSnappingGridResolution() == SNAPGRID_TICKMARKS)
             snapStep *= .1;
 
         double snapValue = round(value / snapStep) * snapStep;
-        if (abs(value - snapValue) < CStudioPreferences::GetSnapRange())
+        if (abs(value - snapValue) < CStudioPreferences::snapRange())
             value = snapValue;
     }
 }

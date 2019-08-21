@@ -566,8 +566,8 @@ void KeyframeManager::SetKeyframeInterpolation()
 
     TKeyframe keyframeData = animCore->GetKeyframeData(keyframeHandles[0]);
 
-    float easeIn = CStudioPreferences::GetInterpolation() ? 100 : 0;
-    float easeOut = CStudioPreferences::GetInterpolation() ? 100 : 0;
+    float easeIn = CStudioPreferences::isInterpolation() ? 100 : 0;
+    float easeOut = CStudioPreferences::isInterpolation() ? 100 : 0;
     getEaseInOutValues(keyframeData, easeIn, easeOut);
 
     if (g_StudioApp.GetDialogs()->displayKeyframeInterpolation(easeIn, easeOut)) {

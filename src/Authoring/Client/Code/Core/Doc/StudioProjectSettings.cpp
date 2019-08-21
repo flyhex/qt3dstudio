@@ -30,11 +30,9 @@
 #include "Qt3DSCommonPrecompile.h"
 #include "StudioProjectSettings.h"
 #include "Core.h"
-#include "Preferences.h"
 #include "Doc.h"
 #include "CoreConst.h"
 #include "Dispatch.h"
-#include "CommonConstants.h"
 #include "StudioPreferences.h"
 #include "Qt3DSLargeInteger.h"
 #include "CColor.h"
@@ -70,7 +68,7 @@ void CStudioProjectSettings::reset()
     // Reset the internal variables
     m_author.clear();
     m_company.clear();
-    m_presentationSize = CStudioPreferences::GetDefaultClientSize();
+    m_presentationSize = CStudioPreferences::defaultClientSize();
     m_maintainAspect = false;
     m_rotatePresentation = false;
     m_preferCompressedTextures = false;

@@ -251,8 +251,8 @@ void RowTimelineContextMenu::onAnimTypeChange(QAction *action)
                                          reinterpret_cast<float *>(keyframes.begin()),
                                          numValues);
         } else if (animType == EAnimationTypeEaseInOut) {
-            float easeIn = CStudioPreferences::GetInterpolation() ? 100 : 0;
-            float easeOut = CStudioPreferences::GetInterpolation() ? 100 : 0;
+            float easeIn = CStudioPreferences::isInterpolation() ? 100 : 0;
+            float easeOut = CStudioPreferences::isInterpolation() ? 100 : 0;
             QVector<SEaseInEaseOutKeyframe> keyframes;
             for (Qt3DSDMKeyframeHandle kfHandle : keyframeHandles) {
                 TKeyframe kfData = animCore->GetKeyframeData(kfHandle);

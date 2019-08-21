@@ -871,7 +871,7 @@ QColor InspectorControlView::showColorDialog(const QColor &color, int instance, 
 
 bool InspectorControlView::toolTipsEnabled() const
 {
-    return CStudioPreferences::ShouldShowTooltips();
+    return CStudioPreferences::isTooltipsOn();
 }
 
 // Converts a path that is relative to the current presentation to be relative to

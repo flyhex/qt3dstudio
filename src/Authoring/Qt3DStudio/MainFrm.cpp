@@ -220,7 +220,7 @@ CMainFrame::CMainFrame()
             this, &CMainFrame::OnPlaybackPreviewRemote);
 
     // Only show Qt3D runtime preview if we have appropriate viewer and it's enabled
-    if (CStudioPreferences::IsLegacyViewerActive()
+    if (CStudioPreferences::isLegacyViewerActive()
             && QFileInfo(CPreviewHelper::getViewerFilePath(QStringLiteral("q3dsviewer"))).exists()) {
         connect(m_ui->actionPreviewQt3DRuntime, &QAction::triggered,
                 this, &CMainFrame::OnPlaybackPreviewQt3DRuntime);
@@ -883,38 +883,47 @@ void CMainFrame::EditPreferences(short inPageIndex)
 
     if (thePrefsReturn == PREFS_RESET_DEFAULTS) {
         // Restore default values
+        // Timeline
         g_StudioApp.SetAutosetKeyframes(true); // Sets the preference as well
-        CStudioPreferences::SetBoundingBoxesOn(true);
-        CStudioPreferences::SetDisplayPivotPoint(true);
-        CStudioPreferences::SetWireframeModeOn(true);
-        CStudioPreferences::SetShowTooltips(true);
-        CStudioPreferences::setShowHelperGrid(true);
+        g_StudioApp.GetCore()->GetDoc()->SetDefaultKeyframeInterpolation(true);
+        CStudioPreferences::setTimebarDisplayTime(false);
+        CStudioPreferences::setTimeAdvanceAmount(CStudioPreferences::DEFAULT_TIME_ADVANCE);
+        CStudioPreferences::setBigTimeAdvanceAmount(CStudioPreferences::DEFAULT_BIG_TIME_ADVANCE);
+        CStudioPreferences::setTimelineSnappingGridActive(true);
+        CStudioPreferences::setTimelineSnappingGridResolution(SNAPGRID_SECONDS);
+        CStudioPreferences::setSnapRange(CStudioPreferences::DEFAULT_SNAPRANGE);
+        CStudioPreferences::setTimelineSplitterLocation(250.);
+
+        // Viewing
+        CStudioPreferences::setDontShowGLVersionDialog(false);
+        CStudioPreferences::setDefaultClientSize(CStudioPreferences::DEFAULT_CLIENT_WIDTH,
+                                                 CStudioPreferences::DEFAULT_CLIENT_HEIGHT);
+        CStudioPreferences::setLegacyViewerActive(true);
+        CStudioPreferences::setEditViewFillMode(true);
+        CStudioPreferences::setPreferredStartupView(
+                    CStudioPreferences::PREFERREDSTARTUP_DEFAULTINDEX);
+        CStudioPreferences::setEditModeLightingEnabled(false);
+
+        // VisualAids
+        CStudioPreferences::setBoundingBoxesOn(true);
+        CStudioPreferences::setPivotPointOn(true);
+        CStudioPreferences::setWireframeModeOn(true);
+        CStudioPreferences::setTooltipsOn(true);
+        CStudioPreferences::setHelperGridOn(true);
         CStudioPreferences::setHelperGridLines(10);
         CStudioPreferences::setHelperGridSpacing(100);
-        CStudioPreferences::SetTimebarDisplayTime(false);
-        g_StudioApp.GetCore()->GetDoc()->SetDefaultKeyframeInterpolation(true);
-        CStudioPreferences::SetSnapRange(CStudioPreferences::DEFAULT_SNAPRANGE);
-        CStudioPreferences::SetDefaultObjectLifetime(CStudioPreferences::DEFAULT_LIFETIME);
-        CStudioPreferences::SetAdvancePropertyExpandedFlag(false);
-        CStudioPreferences::SetPreviewConfig("");
-        CStudioPreferences::SetPreviewProperty("", "");
-        CStudioPreferences::SetDontShowGLVersionDialog(false);
-        CStudioPreferences::SetDefaultClientSize(CStudioPreferences::DEFAULT_CLIENT_WIDTH,
-                                                 CStudioPreferences::DEFAULT_CLIENT_HEIGHT);
-        CStudioPreferences::SetTimeAdvanceAmount(CStudioPreferences::DEFAULT_TIME_ADVANCE);
-        CStudioPreferences::SetBigTimeAdvanceAmount(CStudioPreferences::DEFAULT_BIG_TIME_ADVANCE);
-        CStudioPreferences::SetTimelineSnappingGridActive(true);
-        CStudioPreferences::SetTimelineSnappingGridResolution(SNAPGRID_SECONDS);
-        CStudioPreferences::SetLegacyViewerActive(true);
-        CStudioPreferences::SetEditViewFillMode(true);
-        CStudioPreferences::SetPreferredStartupView(
-                    CStudioPreferences::PREFERREDSTARTUP_DEFAULTINDEX);
-        CStudioPreferences::SetAutoSaveDelay(CStudioPreferences::DEFAULT_AUTOSAVE_DELAY);
-        CStudioPreferences::SetAutoSavePreference(true);
         CStudioPreferences::setSelectorLineWidth(
                     float(CStudioPreferences::DEFAULT_SELECTOR_WIDTH / 10.0f));
         CStudioPreferences::setSelectorLineLength(
                     float(CStudioPreferences::DEFAULT_SELECTOR_LENGTH));
+
+        // Autosave
+        CStudioPreferences::setAutoSaveDelay(CStudioPreferences::DEFAULT_AUTOSAVE_DELAY);
+        CStudioPreferences::setAutoSavePreference(true);
+
+        // Preview
+        CStudioPreferences::setPreviewConfig({});
+        CStudioPreferences::setPreviewProperty({}, {});
 
         RecheckSizingMode();
 
@@ -937,10 +946,10 @@ void CMainFrame::EditPreferences(short inPageIndex)
 void CMainFrame::OnToolAutosetkeys()
 {
     // Toggle autoset keyframes to the opposite of what it's currently set as
-    g_StudioApp.SetAutosetKeyframes(!CStudioPreferences::IsAutosetKeyframesOn());
+    g_StudioApp.SetAutosetKeyframes(!CStudioPreferences::isAutosetKeyframesOn());
 
     // Don't wait for regular update cycle to update the corresponding toolbar/menu checked status
-    m_ui->actionAutoset_Keyframes->setChecked(CStudioPreferences::IsAutosetKeyframesOn());
+    m_ui->actionAutoset_Keyframes->setChecked(CStudioPreferences::isAutosetKeyframesOn());
 }
 
 /**
@@ -952,7 +961,7 @@ void CMainFrame::OnToolAutosetkeys()
 void CMainFrame::OnUpdateToolAutosetkeys()
 {
     // If autoset keyframes is on
-    m_ui->actionAutoset_Keyframes->setChecked(CStudioPreferences::IsAutosetKeyframesOn());
+    m_ui->actionAutoset_Keyframes->setChecked(CStudioPreferences::isAutosetKeyframesOn());
 }
 
 /**
@@ -1465,7 +1474,7 @@ void CMainFrame::OnUpdateLockGuides()
 
 void CMainFrame::OnUpdateEditViewLightingEnabled()
 {
-    m_ui->actionEdit_Lighting->setChecked(CStudioPreferences::editModeLightingEnabled());
+    m_ui->actionEdit_Lighting->setChecked(CStudioPreferences::isEditModeLightingEnabled());
     g_StudioApp.getRenderer().RequestRender();
 }
 
@@ -1488,8 +1497,10 @@ void CMainFrame::onViewResetLayout()
     // If "Yes" is clicked, delete window geometry and window state keys from QSettings
     if (theChoice == QMessageBox::Yes) {
         QSettings settings;
-        QString geoKey = QStringLiteral("mainWindowGeometry") + QString::number(STUDIO_VERSION_NUM);
-        QString stateKey = QStringLiteral("mainWindowState") + QString::number(STUDIO_VERSION_NUM);
+        QString geoKey = QStringLiteral("MainWindow/MainWindowGeometry")
+                + QString::number(STUDIO_VERSION_NUM);
+        QString stateKey = QStringLiteral("MainWindow/MainWindowState")
+                + QString::number(STUDIO_VERSION_NUM);
         settings.remove(geoKey);
         settings.remove(stateKey);
         // Prevent saving geometry and state, and exit
@@ -1595,7 +1606,7 @@ void CMainFrame::onUpdateViewSceneCamera()
  */
 void CMainFrame::OnViewBoundingBoxes()
 {
-    CStudioPreferences::SetBoundingBoxesOn(!CStudioPreferences::IsBoundingBoxesOn());
+    CStudioPreferences::setBoundingBoxesOn(!CStudioPreferences::isBoundingBoxesOn());
     g_StudioApp.getRenderer().RequestRender();
 }
 
@@ -1606,7 +1617,7 @@ void CMainFrame::OnViewBoundingBoxes()
  */
 void CMainFrame::OnUpdateViewBoundingBoxes()
 {
-    m_ui->actionBounding_Boxes->setChecked(CStudioPreferences::IsBoundingBoxesOn());
+    m_ui->actionBounding_Boxes->setChecked(CStudioPreferences::isBoundingBoxesOn());
 }
 
 //==============================================================================
@@ -1615,7 +1626,7 @@ void CMainFrame::OnUpdateViewBoundingBoxes()
  */
 void CMainFrame::OnViewPivotPoint()
 {
-    CStudioPreferences::SetDisplayPivotPoint(!CStudioPreferences::ShouldDisplayPivotPoint());
+    CStudioPreferences::setPivotPointOn(!CStudioPreferences::isPivotPointOn());
     g_StudioApp.getRenderer().RequestRender();
 }
 
@@ -1626,7 +1637,7 @@ void CMainFrame::OnViewPivotPoint()
  */
 void CMainFrame::OnUpdateViewPivotPoint()
 {
-    m_ui->actionPivot_Point->setChecked(CStudioPreferences::ShouldDisplayPivotPoint());
+    m_ui->actionPivot_Point->setChecked(CStudioPreferences::isPivotPointOn());
 }
 
 //==============================================================================
@@ -1635,10 +1646,10 @@ void CMainFrame::OnUpdateViewPivotPoint()
  */
 void CMainFrame::OnViewWireframe()
 {
-    CStudioPreferences::SetWireframeModeOn(!CStudioPreferences::IsWireframeModeOn());
+    CStudioPreferences::setWireframeModeOn(!CStudioPreferences::isWireframeModeOn());
 
     // Don't wait for regular update cycle to update the corresponding toolbar/menu checked status
-    m_ui->actionWireframe->setChecked(CStudioPreferences::IsWireframeModeOn());
+    m_ui->actionWireframe->setChecked(CStudioPreferences::isWireframeModeOn());
 
     g_StudioApp.getRenderer().RequestRender();
 }
@@ -1650,7 +1661,7 @@ void CMainFrame::OnViewWireframe()
  */
 void CMainFrame::OnUpdateViewWireframe()
 {
-    m_ui->actionWireframe->setChecked(CStudioPreferences::IsWireframeModeOn());
+    m_ui->actionWireframe->setChecked(CStudioPreferences::isWireframeModeOn());
 }
 
 //==============================================================================
@@ -1661,7 +1672,7 @@ void CMainFrame::OnUpdateViewWireframe()
  */
 void CMainFrame::OnUpdateViewTooltips()
 {
-    m_ui->actionTooltips->setChecked(CStudioPreferences::ShouldShowTooltips());
+    m_ui->actionTooltips->setChecked(CStudioPreferences::isTooltipsOn());
 }
 
 //==============================================================================
@@ -1671,14 +1682,14 @@ void CMainFrame::OnUpdateViewTooltips()
  */
 void CMainFrame::OnViewTooltips()
 {
-    CStudioPreferences::SetShowTooltips(!CStudioPreferences::ShouldShowTooltips());
+    CStudioPreferences::setTooltipsOn(!CStudioPreferences::isTooltipsOn());
 }
 
 void CMainFrame::onUpdateHelperGrid()
 {
     if (m_sceneView.data() == GetActiveView() && !m_sceneView->isDeploymentView()) {
         m_ui->actionHelper_Grid->setEnabled(true);
-        m_ui->actionHelper_Grid->setChecked(CStudioPreferences::shouldShowHelperGrid());
+        m_ui->actionHelper_Grid->setChecked(CStudioPreferences::isHelperGridOn());
     } else {
         m_ui->actionHelper_Grid->setEnabled(false);
         m_ui->actionHelper_Grid->setChecked(false);
@@ -1687,7 +1698,7 @@ void CMainFrame::onUpdateHelperGrid()
 
 void CMainFrame::onHelperGrid()
 {
-    CStudioPreferences::setShowHelperGrid(!CStudioPreferences::shouldShowHelperGrid());
+    CStudioPreferences::setHelperGridOn(!CStudioPreferences::isHelperGridOn());
 }
 
 //==============================================================================
@@ -1867,7 +1878,7 @@ void CMainFrame::OnShowInspector()
 
 void CMainFrame::OnEditViewLightingEnabled()
 {
-    bool enabled = CStudioPreferences::editModeLightingEnabled();
+    bool enabled = CStudioPreferences::isEditModeLightingEnabled();
     CStudioPreferences::setEditModeLightingEnabled(!enabled);
 }
 
@@ -1917,7 +1928,7 @@ bool CMainFrame::eventFilter(QObject *obj, QEvent *event)
 {
     switch (event->type()) {
     case QEvent::ToolTip: {
-        if (CStudioPreferences::ShouldShowTooltips())
+        if (CStudioPreferences::isTooltipsOn())
             event->ignore();
         else
             return true;
@@ -1946,8 +1957,10 @@ void CMainFrame::handleGeometryAndState(bool save)
         return;
 
     QSettings settings;
-    QString geoKey = QStringLiteral("mainWindowGeometry") + QString::number(STUDIO_VERSION_NUM);
-    QString stateKey = QStringLiteral("mainWindowState") + QString::number(STUDIO_VERSION_NUM);
+    QString geoKey = QStringLiteral("MainWindow/MainWindowGeometry")
+            + QString::number(STUDIO_VERSION_NUM);
+    QString stateKey = QStringLiteral("MainWindow/MainWindowState")
+            + QString::number(STUDIO_VERSION_NUM);
     if (save) {
         settings.setValue(geoKey, saveGeometry());
         settings.setValue(stateKey, saveState(STUDIO_VERSION_NUM));
@@ -1972,7 +1985,8 @@ void CMainFrame::handleRestart()
 void CMainFrame::initializeGeometryAndState()
 {
     QSettings settings;
-    QString stateKey = QStringLiteral("mainWindowState") + QString::number(STUDIO_VERSION_NUM);
+    QString stateKey = QStringLiteral("MainWindow/MainWindowState")
+            + QString::number(STUDIO_VERSION_NUM);
     if (!settings.contains(stateKey)) {
         // On first run, save and restore geometry and state. For some reason they are both needed
         // to avoid a bug with palettes resizing to their original size when window is resized or

@@ -60,8 +60,8 @@ void NavigationBarItem::setIcon(const QPixmap &pixmap)
 
 void NavigationBarItem::setText(const QString &text)
 {
-    QColor textColor = isEnabled() ? CStudioPreferences::GetNormalColor()
-                                   : CStudioPreferences::GetInactiveColor();
+    QColor textColor = isEnabled() ? CStudioPreferences::normalColor()
+                                   : CStudioPreferences::inactiveColor();
     const QString fonttemplate = tr("<font color='%1'>%2</font>");
     m_textLabel.setText(fonttemplate.arg(textColor.name(), text));
 }
@@ -69,7 +69,7 @@ void NavigationBarItem::setText(const QString &text)
 void NavigationBarItem::setHighlight(bool highlight)
 {
     if (highlight) {
-        QColor bgColor = CStudioPreferences::GetMouseOverHighlightColor();
+        QColor bgColor = CStudioPreferences::mouseOverHighlightColor();
         QString bgColorStyle = QStringLiteral("background-color: ") + bgColor.name();
         setStyleSheet(bgColorStyle);
     } else {

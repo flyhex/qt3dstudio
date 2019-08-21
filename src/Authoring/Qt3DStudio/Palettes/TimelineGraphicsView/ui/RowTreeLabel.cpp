@@ -165,9 +165,9 @@ void RowTreeLabel::validateLabel()
 void RowTreeLabel::updateLabelColor()
 {
     if (m_locked)
-        setDefaultTextColor(CStudioPreferences::GetDisabledTextColor());
+        setDefaultTextColor(CStudioPreferences::disabledTextColor());
     else if (m_master)
-        setDefaultTextColor(CStudioPreferences::GetMasterColor());
+        setDefaultTextColor(CStudioPreferences::masterColor());
     else
-        setDefaultTextColor(CStudioPreferences::GetNormalColor());
+        setDefaultTextColor(CStudioPreferences::normalColor());
 }

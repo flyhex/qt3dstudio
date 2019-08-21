@@ -38,7 +38,7 @@
 CAppFonts::CAppFonts()
 {
     // Normal font
-    const QString theFontFace = CStudioPreferences::GetFontFaceName();
+    const QString theFontFace = CStudioPreferences::fontFaceName();
 
     m_NormalFont.setFamily(theFontFace);
     m_NormalFont.setPointSize(13);

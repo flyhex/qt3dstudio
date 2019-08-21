@@ -2221,8 +2221,8 @@ void CDoc::ResetDataCore()
 
     // Setup defaults
     qt3dsdm::IStudioAnimationSystem *theAnimationSystem = GetStudioSystem()->GetAnimationSystem();
-    theAnimationSystem->SetInterpolation(CStudioPreferences::GetInterpolation());
-    theAnimationSystem->SetAutoKeyframe(CStudioPreferences::IsAutosetKeyframesOn());
+    theAnimationSystem->SetInterpolation(CStudioPreferences::isInterpolation());
+    theAnimationSystem->SetAutoKeyframe(CStudioPreferences::isAutosetKeyframesOn());
 }
 
 void CDoc::SetupDataCoreSignals()
@@ -2792,7 +2792,7 @@ void CDoc::ScheduleRemoveComponentInstances(qt3dsdm::Qt3DSDMInstanceHandle inIns
 
 void CDoc::SetDefaultKeyframeInterpolation(bool inSmooth)
 {
-    CStudioPreferences::SetInterpolation(inSmooth);
+    CStudioPreferences::setInterpolation(inSmooth);
     GetStudioSystem()->GetAnimationSystem()->SetInterpolation(inSmooth);
 }
 

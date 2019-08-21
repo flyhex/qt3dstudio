@@ -62,8 +62,9 @@ ConnectionDialog::ConnectionDialog(QWidget *parent)
     : QDialog(parent)
 {
     QSettings settings;
-    QString previousIPAddress = settings.value(QStringLiteral("lastRemoteDeploymentIP")).toString();
-    QString previousPort = settings.value(QStringLiteral("lastRemoteDeploymentPort"),
+    QString previousIPAddress = settings.value(
+                QStringLiteral("Preview/LastRemoteDeploymentIP")).toString();
+    QString previousPort = settings.value(QStringLiteral("Preview/LastRemoteDeploymentPort"),
                                           QStringLiteral("36000")).toString();
 
     m_hostLineEdit = new QLineEdit(this);
@@ -100,8 +101,10 @@ QPair<QString, int> ConnectionDialog::getInfo(QWidget *parent)
         return QPair<QString, int>();
 
     QSettings settings;
-    settings.setValue(QStringLiteral("lastRemoteDeploymentIP"), dialog.m_hostLineEdit->text());
-    settings.setValue(QStringLiteral("lastRemoteDeploymentPort"), dialog.m_portLineEdit->text());
+    settings.setValue(QStringLiteral("Preview/LastRemoteDeploymentIP"),
+                      dialog.m_hostLineEdit->text());
+    settings.setValue(QStringLiteral("Preview/LastRemoteDeploymentPort"),
+                      dialog.m_portLineEdit->text());
 
     return qMakePair(dialog.m_hostLineEdit->text(),
                      dialog.m_portLineEdit->text().toInt());

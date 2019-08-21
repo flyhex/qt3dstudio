@@ -69,7 +69,7 @@ void CEditCameraBar::setupCameras()
     qobject_cast<QListView *>(m_CameraSelector->view())->setSpacing(1);
 
     // set initial view
-    int viewIndex = CStudioPreferences::GetPreferredStartupView();
+    int viewIndex = CStudioPreferences::preferredStartupView();
       // if not set or invalid index, use the scene camera view (last index)
     if (viewIndex == -1 || viewIndex > m_CameraSelector->count() - 3)
         viewIndex = m_CameraSelector->count() - 1;

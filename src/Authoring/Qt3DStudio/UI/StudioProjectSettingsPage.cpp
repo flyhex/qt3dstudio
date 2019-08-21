@@ -35,7 +35,6 @@
 #include "Doc.h"
 #include "Views.h"
 #include "MainFrm.h"
-#include "CommonConstants.h"
 #include "StudioPreferences.h"
 #include "Core.h"
 
@@ -44,7 +43,7 @@ CStudioProjectSettingsPage::CStudioProjectSettingsPage(QWidget *parent)
     , m_aspectRatio(0.0)
     , m_ui(new Ui::StudioProjectSettingsPage)
 {
-    m_font = QFont(CStudioPreferences::GetFontFaceName());
+    m_font = QFont(CStudioPreferences::fontFaceName());
     m_font.setPixelSize(CStudioPreferences::fontSize());
 
     // Create a bold font for the group box text

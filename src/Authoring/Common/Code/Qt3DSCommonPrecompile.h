@@ -90,7 +90,6 @@
 #include "PlatformMacros.h"
 #include "PlatformStrings.h"
 #include "PlatformConversion.h"
-#include "CommonConstants.h"
 #include "Mutex.h"
 #include "Guard.h"
 #include "Thread.h"

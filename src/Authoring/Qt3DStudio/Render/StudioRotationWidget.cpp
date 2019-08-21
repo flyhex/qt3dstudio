@@ -251,8 +251,8 @@ struct SRotationWidget : public SStudioWidgetImpl<StudioWidgetTypes::Rotation>
                         NVRenderBlendEquation::Add, NVRenderBlendEquation::Add));
 
         float pixelRatio = float(StudioUtils::devicePixelRatio());
-        QT3DSF32 theRingRadius = 2 * CStudioPreferences::getSelectorLineLength() * pixelRatio;
-        QT3DSF32 theRingWidth = CStudioPreferences::getSelectorLineWidth() * pixelRatio;
+        QT3DSF32 theRingRadius = 2 * CStudioPreferences::selectorLineLength() * pixelRatio;
+        QT3DSF32 theRingWidth = CStudioPreferences::selectorLineWidth() * pixelRatio;
         QT3DSF32 theRingInner = theRingRadius;
         QT3DSF32 theRingOuter = theRingRadius + theRingWidth;
         if (m_XAxis == nullptr) {

@@ -151,9 +151,9 @@ struct SScaleWidget : public SStudioWidgetImpl<StudioWidgetTypes::Scale>
         inRenderContext.Clear(qt3ds::render::NVRenderClearValues::Depth);
         float pixelRatio = float(StudioUtils::devicePixelRatio());
         QT3DSF32 axisWidth = pixelRatio;
-        QT3DSF32 triWidth = 3 * CStudioPreferences::getSelectorLineWidth() * pixelRatio;
-        QT3DSF32 axisStart = CStudioPreferences::getSelectorLineLength() / 3.0f * pixelRatio;
-        QT3DSF32 axisLength = CStudioPreferences::getSelectorLineLength() * pixelRatio;
+        QT3DSF32 triWidth = 3 * CStudioPreferences::selectorLineWidth() * pixelRatio;
+        QT3DSF32 axisStart = CStudioPreferences::selectorLineLength() / 3.0f * pixelRatio;
+        QT3DSF32 axisLength = CStudioPreferences::selectorLineLength() * pixelRatio;
         QT3DSF32 axisTotalLength = triWidth + axisLength;
         if (m_XAxis == nullptr) {
             TBase::SetupRender(inWidgetContext, inRenderContext);

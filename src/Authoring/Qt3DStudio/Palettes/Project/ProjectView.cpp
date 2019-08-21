@@ -427,7 +427,7 @@ void ProjectView::showContextMenu(int x, int y, int index)
 
 bool ProjectView::toolTipsEnabled()
 {
-    return CStudioPreferences::ShouldShowTooltips();
+    return CStudioPreferences::isTooltipsOn();
 }
 
 void ProjectView::openFile(int row)

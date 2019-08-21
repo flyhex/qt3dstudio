@@ -76,7 +76,8 @@ void StudioTutorialWidget::OnInitDialog()
     setFixedSize(backgroundSize);
 
     QSettings settings;
-    m_ui->studioTutorialShowAgain->setChecked(!settings.value("showWelcomeScreen").toBool());
+    m_ui->studioTutorialShowAgain->setChecked(
+                !settings.value(QStringLiteral("Viewing/ShowWelcomeScreen")).toBool());
     m_backgroundPalette = new QPalette(palette());
     QPixmap background(size());
     QPainter backgroundPainter(&background);
@@ -96,7 +97,7 @@ void StudioTutorialWidget::handleDoNotShowAgainChange(int state)
 {
     QSettings settings;
     const bool show = !(state == Qt::Checked);
-    settings.setValue("showWelcomeScreen", show);
+    settings.setValue(QStringLiteral("Viewing/ShowWelcomeScreen"), show);
 }
 
 void StudioTutorialWidget::handleOpenSample()
