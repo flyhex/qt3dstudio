@@ -360,6 +360,7 @@ public:
     std::set<QString> GetSourcePathList() const;
     std::set<QString> GetFontFileList() const;
     std::set<QString> GetDynamicObjectTextureList() const;
+    qt3dsdm::TInstanceHandleList GetEffectList() const;
     std::set<QString> getRenderableList() const;
     bool IsLockedAtAll(qt3dsdm::Qt3DSDMInstanceHandle inInstance);
     bool IsDuplicateable(qt3dsdm::Qt3DSDMInstanceHandle inInstance);

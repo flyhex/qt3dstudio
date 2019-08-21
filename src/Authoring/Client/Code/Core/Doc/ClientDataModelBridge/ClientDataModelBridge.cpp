@@ -1505,6 +1505,14 @@ std::set<QString> CClientDataModelBridge::GetDynamicObjectTextureList() const
     return theSourcePathList;
 }
 
+TInstanceHandleList CClientDataModelBridge::GetEffectList() const
+{
+    TInstanceHandleList theEffectInstances;
+    m_DataCore->GetInstancesDerivedFrom(theEffectInstances, m_Effect.m_Instance);
+
+    return theEffectInstances;
+}
+
 std::set<QString> CClientDataModelBridge::getRenderableList() const
 {
     std::vector<SValue> valueList
