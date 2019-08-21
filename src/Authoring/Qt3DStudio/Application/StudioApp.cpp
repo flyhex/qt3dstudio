@@ -2059,6 +2059,13 @@ void CStudioApp::showPresentationIdEmptyWarning()
                                  Qt3DSMessageBox::ICON_WARNING, false);
 }
 
+void CStudioApp::showShaderCompileError(const QString &error)
+{
+    m_dialogs->DisplayMessageBox(tr("Warning"),
+                                 tr("Shader compile error.\n") + error,
+                                 Qt3DSMessageBox::ICON_WARNING, false);
+}
+
 void CStudioApp::showInvalidFilenameWarning()
 {
     m_dialogs->DisplayMessageBox(tr("Invalid filename"),

@@ -394,11 +394,13 @@ Rectangle {
 
                                             readonly property var modelData: model.modelData
                                             text: model.modelData.title
-                                            // Color picked from DataInput icon
-                                            color: model.modelData.controlled?
-                                                       _dataInputColor
-                                                     : _parentView.titleColor(modelData.instance,
-                                                                              modelData.handle)
+                                            // Label is showing "controlled", "invalid data" or
+                                            // ordinary text color.
+                                            color: model.modelData.controlled
+                                                   ? _dataInputColor : model.modelData.validData
+                                                      ? _parentView.titleColor(modelData.instance,
+                                                                               modelData.handle)
+                                                         : _invalidDataIndicatorColor
 
                                             Layout.alignment: Qt.AlignTop
 

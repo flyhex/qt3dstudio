@@ -1505,6 +1505,31 @@ std::set<QString> CClientDataModelBridge::GetDynamicObjectTextureList() const
     return theSourcePathList;
 }
 
+TInstanceHandleList CClientDataModelBridge::GetShaderInstances() const
+{
+    TInstanceHandleList theCustomMatInstances;
+    TInstanceHandleList theEffectInstances;
+    m_DataCore->GetInstancesDerivedFrom(theCustomMatInstances, m_CustomMaterial.m_Instance);
+    m_DataCore->GetInstancesDerivedFrom(theEffectInstances, m_Effect.m_Instance);
+
+    TInstanceHandleList cleanedMatInstances;
+    for (const auto &it : theCustomMatInstances) {
+        if (it != m_CustomMaterial.m_Instance)
+            cleanedMatInstances.insert(cleanedMatInstances.end(), it);
+    }
+    TInstanceHandleList cleanedFxInstances;
+
+    // Pick only effects that are not base instances, and which have a valid parent
+    for (const auto &it : theEffectInstances) {
+        if (it != m_Effect.m_Instance && GetParentInstance(it).Valid())
+            cleanedFxInstances.insert(cleanedFxInstances.end(), it);
+    }
+
+    cleanedFxInstances.insert(cleanedFxInstances.end(), cleanedMatInstances.begin(),
+                              cleanedMatInstances.end());
+    return cleanedFxInstances;
+}
+
 std::set<QString> CClientDataModelBridge::getRenderableList() const
 {
     std::vector<SValue> valueList

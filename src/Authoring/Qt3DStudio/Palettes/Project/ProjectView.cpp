@@ -318,6 +318,11 @@ void ProjectView::editPresentationId(int row, bool qmlStream)
     dlg.exec();
 }
 
+void ProjectView::showSpecificShaderError(const int row)
+{
+    m_ProjectModel->showItemError(m_ProjectModel->index(row));
+}
+
 void ProjectView::renamePresentation(int row, bool qmlStream)
 {
     QString relativePresPath = QDir(g_StudioApp.GetCore()->getProjectFile().getProjectPath())

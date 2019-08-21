@@ -143,7 +143,7 @@ public:
                                        bool controlled);
     void notifyPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                qt3dsdm::Qt3DSDMPropertyHandle inProperty);
-    void updateValidState(InspectorControlBase *inItem);
+    void updateValidState(InspectorControlBase *inItem) const;
 
     Q_INVOKABLE void setMaterialTypeValue(long instance, int handle, const QVariant &value);
     Q_INVOKABLE void setShaderValue(long instance, int handle, const QVariant &value);

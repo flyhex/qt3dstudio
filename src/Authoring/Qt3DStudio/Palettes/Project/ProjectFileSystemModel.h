@@ -59,7 +59,8 @@ public:
         DepthRole,
         ExpandedRole,
         FileIdRole,
-        ExtraIconRole
+        ExtraIconRole,
+        HasWarningRole
     };
 
     void setRootPath(const QString &path);
@@ -90,6 +91,8 @@ public:
     void asyncUpdateReferences();
     void onFilesChanged(const Q3DStudio::TFileModificationList &inFileModificationList);
     void clearModelData();
+    void checkShaders(const int startRow = -1, const int endRow = -1);
+    void showItemError(const QModelIndex index);
 
 Q_SIGNALS:
     void modelChanged(QAbstractItemModel *model);
@@ -141,6 +144,7 @@ private:
         bool expanded;
         TreeItem *parent;
         int childCount;
+        QString error;
     };
 
     QFileSystemModel *m_model = nullptr;

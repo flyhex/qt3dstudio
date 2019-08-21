@@ -177,9 +177,11 @@ Rectangle {
                                 id: fileNameLabel
                                 text: _fileId ? fileName + " <" + _fileId + ">" : fileName;
                                 color: {
-                                    _isReferenced ? _textColor
-                                                  : _isProjectReferenced ? _projectReferencedColor
-                                                                         : _disabledColor
+                                    _hasWarning ? _invalidDataIndicatorColor :
+                                                  _isReferenced ? _textColor :
+                                                                  _isProjectReferenced ?
+                                                                      _projectReferencedColor
+                                                                    : _disabledColor
                                 }
                                 leftPadding: 2
 
@@ -211,13 +213,16 @@ Rectangle {
                                     hoverEnabled: true
                                     onPressed: delegateItem.handlePress(mouse, false)
                                     onClicked: delegateItem.handleClick(mouse)
-                                    onDoubleClicked: _parentView.editPresentationId(
-                                                         index, _parentView.isQmlStream(index))
+                                    onDoubleClicked:
+                                        _hasWarning ? _parentView.showSpecificShaderError(index)
+                                                    : _parentView.editPresentationId(
+                                                          index, _parentView.isQmlStream(index))
                                 }
                                 StyledTooltip {
-                                    text: _parentView.isPresentation(index)
-                                          ? qsTr("No presentation Id")
-                                          : qsTr("No Qml stream Id")
+                                    text: _hasWarning ? qsTr("Shader error")
+                                                      : _parentView.isPresentation(index)
+                                                        ? qsTr("No presentation Id")
+                                                        : qsTr("No Qml stream Id")
                                     enabled: warningMouseArea.containsMouse
                                 }
                             }

@@ -98,6 +98,7 @@ public:
     QString presentationId(int row) const;
     void setInitialPresentation(int row);
     Q_INVOKABLE void editPresentationId(int row, bool qmlStream);
+    Q_INVOKABLE void showSpecificShaderError(const int row);
     void renamePresentation(int row, bool qmlStream);
 
     // CPresentationChangeListener

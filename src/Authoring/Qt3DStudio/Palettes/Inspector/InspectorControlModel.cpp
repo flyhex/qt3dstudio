@@ -181,6 +181,7 @@ void InspectorControlModel::notifyPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle
             if (property->m_property == inProperty || imageInstance == inInstance) {
                 updatePropertyValue(property);
                 changed = true;
+                updateValidState(property);
             }
         }
     }
@@ -403,6 +404,7 @@ void InspectorControlModel::updateMaterialValues(const QStringList &values, int 
                 Q_EMIT item->valuesChanged();
                 // Changing values resets the selected index, so pretend the value has also changed
                 Q_EMIT item->valueChanged();
+                updateValidState(item);
             }
         }
     }
@@ -715,7 +717,7 @@ InspectorControlBase *InspectorControlModel::createShaderItem(
             break;
         }
     }
-
+    updateValidState(item);
     return item;
 }
 
@@ -824,11 +826,6 @@ InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *insp
             std::bind(&InspectorControlModel::updateControlledToggleState, this, item)));
     }
 
-    if (item->m_propertyType == qt3dsdm::AdditionalMetaDataType::Import) {
-        item->m_connections.push_back(signalProvider->ConnectControlledToggled(
-            std::bind(&InspectorControlModel::updateValidState, this, item)));
-    }
-
     // synchronize the value itself
     updatePropertyValue(item);
     updateValidState(item);
@@ -912,7 +909,7 @@ void InspectorControlModel::updateAnimateToggleState(InspectorControlBase* inIte
     }
 }
 
-void InspectorControlModel::updateValidState(InspectorControlBase *inItem)
+void InspectorControlModel::updateValidState(InspectorControlBase *inItem) const
 {
     const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
             ->GetClientDataModelBridge();
@@ -922,6 +919,22 @@ void InspectorControlModel::updateValidState(InspectorControlBase *inItem)
         if (fileinfo.exists() != inItem->m_valid) {
             inItem->m_valid = !inItem->m_valid;
             Q_EMIT inItem->validDataChanged();
+        }
+    }
+
+    // Check the validity of shader.
+    if (inItem->m_title == tr("Shader")) {
+        auto err = g_StudioApp.getRenderer().getObjectError(inItem->m_instance);
+        if (!err.isEmpty()) {
+            inItem->m_tooltip = err;
+            inItem->m_valid = false;
+            Q_EMIT inItem->validDataChanged();
+            Q_EMIT inItem->tooltipChanged();
+        } else {
+            inItem->m_tooltip = tr("Shader being used");
+            inItem->m_valid = true;
+            Q_EMIT inItem->validDataChanged();
+            Q_EMIT inItem->tooltipChanged();
         }
     }
 }
@@ -1445,6 +1458,8 @@ void InspectorControlModel::updatePropertyValue(InspectorControlBase *element) c
     // not the controlled flag nor the tooltip
     if (element->m_controllable)
           updateControlledToggleState(element);
+
+    updateValidState(element);
 }
 
 void InspectorControlModel::refreshRenderables()
@@ -1495,7 +1510,6 @@ void InspectorControlModel::refresh()
             if (property->m_property.Valid()) {
                 updatePropertyValue(property);
                 updateControlledToggleState(property);
-                updateValidState(property);
             }
         }
     }
@@ -1641,6 +1655,10 @@ void InspectorControlModel::setShaderValue(long instance, int handle, const QVar
     }
 
     saveIfMaterial(instance);
+
+    // Make sure that inspector panel is up-to-date with regards to result of shader compilation
+    // errors.
+    rebuildTree();
 }
 
 void InspectorControlModel::setMatDataValue(long instance, int handle, const QVariant &value)

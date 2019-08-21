@@ -50,6 +50,7 @@
 #include "IDragable.h"
 #include "IObjectReferenceHelper.h"
 #include "IDirectoryWatchingSystem.h"
+#include "IStudioRenderer.h"
 
 ProjectFileSystemModel::ProjectFileSystemModel(QObject *parent) : QAbstractListModel(parent)
     , m_model(new QFileSystemModel(this))
@@ -80,6 +81,7 @@ QHash<int, QByteArray> ProjectFileSystemModel::roleNames() const
     modelRoleNames.insert(ExpandedRole, "_expanded");
     modelRoleNames.insert(FileIdRole, "_fileId");
     modelRoleNames.insert(ExtraIconRole, "_extraIcon");
+    modelRoleNames.insert(HasWarningRole, "_hasWarning");
     return modelRoleNames;
 }
 
@@ -137,8 +139,14 @@ QVariant ProjectFileSystemModel::data(const QModelIndex &index, int role) const
         if (getIconType(path) & (OBJTYPE_PRESENTATION | OBJTYPE_QML_STREAM)) {
             if (presentationId(path).isEmpty())
                 return QStringLiteral("warning.png");
+        } else if (!item.error.isEmpty()) {
+                return QStringLiteral("warning.png");
         }
         return {};
+    }
+
+    case HasWarningRole: {
+        return !item.error.isEmpty();
     }
 
     default:
@@ -215,7 +223,39 @@ void ProjectFileSystemModel::updateReferences()
 
     m_references.insert(projectPath);
 
-    updateRoles({IsReferencedRole, Qt::DecorationRole});
+    checkShaders();
+
+    updateRoles({IsReferencedRole, Qt::DecorationRole, HasWarningRole, ExtraIconRole});
+}
+
+void ProjectFileSystemModel::showItemError(const QModelIndex index)
+{
+    const auto &item = m_items.at(index.row());
+    // Currently we only show shader compilation errors.
+    g_StudioApp.showShaderCompileError(item.error);
+}
+
+void ProjectFileSystemModel::checkShaders(const int startRow, const int endRow)
+{
+    auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
+    qt3dsdm::TInstanceHandleList theShaderInstances(bridge->GetShaderInstances());
+
+    for (const auto &instance : theShaderInstances) {
+        auto sourcepath = bridge->GetSourcePath(instance);
+        const QString relativePath = g_StudioApp.GetCore()->GetDoc()
+                ->GetResolvedPathToDoc(sourcepath);
+        auto currRow = rowForPath(relativePath);
+
+        if (currRow >= startRow && startRow == -1 && currRow <= endRow)
+            continue;
+
+        auto err = g_StudioApp.getRenderer().getObjectError(instance);
+
+        if (!err.isEmpty() && currRow != -1)
+            m_items[currRow].error = bridge->GetSourcePath(instance) + QStringLiteral("\n\n") + err;
+        else if (currRow != -1)
+            m_items[currRow].error = QString();
+    }
 }
 
 /**
@@ -376,7 +416,8 @@ void ProjectFileSystemModel::updateProjectReferences()
     }
 
     m_projectReferencesUpdateMap.clear();
-    updateRoles({IsProjectReferencedRole});
+    checkShaders();
+    updateRoles({IsProjectReferencedRole, HasWarningRole, ExtraIconRole});
 }
 
 void ProjectFileSystemModel::getQmlAssets(const QObject *qmlNode,
@@ -576,6 +617,9 @@ void ProjectFileSystemModel::showModelChildItems(const QModelIndex &parentIndex,
 
     endInsertRows();
 
+    checkShaders(startRow, startRow + insertCount - 1);
+    updateRoles({HasWarningRole, ExtraIconRole});
+
     // also fetch children so we're notified when files are added or removed in immediate subdirs
     for (const auto &childIndex : rowsToInsert) {
         if (m_model->hasChildren(childIndex) && m_model->canFetchMore(childIndex))
@@ -674,6 +718,9 @@ void ProjectFileSystemModel::importUrls(const QList<QUrl> &urls, int row, bool a
 
     // Batch update all imported presentation nodes
     g_StudioApp.GetCore()->getProjectFile().addPresentationNodes(presentationNodes);
+
+    checkShaders(row, row);
+    updateRoles({HasWarningRole, ExtraIconRole});
 
     // Add new data inputs that are missing from project's data inputs. Duplicates are ignored,
     // even if they are different type.

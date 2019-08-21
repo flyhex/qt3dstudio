@@ -417,6 +417,15 @@ struct SRendererImpl : public IStudioRenderer,
         Render();
     }
 
+    QString getObjectError(qt3dsdm::Qt3DSDMInstanceHandle theInstance) const
+    {
+        auto translator = m_Translation->GetOrCreateTranslator(theInstance);
+        if (translator)
+            return static_cast<SGraphObjectTranslator *>(translator)->GetError();
+        else
+            return {};
+    }
+
     void getPreviewFbo(QSize &outFboDim, qt3ds::QT3DSU32 &outFboTexture) override
     {
         if (m_Translation) {

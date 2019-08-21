@@ -1161,10 +1161,13 @@ struct SEffectTranslator : public SDynamicObjectTranslator
     void SetActive(bool inActive) override
     {
         SEffect &theItem = static_cast<SEffect &>(GetGraphObject());
-        if (m_EffectSystem)
+        if (m_EffectSystem) {
             theItem.SetActive(inActive, *m_EffectSystem);
-        else
+            if (inActive && inActive != theItem.m_Flags.IsActive())
+                m_EffectSystem->SetEffectRequiresCompilation(theItem.m_ClassName, true);
+        } else {
             theItem.m_Flags.SetActive(inActive);
+        }
     }
 
     void ResetEffect() override
@@ -1172,6 +1175,19 @@ struct SEffectTranslator : public SDynamicObjectTranslator
         SEffect &theItem = static_cast<SEffect &>(GetGraphObject());
         if (m_EffectSystem)
             theItem.Reset(*m_EffectSystem);
+    }
+
+    const QString GetError() override
+    {
+        SEffect &theItem = static_cast<SEffect &>(GetGraphObject());
+        return QString::fromUtf8(theItem.GetError().c_str());
+    }
+
+    void SetError(const QString &error) override
+    {
+        SEffect &theItem = static_cast<SEffect &>(GetGraphObject());
+        theItem.SetError(m_EffectSystem->GetResourceManager().GetRenderContext()
+                         .GetStringTable().RegisterStr(error));
     }
 };
 struct SCustomMaterialTranslator : public SDynamicObjectTranslator
@@ -1206,9 +1222,26 @@ struct SCustomMaterialTranslator : public SDynamicObjectTranslator
             SCustomMaterial &theItem = static_cast<SCustomMaterial &>(GetGraphObject());
             if (inActive != theItem.m_Flags.IsActive()) {
                 theItem.m_Flags.SetActive(inActive);
+                // Force compilation in Studio if custom shader became active, so we know
+                // if it has any compilation errors.
+                if (inActive)
+                    m_MaterialSystem->setRequiresCompilation(theItem.m_ClassName, true);
+
                 m_MaterialSystem->OnMaterialActivationChange(theItem, inActive);
             }
         }
+    }
+
+    const QString GetError() override
+    {
+        SCustomMaterial &theItem = static_cast<SCustomMaterial &>(GetGraphObject());
+        return QString::fromUtf8(theItem.GetError().c_str());
+    }
+
+    void SetError(const QString &error) override
+    {
+        SCustomMaterial &theItem = static_cast<SCustomMaterial &>(GetGraphObject());
+        theItem.SetError(m_MaterialSystem->getContext()->GetStringTable().RegisterStr(error));
     }
 };
 struct SReferencedMaterialTranslator : public SGraphObjectTranslator
