@@ -616,8 +616,11 @@ void RowTree::setPropBinding(ITimelineItemProperty *binding)
 {
     m_PropBinding = binding;
 
-    m_rectChannels.resize(m_PropBinding->GetChannelCount());
-    m_activeChannels.resize(m_PropBinding->GetChannelCount());
+    int chCount = int(m_PropBinding->GetChannelCount());
+    m_activeChannels.resize(chCount);
+    if (chCount == 1) // if property has only 1 channel (ex: alpha), don't show channel buttons
+        chCount = 0;
+    m_rectChannels.resize(chCount);
 
     // For bezier animation select first channel (ie x) only by default, else select all channels
     if (m_PropBinding->animationType() == qt3dsdm::EAnimationTypeBezier)
