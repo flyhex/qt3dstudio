@@ -297,6 +297,10 @@ void CDataInputListDlg::updateInfo()
             auto path = refHelper->GetObjectReferenceString(
                         doc->GetSceneInstance(), CRelativePathTools::EPATHTYPE_GUID,
                         allCtrldElemsIt->instHandle).toQString();
+            // Differentiate between paths such as Scene.Layer and Scene.Layer.Light by adding
+            // whitespace, and simultaneously create separation between element path and
+            // count of controlled properties which is shown in UI.
+            path.append(QLatin1Char(' '));
             // One element can have several properties controlled by this datainput,
             // do not show element several times. Show the number of properties after
             // the elementpath and the list of property names in a separate column.
