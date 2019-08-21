@@ -36,6 +36,7 @@ MouseArea {
     property alias value: value.text
     property var activeBrowser
     property bool blockShow: false
+    property bool validData
 
     signal showBrowser
 
@@ -64,6 +65,7 @@ MouseArea {
 
         StyledLabel {
             id: value
+            validData: root.validData
             anchors.fill: parent
             horizontalAlignment: Text.AlignLeft
             rightPadding: 6 + img.width

@@ -37,12 +37,28 @@ RowLayout {
     signal showBrowser
     property string value: ""
     property alias activeBrowser: browser.activeBrowser
+    property var validData: parent.modelData.validData
 
     BrowserCombo {
         id: browser
         Layout.preferredWidth: _valueWidth
+        validData: root.validData
         Layout.fillWidth: true
         value: root.value === "" ? qsTr("Select...") : root.value
         onShowBrowser: root.showBrowser()
+        StyledTooltip {
+            text: qsTr("Invalid path")
+            enabled: browserMouseArea.containsMouse && !root.validData
+        }
+
+        MouseArea {
+            id: browserMouseArea
+            anchors.fill: parent
+            hoverEnabled: true
+            // pass through mouse click to Combobox
+            onPressed: {
+                mouse.accepted = false;
+            }
+        }
     }
 }

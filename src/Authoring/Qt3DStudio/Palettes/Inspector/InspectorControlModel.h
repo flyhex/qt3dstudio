@@ -70,6 +70,7 @@ class InspectorControlBase : public QObject
     Q_PROPERTY(bool animated MEMBER m_animated NOTIFY animatedChanged)
     Q_PROPERTY(bool controlled MEMBER m_controlled NOTIFY controlledChanged)
     Q_PROPERTY(bool controllable MEMBER m_controllable CONSTANT)
+    Q_PROPERTY(bool validData MEMBER m_valid NOTIFY validDataChanged)
     Q_PROPERTY(QString controller MEMBER m_controller NOTIFY controlledChanged)
 
 public:
@@ -81,6 +82,7 @@ Q_SIGNALS:
     void animatedChanged();
     void controlledChanged();
     void tooltipChanged();
+    void validDataChanged();
 
 public:
     qt3dsdm::DataModelDataType::Value m_dataType;
@@ -99,6 +101,7 @@ public:
     bool m_animated = false;
     bool m_controlled = false;
     bool m_controllable = false;
+    bool m_valid = true;
     QString m_controller;
     std::vector<qt3dsdm::TSignalConnectionPtr> m_connections;
 };
@@ -140,6 +143,7 @@ public:
                                        bool controlled);
     void notifyPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance,
                                qt3dsdm::Qt3DSDMPropertyHandle inProperty);
+    void updateValidState(InspectorControlBase *inItem);
 
     Q_INVOKABLE void setMaterialTypeValue(long instance, int handle, const QVariant &value);
     Q_INVOKABLE void setShaderValue(long instance, int handle, const QVariant &value);

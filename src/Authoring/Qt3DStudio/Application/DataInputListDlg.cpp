@@ -355,7 +355,7 @@ void CDataInputListDlg::updateInfo()
                 // Highlight the entire property name item if a non-match was found.
                 if (typeNotMatching) {
                     item3->setForeground(
-                                QBrush(CStudioPreferences::invalidDataInputIndicatorColor()));
+                                QBrush(CStudioPreferences::invalidDataIndicatorColor()));
                     static QString warning(tr("\n\nData Input type is not matching with one or "
                                               "several bound properties"));
                     item3->setToolTip(propNames + warning);

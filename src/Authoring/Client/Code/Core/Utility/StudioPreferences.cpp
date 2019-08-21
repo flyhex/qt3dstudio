@@ -84,7 +84,7 @@ static QColor s_timelineFilterButtonSelectedColor;
 static QColor s_timelineFilterButtonHoveredColor;
 static QColor s_timelineRowCommentBgColor;
 static QColor s_timelinePressedKeyframeColor; // pressed keyframe from multiple selection
-static QColor s_invalidDataInputIndicatorColor;
+static QColor s_invalidDataIndicatorColor;
 
 static int s_fontSize;
 static int s_controlBaseHeight;
@@ -159,7 +159,7 @@ void CStudioPreferences::loadPreferences()
     s_timelineRowCommentBgColor = QColor("#d0000000");
     s_timelinePressedKeyframeColor = QColor("#ffff00");
 
-    s_invalidDataInputIndicatorColor = QColor("#ff2121");
+    s_invalidDataIndicatorColor = QColor("#ff2121");
 
     s_fontSize = 12;
     s_controlBaseHeight = 22;
@@ -615,6 +615,8 @@ void CStudioPreferences::setQmlContextProperties(QQmlContext *qml)
     qml->setContextProperty(QStringLiteral("_yAxisColor"), s_yAxisColor);
     qml->setContextProperty(QStringLiteral("_zAxisColor"), s_zAxisColor);
     qml->setContextProperty(QStringLiteral("_wAxisColor"), s_wAxisColor);
+    qml->setContextProperty(QStringLiteral("_invalidDataIndicatorColor"),
+                            s_invalidDataIndicatorColor);
     qml->setContextProperty(QStringLiteral("_fontSize"), s_fontSize);
     qml->setContextProperty(QStringLiteral("_controlBaseHeight"), s_controlBaseHeight);
     qml->setContextProperty(QStringLiteral("_idWidth"), s_idWidth);
@@ -910,9 +912,9 @@ QColor CStudioPreferences::timelinePressedKeyframeColor()
     return s_timelinePressedKeyframeColor;
 }
 
-QColor CStudioPreferences::invalidDataInputIndicatorColor()
+QColor CStudioPreferences::invalidDataIndicatorColor()
 {
-    return s_invalidDataInputIndicatorColor;
+    return s_invalidDataIndicatorColor;
 }
 
 int CStudioPreferences::fontSize()

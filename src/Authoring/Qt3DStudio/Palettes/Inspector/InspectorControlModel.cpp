@@ -789,12 +789,17 @@ InspectorControlBase* InspectorControlModel::createItem(Qt3DSDMInspectable *insp
         // Update UI icon state and tooltip
         updateControlledToggleState(item);
         item->m_connections.push_back(signalProvider->ConnectControlledToggled(
-            std::bind(&InspectorControlModel::updateControlledToggleState,
-                      this, item)));
+            std::bind(&InspectorControlModel::updateControlledToggleState, this, item)));
+    }
+
+    if (item->m_propertyType == qt3dsdm::AdditionalMetaDataType::Import) {
+        item->m_connections.push_back(signalProvider->ConnectControlledToggled(
+            std::bind(&InspectorControlModel::updateValidState, this, item)));
     }
 
     // synchronize the value itself
     updatePropertyValue(item);
+    updateValidState(item);
     return item;
 }
 
@@ -872,6 +877,20 @@ void InspectorControlModel::updateAnimateToggleState(InspectorControlBase* inIte
     if (animated != inItem->m_animated) {
         inItem->m_animated = animated;
         Q_EMIT inItem->animatedChanged();
+    }
+}
+
+void InspectorControlModel::updateValidState(InspectorControlBase *inItem)
+{
+    const auto bridge = g_StudioApp.GetCore()->GetDoc()->GetStudioSystem()
+            ->GetClientDataModelBridge();
+    if (bridge->GetSourcePathProperty() == inItem->m_property) {
+        QFileInfo fileinfo(g_StudioApp.GetCore()->GetDoc()->GetResolvedPathToDoc(
+                               bridge->GetSourcePath(inItem->m_instance)));
+        if (fileinfo.exists() != inItem->m_valid) {
+            inItem->m_valid = !inItem->m_valid;
+            Q_EMIT inItem->validDataChanged();
+        }
     }
 }
 
@@ -1444,6 +1463,7 @@ void InspectorControlModel::refresh()
             if (property->m_property.Valid()) {
                 updatePropertyValue(property);
                 updateControlledToggleState(property);
+                updateValidState(property);
             }
         }
     }

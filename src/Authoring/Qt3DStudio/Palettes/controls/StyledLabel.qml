@@ -32,8 +32,10 @@ import QtQuick.Layouts 1.3
 
 Label {
     id: styledLabelId
+    property bool validData: true
+
     font.pixelSize: _fontSize
-    color: _textColor
+    color: validData ? _textColor : _invalidDataIndicatorColor
     Layout.preferredHeight: _controlBaseHeight
     Layout.preferredWidth: _idWidth
     verticalAlignment: Text.AlignVCenter
