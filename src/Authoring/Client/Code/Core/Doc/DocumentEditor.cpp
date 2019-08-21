@@ -93,6 +93,7 @@
 #include "StudioApp.h"
 #include "StudioUtils.h"
 #include "Qt3DSDMHandles.h"
+#include "IStudioRenderer.h"
 
 namespace {
 
@@ -5236,6 +5237,7 @@ public:
 
         QSet<QString> imageLoadSet;
 
+        g_StudioApp.getRenderer().MakeContextCurrent();
         for (size_t fileIdx = 0, fileEnd = inList.size(); fileIdx < fileEnd; ++fileIdx) {
             const SFileModificationRecord &theRecord(inList[fileIdx]);
 
@@ -5401,6 +5403,8 @@ public:
 
         if (!imageLoadSet.isEmpty())
             m_Doc.GetBufferCache().reloadImageSet(imageLoadSet);
+
+        g_StudioApp.getRenderer().ReleaseContext();
 
         if (hasProgressFired)
             theDispatch.FireOnProgressEnd();
