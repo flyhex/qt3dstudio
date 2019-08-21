@@ -5411,10 +5411,13 @@ public:
                     IDocumentEditor::fixDefaultTexturePaths(theInstances[0].second);
                 }
 
+                QList<qt3dsdm::Qt3DSDMInstanceHandle> insts;
                 for (size_t i = 0; i < theInstances.size(); ++i) {
                     theDispatch.FireReloadEffectInstance(theInstances[i].second);
-                    theDispatch.FireImmediateRefreshInstance(theInstances[i].second);
+                    insts.append(theInstances[i].second);
                 }
+                theDispatch.FireImmediateRefreshInstance(&insts[0], theInstances.size());
+
             } else if (CDialogs::shaderExtensions().contains(theExtension)
                        && theRecord.m_ModificationType != FileModificationType::Created
                        && !theInstances.empty()) {
