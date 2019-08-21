@@ -253,19 +253,17 @@ void CDoc::RemoveDatainputBindings(
         const QMultiMap<QString, QPair<qt3dsdm::Qt3DSDMInstanceHandle,
                                        qt3dsdm::Qt3DSDMPropertyHandle>> *map)
 {
-    // We might be altering several attributes, aggregate them together
-    m_SceneEditor->BeginAggregateOperation();
     const auto uniqueKeys = map->uniqueKeys();
     for (const auto &name : uniqueKeys) {
         const auto values = map->values(name);
         for (const auto &pair : values) {
+            // Use a batch transaction and close it here afterwards.
             SetInstancePropertyControlled(pair.first, Q3DStudio::CString(),
                                           pair.second, Q3DStudio::CString::fromQString(name),
                                           false, true);
         }
     }
 
-    m_SceneEditor->EndAggregateOperation();
     // if SetInstancePropertyControlled fails for some reason, we might not have open transaction.
     if (isTransactionOpened())
         closeTransaction();
@@ -370,9 +368,8 @@ void CDoc::SetInstancePropertyControlled(
         Q3DStudio::ScopedDocumentEditor(*this, QObject::tr("Set controlled"), __FILE__, __LINE__)
                 ->SetInstancePropertyValue(instance, ctrldElemPropHandle, controlledProperty);
     } else {
-        if (!isTransactionOpened())
-            OpenTransaction(QObject::tr("Set multiple controlled"), __FILE__, __LINE__);
-        SetInstancePropertyValue(instance, L"controlledproperty", controlledProperty);
+        maybeOpenTransaction(QObject::tr("Set multiple controlled"), __FILE__, __LINE__)
+                .SetInstancePropertyValue(instance, ctrldElemPropHandle, controlledProperty);
     }
 }
 
