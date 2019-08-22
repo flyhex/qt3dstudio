@@ -39,6 +39,7 @@
 #include "q3dsqmlstreamproxy.h"
 #include "StudioSubPresentationRenderer.h"
 #include "Qt3DSRenderCustomMaterialSystem.h"
+#include "Qt3DSRenderEffectSystem.h"
 
 #include <QtCore/qdebug.h>
 
@@ -785,8 +786,10 @@ struct SRendererImpl : public IStudioRenderer,
     void OnClosingPresentation() override
     {
         // Clear the shader cache so that shaders are reloaded when loading the next presentation
-        if (m_Context)
-            m_Context->GetCustomMaterialSystem().clearShaderCache();
+        if (m_Context) {
+            m_Context->GetCustomMaterialSystem().clearCaches();
+            m_Context->GetEffectSystem().clearCaches();
+        }
 
         // Destroy translation
         m_Translation = std::shared_ptr<STranslation>();
