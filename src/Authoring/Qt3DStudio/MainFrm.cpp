@@ -56,7 +56,6 @@
 
 #include <QtGui/qevent.h>
 #include <QtGui/qdesktopservices.h>
-#include <QtCore/qsettings.h>
 #include <QtCore/qurl.h>
 #include <QtCore/qprocess.h>
 #include <QtGui/qfontdatabase.h>
@@ -1493,15 +1492,10 @@ void CMainFrame::onViewResetLayout()
                                              "layout? \nYour current layout will be lost, and "
                                              "Studio will restart."));
 
-    // If "Yes" is clicked, delete window geometry and window state keys from QSettings
+    // If "Yes" is clicked, delete window geometry and window state keys
     if (theChoice == QMessageBox::Yes) {
-        QSettings settings;
-        QString geoKey = QStringLiteral("MainWindow/MainWindowGeometry")
-                + QString::number(STUDIO_VERSION_NUM);
-        QString stateKey = QStringLiteral("MainWindow/MainWindowState")
-                + QString::number(STUDIO_VERSION_NUM);
-        settings.remove(geoKey);
-        settings.remove(stateKey);
+        CStudioPreferences::resetWindowGeometry(STUDIO_VERSION_NUM);
+        CStudioPreferences::resetWindowState(STUDIO_VERSION_NUM);
         // Prevent saving geometry and state, and exit
         m_resettingLayout = true;
         QTimer::singleShot(0, this, &CMainFrame::handleRestart);
@@ -1955,21 +1949,15 @@ void CMainFrame::handleGeometryAndState(bool save)
     if (m_resettingLayout)
         return;
 
-    QSettings settings;
-    QString geoKey = QStringLiteral("MainWindow/MainWindowGeometry")
-            + QString::number(STUDIO_VERSION_NUM);
-    QString stateKey = QStringLiteral("MainWindow/MainWindowState")
-            + QString::number(STUDIO_VERSION_NUM);
     if (save) {
-        settings.setValue(geoKey, saveGeometry());
-        settings.setValue(stateKey, saveState(STUDIO_VERSION_NUM));
+        CStudioPreferences::setWindowGeometry(saveGeometry(), STUDIO_VERSION_NUM);
+        CStudioPreferences::setWindowState(saveState(STUDIO_VERSION_NUM), STUDIO_VERSION_NUM);
     } else {
         // Restoring geometry and state back to back results in errors in state restoration, so
         // let's restore state asynchronously
-        restoreGeometry(settings.value(geoKey).toByteArray());
-        QTimer::singleShot(0, this, [this, stateKey]() {
-            QSettings settings;
-            restoreState(settings.value(stateKey).toByteArray(), STUDIO_VERSION_NUM);
+        restoreGeometry(CStudioPreferences::windowGeometry(STUDIO_VERSION_NUM));
+        QTimer::singleShot(0, this, [this]() {
+            restoreState(CStudioPreferences::windowState(STUDIO_VERSION_NUM), STUDIO_VERSION_NUM);
         });
     }
 }
@@ -1983,10 +1971,7 @@ void CMainFrame::handleRestart()
 
 void CMainFrame::initializeGeometryAndState()
 {
-    QSettings settings;
-    QString stateKey = QStringLiteral("MainWindow/MainWindowState")
-            + QString::number(STUDIO_VERSION_NUM);
-    if (!settings.contains(stateKey)) {
+    if (!CStudioPreferences::containsWindowState(STUDIO_VERSION_NUM)) {
         // On first run, save and restore geometry and state. For some reason they are both needed
         // to avoid a bug with palettes resizing to their original size when window is resized or
         // something in a palette is edited.

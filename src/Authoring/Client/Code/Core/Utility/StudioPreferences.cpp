@@ -177,6 +177,57 @@ void CStudioPreferences::savePreferences()
 // Settings to save in QSettings
 //
 
+// MainWindow settings
+//
+QByteArray CStudioPreferences::windowGeometry(int version)
+{
+    QString geoKey = QStringLiteral("MainWindow/MainWindowGeometry")
+            + QString::number(version);
+    return s_preferences.value(geoKey).toByteArray();
+}
+
+void CStudioPreferences::setWindowGeometry(const QByteArray &geometry, int version)
+{
+    QString geoKey = QStringLiteral("MainWindow/MainWindowGeometry")
+            + QString::number(version);
+    s_preferences.setValue(geoKey, geometry);
+}
+
+void CStudioPreferences::resetWindowGeometry(int version)
+{
+    QString geoKey = QStringLiteral("MainWindow/MainWindowGeometry")
+            + QString::number(version);
+    s_preferences.remove(geoKey);
+}
+
+bool CStudioPreferences::containsWindowState(int version)
+{
+    QString stateKey = QStringLiteral("MainWindow/MainWindowState")
+            + QString::number(version);
+    return s_preferences.contains(stateKey);
+}
+
+QByteArray CStudioPreferences::windowState(int version)
+{
+    QString stateKey = QStringLiteral("MainWindow/MainWindowState")
+            + QString::number(version);
+    return s_preferences.value(stateKey).toByteArray();
+}
+
+void CStudioPreferences::setWindowState(const QByteArray &state, int version)
+{
+    QString stateKey = QStringLiteral("MainWindow/MainWindowState")
+            + QString::number(version);
+    s_preferences.setValue(stateKey, state);
+}
+
+void CStudioPreferences::resetWindowState(int version)
+{
+    QString stateKey = QStringLiteral("MainWindow/MainWindowState")
+            + QString::number(version);
+    s_preferences.remove(stateKey);
+}
+
 // Viewing settings
 //
 bool CStudioPreferences::isLegacyViewerActive()
@@ -244,6 +295,21 @@ bool CStudioPreferences::isEditModeLightingEnabled()
 void CStudioPreferences::setEditModeLightingEnabled(bool enabled)
 {
     s_preferences.setValue(QStringLiteral("Viewing/EditModeLightingEnabled"), enabled);
+}
+
+bool CStudioPreferences::containsShowWelcomeScreen()
+{
+    return s_preferences.contains(QStringLiteral("Viewing/ShowWelcomeScreen"));
+}
+
+bool CStudioPreferences::isShowWelcomeScreen()
+{
+    return s_preferences.value(QStringLiteral("Viewing/ShowWelcomeScreen")).toBool();
+}
+
+void CStudioPreferences::setShowWelcomeScreen(bool show)
+{
+    s_preferences.setValue(QStringLiteral("Viewing/ShowWelcomeScreen"), show);
 }
 
 // Timeline settings
@@ -481,6 +547,28 @@ void CStudioPreferences::setPreviewProperty(const QString &inName, const QString
 {
     QString theName = QStringLiteral("Preview/") + inName;
     s_preferences.setValue(theName, inValue);
+}
+
+QString CStudioPreferences::remoteDeploymentIP()
+{
+    return s_preferences.value(QStringLiteral("Preview/LastRemoteDeploymentIP"),
+                               QStringLiteral("127.0.0.1")).toString();
+}
+
+void CStudioPreferences::setRemoteDeploymentIP(const QString &ip)
+{
+    s_preferences.setValue(QStringLiteral("Preview/LastRemoteDeploymentIP"), ip);
+}
+
+QString CStudioPreferences::remoteDeploymentPort()
+{
+    return s_preferences.value(QStringLiteral("Preview/LastRemoteDeploymentPort"),
+                               QStringLiteral("36000")).toString();
+}
+
+void CStudioPreferences::setRemoteDeploymentPort(const QString &port)
+{
+    s_preferences.setValue(QStringLiteral("Preview/LastRemoteDeploymentPort"), port);
 }
 
 // Recent settings

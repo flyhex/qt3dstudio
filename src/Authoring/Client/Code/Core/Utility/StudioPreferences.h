@@ -50,14 +50,25 @@ public:
     static void loadPreferences();
     static void savePreferences();
 
-    static bool isTimelineSnappingGridActive();
-    static void setTimelineSnappingGridActive(bool inActive);
+    //
+    // Settings to save in QSettings
+    //
 
+    // MainWindow settings
+    //
+    static QByteArray windowGeometry(int version);
+    static void setWindowGeometry(const QByteArray &geometry, int version);
+    static void resetWindowGeometry(int version);
+
+    static bool containsWindowState(int version);
+    static QByteArray windowState(int version);
+    static void setWindowState(const QByteArray &state, int version);
+    static void resetWindowState(int version);
+
+    // Viewing settings
+    //
     static bool isLegacyViewerActive();
     static void setLegacyViewerActive(bool inActive);
-
-    static ESnapGridResolution timelineSnappingGridResolution();
-    static void setTimelineSnappingGridResolution(ESnapGridResolution inResolution);
 
     static bool isEditViewFillMode();
     static void setEditViewFillMode(bool inRenderAsSolid);
@@ -65,9 +76,50 @@ public:
     static int preferredStartupView();
     static void setPreferredStartupView(int inStartupView);
 
+    static bool isDontShowGLVersionDialog();
+    static void setDontShowGLVersionDialog(bool inValue);
+
+    static QSize defaultClientSize();
+    static void setDefaultClientSize(int width, int height);
+
+    static bool isEditModeLightingEnabled();
+    static void setEditModeLightingEnabled(bool enabled);
+
+    static bool containsShowWelcomeScreen();
+    static bool isShowWelcomeScreen();
+    static void setShowWelcomeScreen(bool show);
+
+    // Timeline settings
+    //
+    static bool isTimelineSnappingGridActive();
+    static void setTimelineSnappingGridActive(bool inActive);
+
+    static ESnapGridResolution timelineSnappingGridResolution();
+    static void setTimelineSnappingGridResolution(ESnapGridResolution inResolution);
+
     static bool isAutosetKeyframesOn();
     static void setAutosetKeyframesOn(bool inEnable);
 
+    static double timelineSplitterLocation();
+    static void setTimelineSplitterLocation(double inLocation);
+
+    static bool isInterpolation();
+    static void setInterpolation(bool inSmooth);
+
+    static double snapRange();
+    static void setSnapRange(double inSnapRange);
+
+    static bool isTimebarDisplayTime();
+    static void setTimebarDisplayTime(bool inDisplayTime);
+
+    static double timeAdvanceAmount();
+    static void setTimeAdvanceAmount(double inTime);
+
+    static double bigTimeAdvanceAmount();
+    static void setBigTimeAdvanceAmount(double inTime);
+
+    // VisualAids settings
+    //
     static bool isBoundingBoxesOn();
     static void setBoundingBoxesOn(bool inEnable);
 
@@ -89,67 +141,58 @@ public:
     static int helperGridSpacing();
     static void setHelperGridSpacing(int spacing);
 
-    static double timelineSplitterLocation();
-    static void setTimelineSplitterLocation(double inLocation);
+    static float selectorLineWidth();
+    static void setSelectorLineWidth(float width);
 
-    static bool isInterpolation();
-    static void setInterpolation(bool inSmooth);
+    static float selectorLineLength();
+    static void setSelectorLineLength(float length);
 
-    static double snapRange();
-    static void setSnapRange(double inSnapRange);
-
+    // Autosave settings
+    //
     static int autoSaveDelay();
     static void setAutoSaveDelay(int inAutoSaveDelay);
 
     static bool isAutoSavePreference();
     static void setAutoSavePreference(bool inActive);
 
-    static bool isEditModeLightingEnabled();
-    static void setEditModeLightingEnabled(bool enabled);
+    // Preview settings
+    //
+    static QString previewConfig();
+    static void setPreviewConfig(const QString &inValue);
 
-    static bool isTimebarDisplayTime();
-    static void setTimebarDisplayTime(bool inDisplayTime);
+    static QString previewProperty(const QString &inName);
+    static void setPreviewProperty(const QString &inName, const QString &inValue);
 
-    static bool isDontShowGLVersionDialog();
-    static void setDontShowGLVersionDialog(bool inValue);
+    static QString remoteDeploymentIP();
+    static void setRemoteDeploymentIP(const QString &ip);
 
-    static double timeAdvanceAmount();
-    static void setTimeAdvanceAmount(double inTime);
-    static double bigTimeAdvanceAmount();
-    static void setBigTimeAdvanceAmount(double inTime);
+    static QString remoteDeploymentPort();
+    static void setRemoteDeploymentPort(const QString &port);
 
-    static QSize defaultClientSize();
-    static void setDefaultClientSize(int width, int height);
-
+    // Recent settings
+    //
     static int numRecentItems();
     static void setNumRecentItems(int numberOfItems);
 
     static QString recentItem(int index);
     static void setRecentItem(int index, const QString &path);
 
-    static QString previewConfig();
-    static void setPreviewConfig(const QString &inValue);
-    static QString previewProperty(const QString &inName);
-    static void setPreviewProperty(const QString &inName, const QString &inValue);
+    //
+    // Other settings
+    //
+    static void setQmlContextProperties(QQmlContext *qml);
 
-    static float selectorLineWidth();
-    static void setSelectorLineWidth(float width);
-    static float selectorLineLength();
-    static void setSelectorLineLength(float length);
-
-    static QString versionString();
-
-    static ::CColor normalColor();
-    static ::CColor inactiveColor();
+    static QString fontFaceName();
 
     static ::CColor mouseOverHighlightColor();
-
+    static ::CColor normalColor();
+    static ::CColor inactiveColor();
     static ::CColor objectTimebarColor();
     static ::CColor layerTimebarColor();
     static ::CColor disabledTextColor();
-
     static ::CColor singleBoundingBoxColor();
     static ::CColor groupBoundingBoxColor();
+
     static QColor xAxisColor();
     static QColor yAxisColor();
     static QColor zAxisColor();
@@ -164,9 +207,6 @@ public:
     static ::CColor guideFillColor();
     static ::CColor guideFillSelectedColor();
 
-    static QString fontFaceName();
-
-    static void setQmlContextProperties(QQmlContext *qml);
     static QColor studioColor1();
     static QColor studioColor2();
     static QColor studioColor3();
@@ -213,6 +253,7 @@ public:
     static int idWidth();
     static int valueWidth();
     static QSize browserPopupSize();
+    static QString versionString();
 
     // Default values that Studio will start out with or to restore
     static const int PREFERREDSTARTUP_DEFAULTINDEX = -1;

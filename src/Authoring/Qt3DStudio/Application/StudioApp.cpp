@@ -195,7 +195,6 @@ int main(int argc, char *argv[])
 #include <string.h>
 
 #include <QtWidgets/qapplication.h>
-#include <QtCore/qsettings.h>
 
 #include "Core.h"
 #include "HotKeys.h"
@@ -525,17 +524,15 @@ bool CStudioApp::showStartupDialog()
         m_welcomeShownThisSession = true;
 
         bool show = false;
-        QSettings settings;
 
-        if (!settings.contains(QStringLiteral("Viewing/ShowWelcomeScreen"))) {
-            settings.setValue(QStringLiteral("Viewing/ShowWelcomeScreen"), true);
+        if (!CStudioPreferences::containsShowWelcomeScreen()) {
+            CStudioPreferences::setShowWelcomeScreen(true);
             show = true;
         } else {
             // if we are returning to welcome dialog page after canceling
             // file dialog, do not care about settings but always show
             // welcome
-            show = settings.value(QStringLiteral("Viewing/ShowWelcomeScreen")).toBool()
-                    || m_goStraightToWelcomeFileDialog;
+            show = CStudioPreferences::isShowWelcomeScreen() || m_goStraightToWelcomeFileDialog;
         }
 
         if (show) {

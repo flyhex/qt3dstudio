@@ -30,13 +30,13 @@
 #include "remotedeploymentsender.h"
 #include "StudioApp.h"
 #include "Core.h"
+#include "StudioPreferences.h"
 
 #include <QtCore/qpair.h>
 #include <QtCore/qfile.h>
 #include <QtCore/qfileinfo.h>
 #include <QtCore/qdatastream.h>
 #include <QtCore/qdiriterator.h>
-#include <QtCore/qsettings.h>
 #include <QtWidgets/qinputdialog.h>
 #include <QtWidgets/qmessagebox.h>
 #include <QtWidgets/qdialog.h>
@@ -61,11 +61,8 @@ private:
 ConnectionDialog::ConnectionDialog(QWidget *parent)
     : QDialog(parent)
 {
-    QSettings settings;
-    QString previousIPAddress = settings.value(
-                QStringLiteral("Preview/LastRemoteDeploymentIP")).toString();
-    QString previousPort = settings.value(QStringLiteral("Preview/LastRemoteDeploymentPort"),
-                                          QStringLiteral("36000")).toString();
+    QString previousIPAddress = CStudioPreferences::remoteDeploymentIP();
+    QString previousPort = CStudioPreferences::remoteDeploymentPort();
 
     m_hostLineEdit = new QLineEdit(this);
     m_hostLineEdit->setText(previousIPAddress);
@@ -100,11 +97,8 @@ QPair<QString, int> ConnectionDialog::getInfo(QWidget *parent)
     if (!dialog.exec())
         return QPair<QString, int>();
 
-    QSettings settings;
-    settings.setValue(QStringLiteral("Preview/LastRemoteDeploymentIP"),
-                      dialog.m_hostLineEdit->text());
-    settings.setValue(QStringLiteral("Preview/LastRemoteDeploymentPort"),
-                      dialog.m_portLineEdit->text());
+    CStudioPreferences::setRemoteDeploymentIP(dialog.m_hostLineEdit->text());
+    CStudioPreferences::setRemoteDeploymentPort(dialog.m_portLineEdit->text());
 
     return qMakePair(dialog.m_hostLineEdit->text(),
                      dialog.m_portLineEdit->text().toInt());
