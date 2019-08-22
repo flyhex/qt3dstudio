@@ -343,10 +343,9 @@ void CMainFrame::setActionsEnabledStatus(bool enabled)
     m_ui->action_Duplicate_Object->setEnabled(enabled);
     m_ui->actionStudio_Preferences->setEnabled(enabled);
     m_ui->actionPresentation_Settings->setEnabled(enabled);
-    // Note: actionRemote_Preview is special case, disabled here
-    // while enabled by OnConnectionChanged
+    // Note: actionRemote_Preview is a special case. isChecked changes based on OnConnectionChanged.
     if (!enabled)
-        m_ui->actionRemote_Preview->setEnabled(false);
+        m_ui->actionRemote_Preview->setEnabled(m_ui->action_Connect_to_Device->isChecked());
 }
 
 // Timer callback
