@@ -623,7 +623,7 @@ void CDoc::NotifyActiveSlideChanged(qt3dsdm::Qt3DSDMSlideHandle inNewActiveSlide
         if (theLastActiveSlide != inNewActiveSlide) {
             SetActiveSlideChange(inNewActiveSlide);
             if (inIgnoreLastDisplayTime)
-                m_StudioSystem->GetSlideSystem()->SetComponentSeconds(
+                m_StudioSystem->GetSlideSystem()->SetComponentTime(
                             m_StudioSystem->GetSlideSystem()->GetMasterSlide(inNewActiveSlide), 0);
         }
 
@@ -1382,7 +1382,7 @@ bool CDoc::isPlayHeadAtEnd()
     return m_CurrentViewTime >= GetLatestEndTime();
 }
 
-void CDoc::OnComponentSeconds()
+void CDoc::OnComponentTime()
 {
     long theTime = GetCurrentClientTime();
 
@@ -1421,8 +1421,8 @@ void CDoc::DoNotifyTimeChanged(long inNewTime)
     // Update DataModel
     qt3dsdm::Qt3DSDMSlideHandle theMasterSlide =
             m_StudioSystem->GetSlideSystem()->GetMasterSlide(GetActiveSlide());
-    // TODO: fix precision issue from converting to/from float & long. choose 1 type
-    m_StudioSystem->GetSlideSystem()->SetComponentSeconds(theMasterSlide, (float)inNewTime / 1000);
+
+    m_StudioSystem->GetSlideSystem()->SetComponentTime(theMasterSlide, inNewTime);
 }
 
 /**
@@ -1488,7 +1488,7 @@ bool CDoc::IsPlaying()
 long CDoc::GetCurrentClientTime()
 {
     if (m_ActiveSlide.Valid())
-        return m_StudioSystem->GetSlideSystem()->GetComponentSecondsLong(m_ActiveSlide);
+        return m_StudioSystem->GetSlideSystem()->GetComponentTime(m_ActiveSlide);
     return 0;
 }
 
@@ -2244,11 +2244,11 @@ void CDoc::SetupDataCoreSignals()
         m_Connections.push_back(theSlideProvider->ConnectBeforeSlideDeleted(
                                     std::bind(&CDoc::OnSlideDeleted, this, std::placeholders::_1)));
     m_Connections.push_back(
-                m_StudioSystem->GetFullSystem()->GetSignalProvider()->ConnectComponentSeconds(
-                    std::bind(&CDoc::OnComponentSeconds, this)));
+                m_StudioSystem->GetFullSystem()->GetSignalProvider()->ConnectComponentTime(
+                    std::bind(&CDoc::OnComponentTime, this)));
     m_Connections.push_back(
                 m_StudioSystem->GetFullSystem()->GetSignalProvider()->ConnectActiveSlide(
-                    std::bind(&CDoc::OnComponentSeconds, this)));
+                    std::bind(&CDoc::OnComponentTime, this)));
 
     // listener to keep track of datainput bindings
     m_Connections.push_back(

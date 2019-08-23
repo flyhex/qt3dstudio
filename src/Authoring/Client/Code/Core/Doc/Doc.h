@@ -301,7 +301,7 @@ public:
     // IDoc
     virtual qt3dsdm::Qt3DSDMInstanceHandle GetActiveRootInstance();
     long GetCurrentViewTime() const override;
-    virtual void OnComponentSeconds();
+    virtual void OnComponentTime();
     // Notify time changed and set the playback clock to this time.
     void NotifyTimeChanged(long inNewTime) override;
     // Notify time changed.

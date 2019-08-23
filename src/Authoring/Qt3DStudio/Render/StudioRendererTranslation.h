@@ -368,7 +368,7 @@ namespace studio {
         qt3ds::render::SScene *m_Scene;
         Q3DStudio::CGraphIterator m_GraphIterator;
         nvvector<TSignalConnection> m_SignalConnections;
-        QT3DSI32 m_ComponentSecondsDepth;
+        QT3DSI32 m_ComponentTimeDepth;
         SNode m_MouseDownNode;
         SCamera m_MouseDownCamera;
         Option<QT3DSMat44> m_MouseDownParentGlobalTransformInverse;
@@ -418,12 +418,12 @@ namespace studio {
         QT3DSVec2 m_previewFboDimensions;
 
         STranslation(IStudioRenderer &inRenderer, IQt3DSRenderContext &inContext);
-        void MarkBeginComponentSeconds(qt3dsdm::Qt3DSDMSlideHandle) { ++m_ComponentSecondsDepth; }
+        void MarkBeginComponentTime(qt3dsdm::Qt3DSDMSlideHandle) { ++m_ComponentTimeDepth; }
 
-        void MarkComponentSeconds(qt3dsdm::Qt3DSDMSlideHandle)
+        void MarkComponentTime(qt3dsdm::Qt3DSDMSlideHandle)
         {
-            m_ComponentSecondsDepth = qMax(0, m_ComponentSecondsDepth - 1);
-            if (m_ComponentSecondsDepth == 0)
+            m_ComponentTimeDepth = qMax(0, m_ComponentTimeDepth - 1);
+            if (m_ComponentTimeDepth == 0)
                 RequestRender();
         }
 
@@ -641,7 +641,7 @@ namespace studio {
 
         void RequestRender()
         {
-            if (m_ComponentSecondsDepth == 0)
+            if (m_ComponentTimeDepth == 0)
                 m_Renderer.RequestRender();
         }
 

@@ -1966,7 +1966,7 @@ STranslation::STranslation(IStudioRenderer &inRenderer, IQt3DSRenderContext &inC
     , m_DirtySet(inContext.GetAllocator(), "STranslation::m_DirtySet")
     , m_Scene(nullptr)
     , m_SignalConnections(inContext.GetAllocator(), "STranslation::m_SignalConnections")
-    , m_ComponentSecondsDepth(0)
+    , m_ComponentTimeDepth(0)
     , m_KeyRepeat(0)
     , m_EditCameraEnabled(false)
     , m_EditLightEnabled(false)
@@ -2004,10 +2004,10 @@ STranslation::STranslation(IStudioRenderer &inRenderer, IQt3DSRenderContext &inC
     m_SignalConnections.push_back(m_AssetGraph.ConnectChildRemoved(
         std::bind(&STranslation::MarkGraphInstanceDirty, this, std::placeholders::_1,
                   std::placeholders::_2)));
-    m_SignalConnections.push_back(theProvider->ConnectBeginComponentSeconds(
-        std::bind(&STranslation::MarkBeginComponentSeconds, this, std::placeholders::_1)));
-    m_SignalConnections.push_back(theProvider->ConnectComponentSeconds(
-        std::bind(&STranslation::MarkComponentSeconds, this, std::placeholders::_1)));
+    m_SignalConnections.push_back(theProvider->ConnectBeginComponentTime(
+        std::bind(&STranslation::MarkBeginComponentTime, this, std::placeholders::_1)));
+    m_SignalConnections.push_back(theProvider->ConnectComponentTime(
+        std::bind(&STranslation::MarkComponentTime, this, std::placeholders::_1)));
 
     ::CColor color = CStudioPreferences::rulerBackgroundColor(); // Rectangles under tick marks
     m_rectColor = QT3DSVec4(color.GetRed() / 255.f,

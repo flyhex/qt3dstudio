@@ -306,7 +306,7 @@ public:
                          long numValues, bool inUserEdited = true) = 0;
     virtual bool RemoveAnimation(TSlideHandle inSlide, TInstanceHandle instance,
                                  const wchar_t *propName, long subIndex) = 0;
-    virtual void SetKeyframeTime(TKeyframeHandle inKeyframe, long inTimeInMilliseconds) = 0;
+    virtual void SetKeyframeTime(TKeyframeHandle inKeyframe, long inTime) = 0;
     virtual void setBezierKeyframeValue(TKeyframeHandle kfHandle,
                                         const qt3dsdm::TKeyframe &kfData) = 0;
     virtual void DeleteAllKeyframes(Qt3DSDMAnimationHandle inAnimation) = 0;

@@ -334,7 +334,7 @@ void KeyframeManager::copySelectedKeyframes()
                     break;
                 }
 
-                float dt = Qt3DSDMTimelineKeyframe::GetTimeInSecs(kf->GetTime() - minTime);
+                long dt = kf->GetTime() - minTime;
                 qt3dsdm::Qt3DSDMAnimationHandle animation
                         = animationCore->GetAnimationForKeyframe(theKeyframeHandles[0]);
                 m_pasteKeyframeCommandHelper->AddKeyframeData(
@@ -361,10 +361,9 @@ void KeyframeManager::pasteKeyframes()
     if (m_pasteKeyframeCommandHelper && m_pasteKeyframeCommandHelper->HasCopiedKeyframes()) {
         qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = theDoc->GetSelectedInstance();
         if (theSelectedInstance.Valid()) {
-            long theCurrentViewTimeInMilliseconds = theDoc->GetCurrentViewTime();
-            CCmdDataModelInsertKeyframe *theInsertKeyframesCommand =
-                m_pasteKeyframeCommandHelper->GetCommand(theDoc, theCurrentViewTimeInMilliseconds,
-                                                         theSelectedInstance);
+            CCmdDataModelInsertKeyframe *theInsertKeyframesCommand
+                    = m_pasteKeyframeCommandHelper->GetCommand(theDoc, theDoc->GetCurrentViewTime(),
+                                                               theSelectedInstance);
             if (theInsertKeyframesCommand)
                 g_StudioApp.GetCore()->ExecuteCommand(theInsertKeyframesCommand);
         }

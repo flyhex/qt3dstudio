@@ -63,8 +63,6 @@ public:
     void UpdateKeyframesTime(COffsetKeyframesCommandHelper *inCommandHelper, long inTime);
     void GetKeyframeHandles(TKeyframeHandleList &outList) const;
 
-    static float GetTimeInSecs(long inTime);
-
 private:
     TKeyframeHandleList m_KeyframeHandles; // channels handles of the animated property
     CDoc *m_Doc = nullptr;

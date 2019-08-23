@@ -56,58 +56,32 @@ bool Qt3DSDMTimelineKeyframe::IsSelected() const
     return m_Selected;
 }
 
-float my_roundf(float r)
-{
-    return (r > 0.0f) ? floorf(r + 0.5f) : ceilf(r - 0.5f);
-}
-
 long Qt3DSDMTimelineKeyframe::GetTime() const
 {
     if (!m_KeyframeHandles.empty()) {
         IAnimationCore *animaCore = m_Doc->GetStudioSystem()->GetAnimationCore();
         Qt3DSDMKeyframeHandle kfHandle = *m_KeyframeHandles.begin();
-        if (animaCore->KeyframeValid(kfHandle)) {
-            float theTimeinSecs = getKeyframeTime(animaCore->GetKeyframeData(kfHandle));
-            // We always convert back and forth between between long and float.
-            // This causes especially issues when we do comparisons
-            return (long)my_roundf(theTimeinSecs * 1000);
-        }
+        if (animaCore->KeyframeValid(kfHandle))
+            return getKeyframeTime(animaCore->GetKeyframeData(kfHandle));
     }
-    return -1; // keyframe was deleted, and data cannot be retrieved.
-}
 
-float Qt3DSDMTimelineKeyframe::GetTimeInSecs(long inTime)
-{
-    float theTimeinSecs = static_cast<float>(inTime) / 1000.f;
-    // round off to 4 decimal place to workaround precision issues
-    // TODO: fix this, either all talk float OR long. choose one.
-    theTimeinSecs = (float)(((theTimeinSecs + 0.00005) * 10000.0) / 10000.0f);
-    return theTimeinSecs;
+    return -1; // keyframe was deleted, and data cannot be retrieved.
 }
 
 void Qt3DSDMTimelineKeyframe::SetTime(const long inNewTime)
 {
-    float theTimeinSecs = GetTimeInSecs(inNewTime);
     CCmd *theCmd = nullptr;
     if (m_KeyframeHandles.size() == 1) {
-        theCmd = new CCmdDataModelSetKeyframeTime(m_Doc, m_KeyframeHandles.front(), theTimeinSecs);
+        theCmd = new CCmdDataModelSetKeyframeTime(m_Doc, m_KeyframeHandles.front(), inNewTime);
     } else { // more than 1 channel
         CCmdBatch *theBatch = new CCmdBatch(m_Doc);
         TKeyframeHandleList::iterator theIter = m_KeyframeHandles.begin();
         for (; theIter != m_KeyframeHandles.end(); ++theIter)
-            theBatch->AddCommand(new CCmdDataModelSetKeyframeTime(m_Doc, *theIter, theTimeinSecs));
+            theBatch->AddCommand(new CCmdDataModelSetKeyframeTime(m_Doc, *theIter, inNewTime));
         theCmd = theBatch;
     }
     if (theCmd)
         m_Doc->GetCore()->ExecuteCommand(theCmd);
-
-#ifdef _DEBUG
-    // we have a precision issue from converting from long to float..
-    IAnimationCore *theAnimationCore = m_Doc->GetStudioSystem()->GetAnimationCore();
-    long theTest = static_cast<long>(
-        getKeyframeTime(theAnimationCore->GetKeyframeData(*m_KeyframeHandles.begin())) * 1000);
-    Q_ASSERT(inNewTime == theTest);
-#endif
 }
 
 inline Qt3DSDMAnimationHandle GetAnimationHandle(qt3dsdm::IAnimationCore *inAnimationCore,

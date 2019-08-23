@@ -43,16 +43,13 @@
 #include "CmdDataModelBase.h"
 #include "Qt3DSDMStudioSystem.h"
 
-class CCmdDataModelSetKeyframeTime : public CCmdDataModelBase<float>
+class CCmdDataModelSetKeyframeTime : public CCmdDataModelBase<long>
 {
-protected: // Members
-    qt3dsdm::Qt3DSDMKeyframeHandle m_Keyframe;
 
-public: // Construction
-    //@param inTime is in secs
-    CCmdDataModelSetKeyframeTime(CDoc *inDoc, qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe, float inTime)
-        : CCmdDataModelBase(inDoc, inTime)
-        , m_Keyframe(inKeyframe)
+public:
+    CCmdDataModelSetKeyframeTime(CDoc *doc, qt3dsdm::Qt3DSDMKeyframeHandle keyframe, long time)
+        : CCmdDataModelBase(doc, time)
+        , m_Keyframe(keyframe)
     {
     }
     ~CCmdDataModelSetKeyframeTime() {}
@@ -65,22 +62,21 @@ public: // Construction
         theAnimationCore->SetKeyframeData(m_Keyframe, theKeyframe);
     }
 
-    //======================================================================
-    //	ToString
-    //======================================================================
     QString ToString() override
     {
         return QObject::tr("Set Keyframe Time");
     }
+
+protected:
+    qt3dsdm::Qt3DSDMKeyframeHandle m_Keyframe;
 };
 
 class CCmdDataModelSetKeyframeValue : public CCmdDataModelBase<float>
 {
-protected: // Members
+protected:
     qt3dsdm::Qt3DSDMKeyframeHandle m_Keyframe;
 
-public: // Construction
-    //@param inTime is in secs
+public:
     CCmdDataModelSetKeyframeValue(CDoc *inDoc, qt3dsdm::Qt3DSDMKeyframeHandle inKeyframe,
                                   float inValue)
         : CCmdDataModelBase(inDoc, inValue)
@@ -97,9 +93,6 @@ public: // Construction
         theAnimationCore->SetKeyframeData(m_Keyframe, theKeyframe);
     }
 
-    //======================================================================
-    //	ToString
-    //======================================================================
     QString ToString() override
     {
         return QObject::tr("Set Keyframe Value");

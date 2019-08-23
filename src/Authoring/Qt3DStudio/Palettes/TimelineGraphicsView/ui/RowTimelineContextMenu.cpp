@@ -270,11 +270,11 @@ void RowTimelineContextMenu::onAnimTypeChange(QAction *action)
             QVector<SBezierKeyframe> keyframes;
             for (Qt3DSDMKeyframeHandle kfHandle : keyframeHandles) {
                 TKeyframe kfData = animCore->GetKeyframeData(kfHandle);
-                float kfTime = getKeyframeTime(kfData);
+                long kfTime = getKeyframeTime(kfData);
                 float kfValue = getKeyframeValue(kfData);
                 keyframes.append(SBezierKeyframe(kfTime, kfValue,
-                                                 kfTime - .5f, kfValue,
-                                                 kfTime + .5f, kfValue));
+                                                 kfTime - 500, kfValue,
+                                                 kfTime + 500, kfValue));
             }
             long numFloatsPerKeyframe = sizeof(SBezierKeyframe) / sizeof(float);
             long numValues = long(keyframeHandles.size()) * numFloatsPerKeyframe;

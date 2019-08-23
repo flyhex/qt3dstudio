@@ -266,11 +266,11 @@ TimelineControlType RowTimelinePropertyGraph::getClickedBezierControl(const QPoi
 QPointF RowTimelinePropertyGraph::getBezierControlPosition(const SBezierKeyframe &kf,
                                                            BezierControlType type) const
 {
-    float time = 0; // seconds
+    long time = 0;
     float value = 0;
     if (type == BezierControlType::None) {
-        time = kf.m_KeyframeSeconds;
-        value = kf.m_KeyframeValue;
+        time = kf.m_time;
+        value = kf.m_value;
     } else if (type == BezierControlType::In) {
         time = kf.m_InTangentTime;
         value = kf.m_InTangentValue;
@@ -282,12 +282,11 @@ QPointF RowTimelinePropertyGraph::getBezierControlPosition(const SBezierKeyframe
     return getKeyframePosition(time, value);
 }
 
-// time is in seconds
-QPointF RowTimelinePropertyGraph::getKeyframePosition(float time, float value) const
+QPointF RowTimelinePropertyGraph::getKeyframePosition(long time, float value) const
 {
     adjustColorProperty(value);
 
-    return QPointF(m_rowTimeline->rowTree()->m_scene->ruler()->timeToDistance(time * 1000),
+    return QPointF(m_rowTimeline->rowTree()->m_scene->ruler()->timeToDistance(time),
                    m_graphY - value * m_valScale);
 }
 
@@ -304,7 +303,7 @@ void RowTimelinePropertyGraph::updateBezierControlValue(TimelineControlType cont
     QPointF p = m_rowTimeline->mapFromScene(scenePos.x() - RULER_EDGE_OFFSET, scenePos.y());
 
     // time and value at current mouse position
-    float time = m_rowTimeline->rowTree()->m_scene->ruler()->distanceToTime(p.x()) / 1000.f; // secs
+    long time = m_rowTimeline->rowTree()->m_scene->ruler()->distanceToTime(p.x());
     float value = (m_graphY - p.y()) / m_valScale;
     adjustColorProperty(value, false);
 
@@ -312,9 +311,9 @@ void RowTimelinePropertyGraph::updateBezierControlValue(TimelineControlType cont
     bool isBezierIn = controlType == TimelineControlType::BezierInHandle;
 
     // prevent handles from moving to the other side of the keyframe
-    if ((isBezierIn && time > kf.m_KeyframeSeconds)
-        || (!isBezierIn && time < kf.m_KeyframeSeconds)) {
-        time = kf.m_KeyframeSeconds;
+    if ((isBezierIn && time > kf.m_time)
+        || (!isBezierIn && time < kf.m_time)) {
+        time = kf.m_time;
     }
 
     // prevent handles from going beyond prev. and next keyframes
@@ -323,11 +322,14 @@ void RowTimelinePropertyGraph::updateBezierControlValue(TimelineControlType cont
     m_animCore->GetKeyframes(anim, keyframeHandles);
     for (size_t i = 0; i < keyframeHandles.size(); ++i) {
         if (keyframeHandles[i] == m_currKeyframeData.first) {
-            float currKfTime = getKeyframeTime(m_animCore->GetKeyframeData(keyframeHandles[i]));
-            float prevKfTime = i > 0
-                ? getKeyframeTime(m_animCore->GetKeyframeData(keyframeHandles[i - 1])) : -FLT_MAX;
-            float nextKfTime = i < keyframeHandles.size() - 1
-                ? getKeyframeTime(m_animCore->GetKeyframeData(keyframeHandles[i + 1])) : FLT_MAX;
+            long currKfTime = getKeyframeTime(m_animCore->GetKeyframeData(keyframeHandles[i]));
+            long prevKfTime = i > 0
+                    ? getKeyframeTime(m_animCore->GetKeyframeData(keyframeHandles[i - 1]))
+                    : LONG_MIN / 2;
+            long nextKfTime = i < keyframeHandles.size() - 1
+                    ? getKeyframeTime(m_animCore->GetKeyframeData(keyframeHandles[i + 1]))
+                    : LONG_MAX / 2;
+
             if (isBezierIn) {
                 if (time < prevKfTime)
                     time = prevKfTime;
@@ -343,17 +345,17 @@ void RowTimelinePropertyGraph::updateBezierControlValue(TimelineControlType cont
         }
     }
 
-    float &currHandleTime = isBezierIn ? kf.m_InTangentTime : kf.m_OutTangentTime;
+    long &currHandleTime = isBezierIn ? kf.m_InTangentTime : kf.m_OutTangentTime;
     float &currHandleValue = isBezierIn ? kf.m_InTangentValue : kf.m_OutTangentValue;
-    float &otherHandleTime = isBezierIn ? kf.m_OutTangentTime : kf.m_InTangentTime;
+    long &otherHandleTime = isBezierIn ? kf.m_OutTangentTime : kf.m_InTangentTime;
     float &otherHandleValue = isBezierIn ? kf.m_OutTangentValue : kf.m_InTangentValue;
 
     currHandleTime = time;
     currHandleValue = value;
 
     if (!CHotKeys::isCtrlDown()) {
-        otherHandleTime = kf.m_KeyframeSeconds + (kf.m_KeyframeSeconds - time);
-        otherHandleValue = kf.m_KeyframeValue + (kf.m_KeyframeValue - currHandleValue);
+        otherHandleTime = kf.m_time + (kf.m_time - time);
+        otherHandleValue = kf.m_value + (kf.m_value - currHandleValue);
     }
 
     m_animCore->SetKeyframeData(m_currKeyframeData.first, kf);
@@ -394,7 +396,8 @@ void RowTimelinePropertyGraph::fitGraph()
 
             // for bezier keyframes compare tangents in/out also
             if (keyframeData.getType() == qt3dsdm::EAnimationTypeBezier) {
-                float timeIn, valueIn, timeOut, valueOut;
+                long timeIn, timeOut;
+                float valueIn, valueOut;
                 getBezierValues(keyframeData, timeIn, valueIn, timeOut, valueOut);
 
                 if (!m_animCore->IsFirstKeyframe(kfHandle)) { // check tangent-in value

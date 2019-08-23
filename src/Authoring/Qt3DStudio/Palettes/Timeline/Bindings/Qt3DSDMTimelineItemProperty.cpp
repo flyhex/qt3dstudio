@@ -285,10 +285,8 @@ float Qt3DSDMTimelineItemProperty::GetChannelValueAtTime(size_t chIndex, long ti
     }
 
     IAnimationCore *animCore = m_TransMgr->GetStudioSystem()->GetAnimationCore();
-    if (!m_AnimationHandles.empty() && chIndex < m_AnimationHandles.size()) {
-        return animCore->EvaluateAnimation(m_AnimationHandles[chIndex],
-                                           Qt3DSDMTimelineKeyframe::GetTimeInSecs(time));
-    }
+    if (!m_AnimationHandles.empty() && chIndex < m_AnimationHandles.size())
+        return animCore->EvaluateAnimation(m_AnimationHandles[chIndex], time);
 
     return 0.f;
 }

@@ -48,7 +48,7 @@ public:
     ~CPasteKeyframeCommandHelper() {}
 
     // inTime should be relative to the earliest keyframe time in this list
-    void AddKeyframeData(qt3dsdm::Qt3DSDMPropertyHandle inProperty, float inKeyframeTime,
+    void AddKeyframeData(qt3dsdm::Qt3DSDMPropertyHandle inProperty, long inKeyframeTime,
                          qt3dsdm::SGetOrSetKeyframeInfo *inInfos, size_t inInfoCount)
     {
         m_CopiedKeyframeList.push_back(CCmdDataModelInsertKeyframe::STimeKeyframeData(
@@ -66,23 +66,23 @@ public:
     // but that is not an issue in the new data model.
     //
     // 2. The first pasted keyframe is at current view time and the rest are offset accordingly.
-    CCmdDataModelInsertKeyframe *GetCommand(CDoc *inDoc, long inTimeOffsetInMilliseconds,
-                                            qt3dsdm::Qt3DSDMInstanceHandle inTargetInstance)
+    CCmdDataModelInsertKeyframe *GetCommand(CDoc *doc, long timeOffset,
+                                            qt3dsdm::Qt3DSDMInstanceHandle targetInstance)
     {
         using namespace qt3dsdm;
 
         CCmdDataModelInsertKeyframe *insertKeyframesCmd = nullptr;
-        qt3dsdm::IPropertySystem *propSys = inDoc->GetStudioSystem()->GetPropertySystem();
-        CClientDataModelBridge *bridge = inDoc->GetStudioSystem()->GetClientDataModelBridge();
+        qt3dsdm::IPropertySystem *propSys = doc->GetStudioSystem()->GetPropertySystem();
+        CClientDataModelBridge *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
 
         for (auto &kfData : m_CopiedKeyframeList) {
              // check property exists on target
-            if (bridge->hasAggregateInstanceProperty(inTargetInstance, kfData.m_Property)) {
+            if (bridge->hasAggregateInstanceProperty(targetInstance, kfData.m_Property)) {
                 if (!insertKeyframesCmd)
-                    insertKeyframesCmd = new CCmdDataModelInsertKeyframe(inDoc, inTargetInstance);
+                    insertKeyframesCmd = new CCmdDataModelInsertKeyframe(doc, targetInstance);
 
-                // Offset keyframe time by current view time (time in seconds)
-                float time = kfData.m_KeyframeTime + inTimeOffsetInMilliseconds / 1000.f;
+                // Offset keyframe time by current view time
+                long time = kfData.m_KeyframeTime + timeOffset;
                 insertKeyframesCmd->AddKeyframeData(kfData.m_Property, time, kfData.m_Infos,
                                                     kfData.m_ValidInfoCount);
             }

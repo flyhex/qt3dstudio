@@ -46,11 +46,11 @@ public:
     struct STimeKeyframeData
     {
         qt3dsdm::Qt3DSDMPropertyHandle m_Property;
-        float m_KeyframeTime; // seconds
+        long m_KeyframeTime;
         qt3dsdm::SGetOrSetKeyframeInfo m_Infos[4];
         size_t m_ValidInfoCount;
 
-        STimeKeyframeData(qt3dsdm::Qt3DSDMPropertyHandle inProperty, float inKeyframeTime,
+        STimeKeyframeData(qt3dsdm::Qt3DSDMPropertyHandle inProperty, long inKeyframeTime,
                           qt3dsdm::SGetOrSetKeyframeInfo *inInfos, size_t inInfoCount)
             : m_Property(inProperty)
             , m_KeyframeTime(inKeyframeTime)
@@ -75,7 +75,7 @@ public:
         , m_Instance(inInstance) {}
     ~CCmdDataModelInsertKeyframe() {}
 
-    void AddKeyframeData(qt3dsdm::Qt3DSDMPropertyHandle inProperty, float inTime,
+    void AddKeyframeData(qt3dsdm::Qt3DSDMPropertyHandle inProperty, long inTime,
                          qt3dsdm::SGetOrSetKeyframeInfo *inInfos, size_t inInfoCount)
     {
         m_KeyframeDataList.push_back(STimeKeyframeData(inProperty, inTime, inInfos, inInfoCount));

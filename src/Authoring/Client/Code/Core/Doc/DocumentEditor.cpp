@@ -243,7 +243,7 @@ public:
             Qt3DSDMSlideHandle theMaster = theSlideInfo.m_MasterSlide;
             Qt3DSDMSlideHandle theActiveSlide = theSlideInfo.m_ActiveSlide;
             if (theAssociatedSlide == theMaster || theAssociatedSlide == theActiveSlide) {
-                long theViewTime = theSlideInfo.m_ComponentMilliseconds;
+                long theViewTime = theSlideInfo.m_ComponentTime;
                 return eyeballVal && theStart <= theViewTime && theEnd > 0 && theEnd >= theViewTime;
             }
         }
@@ -2811,8 +2811,8 @@ public:
     }
 
     template <typename TKeyframeType>
-    void AddKeyframes(Qt3DSDMAnimationHandle animHandle, const float *keyframeValues, long numValues,
-                      long inOffsetInSeconds)
+    void AddKeyframes(Qt3DSDMAnimationHandle animHandle, const float *keyframeValues,
+                      long numValues, long timeOffset)
     {
         long numFloatsPerKeyframe = sizeof(TKeyframeType) / sizeof(float);
         if (numValues % numFloatsPerKeyframe) {
@@ -2822,25 +2822,21 @@ public:
         long numKeyframes = numValues / numFloatsPerKeyframe;
         for (long idx = 0; idx < numKeyframes; ++idx) {
             TKeyframeType theData(keyframes[idx]);
-            theData.m_KeyframeSeconds += inOffsetInSeconds;
+            theData.m_time += timeOffset;
             m_AnimationCore.InsertKeyframe(animHandle, theData);
         }
     }
 
-    void SetKeyframeTime(TKeyframeHandle inKeyframe, long inTime) override
+    void SetKeyframeTime(TKeyframeHandle kfHandle, long time) override
     {
-        float timeInSecs = static_cast<float>(inTime) / 1000.f;
-        // round off to 4 decimal place to workaround precision issues
-        // TODO: fix this, either all talk float OR long. choose one.
-        timeInSecs = ceilf(timeInSecs * 10000.0f) / 10000.0f;
-        TKeyframe kfData = m_AnimationCore.GetKeyframeData(inKeyframe);
+        TKeyframe kfData = m_AnimationCore.GetKeyframeData(kfHandle);
 
         // offset control points for bezier keyframes
-        offsetBezier(kfData, timeInSecs - getKeyframeTime(kfData));
+        offsetBezier(kfData, time - getKeyframeTime(kfData));
 
         // Functional programming paradigm, returns new value instead of changing current value.
-        kfData = qt3dsdm::setKeyframeTime(kfData, timeInSecs);
-        m_AnimationCore.SetKeyframeData(inKeyframe, kfData);
+        kfData = qt3dsdm::setKeyframeTime(kfData, time);
+        m_AnimationCore.SetKeyframeData(kfHandle, kfData);
     }
 
     void setBezierKeyframeValue(TKeyframeHandle kfHandle, const TKeyframe &kfData) override
@@ -2891,25 +2887,21 @@ public:
             m_AnimationCore.CreateAnimation(inSlide, instance, property, subIndex, animType, false);
 
         long theStartTime = GetTimeRange(instance).first;
-        long theTimeOffsetInSeconds = long(theStartTime / 1000.f);
 
         switch (animType) {
         case EAnimationTypeLinear:
-            AddKeyframes<SLinearKeyframe>(animHandle, keyframeValues, numValues,
-                                          theTimeOffsetInSeconds);
+            AddKeyframes<SLinearKeyframe>(animHandle, keyframeValues, numValues, theStartTime);
             break;
         case EAnimationTypeBezier:
-            AddKeyframes<SBezierKeyframe>(animHandle, keyframeValues, numValues,
-                                          theTimeOffsetInSeconds);
+            AddKeyframes<SBezierKeyframe>(animHandle, keyframeValues, numValues, theStartTime);
             break;
         case EAnimationTypeEaseInOut:
             AddKeyframes<SEaseInEaseOutKeyframe>(animHandle, keyframeValues, numValues,
-                                                 theTimeOffsetInSeconds);
+                                                 theStartTime);
             break;
         default:
             QT3DS_ASSERT(false);
-            AddKeyframes<SLinearKeyframe>(animHandle, keyframeValues, numValues,
-                                          theTimeOffsetInSeconds);
+            AddKeyframes<SLinearKeyframe>(animHandle, keyframeValues, numValues, theStartTime);
             break;
         }
         return animHandle;

@@ -71,7 +71,7 @@ private:
 
     QPointF getBezierControlPosition(const qt3dsdm::SBezierKeyframe &kf,
                                      BezierControlType type = BezierControlType::None) const;
-    QPointF getKeyframePosition(float time, float value) const;
+    QPointF getKeyframePosition(long time, float value) const;
     void checkValScaleLimits();
     void adjustColorProperty(float &val, bool scaleUp = true) const;
 

@@ -120,47 +120,60 @@ using std::hash;
 template <typename TOperator>
 static void HandleKeyframe(SLinearKeyframe &inKeyframe, TOperator &inOperator)
 {
-    inOperator(inKeyframe.m_KeyframeSeconds);
-    inOperator(inKeyframe.m_KeyframeValue);
+    float kfTime = float(inKeyframe.m_time / 1000.f);
+
+    inOperator(kfTime);
+    inOperator(inKeyframe.m_value);
+
+    inKeyframe.m_time = long(kfTime * 1000.f);
 }
 
 template <typename TOperator>
 static void HandleKeyframe(SBezierKeyframe &inKeyframe, TOperator &inOperator)
 {
-    inOperator(inKeyframe.m_KeyframeSeconds);
-    inOperator(inKeyframe.m_KeyframeValue);
-    inOperator(inKeyframe.m_InTangentTime);
+    float kfTime = float(inKeyframe.m_time / 1000.f);
+    float tangentInTime = float(inKeyframe.m_InTangentTime / 1000.f);
+    float tangentOutTime = float(inKeyframe.m_OutTangentTime / 1000.f);
+
+    inOperator(kfTime);
+    inOperator(inKeyframe.m_value);
+    inOperator(tangentInTime);
     inOperator(inKeyframe.m_InTangentValue);
-    inOperator(inKeyframe.m_OutTangentTime);
+    inOperator(tangentOutTime);
     inOperator(inKeyframe.m_OutTangentValue);
+
+    inKeyframe.m_time = long(kfTime * 1000.f);
+    inKeyframe.m_InTangentTime = long(tangentInTime * 1000.f);
+    inKeyframe.m_OutTangentTime = long(tangentOutTime * 1000.f);
 }
 
 template <typename TOperator>
 static void HandleKeyframe(SEaseInEaseOutKeyframe &inKeyframe, TOperator &inOperator)
 {
-    inOperator(inKeyframe.m_KeyframeSeconds);
-    inOperator(inKeyframe.m_KeyframeValue);
+    float kfTime = float(inKeyframe.m_time / 1000.f);
+    inOperator(kfTime);
+    inOperator(inKeyframe.m_value);
     inOperator(inKeyframe.m_EaseIn);
     inOperator(inKeyframe.m_EaseOut);
+
+    inKeyframe.m_time = long(kfTime * 1000.f);
 }
 
-template <typename TItemType>
-struct SVectorWriteOperator
+struct KeyframeWriter
 {
-    vector<TItemType> &m_Vector;
-    SVectorWriteOperator(vector<TItemType> &vec)
-        : m_Vector(vec)
+    vector<float> &m_vector;
+    KeyframeWriter(vector<float> &vec)
+        : m_vector(vec)
     {
     }
-    void operator()(const TItemType &inValue) { m_Vector.push_back(inValue); }
+    void operator()(const float &inValue) { m_vector.push_back(inValue); }
 };
 
-template <typename TItemType>
-struct SMemReadOperator
+struct KeyframeReader
 {
-    const TItemType *m_Ptr;
-    const TItemType *m_End;
-    SMemReadOperator(const TItemType *s, const TItemType *e)
+    const float *m_Ptr;
+    const float *m_End;
+    KeyframeReader(const float *s, const float *e)
         : m_Ptr(s)
         , m_End(e)
     {
@@ -168,7 +181,7 @@ struct SMemReadOperator
 
     bool IsDone() { return m_Ptr >= m_End; }
 
-    void operator()(TItemType &outValue)
+    void operator()(float &outValue)
     {
         if (m_Ptr < m_End) {
             outValue = *m_Ptr;
@@ -183,7 +196,7 @@ template <typename TKeyframeType>
 static void WriteKeyframes(TKeyframeHandleList &inKeyframes, IAnimationCore &inCore,
                            vector<float> &outValues)
 {
-    SVectorWriteOperator<float> theOperator(outValues);
+    KeyframeWriter theOperator(outValues);
     for (size_t idx = 0, end = inKeyframes.size(); idx < end; ++idx) {
         TKeyframe theKeyframeVariant(inCore.GetKeyframeData(inKeyframes[idx]));
         TKeyframeType theData(get<TKeyframeType>(theKeyframeVariant));
@@ -195,7 +208,7 @@ template <typename TKeyframeType>
 static void ReadKeyframes(Qt3DSDMAnimationHandle inAnimation, IAnimationCore &inCore,
                           const float *inStart, const float *inEnd)
 {
-    SMemReadOperator<float> theOperator(inStart, inEnd);
+    KeyframeReader theOperator(inStart, inEnd);
     while (theOperator.IsDone() == false) {
         TKeyframeType theData;
         HandleKeyframe(theData, theOperator);
