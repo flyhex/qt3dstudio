@@ -71,6 +71,20 @@ playhead in the timeline palette, or by running the presentation in the Studio o
 Moving the playhead to a new position, and then changing the value of a property with animation
 enabled will create a new keyframe.
 
+You can click the arrow icon next to the object with animated properties to expand it, this will
+display all animated properties and keyframes.
+
+\image object-animated-properties.png
+
+Furthermore, double-click one of the properties to display the property graph. The property graph
+displays the property animation curves and allows you to edit them.
+
+\image object-animation-channels.png
+
+You can toggle channel visibility by clicking the channel icon on the left side of the scene graph
+(Ctrl + left mouse click to multi select). This function is only available if the animated
+property has more than one channel.
+
 \section1 Edit Animations
 
 \section2 Insert Keyframes
@@ -154,7 +168,20 @@ To copy keyframes from one element to another, follow the steps below:
   the context menu.
 \endlist
 
-\section2 Interpolation
+\section1 Animation Types
+
+There are three different types of animations in Studio. These are described below.
+
+To change animation type, right-click the property row in the timeline and select
+\uicontrol{Animation Type}.
+
+\image select-animation-type.png
+
+\section2 Linear
+
+With linear interpolation the value changes at the same rate from one value to the next.
+
+\section2 Ease In/Out
 
 As the playhead moves from one keyframe to the next, the Qt 3D Studio
 Runtime can perform \e {linear interpolation}, \e {smooth
@@ -173,10 +200,31 @@ keyframe.
 
 \image Studio-Timeline-Interpolation.png
 
-\note If you find that you are constantly setting your keyframes from
-Smooth to Linear, or vice-versa, you may wish to change the
-\uicontrol{Default Interpolation} setting for new keyframes in the
-\l{studio-menu.html#edit}{Application Preferences}.
+\note You can set the default interpolation values for ease in/out animations
+in the \l{studio-menu.html#edit}{studio preferences}.
+
+\section2 Bezier
+
+Bezier animations are using a bezier curve to define the animation. This gives you much more control
+of the animation and interpolation.
+
+Two or more end points define a bezier curve. Each end point represents the channel value
+of a keyframe. These end points have two control points (handles), or if they are located in the
+beginning or end of the timeline, one control point.
+
+\image bezier-curves.png
+
+\section3 Control Points
+
+Once you have created your animation, you can adjust it by moving the control points. To display
+the control points, first select the end point. Then, to move the control point, drag it with the
+left mouse button. If the end point has two control points, both will move simultaneously. To
+move just one, hold down the Ctrl key while dragging. You cannot move control points past previous
+or next keyframe.
+
+\section3 End Points
+To move an end point horizontally, you will need to move the actual keyframe on the timeline bar. To
+move it vertically, you will need to change the value for the animated value in this position.
 
 \section1 Import Animations
 

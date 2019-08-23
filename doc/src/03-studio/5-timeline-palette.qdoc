@@ -281,12 +281,17 @@ coordinates the timing of it all.
 \section2 Zooming In and Out
 
 When working with fast animations you may wish to zoom in to see the
-contents better. To zoom the timeline, do one of the following:
+contents better. It is possible to zoom the timeline both horizontally and vertically.
+To zoom the timeline horizontally, do one of the following:
 \list
   \li Press \c{Alt + mouse right click} and drag the mouse left/right to zoom in/out.
   \li Press \c{+} or \c{-} on the keyboard to zoom in/out.
-  \li Use the slider locate in the bottom of the timeline palette
+  \li Use the slider located in the bottom of the timeline palette
 \endlist
+
+To zoom the timeline vertically, hold down the Alt key and use the mouse scroll wheel.
+
+\note Vertical zooming only applies to expanded property graphs.
 
 \section2 Setting Playhead Time
 
@@ -364,8 +369,8 @@ from the context menu.
 To apply a custom text, first do one of the following:
 \list
   \li
-    Right-click anywhere in the timeline palette and select \uicontrol {Show All Time Bar Texts}
-    from the context menu.
+    Right-click anywhere in the timeline palette and select
+    \uicontrol {Toggle Timebars Text Visibility} from the context menu.
   \li
     Click the
     \inlineimage timeline-texts-icon.png

@@ -111,8 +111,8 @@
     \list
     \li
       \uicontrol{Default Interpolation} - Controls whether new animation
-      keyframes are created with
-      \l{animations.html#interpolation}{linear or smooth interpolation}.
+      keyframes are created with linear or smooth interpolation. This setting applies only to
+      animations of \l{Ease In/Out} type.
     \li
       \uicontrol{Timeline Snapping Grid} - When using snapping in the
       timeline, controls which ticks to snap to.
@@ -246,7 +246,7 @@
   press the \c{Delete} key after selecting the keyframes to delete them.
 \li
   \uicontrol{Set Interpolation} - Changes the in and out
-  \l{animations.html#interpolation}{interpolation}
+  \l{Ease In/Out}{interpolation}
   setting for the selected keyframes. This command is
   also available from the context menu when right-clicking in the
   animation portion of the \e{timeline palette}.

@@ -553,9 +553,21 @@ only in \e{Perspective View} and \e{Orthographic View}.
     \li \c{Shift + ,}
     \li \c{Shift + ,}
   \row
-    \li Zoom timeline in/out
+    \li Zoom timeline in/out horizontally
     \li \c{Alt + right mouse button + right/left mouse drag}
     \li \c{Option + right mouse button + right/left mouse drag}
+  \row
+    \li Zoom property graph in/out vertically
+    \li \c{Alt + mouse scroll wheel}
+    \li \c{Option + mouse scroll wheel}
+  \row
+    \li Pan property graph vertically
+    \li \c{Alt + left mouse button + drag up/down}
+    \li \c{Option + left mouse button + drag up/down}
+  \row
+    \li Move bezier curve control point independent of the other control point
+    \li \c{Ctrl + left mouse button}
+    \li \c{Cmd + left mouse button}
 \endtable
 
 \section2 Slides
