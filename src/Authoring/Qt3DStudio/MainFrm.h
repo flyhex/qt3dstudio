@@ -235,8 +235,6 @@ public:
     QWidget *GetActiveView() const;
     CPlayerWnd *GetPlayerWnd() const;
 
-    void initializeGeometryAndState();
-
     void toggleSelectMode();
     void showScene();
     QString getVariantsFilterStr() const;
@@ -244,12 +242,13 @@ public:
     void updateToolbarVariantsIcons(bool isFiltered);
     void setActionsEnabledStatus(bool enabled);
 
+    void handleGeometryAndState(bool save);
+
 Q_SIGNALS:
     void playStateChanged(bool started);
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event) override;
-    void handleGeometryAndState(bool save);
     void handleRestart();
 
     QScopedPointer<QT_PREPEND_NAMESPACE(Ui::MainFrame)> m_ui;

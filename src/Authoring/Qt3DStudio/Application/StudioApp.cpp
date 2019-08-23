@@ -719,7 +719,13 @@ void CStudioApp::initCore()
     if (m_views) {
         m_views->createViews(m_isSilent);
         m_pMainWnd = m_views->getMainFrame();
-        m_pMainWnd->initializeGeometryAndState();
+        if (!CStudioPreferences::containsWindowState(STUDIO_VERSION_NUM)) {
+            // On first run, save and restore geometry and state. For some reason they are both
+            // needed to avoid a bug with palettes resizing to their original size when window is
+            // resized or something in a palette is edited.
+            m_pMainWnd->handleGeometryAndState(true);
+        }
+        m_pMainWnd->handleGeometryAndState(false);
     }
 
     RegisterGlobalKeyboardShortcuts(m_core->GetHotKeys(), m_pMainWnd);

@@ -1969,17 +1969,6 @@ void CMainFrame::handleRestart()
     QProcess::startDetached(qApp->arguments()[0], presentationFile);
 }
 
-void CMainFrame::initializeGeometryAndState()
-{
-    if (!CStudioPreferences::containsWindowState(STUDIO_VERSION_NUM)) {
-        // On first run, save and restore geometry and state. For some reason they are both needed
-        // to avoid a bug with palettes resizing to their original size when window is resized or
-        // something in a palette is edited.
-        handleGeometryAndState(true);
-    }
-    handleGeometryAndState(false);
-}
-
 void CMainFrame::toggleSelectMode()
 {
     if (m_ui->actionItem_Select_Tool->isChecked())

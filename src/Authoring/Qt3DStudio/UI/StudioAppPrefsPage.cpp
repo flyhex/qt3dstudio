@@ -41,6 +41,7 @@
 #include "ClientDataModelBridge.h"
 #include "Core.h"
 #include "IStudioRenderer.h"
+#include "MainFrm.h"
 
 #include <QtWidgets/qmessagebox.h>
 #include <QtWidgets/qlistview.h>
@@ -410,6 +411,7 @@ void CStudioAppPrefsPage::checkRestartCondition()
                                               "Restart now?"));
 
         if (retval == QMessageBox::Yes) {
+            g_StudioApp.GetViews()->getMainFrame()->handleGeometryAndState(true);
             CStudioPreferences::savePreferences();
             CStudioPreferencesPropPage::endDialog(PREFS_SETTINGS_RESTART);
         }
