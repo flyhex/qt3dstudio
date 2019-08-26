@@ -98,7 +98,6 @@ public:
     void setPropBinding(ITimelineItemProperty *binding); // for property rows
     void selectLabel();
     void togglePropertyExpanded(const QPointF &scenePos = {});
-    void setPropertyExpanded(bool expand);
     void showDataInputSelector(const QString &propertyname, const QPoint &pos);
     ITimelineItemProperty *propBinding();
     void refreshPropBinding(bool forceSync = false);

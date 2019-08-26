@@ -1474,20 +1474,21 @@ void RowTree::togglePropertyExpanded(const QPointF &scenePos)
 {
     QPoint p = mapFromScene(scenePos).toPoint();
 
+    // check mouse over a channel button
     for (int i = 0; i < m_rectChannels.size(); ++i) {
         if (m_rectChannels[i].contains(p))
-            return; // mouse over a channel button
+            return;
     }
 
-    if (!m_rectFitPropGraph.contains(p) && !m_rectMaximizePropGraph.contains(p)
-        && !m_rectColorGradient.contains(p)) {
-        setPropertyExpanded(!m_propGraphExpanded);
+    // check mouse over fit, maximize, or toggle color gradient buttons
+    if (m_rectFitPropGraph.contains(p) || m_rectMaximizePropGraph.contains(p)
+        || m_rectColorGradient.contains(p)) {
+        return;
     }
-}
 
-void RowTree::setPropertyExpanded(bool expand)
-{
-    m_propGraphExpanded = expand;
+    // toggle property graph expand
+    m_propGraphExpanded = !m_propGraphExpanded;
+
     if (m_propGraphExpanded) {
         // start graph in normal (not maximized) size
         m_propGraphHeight = TimelineConstants::ROW_GRAPH_H;

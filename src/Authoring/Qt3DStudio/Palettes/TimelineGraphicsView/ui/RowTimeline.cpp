@@ -109,7 +109,9 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     const int currHeight = size().height() - 1;
 
     if (m_isColorProperty && m_drawColorGradient && !m_keyframes.empty()) {
-        QRectF gradRect(rowTree()->m_scene->ruler()->viewportX(), 0, widget->width(), currHeight);
+        QRect gradRect(rowTree()->m_scene->ruler()->viewportX(), 0, widget->width(), currHeight);
+        if (gradRect.x() < RULER_EDGE_OFFSET)
+            gradRect.setX(int(RULER_EDGE_OFFSET));
         drawColorPropertyGradient(painter, gradRect);
     } else {
         // Background
@@ -380,17 +382,15 @@ void RowTimeline::toggleColorGradient()
     update();
 }
 
-void RowTimeline::drawColorPropertyGradient(QPainter *painter, const QRectF &rect)
+void RowTimeline::drawColorPropertyGradient(QPainter *painter, const QRect &rect)
 {
-    static const QPointF edgeOffset(RULER_EDGE_OFFSET, 0);
     ITimelineItemProperty *propBinding = m_rowTree->propBinding();
-
     QLinearGradient bgGradient(rect.topLeft(), rect.topRight());
-    int start_x = int(qMax(rect.x(), edgeOffset.x()));
-
-    for (int x = start_x; x <= rect.right(); x += 20) { // 20 = sampling step in pixels
-        long time = rowTree()->m_scene->ruler()->distanceToTime(x - edgeOffset.x()); // millis
-        double ratio = qBound(0.0, (x - edgeOffset.x()) / rect.width(), 1.0);
+    for (int x = rect.x(); x < rect.right() + 20; x += 20) { // 20 = sampling step in pixels
+        if (x > rect.right())
+            x = int(rect.right());
+        long time = rowTree()->m_scene->ruler()->distanceToTime(x - RULER_EDGE_OFFSET);
+        double ratio = qBound(0.0, double(x - rect.x()) / rect.width(), 1.0);
 
         bgGradient.setColorAt(ratio, QColor::fromRgbF(
                         qBound(0.0, double(propBinding->GetChannelValueAtTime(0, time)), 1.0),

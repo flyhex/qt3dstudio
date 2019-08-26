@@ -100,7 +100,7 @@ private:
     void updateChildrenMaxEndXRecursive(RowTree *rowTree);
     void updateCommentItem();
     void updateCommentItemPos();
-    void drawColorPropertyGradient(QPainter *painter, const QRectF &rect);
+    void drawColorPropertyGradient(QPainter *painter, const QRect &rect);
     QString formatTime(long millis) const;
     void collectChildKeyframeTimes(QVector<long> &childKeyframeTimes);
 
