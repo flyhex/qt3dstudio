@@ -41,13 +41,13 @@
 #include "CmdDataModelInsertKeyframe.h"
 #include "CmdDataModelChangeKeyframe.h"
 #include "ClientDataModelBridge.h"
-#include "Bindings/OffsetKeyframesCommandHelper.h"
 #include "Bindings/PasteKeyframesCommandHelper.h"
 #include "Bindings/ITimelineItemBinding.h"
 #include "StudioPreferences.h"
 #include "Dialogs.h"
 #include "TimeEnums.h"
 #include "RowTimelinePropertyGraph.h"
+#include "IDocumentEditor.h"
 
 using namespace qt3dsdm;
 
@@ -144,11 +144,15 @@ QList<Keyframe *> KeyframeManager::selectedKeyframes() const
 // update bindings after selected keyframes are moved
 void KeyframeManager::commitMoveSelectedKeyframes()
 {
-    CDoc *theDoc = g_StudioApp.GetCore()->GetDoc();
-    COffsetKeyframesCommandHelper h(*theDoc);
+    Q3DStudio::ScopedDocumentEditor editor(*g_StudioApp.GetCore()->GetDoc(),
+                                           QObject::tr("Set Keyframe Time"), __FILE__, __LINE__);
+    for (Keyframe *keyframe : qAsConst(m_selectedKeyframes)) {
+        Qt3DSDMTimelineKeyframe::TKeyframeHandleList kfHandles;
+        keyframe->binding->GetKeyframeHandles(kfHandles);
 
-    for (Keyframe *keyframe : qAsConst(m_selectedKeyframes))
-        keyframe->binding->UpdateKeyframesTime(&h, keyframe->time);
+        for (auto h : kfHandles)
+            editor->SetKeyframeTime(h, keyframe->time);
+    }
 }
 
 void KeyframeManager::selectKeyframesInRect(const QRectF &rect)

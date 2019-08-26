@@ -30,6 +30,7 @@
 #include "PathTimelineItemBinding.h"
 #include "TimelineTranslationManager.h"
 #include "Doc.h"
+#include "IDocumentEditor.h"
 
 bool CPathTimelineItemBinding::IsExternalizeable()
 {

@@ -42,7 +42,6 @@
 #include "Qt3DSDMHandles.h"
 #include "IDragable.h"
 #include "Qt3DSDMAssetTimelineKeyframe.h"
-#include "OffsetKeyframesCommandHelper.h"
 #include "Qt3DSDMTimeline.h"
 #include "Qt3DSDMSignals.h"
 #include "DispatchListeners.h"

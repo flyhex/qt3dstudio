@@ -38,6 +38,7 @@
 #include "StudioApp.h"
 #include "Core.h"
 #include "RowTree.h"
+#include "IDocumentEditor.h"
 
 // Link to data model
 #include "TimeEditDlg.h"

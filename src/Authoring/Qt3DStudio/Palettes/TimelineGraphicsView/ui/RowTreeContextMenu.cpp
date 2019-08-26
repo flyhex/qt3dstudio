@@ -38,6 +38,7 @@
 #include "Qt3DSDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
 #include "qcursor.h"
+#include "IDocumentEditor.h"
 
 RowTreeContextMenu::RowTreeContextMenu(RowTree *inRowTree, QWidget *parent)
     : QMenu(parent)

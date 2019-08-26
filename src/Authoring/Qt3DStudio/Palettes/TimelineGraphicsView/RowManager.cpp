@@ -44,6 +44,7 @@
 #include "StudioObjectTypes.h"
 #include "Qt3DSDMStudioSystem.h"
 #include "ClientDataModelBridge.h"
+#include "IDocumentEditor.h"
 
 #include <QtWidgets/qgraphicslinearlayout.h>
 #include <QtCore/qpointer.h>

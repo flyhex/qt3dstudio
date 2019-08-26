@@ -351,7 +351,6 @@ SOURCES += \
     Palettes/Timeline/Bindings/ImageTimelineItemBinding.cpp \
     Palettes/Timeline/Bindings/LayerTimelineItemBinding.cpp \
     Palettes/Timeline/Bindings/MaterialTimelineItemBinding.cpp \
-    Palettes/Timeline/Bindings/OffsetKeyframesCommandHelper.cpp \
     Palettes/Timeline/Bindings/PathAnchorPointTimelineItemBinding.cpp \
     Palettes/Timeline/Bindings/PathTimelineItemBinding.cpp \
     Palettes/Timeline/Bindings/Qt3DSDMAssetTimelineKeyframe.cpp \

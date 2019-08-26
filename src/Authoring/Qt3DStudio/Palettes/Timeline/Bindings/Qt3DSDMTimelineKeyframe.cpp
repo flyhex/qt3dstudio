@@ -33,7 +33,6 @@
 #include "CmdDataModelChangeKeyframe.h"
 #include "CmdBatch.h"
 #include "Qt3DSDMStudioSystem.h"
-#include "OffsetKeyframesCommandHelper.h"
 
 #include "Doc.h"
 #include "StudioApp.h"
@@ -150,14 +149,6 @@ bool Qt3DSDMTimelineKeyframe::HasKeyframeHandle(qt3dsdm::Qt3DSDMKeyframeHandle i
 void Qt3DSDMTimelineKeyframe::SetSelected(bool inSelected)
 {
     m_Selected = inSelected;
-}
-
-// For colors, there would be 3 keyframe handles
-void Qt3DSDMTimelineKeyframe::UpdateKeyframesTime(COffsetKeyframesCommandHelper *inCommandHelper,
-                                                 long inTime)
-{
-    for (size_t i = 0; i < m_KeyframeHandles.size(); ++i)
-        inCommandHelper->SetCommandTime(m_KeyframeHandles[i], inTime);
 }
 
 void Qt3DSDMTimelineKeyframe::GetKeyframeHandles(TKeyframeHandleList &outList) const

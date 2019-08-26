@@ -37,7 +37,6 @@
 class IDoc;
 class CDoc;
 class CCmdBatch;
-class COffsetKeyframesCommandHelper;
 struct Keyframe;
 
 class Qt3DSDMTimelineKeyframe : public IKeyframe
@@ -60,7 +59,6 @@ public:
     void AddKeyframeHandle(qt3dsdm::Qt3DSDMKeyframeHandle inHandle);
     bool HasKeyframeHandle(qt3dsdm::Qt3DSDMKeyframeHandle inHandle) const;
     void SetSelected(bool inSelected);
-    void UpdateKeyframesTime(COffsetKeyframesCommandHelper *inCommandHelper, long inTime);
     void GetKeyframeHandles(TKeyframeHandleList &outList) const;
 
 private:
