@@ -393,6 +393,7 @@ struct STranslatorDataModelParser
 #define Camera_ClipFar m_Camera.m_ClipFar
 #define Camera_FOV m_Camera.m_Fov
 #define Camera_FOVHorizontal m_Camera.m_FovHorizontal
+#define Camera_EnableFrustumCulling m_Camera.m_EnableFrustumCulling
 #define Camera_Orthographic m_Camera.m_Orthographic
 #define Camera_ScaleMode m_Camera.m_ScaleMode
 #define Camera_ScaleAnchor m_Camera.m_ScaleAnchor
