@@ -1088,18 +1088,20 @@ struct SRendererImpl : public IStudioRenderer,
     {
         m_MaybeDragStart = false;
         m_mouseDown = false;
+        bool guideExists = true;
         Qt3DSDMGuideHandle theSelectedGuide;
         if (m_PickResult.getType() == StudioPickValueTypes::Guide) {
             theSelectedGuide = m_PickResult.getData<Qt3DSDMGuideHandle>();
-            m_Translation->CheckGuideInPresentationRect(theSelectedGuide, m_UpdatableEditor);
+            guideExists = m_Translation->CheckGuideInPresentationRect(theSelectedGuide,
+                                                                      m_UpdatableEditor);
         }
         m_UpdatableEditor.CommitEditor();
         m_PickResult = SStudioPickValue();
         if (m_Translation)
             m_Translation->EndDrag();
         if (theSelectedGuide.GetHandleValue()) {
-            // Get rid of selection if things aren't editable.
-            if (m_Doc.GetDocumentReader().AreGuidesEditable())
+            // Get rid of selection if things aren't editable or if guide has been deleted.
+            if (guideExists && m_Doc.GetDocumentReader().AreGuidesEditable())
                 m_Doc.NotifySelectionChanged(theSelectedGuide);
             else
                 m_Doc.NotifySelectionChanged();

@@ -3980,7 +3980,7 @@ void STranslation::PerformGuideDrag(Qt3DSDMGuideHandle inGuide, CPt inPoint,
     inEditor.FireImmediateRefresh(qt3dsdm::Qt3DSDMInstanceHandle());
 }
 
-void STranslation::CheckGuideInPresentationRect(Qt3DSDMGuideHandle inGuide,
+bool STranslation::CheckGuideInPresentationRect(Qt3DSDMGuideHandle inGuide,
                                                 CUpdateableDocumentEditor &inEditor)
 {
     qt3dsdm::SGuideInfo theInfo = m_Doc.GetDocumentReader().GetGuideInfo(inGuide);
@@ -4000,6 +4000,8 @@ void STranslation::CheckGuideInPresentationRect(Qt3DSDMGuideHandle inGuide,
 
     if (!inPresentation)
         inEditor.EnsureEditor(QObject::tr("Delete Guide"), __FILE__, __LINE__).DeleteGuide(inGuide);
+
+    return inPresentation;
 }
 
 void STranslation::PerformPathDrag(qt3ds::studio::SPathPick &inPathPick, CPt inOriginalCoords,

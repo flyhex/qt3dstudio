@@ -632,7 +632,7 @@ namespace studio {
 
         void PerformGuideDrag(Qt3DSDMGuideHandle inGuide, CPt inPoint,
                               CUpdateableDocumentEditor &inEditor);
-        void CheckGuideInPresentationRect(Qt3DSDMGuideHandle inGuide,
+        bool CheckGuideInPresentationRect(Qt3DSDMGuideHandle inGuide,
                                           CUpdateableDocumentEditor &inEditor);
 
         void PerformPathDrag(qt3ds::studio::SPathPick &inPathPick, CPt inOriginalCoords,
