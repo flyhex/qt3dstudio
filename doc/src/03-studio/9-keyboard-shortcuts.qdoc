@@ -584,7 +584,7 @@ only in \e{Perspective View} and \e{Orthographic View}.
   \row
     \li Duplicate slide
     \li \c{Ctrl + D}
-    \li \c{Ctrl + D}
+    \li \c{Cmd + D}
 \endtable
 
 \section2 Action
