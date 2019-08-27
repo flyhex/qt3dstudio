@@ -285,7 +285,10 @@ void RowTimelineContextMenu::onAnimTypeChange(QAction *action)
         }
     }
 
-    m_rowTree->refreshPropBinding();
+    // macOS and Linux require this to be done synchronously after animation type change, or
+    // keyframes will be invalid. Does not break anything on Windows either, so it can be done
+    // synchronously for all.
+    m_rowTree->refreshPropBinding(true);
 }
 
 void RowTimelineContextMenu::insertKeyframe()

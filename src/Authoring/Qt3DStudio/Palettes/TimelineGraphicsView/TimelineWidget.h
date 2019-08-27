@@ -97,7 +97,7 @@ public:
     void SetSize(long inX, long inY) override;
     bool isFullReconstructPending() const { return m_fullReconstruct; }
     NavigationBar *navigationBar() const { return m_navigationBar; }
-    void runFullReconstruct();
+    void runFullReconstruct(bool forceSync = false);
 
 protected:
     // DataModel callbacks

@@ -477,13 +477,14 @@ void TimelineWidget::onActiveSlide(const qt3dsdm::Qt3DSDMSlideHandle &inMaster, 
     }
 }
 
-void TimelineWidget::runFullReconstruct()
+void TimelineWidget::runFullReconstruct(bool forceSync)
 {
     m_fullReconstruct = true;
-    if (!m_asyncUpdateTimer.isActive())
+    if (forceSync)
+        onAsyncUpdate();
+    else if (!m_asyncUpdateTimer.isActive())
         m_asyncUpdateTimer.start();
 }
-
 
 void TimelineWidget::insertToHandlesMapRecursive(Qt3DSDMTimelineItemBinding *binding)
 {

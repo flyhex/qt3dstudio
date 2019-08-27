@@ -101,7 +101,7 @@ public:
     void setPropertyExpanded(bool expand);
     void showDataInputSelector(const QString &propertyname, const QPoint &pos);
     ITimelineItemProperty *propBinding();
-    void refreshPropBinding();
+    void refreshPropBinding(bool forceSync = false);
     TreeControlType getClickedControl(const QPointF &scenePos);
     bool shy() const;
     bool visible() const;
