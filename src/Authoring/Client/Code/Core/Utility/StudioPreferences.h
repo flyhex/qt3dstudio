@@ -112,11 +112,11 @@ public:
     static bool isTimebarDisplayTime();
     static void setTimebarDisplayTime(bool inDisplayTime);
 
-    static double timeAdvanceAmount();
-    static void setTimeAdvanceAmount(double inTime);
+    static long timeAdvanceAmount();
+    static void setTimeAdvanceAmount(long inTime);
 
-    static double bigTimeAdvanceAmount();
-    static void setBigTimeAdvanceAmount(double inTime);
+    static long bigTimeAdvanceAmount();
+    static void setBigTimeAdvanceAmount(long inTime);
 
     // VisualAids settings
     //
@@ -256,14 +256,14 @@ public:
     static QString versionString();
 
     // Default values that Studio will start out with or to restore
-    static const int PREFERREDSTARTUP_DEFAULTINDEX = -1;
     static constexpr double DEFAULT_SNAPRANGE = 10.;
-    static const int DEFAULT_CLIENT_WIDTH = 1920;
-    static const int DEFAULT_CLIENT_HEIGHT = 1080;
-    static constexpr double DEFAULT_TIME_ADVANCE = 100.;
-    static constexpr double DEFAULT_BIG_TIME_ADVANCE = 500.;
     static constexpr float DEFAULT_SELECTOR_WIDTH = 30.f;
     static constexpr float DEFAULT_SELECTOR_LENGTH = 50.f;
+    static const int PREFERREDSTARTUP_DEFAULTINDEX = -1;
+    static const int DEFAULT_CLIENT_WIDTH = 1920;
+    static const int DEFAULT_CLIENT_HEIGHT = 1080;
+    static const int DEFAULT_TIME_ADVANCE = 100;
+    static const int DEFAULT_BIG_TIME_ADVANCE = 500;
     static const int DEFAULT_AUTOSAVE_DELAY = 600;
 };
 #endif // INCLUDED_STUDIO_PREFERENCES_H

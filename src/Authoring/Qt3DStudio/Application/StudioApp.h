@@ -194,10 +194,10 @@ public:
     bool PerformSavePrompt();
     void PlaybackStop();
     bool isPlaybackPreviewOn() const;
-    void AdvanceTime();
-    void ReduceTime();
-    void AdvanceUltraBigTime();
-    void ReduceUltraBigTime();
+    void advanceTime();
+    void reduceTime();
+    void advanceTimeBig();
+    void reduceTimeBig();
     void PlaybackToggle();
     void RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent);
     bool OnSave(bool autosave = false);

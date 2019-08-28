@@ -160,9 +160,6 @@ int main(int argc, char *argv[])
     return g_StudioApp.run(parser);
 }
 
-//==============================================================================
-//	Includes
-//==============================================================================
 #include "Exceptions.h"
 #include "IOLibraryException.h"
 #include "MainFrm.h"
@@ -212,10 +209,6 @@ CStudioApp g_StudioApp;
 
 using namespace Q3DStudio;
 
-//=============================================================================
-/**
- * Constructor
- */
 CStudioApp::CStudioApp()
     : m_core(nullptr)
     , m_isSilent(false)
@@ -234,10 +227,6 @@ CStudioApp::CStudioApp()
     connect(m_autosaveTimer, &QTimer::timeout, this, [=](){ OnSave(true); });
 }
 
-//=============================================================================
-/**
- * Destructor
- */
 CStudioApp::~CStudioApp()
 {
     delete m_views;
@@ -286,7 +275,6 @@ void CStudioApp::performShutdown()
     qApp->exit();
 }
 
-//=============================================================================
 /**
  * Entry location for the creation of this application.
  * This creates the all the views, then returns if everything
@@ -343,7 +331,6 @@ bool CStudioApp::initInstance(const QCommandLineParser &parser, bool isOpenGLES)
     return true;
 }
 
-//=============================================================================
 /**
  * Command handler to display the about dialog.
  */
@@ -353,7 +340,6 @@ void CStudioApp::onAppAbout()
     aboutDlg.exec();
 }
 
-//=============================================================================
 /**
  * Main application execution loop.
  * The application's main thread stays in this until the app exits.
@@ -505,7 +491,6 @@ QString CStudioApp::resolvePresentationFile(const QString &inFile)
     return {};
 }
 
-//=============================================================================
 /**
  * Show startup dialog and perform necessary action such as create new doc or load doc.
  * Return false if user requests to exit
@@ -617,7 +602,6 @@ void CStudioApp::openApplication(const QString &inFilename)
 }
 #endif
 
-//=============================================================================
 /**
  * Start the app.
  */
@@ -635,7 +619,6 @@ bool CStudioApp::blankRunApplication()
     return runApplication();
 }
 
-//=============================================================================
 /**
  * Open the specified file and run the application.
  * This will load the file then go into the standard app loop.
@@ -693,7 +676,6 @@ bool CStudioApp::createAndRunApplication(const QString &filename, const QString 
     return theSuccess;
 }
 
-//=============================================================================
 /**
  * This is the app execution loop, the main thread loops here until the app exits.
  * @return true on success; false on failure
@@ -703,7 +685,6 @@ bool CStudioApp::runApplication()
     return qApp->exec() == 0;
 }
 
-//=============================================================================
 /**
  * Initialize the core and all the views.
  */
@@ -868,7 +849,6 @@ CCore *CStudioApp::GetCore()
     return m_core;
 }
 
-//=============================================================================
 /**
  * Get the view manager for this core to communicate to the views.
  */
@@ -877,7 +857,6 @@ CViews *CStudioApp::GetViews()
     return m_views;
 }
 
-//=============================================================================
 /**
  * Get the dialog manager for this core for displaying dialogs.
  */
@@ -924,20 +903,12 @@ void CStudioApp::SetManipulationMode(StudioManipulationModes::Enum inManipulatio
     }
 }
 
-//=============================================================================
-/**
- * return true if undo is possible
- */
 bool CStudioApp::CanUndo()
 {
     return m_core->GetCmdStack()->CanUndo()
             && !m_views->getMainFrame()->getTimelineWidget()->dndActive();
 }
 
-//=============================================================================
-/**
- * return true if redo is possible
- */
 bool CStudioApp::CanRedo()
 {
     return m_core->GetCmdStack()->CanRedo();
@@ -953,7 +924,6 @@ bool CStudioApp::CanCopy()
     return m_core->GetDoc()->canCopy();
 }
 
-//=============================================================================
 /**
  * Get a string describing the type of the copy operation that can be done.
  * Precedence of copying is 1) Actions; 2) Keyframes; 3) Objects
@@ -1091,7 +1061,6 @@ bool CStudioApp::ungroupSelectedObjects() const
     return false;
 }
 
-//=============================================================================
 /**
  * Cuts the selected object or keys
  */
@@ -1105,7 +1074,6 @@ bool CStudioApp::CanCut()
     return m_core->GetDoc()->canCut();
 }
 
-//=============================================================================
 /**
  * Paste keys from the copied list yo
  */
@@ -1119,7 +1087,6 @@ bool CStudioApp::CanPaste()
     return m_core->GetDoc()->canPaste();
 }
 
-//=============================================================================
 /**
  * Get a string describing the type of the paste operation that can be done.
  * Precedence of paste is 1) Actions; 2) Object ; 3) Keyframes
@@ -1152,7 +1119,6 @@ bool CStudioApp::CanChangeTimebarColor()
     return theRetVal;
 }
 
-//=============================================================================
 /**
  * Sets any changed keyframes on the selected object
  */
@@ -1161,7 +1127,6 @@ void CStudioApp::HandleSetChangedKeys()
     m_core->GetDoc()->SetChangedKeyframes();
 }
 
-//=============================================================================
 /**
  * Deletes all selected keys
  */
@@ -1170,7 +1135,6 @@ void CStudioApp::DeleteSelectedKeys()
     m_core->GetDoc()->deleteSelectedKeyframes();
 }
 
-//=============================================================================
 /**
  * Deletes selected object or keyframes
  */
@@ -1199,7 +1163,6 @@ void CStudioApp::OnToggleAutosetKeyframes()
     m_core->GetDispatch()->FireOnToolbarChange();
 }
 
-//==============================================================================
 /**
  * Updates the preferences, and AnimationSystem.
  */
@@ -1210,7 +1173,6 @@ void CStudioApp::SetAutosetKeyframes(bool inFlag)
     m_core->GetDoc()->GetStudioSystem()->GetAnimationSystem()->SetAutoKeyframe(inFlag);
 }
 
-//==============================================================================
 /**
  *	If the presentation is not currently playing, this function will make it
  *	start playing from the current position.  The starting point of the playhead
@@ -1232,7 +1194,6 @@ void CStudioApp::PlaybackPlay()
     }
 }
 
-//==============================================================================
 /**
  *	If the presentation is currently playing, it is stopped.  The playhead is
  *	left wherever it was stopped at (hence it's not restored).
@@ -1242,7 +1203,6 @@ void CStudioApp::PlaybackStopNoRestore()
     m_core->GetDoc()->SetPlayMode(PLAYMODE_STOP);
 }
 
-//==============================================================================
 /**
  *	Moves the playhead back to time zero.
  */
@@ -1262,7 +1222,6 @@ bool CStudioApp::IsPlaying()
     return m_core->GetDoc()->IsPlaying();
 }
 
-//=============================================================================
 /**
  * Performs a file revert.
  * This will revert the doc to the last saved version.
@@ -1275,7 +1234,6 @@ void CStudioApp::OnRevert()
     }
 }
 
-//=============================================================================
 /**
  * Check to see if it is possible to perform a revert.
  */
@@ -1284,7 +1242,6 @@ bool CStudioApp::CanRevert() const
     return m_core->GetDoc()->isModified() && m_core->GetDoc()->isValid();
 }
 
-//==============================================================================
 /**
  * Handles the recent list.
  */
@@ -1294,7 +1251,6 @@ void CStudioApp::OnFileOpenRecent(const QString &inDocument)
         OnLoadDocument(inDocument);
 }
 
-//==============================================================================
 /**
  * Called when closing the current doc, this prompts the user to save the doc.
  * This will only prompt if the doc is modified, and if the user selects save
@@ -1318,7 +1274,6 @@ bool CStudioApp::PerformSavePrompt()
     return true;
 }
 
-//==============================================================================
 /**
  *	If the presentation is currently playing, it is stopped.  The playhead is
  *	restored to the position found in m_PlaybackTime.
@@ -1336,63 +1291,54 @@ void CStudioApp::PlaybackStop()
     m_playbackOriginalSlide = 0;
 }
 
-//=============================================================================
 /**
- * Used for track wheel to do smooth tracking on mac, just scrolls the playhead.
+ * advance time by a small amount
  */
-void CStudioApp::AdvanceTime()
+void CStudioApp::advanceTime()
 {
     if (!m_core->GetDoc()->getPresentationId().isEmpty()) {
-        long theDeltaTime = CStudioPreferences::timeAdvanceAmount();
-        long theTime
-                = (m_core->GetDoc()->GetCurrentViewTime() + theDeltaTime)
-                / theDeltaTime * theDeltaTime;
-        m_core->GetDoc()->NotifyTimeChanged(theTime);
+        long dt = CStudioPreferences::timeAdvanceAmount();
+        long time = (m_core->GetDoc()->GetCurrentViewTime() + dt) / dt * dt;
+        m_core->GetDoc()->NotifyTimeChanged(time);
     }
 }
 
-//=============================================================================
 /**
- * Used for track wheel to do smooth tracking on mac, just scrolls the playhead.
+ * move back time by a small amount
  */
-void CStudioApp::ReduceTime()
+void CStudioApp::reduceTime()
 {
     if (!m_core->GetDoc()->getPresentationId().isEmpty()) {
-        long theDeltaTime = CStudioPreferences::timeAdvanceAmount();
-        long theTime = (m_core->GetDoc()->GetCurrentViewTime() - 1) / theDeltaTime * theDeltaTime;
-        m_core->GetDoc()->NotifyTimeChanged(theTime);
+        long dt = CStudioPreferences::timeAdvanceAmount();
+        long time = (m_core->GetDoc()->GetCurrentViewTime() - 1) / dt * dt;
+        m_core->GetDoc()->NotifyTimeChanged(time);
     }
 }
 
-//=============================================================================
 /**
- * Used for track wheel to do smooth tracking on mac, just scrolls the playhead.
+ * advance time by a big amount
  */
-void CStudioApp::AdvanceUltraBigTime()
+void CStudioApp::advanceTimeBig()
 {
     if (!m_core->GetDoc()->getPresentationId().isEmpty()) {
-        long theDeltaTime = CStudioPreferences::bigTimeAdvanceAmount();
-        long theTime
-                = (m_core->GetDoc()->GetCurrentViewTime() + theDeltaTime)
-                / theDeltaTime * theDeltaTime;
-        m_core->GetDoc()->NotifyTimeChanged(theTime);
+        long dt = CStudioPreferences::bigTimeAdvanceAmount();
+        long time = (m_core->GetDoc()->GetCurrentViewTime() + dt) / dt * dt;
+        m_core->GetDoc()->NotifyTimeChanged(time);
     }
 }
 
-//=============================================================================
 /**
- * Used for track wheel to do smooth tracking on mac, just scrolls the playhead.
+ * move back time by a big amount
  */
-void CStudioApp::ReduceUltraBigTime()
+void CStudioApp::reduceTimeBig()
 {
     if (!m_core->GetDoc()->getPresentationId().isEmpty()) {
-        long theDeltaTime = CStudioPreferences::bigTimeAdvanceAmount();
-        long theTime = (m_core->GetDoc()->GetCurrentViewTime() - 1) / theDeltaTime * theDeltaTime;
-        m_core->GetDoc()->NotifyTimeChanged(theTime);
+        long dt = CStudioPreferences::bigTimeAdvanceAmount();
+        long time = (m_core->GetDoc()->GetCurrentViewTime() - 1) / dt * dt;
+        m_core->GetDoc()->NotifyTimeChanged(time);
     }
 }
 
-//==============================================================================
 /**
  *	If the presentation is currently playing, it is stopped.  Otherwise, the
  *	presetation starts playing from its current position. Called when the user
@@ -1410,26 +1356,17 @@ void CStudioApp::PlaybackToggle()
     }
 }
 
-void CStudioApp::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler,
-                                                 QWidget *actionParent)
+void CStudioApp::RegisterGlobalKeyboardShortcuts(CHotKeys *inShortcutHandler, QWidget *actionParent)
 {
     m_core->RegisterGlobalKeyboardShortcuts(inShortcutHandler, actionParent);
 
-    ADD_GLOBAL_SHORTCUT(actionParent,
-                        QKeySequence(Qt::Key_Period),
-                        CStudioApp::AdvanceTime)
-    ADD_GLOBAL_SHORTCUT(actionParent,
-                        QKeySequence(Qt::Key_Comma),
-                        CStudioApp::ReduceTime)
-    ADD_GLOBAL_SHORTCUT(actionParent,
-                        QKeySequence(Qt::ShiftModifier | Qt::Key_Period),
-                        CStudioApp::AdvanceUltraBigTime)
-    ADD_GLOBAL_SHORTCUT(actionParent,
-                        QKeySequence(Qt::ShiftModifier | Qt::Key_Comma),
-                        CStudioApp::ReduceUltraBigTime)
-    ADD_GLOBAL_SHORTCUT(actionParent,
-                        QKeySequence(Qt::Key_Return),
-                        CStudioApp::PlaybackToggle)
+    ADD_GLOBAL_SHORTCUT(actionParent, QKeySequence(Qt::Key_Period), CStudioApp::advanceTime)
+    ADD_GLOBAL_SHORTCUT(actionParent, QKeySequence(Qt::Key_Comma), CStudioApp::reduceTime)
+    ADD_GLOBAL_SHORTCUT(actionParent, QKeySequence(Qt::ShiftModifier | Qt::Key_Period),
+                        CStudioApp::advanceTimeBig)
+    ADD_GLOBAL_SHORTCUT(actionParent, QKeySequence(Qt::ShiftModifier | Qt::Key_Comma),
+                        CStudioApp::reduceTimeBig)
+    ADD_GLOBAL_SHORTCUT(actionParent, QKeySequence(Qt::Key_Return), CStudioApp::PlaybackToggle)
 
     inShortcutHandler->RegisterKeyUpEvent(
                 new CDynHotKeyConsumer<CStudioApp>(this, &CStudioApp::playbackPreviewEnd), nullptr,
@@ -1550,7 +1487,6 @@ void CStudioApp::SetAutosaveInterval(int interval)
     m_autosaveTimer->setInterval(interval * 1000);
 }
 
-//=============================================================================
 /**
  * Call to load a new document.
  * There should not be a currently active document when this is called.

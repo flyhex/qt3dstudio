@@ -72,7 +72,6 @@ public:
         using namespace qt3dsdm;
 
         CCmdDataModelInsertKeyframe *insertKeyframesCmd = nullptr;
-        qt3dsdm::IPropertySystem *propSys = doc->GetStudioSystem()->GetPropertySystem();
         CClientDataModelBridge *bridge = doc->GetStudioSystem()->GetClientDataModelBridge();
 
         for (auto &kfData : m_CopiedKeyframeList) {

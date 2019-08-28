@@ -386,26 +386,26 @@ void CStudioPreferences::setTimebarDisplayTime(bool inDisplayTime)
     s_preferences.setValue(QStringLiteral("Timeline/DisplayTime"), inDisplayTime);
 }
 
-double CStudioPreferences::timeAdvanceAmount()
+long CStudioPreferences::timeAdvanceAmount()
 {
     return s_preferences.value(QStringLiteral("Timeline/TimeAdvance"),
-                               DEFAULT_TIME_ADVANCE).toDouble();
+                               DEFAULT_TIME_ADVANCE).toInt();
 }
 
-void CStudioPreferences::setTimeAdvanceAmount(double inTime)
+void CStudioPreferences::setTimeAdvanceAmount(long inTime)
 {
-    s_preferences.setValue(QStringLiteral("Timeline/TimeAdvance"), inTime);
+    s_preferences.setValue(QStringLiteral("Timeline/TimeAdvance"), int(inTime));
 }
 
-double CStudioPreferences::bigTimeAdvanceAmount()
+long CStudioPreferences::bigTimeAdvanceAmount()
 {
     return s_preferences.value(QStringLiteral("Timeline/BigTimeAdvance"),
-                               DEFAULT_BIG_TIME_ADVANCE).toDouble();
+                               DEFAULT_BIG_TIME_ADVANCE).toInt();
 }
 
-void CStudioPreferences::setBigTimeAdvanceAmount(double inTime)
+void CStudioPreferences::setBigTimeAdvanceAmount(long inTime)
 {
-    s_preferences.setValue(QStringLiteral("Timeline/BigTimeAdvance"), inTime);
+    s_preferences.setValue(QStringLiteral("Timeline/BigTimeAdvance"), int(inTime));
 }
 
 // VisualAids settings
