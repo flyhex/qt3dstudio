@@ -40,7 +40,7 @@ CDurationEditDlg::CDurationEditDlg(QWidget *parent)
     setWindowFlag(Qt::WindowContextHelpButtonHint, false); // remove '?' from the dialog title bar
 
     QIntValidator *minValidator = new QIntValidator(this);
-    minValidator->setRange(0, 9999);
+    minValidator->setRange(0, 59);
     m_ui->lineEditMinutes->setValidator(minValidator);
     m_ui->lineEditEndMinutes->setValidator(minValidator);
     QIntValidator *secValidator = new QIntValidator(this);
@@ -157,13 +157,23 @@ void CDurationEditDlg::onStartTimeChanged()
     long sec = m_ui->lineEditSeconds->text().toInt();
     long msec = m_ui->lineEditMilliseconds->text().toInt();
 
+    // Keep min & sec values under 60
+    if (min > 59) {
+        min = 59;
+        m_ui->lineEditMinutes->setText(QString::number(min));
+    }
+    if (sec > 59) {
+        sec = 59;
+        m_ui->lineEditSeconds->setText(QString::number(sec));
+    }
+
     long theGoToTime = min * 60000 + sec * 1000 + msec;
 
     // Go to the time specified in the start time edit display
     updateObjectTime(theGoToTime, true);
 
     // If max number of digits reached in a number field, select the next
-    if (m_ui->lineEditMinutes->hasFocus() && min > 999) {
+    if (m_ui->lineEditMinutes->hasFocus() && min > 9) {
         m_ui->lineEditSeconds->setFocus();
         m_ui->lineEditSeconds->selectAll();
     } else if (m_ui->lineEditSeconds->hasFocus() && sec > 9) {
@@ -178,13 +188,23 @@ void CDurationEditDlg::onEndTimeChanged()
     long sec = m_ui->lineEditEndSeconds->text().toInt();
     long msec = m_ui->lineEditEndMilliseconds->text().toInt();
 
+    // Keep min & sec values under 60
+    if (min > 59) {
+        min = 59;
+        m_ui->lineEditEndMinutes->setText(QString::number(min));
+    }
+    if (sec > 59) {
+        sec = 59;
+        m_ui->lineEditEndSeconds->setText(QString::number(sec));
+    }
+
     long theGoToTime = min * 60000 + sec * 1000 + msec;
 
     // Go to the time specified in the end time edit display
     updateObjectTime(theGoToTime, false);
 
     // If max number of digits reached in a number field, select the next
-    if (m_ui->lineEditEndMinutes->hasFocus() && min > 999) {
+    if (m_ui->lineEditEndMinutes->hasFocus() && min > 9) {
         m_ui->lineEditEndSeconds->setFocus();
         m_ui->lineEditEndSeconds->selectAll();
     } else if (m_ui->lineEditEndSeconds->hasFocus() && sec > 9) {
