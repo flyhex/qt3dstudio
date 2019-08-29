@@ -172,6 +172,13 @@ namespace studio {
             // Setup shared default values.
             inCamera.m_ClipFar = 2000000.0f;
             inCamera.m_ClipNear = 1.0f;
+
+            // In orthographic view adjust near clipping based on zoom level
+            if (m_CameraType == EditCameraTypes::Orthographic) {
+                // This seems like a suitable math
+                inCamera.m_ClipNear = (100000 / m_ViewRadius) - (50 * m_ViewRadius);
+            }
+
             if (m_CameraType == EditCameraTypes::Perspective) {
                 inCamera.m_FOV = g_EditCameraFOV;
                 TORAD(inCamera.m_FOV);
