@@ -39,19 +39,22 @@ namespace qt3dsimp {
 class Import;
 
 typedef enum _ESceneGraphWarningCode {
-    ESceneGraphWarningCode_OnlySupportTriangles, ///< Model contains geometric elements other than
-                                                 ///triangles (note that this won't throw exception,
-                                                 ///just pop up warning)
-    ESceneGraphWarningCode_TrianglesDuplicateSemantic, ///< Triangle contains duplicate semantics,
-                                                       ///ex: 1 triangle has multiple TEXCOORD
-                                                       ///(multiple UV maps)
-    ESceneGraphWarningCode_VertexBufferTooLarge, ///< Triangle contains duplicate semantics, ex: 1
-                                                 ///triangle has multiple TEXCOORD (multiple UV
-                                                 ///maps)
-    ESceneGraphWarningCode_MissingSourceFile, ///< Couldn't find a source image file
-    ESceneGraphWarningCode_LockedDestFile, ///< An image or mesh file we need to write to is not
-                                           ///writeable.
-    ESceneGraphWarningCode_Generic, ///< For generic warnings
+    // Model contains geometric elements other than triangles (note that this won't throw exception,
+    // just pop up warning).
+    ESceneGraphWarningCode_OnlySupportTriangles,
+    // Triangle contains duplicate semantics, ex: 1 triangle has multiple TEXCOORD (multiple UV
+    // maps).
+    ESceneGraphWarningCode_TrianglesDuplicateSemantic,
+    // A single mesh exceeds the maximum vertex count of 65535.
+    ESceneGraphWarningCode_VertexBufferTooLarge,
+    // Couldn't find a source image file
+    ESceneGraphWarningCode_MissingSourceFile,
+    // An image or mesh file we need to write to is not writeable.
+    ESceneGraphWarningCode_LockedDestFile,
+    // Mesh is missing a material.
+    ESceneGraphWarningCode_MissingMaterial,
+    // For generic warnings.
+    ESceneGraphWarningCode_Generic
 } ESceneGraphWarningCode;
 
 class ISGTranslationLog
@@ -89,7 +92,7 @@ struct STranslationLog : public qt3dsimp::ISGTranslationLog
 {
     vector<pair<qt3dsimp::ESceneGraphWarningCode, Q3DStudio::CString>> m_Warnings;
     void OnWarning(qt3dsimp::ESceneGraphWarningCode inWarningCode,
-                           const wchar_t *inAssociatedName) override
+                   const wchar_t *inAssociatedName) override
     {
         m_Warnings.push_back(std::make_pair(inWarningCode, inAssociatedName));
     }

@@ -40,8 +40,6 @@
 #include "Qt3DSImportTranslationCommon.h"
 #include "Qt3DSImportSceneGraphTranslation.h"
 #include "Qt3DSImportTranslation.h"
-#include "Dialogs.h"
-#include "StudioApp.h"
 
 #include <QtCore/qbytearray.h>
 #include <QtCore/qfileinfo.h>
@@ -88,7 +86,8 @@ protected:
     void ProcessGeometry(const domGeometry *inGeometry, TFaceIndicies &ioIndicies);
     void ProcessTriangle(const domTrianglesRef inTrianglesRef, TFaceIndicies &ioFaceIndicies,
                          bool &outHasNormals, bool &outHasTexCoords, bool &outHasTexCoords2,
-                         bool &outHasTexTangents, bool &outHasTexBinormals, bool &outHasColors);
+                         bool &outHasTexTangents, bool &outHasTexBinormals, bool &outHasColors,
+                         const char *meshName);
     void GenerateMeshTangents(const domTrianglesRef inTrianglesRef,
                               const SSourceArrayInfo &inVertexArrayInfo,
                               const SSourceArrayInfo &inNormalArrayInfo,
@@ -775,7 +774,15 @@ void ColladaDOMWalker::ProcessGeometry(const domGeometry *inGeometry, TFaceIndic
     long theTriangleArrayCount = (long)theTriangles.getCount();
     for (long theIndex = 0; theIndex < theTriangleArrayCount; ++theIndex) {
         ProcessTriangle(theTriangles[theIndex], ioFaceIndicies, theHasNormals, theHasTexCoords,
-                        theHasTexCoords2, theHasTexTangents, theHasTexBinormals, theHasColors);
+                        theHasTexCoords2, theHasTexTangents, theHasTexBinormals, theHasColors,
+                        GetNameOrIDOrSid(inGeometry));
+    }
+
+    // Pop up warning message if model contains non-triangles geometry
+    if (theMesh->getPolylist_array().getCount() || theMesh->getPolygons_array().getCount()
+        || theMesh->getLines_array().getCount() || theMesh->getLinestrips_array().getCount()
+        || theMesh->getTrifans_array().getCount() || theMesh->getTristrips_array().getCount()) {
+        LogWarning(ESceneGraphWarningCode_OnlySupportTriangles, GetNameOrIDOrSid(inGeometry));
     }
 
     // Prepare arrays for population
@@ -832,13 +839,6 @@ void ColladaDOMWalker::ProcessGeometry(const domGeometry *inGeometry, TFaceIndic
     m_Translator->SetGeometry(theVertices, theNormals, theTexCoords, theTexCoords2, theTexTangents,
                               theTexBinormals, theWeights, theBoneIndex, theColors,
                               theEntireFaceIndiciesList);
-
-    // Pop up warning message if model contains non-triangles geometry
-    if (theMesh->getPolylist_array().getCount() || theMesh->getPolygons_array().getCount()
-        || theMesh->getLines_array().getCount() || theMesh->getLinestrips_array().getCount()
-        || theMesh->getTrifans_array().getCount() || theMesh->getTristrips_array().getCount()) {
-        LogWarning(ESceneGraphWarningCode_OnlySupportTriangles, GetNameOrIDOrSid(inGeometry));
-    }
 }
 
 //==============================================================================
@@ -849,7 +849,7 @@ void ColladaDOMWalker::ProcessTriangle(const domTrianglesRef inTrianglesRef,
                                        TFaceIndicies &ioFaceIndicies, bool &outHasNormals,
                                        bool &outHasTexCoords, bool &outHasTexCoords2,
                                        bool &outHasTexTangents, bool &outHasTexBinormals,
-                                       bool &outHasColors)
+                                       bool &outHasColors, const char *meshName)
 {
     SSourceArrayInfo theVertexArrayInfo;
     SSourceArrayInfo theNormalArrayInfo;
@@ -1014,13 +1014,10 @@ void ColladaDOMWalker::ProcessTriangle(const domTrianglesRef inTrianglesRef,
     // Set the face indicies used by this particular material
     const xsNCName theMaterialName =
         inTrianglesRef->getMaterial(); // TODO: Handle the material settings for this face
-    if (theMaterialName != nullptr) {
+    if (theMaterialName != nullptr)
         ioFaceIndicies.second.push_back(std::make_pair(theMaterialName, theMaterialFaceIndicies));
-    } else {
-        g_StudioApp.GetDialogs()->DisplayKnownErrorDialog(
-                    QObject::tr("The mesh files could not be created.\n"
-                                "Materials are missing from the imported model."));
-    }
+    else
+        LogWarning(ESceneGraphWarningCode_MissingMaterial, meshName);
 }
 
 /**

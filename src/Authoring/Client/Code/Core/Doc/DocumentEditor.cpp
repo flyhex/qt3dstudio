@@ -5442,6 +5442,9 @@ void IDocumentEditor::DisplayImportErrors(const QString &inImportSource,
         case ESceneGraphWarningCode_VertexBufferTooLarge:
             formatStr = L"A single mesh exceeds the maximum vertex count of 65535";
             break;
+        case ESceneGraphWarningCode_MissingMaterial:
+            formatStr = L"Materials are missing from mesh %ls, it was not created";
+            break;
         default:
             break;
         }
