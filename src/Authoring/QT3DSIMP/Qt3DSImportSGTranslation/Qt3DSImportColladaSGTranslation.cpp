@@ -515,9 +515,9 @@ void ColladaDOMWalker::ProcessNode(const domNodeRef inNode)
 {
     switch (inNode->getType()) {
     case NODETYPE_NODE: {
-        const domInstance_geometry_Array &theInstanceGeometryArray =
-            inNode->getInstance_geometry_array();
-        long theGeometryCount = (long)theInstanceGeometryArray.getCount();
+        const domInstance_geometry_Array &theInstanceGeometryArray
+                = inNode->getInstance_geometry_array();
+        size_t theGeometryCount = theInstanceGeometryArray.getCount();
         bool thePushModelFlag = false;
         bool lightFlag = false;
         bool cameraFlag = false;
@@ -541,9 +541,9 @@ void ColladaDOMWalker::ProcessNode(const domNodeRef inNode)
             PushGroup(GetNameOrIDOrSid(inNode));
             ProcessTransform(inNode);
 
-            for (long theIndex = 0; theIndex < theGeometryCount; ++theIndex) {
+            for (size_t theIndex = 0; theIndex < theGeometryCount; ++theIndex) {
                 const domInstance_geometryRef theInstanceGeometryRef =
-                    theInstanceGeometryArray[theIndex];
+                        theInstanceGeometryArray[theIndex];
                 PushModel(GetNameOrIDOrSid(theInstanceGeometryRef));
                 ProcessInstanceGeometry(inNode, theInstanceGeometryRef);
                 PopModel();
@@ -603,6 +603,28 @@ void ColladaDOMWalker::ProcessNode(const domNodeRef inNode)
                     color = point->getColor()->getValue();
                     linearFade = point->getLinear_attenuation()->getValue() * 1000;
                     quadFade = point->getQuadratic_attenuation()->getValue() * 1000;
+                    // Blender exports Area light as Point type, so we need to check if we are
+                    // dealing with Blender, and dig the actual light type from inside extra
+                    // elements
+                    const domExtra_Array &lightExtraArray = light->getExtra_array();
+                    size_t extrasCount = lightExtraArray.getCount();
+                    for (size_t i = 0; i < extrasCount; ++i) {
+                        domExtraRef lightExtra = lightExtraArray[i];
+                        const domTechnique_Array &lightExtraTechniqueArray
+                                = lightExtra->getTechnique_array();
+                        size_t techniqueCount = lightExtraTechniqueArray.getCount();
+                        for (size_t j = 0; j < techniqueCount; ++j) {
+                            domTechniqueRef lightExtraTechnique = lightExtraTechniqueArray[i];
+                            const char *profile = lightExtraTechnique->getProfile();
+                            if (::strcmp(profile, "blender") == 0) {
+                                if (daeElement *theElement
+                                        = lightExtraTechnique->getChild("type")) {
+                                    type = GetIntFromElementChar(theElement);
+                                }
+                                break;
+                            }
+                        }
+                    }
                 } else if (technique->getDirectional()) {
                     type = 1;
                     domLight::domTechnique_common::domDirectionalRef directional
@@ -620,11 +642,12 @@ void ColladaDOMWalker::ProcessNode(const domNodeRef inNode)
                     color = spot->getColor()->getValue();
                     linearFade = spot->getLinear_attenuation()->getValue() * 1000;
                     quadFade = spot->getQuadratic_attenuation()->getValue() * 1000;
+                    LogWarning(ESceneGraphWarningCode_UnsupportedLight, GetNameOrIDOrSid(inNode));
                 }
                 // Collada does not seem to have info about casting shadows or light intensity.
                 // We'll use the defaults (intensity 100, no shadows)
-                SetLightProperties(type,
-                                   SFloat4(color.get(0), color.get(1), color.get(2), color.get(3)),
+                SetLightProperties(type, SFloat4(float(color.get(0)), float(color.get(1)),
+                                                 float(color.get(2)), 1.0f),
                                    100, linearFade, quadFade, false);
             }
         }

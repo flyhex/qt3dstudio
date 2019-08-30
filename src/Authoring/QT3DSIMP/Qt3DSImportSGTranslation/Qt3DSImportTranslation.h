@@ -53,6 +53,8 @@ typedef enum _ESceneGraphWarningCode {
     ESceneGraphWarningCode_LockedDestFile,
     // Mesh is missing a material.
     ESceneGraphWarningCode_MissingMaterial,
+    // Unsupported light type.
+    ESceneGraphWarningCode_UnsupportedLight,
     // For generic warnings.
     ESceneGraphWarningCode_Generic
 } ESceneGraphWarningCode;

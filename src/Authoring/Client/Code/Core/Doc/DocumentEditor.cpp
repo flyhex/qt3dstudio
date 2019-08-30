@@ -5427,23 +5427,26 @@ void IDocumentEditor::DisplayImportErrors(const QString &inImportSource,
         const wchar_t *formatStr = L"Unrecognized warning";
         switch (warning.first) {
         case ESceneGraphWarningCode_OnlySupportTriangles:
-            formatStr = L"Model %ls contains geometric elements other than triangles";
+            formatStr = L"Model \"%ls\" contains geometric elements other than triangles";
             break;
         case ESceneGraphWarningCode_TrianglesDuplicateSemantic:
             formatStr = L"Triangle contains duplicate semantics, ex: 1 triangle has multiple "
                         L"TEXCOORD (multiple UV maps)";
             break;
         case ESceneGraphWarningCode_MissingSourceFile:
-            formatStr = L"Couldn't find a source image file %ls";
+            formatStr = L"Couldn't find a source image file \"%ls\"";
             break;
         case ESceneGraphWarningCode_LockedDestFile:
-            formatStr = L"An image or mesh file %ls is not writeable";
+            formatStr = L"An image or mesh file \"%ls\" is not writeable";
             break;
         case ESceneGraphWarningCode_VertexBufferTooLarge:
             formatStr = L"A single mesh exceeds the maximum vertex count of 65535";
             break;
         case ESceneGraphWarningCode_MissingMaterial:
-            formatStr = L"Materials are missing from mesh %ls, it was not created";
+            formatStr = L"Materials are missing from mesh \"%ls\", it was not created";
+            break;
+        case ESceneGraphWarningCode_UnsupportedLight:
+            formatStr = L"Light type for \"%ls\" is not supported, it was converted to Directional";
             break;
         default:
             break;
