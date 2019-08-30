@@ -290,10 +290,6 @@ TimelineWidget::TimelineWidget(const QSize &preferredSize, QWidget *parent)
         m_graphicsScene->updateTimelineLayoutWidth();
     });
 
-    connect(m_graphicsScene->ruler(), &Ruler::durationChanged, this, [this]() {
-        m_graphicsScene->updateControllerLayoutWidth();
-    });
-
     // data model listeners
     g_StudioApp.GetCore()->GetDispatch()->AddPresentationChangeListener(this);
     g_StudioApp.GetCore()->GetDispatch()->AddClientPlayChangeListener(this);

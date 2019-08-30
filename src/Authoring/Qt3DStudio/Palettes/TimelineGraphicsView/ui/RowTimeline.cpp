@@ -154,12 +154,10 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
 
             painter->setPen(Qt::NoPen);
 
-            if (m_controllerDataInput.size()) {
-                painter->fillRect(QRect(x, 0, w, currHeight),
-                                  CStudioPreferences::dataInputColor());
-            } else if (m_rowTree->indexInLayout() != 1) {
+            if (m_controllerDataInput.size())
+                painter->fillRect(QRect(x, 0, w, currHeight), CStudioPreferences::dataInputColor());
+            else if (m_rowTree->indexInLayout() != 1)
                 painter->fillRect(QRect(x, 0, w, currHeight), m_barColor);
-            }
 
             if (m_state == Selected) {
                 // draw selection overlay on bar

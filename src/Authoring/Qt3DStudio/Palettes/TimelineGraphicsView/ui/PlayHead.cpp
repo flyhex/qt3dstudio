@@ -54,7 +54,8 @@ void PlayHead::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     static const QPixmap pixHead2x = QPixmap(":/images/PlaybackHead@2x.png");
 
     static const int PLAY_HEAD_H = 999999; // theoretically big enough height
-    painter->drawPixmap(-TimelineConstants::PLAYHEAD_W * .5, 0, hiResIcons ? pixHead2x : pixHead);
+    painter->drawPixmap(int(-TimelineConstants::PLAYHEAD_W * .5f), 0, hiResIcons ? pixHead2x
+                                                                                 : pixHead);
     painter->setPen(CStudioPreferences::timelinePlayheadLineColor());
     painter->drawLine(0, 0, 0, PLAY_HEAD_H);
 }
@@ -75,21 +76,9 @@ void PlayHead::setTime(long time)
     updatePosition();
 }
 
-void PlayHead::setPosition(double posX)
-{
-    posX = qBound(TimelineConstants::RULER_EDGE_OFFSET, posX, m_ruler->duration()
-                  * TimelineConstants::RULER_MILLI_W * m_ruler->timelineScale()
-                  + TimelineConstants::RULER_EDGE_OFFSET);
-
-    setX(m_ruler->x() + posX);
-    m_time = (posX - TimelineConstants::RULER_EDGE_OFFSET)
-             / (TimelineConstants::RULER_MILLI_W * m_ruler->timelineScale());
-}
-
 void PlayHead::updatePosition()
 {
-    setX(m_ruler->x() + TimelineConstants::RULER_EDGE_OFFSET
-         + m_time * TimelineConstants::RULER_MILLI_W * m_ruler->timelineScale());
+    setX(m_ruler->x() + TimelineConstants::RULER_EDGE_OFFSET + m_ruler->timeToDistance(m_time));
 }
 
 long PlayHead::time() const

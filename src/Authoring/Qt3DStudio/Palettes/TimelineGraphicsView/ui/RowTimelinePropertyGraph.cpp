@@ -70,7 +70,6 @@ void RowTimelinePropertyGraph::paintGraphs(QPainter *painter, const QRectF &rect
     painter->setClipRect(rect);
 
     static const QPointF edgeOffset(RULER_EDGE_OFFSET, 0);
-    double timelineScale = m_rowTimeline->rowTree()->m_scene->ruler()->timelineScale();
 
     // draw graph base line (graph_Y)
     painter->setPen(QPen(CStudioPreferences::studioColor3()));
@@ -121,7 +120,8 @@ void RowTimelinePropertyGraph::paintGraphs(QPainter *painter, const QRectF &rect
         QPainterPath path;
         int start_j = qMax(rect.x(), edgeOffset.x());
         for (int j = start_j; j < rect.right(); j += 5) { // 5 = sampling step in pixels
-            long time = (j - edgeOffset.x()) / (RULER_MILLI_W * timelineScale); // millis
+            long time = m_rowTimeline->rowTree()->m_scene->ruler()
+                                                         ->distanceToTime(j - edgeOffset.x());
             float value = m_propBinding->GetChannelValueAtTime(m_activeChannelsIndex[i], time);
             adjustColorProperty(value);
 

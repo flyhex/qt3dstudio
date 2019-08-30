@@ -69,7 +69,6 @@ public:
     void setTimelineScale(int scale);
     void setControllerText(const QString &controller);
     void updateTimelineLayoutWidth();
-    void updateControllerLayoutWidth();
     void updateController();
     Ruler *ruler() const;
     PlayHead *playHead() const;

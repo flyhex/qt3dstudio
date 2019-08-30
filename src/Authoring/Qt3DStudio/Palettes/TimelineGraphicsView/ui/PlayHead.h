@@ -42,7 +42,6 @@ public:
     explicit PlayHead(Ruler *m_ruler);
 
     void setHeight(int height);
-    void setPosition(double posX); // set x poisiotn
     void updatePosition(); // sync x poisiotn based on time value
     void setTime(long time); // set time (sets x based on time (ms) input)
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
@@ -52,7 +51,7 @@ public:
 
 private:
     long m_time = 0;
-    Ruler *m_ruler;
+    Ruler *m_ruler = nullptr;
 };
 
 #endif // PLAYHEAD_H

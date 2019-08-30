@@ -292,15 +292,13 @@ void RowManager::updateRulerDuration(bool updateMaxDuration)
     long maxDuration = 0; // for setting correct size for the view so scrollbars appear correctly
     if (m_layoutTree->count() > 1) {
         auto rootRow = static_cast<RowTree *>(m_layoutTree->itemAt(1)->graphicsItem());
-        bool isComponent = rootRow->objectType() == OBJTYPE_COMPONENT;
-        for (int i = 1; i < m_layoutTree->count(); ++i) {
+        bool insideComponent = rootRow->objectType() == OBJTYPE_COMPONENT;
+        for (int i = 2; i < m_layoutTree->count(); ++i) {
             RowTree *row_i = static_cast<RowTree *>(m_layoutTree->itemAt(i)->graphicsItem());
             long dur_i = row_i->rowTimeline()->getEndTime();
 
-            if (((isComponent && i != 1) || row_i->objectType() == OBJTYPE_LAYER)
-                    && dur_i > duration) {
+            if ((insideComponent || row_i->objectType() == OBJTYPE_LAYER) && dur_i > duration)
                 duration = dur_i;
-            }
 
             if (dur_i > maxDuration)
                 maxDuration = dur_i;

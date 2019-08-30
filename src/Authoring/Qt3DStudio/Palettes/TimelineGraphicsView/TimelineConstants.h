@@ -37,15 +37,13 @@ namespace TimelineConstants
     const int ROW_GRAPH_H_MAX   = 300;   // property row height when graph is shown maximized
     const int ROW_SPACING       = 2;
     const int ROW_DEPTH_STEP    = 15;    // x-distance between 2 consecutive depths
-    const double RULER_SEC_W    = 30;    // width of 1 second section (at scale 1)
+    const double RULER_SEC_W    = 60;    // width of 1 second section (at scale 1)
     const double RULER_MILLI_W  = RULER_SEC_W / 1000.0; // width of 1 millisecond section at scale 1
     const int RULER_SEC_DIV     = 10;    // second divisions
     const int RULER_DIV_H1      = 5;     // height of main divisions
     const int RULER_DIV_H2      = 3;     // height of secondary divisions
     const int RULER_DIV_H3      = 1;     // height of minor divisions
     const int RULER_BASE_Y      = 18;    // baseline Y
-    const int RULER_LABEL_W     = 60;
-    const int RULER_LABEL_H     = 10;
     const int RULER_TICK_SCALE1 = 2;
     const int RULER_TICK_SCALE2 = 3;
     const int RULER_TICK_SCALE3 = 6;
@@ -75,8 +73,6 @@ namespace TimelineConstants
 
     const int TIMELINE_SCROLL_MAX_DELTA = 25; // Maximum amount of pixels to scroll per frame
     const int TIMELINE_SCROLL_DIVISOR = 6;    // Divisor for timeline autoscroll distance
-
-    // TODO: move the colors and dimensions to StudioPreferences.
 }
 
 #endif // TIMELINECONSTANTS_H

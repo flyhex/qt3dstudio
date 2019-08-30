@@ -285,7 +285,7 @@ TimelineGraphicsScene::TimelineGraphicsScene(TimelineWidget *timelineWidget)
     });
 
     QTimer::singleShot(0, this, [this]() {
-        m_playHead->setPosition(0);
+        m_playHead->setTime(0);
         m_widgetTimeline->viewTreeContent()->horizontalScrollBar()->setValue(0);
     });
 
@@ -370,20 +370,10 @@ void TimelineGraphicsScene::setControllerText(const QString &controller)
 void TimelineGraphicsScene::updateTimelineLayoutWidth()
 {
     double timelineWidth = TimelineConstants::RULER_EDGE_OFFSET * 2
-                           + m_ruler->maxDuration() * TimelineConstants::RULER_MILLI_W
-                             * m_ruler->timelineScale();
+                           + m_ruler->timeToDistance(m_ruler->maxDuration());
 
     m_layoutTimeline->setMinimumWidth(timelineWidth);
     m_layoutTimeline->setMaximumWidth(timelineWidth);
-}
-
-void TimelineGraphicsScene::updateControllerLayoutWidth()
-{
-    if (m_layoutTimeline->count() < 2)
-        return;
-    auto root = m_layoutTimeline->itemAt(1);
-
-    static_cast<RowTimeline *>(root->graphicsItem())->setEndTime(ruler()->duration());
 }
 
 void TimelineGraphicsScene::updateController()

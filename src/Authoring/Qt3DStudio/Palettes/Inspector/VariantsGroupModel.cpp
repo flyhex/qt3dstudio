@@ -152,7 +152,7 @@ void VariantsGroupModel::setTagState(const QString &group, const QString &tag, b
         }
     }
 
-    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(), QObject::tr("Set Property"))
+    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(), tr("Set Tag State"))
             ->SetInstancePropertyValue(m_instance, m_property, QVariant(val));
 }
 

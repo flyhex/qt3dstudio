@@ -41,7 +41,7 @@ signals:
 public:
     explicit Ruler(TimelineItem *parent = nullptr);
 
-    void setTimelineScale(double scl);
+    void setTimelineScale(int scl);
     long distanceToTime(double distance) const;
     double timeToDistance(long time) const;
     double timelineScale() const;
@@ -59,12 +59,12 @@ protected:
 
 signals:
     void maxDurationChanged(long maxDuration);
-    void durationChanged(long duration);
     void viewportXChanged(int viewportX);
 
 private:
-    const QString timestampString(int timeMs);
-    double m_timeScale = 2;
+    const QString formatTime(double seconds);
+
+    double m_timeScale = 1.;
     long m_duration = 0; // milliseconds
     long m_maxDuration = 0; // milliseconds
     int m_viewportX = 0;

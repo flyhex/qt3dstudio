@@ -46,6 +46,24 @@
 #include <QtWidgets/qpushbutton.h>
 #include <QtWidgets/qshortcut.h>
 
+class TimelineScaleEventfilter : public QObject
+{
+public:
+    TimelineScaleEventfilter(QObject *parent) : QObject(parent) {}
+
+    bool eventFilter(QObject *obj, QEvent *event) override
+    {
+        // reset scale upon double clicking the scale slider's head
+        if (event->type() == QEvent::MouseButtonDblClick) {
+            static_cast<QSlider *>(obj)->setValue(50);
+            event->accept();
+            return true;
+        }
+
+        return QObject::eventFilter(obj, event);
+    }
+};
+
 TimelineToolbar::TimelineToolbar() : QToolBar()
 {
     setContentsMargins(0, 0, 0, 0);
@@ -85,16 +103,17 @@ TimelineToolbar::TimelineToolbar() : QToolBar()
     m_scaleSlider = new QSlider();
     m_scaleSlider->setOrientation(Qt::Horizontal);
     m_scaleSlider->setFixedWidth(100);
-    m_scaleSlider->setMinimum(1);
-    m_scaleSlider->setMaximum(22);
-    m_scaleSlider->setValue(2);
+    m_scaleSlider->setMinimum(0);
+    m_scaleSlider->setMaximum(100);
+    m_scaleSlider->setValue(50);
+    m_scaleSlider->installEventFilter(new TimelineScaleEventfilter(this));
 
     m_timeLabel->setObjectName(QLatin1String("timelineButton"));
     m_timeLabel->setFlat(true);
     m_timeLabel->setMinimumWidth(80);
     m_timeLabel->setToolTip(tr("Go To Time (%1%2T)").arg(ctrlKey).arg(altKey));
 
-    m_diLabel->setText("");
+    m_diLabel->clear();
     m_diLabel->setMinimumWidth(100);
     m_diLabel->setAlignment(Qt::AlignCenter);
     QString styleString = "QLabel { background: transparent; color: "
@@ -256,12 +275,12 @@ void TimelineToolbar::onZoomLevelChanged(int scale)
 
 void TimelineToolbar::onZoomInButtonClicked()
 {
-    m_scaleSlider->setValue(m_scaleSlider->value() + 1);
+    m_scaleSlider->setValue(m_scaleSlider->value() + 5);
 }
 
 void TimelineToolbar::onZoomOutButtonClicked()
 {
-    m_scaleSlider->setValue(m_scaleSlider->value() - 1);
+    m_scaleSlider->setValue(m_scaleSlider->value() - 5);
 }
 
 void TimelineToolbar::onDiButtonClicked()
@@ -393,29 +412,29 @@ void TimelineToolbar::onDataInputChange(int handle, int instance, const QString 
                 timeCtxRoot, ctrldPropertyHandle, controlledPropertyVal);
 
     auto existingCtrl = qt3dsdm::get<QString>(controlledPropertyVal);
-    int slideStrPos = existingCtrl.indexOf("@timeline");
+    int slideStrPos = existingCtrl.indexOf(QLatin1String("@timeline"));
     if (slideStrPos != -1) {
         // find the controlling datainput name and build the string to replace
-        int ctrStrPos = existingCtrl.lastIndexOf("$", slideStrPos - 2);
+        int ctrStrPos = existingCtrl.lastIndexOf(QLatin1Char('$'), slideStrPos - 2);
         QString prevCtrler = existingCtrl.mid(ctrStrPos, slideStrPos - ctrStrPos);
         existingCtrl.replace(prevCtrler + "@timeline", fullTimeControlStr);
     } else {
         if (!existingCtrl.isEmpty() && m_currController.size())
-            existingCtrl.append(" ");
+            existingCtrl.append(QLatin1Char(' '));
         existingCtrl.append(fullTimeControlStr);
     }
 
-    if (existingCtrl.endsWith(" "))
+    if (existingCtrl.endsWith(QLatin1Char(' ')))
         existingCtrl.chop(1);
 
-    if (existingCtrl.startsWith(" "))
+    if (existingCtrl.startsWith(QLatin1Char(' ')))
         existingCtrl.remove(0, 1);
 
     m_diLabel->setText(m_currController);
     qt3dsdm::SValue fullCtrlPropVal
         = std::make_shared<qt3dsdm::CDataStr>(
             Q3DStudio::CString::fromQString(existingCtrl));
-    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, QObject::tr("Set Timeline control"))
+    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, tr("Set Timeline control"))
         ->SetInstancePropertyValue(timeCtxRoot, ctrldPropertyHandle, fullCtrlPropVal);
 }
 
@@ -440,18 +459,12 @@ void TimelineToolbar::OnImmediateRefreshInstanceMultiple(qt3dsdm::Qt3DSDMInstanc
     Q_UNUSED(inInstanceCount)
 }
 
-// Notify the user about control state change also with timeline dock
-// title color change.
+// Notify the user about control state change also with timeline dock title color change.
 void TimelineToolbar::updateTimelineTitleColor(bool controlled)
 {
-    QString styleString;
-    if (controlled) {
-        styleString = "QDockWidget#timeline { color: "
-                + QString(CStudioPreferences::dataInputColor().name()) + "; }";
-    } else {
-        styleString = "QDockWidget#timeline { color: "
-                + QString(CStudioPreferences::textColor().name()) + "; }";
-    }
+    QString styleString = QStringLiteral("QDockWidget#timeline { color: %1; }")
+                          .arg(controlled ? CStudioPreferences::dataInputColor().name()
+                                          : CStudioPreferences::textColor().name());
 
     QWidget *timelineDock = parentWidget()->parentWidget()->parentWidget();
     timelineDock->setStyleSheet(styleString);

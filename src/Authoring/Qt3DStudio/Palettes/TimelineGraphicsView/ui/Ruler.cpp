@@ -33,6 +33,8 @@
 #include <QtGui/qpainter.h>
 #include <QtWidgets/qwidget.h>
 
+using namespace TimelineConstants;
+
 Ruler::Ruler(TimelineItem *parent) : TimelineItem(parent)
 {
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
@@ -42,95 +44,141 @@ void Ruler::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
 {
     Q_UNUSED(option)
 
-    double xStep = TimelineConstants::RULER_SEC_W / TimelineConstants::RULER_SEC_DIV * m_timeScale;
-    double activeSegmentsWidth = TimelineConstants::RULER_EDGE_OFFSET
-            + m_duration / 1000.0 * xStep * TimelineConstants::RULER_SEC_DIV;
-    double totalSegmentsWidth = TimelineConstants::RULER_EDGE_OFFSET
-            + m_maxDuration / 1000.0 * xStep * TimelineConstants::RULER_SEC_DIV;
+    painter->translate(RULER_EDGE_OFFSET, RULER_BASE_Y);
 
-    // Ruler painted width to be at least widget width
-    double minRulerWidth = widget->width();
-    double rowXMax = std::max(minRulerWidth, totalSegmentsWidth);
-
-    painter->save();
+    // draw inactive base line
+    int startX = qMax(m_viewportX - int(RULER_EDGE_OFFSET), 0);
+    int endX = m_viewportX + widget->width();
     painter->setPen(CStudioPreferences::timelineRulerColorDisabled());
-    painter->drawLine(TimelineConstants::RULER_EDGE_OFFSET,
-                      TimelineConstants::RULER_BASE_Y,
-                      rowXMax + TimelineConstants::RULER_EDGE_OFFSET,
-                      TimelineConstants::RULER_BASE_Y);
-    painter->setPen(CStudioPreferences::timelineRulerColor());
-    painter->drawLine(TimelineConstants::RULER_EDGE_OFFSET,
-                      TimelineConstants::RULER_BASE_Y,
-                      activeSegmentsWidth,
-                      TimelineConstants::RULER_BASE_Y);
+    painter->drawLine(startX, 0, endX, 0);
 
+    // draw active base line
+    int durEndX = qMin(endX, int(timeToDistance(m_duration)));
+    if (durEndX > startX) {
+        painter->setPen(CStudioPreferences::timelineRulerColor());
+        painter->drawLine(startX, 0, durEndX, 0);
+    }
+
+    // draw ruler steps and text
     QFont font = painter->font();
     font.setPointSize(8);
     painter->setFont(font);
 
-    const int margin = 50;
-    const int secDiv = TimelineConstants::RULER_SEC_DIV;
-    double rowX = 0;
     bool useDisabledColor = false;
-    for (int i = 0; rowX < rowXMax; i++) {
-        rowX = TimelineConstants::RULER_EDGE_OFFSET + xStep * i;
+    int startSecond = int(distanceToTime(startX) / 1000);
+    int endSecond   = int(distanceToTime(endX)   / 1000) + 1;
 
-        // Optimization to skip painting outside the visible area
-        if (rowX < (m_viewportX - margin) || rowX > (m_viewportX + minRulerWidth + margin))
+    static const int LABEL_W = 40;
+    static const int LABEL_H = 10;
+    static const int MIN_SEC_STEP_DIVISION       = 20;
+    static const int MIN_SEC_STEP_LABEL          = 60;
+    static const int MIN_HALF_SEC_STEP_DIVISION  = 10;
+    static const int MIN_HALF_SEC_STEP_LABEL     = 70;
+    static const int MIN_ONE_TENTH_STEP_DIVISION = 4;
+    static const int MIN_ONE_TENTH_STEP_LABEL    = 30;
+
+    QRectF labelRect(0, 0, LABEL_W, LABEL_H);
+    double secStep      = timeToDistance(1000);
+    double halfSecStep  = timeToDistance(500);
+    double oneTenthStep = timeToDistance(100);
+
+    int skipperSecLabel = qMax(int(MIN_SEC_STEP_LABEL / secStep), 1);
+    if (skipperSecLabel > 5)
+        skipperSecLabel = lroundf(skipperSecLabel / 5.f) * 5;
+
+    int skipperSecDivision = qMax(int(MIN_SEC_STEP_DIVISION / secStep), 1);
+
+    // keep skipperSecLabel and skipperSecDivision in sync
+    if (skipperSecLabel > 5 && skipperSecDivision % 5)
+        skipperSecDivision = lroundf(skipperSecLabel / 10.f) * 5;
+
+    bool drawHalfSecDiv    = halfSecStep  > MIN_HALF_SEC_STEP_DIVISION;
+    bool drawHalfSecLabel  = halfSecStep  > MIN_HALF_SEC_STEP_LABEL;
+    bool drawOneTenthDiv   = oneTenthStep > MIN_ONE_TENTH_STEP_DIVISION;
+    bool drawOneTenthLabel = oneTenthStep > MIN_ONE_TENTH_STEP_LABEL;
+
+    for (int i = startSecond; i <= endSecond; ++i) { // draw seconds
+        if (i % skipperSecDivision)
             continue;
 
-        const int h = i % secDiv == 0 ? TimelineConstants::RULER_DIV_H1
-         : i % secDiv == secDiv * 0.5 ? TimelineConstants::RULER_DIV_H2
-                                      : TimelineConstants::RULER_DIV_H3;
-
-        if (!useDisabledColor && rowX > activeSegmentsWidth) {
+        int x = int(timeToDistance(i * 1000));
+        if (!useDisabledColor && x > durEndX) {
             painter->setPen(CStudioPreferences::timelineRulerColorDisabled());
             useDisabledColor = true;
         }
-        painter->drawLine(QPointF(rowX, TimelineConstants::RULER_BASE_Y - h),
-                          QPointF(rowX, TimelineConstants::RULER_BASE_Y - 1));
 
-        // See if label should be shown at this tick at this zoom level
-        bool drawTimestamp = false;
-        if ((i % (secDiv * 4) == 0)
-                || (i % (secDiv * 2) == 0 && m_timeScale >= TimelineConstants::RULER_TICK_SCALE1)
-                || (i % secDiv == 0 && m_timeScale >= TimelineConstants::RULER_TICK_SCALE2)
-                || (i % secDiv == secDiv * 0.5
-                    && m_timeScale >= TimelineConstants::RULER_TICK_SCALE3)
-                || (m_timeScale >= TimelineConstants::RULER_TICK_SCALE4)) {
-            drawTimestamp = true;
+        // draw second division
+        painter->drawLine(x, -RULER_DIV_H1, x, 0);
+
+        if (i % skipperSecLabel == 0) { // draw label if not skipped
+            labelRect.moveTo(x - LABEL_W / 2, -LABEL_H - 7);
+            painter->drawText(labelRect, Qt::AlignCenter, formatTime(i));
         }
 
-        if (drawTimestamp) {
-            QRectF timestampPos = QRectF(TimelineConstants::RULER_EDGE_OFFSET
-                                         + xStep * i - TimelineConstants::RULER_LABEL_W / 2,
-                                         1, TimelineConstants::RULER_LABEL_W,
-                                         TimelineConstants::RULER_LABEL_H);
-            painter->drawText(timestampPos, Qt::AlignCenter,
-                              timestampString(i * 1000 / TimelineConstants::RULER_SEC_DIV));
+        // draw half seconds
+        if (!drawHalfSecDiv || i == endSecond)
+            continue;
+
+        x = int(timeToDistance(i * 1000 + 500));
+        if (!useDisabledColor && x > durEndX) {
+            painter->setPen(CStudioPreferences::timelineRulerColorDisabled());
+            useDisabledColor = true;
+        }
+        painter->drawLine(x, -RULER_DIV_H2, x, 0);
+
+        if (drawHalfSecLabel) {
+            labelRect.moveTo(x - LABEL_W / 2, -LABEL_H - 7);
+            painter->drawText(labelRect, Qt::AlignCenter, formatTime(i + .5));
         }
 
+        // draw one tenth
+        if (!drawOneTenthDiv)
+            continue;
+
+        for (int j = 1; j <= 9; ++j) {
+            if (j != 5) {
+                x = int(timeToDistance(i * 1000 + j * 100));
+                if (!useDisabledColor && x > durEndX) {
+                    painter->setPen(CStudioPreferences::timelineRulerColorDisabled());
+                    useDisabledColor = true;
+                }
+                painter->drawLine(x, -RULER_DIV_H3, x, 0);
+
+                if (drawOneTenthLabel) {
+                    labelRect.moveTo(x - LABEL_W / 2, -LABEL_H - 7);
+                    painter->drawText(labelRect, Qt::AlignCenter, formatTime(i + .1 * j));
+                }
+            }
+        }
     }
-
-    painter->restore();
 }
 
-void Ruler::setTimelineScale(double scl)
+void Ruler::setTimelineScale(int scl)
 {
-    m_timeScale = scl;
+    // scl is in the range 0..100, project it to an exponential value
+    bool isScaleDown = scl < 50;
+    const double normVal = abs(scl - 50) / 10.; // normalize to range 5..0..5 from scale down to up
+    double scaleVal = pow(normVal, 1.3);
+
+    // For scaling down normalize to range -1..0. 5^1.3 is max scaleVal but 5.1 is used to make
+    // sure scaleVal doesn't reach -1 in which case m_timeScale would become 0.
+    if (isScaleDown)
+        scaleVal /= -pow(5.1, 1.3);
+
+    m_timeScale = 1 + scaleVal;
     update();
 }
 
 // convert distance values to time (milliseconds)
 long Ruler::distanceToTime(double distance) const
 {
-    return distance / (TimelineConstants::RULER_MILLI_W * m_timeScale);
+    return long(distance / (RULER_MILLI_W * m_timeScale));
 }
 
 // convert time (milliseconds) values to distance
 double Ruler::timeToDistance(long time) const
 {
-    return time * TimelineConstants::RULER_MILLI_W * m_timeScale;
+    return time * RULER_MILLI_W * m_timeScale;
 }
 
 double Ruler::timelineScale() const
@@ -159,7 +207,6 @@ void Ruler::setDuration(long duration)
     if (m_duration != duration) {
         m_duration = duration;
         update();
-        emit durationChanged(m_duration);
     }
 }
 
@@ -187,30 +234,17 @@ int Ruler::viewportX() const
     return m_viewportX;
 }
 
-// Returns timestamp in mm:ss.ttt or ss.ttt format
-const QString Ruler::timestampString(int timeMs)
+// Returns ruler time in m:s.t or s.t format
+const QString Ruler::formatTime(double seconds)
 {
-    static const QString zeroString = tr("0");
-    static const QChar fillChar = tr("0").at(0);
-    static const QString noMinutesTemplate = tr("%1.%2");
-    static const QString minutesTemplate = tr("%1:%2.%3");
+    if (seconds < 60)
+        return QString::number(seconds);
 
-    int ms = timeMs % 1000;
-    int s = timeMs % 60000 / 1000;
-    int m = timeMs % 3600000 / 60000;
-    const QString msString = QString::number(ms).rightJustified(3, fillChar);
-    const QString sString = QString::number(s);
+    int mins = int(seconds) / 60;
+    double secs = seconds - mins * 60;
 
-    if (timeMs == 0) {
-        return zeroString;
-    } else if (m == 0) {
-        if (s < 10)
-            return noMinutesTemplate.arg(sString).arg(msString);
-        else
-            return noMinutesTemplate.arg(sString.rightJustified(2, fillChar)).arg(msString);
-    } else {
-        return minutesTemplate.arg(m).arg(sString.rightJustified(2, fillChar)).arg(msString);
-    }
+    const QChar fillChar = tr("0").at(0);
+    return QStringLiteral("%1:%2").arg(mins).arg(QString::number(secs).rightJustified(2, fillChar));
 }
 
 int Ruler::type() const
