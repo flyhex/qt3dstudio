@@ -128,6 +128,7 @@ protected:
     void TrackObjectIndex(const daeElement *inElement, long inIndex);
     void GetIndicesFromElement(const daeElement *inElement, TLongsList &outIndicies);
     bool ApplyAnimation(const daeElement *inContainerElement);
+    int CheckLightType(const domLight *light);
 
 protected:
     std::function<void(const char *)> PushGroup;
@@ -599,39 +600,26 @@ void ColladaDOMWalker::ProcessNode(const domNodeRef inNode)
                 double linearFade = 0;
                 double quadFade = 0;
                 if (technique->getPoint()) {
+                    // Blender exports Area light as Point type, so we need to check if we are
+                    // dealing with Blender, and dig the actual light type from inside extra
+                    // elements
+                    type = CheckLightType(light);
+                    type = (type == -1) ? 0 : type;
                     domLight::domTechnique_common::domPointRef point = technique->getPoint();
                     color = point->getColor()->getValue();
                     linearFade = point->getLinear_attenuation()->getValue() * 1000;
                     quadFade = point->getQuadratic_attenuation()->getValue() * 1000;
-                    // Blender exports Area light as Point type, so we need to check if we are
-                    // dealing with Blender, and dig the actual light type from inside extra
-                    // elements
-                    const domExtra_Array &lightExtraArray = light->getExtra_array();
-                    size_t extrasCount = lightExtraArray.getCount();
-                    for (size_t i = 0; i < extrasCount; ++i) {
-                        domExtraRef lightExtra = lightExtraArray[i];
-                        const domTechnique_Array &lightExtraTechniqueArray
-                                = lightExtra->getTechnique_array();
-                        size_t techniqueCount = lightExtraTechniqueArray.getCount();
-                        for (size_t j = 0; j < techniqueCount; ++j) {
-                            domTechniqueRef lightExtraTechnique = lightExtraTechniqueArray[i];
-                            const char *profile = lightExtraTechnique->getProfile();
-                            if (::strcmp(profile, "blender") == 0) {
-                                if (daeElement *theElement
-                                        = lightExtraTechnique->getChild("type")) {
-                                    type = GetIntFromElementChar(theElement);
-                                }
-                                break;
-                            }
-                        }
-                    }
                 } else if (technique->getDirectional()) {
                     type = 1;
                     domLight::domTechnique_common::domDirectionalRef directional
                             = technique->getDirectional();
                     color = directional->getColor()->getValue();
                 } else if (technique->getAmbient()) {
-                    type = 4;
+                    // Blender exports Hemi light as Ambient type, so we need to check if we are
+                    // dealing with Blender, and dig the actual light type from inside extra
+                    // elements
+                    type = CheckLightType(light);
+                    type = (type == -1) ? 4 : type;
                     domLight::domTechnique_common::domAmbientRef ambient = technique->getAmbient();
                     color = ambient->getColor()->getValue();
                 } else {
@@ -673,6 +661,29 @@ void ColladaDOMWalker::ProcessNode(const domNodeRef inNode)
     default: // No support for other types currently
         break;
     }
+}
+
+int ColladaDOMWalker::CheckLightType(const domLight *light)
+{
+    // In case of Blender, dig the actual light type from inside extra techniques
+    const domExtra_Array &lightExtraArray = light->getExtra_array();
+    size_t extrasCount = lightExtraArray.getCount();
+    for (size_t i = 0; i < extrasCount; ++i) {
+        domExtraRef lightExtra = lightExtraArray[i];
+        const domTechnique_Array &lightExtraTechniqueArray
+                = lightExtra->getTechnique_array();
+        size_t techniqueCount = lightExtraTechniqueArray.getCount();
+        for (size_t j = 0; j < techniqueCount; ++j) {
+            domTechniqueRef lightExtraTechnique = lightExtraTechniqueArray[i];
+            const char *profile = lightExtraTechnique->getProfile();
+            if (::strcmp(profile, "blender") == 0) {
+                if (daeElement *theElement = lightExtraTechnique->getChild("type"))
+                    return GetIntFromElementChar(theElement);
+                break;
+            }
+        }
+    }
+    return -1; // Not found
 }
 
 //==============================================================================

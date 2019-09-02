@@ -490,8 +490,6 @@ public:
     void SetLightProperties(int type, const SFloat4 &color, double intensity, double linearfade,
                             double quadfade, bool shadows) override
     {
-        Q_UNUSED(linearfade)
-        Q_UNUSED(quadfade)
         TIMPHandle light = m_InstanceStack.back();
         switch (type) {
         case 0:
@@ -510,10 +508,8 @@ public:
         }
         m_Import.SetInstancePropertyValue(light, m_Light.m_LightColor, color);
         m_Import.SetInstancePropertyValue(light, m_Light.m_Brightness, intensity);
-        // TODO: These do not seem to be incuded in FbxLight. Kept here in case Collada has support
-        // for them (QT3DS-2857)
-        //m_Import.SetInstancePropertyValue(light, m_Light.m_LinearFade, linearfade);
-        //m_Import.SetInstancePropertyValue(light, m_Light.m_ExpFade, quadfade);
+        m_Import.SetInstancePropertyValue(light, m_Light.m_LinearFade, linearfade);
+        m_Import.SetInstancePropertyValue(light, m_Light.m_ExpFade, quadfade);
         m_Import.SetInstancePropertyValue(light, m_Light.m_CastShadow, shadows);
     }
     void PopLight() override { PopObject(); }

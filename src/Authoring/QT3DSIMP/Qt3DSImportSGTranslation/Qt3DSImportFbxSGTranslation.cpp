@@ -484,9 +484,15 @@ void FbxDomWalker::ProcessLight(FbxNode *inFbxNode)
     ProcessTransform(inFbxNode, true);
     FbxLight *light = inFbxNode->GetLight();
     FbxDouble3 color = light->Color.Get();
-    m_Translator->SetLightProperties(light->LightType.Get(),
-                                     SFloat4(color[0], color[1], color[2], 1.0f),
-            light->Intensity.Get(), 0, 0, light->CastShadows.Get());
+    int lightType = light->LightType.Get();
+    if (lightType == FbxLight::eArea)
+        lightType = 4; // Area light type is 3 in FBX and 4 in DAE and internally
+    FbxLight::EDecayType decayType = light->DecayType.Get();
+    double linearDecay = (decayType == FbxLight::eLinear) ? light->DecayStart.Get() : 0.;
+    double quadDecay = (decayType == FbxLight::eQuadratic) ? light->DecayStart.Get() : 0.;
+    m_Translator->SetLightProperties(lightType, SFloat4(float(color[0]), float(color[1]),
+            float(color[2]), 1.0f), light->Intensity.Get(), linearDecay, quadDecay,
+            light->CastShadows.Get());
     ProcessNodeChildren(inFbxNode);
     m_Translator->PopLight();
 }
