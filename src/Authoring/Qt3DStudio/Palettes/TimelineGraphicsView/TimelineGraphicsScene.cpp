@@ -741,6 +741,11 @@ TExpandMap &TimelineGraphicsScene::expandMap()
     return m_expandMap;
 }
 
+TPropGraphHeightMap &TimelineGraphicsScene::propGraphHeightMap()
+{
+    return m_propGraphHeightMap;
+}
+
 void TimelineGraphicsScene::resetMousePressParams()
 {
     m_autoScrollTimelineTimer.stop();

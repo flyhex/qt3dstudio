@@ -180,8 +180,7 @@ void RowTree::animateExpand(ExpandState state)
     // so let's make sure the animation is stopped first.
     m_expandAnimation.stop();
     m_expandHeightAnimation->setEndValue(QSizeF(size().width(), endHeight));
-    m_expandTimelineHeightAnimation->setEndValue(QSizeF(m_rowTimeline->size().width(),
-                                                        endHeight));
+    m_expandTimelineHeightAnimation->setEndValue(QSizeF(m_rowTimeline->size().width(), endHeight));
     m_expandOpacityAnimation->setEndValue(endOpacity);
     m_expandTimelineOpacityAnimation->setEndValue(endOpacity);
 
@@ -631,8 +630,23 @@ void RowTree::setPropBinding(ITimelineItemProperty *binding)
     for (int i = 0; i < m_rectChannels.size(); ++i)
         m_rectChannels[i].setRect(22, TimelineConstants::ROW_H * (i+1), 16, 16);
 
-    if (parentRow()->expanded())
+    if (m_parentRow->expanded()) {
         setRowVisible(true);
+
+        // restore property graph expand state if saved
+        if (m_scene->propGraphHeightMap().contains(m_parentRow->instance())) {
+            int propGraphH = m_scene->propGraphHeightMap().value(m_parentRow->instance())
+                    .value(m_PropBinding->getPropertyHandle(), 0);
+            m_propGraphExpanded = propGraphH > 0;
+            if (m_propGraphExpanded) {
+                m_propGraphHeight = propGraphH;
+                setMaximumSize(QSizeF(size().width(), m_propGraphHeight));
+                m_rowTimeline->setMaximumSize(QSizeF(size().width(), m_propGraphHeight));
+                m_rowTimeline->propertyGraph()->setExpandHeight(m_propGraphHeight);
+                m_rowTimeline->propertyGraph()->updateChannelFiltering(m_activeChannels);
+            }
+        }
+    }
 
     // Update label color
     m_labelItem.setMaster(m_PropBinding->IsMaster());
@@ -1106,6 +1120,8 @@ TreeControlType RowTree::getClickedControl(const QPointF &scenePos)
                     ? TimelineConstants::ROW_GRAPH_H_MAX : TimelineConstants::ROW_GRAPH_H;
             m_rowTimeline->propertyGraph()->setExpandHeight(m_propGraphHeight);
             animateExpand(ExpandState::Expanded);
+            m_scene->propGraphHeightMap()[m_parentRow->instance()]
+                    .insert(m_PropBinding->getPropertyHandle(), m_propGraphHeight);
         } else if (m_rectColorGradient.contains(p)) { // toggle color gradient
             m_rowTimeline->toggleColorGradient();
         } else { // toggle channels
@@ -1495,8 +1511,14 @@ void RowTree::togglePropertyExpanded(const QPointF &scenePos)
         m_rowTimeline->propertyGraph()->setExpandHeight(m_propGraphHeight);
         m_rowTimeline->propertyGraph()->updateChannelFiltering(m_activeChannels);
         animateExpand(ExpandState::Expanded);
+
+        m_scene->propGraphHeightMap()[m_parentRow->instance()]
+                .insert(m_PropBinding->getPropertyHandle(), m_propGraphHeight);
     } else {
         animateExpand(ExpandState::Collapsed);
+
+        m_scene->propGraphHeightMap()[m_parentRow->instance()]
+                .remove(m_PropBinding->getPropertyHandle());
     }
 }
 

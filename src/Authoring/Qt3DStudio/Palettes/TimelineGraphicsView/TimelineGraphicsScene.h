@@ -56,7 +56,9 @@ QT_FORWARD_DECLARE_CLASS(QGraphicsLinearLayout)
 QT_FORWARD_DECLARE_CLASS(QGraphicsView)
 QT_FORWARD_DECLARE_CLASS(QLabel)
 
-typedef QHash<qt3dsdm::Qt3DSDMInstanceHandle, RowTree::ExpandState> TExpandMap;
+using TExpandMap = QHash<qt3dsdm::Qt3DSDMInstanceHandle, RowTree::ExpandState>;
+using TPropGraphHeightMap = QHash<qt3dsdm::Qt3DSDMInstanceHandle,
+                                  QHash<qt3dsdm::Qt3DSDMPropertyHandle, int>>;
 
 class TimelineGraphicsScene : public QGraphicsScene
 {
@@ -64,7 +66,7 @@ class TimelineGraphicsScene : public QGraphicsScene
 
 public:
     explicit TimelineGraphicsScene(TimelineWidget *timelineWidget);
-    virtual ~TimelineGraphicsScene();
+    virtual ~TimelineGraphicsScene() override;
 
     void setTimelineScale(int scale);
     void setControllerText(const QString &controller);
@@ -86,6 +88,7 @@ public:
     void resetMouseCursor();
     void updateSnapSteps();
     TExpandMap &expandMap();
+    TPropGraphHeightMap &propGraphHeightMap();
     void resetMousePressParams();
     QLabel *timebarTooltip();
     void updateAutoScrolling(double scenePosY);
@@ -158,6 +161,7 @@ private:
     double m_lastAutoScrollX = -1.0;
     double m_lastAutoScrollY = -1.0;
     TExpandMap m_expandMap;
+    TPropGraphHeightMap m_propGraphHeightMap;
     QPointer<RowTree> m_releaseSelectRow = nullptr;
     bool m_autoScrollDownOn = false;
     bool m_autoScrollUpOn = false;

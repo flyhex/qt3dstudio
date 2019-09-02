@@ -424,6 +424,7 @@ void TimelineWidget::OnClosingPresentation()
 {
     m_connections.clear();
     m_graphicsScene->expandMap().clear();
+    m_graphicsScene->propGraphHeightMap().clear();
 
     // Hide timeline widget when presentation is closed
     setVisible(false);
@@ -576,6 +577,7 @@ void TimelineWidget::onAssetDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         m_graphicsScene->rowManager()->deleteRow(row);
         m_handlesMap.remove(inInstance);
         m_graphicsScene->expandMap().remove(inInstance);
+        m_graphicsScene->propGraphHeightMap().remove(inInstance);
         // Ensure row deletions are finalized
         if (!m_asyncUpdateTimer.isActive())
             m_asyncUpdateTimer.start();

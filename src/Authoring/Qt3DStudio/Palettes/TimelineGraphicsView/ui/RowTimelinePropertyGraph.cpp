@@ -71,7 +71,7 @@ void RowTimelinePropertyGraph::paintGraphs(QPainter *painter, const QRectF &rect
 
     static const QPointF edgeOffset(RULER_EDGE_OFFSET, 0);
 
-    // draw graph base line (graph_Y)
+    // draw graph baseline (graph_Y)
     painter->setPen(QPen(CStudioPreferences::studioColor3()));
     painter->drawLine(edgeOffset.x(), m_graphY, rect.right(), m_graphY);
 
@@ -366,7 +366,7 @@ void RowTimelinePropertyGraph::updateChannelFiltering(const QVector<bool> &activ
     m_activeChannels.clear();
     m_activeChannelsIndex.clear();
 
-    const auto animHandles = m_propBinding->animationHandles();
+    const auto animHandles = m_rowTimeline->rowTree()->propBinding()->animationHandles();
     for (int i = 0; i < activeChannels.size(); ++i) {
         if (activeChannels[i]) {
             m_activeChannels.append(animHandles[i]);
