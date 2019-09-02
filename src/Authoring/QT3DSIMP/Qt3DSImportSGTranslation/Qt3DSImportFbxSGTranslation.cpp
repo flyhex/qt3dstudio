@@ -513,7 +513,14 @@ void FbxDomWalker::ProcessCamera(FbxNode *inFbxNode)
     // Maya does not export FOV, but focal length. We need to convert it to FOV.
     FbxDouble fov = (m_AuthoringToolType == EAuthoringToolType_FBX_Maya)
             ? camera->ComputeFieldOfView(camera->FocalLength.Get()) : camera->FieldOfView.Get();
-    m_Translator->SetCameraProperties(camera->GetNearPlane(), camera->GetFarPlane(),
+    FbxDouble nearPlane = camera->GetNearPlane();
+    FbxDouble farPlane = camera->GetFarPlane();
+    // Near and far planes are exported at 100-fold values from Blender.
+    nearPlane = (m_AuthoringToolType == EAuthoringToolType_FBX_Blender)
+            ? nearPlane / 100. : nearPlane;
+    farPlane = (m_AuthoringToolType == EAuthoringToolType_FBX_Blender)
+            ? farPlane / 100. : farPlane;
+    m_Translator->SetCameraProperties(nearPlane, farPlane,
                                       camera->ProjectionType.Get() == FbxCamera::eOrthogonal,
                                       fov);
     ProcessNodeChildren(inFbxNode);
