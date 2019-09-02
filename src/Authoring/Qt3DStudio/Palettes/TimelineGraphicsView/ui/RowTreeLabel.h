@@ -70,6 +70,7 @@ private:
     bool m_locked;
     bool m_master;
     bool m_acceptOnFocusOut;
+    int m_labelWidth;
 };
 
 #endif // ROWTREELABELITEM_H

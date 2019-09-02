@@ -41,10 +41,14 @@ RowTreeLabel::RowTreeLabel(QGraphicsItem *parent)
     , m_locked(false)
     , m_master(false)
     , m_acceptOnFocusOut(true)
+    , m_labelWidth(100)
 {
     setTextInteractionFlags(Qt::TextEditorInteraction);
     setEnabled(false);
     updateLabelColor();
+    QFont font;
+    font.setPixelSize(12);
+    setFont(font);
 }
 
 QString RowTreeLabel::label() const
@@ -95,6 +99,13 @@ void RowTreeLabel::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 {
     if (!m_rowTree->y()) // prevents flickering when the row is just inserted to the layout
         return;
+
+    // Limit the painted label width, see QT3DS-3913
+    int labelWidth = m_rowTree->treeWidth() - int(TimelineConstants::TREE_ICONS_W) - 30;
+    if (labelWidth != m_labelWidth) {
+        m_labelWidth = labelWidth;
+        setTextWidth(m_labelWidth);
+    }
 
     // Remove the HasFocus style state, to prevent the dotted line from being drawn.
     QStyleOptionGraphicsItem *style = const_cast<QStyleOptionGraphicsItem *>(option);
