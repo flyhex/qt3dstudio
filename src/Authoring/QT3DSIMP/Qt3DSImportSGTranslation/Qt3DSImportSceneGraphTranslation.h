@@ -334,6 +334,7 @@ typedef enum _EAuthoringToolType {
     EAuthoringToolType_NextGen_Maya,
     EAuthoringToolType_FCollada_Max,
     EAuthoringToolType_FCollada_Maya,
+    EAuthoringToolType_OpenCollada_Maya,
     EAuthoringToolType_SketchUp,
     EAuthoringToolType_Cinema4D,
     EAuthoringToolType_StudioCORE,

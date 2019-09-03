@@ -40,6 +40,7 @@
 #include "Qt3DSImportTranslationCommon.h"
 #include "Qt3DSImportSceneGraphTranslation.h"
 #include "Qt3DSImportTranslation.h"
+#include "Rotation3.h"
 
 #include <QtCore/qbytearray.h>
 #include <QtCore/qfileinfo.h>
@@ -174,6 +175,7 @@ protected:
     ISceneGraphTranslation *m_Translator;
     const char *m_DAEFilename;
     TElementToIndicesMap m_ElementToIndicies;
+    EAuthoringToolType m_authoringTool;
 };
 
 void FindTexturesViaNewParam(daeElement *inElementPtr, ColladaDOMWalker::TURIList &outTexturePaths)
@@ -466,6 +468,9 @@ void ColladaDOMWalker::SetFColladaAuthoringTool(const char *inName)
     } else if (theAuthoringToolLowerCase.find("opencollada") != std::string::npos
                && theAuthoringToolLowerCase.find("3ds max") != std::string::npos) {
         theAuthoringToolType = EAuthoringToolType_FCollada_Max;
+    } else if (theAuthoringToolLowerCase.find("opencollada") != std::string::npos) {
+        // Assume Maya if no 3ds max was found
+        theAuthoringToolType = EAuthoringToolType_OpenCollada_Maya;
     }
 
     long theAuthoringToolVersion = 0;
@@ -473,6 +478,7 @@ void ColladaDOMWalker::SetFColladaAuthoringTool(const char *inName)
         || theAuthoringToolType == EAuthoringToolType_FCollada_Maya)
         theAuthoringToolVersion = GetFColladaVersion(theAuthoringToolLowerCase);
 
+    m_authoringTool = theAuthoringToolType;
     SetAuthoringTool(theAuthoringToolType, theAuthoringToolVersion);
 }
 
@@ -569,19 +575,29 @@ void ColladaDOMWalker::ProcessNode(const domNodeRef inNode)
                 double clipstart = 0;
                 double clipend = 0;
                 bool ortho = false;
+                double aspectRatio = 0;
                 if (technique->getPerspective()) {
                     fov = technique->getPerspective()->getXfov() != nullptr
                             ? technique->getPerspective()->getXfov()->getValue()
                             : technique->getPerspective()->getYfov()->getValue();
                     clipstart = technique->getPerspective()->getZnear()->getValue();
                     clipend = technique->getPerspective()->getZfar()->getValue();
+                    aspectRatio = technique->getPerspective()->getAspect_ratio()->getValue();
                 } else if (technique->getOrthographic()) {
                     fov = technique->getOrthographic()->getXmag() != nullptr
                             ? technique->getOrthographic()->getXmag()->getValue()
                             : technique->getOrthographic()->getYmag()->getValue();
                     clipstart = technique->getOrthographic()->getZnear()->getValue();
                     clipend = technique->getOrthographic()->getZfar()->getValue();
+                    aspectRatio = technique->getOrthographic()->getAspect_ratio()->getValue();
                     ortho = true;
+                }
+                if (m_authoringTool == EAuthoringToolType_OpenCollada_Maya) {
+                    // Calculate horizontal fov from vertical fov:
+                    // hfov = 2 * tan-1(w/h * tan(vfov / 2))
+                    fov = Q3DStudio::QT3DS_RADIANS_TO_DEGREES * 2
+                            * std::atan(aspectRatio * std::tan(Q3DStudio::QT3DS_DEGREES_TO_RADIANS
+                                                               * fov / 2.));
                 }
                 SetCameraProperties(clipstart, clipend, ortho, fov);
             } else if (lights.getCount()) {
