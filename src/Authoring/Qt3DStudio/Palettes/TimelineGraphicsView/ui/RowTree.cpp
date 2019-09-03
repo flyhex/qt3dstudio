@@ -615,10 +615,24 @@ void RowTree::setPropBinding(ITimelineItemProperty *binding)
 {
     m_PropBinding = binding;
 
+    // update timeline isColorProperty
+    qt3dsdm::TDataTypePair propType = m_PropBinding->GetType();
+    if (propType.first == qt3dsdm::DataModelDataType::Float4
+        && propType.second == qt3dsdm::AdditionalMetaDataType::Color) {
+        m_rowTimeline->m_isColorProperty = true;
+    }
+
     int chCount = int(m_PropBinding->GetChannelCount());
+
+    // for color properties only show alpha channel for custom materials
+    if (m_rowTimeline->m_isColorProperty && m_parentRow->m_objectType != OBJTYPE_CUSTOMMATERIAL)
+        chCount = 3;
+
     m_activeChannels.resize(chCount);
+
     if (chCount == 1) // if property has only 1 channel (ex: alpha), don't show channel buttons
         chCount = 0;
+
     m_rectChannels.resize(chCount);
 
     // For bezier animation select first channel (ie x) only by default, else select all channels
@@ -650,13 +664,6 @@ void RowTree::setPropBinding(ITimelineItemProperty *binding)
 
     // Update label color
     m_labelItem.setMaster(m_PropBinding->IsMaster());
-
-    // update timeline isColorProperty
-    qt3dsdm::TDataTypePair propType = m_PropBinding->GetType();
-    if (m_isProperty && propType.first == qt3dsdm::DataModelDataType::Float4
-                     && propType.second == qt3dsdm::AdditionalMetaDataType::Color) {
-        m_rowTimeline->m_isColorProperty = true;
-    }
 }
 
 void RowTree::setState(State state)
