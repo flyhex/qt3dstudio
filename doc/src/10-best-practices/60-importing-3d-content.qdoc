@@ -182,8 +182,8 @@ UV unwrap and assign material slot IDs to your meshes.
   light color, and the cast shadows property will be imported.
 \li
   \b{Cameras} - Perspective and orthographic cameras can be imported to Studio.
-  Position, rotation and scale properties will be imported. For perspective cameras,
-  field of view will also be imported.
+  Position, rotation and scale properties will be imported as well as start and end clipping.
+  For perspective cameras, field of view will also be imported.
 \endlist
 
 \section2 Other

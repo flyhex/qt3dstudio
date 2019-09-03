@@ -141,6 +141,41 @@ The following properties will be imported into Qt 3D Studio:
   \li Cast shadows
 \endlist
 
+Light type will be imported (and converted if needed).
+
+\table
+  \header
+    \li
+      Light type in Blender
+    \li
+      Will import to Qt 3D Studio as...
+  \row
+    \li
+      Point
+    \li
+      Point
+  \row
+    \li
+      Area
+    \li
+      Area
+  \row
+    \li
+      Sun
+    \li
+      Directional
+  \row
+    \li
+      Spot
+    \li
+      Directional
+  \row
+    \li
+      Hemi
+    \li
+      Directional
+\endtable
+
 \section1 Exporting Cameras
 
 You can export perspective and orthographic cameras from Blender to use in Qt 3D Studio.
@@ -148,6 +183,7 @@ You can export perspective and orthographic cameras from Blender to use in Qt 3D
 The following properties will be imported into Qt 3D Studio:
 \list
   \li Position, rotation, scale
+  \li Clipping start/end
   \li Focal Length (perspective camera only).
 \endlist
 
