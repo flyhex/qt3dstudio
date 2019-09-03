@@ -258,7 +258,9 @@ bool FbxDomWalker::LoadDocument(const std::string &inFilePath)
                                                    major * 1000 + minor * 100 + revision);
                     m_AuthoringToolType = EAuthoringToolType_FBX_Maya;
                 } else if (strstr(appName, "Blender")) {
-                    qWarning("Importing from Blender. Light and Camera rotations may be incorrect");
+                    m_Translator->LogWarning(ESceneGraphWarningCode_Generic,
+                                             "Imported from Blender. Light and Camera rotations may"
+                                             " be incorrect");
                     m_Translator->SetAuthoringTool(EAuthoringToolType_FBX_Blender,
                                                    major * 1000 + minor * 100 + revision);
                     m_AuthoringToolType = EAuthoringToolType_FBX_Blender;
@@ -487,6 +489,8 @@ void FbxDomWalker::ProcessLight(FbxNode *inFbxNode)
     int lightType = light->LightType.Get();
     if (lightType == FbxLight::eArea)
         lightType = 4; // Area light type is 3 in FBX and 4 in DAE and internally
+    else if (lightType == FbxLight::eSpot)
+        m_Translator->LogWarning(ESceneGraphWarningCode_UnsupportedLight, lightName.c_str());
     FbxLight::EDecayType decayType = light->DecayType.Get();
     double linearDecay = (decayType == FbxLight::eLinear) ? light->DecayStart.Get() : 0.;
     double quadDecay = (decayType == FbxLight::eQuadratic) ? light->DecayStart.Get() : 0.;
@@ -657,7 +661,16 @@ void FbxDomWalker::ProcessTransform(FbxNode *inFbxNode, bool ignoreScale)
         // Lights and cameras should ignore scale
         if (ignoreScale)
             theTransformMatrix.SetS(FbxVector4(1.0, 1.0, 1.0, 1.0));
-        // TODO: Do some rotation magic if m_AuthoringToolType == Blender?
+
+        // Do rotation corrections for cameras and lights if importing from Blender
+        // Note: Blender must have "Y Forward" and "Z Up" export settings defined for these to work
+        if (m_AuthoringToolType == EAuthoringToolType_FBX_Blender) {
+            FbxDouble3 rot = inFbxNode->LclRotation.Get();
+            if (inFbxNode->GetLight())
+                theTransformMatrix.SetR(FbxVector4(rot[0] - 90., rot[1], rot[2], 1.0));
+            else if (inFbxNode->GetCamera())
+                theTransformMatrix.SetR(FbxVector4(rot[0], rot[1] - 90., rot[2], 1.0));
+        }
 
         theTransforms.push_back(new NodeTransform(ETransformType_Matrix4x4));
 

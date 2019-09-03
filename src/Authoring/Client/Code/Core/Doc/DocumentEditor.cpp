@@ -5424,7 +5424,7 @@ void IDocumentEditor::DisplayImportErrors(const QString &inImportSource,
     for (size_t idx = 0; idx < inTranslationLog.m_Warnings.size(); ++idx) {
         const std::pair<ESceneGraphWarningCode, Q3DStudio::CString> &warning(
             inTranslationLog.m_Warnings[idx]);
-        const wchar_t *formatStr = L"Unrecognized warning";
+        const wchar_t *formatStr = L"Unrecognized warning: \"%ls\"";
         switch (warning.first) {
         case ESceneGraphWarningCode_OnlySupportTriangles:
             formatStr = L"Model \"%ls\" contains geometric elements other than triangles";
