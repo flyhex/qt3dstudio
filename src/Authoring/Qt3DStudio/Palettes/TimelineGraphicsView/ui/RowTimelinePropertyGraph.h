@@ -33,6 +33,7 @@
 #include "RowTypes.h"
 #include "TimelineConstants.h"
 #include "Bindings/Qt3DSDMTimelineKeyframe.h"
+#include "IDocumentEditor.h"
 
 #include <QtCore/qobject.h>
 #include <QtCore/qtimer.h>
@@ -75,7 +76,7 @@ private:
     void checkValScaleLimits();
     void adjustColorProperty(float &val, bool scaleUp = true) const;
 
-    std::pair<qt3dsdm::Qt3DSDMKeyframeHandle, qt3dsdm::TKeyframe> m_currKeyframeData;
+    qt3dsdm::Qt3DSDMKeyframeHandle m_pressedKeyframeHandle;
     RowTimeline *m_rowTimeline = nullptr;
     ITimelineItemProperty *m_propBinding = nullptr;
     qt3dsdm::IAnimationCore *m_animCore = nullptr;
@@ -88,6 +89,7 @@ private:
     QVector<qt3dsdm::Qt3DSDMAnimationHandle> m_activeChannels; // active channels anim. handles
     QVector<int> m_activeChannelsIndex;
     QTimer m_fitCurveTimer;
+    Q3DStudio::CUpdateableDocumentEditor m_UpdatableEditor;
 };
 
 #endif // ROWTIMELINEPROPERTYGRAPH_H

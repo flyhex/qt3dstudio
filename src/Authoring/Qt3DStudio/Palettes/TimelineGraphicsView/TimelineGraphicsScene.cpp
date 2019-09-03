@@ -634,8 +634,7 @@ void TimelineGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
     bool shift = event->modifiers() & Qt::ShiftModifier;
     if (m_dragging) {
-        if (m_clickedTimelineControlType == TimelineControlType::BezierInHandle
-            || m_clickedTimelineControlType == TimelineControlType::BezierOutHandle) {
+        if (m_clickedTimelineControlType & TimelineControlType::IsBezierControl) {
             if (m_editedTimelineRow && m_editedTimelineRow->propertyGraph()) {
                 m_editedTimelineRow->propertyGraph()->updateBezierControlValue(
                             m_clickedTimelineControlType, event->scenePos());
@@ -846,8 +845,7 @@ void TimelineGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
                     if (m_playHead->time() > ruler()->duration())
                         g_StudioApp.GetCore()->GetDoc()->NotifyTimeChanged(ruler()->duration());
                 }
-            } else if (m_clickedTimelineControlType == TimelineControlType::BezierInHandle
-                       || m_clickedTimelineControlType == TimelineControlType::BezierOutHandle) {
+            } else if (m_clickedTimelineControlType & TimelineControlType::IsBezierControl) {
                 if (m_editedTimelineRow->propertyGraph())
                     m_editedTimelineRow->propertyGraph()->commitBezierEdit();
             }

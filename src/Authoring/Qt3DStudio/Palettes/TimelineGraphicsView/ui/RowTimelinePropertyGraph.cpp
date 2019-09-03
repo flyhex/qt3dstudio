@@ -48,6 +48,7 @@ RowTimelinePropertyGraph::RowTimelinePropertyGraph(QObject *parent)
     : QObject(parent)
     , m_rowTimeline(static_cast<RowTimeline *>(parent))
     , m_animCore(g_StudioApp.GetCore()->GetDoc()->GetAnimationCore())
+    , m_UpdatableEditor(*g_StudioApp.GetCore()->GetDoc())
 {
     m_fitCurveTimer.setInterval(10);
 
@@ -215,12 +216,12 @@ TimelineControlType RowTimelinePropertyGraph::getClickedBezierControl(const QPoi
 
     // reset data
     m_hoveredBezierKeyframe = 0;
-    m_currKeyframeData.first = 0;
+    m_pressedKeyframeHandle = 0;
 
     if (aKeyframeWasHovered)
         m_rowTimeline->update();
 
-    for (size_t i = 0; i < m_activeChannels.size(); ++i) {
+    for (int i = 0; i < m_activeChannels.size(); ++i) {
         Qt3DSDMTimelineKeyframe::TKeyframeHandleList keyframeHandles;
         m_animCore->GetKeyframes(m_activeChannels[i], keyframeHandles);
         const double CONTROL_RADIUS = 8;
@@ -229,15 +230,20 @@ TimelineControlType RowTimelinePropertyGraph::getClickedBezierControl(const QPoi
 
             QPointF kfPos = getBezierControlPosition(kf);
             if (QLineF(kfPos, pos).length() < CONTROL_RADIUS) { // over a bezier keyframe
-                m_currKeyframeData.first = kfHandle;
-                m_currKeyframeData.second = m_animCore->GetKeyframeData(kfHandle);
+                m_pressedKeyframeHandle = kfHandle;
                 if (isHover) {
                     m_hoveredBezierKeyframe = kfHandle;
                 } else {
-                    if (!CHotKeys::isCtrlDown())
-                        m_selectedBezierKeyframes.clear();
-
-                    m_selectedBezierKeyframes.insert(kfHandle);
+                    if (CHotKeys::isCtrlDown()) {
+                        if (m_selectedBezierKeyframes.contains(kfHandle))
+                            m_selectedBezierKeyframes.remove(kfHandle);
+                        else
+                            m_selectedBezierKeyframes.insert(kfHandle);
+                    } else {
+                        if (!m_selectedBezierKeyframes.contains(kfHandle))
+                            m_selectedBezierKeyframes.clear();
+                        m_selectedBezierKeyframes.insert(kfHandle);
+                    }
                 }
                 m_rowTimeline->update();
 
@@ -250,8 +256,7 @@ TimelineControlType RowTimelinePropertyGraph::getClickedBezierControl(const QPoi
                 bool clickedInHandle = QLineF(cInPos, pos).length() < CONTROL_RADIUS;
                 bool clickedOutHandle = QLineF(cOutPos, pos).length() < CONTROL_RADIUS;
                 if (clickedInHandle || clickedOutHandle) {
-                    m_currKeyframeData.first = kfHandle;
-                    m_currKeyframeData.second = m_animCore->GetKeyframeData(kfHandle);
+                    m_pressedKeyframeHandle = kfHandle;
 
                     return clickedInHandle ? TimelineControlType::BezierInHandle
                                            : TimelineControlType::BezierOutHandle;
@@ -291,8 +296,8 @@ QPointF RowTimelinePropertyGraph::getKeyframePosition(long time, float value) co
 }
 
 /**
- * This method is called when the user drags a bezier handle. It updates the bezier keyframe
- * tangent value based on the current position of the handle.
+ * This method is called when the user drags a bezier control. It updates the bezier control
+ * values based on the current position of the handle.
  *
  * @param controlType which handle is being dragged? (BezierInHandle or BezierOutHandle)
  * @param scenePos handle position in timeline scene coordinates
@@ -307,7 +312,27 @@ void RowTimelinePropertyGraph::updateBezierControlValue(TimelineControlType cont
     float value = (m_graphY - p.y()) / m_valScale;
     adjustColorProperty(value, false);
 
-    SBezierKeyframe kf = get<SBezierKeyframe>(m_currKeyframeData.second);
+    SBezierKeyframe kf = get<SBezierKeyframe>(m_animCore->GetKeyframeData(m_pressedKeyframeHandle));
+
+     // moving selected keyframes (vertically)
+    if (controlType == TimelineControlType::BezierKeyframe) {
+        float dVal = value - kf.m_value;
+
+        for (auto kfHandle : m_selectedBezierKeyframes) {
+            SBezierKeyframe kf_i = get<SBezierKeyframe>(m_animCore->GetKeyframeData(kfHandle));
+            kf_i.m_value += dVal;
+            kf_i.m_InTangentValue += dVal;
+            kf_i.m_OutTangentValue += dVal;
+            m_UpdatableEditor.EnsureEditor(QObject::tr("Edit Bezier curve"), __FILE__, __LINE__)
+                    .setBezierKeyframeValue(kfHandle, kf_i);
+        }
+        // immediate refresh is needed to update the value in the inspector, this is not needed
+        // when moving the control points as they are not shown in the inspector
+        m_UpdatableEditor.FireImmediateRefresh(m_rowTimeline->rowTree()->parentRow()->instance());
+        m_rowTimeline->update();
+        return;
+    }
+
     bool isBezierIn = controlType == TimelineControlType::BezierInHandle;
 
     // prevent handles from moving to the other side of the keyframe
@@ -317,11 +342,11 @@ void RowTimelinePropertyGraph::updateBezierControlValue(TimelineControlType cont
     }
 
     // prevent handles from going beyond prev. and next keyframes
-    Qt3DSDMAnimationHandle anim = m_animCore->GetAnimationForKeyframe(m_currKeyframeData.first);
+    Qt3DSDMAnimationHandle anim = m_animCore->GetAnimationForKeyframe(m_pressedKeyframeHandle);
     Qt3DSDMTimelineKeyframe::TKeyframeHandleList keyframeHandles;
     m_animCore->GetKeyframes(anim, keyframeHandles);
     for (size_t i = 0; i < keyframeHandles.size(); ++i) {
-        if (keyframeHandles[i] == m_currKeyframeData.first) {
+        if (keyframeHandles[i] == m_pressedKeyframeHandle) {
             long currKfTime = getKeyframeTime(m_animCore->GetKeyframeData(keyframeHandles[i]));
             long prevKfTime = i > 0
                     ? getKeyframeTime(m_animCore->GetKeyframeData(keyframeHandles[i - 1]))
@@ -358,7 +383,9 @@ void RowTimelinePropertyGraph::updateBezierControlValue(TimelineControlType cont
         otherHandleValue = kf.m_value + (kf.m_value - currHandleValue);
     }
 
-    m_animCore->SetKeyframeData(m_currKeyframeData.first, kf);
+    m_UpdatableEditor.EnsureEditor(QObject::tr("Edit Bezier curve"), __FILE__, __LINE__)
+            .setBezierKeyframeValue(m_pressedKeyframeHandle, kf);
+    m_rowTimeline->update();
 }
 
 void RowTimelinePropertyGraph::updateChannelFiltering(const QVector<bool> &activeChannels)
@@ -469,7 +496,7 @@ void RowTimelinePropertyGraph::selectBezierKeyframesInRange(const QRectF &rect)
 
 void RowTimelinePropertyGraph::deselectAllBezierKeyframes()
 {
-    if (!m_currKeyframeData.first.Valid()) // not currently editing a bezier control
+    if (!m_pressedKeyframeHandle.Valid()) // not currently editing a bezier control
         m_selectedBezierKeyframes.clear();
 }
 
@@ -503,13 +530,7 @@ void RowTimelinePropertyGraph::pan(qreal dy)
 
 void RowTimelinePropertyGraph::commitBezierEdit()
 {
-    // reset the moved keyframe and commit the change, so the undo/redo works correctly
-    // Mahmoud_TODO: improve this (using Updatable editor?)
-    TKeyframe movedKeyframe = m_animCore->GetKeyframeData(m_currKeyframeData.first);
-    m_animCore->SetKeyframeData(m_currKeyframeData.first, m_currKeyframeData.second);
-
-    Q3DStudio::SCOPED_DOCUMENT_EDITOR(*g_StudioApp.GetCore()->GetDoc(), tr("Edit Bezier curve"))
-            ->setBezierKeyframeValue(m_currKeyframeData.first, movedKeyframe);
+    m_UpdatableEditor.CommitEditor();
 }
 
 void RowTimelinePropertyGraph::setExpandHeight(int h)

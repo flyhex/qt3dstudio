@@ -31,16 +31,22 @@
 
 #include <qglobal.h>
 
-enum class TimelineControlType {
-    None,
-    KeyFrame,
-    Duration,
-    DurationStartHandle,
-    DurationEndHandle,
-    BezierKeyframe,
-    BezierInHandle,
-    BezierOutHandle
+enum class TimelineControlType : int {
+    None                = 0x00,
+    KeyFrame            = 0x01,
+    Duration            = 0x02,
+    DurationStartHandle = 0x04,
+    DurationEndHandle   = 0x08,
+    BezierKeyframe      = 0x10,
+    BezierInHandle      = 0x20,
+    BezierOutHandle     = 0x40,
+    IsBezierControl     = BezierKeyframe | BezierInHandle | BezierOutHandle
 };
+
+inline int operator &(TimelineControlType lhs, TimelineControlType rhs)
+{
+    return int(lhs) & int(rhs);
+}
 
 enum class TreeControlType {
     None,
