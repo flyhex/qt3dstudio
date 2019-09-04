@@ -220,6 +220,9 @@ Next, to export as FBX, follow the steps below:
 
 \list 1
   \li From the file menu, select \uicontrol {File > Export > FBX (.fbx)}.
+  \li Under the \uicontrol Main tab, set \uicontrol Forward to \c{Y Forward} and \uicontrol Up
+  to \c{Z Up}.
+  \image blender-fbx-export-axis.png
   \li For animations, ensure that \uicontrol {Baked Animation} under the \uicontrol Animation
   tab is checked on.
   \image 3D_Content/blender-export-6.png
