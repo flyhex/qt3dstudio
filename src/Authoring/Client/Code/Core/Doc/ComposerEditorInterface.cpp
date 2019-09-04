@@ -38,8 +38,16 @@ using namespace Q3DStudio::ComposerImport;
 using namespace qt3ds::foundation;
 
 namespace {
-// base class between performing refresh and performing
-// imports
+// base class between performing refresh and performing imports
+
+// convert imported keyframes times from seconds to millis to be compatible with the animation
+// system. The assumption is that keyframes are imported as EaseInOut type which has 4 values per
+// keyframe
+inline void convertSecondsToMillis(const float *animData, QT3DSU32 numFloats)
+{
+    for (int i = 0; i < numFloats; i += 4)
+        const_cast<float *>(animData)[i] *= 1000.f;
+}
 
 struct STCharPtrHash
 {
@@ -112,13 +120,13 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
         , m_Root(root)
         , m_Slide(slide)
         , m_StartTime(inStartTime)
-        , m_ImportObj(NULL)
+        , m_ImportObj(nullptr)
     {
         m_Editor.BeginAggregateOperation();
     }
 
     // Fires the 'do' notifications
-    ~SComposerImportInterface() { m_Editor.EndAggregateOperation(); }
+    ~SComposerImportInterface() override { m_Editor.EndAggregateOperation(); }
 
     // IComposerEditorInterface
 
@@ -154,7 +162,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
 
     void AddInstanceMap(Qt3DSDMInstanceHandle instanceHandle, TImportId inImportId) override
     {
-        if (inImportId == NULL || *inImportId == 0) {
+        if (inImportId == nullptr || *inImportId == 0) {
             assert(0);
             return;
         }
@@ -397,6 +405,7 @@ struct SComposerImportInterface : public SComposerImportBase, public IComposerEd
         Qt3DSDMInstanceHandle hdl(FindInstance(inInstance));
         if (hdl.Valid()) {
             if (m_Editor.IsAnimationArtistEdited(m_Slide, hdl, propName, propSubIndex) == false) {
+                convertSecondsToMillis(animData, numFloats);
                 Qt3DSDMAnimationHandle anim = m_Editor.CreateOrSetAnimation(
                     m_Slide, hdl, propName, propSubIndex, animType, animData, numFloats, false);
                 m_Editor.SetIsArtistEdited(anim, false);
@@ -429,7 +438,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
 
         SSlideInstanceIdMapIterator(TImportId inImportId, TIdMultiMap &inItems,
                                     qt3dsdm::IStringTable &inStringTable)
-            : m_CurrentItems(NULL)
+            : m_CurrentItems(nullptr)
             , m_CurrentTreeIdx(0)
             , m_CurrentTreeEnd(0)
             , m_Id(inStringTable.RegisterStr(inImportId))
@@ -440,7 +449,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
         {
             m_CurrentTreeIdx = 0;
             m_CurrentTreeEnd = 0;
-            m_CurrentItems = NULL;
+            m_CurrentItems = nullptr;
             TIdMultiMap::const_iterator theFind = inItems.find(m_Id);
             if (theFind != inItems.end()) {
                 m_CurrentItems = &theFind->second;
@@ -774,8 +783,8 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
                                          theIterator.GetCurrentInstance(), propName, propSubIndex)
                 && m_Editor.IsAnimationArtistEdited(theIterator.GetCurrentSlide(),
                                                     theIterator.GetCurrentInstance(), propName,
-                                                    propSubIndex)
-                    == false) {
+                                                    propSubIndex) == false) {
+                convertSecondsToMillis(animData, numFloats);
                 Qt3DSDMAnimationHandle anim = m_Editor.CreateOrSetAnimation(
                     theIterator.GetCurrentSlide(), theIterator.GetCurrentInstance(), propName,
                     propSubIndex, animType, animData, numFloats, false);
@@ -793,6 +802,7 @@ struct SComposerRefreshInterface : public SComposerImportBase, public IComposerE
             if (!m_Editor.AnimationExists(theIterator.GetCurrentSlide(),
                                           theIterator.GetCurrentInstance(), propName,
                                           propSubIndex)) {
+                convertSecondsToMillis(animData, numFloats);
                 Qt3DSDMAnimationHandle anim = m_Editor.CreateOrSetAnimation(
                     theIterator.GetCurrentSlide(), theIterator.GetCurrentInstance(), propName,
                     propSubIndex, animType, animData, numFloats, false);

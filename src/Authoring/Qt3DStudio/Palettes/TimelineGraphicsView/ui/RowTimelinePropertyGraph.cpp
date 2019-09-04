@@ -117,7 +117,7 @@ void RowTimelinePropertyGraph::paintGraphs(QPainter *painter, const QRectF &rect
 
     // draw channel curves
     painter->setPen(CStudioPreferences::studioColor3()); // default to locked color
-    for (size_t i = 0; i < m_activeChannels.size(); ++i) {
+    for (int i = 0; i < m_activeChannels.size(); ++i) {
         QPainterPath path;
         int start_j = qMax(rect.x(), edgeOffset.x());
         for (int j = start_j; j < rect.right(); j += 5) { // 5 = sampling step in pixels
@@ -308,7 +308,7 @@ void RowTimelinePropertyGraph::updateBezierControlValue(TimelineControlType cont
     QPointF p = m_rowTimeline->mapFromScene(scenePos.x() - RULER_EDGE_OFFSET, scenePos.y());
 
     // time and value at current mouse position
-    long time = m_rowTimeline->rowTree()->m_scene->ruler()->distanceToTime(p.x());
+    float time = float(m_rowTimeline->rowTree()->m_scene->ruler()->distanceToTime(p.x()));
     float value = (m_graphY - p.y()) / m_valScale;
     adjustColorProperty(value, false);
 
@@ -347,32 +347,35 @@ void RowTimelinePropertyGraph::updateBezierControlValue(TimelineControlType cont
     m_animCore->GetKeyframes(anim, keyframeHandles);
     for (size_t i = 0; i < keyframeHandles.size(); ++i) {
         if (keyframeHandles[i] == m_pressedKeyframeHandle) {
-            long currKfTime = getKeyframeTime(m_animCore->GetKeyframeData(keyframeHandles[i]));
-            long prevKfTime = i > 0
-                    ? getKeyframeTime(m_animCore->GetKeyframeData(keyframeHandles[i - 1]))
-                    : LONG_MIN / 2;
-            long nextKfTime = i < keyframeHandles.size() - 1
-                    ? getKeyframeTime(m_animCore->GetKeyframeData(keyframeHandles[i + 1]))
-                    : LONG_MAX / 2;
+            float currKfTime = float(getKeyframeTime(m_animCore->GetKeyframeData(
+                                                                    keyframeHandles[i])));
+            // FLT_MAX is divided by 2 so that it doesn't cause an overflow in the calculations
+            // below
+            float prevKfTime = i > 0
+                    ? float(getKeyframeTime(m_animCore->GetKeyframeData(keyframeHandles[i - 1])))
+                    : -FLT_MAX / 2.f;
+            float nextKfTime = i < keyframeHandles.size() - 1.f
+                    ? float(getKeyframeTime(m_animCore->GetKeyframeData(keyframeHandles[i + 1])))
+                    : FLT_MAX / 2.f;
 
             if (isBezierIn) {
                 if (time < prevKfTime)
                     time = prevKfTime;
-                if (!CHotKeys::isCtrlDown() && time < currKfTime * 2 - nextKfTime)
-                    time = currKfTime * 2 - nextKfTime;
+                if (!CHotKeys::isCtrlDown() && time < currKfTime * 2.f - nextKfTime)
+                    time = currKfTime * 2.f - nextKfTime;
             } else { // bezier out
                 if (time > nextKfTime)
                     time = nextKfTime;
-                if (!CHotKeys::isCtrlDown() && time > currKfTime * 2 - prevKfTime)
-                    time = currKfTime * 2 - prevKfTime;
+                if (!CHotKeys::isCtrlDown() && time > currKfTime * 2.f - prevKfTime)
+                    time = currKfTime * 2.f - prevKfTime;
             }
             break;
         }
     }
 
-    long &currHandleTime = isBezierIn ? kf.m_InTangentTime : kf.m_OutTangentTime;
+    float &currHandleTime = isBezierIn ? kf.m_InTangentTime : kf.m_OutTangentTime;
     float &currHandleValue = isBezierIn ? kf.m_InTangentValue : kf.m_OutTangentValue;
-    long &otherHandleTime = isBezierIn ? kf.m_OutTangentTime : kf.m_InTangentTime;
+    float &otherHandleTime = isBezierIn ? kf.m_OutTangentTime : kf.m_InTangentTime;
     float &otherHandleValue = isBezierIn ? kf.m_OutTangentValue : kf.m_InTangentValue;
 
     currHandleTime = time;
