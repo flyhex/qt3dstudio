@@ -379,7 +379,7 @@ void InspectorControlModel::updateMaterialValues(const QStringList &values, int 
 void InspectorControlModel::updateShaderValues()
 {
     int index = 0;
-    if (isAnimatableMaterial() && !isInsideMaterialContainer())
+    if (!isInsideMaterialContainer())
         index = 1;
     updateMaterialValues(shaderValues(), index, true);
 }
@@ -403,7 +403,7 @@ void InspectorControlModel::setMaterials(std::vector<Q3DStudio::CFilePath> &mate
         m_materials.push_back({name, path.toQString()});
     }
 
-    if (!isDefaultMaterial())
+    if (isAnimatableMaterial() && !isDefaultMaterial())
         updateShaderValues();
 }
 
