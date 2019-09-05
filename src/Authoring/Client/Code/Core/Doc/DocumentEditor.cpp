@@ -157,7 +157,7 @@ class CDocEditor : public Q3DStudio::IInternalDocumentEditor
     ISlideSystem &m_SlideSystem;
     ISlideCore &m_SlideCore;
     ISlideGraphCore &m_SlideGraphCore;
-    IAnimationCore &m_AnimationCore;
+    IAnimationCore &m_animCore;
     CClientDataModelBridge &m_Bridge;
     IPropertySystem &m_PropertySystem;
     IMetaData &m_MetaData;
@@ -184,7 +184,7 @@ public:
         , m_SlideSystem(*m_StudioSystem.GetFullSystem()->GetSlideSystem())
         , m_SlideCore(*m_StudioSystem.GetFullSystem()->GetCoreSystem()->GetSlideCore())
         , m_SlideGraphCore(*m_StudioSystem.GetFullSystem()->GetCoreSystem()->GetSlideGraphCore())
-        , m_AnimationCore(*m_StudioSystem.GetFullSystem()->GetAnimationCore())
+        , m_animCore(*m_StudioSystem.GetFullSystem()->GetAnimationCore())
         , m_Bridge(*m_StudioSystem.GetClientDataModelBridge())
         , m_PropertySystem(*m_StudioSystem.GetPropertySystem())
         , m_MetaData(*m_StudioSystem.GetActionMetaData())
@@ -668,7 +668,7 @@ public:
                 theSlide = m_SlideSystem.GetMasterSlide(theSlide);
             inSlide = theSlide;
         }
-        return m_AnimationCore.GetAnimation(inSlide, instance, propHdl, subIndex).Valid();
+        return m_animCore.GetAnimation(inSlide, instance, propHdl, subIndex).Valid();
     }
 
     bool IsAnimationArtistEdited(TSlideHandle inSlide, Qt3DSDMInstanceHandle instance,
@@ -692,10 +692,10 @@ public:
         }
 
         Qt3DSDMAnimationHandle animHandle =
-            m_AnimationCore.GetAnimation(inSlide, instance, propHdl, subIndex);
+            m_animCore.GetAnimation(inSlide, instance, propHdl, subIndex);
         if (animHandle.Valid() == false)
             return false;
-        return m_AnimationCore.IsArtistEdited(animHandle);
+        return m_animCore.IsArtistEdited(animHandle);
     }
 
     pair<std::shared_ptr<qt3dsdm::IDOMWriter>, CFilePath>
@@ -2544,8 +2544,7 @@ public:
                         TSlideHandle inDestSlide, TInstanceHandle inDestInstance)
     {
         m_SlideCore.CopyProperties(inSourceSlide, inSourceInstance, inDestSlide, inDestInstance);
-        m_AnimationCore.CopyAnimations(inSourceSlide, inSourceInstance, inDestSlide,
-                                       inDestInstance);
+        m_animCore.CopyAnimations(inSourceSlide, inSourceInstance, inDestSlide, inDestInstance);
     }
 
     void UnlinkProperty(TInstanceHandle instance, TPropertyHandle propName) override
@@ -2728,7 +2727,7 @@ public:
         }
         SetTimeRange(inInstance, theTimeRange.first + inOffset, theTimeRange.second + inOffset);
         // Offset all the keyframes linked to animations of this instance by this offset.
-        m_AnimationCore.OffsetAnimations(m_Doc.GetActiveSlide(), inInstance, inOffset);
+        m_animCore.OffsetAnimations(m_Doc.GetActiveSlide(), inInstance, inOffset);
 
         // Offset children time as well
         CGraphIterator theChildren;
@@ -2823,30 +2822,73 @@ public:
         for (long idx = 0; idx < numKeyframes; ++idx) {
             TKeyframeType theData(keyframes[idx]);
             theData.m_time += timeOffset;
-            m_AnimationCore.InsertKeyframe(animHandle, theData);
+            m_animCore.InsertKeyframe(animHandle, theData);
         }
     }
 
     void SetKeyframeTime(TKeyframeHandle kfHandle, long time) override
     {
-        TKeyframe kfData = m_AnimationCore.GetKeyframeData(kfHandle);
+        TKeyframe kfData = m_animCore.GetKeyframeData(kfHandle);
 
         // offset control points for bezier keyframes
         offsetBezier(kfData, time - getKeyframeTime(kfData));
 
         // Functional programming paradigm, returns new value instead of changing current value.
         kfData = qt3dsdm::setKeyframeTime(kfData, time);
-        m_AnimationCore.SetKeyframeData(kfHandle, kfData);
+        m_animCore.SetKeyframeData(kfHandle, kfData);
+
+        // For bezier keyframes check that control points of the moved keyframe and the keyframes
+        // before and after it don't go beyond its adjacent keyframes times.
+        Qt3DSDMAnimationHandle anim = m_animCore.GetAnimationForKeyframe(kfHandle);
+        EAnimationType animType = m_animCore.GetAnimationInfo(anim).m_AnimationType;
+        if (animType == EAnimationTypeBezier) {
+            TKeyframeHandleList keyframes;
+            m_animCore.GetKeyframes(anim, keyframes);
+            for (size_t i = 0; i < keyframes.size(); ++i) {
+                if (keyframes[i] == kfHandle) {
+                    SBezierKeyframe kfCurr = get<SBezierKeyframe>(m_animCore.GetKeyframeData(
+                                                                      kfHandle));
+                    if (i > 0) { // check overlap with prev keyframe
+                        SBezierKeyframe kfPrev = get<SBezierKeyframe>(m_animCore.GetKeyframeData(
+                                                                          keyframes[i - 1]));
+                        if (kfPrev.m_OutTangentTime > kfCurr.m_time)
+                            kfPrev.m_OutTangentTime = kfCurr.m_time;
+
+                        if (kfCurr.m_InTangentTime < kfPrev.m_time)
+                            kfCurr.m_InTangentTime = kfPrev.m_time;
+
+                        m_animCore.SetKeyframeData(keyframes[i - 1], kfPrev);
+
+                        // Mahmoud_TODO: trim the value proportinally also so that the control
+                        // point lines maintains the same slope after the time is trimmed
+                    }
+
+                    if (i < keyframes.size() - 1) { // check overlap with next keyframe
+                        SBezierKeyframe kfNext = get<SBezierKeyframe>(m_animCore.GetKeyframeData(
+                                                                          keyframes[i + 1]));
+                        if (kfNext.m_InTangentTime < kfCurr.m_time)
+                            kfNext.m_InTangentTime = kfCurr.m_time;
+
+                        if (kfCurr.m_OutTangentTime > kfNext.m_time)
+                            kfCurr.m_OutTangentTime = kfNext.m_time;
+
+                        m_animCore.SetKeyframeData(keyframes[i + 1], kfNext);
+                    }
+                    m_animCore.SetKeyframeData(kfHandle, kfCurr);
+                    break;
+                }
+            }
+        }
     }
 
     void setBezierKeyframeValue(TKeyframeHandle kfHandle, const TKeyframe &kfData) override
     {
-        m_AnimationCore.SetKeyframeData(kfHandle, kfData);
+        m_animCore.SetKeyframeData(kfHandle, kfData);
     }
 
     void DeleteAllKeyframes(Qt3DSDMAnimationHandle inAnimation) override
     {
-        m_AnimationCore.DeleteAllKeyframes(inAnimation);
+        m_animCore.DeleteAllKeyframes(inAnimation);
     }
 
     void KeyframeProperty(Qt3DSDMInstanceHandle inInstance, Qt3DSDMPropertyHandle inProperty,
@@ -2878,13 +2920,13 @@ public:
         }
 
         Qt3DSDMAnimationHandle animHandle =
-            m_AnimationCore.GetAnimation(inSlide, instance, property, subIndex);
+            m_animCore.GetAnimation(inSlide, instance, property, subIndex);
 
         if (animHandle.Valid())
-            m_AnimationCore.DeleteAnimation(animHandle);
+            m_animCore.DeleteAnimation(animHandle);
 
         animHandle =
-            m_AnimationCore.CreateAnimation(inSlide, instance, property, subIndex, animType, false);
+            m_animCore.CreateAnimation(inSlide, instance, property, subIndex, animType, false);
 
         long theStartTime = GetTimeRange(instance).first;
 
@@ -2916,9 +2958,9 @@ public:
             return false;
         }
         Qt3DSDMAnimationHandle animHandle =
-            m_AnimationCore.GetAnimation(inSlide, instance, propHdl, subIndex);
+            m_animCore.GetAnimation(inSlide, instance, propHdl, subIndex);
         if (animHandle.Valid()) {
-            m_AnimationCore.DeleteAnimation(animHandle);
+            m_animCore.DeleteAnimation(animHandle);
             return true;
         }
         return false;
@@ -2926,7 +2968,7 @@ public:
 
     void SetIsArtistEdited(Qt3DSDMAnimationHandle inAnimation, bool inEdited = true) override
     {
-        m_AnimationCore.SetIsArtistEdited(inAnimation, inEdited);
+        m_animCore.SetIsArtistEdited(inAnimation, inEdited);
     }
 
     qt3dsdm::Qt3DSDMInstanceHandle

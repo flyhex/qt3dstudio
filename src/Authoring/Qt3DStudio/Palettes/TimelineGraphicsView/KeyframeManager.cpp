@@ -141,7 +141,6 @@ QList<Keyframe *> KeyframeManager::selectedKeyframes() const
     return m_selectedKeyframes;
 }
 
-// update bindings after selected keyframes are moved
 void KeyframeManager::commitMoveSelectedKeyframes()
 {
     Q3DStudio::ScopedDocumentEditor editor(*g_StudioApp.GetCore()->GetDoc(),
