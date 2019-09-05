@@ -318,7 +318,7 @@ void RowTimelinePropertyGraph::updateBezierControlValue(TimelineControlType cont
     if (controlType == TimelineControlType::BezierKeyframe) {
         float dVal = value - kf.m_value;
 
-        for (auto kfHandle : m_selectedBezierKeyframes) {
+        for (auto kfHandle : qAsConst(m_selectedBezierKeyframes)) {
             SBezierKeyframe kf_i = get<SBezierKeyframe>(m_animCore->GetKeyframeData(kfHandle));
             kf_i.m_value += dVal;
             kf_i.m_InTangentValue += dVal;
@@ -413,18 +413,25 @@ void RowTimelinePropertyGraph::fitGraph()
     // get min/max keyframes values in the active channels
     float minVal = FLT_MAX;
     float maxVal = -FLT_MAX;
-    for (int i = 0; i < m_activeChannels.size(); ++i) {
-        Qt3DSDMTimelineKeyframe::TKeyframeHandleList keyframeHandles;
-        m_animCore->GetKeyframes(m_activeChannels[i], keyframeHandles);
-        for (auto kfHandle : keyframeHandles) {
-            TKeyframe keyframeData = m_animCore->GetKeyframeData(kfHandle);
-            float value = getKeyframeValue(keyframeData);
-            if (value < minVal)
-                minVal = value;
-            if (value > maxVal)
-                maxVal = value;
 
-            // for bezier keyframes compare tangents in/out also
+    auto ruler = m_rowTimeline->rowTree()->m_scene->ruler();
+    int startX = qMax(ruler->viewportX() - int(RULER_EDGE_OFFSET), 0);
+    int endX   = ruler->viewportX() + m_rowTimeline->rowTree()->m_scene->widgetTimeline()
+                                                   ->viewTimelineContent()->width();
+    long startTime = ruler->distanceToTime(startX);
+    long endTime   = ruler->distanceToTime(endX);
+
+    for (int i = 0; i < m_activeChannels.size(); ++i) {
+        auto extrema = m_animCore->getAnimationExtrema(m_activeChannels[i], startTime, endTime);
+        if (extrema.second < minVal)
+            minVal = extrema.second;
+        if (extrema.first > maxVal)
+            maxVal = extrema.first;
+
+        // for bezier keyframes check selected tangents in/out also
+        for (auto kfHandle : qAsConst(m_selectedBezierKeyframes)) {
+            TKeyframe keyframeData = m_animCore->GetKeyframeData(kfHandle);
+
             if (keyframeData.getType() == qt3dsdm::EAnimationTypeBezier) {
                 long timeIn, timeOut;
                 float valueIn, valueOut;
@@ -456,7 +463,12 @@ void RowTimelinePropertyGraph::fitGraph()
     m_valScale = graphH / (maxVal - minVal);
     checkValScaleLimits();
 
-    m_graphY = marginT + maxVal * m_valScale;
+    m_graphY = double(marginT + maxVal * m_valScale);
+
+    // if value range is < min scale, center the range
+    float rangeH = (maxVal - minVal) * m_valScale;
+    if (rangeH < graphH)
+        m_graphY += double(graphH - rangeH) / 2.;
 
     m_rowTimeline->update();
 }
