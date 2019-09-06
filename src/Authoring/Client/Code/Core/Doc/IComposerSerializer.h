@@ -64,6 +64,7 @@ class IComposerSerializer
 protected:
     virtual ~IComposerSerializer() {}
 public:
+    static void clear();
     // Empty graph roots means use the actual graph roots in the asset graph
     virtual void SerializeScene(qt3dsdm::IDOMWriter &inWriter) = 0;
     // Write properties into the active slide until we get to a slide owner, then create new slides.
@@ -103,14 +104,15 @@ public:
     friend class std::shared_ptr<IComposerSerializer>;
 
     static std::shared_ptr<IComposerSerializer> CreateGraphSlideSerializer(
-        qt3dsdm::IDataCore &inDataCore, qt3dsdm::IMetaData &inMetaData, qt3dsdm::ISlideCore &inSlideCore,
+        qt3dsdm::IDataCore &inDataCore, qt3dsdm::IMetaData &inMetaData,
+        qt3dsdm::ISlideCore &inSlideCore,
         qt3dsdm::IAnimationCore &inAnimationCore, qt3dsdm::IActionCore &inActionCore,
         CGraph &inAssetGraph, qt3dsdm::ISlideSystem &inSlideSystem,
         qt3dsdm::IActionSystem &inActionSystem, qt3dsdm::ISlideGraphCore &inSlideGraphCore,
         qt3dsdm::SComposerObjectDefinitions &inObjectDefinitions,
         std::shared_ptr<Q3DStudio::IImportFailedHandler> inFailedHandler,
         qt3dsdm::IGuideSystem &inGuideSystem, qt3ds::render::IPathManager &inPathManager,
-        qt3dsdm::IPropertySystem &inPropSystem);
+        qt3dsdm::IPropertySystem &inPropSystem, const QString &documentPath);
 };
 }
 

@@ -50,6 +50,8 @@
 #include "foundation/Qt3DSLogging.h"
 #include <unordered_map>
 #include <unordered_set>
+#include <QtCore/qrandom.h>
+#include <QtCore/qdatetime.h>
 
 using namespace qt3dsdm;
 using namespace std;
@@ -304,6 +306,13 @@ struct SMetaDataPropertyEraser
 using std::unordered_set;
 using std::unordered_map;
 
+typedef unordered_map<int, TCharPtr> THandleToIdMap;
+typedef unordered_map<TCharPtr, int> TIdToHandleMap;
+typedef unordered_map<SLong4, int> TGUIDToHandleMap;
+typedef unordered_map<int, SLong4> THandleToGUIDMap;
+typedef unordered_map<Qt3DSDMInstanceHandle, int, hash<int>> TInstanceIntMap;
+typedef unordered_map<Qt3DSDMInstanceHandle, TCharPtr, hash<int>> TInstanceToSiblingMap;
+
 // Algorithm to write is to run through the graph, starting at the root instances
 // and write out the instances as we come to them.
 struct SComposerSerializerImpl : public IComposerSerializer
@@ -312,12 +321,6 @@ struct SComposerSerializerImpl : public IComposerSerializer
     typedef unordered_set<Qt3DSDMSlideHandle, hash<int>> TSlideSet;
     typedef unordered_set<Qt3DSDMActionHandle, hash<int>> TActionSet;
     typedef vector<Qt3DSDMInstanceHandle> TInstanceList;
-    typedef unordered_map<int, TCharPtr> THandleToIdMap;
-    typedef unordered_map<TCharPtr, int> TIdToHandleMap;
-    typedef unordered_map<SLong4, int> TGUIDToHandleMap;
-    typedef unordered_map<int, SLong4> THandleToGUIDMap;
-    typedef unordered_map<Qt3DSDMInstanceHandle, int, hash<int>> TInstanceIntMap;
-    typedef unordered_map<Qt3DSDMInstanceHandle, TCharPtr, hash<int>> TInstanceToSiblingMap;
 
     IDataCore &m_DataCore;
     IMetaData &m_MetaData;
@@ -335,21 +338,18 @@ struct SComposerSerializerImpl : public IComposerSerializer
     qt3ds::render::IPathManager &m_PathManager;
     IPropertySystem &m_propertySystem;
 
-    // The instances we have discovered when we are writing
-    THandleToIdMap m_HandleToIdMap;
-    TIdToHandleMap m_IdToHandleMap;
-
-    TGUIDToHandleMap m_GUIDToHandleMap;
-    THandleToGUIDMap m_HandleToGUIDMap;
-
     Qt3DSDMSlideHandle m_ActiveSlide;
     Qt3DSDMSlideHandle m_ActiveSlideParent;
 
-    THandleToIdMap m_ActionToIdMap;
-    TIdToHandleMap m_IdToActionMap;
-
-    THandleToIdMap m_SlideToIdMap;
-    TIdToHandleMap m_IdToSlideMap;
+    // The unique ids for instances
+    static THandleToIdMap s_HandleToIdMap;
+    static TIdToHandleMap s_IdToHandleMap;
+    static TGUIDToHandleMap s_GUIDToHandleMap;
+    static THandleToGUIDMap s_HandleToGUIDMap;
+    static THandleToIdMap s_ActionToIdMap;
+    static TIdToHandleMap s_IdToActionMap;
+    static THandleToIdMap s_SlideToIdMap;
+    static TIdToHandleMap s_IdToSlideMap;
 
     TInstanceSet m_InstanceSet;
     TSlideSet m_SlideSet;
@@ -377,6 +377,9 @@ struct SComposerSerializerImpl : public IComposerSerializer
 
     Option<int> m_UIPVersion;
 
+    QRandomGenerator m_randomGenerator;
+    QString m_documentPath;
+
     SComposerSerializerImpl(IDataCore &inDataCore, IMetaData &inMetaData, ISlideCore &inSlideCore,
                             IAnimationCore &inAnimationCore, IActionCore &inActionCore,
                             CGraph &inAssetGraph, ISlideSystem &inSlideSystem,
@@ -384,7 +387,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
                             SComposerObjectDefinitions &inObjectDefinitions,
                             std::shared_ptr<Q3DStudio::IImportFailedHandler> inFailedHandler,
                             IGuideSystem &inGuideSystem, qt3ds::render::IPathManager &inPathManager,
-                            IPropertySystem &inPropSystem)
+                            IPropertySystem &inPropSystem,
+                            const QString &documentPath)
         : m_DataCore(inDataCore)
         , m_MetaData(inMetaData)
         , m_SlideCore(inSlideCore)
@@ -403,25 +407,18 @@ struct SComposerSerializerImpl : public IComposerSerializer
         , m_Foundation(Q3DStudio::Foundation::SStudioFoundation::Create())
         , m_InputStreamFactory(qt3ds::render::IInputStreamFactory::Create(*m_Foundation.m_Foundation))
         , m_PreserveFileIds(true)
+        , m_documentPath(documentPath)
     {
+        m_randomGenerator.seed(quint32(QTime::currentTime().msecsSinceStartOfDay()));
     }
 
-    void reset()
+    void reset(bool resetAll = false)
     {
-        m_HandleToIdMap.clear();
-        m_IdToHandleMap.clear();
-
-        m_GUIDToHandleMap.clear();
-        m_HandleToGUIDMap.clear();
+        if (resetAll)
+            clear();
 
         m_ActiveSlide = 0;
         m_ActiveSlideParent = 0;
-
-        m_ActionToIdMap.clear();
-        m_IdToActionMap.clear();
-
-        m_SlideToIdMap.clear();
-        m_IdToSlideMap.clear();
 
         m_InstanceSet.clear();
         m_SlideSet.clear();
@@ -442,8 +439,15 @@ struct SComposerSerializerImpl : public IComposerSerializer
     TCharPtr AddId(const wstring &inId, Qt3DSDMInstanceHandle inHandle)
     {
         TCharPtr theIdStr = m_StringTable.RegisterStr(inId.c_str());
-        m_IdToHandleMap.insert(make_pair(theIdStr, inHandle));
-        m_HandleToIdMap.insert(make_pair(inHandle, theIdStr));
+        if (s_IdToHandleMap.find(theIdStr) != s_IdToHandleMap.end()
+                && s_IdToHandleMap.find(theIdStr)->second != inHandle) {
+            m_ImportFailedHandler->DisplayImportFailed(
+                        m_documentPath, QObject::tr("Duplicate object id detected: ")
+                        + QString::fromWCharArray(theIdStr), false);
+            return theIdStr;
+        }
+        s_IdToHandleMap.insert(make_pair(theIdStr, inHandle));
+        s_HandleToIdMap.insert(make_pair(inHandle, theIdStr));
         if (m_PreserveFileIds)
             m_DataCore.SetInstancePropertyValue(inHandle, m_ObjectDefinitions.m_Asset.m_FileId,
                                                 std::make_shared<CDataStr>(inId.c_str()));
@@ -453,8 +457,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
     TCharPtr SetId(const wstring &inId, Qt3DSDMInstanceHandle inHandle)
     {
         TCharPtr theIdStr = m_StringTable.RegisterStr(inId.c_str());
-        m_IdToHandleMap.insert(make_pair(theIdStr, inHandle)).first->second = inHandle;
-        m_HandleToIdMap.insert(make_pair(inHandle, theIdStr)).first->second = theIdStr;
+        s_IdToHandleMap.insert(make_pair(theIdStr, inHandle)).first->second = inHandle;
+        s_HandleToIdMap.insert(make_pair(inHandle, theIdStr)).first->second = theIdStr;
         if (m_PreserveFileIds)
             m_DataCore.SetInstancePropertyValue(inHandle, m_ObjectDefinitions.m_Asset.m_FileId,
                                                 std::make_shared<CDataStr>(inId.c_str()));
@@ -464,16 +468,30 @@ struct SComposerSerializerImpl : public IComposerSerializer
     TCharPtr AddActionId(const wstring &inId, Qt3DSDMActionHandle inHandle)
     {
         TCharPtr theIdStr = m_StringTable.RegisterStr(inId.c_str());
-        m_IdToActionMap.insert(make_pair(theIdStr, inHandle));
-        m_ActionToIdMap.insert(make_pair(inHandle, theIdStr));
+        if (s_IdToActionMap.find(theIdStr) != s_IdToActionMap.end()
+                && s_IdToActionMap.find(theIdStr)->second != inHandle) {
+            m_ImportFailedHandler->DisplayImportFailed(
+                        m_documentPath, QObject::tr("Duplicate action id detected: ")
+                        + QString::fromWCharArray(theIdStr), false);
+            return theIdStr;
+        }
+        s_IdToActionMap.insert(make_pair(theIdStr, inHandle));
+        s_ActionToIdMap.insert(make_pair(inHandle, theIdStr));
         return theIdStr;
     }
 
     TCharPtr AddSlideId(const wstring &inId, Qt3DSDMSlideHandle inHandle)
     {
         TCharPtr theIdStr = m_StringTable.RegisterStr(inId.c_str());
-        m_IdToSlideMap.insert(make_pair(theIdStr, inHandle));
-        m_SlideToIdMap.insert(make_pair(inHandle, theIdStr));
+        if (s_IdToSlideMap.find(theIdStr) != s_IdToSlideMap.end()
+                && s_IdToSlideMap.find(theIdStr)->second != inHandle) {
+            m_ImportFailedHandler->DisplayImportFailed(
+                        m_documentPath, QObject::tr("Duplicate slide id detected: ")
+                        + QString::fromWCharArray(theIdStr), false);
+            return theIdStr;
+        }
+        s_IdToSlideMap.insert(make_pair(theIdStr, inHandle));
+        s_SlideToIdMap.insert(make_pair(inHandle, theIdStr));
         return theIdStr;
     }
 
@@ -485,8 +503,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
             ++inId;
 
         inId = m_StringTable.RegisterStr(inId);
-        TIdToHandleMap::iterator find = m_IdToHandleMap.find(inId);
-        if (find != m_IdToHandleMap.end())
+        TIdToHandleMap::iterator find = s_IdToHandleMap.find(inId);
+        if (find != s_IdToHandleMap.end())
             return find->second;
         return 0;
     }
@@ -499,8 +517,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
             ++inId;
 
         inId = m_StringTable.RegisterStr(inId);
-        TIdToHandleMap::iterator find = m_IdToSlideMap.find(inId);
-        if (find != m_IdToSlideMap.end())
+        TIdToHandleMap::iterator find = s_IdToSlideMap.find(inId);
+        if (find != s_IdToSlideMap.end())
             return find->second;
         return 0;
     }
@@ -513,22 +531,22 @@ struct SComposerSerializerImpl : public IComposerSerializer
             ++inId;
 
         inId = m_StringTable.RegisterStr(inId);
-        TIdToHandleMap::iterator find = m_IdToActionMap.find(inId);
-        if (find != m_IdToActionMap.end())
+        TIdToHandleMap::iterator find = s_IdToActionMap.find(inId);
+        if (find != s_IdToActionMap.end())
             return find->second;
         return 0;
     }
 
     void AddGuid(SLong4 inId, int inHandle)
     {
-        m_GUIDToHandleMap.insert(make_pair(inId, inHandle));
-        m_HandleToGUIDMap.insert(make_pair(inHandle, inId));
+        s_GUIDToHandleMap.insert(make_pair(inId, inHandle));
+        s_HandleToGUIDMap.insert(make_pair(inHandle, inId));
     }
 
     SLong4 GetInstanceGuid(Qt3DSDMInstanceHandle inInstance)
     {
-        THandleToGUIDMap::iterator find = m_HandleToGUIDMap.find(inInstance);
-        if (find != m_HandleToGUIDMap.end())
+        THandleToGUIDMap::iterator find = s_HandleToGUIDMap.find(inInstance);
+        if (find != s_HandleToGUIDMap.end())
             return find->second;
         SValue theValue;
         if (m_DataCore.GetInstancePropertyValue(inInstance, m_ObjectDefinitions.m_Guided.m_GuidProp,
@@ -581,37 +599,58 @@ struct SComposerSerializerImpl : public IComposerSerializer
         return GetInstanceName(inInstance);
     }
 
-    TCharPtr GetId(const wstring &inIdStem)
+    // Create id for instance. Pass reference handle to id map so that correct
+    // id map is checked against(same handle value can exist in instance, slides and actions).
+    TCharPtr GetId(const wstring &inIdStem, CDataModelHandle handle, const THandleToIdMap &refMap)
     {
-        // Create an ID for this instance
-        wstring theTypeStr(inIdStem);
-        wstring theTypeStem(theTypeStr);
-        wstring::size_type thePos = theTypeStem.find_last_of('_');
-        if (thePos != wstring::npos && thePos < theTypeStem.size() - 2) {
-            if (theTypeStem[thePos + 1] >= '0' && theTypeStem[thePos + 1] <= '1')
-                theTypeStem = theTypeStem.substr(0, thePos);
-        }
-        QT3DSU32 idIdx = 1;
+        // Check old id
+        QString stem(QString::fromWCharArray(inIdStem.c_str()));
+        int pos = stem.lastIndexOf(QLatin1Char('_'));
+        if (pos > 0) {
+            // Already has unique id
+            bool isNumber;
+            stem.mid(pos+2).toInt(&isNumber);
+            if (stem.at(pos+1) == QLatin1Char('u') && isNumber)
+                return m_StringTable.RegisterStr(inIdStem.c_str());
+            stem = stem.left(pos);
+        } else {
+            const wchar_t *savedId = nullptr;
+            if (refMap.find(handle) != refMap.end())
+                savedId = refMap.find(handle)->second;
 
-        while (m_IdToActionMap.find(m_StringTable.RegisterStr(theTypeStr.c_str()))
-               != m_IdToActionMap.end()
-               || m_IdToHandleMap.find(m_StringTable.RegisterStr(theTypeStr.c_str()))
-               != m_IdToHandleMap.end()
-               || m_IdToSlideMap.find(m_StringTable.RegisterStr(theTypeStr.c_str()))
-               != m_IdToSlideMap.end()) {
-            wchar_t theBuffer[16];
-            swprintf(theBuffer, 16, L"_%03d", idIdx);
-            theTypeStr = theTypeStem + theBuffer;
-            ++idIdx;
+            if (savedId) {
+                QString id(QString::fromWCharArray(savedId));
+                // Already has unique id?
+                pos = id.lastIndexOf(QLatin1Char('_'));
+                bool isNumber;
+                id.mid(pos+2).toInt(&isNumber);
+                if (id.at(pos+1) == QLatin1Char('u') && isNumber)
+                    return m_StringTable.RegisterStr(savedId);
+            }
         }
-        return m_StringTable.RegisterStr(theTypeStr.c_str());
+        // Create an ID for this instance
+        QByteArray buffer;
+        wchar_t *str;
+        do {
+            int rid = m_randomGenerator.bounded(65536);
+            QString nid = QStringLiteral("%1_u%2").arg(stem).arg(rid);
+            buffer.resize((nid.length() + 1) * sizeof(wchar_t));
+            buffer.fill(0);
+            str = reinterpret_cast<wchar_t *>(buffer.data());
+            nid.toWCharArray(str);
+        } while (s_IdToActionMap.find(m_StringTable.RegisterStr(str)) != s_IdToActionMap.end()
+                    || s_IdToHandleMap.find(m_StringTable.RegisterStr(str))
+                                                                      != s_IdToHandleMap.end()
+                    || s_IdToSlideMap.find(m_StringTable.RegisterStr(str))
+                                                                      != s_IdToSlideMap.end());
+        return m_StringTable.RegisterStr(str);
     }
 
     TCharPtr GetInstanceId(Qt3DSDMInstanceHandle inInstance)
     {
         QT3DS_ASSERT(inInstance.Valid());
-        THandleToIdMap::iterator theFind(m_HandleToIdMap.find(inInstance));
-        if (theFind != m_HandleToIdMap.end())
+        THandleToIdMap::iterator theFind(s_HandleToIdMap.find(inInstance));
+        if (theFind != s_HandleToIdMap.end())
             return theFind->second;
 
         TCharStr theName(GetInstanceName(inInstance));
@@ -659,13 +698,13 @@ struct SComposerSerializerImpl : public IComposerSerializer
                 }
                 if (theProperty.Valid()) {
                     theIdStr.append(m_DataCore.GetProperty(theProperty).m_Name.wide_str());
-                    theNewId = GetId(theIdStr);
+                    theNewId = GetId(theIdStr, inInstance, s_HandleToIdMap);
                 }
             }
         }
 
         if (IsTrivial(theNewId))
-            theNewId = GetId(theName.wide_str());
+            theNewId = GetId(theName.wide_str(), inInstance, s_HandleToIdMap);
         return AddId(theNewId, inInstance);
     }
 
@@ -673,14 +712,14 @@ struct SComposerSerializerImpl : public IComposerSerializer
                          Qt3DSDMInstanceHandle inInstance)
     {
         QT3DS_ASSERT(inAction.Valid());
-        THandleToIdMap::iterator theFind(m_ActionToIdMap.find(inAction));
-        if (theFind != m_ActionToIdMap.end())
+        THandleToIdMap::iterator theFind(s_ActionToIdMap.find(inAction));
+        if (theFind != s_ActionToIdMap.end())
             return theFind->second;
 
         wstring theActionName(GetInstanceName(inInstance, inSlide));
         theActionName.append(L"-Action");
 
-        TCharPtr theNewId = GetId(theActionName);
+        TCharPtr theNewId = GetId(theActionName, inAction, s_ActionToIdMap);
         return AddActionId(theNewId, inAction);
     }
 
@@ -689,8 +728,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
     TCharPtr GetSlideId(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inInstance)
     {
         QT3DS_ASSERT(inSlide.Valid());
-        THandleToIdMap::iterator theFind(m_SlideToIdMap.find(inSlide));
-        if (theFind != m_SlideToIdMap.end())
+        THandleToIdMap::iterator theFind(s_SlideToIdMap.find(inSlide));
+        if (theFind != s_SlideToIdMap.end())
             return theFind->second;
 
         if (inInstance.Valid() == false) {
@@ -709,7 +748,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
         theSlideName.append(L"-");
         theSlideName.append(GetSlideName(inSlide));
 
-        TCharPtr theNewId = GetId(theSlideName);
+        TCharPtr theNewId = GetId(theSlideName, inSlide, s_SlideToIdMap);
         return AddSlideId(theNewId, inSlide);
     }
 
@@ -751,7 +790,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
                         theInstance, m_ObjectDefinitions.m_Asset.m_FileId, theInstanceIdValue)) {
                 TDataStrPtr theNamePtr = qt3dsdm::get<TDataStrPtr>(theInstanceIdValue);
                 if (theNamePtr && !IsTrivial(theNamePtr->GetData())) {
-                    const wchar_t *theId = GetId(theNamePtr->GetData());
+                    const wchar_t *theId = GetId(theNamePtr->GetData(), theInstance,
+                                                 s_HandleToIdMap);
                     AddId(theId, theInstance);
                 }
             }
@@ -792,13 +832,13 @@ struct SComposerSerializerImpl : public IComposerSerializer
 
     Qt3DSDMInstanceHandle FindInstanceByGUID(SLong4 theGuid)
     {
-        if (m_GUIDToHandleMap.size() == 0)
+        if (s_GUIDToHandleMap.size() == 0)
             GetAllInstanceGuids();
         if (theGuid.Valid() == false)
             return 0;
 
-        TGUIDToHandleMap::iterator theIter(m_GUIDToHandleMap.find(theGuid));
-        if (theIter != m_GUIDToHandleMap.end())
+        TGUIDToHandleMap::iterator theIter(s_GUIDToHandleMap.find(theGuid));
+        if (theIter != s_GUIDToHandleMap.end())
             return theIter->second;
         return 0;
     }
@@ -901,8 +941,8 @@ struct SComposerSerializerImpl : public IComposerSerializer
             SStringRef theRef(get<SStringRef>(retval));
             Qt3DSDMInstanceHandle theRefInstance(GetInstanceById(theRef.m_Id));
             if (theRefInstance.Valid()) {
-                THandleToGUIDMap::iterator theGuidFind = m_HandleToGUIDMap.find(theRefInstance);
-                if (theGuidFind != m_HandleToGUIDMap.end())
+                THandleToGUIDMap::iterator theGuidFind = s_HandleToGUIDMap.find(theRefInstance);
+                if (theGuidFind != s_HandleToGUIDMap.end())
                     theFinalValue = theGuidFind->second;
             }
             return theFinalValue;
@@ -1852,7 +1892,7 @@ struct SComposerSerializerImpl : public IComposerSerializer
                 Qt3DSDMActionHandle theAction(theMasterActions[theEyeballChanges[idx].first]);
                 IDOMWriter::Scope __actionScope(inWriter, L"Action");
                 wstring theRef(L"#");
-                bool hadAction = m_ActionToIdMap.find(theAction) != m_ActionToIdMap.end();
+                bool hadAction = s_ActionToIdMap.find(theAction) != s_ActionToIdMap.end();
                 theRef.append(GetActionId(theAction, inParent, inInstance));
                 inWriter.Att(L"ref", theRef.c_str());
                 inWriter.Att("eyeball", theEyeballChanges[idx].second);
@@ -2872,16 +2912,42 @@ struct SComposerSerializerImpl : public IComposerSerializer
 };
 }
 
+THandleToIdMap SComposerSerializerImpl::s_HandleToIdMap = THandleToIdMap();
+TIdToHandleMap SComposerSerializerImpl::s_IdToHandleMap = TIdToHandleMap();
+TGUIDToHandleMap SComposerSerializerImpl::s_GUIDToHandleMap = TGUIDToHandleMap();
+THandleToGUIDMap SComposerSerializerImpl::s_HandleToGUIDMap = THandleToGUIDMap();
+THandleToIdMap SComposerSerializerImpl::s_ActionToIdMap = THandleToIdMap();
+TIdToHandleMap SComposerSerializerImpl::s_IdToActionMap = TIdToHandleMap();
+THandleToIdMap SComposerSerializerImpl::s_SlideToIdMap = THandleToIdMap();
+TIdToHandleMap SComposerSerializerImpl::s_IdToSlideMap = TIdToHandleMap();
+
+void IComposerSerializer::clear()
+{
+    SComposerSerializerImpl::s_HandleToIdMap.clear();
+    SComposerSerializerImpl::s_IdToHandleMap.clear();
+
+    SComposerSerializerImpl::s_GUIDToHandleMap.clear();
+    SComposerSerializerImpl::s_HandleToGUIDMap.clear();
+
+    SComposerSerializerImpl::s_ActionToIdMap.clear();
+    SComposerSerializerImpl::s_IdToActionMap.clear();
+
+    SComposerSerializerImpl::s_SlideToIdMap.clear();
+    SComposerSerializerImpl::s_IdToSlideMap.clear();
+}
+
 std::shared_ptr<IComposerSerializer> IComposerSerializer::CreateGraphSlideSerializer(
         IDataCore &inDataCore, IMetaData &inMetaData, ISlideCore &inSlideCore,
         IAnimationCore &inAnimationCore, IActionCore &inActionCore, CGraph &inAssetGraph,
         ISlideSystem &inSlideSystem, IActionSystem &inActionSystem, ISlideGraphCore &inSlideGraphCore,
         SComposerObjectDefinitions &inObjectDefinitions,
         std::shared_ptr<Q3DStudio::IImportFailedHandler> inFailedHandler, IGuideSystem &inGuideSystem,
-        qt3ds::render::IPathManager &inPathManager, IPropertySystem &inPropSystem)
+        qt3ds::render::IPathManager &inPathManager, IPropertySystem &inPropSystem,
+        const QString &documentPath)
 {
-    return std::shared_ptr<SComposerSerializerImpl>(new SComposerSerializerImpl(
-                                                          inDataCore, inMetaData, inSlideCore, inAnimationCore, inActionCore, inAssetGraph,
-                                                          inSlideSystem, inActionSystem, inSlideGraphCore, inObjectDefinitions, inFailedHandler,
-                                                          inGuideSystem, inPathManager, inPropSystem));
+    return std::shared_ptr<SComposerSerializerImpl>(
+        new SComposerSerializerImpl(
+            inDataCore, inMetaData, inSlideCore, inAnimationCore, inActionCore, inAssetGraph,
+            inSlideSystem, inActionSystem, inSlideGraphCore, inObjectDefinitions, inFailedHandler,
+            inGuideSystem, inPathManager, inPropSystem, documentPath));
 }

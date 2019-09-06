@@ -2099,6 +2099,7 @@ bool CDoc::VerifyCanRename(qt3dsdm::Qt3DSDMInstanceHandle inAsset)
  */
 void CDoc::LoadPresentationFile(CBufferedInputStream *inInputStream)
 {
+    Q3DStudio::IComposerSerializer::clear();
     // Let any interested parties know that a presentation is going to be loaded
     m_Core->GetDispatch()->FireOnLoadingPresentation();
 
@@ -2271,7 +2272,7 @@ std::shared_ptr<Q3DStudio::IComposerSerializer> CDoc::CreateSerializer()
                 *theFullSystem.GetActionSystem(), *theCoreSystem.GetSlideGraphCore(),
                 theClientBridge.GetObjectDefinitions(), m_ImportFailedHandler,
                 *theCoreSystem.GetGuideSystem(), *GetSceneGraph()->GetPathManager(),
-                *theFullSystem.GetPropertySystem());
+                *theFullSystem.GetPropertySystem(), m_DocumentPath);
 }
 
 std::shared_ptr<Q3DStudio::IComposerSerializer> CDoc::CreateTransactionlessSerializer()
@@ -2290,7 +2291,7 @@ std::shared_ptr<Q3DStudio::IComposerSerializer> CDoc::CreateTransactionlessSeria
                 *theCoreSystem.GetTransactionlessSlideGraphCore(),
                 theClientBridge.GetObjectDefinitions(), m_ImportFailedHandler,
                 *theCoreSystem.GetGuideSystem(), *GetSceneGraph()->GetPathManager(),
-                *theFullSystem.GetPropertySystem());
+                *theFullSystem.GetPropertySystem(), m_DocumentPath);
 }
 
 std::shared_ptr<qt3dsdm::IDOMWriter> CDoc::CreateDOMWriter()
