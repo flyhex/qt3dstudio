@@ -28,52 +28,64 @@
 
 /*!
 
-\title Depth of Field
+\title Depth of Field HQ Blur
 \page depth-of-field-effect.html
 \ingroup qt3dstudio-best-practices
 
-\section1 Using Depth of Field
+The depth of field HQ effect performs a gradient blur on regions of the
+image based on their deviation from a specified distance from the camera.
+
+In the image below, the effect is applied in the right picture. Notice that the cube and
+same-distance floor are in focus while the closer cone and farther sphere are blurred.
 
 \image Effects-DOF.png
 
-The \"Depth Of Field HQ Blur\" effect increasingly blurs regions of the
-image based on their deviation from a specified distance from the
-camera. (Notice that the cube and same-distance floor are in focus while
-the closer cone and farther sphere are blurred.)
+\section1 Properties
+
+\table
+  \header
+    \li Property
+    \li Description
+  \row
+    \li
+      Focus distance
+    \li
+      The distance from the camera where the content is in perfect focus.
+  \row
+    \li
+      Depth of field
+    \li
+      The distance around the \c{Focus Distance} where items are fully in focus. The focus then
+      fades away to fully blurred by the same distance on both the near and far sides.
+  \row
+    \li
+      Debug focus rendering
+    \li
+      Allows you to see exactly how the focus variables work.
+\endtable
+
+\section1 Usage
 
 For this effect to work well, you need to adjust the
-\c{Clipping Start} and \c{Clipping End} properties of the
-camera for the Layer to 'frame' the content. (You ideally want the
-largest possible value for \c{Start} and the smallest possible
-value for \c{End}.) After you do this you can use the properties of
-the effect in the Inspector palette to adjust the effect.
+\uicontrol{Clipping start} and \uicontrol{Clipping end} properties of the
+camera for the layer to frame the content. You ideally want the
+largest possible value for \uicontrol{Clipping start} and the smallest possible
+value for \uicontrol{Clipping end}. Next, adjust the properties of the effect for the desired
+result.
 
-\list
-\li
-  The \c{Focus Distance} property specifies the distance from the
-  camera where the content is in perfect focus.
-\li
-  The \c{Depth of Field} property specifies a the distance around
-  the \c{Focus Distance} where items are fully in focus. The focus
-  then fades away to fully blurred by the same distance on both the near
-  and far sides.
-\endlist
-For example, a \c{Focus Distance} of 100 and a
-\c{Depth of Field} of 20 means that everything that is between 90
-and 110 units away from the camera will be fully in focus, items at a
-distance of 70-90 and 110-130 units will experiencing variable blurring,
-and everything closer than 70 or farther than 130 will be fully blurred.
+For example, a \uicontrol{Focus distance} of 100 and a
+\uicontrol{Depth of field} of 20 means that everything that is between 90
+and 110 units away from the camera will be entirely in focus, items at a
+distance of 70-90 and 110-130 units will experience variable blurring,
+and everything closer than 70 or farther than 130 will be entirely blurred.
 
-To make it easier to set up this effect, turn on the
-\c{Debug Focus Rendering} checkbox for the effect:
+To make it easier to set up this effect, enable \uicontrol{Debug focus rendering}. When enabled,
+the scene view switches to a mode showing the amount of blur to be applied. Anything completely
+fogged in white is entirely blurred, anything that is fully black is entirely in focus, and
+shades of grey represent varying amounts of blur in between. It is far easier to turn on this
+mode and adjust the values in the inspector palette until the content you want is bracketed,
+compared to performing distance calculations and entering numbers.
+
 \image Effects-DOF-Debug.png
-
-When enabled the scene will switch to a mode showing the amount of blur
-to be applied. Anything completely fogged in white will be fully
-blurred, anything that is fully black will be fully in focus, and shades
-of grey represent varying amounts of blur in between. You will find it
-far easier to turn on this mode and just scrub the values in the
-Inspector palette until the content you want is bracketed, compared to
-performing distance calculations and entering numbers.
 
 */

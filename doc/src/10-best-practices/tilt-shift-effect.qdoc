@@ -32,27 +32,60 @@
 \page tilt-shift-effect.html
 \ingroup qt3dstudio-best-practices
 
-\section1 Using Tilt Shift
+The tilt shift effect simulates depth of field in a simple and performant manner.
+Instead of blurring based on the depth buffer, it blurs everything except for a horizontal
+or vertical stripe on the layer.
 
 \image Effects-TiltShift.png
 
-The \"Tilt Shift\" effect simulates depth of field in a much simpler
-(and more performant) manner. Instead of blurring based on the depth
-buffer, it simply blurs everything except for horizontal stripe on the
-layer. The effect is controlled by the properties:
+\section1 Properties
 
-\list
-\li
-  \c{Focus Position} - the vertical placement of the center of
-  effect (the 'focused region') on the screen, from top to bottom.
-\li
-  \c{Focus Width} - the vertical size of the in-focus region.
-\li
-  \c{Blur Amount} - how much the not-in-focus regions are blurred.
-\endlist
-As with the Depth of Field effect, this effect has a
-\c{Debug Rendering} option that you can enable to see where the
-blur will be applied to the Layer. (See above for further description.)
+\table
+  \header
+    \li Property
+    \li Description
+  \row
+    \li
+      Focus position
+    \li
+      The vertical placement of the center of the focused area on the screen. A value
+      0.5 will put the center in the middle of the screen.
+  \row
+    \li
+      Focus width
+    \li
+      The height of the focused area.
+  \row
+    \li
+      Debug rendering
+    \li
+      Allows you to see exactly how the focus variables work.
+  \row
+    \li
+      Blur amount
+    \li
+      The amount of blur applied to the unfocused areas.
+  \row
+    \li
+      Vertical
+    \li
+      Makes the effect work vertically instead of horizontally.
+  \row
+    \li
+      Invert blur
+    \li
+      Inverts the blur so that the center is blurred while the other areas are sharp.
+\endtable
+
+\section1 Usage
+
+To make it easier to set up this effect, enable \uicontrol{Debug focus rendering}. When enabled,
+the scene view switches to a mode showing the amount of blur to be applied. Anything completely
+fogged in white is entirely blurred, anything that is fully black is entirely in focus, and
+shades of grey represent varying amounts of blur in between. It is far easier to turn on this
+mode and adjust the values in the inspector palette until the content you want is bracketed,
+compared to performing distance calculations and entering numbers.
+
 \image Effects-TiltShift-Debug.png
 
 */

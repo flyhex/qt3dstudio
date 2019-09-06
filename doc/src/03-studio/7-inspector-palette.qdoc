@@ -427,7 +427,7 @@ of the camera to be rendered. Aside from special clipping effects, you
 may need to adjust these values to more closely contain your content for
 better results with Ambient Occlusion, or with a layer effect that uses
 the depth buffer of the camera, such as the
-\l{Depth of Field}{Depth of Field effect}.}
+\l{{Depth of field HQ blur}}{Depth of Field effect}.}
 
 \list
 \li

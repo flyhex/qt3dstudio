@@ -32,15 +32,29 @@
 \page gaussian-blur-effect.html
 \ingroup qt3dstudio-best-practices
 
-\section1 Using Gaussian Blur
+The gaussian blur effect is simple to use and understand. It blurs all objects on the
+layer evenly.
+
+In the image below, the effect is applied in the right picture.
 
 \image Effects-GaussianBlur.png
 
-The \"Gaussian Blur\" effect is one of the simplest to use and
-understand. Drop it on a Layer and adjust the \c{Blurriness}
-property in the Inspector palette. In order to keep the effect
-performant large blur values will produce a mosaic result instead of
-smooth blurriness. Play with the slider for the value to find the best
-visual result for your needs.
+\section1 Properties
+
+\table
+  \header
+    \li Property
+    \li Description
+  \row
+    \li
+      Blurriness
+    \li
+      Level of blurriness.
+\endtable
+
+\section1 Usage
+
+To keep the effect performant, large blur values produce a mosaic result instead of
+smooth blurriness.
 
 */

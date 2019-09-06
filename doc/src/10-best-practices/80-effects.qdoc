@@ -69,7 +69,7 @@ lower in the scene graph will be applied before effects that are above them.
   \li
       \div {align="center"}
       \image depth-of-field-icon.png
-      \b {\l{Depth of field}}
+      \b {\l{Depth of field HQ blur}}
       \enddiv
   \li
       \div {align="center"}

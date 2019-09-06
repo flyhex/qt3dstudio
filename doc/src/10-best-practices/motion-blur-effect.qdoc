@@ -32,16 +32,33 @@
 \page motion-blur-effect.html
 \ingroup qt3dstudio-best-practices
 
-\section1 Using Motion Blur
+The motion blur effect takes the image from the previous frame,
+blurs it, fades it by a specified amount, and draws this in the
+transparent areas of the layer. The result is that items moving
+over a transparent background leaves a ghost behind them.
 
 \image Effects-MotionBlur.png
 
-The \"Motion Blur\" effect takes the image from the previous frame,
-blurs it, fades it by a specified amount, and draws this \e{in the
-transparent areas of the layer}. The end result is that items moving
-over a transparent background will leave a ghost behind them.
+\section1 Properties
 
-The caveats for this effect are implicit in the above description:
+\table
+  \header
+    \li
+      Property
+    \li
+      Description
+  \row
+    \li
+      Fade Amount
+    \li
+      The amount the trail fades. A value of 0 does not fade the trail at all.
+      The trail is permanent. A value of 1 fades the trail completely, more or
+      less omitting the motion blur effect.
+\endtable
+
+\section1 Usage
+
+When using this effect, you should be aware of the following caveats:
 
 \list
 \li
@@ -50,12 +67,13 @@ The caveats for this effect are implicit in the above description:
   them.
 \li
   Only the transparent regions are drawn to. If a moving object passes
-  in front of another object on the same layer, there will be no motion
+  in front of another object on the same layer, there is no motion
   trail passing over the object.
 \endlist
-In the simple image shown above the blue ring is placed on a second
-Layer underneath the Layer with the motion blur effect applied. This
-both allows the 'needle' to leave a blur trail over top of the ring, and
+
+In the image shown above the blue ring is placed on a second
+layer underneath the layer with the motion blur effect applied. This
+both allows the needle to leave a blur trail over the ring, and
 also prevents the ring from having a blurry blue halo around it.
 
 */

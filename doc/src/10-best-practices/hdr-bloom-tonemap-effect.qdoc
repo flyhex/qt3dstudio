@@ -33,48 +33,65 @@
 \ingroup qt3dstudio-best-practices
 
 \target hdrbloomtonemap
-\section1 Using HDRBloomTonemap
+
+The HDR bloom tonemap effect provides two features:
+
+\list
+\li
+  Adjust the gamma and exposure of the high-dynamic range rendered
+  content to achieve the image quality you want.
+\li
+  Apply an adjustable bloom effect to very bright areas (like the sun
+  glinting off a car).
+\endlist
+
+In the image below, the effect is applied in the right picture.
 
 \image Effects-HDRBloomTonemap.png
 
-The \"HDRBloomTonemap\" effect provides two features:
+\section1 Properties
 
-\list 1
-\li
-  Adjust the gamma and exposure of the high-dynamic range rendered
-  content to achieve the image quality you want, and
-\li
-  Apply an adjustable 'bloom' effect to very bright areas (like the sun
-  glinting off a car).
-\endlist
-When you add an HDRBloomTonemap effect to a layer, the following
-properties are available in the Inspector palette:
-
-\list
-\li
-  \b{Gamma} - this affects the non-linear curve of the lighting.
-  Higher values will increase the exposure of mid tones, lightening the
-  image (and decreasing the contrast). A value of \c{1.0} causes no
-  adjustment to the image.
-\li
-  \b{Exposure} - this is a linear multiplier on the lighting,
-  brightening or darkening the image overall. A value of \c{0.0}
-  causes no adjustment to the image.
-\li
-  \b{Bloom Threshold} - lighting greater than this value will
-  bloom. A value of \c{1.0} corresponds to white in the original
-  render result. Lowering this value will cause more areas of the
-  rendered scene to bloom; at a value of \c{0.0} everything in the
-  scene will bloom.
-\list
-\li
-  \e{Tip: to disable bloom and use only the tone mapping, set this to
-  a sufficiently high value, like \c{999}.}
-\endlist
-\li
-  \b{Bloom Falloff} - adjusts the amount of bloom. Lower values
+\table
+  \header
+    \li
+      Property
+    \li
+      Description
+  \row
+    \li
+      Gamma
+    \li
+      Affects the non-linear curve of the lighting.
+      Higher values increase the exposure of mid tones, lightening the
+      image (and decreasing the contrast). A value of \c{1.0} causes no
+      adjustment to the image.
+  \row
+    \li
+      Exposure
+    \li
+      A linear multiplier on the lighting,
+      brightening, or darkening the image overall. A value of \c{0.0}
+      causes no adjustment to the image.
+  \row
+    \li
+      Bloom threshold
+    \li
+      Lighting greater than this value blooms. A value of \c{1.0} corresponds to white
+      in the original render result. Lowering this value causes more areas of the
+      rendered scene to bloom; at a value of \c{0.0} everything in the
+      scene blooms.
+  \row
+    \li
+      Bloom falloff
+    \li
+      Adjusts the amount of bloom. Lower values
   result in stronger bloom effect; higher values make the effect more
   subtle.
-\endlist
+\endtable
+
+\section1 Usage
+
+To disable bloom and use only the tone mapping, set \uicontrol{Bloom falloff} to
+a sufficiently high value, like \c{999}.
 
 */

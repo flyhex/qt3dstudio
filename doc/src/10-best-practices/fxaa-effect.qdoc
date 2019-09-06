@@ -32,23 +32,38 @@
 \page fxaa-effect.html
 \ingroup qt3dstudio-best-practices
 
-\section1 Using FXAA
+The FXAA effect applies fast approximate anti-aliasing to the layer.
+FXAA is a high-speed anti-aliasing technique that removes some of the
+artifacts from the image without impacting performance as heavily as
+super-sampling would. In the image below, the effect is applied in the right picture.
 
 \image Effects-FXAA.png
 
-The \"FXAA\" effect applies Fast approXimate Anti-Aliasing to the layer.
-This is a high-speed anti-aliasing technique that removes some of the
-\"jaggies\" from the image without impacting performance as heavily as
-super-sampling would.
+\section1 Usage
 
-\list
-\li
-  Pros: easy fix for many aliasing problems; works with moving images
-  (unlike \l{best-practices-antialiasing.html#progressive-aa}{Progressive Anti-Aliasing}).
-\li
-  Cons: can blur and otherwise 'munge' fine text details present in the
-  layer; as a screen-space heuristic technique it can sometimes leave
-  sharp edges that ideally would be anti-aliased.
-\endlist
+\table
+  \header
+    \li
+      Pros
+    \li
+      Cons
+  \row
+    \li
+      \list
+        \li
+          Easy fix for many aliasing problems.
+        \li
+          Works with moving images
+         (unlike \l{best-practices-antialiasing.html#progressive-aa}{Progressive Anti-Aliasing}).
+      \endlist
+    \li
+      \list
+        \li
+          Can blur and distort fine text details.
+        \li
+          As a screen-space heuristic technique, it can sometimes leave
+          sharp edges that ideally would be anti-aliased.
+      \endlist
+\endtable
 
 */
