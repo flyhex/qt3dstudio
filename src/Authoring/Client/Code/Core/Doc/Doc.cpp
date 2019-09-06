@@ -2488,6 +2488,8 @@ void CDoc::SavePresentationFile(CBufferedOutputStream *inOutputStream)
                     theWriter.Att(L"sourcepath", theImageBuffers[idx].first.c_str());
                     // Writing boolean in wide text results just in "T" or "F" on Linux
                     theWriter.Att("hasTransparency", true);
+                    if (theBuffer.m_TextureFlags.HasOpaquePixels())
+                        theWriter.Att("hasOpaquePixels", true);
                 }
             }
         }
