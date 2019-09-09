@@ -68,6 +68,11 @@ lower in the scene graph will be applied before effects that are above them.
 \row
   \li
       \div {align="center"}
+      \image additive-gradient-icon.png
+      \b {\l{Additive color gradient}}
+      \enddiv
+  \li
+      \div {align="center"}
       \image depth-of-field-icon.png
       \b {\l{Depth of field HQ blur}}
       \enddiv
@@ -81,12 +86,12 @@ lower in the scene graph will be applied before effects that are above them.
       \image gaussian-blur-icon.png
       \b {\l{Gaussian blur}}
       \enddiv
+\row
   \li
       \div {align="center"}
       \image hdr-bloom-tonemap-icon.png
       \b {\l{HDR bloom tonemap}}
       \enddiv
-\row
   \li
       \div {align="center"}
       \image motion-blur-icon.png
