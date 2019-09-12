@@ -5490,6 +5490,9 @@ void IDocumentEditor::DisplayImportErrors(const QString &inImportSource,
         case ESceneGraphWarningCode_UnsupportedLight:
             formatStr = L"Light type for \"%ls\" is not supported, it was converted to Directional";
             break;
+        case ESceneGraphWarningCode_Rotations:
+            formatStr = L"Rotation issue: %ls";
+            break;
         default:
             break;
         }

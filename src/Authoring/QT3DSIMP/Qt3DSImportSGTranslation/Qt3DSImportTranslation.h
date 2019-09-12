@@ -55,6 +55,8 @@ typedef enum _ESceneGraphWarningCode {
     ESceneGraphWarningCode_MissingMaterial,
     // Unsupported light type.
     ESceneGraphWarningCode_UnsupportedLight,
+    // For rotation warnings.
+    ESceneGraphWarningCode_Rotations,
     // For generic warnings.
     ESceneGraphWarningCode_Generic
 } ESceneGraphWarningCode;

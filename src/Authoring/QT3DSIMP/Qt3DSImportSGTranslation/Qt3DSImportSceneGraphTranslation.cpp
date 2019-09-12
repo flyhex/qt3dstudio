@@ -405,7 +405,7 @@ public:
 
     TCharPtr ToImport(const char *data)
     {
-        if (data == NULL || *data == 0)
+        if (data == nullptr || *data == 0)
             return L"";
 
         // Convert from multi byte to wide character string
@@ -427,7 +427,7 @@ public:
         }
         TCharPtr name(ToImport(inName));
 
-        if (name == NULL || *name == 0)
+        if (name == nullptr || *name == 0)
             name = ComposerObjectTypes::Convert(inType);
 
         Q3DStudio::CFilePath objectName = Q3DStudio::CFilePath(name);
@@ -632,7 +632,7 @@ public:
         }
         CharPtrOrError result = m_Import.AddImage(source);
         TCharPtr dest = result.m_Value;
-        TCharPtr imgPath = NULL;
+        TCharPtr imgPath = nullptr;
         wchar_t pathBuf[1024];
         if (result.m_Error) {
             ESceneGraphWarningCode code = ESceneGraphWarningCode_Generic;
@@ -645,7 +645,7 @@ public:
             }
             m_Log.OnWarning(code, errorStr);
         }
-        if (result.m_Value != NULL && *result.m_Value)
+        if (result.m_Value != nullptr && *result.m_Value)
             imgPath = result.m_Value;
         else {
             swprintf(pathBuf, 1024, L"%hs/missing.png",
@@ -1004,7 +1004,7 @@ public:
     template <typename TDataType>
     static NVConstDataRef<QT3DSU8> toRef(const std::vector<TDataType> &data)
     {
-        const TDataType *dataPtr = data.size() ? &data[0] : NULL;
+        const TDataType *dataPtr = data.size() ? &data[0] : nullptr;
         return toU8ConstDataRef(dataPtr, (QT3DSU32)data.size());
     }
 

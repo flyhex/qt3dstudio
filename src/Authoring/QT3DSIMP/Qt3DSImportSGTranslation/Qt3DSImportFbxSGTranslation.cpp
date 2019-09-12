@@ -68,11 +68,9 @@ public:
     typedef std::vector<_SVertexWeightInfo> TPerVertexWeightInfo;
     typedef std::vector<_SJointInfo> TJointInfoList;
     typedef std::tuple<SVector3, SVector3, SVector2, SVector3, SVector3, SVector4, SVector4,
-                       SVector2, SVector3>
-        TVertexInfoTuple;
+                       SVector2, SVector3> TVertexInfoTuple;
     typedef std::pair<std::map<TVertexInfoTuple, long>,
-                      std::vector<std::pair<std::string, TLongsList>>>
-        TFaceIndicies;
+                      std::vector<std::pair<std::string, TLongsList>>> TFaceIndicies;
 
     typedef std::vector<TPerVertexWeightInfo> TVertexWeigthList;
     typedef std::vector<FbxAnimCurve *> TAnimCurveList;
@@ -83,8 +81,8 @@ public:
 
 public:
     bool LoadDocument(const std::string &inFilePath);
-    void ProcessScene();
-    void ProcessAnimationStacks();
+    void ProcessScene(bool animations = false);
+    bool ProcessAnimationStacks();
 
 protected:
     template <typename TNodeFilter>
@@ -258,9 +256,9 @@ bool FbxDomWalker::LoadDocument(const std::string &inFilePath)
                                                    major * 1000 + minor * 100 + revision);
                     m_AuthoringToolType = EAuthoringToolType_FBX_Maya;
                 } else if (strstr(appName, "Blender")) {
-                    m_Translator->LogWarning(ESceneGraphWarningCode_Generic,
+                    m_Translator->LogWarning(ESceneGraphWarningCode_Rotations,
                                              "Imported from Blender. Light and Camera rotations may"
-                                             " be incorrect");
+                                             " be incorrect.");
                     m_Translator->SetAuthoringTool(EAuthoringToolType_FBX_Blender,
                                                    major * 1000 + minor * 100 + revision);
                     m_AuthoringToolType = EAuthoringToolType_FBX_Blender;
@@ -358,21 +356,34 @@ struct SNodeSetFilter
 *
 * @return no return
 */
-void FbxDomWalker::ProcessScene()
+void FbxDomWalker::ProcessScene(bool animations)
 {
     if (m_FbxScene != nullptr) {
-        // FbxAxisSystem::MayaYUp.ConvertScene( m_FbxScene );
-        int sign;
         FbxAxisSystem SceneAxisSystem = m_FbxScene->GetGlobalSettings().GetAxisSystem();
-        if (SceneAxisSystem.GetUpVector(sign) == FbxAxisSystem::eZAxis) {
+        int sign;
+        if (SceneAxisSystem.GetUpVector(sign) == FbxAxisSystem::eZAxis
+                && m_AuthoringToolType != EAuthoringToolType_FBX_Maya) {
+            // Do automatic axis system conversion from Z-up to Y-up
+            FbxAxisSystem::OpenGL.ConvertScene(m_FbxScene);
+
+            m_Translator->LogWarning(ESceneGraphWarningCode_Rotations,
+                                     "Converted axis system from Z-up to Y-up.");
+        } else if (m_AuthoringToolType == EAuthoringToolType_FBX_Max && animations) {
+            // FBX is from 3ds Max and there are animations. As the exported FBX has forced Y-up
+            // axis system, some rotations had pre-rotations, which were removed in the
+            // animation stack handling step. This may cause incorrect rotations.
+            // Do manual x-rotation to fix it.
             std::vector<INodeTransform *> theTransforms;
 
             NodeTransform *theRotX = new NodeTransform(ETransformType_Rotation4);
             (*theRotX)[0] = 1.0f;
             (*theRotX)[1] = (*theRotX)[2] = 0.0f;
-            (*theRotX)[3] =
-                -90.0f; // Apply a -90 degree rotation on the X-axis to 'right' the model
+            (*theRotX)[3] = -90.0f; // Apply rotation on the X-axis to 'right' the model
             theTransforms.push_back(theRotX);
+            m_Translator->LogWarning(ESceneGraphWarningCode_Rotations,
+                                     "Imported Y-up scene with animations from 3ds Max. "
+                                     "X axis was rotated to fix orientation. Some rotations "
+                                     "may still be incorrect.");
 
             m_Translator->SetTransforms(theTransforms);
             delete theRotX;
@@ -381,9 +392,8 @@ void FbxDomWalker::ProcessScene()
         // triangulate just in case
         FbxGeometryConverter theFbxGeometryConverter(m_FbxManager);
         bool bOk = theFbxGeometryConverter.Triangulate(m_FbxScene, true, true);
-        if (!bOk) {
+        if (!bOk)
             QT3DS_ASSERT(false);
-        }
 
         m_importNodes.clear();
         FilterNodeHierarchy(SMeshFilter(), m_importNodes);
@@ -407,8 +417,8 @@ long FbxDomWalker::GetJointNodeID(const FbxNode *inFbxNode)
 
     if (theIter == m_JointNodeHierarchyMap.end())
         theIter = m_JointNodeHierarchyMap
-                      .insert(std::make_pair(inFbxNode, (long)m_JointNodeHierarchyMap.size()))
-                      .first;
+                .insert(std::make_pair(inFbxNode, long(m_JointNodeHierarchyMap.size())))
+                .first;
 
     return theIter->second;
 }
@@ -422,7 +432,7 @@ long FbxDomWalker::GetJointNodeID(const FbxNode *inFbxNode)
 */
 int FbxDomWalker::GetParentJointID(const FbxNode *inFbxNode)
 {
-    long nodeIndex = -1;
+    int nodeIndex = -1;
     TJointNodeHierarchyMap::iterator theIter;
     const FbxNode *parent = inFbxNode->GetParent();
 
@@ -430,7 +440,7 @@ int FbxDomWalker::GetParentJointID(const FbxNode *inFbxNode)
         theIter = m_JointNodeHierarchyMap.find(parent);
 
         if (theIter != m_JointNodeHierarchyMap.end()) {
-            nodeIndex = theIter->second;
+            nodeIndex = int(theIter->second);
             break;
         }
 
@@ -711,7 +721,8 @@ FbxAMatrix GetPoseMatrix(FbxPose *pPose, int pNodeIndex)
     FbxAMatrix lPoseMatrix;
     FbxMatrix lMatrix = pPose->GetMatrix(pNodeIndex);
 
-    memcpy((double *)lPoseMatrix, (double *)lMatrix, sizeof(lMatrix.mData));
+    memcpy(static_cast<double *>(lPoseMatrix), static_cast<double *>(lMatrix),
+           sizeof(lMatrix.mData));
 
     return lPoseMatrix;
 }
@@ -764,10 +775,11 @@ FbxAMatrix GetGlobalPosition(FbxNode *pNode, FbxPose *pPose)
 
 // Compute the transform matrix that the cluster will transform the vertex at binding time.
 void ComputeInitialBindPoseTransform(FbxAMatrix &pMeshGlobalPosition, FbxMesh *pMesh,
-                                     FbxCluster *pCluster, FbxPose * /* pPose */,
+                                     FbxCluster *pCluster, FbxPose *pPose,
                                      FbxAMatrix &pInverseBindMatrix,
                                      FbxAMatrix &pJointToGlobalMatrix)
 {
+    Q_UNUSED(pPose)
     FbxCluster::ELinkMode lClusterMode = pCluster->GetLinkMode();
 
     FbxAMatrix lReferenceGlobalInitPosition;
@@ -799,7 +811,7 @@ void ComputeInitialBindPoseTransform(FbxAMatrix &pMeshGlobalPosition, FbxMesh *p
 
         // Compute the initial position of the link relative to the reference.
         lClusterRelativeInitPosition =
-            lClusterGlobalInitPosition.Inverse() * lReferenceGlobalInitPosition;
+                lClusterGlobalInitPosition.Inverse() * lReferenceGlobalInitPosition;
 
         pInverseBindMatrix = lReferenceGlobalCurrentPosition.Inverse();
         pJointToGlobalMatrix = lClusterRelativeInitPosition;
@@ -837,7 +849,7 @@ void FbxDomWalker::GetVertexWeights(FbxMesh *inFbxMesh, TVertexWeigthList &outWe
     FbxCluster::ELinkMode theClusterMode = FbxCluster::eNormalize;
 
     // a weight entry for each vertex
-    outWeights.resize(inFbxMesh->GetControlPointsCount());
+    outWeights.resize(size_t(inFbxMesh->GetControlPointsCount()));
 
     // right now we do not handle multiple deformers per mesh
     QT3DS_ASSERT(theDeformerCount <= 1);
@@ -846,8 +858,8 @@ void FbxDomWalker::GetVertexWeights(FbxMesh *inFbxMesh, TVertexWeigthList &outWe
         FbxSkin *theSkin = FbxCast<FbxSkin>(inFbxMesh->GetDeformer(i));
 
         if (theSkin && theSkin->GetClusterCount() > 0) {
-            std::vector<FbxVector4>
-                theGlobaBindPose; // contains the transformed vertices to bone space
+            // contains the transformed vertices to bone space
+            std::vector<FbxVector4> theGlobaBindPose;
 
             FbxDeformer::EDeformerType theDeformerType = theSkin->GetDeformerType();
             // we only support skin deformer
@@ -858,7 +870,7 @@ void FbxDomWalker::GetVertexWeights(FbxMesh *inFbxMesh, TVertexWeigthList &outWe
 
             theClusterMode = theSkin->GetCluster(0)->GetLinkMode();
 
-            theGlobaBindPose.resize(inFbxMesh->GetControlPointsCount());
+            theGlobaBindPose.resize(size_t(inFbxMesh->GetControlPointsCount()));
 
             // same for all clusters
             // GetTransformMatrix is the matrix to convert vertices of the mesh (skin) to world
@@ -870,8 +882,8 @@ void FbxDomWalker::GetVertexWeights(FbxMesh *inFbxMesh, TVertexWeigthList &outWe
 
             // convert all vertices from mesh space to world space
             for (unsigned long vertexId = 0; vertexId < theGlobaBindPose.size(); vertexId++) {
-                theGlobaBindPose[vertexId] =
-                    thelocalSkinToWorldSpace.MultT(inFbxMesh->GetControlPoints()[vertexId]);
+                theGlobaBindPose[vertexId] = thelocalSkinToWorldSpace.MultT(
+                            inFbxMesh->GetControlPoints()[vertexId]);
             }
 
             for (int clusterId = 0; clusterId < theSkin->GetClusterCount(); clusterId++) {
@@ -881,17 +893,17 @@ void FbxDomWalker::GetVertexWeights(FbxMesh *inFbxMesh, TVertexWeigthList &outWe
                     continue;
 
                 // this call adds the link node to our global list if not found
-                int jointIdx = GetJointNodeID(theCluster->GetLink());
+                int jointIdx = int(GetJointNodeID(theCluster->GetLink()));
                 int parentJointIdx = GetParentJointID(theCluster->GetLink());
 
                 // should always be a skleton right now
                 QT3DS_ASSERT(theCluster->GetLink()->GetNodeAttribute()->GetAttributeType()
-                          == FbxNodeAttribute::eSkeleton);
+                             == FbxNodeAttribute::eSkeleton);
 
                 // All the links must have the same link mode. and right now we don't support
                 // additive mode
                 if ((theCluster->GetLinkMode() != theClusterMode)
-                    || (theClusterMode == FbxCluster::eAdditive)) {
+                        || (theClusterMode == FbxCluster::eAdditive)) {
                     QT3DS_ASSERT(false);
                     return;
                 }
@@ -909,8 +921,8 @@ void FbxDomWalker::GetVertexWeights(FbxMesh *inFbxMesh, TVertexWeigthList &outWe
                 // The inverse converts from world space to cluster (bone) sapce
                 invBoneBindposeMatrix = BoneBindposeMatrix.Inverse();
                 // This Matrix convertes from local bone space to world space
-                FbxAMatrix boneLocalToSkinWorldSpace =
-                    invBoneBindposeMatrix * thelocalSkinToWorldSpace;
+                FbxAMatrix boneLocalToSkinWorldSpace = invBoneBindposeMatrix
+                        * thelocalSkinToWorldSpace;
                 FbxAMatrix worldSpaceToSkinSpace = thelocalSkinToWorldSpace.Inverse();
 
                 // add a joint node to our internal list
@@ -920,7 +932,7 @@ void FbxDomWalker::GetVertexWeights(FbxMesh *inFbxMesh, TVertexWeigthList &outWe
                 // get the actual weights
                 for (int j = 0; j < theCluster->GetControlPointIndicesCount(); j++) {
                     const int vertexID = vertexIDs[j];
-                    const float w = (float)weights[j];
+                    const float w = float(weights[j]);
 
                     // this can happen with smooting groups
                     if (vertexID >= inFbxMesh->GetControlPointsCount())
@@ -929,8 +941,10 @@ void FbxDomWalker::GetVertexWeights(FbxMesh *inFbxMesh, TVertexWeigthList &outWe
                         continue;
 
                     // store away values and convert vertices to local bone space
-                    outWeights[vertexID].push_back(_SVertexWeightInfo(
-                        jointIdx, w, invBoneBindposeMatrix.MultT(theGlobaBindPose[vertexID])));
+                    outWeights[size_t(vertexID)].push_back(
+                                _SVertexWeightInfo(jointIdx, w,
+                                                   invBoneBindposeMatrix.MultT(
+                                                       theGlobaBindPose[size_t(vertexID)])));
                 }
             }
         }
@@ -944,24 +958,23 @@ void FbxDomWalker::GetVertexWeights(FbxMesh *inFbxMesh, TVertexWeigthList &outWe
         QT3DS_ASSERT(outWeights[vertexID].size() < 4);
 
         // get total sum of the weigths for each vertex
-        for (unsigned long i = 0; i < outWeights[vertexID].size(); i++) {
+        for (unsigned long i = 0; i < outWeights[vertexID].size(); i++)
             weightSum += outWeights[vertexID][i].m_Weight;
-        }
 
         if (weightSum != 0.0f) {
             switch (theClusterMode) {
             case FbxCluster::eNormalize: {
                 float oneOverWeightSum = 1.0f / weightSum;
                 // in this mode we need to normalize the weights
-                for (unsigned long i = 0; i < outWeights[vertexID].size(); i++) {
+                for (unsigned long i = 0; i < outWeights[vertexID].size(); i++)
                     outWeights[vertexID][i].m_Weight *= oneOverWeightSum;
-                }
             } break;
             case FbxCluster::eTotalOne: {
                 // in this mode we must sum up to one
                 if (weightSum < 1.0f) {
-                    outWeights[vertexID].push_back(_SVertexWeightInfo(
-                        0, 1.0f - weightSum, inFbxMesh->GetControlPoints()[vertexID]));
+                    outWeights[vertexID].push_back(
+                                _SVertexWeightInfo(0, 1.0f - weightSum,
+                                                   inFbxMesh->GetControlPoints()[vertexID]));
                 }
             } break;
             case FbxCluster::eAdditive:
@@ -1014,10 +1027,10 @@ void FbxDomWalker::GenerateMeshTangents(const FbxMesh *inFbxMesh,
 
     // normal data
     const FbxGeometryElementNormal *theFbxNormals = inFbxMesh->GetElementNormal();
-    int theFbxNormalCount = 0;
+    size_t theFbxNormalCount = 0;
     FbxGeometryElement::EMappingMode theFbxNormalsMappingMode = FbxGeometryElement::eNone;
     if (theFbxNormals) {
-        theFbxNormalCount = theFbxNormals->GetDirectArray().GetCount();
+        theFbxNormalCount = size_t(theFbxNormals->GetDirectArray().GetCount());
         theFbxNormalsMappingMode = theFbxNormals->GetMappingMode();
     }
     // uv data
@@ -1030,9 +1043,8 @@ void FbxDomWalker::GenerateMeshTangents(const FbxMesh *inFbxMesh,
     }
 
     // we need normals and uv's
-    if (theFbxNormalCount == 0 || theFbxUVsCount == 0) {
+    if (theFbxNormalCount == 0 || theFbxUVsCount == 0)
         return;
-    }
 
     // allocate arrays
     SVector3 *tan1 = new SVector3[theFbxNormalCount * 2];
@@ -1064,53 +1076,41 @@ void FbxDomWalker::GenerateMeshTangents(const FbxMesh *inFbxMesh,
 
         // read vertex 1 data
         int theFbxCtrlPointIndex1 = inFbxMesh->GetPolygonVertex(i, 0);
-        ReadVertex(theFbxCtrlPoints, theFbxCtrlPointIndex1, (float *)vx1, identidy);
+        ReadVertex(theFbxCtrlPoints, theFbxCtrlPointIndex1, static_cast<float *>(vx1), identidy);
         ReadNormal(theFbxNormals, (theFbxNormalsMappingMode == FbxGeometryElement::eByPolygonVertex)
-                       ? theVertexID
-                       : theFbxCtrlPointIndex1,
-                   (float *)n1);
+                   ? theVertexID : theFbxCtrlPointIndex1, static_cast<float *>(n1));
         ReadTexCoord(theFbxUVs, (theFbxUVsMappingMode == FbxGeometryElement::eByPolygonVertex)
-                         ? theVertexID
-                         : theFbxCtrlPointIndex1,
-                     (float *)uv1);
+                     ? theVertexID : theFbxCtrlPointIndex1, static_cast<float *>(uv1));
         theFbxCtrlPointIndex1 = GetNormalIndex(
-            theFbxNormals, (theFbxNormalsMappingMode == FbxGeometryElement::eByPolygonVertex)
-                ? theVertexID
-                : theFbxCtrlPointIndex1);
+                    theFbxNormals,
+                    (theFbxNormalsMappingMode == FbxGeometryElement::eByPolygonVertex)
+                    ? theVertexID : theFbxCtrlPointIndex1);
         ++theVertexID;
 
         // read vertex 2 data
         int theFbxCtrlPointIndex2 = inFbxMesh->GetPolygonVertex(i, 1);
-        ReadVertex(theFbxCtrlPoints, theFbxCtrlPointIndex2, (float *)vx2, identidy);
+        ReadVertex(theFbxCtrlPoints, theFbxCtrlPointIndex2, static_cast<float *>(vx2), identidy);
         ReadNormal(theFbxNormals, (theFbxNormalsMappingMode == FbxGeometryElement::eByPolygonVertex)
-                       ? theVertexID
-                       : theFbxCtrlPointIndex2,
-                   (float *)n2);
+                   ? theVertexID : theFbxCtrlPointIndex2, static_cast<float *>(n2));
         ReadTexCoord(theFbxUVs, (theFbxUVsMappingMode == FbxGeometryElement::eByPolygonVertex)
-                         ? theVertexID
-                         : theFbxCtrlPointIndex2,
-                     (float *)uv2);
+                     ? theVertexID : theFbxCtrlPointIndex2, static_cast<float *>(uv2));
         theFbxCtrlPointIndex2 = GetNormalIndex(
-            theFbxNormals, (theFbxNormalsMappingMode == FbxGeometryElement::eByPolygonVertex)
-                ? theVertexID
-                : theFbxCtrlPointIndex2);
+                    theFbxNormals,
+                    (theFbxNormalsMappingMode == FbxGeometryElement::eByPolygonVertex)
+                    ? theVertexID : theFbxCtrlPointIndex2);
         ++theVertexID;
 
         // read vertex 3 data
         int theFbxCtrlPointIndex3 = inFbxMesh->GetPolygonVertex(i, 2);
-        ReadVertex(theFbxCtrlPoints, theFbxCtrlPointIndex3, (float *)vx3, identidy);
+        ReadVertex(theFbxCtrlPoints, theFbxCtrlPointIndex3, static_cast<float *>(vx3), identidy);
         ReadNormal(theFbxNormals, (theFbxNormalsMappingMode == FbxGeometryElement::eByPolygonVertex)
-                       ? theVertexID
-                       : theFbxCtrlPointIndex3,
-                   (float *)n3);
+                   ? theVertexID : theFbxCtrlPointIndex3, static_cast<float *>(n3));
         ReadTexCoord(theFbxUVs, (theFbxUVsMappingMode == FbxGeometryElement::eByPolygonVertex)
-                         ? theVertexID
-                         : theFbxCtrlPointIndex3,
-                     (float *)uv3);
+                     ? theVertexID : theFbxCtrlPointIndex3, static_cast<float *>(uv3));
         theFbxCtrlPointIndex3 = GetNormalIndex(
-            theFbxNormals, (theFbxNormalsMappingMode == FbxGeometryElement::eByPolygonVertex)
-                ? theVertexID
-                : theFbxCtrlPointIndex3);
+                    theFbxNormals,
+                    (theFbxNormalsMappingMode == FbxGeometryElement::eByPolygonVertex)
+                    ? theVertexID : theFbxCtrlPointIndex3);
         ++theVertexID;
 
         // compute triangle vectors
@@ -1127,8 +1127,8 @@ void FbxDomWalker::GenerateMeshTangents(const FbxMesh *inFbxMesh,
         float t2 = uv3[1] - uv1[1];
 
         float area = (s1 * t2 - s2 * t1);
-        if (area == 0.0)
-            area = 1.0;
+        if (area == 0.0f)
+            area = 1.0f;
 
         float r = 1.0f / area;
 
@@ -1178,7 +1178,7 @@ void FbxDomWalker::GenerateMeshTangents(const FbxMesh *inFbxMesh,
     outTangents.resize(theFbxNormalCount);
     outBinormals.resize(theFbxNormalCount);
     // compute actual tangents
-    for (int i = 0; i < theFbxNormalCount; i++) {
+    for (size_t i = 0; i < theFbxNormalCount; i++) {
         QT3DSVec3 n(normals[i][0], normals[i][1], normals[i][2]);
         const qt3ds::QT3DSVec3 t(tan1[i][0], tan1[i][1], tan1[i][2]);
         const qt3ds::QT3DSVec3 t2(tan2[i][0], tan2[i][1], tan2[i][2]);
@@ -1226,7 +1226,7 @@ long RetrieveFaceIndex(FbxDomWalker::TFaceIndicies &ioFaceIndicies,
     std::pair<FbxDomWalker::TFaceIndicies::first_type::iterator, bool> theTupleEntry;
 
     theTupleEntry = ioFaceIndicies.first.insert(
-        std::make_pair(inFaceValues, (long)(ioFaceIndicies.first.size())));
+                std::make_pair(inFaceValues, long(ioFaceIndicies.first.size())));
 
     return theTupleEntry.first->second;
 }
@@ -1279,8 +1279,8 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
     if (theFbxNormals) {
         theFbxNormalCount = theFbxNormals->GetDirectArray().GetCount();
         theFbxNormalsMappingMode = theFbxNormals->GetMappingMode();
-        canUseDirectMode &=
-            (theFbxNormalsMappingMode == FbxGeometryElement::eByControlPoint) ? true : false;
+        canUseDirectMode &= (theFbxNormalsMappingMode == FbxGeometryElement::eByControlPoint)
+                ? true : false;
     }
     // uv data
     int theFbxUVsSetCount = theFbxMesh->GetElementUVCount(); // overall uv set count
@@ -1291,8 +1291,8 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
     if (theFbxUVs) {
         theFbxUVsCount = theFbxUVs->GetDirectArray().GetCount();
         theFbxUVsMappingMode = theFbxUVs->GetMappingMode();
-        canUseDirectMode &=
-            (theFbxUVsMappingMode == FbxGeometryElement::eByControlPoint) ? true : false;
+        canUseDirectMode &= (theFbxUVsMappingMode == FbxGeometryElement::eByControlPoint)
+                ? true : false;
     }
     // uv data second set
     const FbxGeometryElementUV *theFbxUV2s = theFbxMesh->GetElementUV(1);
@@ -1301,8 +1301,8 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
     if (theFbxUV2s && theFbxUVsSetCount > 1) {
         theFbxUV2sCount = theFbxUV2s->GetDirectArray().GetCount();
         theFbxUV2sMappingMode = theFbxUV2s->GetMappingMode();
-        canUseDirectMode &=
-            (theFbxUV2sMappingMode == FbxGeometryElement::eByControlPoint) ? true : false;
+        canUseDirectMode &= (theFbxUV2sMappingMode == FbxGeometryElement::eByControlPoint)
+                ? true : false;
     }
 
     // tangent data
@@ -1312,8 +1312,8 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
     if (theFbxTangents) {
         theFbxTangentsCount = theFbxTangents->GetDirectArray().GetCount();
         theFbxTangentsMappingMode = theFbxTangents->GetMappingMode();
-        canUseDirectMode &=
-            (theFbxTangentsMappingMode == FbxGeometryElement::eByControlPoint) ? true : false;
+        canUseDirectMode &= (theFbxTangentsMappingMode == FbxGeometryElement::eByControlPoint)
+                ? true : false;
     }
     // binormal data
     FbxGeometryElementBinormal *theFbxBinormals = theFbxMesh->GetElementBinormal();
@@ -1322,8 +1322,8 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
     if (theFbxBinormals) {
         theFbxBinormalsCount = theFbxBinormals->GetDirectArray().GetCount();
         theFbxBinormalsMappingMode = theFbxBinormals->GetMappingMode();
-        canUseDirectMode &=
-            (theFbxBinormalsMappingMode == FbxGeometryElement::eByControlPoint) ? true : false;
+        canUseDirectMode &= (theFbxBinormalsMappingMode == FbxGeometryElement::eByControlPoint)
+                ? true : false;
     }
     // material data
     FbxGeometryElementMaterial *theFbxMaterials = theFbxMesh->GetElementMaterial();
@@ -1346,9 +1346,8 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
     // check if we need to generate tangents and binormals
     std::vector<SVector3> newTangents;
     std::vector<SVector3> newBinormals;
-    if (!theFbxTangents && !theFbxBinormals) {
+    if (!theFbxTangents && !theFbxBinormals)
         GenerateMeshTangents(theFbxMesh, newTangents, newBinormals);
-    }
 
     // polygon data
     int theFbxTriangleCount = theFbxMesh->GetPolygonCount();
@@ -1358,7 +1357,7 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
     QueryMaterialInfo(theFbxMesh, &thePerFaceMaterialnfo);
 
     TLongsList theMaterialFaceIndicies;
-    theMaterialFaceIndicies.reserve(theFbxTriangleCount);
+    theMaterialFaceIndicies.reserve(size_t(theFbxTriangleCount));
 
     // When we build a transform history we build everything into one matrix
     // but the geometric transform is not inherited therefore
@@ -1369,12 +1368,12 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
     canUseDirectMode = false; // currently disabled
     if (canUseDirectMode) {
         QT3DS_ASSERT(!theFbxNormals
-                  || theFbxNormalsMappingMode == FbxGeometryElement::eByControlPoint);
+                     || theFbxNormalsMappingMode == FbxGeometryElement::eByControlPoint);
         QT3DS_ASSERT(!theFbxUVs || theFbxUVsMappingMode == FbxGeometryElement::eByControlPoint);
         QT3DS_ASSERT(!theFbxTangents
-                  || theFbxTangentsMappingMode == FbxGeometryElement::eByControlPoint);
+                     || theFbxTangentsMappingMode == FbxGeometryElement::eByControlPoint);
         QT3DS_ASSERT(!theFbxBinormals
-                  || theFbxBinormalsMappingMode == FbxGeometryElement::eByControlPoint);
+                     || theFbxBinormalsMappingMode == FbxGeometryElement::eByControlPoint);
 
         for (int i = 0; i < theFbxCtrlPointCount; ++i) {
             TVertexInfoTuple theFaceTupleValues;
@@ -1424,7 +1423,7 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
                 int theFbxCtrlPointIndex = theFbxMesh->GetPolygonVertex(i, j);
                 QT3DS_ASSERT(theFbxMesh->GetPolygonSize(i) == 3);
                 QT3DS_ASSERT(theFbxCtrlPointIndex < theFbxCtrlPointCount
-                          && theFbxCtrlPointIndex != -1);
+                             && theFbxCtrlPointIndex != -1);
 
                 ReadVertex(theFbxCtrlPoints, theFbxCtrlPointIndex, get<0>(theFaceTupleValues),
                            geomTransform);
@@ -1432,68 +1431,54 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
                 if (theFbxNormals) {
                     ReadNormal(theFbxNormals,
                                (theFbxNormalsMappingMode == FbxGeometryElement::eByPolygonVertex)
-                                   ? theVertexID
-                                   : theFbxCtrlPointIndex,
-                               get<1>(theFaceTupleValues));
+                               ? theVertexID : theFbxCtrlPointIndex, get<1>(theFaceTupleValues));
                 }
                 if (theFbxUVs) {
                     ReadTexCoord(theFbxUVs,
                                  (theFbxUVsMappingMode == FbxGeometryElement::eByPolygonVertex)
-                                     ? theVertexID
-                                     : theFbxCtrlPointIndex,
-                                 get<2>(theFaceTupleValues));
+                                 ? theVertexID : theFbxCtrlPointIndex, get<2>(theFaceTupleValues));
                 }
                 if (theFbxTangents) {
                     ReadTexTangent(theFbxTangents, (theFbxTangentsMappingMode
                                                     == FbxGeometryElement::eByPolygonVertex)
-                                       ? theVertexID
-                                       : theFbxCtrlPointIndex,
+                                   ? theVertexID : theFbxCtrlPointIndex,
                                    get<3>(theFaceTupleValues));
                 } else if (newTangents.size() > 0) {
                     // we use the mapping as the normals
                     ReadTexTangent(
-                        newTangents, theFbxNormals,
-                        (theFbxNormalsMappingMode == FbxGeometryElement::eByPolygonVertex)
-                            ? theVertexID
-                            : theFbxCtrlPointIndex,
-                        get<3>(theFaceTupleValues));
+                                newTangents, theFbxNormals,
+                                (theFbxNormalsMappingMode == FbxGeometryElement::eByPolygonVertex)
+                                ? theVertexID : theFbxCtrlPointIndex, get<3>(theFaceTupleValues));
                 }
                 if (theFbxBinormals) {
                     ReadTexBinormal(theFbxBinormals, (theFbxBinormalsMappingMode
                                                       == FbxGeometryElement::eByPolygonVertex)
-                                        ? theVertexID
-                                        : theFbxCtrlPointIndex,
+                                    ? theVertexID : theFbxCtrlPointIndex,
                                     get<4>(theFaceTupleValues));
                 } else if (newBinormals.size() > 0) {
                     ReadTexBinormal(
-                        newBinormals, theFbxNormals,
-                        (theFbxNormalsMappingMode == FbxGeometryElement::eByPolygonVertex)
-                            ? theVertexID
-                            : theFbxCtrlPointIndex,
-                        get<4>(theFaceTupleValues));
+                                newBinormals, theFbxNormals,
+                                (theFbxNormalsMappingMode == FbxGeometryElement::eByPolygonVertex)
+                                ? theVertexID : theFbxCtrlPointIndex, get<4>(theFaceTupleValues));
                 }
 
                 if (theVertexWeights.size() > 0) {
-                    ReadWeight(theVertexWeights[theFbxCtrlPointIndex], theFbxCtrlPointIndex,
+                    ReadWeight(theVertexWeights[size_t(theFbxCtrlPointIndex)], theFbxCtrlPointIndex,
                                get<5>(theFaceTupleValues));
-                    ReadBoneIndex(theVertexWeights[theFbxCtrlPointIndex], theFbxCtrlPointIndex,
-                                  get<6>(theFaceTupleValues), theJointInfoList);
+                    ReadBoneIndex(theVertexWeights[size_t(theFbxCtrlPointIndex)],
+                            theFbxCtrlPointIndex, get<6>(theFaceTupleValues), theJointInfoList);
                 }
 
                 if (theFbxUV2s) {
                     ReadTexCoord(theFbxUV2s,
                                  (theFbxUV2sMappingMode == FbxGeometryElement::eByPolygonVertex)
-                                     ? theVertexID
-                                     : theFbxCtrlPointIndex,
-                                 get<7>(theFaceTupleValues));
+                                 ? theVertexID : theFbxCtrlPointIndex, get<7>(theFaceTupleValues));
                 }
 
                 if (theFbxColors) {
                     ReadColor(theFbxColors,
                               (theFbxColorsMappingMode == FbxGeometryElement::eByPolygonVertex)
-                                   ? theVertexID
-                                   : theFbxCtrlPointIndex,
-                              get<8>(theFaceTupleValues));
+                              ? theVertexID : theFbxCtrlPointIndex, get<8>(theFaceTupleValues));
                 }
 
                 long theFaceIndex = RetrieveFaceIndex(theFaceIndices, theFaceTupleValues);
@@ -1529,30 +1514,25 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
     TFloatsList theColors;
 
     // Prepare arrays for population
-    long theNumberOfUniqueFacePoints = (long)theFaceIndices.first.size();
+    size_t theNumberOfUniqueFacePoints = theFaceIndices.first.size();
     if (theNumberOfUniqueFacePoints == 0)
         return;
 
     theVertices.resize(theNumberOfUniqueFacePoints * 3);
-    if (theFbxNormals) {
+    if (theFbxNormals)
         theNormals.resize(theNumberOfUniqueFacePoints * 3);
-    }
-    if (theFbxUVs) {
+    if (theFbxUVs)
         theTexCoords.resize(theNumberOfUniqueFacePoints * 2);
-    }
-    if (theFbxTangents || newTangents.size() > 0) {
+    if (theFbxTangents || newTangents.size() > 0)
         theTexTangents.resize(theNumberOfUniqueFacePoints * 3);
-    }
-    if (theFbxBinormals || newBinormals.size() > 0) {
+    if (theFbxBinormals || newBinormals.size() > 0)
         theTexBinormals.resize(theNumberOfUniqueFacePoints * 3);
-    }
     if (theVertexWeights.size() > 0) {
         theWeights.resize(theNumberOfUniqueFacePoints * 4);
         theBoneIndex.resize(theNumberOfUniqueFacePoints * 4);
     }
-    if (theFbxUV2s) {
+    if (theFbxUV2s)
         theTexCoords2.resize(theNumberOfUniqueFacePoints * 2);
-    }
     if (theFbxColors)
         theColors.resize(theNumberOfUniqueFacePoints * 3);
 
@@ -1560,7 +1540,7 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
     TFaceIndicies::first_type::const_iterator theIter = theFaceIndices.first.begin();
     TFaceIndicies::first_type::const_iterator theEnd = theFaceIndices.first.end();
     for (; theIter != theEnd; ++theIter) {
-        long theFaceIndex = theIter->second;
+        size_t theFaceIndex = size_t(theIter->second);
         const TVertexInfoTuple &thePointTuple = theIter->first;
 
         WriteFloat3(theVertices, theFaceIndex, get<0>(thePointTuple));
@@ -1601,12 +1581,13 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
             for (size_t elCount = 0; elCount < thePerFaceMaterialnfo.m_MatElementsIDs.size();
                  elCount++) {
                 FbxGeometryElementMaterial *theMaterialElement = theFbxMesh->GetElementMaterial(
-                    thePerFaceMaterialnfo.m_MatElementsIDs.at(elCount));
+                            thePerFaceMaterialnfo.m_MatElementsIDs.at(elCount));
                 FbxSurfaceMaterial *theMaterial = inFbxNode->GetMaterial(
-                    theMaterialElement->GetIndexArray().GetAt(thePerFaceMaterialnfo.m_StartFace));
+                            theMaterialElement->GetIndexArray().GetAt(
+                                int(thePerFaceMaterialnfo.m_StartFace)));
                 if (theMaterial)
-                    ReadMaterial(theMaterial, thePerFaceMaterialnfo.m_StartFace,
-                                 thePerFaceMaterialnfo.m_FaceCount);
+                    ReadMaterial(theMaterial, int(thePerFaceMaterialnfo.m_StartFace),
+                                 int(thePerFaceMaterialnfo.m_FaceCount));
             }
         }
     } else if (theFbxNormals) {
@@ -1615,17 +1596,16 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
         thePerFaceMaterialnfo.m_FaceCount = theFbxTriangleCount - thePerFaceMaterialnfo.m_StartFace;
         theFaceMaterialIndices.push_back(thePerFaceMaterialnfo);
 
-        ReadDefaultMaterial(inFbxNode, thePerFaceMaterialnfo.m_StartFace,
-                            thePerFaceMaterialnfo.m_FaceCount);
+        ReadDefaultMaterial(inFbxNode, int(thePerFaceMaterialnfo.m_StartFace),
+                            int(thePerFaceMaterialnfo.m_FaceCount));
     }
 
     // stream out joint info if any
     if (theJointInfoList.size()) {
         TJointInfoList::iterator theIter;
 
-        for (theIter = theJointInfoList.begin(); theIter != theJointInfoList.end(); theIter++) {
+        for (theIter = theJointInfoList.begin(); theIter != theJointInfoList.end(); theIter++)
             m_Translator->SetJointNode(*theIter);
-        }
     }
 
     // Here we process a skeleton hierarchy which belongs to a mesh.
@@ -1668,9 +1648,9 @@ void FbxDomWalker::ReadVertex(const FbxVector4 *inFbxCtrlPoints, int inFbxCtrlPo
     const FbxVector4 &inCtrlPoint = inFbxCtrlPoints[inFbxCtrlPointIndex];
     FbxVector4 transformedCtrlPoint = geometricTransformation.MultT(inCtrlPoint);
 
-    outValue[0] = (float)transformedCtrlPoint[0];
-    outValue[1] = (float)transformedCtrlPoint[1];
-    outValue[2] = (float)transformedCtrlPoint[2];
+    outValue[0] = float(transformedCtrlPoint[0]);
+    outValue[1] = float(transformedCtrlPoint[1]);
+    outValue[2] = float(transformedCtrlPoint[2]);
 }
 
 /**
@@ -1685,8 +1665,9 @@ void FbxDomWalker::ReadVertex(const FbxVector4 *inFbxCtrlPoints, int inFbxCtrlPo
 * @return no return.
 */
 void FbxDomWalker::ReadVertex(const TPerVertexWeightInfo &inFbxWeights,
-                              int /* inFbxCtrlPointIndex */, float *outValue)
+                              int inFbxCtrlPointIndex, float *outValue)
 {
+    Q_UNUSED(inFbxCtrlPointIndex)
     outValue[0] = inFbxWeights[0].m_Position[0];
     outValue[1] = inFbxWeights[0].m_Position[1];
     outValue[2] = inFbxWeights[0].m_Position[2];
@@ -1719,9 +1700,9 @@ void FbxDomWalker::ReadNormal(const FbxGeometryElementNormal *inFbxNormals, int 
 
     FbxVector4 theNormal = inFbxNormals->GetDirectArray().GetAt(theFbxNormalIndex);
 
-    outValue[0] = (float)theNormal[0];
-    outValue[1] = (float)theNormal[1];
-    outValue[2] = (float)theNormal[2];
+    outValue[0] = float(theNormal[0]);
+    outValue[1] = float(theNormal[1]);
+    outValue[2] = float(theNormal[2]);
 }
 
 void FbxDomWalker::ReadColor(const FbxGeometryElementVertexColor *inFbxColors, int inFbxIndex,
@@ -1742,9 +1723,9 @@ void FbxDomWalker::ReadColor(const FbxGeometryElementVertexColor *inFbxColors, i
 
     FbxColor theColor = inFbxColors->GetDirectArray().GetAt(theFbxColorIndex);
 
-    outValue[0] = (float)theColor.mRed;
-    outValue[1] = (float)theColor.mGreen;
-    outValue[2] = (float)theColor.mBlue;
+    outValue[0] = float(theColor.mRed);
+    outValue[1] = float(theColor.mGreen);
+    outValue[2] = float(theColor.mBlue);
 }
 
 /**
@@ -1773,8 +1754,8 @@ void FbxDomWalker::ReadTexCoord(const FbxGeometryElementUV *inFbxUVs, int inFbxI
     }
 
     const FbxVector2 uv(inFbxUVs->GetDirectArray().GetAt(theFbxUVIndex));
-    outValue[0] = (float) uv[0];
-    outValue[1] = (float) uv[1];
+    outValue[0] = float(uv[0]);
+    outValue[1] = float(uv[1]);
 }
 
 /**
@@ -1804,9 +1785,9 @@ void FbxDomWalker::ReadTexTangent(const FbxGeometryElementTangent *inFbxTangents
 
     FbxVector4 theTexTangent = inFbxTangents->GetDirectArray().GetAt(theFbxTangentIndex);
 
-    outValue[0] = (float)theTexTangent[0];
-    outValue[1] = (float)theTexTangent[1];
-    outValue[2] = (float)theTexTangent[2];
+    outValue[0] = float(theTexTangent[0]);
+    outValue[1] = float(theTexTangent[1]);
+    outValue[2] = float(theTexTangent[2]);
 }
 
 /**
@@ -1822,13 +1803,13 @@ void FbxDomWalker::ReadTexTangent(std::vector<SVector3> &inTangentPoints,
                                   const FbxGeometryElementNormal *inFbxNormals, int inFbxIndex,
                                   float *outValue)
 {
-    int theFbxTangentIndex = 0;
+    size_t theFbxTangentIndex = 0;
     switch (inFbxNormals->GetReferenceMode()) {
     case FbxGeometryElement::eDirect:
-        theFbxTangentIndex = inFbxIndex;
+        theFbxTangentIndex = size_t(inFbxIndex);
         break;
     case FbxGeometryElement::eIndexToDirect:
-        theFbxTangentIndex = inFbxNormals->GetIndexArray().GetAt(inFbxIndex);
+        theFbxTangentIndex = size_t(inFbxNormals->GetIndexArray().GetAt(inFbxIndex));
         break;
     default:
         QT3DS_ASSERT(false);
@@ -1867,9 +1848,9 @@ void FbxDomWalker::ReadTexBinormal(const FbxGeometryElementBinormal *inFbxBinorm
 
     FbxVector4 theTexBinormal = inFbxBinormals->GetDirectArray().GetAt(theFbxBinormalIndex);
 
-    outValue[0] = (float)theTexBinormal[0];
-    outValue[1] = (float)theTexBinormal[1];
-    outValue[2] = (float)theTexBinormal[2];
+    outValue[0] = float(theTexBinormal[0]);
+    outValue[1] = float(theTexBinormal[1]);
+    outValue[2] = float(theTexBinormal[2]);
 }
 
 /**
@@ -1885,13 +1866,13 @@ void FbxDomWalker::ReadTexBinormal(std::vector<SVector3> &inBinormalPoints,
                                    const FbxGeometryElementNormal *inFbxNormals, int inFbxIndex,
                                    float *outValue)
 {
-    int theFbxBinormalIndex = 0;
+    size_t theFbxBinormalIndex = 0;
     switch (inFbxNormals->GetReferenceMode()) {
     case FbxGeometryElement::eDirect:
-        theFbxBinormalIndex = inFbxIndex;
+        theFbxBinormalIndex = size_t(inFbxIndex);
         break;
     case FbxGeometryElement::eIndexToDirect:
-        theFbxBinormalIndex = inFbxNormals->GetIndexArray().GetAt(inFbxIndex);
+        theFbxBinormalIndex = size_t(inFbxNormals->GetIndexArray().GetAt(inFbxIndex));
         break;
     default:
         QT3DS_ASSERT(false);
@@ -1913,13 +1894,13 @@ void FbxDomWalker::ReadTexBinormal(std::vector<SVector3> &inBinormalPoints,
 * @return no return.
 */
 void FbxDomWalker::ReadWeight(const FbxDomWalker::TPerVertexWeightInfo &inFbxWeights,
-                              int /* inFbxIndex */, float *outValue)
+                              int inFbxIndex, float *outValue)
 {
+    Q_UNUSED(inFbxIndex)
     // clear since we might not use all values
     outValue[0] = outValue[1] = outValue[2] = outValue[3] = 0;
-    for (unsigned long i = 0; i < inFbxWeights.size() && i < 4; i++) {
+    for (unsigned long i = 0; i < inFbxWeights.size() && i < 4; i++)
         outValue[i] = inFbxWeights[i].m_Weight;
-    }
 }
 
 /**
@@ -1933,9 +1914,10 @@ void FbxDomWalker::ReadWeight(const FbxDomWalker::TPerVertexWeightInfo &inFbxWei
 * @return no return.
 */
 void FbxDomWalker::ReadBoneIndex(const FbxDomWalker::TPerVertexWeightInfo &inFbxWeights,
-                                 int /* inFbxIndex */, float *outValue,
+                                 int inFbxIndex, float *outValue,
                                  const TJointInfoList &inAbsoluteJoints)
 {
+    Q_UNUSED(inFbxIndex)
     // clear since we might not use all values
     outValue[0] = outValue[1] = outValue[2] = outValue[3] = 0;
 
@@ -1950,7 +1932,7 @@ void FbxDomWalker::ReadBoneIndex(const FbxDomWalker::TPerVertexWeightInfo &inFbx
                 break;
             }
         }
-        outValue[i] = (float)relativeIndex;
+        outValue[i] = float(relativeIndex);
     }
 }
 
@@ -1967,15 +1949,15 @@ void FbxDomWalker::ProcessTextureParameter(FbxTexture *inTexture,
 {
     if (inTexture) {
         outTextureParameters.m_Flag = true;
-        outTextureParameters.m_offsetU.SetValue(inTexture->GetTranslationU());
-        outTextureParameters.m_offsetV.SetValue(inTexture->GetTranslationV());
-        outTextureParameters.m_repeatU.SetValue(inTexture->GetScaleU());
-        outTextureParameters.m_repeatV.SetValue(inTexture->GetScaleV());
+        outTextureParameters.m_offsetU.SetValue(float(inTexture->GetTranslationU()));
+        outTextureParameters.m_offsetV.SetValue(float(inTexture->GetTranslationV()));
+        outTextureParameters.m_repeatU.SetValue(float(inTexture->GetScaleU()));
+        outTextureParameters.m_repeatV.SetValue(float(inTexture->GetScaleV()));
 #if 0
         // TODO: These parameters do not work correctly with current math in SetTexture, so they are
         // ignored for now. Created a task (QT3DS-2255) to implement support later, if deemed
         // necessary.
-        outTextureParameters.m_rotateUV.SetValue(inTexture->GetRotationW());
+        outTextureParameters.m_rotateUV.SetValue(float(inTexture->GetRotationW()));
         outTextureParameters.m_mirrorU.SetValue(inTexture->GetSwapUV());
         outTextureParameters.m_mirrorV.SetValue(inTexture->GetSwapUV());
 #endif
@@ -2061,8 +2043,8 @@ void FbxDomWalker::QueryMaterialInfo(FbxMesh *fbxMesh, SFaceMaterialInfo *info)
         FbxSurfaceMaterial *theMaterial = nullptr;
         int theMatId = -1;
         theMaterial = fbxMesh->GetNode()->GetMaterial(
-            theMaterialElement->GetIndexArray().GetAt(info->m_StartFace));
-        theMatId = theMaterialElement->GetIndexArray().GetAt(info->m_StartFace);
+                    theMaterialElement->GetIndexArray().GetAt(int(info->m_StartFace)));
+        theMatId = theMaterialElement->GetIndexArray().GetAt(int(info->m_StartFace));
 
         if (theMatId >= 0) {
             info->m_MatElementsIDs.push_back(l);
@@ -2105,24 +2087,24 @@ void FbxDomWalker::ReadMaterial(const FbxSurfaceMaterial *inMaterial, const int 
         theNewMaterial.m_TechniqueType = EMatCommonProfileTechnique_Lambert;
 
         fbxColor = lambertMaterial->Ambient;
-        attenuationFactor = (float)lambertMaterial->AmbientFactor;
-        theNewMaterial.m_Ambient.SetColor((float)fbxColor.mData[0] * attenuationFactor,
-                (float)fbxColor.mData[1] * attenuationFactor,
-                (float)fbxColor.mData[2] * attenuationFactor, 1);
+        attenuationFactor = float(lambertMaterial->AmbientFactor);
+        theNewMaterial.m_Ambient.SetColor(float(fbxColor.mData[0]) * attenuationFactor,
+                float(fbxColor.mData[1]) * attenuationFactor,
+                float(fbxColor.mData[2]) * attenuationFactor, 1);
         fbxColor = lambertMaterial->Diffuse;
-        attenuationFactor = (float)lambertMaterial->DiffuseFactor;
-        theNewMaterial.m_Diffuse.SetColor((float)fbxColor.mData[0] * attenuationFactor,
-                (float)fbxColor.mData[1] * attenuationFactor,
-                (float)fbxColor.mData[2] * attenuationFactor, 1);
+        attenuationFactor = float(lambertMaterial->DiffuseFactor);
+        theNewMaterial.m_Diffuse.SetColor(float(fbxColor.mData[0]) * attenuationFactor,
+                float(fbxColor.mData[1]) * attenuationFactor,
+                float(fbxColor.mData[2]) * attenuationFactor, 1);
         fbxColor = lambertMaterial->Emissive;
-        attenuationFactor = (float)lambertMaterial->EmissiveFactor;
-        theNewMaterial.m_Emission.SetColor((float)fbxColor.mData[0] * attenuationFactor,
-                (float)fbxColor.mData[1] * attenuationFactor,
-                (float)fbxColor.mData[2] * attenuationFactor, 1);
+        attenuationFactor = float(lambertMaterial->EmissiveFactor);
+        theNewMaterial.m_Emission.SetColor(float(fbxColor.mData[0]) * attenuationFactor,
+                float(fbxColor.mData[1]) * attenuationFactor,
+                float(fbxColor.mData[2]) * attenuationFactor, 1);
         fbxColor = lambertMaterial->TransparentColor;
-        theNewMaterial.m_Transparent.SetColor((float)fbxColor.mData[0], (float)fbxColor.mData[1],
-                (float)fbxColor.mData[2], 1);
-        theNewMaterial.m_Transparency.SetValue((float)lambertMaterial->TransparencyFactor);
+        theNewMaterial.m_Transparent.SetColor(float(fbxColor.mData[0]), float(fbxColor.mData[1]),
+                float(fbxColor.mData[2]), 1);
+        theNewMaterial.m_Transparency.SetValue(float(lambertMaterial->TransparencyFactor));
     }
 
     if (inMaterial->GetClassId().Is(FbxSurfacePhong::ClassId)) {
@@ -2130,15 +2112,15 @@ void FbxDomWalker::ReadMaterial(const FbxSurfaceMaterial *inMaterial, const int 
         theNewMaterial.m_TechniqueType = EMatCommonProfileTechnique_Phong;
 
         fbxColor = phongMaterial->Specular;
-        attenuationFactor = (float)phongMaterial->SpecularFactor;
-        theNewMaterial.m_Specular.SetColor((float)fbxColor.mData[0] * attenuationFactor,
-                (float)fbxColor.mData[1] * attenuationFactor,
-                (float)fbxColor.mData[2] * attenuationFactor, 1);
+        attenuationFactor = float(phongMaterial->SpecularFactor);
+        theNewMaterial.m_Specular.SetColor(float(fbxColor.mData[0]) * attenuationFactor,
+                float(fbxColor.mData[1]) * attenuationFactor,
+                float(fbxColor.mData[2]) * attenuationFactor, 1);
         fbxColor = phongMaterial->Reflection;
-        theNewMaterial.m_Reflective.SetColor((float)fbxColor.mData[0], (float)fbxColor.mData[1],
-                (float)fbxColor.mData[2], 1);
-        theNewMaterial.m_Reflectivity.SetValue((float)phongMaterial->ReflectionFactor);
-        theNewMaterial.m_Shininess.SetValue((float)phongMaterial->Shininess);
+        theNewMaterial.m_Reflective.SetColor(float(fbxColor.mData[0]), float(fbxColor.mData[1]),
+                float(fbxColor.mData[2]), 1);
+        theNewMaterial.m_Reflectivity.SetValue(float(phongMaterial->ReflectionFactor));
+        theNewMaterial.m_Shininess.SetValue(float(phongMaterial->Shininess));
     }
 
     m_Translator->PushMaterial(inMaterial->GetName());
@@ -2184,14 +2166,14 @@ void FbxDomWalker::ReadDefaultMaterial(const FbxNode *inFbxNode, const int start
         if (FbxColor3DT == theFbxType) {
             FbxDouble3 theDouble3 = theProperty.Get<FbxDouble3>();
 
-            theNewMaterial.m_Diffuse.SetColor((float)theDouble3[0], (float)theDouble3[1],
-                                              (float)theDouble3[2], 1);
+            theNewMaterial.m_Diffuse.SetColor(float(theDouble3[0]), float(theDouble3[1]),
+                    float(theDouble3[2]), 1);
             break;
         } else if (FbxColor4DT == theFbxType) {
             FbxDouble4 theDouble4 = theProperty.Get<FbxDouble4>();
 
-            theNewMaterial.m_Diffuse.SetColor((float)theDouble4[0], (float)theDouble4[1],
-                                              (float)theDouble4[2], (float)theDouble4[3]);
+            theNewMaterial.m_Diffuse.SetColor(float(theDouble4[0]), float(theDouble4[1]),
+                    float(theDouble4[2]), float(theDouble4[3]));
             break;
         }
 
@@ -2368,7 +2350,7 @@ inline void WriteKeyframe(const FbxAnimCurveKey &inKey, const char *transformTyp
                           const char *channelName, qt3dsimp::ISceneGraphTranslation *inTranslator)
 {
     // Create a key
-    SKeyframeParameters theKeyframeInfo((float)inKey.GetTime().GetSecondDouble(), inKey.GetValue(),
+    SKeyframeParameters theKeyframeInfo(float(inKey.GetTime().GetSecondDouble()), inKey.GetValue(),
                                         0, 0, 0, 0);
 
     // Set information about the key
@@ -2422,8 +2404,8 @@ void FbxDomWalker::ProcessAnimLayer(FbxNode *inNode, FbxAnimLayer *inAnimLayer)
         FbxNodeAttribute *nodeAttribute = inNode->GetNodeAttribute();
         if (nodeAttribute) {
             redAnimCurve = nodeAttribute->Color.GetCurve(inAnimLayer, FBXSDK_CURVENODE_COLOR_RED);
-            greenAnimCurve =
-                nodeAttribute->Color.GetCurve(inAnimLayer, FBXSDK_CURVENODE_COLOR_GREEN);
+            greenAnimCurve = nodeAttribute->Color.GetCurve(inAnimLayer,
+                                                           FBXSDK_CURVENODE_COLOR_GREEN);
             blueAnimCurve = nodeAttribute->Color.GetCurve(inAnimLayer, FBXSDK_CURVENODE_COLOR_BLUE);
         }
 
@@ -2436,10 +2418,10 @@ void FbxDomWalker::ProcessAnimLayer(FbxNode *inNode, FbxAnimLayer *inAnimLayer)
                 m_Translator->CacheAnimationTrack();
 
                 m_Translator->SetAnimationTrack(FBXSDK_CURVENODE_TRANSLATION,
-                                                theTranslateCurveNode->GetChannelName(i));
+                                                theTranslateCurveNode->GetChannelName(int(i)));
 
                 ProcessAnimCurve(theTranslateCurveNode->GetCurve(i), FBXSDK_CURVENODE_TRANSLATION,
-                                 theTranslateCurveNode->GetChannelName(i));
+                                 theTranslateCurveNode->GetChannelName(int(i)));
             }
         }
 
@@ -2452,10 +2434,10 @@ void FbxDomWalker::ProcessAnimLayer(FbxNode *inNode, FbxAnimLayer *inAnimLayer)
                 m_Translator->CacheAnimationTrack();
 
                 m_Translator->SetAnimationTrack(FBXSDK_CURVENODE_ROTATION,
-                                                theRotateCurveNode->GetChannelName(i));
+                                                theRotateCurveNode->GetChannelName(int(i)));
 
                 ProcessAnimCurve(theRotateCurveNode->GetCurve(i), FBXSDK_CURVENODE_ROTATION,
-                                 theRotateCurveNode->GetChannelName(i));
+                                 theRotateCurveNode->GetChannelName(int(i)));
             }
         }
 
@@ -2468,10 +2450,10 @@ void FbxDomWalker::ProcessAnimLayer(FbxNode *inNode, FbxAnimLayer *inAnimLayer)
                 m_Translator->CacheAnimationTrack();
 
                 m_Translator->SetAnimationTrack(FBXSDK_CURVENODE_SCALING,
-                                                theScaleCurveNode->GetChannelName(i));
+                                                theScaleCurveNode->GetChannelName(int(i)));
 
                 ProcessAnimCurve(theScaleCurveNode->GetCurve(i), FBXSDK_CURVENODE_SCALING,
-                                 theScaleCurveNode->GetChannelName(i));
+                                 theScaleCurveNode->GetChannelName(int(i)));
             }
         }
 
@@ -2511,9 +2493,8 @@ void FbxDomWalker::ProcessAnimLayer(FbxNode *inNode, FbxAnimLayer *inAnimLayer)
             m_NodeIsAnimatedMap.insert(std::make_pair(inNode, true));
 
         // process node children
-        for (int i = 0; i < inNode->GetChildCount(); ++i) {
+        for (int i = 0; i < inNode->GetChildCount(); ++i)
             ProcessAnimLayer(inNode->GetChild(i), inAnimLayer);
-        }
     }
 }
 
@@ -2523,19 +2504,26 @@ void FbxDomWalker::ProcessAnimLayer(FbxNode *inNode, FbxAnimLayer *inAnimLayer)
 *
 * @return no return.
 */
-void FbxDomWalker::ProcessAnimationStacks()
+bool FbxDomWalker::ProcessAnimationStacks()
 {
     if (m_FbxScene != nullptr) {
-        // get animation stack count
+        int numAnimations = m_FbxScene->GetSrcObjectCount<FbxAnimCurve>()
+                + m_FbxScene->GetSrcObjectCount<FbxAnimCurveNode>();
+
+        if (numAnimations == 0) {
+            // No actual animations, bail out
+            return false;
+        }
+
+        // Get animation stack count
         int numAnimStacks = m_FbxScene->GetSrcObjectCount<FbxAnimStack>();
 
-        // iterate throug all animations stacks
+        // Iterate throug all animations stacks
         for (int i = 0; i < numAnimStacks; i++) {
             FbxAnimStack *theAnimStack = m_FbxScene->GetSrcObject<FbxAnimStack>(i);
-
             if (theAnimStack) {
                 FbxNode *theRootNode = m_FbxScene->GetRootNode();
-                // our internal animation system cannot handle pivots.
+                // Our internal animation system cannot handle pivots.
                 // This means fbx can contain "pre-rotations" which must be applied
                 // to the object before the aniamtion is applied. In addition this rotation
                 // is inherited to children. This messes up our converion entirely.
@@ -2543,16 +2531,16 @@ void FbxDomWalker::ProcessAnimationStacks()
                 theRootNode->ResetPivotSetAndConvertAnimation();
                 int numAnimLayers = theAnimStack->GetMemberCount<FbxAnimLayer>();
 
-                // iterate throug all animations layers
+                // Iterate throug all animations layers
                 for (int n = 0; n < numAnimLayers; n++) {
                     FbxAnimLayer *theAnimLayer = theAnimStack->GetMember<FbxAnimLayer>(n);
-                    for (int nodeCount = 0; nodeCount < theRootNode->GetChildCount(); nodeCount++) {
+                    for (int nodeCount = 0; nodeCount < theRootNode->GetChildCount(); nodeCount++)
                         ProcessAnimLayer(theRootNode->GetChild(nodeCount), theAnimLayer);
-                    }
                 }
             }
         }
     }
+    return true;
 }
 
 } // End anonymous namespace
@@ -2567,14 +2555,15 @@ struct ScopedHelper
     ~ScopedHelper() { m_Helper.Release(); }
 };
 
-bool CImportTranslation::ParseFbxFile(const std::string &fileName, Import &import, ISGTranslationLog &log)
+bool CImportTranslation::ParseFbxFile(const std::string &fileName, Import &import,
+                                      ISGTranslationLog &log)
 {
     ISceneGraphTranslation &transHelper = ISceneGraphTranslation::CreateTranslation(import, log);
     ScopedHelper __scope(transHelper);
     FbxDomWalker theDomWalker(&transHelper);
     if (theDomWalker.LoadDocument(fileName)) {
-        theDomWalker.ProcessAnimationStacks();
-        theDomWalker.ProcessScene();
+        bool animated = theDomWalker.ProcessAnimationStacks();
+        theDomWalker.ProcessScene(animated);
         return true;
     }
     return false;
