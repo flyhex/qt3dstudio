@@ -1,0 +1,77 @@
+/****************************************************************************
+**
+** Copyright (C) 2019 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+
+\title Chromatic Aberration
+\page chromatic-aberration.html
+\ingroup qt3dstudio-best-practices
+
+In real life, chromatic aberration is an optical phenomenon causing color fringes in high contrast
+areas. These color fringes are caused by different colors refracting at different angels
+splitting white light into a spectrum. This is called dispersion.
+
+In the image below, the effect is applied in the right picture.
+
+\image effects-chromatic-aberration.png
+
+\section1 Properties
+
+\table
+  \header
+    \li Property
+    \li Description
+  \row
+    \li
+      Aberration amount
+    \li
+      Amount of aberration. A negative value inverses the effect.
+  \row
+    \li
+      Focus depth
+    \li
+      Dispersion scales in relation to the distance from this value.
+  \row
+    \li
+      Effect mask
+    \li
+      A grayscale texture to control position and strength of the effect. The effect is
+      strongest in white areas, and weakest in black areas.
+  \row
+    \li
+      Debug dispersion amount
+    \li
+      Allows you to see exactly how the effect works.
+\endtable
+
+\section1 Usage
+
+To make it easier to set up this effect, enable \uicontrol {Debug dispersion amount}. When enabled,
+the scene view switches to a mode showing the amount of dispersion to be applied.
+Black objects will disperse less, and white objects will disperse more.
+
+*/

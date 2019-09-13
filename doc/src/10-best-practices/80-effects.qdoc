@@ -84,21 +84,51 @@ lower in the scene graph will be applied before effects that are above them.
   \li
       \div {align="center"}
       \image color-master-icon.png
-      \b {\l{Color Master}}
+      \b {\l{Color master}}
       \enddiv
 \row
+  \li
+      \div {align="center"}
+      \image chromatic-aberration-icon.png
+      \b {\l{Chromatic aberration}}
+      \enddiv
   \li
       \div {align="center"}
       \image depth-of-field-icon.png
       \b {\l{Depth of field HQ blur}}
       \enddiv
-
+  \li
+      \div {align="center"}
+      \image desaturate-icon.png
+      \b {\l{Desaturate}}
+      \enddiv
+  \li
+      \div {align="center"}
+      \image distortion-ripple-icon.png
+      \b {\l{Distortion ripple}}
+      \enddiv
+\row
+  \li
+      \div {align="center"}
+      \image distortion-sphere-icon.png
+      \b {\l{Distortion sphere}}
+      \enddiv
+  \li
+      \div {align="center"}
+      \image distortion-spiral-icon.png
+      \b {\l{Distortion spiral}}
+      \enddiv
+  \li
+      \div {align="center"}
+      \image edge-detect-icon.png
+      \b {\l{Edge detect}}
+      \enddiv
   \li
       \div {align="center"}
       \image fxaa-icon.png
       \b {\l{FXAA}}
       \enddiv
-
+\row
   \li
       \div {align="center"}
       \image gaussian-blur-icon.png
@@ -109,7 +139,6 @@ lower in the scene graph will be applied before effects that are above them.
       \image hdr-bloom-tonemap-icon.png
       \b {\l{HDR bloom tonemap}}
       \enddiv
-\row
   \li
       \div {align="center"}
       \image motion-blur-icon.png
@@ -120,8 +149,6 @@ lower in the scene graph will be applied before effects that are above them.
       \image tiltshift-icon.png
       \b{\l{Tilt shift}}
       \enddiv
-  \li
-  \li
 \endtable
 \enddiv
 
