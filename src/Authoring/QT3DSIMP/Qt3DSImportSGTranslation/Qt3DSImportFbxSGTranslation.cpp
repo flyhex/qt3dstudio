@@ -116,7 +116,7 @@ protected:
     void ReadWeight(const TPerVertexWeightInfo &inFbxWeights, int inFbxIndex, float *outValue);
     void ReadBoneIndex(const TPerVertexWeightInfo &inFbxWeights, int inFbxIndex, float *outValue,
                        const TJointInfoList &inAbsoluteJoints);
-    void ReadMaterial(const FbxSurfaceMaterial *inMaterial, const int startFace,
+    void ReadMaterial(FbxSurfaceMaterial *inMaterial, const int startFace,
                       const int faceCount);
     void ReadDefaultMaterial(const FbxNode *pNode, const int startFace, const int faceCount);
     void ProcessTextures(const FbxSurfaceMaterial *inMaterial, const char *fbxMatType,
@@ -158,6 +158,7 @@ protected:
     TJointNodeHierarchyMap m_JointNodeHierarchyMap;
     TNodeSet m_importNodes;
     EAuthoringToolType m_AuthoringToolType;
+    bool m_reportedUnknownMaterials = false;
 };
 
 FbxDomWalker::FbxDomWalker(ISceneGraphTranslation *inTranslation)
@@ -358,6 +359,7 @@ struct SNodeSetFilter
 */
 void FbxDomWalker::ProcessScene(bool animations)
 {
+    m_reportedUnknownMaterials = false;
     if (m_FbxScene != nullptr) {
         FbxAxisSystem SceneAxisSystem = m_FbxScene->GetGlobalSettings().GetAxisSystem();
         int sign;
@@ -1585,9 +1587,10 @@ void FbxDomWalker::ProcessMesh(FbxNode *inFbxNode)
                 FbxSurfaceMaterial *theMaterial = inFbxNode->GetMaterial(
                             theMaterialElement->GetIndexArray().GetAt(
                                 int(thePerFaceMaterialnfo.m_StartFace)));
-                if (theMaterial)
+                if (theMaterial) {
                     ReadMaterial(theMaterial, int(thePerFaceMaterialnfo.m_StartFace),
                                  int(thePerFaceMaterialnfo.m_FaceCount));
+                }
             }
         }
     } else if (theFbxNormals) {
@@ -2062,7 +2065,7 @@ void FbxDomWalker::QueryMaterialInfo(FbxMesh *fbxMesh, SFaceMaterialInfo *info)
 *
 * @return no return.
 */
-void FbxDomWalker::ReadMaterial(const FbxSurfaceMaterial *inMaterial, const int startFace,
+void FbxDomWalker::ReadMaterial(FbxSurfaceMaterial *inMaterial, const int startFace,
                                 const int faceCount)
 {
     SMaterialParameters theNewMaterial;
@@ -2079,11 +2082,59 @@ void FbxDomWalker::ReadMaterial(const FbxSurfaceMaterial *inMaterial, const int 
     // init some base values
     theNewMaterial.m_Ambient.SetColor(0, 0, 0, 1);
     theNewMaterial.m_Diffuse.SetColor(1, 1, 1, 1);
+    theNewMaterial.m_TechniqueType = EMatCommonProfileTechnique_Constant;
+
+    if (m_AuthoringToolType == EAuthoringToolType_FBX_Max
+            && !inMaterial->GetClassId().Is(FbxSurfaceLambert::ClassId)
+            && !inMaterial->GetClassId().Is(FbxSurfacePhong::ClassId)) {
+        // For 3ds Max FBX try getting initial values from FbxSurfaceMaterial, as it may not
+        // have defined surface material type correctly. Ignore attenuations for colors.
+        FbxProperty theProperty = inMaterial->FindProperty(FbxSurfaceMaterial::sAmbient);
+        if (theProperty.IsValid()) {
+            fbxColor = theProperty.Get<FbxDouble3>();
+            theNewMaterial.m_Ambient.SetColor(float(fbxColor.mData[0]), float(fbxColor.mData[1]),
+                    float(fbxColor.mData[2]), 1);
+        }
+        theProperty = inMaterial->FindProperty(FbxSurfaceMaterial::sDiffuse);
+        if (theProperty.IsValid()) {
+            fbxColor = theProperty.Get<FbxDouble3>();
+            theNewMaterial.m_Diffuse.SetColor(float(fbxColor.mData[0]), float(fbxColor.mData[1]),
+                    float(fbxColor.mData[2]), 1);
+        }
+        theProperty = inMaterial->FindProperty(FbxSurfaceMaterial::sEmissive);
+        if (theProperty.IsValid()) {
+            fbxColor = theProperty.Get<FbxDouble3>();
+            theNewMaterial.m_Emission.SetColor(float(fbxColor.mData[0]), float(fbxColor.mData[1]),
+                    float(fbxColor.mData[2]), 1);
+        }
+        theProperty = inMaterial->FindProperty(FbxSurfaceMaterial::sTransparentColor);
+        if (theProperty.IsValid()) {
+            fbxColor = theProperty.Get<FbxDouble3>();
+            theNewMaterial.m_Transparent.SetColor(float(fbxColor.mData[0]),
+                    float(fbxColor.mData[1]), float(fbxColor.mData[2]), 1);
+        }
+        theProperty = inMaterial->FindProperty(FbxSurfaceMaterial::sSpecular);
+        if (theProperty.IsValid()) {
+            fbxColor = theProperty.Get<FbxDouble3>();
+            // Based on tests with an FBX with "unknown" surface material type we might only have
+            // specular color. If that is the case, replace fully black diffuse color with it
+            // instead of applying it to specular.
+            if (theNewMaterial.m_Diffuse.m_Color[0] == 0.0f
+                    && theNewMaterial.m_Diffuse.m_Color[1] == 0.0f
+                    && theNewMaterial.m_Diffuse.m_Color[2] == 0.0f) {
+                theNewMaterial.m_Diffuse.SetColor(float(fbxColor.mData[0]),
+                        float(fbxColor.mData[1]), float(fbxColor.mData[2]), 1);
+            } else {
+                theNewMaterial.m_Specular.SetColor(float(fbxColor.mData[0]),
+                        float(fbxColor.mData[1]), float(fbxColor.mData[2]), 1);
+            }
+        }
+    }
 
     if (inMaterial->GetClassId().Is(FbxSurfaceLambert::ClassId)) {
         // lambert is base for all materials
         // for phong we override the type and read the additional values later below
-        FbxSurfaceLambert *lambertMaterial = (FbxSurfaceLambert *)inMaterial;
+        FbxSurfaceLambert *lambertMaterial = static_cast<FbxSurfaceLambert *>(inMaterial);
         theNewMaterial.m_TechniqueType = EMatCommonProfileTechnique_Lambert;
 
         fbxColor = lambertMaterial->Ambient;
@@ -2108,7 +2159,7 @@ void FbxDomWalker::ReadMaterial(const FbxSurfaceMaterial *inMaterial, const int 
     }
 
     if (inMaterial->GetClassId().Is(FbxSurfacePhong::ClassId)) {
-        FbxSurfacePhong *phongMaterial = (FbxSurfacePhong *)inMaterial;
+        FbxSurfacePhong *phongMaterial = static_cast<FbxSurfacePhong *>(inMaterial);
         theNewMaterial.m_TechniqueType = EMatCommonProfileTechnique_Phong;
 
         fbxColor = phongMaterial->Specular;
@@ -2121,6 +2172,12 @@ void FbxDomWalker::ReadMaterial(const FbxSurfaceMaterial *inMaterial, const int 
                 float(fbxColor.mData[2]), 1);
         theNewMaterial.m_Reflectivity.SetValue(float(phongMaterial->ReflectionFactor));
         theNewMaterial.m_Shininess.SetValue(float(phongMaterial->Shininess));
+    }
+
+    if (!m_reportedUnknownMaterials
+            && theNewMaterial.m_TechniqueType == EMatCommonProfileTechnique_Constant) {
+        m_Translator->LogWarning(ESceneGraphWarningCode_UnknownMaterial, {});
+        m_reportedUnknownMaterials = true;
     }
 
     m_Translator->PushMaterial(inMaterial->GetName());

@@ -5493,6 +5493,10 @@ void IDocumentEditor::DisplayImportErrors(const QString &inImportSource,
         case ESceneGraphWarningCode_Rotations:
             formatStr = L"Rotation issue: %ls";
             break;
+        case ESceneGraphWarningCode_UnknownMaterial:
+            formatStr = L"Unknown material type(s) encountered. Some material properties may be "
+                        "incorrect. Make sure your FBX export settings are correct.";
+            break;
         default:
             break;
         }
