@@ -64,7 +64,6 @@ class IComposerSerializer
 protected:
     virtual ~IComposerSerializer() {}
 public:
-    static void clear();
     // Empty graph roots means use the actual graph roots in the asset graph
     virtual void SerializeScene(qt3dsdm::IDOMWriter &inWriter) = 0;
     // Write properties into the active slide until we get to a slide owner, then create new slides.
