@@ -224,7 +224,7 @@ or next keyframe.
 
 \section3 End Points
 To move an end point horizontally, you will need to move the actual keyframe on the timeline bar. To
-move it vertically, you will need to change the value for the animated value in this position.
+move it vertically, grab it with the mouse and drag it up/down.
 
 \section1 Import Animations
 
