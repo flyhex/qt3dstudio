@@ -78,11 +78,11 @@ struct SAllowedTypesEntry
 };
 
 const char *imgExts[] = {
-    "png", "jpg", "jpeg", "dds", "bmp", "gif", "hdr", "ktx", nullptr,
+    "png", "jpg", "jpeg", "dds", "bmp", "gif", "hdr", "ktx", "astc", nullptr,
 };
 
 const wchar_t *wideImgExts[] = {
-    L"png", L"jpg", L"jpeg", L"dds", L"bmp", L"gif", L"hdr", L"ktx", nullptr,
+    L"png", L"jpg", L"jpeg", L"dds", L"bmp", L"gif", L"hdr", L"ktx", L"astc", nullptr,
 };
 
 const char *modelExts[] = {
