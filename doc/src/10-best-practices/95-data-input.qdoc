@@ -65,6 +65,9 @@ Q3DSPresentation in the C++ API.
   \row
     \li Vector3
     \li 3 float values
+  \row
+    \li Vector4
+    \li 4 float values
 \endtable
 
 \section1 Manage Data Inputs
@@ -151,8 +154,6 @@ To edit a metadata key, follow the steps below:
 
 \list 1
   \li
-    Double-click the desired metadata key in the list.
-  \li
     Edit desired values.
   \li
     Press \uicontrol{OK}.
@@ -176,7 +177,6 @@ To add a data input to control the timeline animation, follow the instructions b
   \li Click the \inlineimage datainput-to-timeline-icon-inactive.png
   icon located in the bottom of the scene graph.
   \li Select the desired data input from the list by clicking it.
-  \li Press \uicontrol{OK}.
 \endlist
 
 \image timeline-datainput.png
@@ -198,7 +198,6 @@ To remove the data input, repeat step 2 above. Then select \uicontrol{[No contro
   \li In the slide palette, click the \inlineimage datainput-to-timeline-icon-inactive.png
   icon located below the slides.
   \li Select the desired data input from the list by clicking it.
-  \li Press \uicontrol{OK}.
 \endlist
 
 \image slide-palette-data-input-active.png
@@ -241,6 +240,9 @@ The following data input types can be used to control object properties:
   \row
     \li Vector3
     \li To control properties with three numeric values such as 3D coordinates or RGB colors
+  \row
+    \li Vector4
+    \li To control properties with four numeric values such as RGBA colors
 \endtable
 
 \list 1
@@ -250,7 +252,6 @@ The following data input types can be used to control object properties:
   \li In the inspector palette, click the \inlineimage datainput-to-timeline-icon-inactive.png
   icon next to the object property you wish to control.
   \li Select the desired data input from the list by clicking it.
-  \li Press \uicontrol{OK}.
 \endlist
 
 \image datainput-property-active-icon.png
