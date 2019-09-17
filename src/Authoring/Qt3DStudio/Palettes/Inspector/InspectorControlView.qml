@@ -334,7 +334,9 @@ Rectangle {
                                                     }
                                                 }
                                                 StyledTooltip {
-                                                    text: qsTr("Enable animation")
+                                                    text: model.modelData.animated
+                                                          ? qsTr("Disable animation")
+                                                          : qsTr("Enable animation")
                                                     enabled: animateButtonMouseArea.containsMouse
                                                 }
                                             }
