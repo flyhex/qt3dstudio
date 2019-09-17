@@ -614,6 +614,8 @@ void RowTree::refreshPropBinding(bool forceSync)
 void RowTree::setPropBinding(ITimelineItemProperty *binding)
 {
     m_PropBinding = binding;
+    if (!m_PropBinding)
+        return;
 
     // update timeline isColorProperty
     qt3dsdm::TDataTypePair propType = m_PropBinding->GetType();

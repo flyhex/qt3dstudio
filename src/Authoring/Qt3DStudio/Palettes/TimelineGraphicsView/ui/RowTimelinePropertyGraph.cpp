@@ -63,6 +63,8 @@ RowTimelinePropertyGraph::RowTimelinePropertyGraph(QObject *parent)
 void RowTimelinePropertyGraph::paintGraphs(QPainter *painter, const QRectF &rect)
 {
     m_propBinding = m_rowTimeline->rowTree()->propBinding();
+    if (!m_propBinding)
+        return;
 
     if (rect.height() < ROW_H) // rect height = row height - 1
         return;

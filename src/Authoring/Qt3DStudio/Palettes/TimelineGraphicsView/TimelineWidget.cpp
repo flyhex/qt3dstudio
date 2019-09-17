@@ -422,6 +422,13 @@ void TimelineWidget::OnNewPresentation()
 
 void TimelineWidget::OnClosingPresentation()
 {
+    // Reset bindings for all property rows
+    for (auto *row : qAsConst(m_handlesMap)) {
+        const auto childProps = row->childProps();
+        for (const auto child : childProps)
+            child->setPropBinding(nullptr);
+    }
+
     m_connections.clear();
     m_graphicsScene->expandMap().clear();
     m_graphicsScene->propGraphHeightMap().clear();
@@ -800,7 +807,6 @@ void TimelineWidget::onPropertyChanged(qt3dsdm::Qt3DSDMInstanceHandle inInstance
 void TimelineWidget::onAsyncUpdate()
 {
     CDoc *doc = g_StudioApp.GetCore()->GetDoc();
-
     if (m_fullReconstruct) {
         m_translationManager->Clear();
         m_binding = static_cast<Qt3DSDMTimelineItemBinding *>(
