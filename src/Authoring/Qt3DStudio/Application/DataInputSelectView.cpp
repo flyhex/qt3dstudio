@@ -141,6 +141,9 @@ QString DataInputSelectView::getDiTypeStr(int type)
     case EDataType::DataTypeVector3:
         return tr("Vector3");
         break;
+    case EDataType::DataTypeVector4:
+        return tr("Vector4");
+        break;
     default:
         return {};
         Q_ASSERT(false);

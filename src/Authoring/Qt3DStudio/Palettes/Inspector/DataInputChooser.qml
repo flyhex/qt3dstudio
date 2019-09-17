@@ -70,7 +70,7 @@ Rectangle {
                 // index directly without going through string -> int table lookup
                 model: [qsTr("[Compatible types]"), qsTr("[All types]"), qsTr("Boolean"),
                         qsTr("Float"), qsTr("Ranged Number"), qsTr("String"), qsTr("Variant"),
-                        qsTr("Vector2"), qsTr("Vector3")]
+                        qsTr("Vector2"), qsTr("Vector3"), qsTr("Vector4")]
 
                 onCurrentIndexChanged: _parentView.setTypeFilter(currentIndex - numOfFixedChoices);
 
