@@ -454,6 +454,7 @@ struct STranslatorDataModelParser
 #define Material_DiffuseLightWrap m_Material.m_DiffuseLightWrap
 #define Material_ReferencedMaterial m_ReferencedMaterial.m_ReferencedMaterial
 #define Material_VertexColors m_Material.m_VertexColors
+#define Material_TransparencyMode m_Material.m_TransparencyMode
 #define Image_ImagePath m_Asset.m_SourcePath
 #define Image_OffscreenRendererId m_Image.m_SubPresentation
 #define Image_Scale_X m_Image.m_RepeatU
