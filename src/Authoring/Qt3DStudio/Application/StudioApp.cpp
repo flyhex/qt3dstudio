@@ -1108,15 +1108,10 @@ QString CStudioApp::GetPasteType()
 
 bool CStudioApp::CanChangeTimebarColor()
 {
-    bool theRetVal = true;
-    qt3dsdm::Qt3DSDMInstanceHandle theSelectedInstance = m_core->GetDoc()->GetSelectedInstance();
-    if (!theSelectedInstance.Valid()
-            || m_core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge()->IsSceneInstance(
-                theSelectedInstance)) {
-        theRetVal = false;
-    }
+    auto theSelectedInstance = m_core->GetDoc()->GetSelectedInstance();
+    auto bridge = m_core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
 
-    return theRetVal;
+    return theSelectedInstance.Valid() && !bridge->IsActiveComponent(theSelectedInstance);
 }
 
 /**
