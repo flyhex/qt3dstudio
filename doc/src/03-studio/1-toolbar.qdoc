@@ -253,10 +253,6 @@ The preview toolbar buttons are used to preview your presentation.
   The \b{Remote Preview} button (keyboard shortcut: \c{F6})will launch the presentation on the
   connected remote device Qt 3D Studio Viewer application. This button is only enabled if you are
   connected to a remote device.
-  \li
-  The \b{Preview with Qt 3D Runtime} button
-  will launch the Qt 3D Runtime Viewer application and preview the
-  application for the presentation.
 \endlist
 
 \note If there is no \c{.uia} file in the folder for the presentation, then the

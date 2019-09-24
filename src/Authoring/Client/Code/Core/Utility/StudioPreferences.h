@@ -67,9 +67,6 @@ public:
 
     // Viewing settings
     //
-    static bool isLegacyViewerActive();
-    static void setLegacyViewerActive(bool inActive);
-
     static bool isEditViewFillMode();
     static void setEditViewFillMode(bool inRenderAsSolid);
 

@@ -99,33 +99,6 @@ load(qt_parts)
                 $$DEPLOY_TOOL $$shell_quote(\$(DEPLOY_DIR)/Qt3DViewer$${exesuffix}) \
                 $$EXTRA_DEPLOY_OPTIONS
         }
-
-        greaterThan(QT_MAJOR_VERSION, 5)|greaterThan(QT_MINOR_VERSION, 10) {
-            # Viewer 2.0
-            win32 {
-                # Viewer 2.0 has similar issues with dependent library naming as viewer 1.0,
-                # but it only has one library that is causing problems and no qml (so far),
-                # so lets just copy the problem lib over to where windeployqt can find it,
-                # i.e. under Qt's bin dir. This pollutes the Qt's bin dir a bit, but as the main
-                # use case for this is gathering installer content in CI after everything is
-                # already built, this shouldn't be a problem.
-                release {
-                    RUNTIME2_LIB = Qt53DStudioRuntime2$${QT_LIBINFIX}.dll
-                } else {
-                    RUNTIME2_LIB = Qt53DStudioRuntime2$${QT_LIBINFIX}d.dll
-                }
-                QMAKE_EXTRA_TARGETS += copyRuntime2
-                deployTarget.depends += copyRuntime2
-                copyRuntime2.commands = \
-                    $$QMAKE_COPY $$shell_quote($$shell_path( \
-                        $$OUT_PWD/src/Runtime/qt3d-runtime/bin/$$RUNTIME2_LIB)) \
-                    $$shell_quote($$shell_path($$[QT_INSTALL_BINS]/$$RUNTIME2_LIB))
-            }
-
-            deployTarget.commands += && \
-                $$DEPLOY_TOOL $$shell_quote(\$(DEPLOY_DIR)/q3dsviewer$${exesuffix}) \
-                $$EXTRA_DEPLOY_OPTIONS
-        }
     } else {
         # Create a dummy target for other platforms
         deployTarget.commands = @echo deployqt target is not supported for this platform.

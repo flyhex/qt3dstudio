@@ -144,7 +144,6 @@ public:
     void OnPlaybackRewind();
     void OnPlaybackStop();
     void OnPlaybackPreview(const QString &viewerExeName, bool remote = false);
-    void OnPlaybackPreviewQt3DRuntime();
     void OnPlaybackPreviewOpenGLRuntime();
     void OnPlaybackPreviewRemote();
     void onFilterVariants();

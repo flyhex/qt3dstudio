@@ -37,7 +37,7 @@ for incoming connections with a presentation sent remotely.
 \section1 Usage
 
 \badcode
-    q3dsviewer [options] [presentation file]
+    Qt3DViewer [options] [presentation file]
 \endcode
 
 When no filename is given, the viewer is launched in remote connection mode.

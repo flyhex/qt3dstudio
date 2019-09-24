@@ -30,6 +30,9 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="m_SnapRangeCombo"/>
+      </item>
       <item row="0" column="1">
        <widget class="QComboBox" name="m_DefaultInterpolation">
         <property name="maximumSize">
@@ -40,20 +43,10 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QComboBox" name="m_SnapRangeCombo"/>
-      </item>
       <item row="1" column="0">
        <widget class="QCheckBox" name="m_checkTimelineAbsoluteSnapping">
         <property name="text">
          <string>Timeline Snapping Grid</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QCheckBox" name="m_checkLegacyViewer">
-        <property name="text">
-         <string>Qt3D Viewer</string>
         </property>
        </widget>
       </item>

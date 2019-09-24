@@ -275,7 +275,6 @@ Project palette using Import functionality.</string>
    <addaction name="actionFilterVariants"/>
    <addaction name="actionPreview"/>
    <addaction name="actionRemote_Preview"/>
-   <addaction name="actionPreviewQt3DRuntime"/>
   </widget>
   <action name="action_Reference_Manual">
    <property name="text">
@@ -873,21 +872,6 @@ Project palette using Import functionality.</string>
    </property>
    <property name="iconVisibleInMenu">
     <bool>false</bool>
-   </property>
-  </action>
-  <action name="actionPreviewQt3DRuntime">
-   <property name="icon">
-    <iconset resource="images.qrc">
-     <normaloff>:/images/playback_tools_play.png</normaloff>:/images/playback_tools_play.png</iconset>
-   </property>
-   <property name="text">
-    <string>Preview with Qt3D Runtime Viewer</string>
-   </property>
-   <property name="iconText">
-    <string>Preview with Qt3D Runtime Viewer</string>
-   </property>
-   <property name="toolTip">
-    <string>Preview with Qt3D Runtime Viewer</string>
    </property>
   </action>
   <action name="actionImportAssets">
