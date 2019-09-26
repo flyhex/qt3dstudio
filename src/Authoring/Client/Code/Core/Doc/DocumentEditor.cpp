@@ -699,7 +699,7 @@ public:
     }
 
     pair<std::shared_ptr<qt3dsdm::IDOMWriter>, CFilePath>
-    DoCopySceneGraphObject(const TInstanceHandleList &inInstances)
+    DoCopySceneGraphObject(const TInstanceHandleList &inInstances, bool preserveFileIds)
     {
         if (inInstances.empty())
             return pair<std::shared_ptr<qt3dsdm::IDOMWriter>, CFilePath>();
@@ -707,7 +707,8 @@ public:
         std::shared_ptr<IDOMWriter> theWriter(m_Doc.CreateDOMWriter());
         TInstanceHandleList theInstances = ToGraphOrdering(inInstances);
         m_Doc.CreateSerializer()->SerializeSceneGraphObjects(*theWriter, theInstances,
-                                                             GetActiveSlide(inInstances[0]));
+                                                             GetActiveSlide(inInstances[0]),
+                                                             preserveFileIds);
         CFilePath theFile = WriteWriterToFile(*theWriter, L"SceneGraph");
         return make_pair(theWriter, theFile);
     }
@@ -716,7 +717,7 @@ public:
     std::shared_ptr<qt3dsdm::IDOMReader>
     CopySceneGraphObjectsToMemory(const qt3dsdm::TInstanceHandleList &instanceList)
     {
-        return DoCopySceneGraphObject(instanceList).first->CreateDOMReader();
+        return DoCopySceneGraphObject(instanceList, false).first->CreateDOMReader();
     }
 
     // Exposed through document reader interface
@@ -762,7 +763,7 @@ public:
         return theFinalPath;
     }
 
-    CFilePath CopySceneGraphObjects(TInstanceHandleList inInstances) override
+    CFilePath CopySceneGraphObjects(TInstanceHandleList inInstances, bool preserveFileIds) override
     {
         if (inInstances.empty())
             return L"";
@@ -773,7 +774,7 @@ public:
         if (!shouldCopy)
             return L"";
 
-        return DoCopySceneGraphObject(inInstances).second;
+        return DoCopySceneGraphObject(inInstances, preserveFileIds).second;
     }
 
     CFilePath CopyAction(Qt3DSDMActionHandle inAction, Qt3DSDMSlideHandle inSlide) override
@@ -3044,11 +3045,13 @@ public:
                                                 bool inGenerateUniqueName,
                                                 DocumentEditorInsertType::Enum inInsertType,
                                                 const CPt &inPosition,
+                                                bool preserveFileIds,
                                                 bool notifyRename = true)
     {
         std::shared_ptr<IComposerSerializer> theSerializer = m_Doc.CreateSerializer();
         TInstanceHandleList retval = theSerializer->SerializeSceneGraphObject(
-            *inReader, m_Doc.GetDocumentDirectory(), inNewRoot, GetActiveSlide(inNewRoot));
+            *inReader, m_Doc.GetDocumentDirectory(), inNewRoot, GetActiveSlide(inNewRoot),
+            preserveFileIds);
         for (size_t idx = 0, end = retval.size(); idx < end; ++idx) {
             qt3dsdm::Qt3DSDMInstanceHandle theInstance(retval[idx]);
             if (inInsertType == DocumentEditorInsertType::NextSibling)
@@ -3067,7 +3070,8 @@ public:
                                               TInstanceHandle inNewRoot,
                                               bool inGenerateUniqueName,
                                               DocumentEditorInsertType::Enum inInsertType,
-                                              const CPt &inPosition) override
+                                              const CPt &inPosition,
+                                              bool preserveFileIds) override
     {
         qt3ds::QT3DSI32 theVersion = 0;
         std::shared_ptr<IDOMReader> theReader = m_Doc.CreateDOMReader(
@@ -3075,13 +3079,14 @@ public:
         if (!theReader)
             return TInstanceHandleList();
         return DoPasteSceneGraphObject(theReader, inNewRoot, inGenerateUniqueName, inInsertType,
-                                       inPosition, false);
+                                       inPosition, preserveFileIds, false);
     }
 
     virtual TInstanceHandleList
     PasteSceneGraphObjectMaster(const CFilePath &inFilePath, TInstanceHandle inNewRoot,
                                 bool inGenerateUniqueName,
-                                DocumentEditorInsertType::Enum inInsertType, const CPt &inPosition) override
+                                DocumentEditorInsertType::Enum inInsertType, const CPt &inPosition,
+                                bool preserveFileIds) override
     {
         qt3ds::QT3DSI32 theVersion = 0;
         std::shared_ptr<IDOMReader> theReader = m_Doc.CreateDOMReader(
@@ -3092,7 +3097,8 @@ public:
         std::shared_ptr<IComposerSerializer> theSerializer = m_Doc.CreateSerializer();
         TInstanceHandleList retval = theSerializer->SerializeSceneGraphObject(
             *theReader, m_Doc.GetDocumentDirectory(), inNewRoot,
-            m_Doc.GetStudioSystem()->GetSlideSystem()->GetMasterSlide(GetActiveSlide(inNewRoot)));
+            m_Doc.GetStudioSystem()->GetSlideSystem()->GetMasterSlide(GetActiveSlide(inNewRoot)),
+            preserveFileIds);
         for (size_t idx = 0, end = retval.size(); idx < end; ++idx) {
             qt3dsdm::Qt3DSDMInstanceHandle theInstance(retval[idx]);
             if (inInsertType == DocumentEditorInsertType::NextSibling)
@@ -3297,7 +3303,7 @@ public:
         // Paste into the master slide of the new component
         TInstanceHandleList insertedHandles = theSerializer->SerializeSceneGraphObject(
                     *theReader,m_Doc.GetDocumentDirectory(), component,
-                    m_SlideSystem.GetMasterSlide(theComponentSlide));
+                    m_SlideSystem.GetMasterSlide(theComponentSlide), true);
 
         // Restore the original time range for all objects.
         if (insertedHandles.size()) {
@@ -3380,7 +3386,7 @@ public:
                 theSerializer->SerializeSceneGraphObject(
                     *theReader, m_Doc.GetDocumentDirectory(),
                     targetComponent,
-                    m_SlideSystem.GetMasterSlide(theComponentSlide));
+                    m_SlideSystem.GetMasterSlide(theComponentSlide), true);
 
         if (insertedHandles.size()) {
             // Restore the original time range for all objects.
@@ -3425,7 +3431,7 @@ public:
     {
         qt3dsdm::TInstanceHandleList theInstances(ToGraphOrdering(inInstances));
         std::shared_ptr<IDOMReader> theReader(CopySceneGraphObjectsToMemory(theInstances));
-        return DoPasteSceneGraphObject(theReader, inDest, true, inInsertType, CPt(), false);
+        return DoPasteSceneGraphObject(theReader, inDest, true, inInsertType, CPt(), false, false);
     }
 
     Qt3DSDMActionHandle AddAction(Qt3DSDMSlideHandle inSlide, Qt3DSDMInstanceHandle inOwner,

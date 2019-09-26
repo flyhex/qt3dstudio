@@ -215,13 +215,14 @@ public:
     // Given the active slide on the document (which we query) and an instance,
     // produce a temporary file (Qt3DSFile::GetTemporaryFile) and serialize this object
     // to that temporary file.
-    virtual CFilePath CopySceneGraphObjects(qt3dsdm::TInstanceHandleList inInstances) = 0;
+    virtual CFilePath CopySceneGraphObjects(qt3dsdm::TInstanceHandleList inInstances,
+                                            bool preserveFileIds) = 0;
 
-    CFilePath CopySceneGraphObject(Qt3DSDMInstanceHandle inInstance)
+    CFilePath CopySceneGraphObject(Qt3DSDMInstanceHandle inInstance, bool preserveFileIds)
     {
         qt3dsdm::TInstanceHandleList theInstances;
         theInstances.push_back(inInstance);
-        return CopySceneGraphObjects(theInstances);
+        return CopySceneGraphObjects(theInstances, preserveFileIds);
     }
 
     // Copy the object just to a DOM representation, don't serialize to file.

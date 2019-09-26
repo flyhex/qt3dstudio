@@ -505,6 +505,9 @@ protected:
     Q3DStudio::CRect m_ClientSize;
     Q3DStudio::CRect m_SceneRect; // The dimensions of the active scene view
 
+    // Indicate that the paste operation is first after cut operation
+    bool m_firstPasteAfterCut = false;
+
 private:
     bool m_playbackPreviewOn = false;
     QString m_presentationId;

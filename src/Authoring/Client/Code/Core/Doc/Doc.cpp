@@ -806,12 +806,13 @@ void CDoc::CutObject(qt3dsdm::TInstanceHandleList inInstances)
     using namespace Q3DStudio;
 
     if (theContinueCutFlag) {
-        CFilePath thePath(GetDocumentReader().CopySceneGraphObjects(inInstances));
+        CFilePath thePath(GetDocumentReader().CopySceneGraphObjects(inInstances, true));
         Qt3DSFile theFile(thePath);
         CStudioClipboard::CopyObjectToClipboard(
                     theFile, false, false,
                     m_StudioSystem->GetClientDataModelBridge()->GetObjectType(inInstances[0]));
         SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Cut Object"))->DeleteInstances(inInstances);
+        m_firstPasteAfterCut = true;
     }
 }
 
@@ -822,11 +823,12 @@ void CDoc::CopyObject(qt3dsdm::TInstanceHandleList inInstances)
     if (inInstances.empty())
         return;
     using namespace Q3DStudio;
-    CFilePath thePath(GetDocumentReader().CopySceneGraphObjects(inInstances));
+    CFilePath thePath(GetDocumentReader().CopySceneGraphObjects(inInstances, false));
     Qt3DSFile theFile(thePath);
     CStudioClipboard::CopyObjectToClipboard(
                 theFile, false, false,
                 m_StudioSystem->GetClientDataModelBridge()->GetObjectType(inInstances[0]));
+    m_firstPasteAfterCut = false;
 }
 
 void CDoc::PasteObject(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
@@ -838,7 +840,9 @@ void CDoc::PasteObject(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         Qt3DSFile theTempAPFile = CStudioClipboard::GetObjectFromClipboard(false, dummy);
         SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Paste Object"))
                 ->PasteSceneGraphObject(theTempAPFile.GetAbsolutePath(), theInstance, true,
-                                        DocumentEditorInsertType::LastChild, CPt());
+                                        DocumentEditorInsertType::LastChild, CPt(),
+                                        m_firstPasteAfterCut);
+        m_firstPasteAfterCut = false;
     }
 }
 
@@ -851,7 +855,9 @@ void CDoc::PasteObjectMaster(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
         Qt3DSFile theTempAPFile = CStudioClipboard::GetObjectFromClipboard(false, dummy);
         SCOPED_DOCUMENT_EDITOR(*this, QObject::tr("Paste Object"))
                 ->PasteSceneGraphObjectMaster(theTempAPFile.GetAbsolutePath(), theInstance, true,
-                                              DocumentEditorInsertType::LastChild, CPt());
+                                              DocumentEditorInsertType::LastChild, CPt(),
+                                              m_firstPasteAfterCut);
+        m_firstPasteAfterCut = false;
     }
 }
 

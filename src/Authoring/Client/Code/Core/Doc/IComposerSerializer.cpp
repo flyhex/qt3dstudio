@@ -2870,26 +2870,28 @@ struct SComposerSerializerImpl : public IComposerSerializer
     // new root.
     virtual qt3dsdm::TInstanceHandleList
     SerializeSceneGraphObject(IDOMReader &inReader, const CFilePath &inDocumentDirectory,
-                              Qt3DSDMInstanceHandle inNewRoot, Qt3DSDMSlideHandle inActiveSlide) override
+                              Qt3DSDMInstanceHandle inNewRoot, Qt3DSDMSlideHandle inActiveSlide,
+                              bool preserveFileIds) override
     {
         reset();
         m_ActiveSlide = inActiveSlide;
-        m_PreserveFileIds = false;
+        m_PreserveFileIds = preserveFileIds;
         return DoSerializeScene(inReader, inDocumentDirectory, inNewRoot);
     }
 
     // Write this instance and its children (and possibly its slides) to a writer.
     // Equivalent to the older partial serialization system
     void SerializeSceneGraphObjects(IDOMWriter &inWriter,
-                                            const TInstanceHandleList &inInstances,
-                                            Qt3DSDMSlideHandle inActiveSlide) override
+                                    const TInstanceHandleList &inInstances,
+                                    Qt3DSDMSlideHandle inActiveSlide,
+                                    bool preserveFileIds) override
     {
         if (inInstances.empty())
             return;
         reset();
         QT3DS_ASSERT(inActiveSlide.Valid());
         m_ActiveSlide = inActiveSlide;
-        m_PreserveFileIds = false;
+        m_PreserveFileIds = preserveFileIds;
         // It is fine if the parent is invalid
         m_ActiveSlideParent = m_SlideCore.GetParentSlide(m_ActiveSlide);
         DoSerializeScene(inWriter, inInstances.data(), (QT3DSU32)inInstances.size());
