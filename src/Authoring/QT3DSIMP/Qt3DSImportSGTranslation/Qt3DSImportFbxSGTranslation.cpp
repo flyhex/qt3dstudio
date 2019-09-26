@@ -159,6 +159,7 @@ protected:
     TNodeSet m_importNodes;
     EAuthoringToolType m_AuthoringToolType;
     bool m_reportedUnknownMaterials = false;
+    FbxAxisSystem::EUpVector m_originalUpVector;
 };
 
 FbxDomWalker::FbxDomWalker(ISceneGraphTranslation *inTranslation)
@@ -363,7 +364,8 @@ void FbxDomWalker::ProcessScene(bool animations)
     if (m_FbxScene != nullptr) {
         FbxAxisSystem SceneAxisSystem = m_FbxScene->GetGlobalSettings().GetAxisSystem();
         int sign;
-        if (SceneAxisSystem.GetUpVector(sign) == FbxAxisSystem::eZAxis
+        m_originalUpVector = SceneAxisSystem.GetUpVector(sign);
+        if (m_originalUpVector == FbxAxisSystem::eZAxis
                 && m_AuthoringToolType != EAuthoringToolType_FBX_Maya) {
             // Do automatic axis system conversion from Z-up to Y-up
             FbxAxisSystem::OpenGL.ConvertScene(m_FbxScene);
@@ -675,13 +677,24 @@ void FbxDomWalker::ProcessTransform(FbxNode *inFbxNode, bool ignoreScale)
             theTransformMatrix.SetS(FbxVector4(1.0, 1.0, 1.0, 1.0));
 
         // Do rotation corrections for cameras and lights if importing from Blender
-        // Note: Blender must have "Y Forward" and "Z Up" export settings defined for these to work
-        if (m_AuthoringToolType == EAuthoringToolType_FBX_Blender) {
-            FbxDouble3 rot = inFbxNode->LclRotation.Get();
+        // Note: Blender and 3ds max must have "Y Forward" and "Z Up" export settings defined for
+        // these to work. For 3ds Max it is the default setting, but for Blender it is not.
+        if (m_originalUpVector == FbxAxisSystem::eZAxis) {
+            if (m_AuthoringToolType == EAuthoringToolType_FBX_Blender) {
+                FbxDouble3 rot = inFbxNode->LclRotation.Get();
+                if (inFbxNode->GetLight())
+                    theTransformMatrix.SetR(FbxVector4(rot[0] - 90., rot[1], rot[2], 1.0));
+                else if (inFbxNode->GetCamera())
+                    theTransformMatrix.SetR(FbxVector4(rot[0], rot[1] - 90., rot[2], 1.0));
+            }
+        } else if (m_originalUpVector == FbxAxisSystem::eYAxis
+                   && m_AuthoringToolType == EAuthoringToolType_FBX_Max) {
+            // 3ds Max messes up the positions if FBX is exported with y-up axis system.
+            // Fix that by switching the positions between z and y axes.
+            FbxDouble3 pos = inFbxNode->LclTranslation.Get();
+            // Override the converted rotations with correct ones
             if (inFbxNode->GetLight())
-                theTransformMatrix.SetR(FbxVector4(rot[0] - 90., rot[1], rot[2], 1.0));
-            else if (inFbxNode->GetCamera())
-                theTransformMatrix.SetR(FbxVector4(rot[0], rot[1] - 90., rot[2], 1.0));
+                theTransformMatrix.SetT(FbxVector4(pos[0], pos[1], pos[2], 1.0));
         }
 
         theTransforms.push_back(new NodeTransform(ETransformType_Matrix4x4));
