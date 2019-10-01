@@ -5394,14 +5394,14 @@ public:
             } else if (CDialogs::effectExtensions().contains(theExtension)
                        && theRecord.m_ModificationType != FileModificationType::Created
                        && !theInstances.empty()) {
-                CString theNameStr = GetName(theInstances[0].second);
                 std::vector<SMetaDataLoadWarning> theWarnings;
                 NVScopedRefCounted<qt3ds::render::IRefCountedInputStream> theStream(
                     m_InputStreamFactory->GetStreamForFile(theRecord.m_File.toQString()));
                 if (theStream) {
-                    m_MetaData.LoadEffectInstance(m_StringTable.GetNarrowStr(theRelativePath.toCString()),
+                    m_MetaData.LoadEffectInstance(m_StringTable.GetNarrowStr(
+                                                      theRelativePath.toCString()),
                                                   theInstances[0].second,
-                                                  TCharStr(theNameStr),
+                                                  theRelativePath.GetFileStem().c_str(),
                                                   theWarnings, *theStream);
                     IDocumentEditor::fixDefaultTexturePaths(theInstances[0].second);
                 }
@@ -5413,7 +5413,6 @@ public:
             } else if (CDialogs::shaderExtensions().contains(theExtension)
                        && theRecord.m_ModificationType != FileModificationType::Created
                        && !theInstances.empty()) {
-                CString theNameStr = GetName(theInstances[0].second);
                 std::vector<SMetaDataLoadWarning> theWarnings;
                 NVScopedRefCounted<qt3ds::render::IRefCountedInputStream> theStream(
                     m_InputStreamFactory->GetStreamForFile(theRecord.m_File.toQString()));
@@ -5421,7 +5420,7 @@ public:
                     m_MetaData.LoadMaterialInstance(m_StringTable.GetNarrowStr(
                                                         theRelativePath.toCString()),
                                                     theInstances[0].second,
-                                                    TCharStr(theNameStr),
+                                                    theRelativePath.GetFileStem().c_str(),
                                                     theWarnings,
                                                     *theStream);
                     IDocumentEditor::fixDefaultTexturePaths(theInstances[0].second);
