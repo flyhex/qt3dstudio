@@ -1109,9 +1109,11 @@ QString CStudioApp::GetPasteType()
 bool CStudioApp::CanChangeTimebarColor()
 {
     auto theSelectedInstance = m_core->GetDoc()->GetSelectedInstance();
-    auto bridge = m_core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
-
-    return theSelectedInstance.Valid() && !bridge->IsActiveComponent(theSelectedInstance);
+    if (theSelectedInstance.Valid()) {
+        auto bridge = m_core->GetDoc()->GetStudioSystem()->GetClientDataModelBridge();
+        return !bridge->IsActiveComponent(theSelectedInstance);
+    }
+    return false;
 }
 
 /**
