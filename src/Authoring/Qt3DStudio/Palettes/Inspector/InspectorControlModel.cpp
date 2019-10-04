@@ -258,6 +258,7 @@ void InspectorControlModel::addMaterial()
         i++;
         absPath = path + QString::number(i) + extension;
     }
+    const auto relPath = doc->GetRelativePathToDoc(absPath);
 
     qt3dsdm::Qt3DSDMInstanceHandle newMaterial;
     {
@@ -280,12 +281,16 @@ void InspectorControlModel::addMaterial()
     const auto type = getBridge()->GetObjectType(instance);
     if (type == OBJTYPE_REFERENCEDMATERIAL) {
         sceneEditor->setMaterialReferenceByPath(instance, absPath);
-        const auto relPath = doc->GetRelativePathToDoc(absPath);
-        sceneEditor->setMaterialSourcePath(instance, Q3DStudio::CString::fromQString(relPath));
         sceneEditor->SetName(instance, getBridge()->GetName(newMaterial, true));
-
+        sceneEditor->setMaterialSourcePath(instance, Q3DStudio::CString::fromQString(relPath));
         doc->GetStudioSystem()->GetFullSystemSignalSender()->SendInstancePropertyValue(
-                                                        instance, getBridge()->GetNameProperty());
+                    instance, getBridge()->GetNameProperty());
+    } else {
+        sceneEditor->SetName(instance, getBridge()->GetName(newMaterial, true));
+        sceneEditor->SetMaterialType(instance, QStringLiteral("Standard Material"));
+        sceneEditor->setMaterialSourcePath(instance, Q3DStudio::CString::fromQString(relPath));
+        doc->GetStudioSystem()->GetFullSystemSignalSender()->SendInstancePropertyValue(
+                    instance, getBridge()->GetNameProperty());
     }
 }
 
@@ -320,6 +325,7 @@ void InspectorControlModel::duplicateMaterial()
             materialName = originalMaterialName + QString::number(i);
             absPath = sceneEditor->getMaterialFilePath(materialName);
         }
+        const auto relPath = doc->GetRelativePathToDoc(absPath);
 
         qt3dsdm::Qt3DSDMInstanceHandle duplicate;
         {
@@ -343,11 +349,16 @@ void InspectorControlModel::duplicateMaterial()
 
         if (type == OBJTYPE_REFERENCEDMATERIAL) {
             scopedEditor->setMaterialReferenceByPath(instance, absPath);
-            const auto relPath = doc->GetRelativePathToDoc(absPath);
             scopedEditor->setMaterialSourcePath(instance, Q3DStudio::CString::fromQString(relPath));
             scopedEditor->SetName(instance, getBridge()->GetName(duplicate, true));
             doc->GetStudioSystem()->GetFullSystemSignalSender()->SendInstancePropertyValue(
-                                                        instance, getBridge()->GetNameProperty());
+                        instance, getBridge()->GetNameProperty());
+        } else if (type != OBJTYPE_CUSTOMMATERIAL) {
+            sceneEditor->SetName(instance, getBridge()->GetName(duplicate, true));
+            sceneEditor->SetMaterialType(instance, QStringLiteral("Standard Material"));
+            sceneEditor->setMaterialSourcePath(instance, Q3DStudio::CString::fromQString(relPath));
+            doc->GetStudioSystem()->GetFullSystemSignalSender()->SendInstancePropertyValue(
+                        instance, getBridge()->GetNameProperty());
         }
     }
 }
