@@ -2499,6 +2499,14 @@ public:
 
     void copyMaterialProperties(Qt3DSDMInstanceHandle src, Qt3DSDMInstanceHandle dst) override
     {
+        const Q3DStudio::CString matType = GetObjectTypeName(src);
+        QString materialTypeString;
+        if (matType == "CustomMaterial")
+            materialTypeString = m_Bridge.GetSourcePath(src);
+        else
+            materialTypeString = QStringLiteral("Standard Material");
+        SetMaterialType(dst, materialTypeString);
+
         const auto srcSlide = m_SlideSystem.GetApplicableSlide(src);
         const auto dstSlide = m_SlideSystem.GetApplicableSlide(dst);
         const auto name = GetName(dst);
@@ -3328,19 +3336,10 @@ public:
             if (oldType == "ReferencedMaterial") {
                 Qt3DSDMInstanceHandle refMaterial = m_Bridge.getMaterialReference(instance);
 
-                if (refMaterial.Valid()) {
-                    const Q3DStudio::CString refType = GetObjectTypeName(refMaterial);
-                    QString v;
-                    if (refType == "CustomMaterial")
-                        v = m_Bridge.GetSourcePath(refMaterial);
-                    else
-                        v = QStringLiteral("Standard Material");
-
-                    SetMaterialType(instance, v);
+                if (refMaterial.Valid())
                     copyMaterialProperties(refMaterial, instance);
-                } else {
+                else
                     SetMaterialType(instance, QStringLiteral("Standard Material"));
-                }
 
                 const auto name = GetName(instance);
                 if (!name.toQString().endsWith(QLatin1String("_animatable")))
