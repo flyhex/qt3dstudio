@@ -2499,12 +2499,14 @@ public:
 
     void copyMaterialProperties(Qt3DSDMInstanceHandle src, Qt3DSDMInstanceHandle dst) override
     {
-        const Q3DStudio::CString matType = GetObjectTypeName(src);
+        const EStudioObjectType matType = m_Bridge.GetObjectType(src);
         QString materialTypeString;
-        if (matType == "CustomMaterial")
+        if (matType == OBJTYPE_CUSTOMMATERIAL)
             materialTypeString = m_Bridge.GetSourcePath(src);
-        else
+        else if (matType == OBJTYPE_MATERIAL)
             materialTypeString = QStringLiteral("Standard Material");
+        else
+            return;
         SetMaterialType(dst, materialTypeString);
 
         const auto srcSlide = m_SlideSystem.GetApplicableSlide(src);
