@@ -358,13 +358,29 @@ void InspectorControlModel::duplicateMaterial()
                     Q3DStudio::SCOPED_DOCUMENT_EDITOR(*doc, tr("Set Material Type")));
         doc->SelectDataModelObject(duplicate);
 
+        // Change all material that reference this material to basic materials too
+        Q3DStudio::CString relPathCString = Q3DStudio::CString::fromQString(relPath);
+        Q3DStudio::CString duplicateName = getBridge()->GetName(duplicate, true);
+        auto nameProperty = getBridge()->GetNameProperty();
+        QVector<qt3dsdm::Qt3DSDMInstanceHandle> refMats;
+        doc->getSceneReferencedMaterials(doc->GetSceneInstance(), refMats);
+        for (auto &refMat : qAsConst(refMats)) {
+            if (getBridge()->getMaterialReference(refMat) == instance) {
+                scopedEditor->setMaterialReferenceByPath(refMat, absPath);
+                scopedEditor->setMaterialSourcePath(refMat, relPathCString);
+                scopedEditor->SetName(refMat, duplicateName);
+                doc->GetStudioSystem()->GetFullSystemSignalSender()->SendInstancePropertyValue(
+                            refMat, nameProperty);
+            }
+        }
+
         if (type != OBJTYPE_REFERENCEDMATERIAL)
             sceneEditor->SetMaterialType(instance, QStringLiteral("Referenced Material"));
         scopedEditor->setMaterialReferenceByPath(instance, absPath);
-        scopedEditor->setMaterialSourcePath(instance, Q3DStudio::CString::fromQString(relPath));
-        scopedEditor->SetName(instance, getBridge()->GetName(duplicate, true));
+        scopedEditor->setMaterialSourcePath(instance, relPathCString);
+        scopedEditor->SetName(instance, duplicateName);
         doc->GetStudioSystem()->GetFullSystemSignalSender()->SendInstancePropertyValue(
-                    instance, getBridge()->GetNameProperty());
+                    instance, nameProperty);
     }
 }
 
