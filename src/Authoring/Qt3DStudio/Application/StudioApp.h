@@ -219,7 +219,6 @@ public:
     void showPresentationIdUniqueWarning();
     void showPresentationIdEmptyWarning();
     void showInvalidFilenameWarning();
-    void showShaderCompileError(QString &error);
     void checkDeletedDatainputs(bool askFromUser);
     void saveDataInputsToProjectFile();
     void verifyDatainputBindings();

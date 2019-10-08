@@ -50,7 +50,6 @@
 #include "IDragable.h"
 #include "IObjectReferenceHelper.h"
 #include "IDirectoryWatchingSystem.h"
-#include "IStudioRenderer.h"
 
 ProjectFileSystemModel::ProjectFileSystemModel(QObject *parent) : QAbstractListModel(parent)
     , m_model(new QFileSystemModel(this))
@@ -207,16 +206,6 @@ void ProjectFileSystemModel::updateReferences()
     std::for_each(fontFileList.begin(), fontFileList.end(), addReferencesPresentation);
     std::for_each(effectTextureList.begin(), effectTextureList.end(), addReferencesPresentation);
     std::for_each(renderableList.begin(), renderableList.end(), addReferencesRenderable);
-
-    qt3dsdm::TInstanceHandleList theEffectInstances(bridge->GetEffectList());
-
-    for (const auto instance : theEffectInstances) {
-        auto err = g_StudioApp.getRenderer().getShaderError(instance);
-        if (!err.isEmpty()) {
-            err.prepend(bridge->GetSourcePath(instance) + QStringLiteral("\n\n"));
-            g_StudioApp.showShaderCompileError(err);
-        }
-    }
 
     m_references.insert(projectPath);
 

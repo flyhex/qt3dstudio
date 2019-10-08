@@ -1173,19 +1173,6 @@ struct SEffectTranslator : public SDynamicObjectTranslator
         if (m_EffectSystem)
             theItem.Reset(*m_EffectSystem);
     }
-
-    const QString GetError() override
-    {
-        SEffect &theItem = static_cast<SEffect &>(GetGraphObject());
-        return QString::fromUtf8(theItem.GetError().c_str());
-    }
-
-    void SetError(const QString &error) override
-    {
-        SEffect &theItem = static_cast<SEffect &>(GetGraphObject());
-        theItem.SetError(m_EffectSystem->GetResourceManager().GetRenderContext()
-                         .GetStringTable().RegisterStr(error));
-    }
 };
 struct SCustomMaterialTranslator : public SDynamicObjectTranslator
 {
