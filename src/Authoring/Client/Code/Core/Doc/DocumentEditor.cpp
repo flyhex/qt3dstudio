@@ -5551,8 +5551,7 @@ void IDocumentEditor::fixDefaultTexturePaths(Qt3DSDMInstanceHandle instance)
             TDataStrPtr strPtr = get<TDataStrPtr>(value);
             const QString strValue = QString::fromWCharArray(strPtr->GetData());
             const QString docRelative = docDir.relativeFilePath(strValue);
-            const QString projRelative = projDir.relativeFilePath(strValue);
-            if (!QFileInfo(docRelative).exists() && !QFileInfo(projRelative).exists()) {
+            if (!QFileInfo(docDir.filePath(docRelative)).exists()) {
                 // Convert path to presentation relative
                 const QVariant newVarValue = QVariant::fromValue(
                             docDir.relativeFilePath(projDir.absoluteFilePath(strValue)));
