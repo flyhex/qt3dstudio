@@ -1855,6 +1855,7 @@ public:
         // Keep material names the same so that if you change the material type
         // any relative path links will still work.
         // Next bug is harder (keep id's the same).
+        Q3DStudio::CString fileId = GetFileId(instance);
         Q3DStudio::CString theName = GetName(instance);
         SLong4 theGuid = m_Bridge.GetInstanceGUID(instance);
         TInstanceHandle nextChild = m_AssetGraph.GetSibling(instance, true);
@@ -1914,6 +1915,9 @@ public:
                                      m_Bridge.GetObjectDefinitions().m_Lightmaps.m_LightmapShadow,
                                      theLightmapShadowValue, false);
 
+        m_DataCore.SetInstancePropertyValue(newMaterial,
+                                            m_Bridge.GetObjectDefinitions().m_Asset.m_FileId,
+                                            std::make_shared<CDataStr>(fileId.c_str()));
         SetName(newMaterial, theName, false);
         m_Bridge.SetInstanceGUID(newMaterial, theGuid);
         // Copy all actions from old material instance to new material instance
