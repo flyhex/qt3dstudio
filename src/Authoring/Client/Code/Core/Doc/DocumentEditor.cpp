@@ -1894,11 +1894,8 @@ public:
                                                    theSlide, instance);
         } else {
             CFilePath thePath = m_Doc.GetResolvedPathToDoc(inRelativePathToMaterialFile);
-            // Reusing the instance handle for new material seems to cause issues with stale
-            // property handles being used, if custom property names match with the names of
-            // previous material properties. So we create an entirely new instance.
             newMaterial = LoadCustomMaterial(thePath, model, theSlide,
-                                             DocumentEditorInsertType::LastChild, 0);
+                                             DocumentEditorInsertType::LastChild, 0, instance);
         }
 
         if (newMaterial.Valid() && nextChild.Valid())
