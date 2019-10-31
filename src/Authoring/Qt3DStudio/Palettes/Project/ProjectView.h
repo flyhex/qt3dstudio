@@ -71,6 +71,7 @@ public:
     Q_INVOKABLE void showContextMenu(int x, int y, int index);
     Q_INVOKABLE bool toolTipsEnabled();
     Q_INVOKABLE void openFile(int row);
+    Q_INVOKABLE void setSelected(int row);
 
     void showContainingFolder(int row) const;
     void copyPath(int row) const;
@@ -121,6 +122,7 @@ Q_SIGNALS:
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
+    void keyReleaseEvent(QKeyEvent *event) override;
 
 private:
     void initialize();
@@ -146,6 +148,7 @@ private:
     QString m_qmlStreamDir;
     QString m_assetImportDir;
     QSize m_preferredSize;
+    int m_selected = -1;
 };
 
 #endif // PROJECTVIEW_H

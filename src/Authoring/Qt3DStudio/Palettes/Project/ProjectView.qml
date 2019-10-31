@@ -63,8 +63,10 @@ Rectangle {
 
                 anchors.fill: parent
                 clip: true
+                focus: true
 
                 ScrollBar.vertical: ScrollBar {}
+                keyNavigationEnabled: true
 
                 model: _parentView.projectModel
 
@@ -72,6 +74,7 @@ Rectangle {
                     // Try to keep something selected always
                     if ((currentIndex < 0 || currentIndex >= count) && count > 0)
                         currentIndex = 0;
+                    _parentView.setSelected(currentIndex);
                 }
 
                 delegate: Rectangle {
@@ -85,6 +88,7 @@ Rectangle {
                                                                            : "transparent"
                     function handlePress(mouse, tryDrag) {
                         projectTree.currentIndex = model.index;
+                        _parentView.setSelected(model.index);
 
                         if (mouse.button === Qt.LeftButton && tryDrag && _isDraggable) {
                             pressPoint = Qt.point(mouse.x, mouse.y);
@@ -102,6 +106,7 @@ Rectangle {
                     }
 
                     function handleClick(mouse) {
+                        _parentView.setSelected(projectTree.currentIndex)
                         if (mouse.button === Qt.RightButton) {
                             var rootPoint = mapToItem(root, mouse.x, mouse.y);
                             _parentView.showContextMenu(rootPoint.x, rootPoint.y,
@@ -145,6 +150,7 @@ Rectangle {
                                     acceptedButtons: Qt.LeftButton
                                     onPressed: delegateItem.handlePress(mouse, false)
                                     onClicked: {
+                                        _parentView.setSelected(index);
                                         if (_expanded)
                                             projectTree.model.collapse(index)
                                         else

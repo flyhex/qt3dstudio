@@ -72,6 +72,7 @@ public:
 
     QString filePath(int row) const;
     bool isRefreshable(int row) const;
+    bool isCollapsable(int row) const;
     bool isCurrentPresentation(const QString &path) const;
     bool isInitialPresentation(const QString &path) const;
     QString presentationId(const QString &path) const;

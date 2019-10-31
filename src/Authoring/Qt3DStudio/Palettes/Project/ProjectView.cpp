@@ -266,6 +266,22 @@ void ProjectView::mousePressEvent(QMouseEvent *event)
     QQuickWidget::mousePressEvent(event);
 }
 
+void ProjectView::keyReleaseEvent(QKeyEvent *event)
+{
+    QKeyEvent *ke = static_cast<QKeyEvent *>(event);
+    if (m_selected >= 0) {
+        auto key = ke->key();
+        if (key == Qt::Key_Delete)
+            deleteFile(m_selected);
+        else if (key == Qt::Key_Right)
+            m_ProjectModel->expand(m_selected);
+        else if (key == Qt::Key_Left && m_ProjectModel->isCollapsable(m_selected))
+            m_ProjectModel->collapse(m_selected);
+    } else {
+        QQuickWidget::keyReleaseEvent(event);
+    }
+}
+
 void ProjectView::startDrag(QQuickItem *item, int row)
 {
     item->grabMouse(); // Grab to make sure we can ungrab after the drag
@@ -453,6 +469,11 @@ void ProjectView::openFile(int row)
     });
 }
 
+void ProjectView::setSelected(int row)
+{
+    m_selected = row;
+}
+
 void ProjectView::refreshImport(int row) const
 {
     if (row == -1)
@@ -589,5 +610,6 @@ void ProjectView::deleteFile(int row) const
 
 void ProjectView::rebuild()
 {
+    m_selected = -1;
     m_ProjectModel->setRootPath(g_StudioApp.GetCore()->getProjectFile().getProjectPath());
 }

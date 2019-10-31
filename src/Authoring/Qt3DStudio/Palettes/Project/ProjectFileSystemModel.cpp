@@ -168,6 +168,12 @@ bool ProjectFileSystemModel::isRefreshable(int row) const
     return path.endsWith(QLatin1String(".import"));
 }
 
+bool ProjectFileSystemModel::isCollapsable(int row) const
+{
+    auto &item = m_items[row];
+    return item.expanded;
+}
+
 void ProjectFileSystemModel::updateReferences()
 {
     m_references.clear();
