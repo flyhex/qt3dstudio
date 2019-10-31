@@ -976,9 +976,15 @@ struct SComposerSerializerImpl : public IComposerSerializer
         } else {
             m_TempBuffer.clear();
             WCharTWriter theWriter(m_TempBuffer);
-            WStrOps<SValue>().ToBuf(theValue, theWriter);
-
-            if (GetValueType(theValue) == DataModelDataType::String || m_TempBuffer.size()) {
+            if (theValueType == DataModelDataType::String || !theValue.empty()) {
+                // QT3DS-3993: store line feeds as replacement chars in UIP
+                if (theValueType == DataModelDataType::String) {
+                    TDataStrPtr strPtr = get<TDataStrPtr>(theValue);
+                    auto strValue = QString::fromWCharArray(strPtr->GetData());
+                    strValue.replace("\n", LINE_BREAK_SUBSTITUTE);
+                    theValue = std::make_shared<CDataStr>(CString::fromQString(strValue));
+                }
+                WStrOps<SValue>().ToBuf(theValue, theWriter);
                 char buffer[] = { 0, 0, 0, 0 };
                 m_TempBuffer.write(buffer, 4);
                 theValueStr.assign((const wchar_t *)m_TempBuffer.begin());
@@ -1007,8 +1013,13 @@ struct SComposerSerializerImpl : public IComposerSerializer
                 return SStringOrInt(std::make_shared<CDataStr>(inValue));
         }
 
-        if (inType == DataModelDataType::String)
-            return std::make_shared<CDataStr>(inValue);
+        if (inType == DataModelDataType::String) {
+            // QT3DS-3993: store line feeds as replacement chars in UIP
+            auto valueStr = std::make_shared<CDataStr>(inValue);
+            auto val = QString::fromStdWString(valueStr->GetData());
+            val.replace(LINE_BREAK_SUBSTITUTE, "\n");
+            return std::make_shared<CDataStr>(CString::fromQString(val));
+        }
 
         qt3ds::foundation::ConvertUTF(
                     reinterpret_cast<const qt3ds::foundation::TWCharEASTLConverter::TCharType *>(inValue), 0,
