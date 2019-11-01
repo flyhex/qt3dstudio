@@ -322,11 +322,13 @@ public:
     virtual qt3dsdm::TInstanceHandleList
     PasteSceneGraphObject(const CFilePath &inFilePath, Qt3DSDMInstanceHandle inNewRoot,
                           bool inGenerateUniqueName, DocumentEditorInsertType::Enum inInsertType,
-                          const CPt &inPosition) = 0;
+                          const CPt &inPosition,
+                          bool preserveFileIds) = 0;
 
     virtual qt3dsdm::TInstanceHandleList PasteSceneGraphObjectMaster(
         const CFilePath &inFilePath, Qt3DSDMInstanceHandle inNewRoot, bool inGenerateUniqueName,
-        DocumentEditorInsertType::Enum inInsertType, const CPt &inPosition) = 0;
+        DocumentEditorInsertType::Enum inInsertType, const CPt &inPosition,
+        bool preserveFileIds) = 0;
 
     virtual void RearrangeObjects(const qt3dsdm::TInstanceHandleList &inInstances,
                                   TInstanceHandle inDest,

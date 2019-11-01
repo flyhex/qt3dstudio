@@ -90,7 +90,6 @@ void CStudioAppPrefsPage::onInitDialog()
     // Add tool tips for controls
     m_ui->m_DefaultInterpolation->setToolTip(tr("Set default keyframe interpolation type"));
     m_ui->m_checkTimelineAbsoluteSnapping->setToolTip(tr("Enable timeline snapping grid"));
-    m_ui->m_checkLegacyViewer->setToolTip(tr("Enable preview with Qt3D Runtime Viewer"));
     m_ui->m_SnapRangeCombo->setToolTip(tr("Set resolution of timeline snapping grid"));
     m_ui->m_buttonRestoreDefaults->setToolTip(tr("Click to restore default Studio settings"));
 
@@ -119,8 +118,6 @@ void CStudioAppPrefsPage::onInitDialog()
     connect(m_ui->m_SnapRangeCombo, activated, this, [=](){ setModified(true); });
     connect(m_ui->m_checkTimelineAbsoluteSnapping, &QCheckBox::clicked,
             this, [=](){ setModified(true); enableOptions(); });
-    connect(m_ui->m_checkLegacyViewer, &QCheckBox::clicked,
-            this, [=](){ setModified(true); m_restartNeeded = true; });
     connect(m_ui->m_EditViewStartupView, activated, this, [=](){ setModified(true); });
     connect(m_ui->helperGridLinesSpinBox,
             static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
@@ -170,9 +167,6 @@ void CStudioAppPrefsPage::loadSettings()
     m_ui->m_checkTimelineAbsoluteSnapping->setChecked(
                 CStudioPreferences::isTimelineSnappingGridActive());
 
-    // Legacy viewer
-    m_ui->m_checkLegacyViewer->setChecked(CStudioPreferences::isLegacyViewerActive());
-
     // Helper grid
     m_ui->helperGridLinesSpinBox->setValue(CStudioPreferences::helperGridLines());
     m_ui->helperGridSpacingSpinBox->setValue(CStudioPreferences::helperGridSpacing());
@@ -220,9 +214,6 @@ void CStudioAppPrefsPage::saveSettings()
     int theCurrentSelection = m_ui->m_SnapRangeCombo->currentIndex();
     CStudioPreferences::setTimelineSnappingGridResolution(ESnapGridResolution(theCurrentSelection));
 
-    // Viewing settings
-    // Legacy viewer
-    CStudioPreferences::setLegacyViewerActive(m_ui->m_checkLegacyViewer->isChecked());
     // Preferred Startup View
     CStudioPreferences::setPreferredStartupView(m_ui->m_EditViewStartupView->currentIndex());
 

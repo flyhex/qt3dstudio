@@ -454,6 +454,7 @@ struct STranslatorDataModelParser
 #define Material_DiffuseLightWrap m_Material.m_DiffuseLightWrap
 #define Material_ReferencedMaterial m_ReferencedMaterial.m_ReferencedMaterial
 #define Material_VertexColors m_Material.m_VertexColors
+#define Material_TransparencyMode m_Material.m_TransparencyMode
 #define Image_ImagePath m_Asset.m_SourcePath
 #define Image_OffscreenRendererId m_Image.m_SubPresentation
 #define Image_Scale_X m_Image.m_RepeatU
@@ -3929,6 +3930,13 @@ void STranslation::PerformWidgetDrag(int inWidgetSubComponent, CPt inOriginalCoo
             TORAD(theRad);
             theRad = MakeNiceRotation(theRad);
             QT3DSQuat theRotation(theRad, thePlaneNormal);
+
+            // Call SetRotationEdges also here so rotation angle text gets drawn.
+            // Here just draw it in the middle of rotation circle for simplicity.
+            m_CumulativeRotation = ShortestAngleDifference(m_CumulativeRotation, theRad);
+            m_LastRenderedWidget->SetRotationEdges(QT3DSVec3(0.0f), thePlaneNormal,
+                                                   m_CumulativeRotation, 0.0f);
+
             ApplyRotationToSelectedInstance(theRotation, *theNode, inEditor, false);
         }
     } break;

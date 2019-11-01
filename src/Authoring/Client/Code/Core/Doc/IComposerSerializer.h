@@ -77,13 +77,15 @@ public:
     // Equivalent to the older partial serialization system
     virtual void SerializeSceneGraphObjects(qt3dsdm::IDOMWriter &inWriter,
                                             const qt3dsdm::TInstanceHandleList &inInstances,
-                                            qt3dsdm::Qt3DSDMSlideHandle inActiveSlide) = 0;
+                                            qt3dsdm::Qt3DSDMSlideHandle inActiveSlide,
+                                            bool preserveFileIds) = 0;
 
     // Read a partial serialization into this slide, attaching the instance as the last child of the
     // new root.
     virtual qt3dsdm::TInstanceHandleList SerializeSceneGraphObject(
         qt3dsdm::IDOMReader &inReader, const Q3DStudio::CFilePath &inDocumentDirectory,
-        qt3dsdm::Qt3DSDMInstanceHandle inNewRoot, qt3dsdm::Qt3DSDMSlideHandle inActiveSlide) = 0;
+        qt3dsdm::Qt3DSDMInstanceHandle inNewRoot, qt3dsdm::Qt3DSDMSlideHandle inActiveSlide,
+        bool preserveFileIds) = 0;
 
     // Save and load just a single action
     virtual void SerializeAction(qt3dsdm::IDOMWriter &inWriter, qt3dsdm::Qt3DSDMSlideHandle inSlide,

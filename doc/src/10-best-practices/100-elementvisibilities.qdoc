@@ -1,0 +1,124 @@
+/****************************************************************************
+**
+** Copyright (C) 2019 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt 3D Studio.
+**
+** $QT_BEGIN_LICENSE:FDL$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU Free Documentation License Usage
+** Alternatively, this file may be used under the terms of the GNU Free
+** Documentation License version 1.3 as published by the Free Software
+** Foundation and appearing in the file included in the packaging of
+** this file. Please review the following information to ensure
+** the GNU Free Documentation License version 1.3 requirements
+** will be met: https://www.gnu.org/licenses/fdl-1.3.html.
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+
+/*!
+\title Manipulating Element Visibility
+\page bestpractices-elementvisibilities.html
+\ingroup qt3dstudio-best-practices
+
+Element visibilities are controlled with element attribute "eyeball". This attribute can be set
+per-slide for each element. See \l{Studio: Timeline Palette}.
+
+Eyeball attribute can also be controlled in Runtime with data inputs or setAttribute API.
+
+Eyeball attribute controls not only element visibility, but also entire element active state.
+Element active state determines if element participates in animations, or if it in general exists
+in the scene at any given moment. Thus, changing element eyeball state is more than just hiding or
+revealing an existing element.
+
+\section1 Using Data Inputs to Control Active State
+
+A boolean type data input can be bound to element "eyeball" property and used to control element
+active state. See \l{Using Data Inputs} for details.
+
+\section2 Master Slide Elements versus Per-slide Elements
+
+When a data input is used to change element eyeball property, runtime behavior depends on whether
+the element exists on master slide, or on a single slide.
+
+\b{For elements on master slide, data input control is persistent.} This means that after element
+visibility has been changed using a data input, element is no longer affected by visibility states
+set in slides, and will not change visibility at slide transitions. This helps avoid - often
+tricky! - bugs where element visibility is controlled by several sources.
+
+\b{For elements existing on a single slide, data input visibility control is not persistent.}
+Element visibility can be set using a data input, but when the slide containing the element is
+re-entered, element visibility will have the state that was assigned to it in Editor.
+
+\section2 SetAttribute API Visibility Control versus Data Inputs
+
+Q3DSElement::setAttribute API can also be used to directly set eyeball attribute. Visibility
+persistence does not apply to any visibility changes done using setAttribute API.
+
+\note Data input is the preferred method for controlling element attributes.
+
+\note Mixing setAttribute and data input control can lead to unexpected behavior. Due to
+performance optimizations, Q3DSDataInput::setValue API by default only generates a change event
+when the new Data Input value differs from the old one. Thus, a data input might discard value even
+though the underlying target element visibility has actually been changed by another controller.
+See \l{Best practices for dynamic visibility control} for example.
+
+\section1 Best Practices for Dynamic Visibility Control
+
+If an element on master slide must be controlled dynamically, consider the following approach:
+
+\list
+\li Use a single visibility controller instead of relying on a combination of slide transitions,
+data inputs and setAttribute calls. For example, the following sequence where element "Element"
+visibility is bound to data input \c visCtrlDI will fail and leave "Element" in non-visible state:
+\code
+visCtrlDI.setValue(true)
+Element.setAttribute("eyeball", false)
+visCtrlDI.setValue(true) // this value change will be discarded, because force=true is not set
+\endcode
+
+\li For data input -controlled elements, set visibility explicitly with data input at
+presentationReady to make sure that visibility is at a known state. This also makes sure that
+master slide element visibility is persistent and not affected by slide transitions. Use parameter
+force = true.
+
+\li Use onSlideChanged signal and data input to explicitly set element visibility at slide
+transition, especially for master slide elements. Do not rely on visibility state set in slide.
+
+\li To make sure that visibility change event is actually created regardless of data input current
+value, use force=true parameter in Q3DSdata input::setValue interface. Do not call setValue
+needlessly when force parameter is set to true, as this can have performance implications.
+\endlist
+
+\section1 Debugging Element Visibility Issues
+
+\b{Element has wrong visibility after slide change, element is on master slide, and \
+visibility (eyeball) was changed with data input before this?}
+
+Slide-based visibility states are no longer used because data input control overrides them. Make
+sure that you will do all visibility changes using data input.
+
+\b{Element visibility was changed using Q3DSElement::setAttribute, and data input \
+visibility setting now has no effect?}
+
+Do not mix setAttribute, slide-based and data input visibility control. Use force = true parameter
+for Q3DSDataInput::setValue API to make sure that data input does not discard incoming value.
+
+\b{Element is not on master slide, and data input visibility control has no effect after \
+slide change?}
+
+Element visibility might have been changed by slide transition. Data input is not creating change
+event, if the new value is not different from previously set value. Use force = true parameter to
+bypass this optimization. Also remember that for non-master slide elements, data input control is
+not persistent. Entering this slide later on will again set visibility to slide-based initial
+value.
+*/

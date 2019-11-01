@@ -218,16 +218,6 @@ CMainFrame::CMainFrame()
     connect(m_ui->actionRemote_Preview, &QAction::triggered,
             this, &CMainFrame::OnPlaybackPreviewRemote);
 
-    // Only show Qt3D runtime preview if we have appropriate viewer and it's enabled
-    if (CStudioPreferences::isLegacyViewerActive()
-            && QFileInfo(CPreviewHelper::getViewerFilePath(QStringLiteral("q3dsviewer"))).exists()) {
-        connect(m_ui->actionPreviewQt3DRuntime, &QAction::triggered,
-                this, &CMainFrame::OnPlaybackPreviewQt3DRuntime);
-        m_ui->actionPreviewQt3DRuntime->setVisible(true);
-    } else {
-        m_ui->actionPreviewQt3DRuntime->setVisible(false);
-    }
-
     // Tool mode toolbar
     connect(m_ui->actionPosition_Tool, &QAction::triggered, this,
             std::bind(&CMainFrame::onTransformToolChanged, this, STUDIO_TOOLMODE_MOVE));
@@ -896,7 +886,6 @@ void CMainFrame::EditPreferences(short inPageIndex)
         CStudioPreferences::setDontShowGLVersionDialog(false);
         CStudioPreferences::setDefaultClientSize(CStudioPreferences::DEFAULT_CLIENT_WIDTH,
                                                  CStudioPreferences::DEFAULT_CLIENT_HEIGHT);
-        CStudioPreferences::setLegacyViewerActive(true);
         CStudioPreferences::setEditViewFillMode(true);
         CStudioPreferences::setPreferredStartupView(
                     CStudioPreferences::PREFERREDSTARTUP_DEFAULTINDEX);
@@ -1030,11 +1019,6 @@ void CMainFrame::OnPlaybackPreview(const QString &viewerExeName, bool remote)
     } else {
         CPreviewHelper::OnPreview(viewerExeName);
     }
-}
-
-void CMainFrame::OnPlaybackPreviewQt3DRuntime()
-{
-    OnPlaybackPreview(QStringLiteral("q3dsviewer"));
 }
 
 void CMainFrame::OnPlaybackPreviewOpenGLRuntime()

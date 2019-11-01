@@ -230,16 +230,6 @@ void CStudioPreferences::resetWindowState(int version)
 
 // Viewing settings
 //
-bool CStudioPreferences::isLegacyViewerActive()
-{
-    return s_preferences.value(QStringLiteral("Viewing/LegacyViewerActive"), false).toBool();
-}
-
-void CStudioPreferences::setLegacyViewerActive(bool inActive)
-{
-    s_preferences.setValue(QStringLiteral("Viewing/LegacyViewerActive"), inActive);
-}
-
 bool CStudioPreferences::isEditViewFillMode()
 {
     return s_preferences.value(QStringLiteral("Viewing/EditViewFillMode"), true).toBool();

@@ -37,6 +37,7 @@
 #include "Qt3DSImportComposerTypes.h"
 #include "Qt3DSFileToolsSeekableMeshBufIOStream.h"
 #include "foundation/StrConvertUTF.h"
+#include <QtCore/qurl.h>
 
 using qt3dsdm::IStringTable;
 
@@ -342,14 +343,14 @@ public:
     {
         if (m_ValidInstances.contains(inst))
             return fromHdl(inst);
-        return NULL;
+        return nullptr;
     }
 
     Instance *GetInstance(TIMPHandle inst)
     {
         if (m_ValidInstances.contains(inst))
             return fromHdl(inst);
-        return NULL;
+        return nullptr;
     }
 
     Instance *GetInstance(TCharPtr id)
@@ -357,7 +358,7 @@ public:
         ImportHashMap<TCharPtr, Instance *>::const_iterator entry = m_IdToInstMap.find(id);
         if (entry != m_IdToInstMap.end())
             return entry->second;
-        return NULL;
+        return nullptr;
     }
 
     Instance *GetInstance(TCharPtr id) const
@@ -365,7 +366,7 @@ public:
         ImportHashMap<TCharPtr, Instance *>::const_iterator entry = m_IdToInstMap.find(id);
         if (entry != m_IdToInstMap.end())
             return entry->second;
-        return NULL;
+        return nullptr;
     }
 
     Option<InstanceDesc> GetInstanceByHandle(TIMPHandle inst) const override
@@ -434,7 +435,7 @@ public:
     QT3DSU32 GetNumProperties(TIMPHandle instance) const override
     {
         Instance *inst = GetInstance(instance);
-        if (inst == NULL) {
+        if (inst == nullptr) {
             QT3DS_ASSERT(false);
             return 0;
         }
@@ -443,7 +444,7 @@ public:
     QT3DSU32 GetProperties(TIMPHandle instance, NVDataRef<PropertyValue> outBuffer) const override
     {
         Instance *inst = GetInstance(instance);
-        if (inst == NULL) {
+        if (inst == nullptr) {
             QT3DS_ASSERT(false);
             return 0;
         }
@@ -460,7 +461,7 @@ public:
                                                     ComposerPropertyNames::Enum val) const override
     {
         Instance *inst = GetInstance(instance);
-        if (inst == NULL) {
+        if (inst == nullptr) {
             QT3DS_ASSERT(false);
             return Empty();
         }
@@ -475,7 +476,7 @@ public:
     QT3DSU32 GetNumChildren(TIMPHandle instance) const override
     {
         Instance *inst = GetInstance(instance);
-        if (inst == NULL) {
+        if (inst == nullptr) {
             QT3DS_ASSERT(false);
             return 0;
         }
@@ -493,7 +494,7 @@ public:
     QT3DSU32 GetChildren(TIMPHandle instance, NVDataRef<InstanceDesc> childBuffer) const override
     {
         Instance *inst = GetInstance(instance);
-        if (inst == NULL) {
+        if (inst == nullptr) {
             QT3DS_ASSERT(false);
             return 0;
         }
@@ -514,7 +515,7 @@ public:
     void MarkInstanceInvalid(TIMPHandle instance) override
     {
         Instance *inst = GetInstance(instance);
-        if (inst == NULL) {
+        if (inst == nullptr) {
             QT3DS_ASSERT(false);
             return;
         }
@@ -579,7 +580,7 @@ public:
         QT3DSIMP_FOREACH(idx, (QT3DSU32)inSource.m_Children.size())
         {
             Instance *oldChild = GetInstance(inSource.m_Children[idx]);
-            if (oldChild == NULL) {
+            if (oldChild == nullptr) {
                 QT3DS_ASSERT(false);
                 return retval;
             }
@@ -599,7 +600,7 @@ public:
             return;
         }
         Instance *theCopy = GetInstance(theNewItemId->second);
-        if (theCopy == NULL) {
+        if (theCopy == nullptr) {
             QT3DS_ASSERT(false);
             return;
         }
@@ -632,7 +633,7 @@ public:
         QT3DSIMP_FOREACH(idx, (QT3DSU32)inSource.m_Children.size())
         {
             Instance *oldChild = GetInstance(inSource.m_Children[idx]);
-            if (oldChild == NULL) {
+            if (oldChild == nullptr) {
                 QT3DS_ASSERT(false);
                 return;
             }
@@ -643,7 +644,7 @@ public:
     TIMPHandle CopyInstance(TIMPHandle inSource) override
     {
         Instance *inst = GetInstance(inSource);
-        if (inst == NULL) {
+        if (inst == nullptr) {
             QT3DS_ASSERT(false);
             return 0;
         }
@@ -654,7 +655,7 @@ public:
         Instance *retval = CopyInstanceHierarchy(*inst, idMap);
 
         Instance *parent = fromHdl(inst->m_Parent);
-        if (parent != NULL)
+        if (parent != nullptr)
             parent->AddChild(retval, inst);
 
         // Copy properties and animations
@@ -666,7 +667,7 @@ public:
     bool SetInstanceProperties(TIMPHandle instance, NVConstDataRef<PropertyValue> inBuffer) override
     {
         Instance *inst = GetInstance(instance);
-        if (inst == NULL) {
+        if (inst == nullptr) {
             QT3DS_ASSERT(false);
             return false;
         }
@@ -677,7 +678,7 @@ public:
                                             const TImportModelValue &val) override
     {
         Instance *inst = GetInstance(instance);
-        if (inst == NULL) {
+        if (inst == nullptr) {
             QT3DS_ASSERT(false);
             return false;
         }
@@ -694,11 +695,11 @@ public:
     {
         Instance *inst = GetInstance(instance);
         Instance *child = GetInstance(childHdl);
-        if (inst == NULL) {
+        if (inst == nullptr) {
             QT3DS_ASSERT(false);
             return false;
         }
-        if (child == NULL) {
+        if (child == nullptr) {
             QT3DS_ASSERT(false);
             return false;
         }
@@ -757,25 +758,36 @@ public:
         if (!m_ImageDir.IsDirectory())
             m_ImageDir.CreateDir(true);
 
-        if (!m_ImageDir.IsDirectory())
-            return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_ImageDir.toCString());
+        if (!m_ImageDir.IsDirectory()) {
+            return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory,
+                                   m_ImageDir.toCString());
+        }
 
         Q3DStudio::CString imgPath = CFilePath::GetAbsolutePath(CString(_imgPath));
-        Q3DStudio::CString srcImgPath =
-            CFilePath::GetRelativePathFromBase(m_FullSrcDirectory, imgPath);
+        Q3DStudio::CString srcImgPath = CFilePath::GetRelativePathFromBase(m_FullSrcDirectory,
+                                                                           imgPath);
 
-        Q3DStudio::SFileErrorCodeFileNameAndNumBytes copyResult =
-            Q3DStudio::SFileTools::FindAndCopyDestFile(m_ImageDir, imgPath);
+        // Need to get rid of %20 and such in the path, or we won't find the image
+        Q3DStudio::CString cleanImgPath
+                = Q3DStudio::CString::fromQString(QUrl::fromPercentEncoding(
+                                                      imgPath.toQString().toUtf8()));
+        Q3DStudio::CString cleanSrcImgPath
+                = Q3DStudio::CString::fromQString(QUrl::fromPercentEncoding(
+                                                      srcImgPath.toQString().toUtf8()));
+
+        Q3DStudio::SFileErrorCodeFileNameAndNumBytes copyResult
+                = Q3DStudio::SFileTools::FindAndCopyDestFile(m_ImageDir, cleanImgPath);
         // Get the actual return value relative do our destination directory
-        Q3DStudio::CString _retval =
-            CFilePath::GetRelativePathFromBase(m_DestDirectory, copyResult.m_DestFilename);
+        Q3DStudio::CString _retval = CFilePath::GetRelativePathFromBase(m_DestDirectory,
+                                                                        copyResult.m_DestFilename);
         // Register the string, so we can hand retval back to clients
         TCharPtr retval = m_StringTable.RegisterStr(_retval.c_str());
-        m_Images.insert(eastl::make_pair(m_StringTable.RegisterStr(srcImgPath.c_str()), retval));
+        m_Images.insert(eastl::make_pair(m_StringTable.RegisterStr(cleanSrcImgPath.c_str()),
+                                         retval));
 
         if (copyResult.m_Error != Q3DStudio::FileErrorCodes::NoError) {
-            CharPtrOrError errorValue(
-                ImportErrorData(FromFileErrorCode(copyResult.m_Error), RegisterStr(imgPath)));
+            CharPtrOrError errorValue(ImportErrorData(FromFileErrorCode(copyResult.m_Error),
+                                                      RegisterStr(cleanImgPath)));
             errorValue.m_Value = retval;
             return errorValue;
         }
@@ -786,23 +798,31 @@ public:
         if (dstPath.hasValue()) {
             if (!m_ImageDir.IsDirectory())
                 m_ImageDir.CreateDir(true);
-            if (!m_ImageDir.IsDirectory())
-                return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory, m_ImageDir.toCString());
-            CFilePath fullDestPath =
-                CFilePath::CombineBaseAndRelative(m_DestDirectory, CString(dstPath.getValue()));
+            if (!m_ImageDir.IsDirectory()) {
+                return ImportErrorData(ImportErrorCodes::UnableToCreateDirectory,
+                                       m_ImageDir.toCString());
+            }
+            CFilePath fullDestPath = CFilePath::CombineBaseAndRelative(m_DestDirectory,
+                                                                       CString(dstPath.getValue()));
             Q3DStudio::SFileErrorCodeAndNumBytes copyResult = Q3DStudio::SFileTools::Copy(
                 fullDestPath, Q3DStudio::FileOpenFlags(Q3DStudio::FileOpenFlagValues::Truncate
                                                        | Q3DStudio::FileOpenFlagValues::Open
                                                        | Q3DStudio::FileOpenFlagValues::Create),
-                CString(_imgPath));
+                        CString(_imgPath));
             // Regardless of if the copy operation succeeds or not, if the destination exists
-            // already
-            // Then we enter it into our dictionary
+            // already then we enter it into our dictionary.
             if (fullDestPath.IsFile()) {
                 CFilePath imgPath = CFilePath::GetAbsolutePath(CString(_imgPath));
-                CFilePath srcImgPath =
-                    CFilePath::GetRelativePathFromBase(m_FullSrcDirectory, imgPath);
-                m_Images.insert(eastl::make_pair(m_StringTable.RegisterStr(srcImgPath.toCString()),
+                CFilePath srcImgPath = CFilePath::GetRelativePathFromBase(m_FullSrcDirectory,
+                                                                          imgPath);
+                // Need to get rid of %20 and such in the path, or we won't find the image
+                Q3DStudio::CString cleanImgPath
+                        = Q3DStudio::CString::fromQString(
+                            QUrl::fromPercentEncoding(imgPath.toQString().toUtf8()));
+                Q3DStudio::CString cleanSrcImgPath
+                        = Q3DStudio::CString::fromQString(
+                            QUrl::fromPercentEncoding(srcImgPath.toQString().toUtf8()));
+                m_Images.insert(eastl::make_pair(m_StringTable.RegisterStr(cleanSrcImgPath),
                                                  m_StringTable.RegisterStr(dstPath.getValue())));
             }
 
@@ -810,7 +830,7 @@ public:
 
             if (copyResult.m_Error != Q3DStudio::FileErrorCodes::NoError) {
                 QT3DS_ASSERT(false);
-                const wchar_t *extraData = NULL;
+                const wchar_t *extraData = nullptr;
                 ImportErrorCodes::Enum error = FromFileErrorCode(copyResult.m_Error);
                 if (error == ImportErrorCodes::ResourceNotWriteable)
                     extraData = dstPath.getValue();
@@ -827,9 +847,13 @@ public:
     Option<TCharPtr> FindImageByPath(TCharPtr _imgPath) const override
     {
         Q3DStudio::CString imgPath = CFilePath::GetAbsolutePath(CString(_imgPath));
-        Q3DStudio::CString srcImgPath =
-            CFilePath::GetRelativePathFromBase(m_FullSrcDirectory, imgPath);
-        return FindImageByRelativePath(srcImgPath.c_str());
+        Q3DStudio::CString srcImgPath = CFilePath::GetRelativePathFromBase(m_FullSrcDirectory,
+                                                                           imgPath);
+        // Need to get rid of %20 and such in the path, or we won't find the image
+        Q3DStudio::CString cleanPath
+                = Q3DStudio::CString::fromQString(QUrl::fromPercentEncoding(
+                                                      srcImgPath.toQString().toUtf8()));
+        return FindImageByRelativePath(cleanPath.c_str());
     }
 
     Option<TCharPtr> FindImageByRelativePath(TCharPtr imgPath) const override
@@ -1146,7 +1170,7 @@ public:
                    MemoryBuffer<RawAllocator> &inTempBuf)
     {
         Instance *theInstance = GetInstance(inAnimation.m_InstanceId);
-        if (theInstance == NULL || theInstance->m_Valid == false)
+        if (theInstance == nullptr || theInstance->m_Valid == false)
             return;
         IDOMWriter::Scope __animScope(writer, L"AnimationTrack");
         TCharStr thePropName(inAnimation.m_PropertyName);
@@ -1395,7 +1419,7 @@ public:
 
         std::shared_ptr<IDOMFactory> factory(IDOMFactory::CreateDOMFactory(m_StringTablePtr));
         std::shared_ptr<IDOMWriter> theWriter;
-        SDOMElement *theTopElement = NULL;
+        SDOMElement *theTopElement = nullptr;
         bool exists = fullPath.Exists();
 
         {
@@ -1413,7 +1437,7 @@ public:
 
                 theTopElement = CDOMSerializer::Read(*factory, stream);
 
-                if (theTopElement == NULL) {
+                if (theTopElement == nullptr) {
                     QT3DS_ASSERT(false);
                     return 0;
                 }
@@ -1480,7 +1504,7 @@ public:
     {
         using namespace Q3DStudio;
         std::shared_ptr<IDOMFactory> factory(IDOMFactory::CreateDOMFactory(m_StringTablePtr));
-        SDOMElement *topElement = NULL;
+        SDOMElement *topElement = nullptr;
         {
             Qt3DSFileToolsSeekableMeshBufIOStream stream(
                 SFile::Wrap(SFile::OpenForRead(fname), fname));
@@ -1492,7 +1516,7 @@ public:
             topElement = CDOMSerializer::Read(*factory, stream);
         }
 
-        if (topElement == NULL) {
+        if (topElement == nullptr) {
             QT3DS_ASSERT(false);
             return false;
         }
@@ -1945,7 +1969,7 @@ QT3DSU32 Import::GetHighestImportRevision(TCharPtr pathToFile)
     std::shared_ptr<IDOMFactory> theFactory = IDOMFactory::CreateDOMFactory(theStringTable);
     SDOMElement *theTopElement = CDOMSerializer::Read(*theFactory, stream);
 
-    if (theTopElement == NULL) {
+    if (theTopElement == nullptr) {
         QT3DS_ASSERT(false);
         return 0;
     }

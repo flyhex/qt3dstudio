@@ -204,6 +204,8 @@ private:
     void updateMaterialValues(const QStringList &values, int elementIndex,
                               bool updatingShaders = false);
     qt3dsdm::Qt3DSDMInstanceHandle getReferenceMaterial(CInspectableBase *inspectable) const;
+    qt3dsdm::Qt3DSDMInstanceHandle getReferenceMaterialRecursively(
+            CInspectableBase *inspectable) const;
     void updateShaderValues();
     void updateMatDataValues();
     void updatePropertyValue(InspectorControlBase *element) const;

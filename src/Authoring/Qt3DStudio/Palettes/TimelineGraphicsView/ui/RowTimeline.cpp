@@ -130,21 +130,23 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     const double edgeOffset = TimelineConstants::RULER_EDGE_OFFSET;
 
     // Duration. Draw duration bar (for scene/component root) also if it has
-    // datainput controller
+    // datainput controller.
     if (m_rowTree->hasDurationBar() || m_controllerDataInput.size()) {
         painter->save();
 
+        // do not draw anything beyond bar area left end
+        auto startXActual = edgeOffset + qMax(0.0, m_startX);
         // fully outside ancestors' limits, draw fully hashed
         if (m_minStartX > m_endX || m_maxEndX < m_startX) {
             painter->setBrush(QBrush(CStudioPreferences::timelineRowColorDurationOff1(),
                                      Qt::BDiagPattern));
             painter->setPen(Qt::NoPen);
-            painter->fillRect(QRect(edgeOffset + m_startX, 0, m_endX - m_startX, currHeight),
+            painter->fillRect(startXActual, 0, edgeOffset + m_endX - startXActual, currHeight,
                               CStudioPreferences::timelineRowColorDurationOff2());
-            painter->drawRect(QRect(edgeOffset + m_startX, 0, m_endX - m_startX, currHeight));
+            painter->drawRect(startXActual, 0, edgeOffset + m_endX - startXActual, currHeight);
 
             painter->setPen(QPen(CStudioPreferences::timelineRowColorDurationEdge(), 2));
-            painter->drawLine(edgeOffset + m_startX, 0, edgeOffset + m_startX, currHeight);
+            painter->drawLine(startXActual, 0, startXActual, currHeight);
             painter->drawLine(edgeOffset + m_endX, 0, edgeOffset + m_endX, currHeight);
         } else {
             // draw main duration part
@@ -193,14 +195,13 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                                      Qt::BDiagPattern));
             if (m_startX < m_minStartX) {
                 painter->setPen(Qt::NoPen);
-                painter->fillRect(QRect(edgeOffset + m_startX, 0, m_minStartX - m_startX,
+                painter->fillRect(QRect(startXActual, 0, qMin(m_minStartX - m_startX, m_minStartX),
                                         currHeight),
                                   CStudioPreferences::timelineRowColorDurationOff2());
-                painter->drawRect(QRect(edgeOffset + m_startX, 0, m_minStartX - m_startX,
+                painter->drawRect(QRect(startXActual, 0, qMin(m_minStartX - m_startX, m_minStartX),
                                         currHeight));
                 painter->setPen(CStudioPreferences::timelineRowColorDurationEdge());
-                painter->drawLine(edgeOffset + m_minStartX, 0, edgeOffset + m_minStartX,
-                                  currHeight);
+                painter->drawLine(startXActual, 0, startXActual, currHeight);
             }
 
             // draw hashed part after
@@ -215,7 +216,7 @@ void RowTimeline::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
 
             if (m_rowTree->indexInLayout() != 1) {
                 painter->setPen(QPen(CStudioPreferences::timelineRowColorDurationEdge(), 2));
-                painter->drawLine(edgeOffset + m_startX, 0, edgeOffset + m_startX, currHeight);
+                painter->drawLine(startXActual, 0, startXActual, currHeight);
                 painter->drawLine(edgeOffset + m_endX, 0, edgeOffset + m_endX, currHeight);
             }
         }
@@ -623,9 +624,6 @@ void RowTimeline::clearBoundChildren()
 // move the duration area (start/end x)
 void RowTimeline::moveDurationBy(double dx)
 {
-    if (m_startX + dx < 0)
-        dx = -m_startX;
-
     m_startX += dx;
     m_endX += dx;
 
@@ -641,8 +639,10 @@ void RowTimeline::moveDurationBy(double dx)
 
     // move keyframes with the row
     if (!m_rowTree->isProperty()) { // make sure we don't move the keyframes twice
-        for (Keyframe *keyframe : qAsConst(m_keyframes))
-            keyframe->time += rowTree()->m_scene->ruler()->distanceToTime(dx);
+        for (Keyframe *keyframe : qAsConst(m_keyframes)) {
+            keyframe->time += rowTree()->m_scene->ruler()->distanceToTime(
+                        (m_startX + dx < 0) ? 0 : dx);
+        }
     }
 
     update();

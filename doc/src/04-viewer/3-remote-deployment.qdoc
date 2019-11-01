@@ -59,7 +59,7 @@ For embedded systems you will have to compile the application on the target devi
 You can run the Viewer from the command line. The default mode is connection mode. To start the
 Viewer, use the following command:
 \badcode
-q3dsviewer
+Qt3DViewer
 \endcode
 
 When you run the Viewer in connection mode it will display connection details, IP address and port,
