@@ -30,9 +30,6 @@
 \title Comparison of Qt 3D and Qt 3D Studio
 \page comparison-qt3d-qt3dstudio.html
 
-In short, Qt 3D Studio is built on top of Qt 3D. The flexible architecture of Qt 3D makes it
-suitable to build 3D runtimes, or engines, such as Qt 3D Studio.
-
 \section1 Qt 3D
 
 Qt 3D is programmer-oriented engine building toolkit and great for both simple and complex scenes.
@@ -72,7 +69,7 @@ Below, we list some common use cases and how they apply to the two:
     \li
       Suitable.
     \li
-      Not possible.
+      Creating meshes and materials dynamically is supported.
   \row
     \li
       Using existing materials and effects.
