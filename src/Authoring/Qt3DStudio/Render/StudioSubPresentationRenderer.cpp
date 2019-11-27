@@ -200,12 +200,9 @@ SOffscreenRendererEnvironment
 StudioSubpresentationRenderer::GetDesiredEnvironment(QT3DSVec2 inPresentationScaleFactor)
 {
     // If we aren't using a clear color, then we are expected to blend with the background
-    if (!m_thread->m_initialized) {
+    if (!m_thread->m_initialized)
         initialize();
-    }
-    bool hasTransparency = true;
-    NVRenderTextureFormats::Enum format =
-        hasTransparency ? NVRenderTextureFormats::RGBA8 : NVRenderTextureFormats::RGB8;
+    NVRenderTextureFormats::Enum format = NVRenderTextureFormats::RGBA8;
     return SOffscreenRendererEnvironment(
                  QT3DSU32(m_thread->m_size.width() * inPresentationScaleFactor.x),
                  QT3DSU32(m_thread->m_size.height() * inPresentationScaleFactor.y),
@@ -257,7 +254,7 @@ void StudioSubpresentationRenderer::Render(const SOffscreenRendererEnvironment &
         else
             func->glEnable(GL_BLEND);
         func->glBlendEquation(GL_FUNC_ADD);
-        func->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        func->glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
         if (!m_program)
             initializeFboCopy();
