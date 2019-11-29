@@ -5607,6 +5607,11 @@ Qt3DSDMInstanceHandle IDocumentEditor::CreateSceneGraphInstance(
     TInstanceHandle theDerivationParent(inMaster);
     inDataCore.DeriveInstance(retval, theDerivationParent);
 
+    // Clear file id derived from the parent
+    // This happens for custom shaders and causes id conflicts (QT3DS-4018)
+    inDataCore.SetInstancePropertyValue(retval, inObjectDefs.m_Asset.m_FileId,
+                                        std::make_shared<CDataStr>(L""));
+
     if (inParent.Valid())
         inAssetGraph.AddChild(inParent, retval);
     else
