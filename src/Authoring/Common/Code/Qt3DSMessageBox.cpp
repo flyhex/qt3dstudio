@@ -35,6 +35,7 @@ using namespace Q3DStudio;
 #include "Qt3DSMessageBox.h"
 
 #include <QtWidgets/qmessagebox.h>
+#include <QtWidgets/qcheckbox.h>
 
 //==============================================================================
 /**
@@ -58,12 +59,14 @@ Qt3DSMessageBox::~Qt3DSMessageBox()
  * @param inTitle Title of the message box
  * @param inText Text to be displayed on the message box
  * @param inIcon Icon to be displayed on the message box
+ * @param inDoNotShowAgainChoice Should we show checkbox for hiding subsequent messages?
  * @param inParentWindow window to attach this dialog to.
  */
 Qt3DSMessageBox::EMessageBoxReturn
 Qt3DSMessageBox::Show(const QString &inTitle, const QString &inText, EMessageBoxIcon inIcon,
-                      bool inShowCancel /*false*/,
-                      Qt3DSMessageBox::TPlatformWindow inParentWindow /*NULL*/)
+                      bool &doNotShowAgain, bool inShowCancel /*false*/,
+                      bool inDoNotShowAgainChoice /*false*/,
+                      Qt3DSMessageBox::TPlatformWindow inParentWindow /*nullptr*/)
 {
     QMessageBox box(inParentWindow);
     box.setWindowTitle(inTitle);
@@ -88,6 +91,31 @@ Qt3DSMessageBox::Show(const QString &inTitle, const QString &inText, EMessageBox
         buttons |= QMessageBox::Cancel;
     box.setStandardButtons(buttons);
 
+    if (inDoNotShowAgainChoice) {
+        QCheckBox *noShowAgain = new QCheckBox(QObject::tr("Do not show again."));
+        box.setCheckBox(noShowAgain);
+        QObject::connect(noShowAgain, &QCheckBox::stateChanged, [&doNotShowAgain](int state) {
+            doNotShowAgain = static_cast<Qt::CheckState>(state) == Qt::CheckState::Checked;
+        });
+    }
+
     auto theButtonPressed = box.exec();
     return theButtonPressed == QMessageBox::Ok ? MSGBX_OK : MSGBX_CANCEL;
+}
+
+//==============================================================================
+/**
+ * Displays the modal message box to the user.
+ * @param inTitle Title of the message box
+ * @param inText Text to be displayed on the message box
+ * @param inIcon Icon to be displayed on the message box
+ * @param inParentWindow window to attach this dialog to.
+ */
+Qt3DSMessageBox::EMessageBoxReturn
+Qt3DSMessageBox::Show(const QString &inTitle, const QString &inText, EMessageBoxIcon inIcon,
+                      bool inShowCancel /*false*/,
+                      Qt3DSMessageBox::TPlatformWindow inParentWindow /*nullptr*/)
+{
+    bool dummy;
+    return Show(inTitle, inText, inIcon, dummy, inShowCancel, false, inParentWindow);
 }

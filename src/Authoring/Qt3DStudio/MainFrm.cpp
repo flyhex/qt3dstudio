@@ -912,6 +912,9 @@ void CMainFrame::EditPreferences(short inPageIndex)
         CStudioPreferences::setPreviewConfig({});
         CStudioPreferences::setPreviewProperty({}, {});
 
+        // Pop-ups
+        CStudioPreferences::setDoNotShowImportWarnings(false);
+
         RecheckSizingMode();
 
         // Save preferences, to make sure we do not lose them on a possible crash

@@ -76,6 +76,7 @@ protected:
 #if 0 // Removed until we have some other Preview configurations that just Viewer
     void onChangePreviewConfiguration();
 #endif
+    void onButtonResetPopupWarnings();
 
     void enableAutosave(bool enabled);
     void setAutosaveInterval(int interval);

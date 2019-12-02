@@ -79,7 +79,12 @@ public:
     virtual ~Qt3DSMessageBox();
     static EMessageBoxReturn Show(const QString &inTitle, const QString &inText,
                                   EMessageBoxIcon inIcon, bool inShowCancel = false,
-                                  TPlatformWindow inParentWindow = NULL);
+                                  TPlatformWindow inParentWindow = nullptr);
+    static EMessageBoxReturn Show(const QString &inTitle, const QString &inText,
+                                  EMessageBoxIcon inIcon, bool &doNotShowAgain,
+                                  bool inShowCancel = false, bool inDoNotShowAgainChoice = false,
+                                  TPlatformWindow inParentWindow = nullptr);
+
 
 protected:
 };

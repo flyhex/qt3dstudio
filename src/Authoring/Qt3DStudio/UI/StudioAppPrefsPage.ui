@@ -417,6 +417,16 @@ palette positions and visibilities</string>
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="m_buttonResetPopupWarnings">
+       <property name="toolTip">
+        <string>Click to clear &quot;Do not Show Again&quot; selections in all pop-ups.</string>
+       </property>
+       <property name="text">
+        <string>Reset Pop-up Warnings</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

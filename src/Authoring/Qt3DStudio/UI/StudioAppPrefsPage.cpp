@@ -114,6 +114,8 @@ void CStudioAppPrefsPage::onInitDialog()
         onApply(); // Save changed preferences before resetting, as it causes Studio to shut down
         CStudioPreferencesPropPage::endDialog(PREFS_RESET_LAYOUT);
     });
+    connect(m_ui->m_buttonResetPopupWarnings, &QPushButton::clicked, this,
+            &CStudioAppPrefsPage::onButtonResetPopupWarnings);
     connect(m_ui->m_DefaultInterpolation, activated, this, [=](){ setModified(true); });
     connect(m_ui->m_SnapRangeCombo, activated, this, [=](){ setModified(true); });
     connect(m_ui->m_checkTimelineAbsoluteSnapping, &QCheckBox::clicked,
@@ -282,6 +284,12 @@ void CStudioAppPrefsPage::onButtonRestoreDefaults()
         // to the CStudioDocPreferences (that called this preferences sheet)
         CStudioPreferencesPropPage::endDialog(PREFS_RESET_DEFAULTS);
     }
+}
+
+void CStudioAppPrefsPage::onButtonResetPopupWarnings()
+{
+    // Setters per pop-up type
+    CStudioPreferences::setDoNotShowImportWarnings(false);
 }
 
 //==============================================================================

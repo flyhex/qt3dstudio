@@ -584,6 +584,20 @@ void CStudioPreferences::setRecentItem(int index, const QString &path)
 }
 
 //
+// Pop-up warning settings
+//
+void CStudioPreferences::setDoNotShowImportWarnings(bool inDoNotShowImportWarnings)
+{
+    s_preferences.setValue(QStringLiteral("PopUps/DoNotShowImportWarnings"),
+                           inDoNotShowImportWarnings);
+}
+
+bool CStudioPreferences::doNotShowImportWarnings()
+{
+    return s_preferences.value(QStringLiteral("PopUps/DoNotShowImportWarnings")).toBool();
+}
+
+//
 // Other settings
 //
 void CStudioPreferences::setQmlContextProperties(QQmlContext *qml)

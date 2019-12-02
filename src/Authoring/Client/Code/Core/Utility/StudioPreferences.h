@@ -175,6 +175,12 @@ public:
     static void setRecentItem(int index, const QString &path);
 
     //
+    // Pop-up warnings
+    //
+    static bool doNotShowImportWarnings();
+    static void setDoNotShowImportWarnings(bool inDoNotShowImportWarnings);
+
+    //
     // Other settings
     //
     static void setQmlContextProperties(QQmlContext *qml);

@@ -364,9 +364,11 @@ void CDialogs::DisplayImportFailed(const QUrl &inURL, const QString &inDescripti
     theMsgText += QStringLiteral("\n%1\n\n").arg(inURL.toDisplayString()) + theText;
 
     // Display the failed import resource message.
-    if (m_ShowGUI) {
-        Qt3DSMessageBox::Show(theTitle, theMsgText, Qt3DSMessageBox::ICON_WARNING, false,
-                              g_StudioApp.m_pMainWnd);
+    if (m_ShowGUI && !CStudioPreferences::doNotShowImportWarnings()) {
+        bool doNotShowAgain = false;
+        Qt3DSMessageBox::Show(theTitle, theMsgText, Qt3DSMessageBox::ICON_WARNING, doNotShowAgain,
+                              false, true, g_StudioApp.m_pMainWnd);
+        CStudioPreferences::setDoNotShowImportWarnings(doNotShowAgain);
     } else {
         qCDebug(qt3ds::TRACE_INFO) << theTitle << ": " << theMsgText;
     }
