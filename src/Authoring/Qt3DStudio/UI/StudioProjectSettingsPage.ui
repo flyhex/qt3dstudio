@@ -86,6 +86,16 @@ when ktx textures are present.</string>
         </property>
        </widget>
       </item>
+      <item row="5" column="0">
+       <widget class="QCheckBox" name="m_checkFlipTex">
+        <property name="toolTip">
+         <string>Flip the y coordinate of compressed textures</string>
+        </property>
+        <property name="text">
+         <string>Flip compressed textures</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

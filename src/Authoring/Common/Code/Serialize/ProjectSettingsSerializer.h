@@ -121,6 +121,9 @@ public:
         bool thePreferKtx = theProjectSettings->getPreferCompressedTextures();
         ar.Att("preferKtx", thePreferKtx);
 
+        bool theFlipCompressedTextures = theProjectSettings->getFlipCompressedTextures();
+        ar.Att("flipCompressedTextures", theFlipCompressedTextures);
+
         if (QColorDialog::customCount() > 0) {
             CustomColorSerializer ccs;
             ar.Serialize(L"CustomColors", ccs);
@@ -160,6 +163,10 @@ public:
         bool thePreferKtx = false;
         if (ar.Att("preferKtx", thePreferKtx))
             theProjectSettings->setPreferCompressedTextures(thePreferKtx);
+
+        bool theFlipCompressedTextures;
+        if (ar.Att("flipCompressedTextures", theFlipCompressedTextures))
+            theProjectSettings->setFlipCompressedTextures(theFlipCompressedTextures);
 
         {
             CustomColorSerializer ccs;

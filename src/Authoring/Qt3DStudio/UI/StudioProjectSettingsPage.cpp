@@ -32,6 +32,7 @@
 #include "StudioProjectSettingsPage.h"
 #include "StudioProjectSettings.h"
 #include "StudioApp.h"
+#include "IDocumentBufferCache.h"
 #include "Doc.h"
 #include "Views.h"
 #include "MainFrm.h"
@@ -100,6 +101,7 @@ void CStudioProjectSettingsPage::onInitDialog()
     connect(m_ui->m_checkConstrainProportions, &QCheckBox::clicked,
             this, &CStudioProjectSettingsPage::onCheckMaintainRatio);
     connect(m_ui->m_checkUseKtx, &QCheckBox::clicked, [=](){ this->setModified(true); });
+    connect(m_ui->m_checkFlipTex, &QCheckBox::clicked, [=](){ this->setModified(true); });
     connect(m_ui->m_Author, &QLineEdit::textEdited, [=](){ this->setModified(true); });
     connect(m_ui->m_Company, &QLineEdit::textEdited, [=](){ this->setModified(true); });
 }
@@ -129,6 +131,9 @@ void CStudioProjectSettingsPage::loadSettings()
 
     // Prefer compressed textures
     m_ui->m_checkUseKtx->setChecked(theProjectSettings->getPreferCompressedTextures());
+
+    // Automatically flip compressed textures
+    m_ui->m_checkFlipTex->setChecked(theProjectSettings->getFlipCompressedTextures());
 
     // Author
     m_ui->m_Author->setText(theProjectSettings->getAuthor());
@@ -169,6 +174,12 @@ void CStudioProjectSettingsPage::saveSettings()
 
     // Prefer compressed textures
     theProjectSettings->setPreferCompressedTextures(m_ui->m_checkUseKtx->isChecked());
+
+    // Automatically flip compressed textures. Trigger reloading if flip status changed.
+    bool updatedFlipTextures = m_ui->m_checkFlipTex->isChecked();
+    if (theProjectSettings->getFlipCompressedTextures() != updatedFlipTextures)
+        g_StudioApp.GetCore()->GetDoc()->GetBufferCache().reloadAll(updatedFlipTextures);
+    theProjectSettings->setFlipCompressedTextures(updatedFlipTextures);
 }
 
 // OnApply: Handler for the Apply button

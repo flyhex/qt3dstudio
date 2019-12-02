@@ -2299,6 +2299,8 @@ void STranslation::PreRender(bool scenePreviewPass)
                 }
             }
         }
+        m_Presentation.m_preferKTX = theSettings->getPreferCompressedTextures();
+        m_Presentation.m_flipCompressedTextures = theSettings->getFlipCompressedTextures();
     }
     if (m_EditCameraEnabled == false && g_StudioApp.IsAuthorZoom()) {
         if (m_Presentation.m_PresentationDimensions.x > theViewportDims.x

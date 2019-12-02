@@ -72,6 +72,7 @@ void CStudioProjectSettings::reset()
     m_maintainAspect = false;
     m_rotatePresentation = false;
     m_preferCompressedTextures = false;
+    m_flipCompressedTextures = false;
 }
 
 //==============================================================================
@@ -143,6 +144,14 @@ void CStudioProjectSettings::setPreferCompressedTextures(bool inFlag)
 {
     if (m_preferCompressedTextures != inFlag) {
         m_preferCompressedTextures = inFlag;
+        m_core->GetDoc()->SetModifiedFlag();
+    }
+}
+
+void CStudioProjectSettings::setFlipCompressedTextures(bool inFlag)
+{
+    if (m_flipCompressedTextures != inFlag) {
+        m_flipCompressedTextures = inFlag;
         m_core->GetDoc()->SetModifiedFlag();
     }
 }

@@ -5448,8 +5448,11 @@ public:
         }
 
 
-        if (!imageLoadSet.isEmpty())
-            m_Doc.GetBufferCache().reloadImageSet(imageLoadSet);
+        if (!imageLoadSet.isEmpty()) {
+            m_Doc.GetBufferCache().reloadImageSet(
+                        imageLoadSet,
+                        m_Doc.GetCore()->GetStudioProjectSettings()->getFlipCompressedTextures());
+        }
 
         g_StudioApp.getRenderer().ReleaseContext();
 

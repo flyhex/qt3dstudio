@@ -135,13 +135,20 @@ struct SDocBufferCache : public IDocumentBufferCache
         }
     }
 
-    void reloadImageSet(const QSet<QString> &imageSet) override
+    void reloadImageSet(const QSet<QString> &imageSet, bool flipCompressedTextures) override
     {
         auto bufMan = GetBufferManager();
         if (bufMan) {
             bufMan->unloadSet(imageSet);
-            bufMan->loadSet(imageSet);
+            bufMan->loadSet(imageSet, flipCompressedTextures);
         }
+    }
+
+    void reloadAll(bool flipCompressedTextures) override
+    {
+        auto bufMan = GetBufferManager();
+        if (bufMan)
+            bufMan->reloadAll(flipCompressedTextures);
     }
 
     // Names are declared in the same order as the primitives

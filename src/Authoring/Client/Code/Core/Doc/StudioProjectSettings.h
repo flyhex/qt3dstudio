@@ -61,6 +61,9 @@ public:
     bool getPreferCompressedTextures() const { return m_preferCompressedTextures; }
     void setPreferCompressedTextures(bool inFlag);
 
+    bool getFlipCompressedTextures() const { return m_flipCompressedTextures; }
+    void setFlipCompressedTextures(bool inFlag);
+
     void reset();
 
 protected:
@@ -71,6 +74,7 @@ protected:
     bool m_maintainAspect;
     bool m_rotatePresentation;
     bool m_preferCompressedTextures;
+    bool m_flipCompressedTextures;
     CCore *m_core;
 };
 
