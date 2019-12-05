@@ -73,7 +73,7 @@ public:
 
 public:
     bool LoadDocument(const std::string &inFilePath);
-    void ProcessScene();
+    bool ProcessScene();
     void ProcessLibraryAnimations();
 
 protected:
@@ -363,10 +363,13 @@ bool ColladaDOMWalker::LoadDocument(const std::string &inFilePath)
  *	This begins by looking at the active visual_scene node and starting import
  *	from that node.
  */
-void ColladaDOMWalker::ProcessScene()
+bool ColladaDOMWalker::ProcessScene()
 {
     if (m_ColladaRoot != nullptr) {
         const domCOLLADA::domSceneRef theScene = m_ColladaRoot->getScene();
+        if (!theScene)
+            return false;
+
         // Retrieve the active visual_scene
         const domInstanceWithExtraRef theInstanceVisualScene = theScene->getInstance_visual_scene();
         const xsAnyURI &theVisualSceneURI = theInstanceVisualScene->getUrl();
@@ -413,6 +416,8 @@ void ColladaDOMWalker::ProcessScene()
         // Disable wrapping the visual scene in it's own group, since m_TopMostParent exists
         // PopGroup( );
     }
+
+    return true;
 }
 
 void ColladaDOMWalker::SetFColladaAuthoringTool(const char *inName)
@@ -1816,8 +1821,7 @@ bool CImportTranslation::ParseColladaFile(const std::string &fileName, Import &i
     ColladaDOMWalker theDOMWalker(&transHelper);
     if (theDOMWalker.LoadDocument(fileName)) {
         theDOMWalker.ProcessLibraryAnimations();
-        theDOMWalker.ProcessScene();
-        return true;
+        return theDOMWalker.ProcessScene();
     }
     return false;
 }
