@@ -48,8 +48,13 @@ index-of-refraction and fragment cutoff(masking).
 It is also possible to write custom material without using the boilerplate code,
 in which case the main function must be implemented in the shader.
 
-\note The Qt 3D Studio 2.0 runtime does not support multiple render passes for
-custom materials.
+\note Some characters used in shader code such as '<' break the XML parsing.
+It is advisable to surround any shader code with <![CDATA[]]> to enable use of such characters.
+Example usage:
+
+\badcode
+<FragmentShader><![CDATA[ void main() { } ]]></FragmentShader>
+\endcode
 
 \section1 Required Functions
 
@@ -504,7 +509,7 @@ This is no longer the case and the main function should add the closing parenthe
         <Shared></Shared>
         <VertexShader>
         </VertexShader>
-        <FragmentShader>
+        <FragmentShader><![CDATA[
 #define UIC_ENABLE_UV0 1
 #define UIC_ENABLE_WORLD_POSITION 1
 #define UIC_ENABLE_TEXTAN 0
@@ -525,7 +530,7 @@ out vec4 fragColor;
         c.rgb *= vec3(red_weight, green_weight, blue_weight);
         fragColor = c;
     }
-        </FragmentShader>
+        ]]></FragmentShader>
     </Shader>
     </Shaders>
     <Passes >
