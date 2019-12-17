@@ -345,6 +345,7 @@ struct STranslatorDataModelParser
 #define Node_LocalOpacity m_Node.m_Opacity
 #define Node_RotationOrder m_Node.m_RotationOrder
 #define Node_LeftHanded m_Node.m_Orientation
+#define Group_ordered m_Node.m_ordered
 #define Layer_TemporalAAEnabled m_Layer.m_TemporalAA
 #define Layer_LayerEnableDepthTest m_Layer.m_DisableDepthTest
 #define Layer_LayerEnableDepthPrePass m_Layer.m_DisableDepthPrepass
@@ -637,6 +638,8 @@ struct SNodeTranslator : public SGraphObjectTranslator
         ITERATE_QT3DS_RENDER_NODE_PROPERTIES
         theParser.ParseProperty(inContext.m_ObjectDefinitions.m_Node.m_BoneId,
                                 theItem.m_SkeletonId);
+        theParser.ParseProperty(inContext.m_ObjectDefinitions.m_Group.m_ordered,
+                                theItem.m_ordered);
         bool ignoresParent = false;
         if (theParser.ParseProperty(inContext.m_ObjectDefinitions.m_Node.m_IgnoresParent,
                                     ignoresParent))
