@@ -1067,6 +1067,18 @@ public:
             m_Bridge.GetOrCreateGraphRoot(retval);
         }
 
+        // Only one camera is active by default. If we already have one active, set the new camera
+        // to inactive.
+        if (inType == ComposerObjectTypes::Camera) {
+            auto cameraLayer = m_Bridge.GetResidingLayer(retval);
+            if (!m_Doc.getActiveCamera(cameraLayer).Valid()) {
+                m_Doc.setActiveCamera(cameraLayer, retval);
+            } else {
+                SetInstancePropertyValue(
+                            retval, m_Bridge.GetSceneAsset().m_Eyeball.m_Property, false);
+            }
+        }
+
         // if we did not set time range earlier, let's set it now to match parent
         TInstanceHandle handle = FinalizeAddOrDrop(retval, inParent, inInsertType, inPosition,
                                                    !setTimeRange, selectCreatedInstance, false);
@@ -1573,6 +1585,20 @@ public:
                 }
             }
             // Now set the property for reals
+            thePropertySystem.SetInstancePropertyValue(instance, propName, value);
+        } else if (propName == m_Bridge.GetSceneAsset().m_Eyeball
+                   && m_Bridge.IsCameraInstance(instance)) {
+            auto cameraLayer = m_Bridge.GetResidingLayer(instance);
+            auto activeCamera = m_Doc.getActiveCamera(cameraLayer);
+            if ((instance != activeCamera) && get<bool>(value)) {
+                // Only one camera per layer should be active. Set the previous one to inactive if
+                // we are activating another one.
+                if (activeCamera.Valid())
+                    thePropertySystem.SetInstancePropertyValue(activeCamera, propName, false);
+                m_Doc.setActiveCamera(cameraLayer, instance);
+            } else if (!get<bool>(value) && activeCamera == instance) {
+                m_Doc.setActiveCamera(cameraLayer, {}); // Inactivating current active camera.
+            }
             thePropertySystem.SetInstancePropertyValue(instance, propName, value);
         } else {
             if (propName != m_Bridge.GetAlias().m_ReferencedNode.m_Property) {
@@ -5176,6 +5202,8 @@ public:
         if (selectedInstances.size() > 0) {
             bool boolValue = false;
             SValue value;
+            qt3dsdm::Qt3DSDMInstanceHandle firstFoundCamera;
+            qt3dsdm::Qt3DSDMInstanceHandle foundCameraLayer;
             for (size_t idx = 0, end = selectedInstances.size(); idx < end; ++idx) {
                 qt3dsdm::Qt3DSDMInstanceHandle handle(selectedInstances[idx]);
                 if (handle.Valid()) {
@@ -5184,7 +5212,21 @@ public:
                         propertySystem->GetInstancePropertyValue(handle, property, value);
                         boolValue = !qt3dsdm::get<bool>(value);
                     }
-                    propertySystem->SetInstancePropertyValue(handle, property, boolValue);
+                    // First found camera is the one that ends up being activated if there are
+                    // several in selection, per-layer. Skip the rest if setting eyeball to true.
+                    // It is ok to deactivate (hide) all cameras, though.
+                    if (m_DataCore.IsInstanceOrDerivedFrom(
+                                handle, m_Bridge.GetObjectDefinitions().m_Camera.m_Instance)) {
+                        auto currCameraLayer = m_Bridge.GetResidingLayer(handle);
+                        if ((!firstFoundCamera.Valid() || boolValue)
+                                && !(foundCameraLayer == currCameraLayer)) {
+                            firstFoundCamera = handle;
+                            foundCameraLayer = currCameraLayer;
+                        } else if (boolValue) {
+                            continue;
+                        }
+                    }
+                    SetInstancePropertyValue(handle, property, boolValue);
                 }
             }
         }

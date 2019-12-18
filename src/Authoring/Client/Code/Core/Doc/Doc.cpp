@@ -759,6 +759,58 @@ void CDoc::SetActiveLayer(qt3dsdm::Qt3DSDMInstanceHandle inLayerInstance)
     m_ActiveLayer = inLayerInstance;
 }
 
+qt3dsdm::Qt3DSDMInstanceHandle CDoc::getActiveCamera(qt3dsdm::Qt3DSDMInstanceHandle inLayer) const
+{
+    return m_ActiveCameras[inLayer];
+}
+
+void CDoc::setActiveCamera(qt3dsdm::Qt3DSDMInstanceHandle inCameraLayer,
+                           qt3dsdm::Qt3DSDMInstanceHandle inCameraInstance)
+{
+    QT3DS_ASSERT(inCameraLayer.Valid());
+    m_ActiveCameras.insert(inCameraLayer, inCameraInstance);
+}
+
+bool CDoc::ensureActiveCamera()
+{
+    m_ActiveCameras.clear();
+
+    qt3dsdm::IDataCore &theCore(*m_StudioSystem->GetFullSystem()->GetCoreSystem()->GetDataCore());
+    CClientDataModelBridge *theBridge = m_StudioSystem->GetClientDataModelBridge();
+    qt3dsdm::TInstanceHandleList cameraInstances;
+
+    theCore.GetInstancesDerivedFrom(cameraInstances,
+                                    theBridge->GetObjectDefinitions().m_Camera.m_Instance);
+
+    bool camerasModified = false;
+
+    qt3dsdm::SValue valCamEyeball;
+    qt3dsdm::Qt3DSDMInstanceHandle cameraLayer;
+
+    for (const auto &inst : qAsConst(cameraInstances)) {
+        GetPropertySystem()->GetInstancePropertyValue
+                (inst, theBridge->GetSceneAsset().m_Eyeball.m_Property, valCamEyeball);
+
+        cameraLayer = theBridge->GetResidingLayer(inst);
+        // Skip over instances without a valid layer. This also skips over the base camera instance
+        // that is included in the list we get.
+        if (!cameraLayer.Valid())
+            continue;
+        if (qt3dsdm::get<bool>(valCamEyeball)) {
+            // Set the first camera that has eyeball=true on this layer to be active and others to
+            // inactive. We might have several active cameras in old presentations,
+            // or in presentations modified by hand.
+            if (!getActiveCamera(cameraLayer).Valid()) {
+                setActiveCamera(cameraLayer, inst);
+            } else {
+                camerasModified = true;
+                SetInstancePropertyValue(inst, L"eyeball", false);
+                m_Core->GetDispatch()->FireImmediateRefreshInstance(inst);
+            }
+        }
+    }
+    return camerasModified;
+}
 /**
  * Deselects all the items and keyframes that are currently selected.
  */
@@ -1166,16 +1218,22 @@ void CDoc::OnSlideDeleted(qt3dsdm::Qt3DSDMSlideHandle inSlide)
 
 void CDoc::OnInstanceDeleted(qt3dsdm::Qt3DSDMInstanceHandle inInstance)
 {
+    using namespace qt3dsdm;
+    CClientDataModelBridge &theBridge(*m_StudioSystem->GetClientDataModelBridge());
+    SComposerObjectDefinitions &theDefinitions(theBridge.GetObjectDefinitions());
+    IDataCore &theCore(*m_StudioSystem->GetFullSystem()->GetCoreSystem()->GetDataCore());
+
     if (GetSelectedInstance() == inInstance)
         DeselectAllItems();
 
     if (m_ActiveLayer == inInstance)
         m_ActiveLayer = 0;
 
-    using namespace qt3dsdm;
-    CClientDataModelBridge &theBridge(*m_StudioSystem->GetClientDataModelBridge());
-    SComposerObjectDefinitions &theDefinitions(theBridge.GetObjectDefinitions());
-    IDataCore &theCore(*m_StudioSystem->GetFullSystem()->GetCoreSystem()->GetDataCore());
+    auto instanceLayer = theBridge.GetResidingLayer(inInstance);
+    if (m_ActiveCameras[instanceLayer] == inInstance) {
+        m_ActiveCameras.remove(instanceLayer);
+    }
+
     if (theCore.IsInstanceOrDerivedFrom(inInstance, theDefinitions.m_SlideOwner.m_Instance)) {
         Qt3DSDMSlideHandle theSlide = theBridge.GetComponentActiveSlide(inInstance);
         if (theSlide == m_ActiveSlide) {

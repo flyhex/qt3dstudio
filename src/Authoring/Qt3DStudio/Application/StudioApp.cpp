@@ -1568,6 +1568,13 @@ bool CStudioApp::OnLoadDocument(const QString &inDocument, bool inShowStartupDia
         }
     } else {
         m_dialogs->ResetSettings(loadFile);
+        if (m_core->GetDoc()->ensureActiveCamera())
+            m_dialogs->DisplayMessageBox(
+                        tr("More than one camera active"),
+                        tr("Layer can only have one active camera. "
+                           "Additional cameras were set to inactive."),
+                        Qt3DSMessageBox::ICON_WARNING, false);
+
         m_core->getProjectFile().updateDocPresentationId();
         m_core->getProjectFile().loadSubpresentationsAndDatainputs(m_subpresentations,
                                                                    m_dataInputDialogItems);

@@ -292,6 +292,13 @@ public:
     void SetActiveLayer(qt3dsdm::Qt3DSDMInstanceHandle inLayerInstance);
     qt3dsdm::Qt3DSDMSlideHandle GetActiveSlide();
 
+    qt3dsdm::Qt3DSDMInstanceHandle getActiveCamera(qt3dsdm::Qt3DSDMInstanceHandle inLayer) const;
+    void setActiveCamera(qt3dsdm::Qt3DSDMInstanceHandle inCameraLayer,
+                         qt3dsdm::Qt3DSDMInstanceHandle inCameraInstance);
+    // Ensure that only one camera per layer is active.
+    // Returns true if additional cameras were inactivated.
+    bool ensureActiveCamera();
+
     void SetPlayMode(EPlayMode inPlayMode, long inRestoreTime = -1);
     bool IsPlaying();
     long GetCurrentClientTime();
@@ -468,6 +475,8 @@ protected:
     qt3dsdm::Qt3DSDMInstanceHandle m_SceneInstance; // Pointer to the root level Scene object.
     qt3dsdm::Qt3DSDMSlideHandle m_ActiveSlide; // The currently active Slide Handle.
     qt3dsdm::Qt3DSDMInstanceHandle m_ActiveLayer; // The currently active layer.
+    // The currently active camera per-layer
+    QMap<qt3dsdm::Qt3DSDMInstanceHandle, qt3dsdm::Qt3DSDMInstanceHandle> m_ActiveCameras;
     CPlaybackClock *m_PlaybackClock; // Playback clock. This is used when user clicks "Play"
     CCore *m_Core;
     bool m_IsModified;

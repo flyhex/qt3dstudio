@@ -131,6 +131,7 @@ void CmdDataModel::DataModelUndo()
         Undo(m_Consumer->m_TransactionList);
         RunUndoNotifications();
         m_Doc.UpdateDatainputMap();
+        m_Doc.ensureActiveCamera();
     }
 }
 
@@ -153,6 +154,7 @@ void CmdDataModel::DataModelRedo()
         Redo(m_Consumer->m_TransactionList);
         RunDoNotifications();
         m_Doc.UpdateDatainputMap();
+        m_Doc.ensureActiveCamera();
     }
 }
 
