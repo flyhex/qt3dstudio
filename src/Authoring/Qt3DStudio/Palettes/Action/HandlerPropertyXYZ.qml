@@ -47,6 +47,8 @@ RowLayout {
 
     signal editingFinished
     signal previewValueChanged
+    signal triggerUndo
+    signal triggerRedo
 
     StyledLabel {
         id: labelItem
@@ -60,5 +62,7 @@ RowLayout {
 
         onEditingFinished: root.editingFinished()
         onPreviewValueChanged: root.previewValueChanged()
+        onTriggerUndo: root.triggerUndo()
+        onTriggerRedo: root.triggerRedo()
     }
 }

@@ -48,6 +48,9 @@ ColumnLayout {
 
     signal editingFinished
     signal previewValueChanged
+    signal triggerUndo
+    signal triggerRedo
+
     transformOrigin: Item.Center
     spacing: 0
 
@@ -67,6 +70,8 @@ ColumnLayout {
             decimalValue: numberOfDecimal
             onEditingFinished: root.editingFinished()
             onPreviewValueChanged: root.previewValueChanged()
+            onTriggerUndo: root.triggerUndo()
+            onTriggerRedo: root.triggerRedo()
         }
 
         Item { width: 10 }
@@ -83,6 +88,8 @@ ColumnLayout {
             decimalValue: numberOfDecimal
             onEditingFinished: root.editingFinished()
             onPreviewValueChanged: root.previewValueChanged()
+            onTriggerUndo: root.triggerUndo()
+            onTriggerRedo: root.triggerRedo()
         }
 
         Item { width: 10 }
@@ -99,6 +106,8 @@ ColumnLayout {
             decimalValue: numberOfDecimal
             onEditingFinished: root.editingFinished()
             onPreviewValueChanged: root.previewValueChanged()
+            onTriggerUndo: root.triggerUndo()
+            onTriggerRedo: root.triggerRedo()
         }
     }
 
@@ -121,6 +130,8 @@ ColumnLayout {
             decimalValue: numberOfDecimal
             onEditingFinished: root.editingFinished()
             onPreviewValueChanged: root.previewValueChanged()
+            onTriggerUndo: root.triggerUndo()
+            onTriggerRedo: root.triggerRedo()
         }
     }
 }

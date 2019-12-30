@@ -42,6 +42,8 @@ RowLayout {
 
     signal editingFinished
     signal previewValueChanged
+    signal triggerUndo
+    signal triggerRedo
 
     onValueChanged: {
         // FloatTextField can set its text internally, thus breaking the binding, so
@@ -59,5 +61,7 @@ RowLayout {
         decimalValue: numberOfDecimal
         onEditingFinished: root.editingFinished()
         onPreviewValueChanged: root.previewValueChanged()
+        onTriggerUndo: root.triggerUndo()
+        onTriggerRedo: root.triggerRedo()
     }
 }

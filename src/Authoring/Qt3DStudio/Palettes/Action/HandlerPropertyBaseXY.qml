@@ -44,6 +44,8 @@ RowLayout {
 
     signal editingFinished
     signal previewValueChanged
+    signal triggerUndo
+    signal triggerRedo
 
     spacing: 0
 
@@ -59,6 +61,8 @@ RowLayout {
         decimalValue: numberOfDecimal
         onEditingFinished: root.editingFinished()
         onPreviewValueChanged: root.previewValueChanged()
+        onTriggerUndo: root.triggerUndo()
+        onTriggerRedo: root.triggerRedo()
     }
 
     Item { width: 20 }
@@ -75,6 +79,8 @@ RowLayout {
         decimalValue: numberOfDecimal
         onEditingFinished: root.editingFinished()
         onPreviewValueChanged: root.previewValueChanged()
+        onTriggerUndo: root.triggerUndo()
+        onTriggerRedo: root.triggerRedo()
     }
 }
 

@@ -163,6 +163,8 @@ public:
     Q_INVOKABLE void duplicateMaterial();
     Q_INVOKABLE bool isGroupCollapsed(int groupIdx) const;
     Q_INVOKABLE void updateGroupCollapseState(int groupIdx, bool state);
+    Q_INVOKABLE void undo();
+    Q_INVOKABLE void redo();
 
 private:
     struct GroupInspectorControl

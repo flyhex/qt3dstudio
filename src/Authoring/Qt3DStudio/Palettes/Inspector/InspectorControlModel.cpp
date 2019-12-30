@@ -28,6 +28,7 @@
 
 #include "InspectorControlModel.h"
 #include "StudioApp.h"
+#include "MainFrm.h"
 #include "Core.h"
 #include "Doc.h"
 #include "InspectorGroup.h"
@@ -2071,6 +2072,16 @@ QHash<int, QByteArray> InspectorControlModel::roleNames() const
     names.insert(GroupTitleRole, "title");
     names.insert(GroupInfoRole, "info");
     return names;
+}
+
+void InspectorControlModel::undo()
+{
+    g_StudioApp.m_pMainWnd->OnEditUndo();
+}
+
+void InspectorControlModel::redo()
+{
+    g_StudioApp.m_pMainWnd->OnEditRedo();
 }
 
 InspectorControlBase::~InspectorControlBase()

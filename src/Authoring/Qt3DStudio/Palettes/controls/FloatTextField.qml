@@ -38,6 +38,8 @@ TextField {
     property bool ignoreHotkeys: true
 
     signal previewValueChanged
+    signal triggerUndo
+    signal triggerRedo
 
     selectByMouse: true
     text: "0.000"
@@ -198,6 +200,13 @@ TextField {
 
             if (!rateLimiter.running)
                 rateLimiter.start();
+        } else if ((event.modifiers & Qt.ControlModifier)
+                   && !(event.modifiers & Qt.ShiftModifier)) {
+            // Undo & redo handling (QT3DS-4000)
+            if (event.key === Qt.Key_Z)
+                floatTextFieldId.triggerUndo();
+            else if (event.key === Qt.Key_Y)
+                floatTextFieldId.triggerRedo();
         }
     }
 }

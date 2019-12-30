@@ -703,6 +703,12 @@ Rectangle {
                                                      Qt.vector4d(valueX, valueY, valueZ, valueW),
                                                      false);
                 }
+                onTriggerUndo: {
+                    _inspectorModel.undo();
+                }
+                onTriggerRedo: {
+                    _inspectorModel.redo();
+                }
             }
         }
     }
@@ -740,6 +746,12 @@ Rectangle {
                     _inspectorModel.setPropertyValue(parent.instance, parent.handle,
                                                      Qt.vector3d(valueX, valueY, valueZ), false);
                 }
+                onTriggerUndo: {
+                    _inspectorModel.undo();
+                }
+                onTriggerRedo: {
+                    _inspectorModel.redo();
+                }
             }
         }
     }
@@ -773,6 +785,12 @@ Rectangle {
                 onPreviewValueChanged: {
                     _inspectorModel.setPropertyValue(parent.instance, parent.handle,
                                                      Qt.vector2d(valueX, valueY), false);
+                }
+                onTriggerUndo: {
+                    _inspectorModel.undo();
+                }
+                onTriggerRedo: {
+                    _inspectorModel.redo();
                 }
             }
         }
@@ -809,6 +827,12 @@ Rectangle {
                 onEditingFinished: {
                     _inspectorModel.setPropertyValue(parent.instance, parent.handle,
                                                      Number(text), true);
+                }
+                onTriggerUndo: {
+                    _inspectorModel.undo();
+                }
+                onTriggerRedo: {
+                    _inspectorModel.redo();
                 }
             }
         }
