@@ -2546,14 +2546,12 @@ void CDoc::SavePresentationFile(CBufferedOutputStream *inOutputStream)
             IDOMWriter::Scope __BufferData(theWriter, L"BufferData");
             for (size_t idx = 0, end = theImageBuffers.size(); idx < end; ++idx) {
                 SImageTextureData theBuffer = theImageBuffers[idx].second;
-                if (theBuffer.m_TextureFlags.HasTransparency()) {
-                    IDOMWriter::Scope __ImageScope(theWriter, L"ImageBuffer");
-                    theWriter.Att(L"sourcepath", theImageBuffers[idx].first.c_str());
-                    // Writing boolean in wide text results just in "T" or "F" on Linux
-                    theWriter.Att("hasTransparency", true);
-                    if (theBuffer.m_TextureFlags.HasOpaquePixels())
-                        theWriter.Att("hasOpaquePixels", true);
-                }
+                IDOMWriter::Scope __ImageScope(theWriter, L"ImageBuffer");
+                theWriter.Att(L"sourcepath", theImageBuffers[idx].first.c_str());
+                // Writing boolean in wide text results just in "T" or "F" on Linux
+                theWriter.Att("hasTransparency", theBuffer.m_TextureFlags.HasTransparency());
+                if (theBuffer.m_TextureFlags.HasOpaquePixels())
+                    theWriter.Att("hasOpaquePixels", true);
             }
         }
     }
