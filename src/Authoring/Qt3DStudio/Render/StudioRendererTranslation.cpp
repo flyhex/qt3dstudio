@@ -369,6 +369,7 @@ struct STranslatorDataModelParser
 #define Layer_HeightUnits m_Layer.m_HeightUnits
 #define Layer_Bottom m_Layer.m_Bottom
 #define Layer_BottomUnits m_Layer.m_BottomUnits
+#define Layer_AoEnabled m_Layer.m_AoEnabled
 #define Layer_AoStrength m_Layer.m_AoStrength
 #define Layer_AoDistance m_Layer.m_AoDistance
 #define Layer_AoSoftness m_Layer.m_AoSoftness

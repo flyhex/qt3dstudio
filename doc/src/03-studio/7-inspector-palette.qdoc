@@ -236,14 +236,17 @@ in the Inspector palette:
   presentation and the layer, either in pixels or as a percentage of the
   presentation's height.
 \li
-  \b{Ambient Occlusion} - Controls the strength of ambient
-  occlusion (AO). AO is a form of approximated global illumination which
+  \b{Ambient Occlusion} - Enables ambient occlusion (AO).
+  AO is a form of approximated global illumination which
   causes non-directional self-shadowing where objects are close
-  together. A value of \c{100} causes full darkness shadows; lower
-  values cause the shadowing to appear lighter. A value of \c{0}
-  disables ambient occlusion entirely, improving performance at a cost
-  to the visual realism of 3D objects rendered in the layer. All values
-  other than \c{0} have the same impact to the performance.
+  together. Disabling ambient occlusion improves performance
+  at a cost to the visual realism of 3D objects rendered in the layer.
+\li
+  \b{AO Strength} - Controls the strength of the ambient occlusion.
+  A value of \c{100} causes full darkness shadows; lower values cause the
+  shadowing to appear lighter. A value of \c{0} effectively disables ambient
+  occlusion. All values other than \c{0} have the same impact to the performance,
+  when \b{Ambient Occlusion} is toggled on.
 \li
   \b{AO Distance} - Roughly how far (in world units) ambient
   occlusion shadows spread away from objects. The following graphic
