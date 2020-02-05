@@ -137,7 +137,7 @@ This page provides short explanations of terms used in Qt 3D Studio.
       The inspector palette is used to control values and animations of element properties.
   \row
     \li
-      \l{Animations#Interpolation}{Interpolation}
+      \l{Animations#Animation Types}{Interpolation}
     \li
       Interpolation defines the easing of \l keyframe animations.
   \row

@@ -5,15 +5,17 @@ url                     = https://doc.qt.io/qt3dstudio
 
 moduleheader            =
 sources.fileextensions  = "*.qdoc *.html"
-sourcedirs              = . \
-                          ../src/Viewer
+sourcedirs              = src/ \
+                          ../src/Runtime/ogl-runtime/src/viewer
 
-headerdirs              = ../src/Viewer
+headerdirs              =  src/ \
+                           ../src/Runtime/ogl-runtime/src/viewer
 
 # TODO: Move images to doc/images
 imagedirs               = ./src/images
 
-depends = qtcore qtgui qtwidgets qtqml qtquick qtmultimedia qtdoc qt3dstudioruntime2
+depends = qtcore qtgui qtwidgets qtqml qtquick qtmultimedia qtdoc
+
 
 qhp.projects            = Qt3DStudio
 
