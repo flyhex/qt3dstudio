@@ -54,7 +54,7 @@
 		</dict>
 	</array>
 	<key>NSHumanReadableCopyright</key>
-	<string>(C) 2019 The Qt Company Ltd</string>
+	<string>(C) 2020 The Qt Company Ltd</string>
 	<key>CFBundleExecutable</key>
 	<string>Qt3DStudio</string>
 	<key>CFBundleIconFile</key>
@@ -62,9 +62,9 @@
 	<key>CFBundleIdentifier</key>
 	<string>org.qt-project.qt3dstudio</string>
 	<key>CFBundleVersion</key>
-	<string>2.4.0</string>
+	<string>2.7.0</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.4</string>
+	<string>2.7</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleSignature</key>
