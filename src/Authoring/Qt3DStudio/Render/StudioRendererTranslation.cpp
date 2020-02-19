@@ -356,6 +356,10 @@ struct STranslatorDataModelParser
 #define Layer_Location m_Layer.m_Location
 #define Layer_ProgressiveAAMode m_Layer.m_ProgressiveAA
 #define Layer_MultisampleAAMode m_Layer.m_MultisampleAA
+#define Layer_DynamicResize m_Layer.m_DynamicResize
+#define Layer_DynamicPaddingUnits m_Layer.m_DynamicPaddingUnits
+#define Layer_DynamicPadding m_Layer.m_DynamicPadding
+#define Layer_DynamicCombine m_Layer.m_DynamicCombine
 #define Layer_HorizontalFieldValues m_Layer.m_HorizontalFieldValues
 #define Layer_Left m_Layer.m_Left
 #define Layer_LeftUnits m_Layer.m_LeftUnits
