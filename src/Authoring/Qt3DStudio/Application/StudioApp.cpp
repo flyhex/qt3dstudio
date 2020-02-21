@@ -1635,12 +1635,6 @@ void CStudioApp::saveDataInputsToProjectFile()
             } else if (item->type == EDataType::DataTypeVariant) {
                 diNode.setAttribute(QStringLiteral("type"), QStringLiteral("Variant"));
             }
-#ifdef DATAINPUT_EVALUATOR_ENABLED
-            else if (item->type == EDataType::DataTypeEvaluator) {
-                diNode.setAttribute(QStringLiteral("type"), QStringLiteral("Evaluator"));
-                diNode.setAttribute(QStringLiteral("evaluator"), item->valueString);
-            }
-#endif
 
             QHashIterator<QString, QString> it(item->metadata);
             QString metadataStr;

@@ -52,9 +52,6 @@ QT_FORWARD_DECLARE_CLASS(QStandardItemModel)
 
 enum EDataType {
     DataTypeBoolean = 0,
-#ifdef DATAINPUT_EVALUATOR_ENABLED
-    DataTypeEvaluator,
-#endif
     DataTypeFloat,
     DataTypeRangedNumber,
     DataTypeString,
@@ -73,9 +70,6 @@ static const QVector<EDataType> allDataTypes {
     EDataType::DataTypeVector2,
     EDataType::DataTypeRangedNumber,
     EDataType::DataTypeBoolean,
-    #ifdef DATAINPUT_EVALUATOR_ENABLED
-    EDataType::DataTypeEvaluator,
-    #endif
     EDataType::DataTypeVariant
 };
 

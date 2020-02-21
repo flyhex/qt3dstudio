@@ -216,12 +216,6 @@ void CDataInputListDlg::updateContents()
             } else if (dataInputType == DataTypeFloat
                        && (m_typeFilter == (int)DataTypeFloat || m_typeFilter == -1)) {
                 dataInput.append(new QStandardItem(tr("Float")));
-#ifdef DATAINPUT_EVALUATOR_ENABLED
-            } else if (dataInputType == DataTypeEvaluator
-                       && (m_typeFilter == (int)DataTypeEvaluator || m_typeFilter == -1)) {
-                dataInput.append(new QStandardItem(tr("Evaluator")));
-                dataInput.append(new QStandardItem(m_dataInputs.at(i)->valueString));
-#endif
             } else if (dataInputType == DataTypeBoolean
                        && (m_typeFilter == (int)DataTypeBoolean || m_typeFilter == -1)) {
                 dataInput.append(new QStandardItem(tr("Boolean")));

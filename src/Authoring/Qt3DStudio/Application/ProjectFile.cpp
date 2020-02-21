@@ -486,12 +486,6 @@ void ProjectFile::parseDataInputElem(const QDomElement &elem,
         } else if (type == QLatin1String("Variant")) {
             item->type = EDataType::DataTypeVariant;
         }
-#ifdef DATAINPUT_EVALUATOR_ENABLED
-        else if (type == QLatin1String("Evaluator")) {
-            item->type = EDataType::DataTypeEvaluator;
-            item->valueString = elem.attribute(QStringLiteral("evaluator"));
-        }
-#endif
 
         auto metadata = elem.attribute(QStringLiteral("metadata"));
         if (!metadata.isEmpty()) {

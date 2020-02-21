@@ -56,9 +56,6 @@ CDataInputDlg::CDataInputDlg(CDataInputDialogItem **datainput, QStandardItemMode
     m_ui->comboBoxTypeList->setItemDelegate(itemDelegate);
 
     m_ui->comboBoxTypeList->addItem(tr("Boolean"), QVariant(DataTypeBoolean));
-#ifdef DATAINPUT_EVALUATOR_ENABLED
-    m_ui->comboBoxTypeList->addItem(tr("Evaluator"), QVariant(DataTypeEvaluator));
-#endif
     m_ui->comboBoxTypeList->addItem(tr("Float"), QVariant(DataTypeFloat));
     m_ui->comboBoxTypeList->addItem(tr("Ranged Number"), QVariant(DataTypeRangedNumber));
     m_ui->comboBoxTypeList->addItem(tr("String"), QVariant(DataTypeString));
@@ -127,11 +124,6 @@ void CDataInputDlg::initDialog()
             m_min = m_dataInput->minValue;
             m_max = m_dataInput->maxValue;
         }
-#ifdef DATAINPUT_EVALUATOR_ENABLED
-        else if (m_type == DataTypeEvaluator) {
-            m_ui->lineEditEvaluation->setText(m_dataInput->valueString);
-        }
-#endif
     } else {
         m_name = getUniqueId(tr("newDataInput"));
         if (m_dataInput->type == DataTypeRangedNumber) {
@@ -190,11 +182,6 @@ void CDataInputDlg::accept()
         m_dataInput->minValue = m_min;
         m_dataInput->maxValue = m_max;
     }
-#ifdef DATAINPUT_EVALUATOR_ENABLED
-    else if (m_type == DataTypeEvaluator) {
-        m_dataInput->valueString = m_text;
-    }
-#endif
 
     m_dataInput->metadata.clear();
     for (auto const &it : qAsConst(m_orderedMetadata))
@@ -255,15 +242,7 @@ void CDataInputDlg::updateVisibility(int type)
         m_ui->doubleSpinBoxMin->setVisible(false);
         m_ui->doubleSpinBoxMax->setVisible(false);
     }
-#ifdef DATAINPUT_EVALUATOR_ENABLED
-    if (type == DataTypeEvaluator) {
-        m_ui->lineEditEvaluation->setVisible(true);
-        m_ui->labelEvaluation->setVisible(true);
-    } else {
-        m_ui->lineEditEvaluation->setVisible(false);
-        m_ui->labelEvaluation->setVisible(false);
-    }
-#endif
+
     // Adjust text label positioning according to the
     // visibility of info text warning about allowed datatypes.
     if (m_dataInput->ctrldElems.size()) {
@@ -293,11 +272,7 @@ bool CDataInputDlg::isEquivalentDataType(int dlgType, qt3dsdm::DataModelDataType
         // Variant can be bound to any property type except timeline controller because only
         // datainput of type Ranged Number has additional min/max information. For slide control,
         // we can allow variant type in addition to String type.
-        || (dlgType == EDataType::DataTypeVariant && dmType != DataModelDataType::RangedNumber)
-#ifdef DATAINPUT_EVALUATOR_ENABLED
-        || dlgType == EDataType::DataTypeEvaluator
-#endif
-        ) {
+        || (dlgType == EDataType::DataTypeVariant && dmType != DataModelDataType::RangedNumber)) {
         return true;
     }
 
