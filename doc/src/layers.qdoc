@@ -116,4 +116,15 @@ the order objects are rendered.
 \l{Using Variant Tags}{Variant tags} makes it possible to exclude layers during loading to
 optimize performance.
 
+\section2 Dynamic Resize
+The Dynamic Resize property causes the layer to be dynamically resized based on the content.
+This makes the layer texture as small as it can be while still showing all the content.
+Thus effects like SSAA can be done more efficiently on the layer, since the empty space around
+the content doesn't take up computing power. This can also, depending on the hardware, cause
+performance problems due to constant resizing. This can be mitigated with the Padding property.
+While resizing may cause problems on the GPU side, the content bounds calculation also takes time
+on the CPU. If more inaccurate bounds are enough, Combine Bounds can be used to have less
+calculations per object in the layer. The user has to balance the performance cost of the resize
+to the performance gain of the lower texture size when evaluating the use of this feature.
+
 */

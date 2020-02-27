@@ -236,6 +236,23 @@ in the Inspector palette:
   presentation and the layer, either in pixels or as a percentage of the
   presentation's height.
 \li
+  \b{Dynamic Resize} - The layer is resized dynamically based on the content.
+  This allows the layer texture to be the smallest possible in order to increase performance.
+  The texture is continuously resized as the content changes.
+\li
+  \b{Padding} - The resized layer can be padded. This lowers the amount of resizes
+  needed as the content changes. The layer is resized only when the content changes
+  so much that it exceeds the previous padded size. Padding is also used in reverse
+  to calculate the lower bounds. When the content changes to be smaller, the resize
+  only happens after it takes less space than the lower bounds. The padding can be
+  expressed in pixels or as percentage of the layer size.
+\li
+  \b{Combine Bounds} - When \c{Dynamic Resize} is in use, the bounds of the objects
+  inside the layer have to be calculated. When this property is disabled, all object
+  bounds are calculated separately and a more accurate layer resize is done based on
+  those separated bounds. When this property is enabled, the object bound calculations
+  are combined, causing more inaccurate but faster results.
+\li
   \b{Ambient Occlusion} - Enables ambient occlusion (AO).
   AO is a form of approximated global illumination which
   causes non-directional self-shadowing where objects are close
