@@ -635,7 +635,6 @@ struct SComposerSerializerImpl : public IComposerSerializer
                     stem.toWCharArray(reinterpret_cast<wchar_t *>(warr.data()));
                     return m_StringTable.RegisterStr(reinterpret_cast<wchar_t *>(warr.data()));
                 }
-                stem = stem.left(pos);
             }
 
             // Create an ID for this instance
